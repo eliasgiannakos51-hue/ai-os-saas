@@ -34,7 +34,14 @@ type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer }
  * ticked). An answer that finished while the person was elsewhere is put
  * back, as on the page.
  */
-export function FilesShell({ initialFiles }: { initialFiles: WorkspaceFile[] }) {
+export function FilesShell({
+  initialFiles,
+  initialOpenId = null,
+}: {
+  initialFiles: WorkspaceFile[];
+  /** A file to open on arrival — `?record=` from the Library: it is ticked, so the next question is asked of it. */
+  initialOpenId?: string | null;
+}) {
   const t = useTranslations("dashboard.files");
   const tAsk = useTranslations("aiSteps.file_ask");
   const tNames = useTranslations("dashboard.tools.names");
@@ -44,12 +51,13 @@ export function FilesShell({ initialFiles }: { initialFiles: WorkspaceFile[] }) 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [files, setFiles] = useState(initialFiles);
-  const [selected, setSelected] = useState<string[]>([]);
+  const asked = initialOpenId ? initialFiles.find((f) => f.id === initialOpenId) : undefined;
+  const [selected, setSelected] = useState<string[]>(asked?.processing_status === "ready" ? [asked.id] : []);
   const [uploading, setUploading] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [askStep, setAskStep] = useState<string | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [pane, setPane] = useState<"files" | null>(null);
+  const [pane, setPane] = useState<"files" | null>(asked ? "files" : null);
   const heldAskStep = useHeldStepLabel(askStep);
   // The worker's real step, through literal keys so the message slicer can
   // bound them (lib/i18n/message-slices.ts); the step codes are

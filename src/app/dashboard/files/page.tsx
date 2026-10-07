@@ -16,6 +16,7 @@ import {
   type WorkspaceFile,
 } from "@/components/files/files-workspace";
 import { FilesShell } from "@/components/files/files-shell";
+import { readRequestedId } from "@/lib/library/requested";
 import { isFeatureOn } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,8 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.files");
 }
 
-export default async function FilesPage() {
+export default async function FilesPage(props: { searchParams: Promise<{ record?: string }> }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
 
   const user = await getCurrentUser();
@@ -77,7 +79,7 @@ export default async function FilesPage() {
   if (await isFeatureOn("tool-shell", user)) {
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <FilesShell initialFiles={rows} />
+        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} />
       </div>
     );
   }

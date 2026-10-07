@@ -36,7 +36,16 @@ type Shown = { id: string | null; set: PostSet; platforms: PostPlatform[] };
  * the platforms, and what was written before. What it does NOT do is one
  * line under the field, not a box.
  */
-export function PostsShell({ history, initialDescription }: { history: PostRow[]; initialDescription?: string }) {
+export function PostsShell({
+  history,
+  initialDescription,
+  initialOpenId = null,
+}: {
+  history: PostRow[];
+  initialDescription?: string;
+  /** Posts to open on arrival — `?record=` from the Library. */
+  initialOpenId?: string | null;
+}) {
   const t = useTranslations("posts");
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
@@ -52,8 +61,9 @@ export function PostsShell({ history, initialDescription }: { history: PostRow[]
   const [length, setLength] = useState(initialDescription?.length ?? 0);
   const [running, setRunning] = useState(false);
   const [turns, setTurns] = useState<{ id: string; role: "user" | "tool"; text: string; shown?: Shown }[]>([]);
-  const [open, setOpen] = useState<"posts" | "recent" | null>(null);
-  const [shown, setShown] = useState<Shown | null>(null);
+  const asked = initialOpenId ? history.find((row) => row.id === initialOpenId && row.set) : undefined;
+  const [open, setOpen] = useState<"posts" | "recent" | null>(asked ? "posts" : null);
+  const [shown, setShown] = useState<Shown | null>(asked?.set ? { id: asked.id, set: asked.set, platforms: asked.platforms } : null);
 
   const estimate = useCostEstimate("postsGenerate", { inputChars: postsEstimateInputChars(length, platforms) });
 

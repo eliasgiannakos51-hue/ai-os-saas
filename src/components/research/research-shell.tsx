@@ -42,11 +42,14 @@ type Turn = { id: string; role: "user" | "tool"; text: string; plan?: { report: 
 export function ResearchShell({
   initialTopic,
   initialReports,
+  initialOpenId = null,
   monthlyCap,
   usedThisMonth,
 }: {
   initialTopic?: string;
   initialReports: ResearchReport[];
+  /** A report to open on arrival — `?record=` from the Library. */
+  initialOpenId?: string | null;
   monthlyCap: number | null;
   usedThisMonth: number;
 }) {
@@ -63,8 +66,9 @@ export function ResearchShell({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [planning, setPlanning] = useState(false);
   const [approved, setApproved] = useState<Set<string>>(new Set());
-  const [open, setOpen] = useState<ResearchReport | null>(null);
-  const [pane, setPane] = useState<"report" | "recent" | null>(null);
+  const asked = initialOpenId ? initialReports.find((r) => r.id === initialOpenId) ?? null : null;
+  const [open, setOpen] = useState<ResearchReport | null>(asked);
+  const [pane, setPane] = useState<"report" | "recent" | null>(asked ? "report" : null);
   const lastProgressRef = useRef<Map<string, string>>(new Map());
 
   const say = (turn: Omit<Turn, "id">) => setTurns((prev) => [...prev, { ...turn, id: `${turn.role}${prev.length}` }]);
@@ -82,6 +86,13 @@ export function ResearchShell({
       return null;
     }
   }, []);
+
+  // The list rows carry no sections: a report opened from a link is read
+  // whole once, the way pressing it under "made before" does.
+  const askedId = asked?.id ?? null;
+  useEffect(() => {
+    if (askedId) void refresh(askedId);
+  }, [askedId, refresh]);
 
   // WHAT IS RUNNING COMES FROM THE ROWS, and a run that has not moved since
   // the last tick is nudged (/continue), exactly as on the page.

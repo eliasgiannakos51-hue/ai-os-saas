@@ -66,12 +66,15 @@ function isRunning(report: ResearchReport): boolean {
 export function ResearchWorkspace({
   initialTopic,
   initialReports,
+  initialOpenId = null,
   monthlyCap,
   usedThisMonth,
 }: {
   /** The question Home routed here, already in the box, never auto-run. */
   initialTopic?: string;
   initialReports: ResearchReport[];
+  /** A report to open on arrival — `?record=` from the Library. */
+  initialOpenId?: string | null;
   monthlyCap: number | null;
   usedThisMonth: number;
 }) {
@@ -89,7 +92,9 @@ export function ResearchWorkspace({
   const [draft, setDraft] = useState<{ report: ResearchReport; credits: number } | null>(null);
   const [running, setRunning] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [open, setOpen] = useState<ResearchReport | null>(null);
+  const [open, setOpen] = useState<ResearchReport | null>(() =>
+    initialOpenId ? initialReports.find((r) => r.id === initialOpenId) ?? null : null
+  );
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Last observed "status:questionsDone" per report, so a stalled chunked
@@ -109,6 +114,13 @@ export function ResearchWorkspace({
       return null;
     }
   }, []);
+
+  // The list rows carry no sections: a report opened from a link is read
+  // whole once, the way selecting it does.
+  const askedId = initialOpenId && initialReports.some((r) => r.id === initialOpenId) ? initialOpenId : null;
+  useEffect(() => {
+    if (askedId) void refresh(askedId);
+  }, [askedId, refresh]);
 
   // WHAT IS RUNNING COMES FROM THE ROWS, NOT FROM THIS COMPONENT.
   //

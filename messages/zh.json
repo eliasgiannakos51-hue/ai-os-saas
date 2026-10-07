@@ -2898,6 +2898,36 @@
         "lost": "方框没有从修改中返回，所以什么都没改。请再试一次。",
         "boxes": "方框"
       }
+    },
+    "library": {
+      "title": "资料库",
+      "description": "你在每个工具中做过的一切，最新的在前。",
+      "tab": "资料库",
+      "searchLabel": "搜索资料库",
+      "searchPlaceholder": "搜索名称和内容",
+      "searchButton": "搜索",
+      "searchScope": "搜索每个工具最新的 60 项，包括其中的文字。",
+      "kindsLabel": "只显示",
+      "all": "全部",
+      "kinds": {
+        "site": "网站",
+        "slides": "幻灯片",
+        "posts": "帖子",
+        "document": "文档",
+        "research": "研究",
+        "analysis": "分析",
+        "file": "文件"
+      },
+      "failed": "无法加载：{tools}。其余内容已显示。",
+      "untitled": "无标题",
+      "empty": {
+        "title": "还没有做过任何东西",
+        "why": "你在网站、幻灯片、帖子、文档、研究、分析和文件中做的东西会自动出现在这里。"
+      },
+      "noMatch": {
+        "title": "没有内容包含“{query}”",
+        "why": "试试更少的词，或换一种类型。"
+      }
     }
   },
   "module": {

@@ -2898,6 +2898,36 @@
         "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
         "boxes": "Kästen"
       }
+    },
+    "library": {
+      "title": "Bibliothek",
+      "description": "Alles, was du erstellt hast, in jedem Werkzeug, das Neueste zuerst.",
+      "tab": "Bibliothek",
+      "searchLabel": "In der Bibliothek suchen",
+      "searchPlaceholder": "Namen und Inhalte durchsuchen",
+      "searchButton": "Suchen",
+      "searchScope": "Durchsucht die neuesten 60 jedes Werkzeugs, samt dem Text darin.",
+      "kindsLabel": "Nur zeigen",
+      "all": "Alle",
+      "kinds": {
+        "site": "Websites",
+        "slides": "Folien",
+        "posts": "Beiträge",
+        "document": "Dokumente",
+        "research": "Recherchen",
+        "analysis": "Analysen",
+        "file": "Dateien"
+      },
+      "failed": "Nicht geladen: {tools}. Der Rest wird angezeigt.",
+      "untitled": "Ohne Titel",
+      "empty": {
+        "title": "Noch nichts erstellt",
+        "why": "Was du in Website, Folien, Beiträgen, Dokumenten, Recherche, Analyse und Dateien erstellst, landet von selbst hier."
+      },
+      "noMatch": {
+        "title": "Nichts enthält „{query}“",
+        "why": "Versuche weniger Wörter oder eine andere Art."
+      }
     }
   },
   "module": {

@@ -2898,6 +2898,36 @@
         "lost": "El bloque no volvió del cambio, así que no cambió nada. Inténtalo de nuevo.",
         "boxes": "Bloques"
       }
+    },
+    "library": {
+      "title": "Biblioteca",
+      "description": "Todo lo que has creado, en cada herramienta, lo más nuevo primero.",
+      "tab": "Biblioteca",
+      "searchLabel": "Buscar en la Biblioteca",
+      "searchPlaceholder": "Buscar en nombres y contenido",
+      "searchButton": "Buscar",
+      "searchScope": "Busca en los 60 más recientes de cada herramienta, incluido el texto que contienen.",
+      "kindsLabel": "Mostrar solo",
+      "all": "Todo",
+      "kinds": {
+        "site": "Sitios",
+        "slides": "Diapositivas",
+        "posts": "Publicaciones",
+        "document": "Documentos",
+        "research": "Investigaciones",
+        "analysis": "Análisis",
+        "file": "Archivos"
+      },
+      "failed": "No se pudo cargar: {tools}. Se muestra el resto.",
+      "untitled": "Sin título",
+      "empty": {
+        "title": "Aún no has creado nada",
+        "why": "Lo que creas en Sitio, Diapositivas, Publicaciones, Documentos, Investigación, Análisis y Archivos llega aquí solo."
+      },
+      "noMatch": {
+        "title": "Nada dice «{query}»",
+        "why": "Prueba con menos palabras o con otro tipo."
+      }
     }
   },
   "module": {

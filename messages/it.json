@@ -2898,6 +2898,36 @@
         "lost": "Il riquadro non è tornato dalla modifica, quindi non è cambiato nulla. Riprova.",
         "boxes": "Riquadri"
       }
+    },
+    "library": {
+      "title": "Libreria",
+      "description": "Tutto ciò che hai creato, in ogni strumento, dal più recente.",
+      "tab": "Libreria",
+      "searchLabel": "Cerca nella Libreria",
+      "searchPlaceholder": "Cerca nei nomi e nel contenuto",
+      "searchButton": "Cerca",
+      "searchScope": "Cerca tra i 60 più recenti di ogni strumento, compreso il testo che contengono.",
+      "kindsLabel": "Mostra solo",
+      "all": "Tutto",
+      "kinds": {
+        "site": "Siti",
+        "slides": "Slide",
+        "posts": "Post",
+        "document": "Documenti",
+        "research": "Ricerche",
+        "analysis": "Analisi",
+        "file": "File"
+      },
+      "failed": "Impossibile caricare: {tools}. Il resto è mostrato.",
+      "untitled": "Senza titolo",
+      "empty": {
+        "title": "Non hai ancora creato nulla",
+        "why": "Ciò che crei in Sito, Slide, Post, Documenti, Ricerca, Analisi e File arriva qui da solo."
+      },
+      "noMatch": {
+        "title": "Niente dice «{query}»",
+        "why": "Prova con meno parole o con un altro tipo."
+      }
     }
   },
   "module": {

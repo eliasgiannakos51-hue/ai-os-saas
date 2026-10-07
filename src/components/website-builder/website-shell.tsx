@@ -51,7 +51,16 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * route puts back every other part exactly as stored
  * (lib/website-boxes.ts, takeEditedBox).
  */
-export function WebsiteShell({ initialWebsites, initialBrief }: { initialWebsites: UserWebsite[]; initialBrief?: string }) {
+export function WebsiteShell({
+  initialWebsites,
+  initialBrief,
+  initialOpenId = null,
+}: {
+  initialWebsites: UserWebsite[];
+  initialBrief?: string;
+  /** A site to open on arrival — `?project=` from the Library or a star. */
+  initialOpenId?: string | null;
+}) {
   const t = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
@@ -61,8 +70,9 @@ export function WebsiteShell({ initialWebsites, initialBrief }: { initialWebsite
   const { addToast } = useToast();
 
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
-  const [currentId, setCurrentId] = useState<string | null>(null);
-  const [pane, setPane] = useState<"site" | "recent" | null>(null);
+  const opened = initialOpenId && initialWebsites.some((w) => w.id === initialOpenId) ? initialOpenId : null;
+  const [currentId, setCurrentId] = useState<string | null>(opened);
+  const [pane, setPane] = useState<"site" | "recent" | null>(opened ? "site" : null);
   const [design, setDesign] = useState<WebsiteDesignChoices>(DEFAULT_DESIGN_CHOICES);
   const [choosingDesign, setChoosingDesign] = useState(false);
   const [busy, setBusy] = useState(false);

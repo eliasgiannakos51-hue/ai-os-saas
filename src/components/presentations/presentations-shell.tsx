@@ -56,12 +56,15 @@ type Open = { id: string | null; deck: Deck };
  */
 export function PresentationsShell({
   initialDescription,
+  initialOpenId = null,
   decks,
   notes,
   ownImageUrls,
   unsplashConfigured,
 }: {
   initialDescription?: string;
+  /** A deck to open on arrival — `?record=` from the Library or a star. */
+  initialOpenId?: string | null;
   decks: DeckRow[];
   notes: NoteRow[];
   ownImageUrls: Record<string, string>;
@@ -86,7 +89,10 @@ export function PresentationsShell({
   const [length, setLength] = useState(initialDescription?.length ?? 0);
   const [running, setRunning] = useState(false);
   const [turns, setTurns] = useState<{ id: string; role: "user" | "tool"; text: string; deck?: Open }[]>([]);
-  const [open, setOpenDeck] = useState<Open | null>(null);
+  const [open, setOpenDeck] = useState<Open | null>(() => {
+    const asked = initialOpenId ? decks.find((d) => d.id === initialOpenId) : undefined;
+    return asked?.deck ? { id: asked.id, deck: asked.deck } : null;
+  });
   // The chosen slide of the open deck, or null for the whole deck. Any
   // other deck opening forgets it: an index means nothing in another deck.
   const [box, setBox] = useState<number | null>(null);
@@ -94,7 +100,12 @@ export function PresentationsShell({
     setOpenDeck(next);
     setBox(null);
   };
-  const [pane, setPane] = useState<"deck" | "recent" | null>(null);
+  // Opened from a link: the deck is shown at once, beside the conversation
+  // on a computer and over it on a phone; a note, which has no slides,
+  // opens what was made before, where it is listed.
+  const [pane, setPane] = useState<"deck" | "recent" | null>(() =>
+    open ? "deck" : initialOpenId && notes.some((n) => n.id === initialOpenId) ? "recent" : null
+  );
   const [exporting, setExporting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 

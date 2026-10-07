@@ -6,6 +6,7 @@ import { getCurrentUserResult } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { TimelineTabs } from "@/components/timeline/timeline-tabs";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { FavoritesList } from "@/components/favorites/favorites-list";
 import { FAVORITES_ICON } from "@/lib/module-icons";
 import { groupFavorites, loadAllFavorites } from "@/lib/favorites";
@@ -58,7 +59,7 @@ export default async function FavoritesPage() {
             scripts/tests/sidebar-naming.test.mjs fails on exactly that,
             in all ten languages. */}
         <PageHeader helpKey="help.favorites" icon={FAVORITES_ICON} title={tSidebar("items.favorites")} />
-        <TimelineTabs view="fav" />
+        <TimelineTabs view="fav" library={await isFeatureOn("library", user)} />
         <FavoritesList groups={groupFavorites(favorites)} />
       </div>
     </div>

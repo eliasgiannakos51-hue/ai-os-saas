@@ -2898,6 +2898,36 @@
         "lost": "The box did not come back from the change, so nothing changed. Try again.",
         "boxes": "Boxes"
       }
+    },
+    "library": {
+      "title": "Library",
+      "description": "Everything you have made, in every tool, newest first.",
+      "tab": "Library",
+      "searchLabel": "Search the Library",
+      "searchPlaceholder": "Search names and what they say",
+      "searchButton": "Search",
+      "searchScope": "Searches the newest 60 from each tool, including the text inside them.",
+      "kindsLabel": "Show only",
+      "all": "All",
+      "kinds": {
+        "site": "Sites",
+        "slides": "Slides",
+        "posts": "Posts",
+        "document": "Documents",
+        "research": "Research",
+        "analysis": "Analyses",
+        "file": "Files"
+      },
+      "failed": "Could not load: {tools}. The rest is shown.",
+      "untitled": "Untitled",
+      "empty": {
+        "title": "Nothing made yet",
+        "why": "What you make in Site, Slides, Posts, Documents, Research, Analyze and Files lands here on its own."
+      },
+      "noMatch": {
+        "title": "Nothing says “{query}”",
+        "why": "Try fewer words, or another kind."
+      }
     }
   },
   "module": {

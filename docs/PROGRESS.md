@@ -34,7 +34,8 @@
   `use-generation-note-text.ts`, για την παλιά σελίδα και το κέλυφος.
 - Έλεγχοι: `site-pages.test.mjs` 67, `site-pages.itest.mjs` 5 (το .zip
   ανοίγει στο zipfile της Python), `.mutation.mjs` 16/16,
-  `site-pages.prodtest.mjs` σε production build, υπολογιστή και κινητό.
+  `site-pages.prodtest.mjs` 38/38 σε production build, υπολογιστή και
+  κινητό. Όλα τα gates και το `build:ci` πράσινα.
   Ενημερώθηκαν για ό,τι μετακινήθηκε οι `boxes`, `tool-shell`,
   `website-negatives`, `website-structural-similarity`, `brand-memory`,
   `route-write-bound`, `feature-catalog`, και οι σουίτες τους ξανάτρεξαν.

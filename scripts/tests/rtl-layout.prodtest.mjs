@@ -102,7 +102,18 @@ const LOCALES = [
 // pointing icon on any of them, and the icon checks would have passed
 // vacuously had they not been written to fail when there is nothing to
 // measure. A check that cannot find its subject is not a passing check.
-const ROUTES = ["/", "/pricing", "/help", "/dashboard", "/dashboard/chat", "/dashboard/overview"];
+//
+// ...and it renders one only for an article that links somewhere
+// (app/help/page.tsx, `article.href &&`), read from help_articles. The
+// fixture below seeds one, in both languages: until 2026-10-05 this
+// file seeded none and relied on rows it never had (QUEUE Α.13).
+// /dashboard/activity is here for the non-pointer: its "this week" card
+// carries the trending-up icon, which the centred Home no longer does.
+const ROUTES = ["/", "/pricing", "/help", "/dashboard", "/dashboard/chat", "/dashboard/overview", "/dashboard/activity"];
+const HELP_ROWS = ["en", "ar"].map((locale) => ({
+  slug: "rtl-arrow", locale, title: "Start a conversation", body: "Open Chat and ask.",
+  category: "getting-started", order: 1, triggers: null, href: "/dashboard/chat", published: true,
+}));
 
 // ---------------------------------------------------------------------
 // The measurement, run inside the page.
@@ -276,6 +287,7 @@ const PROBE = () => {
 // ---------------------------------------------------------------------
 const harness = await startProdHarness({
   supaPort: 54346,
+  tableRows: { help_articles: HELP_ROWS },
   userMetadata: { preferred_locale: "ar", onboarding_completed_at: "2026-01-01T00:00:00Z" },
 });
 const browser = await chromium.launch({ executablePath: chromiumPath() });

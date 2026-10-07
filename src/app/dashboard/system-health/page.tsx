@@ -19,6 +19,8 @@ import { formatNumber } from "@/lib/format-number";
 import { KeyChecks, type KeyInventoryRow } from "@/components/system-health/key-checks";
 import { KEY_INVENTORY, keyVarFor } from "@/lib/ai/providers/key-inventory";
 import { getLocale } from "next-intl/server";
+import { FeatureFlags } from "@/components/system-health/feature-flags";
+import { FLAGS, readFlagAudiences, type FlagKey } from "@/lib/flags/flags";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("pageTitle.systemHealth");
@@ -41,6 +43,8 @@ export default async function SystemHealthPage() {
   // notFound() rather than a redirect or a "not allowed" message: a
   // non-owner should not learn that this page exists at all.
   if (!isAdminEmail(user.email)) notFound();
+
+  const flagAudiences = await readFlagAudiences();
 
   // READ ONCE, ON THE SERVER, AND REDUCED TO BOOLEANS. `process.env` is
   // not available in the browser for anything without a NEXT_PUBLIC_
@@ -178,6 +182,13 @@ export default async function SystemHealthPage() {
             throws, nothing is logged, and the thing that would have
             reported it is the thing that is broken. */}
         <EnvWarnings warnings={warnings} />
+
+        {/* THE SWITCHES (MASTER Μέρος 13 Β): who sees each new tool or big
+            change — nobody, you and the test account, or everyone. No
+            deploy; src/lib/flags/flags.ts is the list. */}
+        <FeatureFlags
+          rows={(Object.keys(FLAGS) as FlagKey[]).map((key) => ({ key, description: FLAGS[key], audience: flagAudiences[key] }))}
+        />
 
         {failed ? (
           <p className="rounded-card border border-danger/30 bg-danger/[0.05] p-4 text-xs text-danger">

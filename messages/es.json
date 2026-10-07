@@ -1336,6 +1336,17 @@
         "bad": "Mala respuesta",
         "retry": "Preguntar de nuevo",
         "ratingFailed": "La valoración no se guardó. Inténtalo de nuevo."
+      },
+      "workArea": {
+        "label": "Resultado",
+        "back": "Volver a la conversación",
+        "tabText": "Texto",
+        "tabCode": "Código",
+        "copy": "Copiar",
+        "download": "Descargar {file}",
+        "close": "Cerrar el área de trabajo",
+        "open": "Abrir junto a la conversación",
+        "isOpen": "Abierto junto a la conversación · pulsa para cerrar"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "No se pudo descartar."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostrar u ocultar la traza de la pila"
+      "toggleStackTrace": "Mostrar u ocultar la traza de la pila",
+      "flags": {
+        "title": "Interruptores",
+        "hint": "Quién ve cada herramienta nueva o cambio grande. Se aplica al momento, sin nuevo despliegue.",
+        "saveFailed": "El interruptor no se guardó. Inténtalo de nuevo.",
+        "audience": {
+          "off": "Nadie",
+          "staff": "Tú y la cuenta de prueba",
+          "everyone": "Todos"
+        }
+      }
     },
     "ideas": {
       "new": "Nueva idea",

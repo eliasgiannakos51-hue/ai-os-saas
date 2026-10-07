@@ -1336,6 +1336,17 @@
         "bad": "Má resposta",
         "retry": "Perguntar de novo",
         "ratingFailed": "A avaliação não foi guardada. Tenta outra vez."
+      },
+      "workArea": {
+        "label": "Resultado",
+        "back": "Voltar à conversa",
+        "tabText": "Texto",
+        "tabCode": "Código",
+        "copy": "Copiar",
+        "download": "Descarregar {file}",
+        "close": "Fechar a área de trabalho",
+        "open": "Abrir ao lado da conversa",
+        "isOpen": "Aberto ao lado da conversa · carrega para fechar"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "Não foi possível dispensar."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostrar ou ocultar o stack trace"
+      "toggleStackTrace": "Mostrar ou ocultar o stack trace",
+      "flags": {
+        "title": "Interruptores",
+        "hint": "Quem vê cada ferramenta nova ou grande mudança. Aplica-se logo, sem novo deploy.",
+        "saveFailed": "O interruptor não foi guardado. Tenta outra vez.",
+        "audience": {
+          "off": "Ninguém",
+          "staff": "Tu e a conta de teste",
+          "everyone": "Todos"
+        }
+      }
     },
     "ideas": {
       "new": "Nova ideia",

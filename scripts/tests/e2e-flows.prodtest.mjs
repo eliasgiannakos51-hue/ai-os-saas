@@ -277,7 +277,21 @@ for (let round = 1; round <= 3; round++) {
   check(`refresh ${round}: still on the mission page`, new URL(page.url()).pathname, "/dashboard/mission");
 }
 // The page must still be rendering its own shell, not an error boundary.
-checkTrue("the page is still intact after 3 round trips", (await page.locator("aside nav a").count()) > 10);
+// The design's sidebar has five fixed rows (src/lib/nav/rail.ts) where
+// the old one had dozens, so "more than ten links" stopped meaning
+// anything (QUEUE Α.13, 2026-10-05). Intact now means: the sidebar's
+// five rows, the page's own heading, and no error boundary's title.
+{
+  const msgs = JSON.parse(readFileSync("messages/en.json", "utf8"));
+  const rail = await page.locator('[data-testid="sidebar"] a').count();
+  const boundary = await page.getByText(msgs.errors.boundary.title).count();
+  const heading = await page.locator("main h1").count();
+  checkTrue(
+    "the page is still intact after 3 round trips",
+    rail >= 5 && heading >= 1 && boundary === 0,
+    `sidebar links ${rail}, headings ${heading}, error boundary ${boundary}`
+  );
+}
 
 console.log("\n== FLOW 5: Chat — composer, focus mode ==");
 await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat`, { waitUntil: "networkidle" });

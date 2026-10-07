@@ -108,8 +108,10 @@ function themeBlock(selector) {
   const open = CSS.indexOf("{", m.index);
   return CSS.slice(open + 1, CSS.indexOf("\n}", open));
 }
+// ONE THEME SINCE 2026-10-04 (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §1: «Ένα
+// θέμα μόνο, σκούρο»): the light block is gone from globals.css, and this
+// measures the one theme the product ships.
 const DARK_VARS = themeBlock(":root");
-const LIGHT_VARS = themeBlock('[data-theme="light"]');
 
 const MARKUP = renderToStaticMarkup(
   React.createElement(
@@ -151,7 +153,6 @@ function page(theme) {
   return `<!doctype html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><style>
 :root{${DARK_VARS}}
-[data-theme="light"]{${LIGHT_VARS}}
 body{margin:0;padding:24px;background:rgb(var(--background));color:rgb(var(--foreground));font-family:system-ui}
 #spinning,#still,#full,#indicator{padding:12px}
 ${cssBlock}
@@ -161,7 +162,6 @@ ${cssBlock}
 
 const ROUTES = new Map([
   ["/dark", page("dark")],
-  ["/light", page("light")],
 ]);
 const server = createServer((req, res) => {
   const body = ROUTES.get((req.url || "").split("?")[0]);
@@ -222,7 +222,7 @@ async function measure(page, selector) {
   return { background, ink: best, ratio: Math.round(bestRatio * 100) / 100 };
 }
 
-for (const theme of ["dark", "light"]) {
+for (const theme of ["dark"]) {
   console.log(`\n== ${theme} ==`);
   const ctx = await browser.newContext({ viewport: { width: 1000, height: 700 } });
   const page = await ctx.newPage();

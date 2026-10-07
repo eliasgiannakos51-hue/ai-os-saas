@@ -200,6 +200,9 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "automation_flows", label: "automation_flows", scope: "user_content" },
   { table: "automation_flow_versions", label: "automation_flow_versions", scope: "user_content" },
   { table: "automation_runs", label: "automation_runs", scope: "user_content" },
+  // MASTER 16, package 36. The sentence a flow was made from, the colour
+  // its steps shared, and which row each step made.
+  { table: "project_flows", label: "project_flows", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

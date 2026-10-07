@@ -23,6 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  "flows": "Flows: one sentence that names several tools — «φτιάξε site για το camping μου, με εικόνες, και posts» — becomes a plan with its total price, and once approved every result goes into one project, in one colour (MASTER 6.1, 6.3; package 36)",
   "automations": "Automations as boxes: say it in a sentence, see the boxes, change one with words or by hand, try it without sending anything, and it runs by itself on the server with its history and its cost (MASTER 16, package 30)",
   "connections": "Connections in one press: a Connect button on every card that opens what the AI will read, Google Calendar as a connection, and Chat answering «τι έχω αύριο;» from it (MASTER 16, package 31)",
   "image-studio": "Image: four pictures from one description, one of them changed with words, and downloaded at the largest size the provider makes (MASTER 16, package 19)",

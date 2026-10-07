@@ -21,7 +21,7 @@ import {
 import {
   DEFAULT_SLIDES,
   IMAGE_SOURCES,
-  MAX_DESCRIPTION_CHARS,
+  MAX_DECK_DESCRIPTION_CHARS,
   MAX_OWN_IMAGES,
   MAX_SLIDES,
   MIN_SLIDES,
@@ -254,7 +254,7 @@ export function PresentationsWorkspace({
         const code = String(body?.error ?? "");
         const message =
           code === "too_long"
-            ? t("errors.tooLong", { limit: MAX_DESCRIPTION_CHARS })
+            ? t("errors.tooLong", { limit: MAX_DECK_DESCRIPTION_CHARS })
             : code === "too_short"
               ? t("errors.tooShort")
               : code === "insufficient_credits" || code === "reserve_failed"
@@ -348,7 +348,7 @@ export function PresentationsWorkspace({
           autoFocus
           id="deck-description"
           value={description}
-          onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_CHARS))}
+          onChange={(e) => setDescription(e.target.value.slice(0, MAX_DECK_DESCRIPTION_CHARS))}
           placeholder={t("form.descriptionPlaceholder")}
           rows={5}
           className="mt-2 w-full rounded-card border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-foreground/40"

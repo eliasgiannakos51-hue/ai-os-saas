@@ -274,7 +274,7 @@ const MUTANTS = [
   {
     name: "the document goes back to a total nobody counted",
     file: DOC,
-    from: "> It now lists **24**",
+    from: "> It now lists **28**",
     to: "> It now lists **19**",
     expect: "docs/projects.md prints the real total",
   },

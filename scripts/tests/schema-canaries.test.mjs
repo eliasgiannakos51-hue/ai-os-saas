@@ -193,8 +193,6 @@ const NOT_PROBEABLE = {
     "drops two select policies and revokes SELECT on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still read either table, and cost-log-reads.dbtest.mjs checks it against a real Postgres",
   "20261011000000_research_reports_server_writes.sql":
     "drops two policies and revokes INSERT and UPDATE from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the privileges are wrong, and research-reports-writes.dbtest.mjs checks them against a real Postgres",
-  "20261010000000_guard_entitlement_metadata.sql":
-    "adds a trigger on auth.users and its trigger function. Neither is visible to /api/health: the auth schema is not exposed through the database API, and a function returning `trigger` never appears in its OpenAPI list. The migration raises at the end if the trigger did not attach, and entitlement-metadata.dbtest.mjs runs its behaviour against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

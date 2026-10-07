@@ -18,13 +18,13 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { runCompletion } from "@/lib/ai/providers/complete";
-import { ANALYSIS_SYSTEM, buildProfileBrief, parseAnalysis } from "@/lib/data-analysis/analyse";
+import { ANALYSIS_MODEL, ANALYSIS_SYSTEM, buildProfileBrief, parseAnalysis } from "@/lib/data-analysis/analyse";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // @function-limit 120
 
-const MODEL = "claude-sonnet-4-6";
+const MODEL = ANALYSIS_MODEL;
 
 /**
  * WHAT THE NUMBERS MEAN.

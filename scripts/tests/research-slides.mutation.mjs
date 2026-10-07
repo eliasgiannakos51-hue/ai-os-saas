@@ -112,8 +112,8 @@ const MUTANTS = [
   {
     name: "a typed description is let past the field's limit",
     file: ROUTE,
-    from: "  if (researchId === null) {\n    const verdict = checkDescription(description);",
-    to: "  if (false) {\n    const verdict = checkDescription(description);",
+    from: "  if (researchId === null) {\n    const verdict = checkDeckDescription(description);",
+    to: "  if (false) {\n    const verdict = checkDeckDescription(description);",
     expect: "...and a typed description is still held to the field's limits",
   },
   {

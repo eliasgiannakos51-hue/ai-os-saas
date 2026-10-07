@@ -3238,6 +3238,87 @@
         "failed": "Algo salió mal. No se cobró nada por lo que no ocurrió.",
         "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
       }
+    },
+    "flows": {
+      "name": "Proyectos",
+      "help": "Escribe en una frase lo que quieres crear, p. ej. «Haz un sitio web para mi camping, con imágenes, y publicaciones para anunciarlo». Ves el plan y su coste, lo apruebas y todo va a un solo proyecto.",
+      "placeholder": "¿Qué quieres crear?",
+      "planIntro": "Este es el plan. Nada empieza antes de que lo apruebes.",
+      "kinds": {
+        "research": "Investigación",
+        "site": "Sitio web",
+        "images": "Imágenes",
+        "posts": "Publicaciones",
+        "slides": "Presentación",
+        "analysis": "Análisis de archivo"
+      },
+      "does": {
+        "research": "Investigación con fuentes numeradas",
+        "site": "Un sitio web con sus páginas",
+        "images": "Cuatro imágenes",
+        "posts": "Publicaciones para cinco plataformas",
+        "slides": "Una presentación",
+        "analysis": "Gráficos y una explicación a partir de tu archivo"
+      },
+      "afterResearch": "creado a partir de la investigación",
+      "price": "hasta {count, plural, one {# crédito} other {# créditos}}",
+      "priceAfterFile": "precio cuando se lea el archivo",
+      "total": "Total: hasta {count, plural, one {# crédito} other {# créditos}}",
+      "totalNote": "Cada herramienta cobra lo que realmente usó, igual que en su propia página. Un paso que falla no cobra nada más.",
+      "colour": "Color",
+      "colourHelp": "El mismo color en el sitio web y en las imágenes.",
+      "colourFromMemory": "el color de tu negocio, desde Memoria",
+      "file": "Elige el archivo",
+      "fileChosen": "Archivo: {name}",
+      "approve": "Aprobar y empezar",
+      "approving": "Creando el proyecto…",
+      "unavailable": "Sin {names}: aún no disponible para ti.",
+      "notYet": "Esto necesita {names}, que Ionexa aún no tiene. No se ha iniciado nada ni se ha cobrado nada.",
+      "notYetNames": {
+        "video": "vídeo",
+        "translation": "traducción",
+        "game": "juegos",
+        "meeting": "reuniones convertidas en objetivos"
+      },
+      "nothing": "No encontré ninguna herramienta en esa frase. Di qué crear: un sitio web, imágenes, publicaciones, una investigación, una presentación o un análisis de archivo.",
+      "started": "Iniciado. Todo va al proyecto «{name}».",
+      "status": {
+        "waiting": "En espera",
+        "running": "En curso",
+        "done": "Listo"
+      },
+      "waitingFor": "Espera la investigación",
+      "stepErrors": {
+        "no_credits": "No hay créditos suficientes",
+        "not_included": "No incluido en tu plan",
+        "not_configured": "Aún no está activo",
+        "rate_limited": "Demasiadas solicitudes a la vez",
+        "refused": "La herramienta lo rechazó",
+        "offline": "Sin conexión",
+        "stopped": "Detenido",
+        "no_file": "Sin archivo",
+        "interrupted": "Se cortó antes de terminar",
+        "failed": "Algo salió mal"
+      },
+      "openStep": "Abrir",
+      "openProject": "Abrir el proyecto",
+      "retry": "Otra vez",
+      "doneOf": "{done} de {total} listos",
+      "mine": "Mis proyectos",
+      "mineRunning": "Mis proyectos ({count} en curso)",
+      "examples": "Ejemplos",
+      "example": {
+        "research": "Investiga campings en las Cícladas y haz una presentación.",
+        "site": "Haz un sitio web para mi camping, con imágenes, y publicaciones para anunciarlo.",
+        "analysis": "Toma este archivo de ventas y escribe un informe con gráficos."
+      },
+      "errors": {
+        "projectLimit": "Has alcanzado el límite de proyectos de tu plan ({limit}).",
+        "rateLimited": "Demasiadas solicitudes a la vez. Inténtalo de nuevo en un momento.",
+        "file": "No se pudo leer ese archivo. Prueba con un archivo CSV o Excel.",
+        "failed": "Algo salió mal. No se ha cobrado nada.",
+        "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
+      }
     }
   },
   "module": {

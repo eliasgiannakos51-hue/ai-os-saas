@@ -3238,6 +3238,87 @@
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla per ciò che non è successo.",
         "offline": "Nessuna connessione. Controlla la rete e riprova."
       }
+    },
+    "flows": {
+      "name": "Progetti",
+      "help": "Scrivi in una frase cosa vuoi creare, ad es. «Crea un sito per il mio campeggio, con immagini, e post per annunciarlo». Vedi il piano e il costo, lo approvi e tutto finisce in un unico progetto.",
+      "placeholder": "Cosa vuoi creare?",
+      "planIntro": "Questo è il piano. Non parte nulla prima della tua approvazione.",
+      "kinds": {
+        "research": "Ricerca",
+        "site": "Sito",
+        "images": "Immagini",
+        "posts": "Post",
+        "slides": "Presentazione",
+        "analysis": "Analisi file"
+      },
+      "does": {
+        "research": "Ricerca con fonti numerate",
+        "site": "Un sito con le sue pagine",
+        "images": "Quattro immagini",
+        "posts": "Post per cinque piattaforme",
+        "slides": "Una presentazione",
+        "analysis": "Grafici e una spiegazione dal tuo file"
+      },
+      "afterResearch": "creato dalla ricerca",
+      "price": "fino a {count, plural, one {# credito} other {# crediti}}",
+      "priceAfterFile": "prezzo dopo la lettura del file",
+      "total": "Totale: fino a {count, plural, one {# credito} other {# crediti}}",
+      "totalNote": "Ogni strumento addebita ciò che ha usato davvero, come nella sua pagina. Un passaggio che fallisce non costa nulla in più.",
+      "colour": "Colore",
+      "colourHelp": "Lo stesso colore sul sito e nelle immagini.",
+      "colourFromMemory": "il colore della tua attività, dalla Memoria",
+      "file": "Scegli il file",
+      "fileChosen": "File scelto: {name}",
+      "approve": "Approva e avvia",
+      "approving": "Creazione del progetto…",
+      "unavailable": "Senza {names}: non ancora disponibile per te.",
+      "notYet": "Serve {names}, che Ionexa non ha ancora. Non è partito nulla e non è stato addebitato nulla.",
+      "notYetNames": {
+        "video": "i video",
+        "translation": "traduzione",
+        "game": "giochi",
+        "meeting": "riunioni trasformate in obiettivi"
+      },
+      "nothing": "Non ho trovato nessuno strumento in quella frase. Di’ cosa creare: un sito, immagini, post, una ricerca, una presentazione o un’analisi file.",
+      "started": "Avviato. Tutto finisce nel progetto «{name}».",
+      "status": {
+        "waiting": "In attesa",
+        "running": "In corso",
+        "done": "Pronto"
+      },
+      "waitingFor": "Aspetta la ricerca",
+      "stepErrors": {
+        "no_credits": "Crediti insufficienti",
+        "not_included": "Non incluso nel tuo piano",
+        "not_configured": "Non ancora attivo",
+        "rate_limited": "Troppe richieste insieme",
+        "refused": "Lo strumento l’ha rifiutato",
+        "offline": "Nessuna connessione",
+        "stopped": "Interrotto",
+        "no_file": "Nessun file",
+        "interrupted": "Interrotto prima della fine",
+        "failed": "Qualcosa è andato storto"
+      },
+      "openStep": "Apri",
+      "openProject": "Apri il progetto",
+      "retry": "Riprova",
+      "doneOf": "{done} su {total} pronti",
+      "mine": "I miei progetti",
+      "mineRunning": "I miei progetti ({count} in corso)",
+      "examples": "Esempi",
+      "example": {
+        "research": "Fai una ricerca sui campeggi delle Cicladi e crea una presentazione.",
+        "site": "Crea un sito per il mio campeggio, con immagini, e post per annunciarlo.",
+        "analysis": "Prendi questo file di vendite e scrivi un report con grafici."
+      },
+      "errors": {
+        "projectLimit": "Hai raggiunto il limite di progetti del tuo piano ({limit}).",
+        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "file": "Impossibile leggere il file. Prova con un file CSV o Excel.",
+        "failed": "Qualcosa è andato storto. Non è stato addebitato nulla.",
+        "offline": "Nessuna connessione. Controlla la rete e riprova."
+      }
     }
   },
   "module": {

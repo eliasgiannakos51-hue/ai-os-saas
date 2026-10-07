@@ -3238,6 +3238,87 @@
         "failed": "Un problème est survenu. Rien n’a été facturé pour ce qui n’a pas eu lieu.",
         "offline": "Pas de connexion. Vérifie le réseau et réessaie."
       }
+    },
+    "flows": {
+      "name": "Projets",
+      "help": "Écrivez en une phrase ce que vous voulez créer, par ex. « Fais un site pour mon camping, avec des images, et des publications pour l’annoncer ». Vous voyez le plan et son coût, vous l’approuvez, et tout va dans un seul projet.",
+      "placeholder": "Que voulez-vous créer ?",
+      "planIntro": "Voici le plan. Rien ne démarre avant votre accord.",
+      "kinds": {
+        "research": "Recherche",
+        "site": "Site",
+        "images": "Images",
+        "posts": "Publications",
+        "slides": "Présentation",
+        "analysis": "Analyse de fichier"
+      },
+      "does": {
+        "research": "Une recherche avec sources numérotées",
+        "site": "Un site avec ses pages",
+        "images": "Quatre images",
+        "posts": "Des publications pour cinq plateformes",
+        "slides": "Une présentation",
+        "analysis": "Des graphiques et une explication à partir de votre fichier"
+      },
+      "afterResearch": "créé à partir de la recherche",
+      "price": "jusqu’à {count, plural, one {# crédit} other {# crédits}}",
+      "priceAfterFile": "prix fixé une fois le fichier lu",
+      "total": "Total : jusqu’à {count, plural, one {# crédit} other {# crédits}}",
+      "totalNote": "Chaque outil facture ce qu’il a réellement utilisé, comme sur sa propre page. Une étape qui échoue ne coûte rien de plus.",
+      "colour": "Couleur",
+      "colourHelp": "La même couleur sur le site et dans les images.",
+      "colourFromMemory": "la couleur de votre entreprise, depuis la Mémoire",
+      "file": "Choisir le fichier",
+      "fileChosen": "Fichier : {name}",
+      "approve": "Approuver et lancer",
+      "approving": "Création du projet…",
+      "unavailable": "Sans {names} : pas encore disponible pour vous.",
+      "notYet": "Cela nécessite {names}, que Ionexa ne propose pas encore. Rien n’a été lancé et rien n’a été facturé.",
+      "notYetNames": {
+        "video": "la vidéo",
+        "translation": "la traduction",
+        "game": "les jeux",
+        "meeting": "les réunions transformées en objectifs"
+      },
+      "nothing": "Je n’ai trouvé aucun outil dans cette phrase. Dites ce qu’il faut créer : un site, des images, des publications, une recherche, une présentation ou une analyse de fichier.",
+      "started": "C’est parti. Tout va dans le projet « {name} ».",
+      "status": {
+        "waiting": "En attente",
+        "running": "En cours",
+        "done": "Prêt"
+      },
+      "waitingFor": "Attend la recherche",
+      "stepErrors": {
+        "no_credits": "Pas assez de crédits",
+        "not_included": "Non inclus dans votre offre",
+        "not_configured": "Pas encore actif",
+        "rate_limited": "Trop de demandes à la fois",
+        "refused": "L’outil a refusé",
+        "offline": "Pas de connexion",
+        "stopped": "Arrêté",
+        "no_file": "Aucun fichier",
+        "interrupted": "Interrompu avant la fin",
+        "failed": "Un problème est survenu"
+      },
+      "openStep": "Ouvrir",
+      "openProject": "Ouvrir le projet",
+      "retry": "Réessayer",
+      "doneOf": "{done} sur {total} prêts",
+      "mine": "Mes projets",
+      "mineRunning": "Mes projets ({count} en cours)",
+      "examples": "Exemples",
+      "example": {
+        "research": "Fais une recherche sur les campings des Cyclades et crée une présentation.",
+        "site": "Fais un site pour mon camping, avec des images, et des publications pour l’annoncer.",
+        "analysis": "Prends ce fichier de ventes et rédige un rapport avec des graphiques."
+      },
+      "errors": {
+        "projectLimit": "Vous avez atteint la limite de projets de votre offre ({limit}).",
+        "rateLimited": "Trop de demandes à la fois. Réessayez dans un instant.",
+        "file": "Impossible de lire ce fichier. Essayez un fichier CSV ou Excel.",
+        "failed": "Un problème est survenu. Rien n’a été facturé.",
+        "offline": "Pas de connexion. Vérifiez le réseau et réessayez."
+      }
     }
   },
   "module": {

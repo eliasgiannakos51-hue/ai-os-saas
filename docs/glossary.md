@@ -198,5 +198,7 @@ Removing one from the product is always allowed.
 | dashboard.firstScreen.understand.example | an example prompt the reader would type |
 | dashboard.firstScreen.repeat.example | an example prompt the reader would type |
 | dashboard.automations.example.finance | an example prompt the reader would type |
+| dashboard.flows.help | quotes an example prompt the reader would type |
+| dashboard.flows.example.site | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

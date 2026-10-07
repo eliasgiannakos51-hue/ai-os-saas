@@ -34,7 +34,7 @@
 // skipped rather than green.
 //
 // Run: node scripts/tests/projects.test.mjs
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -303,8 +303,14 @@ console.log("\n== 6. THE REGISTRY: what a project may hold ==");
   }
   // THE HEADLINE COLUMN HAS TO EXIST, or the picker draws a row of blanks.
   const schema = readFileSync("supabase/migrations/20260803000000_baseline_schema.sql", "utf8");
-  const laterMigrations = ["20260929000000_presentation_decks.sql", "20260930000000_generated_posts.sql"]
-    .map((f) => { try { return readFileSync(`supabase/migrations/${f}`, "utf8"); } catch { return ""; } })
+  // EVERY MIGRATION, not the two the first link-only tables happened to
+  // come from: the fifth table to join (generated_images, package 36) was
+  // created in a file this list did not name, and the check went red on a
+  // column that exists. The population is the directory.
+  const laterMigrations = readdirSync("supabase/migrations")
+    .filter((f) => f.endsWith(".sql") && f !== "20260803000000_baseline_schema.sql")
+    .sort()
+    .map((f) => readFileSync(`supabase/migrations/${f}`, "utf8"))
     .join("\n");
   for (const m of extras.LINK_ONLY_MODULES) {
     const all = schema + laterMigrations;

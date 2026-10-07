@@ -197,6 +197,12 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     "src/lib/ai/module-relevance.ts",          // section 3
     "src/lib/ai/module-synonyms.ts",           // section 3
     "src/components/dashboard/command-palette.tsx", // section 1
+    // Flows (package 36): which tools one sentence names, by the same
+    // cue words the producer matcher routes on, plus the few it does not
+    // carry (pictures, charts, what does not exist yet). A planner, not a
+    // search: a missed word drops a step from a plan the person sees and
+    // approves before anything runs.
+    "src/lib/flows/plan.ts",
     // The free ambiguity detector. It matches a user's words against cue
     // lists that ARE written for matching — phrasings a person types, in
     // all ten languages — and the whole cross-product is measured by

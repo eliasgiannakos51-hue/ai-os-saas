@@ -8,6 +8,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { PROJECTS_ICON } from "@/lib/module-icons";
 import { IN_PROJECT, PROJECTS_TABLE, type ProjectStatus } from "@/lib/projects/project";
 import { ProjectsWorkspace, type ProjectRow } from "@/components/projects/projects-workspace";
+import { FlowShell } from "@/components/flows/flow-shell";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { loadFlowPage } from "@/lib/flows/page-data";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +61,20 @@ export default async function ProjectsPage() {
     createdAt: String(row.created_at ?? ""),
     memberCount: counts.get(String(row.id)) ?? 0,
   }));
+
+  // ONE SENTENCE, SEVERAL TOOLS, ONE PROJECT (MASTER 16, package 36),
+  // behind the switch "flows": the page becomes the place a flow is
+  // written, planned, approved and followed, INSTEAD of the list below —
+  // which it still shows, as «Τα έργα μου». Everybody the switch is off
+  // for keeps this page as it was.
+  if ((await isFeatureOn("flows", user)) && projects) {
+    const data = await loadFlowPage(user);
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <FlowShell initialFlows={data.flows} projects={projects} prices={data.prices} available={data.available} brandColour={data.brandColour} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">

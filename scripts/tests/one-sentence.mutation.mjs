@@ -58,8 +58,8 @@ const MUTANTS = [
     // opposite one — a second line coming back above the greeting.
     name: "a sentence climbs back above Home's greeting",
     file: GREETING,
-    from: '    <div className="flex items-center gap-4">',
-    to: '    <div className="flex items-center gap-4">\n      <p>{tPromise("oneSentence")}</p>',
+    from: '    <div className="flex items-center justify-center gap-4">',
+    to: '    <div className="flex items-center justify-center gap-4">\n      <p>{tPromise("oneSentence")}</p>',
     expect: "...beside the small earth, and with no sentence of its own",
   },
   {

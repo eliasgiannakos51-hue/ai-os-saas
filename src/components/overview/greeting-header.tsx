@@ -10,6 +10,11 @@ import { Earth } from "@/components/brand/earth";
  * DESIGN, «ΑΡΧΙΚΗ»): «Good morning, [όνομα]», by the hour, and no name
  * when we do not know it.
  *
+ * CENTRED OVER THE FIELD, the pair together (the owner, 2026-10-07): set
+ * at the left of the block it leaned left of the field under it. Held by
+ * scripts/tests/design-home.prodtest.mjs, which measures the earth and the
+ * greeting's text against the field's middle on a computer and a phone.
+ *
  * Falls back to the device's local time on first render, then — once
  * mounted — recomputes with the browser's own IANA time zone, so the
  * greeting follows where the person is rather than the server's clock.
@@ -24,10 +29,10 @@ export function GreetingHeader({ name }: { name: string | null }) {
   }, []);
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center justify-center gap-4">
       <Earth variant="small" px={64} className="shrink-0" />
       <h1
-        className="min-w-0 break-words text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+        className="min-w-0 break-words text-center text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
         suppressHydrationWarning
       >
         {tPromise(`greeting.${greeting.part}`)}

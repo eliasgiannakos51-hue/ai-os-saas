@@ -106,7 +106,7 @@ const MUTANTS = [
     file: VIEW,
     from: '    response.headers.set("Cache-Control", "no-store");\n',
     to: "",
-    expect: "...signed briefly, opened rather than saved, never cached or referred",
+    expect: "...signed briefly, opened rather than saved, never cached",
   },
   {
     name: "the Files page lists a page once per mention",

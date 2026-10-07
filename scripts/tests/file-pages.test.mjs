@@ -85,8 +85,8 @@ check("...behind the switch", /if \(!\(await isFeatureOn\("file-pages", user\)\)
 check("...the owner's file only", /\.select\("id, file_type, storage_path"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(view));
 check("...a PDF only", /if \(file\.file_type !== "pdf"\) return NextResponse\.json\(\{ ok: false, code: "not_a_pdf" \}, \{ status: 400 \}\);/.test(view));
 check("...rate limited in the download's own scope, since it mints a link", /checkRateLimit\(\{ scope: "file_download", identifier: user\.id, maxAttempts: 120, windowMinutes: 60 \}\)/.test(view) && /if \(!limited\.allowed\)/.test(view));
-check("...signed briefly, opened rather than saved, never cached or referred",
-  /createSignedUrl\(String\(file\.storage_path\), SIGNED_URL_TTL_SECONDS\);/.test(view) && /"Cache-Control", "no-store"/.test(view) && /"Referrer-Policy", "no-referrer"/.test(view));
+check("...signed briefly, opened rather than saved, never cached",
+  /createSignedUrl\(String\(file\.storage_path\), SIGNED_URL_TTL_SECONDS\);/.test(view) && /"Cache-Control", "no-store"/.test(view));
 check("...a page number is checked before anything is read", view.indexOf('code: "bad_page"') > 0 && view.indexOf('code: "bad_page"') < view.indexOf("auth.getUser()"));
 
 // ---------------------------------------------------------------------

@@ -62,9 +62,13 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       return NextResponse.json({ ok: false, code: "sign_failed" }, { status: 502 });
     }
     const response = NextResponse.redirect(`${signed.signedUrl}#page=${page}`, 302);
-    // The signed address is a bearer token: never cached, never sent on.
+    // The signed address is a bearer token: never cached. It is never a
+    // referrer either, and no header here is needed for that: the request
+    // it answers was sent BY the Files page, so the page is what the
+    // browser names to storage, cut to its origin by the app-wide
+    // Referrer-Policy (next.config.mjs, APP_SECURITY_HEADERS), which
+    // overrides one set here — measured by file-pages.prodtest.mjs.
     response.headers.set("Cache-Control", "no-store");
-    response.headers.set("Referrer-Policy", "no-referrer");
     return response;
   } catch (err) {
     logApiError("/api/files/[id]/view", err, {});

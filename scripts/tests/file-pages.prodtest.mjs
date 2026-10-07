@@ -216,8 +216,11 @@ try {
     const pdf = page.locator('[data-testid="files-page-pdf"]');
     check("...and the PDF opens at that page, in a new tab", (await pdf.getAttribute("href")) === `/api/files/${FID}/view?page=37` && (await pdf.getAttribute("target")) === "_blank" && (await pdf.getAttribute("rel")) === "noopener noreferrer");
     const viewed = await page.request.get(`${ON}/api/files/${FID}/view?page=37`, { maxRedirects: 0 });
-    check("...which is a redirect to the file itself, at #page=37, never cached or referred",
-      viewed.status() === 302 && /#page=37$/.test(viewed.headers().location ?? "") && viewed.headers()["cache-control"] === "no-store" && viewed.headers()["referrer-policy"] === "no-referrer",
+    // The redirect's own Referrer-Policy is the app's: next.config.mjs
+    // overrides one a route sets (measured here, 2026-10-07), and it names
+    // only this origin to storage, never an address.
+    check("...which is a redirect to the file itself, at #page=37, never cached, naming only our origin",
+      viewed.status() === 302 && /#page=37$/.test(viewed.headers().location ?? "") && viewed.headers()["cache-control"] === "no-store" && viewed.headers()["referrer-policy"] === "strict-origin-when-cross-origin",
       `${viewed.status()} ${viewed.headers().location} cache-control=${viewed.headers()["cache-control"]} referrer-policy=${viewed.headers()["referrer-policy"]}`);
 
     // ---- page 12: empty; page 51: not there; a page that did not open

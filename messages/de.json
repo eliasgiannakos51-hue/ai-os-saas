@@ -2869,7 +2869,8 @@
         "done": "Ich habe „{title}“ erstellt, {count, plural, one {# Folie} other {# Folien}}. Sie ist neben dem Gespräch geöffnet; was du als Nächstes schreibst, ändert sie.",
         "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
         "new": "Neue Präsentation"
-      }
+      },
+      "recent": "Zuletzt"
     }
   },
   "module": {

@@ -14,6 +14,9 @@
  * With the switch off, the old page is drawn exactly as before. Slides
  * the same, and there the second thing said in the field CHANGES the open
  * deck through /api/presentations/[id]/edit rather than writing a new one.
+ * Research keeps its stop: the subject is PLANNED, the plan comes back
+ * into the conversation with its price, and only the press under it runs;
+ * the finished report opens beside the conversation with its sources.
  *
  * /api/posts/generate is answered by the browser (page.route), so no
  * model is called and nothing is charged; what is tested is the screen.
@@ -254,6 +257,52 @@ try {
     await page.waitForTimeout(800);
     check("the next thing said CHANGED the open deck instead of writing another",
       generated.length === 1 && edits.length === 1 && edits[0]?.instruction === "Κάν' το πιο σύντομο.", JSON.stringify({ generated: generated.length, edits }));
+
+    // ---- Research: planned, approved, run, and read
+    const RID = "22222222-2222-4222-8222-222222222222";
+    const planned = [];
+    const runs = [];
+    const plannedReport = {
+      id: RID, topic: "Το EU AI Act για μικρές SaaS", status: "pending", document_id: null, credits_charged: 0, error: null,
+      created_at: "2026-10-07T09:00:00Z", completed_at: null,
+      questions: [{ question: "Ποιες υποχρεώσεις ισχύουν από το 2026;", why: "" }, { question: "Τι αλλάζει για τα chatbot;", why: "" }],
+    };
+    await page.route("**/api/research", (r) => {
+      if (r.request().method() !== "POST") return r.continue();
+      planned.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, report: plannedReport, estimate: { credits: 40 } }) });
+    });
+    await page.route(`**/api/research/${RID}/run`, (r) => {
+      runs.push(1);
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
+    });
+    await page.route(`**/api/research/${RID}`, (r) =>
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          report: {
+            ...plannedReport, status: "ready", completed_at: "2026-10-07T09:05:00Z",
+            sections: [{ heading: "Σύνοψη", body: "Από τον Αύγουστο του 2026 ισχύουν οι υποχρεώσεις διαφάνειας [1]." }],
+            sources: [{ title: "EUR-Lex", url: "https://eur-lex.europa.eu/" }],
+          },
+        }),
+      })
+    );
+    await page.goto(`${ON}/dashboard/deep-research`, { waitUntil: "networkidle" });
+    check("Research, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    const researchField = page.locator("main textarea");
+    await researchField.fill("Το EU AI Act για μικρές SaaS");
+    await researchField.press("Enter");
+    const planShown = await page.locator('[data-testid="research-plan"]').waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
+    check("the subject was PLANNED, and the plan is in the conversation with its questions and price",
+      planned.length === 1 && runs.length === 0 && planShown && (await page.locator('[data-testid="research-plan"] ol > li').count()) === 2 &&
+        (await page.locator('[data-testid="research-plan"]').innerText()).includes("40"),
+      JSON.stringify({ planned: planned.length, runs: runs.length }));
+    await press(page.locator('[data-testid="research-start"]'));
+    const reportShown = await page.locator('[data-testid="research-report"]').waitFor({ state: "visible", timeout: 20000 }).then(() => true, () => false);
+    check("only the press ran it, and the finished report opens with its numbered sources",
+      runs.length === 1 && reportShown && (await page.locator('[data-testid="research-sources"] > li').count()) === 1);
     await context.close();
   }
 } catch (err) {

@@ -127,6 +127,18 @@ check("PowerPoint and PDF are on top of the slides",
 check("the slides are drawn by the same component as on the page",
   /<DeckSlides deck=\{open\.deck\} imageUrlFor=\{imageUrlFor\} \/>/.test(slides) && /<DeckSlides deck=\{selected\.deck\} imageUrlFor=\{imageUrlFor\}/.test(read("src/components/presentations/presentations-workspace.tsx")));
 
+console.log("\n== 6. Research, in the shell ==");
+const research = read("src/components/research/research-shell.tsx");
+check("a subject said in the field is PLANNED, not run", /onSend=\{\(text\) => void plan\(text\)\}/.test(research) && /fetch\("\/api\/research", \{/.test(research));
+check("...and the plan comes back with its questions and its price, before anything expensive",
+  /data-testid="research-plan"/.test(research) && /report\.questions\.map\(/.test(research) && /\{t\("estimate", \{ credits \}\)\}/.test(research));
+check("...and only the press under it runs it", /onClick=\{\(\) => run\(report\.id\)\} data-testid="research-start"/.test(research) && /fetch\(`\/api\/research\/\$\{id\}\/run`, \{ method: "POST", keepalive: true \}\)/.test(research));
+check("what is running comes from the rows, and a stalled run is nudged",
+  /const activeKey = reports\.filter\(isRunning\)/.test(research) && /\/api\/research\/\$\{report\.id\}\/continue/.test(research));
+check("Stop is offered while it runs", /data-testid="research-stop"/.test(research) && /\/api\/research\/\$\{report\.id\}\/cancel/.test(research));
+check("the report opens beside the conversation, marked as made by AI, with numbered sources and its PDF",
+  /<AiGeneratedNotice variant="block" \/>/.test(research) && /data-testid="research-sources"/.test(research) && /\[\{i \+ 1\}\]/.test(research) && /href=\{`\/api\/research\/\$\{open\.id\}\/pdf`\}/.test(research));
+
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};

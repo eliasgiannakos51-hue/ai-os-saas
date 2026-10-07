@@ -479,6 +479,13 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Slides in the shell: the field's send writes or changes the deck",
   },
+  {
+    file: "src/components/research/research-shell.tsx",
+    tag: "<ResearchShell",
+    budget: 1,
+    walk: true,
+    why: "Research in the shell: the field's send plans; the plan's start is an outline, as on the page",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

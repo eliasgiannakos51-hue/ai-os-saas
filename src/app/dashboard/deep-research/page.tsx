@@ -13,6 +13,8 @@ import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { ResearchWorkspace, type ResearchReport } from "@/components/research/research-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { ResearchShell } from "@/components/research/research-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +77,21 @@ export default async function DeepResearchPage(
       .eq("user_id", user.id)
       .gte("created_at", since.toISOString()),
   ]);
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
+  // reports and the same plan-then-run stop, drawn as conversation and work.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <ResearchShell
+          initialTopic={readExampleParam(searchParams.brief)}
+          initialReports={(reports ?? []) as unknown as ResearchReport[]}
+          monthlyCap={isAdmin ? null : cap}
+          usedThisMonth={count ?? 0}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full">

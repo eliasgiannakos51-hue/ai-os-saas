@@ -2869,7 +2869,8 @@
         "done": "Ho creato «{title}», {count, plural, one {# slide} other {# slide}}. È aperta accanto alla conversazione; ciò che scrivi ora la modifica.",
         "changed": "Modificata. La nuova versione è aperta accanto alla conversazione.",
         "new": "Nuova presentazione"
-      }
+      },
+      "recent": "Recenti"
     }
   },
   "module": {

@@ -31,33 +31,11 @@ import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { VoicePlayer } from "@/components/voice/voice-player";
 
-type Question = { question: string; why: string };
-type Source = { title: string; url: string };
-type Section = { heading: string; body: string };
-
-export type ResearchReport = {
-  id: string;
-  topic: string;
-  status: "pending" | "planning" | "researching" | "synthesising" | "ready" | "failed";
-  questions: Question[];
-  sections?: Section[];
-  sources?: Source[];
-  document_id: string | null;
-  credits_charged: number;
-  error: string | null;
-  created_at: string;
-  completed_at: string | null;
-  // Written by the worker after each question. Optional because a
-  // database that has not had the progress migration applied simply does
-  // not return them — see api/research/[id], which selects `*`.
-  questions_done?: number | null;
-  questions_total?: number | null;
-  current_question?: string | null;
-  // One step per question, then the writing — built by the server from
-  // the findings (lib/research/research-timeline.ts). Absent from the
-  // list endpoint; present on every poll of api/research/[id].
-  timeline?: ClientStep[];
-};
+// The report's types live in lib/research/report.ts, so the shell
+// (components/research/research-shell.tsx) can name them without importing
+// this page.
+export type { ResearchReport } from "@/lib/research/report";
+import type { ResearchReport } from "@/lib/research/report";
 
 /** Poll interval while a report runs. A report takes minutes, so a
  *  one-second poll would be 300 pointless requests; five seconds is

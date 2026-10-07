@@ -2869,7 +2869,8 @@
         "done": "Criei «{title}», {count, plural, one {# diapositivo} other {# diapositivos}}. Está aberta ao lado da conversa; o que escreveres a seguir altera-a.",
         "changed": "Alterada. A nova versão está aberta ao lado da conversa.",
         "new": "Nova apresentação"
-      }
+      },
+      "recent": "Recentes"
     }
   },
   "module": {

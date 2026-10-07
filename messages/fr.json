@@ -2869,7 +2869,8 @@
         "done": "J’ai créé « {title} », {count, plural, one {# diapo} other {# diapos}}. Elle est ouverte à côté de la conversation ; ce que tu écris ensuite la modifie.",
         "changed": "Modifiée. La nouvelle version est ouverte à côté de la conversation.",
         "new": "Nouvelle présentation"
-      }
+      },
+      "recent": "Récents"
     }
   },
   "module": {

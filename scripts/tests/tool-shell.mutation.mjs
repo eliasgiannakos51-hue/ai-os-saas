@@ -19,7 +19,8 @@ const POSTS = "src/components/posts/posts-shell.tsx";
 const PAGE = "src/app/dashboard/posts/page.tsx";
 const SLIDES = "src/components/presentations/presentations-shell.tsx";
 const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE];
+const RESEARCH = "src/components/research/research-shell.tsx";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH];
 
 const MUTANTS = [
   {
@@ -126,6 +127,27 @@ const MUTANTS = [
     from: "<CostEstimateHint credits={editing ? editEstimate.credits : estimate.credits} />",
     to: "<CostEstimateHint credits={estimate.credits} />",
     expect: "the price shows before sending, for a new deck and for a change",
+  },
+  {
+    name: "Research: a subject said is run at once, with no plan to approve",
+    file: RESEARCH,
+    from: "      onSend={(text) => void plan(text)}",
+    to: "      onSend={(text) => void run(text)}",
+    expect: "is PLANNED, not run",
+  },
+  {
+    name: "Research: the plan loses its price",
+    file: RESEARCH,
+    from: '            <p className="text-xs font-medium text-foreground">{t("estimate", { credits })}</p>\n',
+    to: "",
+    expect: "its questions and its price",
+  },
+  {
+    name: "Research: a stalled run is never nudged",
+    file: RESEARCH,
+    from: "            if (previous === current) void fetch(`/api/research/${report.id}/continue`, { method: \"POST\", keepalive: true }).catch(() => undefined);\n",
+    to: "",
+    expect: "a stalled run is nudged",
   },
 ];
 

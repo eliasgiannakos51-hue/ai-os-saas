@@ -224,7 +224,10 @@ check("questions_done is added", /add column if not exists questions_done/.test(
 check("questions_total is added", /add column if not exists questions_total/.test(migration));
 check("current_question is added", /add column if not exists current_question/.test(migration));
 check("the index is idempotent too", /create index if not exists research_reports_processing_idx/.test(migration));
-check("the UI treats the progress fields as optional", /questions_done\?: number \| null/.test(uiSrc));
+// The report's type moved to lib/research/report.ts (2026-10-07), so the
+// page and the shell (components/research/research-shell.tsx) share it.
+const reportTypeSrc = readFileSync("src/lib/research/report.ts", "utf8");
+check("the UI treats the progress fields as optional", /questions_done\?: number \| null/.test(reportTypeSrc) && /from "@\/lib\/research\/report"/.test(uiSrc));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

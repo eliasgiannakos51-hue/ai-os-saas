@@ -27,6 +27,9 @@ export type ShellTurn = {
   text: string;
   /** A small card under a tool turn that opens the work again. */
   card?: { title: string; open: boolean; onOpen: () => void };
+  /** What a tool turn shows under its words: a plan to approve, with its
+   *  price and the press that starts it (Research). */
+  extra?: ReactNode;
 };
 
 export const MAX_SHELL_OPTIONS = 4;
@@ -79,6 +82,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
                 >
                   {turn.text}
                 </p>
+                {turn.extra}
                 {turn.card && (
                   <button
                     type="button"

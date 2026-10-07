@@ -2853,6 +2853,18 @@
         "run": "执行",
         "analyze": "分析"
       }
+    },
+    "toolShell": {
+      "open": "打开",
+      "isOpen": "已在对话旁打开",
+      "back": "返回对话",
+      "close": "关闭",
+      "posts": {
+        "done": "{count, plural, other {我写了 # 条帖子。}}它们已在对话旁打开，每条都有复制按钮。",
+        "platforms": "{count, plural, other {# 个平台}}",
+        "copyAll": "全部复制",
+        "copyOne": "复制 {platform} 的帖子"
+      }
     }
   },
   "module": {

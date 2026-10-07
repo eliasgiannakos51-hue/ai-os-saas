@@ -2853,6 +2853,18 @@
         "run": "Exécuter",
         "analyze": "Analyser"
       }
+    },
+    "toolShell": {
+      "open": "Ouvrir",
+      "isOpen": "Ouvert à côté de la conversation",
+      "back": "Retour à la conversation",
+      "close": "Fermer",
+      "posts": {
+        "done": "{count, plural, one {J’ai écrit # publication.} other {J’ai écrit # publications.}} Elles sont ouvertes à côté de la conversation, chacune avec son bouton de copie.",
+        "platforms": "{count, plural, one {# plateforme} other {# plateformes}}",
+        "copyAll": "Tout copier",
+        "copyOne": "Copier la publication {platform}"
+      }
     }
   },
   "module": {

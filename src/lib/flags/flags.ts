@@ -24,6 +24,7 @@ export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
+  "tool-shell": "Every tool in one shell: the conversation on the left, the work on the right, one field and at most four options (MASTER 14.3, package 3)",
 } as const;
 
 export type FlagKey = keyof typeof FLAGS;

@@ -14,6 +14,8 @@ import { POSTS_ICON } from "@/lib/module-icons";
 import { normalisePlatforms, parseStoredPostSet } from "@/lib/posts/platforms";
 import { PostsWorkspace, type PostRow } from "@/components/posts/posts-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { PostsShell } from "@/components/posts/posts-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +79,17 @@ export default async function PostsPage(
     creditsCharged: Number(row.credits_charged ?? 0),
     createdAt: String(row.created_at ?? ""),
   }));
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
+  // history and the same brief, drawn as conversation and work. Below md
+  // the bottom bar takes 4rem more, as on Chat (app/dashboard/chat/page.tsx).
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <PostsShell history={history} initialDescription={readExampleParam(searchParams.brief)} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">

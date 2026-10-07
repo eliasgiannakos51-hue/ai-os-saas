@@ -2853,6 +2853,18 @@
         "run": "Ausführen",
         "analyze": "Analysieren"
       }
+    },
+    "toolShell": {
+      "open": "Öffnen",
+      "isOpen": "Neben dem Gespräch geöffnet",
+      "back": "Zurück zum Gespräch",
+      "close": "Schließen",
+      "posts": {
+        "done": "{count, plural, one {Ich habe # Beitrag geschrieben.} other {Ich habe # Beiträge geschrieben.}} Sie sind neben dem Gespräch geöffnet, jeder mit seiner Kopieren-Taste.",
+        "platforms": "{count, plural, one {# Plattform} other {# Plattformen}}",
+        "copyAll": "Alle kopieren",
+        "copyOne": "Den Beitrag für {platform} kopieren"
+      }
     }
   },
   "module": {

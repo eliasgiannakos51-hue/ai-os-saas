@@ -460,13 +460,26 @@ const REPLACEMENT_SURFACES = [
     budget: 1,
     why: "the lock screen a module shows instead of its list; its 'view plans' link is the only control on it",
   },
+  // A TOOL IN THE SHELL (MASTER 14.3, package 3), behind the switch
+  // "tool-shell": the page returns it early INSTEAD of the old body, so
+  // it is its own screen. `walk` measures everything it reaches — its one
+  // filled control is the field's send, in components/chat/chat-composer.tsx
+  // — and the page is measured without walking into it.
+  {
+    file: "src/components/posts/posts-shell.tsx",
+    tag: "<PostsShell",
+    budget: 1,
+    walk: true,
+    why: "Posts in the shell: the field's send is the one action that starts the work",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
+const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));
 
 const measured = new Map();
 const overlays = new Map();
 for (const page of pages) {
-  const hits = [...reachableFrom([page, ...layoutChain(page)])]
+  const hits = [...reachableFrom([page, ...layoutChain(page)], walkedReplacements)]
     .flatMap(controlsIn)
     .filter((h) => !chromeKeys.has(`${h.file}:${h.at}`));
   for (const h of hits) {
@@ -538,7 +551,9 @@ check(
 // ---------------------------------------------------------------------
 console.log("\n== 3b. the declared replacement surfaces, and the proof ==");
 for (const r of REPLACEMENT_SURFACES) {
-  const own = controlsIn(r.file);
+  const own = r.walk
+    ? [...reachableFrom([r.file])].flatMap(controlsIn).filter((h) => h.surface === "base" && !chromeKeys.has(`${h.file}:${h.at}`))
+    : controlsIn(r.file);
   check(
     `${r.file}: ${own.length} filled accent control, budget ${r.budget}`,
     own.length <= r.budget,

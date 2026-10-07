@@ -2853,6 +2853,18 @@
         "run": "実行",
         "analyze": "分析"
       }
+    },
+    "toolShell": {
+      "open": "開く",
+      "isOpen": "会話の横に表示中",
+      "back": "会話に戻る",
+      "close": "閉じる",
+      "posts": {
+        "done": "{count, plural, other {#件の投稿を書きました。}}会話の横に、それぞれコピーボタン付きで開いています。",
+        "platforms": "{count, plural, other {#個のプラットフォーム}}",
+        "copyAll": "すべてコピー",
+        "copyOne": "{platform}の投稿をコピー"
+      }
     }
   },
   "module": {

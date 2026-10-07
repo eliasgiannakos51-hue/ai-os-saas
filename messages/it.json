@@ -1710,6 +1710,11 @@
           "notConfigured": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e non è stato possibile aggiungerne nessuna — la libreria di foto non è configurata su questa installazione. Tutto il resto della pagina è come è stato generato.",
           "quota": "{count, plural, one {Una immagine} other {# immagini}} non sono state aggiunte: la libreria di foto ha rifiutato altre richieste per ora. Riprova tra un'ora o aggiungi immagini tue.",
           "noMatch": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e nessuna fotografia corrispondeva. Non è stato messo nulla di estraneo al suo posto — descrivere il soggetto in modo diverso di solito aiuta."
+        },
+        "fromMemory": {
+          "name": "Dalla memoria: il nome «{name}».",
+          "colours": "Dalla memoria: i colori {colours}.",
+          "both": "Dalla memoria: il nome «{name}» e i colori {colours}. Per cambiarli, dillo alla Chat."
         }
       },
       "regeneratePaid": "Rigenera · circa {count} crediti",

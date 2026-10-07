@@ -1710,6 +1710,11 @@
           "notConfigured": "{count, plural, one {One picture was} other {# pictures were}} asked for and none could be added — the photo library is not set up on this deployment. Everything else on the page is as generated.",
           "quota": "{count, plural, one {One picture} other {# pictures}} could not be added: the photo library refused more requests for now. Try again in an hour, or add your own images.",
           "noMatch": "{count, plural, one {One picture was} other {# pictures were}} asked for and no photograph matched. Nothing unrelated was put in its place — describing the subject differently usually helps."
+        },
+        "fromMemory": {
+          "name": "From memory: the name «{name}».",
+          "colours": "From memory: the colours {colours}.",
+          "both": "From memory: the name «{name}» and the colours {colours}. To change them, tell Chat."
         }
       },
       "regeneratePaid": "Regenerate · about {count} credits",

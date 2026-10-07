@@ -1710,6 +1710,11 @@
           "notConfigured": "{count, plural, one {Foi pedida uma imagem} other {Foram pedidas # imagens}} e nenhuma pôde ser adicionada — a biblioteca de fotografias não está configurada nesta instalação. Tudo o resto na página está como foi gerado.",
           "quota": "{count, plural, one {Uma imagem} other {# imagens}} não puderam ser adicionadas: a biblioteca de fotografias recusou mais pedidos por agora. Tente daqui a uma hora ou adicione as suas próprias imagens.",
           "noMatch": "{count, plural, one {Foi pedida uma imagem} other {Foram pedidas # imagens}} e nenhuma fotografia correspondeu. Nada de alheio foi colocado no lugar — descrever o tema de outra forma costuma ajudar."
+        },
+        "fromMemory": {
+          "name": "Da memória: o nome “{name}”.",
+          "colours": "Da memória: as cores {colours}.",
+          "both": "Da memória: o nome “{name}” e as cores {colours}. Para mudá-los, diga ao Chat."
         }
       },
       "regeneratePaid": "Regenerar · cerca de {count} créditos",

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { loadDeepDive } from "@/lib/ai/deep-dive-load";
 import {
   summariseProvenance,
@@ -1348,6 +1349,7 @@ export async function POST(request: Request) {
             userMessage: message,
             assistantMessage: assistantText,
             costs,
+            brand: await isFeatureOn("brand-memory", user),
           });
         }
 

@@ -1710,6 +1710,11 @@
           "notConfigured": "{count, plural, one {Une image a été} other {# images ont été}} demandée et aucune n'a pu être ajoutée — la bibliothèque de photos n'est pas configurée sur ce déploiement. Tout le reste de la page est tel qu'il a été généré.",
           "quota": "{count, plural, one {Une image} other {# images}} n'ont pas pu être ajoutées : la bibliothèque de photos a refusé d'autres requêtes pour l'instant. Réessayez dans une heure ou ajoutez vos propres images.",
           "noMatch": "{count, plural, one {Une image a été} other {# images ont été}} demandée et aucune photographie ne correspondait. Rien d'étranger n'a été mis à la place — décrire le sujet autrement aide généralement."
+        },
+        "fromMemory": {
+          "name": "De la mémoire : le nom « {name} ».",
+          "colours": "De la mémoire : les couleurs {colours}.",
+          "both": "De la mémoire : le nom « {name} » et les couleurs {colours}. Pour les changer, dites-le au Chat."
         }
       },
       "regeneratePaid": "Régénérer · environ {count} crédits",

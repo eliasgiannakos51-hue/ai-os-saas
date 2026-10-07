@@ -9,6 +9,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
+import { parseGenerationNotes } from "@/lib/website-generation-notes";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -124,6 +125,20 @@ export function WebsiteShell({
       void reportUsage(usage);
       if (record.status === "completed") {
         say({ role: "tool", text: tShell("site.done", { name: record.name }), siteId: id });
+        // What the brief took from memory (package 6), said in the
+        // conversation so a wrong name or colour is seen at once.
+        const remembered = parseGenerationNotes(record.generation_notes).find((n) => n.kind === "fromMemory");
+        if (remembered && remembered.kind === "fromMemory") {
+          say({
+            role: "tool",
+            text:
+              remembered.name !== null && remembered.colours.length > 0
+                ? t("notes.fromMemory.both", { name: remembered.name, colours: remembered.colours.join(", ") })
+                : remembered.name !== null
+                  ? t("notes.fromMemory.name", { name: remembered.name })
+                  : t("notes.fromMemory.colours", { colours: remembered.colours.join(", ") }),
+          });
+        }
         setPane("site");
       } else {
         say({ role: "tool", text: record.error_message ?? t("generateFailed") });

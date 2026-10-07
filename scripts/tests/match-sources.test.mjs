@@ -262,6 +262,12 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // scripts/tests/library.test.mjs checks the sentence it cuts. The
     // ceiling caught it on the build that introduced it.
     "src/lib/library/sources.ts",
+    // THE BUSINESS'S COLOURS AND NAME (package 6, 2026-10-07). Folds two
+    // things: a colour word the person said, against a fixed table of
+    // colour names written for exactly that (scripts/tests/brand-memory.test.mjs
+    // runs it word by word); and the remembered name, against the brief,
+    // only to avoid saying it twice. Neither decides what is shown to whom.
+    "src/lib/memory/brand.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

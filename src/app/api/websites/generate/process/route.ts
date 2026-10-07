@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { scrubSecrets } from "@/lib/scrub-secrets";
-import { memoryPromptFor } from "@/lib/memory/store";
+import { loadMemories, memoryPromptFor } from "@/lib/memory/store";
+import { brandBriefFor, readBrand } from "@/lib/memory/brand";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
@@ -539,9 +541,23 @@ export async function POST(request: Request) {
       })
         ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
         : "";
+      // THE BUSINESS, REMEMBERED (package 6, behind the switch
+      // "brand-memory"): a name and colours said in Chat reach this brief
+      // as values, the way the form's own colours do (lib/memory/brand.ts),
+      // under the same memory rule as the block above. What was used is a
+      // note on the row, so the screen says it. Not in the hold above: at
+      // most four short lines, like the memory block beside it.
+      const brand =
+        memoryActiveFor({ surface: "website", user, planLimit: plan?.capabilities.chatMemoryLimit ?? 0 }) &&
+        (await isFeatureOn("brand-memory", user))
+          ? brandBriefFor(readBrand(await loadMemories(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)), description)
+          : null;
+      if (brand && (brand.used.name !== null || brand.used.colours.length > 0)) {
+        notes.push({ kind: "fromMemory", name: brand.used.name, colours: brand.used.colours });
+      }
       htmlContent = await generateWebsiteHtml(
         apiKey,
-        description,
+        `${description}${brand?.brief ?? ""}`,
         referenceImages,
         onDelta,
         formEndpointUrl,

@@ -57,7 +57,10 @@ export type GenerationNote =
    *  deployment that was never finished, an exhausted quota fixes itself
    *  within the hour, and searches that all came back empty is a brief
    *  nobody can match. */
-  | { kind: "photosDropped"; count: number; reason: "notConfigured" | "quota" | "noMatch" };
+  | { kind: "photosDropped"; count: number; reason: "notConfigured" | "quota" | "noMatch" }
+  // The business name and colours the brief took from memory (package 6),
+  // said back so the person sees where they came from and can correct them.
+  | { kind: "fromMemory"; name: string | null; colours: string[] };
 
 const FEATURES: readonly NegativeFeature[] = [
   "booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget",
@@ -99,6 +102,12 @@ export function parseGenerationNotes(raw: unknown): GenerationNote[] {
       (n.reason === "notConfigured" || n.reason === "quota" || n.reason === "noMatch")
     ) {
       out.push({ kind: "photosDropped", count: n.count, reason: n.reason });
+    } else if (n.kind === "fromMemory") {
+      const name = typeof n.name === "string" && n.name.trim() ? n.name.trim().slice(0, 80) : null;
+      const colours = Array.isArray(n.colours)
+        ? n.colours.filter((c): c is string => typeof c === "string" && c.trim().length > 0).map((c) => c.trim().slice(0, 30)).slice(0, 4)
+        : [];
+      if (name !== null || colours.length > 0) out.push({ kind: "fromMemory", name, colours });
     } else if (n.kind === "spelling" && Array.isArray(n.words)) {
       // Read as defensively as every other note: only strings, only the
       // ones with something in them, capped so a malformed row cannot

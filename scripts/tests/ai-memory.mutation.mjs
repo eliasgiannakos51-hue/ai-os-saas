@@ -49,8 +49,8 @@ const MUTANTS = [
     name: "the extractor goes back to a bare .insert()",
     gate: UNIT,
     file: MEMORY,
-    from: 'const { error } = await supabase.rpc("chat_memory_record", {\n      p_memory_text: extracted,\n      p_memory_fold: memoryFold(extracted),\n      p_conversation_id: conversationId,\n    });',
-    to: 'const { error } = await supabase.from("chat_memory").insert({\n      user_id: userId,\n      memory_text: extracted,\n      source_conversation_id: conversationId,\n    });',
+    from: 'const { error } = await supabase.rpc("chat_memory_record", {\n        p_memory_text: row,\n        p_memory_fold: memoryFold(row),\n        p_conversation_id: conversationId,\n      });',
+    to: 'const { error } = await supabase.from("chat_memory").insert({\n        user_id: userId,\n        memory_text: row,\n        source_conversation_id: conversationId,\n      });',
     expect: "no longer does a bare .insert()",
   },
   {

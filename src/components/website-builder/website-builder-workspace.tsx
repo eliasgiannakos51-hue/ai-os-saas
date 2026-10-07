@@ -1122,6 +1122,14 @@ export function WebsiteBuilderWorkspace({
         // set a key, and "no photographs matched" tells them to change
         // the words.
         return t(`notes.photosDropped.${note.reason}`, { count: note.count });
+      case "fromMemory":
+        // Where the name and the colours came from, so a wrong one is
+        // corrected in Chat (or on the memory page) and not argued with here.
+        return note.name !== null && note.colours.length > 0
+          ? t("notes.fromMemory.both", { name: note.name, colours: note.colours.join(", ") })
+          : note.name !== null
+            ? t("notes.fromMemory.name", { name: note.name })
+            : t("notes.fromMemory.colours", { colours: note.colours.join(", ") });
       case "spelling":
         // The words themselves, joined — the owner is the only one who can
         // say whether "ρεμπα" is a typo or a brand, and they can only say

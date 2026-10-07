@@ -1361,6 +1361,29 @@
         "changing": "正在修改网站…",
         "nextChanges": "你现在在对话中写的内容会修改这个网站。",
         "reopen": "显示网站"
+      },
+      "attach": {
+        "label": "附加 PDF 或图片",
+        "reading": "正在读取…",
+        "pages": "{count, plural, other {# 页}}",
+        "readyPdf": "就绪",
+        "readyImage": "将随消息发送",
+        "remove": "移除“{name}”",
+        "unreadable": "在“{name}”中未找到文字。如果是扫描件，请作为图片附加。",
+        "offline": "没有网络连接。请检查网络后重试。",
+        "type": "“{name}”：仅支持 PDF、JPG 或 PNG。",
+        "pdfTooLarge": "“{name}”：PDF 超过 20 MB。",
+        "imageTooLarge": "“{name}”：图片超过 5 MB。",
+        "tooManyPdfs": "每条消息最多 {max} 个 PDF。",
+        "tooManyImages": "每条消息最多 {max} 张图片。",
+        "holdReading": "文件正在读取，发送将等待。",
+        "holdFailed": "请移除无法读取的文件后再发送。",
+        "imageUpload": "图片未能上传，因此消息未发送。请重试。",
+        "notReady": "尚未读取：{names}。请稍后重试。",
+        "refused": "附件未被接受。请重新附加。",
+        "openInFiles": "在文件中打开",
+        "memoryUsed": "来自记忆（{count}）",
+        "manageMemory": "Ionexa 记住的内容"
       }
     },
     "create": {

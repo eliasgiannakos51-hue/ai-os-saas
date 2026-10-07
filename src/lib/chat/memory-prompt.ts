@@ -11,6 +11,8 @@
  * carries. See buildMemoryPromptAddition.
  */
 export type RememberedFact = {
+  /** The chat_memory row, when the reader asked for it (package 9: what an answer used is named). */
+  id?: string;
   text: string;
   timesSeen: number;
   lastSeenAt: string;
@@ -31,11 +33,11 @@ const STALE_AFTER_DAYS = 180;
  * The model is told which it is holding, and how old it is, rather than
  * being left to weigh unlabelled facts.
  */
-export function buildMemoryPromptAddition(memories: RememberedFact[]): string {
+export function buildMemoryPromptAddition(memories: RememberedFact[], options: { numbered?: boolean } = {}): string {
   if (memories.length === 0) return "";
   const now = Date.now();
   const bulletList = memories
-    .map((m) => {
+    .map((m, i) => {
       const parsed = Date.parse(m.lastSeenAt);
       const days = Number.isFinite(parsed) ? Math.floor((now - parsed) / 86_400_000) : 0;
       const weight =
@@ -43,7 +45,9 @@ export function buildMemoryPromptAddition(memories: RememberedFact[]): string {
           ? `επαναλαμβάνεται, ${m.timesSeen} φορές`
           : "αναφέρθηκε μία φορά";
       const age = days >= STALE_AFTER_DAYS ? ", πριν από πάνω από έξι μήνες" : "";
-      return `- ${m.text} (${weight}${age})`;
+      // NUMBERED when the answer is asked to say which it used
+      // (lib/chat/memory-citations.ts): the number is how it says so.
+      return `${options.numbered ? `[${i + 1}]` : "-"} ${m.text} (${weight}${age})`;
     })
     .join("\n");
   return (

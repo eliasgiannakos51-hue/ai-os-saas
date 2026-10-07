@@ -151,7 +151,7 @@ export async function loadRecentMemories(
 ): Promise<RememberedFact[]> {
   const { data, error } = await supabase
     .from("chat_memory")
-    .select("memory_text, times_seen, last_seen_at")
+    .select("id, memory_text, times_seen, last_seen_at")
     .eq("user_id", userId)
     // LAST SEEN, NOT CREATED. Ordering by created_at meant a fact learned
     // two years ago and repeated yesterday sorted behind a one-off from
@@ -166,6 +166,7 @@ export async function loadRecentMemories(
   }
 
   return (data ?? []).map((row) => ({
+    id: String(row.id),
     text: row.memory_text as string,
     timesSeen: Number(row.times_seen ?? 1),
     lastSeenAt: String(row.last_seen_at ?? ""),

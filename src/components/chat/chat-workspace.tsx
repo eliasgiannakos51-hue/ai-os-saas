@@ -35,6 +35,11 @@ import { SitePane, type SitePaneHandle } from "@/components/chat/site-pane";
 import { openSiteFor } from "@/lib/chat/open-tool";
 import { workItemFrom, type WorkItem } from "@/lib/chat/work-area";
 import type { Provenance } from "@/lib/chat/provenance";
+import { AttachmentTray, MemoriesUsed, SentAttachments, useChatAttachments } from "@/components/chat/chat-attachments";
+import { CHAT_ACCEPT, discardChatImages } from "@/lib/chat/attach-client";
+import { parseStoredAttachments, type ChatAttachment } from "@/lib/chat/attachment-types";
+import { readAnswerBasis, readMemoriesUsed, type MemoryUsed } from "@/lib/chat/memory-citations";
+import { useToast } from "@/components/toast/toast-context";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
@@ -97,6 +102,7 @@ export function ChatWorkspace({
   initialWorkMode,
   workArea = false,
   opensTools = false,
+  attachments = false,
   greeting = null,
 }: {
   initialConversations: ChatConversation[];
@@ -135,6 +141,9 @@ export function ChatWorkspace({
   /** The switch "chat-opens-tools" (package 7): a request for a site opens
    *  the Site beside the conversation instead of being answered in words. */
   opensTools?: boolean;
+  /** The switch "chat-attachments" (package 9): PDFs and images given to a
+   *  message, and under each answer the remembered facts it used. */
+  attachments?: boolean;
   /** The name the empty Chat greets with (lib/greeting.ts, greetingName),
    *  or null when it is not known — then the greeting has no name. */
   greeting?: string | null;
@@ -185,7 +194,18 @@ export function ChatWorkspace({
   // parallel map: a reply and the list of entries it was built from are
   // one thing, and two structures keyed by id drift the moment a message
   // is removed from one of them.
-  const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
+  const [messages, setMessages] = useState<
+    (ChatMessage & {
+      provenance?: Provenance;
+      timeline?: ClientStep[];
+      attachments?: ChatAttachment[];
+      /** On-page pictures of images just sent, by stored path. */
+      previews?: Record<string, string>;
+      memoriesUsed?: MemoryUsed[];
+    })[]
+  >([]);
+  const { addToast } = useToast();
+  const attach = useChatAttachments((lines) => addToast(lines.join(" "), "error"));
   // The one answer whose earth keeps turning, calmly, once it is done.
   const lastAnswerId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   // What each finished answer produced, if anything (lib/chat/work-area.ts).
@@ -364,7 +384,21 @@ export function ChatWorkspace({
         setMessages([]);
         return;
       }
-      setMessages((data as ChatMessage[] | null) ?? []);
+      // A row's attachments and what its answer stood on (package 9) are
+      // read back, so a reload shows what the stream showed; the
+      // `provenance` column's shape is not the client's Provenance, so it
+      // is unpacked rather than spread.
+      setMessages(
+        ((data as (ChatMessage & { attachments?: unknown; provenance?: unknown })[] | null) ?? []).map(({ attachments: storedAttachments, provenance: stored, ...row }) => {
+          const basis = readAnswerBasis(stored);
+          return {
+            ...row,
+            attachments: parseStoredAttachments(storedAttachments),
+            provenance: basis.modules ?? undefined,
+            memoriesUsed: basis.memories,
+          };
+        })
+      );
     } catch (err) {
       if (token !== requestTokenRef.current) return;
       setError(getErrorMessage(err, "Could not load that conversation."));
@@ -504,6 +538,13 @@ export function ChatWorkspace({
       setLoadingMessages(false);
     }
     const supabase = createClient();
+    // THE IMAGES GO WITH THE CONVERSATION (package 9): read before the
+    // rows are deleted, removed after. A PDF is a file in Files and stays
+    // there. Without the column (migration 20261018000000 not yet run)
+    // there is nothing to read and nothing is removed.
+    const { data: attachedRows } = attachments
+      ? await supabase.from("chat_messages").select("attachments").eq("conversation_id", id).not("attachments", "is", null)
+      : { data: null };
     const { error: deleteError } = await supabase
       .from("chat_conversations")
       .delete()
@@ -511,7 +552,12 @@ export function ChatWorkspace({
     if (deleteError) {
       setConversations(previous);
       setError(getErrorMessage(deleteError, "Could not delete conversation."));
+      return;
     }
+    const imagePaths = ((attachedRows ?? []) as { attachments?: unknown }[]).flatMap((row) =>
+      parseStoredAttachments(row.attachments).flatMap((a) => (a.kind === "image" ? [a.path] : []))
+    );
+    void discardChatImages(imagePaths);
   }
 
   // THE QUESTION THE SERVER ASKED INSTEAD OF ANSWERING — V5 #6.
@@ -561,6 +607,25 @@ export function ChatWorkspace({
     setError(null);
     setIsRateLimitNotice(false);
 
+    // WHAT THE MESSAGE CARRIES (package 9): the PDFs Files has read, and
+    // the images, which go up now. A failure here sends nothing.
+    let carried: { attachments: ChatAttachment[]; imagePaths: string[]; previews: Record<string, string> } | null = null;
+    if (attachments && attach.items.length > 0) {
+      if (attach.hold) {
+        composerRef.current?.setText(text);
+        return;
+      }
+      setSending(true);
+      const prepared = await attach.prepare();
+      if (!prepared.ok) {
+        setSending(false);
+        setError(prepared.error);
+        composerRef.current?.setText(text);
+        return;
+      }
+      carried = prepared;
+    }
+
     const sentFromId = activeId;
     setMessages((m) => [
       ...m,
@@ -570,6 +635,7 @@ export function ChatWorkspace({
         role: "user",
         content: text,
         created_at: new Date().toISOString(),
+        ...(carried ? { attachments: carried.attachments, previews: carried.previews } : {}),
       },
     ]);
     setSending(true);
@@ -596,13 +662,21 @@ export function ChatWorkspace({
           ...(mentorPreset ? { mentorPreset } : {}),
           ...(workMode ? { workMode } : {}),
           ...(options.skipClarification ? { skipClarification: true } : {}),
+          ...(carried ? { attachments: carried.attachments } : {}),
         }),
       });
 
       const contentType = res.headers.get("content-type") ?? "";
       if (!contentType.includes("application/x-ndjson") || !res.body) {
         const data = await res.json().catch(() => null);
-        if (data?.rateLimited) {
+        // Refused before anything was saved: the images just uploaded
+        // belong to nothing, and the tray stays as it was to send again.
+        if (carried) void discardChatImages(carried.imagePaths);
+        if (data?.reason === "attachment_not_ready") {
+          setError(t("attach.notReady", { names: Array.isArray(data.names) ? data.names.join(", ") : "" }));
+        } else if (data?.reason === "bad_attachments") {
+          setError(t("attach.refused"));
+        } else if (data?.rateLimited) {
           setIsRateLimitNotice(true);
           setError(data.message);
         } else {
@@ -611,6 +685,8 @@ export function ChatWorkspace({
         return;
       }
 
+      // The message is saved with what it carried; the tray empties.
+      if (carried) attach.clear();
       let resolvedConversationId: string | null = sentFromId;
       let accumulatedText = "";
       let streamError: string | null = null;
@@ -623,6 +699,7 @@ export function ChatWorkspace({
       let finalContent: string | null = null;
       let finishedTimeline: ClientStep[] | undefined;
       let savedId: string | null = null;
+      let memoriesUsed: MemoryUsed[] = [];
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
         if (event.type === "done") {
           usageEvent = event;
@@ -631,6 +708,7 @@ export function ChatWorkspace({
           if (typeof event.content === "string" && event.content.trim()) finalContent = event.content;
           finishedTimeline = keepChatSteps(event.timeline);
           if (typeof event.messageId === "string" && PERSISTED_ID.test(event.messageId)) savedId = event.messageId;
+          memoriesUsed = readMemoriesUsed(event.memoriesUsed);
         }
         if (event.type === "timeline") {
           setLiveTimeline(keepChatSteps(event.steps) ?? []);
@@ -708,6 +786,7 @@ export function ChatWorkspace({
             created_at: new Date().toISOString(),
             provenance: provenance ?? undefined,
             timeline: finishedTimeline,
+            memoriesUsed,
           },
         ]);
         if (resolvedConversationId) {
@@ -965,8 +1044,11 @@ export function ChatWorkspace({
                         fill with no border, and the answer stays bare.
                         The 85% cap comes back with the surface, so a
                         long question does not paint the whole pane. */}
-                    <div className="min-w-0 max-w-[85%] whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">
-                      {msg.content}
+                    <div className="flex min-w-0 max-w-[85%] flex-col items-end">
+                      <SentAttachments attachments={msg.attachments} previews={msg.previews} />
+                      <div className="min-w-0 max-w-full whitespace-pre-wrap rounded-card bg-panel px-4 py-2.5 text-foreground">
+                        {msg.content}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -1018,9 +1100,10 @@ export function ChatWorkspace({
                       </div>
                       {/* WHERE IT CAME FROM — V4.6 #9. Only on messages
                           that carried one: a reply reloaded from the
-                          database has no provenance, and inventing an
-                          empty one would render a source line under an
-                          answer whose sources nobody recorded. */}
+                          database has it only when the row kept it (the
+                          switch "chat-attachments", package 9), and
+                          inventing an empty one would render a source line
+                          under an answer whose sources nobody recorded. */}
                       {/* WHERE THE ANSWER POINTS — a button, not an
                           instruction. Free: lib/transitions/
                           destinations.ts is a fold and a regex, so this
@@ -1029,6 +1112,10 @@ export function ChatWorkspace({
                           "Listen" is: half a sentence points nowhere. */}
                       <TransitionButton text={msg.content} />
                       <ProvenanceLine provenance={msg.provenance} />
+                      {/* WHICH REMEMBERED THINGS IT USED (package 9): the
+                          ones the answer named, not all that were in front
+                          of it (lib/chat/memory-citations.ts). */}
+                      <MemoriesUsed memories={msg.memoriesUsed} />
                       {/* What the answer did, step by step — only on an
                           answer that searched, and only in this page:
                           a reloaded conversation has none (not stored). */}
@@ -1180,6 +1267,9 @@ export function ChatWorkspace({
               onSend={(text) => void handleSend(text)}
               onStop={stopGeneration}
               initialText={composerInitialText}
+              attach={attachments ? { accept: CHAT_ACCEPT, label: t("attach.label"), onFiles: attach.add } : undefined}
+              tray={attachments ? <AttachmentTray items={attach.items} onRemove={attach.remove} holdReason={attach.holdReason} /> : undefined}
+              holdSend={attachments && attach.hold}
               beside={
                 /* PRESS ONCE, THEN TALK (#2), INSIDE THE FIELD beside the
                    microphone since 2026-10-07 (MASTER 13.2: «Δεύτερο

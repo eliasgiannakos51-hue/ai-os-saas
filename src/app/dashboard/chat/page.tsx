@@ -118,6 +118,7 @@ export default async function ChatPage(
         // THE SWITCH "chat-opens-tools" (package 7): «φτιάξε μου site»
         // opens the Site beside the conversation.
         opensTools={await isFeatureOn("chat-opens-tools", user)}
+        attachments={await isFeatureOn("chat-attachments", user)}
         // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
         // it can be chosen. It is validated against the person's OWN
         // projects rather than trusted, exactly as `?c=` is above: an id

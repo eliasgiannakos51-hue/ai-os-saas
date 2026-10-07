@@ -1361,6 +1361,29 @@
         "changing": "Die Website wird geändert…",
         "nextChanges": "Was du jetzt im Gespräch schreibst, ändert diese Website.",
         "reopen": "Website zeigen"
+      },
+      "attach": {
+        "label": "PDF oder Bild anhängen",
+        "reading": "Wird gelesen…",
+        "pages": "{count, plural, one {# Seite} other {# Seiten}}",
+        "readyPdf": "Bereit",
+        "readyImage": "Geht mit der Nachricht",
+        "remove": "„{name}“ entfernen",
+        "unreadable": "In „{name}“ wurde kein Text gefunden. Ist es ein Scan, hängen Sie es als Bild an.",
+        "offline": "Keine Verbindung. Prüfen Sie das Netzwerk und versuchen Sie es erneut.",
+        "type": "„{name}“: nur PDF, JPG oder PNG.",
+        "pdfTooLarge": "„{name}“: Das PDF ist größer als 20 MB.",
+        "imageTooLarge": "„{name}“: Das Bild ist größer als 5 MB.",
+        "tooManyPdfs": "Bis zu {max} PDFs pro Nachricht.",
+        "tooManyImages": "Bis zu {max} Bilder pro Nachricht.",
+        "holdReading": "Die Datei wird gelesen; das Senden wartet.",
+        "holdFailed": "Entfernen Sie die nicht lesbare Datei, um zu senden.",
+        "imageUpload": "Das Bild wurde nicht hochgeladen, die Nachricht nicht gesendet. Versuchen Sie es erneut.",
+        "notReady": "Noch nicht gelesen: {names}. Versuchen Sie es gleich erneut.",
+        "refused": "Die Anhänge wurden nicht angenommen. Hängen Sie sie erneut an.",
+        "openInFiles": "In Dateien öffnen",
+        "memoryUsed": "Aus dem Gedächtnis ({count})",
+        "manageMemory": "Was Ionexa sich merkt"
       }
     },
     "create": {

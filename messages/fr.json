@@ -1361,6 +1361,29 @@
         "changing": "Modification du site…",
         "nextChanges": "Ce que vous écrivez maintenant dans la conversation modifie ce site.",
         "reopen": "Afficher le site"
+      },
+      "attach": {
+        "label": "Joindre un PDF ou une image",
+        "reading": "Lecture…",
+        "pages": "{count, plural, one {# page} other {# pages}}",
+        "readyPdf": "Prêt",
+        "readyImage": "Part avec le message",
+        "remove": "Retirer « {name} »",
+        "unreadable": "Aucun texte trouvé dans « {name} ». S’il s’agit d’un scan, joignez-le comme image.",
+        "offline": "Pas de connexion. Vérifiez le réseau et réessayez.",
+        "type": "« {name} » : uniquement PDF, JPG ou PNG.",
+        "pdfTooLarge": "« {name} » : le PDF dépasse 20 Mo.",
+        "imageTooLarge": "« {name} » : l’image dépasse 5 Mo.",
+        "tooManyPdfs": "Jusqu’à {max} PDF par message.",
+        "tooManyImages": "Jusqu’à {max} images par message.",
+        "holdReading": "Le fichier est en cours de lecture ; l’envoi attend.",
+        "holdFailed": "Retirez le fichier illisible pour envoyer.",
+        "imageUpload": "L’image n’a pas été envoyée, le message non plus. Réessayez.",
+        "notReady": "Pas encore lu : {names}. Réessayez dans un instant.",
+        "refused": "Les pièces jointes n’ont pas été acceptées. Joignez-les à nouveau.",
+        "openInFiles": "Ouvrir dans Fichiers",
+        "memoryUsed": "De la mémoire ({count})",
+        "manageMemory": "Ce dont Ionexa se souvient"
       }
     },
     "create": {

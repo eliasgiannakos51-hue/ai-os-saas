@@ -1361,6 +1361,29 @@
         "changing": "A alterar o site…",
         "nextChanges": "O que escrever agora na conversa altera este site.",
         "reopen": "Mostrar o site"
+      },
+      "attach": {
+        "label": "Anexar um PDF ou imagem",
+        "reading": "A ler…",
+        "pages": "{count, plural, one {# página} other {# páginas}}",
+        "readyPdf": "Pronto",
+        "readyImage": "Vai com a mensagem",
+        "remove": "Remover «{name}»",
+        "unreadable": "Não foi encontrado texto em «{name}». Se for uma digitalização, anexe-a como imagem.",
+        "offline": "Sem ligação. Verifique a rede e tente novamente.",
+        "type": "«{name}»: apenas PDF, JPG ou PNG.",
+        "pdfTooLarge": "«{name}»: o PDF excede 20 MB.",
+        "imageTooLarge": "«{name}»: a imagem excede 5 MB.",
+        "tooManyPdfs": "Até {max} PDF por mensagem.",
+        "tooManyImages": "Até {max} imagens por mensagem.",
+        "holdReading": "O ficheiro está a ser lido; o envio aguarda.",
+        "holdFailed": "Remova o ficheiro ilegível para enviar.",
+        "imageUpload": "A imagem não foi carregada, por isso a mensagem não foi enviada. Tente novamente.",
+        "notReady": "Ainda não lido: {names}. Tente novamente daqui a pouco.",
+        "refused": "Os anexos não foram aceites. Anexe-os novamente.",
+        "openInFiles": "Abrir em Ficheiros",
+        "memoryUsed": "Da memória ({count})",
+        "manageMemory": "O que o Ionexa lembra"
       }
     },
     "create": {

@@ -1361,6 +1361,29 @@
         "changing": "Changing the site…",
         "nextChanges": "Anything you write in the conversation now changes this site.",
         "reopen": "Show the site"
+      },
+      "attach": {
+        "label": "Attach a PDF or image",
+        "reading": "Reading…",
+        "pages": "{count, plural, one {# page} other {# pages}}",
+        "readyPdf": "Ready",
+        "readyImage": "Goes with the message",
+        "remove": "Remove “{name}”",
+        "unreadable": "No text found in “{name}”. If it is a scan, attach it as an image.",
+        "offline": "No connection. Check the network and try again.",
+        "type": "“{name}”: only PDF, JPG or PNG.",
+        "pdfTooLarge": "“{name}”: the PDF is over 20 MB.",
+        "imageTooLarge": "“{name}”: the image is over 5 MB.",
+        "tooManyPdfs": "Up to {max} PDFs per message.",
+        "tooManyImages": "Up to {max} images per message.",
+        "holdReading": "The file is being read; sending waits.",
+        "holdFailed": "Remove the file that could not be read to send.",
+        "imageUpload": "The image did not upload, so the message was not sent. Try again.",
+        "notReady": "Not read yet: {names}. Try again in a moment.",
+        "refused": "The attachments were not accepted. Attach them again.",
+        "openInFiles": "Open in Files",
+        "memoryUsed": "From memory ({count})",
+        "manageMemory": "What Ionexa remembers"
       }
     },
     "create": {

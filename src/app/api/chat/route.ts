@@ -3,6 +3,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isFeatureOn } from "@/lib/flags/flags";
+import { readChatAttachments, parseStoredAttachments, conversationAttachments } from "@/lib/chat/attachment-types";
+import { loadAttachmentContent, attachmentInputChars, isMissingColumn } from "@/lib/chat/attachments";
+import { memoryCitationInstruction, MemoryMarkerHoldback, takeMemoryMarker, citedMemories, MEMORY_MARK_OPEN } from "@/lib/chat/memory-citations";
 import { loadDeepDive } from "@/lib/ai/deep-dive-load";
 import {
   summariseProvenance,
@@ -322,6 +325,7 @@ export async function POST(request: Request) {
     let mentorPreset: string | null;
     let skipClarification = false;
     let workMode: WorkMode | null = null;
+    let rawAttachments: unknown = undefined;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -347,6 +351,7 @@ export async function POST(request: Request) {
       // The way of working a Home quick action chose
       // (lib/chat/work-modes.ts) — one of four, or none.
       workMode = readWorkMode(body?.workMode);
+      rawAttachments = body?.attachments;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -452,6 +457,34 @@ export async function POST(request: Request) {
     const memories = memoryActive
       ? await loadRecentMemories(supabase, user.id, plan.capabilities.chatMemoryLimit)
       : [];
+
+    // PDFS AND IMAGES, AND WHICH MEMORIES AN ANSWER USED (MASTER 16,
+    // package 9), behind the switch "chat-attachments". With it off,
+    // attachments in a request are refused and nothing below changes.
+    const attachmentsOn = await isFeatureOn("chat-attachments", user);
+    const readAttachments = readChatAttachments(rawAttachments, user.id);
+    if (!readAttachments.ok || (!attachmentsOn && readAttachments.list.length > 0)) {
+      return NextResponse.json(
+        { ok: false, reason: "bad_attachments", error: "Those attachments cannot be sent." },
+        { status: 400 }
+      );
+    }
+    const currentAttachments = readAttachments.list;
+    // READ BEFORE ANYTHING IS HELD: an attachment that cannot be read (a
+    // PDF still being read, a file that is not the sender's) is said now,
+    // not answered around.
+    const currentAttachmentContent =
+      currentAttachments.length > 0 ? await loadAttachmentContent(supabase, user.id, currentAttachments, "/api/chat") : null;
+    if (currentAttachmentContent && currentAttachmentContent.missing.length > 0) {
+      return NextResponse.json(
+        { ok: false, reason: "attachment_not_ready", names: currentAttachmentContent.missing, error: "An attachment could not be read yet." },
+        { status: 409 }
+      );
+    }
+    // THE MEMORY NUMBERS: with the switch on, the remembered facts are
+    // numbered and an answer that used any names them at its end
+    // (lib/chat/memory-citations.ts), which is held back from the stream.
+    const citeMemories = attachmentsOn && memories.length > 0;
 
     // Custom AI persona name (Ultimate+, see Settings > AI Persona) —
     // falls back to "Ionexa" for everyone else, or if the plan doesn't
@@ -693,7 +726,8 @@ export async function POST(request: Request) {
     // be cached — which is why this reorder is a requirement rather than
     // a tidy-up. Nothing is added or removed; the same text is sent.
     const systemPerUser =
-      buildMemoryPromptAddition(memories) +
+      buildMemoryPromptAddition(memories, { numbered: citeMemories }) +
+      (citeMemories ? memoryCitationInstruction(memories.length) : "") +
       mentorContext +
       tradingMentorContext +
       productMentorContext +
@@ -789,8 +823,11 @@ export async function POST(request: Request) {
         pricingConfig,
         freeLimits
       ) <= freeChatMaxCostEur();
+    // A MESSAGE WITH ATTACHMENTS IS NEVER A FREE ONE: a PDF can be forty
+    // thousand tokens, and the free envelope is sized for a question. It
+    // takes the paid path, with its hold and its "not enough credits".
     const freeGrant =
-      !bypassCredits && withinFreeSize && withinFreeCost
+      !bypassCredits && withinFreeSize && withinFreeCost && currentAttachments.length === 0
         ? await consumeFreeChatMessage(user.id, plan?.slug ?? "free", legacy)
         : null;
     const isFreeMessage = freeGrant?.granted === true;
@@ -808,7 +845,7 @@ export async function POST(request: Request) {
       "chatMessage",
       {
         model: MODEL,
-        inputChars: message.length + systemPrompt.length,
+        inputChars: message.length + systemPrompt.length + (currentAttachmentContent ? attachmentInputChars(currentAttachmentContent) : 0),
         // The tool is offered on every message but only billed when the
         // model really searches. Budgeting for one keeps the hold from
         // being short on the replies that do search, and the difference
@@ -886,12 +923,21 @@ export async function POST(request: Request) {
 
     // Prior turns for context (oldest first) — empty for a brand-new
     // conversation, since there's nothing to load yet.
-    const { data: historyRows, error: historyError } = await supabase
-      .from("chat_messages")
-      .select("role, content")
-      .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: false })
-      .limit(HISTORY_LIMIT);
+    // With the switch on, what earlier messages carried is read too, so a
+    // PDF attached two messages ago is still what "and on page 3?" is
+    // about. A database without the column yet (the migration is pasted
+    // by hand) answers as before.
+    const readHistory = (columns: string) =>
+      supabase
+        .from("chat_messages")
+        .select(columns)
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: false })
+        .limit(HISTORY_LIMIT);
+    let { data: historyRows, error: historyError } = await readHistory(attachmentsOn ? "role, content, attachments" : "role, content");
+    if (attachmentsOn && isMissingColumn(historyError)) {
+      ({ data: historyRows, error: historyError } = await readHistory("role, content"));
+    }
 
     if (historyError) {
       logApiError("/api/chat", historyError, { stage: "load_history" });
@@ -902,19 +948,35 @@ export async function POST(request: Request) {
       );
     }
 
-    const history = (historyRows ?? []).reverse() as {
+    const history = ((historyRows ?? []) as unknown as {
       role: "user" | "assistant";
       content: string;
-    }[];
+      attachments?: unknown;
+    }[]).reverse();
+    // What the conversation carried before this message, within the caps,
+    // read now; this message's own were read above.
+    const earlierAttachments = attachmentsOn
+      ? conversationAttachments(
+          history.filter((m) => m.role === "user").map((m) => parseStoredAttachments(m.attachments, user.id)),
+          currentAttachments
+        ).filter((a) => !currentAttachments.includes(a))
+      : [];
+    const earlierAttachmentContent =
+      earlierAttachments.length > 0 ? await loadAttachmentContent(supabase, user.id, earlierAttachments, "/api/chat") : null;
+    const attachmentBlocks = [...(earlierAttachmentContent?.blocks ?? []), ...(currentAttachmentContent?.blocks ?? [])];
+    const attachmentChars =
+      (earlierAttachmentContent ? attachmentInputChars(earlierAttachmentContent) : 0) +
+      (currentAttachmentContent ? attachmentInputChars(currentAttachmentContent) : 0);
 
     // Save the user's message right away so it's durable even if the
     // Claude call below fails.
-    const { error: userMessageError } = await supabase.from("chat_messages").insert({
-      conversation_id: conversationId,
-      user_id: user.id,
-      role: "user",
-      content: message,
-    });
+    const userRow: Record<string, unknown> = { conversation_id: conversationId, user_id: user.id, role: "user", content: message };
+    let { error: userMessageError } = await supabase
+      .from("chat_messages")
+      .insert(currentAttachments.length > 0 ? { ...userRow, attachments: currentAttachments } : userRow);
+    if (currentAttachments.length > 0 && isMissingColumn(userMessageError)) {
+      ({ error: userMessageError } = await supabase.from("chat_messages").insert(userRow));
+    }
 
     if (userMessageError) {
       logApiError("/api/chat", userMessageError, { stage: "save_user_message" });
@@ -998,6 +1060,10 @@ export async function POST(request: Request) {
         );
 
         let assistantText = "";
+        // THE MEMORY MARKER, held back from the screen as it streams
+        // (lib/chat/memory-citations.ts): only when the memories were numbered.
+        const memoryHoldback = citeMemories ? new MemoryMarkerHoldback() : null;
+        let memoriesUsed: { id: string | null; text: string }[] = [];
         let lastRoundBlocks: Anthropic.ContentBlock[] = [];
         let webSearchCount = 0;
 
@@ -1118,7 +1184,7 @@ export async function POST(request: Request) {
           "chatMessage",
           {
             model: MODEL,
-            inputChars: message.length + historyChars + systemPrompt.length,
+            inputChars: message.length + historyChars + systemPrompt.length + attachmentChars,
             expectedWebSearches: isFreeMessage ? 0 : 1,
             planSlug: plan?.slug ?? null,
           },
@@ -1170,6 +1236,23 @@ export async function POST(request: Request) {
             message,
             MODEL
           ) as Anthropic.MessageParam[];
+          // THE ATTACHMENTS RIDE ON THIS TURN: the documents and images
+          // first, the question after them, as the model reads best.
+          if (attachmentBlocks.length > 0) {
+            conversation[conversation.length - 1] = {
+              role: "user",
+              content: [
+                ...attachmentBlocks,
+                {
+                  type: "text",
+                  text:
+                    "Τα παραπάνω τα επισύναψε ο χρήστης σε αυτή τη συζήτηση. Όταν απαντάς από ένα έγγραφο, γράψε σε ποια σελίδα το βρήκες· " +
+                    "αν η απάντηση δεν υπάρχει σε αυτά, πες το.",
+                },
+                { type: "text", text: message },
+              ],
+            };
+          }
 
           // The last round's blocks, kept for the numbered sources: the web
           // search citations live on them (lib/chat/web-sources.ts).
@@ -1208,7 +1291,8 @@ export async function POST(request: Request) {
             claudeStream.on("text", (delta) => {
               markStep("writing");
               assistantText += delta;
-              safeEnqueue(controller, ndjsonLine({ type: "delta", text: delta }));
+              const shown = memoryHoldback ? memoryHoldback.push(delta) : delta;
+              if (shown) safeEnqueue(controller, ndjsonLine({ type: "delta", text: shown }));
             });
 
             let finalResponse: Anthropic.Message;
@@ -1258,7 +1342,8 @@ export async function POST(request: Request) {
                 supabase,
                 userId: user.id,
                 conversationId: finalConversationId!,
-                assistantText,
+                // A marker being written when Stop arrived is not part of the answer.
+                assistantText: memoryHoldback ? assistantText.split(MEMORY_MARK_OPEN)[0].trimEnd() : assistantText,
                 reservationId,
                 costs,
                 plan,
@@ -1315,6 +1400,15 @@ export async function POST(request: Request) {
           );
           controller.close();
           return;
+        }
+
+        // The held tail: a marker is taken off the answer and read; anything
+        // else that was held is shown now, so nothing written is lost.
+        if (memoryHoldback) {
+          const finished = memoryHoldback.finish(memories.length);
+          if (finished.release) safeEnqueue(controller, ndjsonLine({ type: "delta", text: finished.release }));
+          assistantText = takeMemoryMarker(assistantText, memories.length).text;
+          memoriesUsed = citedMemories(memories, finished.cited);
         }
 
         if (!assistantText.trim()) {
@@ -1376,6 +1470,9 @@ export async function POST(request: Request) {
             reservedCredits: bypassCredits || isFreeMessage ? 0 : streamEstimate.reserveCredits,
             freeMessage: isFreeMessage,
             freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining : undefined,
+            attachedPdfs: attachmentsOn ? currentAttachments.filter((a) => a.kind === "pdf").length : undefined,
+            attachedImages: attachmentsOn ? currentAttachments.filter((a) => a.kind === "image").length : undefined,
+            memoriesUsed: citeMemories ? memoriesUsed.length : undefined,
             ...clarificationRecord,
           },
         });
@@ -1396,16 +1493,24 @@ export async function POST(request: Request) {
         const sourced = attachWebSources(assistantText, lastRoundBlocks);
         // The row's id goes back on `done`: the rating under the answer
         // (src/app/api/chat/messages/[id]/rating/route.ts) names it.
-        const { data: assistantRow, error: assistantMessageError } = await supabase
-          .from("chat_messages")
-          .insert({
-            conversation_id: finalConversationId,
-            user_id: user.id,
-            role: "assistant",
-            content: sourced.text,
-          })
-          .select("id")
-          .single();
+        // With the switch on, the row also keeps what the answer stood on
+        // — the modules read and the remembered facts it named — so a
+        // reload shows "From memory" as the stream did. A database without
+        // the column (migration 20261018000000 not yet run) still saves the
+        // answer, without it.
+        const assistantInsert = {
+          conversation_id: finalConversationId,
+          user_id: user.id,
+          role: "assistant",
+          content: sourced.text,
+        };
+        const saveAssistant = (row: Record<string, unknown>) => supabase.from("chat_messages").insert(row).select("id").single();
+        let { data: assistantRow, error: assistantMessageError } = await saveAssistant(
+          attachmentsOn ? { ...assistantInsert, provenance: { modules: hasProvenance(provenance) ? provenance : null, memories: memoriesUsed } } : assistantInsert
+        );
+        if (attachmentsOn && isMissingColumn(assistantMessageError)) {
+          ({ data: assistantRow, error: assistantMessageError } = await saveAssistant(assistantInsert));
+        }
         if (assistantMessageError) {
           logApiError("/api/chat", assistantMessageError, { stage: "save_assistant_message" });
         }
@@ -1442,6 +1547,8 @@ export async function POST(request: Request) {
               wouldHaveCharged: null,
               freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining : null,
             }),
+            // The remembered facts this answer said it used — shown under it.
+            memoriesUsed: memoriesUsed.length > 0 ? memoriesUsed : undefined,
           })
         );
         controller.close();

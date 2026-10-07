@@ -1361,6 +1361,29 @@
         "changing": "Cambiando el sitio…",
         "nextChanges": "Lo que escribas ahora en la conversación cambia este sitio.",
         "reopen": "Mostrar el sitio"
+      },
+      "attach": {
+        "label": "Adjuntar un PDF o una imagen",
+        "reading": "Leyendo…",
+        "pages": "{count, plural, one {# página} other {# páginas}}",
+        "readyPdf": "Listo",
+        "readyImage": "Va con el mensaje",
+        "remove": "Quitar «{name}»",
+        "unreadable": "No se encontró texto en «{name}». Si es un escaneo, adjúntalo como imagen.",
+        "offline": "Sin conexión. Revisa la red e inténtalo de nuevo.",
+        "type": "«{name}»: solo PDF, JPG o PNG.",
+        "pdfTooLarge": "«{name}»: el PDF supera los 20 MB.",
+        "imageTooLarge": "«{name}»: la imagen supera los 5 MB.",
+        "tooManyPdfs": "Hasta {max} PDF por mensaje.",
+        "tooManyImages": "Hasta {max} imágenes por mensaje.",
+        "holdReading": "Se está leyendo el archivo; el envío espera.",
+        "holdFailed": "Quita el archivo que no se pudo leer para enviar.",
+        "imageUpload": "La imagen no se subió, así que el mensaje no se envió. Inténtalo de nuevo.",
+        "notReady": "Aún sin leer: {names}. Inténtalo de nuevo en un momento.",
+        "refused": "No se aceptaron los adjuntos. Adjúntalos de nuevo.",
+        "openInFiles": "Abrir en Archivos",
+        "memoryUsed": "De la memoria ({count})",
+        "manageMemory": "Lo que Ionexa recuerda"
       }
     },
     "create": {

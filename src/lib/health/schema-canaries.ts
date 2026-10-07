@@ -399,6 +399,20 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "thumbs up and down under a Chat answer fail to save, and say so",
   },
   {
+    kind: "column",
+    table: "chat_messages",
+    column: "attachments",
+    migration: "20261018000000_chat_message_attachments.sql",
+    breaks: "a Chat message's PDFs and images are answered but not kept: after a reload the chips are gone, and a later question in the same conversation no longer sees them",
+  },
+  {
+    kind: "column",
+    table: "chat_messages",
+    column: "provenance",
+    migration: "20261018000000_chat_message_attachments.sql",
+    breaks: "which remembered facts an answer used is shown when it arrives but not after a reload",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

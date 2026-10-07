@@ -6,11 +6,13 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type ClipboardEvent,
+  type DragEvent,
   type FormEvent,
   type KeyboardEvent,
 } from "react";
 import Link from "next/link";
-import { ArrowUp, LayoutGrid, Square } from "lucide-react";
+import { ArrowUp, LayoutGrid, Paperclip, Square } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { VoiceInput } from "@/components/voice/voice-input";
@@ -66,12 +68,38 @@ export const ChatComposer = forwardRef<
      *  price depends on it (the estimate shown before sending). Chat does
      *  not pass it, so a keystroke there still re-renders this box alone. */
     onLengthChange?: (length: number) => void;
+    /** Files given to the message (package 9): the «+» beside the grid,
+     *  and files pasted into the box or dropped on it. Drawn only when
+     *  given — Chat passes it behind the switch "chat-attachments". */
+    attach?: { accept: string; label: string; onFiles: (files: File[]) => void };
+    /** What the message carries, drawn above the text (the chips). */
+    tray?: React.ReactNode;
+    /** Send waits: a file is still being read. Enter does nothing either. */
+    holdSend?: boolean;
   }
->(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, placeholder, onLengthChange }, ref) {
+>(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, placeholder, onLengthChange, attach, tray, holdSend = false }, ref) {
   const t = useTranslations("dashboard.chat");
   const tRail = useTranslations("sidebar.rail");
   const [input, setInput] = useState(initialText);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  // A pasted screenshot or a file dropped on the field is the same as one
+  // chosen with «+»; text pasted is still text.
+  function takeFiles(list: FileList | null | undefined): boolean {
+    const files = Array.from(list ?? []);
+    if (!attach || files.length === 0) return false;
+    attach.onFiles(files);
+    return true;
+  }
+  function handlePaste(e: ClipboardEvent<HTMLTextAreaElement>) {
+    if (takeFiles(e.clipboardData?.files)) e.preventDefault();
+  }
+  function handleDrop(e: DragEvent<HTMLDivElement>) {
+    setDragging(false);
+    if (takeFiles(e.dataTransfer?.files)) e.preventDefault();
+  }
 
   function resize(el: HTMLTextAreaElement) {
     el.style.height = "auto";
@@ -110,7 +138,7 @@ export const ChatComposer = forwardRef<
       return;
     }
     const text = input.trim();
-    if (!text) return;
+    if (!text || holdSend) return;
     setInput("");
     onLengthChange?.(0);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
@@ -126,12 +154,19 @@ export const ChatComposer = forwardRef<
 
   return (
     <form onSubmit={submit}>
-      <div className="relative">
+      {tray}
+      <div
+        className="relative"
+        onDragOver={attach ? (e) => { if (e.dataTransfer?.types?.includes("Files")) { e.preventDefault(); setDragging(true); } } : undefined}
+        onDragLeave={attach ? () => setDragging(false) : undefined}
+        onDrop={attach ? handleDrop : undefined}
+      >
         <textarea
           ref={textareaRef}
           value={input}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
+          onPaste={attach ? handlePaste : undefined}
           placeholder={placeholder ?? t("composerPlaceholder")}
           rows={1}
           // max-h-40 (160px) was the whole complaint: a long message scrolled
@@ -142,7 +177,7 @@ export const ChatComposer = forwardRef<
           // πεδίο μένει κάτω, ίδιο με της αρχικής»): the controls sit on
           // a row under the text — voice bottom-left, send bottom-right —
           // so the text has the full width and never runs under a button.
-          className="focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60"
+          className={`focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "border-foreground/60" : "border-border"}`}
           autoFocus
         />
         {/* THE MICROPHONE SITS BESIDE THE BOX, NEVER INSTEAD OF IT, and
@@ -153,8 +188,8 @@ export const ChatComposer = forwardRef<
         {/* THE GRID THAT OPENS ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §5, «Πεδίο κάτω,
             ίδιο παντού»), before the microphone. A link, so it opens in a
             new tab like any other and needs nothing from this component.
-            The «+» for an attachment is not here yet: Chat has no upload
-            path to put it on (docs/REMAINING.md, «§5 Πεδίο ίδιο παντού»). */}
+            The «+» after it gives the message a PDF or an image (package
+            9), when the screen passes `attach`. */}
         <div className="absolute bottom-2 start-2 flex items-center gap-1">
           <Link
             href="/dashboard/tools"
@@ -165,6 +200,34 @@ export const ChatComposer = forwardRef<
           >
             <LayoutGrid className="h-4 w-4" aria-hidden="true" />
           </Link>
+          {attach && (
+            <>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                aria-label={attach.label}
+                title={attach.label}
+                data-testid="composer-attach"
+                className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              >
+                <Paperclip className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept={attach.accept}
+                multiple
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                data-testid="composer-attach-input"
+                onChange={(e) => {
+                  takeFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </>
+          )}
           <VoiceInput
             disabled={sending}
             onTranscript={(text) => {
@@ -196,7 +259,7 @@ export const ChatComposer = forwardRef<
         ) : (
           <button
             type="submit"
-            disabled={sending || !input.trim()}
+            disabled={sending || holdSend || !input.trim()}
             aria-label={t("send")}
             className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-button text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >

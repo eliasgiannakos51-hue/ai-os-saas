@@ -1361,6 +1361,29 @@
         "changing": "Modifico il sito…",
         "nextChanges": "Ciò che scrivi ora nella conversazione modifica questo sito.",
         "reopen": "Mostra il sito"
+      },
+      "attach": {
+        "label": "Allega un PDF o un’immagine",
+        "reading": "Lettura…",
+        "pages": "{count, plural, one {# pagina} other {# pagine}}",
+        "readyPdf": "Pronto",
+        "readyImage": "Parte con il messaggio",
+        "remove": "Rimuovi «{name}»",
+        "unreadable": "Nessun testo trovato in «{name}». Se è una scansione, allegala come immagine.",
+        "offline": "Nessuna connessione. Controlla la rete e riprova.",
+        "type": "«{name}»: solo PDF, JPG o PNG.",
+        "pdfTooLarge": "«{name}»: il PDF supera i 20 MB.",
+        "imageTooLarge": "«{name}»: l’immagine supera i 5 MB.",
+        "tooManyPdfs": "Fino a {max} PDF per messaggio.",
+        "tooManyImages": "Fino a {max} immagini per messaggio.",
+        "holdReading": "Il file è in lettura; l’invio attende.",
+        "holdFailed": "Rimuovi il file illeggibile per inviare.",
+        "imageUpload": "L’immagine non è stata caricata, quindi il messaggio non è partito. Riprova.",
+        "notReady": "Non ancora letto: {names}. Riprova tra poco.",
+        "refused": "Gli allegati non sono stati accettati. Allegali di nuovo.",
+        "openInFiles": "Apri in File",
+        "memoryUsed": "Dalla memoria ({count})",
+        "manageMemory": "Cosa ricorda Ionexa"
       }
     },
     "create": {

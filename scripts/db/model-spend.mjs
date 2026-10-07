@@ -45,8 +45,12 @@
 import { execFileSync } from "node:child_process";
 
 const QUERY = `select
-  feature,
+  -- The ALL row is the "before" of BUILD-SPECS 2.13 (QUEUE E.2): average
+  -- cost per request across every feature, the number the router has to
+  -- lower at equal or better quality (scenario 12).
+  coalesce(feature, 'ALL')                              as feature,
   count(*)                                              as rows_logged,
+  round(sum(real_cost_usd) / nullif(count(*), 0), 6)    as avg_cost_usd_per_request,
   sum(ai_calls)                                         as ai_calls,
   sum(input_tokens)                                     as input_tokens,
   sum(output_tokens)                                    as output_tokens,
@@ -68,8 +72,8 @@ const QUERY = `select
   end                                                   as cache_read_pct
 from public.ai_cost_log
 where created_at >= now() - interval '30 days'
-group by feature
-order by real_cost_usd desc nulls last;`;
+group by grouping sets ((feature), ())
+order by (feature is null) desc, real_cost_usd desc nulls last;`;
 
 if (process.argv.includes("--sql")) {
   console.log(QUERY);

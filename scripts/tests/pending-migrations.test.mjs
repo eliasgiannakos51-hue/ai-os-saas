@@ -106,10 +106,27 @@ console.log("\n== 3. every CREATE POLICY in the directory is expected ==");
     }
   }
   check(`both spellings were found (${statements} statements, ${unquoted} written without quotes)`, statements >= 200 && unquoted >= 50);
+  // DROPPED FOR GOOD (2026-10-05): a policy a later file drops and never
+  // re-creates is rightly NOT expected — 20261011, 20261012, 20261014 and
+  // 20261015 take write and read policies away on purpose. Counted from
+  // the same SQL, in run order, so the slack below stays what it was for.
+  const live = new Set();
+  let droppedForGood = 0;
+  const gone = new Set();
+  for (const f of [...files].sort()) {
+    const sql = readFileSync(`${MIG_DIR}/${f}`, "utf8").replace(/^\s*--.*$/gm, "");
+    for (const m of sql.matchAll(/(create|drop)\s+policy\s+(?:if\s+exists\s+)?(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_%$]*))\s+on\s+([a-z_.]+)/gi)) {
+      const key = `${m[4].replace(/^public\./, "")} ${m[2] ?? m[3]}`;
+      if (m[1].toLowerCase() === "create") { live.add(key); gone.delete(key); }
+      else if (live.delete(key)) gone.add(key);
+    }
+  }
+  droppedForGood = gone.size;
+  check(`policies dropped for good were counted (${droppedForGood})`, droppedForGood >= 18);
   const policies = all.flatMap((m) => m.objects.filter((o) => o.kind === "policy"));
   check(
     `the expected set carries them (${policies.length} of ${statements})`,
-    policies.length >= statements - 25,
+    policies.length >= statements - 25 - droppedForGood,
     `${policies.length} expected against ${statements} written — a drop-then-create policy is a policy that exists`
   );
 }

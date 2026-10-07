@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { isResearchJobStale, type ResearchStatus } from "@/lib/research/research-limits";
 import { researchReportForClient } from "@/lib/research/research-timeline";
+import { RESEARCH_CLIENT_COLUMNS } from "@/lib/billing/client-columns";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -21,28 +23,34 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    // `*`, not a column list.
-    //
-    // The progress columns (questions_done / questions_total /
-    // current_question) are added by a migration, and PostgREST fails the
-    // WHOLE query when a listed column does not exist. A column list here
-    // would mean an instance running new code against an un-migrated
-    // database could not read a single report — every poll a 500. `*`
-    // simply returns whatever the table has.
-    const { data, error } = await supabase
+    // THE ACCOUNT'S COLUMNS, then the server's. The account may read only
+    // RESEARCH_CLIENT_COLUMNS (20261013000000_cost_columns_server_only.sql);
+    // this read through its own client is also the ownership check. Every
+    // name on the list has existed since 20260924000000 or earlier.
+    const { data: own, error } = await supabase
       .from("research_reports")
-      .select("*")
+      .select(RESEARCH_CLIENT_COLUMNS)
       .eq("id", params.id)
       .eq("user_id", user.id)
       .maybeSingle();
-
     if (error) {
       logApiError("/api/research/[id]", error, { stage: "load" });
       return NextResponse.json({ ok: false, error: "Could not load that report." }, { status: 500 });
     }
-    if (!data) {
-      return NextResponse.json({ ok: false, error: "Report not found." }, { status: 404 });
-    }
+    const notFound = () => NextResponse.json({ ok: false, error: "Report not found." }, { status: 404 });
+    if (!own) return notFound();
+
+    // The per-call cost record the timeline is weighed with: a server-only
+    // column, read for the row the account just proved is its own.
+    // researchReportForClient uses it and never returns it.
+    const { data: serverSide } = await createAdminClient()
+      .from("research_reports")
+      .select("usage_entries")
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!serverSide) return notFound();
+    const data: Record<string, unknown> = { ...(own as Record<string, unknown>), ...(serverSide as Record<string, unknown>) };
 
     // STALE-JOB RECOVERY — the backstop Deep Research never had.
     //
@@ -57,8 +65,11 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     // runs on a path that reached the end, and the credit HOLD is released
     // by releaseExpiredReservations on the daily cron (reservations carry
     // their own expires_at). A row reaped here was never charged.
-    if (isResearchJobStale(String(data.status), data.processing_started_at ?? null, String(data.created_at), new Date())) {
-      const { data: failed } = await supabase
+    if (isResearchJobStale(String(data.status), (data.processing_started_at as string | null) ?? null, String(data.created_at), new Date())) {
+      // The server's write: the account cannot update its reports
+      // (20261011000000_research_reports_server_writes.sql). Still scoped
+      // to this user's own row.
+      const { data: failed } = await createAdminClient()
         .from("research_reports")
         .update({
           status: "failed" satisfies ResearchStatus,
@@ -69,21 +80,21 @@ export async function GET(_request: Request, { params }: { params: { id: string 
         .eq("user_id", user.id)
         // Conditioned on the status we just read, so this can never
         // clobber a 'ready' the worker wrote between the SELECT and here.
-        .eq("status", data.status)
+        .eq("status", String(data.status))
         .select("*")
         .maybeSingle();
 
       if (failed) {
         logApiError("/api/research/[id]", "stale research job force-failed", {
           reportId: params.id,
-          status: data.status,
-          processingStartedAt: data.processing_started_at ?? null,
+          status: String(data.status),
+          processingStartedAt: (data.processing_started_at as string | null) ?? null,
         });
         return NextResponse.json({ ok: true, report: researchReportForClient(failed) });
       }
       // The worker won the race — re-read rather than returning our now
       // stale copy.
-      const { data: fresh } = await supabase
+      const { data: fresh } = await createAdminClient()
         .from("research_reports")
         .select("*")
         .eq("id", params.id)

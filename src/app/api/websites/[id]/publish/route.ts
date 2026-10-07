@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -400,7 +401,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
         }
       }
 
-      const { error: updateError } = await supabase
+      // THE SERVER'S WRITES, here and below: the account cannot write
+      // published_sites itself (20261014000000_server_written_tables.sql),
+      // so a page goes live only after the plan cap, the script strip and
+      // the pre-publish scan above. Every one is scoped to the caller.
+      const { error: updateError } = await createAdminClient()
         .from("published_sites")
         .update({
           subdomain,
@@ -410,7 +415,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
           is_active: true,
           updated_at: nowIso,
         })
-        .eq("id", existing.id);
+        .eq("id", existing.id)
+        .eq("user_id", user.id);
       if (updateError) {
         // THE SAME CLASH THE INSERT PATH BELOW ALREADY ANSWERS PROPERLY.
         //
@@ -445,7 +451,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         );
       }
 
-      const { data: created, error: insertError } = await supabase
+      const { data: created, error: insertError } = await createAdminClient()
         .from("published_sites")
         .insert({
           website_id: websiteId,
@@ -545,10 +551,11 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await createAdminClient()
       .from("published_sites")
       .update({ status: "unpublished", is_active: false })
       .eq("website_id", websiteId)
+      .eq("user_id", user.id)
       .select("id")
       .maybeSingle();
 

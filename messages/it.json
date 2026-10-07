@@ -1009,7 +1009,8 @@
       "agreedRate": "A {price} € per credito, la tariffa che hai accettato.",
       "capReached": "Hai raggiunto il tuo limite. Non verrà addebitato altro finché non lo aumenti.",
       "turnOff": "Disattiva l'utilizzo extra",
-      "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato."
+      "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato.",
+      "needsSubscription": "Il pagamento a consumo è per i piani a pagamento: viene addebitato con la prossima fattura. Scegli prima un piano."
     },
     "addons": {
       "title": "Componenti aggiuntivi",
@@ -4446,5 +4447,52 @@
         "trafficDown": "il traffico del sito è sceso del {percent}%"
       }
     }
+  },
+  "routerReport": {
+    "title": "Il router, nell’ombra",
+    "intro": "Quanto è costata ogni richiesta addebitata e quale modello avrebbe scelto il router. Per ora non si instrada nulla con questo: finché il set di qualità non misura un modello più economico, ogni richiesta mantiene il modello di oggi.",
+    "period": "Periodo",
+    "day": "Giorno",
+    "week": "Settimana",
+    "month": "Mese",
+    "requests": "Richieste",
+    "avgCost": "Costo medio per richiesta",
+    "revenue": "Ricavi in crediti",
+    "margin": "Margine",
+    "cached": "Token di input dalla cache",
+    "fallback": "Risposto dal modello di riserva",
+    "escalated": "Passato a un modello più potente",
+    "bumped": "Livello alzato per scarsa certezza",
+    "notRecorded": "Non ancora registrato",
+    "unavailable": "Non leggibile",
+    "unclassified": "{count} richieste senza decisione: addebitate prima che esistesse l’ombra, oppure non testuali.",
+    "byCategory": "Costo per tipo di lavoro",
+    "byTier": "Costo per livello",
+    "byModel": "Costo per modello",
+    "byFeature": "Costo per strumento",
+    "colName": "Nome",
+    "colRequests": "Richieste",
+    "colShare": "Quota",
+    "colCost": "Costo",
+    "colAvg": "Per richiesta",
+    "shadowTitle": "Proiezione dell’ombra",
+    "shadowBody": "Gli stessi token con il modello scelto dal router sarebbero costati {projected}, contro {actual} spesi davvero, su {rows} richieste. Una proiezione, non un risparmio: non sa se quel modello avrebbe richiesto più token, usato la cache in modo diverso o fallito.",
+    "shadowNone": "Nessuna richiesta di questo periodo registra abbastanza per una proiezione.",
+    "tableTitle": "La tabella dei modelli (versione {version}, {source})",
+    "sourceEnv": "da AI_MODEL_TABLE",
+    "sourceDefault": "predefinita",
+    "tableRejected": "AI_MODEL_TABLE è stata rifiutata, quindi vale quella predefinita: {problems}",
+    "colCategory": "Tipo di lavoro",
+    "colTier": "Livello",
+    "colPrimary": "Principale",
+    "colFallback": "Riserva",
+    "colPrice": "USD per 1.000 token (input / output)",
+    "colWait": "Attesa massima",
+    "colQuality": "Qualità",
+    "notMeasured": "Non misurata",
+    "seconds": "{n} s",
+    "pricePer1k": "${input} / ${output}",
+    "truncated": "Sono state lette solo le {cap} richieste più recenti; i dati si riferiscono a quelle.",
+    "empty": "Nessuna richiesta addebitata in questo periodo."
   }
 }

@@ -120,7 +120,9 @@ if (suites.length === 0) {
 // 196 -> 208 on 2026-10-04: the suites of 2026-10-01..04 (job-timeline,
 // greeting-name, key-inventory, email-strings, research-timeline,
 // ci-step-timeouts, early-redirects and the rest of that round).
-const FLOOR = 208;
+// 208 -> 220 on 2026-10-05: the design round's suites and E.2's three
+// (router-classify, router-model-table, routing-report).
+const FLOOR = 220;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -71,20 +71,6 @@
    οθόνης στις αναφορές, το bot μετά από κάθε deploy, και **πράσινο CI
    στην παραγωγή**: σήμερα κάθε deploy βγαίνει κόκκινο γιατί λείπουν.
 
-3. **Το pull request #223 έχει πλέον και το design** (2026-10-04).
-   - Το #223 δεν είχε γίνει merge όταν τελείωσε το design. Γι' αυτό το
-     design μπήκε στο ίδιο pull request, όπως έλεγε αυτό το σημείο.
-     Επιπλέον, τα commits υπήρχαν μόνο σε αυτό το container, που
-     σβήνεται όταν τελειώσει η session.
-   - **Τι κάνεις:** ανοίγεις το preview (σύνδεσμος στο #223) και το
-     βλέπεις στον υπολογιστή και στο κινητό. Αν σου αρέσει, κάνεις
-     merge εσύ.
-   - **Πριν από το merge:** το 8 (`ADMIN_EMAILS`), αλλιώς χάνεις τη
-     σελίδα διαχειριστή.
-   - **Αν θέλεις μόνο το timeline τώρα:** πες «μόνο timeline». Θα
-     ανοίξω pull request μόνο με τα τρία πρώτα commits, και το design
-     μένει για μετά. Αυτό θέλει ένα δεύτερο branch, άρα την άδειά σου.
-
 4. **Η κατάσταση των κλειδιών στην παραγωγή.** Στο site, με τον δικό σου
    λογαριασμό: `/dashboard/system-health` → ενότητα «Capabilities».
    Εικόνα οθόνης· δείχνει μόνο ονόματα και ναι/όχι. Μετά το merge, και
@@ -98,6 +84,14 @@
    απαγορεύουν χρήση σε υπηρεσία για ανηλίκους
    (`docs/keys-status-2026-10-04.md`). Το mockup ακυρώθηκε (ισχύει το
    ΣΥΣΤΗΜΑ DESIGN του `docs/CONTEXT.md`).
+   **Για τον router (2.13 Β, 2026-10-05):** τι θα γλίτωνε το κλειδί, με
+   τιμές καταλόγου που **δεν έχουν ελεγχθεί σε λογαριασμό**
+   (`src/lib/ai/providers/catalog.ts`). Αν περνούν το όριο ποιότητας, δεν
+   το ξέρω· το απαντά το E.4.
+   - Gemini 2.5 Flash, 0,30 / 2,50 $ ανά εκατομμύριο tokens, απέναντι
+     στο Haiku 4.5 (1 / 5 $). Είσοδος −70%, έξοδος −50%.
+   - Gemini 2.5 Pro, 1,25 / 10 $, απέναντι στο Sonnet 4.6 (3 / 15 $).
+     Είσοδος −58%, έξοδος −33%.
 
 6. **Όρος ηλικίας στους όρους χρήσης του Ionexa.** Σήμερα δεν γράφουν
    κατώτατη ηλικία. Οι όροι του Gemini θέλουν η υπηρεσία να μην
@@ -113,7 +107,10 @@
      μόνο το Pro επιτρέπει). Αν είναι Hobby, αλλάζω σε Λύση 2.
    *Ξεμπλοκάρει:* cinematic (3.2), Βίντεο (5.13).
 
-8. **`ADMIN_EMAILS` στο Vercel — πριν από το επόμενο merge.** Το email
+8. **`ADMIN_EMAILS` στο Vercel — τώρα.** Το #223 έγινε merge
+   (2026-10-05), οπότε στην παραγωγή ισχύει ήδη. Αν το `ADMIN_EMAILS`
+   λείπει, οι σελίδες διαχειριστή (κόστη, υγεία συστήματος) δίνουν 404.
+   Ο έλεγχος είναι το βήμα 5. Το email
    σου βγήκε από τον κώδικα, όπως ζήτησες. Από εδώ και πέρα ο διαχειριστής
    ορίζεται μόνο από το Vercel. Αν λείπει, κανείς δεν είναι διαχειριστής
    και οι σελίδες διαχειριστή δίνουν 404.
@@ -165,24 +162,6 @@
     `docs/first-run/first-run.<γλώσσα>.md` και
     `docs/first-run/emails.<γλώσσα>.md`.
 
-16. **Ένα pull request ανά βήμα της ΦΑΣΗΣ E: χρειάζεται ένα από δύο** (2026-10-04).
-   Ζήτησες ένα pull request για κάθε αριθμό της σειράς του 2.12–2.14.
-   Επιτρέπεται να ανεβάζω μόνο στο `claude/keen-turing-bv8gw4`, και από
-   αυτό είναι ανοιχτό το #223. Ό,τι ανεβάσω εκεί μπαίνει στο #223.
-   Δύο δρόμοι, διαλέγεις έναν:
-   - **Α. Κάνεις merge το #223.** Τότε κάθε βήμα της E ανοίγει δικό του
-     pull request από το ίδιο branch, το ένα μετά το άλλο, και κάθε
-     φορά περιμένει το merge του προηγούμενου.
-   - **Β. Μου δίνεις άδεια για ένα branch ανά βήμα**, με όνομα
-     `claude/keen-turing-bv8gw4-e1`, `-e2` κ.λπ. Γράψε «ναι, branch ανά
-     βήμα». Κάθε pull request έχει τότε το δικό του preview, και δεν
-     περιμένει το merge του προηγούμενου.
-   *Μέχρι να απαντήσεις:* το E.1 (απογραφή) είναι μόνο ένα αρχείο
-   κειμένου και μπαίνει στο #223. Ο κώδικας του E.2 και μετά μένει σε
-   τοπικό branch, που δεν ανεβαίνει. Αν σβηστεί το container πριν
-   απαντήσεις, χάνεται, και θα το ξαναγράψω.
-   *Ξεμπλοκάρει:* το «ένα pull request ανά βήμα» της ΦΑΣΗΣ E.
-
 17. **Δύο add-ons πωλούνται χωρίς να δίνουν τίποτα** (βρέθηκε 2026-10-04,
    `docs/FEATURES.md` → «Τι βρήκα» 3). Πρόκειται για τα «+10 GB
    αποθήκευση» (5 €/μήνα) και «προτεραιότητα» (20 €/μήνα). Εμφανίζονται
@@ -202,7 +181,264 @@
    Αν κάποιος τα έχει ήδη αγοράσει, στο Stripe → Subscriptions φαίνεται
    ποιος.
 
+18. **Ο αριθμός «πριν» του router** (2026-10-05, E.2). Χωρίς αυτόν δεν
+    μπορώ να γράψω «βελτίωση» σε κανένα επόμενο βήμα.
+    1. Supabase → το project → **SQL Editor** → **New query**.
+    2. Επικόλλησε το ερώτημα που τυπώνει
+       `node scripts/db/model-spend.mjs --sql`. Είναι στο αρχείο
+       `scripts/db/model-spend.mjs`, ανάμεσα στο ``const QUERY = ` `` και
+       στο `` `; ``. Μόνο ανάγνωση: δεν γράφει και δεν σβήνει τίποτα.
+    3. **Run**. Στείλε μου ολόκληρη τη γραμμή **ALL**, ή ένα screenshot
+       του αποτελέσματος. Περιέχει αριθμούς, όχι κλειδιά ούτε στοιχεία
+       χρηστών.
+    *Ξεμπλοκάρει:* το «πριν» του σεναρίου 12 (μέσο κόστος ανά αίτημα).
+
+19. **Εργαλεία που δεν είναι ακόμα «λειτουργικά»: κρύβονται ή μένουν;**
+    (2026-10-05, `docs/DECISIONS.md` → «Ο νέος τρόπος λειτουργίας… οι
+    συγκρούσεις» 4.) Με τον ορισμό του «λειτουργικό» κανένα εργαλείο
+    δεν περνά σήμερα, γιατί δεν υπάρχει ακόμα η Βιβλιοθήκη. Μέχρι να
+    απαντήσεις, κρύβω μόνο όσα είναι «μόνο οθόνη» στο `docs/FEATURES.md`
+    και τα υπόλοιπα μένουν, χωρίς ένδειξη beta.
+    *Ξεμπλοκάρει:* το All tools του design.
+
+20. **ΚΡΙΣΙΜΟ — το migration της ασφάλειας,
+    `20261010000000_guard_entitlement_metadata.sql`.** Τρέχει μετά το
+    merge του pull request της ασφάλειας, όχι πριν (η εγγραφή χρειάζεται
+    τον νέο κώδικα). Δεν σβήνει τίποτα· προσθέτει έναν φύλακα στον πίνακα
+    των λογαριασμών.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση). Supabase → SQL Editor → New
+       query:
+       ```sql
+       select tgname from pg_trigger
+        where tgrelid = 'auth.users'::regclass and not tgisinternal;
+       ```
+       Κράτα τι βγάζει. Μετά το migration θα βγάζει τα ίδια συν
+       `guard_entitlement_metadata`.
+    2. **Αντίγραφο** (δεν σβήνει τίποτα, μόνο αντιγράφει):
+       ```sql
+       create schema if not exists backup;
+       revoke all on schema backup from public, anon, authenticated;
+       create table backup.user_meta_20261010 as
+         select id, raw_user_meta_data from auth.users;
+       select count(*) from backup.user_meta_20261010;
+       ```
+    3. **Το migration:** άνοιξε το αρχείο στο GitHub (branch `main` μετά
+       το merge) → `supabase/migrations/20261010000000_guard_entitlement_metadata.sql`
+       → «Copy raw file» → επικόλληση σε νέο query → **Run**. Πρέπει να
+       δεις «Success». Αν δεις μήνυμα «the trigger is not on
+       auth.users», δεν πέτυχε· στείλε μου το μήνυμα.
+    4. **Έλεγχος** στο site: αποσυνδέσου και ξανασυνδέσου. Μετά άλλαξε
+       το εμφανιζόμενο όνομα στις Ρυθμίσεις. Και τα δύο πρέπει να
+       δουλεύουν όπως πριν.
+    5. **Αν η σύνδεση δεν δουλεύει**, τρέξε αμέσως αυτό και πες μου:
+       ```sql
+       drop trigger if exists guard_entitlement_metadata on auth.users;
+       ```
+       Ο λογαριασμός σου και τα δεδομένα δεν αλλάζουν από αυτό.
+    6. **Έλεγχος λογαριασμών** (μόνο ανάγνωση): λογαριασμοί με
+       πληρωμένο πλάνο χωρίς συνδρομή, που δεν είναι beta ούτε μέλη
+       ομάδας.
+       ```sql
+       select u.id, u.created_at,
+              u.raw_user_meta_data->>'subscription_tier' as tier
+         from auth.users u
+        where coalesce(u.raw_user_meta_data->>'subscription_tier', 'free') <> 'free'
+          and coalesce(u.raw_user_meta_data->>'stripe_subscription_id', '') = ''
+          and coalesce(u.raw_user_meta_data->>'is_beta_tester', 'false') <> 'true'
+          and not exists (select 1 from public.team_members t
+                           where t.member_user_id = u.id and t.status = 'active');
+       ```
+       Πες μου μόνο πόσες γραμμές βγαίνουν. Αν βγουν, τι κάνουμε μαζί
+       τους είναι δική σου απόφαση (χρήματα).
+    7. Όταν περάσει μία εβδομάδα χωρίς πρόβλημα:
+       `drop table backup.user_meta_20261010;`
+
+21. **`BETA_INVITE_CODE` στο Vercel.** Ο κωδικός beta δεν έχει πλέον
+    προεπιλογή στον κώδικα. Αν η μεταβλητή λείπει, κανένας κωδικός δεν
+    δουλεύει και οι νέοι λογαριασμοί ξεκινούν στο Free (η εγγραφή
+    δουλεύει κανονικά).
+    1. Vercel → το project → Settings → Environment Variables.
+    2. Ψάξε `BETA_INVITE_CODE`. Αν θέλεις να συνεχίσει το beta,
+       **Add New** με έναν **καινούργιο** κωδικό που δεν έχει γραφτεί
+       ποτέ στο repository, Production και Preview, Save.
+    3. Πες μου μόνο «υπάρχει» ή «δεν υπάρχει». Όχι την τιμή.
+
+22. **Επιβεβαίωση email στην εγγραφή.** Σήμερα ο λογαριασμός
+    δημιουργείται χωρίς να επιβεβαιωθεί ότι το email ανήκει σε αυτόν που
+    γράφεται (σοβαρό, `docs/SECURITY-AUDIT.md` ΑΣ-5.8· οι λεπτομέρειες
+    στη συνομιλία). Η διόρθωση αλλάζει τη ροή: ο νέος χρήστης θα
+    πατά σύνδεσμο στο email πριν μπει. Ναι ή όχι;
+
+23. **Supabase: αντίγραφα ασφαλείας και όρια σύνδεσης.**
+    1. Supabase → το project → **Database** → **Backups**. Πες μου τι
+       γράφει: υπάρχουν; κάθε πότε; υπάρχει «Point in time recovery»;
+    2. Supabase → **Authentication** → **Rate Limits**. Στείλε μου
+       screenshot.
+    3. Supabase → **Authentication** → **Sign In / Providers**: ποιοι
+       πάροχοι είναι ενεργοί (Email, Google…);
+
+24. **Τρεις αποφάσεις για χρήματα** (`docs/SECURITY-AUDIT.md`,
+    `docs/BUGS.md`):
+    - **Ομάδες:** όταν ο ιδιοκτήτης σταματά να πληρώνει ή αφαιρεί μέλος,
+      το μέλος χάνει αμέσως το πλάνο της ομάδας. Προτείνω ναι.
+    - **«Regenerate (free)»:** γίνεται πραγματικά δωρεάν (μία φορά ανά
+      site), ή αλλάζει το κείμενο σε «Regenerate». Προτείνω το δεύτερο.
+    - **Χρέωση που ξεπερνά το υπόλοιπο:** σήμερα το επιπλέον το
+      απορροφάς εσύ. Προτείνω να μένει έτσι, με όριο ανά ενέργεια.
+    Και η διόρθωση της αλλαγής πλάνου (ΑΣ-4.3): στο επόμενο pull request
+    σου γράφω πρώτα τι αλλάζει στη χρέωση, πριν μπει.
+
+25. **ΚΡΙΣΙΜΟ — το migration της έρευνας,
+    `20261011000000_research_reports_server_writes.sql`.** Τρέχει μετά το
+    merge του pull request της έρευνας, όχι πριν: ο παλιός κώδικας γράφει
+    ακόμα τις αναφορές με τον client του χρήστη και θα σταματούσε. Δεν
+    σβήνει τίποτα· αλλάζει μόνο ποιος μπορεί να γράψει στον πίνακα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.research_reports', 'UPDATE');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261011000000_research_reports_server_writes.sql`
+       → «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site, ξεκίνα μια Deep Research: πρέπει να δουλεύει όπως πριν.
+    4. **Αν η Deep Research σταματήσει να ξεκινά:**
+       ```sql
+       create policy "insert_own_research_reports" on public.research_reports for insert with check (auth.uid() = user_id);
+       create policy "update_own_research_reports" on public.research_reports for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       grant insert, update on public.research_reports to authenticated;
+       ```
+       και πες μου.
+
+26. **Το migration του αρχείου κόστους,
+    `20261012000000_cost_log_server_reads.sql`.** Τρέχει μετά το merge
+    του pull request του, όχι πριν: ο παλιός κώδικας διαβάζει ακόμα το
+    αρχείο κόστους με τα δικαιώματα του χρήστη, και τα Recent tools και η
+    απόδειξη του site θα έμεναν κενά. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.ai_cost_log', 'SELECT');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261012000000_cost_log_server_reads.sql` →
+       «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site, άνοιξε τις Ρυθμίσεις: η δραστηριότητα credits φαίνεται όπως
+       πριν.
+    4. **Αν κάτι από αυτά μείνει κενό:**
+       ```sql
+       create policy "select_own_ai_cost_log" on public.ai_cost_log for select using (auth.uid() = user_id);
+       create policy ai_provider_log_select_own on public.ai_provider_log for select using (auth.uid() = user_id);
+       grant select on public.ai_cost_log, public.ai_provider_log to authenticated;
+       ```
+       και πες μου.
+
+27. **Το migration των πεδίων κόστους,
+    `20261013000000_cost_columns_server_only.sql`.** Τρέχει μετά το merge
+    του pull request του, όχι πριν: ο παλιός κώδικας διαβάζει τις εργασίες
+    και τις αναφορές «όλες τις στήλες», και αυτό το migration το
+    απαγορεύει. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_column_privilege('authenticated', 'public.ai_jobs', 'usage_entries', 'SELECT');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261013000000_cost_columns_server_only.sql` →
+       «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site, άνοιξε μια παλιά Deep Research και ξεκίνα μια δημιουργία στο
+       Create: πρέπει να δουλεύουν όπως πριν.
+    4. **Αν κάτι από αυτά δεν ανοίγει:**
+       ```sql
+       grant select on public.ai_jobs, public.research_reports to authenticated;
+       ```
+       και πες μου.
+
+28. **Το migration των εγγραφών ομάδας, αρχείων και σελίδων,
+    `20261014000000_server_written_tables.sql`.** Τρέχει μετά το merge
+    του pull request του, όχι πριν: ο παλιός κώδικας γράφει ακόμα αυτούς
+    τους πίνακες με τα δικαιώματα του χρήστη, και η πρόσκληση μέλους, το
+    ανέβασμα αρχείου και η δημοσίευση θα σταματούσαν. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.user_files', 'INSERT');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261014000000_server_written_tables.sql` →
+       «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site: ανέβασε ένα αρχείο στα Files και άνοιξε το
+       `/dashboard/system-health`· ο έλεγχος «user_files writes» πρέπει να
+       είναι πράσινος.
+    4. **Αν κάτι από αυτά δεν δουλεύει:**
+       ```sql
+       create policy "insert_own_team_members" on public.team_members for insert with check (auth.uid() = owner_id);
+       create policy "update_own_team_members" on public.team_members for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+       create policy "delete_own_team_members" on public.team_members for delete using (auth.uid() = owner_id);
+       create policy "insert_own_user_files" on public.user_files for insert with check (auth.uid() = user_id);
+       create policy "update_own_user_files" on public.user_files for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       create policy "delete_own_user_files" on public.user_files for delete using (auth.uid() = user_id);
+       create policy "insert_own_published_sites" on public.published_sites for insert with check (auth.uid() = user_id);
+       create policy "update_own_published_sites" on public.published_sites for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       create policy "delete_own_published_sites" on public.published_sites for delete using (auth.uid() = user_id);
+       grant insert, update, delete on public.team_members, public.user_files, public.published_sites to authenticated;
+       ```
+       και πες μου.
+
+29. **Το migration των agents και των sites,
+    `20261015000000_agents_websites_server_written.sql`.** Τρέχει μετά το
+    merge του pull request του, όχι πριν: ο παλιός κώδικας γράφει ακόμα
+    agents και sites με τα δικαιώματα του χρήστη, και η δημιουργία τους θα
+    σταματούσε. Δεν σβήνει τίποτα.
+    1. **Προεπισκόπηση** (μόνο ανάγνωση):
+       ```sql
+       select has_table_privilege('authenticated', 'public.user_websites', 'UPDATE');
+       ```
+       Σήμερα βγάζει `true`.
+    2. **Το migration:** GitHub, branch `main` μετά το merge →
+       `supabase/migrations/20261015000000_agents_websites_server_written.sql`
+       → «Copy raw file» → νέο query στο SQL Editor → **Run** → «Success».
+    3. **Έλεγχος:** το ερώτημα του βήματος 1 βγάζει πλέον `false`. Στο
+       site: φτιάξε ένα μικρό site στο Website Builder και έναν agent·
+       πρέπει να δουλεύουν όπως πριν.
+    4. **Αν κάτι από αυτά δεν δουλεύει:**
+       ```sql
+       create policy "insert_own_user_agents" on public.user_agents for insert with check (auth.uid() = user_id);
+       create policy "update_own_user_agents" on public.user_agents for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       create policy "delete_own_user_agents" on public.user_agents for delete using (auth.uid() = user_id);
+       create policy "insert_own_user_websites" on public.user_websites for insert with check (auth.uid() = user_id);
+       create policy "update_own_user_websites" on public.user_websites for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+       grant insert, update, delete on public.user_agents to authenticated;
+       grant insert, update on public.user_websites to authenticated;
+       ```
+       και πες μου.
+
+30. **Έξι αποφάσεις που βρέθηκαν στη λίστα «τι απομένει»** (`docs/REMAINING.md`,
+    2026-10-05). Καμία δεν βιάζεται: αφορούν εργαλεία από την ομάδα 7 της
+    ουράς και μετά. Τις γράφω τώρα για να μη βρεθούν μπροστά μας εκείνη
+    την ώρα.
+    1. **Avatars:** ποιος πάροχος, και αν επιτρέπεται το πρόσωπο του ίδιου
+       του χρήστη (με ποια συναίνεση).
+    2. **Apps:** πού ζουν τα δεδομένα κάθε εφαρμογής που φτιάχνει ο
+       χρήστης (φιλοξενία και κόστος).
+    3. **Γραφήματα από δεδομένα:** αρκεί υπολογισμός μέσα στην εφαρμογή,
+       ή χρειάζεται απομονωμένο περιβάλλον εκτέλεσης (ουρά 2.1);
+    4. **Όροι Kling** για τα cinematic sites: νομικός έλεγχος πριν
+       συνδεθεί.
+    5. **Προεπιλεγμένη γλώσσα:** σήμερα αγγλικά όταν ο browser δεν ζητά
+       ελληνικά. Αλλαγή σε ελληνικά αλλάζει τι βλέπουν οι σημερινοί χρήστες.
+    6. **MCP:** ποιοι servers μπαίνουν στη λίστα· την προτείνω εγώ.
+    *Ξεμπλοκάρει:* 5.21, 5.22, Ρ.3 και 6.10 της ουράς, και το 2.6.
+
 ## Έκλεισαν 2026-10-04
+
+- **NEEDS 3 και 16, το #223 και το «ένα pull request ανά βήμα»:** έγινε
+  merge στις 2026-10-05. Από εδώ και πέρα κάθε βήμα της ΦΑΣΗΣ E ανοίγει
+  δικό του pull request από το ίδιο branch.
 
 - Migration `20261008000000_website_timeline.sql`: έτρεξε, ο έλεγχος
   δείχνει 1.

@@ -105,6 +105,21 @@ const ANTHROPIC_MODELS: CatalogModel[] = [
     capabilities: [...BASE, "prompt_caching", "server_web_search", "batch"],
   },
   {
+    // The "deep" agent depth (lib/agents/agent-depth.ts) asks for this id.
+    // Until 2026-10-05 it was not here, so runCompletion found no catalog
+    // row, assumed "mid" and served the deep agent's final write with
+    // Sonnet — while its research passes, which call the SDK directly,
+    // ran on Opus (docs/FEATURES.md, "Τι βρήκα" 2). The gate that every
+    // model id the app names resolves here is router-model-table.test.mjs.
+    id: "claude-opus-4-5",
+    provider: "anthropic",
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheMinimumTokens: 4096,
+    tier: "large",
+    capabilities: [...BASE, "prompt_caching", "server_web_search", "batch"],
+  },
+  {
     id: "claude-haiku-4-5",
     provider: "anthropic",
     inputPerMTok: 1,

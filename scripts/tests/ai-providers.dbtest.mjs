@@ -171,11 +171,15 @@ sql(`insert into public.ai_provider_log
        (user_id, request_id, attempt_index, purpose, provider, model, outcome, latency_ms)
      values ('${OTHER}', gen_random_uuid(), 0, 'chat', 'openai', 'openai/gpt-5', 'success', 7)`);
 
+// THE SERVER READS IT (2026-10-05, 20261012000000_cost_log_server_reads.sql):
+// the account no longer reads its own rows directly either — provider and
+// model names stay on the server. The service role still sees them all.
 const ownRead = tryAs("authenticated", USER, `select count(*) from public.ai_provider_log;`);
-ok("a user reads their own routing rows", ownRead.ok && Number(ownRead.out) === OUTCOMES.length, JSON.stringify(ownRead));
+ok("a user cannot read even their own routing rows", !ownRead.ok && /permission denied/.test(ownRead.out ?? ownRead.error ?? ""), JSON.stringify(ownRead));
 const otherRead = tryAs("authenticated", USER,
   `select count(*) from public.ai_provider_log where user_id = '${OTHER}';`);
-ok("...and cannot see anybody else's", otherRead.ok && otherRead.out === "0", JSON.stringify(otherRead));
+ok("...nor anybody else's", !otherRead.ok, JSON.stringify(otherRead));
+ok("...and the server reads them", Number(sql(`select count(*) from public.ai_provider_log where user_id = '${USER}'`)) === OUTCOMES.length);
 
 const forge = tryAs("authenticated", USER,
   `insert into public.ai_provider_log (user_id, request_id, attempt_index, purpose, provider, model, outcome, latency_ms)
@@ -285,9 +289,15 @@ sql(`insert into public.ai_provider_log
        (user_id, request_id, attempt_index, purpose, provider, model, outcome, latency_ms, cache_kept, reason)
      values ('${USER}', gen_random_uuid(), 0, 'chat', 'anthropic', 'claude-sonnet-4-6', 'success', 42, false, 'keep me')`);
 
+// THE LATER MIGRATION THAT NARROWS THE GRANT RUNS AGAIN TOO, in order:
+// 20260828 grants SELECT to the account and 20261012 takes it back
+// (the provider log is read by the server only). Re-running the first
+// alone would leave the shared database more open than any real one,
+// and every suite after this one would inherit it.
 for (const migration of [
   "supabase/migrations/20260828000000_ai_provider_log.sql",
   "supabase/migrations/20260829000000_agent_run_batches.sql",
+  "supabase/migrations/20261012000000_cost_log_server_reads.sql",
 ]) {
   let reapplied = true;
   let error = "";
@@ -316,7 +326,7 @@ ok("the grants survived: authenticated still cannot write the log",
   sql(`select has_table_privilege('authenticated', 'public.ai_provider_log', 'insert')`) === "f" &&
   sql(`select has_table_privilege('authenticated', 'public.ai_provider_log', 'update')`) === "f" &&
   sql(`select has_table_privilege('authenticated', 'public.ai_provider_log', 'delete')`) === "f");
-ok("...and can still read it", sql(`select has_table_privilege('authenticated', 'public.ai_provider_log', 'select')`) === "t");
+ok("...nor read it: the server reads it", sql(`select has_table_privilege('authenticated', 'public.ai_provider_log', 'select')`) === "f");
 ok("'queued' is still an accepted status after the re-run",
   sql(`select count(*) from pg_constraint
         where conrelid='public.agent_runs'::regclass

@@ -117,6 +117,18 @@ const MUTANTS = [
     to: "    \"\" ||",
     expect: "the stamp reads the platform variables before it reaches for git",
   },
+  {
+    // A POLICY DROPPED FOR GOOD, EXPECTED AGAIN (2026-10-05). The
+    // generator stops applying later DROP POLICY statements, and a
+    // database with every migration applied reports two MISSING POLICY
+    // findings on research_reports — the red db-inventory.dbtest that
+    // added the post-pass.
+    name: "the generator forgets the policies a later migration dropped",
+    file: INV,
+    from: "  if (created && fileName(file) > fileName(created.file)) defined.policies.delete(key);",
+    to: "  if (false) defined.policies.delete(key);",
+    expect: "a policy a later migration drops for good is not expected",
+  },
 ];
 
 function runGate() {

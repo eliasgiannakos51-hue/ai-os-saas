@@ -74,7 +74,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Member not found." }, { status: 404 });
     }
 
-    const { error: deleteError } = await supabase.from("team_members").delete().eq("id", memberId);
+    // THE SERVER'S WRITE (20261014000000_server_written_tables.sql): a
+    // member leaves only through this route, so what the team granted is
+    // always taken back below.
+    const { error: deleteError } = await createAdminClient()
+      .from("team_members")
+      .delete()
+      .eq("id", memberId)
+      .eq("owner_id", user.id);
     if (deleteError) {
       logApiError("/api/team/remove", deleteError, { stage: "delete" });
       return NextResponse.json(

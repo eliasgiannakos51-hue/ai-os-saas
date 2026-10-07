@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -21,11 +22,12 @@ export const dynamic = "force-dynamic";
 
 // Pause / resume / edit / delete for one agent.
 //
-// OWNERSHIP, not just authentication: every query below goes through the
-// user-scoped client, so RLS (select/update/delete_own_user_agents) scopes
-// it to the caller's own rows. A stranger's id is simply not found —
-// there is no code path where an id from the request body selects the row
-// that gets written.
+// OWNERSHIP, not just authentication: every read below goes through the
+// user-scoped client, so RLS (select_own_user_agents) scopes it to the
+// caller's own rows, and every write is the server's, scoped by id AND
+// user_id (20261015000000_agents_websites_server_written.sql). A
+// stranger's id is simply not found — there is no code path where an id
+// from the request body selects the row that gets written.
 
 type PatchBody = {
   name?: unknown;
@@ -250,10 +252,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       return NextResponse.json({ ok: true, agent });
     }
 
-    const { data: updated, error: updateError } = await supabase
+    // THE SERVER'S WRITE (20261015000000_agents_websites_server_written.sql):
+    // only the fields validated above, on the caller's own agent.
+    const { data: updated, error: updateError } = await createAdminClient()
       .from("user_agents")
       .update(updates)
       .eq("id", agentId)
+      .eq("user_id", user.id)
       .select()
       .single();
 
@@ -286,10 +291,13 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
     }
 
     // agent_runs cascades from user_agents, so the history goes with it.
-    const { error, count } = await supabase
+    // The server's write, on the caller's own agent
+    // (20261015000000_agents_websites_server_written.sql).
+    const { error, count } = await createAdminClient()
       .from("user_agents")
       .delete({ count: "exact" })
-      .eq("id", agentId);
+      .eq("id", agentId)
+      .eq("user_id", user.id);
 
     if (error) {
       logApiError("/api/agents/[id]", error, { stage: "delete", agentId });

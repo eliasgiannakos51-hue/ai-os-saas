@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Settings as SettingsIcon } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { CheckoutNotice } from "@/components/billing/checkout-notice";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
@@ -146,7 +147,10 @@ export default async function SettingsPage() {
     // row was a zero charge. Only credits_charged = 0 is taken from here;
     // rows that DID charge already have a credit_transactions row above,
     // and reading both would show every charge twice.
-    supabase
+    //
+    // THE SERVER'S READ: the account cannot read ai_cost_log itself
+    // (20261012000000_cost_log_server_reads.sql). Its own rows only.
+    createAdminClient()
       .from("ai_cost_log")
       .select("id, feature, created_at, metadata")
       .eq("user_id", user.id)
@@ -206,7 +210,7 @@ export default async function SettingsPage() {
   // is not indistinguishable from broken billing). Nothing ever read it.
   let wouldHaveUsedCredits: number | null = null;
   if (isAdmin || isBeta) {
-    const { data: bypassRows } = await supabase
+    const { data: bypassRows } = await createAdminClient()
       .from("ai_cost_log")
       .select("metadata")
       .eq("user_id", user.id)

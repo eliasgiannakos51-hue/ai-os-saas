@@ -79,6 +79,25 @@ export const MAX_CLIP_SECONDS = 120;
  *  ten-minute request that cannot be paused for ten minutes. */
 export const MAX_SPEAK_CHARS = 2500;
 
+/**
+ * THE SECONDS A TRANSCRIPTION IS BILLED FOR (fixed 2026-10-05).
+ *
+ * The provider returns the audio's own length (`duration` in Whisper's
+ * verbose_json) and bills on it. The browser's figure is what the cap was
+ * checked against before the call; the larger of the two is what the
+ * meter and the price use after it, so a short reported figure cannot
+ * shrink either. A missing or nonsense provider figure leaves the
+ * reported one standing.
+ */
+export function billableTranscribeSeconds(reportedSeconds: number, providerDuration: unknown): number {
+  const reported = Number.isFinite(reportedSeconds) && reportedSeconds > 0 ? Math.ceil(reportedSeconds) : 0;
+  const measured =
+    typeof providerDuration === "number" && Number.isFinite(providerDuration) && providerDuration > 0
+      ? Math.ceil(providerDuration)
+      : 0;
+  return Math.max(1, reported, measured);
+}
+
 export function transcribeCostUsd(seconds: number): number {
   if (!Number.isFinite(seconds) || seconds <= 0) return 0;
   return (seconds / 60) * VOICE_RATES_USD.transcribePerMinute;

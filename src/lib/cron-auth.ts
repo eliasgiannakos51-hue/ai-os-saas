@@ -31,8 +31,9 @@ function isLocalDevelopment(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
-/** Constant-time compare, so the response time can't be used to learn the secret. */
-function secretsMatch(provided: string, expected: string): boolean {
+/** Constant-time compare, so the response time can't be used to learn the secret.
+ *  Exported for the internal hand-off routes, which compare the same secret. */
+export function secretsMatch(provided: string, expected: string): boolean {
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);
   // timingSafeEqual throws on a length mismatch, so length is compared

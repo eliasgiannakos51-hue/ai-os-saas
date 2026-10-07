@@ -90,3 +90,29 @@ export async function consumeVoiceSeconds(
     return { ok: false, reason: "error", usedSeconds: 0, remainingSeconds: 0 };
   }
 }
+
+/**
+ * SECONDS THE PROVIDER BILLED BEYOND WHAT WAS METERED (2026-10-05).
+ *
+ * The cap is checked before the call, on the browser's figure; the
+ * provider then reports the audio's real length
+ * (billableTranscribeSeconds, lib/voice/voice-pricing.ts). Seconds already
+ * spent are recorded whatever the cap says, so the next request sees
+ * them: the limit passed is int4's ceiling in minutes, which no meter
+ * reaches.
+ */
+const RECORD_ONLY_LIMIT_MINUTES = 35_000_000;
+
+export async function recordExtraVoiceSeconds(
+  admin: SupabaseClient,
+  params: { userId: string; seconds: number; kind: "transcribe" | "speak" }
+): Promise<ConsumeResult | null> {
+  if (!(params.seconds > 0)) return null;
+  return consumeVoiceSeconds(admin, {
+    userId: params.userId,
+    seconds: params.seconds,
+    characters: 0,
+    limitMinutes: RECORD_ONLY_LIMIT_MINUTES,
+    kind: params.kind,
+  });
+}

@@ -181,10 +181,18 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
-  "20261002000000_search_index_locale_translations_only.sql":
-    "`create or replace` on search_index_sync, which existed before it. The function is present whether or not this file ran, so its existence proves nothing — the property it changes is behavioural and only unified-search.dbtest.mjs can see it",
-  "20261004000000_revoke_public_execute_prune_project_links.sql":
-    "revokes EXECUTE from PUBLIC and from authenticated on three functions and grants nothing new. A canary asks whether an OBJECT exists; all three exist either way, and the property this file changes is a privilege, which /api/health cannot see at all — grants-and-policies.dbtest.mjs and role-grants.dbtest.mjs are what read it",
+  "20261015000000_agents_websites_server_written.sql":
+    "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
+  "20261014000000_server_written_tables.sql":
+    "drops nine write policies and revokes INSERT, UPDATE and DELETE on three tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write any of them, and server-written-tables.dbtest.mjs checks it against a real Postgres",
+  "20261013000000_cost_columns_server_only.sql":
+    "narrows SELECT on two tables to listed columns. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can read a server-only column or has lost a listed one, and cost-columns.dbtest.mjs checks it against a real Postgres",
+  "20261012000000_cost_log_server_reads.sql":
+    "drops two select policies and revokes SELECT on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still read either table, and cost-log-reads.dbtest.mjs checks it against a real Postgres",
+  "20261011000000_research_reports_server_writes.sql":
+    "drops two policies and revokes INSERT and UPDATE from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the privileges are wrong, and research-reports-writes.dbtest.mjs checks them against a real Postgres",
+  "20261010000000_guard_entitlement_metadata.sql":
+    "adds a trigger on auth.users and its trigger function. Neither is visible to /api/health: the auth schema is not exposed through the database API, and a function returning `trigger` never appears in its OpenAPI list. The migration raises at the end if the trigger did not attach, and entitlement-metadata.dbtest.mjs runs its behaviour against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

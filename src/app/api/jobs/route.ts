@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { JOB_CLIENT_COLUMNS } from "@/lib/billing/client-columns";
 import { logApiError } from "@/lib/log-error";
 import { isJobKind, isJobStale, jobPercent } from "@/lib/jobs/job-types";
 import { pickResumableJob } from "@/lib/jobs/resumable";
@@ -53,7 +55,7 @@ export async function GET(request: Request) {
     if (!activeOnly) {
       const { data, error } = await supabase
         .from("ai_jobs")
-        .select("*")
+        .select(JOB_CLIENT_COLUMNS)
         .eq("kind", kind)
         .order("created_at", { ascending: false })
         .limit(1);
@@ -77,7 +79,7 @@ export async function GET(request: Request) {
     // and its failure costs exactly the feature it powers.
     const { data: activeRows, error: activeError } = await supabase
       .from("ai_jobs")
-      .select("*")
+      .select(JOB_CLIENT_COLUMNS)
       .eq("kind", kind)
       .in("status", ["queued", "running"])
       .order("created_at", { ascending: false })
@@ -93,7 +95,7 @@ export async function GET(request: Request) {
     let unseenRow: Record<string, unknown> | undefined;
     const { data: unseenRows, error: unseenError } = await supabase
       .from("ai_jobs")
-      .select("*")
+      .select(JOB_CLIENT_COLUMNS)
       .eq("kind", kind)
       .eq("status", "done")
       .is("consumed_at", null)
@@ -137,11 +139,19 @@ export async function GET(request: Request) {
         (activeRow.created_at as string | null) ?? null
       )
     ) {
+      // The credit hold is a server-only column (lib/billing/client-columns.ts):
+      // read by the server, for a row the read above showed is the caller's.
+      const { data: held } = await createAdminClient()
+        .from("ai_jobs")
+        .select("reservation_id")
+        .eq("id", String(activeRow.id))
+        .eq("user_id", user.id)
+        .maybeSingle();
       const reaped = await reapJob({
         id: String(activeRow.id),
         user_id: String(activeRow.user_id),
         status: String(activeRow.status),
-        reservation_id: (activeRow.reservation_id as string | null) ?? null,
+        reservation_id: (held?.reservation_id as string | null) ?? null,
       });
       if (reaped) {
         activeRow = { ...activeRow, status: "failed", error: "stalled", credits_charged: 0 };

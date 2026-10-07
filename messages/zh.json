@@ -1009,7 +1009,8 @@
       "agreedRate": "按你同意的价格，每点数 €{price}。",
       "capReached": "已达上限。在你调高之前不会再产生费用。",
       "turnOff": "关闭超额用量",
-      "turnOffNote": "关闭后不再产生新费用。本月已使用的部分仍会计入账单。"
+      "turnOffNote": "关闭后不再产生新费用。本月已使用的部分仍会计入账单。",
+      "needsSubscription": "按量付费仅适用于付费方案：它会计入你的下一张账单。请先选择一个方案。"
     },
     "addons": {
       "title": "附加包",
@@ -4446,5 +4447,52 @@
         "trafficDown": "网站访问量下降了 {percent}%"
       }
     }
+  },
+  "routerReport": {
+    "title": "影子路由器",
+    "intro": "每个已结算请求的费用，以及路由器本会选择的模型。目前不会据此路由任何请求：在质量集测出更便宜的模型之前，每个请求都保持现在的模型。",
+    "period": "时间段",
+    "day": "日",
+    "week": "周",
+    "month": "月",
+    "requests": "请求",
+    "avgCost": "每个请求的平均费用",
+    "revenue": "积分收入",
+    "margin": "利润率",
+    "cached": "来自缓存的输入令牌",
+    "fallback": "由备用模型回答",
+    "escalated": "升级到更强的模型",
+    "bumped": "因把握不足而提升等级",
+    "notRecorded": "尚未记录",
+    "unavailable": "无法读取",
+    "unclassified": "{count} 个请求没有决策：在影子功能出现前结算，或不是文本。",
+    "byCategory": "按工作类型的费用",
+    "byTier": "按等级的费用",
+    "byModel": "按模型的费用",
+    "byFeature": "按工具的费用",
+    "colName": "名称",
+    "colRequests": "请求",
+    "colShare": "占比",
+    "colCost": "费用",
+    "colAvg": "每个请求",
+    "shadowTitle": "影子估算",
+    "shadowBody": "同样的令牌用路由器选择的模型处理将花费 {projected}，实际支出为 {actual}，共 {rows} 个请求。这是估算，不是节省：它无法知道该模型是否需要更多令牌、缓存方式是否不同或是否会失败。",
+    "shadowNone": "此时间段内没有足够记录可供估算的请求。",
+    "tableTitle": "模型表（版本 {version}，{source}）",
+    "sourceEnv": "来自 AI_MODEL_TABLE",
+    "sourceDefault": "默认",
+    "tableRejected": "AI_MODEL_TABLE 被拒绝，因此使用默认表：{problems}",
+    "colCategory": "工作类型",
+    "colTier": "等级",
+    "colPrimary": "主模型",
+    "colFallback": "备用模型",
+    "colPrice": "每 1,000 令牌的美元（输入 / 输出）",
+    "colWait": "最长等待",
+    "colQuality": "质量",
+    "notMeasured": "未测量",
+    "seconds": "{n} 秒",
+    "pricePer1k": "${input} / ${output}",
+    "truncated": "只读取了最新的 {cap} 个请求；数字针对这些请求。",
+    "empty": "此时间段内没有已结算的请求。"
   }
 }

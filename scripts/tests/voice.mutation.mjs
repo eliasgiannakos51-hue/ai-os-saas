@@ -48,6 +48,8 @@ const EL = "messages/el.json";
 const POLICY = "src/lib/billing/margin-policy.ts";
 const SETTINGS = "src/components/settings/voice-settings.tsx";
 const SETTINGS_PAGE = "src/app/dashboard/settings/page.tsx";
+const VOICE_ROUTE = "src/app/api/voice/transcribe/route.ts";
+const MEETINGS_ROUTE = "src/app/api/meetings/transcribe/route.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -409,6 +411,33 @@ const MUTANTS = [
     file: PLAYER,
     from: "  if (!availability.speakAvailable) return null;",
     to: "  if (false) return null;",
+  },
+  // ------------------------------------------------------------------
+  // THE LENGTH A TRANSCRIPTION IS BILLED ON (2026-10-05).
+  // ------------------------------------------------------------------
+  {
+    name: "the browser's figure wins over the provider's",
+    file: PRICING,
+    from: "  return Math.max(1, reported, measured);",
+    to: "  return Math.max(1, reported);",
+  },
+  {
+    name: "the provider's duration is never read",
+    file: PROVIDERS,
+    from: "const seconds = billableTranscribeSeconds(params.durationSeconds, data.duration);",
+    to: "const seconds = billableTranscribeSeconds(params.durationSeconds, undefined);",
+  },
+  {
+    name: "the voice route meters only what the browser reported",
+    file: VOICE_ROUTE,
+    from: '    await recordExtraVoiceSeconds(admin, { userId: user.id, seconds: billedSeconds - seconds, kind: "transcribe" });\n',
+    to: "",
+  },
+  {
+    name: "the meetings route logs the reported seconds as the cost's units",
+    file: MEETINGS_ROUTE,
+    from: "      units: billedSeconds,",
+    to: "      units: seconds,",
   },
 ];
 

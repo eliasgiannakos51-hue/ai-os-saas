@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
@@ -209,10 +210,11 @@ export async function POST(request: Request) {
     // proceed to the real AI call below, unlike a SELECT-then-UPDATE
     // check in application code.
     const staleClaimCutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-    const { data: claimedRows, error: claimError } = await supabase
+    const { data: claimedRows, error: claimError } = await createAdminClient()
       .from("user_websites")
       .update({ editing_started_at: new Date().toISOString() })
       .eq("id", websiteId)
+      .eq("user_id", user.id)
       .or(`editing_started_at.is.null,editing_started_at.lt.${staleClaimCutoff}`)
       .select("id");
 
@@ -464,10 +466,11 @@ export async function POST(request: Request) {
     const nextPages = saved.pages;
     const nextHomeHtml = saved.htmlContent;
 
-    const { data: updatedRecord, error: updateError } = await supabase
+    const { data: updatedRecord, error: updateError } = await createAdminClient()
       .from("user_websites")
       .update({ html_content: nextHomeHtml, pages: nextPages.length > 0 ? nextPages : null })
       .eq("id", websiteId)
+      .eq("user_id", user.id)
       .select()
       // maybeSingle, not single: the site can be DELETED while the edit
       // was generating. .single() reported that as PGRST116 ("Cannot
@@ -588,10 +591,11 @@ export async function POST(request: Request) {
       // update itself fails, the claim still self-expires after 2
       // minutes via the staleClaimCutoff check above, so it can never
       // lock a website out of editing forever.
-      const { error: releaseError } = await supabase
+      const { error: releaseError } = await createAdminClient()
         .from("user_websites")
         .update({ editing_started_at: null })
-        .eq("id", websiteId);
+        .eq("id", websiteId)
+        .eq("user_id", user.id);
       if (releaseError) {
         logApiError("/api/websites/edit", releaseError, { stage: "release_edit_lock" });
       }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { FILE_BUCKET } from "@/lib/files/store";
 import { deserialisePages } from "@/lib/files/extract";
@@ -61,7 +62,10 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
       return NextResponse.json({ ok: false, error: "The file could not be deleted." }, { status: 502 });
     }
 
-    const { error: deleteError } = await supabase
+    // THE SERVER'S WRITE (20261014000000_server_written_tables.sql): a row
+    // goes only after its object, so the storage quota cannot be emptied
+    // while the bytes stay.
+    const { error: deleteError } = await createAdminClient()
       .from("user_files")
       .delete()
       .eq("id", params.id)

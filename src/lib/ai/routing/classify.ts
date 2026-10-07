@@ -74,6 +74,23 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   file_ask: "complex",
   record_ask: "complex",
   weekly_reflection: "complex",
+  // Added 2026-10-05 (QUEUE E.2): every settlement feature string now has
+  // a tier, so the shadow router (lib/ai/routing/shadow.ts) records a
+  // decision rather than the unknown-feature default for half the log.
+  // scripts/tests/router-classify.test.mjs derives the population from
+  // the settleReservation call sites and holds it complete.
+  chat_free: "complex",
+  presentation_generate: "complex",
+  presentation_edit: "complex",
+  posts_generate: "complex",
+  meeting_analyse: "complex",
+  data_analysis: "complex",
+  document_translate: "complex",
+  mission_review: "complex",
+  automation_run: "complex",
+  scheduled_agent_run: "complex",
+  agent_run_batch: "complex",
+  ask_ai_record: "complex",
 
   // Simple: short, well-specified, one right answer.
   create_studio_detect: "simple",
@@ -81,6 +98,15 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   import_map: "simple",
   text_action: "simple",
   insight_narrate: "simple",
+  chat_clarify: "simple",
+  clarification_check: "simple",
+  clarification_free: "simple",
+  website_generate_precheck: "simple",
+  agent_build_precheck: "simple",
+  transition_detect: "simple",
+  lead_classification: "simple",
+  import_paste: "simple",
+  create: "simple",
 
   // Trivial: mechanical transforms where a strong model is pure waste.
   agent_template_fill: "trivial",

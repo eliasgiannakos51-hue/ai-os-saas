@@ -64,6 +64,12 @@ async function syncSubscriptionToUser(
   const subscription =
     subscriptionHint ?? (await stripe.subscriptions.retrieve(subscriptionId));
 
+  // AN ADD-ON IS NOT THE PLAN. A recurring add-on (api/billing/addons) is
+  // its own Stripe subscription, marked with metadata.addon_slug, and its
+  // price is no plan's price, so it must never be synced as the plan (fixed
+  // 2026-10-05). Add-ons are granted by grantAddon below.
+  if (subscription.metadata?.addon_slug) return;
+
   const customerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
   const customer = await stripe.customers.retrieve(customerId);

@@ -19,6 +19,8 @@
 // "not exported, nobody noticed".
 
 /** How a table's rows are tied to a person. */
+import { JOB_CLIENT_COLUMNS, RESEARCH_CLIENT_COLUMNS } from "@/lib/billing/client-columns";
+
 export type UserDataScope =
   /** Ordinary content the user created. Exported in full. */
   | "user_content"
@@ -44,6 +46,19 @@ export type UserDataTable = {
   /** Columns stripped before export — secrets that belong to the account
    *  but must never be written into a file the user emails to themselves. */
   redactColumns?: string[];
+  /**
+   * A table the account cannot read itself (2026-10-05: ai_cost_log,
+   * ai_provider_log) is exported by the server, with THESE columns only —
+   * what the user did and was charged, never our cost, margin or model.
+   * See api/account/export.
+   */
+  serverExportColumns?: string[];
+  /**
+   * A table the account reads only SOME columns of (2026-10-05: ai_jobs,
+   * research_reports — lib/billing/client-columns.ts) is exported through
+   * the user's own session with THIS list, since `*` would be refused.
+   */
+  exportColumns?: string;
   /** Set when the row is NOT removed by `auth.users` cascade and therefore
    *  needs explicit deletion. See erasureNote for why. */
   needsExplicitErasure?: boolean;
@@ -131,12 +146,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "file_collections", label: "file_collections", scope: "user_content" },
   { table: "file_collection_items", label: "file_collection_items", scope: "user_content" },
   { table: "user_documents", label: "documents", scope: "user_content" },
-  { table: "research_reports", label: "research_reports", scope: "user_content" },
+  { table: "research_reports", label: "research_reports", scope: "user_content", exportColumns: RESEARCH_CLIENT_COLUMNS },
   // Background job rows. `input` holds the user's own words — the agent
   // they described, the question they asked — and `result` holds what came
   // back, so a job row is user content in the ordinary sense and has to be
   // exported and erased like any other.
-  { table: "ai_jobs", label: "background_jobs", scope: "user_content" },
+  { table: "ai_jobs", label: "background_jobs", scope: "user_content", exportColumns: JOB_CLIENT_COLUMNS },
   { table: "user_insights", label: "insights", scope: "user_content" },
   // In-app notifications. An agent delivering "in_app" writes its whole
   // result into the body, so these rows hold the same content an emailed
@@ -197,7 +212,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "user_credits", label: "credits_balance", scope: "account" },
   { table: "credit_transactions", label: "credit_transactions", scope: "account" },
   { table: "credit_reservations", label: "credit_reservations", scope: "account" },
-  { table: "ai_cost_log", label: "ai_usage_log", scope: "account" },
+  {
+    table: "ai_cost_log",
+    label: "ai_usage_log",
+    scope: "account",
+    serverExportColumns: ["id", "feature", "credits_charged", "created_at"],
+  },
   // Voice minutes (V4 #19/#2). ACCOUNT scope, and it is a short row: the
   // seconds of speech in and out this month and last, and nothing else.
   // No audio, no transcript, no language, no device — the table has
@@ -212,7 +232,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // requests, so it is theirs, and it carries no prompt, no completion
   // and no tool arguments — nothing the model was shown or said. Removed
   // by the auth.users cascade.
-  { table: "ai_provider_log", label: "ai_provider_routing", scope: "account" },
+  {
+    table: "ai_provider_log",
+    label: "ai_provider_routing",
+    scope: "account",
+    serverExportColumns: ["id", "created_at", "purpose", "outcome"],
+  },
   // Which MODEL served which of this account's calls, at which tier, and
   // what it cost (V4 #34/#35). ACCOUNT scope for exactly the reason
   // ai_provider_log above is: it is an operational record OF this user's

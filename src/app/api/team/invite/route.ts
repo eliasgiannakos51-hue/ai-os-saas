@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlan, type PlanSlug } from "@/lib/billing/plans";
 import { maxSeatsForPlan } from "@/lib/team/seat-limits";
 import { sendTeamInviteEmail } from "@/lib/email/send-team-invite-email";
@@ -173,7 +174,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { error: insertError } = await supabase
+    // THE SERVER'S WRITE: the account cannot insert invites itself
+    // (20261014000000_server_written_tables.sql), so every seat passes the
+    // plan, seat and rate checks above. The owner is the session's.
+    const { error: insertError } = await createAdminClient()
       .from("team_members")
       .insert({ owner_id: user.id, member_email: email, role });
 

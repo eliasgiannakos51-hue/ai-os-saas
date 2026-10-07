@@ -16,6 +16,7 @@ import { resolveMarginFor } from "@/lib/billing/margin-policy";
 import type { Plan } from "@/lib/billing/plans";
 import { sendMarginAlertEmail } from "@/lib/email/margin-alert";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { shadowRoute, NON_TEXT_FEATURES, type ShadowDecision } from "@/lib/ai/routing/shadow";
 
 // Three-phase billing: RESERVE -> EXECUTE -> SETTLE.
 //
@@ -513,6 +514,20 @@ export async function settleReservation(params: {
     });
   }
 
+  // WHAT THE 2.13 ROUTER WOULD HAVE DONE (QUEUE E.2), recorded next to
+  // what actually happened and changing nothing. A caller that has the
+  // user's text (chat) passes a decision made from it; everyone else gets
+  // the feature-level one here. Never allowed to fail a settlement: the
+  // charge is the thing that matters, the shadow is a measurement.
+  let routing: ShadowDecision | { error: string } | undefined;
+  try {
+    routing = NON_TEXT_FEATURES.has(feature)
+      ? undefined
+      : (metadata.routing as ShadowDecision | undefined) ?? shadowRoute({ feature });
+  } catch (err) {
+    routing = { error: err instanceof Error ? err.message : String(err) };
+  }
+
   try {
     const admin = createAdminClient();
     const { error } = await admin.rpc("settle_reservation", {
@@ -542,6 +557,7 @@ export async function settleReservation(params: {
       p_stage_breakdown: costs.breakdownByStage(),
       p_metadata: {
         ...metadata,
+        routing,
         planSlug: plan?.slug ?? null,
         effectiveCreditPriceEur: effectivePrice,
         // What each credit brought in — differs from the price above only

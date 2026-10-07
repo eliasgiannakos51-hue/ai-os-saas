@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { websiteNameFrom } from "@/lib/website-name";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { classifyWebsiteDescription, WEBSITE_MODEL } from "@/lib/website-builder";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
@@ -430,7 +431,11 @@ export async function POST(request: Request) {
       });
     }
 
-    const { data: record, error: insertError } = await supabase
+    // THE SERVER'S WRITE: the account cannot insert sites itself
+    // (20261015000000_agents_websites_server_written.sql), so a pending row
+    // exists only after the plan gate, the fair-use cap and the checks
+    // above — and api/websites/generate/process works only on such rows.
+    const { data: record, error: insertError } = await createAdminClient()
       .from("user_websites")
       .insert({
         user_id: user.id,
@@ -504,10 +509,11 @@ export async function POST(request: Request) {
         // the user watched them upload. Fail the start instead, and mark
         // the row so nothing picks it up half-configured.
         logApiError("/api/websites/generate", refError, { stage: "insert_reference_images" });
-        await supabase
+        await createAdminClient()
           .from("user_websites")
           .update({ status: "failed", error_message: "Could not attach the reference images." })
           .eq("id", record.id)
+          .eq("user_id", user.id)
           .eq("status", "pending");
         return NextResponse.json(
           { ok: false, error: "Could not attach the reference images. Please try again." },

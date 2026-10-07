@@ -265,9 +265,15 @@ check(
   "without it the export carries import_id values that resolve to nothing"
 );
 const exportSrc = readFileSync("src/app/api/account/export/route.ts", "utf8");
+// EVERY COLUMN unless the registry names a list. Since 2026-10-05 two
+// tables are exported with a column list (lib/billing/client-columns.ts),
+// neither of which carries import_id; every table that does still takes `*`.
 check(
   "the export selects every column, so import_id comes with the row",
-  /\.select\("\*"\)/.test(exportSrc),
+  /\.select\(t\.exportColumns \?\? "\*"\)/.test(exportSrc) &&
+    [...registrySrc.matchAll(/table: "([a-z_]+)"[^}]*exportColumns:/g)]
+      .map((m) => m[1])
+      .every((t) => t === "ai_jobs" || t === "research_reports"),
   "a column list that omitted import_id would export the demo as though it were real"
 );
 

@@ -18,7 +18,7 @@ import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { transcribeCostUsd, voiceCredits, voiceMinutesForPlan } from "@/lib/voice/voice-pricing";
-import { consumeVoiceSeconds, readVoiceUsage } from "@/lib/voice/voice-usage";
+import { consumeVoiceSeconds, readVoiceUsage, recordExtraVoiceSeconds } from "@/lib/voice/voice-usage";
 import { transcribeAudio } from "@/lib/voice/voice-providers";
 import {
   checkMeetingUpload,
@@ -273,11 +273,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // BILLED ON THE PROVIDER'S LENGTH (2026-10-05). `result.seconds` is
+    // the larger of the reported and the measured duration; any seconds
+    // past what was metered above are recorded on the meter too.
+    const billedSeconds = result.seconds;
+    await recordExtraVoiceSeconds(admin, { userId: user.id, seconds: billedSeconds - seconds, kind: "transcribe" });
+
     const costs = new CostAccumulator();
     costs.recordExternal("transcribe", {
       provider: "openai",
       usdCost: result.usdCost,
-      units: seconds,
+      units: billedSeconds,
       unit: "seconds",
     });
 
@@ -288,7 +294,7 @@ export async function POST(request: Request) {
       costs,
       plan,
       bypassCharge: bypassCredits,
-      metadata: { kind: "meeting_transcribe", seconds, detectedLanguage: result.language },
+      metadata: { kind: "meeting_transcribe", seconds: billedSeconds, reportedSeconds: seconds, detectedLanguage: result.language },
     });
 
     // THE ROW IS WRITTEN AFTER THE SETTLEMENT, which is the order
@@ -309,7 +315,7 @@ export async function POST(request: Request) {
         // the column and the screen both want "el". See normaliseLanguage.
         language: normaliseLanguage(result.language),
         transcript: result.text,
-        duration_seconds: seconds,
+        duration_seconds: billedSeconds,
         credits_charged: settlement.creditsCharged,
       })
       .select("id, title, language, transcript, duration_seconds, credits_charged, created_at")
@@ -329,7 +335,7 @@ export async function POST(request: Request) {
         // A CODE, NEVER THE PROVIDER'S WORD. Whisper answers "greek";
         // the column and the screen both want "el". See normaliseLanguage.
         language: normaliseLanguage(result.language),
-        seconds,
+        seconds: billedSeconds,
         usage: buildUsageReceipt({
           creditsCharged: settlement.creditsCharged,
           bypass: bypassCredits,
@@ -344,7 +350,7 @@ export async function POST(request: Request) {
       meeting: row,
       transcript: result.text,
       language: normaliseLanguage(result.language),
-      seconds,
+      seconds: billedSeconds,
       usage: buildUsageReceipt({
         creditsCharged: settlement.creditsCharged,
         bypass: bypassCredits,

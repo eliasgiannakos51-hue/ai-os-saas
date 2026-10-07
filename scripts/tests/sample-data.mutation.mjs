@@ -90,8 +90,8 @@ const MUTANTS = [
   {
     name: "the export stops selecting every column",
     file: EXPORT,
-    from: '.select("*")',
-    to: '.select("id, user_id, created_at")',
+    from: '.select(t.exportColumns ?? "*")',
+    to: '.select(t.exportColumns ?? "id, user_id, created_at")',
     expect: "selects every column",
   },
 ];

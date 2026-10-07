@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { secretsMatch } from "@/lib/cron-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
@@ -43,7 +44,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     const expected = internalHandoffToken();
     const presented = request.headers.get(INTERNAL_HANDOFF_HEADER);
-    const isInternal = Boolean(expected && presented && presented === expected);
+    const isInternal = Boolean(expected && presented && secretsMatch(presented, expected));
 
     const admin = createAdminClient();
     const { data: job } = await admin

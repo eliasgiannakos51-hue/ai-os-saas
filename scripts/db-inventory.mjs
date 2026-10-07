@@ -407,6 +407,29 @@ function parseDdl(files, into) {
       });
     }
 
+    // DROP POLICY WITH NO CREATE AFTER IT, IN THE SAME FILE: A POLICY A
+    // LATER MIGRATION TOOK AWAY ON PURPOSE (2026-10-05).
+    //
+    // Most drops here are the first half of a drop-and-create pair, and
+    // those are skipped. 20261011000000_research_reports_server_writes.sql
+    // is the first that only drops: research_reports' insert and update
+    // policies are gone, and expecting them made the generated query
+    // report two MISSING POLICY findings on a database with every
+    // migration applied (db-inventory.dbtest.mjs went red). Recorded here
+    // and applied after every file is read, by file name, because the
+    // directory listing is not promised to be in order.
+    for (const m of sql.matchAll(
+      /drop\s+policy\s+(?:if\s+exists\s+)?(?:"([^"]+)"|([a-z0-9_]+))\s+on\s+(?:([a-z0-9_]+)\.)?"?([a-z0-9_]+)"?/gi
+    )) {
+      const name = m[1] ?? m[2];
+      const schema = (m[3] ?? "public").toLowerCase();
+      const key = `${schema}.${m[4]} ${name}`;
+      const recreated = [...sql.slice(m.index + m[0].length).matchAll(
+        /create\s+policy\s+(?:"([^"]+)"|([a-z0-9_]+))\s+on\s+(?:([a-z0-9_]+)\.)?"?([a-z0-9_]+)"?/gi
+      )].some((c) => `${(c[3] ?? "public").toLowerCase()}.${c[4]} ${c[1] ?? c[2]}` === key);
+      if (!recreated) into.policyDrops.push({ key, file });
+    }
+
     // POLICIES CREATED BY A LOOP, not by a literal statement.
     //
     // The thirteen module tables get RLS and four policies each from a
@@ -475,6 +498,7 @@ const defined = {
   tables: new Set(),
   columns: new Map(),
   policies: new Map(),
+  policyDrops: [],
   functions: new Map(),
   checks: new Map(),
   tableDdl: new Map(),
@@ -483,6 +507,13 @@ const defined = {
 };
 const { additive, snapshots } = sqlFiles();
 parseDdl(additive, defined);
+// A drop in a file NEWER than the one that created the policy removes it
+// from what the database is expected to hold (see policyDrops above).
+const fileName = (f) => path.basename(f);
+for (const { key, file } of defined.policyDrops) {
+  const created = defined.policies.get(key);
+  if (created && fileName(file) > fileName(created.file)) defined.policies.delete(key);
+}
 // Snapshots second and only for tables the additive files never mention —
 // they hold the original V1 base schema, which was never re-expressed as a
 // migration.

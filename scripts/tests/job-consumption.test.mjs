@@ -287,7 +287,15 @@ console.log("\n== 4. /api/jobs asks both questions ==");
 check("it still returns work in flight", /\.in\("status", \["queued", "running"\]\)/.test(listSrc));
 check("AND finished work that has never been seen", /\.eq\("status", "done"\)[\s\S]{0,80}\.is\("consumed_at", null\)/.test(listSrc));
 check("the choice between them is the tested rule, not an inline condition", /pickResumableJob\(/.test(listSrc));
-check("read through the user's own client, so RLS scopes it", /createClient\(\)/.test(listSrc) && !/createAdminClient/.test(listSrc));
+// THE ONE SERVER READ (2026-10-05): a stale row's credit hold, a column
+// the account may not read (lib/billing/client-columns.ts), fetched for the
+// row the user's own read returned — by id AND user_id.
+check(
+  "read through the user's own client, so RLS scopes it",
+  /createClient\(\)/.test(listSrc) &&
+    [...listSrc.matchAll(/createAdminClient\(\)/g)].length === 1 &&
+    /createAdminClient\(\)\s*\.from\("ai_jobs"\)\s*\.select\("reservation_id"\)\s*\.eq\("id", String\(activeRow\.id\)\)\s*\.eq\("user_id", user\.id\)/.test(listSrc)
+);
 // A page resuming a finished build has to restore what was ASKED as well
 // as what came back, or answering the builder's clarifying questions
 // sends the answers with no question attached to them.

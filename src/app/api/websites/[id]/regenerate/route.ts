@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import type { UserWebsite } from "@/types/user-website";
 
@@ -76,10 +77,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // used by editing_started_at/processing_started_at elsewhere in this
     // app: a fast double-click on "Regenerate (free)" can only ever win
     // this update once.
-    const { data: claimedRows, error: claimError } = await supabase
+    const { data: claimedRows, error: claimError } = await createAdminClient()
       .from("user_websites")
       .update({ status: "pending", error_message: null, free_retry_used: true })
       .eq("id", websiteId)
+      .eq("user_id", user.id)
       .eq("status", "flagged")
       .eq("free_retry_used", false)
       .select("id");

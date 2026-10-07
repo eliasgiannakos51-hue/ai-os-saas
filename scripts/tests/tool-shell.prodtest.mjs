@@ -18,6 +18,11 @@
  * into the conversation with its price, and only the press under it runs;
  * the finished report opens beside the conversation with its sources.
  *
+ * BOXES (package 4): a slide, and a part of the site, are pressed to choose
+ * them; the field then says what will change, the next change is sent with
+ * that one box, and the preview stays sandbox="" with the chosen part
+ * outlined. scripts/tests/boxes.test.mjs runs the server half.
+ *
  * /api/posts/generate is answered by the browser (page.route), so no
  * model is called and nothing is charged; what is tested is the screen.
  *
@@ -96,6 +101,7 @@ const W = {
   name: el.dashboard.tools.names.posts,
   oldGenerate: el.posts.form.generate,
   back: el.dashboard.toolShell.back,
+  box: el.dashboard.toolShell.box,
 };
 
 const servers = [];
@@ -296,7 +302,33 @@ try {
     await slideField.press("Enter");
     await page.waitForTimeout(800);
     check("the next thing said CHANGED the open deck instead of writing another",
-      generated.length === 1 && edits.length === 1 && edits[0]?.instruction === "Κάν' το πιο σύντομο.", JSON.stringify({ generated: generated.length, edits }));
+      generated.length === 1 && edits.length === 1 && edits[0]?.instruction === "Κάν' το πιο σύντομο." && !("slideIndex" in (edits[0] ?? {})), JSON.stringify({ generated: generated.length, edits }));
+
+    // ---- Slides: one box
+    const slideBox = page.locator('[data-testid="slide-box"]').nth(1);
+    const boxesShown = await slideBox.waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
+    check("the open deck's slides are boxes to press", boxesShown && (await page.locator('[data-testid="slide-box"]').count()) === 3);
+    if (boxesShown) await press(slideBox);
+    await page.waitForTimeout(300);
+    const chip = page.locator('[data-testid="box-chosen"]');
+    check("pressing slide 2 says under the field that only it will change",
+      (await chip.count()) === 1 && (await chip.innerText()).includes(W.box.slide.replace("{n}", "2")), (await chip.count()) ? await chip.innerText() : "no chip");
+    if (device.touch) check("phone: pressing a box goes back to the field", (await page.locator('[data-testid="tool-shell-work"]').count()) === 0 && (await slideField.isVisible()));
+    else check("computer: the pressed slide is marked as chosen", (await slideBox.getAttribute("aria-pressed")) === "true");
+    await slideField.fill("Πρόσθεσε μια τιμή.");
+    await slideField.press("Enter");
+    await page.waitForTimeout(800);
+    check("the change was sent with that slide, and only that slide",
+      edits.length === 2 && edits[1]?.slideIndex === 1 && edits[1]?.instruction === "Πρόσθεσε μια τιμή.", JSON.stringify(edits[1] ?? null));
+    check("...and the conversation says only slide 2 changed",
+      (await page.locator('[data-testid="tool-shell-thread"] [data-role="tool"]').last().innerText()).includes(W.box.slideChanged.replace("{n}", "2")));
+    // On a phone the changed deck opened over the field again: back first.
+    if (device.touch) await press(page.getByRole("button", { name: W.back }));
+    await page.waitForTimeout(300);
+    check("...the slide is still chosen for the next change", (await chip.count()) === 1);
+    if ((await page.locator('[data-testid="box-clear"]').count()) === 1) await press(page.locator('[data-testid="box-clear"]'));
+    await page.waitForTimeout(200);
+    check("...and the press beside it goes back to the whole deck", (await chip.count()) === 0);
 
     // ---- Research: planned, approved, run, and read
     const RID = "22222222-2222-4222-8222-222222222222";
@@ -407,7 +439,9 @@ try {
 
     // ---- Site: built, watched, previewed, then changed from the field
     const SID = "77777777-7777-4777-8777-777777777777";
-    const HTML = "<!doctype html><html><head><title>Φούρνος</title></head><body><h1>Ο φούρνος της γειτονιάς</h1><p>Πρωινό στο γραφείο σας.</p></body></html>";
+    const HTML =
+      "<!doctype html><html><head><title>Φούρνος</title></head><body><header><h1>Ο φούρνος της γειτονιάς</h1></header>" +
+      "<section><h2>Πρωινό στο γραφείο σας</h2><p>Κάθε πρωί.</p></section><footer><p>Πάτρα</p></footer></body></html>";
     const siteRecord = (status, html) => ({
       id: SID, user_id: MOCK_USER.id, name: "Φούρνος", html_content: html, status, error_message: null, description: "Site για φούρνο",
       reference_image_url: null, has_reference_images: false, is_large_request: false, free_retry_used: false, created_at: "2026-10-07T10:00:00Z",
@@ -447,7 +481,30 @@ try {
     await siteField.press("Enter");
     await page.waitForTimeout(800);
     check("the next thing said CHANGED the site instead of building another",
-      built.length === 1 && changes.length === 1 && changes[0]?.changeRequest === "Άλλαξε το πρωινό σε μεσημεριανό." && changes[0]?.websiteId === SID, JSON.stringify(changes));
+      built.length === 1 && changes.length === 1 && changes[0]?.changeRequest === "Άλλαξε το πρωινό σε μεσημεριανό." && changes[0]?.websiteId === SID && !("section" in (changes[0] ?? {})), JSON.stringify(changes));
+
+    // ---- Site: one box
+    const siteBox = page.locator('[data-testid="site-box"]').nth(1);
+    const partsShown = await siteBox.waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
+    check("the site's parts are boxes to press: header, section, footer", partsShown && (await page.locator('[data-testid="site-box"]').count()) === 3);
+    const partName = partsShown ? (await siteBox.innerText()).replace(/^2\.\s*/, "") : "";
+    if (partsShown) await press(siteBox);
+    await page.waitForTimeout(300);
+    check("pressing a part says under the field that only it will change",
+      (await chip.count()) === 1 && (await chip.innerText()).includes(partName) && partName.length > 0, JSON.stringify({ partName }));
+    if (device.touch) check("phone: pressing a part goes back to the field", (await page.locator('[data-testid="tool-shell-work"]').count()) === 0 && (await siteField.isVisible()));
+    else {
+      const frame = page.locator('[data-testid="site-preview"] iframe');
+      check("computer: the chosen part is outlined in the preview, which stays without scripts",
+        (await frame.getAttribute("sandbox")) === "" && /<section data-ionexa-n="2" data-ionexa-on>/.test((await frame.getAttribute("srcdoc")) ?? ""));
+    }
+    await siteField.fill("Βάλε και ωράριο.");
+    await siteField.press("Enter");
+    await page.waitForTimeout(800);
+    check("the change was sent with that part, and only that part",
+      changes.length === 2 && changes[1]?.section === 1 && changes[1]?.changeRequest === "Βάλε και ωράριο.", JSON.stringify(changes[1] ?? null));
+    check("...and the conversation says only that part changed",
+      (await page.locator('[data-testid="tool-shell-thread"] [data-role="tool"]').last().innerText()).includes(W.box.partChanged.replace("{name}", partName)));
 
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();

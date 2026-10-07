@@ -338,3 +338,43 @@ export function slidesWantingImages(deck: Deck): number {
 export function deckPlainText(deck: Deck): string {
   return [deck.title, ...deck.slides.flatMap((s) => [s.title, ...s.bullets])].filter(Boolean).join("\n");
 }
+
+/**
+ * ONE BOX, ONE CHANGE (MASTER Μέρος 16, package 4): «πατάω ένα κουτί, γράφω
+ * τι να αλλάξει, και αλλάζει μόνο αυτό». A slide is a box.
+ *
+ * The model is asked for the whole deck with only that slide changed, and
+ * then NOT TRUSTED to have done so: keepOnlySlide takes that one slide from
+ * what came back and every other slide from what was stored, so the rest
+ * of the deck is the stored deck, byte for byte, whatever the model wrote.
+ * Read by app/api/presentations/[id]/edit/route.ts; held by
+ * scripts/tests/boxes.test.mjs, which runs both.
+ */
+export function scopeInstructionToSlide(instruction: string, index: number, total: number): string {
+  return `Change ONLY slide ${index + 1} of ${total}. Keep every other slide exactly as it is, and return the whole deck. The change to slide ${index + 1}: ${instruction}`;
+}
+
+export function keepOnlySlide(stored: Deck, edited: Deck, index: number): Deck | null {
+  if (!Number.isInteger(index) || index < 0 || index >= stored.slides.length) return null;
+  const changed = edited.slides[index];
+  if (!changed) return null;
+  return { ...stored, slides: stored.slides.map((slide, i) => (i === index ? changed : slide)) };
+}
+
+/** A slide index from a request body, or null for none, or "bad" for one that is not a slide of this deck. */
+export function readSlideIndex(value: unknown, total: number): number | null | "bad" {
+  if (value === undefined || value === null) return null;
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value < total ? value : "bad";
+}
+
+/**
+ * The changed slide's picture, without searching when nothing asks for it.
+ * The stored picture stays when the slide still wants the same one (or the
+ * deck uses the person's own photos, where an edit brings no new ones);
+ * otherwise the image is null and the route searches for THIS slide only.
+ */
+export function keepBoxImage(before: Slide, after: Slide, source: ImageSource): Slide {
+  if (!after.imageQuery) return { ...after, image: null };
+  if (before.image && (source === "own" || after.imageQuery === before.imageQuery)) return { ...after, image: before.image };
+  return { ...after, image: null };
+}

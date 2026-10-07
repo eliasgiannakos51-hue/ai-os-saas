@@ -289,8 +289,8 @@ const MUTANTS = [
   {
     name: "the model is sent the home page whichever page was chosen",
     file: EDIT,
-    from: "const editResult = await editWebsiteHtml(apiKey, sourceHtml, changeRequest",
-    to: "const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest",
+    from: "section === null ? sourceHtml : (markBoxForEdit(sourceHtml, section) ?? sourceHtml),",
+    to: "section === null ? website.html_content : (markBoxForEdit(website.html_content, section) ?? website.html_content),",
   },
   {
     name: "the save drops the pages column, so the edit vanishes on reload",

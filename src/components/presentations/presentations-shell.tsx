@@ -8,7 +8,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton, saveFileResponse } from "@/components/ui/download-pdf-button";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
-import { ToolShell, OPTION, ACTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { DeckSlides } from "@/components/presentations/deck-slides";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { createClient } from "@/lib/supabase/client";
@@ -49,6 +49,10 @@ type Open = { id: string | null; deck: Deck };
  * PowerPoint and PDF on top. Four options under the field: how many
  * slides, where the pictures come from, what was made before, and a new
  * deck.
+ *
+ * BOXES (package 4): a slide's number and title are pressed to choose it,
+ * and the next change goes with its index — the route keeps every other
+ * slide exactly as stored (lib/presentations/deck.ts, keepOnlySlide).
  */
 export function PresentationsShell({
   initialDescription,
@@ -82,7 +86,14 @@ export function PresentationsShell({
   const [length, setLength] = useState(initialDescription?.length ?? 0);
   const [running, setRunning] = useState(false);
   const [turns, setTurns] = useState<{ id: string; role: "user" | "tool"; text: string; deck?: Open }[]>([]);
-  const [open, setOpen] = useState<Open | null>(null);
+  const [open, setOpenDeck] = useState<Open | null>(null);
+  // The chosen slide of the open deck, or null for the whole deck. Any
+  // other deck opening forgets it: an index means nothing in another deck.
+  const [box, setBox] = useState<number | null>(null);
+  const setOpen = (next: Open | null) => {
+    setOpenDeck(next);
+    setBox(null);
+  };
   const [pane, setPane] = useState<"deck" | "recent" | null>(null);
   const [exporting, setExporting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -157,6 +168,8 @@ export function PresentationsShell({
                   ? t("edit.notIncluded")
                   : code === "no_deck"
                     ? t("edit.noDeck")
+                    : code === "bad_slide"
+                      ? tShell("box.lost")
                     : code === "not_saved"
                       ? t("edit.notSaved")
                       : t("errors.failed");
@@ -225,7 +238,7 @@ export function PresentationsShell({
       const response = await fetch(`/api/presentations/${open.id}/edit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instruction: instruction.slice(0, MAX_INSTRUCTION_CHARS) }),
+        body: JSON.stringify({ instruction: instruction.slice(0, MAX_INSTRUCTION_CHARS), ...(box === null ? {} : { slideIndex: box }) }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
@@ -233,8 +246,9 @@ export function PresentationsShell({
         return;
       }
       const changed: Open = { id: String(body.id), deck: body.deck as Deck };
-      say("tool", tShell("slides.changed"), changed);
-      setOpen(changed);
+      say("tool", box === null ? tShell("slides.changed") : tShell("box.slideChanged", { n: box + 1 }), changed);
+      // The same slide stays chosen: the next words are usually about it.
+      setOpenDeck(changed);
       setPane("deck");
       router.refresh();
     } catch {
@@ -310,7 +324,24 @@ export function PresentationsShell({
               <DownloadPdfButton href={`/api/presentations/${open.id}/pdf`} label={t("result.exportPdf")} fallbackName="presentation" className={OPTION} />
             </>
           ) : null,
-          body: <DeckSlides deck={open.deck} imageUrlFor={imageUrlFor} />,
+          body: open.id ? (
+            <>
+              <p className="mb-3 text-xs text-muted">{tShell("box.hint")}</p>
+              <DeckSlides
+                deck={open.deck}
+                imageUrlFor={imageUrlFor}
+                selected={box}
+                onSelect={(index) => {
+                  setBox((v) => (v === index ? null : index));
+                  // On a phone the work covers the field: back to it.
+                  if (!workIsBeside()) setPane(null);
+                  composerRef.current?.focus();
+                }}
+              />
+            </>
+          ) : (
+            <DeckSlides deck={open.deck} imageUrlFor={imageUrlFor} />
+          ),
         }
       : pane === "recent"
         ? {
@@ -382,7 +413,13 @@ export function PresentationsShell({
           </span>
         ) : null
       }
-      placeholder={editing ? t("edit.placeholder") : t("form.descriptionPlaceholder")}
+      placeholder={
+        editing && box !== null
+          ? tShell("box.placeholder", { name: tShell("box.slide", { n: box + 1 }) })
+          : editing
+            ? t("edit.placeholder")
+            : t("form.descriptionPlaceholder")
+      }
       sending={running}
       onSend={(text) => void (editing ? change(text) : write(text))}
       onStop={() => abortRef.current?.abort()}
@@ -461,7 +498,10 @@ export function PresentationsShell({
         </button>,
       ]}
       footer={
-        !running && length > 0 ? <CostEstimateHint credits={editing ? editEstimate.credits : estimate.credits} /> : null
+        <>
+          {editing && box !== null && <ChosenBox label={tShell("box.slide", { n: box + 1 })} onClear={() => setBox(null)} />}
+          {!running && length > 0 ? <CostEstimateHint credits={editing ? editEstimate.credits : estimate.credits} /> : null}
+        </>
       }
       work={work}
       onCloseWork={() => setPane(null)}

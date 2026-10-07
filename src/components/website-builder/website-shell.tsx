@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Clock, Download, Palette, Plus, Square } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -9,7 +9,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
-import { ToolShell, OPTION, ACTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { websiteNameFrom } from "@/lib/website-name";
@@ -21,7 +21,9 @@ import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { findUnfilledPlaceholders } from "@/lib/website-placeholders";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { findPageBoxes, outlineBoxes, type PageBox } from "@/lib/website-boxes";
 import type { UserWebsite } from "@/types/user-website";
+import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
@@ -42,6 +44,12 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * changes it (/api/websites/edit). Three options: the design, the sites
  * made before, and a new site. Price before, as on the page: the same
  * estimator the server reserves against.
+ *
+ * BOXES (package 4): the page's parts — header, sections, footer — are
+ * listed above the preview and pressed by number; the chosen one is
+ * outlined in the preview, and the next change goes with its index. The
+ * route puts back every other part exactly as stored
+ * (lib/website-boxes.ts, takeEditedBox).
  */
 export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite[] }) {
   const t = useTranslations("dashboard.websiteBuilder");
@@ -64,6 +72,10 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
   // What was asked of each site in THIS conversation, so the invented-number
   // check does not accuse a number the person typed themselves.
   const [asked, setAsked] = useState<Record<string, string[]>>({});
+  // The chosen part, with the site it belongs to: an index means nothing
+  // on another site, so opening one forgets it without a reset anywhere.
+  const [box, setBox] = useState<{ siteId: string; index: number } | null>(null);
+  const composerRef = useRef<ChatComposerHandle>(null);
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
@@ -164,23 +176,33 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
 
   async function change(request: string) {
     if (!current) return;
+    const part = chosen;
+    const partLabel = chosenLabel;
     setBusy(true);
     try {
       const res = await fetchWithAuthRetry("/api/websites/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ websiteId: current.id, changeRequest: request, referenceImagePaths: [], pageSlug: "" }),
+        body: JSON.stringify({ websiteId: current.id, changeRequest: request, referenceImagePaths: [], pageSlug: "", ...(part === null ? {} : { section: part }) }),
       });
       const data = await res.json();
       void refreshCredits();
       if (!res.ok || !data.ok || !data.edited) {
-        say({ role: "tool", text: data?.reason === "unknown_page" || data?.reason === "invalid_page" ? t("editPageGone") : getErrorMessage(data?.error ?? data?.message, t("generateFailed")) });
+        say({
+          role: "tool",
+          text:
+            data?.reason === "unknown_page" || data?.reason === "invalid_page"
+              ? t("editPageGone")
+              : data?.reason === "box_lost" || data?.reason === "bad_section"
+                ? tShell("box.lost")
+                : getErrorMessage(data?.error ?? data?.message, t("generateFailed")),
+        });
         return;
       }
       const record = data.record as UserWebsite;
       setWebsites((prev) => prev.map((w) => (w.id === record.id ? record : w)));
       setAsked((prev) => ({ ...prev, [record.id]: [...(prev[record.id] ?? []), request] }));
-      say({ role: "tool", text: tShell("site.changed"), siteId: record.id });
+      say({ role: "tool", text: part === null ? tShell("site.changed") : tShell("box.partChanged", { name: partLabel }), siteId: record.id });
       setPane("site");
     } catch {
       say({ role: "tool", text: tCommon("networkErrorCheckConnection") });
@@ -228,6 +250,19 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
   // Only for a site whose every request is in this conversation: a number
   // typed in an earlier visit is not here to be recognised.
   const invented = complete && current && asked[current.id] ? findInventedNumbers(html, asked[current.id].join("\n")) : [];
+  const boxes = useMemo(() => (complete ? findPageBoxes(html) : []), [complete, html]);
+  const chosen = box && current && box.siteId === current.id && box.index < boxes.length ? box.index : null;
+  // Literal keys, so the message slicer can bound them (lib/i18n/message-slices.ts).
+  const boxLabel = (b: PageBox, i: number) =>
+    b.heading ??
+    (b.tag === "header"
+      ? tShell("box.header")
+      : b.tag === "footer"
+        ? tShell("box.footer")
+        : b.tag === "nav"
+          ? tShell("box.nav")
+          : tShell("box.part", { n: i + 1 }));
+  const chosenLabel = chosen === null ? "" : boxLabel(boxes[chosen], chosen);
 
   const shellTurns: ShellTurn[] = turns.map((turn) => ({
     id: turn.id,
@@ -279,8 +314,38 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
               <AiGeneratedNotice variant="block" />
               {unfilled.length > 0 && <p className="text-xs text-warning">{t("unfilledTitle", { count: unfilled.length })} {t("unfilledBody")}</p>}
               {invented.length > 0 && <p className="text-xs text-warning">{t("inventedTitle", { count: invented.length })} {t("inventedBody")}</p>}
+              {complete && boxes.length > 1 && (
+                <div role="group" aria-label={tShell("box.boxes")} data-testid="site-boxes">
+                  <p className="mb-1.5 text-xs text-muted">{tShell("box.hint")}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {boxes.map((b, i) => (
+                      <button
+                        key={`${i}:${b.start}`}
+                        type="button"
+                        aria-pressed={chosen === i}
+                        data-testid="site-box"
+                        onClick={() => {
+                          setBox(chosen === i ? null : { siteId: current.id, index: i });
+                          // On a phone the work covers the field: back to it.
+                          if (!workIsBeside()) setPane(null);
+                          composerRef.current?.focus();
+                        }}
+                        className={`${OPTION} ${chosen === i ? "border-foreground text-foreground" : ""}`}
+                      >
+                        {i + 1}. {boxLabel(b, i)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {complete ? (
-                <iframe key={`${current.id}:${html.length}`} srcDoc={html} sandbox="" title={current.name} className="min-h-[60vh] w-full flex-1 rounded-card bg-paper" />
+                <iframe
+                  key={`${current.id}:${html.length}`}
+                  srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
+                  sandbox=""
+                  title={current.name}
+                  className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
+                />
               ) : (
                 <p className="text-xs text-muted">{running(current) ? t("generating") : current.error_message ?? t("generateFailed")}</p>
               )}
@@ -316,6 +381,7 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
 
   return (
     <ToolShell
+      ref={composerRef}
       name={tNames("site")}
       turns={shellTurns}
       working={
@@ -342,7 +408,13 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
           </div>
         ) : null
       }
-      placeholder={current?.status === "completed" && !pending ? t("editPlaceholder") : t("descriptionPlaceholder")}
+      placeholder={
+        current?.status === "completed" && !pending
+          ? chosen === null
+            ? t("editPlaceholder")
+            : tShell("box.placeholder", { name: chosenLabel })
+          : t("descriptionPlaceholder")
+      }
       sending={busy}
       onSend={send}
       onLengthChange={setLength}
@@ -378,7 +450,12 @@ export function WebsiteShell({ initialWebsites }: { initialWebsites: UserWebsite
           {tShell("site.new")}
         </button>,
       ]}
-      footer={!busy && length > 0 && !(current?.status === "completed") ? <p className="mt-1.5 text-[11px] text-muted">{t("estimatedCost", { count: estimatedCost })}</p> : null}
+      footer={
+        <>
+          {chosen !== null && !pending && <ChosenBox label={chosenLabel} onClear={() => setBox(null)} />}
+          {!busy && length > 0 && !(current?.status === "completed") ? <p className="mt-1.5 text-[11px] text-muted">{t("estimatedCost", { count: estimatedCost })}</p> : null}
+        </>
+      }
       work={work}
       onCloseWork={() => setPane(null)}
     />

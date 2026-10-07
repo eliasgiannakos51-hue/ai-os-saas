@@ -2882,6 +2882,21 @@
         "skip": "Seguir sin ellas",
         "new": "Nuevo sitio",
         "design": "Diseño"
+      },
+      "box": {
+        "only": "Solo cambia: {name}",
+        "whole": "Todo junto",
+        "hint": "Pulsa un bloque para cambiar solo ese.",
+        "slide": "diapositiva {n}",
+        "part": "parte {n}",
+        "header": "cabecera",
+        "footer": "pie de página",
+        "nav": "menú",
+        "placeholder": "¿Qué debe cambiar en «{name}»?",
+        "slideChanged": "Solo cambió la diapositiva {n}. Las demás siguen igual.",
+        "partChanged": "Solo cambió «{name}». El resto del sitio sigue igual.",
+        "lost": "El bloque no volvió del cambio, así que no cambió nada. Inténtalo de nuevo.",
+        "boxes": "Bloques"
       }
     }
   },

@@ -2882,6 +2882,21 @@
         "skip": "Continuer sans",
         "new": "Nouveau site",
         "design": "Apparence"
+      },
+      "box": {
+        "only": "Seulement : {name}",
+        "whole": "Tout ensemble",
+        "hint": "Appuie sur un bloc pour ne modifier que celui-ci.",
+        "slide": "diapositive {n}",
+        "part": "partie {n}",
+        "header": "en-tête",
+        "footer": "pied de page",
+        "nav": "menu",
+        "placeholder": "Que faut-il changer dans « {name} » ?",
+        "slideChanged": "Seule la diapositive {n} a changé. Les autres sont restées identiques.",
+        "partChanged": "Seul « {name} » a changé. Le reste du site est resté identique.",
+        "lost": "Le bloc n’est pas revenu de la modification, donc rien n’a changé. Réessaie.",
+        "boxes": "Blocs"
       }
     }
   },

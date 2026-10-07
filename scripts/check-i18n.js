@@ -58,6 +58,11 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  // "menu" is the French, Italian and Portuguese word for a site's menu
+  // too: the name of a box in Site (package 4, dashboard.toolShell.box).
+  "fr:dashboard.toolShell.box.nav",
+  "it:dashboard.toolShell.box.nav",
+  "pt:dashboard.toolShell.box.nav",
   // "Design" is the German word for a site's look (das Design), as the
   // German site builders call the same control.
   "de:dashboard.toolShell.site.design",

@@ -177,7 +177,7 @@ check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site
 check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(site));
 check("the price shows before sending, from the server's own estimator", /estimateForAction\(\s*"websiteGenerate"/.test(site) && /t\("estimatedCost", \{ count: estimatedCost \}\)/.test(site));
 check("the site beside the conversation is sandboxed, marked as made by AI, and says what it still lacks",
-  /srcDoc=\{html\} sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));
+  /srcDoc=\{chosen === null \? html : outlineBoxes\(html, chosen\)\}\s*sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));
 check("...and accuses no number the person typed: only for a site whose every request is in this conversation",
   /asked\[current\.id\] \? findInventedNumbers\(html, asked\[current\.id\]\.join\("\\n"\)\) : \[\]/.test(site));
 check("Publish is on top of it", /<PublishControl websiteId=\{current\.id\}/.test(site));

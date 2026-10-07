@@ -154,3 +154,25 @@ export const ACTION =
 
 /** One option under the field: a label that is pressed, or that opens a choice. */
 export const OPTION = "chip-link gap-1.5";
+
+/**
+ * ONE BOX CHOSEN (package 4): under the field, what the next change will
+ * touch, and the press that goes back to the whole thing. Slides and Site
+ * draw it while a slide or a part of the page is chosen.
+ */
+export function ChosenBox({ label, onClear }: { label: string; onClear: () => void }) {
+  const t = useTranslations("dashboard.toolShell");
+  return (
+    <p data-testid="box-chosen" className="mt-1 flex items-center gap-1 text-xs text-foreground">
+      <span className="min-w-0 break-words">{t("box.only", { name: label })}</span>
+      <button type="button" onClick={onClear} aria-label={t("box.whole")} title={t("box.whole")} data-testid="box-clear" className={ACTION}>
+        <X className="h-3.5 w-3.5" aria-hidden="true" />
+      </button>
+    </p>
+  );
+}
+
+/** Whether the work sits beside the conversation (a computer) or covers it (a phone). */
+export function workIsBeside(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+}

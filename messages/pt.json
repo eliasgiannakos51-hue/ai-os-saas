@@ -2882,6 +2882,21 @@
         "skip": "Continuar sem elas",
         "new": "Novo site",
         "design": "Aspeto"
+      },
+      "box": {
+        "only": "Muda só: {name}",
+        "whole": "Tudo junto",
+        "hint": "Toque num bloco para mudar só esse.",
+        "slide": "diapositivo {n}",
+        "part": "parte {n}",
+        "header": "cabeçalho",
+        "footer": "rodapé",
+        "nav": "menu",
+        "placeholder": "O que deve mudar em «{name}»?",
+        "slideChanged": "Só o diapositivo {n} mudou. Os outros ficaram iguais.",
+        "partChanged": "Só «{name}» mudou. O resto do site ficou igual.",
+        "lost": "O bloco não voltou da alteração, por isso nada mudou. Tente de novo.",
+        "boxes": "Blocos"
       }
     }
   },

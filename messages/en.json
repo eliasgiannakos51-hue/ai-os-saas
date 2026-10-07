@@ -2882,6 +2882,21 @@
         "skip": "Go on without",
         "new": "New site",
         "design": "Design"
+      },
+      "box": {
+        "only": "Changing only: {name}",
+        "whole": "The whole thing",
+        "hint": "Press a box to change only that one.",
+        "slide": "slide {n}",
+        "part": "part {n}",
+        "header": "header",
+        "footer": "footer",
+        "nav": "menu",
+        "placeholder": "What should change in “{name}”?",
+        "slideChanged": "Only slide {n} changed. The others stayed the same.",
+        "partChanged": "Only “{name}” changed. The rest of the site stayed the same.",
+        "lost": "The box did not come back from the change, so nothing changed. Try again.",
+        "boxes": "Boxes"
       }
     }
   },

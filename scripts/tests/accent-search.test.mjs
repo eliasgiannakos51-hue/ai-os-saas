@@ -259,6 +259,10 @@ check("no component compares user text with toLowerCase().includes()", offenders
   //                              spec-defined ASCII identifiers, not
   //                              anybody's text — a meta tag named with
   //                              an accent is not a meta tag we own.
+  //   lib/website-boxes.ts       an HTML TAG NAME against the fixed sets
+  //                              of void, raw-text and non-box elements
+  //                              — spec-defined ASCII, the same case as
+  //                              seo/head.ts.
   //
   //   NOT ADDED: lib/website-link-safety.ts, which this sweep flagged
   //   because a new function bound `slug` to a lowered value while an
@@ -287,6 +291,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
     "src/lib/publishing/subdomain.ts",
     "src/lib/seo/facts.ts",
     "src/lib/seo/head.ts",
+    "src/lib/website-boxes.ts",
   ];
   const realOffenders = indirectOffenders.filter(
     (o) => !ASCII_BY_CONSTRUCTION.some((f) => o === f || o.startsWith(f + ":"))

@@ -2882,6 +2882,21 @@
         "skip": "Continua senza",
         "new": "Nuovo sito",
         "design": "Aspetto"
+      },
+      "box": {
+        "only": "Cambia solo: {name}",
+        "whole": "Tutto insieme",
+        "hint": "Premi un riquadro per cambiare solo quello.",
+        "slide": "diapositiva {n}",
+        "part": "parte {n}",
+        "header": "intestazione",
+        "footer": "piè di pagina",
+        "nav": "menu",
+        "placeholder": "Cosa deve cambiare in «{name}»?",
+        "slideChanged": "È cambiata solo la diapositiva {n}. Le altre sono rimaste uguali.",
+        "partChanged": "È cambiato solo «{name}». Il resto del sito è rimasto uguale.",
+        "lost": "Il riquadro non è tornato dalla modifica, quindi non è cambiato nulla. Riprova.",
+        "boxes": "Riquadri"
       }
     }
   },

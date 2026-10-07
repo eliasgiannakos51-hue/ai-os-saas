@@ -2882,6 +2882,21 @@
         "skip": "Ohne weitermachen",
         "new": "Neue Website",
         "design": "Design"
+      },
+      "box": {
+        "only": "Nur ändern: {name}",
+        "whole": "Alles zusammen",
+        "hint": "Tippe auf einen Kasten, um nur diesen zu ändern.",
+        "slide": "Folie {n}",
+        "part": "Teil {n}",
+        "header": "Kopfbereich",
+        "footer": "Fußbereich",
+        "nav": "Menü",
+        "placeholder": "Was soll sich in „{name}“ ändern?",
+        "slideChanged": "Nur Folie {n} wurde geändert. Die anderen sind gleich geblieben.",
+        "partChanged": "Nur „{name}“ wurde geändert. Der Rest der Website ist gleich geblieben.",
+        "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
+        "boxes": "Kästen"
       }
     }
   },

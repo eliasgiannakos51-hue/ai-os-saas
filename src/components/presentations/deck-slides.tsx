@@ -10,15 +10,22 @@ import type { Deck, Slide, SlideLayout } from "@/lib/presentations/deck";
  * its Unsplash credit, the bullets and the speaker notes. One drawing for
  * the page (components/presentations/presentations-workspace.tsx) and for
  * Slides in the shell (components/presentations/presentations-shell.tsx).
+ *
+ * With `onSelect`, each slide is a BOX (package 4): its number and title
+ * are pressed to choose it, and the next change touches only that slide.
  */
 export function DeckSlides({
   deck,
   imageUrlFor,
   className = "",
+  selected = null,
+  onSelect,
 }: {
   deck: Deck;
   imageUrlFor: (slide: Slide) => string | null;
   className?: string;
+  selected?: number | null;
+  onSelect?: (index: number) => void;
 }) {
   const t = useTranslations("presentations");
   // Literal keys, so the message slicer can bound what this needs
@@ -35,11 +42,32 @@ export function DeckSlides({
       {deck.slides.map((slide, index) => {
         const url = imageUrlFor(slide);
         return (
-          <li key={index} className="rounded-card border border-border bg-background p-4">
-            <p className="text-[11px] uppercase tracking-wide text-muted">
-              {index + 1} · {layouts[slide.layout]}
-            </p>
-            <h3 className="mt-1 text-sm font-semibold text-foreground">{slide.title}</h3>
+          <li
+            key={index}
+            data-testid="slide-card"
+            className={`rounded-card border bg-background p-4 ${selected === index ? "border-foreground" : "border-border"}`}
+          >
+            {onSelect ? (
+              <button
+                type="button"
+                onClick={() => onSelect(index)}
+                aria-pressed={selected === index}
+                data-testid="slide-box"
+                className="block min-h-[44px] w-full text-start"
+              >
+                <span className="block text-[11px] uppercase tracking-wide text-muted">
+                  {index + 1} · {layouts[slide.layout]}
+                </span>
+                <span className="mt-1 block text-sm font-semibold text-foreground">{slide.title}</span>
+              </button>
+            ) : (
+              <>
+                <p className="text-[11px] uppercase tracking-wide text-muted">
+                  {index + 1} · {layouts[slide.layout]}
+                </p>
+                <h3 className="mt-1 text-sm font-semibold text-foreground">{slide.title}</h3>
+              </>
+            )}
             {url && (
               <figure className="mt-2">
                 <Image

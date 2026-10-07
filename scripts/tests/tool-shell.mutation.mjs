@@ -191,8 +191,8 @@ const MUTANTS = [
   {
     name: "Site: the preview runs the generated page's scripts",
     file: SITE,
-    from: 'srcDoc={html} sandbox=""',
-    to: 'srcDoc={html} sandbox="allow-scripts"',
+    from: 'srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}\n                  sandbox=""',
+    to: 'srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}\n                  sandbox="allow-scripts"',
     expect: "is sandboxed",
   },
   {

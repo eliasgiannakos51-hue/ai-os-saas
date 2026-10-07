@@ -43,6 +43,7 @@ import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import { applyEditedDocument, resolveEditTarget, HOME_INDEX } from "@/lib/publishing/page-edit-target";
+import { findPageBoxes, markBoxForEdit, readBoxIndex, scopeChangeToBox, takeEditedBox } from "@/lib/website-boxes";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,10 @@ const MAX_CHANGE_REQUEST_LENGTH = 20000;
 // edit appends a new website_versions row and updates user_websites'
 // html_content in place, so the preview/download UI always shows the
 // latest version without any changes there.
+// The model's page came back without the box it was asked to change:
+// nothing is saved and nothing is charged, like any failed edit here.
+const BOX_LOST = "box_lost";
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -90,6 +95,8 @@ export async function POST(request: Request) {
     // document, which is what every existing caller sends — a site with
     // no sub-pages behaves exactly as it did.
     let pageSlugRaw: string;
+    // WHICH BOX of that page (package 4), or none for the whole page.
+    let sectionRaw: unknown;
     try {
       const body = await request.json();
       websiteId = typeof body?.websiteId === "string" ? body.websiteId : "";
@@ -101,6 +108,7 @@ export async function POST(request: Request) {
         ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
         : [];
       pageSlugRaw = typeof body?.pageSlug === "string" ? body.pageSlug.trim().toLowerCase() : "";
+      sectionRaw = body?.section;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -145,7 +153,7 @@ export async function POST(request: Request) {
       // The PAGE is part of what makes this request distinct: "make the
       // heading bigger" on /services is not a repeat of the same words on
       // the home page, and the breaker would otherwise treat it as one.
-      fingerprintRequest(websiteId, `${pageSlugRaw}\n${changeRequest}`)
+      fingerprintRequest(websiteId, `${pageSlugRaw}\n${typeof sectionRaw === "number" ? sectionRaw : ""}\n${changeRequest}`)
     );
     if (!breakerCheck.allowed) {
       return NextResponse.json({ ok: true, edited: false, rateLimited: true, message: breakerCheck.reason });
@@ -198,6 +206,15 @@ export async function POST(request: Request) {
     // saving the result onto a sub-page is precisely the bug this
     // resolution exists to prevent.
     const sourceHtml = target.html;
+
+    // ONE BOX, ONE CHANGE. Checked against the page before anything is
+    // held, so a box the page does not have costs nothing and locks
+    // nothing.
+    const section = readBoxIndex(sectionRaw, findPageBoxes(sourceHtml).length);
+    if (section === "bad") {
+      // A code and no sentence: the shell only offers boxes the page has.
+      return NextResponse.json({ ok: false, reason: "bad_section" }, { status: 400 });
+    }
 
     // Idempotency guard — a real, atomic DB-level claim, not a check-
     // then-act race: this single UPDATE only succeeds (returns a row) if
@@ -340,8 +357,22 @@ export async function POST(request: Request) {
     const photoSource = parsePhotoSource(website.description ?? "");
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      const editResult = await editWebsiteHtml(apiKey, sourceHtml, changeRequest, referenceImages, formEndpointUrl, costs);
+      const editResult = await editWebsiteHtml(
+        apiKey,
+        section === null ? sourceHtml : (markBoxForEdit(sourceHtml, section) ?? sourceHtml),
+        section === null ? changeRequest : scopeChangeToBox(changeRequest),
+        referenceImages,
+        formEndpointUrl,
+        costs
+      );
       updatedHtml = editResult.html;
+      if (section !== null) {
+        // The rest of the page is the STORED page, whatever the model
+        // wrote; a page with the box gone is an edit that did not happen.
+        const boxed = takeEditedBox(sourceHtml, updatedHtml, section);
+        if (!boxed) throw new Error(BOX_LOST);
+        updatedHtml = boxed;
+      }
       usedCheapPatch = editResult.usedCheapPatch;
       images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });
       updatedHtml = images.html;
@@ -443,6 +474,9 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });
       await releaseReservation(user.id, reservationId);
+      if (err instanceof Error && err.message === BOX_LOST) {
+        return NextResponse.json({ ok: false, reason: BOX_LOST }, { status: 502 });
+      }
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },

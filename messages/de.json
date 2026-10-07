@@ -2388,7 +2388,16 @@
       "usedUnlimited": "{used} in diesem Monat",
       "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1.",
       "progressStep": "Frage {done} von {total}",
-      "keepsRunning": "Das läuft weiter, auch wenn Sie die Seite schließen."
+      "keepsRunning": "Das läuft weiter, auch wenn Sie die Seite schließen.",
+      "toSlides": {
+        "send": "An Slides",
+        "price": "~{count, plural, one {# Credit} other {# Credits}}",
+        "confirm": "Erneut drücken für {count, plural, one {# Credit} other {# Credits}}",
+        "cancel": "Abbrechen",
+        "working": "Die Präsentation wird erstellt…",
+        "notReady": "Die Recherche ist noch nicht fertig, daher gibt es nichts zu präsentieren.",
+        "offline": "Keine Verbindung. Prüfe das Netzwerk und versuche es erneut."
+      }
     },
     "onboarding": {
       "title": "Machen wir es zu deinem",

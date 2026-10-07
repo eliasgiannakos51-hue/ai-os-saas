@@ -2388,7 +2388,16 @@
       "usedUnlimited": "{used} this month",
       "capReached": "You have used this month's research reports. It resets on the 1st.",
       "progressStep": "Question {done} of {total}",
-      "keepsRunning": "This keeps running if you close the page."
+      "keepsRunning": "This keeps running if you close the page.",
+      "toSlides": {
+        "send": "To Slides",
+        "price": "~{count, plural, one {# credit} other {# credits}}",
+        "confirm": "Press again for {count, plural, one {# credit} other {# credits}}",
+        "cancel": "Cancel",
+        "working": "Making the presentation…",
+        "notReady": "The research is not finished yet, so there is nothing to present.",
+        "offline": "No connection. Check the network and try again."
+      }
     },
     "onboarding": {
       "title": "Let's make this yours",

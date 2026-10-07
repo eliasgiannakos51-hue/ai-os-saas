@@ -2388,7 +2388,16 @@
       "usedUnlimited": "本月 {used} 次",
       "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",
       "progressStep": "第 {done} 个问题，共 {total} 个",
-      "keepsRunning": "即使关闭页面，任务也会继续运行。"
+      "keepsRunning": "即使关闭页面，任务也会继续运行。",
+      "toSlides": {
+        "send": "发送到 Slides",
+        "price": "~{count, plural, other {# 积分}}",
+        "confirm": "再按一次，花费 {count, plural, other {# 积分}}",
+        "cancel": "取消",
+        "working": "正在制作演示文稿…",
+        "notReady": "研究尚未完成，暂时没有可演示的内容。",
+        "offline": "没有网络连接。请检查网络后重试。"
+      }
     },
     "onboarding": {
       "title": "让它成为你的",

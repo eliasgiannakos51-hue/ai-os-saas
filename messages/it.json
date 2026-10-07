@@ -2388,7 +2388,16 @@
       "usedUnlimited": "{used} questo mese",
       "capReached": "Hai esaurito i report di questo mese. Si azzera il 1°.",
       "progressStep": "Domanda {done} di {total}",
-      "keepsRunning": "Continua a girare anche se chiudi la pagina."
+      "keepsRunning": "Continua a girare anche se chiudi la pagina.",
+      "toSlides": {
+        "send": "A Slides",
+        "price": "~{count, plural, one {# credito} other {# crediti}}",
+        "confirm": "Premi di nuovo per {count, plural, one {# credito} other {# crediti}}",
+        "cancel": "Annulla",
+        "working": "Sto creando la presentazione…",
+        "notReady": "La ricerca non è ancora finita, quindi non c’è niente da presentare.",
+        "offline": "Nessuna connessione. Controlla la rete e riprova."
+      }
     },
     "onboarding": {
       "title": "Rendiamolo tuo",

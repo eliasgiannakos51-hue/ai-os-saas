@@ -2388,7 +2388,16 @@
       "usedUnlimited": "{used} αυτόν τον μήνα",
       "capReached": "Εξάντλησες τις αναφορές έρευνας του μήνα. Ανανεώνονται την 1η.",
       "progressStep": "Ερώτημα {done} από {total}",
-      "keepsRunning": "Συνεχίζει να τρέχει ακόμα κι αν κλείσεις τη σελίδα."
+      "keepsRunning": "Συνεχίζει να τρέχει ακόμα κι αν κλείσεις τη σελίδα.",
+      "toSlides": {
+        "send": "Στο Slides",
+        "price": "περίπου {count, plural, one {# credit} other {# credits}}",
+        "confirm": "Πάτα ξανά για {count, plural, one {# credit} other {# credits}}",
+        "cancel": "Άκυρο",
+        "working": "Φτιάχνεται η παρουσίαση…",
+        "notReady": "Η έρευνα δεν έχει τελειώσει ακόμα, άρα δεν γίνεται παρουσίαση.",
+        "offline": "Χωρίς σύνδεση. Έλεγξε το δίκτυο και δοκίμασε ξανά."
+      }
     },
     "onboarding": {
       "title": "Ας το κάνουμε δικό σου",

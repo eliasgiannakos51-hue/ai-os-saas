@@ -2388,7 +2388,16 @@
       "usedUnlimited": "{used} هذا الشهر",
       "capReached": "استنفدت تقارير هذا الشهر. تتجدّد في اليوم الأول.",
       "progressStep": "السؤال {done} من {total}",
-      "keepsRunning": "تستمر العملية حتى لو أغلقت الصفحة."
+      "keepsRunning": "تستمر العملية حتى لو أغلقت الصفحة.",
+      "toSlides": {
+        "send": "إلى Slides",
+        "price": "~{count, plural, zero {# رصيد} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
+        "confirm": "اضغط مرة أخرى مقابل {count, plural, zero {# رصيد} one {رصيد واحد} two {رصيدين} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
+        "cancel": "إلغاء",
+        "working": "يجري إعداد العرض التقديمي…",
+        "notReady": "لم ينتهِ البحث بعد، لذا لا يوجد ما يُعرض.",
+        "offline": "لا يوجد اتصال. تحقّق من الشبكة وحاول مرة أخرى."
+      }
     },
     "onboarding": {
       "title": "لنجعله خاصًا بك",

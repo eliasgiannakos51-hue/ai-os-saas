@@ -2388,7 +2388,16 @@
       "usedUnlimited": "今月 {used} 件",
       "capReached": "今月の調査レポートを使い切りました。1日にリセットされます。",
       "progressStep": "質問 {done} / {total}",
-      "keepsRunning": "ページを閉じても処理は続きます。"
+      "keepsRunning": "ページを閉じても処理は続きます。",
+      "toSlides": {
+        "send": "Slides へ",
+        "price": "~{count, plural, other {# クレジット}}",
+        "confirm": "もう一度押すと {count, plural, other {# クレジット}}",
+        "cancel": "キャンセル",
+        "working": "プレゼンテーションを作成中…",
+        "notReady": "リサーチがまだ終わっていないため、プレゼンテーションにできません。",
+        "offline": "接続がありません。ネットワークを確認して、もう一度お試しください。"
+      }
     },
     "onboarding": {
       "title": "あなた仕様にしましょう",

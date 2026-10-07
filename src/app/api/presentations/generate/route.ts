@@ -23,7 +23,10 @@ import { resolveLanguage } from "@/lib/text/resolve-language";
 import { SUPPORTED_LOCALES } from "@/i18n/constants";
 import { isUnsplashConfigured } from "@/lib/unsplash";
 import {
+  MAX_BULLETS,
   MAX_OWN_IMAGES,
+  MAX_SLIDES,
+  MIN_SLIDES,
   checkDescription,
   clampSlideCount,
   deckEstimateInputChars,
@@ -37,6 +40,10 @@ import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { PRESENTATION_MODEL } from "@/lib/presentations/prompt";
 import { resolveOwnImages, resolveUnsplashImages } from "@/lib/presentations/images";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { researchBrief, withSourcesSlides } from "@/lib/research/research-to-slides";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const dynamic = "force-dynamic";
 // Twenty slides is one long Sonnet call — measured at 40-70s for the
@@ -63,6 +70,14 @@ export const maxDuration = 120; // @function-limit 120
  * slide that wants one; this route turns those into Unsplash photos, or
  * hands out the person's own uploads, or drops them — lib/presentations/
  * images.ts. None of that is a model call and none of it costs credits.
+ *
+ * FROM A RESEARCH REPORT (MASTER 16, package 11), behind the switch
+ * "research-slides": `researchId` instead of `description`. The report is
+ * read by id AND owner, after the plan gate and before the breaker, and
+ * becomes the brief (lib/research/research-to-slides.ts) — so it is
+ * estimated, held and settled exactly as a typed description is. Its
+ * numbered sources are added after the model's slides by code, from the
+ * stored list.
  */
 export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -74,10 +89,15 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
-  const description = typeof body.description === "string" ? body.description.trim() : "";
-  const verdict = checkDescription(description);
-  if (!verdict.ok) return NextResponse.json({ error: verdict.reason, limit: verdict.limit }, { status: 400 });
-  const slideCount = clampSlideCount(body.slideCount);
+  // A REPORT BY ID, or a description typed in the field — never both.
+  const researchId = typeof body.researchId === "string" && UUID.test(body.researchId) ? body.researchId : null;
+  if (body.researchId !== undefined && researchId === null) return NextResponse.json({ error: "bad_research" }, { status: 400 });
+  let description = typeof body.description === "string" ? body.description.trim() : "";
+  if (researchId === null) {
+    const verdict = checkDescription(description);
+    if (!verdict.ok) return NextResponse.json({ error: verdict.reason, limit: verdict.limit }, { status: 400 });
+  }
+  let slideCount = clampSlideCount(body.slideCount);
   const imageSource: ImageSource = isImageSource(body.imageSource) ? body.imageSource : "none";
   const ownImagePaths = Array.isArray(body.ownImagePaths)
     ? body.ownImagePaths.filter((p): p is string => typeof p === "string" && p.length > 0)
@@ -109,6 +129,29 @@ export async function POST(request: Request) {
       { ok: false, code: "not_included", error: "Presentations is not included on this plan." },
       { status: 403 }
     );
+  }
+
+  // THE REPORT, the person's own and finished, becomes the brief.
+  let reportSources: { title: string; url: string }[] = [];
+  if (researchId !== null) {
+    if (!(await isFeatureOn("research-slides", user))) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
+    const { data: report, error: reportError } = await supabase
+      .from("research_reports")
+      .select("id, topic, status, sections, sources")
+      .eq("id", researchId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (reportError) {
+      logApiError("/api/presentations/generate", reportError, { stage: "load_research" });
+      return NextResponse.json({ error: "generate_failed" }, { status: 500 });
+    }
+    if (!report) return NextResponse.json({ error: "research_not_found" }, { status: 404 });
+    const made = report.status === "ready" ? researchBrief({ topic: String(report.topic ?? ""), sections: report.sections, sources: report.sources }) : null;
+    if (!made) return NextResponse.json({ error: "research_not_ready" }, { status: 409 });
+    description = made.brief;
+    reportSources = made.sources;
+    // Room for the sources slides inside the deck's own ceiling.
+    slideCount = Math.max(MIN_SLIDES, Math.min(slideCount, MAX_SLIDES - Math.ceil(reportSources.length / MAX_BULLETS)));
   }
 
   // An own-photo path that is not under the person's own folder would be
@@ -245,7 +288,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "unusable", creditsCharged: settlement.creditsCharged }, { status: 502 });
     }
 
-    let deck: Deck = outcome.deck;
+    let deck: Deck = withSourcesSlides(outcome.deck, reportSources);
     const wanted = slidesWantingImages(deck);
     if (imageSource === "unsplash") deck = await resolveUnsplashImages(deck);
     else if (imageSource === "own") deck = resolveOwnImages(deck, ownImagePaths);
@@ -258,7 +301,7 @@ export async function POST(request: Request) {
       costs,
       plan,
       bypassCharge: bypass,
-      metadata: { slideCount, slides: deck.slides.length, imageSource, locale, imagesWanted: wanted, imagesFound: found },
+      metadata: { slideCount, slides: deck.slides.length, imageSource, locale, imagesWanted: wanted, imagesFound: found, ...(researchId ? { researchId } : {}) },
     });
 
     const { data: row, error: saveError } = await supabase

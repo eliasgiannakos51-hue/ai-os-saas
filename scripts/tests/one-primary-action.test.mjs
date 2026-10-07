@@ -460,13 +460,61 @@ const REPLACEMENT_SURFACES = [
     budget: 1,
     why: "the lock screen a module shows instead of its list; its 'view plans' link is the only control on it",
   },
+  // A TOOL IN THE SHELL (MASTER 14.3, package 3), behind the switch
+  // "tool-shell": the page returns it early INSTEAD of the old body, so
+  // it is its own screen. `walk` measures everything it reaches — its one
+  // filled control is the field's send, in components/chat/chat-composer.tsx
+  // — and the page is measured without walking into it.
+  {
+    file: "src/components/posts/posts-shell.tsx",
+    tag: "<PostsShell",
+    budget: 1,
+    walk: true,
+    why: "Posts in the shell: the field's send is the one action that starts the work",
+  },
+  {
+    file: "src/components/presentations/presentations-shell.tsx",
+    tag: "<PresentationsShell",
+    budget: 1,
+    walk: true,
+    why: "Slides in the shell: the field's send writes or changes the deck",
+  },
+  {
+    file: "src/components/research/research-shell.tsx",
+    tag: "<ResearchShell",
+    budget: 1,
+    walk: true,
+    why: "Research in the shell: the field's send plans; the plan's start is an outline, as on the page",
+  },
+  {
+    file: "src/components/data-analysis/analysis-shell.tsx",
+    tag: "<AnalysisShell",
+    budget: 1,
+    walk: true,
+    why: "Analyze in the shell: the field's send asks the file; upload and find patterns are options",
+  },
+  {
+    file: "src/components/files/files-shell.tsx",
+    tag: "<FilesShell",
+    budget: 1,
+    walk: true,
+    why: "Files in the shell: the field's send asks the ticked files; upload is an option",
+  },
+  {
+    file: "src/components/website-builder/website-shell.tsx",
+    tag: "<WebsiteShell",
+    budget: 1,
+    walk: true,
+    why: "Site in the shell: the field's send builds or changes the site; Publish is outlined, as on the page",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
+const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));
 
 const measured = new Map();
 const overlays = new Map();
 for (const page of pages) {
-  const hits = [...reachableFrom([page, ...layoutChain(page)])]
+  const hits = [...reachableFrom([page, ...layoutChain(page)], walkedReplacements)]
     .flatMap(controlsIn)
     .filter((h) => !chromeKeys.has(`${h.file}:${h.at}`));
   for (const h of hits) {
@@ -538,7 +586,9 @@ check(
 // ---------------------------------------------------------------------
 console.log("\n== 3b. the declared replacement surfaces, and the proof ==");
 for (const r of REPLACEMENT_SURFACES) {
-  const own = controlsIn(r.file);
+  const own = r.walk
+    ? [...reachableFrom([r.file])].flatMap(controlsIn).filter((h) => h.surface === "base" && !chromeKeys.has(`${h.file}:${h.at}`))
+    : controlsIn(r.file);
   check(
     `${r.file}: ${own.length} filled accent control, budget ${r.budget}`,
     own.length <= r.budget,

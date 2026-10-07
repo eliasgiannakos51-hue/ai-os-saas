@@ -58,6 +58,23 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  // "menu" is the French, Italian and Portuguese word for a site's menu
+  // too: the name of a box in Site (package 4, dashboard.toolShell.box).
+  // The Library's kinds (package 5, 2026-10-07): "Sites", "Documents"
+  // and "Analyses" are the French plurals, spelled as in English; "Sites"
+  // and "Slides" are what Portuguese software calls them, as
+  // dashboard.tools.names.site already says.
+  "fr:dashboard.library.kinds.site",
+  "fr:dashboard.library.kinds.document",
+  "fr:dashboard.library.kinds.analysis",
+  "pt:dashboard.library.kinds.site",
+  "pt:dashboard.library.kinds.slides",
+  "fr:dashboard.toolShell.box.nav",
+  "it:dashboard.toolShell.box.nav",
+  "pt:dashboard.toolShell.box.nav",
+  // "Design" is the German word for a site's look (das Design), as the
+  // German site builders call the same control.
+  "de:dashboard.toolShell.site.design",
   // "Name" is the German word for name, capital and all — the column
   // heading of a table on the owner-only cost page (QUEUE E.2).
   "de:routerReport.colName",

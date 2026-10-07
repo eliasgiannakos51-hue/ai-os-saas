@@ -2853,6 +2853,80 @@
         "run": "Run",
         "analyze": "Analyze"
       }
+    },
+    "toolShell": {
+      "open": "Open",
+      "isOpen": "Open beside the conversation",
+      "back": "Back to the conversation",
+      "close": "Close",
+      "posts": {
+        "done": "{count, plural, one {I wrote # post.} other {I wrote # posts.}} They are open beside the conversation, each with its copy button.",
+        "platforms": "{count, plural, one {# platform} other {# platforms}}",
+        "copyAll": "Copy all",
+        "copyOne": "Copy the {platform} post"
+      },
+      "slides": {
+        "done": "I made “{title}”, {count, plural, one {# slide} other {# slides}}. It is open beside the conversation; what you write next changes it.",
+        "changed": "Changed. The new version is open beside the conversation.",
+        "new": "New deck"
+      },
+      "recent": "Recent",
+      "analyze": {
+        "needFile": "Upload a file first, with “Upload a file” under the field."
+      },
+      "site": {
+        "done": "“{name}” is ready, open beside the conversation. What you write next changes it.",
+        "changed": "Changed. The new version is open beside the conversation.",
+        "building": "Building “{name}”…",
+        "questions": "Before I start, a few questions. Answer them in the field, or go on without:",
+        "skip": "Go on without",
+        "new": "New site",
+        "design": "Design"
+      },
+      "box": {
+        "only": "Changing only: {name}",
+        "whole": "The whole thing",
+        "hint": "Press a box to change only that one.",
+        "slide": "slide {n}",
+        "part": "part {n}",
+        "header": "header",
+        "footer": "footer",
+        "nav": "menu",
+        "placeholder": "What should change in “{name}”?",
+        "slideChanged": "Only slide {n} changed. The others stayed the same.",
+        "partChanged": "Only “{name}” changed. The rest of the site stayed the same.",
+        "lost": "The box did not come back from the change, so nothing changed. Try again.",
+        "boxes": "Boxes"
+      }
+    },
+    "library": {
+      "description": "Everything you have made, in every tool, newest first.",
+      "tab": "Library",
+      "searchLabel": "Search the Library",
+      "searchPlaceholder": "Search names and what they say",
+      "searchButton": "Search",
+      "searchScope": "Searches the newest 60 from each tool, including the text inside them.",
+      "kindsLabel": "Show only",
+      "all": "All",
+      "kinds": {
+        "site": "Sites",
+        "slides": "Slides",
+        "posts": "Posts",
+        "document": "Documents",
+        "research": "Research",
+        "analysis": "Analyses",
+        "file": "Files"
+      },
+      "failed": "Could not load: {tools}. The rest is shown.",
+      "untitled": "Untitled",
+      "empty": {
+        "title": "Nothing made yet",
+        "why": "What you make in Site, Slides, Posts, Documents, Research, Analyze and Files lands here on its own."
+      },
+      "noMatch": {
+        "title": "Nothing says “{query}”",
+        "why": "Try fewer words, or another kind."
+      }
     }
   },
   "module": {

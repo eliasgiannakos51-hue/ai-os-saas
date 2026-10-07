@@ -120,12 +120,15 @@ console.log("\n== 3. the three things the batch named ==");
 check("the answer has a copy button", /data-testid="files-copy-answer"/.test(workspace));
 // An answer pasted without its sources is a claim with nothing behind
 // it — which is the opposite of what a citing feature is for.
-check("and it takes the citations with it", /function answerForClipboard/.test(workspace));
+// The builder lives in lib/files/answer.ts since 2026-10-07, shared with
+// Files in the shell; the page must still use it for its copy button.
+const answerLib = stripComments(readFileSync("src/lib/files/answer.ts", "utf8"));
+check("and it takes the citations with it", /export function answerForClipboard/.test(answerLib) && /answerForClipboard\(answer\)/.test(workspace));
 check(
   "the sources are appended, not summarised away",
-  /answer\.citations\.map\(\(c\) => `- \$\{c\.filename\} — \$\{c\.label\}`\)/.test(workspace)
+  /answer\.citations\.map\(\(c\) => `- \$\{c\.filename\} — \$\{c\.label\}`\)/.test(answerLib)
 );
-check("an uncited answer copies as itself", /if \(answer\.citations\.length === 0\) return answer\.text;/.test(workspace));
+check("an uncited answer copies as itself", /if \(answer\.citations\.length === 0\) return answer\.text;/.test(answerLib));
 // (b) each citation on its own.
 check("every citation has its own button", /data-testid="files-copy-citation"/.test(workspace));
 check("and it copies the file and the page", /text=\{`\$\{citation\.filename\} — \$\{citation\.label\}`\}/.test(workspace));

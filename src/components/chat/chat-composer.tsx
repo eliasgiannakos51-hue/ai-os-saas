@@ -59,8 +59,15 @@ export const ChatComposer = forwardRef<
      *  (docs/MASTER.md, Μέρος 13.2). Drawn by the parent, which knows
      *  whether it can start. */
     beside?: React.ReactNode;
+    /** The box's placeholder; Chat's own when not given. The tool shell
+     *  (components/shell/tool-shell.tsx) passes each tool's. */
+    placeholder?: string;
+    /** Called with the text's length on every keystroke, for a tool whose
+     *  price depends on it (the estimate shown before sending). Chat does
+     *  not pass it, so a keystroke there still re-renders this box alone. */
+    onLengthChange?: (length: number) => void;
   }
->(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside }, ref) {
+>(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, placeholder, onLengthChange }, ref) {
   const t = useTranslations("dashboard.chat");
   const tRail = useTranslations("sidebar.rail");
   const [input, setInput] = useState(initialText);
@@ -74,6 +81,7 @@ export const ChatComposer = forwardRef<
   useImperativeHandle(ref, () => ({
     setText: (text: string) => {
       setInput(text);
+      onLengthChange?.(text.length);
       const el = textareaRef.current;
       if (el) {
         // The value lands on the next render; resize after it has.
@@ -88,6 +96,7 @@ export const ChatComposer = forwardRef<
 
   function handleInput(e: ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
+    onLengthChange?.(e.target.value.length);
     resize(e.target);
   }
 
@@ -103,6 +112,7 @@ export const ChatComposer = forwardRef<
     const text = input.trim();
     if (!text) return;
     setInput("");
+    onLengthChange?.(0);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     onSend(text);
   }
@@ -122,7 +132,7 @@ export const ChatComposer = forwardRef<
           value={input}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder={t("composerPlaceholder")}
+          placeholder={placeholder ?? t("composerPlaceholder")}
           rows={1}
           // max-h-40 (160px) was the whole complaint: a long message scrolled
           // inside a box a quarter the height of the thread above it. A

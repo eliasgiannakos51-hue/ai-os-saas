@@ -1,6 +1,6 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3582, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3636, which is why this file exists.
 
 **Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 

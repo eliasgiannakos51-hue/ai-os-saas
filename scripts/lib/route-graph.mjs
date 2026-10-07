@@ -33,14 +33,18 @@ export function appEntries(root = "src/app") {
   return out.sort();
 }
 
-/** Everything reachable from these files by import, transitively. */
-export function reachableFrom(seeds) {
+/** Everything reachable from these files by import, transitively. A file
+ *  in `stopAt` is reached but not walked into: what only it imports is not
+ *  reachable through it (scripts/tests/one-primary-action.test.mjs uses
+ *  this for a screen a page draws INSTEAD of its body). */
+export function reachableFrom(seeds, stopAt = new Set()) {
   const seen = new Set();
   const stack = [...seeds];
   while (stack.length > 0) {
     const file = stack.pop();
     if (seen.has(file)) continue;
     seen.add(file);
+    if (stopAt.has(file)) continue;
     const source = readFileSync(file, "utf8");
     const specs = [
       ...[...source.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]),

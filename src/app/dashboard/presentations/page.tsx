@@ -12,10 +12,13 @@ import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { readRequestedId } from "@/lib/library/requested";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CREATE_ATTACHMENT_BUCKET } from "@/lib/create-attachment-image";
 import { isUnsplashConfigured } from "@/lib/unsplash";
 import { parseStoredDeck } from "@/lib/presentations/deck";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { PresentationsShell } from "@/components/presentations/presentations-shell";
 import {
   PresentationsWorkspace,
   type DeckRow,
@@ -78,15 +81,29 @@ export default async function PresentationsPage(
   // RLS scopes this to the caller. The hand-typed notes from the old
   // form are in here too, marked `source = 'note'` — see the 20260929
   // migration.
-  const { data: rows } = await supabase
+  const PRESENTATION_COLUMNS = "id, title, description, slide_count, slides, image_source, source, error, credits_charged, created_at";
+  const { data: listed } = await supabase
     .from("ai_presentations")
-    .select("id, title, description, slide_count, slides, image_source, source, error, credits_charged, created_at")
+    .select(PRESENTATION_COLUMNS)
     .order("created_at", { ascending: false })
     .limit(40);
+  // A DECK OLDER THAN THE NEWEST 40 STILL OPENS from the Library or a
+  // star: read on its own, by id AND owner, when the list does not have it.
+  const rows = [...(listed ?? [])];
+  const wanted = readRequestedId(requestedRecord);
+  if (wanted && !rows.some((r) => String(r.id) === wanted)) {
+    const { data: one } = await supabase
+      .from("ai_presentations")
+      .select(PRESENTATION_COLUMNS)
+      .eq("id", wanted)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (one) rows.push(one);
+  }
 
   const decks: DeckRow[] = [];
   const notes: NoteRow[] = [];
-  for (const row of rows ?? []) {
+  for (const row of rows) {
     if (row.source === "generated") {
       decks.push({
         id: String(row.id),
@@ -123,6 +140,23 @@ export default async function PresentationsPage(
     for (const entry of signed ?? []) {
       if (entry.path && entry.signedUrl) ownImageUrls[entry.path] = entry.signedUrl;
     }
+  }
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same decks,
+  // notes and photographs, drawn as conversation and work.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <PresentationsShell
+          initialDescription={readExampleParam(searchParams?.brief)}
+          initialOpenId={wanted}
+          decks={decks}
+          notes={notes}
+          ownImageUrls={ownImageUrls}
+          unsplashConfigured={isUnsplashConfigured()}
+        />
+      </div>
+    );
   }
 
   return (

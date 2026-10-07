@@ -20,16 +20,10 @@ import {
   type PostSet,
 } from "@/lib/posts/platforms";
 
-export type PostRow = {
-  id: string;
-  description: string;
-  platforms: PostPlatform[];
-  /** Null for a run that failed — `error` says why. */
-  set: PostSet | null;
-  error: string | null;
-  creditsCharged: number;
-  createdAt: string;
-};
+// The row type lives in lib/posts/platforms.ts, so the shell
+// (components/posts/posts-shell.tsx) can name it without importing this page.
+export type { PostRow } from "@/lib/posts/platforms";
+import type { PostRow } from "@/lib/posts/platforms";
 
 /** The four things this page does not do, as identifiers the UI and the
  *  gate both read. The first is the one the name would otherwise promise. */

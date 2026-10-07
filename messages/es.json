@@ -2853,6 +2853,80 @@
         "run": "Ejecutar",
         "analyze": "Analizar"
       }
+    },
+    "toolShell": {
+      "open": "Abrir",
+      "isOpen": "Abierto junto a la conversación",
+      "back": "Volver a la conversación",
+      "close": "Cerrar",
+      "posts": {
+        "done": "{count, plural, one {Escribí # publicación.} other {Escribí # publicaciones.}} Están abiertas junto a la conversación, cada una con su botón de copiar.",
+        "platforms": "{count, plural, one {# plataforma} other {# plataformas}}",
+        "copyAll": "Copiar todo",
+        "copyOne": "Copiar la publicación de {platform}"
+      },
+      "slides": {
+        "done": "He creado «{title}», {count, plural, one {# diapositiva} other {# diapositivas}}. Está abierta junto a la conversación; lo que escribas ahora la cambia.",
+        "changed": "Cambiada. La nueva versión está abierta junto a la conversación.",
+        "new": "Nueva presentación"
+      },
+      "recent": "Recientes",
+      "analyze": {
+        "needFile": "Sube primero un archivo, con «Subir un archivo» debajo del campo."
+      },
+      "site": {
+        "done": "«{name}» está listo, abierto junto a la conversación. Lo que escribas ahora lo cambia.",
+        "changed": "Cambiado. La nueva versión está abierta junto a la conversación.",
+        "building": "Construyendo «{name}»…",
+        "questions": "Antes de empezar, unas preguntas. Respóndelas en el campo, o sigue sin ellas:",
+        "skip": "Seguir sin ellas",
+        "new": "Nuevo sitio",
+        "design": "Diseño"
+      },
+      "box": {
+        "only": "Solo cambia: {name}",
+        "whole": "Todo junto",
+        "hint": "Pulsa un bloque para cambiar solo ese.",
+        "slide": "diapositiva {n}",
+        "part": "parte {n}",
+        "header": "cabecera",
+        "footer": "pie de página",
+        "nav": "menú",
+        "placeholder": "¿Qué debe cambiar en «{name}»?",
+        "slideChanged": "Solo cambió la diapositiva {n}. Las demás siguen igual.",
+        "partChanged": "Solo cambió «{name}». El resto del sitio sigue igual.",
+        "lost": "El bloque no volvió del cambio, así que no cambió nada. Inténtalo de nuevo.",
+        "boxes": "Bloques"
+      }
+    },
+    "library": {
+      "description": "Todo lo que has creado, en cada herramienta, lo más nuevo primero.",
+      "tab": "Biblioteca",
+      "searchLabel": "Buscar en la Biblioteca",
+      "searchPlaceholder": "Buscar en nombres y contenido",
+      "searchButton": "Buscar",
+      "searchScope": "Busca en los 60 más recientes de cada herramienta, incluido el texto que contienen.",
+      "kindsLabel": "Mostrar solo",
+      "all": "Todo",
+      "kinds": {
+        "site": "Sitios",
+        "slides": "Diapositivas",
+        "posts": "Publicaciones",
+        "document": "Documentos",
+        "research": "Investigaciones",
+        "analysis": "Análisis",
+        "file": "Archivos"
+      },
+      "failed": "No se pudo cargar: {tools}. Se muestra el resto.",
+      "untitled": "Sin título",
+      "empty": {
+        "title": "Aún no has creado nada",
+        "why": "Lo que creas en Sitio, Diapositivas, Publicaciones, Documentos, Investigación, Análisis y Archivos llega aquí solo."
+      },
+      "noMatch": {
+        "title": "Nada dice «{query}»",
+        "why": "Prueba con menos palabras o con otro tipo."
+      }
     }
   },
   "module": {

@@ -15,6 +15,9 @@ import {
   type WorkspaceCollection,
   type WorkspaceFile,
 } from "@/components/files/files-workspace";
+import { FilesShell } from "@/components/files/files-shell";
+import { readRequestedId } from "@/lib/library/requested";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +25,8 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.files");
 }
 
-export default async function FilesPage() {
+export default async function FilesPage(props: { searchParams: Promise<{ record?: string }> }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
 
   const user = await getCurrentUser();
@@ -68,6 +72,17 @@ export default async function FilesPage() {
     description: c.description === null ? null : String(c.description),
     fileIds: byCollection.get(String(c.id)) ?? [],
   }));
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same files
+  // and the same answers, drawn as conversation and work. Collections stay
+  // on the page; the shell asks of what is ticked.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full">

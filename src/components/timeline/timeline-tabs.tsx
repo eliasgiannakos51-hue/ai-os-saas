@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { History, Star } from "lucide-react";
+import { History, Library, Star } from "lucide-react";
 
 /**
  * The two views this one page now carries — V4.6 #3.
@@ -18,11 +18,16 @@ import { History, Star } from "lucide-react";
  * scans at all. Each tab reads its own source, which is why this is a
  * link and not a checkbox.
  */
-export function TimelineTabs({ view }: { view: "all" | "fav" }) {
+export function TimelineTabs({ view, library = false }: { view: "library" | "all" | "fav"; library?: boolean }) {
   const t = useTranslations("dashboard.timeline");
+  const tLibrary = useTranslations("dashboard.library");
 
+  // WITH THE SWITCH "library" ON (package 5) this page opens on the
+  // Library, and the entries move one tab along to ?view=entries — read in
+  // app/dashboard/timeline/page.tsx. With it off, the two tabs as before.
   const tabs = [
-    { id: "all" as const, href: "/dashboard/timeline", label: t("tabAll"), Icon: History },
+    ...(library ? [{ id: "library" as const, href: "/dashboard/timeline", label: tLibrary("tab"), Icon: Library }] : []),
+    { id: "all" as const, href: library ? "/dashboard/timeline?view=entries" : "/dashboard/timeline", label: t("tabAll"), Icon: History },
     // THE STAR GOES TO THE STARRED PAGE. It used to point at
     // /dashboard/timeline?view=fav while /dashboard/favorites redirected
     // here — so the page had an address nobody ever landed on, and the

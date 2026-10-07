@@ -6,11 +6,14 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { WebsiteBuilderWorkspace } from "@/components/website-builder/website-builder-workspace";
+import { WebsiteShell } from "@/components/website-builder/website-shell";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
 import { RECORD_CAP } from "@/lib/record-cap";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { readRequestedId } from "@/lib/library/requested";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { accountHasCapability } from "@/lib/billing/capability-gate";
@@ -51,7 +54,7 @@ export default async function WebsiteBuilderPage(
     // sides — rename it in the link and this page still compiles and still
     // renders, it just stops doing anything — so first-screen.test.mjs
     // compares the two names.
-    searchParams: Promise<{ brief?: string }>;
+    searchParams: Promise<{ brief?: string; project?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -89,9 +92,27 @@ export default async function WebsiteBuilderPage(
     .limit(RECORD_CAP);
 
   const websiteRows = (websites as UserWebsite[] | null) ?? [];
+  // `?project=` (the Library, a star): a site older than the newest
+  // RECORD_CAP still opens — read on its own, by id AND owner.
+  const wanted = readRequestedId(searchParams.project);
+  if (wanted && !websiteRows.some((w) => w.id === wanted)) {
+    const { data: one } = await supabase.from("user_websites").select("*").eq("id", wanted).eq("user_id", user.id).maybeSingle();
+    if (one) websiteRows.push(one as UserWebsite);
+  }
   const favoritedWebsiteIds = [
     ...(await loadFavoriteIds(supabase, user.id, "user_websites", websiteRows.map((w) => w.id))),
   ];
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same sites,
+  // drawn as conversation and work. Reference photos and the version
+  // history stay on the page.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} initialOpenId={wanted} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full">

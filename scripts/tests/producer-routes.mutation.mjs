@@ -23,8 +23,9 @@ const GATE = "scripts/tests/producer-routes.test.mjs";
 const ROUTES = "src/lib/create-studio/producer-routes.ts";
 const PATTERNS = "src/lib/text/unicode-patterns.ts";
 const POSTS_PAGE = "src/app/dashboard/posts/page.tsx";
+const WEBSITE_PAGE = "src/app/dashboard/website-builder/page.tsx";
 
-const TARGETS = [GATE, ROUTES, PATTERNS, POSTS_PAGE];
+const TARGETS = [GATE, ROUTES, PATTERNS, POSTS_PAGE, WEBSITE_PAGE];
 
 const MUTANTS = [
   {
@@ -109,7 +110,14 @@ const MUTANTS = [
     file: POSTS_PAGE,
     from: "initialDescription={readExampleParam(searchParams.brief)}",
     to: "initialDescription={undefined}",
-    expect: "posts/page.tsx really reads searchParams.brief",
+    expect: "posts/page.tsx really reads searchParams.brief in <PostsShell> too",
+  },
+  {
+    name: "the Site shell is drawn without the brief",
+    file: WEBSITE_PAGE,
+    from: "<WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} initialOpenId={wanted} />",
+    to: "<WebsiteShell initialWebsites={websiteRows} initialOpenId={wanted} />",
+    expect: "website-builder/page.tsx really reads searchParams.brief in <WebsiteShell> too",
   },
   {
     name: "the brief stops being clamped",

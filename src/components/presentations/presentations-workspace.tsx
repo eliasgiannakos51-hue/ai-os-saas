@@ -8,6 +8,7 @@ import { FileDown, Paperclip, Play, Square, Trash2, Wand2, X } from "lucide-reac
 import { useToast } from "@/components/toast/toast-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton, saveFileResponse } from "@/components/ui/download-pdf-button";
+import { DeckSlides } from "@/components/presentations/deck-slides";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -17,7 +18,6 @@ import {
   MAX_ATTACHMENT_IMAGE_BYTES,
   buildAttachmentImagePath,
 } from "@/lib/create-attachment-image";
-import { UNSPLASH_HOME_URL, withUnsplashUtm } from "@/lib/website-image-placeholders";
 import {
   DEFAULT_SLIDES,
   IMAGE_SOURCES,
@@ -34,23 +34,11 @@ import {
   deckEditEstimateInputChars,
 } from "@/lib/presentations/deck";
 
-export type DeckRow = {
-  id: string;
-  title: string;
-  /** Null for a run that failed — `error` says why. */
-  deck: Deck | null;
-  error: string | null;
-  creditsCharged: number;
-  createdAt: string;
-};
-
-export type NoteRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  slideCount: number | null;
-  createdAt: string;
-};
+// The row types live in lib/presentations/rows.ts, so the shell
+// (components/presentations/presentations-shell.tsx) can name them without
+// importing this page.
+export type { DeckRow, NoteRow } from "@/lib/presentations/rows";
+import type { DeckRow, NoteRow } from "@/lib/presentations/rows";
 
 /** The four things this page does not do, as identifiers the UI and the
  *  gate both read. A fifth one appearing here without a message key is a
@@ -614,61 +602,7 @@ export function PresentationsWorkspace({
             </div>
           )}
 
-          <ol className="mt-4 grid gap-3 sm:grid-cols-2">
-            {selected.deck.slides.map((slide, index) => {
-              const url = imageUrlFor(slide);
-              return (
-                <li key={index} className="rounded-card border border-border bg-background p-4">
-                  <p className="text-[11px] uppercase tracking-wide text-muted">
-                    {index + 1} · {t(`result.layout.${slide.layout}`)}
-                  </p>
-                  <h3 className="mt-1 text-sm font-semibold text-foreground">{slide.title}</h3>
-                  {url && (
-                    <figure className="mt-2">
-                      <Image
-                        src={url}
-                        alt={slide.imageQuery ?? slide.title}
-                        width={640}
-                        height={360}
-                        unoptimized
-                        className="h-36 w-full rounded-item object-cover"
-                      />
-                      {slide.image?.kind === "unsplash" && (
-                        <figcaption className="mt-1 text-[10px] text-muted">
-                          {t.rich("result.photoBy", {
-                            name: slide.image.photographerName,
-                            author: (chunks) => (
-                              <a href={withUnsplashUtm((slide.image as { photographerUrl: string }).photographerUrl)} target="_blank" rel="noreferrer" className="underline">
-                                {chunks}
-                              </a>
-                            ),
-                            unsplash: (chunks) => (
-                              <a href={UNSPLASH_HOME_URL} target="_blank" rel="noreferrer" className="underline">
-                                {chunks}
-                              </a>
-                            ),
-                          })}
-                        </figcaption>
-                      )}
-                    </figure>
-                  )}
-                  {slide.bullets.length > 0 && (
-                    <ul className="mt-2 list-disc space-y-1 ps-4 text-xs text-foreground">
-                      {slide.bullets.map((b, i) => (
-                        <li key={i}>{b}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {slide.notes && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-[11px] font-medium text-muted">{t("result.notes")}</summary>
-                      <p className="mt-1 text-xs text-muted">{slide.notes}</p>
-                    </details>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+          <DeckSlides deck={selected.deck} imageUrlFor={imageUrlFor} className="mt-4" />
         </section>
       )}
 

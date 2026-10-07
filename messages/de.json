@@ -2853,6 +2853,80 @@
         "run": "Ausführen",
         "analyze": "Analysieren"
       }
+    },
+    "toolShell": {
+      "open": "Öffnen",
+      "isOpen": "Neben dem Gespräch geöffnet",
+      "back": "Zurück zum Gespräch",
+      "close": "Schließen",
+      "posts": {
+        "done": "{count, plural, one {Ich habe # Beitrag geschrieben.} other {Ich habe # Beiträge geschrieben.}} Sie sind neben dem Gespräch geöffnet, jeder mit seiner Kopieren-Taste.",
+        "platforms": "{count, plural, one {# Plattform} other {# Plattformen}}",
+        "copyAll": "Alle kopieren",
+        "copyOne": "Den Beitrag für {platform} kopieren"
+      },
+      "slides": {
+        "done": "Ich habe „{title}“ erstellt, {count, plural, one {# Folie} other {# Folien}}. Sie ist neben dem Gespräch geöffnet; was du als Nächstes schreibst, ändert sie.",
+        "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
+        "new": "Neue Präsentation"
+      },
+      "recent": "Zuletzt",
+      "analyze": {
+        "needFile": "Lade zuerst eine Datei hoch, mit „Datei hochladen“ unter dem Feld."
+      },
+      "site": {
+        "done": "„{name}“ ist fertig und neben dem Gespräch geöffnet. Was du als Nächstes schreibst, ändert es.",
+        "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
+        "building": "Ich baue „{name}“…",
+        "questions": "Bevor ich anfange, ein paar Fragen. Beantworte sie im Feld oder mach ohne weiter:",
+        "skip": "Ohne weitermachen",
+        "new": "Neue Website",
+        "design": "Design"
+      },
+      "box": {
+        "only": "Nur ändern: {name}",
+        "whole": "Alles zusammen",
+        "hint": "Tippe auf einen Kasten, um nur diesen zu ändern.",
+        "slide": "Folie {n}",
+        "part": "Teil {n}",
+        "header": "Kopfbereich",
+        "footer": "Fußbereich",
+        "nav": "Menü",
+        "placeholder": "Was soll sich in „{name}“ ändern?",
+        "slideChanged": "Nur Folie {n} wurde geändert. Die anderen sind gleich geblieben.",
+        "partChanged": "Nur „{name}“ wurde geändert. Der Rest der Website ist gleich geblieben.",
+        "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
+        "boxes": "Kästen"
+      }
+    },
+    "library": {
+      "description": "Alles, was du erstellt hast, in jedem Werkzeug, das Neueste zuerst.",
+      "tab": "Bibliothek",
+      "searchLabel": "In der Bibliothek suchen",
+      "searchPlaceholder": "Namen und Inhalte durchsuchen",
+      "searchButton": "Suchen",
+      "searchScope": "Durchsucht die neuesten 60 jedes Werkzeugs, samt dem Text darin.",
+      "kindsLabel": "Nur zeigen",
+      "all": "Alle",
+      "kinds": {
+        "site": "Websites",
+        "slides": "Folien",
+        "posts": "Beiträge",
+        "document": "Dokumente",
+        "research": "Recherchen",
+        "analysis": "Analysen",
+        "file": "Dateien"
+      },
+      "failed": "Nicht geladen: {tools}. Der Rest wird angezeigt.",
+      "untitled": "Ohne Titel",
+      "empty": {
+        "title": "Noch nichts erstellt",
+        "why": "Was du in Website, Folien, Beiträgen, Dokumenten, Recherche, Analyse und Dateien erstellst, landet von selbst hier."
+      },
+      "noMatch": {
+        "title": "Nichts enthält „{query}“",
+        "why": "Versuche weniger Wörter oder eine andere Art."
+      }
     }
   },
   "module": {

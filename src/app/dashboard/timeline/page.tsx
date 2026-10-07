@@ -14,6 +14,10 @@ import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
 import { loadFavoriteKeys } from "@/lib/favorites";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { loadLibrary } from "@/lib/library/load";
+import { isLibraryKind } from "@/lib/library/sources";
+import { LibraryView } from "@/components/library/library-view";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.mine");
@@ -30,7 +34,7 @@ function resolveRange(value: string | undefined): TimelineRange {
 
 export default async function TimelinePage(
   props: {
-    searchParams: Promise<{ module?: string; range?: string; view?: string }>;
+    searchParams: Promise<{ module?: string; range?: string; view?: string; kind?: string; q?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -73,6 +77,28 @@ export default async function TimelinePage(
   // two would drift.
   if (searchParams.view === "fav") redirect("/dashboard/favorites");
 
+  // THE LIBRARY (package 5), behind the switch "library". This is the page
+  // All tools already names «Βιβλιοθήκη» (lib/nav/all-tools.ts), so with
+  // the switch on it opens on what the account MADE, in every tool; the
+  // entries this page always listed are one tab along, at ?view=entries,
+  // exactly as before. With the switch off nothing here changes.
+  const library = await isFeatureOn("library", user);
+  if (library && searchParams.view !== "entries") {
+    const kind = isLibraryKind(searchParams.kind) ? searchParams.kind : null;
+    const query = typeof searchParams.q === "string" ? searchParams.q.slice(0, 200) : "";
+    const { items, failed } = await loadLibrary(supabase, user.id, { kind, query });
+    const tLibrary = await getTranslations("dashboard.library");
+    return (
+      <div className="min-h-full">
+        <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+          <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} description={tLibrary("description")} />
+          <TimelineTabs view="library" library />
+          <LibraryView items={items} kind={kind} query={query} failed={failed} />
+        </div>
+      </div>
+    );
+  }
+
   const moduleSlug = LINKABLE_MODULES.some((m) => m.slug === searchParams.module)
     ? (searchParams.module as string)
     : "all";
@@ -105,8 +131,8 @@ export default async function TimelinePage(
     <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} />
-        <TimelineTabs view="all" />
-        <TimelineFilters moduleSlug={moduleSlug} range={range} />
+        <TimelineTabs view="all" library={library} />
+        <TimelineFilters moduleSlug={moduleSlug} range={range} entriesView={library} />
         {sessionDegraded ? (
           <ErrorMessage message={tMission("sessionExpired")} />
         ) : (

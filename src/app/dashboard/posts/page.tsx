@@ -14,6 +14,9 @@ import { POSTS_ICON } from "@/lib/module-icons";
 import { normalisePlatforms, parseStoredPostSet } from "@/lib/posts/platforms";
 import { PostsWorkspace, type PostRow } from "@/components/posts/posts-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { readRequestedId } from "@/lib/library/requested";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { PostsShell } from "@/components/posts/posts-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +37,7 @@ export function generateMetadata(): Promise<Metadata> {
 // compared against the emitter by scripts/tests/producer-routes.test.mjs.
 export default async function PostsPage(
   props: {
-    searchParams: Promise<{ brief?: string }>;
+    searchParams: Promise<{ brief?: string; record?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -62,13 +65,22 @@ export default async function PostsPage(
   }
 
   // RLS scopes this to the caller.
-  const { data: rows } = await supabase
+  const POST_COLUMNS = "id, description, platforms, posts, status, error, credits_charged, created_at";
+  const { data: listed } = await supabase
     .from("generated_posts")
-    .select("id, description, platforms, posts, status, error, credits_charged, created_at")
+    .select(POST_COLUMNS)
     .order("created_at", { ascending: false })
     .limit(40);
+  // `?record=` (the Library): posts older than the newest 40 still open —
+  // read on their own, by id AND owner.
+  const rows = [...(listed ?? [])];
+  const wanted = readRequestedId(searchParams.record);
+  if (wanted && !rows.some((r) => String(r.id) === wanted)) {
+    const { data: one } = await supabase.from("generated_posts").select(POST_COLUMNS).eq("id", wanted).eq("user_id", user.id).maybeSingle();
+    if (one) rows.push(one);
+  }
 
-  const history: PostRow[] = (rows ?? []).map((row) => ({
+  const history: PostRow[] = rows.map((row) => ({
     id: String(row.id),
     description: String(row.description ?? ""),
     platforms: normalisePlatforms(row.platforms),
@@ -77,6 +89,17 @@ export default async function PostsPage(
     creditsCharged: Number(row.credits_charged ?? 0),
     createdAt: String(row.created_at ?? ""),
   }));
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
+  // history and the same brief, drawn as conversation and work. Below md
+  // the bottom bar takes 4rem more, as on Chat (app/dashboard/chat/page.tsx).
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <PostsShell history={history} initialDescription={readExampleParam(searchParams.brief)} initialOpenId={wanted} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">

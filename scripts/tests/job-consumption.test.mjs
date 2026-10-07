@@ -357,7 +357,10 @@ check("agent_run's outcome is marked when it is announced", /markJobConsumed\(ru
 check("the files answer carries JobSeen", /<JobSeen jobId=\{answer\.jobId\} \/>/.test(filesUi));
 check("and the files page resumes an answer it never showed", /kind=file_ask/.test(filesUi));
 check("attaching to one still running rather than starting a second", /watchJob\(String\(job\.id\)/.test(filesUi));
-check("the resumed answer is built by the same function as the inline one", /answerFromResult\(/.test(filesUi) && (filesUi.match(/answerFromResult\(/g) ?? []).length >= 3);
+// Two calls — the inline answer and the resumed one — to the one builder,
+// which lives in lib/files/answer.ts since 2026-10-07.
+check("the resumed answer is built by the same function as the inline one",
+  (stripComments(filesUi).match(/answerFromResult\(/g) ?? []).length >= 3 && /import \{ answerFromResult/.test(filesUi));
 // The agents page must restore the sentence that was typed, or a resumed
 // clarification round answers a question that is no longer attached to
 // anything.

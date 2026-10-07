@@ -23,7 +23,11 @@ import {
   MAX_INSTRUCTION_CHARS,
   MIN_INSTRUCTION_CHARS,
   deckEditEstimateInputChars,
+  keepBoxImage,
+  keepOnlySlide,
   parseStoredDeck,
+  readSlideIndex,
+  scopeInstructionToSlide,
   slidesWantingImages,
   type Deck,
 } from "@/lib/presentations/deck";
@@ -75,9 +79,11 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   }
 
   let instruction: string;
+  let slideIndex: unknown;
   try {
     const body = await request.json();
     instruction = typeof body?.instruction === "string" ? body.instruction.trim() : "";
+    slideIndex = body?.slideIndex;
   } catch {
     return NextResponse.json({ error: "bad_body" }, { status: 400 });
   }
@@ -123,11 +129,17 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   const stored = parseStoredDeck(row.slides);
   if (!stored) return NextResponse.json({ error: "no_deck" }, { status: 409 });
 
+  // ONE BOX (package 4): a slide index changes that slide and nothing
+  // else. Checked against the stored deck before anything is held, so a
+  // slide that is not there costs nothing.
+  const box = readSlideIndex(slideIndex, stored.slides.length);
+  if (box === "bad") return NextResponse.json({ error: "bad_slide" }, { status: 400 });
+
   try {
     const breaker = await checkAiCallAllowed(
       user.id,
       "presentation_edit",
-      fingerprintRequest(params.id, instruction)
+      fingerprintRequest(params.id, instruction, box)
     );
     if (!breaker.allowed) return NextResponse.json({ error: "rate_limited", detail: breaker.reason }, { status: 429 });
 
@@ -190,7 +202,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const outcome = await editDeck({
       apiKey,
       deck: stored,
-      instruction,
+      instruction: box === null ? instruction : scopeInstructionToSlide(instruction, box, stored.slides.length),
       locale,
       imageSource: stored.imageSource,
       costs,
@@ -207,12 +219,15 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       logApiError("/api/presentations/[id]/edit", new Error(outcome.detail), { kind: outcome.kind });
       return NextResponse.json({ error: "ai_unavailable" }, { status: 503 });
     }
-    if (!outcome.ok) {
+    // The rest of the deck is the STORED deck, whatever the model wrote.
+    const boxed = outcome.ok && box !== null ? keepOnlySlide(stored, outcome.deck, box) : null;
+    if (!outcome.ok || (box !== null && !boxed)) {
       // The model answered and the answer was not a deck. The tokens
       // were spent, so this SETTLES rather than releasing — and the
       // stored deck is left exactly as it was, which is the part that
       // matters to somebody who asked for a small change.
-      logApiError("/api/presentations/[id]/edit", new Error(outcome.detail), { kind: outcome.kind });
+      const kind = outcome.ok ? "no_such_slide" : outcome.kind;
+      logApiError("/api/presentations/[id]/edit", new Error(outcome.ok ? "the slide came back missing" : outcome.detail), { kind });
       const settlement = await settleReservation({
         userId: user.id,
         reservationId,
@@ -220,18 +235,29 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
         costs,
         plan,
         bypassCharge: bypass,
-        metadata: { deckId: params.id, outcome: outcome.kind },
+        metadata: { deckId: params.id, outcome: kind },
       });
       return NextResponse.json({ error: "unusable", creditsCharged: settlement.creditsCharged }, { status: 502 });
     }
 
-    let deck: Deck = outcome.deck;
+    let deck: Deck = boxed ?? outcome.deck;
     const wanted = slidesWantingImages(deck);
     // THE SAME SOURCE THE DECK WAS MADE WITH. An edit is not a place to
     // change where the pictures come from: "own" means the person's
     // uploads, and this route was given no new ones, so it re-resolves
     // from the paths the stored deck already carries.
-    if (stored.imageSource === "unsplash") deck = await resolveUnsplashImages(deck);
+    //
+    // A PICTURE FOR ONE BOX ONLY. The whole-deck resolver searches every
+    // slide again; for one box that is eight searches to change one, so
+    // the box keeps its own picture when it still wants it and otherwise
+    // searches for itself alone.
+    if (boxed && box !== null) {
+      let slide = keepBoxImage(stored.slides[box], boxed.slides[box], stored.imageSource);
+      if (stored.imageSource === "unsplash" && slide.imageQuery && !slide.image) {
+        slide = (await resolveUnsplashImages({ ...boxed, slides: [slide] })).slides[0];
+      }
+      deck = { ...boxed, slides: boxed.slides.map((s, i) => (i === box ? slide : s)) };
+    } else if (stored.imageSource === "unsplash") deck = await resolveUnsplashImages(deck);
     else if (stored.imageSource === "own") {
       deck = resolveOwnImages(
         deck,
@@ -250,6 +276,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       metadata: {
         deckId: params.id,
         slidesBefore: stored.slides.length,
+        slide: box,
         slides: deck.slides.length,
         locale,
         imagesWanted: wanted,

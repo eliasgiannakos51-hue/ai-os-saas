@@ -13,6 +13,9 @@ import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { ResearchWorkspace, type ResearchReport } from "@/components/research/research-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { readRequestedId } from "@/lib/library/requested";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { ResearchShell } from "@/components/research/research-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +30,7 @@ export function generateMetadata(): Promise<Metadata> {
 // against the one lib/create-studio/producer-routes.ts emits.
 export default async function DeepResearchPage(
   props: {
-    searchParams: Promise<{ brief?: string }>;
+    searchParams: Promise<{ brief?: string; record?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -62,10 +65,11 @@ export default async function DeepResearchPage(
   since.setUTCDate(1);
   since.setUTCHours(0, 0, 0, 0);
 
-  const [{ data: reports }, { count }] = await Promise.all([
+  const REPORT_COLUMNS = "id, topic, status, questions, document_id, credits_charged, error, created_at, completed_at";
+  const [{ data: listed }, { count }] = await Promise.all([
     supabase
       .from("research_reports")
-      .select("id, topic, status, questions, document_id, credits_charged, error, created_at, completed_at")
+      .select(REPORT_COLUMNS)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(100),
@@ -75,6 +79,30 @@ export default async function DeepResearchPage(
       .eq("user_id", user.id)
       .gte("created_at", since.toISOString()),
   ]);
+  // `?record=` (the Library): a report older than the newest 100 still
+  // opens — read on its own, by id AND owner.
+  const reports = [...(listed ?? [])];
+  const wanted = readRequestedId(searchParams.record);
+  if (wanted && !reports.some((r) => String(r.id) === wanted)) {
+    const { data: one } = await supabase.from("research_reports").select(REPORT_COLUMNS).eq("id", wanted).eq("user_id", user.id).maybeSingle();
+    if (one) reports.push(one);
+  }
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
+  // reports and the same plan-then-run stop, drawn as conversation and work.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <ResearchShell
+          initialTopic={readExampleParam(searchParams.brief)}
+          initialReports={reports as unknown as ResearchReport[]}
+          initialOpenId={wanted}
+          monthlyCap={isAdmin ? null : cap}
+          usedThisMonth={count ?? 0}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full">
@@ -90,7 +118,8 @@ export default async function DeepResearchPage(
 
         <ResearchWorkspace
         initialTopic={readExampleParam(searchParams.brief)}
-          initialReports={(reports ?? []) as unknown as ResearchReport[]}
+          initialReports={reports as unknown as ResearchReport[]}
+          initialOpenId={wanted}
           monthlyCap={isAdmin ? null : cap}
           usedThisMonth={count ?? 0}
         />

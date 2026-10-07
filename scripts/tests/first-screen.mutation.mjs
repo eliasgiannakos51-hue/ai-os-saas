@@ -269,8 +269,8 @@ const MUTANTS = [
     dimension: "F. hierarchy",
     name: "a second line comes back beside the greeting",
     file: GREETING,
-    from: '    <div className="flex items-center gap-4">',
-    to: '    <div className="flex items-center gap-4">\n      <p>{tPromise("oneSentence")}</p>',
+    from: '    <div className="flex items-center justify-center gap-4">',
+    to: '    <div className="flex items-center justify-center gap-4">\n      <p>{tPromise("oneSentence")}</p>',
     expect: "the sentence is not drawn beside it",
   },
   {

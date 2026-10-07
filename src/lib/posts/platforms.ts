@@ -236,3 +236,15 @@ export function postsEstimateInputChars(descriptionChars: number, platforms: Pos
   const allowance = normalisePlatforms(platforms).reduce((sum, p) => sum + PLATFORMS[p].outputAllowanceChars, 0);
   return Math.max(0, descriptionChars) + allowance;
 }
+
+/** One run of the generator as the Posts page lists it (generated_posts). */
+export type PostRow = {
+  id: string;
+  description: string;
+  platforms: PostPlatform[];
+  /** Null for a run that failed — `error` says why. */
+  set: PostSet | null;
+  error: string | null;
+  creditsCharged: number;
+  createdAt: string;
+};

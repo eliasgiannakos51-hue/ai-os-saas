@@ -2853,6 +2853,80 @@
         "run": "执行",
         "analyze": "分析"
       }
+    },
+    "toolShell": {
+      "open": "打开",
+      "isOpen": "已在对话旁打开",
+      "back": "返回对话",
+      "close": "关闭",
+      "posts": {
+        "done": "{count, plural, other {我写了 # 条帖子。}}它们已在对话旁打开，每条都有复制按钮。",
+        "platforms": "{count, plural, other {# 个平台}}",
+        "copyAll": "全部复制",
+        "copyOne": "复制 {platform} 的帖子"
+      },
+      "slides": {
+        "done": "我做好了“{title}”，{count, plural, other {共 # 张幻灯片}}。它已在对话旁打开；你接下来写的内容会修改它。",
+        "changed": "已修改。新版本已在对话旁打开。",
+        "new": "新建演示"
+      },
+      "recent": "最近",
+      "analyze": {
+        "needFile": "请先通过输入框下方的“上传文件”上传一个文件。"
+      },
+      "site": {
+        "done": "“{name}”已完成，已在对话旁打开。你接下来写的内容会修改它。",
+        "changed": "已修改。新版本已在对话旁打开。",
+        "building": "正在构建“{name}”…",
+        "questions": "开始之前有几个问题。请在输入框中回答，或直接继续：",
+        "skip": "直接继续",
+        "new": "新建网站",
+        "design": "设计"
+      },
+      "box": {
+        "only": "只改：{name}",
+        "whole": "整体",
+        "hint": "点一个方框，只改这一个。",
+        "slide": "第 {n} 张幻灯片",
+        "part": "第 {n} 部分",
+        "header": "页眉",
+        "footer": "页脚",
+        "nav": "菜单",
+        "placeholder": "“{name}”要改什么？",
+        "slideChanged": "只改了第 {n} 张幻灯片，其他保持不变。",
+        "partChanged": "只改了“{name}”，网站其余部分保持不变。",
+        "lost": "方框没有从修改中返回，所以什么都没改。请再试一次。",
+        "boxes": "方框"
+      }
+    },
+    "library": {
+      "description": "你在每个工具中做过的一切，最新的在前。",
+      "tab": "资料库",
+      "searchLabel": "搜索资料库",
+      "searchPlaceholder": "搜索名称和内容",
+      "searchButton": "搜索",
+      "searchScope": "搜索每个工具最新的 60 项，包括其中的文字。",
+      "kindsLabel": "只显示",
+      "all": "全部",
+      "kinds": {
+        "site": "网站",
+        "slides": "幻灯片",
+        "posts": "帖子",
+        "document": "文档",
+        "research": "研究",
+        "analysis": "分析",
+        "file": "文件"
+      },
+      "failed": "无法加载：{tools}。其余内容已显示。",
+      "untitled": "无标题",
+      "empty": {
+        "title": "还没有做过任何东西",
+        "why": "你在网站、幻灯片、帖子、文档、研究、分析和文件中做的东西会自动出现在这里。"
+      },
+      "noMatch": {
+        "title": "没有内容包含“{query}”",
+        "why": "试试更少的词，或换一种类型。"
+      }
     }
   },
   "module": {

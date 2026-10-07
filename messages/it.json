@@ -2853,6 +2853,80 @@
         "run": "Esegui",
         "analyze": "Analizza"
       }
+    },
+    "toolShell": {
+      "open": "Apri",
+      "isOpen": "Aperto accanto alla conversazione",
+      "back": "Torna alla conversazione",
+      "close": "Chiudi",
+      "posts": {
+        "done": "{count, plural, one {Ho scritto # post.} other {Ho scritto # post.}} Sono aperti accanto alla conversazione, ognuno con il suo pulsante per copiarlo.",
+        "platforms": "{count, plural, one {# piattaforma} other {# piattaforme}}",
+        "copyAll": "Copia tutto",
+        "copyOne": "Copia il post per {platform}"
+      },
+      "slides": {
+        "done": "Ho creato «{title}», {count, plural, one {# slide} other {# slide}}. È aperta accanto alla conversazione; ciò che scrivi ora la modifica.",
+        "changed": "Modificata. La nuova versione è aperta accanto alla conversazione.",
+        "new": "Nuova presentazione"
+      },
+      "recent": "Recenti",
+      "analyze": {
+        "needFile": "Carica prima un file, con «Carica un file» sotto il campo."
+      },
+      "site": {
+        "done": "«{name}» è pronto, aperto accanto alla conversazione. Ciò che scrivi ora lo modifica.",
+        "changed": "Modificato. La nuova versione è aperta accanto alla conversazione.",
+        "building": "Sto costruendo «{name}»…",
+        "questions": "Prima di iniziare, qualche domanda. Rispondi nel campo, o continua senza:",
+        "skip": "Continua senza",
+        "new": "Nuovo sito",
+        "design": "Aspetto"
+      },
+      "box": {
+        "only": "Cambia solo: {name}",
+        "whole": "Tutto insieme",
+        "hint": "Premi un riquadro per cambiare solo quello.",
+        "slide": "diapositiva {n}",
+        "part": "parte {n}",
+        "header": "intestazione",
+        "footer": "piè di pagina",
+        "nav": "menu",
+        "placeholder": "Cosa deve cambiare in «{name}»?",
+        "slideChanged": "È cambiata solo la diapositiva {n}. Le altre sono rimaste uguali.",
+        "partChanged": "È cambiato solo «{name}». Il resto del sito è rimasto uguale.",
+        "lost": "Il riquadro non è tornato dalla modifica, quindi non è cambiato nulla. Riprova.",
+        "boxes": "Riquadri"
+      }
+    },
+    "library": {
+      "description": "Tutto ciò che hai creato, in ogni strumento, dal più recente.",
+      "tab": "Libreria",
+      "searchLabel": "Cerca nella Libreria",
+      "searchPlaceholder": "Cerca nei nomi e nel contenuto",
+      "searchButton": "Cerca",
+      "searchScope": "Cerca tra i 60 più recenti di ogni strumento, compreso il testo che contengono.",
+      "kindsLabel": "Mostra solo",
+      "all": "Tutto",
+      "kinds": {
+        "site": "Siti",
+        "slides": "Slide",
+        "posts": "Post",
+        "document": "Documenti",
+        "research": "Ricerche",
+        "analysis": "Analisi",
+        "file": "File"
+      },
+      "failed": "Impossibile caricare: {tools}. Il resto è mostrato.",
+      "untitled": "Senza titolo",
+      "empty": {
+        "title": "Non hai ancora creato nulla",
+        "why": "Ciò che crei in Sito, Slide, Post, Documenti, Ricerca, Analisi e File arriva qui da solo."
+      },
+      "noMatch": {
+        "title": "Niente dice «{query}»",
+        "why": "Prova con meno parole o con un altro tipo."
+      }
     }
   },
   "module": {

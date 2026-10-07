@@ -14,9 +14,12 @@ const RANGE_ORDER: TimelineRange[] = ["today", "week", "month", "all"];
 export function TimelineFilters({
   moduleSlug,
   range,
+  entriesView = false,
 }: {
   moduleSlug: string;
   range: TimelineRange;
+  /** The Library is on, so the entries live at ?view=entries and a filter must stay there. */
+  entriesView?: boolean;
 }) {
   const t = useTranslations("dashboard.timeline");
   const tKey = useTranslations();
@@ -24,6 +27,7 @@ export function TimelineFilters({
 
   function navigate(nextModule: string, nextRange: TimelineRange) {
     const params = new URLSearchParams();
+    if (entriesView) params.set("view", "entries");
     if (nextModule !== "all") params.set("module", nextModule);
     if (nextRange !== "all") params.set("range", nextRange);
     const qs = params.toString();

@@ -329,7 +329,7 @@ console.log("\n== 8. LIVE EDITING is per page, not just the first ==");
     edit.indexOf("resolveEditTarget(") < edit.indexOf("claim_edit_lock"));
   ok("an unknown page is a 404", /reason === "invalid_slug"[\s\S]{0,300}status: 404/.test(edit));
   ok("the model is sent the SELECTED document",
-    /editWebsiteHtml\(apiKey, sourceHtml,/.test(edit));
+    /editWebsiteHtml\(\s*apiKey,\s*section === null \? sourceHtml : \(markBoxForEdit\(sourceHtml, section\) \?\? sourceHtml\),/.test(edit));
   ok("...and the hold is sized from it too",
     /inputChars: sourceHtml\.length \+ changeRequest\.length/.test(edit));
   ok("the result is written back through applyEditedDocument",

@@ -231,6 +231,7 @@ const DECLARED = {
   "files/upload": { bound: "limited", scope: "file_upload", why: "storage counts against the plan's own quota (lib/files), not against credits" },
   "files/register": { bound: "limited", scope: "file_upload", why: "metadata for an object already uploaded; the quota was charged there" },
   "files/[id]/download": { bound: "limited", scope: "file_download", why: "mints a signed URL; the bytes leave Supabase, not this process" },
+  "files/[id]/view": { bound: "limited", scope: "file_download", why: "the same signed URL as the download, opened at a page; the same scope, so the two cannot be added together to mint more" },
   "files/[id]": { bound: "none", why: "DELETE removes an object. Deleting is the cheap direction and refusing to delete costs the user storage they are paying for." },
 
   // --- outbound messages: free APIs, but an unbounded relay all the same ---

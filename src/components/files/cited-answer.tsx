@@ -20,8 +20,12 @@ import { pdfPageHref, splitAnswer, uniquePages } from "@/lib/files/page-refs";
  * answer never saw. Held by scripts/tests/file-pages.test.mjs.
  */
 
+// A reference inside a sentence stays the height of the line, as a link
+// in running text does: a 44px box there would push the lines of the
+// answer apart. The 44px target for every page is the list under the
+// answer (CitedPages), which names the same pages once each.
 const CHIP =
-  "mx-0.5 inline-flex min-h-[28px] items-center rounded-item bg-panel px-1.5 align-baseline text-xs text-foreground underline decoration-dotted underline-offset-2 hover:bg-panel-hover";
+  "mx-0.5 inline rounded-item bg-panel px-1.5 py-0.5 align-baseline text-xs text-foreground underline decoration-dotted underline-offset-2 hover:bg-panel-hover";
 
 export function CitedAnswerText({ answer, onOpen }: { answer: Answer; onOpen: (c: Citation) => void }) {
   const t = useTranslations("dashboard.files.pageRefs");

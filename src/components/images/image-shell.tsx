@@ -86,7 +86,11 @@ export function ImageShell({
     "9:16": t("aspects.story"),
   };
   const shown = images.find((image) => image.id === shownId) ?? null;
-  const editing = shown !== null && chosen !== null && open === "image";
+  // THE CHOICE OUTLIVES THE PANE. On a phone the pictures cover the
+  // conversation, so choosing one and going back to type is the only way
+  // to change it: closing the pane must not forget which one was chosen.
+  // It is cleared by its own ✕ (ChosenBox), or by opening another image.
+  const editing = shown !== null && chosen !== null;
 
   function say(role: Turn["role"], text: string, image?: string) {
     setTurns((prev) => [...prev, { id: `${role}${prev.length}`, role, text, image }]);
@@ -430,10 +434,7 @@ export function ImageShell({
           </>
         }
         work={work}
-        onCloseWork={() => {
-          setOpen(null);
-          setChosen(null);
-        }}
+        onCloseWork={() => setOpen(null)}
       />
       {confirming && (
         <LargeActionConfirm

@@ -288,7 +288,13 @@ try {
     await confirmIfAsked(page, press);
     const download = await downloadP;
     check("the largest size is asked for that picture", asked.full.length === 1 && asked.full[0].variant === 1, JSON.stringify(asked.full));
-    check("...and is saved, under the description's words", download?.suggestedFilename() === "Βάρκα-στο-λιμάνι-2-full.png", download?.suggestedFilename());
+    // THE NAME IS IN THE ADDRESS the app builds; storage turns it into the
+    // header that names the file. Headless Chromium reports "download" for
+    // the suggested name whatever that header says (measured here,
+    // 2026-10-07, as it did for package 10's blobs), so the address is
+    // what is read.
+    check("...and is saved, under the description's words",
+      Boolean(download) && decodeURIComponent(new URL(download.url()).searchParams.get("download") ?? "") === "Βάρκα-στο-λιμάνι-2-full.png", download?.url());
     check("...and the page stayed where it was", new URL(page.url()).pathname === "/dashboard/images");
 
     // ---- the download route, the app's own

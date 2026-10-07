@@ -149,6 +149,13 @@ const MUTANTS = [
     to: "",
     expect: "without the provider's key it says so",
   },
+  {
+    name: "on a phone, going back to the field forgets the chosen picture",
+    file: SHELL,
+    from: "        onCloseWork={() => setOpen(null)}",
+    to: "        onCloseWork={() => {\n          setOpen(null);\n          setChosen(null);\n        }}",
+    expect: "the choice outlives the pane",
+  },
 ];
 
 runMutations({

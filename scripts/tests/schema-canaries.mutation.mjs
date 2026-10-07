@@ -116,12 +116,14 @@ const MUTANTS = [
     // RE-ANCHORED 2026-10-05: three security migrations pushed the posts
     // and projects files out of the newest-12 window, so the deleted
     // canary is now the meetings one, the newest file with a table.
+    // RE-ANCHORED 2026-10-07: the Image tool's migration (package 19)
+    // pushed meetings out in turn. The canary taken away is now the
+    // generated_images one, the newest file of all; still a deletion.
     name: "a migration in the window loses its canary — the state all three new screens were in",
     file: CANARIES,
-    // Still a DELETION: the whole entry goes, its comment with it.
-    from: "  {\n    // THE EXPENSIVE ORDER. The meeting row is written AFTER the\n    // transcription has run and settled, so a missing table is not a page\n    // that fails to load \u2014 it is a person who uploaded a recording,\n    // waited, paid for the minutes, and got a transcript that vanishes\n    // when they close the tab. The route hands the text back anyway for\n    // exactly that reason, which makes the failure survivable and\n    // completely invisible without this line.\n    kind: \"table\",\n    table: \"meetings\",\n    migration: \"20261006000000_meetings.sql\",\n    breaks:\n      \"Meetings: a recording is transcribed and CHARGED, and then the row fails to save \u2014 the person pays for minutes and keeps nothing\",\n  },\n",
+    from: "  {\n    kind: \"column\",\n    table: \"generated_images\",\n    column: \"variants\",\n    migration: \"20261019000000_generated_images.sql\",\n    breaks: \"the Image tool makes four pictures, cannot write their row, deletes them again and charges nothing — so it makes nothing at all\",\n  },\n",
     to: "",
-    expect: "20261006000000_meetings.sql",
+    expect: "20261019000000_generated_images.sql",
   },
   {
     // 8b. AND THE CLAUSE THE OLD MUTANT WAS ACTUALLY DRIVING, kept —
@@ -142,7 +144,7 @@ const MUTANTS = [
     name: "a migration that really does add a table is excused as unprobeable",
     file: GATE,
     from: 'const NOT_PROBEABLE = {',
-    to: 'const NOT_PROBEABLE = {\n  "20261006000000_meetings.sql": "excused by a mutation, with a reason long enough to clear the length check",',
+    to: 'const NOT_PROBEABLE = {\n  "20261019000000_generated_images.sql": "excused by a mutation, with a reason long enough to clear the length check",',
     expect: "it really adds nothing canaried",
   },
   {

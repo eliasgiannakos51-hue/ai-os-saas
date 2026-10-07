@@ -176,6 +176,8 @@ check("...and a large one asks once more", /needsLargeActionConfirmation\(credit
 check("a chosen picture is changed with words, the others are not", /if \(editing && shown && chosen !== null\) \{[\s\S]{0,200}change\(text\.slice\(0, MAX_IMAGE_INSTRUCTION_CHARS\), target, index\)/.test(shell) && /`\/api\/images\/\$\{image\.id\}\/edit`, \{ variant: index, instruction \}/.test(shell));
 check("without the provider's key it says so, sends nothing, charges nothing", /if \(!configured\) \{\s*say\("tool", t\("notConfigured"\)\);\s*return;/.test(shell));
 check("every refusal is said in words", ["too_short", "too_long", "insufficient_credits", "rate_limited", "not_configured", "refused", "busy", "not_found", "ai_unavailable"].every((c) => shell.includes(`case "${c}":`)));
+check("the choice outlives the pane: going back to the field on a phone keeps it",
+  /const editing = shown !== null && chosen !== null;/.test(shell) && /onCloseWork=\{\(\) => setOpen\(null\)\}/.test(shell));
 check("a picture is a button, pressed to choose it", /data-testid="image-variant"/.test(shell) && /aria-pressed=\{chosen === variant\.index\}/.test(shell));
 
 const KEYS = ["name", "help", "placeholder", "placeholderEdit", "aspect", "recent", "recentEmpty", "made", "changed", "fullReady", "choose", "chosen", "picture", "download", "fullMake", "fullDownload", "priceVariants", "priceEdit", "price", "delete", "deleteConfirm", "notConfigured"];

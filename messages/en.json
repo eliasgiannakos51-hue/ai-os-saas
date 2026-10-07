@@ -1749,7 +1749,8 @@
           "name": "From memory: the name «{name}».",
           "colours": "From memory: the colours {colours}.",
           "both": "From memory: the name «{name}» and the colours {colours}. To change them, tell Chat."
-        }
+        },
+        "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it."
       },
       "regeneratePaid": "Regenerate · about {count} credits",
       "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started."
@@ -2936,6 +2937,13 @@
         "partChanged": "Only “{name}” changed. The rest of the site stayed the same.",
         "lost": "The box did not come back from the change, so nothing changed. Try again.",
         "boxes": "Boxes"
+      },
+      "pages": {
+        "auto": "Pages: as many as needed",
+        "count": "{count, plural, one {# page} other {# pages}}",
+        "undo": "Undo the last change",
+        "undone": "Undid the last change.",
+        "nothingToUndo": "Nothing to undo: the site is as it was made."
       }
     },
     "library": {

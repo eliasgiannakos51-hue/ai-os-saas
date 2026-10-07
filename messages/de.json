@@ -1749,7 +1749,8 @@
           "name": "Aus dem Gedächtnis: der Name „{name}“.",
           "colours": "Aus dem Gedächtnis: die Farben {colours}.",
           "both": "Aus dem Gedächtnis: der Name „{name}“ und die Farben {colours}. Um sie zu ändern, sag es im Chat."
-        }
+        },
+        "pagesShort": "Du hast {asked} Seiten angefordert, {made} wurden erstellt. Sag, welche fehlt, und ich füge sie hinzu."
       },
       "regeneratePaid": "Neu erstellen · etwa {count} Credits",
       "regenerateNoCredits": "Nicht genug Credits für eine weitere Neugenerierung: Sie braucht etwa {needed}, Sie haben {available}. Es wurde nichts gestartet."
@@ -2936,6 +2937,13 @@
         "partChanged": "Nur „{name}“ wurde geändert. Der Rest der Website ist gleich geblieben.",
         "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
         "boxes": "Kästen"
+      },
+      "pages": {
+        "auto": "Seiten: so viele wie nötig",
+        "count": "{count, plural, one {# Seite} other {# Seiten}}",
+        "undo": "Letzte Änderung rückgängig machen",
+        "undone": "Die letzte Änderung wurde rückgängig gemacht.",
+        "nothingToUndo": "Nichts rückgängig zu machen: Die Website ist so, wie sie erstellt wurde."
       }
     },
     "library": {

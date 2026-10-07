@@ -57,6 +57,7 @@ import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import type { WebsitePage } from "@/lib/publishing/website-pages";
+import { readPageRequest } from "@/lib/websites/page-request";
 import type { Evidence } from "@/lib/jobs/job-timeline";
 import {
   attachWebsiteEvidence,
@@ -818,6 +819,12 @@ export async function POST(request: Request) {
       });
       htmlContent = optimised[0];
       extraPages = keptPages.map((pg, i) => ({ ...pg, html: optimised[i + 1] }));
+      // FEWER PAGES THAN WERE ASKED FOR (package 10) is said, not passed
+      // off as what was wanted: the model stopped short, or a page was
+      // removed because the brief forbade it (that one has its own note).
+      const pagesAsked = readPageRequest(description);
+      const pagesMade = 1 + extraPages.length;
+      if (pagesAsked !== null && pagesMade < pagesAsked) notes.push({ kind: "pagesShort", asked: pagesAsked, made: pagesMade });
       const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));
       // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
       // content for what a deterministic scan cannot see, and content is
@@ -1139,6 +1146,10 @@ export async function POST(request: Request) {
       website_id: updatedRecord.id,
       version_number: FIRST_VERSION_NUMBER,
       html_content: htmlContent,
+      // THE WHOLE SITE, as every edit's version already is: undo and
+      // rollback restore a version, and a first version that carried only
+      // the home page would restore a site whose navigation leads nowhere.
+      pages: extraPages.length > 0 ? extraPages : null,
     });
     if (versionError) {
       logApiError("/api/websites/generate/process", versionError, { stage: "insert_version" });

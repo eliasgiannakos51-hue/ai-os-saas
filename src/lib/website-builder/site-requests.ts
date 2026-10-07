@@ -104,7 +104,11 @@ export type SiteChange =
   /** "pageGone": the page was renamed or removed; "boxLost": the chosen part did not come back. */
   | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown };
 
-export async function requestSiteChange(input: { websiteId: string; changeRequest: string; section?: number | null }): Promise<SiteChange> {
+/**
+ * A change in words. `pageSlug` names the page it is about ("" or absent:
+ * the home page); `section` the part of THAT page, by number.
+ */
+export async function requestSiteChange(input: { websiteId: string; changeRequest: string; section?: number | null; pageSlug?: string }): Promise<SiteChange> {
   const res = await fetchWithAuthRetry("/api/websites/edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -112,7 +116,7 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
       websiteId: input.websiteId,
       changeRequest: input.changeRequest,
       referenceImagePaths: [],
-      pageSlug: "",
+      pageSlug: input.pageSlug ?? "",
       ...(input.section === null || input.section === undefined ? {} : { section: input.section }),
     }),
   });
@@ -133,4 +137,19 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
 export async function requestSiteStop(websiteId: string): Promise<boolean> {
   const res = await fetch(`/api/websites/${encodeURIComponent(websiteId)}/cancel`, { method: "POST" });
   return res.ok;
+}
+
+export type SiteUndo =
+  | { kind: "undone"; record: UserWebsite }
+  /** "nothing": the site is as first made; "busy": it is being made or changed. */
+  | { kind: "refused"; reason: "nothing" | "busy" | "other" };
+
+/** Take back the last change (api/websites/[id]/undo, package 10). Free. */
+export async function requestSiteUndo(websiteId: string): Promise<SiteUndo> {
+  const res = await fetchWithAuthRetry(`/api/websites/${encodeURIComponent(websiteId)}/undo`, { method: "POST" });
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data?.ok || !data.record) {
+    return { kind: "refused", reason: data?.code === "nothing_to_undo" ? "nothing" : data?.code === "busy" ? "busy" : "other" };
+  }
+  return { kind: "undone", record: data.record as UserWebsite };
 }

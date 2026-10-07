@@ -60,7 +60,10 @@ export type GenerationNote =
   | { kind: "photosDropped"; count: number; reason: "notConfigured" | "quota" | "noMatch" }
   // The business name and colours the brief took from memory (package 6),
   // said back so the person sees where they came from and can correct them.
-  | { kind: "fromMemory"; name: string | null; colours: string[] };
+  | { kind: "fromMemory"; name: string | null; colours: string[] }
+  // Fewer pages came back than the person asked for (package 10,
+  // lib/websites/page-request.ts) — said, with both numbers.
+  | { kind: "pagesShort"; asked: number; made: number };
 
 const FEATURES: readonly NegativeFeature[] = [
   "booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget",
@@ -82,6 +85,8 @@ export function parseGenerationNotes(raw: unknown): GenerationNote[] {
       out.push({ kind: "removedPage", feature: n.feature, slug: n.slug.slice(0, 60) });
     } else if (n.kind === "pageCap" && isNonNegativeInt(n.cap) && n.cap > 0 && isNonNegativeInt(n.started) && n.started > n.cap) {
       out.push({ kind: "pageCap", cap: n.cap, started: n.started });
+    } else if (n.kind === "pagesShort" && isNonNegativeInt(n.asked) && isNonNegativeInt(n.made) && n.made >= 1 && n.asked > n.made) {
+      out.push({ kind: "pagesShort", asked: n.asked, made: n.made });
     } else if (n.kind === "mapZoom" && isNonNegativeInt(n.count) && n.count > 0) {
       out.push({ kind: "mapZoom", count: n.count });
     } else if (n.kind === "stopped" && isNonNegativeInt(n.credits)) {

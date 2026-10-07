@@ -131,7 +131,9 @@ check("...and what was used is a note on the row", /notes\.push\(\{ kind: "fromM
 const line = code("src/components/website-builder/use-remembered-line.ts");
 check("one sentence for it, from the note on the row", /parseGenerationNotes\(record\.generation_notes\)\.find\(\(n\): n is FromMemory => n\.kind === "fromMemory"\)/.test(line) && /notes\.fromMemory\.both/.test(line));
 check("the Site shell says it after the site is made", /const fromMemory = remembered\.forRecord\(record\);\s*if \(fromMemory\) say\(/.test(code("src/components/website-builder/website-shell.tsx")));
-check("...and so does the old page", /case "fromMemory":\s*return remembered\.sentence\(note\);/.test(code("src/components/website-builder/website-builder-workspace.tsx")));
+check("...and so does the old page, through the shared note sentences",
+  /case "fromMemory":\s*return remembered\.sentence\(note\);/.test(code("src/components/website-builder/use-generation-note-text.ts")) &&
+  /const describeNote = useGenerationNoteText\(\);/.test(code("src/components/website-builder/website-builder-workspace.tsx")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the note ==");

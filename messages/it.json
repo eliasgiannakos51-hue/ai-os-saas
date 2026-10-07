@@ -1749,7 +1749,8 @@
           "name": "Dalla memoria: il nome «{name}».",
           "colours": "Dalla memoria: i colori {colours}.",
           "both": "Dalla memoria: il nome «{name}» e i colori {colours}. Per cambiarli, dillo alla Chat."
-        }
+        },
+        "pagesShort": "Hai chiesto {asked} pagine e ne sono state create {made}. Dimmi quale manca e la aggiungo."
       },
       "regeneratePaid": "Rigenera · circa {count} crediti",
       "regenerateNoCredits": "Crediti insufficienti per un'altra rigenerazione: ne servono circa {needed}, ne hai {available}. Non è stato avviato nulla."
@@ -2936,6 +2937,13 @@
         "partChanged": "È cambiato solo «{name}». Il resto del sito è rimasto uguale.",
         "lost": "Il riquadro non è tornato dalla modifica, quindi non è cambiato nulla. Riprova.",
         "boxes": "Riquadri"
+      },
+      "pages": {
+        "auto": "Pagine: quante servono",
+        "count": "{count, plural, one {# pagina} other {# pagine}}",
+        "undo": "Annulla l’ultima modifica",
+        "undone": "Ho annullato l’ultima modifica.",
+        "nothingToUndo": "Niente da annullare: il sito è come è stato creato."
       }
     },
     "library": {

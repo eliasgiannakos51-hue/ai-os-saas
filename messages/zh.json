@@ -1749,7 +1749,8 @@
           "name": "来自记忆：名称“{name}”。",
           "colours": "来自记忆：颜色 {colours}。",
           "both": "来自记忆：名称“{name}”和颜色 {colours}。要更改，请在聊天中告诉我。"
-        }
+        },
+        "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。"
       },
       "regeneratePaid": "重新生成 · 约 {count} 积分",
       "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。"
@@ -2936,6 +2937,13 @@
         "partChanged": "只改了“{name}”，网站其余部分保持不变。",
         "lost": "方框没有从修改中返回，所以什么都没改。请再试一次。",
         "boxes": "方框"
+      },
+      "pages": {
+        "auto": "页面：按需要",
+        "count": "{count, plural, other {# 页}}",
+        "undo": "撤销上一次更改",
+        "undone": "已撤销上一次更改。",
+        "nothingToUndo": "没有可撤销的更改：网站仍是生成时的样子。"
       }
     },
     "library": {

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { hasEnoughCredits } from "@/lib/billing/credits";
-import { reserveCredits } from "@/lib/billing/reservations";
+import { releaseReservation, reserveCredits } from "@/lib/billing/reservations";
 import { imageApiKey } from "@/lib/images/gemini-image";
 import { IMAGE_FEATURE } from "@/lib/images/image-pricing";
 import {
@@ -52,9 +52,11 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   const gate = await imageGate(user);
   if (gate instanceof NextResponse) return gate;
 
-  // Held from the claim until remake() takes the row over (it lets go in
-  // its own `finally`), so a throw in between does not leave it locked.
+  // Held from the claim until remake() takes the row over (it lets go of
+  // both in its own `finally` and failure paths), so a throw in between
+  // leaves neither the row locked nor the credits held.
   let claimed = false;
+  let reservationId = "";
   try {
     const { data, error } = await supabase
       .from("generated_images")
@@ -80,13 +82,16 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     if (spend instanceof NextResponse) return spend;
     if (!(await claimImage(user.id, id))) return refuse("busy", 409);
     claimed = true;
-    let reservationId = "";
     if (!spend.bypass && gate.plan) {
       const enough = await hasEnoughCredits(user.id, gate.prices.full, gate.plan);
-      const reservation = enough.ok ? await reserveCredits(user.id, gate.prices.full, IMAGE_FEATURE, { kind: "full", image: id, variant: index }) : null;
-      if (!reservation?.ok) {
+      if (!enough.ok) {
         await releaseImage(user.id, id);
-        return refuse(enough.ok ? "reserve_failed" : "insufficient_credits", 402);
+        return refuse("insufficient_credits", 402);
+      }
+      const reservation = await reserveCredits(user.id, gate.prices.full, IMAGE_FEATURE, { kind: "full", image: id, variant: index });
+      if (!reservation.ok) {
+        await releaseImage(user.id, id);
+        return refuse("reserve_failed", 402);
       }
       reservationId = reservation.reservationId;
     }
@@ -95,7 +100,10 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     return await remake({ user, plan: gate.plan, bypass: spend.bypass, apiKey, row, variant, job: { kind: "full" }, reservationId, signal: request.signal });
   } catch (err) {
     logApiError("/api/images/[id]/full", err);
-    if (claimed) await releaseImage(user.id, id);
+    if (claimed) {
+      await releaseReservation(user.id, reservationId);
+      await releaseImage(user.id, id);
+    }
     return refuse("failed", 500);
   }
 }

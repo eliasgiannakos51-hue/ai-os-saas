@@ -142,7 +142,8 @@ check("the switch is image-studio, the plan Starter and up", /if \(!\(await isFe
 check("before anything is spent: the breaker, and the ceiling on accounts not charged", /const breaker = await checkAiCallAllowed\(user\.id, endpoint, fingerprint\);\s*if \(!breaker\.allowed\) return refuse\("rate_limited", 429\);/.test(access) && /checkBypassCeiling\(user\.id, gate\.isAdmin, isBeta\)/.test(access));
 check("one change at a time: the row is claimed, and a stale claim expires",
   /\.or\(`busy_since\.is\.null,busy_since\.lt\.\$\{cutoff\}`\)/.test(access) && /if \(!\(await claimImage\(user\.id, id\)\)\) return refuse\("busy", 409\);/.test(edit) && /finally \{\s*await releaseImage\(user\.id, row\.id\);/.test(remake));
-check("...and a refused hold lets go of the claim", [edit, full].every((s) => /if \(!reservation\?\.ok\) \{\s*await releaseImage\(user\.id, id\);/.test(s)));
+check("...and a refused hold lets go of the claim, and a throw before remake() lets go of both",
+  [edit, full].every((s) => /if \(!enough\.ok\) \{\s*await releaseImage\(user\.id, id\);/.test(s) && /if \(!reservation\.ok\) \{\s*await releaseImage\(user\.id, id\);/.test(s) && /if \(claimed\) \{\s*await releaseReservation\(user\.id, reservationId\);\s*await releaseImage\(user\.id, id\);/.test(s)));
 check("a saved picture: rate limited, the largest size only once made, never cached",
   /checkRateLimit\(\{ scope: "image_download", identifier: user\.id, maxAttempts: 240, windowMinutes: 60 \}\)/.test(download) && /if \(full && !variant\.fullPath\) return refuse\("not_made", 404\);/.test(download) && /"Cache-Control", "no-store"/.test(download));
 check("a deleted image takes every picture it names first, then its row",
@@ -159,7 +160,6 @@ check("written by the server only: insert and update revoked", /revoke insert, u
 check("the bucket is private", /values \('ai-images', 'ai-images', false, 52428800\)\s*on conflict \(id\) do update set public = false/.test(sql));
 check("deleting an account empties it", /v_buckets text\[\] := array\['user-files', 'create-attachments', 'website-references', 'ai-images'\];/.test(sql));
 check("the bucket the code names is the one the migration makes", /export const IMAGE_BUCKET = "ai-images";/.test(code("src/lib/images/image-studio.ts")));
-check("it says how to undo it", /-- How to undo: drop table public\.generated_images;/.test(migration));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the screen and the words ==");

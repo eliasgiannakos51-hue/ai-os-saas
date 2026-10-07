@@ -52,15 +52,36 @@ check("...and write through the rating route, putting the thumb back if it fails
   /fetch\(`\/api\/chat\/messages\/\$\{encodeURIComponent\(messageId\)\}\/rating`/.test(actions) && /setCurrent\(before\)/.test(actions));
 check("nothing sits BESIDE an answer any more", !/AssistantAvatar/.test(ws) && !/flex items-start gap-2\.5/.test(ws));
 check("no other icon stands in for it", !/MessageCircle/.test(ws));
-check("the empty conversation opens with the earth too", /<Earth variant="small" px=\{64\} \/>/.test(ws));
+
+console.log("\n== 1b. Chat with no message: the earth, the greeting, the field (MASTER 14.2) ==");
+// «Όταν το Chat είναι άδειο: στο κέντρο η γη του Ionexa με τον χαιρετισμό,
+// και από κάτω το πεδίο. Όχι άλλο εικονίδιο, όχι κάρτες, όχι λίστες.»
+const emptyAt = ws.indexOf(") : isEmpty ? (");
+const emptyBlock = emptyAt < 0 ? "" : ws.slice(emptyAt, ws.indexOf(") : (", emptyAt + 1));
+check("the empty screen was located", emptyBlock.length > 100 && /const isEmpty = !loadingMessages && messages\.length === 0 && !sending;/.test(ws));
+check("the empty conversation opens with the earth", /<Earth variant="small" px=\{96\} \/>/.test(emptyBlock));
+check("...and the hour's greeting, with the name Home uses",
+  /\{tPromise\(`greeting\.\$\{dayPart\}`\)\}\s*\{greeting \? `, \$\{greeting\}` : ""\}/.test(emptyBlock));
+// COUNTED, NOT LISTED: every element the empty screen draws, by tag. A
+// card, a list, a paragraph, an icon or a chip is a tag that is not one
+// of these three, whatever it is called.
+const tags = [...new Set([...emptyBlock.matchAll(/<([A-Za-z][A-Za-z0-9.]*)/g)].map((m) => m[1]))].sort();
+check(`...and nothing else: no other icon, no card, no list (${tags.join(", ")})`, tags.join(",") === "Earth,div,h1", tags.join(", "));
 // CENTRED WITHOUT BEING CUT. h-full with justify-center centres a block
 // taller than the pane by pushing its top above the scroll origin, where
 // no scroll reaches: on a 390px phone the earth and the title were
 // simply gone (D.11 screenshots). min-h-full lets it grow and scroll.
 check(
   "the empty conversation grows and scrolls rather than losing its top on a phone",
-  /<div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center[^"]*">\s*<Earth variant="small" px=\{64\} \/>/.test(ws)
+  /<div data-testid="chat-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-end[^"]*">\s*<Earth variant="small"/.test(ws)
 );
+check("the field follows right under it: no rule over the field, and a spacer under it while empty",
+  /className=\{`p-4 sm:p-6 \$\{isEmpty \? "" : "border-t border-border"\}`\}/.test(ws) &&
+    /\{isEmpty && <div className="min-h-0 flex-1" aria-hidden="true" \/>\}/.test(ws));
+check("the row over the field waits for a conversation, or for a mode already on",
+  /\{\(!isEmpty \|\| workMode \|\| mentorMode\) && \(\s*<div className="mb-2 flex flex-wrap justify-end gap-2">/.test(ws));
+const chatPage = stripComments(readFileSync("src/app/dashboard/chat/page.tsx", "utf8"));
+check("the page hands it the name Home greets with", /greeting=\{greetingName\(user\.user_metadata\)\}/.test(chatPage));
 
 console.log("\n== 2. the same field as Home's ==");
 check("voice bottom-left, as on Home", /absolute bottom-2 start-2/.test(composer) && /absolute bottom-3 start-16/.test(home));

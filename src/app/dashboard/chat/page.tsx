@@ -14,6 +14,7 @@ import { loadFavoriteIds } from "@/lib/favorites";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readWorkMode } from "@/lib/chat/work-modes";
 import { isFeatureOn } from "@/lib/flags/flags";
+import { greetingName } from "@/lib/greeting";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.chat");
@@ -91,6 +92,9 @@ export default async function ChatPage(
       <ChatWorkspace
         initialConversations={conversations}
         initialMentorPreset={initialMentorPreset}
+        // THE NAME THE EMPTY CHAT GREETS WITH (MASTER 14.2), the same one
+        // Home uses: the display name, never the email.
+        greeting={greetingName(user.user_metadata)}
         // Deep link from /dashboard/favorites. Validated against the
         // user's own list rather than trusted: an id in the URL must not
         // be able to make the workspace ask for someone else's thread.

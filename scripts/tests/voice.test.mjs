@@ -792,12 +792,20 @@ ok(
 // THE TALK BUTTON, SAME RULE. Scenario 11: «Χωρίς κλειδί παρόχου, τα δύο
 // κουμπιά δεν εμφανίζονται».
 const chatCode = stripComments(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
-const talkGate = chatCode.match(/\{(\w+) && \(\s*<button[\s\S]{0,200}?data-testid="voice-conversation-start"/);
+const talkGate = chatCode.match(/\{\s*(\w+) && \(\s*<button[\s\S]{0,300}?data-testid="voice-conversation-start"/);
 const talkDecl = talkGate ? chatCode.match(new RegExp(`const ${talkGate[1]} =([\\s\\S]*?);`)) : null;
 ok(
   "the Talk button is drawn only behind an availability flag",
   Boolean(talkGate) && Boolean(talkDecl),
   talkGate?.[0]?.slice(0, 80) ?? "no `{flag && (<button ... voice-conversation-start` in chat-workspace",
+);
+// INSIDE THE FIELD, BESIDE THE MICROPHONE (docs/MASTER.md, Μέρος 13.2:
+// «Δεύτερο κουμπί δίπλα στο μικρόφωνο»), since 2026-10-07: the chat hands
+// it to the composer, which draws it right after <VoiceInput>.
+const composerCode = stripComments(readFileSync("src/components/chat/chat-composer.tsx", "utf8"));
+ok(
+  "...inside the field, right after the microphone",
+  /beside=\{\s*talkAvailable && \(/.test(chatCode) && /<VoiceInput[\s\S]{0,800}?\/>\s*\{beside\}\s*<\/div>/.test(composerCode),
 );
 ok(
   "...which needs BOTH providers, the plan and minutes left",

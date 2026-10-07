@@ -54,8 +54,13 @@ export const ChatComposer = forwardRef<
      *  message counter, the large-message price). They re-render on THEIR
      *  changes, which are rare, not on keystrokes. */
     children?: React.ReactNode;
+    /** A button drawn inside the field, after the microphone — the
+     *  voice conversation's, «δεύτερο κουμπί δίπλα στο μικρόφωνο»
+     *  (docs/MASTER.md, Μέρος 13.2). Drawn by the parent, which knows
+     *  whether it can start. */
+    beside?: React.ReactNode;
   }
->(function ChatComposer({ sending, onSend, onStop, initialText = "", children }, ref) {
+>(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside }, ref) {
   const t = useTranslations("dashboard.chat");
   const tRail = useTranslations("sidebar.rail");
   const [input, setInput] = useState(initialText);
@@ -165,6 +170,7 @@ export const ChatComposer = forwardRef<
               }
             }}
           />
+          {beside}
         </div>
         {sending && onStop ? (
           <button

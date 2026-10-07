@@ -33,6 +33,18 @@ export const AI_SURFACES = [
 export type AiSurface = (typeof AI_SURFACES)[number];
 
 /**
+ * Surfaces that keep their examples (Home offers them, and the words stay
+ * translated) but draw no chips, each with the owner's reason. Chat since
+ * MASTER Μέρος 14.2 (2026-10-07): «Όταν το Chat είναι άδειο: στο κέντρο η
+ * γη του Ionexa με τον χαιρετισμό, και από κάτω το πεδίο. Όχι άλλο
+ * εικονίδιο, όχι κάρτες, όχι λίστες.» Checked both ways by
+ * scripts/tests/example-prompts.test.mjs.
+ */
+export const NO_CHIPS_ON_SCREEN: Partial<Record<AiSurface, string>> = {
+  chat: "MASTER 14.2: the empty Chat is the earth, the greeting and the field, with no cards and no lists",
+};
+
+/**
  * How many examples each surface offers.
  *
  * Three or four, never one and never eight. One reads as the only thing

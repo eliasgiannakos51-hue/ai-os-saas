@@ -17,7 +17,7 @@
  *   8. the meta event stops carrying it
  *   9. a source with no id is dropped instead of listed
  *  10. the URL opens a record that is not on the page
- *  11. the statement leaves the first screen
+ *  11. the statement leaves the chat's "?" (the first screen since MASTER 14.2)
  *  12. one language loses the statement
  *  13. a total-rows field appears for somebody to fill in
  *
@@ -166,11 +166,13 @@ const MUTANTS = [
     expect: "ignores an id that is not on the page",
   },
   {
-    name: "the statement leaves the first screen",
+    // RE-ANCHORED 2026-10-07: the empty Chat has no card (MASTER 14.2);
+    // the "?" is where the statement is.
+    name: "the statement leaves the chat's \"?\"",
     file: WS,
-    from: '<p className="text-xs font-semibold text-foreground/80">{t("dataScope.title")}</p>',
-    to: "",
-    expect: "it is on the first screen",
+    from: '<HelpTip helpKey="help.chat" scopeKey="dashboard.chat.dataScope" />',
+    to: '<HelpTip helpKey="help.chat" />',
+    expect: 'it is in the chat\'s "?"',
   },
   {
     name: "Japanese loses the statement",

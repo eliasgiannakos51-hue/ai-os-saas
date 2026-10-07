@@ -1648,14 +1648,20 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   });
   const chat = await textAndPlaceholders();
   for (const [what, needle] of [
-    ["the empty-state heading", "Ionexa Συνομιλία"],
     ["the composer placeholder", "Γράψε στο Ionexa..."],
-    ["the Mentor Mode toggle", "Λειτουργία μέντορα"],
     ["the new-chat button", "Νέα συνομιλία"],
     ["the empty conversation list", "Καμία συνομιλία ακόμα."],
   ]) {
     checkTrue(`${what} is Greek`, chat.includes(needle));
   }
+  // THE EMPTY CHAT GREETS (MASTER 14.2, 2026-10-07): the earth, the
+  // hour's greeting and the field. The greeting depends on the hour, so
+  // any of the three Greek ones, read from messages/el.json; and the
+  // title and the Mentor Mode chip that used to be here are not.
+  const chatGreetings = Object.values(JSON.parse(readSrc("messages/el.json", "utf8")).promise.greeting);
+  checkTrue("the empty-state greeting is Greek", chatGreetings.some((g) => chat.includes(g)), chatGreetings.join(" / "));
+  checkTrue("...and the old title and the Mentor Mode chip are not on it",
+    !chat.includes("Ionexa Συνομιλία") && !chat.includes("Λειτουργία μέντορα"), chat.slice(0, 200));
   // The empty-state BODY was pinned to "Ρώτησε ό,τι θέλεις", which the
   // copy no longer says. The five above are labels on controls and are
   // stable; a body paragraph is prose and will be rewritten again. So the

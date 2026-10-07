@@ -486,6 +486,13 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Research in the shell: the field's send plans; the plan's start is an outline, as on the page",
   },
+  {
+    file: "src/components/data-analysis/analysis-shell.tsx",
+    tag: "<AnalysisShell",
+    budget: 1,
+    walk: true,
+    why: "Analyze in the shell: the field's send asks the file; upload and find patterns are options",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

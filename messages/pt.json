@@ -2870,7 +2870,10 @@
         "changed": "Alterada. A nova versão está aberta ao lado da conversa.",
         "new": "Nova apresentação"
       },
-      "recent": "Recentes"
+      "recent": "Recentes",
+      "analyze": {
+        "needFile": "Carrega primeiro um ficheiro, com «Carregar um ficheiro» por baixo do campo."
+      }
     }
   },
   "module": {

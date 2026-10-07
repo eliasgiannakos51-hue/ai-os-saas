@@ -20,7 +20,8 @@ const PAGE = "src/app/dashboard/posts/page.tsx";
 const SLIDES = "src/components/presentations/presentations-shell.tsx";
 const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
 const RESEARCH = "src/components/research/research-shell.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH];
+const ANALYZE = "src/components/data-analysis/analysis-shell.tsx";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE];
 
 const MUTANTS = [
   {
@@ -148,6 +149,20 @@ const MUTANTS = [
     from: "            if (previous === current) void fetch(`/api/research/${report.id}/continue`, { method: \"POST\", keepalive: true }).catch(() => undefined);\n",
     to: "",
     expect: "a stalled run is nudged",
+  },
+  {
+    name: "Analyze: a question with no file goes nowhere and says nothing",
+    file: ANALYZE,
+    from: '      note("tool", tShell("analyze.needFile"));\n',
+    to: "",
+    expect: "it says to upload one",
+  },
+  {
+    name: "Analyze: the answers lose the rows they stand on",
+    file: ANALYZE,
+    from: '<div data-testid="analysis-evidence" className="mt-2">',
+    to: '<div className="mt-2">',
+    expect: "each answer with the rows it stands on",
   },
 ];
 

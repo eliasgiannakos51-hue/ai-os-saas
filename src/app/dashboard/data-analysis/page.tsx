@@ -8,6 +8,8 @@ import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AnalysisWorkspace, type AnalysisSummary, type AskRecord } from "@/components/data-analysis/analysis-workspace";
+import { AnalysisShell } from "@/components/data-analysis/analysis-shell";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { buildChart, type BuiltChart, type ChartSpec } from "@/lib/data-analysis/charts";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 import type { AnalysisFindings } from "@/lib/data-analysis/analyse";
@@ -125,6 +127,16 @@ export default async function DataAnalysisPage(
         })),
       };
     }
+  }
+
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same file,
+  // charts and questions, drawn as conversation and work.
+  if (await isFeatureOn("tool-shell", user)) {
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <AnalysisShell analyses={analyses} current={current} />
+      </div>
+    );
   }
 
   return (

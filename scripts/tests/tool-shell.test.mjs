@@ -139,12 +139,24 @@ check("Stop is offered while it runs", /data-testid="research-stop"/.test(resear
 check("the report opens beside the conversation, marked as made by AI, with numbered sources and its PDF",
   /<AiGeneratedNotice variant="block" \/>/.test(research) && /data-testid="research-sources"/.test(research) && /\[\{i \+ 1\}\]/.test(research) && /href=\{`\/api\/research\/\$\{open\.id\}\/pdf`\}/.test(research));
 
+console.log("\n== 7. Analyze, in the shell ==");
+const analyze = read("src/components/data-analysis/analysis-shell.tsx");
+check("the field asks the open file, through the same route as the page", /onSend=\{\(text\) => void ask\(text\)\}/.test(analyze) && /fetch\(`\/api\/data-analysis\/\$\{current\.id\}\/ask`/.test(analyze));
+check("...and with no file, it says to upload one instead of failing silently", /note\("tool", tShell\("analyze\.needFile"\)\)/.test(analyze));
+check("the conversation is the questions asked of this file, each answer with the rows it stands on",
+  /\[\.\.\.current\.questions\]\.reverse\(\)/.test(analyze) && /data-testid="analysis-evidence"/.test(analyze) && /t\("ask\.matched"/.test(analyze));
+check("upload and find patterns are options, through the page's routes",
+  /fetch\("\/api\/data-analysis\/upload", \{ method: "POST", body: form \}\)/.test(analyze) && /fetch\(`\/api\/data-analysis\/\$\{current\.id\}\/analyse`/.test(analyze));
+check("the file beside the conversation says when it was only partly read", /t\("summary\.truncated"\)/.test(analyze) && /t\("summary\.ragged"/.test(analyze));
+check("...and computes nothing: the column line is the page's own", /import \{ describeColumn[^}]*\} from "@\/lib\/data-analysis\/view"/.test(analyze) && !/function describeColumn/.test(analyze));
+
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};
   check(`${l}: the shell's words`, ["open", "isOpen", "back", "close"].every((k) => typeof m[k] === "string" && m[k]) &&
     ["done", "platforms", "copyAll", "copyOne"].every((k) => typeof m.posts?.[k] === "string" && m.posts[k]) && /\{count, plural/.test(m.posts?.done ?? "") &&
-    ["done", "changed", "new"].every((k) => typeof m.slides?.[k] === "string" && m.slides[k]) && /\{title\}[\s\S]*\{count, plural/.test(m.slides?.done ?? ""));
+    ["done", "changed", "new"].every((k) => typeof m.slides?.[k] === "string" && m.slides[k]) && /\{title\}[\s\S]*\{count, plural/.test(m.slides?.done ?? "") &&
+    typeof m.recent === "string" && m.recent && typeof m.analyze?.needFile === "string" && m.analyze.needFile);
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

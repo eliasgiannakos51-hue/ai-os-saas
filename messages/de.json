@@ -2870,7 +2870,10 @@
         "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
         "new": "Neue Präsentation"
       },
-      "recent": "Zuletzt"
+      "recent": "Zuletzt",
+      "analyze": {
+        "needFile": "Lade zuerst eine Datei hoch, mit „Datei hochladen“ unter dem Feld."
+      }
     }
   },
   "module": {

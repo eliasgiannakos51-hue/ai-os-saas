@@ -8,20 +8,14 @@ import { Download, Loader2, Sparkles, Upload } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useToast } from "@/components/toast/toast-context";
 import { AnalysisChart } from "@/components/data-analysis/analysis-chart";
-import type { BuiltChart } from "@/lib/data-analysis/charts";
-import type { AnalysisFindings } from "@/lib/data-analysis/analyse";
-import type { ColumnProfile, TableProfile } from "@/lib/data-analysis/profile";
-import type { QueryResult } from "@/lib/data-analysis/query";
 import { MAX_UPLOAD_BYTES } from "@/lib/data-analysis/limits";
 
-export type AnalysisSummary = { id: string; title: string; rowCount: number; createdAt: string; analysed: boolean };
-
-export type AskRecord = {
-  id: string;
-  question: string;
-  answer: string | null;
-  evidence: QueryResult | null;
-};
+// The shapes the page hands this live in lib/data-analysis/view.ts, so
+// Analyze in the shell (components/data-analysis/analysis-shell.tsx) can
+// name them without importing this page.
+export type { AnalysisSummary, AskRecord, AnalysisView } from "@/lib/data-analysis/view";
+import type { AnalysisSummary, AnalysisView } from "@/lib/data-analysis/view";
+import { describeColumn } from "@/lib/data-analysis/view";
 
 // The whole tool, on one screen: what you uploaded, what the columns
 // really are, what was found, the charts, and a box to ask it something.
@@ -36,19 +30,7 @@ export function AnalysisWorkspace({
   current,
 }: {
   analyses: AnalysisSummary[];
-  current: {
-    id: string;
-    title: string;
-    fileName: string;
-    rowCount: number;
-    truncated: boolean;
-    raggedRows: number;
-    profile: TableProfile;
-    findings: AnalysisFindings | null;
-    charts: BuiltChart[];
-    questions: AskRecord[];
-    legacyNotes: { id: string; title: string; description: string | null; findings: string | null }[];
-  } | null;
+  current: AnalysisView | null;
 }) {
   const t = useTranslations("dataAnalysis");
   const router = useRouter();
@@ -391,17 +373,4 @@ export function AnalysisWorkspace({
       )}
     </div>
   );
-}
-
-function describeColumn(column: ColumnProfile): string {
-  if (column.numeric) {
-    const n = column.numeric;
-    const round = (v: number) => (Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 100) / 100);
-    return `${round(n.min)} – ${round(n.max)} · x̄ ${round(n.mean)}${n.outlierCount > 0 ? ` · ${n.outlierCount}⚠` : ""}`;
-  }
-  if (column.dateRange) return `${column.dateRange.min} → ${column.dateRange.max}`;
-  return column.topValues
-    .slice(0, 3)
-    .map((v) => `${v.value} (${v.count})`)
-    .join(", ");
 }

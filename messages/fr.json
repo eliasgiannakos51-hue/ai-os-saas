@@ -2870,7 +2870,10 @@
         "changed": "Modifiée. La nouvelle version est ouverte à côté de la conversation.",
         "new": "Nouvelle présentation"
       },
-      "recent": "Récents"
+      "recent": "Récents",
+      "analyze": {
+        "needFile": "Importe d’abord un fichier, avec « Importer un fichier » sous le champ."
+      }
     }
   },
   "module": {

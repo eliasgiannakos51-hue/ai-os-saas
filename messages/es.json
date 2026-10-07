@@ -2870,7 +2870,10 @@
         "changed": "Cambiada. La nueva versión está abierta junto a la conversación.",
         "new": "Nueva presentación"
       },
-      "recent": "Recientes"
+      "recent": "Recientes",
+      "analyze": {
+        "needFile": "Sube primero un archivo, con «Subir un archivo» debajo del campo."
+      }
     }
   },
   "module": {

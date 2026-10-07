@@ -44,7 +44,29 @@ function check(name, cond, detail) {
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const supa = await startMockSupabase({
   port: 54363,
-  tableRows: { user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }] },
+  tableRows: {
+    user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }],
+    // ONE FILE AND ONE QUESTION ASKED OF IT, so Analyze has something to
+    // draw: the conversation is the questions, the work is the file.
+    data_analyses: [{
+      id: "33333333-3333-4333-8333-333333333333", user_id: MOCK_USER.id, title: "πωλήσεις.csv", file_name: "πωλήσεις.csv",
+      row_count: 3, truncated: false, ragged_rows: 0, created_at: "2026-10-07T08:00:00Z", analysed_at: null,
+      headers: ["περιοχή", "ποσό"], rows: [["Αθήνα", "10"], ["Πάτρα", "4"], ["Αθήνα", "6"]],
+      profile: {
+        rowCount: 3, duplicateRows: 0, correlations: [],
+        columns: [
+          { name: "περιοχή", index: 0, type: "text", filled: 3, missing: 0, unique: 2, topValues: [{ value: "Αθήνα", count: 2 }, { value: "Πάτρα", count: 1 }] },
+          { name: "ποσό", index: 1, type: "number", filled: 3, missing: 0, unique: 3, topValues: [], numeric: { min: 4, max: 10, mean: 6.67, median: 6, sum: 20, stdDev: 2.5, outlierCount: 0 } },
+        ],
+      },
+      findings: null,
+    }],
+    data_analysis_questions: [{
+      id: "44444444-4444-4444-8444-444444444444", analysis_id: "33333333-3333-4333-8333-333333333333", user_id: MOCK_USER.id,
+      created_at: "2026-10-07T08:01:00Z", question: "Ποια περιοχή πούλησε περισσότερα;", answer: "Η Αθήνα, με 16.",
+      evidence: { query: {}, rows: [{ group: "Αθήνα", value: 16, rows: 2 }, { group: "Πάτρα", value: 4, rows: 1 }], matchedRows: 3, totalRows: 3 },
+    }],
+  },
 });
 
 const freePort = () =>
@@ -145,6 +167,10 @@ try {
       ]).map(({ domain, path, ...c }) => c)
     );
     const page = await context.newPage();
+    // A SCREEN THAT THROWS IS A FAILURE WHATEVER ELSE PASSES: every
+    // uncaught error in the page is collected and checked at the end.
+    const pageErrors = [];
+    page.on("pageerror", (err) => pageErrors.push(String(err?.message ?? err)));
     // A real finger on the phone, a mouse on the desktop.
     const cdp = device.touch ? await context.newCDPSession(page) : null;
     async function press(locator) {
@@ -303,6 +329,28 @@ try {
     const reportShown = await page.locator('[data-testid="research-report"]').waitFor({ state: "visible", timeout: 20000 }).then(() => true, () => false);
     check("only the press ran it, and the finished report opens with its numbered sources",
       runs.length === 1 && reportShown && (await page.locator('[data-testid="research-sources"] > li').count()) === 1);
+    // ---- Analyze: the conversation is the questions asked of the file
+    const asked = [];
+    await page.route("**/api/data-analysis/*/ask", (r) => {
+      asked.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
+    });
+    await page.goto(`${ON}/dashboard/data-analysis`, { waitUntil: "networkidle" });
+    check("Analyze, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    check("...the question asked before is in the conversation, with the rows its answer stands on",
+      (await page.locator('[data-testid="tool-shell-thread"] [data-role="user"]').count()) >= 1 && (await page.locator('[data-testid="analysis-evidence"] tr').count()) === 2);
+    const analyzeOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();
+    check(`...with at most four options (${analyzeOptions})`, analyzeOptions >= 1 && analyzeOptions <= 4);
+    if (!device.touch) {
+      check("computer: the file is open beside the conversation", (await page.locator('[data-testid="analysis-file"]').count()) === 1);
+    }
+    const askField = page.locator("main textarea");
+    await askField.fill("Πόσα πούλησε η Πάτρα;");
+    await askField.press("Enter");
+    await page.waitForTimeout(800);
+    check("the field asked the open file", asked.length === 1 && asked[0]?.question === "Πόσα πούλησε η Πάτρα;", JSON.stringify(asked));
+
+    check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }
 } catch (err) {

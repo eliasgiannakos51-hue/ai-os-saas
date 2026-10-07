@@ -2870,7 +2870,10 @@
         "changed": "Changed. The new version is open beside the conversation.",
         "new": "New deck"
       },
-      "recent": "Recent"
+      "recent": "Recent",
+      "analyze": {
+        "needFile": "Upload a file first, with “Upload a file” under the field."
+      }
     }
   },
   "module": {

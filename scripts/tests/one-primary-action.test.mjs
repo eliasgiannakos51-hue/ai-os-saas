@@ -493,6 +493,13 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Analyze in the shell: the field's send asks the file; upload and find patterns are options",
   },
+  {
+    file: "src/components/files/files-shell.tsx",
+    tag: "<FilesShell",
+    budget: 1,
+    walk: true,
+    why: "Files in the shell: the field's send asks the ticked files; upload is an option",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

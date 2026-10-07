@@ -250,10 +250,13 @@ check("the handler reports the pass count", /parts: context\.passes\.length/.tes
 // resumed answer is precisely the one nobody looks at, so `parts` living
 // in the shared builder is what stops a returning user being told their
 // answer was read whole when it was stitched from five passes.
-check("the client carries it through", /parts: Number\(result\.parts \?\? 1\)/.test(workspaceCode));
+// The builder moved to lib/files/answer.ts on 2026-10-07, shared by the
+// page and Files in the shell (components/files/files-shell.tsx).
+const answerLibCode = stripComments(readFileSync("src/lib/files/answer.ts", "utf8"));
+check("the client carries it through", /parts: Number\(result\.parts \?\? 1\)/.test(answerLibCode) && /from "@\/lib\/files\/answer"/.test(workspaceCode));
 check(
   "...in the shared builder, so the resumed path cannot drift from the inline one",
-  /function answerFromResult\([\s\S]{0,700}parts: Number\(result\.parts/.test(workspaceCode)
+  /export function answerFromResult\([\s\S]{0,700}parts: Number\(result\.parts/.test(answerLibCode)
 );
 check("and shows it only when there was more than one", /answer\.parts > 1 && !answer\.truncated/.test(workspaceCode));
 checkList(

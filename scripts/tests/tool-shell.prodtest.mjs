@@ -61,6 +61,10 @@ const supa = await startMockSupabase({
       },
       findings: null,
     }],
+    user_files: [{
+      id: "55555555-5555-4555-8555-555555555555", user_id: MOCK_USER.id, filename: "σύμβαση.pdf", file_type: "pdf",
+      size_bytes: 120000, page_count: 12, char_count: 30000, processing_status: "ready", error: null, uploaded_at: "2026-10-07T07:00:00Z",
+    }],
     data_analysis_questions: [{
       id: "44444444-4444-4444-8444-444444444444", analysis_id: "33333333-3333-4333-8333-333333333333", user_id: MOCK_USER.id,
       created_at: "2026-10-07T08:01:00Z", question: "Ποια περιοχή πούλησε περισσότερα;", answer: "Η Αθήνα, με 16.",
@@ -95,6 +99,9 @@ const W = {
 };
 
 const servers = [];
+// Every uncaught error in the page, per device; printed also when a step
+// throws, because a crashed screen is usually WHY the step threw.
+const pageErrors = [];
 let browser = null;
 const cleanup = () => {
   for (const server of servers) {
@@ -117,12 +124,19 @@ async function start(env) {
   throw new Error("the production server did not start");
 }
 
+// THE SHAPE THE ROUTE RETURNS (lib/presentations/deck.ts, Deck and Slide),
+// every field: the first version of this left out `notes`, and the screen
+// crashed on a deck the real route can never send.
+const slide = (layout, title, bullets) => ({ layout, title, bullets, notes: "", imageQuery: null, image: null });
 const DECK = {
+  version: 1,
   title: "Πρωινό στο γραφείο",
+  locale: "el",
+  imageSource: "none",
   slides: [
-    { layout: "title", title: "Πρωινό στο γραφείο", bullets: [] },
-    { layout: "bullets", title: "Τι φέρνουμε", bullets: ["Ψωμί της ημέρας", "Καφές", "Φρούτα"] },
-    { layout: "bullets", title: "Τιμές", bullets: ["Από δέκα άτομα", "Παραγγελία ως τις 18:00"] },
+    slide("title", "Πρωινό στο γραφείο", []),
+    slide("bullets", "Τι φέρνουμε", ["Ψωμί της ημέρας", "Καφές", "Φρούτα"]),
+    slide("bullets", "Τιμές", ["Από δέκα άτομα", "Παραγγελία ως τις 18:00"]),
   ],
 };
 
@@ -169,7 +183,7 @@ try {
     const page = await context.newPage();
     // A SCREEN THAT THROWS IS A FAILURE WHATEVER ELSE PASSES: every
     // uncaught error in the page is collected and checked at the end.
-    const pageErrors = [];
+    pageErrors.length = 0;
     page.on("pageerror", (err) => pageErrors.push(String(err?.message ?? err)));
     // A real finger on the phone, a mouse on the desktop.
     const cdp = device.touch ? await context.newCDPSession(page) : null;
@@ -350,11 +364,52 @@ try {
     await page.waitForTimeout(800);
     check("the field asked the open file", asked.length === 1 && asked[0]?.question === "Πόσα πούλησε η Πάτρα;", JSON.stringify(asked));
 
+    // ---- Files: tick a file, ask, and the answer names its page
+    const askedFiles = [];
+    await page.route("**/api/jobs?kind=file_ask", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, job: null }) }));
+    await page.route("**/api/files/ask", (r) => {
+      askedFiles.push(r.request().postDataJSON());
+      return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, jobId: "66666666-6666-4666-8666-666666666666" }) });
+    });
+    await page.route("**/api/jobs/66666666-6666-4666-8666-666666666666", (r) =>
+      r.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          job: {
+            id: "66666666-6666-4666-8666-666666666666", status: "done", stepLabel: null, error: null, creditsCharged: 2,
+            result: { answered: true, answer: "Η ακύρωση θέλει γραπτή ειδοποίηση 30 ημερών [σύμβαση.pdf, σελ. 3].", answeredFromDocuments: true,
+              citations: [{ filename: "σύμβαση.pdf", label: "σελ. 3" }], removedCitations: 0, skippedFiles: [], truncated: false, parts: 1, disclosure: "" },
+          },
+        }),
+      })
+    );
+    await page.route("**/api/jobs/*/seen", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) }));
+    await page.goto(`${ON}/dashboard/files`, { waitUntil: "networkidle" });
+    check("Files, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    const filesField = page.locator("main textarea");
+    await filesField.fill("Τι λέει για την ακύρωση;");
+    await filesField.press("Enter");
+    await page.waitForTimeout(400);
+    check("with nothing ticked, nothing is asked, and the files open to tick one",
+      askedFiles.length === 0 && (await page.locator('[data-testid="files-shell-list"]').count()) === 1);
+    await press(page.locator('[data-testid="files-shell-list"] input[type=checkbox]').first());
+    if (device.touch) {
+      await press(page.getByRole("button", { name: W.back }));
+      await page.waitForTimeout(300);
+    }
+    await filesField.fill("Τι λέει για την ακύρωση;");
+    await filesField.press("Enter");
+    const cited = await page.locator('[data-testid="files-citations"] li').first().waitFor({ state: "visible", timeout: 15000 }).then(() => true, () => false);
+    check("the ticked file was asked, and the answer names the page it came from",
+      askedFiles.length === 1 && askedFiles[0]?.fileIds?.[0] === "55555555-5555-4555-8555-555555555555" && cited &&
+        (await page.locator('[data-testid="files-citations"]').innerText()).includes("σελ. 3"), JSON.stringify(askedFiles));
+
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }
 } catch (err) {
-  check("the run completed", false, String(err?.stack ?? err));
+  check("the run completed", false, String(err?.stack ?? err) + (pageErrors.length ? `\n        page errors: ${pageErrors.slice(0, 3).join(" | ")}` : ""));
 } finally {
   if (browser) await browser.close().catch(() => {});
   cleanup();

@@ -150,6 +150,22 @@ check("upload and find patterns are options, through the page's routes",
 check("the file beside the conversation says when it was only partly read", /t\("summary\.truncated"\)/.test(analyze) && /t\("summary\.ragged"/.test(analyze));
 check("...and computes nothing: the column line is the page's own", /import \{ describeColumn[^}]*\} from "@\/lib\/data-analysis\/view"/.test(analyze) && !/function describeColumn/.test(analyze));
 
+console.log("\n== 8. Files, in the shell ==");
+const filesShell = read("src/components/files/files-shell.tsx");
+const uploadLib = read("src/lib/files/upload-file.ts");
+check("selection is still the subject: nothing is asked with nothing ticked",
+  /if \(selected\.length === 0\) \{\s*say\(\{ role: "tool", text: t\("selectFirst"\) \}\);/.test(filesShell) && /t\("askSelected", \{ count: selectedFiles\.length/.test(filesShell));
+check("the field asks the ticked files, as a background job through the page's route",
+  /startAndWatchJob\(\s*"\/api\/files\/ask",\s*\{ question: text, fileIds: selected, language: locale \}/.test(filesShell));
+check("every answer says the page it came from, or that it is not in the documents",
+  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{c\.label\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
+check("...built by the same function as on the page, and copied with its sources",
+  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
+check("an answer that finished elsewhere is put back, and one running is watched", /\/api\/jobs\?kind=file_ask/.test(filesShell) && /watchJob\(String\(job\.id\)/.test(filesShell) && /<JobSeen jobId=\{turn\.answer\.jobId\} \/>/.test(filesShell));
+check("an upload whose registration does not land is removed from the bucket",
+  /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));
+check("a file that stored but could not be read is not called a success", /outcome\.file\.processing_status === "failed"/.test(filesShell));
+
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};

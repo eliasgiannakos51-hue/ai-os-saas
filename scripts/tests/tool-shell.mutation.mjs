@@ -21,7 +21,9 @@ const SLIDES = "src/components/presentations/presentations-shell.tsx";
 const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
 const RESEARCH = "src/components/research/research-shell.tsx";
 const ANALYZE = "src/components/data-analysis/analysis-shell.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE];
+const FILES = "src/components/files/files-shell.tsx";
+const UPLOAD = "src/lib/files/upload-file.ts";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD];
 
 const MUTANTS = [
   {
@@ -163,6 +165,27 @@ const MUTANTS = [
     from: '<div data-testid="analysis-evidence" className="mt-2">',
     to: '<div className="mt-2">',
     expect: "each answer with the rows it stands on",
+  },
+  {
+    name: "Files: an object with no row is left in the bucket",
+    file: UPLOAD,
+    from: "      await createBrowserSupabase().storage.from(FILE_BUCKET).remove([path]);\n",
+    to: "",
+    expect: "is removed from the bucket",
+  },
+  {
+    name: "Files: a question with nothing ticked is sent anyway",
+    file: FILES,
+    from: "    if (selected.length === 0) {",
+    to: "    if (false) {",
+    expect: "nothing is asked with nothing ticked",
+  },
+  {
+    name: "Files: the answer loses where it came from",
+    file: FILES,
+    from: '<ul data-testid="files-citations" className="mt-1 space-y-0.5">',
+    to: '<ul className="mt-1 space-y-0.5">',
+    expect: "the page it came from",
   },
 ];
 

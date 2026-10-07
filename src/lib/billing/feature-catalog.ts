@@ -1116,6 +1116,26 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // is not on the pricing page, and NOTHING may read the capability.
   // The second half is what makes the flag come off — enforce it and
   // the build goes red until the row is published.
+  // THE IMAGE TOOL (MASTER 16, package 19). Starter and up — the tier the
+  // Images page already carries (buildLogs above, lib/build-modules.ts) —
+  // enforced in every image route before anything is spent. NOT A ROW YET:
+  // it is behind the switch "image-studio" for the owner and the test
+  // account, and no image is made without the provider's key (NEEDS 5), so
+  // a buyer cannot have it. The row goes on in the commit that opens the
+  // switch to everyone.
+  {
+    id: "imageStudio",
+    group: "make",
+    minPlan: "starter",
+    routes: ["images/generate", "images/[id]/edit", "images/[id]/full", "images/[id]/download", "images/[id]"],
+    charges: true,
+    notBuilt:
+      "behind the switch image-studio until the owner opens it to everyone, and no picture is made " +
+      "until the image provider's key is set (NEEDS 5)",
+    enforcedIn: "src/lib/images/image-route.ts",
+    enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", IMAGE_MIN_PLAN)",
+    cell: (p) => boolCell(p.slug !== "free"),
+  },
   {
     id: "customDomain",
     group: "make",

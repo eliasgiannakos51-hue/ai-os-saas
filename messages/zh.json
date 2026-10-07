@@ -2994,6 +2994,53 @@
         "title": "没有内容包含“{query}”",
         "why": "试试更少的词，或换一种类型。"
       }
+    },
+    "images": {
+      "name": "图片",
+      "help": "说出你想看到的。你会得到 4 个版本；点一个，可以用文字修改它，或以最高分辨率下载。",
+      "placeholder": "描述你想要的图片",
+      "placeholderEdit": "图片 {n} 要改什么？",
+      "aspect": "形状",
+      "aspects": {
+        "square": "方形 1:1",
+        "portrait": "竖版 4:5",
+        "wide": "横版 16:9",
+        "story": "快拍 9:16"
+      },
+      "recent": "之前的",
+      "recentEmpty": "你还没有生成过图片。",
+      "made": "已完成 {made}/{asked}。",
+      "changed": "只改了图片 {n}。",
+      "fullReady": "图片 {n} 的最高分辨率版本正在下载。",
+      "choose": "点一张图片，用文字修改它或下载它。",
+      "chosen": "图片 {n}",
+      "picture": "图片 {n}",
+      "download": "下载",
+      "fullMake": "以最高分辨率下载",
+      "fullDownload": "以最高分辨率下载（已就绪）",
+      "priceVariants": "{n} 张图片：{count, plural, other {# 积分}}",
+      "priceEdit": "修改一张图片：{count, plural, other {# 积分}}",
+      "price": "{count, plural, other {# 积分}}",
+      "delete": "删除图片",
+      "deleteConfirm": "删除这张图片及其所有版本？此操作无法撤销。",
+      "notConfigured": "图片功能尚未开启。不会扣费。",
+      "working": {
+        "variants": "正在生成 4 张图片…",
+        "edit": "正在修改图片 {n}…",
+        "full": "正在生成最高分辨率版本…"
+      },
+      "errors": {
+        "tooShort": "请再多描述一点这张图片。",
+        "tooLong": "内容太长；最多 {limit} 个字符。",
+        "insufficient": "积分不足。",
+        "rateLimited": "请求太多。请稍后再试。",
+        "refused": "服务商拒绝生成这张图片。请换个描述；没有扣费。",
+        "busy": "这张图片正在修改中。请等它完成。",
+        "gone": "这张图片已不存在。",
+        "unavailable": "图片服务商暂时没有响应。没有扣费；请再试一次。",
+        "failed": "出了点问题。没有完成的部分不会扣费。",
+        "offline": "没有网络连接。请检查网络后再试。"
+      }
     }
   },
   "module": {

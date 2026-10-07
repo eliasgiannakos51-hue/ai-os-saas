@@ -244,8 +244,8 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   {
     name: "GOOGLE_API_KEY",
     level: "optional",
-    what: "Gemini as a FAILOVER provider for AI calls (lib/ai/providers/registry.ts)",
-    fallback: "the provider is skipped; if Anthropic is unreachable the call fails rather than failing over",
+    what: "Gemini as a FAILOVER provider for AI calls (lib/ai/providers/registry.ts), and the Image tool's pictures (lib/images/gemini-image.ts, behind the switch image-studio)",
+    fallback: "the provider is skipped; if Anthropic is unreachable the call fails rather than failing over. The Image tool says it is not set up yet and charges nothing",
     secret: true,
   },
   {
@@ -261,8 +261,8 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   {
     name: "GEMINI_API_KEY",
     level: "optional",
-    what: "Accepted in place of GOOGLE_API_KEY by the key check and scripts/cinematic-media.mjs; the failover chain reads GOOGLE_API_KEY only",
-    fallback: "nothing changes; set GOOGLE_API_KEY for Gemini failover",
+    what: "Accepted in place of GOOGLE_API_KEY by the key check, scripts/cinematic-media.mjs and the Image tool (lib/images/gemini-image.ts); the failover chain reads GOOGLE_API_KEY only",
+    fallback: "nothing changes; set GOOGLE_API_KEY for Gemini failover. The Image tool reads either name",
     secret: true,
   },
   {
@@ -276,14 +276,14 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     name: "BFL_API_KEY",
     level: "optional",
     what: "Black Forest Labs (Flux) images — NO FEATURE READS THIS YET; only the key check on this page",
-    fallback: "nothing changes: there is no image generator",
+    fallback: "nothing changes: the Image tool uses Gemini (GEMINI_API_KEY or GOOGLE_API_KEY)",
     secret: true,
   },
   {
     name: "IDEOGRAM_API_KEY",
     level: "optional",
     what: "Ideogram images with text — NO FEATURE READS THIS YET, and the provider has no free call to test it",
-    fallback: "nothing changes: there is no image generator",
+    fallback: "nothing changes: the Image tool uses Gemini (GEMINI_API_KEY or GOOGLE_API_KEY)",
     secret: true,
   },
   {

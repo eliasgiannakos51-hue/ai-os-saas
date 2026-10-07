@@ -2994,6 +2994,53 @@
         "title": "Nichts enthält „{query}“",
         "why": "Versuche weniger Wörter oder eine andere Art."
       }
+    },
+    "images": {
+      "name": "Bild",
+      "help": "Beschreibe, was du sehen willst. Du bekommst 4 Versionen; tippe eine an, um sie mit Worten zu ändern oder in voller Auflösung herunterzuladen.",
+      "placeholder": "Beschreibe das Bild, das du willst",
+      "placeholderEdit": "Was soll sich an Bild {n} ändern?",
+      "aspect": "Format",
+      "aspects": {
+        "square": "Quadrat 1:1",
+        "portrait": "Hochformat 4:5",
+        "wide": "Breit 16:9",
+        "story": "Story-Format 9:16"
+      },
+      "recent": "Frühere",
+      "recentEmpty": "Du hast noch keine Bilder erstellt.",
+      "made": "{made} von {asked} fertig.",
+      "changed": "Nur Bild {n} wurde geändert.",
+      "fullReady": "Bild {n} in voller Auflösung wird heruntergeladen.",
+      "choose": "Tippe ein Bild an, um es mit Worten zu ändern oder herunterzuladen.",
+      "chosen": "Bild {n}",
+      "picture": "Bild {n}",
+      "download": "Herunterladen",
+      "fullMake": "In voller Auflösung herunterladen",
+      "fullDownload": "In voller Auflösung herunterladen (fertig)",
+      "priceVariants": "{n} Bilder: {count, plural, one {# Credit} other {# Credits}}",
+      "priceEdit": "Ein Bild ändern: {count, plural, one {# Credit} other {# Credits}}",
+      "price": "{count, plural, one {# Credit} other {# Credits}}",
+      "delete": "Bild löschen",
+      "deleteConfirm": "Dieses Bild und alle seine Versionen löschen? Das lässt sich nicht rückgängig machen.",
+      "notConfigured": "Bilder sind noch nicht eingeschaltet. Es wird nichts berechnet.",
+      "working": {
+        "variants": "4 Bilder werden erstellt…",
+        "edit": "Bild {n} wird geändert…",
+        "full": "Wird in voller Auflösung erstellt…"
+      },
+      "errors": {
+        "tooShort": "Beschreibe das Bild etwas genauer.",
+        "tooLong": "Das ist zu lang; bis zu {limit} Zeichen.",
+        "insufficient": "Nicht genug Credits dafür.",
+        "rateLimited": "Zu viele Anfragen auf einmal. Versuche es gleich noch einmal.",
+        "refused": "Der Anbieter hat abgelehnt, dieses Bild zu erstellen. Versuche eine andere Beschreibung; es wurde nichts berechnet.",
+        "busy": "Dieses Bild wird gerade geändert. Warte, bis es fertig ist.",
+        "gone": "Dieses Bild gibt es nicht mehr.",
+        "unavailable": "Der Bildanbieter antwortet gerade nicht. Es wurde nichts berechnet; versuche es noch einmal.",
+        "failed": "Etwas ist schiefgelaufen. Nichts, was nicht entstanden ist, wurde berechnet.",
+        "offline": "Keine Verbindung. Prüfe das Netzwerk und versuche es erneut."
+      }
     }
   },
   "module": {

@@ -2994,6 +2994,53 @@
         "title": "Rien ne dit « {query} »",
         "why": "Essayez moins de mots, ou un autre type."
       }
+    },
+    "images": {
+      "name": "Image",
+      "help": "Dis ce que tu veux voir. Tu reçois 4 versions ; appuie sur l’une pour la modifier avec des mots ou la télécharger en pleine résolution.",
+      "placeholder": "Décris l’image que tu veux",
+      "placeholderEdit": "Que faut-il changer dans l’image {n} ?",
+      "aspect": "Format",
+      "aspects": {
+        "square": "Carrée 1:1",
+        "portrait": "Portrait 4:5",
+        "wide": "Paysage 16:9",
+        "story": "Story 9:16"
+      },
+      "recent": "Précédentes",
+      "recentEmpty": "Tu n’as encore créé aucune image.",
+      "made": "{made} sur {asked} prêtes.",
+      "changed": "Seule l’image {n} a changé.",
+      "fullReady": "L’image {n} en pleine résolution se télécharge.",
+      "choose": "Appuie sur une image pour la modifier avec des mots ou la télécharger.",
+      "chosen": "image {n}",
+      "picture": "Image {n}",
+      "download": "Télécharger",
+      "fullMake": "Télécharger en pleine résolution",
+      "fullDownload": "Télécharger en pleine résolution (prête)",
+      "priceVariants": "{n} images : {count, plural, one {# crédit} other {# crédits}}",
+      "priceEdit": "Modifier une image : {count, plural, one {# crédit} other {# crédits}}",
+      "price": "{count, plural, one {# crédit} other {# crédits}}",
+      "delete": "Supprimer l’image",
+      "deleteConfirm": "Supprimer cette image et toutes ses versions ? C’est définitif.",
+      "notConfigured": "Les images ne sont pas encore activées. Rien n’est facturé.",
+      "working": {
+        "variants": "Création de 4 images…",
+        "edit": "Modification de l’image {n}…",
+        "full": "Création en pleine résolution…"
+      },
+      "errors": {
+        "tooShort": "Dis-en un peu plus sur l’image.",
+        "tooLong": "C’est trop long ; jusqu’à {limit} caractères.",
+        "insufficient": "Pas assez de crédits pour cela.",
+        "rateLimited": "Trop de demandes à la fois. Réessaie dans un instant.",
+        "refused": "Le fournisseur a refusé de créer cette image. Essaie une autre description ; rien n’a été facturé.",
+        "busy": "Cette image est déjà en cours de modification. Attends qu’elle soit prête.",
+        "gone": "Cette image n’existe plus.",
+        "unavailable": "Le fournisseur d’images ne répond pas pour l’instant. Rien n’a été facturé ; réessaie.",
+        "failed": "Un problème est survenu. Rien de ce qui n’a pas été fait n’a été facturé.",
+        "offline": "Pas de connexion. Vérifie le réseau et réessaie."
+      }
     }
   },
   "module": {

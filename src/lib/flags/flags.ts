@@ -23,6 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  "image-studio": "Image: four pictures from one description, one of them changed with words, and downloaded at the largest size the provider makes (MASTER 16, package 19)",
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
   "tool-shell": "Every tool in one shell: the conversation on the left, the work on the right, one field and at most four options (MASTER 14.3, package 3)",
   "chat-opens-tools": "Chat opens tools: «φτιάξε μου site για το camping» opens the Site beside the conversation, with its price, and builds it there on one press (MASTER 2.3, package 7)",

@@ -2994,6 +2994,53 @@
         "title": "Niente dice «{query}»",
         "why": "Prova con meno parole o con un altro tipo."
       }
+    },
+    "images": {
+      "name": "Immagine",
+      "help": "Di’ cosa vuoi vedere. Ricevi 4 versioni; premine una per cambiarla a parole o scaricarla alla massima risoluzione.",
+      "placeholder": "Descrivi l’immagine che vuoi",
+      "placeholderEdit": "Cosa deve cambiare nell’immagine {n}?",
+      "aspect": "Formato",
+      "aspects": {
+        "square": "Quadrata 1:1",
+        "portrait": "Verticale 4:5",
+        "wide": "Orizzontale 16:9",
+        "story": "Formato story 9:16"
+      },
+      "recent": "Precedenti",
+      "recentEmpty": "Non hai ancora creato immagini.",
+      "made": "{made} su {asked} pronte.",
+      "changed": "È cambiata solo l’immagine {n}.",
+      "fullReady": "L’immagine {n} alla massima risoluzione si sta scaricando.",
+      "choose": "Premi un’immagine per cambiarla a parole o scaricarla.",
+      "chosen": "immagine {n}",
+      "picture": "Immagine {n}",
+      "download": "Scarica",
+      "fullMake": "Scarica alla massima risoluzione",
+      "fullDownload": "Scarica alla massima risoluzione (pronta)",
+      "priceVariants": "{n} immagini: {count, plural, one {# credito} other {# crediti}}",
+      "priceEdit": "Cambiare un’immagine: {count, plural, one {# credito} other {# crediti}}",
+      "price": "{count, plural, one {# credito} other {# crediti}}",
+      "delete": "Elimina immagine",
+      "deleteConfirm": "Eliminare questa immagine e tutte le sue versioni? Non si può annullare.",
+      "notConfigured": "Le immagini non sono ancora attive. Non viene addebitato nulla.",
+      "working": {
+        "variants": "Creo 4 immagini…",
+        "edit": "Cambio l’immagine {n}…",
+        "full": "La creo alla massima risoluzione…"
+      },
+      "errors": {
+        "tooShort": "Di’ qualcosa in più sull’immagine.",
+        "tooLong": "È troppo lungo; fino a {limit} caratteri.",
+        "insufficient": "Crediti insufficienti per questo.",
+        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "refused": "Il fornitore ha rifiutato di creare questa immagine. Prova un’altra descrizione; non è stato addebitato nulla.",
+        "busy": "Questa immagine si sta già modificando. Aspetta che finisca.",
+        "gone": "Quell’immagine non esiste più.",
+        "unavailable": "Il fornitore di immagini ora non risponde. Non è stato addebitato nulla; riprova.",
+        "failed": "Qualcosa è andato storto. Non è stato addebitato nulla di ciò che non è stato fatto.",
+        "offline": "Nessuna connessione. Controlla la rete e riprova."
+      }
     }
   },
   "module": {

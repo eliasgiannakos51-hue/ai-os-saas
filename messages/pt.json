@@ -2994,6 +2994,53 @@
         "title": "Nada diz “{query}”",
         "why": "Tente menos palavras ou outro tipo."
       }
+    },
+    "images": {
+      "name": "Imagem",
+      "help": "Diz o que queres ver. Recebes 4 versões; toca numa para a mudares por palavras ou descarregares em resolução máxima.",
+      "placeholder": "Descreve a imagem que queres",
+      "placeholderEdit": "O que deve mudar na imagem {n}?",
+      "aspect": "Formato",
+      "aspects": {
+        "square": "Quadrada 1:1",
+        "portrait": "Vertical 4:5",
+        "wide": "Horizontal 16:9",
+        "story": "Formato story 9:16"
+      },
+      "recent": "Anteriores",
+      "recentEmpty": "Ainda não criaste imagens.",
+      "made": "{made} de {asked} prontas.",
+      "changed": "Só a imagem {n} mudou.",
+      "fullReady": "A imagem {n} em resolução máxima está a descarregar.",
+      "choose": "Toca numa imagem para a mudares por palavras ou descarregares.",
+      "chosen": "imagem {n}",
+      "picture": "Imagem {n}",
+      "download": "Descarregar",
+      "fullMake": "Descarregar em resolução máxima",
+      "fullDownload": "Descarregar em resolução máxima (pronta)",
+      "priceVariants": "{n} imagens: {count, plural, one {# crédito} other {# créditos}}",
+      "priceEdit": "Mudar uma imagem: {count, plural, one {# crédito} other {# créditos}}",
+      "price": "{count, plural, one {# crédito} other {# créditos}}",
+      "delete": "Eliminar imagem",
+      "deleteConfirm": "Eliminar esta imagem e todas as suas versões? Não dá para desfazer.",
+      "notConfigured": "As imagens ainda não estão ativas. Nada é cobrado.",
+      "working": {
+        "variants": "A criar 4 imagens…",
+        "edit": "A mudar a imagem {n}…",
+        "full": "A criar em resolução máxima…"
+      },
+      "errors": {
+        "tooShort": "Diz um pouco mais sobre a imagem.",
+        "tooLong": "É demasiado longo; até {limit} caracteres.",
+        "insufficient": "Não há créditos suficientes para isto.",
+        "rateLimited": "Demasiados pedidos ao mesmo tempo. Tenta novamente daqui a pouco.",
+        "refused": "O fornecedor recusou criar esta imagem. Tenta outra descrição; nada foi cobrado.",
+        "busy": "Esta imagem já está a mudar. Espera que termine.",
+        "gone": "Essa imagem já não existe.",
+        "unavailable": "O fornecedor de imagens não está a responder. Nada foi cobrado; tenta novamente.",
+        "failed": "Algo correu mal. Não foi cobrado nada que não tenha sido feito.",
+        "offline": "Sem ligação. Verifica a rede e tenta novamente."
+      }
     }
   },
   "module": {

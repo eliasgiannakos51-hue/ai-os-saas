@@ -2994,6 +2994,53 @@
         "title": "Nothing says “{query}”",
         "why": "Try fewer words, or another kind."
       }
+    },
+    "images": {
+      "name": "Image",
+      "help": "Say what you want to see. You get 4 versions; press one to change it in words or download it at full resolution.",
+      "placeholder": "Describe the image you want",
+      "placeholderEdit": "What should change in image {n}?",
+      "aspect": "Shape",
+      "aspects": {
+        "square": "Square 1:1",
+        "portrait": "Portrait 4:5",
+        "wide": "Wide 16:9",
+        "story": "Story 9:16"
+      },
+      "recent": "Earlier",
+      "recentEmpty": "You have not made any images yet.",
+      "made": "{made} of {asked} ready.",
+      "changed": "Only image {n} changed.",
+      "fullReady": "Image {n} at full resolution is downloading.",
+      "choose": "Press an image to change it in words or download it.",
+      "chosen": "image {n}",
+      "picture": "Image {n}",
+      "download": "Download",
+      "fullMake": "Download at full resolution",
+      "fullDownload": "Download at full resolution (ready)",
+      "priceVariants": "{n} images: {count, plural, one {# credit} other {# credits}}",
+      "priceEdit": "Changing one image: {count, plural, one {# credit} other {# credits}}",
+      "price": "{count, plural, one {# credit} other {# credits}}",
+      "delete": "Delete image",
+      "deleteConfirm": "Delete this image and all its versions? This cannot be undone.",
+      "notConfigured": "Images are not switched on yet. Nothing is charged.",
+      "working": {
+        "variants": "Making 4 images…",
+        "edit": "Changing image {n}…",
+        "full": "Making it at full resolution…"
+      },
+      "errors": {
+        "tooShort": "Say a little more about the image.",
+        "tooLong": "That is too long; up to {limit} characters.",
+        "insufficient": "Not enough credits for this.",
+        "rateLimited": "Too many requests at once. Try again shortly.",
+        "refused": "The provider declined to make this image. Try another description; nothing was charged.",
+        "busy": "This image is already changing. Wait for it to finish.",
+        "gone": "That image no longer exists.",
+        "unavailable": "The image provider is not answering right now. Nothing was charged; try again.",
+        "failed": "Something went wrong. Nothing that was not made was charged.",
+        "offline": "No connection. Check the network and try again."
+      }
     }
   },
   "module": {

@@ -188,6 +188,11 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // generation. The Content tracker (public.content) is listed above on
   // its own; this table is what the generator writes.
   { table: "generated_posts", label: "generated_posts", scope: "user_content" },
+  // MASTER 16, package 19. The rows are the words and the paths; the
+  // pictures themselves are in the ai-images bucket, which the account
+  // erasure empties (20261019000000_generated_images.sql puts it in
+  // delete_user_storage_objects' list).
+  { table: "generated_images", label: "generated_images", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

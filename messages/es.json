@@ -2994,6 +2994,53 @@
         "title": "Nada dice «{query}»",
         "why": "Prueba con menos palabras o con otro tipo."
       }
+    },
+    "images": {
+      "name": "Imagen",
+      "help": "Di lo que quieres ver. Recibes 4 versiones; pulsa una para cambiarla con palabras o descargarla a resolución completa.",
+      "placeholder": "Describe la imagen que quieres",
+      "placeholderEdit": "¿Qué debe cambiar en la imagen {n}?",
+      "aspect": "Formato",
+      "aspects": {
+        "square": "Cuadrada 1:1",
+        "portrait": "Vertical 4:5",
+        "wide": "Horizontal 16:9",
+        "story": "Formato story 9:16"
+      },
+      "recent": "Anteriores",
+      "recentEmpty": "Aún no has creado imágenes.",
+      "made": "{made} de {asked} listas.",
+      "changed": "Solo cambió la imagen {n}.",
+      "fullReady": "La imagen {n} a resolución completa se está descargando.",
+      "choose": "Pulsa una imagen para cambiarla con palabras o descargarla.",
+      "chosen": "imagen {n}",
+      "picture": "Imagen {n}",
+      "download": "Descargar",
+      "fullMake": "Descargar a resolución completa",
+      "fullDownload": "Descargar a resolución completa (lista)",
+      "priceVariants": "{n} imágenes: {count, plural, one {# crédito} other {# créditos}}",
+      "priceEdit": "Cambiar una imagen: {count, plural, one {# crédito} other {# créditos}}",
+      "price": "{count, plural, one {# crédito} other {# créditos}}",
+      "delete": "Eliminar imagen",
+      "deleteConfirm": "¿Eliminar esta imagen y todas sus versiones? No se puede deshacer.",
+      "notConfigured": "Las imágenes aún no están activadas. No se cobra nada.",
+      "working": {
+        "variants": "Creando 4 imágenes…",
+        "edit": "Cambiando la imagen {n}…",
+        "full": "Creándola a resolución completa…"
+      },
+      "errors": {
+        "tooShort": "Di un poco más sobre la imagen.",
+        "tooLong": "Es demasiado largo; hasta {limit} caracteres.",
+        "insufficient": "No hay créditos suficientes para esto.",
+        "rateLimited": "Demasiadas solicitudes a la vez. Inténtalo de nuevo en un momento.",
+        "refused": "El proveedor se negó a crear esta imagen. Prueba otra descripción; no se cobró nada.",
+        "busy": "Esta imagen ya se está cambiando. Espera a que termine.",
+        "gone": "Esa imagen ya no existe.",
+        "unavailable": "El proveedor de imágenes no responde ahora. No se cobró nada; inténtalo de nuevo.",
+        "failed": "Algo salió mal. No se cobró nada que no se hiciera.",
+        "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
+      }
     }
   },
   "module": {

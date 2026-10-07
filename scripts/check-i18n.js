@@ -69,6 +69,13 @@ const LOCALE_ALLOWED = new Set([
   // "page" is the French word for a page too, in the same ICU plural.
   "fr:dashboard.chat.attach.pages",
   "fr:dashboard.toolShell.pages.count",
+  // "image" and "portrait" are the French words too, and "story" is what
+  // the format is called in French apps (the Image tool, MASTER 16, 19).
+  "fr:dashboard.images.name",
+  "fr:dashboard.images.picture",
+  "fr:dashboard.images.chosen",
+  "fr:dashboard.images.aspects.portrait",
+  "fr:dashboard.images.aspects.story",
   "pt:dashboard.chat.sitePane.label",
   "fr:dashboard.library.kinds.site",
   "fr:dashboard.library.kinds.document",

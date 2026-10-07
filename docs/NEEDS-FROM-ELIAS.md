@@ -142,7 +142,13 @@
     γονέα σου· δεν περιμένω.
     - Το `gmail.readonly` είναι «restricted». Έως 100 δοκιμαστικοί
       χρήστες χωρίς έλεγχο (η ουρά ζητά «Gmail μόνο για δοκιμαστές»).
-    - Μετά: `GOOGLE_OAUTH_CLIENT_ID` / `_SECRET` στο Vercel.
+    - Μετά: `GOOGLE_OAUTH_CLIENT_ID` / `_SECRET` στο Vercel, και το
+      `INTEGRATION_ENCRYPTION_KEY` (32 bytes· `openssl rand -hex 32`).
+    - Το Ημερολόγιο (2026-10-07, πακέτο 31) θέλει το ίδιο client. Στην
+      οθόνη συναίνεσης της Google πρόσθεσε και το scope
+      `https://www.googleapis.com/auth/calendar.events.readonly`· είναι
+      «sensitive», όχι «restricted», άρα θέλει τον έλεγχο της Google αλλά
+      όχι το CASA. Μέχρι τον έλεγχο, μόνο οι δοκιμαστικοί χρήστες.
     *Ξεμπλοκάρει:* Gmail (2.5) και Ημερολόγιο (2.4).
 
 11. **GitHub OAuth App** (δωρεάν): GitHub → Settings → Developer settings

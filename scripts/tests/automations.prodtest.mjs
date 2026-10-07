@@ -30,9 +30,7 @@
  */
 import http from "node:http";
 import { spawn } from "node:child_process";
-import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 
@@ -142,14 +140,28 @@ function rest({ req, res, url, body, json }) {
 }
 
 const flags = [];
+const bucket = new Map();
+// The person's language, as the account keeps it: what a notification is written in.
+MOCK_USER.user_metadata = { ...(MOCK_USER.user_metadata ?? {}), preferred_locale: "el" };
 const supa = await startMockSupabase({
   port: 54381,
   tableRows: { feature_flags: flags, user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }] },
+  // THE FILES BUCKET: what the browser stores is what the register route reads back.
   handle: (ctx) => {
-    if (ctx.url.pathname.startsWith("/storage/v1/object/user-files")) {
-      ctx.json(200, { Key: ctx.url.pathname.replace("/storage/v1/object/", "") });
+    const m = ctx.url.pathname.match(/^\/storage\/v1\/object\/(?:authenticated\/)?user-files\/(.+)$/);
+    if (m && ctx.req.method === "POST") {
+      bucket.set(decodeURIComponent(m[1]), ctx.body);
+      ctx.json(200, { Key: `user-files/${m[1]}` });
       return true;
     }
+    if (m && ctx.req.method === "GET") {
+      const bytes = bucket.get(decodeURIComponent(m[1]));
+      if (bytes === undefined) return ctx.json(404, { message: "not found" }), true;
+      ctx.res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+      ctx.res.end(bytes);
+      return true;
+    }
+    if (ctx.url.pathname.startsWith("/storage/v1/object/user-files")) return ctx.json(200, []), true;
     return rest(ctx);
   },
 });
@@ -189,8 +201,9 @@ const model = http.createServer((req, res) => {
     const words = JSON.stringify(asked.messages ?? []);
     let out;
     if (asked.tool_choice?.name === "set_automation") {
-      if (words.includes("Telegram") && !/9|εννιά/.test(words.split("Their time zone")[0].replace(/Telegram/g, ""))) out = tool("set_automation", { name: "", boxes: [], question: "Τι ώρα το πρωί να σου στέλνω;", unsupported: "" });
-      else if (words.includes("Telegram")) out = tool("set_automation", { name: "Το πρωινό μου", boxes: MORNING("09:00"), question: "", unsupported: "" });
+      // Keyed on the person's own words: "κάθε πρωί" with no hour is a question.
+      if (words.includes("κάθε πρωί") && !/9|εννιά/.test(words.split("Their time zone")[0])) out = tool("set_automation", { name: "", boxes: [], question: "Τι ώρα το πρωί να σου στέλνω;", unsupported: "" });
+      else if (words.includes("κάθε πρωί")) out = tool("set_automation", { name: "Το πρωινό μου", boxes: MORNING("09:00"), question: "", unsupported: "" });
       else if (words.includes("Δευτέρα")) out = tool("set_automation", { name: "Αναφορά Δευτέρας", boxes: MONDAY, question: "", unsupported: "" });
       else out = tool("set_automation", { name: "Σύνοψη αρχείων", boxes: UPLOAD, question: "", unsupported: "" });
     } else if (asked.tool_choice?.name === "set_box") {
@@ -234,6 +247,11 @@ const base = {
 
 const el = JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.automations;
 const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
+// The brand names the boxes print, read from where the screen takes them.
+const CONNECTION = {
+  google_calendar: readFileSync("src/lib/integrations/providers.ts", "utf8").match(/id: "google_calendar",[\s\S]*?name: "([^"]+)"/)[1],
+  telegram: readFileSync("src/components/automations/flow-boxes.tsx", "utf8").match(/telegram: "([^"]+)"/)[1],
+};
 
 const servers = [];
 const pageErrors = [];
@@ -259,7 +277,8 @@ async function start(env) {
   throw new Error("the production server did not start");
 }
 async function open(origin, device) {
-  const context = await browser.newContext({ viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch });
+  // A person in Greece: the browser's zone is the one an automation is made in.
+  const context = await browser.newContext({ viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch, timezoneId: "Europe/Athens" });
   await context.addCookies(
     [
       { ...supa.authCookie, url: origin, httpOnly: false, secure: false, sameSite: "Lax" },
@@ -335,7 +354,7 @@ try {
       (await boxes.count()) === 4 && (await boxes.nth(0).innerText()).includes(fill(el.start.day, { at: "09:00" })) && (await boxes.nth(1).innerText()).includes(el.sources.calendar_today) && (await boxes.nth(3).innerText()).includes(el.actions.send_telegram));
     const needs = await page.locator('[data-testid="flow-needs"]').allInnerTexts();
     check("the calendar and Telegram are not connected: each box says so, with the press that connects it",
-      needs.length === 2 && needs[0].includes("Google Calendar") && needs[1].includes("Telegram") && (await page.locator('[data-testid="flow-needs"] a').first().getAttribute("href")) === "/dashboard/integrations");
+      needs.length === 2 && needs[0].includes(fill(el.needsConnection, { name: CONNECTION.google_calendar })) && needs[1].includes(fill(el.needsConnection, { name: CONNECTION.telegram })) && (await page.locator('[data-testid="flow-needs"] a').first().getAttribute("href")) === "/dashboard/integrations");
     // Change ONE box with words.
     await press(boxes.nth(0));
     check("pressing a box chooses it: the field says it will change only that one", (await page.locator('[data-testid="box-chosen"]').innerText()).includes(el.kinds.start) && (await page.locator("textarea").first().getAttribute("placeholder")) === el.placeholderBox);
@@ -348,7 +367,7 @@ try {
     await press(page.locator('[data-testid="flow-toggle"]'));
     await settle(page);
     check("switching it on is refused while the calendar and Telegram are not connected, and it says which",
-      flowNamed("Το πρωινό μου").is_active === false && (await thread(page)).includes(fill(el.errors.needsConnection, { names: "Google Calendar, Telegram" })));
+      flowNamed("Το πρωινό μου").is_active === false && (await thread(page)).includes(fill(el.errors.needsConnection, { names: `${CONNECTION.google_calendar}, ${CONNECTION.telegram}` })));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }
@@ -447,11 +466,17 @@ try {
     check("switched on: it runs on every file, with no next hour", flowNamed("Σύνοψη αρχείων").is_active === true && flowNamed("Σύνοψη αρχείων").next_run_at === null && (await page.locator('[data-testid="flow-state"]').innerText()).includes(el.status.onFile));
     // Upload on the Files page, as anybody would.
     await page.goto(`${ON}/dashboard/files`, { waitUntil: "networkidle" });
-    const dir = mkdtempSync(join(tmpdir(), "automation-file-"));
-    const file = join(dir, "σύμβαση.txt");
-    writeFileSync(file, "Σύμβαση μίσθωσης. Ισχύει ως τις 31/12/2027. Μίσθωμα 900 € τον μήνα.");
+    const contract = Buffer.from("Σύμβαση μίσθωσης. Ισχύει ως τις 31/12/2027. Μίσθωμα 900 € τον μήνα.");
+    const seen = [];
+    page.on("request", (r) => seen.push(`${r.method()} ${new URL(r.url()).pathname}`));
+    page.on("console", (m) => seen.push(`console ${m.type()}: ${m.text().slice(0, 160)}`));
     const kicked = page.waitForResponse((r) => r.url().endsWith("/api/automations/events"), { timeout: 30000 }).catch(() => null);
-    await page.locator('input[type="file"]').first().setInputFiles(file);
+    const registered = page.waitForResponse((r) => /\/api\/files\/(register|upload)$/.test(r.url()), { timeout: 30000 }).catch(() => null);
+    // The Files tool's own picker (the shell's, or the page's before it), not another one on the screen.
+    await page.locator('[data-testid="files-shell-input"], main input[type="file"][accept]').first().setInputFiles({ name: "σύμβαση.txt", mimeType: "text/plain", buffer: contract });
+    const reg = await registered;
+    const regBody = reg ? await reg.json().catch(() => null) : null;
+    check("the file is stored and read, and its answer says one automation was started", reg?.status() === 200 && regBody?.file?.processing_status === "ready" && regBody.automations === 1, `${JSON.stringify(regBody)}\n        seen: ${seen.filter((x) => !/_next|favicon/.test(x)).slice(-15).join(" | ")}\n        inputs: ${await page.locator('input[type="file"]').count()} ${await page.locator('input[type="file"]').first().getAttribute("data-testid")}\n        url: ${page.url()}\n        main: ${(await page.locator("main").innerText()).slice(0, 400).replace(/\n/g, " / ")}`);
     const kick = await kicked;
     check("the upload that started an automation asks for it to run, at once", Boolean(kick) && kick.status() === 200 && (await kick.json()).ran === 1);
     const run = runsOf(upload).find((r) => r.started_by === "event");
@@ -463,7 +488,7 @@ try {
     await press(page.locator('[data-testid="flow-mine"]'));
     await press(page.locator('[data-testid="flow-list"] button', { hasText: "Σύνοψη αρχείων" }));
     await page.locator('[data-testid="flow-run"]').first().waitFor({ timeout: 10000 }).catch(() => null);
-    check("the history shows the run from the file, done", (await page.locator('[data-testid="flow-run"]').first().innerText()).includes(el.by.event) && (await page.locator('[data-testid="flow-run"]').first().innerText()).includes(el.runStatus.done));
+    check("the history shows the run from the file, done", (await page.locator('[data-testid="flow-run"]').count()) > 0 && (await page.locator('[data-testid="flow-run"]').first().innerText()).includes(el.by.event) && (await page.locator('[data-testid="flow-run"]').first().innerText()).includes(el.runStatus.done));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

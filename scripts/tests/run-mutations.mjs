@@ -130,7 +130,8 @@ if (suites.length === 0) {
 // 242 -> 243 on 2026-10-07: file-pages (MASTER 16, package 12).
 // 243 -> 244 on 2026-10-07: image-studio (MASTER 16, package 19).
 // 244 -> 245 on 2026-10-07: google-calendar (MASTER 16, package 31).
-const FLOOR = 245;
+// 245 -> 246 on 2026-10-07: automations (MASTER 16, package 30).
+const FLOOR = 246;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

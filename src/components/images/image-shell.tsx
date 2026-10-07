@@ -39,12 +39,7 @@ import {
 type Turn = { id: string; role: "user" | "tool"; text: string; image?: string };
 type Running = "variants" | "edit" | "full" | null;
 
-const ASPECT_KEY: Record<ImageAspect, "square" | "portrait" | "wide" | "story"> = {
-  "1:1": "square",
-  "4:5": "portrait",
-  "16:9": "wide",
-  "9:16": "story",
-};
+
 const ASPECT_CLASS: Record<ImageAspect, string> = {
   "1:1": "aspect-square",
   "4:5": "aspect-[4/5]",
@@ -83,6 +78,13 @@ export function ImageShell({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [confirming, setConfirming] = useState<{ credits: number; go: () => void } | null>(null);
 
+  // LITERAL KEYS, so the message slicer can see every word this screen uses.
+  const aspectLabel: Record<ImageAspect, string> = {
+    "1:1": t("aspects.square"),
+    "4:5": t("aspects.portrait"),
+    "16:9": t("aspects.wide"),
+    "9:16": t("aspects.story"),
+  };
   const shown = images.find((image) => image.id === shownId) ?? null;
   const editing = shown !== null && chosen !== null && open === "image";
 
@@ -376,7 +378,7 @@ export function ImageShell({
         options={[
           <span key="aspect" className="relative">
             <button type="button" onClick={() => setChoosingAspect((v) => !v)} aria-expanded={choosingAspect} data-testid="image-aspect" className={OPTION}>
-              {t(`aspects.${ASPECT_KEY[aspect]}`)}
+              {aspectLabel[aspect]}
               <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             {choosingAspect && (
@@ -393,7 +395,7 @@ export function ImageShell({
                         setChoosingAspect(false);
                       }}
                     />
-                    <span className="flex-1">{t(`aspects.${ASPECT_KEY[a]}`)}</span>
+                    <span className="flex-1">{aspectLabel[a]}</span>
                   </label>
                 ))}
               </fieldset>

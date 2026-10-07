@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { hasEnoughCredits } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
-import { callImage } from "@/lib/images/gemini-image";
+import { callImage, imageApiKey } from "@/lib/images/gemini-image";
 import { IMAGE_FEATURE, IMAGE_PREVIEW_MODEL, IMAGE_RATES_USD } from "@/lib/images/image-pricing";
-import { IMAGE_ROW_COLUMNS, imageContext, refuse, showImages, storePicture, type ImageRow } from "@/lib/images/image-route";
+import { IMAGE_ROW_COLUMNS, imageGate, refuse, removePictures, showImages, spendingAllowed, storePicture, type ImageRow } from "@/lib/images/image-access";
 import {
-  IMAGE_BUCKET,
   IMAGE_VARIANTS,
   MAX_IMAGE_DESCRIPTION_CHARS,
   checkImageText,
@@ -50,9 +50,19 @@ export async function POST(request: Request) {
   const description = verdict.text;
   const aspect = readAspect(body.aspect);
 
-  const ctx = await imageContext({ spending: true, endpoint: "image_generate", fingerprint: fingerprintRequest(description, aspect) });
-  if (ctx instanceof NextResponse) return ctx;
-  const { user, plan, prices, bypass } = ctx;
+  const apiKey = imageApiKey();
+  if (!apiKey) return refuse("not_configured", 503);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return refuse("not_signed_in", 401);
+  const gate = await imageGate(user);
+  if (gate instanceof NextResponse) return gate;
+  const spend = await spendingAllowed(user, gate, "image_generate", fingerprintRequest(description, aspect));
+  if (spend instanceof NextResponse) return spend;
+  const { plan, prices } = gate;
+  const { bypass } = spend;
 
   let reservationId = "";
   let settled = false;
@@ -69,7 +79,7 @@ export async function POST(request: Request) {
     const id = crypto.randomUUID();
     const outcomes = await Promise.all(
       Array.from({ length: IMAGE_VARIANTS }, (_, index) =>
-        callImage({ apiKey: ctx.apiKey, model: IMAGE_PREVIEW_MODEL, prompt: variantPrompt(description, index), aspect, signal: request.signal })
+        callImage({ apiKey, model: IMAGE_PREVIEW_MODEL, prompt: variantPrompt(description, index), aspect, signal: request.signal })
       )
     );
 
@@ -100,7 +110,7 @@ export async function POST(request: Request) {
       .single();
     if (saveError || !row) {
       logApiError("/api/images/generate", saveError ?? new Error("no row"), { stage: "save" });
-      await admin.storage.from(IMAGE_BUCKET).remove(variants.map((v) => v.path));
+      await removePictures(variants.map((v) => v.path));
       await releaseReservation(user.id, reservationId);
       return refuse("save_failed", 500);
     }

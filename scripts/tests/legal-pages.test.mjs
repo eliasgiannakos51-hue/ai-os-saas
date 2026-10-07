@@ -428,17 +428,21 @@ const COMPANY = {
   RESEND_API_KEY: "Resend",
   UNSPLASH_ACCESS_KEY: "Unsplash",
   GOOGLE_OAUTH_CLIENT_ID: "Google",
+  // The Image tool (src/lib/images/gemini-image.ts) sends descriptions and
+  // pictures to Gemini under either name, so both are Google now.
+  GEMINI_API_KEY: "Google",
+  GOOGLE_API_KEY: "Google",
   SLACK_CLIENT_ID: "Slack",
   TELEGRAM_BOT_TOKEN: "Telegram",
 };
 // Not sub-processors, each for a reason that is CHECKED below rather than
 // trusted: a key the inventory lists but no code sends anything with.
-const INVENTORY_ONLY = ["DEEPGRAM_API_KEY", "BFL_API_KEY", "IDEOGRAM_API_KEY", "RUNWAYML_API_SECRET", "GEMINI_API_KEY"];
+const INVENTORY_ONLY = ["DEEPGRAM_API_KEY", "BFL_API_KEY", "IDEOGRAM_API_KEY", "RUNWAYML_API_SECRET"];
 // Text providers the failover CAN use, off unless an operator names them in
 // AI_PROVIDER_ORDER (lib/ai/providers/registry.ts: DEFAULT_PROVIDER_ORDER
 // is anthropic alone). The day that default changes, these become
 // sub-processors, and the check on the default below goes red first.
-const FAILOVER_OFF_BY_DEFAULT = ["GOOGLE_API_KEY", "GROQ_API_KEY"];
+const FAILOVER_OFF_BY_DEFAULT = ["GROQ_API_KEY"];
 // Web push carries a payload encrypted to the browser (RFC 8291): the push
 // service relays ciphertext it cannot read.
 const NOT_A_RECIPIENT = ["VAPID_PRIVATE_KEY"];

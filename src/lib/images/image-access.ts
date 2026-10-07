@@ -1,7 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -10,7 +9,6 @@ import { checkAiCallAllowed } from "@/lib/ai-circuit-breaker";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
 import { planMeetsMinimum, type Plan, type PlanSlug } from "@/lib/billing/plans";
 import { isFeatureOn } from "@/lib/flags/flags";
-import { imageApiKey } from "@/lib/images/gemini-image";
 import { imagePrices, type ImagePrices } from "@/lib/images/image-pricing";
 import {
   IMAGE_BUCKET,
@@ -23,65 +21,50 @@ import {
 } from "@/lib/images/image-studio";
 
 /**
- * WHAT EVERY IMAGE ROUTE DOES FIRST, written once (MASTER 16, package 19).
+ * WHAT THE IMAGE ROUTES SHARE (MASTER 16, package 19), and nothing that
+ * reaches the provider: the routes that only read, save or delete import
+ * this and not lib/images/gemini-image.ts, so they are not counted as
+ * spending (scripts/tests/route-spend-inventory.test.mjs).
  *
- * The order is the one every paid route keeps (route-refusals gate): the
- * key, the person, the switch, the plan, then — for a route that spends —
- * the breaker and the bypass ceiling, and only then the price. Each
- * refusal is a CODE; the screen says it in the reader's language
- * (components/images/image-shell.tsx).
+ * EACH ROUTE STILL SAYS WHO IS ASKING AND WHOSE ROW IT IS, in its own
+ * file: auth.getUser() and `.eq("user_id", user.id)` are written where the
+ * gates read them (security-posture, route-contract). What is shared is
+ * what comes after: the switch and the plan, the breaker, the bucket.
  *
  * THE PLAN. Images are Starter and up — the tier the Images page has
  * carried since the build modules (src/lib/build-modules.ts, minPlanSlug)
- * and the catalog row says (feature-catalog.ts, "imageStudio"). No tier is
- * decided here.
+ * and the catalog entry says (feature-catalog.ts, "imageStudio"). No tier
+ * is decided here.
  */
 export const IMAGE_MIN_PLAN: PlanSlug = "starter";
-
-export type ImageContext = {
-  user: User;
-  supabase: Awaited<ReturnType<typeof createClient>>;
-  plan: Plan | null;
-  packPriceEur: number | null;
-  prices: ImagePrices;
-  bypass: boolean;
-  apiKey: string;
-};
 
 export function refuse(code: string, status: number, extra: Record<string, unknown> = {}): NextResponse {
   return NextResponse.json({ ok: false, code, ...extra }, { status });
 }
 
-/**
- * The person, the switch and the plan; and when `spending`, the key, the
- * breaker and the ceiling. Returns a refusal or everything a route needs.
- */
-export async function imageContext(options: { spending: boolean; fingerprint?: string; endpoint?: string }): Promise<ImageContext | NextResponse> {
-  const apiKey = imageApiKey();
-  if (options.spending && !apiKey) return refuse("not_configured", 503);
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return refuse("not_signed_in", 401);
+export type ImageGate = { plan: Plan | null; packPriceEur: number | null; prices: ImagePrices; isAdmin: boolean };
+
+/** The switch and the plan, for a signed-in person. A refusal, or the price list for this account. */
+export async function imageGate(user: User): Promise<ImageGate | NextResponse> {
   if (!(await isFeatureOn("image-studio", user))) return refuse("not_enabled", 403);
   const isAdmin = isAdminEmail(user.email);
   const plan = await resolveEffectivePlan(user);
   if (!isAdmin && !planMeetsMinimum(plan?.slug ?? "free", IMAGE_MIN_PLAN)) return refuse("not_included", 403);
-
-  let bypass = isAdmin;
-  if (options.spending) {
-    const breaker = await checkAiCallAllowed(user.id, options.endpoint ?? "image_generate", options.fingerprint ?? "");
-    if (!breaker.allowed) return refuse("rate_limited", 429);
-    const isBeta = await hasActiveBetaBypass(user);
-    bypass = isAdmin || isBeta;
-    if (bypass) {
-      const ceiling = await checkBypassCeiling(user.id, isAdmin, isBeta);
-      if (!ceiling.allowed) return refuse("bypass_ceiling", 429);
-    }
-  }
   const packPriceEur = await getPurchasedPackCreditPriceEur(user.id);
-  return { user, supabase, plan, packPriceEur, prices: imagePrices(plan, packPriceEur), bypass, apiKey };
+  return { plan, packPriceEur, prices: imagePrices(plan, packPriceEur), isAdmin };
+}
+
+/** Before anything is spent: the breaker, and the ceiling on accounts that are not charged. */
+export async function spendingAllowed(user: User, gate: ImageGate, endpoint: string, fingerprint: string): Promise<{ bypass: boolean } | NextResponse> {
+  const breaker = await checkAiCallAllowed(user.id, endpoint, fingerprint);
+  if (!breaker.allowed) return refuse("rate_limited", 429);
+  const isBeta = await hasActiveBetaBypass(user);
+  const bypass = gate.isAdmin || isBeta;
+  if (bypass) {
+    const ceiling = await checkBypassCeiling(user.id, gate.isAdmin, isBeta);
+    if (!ceiling.allowed) return refuse("bypass_ceiling", 429);
+  }
+  return { bypass };
 }
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -96,18 +79,6 @@ export type ImageRow = {
 };
 
 export const IMAGE_ROW_COLUMNS = "id, prompt, aspect, variants, credits_charged, created_at";
-
-/** One row, the owner's only: read through the person's own session (RLS) AND filtered on user_id. */
-export async function loadOwnImage(ctx: ImageContext, id: string): Promise<ImageRow | null> {
-  const { data, error } = await ctx.supabase
-    .from("generated_images")
-    .select(IMAGE_ROW_COLUMNS)
-    .eq("id", id)
-    .eq("user_id", ctx.user.id)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as ImageRow | null) ?? null;
-}
 
 /**
  * A CHANGE AT A TIME. A change and a largest size both rewrite `variants`
@@ -139,6 +110,13 @@ export async function storePicture(path: string, data: Buffer, mime: string): Pr
   return !error;
 }
 
+/** Removes pictures this file stored: a row that could not be written, or a row deleted. */
+export async function removePictures(paths: string[]): Promise<boolean> {
+  if (paths.length === 0) return true;
+  const { error } = await createAdminClient().storage.from(IMAGE_BUCKET).remove(paths);
+  return !error;
+}
+
 export async function readPicture(path: string): Promise<{ data: Buffer; mime: string } | null> {
   const { data, error } = await createAdminClient().storage.from(IMAGE_BUCKET).download(path);
   if (error || !data) return null;
@@ -157,7 +135,8 @@ export async function showImages(rows: ImageRow[], userId: string): Promise<Show
   const signed = new Map<string, string>();
   if (paths.length > 0) {
     const { data } = await createAdminClient().storage.from(IMAGE_BUCKET).createSignedUrls(paths, IMAGE_URL_TTL_SECONDS);
-    for (const entry of data ?? []) if (entry.path && entry.signedUrl) signed.set(entry.path, entry.signedUrl);
+    // An answer that is not a list signs nothing, rather than throwing the page away.
+    for (const entry of Array.isArray(data) ? data : []) if (entry.path && entry.signedUrl) signed.set(entry.path, entry.signedUrl);
   }
   return parsed.map(({ row, variants }) => ({
     id: row.id,

@@ -9,7 +9,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-05">
+    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-07">
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you
@@ -90,6 +90,13 @@ export default function PrivacyPage() {
           <li>
             <span className="text-foreground/90">Unsplash</span> — photo
             search for sites and presentations. It receives search words, not
+            your account details.
+          </li>
+          <li>
+            <span className="text-foreground/90">Google</span> — only if you
+            use the Image tool: Google&apos;s Gemini receives the description
+            you write and, when you change a picture or ask for it at full
+            size, that picture, and makes the pictures. It does not receive
             your account details.
           </li>
           <li>

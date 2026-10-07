@@ -13,7 +13,7 @@ import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/bill
 import { planMeetsMinimum } from "@/lib/billing/plans";
 import { imageApiKey } from "@/lib/images/gemini-image";
 import { imagePrices } from "@/lib/images/image-pricing";
-import { IMAGE_MIN_PLAN, IMAGE_ROW_COLUMNS, showImages, type ImageRow } from "@/lib/images/image-route";
+import { IMAGE_MIN_PLAN, IMAGE_ROW_COLUMNS, showImages, type ImageRow } from "@/lib/images/image-access";
 import { readRequestedId } from "@/lib/library/requested";
 
 export const dynamic = "force-dynamic";
@@ -40,10 +40,8 @@ export default async function ImagesPage(props: { searchParams: Promise<{ record
   // tool's, which the page below refuses with its own wall — keeps the
   // list it always had.
   const plan = await resolveEffectivePlan(user);
-  if (
-    (await isFeatureOn("image-studio", user)) &&
-    (isAdminEmail(user.email) || planMeetsMinimum(plan?.slug ?? "free", IMAGE_MIN_PLAN))
-  ) {
+  const included = isAdminEmail(user.email) || planMeetsMinimum(plan?.slug ?? "free", IMAGE_MIN_PLAN);
+  if ((await isFeatureOn("image-studio", user)) && included) {
     const supabase = await createClient();
     const { data } = await supabase
       .from("generated_images")
@@ -65,5 +63,7 @@ export default async function ImagesPage(props: { searchParams: Promise<{ record
       </div>
     );
   }
-  return <BuildModulePage config={CONFIG} icon={MODULE_ICONS.images} />;
+  return (
+    <BuildModulePage config={CONFIG} icon={MODULE_ICONS.images} />
+  );
 }

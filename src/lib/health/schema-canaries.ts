@@ -413,6 +413,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "which remembered facts an answer used is shown when it arrives but not after a reload",
   },
   {
+    kind: "column",
+    table: "generated_images",
+    column: "variants",
+    migration: "20261019000000_generated_images.sql",
+    breaks: "the Image tool makes four pictures, cannot write their row, deletes them again and charges nothing — so it makes nothing at all",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

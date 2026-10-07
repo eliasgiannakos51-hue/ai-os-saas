@@ -175,8 +175,10 @@ export type FeatureEntry = {
   unlimitedProof?: UnlimitedProof;
   /**
    * Kept out of the published comparison table, with the reason.
-   * Owner-only operational screens are the only legitimate use: they are
-   * not sold, so a row for them would be a row no buyer can ever buy.
+   * Owner-only screens are the only legitimate use: they are not sold, so
+   * a row for them would be a row no buyer can ever buy. A tool behind a
+   * switch that admits only the owner and the test account is one of
+   * them until the switch opens (imageStudio, below).
    */
   notSold?: string;
   /**
@@ -1118,21 +1120,24 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // the build goes red until the row is published.
   // THE IMAGE TOOL (MASTER 16, package 19). Starter and up — the tier the
   // Images page already carries (buildLogs above, lib/build-modules.ts) —
-  // enforced in every image route before anything is spent. NOT A ROW YET:
-  // it is behind the switch "image-studio" for the owner and the test
-  // account, and no image is made without the provider's key (NEEDS 5), so
-  // a buyer cannot have it. The row goes on in the commit that opens the
-  // switch to everyone.
+  // enforced in every image route before anything is spent. NOT A ROW YET,
+  // and not `notBuilt` either, because it is built (pricing-truth holds a
+  // held tier with routes to publishing it): it is behind the switch
+  // "image-studio", which admits the owner and the test account only, and
+  // no picture is made without the provider's key (NEEDS 5). A row a buyer
+  // cannot have is the lie this file exists to stop. It is published when
+  // the switch is opened to everyone (docs/NEEDS-FROM-ELIAS.md, 38).
   {
     id: "imageStudio",
     group: "make",
     minPlan: "starter",
     routes: ["images/generate", "images/[id]/edit", "images/[id]/full", "images/[id]/download", "images/[id]"],
     charges: true,
-    notBuilt:
-      "behind the switch image-studio until the owner opens it to everyone, and no picture is made " +
-      "until the image provider's key is set (NEEDS 5)",
-    enforcedIn: "src/lib/images/image-route.ts",
+    notSold:
+      "owner-only for now: the switch image-studio admits the owner and the test account " +
+      "(isFeatureOn in src/lib/images/image-access.ts), and no picture is made until the image " +
+      "provider's key is set (NEEDS 5)",
+    enforcedIn: "src/lib/images/image-access.ts",
     enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", IMAGE_MIN_PLAN)",
     cell: (p) => boolCell(p.slug !== "free"),
   },

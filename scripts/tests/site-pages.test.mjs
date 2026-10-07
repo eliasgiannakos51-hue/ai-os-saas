@@ -105,7 +105,10 @@ check("the route is behind the switch", /if \(!\(await isFeatureOn\("site-pages"
 check("...only the owner's site, history and version are read", (route.match(/\.eq\("user_id", user\.id\)/g) ?? []).length === 4);
 check("...a site being made or changed is refused", /if \(site\.status !== "completed"\) return fail\("busy", 409\);/.test(route));
 check("...nothing to undo is said", /if \(!target\) return fail\("nothing_to_undo", 409\);/.test(route));
-check("...the home page and the pages come back together", /\.update\(\{ html_content: restore\.html_content, pages \}\)/.test(route));
+check("...the home page and the pages come back together, written by the server as every site write is",
+  /createAdminClient\(\)\s*\.from\("user_websites"\)\s*\.update\(\{ html_content: restore\.html_content, pages \}\)/.test(route));
+check("...never in the middle of an edit: the edit's own lock is respected",
+  /\.or\(`editing_started_at\.is\.null,editing_started_at\.lt\.\$\{staleClaimCutoff\}`\)/.test(route) && /if \(!record\) return fail\("busy", 409\);/.test(route));
 check("...one more version row records it; nothing is deleted",
   /change_description: undoDescription\(target\.undoes\),/.test(route) && /version_number: highest \+ 1,/.test(route) && !/\.delete\(/.test(route));
 check("...free: no hold, no charge", !/reserveCredits|settleReservation|deductCredits/.test(route));

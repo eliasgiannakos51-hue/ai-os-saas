@@ -464,8 +464,9 @@ console.log("\n== PART C: the produced page is measured, not trusted ==\n");
 
   // IT REACHES A PERSON, IN THEIR LANGUAGE. A note nothing renders is a
   // column nobody reads.
-  const workspace = readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8");
-  check('the workspace has a case for it', /case "sameSkeleton":/.test(workspace));
+  // The sentences live in the hook the Site page and the Site shell share.
+  const workspace = readFileSync("src/components/website-builder/use-generation-note-text.ts", "utf8");
+  check('the workspace has a case for it', /case "sameSkeleton":/.test(workspace) && /const describeNote = useGenerationNoteText\(\);/.test(readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8")));
   check("...and passes both values to the translation", /notes\.sameSkeleton", \{ percent: note\.percent, name: note\.against \}/.test(workspace));
   for (const locale of ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"]) {
     const text = JSON.parse(readFileSync(`messages/${locale}.json`, "utf8"))

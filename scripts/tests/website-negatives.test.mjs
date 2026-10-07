@@ -284,7 +284,10 @@ console.log("\n== 6. the owner is told, in their language ==");
   for (const kind of ["removedFeature", "removedPage", "pageCap", "mapZoom", "stopped"]) {
     check(`the ${kind} note is described through t("notes.${kind}")`, new RegExp(`case "${kind}":\\s*return t\\("notes\\.${kind}"`).test(said));
   }
-  check("the feature name comes from the locale too, never from the stored English label", /t\(`notes\.feature\.\$\{note\.feature\}`\)/.test(said) && !/FEATURE_LABELS_EN/.test(said) && !/FEATURE_LABELS_EN/.test(ws));
+  check("the feature name comes from the locale too, never from the stored English label",
+    /feature: featureName\(note\.feature\)/.test(said) &&
+      ["booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget"].every((f) => new RegExp(`case "${f}": return t\\("notes\\.feature\\.${f}"\\);`).test(said)) &&
+      !/FEATURE_LABELS_EN/.test(said) && !/FEATURE_LABELS_EN/.test(ws));
   const FEATURES = ["booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget"];
   const texts = {};
   for (const l of LOCALES) {

@@ -115,8 +115,8 @@ const MUTANTS = [
   {
     name: "the Site shell is drawn without the brief",
     file: WEBSITE_PAGE,
-    from: "<WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} initialOpenId={wanted} />",
-    to: "<WebsiteShell initialWebsites={websiteRows} initialOpenId={wanted} />",
+    from: "<WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} initialOpenId={wanted}",
+    to: "<WebsiteShell initialWebsites={websiteRows} initialOpenId={wanted}",
     expect: "website-builder/page.tsx really reads searchParams.brief in <WebsiteShell> too",
   },
   {

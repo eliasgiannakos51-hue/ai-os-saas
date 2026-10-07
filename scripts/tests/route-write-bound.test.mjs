@@ -141,6 +141,10 @@ const DECLARED = {
     columns: ["user_id", "table_name", "record_id"],
     why: "a favourite is a SET membership: the unique(user_id, table_name, record_id) constraint means the same row cannot be inserted twice, so the ceiling is the number of things that exist to favourite, not the number of calls.",
   },
+  "src/app/api/websites/[id]/undo/route.ts": {
+    kind: "state_precondition",
+    why: "it refuses with 409 unless the history holds a change not yet undone (lib/websites/undo.ts, undoTarget), and the row it inserts records undoing exactly that change; the next call finds it undone. So undo rows can never outnumber the changes, and every change was paid for by api/websites/edit's reservation.",
+  },
   "src/app/api/billing/cancel/route.ts": {
     kind: "state_precondition",
     why: "it refuses with 400 unless the account has an ACTIVE subscription, and the insert it makes is the record of cancelling that subscription. A second call finds nothing active and never reaches the insert, so the row count is bounded by how many times an account has actually subscribed.",

@@ -17,6 +17,7 @@ import { parseGenerationNotes } from "@/lib/website-generation-notes";
 import { normalisePages } from "@/lib/publishing/website-pages";
 import { PAGE_COUNT_CHOICES, pageRequestBrief } from "@/lib/websites/page-request";
 import { siteDownload } from "@/lib/websites/site-download";
+import { saveBlob } from "@/components/ui/download-pdf-button";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
@@ -254,12 +255,7 @@ export function WebsiteShell({
   function download(site: UserWebsite) {
     // With pages, the whole site: a .zip whose pages link to each other.
     const file = pages ? siteDownload(site) : { filename: `${site.name || "site"}.html`, type: "text/html;charset=utf-8", data: site.html_content };
-    const url = URL.createObjectURL(new Blob([file.data as BlobPart], { type: file.type }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    saveBlob(new Blob([file.data as BlobPart], { type: file.type }), file.filename);
   }
 
   // PRICE BEFORE, the same estimator the server reserves against (as on the page).

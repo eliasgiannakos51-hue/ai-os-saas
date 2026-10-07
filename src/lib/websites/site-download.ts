@@ -1,3 +1,10 @@
+// BOUNDARY-FORMAT: html
+//
+// linkPagesForDisk matches the TAG name <a in model-written HTML; tag and
+// attribute names are ASCII by the HTML specification, and the boundary
+// is what stops <a matching <article. Link text is never matched.
+//
+// Declared for scripts/tests/untrusted-boundaries.test.mjs.
 import { normalisePages } from "@/lib/publishing/website-pages";
 import { pageLinkTarget } from "@/lib/website-link-safety";
 import { zipStore } from "@/lib/websites/zip-store";

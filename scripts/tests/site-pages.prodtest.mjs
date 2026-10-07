@@ -25,6 +25,12 @@ import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
+import { loadTs } from "./load-ts.mjs";
+
+// The snapshot the public route reads is what publishing writes: the page
+// links resolved under the site's address by the same function
+// api/websites/[id]/publish runs.
+const { makeGeneratedLinksSafe } = await loadTs("src/lib/website-link-safety.ts");
 
 let pass = 0;
 const failures = [];
@@ -52,6 +58,8 @@ const PAGES = [
   { slug: "contact", label: "Επικοινωνία", html: doc("Επικοινωνία", "Γράψτε μας.") },
 ];
 
+const PUBLISHED = { pageSlugs: PAGES.map((p) => p.slug), basePath: `/s/${ADDRESS}` };
+
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const supa = await startMockSupabase({
   port: 54369,
@@ -59,7 +67,8 @@ const supa = await startMockSupabase({
     user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }],
     // THE PUBLISHED ADDRESS: the public route reads this snapshot.
     published_sites: [
-      { id: "c1111111-1111-4111-8111-111111111111", user_id: MOCK_USER.id, website_id: SID, subdomain: ADDRESS, html_content: HOME, pages: PAGES,
+      { id: "c1111111-1111-4111-8111-111111111111", user_id: MOCK_USER.id, website_id: SID, subdomain: ADDRESS,
+        html_content: makeGeneratedLinksSafe(HOME, PUBLISHED).html, pages: PAGES.map((p) => ({ ...p, html: makeGeneratedLinksSafe(p.html, PUBLISHED).html })),
         status: "live", is_active: true, updated_at: "2026-10-07T12:00:00Z", published_at: "2026-10-07T12:00:00Z" },
     ],
   },
@@ -267,7 +276,7 @@ try {
     const homeResponse = await visitor.goto(`${ON}/s/${ADDRESS}`, { waitUntil: "domcontentloaded" });
     const homeText = await visitor.content();
     check("the address serves the home page", homeResponse?.status() === 200 && homeText.includes("Καλώς ήρθατε στην Αύρα."), String(homeResponse?.status()));
-    check("...whose menu leads to the other pages under the same address", homeText.includes(`href="/s/${ADDRESS}/rooms"`), homeText.match(/href="[^"]*rooms[^"]*"/)?.[0]);
+    check("...whose menu, as publishing writes it, leads to the other pages under the same address", homeText.includes(`href="/s/${ADDRESS}/rooms"`), homeText.match(/href="[^"]*rooms[^"]*"/)?.[0]);
     const roomsResponse = await visitor.goto(`${ON}/s/${ADDRESS}/rooms`, { waitUntil: "domcontentloaded" });
     check("...and each page is served there", roomsResponse?.status() === 200 && (await visitor.content()).includes("Δίκλινα με θέα."), String(roomsResponse?.status()));
     const missing = await visitor.goto(`${ON}/s/${ADDRESS}/nothing-here`, { waitUntil: "domcontentloaded" });

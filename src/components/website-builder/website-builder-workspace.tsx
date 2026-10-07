@@ -1,5 +1,6 @@
 "use client";
 
+import { saveBlob } from "@/components/ui/download-pdf-button";
 import { websiteNameFrom } from "@/lib/website-name";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
@@ -202,13 +203,7 @@ function WebsiteThumbnail({ website }: { website: UserWebsite }) {
 }
 
 function downloadHtml(website: UserWebsite) {
-  const blob = new Blob([website.html_content], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${website.name || "website"}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  saveBlob(new Blob([website.html_content], { type: "text/html" }), `${website.name || "website"}.html`);
 }
 
 // Website Builder — real Claude generation (see api/websites/generate/route.ts

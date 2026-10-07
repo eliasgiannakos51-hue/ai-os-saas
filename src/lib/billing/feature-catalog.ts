@@ -294,6 +294,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "websites/status",
       "websites/[id]/cancel",
       "websites/[id]/regenerate",
+      "websites/[id]/undo",
     ],
     charges: true,
     // WRONG UNTIL 2026-09-13, AND THIS FILE SAID SO CONFIDENTLY. It named

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import type { GenerationNote } from "@/lib/website-generation-notes";
+import type { NegativeFeature } from "@/lib/website-negative-instructions";
 
 /**
  * WHAT THE CODE DID TO A GENERATED SITE, SAID IN THE READER'S LANGUAGE —
@@ -14,12 +15,29 @@ import type { GenerationNote } from "@/lib/website-generation-notes";
 export function useGenerationNoteText(): (note: GenerationNote) => string {
   const t = useTranslations("dashboard.websiteBuilder");
   const remembered = useRememberedLine();
+  // LITERAL KEYS, so the message slicer can bound what this needs
+  // (lib/i18n/message-slices.ts): a template key makes the whole group
+  // unbounded for every screen that uses the hook.
+  const featureName = (feature: NegativeFeature): string => {
+    switch (feature) {
+      case "booking": return t("notes.feature.booking");
+      case "contactForm": return t("notes.feature.contactForm");
+      case "newsletter": return t("notes.feature.newsletter");
+      case "map": return t("notes.feature.map");
+      case "prices": return t("notes.feature.prices");
+      case "gallery": return t("notes.feature.gallery");
+      case "testimonials": return t("notes.feature.testimonials");
+      case "blog": return t("notes.feature.blog");
+      case "social": return t("notes.feature.social");
+      case "chatWidget": return t("notes.feature.chatWidget");
+    }
+  };
   return (note: GenerationNote): string => {
     switch (note.kind) {
       case "removedFeature":
-        return t("notes.removedFeature", { feature: t(`notes.feature.${note.feature}`), count: note.count });
+        return t("notes.removedFeature", { feature: featureName(note.feature), count: note.count });
       case "removedPage":
-        return t("notes.removedPage", { feature: t(`notes.feature.${note.feature}`), slug: note.slug });
+        return t("notes.removedPage", { feature: featureName(note.feature), slug: note.slug });
       case "pageCap":
         return t("notes.pageCap", { cap: note.cap, started: note.started });
       case "mapZoom":
@@ -37,7 +55,11 @@ export function useGenerationNoteText(): (note: GenerationNote) => string {
         // is not set up on this deployment" tells the owner to go and
         // set a key, and "no photographs matched" tells them to change
         // the words.
-        return t(`notes.photosDropped.${note.reason}`, { count: note.count });
+        return note.reason === "notConfigured"
+          ? t("notes.photosDropped.notConfigured", { count: note.count })
+          : note.reason === "quota"
+            ? t("notes.photosDropped.quota", { count: note.count })
+            : t("notes.photosDropped.noMatch", { count: note.count });
       case "fromMemory":
         // Where the name and the colours came from, so a wrong one is
         // corrected in Chat (or on the memory page) and not argued with here.

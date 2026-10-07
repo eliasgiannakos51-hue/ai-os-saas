@@ -70,6 +70,13 @@ const MUTANTS = [
     expect: "the route is behind the switch",
   },
   {
+    name: "undo lands in the middle of an edit",
+    file: ROUTE,
+    from: "      .or(`editing_started_at.is.null,editing_started_at.lt.${staleClaimCutoff}`)\n",
+    to: "",
+    expect: "...never in the middle of an edit: the edit's own lock is respected",
+  },
+  {
     name: "undo runs on a site being made",
     file: ROUTE,
     from: '    if (site.status !== "completed") return fail("busy", 409);\n',

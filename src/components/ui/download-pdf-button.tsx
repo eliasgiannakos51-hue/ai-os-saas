@@ -48,10 +48,20 @@ export function savePdfResponse(blobRaw: Blob, res: Response, fallbackName: stri
  * copy is where one of them gets forgotten.
  */
 export function saveFileResponse(blobRaw: Blob, res: Response, fallbackFilename: string): void {
-  const blob = new Blob([blobRaw], { type: "application/octet-stream" });
   const filename =
     res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1] ?? fallbackFilename;
+  saveBlob(blobRaw, filename);
+}
 
+/**
+ * Bytes made in the browser, saved as a file, past the same traps: forced
+ * to octet-stream (an .html or .zip blob is otherwise opened, not saved),
+ * the anchor in the document, the URL revoked later. The Site's download
+ * (components/website-builder/website-shell.tsx, package 10) came out as a
+ * file called "download" from a detached anchor revoked on the next line.
+ */
+export function saveBlob(blobRaw: Blob, filename: string): void {
+  const blob = new Blob([blobRaw], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;

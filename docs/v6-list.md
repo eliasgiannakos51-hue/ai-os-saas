@@ -447,30 +447,38 @@ assumed.**
     CHAT_SHOTS=/tmp node scripts/tests/chat-streaming-contrast.prodtest.mjs
 
 Nine text points on the STREAMING block — the one inside
-`sending && streamingText !== null`, identified by having no "Listen"
-button — read **15.71:1 at 1440×900 and 15.68:1 at 390×844** on
-2026-09-19. `chat-ground-dim` is on both the finished and the streaming
+`sending && streamingText !== null`, identified then by having no
+"Listen" button and since 2026-10-08 by its row of actions having no
+copy button — read **15.71:1 at 1440×900 and 15.68:1 at 390×844** on
+2026-09-19. The command above prints the figures of the day it runs:
+six walks since 2026-10-08 (two devices, Greek and English, and a Free
+account), worst 14.09:1 when it was run that day. `chat-ground-dim` is on both the finished and the streaming
 answer; the source always said so, and no gate had ever photographed the
 second one. `chat-measure.prodtest.mjs` seeds `chat_messages`, so every
 figure behind the 2026-09-04 choice of `dim` was taken on a finished
 message.
 
-**What is left is MOVEMENT, and this harness cannot measure it.**
-`route.fulfill` hands Playwright the whole NDJSON body at once, so the
-component receives every delta in one burst: the streaming state it
-samples is a frozen snapshot of a finished stream. A version of the file
+**What is left is MOVEMENT. Since 2026-10-08 the harness can measure it;
+nothing does yet.** Until then the file answered /api/chat with
+`route.fulfill`, which hands the page the whole NDJSON body at once, so
+the component received every delta in one burst. A version of the file
 did measure travel and printed 0px in one second — a number that meant
-nothing, and was removed rather than reported.
+nothing, and was removed rather than reported. From 2026-10-05 (React
+19) the same burst was not even drawn: the streaming block never reached
+the screen, and the file was red on "an answer is mid-stream right now"
+until 2026-10-08.
 
 The remaining hypothesis is `hooks/use-stick-to-bottom.ts`: the thread
 sticks to the bottom as tokens arrive, so a line someone has started
 reading is somewhere else by the time they finish it.
 
-**What would settle it:** point `ANTHROPIC_BASE_URL` at a local server
-emitting `content_block_delta` events with real gaps, so the app's own
-streaming path runs at a real pace. That also needs the Supabase
-stand-in to answer the reserve and settle RPCs, which it currently does
-not. Roughly half a day.
+**What would settle it:** the half that was missing is built. Since
+2026-10-08 the file runs the real /api/chat against a local model that
+emits `content_block_delta` events with real gaps (`ANTHROPIC_BASE_URL`),
+with the Supabase stand-in answering the reserve, settle and release
+calls, and the model holds before its last paragraph so the contrast is
+read on a still page. What remains is the measurement itself: a line's
+position read twice while the model is still writing, before the hold.
 
 ## 16. The gates that read the same artefact as the code — swept 2026-09-19
 

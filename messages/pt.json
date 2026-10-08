@@ -3432,6 +3432,34 @@
         "title": "Lembrete: {name}",
         "body": "Fase: {stage}"
       }
+    },
+    "translate": {
+      "button": "Traduzir",
+      "title": "Traduzir para outro idioma",
+      "language": "Idioma",
+      "copyNoteSite": "O seu site não muda. A tradução torna-se um novo site ao lado, com as mesmas páginas, cores e imagens.",
+      "copyNoteDocument": "O seu documento não muda. A tradução torna-se um novo documento ao lado, com a mesma forma.",
+      "estimating": "A calcular o preço…",
+      "estimate": "A tradução custa cerca de {count, plural, one {# crédito} other {# créditos}}. Só é cobrado quando premir Traduzir.",
+      "bypassFree": "A tradução é gratuita nesta conta.",
+      "sameLanguage": "Já está escrito nesse idioma. Escolha outro.",
+      "nothing": "Não há texto para traduzir.",
+      "tooLong": "É demasiado longo para uma tradução ({chars} caracteres; o limite é {limit}).",
+      "estimateFailed": "Não foi possível calcular o preço. Tente novamente.",
+      "go": "Traduzir",
+      "running": "A traduzir…",
+      "stop": "Parar",
+      "stopped": "Parado. Nada foi cobrado e nada foi escrito.",
+      "done": "Pronto: «{name}».",
+      "kept": "{count, plural, one {# parte ficou como estava} other {# partes ficaram como estavam}}, porque a sua tradução não mantinha a forma.",
+      "charged": "{count, plural, one {# crédito cobrado} other {# créditos cobrados}}.",
+      "chargedNothing": "Sem custos.",
+      "open": "Abrir",
+      "insufficient": "Créditos insuficientes para esta tradução. Nada foi cobrado.",
+      "dailyLimit": "Atingiu o limite de novos sites de hoje. Tente amanhã.",
+      "notIncluded": "O Site não está incluído no seu plano.",
+      "unusable": "A resposta não era utilizável e nada foi escrito. Só é cobrado o que foi gasto.",
+      "failed": "Não foi possível fazer a tradução. Não foram cobrados créditos."
     }
   },
   "module": {

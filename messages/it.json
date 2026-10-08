@@ -3432,6 +3432,34 @@
         "title": "Promemoria: {name}",
         "body": "Fase: {stage}"
       }
+    },
+    "translate": {
+      "button": "Traduci",
+      "title": "Traduci in un'altra lingua",
+      "language": "Lingua",
+      "copyNoteSite": "Il tuo sito non cambia. La traduzione diventa un nuovo sito accanto, con le stesse pagine, colori e immagini.",
+      "copyNoteDocument": "Il tuo documento non cambia. La traduzione diventa un nuovo documento accanto, nella stessa forma.",
+      "estimating": "Calcolo del prezzo…",
+      "estimate": "La traduzione costa circa {count, plural, one {# credito} other {# crediti}}. Addebitato solo quando premi Traduci.",
+      "bypassFree": "La traduzione è gratuita su questo account.",
+      "sameLanguage": "È già scritto in quella lingua. Scegline un'altra.",
+      "nothing": "Non c'è testo da tradurre.",
+      "tooLong": "È troppo lungo per una traduzione ({chars} caratteri; il limite è {limit}).",
+      "estimateFailed": "Il prezzo non è stato calcolato. Riprova.",
+      "go": "Traduci",
+      "running": "Traduzione in corso…",
+      "stop": "Ferma",
+      "stopped": "Fermato. Non è stato addebitato né scritto nulla.",
+      "done": "Fatto: «{name}».",
+      "kept": "{count, plural, one {# parte è rimasta com'era} other {# parti sono rimaste com'erano}}, perché la loro traduzione non manteneva la forma.",
+      "charged": "{count, plural, one {Addebitato # credito} other {Addebitati # crediti}}.",
+      "chargedNothing": "Nessun addebito.",
+      "open": "Aprilo",
+      "insufficient": "Crediti insufficienti per questa traduzione. Non è stato addebitato nulla.",
+      "dailyLimit": "Hai raggiunto il limite di nuovi siti di oggi. Riprova domani.",
+      "notIncluded": "Il Sito non è incluso nel tuo piano.",
+      "unusable": "La risposta non era utilizzabile e non è stato scritto nulla. Si addebita solo quanto speso.",
+      "failed": "Non è stato possibile fare la traduzione. Nessun credito addebitato."
     }
   },
   "module": {

@@ -200,6 +200,11 @@ const DECLARED = {
     billing: "settled",
     note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing.",
   },
+  "src/lib/translate/translate-call.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then.",
+  },
   "src/lib/posts/generate.ts": {
     calls: 1,
     billing: "settled",

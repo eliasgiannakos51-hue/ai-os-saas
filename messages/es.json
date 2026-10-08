@@ -3432,6 +3432,34 @@
         "title": "Recordatorio: {name}",
         "body": "Etapa: {stage}"
       }
+    },
+    "translate": {
+      "button": "Traducir",
+      "title": "Traducir a otro idioma",
+      "language": "Idioma",
+      "copyNoteSite": "Tu sitio no cambia. La traducción es un sitio nuevo a su lado, con las mismas páginas, colores e imágenes.",
+      "copyNoteDocument": "Tu documento no cambia. La traducción es un documento nuevo a su lado, con la misma forma.",
+      "estimating": "Calculando el precio…",
+      "estimate": "La traducción cuesta unos {count, plural, one {# crédito} other {# créditos}}. Solo se cobra al pulsar Traducir.",
+      "bypassFree": "La traducción es gratuita en esta cuenta.",
+      "sameLanguage": "Ya está escrito en ese idioma. Elige otro.",
+      "nothing": "No hay texto que traducir.",
+      "tooLong": "Es demasiado largo para una traducción ({chars} caracteres; el límite es {limit}).",
+      "estimateFailed": "No se pudo calcular el precio. Inténtalo de nuevo.",
+      "go": "Traducir",
+      "running": "Traduciendo…",
+      "stop": "Detener",
+      "stopped": "Detenido. No se cobró nada ni se escribió nada.",
+      "done": "Listo: «{name}».",
+      "kept": "{count, plural, one {# fragmento quedó como estaba} other {# fragmentos quedaron como estaban}}, porque su traducción no mantenía la forma.",
+      "charged": "Se cobraron {count, plural, one {# crédito} other {# créditos}}.",
+      "chargedNothing": "Sin cargo.",
+      "open": "Abrirlo",
+      "insufficient": "No hay créditos suficientes para esta traducción. No se cobró nada.",
+      "dailyLimit": "Has llegado al límite de sitios nuevos de hoy. Inténtalo mañana.",
+      "notIncluded": "El Sitio no está incluido en tu plan.",
+      "unusable": "La respuesta no era utilizable y no se escribió nada. Solo se cobra lo gastado.",
+      "failed": "No se pudo hacer la traducción. No se cobraron créditos."
     }
   },
   "module": {

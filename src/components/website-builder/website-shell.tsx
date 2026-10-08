@@ -18,6 +18,7 @@ import { normalisePages } from "@/lib/publishing/website-pages";
 import { PAGE_COUNT_CHOICES, pageRequestBrief } from "@/lib/websites/page-request";
 import { siteDownload } from "@/lib/websites/site-download";
 import { saveBlob } from "@/components/ui/download-pdf-button";
+import { TranslateButton } from "@/components/translate/translate-button";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
@@ -71,6 +72,7 @@ export function WebsiteShell({
   initialBrief,
   initialOpenId = null,
   pages = false,
+  translate = false,
 }: {
   initialWebsites: UserWebsite[];
   initialBrief?: string;
@@ -78,6 +80,8 @@ export function WebsiteShell({
   initialOpenId?: string | null;
   /** The switch "site-pages" (package 10), read by the page. */
   pages?: boolean;
+  /** The switch "translate" (package 28), read by the page. */
+  translate?: boolean;
 }) {
   const t = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
@@ -346,6 +350,23 @@ export function WebsiteShell({
               <button type="button" onClick={() => download(current)} disabled={current.status !== "completed" || !looksLikeCompleteHtmlDocument(current.html_content)} aria-label={t("downloadButton")} title={t("downloadButton")} data-testid="site-download" className={ACTION}>
                 <Download className="h-4 w-4" aria-hidden="true" />
               </button>
+              {/* A COPY IN ANOTHER LANGUAGE (package 28): listed the moment
+                  it exists, opened here on «Άνοιξέ το». */}
+              {translate && current.status === "completed" && (
+                <TranslateButton
+                  kind="site"
+                  id={current.id}
+                  actionClassName={ACTION}
+                  onDone={(made) => {
+                    const record = made.record as UserWebsite | undefined;
+                    if (record) setWebsites((prev) => (prev.some((w) => w.id === record.id) ? prev : [record, ...prev]));
+                  }}
+                  onOpen={(made) => {
+                    setCurrentId(made.id);
+                    setPane("site");
+                  }}
+                />
+              )}
             </>
           ),
           body: (

@@ -3432,6 +3432,34 @@
         "title": "提醒：{name}",
         "body": "阶段：{stage}"
       }
+    },
+    "translate": {
+      "button": "翻译",
+      "title": "翻译成另一种语言",
+      "language": "语言",
+      "copyNoteSite": "你的网站不会改变。译文会成为旁边的一个新网站，页面、颜色和图片都相同。",
+      "copyNoteDocument": "你的文档不会改变。译文会成为旁边的一个新文档，格式相同。",
+      "estimating": "正在计算价格…",
+      "estimate": "翻译大约需要 {count, plural, other {# 积分}}。只有按下“翻译”时才扣费。",
+      "bypassFree": "此账户翻译免费。",
+      "sameLanguage": "它已经是这种语言了。请选择另一种。",
+      "nothing": "没有需要翻译的文字。",
+      "tooLong": "内容太长，无法一次翻译（{chars} 个字符；上限为 {limit}）。",
+      "estimateFailed": "无法计算价格。请重试。",
+      "go": "翻译",
+      "running": "正在翻译…",
+      "stop": "停止",
+      "stopped": "已停止。没有扣费，也没有写入任何内容。",
+      "done": "完成：“{name}”。",
+      "kept": "{count, plural, other {# 段保持原样}}，因为它们的译文没有保留格式。",
+      "charged": "已扣除 {count, plural, other {# 积分}}。",
+      "chargedNothing": "未扣费。",
+      "open": "打开",
+      "insufficient": "积分不足，无法进行此次翻译。没有扣费。",
+      "dailyLimit": "你已达到今天新建网站的上限。请明天再试。",
+      "notIncluded": "你的套餐不包含网站功能。",
+      "unusable": "回答不可用，没有写入任何内容。只收取已消耗的部分。",
+      "failed": "翻译未能完成。没有扣除积分。"
     }
   },
   "module": {

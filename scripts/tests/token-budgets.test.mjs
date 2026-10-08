@@ -161,6 +161,12 @@ const CLASSIFIED = {
     // deck is — a document missing its last sections must not read as a
     // short one.
     "src/lib/documents/write-call.ts",
+    // Package 28. One forced tool call per batch of a page's pieces; the
+    // ceiling grows with the batch (batchMaxTokens). A list cut at
+    // max_tokens is refused by stop_reason and asked once more, and if it
+    // is cut again its pieces stay as they were — never a page filled
+    // from a list that ends early.
+    "src/lib/translate/translate-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

@@ -77,7 +77,7 @@ export default async function DocumentsPage(props: { searchParams?: Promise<{ re
     }));
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <DocumentsShell initialOpenId={readRequestedId(typeof searchParams?.record === "string" ? searchParams.record : null)} docs={written} />
+        <DocumentsShell initialOpenId={readRequestedId(typeof searchParams?.record === "string" ? searchParams.record : null)} docs={written} translate={await isFeatureOn("translate", user)} />
       </div>
     );
   }

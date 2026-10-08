@@ -162,7 +162,7 @@ check("...on every page", files.every((f) => /href="services\.html"/.test(f.data
 console.log("\n== 5. the shell ==");
 // ---------------------------------------------------------------------
 check('"site-pages" is declared as a switch', /\n  "site-pages": "/.test(code("src/lib/flags/flags.ts")));
-check("the Site page reads it for the shell", /<WebsiteShell [^>]*pages=\{await isFeatureOn\("site-pages", user\)\} \/>/.test(code("src/app/dashboard/website-builder/page.tsx")));
+check("the Site page reads it for the shell", /<WebsiteShell [^>]*pages=\{await isFeatureOn\("site-pages", user\)\}[^>]*\/>/.test(code("src/app/dashboard/website-builder/page.tsx")));
 const shell = code("src/components/website-builder/website-shell.tsx");
 check("a new site's brief carries the page request, only with the switch",
   /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: 0 \}\) \+ \(pages \? pageRequestBrief\(pageCount\) : ""\)/.test(shell));

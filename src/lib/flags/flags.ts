@@ -23,6 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  translate: "Translate: a site and a document into another language in the same form, as a new copy beside the original, with the price before (MASTER 16, package 28)",
   "finance-sales": "Finances: write «πλήρωσα 50 ευρώ ρεύμα» and it is recorded, read by code; Sales: move a contact from stage to stage with a reminder that arrives in the bell (MASTER 16, package 18). Needs migration 20261023000000_lead_stages.sql",
   "meeting-goal": "Meetings: the actions you tick become the steps of a goal, inside a project you choose or make there (MASTER 16, package 17)",
   "analysis-provenance": "Analyze: every number in a finding is a fact computed from the file, pressable to show how it was made, and every chart value says how many rows it came from (MASTER 16, package 16)",

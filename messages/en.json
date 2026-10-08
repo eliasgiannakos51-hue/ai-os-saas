@@ -3432,6 +3432,34 @@
         "title": "Reminder: {name}",
         "body": "Stage: {stage}"
       }
+    },
+    "translate": {
+      "button": "Translate",
+      "title": "Translate into another language",
+      "language": "Language",
+      "copyNoteSite": "Your site does not change. The translation becomes a new site beside it, with the same pages, colours and images.",
+      "copyNoteDocument": "Your document does not change. The translation becomes a new document beside it, in the same form.",
+      "estimating": "Working out the price…",
+      "estimate": "Translation costs about {count, plural, one {# credit} other {# credits}}. Charged only when you press Translate.",
+      "bypassFree": "Translation is free on this account.",
+      "sameLanguage": "It is already written in that language. Choose another.",
+      "nothing": "There is no text to translate.",
+      "tooLong": "This is too long for one translation ({chars} characters; the limit is {limit}).",
+      "estimateFailed": "The price could not be worked out. Try again.",
+      "go": "Translate",
+      "running": "Translating…",
+      "stop": "Stop",
+      "stopped": "Stopped. Nothing was charged and nothing was written.",
+      "done": "Done: “{name}”.",
+      "kept": "{count, plural, one {# piece was left as it was} other {# pieces were left as they were}}, because their translation did not keep the form.",
+      "charged": "{count, plural, one {# credit} other {# credits}} charged.",
+      "chargedNothing": "Nothing charged.",
+      "open": "Open it",
+      "insufficient": "Not enough credits for this translation. Nothing was charged.",
+      "dailyLimit": "You have reached today's limit of new sites. Try tomorrow.",
+      "notIncluded": "The Site is not included in your plan.",
+      "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
+      "failed": "The translation could not be made. No credits were charged."
     }
   },
   "module": {

@@ -11,6 +11,7 @@ import { saveFileResponse } from "@/components/ui/download-pdf-button";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { DocumentPdfButton } from "@/components/documents/document-pdf-button";
+import { TranslateButton } from "@/components/translate/translate-button";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import type { PdfBlock } from "@/lib/pdf/blocks";
 import {
@@ -38,7 +39,7 @@ type Open = { id: string; title: string; blocks: PdfBlock[] };
  * blocks, with Word, PDF and the editor on top. Three options under the
  * field: what kind of document, what was written before, a new one.
  */
-export function DocumentsShell({ initialOpenId = null, docs }: { initialOpenId?: string | null; docs: WrittenDocRow[] }) {
+export function DocumentsShell({ initialOpenId = null, docs, translate = false }: { initialOpenId?: string | null; docs: WrittenDocRow[]; /** The switch "translate" (package 28). */ translate?: boolean }) {
   const t = useTranslations("dashboard.documents.writer");
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
@@ -212,6 +213,7 @@ export function DocumentsShell({ initialOpenId = null, docs }: { initialOpenId?:
                 <FileDown className="h-4 w-4" aria-hidden="true" />
               </button>
               <DocumentPdfButton documentId={open.id} />
+              {translate && <TranslateButton kind="document" id={open.id} actionClassName={ACTION} openHref={(id) => `/dashboard/documents/${id}`} />}
               <Link href={`/dashboard/documents/${open.id}`} aria-label={t("openEditor")} title={t("openEditor")} data-testid="document-open-editor" className={ACTION}>
                 <PenLine className="h-4 w-4" aria-hidden="true" />
               </Link>

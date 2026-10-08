@@ -3432,6 +3432,34 @@
         "title": "Rappel : {name}",
         "body": "Étape : {stage}"
       }
+    },
+    "translate": {
+      "button": "Traduire",
+      "title": "Traduire dans une autre langue",
+      "language": "Langue",
+      "copyNoteSite": "Votre site ne change pas. La traduction devient un nouveau site à côté, avec les mêmes pages, couleurs et images.",
+      "copyNoteDocument": "Votre document ne change pas. La traduction devient un nouveau document à côté, dans la même forme.",
+      "estimating": "Calcul du prix…",
+      "estimate": "La traduction coûte environ {count, plural, one {# crédit} other {# crédits}}. Débité seulement quand vous appuyez sur Traduire.",
+      "bypassFree": "La traduction est gratuite sur ce compte.",
+      "sameLanguage": "C'est déjà écrit dans cette langue. Choisissez-en une autre.",
+      "nothing": "Il n'y a aucun texte à traduire.",
+      "tooLong": "C'est trop long pour une traduction ({chars} caractères ; la limite est {limit}).",
+      "estimateFailed": "Le prix n'a pas pu être calculé. Réessayez.",
+      "go": "Traduire",
+      "running": "Traduction…",
+      "stop": "Arrêter",
+      "stopped": "Arrêté. Rien n'a été débité et rien n'a été écrit.",
+      "done": "Terminé : « {name} ».",
+      "kept": "{count, plural, one {# passage est resté tel quel} other {# passages sont restés tels quels}}, car leur traduction ne gardait pas la forme.",
+      "charged": "{count, plural, one {# crédit débité} other {# crédits débités}}.",
+      "chargedNothing": "Aucun débit.",
+      "open": "L'ouvrir",
+      "insufficient": "Pas assez de crédits pour cette traduction. Rien n'a été débité.",
+      "dailyLimit": "Vous avez atteint la limite de nouveaux sites pour aujourd'hui. Réessayez demain.",
+      "notIncluded": "Le Site n'est pas inclus dans votre offre.",
+      "unusable": "La réponse n'était pas utilisable, et rien n'a été écrit. Seul ce qui a été dépensé est débité.",
+      "failed": "La traduction n'a pas pu être faite. Aucun crédit n'a été débité."
     }
   },
   "module": {

@@ -3432,6 +3432,34 @@
         "title": "Erinnerung: {name}",
         "body": "Phase: {stage}"
       }
+    },
+    "translate": {
+      "button": "Übersetzen",
+      "title": "In eine andere Sprache übersetzen",
+      "language": "Sprache",
+      "copyNoteSite": "Deine Website bleibt unverändert. Die Übersetzung wird eine neue Website daneben, mit denselben Seiten, Farben und Bildern.",
+      "copyNoteDocument": "Dein Dokument bleibt unverändert. Die Übersetzung wird ein neues Dokument daneben, in derselben Form.",
+      "estimating": "Preis wird berechnet…",
+      "estimate": "Die Übersetzung kostet etwa {count, plural, one {# Credit} other {# Credits}}. Berechnet erst, wenn du auf Übersetzen drückst.",
+      "bypassFree": "Die Übersetzung ist auf diesem Konto kostenlos.",
+      "sameLanguage": "Es ist bereits in dieser Sprache geschrieben. Wähle eine andere.",
+      "nothing": "Es gibt keinen Text zu übersetzen.",
+      "tooLong": "Das ist zu lang für eine Übersetzung ({chars} Zeichen; das Limit ist {limit}).",
+      "estimateFailed": "Der Preis konnte nicht berechnet werden. Versuche es erneut.",
+      "go": "Übersetzen",
+      "running": "Wird übersetzt…",
+      "stop": "Stoppen",
+      "stopped": "Gestoppt. Nichts wurde berechnet und nichts geschrieben.",
+      "done": "Fertig: „{name}“.",
+      "kept": "{count, plural, one {# Abschnitt blieb unverändert} other {# Abschnitte blieben unverändert}}, weil ihre Übersetzung die Form nicht behielt.",
+      "charged": "{count, plural, one {# Credit} other {# Credits}} berechnet.",
+      "chargedNothing": "Nichts berechnet.",
+      "open": "Öffnen",
+      "insufficient": "Nicht genug Credits für diese Übersetzung. Nichts wurde berechnet.",
+      "dailyLimit": "Du hast das heutige Limit für neue Websites erreicht. Versuche es morgen.",
+      "notIncluded": "Die Website ist in deinem Tarif nicht enthalten.",
+      "unusable": "Die Antwort war nicht brauchbar, und nichts wurde geschrieben. Berechnet wird nur, was verbraucht wurde.",
+      "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
     }
   },
   "module": {

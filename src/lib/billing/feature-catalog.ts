@@ -347,7 +347,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     pages: ["documents", "documents/[id]"],
     // The Word download (package 14) is a file of what is already the
     // person's, as the PDF is: free, bounded by lib/export-guard.ts.
-    routes: ["documents", "documents/[id]", "documents/[id]/pdf", "documents/[id]/pdf-estimate", "documents/[id]/docx"],
+    // "translate" (package 28) is the PDF's translation made a copy: it
+    // charges as that does, on every plan; its SITE half also asks for the
+    // plan that includes the Site (websiteBuilder), in the route itself.
+    routes: ["documents", "documents/[id]", "documents/[id]/pdf", "documents/[id]/pdf-estimate", "documents/[id]/docx", "translate"],
     charges: true,
     enforcedIn: "src/app/api/documents/[id]/pdf/route.ts",
     enforcedSymbol: "reserveCredits",

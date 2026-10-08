@@ -60,8 +60,8 @@ export const MAX_SLIDES = 20;
 export const DEFAULT_SLIDES = 10;
 
 /** The description box. Longer than this is a document, not a brief. */
-export const MAX_DESCRIPTION_CHARS = 4_000;
-export const MIN_DESCRIPTION_CHARS = 10;
+export const MAX_DECK_DESCRIPTION_CHARS = 4_000;
+export const MIN_DECK_DESCRIPTION_CHARS = 10;
 
 /**
  * HOW LONG "make it more formal" IS ALLOWED TO BE.
@@ -296,10 +296,10 @@ export type DescriptionVerdict =
   | { ok: true }
   | { ok: false; reason: "too_short" | "too_long"; limit: number };
 
-export function checkDescription(description: string): DescriptionVerdict {
+export function checkDeckDescription(description: string): DescriptionVerdict {
   const length = description.trim().length;
-  if (length < MIN_DESCRIPTION_CHARS) return { ok: false, reason: "too_short", limit: MIN_DESCRIPTION_CHARS };
-  if (length > MAX_DESCRIPTION_CHARS) return { ok: false, reason: "too_long", limit: MAX_DESCRIPTION_CHARS };
+  if (length < MIN_DECK_DESCRIPTION_CHARS) return { ok: false, reason: "too_short", limit: MIN_DECK_DESCRIPTION_CHARS };
+  if (length > MAX_DECK_DESCRIPTION_CHARS) return { ok: false, reason: "too_long", limit: MAX_DECK_DESCRIPTION_CHARS };
   return { ok: true };
 }
 

@@ -27,7 +27,7 @@ import {
   MAX_OWN_IMAGES,
   MAX_SLIDES,
   MIN_SLIDES,
-  checkDescription,
+  checkDeckDescription,
   clampSlideCount,
   deckEstimateInputChars,
   isImageSource,
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
   if (body.researchId !== undefined && researchId === null) return NextResponse.json({ error: "bad_research" }, { status: 400 });
   let description = typeof body.description === "string" ? body.description.trim() : "";
   if (researchId === null) {
-    const verdict = checkDescription(description);
+    const verdict = checkDeckDescription(description);
     if (!verdict.ok) return NextResponse.json({ error: verdict.reason, limit: verdict.limit }, { status: 400 });
   }
   let slideCount = clampSlideCount(body.slideCount);

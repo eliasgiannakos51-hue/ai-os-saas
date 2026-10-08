@@ -420,6 +420,12 @@ export function ChatWorkspace({
 
   function startNewChat() {
     requestTokenRef.current += 1;
+    // Closed here, not only by the [activeId] effects above: a Site opened
+    // in a conversation that never reached /api/chat has no id, so
+    // setActiveId(null) changes nothing, and the next sentence went to the
+    // site as a charged change (chat-opens-tools.prodtest.mjs).
+    setSiteBrief(null);
+    setOpenWorkId(null);
     setActiveId(null);
     setMessages([]);
     setError(null);

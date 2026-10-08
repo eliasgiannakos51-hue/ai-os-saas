@@ -92,6 +92,14 @@ check("on a phone, back to the conversation keeps the site open, and one press s
   /\{siteBrief !== null && siteHidden && \(\s*<button type="button" onClick=\{\(\) => setSiteHidden\(false\)\} data-testid="chat-site-reopen"/.test(chat) && /onClick=\{onBack\}[^>]*data-testid="chat-site-back"/.test(code("src/components/chat/site-pane.tsx")));
 check("...and a change said from the conversation shows it again", /sitePaneRef\.current\?\.take\(text\)\) \{\s*showMine\(\);\s*setSiteHidden\(false\);/.test(chat));
 check("...and closed when the conversation changes", /useEffect\(\(\) => setSiteBrief\(null\), \[activeId\]\)/.test(chat));
+{
+  // «Νέα συνομιλία» from a conversation that never reached /api/chat: its
+  // id is already null, so the effect above does not run, and the pane has
+  // to be closed by startNewChat itself (the prodtest drives it).
+  const start = chat.indexOf("function startNewChat() {");
+  const body = start > 0 ? chat.slice(start, chat.indexOf("\n  }\n", start)) : "";
+  check("...and «Νέα συνομιλία» closes it even when there was no conversation yet", /setSiteBrief\(null\);/.test(body) && /setOpenWorkId\(null\);/.test(body), body.slice(0, 200));
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. the pane ==");

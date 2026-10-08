@@ -13,13 +13,16 @@ migration έρχεται με περιεχόμενο, προεπισκόπηση
 
 ## 1. Πού βρίσκονται
 
-- Branch: `claude/keen-turing-bv8gw4` του repository
-  `eliasgiannakos51-hue/ai-os-saas`.
+- Branch: το branch του pull request που τα φέρνει (το γράφει πάνω πάνω
+  στη σελίδα του pull request), ή `main` αφού γίνει merge, στο repository
+  `eliasgiannakos51-hue/ai-os-saas`. (Μέχρι 2026-10-07 εδώ έγραφε ένα
+  σταθερό branch· κάθε πακέτο έχει πια το δικό του.)
 - Φάκελος: `supabase/migrations/`.
-- Στο GitHub: άνοιξε το repository → πάνω αριστερά, στο κουμπί με το
-  όνομα του branch (λέει `main`), διάλεξε `claude/keen-turing-bv8gw4` →
-  φάκελος `supabase` → `migrations` → πάτησε το αρχείο → κουμπί
-  «Copy raw file» (δύο τετράγωνα, πάνω δεξιά στο περιεχόμενο).
+- Στο GitHub: στη σελίδα του pull request → "Files changed" → το αρχείο
+  του migration → "..." → "View file" → κουμπί "Copy raw file" (δύο
+  τετράγωνα, πάνω δεξιά στο περιεχόμενο). Ή, μετά το merge: άνοιξε το
+  repository → φάκελος `supabase` → `migrations` → πάτησε το αρχείο →
+  "Copy raw file".
 
 ## 2. Πού τα επικολλάς
 

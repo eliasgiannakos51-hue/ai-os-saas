@@ -533,6 +533,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "files/ask",
       "data-analysis/upload",
       "data-analysis/[id]/analyse",
+      // What the analysis will hold, quoted before (a flow's step, package 36).
+      "data-analysis/[id]/price",
       "data-analysis/[id]/ask",
       "data-analysis/[id]/export",
       "import/csv/analyse",
@@ -801,7 +803,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "free",
     sidebar: ["/dashboard/projects"],
     pages: ["projects", "projects/[id]"],
-    routes: ["projects", "projects/[id]/members"],
+    // Flows (package 36) make the project and file each result in it, under
+    // the same project cap; each step is charged by its own tool.
+    routes: ["projects", "projects/[id]/members", "flows", "flows/[id]/steps"],
     charges: false,
     enforcedIn: "src/app/api/projects/route.ts",
     enforcedSymbol: "maxProjectsForPlan",

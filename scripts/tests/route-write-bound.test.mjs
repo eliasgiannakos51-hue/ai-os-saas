@@ -135,6 +135,10 @@ for (const kind of Object.keys(BOUNDS)) {
 // The two whose bound is not in the route's own code.
 // ---------------------------------------------------------------------
 const DECLARED = {
+  "src/app/api/flows/[id]/steps/route.ts": {
+    kind: "state_precondition",
+    why: "the entity_links edge it writes puts a step's row in the flow's project, and it is written only when a step is marked done with a row read back as the person's own, of that step's kind, and only when the same edge is not already there; a finished step refuses with 409. So the edges are at most one per step of a plan, and a plan has at most six steps (lib/flows/plan.ts FLOW_KINDS).",
+  },
   "src/app/api/favorites/toggle/route.ts": {
     kind: "unique_constraint",
     table: "user_favorites",

@@ -109,7 +109,7 @@ console.log("\n== 4. the route ==");
 const route = code("src/app/api/presentations/generate/route.ts");
 check('"research-slides" is declared as a switch', /\n  "research-slides": "/.test(code("src/lib/flags/flags.ts")));
 check("a report id is checked before anybody is read", route.indexOf('error: "bad_research"') > 0 && route.indexOf('error: "bad_research"') < route.indexOf("await supabase.auth.getUser()"));
-check("...and a typed description is still held to the field's limits", /if \(researchId === null\) \{\s*const verdict = checkDescription\(description\);/.test(route));
+check("...and a typed description is still held to the field's limits", /if \(researchId === null\) \{\s*const verdict = checkDeckDescription\(description\);/.test(route));
 check("the report is read only with the switch on", /if \(!\(await isFeatureOn\("research-slides", user\)\)\) return NextResponse\.json\(\{ error: "not_enabled" \}, \{ status: 403 \}\);/.test(route));
 check("...by id AND owner", /\.from\("research_reports"\)\s*\.select\("id, topic, status, sections, sources"\)\s*\.eq\("id", researchId\)\s*\.eq\("user_id", user\.id\)/.test(route));
 check("...only when it is finished", /const made = report\.status === "ready" \? researchBrief\(/.test(route) && /if \(!made\) return NextResponse\.json\(\{ error: "research_not_ready" \}, \{ status: 409 \}\);/.test(route));

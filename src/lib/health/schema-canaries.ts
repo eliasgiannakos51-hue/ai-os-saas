@@ -427,6 +427,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Automations as boxes (switch \"automations\") cannot save a single automation, so nothing is made, run or shown — and a file upload queues nothing",
   },
   {
+    kind: "column",
+    table: "project_flows",
+    column: "steps",
+    migration: "20261022000000_project_flows.sql",
+    breaks: "Flows (switch \"flows\") cannot be approved: the project is made but the flow is not saved, so no step runs",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

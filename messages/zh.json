@@ -124,6 +124,7 @@
       "websiteBuilder": "做个网站",
       "apps": "应用点子",
       "images": "图片点子",
+      "imageTool": "图片",
       "videos": "视频点子",
       "coding": "编程",
       "dataAnalysis": "看看数字怎么说",
@@ -3238,6 +3239,110 @@
         "failed": "出了点问题。未发生的部分不会收费。",
         "offline": "没有网络连接。请检查网络后重试。"
       }
+    },
+    "flows": {
+      "name": "项目",
+      "help": "用一句话写下你想做什么，例如“为我的露营地做一个带图片的网站，再做些帖子来宣传它”。你会看到计划和费用，确认后，所有内容都会放进同一个项目。",
+      "placeholder": "你想做什么？",
+      "planIntro": "这是计划。你确认之前，什么都不会开始。",
+      "kinds": {
+        "research": "调研",
+        "site": "网站",
+        "images": "图片",
+        "posts": "帖子",
+        "slides": "演示文稿",
+        "analysis": "文件分析"
+      },
+      "does": {
+        "research": "带编号来源的调研",
+        "site": "包含各页面的网站",
+        "images": "四张图片",
+        "posts": "适用于五个平台的帖子",
+        "slides": "一份演示文稿",
+        "analysis": "根据你的文件生成图表和说明"
+      },
+      "afterResearch": "基于调研生成",
+      "price": "最多 {count, plural, other {# 积分}}",
+      "priceAfterFile": "读取文件后定价",
+      "total": "总计：最多 {count, plural, other {# 积分}}",
+      "totalNote": "每个工具按实际用量收费，与其单独页面相同。失败的步骤不会额外收费。",
+      "colour": "颜色",
+      "colourHelp": "网站和图片使用相同的颜色。",
+      "colourFromMemory": "你的品牌颜色，来自记忆",
+      "file": "选择文件",
+      "fileChosen": "文件：{name}",
+      "approve": "确认并开始",
+      "approving": "正在创建项目…",
+      "unavailable": "不含 {names}：你暂时无法使用。",
+      "notYet": "这需要 {names}，Ionexa 目前还没有。没有开始任何操作，也没有收取任何费用。",
+      "notYetNames": {
+        "video": "视频",
+        "translation": "翻译",
+        "game": "游戏",
+        "meeting": "把会议转化为目标"
+      },
+      "nothing": "这句话里没有找到工具。请说明要做什么：网站、图片、帖子、调研、演示文稿或文件分析。",
+      "started": "已开始。所有内容都会放进项目“{name}”。",
+      "status": {
+        "waiting": "等待中",
+        "running": "制作中",
+        "done": "已完成"
+      },
+      "waitingFor": "等待调研完成",
+      "stepErrors": {
+        "no_credits": "积分不足",
+        "not_included": "你的套餐不包含此项",
+        "not_configured": "尚未启用",
+        "rate_limited": "同时请求过多",
+        "refused": "工具拒绝了该请求",
+        "offline": "无网络连接",
+        "stopped": "已停止",
+        "no_file": "没有文件",
+        "interrupted": "未完成就中断了",
+        "failed": "出了点问题"
+      },
+      "openStep": "打开",
+      "openProject": "打开项目",
+      "retry": "重试",
+      "doneOf": "已完成 {done}/{total}",
+      "mine": "我的项目",
+      "mineRunning": "我的项目（{count} 个进行中）",
+      "examples": "示例",
+      "example": {
+        "research": "调研基克拉泽斯群岛的露营地，并做一份演示文稿。",
+        "site": "为我的露营地做一个带图片的网站，再做些帖子来宣传它。",
+        "analysis": "用这份销售文件写一份带图表的报告。"
+      },
+      "errors": {
+        "projectLimit": "你已达到套餐的项目上限（{limit}）。",
+        "rateLimited": "同时请求过多，请稍后再试。",
+        "file": "无法读取该文件。请尝试 CSV 或 Excel 文件。",
+        "failed": "出了点问题，未收取任何费用。",
+        "offline": "无网络连接。请检查网络后重试。"
+      }
+    },
+    "firstTask": {
+      "lead": "选一件现在就要完成的事。几秒钟内就会得到回答。",
+      "cost": "免费，在本月免费消息额度内。",
+      "tasks": {
+        "write": {
+          "label": "写作",
+          "text": "写一封简短的邮件，向供应商询价"
+        },
+        "plan": {
+          "label": "规划",
+          "text": "帮我制定一个本月找到第一批客户的计划"
+        },
+        "explain": {
+          "label": "了解",
+          "text": "用简单的话解释一下，什么样的 Google 商家介绍才算好"
+        }
+      },
+      "ownLabel": "或者写下你想要的",
+      "ownPlaceholder": "或者写下你想完成的事…",
+      "send": "开始",
+      "import": "从 CSV 文件导入你的数据",
+      "skip": "跳过"
     }
   },
   "module": {

@@ -1,12 +1,12 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3893, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **602 strings**. The whole product is 3972, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 369 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (23)
+## Tier 1 — THE SENTENCES — read these (25)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -69,6 +69,18 @@ Professional または Ultimate をチームの基本にして、メンバーを
 > EN — Your data stays yours. It is stored privately, only you can read it, and it is never used to train anything. You can delete it, or your whole account, at any time.
 
 データはあなたのものです。非公開で保存され、読めるのはあなただけで、学習に使われることはありません。いつでもデータもアカウントも削除できます。
+
+**`dashboard.firstTask.lead`**
+
+> EN — Pick something to get done now. The answer arrives in a few seconds.
+
+今すぐやりたいことを選んでください。数秒で答えが届きます。
+
+**`dashboard.firstTask.tasks.explain.text`**
+
+> EN — Explain in plain words what makes a good business description on Google
+
+Google のビジネス説明文を良くするポイントを、わかりやすく説明して
 
 **`dashboard.onboarding.analysingHint`**
 
@@ -158,7 +170,7 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。
 
-## Tier 2 — The labels — skim these (360)
+## Tier 2 — The labels — skim these (369)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -809,6 +821,72 @@ Googleサインインを開始できませんでした。もう一度お試し�
 > EN — Let's make this yours
 
 あなた仕様にしましょう
+
+**`dashboard.firstTask.cost`**
+
+> EN — Free, within this month's free messages.
+
+今月の無料メッセージの範囲内で無料です。
+
+**`dashboard.firstTask.import`**
+
+> EN — Bring your data from a CSV file
+
+CSV ファイルからデータを取り込む
+
+**`dashboard.firstTask.ownLabel`**
+
+> EN — Or write what you want
+
+または、やりたいことを書く
+
+**`dashboard.firstTask.ownPlaceholder`**
+
+> EN — Or write what you want done…
+
+または、やりたいことを書いてください…
+
+**`dashboard.firstTask.send`**
+
+> EN — Start
+
+始める
+
+**`dashboard.firstTask.skip`**
+
+> EN — Skip
+
+スキップ
+
+**`dashboard.firstTask.tasks.explain.label`**
+
+> EN — Learn
+
+学ぶ
+
+**`dashboard.firstTask.tasks.plan.label`**
+
+> EN — Plan
+
+計画する
+
+**`dashboard.firstTask.tasks.plan.text`**
+
+> EN — Make me a plan to find my first customers this month
+
+今月、最初のお客様を見つけるための計画を立てて
+
+**`dashboard.firstTask.tasks.write.label`**
+
+> EN — Write
+
+書く
+
+**`dashboard.firstTask.tasks.write.text`**
+
+> EN — Write a short email asking a supplier for a quote
+
+仕入れ先に見積もりを依頼する短いメールを書いて
 
 **`dashboard.onboarding.analyseError`**
 
@@ -1760,6 +1838,12 @@ DevOps
 
 画像のアイデア
 
+**`sidebar.items.imageTool`**
+
+> EN — Image
+
+画像
+
 **`sidebar.items.integrations`**
 
 > EN — Integrations
@@ -2314,25 +2398,7 @@ credits の履歴を見る
 
 もう一度試す
 
-**`promise.greeting.afternoon`**
-
-> EN — Good afternoon
-
-こんにちは
-
-**`promise.greeting.evening`**
-
-> EN — Good evening
-
-こんばんは
-
-**`promise.greeting.morning`**
-
-> EN — Good morning
-
-おはようございます
-
-## Tier 3 — Further in — only if you have time (205)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2391,6 +2457,24 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Show the numbers
 
 数値を表示
+
+**`promise.greeting.afternoon`**
+
+> EN — Good afternoon
+
+こんにちは
+
+**`promise.greeting.evening`**
+
+> EN — Good evening
+
+こんばんは
+
+**`promise.greeting.morning`**
+
+> EN — Good morning
+
+おはようございます
 
 ### dashboard chrome
 

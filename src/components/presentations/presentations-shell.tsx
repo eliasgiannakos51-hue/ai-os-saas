@@ -22,7 +22,7 @@ import {
 import {
   DEFAULT_SLIDES,
   IMAGE_SOURCES,
-  MAX_DESCRIPTION_CHARS,
+  MAX_DECK_DESCRIPTION_CHARS,
   MAX_INSTRUCTION_CHARS,
   MAX_OWN_IMAGES,
   MAX_SLIDES,
@@ -213,11 +213,11 @@ export function PresentationsShell({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ description: description.slice(0, MAX_DESCRIPTION_CHARS), slideCount, imageSource, ownImagePaths, locale }),
+        body: JSON.stringify({ description: description.slice(0, MAX_DECK_DESCRIPTION_CHARS), slideCount, imageSource, ownImagePaths, locale }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
-        say("tool", refusal(String(body?.error ?? ""), MAX_DESCRIPTION_CHARS));
+        say("tool", refusal(String(body?.error ?? ""), MAX_DECK_DESCRIPTION_CHARS));
         await discardUploads();
         return;
       }

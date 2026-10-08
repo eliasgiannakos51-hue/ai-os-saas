@@ -124,6 +124,7 @@
       "websiteBuilder": "Build a site",
       "apps": "App ideas",
       "images": "Image ideas",
+      "imageTool": "Image",
       "videos": "Video ideas",
       "coding": "Coding",
       "dataAnalysis": "See what the numbers say",
@@ -3238,6 +3239,110 @@
         "failed": "Something went wrong. Nothing was charged for what did not happen.",
         "offline": "No connection. Check the network and try again."
       }
+    },
+    "flows": {
+      "name": "Projects",
+      "help": "Write in one sentence what you want made, e.g. “Make a site for my campsite, with pictures, and posts to announce it”. You see the plan and its cost, approve it, and everything goes into one project.",
+      "placeholder": "What do you want made?",
+      "planIntro": "This is the plan. Nothing starts before you approve it.",
+      "kinds": {
+        "research": "Research",
+        "site": "Site",
+        "images": "Pictures",
+        "posts": "Posts",
+        "slides": "Presentation",
+        "analysis": "File analysis"
+      },
+      "does": {
+        "research": "Research with numbered sources",
+        "site": "A site with its pages",
+        "images": "Four pictures",
+        "posts": "Posts for five platforms",
+        "slides": "A presentation",
+        "analysis": "Charts and an explanation from your file"
+      },
+      "afterResearch": "made from the research",
+      "price": "up to {count, plural, one {# credit} other {# credits}}",
+      "priceAfterFile": "priced once the file is read",
+      "total": "Total: up to {count, plural, one {# credit} other {# credits}}",
+      "totalNote": "Each tool charges what it really used, as on its own page. A step that fails charges nothing more.",
+      "colour": "Colour",
+      "colourHelp": "The same colour on the site and in the pictures.",
+      "colourFromMemory": "your business colour, from Memory",
+      "file": "Choose the file",
+      "fileChosen": "File: {name}",
+      "approve": "Approve and start",
+      "approving": "Making the project…",
+      "unavailable": "Without {names}: not available to you yet.",
+      "notYet": "This needs {names}, which Ionexa does not have yet. Nothing was started and nothing was charged.",
+      "notYetNames": {
+        "video": "video",
+        "translation": "translation",
+        "game": "games",
+        "meeting": "meetings turned into goals"
+      },
+      "nothing": "I found no tool in that sentence. Say what to make: a site, pictures, posts, research, a presentation or a file analysis.",
+      "started": "Started. Everything goes into the project “{name}”.",
+      "status": {
+        "waiting": "Waiting",
+        "running": "Being made",
+        "done": "Ready"
+      },
+      "waitingFor": "Waits for the research",
+      "stepErrors": {
+        "no_credits": "Not enough credits",
+        "not_included": "Not included in your plan",
+        "not_configured": "Not active yet",
+        "rate_limited": "Too many requests at once",
+        "refused": "The tool refused it",
+        "offline": "No connection",
+        "stopped": "Stopped",
+        "no_file": "No file",
+        "interrupted": "Cut off before it finished",
+        "failed": "Something went wrong"
+      },
+      "openStep": "Open",
+      "openProject": "Open the project",
+      "retry": "Again",
+      "doneOf": "{done} of {total} ready",
+      "mine": "My projects",
+      "mineRunning": "My projects ({count} running)",
+      "examples": "Examples",
+      "example": {
+        "research": "Research campsites in the Cyclades and make a presentation.",
+        "site": "Make a site for my campsite, with pictures, and posts to announce it.",
+        "analysis": "Take this sales file and write a report with charts."
+      },
+      "errors": {
+        "projectLimit": "You have reached your plan's project limit ({limit}).",
+        "rateLimited": "Too many requests at once. Try again shortly.",
+        "file": "That file could not be read. Try a CSV or Excel file.",
+        "failed": "Something went wrong. Nothing was charged.",
+        "offline": "No connection. Check the network and try again."
+      }
+    },
+    "firstTask": {
+      "lead": "Pick something to get done now. The answer arrives in a few seconds.",
+      "cost": "Free, within this month's free messages.",
+      "tasks": {
+        "write": {
+          "label": "Write",
+          "text": "Write a short email asking a supplier for a quote"
+        },
+        "plan": {
+          "label": "Plan",
+          "text": "Make me a plan to find my first customers this month"
+        },
+        "explain": {
+          "label": "Learn",
+          "text": "Explain in plain words what makes a good business description on Google"
+        }
+      },
+      "ownLabel": "Or write what you want",
+      "ownPlaceholder": "Or write what you want done…",
+      "send": "Start",
+      "import": "Bring your data from a CSV file",
+      "skip": "Skip"
     }
   },
   "module": {

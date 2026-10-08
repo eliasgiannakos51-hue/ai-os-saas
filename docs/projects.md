@@ -221,11 +221,13 @@ defaults to `'related'`.
 > (`src/lib/presentations/`); this document was written afterwards and
 > never caught up.
 >
-> It now lists **24** — the thirteen classifiers, those five, and six more
-> that redesign phase 2 added in `src/lib/projects/linkable-extras.ts` so
-> a project can hold the work the person actually came to do:
+> It now lists **28** — the thirteen classifiers, those five, and ten more
+> in `src/lib/projects/linkable-extras.ts` so a project can hold the work
+> the person actually came to do: six that redesign phase 2 added, and
+> four that Flows (package 36, 2026-10-07) add because a flow files its
+> site, pictures, research and analysis in a project:
 >
-> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts
+> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts, sites, generated-images, research, analyses
 >
 > Every number and both lists above are read off the registries by
 > `scripts/tests/projects.test.mjs`, which goes red if any of the three

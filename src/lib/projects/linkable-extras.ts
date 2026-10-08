@@ -81,4 +81,41 @@ export const LINK_ONLY_MODULES: LinkableModule[] = [
     headlineKey: "description",
     fields: [],
   },
+  // WHAT A FLOW MAKES (MASTER 16, package 36): «site, εικόνες και posts
+  // σε ένα έργο» is three rows in three tables, and the project can only
+  // hold the tables named here. The REAL tables of each tool — the Site's
+  // user_websites, the Image tool's generated_images — not the old
+  // trackers (ai_websites, ai_images) the build modules still list.
+  {
+    slug: "sites",
+    titleKey: "sidebar.items.websiteBuilder",
+    table: "user_websites",
+    headlineKey: "name",
+    fields: [],
+  },
+  {
+    slug: "generated-images",
+    // The tool's own name, «Εικόνα». sidebar.items.images is the old
+    // ai_images tracker's, and under it the picker showed «Ιδέες για
+    // εικόνες» twice (projects.test.mjs, section 6).
+    titleKey: "sidebar.items.imageTool",
+    table: "generated_images",
+    // The description the four pictures were made from.
+    headlineKey: "prompt",
+    fields: [],
+  },
+  {
+    slug: "research",
+    titleKey: "sidebar.items.deepResearch",
+    table: "research_reports",
+    headlineKey: "topic",
+    fields: [],
+  },
+  {
+    slug: "analyses",
+    titleKey: "sidebar.items.dataAnalysis",
+    table: "data_analyses",
+    headlineKey: "title",
+    fields: [],
+  },
 ];

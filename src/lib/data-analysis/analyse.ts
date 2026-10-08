@@ -132,6 +132,9 @@ function round(value: number): number {
  * The instruction. Written here rather than in the route so the build
  * gate can assert the four refusals are in it.
  */
+/** The model a file's analysis runs on (api/data-analysis/[id]/analyse), and is quoted on (…/price). */
+export const ANALYSIS_MODEL = "claude-sonnet-4-6";
+
 export const ANALYSIS_SYSTEM = `You are reading a summary of a spreadsheet a user uploaded. Every statistic you are shown was computed from the whole file by the application, not by you.
 
 YOUR JOB is to say what the numbers MEAN — patterns, anomalies, and what is worth looking at next.

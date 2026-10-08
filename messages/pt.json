@@ -124,6 +124,7 @@
       "websiteBuilder": "Criar um site",
       "apps": "Ideias de apps",
       "images": "Ideias de imagens",
+      "imageTool": "Imagem",
       "videos": "Ideias de vídeos",
       "coding": "Código",
       "dataAnalysis": "Vê o que dizem os números",
@@ -3238,6 +3239,110 @@
         "failed": "Algo deu errado. Nada foi cobrado pelo que não aconteceu.",
         "offline": "Sem conexão. Verifique a rede e tente de novo."
       }
+    },
+    "flows": {
+      "name": "Projetos",
+      "help": "Escreva numa frase o que quer criar, p. ex. «Faz um site para o meu parque de campismo, com imagens, e posts para o anunciar». Vê o plano e o custo, aprova-o e tudo vai para um único projeto.",
+      "placeholder": "O que quer criar?",
+      "planIntro": "Este é o plano. Nada começa antes de o aprovar.",
+      "kinds": {
+        "research": "Pesquisa",
+        "site": "Site",
+        "images": "Imagens",
+        "posts": "Posts",
+        "slides": "Apresentação",
+        "analysis": "Análise de ficheiro"
+      },
+      "does": {
+        "research": "Pesquisa com fontes numeradas",
+        "site": "Um site com as suas páginas",
+        "images": "Quatro imagens",
+        "posts": "Posts para cinco plataformas",
+        "slides": "Uma apresentação",
+        "analysis": "Gráficos e uma explicação a partir do seu ficheiro"
+      },
+      "afterResearch": "criado a partir da pesquisa",
+      "price": "até {count, plural, one {# crédito} other {# créditos}}",
+      "priceAfterFile": "preço definido quando o ficheiro for lido",
+      "total": "Total: até {count, plural, one {# crédito} other {# créditos}}",
+      "totalNote": "Cada ferramenta cobra o que realmente usou, como na sua própria página. Um passo que falha não cobra mais nada.",
+      "colour": "Cor",
+      "colourHelp": "A mesma cor no site e nas imagens.",
+      "colourFromMemory": "a cor do seu negócio, da Memória",
+      "file": "Escolher o ficheiro",
+      "fileChosen": "Ficheiro: {name}",
+      "approve": "Aprovar e começar",
+      "approving": "A criar o projeto…",
+      "unavailable": "Sem {names}: ainda não disponível para si.",
+      "notYet": "Isto precisa de {names}, que a Ionexa ainda não tem. Nada foi iniciado e nada foi cobrado.",
+      "notYetNames": {
+        "video": "vídeo",
+        "translation": "tradução",
+        "game": "jogos",
+        "meeting": "reuniões transformadas em objetivos"
+      },
+      "nothing": "Não encontrei nenhuma ferramenta nessa frase. Diga o que criar: um site, imagens, posts, uma pesquisa, uma apresentação ou uma análise de ficheiro.",
+      "started": "Iniciado. Tudo vai para o projeto «{name}».",
+      "status": {
+        "waiting": "Em espera",
+        "running": "Em criação",
+        "done": "Pronto"
+      },
+      "waitingFor": "Aguarda a pesquisa",
+      "stepErrors": {
+        "no_credits": "Créditos insuficientes",
+        "not_included": "Não incluído no seu plano",
+        "not_configured": "Ainda não está ativo",
+        "rate_limited": "Demasiados pedidos ao mesmo tempo",
+        "refused": "A ferramenta recusou",
+        "offline": "Sem ligação",
+        "stopped": "Parado",
+        "no_file": "Sem ficheiro",
+        "interrupted": "Interrompido antes de terminar",
+        "failed": "Algo correu mal"
+      },
+      "openStep": "Abrir",
+      "openProject": "Abrir o projeto",
+      "retry": "Outra vez",
+      "doneOf": "{done} de {total} prontos",
+      "mine": "Os meus projetos",
+      "mineRunning": "Os meus projetos ({count} em curso)",
+      "examples": "Exemplos",
+      "example": {
+        "research": "Pesquisa parques de campismo nas Cíclades e faz uma apresentação.",
+        "site": "Faz um site para o meu parque de campismo, com imagens, e posts para o anunciar.",
+        "analysis": "Pega neste ficheiro de vendas e escreve um relatório com gráficos."
+      },
+      "errors": {
+        "projectLimit": "Atingiu o limite de projetos do seu plano ({limit}).",
+        "rateLimited": "Demasiados pedidos ao mesmo tempo. Tente novamente daqui a pouco.",
+        "file": "Não foi possível ler esse ficheiro. Experimente um ficheiro CSV ou Excel.",
+        "failed": "Algo correu mal. Nada foi cobrado.",
+        "offline": "Sem ligação. Verifique a rede e tente novamente."
+      }
+    },
+    "firstTask": {
+      "lead": "Escolhe algo para fazer agora. A resposta chega em poucos segundos.",
+      "cost": "Grátis, dentro das mensagens gratuitas deste mês.",
+      "tasks": {
+        "write": {
+          "label": "Escrever",
+          "text": "Escreve um email curto a pedir um orçamento a um fornecedor"
+        },
+        "plan": {
+          "label": "Planear",
+          "text": "Faz-me um plano para encontrar os meus primeiros clientes este mês"
+        },
+        "explain": {
+          "label": "Aprender",
+          "text": "Explica-me em palavras simples o que torna boa uma descrição de empresa no Google"
+        }
+      },
+      "ownLabel": "Ou escreve o que queres",
+      "ownPlaceholder": "Ou escreve o que queres que se faça…",
+      "send": "Começar",
+      "import": "Traz os teus dados de um ficheiro CSV",
+      "skip": "Saltar"
     }
   },
   "module": {

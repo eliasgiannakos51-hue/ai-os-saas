@@ -9,6 +9,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { activationAvailable } from "@/lib/import/activation";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { providerConfigured } from "@/lib/integrations/oauth";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { greetingName } from "@/lib/greeting";
+import { FirstTask } from "@/components/onboarding/first-task";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +27,8 @@ export function generateMetadata(): Promise<Metadata> {
  * one true sentence back out. A dashboard chrome around that is an
  * invitation to wander off into an empty product.
  */
-export default async function OnboardingPage() {
+export default async function OnboardingPage(props: { searchParams: Promise<{ classic?: string }> }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
 
   const {
@@ -61,6 +65,20 @@ export default async function OnboardingPage() {
   // Only a successful read may move them.
   if (!stateError && (state?.completed_at || state?.skipped_at)) {
     redirect("/dashboard/overview");
+  }
+
+  // THE FIRST TASK (MASTER 16, package 39), behind the switch
+  // "first-task": three tasks that finish on any plan, one press each,
+  // INSTEAD of the questionnaire below — which stays one press away
+  // (?classic=1), because the free first import lives in it.
+  if ((await isFeatureOn("first-task", user)) && searchParams.classic !== "1") {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
+        <div className="w-full max-w-2xl">
+          <FirstTask name={greetingName(user.user_metadata)} />
+        </div>
+      </main>
+    );
   }
 
   return (

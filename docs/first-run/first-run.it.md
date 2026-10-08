@@ -1,12 +1,12 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **588 strings**. The whole product is 3893, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **602 strings**. The whole product is 3972, which is why this file exists.
 
-**Start with tier 1. It is 23 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 360 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 369 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
-## Tier 1 — THE SENTENCES — read these (23)
+## Tier 1 — THE SENTENCES — read these (25)
 
 _On the first screens, 12 words or more. This is prose somebody wrote, and prose is where a translation can be correct word by word and still read like nobody says that._
 
@@ -69,6 +69,18 @@ Porta dati reali e l'IA ti dirà qualcosa sulla tua attività entro due minuti.
 > EN — Your data stays yours. It is stored privately, only you can read it, and it is never used to train anything. You can delete it, or your whole account, at any time.
 
 I tuoi dati restano tuoi. Sono archiviati in modo privato, solo tu puoi leggerli e non vengono mai usati per addestrare nulla. Puoi cancellarli, o l'intero account, quando vuoi.
+
+**`dashboard.firstTask.lead`**
+
+> EN — Pick something to get done now. The answer arrives in a few seconds.
+
+Scegli qualcosa da fare adesso. La risposta arriva in pochi secondi.
+
+**`dashboard.firstTask.tasks.explain.text`**
+
+> EN — Explain in plain words what makes a good business description on Google
+
+Spiegami in parole semplici cosa rende buona la descrizione di un'attività su Google
 
 **`dashboard.onboarding.analysingHint`**
 
@@ -158,7 +170,7 @@ Sembra una domanda. La rispondo o la registro?
 
 Descrivi qualsiasi cosa — un'idea di prodotto, un'operazione, il feedback di un utente, una metrica — e finisce automaticamente nel modulo giusto.
 
-## Tier 2 — The labels — skim these (360)
+## Tier 2 — The labels — skim these (369)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -809,6 +821,72 @@ Elaborazione...
 > EN — Let's make this yours
 
 Rendiamolo tuo
+
+**`dashboard.firstTask.cost`**
+
+> EN — Free, within this month's free messages.
+
+Gratis, entro i messaggi gratuiti del mese.
+
+**`dashboard.firstTask.import`**
+
+> EN — Bring your data from a CSV file
+
+Porta i tuoi dati da un file CSV
+
+**`dashboard.firstTask.ownLabel`**
+
+> EN — Or write what you want
+
+Oppure scrivi cosa vuoi
+
+**`dashboard.firstTask.ownPlaceholder`**
+
+> EN — Or write what you want done…
+
+Oppure scrivi cosa vuoi fare…
+
+**`dashboard.firstTask.send`**
+
+> EN — Start
+
+Inizia
+
+**`dashboard.firstTask.skip`**
+
+> EN — Skip
+
+Salta
+
+**`dashboard.firstTask.tasks.explain.label`**
+
+> EN — Learn
+
+Impara
+
+**`dashboard.firstTask.tasks.plan.label`**
+
+> EN — Plan
+
+Organizza
+
+**`dashboard.firstTask.tasks.plan.text`**
+
+> EN — Make me a plan to find my first customers this month
+
+Fammi un piano per trovare i miei primi clienti questo mese
+
+**`dashboard.firstTask.tasks.write.label`**
+
+> EN — Write
+
+Scrivi
+
+**`dashboard.firstTask.tasks.write.text`**
+
+> EN — Write a short email asking a supplier for a quote
+
+Scrivi una breve email per chiedere un preventivo a un fornitore
 
 **`dashboard.onboarding.analyseError`**
 
@@ -1760,6 +1838,12 @@ Idee
 
 Idee per immagini
 
+**`sidebar.items.imageTool`**
+
+> EN — Image
+
+Immagine
+
 **`sidebar.items.integrations`**
 
 > EN — Integrations
@@ -2314,25 +2398,7 @@ Vedi la cronologia dei crediti
 
 Riprova
 
-**`promise.greeting.afternoon`**
-
-> EN — Good afternoon
-
-Buon pomeriggio
-
-**`promise.greeting.evening`**
-
-> EN — Good evening
-
-Buonasera
-
-**`promise.greeting.morning`**
-
-> EN — Good morning
-
-Buongiorno
-
-## Tier 3 — Further in — only if you have time (205)
+## Tier 3 — Further in — only if you have time (208)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2391,6 +2457,24 @@ Nascondi i numeri
 > EN — Show the numbers
 
 Mostra i numeri
+
+**`promise.greeting.afternoon`**
+
+> EN — Good afternoon
+
+Buon pomeriggio
+
+**`promise.greeting.evening`**
+
+> EN — Good evening
+
+Buonasera
+
+**`promise.greeting.morning`**
+
+> EN — Good morning
+
+Buongiorno
 
 ### dashboard chrome
 

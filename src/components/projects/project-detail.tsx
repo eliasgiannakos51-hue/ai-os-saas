@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { MessageCircle, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/projects/project";
+import { LIBRARY_SOURCES } from "@/lib/library/sources";
 
 export type ProjectMemberView = {
   table: string;
@@ -45,7 +46,31 @@ export type ProjectHeader = {
 const TASK_TABLES = new Set(["ai_missions"]);
 const FILE_TABLES = new Set(["user_files"]);
 const AGENT_TABLES = new Set(["user_agents"]);
-const RESULT_TABLES = new Set(["ai_presentations", "generated_posts", "ai_websites", "ai_apps", "ai_images", "ai_videos"]);
+const RESULT_TABLES = new Set([
+  "ai_presentations",
+  "generated_posts",
+  "ai_websites",
+  "ai_apps",
+  "ai_images",
+  "ai_videos",
+  // What a flow makes (package 36).
+  "user_websites",
+  "generated_images",
+  "research_reports",
+  "data_analyses",
+]);
+
+/**
+ * WHERE A MEMBER OPENS: in the tool that made it, at that row — the same
+ * address the Library opens it at (lib/library/sources.ts hrefFor), and
+ * the Image tool's own `?record=`. A row of a table with no such place
+ * stays a line of text.
+ */
+function openHref(member: ProjectMemberView): string | null {
+  if (member.table === "generated_images") return `/dashboard/images?record=${encodeURIComponent(member.id)}`;
+  const source = LIBRARY_SOURCES.find((s) => s.table === member.table);
+  return source ? source.hrefFor(member.id) : null;
+}
 
 export function ProjectDetail({
   project,
@@ -138,7 +163,13 @@ export function ProjectDetail({
               {section.rows.map((member) => (
                 <li key={`${member.table}:${member.id}`} className="flex items-center justify-between gap-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <p className="break-words text-sm text-foreground">{member.headline || t("untitled")}</p>
+                    {openHref(member) ? (
+                      <Link href={openHref(member)!} data-testid="project-member-open" className="break-words text-sm text-foreground underline-offset-2 hover:underline">
+                        {member.headline || t("untitled")}
+                      </Link>
+                    ) : (
+                      <p className="break-words text-sm text-foreground">{member.headline || t("untitled")}</p>
+                    )}
                     <p className="text-[11px] text-muted">{tKey(member.titleKey)}</p>
                   </div>
                   <button

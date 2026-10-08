@@ -67,7 +67,7 @@ const {
   MIN_SLIDES, MAX_SLIDES, DEFAULT_SLIDES, MAX_BULLETS, MAX_TITLE_CHARS, MAX_BULLET_CHARS, MAX_NOTES_CHARS,
   MAX_OWN_IMAGES, SLIDE_OUTPUT_CHARS, SLIDE_LAYOUTS, IMAGE_SOURCES,
   parseDeckToolInput, parseStoredDeck, parseSlideImage, assignOwnImages, deckEstimateInputChars, clampSlideCount,
-  checkDescription,
+  checkDeckDescription,
 } = deck;
 
 ok(`ten locales were read (${LOCALES.length})`, LOCALES.length === 10);
@@ -124,7 +124,7 @@ ok("a deck with no title takes the fallback", parseDeckToolInput({ slides: [slid
 }
 ok("the estimate grows with every slide asked for", deckEstimateInputChars(100, 20) - deckEstimateInputChars(100, 10) === 10 * SLIDE_OUTPUT_CHARS);
 ok("...and the slide count is clamped before it is priced", deckEstimateInputChars(0, 999) === MAX_SLIDES * SLIDE_OUTPUT_CHARS && clampSlideCount("x") === DEFAULT_SLIDES);
-ok("a one-word brief is refused before anything is spent", !checkDescription("hi").ok && checkDescription("A pitch of our bakery's catering service to hotels").ok);
+ok("a one-word brief is refused before anything is spent", !checkDeckDescription("hi").ok && checkDeckDescription("A pitch of our bakery's catering service to hotels").ok);
 
 console.log("\n== 2. the call: forced tool, fenced brief, usage recorded before the parse ==");
 const gen = await loadTs(PROMPT_TS);
@@ -150,7 +150,7 @@ console.log("\n== 3. the route: refuse before spend, session client, hold sized 
 {
   const src = stripComments(readFileSync(ROUTE, "utf8"));
   const at = (re) => { const m = src.search(re); return m; };
-  const desc = at(/checkDescription\(/), auth = at(/auth\.getUser\(/), breaker = at(/checkAiCallAllowed\(/), reserve = at(/await reserveCredits\(/), call = at(/await generateDeck\(/);
+  const desc = at(/checkDeckDescription\(/), auth = at(/auth\.getUser\(/), breaker = at(/checkAiCallAllowed\(/), reserve = at(/await reserveCredits\(/), call = at(/await generateDeck\(/);
   ok("the brief is checked before the user is read", desc !== -1 && auth !== -1 && desc < auth);
   ok("the breaker runs before the hold, and the hold before the model", breaker < reserve && reserve < call, `${breaker} < ${reserve} < ${call}`);
   // AND IT COVERS THE RECORDS TOO (2026-09-27) — see the same check in

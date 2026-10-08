@@ -613,7 +613,8 @@ if (!DB) {
   // 112 -> 116 on 2026-10-07: generated_images (20261019, package 19) and
   // automation_flows, automation_flow_versions, automation_runs (20261021,
   // package 30); credit-flow.dbtest.mjs measured 116 in CI on #271.
-  check(`116 tables`, tables === 116, `got ${tables}`);
+  // 116 -> 117 on 2026-10-07: project_flows (20261022, package 36).
+  check(`117 tables`, tables === 117, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -812,4 +813,7 @@ if (!DB) {
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
-process.exit(failures.length === 0 ? 0 : 1);
+// exitCode, NOT process.exit(): a process.exit() with output still queued
+// in a full pipe drops it, and db-migrations.mutation.mjs then read a red
+// gate with no FAIL line (seen 2026-10-07, under a parallel sweep).
+process.exitCode = failures.length === 0 ? 0 : 1;

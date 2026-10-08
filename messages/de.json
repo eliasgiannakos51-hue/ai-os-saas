@@ -124,6 +124,7 @@
       "websiteBuilder": "Website bauen",
       "apps": "App-Ideen",
       "images": "Bild-Ideen",
+      "imageTool": "Bild",
       "videos": "Video-Ideen",
       "coding": "Code",
       "dataAnalysis": "Sieh, was die Zahlen sagen",
@@ -3238,6 +3239,110 @@
         "failed": "Etwas ist schiefgelaufen. Für das, was nicht passiert ist, wurde nichts berechnet.",
         "offline": "Keine Verbindung. Prüfe das Netzwerk und versuch es noch einmal."
       }
+    },
+    "flows": {
+      "name": "Projekte",
+      "help": "Schreib in einem Satz, was entstehen soll, z. B. „Mach eine Website für meinen Campingplatz, mit Bildern, und Beiträge, um sie anzukündigen“. Du siehst den Plan und die Kosten, gibst ihn frei, und alles landet in einem Projekt.",
+      "placeholder": "Was soll entstehen?",
+      "planIntro": "Das ist der Plan. Nichts startet, bevor du ihn freigibst.",
+      "kinds": {
+        "research": "Recherche",
+        "site": "Website",
+        "images": "Bilder",
+        "posts": "Beiträge",
+        "slides": "Präsentation",
+        "analysis": "Dateianalyse"
+      },
+      "does": {
+        "research": "Recherche mit nummerierten Quellen",
+        "site": "Eine Website mit ihren Seiten",
+        "images": "Vier Bilder",
+        "posts": "Beiträge für fünf Plattformen",
+        "slides": "Eine Präsentation",
+        "analysis": "Diagramme und eine Erklärung aus deiner Datei"
+      },
+      "afterResearch": "aus der Recherche erstellt",
+      "price": "bis zu {count, plural, one {# Credit} other {# Credits}}",
+      "priceAfterFile": "Preis, sobald die Datei gelesen ist",
+      "total": "Gesamt: bis zu {count, plural, one {# Credit} other {# Credits}}",
+      "totalNote": "Jedes Tool berechnet, was es wirklich verbraucht hat, wie auf seiner eigenen Seite. Ein fehlgeschlagener Schritt kostet nichts weiter.",
+      "colour": "Farbe",
+      "colourHelp": "Dieselbe Farbe auf der Website und in den Bildern.",
+      "colourFromMemory": "deine Firmenfarbe, aus dem Gedächtnis",
+      "file": "Datei auswählen",
+      "fileChosen": "Datei: {name}",
+      "approve": "Freigeben und starten",
+      "approving": "Projekt wird erstellt…",
+      "unavailable": "Ohne {names}: für dich noch nicht verfügbar.",
+      "notYet": "Dafür braucht es {names}, was Ionexa noch nicht hat. Nichts wurde gestartet und nichts berechnet.",
+      "notYetNames": {
+        "video": "Video",
+        "translation": "Übersetzung",
+        "game": "Spiele",
+        "meeting": "Meetings, aus denen Ziele werden"
+      },
+      "nothing": "In diesem Satz habe ich kein Tool gefunden. Sag, was entstehen soll: eine Website, Bilder, Beiträge, eine Recherche, eine Präsentation oder eine Dateianalyse.",
+      "started": "Gestartet. Alles landet im Projekt „{name}“.",
+      "status": {
+        "waiting": "Wartet",
+        "running": "Wird erstellt",
+        "done": "Fertig"
+      },
+      "waitingFor": "Wartet auf die Recherche",
+      "stepErrors": {
+        "no_credits": "Nicht genug Credits",
+        "not_included": "Nicht in deinem Tarif enthalten",
+        "not_configured": "Noch nicht aktiv",
+        "rate_limited": "Zu viele Anfragen auf einmal",
+        "refused": "Das Tool hat es abgelehnt",
+        "offline": "Keine Verbindung",
+        "stopped": "Gestoppt",
+        "no_file": "Keine Datei",
+        "interrupted": "Abgebrochen, bevor es fertig war",
+        "failed": "Etwas ist schiefgelaufen"
+      },
+      "openStep": "Öffnen",
+      "openProject": "Projekt öffnen",
+      "retry": "Nochmal",
+      "doneOf": "{done} von {total} fertig",
+      "mine": "Meine Projekte",
+      "mineRunning": "Meine Projekte ({count} laufen)",
+      "examples": "Beispiele",
+      "example": {
+        "research": "Recherchiere Campingplätze auf den Kykladen und mach eine Präsentation.",
+        "site": "Mach eine Website für meinen Campingplatz, mit Bildern, und Beiträge, um sie anzukündigen.",
+        "analysis": "Nimm diese Verkaufsdatei und schreib einen Bericht mit Diagrammen."
+      },
+      "errors": {
+        "projectLimit": "Du hast das Projektlimit deines Tarifs erreicht ({limit}).",
+        "rateLimited": "Zu viele Anfragen auf einmal. Versuch es gleich noch einmal.",
+        "file": "Die Datei konnte nicht gelesen werden. Versuch es mit einer CSV- oder Excel-Datei.",
+        "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet.",
+        "offline": "Keine Verbindung. Prüf das Netzwerk und versuch es noch einmal."
+      }
+    },
+    "firstTask": {
+      "lead": "Wähle etwas, das jetzt erledigt werden soll. Die Antwort kommt in wenigen Sekunden.",
+      "cost": "Kostenlos, innerhalb der kostenlosen Nachrichten dieses Monats.",
+      "tasks": {
+        "write": {
+          "label": "Schreiben",
+          "text": "Schreib eine kurze E-Mail, die einen Lieferanten um ein Angebot bittet"
+        },
+        "plan": {
+          "label": "Planen",
+          "text": "Erstelle mir einen Plan, um diesen Monat meine ersten Kunden zu finden"
+        },
+        "explain": {
+          "label": "Lernen",
+          "text": "Erklär mir in einfachen Worten, was eine gute Unternehmensbeschreibung bei Google ausmacht"
+        }
+      },
+      "ownLabel": "Oder schreib, was du möchtest",
+      "ownPlaceholder": "Oder schreib, was erledigt werden soll…",
+      "send": "Los",
+      "import": "Bring deine Daten aus einer CSV-Datei mit",
+      "skip": "Überspringen"
     }
   },
   "module": {

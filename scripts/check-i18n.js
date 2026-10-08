@@ -64,6 +64,14 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.automations.kinds.condition",
   "fr:dashboard.automations.kinds.action",
   "de:dashboard.automations.kinds.start",
+  // A flow's steps (package 36) by the tools' own names: "Site" and
+  // "Posts" are what the Greek and Portuguese tool names already are, and
+  // "Site" is the French word.
+  "el:dashboard.flows.kinds.site",
+  "el:dashboard.flows.kinds.posts",
+  "fr:dashboard.flows.kinds.site",
+  "pt:dashboard.flows.kinds.site",
+  "pt:dashboard.flows.kinds.posts",
   // "menu" is the French, Italian and Portuguese word for a site's menu
   // too: the name of a box in Site (package 4, dashboard.toolShell.box).
   // The Library's kinds (package 5, 2026-10-07): "Sites", "Documents"
@@ -78,6 +86,8 @@ const LOCALE_ALLOWED = new Set([
   // "image" and "portrait" are the French words too, and "story" is what
   // the format is called in French apps (the Image tool, MASTER 16, 19).
   "fr:dashboard.images.name",
+  // The same tool's name where a project lists what it holds (package 36).
+  "fr:sidebar.items.imageTool",
   "fr:dashboard.images.picture",
   "fr:dashboard.images.chosen",
   "fr:dashboard.images.aspects.portrait",

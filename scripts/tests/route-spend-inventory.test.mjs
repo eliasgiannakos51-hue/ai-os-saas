@@ -275,6 +275,9 @@ const DECLARED = {
   "automations/runs/[runId]/cancel": { bound: "artefact", why: "cancels the person's own waiting run in one conditional update; nothing is sent or charged" },
   "cron/automation-flows": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel, bounded per tick and per person, and every AI box is held and settled in the runner on the automation's owner" },
 
+  // --- flows (package 36) ---
+  "flows": { bound: "limited", scope: "flow_create", why: "makes a project and the row that follows a flow; calls no model and charges nothing — the model and storage in its closure are the image tool's, imported to ask whether pictures are available to this person" },
+
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },

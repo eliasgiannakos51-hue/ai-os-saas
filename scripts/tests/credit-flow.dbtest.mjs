@@ -189,7 +189,9 @@ console.log("== 0. the database really is the one the migrations build ==");
 // generated_images (package 19), 20261021000000_automation_flows.sql adds
 // automation_flows, automation_flow_versions and automation_runs
 // (package 30). Measured by this line in CI on #271 (got 116).
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 116);
+// 116 -> 117 on 2026-10-07: 20261022000000_project_flows.sql adds
+// project_flows (package 36).
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 117);
 eq(
   "the credit functions exist",
   Number(

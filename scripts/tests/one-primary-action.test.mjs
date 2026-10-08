@@ -518,6 +518,20 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Automations in the shell (package 30): the field's send makes an automation or changes the chosen box; try, run, switch on and approve are quiet panels",
   },
+  {
+    file: "src/components/flows/flow-shell.tsx",
+    tag: "<FlowShell",
+    budget: 1,
+    walk: true,
+    why: "Flows on the Projects page (package 36): the field's send makes the plan; approve, open and again are quiet panels",
+  },
+  {
+    file: "src/components/onboarding/first-task.tsx",
+    tag: "<FirstTask",
+    budget: 1,
+    walk: true,
+    why: "The first task on /onboarding (package 39), INSTEAD of the questionnaire: the field's send is the one filled control; the three tasks are quiet panels",
+  },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));
 const walkedReplacements = new Set(REPLACEMENT_SURFACES.filter((r) => r.walk).map((r) => r.file));

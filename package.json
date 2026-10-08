@@ -32,7 +32,8 @@
     "build:ci": "node scripts/ci-build.mjs",
     "test:unit:verbose": "node scripts/tests/run-gates.mjs --verbose",
     "db:spend": "node scripts/db/model-spend.mjs",
-    "bot": "node scripts/e2e-bot.mjs"
+    "bot": "node scripts/e2e-bot.mjs",
+    "acceptance": "node scripts/acceptance.mjs"
   },
   "engines": {
     "node": "22.x"

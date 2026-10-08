@@ -34,7 +34,7 @@
 // skipped rather than green.
 //
 // Run: node scripts/tests/projects.test.mjs
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -277,6 +277,21 @@ console.log("\n== 6. THE REGISTRY: what a project may hold ==");
   ok("every link-only entry carries what a headline needs and no tracker fields",
     extras.LINK_ONLY_MODULES.every((m) => m.table && m.headlineKey && m.titleKey && Array.isArray(m.fields) && m.fields.length === 0));
   ok("no table is registered twice", new Set(tables).size === tables.length);
+  // TWO ROWS UNDER ONE NAME. The Image tool's table joined the registry
+  // (package 36) under the old tracker's key, sidebar.items.images, so the
+  // «Σύνδεση με...» picker and the timeline's module filter offered
+  // «Ιδέες για εικόνες» twice, in every language, and the second one
+  // searched a different table from the first. The population is every
+  // linkable module, in every locale.
+  for (const l of LOCALES) {
+    const byName = new Map();
+    for (const m of kg.LINKABLE_MODULES) {
+      const name = lookup(messages[l], m.titleKey);
+      byName.set(name, [...(byName.get(name) ?? []), m.slug]);
+    }
+    const twice = [...byName].filter(([, slugs]) => slugs.length > 1).map(([name, slugs]) => `${name}: ${slugs.join(" + ")}`);
+    ok(`${l}: no two of the ${kg.LINKABLE_MODULES.length} linkable modules share a name`, twice.length === 0, twice.join("; "));
+  }
 
   // THE COUNT THE DOCUMENT PRINTS. docs/projects.md said nineteen when it
   // was eighteen and named presentations as a build module a round after
@@ -303,8 +318,14 @@ console.log("\n== 6. THE REGISTRY: what a project may hold ==");
   }
   // THE HEADLINE COLUMN HAS TO EXIST, or the picker draws a row of blanks.
   const schema = readFileSync("supabase/migrations/20260803000000_baseline_schema.sql", "utf8");
-  const laterMigrations = ["20260929000000_presentation_decks.sql", "20260930000000_generated_posts.sql"]
-    .map((f) => { try { return readFileSync(`supabase/migrations/${f}`, "utf8"); } catch { return ""; } })
+  // EVERY MIGRATION, not the two the first link-only tables happened to
+  // come from: the fifth table to join (generated_images, package 36) was
+  // created in a file this list did not name, and the check went red on a
+  // column that exists. The population is the directory.
+  const laterMigrations = readdirSync("supabase/migrations")
+    .filter((f) => f.endsWith(".sql") && f !== "20260803000000_baseline_schema.sql")
+    .sort()
+    .map((f) => readFileSync(`supabase/migrations/${f}`, "utf8"))
     .join("\n");
   for (const m of extras.LINK_ONLY_MODULES) {
     const all = schema + laterMigrations;

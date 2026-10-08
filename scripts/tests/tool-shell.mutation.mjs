@@ -114,8 +114,8 @@ const MUTANTS = [
   {
     name: "Slides: the photographs stay behind after a refusal",
     file: SLIDES,
-    from: '        say("tool", refusal(String(body?.error ?? ""), MAX_DESCRIPTION_CHARS));\n        await discardUploads();',
-    to: '        say("tool", refusal(String(body?.error ?? ""), MAX_DESCRIPTION_CHARS));',
+    from: '        say("tool", refusal(String(body?.error ?? ""), MAX_DECK_DESCRIPTION_CHARS));\n        await discardUploads();',
+    to: '        say("tool", refusal(String(body?.error ?? ""), MAX_DECK_DESCRIPTION_CHARS));',
     expect: "the photographs are removed again",
   },
   {

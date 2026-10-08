@@ -301,6 +301,14 @@ console.log("\n== 7. every feature that reads is wired to the switch ==");
     unasked.length === 0,
     unasked.join(", ") + " — a switch nothing reads"
   );
+  // AND THE CHAT ASKS ABOUT ITS OWN. "Some code" stopped being enough on
+  // 2026-10-08: the document writer (package 14) reads memory under the
+  // chat switch too, so a chat route that stopped asking left the switch
+  // "asked about" and every line above green.
+  check(
+    "the chat route asks about its own switch",
+    /memoryActiveFor\(\{\s*surface:\s*"chat"/.test(stripComments(readFileSync("src/app/api/chat/route.ts", "utf8")))
+  );
   // THE HELP TEXT SAYS ONLY THE CHAT ADDS, which is true while
   // recordMemory() has no caller: the chat writes through its own
   // extractor (lib/chat/memory.ts). The day a second feature records, the

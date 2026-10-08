@@ -2259,7 +2259,7 @@
         "googleCalendar": {
           "summary": "Legge i tuoi impegni perché l’IA possa rispondere «cosa ho domani?».",
           "sees": "Titolo, ora, luogo e organizzatore degli impegni nei giorni che chiedi. Mai la descrizione di un invito, mai un calendario diverso da quello principale.",
-          "consent": "L’IA potrà leggere gli eventi del tuo calendario principale per rispondere alle tue domande. Legge solo quando una domanda lo richiede — mai in background — e non può creare, modificare o eliminare nulla."
+          "consent": "L’IA potrà leggere gli eventi del tuo calendario principale per rispondere alle tue domande. Legge solo quando lo richiede una tua domanda o un’automazione che hai attivato — nient’altro — e non può creare, modificare o eliminare nulla."
         },
         "slack": {
           "summary": "Leggere i canali in cui si trova l'app e far pubblicare lì gli agenti.",

@@ -119,7 +119,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     if (!changed.ok) return refuse("unusable", 422, { creditsCharged: settlement.creditsCharged });
 
     const boxes = current.boxes.map((b) => (b.id === boxId ? changed.box : b));
-    const schedule = await scheduleAfterChange(user.id, flow, boxes);
+    const schedule = await scheduleAfterChange(user, flow, boxes);
     const saved = await saveVersion({ flowId: id, userId: user.id, version: flow.version + 1, boxes, said: instruction, extra: schedule.patch });
     if (!saved) return refuse("save_failed", 500, { creditsCharged: settlement.creditsCharged });
     const { data: row } = await supabase.from("automation_flows").select(FLOW_COLUMNS).eq("id", id).eq("user_id", user.id).maybeSingle();

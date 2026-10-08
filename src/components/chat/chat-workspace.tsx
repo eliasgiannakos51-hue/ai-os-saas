@@ -45,6 +45,7 @@ import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
 import type { WorkMode } from "@/lib/chat/work-modes";
 import { chatTimelineWorthShowing, isChatStep, readChatStepFrame, type ChatStep } from "@/lib/chat/chat-timeline";
+import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
 
 // What each phase of an answer is called on screen (lib/chat/chat-timeline.ts).
 // Named rather than built from the step, so every message is a literal.
@@ -668,6 +669,8 @@ export function ChatWorkspace({
           ...(mentorPreset ? { mentorPreset } : {}),
           ...(workMode ? { workMode } : {}),
           ...(options.skipClarification ? { skipClarification: true } : {}),
+          // Where the person is: what «αύριο» means when Chat reads their calendar.
+          timeZone: resolveBrowserTimeZone(),
           ...(carried ? { attachments: carried.attachments } : {}),
         }),
       });

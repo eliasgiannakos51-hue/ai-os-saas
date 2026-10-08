@@ -34,7 +34,7 @@ const MUTANTS = [
     // nothing. Put back, §7 must see a switch no code asks about.
     name: "the chat stops asking about its own switch",
     file: CHAT,
-    from: 'memoryActiveFor({ surface: "chat", user, planLimit: plan.capabilities.chatMemoryLimit })',
+    from: 'memoryActiveFor({ surface: "chat", user, planLimit: memoryWindow })',
     to: "true",
     expect: "every switch on /dashboard/ai-memory is asked about by some code",
   },

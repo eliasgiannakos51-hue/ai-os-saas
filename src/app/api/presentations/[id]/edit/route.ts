@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
@@ -194,9 +195,9 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const memoryBlock = memoryActiveFor({
       surface: "presentation",
       user,
-      planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+      planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin),
     })
-      ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+      ? await memoryPromptFor(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
       : "";
 
     const outcome = await editDeck({

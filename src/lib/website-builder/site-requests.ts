@@ -26,10 +26,18 @@ export const isSiteRunning = (w: UserWebsite | null | undefined): boolean =>
 export type SiteStart =
   | { kind: "questions"; questions: string[] }
   | { kind: "started"; record: UserWebsite }
-  /** The server answered but made nothing (an off-topic brief, a duplicate refused) — with its sentence. */
-  | { kind: "notMade"; message: string | null }
-  /** Refused: the plan, the credits, the size — `error` is the server's own. */
-  | { kind: "refused"; error: unknown };
+  /**
+   * The server answered but made nothing (an off-topic brief, a duplicate
+   * refused, no credits) — with its sentence, which is English, and, when it
+   * is out of credits, `code: "insufficient_credits"` with the two numbers,
+   * for a screen to say it in its own language.
+   */
+  | { kind: "notMade"; message: string | null; code: string | null; available: number | null; needed: number | null }
+  /** Refused: the plan, the credits, the size — `error` is the server's own; `code` is "not_included" when the plan has no Site. */
+  | { kind: "refused"; error: unknown; code: string | null };
+
+const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
 
 export async function startSiteGeneration(input: {
   name: string;
@@ -42,9 +50,9 @@ export async function startSiteGeneration(input: {
     body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null };
+  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null, code: str(data?.code) };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
-  if (!data.generated) return { kind: "notMade", message: typeof data.message === "string" ? data.message : null };
+  if (!data.generated) return { kind: "notMade", message: str(data.message), code: str(data.code), available: num(data.available), needed: num(data.needed) };
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the
   // status is watched below. keepalive so leaving the page does not

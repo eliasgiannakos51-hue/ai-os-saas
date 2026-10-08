@@ -298,6 +298,11 @@ export async function POST(request: Request) {
             generated: false,
             rateLimited: true,
             message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
+            // The sentence is English; a screen says it in its own language
+            // from these (lib/website-builder/site-requests.ts).
+            code: "insufficient_credits",
+            available: check.remaining,
+            needed: CREDIT_COSTS.clarificationCheck,
           });
         }
       }
@@ -392,6 +397,9 @@ export async function POST(request: Request) {
           generated: false,
           rateLimited: true,
           message: insufficientCreditsMessage(check.remaining, estimatedCost),
+          code: "insufficient_credits",
+          available: check.remaining,
+          needed: estimatedCost,
         });
       }
     }

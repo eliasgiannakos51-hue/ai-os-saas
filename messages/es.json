@@ -1361,7 +1361,8 @@
         "building": "Creando el sitio… tarda unos minutos.",
         "changing": "Cambiando el sitio…",
         "nextChanges": "Lo que escribas ahora en la conversación cambia este sitio.",
-        "reopen": "Mostrar el sitio"
+        "reopen": "Mostrar el sitio",
+        "failed": "No se pudo crear el sitio. La creación no se ha cobrado; inténtalo de nuevo."
       },
       "attach": {
         "label": "Adjuntar un PDF o una imagen",

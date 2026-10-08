@@ -305,6 +305,13 @@ for (const [file, shape] of SHELL_OPENS) {
   check(`${file.split("/").pop()} opens on the asked item`, shape.test(code(file)));
 }
 
+// NOTHING SHOWN IS NOT "NOTHING MADE" (2026-10-08,
+// scripts/tests/library-edges.prodtest.mjs): with every table failing,
+// the page said «Δεν έχεις φτιάξει τίποτα ακόμη» under the line naming
+// what did not load.
+check("a tool that did not load is never followed by «nothing made» or «nothing says»",
+  /\{items\.length === 0 && failed\.length > 0 \? null : items\.length === 0 \? \(/.test(code("src/components/library/library-view.tsx")));
+
 // ---------------------------------------------------------------------
 console.log("\n== 6. the words, in every language ==");
 // ---------------------------------------------------------------------

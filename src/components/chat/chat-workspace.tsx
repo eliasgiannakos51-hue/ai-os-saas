@@ -31,7 +31,7 @@ import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
 import { AnswerActions } from "@/components/chat/answer-actions";
 import { ResultCard, WorkArea } from "@/components/chat/work-area";
-import { SitePane, type SitePaneHandle } from "@/components/chat/site-pane";
+import { SitePane, type SitePaneHandle, type SiteWall } from "@/components/chat/site-pane";
 import { openSiteFor } from "@/lib/chat/open-tool";
 import { workItemFrom, type WorkItem } from "@/lib/chat/work-area";
 import type { Provenance } from "@/lib/chat/provenance";
@@ -102,6 +102,7 @@ export function ChatWorkspace({
   initialWorkMode,
   workArea = false,
   opensTools = false,
+  siteWall = null,
   attachments = false,
   greeting = null,
 }: {
@@ -141,6 +142,10 @@ export function ChatWorkspace({
   /** The switch "chat-opens-tools" (package 7): a request for a site opens
    *  the Site beside the conversation instead of being answered in words. */
   opensTools?: boolean;
+  /** This account's plan has no Site: the Site opened from Chat shows the
+   *  plan's wall instead of offering what /api/websites/generate refuses.
+   *  Decided by the page from the same gate the route asks. */
+  siteWall?: SiteWall | null;
   /** The switch "chat-attachments" (package 9): PDFs and images given to a
    *  message, and under each answer the remembered facts it used. */
   attachments?: boolean;
@@ -163,6 +168,19 @@ export function ChatWorkspace({
   const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
+  const tOutOfCredits = useTranslations("credits.outOfCredits");
+  const tErrors = useTranslations("errors");
+  // OUT OF CREDITS, IN THE SCREEN'S LANGUAGE. The route's sentence is
+  // English (insufficientCreditsMessage in lib/billing/credits.ts) and was
+  // shown as it came, on a Greek screen too — found 2026-10-08 by
+  // scripts/tests/brand-memory.prodtest.mjs. The route sends a code and
+  // the two numbers for this.
+  const outOfCreditsText = (available: unknown, needed: unknown) =>
+    `${tErrors("codes.insufficientCredits.what")} ${
+      typeof available === "number" && typeof needed === "number"
+        ? tOutOfCredits("detailWithNumbers", { available, needed })
+        : tOutOfCredits("detail")
+    }`;
   const t = useTranslations("dashboard.chat");
   const tSteps = useTranslations("aiSteps");
   const chatStepLabel = (label: string | null) => (isChatStep(label) ? tSteps(CHAT_STEP_MESSAGE[label]) : null);
@@ -684,7 +702,7 @@ export function ChatWorkspace({
           setError(t("attach.refused"));
         } else if (data?.rateLimited) {
           setIsRateLimitNotice(true);
-          setError(data.message);
+          setError(data.code === "insufficient_credits" ? outOfCreditsText(data.available, data.needed) : data.message);
         } else {
           setError(describeStatus(res.status).text);
         }
@@ -771,7 +789,7 @@ export function ChatWorkspace({
             });
           }
         } else if (event.type === "error") {
-          streamError = describeStatus(500).text;
+          streamError = event.outOfCredits === true ? outOfCreditsText(event.available, event.needed) : describeStatus(500).text;
         }
       });
 
@@ -1333,6 +1351,7 @@ export function ChatWorkspace({
           ref={sitePaneRef}
           key={siteBrief}
           brief={siteBrief}
+          wall={siteWall}
           hidden={siteHidden}
           onBack={() => setSiteHidden(true)}
           onClose={() => setSiteBrief(null)}

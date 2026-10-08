@@ -24,6 +24,7 @@ import {
   MAX_TOOL_ROUNDS,
 } from "@/lib/integrations/chat-tool";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -449,14 +450,19 @@ export async function POST(request: Request) {
     // one — "Chat: Off" did nothing to the chat. memoryActiveFor() is the
     // predicate every other feature asks; scripts/tests/memory-universal
     // §7 checks every surface in lib/memory/surfaces.ts is asked about.
+    //
+    // THE OWNER READS AND WRITES THE MOST ANY PLAN KEEPS, whatever his own
+    // subscription says — every other plan gate already opens to him
+    // (lib/memory/memory-window.ts).
+    const memoryWindow = memoryWindowFor(plan.capabilities.chatMemoryLimit, isAdminEmail(user.email));
     const memoryActive = chatMemoryActive({
       userEnabled:
         isChatMemoryEnabled(user) &&
-        memoryActiveFor({ surface: "chat", user, planLimit: plan.capabilities.chatMemoryLimit }),
-      planLimit: plan.capabilities.chatMemoryLimit,
+        memoryActiveFor({ surface: "chat", user, planLimit: memoryWindow }),
+      planLimit: memoryWindow,
     });
     const memories = memoryActive
-      ? await loadRecentMemories(supabase, user.id, plan.capabilities.chatMemoryLimit)
+      ? await loadRecentMemories(supabase, user.id, memoryWindow)
       : [];
 
     // PDFS AND IMAGES, AND WHICH MEMORIES AN ANSWER USED (MASTER 16,
@@ -868,6 +874,11 @@ export async function POST(request: Request) {
           ok: true,
           rateLimited: true,
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
+          // The sentence above is English; the screen says it in its own
+          // language from these (components/chat/chat-workspace.tsx).
+          code: "insufficient_credits",
+          available: check.remaining,
+          needed: estimate.reserveCredits,
         });
       }
     }
@@ -1211,6 +1222,7 @@ export async function POST(request: Request) {
                     ? `Not enough credits for this message (you have ${reservation.available}, this needs about ${streamEstimate.reserveCredits}). No credits were charged.`
                     : "Could not reserve credits for this message. No credits were charged — please try again.",
                 outOfCredits: reservation.reason === "insufficient",
+                ...(reservation.reason === "insufficient" ? { available: reservation.available, needed: streamEstimate.reserveCredits } : {}),
               })
             );
             controller.close();

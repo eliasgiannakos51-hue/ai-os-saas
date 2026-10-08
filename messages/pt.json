@@ -1361,7 +1361,8 @@
         "building": "A criar o site… demora alguns minutos.",
         "changing": "A alterar o site…",
         "nextChanges": "O que escrever agora na conversa altera este site.",
-        "reopen": "Mostrar o site"
+        "reopen": "Mostrar o site",
+        "failed": "Não foi possível criar o site. A criação não foi cobrada; tente novamente."
       },
       "attach": {
         "label": "Anexar um PDF ou imagem",

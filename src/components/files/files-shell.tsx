@@ -13,7 +13,10 @@ import { stepLabelKey } from "@/lib/jobs/step-labels";
 import { useHeldStepLabel } from "@/lib/jobs/use-ai-job";
 import { startAndWatchJob, watchJob } from "@/lib/jobs/start-and-watch";
 import { markJobConsumed } from "@/lib/jobs/consume";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { useErrorText } from "@/lib/errors/use-error-text";
+import { ApiError } from "@/lib/errors/api-error";
+import type { ApiErrorPayload } from "@/lib/errors/error-codes";
+import { isStoppedMessage } from "@/lib/stop-message";
 import { ACCEPT_ATTRIBUTE, MAX_FILE_BYTES, MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS, formatBytes, kindFromExtension } from "@/lib/files/file-types";
 import { answerForClipboard, answerFromResult, type Answer, type WorkspaceFile } from "@/lib/files/answer";
 import { uploadFile } from "@/lib/files/upload-file";
@@ -51,6 +54,8 @@ export function FilesShell({
   const t = useTranslations("dashboard.files");
   const tAsk = useTranslations("aiSteps.file_ask");
   const tNames = useTranslations("dashboard.tools.names");
+  const tSteps = useTranslations("aiSteps");
+  const describe = useErrorText();
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
@@ -160,7 +165,18 @@ export function FilesShell({
           tooLargeForTransfer: t("tooLargeForTransfer"),
         });
         if (!outcome.ok) {
-          say({ role: "tool", text: outcome.error });
+          // The server's refusal, in the reader's language: a plan's file
+          // or storage limit is the plan's limit (lib/files/ingest.ts,
+          // `limitReached`); a body the host refused before the route ran
+          // has no answer to read; with no status, the words passed in.
+          say({
+            role: "tool",
+            text: !outcome.status
+              ? outcome.error
+              : outcome.status === 413 && !outcome.body
+                ? t("tooLargeForTransfer")
+                : describe(new ApiError(outcome.status, (outcome.body?.limitReached ? { ...outcome.body, code: "planLimit" } : outcome.body ?? null) as ApiErrorPayload | null)).text,
+          });
           continue;
         }
         setFiles((current) => [outcome.file, ...current]);
@@ -171,7 +187,8 @@ export function FilesShell({
           if (outcome.file.processing_status === "ready") setSelected((current) => (current.length < MAX_FILES_PER_QUESTION ? [...current, outcome.file.id] : current));
         }
       } catch (err) {
-        say({ role: "tool", text: getErrorMessage(err, t("uploadError")) });
+        // Thrown, not answered: the connection (lib/errors/use-error-text.ts).
+        say({ role: "tool", text: describe(err).text });
       } finally {
         setUploading(null);
       }
@@ -185,14 +202,14 @@ export function FilesShell({
       const response = await fetch(`/api/files/${file.id}`, { method: "DELETE" });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) {
-        addToast(data?.error ?? t("deleteError"), "error");
+        addToast(t("deleteError"), "error");
         return;
       }
       setFiles((current) => current.filter((f) => f.id !== file.id));
       setSelected((current) => current.filter((id) => id !== file.id));
       router.refresh();
     } catch (err) {
-      addToast(getErrorMessage(err, t("deleteError")), "error");
+      addToast(describe(err).text, "error");
     }
   }
 
@@ -217,7 +234,24 @@ export function FilesShell({
         { onProgress: (job) => setAskStep(job.stepLabel) }
       );
       if (!outcome.ok) {
-        say({ role: "tool", text: outcome.code === "still_running" ? t("askStillRunning") : outcome.code === "stalled" ? t("askStalled") : outcome.error || t("askError") });
+        // IN THE READER'S LANGUAGE (checked 2026-10-08 by
+        // scripts/tests/tool-shell-edges.prodtest.mjs): a refusal is said
+        // from the route's status (lib/errors/use-error-text.ts), and a job
+        // that failed carries the worker's or the provider's own English,
+        // which is for logs.
+        say({
+          role: "tool",
+          text:
+            outcome.code === "still_running"
+              ? t("askStillRunning")
+              : outcome.code === "stalled"
+                ? t("askStalled")
+                : outcome.status
+                  ? describe(new ApiError(outcome.status, (outcome.body ?? null) as ApiErrorPayload | null)).text
+                  : isStoppedMessage(outcome.error)
+                    ? tSteps("stopped")
+                    : t("askError"),
+        });
         return;
       }
       const data = outcome.result as Record<string, unknown>;
@@ -228,8 +262,8 @@ export function FilesShell({
       const answer = answerFromResult(data, Number(outcome.creditsCharged ?? 0), outcome.jobId ?? null);
       say({ role: "tool", text: answer.text, answer });
       router.refresh();
-    } catch (err) {
-      say({ role: "tool", text: getErrorMessage(err, t("askError")) });
+    } catch {
+      say({ role: "tool", text: t("askError") });
     } finally {
       setAsking(false);
     }

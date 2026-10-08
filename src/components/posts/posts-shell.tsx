@@ -11,7 +11,6 @@ import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-est
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { createClient } from "@/lib/supabase/client";
-import { getErrorMessage } from "@/lib/get-error-message";
 import {
   MAX_DESCRIPTION_CHARS,
   PLATFORMS,
@@ -132,7 +131,8 @@ export function PostsShell({
     if (!window.confirm(t("history.deleteConfirm"))) return;
     const { error } = await supabase.from("generated_posts").delete().eq("id", id);
     if (error) {
-      addToast(getErrorMessage(error, t("errors.failed")), "error");
+      // The database's own message is English; the reader gets the screen's words.
+      addToast(t("errors.failed"), "error");
       return;
     }
     if (shown?.id === id) setShown(null);

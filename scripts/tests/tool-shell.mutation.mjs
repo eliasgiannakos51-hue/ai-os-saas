@@ -24,7 +24,10 @@ const ANALYZE = "src/components/data-analysis/analysis-shell.tsx";
 const FILES = "src/components/files/files-shell.tsx";
 const UPLOAD = "src/lib/files/upload-file.ts";
 const SITE = "src/components/website-builder/website-shell.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE];
+const SITE_REQUESTS = "src/lib/website-builder/site-requests.ts";
+const SITE_GENERATE = "src/app/api/websites/generate/route.ts";
+const JOBS = "src/lib/jobs/start-and-watch.ts";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS];
 
 const MUTANTS = [
   {
@@ -208,6 +211,98 @@ const MUTANTS = [
     from: 'asked[current.id] ? findInventedNumbers(html, asked[current.id].join("\\n")) : []',
     to: 'findInventedNumbers(html, (asked[current.id] ?? []).join("\\n"))',
     expect: "accuses no number the person typed",
+  },
+  // ---- a refusal said in the reader's language (2026-10-08)
+  {
+    name: "Site: a failed build says the worker's English sentence",
+    file: SITE,
+    from: 'say({ role: "tool", text: failedText(record) });',
+    to: 'say({ role: "tool", text: record.error_message ?? t("generateFailed") });',
+    expect: "no route's English is said to the reader",
+  },
+  {
+    name: "Site: a stop is no longer said by its note",
+    file: SITE,
+    from: "    if (stopped) return describeNote(stopped);\n",
+    to: "",
+    expect: "a stop by its note",
+  },
+  {
+    name: "Site: out of credits on a new site is read as the limits",
+    file: SITE,
+    from: 'outcome.code === "insufficientCredits"\n              ? refusalText(402, null)',
+    to: 'outcome.code === "never"\n              ? refusalText(402, null)',
+    expect: "read from the code, not from the sentence",
+  },
+  {
+    name: "Site: the requests drop the code the route sent",
+    file: SITE_REQUESTS,
+    from: 'code: typeof data.code === "string" ? data.code : null,',
+    to: "code: null,",
+    expect: "read from the code, not from the sentence",
+  },
+  {
+    name: "Site: the route says not enough credits without its code",
+    file: SITE_GENERATE,
+    from: '          code: "insufficientCredits",\n          message: insufficientCreditsMessage(check.remaining, estimatedCost),',
+    to: "          message: insufficientCreditsMessage(check.remaining, estimatedCost),",
+    expect: "carries its code",
+  },
+  {
+    name: "Research: a refused plan says the route's English",
+    file: RESEARCH,
+    from: 'say({ role: "tool", text: response.status === 502 ? t("planError") : refusalText(response.status, data) });',
+    to: 'say({ role: "tool", text: data.error ?? t("planError") });',
+    expect: "no route's English is said to the reader",
+  },
+  {
+    name: "Files: a failed question says the provider's own message",
+    file: FILES,
+    from: ': isStoppedMessage(outcome.error)\n                    ? tSteps("stopped")\n                    : t("askError"),',
+    to: ": outcome.error || t(\"askError\"),",
+    expect: "no route's English is said to the reader",
+  },
+  {
+    name: "Files: the question's refusal loses its status",
+    file: JOBS,
+    from: ", status: response.status, body: started };",
+    to: " };",
+    expect: "a failed job in the screen's words",
+  },
+  {
+    name: "Files: a file over the plan's limit is said as the route wrote it",
+    file: FILES,
+    from: "            text: !outcome.status\n              ? outcome.error",
+    to: "            text: outcome.error,\n            unread: !outcome.status\n              ? outcome.error",
+    expect: "no route's English is said to the reader",
+  },
+  {
+    name: "Files: the plan's limit is said as a missing feature",
+    file: FILES,
+    from: "outcome.body?.limitReached ? { ...outcome.body, code: \"planLimit\" } : outcome.body ?? null",
+    to: "outcome.body ?? null",
+    expect: "is the plan's limit",
+  },
+  {
+    name: "Analyze: out of credits is said as 'not answered'",
+    file: ANALYZE,
+    from: 'note("tool", refusal(response.status, body?.error, t("ask.failed")));',
+    to: 'note("tool", t("ask.failed"));',
+    expect: "said as such",
+  },
+  {
+    name: "Slides: Stop does not reach a change",
+    file: SLIDES,
+    from: "        signal: controller.signal,\n        body: JSON.stringify({ instruction:",
+    to: "        body: JSON.stringify({ instruction:",
+    expect: "Stop reaches a change",
+  },
+  {
+    name: "Files: an upload with no connection says the browser's English",
+    file: FILES,
+    from: '        say({ role: "tool", text: describe(err).text });',
+    to: '        say({ role: "tool", text: getErrorMessage(err, t("uploadError")) });',
+    expect: "no route's English is said to the reader",
   },
 ];
 

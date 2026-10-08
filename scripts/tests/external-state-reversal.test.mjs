@@ -119,9 +119,14 @@ check(
   DELETE_ROUTE.indexOf("stripe.subscriptions.cancel") < DELETE_ROUTE.indexOf("deleteUser("),
   "after deleteUser the metadata holding the subscription id is gone, so a cancellation there cancels nothing"
 );
+// THE STRIPE REFUSAL'S OWN give-back, not any in the file: since
+// 2026-10-08 the route gives the link back after a failed file removal too
+// (lib/account/erase-storage.ts), earlier in the file, and a check over the
+// whole file stayed green with the Stripe one gone.
+const STRIPE_TO_DELETE = DELETE_ROUTE.slice(DELETE_ROUTE.indexOf("stripe.subscriptions.cancel"), DELETE_ROUTE.indexOf("deleteUser("));
 check(
   "...and a failure deletes nothing and releases the link",
-  /used_at: null/.test(DELETE_ROUTE),
+  STRIPE_TO_DELETE.length > 0 && /used_at: null/.test(STRIPE_TO_DELETE),
   "refusing a deletion without giving the single-use token back leaves the person unable to delete at all"
 );
 

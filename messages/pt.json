@@ -1371,6 +1371,8 @@
         "readyImage": "Vai com a mensagem",
         "remove": "Remover «{name}»",
         "unreadable": "Não foi encontrado texto em «{name}». Se for uma digitalização, anexe-a como imagem.",
+        "fileLimit": "«{name}»: atingiu o limite de ficheiros do seu plano. Apague um ficheiro em Ficheiros ou mude de plano.",
+        "uploadLimit": "Demasiados carregamentos de ficheiros na última hora. Tente novamente daqui a pouco.",
         "offline": "Sem ligação. Verifique a rede e tente novamente.",
         "type": "«{name}»: apenas PDF, JPG ou PNG.",
         "pdfTooLarge": "«{name}»: o PDF excede 20 MB.",

@@ -684,7 +684,11 @@ export function ChatWorkspace({
           setError(t("attach.refused"));
         } else if (data?.rateLimited) {
           setIsRateLimitNotice(true);
-          setError(data.message);
+          // In the reader's language. The route's `message` is English, and
+          // a Greek screen out of credits said "Not enough credits…" as it
+          // came (found 2026-10-08,
+          // scripts/tests/chat-attachments-edges.prodtest.mjs).
+          setError(describeStatus(data.outOfCredits === true ? 402 : 429).text);
         } else {
           setError(describeStatus(res.status).text);
         }
@@ -771,7 +775,8 @@ export function ChatWorkspace({
             });
           }
         } else if (event.type === "error") {
-          streamError = describeStatus(500).text;
+          // A hold refused for want of credits is not a failure on our side.
+          streamError = describeStatus(event.outOfCredits === true ? 402 : 500).text;
         }
       });
 

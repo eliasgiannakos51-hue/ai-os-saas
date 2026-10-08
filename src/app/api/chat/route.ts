@@ -406,13 +406,23 @@ export async function POST(request: Request) {
     // to the model — which is what the old CANNED_ANSWER_LOCALE guard did
     // for nine locales, now as a consequence of the data rather than as a
     // check somebody has to remember.
+    //
+    // A MESSAGE THAT CARRIES A FILE IS EXCLUDED TOO (package 9): it is
+    // about the file. «Πόσο κοστίζει;» under a photograph asks the price of
+    // what is in it, and "What is this?" under a picture asks what the
+    // picture shows; both are help-article triggers, and both were answered
+    // with the article (found 2026-10-08,
+    // scripts/tests/chat-attachments-edges.prodtest.mjs).
+    const carriesFiles = Array.isArray(rawAttachments) && rawAttachments.length > 0;
     const cannedMatch = mentorMode
       ? null
-      : matchCannedAnswer(
-          message,
-          await loadCannedArticles(locale),
-          conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
-        );
+      : carriesFiles
+        ? null
+        : matchCannedAnswer(
+            message,
+            await loadCannedArticles(locale),
+            conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
+          );
     if (cannedMatch) {
       return await answerFromKnowledgeBase({
         supabase,
@@ -867,6 +877,9 @@ export async function POST(request: Request) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
+          // What the screen says, in the reader's language; `message` is
+          // the English sentence for anything that reads this route raw.
+          outOfCredits: true,
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
@@ -1124,7 +1137,14 @@ export async function POST(request: Request) {
         // tokens — settled under its own feature, so a thread that ended
         // in a question and one that ended in an answer are separate rows
         // rather than an average of the two.
-        if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification) {
+        //
+        // NOT WHEN THE MESSAGE CARRIES A FILE (package 9). The check reads
+        // the words alone, and «Κάνε μου περίληψη» without the PDF it is
+        // about reads as a request with nothing to summarise: the person
+        // who attached the document was asked which one (found 2026-10-08,
+        // scripts/tests/chat-attachments-edges.prodtest.mjs). The file is
+        // what "this" is.
+        if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification && currentAttachments.length === 0) {
           try {
             const decision = await checkNeedsClarification(apiKey, "chat", message, costs);
             clarificationRecord = clarificationMetadata(decision);

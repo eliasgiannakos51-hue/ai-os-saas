@@ -59,7 +59,15 @@ export async function startMockSupabase({ port = 54341, tableRows = {}, handle =
       return res.end();
     }
     let body = "";
-    req.on("data", (c) => (body += c));
+    // The bytes as they came, too: `body` is decoded as text, which is
+    // right for JSON and wrong for an uploaded PDF or picture.
+    // scripts/tests/chat-attachments-edges.prodtest.mjs stores uploads
+    // from `raw` and serves them back to the routes that read them.
+    const chunks = [];
+    req.on("data", (c) => {
+      chunks.push(c);
+      body += c;
+    });
     req.on("end", () => {
       hits.push(`${req.method} ${req.url}`);
       const url = new URL(req.url, "http://x");
@@ -70,7 +78,7 @@ export async function startMockSupabase({ port = 54341, tableRows = {}, handle =
       // A TEST'S OWN ANSWERS, asked first. The Image tool's prodtest signs
       // and serves pictures from the ai-images bucket this way; everything
       // it does not answer falls through to the stand-in below.
-      if (handle && handle({ req, res, url, body, json })) return;
+      if (handle && handle({ req, res, url, body, raw: Buffer.concat(chunks), json })) return;
       // updateUser({ data }) is a PUT here, and GoTrue MERGES `data` into
       // user_metadata. Kept, so a preference the app writes on the
       // account (src/app/api/nav/recent-tools/route.ts pins a tool there)

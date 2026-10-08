@@ -13,7 +13,14 @@ export type UploadMessages = {
   tooLargeForTransfer: string;
 };
 
-export type UploadOutcome = { ok: true; file: WorkspaceFile } | { ok: false; error: string };
+/**
+ * A failure carries the route's status and whether a plan limit was the
+ * reason, so a screen can say it in its own words: the routes answer in
+ * English (lib/files/ingest.ts). The Chat does (lib/chat/attach-client.ts).
+ */
+export type UploadOutcome =
+  | { ok: true; file: WorkspaceFile }
+  | { ok: false; error: string; status?: number; limitReached?: boolean };
 
 /** The host refuses a request body over about 4.5MB before the route runs. */
 const ROUTE_BODY_LIMIT = 4 * 1024 * 1024;
@@ -62,7 +69,7 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path, filename: file.name }),
     });
-    const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number } | null;
+    const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number; limitReached?: boolean } | null;
     // A file that was read may have started automations: they run now, in their own request.
     if (data?.ok) startQueuedAutomations(data.automations);
     if (data?.ok && data.file) return { ok: true, file: data.file };
@@ -71,16 +78,21 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
     } catch {
       /* the object stays; the person still sees the upload error */
     }
-    return { ok: false, error: data?.error ?? words.error };
+    return { ok: false, error: data?.error ?? words.error, status: response.status, limitReached: data?.limitReached === true };
   }
 
   if (file.size > ROUTE_BODY_LIMIT) return { ok: false, error: fallback ?? words.error };
   const body = new FormData();
   body.append("file", file);
   const response = await fetch("/api/files/upload", { method: "POST", body });
-  const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number } | null;
+  const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number; limitReached?: boolean } | null;
   // A file that was read may have started automations: they run now, in their own request.
   if (data?.ok) startQueuedAutomations(data.automations);
   if (data?.ok && data.file) return { ok: true, file: data.file };
-  return { ok: false, error: data?.error ?? (response.status === 413 ? words.tooLargeForTransfer : words.error) };
+  return {
+    ok: false,
+    error: data?.error ?? (response.status === 413 ? words.tooLargeForTransfer : words.error),
+    status: response.status,
+    limitReached: data?.limitReached === true,
+  };
 }

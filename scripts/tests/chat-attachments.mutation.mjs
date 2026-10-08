@@ -9,7 +9,12 @@
  * or out of range, a bracket that was not a marker lost, a refused
  * message's images left behind, send not waiting on a file being read,
  * a document's pages unmarked, a cut document passed off as whole, and a
- * 30 MB PDF uploaded before it is refused.
+ * 30 MB PDF uploaded before it is refused. And the four found in the
+ * browser on 2026-10-08 (scripts/tests/chat-attachments-edges.prodtest.mjs):
+ * a question about a file answered by a help article, or met with a
+ * clarifying question that never saw the file; out of credits said in
+ * English; a refused PDF's reason in the route's English; a chip's
+ * «remove» back under a 44px touch target.
  *
  * Run: node scripts/tests/chat-attachments.mutation.mjs
  */
@@ -24,6 +29,8 @@ const CONTENT = "src/lib/chat/attachments.ts";
 const ROUTE = "src/app/api/chat/route.ts";
 const CHAT = "src/components/chat/chat-workspace.tsx";
 const COMPOSER = "src/components/chat/chat-composer.tsx";
+const CLIENT = "src/lib/chat/attach-client.ts";
+const UI = "src/components/chat/chat-attachments.tsx";
 
 const MUTANTS = [
   {
@@ -126,11 +133,67 @@ const MUTANTS = [
     gate: RUN,
     expect: "...and a document cut short says so inside it",
   },
+  {
+    name: "a question about a picture is answered with a help article",
+    file: ROUTE,
+    from: "      : carriesFiles\n        ? null\n        : matchCannedAnswer(",
+    to: "      : false\n        ? null\n        : matchCannedAnswer(",
+    expect: "a message that carries a file is never answered by a help article",
+  },
+  {
+    name: "the opening question is checked for clarity without its file",
+    file: ROUTE,
+    from: "!skipClarification && currentAttachments.length === 0) {",
+    to: "!skipClarification) {",
+    expect: "...and its opening question is not checked for clarity without the file",
+  },
+  {
+    name: "the route stops saying it was credits",
+    file: ROUTE,
+    from: "          outOfCredits: true,\n",
+    to: "",
+    expect: "out of credits, the route says so in a flag the screen reads",
+  },
+  {
+    name: "out of credits is said in the route's English again",
+    file: CHAT,
+    from: "          setError(describeStatus(data.outOfCredits === true ? 402 : 429).text);",
+    to: "          setError(data.message);",
+    expect: "out of credits, or held back, the Chat says so in its own language",
+  },
+  {
+    name: "a hold refused mid-answer reads as our failure",
+    file: CHAT,
+    from: "streamError = describeStatus(event.outOfCredits === true ? 402 : 500).text;",
+    to: "streamError = describeStatus(500).text;",
+    expect: "...and a hold refused once the answer started is not called our failure",
+  },
+  {
+    name: "a scanned PDF's English reason reaches the chip",
+    file: CLIENT,
+    from: '  if (outcome.file.processing_status !== "ready") return { ok: false, error: words.unreadable };',
+    to: '  if (outcome.file.processing_status !== "ready") return { ok: false, error: outcome.file.error ?? words.unreadable };',
+    expect: "...and is said in the reader's words, never the route's",
+  },
+  {
+    name: "the plan's file limit is said in the route's English",
+    file: CLIENT,
+    from: "      ? words.fileLimit\n",
+    to: "      ? outcome.error\n",
+    expect: "a PDF Files refused says why in the reader's words: the plan's limit, the hourly limit, or ours",
+  },
+  {
+    name: "«remove» on a chip is 32px again",
+    file: UI,
+    from: '              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"',
+    to: '              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"',
+    expect: "«remove» on a chip and «From memory» are 44px targets",
+  },
 ];
 
 runMutations({
   name: "chat-attachments",
   gate: GATE,
-  targets: [TYPES, CITE, ADMIT, CONTENT, ROUTE, CHAT, COMPOSER],
+  targets: [TYPES, CITE, ADMIT, CONTENT, ROUTE, CHAT, COMPOSER, CLIENT, UI],
   mutants: MUTANTS,
 });

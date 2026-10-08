@@ -188,6 +188,16 @@ check("the answer's row keeps what it stood on", /attachmentsOn \? \{ \.\.\.assi
 check("a database without the columns still saves both messages (and reads history)",
   (route.match(/isMissingColumn\(/g) ?? []).length === 3);
 check("`done` says which memories were used", /memoriesUsed: memoriesUsed\.length > 0 \? memoriesUsed : undefined,/.test(route));
+// FOUND IN THE BROWSER ON 2026-10-08 (scripts/tests/chat-attachments-edges.prodtest.mjs
+// walks each one through the real routes): a message that carries a file
+// is about the file.
+check("a message that carries a file is never answered by a help article",
+  /const carriesFiles = Array\.isArray\(rawAttachments\) && rawAttachments\.length > 0;/.test(route) &&
+  /: carriesFiles\s*\?\s*null\s*:\s*matchCannedAnswer\(/.test(route));
+check("...and its opening question is not checked for clarity without the file",
+  /history\.length === 0 && !isFreeMessage && !skipClarification && currentAttachments\.length === 0\)/.test(route));
+check("out of credits, the route says so in a flag the screen reads",
+  /rateLimited: true,\s*outOfCredits: true,\s*message: insufficientCreditsMessage\(/.test(route));
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. the screen ==");
@@ -216,9 +226,25 @@ check("...send waits while one is being read, or a failed one is still there", /
 check("every refusal is said", /if \(refused\.length > 0\) onRefused\(/.test(ui));
 check("«From memory» links to what Ionexa remembers", /href="\/dashboard\/ai-memory"/.test(ui));
 check("a sent PDF opens in Files", /\/dashboard\/files\?record=\$\{encodeURIComponent\(a\.fileId\)\}/.test(ui));
+// 44px touch targets (docs/CONTEXT.md); measured in a browser by
+// scripts/tests/chat-attachments-edges.prodtest.mjs, held here between runs.
+check("«remove» on a chip and «From memory» are 44px targets",
+  /className="flex h-11 w-11 shrink-0[^"]*"\s*>\s*<X /.test(ui) && /<summary className="flex min-h-\[44px\]/.test(ui));
 const client = code("src/lib/chat/attach-client.ts");
 check("images are all or nothing: a partial upload is removed", /if \(failed\) \{\s*await discardChatImages\(results\.filter\(\(r\) => !r\.error\)\.map\(\(r\) => r\.path\)\);/.test(client));
 check("a PDF Files could not read is not attached", /if \(outcome\.file\.processing_status !== "ready"\) return \{ ok: false/.test(client));
+// IN THE READER'S LANGUAGE: the Files routes and the chat route answer in
+// English, and those sentences reached a Greek screen as they came.
+check("...and is said in the reader's words, never the route's",
+  /if \(outcome\.file\.processing_status !== "ready"\) return \{ ok: false, error: words\.unreadable \};/.test(client));
+check("a PDF Files refused says why in the reader's words: the plan's limit, the hourly limit, or ours",
+  /outcome\.limitReached\s*\?\s*words\.fileLimit\s*:\s*outcome\.status === 429\s*\?\s*words\.uploadLimit\s*:\s*ours\.includes\(outcome\.error\)\s*\?\s*outcome\.error\s*:\s*words\.error/.test(client) &&
+  (code("src/lib/files/upload-file.ts").match(/status: response\.status,?\s*limitReached: data\?\.limitReached === true/g) ?? []).length === 2 &&
+  /fileLimit: t\("fileLimit", \{ name: file\.name \}\),\s*uploadLimit: t\("uploadLimit"\),/.test(ui));
+check("out of credits, or held back, the Chat says so in its own language",
+  /setError\(describeStatus\(data\.outOfCredits === true \? 402 : 429\)\.text\);/.test(ws) && !/setError\(data\.message\)/.test(ws));
+check("...and a hold refused once the answer started is not called our failure",
+  /streamError = describeStatus\(event\.outOfCredits === true \? 402 : 500\)\.text;/.test(ws));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. the migration and the words ==");
@@ -230,10 +256,11 @@ check("/api/health names both if they are missing",
   /table: "chat_messages",\s*column: "attachments",\s*migration: "20261018000000_chat_message_attachments\.sql"/.test(canaries) &&
   /table: "chat_messages",\s*column: "provenance",\s*migration: "20261018000000_chat_message_attachments\.sql"/.test(canaries));
 const KEYS = ["label", "reading", "pages", "readyPdf", "readyImage", "remove", "unreadable", "offline", "type", "pdfTooLarge", "imageTooLarge",
-  "tooManyPdfs", "tooManyImages", "holdReading", "holdFailed", "imageUpload", "notReady", "refused", "openInFiles", "memoryUsed", "manageMemory"];
+  "tooManyPdfs", "tooManyImages", "holdReading", "holdFailed", "imageUpload", "notReady", "refused", "openInFiles", "memoryUsed", "manageMemory",
+  "fileLimit", "uploadLimit"];
 const LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json"));
 check(`the ten languages (${LOCALES.length})`, LOCALES.length === 10);
-check(`the words to look for (${KEYS.length})`, KEYS.length >= 21);
+check(`the words to look for (${KEYS.length})`, KEYS.length >= 23);
 for (const file of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.chat?.attach ?? {};
   const empty = KEYS.filter((k) => typeof m[k] !== "string" || !m[k].trim());

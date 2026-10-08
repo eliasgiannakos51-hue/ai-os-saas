@@ -1371,6 +1371,8 @@
         "readyImage": "Part avec le message",
         "remove": "Retirer « {name} »",
         "unreadable": "Aucun texte trouvé dans « {name} ». S’il s’agit d’un scan, joignez-le comme image.",
+        "fileLimit": "« {name} » : vous avez atteint la limite de fichiers de votre offre. Supprimez un fichier dans Fichiers ou changez d’offre.",
+        "uploadLimit": "Trop de fichiers envoyés au cours de la dernière heure. Réessayez dans un moment.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez.",
         "type": "« {name} » : uniquement PDF, JPG ou PNG.",
         "pdfTooLarge": "« {name} » : le PDF dépasse 20 Mo.",

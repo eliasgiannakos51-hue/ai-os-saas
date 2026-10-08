@@ -113,8 +113,8 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: ανεβάζω ένα PDF και μια εικόνα στο Chat και ρωτάω γι' αυτά.
 - Βλέπω: απάντηση από αυτά, και κάτω της ποια στοιχεία μνήμης χρησιμοποίησε.
 - Χρόνος: 2 λεπτά
-- Αυτόματα: `scripts/tests/chat-attachments.prodtest.mjs`
-- Σήμερα: φτιαγμένο, πίσω από τον διακόπτη `chat-attachments`
+- Αυτόματα: `scripts/tests/chat-attachments.prodtest.mjs`, `scripts/tests/chat-attachments-edges.prodtest.mjs`
+- Σήμερα: φτιαγμένο και ελεγμένο από τον Claude (2026-10-08: σε production build με τοπικό υποκατάστατο της Supabase και του μοντέλου, υπολογιστής και κινητό, ελληνικά και αγγλικά· όχι ακόμα στην παραγωγή, NEEDS 2), πίσω από τον διακόπτη `chat-attachments`
 
 ### Α10. Site πέντε σελίδων
 - Πακέτο: 10

@@ -1371,6 +1371,8 @@
         "readyImage": "Goes with the message",
         "remove": "Remove “{name}”",
         "unreadable": "No text found in “{name}”. If it is a scan, attach it as an image.",
+        "fileLimit": "“{name}”: you have reached your plan’s file limit. Delete a file in Files or upgrade your plan.",
+        "uploadLimit": "Too many file uploads in the last hour. Try again in a little while.",
         "offline": "No connection. Check the network and try again.",
         "type": "“{name}”: only PDF, JPG or PNG.",
         "pdfTooLarge": "“{name}”: the PDF is over 20 MB.",

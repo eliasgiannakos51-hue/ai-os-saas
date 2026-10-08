@@ -1371,6 +1371,8 @@
         "readyImage": "Va con el mensaje",
         "remove": "Quitar «{name}»",
         "unreadable": "No se encontró texto en «{name}». Si es un escaneo, adjúntalo como imagen.",
+        "fileLimit": "«{name}»: has llegado al límite de archivos de tu plan. Borra un archivo en Archivos o mejora tu plan.",
+        "uploadLimit": "Demasiadas subidas de archivos en la última hora. Vuelve a intentarlo dentro de un rato.",
         "offline": "Sin conexión. Revisa la red e inténtalo de nuevo.",
         "type": "«{name}»: solo PDF, JPG o PNG.",
         "pdfTooLarge": "«{name}»: el PDF supera los 20 MB.",

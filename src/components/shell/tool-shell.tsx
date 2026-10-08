@@ -55,10 +55,17 @@ type Props = {
   /** What the tool made, beside the conversation. */
   work?: { title: string; actions?: ReactNode; body: ReactNode } | null;
   onCloseWork?: () => void;
+  /** Files given to the field — the «+», a paste, a drop — and what they
+   *  are, drawn above the text; the same as Chat's (package 9). Slides
+   *  passes them for a spreadsheet to chart (package 13). */
+  attach?: { accept: string; label: string; onFiles: (files: File[]) => void };
+  tray?: ReactNode;
+  /** Send waits while a file is still being read. */
+  holdSend?: boolean;
 };
 
 export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(
-  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork },
+  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend },
   ref
 ) {
   const t = useTranslations("dashboard.toolShell");
@@ -115,6 +122,9 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
               initialText={initialText}
               placeholder={placeholder}
               onLengthChange={onLengthChange}
+              attach={attach}
+              tray={tray}
+              holdSend={holdSend}
             >
               {options.length > 0 && (
                 <div data-testid="tool-shell-options" className="mt-2 flex flex-wrap gap-2">

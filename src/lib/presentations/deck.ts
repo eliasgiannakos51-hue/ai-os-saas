@@ -11,14 +11,21 @@
  * database, no "server-only", so scripts/tests/presentations.test.mjs can
  * load it and check every bound below against the real values.
  *
- * WHAT A SLIDE IS, and what it is not. Five layouts, all of them one
+ * WHAT A SLIDE IS, and what it is not. Six layouts, all of them one
  * title plus a bounded amount of text: a deck this feature produces is
  * something a person presents from, not a poster. There is no free
- * positioning, no chart, no table, no animation, and the exporters do
- * not pretend otherwise — a .pptx from here opens in PowerPoint as
- * editable text boxes and the person finishes it there. That is the
- * honest scope, and the page says it (presentations.limits.* in the
- * catalogue).
+ * positioning, no table, no animation, and the exporters do not pretend
+ * otherwise — a .pptx from here opens in PowerPoint as editable text
+ * boxes and the person finishes it there. That is the honest scope, and
+ * the page says it (presentations.limits.* in the catalogue).
+ *
+ * THE ONE PICTURE OF NUMBERS IS A CHART FROM THE PERSON'S OWN FILE
+ * (MASTER 16, package 13, behind the switch "slides-charts"). Its points
+ * are computed in code from the file's rows (lib/presentations/
+ * deck-charts.ts, on lib/data-analysis/charts.ts); the model only says
+ * WHICH of the charts it was shown goes on which slide, by number, and
+ * never writes a number that is drawn. A .pptx carries it as a native
+ * chart, which PowerPoint opens as one it can edit.
  *
  * EVERY BOUND IS APPLIED TWICE. The model is TOLD the limits in the
  * prompt, and parseDeckToolInput CLAMPS whatever comes back: a title
@@ -28,7 +35,7 @@
  */
 
 /** The layouts a slide may have. The model picks one per slide. */
-export const SLIDE_LAYOUTS = ["title", "bullets", "section", "quote", "image"] as const;
+export const SLIDE_LAYOUTS = ["title", "bullets", "section", "quote", "image", "chart"] as const;
 export type SlideLayout = (typeof SLIDE_LAYOUTS)[number];
 
 export function isSlideLayout(value: unknown): value is SlideLayout {
@@ -119,6 +126,47 @@ export type OwnSlideImage = {
 
 export type SlideImage = UnsplashSlideImage | OwnSlideImage;
 
+/** The chart kinds a slide draws: the ones PowerPoint, the PDF and the
+ *  page all draw alike. */
+export const DECK_CHART_KINDS = ["bar", "line", "pie"] as const;
+export type DeckChartKind = (typeof DECK_CHART_KINDS)[number];
+/** The arithmetic behind a chart's points, as lib/data-analysis/charts.ts names it. */
+export const DECK_CHART_AGGREGATIONS = ["sum", "mean", "count", "min", "max"] as const;
+export type DeckChartAggregation = (typeof DECK_CHART_AGGREGATIONS)[number];
+/** Points a chart slide carries: lib/data-analysis/charts.ts gathers the
+ *  rest of a long category list into one, so this is its MAX_CATEGORIES. */
+export const MAX_CHART_POINTS = 20;
+/** A chart slide's words share it with the chart. */
+export const MAX_CHART_BULLETS = 3;
+const MAX_CHART_LABEL_CHARS = 60;
+const MAX_CHART_NAME_CHARS = 120;
+
+/**
+ * A CHART ON A SLIDE: the numbers, and where they came from.
+ *
+ * `points` were computed from the file's rows by buildChart; `source` is
+ * how — which file, which column along the bottom, which column measured
+ * and with what arithmetic, over how many rows — so the page can say it
+ * under the chart and the person can check it in Analyze, where the same
+ * file lives (`dataId`).
+ */
+export type SlideChart = {
+  kind: DeckChartKind;
+  /** The chart's own name in the list the model was shown ("Revenue by Region"). */
+  title: string;
+  points: { label: string; value: number }[];
+  /** The last point gathers every category past MAX_CHART_POINTS - 1. */
+  gathered: boolean;
+  source: {
+    dataId: string;
+    file: string;
+    x: string;
+    y: string | null;
+    aggregation: DeckChartAggregation;
+    rows: number;
+  };
+};
+
 export type Slide = {
   layout: SlideLayout;
   title: string;
@@ -130,6 +178,9 @@ export type Slide = {
    *  was found, so a re-export with a different source can search again. */
   imageQuery: string | null;
   image: SlideImage | null;
+  /** Layout "chart" only. Optional because every deck written before
+   *  package 13 has none, and is read back without one. */
+  chart?: SlideChart | null;
 };
 
 export type Deck = {
@@ -175,7 +226,7 @@ export type DeckVerdict = { ok: true; deck: Deck } | { ok: false; reason: "no_sl
 export function parseDeckToolInput(
   raw: unknown,
   context: { locale: string; imageSource: ImageSource; fallbackTitle: string },
-  options: { keepImages?: boolean } = {}
+  options: { keepImages?: boolean; charts?: readonly SlideChart[] } = {}
 ): DeckVerdict {
   const input = (raw ?? {}) as Record<string, unknown>;
   const rawSlides = Array.isArray(input.slides) ? input.slides : [];
@@ -184,21 +235,34 @@ export function parseDeckToolInput(
     if (slides.length >= MAX_SLIDES) break;
     const s = (entry ?? {}) as Record<string, unknown>;
     const title = clip(s.title, MAX_TITLE_CHARS);
+    // THE CHART IS THE CODE'S. From the model it is a NUMBER into the list
+    // it was shown (`options.charts`), resolved here to the chart that was
+    // computed; from a stored row it is the chart itself, checked again.
+    // A number with no list, or past it, is no chart.
+    const chart = options.charts
+      ? chartByNumber(s.chart, options.charts)
+      : options.keepImages
+        ? parseSlideChart(s.chart)
+        : null;
     const bullets = (Array.isArray(s.bullets) ? s.bullets : [])
       .map((b) => clip(b, MAX_BULLET_CHARS))
       .filter((b) => b.length > 0)
-      .slice(0, MAX_BULLETS);
+      .slice(0, chart ? MAX_CHART_BULLETS : MAX_BULLETS);
     const notes = clip(s.notes, MAX_NOTES_CHARS);
     if (!title && bullets.length === 0) continue;
-    const layout = isSlideLayout(s.layout) ? s.layout : bullets.length > 0 ? "bullets" : "section";
+    // A slide with a chart IS a chart slide, whatever layout it named; a
+    // "chart" slide with none is a slide of points.
+    const named = isSlideLayout(s.layout) ? s.layout : bullets.length > 0 ? "bullets" : "section";
+    const layout: SlideLayout = chart ? "chart" : named === "chart" ? (bullets.length > 0 ? "bullets" : "section") : named;
     const query = clip(s.imageQuery, MAX_IMAGE_QUERY_CHARS);
     slides.push({
       layout,
       title,
       bullets,
       notes,
-      imageQuery: query.length > 0 ? query : null,
-      image: options.keepImages ? parseSlideImage(s.image) : null,
+      imageQuery: chart || query.length === 0 ? null : query,
+      image: options.keepImages && !chart ? parseSlideImage(s.image) : null,
+      ...(chart ? { chart } : {}),
     });
   }
   if (slides.length === 0) return { ok: false, reason: "no_slides" };
@@ -219,6 +283,59 @@ export function parseDeckToolInput(
  * download. Everything goes through the same clamps as the model's
  * output; images are kept only in a shape the exporters know.
  */
+function chartByNumber(value: unknown, charts: readonly SlideChart[]): SlideChart | null {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= charts.length ? charts[value - 1] : null;
+}
+
+/**
+ * A stored chart, made safe: the shape the exporters draw, or nothing.
+ * Bounded like every other field — a row edited by hand must not hand
+ * PowerPoint a thousand categories or a value that is not a number.
+ */
+export function parseSlideChart(raw: unknown): SlideChart | null {
+  if (!raw || typeof raw !== "object") return null;
+  const c = raw as Record<string, unknown>;
+  if (typeof c.kind !== "string" || !(DECK_CHART_KINDS as readonly string[]).includes(c.kind)) return null;
+  const points = (Array.isArray(c.points) ? c.points : [])
+    .map((p) => (p && typeof p === "object" ? (p as Record<string, unknown>) : {}))
+    .filter((p) => typeof p.value === "number" && Number.isFinite(p.value))
+    .map((p) => ({ label: clip(p.label, MAX_CHART_LABEL_CHARS), value: p.value as number }))
+    .slice(0, MAX_CHART_POINTS);
+  if (points.length === 0) return null;
+  const src = (c.source && typeof c.source === "object" ? c.source : {}) as Record<string, unknown>;
+  const aggregation = typeof src.aggregation === "string" && (DECK_CHART_AGGREGATIONS as readonly string[]).includes(src.aggregation) ? (src.aggregation as DeckChartAggregation) : null;
+  const dataId = clip(src.dataId, 64);
+  const file = clip(src.file, 200);
+  const x = clip(src.x, MAX_CHART_NAME_CHARS);
+  if (!aggregation || !dataId || !file || !x) return null;
+  const y = src.y === null || src.y === undefined ? null : clip(src.y, MAX_CHART_NAME_CHARS) || null;
+  const rows = typeof src.rows === "number" && Number.isFinite(src.rows) && src.rows >= 0 ? Math.round(src.rows) : 0;
+  return {
+    kind: c.kind as DeckChartKind,
+    title: clip(c.title, MAX_CHART_NAME_CHARS),
+    points,
+    gathered: c.gathered === true,
+    source: { dataId, file, x, y, aggregation, rows },
+  };
+}
+
+/**
+ * The charts a deck carries, once each and in slide order: the list an
+ * edit shows the model, numbered the way renderDeckForEditing numbers
+ * them (lib/presentations/prompt.ts), so the number it answers with
+ * resolves to the chart that slide already had.
+ */
+export function deckCharts(deck: Deck): SlideChart[] {
+  const seen = new Map<string, SlideChart>();
+  for (const slide of deck.slides) {
+    if (slide.chart) {
+      const key = JSON.stringify(slide.chart);
+      if (!seen.has(key)) seen.set(key, slide.chart);
+    }
+  }
+  return [...seen.values()];
+}
+
 export function parseStoredDeck(raw: unknown): Deck | null {
   if (!raw || typeof raw !== "object") return null;
   const input = raw as Record<string, unknown>;
@@ -289,7 +406,17 @@ export function deckEditEstimateInputChars(deck: Deck, instructionChars: number)
     (n, s) => n + s.title.length + s.notes.length + (s.imageQuery?.length ?? 0) + s.bullets.reduce((b, x) => b + x.length, 0),
     deck.title.length
   );
-  return deckChars + Math.max(0, instructionChars);
+  // THE CHARTS GO BACK UP TOO, as the list the edit shows the model.
+  return deckChars + deckChartsChars(deckCharts(deck)) + Math.max(0, instructionChars);
+}
+
+/** Characters of the chart list a call sends: names, labels and values,
+ *  the size renderChartsForModel (lib/presentations/prompt.ts) writes. */
+export function deckChartsChars(charts: readonly SlideChart[]): number {
+  return charts.reduce(
+    (n, c) => n + 40 + c.title.length + c.source.file.length + c.points.reduce((p, x) => p + x.label.length + 16, 0),
+    0
+  );
 }
 
 export type DescriptionVerdict =

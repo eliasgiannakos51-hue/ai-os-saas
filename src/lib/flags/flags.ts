@@ -23,6 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  "slides-charts": "Slides from your own file: a spreadsheet given to Slides with «+» becomes a deck with a real chart of its numbers, computed from the file and drawn as a chart PowerPoint can edit (MASTER 16, package 13)",
   "first-task": "First task: a new account lands on one screen with three tasks that finish on any plan, the free one included, in one press each — instead of the three-step questionnaire — with its own field, and the data import one press away (MASTER 16, package 39)",
   "flows": "Flows: one sentence that names several tools — «φτιάξε site για το camping μου, με εικόνες, και posts» — becomes a plan with its total price, and once approved every result goes into one project, in one colour (MASTER 6.1, 6.3; package 36)",
   "automations": "Automations as boxes: say it in a sentence, see the boxes, change one with words or by hand, try it without sending anything, and it runs by itself on the server with its history and its cost (MASTER 16, package 30)",

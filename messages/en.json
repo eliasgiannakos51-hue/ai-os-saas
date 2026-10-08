@@ -4520,7 +4520,8 @@
         "bullets": "Points",
         "section": "Section",
         "quote": "Quote",
-        "image": "Photo"
+        "image": "Photo",
+        "chart": "Chart"
       }
     },
     "errors": {
@@ -4554,6 +4555,33 @@
       "notSaved": "The change was made but could not be saved. Nothing was lost — try again.",
       "noDeck": "This row has no deck to change.",
       "notIncluded": "Presentations are not included on your plan."
+    },
+    "chart": {
+      "attach": "Add a spreadsheet (CSV or Excel) to make a chart from",
+      "reading": "Reading the file…",
+      "ready": "{rows, plural, one {# row} other {# rows}} — the deck will have a chart from it",
+      "remove": "Remove {name}",
+      "failed": {
+        "type": "Only a CSV or Excel (.xlsx) file can be made into a chart.",
+        "tooLarge": "The file is larger than {mb} MB.",
+        "unreadable": "This file could not be read as a table.",
+        "tooMany": "Too many files in the last hour. Try again later.",
+        "other": "The file could not be read. Try again."
+      },
+      "noData": "This file has no column of numbers or categories to draw, so no deck was made and nothing was charged.",
+      "gone": "That file is no longer there. Add it again with «+».",
+      "other": "Other",
+      "fallbackTitle": "{y} by {x}",
+      "fallbackCount": "How many rows for each {x}",
+      "how": {
+        "sum": "the sum of {y} for each {x}",
+        "mean": "the average of {y} for each {x}",
+        "count": "the number of rows for each {x}",
+        "min": "the lowest {y} for each {x}",
+        "max": "the highest {y} for each {x}"
+      },
+      "source": "From {file} ({rows} rows): {how}.",
+      "openFile": "Open the file in Analyze"
     }
   },
   "posts": {

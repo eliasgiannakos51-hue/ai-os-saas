@@ -42,7 +42,9 @@ const MUTANTS = [
   {
     name: "a seventh bullet survives",
     file: DECK,
-    from: "      .slice(0, MAX_BULLETS);",
+    // THE ANCHOR MOVED on 2026-10-08, when a chart slide (package 13) got
+    // its own, smaller ceiling beside the chart.
+    from: "      .slice(0, chart ? MAX_CHART_BULLETS : MAX_BULLETS);",
     to: "      .slice(0);",
     expect: "the parser drops a seventh bullet",
   },
@@ -74,8 +76,10 @@ const MUTANTS = [
     // THE ANCHOR MOVED on 2026-09-27, when the account's own records
     // joined the brief inside the same markers. The defect is unchanged
     // — the untrusted region no longer opens.
-    from: "${UNTRUSTED_OPEN}${context}",
-    to: "${context}",
+    // And again on 2026-10-08, when the charts from the person's file
+    // (package 13) joined them, first.
+    from: "${UNTRUSTED_OPEN}${chartList}${context}",
+    to: "${chartList}${context}",
     expect: "the brief is fenced as data",
   },
   {
@@ -96,7 +100,7 @@ const MUTANTS = [
   {
     name: "the hold is sized from the brief alone",
     file: ROUTE,
-    from: "        inputChars: deckEstimateInputChars(description.length + businessContext.length, slideCount),",
+    from: "        inputChars: deckEstimateInputChars(description.length + businessContext.length + deckChartsChars(charts), slideCount),",
     to: "        inputChars: description.length,",
     expect: "the hold is sized per slide asked for",
   },

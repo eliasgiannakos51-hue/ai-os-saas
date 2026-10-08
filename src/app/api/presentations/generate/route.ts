@@ -29,12 +29,17 @@ import {
   MIN_SLIDES,
   checkDeckDescription,
   clampSlideCount,
+  deckChartsChars,
   deckEstimateInputChars,
   isImageSource,
   slidesWantingImages,
   type Deck,
   type ImageSource,
+  type SlideChart,
 } from "@/lib/presentations/deck";
+import { deckChartsFrom, ensureChartSlide } from "@/lib/presentations/deck-charts";
+import { emailTranslator } from "@/lib/email/email-locale";
+import type { TableProfile } from "@/lib/data-analysis/profile";
 import { generateDeck } from "@/lib/presentations/generate";
 import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
@@ -78,6 +83,15 @@ export const maxDuration = 120; // @function-limit 120
  * estimated, held and settled exactly as a typed description is. Its
  * numbered sources are added after the model's slides by code, from the
  * stored list.
+ *
+ * FROM A FILE OF THE PERSON'S OWN (MASTER 16, package 13), behind the
+ * switch "slides-charts": `dataId` names a spreadsheet already uploaded
+ * through api/data-analysis/upload (free, no model). It is read by id AND
+ * owner, its charts are computed from its rows here, before anything is
+ * spent (lib/presentations/deck-charts.ts), and a file that allows none
+ * is refused at that point. The list goes to the model with the brief and
+ * into the estimate; the deck that comes back carries at least one of
+ * them (ensureChartSlide), with the file's numbers, whatever was written.
  */
 export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -92,6 +106,11 @@ export async function POST(request: Request) {
   // A REPORT BY ID, or a description typed in the field — never both.
   const researchId = typeof body.researchId === "string" && UUID.test(body.researchId) ? body.researchId : null;
   if (body.researchId !== undefined && researchId === null) return NextResponse.json({ error: "bad_research" }, { status: 400 });
+  // A FILE BY ID, with a description; not with a report.
+  const dataId = typeof body.dataId === "string" && UUID.test(body.dataId) ? body.dataId : null;
+  if ((body.dataId !== undefined && dataId === null) || (dataId !== null && researchId !== null)) {
+    return NextResponse.json({ error: "bad_data" }, { status: 400 });
+  }
   let description = typeof body.description === "string" ? body.description.trim() : "";
   if (researchId === null) {
     const verdict = checkDeckDescription(description);
@@ -154,6 +173,37 @@ export async function POST(request: Request) {
     slideCount = Math.max(MIN_SLIDES, Math.min(slideCount, MAX_SLIDES - Math.ceil(reportSources.length / MAX_BULLETS)));
   }
 
+  // THE FILE, the person's own, and the charts it allows — computed here,
+  // before the breaker and the hold, so a file with nothing to draw costs
+  // nothing. The session client: RLS decides, and the owner filter says it.
+  let charts: SlideChart[] = [];
+  if (dataId !== null) {
+    if (!(await isFeatureOn("slides-charts", user))) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
+    const { data: file, error: fileError } = await supabase
+      .from("data_analyses")
+      .select("id, file_name, title, headers, rows, profile")
+      .eq("id", dataId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (fileError) {
+      logApiError("/api/presentations/generate", fileError, { stage: "load_data" });
+      return NextResponse.json({ error: "generate_failed" }, { status: 500 });
+    }
+    if (!file) return NextResponse.json({ error: "data_not_found" }, { status: 404 });
+    const deckLocale = resolveLanguage(description, uiLocale);
+    charts = deckChartsFrom(
+      {
+        dataId,
+        file: String(file.file_name ?? file.title ?? ""),
+        headers: Array.isArray(file.headers) ? (file.headers as string[]) : [],
+        rows: Array.isArray(file.rows) ? (file.rows as string[][]) : [],
+        profile: (file.profile ?? { rowCount: 0, columns: [], duplicateRows: 0, correlations: [] }) as TableProfile,
+      },
+      emailTranslator(deckLocale)("presentations.chart.other")
+    );
+    if (charts.length === 0) return NextResponse.json({ error: "no_chart_data" }, { status: 422 });
+  }
+
   // An own-photo path that is not under the person's own folder would be
   // refused by storage RLS at export time; refusing it here says why
   // before anything is spent.
@@ -165,7 +215,7 @@ export async function POST(request: Request) {
     const breaker = await checkAiCallAllowed(
       user.id,
       "presentation_generate",
-      fingerprintRequest(description, slideCount, imageSource)
+      fingerprintRequest(description, slideCount, imageSource, dataId)
     );
     if (!breaker.allowed) return NextResponse.json({ error: "rate_limited", detail: breaker.reason }, { status: 429 });
 
@@ -194,7 +244,7 @@ export async function POST(request: Request) {
       "presentationGenerate",
       {
         model: PRESENTATION_MODEL,
-        inputChars: deckEstimateInputChars(description.length + businessContext.length, slideCount),
+        inputChars: deckEstimateInputChars(description.length + businessContext.length + deckChartsChars(charts), slideCount),
         planSlug: plan?.slug ?? null,
       },
       pricingConfig,
@@ -251,6 +301,7 @@ export async function POST(request: Request) {
       costs,
       memoryBlock,
       businessContext,
+      charts,
       // THE STOP BUTTON: the request's own abort signal. When the person
       // stops, the provider call is aborted with it.
       signal: request.signal,
@@ -289,6 +340,15 @@ export async function POST(request: Request) {
     }
 
     let deck: Deck = withSourcesSlides(outcome.deck, reportSources);
+    if (charts.length > 0) {
+      const first = charts[0].source;
+      const say = emailTranslator(locale);
+      deck = ensureChartSlide(
+        deck,
+        charts,
+        first.aggregation === "count" ? say("presentations.chart.fallbackCount", { x: first.x }) : say("presentations.chart.fallbackTitle", { y: first.y ?? "", x: first.x })
+      );
+    }
     const wanted = slidesWantingImages(deck);
     if (imageSource === "unsplash") deck = await resolveUnsplashImages(deck);
     else if (imageSource === "own") deck = resolveOwnImages(deck, ownImagePaths);
@@ -301,7 +361,16 @@ export async function POST(request: Request) {
       costs,
       plan,
       bypassCharge: bypass,
-      metadata: { slideCount, slides: deck.slides.length, imageSource, locale, imagesWanted: wanted, imagesFound: found, ...(researchId ? { researchId } : {}) },
+      metadata: {
+        slideCount,
+        slides: deck.slides.length,
+        imageSource,
+        locale,
+        imagesWanted: wanted,
+        imagesFound: found,
+        ...(researchId ? { researchId } : {}),
+        ...(dataId ? { dataId, charts: deck.slides.filter((s) => s.chart).length } : {}),
+      },
     });
 
     const { data: row, error: saveError } = await supabase

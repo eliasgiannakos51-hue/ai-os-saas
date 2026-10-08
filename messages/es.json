@@ -4520,7 +4520,8 @@
         "bullets": "Puntos",
         "section": "Sección",
         "quote": "Cita",
-        "image": "Foto"
+        "image": "Foto",
+        "chart": "Gráfico"
       }
     },
     "errors": {
@@ -4554,6 +4555,33 @@
       "notSaved": "El cambio se hizo pero no se pudo guardar. No se perdió nada: inténtalo de nuevo.",
       "noDeck": "Esta fila no tiene presentación que cambiar.",
       "notIncluded": "Las presentaciones no están incluidas en tu plan."
+    },
+    "chart": {
+      "attach": "Añade una hoja de cálculo (CSV o Excel) para hacer un gráfico",
+      "reading": "Leyendo el archivo…",
+      "ready": "{rows, plural, one {# fila} other {# filas}}: la presentación tendrá un gráfico de este archivo",
+      "remove": "Quitar {name}",
+      "failed": {
+        "type": "Solo se puede hacer un gráfico de un archivo CSV o Excel (.xlsx).",
+        "tooLarge": "El archivo supera los {mb} MB.",
+        "unreadable": "No se pudo leer el archivo como una tabla.",
+        "tooMany": "Demasiados archivos en la última hora. Inténtalo más tarde.",
+        "other": "No se pudo leer el archivo. Inténtalo de nuevo."
+      },
+      "noData": "Este archivo no tiene ninguna columna de números o categorías que dibujar, así que no se hizo la presentación y no se cobró nada.",
+      "gone": "Ese archivo ya no está. Añádelo de nuevo con «+».",
+      "other": "Otros",
+      "fallbackTitle": "{y} por {x}",
+      "fallbackCount": "Cuántas filas hay de cada {x}",
+      "how": {
+        "sum": "la suma de {y} para cada {x}",
+        "mean": "la media de {y} para cada {x}",
+        "count": "el número de filas para cada {x}",
+        "min": "el valor más bajo de {y} para cada {x}",
+        "max": "el valor más alto de {y} para cada {x}"
+      },
+      "source": "De {file} ({rows} filas): {how}.",
+      "openFile": "Abrir el archivo en Analizar"
     }
   },
   "posts": {

@@ -4520,7 +4520,8 @@
         "bullets": "Idées clés",
         "section": "Partie",
         "quote": "Citation",
-        "image": "Image"
+        "image": "Image",
+        "chart": "Graphique"
       }
     },
     "errors": {
@@ -4554,6 +4555,33 @@
       "notSaved": "La modification a été faite mais n'a pas pu être enregistrée. Rien n'est perdu — réessayez.",
       "noDeck": "Cette ligne n'a pas de présentation à modifier.",
       "notIncluded": "Les présentations ne sont pas incluses dans votre forfait."
+    },
+    "chart": {
+      "attach": "Ajoutez un tableur (CSV ou Excel) pour en faire un graphique",
+      "reading": "Lecture du fichier…",
+      "ready": "{rows, plural, one {# ligne} other {# lignes}} — la présentation aura un graphique tiré de ce fichier",
+      "remove": "Retirer {name}",
+      "failed": {
+        "type": "Seul un fichier CSV ou Excel (.xlsx) peut devenir un graphique.",
+        "tooLarge": "Le fichier dépasse {mb} Mo.",
+        "unreadable": "Ce fichier n’a pas pu être lu comme un tableau.",
+        "tooMany": "Trop de fichiers au cours de la dernière heure. Réessayez plus tard.",
+        "other": "Le fichier n’a pas pu être lu. Réessayez."
+      },
+      "noData": "Ce fichier n’a aucune colonne de nombres ou de catégories à représenter : aucune présentation n’a été créée et rien n’a été facturé.",
+      "gone": "Ce fichier n’est plus là. Ajoutez-le à nouveau avec « + ».",
+      "other": "Autres",
+      "fallbackTitle": "{y} par {x}",
+      "fallbackCount": "Nombre de lignes pour chaque {x}",
+      "how": {
+        "sum": "la somme de {y} pour chaque {x}",
+        "mean": "la moyenne de {y} pour chaque {x}",
+        "count": "le nombre de lignes pour chaque {x}",
+        "min": "la plus petite valeur de {y} pour chaque {x}",
+        "max": "la plus grande valeur de {y} pour chaque {x}"
+      },
+      "source": "Tiré de {file} ({rows} lignes) : {how}.",
+      "openFile": "Ouvrir le fichier dans Analyser"
     }
   },
   "posts": {

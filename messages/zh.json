@@ -4520,7 +4520,8 @@
         "bullets": "要点",
         "section": "章节",
         "quote": "引言",
-        "image": "照片"
+        "image": "照片",
+        "chart": "图表"
       }
     },
     "errors": {
@@ -4554,6 +4555,33 @@
       "notSaved": "更改已完成但未能保存。没有丢失任何内容——请重试。",
       "noDeck": "该记录没有可修改的演示。",
       "notIncluded": "你的套餐不包含演示功能。"
+    },
+    "chart": {
+      "attach": "添加电子表格（CSV 或 Excel）来生成图表",
+      "reading": "正在读取文件…",
+      "ready": "{rows} 行 — 演示文稿将包含来自此文件的图表",
+      "remove": "移除 {name}",
+      "failed": {
+        "type": "只有 CSV 或 Excel（.xlsx）文件可以生成图表。",
+        "tooLarge": "文件超过 {mb} MB。",
+        "unreadable": "无法将此文件读取为表格。",
+        "tooMany": "过去一小时内的文件太多，请稍后再试。",
+        "other": "无法读取文件，请重试。"
+      },
+      "noData": "此文件没有可绘制的数字或类别列，因此没有生成演示文稿，也没有扣费。",
+      "gone": "该文件已不存在，请用「+」重新添加。",
+      "other": "其他",
+      "fallbackTitle": "按{x}划分的{y}",
+      "fallbackCount": "每个{x}的行数",
+      "how": {
+        "sum": "每个{x}的{y}总和",
+        "mean": "每个{x}的{y}平均值",
+        "count": "每个{x}的行数",
+        "min": "每个{x}的{y}最小值",
+        "max": "每个{x}的{y}最大值"
+      },
+      "source": "来自 {file}（{rows} 行）：{how}。",
+      "openFile": "在“分析”中打开文件"
     }
   },
   "posts": {

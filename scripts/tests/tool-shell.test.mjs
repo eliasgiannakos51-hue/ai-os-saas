@@ -120,7 +120,7 @@ check("what it does not do is one line, not a box", /<p className="mt-1\.5 text-
 console.log("\n== 5. Slides, in the shell ==");
 const slides = read("src/components/presentations/presentations-shell.tsx");
 check("the first thing said writes the deck, through the same route as the old page",
-  /fetch\("\/api\/presentations\/generate"/.test(slides) && /slideCount, imageSource, ownImagePaths, locale \}\)/.test(slides));
+  /fetch\("\/api\/presentations\/generate"/.test(slides) && /slideCount,\s*imageSource,\s*ownImagePaths,\s*locale,?\s*(\.\.\.\(chartsFromFile[^\n]*\n\s*)?\}\)/.test(slides));
 check("...and while a saved deck is open, what is said next changes it",
   /const editing = Boolean\(open\?\.id\);/.test(slides) && /onSend=\{\(text\) => void \(editing \? change\(text\) : write\(text\)\)\}/.test(slides) &&
     /fetch\(`\/api\/presentations\/\$\{open\.id\}\/edit`/.test(slides));

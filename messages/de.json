@@ -4520,7 +4520,8 @@
         "bullets": "Stichpunkte",
         "section": "Abschnitt",
         "quote": "Zitat",
-        "image": "Foto"
+        "image": "Foto",
+        "chart": "Diagramm"
       }
     },
     "errors": {
@@ -4554,6 +4555,33 @@
       "notSaved": "Die Änderung wurde vorgenommen, konnte aber nicht gespeichert werden. Nichts ging verloren — bitte erneut versuchen.",
       "noDeck": "Dieser Eintrag hat keine Präsentation zum Ändern.",
       "notIncluded": "Präsentationen sind in Ihrem Tarif nicht enthalten."
+    },
+    "chart": {
+      "attach": "Tabelle (CSV oder Excel) für ein Diagramm hinzufügen",
+      "reading": "Datei wird gelesen…",
+      "ready": "{rows, plural, one {# Zeile} other {# Zeilen}} – die Präsentation bekommt ein Diagramm daraus",
+      "remove": "{name} entfernen",
+      "failed": {
+        "type": "Nur eine CSV- oder Excel-Datei (.xlsx) kann zum Diagramm werden.",
+        "tooLarge": "Die Datei ist größer als {mb} MB.",
+        "unreadable": "Diese Datei konnte nicht als Tabelle gelesen werden.",
+        "tooMany": "Zu viele Dateien in der letzten Stunde. Versuche es später erneut.",
+        "other": "Die Datei konnte nicht gelesen werden. Versuche es erneut."
+      },
+      "noData": "Diese Datei hat keine Spalte mit Zahlen oder Kategorien zum Darstellen, daher wurde keine Präsentation erstellt und nichts berechnet.",
+      "gone": "Diese Datei ist nicht mehr da. Füge sie mit „+“ erneut hinzu.",
+      "other": "Sonstige",
+      "fallbackTitle": "{y} nach {x}",
+      "fallbackCount": "Anzahl der Zeilen je {x}",
+      "how": {
+        "sum": "die Summe von {y} je {x}",
+        "mean": "der Durchschnitt von {y} je {x}",
+        "count": "die Anzahl der Zeilen je {x}",
+        "min": "der kleinste Wert von {y} je {x}",
+        "max": "der größte Wert von {y} je {x}"
+      },
+      "source": "Aus {file} ({rows} Zeilen): {how}.",
+      "openFile": "Datei in Analysieren öffnen"
     }
   },
   "posts": {

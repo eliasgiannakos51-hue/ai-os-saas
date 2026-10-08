@@ -245,8 +245,15 @@ export async function POST(request: Request) {
     });
 
     if (!planned.ok) {
+      // `code` says which of the two it was — the AI service never answered,
+      // or it answered with no usable plan — so the screen can say it in
+      // the reader's language (lib/research/failure.ts).
       return NextResponse.json(
-        { ok: false, error: "The AI could not break that topic into research questions. Try describing it differently." },
+        {
+          ok: false,
+          code: planned.reason === "api_error" ? "ai_unavailable" : "plan_unusable",
+          error: "The AI could not break that topic into research questions. Try describing it differently.",
+        },
         { status: 502 }
       );
     }

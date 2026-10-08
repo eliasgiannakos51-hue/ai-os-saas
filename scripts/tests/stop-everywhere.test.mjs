@@ -64,7 +64,10 @@ console.log("== 1. the column, and the two halves that read and write it ==");
     /import \{ STOPPED_MESSAGE \} from "@\/lib\/stop-message";\s*export \{ STOPPED_MESSAGE \};/.test(lib) &&
     !/import "server-only"/.test(read("src/lib/stop-message.ts")));
   check("the browser recognises the sentence and shows its own locale's word instead",
-    /isStoppedMessage\(report\.error\) \? tSteps\("stopped"\)/.test(read(RESEARCH_UI)) &&
+    // Since 2026-10-08 the research screens say a failed report's reason
+    // through components/research/failure-words.ts, which knows this one.
+    /if \(isStoppedMessage\(error\)\) return tSteps\("stopped"\);/.test(read("src/components/research/failure-words.ts")) &&
+    /failures\.failed\(report\.error\)/.test(read(RESEARCH_UI)) &&
     /kind === "stopped"/.test(read(SITE_UI)));
 }
 

@@ -434,7 +434,7 @@ const MULTI = [
 }
 check("the prompt requires the filename in the citation", /\[filename, Page 3\]/.test(askSystemPrompt({ language: "en", filenames: ["a.pdf", "b.pdf"], truncated: false })));
 check("and the header the model copies carries the filename", /--- FILE: \$\{file\.filename\} \| \$\{page\.label\} ---/.test(readFileSync("src/lib/files/ask.ts", "utf8")));
-check("the answer's source list shows file and page", /citation\.filename\} — \{citation\.label/.test(workspaceCode));
+check("the answer's source list shows file and page", /citation\.filename\} — \{show\(citation\.label\)/.test(workspaceCode));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

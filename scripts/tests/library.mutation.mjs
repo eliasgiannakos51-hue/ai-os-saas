@@ -7,8 +7,9 @@
  * slides not searched at all, an accent that hides a match, the newest
  * not first, every page's text read on every visit, the Library shown
  * with its switch off, an old item read without its owner, a link that
- * opens the tool on the wrong item, a tool's table left out, and the
- * search's own words escaped away.
+ * opens the tool on the wrong item, a tool's table left out, the
+ * search's own words escaped away, and (2026-10-08) a file's page markers
+ * read as its words.
  *
  * Run: node scripts/tests/library.mutation.mjs
  */
@@ -130,6 +131,20 @@ const MUTANTS = [
     from: "    if (askedId) void refresh(askedId);\n",
     to: "",
     expect: "research-shell.tsx opens on the asked item",
+  },
+  {
+    name: "a file's page markers are searched and shown as its words",
+    file: SOURCES,
+    from: '    else if (column === "extracted_text") parts.push(textOfFile(text(value)));\n',
+    to: "",
+    expect: "a file is found by what it says, its snippet its words with no page marker or English label",
+  },
+  {
+    name: "a sheet's own name is dropped with the markers",
+    file: SOURCES,
+    from: "(labelParts(label) ? \" \" : ` ${label} `)",
+    to: '" "',
+    expect: "...the markers are not its words",
   },
   {
     name: "Greek escapes the search's words",

@@ -58,6 +58,9 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  // "Page" is the French word for a page of a document (the package check
+  // of 2026-10-08: a cited page, «Page 12», in the reader's language).
+  "fr:dashboard.files.pageRefs.page",
   // The kinds of box in an automation (package 30): "Condition" and
   // "Action" are the French words, "Start" is the German one (as on
   // every German start button).

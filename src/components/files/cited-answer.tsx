@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { ExternalLink, FileText, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import type { Answer, Citation } from "@/lib/files/answer";
-import { pdfPageHref, splitAnswer, uniquePages } from "@/lib/files/page-refs";
+import { labelParts, pdfPageHref, splitAnswer, uniquePages } from "@/lib/files/page-refs";
 
 /**
  * AN ANSWER THAT SAYS WHERE (MASTER 16, package 12: «η απάντηση γράφει σε
@@ -20,6 +20,20 @@ import { pdfPageHref, splitAnswer, uniquePages } from "@/lib/files/page-refs";
  * answer never saw. Held by scripts/tests/file-pages.test.mjs.
  */
 
+/**
+ * A stored page label, shown in the reader's language: «Σελίδα 12» on a
+ * Greek screen for the "Page 12" extraction stored (lib/files/page-refs.ts,
+ * labelParts). Every place on the Files screens that shows a label shows it
+ * through this; what is stored, matched and linked stays as it was.
+ */
+export function usePageLabel(): (label: string) => string {
+  const t = useTranslations("dashboard.files.pageRefs");
+  return (label) => {
+    const parts = labelParts(label);
+    return !parts ? label : parts.unit === "page" ? t("page", { n: parts.n }) : t("rows", { n: parts.n });
+  };
+}
+
 // A reference inside a sentence stays the height of the line, as a link
 // in running text does: a 44px box there would push the lines of the
 // answer apart. The 44px target for every page is the list under the
@@ -29,6 +43,7 @@ const CHIP =
 
 export function CitedAnswerText({ answer, onOpen }: { answer: Answer; onOpen: (c: Citation) => void }) {
   const t = useTranslations("dashboard.files.pageRefs");
+  const show = usePageLabel();
   return (
     <p data-testid="files-answer-text" className="whitespace-pre-wrap break-words text-sm leading-relaxed text-body">
       {splitAnswer(answer.text, answer.citations).map((piece, i) =>
@@ -39,11 +54,11 @@ export function CitedAnswerText({ answer, onOpen }: { answer: Answer; onOpen: (c
             key={i}
             type="button"
             onClick={() => onOpen(piece.citation)}
-            aria-label={t("open", { label: piece.citation.label, name: piece.citation.filename })}
+            aria-label={t("open", { label: show(piece.citation.label), name: piece.citation.filename })}
             data-testid="files-cite"
             className={CHIP}
           >
-            {piece.citation.label}
+            {show(piece.citation.label)}
           </button>
         )
       )}
@@ -53,6 +68,7 @@ export function CitedAnswerText({ answer, onOpen }: { answer: Answer; onOpen: (c
 
 export function CitedPages({ answer, onOpen }: { answer: Answer; onOpen: (c: Citation) => void }) {
   const t = useTranslations("dashboard.files.pageRefs");
+  const show = usePageLabel();
   const pages = uniquePages(answer.citations);
   return (
     <div className="space-y-1">
@@ -64,17 +80,17 @@ export function CitedPages({ answer, onOpen }: { answer: Answer; onOpen: (c: Cit
                 <button
                   type="button"
                   onClick={() => onOpen(c)}
-                  aria-label={t("open", { label: c.label, name: c.filename })}
+                  aria-label={t("open", { label: show(c.label), name: c.filename })}
                   data-testid="files-page"
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-2.5 text-xs text-foreground hover:bg-panel-hover"
                 >
                   <FileText className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
                   <span className="max-w-[14rem] truncate">{c.filename}</span>
-                  <span className="text-muted">— {c.label}</span>
+                  <span className="text-muted">— {show(c.label)}</span>
                 </button>
               ) : (
                 <span className="text-xs text-foreground">
-                  {c.filename} — {c.label}
+                  {c.filename} — {show(c.label)}
                 </span>
               )}
             </li>
@@ -95,6 +111,7 @@ type PageState = { status: "loading" } | { status: "ready"; label: string; text:
 /** One page of one file: its words, and for a PDF the file opened at it. */
 export function PageView({ citation, onClose }: { citation: Citation; onClose: () => void }) {
   const t = useTranslations("dashboard.files.pageRefs");
+  const show = usePageLabel();
   const [state, setState] = useState<PageState>({ status: "loading" });
   const fileId = citation.fileId!;
   const page = citation.page!;
@@ -116,10 +133,10 @@ export function PageView({ citation, onClose }: { citation: Citation; onClose: (
   }, [fileId, page]);
 
   return (
-    <section data-testid="files-page-view" aria-label={t("open", { label: citation.label, name: citation.filename })} className="surface-tight mt-2 space-y-2">
+    <section data-testid="files-page-view" aria-label={t("open", { label: show(citation.label), name: citation.filename })} className="surface-tight mt-2 space-y-2">
       <div className="flex items-start gap-2">
         <p className="min-w-0 flex-1 break-words text-sm font-medium text-foreground">
-          {citation.filename} — {state.status === "ready" ? state.label : citation.label}
+          {citation.filename} — {show(state.status === "ready" ? state.label : citation.label)}
         </p>
         <button type="button" onClick={onClose} aria-label={t("close")} data-testid="files-page-close" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground">
           <X className="h-4 w-4" aria-hidden="true" />

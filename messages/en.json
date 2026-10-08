@@ -2332,8 +2332,17 @@
       "askDisabledNoQuestion": "Type your question to continue.",
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
+      "unreadable": {
+        "scan": "This PDF has no text layer: it is a scan or an image-only export, and it would need OCR before the AI can read it.",
+        "encoding": "This PDF has text in it, but its font encoding could not be decoded — a limitation on our side, not a problem with your file. Re-saving it from the original application, or printing it to a new PDF, usually produces one that can be read.",
+        "locked": "This file is password-protected. Remove the password and upload it again.",
+        "empty": "This file appears to be empty — there was nothing in it to read."
+      },
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
       "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
+      "askNoCredits": "Not enough credits for this question. Nothing was charged.",
+      "askRateLimited": "Too many questions in the last hour. Try again shortly — nothing was charged.",
+      "askFailed": "The question was not answered: the AI service did not respond. Nothing was charged — try again in a moment.",
       "questionLength": "{used, number} of {max, number} characters",
       "questionAtLimit": "You've reached the {max, number}-character limit for one question.",
       "readInParts": "Your documents were too long to read in one go, so they were read in {parts} parts and the answers combined.",
@@ -2345,6 +2354,9 @@
       "uploadStorageMissing": "File storage is not set up on this deployment — the 'user-files' bucket is missing. An administrator must run the storage repair SQL (System Health → File storage).",
       "uploadStoragePolicy": "File storage refused the upload — the bucket's access policies are missing. An administrator must run the storage repair SQL (System Health → File storage).",
       "tooLargeForTransfer": "The hosting platform refused the upload before it reached the app. Try again in a moment.",
+      "uploadFileCap": "You have reached the number of files your plan includes. Delete one or upgrade.",
+      "uploadStorageCap": "That file does not fit in your plan's storage. Delete some files or upgrade.",
+      "uploadRateLimited": "Too many uploads in the last hour. Try again shortly.",
       "sharedStored": "{count, plural, one {# file} other {# files}} added from the share.",
       "sharedFailed": "{count, plural, one {# file} other {# files}} could not be added.",
       "sharedReason": "Why: {reason}",
@@ -2353,6 +2365,8 @@
       "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device.",
       "pagesPartRead": "First {read} of {total} pages are read",
       "pageRefs": {
+        "page": "Page {n}",
+        "rows": "Rows {n}",
         "open": "Open: {name}, {label}",
         "close": "Close the page",
         "loading": "Opening the page…",
@@ -2379,6 +2393,19 @@
       "start": "Start the research",
       "notNow": "Not now",
       "runError": "The report could not be completed.",
+      "refused": {
+        "noCredits": "Not enough credits for a research report. Nothing was charged.",
+        "rateLimited": "Too many reports in a short time. Try again shortly.",
+        "unavailable": "The AI service did not respond. Nothing was charged — try again in a moment."
+      },
+      "failed": {
+        "noFindings": "The searches did not find anything usable on this topic.",
+        "unavailable": "The AI service did not answer the research questions. Run it again in a moment.",
+        "notWritten": "The report could not be written from what was found.",
+        "interrupted": "The report stopped before it finished. No credits were charged — run it again.",
+        "notStarted": "The report did not start.",
+        "noCredits": "There were not enough credits to run the report."
+      },
       "finished": "Your report is ready",
       "inProgress": "Searching and writing…",
       "statusPending": "Planned",

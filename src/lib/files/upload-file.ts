@@ -4,14 +4,24 @@ import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 import { FILE_BUCKET, extensionOf } from "@/lib/files/file-types";
 import type { WorkspaceFile } from "@/lib/files/answer";
 import { startQueuedAutomations } from "@/lib/automations/kick";
+import { uploadRefusal, type UploadRefusal } from "@/lib/files/refusal-words";
 
-/** The words an upload can end in, in the reader's language. */
+/** The words an upload can end in, in the reader's language.
+ *
+ *  `refused` says a refusal from the route by what it is
+ *  (lib/files/refusal-words.ts), never in the route's own English; Files
+ *  passes it (components/files/files-shell.tsx). A caller that does not —
+ *  Chat's attachments, lib/chat/attach-client.ts, as of 2026-10-08 — still
+ *  gets the route's `error`, as before. */
 export type UploadMessages = {
   error: string;
   storageMissing: string;
   storagePolicy: string;
-  tooLargeForTransfer: string;
+  tooLargeForTransfer?: string;
+  refused?: (refusal: UploadRefusal) => string;
 };
+
+type IngestBody = { ok?: boolean; error?: string; stage?: string; limitReached?: boolean; file?: WorkspaceFile; automations?: number };
 
 export type UploadOutcome = { ok: true; file: WorkspaceFile } | { ok: false; error: string };
 
@@ -32,6 +42,8 @@ const ROUTE_BODY_LIMIT = 4 * 1024 * 1024;
  * the browser, where it was put. scripts/tests/tool-shell.test.mjs holds it.
  */
 export async function uploadFile(file: File, words: UploadMessages): Promise<UploadOutcome> {
+  const refused = (data: IngestBody | null, status: number): string =>
+    words.refused ? words.refused(uploadRefusal(data, status)) : data?.error ?? (status === 413 ? words.tooLargeForTransfer ?? words.error : words.error);
   let path: string | null = null;
   let fallback: string | undefined;
   try {
@@ -62,7 +74,7 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path, filename: file.name }),
     });
-    const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number } | null;
+    const data = (await response.json().catch(() => null)) as IngestBody | null;
     // A file that was read may have started automations: they run now, in their own request.
     if (data?.ok) startQueuedAutomations(data.automations);
     if (data?.ok && data.file) return { ok: true, file: data.file };
@@ -71,16 +83,18 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
     } catch {
       /* the object stays; the person still sees the upload error */
     }
-    return { ok: false, error: data?.error ?? words.error };
+    return { ok: false, error: refused(data, response.status) };
   }
 
-  if (file.size > ROUTE_BODY_LIMIT) return { ok: false, error: fallback ?? words.error };
+  // Storage's own message is the storage service's English: said only to a
+  // caller that has no words of its own for a refusal.
+  if (file.size > ROUTE_BODY_LIMIT) return { ok: false, error: words.refused ? words.error : fallback ?? words.error };
   const body = new FormData();
   body.append("file", file);
   const response = await fetch("/api/files/upload", { method: "POST", body });
-  const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number } | null;
+  const data = (await response.json().catch(() => null)) as IngestBody | null;
   // A file that was read may have started automations: they run now, in their own request.
   if (data?.ok) startQueuedAutomations(data.automations);
   if (data?.ok && data.file) return { ok: true, file: data.file };
-  return { ok: false, error: data?.error ?? (response.status === 413 ? words.tooLargeForTransfer : words.error) };
+  return { ok: false, error: refused(data, response.status) };
 }

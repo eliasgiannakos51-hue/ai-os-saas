@@ -13,12 +13,11 @@ import { useToast } from "@/components/toast/toast-context";
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { formatDateTime } from "@/lib/format-number";
-import { getErrorMessage } from "@/lib/get-error-message";
-import { isStoppedMessage } from "@/lib/stop-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
 import type { ResearchReport } from "@/lib/research/report";
 import { CitedBody } from "@/components/research/cited-body";
 import { SendToSlides } from "@/components/research/send-to-slides";
+import { useResearchFailureWords } from "@/components/research/failure-words";
 
 /** A report takes minutes; five seconds is responsive enough (as on the page). */
 const POLL_MS = 5000;
@@ -67,6 +66,8 @@ export function ResearchShell({
   const router = useRouter();
   const { addToast } = useToast();
   const composerRef = useRef<ChatComposerHandle>(null);
+  // What goes wrong, in the reader's language (components/research/failure-words.ts).
+  const failures = useResearchFailureWords();
 
   const [reports, setReports] = useState(initialReports);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -124,14 +125,14 @@ export function ResearchShell({
             setPane("report");
             router.refresh();
           } else if (report.status === "failed") {
-            say({ role: "tool", text: isStoppedMessage(report.error) ? tSteps("stopped") : report.error ?? t("runError") });
+            say({ role: "tool", text: failures.failed(report.error) });
             router.refresh();
           }
         });
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [activeKey, refresh, t, tSteps, router]);
+  }, [activeKey, refresh, t, tSteps, router, failures]);
 
   // One immediate read on mount for anything already in flight.
   useEffect(() => {
@@ -151,16 +152,16 @@ export function ResearchShell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: value, language: locale }),
       });
-      const data = await response.json();
-      if (!data.ok) {
-        say({ role: "tool", text: data.error ?? t("planError") });
+      const data = await response.json().catch(() => null);
+      if (!data?.ok) {
+        say({ role: "tool", text: failures.refused(data, response.status, "plan") });
         return;
       }
       const report = data.report as ResearchReport;
       setReports((current) => [{ ...report, sections: [], sources: [] }, ...current]);
       say({ role: "tool", text: t("planIntro"), plan: { report, credits: Number(data.estimate?.credits ?? 0) } });
-    } catch (err) {
-      say({ role: "tool", text: getErrorMessage(err, t("planError")) });
+    } catch {
+      say({ role: "tool", text: t("planError") });
     } finally {
       setPlanning(false);
     }
@@ -175,7 +176,7 @@ export function ResearchShell({
       .then(async (response) => {
         const data = await response.json().catch(() => null);
         if (data && !data.ok) {
-          say({ role: "tool", text: data.error ?? t("runError") });
+          say({ role: "tool", text: failures.refused(data, response.status, "run") });
           void refresh(id);
         }
       })
@@ -188,14 +189,14 @@ export function ResearchShell({
       const response = await fetch(`/api/research/${id}`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("deleteError"), "error");
+        addToast(t("deleteError"), "error");
         return;
       }
       setReports((current) => current.filter((r) => r.id !== id));
       setOpen((current) => (current?.id === id ? null : current));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("deleteError")), "error");
+    } catch {
+      addToast(t("deleteError"), "error");
     }
   }
 

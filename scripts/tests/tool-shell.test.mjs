@@ -164,9 +164,9 @@ check("selection is still the subject: nothing is asked with nothing ticked",
 check("the field asks the ticked files, as a background job through the page's route",
   /startAndWatchJob\(\s*"\/api\/files\/ask",\s*\{ question: text, fileIds: selected, language: locale \}/.test(filesShell));
 check("every answer says the page it came from, or that it is not in the documents",
-  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{c\.label\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
+  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{show\(c\.label\)\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
 check("...built by the same function as on the page, and copied with its sources",
-  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
+  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!, show\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
 check("an answer that finished elsewhere is put back, and one running is watched", /\/api\/jobs\?kind=file_ask/.test(filesShell) && /watchJob\(String\(job\.id\)/.test(filesShell) && /<JobSeen jobId=\{turn\.answer\.jobId\} \/>/.test(filesShell));
 check("an upload whose registration does not land is removed from the bucket",
   /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));

@@ -1350,6 +1350,40 @@
         "close": "Fermer la zone de travail",
         "open": "Ouvrir à côté de la conversation",
         "isOpen": "Ouvert à côté de la conversation · appuyez pour fermer"
+      },
+      "sitePane": {
+        "label": "Site",
+        "willMake": "Je vais créer ce site à côté de la conversation :",
+        "make": "Le créer",
+        "notNow": "Pas maintenant",
+        "openInSite": "Ouvrir dans Site",
+        "building": "Création du site… cela prend quelques minutes.",
+        "changing": "Modification du site…",
+        "nextChanges": "Ce que vous écrivez maintenant dans la conversation modifie ce site.",
+        "reopen": "Afficher le site"
+      },
+      "attach": {
+        "label": "Joindre un PDF ou une image",
+        "reading": "Lecture…",
+        "pages": "{count, plural, one {# page} other {# pages}}",
+        "readyPdf": "Prêt",
+        "readyImage": "Part avec le message",
+        "remove": "Retirer « {name} »",
+        "unreadable": "Aucun texte trouvé dans « {name} ». S’il s’agit d’un scan, joignez-le comme image.",
+        "offline": "Pas de connexion. Vérifiez le réseau et réessayez.",
+        "type": "« {name} » : uniquement PDF, JPG ou PNG.",
+        "pdfTooLarge": "« {name} » : le PDF dépasse 20 Mo.",
+        "imageTooLarge": "« {name} » : l’image dépasse 5 Mo.",
+        "tooManyPdfs": "Jusqu’à {max} PDF par message.",
+        "tooManyImages": "Jusqu’à {max} images par message.",
+        "holdReading": "Le fichier est en cours de lecture ; l’envoi attend.",
+        "holdFailed": "Retirez le fichier illisible pour envoyer.",
+        "imageUpload": "L’image n’a pas été envoyée, le message non plus. Réessayez.",
+        "notReady": "Pas encore lu : {names}. Réessayez dans un instant.",
+        "refused": "Les pièces jointes n’ont pas été acceptées. Joignez-les à nouveau.",
+        "openInFiles": "Ouvrir dans Fichiers",
+        "memoryUsed": "De la mémoire ({count})",
+        "manageMemory": "Ce dont Ionexa se souvient"
       }
     },
     "create": {
@@ -1710,6 +1744,11 @@
           "notConfigured": "{count, plural, one {Une image a été} other {# images ont été}} demandée et aucune n'a pu être ajoutée — la bibliothèque de photos n'est pas configurée sur ce déploiement. Tout le reste de la page est tel qu'il a été généré.",
           "quota": "{count, plural, one {Une image} other {# images}} n'ont pas pu être ajoutées : la bibliothèque de photos a refusé d'autres requêtes pour l'instant. Réessayez dans une heure ou ajoutez vos propres images.",
           "noMatch": "{count, plural, one {Une image a été} other {# images ont été}} demandée et aucune photographie ne correspondait. Rien d'étranger n'a été mis à la place — décrire le sujet autrement aide généralement."
+        },
+        "fromMemory": {
+          "name": "De la mémoire : le nom « {name} ».",
+          "colours": "De la mémoire : les couleurs {colours}.",
+          "both": "De la mémoire : le nom « {name} » et les couleurs {colours}. Pour les changer, dites-le au Chat."
         }
       },
       "regeneratePaid": "Régénérer · environ {count} crédits",

@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { memoryFold } from "./memory-fold";
+import { BRAND_COLOURS_PREFIX, BRAND_NAME_PREFIX, splitBrandLines } from "@/lib/memory/brand";
 import type { RememberedFact } from "./memory-prompt";
 
 const MEMORY_MODEL = "claude-sonnet-4-6";
@@ -46,6 +47,13 @@ const EXTRACTION_SYSTEM_PROMPT =
   "ΣΗΜΑΝΤΙΚΟ: η απαγόρευση αφορά ΤΟ ΠΕΡΙΕΧΟΜΕΝΟ, ΟΧΙ ολόκληρη την ανταλλαγή. Αν το ίδιο μήνυμα περιέχει ΚΑΙ ευαίσθητο υλικό ΚΑΙ συνηθισμένα μόνιμα στοιχεία (όνομα, επάγγελμα, προτίμηση), εξάγεις ΜΟΝΟ τα συνηθισμένα και αγνοείς εντελώς το ευαίσθητο. Παράδειγμα: «με λένε Ηλίας, φτιάχνω SaaS, και τελευταία νιώθω εξαντλημένος» -> «Τον λένε Ηλία και φτιάχνει ένα SaaS.» (χωρίς καμία αναφορά στην εξάντληση). " +
   "Απάντα ΑΚΡΙΒΩΣ: NONE μόνο όταν δεν μένει ΤΙΠΟΤΑ μη-ευαίσθητο και αξιόλογο να θυμάσαι. Μην εξηγείς, μην προσθέτεις τίποτα άλλο εκτός από τις 1-2 προτάσεις ή το NONE.";
 
+// THE BUSINESS, AS VALUES (package 6, behind the switch "brand-memory").
+// A name and a palette are things a site must use exactly, so they are
+// written in a shape lib/memory/brand.ts reads without a model, each on
+// its own line and so its own row.
+const BRAND_EXTRACTION_RULE =
+  ` ΕΠΙΠΛΕΟΝ: αν ο χρήστης λέει το όνομα της επιχείρησής του, γράψε σε ΔΙΚΗ ΤΟΥ γραμμή ακριβώς «${BRAND_NAME_PREFIX} <το όνομα, όπως το έγραψε>». Αν λέει τα χρώματα της επιχείρησής του (του brand, του logo), γράψε σε ΔΙΚΗ ΤΟΥ γραμμή ακριβώς «${BRAND_COLOURS_PREFIX} <χρώμα>, <χρώμα>», με τα χρώματα όπως τα είπε ή σε #hex. Αυτές οι γραμμές μετρούν πέρα από τις 1-2 προτάσεις.`;
+
 // Fires a second, small/fast Claude call after a chat exchange to pull out
 // anything worth remembering across future, unrelated conversations — a
 // name, role, preference, recurring context. Best-effort: awaited inline
@@ -60,6 +68,7 @@ export async function extractAndStoreMemory({
   userMessage,
   assistantMessage,
   costs,
+  brand = false,
 }: {
   apiKey: string;
   supabase: SupabaseClient;
@@ -72,6 +81,8 @@ export async function extractAndStoreMemory({
   // COUNT to the circuit breaker — its tokens were never priced and
   // never charged to anyone. See CREDITS.md.
   costs?: CostAccumulator;
+  /** The switch "brand-memory": ask for the business name and colours as their own lines. */
+  brand?: boolean;
 }): Promise<void> {
   try {
     // No separate circuit-breaker check here — this only ever runs once
@@ -85,7 +96,7 @@ export async function extractAndStoreMemory({
     const result = await anthropic.messages.create({
       model: MEMORY_MODEL,
       max_tokens: MEMORY_MAX_TOKENS,
-      system: EXTRACTION_SYSTEM_PROMPT,
+      system: brand ? `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` : EXTRACTION_SYSTEM_PROMPT,
       messages: [
         {
           role: "user",
@@ -116,13 +127,17 @@ export async function extractAndStoreMemory({
     // because chat_memory has no UPDATE policy on purpose: the table is
     // append/delete-only for a browser session, and a counter is not a
     // reason to give that up. See the migration's own note.
-    const { error } = await supabase.rpc("chat_memory_record", {
-      p_memory_text: extracted,
-      p_memory_fold: memoryFold(extracted),
-      p_conversation_id: conversationId,
-    });
-    if (error) {
-      logApiError("chat:extractAndStoreMemory", error, { stage: "record", userId });
+    // One row per brand line, the rest as one row (lib/memory/brand.ts):
+    // without the switch the answer is recorded whole, as before.
+    for (const row of brand ? splitBrandLines(extracted) : [extracted]) {
+      const { error } = await supabase.rpc("chat_memory_record", {
+        p_memory_text: row,
+        p_memory_fold: memoryFold(row),
+        p_conversation_id: conversationId,
+      });
+      if (error) {
+        logApiError("chat:extractAndStoreMemory", error, { stage: "record", userId });
+      }
     }
   } catch (err) {
     logApiError("chat:extractAndStoreMemory", err, { stage: "unhandled", userId });
@@ -136,7 +151,7 @@ export async function loadRecentMemories(
 ): Promise<RememberedFact[]> {
   const { data, error } = await supabase
     .from("chat_memory")
-    .select("memory_text, times_seen, last_seen_at")
+    .select("id, memory_text, times_seen, last_seen_at")
     .eq("user_id", userId)
     // LAST SEEN, NOT CREATED. Ordering by created_at meant a fact learned
     // two years ago and repeated yesterday sorted behind a one-off from
@@ -151,6 +166,7 @@ export async function loadRecentMemories(
   }
 
   return (data ?? []).map((row) => ({
+    id: String(row.id),
     text: row.memory_text as string,
     timesSeen: Number(row.times_seen ?? 1),
     lastSeenAt: String(row.last_seen_at ?? ""),

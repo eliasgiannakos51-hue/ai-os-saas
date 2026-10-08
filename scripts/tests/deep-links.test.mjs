@@ -260,7 +260,9 @@ for (const l of favLinks) {
 // its own tool — /dashboard/posts?record=, /dashboard/deep-research?record=,
 // /dashboard/files?record= — and keeps the entries at
 // /dashboard/timeline?view=entries; each read by the page it points at.
-const DEEP_LINK_FLOOR = 58;
+// 58 -> 59 (2026-10-07): the Site opened beside Chat (package 7) links to
+// /dashboard/website-builder?brief= before a site exists; read by that page.
+const DEEP_LINK_FLOOR = 59;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

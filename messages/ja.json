@@ -1350,6 +1350,40 @@
         "close": "作業エリアを閉じる",
         "open": "会話の横に開く",
         "isOpen": "会話の横に表示中 · 押すと閉じます"
+      },
+      "sitePane": {
+        "label": "サイト",
+        "willMake": "会話の横にこのサイトを作ります:",
+        "make": "作成する",
+        "notNow": "今はしない",
+        "openInSite": "サイトで開く",
+        "building": "サイトを作成中… 数分かかります。",
+        "changing": "サイトを変更中…",
+        "nextChanges": "今会話に書いたことがこのサイトを変更します。",
+        "reopen": "サイトを表示"
+      },
+      "attach": {
+        "label": "PDF または画像を添付",
+        "reading": "読み込み中…",
+        "pages": "{count, plural, other {# ページ}}",
+        "readyPdf": "準備完了",
+        "readyImage": "メッセージと一緒に送信されます",
+        "remove": "「{name}」を削除",
+        "unreadable": "「{name}」にテキストが見つかりません。スキャンした文書の場合は画像として添付してください。",
+        "offline": "接続がありません。ネットワークを確認して、もう一度お試しください。",
+        "type": "「{name}」: PDF、JPG、PNG のみ対応しています。",
+        "pdfTooLarge": "「{name}」: PDF が 20 MB を超えています。",
+        "imageTooLarge": "「{name}」: 画像が 5 MB を超えています。",
+        "tooManyPdfs": "1 通につき PDF は {max} 件までです。",
+        "tooManyImages": "1 通につき画像は {max} 枚までです。",
+        "holdReading": "ファイルを読み込み中です。送信は待機しています。",
+        "holdFailed": "送信するには、読み込めなかったファイルを削除してください。",
+        "imageUpload": "画像をアップロードできなかったため、メッセージは送信されていません。もう一度お試しください。",
+        "notReady": "まだ読み込まれていません: {names}。少し待ってからもう一度お試しください。",
+        "refused": "添付ファイルが受け付けられませんでした。もう一度添付してください。",
+        "openInFiles": "ファイルで開く",
+        "memoryUsed": "メモリーから ({count})",
+        "manageMemory": "Ionexa が覚えていること"
       }
     },
     "create": {
@@ -1710,6 +1744,11 @@
           "notConfigured": "{count, plural, other {画像が#点}}要求されましたが、1点も追加できませんでした。この環境では写真ライブラリが設定されていません。ページのそれ以外の部分は生成されたとおりです。",
           "quota": "{count, plural, other {画像#点}}を追加できませんでした。写真ライブラリが現在これ以上のリクエストを拒否しています。1時間後に再試行するか、ご自身の画像を追加してください。",
           "noMatch": "{count, plural, other {画像が#点}}要求されましたが、一致する写真がありませんでした。無関係なものを代わりに入れることはしていません。題材の書き方を変えると見つかることが多いです。"
+        },
+        "fromMemory": {
+          "name": "記憶から: 名前「{name}」。",
+          "colours": "記憶から: 色 {colours}。",
+          "both": "記憶から: 名前「{name}」と色 {colours}。変えるにはチャットで伝えてください。"
         }
       },
       "regeneratePaid": "再生成 · 約 {count} クレジット",

@@ -41,30 +41,35 @@ async function resizeIfNeeded(buffer: Buffer): Promise<Buffer> {
   }
 }
 
+/** One image from the attachments bucket, resized, or null when it cannot be read or is not an accepted image. */
+export async function downloadAttachmentImage(
+  supabase: SupabaseClient,
+  path: string,
+  callerContext: string
+): Promise<AttachmentImage | null> {
+  try {
+    const { data: blob, error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).download(path);
+    if (error || !blob) {
+      logApiError(callerContext, error, { stage: "attachment_image_download" });
+      return null;
+    }
+    if (blob.size > MAX_ATTACHMENT_IMAGE_BYTES || !isSupportedAttachmentImageType(blob.type)) {
+      return null;
+    }
+    const arrayBuffer = await blob.arrayBuffer();
+    const resized = await resizeIfNeeded(Buffer.from(arrayBuffer));
+    return { base64: resized.toString("base64"), mediaType: blob.type };
+  } catch (err) {
+    logApiError(callerContext, err, { stage: "attachment_image_download" });
+    return null;
+  }
+}
+
 export async function downloadAttachmentImages(
   supabase: SupabaseClient,
   paths: string[],
   callerContext: string
 ): Promise<AttachmentImage[]> {
-  const results = await Promise.all(
-    paths.map(async (path): Promise<AttachmentImage | null> => {
-      try {
-        const { data: blob, error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).download(path);
-        if (error || !blob) {
-          logApiError(callerContext, error, { stage: "attachment_image_download" });
-          return null;
-        }
-        if (blob.size > MAX_ATTACHMENT_IMAGE_BYTES || !isSupportedAttachmentImageType(blob.type)) {
-          return null;
-        }
-        const arrayBuffer = await blob.arrayBuffer();
-        const resized = await resizeIfNeeded(Buffer.from(arrayBuffer));
-        return { base64: resized.toString("base64"), mediaType: blob.type };
-      } catch (err) {
-        logApiError(callerContext, err, { stage: "attachment_image_download" });
-        return null;
-      }
-    })
-  );
+  const results = await Promise.all(paths.map((path) => downloadAttachmentImage(supabase, path, callerContext)));
   return results.filter((image): image is AttachmentImage => image !== null);
 }

@@ -103,7 +103,7 @@ check(
   !/if \(memoryEnabled\)/.test(route),
   "route.ts still has `if (memoryEnabled)` — the write can run on a plan whose read is capped at 0."
 );
-check("memories still reach the system prompt", /buildMemoryPromptAddition\(memories\)/.test(route));
+check("memories still reach the system prompt", /buildMemoryPromptAddition\(memories(, \{ numbered: citeMemories \})?\)/.test(route));
 
 console.log("\n== 5. in-conversation history is a separate mechanism and still there ==");
 // (γ) of the brief: remembering WITHIN one conversation never went

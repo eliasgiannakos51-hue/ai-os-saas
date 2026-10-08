@@ -1350,6 +1350,40 @@
         "close": "Arbeitsbereich schließen",
         "open": "Neben dem Gespräch öffnen",
         "isOpen": "Neben dem Gespräch geöffnet · zum Schließen tippen"
+      },
+      "sitePane": {
+        "label": "Website",
+        "willMake": "Ich erstelle diese Website neben dem Gespräch:",
+        "make": "Erstellen",
+        "notNow": "Nicht jetzt",
+        "openInSite": "In Website öffnen",
+        "building": "Die Website wird erstellt… das dauert ein paar Minuten.",
+        "changing": "Die Website wird geändert…",
+        "nextChanges": "Was du jetzt im Gespräch schreibst, ändert diese Website.",
+        "reopen": "Website zeigen"
+      },
+      "attach": {
+        "label": "PDF oder Bild anhängen",
+        "reading": "Wird gelesen…",
+        "pages": "{count, plural, one {# Seite} other {# Seiten}}",
+        "readyPdf": "Bereit",
+        "readyImage": "Geht mit der Nachricht",
+        "remove": "„{name}“ entfernen",
+        "unreadable": "In „{name}“ wurde kein Text gefunden. Ist es ein Scan, hängen Sie es als Bild an.",
+        "offline": "Keine Verbindung. Prüfen Sie das Netzwerk und versuchen Sie es erneut.",
+        "type": "„{name}“: nur PDF, JPG oder PNG.",
+        "pdfTooLarge": "„{name}“: Das PDF ist größer als 20 MB.",
+        "imageTooLarge": "„{name}“: Das Bild ist größer als 5 MB.",
+        "tooManyPdfs": "Bis zu {max} PDFs pro Nachricht.",
+        "tooManyImages": "Bis zu {max} Bilder pro Nachricht.",
+        "holdReading": "Die Datei wird gelesen; das Senden wartet.",
+        "holdFailed": "Entfernen Sie die nicht lesbare Datei, um zu senden.",
+        "imageUpload": "Das Bild wurde nicht hochgeladen, die Nachricht nicht gesendet. Versuchen Sie es erneut.",
+        "notReady": "Noch nicht gelesen: {names}. Versuchen Sie es gleich erneut.",
+        "refused": "Die Anhänge wurden nicht angenommen. Hängen Sie sie erneut an.",
+        "openInFiles": "In Dateien öffnen",
+        "memoryUsed": "Aus dem Gedächtnis ({count})",
+        "manageMemory": "Was Ionexa sich merkt"
       }
     },
     "create": {
@@ -1710,6 +1744,11 @@
           "notConfigured": "{count, plural, one {Ein Bild wurde} other {# Bilder wurden}} angefordert und keines konnte eingefügt werden — die Fotobibliothek ist in dieser Installation nicht eingerichtet. Alles andere auf der Seite ist wie erzeugt.",
           "quota": "{count, plural, one {Ein Bild} other {# Bilder}} konnten nicht eingefügt werden: die Fotobibliothek hat weitere Anfragen vorerst abgelehnt. Versuchen Sie es in einer Stunde erneut oder fügen Sie eigene Bilder hinzu.",
           "noMatch": "{count, plural, one {Ein Bild wurde} other {# Bilder wurden}} angefordert und kein Foto passte. Nichts Unpassendes wurde eingesetzt — eine andere Beschreibung des Motivs hilft meist."
+        },
+        "fromMemory": {
+          "name": "Aus dem Gedächtnis: der Name „{name}“.",
+          "colours": "Aus dem Gedächtnis: die Farben {colours}.",
+          "both": "Aus dem Gedächtnis: der Name „{name}“ und die Farben {colours}. Um sie zu ändern, sag es im Chat."
         }
       },
       "regeneratePaid": "Neu erstellen · etwa {count} Credits",

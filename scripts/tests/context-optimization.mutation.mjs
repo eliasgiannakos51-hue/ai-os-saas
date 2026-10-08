@@ -239,8 +239,8 @@ const MUTANTS = [
     to: "      codingContext",
     edits: [
       {
-        from: "    const systemPerUser =\n      buildMemoryPromptAddition(memories) +",
-        to: "    const systemPerUser =\n      buildMemoryPromptAddition(memories) +\n      buildEntityMentionPromptAddition(mentionedEntities) +",
+        from: "    const systemPerUser =\n      buildMemoryPromptAddition(memories, { numbered: citeMemories }) +",
+        to: "    const systemPerUser =\n      buildMemoryPromptAddition(memories, { numbered: citeMemories }) +\n      buildEntityMentionPromptAddition(mentionedEntities) +",
       },
       {
         // `edits` TAKES PRECEDENCE OVER from/to, so this is the one that

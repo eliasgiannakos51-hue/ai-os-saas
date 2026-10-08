@@ -1350,6 +1350,40 @@
         "close": "Fechar a área de trabalho",
         "open": "Abrir ao lado da conversa",
         "isOpen": "Aberto ao lado da conversa · carrega para fechar"
+      },
+      "sitePane": {
+        "label": "Site",
+        "willMake": "Vou criar este site ao lado da conversa:",
+        "make": "Criar",
+        "notNow": "Agora não",
+        "openInSite": "Abrir no Site",
+        "building": "A criar o site… demora alguns minutos.",
+        "changing": "A alterar o site…",
+        "nextChanges": "O que escrever agora na conversa altera este site.",
+        "reopen": "Mostrar o site"
+      },
+      "attach": {
+        "label": "Anexar um PDF ou imagem",
+        "reading": "A ler…",
+        "pages": "{count, plural, one {# página} other {# páginas}}",
+        "readyPdf": "Pronto",
+        "readyImage": "Vai com a mensagem",
+        "remove": "Remover «{name}»",
+        "unreadable": "Não foi encontrado texto em «{name}». Se for uma digitalização, anexe-a como imagem.",
+        "offline": "Sem ligação. Verifique a rede e tente novamente.",
+        "type": "«{name}»: apenas PDF, JPG ou PNG.",
+        "pdfTooLarge": "«{name}»: o PDF excede 20 MB.",
+        "imageTooLarge": "«{name}»: a imagem excede 5 MB.",
+        "tooManyPdfs": "Até {max} PDF por mensagem.",
+        "tooManyImages": "Até {max} imagens por mensagem.",
+        "holdReading": "O ficheiro está a ser lido; o envio aguarda.",
+        "holdFailed": "Remova o ficheiro ilegível para enviar.",
+        "imageUpload": "A imagem não foi carregada, por isso a mensagem não foi enviada. Tente novamente.",
+        "notReady": "Ainda não lido: {names}. Tente novamente daqui a pouco.",
+        "refused": "Os anexos não foram aceites. Anexe-os novamente.",
+        "openInFiles": "Abrir em Ficheiros",
+        "memoryUsed": "Da memória ({count})",
+        "manageMemory": "O que o Ionexa lembra"
       }
     },
     "create": {
@@ -1710,6 +1744,11 @@
           "notConfigured": "{count, plural, one {Foi pedida uma imagem} other {Foram pedidas # imagens}} e nenhuma pôde ser adicionada — a biblioteca de fotografias não está configurada nesta instalação. Tudo o resto na página está como foi gerado.",
           "quota": "{count, plural, one {Uma imagem} other {# imagens}} não puderam ser adicionadas: a biblioteca de fotografias recusou mais pedidos por agora. Tente daqui a uma hora ou adicione as suas próprias imagens.",
           "noMatch": "{count, plural, one {Foi pedida uma imagem} other {Foram pedidas # imagens}} e nenhuma fotografia correspondeu. Nada de alheio foi colocado no lugar — descrever o tema de outra forma costuma ajudar."
+        },
+        "fromMemory": {
+          "name": "Da memória: o nome “{name}”.",
+          "colours": "Da memória: as cores {colours}.",
+          "both": "Da memória: o nome “{name}” e as cores {colours}. Para mudá-los, diga ao Chat."
         }
       },
       "regeneratePaid": "Regenerar · cerca de {count} créditos",

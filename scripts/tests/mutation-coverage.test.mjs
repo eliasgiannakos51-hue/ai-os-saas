@@ -263,7 +263,9 @@ console.log(
 // 243 -> 249 on 2026-10-05: chat-rating, feature-flags, migration-undo
 // and chat-work-area (MASTER Μέρος 13 Β and Δ.2) covered six more. Read
 // off the run.
-const RATCHET = 249;
+// 249 -> 255 on 2026-10-07: library, brand-memory and chat-opens-tools
+// (MASTER 16, packages 5–7) covered six more. Read off the run.
+const RATCHET = 255;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

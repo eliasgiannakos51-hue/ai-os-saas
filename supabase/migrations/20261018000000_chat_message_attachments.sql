@@ -1,0 +1,34 @@
+-- ---------------------------------------------------------------------------
+-- WHAT A CHAT MESSAGE CARRIED, AND WHAT AN ANSWER USED (2026-10-07, MASTER
+-- 16 package 9, behind the switch "chat-attachments").
+--
+-- attachments  on a user's message: the PDFs (user_files ids) and images
+--              (paths in the create-attachments bucket) it was sent with,
+--              as names and ids only — never the content, which stays in
+--              user_files and in storage. Shape: src/lib/chat/attachment-types.ts.
+-- provenance   on an answer: what it stood on — the records it was given
+--              (src/lib/chat/provenance.ts) and the remembered facts it
+--              said it used (src/lib/chat/memory-citations.ts) — so a
+--              reloaded conversation still shows both lines under it.
+--
+-- Written only by src/app/api/chat/route.ts through the signed-in
+-- session; the existing chat_messages policies already limit every row to
+-- its owner. Until this runs, the route saves messages without the two
+-- columns (isMissingColumn in src/lib/chat/attachments.ts) and /api/health
+-- names them as missing (src/lib/health/schema-canaries.ts).
+--
+-- Nothing here is about anyone but the account itself: names and ids of
+-- its own files, and the text of its own memory rows. Deleting a
+-- conversation deletes these rows with it (the existing cascade), and the
+-- Chat screen then removes the images they named
+-- (src/components/chat/chat-workspace.tsx, deleteConversation).
+--
+-- Idempotent: add column if not exists.
+-- How to check it after running: /api/health lists chat_messages.attachments
+-- and chat_messages.provenance.
+-- How to undo: alter table public.chat_messages drop column attachments;
+--              alter table public.chat_messages drop column provenance;
+-- ---------------------------------------------------------------------------
+
+alter table public.chat_messages add column if not exists attachments jsonb;
+alter table public.chat_messages add column if not exists provenance jsonb;

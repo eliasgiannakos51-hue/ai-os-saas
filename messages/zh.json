@@ -1350,6 +1350,40 @@
         "close": "关闭工作区",
         "open": "在对话旁打开",
         "isOpen": "已在对话旁打开 · 点击关闭"
+      },
+      "sitePane": {
+        "label": "网站",
+        "willMake": "我将在对话旁边制作这个网站：",
+        "make": "制作",
+        "notNow": "暂不",
+        "openInSite": "在网站中打开",
+        "building": "正在制作网站… 需要几分钟。",
+        "changing": "正在修改网站…",
+        "nextChanges": "你现在在对话中写的内容会修改这个网站。",
+        "reopen": "显示网站"
+      },
+      "attach": {
+        "label": "附加 PDF 或图片",
+        "reading": "正在读取…",
+        "pages": "{count, plural, other {# 页}}",
+        "readyPdf": "就绪",
+        "readyImage": "将随消息发送",
+        "remove": "移除“{name}”",
+        "unreadable": "在“{name}”中未找到文字。如果是扫描件，请作为图片附加。",
+        "offline": "没有网络连接。请检查网络后重试。",
+        "type": "“{name}”：仅支持 PDF、JPG 或 PNG。",
+        "pdfTooLarge": "“{name}”：PDF 超过 20 MB。",
+        "imageTooLarge": "“{name}”：图片超过 5 MB。",
+        "tooManyPdfs": "每条消息最多 {max} 个 PDF。",
+        "tooManyImages": "每条消息最多 {max} 张图片。",
+        "holdReading": "文件正在读取，发送将等待。",
+        "holdFailed": "请移除无法读取的文件后再发送。",
+        "imageUpload": "图片未能上传，因此消息未发送。请重试。",
+        "notReady": "尚未读取：{names}。请稍后重试。",
+        "refused": "附件未被接受。请重新附加。",
+        "openInFiles": "在文件中打开",
+        "memoryUsed": "来自记忆（{count}）",
+        "manageMemory": "Ionexa 记住的内容"
       }
     },
     "create": {
@@ -1710,6 +1744,11 @@
           "notConfigured": "请求了 {count} 张图片，但一张也无法添加——此部署未配置图片库。页面其余内容与生成时一致。",
           "quota": "有 {count} 张图片无法添加：图片库暂时拒绝了更多请求。请一小时后重试，或添加你自己的图片。",
           "noMatch": "请求了 {count} 张图片，但没有匹配的照片。我们没有放入无关的图片——换一种方式描述主题通常会有帮助。"
+        },
+        "fromMemory": {
+          "name": "来自记忆：名称“{name}”。",
+          "colours": "来自记忆：颜色 {colours}。",
+          "both": "来自记忆：名称“{name}”和颜色 {colours}。要更改，请在聊天中告诉我。"
         }
       },
       "regeneratePaid": "重新生成 · 约 {count} 积分",

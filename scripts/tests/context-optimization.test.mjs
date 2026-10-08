@@ -383,7 +383,7 @@ console.log("\n== 5. wired in, and wired in the right order ==");
     PER_MESSAGE.every((m) => !perUserBlock.includes(m)),
     PER_MESSAGE.filter((m) => perUserBlock.includes(m)).join(", "));
   ok("...and the per-user block carries the rest",
-    /const systemPerUser =\s*\n\s*buildMemoryPromptAddition\(memories\) \+[\s\S]{0,220}userContext \+\s*\n\s*integrationInstruction;/.test(route));
+    /const systemPerUser =\s*\n\s*buildMemoryPromptAddition\(memories, \{ numbered: citeMemories \}\) \+\s*\n\s*\(citeMemories \? memoryCitationInstruction\(memories\.length\) : ""\) \+[\s\S]{0,220}userContext \+\s*\n\s*integrationInstruction;/.test(route));
   ok("the cost estimate still sizes the WHOLE prompt",
     /const systemPrompt = systemStaticPrefix \+ systemPerUser \+ systemDynamicSuffix;/.test(route));
   ok("the conversation is cached", /buildCachedMessages\(\s*\n?\s*effectiveHistory/.test(route));

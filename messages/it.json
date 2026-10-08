@@ -1350,6 +1350,40 @@
         "close": "Chiudi l’area di lavoro",
         "open": "Apri accanto alla conversazione",
         "isOpen": "Aperto accanto alla conversazione · premi per chiudere"
+      },
+      "sitePane": {
+        "label": "Sito",
+        "willMake": "Creerò questo sito accanto alla conversazione:",
+        "make": "Crealo",
+        "notNow": "Non ora",
+        "openInSite": "Apri in Sito",
+        "building": "Creo il sito… ci vogliono alcuni minuti.",
+        "changing": "Modifico il sito…",
+        "nextChanges": "Ciò che scrivi ora nella conversazione modifica questo sito.",
+        "reopen": "Mostra il sito"
+      },
+      "attach": {
+        "label": "Allega un PDF o un’immagine",
+        "reading": "Lettura…",
+        "pages": "{count, plural, one {# pagina} other {# pagine}}",
+        "readyPdf": "Pronto",
+        "readyImage": "Parte con il messaggio",
+        "remove": "Rimuovi «{name}»",
+        "unreadable": "Nessun testo trovato in «{name}». Se è una scansione, allegala come immagine.",
+        "offline": "Nessuna connessione. Controlla la rete e riprova.",
+        "type": "«{name}»: solo PDF, JPG o PNG.",
+        "pdfTooLarge": "«{name}»: il PDF supera i 20 MB.",
+        "imageTooLarge": "«{name}»: l’immagine supera i 5 MB.",
+        "tooManyPdfs": "Fino a {max} PDF per messaggio.",
+        "tooManyImages": "Fino a {max} immagini per messaggio.",
+        "holdReading": "Il file è in lettura; l’invio attende.",
+        "holdFailed": "Rimuovi il file illeggibile per inviare.",
+        "imageUpload": "L’immagine non è stata caricata, quindi il messaggio non è partito. Riprova.",
+        "notReady": "Non ancora letto: {names}. Riprova tra poco.",
+        "refused": "Gli allegati non sono stati accettati. Allegali di nuovo.",
+        "openInFiles": "Apri in File",
+        "memoryUsed": "Dalla memoria ({count})",
+        "manageMemory": "Cosa ricorda Ionexa"
       }
     },
     "create": {
@@ -1710,6 +1744,11 @@
           "notConfigured": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e non è stato possibile aggiungerne nessuna — la libreria di foto non è configurata su questa installazione. Tutto il resto della pagina è come è stato generato.",
           "quota": "{count, plural, one {Una immagine} other {# immagini}} non sono state aggiunte: la libreria di foto ha rifiutato altre richieste per ora. Riprova tra un'ora o aggiungi immagini tue.",
           "noMatch": "{count, plural, one {È stata richiesta una immagine} other {Sono state richieste # immagini}} e nessuna fotografia corrispondeva. Non è stato messo nulla di estraneo al suo posto — descrivere il soggetto in modo diverso di solito aiuta."
+        },
+        "fromMemory": {
+          "name": "Dalla memoria: il nome «{name}».",
+          "colours": "Dalla memoria: i colori {colours}.",
+          "both": "Dalla memoria: il nome «{name}» e i colori {colours}. Per cambiarli, dillo alla Chat."
         }
       },
       "regeneratePaid": "Rigenera · circa {count} crediti",

@@ -80,8 +80,8 @@ const MUTANTS = [
     // reverse and every conversation is replayed backwards.
     name: "conversation history reaches the model newest-first",
     file: ROUTE,
-    from: "const history = (historyRows ?? []).reverse() as {",
-    to: "const history = (historyRows ?? []) as {",
+    from: "const history = (historyRows ?? []).reverse() as unknown as {",
+    to: "const history = (historyRows ?? []) as unknown as {",
     expect: "oldest-first",
   },
   {

@@ -3396,6 +3396,42 @@
       "send": "Empezar",
       "import": "Trae tus datos desde un archivo CSV",
       "skip": "Omitir"
+    },
+    "financeQuick": {
+      "title": "Escribe lo que pagaste o cobraste",
+      "placeholder": "p. ej. pagué 50 euros de luz",
+      "save": "Registrar",
+      "hint": "Un importe y si se pagó o se cobró. Se lee tal como lo escribes: no se adivina nada.",
+      "doneExpense": "Registrado: un gasto de {amount} — {description}.",
+      "doneIncome": "Registrado: un ingreso de {amount} — {description}.",
+      "open": "Abrirlo",
+      "missingAmount": "No encontré un único importe. Escribe uno solo, p. ej. «pagué 50 € de luz».",
+      "missingType": "No sé si se pagó o se cobró. Empieza con «pagué» o «cobré».",
+      "missingBoth": "Escribe un importe y si se pagó o se cobró, p. ej. «pagué 50 € de luz».",
+      "failed": "No se pudo registrar. Inténtalo de nuevo."
+    },
+    "sales": {
+      "title": "Contactos por etapa",
+      "empty": "Todavía no hay contactos.",
+      "dueTitle": "Recordatorios pendientes",
+      "moveTo": "Mover a",
+      "remind": "Recordármelo el",
+      "move": "Mover",
+      "remindOn": "recordatorio {date}",
+      "badReminder": "Elige un día de recordatorio posterior a hoy, dentro de un año.",
+      "failed": "No se pudo guardar. Inténtalo de nuevo.",
+      "stages": {
+        "new": "Nuevo",
+        "contacted": "Contactado",
+        "meeting": "Reunión",
+        "proposal": "Propuesta",
+        "won": "Ganado",
+        "lost": "Perdido"
+      },
+      "reminder": {
+        "title": "Recordatorio: {name}",
+        "body": "Etapa: {stage}"
+      }
     }
   },
   "module": {

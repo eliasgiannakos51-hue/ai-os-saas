@@ -3396,6 +3396,42 @@
       "send": "始める",
       "import": "CSV ファイルからデータを取り込む",
       "skip": "スキップ"
+    },
+    "financeQuick": {
+      "title": "支払ったもの・受け取ったものを書く",
+      "placeholder": "例：電気代 50ユーロ 払った",
+      "save": "記録",
+      "hint": "金額を1つと、支払いか受け取りか。書いたとおりに読み取ります。推測はしません。",
+      "doneExpense": "記録しました：支出 {amount} — {description}。",
+      "doneIncome": "記録しました：収入 {amount} — {description}。",
+      "open": "開く",
+      "missingAmount": "金額を1つに特定できませんでした。「電気代 50ユーロ 払った」のように1つだけ書いてください。",
+      "missingType": "支払いか受け取りか分かりませんでした。「払った」か「受け取った」を入れてください。",
+      "missingBoth": "金額を1つと、支払いか受け取りかを書いてください。例：「電気代 50ユーロ 払った」。",
+      "failed": "記録できませんでした。もう一度お試しください。"
+    },
+    "sales": {
+      "title": "段階別の連絡先",
+      "empty": "連絡先はまだありません。",
+      "dueTitle": "期日になったリマインダー",
+      "moveTo": "移動先",
+      "remind": "リマインド日",
+      "move": "移動",
+      "remindOn": "リマインダー {date}",
+      "badReminder": "今日より後、1年以内のリマインド日を選んでください。",
+      "failed": "保存できませんでした。もう一度お試しください。",
+      "stages": {
+        "new": "新規",
+        "contacted": "連絡済み",
+        "meeting": "打ち合わせ",
+        "proposal": "提案",
+        "won": "成約",
+        "lost": "失注"
+      },
+      "reminder": {
+        "title": "リマインダー：{name}",
+        "body": "段階：{stage}"
+      }
     }
   },
   "module": {

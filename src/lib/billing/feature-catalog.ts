@@ -685,6 +685,11 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "nav/track",
       "nav/recent-tools",
       "cron/nav-retention",
+      // Finances and Sales (package 18): a sentence read by code, a stage
+      // moved, a reminder sent. No model, no charge.
+      "finance/quick",
+      "sales/[id]/stage",
+      "cron/lead-reminders",
     ],
     charges: true,
     enforcedIn: "src/lib/modules.ts",

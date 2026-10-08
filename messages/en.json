@@ -3396,6 +3396,42 @@
       "send": "Start",
       "import": "Bring your data from a CSV file",
       "skip": "Skip"
+    },
+    "financeQuick": {
+      "title": "Write what you paid or received",
+      "placeholder": "e.g. paid 50 euros for electricity",
+      "save": "Record",
+      "hint": "One amount and whether it was paid or received. Read as written — nothing is guessed.",
+      "doneExpense": "Recorded: an expense of {amount} — {description}.",
+      "doneIncome": "Recorded: income of {amount} — {description}.",
+      "open": "Open it",
+      "missingAmount": "I could not find one amount. Write a single amount, e.g. «paid 50 € for electricity».",
+      "missingType": "I could not tell if it was paid or received. Start with «paid» or «received».",
+      "missingBoth": "Write one amount and whether it was paid or received, e.g. «paid 50 € for electricity».",
+      "failed": "It could not be recorded. Try again."
+    },
+    "sales": {
+      "title": "Contacts by stage",
+      "empty": "No contacts yet.",
+      "dueTitle": "Reminders due",
+      "moveTo": "Move to",
+      "remind": "Remind me on",
+      "move": "Move",
+      "remindOn": "reminder {date}",
+      "badReminder": "Choose a reminder day after today, within a year.",
+      "failed": "It could not be saved. Try again.",
+      "stages": {
+        "new": "New",
+        "contacted": "Contacted",
+        "meeting": "Meeting",
+        "proposal": "Proposal",
+        "won": "Won",
+        "lost": "Lost"
+      },
+      "reminder": {
+        "title": "Reminder: {name}",
+        "body": "Stage: {stage}"
+      }
     }
   },
   "module": {

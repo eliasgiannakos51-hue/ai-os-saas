@@ -3396,6 +3396,42 @@
       "send": "Commencer",
       "import": "Importe tes données depuis un fichier CSV",
       "skip": "Passer"
+    },
+    "financeQuick": {
+      "title": "Écrivez ce que vous avez payé ou reçu",
+      "placeholder": "p. ex. j’ai payé 50 euros d’électricité",
+      "save": "Enregistrer",
+      "hint": "Un montant, et s’il a été payé ou reçu. Lu tel qu’écrit : rien n’est deviné.",
+      "doneExpense": "Enregistré : une dépense de {amount} — {description}.",
+      "doneIncome": "Enregistré : une recette de {amount} — {description}.",
+      "open": "L’ouvrir",
+      "missingAmount": "Je n’ai pas trouvé un seul montant. Écrivez-en un seul, p. ex. « j’ai payé 50 € d’électricité ».",
+      "missingType": "Je ne sais pas s’il a été payé ou reçu. Commencez par « j’ai payé » ou « j’ai reçu ».",
+      "missingBoth": "Écrivez un montant et s’il a été payé ou reçu, p. ex. « j’ai payé 50 € d’électricité ».",
+      "failed": "L’enregistrement a échoué. Réessayez."
+    },
+    "sales": {
+      "title": "Contacts par étape",
+      "empty": "Aucun contact pour l’instant.",
+      "dueTitle": "Rappels arrivés",
+      "moveTo": "Passer à",
+      "remind": "Me le rappeler le",
+      "move": "Déplacer",
+      "remindOn": "rappel {date}",
+      "badReminder": "Choisissez un jour de rappel après aujourd’hui, dans l’année.",
+      "failed": "L’enregistrement a échoué. Réessayez.",
+      "stages": {
+        "new": "Nouveau",
+        "contacted": "Contacté",
+        "meeting": "Rendez-vous",
+        "proposal": "Proposition",
+        "won": "Gagné",
+        "lost": "Perdu"
+      },
+      "reminder": {
+        "title": "Rappel : {name}",
+        "body": "Étape : {stage}"
+      }
     }
   },
   "module": {

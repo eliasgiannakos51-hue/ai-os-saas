@@ -3396,6 +3396,42 @@
       "send": "Los",
       "import": "Bring deine Daten aus einer CSV-Datei mit",
       "skip": "Überspringen"
+    },
+    "financeQuick": {
+      "title": "Schreib, was du bezahlt oder erhalten hast",
+      "placeholder": "z. B. 50 Euro Strom bezahlt",
+      "save": "Erfassen",
+      "hint": "Ein Betrag und ob bezahlt oder erhalten. So gelesen, wie geschrieben – nichts wird geraten.",
+      "doneExpense": "Erfasst: eine Ausgabe von {amount} – {description}.",
+      "doneIncome": "Erfasst: eine Einnahme von {amount} – {description}.",
+      "open": "Öffnen",
+      "missingAmount": "Ich habe nicht genau einen Betrag gefunden. Schreib einen, z. B. „50 € Strom bezahlt“.",
+      "missingType": "Ich weiß nicht, ob bezahlt oder erhalten. Schreib „bezahlt“ oder „erhalten“.",
+      "missingBoth": "Schreib einen Betrag und ob bezahlt oder erhalten, z. B. „50 € Strom bezahlt“.",
+      "failed": "Das konnte nicht erfasst werden. Versuch es erneut."
+    },
+    "sales": {
+      "title": "Kontakte nach Phase",
+      "empty": "Noch keine Kontakte.",
+      "dueTitle": "Fällige Erinnerungen",
+      "moveTo": "Verschieben nach",
+      "remind": "Erinnern am",
+      "move": "Verschieben",
+      "remindOn": "Erinnerung {date}",
+      "badReminder": "Wähle einen Erinnerungstag nach heute, innerhalb eines Jahres.",
+      "failed": "Das konnte nicht gespeichert werden. Versuch es erneut.",
+      "stages": {
+        "new": "Neu",
+        "contacted": "Kontaktiert",
+        "meeting": "Termin",
+        "proposal": "Angebot",
+        "won": "Gewonnen",
+        "lost": "Verloren"
+      },
+      "reminder": {
+        "title": "Erinnerung: {name}",
+        "body": "Phase: {stage}"
+      }
     }
   },
   "module": {

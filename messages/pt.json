@@ -3396,6 +3396,42 @@
       "send": "Começar",
       "import": "Traz os teus dados de um ficheiro CSV",
       "skip": "Saltar"
+    },
+    "financeQuick": {
+      "title": "Escreva o que pagou ou recebeu",
+      "placeholder": "p. ex. paguei 50 euros de luz",
+      "save": "Registar",
+      "hint": "Um valor e se foi pago ou recebido. Lido como está escrito — nada é adivinhado.",
+      "doneExpense": "Registado: uma despesa de {amount} — {description}.",
+      "doneIncome": "Registado: uma receita de {amount} — {description}.",
+      "open": "Abrir",
+      "missingAmount": "Não encontrei um único valor. Escreva só um, p. ex. «paguei 50 € de luz».",
+      "missingType": "Não sei se foi pago ou recebido. Comece com «paguei» ou «recebi».",
+      "missingBoth": "Escreva um valor e se foi pago ou recebido, p. ex. «paguei 50 € de luz».",
+      "failed": "Não foi possível registar. Tente novamente."
+    },
+    "sales": {
+      "title": "Contactos por fase",
+      "empty": "Ainda não há contactos.",
+      "dueTitle": "Lembretes que chegaram",
+      "moveTo": "Mover para",
+      "remind": "Lembrar-me a",
+      "move": "Mover",
+      "remindOn": "lembrete {date}",
+      "badReminder": "Escolha um dia de lembrete depois de hoje, dentro de um ano.",
+      "failed": "Não foi possível guardar. Tente novamente.",
+      "stages": {
+        "new": "Novo",
+        "contacted": "Contactado",
+        "meeting": "Reunião",
+        "proposal": "Proposta",
+        "won": "Ganho",
+        "lost": "Perdido"
+      },
+      "reminder": {
+        "title": "Lembrete: {name}",
+        "body": "Fase: {stage}"
+      }
     }
   },
   "module": {

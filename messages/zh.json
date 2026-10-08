@@ -3396,6 +3396,42 @@
       "send": "开始",
       "import": "从 CSV 文件导入你的数据",
       "skip": "跳过"
+    },
+    "financeQuick": {
+      "title": "写下你付了或收到了什么",
+      "placeholder": "例如：付了50欧元电费",
+      "save": "记录",
+      "hint": "一个金额，以及是付出还是收到。按你写的读取——不做任何猜测。",
+      "doneExpense": "已记录：支出 {amount} — {description}。",
+      "doneIncome": "已记录：收入 {amount} — {description}。",
+      "open": "打开",
+      "missingAmount": "没有找到唯一的金额。请只写一个金额，例如「付了50欧元电费」。",
+      "missingType": "看不出是付出还是收到。请以「付了」或「收到」开头。",
+      "missingBoth": "请写一个金额，并说明是付出还是收到，例如「付了50欧元电费」。",
+      "failed": "无法记录，请重试。"
+    },
+    "sales": {
+      "title": "按阶段的联系人",
+      "empty": "还没有联系人。",
+      "dueTitle": "到期的提醒",
+      "moveTo": "移到",
+      "remind": "提醒日期",
+      "move": "移动",
+      "remindOn": "提醒 {date}",
+      "badReminder": "请选择今天之后、一年以内的提醒日期。",
+      "failed": "无法保存，请重试。",
+      "stages": {
+        "new": "新",
+        "contacted": "已联系",
+        "meeting": "会面",
+        "proposal": "报价",
+        "won": "成交",
+        "lost": "流失"
+      },
+      "reminder": {
+        "title": "提醒：{name}",
+        "body": "阶段：{stage}"
+      }
     }
   },
   "module": {

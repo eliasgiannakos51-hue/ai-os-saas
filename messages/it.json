@@ -3396,6 +3396,42 @@
       "send": "Inizia",
       "import": "Porta i tuoi dati da un file CSV",
       "skip": "Salta"
+    },
+    "financeQuick": {
+      "title": "Scrivi cosa hai pagato o ricevuto",
+      "placeholder": "es. pagato 50 euro di luce",
+      "save": "Registra",
+      "hint": "Un importo e se è stato pagato o ricevuto. Letto come scritto: niente viene indovinato.",
+      "doneExpense": "Registrato: una spesa di {amount} — {description}.",
+      "doneIncome": "Registrato: un’entrata di {amount} — {description}.",
+      "open": "Aprilo",
+      "missingAmount": "Non ho trovato un solo importo. Scrivine uno, es. «pagato 50 € di luce».",
+      "missingType": "Non so se è stato pagato o ricevuto. Inizia con «pagato» o «ricevuto».",
+      "missingBoth": "Scrivi un importo e se è stato pagato o ricevuto, es. «pagato 50 € di luce».",
+      "failed": "Non è stato possibile registrarlo. Riprova."
+    },
+    "sales": {
+      "title": "Contatti per fase",
+      "empty": "Ancora nessun contatto.",
+      "dueTitle": "Promemoria arrivati",
+      "moveTo": "Sposta in",
+      "remind": "Ricordamelo il",
+      "move": "Sposta",
+      "remindOn": "promemoria {date}",
+      "badReminder": "Scegli un giorno di promemoria dopo oggi, entro un anno.",
+      "failed": "Non è stato possibile salvare. Riprova.",
+      "stages": {
+        "new": "Nuovo",
+        "contacted": "Contattato",
+        "meeting": "Incontro",
+        "proposal": "Proposta",
+        "won": "Vinto",
+        "lost": "Perso"
+      },
+      "reminder": {
+        "title": "Promemoria: {name}",
+        "body": "Fase: {stage}"
+      }
     }
   },
   "module": {

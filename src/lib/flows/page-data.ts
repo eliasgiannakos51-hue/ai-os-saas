@@ -22,7 +22,7 @@ const FLOWS_SHOWN = 20;
  * never under the price held — which steps they can run, and the
  * business's colour from memory, when Memory knows one.
  */
-export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; prices: FlowPrices; available: Record<FlowKind, boolean>; brandColour: string | null }> {
+export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; prices: FlowPrices; available: Record<FlowKind, boolean> & { slidesFromResearch: boolean }; brandColour: string | null }> {
   const supabase = await createClient();
   const plan = await resolveEffectivePlan(user);
   const [{ data, error }, packPrice, available] = await Promise.all([

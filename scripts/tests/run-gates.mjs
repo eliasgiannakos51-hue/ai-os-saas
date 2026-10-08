@@ -46,8 +46,9 @@
  *
  * Run: node scripts/tests/run-gates.mjs
  */
-import { readdirSync } from "node:fs";
+import { closeSync, mkdtempSync, openSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const DIR = "scripts/tests";
@@ -107,12 +108,28 @@ const silent = [];
 const spoke = [];
 const started = Date.now();
 
+// EACH GATE WRITES TO A FILE, NOT A PIPE. 346 of the 348 gates call
+// process.exit() (counted 2026-10-08), and process.exit() with output
+// still queued on a pipe drops the tail — the tally line — so a passing
+// gate read as one that printed no count and failed the run. Measured:
+// schema-canaries (12 KB of output) in 1 of 12 runs, security-posture
+// (47 KB) in 1 of 8; two full runs of this file in a row failed, each on
+// a different gate. Writes to a file are synchronous in Node, so nothing
+// is queued when a gate exits. billing-coverage, ceiling-vs-outcome and
+// db-migrations had been fixed one at a time (process.exitCode); this
+// ends it for every gate this runner runs.
+const OUT_DIR = mkdtempSync(join(tmpdir(), "run-gates-"));
+const OUT = join(OUT_DIR, "gate.out");
+process.on("exit", () => rmSync(OUT_DIR, { recursive: true, force: true }));
+
 for (const file of gates) {
   const path = join(DIR, file);
   const t0 = Date.now();
-  const r = spawnSync(process.execPath, [path], { encoding: "utf8", stdio: "pipe" });
+  const fd = openSync(OUT, "w");
+  const r = spawnSync(process.execPath, [path], { stdio: ["ignore", fd, fd] });
+  closeSync(fd);
   const ms = Date.now() - t0;
-  const out = String(r.stdout ?? "") + String(r.stderr ?? "");
+  const out = readFileSync(OUT, "utf8");
   ran++;
 
   // A NULL STATUS IS NOT A VERDICT — the child was killed or never ran,

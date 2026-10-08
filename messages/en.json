@@ -4447,6 +4447,35 @@
     "chart": {
       "nothingToPlot": "Nothing to plot for this one.",
       "truncated": "Showing the largest {count}; the rest are grouped or left out."
+    },
+    "how": {
+      "title": "How the numbers were made",
+      "press": "Press a number to see how it was made.",
+      "rows": "The file's rows, counted one by one.",
+      "duplicates": "Rows identical to an earlier row in every column (rows in the file: {rows}).",
+      "sum": "The sum of the column «{column}» (rows with a value: {rows}).",
+      "mean": "The mean of «{column}»: the sum divided by the rows with a value ({rows}).",
+      "median": "The median of «{column}»: the middle value once they are in order (rows with a value: {rows}).",
+      "min": "The smallest value in «{column}» (rows with a value: {rows}).",
+      "max": "The largest value in «{column}» (rows with a value: {rows}).",
+      "missing": "Rows with no value in «{column}» (rows in the file: {rows}).",
+      "distinct": "Different values in «{column}» (rows with a value: {rows}).",
+      "outliers": "Values of «{column}» further than 3 standard deviations from its mean (rows with a value: {rows}).",
+      "topCount": "Rows where «{column}» is «{label}» (rows with a value: {rows}).",
+      "r": "Pearson correlation between «{column}» and «{other}», over the rows that have both. From −1 to 1; it does not say what causes what.",
+      "from": "The first date in «{column}».",
+      "to": "The last date in «{column}».",
+      "chartTitle": "How each value was made",
+      "point": "rows: {rows}",
+      "other": "What does not fit on the chart, together.",
+      "dropped": "Findings with a number that was not computed from the file were left out: {count}.",
+      "chart": {
+        "sum": "For each «{x}», the sum of «{y}».",
+        "mean": "For each «{x}», the mean of «{y}».",
+        "count": "For each «{x}», how many rows it has.",
+        "min": "For each «{x}», the smallest «{y}».",
+        "max": "For each «{x}», the largest «{y}»."
+      }
     }
   },
   "coding": {

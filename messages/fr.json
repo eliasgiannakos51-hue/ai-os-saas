@@ -4447,6 +4447,35 @@
     "chart": {
       "nothingToPlot": "Rien à tracer pour celui-ci.",
       "truncated": "Affichage des {count} plus grands ; le reste est regroupé ou omis."
+    },
+    "how": {
+      "title": "Comment les chiffres ont été obtenus",
+      "press": "Appuyez sur un chiffre pour voir comment il a été obtenu.",
+      "rows": "Les lignes du fichier, comptées une à une.",
+      "duplicates": "Lignes identiques à une ligne précédente dans toutes les colonnes (lignes du fichier : {rows}).",
+      "sum": "La somme de la colonne « {column} » (lignes avec une valeur : {rows}).",
+      "mean": "La moyenne de « {column} » : la somme divisée par les lignes avec une valeur ({rows}).",
+      "median": "La médiane de « {column} » : la valeur du milieu une fois triées (lignes avec une valeur : {rows}).",
+      "min": "La plus petite valeur de « {column} » (lignes avec une valeur : {rows}).",
+      "max": "La plus grande valeur de « {column} » (lignes avec une valeur : {rows}).",
+      "missing": "Lignes sans valeur dans « {column} » (lignes du fichier : {rows}).",
+      "distinct": "Valeurs différentes dans « {column} » (lignes avec une valeur : {rows}).",
+      "outliers": "Valeurs de « {column} » à plus de 3 écarts-types de sa moyenne (lignes avec une valeur : {rows}).",
+      "topCount": "Lignes où « {column} » vaut « {label} » (lignes avec une valeur : {rows}).",
+      "r": "Corrélation de Pearson entre « {column} » et « {other} », sur les lignes qui ont les deux. De −1 à 1 ; elle ne dit pas ce qui cause quoi.",
+      "from": "La première date de « {column} ».",
+      "to": "La dernière date de « {column} ».",
+      "chartTitle": "Comment chaque valeur a été obtenue",
+      "point": "lignes : {rows}",
+      "other": "Ce qui ne tient pas sur le graphique, regroupé.",
+      "dropped": "Les constats contenant un chiffre qui n’a pas été calculé à partir du fichier ont été écartés : {count}.",
+      "chart": {
+        "sum": "Pour chaque « {x} », la somme de « {y} ».",
+        "mean": "Pour chaque « {x} », la moyenne de « {y} ».",
+        "count": "Pour chaque « {x} », le nombre de lignes.",
+        "min": "Pour chaque « {x} », le plus petit « {y} ».",
+        "max": "Pour chaque « {x} », le plus grand « {y} »."
+      }
     }
   },
   "coding": {

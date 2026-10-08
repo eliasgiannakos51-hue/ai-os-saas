@@ -134,7 +134,7 @@ export default async function DataAnalysisPage(
   if (await isFeatureOn("tool-shell", user)) {
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <AnalysisShell analyses={analyses} current={current} />
+        <AnalysisShell analyses={analyses} current={current} provenance={await isFeatureOn("analysis-provenance", user)} />
       </div>
     );
   }

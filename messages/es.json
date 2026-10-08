@@ -4447,6 +4447,35 @@
     "chart": {
       "nothingToPlot": "Aquí no hay nada que dibujar.",
       "truncated": "Mostrando los {count} mayores; el resto se agrupa o se omite."
+    },
+    "how": {
+      "title": "Cómo se obtuvieron los números",
+      "press": "Pulsa un número para ver cómo se obtuvo.",
+      "rows": "Las filas del archivo, contadas una a una.",
+      "duplicates": "Filas idénticas a una anterior en todas las columnas (filas del archivo: {rows}).",
+      "sum": "La suma de la columna «{column}» (filas con valor: {rows}).",
+      "mean": "La media de «{column}»: la suma dividida entre las filas con valor ({rows}).",
+      "median": "La mediana de «{column}»: el valor central una vez ordenados (filas con valor: {rows}).",
+      "min": "El valor más pequeño de «{column}» (filas con valor: {rows}).",
+      "max": "El valor más grande de «{column}» (filas con valor: {rows}).",
+      "missing": "Filas sin valor en «{column}» (filas del archivo: {rows}).",
+      "distinct": "Valores distintos en «{column}» (filas con valor: {rows}).",
+      "outliers": "Valores de «{column}» a más de 3 desviaciones típicas de su media (filas con valor: {rows}).",
+      "topCount": "Filas en las que «{column}» es «{label}» (filas con valor: {rows}).",
+      "r": "Correlación de Pearson entre «{column}» y «{other}», en las filas que tienen ambas. De −1 a 1; no dice qué causa qué.",
+      "from": "La primera fecha de «{column}».",
+      "to": "La última fecha de «{column}».",
+      "chartTitle": "Cómo se obtuvo cada valor",
+      "point": "filas: {rows}",
+      "other": "Lo que no cabe en el gráfico, junto.",
+      "dropped": "Se omitieron hallazgos con un número que no se calculó a partir del archivo: {count}.",
+      "chart": {
+        "sum": "Para cada «{x}», la suma de «{y}».",
+        "mean": "Para cada «{x}», la media de «{y}».",
+        "count": "Para cada «{x}», cuántas filas tiene.",
+        "min": "Para cada «{x}», el menor «{y}».",
+        "max": "Para cada «{x}», el mayor «{y}»."
+      }
     }
   },
   "coding": {

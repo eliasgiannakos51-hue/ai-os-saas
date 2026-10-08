@@ -4447,6 +4447,35 @@
     "chart": {
       "nothingToPlot": "Hier gibt es nichts zu zeichnen.",
       "truncated": "Zeigt die größten {count}; der Rest ist gruppiert oder weggelassen."
+    },
+    "how": {
+      "title": "Wie die Zahlen entstanden sind",
+      "press": "Tippe auf eine Zahl, um zu sehen, wie sie entstanden ist.",
+      "rows": "Die Zeilen der Datei, einzeln gezählt.",
+      "duplicates": "Zeilen, die in jeder Spalte einer früheren Zeile gleichen (Zeilen der Datei: {rows}).",
+      "sum": "Die Summe der Spalte „{column}“ (Zeilen mit Wert: {rows}).",
+      "mean": "Der Mittelwert von „{column}“: die Summe geteilt durch die Zeilen mit Wert ({rows}).",
+      "median": "Der Median von „{column}“: der mittlere Wert, wenn sie sortiert sind (Zeilen mit Wert: {rows}).",
+      "min": "Der kleinste Wert in „{column}“ (Zeilen mit Wert: {rows}).",
+      "max": "Der größte Wert in „{column}“ (Zeilen mit Wert: {rows}).",
+      "missing": "Zeilen ohne Wert in „{column}“ (Zeilen der Datei: {rows}).",
+      "distinct": "Verschiedene Werte in „{column}“ (Zeilen mit Wert: {rows}).",
+      "outliers": "Werte von „{column}“, die mehr als 3 Standardabweichungen von ihrem Mittelwert entfernt sind (Zeilen mit Wert: {rows}).",
+      "topCount": "Zeilen, in denen „{column}“ den Wert „{label}“ hat (Zeilen mit Wert: {rows}).",
+      "r": "Pearson-Korrelation zwischen „{column}“ und „{other}“, über die Zeilen, die beide haben. Von −1 bis 1; sie sagt nicht, was was verursacht.",
+      "from": "Das erste Datum in „{column}“.",
+      "to": "Das letzte Datum in „{column}“.",
+      "chartTitle": "Wie jeder Wert entstanden ist",
+      "point": "Zeilen: {rows}",
+      "other": "Was nicht ins Diagramm passt, zusammengefasst.",
+      "dropped": "Ergebnisse mit einer Zahl, die nicht aus der Datei berechnet wurde, wurden weggelassen: {count}.",
+      "chart": {
+        "sum": "Für jedes „{x}“ die Summe von „{y}“.",
+        "mean": "Für jedes „{x}“ der Mittelwert von „{y}“.",
+        "count": "Für jedes „{x}“ die Anzahl der Zeilen.",
+        "min": "Für jedes „{x}“ der kleinste Wert von „{y}“.",
+        "max": "Für jedes „{x}“ der größte Wert von „{y}“."
+      }
     }
   },
   "coding": {

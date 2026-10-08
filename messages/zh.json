@@ -4447,6 +4447,35 @@
     "chart": {
       "nothingToPlot": "这一项没有可绘制的内容。",
       "truncated": "显示最大的 {count} 项；其余的已归类或略去。"
+    },
+    "how": {
+      "title": "这些数字是怎么得出的",
+      "press": "点按一个数字，查看它是怎么得出的。",
+      "rows": "文件的行数，逐行计数。",
+      "duplicates": "每一列都与之前某一行相同的行（文件行数：{rows}）。",
+      "sum": "「{column}」列的总和（有值的行：{rows}）。",
+      "mean": "「{column}」的平均值：总和除以有值的行数（{rows}）。",
+      "median": "「{column}」的中位数：排序后位于中间的值（有值的行：{rows}）。",
+      "min": "「{column}」中最小的值（有值的行：{rows}）。",
+      "max": "「{column}」中最大的值（有值的行：{rows}）。",
+      "missing": "「{column}」中没有值的行（文件行数：{rows}）。",
+      "distinct": "「{column}」中不同值的个数（有值的行：{rows}）。",
+      "outliers": "「{column}」中偏离平均值超过 3 个标准差的值（有值的行：{rows}）。",
+      "topCount": "「{column}」为「{label}」的行（有值的行：{rows}）。",
+      "r": "「{column}」与「{other}」之间的皮尔逊相关系数，基于两者都有值的行。范围从 −1 到 1；它不说明谁导致了谁。",
+      "from": "「{column}」中最早的日期。",
+      "to": "「{column}」中最晚的日期。",
+      "chartTitle": "每个值是怎么得出的",
+      "point": "行：{rows}",
+      "other": "图表放不下的部分，合在一起。",
+      "dropped": "含有未从文件计算得出的数字的发现已被略去：{count}。",
+      "chart": {
+        "sum": "按每个「{x}」，「{y}」的总和。",
+        "mean": "按每个「{x}」，「{y}」的平均值。",
+        "count": "按每个「{x}」，它有多少行。",
+        "min": "按每个「{x}」，最小的「{y}」。",
+        "max": "按每个「{x}」，最大的「{y}」。"
+      }
     }
   },
   "coding": {

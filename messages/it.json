@@ -4447,6 +4447,35 @@
     "chart": {
       "nothingToPlot": "Qui non c'è nulla da tracciare.",
       "truncated": "Mostriamo i {count} maggiori; il resto è raggruppato o omesso."
+    },
+    "how": {
+      "title": "Come sono stati ottenuti i numeri",
+      "press": "Tocca un numero per vedere come è stato ottenuto.",
+      "rows": "Le righe del file, contate una per una.",
+      "duplicates": "Righe identiche a una precedente in ogni colonna (righe del file: {rows}).",
+      "sum": "La somma della colonna «{column}» (righe con un valore: {rows}).",
+      "mean": "La media di «{column}»: la somma divisa per le righe con un valore ({rows}).",
+      "median": "La mediana di «{column}»: il valore centrale una volta ordinati (righe con un valore: {rows}).",
+      "min": "Il valore più piccolo di «{column}» (righe con un valore: {rows}).",
+      "max": "Il valore più grande di «{column}» (righe con un valore: {rows}).",
+      "missing": "Righe senza valore in «{column}» (righe del file: {rows}).",
+      "distinct": "Valori diversi in «{column}» (righe con un valore: {rows}).",
+      "outliers": "Valori di «{column}» a più di 3 deviazioni standard dalla sua media (righe con un valore: {rows}).",
+      "topCount": "Righe in cui «{column}» è «{label}» (righe con un valore: {rows}).",
+      "r": "Correlazione di Pearson tra «{column}» e «{other}», sulle righe che hanno entrambi. Da −1 a 1; non dice cosa causa cosa.",
+      "from": "La prima data di «{column}».",
+      "to": "L’ultima data di «{column}».",
+      "chartTitle": "Come è stato ottenuto ogni valore",
+      "point": "righe: {rows}",
+      "other": "Ciò che non entra nel grafico, insieme.",
+      "dropped": "Sono stati esclusi i risultati con un numero non calcolato dal file: {count}.",
+      "chart": {
+        "sum": "Per ogni «{x}», la somma di «{y}».",
+        "mean": "Per ogni «{x}», la media di «{y}».",
+        "count": "Per ogni «{x}», quante righe ha.",
+        "min": "Per ogni «{x}», il valore più piccolo di «{y}».",
+        "max": "Per ogni «{x}», il valore più grande di «{y}»."
+      }
     }
   },
   "coding": {

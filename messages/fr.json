@@ -1279,6 +1279,44 @@
         "insufficient": "Pas assez de crédits pour cette traduction. Rien n'a été facturé.",
         "charged": "Traduit et téléchargé — {count, plural, one {# crédit facturé} other {# crédits facturés}}.",
         "chargedNothing": "Traduit et téléchargé — rien facturé."
+      },
+      "writer": {
+        "kind": "Type de document",
+        "placeholder": "Décrivez le document dont vous avez besoin : ce que c’est, pour qui, ce qu’il doit dire",
+        "changePlaceholder": "Dites ce qu’il faut changer dans le document",
+        "block": "bloc {n}",
+        "boxHint": "Appuyez sur un bloc pour ne changer que celui-ci.",
+        "writing": "Rédaction du document…",
+        "changing": "Modification…",
+        "done": "J’ai rédigé « {title} ». Il est ouvert à côté de la conversation ; ce que vous écrivez maintenant le modifie.",
+        "changed": "Modifié. La nouvelle version est ouverte à côté de la conversation.",
+        "blockChanged": "Le bloc {n} a changé ; tout le reste est resté tel quel.",
+        "recent": "Rédigés avant",
+        "noneYet": "Rien n’a encore été rédigé.",
+        "new": "Nouveau document",
+        "word": "Télécharger Word (.docx)",
+        "openEditor": "Ouvrir dans l’éditeur",
+        "kinds": {
+          "free": "Tout document",
+          "offer": "Offre",
+          "letter": "Lettre",
+          "cv": "CV",
+          "report": "Rapport",
+          "invoice": "Facture",
+          "script": "Scénario"
+        },
+        "errors": {
+          "tooShort": "Dites-en un peu plus sur le document d’abord.",
+          "tooLong": "C’est plus long qu’une description. Décrivez le document, ne le collez pas.",
+          "insufficient": "Pas assez de crédits pour ce document.",
+          "rateLimited": "Trop de demandes. Attendez une minute et réessayez.",
+          "unavailable": "Le service d’IA n’était pas disponible. Rien n’a été facturé.",
+          "unusable": "Le modèle a renvoyé autre chose qu’un document. Essayez de le décrire autrement.",
+          "notIncluded": "La rédaction de documents n’est pas incluse dans votre offre.",
+          "notSaved": "La modification a été faite mais n’a pas pu être enregistrée. Rien n’est perdu ; réessayez.",
+          "failed": "Cela n’a pas fonctionné. Réessayez.",
+          "exportFailed": "Le fichier n’a pas pu être créé."
+        }
       }
     },
     "chat": {
@@ -2910,7 +2948,8 @@
         "memory": "Mémoire",
         "finances": "Finances",
         "sales": "Ventes",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Document"
       }
     },
     "home": {

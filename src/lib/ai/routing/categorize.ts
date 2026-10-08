@@ -73,6 +73,8 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
 
   presentation_generate: "writing",
   presentation_edit: "writing",
+  document_generate: "writing",
+  document_edit: "writing",
   posts_generate: "writing",
   weekly_reflection: "writing",
   text_action: "writing",

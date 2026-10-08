@@ -287,13 +287,14 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           echo "CHROMIUM_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
-      # THE OTHER PROGRAM THAT OPENS A POWERPOINT. slides-charts.prodtest.mjs
-      # hands the .pptx Slides downloads to LibreOffice Impress and reads
-      # the chart back from what Impress wrote; without it that test fails
-      # rather than passing unopened.
-      - name: libreoffice impress
+      # THE OTHER PROGRAMS THAT OPEN A POWERPOINT AND A WORD FILE.
+      # slides-charts.prodtest.mjs hands the .pptx Slides downloads to
+      # LibreOffice Impress and reads the chart back from what Impress
+      # wrote; document-writer.prodtest.mjs does the same with the .docx and
+      # Writer. Without them those tests fail rather than passing unopened.
+      - name: libreoffice impress and writer
         timeout-minutes: 10
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libreoffice-impress
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libreoffice-impress libreoffice-writer
       - name: production browser tests
         timeout-minutes: 160
         run: npm run test:prod

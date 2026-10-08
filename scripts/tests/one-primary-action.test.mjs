@@ -384,7 +384,11 @@ const BASELINE = {
   "dashboard/create/page.tsx": 1,
   "dashboard/data-analysis/page.tsx": 1,
   "dashboard/deep-research/page.tsx": 1,
-  "dashboard/documents/page.tsx": 1,
+  // TWO, and never on one screen: the page draws EITHER the writer
+  // (package 14, behind the switch "document-writer"), whose one filled
+  // control is the field's send, OR the notes list, whose one is «New
+  // document» — the same either-or as the images page below.
+  "dashboard/documents/page.tsx": 2,
   "dashboard/files/page.tsx": 1,
   // TWO, and never on one screen: the page draws EITHER the Image tool
   // (package 19, behind the switch "image-studio"), whose one filled

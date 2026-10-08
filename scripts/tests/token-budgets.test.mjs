@@ -155,6 +155,12 @@ const CLASSIFIED = {
     // stop_reason as the deck: a cut set would parse as fewer platforms
     // than were asked for.
     "src/lib/posts/generate.ts",
+    // Package 14. One forced tool call per document (or per block, or the
+    // whole document rewritten); the ceiling is the caller's, and a cut
+    // reply is refused by stop_reason as "unusable" in call(), as the
+    // deck is — a document missing its last sections must not read as a
+    // short one.
+    "src/lib/documents/write-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

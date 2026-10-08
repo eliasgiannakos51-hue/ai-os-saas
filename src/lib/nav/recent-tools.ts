@@ -70,6 +70,8 @@ export const COMPLETION_TOOLS: Readonly<Record<string, string>> = {
   data_analysis: "/dashboard/data-analysis",
   meeting_analyse: "/dashboard/meetings",
   document_translate: "/dashboard/documents",
+  document_generate: "/dashboard/documents",
+  document_edit: "/dashboard/documents",
   file_ask: "/dashboard/files",
   insight_narrate: "/dashboard/predictions",
   mission_plan: "/dashboard/mission",

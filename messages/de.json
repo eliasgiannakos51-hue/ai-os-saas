@@ -1279,6 +1279,44 @@
         "insufficient": "Nicht genug Credits für diese Übersetzung. Nichts wurde berechnet.",
         "charged": "Übersetzt und heruntergeladen — {count, plural, one {# Credit} other {# Credits}} berechnet.",
         "chargedNothing": "Übersetzt und heruntergeladen — nichts berechnet."
+      },
+      "writer": {
+        "kind": "Art des Dokuments",
+        "placeholder": "Beschreibe das Dokument, das du brauchst: was es ist, für wen, was darin stehen muss",
+        "changePlaceholder": "Sag, was im Dokument geändert werden soll",
+        "block": "Abschnitt {n}",
+        "boxHint": "Tippe auf einen Abschnitt, um nur diesen zu ändern.",
+        "writing": "Das Dokument wird geschrieben…",
+        "changing": "Wird geändert…",
+        "done": "Ich habe „{title}“ geschrieben. Es ist neben dem Gespräch geöffnet; was du jetzt schreibst, ändert es.",
+        "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
+        "blockChanged": "Abschnitt {n} wurde geändert; alles andere ist geblieben.",
+        "recent": "Früher geschrieben",
+        "noneYet": "Noch nichts geschrieben.",
+        "new": "Neues Dokument",
+        "word": "Word herunterladen (.docx)",
+        "openEditor": "Im Editor öffnen",
+        "kinds": {
+          "free": "Beliebiges Dokument",
+          "offer": "Angebot",
+          "letter": "Brief",
+          "cv": "Lebenslauf",
+          "report": "Bericht",
+          "invoice": "Rechnung",
+          "script": "Drehbuch"
+        },
+        "errors": {
+          "tooShort": "Erzähl zuerst etwas mehr über das Dokument.",
+          "tooLong": "Das ist länger als eine Beschreibung. Beschreibe das Dokument, statt es einzufügen.",
+          "insufficient": "Nicht genug Credits für dieses Dokument.",
+          "rateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
+          "unavailable": "Der KI-Dienst war nicht verfügbar. Es wurde nichts berechnet.",
+          "unusable": "Das Modell hat etwas zurückgegeben, das kein Dokument war. Beschreibe es anders.",
+          "notIncluded": "Das Schreiben von Dokumenten ist in deinem Tarif nicht enthalten.",
+          "notSaved": "Die Änderung wurde gemacht, konnte aber nicht gespeichert werden. Nichts ging verloren; versuche es erneut.",
+          "failed": "Das hat nicht geklappt. Versuche es erneut.",
+          "exportFailed": "Die Datei konnte nicht erstellt werden."
+        }
       }
     },
     "chat": {
@@ -2910,7 +2948,8 @@
         "memory": "Gedächtnis",
         "finances": "Finanzen",
         "sales": "Vertrieb",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Dokument"
       }
     },
     "home": {

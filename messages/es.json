@@ -1279,6 +1279,44 @@
         "insufficient": "No hay créditos suficientes para esta traducción. No se cobró nada.",
         "charged": "Traducido y descargado — se cobraron {count, plural, one {# crédito} other {# créditos}}.",
         "chargedNothing": "Traducido y descargado — sin cargo."
+      },
+      "writer": {
+        "kind": "Tipo de documento",
+        "placeholder": "Describe el documento que necesitas: qué es, para quién, qué debe decir",
+        "changePlaceholder": "Di qué cambiar en el documento",
+        "block": "bloque {n}",
+        "boxHint": "Pulsa un bloque para cambiar solo ese.",
+        "writing": "Escribiendo el documento…",
+        "changing": "Cambiando…",
+        "done": "He escrito «{title}». Está abierto junto a la conversación; lo que escribas ahora lo cambia.",
+        "changed": "Cambiado. La nueva versión está abierta junto a la conversación.",
+        "blockChanged": "El bloque {n} ha cambiado; todo lo demás sigue igual.",
+        "recent": "Escritos antes",
+        "noneYet": "Todavía no se ha escrito nada.",
+        "new": "Nuevo documento",
+        "word": "Descargar Word (.docx)",
+        "openEditor": "Abrir en el editor",
+        "kinds": {
+          "free": "Cualquier documento",
+          "offer": "Oferta",
+          "letter": "Carta",
+          "cv": "Currículum",
+          "report": "Informe",
+          "invoice": "Factura",
+          "script": "Guion"
+        },
+        "errors": {
+          "tooShort": "Cuenta un poco más sobre el documento primero.",
+          "tooLong": "Eso es más largo que una descripción. Describe el documento; no lo pegues.",
+          "insufficient": "No hay créditos suficientes para este documento.",
+          "rateLimited": "Demasiadas solicitudes. Espera un minuto y vuelve a intentarlo.",
+          "unavailable": "El servicio de IA no estaba disponible. No se cobró nada.",
+          "unusable": "El modelo devolvió algo que no era un documento. Prueba a describirlo de otra forma.",
+          "notIncluded": "Redactar documentos no está incluido en tu plan.",
+          "notSaved": "El cambio se hizo pero no se pudo guardar. No se perdió nada; vuelve a intentarlo.",
+          "failed": "No ha funcionado. Vuelve a intentarlo.",
+          "exportFailed": "No se pudo crear el archivo."
+        }
       }
     },
     "chat": {
@@ -2910,7 +2948,8 @@
         "memory": "Memoria",
         "finances": "Finanzas",
         "sales": "Ventas",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Documento"
       }
     },
     "home": {

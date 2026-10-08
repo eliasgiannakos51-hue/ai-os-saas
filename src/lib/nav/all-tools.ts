@@ -68,11 +68,29 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/finance": "finances",
   "/dashboard/sales": "sales",
   "/dashboard/trading": "trading",
+  // Shown only behind its switch: SHOWN_BY_SWITCH below.
+  "/dashboard/documents": "document",
 };
 
 export type AllToolsNameKey =
   | "site" | "slides" | "posts" | "research" | "analyze" | "files" | "automations" | "projects"
-  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading";
+  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading" | "document";
+
+/**
+ * A HIDDEN TOOL THAT COMES BACK WITH ITS SWITCH (MASTER 14.1: «Κάθε νέο
+ * εργαλείο μπαίνει εδώ μόλις γίνει λειτουργικό»). For whoever the switch
+ * admits, the square is drawn in its group; for everybody else the reason
+ * in HIDDEN_FROM_ALL_TOOLS still holds. The page reads the switches
+ * (app/dashboard/tools/page.tsx) and hands the grid the hrefs that are on.
+ */
+export const SHOWN_BY_SWITCH: Readonly<Record<string, { flag: "document-writer"; group: AllToolsGroupKey }>> = {
+  "/dashboard/documents": { flag: "document-writer", group: "make" },
+};
+
+/** The hrefs a group draws: its own, then those its switches turned on. */
+export function groupHrefs(group: { key: AllToolsGroupKey; hrefs: readonly string[] }, switchedOn: readonly string[]): string[] {
+  return [...group.hrefs, ...switchedOn.filter((h) => SHOWN_BY_SWITCH[h]?.group === group.key && !group.hrefs.includes(h))];
+}
 
 /**
  * Hidden from All tools, each with the reason. NOTHING HERE IS REMOVED:
@@ -83,7 +101,7 @@ export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
   "/dashboard/documents":
-    "today it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does)",
+    "without the switch document-writer it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does); with the switch on it writes them, and is drawn under Make (SHOWN_BY_SWITCH)",
   "/dashboard/chat":
     "Ask me is a row of the sidebar itself (MASTER 14.1), so a square here would be a second door to the same room",
   "/dashboard/coding":

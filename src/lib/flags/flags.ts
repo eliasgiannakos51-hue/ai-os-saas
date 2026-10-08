@@ -23,6 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  "document-writer": "Document that writes: a document from a description (an offer, a letter, a CV, a report, an invoice, a script, or anything), one paragraph changed with words and nothing else, and downloads in Word and PDF; Document returns to All tools for whoever has it (MASTER 16, package 14)",
   "slides-charts": "Slides from your own file: a spreadsheet given to Slides with «+» becomes a deck with a real chart of its numbers, computed from the file and drawn as a chart PowerPoint can edit (MASTER 16, package 13)",
   "first-task": "First task: a new account lands on one screen with three tasks that finish on any plan, the free one included, in one press each — instead of the three-step questionnaire — with its own field, and the data import one press away (MASTER 16, package 39)",
   "flows": "Flows: one sentence that names several tools — «φτιάξε site για το camping μου, με εικόνες, και posts» — becomes a plan with its total price, and once approved every result goes into one project, in one colour (MASTER 6.1, 6.3; package 36)",

@@ -1279,6 +1279,44 @@
         "insufficient": "积分不足，无法完成此翻译。未扣费。",
         "charged": "已翻译并下载 — 扣除 {count} 积分。",
         "chargedNothing": "已翻译并下载 — 未扣费。"
+      },
+      "writer": {
+        "kind": "文档类型",
+        "placeholder": "描述你需要的文档：是什么、写给谁、必须写些什么",
+        "changePlaceholder": "说出要在文档中修改什么",
+        "block": "第 {n} 段",
+        "boxHint": "点按一段，只修改那一段。",
+        "writing": "正在撰写文档…",
+        "changing": "正在修改…",
+        "done": "我写好了「{title}」。它已在对话旁打开；你现在写的内容会修改它。",
+        "changed": "已修改。新版本已在对话旁打开。",
+        "blockChanged": "第 {n} 段已修改；其他内容保持不变。",
+        "recent": "之前写的",
+        "noneYet": "还没有写过任何内容。",
+        "new": "新文档",
+        "word": "下载 Word（.docx）",
+        "openEditor": "在编辑器中打开",
+        "kinds": {
+          "free": "任意文档",
+          "offer": "报价",
+          "letter": "信函",
+          "cv": "简历",
+          "report": "报告",
+          "invoice": "发票",
+          "script": "剧本"
+        },
+        "errors": {
+          "tooShort": "请先多说一点关于这份文档的内容。",
+          "tooLong": "这比描述还长。请描述文档，不要直接粘贴。",
+          "insufficient": "积分不足，无法生成这份文档。",
+          "rateLimited": "请求过多。请等一分钟再试。",
+          "unavailable": "AI 服务暂时不可用。未扣除任何积分。",
+          "unusable": "模型返回的内容不是文档。请换一种方式描述。",
+          "notIncluded": "你的套餐不包含撰写文档。",
+          "notSaved": "修改已完成但未能保存。没有丢失任何内容；请重试。",
+          "failed": "没有成功。请重试。",
+          "exportFailed": "无法生成文件。"
+        }
       }
     },
     "chat": {
@@ -2910,7 +2948,8 @@
         "memory": "记忆",
         "finances": "财务",
         "sales": "销售",
-        "trading": "交易"
+        "trading": "交易",
+        "document": "文档"
       }
     },
     "home": {

@@ -2861,6 +2861,20 @@
         "rate_limited": "Demasiadas gravações na última hora. Tenta mais tarde.",
         "empty": "Essa gravação estava vazia.",
         "failed": "Algo correu mal. Nada foi cobrado."
+      },
+      "goal": {
+        "title": "{count, plural, one {Transformar esta ação num passo de um objetivo} other {Transformar estas # ações nos passos de um objetivo}}",
+        "goalLabel": "O objetivo",
+        "projectLabel": "No projeto",
+        "newProject": "Um projeto novo…",
+        "newProjectName": "Nome do projeto novo",
+        "make": "{count, plural, one {Criar o objetivo com 1 passo} other {Criar o objetivo com # passos}}",
+        "done": "{count, plural, one {O objetivo foi criado com 1 passo, dentro do projeto.} other {O objetivo foi criado com # passos, dentro do projeto.}}",
+        "openProject": "Abrir o projeto",
+        "openGoals": "Ver em Objetivos",
+        "projectLimit": "Todos os projetos do seu plano estão em uso. Escolha um deles ou arquive um primeiro.",
+        "projectName": "Dê ao projeto novo um nome com pelo menos duas letras.",
+        "projectFull": "Esse projeto está cheio. Escolha outro."
       }
     },
     "voicePage": {

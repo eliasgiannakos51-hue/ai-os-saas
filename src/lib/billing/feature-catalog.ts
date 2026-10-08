@@ -422,6 +422,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "meetings/[id]",
       "meetings/[id]/analyse",
       "meetings/[id]/actions",
+      // A goal from the meeting's actions (package 17): no model, no charge.
+      "meetings/[id]/goal",
     ],
     charges: true,
     enforcedIn: "src/lib/voice/voice-pricing.ts",

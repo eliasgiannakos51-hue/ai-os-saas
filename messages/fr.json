@@ -2861,6 +2861,20 @@
         "rate_limited": "Trop d'enregistrements dans la dernière heure. Réessayez plus tard.",
         "empty": "Cet enregistrement était vide.",
         "failed": "Une erreur est survenue. Rien n'a été facturé."
+      },
+      "goal": {
+        "title": "{count, plural, one {Faire de cette action une étape d’un objectif} other {Faire de ces # actions les étapes d’un objectif}}",
+        "goalLabel": "L’objectif",
+        "projectLabel": "Dans le projet",
+        "newProject": "Un nouveau projet…",
+        "newProjectName": "Nom du nouveau projet",
+        "make": "{count, plural, one {Créer l’objectif avec 1 étape} other {Créer l’objectif avec # étapes}}",
+        "done": "{count, plural, one {L’objectif a été créé avec 1 étape, dans le projet.} other {L’objectif a été créé avec # étapes, dans le projet.}}",
+        "openProject": "Ouvrir le projet",
+        "openGoals": "Le voir dans Objectifs",
+        "projectLimit": "Tous les projets de votre offre sont utilisés. Choisissez-en un, ou archivez-en un d’abord.",
+        "projectName": "Donnez au nouveau projet un nom d’au moins deux lettres.",
+        "projectFull": "Ce projet est plein. Choisissez-en un autre."
       }
     },
     "voicePage": {

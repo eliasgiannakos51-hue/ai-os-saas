@@ -2861,6 +2861,20 @@
         "rate_limited": "直近1時間の録音が多すぎます。しばらくしてからお試しください。",
         "empty": "この録音は空でした。",
         "failed": "問題が発生しました。料金はかかっていません。"
+      },
+      "goal": {
+        "title": "{count, plural, other {この # 件のアクションを目標のステップにする}}",
+        "goalLabel": "目標",
+        "projectLabel": "入れるプロジェクト",
+        "newProject": "新しいプロジェクト…",
+        "newProjectName": "新しいプロジェクトの名前",
+        "make": "{count, plural, other {# ステップの目標を作成}}",
+        "done": "{count, plural, other {# ステップの目標をプロジェクト内に作成しました。}}",
+        "openProject": "プロジェクトを開く",
+        "openGoals": "目標で見る",
+        "projectLimit": "プランのプロジェクトはすべて使用中です。そのいずれかを選ぶか、先に1つアーカイブしてください。",
+        "projectName": "新しいプロジェクトに2文字以上の名前を付けてください。",
+        "projectFull": "そのプロジェクトはいっぱいです。別のプロジェクトを選んでください。"
       }
     },
     "voicePage": {

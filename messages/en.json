@@ -2861,6 +2861,20 @@
         "rate_limited": "Too many recordings in the last hour. Try again later.",
         "empty": "That recording was empty.",
         "failed": "Something went wrong. Nothing was charged."
+      },
+      "goal": {
+        "title": "{count, plural, one {Make this action a step of a goal} other {Make these # actions the steps of a goal}}",
+        "goalLabel": "The goal",
+        "projectLabel": "In the project",
+        "newProject": "A new project…",
+        "newProjectName": "Name of the new project",
+        "make": "{count, plural, one {Make the goal with 1 step} other {Make the goal with # steps}}",
+        "done": "{count, plural, one {The goal was made with 1 step, inside the project.} other {The goal was made with # steps, inside the project.}}",
+        "openProject": "Open the project",
+        "openGoals": "See it in Goals",
+        "projectLimit": "Your plan's projects are all in use. Choose one of them, or archive one first.",
+        "projectName": "Give the new project a name of at least two letters.",
+        "projectFull": "That project is full. Choose another one."
       }
     },
     "voicePage": {

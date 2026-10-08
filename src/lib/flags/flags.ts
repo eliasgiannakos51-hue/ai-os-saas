@@ -23,6 +23,7 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  "meeting-goal": "Meetings: the actions you tick become the steps of a goal, inside a project you choose or make there (MASTER 16, package 17)",
   "analysis-provenance": "Analyze: every number in a finding is a fact computed from the file, pressable to show how it was made, and every chart value says how many rows it came from (MASTER 16, package 16)",
   "posts-images": "Posts with a picture: your own photo, or one from Unsplash, on every post at its platform's own size (LinkedIn 1200x627, X 1600x900, Instagram and Threads 1080x1350, Facebook 1200x630), each downloadable (MASTER 16, package 15)",
   "document-writer": "Document that writes: a document from a description (an offer, a letter, a CV, a report, an invoice, a script, or anything), one paragraph changed with words and nothing else, and downloads in Word and PDF; Document returns to All tools for whoever has it (MASTER 16, package 14)",

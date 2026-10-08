@@ -2861,6 +2861,20 @@
         "rate_limited": "过去一小时内录音次数过多。请稍后再试。",
         "empty": "该录音是空的。",
         "failed": "出了点问题。未收取任何费用。"
+      },
+      "goal": {
+        "title": "{count, plural, other {把这 # 项行动变成一个目标的步骤}}",
+        "goalLabel": "目标",
+        "projectLabel": "放在项目",
+        "newProject": "新建项目…",
+        "newProjectName": "新项目的名称",
+        "make": "{count, plural, other {创建含 # 个步骤的目标}}",
+        "done": "{count, plural, other {目标已创建，含 # 个步骤，位于该项目中。}}",
+        "openProject": "打开项目",
+        "openGoals": "在“目标”中查看",
+        "projectLimit": "你的套餐中的项目都已用完。请选择其中一个，或先归档一个。",
+        "projectName": "请给新项目起一个至少两个字的名称。",
+        "projectFull": "该项目已满。请选择另一个。"
       }
     },
     "voicePage": {

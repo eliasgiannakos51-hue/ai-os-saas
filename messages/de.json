@@ -2861,6 +2861,20 @@
         "rate_limited": "Zu viele Aufnahmen in der letzten Stunde. Versuche es später.",
         "empty": "Diese Aufnahme war leer.",
         "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet."
+      },
+      "goal": {
+        "title": "{count, plural, one {Diese Aufgabe zu einem Schritt eines Ziels machen} other {Diese # Aufgaben zu Schritten eines Ziels machen}}",
+        "goalLabel": "Das Ziel",
+        "projectLabel": "Im Projekt",
+        "newProject": "Ein neues Projekt…",
+        "newProjectName": "Name des neuen Projekts",
+        "make": "{count, plural, one {Ziel mit 1 Schritt erstellen} other {Ziel mit # Schritten erstellen}}",
+        "done": "{count, plural, one {Das Ziel wurde mit 1 Schritt im Projekt erstellt.} other {Das Ziel wurde mit # Schritten im Projekt erstellt.}}",
+        "openProject": "Projekt öffnen",
+        "openGoals": "In Ziele ansehen",
+        "projectLimit": "Alle Projekte deines Tarifs sind belegt. Wähle eines davon oder archiviere zuerst eines.",
+        "projectName": "Gib dem neuen Projekt einen Namen mit mindestens zwei Buchstaben.",
+        "projectFull": "Dieses Projekt ist voll. Wähle ein anderes."
       }
     },
     "voicePage": {

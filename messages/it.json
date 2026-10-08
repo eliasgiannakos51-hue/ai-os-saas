@@ -2861,6 +2861,20 @@
         "rate_limited": "Troppe registrazioni nell'ultima ora. Riprova più tardi.",
         "empty": "Quella registrazione era vuota.",
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla."
+      },
+      "goal": {
+        "title": "{count, plural, one {Trasforma questa azione in un passo di un obiettivo} other {Trasforma queste # azioni nei passi di un obiettivo}}",
+        "goalLabel": "L’obiettivo",
+        "projectLabel": "Nel progetto",
+        "newProject": "Un nuovo progetto…",
+        "newProjectName": "Nome del nuovo progetto",
+        "make": "{count, plural, one {Crea l’obiettivo con 1 passo} other {Crea l’obiettivo con # passi}}",
+        "done": "{count, plural, one {L’obiettivo è stato creato con 1 passo, nel progetto.} other {L’obiettivo è stato creato con # passi, nel progetto.}}",
+        "openProject": "Apri il progetto",
+        "openGoals": "Vedilo in Obiettivi",
+        "projectLimit": "Tutti i progetti del tuo piano sono in uso. Scegline uno o archiviane uno prima.",
+        "projectName": "Dai al nuovo progetto un nome di almeno due lettere.",
+        "projectFull": "Quel progetto è pieno. Scegline un altro."
       }
     },
     "voicePage": {

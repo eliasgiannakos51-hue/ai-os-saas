@@ -2154,6 +2154,10 @@
       "publishChanges": "Publish changes",
       "publishSuccess": "Your site is live.",
       "publishError": "Could not publish that site. Please try again.",
+      "limitReached": "You have reached your plan’s limit of live sites. Unpublish one or upgrade your plan.",
+      "paidOnly": "Publishing is available on paid plans.",
+      "tooManyToday": "You have published a lot of changes today. Try again tomorrow.",
+      "securityBlocked": "The security check found something that should not go live, so the site was not published.",
       "unpublish": "Unpublish",
       "unpublishSuccess": "Your site is no longer public.",
       "unpublishError": "Could not unpublish that site. Please try again.",
@@ -2948,7 +2952,10 @@
         "questions": "Before I start, a few questions. Answer them in the field, or go on without:",
         "skip": "Go on without",
         "new": "New site",
-        "design": "Design"
+        "design": "Design",
+        "held": "Our safety review held this change back, so the site is as it was.",
+        "busy": "A change to this site is already being made. Wait for it to finish, then say it again.",
+        "offTopic": "Here I make websites. Tell me what site you want: for which business or purpose, which sections, what style."
       },
       "box": {
         "only": "Changing only: {name}",

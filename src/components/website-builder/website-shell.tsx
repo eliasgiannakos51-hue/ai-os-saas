@@ -18,7 +18,7 @@ import { normalisePages } from "@/lib/publishing/website-pages";
 import { PAGE_COUNT_CHOICES, pageRequestBrief } from "@/lib/websites/page-request";
 import { siteDownload } from "@/lib/websites/site-download";
 import { saveBlob } from "@/components/ui/download-pdf-button";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { applyDesignBrief, DEFAULT_DESIGN_CHOICES, type WebsiteDesignChoices } from "@/lib/website-design-brief";
@@ -65,6 +65,13 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * (api/websites/[id]/undo), the download is the whole site
  * (lib/websites/site-download.ts), and what the code did to the site after
  * the model wrote it is said beside the preview, as on the page.
+ *
+ * FAILURES IN THE READER'S LANGUAGE. A refusal or a failure is said from
+ * its status, its code and the site's own notes (lib/errors/use-error-text.ts,
+ * failedText below) — never from the route's `error`, `message` or
+ * `error_message`, which are English sentences for logs and, when the
+ * provider fails, the provider's own JSON. Held by
+ * scripts/tests/site-pages-edges.prodtest.mjs and scripts/tests/site-pages.test.mjs.
  */
 export function WebsiteShell({
   initialWebsites,
@@ -84,6 +91,8 @@ export function WebsiteShell({
   const tNames = useTranslations("dashboard.tools.names");
   const tSteps = useTranslations("aiSteps");
   const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const describe = useErrorText();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
 
@@ -119,6 +128,21 @@ export function WebsiteShell({
   }, []);
 
   const say = (turn: Omit<Turn, "id">) => setTurns((prev) => [...prev, { ...turn, id: `${turn.role}${prev.length}` }]);
+
+  // WHY A SITE WAS NOT MADE, from the row's status and notes. The worker
+  // (api/websites/generate/process) fails a site before the model's work
+  // (a limit, the credit hold) or when the provider fails, and then
+  // releases the hold and charges nothing; a stop carries its own note
+  // with what it cost; a row that failed AFTER a whole document was
+  // written (a held site whose last status write failed) may have been
+  // charged, so it is not promised otherwise.
+  function failedText(record: UserWebsite): string {
+    if (record.status === "flagged") return t("flaggedTitle");
+    const stopped = parseGenerationNotes(record.generation_notes).find((note) => note.kind === "stopped");
+    if (stopped) return describeNote(stopped);
+    const written = looksLikeCompleteHtmlDocument(record.html_content ?? "");
+    return `${t("generateFailed")} ${written ? tErrors("credits.unverified") : tErrors("credits.notCharged")}`;
+  }
   const current = websites.find((w) => w.id === currentId) ?? null;
   const running = isSiteRunning;
   const remembered = useRememberedLine();
@@ -138,7 +162,7 @@ export function WebsiteShell({
           if (fromMemory) say({ role: "tool", text: fromMemory });
           setPane("site");
         } else {
-          say({ role: "tool", text: record.error_message ?? t("generateFailed") });
+          say({ role: "tool", text: failedText(record) });
         }
       },
     });
@@ -155,7 +179,7 @@ export function WebsiteShell({
     try {
       const outcome = await startSiteGeneration({ name, description, skipClarification });
       if (outcome.kind === "refused") {
-        say({ role: "tool", text: getErrorMessage(outcome.error, t("generateFailed")) });
+        say({ role: "tool", text: describe(outcome.error).text });
         return;
       }
       if (outcome.kind === "questions") {
@@ -165,7 +189,7 @@ export function WebsiteShell({
         return;
       }
       if (outcome.kind === "notMade") {
-        say({ role: "tool", text: outcome.message ?? t("generateFailed") });
+        say({ role: "tool", text: outcome.offTopic ? tShell("site.offTopic") : t("generateFailed") });
         return;
       }
       const record = outcome.record;
@@ -176,7 +200,7 @@ export function WebsiteShell({
       say({ role: "tool", text: tShell("site.building", { name: record.name }) });
       poll(record.id);
     } catch (err) {
-      say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : getErrorMessage(err, t("generateFailed")) });
+      say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : t("generateFailed") });
     } finally {
       setBusy(false);
     }
@@ -199,7 +223,11 @@ export function WebsiteShell({
               ? t("editPageGone")
               : outcome.reason === "boxLost"
                 ? tShell("box.lost")
-                : getErrorMessage(outcome.error, t("generateFailed")),
+                : outcome.reason === "held"
+                  ? `${tShell("site.held")} ${tErrors("credits.notCharged")}`
+                  : outcome.reason === "busy"
+                    ? `${tShell("site.busy")} ${tErrors("credits.notCharged")}`
+                    : describe(outcome.error).text,
         });
         return;
       }
@@ -409,7 +437,7 @@ export function WebsiteShell({
                   className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
                 />
               ) : (
-                <p className="text-xs text-muted">{running(current) ? t("generating") : current.error_message ?? t("generateFailed")}</p>
+                <p className="text-xs text-muted">{running(current) ? t("generating") : failedText(current)}</p>
               )}
             </div>
           ),
@@ -430,7 +458,7 @@ export function WebsiteShell({
                       className="w-full min-w-0 text-start"
                     >
                       <p className="break-words text-sm text-foreground">{w.name}</p>
-                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.error_message ?? w.status}</p>
+                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.status === "flagged" ? t("statusFlagged") : t("statusFailed")}</p>
                     </button>
                   </li>
                 ))}

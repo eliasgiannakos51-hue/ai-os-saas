@@ -2154,6 +2154,10 @@
       "publishChanges": "Pubblica le modifiche",
       "publishSuccess": "Il tuo sito è online.",
       "publishError": "Non è stato possibile pubblicare il sito. Riprova.",
+      "limitReached": "Hai raggiunto il limite di siti online del tuo piano. Ritirane uno o passa a un piano superiore.",
+      "paidOnly": "La pubblicazione è disponibile nei piani a pagamento.",
+      "tooManyToday": "Oggi hai pubblicato molte modifiche. Riprova domani.",
+      "securityBlocked": "Il controllo di sicurezza ha trovato qualcosa che non deve andare online, quindi il sito non è stato pubblicato.",
       "unpublish": "Rimuovi",
       "unpublishSuccess": "Il tuo sito non è più pubblico.",
       "unpublishError": "Non è stato possibile rimuovere il sito. Riprova.",
@@ -2948,7 +2952,10 @@
         "questions": "Prima di iniziare, qualche domanda. Rispondi nel campo, o continua senza:",
         "skip": "Continua senza",
         "new": "Nuovo sito",
-        "design": "Aspetto"
+        "design": "Aspetto",
+        "held": "Il nostro controllo di sicurezza ha trattenuto questa modifica: il sito è rimasto com’era.",
+        "busy": "È già in corso una modifica a questo sito. Aspetta che finisca, poi chiedila di nuovo.",
+        "offTopic": "Qui creo siti web. Dimmi che sito vuoi: per quale attività o scopo, quali sezioni, che stile."
       },
       "box": {
         "only": "Cambia solo: {name}",

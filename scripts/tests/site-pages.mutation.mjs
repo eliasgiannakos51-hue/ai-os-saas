@@ -9,7 +9,9 @@
  * with a wrong checksum, or pages that link to nothing; fewer pages than
  * asked passed off in silence; a first version without its pages; the
  * change sent to the home page from another page's tab; a part chosen on
- * one page changing another.
+ * one page changing another; and a failure said in the server's English
+ * on a Greek screen — out of credits, a provider down, a change held back
+ * or still running, a site that was not made.
  *
  * Run: node scripts/tests/site-pages.mutation.mjs
  */
@@ -25,6 +27,11 @@ const DL = "src/lib/websites/site-download.ts";
 const PROC = "src/app/api/websites/generate/process/route.ts";
 const NOTES = "src/lib/website-generation-notes.ts";
 const SHELL = "src/components/website-builder/website-shell.tsx";
+const REQUESTS = "src/lib/website-builder/site-requests.ts";
+const GENERATE = "src/app/api/websites/generate/route.ts";
+const EDIT = "src/app/api/websites/edit/route.ts";
+const PUBLISH = "src/components/publishing/publish-control.tsx";
+const LIVE = "src/components/publishing/published-sites-list.tsx";
 
 const MUTANTS = [
   {
@@ -140,11 +147,109 @@ const MUTANTS = [
     to: "box.siteId === current.id && box.index < boxes.length",
     expect: "a chosen part belongs to its page: another page forgets it",
   },
+  {
+    name: "a site that was not made says the worker's English again",
+    file: SHELL,
+    from: '          say({ role: "tool", text: failedText(record) });',
+    to: '          say({ role: "tool", text: record.error_message ?? failedText(record) });',
+    expect: "no server sentence reaches the conversation: not error_message, not getErrorMessage",
+  },
+  {
+    name: "a refused site says the route's sentence",
+    file: SHELL,
+    from: '        say({ role: "tool", text: describe(outcome.error).text });',
+    to: '        say({ role: "tool", text: outcome.error.message });',
+    expect: "a refusal to make a site is said through the shared error sentences",
+  },
+  {
+    name: "a change held back says nothing about the credits",
+    file: SHELL,
+    from: '                  ? `${tShell("site.held")} ${tErrors("credits.notCharged")}`',
+    to: '                  ? tShell("site.held")',
+    expect: "...and so is a refused change, after its own four reasons",
+  },
+  {
+    name: "a site that failed after it was written is promised free",
+    file: SHELL,
+    from: 'written ? tErrors("credits.unverified") : tErrors("credits.notCharged")',
+    to: 'tErrors("credits.notCharged")',
+    expect: "...free only when no whole document was written; a stop says what it cost",
+  },
+  {
+    name: "out of credits is a site not made, with the server's sentence",
+    file: REQUESTS,
+    from: '    if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data) };\n',
+    to: "",
+    expect: "...a refusal answered 200 is one before any work: short credits, or a limit",
+  },
+  {
+    name: "short credits are said as a limit",
+    file: REQUESTS,
+    from: '  const short = data?.code === "insufficientCredits";',
+    to: '  const short = false;',
+    expect: "...a refusal answered 200 is one before any work: short credits, or a limit",
+  },
+  {
+    name: "a held change is said as an unknown failure",
+    file: REQUESTS,
+    from: '          : data?.flagged === true\n            ? "held"\n',
+    to: '          : false\n            ? "held"\n',
+    expect: "...and a change's refusal names a held change and a busy site",
+  },
+  {
+    name: "making a site without credits does not name the code",
+    file: GENERATE,
+    from: '          rateLimited: true,\n          code: "insufficientCredits",\n          message: insufficientCreditsMessage(check.remaining, estimatedCost),',
+    to: '          rateLimited: true,\n          message: insufficientCreditsMessage(check.remaining, estimatedCost),',
+    expect: "making a site: both credit refusals carry the code",
+  },
+  {
+    name: "a site already being changed is not named",
+    file: EDIT,
+    from: "        busy: true,\n",
+    to: "",
+    expect: "...a site already being changed says so",
+  },
+  {
+    name: "a provider failure on a change is not named",
+    file: EDIT,
+    from: '          code: "upstreamUnavailable",\n',
+    to: "",
+    expect: "...a provider failure is named, and says the hold went back",
+  },
+  {
+    name: "a brief that is not a website shows the classifier's sentence",
+    file: SHELL,
+    from: '        say({ role: "tool", text: outcome.offTopic ? tShell("site.offTopic") : t("generateFailed") });',
+    to: '        say({ role: "tool", text: outcome.message ?? t("generateFailed") });',
+    expect: "a brief that is not a website is said in the reader's words, not the classifier's",
+  },
+  {
+    name: "a refused publish shows the route's English",
+    file: PUBLISH,
+    from: '        addToast(refusalText(response.status, data), "error");',
+    to: '        addToast(data?.error ?? refusalText(response.status, data), "error");',
+    expect: "...and no publishing control shows the route's own sentence",
+  },
+  {
+    name: "the plan's limit is said as a general failure",
+    file: PUBLISH,
+    from: '    if (data?.limitReached === true) return t("limitReached");\n',
+    to: "",
+    expect: "a refused publish is said from what the route names: the plan's limit, paid plans only, the security scan, today's limit",
+  },
+  {
+    name: "a refused rollback on the live sites shows the route's English",
+    file: LIVE,
+    from: '      if (!data.ok) {\n        addToast(t("rollbackError"), "error");',
+    to: '      if (!data.ok) {\n        addToast(data.error ?? t("rollbackError"), "error");',
+    expect: "...and no publishing control shows the route's own sentence",
+  },
 ];
 
 runMutations({
   name: "site-pages",
   gate: GATE,
-  targets: [REQ, UNDO, ROUTE, ZIP, DL, PROC, NOTES, SHELL],
+  targets: [REQ, UNDO, ROUTE, ZIP, DL, PROC, NOTES, SHELL, REQUESTS, GENERATE, EDIT, PUBLISH, LIVE],
   mutants: MUTANTS,
 });

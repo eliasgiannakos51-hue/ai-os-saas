@@ -297,6 +297,9 @@ export async function POST(request: Request) {
             ok: true,
             generated: false,
             rateLimited: true,
+            // The screen says it from this code, in the reader's language
+            // (lib/website-builder/site-requests.ts); `message` is for logs.
+            code: "insufficientCredits",
             message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
           });
         }
@@ -340,7 +343,10 @@ export async function POST(request: Request) {
         // Same reasoning as the clarification branch: the call ran and
         // cost money, so it is settled even though nothing gets generated.
         await settlePrechecks(clarificationRecord);
-        return NextResponse.json({ ok: true, generated: false, message: classification.message });
+        // Named, so the Site says what it makes in the reader's language
+        // (lib/website-builder/site-requests.ts); `message` may be the
+        // classifier's English default.
+        return NextResponse.json({ ok: true, generated: false, offTopic: true, message: classification.message });
       }
     } catch (err) {
       // Best-effort: a classifier hiccup shouldn't block a real website
@@ -391,6 +397,7 @@ export async function POST(request: Request) {
           ok: true,
           generated: false,
           rateLimited: true,
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, estimatedCost),
         });
       }

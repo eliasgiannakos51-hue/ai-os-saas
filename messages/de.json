@@ -2154,6 +2154,10 @@
       "publishChanges": "Änderungen veröffentlichen",
       "publishSuccess": "Ihre Seite ist live.",
       "publishError": "Die Seite konnte nicht veröffentlicht werden. Bitte erneut versuchen.",
+      "limitReached": "Du hast das Limit deines Plans für Live-Websites erreicht. Nimm eine offline oder wechsle zu einem größeren Plan.",
+      "paidOnly": "Veröffentlichen ist in den kostenpflichtigen Plänen enthalten.",
+      "tooManyToday": "Du hast heute viele Änderungen veröffentlicht. Versuche es morgen noch einmal.",
+      "securityBlocked": "Die Sicherheitsprüfung hat etwas gefunden, das nicht online gehen sollte. Die Website wurde nicht veröffentlicht.",
       "unpublish": "Offline nehmen",
       "unpublishSuccess": "Ihre Seite ist nicht mehr öffentlich.",
       "unpublishError": "Die Seite konnte nicht offline genommen werden. Bitte erneut versuchen.",
@@ -2948,7 +2952,10 @@
         "questions": "Bevor ich anfange, ein paar Fragen. Beantworte sie im Feld oder mach ohne weiter:",
         "skip": "Ohne weitermachen",
         "new": "Neue Website",
-        "design": "Design"
+        "design": "Design",
+        "held": "Unsere Sicherheitsprüfung hat diese Änderung zurückgehalten, die Website ist unverändert.",
+        "busy": "An dieser Website wird gerade schon etwas geändert. Warte, bis es fertig ist, und sag es dann noch einmal.",
+        "offTopic": "Hier erstelle ich Websites. Sag mir, welche Website du möchtest: für welches Unternehmen oder welchen Zweck, welche Bereiche, welcher Stil."
       },
       "box": {
         "only": "Nur ändern: {name}",

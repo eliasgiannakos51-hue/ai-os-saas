@@ -1,4 +1,5 @@
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
+import { ApiError } from "@/lib/errors/api-error";
 import type { UserWebsite } from "@/types/user-website";
 
 /**
@@ -16,6 +17,14 @@ import type { UserWebsite } from "@/types/user-website";
  * Client-safe. A network failure is THROWN (a TypeError from fetch), so
  * each screen says it in its own words; everything the server answered is
  * returned as a value.
+ *
+ * A REFUSAL IS AN ApiError (lib/errors/api-error.ts): its status, its code
+ * and whether the credits came back, so a screen says it through
+ * lib/errors/use-error-text.ts in the reader's language. The routes'
+ * `error` and `message` are English sentences for logs and a curl; shown
+ * as they were, a Greek screen read «Not enough credits (you have: 0,
+ * need: 15)» and, when the provider was down, the provider's own JSON
+ * (found 2026-10-08 by scripts/tests/site-pages-edges.prodtest.mjs).
  */
 
 export const SITE_POLL_INTERVAL_MS = 2500;
@@ -26,10 +35,28 @@ export const isSiteRunning = (w: UserWebsite | null | undefined): boolean =>
 export type SiteStart =
   | { kind: "questions"; questions: string[] }
   | { kind: "started"; record: UserWebsite }
-  /** The server answered but made nothing (an off-topic brief, a duplicate refused) — with its sentence. */
-  | { kind: "notMade"; message: string | null }
-  /** Refused: the plan, the credits, the size — `error` is the server's own. */
-  | { kind: "refused"; error: unknown };
+  /**
+   * The server answered but made nothing: a brief that is not a website
+   * (`offTopic`), with the classifier's sentence — which may be its
+   * English default (lib/website-builder.ts, DEFAULT_OFF_TOPIC_MESSAGE).
+   */
+  | { kind: "notMade"; offTopic: boolean; message: string | null }
+  /** Refused: the plan, the credits, today's limit, the size, a failure. */
+  | { kind: "refused"; error: ApiError };
+
+/**
+ * A refusal the routes answer with 200 and `rateLimited` — before any work,
+ * so nothing was charged. Short credits are a 402 in lib/errors/error-codes.ts
+ * terms (the route names them with `code: "insufficientCredits"`); a limit
+ * is a 429.
+ */
+function refusedBeforeWork(data: { code?: unknown; message?: unknown } | null): ApiError {
+  const short = data?.code === "insufficientCredits";
+  return new ApiError(short ? 402 : 429, {
+    error: typeof data?.message === "string" ? data.message : undefined,
+    code: short ? "insufficientCredits" : "rateLimited",
+  });
+}
 
 export async function startSiteGeneration(input: {
   name: string;
@@ -42,9 +69,12 @@ export async function startSiteGeneration(input: {
     body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null };
+  if (!res.ok || !data?.ok) return { kind: "refused", error: new ApiError(res.status, data) };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
-  if (!data.generated) return { kind: "notMade", message: typeof data.message === "string" ? data.message : null };
+  if (!data.generated) {
+    if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data) };
+    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };
+  }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the
   // status is watched below. keepalive so leaving the page does not
@@ -101,8 +131,13 @@ export function watchSite(
 
 export type SiteChange =
   | { kind: "changed"; record: UserWebsite }
-  /** "pageGone": the page was renamed or removed; "boxLost": the chosen part did not come back. */
-  | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown };
+  /**
+   * "pageGone": the page was renamed or removed; "boxLost": the chosen part
+   * did not come back; "held": the safety review kept the change back;
+   * "busy": another change to this site is still being made; "other":
+   * everything else, said from `error`.
+   */
+  | { kind: "refused"; reason: "pageGone" | "boxLost" | "held" | "busy" | "other"; error: ApiError };
 
 /**
  * A change in words. `pageSlug` names the page it is about ("" or absent:
@@ -127,8 +162,13 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
         ? "pageGone"
         : data?.reason === "box_lost" || data?.reason === "bad_section"
           ? "boxLost"
-          : "other";
-    return { kind: "refused", reason, error: data?.error ?? data?.message ?? null };
+          : data?.flagged === true
+            ? "held"
+            : data?.busy === true
+              ? "busy"
+              : "other";
+    const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : new ApiError(res.status, data);
+    return { kind: "refused", reason, error };
   }
   return { kind: "changed", record: data.record as UserWebsite };
 }

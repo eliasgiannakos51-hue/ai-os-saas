@@ -36,7 +36,7 @@ const MUTANTS = [
     file: CHAT,
     from: 'memoryActiveFor({ surface: "chat", user, planLimit: plan.capabilities.chatMemoryLimit })',
     to: "true",
-    expect: "every switch on /dashboard/ai-memory is asked about by some code",
+    expect: "the chat route asks about its own switch",
   },
   {
     // 🔴 THE ONE ASKED FOR. The loader stops scoping to the caller, so

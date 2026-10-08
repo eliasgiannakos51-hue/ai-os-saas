@@ -139,7 +139,7 @@ const MUTANTS = [
     file: GATE,
     from: 'const wanted = p.replace(/\\$\\{[^}]*\\}/g, "*").replace(/\\$\\{.*$/, "");',
     to: 'const wanted = p.replace(/\\$\\{[^}]*\\}/g, "*");',
-    expect: "/dashboard/documents really produces something",
+    expect: "the URL reader finds the PDF route behind its trailing",
   },
   {
     // The comparison itself. Inverted rather than defanged: a defanged

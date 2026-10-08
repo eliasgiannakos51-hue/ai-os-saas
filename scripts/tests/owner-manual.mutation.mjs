@@ -4,7 +4,8 @@
  *
  * A page that moved, a button renamed on screen, a question MASTER asks
  * with no section, a file renamed, an npm script that is not there, a
- * setting name that is not one.
+ * setting name that is not one; a manual that says the product goes to
+ * the next provider where it does not, or leaves out where it does.
  *
  * Run: node scripts/tests/owner-manual.mutation.mjs
  */
@@ -13,6 +14,7 @@ import { runMutations } from "./lib/mutation-runner.mjs";
 const GATE = "scripts/tests/owner-manual.test.mjs";
 const OWNER = "docs/OWNER.md";
 const EL = "messages/el.json";
+const SPELLING = "src/lib/websites-greek-spelling-check.ts";
 
 const MUTANTS = [
   {
@@ -57,6 +59,27 @@ const MUTANTS = [
     to: "`GROQ_KEY`",
     expect: "are ones the code or the key inventory knows",
   },
+  {
+    name: "the manual says every provider failure goes to the next one",
+    file: OWNER,
+    from: "   χρεώνεται, αλλά το Ionexa **δεν** πηγαίνει μόνο του σε άλλον πάροχο.",
+    to: "   χρεώνεται, και το Ionexa πηγαίνει μόνο του στον επόμενο πάροχο.",
+    expect: "...and says what Chat does when its provider fails",
+  },
+  {
+    name: "the manual leaves out a tool that does go to the next provider",
+    file: OWNER,
+    from: "   Coding, οι βοηθοί,",
+    to: "   οι βοηθοί,",
+    expect: "the manual names every one of them",
+  },
+  {
+    name: "a tool the manual names no longer goes to the next provider",
+    file: SPELLING,
+    from: "    const outcome = await runCompletion(",
+    to: "    const outcome = await runCompletionOnce(",
+    expect: "...and every name here is still a caller",
+  },
 ];
 
-runMutations({ name: "owner-manual", gate: GATE, targets: [OWNER, EL], mutants: MUTANTS });
+runMutations({ name: "owner-manual", gate: GATE, targets: [OWNER, EL, SPELLING], mutants: MUTANTS });

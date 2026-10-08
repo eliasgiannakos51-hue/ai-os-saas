@@ -867,6 +867,10 @@ export async function POST(request: Request) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
+          // WHICH refusal, by name: the Chat screen says it in the reader's
+          // language (components/chat/chat-workspace.tsx). The sentence
+          // below is English and stays for any other caller that prints it.
+          reason: "insufficient_credits",
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }

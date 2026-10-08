@@ -684,7 +684,10 @@ export function ChatWorkspace({
           setError(t("attach.refused"));
         } else if (data?.rateLimited) {
           setIsRateLimitNotice(true);
-          setError(data.message);
+          // OUT OF CREDITS, IN THE READER'S LANGUAGE. The route's sentence
+          // is English, and a Free account whose free messages ran out read
+          // it on a Greek screen (scripts/tests/first-task-edges.prodtest.mjs).
+          setError(data.reason === "insufficient_credits" ? describeStatus(402).text : data.message);
         } else {
           setError(describeStatus(res.status).text);
         }

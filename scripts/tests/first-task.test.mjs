@@ -106,5 +106,33 @@ for (const loc of LOCALES) {
   check(`${loc}.json: every word, and no placeholder to escape`, missing.length === 0 && braces.length === 0, [...missing, ...braces].join(", "));
 }
 
+// ---------------------------------------------------------------------
+console.log("\n== 6. on the way there, in the reader's language ==");
+// ---------------------------------------------------------------------
+// Both found on 2026-10-08 by first-task-edges.prodtest.mjs, which reads
+// every text the screen shows from the login page to the answer: the
+// sign-in splash was three English literals, and Chat printed the route's
+// English out-of-credits sentence on a Greek screen.
+const splash = code("src/components/auth/login-splash.tsx");
+check(
+  "the sign-in splash says its three lines from the catalogue",
+  /useTranslations\("auth\.splash"\)/.test(splash) &&
+    /const lines[^=]*=\s*\{\s*loading: t\("loading"\),\s*syncing: t\("syncing"\),\s*ready: t\("ready"\),\s*\};/.test(splash) &&
+    /\{lines\[STEPS\[step\]\]\}/.test(splash)
+);
+for (const loc of LOCALES) {
+  const words = JSON.parse(readFileSync(`messages/${loc}.json`, "utf8")).auth?.splash ?? {};
+  const ok = ["loading", "syncing", "ready"].every((k) => typeof words[k] === "string" && words[k].trim() && !/[{}]/.test(words[k]));
+  check(`${loc}.json: the splash's three lines`, ok && (loc !== "el" || /[\u0370-\u03ff]/.test(words.loading)), JSON.stringify(words));
+}
+check(
+  "Chat's out-of-credits refusal is named, not only an English sentence",
+  /rateLimited: true,\s*reason: "insufficient_credits",\s*message: insufficientCreditsMessage\(/.test(code("src/app/api/chat/route.ts"))
+);
+check(
+  "...and the Chat screen says it in the reader's language",
+  /setError\(data\.reason === "insufficient_credits" \? describeStatus\(402\)\.text : data\.message\);/.test(code("src/components/chat/chat-workspace.tsx"))
+);
+
 console.log(failures.length ? `\nFAILED: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);
 process.exit(failures.length === 0 ? 0 : 1);

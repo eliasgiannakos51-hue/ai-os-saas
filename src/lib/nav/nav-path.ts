@@ -73,6 +73,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "deep-research",
   "documents",
   "favorites",
+  "games",
   "files",
   "form-submissions",
   "images",

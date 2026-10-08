@@ -27,6 +27,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { stripSqlComments } from "../lib/sql-text.mjs";
 import path from "node:path";
 import { loadTs } from "./load-ts.mjs";
+import { callsThroughImport } from "./lib/one-hop.mjs";
 
 let pass = 0;
 const failures = [];
@@ -249,7 +250,9 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
   check(`routes that can reach a provider call (${aiRoutes.length})`, aiRoutes.length >= 20);
 
   const label = (f) => f.replace(path.join("src", "app", "api") + path.sep, "").replace(path.sep + "route.ts", "");
-  const unguarded = aiRoutes.filter((f) => !/checkAiCallAllowed/.test(read(f)));
+  // ...or through a shared step it calls whose own body asks the breaker
+  // (scripts/tests/lib/one-hop.mjs; the game routes, lib/games/charge.ts).
+  const unguarded = aiRoutes.filter((f) => !/checkAiCallAllowed/.test(read(f)) && callsThroughImport(read(f), /\bcheckAiCallAllowed\s*\(/).length === 0);
   console.log(`  ....  ${aiRoutes.length} routes reach a provider call; ${unguarded.length} without checkAiCallAllowed`);
   for (const f of unguarded) console.log(`        ${label(f)}`);
 
@@ -258,7 +261,6 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
   // here for a reason that was read; anything else is a failure.
   const ALLOWED = new Map([
     ["cron/agent-batches", "cron: CRON_SECRET, fires on a schedule, not on demand"],
-    ["cron/agent-runs", "cron: CRON_SECRET, fires on a schedule, not on demand"],
     ["cron/automation-flows", "cron: CRON_SECRET, fires on a schedule, not on demand; every AI box it runs passes checkAiCallAllowed in lib/automations/runner.ts"],
     ["jobs", "GET. imports reapJob for the stale-job sweep; makes no provider call itself"],
     [path.join("jobs", "[id]"), "GET. same — reapJob only"],

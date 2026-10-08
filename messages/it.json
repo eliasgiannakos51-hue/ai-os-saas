@@ -224,7 +224,8 @@
       "personalFinance": "Finanze personali",
       "personalJournal": "Diario",
       "personalLifeOs": "Life OS",
-      "activity": "Attività"
+      "activity": "Attività",
+      "games": "Giochi"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -286,7 +287,8 @@
       "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.",
       "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
       "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.",
-      "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri"
+      "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri",
+      "games": "Descrivi un gioco, cambia il suo piano a parole e giocaci qui, isolato dal tuo account."
     },
     "closeMenu": "Chiudi il menu",
     "rail": {
@@ -2963,7 +2965,8 @@
         "finances": "Finanze",
         "sales": "Vendite",
         "trading": "Trading",
-        "document": "Documento"
+        "document": "Documento",
+        "games": "Giochi"
       }
     },
     "home": {
@@ -3460,6 +3463,45 @@
       "notIncluded": "Il Sito non è incluso nel tuo piano.",
       "unusable": "La risposta non era utilizzabile e non è stato scritto nulla. Si addebita solo quanto speso.",
       "failed": "Non è stato possibile fare la traduzione. Nessun credito addebitato."
+    },
+    "games": {
+      "placeholder": "Descrivi un gioco: cosa fa il giocatore, cosa lo ostacola, come vince…",
+      "placeholderBox": "Di' cosa cambiare in questo riquadro…",
+      "placeholderChange": "Di' cosa cambiare nel gioco, ad es. «un nemico più veloce»…",
+      "boxes": {
+        "rules": "Regole",
+        "levels": "Livelli",
+        "characters": "Personaggi",
+        "controls": "Comandi",
+        "win": "Come si vince"
+      },
+      "boxHint": "Questo è il piano. Premi un riquadro e di' cosa cambiare; cambia solo quello. Quando sei pronto, crea il gioco.",
+      "planned": "Il piano di «{title}» è pronto. Guarda i riquadri a destra.",
+      "boxChanged": "Il riquadro «{box}» è cambiato. Gli altri sono rimasti com'erano.",
+      "build": "Crea il gioco",
+      "building": "Scrittura del gioco…",
+      "built": "Il gioco è pronto. Giocalo a destra e di' cosa cambiare.",
+      "changed": "Cambiato. La nuova versione si gioca a destra; quella prima è conservata.",
+      "restored": "È tornata la versione {n}.",
+      "recent": "I tuoi giochi",
+      "noneYet": "Non hai ancora creato un gioco.",
+      "download": "Scarica il codice",
+      "play": "Il gioco",
+      "sealed": "Si gioca isolato: non vede nulla del tuo account e non va su internet.",
+      "versions": "{count, plural, one {# versione} other {# versioni}}",
+      "version": "Versione {n}",
+      "first": "la prima",
+      "restore": "Ripristina",
+      "errors": {
+        "insufficient": "Crediti insufficienti. Non è stato addebitato nulla.",
+        "unavailable": "Il servizio non risponde in questo momento. Non è stato addebitato nulla.",
+        "unusable": "La risposta non era un gioco giocabile e non è stata conservata. Si addebita solo quanto speso.",
+        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "notIncluded": "I giochi sono inclusi nei piani che hanno il Sito.",
+        "tooLong": "La descrizione è troppo lunga.",
+        "stopped": "Fermato. Non è stato addebitato nulla.",
+        "failed": "Qualcosa è andato storto. Riprova."
+      }
     }
   },
   "module": {
@@ -4186,6 +4228,11 @@
       "is": "Una mappa di tutto Ionexa, in una pagina.",
       "does": "Mostra ogni strumento con una riga su cosa fa, raggruppati per ciò che crei, chiedi, esegui e vedi.",
       "doesNot": "Non è l’unica strada: scrivi cosa vuoi nel campo della Home o premi ⌘K e arrivi allo stesso strumento."
+    },
+    "games": {
+      "is": "Un piccolo gioco tuo, da una descrizione.",
+      "does": "Prima ti mostra il piano in cinque riquadri; cambiane uno a parole, poi scrive il gioco e ci giochi qui, con la tastiera o al tocco.",
+      "doesNot": "Non vede il tuo account e non va su internet: il gioco gira isolato, e così il file che scarichi."
     }
   },
   "helpCentre": {

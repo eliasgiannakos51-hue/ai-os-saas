@@ -163,6 +163,14 @@ export const HELP_TIPS: HelpTip[] = [
     keyPrefix: "help.files",
   },
   {
+    // Package 26. People assume a game made here can see the account it
+    // was made in, or call out to the internet; it can do neither.
+    id: "games",
+    file: "src/app/dashboard/games/page.tsx",
+    keyPrefix: "help.games",
+    corrects: "that a game made here can see your account or reach the internet",
+  },
+  {
     id: "deepResearch",
     file: "src/app/dashboard/deep-research/page.tsx",
     keyPrefix: "help.deepResearch",

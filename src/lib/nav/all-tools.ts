@@ -70,11 +70,12 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/trading": "trading",
   // Shown only behind its switch: SHOWN_BY_SWITCH below.
   "/dashboard/documents": "document",
+  "/dashboard/games": "games",
 };
 
 export type AllToolsNameKey =
   | "site" | "slides" | "posts" | "research" | "analyze" | "files" | "automations" | "projects"
-  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading" | "document";
+  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading" | "document" | "games";
 
 /**
  * A HIDDEN TOOL THAT COMES BACK WITH ITS SWITCH (MASTER 14.1: «Κάθε νέο
@@ -83,8 +84,23 @@ export type AllToolsNameKey =
  * in HIDDEN_FROM_ALL_TOOLS still holds. The page reads the switches
  * (app/dashboard/tools/page.tsx) and hands the grid the hrefs that are on.
  */
-export const SHOWN_BY_SWITCH: Readonly<Record<string, { flag: "document-writer"; group: AllToolsGroupKey }>> = {
+export const SHOWN_BY_SWITCH: Readonly<Record<string, { flag: "document-writer" | "games"; group: AllToolsGroupKey }>> = {
   "/dashboard/documents": { flag: "document-writer", group: "make" },
+  "/dashboard/games": { flag: "games", group: "make" },
+};
+
+/**
+ * A TOOL THAT EXISTS ONLY BEHIND ITS SWITCH (Games, package 26), with no
+ * row in the sidebar's config. That config is also the search (⌘K) and
+ * the records hub, which read no switch: a row there would be a door to
+ * a page that, for everybody the switch does not admit, does not exist.
+ * So its square is described here, and All tools draws it only for those
+ * whose switch is on (SHOWN_BY_SWITCH, app/dashboard/tools/page.tsx).
+ * Pure, like the rest of this file; the grid gives it its icon
+ * (components/tools/tools-grid.tsx SWITCH_ONLY_ICONS).
+ */
+export const SWITCH_ONLY_ITEMS: Readonly<Record<string, { label: string; hintKey: string }>> = {
+  "/dashboard/games": { label: "Games", hintKey: "games" },
 };
 
 /** The hrefs a group draws: its own, then those its switches turned on. */
@@ -98,6 +114,8 @@ export function groupHrefs(group: { key: AllToolsGroupKey; hrefs: readonly strin
  * where 14.1 says so, from Settings or the sidebar.
  */
 export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
+  "/dashboard/games":
+    "without the switch games the page does not exist (package 26); with it on, it is drawn under Make (SHOWN_BY_SWITCH)",
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
   "/dashboard/documents":

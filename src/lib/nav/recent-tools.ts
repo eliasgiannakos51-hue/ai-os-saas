@@ -62,6 +62,8 @@ export type RecentAction = "pin" | "unpin" | "remove";
 export const COMPLETION_TOOLS: Readonly<Record<string, string>> = {
   website_generate: "/dashboard/website-builder",
   website_edit: "/dashboard/website-builder",
+  game_generate: "/dashboard/games",
+  game_edit: "/dashboard/games",
   deep_research: "/dashboard/deep-research",
   research_plan: "/dashboard/deep-research",
   presentation_generate: "/dashboard/presentations",

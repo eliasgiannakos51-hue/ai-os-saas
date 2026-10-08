@@ -68,13 +68,16 @@ console.log("== 0. the population ==");
 check(`the sidebar's tools were read (${allDrawn.length} in ${drawn.length} groups and Settings)`, allDrawn.length >= 20 && drawn.length >= 4);
 
 console.log("\n== 0b. every tool is in exactly one group, or hidden with a reason ==");
-const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS } = await loadTs("src/lib/nav/all-tools.ts");
+const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS, SWITCH_ONLY_ITEMS } = await loadTs("src/lib/nav/all-tools.ts");
 const grouped = ALL_TOOLS_GROUPS.flatMap((g) => g.hrefs);
 const hidden = Object.keys(HIDDEN_FROM_ALL_TOOLS);
 check("the four groups, in the design's order", ALL_TOOLS_GROUPS.map((g) => g.key).join(",") === "make,ask,organise,business");
 // THE POPULATION IS WHAT THE GRID CAN DRAW: the owner's view, which is
 // every member tool plus the owner-only ones, minus the Settings block.
-const ownerTools = drawnFor(true).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href));
+// ...and the tools with no sidebar row, drawn only behind their switch
+// (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS, Games).
+const switchOnly = Object.keys(SWITCH_ONLY_ITEMS);
+const ownerTools = [...drawnFor(true).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href)), ...switchOnly];
 const memberTools = drawnFor(false).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href));
 check(`the population was read (${ownerTools.length} for the owner, ${memberTools.length} for a member)`, ownerTools.length >= memberTools.length && memberTools.length >= 20);
 const unplaced = ownerTools.filter((h) => !grouped.includes(h) && !hidden.includes(h));
@@ -97,7 +100,8 @@ check(
   const flagsSrc = readFileSync("src/lib/flags/flags.ts", "utf8");
   const switched = Object.entries(SHOWN_BY_SWITCH);
   check(`a tool shown by its switch is hidden without it, with its reason (${switched.length})`, switched.length >= 1 && switched.every(([h]) => hidden.includes(h)));
-  check("...its switch is a declared one", switched.every(([, s]) => new RegExp(`"${s.flag}":`).test(flagsSrc)) && (FLAGS === null || switched.every(([, s]) => s.flag in FLAGS)));
+  check("...its switch is a declared one", switched.every(([, s]) => new RegExp(`\\n  (?:"${s.flag}"|${s.flag}): "`).test(flagsSrc)) && (FLAGS === null || switched.every(([, s]) => s.flag in FLAGS)));
+  check("a tool with no sidebar row is drawn only behind a switch, never in a group", switchOnly.every((h) => h in SHOWN_BY_SWITCH && !grouped.includes(h)) && /for \(const \[href, item\] of Object\.entries\(SWITCH_ONLY_ITEMS\)\) if \(!byHref\.has\(href\)\) byHref\.set\(href, \{ href, \.\.\.item, icon: SWITCH_ONLY_ICONS\[href\] \?\? LayoutGrid \}\);/.test(grid) && switchOnly.every((h) => new RegExp(`"${h.replace(/\//g, "\\/")}": [A-Z_]+_ICON`).test(grid)));
   const make = ALL_TOOLS_GROUPS.find((g) => g.key === "make");
   const ask = ALL_TOOLS_GROUPS.find((g) => g.key === "ask");
   check("...with the switch on, it is drawn in its own group, after the group's tools", JSON.stringify(groupHrefs(make, ["/dashboard/documents"])) === JSON.stringify([...make.hrefs, "/dashboard/documents"]));

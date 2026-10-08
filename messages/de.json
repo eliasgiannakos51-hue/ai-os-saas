@@ -224,7 +224,8 @@
       "personalFinance": "Persönliche Finanzen",
       "personalJournal": "Tagebuch",
       "personalLifeOs": "Life OS",
-      "activity": "Aktivität"
+      "activity": "Aktivität",
+      "games": "Spiele"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -286,7 +287,8 @@
       "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
-      "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen"
+      "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen",
+      "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto."
     },
     "closeMenu": "Menü schließen",
     "rail": {
@@ -2963,7 +2965,8 @@
         "finances": "Finanzen",
         "sales": "Vertrieb",
         "trading": "Trading",
-        "document": "Dokument"
+        "document": "Dokument",
+        "games": "Spiele"
       }
     },
     "home": {
@@ -3460,6 +3463,45 @@
       "notIncluded": "Die Website ist in deinem Tarif nicht enthalten.",
       "unusable": "Die Antwort war nicht brauchbar, und nichts wurde geschrieben. Berechnet wird nur, was verbraucht wurde.",
       "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
+    },
+    "games": {
+      "placeholder": "Beschreibe ein Spiel: was der Spieler tut, was ihn aufhält, wie er gewinnt…",
+      "placeholderBox": "Sag, was sich in diesem Kasten ändern soll…",
+      "placeholderChange": "Sag, was sich im Spiel ändern soll, z. B. „ein schnellerer Gegner“…",
+      "boxes": {
+        "rules": "Regeln",
+        "levels": "Level",
+        "characters": "Figuren",
+        "controls": "Steuerung",
+        "win": "Wie man gewinnt"
+      },
+      "boxHint": "Das ist der Plan. Tippe auf einen Kasten und sag, was sich ändern soll; nur er ändert sich. Wenn du so weit bist, erstelle das Spiel.",
+      "planned": "Der Plan für „{title}“ ist fertig. Sieh dir die Kästen rechts an.",
+      "boxChanged": "Der Kasten „{box}“ hat sich geändert. Die anderen sind geblieben.",
+      "build": "Spiel erstellen",
+      "building": "Das Spiel wird geschrieben…",
+      "built": "Das Spiel ist fertig. Spiel es rechts und sag, was sich ändern soll.",
+      "changed": "Geändert. Die neue Version läuft rechts; die vorherige ist gespeichert.",
+      "restored": "Version {n} ist zurück.",
+      "recent": "Deine Spiele",
+      "noneYet": "Du hast noch kein Spiel erstellt.",
+      "download": "Code herunterladen",
+      "play": "Das Spiel",
+      "sealed": "Es läuft abgeschottet: Es sieht nichts von deinem Konto und geht nicht ins Internet.",
+      "versions": "{count, plural, one {# Version} other {# Versionen}}",
+      "version": "Fassung {n}",
+      "first": "die erste",
+      "restore": "Wiederherstellen",
+      "errors": {
+        "insufficient": "Nicht genug Credits. Nichts wurde berechnet.",
+        "unavailable": "Der Dienst antwortet gerade nicht. Nichts wurde berechnet.",
+        "unusable": "Die Antwort war kein spielbares Spiel und wurde nicht behalten. Berechnet wird nur, was verbraucht wurde.",
+        "rateLimited": "Zu viele Anfragen auf einmal. Versuche es gleich noch einmal.",
+        "notIncluded": "Spiele gibt es in den Tarifen mit der Website.",
+        "tooLong": "Die Beschreibung ist zu lang.",
+        "stopped": "Gestoppt. Nichts wurde berechnet.",
+        "failed": "Etwas ist schiefgelaufen. Versuche es erneut."
+      }
     }
   },
   "module": {
@@ -4186,6 +4228,11 @@
       "is": "Eine Karte von ganz Ionexa, auf einer Seite.",
       "does": "Zeigt jedes Werkzeug mit einer Zeile dazu, was es tut – gruppiert danach, was du erstellst, fragst, laufen lässt und ansiehst.",
       "doesNot": "Es ist nicht der einzige Weg: Schreib in das Feld auf der Startseite, was du willst, oder drücke ⌘K – du landest beim selben Werkzeug."
+    },
+    "games": {
+      "is": "Ein eigenes kleines Spiel, aus einer Beschreibung.",
+      "does": "Zuerst zeigt es den Plan in fünf Feldern; ändere jedes davon mit Worten, dann schreibt es das Spiel und du spielst es hier, mit Tastatur oder per Touch.",
+      "doesNot": "Es sieht dein Konto nicht und geht nicht ins Internet: Das Spiel läuft abgeschottet, ebenso die Datei, die du herunterlädst."
     }
   },
   "helpCentre": {

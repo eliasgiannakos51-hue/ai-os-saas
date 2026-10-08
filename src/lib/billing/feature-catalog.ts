@@ -1197,6 +1197,26 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", DOCUMENT_WRITER_MIN_PLAN)",
     cell: (p) => boolCell(p.slug !== "free"),
   },
+  // GAMES (MASTER 16, package 26): a game from a description, played in
+  // the browser and changed with words. The Site's plan — a game is a page
+  // of code written from a description, the Site's own work — enforced in
+  // every games route before anything is spent (lib/games/game-access.ts).
+  // NOT A ROW YET, for documentWriter's reason: the switch "games" admits
+  // the owner and the test account only.
+  {
+    id: "games",
+    group: "make",
+    minPlan: "starter",
+    pages: ["games"],
+    routes: ["games", "games/[id]", "games/[id]/download"],
+    charges: true,
+    notSold:
+      "owner-only for now: the switch games admits the owner and the test account " +
+      "(isFeatureOn in src/lib/games/game-access.ts); the tier is confirmed when it opens to everyone",
+    enforcedIn: "src/lib/games/game-access.ts",
+    enforcedSymbol: 'accountHasCapability(plan?.slug ?? "free", "websiteBuilder", isAdmin)',
+    cell: (p) => boolCell(p.capabilities.websiteBuilder),
+  },
   {
     id: "customDomain",
     group: "make",

@@ -224,7 +224,8 @@
       "personalFinance": "Personal Finance",
       "personalJournal": "Journaling",
       "personalLifeOs": "Life OS",
-      "activity": "Activity"
+      "activity": "Activity",
+      "games": "Games"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -286,7 +287,8 @@
       "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it.",
       "aiMemory": "What the chat has kept about you, and how to remove it.",
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
-      "activity": "Your next step, what changed, your progress and your numbers"
+      "activity": "Your next step, what changed, your progress and your numbers",
+      "games": "Describe a game, change its plan in words, and play it here, sealed off from your account."
     },
     "closeMenu": "Close menu",
     "rail": {
@@ -2963,7 +2965,8 @@
         "finances": "Finances",
         "sales": "Sales",
         "trading": "Trading",
-        "document": "Document"
+        "document": "Document",
+        "games": "Games"
       }
     },
     "home": {
@@ -3460,6 +3463,45 @@
       "notIncluded": "The Site is not included in your plan.",
       "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
       "failed": "The translation could not be made. No credits were charged."
+    },
+    "games": {
+      "placeholder": "Describe a game: what the player does, what stands in the way, how they win…",
+      "placeholderBox": "Say what to change in this box…",
+      "placeholderChange": "Say what to change in the game, e.g. “a faster enemy”…",
+      "boxes": {
+        "rules": "Rules",
+        "levels": "Levels",
+        "characters": "Characters",
+        "controls": "Controls",
+        "win": "How you win"
+      },
+      "boxHint": "This is the plan. Press a box and say what to change; only that box changes. When you are ready, make the game.",
+      "planned": "The plan for “{title}” is ready. See the boxes on the right.",
+      "boxChanged": "The “{box}” box changed. The others are as they were.",
+      "build": "Make the game",
+      "building": "Writing the game…",
+      "built": "The game is ready. Play it on the right, and say what to change.",
+      "changed": "Changed. The new version plays on the right; the one before is kept.",
+      "restored": "Version {n} is back.",
+      "recent": "Your games",
+      "noneYet": "You have not made a game yet.",
+      "download": "Download the code",
+      "play": "The game",
+      "sealed": "It plays sealed off: it sees nothing of your account and does not reach the internet.",
+      "versions": "{count, plural, one {# version} other {# versions}}",
+      "version": "Version {n}",
+      "first": "the first",
+      "restore": "Restore",
+      "errors": {
+        "insufficient": "Not enough credits. Nothing was charged.",
+        "unavailable": "The service is not answering right now. Nothing was charged.",
+        "unusable": "The answer was not a playable game and was not kept. Only what was spent is charged.",
+        "rateLimited": "Too many requests at once. Try again shortly.",
+        "notIncluded": "Games come with the plans that have the Site.",
+        "tooLong": "The description is too long.",
+        "stopped": "Stopped. Nothing was charged.",
+        "failed": "Something went wrong. Try again."
+      }
     }
   },
   "module": {
@@ -4186,6 +4228,11 @@
       "is": "A map of all of Ionexa, on one page.",
       "does": "Shows every tool with one line on what it does, grouped by what you make, ask, run and see.",
       "doesNot": "It is not the only way in: type what you want in the field on Home, or press ⌘K, and you reach the same tool."
+    },
+    "games": {
+      "is": "A small game of your own, from a description.",
+      "does": "It shows you the plan in five boxes first; change any of them in words, then it writes the game and you play it here, with the keyboard or by touch.",
+      "doesNot": "It does not see your account and does not reach the internet: the game plays sealed off, and so does the file you download."
     }
   },
   "helpCentre": {

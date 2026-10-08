@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
+  Gamepad2,
   Bot,
   Brain,
   CalendarClock,
@@ -246,6 +247,9 @@ export const PREDICTIONS_ICON: LucideIcon = Compass;
 // project here is a grouping WITH A GOAL and a state, not a directory,
 // and FolderOpen is already the records hub.
 export const PROJECTS_ICON: LucideIcon = FolderKanban;
+
+// Package 26: Games, the page and its square in All tools.
+export const GAMES_ICON: LucideIcon = Gamepad2;
 
 
 // ONE MARK FOR EVERY POSITION THAT IS ONLY A POSITION.

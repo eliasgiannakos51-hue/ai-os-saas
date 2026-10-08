@@ -224,7 +224,8 @@
       "personalFinance": "Finances personnelles",
       "personalJournal": "Journal",
       "personalLifeOs": "Life OS",
-      "activity": "Activité"
+      "activity": "Activité",
+      "games": "Jeux"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -286,7 +287,8 @@
       "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
       "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
       "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez.",
-      "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres"
+      "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres",
+      "games": "Décrivez un jeu, changez son plan avec des mots et jouez-y ici, isolé de votre compte."
     },
     "closeMenu": "Fermer le menu",
     "rail": {
@@ -2963,7 +2965,8 @@
         "finances": "Finances",
         "sales": "Ventes",
         "trading": "Trading",
-        "document": "Document"
+        "document": "Document",
+        "games": "Jeux"
       }
     },
     "home": {
@@ -3460,6 +3463,45 @@
       "notIncluded": "Le Site n'est pas inclus dans votre offre.",
       "unusable": "La réponse n'était pas utilisable, et rien n'a été écrit. Seul ce qui a été dépensé est débité.",
       "failed": "La traduction n'a pas pu être faite. Aucun crédit n'a été débité."
+    },
+    "games": {
+      "placeholder": "Décrivez un jeu : ce que fait le joueur, ce qui l'en empêche, comment il gagne…",
+      "placeholderBox": "Dites ce qu'il faut changer dans ce bloc…",
+      "placeholderChange": "Dites ce qu'il faut changer dans le jeu, p. ex. « un ennemi plus rapide »…",
+      "boxes": {
+        "rules": "Règles",
+        "levels": "Niveaux",
+        "characters": "Personnages",
+        "controls": "Commandes",
+        "win": "Comment gagner"
+      },
+      "boxHint": "Voici le plan. Appuyez sur un bloc et dites quoi changer ; seul ce bloc change. Quand vous êtes prêt, créez le jeu.",
+      "planned": "Le plan de « {title} » est prêt. Voyez les blocs à droite.",
+      "boxChanged": "Le bloc « {box} » a changé. Les autres sont restés tels quels.",
+      "build": "Créer le jeu",
+      "building": "Écriture du jeu…",
+      "built": "Le jeu est prêt. Jouez à droite et dites ce qu'il faut changer.",
+      "changed": "Modifié. La nouvelle version se joue à droite ; la précédente est conservée.",
+      "restored": "La version {n} est revenue.",
+      "recent": "Vos jeux",
+      "noneYet": "Vous n'avez pas encore créé de jeu.",
+      "download": "Télécharger le code",
+      "play": "Le jeu",
+      "sealed": "Il se joue isolé : il ne voit rien de votre compte et n'accède pas à internet.",
+      "versions": "{count, plural, one {# version du jeu} other {# versions du jeu}}",
+      "version": "Version n° {n}",
+      "first": "la première",
+      "restore": "Restaurer",
+      "errors": {
+        "insufficient": "Pas assez de crédits. Rien n'a été débité.",
+        "unavailable": "Le service ne répond pas pour le moment. Rien n'a été débité.",
+        "unusable": "La réponse n'était pas un jeu jouable et n'a pas été conservée. Seul ce qui a été dépensé est débité.",
+        "rateLimited": "Trop de demandes à la fois. Réessayez dans un instant.",
+        "notIncluded": "Les jeux sont inclus dans les offres qui ont le Site.",
+        "tooLong": "La description est trop longue.",
+        "stopped": "Arrêté. Rien n'a été débité.",
+        "failed": "Un problème est survenu. Réessayez."
+      }
     }
   },
   "module": {
@@ -4186,6 +4228,11 @@
       "is": "Une carte de tout Ionexa, sur une page.",
       "does": "Montre chaque outil avec une ligne sur ce qu’il fait, regroupés selon ce que vous créez, demandez, lancez et consultez.",
       "doesNot": "Ce n’est pas le seul chemin : écrivez ce que vous voulez dans le champ de l’accueil ou appuyez sur ⌘K, et vous arrivez au même outil."
+    },
+    "games": {
+      "is": "Un petit jeu à vous, à partir d'une description.",
+      "does": "Il vous montre d'abord le plan en cinq cases ; changez-en une avec des mots, puis il écrit le jeu et vous y jouez ici, au clavier ou au toucher.",
+      "doesNot": "Il ne voit pas votre compte et n'accède pas à internet : le jeu tourne isolé, tout comme le fichier que vous téléchargez."
     }
   },
   "helpCentre": {

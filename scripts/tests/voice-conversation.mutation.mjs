@@ -26,14 +26,14 @@ const MUTANTS = [
     file: PROVIDERS,
     from: '  const raw = process.env.ELEVENLABS_BASE_URL;\n  if (typeof raw !== "string" || raw.trim() === "") return "https://api.elevenlabs.io/v1";\n  return raw.trim().replace(/\\/+$/, "");',
     to: '  return "https://api.elevenlabs.io/v1";',
-    expect: "a real request reaches the server it names",
+    expect: "the request goes to the server it names",
   },
   {
     name: "a trailing slash is kept",
     file: PROVIDERS,
     from: '  if (typeof raw !== "string" || raw.trim() === "") return "https://api.elevenlabs.io/v1";\n  return raw.trim().replace(/\\/+$/, "");',
     to: '  if (typeof raw !== "string" || raw.trim() === "") return "https://api.elevenlabs.io/v1";\n  return raw.trim();',
-    expect: "a real request reaches the server it names, the trailing slash trimmed",
+    expect: "the request goes to the server it names, the trailing slash trimmed",
   },
   {
     name: "the loop does not listen again after it speaks",

@@ -1,11 +1,12 @@
 // TEAM INVITES, FILE ROWS, PUBLISHED PAGES, AGENTS AND SITES ARE WRITTEN
 // BY THE SERVER ONLY, AGAINST A REAL POSTGRES.
 //
-// supabase/migrations/20261014000000_server_written_tables.sql and
-// 20261015000000_agents_websites_server_written.sql. As the signed-in
-// role, on the account's OWN rows: reading works, inserting and updating
-// do not, and deleting does not either — except a site, which the
-// builder deletes from the browser. As the service role, all of it does.
+// supabase/migrations/20261014000000_server_written_tables.sql,
+// 20261015000000_agents_websites_server_written.sql and
+// 20261024000000_user_games.sql. As the signed-in role, on the account's
+// OWN rows: reading works, inserting and updating do not, and deleting
+// does not either — except a site and a game, which their screens delete.
+// As the service role, all of it does.
 //
 // Run: node scripts/tests/server-written-tables.dbtest.mjs   (needs a
 // database; run through `npm run test:db`, which provisions one)
@@ -54,6 +55,8 @@ sql(`insert into public.team_members (owner_id, member_email, role) values ('${U
 sql(`insert into public.user_files (user_id, filename, file_type, size_bytes, storage_path) values ('${U}', 'a.txt', 'txt', 10, '${U}/a')`);
 sql(`insert into public.published_sites (website_id, user_id, subdomain, html_content) values ('${W}', '${U}', 'server-written-test', '<p>x</p>')`);
 sql(`insert into public.user_agents (user_id, name, prompt, schedule_cron, status, delivery_target) values ('${U}', 'a', 'p', '0 9 * * *', 'paused', 'a@test.local')`);
+const G = "eeeeeeee-0000-0000-0000-0000000008b1";
+sql(`insert into public.user_games (id, user_id, title, plan) values ('${G}', '${U}', 'game', '{"title":"game","boxes":[]}')`);
 
 const CASES = [
   {
@@ -91,6 +94,13 @@ const CASES = [
     update: `update public.user_websites set status = 'completed', attempt_count = 0 where user_id = '${U}'`,
     del: null,
   },
+  {
+    table: "user_games",
+    read: `select count(*) from public.user_games where user_id = '${U}'`,
+    insert: `insert into public.user_games (user_id, title, plan, html) values ('${U}', 'b', '{}', '<html><script>fetch("/x")</script></html>')`,
+    update: `update public.user_games set html = '<html><script>fetch("/x")</script></html>' where user_id = '${U}'`,
+    del: null,
+  },
 ];
 
 for (const c of CASES) {
@@ -108,6 +118,19 @@ for (const c of CASES) {
 console.log("\n== user_websites: the builder still deletes its own site ==");
 const siteDel = asUser(U, `delete from public.user_websites where id = '${W}'`);
 ok("user_websites: delete works", siteDel.ok && sql(`select count(*) from public.user_websites where id = '${W}'`) === "0", siteDel.out);
+
+console.log("\n== user_games: the person deletes a game, and only their own ==");
+const other = "eeeeeeee-0000-0000-0000-000000000802";
+sql(`delete from auth.users where id = '${other}'`);
+sql(`insert into auth.users (id, email) values ('${other}', 'server-written-other@test.local')`);
+sql(`insert into public.user_games (user_id, title, plan) values ('${other}', 'theirs', '{}')`);
+ok("user_games: another person's game is not read", asUser(U, `select count(*) from public.user_games where user_id = '${other}'`).out === "0");
+const theirs = asUser(U, `delete from public.user_games where user_id = '${other}'`);
+ok("user_games: ...nor deleted", theirs.ok && sql(`select count(*) from public.user_games where user_id = '${other}'`) === "1", theirs.out);
+const gameDel = asUser(U, `delete from public.user_games where id = '${G}'`);
+ok("user_games: the person's own is deleted", gameDel.ok && sql(`select count(*) from public.user_games where id = '${G}'`) === "0", gameDel.out);
+sql(`delete from auth.users where id = '${other}'`);
+ok("user_games: a game goes with its account", sql(`select count(*) from public.user_games where user_id = '${other}'`) === "0");
 
 sql(`delete from auth.users where id = '${U}'`);
 

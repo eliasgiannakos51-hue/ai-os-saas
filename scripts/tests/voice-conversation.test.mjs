@@ -6,9 +6,10 @@
 //   SPEECH THAT CAN ONLY GO TO ONE PLACE. Until package 29 the ElevenLabs
 //   address was a constant, so the last step of the loop could not be
 //   pointed at a stand-in and the loop had never run end to end in a
-//   build. Section 1 sends a real request through synthesiseSpeech to a
-//   local server named by ELEVENLABS_BASE_URL, and requires the real
-//   address when it is unset.
+//   build. Section 1 runs synthesiseSpeech with ELEVENLABS_BASE_URL set and
+//   reads the request it makes — address, key, words — at fetch, with no
+//   port opened (billing-coverage.test.mjs: a unit suite binds none); the
+//   browser test sends it to a real local server. Unset, the real address.
 //
 //   A LOOP THAT STOPS AFTER ONE TURN, or speaks before the answer is in,
 //   or keeps the microphone open after it is closed. Section 2 holds the
@@ -16,7 +17,6 @@
 //   (voice-conversation.prodtest.mjs) runs it.
 //
 // Run: node scripts/tests/voice-conversation.test.mjs
-import http from "node:http";
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
@@ -35,33 +35,31 @@ console.log("== 1. speech goes where ELEVENLABS_BASE_URL says, and to ElevenLabs
   ok("unset or blank, it is ElevenLabs' own API", /if \(typeof raw !== "string" \|\| raw\.trim\(\) === ""\) return "https:\/\/api\.elevenlabs\.io\/v1";/.test(providers));
   ok("the speech request is built from it, not from a constant", /fetch\(`\$\{elevenLabsBase\(\)\}\$\{ELEVENLABS_TTS_PATH\}\/\$\{voiceIdFor\(params\.voiceKey\)\}`/.test(providers) && !/https:\/\/api\.elevenlabs\.io\/v1\/text-to-speech/.test(providers));
 
+  // THE REQUEST, CAUGHT AT fetch: what synthesiseSpeech sends, where, with
+  // what — answered with eight bytes of audio, as ElevenLabs answers.
   const asked = [];
-  const server = http.createServer((req, res) => {
-    let body = "";
-    req.on("data", (c) => (body += c));
-    req.on("end", () => {
-      asked.push({ url: req.url, key: req.headers["xi-api-key"], body: JSON.parse(body || "{}") });
-      res.writeHead(200, { "Content-Type": "audio/mpeg" });
-      res.end(Buffer.from([0xff, 0xfb, 0x90, 0xc0, 0, 0, 0, 0]));
-    });
-  });
-  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => {
+    const headers = new Headers(init.headers);
+    asked.push({ url: String(url), key: headers.get("xi-api-key"), body: JSON.parse(String(init.body ?? "{}")) });
+    return new Response(new Uint8Array([0xff, 0xfb, 0x90, 0xc0, 0, 0, 0, 0]), { status: 200, headers: { "Content-Type": "audio/mpeg" } });
+  };
   const saved = { key: process.env.ELEVENLABS_API_KEY, base: process.env.ELEVENLABS_BASE_URL };
   process.env.ELEVENLABS_API_KEY = "test-key";
-  process.env.ELEVENLABS_BASE_URL = `http://127.0.0.1:${server.address().port}/v1/`;
+  process.env.ELEVENLABS_BASE_URL = "http://127.0.0.1:4010/v1/";
   try {
     const V = await loadTs("src/lib/voice/voice-providers.ts");
     const out = await V.synthesiseSpeech({ text: "Ανοίγει στις 8 το πρωί.", voiceKey: "default" });
-    ok("a real request reaches the server it names, the trailing slash trimmed", asked.length === 1 && /^\/v1\/text-to-speech\/[^/]+$/.test(asked[0].url), JSON.stringify(asked.map((a) => a.url)));
+    ok("the request goes to the server it names, the trailing slash trimmed", asked.length === 1 && /^http:\/\/127\.0\.0\.1:4010\/v1\/text-to-speech\/[^/]+$/.test(asked[0].url), JSON.stringify(asked.map((a) => a.url)));
     ok("...with the key, and the words to say", asked[0]?.key === "test-key" && asked[0]?.body?.text === "Ανοίγει στις 8 το πρωί.");
     ok("...and its bytes come back as the audio", out.ok === true && out.audio.byteLength === 8 && out.contentType === "audio/mpeg");
   } catch (err) {
     ok("the speech call ran", false, String(err?.stack ?? err).slice(0, 400));
   } finally {
+    globalThis.fetch = realFetch;
     process.env.ELEVENLABS_API_KEY = saved.key ?? "";
     if (saved.base === undefined) delete process.env.ELEVENLABS_BASE_URL;
     else process.env.ELEVENLABS_BASE_URL = saved.base;
-    server.close();
   }
   ok("the variable is documented where every other one is", /\nELEVENLABS_BASE_URL=\n/.test(readFileSync(".env.local.example", "utf8")));
 }

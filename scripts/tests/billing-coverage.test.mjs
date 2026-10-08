@@ -205,6 +205,11 @@ const DECLARED = {
     billing: "settled",
     note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then.",
   },
+  "src/lib/games/game-call.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing.",
+  },
   "src/lib/posts/generate.ts": {
     calls: 1,
     billing: "settled",

@@ -224,7 +224,8 @@
       "personalFinance": "Finanzas personales",
       "personalJournal": "Diario",
       "personalLifeOs": "Life OS",
-      "activity": "Actividad"
+      "activity": "Actividad",
+      "games": "Juegos"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -286,7 +287,8 @@
       "projects": "Una carpeta con un objetivo. Lo que metes es lo que hay — nada entra solo.",
       "aiMemory": "Lo que el chat ha guardado sobre ti, y cómo borrarlo.",
       "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú.",
-      "activity": "Tu próximo paso, qué ha cambiado, tu progreso y tus cifras"
+      "activity": "Tu próximo paso, qué ha cambiado, tu progreso y tus cifras",
+      "games": "Describe un juego, cambia su plan con palabras y juégalo aquí, aislado de tu cuenta."
     },
     "closeMenu": "Cerrar el menú",
     "rail": {
@@ -2963,7 +2965,8 @@
         "finances": "Finanzas",
         "sales": "Ventas",
         "trading": "Trading",
-        "document": "Documento"
+        "document": "Documento",
+        "games": "Juegos"
       }
     },
     "home": {
@@ -3460,6 +3463,45 @@
       "notIncluded": "El Sitio no está incluido en tu plan.",
       "unusable": "La respuesta no era utilizable y no se escribió nada. Solo se cobra lo gastado.",
       "failed": "No se pudo hacer la traducción. No se cobraron créditos."
+    },
+    "games": {
+      "placeholder": "Describe un juego: qué hace el jugador, qué se lo impide, cómo gana…",
+      "placeholderBox": "Di qué cambiar en esta caja…",
+      "placeholderChange": "Di qué cambiar en el juego, p. ej. «un enemigo más rápido»…",
+      "boxes": {
+        "rules": "Reglas",
+        "levels": "Niveles",
+        "characters": "Personajes",
+        "controls": "Controles",
+        "win": "Cómo se gana"
+      },
+      "boxHint": "Este es el plan. Pulsa una caja y di qué cambiar; solo cambia esa. Cuando estés listo, crea el juego.",
+      "planned": "El plan de «{title}» está listo. Mira las cajas a la derecha.",
+      "boxChanged": "Cambió la caja «{box}». Las demás siguen igual.",
+      "build": "Crear el juego",
+      "building": "Escribiendo el juego…",
+      "built": "El juego está listo. Juégalo a la derecha y di qué cambiar.",
+      "changed": "Cambiado. La nueva versión se juega a la derecha; la anterior se guardó.",
+      "restored": "Ha vuelto la versión {n}.",
+      "recent": "Tus juegos",
+      "noneYet": "Aún no has creado ningún juego.",
+      "download": "Descargar el código",
+      "play": "El juego",
+      "sealed": "Se juega aislado: no ve nada de tu cuenta y no sale a internet.",
+      "versions": "{count, plural, one {# versión} other {# versiones}}",
+      "version": "Versión {n}",
+      "first": "la primera",
+      "restore": "Restaurar",
+      "errors": {
+        "insufficient": "No hay créditos suficientes. No se cobró nada.",
+        "unavailable": "El servicio no responde ahora mismo. No se cobró nada.",
+        "unusable": "La respuesta no era un juego jugable y no se guardó. Solo se cobra lo gastado.",
+        "rateLimited": "Demasiadas solicitudes a la vez. Inténtalo en un momento.",
+        "notIncluded": "Los juegos vienen con los planes que tienen el Sitio.",
+        "tooLong": "La descripción es demasiado larga.",
+        "stopped": "Detenido. No se cobró nada.",
+        "failed": "Algo salió mal. Inténtalo de nuevo."
+      }
     }
   },
   "module": {
@@ -4186,6 +4228,11 @@
       "is": "Un mapa de todo Ionexa, en una página.",
       "does": "Muestra cada herramienta con una línea sobre lo que hace, agrupadas por lo que creas, preguntas, ejecutas y ves.",
       "doesNot": "No es el único camino: escribe lo que quieres en el campo de Inicio o pulsa ⌘K y llegas a la misma herramienta."
+    },
+    "games": {
+      "is": "Un pequeño juego tuyo, a partir de una descripción.",
+      "does": "Primero te muestra el plan en cinco casillas; cambia cualquiera con palabras, luego escribe el juego y lo juegas aquí, con el teclado o al tacto.",
+      "doesNot": "No ve tu cuenta ni sale a internet: el juego se ejecuta aislado, y también el archivo que descargas."
     }
   },
   "helpCentre": {

@@ -54,7 +54,14 @@ const MUTANTS = [
     from: "lg:static lg:z-auto lg:w-[60%] lg:shrink-0",
     to: "lg:static lg:z-auto lg:w-full lg:shrink-0",
     expect: "the work is beside it",
+  },  {
+    name: "on a phone the tab bar is drawn over the work's last 64px",
+    file: SHELL,
+    from: " pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0",
+    to: "",
+    expect: "on a phone the work ends above the tab bar",
   },
+
   {
     name: "no way back from the work on a phone",
     file: SHELL,

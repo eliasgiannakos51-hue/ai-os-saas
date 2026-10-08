@@ -167,6 +167,11 @@ const CLASSIFIED = {
     // is cut again its pieces stay as they were — never a page filled
     // from a list that ends early.
     "src/lib/translate/translate-call.ts",
+    // Package 26. One forced tool call per step: the plan and a box at
+    // PLAN_MAX_TOKENS, the game and a change at GAME_MAX_TOKENS
+    // (lib/games/game-plan.ts). A game cut at max_tokens is refused by
+    // stop_reason as "unusable" — its last script would never close.
+    "src/lib/games/game-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

@@ -395,6 +395,10 @@ const BASELINE = {
   // control is the field's send, OR the old list for everyone else, whose
   // one is "add". Back to 1 when the switch is everyone's and the list goes.
   "dashboard/images/page.tsx": 2,
+  // ONE: the field's send. The page is Games (package 26), born in the
+  // shell; without the switch it does not exist, and without the plan it
+  // is the wall, returned early.
+  "dashboard/games/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.

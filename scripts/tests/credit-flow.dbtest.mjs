@@ -191,7 +191,9 @@ console.log("== 0. the database really is the one the migrations build ==");
 // (package 30). Measured by this line in CI on #271 (got 116).
 // 116 -> 117 on 2026-10-07: 20261022000000_project_flows.sql adds
 // project_flows (package 36).
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 117);
+// 117 -> 118 on 2026-10-08: 20261024000000_user_games.sql adds
+// user_games (package 26); db-migrations.test.mjs moved in the same commit.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 118);
 eq(
   "the credit functions exist",
   Number(

@@ -224,7 +224,8 @@
       "personalFinance": "Finanças pessoais",
       "personalJournal": "Diário",
       "personalLifeOs": "Life OS",
-      "activity": "Atividade"
+      "activity": "Atividade",
+      "games": "Jogos"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -286,7 +287,8 @@
       "projects": "Uma pasta com um objetivo. O que colocas é o que lá está — nada entra sozinho.",
       "aiMemory": "O que o chat guardou sobre si, e como apagar.",
       "meetings": "Transforma uma gravação em transcrição, resumo e ações que escolhes tu.",
-      "activity": "O seu próximo passo, o que mudou, o seu progresso e os seus números"
+      "activity": "O seu próximo passo, o que mudou, o seu progresso e os seus números",
+      "games": "Descreva um jogo, mude o plano com palavras e jogue aqui, isolado da sua conta."
     },
     "closeMenu": "Fechar o menu",
     "rail": {
@@ -2963,7 +2965,8 @@
         "finances": "Finanças",
         "sales": "Vendas",
         "trading": "Trading",
-        "document": "Documento"
+        "document": "Documento",
+        "games": "Jogos"
       }
     },
     "home": {
@@ -3460,6 +3463,45 @@
       "notIncluded": "O Site não está incluído no seu plano.",
       "unusable": "A resposta não era utilizável e nada foi escrito. Só é cobrado o que foi gasto.",
       "failed": "Não foi possível fazer a tradução. Não foram cobrados créditos."
+    },
+    "games": {
+      "placeholder": "Descreva um jogo: o que o jogador faz, o que o impede, como ganha…",
+      "placeholderBox": "Diga o que mudar nesta caixa…",
+      "placeholderChange": "Diga o que mudar no jogo, p. ex. «um inimigo mais rápido»…",
+      "boxes": {
+        "rules": "Regras",
+        "levels": "Níveis",
+        "characters": "Personagens",
+        "controls": "Controlos",
+        "win": "Como se ganha"
+      },
+      "boxHint": "Este é o plano. Prima uma caixa e diga o que mudar; só ela muda. Quando estiver pronto, crie o jogo.",
+      "planned": "O plano de «{title}» está pronto. Veja as caixas à direita.",
+      "boxChanged": "A caixa «{box}» mudou. As outras ficaram como estavam.",
+      "build": "Criar o jogo",
+      "building": "A escrever o jogo…",
+      "built": "O jogo está pronto. Jogue-o à direita e diga o que mudar.",
+      "changed": "Mudou. A nova versão joga-se à direita; a anterior foi guardada.",
+      "restored": "A versão {n} voltou.",
+      "recent": "Os seus jogos",
+      "noneYet": "Ainda não criou nenhum jogo.",
+      "download": "Transferir o código",
+      "play": "O jogo",
+      "sealed": "Joga-se isolado: não vê nada da sua conta e não vai à internet.",
+      "versions": "{count, plural, one {# versão} other {# versões}}",
+      "version": "Versão {n}",
+      "first": "a primeira",
+      "restore": "Restaurar",
+      "errors": {
+        "insufficient": "Créditos insuficientes. Nada foi cobrado.",
+        "unavailable": "O serviço não está a responder agora. Nada foi cobrado.",
+        "unusable": "A resposta não era um jogo jogável e não foi guardada. Só é cobrado o que foi gasto.",
+        "rateLimited": "Demasiados pedidos ao mesmo tempo. Tente daqui a pouco.",
+        "notIncluded": "Os jogos vêm com os planos que têm o Site.",
+        "tooLong": "A descrição é demasiado longa.",
+        "stopped": "Parado. Nada foi cobrado.",
+        "failed": "Algo correu mal. Tente novamente."
+      }
     }
   },
   "module": {
@@ -4186,6 +4228,11 @@
       "is": "Um mapa de todo o Ionexa, numa página.",
       "does": "Mostra cada ferramenta com uma linha sobre o que faz, agrupadas pelo que crias, perguntas, executas e vês.",
       "doesNot": "Não é o único caminho: escreve o que queres no campo do Início ou carrega em ⌘K e chegas à mesma ferramenta."
+    },
+    "games": {
+      "is": "Um pequeno jogo seu, a partir de uma descrição.",
+      "does": "Primeiro mostra o plano em cinco caixas; mude qualquer uma com palavras, depois escreve o jogo e você joga aqui, com o teclado ou pelo toque.",
+      "doesNot": "Não vê sua conta e não acessa a internet: o jogo roda isolado, assim como o arquivo que você baixa."
     }
   },
   "helpCentre": {

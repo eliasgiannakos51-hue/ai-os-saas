@@ -37,6 +37,7 @@
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { loadTs } from "./load-ts.mjs";
+import { callsThroughImport } from "./lib/one-hop.mjs";
 import { stripComments } from "../lib/test-export-drift.mjs";
 
 let pass = 0;
@@ -217,20 +218,43 @@ console.log("\n== an entry that says it is free does not own a route that spends
 // it is a read, and a route that checks affordability and then does
 // nothing has charged nobody.
 const SPENDS = /\b(reserveCredits|settleReservation|deductCredits)\s*\(/;
-const chargingRoutes = routes.filter((r) =>
-  SPENDS.test(readFileSync(`src/app/api/${r}/route.ts`, "utf8"))
-);
+// ONE HOP THROUGH A SHARED STEP (scripts/tests/lib/one-hop.mjs): the
+// game routes charge through lib/games/charge.ts chargedGameStep, and a
+// scan of the route file alone called them free.
+const spendsThroughImport = (src) => callsThroughImport(src, SPENDS).length > 0;
+const chargingRoutes = routes.filter((r) => {
+  const src = readFileSync(`src/app/api/${r}/route.ts`, "utf8");
+  return SPENDS.test(src) || spendsThroughImport(src);
+});
 check(
   `the credit scan found charging routes (${chargingRoutes.length} >= 20)`,
   chargingRoutes.length >= 20
 );
 
+// A ROUTE THAT ONLY SETTLES A HOLD ANOTHER ROUTE TOOK. Seen once the scan
+// followed one hop (2026-10-08); each carries its reason, and is checked
+// both ways below so it cannot outlive the call it excuses.
+const SETTLES_FOR_ANOTHER = {
+  "jobs/[id]/continue":
+    "runs the next step of a background job (lib/jobs/run-job.ts runJob) and settles the hold the route that STARTED the job took — Deep Research and the agent runs, reserved there and declared by their own entries. The person pays for that action; the job queue itself charges nothing new.",
+};
 const understated = [];
 for (const route of chargingRoutes) {
+  if (Object.prototype.hasOwnProperty.call(SETTLES_FOR_ANOTHER, route)) continue;
   const owner = FEATURE_CATALOG.find((f) => f.id === routeOwner.get(route));
   if (owner && !owner.charges) understated.push(`${route} -> ${owner.id} says charges:false`);
 }
 checkEqual("no charging route belongs to an entry declared free", understated, []);
+checkEqual(
+  "every route excused for settling another's hold still settles one",
+  Object.keys(SETTLES_FOR_ANOTHER).filter((r) => !chargingRoutes.includes(r)),
+  []
+);
+checkEqual(
+  "the game routes are seen to charge, through lib/games/charge.ts",
+  ["games", "games/[id]"].filter((r) => !chargingRoutes.includes(r)),
+  []
+);
 
 // The mirror, and it is the half that catches a stale `true` left behind
 // after the credits came out of a feature.

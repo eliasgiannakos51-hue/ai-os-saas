@@ -36,6 +36,7 @@
 // Run: node scripts/tests/route-spend-inventory.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import { callsThroughImport } from "./lib/one-hop.mjs";
 
 const ROOT = process.cwd();
 let pass = 0,
@@ -403,8 +404,10 @@ const CONTINUES_SOMEBODY_ELSES_HOLD = {
   "voice/usage": { bound: "reads_only", why: "reads a usage counter; the provider URL is a constant in voice-providers, imported to say whether voice is configured at all." },
   "system-health/keys": { bound: "reads_only", why: "owner-only; one GET per provider to a model or account LIST, never a generation, and only when the owner presses the button. There is no loop to stop." },
 };
+// ...or through a shared step it calls whose own body reserves
+// (scripts/tests/lib/one-hop.mjs; the game routes, lib/games/charge.ts).
 const unboundModel = modelRoutes
-  .filter((c) => !BOUNDS_ITSELF.test(SOURCE.get(c.route)))
+  .filter((c) => !BOUNDS_ITSELF.test(SOURCE.get(c.route)) && callsThroughImport(SOURCE.get(c.route), /\breserveCredits\s*\(/).length === 0)
   .filter((c) => !CONTINUES_SOMEBODY_ELSES_HOLD[shortName(c.route)])
   .map((c) => shortName(c.route));
 check(

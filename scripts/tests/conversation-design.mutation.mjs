@@ -5,7 +5,8 @@
  * The old icon back beside the answer, the writing answer not speeding
  * up, every old answer animating, the earth gone from the empty state,
  * and the field's controls moving back over the text. Since 2026-10-08:
- * the free-message count back under the empty field, and the first
+ * the free-message count back under the empty field, the used-up line's
+ * icon back on the empty Chat, and the first
  * message's refusal or failure back in the route's English prose.
  *
  * Run: node scripts/tests/conversation-design.mutation.mjs
@@ -30,6 +31,13 @@ const MUTANTS = [
     from: "{freeRemaining !== null && (!isEmpty || freeRemaining === 0) && (",
     to: "{freeRemaining !== null && (",
     expect: "the free-message count waits for a conversation",
+  },
+  {
+    name: "the used-up line keeps its gift icon on the empty Chat",
+    file: WS,
+    from: '{!isEmpty && <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />}',
+    to: '<Gift className="h-3 w-3 text-success/80" aria-hidden="true" />',
+    expect: "that one line has no icon",
   },
   {
     name: "a refusal shows the route's English prose again",

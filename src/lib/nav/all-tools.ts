@@ -86,13 +86,16 @@ export type AllToolsNameKey =
  * lib/flags/flags.ts is on for — the owner and the test account first,
  * everyone once he opens it on /dashboard/system-health — and the page
  * behind it reads the same switch (app/dashboard/images/page.tsx,
- * app/dashboard/integrations/page.tsx). Turning the switch off takes the
- * square away with the tool. `flag` is a plain string so that this file,
- * which the browser loads, imports nothing from lib/flags/flags.ts (it
- * reads the database); scripts/tests/all-tools.test.mjs holds that every
- * one names a switch that exists. Found missing on 2026-10-08: both tools were
- * built (packages 19 and 31) and neither had a square, so opening them to
- * everyone would have left them reachable only by their address and ⌘K.
+ * app/dashboard/integrations/page.tsx, where it is the Connect button).
+ * Turning the switch off takes the square away again. `flag` is a plain
+ * string so that this file, which the browser loads, imports nothing from
+ * lib/flags/flags.ts (it reads the database);
+ * scripts/tests/all-tools.test.mjs holds that every one names a switch
+ * that exists. Found missing on 2026-10-08: both tools were built
+ * (packages 19 and 31) and neither had a square, so opening them to
+ * everyone would have left Image reachable only by its address and ⌘K,
+ * and Connections only from Settings, where 14.1 put Integrations
+ * (app/dashboard/settings/page.tsx).
  */
 export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey; flag: string; name: AllToolsNameKey }[] = [
   { href: "/dashboard/images", group: "make", flag: "image-studio", name: "image" },

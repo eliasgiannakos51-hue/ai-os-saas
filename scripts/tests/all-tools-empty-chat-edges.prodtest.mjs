@@ -426,8 +426,9 @@ try {
       await openChat();
       const used = await extras();
       const exhausted = L.credits.freeChat.exhausted;
-      check(`${tag}: free messages used up: the one line that says so, and nothing more`,
-        Boolean(used) && used.seen.filter((s) => !s.startsWith("svg")).length === 1 && used.seen.some((s) => s.includes(exhausted.slice(0, 40))),
+      // No icon beside it either (MASTER 14.2: «Όχι άλλο εικονίδιο»).
+      check(`${tag}: free messages used up: the one line that says so, with no icon, and nothing more`,
+        Boolean(used) && used.seen.length === 1 && used.seen[0].includes(exhausted.slice(0, 40)),
         JSON.stringify(used?.seen));
       const field = page.locator("form textarea").first();
       const ask = locale === "el" ? "Γράψε μου ένα ποίημα για τη θάλασσα" : "Write me a poem about the sea";

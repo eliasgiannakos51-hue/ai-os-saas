@@ -39,8 +39,9 @@ import { useToast } from "@/components/toast/toast-context";
  *
  * THE NEW TOOLS (MASTER 14.1, lib/nav/all-tools.ts SWITCHED_SQUARES) join
  * their group only for the hrefs the page found switched on for this
- * person (`switchedOn`). Their sidebar rows are hidden, so they are
- * looked up in the whole list rather than in what the sidebar draws.
+ * person (`switchedOn`). Neither is a row of the main groups the grid
+ * draws from — Image's row is hidden, and Integrations sits in the
+ * Settings group — so they are looked up in the whole list.
  */
 export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: boolean; pinned?: string[]; switchedOn?: string[] }) {
   const t = useTranslations("dashboard.tools");
@@ -170,8 +171,10 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const name = label(item);
     const description = hint(item);
     // NO PIN ON A SWITCHED SQUARE: Recent tools (api/nav/recent-tools)
-    // takes only what the sidebar lists, and these rows are hidden there,
-    // so a pin would be refused every time — a button that does nothing.
+    // takes only the visible rows of the main groups, and neither of these
+    // is one (Image's row is hidden, Integrations is in the Settings
+    // group), so a pin would be refused every time — a button that does
+    // nothing.
     const canPin =
       !NEVER_RECENT.includes(item.href) && !item.href.startsWith("/help") && item.href !== "/dashboard/settings" &&
       !SWITCHED_SQUARES.some((s) => s.href === item.href);

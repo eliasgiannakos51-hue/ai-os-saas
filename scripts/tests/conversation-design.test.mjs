@@ -88,6 +88,11 @@ check("the row over the field waits for a conversation, or for a mode already on
 check("the free-message count waits for a conversation, unless the free messages are used up",
   /\{freeRemaining !== null && \(!isEmpty \|\| freeRemaining === 0\) && \(/.test(ws) &&
     (ws.match(/\{freeRemaining !== null &&/g) ?? []).length === 1);
+// The used-up line kept its gift icon on the empty Chat until 2026-10-08
+// (the browser test allowed an svg beside it); MASTER 14.2: «Όχι άλλο
+// εικονίδιο». The icon waits for a conversation with the count.
+check("...and on the empty Chat that one line has no icon",
+  /\{!isEmpty && <Gift className=/.test(ws) && (ws.match(/<Gift\b/g) ?? []).length === 1);
 const chatPage = stripComments(readFileSync("src/app/dashboard/chat/page.tsx", "utf8"));
 check("the page hands it the name Home greets with", /greeting=\{greetingName\(user\.user_metadata\)\}/.test(chatPage));
 

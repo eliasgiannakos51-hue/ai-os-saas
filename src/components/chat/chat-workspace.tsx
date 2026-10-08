@@ -1328,10 +1328,11 @@ export function ChatWorkspace({
               {/* NOT ON THE EMPTY CHAT (MASTER 14.2: «τίποτα άλλο»): the
                   count waits for a conversation. Used up is the one
                   exception — the next message costs credits, and that is
-                  said before it is typed, in one line. */}
+                  said before it is typed, in one line and without the
+                  icon («Όχι άλλο εικονίδιο»). */}
               {freeRemaining !== null && (!isEmpty || freeRemaining === 0) && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
-                  <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />
+                  {!isEmpty && <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />}
                   {freeRemaining > 0
                     ? tFree("remaining", { count: freeRemaining })
                     : tFree("exhausted")}

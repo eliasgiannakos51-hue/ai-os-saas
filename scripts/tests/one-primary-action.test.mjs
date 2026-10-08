@@ -386,7 +386,11 @@ const BASELINE = {
   "dashboard/deep-research/page.tsx": 1,
   "dashboard/documents/page.tsx": 1,
   "dashboard/files/page.tsx": 1,
-  "dashboard/images/page.tsx": 1,
+  // TWO, and never on one screen: the page draws EITHER the Image tool
+  // (package 19, behind the switch "image-studio"), whose one filled
+  // control is the field's send, OR the old list for everyone else, whose
+  // one is "add". Back to 1 when the switch is everyone's and the list goes.
+  "dashboard/images/page.tsx": 2,
   "dashboard/integrations/page.tsx": 1,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.
@@ -506,6 +510,13 @@ const REPLACEMENT_SURFACES = [
     budget: 1,
     walk: true,
     why: "Site in the shell: the field's send builds or changes the site; Publish is outlined, as on the page",
+  },
+  {
+    file: "src/components/automations/automation-shell.tsx",
+    tag: "<AutomationShell",
+    budget: 1,
+    walk: true,
+    why: "Automations in the shell (package 30): the field's send makes an automation or changes the chosen box; try, run, switch on and approve are quiet panels",
   },
 ];
 const replacementFiles = new Set(REPLACEMENT_SURFACES.map((r) => r.file));

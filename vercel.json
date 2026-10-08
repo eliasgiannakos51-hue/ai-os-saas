@@ -13,6 +13,10 @@
       "schedule": "*/15 * * * *"
     },
     {
+      "path": "/api/cron/automation-flows",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/cron/cost-alerts",
       "schedule": "5 * * * *"
     },

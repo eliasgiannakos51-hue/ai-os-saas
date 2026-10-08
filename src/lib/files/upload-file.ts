@@ -3,6 +3,7 @@
 import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 import { FILE_BUCKET, extensionOf } from "@/lib/files/file-types";
 import type { WorkspaceFile } from "@/lib/files/answer";
+import { startQueuedAutomations } from "@/lib/automations/kick";
 
 /** The words an upload can end in, in the reader's language. */
 export type UploadMessages = {
@@ -61,7 +62,9 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path, filename: file.name }),
     });
-    const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile } | null;
+    const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number } | null;
+    // A file that was read may have started automations: they run now, in their own request.
+    if (data?.ok) startQueuedAutomations(data.automations);
     if (data?.ok && data.file) return { ok: true, file: data.file };
     try {
       await createBrowserSupabase().storage.from(FILE_BUCKET).remove([path]);
@@ -75,7 +78,9 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
   const body = new FormData();
   body.append("file", file);
   const response = await fetch("/api/files/upload", { method: "POST", body });
-  const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile } | null;
+  const data = (await response.json().catch(() => null)) as { ok?: boolean; error?: string; file?: WorkspaceFile; automations?: number } | null;
+  // A file that was read may have started automations: they run now, in their own request.
+  if (data?.ok) startQueuedAutomations(data.automations);
   if (data?.ok && data.file) return { ok: true, file: data.file };
   return { ok: false, error: data?.error ?? (response.status === 413 ? words.tooLargeForTransfer : words.error) };
 }

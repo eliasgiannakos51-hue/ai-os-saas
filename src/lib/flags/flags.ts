@@ -23,6 +23,9 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
+  "automations": "Automations as boxes: say it in a sentence, see the boxes, change one with words or by hand, try it without sending anything, and it runs by itself on the server with its history and its cost (MASTER 16, package 30)",
+  "connections": "Connections in one press: a Connect button on every card that opens what the AI will read, Google Calendar as a connection, and Chat answering «τι έχω αύριο;» from it (MASTER 16, package 31)",
+  "image-studio": "Image: four pictures from one description, one of them changed with words, and downloaded at the largest size the provider makes (MASTER 16, package 19)",
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
   "tool-shell": "Every tool in one shell: the conversation on the left, the work on the right, one field and at most four options (MASTER 14.3, package 3)",
   "chat-opens-tools": "Chat opens tools: «φτιάξε μου site για το camping» opens the Site beside the conversation, with its price, and builds it there on one press (MASTER 2.3, package 7)",

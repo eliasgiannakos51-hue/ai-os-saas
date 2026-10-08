@@ -314,11 +314,23 @@ console.log("\n== 5. data minimisation ==");
 // Gmail and Drive are SEPARATE integrations even though they share one
 // Google OAuth client: a user who wants the AI to see their files must not
 // have to hand over their mail to get it.
-check("there are three providers", providers.PROVIDERS.length, 3);
+// Four since package 31 (2026-10-07): Google Calendar, behind its switch.
+check("there are four providers", providers.PROVIDERS.length, 4);
 check(
-  "Gmail and Drive are separate rows",
+  "Gmail, Drive and Calendar are separate rows",
   providers.PROVIDERS.filter((p) => p.oauthFamily === "google").map((p) => p.id),
-  ["gmail", "google_drive"]
+  ["gmail", "google_drive", "google_calendar"]
+);
+check(
+  "Calendar asks for events, read-only — the narrowest calendar scope",
+  providers.PROVIDERS.find((p) => p.id === "google_calendar")?.scopes,
+  ["https://www.googleapis.com/auth/calendar.events.readonly"]
+);
+check(
+  "Calendar is behind a declared switch",
+  providers.PROVIDERS.find((p) => p.id === "google_calendar")?.behindSwitch === "connections" &&
+    /\n  "connections": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")),
+  true
 );
 check("Gmail asks for read-only", providers.getProvider("gmail").scopes, [
   "https://www.googleapis.com/auth/gmail.readonly",
@@ -671,9 +683,11 @@ console.log("\n== the copy offers only what can be connected (2026-10-05) ==");
 {
   // "your mail, your calendar, your files" — and no calendar provider.
   // The population is the provider registry, so a calendar provider that
-  // ships lifts this on its own.
-  const providerIds = [...read("src/lib/integrations/providers.ts").matchAll(/^\s+id: "(\w+)"/gm)].map((m) => m[1]);
-  checkTrue(`providers were read (${providerIds.length})`, providerIds.length >= 3, providerIds.join(", "));
+  // ships lifts this on its own. SHIPS TO EVERYONE: one behind a switch
+  // (Google Calendar, package 31, "connections") is there for the owner
+  // and the test account only, and the empty state is everybody's.
+  const providerIds = providers.PROVIDERS.filter((p) => !p.behindSwitch).map((p) => p.id);
+  checkTrue(`providers open to everyone were read (${providerIds.length})`, providerIds.length >= 3, providerIds.join(", "));
   if (!providerIds.some((id) => /calendar/.test(id))) {
     for (const [locale, word] of [["en", /calendar/i], ["el", /ημερολόγιο/i]]) {
       const body = JSON.parse(read(`messages/${locale}.json`)).dashboard.integrations.emptyBody;

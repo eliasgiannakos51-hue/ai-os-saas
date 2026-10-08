@@ -259,6 +259,7 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
   const ALLOWED = new Map([
     ["cron/agent-batches", "cron: CRON_SECRET, fires on a schedule, not on demand"],
     ["cron/agent-runs", "cron: CRON_SECRET, fires on a schedule, not on demand"],
+    ["cron/automation-flows", "cron: CRON_SECRET, fires on a schedule, not on demand; every AI box it runs passes checkAiCallAllowed in lib/automations/runner.ts"],
     ["jobs", "GET. imports reapJob for the stale-job sweep; makes no provider call itself"],
     [path.join("jobs", "[id]"), "GET. same — reapJob only"],
     [path.join("jobs", "[id]", "continue"), "bounded by claimJob: one claim per job, and the job was created through a route that did check"],

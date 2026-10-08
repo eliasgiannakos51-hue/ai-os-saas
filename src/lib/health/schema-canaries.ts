@@ -413,6 +413,20 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "which remembered facts an answer used is shown when it arrives but not after a reload",
   },
   {
+    kind: "column",
+    table: "generated_images",
+    column: "variants",
+    migration: "20261019000000_generated_images.sql",
+    breaks: "the Image tool makes four pictures, cannot write their row, deletes them again and charges nothing — so it makes nothing at all",
+  },
+  {
+    kind: "column",
+    table: "automation_runs",
+    column: "steps",
+    migration: "20261021000000_automation_flows.sql",
+    breaks: "Automations as boxes (switch \"automations\") cannot save a single automation, so nothing is made, run or shown — and a file upload queues nothing",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

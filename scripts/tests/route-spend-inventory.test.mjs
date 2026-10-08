@@ -233,6 +233,8 @@ const DECLARED = {
   "files/[id]/download": { bound: "limited", scope: "file_download", why: "mints a signed URL; the bytes leave Supabase, not this process" },
   "files/[id]/view": { bound: "limited", scope: "file_download", why: "the same signed URL as the download, opened at a page; the same scope, so the two cannot be added together to mint more" },
   "files/[id]": { bound: "none", why: "DELETE removes an object. Deleting is the cheap direction and refusing to delete costs the user storage they are paying for." },
+  "images/[id]/download": { bound: "limited", scope: "image_download", why: "mints a signed URL to a picture already paid for; the bytes leave Supabase, not this process" },
+  "images/[id]": { bound: "none", why: "DELETE removes the person's own pictures and their row. Deleting is the cheap direction, and refusing it keeps files they asked to be rid of." },
 
   // --- outbound messages: free APIs, but an unbounded relay all the same ---
   "delivery-channels": { bound: "limited", scope: "delivery_channel_test", why: "sends a test message to a caller-supplied address; scope delivery_channel_test" },
@@ -259,6 +261,19 @@ const DECLARED = {
   "websites/storage-usage": { bound: "artefact", why: "sums the bytes the account already stores; the storage read is the sum itself, and it is what the quota screen shows" },
   "integrations/[provider]/connect": { bound: "artefact", why: "mints an OAuth state and redirects; it is rate limited on integration_connect, but nothing here spends, so the limit is not what excuses it" },
   "cron/monthly-credits": { bound: "artefact", why: "cron, guarded by CRON_SECRET; it GRANTS credits rather than consuming anything" },
+
+  // --- automations as boxes (package 30) ---
+  // The runner reserves and settles every AI box itself
+  // (lib/automations/runner.ts), two hops from these routes; what stops a
+  // loop of the ROUTE is named here.
+  "automations/flows/[id]/run": { bound: "limited", scope: "automation_run", why: "«Δοκιμή» and «Εκτέλεση τώρα», started by hand; each AI box is held and settled in the runner against the automation's own limit" },
+  "automations/events": { bound: "limited", scope: "automation_events", why: "runs the caller's own queued file runs, at most three a call; each AI box is held and settled in the runner" },
+  "automations/flows/[id]": { bound: "artefact", why: "edits or deletes the person's own automation row; the telegram URL is in lib/agents/delivery-store.ts, imported to ask WHETHER Telegram is connected" },
+  "automations/flows/[id]/active": { bound: "artefact", why: "switches an automation on or off; same closure — it asks whether Telegram and the calendar are connected, it sends nothing" },
+  "automations/flows/[id]/undo": { bound: "artefact", why: "puts back the previous version of the boxes; same closure as the edit" },
+  "automations/flows/[id]/runs": { bound: "artefact", why: "reads the person's own run history; the closure reaches the delivery store through the shared access module, and nothing is sent" },
+  "automations/runs/[runId]/cancel": { bound: "artefact", why: "cancels the person's own waiting run in one conditional update; nothing is sent or charged" },
+  "cron/automation-flows": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel, bounded per tick and per person, and every AI box is held and settled in the runner on the automation's owner" },
 
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },

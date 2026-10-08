@@ -9,7 +9,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-05">
+    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-07">
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you
@@ -96,7 +96,11 @@ export default function PrivacyPage() {
             <span className="text-foreground/90">Google</span> and{" "}
             <span className="text-foreground/90">Slack</span> — only if you
             connect them: Ionexa reads from them what you ask it to, and
-            sends to Slack what you set an agent to send there.
+            sends to Slack what you set an agent to send there. Google&apos;s
+            Gemini also, only if you use the Image tool: it receives the
+            description you write and, when you change a picture or ask for
+            it at full size, that picture, and makes the pictures. It does
+            not receive your account details.
           </li>
           <li>
             <span className="text-foreground/90">Telegram</span> and{" "}

@@ -58,6 +58,12 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  // The kinds of box in an automation (package 30): "Condition" and
+  // "Action" are the French words, "Start" is the German one (as on
+  // every German start button).
+  "fr:dashboard.automations.kinds.condition",
+  "fr:dashboard.automations.kinds.action",
+  "de:dashboard.automations.kinds.start",
   // "menu" is the French, Italian and Portuguese word for a site's menu
   // too: the name of a box in Site (package 4, dashboard.toolShell.box).
   // The Library's kinds (package 5, 2026-10-07): "Sites", "Documents"
@@ -69,6 +75,13 @@ const LOCALE_ALLOWED = new Set([
   // "page" is the French word for a page too, in the same ICU plural.
   "fr:dashboard.chat.attach.pages",
   "fr:dashboard.toolShell.pages.count",
+  // "image" and "portrait" are the French words too, and "story" is what
+  // the format is called in French apps (the Image tool, MASTER 16, 19).
+  "fr:dashboard.images.name",
+  "fr:dashboard.images.picture",
+  "fr:dashboard.images.chosen",
+  "fr:dashboard.images.aspects.portrait",
+  "fr:dashboard.images.aspects.story",
   "pt:dashboard.chat.sitePane.label",
   "fr:dashboard.library.kinds.site",
   "fr:dashboard.library.kinds.document",

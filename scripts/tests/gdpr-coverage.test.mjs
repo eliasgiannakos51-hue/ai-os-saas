@@ -327,8 +327,20 @@ for (const file of libFiles) {
 }
 check(`the bucket constants were found (${[...buckets].sort().join(", ")})`, buckets.size >= 3);
 
-const eraseMigration = "supabase/migrations/20261005000000_delete_user_storage_objects_all_buckets.sql";
-check("the all-buckets erasure migration exists", existsSync(eraseMigration));
+// THE FUNCTION THE DATABASE RUNS IS THE LAST ONE WRITTEN. 20261005000000
+// introduced it; a later migration that adds a bucket replaces it
+// (20261019000000_generated_images.sql added 'ai-images'), and reading
+// the first one would check a list the database no longer has.
+const ERASE_DEFINITION = /create or replace function public\.delete_user_storage_objects\(/;
+const eraseMigrations = readdirSync("supabase/migrations")
+  .filter((f) => f.endsWith(".sql"))
+  .sort()
+  .filter((f) => ERASE_DEFINITION.test(readFileSync(join("supabase/migrations", f), "utf8")));
+const eraseMigration = eraseMigrations.length > 0 ? join("supabase/migrations", eraseMigrations[eraseMigrations.length - 1]) : "";
+check(
+  `the all-buckets erasure migration exists, and the newest definition is read (${eraseMigrations.join(", ") || "none"})`,
+  eraseMigrations[0] === "20261005000000_delete_user_storage_objects_all_buckets.sql" && existsSync(eraseMigration)
+);
 if (existsSync(eraseMigration) && buckets.size >= 3) {
   const body = readFileSync(eraseMigration, "utf8");
   // The array the function actually deletes from — not the prose above it,

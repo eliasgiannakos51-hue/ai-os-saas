@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       const { status, ...body } = result;
       return NextResponse.json(body, { status });
     }
-    return NextResponse.json({ ok: true, file: result.file });
+    return NextResponse.json({ ok: true, file: result.file, automations: result.automations });
   } catch (err) {
     logApiError("/api/files/register", err, {});
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

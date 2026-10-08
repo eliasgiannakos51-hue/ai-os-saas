@@ -31,7 +31,7 @@ export const MOCK_USER = {
  * server and middleware bundles — they are not read at start time, so the
  * URL baked into the build has to be the one this listens on.
  */
-export async function startMockSupabase({ port = 54341, tableRows = {} } = {}) {
+export async function startMockSupabase({ port = 54341, tableRows = {}, handle = null } = {}) {
   const rowsFor = {
     user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 500, credits_total: 500 }],
     // Without this row dashboard/overview redirects to /onboarding, and
@@ -67,6 +67,10 @@ export async function startMockSupabase({ port = 54341, tableRows = {} } = {}) {
         res.writeHead(code, { "Content-Type": "application/json" });
         res.end(JSON.stringify(data));
       };
+      // A TEST'S OWN ANSWERS, asked first. The Image tool's prodtest signs
+      // and serves pictures from the ai-images bucket this way; everything
+      // it does not answer falls through to the stand-in below.
+      if (handle && handle({ req, res, url, body, json })) return;
       // updateUser({ data }) is a PUT here, and GoTrue MERGES `data` into
       // user_metadata. Kept, so a preference the app writes on the
       // account (src/app/api/nav/recent-tools/route.ts pins a tool there)

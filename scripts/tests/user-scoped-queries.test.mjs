@@ -87,6 +87,11 @@ const ALLOWED = new Map([
     "src/lib/research/run-research.ts::failChunk",
     "Keyed by the reportId this run already loaded and authorised.",
   ],
+  [
+    "src/lib/images/image-access.ts::showImages",
+    "Its query is to storage, for paths read off rows the caller already selected with .eq(\"user_id\", user.id); " +
+      "userId is the owner folder every one of those paths must start with (readVariants), so a path that is not the owner's is never signed.",
+  ],
 ]);
 
 const files = [];

@@ -141,6 +141,10 @@ const CHARGES_A_ROW_OWNER = {
     accounts: ["userId"],
     why: "cron, behind CRON_SECRET. `userId` is read off each scheduled_agent_runs / automation row it found, which IS the account that asked — when they pressed schedule. There is no caller here to charge instead: the caller is Vercel.",
   },
+  "src/lib/automations/runner.ts": {
+    accounts: ["ctx.user.id"],
+    why: "one run of one automation (package 30). `ctx.user` is the automation's OWNER: the signed-in caller on «Δοκιμή», «Εκτέλεση τώρα», «Έγκριση» and api/automations/events (each loads the row with .eq(\"user_id\", user.id)), and the row's user_id on the cron behind CRON_SECRET, whose caller is Vercel. Nobody else's automation reaches it.",
+  },
 };
 
 const CALLER = /^user\.id$|^userId$|^claimed\.user_id$|^params\.userId$/;

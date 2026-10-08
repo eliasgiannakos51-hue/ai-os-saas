@@ -16,6 +16,9 @@ import { loadFavoriteIds } from "@/lib/favorites";
 import { AutomationRealizeList } from "@/components/automation/automation-realize-list";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import type { UserAutomation } from "@/types/user-automation";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { AutomationShell } from "@/components/automations/automation-shell";
+import { loadAutomationPage } from "@/lib/automations/page-data";
 
 // The 12 business modules share this one route, so they shared one
 // COUNT: 12 /^ {4}slug: "/ in src/lib/modules.ts
@@ -38,6 +41,7 @@ export async function generateMetadata(
 export default async function ModulePage(
   props: {
     params: Promise<{ module: string }>;
+    searchParams: Promise<{ run?: string }>;
   }
 ) {
   const params = await props.params;
@@ -54,6 +58,31 @@ export default async function ModulePage(
 
   if (!user) {
     redirect("/login");
+  }
+
+  // AUTOMATIONS AS BOXES (MASTER 16, package 30), behind the switch
+  // "automations": the tool in the shell, INSTEAD of the list below.
+  // Everybody the switch is off for keeps the page they always had, and
+  // the one-sentence automations keep running for everybody — the shell
+  // shows them too, as they were.
+  const isAutomationModule = moduleConfig.slug === "automation";
+  if ((await isFeatureOn("automations", user)) && isAutomationModule) {
+    const searchParams = await props.searchParams;
+    const data = await loadAutomationPage(user, searchParams.run);
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <AutomationShell
+          initialFlows={data.flows}
+          initialRuns={data.runs}
+          initialOpenId={data.openId}
+          initialRunId={data.runId}
+          prices={data.prices}
+          configured={Boolean(process.env.ANTHROPIC_API_KEY)}
+          connected={data.connected}
+          older={data.older}
+        />
+      </div>
+    );
   }
 
   // CAPPED, AND THE PAGE SAYS SO. This read every row the account had
@@ -76,7 +105,6 @@ export default async function ModulePage(
   // sections (Active Automations + "Make this real"), built on top of the
   // shared GenericList rather than inside it, so the other 12 modules are
   // untouched.
-  const isAutomationModule = moduleConfig.slug === "automation";
   let userAutomations: UserAutomation[] = [];
   if (isAutomationModule) {
     const { data: automationRows } = await supabase

@@ -91,8 +91,8 @@ export const KEY_INVENTORY: KeyEntry[] = [
     label: "Google Gemini",
     envVars: ["GOOGLE_API_KEY", "GEMINI_API_KEY"],
     roles: ["Nano Banana Pro: images", "Veo 3.1: video", "failover for text"],
-    readBy: ["src/lib/ai/providers/registry.ts"],
-    missing: "Not set in Vercel as of 2026-10-03. Images and video have no adapter in src/ yet.",
+    readBy: ["src/lib/ai/providers/registry.ts", "src/lib/images/gemini-image.ts"],
+    missing: "Not set in Vercel as of 2026-10-03. Images: src/lib/images/gemini-image.ts, behind the switch image-studio (2026-10-07). Video has no adapter in src/ yet.",
     check: {
       url: "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
       headers: (key) => ({ "x-goog-api-key": key }),
@@ -122,7 +122,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     envVars: ["BFL_API_KEY"],
     roles: ["photorealistic images"],
     readBy: [],
-    missing: "No adapter; the Images page has no generator. The owner's decision of 2026-10-03 routes images through Gemini first.",
+    missing: "No adapter. The owner's decision of 2026-10-03 routes images through Gemini first, and the Image tool does (src/lib/images/gemini-image.ts).",
     check: { url: "https://api.bfl.ai/v1/credits", headers: (key) => ({ "x-key": key }) },
   },
   {

@@ -186,7 +186,6 @@ const relyOnLayout = dashboardPages.filter((p) => !guards(p));
 const STANDS_ON_THE_LAYOUT = {
   "src/app/dashboard/apps/page.tsx": "a BuildModulePage shell: it renders a config and reads no table on the server, so there is nothing an unauthenticated render could disclose.",
   "src/app/dashboard/campaigns/page.tsx": "the same shell, the same config-only render.",
-  "src/app/dashboard/images/page.tsx": "the same shell.",
   "src/app/dashboard/videos/page.tsx": "the same shell.",
   "src/app/dashboard/websites/page.tsx": "the same shell.",
   "src/app/dashboard/memory/page.tsx": "a 308 to /dashboard/search and nothing else — a kept address for old bookmarks. It has no body to protect, and the page it forwards to resolves and refuses.",

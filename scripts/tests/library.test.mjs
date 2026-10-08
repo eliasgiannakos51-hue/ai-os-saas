@@ -76,6 +76,7 @@ const PART_OF_ANOTHER = {
 // to the person — and is nobody's made thing.
 const BOOKKEEPING = {
   agent_runs: "a log of an agent's run",
+  automation_runs: "a log of an automation's run; what it saves goes to the Library as a user_documents row",
   ai_jobs: "the queue a long job runs through",
   ai_provider_log: "which model answered, for the owner",
   credit_transactions: "credits spent",

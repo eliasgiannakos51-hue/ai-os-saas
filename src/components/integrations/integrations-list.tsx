@@ -32,6 +32,8 @@ export function IntegrationsList({
   integrations,
   cap,
   configured,
+  shown,
+  connectButton = false,
   encryptionReady,
 }: {
   integrations: IntegrationSummary[];
@@ -39,6 +41,12 @@ export function IntegrationsList({
   cap: number;
   /** Providers whose OAuth app is set up on this deployment. */
   configured: ProviderId[];
+  /** Providers this person may see — those behind a closed switch are left
+   *  out on the server (lib/integrations/switches.ts). */
+  shown: ProviderId[];
+  /** The switch "connections" (package 31): Connect is a button on the
+   *  card, not an item in its menu. It opens the same consent step. */
+  connectButton?: boolean;
   /** False when INTEGRATION_ENCRYPTION_KEY is missing — connecting is
    *  refused server-side, and saying so here beats a 503 after a redirect. */
   encryptionReady: boolean;
@@ -77,8 +85,8 @@ export function IntegrationsList({
 
   const rows = useMemo(() => {
     const q = query.trim();
-    return PROVIDERS.filter((p) => matchesSearch(p.name, q));
-  }, [query]);
+    return PROVIDERS.filter((p) => shown.includes(p.id) && matchesSearch(p.name, q));
+  }, [query, shown]);
 
   async function disconnect(provider: ProviderId, name: string) {
     if (!window.confirm(t("confirmDisconnect", { name }))) return;
@@ -234,6 +242,22 @@ export function IntegrationsList({
                       <p className="text-[11px] text-warning/80">{t("providerUnavailable")}</p>
                     )}
                   </div>
+                  {/* ONE PRESS TO WHAT IT WILL READ (MASTER 16, package 31):
+                      the consent step is the next thing on screen, and from
+                      there one more press is Google's own window. */}
+                  {connectButton && !isConnected && (
+                    <button
+                      type="button"
+                      disabled={!isAvailable}
+                      onClick={() => setConsentFor(provider.id)}
+                      aria-label={t("connectTo", { name: provider.name })}
+                      data-testid="integration-connect"
+                      className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 text-xs font-medium text-foreground transition-colors duration-200 hover:bg-panel-hover disabled:opacity-50"
+                    >
+                      <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      {t("connect")}
+                    </button>
+                  )}
                 </EntityCard>
               );
             })}

@@ -4,6 +4,7 @@ import { logApiError } from "@/lib/log-error";
 import { getUsableAccessToken, recordSync } from "@/lib/integrations/store";
 import type { ProviderId } from "@/lib/integrations/providers";
 import { matchesSearch } from "@/lib/text/search-match";
+import { calendarWindow } from "@/lib/integrations/calendar-window";
 
 // Reading the user's real data.
 //
@@ -347,14 +348,71 @@ export async function listSlackChannels(
 }
 
 // ---------------------------------------------------------------------
+// Google Calendar (read-only, events only). MASTER 16, package 31.
+// ---------------------------------------------------------------------
+
+type CalendarTime = { dateTime?: string; date?: string };
+const whenOf = (t: CalendarTime | undefined): string => t?.dateTime ?? t?.date ?? "";
+
+/**
+ * Events in a period, the soonest first. DATA MINIMISATION as for Gmail:
+ * the title, the time, the place and the organiser — never the
+ * description, which is the free text any invitation's sender writes and
+ * the likeliest place for words addressed to an AI.
+ */
+export async function readCalendar(
+  accessToken: string,
+  query: string,
+  limit: number,
+  period: { from?: unknown; to?: unknown } = {}
+): Promise<ReadResult> {
+  const { timeMin, timeMax } = calendarWindow(period.from, period.to);
+  const url = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+  url.searchParams.set("timeMin", timeMin);
+  url.searchParams.set("timeMax", timeMax);
+  url.searchParams.set("singleEvents", "true");
+  url.searchParams.set("orderBy", "startTime");
+  url.searchParams.set("maxResults", String(limit));
+  url.searchParams.set("fields", "items(id,summary,start,end,location,htmlLink,organizer(displayName,email),status)");
+  // "*" or nothing: everything in the period, which is what a question
+  // about a day usually wants.
+  const words = query.trim();
+  if (words && words !== "*") url.searchParams.set("q", words);
+
+  const result = await apiGet(url.toString(), accessToken);
+  if (!result.ok) return result;
+  const events = Array.isArray(result.json.items) ? (result.json.items as Record<string, unknown>[]) : [];
+  return {
+    ok: true,
+    items: events
+      .filter((event) => event.status !== "cancelled")
+      .slice(0, limit)
+      .map((event) => {
+        const start = whenOf(event.start as CalendarTime | undefined);
+        const end = whenOf(event.end as CalendarTime | undefined);
+        const organizer = (event.organizer ?? {}) as { displayName?: string; email?: string };
+        return {
+          source: "google_calendar" as const,
+          title: clip(event.summary) || "(no title)",
+          from: clip(organizer.displayName || organizer.email, 120) || undefined,
+          date: clip(end ? `${start} → ${end}` : start, 80),
+          snippet: typeof event.location === "string" && event.location.trim() ? clip(`at: ${event.location}`, 200) : undefined,
+          link: typeof event.htmlLink === "string" ? event.htmlLink : undefined,
+        };
+      }),
+  };
+}
+
+// ---------------------------------------------------------------------
 // The one entry point everything above the integration layer uses.
 // ---------------------------------------------------------------------
 
-export type SearchSource = "email" | "files" | "slack";
+export type SearchSource = "email" | "files" | "calendar" | "slack";
 
 const SOURCE_TO_PROVIDER: Record<SearchSource, ProviderId> = {
   email: "gmail",
   files: "google_drive",
+  calendar: "google_calendar",
   slack: "slack",
 };
 
@@ -363,6 +421,8 @@ export async function searchUserData(params: {
   source: SearchSource;
   query: string;
   limit?: number;
+  /** The days a calendar read covers (calendarWindow); ignored elsewhere. */
+  period?: { from?: unknown; to?: unknown };
   /** What caused the read, for the user-visible audit trail. */
   trigger: "chat" | "agent" | "life_context" | "manual";
 }): Promise<ReadResult> {
@@ -379,6 +439,7 @@ export async function searchUserData(params: {
   try {
     if (provider === "gmail") result = await readGmail(token.accessToken, query, limit);
     else if (provider === "google_drive") result = await readDrive(token.accessToken, query, limit);
+    else if (provider === "google_calendar") result = await readCalendar(token.accessToken, query, limit, params.period);
     else result = await readSlack(token.accessToken, query, limit);
   } catch (err) {
     // The provider payload never reaches the log — only the fact of a
@@ -457,6 +518,16 @@ export async function fetchAccountLabel(
       if (!result.ok) return null;
       const user = (result.json.user ?? {}) as { emailAddress?: string };
       return typeof user.emailAddress === "string" ? user.emailAddress : null;
+    }
+    if (provider === "google_calendar") {
+      // The primary calendar's own name is its owner's address, and the
+      // events scope can read it from an empty page of events.
+      const result = await apiGet(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1&fields=summary",
+        accessToken
+      );
+      if (!result.ok) return null;
+      return typeof result.json.summary === "string" ? result.json.summary : null;
     }
     // Slack's workspace name already arrived in the token response and is
     // stored as metadata.team_name, so there is nothing extra to fetch.

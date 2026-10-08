@@ -17,6 +17,8 @@ import { encryptionAvailable } from "@/lib/integrations/crypto";
 import { providerConfigured } from "@/lib/integrations/oauth";
 import { PROVIDERS, type ProviderId } from "@/lib/integrations/providers";
 import { IntegrationsList } from "@/components/integrations/integrations-list";
+import { providersOpenTo } from "@/lib/integrations/switches";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +55,9 @@ export default async function IntegrationsPage() {
   // client component must never learn which secrets exist. What crosses is
   // a list of provider IDS, which is public information.
   const configured = PROVIDERS.map((p) => p.id).filter((id: ProviderId) => providerConfigured(id));
+  // Providers behind a closed switch are not drawn (lib/integrations/switches.ts).
+  const open = await providersOpenTo(user);
+  const shown = PROVIDERS.map((p) => p.id).filter((id) => open.has(id));
 
   const integrations = await listIntegrations(user.id);
   const cap = isAdmin ? Number.POSITIVE_INFINITY : planCap;
@@ -77,6 +82,8 @@ export default async function IntegrationsPage() {
             integrations={integrations}
             cap={cap}
             configured={configured}
+            shown={shown}
+            connectButton={await isFeatureOn("connections", user)}
             encryptionReady={encryptionAvailable()}
           />
         </Suspense>

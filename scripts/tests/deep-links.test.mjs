@@ -262,7 +262,12 @@ for (const l of favLinks) {
 // /dashboard/timeline?view=entries; each read by the page it points at.
 // 58 -> 59 (2026-10-07): the Site opened beside Chat (package 7) links to
 // /dashboard/website-builder?brief= before a site exists; read by that page.
-const DEEP_LINK_FLOOR = 59;
+// 59 -> 60 (2026-10-07): the Image tool (package 19) saves a picture
+// through /api/images/<id>/download?variant=, read by that route.
+// 60 -> 61 (2026-10-07): an automation waiting for approval notifies
+// with /dashboard/automation?run=<id> (lib/automations/runner.ts), read
+// by lib/automations/page-data.ts through the module page (package 30).
+const DEEP_LINK_FLOOR = 61;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

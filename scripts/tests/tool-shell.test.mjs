@@ -94,7 +94,13 @@ for (const f of users) {
   check(`${component}: drawn by a page (${callers.length})`, callers.length >= 1);
   for (const p of callers) {
     const src = read(p);
-    const gate = src.indexOf('if (await isFeatureOn("tool-shell", user)) {');
+    // "tool-shell" for a tool that moved into the shell, or — for a tool
+    // that was BORN in it, with no old body of its own — that tool's own
+    // declared switch (the Image tool, "image-studio", package 19). Either
+    // way a switch, read before the shell is drawn.
+    const switchAt = /if \((?:\(?await isFeatureOn\("([a-z-]+)", user\)\)?)(?: && [^{]+)?\) \{/.exec(src);
+    const switchKey = switchAt?.[1] ?? "";
+    const gate = switchAt && (switchKey === "tool-shell" || new RegExp(`\\n  "${switchKey}": "`).test(flags)) ? switchAt.index : -1;
     const drawn = src.indexOf(`<${component}`);
     const lastReturn = src.lastIndexOf("return (");
     check(`${p}: only behind the switch, and INSTEAD of the old body`,

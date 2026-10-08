@@ -5,6 +5,8 @@ import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X,
 import { Earth } from "@/components/brand/earth";
 import { useLocale, useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { ApiError } from "@/lib/errors/api-error";
+import { isErrorCode } from "@/lib/errors/error-codes";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -683,8 +685,12 @@ export function ChatWorkspace({
         } else if (data?.reason === "bad_attachments") {
           setError(t("attach.refused"));
         } else if (data?.rateLimited) {
+          // IN THE READER'S LANGUAGE (2026-10-08): the route's `message`
+          // is English prose, and a Greek screen showed it as it was. The
+          // route names the case in `code`; refused before anything ran,
+          // so nothing was charged (a 4xx to creditOutcomeForStatus).
           setIsRateLimitNotice(true);
-          setError(data.message);
+          setError(isErrorCode(data.code) ? describe(new ApiError(429, { code: data.code })).text : data.message);
         } else {
           setError(describeStatus(res.status).text);
         }
@@ -771,7 +777,16 @@ export function ChatWorkspace({
             });
           }
         } else if (event.type === "error") {
-          streamError = describeStatus(500).text;
+          // WHAT THE ROUTE KNOWS, SAID (lib/errors/error-codes.ts): no
+          // credits for the hold, or the AI service did not answer and
+          // nothing was kept — and the free message it gave back.
+          if (typeof event.freeRemaining === "number") setFreeRemaining(event.freeRemaining);
+          streamError =
+            event.outOfCredits === true
+              ? describeStatus(402).text
+              : event.code === "upstreamUnavailable"
+                ? describeStatus(503, event.creditsRefunded === true).text
+                : describeStatus(500).text;
         }
       });
 
@@ -1310,7 +1325,11 @@ export function ChatWorkspace({
                   {tFree("largeMessage", { count: largeMessageCredits })}
                 </p>
               )}
-              {freeRemaining !== null && (
+              {/* NOT ON THE EMPTY CHAT (MASTER 14.2: «τίποτα άλλο»): the
+                  count waits for a conversation. Used up is the one
+                  exception — the next message costs credits, and that is
+                  said before it is typed, in one line. */}
+              {freeRemaining !== null && (!isEmpty || freeRemaining === 0) && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
                   <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />
                   {freeRemaining > 0

@@ -48,8 +48,12 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
  * THE ONE-WORD NAME ON EACH SQUARE (MASTER Μέρος 14.1, 2026-10-07: «Μεγάλα
  * τετράγωνα: εικονίδιο, όνομα μίας λέξης, μία γραμμή», and the names it
  * lists). The value is the key under dashboard.tools.names in
- * messages/*.json; the grid reads it through a literal map, so the
- * message slicer can bound it. "Mine" is Library and "What it remembers"
+ * messages/*.json, and under dashboard.tools.lines for the one line under
+ * it — short enough to keep the square a square on a 390px phone, where
+ * the sidebar's longer hints made two of them taller than wide (measured
+ * 2026-10-08, scripts/tests/all-tools-empty-chat-edges.prodtest.mjs). The
+ * grid reads both through literal maps, so the message slicer can bound
+ * them. "Mine" is Library and "What it remembers"
  * is Memory from here on.
  */
 export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
@@ -72,7 +76,28 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
 
 export type AllToolsNameKey =
   | "site" | "slides" | "posts" | "research" | "analyze" | "files" | "automations" | "projects"
-  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading";
+  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading"
+  | "image" | "connections";
+
+/**
+ * THE NEW TOOLS, EACH BEHIND ITS OWN SWITCH (MASTER Μέρος 14.1: «Κάθε νέο
+ * εργαλείο μπαίνει εδώ μόλις γίνει λειτουργικό: Image, … Connections»).
+ * A square here is drawn for exactly the people its switch in
+ * lib/flags/flags.ts is on for — the owner and the test account first,
+ * everyone once he opens it on /dashboard/system-health — and the page
+ * behind it reads the same switch (app/dashboard/images/page.tsx,
+ * app/dashboard/integrations/page.tsx). Turning the switch off takes the
+ * square away with the tool. `flag` is a plain string so that this file,
+ * which the browser loads, imports nothing from lib/flags/flags.ts (it
+ * reads the database); scripts/tests/all-tools.test.mjs holds that every
+ * one names a switch that exists. Found missing on 2026-10-08: both tools were
+ * built (packages 19 and 31) and neither had a square, so opening them to
+ * everyone would have left them reachable only by their address and ⌘K.
+ */
+export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey; flag: string; name: AllToolsNameKey }[] = [
+  { href: "/dashboard/images", group: "make", flag: "image-studio", name: "image" },
+  { href: "/dashboard/integrations", group: "organise", flag: "connections", name: "connections" },
+];
 
 /**
  * Hidden from All tools, each with the reason. NOTHING HERE IS REMOVED:

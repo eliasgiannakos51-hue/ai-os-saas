@@ -310,8 +310,8 @@ const MUTANTS = [
   {
     name: "the Settings block comes back onto All tools",
     file: TOOLS_PAGE,
-    from: 'import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
-    to: 'import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    from: 'import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    to: 'import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
     expect: "All tools draws the main groups' tools only",
   },
 

@@ -430,7 +430,7 @@ export async function POST(request: Request) {
       fingerprintRequest(message, conversationId, String(mentorMode), mentorPreset)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, rateLimited: true, message: breakerCheck.reason });
+      return NextResponse.json({ ok: true, rateLimited: true, code: breakerCheck.code, message: breakerCheck.reason });
     }
 
     const plan = await resolveEffectivePlan(user);
@@ -867,6 +867,9 @@ export async function POST(request: Request) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
+          // The case by name, so the screen says it in its own language
+          // (components/chat/chat-workspace.tsx); the prose is for logs.
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
@@ -1400,7 +1403,16 @@ export async function POST(request: Request) {
           if (isFreeMessage) await releaseFreeChatMessage(user.id);
           const errMessage = err instanceof Error ? err.message : "Chat request failed.";
           controller.enqueue(
-            ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
+            ndjsonLine({
+              type: "error",
+              error: `${errMessage} No credits were charged — please try again.`,
+              // Said as values too, so the screen says it in its language:
+              // the AI service failed, nothing was kept, and the free
+              // message is back.
+              code: "upstreamUnavailable",
+              creditsRefunded: true,
+              freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining + 1 : undefined,
+            })
           );
           controller.close();
           return;
@@ -1422,6 +1434,9 @@ export async function POST(request: Request) {
             ndjsonLine({
               type: "error",
               error: "The model did not return a response. No credits were charged — please try again.",
+              code: "upstreamUnavailable",
+              creditsRefunded: true,
+              freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining + 1 : undefined,
             })
           );
           controller.close();

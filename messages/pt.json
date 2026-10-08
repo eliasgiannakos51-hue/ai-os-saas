@@ -667,7 +667,16 @@
       "deleting": "A eliminar…",
       "confirmButton": "Eliminar permanentemente a tua conta",
       "cancel": "Cancelar e voltar",
-      "confirmFailed": "Não conseguimos concluir a eliminação. A tua conta continua a existir — tenta o link outra vez ou contacta o apoio."
+      "confirmFailed": "Não conseguimos concluir a eliminação. A tua conta continua a existir — tenta o link outra vez ou contacta o apoio.",
+      "errors": {
+        "rate_limited": "Demasiadas tentativas. Tenta outra vez mais tarde.",
+        "invalid_request": "Este link está incompleto. Usa o link do teu email exatamente como foi enviado.",
+        "link_invalid": "Este link não é válido ou expirou. Podes pedir um novo nas Configurações.",
+        "retry": "Algo correu mal. Tenta outra vez.",
+        "contact_support": "Não conseguimos eliminar a conta. Contacta o apoio.",
+        "files_retry": "Não conseguimos eliminar os ficheiros desta conta, por isso a conta não foi eliminada. O teu link continua a funcionar — tenta outra vez.",
+        "subscription_retry": "Não conseguimos cancelar a subscrição desta conta, por isso nada foi eliminado. O teu link continua a funcionar — tenta outra vez."
+      }
     },
     "generateStrongPassword": "Gerar senha forte",
     "verifyEmail": {

@@ -1,6 +1,6 @@
 -- ---------------------------------------------------------------------------
 -- GOOGLE CALENDAR AS A CONNECTION (2026-10-07, MASTER 16 package 31, behind
--- the switch "google-calendar").
+-- the switch "connections").
 --
 -- user_integrations.provider was checked against three names since the
 -- baseline (gmail, google_drive, slack). The Calendar connection

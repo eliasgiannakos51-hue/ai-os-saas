@@ -128,6 +128,15 @@ const MUTANTS = [
     to: '"make": "",',
     expect: "el.json: the pane's words",
   },
+  {
+    // The defect as it shipped in package 7: the pane outlives «Νέα
+    // συνομιλία» when the conversation had no id yet.
+    name: "«Νέα συνομιλία» leaves the site pane open",
+    file: CHAT,
+    from: "    setSiteBrief(null);\n    setOpenWorkId(null);\n    setActiveId(null);",
+    to: "    setActiveId(null);",
+    expect: "«Νέα συνομιλία» closes it even when there was no conversation yet",
+  },
 ];
 
 runMutations({

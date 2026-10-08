@@ -277,6 +277,21 @@ console.log("\n== 6. THE REGISTRY: what a project may hold ==");
   ok("every link-only entry carries what a headline needs and no tracker fields",
     extras.LINK_ONLY_MODULES.every((m) => m.table && m.headlineKey && m.titleKey && Array.isArray(m.fields) && m.fields.length === 0));
   ok("no table is registered twice", new Set(tables).size === tables.length);
+  // TWO ROWS UNDER ONE NAME. The Image tool's table joined the registry
+  // (package 36) under the old tracker's key, sidebar.items.images, so the
+  // «Σύνδεση με...» picker and the timeline's module filter offered
+  // «Ιδέες για εικόνες» twice, in every language, and the second one
+  // searched a different table from the first. The population is every
+  // linkable module, in every locale.
+  for (const l of LOCALES) {
+    const byName = new Map();
+    for (const m of kg.LINKABLE_MODULES) {
+      const name = lookup(messages[l], m.titleKey);
+      byName.set(name, [...(byName.get(name) ?? []), m.slug]);
+    }
+    const twice = [...byName].filter(([, slugs]) => slugs.length > 1).map(([name, slugs]) => `${name}: ${slugs.join(" + ")}`);
+    ok(`${l}: no two of the ${kg.LINKABLE_MODULES.length} linkable modules share a name`, twice.length === 0, twice.join("; "));
+  }
 
   // THE COUNT THE DOCUMENT PRINTS. docs/projects.md said nineteen when it
   // was eighteen and named presentations as a build module a round after

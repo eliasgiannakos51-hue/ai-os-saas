@@ -295,6 +295,15 @@ const MUTANTS = [
     to: '    table: "user_agents_removed",',
     expect: "agents, so the Agents section is not an empty promise",
   },
+  {
+    // The defect as it shipped in package 36: the Image tool's table under
+    // the old tracker's name, so the picker offers «Ιδέες για εικόνες» twice.
+    name: "the Image tool's table takes the old tracker's name again",
+    file: EXTRAS,
+    from: '    titleKey: "sidebar.items.imageTool",',
+    to: '    titleKey: "sidebar.items.images",',
+    expect: "el: no two of the 28 linkable modules share a name",
+  },
   // ---- the copy ---------------------------------------------------------
   {
     name: "the Chinese delete confirmation stops saying the contents stay",

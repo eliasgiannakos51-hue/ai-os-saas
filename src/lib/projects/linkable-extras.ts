@@ -95,7 +95,10 @@ export const LINK_ONLY_MODULES: LinkableModule[] = [
   },
   {
     slug: "generated-images",
-    titleKey: "sidebar.items.images",
+    // The tool's own name, «Εικόνα». sidebar.items.images is the old
+    // ai_images tracker's, and under it the picker showed «Ιδέες για
+    // εικόνες» twice (projects.test.mjs, section 6).
+    titleKey: "sidebar.items.imageTool",
     table: "generated_images",
     // The description the four pictures were made from.
     headlineKey: "prompt",

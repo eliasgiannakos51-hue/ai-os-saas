@@ -86,6 +86,8 @@ const LOCALE_ALLOWED = new Set([
   // "image" and "portrait" are the French words too, and "story" is what
   // the format is called in French apps (the Image tool, MASTER 16, 19).
   "fr:dashboard.images.name",
+  // The same tool's name where a project lists what it holds (package 36).
+  "fr:sidebar.items.imageTool",
   "fr:dashboard.images.picture",
   "fr:dashboard.images.chosen",
   "fr:dashboard.images.aspects.portrait",

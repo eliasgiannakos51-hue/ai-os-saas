@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **601 strings**. The whole product is 3971, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **602 strings**. The whole product is 3972, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 368 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 369 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (368)
+## Tier 2 — The labels — skim these (369)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1837,6 +1837,12 @@ DevOps
 > EN — Image ideas
 
 图片点子
+
+**`sidebar.items.imageTool`**
+
+> EN — Image
+
+图片
 
 **`sidebar.items.integrations`**
 

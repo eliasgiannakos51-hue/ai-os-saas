@@ -142,6 +142,7 @@ console.log("\n== 5. the routes: the switch, the person's own folder, nothing sp
   ok("...reads the set with the person's own session, by id AND owner", /\.from\("generated_posts"\)\s*\.select\("posts"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(img) && !/createAdminClient/.test(img));
   ok("...cuts only a photo from the person's own folder", /set\.image\.kind === "own" && !set\.image\.path\.startsWith\(`\$\{user\.id\}\/`\)\) return NextResponse\.json\(\{ ok: false, code: "not_found" \}/.test(img));
   ok("...and only for a platform the set has", /!set\.posts\.some\(\(p\) => p\.platform === platform\)/.test(img) && /if \(!isPostPlatform\(platform\)\)/.test(img));
+  ok("every picture asked for is bounded, a view as much as a download", /const cuts = await checkRateLimit\(\{ scope: "post_image", identifier: user\.id, maxAttempts: 240, windowMinutes: 60 \}\);\s*if \(!cuts\.allowed\) return NextResponse\.json\(\{ ok: false, code: "too_many_pictures" \}, \{ status: 429 \}\);/.test(img) && img.indexOf("checkRateLimit(") < img.indexOf("cutForPlatform("));
   ok("a download is bounded like every export, and named for what it is", /if \(download && !\(await allowExport\(user\.id\)\)\)/.test(img) && /\$\{download \? "attachment" : "inline"\}; filename="\$\{postImageFilename\(platform\)\}"/.test(img));
   ok("...and is the cut, as a JPEG", /const jpeg = await cutForPlatform\(source, platform\);/.test(img) && /"Content-Type": "image\/jpeg"/.test(img));
 

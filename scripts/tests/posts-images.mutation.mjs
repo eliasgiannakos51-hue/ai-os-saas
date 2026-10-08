@@ -100,6 +100,13 @@ const MUTANTS = [
     expect: "...cuts only a photo from the person's own folder",
   },
   {
+    name: "a picture viewed is not bounded",
+    file: IMAGE,
+    from: "    if (!cuts.allowed) return",
+    to: "    if (false) return",
+    expect: "every picture asked for is bounded, a view as much as a download",
+  },
+  {
     name: "a download is not bounded",
     file: IMAGE,
     from: "    if (download && !(await allowExport(user.id)))",

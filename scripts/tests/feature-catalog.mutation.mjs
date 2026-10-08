@@ -157,8 +157,8 @@ const MUTANTS = [
     dimension: "E. what spends money",
     name: "a paid feature is relabelled free",
     file: CATALOG,
-    from: '    routes: ["posts/generate"],\n    charges: true,',
-    to: '    routes: ["posts/generate"],\n    charges: false,',
+    from: '    routes: ["posts/generate", "posts/[id]/image"],\n    charges: true,',
+    to: '    routes: ["posts/generate", "posts/[id]/image"],\n    charges: false,',
     expect: "no charging route belongs to an entry declared free",
   },
   {

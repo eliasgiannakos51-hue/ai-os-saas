@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { allowExport } from "@/lib/export-guard";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { isPostPlatform, parseStoredPostSet } from "@/lib/posts/platforms";
 import { postImageFilename } from "@/lib/posts/post-images";
@@ -19,6 +20,8 @@ export const runtime = "nodejs";
  * Read with the person's own session, by id AND owner; their own photo is
  * read only from their own folder. `&download=1` sends it as a file named
  * for what it is (instagram-1080x1350.jpg), bounded like every export.
+ * EVERY request is bounded too (scope post_image, 240 an hour): each one
+ * cuts a picture with sharp in this process, and a set shows up to five.
  * An Unsplash photo's use was registered once, when the posts chose it
  * (api/posts/generate), which is what Unsplash asks — not once per file.
  * No model, no charge.
@@ -38,6 +41,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
   if (!(await isFeatureOn("posts-images", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
 
   try {
+    const cuts = await checkRateLimit({ scope: "post_image", identifier: user.id, maxAttempts: 240, windowMinutes: 60 });
+    if (!cuts.allowed) return NextResponse.json({ ok: false, code: "too_many_pictures" }, { status: 429 });
     if (download && !(await allowExport(user.id))) return NextResponse.json({ ok: false, code: "too_many_exports" }, { status: 429 });
     const { data: row, error } = await supabase
       .from("generated_posts")

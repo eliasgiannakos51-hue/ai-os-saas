@@ -399,7 +399,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     capability: "posts",
     sidebar: ["/dashboard/posts"],
     pages: ["posts"],
-    routes: ["posts/generate"],
+    routes: ["posts/generate", "posts/[id]/image"],
     charges: true,
     enforcedIn: "src/app/api/posts/generate/route.ts",
     enforcedSymbol: 'accountHasCapability(await resolveEffectivePlanSlug(user), "posts"',

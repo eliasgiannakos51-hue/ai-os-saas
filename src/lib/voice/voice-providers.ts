@@ -69,7 +69,22 @@ function openAiBase(): string {
   return raw.trim().replace(/\/+$/, "");
 }
 const OPENAI_TRANSCRIBE_PATH = "/audio/transcriptions";
-const ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech";
+
+/**
+ * WHERE SPEECH GOES, overridable for the same two reasons (package 29).
+ * `ELEVENLABS_BASE_URL` names the API root ("https://api.elevenlabs.io/v1"
+ * unset). Without it the voice conversation's last step — the answer read
+ * aloud — was the one call no production build could be pointed away
+ * from, so the loop listen, answer, speak, listen again had never run end
+ * to end anywhere but by hand; scripts/tests/voice-conversation.prodtest.mjs
+ * runs it now.
+ */
+function elevenLabsBase(): string {
+  const raw = process.env.ELEVENLABS_BASE_URL;
+  if (typeof raw !== "string" || raw.trim() === "") return "https://api.elevenlabs.io/v1";
+  return raw.trim().replace(/\/+$/, "");
+}
+const ELEVENLABS_TTS_PATH = "/text-to-speech";
 
 /** How long we wait on a provider before giving up. The conversation
  *  loop's whole budget is 1.5 seconds; a request still open at 20 is not
@@ -207,7 +222,7 @@ export async function synthesiseSpeech(params: {
 
   try {
     const response = await withTimeout((signal) =>
-      fetch(`${ELEVENLABS_TTS_URL}/${voiceIdFor(params.voiceKey)}`, {
+      fetch(`${elevenLabsBase()}${ELEVENLABS_TTS_PATH}/${voiceIdFor(params.voiceKey)}`, {
         method: "POST",
         headers: {
           "xi-api-key": apiKey,

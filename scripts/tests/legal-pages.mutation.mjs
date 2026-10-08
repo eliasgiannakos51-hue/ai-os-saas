@@ -150,8 +150,8 @@ const MUTANTS = [
     // An excused key that some code starts sending data with.
     name: "an inventory-only key starts being used by real code",
     file: VOICE,
-    from: "const ELEVENLABS_TTS_URL",
-    to: "export const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY;\nconst ELEVENLABS_TTS_URL",
+    from: "const ELEVENLABS_TTS_PATH",
+    to: "export const DEEPGRAM_KEY = process.env.DEEPGRAM_API_KEY;\nconst ELEVENLABS_TTS_PATH",
     expect: "DEEPGRAM_API_KEY is still read only by the key inventory",
   },
   {

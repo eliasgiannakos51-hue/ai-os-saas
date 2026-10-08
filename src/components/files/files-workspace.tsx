@@ -50,7 +50,9 @@ import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 // shares them rather than keeping a second copy that could drift.
 export type { WorkspaceFile, WorkspaceCollection } from "@/lib/files/answer";
 import type { WorkspaceFile, WorkspaceCollection, Answer } from "@/lib/files/answer";
-import { answerFromResult, answerForClipboard } from "@/lib/files/answer";
+import { answerFromResult, answerForClipboard, type Citation } from "@/lib/files/answer";
+import { CitedAnswerText, CitedPages, PageView } from "@/components/files/cited-answer";
+import { pagesRead, uniquePages } from "@/lib/files/page-refs";
 
 /**
  * The File Workspace.
@@ -70,10 +72,13 @@ export function FilesWorkspace({
   initialFiles,
   initialCollections,
   usage,
+  pages = false,
 }: {
   initialFiles: WorkspaceFile[];
   initialCollections: WorkspaceCollection[];
   usage: { fileCap: number | null; storageBytes: number; storageCap: number | null };
+  /** The switch "file-pages" (package 12). */
+  pages?: boolean;
 }) {
   const t = useTranslations("dashboard.files");
   const tCommon = useTranslations("common");
@@ -95,6 +100,7 @@ export function FilesWorkspace({
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
   const [answer, setAnswer] = useState<Answer | null>(null);
+  const [openPage, setOpenPage] = useState<Citation | null>(null);
   // The worker's real step, so a long read is not a bare spinner.
   //
   // JOB_STEPS stores CODES ("reading", "answering", "checking"), not
@@ -820,9 +826,11 @@ export function FilesWorkspace({
                   tags={[
                     { key: "type", label: file.file_type.toUpperCase(), tone: "accent" },
                     { key: "size", label: formatBytes(file.size_bytes) },
-                    ...(file.page_count
-                      ? [{ key: "pages", label: t("pages", { count: file.page_count }) }]
-                      : []),
+                    ...(pages && pagesRead(file.file_type, file.page_count)
+                      ? [{ key: "pages", label: t("pagesPartRead", { read: pagesRead(file.file_type, file.page_count)!.read, total: pagesRead(file.file_type, file.page_count)!.total }) }]
+                      : file.page_count
+                        ? [{ key: "pages", label: t("pages", { count: file.page_count }) }]
+                        : []),
                   ]}
                   selected={isSelected}
                   menuLabel={tModule("actionsFor", { name: file.filename })}
@@ -1058,7 +1066,15 @@ export function FilesWorkspace({
                 {t("notInDocuments")}
               </p>
             )}
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{answer.text}</p>
+            {pages ? (
+              <>
+                <CitedAnswerText answer={answer} onOpen={setOpenPage} />
+                <CitedPages answer={{ ...answer, citations: [] }} onOpen={setOpenPage} />
+                {openPage?.fileId && <PageView key={`${openPage.fileId}-${openPage.page}`} citation={openPage} onClose={() => setOpenPage(null)} />}
+              </>
+            ) : (
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{answer.text}</p>
+            )}
 
             {/* THE ANSWER, ON THE CLIPBOARD.
                 An answer that can only be read on this page is an answer
@@ -1079,14 +1095,25 @@ export function FilesWorkspace({
               <div>
                 <p className="mb-1 text-[11px] font-medium text-muted">{t("citations")}</p>
                 <ul className="space-y-0.5">
-                  {answer.citations.map((citation, i) => (
+                  {(pages ? uniquePages(answer.citations) : answer.citations).map((citation, i) => (
                     <li
                       key={`${citation.filename}-${citation.label}-${i}`}
                       className="flex items-center gap-1.5 text-[11px] text-muted"
                     >
-                      <span className="min-w-0 break-words">
-                        {citation.filename} — {citation.label}
-                      </span>
+                      {pages && citation.fileId && citation.page ? (
+                        <button
+                          type="button"
+                          onClick={() => setOpenPage(citation)}
+                          data-testid="files-page"
+                          className="min-h-[44px] min-w-0 break-words text-start underline decoration-dotted underline-offset-2 hover:text-foreground"
+                        >
+                          {citation.filename} — {citation.label}
+                        </button>
+                      ) : (
+                        <span className="min-w-0 break-words">
+                          {citation.filename} — {citation.label}
+                        </span>
+                      )}
                       {/* Each one on its own, because a citation is what
                           somebody pastes into a message to say "it is on
                           this page of this file". */}

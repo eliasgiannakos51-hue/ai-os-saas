@@ -1749,7 +1749,8 @@
           "name": "From memory: the name «{name}».",
           "colours": "From memory: the colours {colours}.",
           "both": "From memory: the name «{name}» and the colours {colours}. To change them, tell Chat."
-        }
+        },
+        "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it."
       },
       "regeneratePaid": "Regenerate · about {count} credits",
       "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started."
@@ -2342,7 +2343,18 @@
       "sharedReason": "Why: {reason}",
       "sharedRateLimit": "Too many uploads in the last hour. Try sharing again shortly.",
       "sharedDropped": "Only the first {max} files were taken.",
-      "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device."
+      "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device.",
+      "pagesPartRead": "First {read} of {total} pages are read",
+      "pageRefs": {
+        "open": "Open: {name}, {label}",
+        "close": "Close the page",
+        "loading": "Opening the page…",
+        "empty": "This page had no text that could be read (it may be an image).",
+        "missing": "This page is no longer in the file.",
+        "failed": "The page did not open. Try again.",
+        "openPdf": "Open the PDF at this page",
+        "unread": "Only the first {read} of the {total} pages of “{name}” were read; anything after them is not in this answer."
+      }
     },
     "deepResearch": {
       "title": "Look into it properly",
@@ -2387,7 +2399,16 @@
       "usedUnlimited": "{used} this month",
       "capReached": "You have used this month's research reports. It resets on the 1st.",
       "progressStep": "Question {done} of {total}",
-      "keepsRunning": "This keeps running if you close the page."
+      "keepsRunning": "This keeps running if you close the page.",
+      "toSlides": {
+        "send": "To Slides",
+        "price": "~{count, plural, one {# credit} other {# credits}}",
+        "confirm": "Press again for {count, plural, one {# credit} other {# credits}}",
+        "cancel": "Cancel",
+        "working": "Making the presentation…",
+        "notReady": "The research is not finished yet, so there is nothing to present.",
+        "offline": "No connection. Check the network and try again."
+      }
     },
     "onboarding": {
       "title": "Let's make this yours",
@@ -2936,6 +2957,13 @@
         "partChanged": "Only “{name}” changed. The rest of the site stayed the same.",
         "lost": "The box did not come back from the change, so nothing changed. Try again.",
         "boxes": "Boxes"
+      },
+      "pages": {
+        "auto": "Pages: as many as needed",
+        "count": "{count, plural, one {# page} other {# pages}}",
+        "undo": "Undo the last change",
+        "undone": "Undid the last change.",
+        "nothingToUndo": "Nothing to undo: the site is as it was made."
       }
     },
     "library": {

@@ -124,7 +124,11 @@ if (suites.length === 0) {
 // (router-classify, router-model-table, routing-report).
 // 220 -> 231 on 2026-10-05: group 1's suites (#244), the Next 16 round,
 // login-failure-alert, pricing-promises, regenerate-cost and chat-rating.
-const FLOOR = 231;
+// 231 -> 242 on 2026-10-07: MASTER 16 packages 5–11 (library,
+// brand-memory, chat-opens-tools, chat-attachments, site-pages,
+// research-slides and the rest of that round). Read off the run.
+// 242 -> 243 on 2026-10-07: file-pages (MASTER 16, package 12).
+const FLOOR = 243;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

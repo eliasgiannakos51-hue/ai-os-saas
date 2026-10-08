@@ -278,10 +278,16 @@ console.log("\n== 6. the owner is told, in their language ==");
   check("the workspace parses the column through the shared reader", /parseGenerationNotes\(previewWebsite\.generation_notes\)/.test(ws));
   check("...only for the site as generated, not a rolled-back version", /previewWebsite && !viewingVersion \? parseGenerationNotes/.test(ws));
   check("a panel renders them whenever there is a note, behind no other condition", /\{generationNotes\.length > 0 && \(\s*<div\s+data-testid="website-generation-notes"/.test(ws));
+  // The sentences live in one hook the old page and the shell share.
+  const said = read("src/components/website-builder/use-generation-note-text.ts");
+  check("the workspace says every note through the shared sentences", /const describeNote = useGenerationNoteText\(\);/.test(ws));
   for (const kind of ["removedFeature", "removedPage", "pageCap", "mapZoom", "stopped"]) {
-    check(`the ${kind} note is described through t("notes.${kind}")`, new RegExp(`case "${kind}":\\s*return t\\("notes\\.${kind}"`).test(ws));
+    check(`the ${kind} note is described through t("notes.${kind}")`, new RegExp(`case "${kind}":\\s*return t\\("notes\\.${kind}"`).test(said));
   }
-  check("the feature name comes from the locale too, never from the stored English label", /t\(`notes\.feature\.\$\{note\.feature\}`\)/.test(ws) && !/FEATURE_LABELS_EN/.test(ws));
+  check("the feature name comes from the locale too, never from the stored English label",
+    /feature: featureName\(note\.feature\)/.test(said) &&
+      ["booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget"].every((f) => new RegExp(`case "${f}": return t\\("notes\\.feature\\.${f}"\\);`).test(said)) &&
+      !/FEATURE_LABELS_EN/.test(said) && !/FEATURE_LABELS_EN/.test(ws));
   const FEATURES = ["booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget"];
   const texts = {};
   for (const l of LOCALES) {

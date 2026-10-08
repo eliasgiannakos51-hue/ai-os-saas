@@ -68,6 +68,7 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.chat.sitePane.label",
   // "page" is the French word for a page too, in the same ICU plural.
   "fr:dashboard.chat.attach.pages",
+  "fr:dashboard.toolShell.pages.count",
   "pt:dashboard.chat.sitePane.label",
   "fr:dashboard.library.kinds.site",
   "fr:dashboard.library.kinds.document",

@@ -1749,7 +1749,8 @@
           "name": "記憶から: 名前「{name}」。",
           "colours": "記憶から: 色 {colours}。",
           "both": "記憶から: 名前「{name}」と色 {colours}。変えるにはチャットで伝えてください。"
-        }
+        },
+        "pagesShort": "{asked} ページを依頼しましたが、作成されたのは {made} ページです。足りないページを教えてください。追加します。"
       },
       "regeneratePaid": "再生成 · 約 {count} クレジット",
       "regenerateNoCredits": "再生成に必要なクレジットが足りません。約 {needed} 必要で、残りは {available} です。何も開始されていません。"
@@ -2342,7 +2343,18 @@
       "sharedReason": "理由: {reason}",
       "sharedRateLimit": "直近 1 時間のアップロードが多すぎます。少し待って共有し直してください。",
       "sharedDropped": "最初の {max} 件のみを取り込みました。",
-      "openedFromDevice": "端末から {count} 件のファイルを開きました。"
+      "openedFromDevice": "端末から {count} 件のファイルを開きました。",
+      "pagesPartRead": "{total} ページ中、最初の {read} ページを読み取ります",
+      "pageRefs": {
+        "open": "開く: {name}、{label}",
+        "close": "ページを閉じる",
+        "loading": "ページを開いています…",
+        "empty": "このページには読み取れるテキストがありませんでした（画像の可能性があります）。",
+        "missing": "このページはもうファイルにありません。",
+        "failed": "ページを開けませんでした。もう一度お試しください。",
+        "openPdf": "このページで PDF を開く",
+        "unread": "「{name}」は {total} ページ中、最初の {read} ページだけを読みました。それ以降の内容はこの回答に含まれていません。"
+      }
     },
     "deepResearch": {
       "title": "じっくり調べる",
@@ -2387,7 +2399,16 @@
       "usedUnlimited": "今月 {used} 件",
       "capReached": "今月の調査レポートを使い切りました。1日にリセットされます。",
       "progressStep": "質問 {done} / {total}",
-      "keepsRunning": "ページを閉じても処理は続きます。"
+      "keepsRunning": "ページを閉じても処理は続きます。",
+      "toSlides": {
+        "send": "Slides へ",
+        "price": "~{count, plural, other {# クレジット}}",
+        "confirm": "もう一度押すと {count, plural, other {# クレジット}}",
+        "cancel": "キャンセル",
+        "working": "プレゼンテーションを作成中…",
+        "notReady": "リサーチがまだ終わっていないため、プレゼンテーションにできません。",
+        "offline": "接続がありません。ネットワークを確認して、もう一度お試しください。"
+      }
     },
     "onboarding": {
       "title": "あなた仕様にしましょう",
@@ -2936,6 +2957,13 @@
         "partChanged": "「{name}」だけが変わりました。サイトのほかの部分はそのままです。",
         "lost": "ボックスが変更から戻らなかったため、何も変わっていません。もう一度お試しください。",
         "boxes": "ボックス"
+      },
+      "pages": {
+        "auto": "ページ数：必要なだけ",
+        "count": "{count, plural, other {# ページ}}",
+        "undo": "最後の変更を元に戻す",
+        "undone": "最後の変更を元に戻しました。",
+        "nothingToUndo": "元に戻す変更はありません。サイトは作成時のままです。"
       }
     },
     "library": {

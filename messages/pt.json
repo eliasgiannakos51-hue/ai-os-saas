@@ -1749,7 +1749,8 @@
           "name": "Da memória: o nome “{name}”.",
           "colours": "Da memória: as cores {colours}.",
           "both": "Da memória: o nome “{name}” e as cores {colours}. Para mudá-los, diga ao Chat."
-        }
+        },
+        "pagesShort": "Pediu {asked} páginas e foram criadas {made}. Diga qual falta e eu acrescento-a."
       },
       "regeneratePaid": "Regenerar · cerca de {count} créditos",
       "regenerateNoCredits": "Créditos insuficientes para outra regeneração: são precisos cerca de {needed} e tem {available}. Nada foi iniciado."
@@ -2342,7 +2343,18 @@
       "sharedReason": "Motivo: {reason}",
       "sharedRateLimit": "Demasiados carregamentos na última hora. Tente partilhar daqui a pouco.",
       "sharedDropped": "Só foram aceites os primeiros {max} ficheiros.",
-      "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo."
+      "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo.",
+      "pagesPartRead": "São lidas as primeiras {read} de {total} páginas",
+      "pageRefs": {
+        "open": "Abrir: {name}, {label}",
+        "close": "Fechar a página",
+        "loading": "A abrir a página…",
+        "empty": "Esta página não tinha texto legível (talvez seja uma imagem).",
+        "missing": "Esta página já não está no ficheiro.",
+        "failed": "A página não abriu. Tente novamente.",
+        "openPdf": "Abrir o PDF nesta página",
+        "unread": "De «{name}» só foram lidas as primeiras {read} de {total} páginas; o que vem depois não está nesta resposta."
+      }
     },
     "deepResearch": {
       "title": "Procura a fundo",
@@ -2387,7 +2399,16 @@
       "usedUnlimited": "{used} este mês",
       "capReached": "Já usaste os relatórios deste mês. Reinicia no dia 1.",
       "progressStep": "Pergunta {done} de {total}",
-      "keepsRunning": "Continua a correr mesmo que feche a página."
+      "keepsRunning": "Continua a correr mesmo que feche a página.",
+      "toSlides": {
+        "send": "Para o Slides",
+        "price": "~{count, plural, one {# crédito} other {# créditos}}",
+        "confirm": "Prima de novo por {count, plural, one {# crédito} other {# créditos}}",
+        "cancel": "Cancelar",
+        "working": "A criar a apresentação…",
+        "notReady": "A pesquisa ainda não terminou, por isso não há nada para apresentar.",
+        "offline": "Sem ligação. Verifique a rede e tente novamente."
+      }
     },
     "onboarding": {
       "title": "Vamos torná-lo teu",
@@ -2936,6 +2957,13 @@
         "partChanged": "Só «{name}» mudou. O resto do site ficou igual.",
         "lost": "O bloco não voltou da alteração, por isso nada mudou. Tente de novo.",
         "boxes": "Blocos"
+      },
+      "pages": {
+        "auto": "Páginas: as necessárias",
+        "count": "{count, plural, one {# página} other {# páginas}}",
+        "undo": "Anular a última alteração",
+        "undone": "Anulei a última alteração.",
+        "nothingToUndo": "Nada para anular: o site está como foi criado."
       }
     },
     "library": {

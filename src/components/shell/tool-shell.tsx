@@ -73,15 +73,17 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
           <ol className="chat-measure space-y-4">
             {turns.map((turn) => (
               <li key={turn.id} data-role={turn.role} className={turn.role === "user" ? "flex justify-end" : ""}>
-                <p
-                  className={
-                    turn.role === "user"
-                      ? "max-w-[85%] whitespace-pre-wrap break-words rounded-card bg-panel px-3 py-2 text-sm text-foreground"
-                      : "whitespace-pre-wrap break-words text-sm leading-relaxed text-body"
-                  }
-                >
-                  {turn.text}
-                </p>
+                {turn.text && (
+                  <p
+                    className={
+                      turn.role === "user"
+                        ? "max-w-[85%] whitespace-pre-wrap break-words rounded-card bg-panel px-3 py-2 text-sm text-foreground"
+                        : "whitespace-pre-wrap break-words text-sm leading-relaxed text-body"
+                    }
+                  >
+                    {turn.text}
+                  </p>
+                )}
                 {turn.extra}
                 {turn.card && (
                   <button

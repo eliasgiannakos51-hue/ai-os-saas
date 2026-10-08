@@ -30,7 +30,8 @@ const GATE = "scripts/tests/website-structural-similarity.test.mjs";
 const BUILDER = "src/lib/website-builder.ts";
 const ROUTE = "src/app/api/websites/generate/process/route.ts";
 const NOTES = "src/lib/website-generation-notes.ts";
-const WORKSPACE = "src/components/website-builder/website-builder-workspace.tsx";
+// The note's sentences moved into the hook the page and the shell share.
+const WORKSPACE = "src/components/website-builder/use-generation-note-text.ts";
 const PAIRS = "scripts/website-pairs-check.mjs";
 const EL = "messages/el.json";
 const TARGETS = [GATE, BUILDER, ROUTE, NOTES, WORKSPACE, PAIRS, EL];

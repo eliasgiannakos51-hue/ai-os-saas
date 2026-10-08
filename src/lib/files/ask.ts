@@ -304,7 +304,12 @@ export function synthesisSystemPrompt(params: { language: string; parts: number;
     .join("\n");
 }
 
-export type Citation = { filename: string; label: string };
+/**
+ * A page reference. `fileId` and `page` are what a checked reference
+ * resolved to (verifyCitations), so the screen can open THAT page of THAT
+ * file (package 12); a reference that was only parsed has neither.
+ */
+export type Citation = { filename: string; label: string; fileId?: string; page?: number };
 
 /** Every `[file, page]` the answer claims. */
 export function parseCitations(answer: string): Citation[] {
@@ -393,7 +398,9 @@ export function verifyCitations(answer: string, allowed: PreparedContext["allowe
   const cleaned = answer.replace(/\[([^\][|]{1,200}?),\s*([^\][|]{1,80}?)\]/g, (_whole, file, label) => {
     const entry = resolve(String(file).trim(), String(label).trim());
     if (entry) {
-      const canonical = { filename: entry.filename, label: entry.label };
+      // The page it resolved to travels with it, so the screen can open
+      // that page of that file (package 12).
+      const canonical: Citation = { filename: entry.filename, label: entry.label, fileId: entry.fileId, page: entry.page };
       verified.push(canonical);
       return `[${canonical.filename}, ${canonical.label}]`;
     }

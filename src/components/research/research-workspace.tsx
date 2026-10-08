@@ -36,6 +36,8 @@ import { VoicePlayer } from "@/components/voice/voice-player";
 // this page.
 export type { ResearchReport } from "@/lib/research/report";
 import type { ResearchReport } from "@/lib/research/report";
+import { CitedBody } from "@/components/research/cited-body";
+import { SendToSlides } from "@/components/research/send-to-slides";
 
 /** Poll interval while a report runs. A report takes minutes, so a
  *  one-second poll would be 300 pointless requests; five seconds is
@@ -69,6 +71,7 @@ export function ResearchWorkspace({
   initialOpenId = null,
   monthlyCap,
   usedThisMonth,
+  slides = false,
 }: {
   /** The question Home routed here, already in the box, never auto-run. */
   initialTopic?: string;
@@ -77,6 +80,8 @@ export function ResearchWorkspace({
   initialOpenId?: string | null;
   monthlyCap: number | null;
   usedThisMonth: number;
+  /** The switch "research-slides" (package 11). */
+  slides?: boolean;
 }) {
   const t = useTranslations("dashboard.deepResearch");
   const tModule = useTranslations("module");
@@ -580,7 +585,11 @@ export function ResearchWorkspace({
               {section.heading && (
                 <h3 className="text-xs font-semibold text-foreground">{section.heading}</h3>
               )}
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{section.body}</p>
+              {slides ? (
+                <CitedBody body={section.body} sources={open.sources ?? []} className="text-sm leading-relaxed text-muted" />
+              ) : (
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{section.body}</p>
+              )}
             </div>
           ))}
 
@@ -616,6 +625,12 @@ export function ResearchWorkspace({
                 the word "report", and the source numbering that the claims
                 cite would not survive the flattening. */}
             <DownloadPdfButton href={`/api/research/${open.id}/pdf`} fallbackName="research-report" />
+            {slides && (
+              <SendToSlides
+                report={open}
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              />
+            )}
           {open.document_id && (
             <Link
               href={`/dashboard/documents/${open.document_id}`}

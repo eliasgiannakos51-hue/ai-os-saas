@@ -99,6 +99,7 @@ export default async function DeepResearchPage(
           initialOpenId={wanted}
           monthlyCap={isAdmin ? null : cap}
           usedThisMonth={count ?? 0}
+          slides={await isFeatureOn("research-slides", user)}
         />
       </div>
     );
@@ -122,6 +123,7 @@ export default async function DeepResearchPage(
           initialOpenId={wanted}
           monthlyCap={isAdmin ? null : cap}
           usedThisMonth={count ?? 0}
+          slides={await isFeatureOn("research-slides", user)}
         />
       </div>
     </div>

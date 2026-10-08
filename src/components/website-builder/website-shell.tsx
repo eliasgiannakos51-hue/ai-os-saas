@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Clock, Download, Palette, Plus, Square } from "lucide-react";
+import { Clock, Download, Files, Palette, Plus, Square, Undo2 } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
@@ -11,7 +11,13 @@ import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
-import { isSiteRunning, requestSiteChange, requestSiteStop, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
+import { isSiteRunning, requestSiteChange, requestSiteStop, requestSiteUndo, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
+import { useGenerationNoteText } from "@/components/website-builder/use-generation-note-text";
+import { parseGenerationNotes } from "@/lib/website-generation-notes";
+import { normalisePages } from "@/lib/publishing/website-pages";
+import { PAGE_COUNT_CHOICES, pageRequestBrief } from "@/lib/websites/page-request";
+import { siteDownload } from "@/lib/websites/site-download";
+import { saveBlob } from "@/components/ui/download-pdf-button";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
@@ -50,16 +56,28 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * outlined in the preview, and the next change goes with its index. The
  * route puts back every other part exactly as stored
  * (lib/website-boxes.ts, takeEditedBox).
+ *
+ * PAGES (package 10), behind the switch "site-pages": a fourth option asks
+ * for one, three or five pages (lib/websites/page-request.ts); a site with
+ * pages shows them as tabs over the preview, and the parts, the chosen
+ * part and the next change are the open page's — the route already edits
+ * any page by its slug. Undo takes back the last change
+ * (api/websites/[id]/undo), the download is the whole site
+ * (lib/websites/site-download.ts), and what the code did to the site after
+ * the model wrote it is said beside the preview, as on the page.
  */
 export function WebsiteShell({
   initialWebsites,
   initialBrief,
   initialOpenId = null,
+  pages = false,
 }: {
   initialWebsites: UserWebsite[];
   initialBrief?: string;
   /** A site to open on arrival — `?project=` from the Library or a star. */
   initialOpenId?: string | null;
+  /** The switch "site-pages" (package 10), read by the page. */
+  pages?: boolean;
 }) {
   const t = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
@@ -84,7 +102,13 @@ export function WebsiteShell({
   const [asked, setAsked] = useState<Record<string, string[]>>({});
   // The chosen part, with the site it belongs to: an index means nothing
   // on another site, so opening one forgets it without a reset anywhere.
-  const [box, setBox] = useState<{ siteId: string; index: number } | null>(null);
+  const [box, setBox] = useState<{ siteId: string; slug: string; index: number } | null>(null);
+  // How many pages the next site is asked for; null lets the site decide.
+  const [pageCount, setPageCount] = useState<number | null>(null);
+  const [choosingPages, setChoosingPages] = useState(false);
+  // The open page, with the site it belongs to, as the chosen part is.
+  const [openPage, setOpenPage] = useState<{ siteId: string; slug: string } | null>(null);
+  const describeNote = useGenerationNoteText();
   const composerRef = useRef<ChatComposerHandle>(null);
   const mountedRef = useRef(true);
   useEffect(() => {
@@ -162,9 +186,10 @@ export function WebsiteShell({
     if (!current) return;
     const part = chosen;
     const partLabel = chosenLabel;
+    const slug = pageSlug;
     setBusy(true);
     try {
-      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part });
+      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, ...(pages ? { pageSlug: slug } : {}) });
       void refreshCredits();
       if (outcome.kind === "refused") {
         say({
@@ -190,6 +215,27 @@ export function WebsiteShell({
     }
   }
 
+  async function undo() {
+    if (!current) return;
+    setBusy(true);
+    try {
+      const outcome = await requestSiteUndo(current.id);
+      if (outcome.kind === "refused") {
+        say({ role: "tool", text: outcome.reason === "nothing" ? tShell("pages.nothingToUndo") : outcome.reason === "busy" ? t("generating") : t("generateFailed") });
+        return;
+      }
+      const record = outcome.record;
+      setWebsites((prev) => prev.map((w) => (w.id === record.id ? record : w)));
+      setBox(null);
+      say({ role: "tool", text: tShell("pages.undone"), siteId: record.id });
+      setPane("site");
+    } catch {
+      say({ role: "tool", text: tCommon("networkErrorCheckConnection") });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function send(text: string) {
     say({ role: "user", text });
     if (pending) {
@@ -202,17 +248,14 @@ export function WebsiteShell({
       void change(text);
       return;
     }
-    const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: 0 });
+    const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: 0 }) + (pages ? pageRequestBrief(pageCount) : "");
     void generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false);
   }
 
   function download(site: UserWebsite) {
-    const url = URL.createObjectURL(new Blob([site.html_content], { type: "text/html;charset=utf-8" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${site.name || "site"}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // With pages, the whole site: a .zip whose pages link to each other.
+    const file = pages ? siteDownload(site) : { filename: `${site.name || "site"}.html`, type: "text/html;charset=utf-8", data: site.html_content };
+    saveBlob(new Blob([file.data as BlobPart], { type: file.type }), file.filename);
   }
 
   // PRICE BEFORE, the same estimator the server reserves against (as on the page).
@@ -223,14 +266,18 @@ export function WebsiteShell({
     accountCreditPriceEur ?? undefined
   ).estimatedCredits;
 
-  const html = current?.html_content ?? "";
+  // THE OPEN PAGE (package 10): home unless a tab chose another of THIS site's.
+  const sitePages = pages && current ? normalisePages(current.pages).pages : [];
+  const pageSlug = openPage && current && openPage.siteId === current.id && sitePages.some((p) => p.slug === openPage.slug) ? openPage.slug : "";
+  const html = pageSlug ? sitePages.find((p) => p.slug === pageSlug)!.html : current?.html_content ?? "";
+  const notes = pages && current && current.status === "completed" ? parseGenerationNotes(current.generation_notes) : [];
   const complete = Boolean(current) && current!.status === "completed" && looksLikeCompleteHtmlDocument(html);
   const unfilled = complete ? findUnfilledPlaceholders(html) : [];
   // Only for a site whose every request is in this conversation: a number
   // typed in an earlier visit is not here to be recognised.
   const invented = complete && current && asked[current.id] ? findInventedNumbers(html, asked[current.id].join("\n")) : [];
   const boxes = useMemo(() => (complete ? findPageBoxes(html) : []), [complete, html]);
-  const chosen = box && current && box.siteId === current.id && box.index < boxes.length ? box.index : null;
+  const chosen = box && current && box.siteId === current.id && box.slug === pageSlug && box.index < boxes.length ? box.index : null;
   // Literal keys, so the message slicer can bound them (lib/i18n/message-slices.ts).
   const boxLabel = (b: PageBox, i: number) =>
     b.heading ??
@@ -283,7 +330,20 @@ export function WebsiteShell({
           actions: (
             <>
               <PublishControl websiteId={current.id} websiteName={current.name} disabled={current.status !== "completed"} />
-              <button type="button" onClick={() => download(current)} disabled={!complete} aria-label={t("downloadButton")} title={t("downloadButton")} className={ACTION}>
+              {pages && (
+                <button
+                  type="button"
+                  onClick={() => void undo()}
+                  disabled={current.status !== "completed" || busy}
+                  aria-label={tShell("pages.undo")}
+                  title={tShell("pages.undo")}
+                  data-testid="site-undo"
+                  className={`${ACTION} disabled:opacity-40`}
+                >
+                  <Undo2 className="h-4 w-4" aria-hidden="true" />
+                </button>
+              )}
+              <button type="button" onClick={() => download(current)} disabled={current.status !== "completed" || !looksLikeCompleteHtmlDocument(current.html_content)} aria-label={t("downloadButton")} title={t("downloadButton")} data-testid="site-download" className={ACTION}>
                 <Download className="h-4 w-4" aria-hidden="true" />
               </button>
             </>
@@ -291,6 +351,29 @@ export function WebsiteShell({
           body: (
             <div data-testid="site-preview" className="flex h-full flex-col gap-3">
               <AiGeneratedNotice variant="block" />
+              {notes.length > 0 && (
+                <ul data-testid="site-notes" className="space-y-1 text-xs text-muted">
+                  {notes.map((note, i) => (
+                    <li key={`${note.kind}-${i}`}>{describeNote(note)}</li>
+                  ))}
+                </ul>
+              )}
+              {sitePages.length > 0 && current.status === "completed" && (
+                <nav data-testid="site-pages" aria-label={t("pageSelectLabel")} className="flex flex-wrap gap-1.5">
+                  {[{ slug: "", label: t("pageHome") }, ...sitePages].map((p) => (
+                    <button
+                      key={p.slug || "home"}
+                      type="button"
+                      aria-current={pageSlug === p.slug ? "page" : undefined}
+                      data-testid="site-page"
+                      onClick={() => setOpenPage({ siteId: current.id, slug: p.slug })}
+                      className={`${OPTION} ${pageSlug === p.slug ? "border-foreground text-foreground" : ""}`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </nav>
+              )}
               {unfilled.length > 0 && <p className="text-xs text-warning">{t("unfilledTitle", { count: unfilled.length })} {t("unfilledBody")}</p>}
               {invented.length > 0 && <p className="text-xs text-warning">{t("inventedTitle", { count: invented.length })} {t("inventedBody")}</p>}
               {complete && boxes.length > 1 && (
@@ -304,7 +387,7 @@ export function WebsiteShell({
                         aria-pressed={chosen === i}
                         data-testid="site-box"
                         onClick={() => {
-                          setBox(chosen === i ? null : { siteId: current.id, index: i });
+                          setBox(chosen === i ? null : { siteId: current.id, slug: pageSlug, index: i });
                           // On a phone the work covers the field: back to it.
                           if (!workIsBeside()) setPane(null);
                           composerRef.current?.focus();
@@ -319,7 +402,7 @@ export function WebsiteShell({
               )}
               {complete ? (
                 <iframe
-                  key={`${current.id}:${html.length}`}
+                  key={`${current.id}:${pageSlug}:${html.length}`}
                   srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
                   sandbox=""
                   title={current.name}
@@ -414,6 +497,44 @@ export function WebsiteShell({
           <Clock className="h-3.5 w-3.5" aria-hidden="true" />
           {tShell("recent")}
         </button>,
+        // HOW MANY PAGES (package 10): the fourth option, for a new site.
+        ...(pages
+          ? [
+              <span key="pages" className="relative">
+                <button
+                  type="button"
+                  onClick={() => setChoosingPages((v) => !v)}
+                  aria-expanded={choosingPages}
+                  disabled={current?.status === "completed" && !pending}
+                  data-testid="site-page-count"
+                  className={`${OPTION} disabled:opacity-40`}
+                >
+                  <Files className="h-3.5 w-3.5" aria-hidden="true" />
+                  {pageCount === null ? tShell("pages.auto") : tShell("pages.count", { count: pageCount })}
+                </button>
+                {choosingPages && (
+                  <div role="menu" className="surface absolute bottom-full start-0 z-10 mb-2 flex w-56 flex-col gap-1">
+                    {[null, ...PAGE_COUNT_CHOICES].map((n) => (
+                      <button
+                        key={n ?? "auto"}
+                        type="button"
+                        role="menuitemradio"
+                        aria-checked={pageCount === n}
+                        data-testid="site-page-count-choice"
+                        onClick={() => {
+                          setPageCount(n);
+                          setChoosingPages(false);
+                        }}
+                        className={`${OPTION} justify-start ${pageCount === n ? "border-foreground text-foreground" : ""}`}
+                      >
+                        {n === null ? tShell("pages.auto") : tShell("pages.count", { count: n })}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </span>,
+            ]
+          : []),
         <button
           key="new"
           type="button"

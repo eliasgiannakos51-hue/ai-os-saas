@@ -17,6 +17,7 @@ import { wrapUntrusted } from "@/lib/agents/agent-config";
 import { JOB_STEPS } from "@/lib/jobs/job-types";
 import type { JobContext, JobHandler, JobHandlerResult } from "@/lib/jobs/run-job";
 import { modelText, truncationNotice } from "@/lib/verification/truncation";
+import { unreadPages } from "@/lib/files/page-refs";
 
 /**
  * Room for the answer.
@@ -225,6 +226,9 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
       // combined", and the second is a weaker guarantee: a fact that
       // only makes sense across two parts can be missed by both.
       parts: context.passes.length,
+      // A PDF past the page limit was read only so far (package 12): the
+      // answer says which pages it never saw, rather than covering them.
+      unreadPages: unreadPages(files),
       disclosure: aiGeneratedNotice(language),
     },
   };

@@ -17,6 +17,8 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { isStoppedMessage } from "@/lib/stop-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
 import type { ResearchReport } from "@/lib/research/report";
+import { CitedBody } from "@/components/research/cited-body";
+import { SendToSlides } from "@/components/research/send-to-slides";
 
 /** A report takes minutes; five seconds is responsive enough (as on the page). */
 const POLL_MS = 5000;
@@ -45,6 +47,7 @@ export function ResearchShell({
   initialOpenId = null,
   monthlyCap,
   usedThisMonth,
+  slides = false,
 }: {
   initialTopic?: string;
   initialReports: ResearchReport[];
@@ -52,6 +55,9 @@ export function ResearchShell({
   initialOpenId?: string | null;
   monthlyCap: number | null;
   usedThisMonth: number;
+  /** The switch "research-slides" (package 11): the numbers open their
+   *  sources, and the report goes to Slides with one press. */
+  slides?: boolean;
 }) {
   const t = useTranslations("dashboard.deepResearch");
   const tNames = useTranslations("dashboard.tools.names");
@@ -255,6 +261,7 @@ export function ResearchShell({
           title: open.topic,
           actions: (
             <>
+              {slides && <SendToSlides report={open} className={OPTION} />}
               <DownloadPdfButton href={`/api/research/${open.id}/pdf`} fallbackName="research-report" className={OPTION} />
               {open.document_id && (
                 <Link href={`/dashboard/documents/${open.document_id}`} className={OPTION}>
@@ -273,7 +280,11 @@ export function ResearchShell({
               {(open.sections ?? []).map((section, i) => (
                 <div key={`${section.heading}-${i}`} className="space-y-1">
                   {section.heading && <h3 className="text-sm font-semibold text-foreground">{section.heading}</h3>}
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{section.body}</p>
+                  {slides ? (
+                    <CitedBody body={section.body} sources={open.sources ?? []} className="text-sm leading-relaxed text-body" />
+                  ) : (
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{section.body}</p>
+                  )}
                 </div>
               ))}
               {(open.sources ?? []).length > 0 && (

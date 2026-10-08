@@ -1749,7 +1749,8 @@
           "name": "Aus dem Gedächtnis: der Name „{name}“.",
           "colours": "Aus dem Gedächtnis: die Farben {colours}.",
           "both": "Aus dem Gedächtnis: der Name „{name}“ und die Farben {colours}. Um sie zu ändern, sag es im Chat."
-        }
+        },
+        "pagesShort": "Du hast {asked} Seiten angefordert, {made} wurden erstellt. Sag, welche fehlt, und ich füge sie hinzu."
       },
       "regeneratePaid": "Neu erstellen · etwa {count} Credits",
       "regenerateNoCredits": "Nicht genug Credits für eine weitere Neugenerierung: Sie braucht etwa {needed}, Sie haben {available}. Es wurde nichts gestartet."
@@ -2342,7 +2343,18 @@
       "sharedReason": "Grund: {reason}",
       "sharedRateLimit": "Zu viele Uploads in der letzten Stunde. Versuchen Sie es gleich noch einmal.",
       "sharedDropped": "Es wurden nur die ersten {max} Dateien übernommen.",
-      "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet."
+      "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet.",
+      "pagesPartRead": "Die ersten {read} von {total} Seiten werden gelesen",
+      "pageRefs": {
+        "open": "Öffnen: {name}, {label}",
+        "close": "Seite schließen",
+        "loading": "Die Seite wird geöffnet…",
+        "empty": "Diese Seite enthielt keinen lesbaren Text (vielleicht ist sie ein Bild).",
+        "missing": "Diese Seite ist nicht mehr in der Datei.",
+        "failed": "Die Seite wurde nicht geöffnet. Versuche es erneut.",
+        "openPdf": "PDF auf dieser Seite öffnen",
+        "unread": "Von „{name}“ wurden nur die ersten {read} von {total} Seiten gelesen; was danach kommt, ist nicht in dieser Antwort."
+      }
     },
     "deepResearch": {
       "title": "Gründlich nachsehen",
@@ -2387,7 +2399,16 @@
       "usedUnlimited": "{used} in diesem Monat",
       "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1.",
       "progressStep": "Frage {done} von {total}",
-      "keepsRunning": "Das läuft weiter, auch wenn Sie die Seite schließen."
+      "keepsRunning": "Das läuft weiter, auch wenn Sie die Seite schließen.",
+      "toSlides": {
+        "send": "An Slides",
+        "price": "~{count, plural, one {# Credit} other {# Credits}}",
+        "confirm": "Erneut drücken für {count, plural, one {# Credit} other {# Credits}}",
+        "cancel": "Abbrechen",
+        "working": "Die Präsentation wird erstellt…",
+        "notReady": "Die Recherche ist noch nicht fertig, daher gibt es nichts zu präsentieren.",
+        "offline": "Keine Verbindung. Prüfe das Netzwerk und versuche es erneut."
+      }
     },
     "onboarding": {
       "title": "Machen wir es zu deinem",
@@ -2936,6 +2957,13 @@
         "partChanged": "Nur „{name}“ wurde geändert. Der Rest der Website ist gleich geblieben.",
         "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
         "boxes": "Kästen"
+      },
+      "pages": {
+        "auto": "Seiten: so viele wie nötig",
+        "count": "{count, plural, one {# Seite} other {# Seiten}}",
+        "undo": "Letzte Änderung rückgängig machen",
+        "undone": "Die letzte Änderung wurde rückgängig gemacht.",
+        "nothingToUndo": "Nichts rückgängig zu machen: Die Website ist so, wie sie erstellt wurde."
       }
     },
     "library": {

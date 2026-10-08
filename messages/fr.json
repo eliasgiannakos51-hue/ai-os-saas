@@ -1749,7 +1749,8 @@
           "name": "De la mémoire : le nom « {name} ».",
           "colours": "De la mémoire : les couleurs {colours}.",
           "both": "De la mémoire : le nom « {name} » et les couleurs {colours}. Pour les changer, dites-le au Chat."
-        }
+        },
+        "pagesShort": "Vous avez demandé {asked} pages et {made} ont été créées. Dites laquelle manque et je l’ajoute."
       },
       "regeneratePaid": "Régénérer · environ {count} crédits",
       "regenerateNoCredits": "Pas assez de crédits pour une nouvelle régénération : il en faut environ {needed}, vous en avez {available}. Rien n’a été lancé."
@@ -2342,7 +2343,18 @@
       "sharedReason": "Raison : {reason}",
       "sharedRateLimit": "Trop d'envois dans la dernière heure. Réessayez le partage dans un instant.",
       "sharedDropped": "Seuls les {max} premiers fichiers ont été pris.",
-      "openedFromDevice": "{count, plural, one {# fichier ouvert} other {# fichiers ouverts}} depuis votre appareil."
+      "openedFromDevice": "{count, plural, one {# fichier ouvert} other {# fichiers ouverts}} depuis votre appareil.",
+      "pagesPartRead": "Les {read} premières pages sur {total} sont lues",
+      "pageRefs": {
+        "open": "Ouvrir : {name}, {label}",
+        "close": "Fermer la page",
+        "loading": "Ouverture de la page…",
+        "empty": "Cette page n’avait pas de texte lisible (c’est peut-être une image).",
+        "missing": "Cette page n’est plus dans le fichier.",
+        "failed": "La page ne s’est pas ouverte. Réessayez.",
+        "openPdf": "Ouvrir le PDF à cette page",
+        "unread": "Seules les {read} premières des {total} pages de « {name} » ont été lues ; la suite n’est pas dans cette réponse."
+      }
     },
     "deepResearch": {
       "title": "Cherche à fond",
@@ -2387,7 +2399,16 @@
       "usedUnlimited": "{used} ce mois-ci",
       "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er.",
       "progressStep": "Question {done} sur {total}",
-      "keepsRunning": "Le travail continue même si vous fermez la page."
+      "keepsRunning": "Le travail continue même si vous fermez la page.",
+      "toSlides": {
+        "send": "Vers Slides",
+        "price": "~{count, plural, one {# crédit} other {# crédits}}",
+        "confirm": "Appuyez encore pour {count, plural, one {# crédit} other {# crédits}}",
+        "cancel": "Annuler",
+        "working": "Création de la présentation…",
+        "notReady": "La recherche n’est pas encore terminée : il n’y a rien à présenter.",
+        "offline": "Pas de connexion. Vérifiez le réseau et réessayez."
+      }
     },
     "onboarding": {
       "title": "Faisons-en le vôtre",
@@ -2936,6 +2957,13 @@
         "partChanged": "Seul « {name} » a changé. Le reste du site est resté identique.",
         "lost": "Le bloc n’est pas revenu de la modification, donc rien n’a changé. Réessaie.",
         "boxes": "Blocs"
+      },
+      "pages": {
+        "auto": "Pages : autant que nécessaire",
+        "count": "{count, plural, one {# page} other {# pages}}",
+        "undo": "Annuler la dernière modification",
+        "undone": "La dernière modification a été annulée.",
+        "nothingToUndo": "Rien à annuler : le site est tel qu’il a été créé."
       }
     },
     "library": {

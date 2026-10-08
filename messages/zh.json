@@ -1749,7 +1749,8 @@
           "name": "来自记忆：名称“{name}”。",
           "colours": "来自记忆：颜色 {colours}。",
           "both": "来自记忆：名称“{name}”和颜色 {colours}。要更改，请在聊天中告诉我。"
-        }
+        },
+        "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。"
       },
       "regeneratePaid": "重新生成 · 约 {count} 积分",
       "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。"
@@ -2342,7 +2343,18 @@
       "sharedReason": "原因：{reason}",
       "sharedRateLimit": "过去一小时上传次数过多，请稍后再共享。",
       "sharedDropped": "仅接收了前 {max} 个文件。",
-      "openedFromDevice": "已从你的设备打开 {count} 个文件。"
+      "openedFromDevice": "已从你的设备打开 {count} 个文件。",
+      "pagesPartRead": "读取 {total} 页中的前 {read} 页",
+      "pageRefs": {
+        "open": "打开：{name}，{label}",
+        "close": "关闭页面",
+        "loading": "正在打开页面…",
+        "empty": "此页面没有可读取的文字（可能是图片）。",
+        "missing": "此页面已不在文件中。",
+        "failed": "页面未能打开。请重试。",
+        "openPdf": "在此页打开 PDF",
+        "unread": "“{name}”共 {total} 页，只读取了前 {read} 页；之后的内容不在此回答中。"
+      }
     },
     "deepResearch": {
       "title": "好好查一下",
@@ -2387,7 +2399,16 @@
       "usedUnlimited": "本月 {used} 次",
       "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",
       "progressStep": "第 {done} 个问题，共 {total} 个",
-      "keepsRunning": "即使关闭页面，任务也会继续运行。"
+      "keepsRunning": "即使关闭页面，任务也会继续运行。",
+      "toSlides": {
+        "send": "发送到 Slides",
+        "price": "~{count, plural, other {# 积分}}",
+        "confirm": "再按一次，花费 {count, plural, other {# 积分}}",
+        "cancel": "取消",
+        "working": "正在制作演示文稿…",
+        "notReady": "研究尚未完成，暂时没有可演示的内容。",
+        "offline": "没有网络连接。请检查网络后重试。"
+      }
     },
     "onboarding": {
       "title": "让它成为你的",
@@ -2936,6 +2957,13 @@
         "partChanged": "只改了“{name}”，网站其余部分保持不变。",
         "lost": "方框没有从修改中返回，所以什么都没改。请再试一次。",
         "boxes": "方框"
+      },
+      "pages": {
+        "auto": "页面：按需要",
+        "count": "{count, plural, other {# 页}}",
+        "undo": "撤销上一次更改",
+        "undone": "已撤销上一次更改。",
+        "nothingToUndo": "没有可撤销的更改：网站仍是生成时的样子。"
       }
     },
     "library": {

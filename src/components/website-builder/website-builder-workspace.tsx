@@ -1,5 +1,6 @@
 "use client";
 
+import { saveBlob } from "@/components/ui/download-pdf-button";
 import { websiteNameFrom } from "@/lib/website-name";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
@@ -25,7 +26,7 @@ import { StepFlow } from "@/components/ui/step-flow";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { parseGenerationNotes, type GenerationNote } from "@/lib/website-generation-notes";
-import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
+import { useGenerationNoteText } from "@/components/website-builder/use-generation-note-text";
 import { useTranslations, useLocale } from "next-intl";
 import { normalisePages, type WebsitePage } from "@/lib/publishing/website-pages";
 import { censusSiteImages, shouldOfferOwnPhotos } from "@/lib/website-image-census";
@@ -202,13 +203,7 @@ function WebsiteThumbnail({ website }: { website: UserWebsite }) {
 }
 
 function downloadHtml(website: UserWebsite) {
-  const blob = new Blob([website.html_content], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${website.name || "website"}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  saveBlob(new Blob([website.html_content], { type: "text/html" }), `${website.name || "website"}.html`);
 }
 
 // Website Builder — real Claude generation (see api/websites/generate/route.ts
@@ -1099,42 +1094,7 @@ export function WebsiteBuilderWorkspace({
     () => (previewWebsite && !viewingVersion ? parseGenerationNotes(previewWebsite.generation_notes) : []),
     [previewWebsite, viewingVersion]
   );
-  const remembered = useRememberedLine();
-  const describeNote = (note: GenerationNote): string => {
-    switch (note.kind) {
-      case "removedFeature":
-        return t("notes.removedFeature", { feature: t(`notes.feature.${note.feature}`), count: note.count });
-      case "removedPage":
-        return t("notes.removedPage", { feature: t(`notes.feature.${note.feature}`), slug: note.slug });
-      case "pageCap":
-        return t("notes.pageCap", { cap: note.cap, started: note.started });
-      case "mapZoom":
-        return t("notes.mapZoom", { count: note.count });
-      case "stopped":
-        return t("notes.stopped", { count: note.credits });
-      case "sameSkeleton":
-        // THE OLDER SITE IS NAMED. "This looks like another of your sites"
-        // is unactionable; "87% the same structure as Καφέ Λιμάνι" can be
-        // opened in the other tab and disagreed with.
-        return t("notes.sameSkeleton", { percent: note.percent, name: note.against });
-      case "photosDropped":
-        // THE REASON IS PART OF THE SENTENCE, not a detail behind it.
-        // "No pictures were added" is not actionable; "the photo library
-        // is not set up on this deployment" tells the owner to go and
-        // set a key, and "no photographs matched" tells them to change
-        // the words.
-        return t(`notes.photosDropped.${note.reason}`, { count: note.count });
-      case "fromMemory":
-        // Where the name and the colours came from, so a wrong one is
-        // corrected in Chat (or on the memory page) and not argued with here.
-        return remembered.sentence(note);
-      case "spelling":
-        // The words themselves, joined — the owner is the only one who can
-        // say whether "ρεμπα" is a typo or a brand, and they can only say
-        // it if they can see the word.
-        return t("notes.spelling", { count: note.words.length, words: note.words.join(", ") });
-    }
-  };
+  const describeNote = useGenerationNoteText();
   // A run the owner stopped: the row is "failed" with an English sentence
   // for the logs; the person sees their own language, with the number.
   const stoppedNote = generationNotes.find((n) => n.kind === "stopped");

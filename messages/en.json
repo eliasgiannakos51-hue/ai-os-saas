@@ -4662,6 +4662,21 @@
       "failed": "failed",
       "delete": "Delete",
       "deleteConfirm": "Delete these posts? This can't be undone."
+    },
+    "picture": {
+      "option": "Picture",
+      "none": "No picture",
+      "own": "My photo",
+      "unsplash": "A photo from Unsplash",
+      "attach": "Add your photo (JPEG or PNG)",
+      "uploading": "Uploading the photo…",
+      "ready": "Each post gets this photo at its platform's size",
+      "failed": "The photo could not be uploaded. Try again.",
+      "rejected": "Only a JPEG or PNG under 5 MB.",
+      "needPhoto": "Add your photo with «+» first, or choose another picture.",
+      "download": "Download the picture for {platform}",
+      "credit": "Photo by <author>{name}</author> on <unsplash>Unsplash</unsplash>",
+      "noneFound": "No photo matched these posts, so they have no picture."
     }
   },
   "projects": {

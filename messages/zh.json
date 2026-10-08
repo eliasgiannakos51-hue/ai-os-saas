@@ -4662,6 +4662,21 @@
       "failed": "失败",
       "delete": "删除",
       "deleteConfirm": "删除这些帖子？此操作无法撤销。"
+    },
+    "picture": {
+      "option": "图片",
+      "none": "不配图片",
+      "own": "我的照片",
+      "unsplash": "来自 Unsplash 的照片",
+      "attach": "添加你的照片（JPEG 或 PNG）",
+      "uploading": "正在上传照片…",
+      "ready": "每条帖子都会按其平台的尺寸使用这张照片",
+      "failed": "照片未能上传，请重试。",
+      "rejected": "仅限 5 MB 以内的 JPEG 或 PNG。",
+      "needPhoto": "请先用「+」添加你的照片，或选择其他图片。",
+      "download": "下载 {platform} 的图片",
+      "credit": "照片作者：<author>{name}</author>，来自 <unsplash>Unsplash</unsplash>",
+      "noneFound": "没有与这些帖子匹配的照片，因此它们没有图片。"
     }
   },
   "projects": {

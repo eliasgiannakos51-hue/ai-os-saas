@@ -4662,6 +4662,21 @@
       "failed": "falhou",
       "delete": "Eliminar",
       "deleteConfirm": "Eliminar estas publicações? Não é possível anular."
+    },
+    "picture": {
+      "option": "Imagem",
+      "none": "Sem imagem",
+      "own": "A minha fotografia",
+      "unsplash": "Uma fotografia do Unsplash",
+      "attach": "Adicione a sua fotografia (JPEG ou PNG)",
+      "uploading": "A carregar a fotografia…",
+      "ready": "Cada publicação recebe esta fotografia no tamanho da sua plataforma",
+      "failed": "Não foi possível carregar a fotografia. Tente novamente.",
+      "rejected": "Apenas um JPEG ou PNG com menos de 5 MB.",
+      "needPhoto": "Adicione primeiro a sua fotografia com «+», ou escolha outra imagem.",
+      "download": "Transferir a imagem para {platform}",
+      "credit": "Fotografia de <author>{name}</author> no <unsplash>Unsplash</unsplash>",
+      "noneFound": "Nenhuma fotografia correspondeu a estas publicações, por isso não têm imagem."
     }
   },
   "projects": {

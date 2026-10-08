@@ -4662,6 +4662,21 @@
       "failed": "فشل",
       "delete": "حذف",
       "deleteConfirm": "أتحذف هذه المنشورات؟ لا يمكن التراجع."
+    },
+    "picture": {
+      "option": "صورة",
+      "none": "بلا صورة",
+      "own": "صورتي",
+      "unsplash": "صورة من Unsplash",
+      "attach": "أضف صورتك (JPEG أو PNG)",
+      "uploading": "جارٍ رفع الصورة…",
+      "ready": "يحصل كل منشور على هذه الصورة بمقاس منصته",
+      "failed": "تعذّر رفع الصورة. حاول مرة أخرى.",
+      "rejected": "ملف JPEG أو PNG أصغر من 5 ميغابايت فقط.",
+      "needPhoto": "أضف صورتك أولًا بـ «+»، أو اختر صورة أخرى.",
+      "download": "تنزيل الصورة لـ {platform}",
+      "credit": "صورة بعدسة <author>{name}</author> على <unsplash>Unsplash</unsplash>",
+      "noneFound": "لم تطابق أي صورة هذه المنشورات، لذا فهي بلا صورة."
     }
   },
   "projects": {

@@ -4662,6 +4662,21 @@
       "failed": "échec",
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer ces publications ? C'est irréversible."
+    },
+    "picture": {
+      "option": "Image",
+      "none": "Sans image",
+      "own": "Ma photo",
+      "unsplash": "Une photo d’Unsplash",
+      "attach": "Ajoutez votre photo (JPEG ou PNG)",
+      "uploading": "Envoi de la photo…",
+      "ready": "Chaque publication reçoit cette photo au format de sa plateforme",
+      "failed": "La photo n’a pas pu être envoyée. Réessayez.",
+      "rejected": "Uniquement un JPEG ou PNG de moins de 5 Mo.",
+      "needPhoto": "Ajoutez d’abord votre photo avec « + », ou choisissez une autre image.",
+      "download": "Télécharger l’image pour {platform}",
+      "credit": "Photo de <author>{name}</author> sur <unsplash>Unsplash</unsplash>",
+      "noneFound": "Aucune photo ne correspondait à ces publications, elles n’ont donc pas d’image."
     }
   },
   "projects": {

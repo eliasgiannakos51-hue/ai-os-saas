@@ -4662,6 +4662,21 @@
       "failed": "失敗",
       "delete": "削除",
       "deleteConfirm": "これらの投稿を削除しますか？元に戻せません。"
+    },
+    "picture": {
+      "option": "画像",
+      "none": "画像なし",
+      "own": "自分の写真",
+      "unsplash": "Unsplash の写真",
+      "attach": "写真を追加（JPEG または PNG）",
+      "uploading": "写真をアップロード中…",
+      "ready": "各投稿にこの写真が、そのプラットフォームのサイズで付きます",
+      "failed": "写真をアップロードできませんでした。もう一度お試しください。",
+      "rejected": "5 MB 未満の JPEG または PNG のみです。",
+      "needPhoto": "まず「+」で写真を追加するか、別の画像を選んでください。",
+      "download": "{platform} 用の画像をダウンロード",
+      "credit": "写真：<author>{name}</author>（<unsplash>Unsplash</unsplash>）",
+      "noneFound": "これらの投稿に合う写真がなかったため、画像はありません。"
     }
   },
   "projects": {

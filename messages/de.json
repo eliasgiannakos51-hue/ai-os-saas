@@ -4662,6 +4662,21 @@
       "failed": "fehlgeschlagen",
       "delete": "Löschen",
       "deleteConfirm": "Diese Beiträge löschen? Das lässt sich nicht rückgängig machen."
+    },
+    "picture": {
+      "option": "Bild",
+      "none": "Kein Bild",
+      "own": "Mein Foto",
+      "unsplash": "Ein Foto von Unsplash",
+      "attach": "Füge dein Foto hinzu (JPEG oder PNG)",
+      "uploading": "Das Foto wird hochgeladen…",
+      "ready": "Jeder Beitrag bekommt dieses Foto im Format seiner Plattform",
+      "failed": "Das Foto konnte nicht hochgeladen werden. Versuche es erneut.",
+      "rejected": "Nur ein JPEG oder PNG unter 5 MB.",
+      "needPhoto": "Füge zuerst dein Foto mit „+“ hinzu oder wähle ein anderes Bild.",
+      "download": "Bild für {platform} herunterladen",
+      "credit": "Foto von <author>{name}</author> auf <unsplash>Unsplash</unsplash>",
+      "noneFound": "Kein Foto passte zu diesen Beiträgen, daher haben sie kein Bild."
     }
   },
   "projects": {

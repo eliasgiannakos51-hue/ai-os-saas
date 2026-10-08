@@ -22,7 +22,7 @@ import { POSTS_MAX_TOKENS, POSTS_MODEL, WRITE_POSTS_TOOL, buildPostsSystemPrompt
 const writePostsTool: Anthropic.Tool = WRITE_POSTS_TOOL;
 
 export type GeneratePostsResult =
-  | { ok: true; set: PostSet }
+  | { ok: true; set: PostSet; imageQuery: string | null }
   | { ok: false; kind: "aborted" | "no_tool_use" | "unusable" | "provider"; detail: string };
 
 export async function generatePosts(params: {
@@ -56,6 +56,9 @@ export async function generatePosts(params: {
    *  the cache breakpoint would invalidate the cached prefix on every
    *  call and cost MORE than not caching at all. */
   businessContext?: string;
+  /** A picture from Unsplash was asked for (package 15): the model also
+   *  says what to search for. */
+  wantsPhoto?: boolean;
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GeneratePostsResult> {
@@ -74,7 +77,7 @@ export async function generatePosts(params: {
         messages: [
           {
             role: "user",
-            content: buildPostsUserMessage(params.description, params.platforms, params.locale, params.businessContext ?? ""),
+            content: buildPostsUserMessage(params.description, params.platforms, params.locale, params.businessContext ?? "", params.wantsPhoto ?? false),
           },
         ],
         tools: [writePostsTool],
@@ -101,5 +104,5 @@ export async function generatePosts(params: {
 
   const verdict = parsePostsToolInput(toolUse.input, { platforms: params.platforms, locale: params.locale });
   if (!verdict.ok) return { ok: false, kind: "unusable", detail: verdict.reason };
-  return { ok: true, set: verdict.set };
+  return { ok: true, set: verdict.set, imageQuery: verdict.imageQuery };
 }

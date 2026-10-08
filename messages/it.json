@@ -4662,6 +4662,21 @@
       "failed": "non riuscita",
       "delete": "Elimina",
       "deleteConfirm": "Eliminare questi post? Non si può annullare."
+    },
+    "picture": {
+      "option": "Immagine",
+      "none": "Nessuna immagine",
+      "own": "La mia foto",
+      "unsplash": "Una foto da Unsplash",
+      "attach": "Aggiungi la tua foto (JPEG o PNG)",
+      "uploading": "Caricamento della foto…",
+      "ready": "Ogni post riceve questa foto nel formato della sua piattaforma",
+      "failed": "Non è stato possibile caricare la foto. Riprova.",
+      "rejected": "Solo un JPEG o PNG sotto i 5 MB.",
+      "needPhoto": "Aggiungi prima la tua foto con «+», oppure scegli un’altra immagine.",
+      "download": "Scarica l’immagine per {platform}",
+      "credit": "Foto di <author>{name}</author> su <unsplash>Unsplash</unsplash>",
+      "noneFound": "Nessuna foto corrispondeva a questi post, quindi non hanno un’immagine."
     }
   },
   "projects": {

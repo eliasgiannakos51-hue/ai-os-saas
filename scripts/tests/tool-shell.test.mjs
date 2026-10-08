@@ -110,7 +110,7 @@ for (const f of users) {
 
 console.log("\n== 4. Posts, in the shell ==");
 const posts = read("src/components/posts/posts-shell.tsx");
-check("it writes through the same route as the old page", /fetch\("\/api\/posts\/generate"/.test(posts) && /JSON\.stringify\(\{ description: text, platforms: chosen, locale \}\)/.test(posts));
+check("it writes through the same route as the old page", /fetch\("\/api\/posts\/generate"/.test(posts) && /JSON\.stringify\(\{\s*description: text,\s*platforms: chosen,\s*locale,/.test(posts));
 check("the price shows before sending, from the length typed", /onLengthChange=\{setLength\}/.test(posts) && /<CostEstimateHint credits=\{estimate\.credits\} \/>/.test(posts) && /postsEstimateInputChars\(length, platforms\)/.test(posts));
 check("Stop aborts the request", /onStop=\{\(\) => abortRef\.current\?\.abort\(\)\}/.test(posts) && /signal: controller\.signal/.test(posts));
 check("the posts open beside the conversation, one per platform with its copy", /data-testid="posts-result"/.test(posts) && /<CopyButton text=\{clipboard\}/.test(posts) && /setOpen\("posts"\)/.test(posts));

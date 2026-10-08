@@ -259,6 +259,7 @@
       "team": "Comparte tu plan con otras personas, cada una en su propia cuenta.",
       "apps": "Lleva el control de las apps que planeas o ya has lanzado. No las construye.",
       "images": "Lleva el control de las imágenes que planeas o ya has hecho. No las genera.",
+      "imageTool": "Cuatro imágenes a partir de una descripción; cambia una con palabras y descárgala a máxima resolución.",
       "videos": "Lleva el control de los vídeos que planeas o ya has hecho. No los genera.",
       "coding": "Escribe, explica, corrige, convierte y prueba fragmentos de código. No ejecuta código ni abre un repositorio.",
       "presentations": "Describe una presentación y obtén las diapositivas: PowerPoint o PDF, con fotos de Unsplash o tuyas. No dibuja gráficos.",

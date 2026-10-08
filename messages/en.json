@@ -259,6 +259,7 @@
       "team": "Give people your plan, each on their own account.",
       "apps": "Keep track of apps you are planning or have already shipped. It does not build them.",
       "images": "Keep track of images you are planning or have already made. It does not generate them.",
+      "imageTool": "Four pictures from one description; change one in words and download it at full resolution.",
       "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
       "coding": "Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.",
       "presentations": "Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.",

@@ -259,6 +259,7 @@
       "team": "Dá o teu plano a outras pessoas, cada uma na sua própria conta.",
       "apps": "Acompanhe as apps que está a planear ou já lançou. Não as constrói.",
       "images": "Acompanhe as imagens que está a planear ou já fez. Não as gera.",
+      "imageTool": "Quatro imagens a partir de uma descrição; muda uma por palavras e descarrega-a na resolução máxima.",
       "videos": "Acompanhe os vídeos que está a planear ou já fez. Não os gera.",
       "coding": "Escreva, explique, corrija, converta e teste excertos de código. Não executa código nem abre um repositório.",
       "presentations": "Descreve uma apresentação e recebe os diapositivos: PowerPoint ou PDF, com fotos do Unsplash ou tuas. Não desenha gráficos.",

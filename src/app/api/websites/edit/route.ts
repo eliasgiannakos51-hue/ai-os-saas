@@ -243,6 +243,9 @@ export async function POST(request: Request) {
       return NextResponse.json({
         ok: true,
         edited: false,
+        // Named, so the Site says it in the reader's language
+        // (lib/website-builder/site-requests.ts); `message` is for logs.
+        busy: true,
         message: "A generation is already in progress for this — please wait for it to finish.",
       });
     }
@@ -486,10 +489,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: false, reason: BOX_LOST }, { status: 502 });
       }
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";
+      // `error` carries the provider's own words and is for logs; the
+      // screen says it from the code, and that the hold went back when
+      // there was one (an admin or beta account holds nothing).
       return NextResponse.json(
-        // creditsRefunded: the hold was released just above, and the
-        // screen says so in its reader's language (lib/errors/error-codes.ts).
-        { ok: false, error: `${errMessage} No credits were charged — please try again.`, creditsRefunded: true },
+        // `error` carries the provider's own words and is for logs; the
+        // screen says it from the code, and that the hold went back when
+        // there was one (an admin or beta account holds nothing) — released
+        // just above (lib/errors/error-codes.ts).
+        {
+          ok: false,
+          code: "upstreamUnavailable",
+          ...(reservationId ? { creditsRefunded: true } : {}),
+          error: `${errMessage} No credits were charged — please try again.`,
+        },
         { status: 502 }
       );
     }

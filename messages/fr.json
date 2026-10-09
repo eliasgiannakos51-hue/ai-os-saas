@@ -2157,6 +2157,10 @@
       "publishChanges": "Publier les modifications",
       "publishSuccess": "Votre site est en ligne.",
       "publishError": "Impossible de publier ce site. Réessayez.",
+      "limitReached": "Vous avez atteint la limite de sites en ligne de votre offre. Retirez-en un ou passez à une offre supérieure.",
+      "paidOnly": "La publication est disponible avec les offres payantes.",
+      "tooManyToday": "Vous avez publié beaucoup de modifications aujourd’hui. Réessayez demain.",
+      "securityBlocked": "Le contrôle de sécurité a trouvé quelque chose qui ne doit pas être mis en ligne : le site n’a pas été publié.",
       "unpublish": "Retirer",
       "unpublishSuccess": "Votre site n'est plus public.",
       "unpublishError": "Impossible de retirer ce site. Réessayez.",
@@ -2972,7 +2976,10 @@
         "questions": "Avant de commencer, quelques questions. Réponds dans le champ, ou continue sans :",
         "skip": "Continuer sans",
         "new": "Nouveau site",
-        "design": "Apparence"
+        "design": "Apparence",
+        "held": "Notre contrôle de sécurité a retenu cette modification : le site est resté tel quel.",
+        "busy": "Une modification de ce site est déjà en cours. Attendez qu’elle se termine, puis redemandez-la.",
+        "offTopic": "Ici, je crée des sites web. Dites-moi quel site vous voulez : pour quelle activité ou quel but, quelles sections, quel style."
       },
       "box": {
         "only": "Seulement : {name}",

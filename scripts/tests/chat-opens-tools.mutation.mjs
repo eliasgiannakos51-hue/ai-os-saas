@@ -172,8 +172,8 @@ const MUTANTS = [
   {
     name: "no credits is said in the route's English",
     file: PANE,
-    from: '        if (outcome.code === "insufficientCredits") {',
-    to: '        if (outcome.code === "never") {',
+    from: '      if (outcome.kind === "refused" && outcome.code === "insufficientCredits") {\n        void refreshCredits();',
+    to: '      if (outcome.kind === "refused" && outcome.code === "never") {\n        void refreshCredits();',
     expect: "no credits is said by the credits notice",
   },
   {
@@ -208,8 +208,8 @@ const MUTANTS = [
   {
     name: "a change with no credits reads as «could not create the website» again",
     file: PANE,
-    from: '      if (outcome.kind === "refused" && outcome.code === "insufficientCredits") {',
-    to: '      if (outcome.kind === "refused" && outcome.code === "never") {',
+    from: '      if (outcome.kind === "refused" && outcome.code === "insufficientCredits") {\n        // NO CREDITS FOR A CHANGE',
+    to: '      if (outcome.kind === "refused" && outcome.code === "never") {\n        // NO CREDITS FOR A CHANGE',
     expect: "no credits for a change is said by the credits notice too",
   },
   {

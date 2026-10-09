@@ -210,9 +210,13 @@ for (const f of users) {
   const said = PROSE.filter(([re]) => re.test(src)).map(([, what]) => what);
   check(`${f}: no route's English is said to the reader`, said.length === 0, said.join("; "));
 }
+// The Site's requests make every refusal an ApiError (lib/website-builder/
+// site-requests.ts, package 10's check, scripts/tests/site-pages.test.mjs):
+// out of credits a 402 by its code, a limit a 429, and the shell says it.
 check("Site: out of credits and the limits are read from the code, not from the sentence",
-  /outcome\.code === "insufficientCredits"\s*\?\s*refusalText\(402, null\)/.test(site) && /outcome\.body\?\.code === "insufficientCredits"\s*\?\s*refusalText\(402, null\)/.test(site) &&
-    /kind: "notMade", message: str\(data\.message\), rateLimited: data\.rateLimited === true, code: str\(data\.code\)/.test(siteRequests));
+  /if \(outcome\.kind === "refused"\) \{\s*say\(\{ role: "tool", text: describe\(outcome\.error\)\.text \}\);/.test(site) && /:\s*describe\(outcome\.error\)\.text,/.test(site) &&
+    /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\)/.test(siteRequests) && /const short = data\?\.code === "insufficientCredits";/.test(siteRequests) &&
+    /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\)/.test(siteRequests));
 for (const route of ["src/app/api/websites/generate/route.ts", "src/app/api/websites/edit/route.ts"]) {
   const src = read(route);
   const said = (src.match(/insufficientCreditsMessage\(/g) ?? []).length;

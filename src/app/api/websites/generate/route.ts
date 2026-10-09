@@ -335,9 +335,10 @@ export async function POST(request: Request) {
     }
 
     // Off-topic guard — a cheap classification call BEFORE any credits are
-    // touched or any row is created, so a request like "write me a poem"
-    // costs the user nothing and gets a real, helpful message instead of
-    // an AI call that just wraps the poem in an HTML page (see
+    // held or any row is created, so a request like "write me a poem"
+    // costs the user only that call (settled below by settlePrechecks, as
+    // the clarification check is) and gets a real, helpful message instead
+    // of an AI call that just wraps the poem in an HTML page (see
     // lib/website-builder.ts).
     try {
       void recordAiCallForDailySpend(1);
@@ -346,7 +347,10 @@ export async function POST(request: Request) {
         // Same reasoning as the clarification branch: the call ran and
         // cost money, so it is settled even though nothing gets generated.
         await settlePrechecks(clarificationRecord);
-        return NextResponse.json({ ok: true, generated: false, message: classification.message });
+        // Named, so the Site says what it makes in the reader's language
+        // (lib/website-builder/site-requests.ts); `message` may be the
+        // classifier's English default.
+        return NextResponse.json({ ok: true, generated: false, offTopic: true, message: classification.message });
       }
     } catch (err) {
       // Best-effort: a classifier hiccup shouldn't block a real website

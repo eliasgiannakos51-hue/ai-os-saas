@@ -229,16 +229,16 @@ const MUTANTS = [
   },
   {
     name: "Site: out of credits on a new site is read as the limits",
-    file: SITE,
-    from: 'outcome.code === "insufficientCredits"\n              ? refusalText(402, null)',
-    to: 'outcome.code === "never"\n              ? refusalText(402, null)',
+    file: SITE_REQUESTS,
+    from: '  const short = data?.code === "insufficientCredits";',
+    to: '  const short = data?.code === "never";',
     expect: "read from the code, not from the sentence",
   },
   {
-    name: "Site: the requests drop the code the route sent",
+    name: "Site: a refusal before any work is a site not made, with the route's sentence",
     file: SITE_REQUESTS,
-    from: "rateLimited: data.rateLimited === true, code: str(data.code),",
-    to: "rateLimited: data.rateLimited === true, code: null,",
+    from: '    if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data), ...routeSaid(data) };\n',
+    to: "",
     expect: "read from the code, not from the sentence",
   },
   {

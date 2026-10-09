@@ -145,6 +145,15 @@ export const SitePane = forwardRef<
     try {
       const outcome = await startSiteGeneration({ name, description: withDescription, skipClarification });
       if (!mounted.current) return;
+      // NO CREDITS: the credits notice, with the two numbers the route
+      // sends — a refusal before any work, as the Site's requests read it
+      // (lib/website-builder/site-requests.ts).
+      if (outcome.kind === "refused" && outcome.code === "insufficientCredits") {
+        void refreshCredits();
+        setNoCredits({ available: outcome.available, needed: outcome.needed });
+        setStage("failed");
+        return;
+      }
       if (outcome.kind === "refused") {
         void refreshCredits();
         failWith(
@@ -162,12 +171,6 @@ export const SitePane = forwardRef<
         return;
       }
       if (outcome.kind === "notMade") {
-        if (outcome.code === "insufficientCredits") {
-          void refreshCredits();
-          setNoCredits({ available: outcome.available, needed: outcome.needed });
-          setStage("failed");
-          return;
-        }
         failWith(outcome.message ?? tSite("generateFailed"));
         return;
       }

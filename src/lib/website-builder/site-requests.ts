@@ -1,4 +1,5 @@
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
+import { ApiError } from "@/lib/errors/api-error";
 import type { ApiErrorPayload } from "@/lib/errors/error-codes";
 import type { UserWebsite } from "@/types/user-website";
 
@@ -16,11 +17,18 @@ import type { UserWebsite } from "@/types/user-website";
  *
  * Client-safe. A network failure is THROWN (a TypeError from fetch), so
  * each screen says it in its own words; everything the server answered is
- * returned as a value — with its status and its body, because the
- * routes' `error` and `message` are English prose for logs, and a screen
- * says a refusal in its reader's language from the status and the code
- * (lib/errors/use-error-text.ts; held 2026-10-08 by
- * scripts/tests/tool-shell-edges.prodtest.mjs).
+ * returned as a value.
+ *
+ * A REFUSAL IS AN ApiError (lib/errors/api-error.ts): its status, its code
+ * and whether the credits came back, so a screen says it through
+ * lib/errors/use-error-text.ts in the reader's language. The routes'
+ * `error` and `message` are English sentences for logs and a curl; shown
+ * as they were, a Greek screen read «Not enough credits (you have: 0,
+ * need: 15)» and, when the provider was down, the provider's own JSON
+ * (found 2026-10-08 by scripts/tests/site-pages-edges.prodtest.mjs and
+ * scripts/tests/tool-shell-edges.prodtest.mjs). Beside it, the route's own
+ * `code` and, out of credits, the two numbers it sends, which Chat's Site
+ * pane says with the credits notice (components/chat/site-pane.tsx).
  */
 
 export const SITE_POLL_INTERVAL_MS = 2500;
@@ -32,18 +40,55 @@ export type SiteStart =
   | { kind: "questions"; questions: string[] }
   | { kind: "started"; record: UserWebsite }
   /**
-   * The server answered but made nothing (an off-topic brief, a duplicate
-   * refused, no credits) — with its sentence, which is English. `code`
-   * "insufficientCredits" and `rateLimited` say why when it was the balance
-   * or the limits; out of credits, `available` and `needed` carry the two
-   * numbers, for a screen to say it in its own language.
+   * The server answered but made nothing: a brief that is not a website
+   * (`offTopic`), with the classifier's sentence — which may be its
+   * English default (lib/website-builder.ts, DEFAULT_OFF_TOPIC_MESSAGE).
    */
-  | { kind: "notMade"; message: string | null; code: string | null; rateLimited: boolean; available: number | null; needed: number | null }
-  /** Refused: the plan, the credits, the size — `error` is the server's own; `code` is "not_included" when the plan has no Site. */
-  | { kind: "refused"; error: unknown; status: number; body: ApiErrorPayload | null; code: string | null };
+  | { kind: "notMade"; offTopic: boolean; message: string | null }
+  /**
+   * Refused: the plan, the credits, today's limit, the size, a failure.
+   * `code` is the route's own ("not_included" when the plan has no Site,
+   * "insufficientCredits" when the balance is short, with `available` and
+   * `needed`).
+   */
+  | ({ kind: "refused"; error: ApiError } & RouteSaid);
+
+/** What the route named, beside the ApiError: its own code and, out of credits, the two numbers. */
+type RouteSaid = { code: string | null; available: number | null; needed: number | null };
 
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
+function routeSaid(data: Record<string, unknown> | null): RouteSaid {
+  return { code: str(data?.code), available: num(data?.available), needed: num(data?.needed) };
+}
+
+/**
+ * A refusal the routes answer with 200 and `rateLimited` — before any work,
+ * so nothing was charged. Short credits are a 402 in lib/errors/error-codes.ts
+ * terms (the route names them with `code: "insufficientCredits"`); a limit
+ * is a 429.
+ */
+function refusedBeforeWork(data: { code?: unknown; message?: unknown } | null): ApiError {
+  const short = data?.code === "insufficientCredits";
+  return new ApiError(short ? 402 : 429, {
+    error: typeof data?.message === "string" ? data.message : undefined,
+    code: short ? "insufficientCredits" : "rateLimited",
+  });
+}
+
+/**
+ * Any other refusal, as an ApiError whose `message` is the route's own
+ * sentence, or empty when it gave none — what `error` was before it became
+ * an ApiError. Chat's Site pane (components/chat/site-pane.tsx) still says
+ * a refusal through getErrorMessage, which shows a message and falls back
+ * to its own translated sentence on an empty one; with ApiError's default
+ * it read «Request failed with 200» for a change the safety review held
+ * back (found 2026-10-09). The shell reads only the status, the code and
+ * the credits (lib/errors/use-error-text.ts).
+ */
+function refusal(status: number, data: ApiErrorPayload | null, prose: unknown): ApiError {
+  return new ApiError(status, { ...(data ?? {}), error: typeof prose === "string" ? prose : "" });
+}
 
 export async function startSiteGeneration(input: {
   name: string;
@@ -56,10 +101,11 @@ export async function startSiteGeneration(input: {
     body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null, status: res.status, body: data, code: str(data?.code) };
+  if (!res.ok || !data?.ok) return { kind: "refused", error: refusal(res.status, data, data?.error), ...routeSaid(data) };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
   if (!data.generated) {
-    return { kind: "notMade", message: str(data.message), rateLimited: data.rateLimited === true, code: str(data.code), available: num(data.available), needed: num(data.needed) };
+    if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data), ...routeSaid(data) };
+    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };
   }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the
@@ -119,23 +165,13 @@ export type SiteChange =
   | { kind: "changed"; record: UserWebsite }
   /**
    * "pageGone": the page was renamed or removed; "boxLost": the chosen part
-   * did not come back. `status` and `body` are the route's answer: 200 with
-   * `edited: false` is a refusal said in the body (`code`, `rateLimited`,
-   * `flagged`), anything else is said by the status. `code` is
-   * "insufficientCredits", with the two numbers, when the balance is short —
-   * for a screen to say it in its own language rather than the route's
-   * English sentence.
+   * did not come back; "held": the safety review kept the change back;
+   * "busy": another change to this site is still being made; "other":
+   * everything else, said from `error`. `code` is "insufficientCredits",
+   * with the two numbers, when the balance is short — for a screen to say
+   * it in its own language rather than the route's English sentence.
    */
-  | {
-      kind: "refused";
-      reason: "pageGone" | "boxLost" | "other";
-      error: unknown;
-      status: number;
-      body: (ApiErrorPayload & Record<string, unknown>) | null;
-      code: string | null;
-      available: number | null;
-      needed: number | null;
-    };
+  | ({ kind: "refused"; reason: "pageGone" | "boxLost" | "held" | "busy" | "other"; error: ApiError } & RouteSaid);
 
 /**
  * A change in words. `pageSlug` names the page it is about ("" or absent:
@@ -160,8 +196,13 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
         ? "pageGone"
         : data?.reason === "box_lost" || data?.reason === "bad_section"
           ? "boxLost"
-          : "other";
-    return { kind: "refused", reason, status: res.status, body: data, error: data?.error ?? data?.message ?? null, code: str(data?.code), available: num(data?.available), needed: num(data?.needed) };
+          : data?.flagged === true
+            ? "held"
+            : data?.busy === true
+              ? "busy"
+              : "other";
+    const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : refusal(res.status, data, data?.error ?? data?.message);
+    return { kind: "refused", reason, error, ...routeSaid(data) };
   }
   return { kind: "changed", record: data.record as UserWebsite };
 }

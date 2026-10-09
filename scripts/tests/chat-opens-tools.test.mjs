@@ -131,16 +131,17 @@ check("a site that failed is said in the pane's own words, never the worker's se
   /failWith\(whyNotMade\(done\)\)/.test(pane) && /return t\("failed"\);/.test(pane) && !/error_message/.test(pane));
 check("a server sentence is shown as it came only on an English screen", /const serverSaid = \(text: string \| null \| undefined, ours: string\) => \(locale\.startsWith\("en"\) && text \? text : ours\);/.test(pane));
 check("no credits is said by the credits notice, from the code and numbers the route sends",
-  /if \(outcome\.code === "insufficientCredits"\) \{[\s\S]{0,160}setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\)/.test(pane) && /<OutOfCreditsNotice/.test(pane) &&
+  /if \(outcome\.kind === "refused" && outcome\.code === "insufficientCredits"\) \{\s*void refreshCredits\(\);\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("failed"\);/.test(pane) && /<OutOfCreditsNotice/.test(pane) &&
     (code("src/app/api/websites/generate/route.ts").match(/code: "insufficientCredits",\s*message: insufficientCreditsMessage\([^)]*\),\s*available: check\.remaining,/g) ?? []).length === 2 &&
-    /code: str\(data\.code\), available: num\(data\.available\), needed: num\(data\.needed\)/.test(code("src/lib/website-builder/site-requests.ts")));
+    /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\), \.\.\.routeSaid\(data\) \};/.test(code("src/lib/website-builder/site-requests.ts")) &&
+    /return \{ code: str\(data\?\.code\), available: num\(data\?\.available\), needed: num\(data\?\.needed\) \};/.test(code("src/lib/website-builder/site-requests.ts")));
 // AND A CHANGE SAID AFTER THE SITE IS MADE, out of credits (2026-10-09,
 // scripts/tests/chat-opens-tools-edges.prodtest.mjs part 5): a non-English
 // screen said «could not create the website» for a site that existed.
 check("no credits for a change is said by the credits notice too, and the site stays",
   /if \(outcome\.kind === "refused" && outcome\.code === "insufficientCredits"\) \{\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("done"\);\s*return;/.test(pane) &&
     (code("src/app/api/websites/edit/route.ts").match(/code: "insufficientCredits"/g) ?? []).length === 2 &&
-    /error: data\?\.error \?\? data\?\.message \?\? null, code: str\(data\?\.code\), available: num\(data\?\.available\), needed: num\(data\?\.needed\)/.test(code("src/lib/website-builder/site-requests.ts")));
+    /return \{ kind: "refused", reason, error, \.\.\.routeSaid\(data\) \};/.test(code("src/lib/website-builder/site-requests.ts")));
 {
   // AND THE CHAT ITSELF, out of credits: the same English sentence was set
   // as the chat's error on every screen (scripts/tests/brand-memory.prodtest.mjs).

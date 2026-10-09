@@ -730,4 +730,8 @@ console.log("\n== 6. NEXT_PUBLIC_ is not a naming convention ==");
 }
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
-process.exit(fail === 0 ? 0 : 1);
+// exitCode, NOT process.exit(): this gate prints about 47 KB, and
+// process.exit() with output still queued on a pipe drops the tail — the
+// tally line — so scripts/tests/run-gates.mjs read it as a gate that
+// printed no count and failed the run (measured 2026-10-08: 1 run in 8).
+process.exitCode = fail === 0 ? 0 : 1;

@@ -259,6 +259,7 @@
       "team": "Faites profiter d’autres personnes de votre forfait, chacune sur son propre compte.",
       "apps": "Suivez les applis que vous préparez ou avez déjà livrées. Ne les construit pas.",
       "images": "Suivez les images que vous préparez ou avez déjà faites. Ne les génère pas.",
+      "imageTool": "Quatre images à partir d’une description ; modifie-en une avec des mots et télécharge-la en pleine résolution.",
       "videos": "Suivez les vidéos que vous préparez ou avez déjà faites. Ne les génère pas.",
       "coding": "Écrivez, expliquez, corrigez, convertissez et testez des extraits de code. N'exécute pas de code et n'ouvre pas de dépôt.",
       "presentations": "Décrivez une présentation et obtenez les diapositives : PowerPoint ou PDF, avec des photos d'Unsplash ou les vôtres. Aucun graphique.",

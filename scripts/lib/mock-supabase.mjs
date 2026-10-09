@@ -61,8 +61,9 @@ export async function startMockSupabase({ port = 54341, tableRows = {}, handle =
     let body = "";
     // The bytes as they came, too: `body` is decoded as text, which is
     // right for JSON and wrong for an uploaded PDF or picture.
-    // scripts/tests/chat-attachments-edges.prodtest.mjs stores uploads
-    // from `raw` and serves them back to the routes that read them.
+    // scripts/tests/chat-attachments-edges.prodtest.mjs and
+    // scripts/tests/image-studio-edges.prodtest.mjs store uploads from
+    // `raw` and serve them back to the routes that read them.
     const chunks = [];
     req.on("data", (c) => {
       chunks.push(c);

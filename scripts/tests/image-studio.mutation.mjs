@@ -9,7 +9,9 @@
  * without its owner filter, its switch, its claim or its rate limit; a
  * deletion that leaves pictures behind; a public bucket; the provider's
  * refusal read as an outage; four identical asks; a price off the
- * settlement's formula; a screen that sends without a key.
+ * settlement's formula; a screen that sends without a key. And the tool
+ * called by the ideas list's name where its switch is on: in the tab, the
+ * ⌘K menu, the records hub, the wall of a plan below it.
  *
  * Run: node scripts/tests/image-studio.mutation.mjs
  */
@@ -28,6 +30,12 @@ const STUDIO = "src/lib/images/image-studio.ts";
 const PRICING = "src/lib/images/image-pricing.ts";
 const SHELL = "src/components/images/image-shell.tsx";
 const MIGRATION = "supabase/migrations/20261019000000_generated_images.sql";
+const PAGE = "src/app/dashboard/images/page.tsx";
+const PALETTE = "src/components/dashboard/command-palette.tsx";
+const LAYOUT = "src/app/dashboard/layout.tsx";
+const RECORDS = "src/app/dashboard/records/page.tsx";
+const NAMES = "src/lib/nav/switched-names.ts";
+const NAMES_ON = "src/lib/nav/switched-on.ts";
 
 const MUTANTS = [
   {
@@ -163,11 +171,60 @@ const MUTANTS = [
     to: "overlay-fade-in fixed inset-0 z-50",
     expect: "the question is ABOVE the work pane",
   },
+  {
+    name: "the tab keeps the ideas list's name where the switch is on",
+    file: PAGE,
+    from: "? pageTitle(TOOL_TITLE_KEY) : pageTitle(CONFIG.titleKey);",
+    to: "? pageTitle(CONFIG.titleKey) : pageTitle(CONFIG.titleKey);",
+    expect: "the tab says it",
+  },
+  {
+    name: "a plan below the tool's meets the ideas list's wall",
+    file: PAGE,
+    from: '  if (switchedName("/dashboard/images", await switchedOnFor(user.email))) {',
+    to: '  if (included && switchedName("/dashboard/images", await switchedOnFor(user.email))) {',
+    expect: "a plan below the tool's meets a wall under the tool's name",
+  },
+  {
+    name: "the name is the tool's for everybody, switch or not",
+    file: NAMES,
+    from: "  if (!switchedOn.includes(href)) return null;\n",
+    to: "",
+    expect: "...by that name only for whom the switch is on",
+  },
+  {
+    name: "whom the name is for ignores the switch",
+    file: NAMES_ON,
+    from: "isFlagKey(s.flag) && audienceAllows(audiences[s.flag], staff)",
+    to: "isFlagKey(s.flag)",
+    expect: "whom it is on for is the switch's own rule",
+  },
+  {
+    name: "the ⌘K menu draws the row by the ideas list's name",
+    file: PALETTE,
+    from: "            {itemLabel(item)}",
+    to: "            {translatedLabel(item.label)}",
+    expect: "the ⌘K menu shows and matches every page row by that name",
+  },
+  {
+    name: "the layout never tells the ⌘K menu for whom the switch is on",
+    file: LAYOUT,
+    from: "<CommandPalette isOwner={isAdmin} switchedOn={switchedOn} />",
+    to: "<CommandPalette isOwner={isAdmin} />",
+    expect: "...and is told by the layout for whom it is on",
+  },
+  {
+    name: "the records hub keeps the line that says the page makes nothing",
+    file: RECORDS,
+    from: "hint: switched ? tSidebar(`hints.${switched.hintKey}`) : item.hintKey",
+    to: "hint: item.hintKey",
+    expect: "the records hub names it the same way, with the tool's line",
+  },
 ];
 
 runMutations({
   name: "image-studio",
   gate: GATE,
-  targets: ["src/components/credits/cost-estimate.tsx", GENERATE, EDIT, FULL, DOWNLOAD, DELETE, REMAKE, ACCESS, ANSWER, STUDIO, PRICING, SHELL, MIGRATION],
+  targets: ["src/components/credits/cost-estimate.tsx", GENERATE, EDIT, FULL, DOWNLOAD, DELETE, REMAKE, ACCESS, ANSWER, STUDIO, PRICING, SHELL, MIGRATION, PAGE, PALETTE, LAYOUT, RECORDS, NAMES, NAMES_ON],
   mutants: MUTANTS,
 });

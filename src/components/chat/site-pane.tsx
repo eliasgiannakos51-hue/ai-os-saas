@@ -133,6 +133,11 @@ export const SitePane = forwardRef<
           const fromMemory = remembered.forRecord(done);
           if (fromMemory) say(fromMemory);
           setStage("done");
+        } else if (done.status === "flagged") {
+          // Never the stored sentence: it is English whatever the reader's
+          // language, and it speaks of a button this pane does not have
+          // (src/lib/websites/flagged-notice.ts).
+          failWith(`${tSite("flaggedTitle")}. ${tSite("flaggedBody")}`);
         } else {
           failWith(whyNotMade(done));
         }

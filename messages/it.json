@@ -1669,6 +1669,8 @@
       "statusCompleted": "Pronto",
       "statusFlagged": "Segnalato",
       "flaggedTitle": "Segnalato dal nostro controllo di sicurezza",
+      "flaggedBody": "Il nostro controllo di sicurezza ha bloccato questo sito, quindi non può essere pubblicato così com’è.",
+      "flaggedDetails": "Cosa ha trovato il controllo",
       "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
       "design": {
         "title": "Design",
@@ -2543,6 +2545,23 @@
           "staff": "Tu e l’account di prova",
           "everyone": "Tutti"
         }
+      },
+      "alerts": {
+        "title": "Avvisi per te",
+        "hint": "Gli errori in produzione, un aumento improvviso dei costi, un margine sotto la soglia e un’ondata di accessi falliti arrivano via email a ADMIN_EMAILS.",
+        "recipients": "Destinatari: {count, plural, one {# indirizzo} other {# indirizzi}} da ADMIN_EMAILS",
+        "recipientsNone": "Destinatari: nessuno — ADMIN_EMAILS non è impostato",
+        "mailerOk": "Invio: configurato, dal tuo indirizzo (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Invio: RESEND_API_KEY non è impostato — nessun avviso parte",
+        "mailerTestSender": "Invio: dall’indirizzo di prova di Resend, che arriva solo all’email del tuo account Resend. Imposta RESEND_FROM_EMAIL su un indirizzo del tuo dominio.",
+        "send": "Invia un avviso di prova",
+        "sending": "Invio in corso…",
+        "sent": "Inviato a {count, plural, one {# indirizzo} other {# indirizzi}}. Se non arriva entro pochi minuti, guarda anche nello spam.",
+        "refused": "Non inviato. Resend ha risposto:",
+        "notConfigured": "Non inviato: RESEND_API_KEY non è impostato.",
+        "noRecipients": "Non inviato: ADMIN_EMAILS non è impostato.",
+        "rateLimited": "Troppe prove in quest’ora. Riprova più tardi.",
+        "failed": "Non inviato. Riprova."
       }
     },
     "ideas": {

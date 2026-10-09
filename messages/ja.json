@@ -1669,6 +1669,8 @@
       "statusCompleted": "完成",
       "statusFlagged": "フラグ付き",
       "flaggedTitle": "安全性レビューによりフラグが付けられました",
+      "flaggedBody": "安全審査でこのサイトが保留されたため、このままでは公開できません。",
+      "flaggedDetails": "審査で見つかった内容",
       "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。",
       "design": {
         "title": "デザイン",
@@ -2543,6 +2545,23 @@
           "staff": "あなたとテスト用アカウント",
           "everyone": "全員"
         }
+      },
+      "alerts": {
+        "title": "あなたへの通知",
+        "hint": "本番環境のエラー、コストの急増、下限を下回る利益率、ログイン失敗の急増は、ADMIN_EMAILS にメールで届きます。",
+        "recipients": "宛先：ADMIN_EMAILS の {count, plural, other {# 件のアドレス}}",
+        "recipientsNone": "宛先：なし — ADMIN_EMAILS が設定されていません",
+        "mailerOk": "送信：設定済み、あなた自身のアドレスから（RESEND_API_KEY、RESEND_FROM_EMAIL）",
+        "mailerMissing": "送信：RESEND_API_KEY が設定されていません — 通知は送られません",
+        "mailerTestSender": "送信：Resend のテスト用アドレスから。届くのは Resend アカウントのメールだけです。RESEND_FROM_EMAIL を自分のドメインのアドレスに設定してください。",
+        "send": "テスト通知を送る",
+        "sending": "送信中…",
+        "sent": "{count, plural, other {# 件のアドレス}}に送信しました。数分たっても届かない場合は、迷惑メールも確認してください。",
+        "refused": "送信されませんでした。Resend の応答：",
+        "notConfigured": "送信されませんでした：RESEND_API_KEY が設定されていません。",
+        "noRecipients": "送信されませんでした：ADMIN_EMAILS が設定されていません。",
+        "rateLimited": "この1時間のテストが多すぎます。後でもう一度お試しください。",
+        "failed": "送信されませんでした。もう一度お試しください。"
       }
     },
     "ideas": {

@@ -217,7 +217,7 @@ check("a refusal to make a site is said through the shared error sentences", /if
 check("...and so is a refused change, after its own four reasons",
   /outcome\.reason === "held"\s*\?\s*`\$\{tShell\("site\.held"\)\} \$\{tErrors\("credits\.notCharged"\)\}`\s*:\s*outcome\.reason === "busy"\s*\?\s*`\$\{tShell\("site\.busy"\)\} \$\{tErrors\("credits\.notCharged"\)\}`\s*:\s*describe\(outcome\.error\)\.text/.test(shell));
 check("no server sentence reaches the conversation: not error_message, not getErrorMessage", !/\berror_message\b/.test(shell) && !/getErrorMessage/.test(shell));
-check("a site that was not made is said from its status and notes", /say\(\{ role: "tool", text: failedText\(record\) \}\);/.test(shell) && /\{running\(current\) \? t\("generating"\) : failedText\(current\)\}/.test(shell));
+check("a site that was not made is said from its status and notes", /say\(\{ role: "tool", text: failedText\(record\) \}\);/.test(shell) && /\{running\(current\) \? t\("generating"\) : current\.status === "flagged" \? t\("flaggedBody"\) : failedText\(current\)\}/.test(shell));
 check("...free only when no whole document was written; a stop says what it cost",
   /if \(stopped\) return describeNote\(stopped\);\s*const written = looksLikeCompleteHtmlDocument\(record\.html_content \?\? ""\);\s*return `\$\{t\("generateFailed"\)\} \$\{written \? tErrors\("credits\.unverified"\) : tErrors\("credits\.notCharged"\)\}`;/.test(shell));
 check("a refusal carries the route's status and code", /if \(!res\.ok \|\| !data\?\.ok\) return \{ kind: "refused", error: refusal\(res\.status, data, data\?\.error\), \.\.\.routeSaid\(data\) \};/.test(requests));

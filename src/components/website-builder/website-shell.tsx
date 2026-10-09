@@ -161,6 +161,9 @@ export function WebsiteShell({
           const fromMemory = remembered.forRecord(record);
           if (fromMemory) say({ role: "tool", text: fromMemory });
           setPane("site");
+        } else if (record.status === "flagged") {
+          // Never the stored sentence: src/lib/websites/flagged-notice.ts.
+          say({ role: "tool", text: `${t("flaggedTitle")}. ${t("flaggedBody")}` });
         } else {
           say({ role: "tool", text: failedText(record) });
         }
@@ -437,7 +440,7 @@ export function WebsiteShell({
                   className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
                 />
               ) : (
-                <p className="text-xs text-muted">{running(current) ? t("generating") : failedText(current)}</p>
+                <p className="text-xs text-muted">{running(current) ? t("generating") : current.status === "flagged" ? t("flaggedBody") : failedText(current)}</p>
               )}
             </div>
           ),
@@ -458,7 +461,7 @@ export function WebsiteShell({
                       className="w-full min-w-0 text-start"
                     >
                       <p className="break-words text-sm text-foreground">{w.name}</p>
-                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.status === "flagged" ? t("statusFlagged") : t("statusFailed")}</p>
+                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.status === "flagged" ? t("flaggedTitle") : t("statusFailed")}</p>
                     </button>
                   </li>
                 ))}

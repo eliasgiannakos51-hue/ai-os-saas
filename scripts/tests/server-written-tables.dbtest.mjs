@@ -1,11 +1,14 @@
 // TEAM INVITES, FILE ROWS, PUBLISHED PAGES, AGENTS AND SITES ARE WRITTEN
 // BY THE SERVER ONLY, AGAINST A REAL POSTGRES.
 //
-// supabase/migrations/20261014000000_server_written_tables.sql and
-// 20261015000000_agents_websites_server_written.sql. As the signed-in
-// role, on the account's OWN rows: reading works, inserting and updating
-// do not, and deleting does not either — except a site, which the
-// builder deletes from the browser. As the service role, all of it does.
+// supabase/migrations/20261014000000_server_written_tables.sql,
+// 20261015000000_agents_websites_server_written.sql and
+// 20261023100000_projects_site_versions_server_written.sql. As the
+// signed-in role, on the account's OWN rows: reading works, inserting and
+// updating do not, and deleting does not either — except a site, which the
+// builder deletes from the browser, and a project, which the account still
+// renames and deletes (only its creation is the server's). As the service
+// role, all of it does.
 //
 // Run: node scripts/tests/server-written-tables.dbtest.mjs   (needs a
 // database; run through `npm run test:db`, which provisions one)
@@ -54,6 +57,10 @@ sql(`insert into public.team_members (owner_id, member_email, role) values ('${U
 sql(`insert into public.user_files (user_id, filename, file_type, size_bytes, storage_path) values ('${U}', 'a.txt', 'txt', 10, '${U}/a')`);
 sql(`insert into public.published_sites (website_id, user_id, subdomain, html_content) values ('${W}', '${U}', 'server-written-test', '<p>x</p>')`);
 sql(`insert into public.user_agents (user_id, name, prompt, schedule_cron, status, delivery_target) values ('${U}', 'a', 'p', '0 9 * * *', 'paused', 'a@test.local')`);
+const PS = sql(`select id from public.published_sites where user_id = '${U}' limit 1`);
+sql(`insert into public.site_versions (published_site_id, user_id, html_content, version_number) values ('${PS}', '${U}', '<p>v1</p>', 1)`);
+const P = "eeeeeeee-0000-0000-0000-0000000008b1";
+sql(`insert into public.projects (id, user_id, name) values ('${P}', '${U}', 'camping')`);
 
 const CASES = [
   {
@@ -85,6 +92,13 @@ const CASES = [
     del: `delete from public.user_agents where user_id = '${U}'`,
   },
   {
+    table: "site_versions",
+    read: `select count(*) from public.site_versions where user_id = '${U}'`,
+    insert: `insert into public.site_versions (published_site_id, user_id, html_content, version_number) values ('${PS}', '${U}', '<p>v2</p>', 2)`,
+    update: `update public.site_versions set html_content = '<p>z</p>' where user_id = '${U}'`,
+    del: `delete from public.site_versions where user_id = '${U}'`,
+  },
+  {
     table: "user_websites",
     read: `select count(*) from public.user_websites where user_id = '${U}'`,
     insert: `insert into public.user_websites (user_id, name, html_content, status) values ('${U}', 'b', '', 'pending')`,
@@ -108,6 +122,15 @@ for (const c of CASES) {
 console.log("\n== user_websites: the builder still deletes its own site ==");
 const siteDel = asUser(U, `delete from public.user_websites where id = '${W}'`);
 ok("user_websites: delete works", siteDel.ok && sql(`select count(*) from public.user_websites where id = '${W}'`) === "0", siteDel.out);
+
+console.log("\n== projects: created by the server, renamed and deleted by the account ==");
+ok("projects: the account reads its own", asUser(U, `select count(*) from public.projects where user_id = '${U}'`).out === "1");
+ok("projects: ...but cannot create one", denied(asUser(U, `insert into public.projects (user_id, name) values ('${U}', 'second')`)));
+ok("projects: the server still creates", asServer(`insert into public.projects (user_id, name) values ('${U}', 'by the server')`).ok);
+const renamed = asUser(U, `update public.projects set name = 'renamed' where id = '${P}'`);
+ok("projects: the account renames its own", renamed.ok && sql(`select name from public.projects where id = '${P}'`) === "renamed", renamed.out);
+const gone = asUser(U, `delete from public.projects where id = '${P}'`);
+ok("projects: ...and deletes its own", gone.ok && sql(`select count(*) from public.projects where id = '${P}'`) === "0", gone.out);
 
 sql(`delete from auth.users where id = '${U}'`);
 

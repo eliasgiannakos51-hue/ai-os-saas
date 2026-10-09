@@ -1669,6 +1669,8 @@
       "statusCompleted": "Prêt",
       "statusFlagged": "Signalé",
       "flaggedTitle": "Signalé par notre contrôle de sécurité",
+      "flaggedBody": "Notre contrôle de sécurité a retenu ce site : il ne peut pas être publié en l’état.",
+      "flaggedDetails": "Ce que le contrôle a trouvé",
       "editUnavailable": "Vous pourrez demander des modifications une fois le site généré.",
       "design": {
         "title": "Design",
@@ -2543,6 +2545,23 @@
           "staff": "Vous et le compte de test",
           "everyone": "Tout le monde"
         }
+      },
+      "alerts": {
+        "title": "Alertes pour vous",
+        "hint": "Les erreurs en production, une hausse soudaine des coûts, une marge sous le seuil et une vague de connexions échouées sont envoyées par email à ADMIN_EMAILS.",
+        "recipients": "Destinataires : {count, plural, one {# adresse} other {# adresses}} depuis ADMIN_EMAILS",
+        "recipientsNone": "Destinataires : personne — ADMIN_EMAILS n’est pas défini",
+        "mailerOk": "Envoi : configuré, depuis votre propre adresse (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Envoi : RESEND_API_KEY n’est pas défini — aucune alerte ne part",
+        "mailerTestSender": "Envoi : depuis l’adresse de test de Resend, qui n’atteint que l’email de votre compte Resend. Définissez RESEND_FROM_EMAIL avec une adresse de votre propre domaine.",
+        "send": "Envoyer une alerte de test",
+        "sending": "Envoi…",
+        "sent": "Envoyée à {count, plural, one {# adresse} other {# adresses}}. Si elle n’arrive pas d’ici quelques minutes, regardez aussi dans les spams.",
+        "refused": "Non envoyée. Resend a répondu :",
+        "notConfigured": "Non envoyée : RESEND_API_KEY n’est pas défini.",
+        "noRecipients": "Non envoyée : ADMIN_EMAILS n’est pas défini.",
+        "rateLimited": "Trop de tests cette heure-ci. Réessayez plus tard.",
+        "failed": "Non envoyée. Réessayez."
       }
     },
     "ideas": {

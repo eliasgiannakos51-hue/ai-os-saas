@@ -488,8 +488,11 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     }
 
     // Every published state is a version, so rollback means "what the
-    // public actually saw", not "what was in the editor".
-    const { error: versionError } = await supabase.from("site_versions").insert({
+    // public actually saw", not "what was in the editor". Written by the
+    // server (the account holds no write on site_versions:
+    // 20261023100000_projects_site_versions_server_written.sql), user_id
+    // from the session, after every check above.
+    const { error: versionError } = await createAdminClient().from("site_versions").insert({
       published_site_id: publishedSiteId,
       user_id: user.id,
       html_content: publishedHtml,
@@ -503,7 +506,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       // than failing a publish that already succeeded.
       logApiError("/api/websites/[id]/publish", versionError, { stage: "insert_version" });
     }
-    await pruneVersions(supabase, publishedSiteId);
+    await pruneVersions(supabase, publishedSiteId, user.id);
 
     void logSecurityCheck(supabase, {
       userId: user.id,
@@ -613,19 +616,24 @@ async function nextVersionFor(
 
 /** Keeps the newest MAX_SITE_VERSIONS. Each version is a full copy of the
  *  HTML, so an unbounded history is a table of megabyte rows that every
- *  dashboard query has to step over. */
+ *  dashboard query has to step over. The ids are read through the
+ *  person's own client (RLS: their own rows only) and filtered by the
+ *  caller as well; the delete is the server's, scoped to those ids AND to
+ *  the caller. */
 async function pruneVersions(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  publishedSiteId: string
+  publishedSiteId: string,
+  userId: string
 ): Promise<void> {
   const { data } = await supabase
     .from("site_versions")
     .select("id")
     .eq("published_site_id", publishedSiteId)
+    .eq("user_id", userId)
     .order("version_number", { ascending: false })
     .range(MAX_SITE_VERSIONS, MAX_SITE_VERSIONS + 200);
   const ids = (data ?? []).map((row) => row.id);
   if (ids.length === 0) return;
-  const { error } = await supabase.from("site_versions").delete().in("id", ids);
+  const { error } = await createAdminClient().from("site_versions").delete().in("id", ids).eq("user_id", userId);
   if (error) logApiError("/api/websites/[id]/publish", error, { stage: "prune_versions" });
 }

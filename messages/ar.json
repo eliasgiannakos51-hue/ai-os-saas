@@ -1669,6 +1669,8 @@
       "statusCompleted": "جاهز",
       "statusFlagged": "مُعلَّم",
       "flaggedTitle": "تم تعليمه بواسطة مراجعة السلامة لدينا",
+      "flaggedBody": "أوقف فحص الأمان لدينا هذا الموقع، لذا لا يمكن نشره كما هو.",
+      "flaggedDetails": "ما الذي وجده الفحص",
       "editUnavailable": "يمكنك طلب تعديلات بمجرد انتهاء إنشاء الموقع.",
       "design": {
         "title": "التصميم",
@@ -2543,6 +2545,23 @@
           "staff": "أنت وحساب الاختبار",
           "everyone": "الجميع"
         }
+      },
+      "alerts": {
+        "title": "تنبيهات لك",
+        "hint": "أخطاء الإنتاج، والارتفاع المفاجئ في التكلفة، والهامش تحت الحد الأدنى، وموجة من محاولات تسجيل الدخول الفاشلة تُرسل بالبريد الإلكتروني إلى ADMIN_EMAILS.",
+        "recipients": "المستلمون: {count, plural, zero {# عنوان} one {عنوان واحد} two {عنوانان} few {# عناوين} many {# عنوانًا} other {# عنوان}} من ADMIN_EMAILS",
+        "recipientsNone": "المستلمون: لا أحد — ADMIN_EMAILS غير مضبوط",
+        "mailerOk": "الإرسال: مضبوط، من عنوانك الخاص (RESEND_API_KEY، RESEND_FROM_EMAIL)",
+        "mailerMissing": "الإرسال: RESEND_API_KEY غير مضبوط — لا يخرج أي تنبيه",
+        "mailerTestSender": "الإرسال: من عنوان الاختبار في Resend، الذي لا يصل إلا إلى بريد حسابك في Resend. اضبط RESEND_FROM_EMAIL على عنوان من نطاقك الخاص.",
+        "send": "أرسل تنبيهًا تجريبيًا",
+        "sending": "جارٍ الإرسال…",
+        "sent": "أُرسل إلى {count, plural, zero {# عنوان} one {عنوان واحد} two {عنوانين} few {# عناوين} many {# عنوانًا} other {# عنوان}}. إذا لم يصل خلال دقائق، فتحقق من البريد غير المرغوب فيه أيضًا.",
+        "refused": "لم يُرسل. ردّ Resend:",
+        "notConfigured": "لم يُرسل: RESEND_API_KEY غير مضبوط.",
+        "noRecipients": "لم يُرسل: ADMIN_EMAILS غير مضبوط.",
+        "rateLimited": "اختبارات كثيرة خلال هذه الساعة. حاول لاحقًا.",
+        "failed": "لم يُرسل. حاول مرة أخرى."
       }
     },
     "ideas": {

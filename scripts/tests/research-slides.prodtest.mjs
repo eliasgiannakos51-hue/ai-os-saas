@@ -485,7 +485,10 @@ try {
         check("...with no English sentence on the Greek screen", found.length === 0, found.join(" | "));
       }
       if (run.credits === 0 || run.reports) check("...and the model was never asked", model.calls.length === 0, String(model.calls.length));
-      else check("...after the model was really asked; the plan's hold given back", model.calls.length >= 1 && tables.rpcCalls.some((c) => c.name === "release_reservation" || c.name === "settle_reservation"), tables.rpcCalls.map((c) => c.name).join(","));
+      // The screen says nothing was charged (refused.unavailable), so the
+      // plan's hold must be given back, never settled: a call that never
+      // returned is a release (lib/billing/reservations.ts, settleReservation).
+      else check("...after the model was really asked; the plan's hold given back, never settled", model.calls.length >= 1 && tables.rpcCalls.some((c) => c.name === "release_reservation") && !tables.rpcCalls.some((c) => c.name === "settle_reservation"), tables.rpcCalls.map((c) => c.name).join(","));
       check("...and no report is made", store.research_reports.length === (run.reports ?? []).length, String(store.research_reports.length));
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();

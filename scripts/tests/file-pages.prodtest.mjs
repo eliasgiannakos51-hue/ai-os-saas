@@ -31,7 +31,8 @@
  * overloaded (HTTP 529, the API's own error, through the SDK's retries and
  * the worker's); a Free account at its file limit; a scanned PDF with no
  * text; the screens in Greek and English — every page reference in the
- * reader's language («Σελίδα 37», never «Page 37» on a Greek screen), and
+ * reader's language («Σελίδα 37», never «Page 37» on a Greek screen, and
+ * in what the copy buttons put on the clipboard, since 2026-10-09), and
  * no English sentence from a route on a Greek one; and the Library's search
  * (switch "library"), which shows a file's words without its page markers.
  *
@@ -192,6 +193,8 @@ const messages = (locale) => JSON.parse(readFileSync(`messages/${locale}.json`, 
 const M = { el: messages("el"), en: messages("en") };
 const el = M.el;
 const W = el.pageRefs;
+// The copy button's own name (components/ui/copy-button.tsx, "common").
+const COPY = { el: JSON.parse(readFileSync("messages/el.json", "utf8")).common.copy, en: JSON.parse(readFileSync("messages/en.json", "utf8")).common.copy };
 const fill = (s, vars) => String(s ?? "<no such words>").replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
 // The English a Greek Files screen must never show: the en.json words of the
 // namespaces it draws, and the sentences the Files routes write in English.
@@ -326,12 +329,43 @@ try {
     await page.route("**/api/jobs/*/consume", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) }));
     const pageReads = [];
     page.on("request", (req) => { if (/\/api\/files\/[^/]+\?page=/.test(req.url())) pageReads.push(new URL(req.url()).search); });
+    // WHAT IS COPIED: the clipboard's write, kept where the test can read it
+    // (components/ui/copy-button.tsx calls navigator.clipboard.writeText).
+    await page.addInitScript(() => {
+      window.__copied = [];
+      const writeText = (t) => (window.__copied.push(String(t)), Promise.resolve());
+      try { Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true }); } catch {}
+    });
+    async function copiedBy(button) {
+      await press(button);
+      for (let i = 0; i < 30; i++) {
+        const last = await page.evaluate(() => window.__copied.at(-1) ?? null);
+        if (last !== null) return last;
+        await page.waitForTimeout(100);
+      }
+      return "";
+    }
+    const isPage = run.screen.startsWith("page");
+    const copyAnswer = isPage ? page.locator('[data-testid="files-copy-answer"]') : page.locator(`[data-testid="files-answer"] button[aria-label="${COPY[locale]}"]`).first();
 
     await page.goto(`${ON}/dashboard/files`, { waitUntil: "networkidle" });
     const answer = page.locator('[data-testid="files-answer"], [data-testid="files-answer-text"]').first();
     await answer.waitFor({ timeout: 10000 }).catch(() => null);
     const text = await page.locator("main").innerText();
     check("the answer is on the screen", text.includes("Το μίσθωμα είναι 4.820 ευρώ"), text.slice(0, 300));
+    // What is copied reads like what is read: the answer's own references
+    // and the list under it, each page in the reader's language.
+    async function copiedCheck() {
+      await page.evaluate(() => { window.__copied.length = 0; });
+      const copied = await copiedBy(copyAnswer);
+      check("what is copied names each page in the reader's language, in the text and in its list",
+        copied.includes(`[${NAME}, ${fill(R.page, { n: 37 })}]`) && copied.includes(`- ${NAME} — ${fill(R.page, { n: 37 })}`) && (locale !== "el" || !ENGLISH_LABEL.test(copied)), JSON.stringify(copied.slice(0, 400)));
+      if (isPage) {
+        await page.evaluate(() => { window.__copied.length = 0; });
+        const one = await copiedBy(page.locator('[data-testid="files-copy-citation"]').first());
+        check("...and one page copied on its own, the same way", one === `${NAME} — ${fill(R.page, { n: 37 })}`, JSON.stringify(one));
+      }
+    }
     if (run.flags["file-pages"] !== "off") check("...saying which pages of the PDF it never read", (await page.locator('[data-testid="files-unread"]').count()) >= 1 && text.includes(fill(R.unread, { name: NAME, read: 50, total: 51 })));
 
     if (run.flags["file-pages"] === "off") {
@@ -340,6 +374,7 @@ try {
       // a display, and the switch is about pressing it.
       check("...the answer reads as before, its list as text, each page in the reader's language", text.includes(`[${NAME}, ${fill(R.page, { n: 37 })}]`) && text.includes(`${NAME} — ${fill(R.page, { n: 37 })}`), text.slice(0, 400));
       check("...and nothing new speaks of pages", !text.includes(fill(L.pagesPartRead, { read: 50, total: 51 })) && !text.includes(fill(R.unread, { name: NAME, read: 50, total: 51 })));
+      await copiedCheck();
       await greekOnly(page, "the answer, switch off");
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();
@@ -356,6 +391,7 @@ try {
     check("...and told to a screen reader the same way", ((await cites.nth(0).getAttribute("aria-label")) ?? "").includes(fill(R.page, { n: 37 })), await cites.nth(0).getAttribute("aria-label").catch(() => ""));
     const lbox = await listed.first().boundingBox();
     check("...a 44px target", lbox && lbox.height >= 44, JSON.stringify(lbox));
+    await copiedCheck();
     if (run.screen === "page" || device.label === "desktop") {
       check("the file says it is read only in part", text.includes(fill(L.pagesPartRead, { read: 50, total: 51 })));
     }

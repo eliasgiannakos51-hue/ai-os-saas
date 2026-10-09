@@ -18,7 +18,6 @@ import { normalisePages } from "@/lib/publishing/website-pages";
 import { PAGE_COUNT_CHOICES, pageRequestBrief } from "@/lib/websites/page-request";
 import { siteDownload } from "@/lib/websites/site-download";
 import { saveBlob } from "@/components/ui/download-pdf-button";
-import { getErrorMessage } from "@/lib/get-error-message";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { applyDesignBrief, DEFAULT_DESIGN_CHOICES, type WebsiteDesignChoices } from "@/lib/website-design-brief";
@@ -29,10 +28,18 @@ import { findUnfilledPlaceholders } from "@/lib/website-placeholders";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { findPageBoxes, outlineBoxes, type PageBox } from "@/lib/website-boxes";
+import { useErrorText } from "@/lib/errors/use-error-text";
+import { ApiError } from "@/lib/errors/api-error";
+import type { ApiErrorPayload } from "@/lib/errors/error-codes";
 import type { UserWebsite } from "@/types/user-website";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 
 const MAX_NAME_LENGTH = 100;
+// Most failures the site worker writes say they cost nothing in these
+// words (api/websites/generate/process/route.ts). One that does not — the
+// circuit breaker's reason, a flagged site the database could not hold —
+// is said as unverified, never as free; a stop has its own note.
+const NOT_CHARGED = /No credits were charged|Nothing was charged/i;
 const MAX_DESCRIPTION_LENGTH = 20000;
 
 type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; questions?: string[] };
@@ -84,6 +91,8 @@ export function WebsiteShell({
   const tNames = useTranslations("dashboard.tools.names");
   const tSteps = useTranslations("aiSteps");
   const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const describe = useErrorText();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
 
@@ -123,6 +132,19 @@ export function WebsiteShell({
   const running = isSiteRunning;
   const remembered = useRememberedLine();
 
+  // A REFUSAL IN THE READER'S LANGUAGE (checked 2026-10-08 by
+  // scripts/tests/tool-shell-edges.prodtest.mjs). The site routes answer in
+  // English prose, which is for logs; what the conversation says is read
+  // from the status and the code (lib/errors/use-error-text.ts).
+  const refusalText = (status: number, body: ApiErrorPayload | null) => describe(new ApiError(status, body)).text;
+  // A site the worker could not finish: a stop is said by its note, as on
+  // the page; anything else in the screen's words, with whether it cost.
+  function failedText(record: UserWebsite): string {
+    const stopped = parseGenerationNotes(record.generation_notes).find((n) => n.kind === "stopped");
+    if (stopped) return describeNote(stopped);
+    if (record.status === "flagged") return t("flaggedTitle");
+    return `${t("generateFailed")} ${tErrors(NOT_CHARGED.test(record.error_message ?? "") ? "credits.notCharged" : "credits.unverified")}`;
+  }
 
   function poll(id: string) {
     watchSite(id, {
@@ -138,7 +160,7 @@ export function WebsiteShell({
           if (fromMemory) say({ role: "tool", text: fromMemory });
           setPane("site");
         } else {
-          say({ role: "tool", text: record.error_message ?? t("generateFailed") });
+          say({ role: "tool", text: failedText(record) });
         }
       },
     });
@@ -155,7 +177,7 @@ export function WebsiteShell({
     try {
       const outcome = await startSiteGeneration({ name, description, skipClarification });
       if (outcome.kind === "refused") {
-        say({ role: "tool", text: getErrorMessage(outcome.error, t("generateFailed")) });
+        say({ role: "tool", text: refusalText(outcome.status, outcome.body) });
         return;
       }
       if (outcome.kind === "questions") {
@@ -165,7 +187,17 @@ export function WebsiteShell({
         return;
       }
       if (outcome.kind === "notMade") {
-        say({ role: "tool", text: outcome.message ?? t("generateFailed") });
+        // The balance and the limits are said from the code; any other
+        // sentence is the off-topic answer, written by the model to the brief.
+        say({
+          role: "tool",
+          text:
+            outcome.code === "insufficientCredits"
+              ? refusalText(402, null)
+              : outcome.rateLimited
+                ? refusalText(429, null)
+                : outcome.message ?? t("generateFailed"),
+        });
         return;
       }
       const record = outcome.record;
@@ -176,7 +208,7 @@ export function WebsiteShell({
       say({ role: "tool", text: tShell("site.building", { name: record.name }) });
       poll(record.id);
     } catch (err) {
-      say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : getErrorMessage(err, t("generateFailed")) });
+      say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : t("generateFailed") });
     } finally {
       setBusy(false);
     }
@@ -199,7 +231,15 @@ export function WebsiteShell({
               ? t("editPageGone")
               : outcome.reason === "boxLost"
                 ? tShell("box.lost")
-                : getErrorMessage(outcome.error, t("generateFailed")),
+                : outcome.status !== 200
+                  ? refusalText(outcome.status, outcome.body)
+                  : outcome.body?.code === "insufficientCredits"
+                    ? refusalText(402, null)
+                    : outcome.body?.rateLimited
+                      ? refusalText(429, null)
+                      : outcome.body?.flagged
+                        ? `${t("flaggedTitle")}. ${tErrors("credits.notCharged")}`
+                        : t("editUnavailable"),
         });
         return;
       }
@@ -409,7 +449,7 @@ export function WebsiteShell({
                   className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
                 />
               ) : (
-                <p className="text-xs text-muted">{running(current) ? t("generating") : current.error_message ?? t("generateFailed")}</p>
+                <p className="text-xs text-muted">{running(current) ? t("generating") : failedText(current)}</p>
               )}
             </div>
           ),
@@ -430,7 +470,7 @@ export function WebsiteShell({
                       className="w-full min-w-0 text-start"
                     >
                       <p className="break-words text-sm text-foreground">{w.name}</p>
-                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.error_message ?? w.status}</p>
+                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.status === "flagged" ? t("flaggedTitle") : t("statusFailed")}</p>
                     </button>
                   </li>
                 ))}

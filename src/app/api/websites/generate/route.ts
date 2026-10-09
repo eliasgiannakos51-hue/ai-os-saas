@@ -297,6 +297,9 @@ export async function POST(request: Request) {
             ok: true,
             generated: false,
             rateLimited: true,
+            // The screen says this in its reader's language from the code;
+            // the message is for logs (lib/website-builder/site-requests.ts).
+            code: "insufficientCredits",
             message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
           });
         }
@@ -391,6 +394,7 @@ export async function POST(request: Request) {
           ok: true,
           generated: false,
           rateLimited: true,
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, estimatedCost),
         });
       }

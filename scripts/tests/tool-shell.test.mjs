@@ -193,6 +193,59 @@ check("...and accuses no number the person typed: only for a site whose every re
   /asked\[current\.id\] \? findInventedNumbers\(html, asked\[current\.id\]\.join\("\\n"\)\) : \[\]/.test(site));
 check("Publish is on top of it", /<PublishControl websiteId=\{current\.id\}/.test(site));
 
+console.log("\n== 10. a refusal is said in the reader's language ==");
+// Checked 2026-10-08 in the built app by scripts/tests/tool-shell-edges.prodtest.mjs:
+// out of credits, the model down, a Free account's limit. The routes answer
+// with English prose for logs; a shell that puts it in the conversation or a
+// toast shows English on a Greek screen. Ranges over every tool in the shell.
+const PROSE = [
+  [/(?:text:|addToast\(|note\("tool",)\s*(?:data|body|outcome|report)\??\.error\b/, "a route's `error` said as it is"],
+  [/\b(?:data|body|outcome|report)\??\.error \?\? t\(/, "a route's `error`, with a translation only when it is missing"],
+  [/\boutcome\.error \|\|/, "a job's or a route's `error`, before the translation"],
+  [/\b(?:record|current|w)\.error_message \?\?(?! "")/, "the site worker's `error_message`"],
+  [/getErrorMessage\(/, "getErrorMessage, which prefers any English message to the translation"],
+];
+for (const f of users) {
+  const src = read(f);
+  const said = PROSE.filter(([re]) => re.test(src)).map(([, what]) => what);
+  check(`${f}: no route's English is said to the reader`, said.length === 0, said.join("; "));
+}
+check("Site: out of credits and the limits are read from the code, not from the sentence",
+  /outcome\.code === "insufficientCredits"\s*\?\s*refusalText\(402, null\)/.test(site) && /outcome\.body\?\.code === "insufficientCredits"\s*\?\s*refusalText\(402, null\)/.test(site) &&
+    /code: typeof data\.code === "string" \? data\.code : null/.test(siteRequests));
+for (const route of ["src/app/api/websites/generate/route.ts", "src/app/api/websites/edit/route.ts"]) {
+  const src = read(route);
+  const said = (src.match(/insufficientCreditsMessage\(/g) ?? []).length;
+  const coded = (src.match(/code: "insufficientCredits"/g) ?? []).length;
+  check(`${route}: every "not enough credits" carries its code (${coded} of ${said})`, said >= 1 && coded >= said);
+}
+check("Site: a build the worker could not finish is said in the screen's words, a stop by its note",
+  /say\(\{ role: "tool", text: failedText\(record\) \}\)/.test(site) && /if \(stopped\) return describeNote\(stopped\);/.test(site));
+check("Research: a plan or a run refused is said from the status", /response\.status === 502 && data \? t\("planError"\) : refusalText\(response\.status, data\)/.test(research) &&
+  /text: refusalText\(response\.status, data\)/.test(research));
+// Checked 2026-10-09 by tool-shell-edges.prodtest.mjs: a 504 text page from
+// the host made `response.json()` throw, and the catch said "your device
+// could not reach us" — and "you were not charged" — about a request that
+// had reached the server.
+check("Research: a plan answered with something that is not JSON is not the connection",
+  /const data = await response\.json\(\)\.catch\(\(\) => null\);\s*if \(!data\?\.ok\)/.test(research));
+// Checked the same day: over 4MB the bytes go to storage alone, and
+// storage that could not be reached answered «Failed to fetch» into the
+// conversation. Storage's own words are never what the reader is told.
+check("Files: a file over the route's limit, with storage unreachable, is the connection — never storage's English",
+  !/error: fallback/.test(uploadLib) && /unanswered \? \(words\.offline \?\? words\.error\) : words\.error/.test(uploadLib) &&
+    /unanswered = typeof \(error as \{ status\?: unknown \}\)\.status !== "number"/.test(uploadLib) &&
+    /offline: describe\(new ApiError\(0, null\)\)\.text/.test(filesShell));
+check("Files: a question refused is said from the status, a failed job in the screen's words",
+  /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*t\("askError"\)/.test(filesShell) &&
+    /status: response\.status, body: started/.test(read("src/lib/jobs/start-and-watch.ts")));
+check("Files: a file the plan has no room for is the plan's limit",
+  /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(filesShell) && (uploadLib.match(/status: response\.status, body: data/g) ?? []).length === 2);
+check("Analyze: out of credits and the model down are said as such", /status === 402 \? describe\(new ApiError\(402, null\)\)\.text : code === "ai_unavailable" \? t\("analyse\.unavailable"\)/.test(analyze) &&
+  (analyze.match(/refusal\(response\.status, body\?\.error,/g) ?? []).length === 2);
+check("Slides: Stop reaches a change as well as a new deck",
+  (slides.match(/signal: controller\.signal/g) ?? []).length === 2 && (slides.match(/abortRef\.current = controller;/g) ?? []).length === 2);
+
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};

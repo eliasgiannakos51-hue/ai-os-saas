@@ -305,6 +305,9 @@ export async function POST(request: Request) {
           ok: true,
           edited: false,
           rateLimited: true,
+          // The screen says this in its reader's language from the code;
+          // the message is for logs (lib/website-builder/site-requests.ts).
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
@@ -335,6 +338,7 @@ export async function POST(request: Request) {
           ok: true,
           edited: false,
           rateLimited: true,
+          ...(reservation.reason === "insufficient" ? { code: "insufficientCredits" } : {}),
           message:
             reservation.reason === "insufficient"
               ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
@@ -479,7 +483,9 @@ export async function POST(request: Request) {
       }
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";
       return NextResponse.json(
-        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        // creditsRefunded: the hold was released just above, and the
+        // screen says so in its reader's language (lib/errors/error-codes.ts).
+        { ok: false, error: `${errMessage} No credits were charged — please try again.`, creditsRefunded: true },
         { status: 502 }
       );
     }

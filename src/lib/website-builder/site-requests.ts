@@ -1,4 +1,5 @@
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
+import type { ApiErrorPayload } from "@/lib/errors/error-codes";
 import type { UserWebsite } from "@/types/user-website";
 
 /**
@@ -15,7 +16,11 @@ import type { UserWebsite } from "@/types/user-website";
  *
  * Client-safe. A network failure is THROWN (a TypeError from fetch), so
  * each screen says it in its own words; everything the server answered is
- * returned as a value.
+ * returned as a value — with its status and its body, because the
+ * routes' `error` and `message` are English prose for logs, and a screen
+ * says a refusal in its reader's language from the status and the code
+ * (lib/errors/use-error-text.ts; held 2026-10-08 by
+ * scripts/tests/tool-shell-edges.prodtest.mjs).
  */
 
 export const SITE_POLL_INTERVAL_MS = 2500;
@@ -26,10 +31,11 @@ export const isSiteRunning = (w: UserWebsite | null | undefined): boolean =>
 export type SiteStart =
   | { kind: "questions"; questions: string[] }
   | { kind: "started"; record: UserWebsite }
-  /** The server answered but made nothing (an off-topic brief, a duplicate refused) — with its sentence. */
-  | { kind: "notMade"; message: string | null }
+  /** The server answered but made nothing (an off-topic brief, a duplicate refused) — with its sentence.
+   *  `code` "insufficientCredits" and `rateLimited` say why when it was the balance or the limits. */
+  | { kind: "notMade"; message: string | null; code: string | null; rateLimited: boolean }
   /** Refused: the plan, the credits, the size — `error` is the server's own. */
-  | { kind: "refused"; error: unknown };
+  | { kind: "refused"; error: unknown; status: number; body: ApiErrorPayload | null };
 
 export async function startSiteGeneration(input: {
   name: string;
@@ -42,9 +48,16 @@ export async function startSiteGeneration(input: {
     body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null };
+  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null, status: res.status, body: data };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
-  if (!data.generated) return { kind: "notMade", message: typeof data.message === "string" ? data.message : null };
+  if (!data.generated) {
+    return {
+      kind: "notMade",
+      message: typeof data.message === "string" ? data.message : null,
+      code: typeof data.code === "string" ? data.code : null,
+      rateLimited: data.rateLimited === true,
+    };
+  }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the
   // status is watched below. keepalive so leaving the page does not
@@ -101,8 +114,10 @@ export function watchSite(
 
 export type SiteChange =
   | { kind: "changed"; record: UserWebsite }
-  /** "pageGone": the page was renamed or removed; "boxLost": the chosen part did not come back. */
-  | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown };
+  /** "pageGone": the page was renamed or removed; "boxLost": the chosen part did not come back.
+   *  `status` and `body` are the route's answer: 200 with `edited: false` is a refusal said in the body
+   *  (`code`, `rateLimited`, `flagged`), anything else is said by the status. */
+  | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown; status: number; body: (ApiErrorPayload & Record<string, unknown>) | null };
 
 /**
  * A change in words. `pageSlug` names the page it is about ("" or absent:
@@ -128,7 +143,7 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
         : data?.reason === "box_lost" || data?.reason === "bad_section"
           ? "boxLost"
           : "other";
-    return { kind: "refused", reason, error: data?.error ?? data?.message ?? null };
+    return { kind: "refused", reason, error: data?.error ?? data?.message ?? null, status: res.status, body: data };
   }
   return { kind: "changed", record: data.record as UserWebsite };
 }

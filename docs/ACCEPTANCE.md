@@ -61,16 +61,16 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: ανοίγω διαδοχικά Site, Slides, Posts, Research, Analyze, Files.
 - Βλέπω: συνομιλία αριστερά, δουλειά δεξιά, ένα πεδίο και το πολύ 4 επιλογές.
 - Χρόνος: 2 λεπτά
-- Αυτόματα: `scripts/tests/tool-shell.prodtest.mjs`
-- Σήμερα: φτιαγμένο, πίσω από τον διακόπτη `tool-shell`
+- Αυτόματα: `scripts/tests/tool-shell.prodtest.mjs`, `scripts/tests/tool-shell-edges.prodtest.mjs`
+- Σήμερα: φτιαγμένο, πίσω από τον διακόπτη `tool-shell`· ελεγμένο 2026-10-08 σε production build, σε υπολογιστή και κινητό, ελληνικά και αγγλικά: νέος λογαριασμός, χωρίς credits, πάροχος που δεν απαντά, Free
 
 ### Α4. Κουτιά
 - Πακέτο: 4
 - Κάνω: σε Site και σε Slides πατάω ένα κουτί και γράφω τι να αλλάξει.
 - Βλέπω: αλλάζει μόνο εκείνο το κουτί.
 - Χρόνος: 3 λεπτά
-- Αυτόματα: `scripts/tests/tool-shell.prodtest.mjs`, `scripts/tests/boxes.test.mjs`
-- Σήμερα: φτιαγμένο, πίσω από τον διακόπτη `tool-shell`
+- Αυτόματα: `scripts/tests/tool-shell.prodtest.mjs`, `scripts/tests/boxes.test.mjs`, `scripts/tests/tool-shell-edges.prodtest.mjs`
+- Σήμερα: φτιαγμένο, πίσω από τον διακόπτη `tool-shell`· ελεγμένο 2026-10-08 μέσα από τα πραγματικά routes, με μοντέλο που ξαναγράφει ολόκληρη την παρουσίαση και ολόκληρη τη σελίδα: αποθηκεύεται και φαίνεται αλλαγμένο μόνο το κουτί
 
 ## ΒΑΣΗ
 

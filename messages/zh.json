@@ -224,7 +224,8 @@
       "personalFinance": "个人理财",
       "personalJournal": "日志",
       "personalLifeOs": "生活系统",
-      "activity": "动态"
+      "activity": "动态",
+      "games": "游戏"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -286,7 +287,8 @@
       "projects": "有目标的文件夹。你放什么就有什么——不会自己进来。",
       "aiMemory": "对话记住了你的哪些事，以及如何删除。",
       "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。",
-      "activity": "下一步、变化、进度和你的数据"
+      "activity": "下一步、变化、进度和你的数据",
+      "games": "描述一个游戏，用文字修改它的计划，然后在这里玩——与你的账户隔离。"
     },
     "closeMenu": "关闭菜单",
     "rail": {
@@ -2870,6 +2872,20 @@
         "rate_limited": "过去一小时内录音次数过多。请稍后再试。",
         "empty": "该录音是空的。",
         "failed": "出了点问题。未收取任何费用。"
+      },
+      "goal": {
+        "title": "{count, plural, other {把这 # 项行动变成一个目标的步骤}}",
+        "goalLabel": "目标",
+        "projectLabel": "放在项目",
+        "newProject": "新建项目…",
+        "newProjectName": "新项目的名称",
+        "make": "{count, plural, other {创建含 # 个步骤的目标}}",
+        "done": "{count, plural, other {目标已创建，含 # 个步骤，位于该项目中。}}",
+        "openProject": "打开项目",
+        "openGoals": "在“目标”中查看",
+        "projectLimit": "你的套餐中的项目都已用完。请选择其中一个，或先归档一个。",
+        "projectName": "请给新项目起一个至少两个字的名称。",
+        "projectFull": "该项目已满。请选择另一个。"
       }
     },
     "voicePage": {
@@ -2958,7 +2974,8 @@
         "finances": "财务",
         "sales": "销售",
         "trading": "交易",
-        "document": "文档"
+        "document": "文档",
+        "games": "游戏"
       }
     },
     "home": {
@@ -3391,6 +3408,109 @@
       "send": "开始",
       "import": "从 CSV 文件导入你的数据",
       "skip": "跳过"
+    },
+    "financeQuick": {
+      "title": "写下你付了或收到了什么",
+      "placeholder": "例如：付了50欧元电费",
+      "save": "记录",
+      "hint": "一个金额，以及是付出还是收到。按你写的读取——不做任何猜测。",
+      "doneExpense": "已记录：支出 {amount} — {description}。",
+      "doneIncome": "已记录：收入 {amount} — {description}。",
+      "open": "打开",
+      "missingAmount": "没有找到唯一的金额。请只写一个金额，例如「付了50欧元电费」。",
+      "missingType": "看不出是付出还是收到。请以「付了」或「收到」开头。",
+      "missingBoth": "请写一个金额，并说明是付出还是收到，例如「付了50欧元电费」。",
+      "failed": "无法记录，请重试。"
+    },
+    "sales": {
+      "title": "按阶段的联系人",
+      "empty": "还没有联系人。",
+      "dueTitle": "到期的提醒",
+      "moveTo": "移到",
+      "remind": "提醒日期",
+      "move": "移动",
+      "remindOn": "提醒 {date}",
+      "badReminder": "请选择今天之后、一年以内的提醒日期。",
+      "failed": "无法保存，请重试。",
+      "stages": {
+        "new": "新",
+        "contacted": "已联系",
+        "meeting": "会面",
+        "proposal": "报价",
+        "won": "成交",
+        "lost": "流失"
+      },
+      "reminder": {
+        "title": "提醒：{name}",
+        "body": "阶段：{stage}"
+      }
+    },
+    "translate": {
+      "button": "翻译",
+      "title": "翻译成另一种语言",
+      "language": "语言",
+      "copyNoteSite": "你的网站不会改变。译文会成为旁边的一个新网站，页面、颜色和图片都相同。",
+      "copyNoteDocument": "你的文档不会改变。译文会成为旁边的一个新文档，格式相同。",
+      "estimating": "正在计算价格…",
+      "estimate": "翻译大约需要 {count, plural, other {# 积分}}。只有按下“翻译”时才扣费。",
+      "bypassFree": "此账户翻译免费。",
+      "sameLanguage": "它已经是这种语言了。请选择另一种。",
+      "nothing": "没有需要翻译的文字。",
+      "tooLong": "内容太长，无法一次翻译（{chars} 个字符；上限为 {limit}）。",
+      "estimateFailed": "无法计算价格。请重试。",
+      "go": "翻译",
+      "running": "正在翻译…",
+      "stop": "停止",
+      "stopped": "已停止。没有扣费，也没有写入任何内容。",
+      "done": "完成：“{name}”。",
+      "kept": "{count, plural, other {# 段保持原样}}，因为它们的译文没有保留格式。",
+      "charged": "已扣除 {count, plural, other {# 积分}}。",
+      "chargedNothing": "未扣费。",
+      "open": "打开",
+      "insufficient": "积分不足，无法进行此次翻译。没有扣费。",
+      "dailyLimit": "你已达到今天新建网站的上限。请明天再试。",
+      "notIncluded": "你的套餐不包含网站功能。",
+      "unusable": "回答不可用，没有写入任何内容。只收取已消耗的部分。",
+      "failed": "翻译未能完成。没有扣除积分。"
+    },
+    "games": {
+      "placeholder": "描述一个游戏：玩家做什么，什么在阻挡他，怎样获胜……",
+      "placeholderBox": "说说这个方框里要改什么……",
+      "placeholderChange": "说说游戏里要改什么，例如“敌人更快”……",
+      "boxes": {
+        "rules": "规则",
+        "levels": "关卡",
+        "characters": "角色",
+        "controls": "操作",
+        "win": "怎样获胜"
+      },
+      "boxHint": "这是计划。点一个方框，说要改什么，只有它会改。准备好后，就制作游戏。",
+      "planned": "“{title}”的计划已就绪。请看右侧的方框。",
+      "boxChanged": "“{box}”方框已更改，其他保持不变。",
+      "build": "制作游戏",
+      "building": "正在编写游戏……",
+      "built": "游戏已就绪。在右侧试玩，并说说要改什么。",
+      "changed": "已更改。新版本在右侧运行，上一版已保留。",
+      "restored": "已恢复第 {n} 版。",
+      "recent": "你的游戏",
+      "noneYet": "你还没有制作游戏。",
+      "download": "下载代码",
+      "play": "游戏",
+      "sealed": "它在隔离环境中运行：看不到你账户中的任何内容，也不连接互联网。",
+      "versions": "{count, plural, other {# 个版本}}",
+      "version": "第 {n} 版",
+      "first": "第一版",
+      "restore": "恢复",
+      "errors": {
+        "insufficient": "积分不足。没有扣费。",
+        "unavailable": "服务暂时没有响应。没有扣费。",
+        "unusable": "回答不是可玩的游戏，未保留。只收取已消耗的部分。",
+        "rateLimited": "请求太多，请稍后再试。",
+        "notIncluded": "游戏包含在拥有网站功能的套餐中。",
+        "tooLong": "描述太长。",
+        "stopped": "已停止。没有扣费。",
+        "failed": "出了点问题。请重试。"
+      }
     }
   },
   "module": {
@@ -4117,6 +4237,11 @@
       "is": "整个 Ionexa 的地图,就在一页上。",
       "does": "列出每个工具,并用一行说明它的作用,按你要创建、询问、运行和查看的内容分组。",
       "doesNot": "这不是唯一的入口:在首页的输入框写下你想要的,或按 ⌘K,也能到达同一个工具。"
+    },
+    "games": {
+      "is": "根据一段描述，做一个属于你自己的小游戏。",
+      "does": "先用五个框展示计划；用文字修改其中任意一个，然后写出游戏，你就在这里用键盘或触摸来玩。",
+      "doesNot": "它看不到你的账户，也不会连接互联网：游戏在隔离环境中运行，你下载的文件也一样。"
     }
   },
   "helpCentre": {
@@ -4456,6 +4581,35 @@
     "chart": {
       "nothingToPlot": "这一项没有可绘制的内容。",
       "truncated": "显示最大的 {count} 项；其余的已归类或略去。"
+    },
+    "how": {
+      "title": "这些数字是怎么得出的",
+      "press": "点按一个数字，查看它是怎么得出的。",
+      "rows": "文件的行数，逐行计数。",
+      "duplicates": "每一列都与之前某一行相同的行（文件行数：{rows}）。",
+      "sum": "「{column}」列的总和（有值的行：{rows}）。",
+      "mean": "「{column}」的平均值：总和除以有值的行数（{rows}）。",
+      "median": "「{column}」的中位数：排序后位于中间的值（有值的行：{rows}）。",
+      "min": "「{column}」中最小的值（有值的行：{rows}）。",
+      "max": "「{column}」中最大的值（有值的行：{rows}）。",
+      "missing": "「{column}」中没有值的行（文件行数：{rows}）。",
+      "distinct": "「{column}」中不同值的个数（有值的行：{rows}）。",
+      "outliers": "「{column}」中偏离平均值超过 3 个标准差的值（有值的行：{rows}）。",
+      "topCount": "「{column}」为「{label}」的行（有值的行：{rows}）。",
+      "r": "「{column}」与「{other}」之间的皮尔逊相关系数，基于两者都有值的行。范围从 −1 到 1；它不说明谁导致了谁。",
+      "from": "「{column}」中最早的日期。",
+      "to": "「{column}」中最晚的日期。",
+      "chartTitle": "每个值是怎么得出的",
+      "point": "行：{rows}",
+      "other": "图表放不下的部分，合在一起。",
+      "dropped": "含有未从文件计算得出的数字的发现已被略去：{count}。",
+      "chart": {
+        "sum": "按每个「{x}」，「{y}」的总和。",
+        "mean": "按每个「{x}」，「{y}」的平均值。",
+        "count": "按每个「{x}」，它有多少行。",
+        "min": "按每个「{x}」，最小的「{y}」。",
+        "max": "按每个「{x}」，最大的「{y}」。"
+      }
     }
   },
   "coding": {

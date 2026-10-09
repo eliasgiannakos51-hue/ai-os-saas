@@ -36,6 +36,7 @@
 // Run: node scripts/tests/route-write-bound.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import { callsThroughImport } from "./lib/one-hop.mjs";
 
 let pass = 0,
   fail = 0;
@@ -109,7 +110,9 @@ const BOUNDS = {
     (/if\s*\(\s*!\s*[A-Za-z_$][\w$]*\.allowed\s*\)/.test(src) || /if\s*\(\s*!\s*allowed\s*\)/.test(src)),
   own_limiter: /countRateLimitHits\s*\(|recordRateLimitHit\s*\(/,
   cron_secret: /checkCronAuth\s*\(/,
-  reservation: /\breserveCredits\s*\(|\bstartJob\s*\(/,
+  // ...or a shared paid step the route calls that reserves in its own body
+  // (scripts/tests/lib/one-hop.mjs; the game routes, lib/games/charge.ts).
+  reservation: (src) => /\breserveCredits\s*\(|\bstartJob\s*\(/.test(src) || callsThroughImport(src, /\breserveCredits\s*\(/).length > 0,
   plan_cap: /maxProjectsForPlan|MAX_MEMBERS|maxAgentsForAccount|checkAgentActivationCap|seat_count|maxIntegrationsForPlan|storageLimitBytes|maxAgentTemplates/,
   free_allowance: /consumeFreeChat/,
   stripe_signature: /constructEvent\s*\(/,

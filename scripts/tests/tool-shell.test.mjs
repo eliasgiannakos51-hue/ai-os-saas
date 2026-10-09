@@ -46,7 +46,14 @@ check("the shell's one field is Chat's own, with the tool's placeholder",
 check("...and the options are drawn under that field, inside it",
   /<ChatComposer[\s\S]*?>\s*\{options\.length > 0 && \(\s*<div data-testid="tool-shell-options"/.test(shell));
 check("the conversation is on the left and grows; the work is beside it, 60% on a computer",
-  /<div className="flex min-w-0 flex-1 flex-col">/.test(shell) && /data-testid="tool-shell-work"\s+className="fixed inset-0 z-\[60\] flex flex-col bg-workspace lg:static lg:z-auto lg:w-\[60%\] lg:shrink-0"/.test(shell));
+  /<div className="flex min-w-0 flex-1 flex-col">/.test(shell) && /data-testid="tool-shell-work"\s+className="fixed inset-0 z-\[60\] flex flex-col bg-workspace [^"]*lg:static lg:z-auto lg:w-\[60%\] lg:shrink-0"/.test(shell));
+{
+  const pane = /data-testid="tool-shell-work"\s+className="([^"]*)"/.exec(shell)?.[1] ?? "";
+  const bar = readFileSync("src/components/dashboard/mobile-tab-bar.tsx", "utf8");
+  const layout = readFileSync("src/app/dashboard/layout.tsx", "utf8");
+  check("on a phone the work ends above the tab bar, which is drawn over it, and only where the bar is",
+    /\bpb-\[calc\(4rem\+env\(safe-area-inset-bottom\)\)\] md:pb-0\b/.test(pane) && /className="fixed inset-x-0 bottom-0 z-40 [^"]*md:hidden"/.test(bar) && /min-h-\[56px\]/.test(bar) && /<div className="relative z-10 flex min-h-screen">/.test(layout) && /<main id="main-content" className="flex-1 pb-16 md:pb-0">/.test(layout), pane);
+}
 check("...and on a phone the work is the whole screen, with a button back to the conversation",
   /data-testid="tool-shell-back" className=\{`\$\{ACTION\} lg:hidden`\}/.test(shell) && /onClick=\{onCloseWork\}/.test(shell));
 check("a card in the conversation opens the work again", /data-testid="tool-shell-card"/.test(shell) && /onClick=\{turn\.card\.onOpen\}/.test(shell));
@@ -97,12 +104,17 @@ for (const f of users) {
     // "tool-shell" for a tool that moved into the shell, or — for a tool
     // that was BORN in it, with no old body of its own — that tool's own
     // declared switch (the Image tool, "image-studio", package 19). Either
-    // way a switch, read before the shell is drawn.
+    // way a switch, read before the shell is drawn. A key that is a plain
+    // word is declared unquoted (`games: "…"`), one with a hyphen quoted.
     const switchAt = /if \((?:\(?await isFeatureOn\("([a-z-]+)", user\)\)?)(?: && [^{]+)?\) \{/.exec(src);
     const switchKey = switchAt?.[1] ?? "";
-    const gate = switchAt && (switchKey === "tool-shell" || new RegExp(`\\n  "${switchKey}": "`).test(flags)) ? switchAt.index : -1;
+    const gate = switchAt && (switchKey === "tool-shell" || new RegExp(`\\n  (?:"${switchKey}"|${switchKey}): "`).test(flags)) ? switchAt.index : -1;
     const drawn = src.indexOf(`<${component}`);
-    const lastReturn = src.lastIndexOf("return (");
+    // A TOOL BORN IN THE SHELL WITH NO OLD BODY (Games, package 26) has
+    // nothing to fall back to: for everybody the switch does not admit,
+    // the page ends in notFound() — the address does not exist for them.
+    const endsNotFound = /\n  notFound\(\);\n\}\s*$/.test(src);
+    const lastReturn = endsNotFound ? src.length : src.lastIndexOf("return (");
     check(`${p}: only behind the switch, and INSTEAD of the old body`,
       gate >= 0 && drawn > gate && drawn < lastReturn && /return \(\s*<div className="h-\[calc\(100dvh-8rem\)\] md:h-\[calc\(100vh-4rem\)\]">/.test(src.slice(gate, lastReturn)));
   }

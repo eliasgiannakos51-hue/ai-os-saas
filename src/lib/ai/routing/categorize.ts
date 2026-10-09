@@ -64,6 +64,9 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   website_generate: "code",
   website_edit: "code",
   code_assist: "code",
+  // Package 26: a game is a page of code written from a plan, as a site is.
+  game_generate: "code",
+  game_edit: "code",
 
   deep_research: "research",
   research_plan: "research",

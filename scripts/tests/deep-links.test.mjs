@@ -271,7 +271,9 @@ for (const l of favLinks) {
 // /dashboard/chat?mode=&ask=, read by app/dashboard/chat/page.tsx, and
 // keeps the questionnaire at /onboarding?classic=1, read by
 // app/onboarding/page.tsx.
-const DEEP_LINK_FLOOR = 64;
+// 64 -> 65 (2026-10-08): the Translate dialog (package 28) asks
+// /api/translate?kind=&id=&target= for the price, read by that route's GET.
+const DEEP_LINK_FLOOR = 65;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

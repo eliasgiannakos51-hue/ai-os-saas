@@ -347,7 +347,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     pages: ["documents", "documents/[id]"],
     // The Word download (package 14) is a file of what is already the
     // person's, as the PDF is: free, bounded by lib/export-guard.ts.
-    routes: ["documents", "documents/[id]", "documents/[id]/pdf", "documents/[id]/pdf-estimate", "documents/[id]/docx"],
+    // "translate" (package 28) is the PDF's translation made a copy: it
+    // charges as that does, on every plan; its SITE half also asks for the
+    // plan that includes the Site (websiteBuilder), in the route itself.
+    routes: ["documents", "documents/[id]", "documents/[id]/pdf", "documents/[id]/pdf-estimate", "documents/[id]/docx", "translate"],
     charges: true,
     enforcedIn: "src/app/api/documents/[id]/pdf/route.ts",
     enforcedSymbol: "reserveCredits",
@@ -422,6 +425,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "meetings/[id]",
       "meetings/[id]/analyse",
       "meetings/[id]/actions",
+      // A goal from the meeting's actions (package 17): no model, no charge.
+      "meetings/[id]/goal",
     ],
     charges: true,
     enforcedIn: "src/lib/voice/voice-pricing.ts",
@@ -683,6 +688,11 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "nav/track",
       "nav/recent-tools",
       "cron/nav-retention",
+      // Finances and Sales (package 18): a sentence read by code, a stage
+      // moved, a reminder sent. No model, no charge.
+      "finance/quick",
+      "sales/[id]/stage",
+      "cron/lead-reminders",
     ],
     charges: true,
     enforcedIn: "src/lib/modules.ts",
@@ -1186,6 +1196,26 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     enforcedIn: "src/lib/documents/writer-access.ts",
     enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", DOCUMENT_WRITER_MIN_PLAN)",
     cell: (p) => boolCell(p.slug !== "free"),
+  },
+  // GAMES (MASTER 16, package 26): a game from a description, played in
+  // the browser and changed with words. The Site's plan — a game is a page
+  // of code written from a description, the Site's own work — enforced in
+  // every games route before anything is spent (lib/games/game-access.ts).
+  // NOT A ROW YET, for documentWriter's reason: the switch "games" admits
+  // the owner and the test account only.
+  {
+    id: "games",
+    group: "make",
+    minPlan: "starter",
+    pages: ["games"],
+    routes: ["games", "games/[id]", "games/[id]/download"],
+    charges: true,
+    notSold:
+      "owner-only for now: the switch games admits the owner and the test account " +
+      "(isFeatureOn in src/lib/games/game-access.ts); the tier is confirmed when it opens to everyone",
+    enforcedIn: "src/lib/games/game-access.ts",
+    enforcedSymbol: 'accountHasCapability(plan?.slug ?? "free", "websiteBuilder", isAdmin)',
+    cell: (p) => boolCell(p.capabilities.websiteBuilder),
   },
   {
     id: "customDomain",

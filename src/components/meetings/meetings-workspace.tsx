@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
-import { ShieldAlert, Trash2, Upload } from "lucide-react";
+import { ShieldAlert, Target, Trash2, Upload } from "lucide-react";
 import {
   checkMeetingUpload,
   isMeetingAudioType,
@@ -77,12 +77,16 @@ export function MeetingsWorkspace({
   minutes,
   meetings,
   keptActions,
+  goals = null,
 }: {
   limits: MeetingLimits;
   price: MeetingPrice;
   minutes: { usedSeconds: number; limitMinutes: number };
   meetings: MeetingRow[];
   keptActions: KeptAction[];
+  /** The switch "meeting-goal" (package 17): the person's active projects
+   *  to put a goal made from this meeting in. Null when the switch is off. */
+  goals?: { projects: { id: string; name: string }[] } | null;
 }) {
   const t = useTranslations("dashboard.meetings");
   // The out-of-credits sentence already exists, in ten languages, and is
@@ -105,6 +109,11 @@ export function MeetingsWorkspace({
   const [busy, setBusy] = useState<"idle" | "transcribing" | "analysing">("idle");
   const [openId, setOpenId] = useState<string | null>(meetings[0]?.id ?? null);
   const [ticked, setTicked] = useState<Set<number>>(new Set());
+  const [goalWords, setGoalWords] = useState("");
+  const [projectChoice, setProjectChoice] = useState<string>(goals?.projects[0]?.id ?? "new");
+  const [newProjectName, setNewProjectName] = useState("");
+  const [goalMade, setGoalMade] = useState<{ projectId: string; steps: number } | null>(null);
+  const [goalBusy, setGoalBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const mb = (bytes: number) => Math.round((bytes / (1024 * 1024)) * 10) / 10;
@@ -269,6 +278,55 @@ export function MeetingsWorkspace({
     }
     setKept((prev) => [...(data.actions as KeptAction[]), ...prev]);
     setTicked(new Set());
+  }
+
+  /**
+   * THE TICKED ACTIONS BECOME A GOAL'S STEPS, IN A PROJECT (package 17).
+   * A new project is made first through api/projects — where the plan's
+   * project cap lives — and the goal then through api/meetings/[id]/goal,
+   * which re-reads the actions by index. Only the indexes are sent.
+   */
+  async function makeGoal(meetingId: string) {
+    if (ticked.size === 0 || goalBusy) return;
+    setGoalBusy(true);
+    setProblem(null);
+    try {
+      let projectId = projectChoice;
+      if (projectChoice === "new") {
+        const made = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newProjectName.trim(), goal: goalWords.trim() }),
+        });
+        const madeBody = await made.json().catch(() => null);
+        if (!made.ok || !madeBody?.project?.id) {
+          setProblem(
+            madeBody?.error === "project_limit_reached"
+              ? t("goal.projectLimit")
+              : madeBody?.error === "too_short" || madeBody?.error === "too_long"
+                ? t("goal.projectName")
+                : t("errors.failed")
+          );
+          return;
+        }
+        projectId = String(madeBody.project.id);
+      }
+      const res = await fetch(`/api/meetings/${meetingId}/goal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keep: [...ticked], goal: goalWords.trim(), projectId }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setProblem(data?.code === "project_full" ? t("goal.projectFull") : errorText(data?.code, res.status));
+        return;
+      }
+      setGoalMade({ projectId: String(data.projectId), steps: Number(data.steps) });
+      setTicked(new Set());
+      setGoalWords("");
+    } finally {
+      setGoalBusy(false);
+    }
   }
 
   async function remove(meetingId: string) {
@@ -555,6 +613,74 @@ export function MeetingsWorkspace({
                   >
                     {ticked.size === 0 ? t("keepNone") : t("keepSelected", { count: ticked.size })}
                   </button>
+                  {goals && ticked.size > 0 ? (
+                    <div data-testid="meeting-goal" className="mt-3 space-y-2 rounded-card bg-panel p-3">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <Target className="h-4 w-4 text-muted" aria-hidden="true" />
+                        {t("goal.title", { count: ticked.size })}
+                      </p>
+                      <label className="block text-xs text-muted">
+                        {t("goal.goalLabel")}
+                        <input
+                          data-testid="meeting-goal-text"
+                          value={goalWords}
+                          onChange={(e) => setGoalWords(e.target.value)}
+                          placeholder={open.title}
+                          maxLength={500}
+                          className="input mt-1 w-full"
+                        />
+                      </label>
+                      <label className="block text-xs text-muted">
+                        {t("goal.projectLabel")}
+                        <select
+                          data-testid="meeting-goal-project"
+                          value={projectChoice}
+                          onChange={(e) => setProjectChoice(e.target.value)}
+                          className="input mt-1 w-full"
+                        >
+                          {goals.projects.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                          <option value="new">{t("goal.newProject")}</option>
+                        </select>
+                      </label>
+                      {projectChoice === "new" ? (
+                        <label className="block text-xs text-muted">
+                          {t("goal.newProjectName")}
+                          <input
+                            data-testid="meeting-goal-new-project"
+                            value={newProjectName}
+                            onChange={(e) => setNewProjectName(e.target.value)}
+                            maxLength={120}
+                            className="input mt-1 w-full"
+                          />
+                        </label>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => makeGoal(open.id)}
+                        disabled={goalBusy || (projectChoice === "new" && newProjectName.trim().length < 2)}
+                        data-testid="meeting-goal-make"
+                        className="inline-flex min-h-[44px] items-center rounded-card bg-panel-hover px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+                      >
+                        {t("goal.make", { count: ticked.size })}
+                      </button>
+                    </div>
+                  ) : null}
+                  {goalMade ? (
+                    <p data-testid="meeting-goal-done" role="status" className="mt-3 text-sm text-foreground">
+                      {t("goal.done", { count: goalMade.steps })}{" "}
+                      <a href={`/dashboard/projects/${goalMade.projectId}`} data-testid="meeting-goal-open-project" className="underline">
+                        {t("goal.openProject")}
+                      </a>
+                      {" · "}
+                      <a href="/dashboard/mission" className="underline">
+                        {t("goal.openGoals")}
+                      </a>
+                    </p>
+                  ) : null}
                 </>
               )}
             </div>

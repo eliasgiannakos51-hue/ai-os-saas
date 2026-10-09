@@ -139,6 +139,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Apps: "apps",
   Images: "images",
   Videos: "videos",
+  Games: "games",
   "Business health": "businessHealth",
   "AI Coding": "coding",
   "Data Analysis": "dataAnalysis",

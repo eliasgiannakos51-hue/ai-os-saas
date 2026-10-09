@@ -202,6 +202,9 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // MASTER 16, package 36. The sentence a flow was made from, the colour
   // its steps shared, and which row each step made.
   { table: "project_flows", label: "project_flows", scope: "user_content" },
+  // MASTER 16, package 26: a game the person described — its plan, its
+  // code and its last versions. All of it is theirs to take with them.
+  { table: "user_games", label: "user_games", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

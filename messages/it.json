@@ -224,7 +224,8 @@
       "personalFinance": "Finanze personali",
       "personalJournal": "Diario",
       "personalLifeOs": "Life OS",
-      "activity": "Attività"
+      "activity": "Attività",
+      "games": "Giochi"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -286,7 +287,8 @@
       "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.",
       "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
       "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.",
-      "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri"
+      "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri",
+      "games": "Descrivi un gioco, cambia il suo piano a parole e giocaci qui, isolato dal tuo account."
     },
     "closeMenu": "Chiudi il menu",
     "rail": {
@@ -2870,6 +2872,20 @@
         "rate_limited": "Troppe registrazioni nell'ultima ora. Riprova più tardi.",
         "empty": "Quella registrazione era vuota.",
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla."
+      },
+      "goal": {
+        "title": "{count, plural, one {Trasforma questa azione in un passo di un obiettivo} other {Trasforma queste # azioni nei passi di un obiettivo}}",
+        "goalLabel": "L’obiettivo",
+        "projectLabel": "Nel progetto",
+        "newProject": "Un nuovo progetto…",
+        "newProjectName": "Nome del nuovo progetto",
+        "make": "{count, plural, one {Crea l’obiettivo con 1 passo} other {Crea l’obiettivo con # passi}}",
+        "done": "{count, plural, one {L’obiettivo è stato creato con 1 passo, nel progetto.} other {L’obiettivo è stato creato con # passi, nel progetto.}}",
+        "openProject": "Apri il progetto",
+        "openGoals": "Vedilo in Obiettivi",
+        "projectLimit": "Tutti i progetti del tuo piano sono in uso. Scegline uno o archiviane uno prima.",
+        "projectName": "Dai al nuovo progetto un nome di almeno due lettere.",
+        "projectFull": "Quel progetto è pieno. Scegline un altro."
       }
     },
     "voicePage": {
@@ -2958,7 +2974,8 @@
         "finances": "Finanze",
         "sales": "Vendite",
         "trading": "Trading",
-        "document": "Documento"
+        "document": "Documento",
+        "games": "Giochi"
       }
     },
     "home": {
@@ -3391,6 +3408,109 @@
       "send": "Inizia",
       "import": "Porta i tuoi dati da un file CSV",
       "skip": "Salta"
+    },
+    "financeQuick": {
+      "title": "Scrivi cosa hai pagato o ricevuto",
+      "placeholder": "es. pagato 50 euro di luce",
+      "save": "Registra",
+      "hint": "Un importo e se è stato pagato o ricevuto. Letto come scritto: niente viene indovinato.",
+      "doneExpense": "Registrato: una spesa di {amount} — {description}.",
+      "doneIncome": "Registrato: un’entrata di {amount} — {description}.",
+      "open": "Aprilo",
+      "missingAmount": "Non ho trovato un solo importo. Scrivine uno, es. «pagato 50 € di luce».",
+      "missingType": "Non so se è stato pagato o ricevuto. Inizia con «pagato» o «ricevuto».",
+      "missingBoth": "Scrivi un importo e se è stato pagato o ricevuto, es. «pagato 50 € di luce».",
+      "failed": "Non è stato possibile registrarlo. Riprova."
+    },
+    "sales": {
+      "title": "Contatti per fase",
+      "empty": "Ancora nessun contatto.",
+      "dueTitle": "Promemoria arrivati",
+      "moveTo": "Sposta in",
+      "remind": "Ricordamelo il",
+      "move": "Sposta",
+      "remindOn": "promemoria {date}",
+      "badReminder": "Scegli un giorno di promemoria dopo oggi, entro un anno.",
+      "failed": "Non è stato possibile salvare. Riprova.",
+      "stages": {
+        "new": "Nuovo",
+        "contacted": "Contattato",
+        "meeting": "Incontro",
+        "proposal": "Proposta",
+        "won": "Vinto",
+        "lost": "Perso"
+      },
+      "reminder": {
+        "title": "Promemoria: {name}",
+        "body": "Fase: {stage}"
+      }
+    },
+    "translate": {
+      "button": "Traduci",
+      "title": "Traduci in un'altra lingua",
+      "language": "Lingua",
+      "copyNoteSite": "Il tuo sito non cambia. La traduzione diventa un nuovo sito accanto, con le stesse pagine, colori e immagini.",
+      "copyNoteDocument": "Il tuo documento non cambia. La traduzione diventa un nuovo documento accanto, nella stessa forma.",
+      "estimating": "Calcolo del prezzo…",
+      "estimate": "La traduzione costa circa {count, plural, one {# credito} other {# crediti}}. Addebitato solo quando premi Traduci.",
+      "bypassFree": "La traduzione è gratuita su questo account.",
+      "sameLanguage": "È già scritto in quella lingua. Scegline un'altra.",
+      "nothing": "Non c'è testo da tradurre.",
+      "tooLong": "È troppo lungo per una traduzione ({chars} caratteri; il limite è {limit}).",
+      "estimateFailed": "Il prezzo non è stato calcolato. Riprova.",
+      "go": "Traduci",
+      "running": "Traduzione in corso…",
+      "stop": "Ferma",
+      "stopped": "Fermato. Non è stato addebitato né scritto nulla.",
+      "done": "Fatto: «{name}».",
+      "kept": "{count, plural, one {# parte è rimasta com'era} other {# parti sono rimaste com'erano}}, perché la loro traduzione non manteneva la forma.",
+      "charged": "{count, plural, one {Addebitato # credito} other {Addebitati # crediti}}.",
+      "chargedNothing": "Nessun addebito.",
+      "open": "Aprilo",
+      "insufficient": "Crediti insufficienti per questa traduzione. Non è stato addebitato nulla.",
+      "dailyLimit": "Hai raggiunto il limite di nuovi siti di oggi. Riprova domani.",
+      "notIncluded": "Il Sito non è incluso nel tuo piano.",
+      "unusable": "La risposta non era utilizzabile e non è stato scritto nulla. Si addebita solo quanto speso.",
+      "failed": "Non è stato possibile fare la traduzione. Nessun credito addebitato."
+    },
+    "games": {
+      "placeholder": "Descrivi un gioco: cosa fa il giocatore, cosa lo ostacola, come vince…",
+      "placeholderBox": "Di' cosa cambiare in questo riquadro…",
+      "placeholderChange": "Di' cosa cambiare nel gioco, ad es. «un nemico più veloce»…",
+      "boxes": {
+        "rules": "Regole",
+        "levels": "Livelli",
+        "characters": "Personaggi",
+        "controls": "Comandi",
+        "win": "Come si vince"
+      },
+      "boxHint": "Questo è il piano. Premi un riquadro e di' cosa cambiare; cambia solo quello. Quando sei pronto, crea il gioco.",
+      "planned": "Il piano di «{title}» è pronto. Guarda i riquadri a destra.",
+      "boxChanged": "Il riquadro «{box}» è cambiato. Gli altri sono rimasti com'erano.",
+      "build": "Crea il gioco",
+      "building": "Scrittura del gioco…",
+      "built": "Il gioco è pronto. Giocalo a destra e di' cosa cambiare.",
+      "changed": "Cambiato. La nuova versione si gioca a destra; quella prima è conservata.",
+      "restored": "È tornata la versione {n}.",
+      "recent": "I tuoi giochi",
+      "noneYet": "Non hai ancora creato un gioco.",
+      "download": "Scarica il codice",
+      "play": "Il gioco",
+      "sealed": "Si gioca isolato: non vede nulla del tuo account e non va su internet.",
+      "versions": "{count, plural, one {# versione} other {# versioni}}",
+      "version": "Versione {n}",
+      "first": "la prima",
+      "restore": "Ripristina",
+      "errors": {
+        "insufficient": "Crediti insufficienti. Non è stato addebitato nulla.",
+        "unavailable": "Il servizio non risponde in questo momento. Non è stato addebitato nulla.",
+        "unusable": "La risposta non era un gioco giocabile e non è stata conservata. Si addebita solo quanto speso.",
+        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "notIncluded": "I giochi sono inclusi nei piani che hanno il Sito.",
+        "tooLong": "La descrizione è troppo lunga.",
+        "stopped": "Fermato. Non è stato addebitato nulla.",
+        "failed": "Qualcosa è andato storto. Riprova."
+      }
     }
   },
   "module": {
@@ -4117,6 +4237,11 @@
       "is": "Una mappa di tutto Ionexa, in una pagina.",
       "does": "Mostra ogni strumento con una riga su cosa fa, raggruppati per ciò che crei, chiedi, esegui e vedi.",
       "doesNot": "Non è l’unica strada: scrivi cosa vuoi nel campo della Home o premi ⌘K e arrivi allo stesso strumento."
+    },
+    "games": {
+      "is": "Un piccolo gioco tuo, da una descrizione.",
+      "does": "Prima ti mostra il piano in cinque riquadri; cambiane uno a parole, poi scrive il gioco e ci giochi qui, con la tastiera o al tocco.",
+      "doesNot": "Non vede il tuo account e non va su internet: il gioco gira isolato, e così il file che scarichi."
     }
   },
   "helpCentre": {
@@ -4456,6 +4581,35 @@
     "chart": {
       "nothingToPlot": "Qui non c'è nulla da tracciare.",
       "truncated": "Mostriamo i {count} maggiori; il resto è raggruppato o omesso."
+    },
+    "how": {
+      "title": "Come sono stati ottenuti i numeri",
+      "press": "Tocca un numero per vedere come è stato ottenuto.",
+      "rows": "Le righe del file, contate una per una.",
+      "duplicates": "Righe identiche a una precedente in ogni colonna (righe del file: {rows}).",
+      "sum": "La somma della colonna «{column}» (righe con un valore: {rows}).",
+      "mean": "La media di «{column}»: la somma divisa per le righe con un valore ({rows}).",
+      "median": "La mediana di «{column}»: il valore centrale una volta ordinati (righe con un valore: {rows}).",
+      "min": "Il valore più piccolo di «{column}» (righe con un valore: {rows}).",
+      "max": "Il valore più grande di «{column}» (righe con un valore: {rows}).",
+      "missing": "Righe senza valore in «{column}» (righe del file: {rows}).",
+      "distinct": "Valori diversi in «{column}» (righe con un valore: {rows}).",
+      "outliers": "Valori di «{column}» a più di 3 deviazioni standard dalla sua media (righe con un valore: {rows}).",
+      "topCount": "Righe in cui «{column}» è «{label}» (righe con un valore: {rows}).",
+      "r": "Correlazione di Pearson tra «{column}» e «{other}», sulle righe che hanno entrambi. Da −1 a 1; non dice cosa causa cosa.",
+      "from": "La prima data di «{column}».",
+      "to": "L’ultima data di «{column}».",
+      "chartTitle": "Come è stato ottenuto ogni valore",
+      "point": "righe: {rows}",
+      "other": "Ciò che non entra nel grafico, insieme.",
+      "dropped": "Sono stati esclusi i risultati con un numero non calcolato dal file: {count}.",
+      "chart": {
+        "sum": "Per ogni «{x}», la somma di «{y}».",
+        "mean": "Per ogni «{x}», la media di «{y}».",
+        "count": "Per ogni «{x}», quante righe ha.",
+        "min": "Per ogni «{x}», il valore più piccolo di «{y}».",
+        "max": "Per ogni «{x}», il valore più grande di «{y}»."
+      }
     }
   },
   "coding": {

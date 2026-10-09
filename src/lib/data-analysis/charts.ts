@@ -37,7 +37,9 @@ export type ChartSpec = {
   reason?: string;
 };
 
-export type ChartPoint = { label: string; value: number };
+/** `rows`: how many rows the value was computed from (package 16 shows it
+ *  as "how this number was made"). Absent on a scatter, where it is one. */
+export type ChartPoint = { label: string; value: number; rows?: number };
 export type BuiltChart = { spec: ChartSpec; points: ChartPoint[]; truncated: boolean };
 
 /** More categories than this and the x-axis is a smear. The rest are
@@ -189,6 +191,7 @@ export function buildChart(
   let points: ChartPoint[] = [...buckets.entries()].map(([label, values]) => ({
     label,
     value: aggregate(spec.aggregation, values),
+    rows: values.length,
   }));
 
   // An ordered axis is sorted by its own order; a categorical one by
@@ -212,7 +215,7 @@ export function buildChart(
     // produced for sum and count; for the rest the tail is cut and the
     // caller is told it was.
     if (spec.aggregation === "sum" || spec.aggregation === "count") {
-      kept.push({ label: "Other", value: rest.reduce((s, p) => s + p.value, 0) });
+      kept.push({ label: "Other", value: rest.reduce((s, p) => s + p.value, 0), rows: rest.reduce((s, p) => s + (p.rows ?? 0), 0) });
     }
     points = kept;
   }

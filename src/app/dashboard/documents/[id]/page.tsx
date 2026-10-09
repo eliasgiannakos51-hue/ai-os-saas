@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentEditor } from "@/components/documents/document-editor";
 import { loadFavoriteIds } from "@/lib/favorites";
+import { isFeatureOn } from "@/lib/flags/flags";
 import type { UserDocument } from "@/types/document";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -42,6 +43,7 @@ export default async function DocumentEditorPage(props: { params: Promise<{ id: 
     <DocumentEditor
       doc={doc as Pick<UserDocument, "id" | "title" | "content" | "updated_at">}
       initialFavorited={favorited.has(doc.id as string)}
+      translate={await isFeatureOn("translate", user)}
     />
   );
 }

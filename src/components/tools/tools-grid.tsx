@@ -4,13 +4,17 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Pin, PinOff, Search } from "lucide-react";
+import { LayoutGrid, Pin, PinOff, Search, type LucideIcon } from "lucide-react";
 import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, groupHrefs, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
+import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, groupHrefs, SWITCH_ONLY_ITEMS, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
+import { GAMES_ICON } from "@/lib/module-icons";
+
+/** The icon of each tool with no sidebar row (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS). */
+const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON };
 import { useToast } from "@/components/toast/toast-context";
 
 /**
@@ -51,6 +55,10 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const byHref = new Map(
       sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))
     );
+    // A tool with no sidebar row at all (lib/nav/all-tools.ts
+    // SWITCH_ONLY_ITEMS): drawn only through groupHrefs, so only when its
+    // switch is on.
+    for (const [href, item] of Object.entries(SWITCH_ONLY_ITEMS)) if (!byHref.has(href)) byHref.set(href, { href, ...item, icon: SWITCH_ONLY_ICONS[href] ?? LayoutGrid });
     // Literal keys, so the message slicer can bound what this page needs
     // (lib/i18n/message-slices.ts): a template-literal key is unbounded.
     const headings: Record<AllToolsGroupKey, string> = {
@@ -87,6 +95,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     sales: t("names.sales"),
     trading: t("names.trading"),
     document: t("names.document"),
+    games: t("names.games"),
   };
 
   const label = (item: SidebarItem) => (ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : longLabel(item));

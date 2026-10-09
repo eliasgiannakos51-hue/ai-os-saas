@@ -609,6 +609,38 @@ export const ACTION_PROFILES = {
     baseOutputChars: 2200,
     outputCharsPerInputChar: 0,
   },
+  // GAMES (MASTER 16, package 26; api/games and api/games/[id]). Each
+  // call site passes EVERY character it sends — the system prompt and the
+  // message (lib/games/game-plan.ts) — so systemPromptTokens is only the
+  // tool schema's few lines. The plan is five boxes of at most 600
+  // characters and a title; one box is one box; a written game is held
+  // at the most the prompt allows (30,000 characters); a change sends the
+  // whole game up and gets the whole game back, so its output tracks its
+  // input one to one.
+  gamePlan: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 3200,
+    outputCharsPerInputChar: 0,
+  },
+  gameBoxEdit: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 700,
+    outputCharsPerInputChar: 0,
+  },
+  gameWrite: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 30000,
+    outputCharsPerInputChar: 0,
+  },
+  gameChange: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
   // One set of social posts (api/posts/generate) — V5 #22. The same
   // shape as presentationGenerate: one forced-tool call, and the cost is
   // set by WHICH platforms were asked for rather than by the brief, so

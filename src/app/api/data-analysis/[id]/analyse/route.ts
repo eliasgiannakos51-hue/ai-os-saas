@@ -18,7 +18,9 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { runCompletion } from "@/lib/ai/providers/complete";
-import { ANALYSIS_MODEL, ANALYSIS_SYSTEM, buildProfileBrief, parseAnalysis } from "@/lib/data-analysis/analyse";
+import { ANALYSIS_MODEL, ANALYSIS_SYSTEM, analysisBrief, parseAnalysis, parseAnalysisWithFacts } from "@/lib/data-analysis/analyse";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { SUPPORTED_LOCALES } from "@/i18n/constants";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 
 export const dynamic = "force-dynamic";
@@ -40,8 +42,12 @@ const MODEL = ANALYSIS_MODEL;
  * file with the same columns genuinely cost the same to analyse, and
  * pricing by upload size would be charging for storage.
  */
-export async function POST(_request: Request, props: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+  // The reader's language, for the numbers written into the findings'
+  // plain text (package 16). Optional: an empty body is the old request.
+  const body = (await request.json().catch(() => null)) as { locale?: unknown } | null;
+  const locale = typeof body?.locale === "string" && (SUPPORTED_LOCALES as readonly string[]).includes(body.locale) ? body.locale : "en";
   const supabase = await createClient();
   const {
     data: { user },
@@ -62,12 +68,13 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
     const headers = (analysis.headers ?? []) as string[];
     const rows = (analysis.rows ?? []) as string[][];
 
-    const brief = buildProfileBrief({
-      fileName: String(analysis.file_name ?? analysis.title ?? "dataset"),
-      profile,
-      headers,
-      rows,
-    });
+    // EVERY NUMBER A FACT (package 16), behind its switch: the facts go in
+    // the brief, and the reply's numbers are read against them.
+    const withFacts = await isFeatureOn("analysis-provenance", user);
+    const { brief, facts } = analysisBrief(
+      { fileName: String(analysis.file_name ?? analysis.title ?? "dataset"), profile, headers, rows },
+      withFacts
+    );
 
     const breaker = await checkAiCallAllowed(user.id, "data_analyse", fingerprintRequest(params.id, brief));
     if (!breaker.allowed) return NextResponse.json({ error: "rate_limited", detail: breaker.reason }, { status: 429 });
@@ -131,7 +138,7 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
     }
 
     costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
-    const parsed = parseAnalysis(outcome.text, profile);
+    const parsed = withFacts ? parseAnalysisWithFacts(outcome.text, profile, facts, locale) : parseAnalysis(outcome.text, profile);
 
     // THE SAVE COMES BEFORE THE CHARGE, and a save that fails refuses.
     //
@@ -204,6 +211,8 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
       // file does not have is a prompt problem, and a silent filter hides
       // it from the only person who would notice.
       rejected: parsed.rejected,
+      // Findings left out for a number that was not computed: said on the screen.
+      dropped: parsed.rejected.filter((r) => r.includes("not computed facts")).length,
       creditsCharged: settlement.creditsCharged,
     });
   } catch (err) {

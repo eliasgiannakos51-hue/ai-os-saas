@@ -2,6 +2,7 @@ import { validateChartSpec, type ChartSpec } from "@/lib/data-analysis/charts";
 import { jsonSliceOf } from "@/lib/json-from-text";
 import { truncate } from "@/lib/text/truncate";
 import type { TableProfile } from "@/lib/data-analysis/profile";
+import { FACTS_RULE, buildFacts, factIdsIn, partsToText, renderFactsForModel, resolveText, type Fact, type TextPart } from "@/lib/data-analysis/facts";
 
 /**
  * WHAT THE MODEL IS ASKED, AND WHAT IS DONE WITH THE ANSWER.
@@ -32,6 +33,10 @@ export type Finding = {
   detail: string;
   /** Which columns it is about. Checked against the profile. */
   columns: string[];
+  /** The same words with every number as the fact it is (package 16,
+   *  lib/data-analysis/facts.ts). Absent on findings made before. */
+  headlineParts?: TextPart[];
+  detailParts?: TextPart[];
 };
 
 export type AnalysisFindings = {
@@ -40,6 +45,9 @@ export type AnalysisFindings = {
   charts: ChartSpec[];
   /** Questions the data could answer, offered as one-click follow-ups. */
   suggestedQuestions: string[];
+  summaryParts?: TextPart[];
+  /** Every fact the parts refer to, with how it was computed. */
+  facts?: Fact[];
 };
 
 export type ParseOutcome = {
@@ -246,4 +254,93 @@ export function extractJson(raw: string): Record<string, unknown> | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * THE SAME READING, WITH EVERY NUMBER A FACT (package 16, behind the
+ * switch "analysis-provenance"). parseAnalysis decides what survives on
+ * columns and charts; this then reads each finding's numbers. A finding
+ * with a number that is no fact — typed, or a reference to a fact that
+ * does not exist — is dropped and said, as a finding about a column the
+ * file does not have is. A summary keeps only its sentences that pass.
+ * The plain text (headline, detail, summary) carries the numbers written
+ * for `locale`, so a page that does not draw the parts still reads right.
+ */
+export function parseAnalysisWithFacts(raw: string, profile: TableProfile, facts: readonly Fact[], locale: string): ParseOutcome {
+  const base = parseAnalysis(raw, profile);
+  const rejected = [...base.rejected];
+  const names = [
+    ...profile.columns.map((c) => c.name),
+    // The values of a CATEGORY column ("Region 2"); a numeric column's
+    // values are numbers, and a number is what this reads.
+    ...profile.columns.filter((c) => c.type === "text" || c.type === "boolean").flatMap((c) => c.topValues.map((t) => t.value)),
+  ];
+
+  const findings: Finding[] = [];
+  for (const finding of base.findings.findings) {
+    const headline = resolveText(finding.headline, facts, finding.columns, names);
+    const detail = resolveText(finding.detail, facts, finding.columns, names);
+    const unknown = [...headline.unknown, ...detail.unknown];
+    const stray = [...headline.stray, ...detail.stray];
+    if (unknown.length > 0 || stray.length > 0) {
+      rejected.push(
+        `"${finding.headline}" has numbers that are not computed facts: ${[...unknown.map((u) => `{${u}}`), ...stray].join(", ")}`
+      );
+      continue;
+    }
+    findings.push({
+      ...finding,
+      headline: partsToText(headline.parts, facts, locale),
+      detail: partsToText(detail.parts, facts, locale),
+      headlineParts: headline.parts,
+      detailParts: detail.parts,
+    });
+  }
+
+  // THE SUMMARY, SENTENCE BY SENTENCE: one bad number costs its sentence.
+  const summaryParts: TextPart[] = [];
+  for (const sentence of base.findings.summary.split(/(?<=[.!?;·。])\s+/).filter((s) => s.trim())) {
+    const read = resolveText(sentence, facts, [], names);
+    if (read.unknown.length > 0 || read.stray.length > 0) {
+      rejected.push(`a summary sentence had numbers that are not computed facts: ${[...read.unknown, ...read.stray].join(", ")}`);
+      continue;
+    }
+    if (summaryParts.length > 0) summaryParts.push({ text: " " });
+    summaryParts.push(...read.parts);
+  }
+
+  // A question offered back is not a claim; its references are written in.
+  const suggestedQuestions = base.findings.suggestedQuestions.map((q) => partsToText(resolveText(q, facts, [], names).parts, facts, locale));
+
+  const used = new Set(factIdsIn(summaryParts, ...findings.flatMap((f) => [f.headlineParts, f.detailParts])));
+  return {
+    findings: {
+      ...base.findings,
+      summary: partsToText(summaryParts, facts, locale),
+      summaryParts,
+      findings,
+      suggestedQuestions,
+      facts: facts.filter((f) => used.has(f.id)),
+    },
+    rejected,
+  };
+}
+
+/**
+ * WHAT ONE ANALYSIS SENDS AS ITS BRIEF, in one place, so the price route
+ * quotes the same characters the analyse route holds for. With the switch
+ * "analysis-provenance" the brief ends with the rule that numbers are
+ * written as {F7} and the facts themselves. They go in the BRIEF, not the
+ * system prompt, so the system prompt stays the constant ANALYSIS_SYSTEM
+ * and both routes keep sizing their hold as ANALYSIS_SYSTEM.length +
+ * brief.length — the shape charge-sees-input.test.mjs can read.
+ */
+export function analysisBrief(
+  params: { fileName: string; profile: TableProfile; headers: readonly string[]; rows: readonly (readonly string[])[] },
+  withFacts: boolean
+): { brief: string; facts: Fact[] } {
+  const brief = buildProfileBrief(params);
+  if (!withFacts) return { brief, facts: [] };
+  const facts = buildFacts(params.profile);
+  return { brief: `${brief}\n${FACTS_RULE}\n\n${renderFactsForModel(facts)}`, facts };
 }

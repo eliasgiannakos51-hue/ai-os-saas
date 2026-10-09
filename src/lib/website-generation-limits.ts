@@ -91,3 +91,20 @@ export function isGenerationJobStale(
   );
   return ageMs > timeoutMs;
 }
+
+// Fair-use daily cap, counted in rows of user_websites made in the last
+// FAIR_USE_WINDOW_MS (api/websites/generate and api/translate) — applies
+// even to "unlimited" plans (Ultimate/Enterprise's marketing copy is "unlimited team seats/AI agents", never
+// "unlimited generations"; credits are the real per-plan limit for
+// everyone else, but Ultimate/Enterprise's large monthly credit
+// allotment plus admin/beta bypass accounts have no natural ceiling on
+// requests/day). 50/day is far above realistic use (realistically 1-5/
+// day) — this exists purely to catch runaway automation/bugs/abuse, not
+// to constrain any real user. Applied to every plan uniformly (simpler
+// and still harmless for lower tiers, which hit their credit limit
+// first in every realistic scenario) rather than only Ultimate.
+// Independent of, and in addition to, the platform-wide circuit breaker
+// (lib/ai-circuit-breaker.ts), which is the final safety net
+// across the whole platform regardless of plan or per-feature caps.
+export const MAX_GENERATIONS_PER_DAY = 50;
+export const FAIR_USE_WINDOW_MS = 24 * 60 * 60 * 1000;

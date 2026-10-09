@@ -20,6 +20,7 @@ import { resolveMarginFor } from "@/lib/billing/margin-policy";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { CHARS_PER_SPOKEN_MINUTE, meetingLimits } from "@/lib/meetings/meeting-limits";
 import { MeetingsWorkspace, type MeetingRow } from "@/components/meetings/meetings-workspace";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.meetings");
@@ -135,10 +136,21 @@ export default async function MeetingsPage() {
   };
 
 
+  // A GOAL FROM THE MEETING (package 17), behind its switch: the person's
+  // active projects to put it in, read under their own RLS.
+  const goals = (await isFeatureOn("meeting-goal", user))
+    ? {
+        projects: (
+          (await supabase.from("projects").select("id, name").eq("status", "active").order("created_at", { ascending: false }).limit(50)).data ?? []
+        ).map((p) => ({ id: String(p.id), name: String(p.name ?? "") })),
+      }
+    : null;
+
   return (
     <div className="space-y-6">
       <PageHeader icon={MEETINGS_ICON} title={t("title")} description={t("description")} helpKey="help.meetings" />
       <MeetingsWorkspace
+        goals={goals}
         limits={meetingLimits()}
         price={price}
         minutes={{ usedSeconds: allowance.usedSeconds, limitMinutes }}

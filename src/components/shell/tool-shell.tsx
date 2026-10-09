@@ -137,11 +137,18 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
         </div>
       </div>
 
+      {/* ON A PHONE THE WORK IS THE WHOLE SCREEN, ABOVE THE TAB BAR'S 64px.
+          Its z-[60] is counted inside the dashboard's z-10 layer
+          (app/dashboard/layout.tsx), and the tab bar
+          (components/dashboard/mobile-tab-bar.tsx, z-40, md:hidden) sits
+          outside it, so the bar is drawn over the work's last 64px: a
+          game's versions and a Site's last section were under it,
+          unreachable (measured 2026-10-08). The same room main keeps. */}
       {work && (
         <section
           aria-label={work.title}
           data-testid="tool-shell-work"
-          className="fixed inset-0 z-[60] flex flex-col bg-workspace lg:static lg:z-auto lg:w-[60%] lg:shrink-0"
+          className="fixed inset-0 z-[60] flex flex-col bg-workspace pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 lg:static lg:z-auto lg:w-[60%] lg:shrink-0"
         >
           <div className="flex items-center gap-1 px-2 py-1.5">
             <button type="button" onClick={onCloseWork} aria-label={t("back")} data-testid="tool-shell-back" className={`${ACTION} lg:hidden`}>

@@ -224,7 +224,8 @@
       "personalFinance": "Personal Finance",
       "personalJournal": "Journaling",
       "personalLifeOs": "Life OS",
-      "activity": "Activity"
+      "activity": "Activity",
+      "games": "Games"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -286,7 +287,8 @@
       "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it.",
       "aiMemory": "What the chat has kept about you, and how to remove it.",
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
-      "activity": "Your next step, what changed, your progress and your numbers"
+      "activity": "Your next step, what changed, your progress and your numbers",
+      "games": "Describe a game, change its plan in words, and play it here, sealed off from your account."
     },
     "closeMenu": "Close menu",
     "rail": {
@@ -2870,6 +2872,20 @@
         "rate_limited": "Too many recordings in the last hour. Try again later.",
         "empty": "That recording was empty.",
         "failed": "Something went wrong. Nothing was charged."
+      },
+      "goal": {
+        "title": "{count, plural, one {Make this action a step of a goal} other {Make these # actions the steps of a goal}}",
+        "goalLabel": "The goal",
+        "projectLabel": "In the project",
+        "newProject": "A new project…",
+        "newProjectName": "Name of the new project",
+        "make": "{count, plural, one {Make the goal with 1 step} other {Make the goal with # steps}}",
+        "done": "{count, plural, one {The goal was made with 1 step, inside the project.} other {The goal was made with # steps, inside the project.}}",
+        "openProject": "Open the project",
+        "openGoals": "See it in Goals",
+        "projectLimit": "Your plan's projects are all in use. Choose one of them, or archive one first.",
+        "projectName": "Give the new project a name of at least two letters.",
+        "projectFull": "That project is full. Choose another one."
       }
     },
     "voicePage": {
@@ -2958,7 +2974,8 @@
         "finances": "Finances",
         "sales": "Sales",
         "trading": "Trading",
-        "document": "Document"
+        "document": "Document",
+        "games": "Games"
       }
     },
     "home": {
@@ -3391,6 +3408,109 @@
       "send": "Start",
       "import": "Bring your data from a CSV file",
       "skip": "Skip"
+    },
+    "financeQuick": {
+      "title": "Write what you paid or received",
+      "placeholder": "e.g. paid 50 euros for electricity",
+      "save": "Record",
+      "hint": "One amount and whether it was paid or received. Read as written — nothing is guessed.",
+      "doneExpense": "Recorded: an expense of {amount} — {description}.",
+      "doneIncome": "Recorded: income of {amount} — {description}.",
+      "open": "Open it",
+      "missingAmount": "I could not find one amount. Write a single amount, e.g. «paid 50 € for electricity».",
+      "missingType": "I could not tell if it was paid or received. Start with «paid» or «received».",
+      "missingBoth": "Write one amount and whether it was paid or received, e.g. «paid 50 € for electricity».",
+      "failed": "It could not be recorded. Try again."
+    },
+    "sales": {
+      "title": "Contacts by stage",
+      "empty": "No contacts yet.",
+      "dueTitle": "Reminders due",
+      "moveTo": "Move to",
+      "remind": "Remind me on",
+      "move": "Move",
+      "remindOn": "reminder {date}",
+      "badReminder": "Choose a reminder day after today, within a year.",
+      "failed": "It could not be saved. Try again.",
+      "stages": {
+        "new": "New",
+        "contacted": "Contacted",
+        "meeting": "Meeting",
+        "proposal": "Proposal",
+        "won": "Won",
+        "lost": "Lost"
+      },
+      "reminder": {
+        "title": "Reminder: {name}",
+        "body": "Stage: {stage}"
+      }
+    },
+    "translate": {
+      "button": "Translate",
+      "title": "Translate into another language",
+      "language": "Language",
+      "copyNoteSite": "Your site does not change. The translation becomes a new site beside it, with the same pages, colours and images.",
+      "copyNoteDocument": "Your document does not change. The translation becomes a new document beside it, in the same form.",
+      "estimating": "Working out the price…",
+      "estimate": "Translation costs about {count, plural, one {# credit} other {# credits}}. Charged only when you press Translate.",
+      "bypassFree": "Translation is free on this account.",
+      "sameLanguage": "It is already written in that language. Choose another.",
+      "nothing": "There is no text to translate.",
+      "tooLong": "This is too long for one translation ({chars} characters; the limit is {limit}).",
+      "estimateFailed": "The price could not be worked out. Try again.",
+      "go": "Translate",
+      "running": "Translating…",
+      "stop": "Stop",
+      "stopped": "Stopped. Nothing was charged and nothing was written.",
+      "done": "Done: “{name}”.",
+      "kept": "{count, plural, one {# piece was left as it was} other {# pieces were left as they were}}, because their translation did not keep the form.",
+      "charged": "{count, plural, one {# credit} other {# credits}} charged.",
+      "chargedNothing": "Nothing charged.",
+      "open": "Open it",
+      "insufficient": "Not enough credits for this translation. Nothing was charged.",
+      "dailyLimit": "You have reached today's limit of new sites. Try tomorrow.",
+      "notIncluded": "The Site is not included in your plan.",
+      "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
+      "failed": "The translation could not be made. No credits were charged."
+    },
+    "games": {
+      "placeholder": "Describe a game: what the player does, what stands in the way, how they win…",
+      "placeholderBox": "Say what to change in this box…",
+      "placeholderChange": "Say what to change in the game, e.g. “a faster enemy”…",
+      "boxes": {
+        "rules": "Rules",
+        "levels": "Levels",
+        "characters": "Characters",
+        "controls": "Controls",
+        "win": "How you win"
+      },
+      "boxHint": "This is the plan. Press a box and say what to change; only that box changes. When you are ready, make the game.",
+      "planned": "The plan for “{title}” is ready. See the boxes on the right.",
+      "boxChanged": "The “{box}” box changed. The others are as they were.",
+      "build": "Make the game",
+      "building": "Writing the game…",
+      "built": "The game is ready. Play it on the right, and say what to change.",
+      "changed": "Changed. The new version plays on the right; the one before is kept.",
+      "restored": "Version {n} is back.",
+      "recent": "Your games",
+      "noneYet": "You have not made a game yet.",
+      "download": "Download the code",
+      "play": "The game",
+      "sealed": "It plays sealed off: it sees nothing of your account and does not reach the internet.",
+      "versions": "{count, plural, one {# version} other {# versions}}",
+      "version": "Version {n}",
+      "first": "the first",
+      "restore": "Restore",
+      "errors": {
+        "insufficient": "Not enough credits. Nothing was charged.",
+        "unavailable": "The service is not answering right now. Nothing was charged.",
+        "unusable": "The answer was not a playable game and was not kept. Only what was spent is charged.",
+        "rateLimited": "Too many requests at once. Try again shortly.",
+        "notIncluded": "Games come with the plans that have the Site.",
+        "tooLong": "The description is too long.",
+        "stopped": "Stopped. Nothing was charged.",
+        "failed": "Something went wrong. Try again."
+      }
     }
   },
   "module": {
@@ -4117,6 +4237,11 @@
       "is": "A map of all of Ionexa, on one page.",
       "does": "Shows every tool with one line on what it does, grouped by what you make, ask, run and see.",
       "doesNot": "It is not the only way in: type what you want in the field on Home, or press ⌘K, and you reach the same tool."
+    },
+    "games": {
+      "is": "A small game of your own, from a description.",
+      "does": "It shows you the plan in five boxes first; change any of them in words, then it writes the game and you play it here, with the keyboard or by touch.",
+      "doesNot": "It does not see your account and does not reach the internet: the game plays sealed off, and so does the file you download."
     }
   },
   "helpCentre": {
@@ -4456,6 +4581,35 @@
     "chart": {
       "nothingToPlot": "Nothing to plot for this one.",
       "truncated": "Showing the largest {count}; the rest are grouped or left out."
+    },
+    "how": {
+      "title": "How the numbers were made",
+      "press": "Press a number to see how it was made.",
+      "rows": "The file's rows, counted one by one.",
+      "duplicates": "Rows identical to an earlier row in every column (rows in the file: {rows}).",
+      "sum": "The sum of the column «{column}» (rows with a value: {rows}).",
+      "mean": "The mean of «{column}»: the sum divided by the rows with a value ({rows}).",
+      "median": "The median of «{column}»: the middle value once they are in order (rows with a value: {rows}).",
+      "min": "The smallest value in «{column}» (rows with a value: {rows}).",
+      "max": "The largest value in «{column}» (rows with a value: {rows}).",
+      "missing": "Rows with no value in «{column}» (rows in the file: {rows}).",
+      "distinct": "Different values in «{column}» (rows with a value: {rows}).",
+      "outliers": "Values of «{column}» further than 3 standard deviations from its mean (rows with a value: {rows}).",
+      "topCount": "Rows where «{column}» is «{label}» (rows with a value: {rows}).",
+      "r": "Pearson correlation between «{column}» and «{other}», over the rows that have both. From −1 to 1; it does not say what causes what.",
+      "from": "The first date in «{column}».",
+      "to": "The last date in «{column}».",
+      "chartTitle": "How each value was made",
+      "point": "rows: {rows}",
+      "other": "What does not fit on the chart, together.",
+      "dropped": "Findings with a number that was not computed from the file were left out: {count}.",
+      "chart": {
+        "sum": "For each «{x}», the sum of «{y}».",
+        "mean": "For each «{x}», the mean of «{y}».",
+        "count": "For each «{x}», how many rows it has.",
+        "min": "For each «{x}», the smallest «{y}».",
+        "max": "For each «{x}», the largest «{y}»."
+      }
     }
   },
   "coding": {

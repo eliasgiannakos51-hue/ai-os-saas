@@ -409,7 +409,10 @@ const DELETE_CONFIRM = "src/app/api/delete-account/confirm/route.ts";
 const deleteConfirm = SRC.get(DELETE_CONFIRM) ?? "";
 check(
   `${DELETE_CONFIRM.replace("src/app/api/", "")}: the token give-back is checked`,
-  /const \{ error: giveBackError \} = await admin[\s\S]{0,200}\.update\(\{ used_at: null \}\)/.test(deleteConfirm),
+  // EVERY write that gives the token back, each with its error read.
+  (deleteConfirm.match(/\.update\(\{ used_at: null \}\)/g) ?? []).length >= 2 &&
+    (deleteConfirm.match(/\.update\(\{ used_at: null \}\)/g) ?? []).length ===
+      (deleteConfirm.match(/const \{ error: giveBackError \} = await admin\s*\.from\("account_deletion_requests"\)\s*\.update\(\{ used_at: null \}\)/g) ?? []).length,
   "'Your link still works' is a promise about this exact write"
 );
 // BY ABSENCE, over the branch's own body. Asserting the replacement
@@ -417,21 +420,22 @@ check(
 // reassurance is NOT in the branch where its premise failed. The route
 // reuses its standard dead-end message there, so the positive half is
 // just that the branch returns at all.
-const giveBackAt = deleteConfirm.indexOf("if (giveBackError) {");
-// BOUNDED BY THE BRANCH'S OWN CLOSING BRACE, not by a character count.
-// A fixed window ran past the `}` and into the reassuring return that
-// follows it — which is the sentence this check exists to keep OUT, so
-// the window was reading the very thing it forbids.
-const giveBackEnd = giveBackAt === -1 ? -1 : deleteConfirm.indexOf("\n        }", giveBackAt);
-const giveBackBranch =
-  giveBackAt === -1 || giveBackEnd === -1
-    ? "Your link still works"
-    : deleteConfirm.slice(giveBackAt, giveBackEnd);
+// EVERY GIVE-BACK, not the first one: since 2026-10-08 the route has two
+// (the files and the subscription), and a check that read the first could
+// not see the second. Each branch is bounded by its own matching brace.
+const giveBackBranches = [];
+for (let at = deleteConfirm.indexOf("if (giveBackError) {"); at !== -1; at = deleteConfirm.indexOf("if (giveBackError) {", at + 1)) {
+  let i = deleteConfirm.indexOf("{", at) + 1;
+  for (let depth = 1; i < deleteConfirm.length && depth > 0; i++) {
+    if (deleteConfirm[i] === "{") depth++;
+    else if (deleteConfirm[i] === "}") depth--;
+  }
+  giveBackBranches.push(deleteConfirm.slice(at, i));
+}
 check(
-  "…and a give-back that failed does not say the link still works",
-  giveBackAt !== -1 &&
-    !/link still works/.test(giveBackBranch) &&
-    /return NextResponse\.json\([\s\S]{0,300}status: 500/.test(giveBackBranch),
+  `…and a give-back that failed does not say the link still works (${giveBackBranches.length} give-backs)`,
+  giveBackBranches.length >= 2 &&
+    giveBackBranches.every((b) => !/link still works/.test(b) && /return NextResponse\.json\([\s\S]{0,300}status: 500/.test(b)),
   "the claim above it consumed the single-use token, so the reassuring sentence with no give-back behind it sends somebody back to a link that can never work again — on the erasure path"
 );
 

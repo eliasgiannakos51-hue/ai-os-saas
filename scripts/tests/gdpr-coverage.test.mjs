@@ -296,7 +296,10 @@ check(
   "...BEFORE deleteUser, so a failure stops the deletion",
   confirmSrc.indexOf("forget_user_in_production_errors") < confirmSrc.indexOf("deleteUser(")
 );
-check("...and storage objects are still deleted too", /delete_user_storage_objects/.test(confirmSrc));
+check("...and storage objects are still deleted too, through the Storage API", /eraseUserStorage\(admin\.storage, claimed\.user_id\)/.test(confirmSrc));
+// The SQL function Supabase refuses since 2026-03 (protect_objects_delete):
+// calling it again is every deletion failing again.
+check("...and not through delete_user_storage_objects(), which Supabase refuses", !/delete_user_storage_objects/.test(stripComments(confirmSrc)));
 
 // EVERY BUCKET, NOT THE ONE THE FUNCTION WAS WRITTEN FOR.
 //
@@ -327,42 +330,26 @@ for (const file of libFiles) {
 }
 check(`the bucket constants were found (${[...buckets].sort().join(", ")})`, buckets.size >= 3);
 
-// THE FUNCTION THE DATABASE RUNS IS THE LAST ONE WRITTEN. 20261005000000
-// introduced it; a later migration that adds a bucket replaces it
-// (20261019000000_generated_images.sql added 'ai-images'), and reading
-// the first one would check a list the database no longer has.
-const ERASE_DEFINITION = /create or replace function public\.delete_user_storage_objects\(/;
-const eraseMigrations = readdirSync("supabase/migrations")
-  .filter((f) => f.endsWith(".sql"))
-  .sort()
-  .filter((f) => ERASE_DEFINITION.test(readFileSync(join("supabase/migrations", f), "utf8")));
-const eraseMigration = eraseMigrations.length > 0 ? join("supabase/migrations", eraseMigrations[eraseMigrations.length - 1]) : "";
-check(
-  `the all-buckets erasure migration exists, and the newest definition is read (${eraseMigrations.join(", ") || "none"})`,
-  eraseMigrations[0] === "20261005000000_delete_user_storage_objects_all_buckets.sql" && existsSync(eraseMigration)
-);
-if (existsSync(eraseMigration) && buckets.size >= 3) {
-  const body = readFileSync(eraseMigration, "utf8");
-  // The array the function actually deletes from — not the prose above it,
-  // which names all three too and would make this pass while the code
-  // named one. SHAPE: A line-level tool asserting a structural property.
-  const declared = /v_buckets text\[\] := array\[([^\]]+)\]/.exec(body);
-  check("the function declares its bucket list as one array", Boolean(declared));
-  const listed = declared ? [...declared[1].matchAll(/'([a-z][a-z-]+)'/g)].map((m) => m[1]) : [];
+// THE LIST THE DELETION REMOVES FROM. Until 2026-10-08 it was the array
+// inside public.delete_user_storage_objects(), a SQL function Supabase
+// refuses since 2026-03; the deletion now lists and removes through the
+// Storage API, bucket by bucket, from USER_BUCKETS in
+// src/lib/account/erase-storage.ts. Held both ways: every bucket the
+// application writes is on it, and nothing else is.
+const { USER_BUCKETS } = await loadTs("src/lib/account/erase-storage.ts");
+const listed = [...(USER_BUCKETS ?? [])];
+// FLOOR. An unread list is [] and makes the "no unknown bucket" line green.
+check(`the erasure list was read (${listed.length})`, listed.length >= 3, `read: ${listed.join(", ") || "none"}`);
+if (buckets.size >= 3) {
   // check() here takes a CONDITION, not an actual/expected pair — and an
   // array is truthy either way, so `check(name, missing, [])` passes with
-  // two buckets missing. Written that way first and caught by mutating the
-  // migration down to one bucket rather than by reading it back.
+  // two buckets missing.
   const missing = [...buckets].filter((b) => !listed.includes(b));
   check(
-    `the array holds every bucket (${listed.join(", ") || "none"})`,
+    `the list holds every bucket (${listed.join(", ") || "none"})`,
     missing.length === 0,
     `not deleted on account erasure: ${missing.join(", ")}`
   );
-  // FLOOR. `listed` is scraped out of the migration, and an unparsed array
-  // yields [] — which makes the "no unknown bucket" line below green while
-  // the function deletes from nothing at all.
-  check(`the array parsed to bucket names (${listed.length})`, listed.length >= 3, `parsed: ${listed.join(", ") || "none"}`);
   const extra = listed.filter((b) => !buckets.has(b));
   check("...and no bucket the application does not use", extra.length === 0, `unknown bucket(s): ${extra.join(", ")}`);
 }
@@ -397,7 +384,10 @@ check(
 // leave the person unable to delete at all.
 check(
   "...and a failure releases the claim so the link still works",
-  /used_at: null/.test(confirmSrc),
+  // In the subscription's own failure path, between the cancel and the
+  // account's deletion: the files path releases it too (erase-storage.test
+  // holds that one), and a single match anywhere let either go unnoticed.
+  /used_at: null/.test(confirmSrc.slice(confirmSrc.indexOf("stripe.subscriptions.cancel"), confirmSrc.indexOf("deleteUser("))),
   "refusing the deletion without releasing the single-use token is a worse trap than the one being fixed"
 );
 

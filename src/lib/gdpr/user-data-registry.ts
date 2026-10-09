@@ -190,8 +190,7 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "generated_posts", label: "generated_posts", scope: "user_content" },
   // MASTER 16, package 19. The rows are the words and the paths; the
   // pictures themselves are in the ai-images bucket, which the account
-  // erasure empties (20261019000000_generated_images.sql puts it in
-  // delete_user_storage_objects' list).
+  // erasure empties (USER_BUCKETS in src/lib/account/erase-storage.ts).
   { table: "generated_images", label: "generated_images", scope: "user_content" },
   // MASTER 16, package 30. The automation as the person said it and as
   // they changed it, every version of its boxes, and every run with its

@@ -667,7 +667,16 @@
       "deleting": "Wird gelöscht…",
       "confirmButton": "Dein Konto dauerhaft löschen",
       "cancel": "Abbrechen und zurück",
-      "confirmFailed": "Wir konnten die Löschung nicht abschließen. Dein Konto besteht weiterhin — versuch den Link erneut oder wende dich an den Support."
+      "confirmFailed": "Wir konnten die Löschung nicht abschließen. Dein Konto besteht weiterhin — versuch den Link erneut oder wende dich an den Support.",
+      "errors": {
+        "rate_limited": "Zu viele Versuche. Versuch es später erneut.",
+        "invalid_request": "Dieser Link ist unvollständig. Nutze den Link aus deiner E-Mail genau so, wie er gesendet wurde.",
+        "link_invalid": "Dieser Link ist ungültig oder abgelaufen. Einen neuen kannst du in den Einstellungen anfordern.",
+        "retry": "Etwas ist schiefgelaufen. Versuch es erneut.",
+        "contact_support": "Wir konnten das Konto nicht löschen. Wende dich an den Support.",
+        "files_retry": "Wir konnten die Dateien dieses Kontos nicht löschen, deshalb wurde das Konto nicht gelöscht. Dein Link funktioniert weiterhin — versuch es erneut.",
+        "subscription_retry": "Wir konnten das Abonnement dieses Kontos nicht kündigen, deshalb wurde nichts gelöscht. Dein Link funktioniert weiterhin — versuch es erneut."
+      }
     },
     "generateStrongPassword": "Sicheres Passwort erzeugen",
     "verifyEmail": {

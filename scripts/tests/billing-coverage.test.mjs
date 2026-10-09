@@ -757,16 +757,24 @@ checkTrue("it is rate limited so a systemic cause cannot flood", /COOLDOWN_MS/.t
 // re-throw, and it is not empty — read from the code rather than the
 // comments, because the prose inside that block discusses both throwing
 // and logging.
-const alertCode = alert.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+//
+// SINCE 2026-10-08 THE SEND IS lib/email/owner-alert.ts's, shared by the
+// four owner alerts (ΑΣ-8.5), so the catch is read where it now lives: the
+// margin alert hands its message there and has nothing else that can
+// throw, and the helper's catch is the one that must hold.
+const stripJs = (code) => code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+const marginCode = stripJs(alert);
+const alertCode = stripJs(readFileSync("src/lib/email/owner-alert.ts", "utf8"));
 const CATCH = /catch\s*(?:\([^)]*\))?\s*\{/;
 checkTrue("and never throws — it runs after the user was charged",
-  CATCH.test(alertCode) && !/catch\s*(?:\([^)]*\))?\s*\{[^}]*\bthrow\b/.test(alertCode));
+  /await sendOwnerAlert\("margin-alert",/.test(marginCode) && !/emails\.send\(|\bthrow\b/.test(marginCode) &&
+    CATCH.test(alertCode) && !/catch\s*(?:\([^)]*\))?\s*\{[^}]*\bthrow\b/.test(alertCode));
 // AND THE OTHER HALF, which the old shape check could not see: an empty
 // catch also never throws. The alert that says the product just sold AI
 // below cost is exactly the one whose failure nobody would notice, so it
 // has to leave a trace. See scripts/tests/email-silence.test.mjs.
 checkTrue("...and does not swallow its own failure — this is the alert nobody would miss",
-  /catch\s*\([^)]*\)\s*\{[\s\S]{0,300}?console\.error\(/.test(alertCode));
+  /catch\s*\([^)]*\)\s*\{[\s\S]{0,300}?outcome = \{ ok: false/.test(alertCode) && /if \(!outcome\.ok\) console\.error\(/.test(alertCode));
 
 console.log("\n== 14. the environment is reported at runtime, never at build ==");
 const envMod = await loadTs("src/lib/env-check.ts");
@@ -796,6 +804,9 @@ const full = {
   // Recommended since the refused-email incident: the resend.dev fallback
   // is testing mode, which delivers only to the Resend account owner.
   RESEND_FROM_EMAIL: "Ionexa AI <hello@ionexa.com>",
+  // Recommended since 2026-10-08 (ΑΣ-8.5): unset, nobody is an admin and
+  // no owner alert is sent to anyone.
+  ADMIN_EMAILS: "owner@example.com",
   // Recommended since the PWA audit: with no VAPID pair, lib/push
   // /web-push.ts turns every send into a silent no-op — an agent finishes,
   // a mission is due, and nothing reaches the phone that was told it

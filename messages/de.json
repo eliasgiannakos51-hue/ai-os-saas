@@ -1660,6 +1660,8 @@
       "statusCompleted": "Fertig",
       "statusFlagged": "Markiert",
       "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
+      "flaggedBody": "Unsere Sicherheitsprüfung hat diese Website angehalten, daher kann sie so nicht veröffentlicht werden.",
+      "flaggedDetails": "Was die Prüfung gefunden hat",
       "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
       "design": {
         "title": "Design",
@@ -2503,6 +2505,23 @@
           "staff": "Du und das Testkonto",
           "everyone": "Alle"
         }
+      },
+      "alerts": {
+        "title": "Warnungen an dich",
+        "hint": "Fehler in der Produktion, ein plötzlicher Kostenanstieg, eine Marge unter der Grenze und eine Welle fehlgeschlagener Anmeldungen gehen per E-Mail an ADMIN_EMAILS.",
+        "recipients": "Empfänger: {count, plural, one {# Adresse} other {# Adressen}} aus ADMIN_EMAILS",
+        "recipientsNone": "Empfänger: niemand — ADMIN_EMAILS ist nicht gesetzt",
+        "mailerOk": "Versand: eingerichtet, von deiner eigenen Adresse (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Versand: RESEND_API_KEY ist nicht gesetzt — keine Warnung geht hinaus",
+        "mailerTestSender": "Versand: von der Testadresse von Resend, die nur die E-Mail deines Resend-Kontos erreicht. Setze RESEND_FROM_EMAIL auf eine Adresse deiner eigenen Domain.",
+        "send": "Testwarnung senden",
+        "sending": "Wird gesendet…",
+        "sent": "Gesendet an {count, plural, one {# Adresse} other {# Adressen}}. Wenn sie in ein paar Minuten nicht da ist, sieh auch im Spam nach.",
+        "refused": "Nicht gesendet. Resend antwortete:",
+        "notConfigured": "Nicht gesendet: RESEND_API_KEY ist nicht gesetzt.",
+        "noRecipients": "Nicht gesendet: ADMIN_EMAILS ist nicht gesetzt.",
+        "rateLimited": "Zu viele Tests in dieser Stunde. Versuche es später erneut.",
+        "failed": "Nicht gesendet. Versuche es erneut."
       }
     },
     "ideas": {

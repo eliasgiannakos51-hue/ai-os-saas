@@ -20,6 +20,7 @@ const EXTRAS = "src/lib/projects/linkable-extras.ts";
 const MIGRATION = "supabase/migrations/20261001000000_projects.sql";
 const ROUTE = "src/app/api/projects/route.ts";
 const MEMBERS = "src/app/api/projects/[id]/members/route.ts";
+const SERVER_CREATE = "supabase/migrations/20261023100000_projects_site_versions_server_written.sql";
 const DETAIL = "src/components/projects/project-detail.tsx";
 const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
 const CHAT_WS = "src/components/chat/chat-workspace.tsx";
@@ -32,7 +33,7 @@ const DETAIL_PAGE = "src/app/dashboard/projects/[id]/page.tsx";
 const DOC = "docs/projects.md";
 
 const TARGETS = [GATE, PROJECT, EXTRAS, MIGRATION, ROUTE, MEMBERS, DETAIL, CHAT_PAGE, CHAT_WS, ZH, KG, DOC,
-  CTX, CHAT_ROUTE, CONV_SCOPE, DETAIL_PAGE];
+  CTX, CHAT_ROUTE, CONV_SCOPE, DETAIL_PAGE, SERVER_CREATE];
 
 const MUTANTS = [
   // ---- the decision itself -------------------------------------------
@@ -93,11 +94,32 @@ const MUTANTS = [
     expect: "user_id is never taken from the body",
   },
   {
-    name: "the create route reaches for the service role",
+    name: "the delete reaches for the service role too",
     file: ROUTE,
+    from: '    const { error } = await supabase.from("projects").delete()',
+    to: '    const { error } = await createAdminClient().from("projects").delete()',
+    expect: "the service role only for the create, after the cap, with the session's user",
+  },
+  {
+    name: "the membership route reaches for the service role",
+    file: MEMBERS,
     from: 'import { createClient } from "@/lib/supabase/server";',
     to: 'import { createClient } from "@/lib/supabase/server";\nimport { createAdminClient } from "@/lib/supabase/admin";',
     expect: "no admin client anywhere in it",
+  },
+  {
+    name: "the later migration leaves the account its INSERT",
+    file: SERVER_CREATE,
+    from: "revoke insert on public.projects from anon, authenticated;",
+    to: "revoke insert on public.projects from anon;",
+    expect: "...and a later migration takes the account's INSERT back",
+  },
+  {
+    name: "the create goes back to the account's own client",
+    file: ROUTE,
+    from: "    const { data, error } = await createAdminClient()\n      .from(\"projects\")\n      .insert({",
+    to: "    const { data, error } = await supabase\n      .from(\"projects\")\n      .insert({",
+    expect: "the service role only for the create, after the cap, with the session's user",
   },
   {
     name: "the insert policy stops checking the owner",

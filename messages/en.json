@@ -1660,6 +1660,8 @@
       "statusCompleted": "Ready",
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
+      "flaggedBody": "Our safety review held this site, so it can’t be published as it is.",
+      "flaggedDetails": "What the review found",
       "editUnavailable": "You can request changes once this website has finished generating.",
       "design": {
         "title": "Design",
@@ -2503,6 +2505,23 @@
           "staff": "You and the test account",
           "everyone": "Everyone"
         }
+      },
+      "alerts": {
+        "title": "Alerts to you",
+        "hint": "Production errors, a sudden cost rise, a margin below the floor and a wave of failed sign-ins are emailed to ADMIN_EMAILS.",
+        "recipients": "Recipients: {count, plural, one {# address} other {# addresses}} from ADMIN_EMAILS",
+        "recipientsNone": "Recipients: nobody — ADMIN_EMAILS is not set",
+        "mailerOk": "Sending: set up, from your own address (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Sending: RESEND_API_KEY is not set — no alert leaves",
+        "mailerTestSender": "Sending: from Resend’s test address, which only reaches the email of your Resend account. Set RESEND_FROM_EMAIL to an address on your own domain.",
+        "send": "Send a test alert",
+        "sending": "Sending…",
+        "sent": "Sent to {count, plural, one {# address} other {# addresses}}. If it has not arrived in a few minutes, look in spam too.",
+        "refused": "Not sent. Resend answered:",
+        "notConfigured": "Not sent: RESEND_API_KEY is not set.",
+        "noRecipients": "Not sent: ADMIN_EMAILS is not set.",
+        "rateLimited": "Too many tests this hour. Try again later.",
+        "failed": "Not sent. Try again."
       }
     },
     "ideas": {

@@ -222,7 +222,9 @@ check(
 // read by a Greek user in English. They are recorded rather than fixed in
 // this pass because closing them is 38 keys across ten locales, which is
 // a translation job, not a sweep; recording them is what stops a 39th.
-const INDIRECT_ENGLISH_BASELINE = 38;
+// 37 since 2026-10-08: the flagged-site toast in the website builder now
+// says it in the reader's language (src/lib/websites/flagged-notice.ts).
+const INDIRECT_ENGLISH_BASELINE = 37;
 reportBaseline("INDIRECT_ENGLISH_BASELINE", INDIRECT_ENGLISH_BASELINE, indirect.length);
 checkTrue(
   `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,

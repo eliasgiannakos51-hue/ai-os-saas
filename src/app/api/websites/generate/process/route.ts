@@ -58,6 +58,7 @@ import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import type { WebsitePage } from "@/lib/publishing/website-pages";
 import { readPageRequest } from "@/lib/websites/page-request";
+import { flaggedMessage } from "@/lib/websites/flagged-notice";
 import type { Evidence } from "@/lib/jobs/job-timeline";
 import {
   attachWebsiteEvidence,
@@ -985,9 +986,9 @@ export async function POST(request: Request) {
         // not to move until a manual reload. The final status is written
         // after settlement instead.
         status: "processing",
-        error_message: isFlagged
-          ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it; the button shows what that costs.`
-          : null,
+        // The sentence from src/lib/websites/flagged-notice.ts, whose
+        // reader is the only thing a screen shows of it.
+        error_message: isFlagged ? flaggedMessage(flaggedSummary) : null,
       })
       .eq("id", websiteId)
       .eq("user_id", writerUserId)

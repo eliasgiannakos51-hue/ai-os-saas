@@ -33,6 +33,11 @@
  *  26. the agents migration leaves agents writable
  *  27. an agent edit is written through the user's client again
  *  28. a site update in the generation route loses its owner scope
+ *  29. the 2026-10-08 migration leaves the account its project INSERT
+ *  30. ...or its site-history writes
+ *  31. a project is created through the user's client again
+ *  32. a site version is written through the user's client again
+ *  33. the history trim loses its owner scope
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
@@ -62,6 +67,10 @@ const FILES_DIAGNOSTIC = "src/app/api/system-health/files/route.ts";
 const AGENTS_MIGRATION = "supabase/migrations/20261015000000_agents_websites_server_written.sql";
 const AGENT_EDIT = "src/app/api/agents/[id]/route.ts";
 const SITE_PROCESS = "src/app/api/websites/generate/process/route.ts";
+const PROJECTS_MIGRATION = "supabase/migrations/20261023100000_projects_site_versions_server_written.sql";
+const PROJECTS_ROUTE = "src/app/api/projects/route.ts";
+const ROLLBACK = "src/app/api/published/[id]/rollback/route.ts";
+const PUBLISH = "src/app/api/websites/[id]/publish/route.ts";
 
 // Top-level declaration under the name the reader looks for — see the
 // SHAPE note in scripts/tests/lib/mutation-runner.mjs.
@@ -262,11 +271,46 @@ const MUTANTS = [
     to: '.update({ status: isFlagged ? "flagged" : "completed" })\n      .eq("id", websiteId);',
     expect: "every site update in the routes is scoped to the caller",
   },
+  {
+    name: "the 2026-10-08 migration leaves the account its project INSERT",
+    file: PROJECTS_MIGRATION,
+    from: "revoke insert on public.projects from anon, authenticated;",
+    to: "revoke insert on public.projects from anon;",
+    expect: "projects: the account loses INSERT and keeps the other three",
+  },
+  {
+    name: "...or its site-history writes",
+    file: PROJECTS_MIGRATION,
+    from: "revoke insert, update, delete on public.site_versions from anon, authenticated;",
+    to: "revoke update on public.site_versions from anon, authenticated;",
+    expect: "site_versions: the account loses INSERT, UPDATE and DELETE",
+  },
+  {
+    name: "a project is created through the user's client again",
+    file: PROJECTS_ROUTE,
+    from: "    const { data, error } = await createAdminClient()\n      .from(\"projects\")",
+    to: "    const { data, error } = await supabase\n      .from(\"projects\")",
+    expect: "every create and every history write goes through the admin client",
+  },
+  {
+    name: "a site version is written through the user's client again",
+    file: ROLLBACK,
+    from: 'const { error: versionError } = await createAdminClient().from("site_versions").insert({',
+    to: 'const { error: versionError } = await supabase.from("site_versions").insert({',
+    expect: "every create and every history write goes through the admin client",
+  },
+  {
+    name: "the history trim loses its owner scope",
+    file: PUBLISH,
+    from: '.from("site_versions").delete().in("id", ids).eq("user_id", userId);',
+    to: '.from("site_versions").delete().in("id", ids);',
+    expect: "...and the history trim is scoped to the caller",
+  },
 ];
 
 runMutations({
   name: "entitlement-trust",
   gate: GATE,
-  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL, WRITES_MIGRATION, TEAM_INVITE, FILES_DIAGNOSTIC, AGENTS_MIGRATION, AGENT_EDIT, SITE_PROCESS],
+  targets: [GATE, MIGRATION, SIGNUP, BETA, OVERAGE, WEBHOOK, CRON, CREATE_JOB, CONFIG, JOBS_CONTINUE, RESEARCH_MIGRATION, RESEARCH_START, COST_MIGRATION, SETTINGS_PAGE, REGISTRY, COLUMN_MIGRATION, CLIENT_COLUMNS, JOB_POLL, WRITES_MIGRATION, TEAM_INVITE, FILES_DIAGNOSTIC, AGENTS_MIGRATION, AGENT_EDIT, SITE_PROCESS, PROJECTS_MIGRATION, PROJECTS_ROUTE, ROLLBACK, PUBLISH],
   mutants: MUTANTS,
 });

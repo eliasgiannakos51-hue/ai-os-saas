@@ -68,8 +68,10 @@ export async function POST(request: Request) {
     }
     const name = checkProjectName(projectNameFor(said));
     if (!name.ok) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
-    // The project through the person's own client, as api/projects makes it.
-    const { data: project, error: projectError } = await supabase
+    // The project as api/projects makes it: by the server, after the cap
+    // above, user_id from the session (the account holds no INSERT on
+    // projects: 20261023100000_projects_site_versions_server_written.sql).
+    const { data: project, error: projectError } = await createAdminClient()
       .from("projects")
       .insert({ user_id: user.id, name: name.name, goal: said.slice(0, 500), status: "active" })
       .select("id, name")

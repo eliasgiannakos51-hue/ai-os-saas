@@ -1660,6 +1660,8 @@
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
+      "flaggedBody": "我们的安全审查拦下了这个网站，因此无法按现状发布。",
+      "flaggedDetails": "审查发现了什么",
       "editUnavailable": "网站生成完成后即可提出修改要求。",
       "design": {
         "title": "设计",
@@ -2503,6 +2505,23 @@
           "staff": "你和测试账户",
           "everyone": "所有人"
         }
+      },
+      "alerts": {
+        "title": "发给你的提醒",
+        "hint": "生产环境错误、成本骤增、利润率低于下限以及大量登录失败，都会通过邮件发送到 ADMIN_EMAILS。",
+        "recipients": "收件人：来自 ADMIN_EMAILS 的 {count, plural, other {# 个地址}}",
+        "recipientsNone": "收件人：无 — 未设置 ADMIN_EMAILS",
+        "mailerOk": "发送：已设置，使用你自己的地址（RESEND_API_KEY、RESEND_FROM_EMAIL）",
+        "mailerMissing": "发送：未设置 RESEND_API_KEY — 不会发出任何提醒",
+        "mailerTestSender": "发送：使用 Resend 的测试地址，只能送达你 Resend 账户的邮箱。请把 RESEND_FROM_EMAIL 设为你自己域名下的地址。",
+        "send": "发送测试提醒",
+        "sending": "正在发送…",
+        "sent": "已发送到 {count, plural, other {# 个地址}}。如果几分钟内没有收到，也请查看垃圾邮件。",
+        "refused": "未发送。Resend 的回复：",
+        "notConfigured": "未发送：未设置 RESEND_API_KEY。",
+        "noRecipients": "未发送：未设置 ADMIN_EMAILS。",
+        "rateLimited": "本小时测试次数过多，请稍后再试。",
+        "failed": "未发送，请重试。"
       }
     },
     "ideas": {

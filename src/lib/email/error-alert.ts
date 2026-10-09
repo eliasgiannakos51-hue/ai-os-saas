@@ -1,13 +1,10 @@
 import "server-only";
 import { escapeHtml } from "@/lib/html-escape";
-import { createResendClient } from "@/lib/resend";
-import { senderAddress } from "@/lib/email/resend-config";
-import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
+import { sendOwnerAlert } from "@/lib/email/owner-alert";
 
-// The From address, from ONE definition — see lib/email/resend-config.ts.
-// This was one of fourteen copies of the same line — the constant AND
-// its fallback, repeated per file. The fallback is the half that decides
-// whether mail reaches anybody, so it now has one definition.
+// The From address, the recipients (ADMIN_EMAILS) and the delivery
+// verdict all come from lib/email/owner-alert.ts, shared with the other
+// three owner alerts and the test button on /dashboard/system-health.
 
 /**
  * Emails the owner when an error crosses an alert threshold.
@@ -27,58 +24,37 @@ export async function sendErrorAlertEmail(params: {
   affectedUsers: number;
   recentCount: number;
 }): Promise<void> {
-  const recipients = ADMIN_EMAILS;
-  if (recipients.length === 0) return;
+  const reason =
+    params.affectedUsers >= 2
+      ? `${params.affectedUsers} different users affected`
+      : `${params.recentCount} occurrences in a short window`;
 
-  try {
-    const resend = createResendClient();
-    const reason =
-      params.affectedUsers >= 2
-        ? `${params.affectedUsers} different users affected`
-        : `${params.recentCount} occurrences in a short window`;
-
-    await resend.emails.send({
-      from: senderAddress(),
-      to: recipients,
-      subject: `[Ionexa] ${params.route} is failing — ${reason}`,
-      html: `
-        <div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px">
-          <h2 style="margin:0 0 4px">Production error</h2>
-          <p style="color:#666;margin:0 0 16px">${escapeHtml(reason)}</p>
-          <table style="width:100%;border-collapse:collapse;font-size:14px">
-            <tr><td style="padding:6px 0;color:#666">Route</td><td><code>${escapeHtml(params.route)}</code></td></tr>
-            <tr><td style="padding:6px 0;color:#666">Message</td><td>${escapeHtml(params.message)}</td></tr>
-            <tr><td style="padding:6px 0;color:#666">Total occurrences</td><td>${params.occurrenceCount}</td></tr>
-            <tr><td style="padding:6px 0;color:#666">Users affected</td><td>${params.affectedUsers}</td></tr>
-          </table>
-          <p style="margin-top:20px">
-            <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/dashboard/system-health"
-               style="background:#f97316;color:#000;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600">
-              Open System Health
-            </a>
-          </p>
-        </div>`,
-    });
-  } catch (err) {
-    // BEST-EFFORT, BUT NOT SILENT — and the distinction is the whole
-    // point of this catch.
-    //
-    // It stays empty of logApiError on purpose: this function runs INSIDE
-    // logApiError, so reporting the failure that way would re-enter the
-    // alert path and, on a persistent fault, do it repeatedly. That is
-    // why the block was written empty.
-    //
-    // Empty was the wrong conclusion from a right premise. On a
-    // deployment with no RESEND_API_KEY this is the alert that tells the
-    // owner something is wrong, and it was failing without a trace — the
-    // mail that would have reported the problem being part of the
-    // problem. console.error reaches the same Vercel runtime log as
-    // everything else and re-enters nothing, so the reason is recorded
-    // and the recursion is still impossible.
-    console.error(
-      "[error-alert] could not send the alert:",
-      err instanceof Error ? err.message : String(err)
-    );
-  }
+  // BEST-EFFORT, BUT NOT SILENT, and never through logApiError: this
+  // function runs INSIDE logApiError, so reporting its own failure that
+  // way would re-enter the alert path on every request of a persistent
+  // fault. lib/email/owner-alert.ts says a failure with console.error —
+  // the same Vercel runtime log, and it re-enters nothing — including the
+  // refusal Resend RETURNS rather than throws, which this file used to
+  // read as delivered (ΑΣ-8.5, 2026-10-08).
+  await sendOwnerAlert("error-alert", {
+    subject: `[Ionexa] ${params.route} is failing — ${reason}`,
+    html: `
+      <div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px">
+        <h2 style="margin:0 0 4px">Production error</h2>
+        <p style="color:#666;margin:0 0 16px">${escapeHtml(reason)}</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
+          <tr><td style="padding:6px 0;color:#666">Route</td><td><code>${escapeHtml(params.route)}</code></td></tr>
+          <tr><td style="padding:6px 0;color:#666">Message</td><td>${escapeHtml(params.message)}</td></tr>
+          <tr><td style="padding:6px 0;color:#666">Total occurrences</td><td>${params.occurrenceCount}</td></tr>
+          <tr><td style="padding:6px 0;color:#666">Users affected</td><td>${params.affectedUsers}</td></tr>
+        </table>
+        <p style="margin-top:20px">
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/dashboard/system-health"
+             style="background:#f97316;color:#000;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600">
+            Open System Health
+          </a>
+        </p>
+      </div>`,
+  });
 }
 

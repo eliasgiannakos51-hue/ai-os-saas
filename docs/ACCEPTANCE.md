@@ -45,16 +45,16 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: ανοίγω το All tools.
 - Βλέπω: μόνο μεγάλα τετράγωνα με τα σημαντικά εργαλεία, χωρίς «beta».
 - Χρόνος: 10 δευτερόλεπτα
-- Αυτόματα: `scripts/tests/design-home.prodtest.mjs`, `scripts/tests/all-tools.test.mjs`
-- Σήμερα: φτιαγμένο
+- Αυτόματα: `scripts/tests/design-home.prodtest.mjs`, `scripts/tests/all-tools.test.mjs`, `scripts/tests/all-tools-empty-chat-edges.prodtest.mjs`
+- Σήμερα: φτιαγμένο, ελεγμένο σε browser 2026-10-08 (τοπικό production build, υπολογιστής και κινητό, ελληνικά και αγγλικά)· τα τετράγωνα και στις άλλες οκτώ γλώσσες, 2026-10-09
 
 ### Α2. Chat χωρίς μήνυμα
 - Πακέτο: 2
 - Κάνω: ανοίγω ένα νέο Chat.
 - Βλέπω: στο κέντρο τη γη με τον χαιρετισμό και το πεδίο, τίποτα άλλο.
 - Χρόνος: 10 δευτερόλεπτα
-- Αυτόματα: `scripts/tests/design-home.prodtest.mjs`, `scripts/tests/conversation-design.test.mjs`
-- Σήμερα: φτιαγμένο
+- Αυτόματα: `scripts/tests/design-home.prodtest.mjs`, `scripts/tests/conversation-design.test.mjs`, `scripts/tests/all-tools-empty-chat-edges.prodtest.mjs`
+- Σήμερα: φτιαγμένο, ελεγμένο σε browser 2026-10-08 (τοπικό production build, υπολογιστής και κινητό, ελληνικά και αγγλικά)
 
 ### Α3. Κέλυφος
 - Πακέτο: 3

@@ -2910,7 +2910,28 @@
         "memory": "记忆",
         "finances": "财务",
         "sales": "销售",
-        "trading": "交易"
+        "trading": "交易",
+        "image": "图片",
+        "connections": "连接"
+      },
+      "lines": {
+        "site": "根据描述生成网站。",
+        "slides": "根据描述生成演示文稿。",
+        "posts": "每个平台一条帖子。",
+        "research": "任何主题的带来源报告。",
+        "analyze": "从数据文件得出结论。",
+        "files": "就你的文档提问。",
+        "automations": "自动运行的任务。",
+        "projects": "带目标的文件夹。",
+        "goals": "把目标拆成步骤。",
+        "meetings": "从录音得到摘要和行动项。",
+        "library": "你做过的一切，集中一处。",
+        "memory": "Ionexa 记得的关于你的事。",
+        "finances": "记录收入和支出。",
+        "sales": "联系人、跟进和下一步。",
+        "trading": "你的交易记录。",
+        "image": "一段描述生成四张图片。",
+        "connections": "一键连接你的服务。"
       }
     },
     "home": {

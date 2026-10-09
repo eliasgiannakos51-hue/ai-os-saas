@@ -4,7 +4,10 @@
  *
  * The old icon back beside the answer, the writing answer not speeding
  * up, every old answer animating, the earth gone from the empty state,
- * and the field's controls moving back over the text.
+ * and the field's controls moving back over the text. Since 2026-10-08:
+ * the free-message count back under the empty field, the used-up line's
+ * icon back on the empty Chat, and the first
+ * message's refusal or failure back in the route's English prose.
  *
  * Run: node scripts/tests/conversation-design.mutation.mjs
  */
@@ -16,9 +19,75 @@ const GATE = "scripts/tests/conversation-design.test.mjs";
 const WS = "src/components/chat/chat-workspace.tsx";
 const COMPOSER = "src/components/chat/chat-composer.tsx";
 const ACTIONS = "src/components/chat/answer-actions.tsx";
-const TARGETS = [GATE, WS, COMPOSER, ACTIONS];
+const ROUTE = "src/app/api/chat/route.ts";
+const BREAKER = "src/lib/ai-circuit-breaker.ts";
+const TARGETS = [GATE, WS, COMPOSER, ACTIONS, ROUTE, BREAKER];
 
 const MUTANTS = [
+  // 2026-10-08
+  {
+    name: "the free-message count comes back under the empty field",
+    file: WS,
+    from: "{freeRemaining !== null && (!isEmpty || freeRemaining === 0) && (",
+    to: "{freeRemaining !== null && (",
+    expect: "the free-message count waits for a conversation",
+  },
+  {
+    name: "the used-up line keeps its gift icon on the empty Chat",
+    file: WS,
+    from: '{!isEmpty && <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />}',
+    to: '<Gift className="h-3 w-3 text-success/80" aria-hidden="true" />',
+    expect: "that one line has no icon",
+  },
+  {
+    name: "a refusal shows the route's English prose again",
+    file: WS,
+    from: "setError(isErrorCode(data.code) ? describe(new ApiError(429, { code: data.code })).text : data.message);",
+    to: "setError(data.message);",
+    expect: "a refusal is said from its code",
+  },
+  {
+    name: "the credit refusal loses its code",
+    file: ROUTE,
+    from: '          code: "insufficientCredits",\n',
+    to: "",
+    expect: "the route names the credit refusal by its code",
+  },
+  {
+    name: "one circuit-breaker refusal loses its code",
+    file: BREAKER,
+    from: '        reason: "You\'ve made a lot of AI requests in the last hour — please wait a bit and try again.",\n        code: "rateLimited",\n',
+    to: '        reason: "You\'ve made a lot of AI requests in the last hour — please wait a bit and try again.",\n',
+    expect: "every one of its refusals carrying a code",
+  },
+  {
+    name: "the route stops passing the breaker's code",
+    file: ROUTE,
+    from: "rateLimited: true, code: breakerCheck.code, message: breakerCheck.reason",
+    to: "rateLimited: true, message: breakerCheck.reason",
+    expect: "every one of its refusals carrying a code",
+  },
+  {
+    name: "a failed model stops saying the free message is back",
+    file: ROUTE,
+    from: "              freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining + 1 : undefined,\n            })\n          );\n          controller.close();\n          return;\n        }\n\n        // The held tail",
+    to: "            })\n          );\n          controller.close();\n          return;\n        }\n\n        // The held tail",
+    expect: "a model that fails is said as the AI service",
+  },
+  {
+    name: "the screen says «something broke on our side» for a failed model again",
+    file: WS,
+    from: '              : event.code === "upstreamUnavailable"\n                ? describeStatus(503, event.creditsRefunded === true).text\n                : describeStatus(500).text;',
+    to: "              : describeStatus(500).text;",
+    expect: "the screen reads those values",
+  },
+  {
+    name: "the screen keeps the given-back free message counted as spent",
+    file: WS,
+    from: '          if (typeof event.freeRemaining === "number") setFreeRemaining(event.freeRemaining);\n          streamError =',
+    to: "          streamError =",
+    expect: "the screen reads those values",
+  },
   {
     name: "the empty conversation is clipped at the top on a phone again",
     file: WS,

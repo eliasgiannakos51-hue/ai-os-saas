@@ -8,6 +8,8 @@ import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ToolsGrid } from "@/components/tools/tools-grid";
 import { readRecentPrefs } from "@/lib/nav/recent-tools";
+import { SWITCHED_SQUARES } from "@/lib/nav/all-tools";
+import { isFeatureOn, isFlagKey } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +33,19 @@ export default async function ToolsPage() {
 
   const t = await getTranslations("dashboard.tools");
   const isOwner = isAdminEmail(user.email);
+  // THE NEW TOOLS' SQUARES (MASTER 14.1), each drawn only when its own
+  // switch is on for this person — the same switch its page reads.
+  const switchedOn: string[] = [];
+  for (const square of SWITCHED_SQUARES) {
+    if (isFlagKey(square.flag) && (await isFeatureOn(square.flag, user))) switchedOn.push(square.href);
+  }
 
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <PageHeader helpKey="help.tools" icon={LayoutGrid} title={t("title")} description={t("description")} />
         <div className="mt-4">
-          <ToolsGrid isOwner={isOwner} pinned={readRecentPrefs(user.user_metadata).pinned} />
+          <ToolsGrid isOwner={isOwner} pinned={readRecentPrefs(user.user_metadata).pinned} switchedOn={switchedOn} />
         </div>
         <p className="mt-6 text-xs text-muted">{t("orPress")}</p>
       </div>

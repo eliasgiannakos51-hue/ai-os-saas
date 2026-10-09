@@ -17,7 +17,7 @@
 // that line). BUILD-SPECS 2.4 scenario 10: "slides" finds Presentations.
 //
 // Run: node scripts/tests/all-tools.test.mjs
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { stripComments } from "../check-mutation-markers.mjs";
 import { loadTs } from "./load-ts.mjs";
 import { groupBlocks } from "./lib/sidebar-source.mjs";
@@ -111,16 +111,68 @@ check("...and the English names are exactly 14.1's list, Document aside",
   [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
 check("...and no name is given to a tool that is not shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h)));
 check("Document is hidden, with the reason 14.1 gives (notes only)", /notes/.test(HIDDEN_FROM_ALL_TOOLS["/dashboard/documents"] ?? ""));
+const { SWITCHED_SQUARES } = await loadTs("src/lib/nav/all-tools.ts");
 for (const l of LOCALES) {
   const n = messages[l].dashboard?.tools?.names ?? {};
-  const keys = Object.values(ALL_TOOLS_NAMES);
+  const keys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)];
   const bad = keys.filter((k) => typeof n[k] !== "string" || n[k].trim() === "" || /\s/.test(n[k].trim()));
   check(`${l}: every square's name is one word`, bad.length === 0, bad.map((k) => `${k}=${JSON.stringify(n[k])}`).join(", "));
 }
 check("the square draws the one-word name, and falls back to the sidebar's only for a tool without one",
-  /const label = \(item: SidebarItem\) => \(ALL_TOOLS_NAMES\[item\.href\] \? names\[ALL_TOOLS_NAMES\[item\.href\]\] : longLabel\(item\)\);/.test(grid));
+  /const label = \(item: SidebarItem\) => \{ const k = nameKey\(item\.href\); return k \? names\[k\] : longLabel\(item\); \};/.test(grid) &&
+    /const nameKey = \(href: string\): AllToolsNameKey \| undefined =>\s*ALL_TOOLS_NAMES\[href\] \?\? SWITCHED_SQUARES\.find\(\(s\) => s\.href === href\)\?\.name;/.test(grid));
 check("no «In testing…» line on the page (MASTER 14.1)",
   !/inTesting|In testing/i.test(grid) && LOCALES.every((l) => !/in testing/i.test(JSON.stringify(messages[l].dashboard?.tools ?? {}))));
+
+console.log("\n== 0d. one line under each name, short enough to keep the square a square ==");
+// MASTER 14.1: «Μεγάλα τετράγωνα: εικονίδιο, όνομα μίας λέξης, μία γραμμή».
+// The sidebar's hints run to two sentences; on a 390px phone two squares
+// came out taller than wide (Slides 173x232, Posts 173x214, measured
+// 2026-10-08 by scripts/tests/all-tools-empty-chat-edges.prodtest.mjs,
+// which measures every square as drawn in Greek and English). The other
+// eight languages are held here by length: LINE_MAX characters fit three
+// lines of the narrowest square with room to spare.
+const LINE_MAX = 60;
+const lineKeys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)];
+for (const l of LOCALES) {
+  const lines = messages[l].dashboard?.tools?.lines ?? {};
+  const bad = lineKeys.filter((k) => typeof lines[k] !== "string" || lines[k].trim() === "" || lines[k].length > LINE_MAX);
+  check(`${l}: every square has its one line, and it is short enough to stay one line (≤ ${LINE_MAX})`, bad.length === 0,
+    bad.map((k) => `${k}=${JSON.stringify(lines[k])}`).join(", "));
+}
+check("...and no line is kept for a square that does not exist", Object.keys(messages.en.dashboard.tools.lines ?? {}).every((k) => lineKeys.includes(k)));
+check("the square draws its own line, and the sidebar's longer hint only for a tool without one",
+  /const hint = \(item: SidebarItem\) => \{ const k = nameKey\(item\.href\); return k \? lines\[k\] : sidebarHint\(item\); \};/.test(grid) &&
+    lineKeys.every((k) => grid.includes(`${k}: t("lines.${k}")`)));
+
+console.log("\n== 0e. the new tools: a square exactly when their switch is on (MASTER 14.1) ==");
+// «Κάθε νέο εργαλείο μπαίνει εδώ μόλις γίνει λειτουργικό: Image, Video,
+// Studio, Music, Avatars, Films, Apps, Games, Translate, Business,
+// Connections.» Each is built behind a switch (lib/flags/flags.ts), so its
+// square follows the same switch its page reads.
+const MASTER_14_1_NEW = ["Image", "Video", "Studio", "Music", "Avatars", "Films", "Apps", "Games", "Translate", "Business", "Connections"];
+const flagsSrc = readFileSync("src/lib/flags/flags.ts", "utf8");
+const flagKeys = [...(flagsSrc.match(/export const FLAGS = \{([\s\S]*?)\} as const;/)?.[1] ?? "").matchAll(/^\s*"?([a-z0-9-]+)"?:/gm)].map((m) => m[1]);
+check(`the switches were read (${flagKeys.length})`, flagKeys.length >= 5 && flagKeys.includes("image-studio"));
+check(`there are new tools to place (${SWITCHED_SQUARES.length})`, SWITCHED_SQUARES.length >= 1);
+for (const sq of SWITCHED_SQUARES) {
+  const pagePath = `src/app${sq.href}/page.tsx`;
+  const pageSrc = existsSync(pagePath) ? stripComments(readFileSync(pagePath, "utf8")) : "";
+  check(`${sq.href}: names a switch that exists in lib/flags/flags.ts ("${sq.flag}")`, flagKeys.includes(sq.flag));
+  check(`${sq.href}: ...and its page reads that same switch`, pageSrc.includes(`isFeatureOn("${sq.flag}"`));
+  check(`${sq.href}: ...is a row of the sidebar's list, and in no group and not hidden here`,
+    new RegExp(`href: "${sq.href.replace(/\//g, "\\/")}"`).test(navSrc) && !grouped.includes(sq.href) && !hidden.includes(sq.href));
+  check(`${sq.href}: ...in one of the four groups`, ["make", "ask", "organise", "business"].includes(sq.group));
+  check(`${sq.href}: ...named as 14.1 names it ("${messages.en.dashboard.tools.names[sq.name]}")`, MASTER_14_1_NEW.includes(messages.en.dashboard.tools.names[sq.name]));
+}
+const toolsPage = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
+check("the page asks each square's switch for THIS person, and hands the grid what is on",
+  /for \(const square of SWITCHED_SQUARES\) \{\s*if \(isFlagKey\(square\.flag\) && \(await isFeatureOn\(square\.flag, user\)\)\) switchedOn\.push\(square\.href\);\s*\}/.test(toolsPage) &&
+    /switchedOn=\{switchedOn\}/.test(toolsPage));
+check("...and the grid draws a new tool's square only when its switch is on",
+  /\.\.\.SWITCHED_SQUARES\.filter\(\(s\) => s\.group === g\.key && switchedOn\.includes\(s\.href\)\)\.map\(\(s\) => everyItem\.get\(s\.href\)\)/.test(grid));
+check("...with no pin, because Recent tools takes only what the sidebar lists",
+  /!SWITCHED_SQUARES\.some\(\(s\) => s\.href === item\.href\)/.test(grid));
 
 console.log("\n== 1. the search finds a tool by a word it is not called ==");
 const match = await loadTs("src/lib/command-palette-match.ts");
@@ -128,20 +180,21 @@ const { ITEM_LABEL_KEYS } = await loadTs("src/lib/sidebar-label-keys.ts");
 const { aliasesFor } = await loadTs("src/lib/palette-aliases.ts");
 check(
   "the grid builds its candidates the way the palette does, plus the one-word name and the description",
-  /candidates: \[label\(item\), longLabel\(item\), item\.label, \.\.\.aliasesFor\(ITEM_LABEL_KEYS\[item\.label\] \?\? "", locale\), hint\(item\)\]/.test(grid) &&
+  /candidates: \[label\(item\), longLabel\(item\), item\.label, \.\.\.aliasesFor\(ITEM_LABEL_KEYS\[item\.label\] \?\? "", locale\), hint\(item\), sidebarHint\(item\)\]/.test(grid) &&
     /filterAndRankCandidates\(/.test(grid)
 );
 const tools = grouped.map((h) => allDrawn.find((i) => i.href === h)).filter(Boolean);
 const search = (locale, query) => {
   const m = messages[locale].sidebar;
   const names = messages[locale].dashboard.tools.names;
+  const lines = messages[locale].dashboard.tools.lines;
   return match.filterAndRankCandidates(
     tools.map((item) => {
       const key = ITEM_LABEL_KEYS[item.label];
       const long = key ? m.items[key] : item.label;
       return {
         item,
-        candidates: [ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : long, long, item.label, ...aliasesFor(key ?? "", locale), m.hints?.[key] ?? ""],
+        candidates: [ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : long, long, item.label, ...aliasesFor(key ?? "", locale), lines[ALL_TOOLS_NAMES[item.href]] ?? "", m.hints?.[key] ?? ""],
       };
     }),
     query
@@ -178,7 +231,7 @@ check("a 44px pin on the square, its state announced", /data-testid="tool-pin"/.
 check("...writing through the sidebar's own route", /fetch\("\/api\/nav\/recent-tools"/.test(grid) && /JSON\.stringify\(\{ action, href \}\)/.test(grid));
 check("...and a failed write puts the pin back and says so", /setPins\(before\)/.test(grid) && /addToast\(/.test(grid));
 check("Chat and Coding (never in Recent tools), Settings and Help have no pin",
-  /const canPin = !NEVER_RECENT\.includes\(item\.href\) && !item\.href\.startsWith\("\/help"\) && item\.href !== "\/dashboard\/settings";/.test(grid) && /\{canPin && \(/.test(grid));
+  /const canPin =\s*!NEVER_RECENT\.includes\(item\.href\) && !item\.href\.startsWith\("\/help"\) && item\.href !== "\/dashboard\/settings" &&/.test(grid) && /\{canPin && \(/.test(grid));
 const page = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
 check("the page hands the grid this person's pins", /pinned=\{readRecentPrefs\(user\.user_metadata\)\.pinned\}/.test(page));
 

@@ -2910,7 +2910,28 @@
         "memory": "Memory",
         "finances": "Finances",
         "sales": "Sales",
-        "trading": "Trading"
+        "trading": "Trading",
+        "image": "Image",
+        "connections": "Connections"
+      },
+      "lines": {
+        "site": "A website from a description.",
+        "slides": "A presentation from a description.",
+        "posts": "One post for each platform.",
+        "research": "A sourced report on any topic.",
+        "analyze": "Findings from a data file.",
+        "files": "Ask about your documents.",
+        "automations": "Tasks that run on their own.",
+        "projects": "A folder with a goal.",
+        "goals": "A goal, broken into steps.",
+        "meetings": "Summary and actions from a recording.",
+        "library": "Everything you made and did, in one place.",
+        "memory": "What Ionexa remembers about you.",
+        "finances": "Log income and expenses.",
+        "sales": "Contacts, outreach and next steps.",
+        "trading": "A log of your trades.",
+        "image": "Four pictures from one description.",
+        "connections": "Connect your services in one press."
       }
     },
     "home": {

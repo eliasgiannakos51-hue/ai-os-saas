@@ -2267,7 +2267,7 @@
         "googleCalendar": {
           "summary": "Liest deine Termine, damit die KI „Was habe ich morgen?“ beantworten kann.",
           "sees": "Titel, Uhrzeit, Ort und Organisator der Termine an den Tagen, nach denen du fragst. Nie die Beschreibung einer Einladung, nie einen anderen Kalender als deinen Hauptkalender.",
-          "consent": "Die KI kann die Termine deines Hauptkalenders lesen, um deine Fragen zu beantworten. Sie liest nur, wenn eine Frage es braucht — nie im Hintergrund — und kann nichts anlegen, ändern oder löschen."
+          "consent": "Die KI kann die Termine deines Hauptkalenders lesen, um deine Fragen zu beantworten. Sie liest nur, wenn eine deiner Fragen oder eine Automation, die du eingeschaltet hast, es braucht — sonst nie — und kann nichts anlegen, ändern oder löschen."
         },
         "slack": {
           "summary": "Kanäle lesen, in denen die App ist, und Agenten dort posten lassen.",

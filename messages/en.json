@@ -2267,7 +2267,7 @@
         "googleCalendar": {
           "summary": "Read your meetings so the AI can answer “what do I have tomorrow?”.",
           "sees": "The title, time, place and organiser of meetings on the days you ask about. Never an invitation's description, never any calendar but your main one.",
-          "consent": "The AI will be able to read the events in your main calendar to answer the questions you ask. It reads only when a question needs it — never in the background — and it can't create, change or delete anything."
+          "consent": "The AI will be able to read the events in your main calendar to answer the questions you ask. It reads only when one of your questions, or an automation you switched on, needs it — nothing else — and it can't create, change or delete anything."
         },
         "slack": {
           "summary": "Read channels the app is in, and let agents post results there.",

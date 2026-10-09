@@ -16,6 +16,7 @@ import {
 import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
 import { providersOpenTo } from "@/lib/integrations/switches";
+import { isValidTimeZone } from "@/lib/agents/cron-expression";
 import {
   buildSearchTool,
   searchToolInstruction,
@@ -328,6 +329,7 @@ export async function POST(request: Request) {
     let skipClarification = false;
     let workMode: WorkMode | null = null;
     let rawAttachments: unknown = undefined;
+    let timeZone: string | null = null;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -354,6 +356,10 @@ export async function POST(request: Request) {
       // (lib/chat/work-modes.ts) — one of four, or none.
       workMode = readWorkMode(body?.workMode);
       rawAttachments = body?.attachments;
+      // The person's time zone, from their browser: what «αύριο» means for
+      // a calendar read (lib/integrations/calendar-window.ts). Only a real
+      // IANA zone is kept; anything else reads Greenwich's days, as before.
+      timeZone = typeof body?.timeZone === "string" && body.timeZone.length <= 64 && isValidTimeZone(body.timeZone) ? body.timeZone : null;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -712,7 +718,8 @@ export async function POST(request: Request) {
       integrationSearchTool = buildSearchTool(integrations);
       if (integrationSearchTool) {
         integrationInstruction = searchToolInstruction(
-          integrations.filter((i) => i.status === "connected").map((i) => i.provider)
+          integrations.filter((i) => i.status === "connected").map((i) => i.provider),
+          timeZone
         );
       }
     } catch (err) {
@@ -1430,7 +1437,7 @@ export async function POST(request: Request) {
             markStep("searching_data");
             const results = await Promise.all(
               toolUses.map(async (toolUse) => {
-                const executed = await executeSearchTool({ userId: user.id, input: toolUse.input });
+                const executed = await executeSearchTool({ userId: user.id, input: toolUse.input, timeZone });
                 return {
                   type: "tool_result" as const,
                   tool_use_id: toolUse.id,

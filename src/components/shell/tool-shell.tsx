@@ -143,7 +143,13 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">{work.body}</div>
+          {/* ROOM FOR THE TAB BAR. Under md the phone's tab bar
+              (components/dashboard/mobile-tab-bar.tsx: 56px and the safe
+              area) is painted over this pane, which sits in the page's
+              own layer; without this the last 57px could not be scrolled
+              into sight — an automation's history among them (found
+              2026-10-08 by scripts/tests/connections-automations-edges.prodtest.mjs). */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 md:pb-5">{work.body}</div>
         </section>
       )}
     </div>

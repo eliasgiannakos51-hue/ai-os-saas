@@ -2,10 +2,12 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, ExternalLink, Globe, Square, X, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
@@ -16,6 +18,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { parseGenerationNotes } from "@/lib/website-generation-notes";
 import { requestSiteChange, requestSiteStop, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
 import type { UserWebsite } from "@/types/user-website";
 
@@ -31,7 +34,10 @@ export type SitePaneHandle = {
   take: (text: string) => boolean;
 };
 
-type Stage = "confirm" | "questions" | "building" | "done" | "changing" | "failed";
+type Stage = "locked" | "confirm" | "questions" | "building" | "done" | "changing" | "failed";
+
+/** The Site's plan wall (components/billing/upgrade-required.tsx), when this account's plan has no Site. */
+export type SiteWall = { featureName: string; planName: string; planSlug: string; priceEur: number | null };
 
 /**
  * THE SITE, OPENED FROM CHAT (MASTER 16, package 7), behind the switch
@@ -47,27 +53,42 @@ type Stage = "confirm" | "questions" | "building" | "done" | "changing" | "faile
  * stays sandbox="" with no scripts; and what is said next in Chat changes
  * it, as in the Site itself. The site is a row like any other, so it is in
  * the Site and in the Library afterwards, and "Open in Site" goes there.
+ *
+ * IN THE SCREEN'S LANGUAGE, ALL THE WAY TO THE END (2026-10-08,
+ * scripts/tests/chat-opens-tools-edges.prodtest.mjs). The Site's routes
+ * and its worker write their refusals and failures as English sentences —
+ * and a provider's own error, `529 {"type":"error",…}`, reached this pane
+ * as it came. So: a plan without the Site gets the plan's wall before
+ * anything is offered (`wall`); no credits is said by OutOfCreditsNotice
+ * from the code and numbers the route sends; a site that failed is said
+ * by this pane's own sentence, or by the stopped note when it was stopped.
+ * A server sentence is shown as it came only on an English screen.
  */
 export const SitePane = forwardRef<
   SitePaneHandle,
   {
     brief: string;
+    /** This account's plan has no Site: the wall, and nothing to press that would be refused. */
+    wall?: SiteWall | null;
     /** Put aside on a phone: still open, so the next sentence still reaches it. */
     hidden: boolean;
     onBack: () => void;
     onClose: () => void;
   }
->(function SitePane({ brief, hidden, onBack, onClose }, ref) {
+>(function SitePane({ brief, wall = null, hidden, onBack, onClose }, ref) {
   const t = useTranslations("dashboard.chat.sitePane");
   const tSite = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
   const tWork = useTranslations("dashboard.chat.workArea");
   const tSteps = useTranslations("aiSteps");
   const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const locale = useLocale();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
   const remembered = useRememberedLine();
-  const [stage, setStage] = useState<Stage>("confirm");
+  const [stage, setStage] = useState<Stage>(wall ? "locked" : "confirm");
+  const [noCredits, setNoCredits] = useState<{ available: number | null; needed: number | null } | null>(null);
   const [site, setSite] = useState<UserWebsite | null>(null);
   const [questions, setQuestions] = useState<string[]>([]);
   const [lines, setLines] = useState<string[]>([]);
@@ -80,6 +101,16 @@ export const SitePane = forwardRef<
   const failWith = (line: string) => {
     say(line);
     setStage(site && site.status === "completed" ? "done" : "failed");
+  };
+  // A sentence the server wrote is English: shown as it came only where
+  // the screen is English, and the pane's own words everywhere else.
+  const serverSaid = (text: string | null | undefined, ours: string) => (locale.startsWith("en") && text ? text : ours);
+  // Why a site that was being made ended without being made.
+  const whyNotMade = (done: UserWebsite): string => {
+    if (done.status === "flagged") return tSite("flaggedTitle");
+    const stopped = parseGenerationNotes(done.generation_notes).find((n) => n.kind === "stopped");
+    if (stopped && stopped.kind === "stopped") return tSite("notes.stopped", { count: stopped.credits });
+    return t("failed");
   };
 
   // PRICE BEFORE, from the estimator the server reserves against — the
@@ -103,7 +134,7 @@ export const SitePane = forwardRef<
           if (fromMemory) say(fromMemory);
           setStage("done");
         } else {
-          failWith(done.error_message ?? tSite("generateFailed"));
+          failWith(whyNotMade(done));
         }
       },
     });
@@ -116,7 +147,11 @@ export const SitePane = forwardRef<
       if (!mounted.current) return;
       if (outcome.kind === "refused") {
         void refreshCredits();
-        failWith(getErrorMessage(outcome.error, tSite("generateFailed")));
+        failWith(
+          outcome.code === "not_included"
+            ? `${tErrors("codes.forbidden.what")} ${tErrors("codes.forbidden.next")}`
+            : serverSaid(getErrorMessage(outcome.error, ""), tSite("generateFailed"))
+        );
         return;
       }
       if (outcome.kind === "questions") {
@@ -127,6 +162,12 @@ export const SitePane = forwardRef<
         return;
       }
       if (outcome.kind === "notMade") {
+        if (outcome.code === "insufficientCredits") {
+          void refreshCredits();
+          setNoCredits({ available: outcome.available, needed: outcome.needed });
+          setStage("failed");
+          return;
+        }
         failWith(outcome.message ?? tSite("generateFailed"));
         return;
       }
@@ -140,12 +181,22 @@ export const SitePane = forwardRef<
 
   async function change(request: string, current: UserWebsite) {
     setStage("changing");
+    setNoCredits(null);
     try {
       const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request });
       void refreshCredits();
       if (!mounted.current) return;
+      if (outcome.kind === "refused" && outcome.code === "insufficientCredits") {
+        // NO CREDITS FOR A CHANGE (2026-10-09): the notice, with the
+        // numbers, and the site as it was — not «could not create the
+        // website», which is what a non-English screen said for every
+        // refused change.
+        setNoCredits({ available: outcome.available, needed: outcome.needed });
+        setStage("done");
+        return;
+      }
       if (outcome.kind === "refused") {
-        failWith(outcome.reason === "pageGone" ? tSite("editPageGone") : getErrorMessage(outcome.error, tSite("generateFailed")));
+        failWith(outcome.reason === "pageGone" ? tSite("editPageGone") : serverSaid(getErrorMessage(outcome.error, ""), tSite("generateFailed")));
         return;
       }
       setSite(outcome.record);
@@ -225,6 +276,13 @@ export const SitePane = forwardRef<
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-4">
+        {stage === "locked" && wall && (
+          <div className="mx-auto mt-6 w-full max-w-md" data-testid="chat-site-locked">
+            <p className="mb-3 break-words text-sm text-muted">«{description}»</p>
+            <UpgradeRequired {...wall} />
+          </div>
+        )}
+
         {stage === "confirm" && (
           <div className="mx-auto mt-6 w-full max-w-md surface-tight" role="status" aria-live="polite">
             <p className="text-sm text-foreground">{t("willMake")}</p>
@@ -257,6 +315,13 @@ export const SitePane = forwardRef<
               </li>
             ))}
           </ul>
+        )}
+
+        {noCredits && (
+          <OutOfCreditsNotice
+            className="mx-auto mt-2 w-full max-w-md"
+            {...(noCredits.available !== null && noCredits.needed !== null ? { available: noCredits.available, needed: noCredits.needed } : {})}
+          />
         )}
 
         {stage === "questions" && (

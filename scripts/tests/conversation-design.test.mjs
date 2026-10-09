@@ -113,8 +113,10 @@ console.log("\n== 3. the first message, refused or failed, in the reader's langu
 // charged — and the free message it gave back stayed counted as spent.
 const route = stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"));
 const breaker = stripComments(readFileSync("src/lib/ai-circuit-breaker.ts", "utf8"));
+// Out of credits is said with its two numbers (outOfCreditsText, package 7's
+// check, scripts/tests/chat-opens-tools.test.mjs); every other code here.
 check("a refusal is said from its code, in the reader's language, not from the route's prose",
-  /setError\(isErrorCode\(data\.code\) \? describe\(new ApiError\(429, \{ code: data\.code \}\)\)\.text : data\.message\);/.test(ws));
+  /:\s*isErrorCode\(data\.code\)\s*\?\s*describe\(new ApiError\(429, \{ code: data\.code \}\)\)\.text\s*:\s*data\.message\s*\);/.test(ws));
 check("...the route names the credit refusal by its code",
   /rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(/.test(route));
 check("...and the circuit breaker's, every one of its refusals carrying a code",
@@ -126,7 +128,7 @@ check(`a model that fails is said as the AI service, with nothing kept and the f
   modelFailures === 2);
 check("...and the screen reads those values, not the prose",
   /if \(typeof event\.freeRemaining === "number"\) setFreeRemaining\(event\.freeRemaining\);/.test(ws) &&
-    /event\.outOfCredits === true\s*\? describeStatus\(402\)\.text\s*: event\.code === "upstreamUnavailable"\s*\? describeStatus\(503, event\.creditsRefunded === true\)\.text\s*: describeStatus\(500\)\.text;/.test(ws));
+    /event\.outOfCredits === true\s*\? outOfCreditsText\(event\.available, event\.needed\)\s*: event\.code === "upstreamUnavailable"\s*\? describeStatus\(503, event\.creditsRefunded === true\)\.text\s*: describeStatus\(500\)\.text;/.test(ws));
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

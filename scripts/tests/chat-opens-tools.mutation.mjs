@@ -23,6 +23,9 @@ const CHAT = "src/components/chat/chat-workspace.tsx";
 const PAGE = "src/app/dashboard/chat/page.tsx";
 const PANE = "src/components/chat/site-pane.tsx";
 const EL = "messages/el.json";
+const GENERATE = "src/app/api/websites/generate/route.ts";
+const CHAT_ROUTE = "src/app/api/chat/route.ts";
+const EDIT = "src/app/api/websites/edit/route.ts";
 
 const MUTANTS = [
   {
@@ -103,8 +106,8 @@ const MUTANTS = [
   {
     name: "the switch is ignored",
     file: PAGE,
-    from: 'opensTools={await isFeatureOn("chat-opens-tools", user)}',
-    to: "opensTools={true}",
+    from: '    isFeatureOn("chat-opens-tools", user),\n  ]);',
+    to: "    Promise.resolve(true),\n  ]);",
     expect: "the Chat page reads it",
   },
   {
@@ -137,11 +140,90 @@ const MUTANTS = [
     to: "    setActiveId(null);",
     expect: "«Νέα συνομιλία» closes it even when there was no conversation yet",
   },
+  // ---- 2026-10-08, the edges (scripts/tests/chat-opens-tools-edges.prodtest.mjs)
+  {
+    name: "a Free account is offered «Φτιάξ' το» and refused in English",
+    file: PAGE,
+    from: "        siteWall={siteWall}",
+    to: "        siteWall={null}",
+    expect: "a plan without the Site gets the plan's wall in the pane",
+  },
+  {
+    name: "the pane ignores the wall it is given",
+    file: PANE,
+    from: 'useState<Stage>(wall ? "locked" : "confirm")',
+    to: 'useState<Stage>("confirm")',
+    expect: "the plan's wall, before anything is offered",
+  },
+  {
+    name: "a failed site shows the worker's English sentence again",
+    file: PANE,
+    from: "          failWith(whyNotMade(done));",
+    to: "          failWith(done.error_message ?? whyNotMade(done));",
+    expect: "a site that failed is said in the pane's own words",
+  },
+  {
+    name: "a server sentence is shown on every screen",
+    file: PANE,
+    from: '(locale.startsWith("en") && text ? text : ours)',
+    to: "(text ? text : ours)",
+    expect: "a server sentence is shown as it came only on an English screen",
+  },
+  {
+    name: "no credits is said in the route's English",
+    file: PANE,
+    from: '        if (outcome.code === "insufficientCredits") {',
+    to: '        if (outcome.code === "never") {',
+    expect: "no credits is said by the credits notice",
+  },
+  {
+    name: "the Site's main credit refusal stops sending its code",
+    file: GENERATE,
+    from: '          available: check.remaining,\n          needed: estimatedCost,',
+    to: "",
+    expect: "no credits is said by the credits notice",
+  },
+  {
+    name: "Chat sets the route's English sentence as its error again",
+    file: CHAT,
+    from: '            data.code === "insufficientCredits"\n              ? outOfCreditsText(data.available, data.needed)',
+    to: '            data.code === "never"\n              ? outOfCreditsText(data.available, data.needed)',
+    expect: "Chat says no credits in its own words",
+  },
+  {
+    name: "a hold refused inside the answer reads as our own failure again",
+    file: CHAT,
+    from: "              ? outOfCreditsText(event.available, event.needed)\n              : event.code",
+    to: "              ? describeStatus(500).text\n              : event.code",
+    expect: "Chat says no credits in its own words",
+  },
+  {
+    name: "the chat route stops sending the numbers",
+    file: CHAT_ROUTE,
+    from: '          available: check.remaining,\n          needed: estimate.reserveCredits,',
+    to: "",
+    expect: "Chat says no credits in its own words",
+  },
+  // ---- 2026-10-09, a change with no credits (chat-opens-tools-edges part 5)
+  {
+    name: "a change with no credits reads as «could not create the website» again",
+    file: PANE,
+    from: '      if (outcome.kind === "refused" && outcome.code === "insufficientCredits") {',
+    to: '      if (outcome.kind === "refused" && outcome.code === "never") {',
+    expect: "no credits for a change is said by the credits notice too",
+  },
+  {
+    name: "the edit route stops sending its code",
+    file: EDIT,
+    from: '          code: "insufficientCredits",\n          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),\n          available: check.remaining,\n          needed: estimate.reserveCredits,',
+    to: "          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),",
+    expect: "no credits for a change is said by the credits notice too",
+  },
 ];
 
 runMutations({
   name: "chat-opens-tools",
   gate: GATE,
-  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL],
+  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE, EDIT],
   mutants: MUTANTS,
 });

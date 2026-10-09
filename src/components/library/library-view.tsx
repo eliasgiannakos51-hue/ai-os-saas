@@ -117,7 +117,11 @@ export function LibraryView({
         </p>
       )}
 
-      {items.length === 0 ? (
+      {/* NOTHING SHOWN IS NOT "NOTHING MADE". With a tool that did not
+          load, the line above says which; «Δεν έχεις φτιάξει τίποτα ακόμη»
+          under it would be a claim about rows nobody read
+          (scripts/tests/library-edges.prodtest.mjs, 2026-10-08). */}
+      {items.length === 0 && failed.length > 0 ? null : items.length === 0 ? (
         <div className="mt-6">
           {query ? (
             <EmptyState icon={Search} title={t("noMatch.title", { query })}>

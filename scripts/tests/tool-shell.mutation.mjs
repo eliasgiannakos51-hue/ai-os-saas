@@ -237,8 +237,8 @@ const MUTANTS = [
   {
     name: "Site: the requests drop the code the route sent",
     file: SITE_REQUESTS,
-    from: 'code: typeof data.code === "string" ? data.code : null,',
-    to: "code: null,",
+    from: "rateLimited: data.rateLimited === true, code: str(data.code),",
+    to: "rateLimited: data.rateLimited === true, code: null,",
     expect: "read from the code, not from the sentence",
   },
   {

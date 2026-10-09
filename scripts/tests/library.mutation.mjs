@@ -24,8 +24,17 @@ const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
 const SITE_SHELL = "src/components/website-builder/website-shell.tsx";
 const RESEARCH_SHELL = "src/components/research/research-shell.tsx";
 const EL = "messages/el.json";
+const VIEW = "src/components/library/library-view.tsx";
 
 const MUTANTS = [
+  {
+    // 2026-10-08: nothing could be read, and the page said nothing was made.
+    name: "a failed load reads as «nothing made yet»",
+    file: VIEW,
+    from: "{items.length === 0 && failed.length > 0 ? null : items.length === 0 ? (",
+    to: "{items.length === 0 ? (",
+    expect: "a tool that did not load is never followed by",
+  },
   {
     name: "the owner is left to RLS alone",
     file: LOAD,
@@ -143,6 +152,6 @@ const MUTANTS = [
 runMutations({
   name: "library",
   gate: GATE,
-  targets: [LOAD, SOURCES, REQUESTED, TIMELINE, FILTERS, SLIDES_PAGE, SITE_SHELL, RESEARCH_SHELL, EL],
+  targets: [LOAD, SOURCES, REQUESTED, TIMELINE, FILTERS, SLIDES_PAGE, SITE_SHELL, RESEARCH_SHELL, EL, VIEW],
   mutants: MUTANTS,
 });

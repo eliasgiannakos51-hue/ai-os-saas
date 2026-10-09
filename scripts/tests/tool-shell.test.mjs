@@ -212,7 +212,7 @@ for (const f of users) {
 }
 check("Site: out of credits and the limits are read from the code, not from the sentence",
   /outcome\.code === "insufficientCredits"\s*\?\s*refusalText\(402, null\)/.test(site) && /outcome\.body\?\.code === "insufficientCredits"\s*\?\s*refusalText\(402, null\)/.test(site) &&
-    /code: typeof data\.code === "string" \? data\.code : null/.test(siteRequests));
+    /kind: "notMade", message: str\(data\.message\), rateLimited: data\.rateLimited === true, code: str\(data\.code\)/.test(siteRequests));
 for (const route of ["src/app/api/websites/generate/route.ts", "src/app/api/websites/edit/route.ts"]) {
   const src = read(route);
   const said = (src.match(/insufficientCreditsMessage\(/g) ?? []).length;

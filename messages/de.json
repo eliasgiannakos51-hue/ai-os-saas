@@ -1361,7 +1361,8 @@
         "building": "Die Website wird erstellt… das dauert ein paar Minuten.",
         "changing": "Die Website wird geändert…",
         "nextChanges": "Was du jetzt im Gespräch schreibst, ändert diese Website.",
-        "reopen": "Website zeigen"
+        "reopen": "Website zeigen",
+        "failed": "Die Website konnte nicht erstellt werden. Die Erstellung wurde nicht berechnet; versuch es noch einmal."
       },
       "attach": {
         "label": "PDF oder Bild anhängen",

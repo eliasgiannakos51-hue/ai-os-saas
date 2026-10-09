@@ -1361,7 +1361,8 @@
         "building": "Building the site… it takes a few minutes.",
         "changing": "Changing the site…",
         "nextChanges": "Anything you write in the conversation now changes this site.",
-        "reopen": "Show the site"
+        "reopen": "Show the site",
+        "failed": "The site could not be made. Making it was not charged; try again."
       },
       "attach": {
         "label": "Attach a PDF or image",

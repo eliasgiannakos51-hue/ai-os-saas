@@ -31,11 +31,19 @@ export const isSiteRunning = (w: UserWebsite | null | undefined): boolean =>
 export type SiteStart =
   | { kind: "questions"; questions: string[] }
   | { kind: "started"; record: UserWebsite }
-  /** The server answered but made nothing (an off-topic brief, a duplicate refused) — with its sentence.
-   *  `code` "insufficientCredits" and `rateLimited` say why when it was the balance or the limits. */
-  | { kind: "notMade"; message: string | null; code: string | null; rateLimited: boolean }
-  /** Refused: the plan, the credits, the size — `error` is the server's own. */
-  | { kind: "refused"; error: unknown; status: number; body: ApiErrorPayload | null };
+  /**
+   * The server answered but made nothing (an off-topic brief, a duplicate
+   * refused, no credits) — with its sentence, which is English. `code`
+   * "insufficientCredits" and `rateLimited` say why when it was the balance
+   * or the limits; out of credits, `available` and `needed` carry the two
+   * numbers, for a screen to say it in its own language.
+   */
+  | { kind: "notMade"; message: string | null; code: string | null; rateLimited: boolean; available: number | null; needed: number | null }
+  /** Refused: the plan, the credits, the size — `error` is the server's own; `code` is "not_included" when the plan has no Site. */
+  | { kind: "refused"; error: unknown; status: number; body: ApiErrorPayload | null; code: string | null };
+
+const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
 
 export async function startSiteGeneration(input: {
   name: string;
@@ -48,15 +56,10 @@ export async function startSiteGeneration(input: {
     body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null, status: res.status, body: data };
+  if (!res.ok || !data?.ok) return { kind: "refused", error: data?.error ?? null, status: res.status, body: data, code: str(data?.code) };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
   if (!data.generated) {
-    return {
-      kind: "notMade",
-      message: typeof data.message === "string" ? data.message : null,
-      code: typeof data.code === "string" ? data.code : null,
-      rateLimited: data.rateLimited === true,
-    };
+    return { kind: "notMade", message: str(data.message), rateLimited: data.rateLimited === true, code: str(data.code), available: num(data.available), needed: num(data.needed) };
   }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the
@@ -114,10 +117,25 @@ export function watchSite(
 
 export type SiteChange =
   | { kind: "changed"; record: UserWebsite }
-  /** "pageGone": the page was renamed or removed; "boxLost": the chosen part did not come back.
-   *  `status` and `body` are the route's answer: 200 with `edited: false` is a refusal said in the body
-   *  (`code`, `rateLimited`, `flagged`), anything else is said by the status. */
-  | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown; status: number; body: (ApiErrorPayload & Record<string, unknown>) | null };
+  /**
+   * "pageGone": the page was renamed or removed; "boxLost": the chosen part
+   * did not come back. `status` and `body` are the route's answer: 200 with
+   * `edited: false` is a refusal said in the body (`code`, `rateLimited`,
+   * `flagged`), anything else is said by the status. `code` is
+   * "insufficientCredits", with the two numbers, when the balance is short —
+   * for a screen to say it in its own language rather than the route's
+   * English sentence.
+   */
+  | {
+      kind: "refused";
+      reason: "pageGone" | "boxLost" | "other";
+      error: unknown;
+      status: number;
+      body: (ApiErrorPayload & Record<string, unknown>) | null;
+      code: string | null;
+      available: number | null;
+      needed: number | null;
+    };
 
 /**
  * A change in words. `pageSlug` names the page it is about ("" or absent:
@@ -143,7 +161,7 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
         : data?.reason === "box_lost" || data?.reason === "bad_section"
           ? "boxLost"
           : "other";
-    return { kind: "refused", reason, error: data?.error ?? data?.message ?? null, status: res.status, body: data };
+    return { kind: "refused", reason, status: res.status, body: data, error: data?.error ?? data?.message ?? null, code: str(data?.code), available: num(data?.available), needed: num(data?.needed) };
   }
   return { kind: "changed", record: data.record as UserWebsite };
 }

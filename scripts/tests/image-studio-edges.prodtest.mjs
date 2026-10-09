@@ -513,7 +513,9 @@ async function names(page, press, origin, device, locale, on) {
   const entry = page.locator('a[href="/dashboard/images"]').first();
   const said = (await entry.innerText().catch(() => "")).split("\n").map((s) => s.trim()).filter(Boolean);
   check(`${state}: the records hub names it «${want}»`, said[0] === want, JSON.stringify(said));
-  if (on) check(`${state}: ...and does not say the tool makes nothing`, !said.includes(T.sidebar.hints.images), JSON.stringify(said));
+  if (on)
+    check(`${state}: ...with the tool's own line, not the one that says it makes nothing`,
+      said.includes(T.sidebar.hints.imageTool) && !said.includes(T.sidebar.hints.images), JSON.stringify(said));
 
   // All tools: never the ideas page's name for the tool; any square it draws for it carries the tool's.
   await page.goto(`${origin}/dashboard/tools`, { waitUntil: "networkidle" });

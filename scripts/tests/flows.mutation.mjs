@@ -29,8 +29,24 @@ const MIGRATION = "supabase/migrations/20261022000000_project_flows.sql";
 const INCLUDES = "src/lib/flows/plan-includes.ts";
 const AVAILABILITY = "src/lib/flows/availability.ts";
 const SITE_ROUTE = "src/app/api/websites/generate/route.ts";
+const RUN = "src/lib/flows/run-step.ts";
 
 const MUTANTS = [
+  // 2026-10-09, docs/BUGS.md 36.4
+  {
+    name: "a site refused for credits says «The tool refused it» again",
+    file: RUN,
+    from: 'error: start.kind === "refused" ? siteRefusal(start) : "failed"',
+    to: 'error: start.kind === "refused" ? "refused" : "failed"',
+    expect: "a site refused for credits is no_credits",
+  },
+  {
+    name: "every site refusal is the general one, whatever its code",
+    file: RUN,
+    from: 'return said === "failed" ? "refused" : said;',
+    to: 'return "refused";',
+    expect: "a site refused for credits is no_credits",
+  },
   {
     name: "a sentence that needs a video runs the half that exists",
     file: PLAN,
@@ -218,6 +234,6 @@ const MUTANTS = [
 runMutations({
   name: "flows",
   gate: GATE,
-  targets: [PLAN, BRIEF, CREATE, STEPS, SHELL, MIGRATION, INCLUDES, AVAILABILITY, SITE_ROUTE],
+  targets: [PLAN, BRIEF, CREATE, STEPS, SHELL, MIGRATION, INCLUDES, AVAILABILITY, SITE_ROUTE, RUN],
   mutants: MUTANTS,
 });

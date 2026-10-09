@@ -151,6 +151,13 @@ check("two steps finishing together lose neither", /\.eq\("updated_at", current\
 check("the creating route is bounded", /checkRateLimit\(\{ scope: "flow_create", identifier: user\.id,/.test(create));
 const run = code("src/lib/flows/run-step.ts");
 check("each step is its own tool's request", ['startSiteGeneration(', '"/api/images/generate"', '"/api/posts/generate"', '"/api/research"', '"/api/presentations/generate"', '"/api/data-analysis/upload"'].every((s) => run.includes(s)) && !/\.from\(|createAdminClient|reserveCredits/.test(run));
+// A SITE REFUSED FOR CREDITS SAYS SO (docs/BUGS.md 36.4): the refusal's
+// status and route code go through the same codeOf as every other step,
+// and only what it does not name stays "refused".
+check("a site refused for credits is no_credits, like every other step",
+  /function siteRefusal\(start: \{ error: \{ status: number \}; code: string \| null \}\): string \{\s*const said = codeOf\(start\.error\.status, \{ code: start\.code === "insufficientCredits" \? "insufficient_credits" : start\.code \}\);\s*return said === "failed" \? "refused" : said;\s*\}/.test(run) &&
+    /error: start\.kind === "refused" \? siteRefusal\(start\) : "failed"/.test(run) &&
+    /if \(status === 402 \|\| data\?\.error === "insufficient_credits" \|\| data\?\.code === "insufficient_credits"\) return "no_credits";/.test(run));
 check("a deck after a research is made from it", /\.\.\.\(input\.researchId \? \{ researchId: input\.researchId \} : \{\}\)/.test(run));
 const shell = code("src/components/flows/flow-shell.tsx");
 check("nothing starts before «Έγκριση», and a large total asks again", /onApprove=\{\(\) => withConfirm\(totalOf\(draft\), \(\) => void approve\(id\)\)\}/.test(shell) && /async function approve\([\s\S]*?fetch\("\/api\/flows"[\s\S]*?if \(!response\.ok \|\| !data\?\.ok\) \{[\s\S]*?return;[\s\S]*?advance\(flow\.id/.test(shell));

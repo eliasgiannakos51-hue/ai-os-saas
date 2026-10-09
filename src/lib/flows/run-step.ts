@@ -58,6 +58,20 @@ function codeOf(status: number, data: Record<string, unknown> | null): string {
   return "failed";
 }
 
+/**
+ * A site the route refused, in the same codes as every other step. The
+ * refusal carries the route's status and its own code
+ * (lib/website-builder/site-requests.ts), so short credits read as
+ * no_credits here as they do on the pictures and the posts; before it
+ * did, a flow with no credits said «The tool refused it» for the site
+ * alone (docs/BUGS.md 36.4, found by scripts/tests/flows-edges.prodtest.mjs).
+ * Anything the codes do not name stays "refused".
+ */
+function siteRefusal(start: { error: { status: number }; code: string | null }): string {
+  const said = codeOf(start.error.status, { code: start.code === "insufficientCredits" ? "insufficient_credits" : start.code });
+  return said === "failed" ? "refused" : said;
+}
+
 function site(input: StepInput): Promise<StepOutcome> {
   return new Promise((resolve) => {
     const follow = (id: string) =>
@@ -69,7 +83,7 @@ function site(input: StepInput): Promise<StepOutcome> {
     if (input.startedRow) return follow(input.startedRow);
     startSiteGeneration({ name: input.name, description: input.brief, skipClarification: true })
       .then((start) => {
-        if (start.kind !== "started") return resolve({ ok: false, error: start.kind === "refused" ? "refused" : "failed" });
+        if (start.kind !== "started") return resolve({ ok: false, error: start.kind === "refused" ? siteRefusal(start) : "failed" });
         input.onStarted?.(start.record.id);
         follow(start.record.id);
       })

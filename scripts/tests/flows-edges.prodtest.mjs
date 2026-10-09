@@ -617,12 +617,13 @@ try {
       await allFinished(3);
       check(`${run}: no credits: the pictures and the posts refused by their own routes, said as «${F.stepErrors.no_credits}»`,
         (await statuses()) === "site:failed,images:failed,posts:failed" && (await stepText("images")).includes(F.stepErrors.no_credits) && (await stepText("posts")).includes(F.stepErrors.no_credits), `${await statuses()} | ${await stepText("images")} | ${await stepText("posts")}`);
-      // The site's refusal reaches the flow without its reason on this
-      // branch (lib/website-builder/site-requests.ts answers it as "made
-      // nothing"), so the step says the general failure; what is held is
-      // that it says one of the two, in the screen's language.
+      // The site's refusal reaches the flow with its status and the
+      // route's code (lib/website-builder/site-requests.ts), and
+      // lib/flows/run-step.ts siteRefusal says it as the other steps do
+      // (docs/BUGS.md 36.4: it said «The tool refused it» on the merged
+      // tree, 2026-10-09).
       const siteSays = await stepText("site");
-      check(`${run}: ...the site refused too, in words of this screen`, siteSays.includes(F.stepErrors.no_credits) || siteSays.includes(F.stepErrors.failed), siteSays);
+      check(`${run}: ...the site refused too, said as «${F.stepErrors.no_credits}»`, siteSays.includes(F.stepErrors.no_credits), siteSays);
       const broke = flowOf(F.example.site);
       check(`${run}: ...nothing held, nothing charged — not even the site's pre-check — nothing in the project, the flow reads as failed`,
         rpcOf("reserve_credits").length === 0 && rpcOf("settle_reservation").length === 0 && linksInto(broke?.project_id).length === 0 && broke?.status === "failed", JSON.stringify(rpcs.filter((r) => /reserve|settle|release|deduct/.test(r.name)).map((r) => `${r.name}:${r.args.p_credits_to_charge ?? r.args.p_credits ?? ""}`)));

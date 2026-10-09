@@ -251,7 +251,7 @@ const MUTANTS = [
   {
     name: "Research: a refused plan says the route's English",
     file: RESEARCH,
-    from: 'say({ role: "tool", text: response.status === 502 ? t("planError") : refusalText(response.status, data) });',
+    from: 'say({ role: "tool", text: response.status === 502 && data ? t("planError") : refusalText(response.status, data) });',
     to: 'say({ role: "tool", text: data.error ?? t("planError") });',
     expect: "no route's English is said to the reader",
   },
@@ -296,6 +296,28 @@ const MUTANTS = [
     from: "        signal: controller.signal,\n        body: JSON.stringify({ instruction:",
     to: "        body: JSON.stringify({ instruction:",
     expect: "Stop reaches a change",
+  },
+  // ---- 2026-10-09: what the verify pass found under the same heading
+  {
+    name: "Research: a plan the host answered in text throws into 'offline'",
+    file: RESEARCH,
+    from: "const data = await response.json().catch(() => null);\n      if (!data?.ok) {",
+    to: "const data = await response.json();\n      if (!data?.ok) {",
+    expect: "is not the connection",
+  },
+  {
+    name: "Files: a file over 4MB says storage's own English when storage is unreachable",
+    file: UPLOAD,
+    from: "error: unanswered ? (words.offline ?? words.error) : words.error",
+    to: "error: words.error",
+    expect: "never storage's English",
+  },
+  {
+    name: "Files: the shell gives the upload no words for the connection",
+    file: FILES,
+    from: "          offline: describe(new ApiError(0, null)).text,\n",
+    to: "",
+    expect: "never storage's English",
   },
   {
     name: "Files: an upload with no connection says the browser's English",

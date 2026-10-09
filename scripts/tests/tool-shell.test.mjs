@@ -221,8 +221,21 @@ for (const route of ["src/app/api/websites/generate/route.ts", "src/app/api/webs
 }
 check("Site: a build the worker could not finish is said in the screen's words, a stop by its note",
   /say\(\{ role: "tool", text: failedText\(record\) \}\)/.test(site) && /if \(stopped\) return describeNote\(stopped\);/.test(site));
-check("Research: a plan or a run refused is said from the status", /response\.status === 502 \? t\("planError"\) : refusalText\(response\.status, data\)/.test(research) &&
+check("Research: a plan or a run refused is said from the status", /response\.status === 502 && data \? t\("planError"\) : refusalText\(response\.status, data\)/.test(research) &&
   /text: refusalText\(response\.status, data\)/.test(research));
+// Checked 2026-10-09 by tool-shell-edges.prodtest.mjs: a 504 text page from
+// the host made `response.json()` throw, and the catch said "your device
+// could not reach us" — and "you were not charged" — about a request that
+// had reached the server.
+check("Research: a plan answered with something that is not JSON is not the connection",
+  /const data = await response\.json\(\)\.catch\(\(\) => null\);\s*if \(!data\?\.ok\)/.test(research));
+// Checked the same day: over 4MB the bytes go to storage alone, and
+// storage that could not be reached answered «Failed to fetch» into the
+// conversation. Storage's own words are never what the reader is told.
+check("Files: a file over the route's limit, with storage unreachable, is the connection — never storage's English",
+  !/error: fallback/.test(uploadLib) && /unanswered \? \(words\.offline \?\? words\.error\) : words\.error/.test(uploadLib) &&
+    /unanswered = typeof \(error as \{ status\?: unknown \}\)\.status !== "number"/.test(uploadLib) &&
+    /offline: describe\(new ApiError\(0, null\)\)\.text/.test(filesShell));
 check("Files: a question refused is said from the status, a failed job in the screen's words",
   /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*t\("askError"\)/.test(filesShell) &&
     /status: response\.status, body: started/.test(read("src/lib/jobs/start-and-watch.ts")));

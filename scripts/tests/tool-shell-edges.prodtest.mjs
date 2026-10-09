@@ -23,12 +23,16 @@
  *              The two that run in a background worker (a site being
  *              built, a question asked of files) are answered by the
  *              browser with the row the worker writes on that failure.
- *   BOXES      package 4 through the REAL edit routes: a slide, and a part
+ *              And a Research plan that the HOST answers (504, a text
+ *              page) is the service, not the connection.
+ *   BOXES     package 4 through the REAL edit routes: a slide, and a part
  *              of the site, are pressed; the model (answered locally)
  *              rewrites EVERYTHING it is sent, and what is saved and shown
  *              changed only in the box that was pressed.
  *   STOP       Stop pressed during a change to one slide stops it.
- *   CONNECTION a file sent to Files while the connection drops says so.
+ *   CONNECTION a file sent to Files while the connection drops says so,
+ *              under 4MB (through the app's route) and over it (storage
+ *              alone).
  *   FREE       Site, Slides, Posts and Research are not on Free: the page
  *              says which plan has them, in the screen's language.
  *              Analyze and Files are, and are the shell.
@@ -489,6 +493,25 @@ try {
         await backToField();
       }
       check(`${run}: the real routes did call the model (${modelCalls - calledBefore})`, modelCalls - calledBefore >= 5);
+      // A plan answered by the HOST, not the route: a function that runs out
+      // of time answers 504 with a text page. The page was reached, so it is
+      // not the connection, and whether it cost cannot be known from here.
+      await page.route("**/api/research", (r) =>
+        r.request().method() === "POST"
+          ? r.fulfill({ status: 504, contentType: "text/plain", body: "An error occurred with your deployment\n\nFUNCTION_INVOCATION_TIMEOUT" })
+          : r.continue()
+      );
+      await page.goto(`${OWNER}/dashboard/deep-research`, { waitUntil: "networkidle" });
+      {
+        const before = await toolTurns();
+        await say(brief.research);
+        const said = await lastToolTurn(before, 20000);
+        check(`${run}: research — a plan the host timed out says the service, not the connection`,
+          said !== null && said.includes(W.upstream) && !said.includes(M.errors.codes.offline.what), said ?? "nothing was said");
+        inLanguage("research, host timeout", await shellText());
+        await backToField();
+      }
+      await page.unrouteAll({ behavior: "ignoreErrors" });
       // A site being BUILT fails in the worker, which writes the row the
       // status route then returns (api/websites/generate/process, the
       // anthropic_call stage: `${err.message} No credits were charged —
@@ -611,12 +634,15 @@ try {
       // The page itself gave the request up (net::ERR_ABORTED), which is
       // what reaches the route as request.signal.
       let editAborted = false;
+      // What the change asked for: ONE slide, the second (slideIndex 1).
+      let editBody = null;
       const onFailed = (request) => {
         if (/\/api\/presentations\/[^/]+\/edit$/.test(request.url())) editAborted = true;
       };
       page.on("requestfailed", onFailed);
       await page.route("**/api/presentations/generate", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ id: DECK_ID, deck: DECK, creditsCharged: 4 }) }));
       await page.route("**/api/presentations/*/edit", async (r) => {
+        try { editBody = r.request().postDataJSON(); } catch { editBody = null; }
         await new Promise((res) => setTimeout(res, 4000));
         await r.fulfill({ contentType: "application/json", body: JSON.stringify({ id: DECK_ID, deck: { ...DECK, title: "CHANGED" }, creditsCharged: 2 }) }).catch(() => {});
       });
@@ -635,7 +661,8 @@ try {
         await page.waitForTimeout(5000);
         const said = await lastToolTurn(before, 1000);
         check(`${run}: slides — Stop during a change to one slide stops it, and the conversation says so`,
-          stopShown && said === M.aiSteps.stopped && editAborted, JSON.stringify({ stopShown, said, editAborted }));
+          stopShown && said === M.aiSteps.stopped && editAborted && editBody?.slideIndex === 1,
+          JSON.stringify({ stopShown, said, editAborted, slideIndex: editBody?.slideIndex ?? null }));
       }
       page.off("requestfailed", onFailed);
       await page.unrouteAll({ behavior: "ignoreErrors" });
@@ -656,6 +683,17 @@ try {
         const said = await lastToolTurn(before, 15000);
         check(`${run}: files — a file sent while the connection drops says the connection`, said !== null && said.includes(M.errors.codes.offline.what), said ?? "nothing was said");
         inLanguage("files, connection dropped", await shellText());
+      }
+      {
+        // Over 4MB the bytes cannot go through the app's own route
+        // (lib/files/upload-file.ts, ROUTE_BODY_LIMIT), so storage that
+        // could not be reached is the whole answer — and its own message
+        // is the browser's English «Failed to fetch».
+        const before = await toolTurns();
+        await page.locator('[data-testid="files-shell-input"]').setInputFiles({ name: "minutes.txt", mimeType: "text/plain", buffer: Buffer.alloc(5 * 1024 * 1024, "a") });
+        const said = await lastToolTurn(before, 15000);
+        check(`${run}: files — a file over 4MB sent while the connection drops says the connection`, said !== null && said.includes(M.errors.codes.offline.what), said ?? "nothing was said");
+        inLanguage("files over 4MB, connection dropped", await shellText());
       }
       await page.unrouteAll({ behavior: "ignoreErrors" });
       await backToField();

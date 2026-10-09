@@ -162,10 +162,14 @@ export function ResearchShell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: value, language: locale }),
       });
-      const data = await response.json();
-      if (!data.ok) {
-        // 502: the model gave no plan, or could not be reached.
-        say({ role: "tool", text: response.status === 502 ? t("planError") : refusalText(response.status, data) });
+      // An answer that is not JSON (the host's own 504 page when the
+      // function runs out of time) reached the server: it is said from its
+      // status, never as the connection (checked 2026-10-09 by
+      // scripts/tests/tool-shell-edges.prodtest.mjs).
+      const data = await response.json().catch(() => null);
+      if (!data?.ok) {
+        // 502 from the route: the model gave no plan, or could not be reached.
+        say({ role: "tool", text: response.status === 502 && data ? t("planError") : refusalText(response.status, data) });
         return;
       }
       const report = data.report as ResearchReport;

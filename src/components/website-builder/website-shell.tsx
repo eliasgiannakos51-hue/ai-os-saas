@@ -35,8 +35,10 @@ import type { UserWebsite } from "@/types/user-website";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 
 const MAX_NAME_LENGTH = 100;
-// Every failure the site worker writes says so in these words, except a
-// stop, which has its own note (api/websites/generate/process/route.ts).
+// Most failures the site worker writes say they cost nothing in these
+// words (api/websites/generate/process/route.ts). One that does not — the
+// circuit breaker's reason, a flagged site the database could not hold —
+// is said as unverified, never as free; a stop has its own note.
 const NOT_CHARGED = /No credits were charged|Nothing was charged/i;
 const MAX_DESCRIPTION_LENGTH = 20000;
 

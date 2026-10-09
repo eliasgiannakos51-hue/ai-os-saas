@@ -163,6 +163,7 @@ export function FilesShell({
           storageMissing: t("uploadStorageMissing"),
           storagePolicy: t("uploadStoragePolicy"),
           tooLargeForTransfer: t("tooLargeForTransfer"),
+          offline: describe(new ApiError(0, null)).text,
         });
         if (!outcome.ok) {
           // The server's refusal, in the reader's language: a plan's file

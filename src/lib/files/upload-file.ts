@@ -11,6 +11,8 @@ export type UploadMessages = {
   storageMissing: string;
   storagePolicy: string;
   tooLargeForTransfer: string;
+  /** Storage could not be reached at all, so there is no answer to read. */
+  offline?: string;
 };
 
 /** A refusal the server answered carries its status and body, so the screen
@@ -38,7 +40,11 @@ const ROUTE_BODY_LIMIT = 4 * 1024 * 1024;
  */
 export async function uploadFile(file: File, words: UploadMessages): Promise<UploadOutcome> {
   let path: string | null = null;
-  let fallback: string | undefined;
+  // Storage that could not be reached answered nothing: storage-js's
+  // StorageUnknownError carries no status, and its message is the
+  // browser's English («Failed to fetch»), so the reader is never shown it
+  // (checked 2026-10-09 by scripts/tests/tool-shell-edges.prodtest.mjs).
+  let unanswered = false;
   try {
     const supabase = createBrowserSupabase();
     const { data: sessionData } = await supabase.auth.getSession();
@@ -53,7 +59,7 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
         const message = error.message ?? "";
         if (/bucket not found/i.test(message)) return { ok: false, error: words.storageMissing };
         if (/row-level security|policy/i.test(message)) return { ok: false, error: words.storagePolicy };
-        fallback = message || undefined;
+        unanswered = typeof (error as { status?: unknown }).status !== "number";
         path = null;
       }
     }
@@ -79,7 +85,7 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
     return { ok: false, error: data?.error ?? words.error, status: response.status, body: data };
   }
 
-  if (file.size > ROUTE_BODY_LIMIT) return { ok: false, error: fallback ?? words.error };
+  if (file.size > ROUTE_BODY_LIMIT) return { ok: false, error: unanswered ? (words.offline ?? words.error) : words.error };
   const body = new FormData();
   body.append("file", file);
   const response = await fetch("/api/files/upload", { method: "POST", body });

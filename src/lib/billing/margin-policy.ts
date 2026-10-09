@@ -283,4 +283,10 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   presentationGenerate: "presentation_generate",
   // V5 #22.
   postsGenerate: "posts_generate",
+  // MASTER 16, package 14: a written document and both kinds of change to
+  // one settle as two features, so a margin can be set on writing apart
+  // from changing.
+  documentGenerate: "document_generate",
+  documentEdit: "document_edit",
+  documentBlockEdit: "document_edit",
 };

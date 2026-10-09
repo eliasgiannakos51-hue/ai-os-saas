@@ -1288,6 +1288,44 @@
         "insufficient": "Créditos insuficientes para esta tradução. Nada foi cobrado.",
         "charged": "Traduzido e descarregado — {count, plural, one {# crédito cobrado} other {# créditos cobrados}}.",
         "chargedNothing": "Traduzido e descarregado — sem cobrança."
+      },
+      "writer": {
+        "kind": "Tipo de documento",
+        "placeholder": "Descreva o documento de que precisa: o que é, para quem, o que deve dizer",
+        "changePlaceholder": "Diga o que mudar no documento",
+        "block": "bloco {n}",
+        "boxHint": "Toque num bloco para mudar só esse.",
+        "writing": "A escrever o documento…",
+        "changing": "A alterar…",
+        "done": "Escrevi «{title}». Está aberto ao lado da conversa; o que escrever agora altera-o.",
+        "changed": "Alterado. A nova versão está aberta ao lado da conversa.",
+        "blockChanged": "O bloco {n} foi alterado; tudo o resto ficou como estava.",
+        "recent": "Escritos antes",
+        "noneYet": "Ainda não foi escrito nada.",
+        "new": "Novo documento",
+        "word": "Transferir Word (.docx)",
+        "openEditor": "Abrir no editor",
+        "kinds": {
+          "free": "Qualquer documento",
+          "offer": "Proposta",
+          "letter": "Carta",
+          "cv": "Currículo",
+          "report": "Relatório",
+          "invoice": "Fatura",
+          "script": "Guião"
+        },
+        "errors": {
+          "tooShort": "Diga um pouco mais sobre o documento primeiro.",
+          "tooLong": "Isso é mais longo do que uma descrição. Descreva o documento; não o cole.",
+          "insufficient": "Não há créditos suficientes para este documento.",
+          "rateLimited": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
+          "unavailable": "O serviço de IA não estava disponível. Nada foi cobrado.",
+          "unusable": "O modelo devolveu algo que não era um documento. Tente descrevê-lo de outra forma.",
+          "notIncluded": "A redação de documentos não está incluída no seu plano.",
+          "notSaved": "A alteração foi feita, mas não foi possível guardá-la. Nada se perdeu; tente novamente.",
+          "failed": "Não funcionou. Tente novamente.",
+          "exportFailed": "Não foi possível criar o ficheiro."
+        }
       }
     },
     "chat": {
@@ -2919,7 +2957,8 @@
         "memory": "Memória",
         "finances": "Finanças",
         "sales": "Vendas",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Documento"
       }
     },
     "home": {
@@ -4529,7 +4568,8 @@
         "bullets": "Tópicos",
         "section": "Secção",
         "quote": "Citação",
-        "image": "Foto"
+        "image": "Foto",
+        "chart": "Gráfico"
       }
     },
     "errors": {
@@ -4563,6 +4603,33 @@
       "notSaved": "A alteração foi feita mas não pôde ser guardada. Nada se perdeu — tente novamente.",
       "noDeck": "Esta linha não tem apresentação para alterar.",
       "notIncluded": "As apresentações não estão incluídas no seu plano."
+    },
+    "chart": {
+      "attach": "Adicione uma folha de cálculo (CSV ou Excel) para fazer um gráfico",
+      "reading": "A ler o ficheiro…",
+      "ready": "{rows, plural, one {# linha} other {# linhas}} — a apresentação terá um gráfico deste ficheiro",
+      "remove": "Remover {name}",
+      "failed": {
+        "type": "Só um ficheiro CSV ou Excel (.xlsx) pode tornar-se um gráfico.",
+        "tooLarge": "O ficheiro tem mais de {mb} MB.",
+        "unreadable": "Não foi possível ler o ficheiro como tabela.",
+        "tooMany": "Demasiados ficheiros na última hora. Tente mais tarde.",
+        "other": "Não foi possível ler o ficheiro. Tente novamente."
+      },
+      "noData": "Este ficheiro não tem nenhuma coluna de números ou categorias para desenhar, por isso não foi feita nenhuma apresentação e nada foi cobrado.",
+      "gone": "Esse ficheiro já não existe. Adicione-o de novo com «+».",
+      "other": "Outros",
+      "fallbackTitle": "{y} por {x}",
+      "fallbackCount": "Quantas linhas para cada {x}",
+      "how": {
+        "sum": "a soma de {y} para cada {x}",
+        "mean": "a média de {y} para cada {x}",
+        "count": "o número de linhas para cada {x}",
+        "min": "o valor mais baixo de {y} para cada {x}",
+        "max": "o valor mais alto de {y} para cada {x}"
+      },
+      "source": "De {file} ({rows} linhas): {how}.",
+      "openFile": "Abrir o ficheiro em Analisar"
     }
   },
   "posts": {
@@ -4604,6 +4671,21 @@
       "failed": "falhou",
       "delete": "Eliminar",
       "deleteConfirm": "Eliminar estas publicações? Não é possível anular."
+    },
+    "picture": {
+      "option": "Imagem",
+      "none": "Sem imagem",
+      "own": "A minha fotografia",
+      "unsplash": "Uma fotografia do Unsplash",
+      "attach": "Adicione a sua fotografia (JPEG ou PNG)",
+      "uploading": "A carregar a fotografia…",
+      "ready": "Cada publicação recebe esta fotografia no tamanho da sua plataforma",
+      "failed": "Não foi possível carregar a fotografia. Tente novamente.",
+      "rejected": "Apenas um JPEG ou PNG com menos de 5 MB.",
+      "needPhoto": "Adicione primeiro a sua fotografia com «+», ou escolha outra imagem.",
+      "download": "Transferir a imagem para {platform}",
+      "credit": "Fotografia de <author>{name}</author> no <unsplash>Unsplash</unsplash>",
+      "noneFound": "Nenhuma fotografia correspondeu a estas publicações, por isso não têm imagem."
     }
   },
   "projects": {

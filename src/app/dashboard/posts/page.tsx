@@ -17,6 +17,7 @@ import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readRequestedId } from "@/lib/library/requested";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { PostsShell } from "@/components/posts/posts-shell";
+import { isUnsplashConfigured } from "@/lib/unsplash";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +97,13 @@ export default async function PostsPage(
   if (await isFeatureOn("tool-shell", user)) {
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <PostsShell history={history} initialDescription={readExampleParam(searchParams.brief)} initialOpenId={wanted} />
+        <PostsShell
+          history={history}
+          initialDescription={readExampleParam(searchParams.brief)}
+          initialOpenId={wanted}
+          pictures={await isFeatureOn("posts-images", user)}
+          unsplashConfigured={isUnsplashConfigured()}
+        />
       </div>
     );
   }

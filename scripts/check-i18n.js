@@ -615,6 +615,9 @@ const LOCALE_ALLOWED = new Set([
   "el:settings.notifications.channels.email",
   "it:settings.notifications.channels.email",
   "fr:settings.notifications.title",
+  // «Document» and «CV» are the French words (the Document writer, package 14).
+  "fr:dashboard.tools.names.document",
+  "fr:dashboard.documents.writer.kinds.cv",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

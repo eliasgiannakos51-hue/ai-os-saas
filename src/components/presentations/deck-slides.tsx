@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { UNSPLASH_HOME_URL, withUnsplashUtm } from "@/lib/website-image-placeholders";
 import type { Deck, Slide, SlideLayout } from "@/lib/presentations/deck";
+import { DeckChart } from "@/components/presentations/deck-chart";
 
 /**
  * A DECK'S SLIDES, AS CARDS: number and layout, title, the photograph with
@@ -13,6 +14,7 @@ import type { Deck, Slide, SlideLayout } from "@/lib/presentations/deck";
  *
  * With `onSelect`, each slide is a BOX (package 4): its number and title
  * are pressed to choose it, and the next change touches only that slide.
+ * A chart slide draws its chart from the file's numbers (package 13).
  */
 export function DeckSlides({
   deck,
@@ -36,6 +38,7 @@ export function DeckSlides({
     section: t("result.layout.section"),
     quote: t("result.layout.quote"),
     image: t("result.layout.image"),
+    chart: t("result.layout.chart"),
   };
   return (
     <ol className={`grid gap-3 sm:grid-cols-2 ${className}`}>
@@ -97,6 +100,7 @@ export function DeckSlides({
                 )}
               </figure>
             )}
+            {slide.chart && <DeckChart chart={slide.chart} />}
             {slide.bullets.length > 0 && (
               <ul className="mt-2 list-disc space-y-1 ps-4 text-xs text-foreground">
                 {slide.bullets.map((b, i) => (

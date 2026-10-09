@@ -110,7 +110,7 @@ for (const f of users) {
 
 console.log("\n== 4. Posts, in the shell ==");
 const posts = read("src/components/posts/posts-shell.tsx");
-check("it writes through the same route as the old page", /fetch\("\/api\/posts\/generate"/.test(posts) && /JSON\.stringify\(\{ description: text, platforms: chosen, locale \}\)/.test(posts));
+check("it writes through the same route as the old page", /fetch\("\/api\/posts\/generate"/.test(posts) && /JSON\.stringify\(\{\s*description: text,\s*platforms: chosen,\s*locale,/.test(posts));
 check("the price shows before sending, from the length typed", /onLengthChange=\{setLength\}/.test(posts) && /<CostEstimateHint credits=\{estimate\.credits\} \/>/.test(posts) && /postsEstimateInputChars\(length, platforms\)/.test(posts));
 check("Stop aborts the request", /onStop=\{\(\) => abortRef\.current\?\.abort\(\)\}/.test(posts) && /signal: controller\.signal/.test(posts));
 check("the posts open beside the conversation, one per platform with its copy", /data-testid="posts-result"/.test(posts) && /<CopyButton text=\{clipboard\}/.test(posts) && /setOpen\("posts"\)/.test(posts));
@@ -120,7 +120,7 @@ check("what it does not do is one line, not a box", /<p className="mt-1\.5 text-
 console.log("\n== 5. Slides, in the shell ==");
 const slides = read("src/components/presentations/presentations-shell.tsx");
 check("the first thing said writes the deck, through the same route as the old page",
-  /fetch\("\/api\/presentations\/generate"/.test(slides) && /slideCount, imageSource, ownImagePaths, locale \}\)/.test(slides));
+  /fetch\("\/api\/presentations\/generate"/.test(slides) && /slideCount,\s*imageSource,\s*ownImagePaths,\s*locale,?\s*(\.\.\.\(chartsFromFile[^\n]*\n\s*)?\}\)/.test(slides));
 check("...and while a saved deck is open, what is said next changes it",
   /const editing = Boolean\(open\?\.id\);/.test(slides) && /onSend=\{\(text\) => void \(editing \? change\(text\) : write\(text\)\)\}/.test(slides) &&
     /fetch\(`\/api\/presentations\/\$\{open\.id\}\/edit`/.test(slides));

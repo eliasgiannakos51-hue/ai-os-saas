@@ -74,6 +74,10 @@ export const WRITE_POSTS_TOOL: ToolDefinition = {
           required: ["platform", "text", "hashtags"],
         },
       },
+      imageQuery: {
+        type: ["string", "null"],
+        description: "Only when asked for: two to five concrete English words for ONE photograph that suits every post. Otherwise null.",
+      },
     },
     required: ["posts"],
   },
@@ -96,14 +100,20 @@ export function buildPostsUserMessage(
   description: string,
   platforms: PostPlatform[],
   locale: string,
-  businessContext = ""
+  businessContext = "",
+  wantsPhoto = false
 ): string {
   const scrub = (text: string) =>
     text.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)");
   const context = businessContext.trim()
     ? `\n${scrub(businessContext.trim())}\n\n---\n`
     : "";
-  return `Write posts for: ${platforms.join(", ")}. Write them in ${languageNameFor(locale)}.
+  // A PHOTO FROM UNSPLASH (package 15): the posts say what one picture
+  // should show; the route searches for it and credits its photographer.
+  const photo = wantsPhoto
+    ? `\nAlso set imageQuery: two to five concrete English words for ONE photograph that suits every post — a place, an object, a scene, never an abstraction ("success", "growth").`
+    : "";
+  return `Write posts for: ${platforms.join(", ")}. Write them in ${languageNameFor(locale)}.${photo}
 ${context ? "\nThe block below has two parts: this account's own records first, then the brief. Use the records for names, prices and facts so the posts are about THIS business; write the post the brief asks for." : ""}
 ${UNTRUSTED_OPEN}${context}
 ${scrub(description)}

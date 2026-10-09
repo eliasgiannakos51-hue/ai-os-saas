@@ -2,7 +2,7 @@ import "server-only";
 import PptxGenJS from "pptxgenjs";
 import { isRtlLocale } from "@/lib/pdf/rtl";
 import { UNSPLASH_HOME_URL, withUnsplashUtm } from "@/lib/website-image-placeholders";
-import type { Deck, Slide } from "@/lib/presentations/deck";
+import type { Deck, Slide, SlideChart } from "@/lib/presentations/deck";
 import type { LoadedImage } from "@/lib/presentations/images";
 
 /**
@@ -216,7 +216,93 @@ function addImageSlide(target: PptxGenJS.Slide, slide: Slide, rtl: boolean, imag
   });
 }
 
-export async function renderDeckPptx(deck: Deck, images: Map<number, LoadedImage>): Promise<Buffer> {
+/**
+ * A CHART SLIDE: the title, a NATIVE chart — PowerPoint opens it as a
+ * chart it can edit, with the file's numbers in its own data sheet — the
+ * slide's few points beside it, and under it where the numbers came from.
+ * The values are the stored ones, never re-derived here.
+ */
+function addChartSlide(pres: PptxGenJS, target: PptxGenJS.Slide, slide: Slide, chart: SlideChart, rtl: boolean, source: string) {
+  target.addText(slide.title, {
+    x: MARGIN,
+    y: MARGIN * 0.6,
+    w: W - MARGIN * 2,
+    h: 0.75,
+    fontSize: 22,
+    bold: true,
+    color: INK,
+    align: align(rtl),
+    valign: "middle",
+    fit: "shrink",
+  });
+  const top = MARGIN * 0.6 + 0.85;
+  const chartH = H - top - 0.55;
+  const chartW = slide.bullets.length > 0 ? (W - MARGIN * 2) * 0.64 : W - MARGIN * 2;
+  const chartX = slide.bullets.length > 0 && rtl ? W - MARGIN - chartW : MARGIN;
+  const type = chart.kind === "line" ? pres.ChartType.line : chart.kind === "pie" ? pres.ChartType.pie : pres.ChartType.bar;
+  const series = chart.source.y ?? chart.source.x;
+  target.addChart(type, [{ name: series, labels: chart.points.map((p) => p.label), values: chart.points.map((p) => p.value) }], {
+    x: chartX,
+    y: top,
+    w: chartW,
+    h: chartH,
+    barDir: "col",
+    chartColors: chart.kind === "pie" ? ["F97316", "1A1A1A", "6B7280", "FDBA74", "9CA3AF", "C2410C", "D1D5DB", "FED7AA"] : [ACCENT],
+    showValue: true,
+    dataLabelFontSize: 9,
+    dataLabelColor: chart.kind === "pie" ? "FFFFFF" : INK,
+    showLegend: chart.kind === "pie",
+    legendPos: "r",
+    legendFontSize: 9,
+    catAxisLabelFontSize: 9,
+    valAxisLabelFontSize: 9,
+    catAxisLabelColor: MUTED,
+    valAxisLabelColor: MUTED,
+    lineDataSymbol: "circle",
+    showTitle: false,
+  });
+  if (slide.bullets.length > 0) {
+    const textW = W - MARGIN * 2 - chartW - 0.25;
+    target.addText(
+      slide.bullets.map((b) => ({ text: b, options: { bullet: true, breakLine: true, paraSpaceAfter: 6 } })),
+      {
+        x: rtl ? MARGIN : W - MARGIN - textW,
+        y: top,
+        w: textW,
+        h: chartH,
+        fontSize: 13,
+        color: INK,
+        align: align(rtl),
+        valign: "top",
+        fit: "shrink",
+      }
+    );
+  }
+  target.addText(source, {
+    x: MARGIN,
+    y: H - 0.45,
+    w: W - MARGIN * 2,
+    h: 0.3,
+    fontSize: 8,
+    color: CREDIT,
+    align: align(rtl),
+    fit: "shrink",
+  });
+}
+
+/** Where a chart's numbers came from, in English when the caller has no
+ *  translator for the deck's language. The routes pass one. */
+function englishSource(chart: SlideChart): string {
+  const { file, rows, aggregation, x, y } = chart.source;
+  const how = aggregation === "count" ? `rows counted for each ${x}` : `the ${aggregation} of ${y} for each ${x}`;
+  return `From ${file} (${rows} rows): ${how}`;
+}
+
+export async function renderDeckPptx(
+  deck: Deck,
+  images: Map<number, LoadedImage>,
+  sourceText: (chart: SlideChart) => string = englishSource
+): Promise<Buffer> {
   const pres = new PptxGenJS();
   pres.layout = "LAYOUT_16x9";
   pres.title = deck.title;
@@ -238,6 +324,10 @@ export async function renderDeckPptx(deck: Deck, images: Map<number, LoadedImage
         break;
       case "image":
         addImageSlide(target, slide, rtl, image);
+        break;
+      case "chart":
+        if (slide.chart) addChartSlide(pres, target, slide, slide.chart, rtl, sourceText(slide.chart));
+        else addBulletsSlide(target, slide, rtl, undefined);
         break;
       default:
         addBulletsSlide(target, slide, rtl, image);

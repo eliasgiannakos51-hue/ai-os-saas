@@ -8,6 +8,8 @@ import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ToolsGrid } from "@/components/tools/tools-grid";
 import { readRecentPrefs } from "@/lib/nav/recent-tools";
+import { SHOWN_BY_SWITCH } from "@/lib/nav/all-tools";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +33,18 @@ export default async function ToolsPage() {
 
   const t = await getTranslations("dashboard.tools");
   const isOwner = isAdminEmail(user.email);
+  // A hidden tool whose switch admits this person comes back to its group.
+  const switchedOn: string[] = [];
+  for (const [href, { flag }] of Object.entries(SHOWN_BY_SWITCH)) {
+    if (await isFeatureOn(flag, user)) switchedOn.push(href);
+  }
 
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <PageHeader helpKey="help.tools" icon={LayoutGrid} title={t("title")} description={t("description")} />
         <div className="mt-4">
-          <ToolsGrid isOwner={isOwner} pinned={readRecentPrefs(user.user_metadata).pinned} />
+          <ToolsGrid isOwner={isOwner} pinned={readRecentPrefs(user.user_metadata).pinned} switchedOn={switchedOn} />
         </div>
         <p className="mt-6 text-xs text-muted">{t("orPress")}</p>
       </div>

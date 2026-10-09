@@ -154,6 +154,7 @@ export default async function PresentationsPage(
           notes={notes}
           ownImageUrls={ownImageUrls}
           unsplashConfigured={isUnsplashConfigured()}
+          chartsFromFile={await isFeatureOn("slides-charts", user)}
         />
       </div>
     );

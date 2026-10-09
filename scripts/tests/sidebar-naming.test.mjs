@@ -536,6 +536,17 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
     return matched;
   };
 
+  // THE READER ITSELF, HELD ON ITS OWN CASE. "/dashboard/documents
+  // produces something" stopped proving the reader on 2026-10-08: the
+  // writer (package 14) made the page call api/documents/generate too, so
+  // a reader that lost the PDF route still found a producer. The PDF route
+  // is the URL with the trailing unclosed interpolation, so it is named.
+  check(
+    "the URL reader finds the PDF route behind its trailing `${lang` (api/documents/[id]/pdf)",
+    routesFetchedBy("documents").includes("src/app/api/documents/[id]/pdf/route.ts"),
+    routesFetchedBy("documents").join(", ")
+  );
+
   const producesFor = (slug) => {
     const sources = [
       ...routesFetchedBy(slug),

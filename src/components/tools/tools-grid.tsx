@@ -9,7 +9,7 @@ import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/side
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
+import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, groupHrefs, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -37,7 +37,7 @@ import { useToast } from "@/components/toast/toast-context";
  * /api/nav/recent-tools the sidebar uses. Chat and Coding have rows of
  * their own and are never in Recent tools, so their squares have no pin.
  */
-export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?: string[] }) {
+export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: boolean; pinned?: string[]; switchedOn?: string[] }) {
   const t = useTranslations("dashboard.tools");
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
@@ -64,9 +64,9 @@ export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?:
     return ALL_TOOLS_GROUPS.map((g) => ({
       key: g.key,
       heading: headings[g.key],
-      items: g.hrefs.map((h) => byHref.get(h)).filter((i): i is SidebarItem => Boolean(i)),
+      items: groupHrefs(g, switchedOn).map((h) => byHref.get(h)).filter((i): i is SidebarItem => Boolean(i)),
     })).filter((g) => g.items.length > 0);
-  }, [isOwner, t]);
+  }, [isOwner, t, switchedOn]);
 
   // THE ONE-WORD NAMES (MASTER 14.1), through literal keys for the same
   // reason as the headings above.
@@ -86,6 +86,7 @@ export function ToolsGrid({ isOwner, pinned = [] }: { isOwner: boolean; pinned?:
     finances: t("names.finances"),
     sales: t("names.sales"),
     trading: t("names.trading"),
+    document: t("names.document"),
   };
 
   const label = (item: SidebarItem) => (ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : longLabel(item));

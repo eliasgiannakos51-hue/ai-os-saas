@@ -1288,6 +1288,44 @@
         "insufficient": "Crediti insufficienti per questa traduzione. Nulla è stato addebitato.",
         "charged": "Tradotto e scaricato — {count, plural, one {# credito addebitato} other {# crediti addebitati}}.",
         "chargedNothing": "Tradotto e scaricato — nessun addebito."
+      },
+      "writer": {
+        "kind": "Tipo di documento",
+        "placeholder": "Descrivi il documento che ti serve: cos’è, per chi, cosa deve dire",
+        "changePlaceholder": "Di’ cosa cambiare nel documento",
+        "block": "blocco {n}",
+        "boxHint": "Tocca un blocco per cambiare solo quello.",
+        "writing": "Sto scrivendo il documento…",
+        "changing": "Sto modificando…",
+        "done": "Ho scritto «{title}». È aperto accanto alla conversazione; ciò che scrivi ora lo modifica.",
+        "changed": "Modificato. La nuova versione è aperta accanto alla conversazione.",
+        "blockChanged": "Il blocco {n} è cambiato; tutto il resto è rimasto com’era.",
+        "recent": "Scritti prima",
+        "noneYet": "Non è ancora stato scritto nulla.",
+        "new": "Nuovo documento",
+        "word": "Scarica Word (.docx)",
+        "openEditor": "Apri nell’editor",
+        "kinds": {
+          "free": "Qualsiasi documento",
+          "offer": "Offerta",
+          "letter": "Lettera",
+          "cv": "Curriculum",
+          "report": "Relazione",
+          "invoice": "Fattura",
+          "script": "Sceneggiatura"
+        },
+        "errors": {
+          "tooShort": "Di’ qualcosa in più sul documento prima.",
+          "tooLong": "È più lungo di una descrizione. Descrivi il documento, non incollarlo.",
+          "insufficient": "Crediti insufficienti per questo documento.",
+          "rateLimited": "Troppe richieste. Aspetta un minuto e riprova.",
+          "unavailable": "Il servizio di IA non era disponibile. Non è stato addebitato nulla.",
+          "unusable": "Il modello ha restituito qualcosa che non era un documento. Prova a descriverlo diversamente.",
+          "notIncluded": "La scrittura di documenti non è inclusa nel tuo piano.",
+          "notSaved": "La modifica è stata fatta ma non è stato possibile salvarla. Non si è perso nulla; riprova.",
+          "failed": "Non ha funzionato. Riprova.",
+          "exportFailed": "Non è stato possibile creare il file."
+        }
       }
     },
     "chat": {
@@ -2919,7 +2957,8 @@
         "memory": "Memoria",
         "finances": "Finanze",
         "sales": "Vendite",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Documento"
       }
     },
     "home": {
@@ -4529,7 +4568,8 @@
         "bullets": "Punti",
         "section": "Sezione",
         "quote": "Citazione",
-        "image": "Foto"
+        "image": "Foto",
+        "chart": "Grafico"
       }
     },
     "errors": {
@@ -4563,6 +4603,33 @@
       "notSaved": "La modifica è stata fatta ma non è stata salvata. Non è andato perso nulla: riprova.",
       "noDeck": "Questa riga non ha una presentazione da modificare.",
       "notIncluded": "Le presentazioni non sono incluse nel tuo piano."
+    },
+    "chart": {
+      "attach": "Aggiungi un foglio di calcolo (CSV o Excel) per farne un grafico",
+      "reading": "Lettura del file…",
+      "ready": "{rows, plural, one {# riga} other {# righe}}: la presentazione avrà un grafico da questo file",
+      "remove": "Rimuovi {name}",
+      "failed": {
+        "type": "Solo un file CSV o Excel (.xlsx) può diventare un grafico.",
+        "tooLarge": "Il file supera i {mb} MB.",
+        "unreadable": "Non è stato possibile leggere il file come tabella.",
+        "tooMany": "Troppi file nell’ultima ora. Riprova più tardi.",
+        "other": "Non è stato possibile leggere il file. Riprova."
+      },
+      "noData": "Questo file non ha colonne di numeri o categorie da rappresentare, quindi non è stata creata nessuna presentazione e non è stato addebitato nulla.",
+      "gone": "Quel file non c’è più. Aggiungilo di nuovo con «+».",
+      "other": "Altri",
+      "fallbackTitle": "{y} per {x}",
+      "fallbackCount": "Quante righe per ogni {x}",
+      "how": {
+        "sum": "la somma di {y} per ogni {x}",
+        "mean": "la media di {y} per ogni {x}",
+        "count": "il numero di righe per ogni {x}",
+        "min": "il valore più basso di {y} per ogni {x}",
+        "max": "il valore più alto di {y} per ogni {x}"
+      },
+      "source": "Da {file} ({rows} righe): {how}.",
+      "openFile": "Apri il file in Analizza"
     }
   },
   "posts": {
@@ -4604,6 +4671,21 @@
       "failed": "non riuscita",
       "delete": "Elimina",
       "deleteConfirm": "Eliminare questi post? Non si può annullare."
+    },
+    "picture": {
+      "option": "Immagine",
+      "none": "Nessuna immagine",
+      "own": "La mia foto",
+      "unsplash": "Una foto da Unsplash",
+      "attach": "Aggiungi la tua foto (JPEG o PNG)",
+      "uploading": "Caricamento della foto…",
+      "ready": "Ogni post riceve questa foto nel formato della sua piattaforma",
+      "failed": "Non è stato possibile caricare la foto. Riprova.",
+      "rejected": "Solo un JPEG o PNG sotto i 5 MB.",
+      "needPhoto": "Aggiungi prima la tua foto con «+», oppure scegli un’altra immagine.",
+      "download": "Scarica l’immagine per {platform}",
+      "credit": "Foto di <author>{name}</author> su <unsplash>Unsplash</unsplash>",
+      "noneFound": "Nessuna foto corrispondeva a questi post, quindi non hanno un’immagine."
     }
   },
   "projects": {

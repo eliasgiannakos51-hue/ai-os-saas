@@ -1288,6 +1288,44 @@
         "insufficient": "Not enough credits for this translation. Nothing was charged.",
         "charged": "Translated and downloaded — {count, plural, one {# credit} other {# credits}} charged.",
         "chargedNothing": "Translated and downloaded — nothing charged."
+      },
+      "writer": {
+        "kind": "Kind of document",
+        "placeholder": "Describe the document you need: what it is, for whom, what it must say",
+        "changePlaceholder": "Say what to change in the document",
+        "block": "block {n}",
+        "boxHint": "Press a block to change only that one.",
+        "writing": "Writing the document…",
+        "changing": "Changing…",
+        "done": "I wrote «{title}». It is open beside the conversation; what you write now changes it.",
+        "changed": "Changed. The new version is open beside the conversation.",
+        "blockChanged": "Block {n} changed; everything else is as it was.",
+        "recent": "Written before",
+        "noneYet": "Nothing written yet.",
+        "new": "New document",
+        "word": "Download Word (.docx)",
+        "openEditor": "Open in the editor",
+        "kinds": {
+          "free": "Any document",
+          "offer": "Offer",
+          "letter": "Letter",
+          "cv": "CV",
+          "report": "Report",
+          "invoice": "Invoice",
+          "script": "Script"
+        },
+        "errors": {
+          "tooShort": "Say a little more about the document first.",
+          "tooLong": "That is longer than a description. Describe the document; do not paste it.",
+          "insufficient": "Not enough credits for this document.",
+          "rateLimited": "Too many requests. Wait a minute and try again.",
+          "unavailable": "The AI service was not available. Nothing was charged.",
+          "unusable": "The model returned something that was not a document. Try describing it differently.",
+          "notIncluded": "Writing documents is not included on your plan.",
+          "notSaved": "The change was made but could not be saved. Nothing was lost; try again.",
+          "failed": "It did not work. Try again.",
+          "exportFailed": "The file could not be made."
+        }
       }
     },
     "chat": {
@@ -2919,7 +2957,8 @@
         "memory": "Memory",
         "finances": "Finances",
         "sales": "Sales",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Document"
       }
     },
     "home": {
@@ -4529,7 +4568,8 @@
         "bullets": "Points",
         "section": "Section",
         "quote": "Quote",
-        "image": "Photo"
+        "image": "Photo",
+        "chart": "Chart"
       }
     },
     "errors": {
@@ -4563,6 +4603,33 @@
       "notSaved": "The change was made but could not be saved. Nothing was lost — try again.",
       "noDeck": "This row has no deck to change.",
       "notIncluded": "Presentations are not included on your plan."
+    },
+    "chart": {
+      "attach": "Add a spreadsheet (CSV or Excel) to make a chart from",
+      "reading": "Reading the file…",
+      "ready": "{rows, plural, one {# row} other {# rows}} — the deck will have a chart from it",
+      "remove": "Remove {name}",
+      "failed": {
+        "type": "Only a CSV or Excel (.xlsx) file can be made into a chart.",
+        "tooLarge": "The file is larger than {mb} MB.",
+        "unreadable": "This file could not be read as a table.",
+        "tooMany": "Too many files in the last hour. Try again later.",
+        "other": "The file could not be read. Try again."
+      },
+      "noData": "This file has no column of numbers or categories to draw, so no deck was made and nothing was charged.",
+      "gone": "That file is no longer there. Add it again with «+».",
+      "other": "Other",
+      "fallbackTitle": "{y} by {x}",
+      "fallbackCount": "How many rows for each {x}",
+      "how": {
+        "sum": "the sum of {y} for each {x}",
+        "mean": "the average of {y} for each {x}",
+        "count": "the number of rows for each {x}",
+        "min": "the lowest {y} for each {x}",
+        "max": "the highest {y} for each {x}"
+      },
+      "source": "From {file} ({rows} rows): {how}.",
+      "openFile": "Open the file in Analyze"
     }
   },
   "posts": {
@@ -4604,6 +4671,21 @@
       "failed": "failed",
       "delete": "Delete",
       "deleteConfirm": "Delete these posts? This can't be undone."
+    },
+    "picture": {
+      "option": "Picture",
+      "none": "No picture",
+      "own": "My photo",
+      "unsplash": "A photo from Unsplash",
+      "attach": "Add your photo (JPEG or PNG)",
+      "uploading": "Uploading the photo…",
+      "ready": "Each post gets this photo at its platform's size",
+      "failed": "The photo could not be uploaded. Try again.",
+      "rejected": "Only a JPEG or PNG under 5 MB.",
+      "needPhoto": "Add your photo with «+» first, or choose another picture.",
+      "download": "Download the picture for {platform}",
+      "credit": "Photo by <author>{name}</author> on <unsplash>Unsplash</unsplash>",
+      "noneFound": "No photo matched these posts, so they have no picture."
     }
   },
   "projects": {

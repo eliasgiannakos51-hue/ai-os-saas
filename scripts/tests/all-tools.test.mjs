@@ -87,8 +87,25 @@ const bare = hidden.filter((h) => String(HIDDEN_FROM_ALL_TOOLS[h] ?? "").trim().
 check("...and every hidden tool says why, in a sentence", bare.length === 0, bare.join(", "));
 check(
   "the grid draws the tools through those groups, and nothing else",
-  /return ALL_TOOLS_GROUPS\.map\(/.test(grid) && /g\.hrefs\.map\(\(h\) => byHref\.get\(h\)\)/.test(grid)
+  /return ALL_TOOLS_GROUPS\.map\(/.test(grid) && /groupHrefs\(g, switchedOn\)\.map\(\(h\) => byHref\.get\(h\)\)/.test(grid)
 );
+
+// A HIDDEN TOOL THAT COMES BACK WITH ITS SWITCH (package 14: Document).
+{
+  const { SHOWN_BY_SWITCH, groupHrefs } = await loadTs("src/lib/nav/all-tools.ts");
+  const { FLAGS } = await loadTs("src/lib/flags/flags.ts").catch(() => ({ FLAGS: null }));
+  const flagsSrc = readFileSync("src/lib/flags/flags.ts", "utf8");
+  const switched = Object.entries(SHOWN_BY_SWITCH);
+  check(`a tool shown by its switch is hidden without it, with its reason (${switched.length})`, switched.length >= 1 && switched.every(([h]) => hidden.includes(h)));
+  check("...its switch is a declared one", switched.every(([, s]) => new RegExp(`"${s.flag}":`).test(flagsSrc)) && (FLAGS === null || switched.every(([, s]) => s.flag in FLAGS)));
+  const make = ALL_TOOLS_GROUPS.find((g) => g.key === "make");
+  const ask = ALL_TOOLS_GROUPS.find((g) => g.key === "ask");
+  check("...with the switch on, it is drawn in its own group, after the group's tools", JSON.stringify(groupHrefs(make, ["/dashboard/documents"])) === JSON.stringify([...make.hrefs, "/dashboard/documents"]));
+  check("...and in no other group", !groupHrefs(ask, ["/dashboard/documents"]).includes("/dashboard/documents"));
+  check("...and an href that is not switched cannot ride in on the list", JSON.stringify(groupHrefs(make, ["/dashboard/predictions"])) === JSON.stringify([...make.hrefs]));
+  const toolsPage = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
+  check("the page asks each switch for this person, and hands the grid what is on", /for \(const \[href, \{ flag \}\] of Object\.entries\(SHOWN_BY_SWITCH\)\)/.test(toolsPage) && /await isFeatureOn\(flag, user\)/.test(toolsPage) && /switchedOn=\{switchedOn\}/.test(toolsPage));
+}
 check("...and no Settings block: Settings, Integrations and Help are reached from Settings (MASTER 14.1)",
   !/SETTINGS_GROUP|\.\.\.settings\b/.test(grid));
 
@@ -109,7 +126,10 @@ const expected = MASTER_14_1.filter((n) => n !== "Document");
 check(`every grouped tool has a one-word name (${grouped.length} squares)`, grouped.every((h) => ALL_TOOLS_NAMES[h]), grouped.filter((h) => !ALL_TOOLS_NAMES[h]).join(", "));
 check("...and the English names are exactly 14.1's list, Document aside",
   [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
-check("...and no name is given to a tool that is not shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h)));
+{
+  const { SHOWN_BY_SWITCH } = await loadTs("src/lib/nav/all-tools.ts");
+  check("...and no name is given to a tool that is never shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h) || h in SHOWN_BY_SWITCH));
+}
 check("Document is hidden, with the reason 14.1 gives (notes only)", /notes/.test(HIDDEN_FROM_ALL_TOOLS["/dashboard/documents"] ?? ""));
 for (const l of LOCALES) {
   const n = messages[l].dashboard?.tools?.names ?? {};

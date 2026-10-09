@@ -27,6 +27,9 @@ import { POSTS_MODEL } from "@/lib/posts/prompt";
 import { generatePosts } from "@/lib/posts/generate";
 import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { isUnsplashConfigured, searchUnsplashPhoto, triggerUnsplashDownload } from "@/lib/unsplash";
+import { isPostImageSource, type PostImage, type PostImageSource } from "@/lib/posts/post-images";
 
 export const dynamic = "force-dynamic";
 // One forced-tool call returning at most five short posts; measured well
@@ -61,6 +64,12 @@ export async function POST(request: Request) {
   const verdict = checkDescription(description);
   if (!verdict.ok) return NextResponse.json({ error: verdict.reason, limit: verdict.limit }, { status: 400 });
   const platforms: PostPlatform[] = normalisePlatforms(body.platforms);
+  // THE PICTURE (package 15): none, the person's own photo by its path, or
+  // one Unsplash finds for the posts.
+  const picture = (body.image ?? null) as { source?: unknown; path?: unknown } | null;
+  const pictureSource: PostImageSource = picture && isPostImageSource(picture.source) ? picture.source : "none";
+  const ownPath = pictureSource === "own" && typeof picture?.path === "string" ? picture.path : null;
+  if (pictureSource === "own" && (!ownPath || ownPath.includes(".."))) return NextResponse.json({ error: "bad_image_path" }, { status: 400 });
   const uiLocale =
     typeof body.locale === "string" && (SUPPORTED_LOCALES as readonly string[]).includes(body.locale)
       ? body.locale
@@ -84,6 +93,13 @@ export async function POST(request: Request) {
       { status: 403 }
     );
   }
+
+  // The switch, and a photo only from the person's own folder — both
+  // before anything is spent.
+  if (pictureSource !== "none" && !(await isFeatureOn("posts-images", user))) {
+    return NextResponse.json({ error: "not_enabled" }, { status: 403 });
+  }
+  if (ownPath && !ownPath.startsWith(`${user.id}/`)) return NextResponse.json({ error: "bad_image_path" }, { status: 400 });
 
   try {
     const breaker = await checkAiCallAllowed(
@@ -184,6 +200,7 @@ export async function POST(request: Request) {
       costs,
       memoryBlock,
       businessContext,
+      wantsPhoto: pictureSource === "unsplash" && isUnsplashConfigured(),
       // THE STOP BUTTON: the request's own abort signal.
       signal: request.signal,
     });
@@ -249,13 +266,25 @@ export async function POST(request: Request) {
       metadata: { platforms, returned: outcome.set.posts.length, locale },
     });
 
+    // THE ONE PICTURE: the person's photo as given, or the Unsplash photo
+    // the posts' own words found, its use registered as Unsplash asks.
+    let image: PostImage | null = ownPath ? { kind: "own", path: ownPath } : null;
+    if (pictureSource === "unsplash" && outcome.imageQuery) {
+      const photo = await searchUnsplashPhoto(outcome.imageQuery);
+      if (photo) {
+        image = { kind: "unsplash", ...photo };
+        void triggerUnsplashDownload(photo);
+      }
+    }
+    const set = image ? { ...outcome.set, image } : outcome.set;
+
     const { data: row, error: saveError } = await admin
       .from("generated_posts")
       .insert({
         user_id: user.id,
         description,
         platforms,
-        posts: outcome.set,
+        posts: set,
         locale,
         status: "done",
         credits_charged: settlement.creditsCharged,
@@ -267,7 +296,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       id: row?.id ?? null,
-      set: outcome.set,
+      set,
       creditsCharged: settlement.creditsCharged,
     });
   } catch (err) {

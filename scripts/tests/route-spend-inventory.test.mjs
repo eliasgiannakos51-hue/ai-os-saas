@@ -226,6 +226,7 @@ const DECLARED = {
   "research/[id]/pdf": { bound: "limited", scope: "document_export", why: "a report already paid for, re-rendered; lib/export-guard.ts" },
   "presentations/[id]/pdf": { bound: "limited", scope: "document_export", why: "a deck already paid for; downloads its own slide photos first" },
   "presentations/[id]/pptx": { bound: "limited", scope: "document_export", why: "same deck, other format; pptxgenjs builds it in this process" },
+  "posts/[id]/image": { bound: "limited", scope: "post_image", why: "cuts the set's one picture to a platform's size with sharp, in this process; every view counts against post_image (240 an hour, a set shows up to five), and a download also against document_export" },
 
   // --- free because the user is spending their own quota, not ours ---
   "files/upload": { bound: "limited", scope: "file_upload", why: "storage counts against the plan's own quota (lib/files), not against credits" },

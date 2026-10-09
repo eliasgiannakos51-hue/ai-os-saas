@@ -345,7 +345,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "free",
     sidebar: ["/dashboard/documents"],
     pages: ["documents", "documents/[id]"],
-    routes: ["documents", "documents/[id]", "documents/[id]/pdf", "documents/[id]/pdf-estimate"],
+    // The Word download (package 14) is a file of what is already the
+    // person's, as the PDF is: free, bounded by lib/export-guard.ts.
+    routes: ["documents", "documents/[id]", "documents/[id]/pdf", "documents/[id]/pdf-estimate", "documents/[id]/docx"],
     charges: true,
     enforcedIn: "src/app/api/documents/[id]/pdf/route.ts",
     enforcedSymbol: "reserveCredits",
@@ -397,7 +399,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     capability: "posts",
     sidebar: ["/dashboard/posts"],
     pages: ["posts"],
-    routes: ["posts/generate"],
+    routes: ["posts/generate", "posts/[id]/image"],
     charges: true,
     enforcedIn: "src/app/api/posts/generate/route.ts",
     enforcedSymbol: 'accountHasCapability(await resolveEffectivePlanSlug(user), "posts"',
@@ -1161,6 +1163,28 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "provider's key is set (NEEDS 5)",
     enforcedIn: "src/lib/images/image-access.ts",
     enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", IMAGE_MIN_PLAN)",
+    cell: (p) => boolCell(p.slug !== "free"),
+  },
+  // THE DOCUMENT WRITER (MASTER 16, package 14): a document from a
+  // description, and one paragraph of it changed with words. Starter and
+  // up — the tier of Slides and Posts, the other tools that write from a
+  // description — enforced in both routes before anything is spent
+  // (lib/documents/writer-access.ts). NOT A ROW YET, for imageStudio's
+  // reason: it is behind the switch "document-writer", which admits the
+  // owner and the test account only, and a row a buyer cannot have is
+  // the lie this file exists to stop. It is published, and the tier
+  // confirmed by the owner, when the switch is opened to everyone.
+  {
+    id: "documentWriter",
+    group: "make",
+    minPlan: "starter",
+    routes: ["documents/generate", "documents/[id]/edit"],
+    charges: true,
+    notSold:
+      "owner-only for now: the switch document-writer admits the owner and the test account " +
+      "(isFeatureOn in src/lib/documents/writer-access.ts); the tier is confirmed when it opens to everyone",
+    enforcedIn: "src/lib/documents/writer-access.ts",
+    enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", DOCUMENT_WRITER_MIN_PLAN)",
     cell: (p) => boolCell(p.slug !== "free"),
   },
   {

@@ -1288,6 +1288,44 @@
         "insufficient": "Nicht genug Credits für diese Übersetzung. Nichts wurde berechnet.",
         "charged": "Übersetzt und heruntergeladen — {count, plural, one {# Credit} other {# Credits}} berechnet.",
         "chargedNothing": "Übersetzt und heruntergeladen — nichts berechnet."
+      },
+      "writer": {
+        "kind": "Art des Dokuments",
+        "placeholder": "Beschreibe das Dokument, das du brauchst: was es ist, für wen, was darin stehen muss",
+        "changePlaceholder": "Sag, was im Dokument geändert werden soll",
+        "block": "Abschnitt {n}",
+        "boxHint": "Tippe auf einen Abschnitt, um nur diesen zu ändern.",
+        "writing": "Das Dokument wird geschrieben…",
+        "changing": "Wird geändert…",
+        "done": "Ich habe „{title}“ geschrieben. Es ist neben dem Gespräch geöffnet; was du jetzt schreibst, ändert es.",
+        "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
+        "blockChanged": "Abschnitt {n} wurde geändert; alles andere ist geblieben.",
+        "recent": "Früher geschrieben",
+        "noneYet": "Noch nichts geschrieben.",
+        "new": "Neues Dokument",
+        "word": "Word herunterladen (.docx)",
+        "openEditor": "Im Editor öffnen",
+        "kinds": {
+          "free": "Beliebiges Dokument",
+          "offer": "Angebot",
+          "letter": "Brief",
+          "cv": "Lebenslauf",
+          "report": "Bericht",
+          "invoice": "Rechnung",
+          "script": "Drehbuch"
+        },
+        "errors": {
+          "tooShort": "Erzähl zuerst etwas mehr über das Dokument.",
+          "tooLong": "Das ist länger als eine Beschreibung. Beschreibe das Dokument, statt es einzufügen.",
+          "insufficient": "Nicht genug Credits für dieses Dokument.",
+          "rateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
+          "unavailable": "Der KI-Dienst war nicht verfügbar. Es wurde nichts berechnet.",
+          "unusable": "Das Modell hat etwas zurückgegeben, das kein Dokument war. Beschreibe es anders.",
+          "notIncluded": "Das Schreiben von Dokumenten ist in deinem Tarif nicht enthalten.",
+          "notSaved": "Die Änderung wurde gemacht, konnte aber nicht gespeichert werden. Nichts ging verloren; versuche es erneut.",
+          "failed": "Das hat nicht geklappt. Versuche es erneut.",
+          "exportFailed": "Die Datei konnte nicht erstellt werden."
+        }
       }
     },
     "chat": {
@@ -2919,7 +2957,8 @@
         "memory": "Gedächtnis",
         "finances": "Finanzen",
         "sales": "Vertrieb",
-        "trading": "Trading"
+        "trading": "Trading",
+        "document": "Dokument"
       }
     },
     "home": {
@@ -4529,7 +4568,8 @@
         "bullets": "Stichpunkte",
         "section": "Abschnitt",
         "quote": "Zitat",
-        "image": "Foto"
+        "image": "Foto",
+        "chart": "Diagramm"
       }
     },
     "errors": {
@@ -4563,6 +4603,33 @@
       "notSaved": "Die Änderung wurde vorgenommen, konnte aber nicht gespeichert werden. Nichts ging verloren — bitte erneut versuchen.",
       "noDeck": "Dieser Eintrag hat keine Präsentation zum Ändern.",
       "notIncluded": "Präsentationen sind in Ihrem Tarif nicht enthalten."
+    },
+    "chart": {
+      "attach": "Tabelle (CSV oder Excel) für ein Diagramm hinzufügen",
+      "reading": "Datei wird gelesen…",
+      "ready": "{rows, plural, one {# Zeile} other {# Zeilen}} – die Präsentation bekommt ein Diagramm daraus",
+      "remove": "{name} entfernen",
+      "failed": {
+        "type": "Nur eine CSV- oder Excel-Datei (.xlsx) kann zum Diagramm werden.",
+        "tooLarge": "Die Datei ist größer als {mb} MB.",
+        "unreadable": "Diese Datei konnte nicht als Tabelle gelesen werden.",
+        "tooMany": "Zu viele Dateien in der letzten Stunde. Versuche es später erneut.",
+        "other": "Die Datei konnte nicht gelesen werden. Versuche es erneut."
+      },
+      "noData": "Diese Datei hat keine Spalte mit Zahlen oder Kategorien zum Darstellen, daher wurde keine Präsentation erstellt und nichts berechnet.",
+      "gone": "Diese Datei ist nicht mehr da. Füge sie mit „+“ erneut hinzu.",
+      "other": "Sonstige",
+      "fallbackTitle": "{y} nach {x}",
+      "fallbackCount": "Anzahl der Zeilen je {x}",
+      "how": {
+        "sum": "die Summe von {y} je {x}",
+        "mean": "der Durchschnitt von {y} je {x}",
+        "count": "die Anzahl der Zeilen je {x}",
+        "min": "der kleinste Wert von {y} je {x}",
+        "max": "der größte Wert von {y} je {x}"
+      },
+      "source": "Aus {file} ({rows} Zeilen): {how}.",
+      "openFile": "Datei in Analysieren öffnen"
     }
   },
   "posts": {
@@ -4604,6 +4671,21 @@
       "failed": "fehlgeschlagen",
       "delete": "Löschen",
       "deleteConfirm": "Diese Beiträge löschen? Das lässt sich nicht rückgängig machen."
+    },
+    "picture": {
+      "option": "Bild",
+      "none": "Kein Bild",
+      "own": "Mein Foto",
+      "unsplash": "Ein Foto von Unsplash",
+      "attach": "Füge dein Foto hinzu (JPEG oder PNG)",
+      "uploading": "Das Foto wird hochgeladen…",
+      "ready": "Jeder Beitrag bekommt dieses Foto im Format seiner Plattform",
+      "failed": "Das Foto konnte nicht hochgeladen werden. Versuche es erneut.",
+      "rejected": "Nur ein JPEG oder PNG unter 5 MB.",
+      "needPhoto": "Füge zuerst dein Foto mit „+“ hinzu oder wähle ein anderes Bild.",
+      "download": "Bild für {platform} herunterladen",
+      "credit": "Foto von <author>{name}</author> auf <unsplash>Unsplash</unsplash>",
+      "noneFound": "Kein Foto passte zu diesen Beiträgen, daher haben sie kein Bild."
     }
   },
   "projects": {

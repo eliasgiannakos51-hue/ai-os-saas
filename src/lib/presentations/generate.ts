@@ -2,7 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
-import { parseDeckToolInput, type Deck, type ImageSource } from "@/lib/presentations/deck";
+import { deckCharts, parseDeckToolInput, type Deck, type ImageSource, type SlideChart } from "@/lib/presentations/deck";
 import {
   PRESENTATION_MAX_TOKENS,
   PRESENTATION_MODEL,
@@ -81,6 +81,10 @@ export async function generateDeck(params: {
    *  between two requests from the same person, so behind the cache
    *  breakpoint they would invalidate the cached prefix every call. */
   businessContext?: string;
+  /** Charts computed from the person's file (lib/presentations/deck-charts.ts),
+   *  or none. Shown to the model by number; the number it answers with is
+   *  resolved to the chart itself by the parser. */
+  charts?: readonly SlideChart[];
   costs: CostAccumulator;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
@@ -90,9 +94,11 @@ export async function generateDeck(params: {
       params.description,
       params.slideCount,
       params.locale,
-      params.businessContext ?? ""
+      params.businessContext ?? "",
+      params.charts ?? []
     ),
     fallbackTitle: params.description.slice(0, 60),
+    charts: params.charts ?? [],
   });
 }
 
@@ -129,6 +135,8 @@ export async function editDeck(params: {
     // honest fallback is what the deck was called, not a slice of the
     // instruction — "make it more formal" is not a title.
     fallbackTitle: params.deck.title,
+    // THE CHARTS IT ALREADY HAS, numbered as the message shows them.
+    charts: deckCharts(params.deck),
   });
 }
 
@@ -136,6 +144,7 @@ async function runDeckCall(params: {
   apiKey: string;
   userMessage: string;
   fallbackTitle: string;
+  charts: readonly SlideChart[];
   locale: string;
   imageSource: ImageSource;
   memoryBlock?: string;
@@ -183,11 +192,7 @@ async function runDeckCall(params: {
   );
   if (!toolUse) return { ok: false, kind: "no_tool_use", detail: "the model returned no deck" };
 
-  const verdict = parseDeckToolInput(toolUse.input, {
-    locale: params.locale,
-    imageSource: params.imageSource,
-    fallbackTitle: params.fallbackTitle,
-  });
+  const verdict = parseDeckToolInput(toolUse.input, { locale: params.locale, imageSource: params.imageSource, fallbackTitle: params.fallbackTitle }, { charts: params.charts });
   if (!verdict.ok) return { ok: false, kind: "unusable", detail: verdict.reason };
   return { ok: true, deck: verdict.deck };
 }

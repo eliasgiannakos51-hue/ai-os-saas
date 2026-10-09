@@ -7,6 +7,8 @@ import { pdfResponse } from "@/lib/pdf/render";
 import { PdfDeck } from "@/lib/pdf/deck";
 import { parseStoredDeck } from "@/lib/presentations/deck";
 import { loadDeckImages } from "@/lib/presentations/images";
+import { chartSourceText } from "@/lib/presentations/deck-charts";
+import { emailTranslator } from "@/lib/email/email-locale";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,7 +48,9 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
     if (!deck) return NextResponse.json({ error: "not_ready" }, { status: 409 });
 
     const images = await loadDeckImages(deck, supabase, "/api/presentations/[id]/pdf");
-    const element = React.createElement(PdfDeck, { deck, images });
+    // Where each chart's numbers came from, in the deck's own language.
+    const say = emailTranslator(deck.locale);
+    const element = React.createElement(PdfDeck, { deck, images, sourceText: (chart) => chartSourceText(chart, say) });
     return await pdfResponse(element, { filename: deck.title, fallbackName: "presentation" });
   } catch (err) {
     logApiError("/api/presentations/[id]/pdf", err);

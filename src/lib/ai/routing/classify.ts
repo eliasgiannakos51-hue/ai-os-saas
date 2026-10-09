@@ -70,6 +70,9 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   data_analyse: "complex",
   code_assist: "complex",
   website_edit: "complex",
+  // Package 26: writing a whole game is the Site's generation; a box or a change, its edit.
+  game_generate: "expert",
+  game_edit: "complex",
   research_plan: "complex",
   file_ask: "complex",
   record_ask: "complex",
@@ -82,6 +85,8 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   chat_free: "complex",
   presentation_generate: "complex",
   presentation_edit: "complex",
+  document_generate: "complex",
+  document_edit: "complex",
   posts_generate: "complex",
   meeting_analyse: "complex",
   data_analysis: "complex",

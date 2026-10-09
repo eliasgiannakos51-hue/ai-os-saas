@@ -42,7 +42,7 @@
  * reading the calendar with the connections switch closed; the consent
  * promised no reads «in the background» while an automation reads at its
  * hour; and on a phone the tab bar covered the bottom of every tool's work
- * area. One is open and pinned as it is: NEEDS 41.
+ * area. One is open and pinned as it is: NEEDS 43.
  *
  * Run: node scripts/tests/connections-automations-edges.prodtest.mjs
  *      SKIP_BUILD=1 node scripts/tests/connections-automations-edges.prodtest.mjs
@@ -781,7 +781,7 @@ try {
     let reads = google.calendarCalls.length;
     let asks = model.calls.length;
     let said = await ask(QUESTION);
-    // OPEN, NEEDS 41 (docs/NEEDS-FROM-ELIAS.md): a message the month's free
+    // OPEN, NEEDS 43 (docs/NEEDS-FROM-ELIAS.md): a message the month's free
     // allowance pays for runs without tools (src/app/api/chat/route.ts,
     // effectiveTools), so the calendar is never offered and «Τι έχω αύριο;»
     // is answered without it — on a Growth account, the first 107 messages
@@ -790,7 +790,7 @@ try {
     // Pinned as it is, so the day it changes this line goes red and is
     // replaced by the walk below.
     const freeAsked = model.calls.slice(asks).filter((c) => c.stream);
-    check("OPEN, NEEDS 41: on a message the free allowance pays for, Chat is not handed the calendar and answers without it",
+    check("OPEN, NEEDS 43: on a message the free allowance pays for, Chat is not handed the calendar and answers without it",
       freeAsked.length === 1 && !(freeAsked[0].tools ?? []).some((t) => t.name === "search_my_data") && google.calendarCalls.length === reads && !tomorrowTitles.some((t) => said.includes(t)),
       `${said.slice(-200)} | tools: ${freeAsked.map((c) => (c.tools ?? []).map((t) => t.name).join("+")).join(" / ")} | reads: ${google.calendarCalls.length - reads}`);
     // ---- the same, once the free messages are spent

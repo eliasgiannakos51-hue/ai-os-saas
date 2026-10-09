@@ -44,8 +44,8 @@ const MUTANTS = [
     // use changed with it. The five strings did not.
     name: "ChartPoint renames value, and the keys are left behind",
     file: CHARTS_LIB,
-    from: "export type ChartPoint = { label: string; value: number };",
-    to: "export type ChartPoint = { label: string; amount: number };",
+    from: "export type ChartPoint = { label: string; value: number; rows?: number };",
+    to: "export type ChartPoint = { label: string; amount: number; rows?: number };",
     expect: "every chart key names a real field",
   },
   {

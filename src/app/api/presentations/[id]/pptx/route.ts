@@ -5,6 +5,8 @@ import { allowExport } from "@/lib/export-guard";
 import { safeFilename } from "@/lib/pdf/blocks";
 import { parseStoredDeck } from "@/lib/presentations/deck";
 import { loadDeckImages } from "@/lib/presentations/images";
+import { chartSourceText } from "@/lib/presentations/deck-charts";
+import { emailTranslator } from "@/lib/email/email-locale";
 import { renderDeckPptx } from "@/lib/presentations/pptx";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +53,9 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
     if (!deck) return NextResponse.json({ error: "not_ready" }, { status: 409 });
 
     const images = await loadDeckImages(deck, supabase, "/api/presentations/[id]/pptx");
-    const buffer = await renderDeckPptx(deck, images);
+    // Where each chart's numbers came from, in the deck's own language.
+    const say = emailTranslator(deck.locale);
+    const buffer = await renderDeckPptx(deck, images, (chart) => chartSourceText(chart, say));
     const name = `${safeFilename(deck.title, "presentation")}.pptx`;
     return new NextResponse(new Uint8Array(buffer), {
       headers: {

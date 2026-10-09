@@ -162,15 +162,15 @@ const MUTANTS = [
   {
     name: "on a phone the tab bar covers the bottom of the work area again",
     file: SHELL,
-    from: 'overflow-y-auto px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 md:pb-5">',
-    to: 'overflow-y-auto px-4 py-5 sm:px-6">',
+    from: "bg-workspace pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 ",
+    to: "bg-workspace ",
     expect: "on a phone the work area keeps room for the tab bar under it",
   },
   {
     name: "the room left is less than the tab bar",
     file: SHELL,
-    from: "pb-[calc(5rem+env(safe-area-inset-bottom))]",
-    to: "pb-[calc(2rem+env(safe-area-inset-bottom))]",
+    from: "pb-[calc(4rem+env(safe-area-inset-bottom))]",
+    to: "pb-[calc(3rem+env(safe-area-inset-bottom))]",
     expect: "on a phone the work area keeps room for the tab bar under it",
   },
 ];

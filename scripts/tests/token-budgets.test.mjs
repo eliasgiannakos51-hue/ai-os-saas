@@ -155,6 +155,23 @@ const CLASSIFIED = {
     // stop_reason as the deck: a cut set would parse as fewer platforms
     // than were asked for.
     "src/lib/posts/generate.ts",
+    // Package 14. One forced tool call per document (or per block, or the
+    // whole document rewritten); the ceiling is the caller's, and a cut
+    // reply is refused by stop_reason as "unusable" in call(), as the
+    // deck is — a document missing its last sections must not read as a
+    // short one.
+    "src/lib/documents/write-call.ts",
+    // Package 28. One forced tool call per batch of a page's pieces; the
+    // ceiling grows with the batch (batchMaxTokens). A list cut at
+    // max_tokens is refused by stop_reason and asked once more, and if it
+    // is cut again its pieces stay as they were — never a page filled
+    // from a list that ends early.
+    "src/lib/translate/translate-call.ts",
+    // Package 26. One forced tool call per step: the plan and a box at
+    // PLAN_MAX_TOKENS, the game and a change at GAME_MAX_TOKENS
+    // (lib/games/game-plan.ts). A game cut at max_tokens is refused by
+    // stop_reason as "unusable" — its last script would never close.
+    "src/lib/games/game-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

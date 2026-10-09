@@ -1,14 +1,14 @@
-// TEAM INVITES, FILE ROWS, PUBLISHED PAGES, AGENTS AND SITES ARE WRITTEN
-// BY THE SERVER ONLY, AGAINST A REAL POSTGRES.
+// TEAM INVITES, FILE ROWS, PUBLISHED PAGES, AGENTS, SITES, PROJECTS AND
+// GAMES ARE WRITTEN BY THE SERVER ONLY, AGAINST A REAL POSTGRES.
 //
 // supabase/migrations/20261014000000_server_written_tables.sql,
-// 20261015000000_agents_websites_server_written.sql and
-// 20261023100000_projects_site_versions_server_written.sql. As the
-// signed-in role, on the account's OWN rows: reading works, inserting and
-// updating do not, and deleting does not either — except a site, which the
-// builder deletes from the browser, and a project, which the account still
-// renames and deletes (only its creation is the server's). As the service
-// role, all of it does.
+// 20261015000000_agents_websites_server_written.sql,
+// 20261023100000_projects_site_versions_server_written.sql and
+// 20261024000000_user_games.sql. As the signed-in role, on the account's
+// OWN rows: reading works, inserting and updating do not, and deleting
+// does not either — except a site and a game, which their screens delete,
+// and a project, which the account still renames and deletes (only its
+// creation is the server's). As the service role, all of it does.
 //
 // Run: node scripts/tests/server-written-tables.dbtest.mjs   (needs a
 // database; run through `npm run test:db`, which provisions one)
@@ -61,6 +61,8 @@ const PS = sql(`select id from public.published_sites where user_id = '${U}' lim
 sql(`insert into public.site_versions (published_site_id, user_id, html_content, version_number) values ('${PS}', '${U}', '<p>v1</p>', 1)`);
 const P = "eeeeeeee-0000-0000-0000-0000000008b1";
 sql(`insert into public.projects (id, user_id, name) values ('${P}', '${U}', 'camping')`);
+const G = "eeeeeeee-0000-0000-0000-0000000008b2";
+sql(`insert into public.user_games (id, user_id, title, plan) values ('${G}', '${U}', 'game', '{"title":"game","boxes":[]}')`);
 
 const CASES = [
   {
@@ -105,6 +107,13 @@ const CASES = [
     update: `update public.user_websites set status = 'completed', attempt_count = 0 where user_id = '${U}'`,
     del: null,
   },
+  {
+    table: "user_games",
+    read: `select count(*) from public.user_games where user_id = '${U}'`,
+    insert: `insert into public.user_games (user_id, title, plan, html) values ('${U}', 'b', '{}', '<html><script>fetch("/x")</script></html>')`,
+    update: `update public.user_games set html = '<html><script>fetch("/x")</script></html>' where user_id = '${U}'`,
+    del: null,
+  },
 ];
 
 for (const c of CASES) {
@@ -131,6 +140,19 @@ const renamed = asUser(U, `update public.projects set name = 'renamed' where id 
 ok("projects: the account renames its own", renamed.ok && sql(`select name from public.projects where id = '${P}'`) === "renamed", renamed.out);
 const gone = asUser(U, `delete from public.projects where id = '${P}'`);
 ok("projects: ...and deletes its own", gone.ok && sql(`select count(*) from public.projects where id = '${P}'`) === "0", gone.out);
+
+console.log("\n== user_games: the person deletes a game, and only their own ==");
+const other = "eeeeeeee-0000-0000-0000-000000000802";
+sql(`delete from auth.users where id = '${other}'`);
+sql(`insert into auth.users (id, email) values ('${other}', 'server-written-other@test.local')`);
+sql(`insert into public.user_games (user_id, title, plan) values ('${other}', 'theirs', '{}')`);
+ok("user_games: another person's game is not read", asUser(U, `select count(*) from public.user_games where user_id = '${other}'`).out === "0");
+const theirs = asUser(U, `delete from public.user_games where user_id = '${other}'`);
+ok("user_games: ...nor deleted", theirs.ok && sql(`select count(*) from public.user_games where user_id = '${other}'`) === "1", theirs.out);
+const gameDel = asUser(U, `delete from public.user_games where id = '${G}'`);
+ok("user_games: the person's own is deleted", gameDel.ok && sql(`select count(*) from public.user_games where id = '${G}'`) === "0", gameDel.out);
+sql(`delete from auth.users where id = '${other}'`);
+ok("user_games: a game goes with its account", sql(`select count(*) from public.user_games where user_id = '${other}'`) === "0");
 
 sql(`delete from auth.users where id = '${U}'`);
 

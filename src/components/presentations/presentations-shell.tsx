@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ChevronDown, Clock, FileDown, Image as ImageIcon, Plus, Trash2 } from "lucide-react";
+import { BarChart3, ChevronDown, Clock, FileDown, Image as ImageIcon, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton, saveFileResponse } from "@/components/ui/download-pdf-button";
@@ -34,6 +34,12 @@ import {
   type Slide,
 } from "@/lib/presentations/deck";
 import type { DeckRow, NoteRow } from "@/lib/presentations/rows";
+import { MAX_UPLOAD_BYTES } from "@/lib/data-analysis/limits";
+
+/** What a spreadsheet given to Slides is, while it is read and after. */
+type DataFile = { name: string; state: "reading" | "ready" | "failed"; id?: string; rows?: number; error?: string };
+/** The files a chart is made from: what api/data-analysis/upload reads. */
+const DATA_ACCEPT = ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 type Open = { id: string | null; deck: Deck };
 
@@ -52,6 +58,13 @@ type Open = { id: string | null; deck: Deck };
  * BOXES (package 4): a slide's number and title are pressed to choose it,
  * and the next change goes with its index — the route keeps every other
  * slide exactly as stored (lib/presentations/deck.ts, keepOnlySlide).
+ *
+ * A CHART FROM A FILE (package 13), behind the switch "slides-charts": the
+ * field's «+» (or a paste, or a drop) takes a CSV or Excel file, which is
+ * read at once by api/data-analysis/upload — free, no model — and becomes
+ * a chip saying how many rows it has. The deck written next is made from
+ * it: its id goes with the brief, and the route computes the charts from
+ * the rows. The file stays in Analyze, where its chart slide links to.
  */
 export function PresentationsShell({
   initialDescription,
@@ -60,6 +73,7 @@ export function PresentationsShell({
   notes,
   ownImageUrls,
   unsplashConfigured,
+  chartsFromFile = false,
 }: {
   initialDescription?: string;
   /** A deck to open on arrival — `?record=` from the Library or a star. */
@@ -68,6 +82,8 @@ export function PresentationsShell({
   notes: NoteRow[];
   ownImageUrls: Record<string, string>;
   unsplashConfigured: boolean;
+  /** The switch "slides-charts", read by the page. */
+  chartsFromFile?: boolean;
 }) {
   const t = useTranslations("presentations");
   const tShell = useTranslations("dashboard.toolShell");
@@ -107,6 +123,7 @@ export function PresentationsShell({
   );
   const [exporting, setExporting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const [dataFile, setDataFile] = useState<DataFile | null>(null);
 
   // WHILE A SAVED DECK IS THE CURRENT ONE, THE FIELD CHANGES IT — also
   // with the work area closed, which on a phone is the only way to reach
@@ -162,6 +179,45 @@ export function PresentationsShell({
     return ok.map((r) => r.path);
   }
 
+  // THE SPREADSHEET, READ AS SOON AS IT IS GIVEN: one file, the last one
+  // given. The upload is free and makes no model call; what it answers —
+  // the rows, or why the file could not be read — is said on the chip.
+  async function addDataFile(files: File[]) {
+    const file = files[files.length - 1];
+    if (!file) return;
+    if (!/\.(csv|xlsx)$/i.test(file.name)) {
+      setDataFile({ name: file.name, state: "failed", error: t("chart.failed.type") });
+      return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setDataFile({ name: file.name, state: "failed", error: t("chart.failed.tooLarge", { mb: Math.round(MAX_UPLOAD_BYTES / (1024 * 1024)) }) });
+      return;
+    }
+    setDataFile({ name: file.name, state: "reading" });
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const response = await fetch("/api/data-analysis/upload", { method: "POST", body: form });
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.id) {
+        const code = String(body?.error ?? "");
+        const error =
+          code === "too_large"
+            ? t("chart.failed.tooLarge", { mb: Math.round(MAX_UPLOAD_BYTES / (1024 * 1024)) })
+            : code === "unreadable"
+              ? t("chart.failed.unreadable")
+              : code === "too_many_uploads"
+                ? t("chart.failed.tooMany")
+                : t("chart.failed.other");
+        setDataFile({ name: file.name, state: "failed", error });
+        return;
+      }
+      setDataFile({ name: file.name, state: "ready", id: String(body.id), rows: Number(body.rowCount ?? 0) });
+    } catch {
+      setDataFile({ name: file.name, state: "failed", error: t("chart.failed.other") });
+    }
+  }
+
   function refusal(code: string, limit: number): string {
     return code === "too_long"
       ? t("errors.tooLong", { limit })
@@ -175,6 +231,10 @@ export function PresentationsShell({
               ? t("errors.unavailable")
               : code === "unusable"
                 ? t("errors.unusable")
+                : code === "no_chart_data"
+                  ? t("chart.noData")
+                : code === "data_not_found" || code === "bad_data"
+                  ? t("chart.gone")
                 : code === "not_included"
                   ? t("edit.notIncluded")
                   : code === "no_deck"
@@ -213,7 +273,14 @@ export function PresentationsShell({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ description: description.slice(0, MAX_DECK_DESCRIPTION_CHARS), slideCount, imageSource, ownImagePaths, locale }),
+        body: JSON.stringify({
+          description: description.slice(0, MAX_DECK_DESCRIPTION_CHARS),
+          slideCount,
+          imageSource,
+          ownImagePaths,
+          locale,
+          ...(chartsFromFile && dataFile?.state === "ready" && dataFile.id ? { dataId: dataFile.id } : {}),
+        }),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
@@ -224,6 +291,8 @@ export function PresentationsShell({
       uploaded = [];
       const made: Open = { id: (body?.id as string | null) ?? null, deck: body?.deck as Deck };
       say("tool", tShell("slides.done", { title: made.deck.title, count: made.deck.slides.length }), made);
+      // The deck is made from the file; the next one starts without it.
+      setDataFile(null);
       if (body?.images && body.images.wanted > 0 && body.images.found === 0 && imageSource !== "none") say("tool", t("result.noPhotoFound"));
       setOpen(made);
       setPane("deck");
@@ -440,6 +509,43 @@ export function PresentationsShell({
             : t("form.descriptionPlaceholder")
       }
       sending={running}
+      attach={chartsFromFile && !editing ? { accept: DATA_ACCEPT, label: t("chart.attach"), onFiles: (files) => void addDataFile(files) } : undefined}
+      tray={
+        chartsFromFile && !editing && dataFile ? (
+          <p
+            data-testid="slides-data-chip"
+            data-state={dataFile.state}
+            className={`mb-2 flex min-h-[44px] max-w-full items-center gap-2 rounded-item bg-panel px-2 py-1 text-xs ${dataFile.state === "failed" ? "text-danger" : "text-foreground"}`}
+          >
+            <BarChart3 className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <span className="block max-w-[16rem] truncate">{dataFile.name}</span>
+              <span className="block text-[11px] text-muted" aria-live="polite">
+                {dataFile.state === "reading" ? (
+                  <span className="inline-flex items-center gap-1">
+                    <ThinkingIndicator size="sm" />
+                    {t("chart.reading")}
+                  </span>
+                ) : dataFile.state === "failed" ? (
+                  <span className="text-danger">{dataFile.error}</span>
+                ) : (
+                  t("chart.ready", { rows: dataFile.rows ?? 0 })
+                )}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setDataFile(null)}
+              aria-label={t("chart.remove", { name: dataFile.name })}
+              data-testid="slides-data-remove"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </p>
+        ) : undefined
+      }
+      holdSend={chartsFromFile && dataFile?.state === "reading"}
       onSend={(text) => void (editing ? change(text) : write(text))}
       onStop={() => abortRef.current?.abort()}
       initialText={initialDescription}

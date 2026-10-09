@@ -75,7 +75,7 @@ ok(`ten locales were read (${LOCALES.length})`, LOCALES.length === 10);
 console.log("== 1. the contract: every bound is applied, not merely stated ==");
 ok("the slide bounds are sane", MIN_SLIDES >= 1 && MIN_SLIDES < DEFAULT_SLIDES && DEFAULT_SLIDES <= MAX_SLIDES && MAX_SLIDES <= 20,
   `${MIN_SLIDES} < ${DEFAULT_SLIDES} <= ${MAX_SLIDES}`);
-ok("five layouts, three image sources", SLIDE_LAYOUTS.length === 5 && IMAGE_SOURCES.length === 3);
+ok("six layouts — the sixth a chart from the person's file, package 13 — and three image sources", SLIDE_LAYOUTS.length === 6 && SLIDE_LAYOUTS.includes("chart") && IMAGE_SOURCES.length === 3);
 const ctx = { locale: "en", imageSource: "none", fallbackTitle: "fallback" };
 const slide = (i, extra = {}) => ({ layout: "bullets", title: `Slide ${i}`, bullets: ["a", "b"], notes: "say this", imageQuery: null, ...extra });
 {
@@ -156,7 +156,8 @@ console.log("\n== 3. the route: refuse before spend, session client, hold sized 
   // AND IT COVERS THE RECORDS TOO (2026-09-27) — see the same check in
   // posts.test.mjs. A hold sized on the brief alone is short by the size
   // of the account on every request from anybody who has one.
-  ok("the hold is sized per slide asked for", /inputChars:\s*deckEstimateInputChars\(description\.length\s*\+\s*businessContext\.length,\s*slideCount\)/.test(src));
+  // AND THE CHARTS FROM A FILE (2026-10-08, package 13): they are sent.
+  ok("the hold is sized per slide asked for", /inputChars:\s*deckEstimateInputChars\(description\.length\s*\+\s*businessContext\.length\s*\+\s*deckChartsChars\(charts\),\s*slideCount\)/.test(src));
   ok("own-photo paths must be under the person's own folder", /startsWith\(`\$\{user\.id\}\/`\)/.test(src));
   const abortedBlock = src.slice(at(/outcome\.kind === "aborted"/), at(/outcome\.kind === "provider"/));
   ok("a stopped run releases the hold", /releaseReservation\(/.test(abortedBlock) && /status:\s*499/.test(abortedBlock));

@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { BuiltChart } from "@/lib/data-analysis/charts";
 
 // EVERY POINT WAS COMPUTED ON THE SERVER, from the real rows, by
@@ -48,7 +48,37 @@ function formatValue(value: number): string {
   return abs >= 100 ? String(Math.round(value)) : String(Math.round(value * 100) / 100);
 }
 
-export function AnalysisChart({ chart }: { chart: BuiltChart }) {
+/**
+ * HOW EACH VALUE WAS MADE (package 16, behind "analysis-provenance"):
+ * the arithmetic in words, and every value with the rows it came from —
+ * the same numbers the chart draws, from lib/data-analysis/charts.ts.
+ */
+function ChartHow({ chart }: { chart: BuiltChart }) {
+  const tHow = useTranslations("dataAnalysis.how");
+  const locale = useLocale();
+  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
+  const { spec, points } = chart;
+  return (
+    <details data-testid="chart-how" className="mt-3 text-xs">
+      <summary className="flex min-h-[44px] cursor-pointer items-center text-foreground">{tHow("chartTitle")}</summary>
+      <p className="text-muted">{tHow(`chart.${spec.aggregation}`, { x: spec.x, y: spec.y ?? "" })}</p>
+      <table className="mt-1 w-full text-start">
+        <tbody>
+          {points.map((point) => (
+            <tr key={point.label} data-testid="chart-how-row">
+              <td className="py-1 text-muted">{point.label}</td>
+              <td className="py-1 text-end text-foreground">{number.format(point.value)}</td>
+              <td className="py-1 ps-3 text-end text-[11px] text-muted">{point.rows !== undefined ? tHow("point", { rows: point.rows }) : null}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {points.some((point) => point.label === "Other") ? <p className="mt-1 text-muted">{tHow("other")}</p> : null}
+    </details>
+  );
+}
+
+export function AnalysisChart({ chart, how = false }: { chart: BuiltChart; how?: boolean }) {
   const t = useTranslations("dataAnalysis.chart");
   const { spec, points } = chart;
 
@@ -135,6 +165,7 @@ export function AnalysisChart({ chart }: { chart: BuiltChart }) {
           )}
         </ResponsiveContainer>
       </div>
+      {how && spec.kind !== "scatter" ? <ChartHow chart={chart} /> : null}
     </div>
   );
 }

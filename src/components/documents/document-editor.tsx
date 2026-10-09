@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { DocumentPdfButton } from "@/components/documents/document-pdf-button";
+import { TranslateButton } from "@/components/translate/translate-button";
 import { Bold, Italic, Heading1, Heading2, List, ChevronLeft, Check, Loader2 } from "lucide-react";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { UserDocument } from "@/types/document";
@@ -21,9 +22,12 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 export function DocumentEditor({
   doc,
   initialFavorited = false,
+  translate = false,
 }: {
   doc: Pick<UserDocument, "id" | "title" | "content" | "updated_at">;
   initialFavorited?: boolean;
+  /** The switch "translate" (package 28), read by the page. */
+  translate?: boolean;
 }) {
   const t = useTranslations("dashboard.documents");
   const [title, setTitle] = useState(doc.title);
@@ -149,6 +153,9 @@ export function DocumentEditor({
                 button asks which language first (V4.6) — the document's
                 own, free, or a translation, priced before it runs. */}
             <DocumentPdfButton documentId={doc.id} />
+            {/* A copy in another language, as what is STORED reads — the
+                same rule as the PDF beside it (package 28). */}
+            {translate && <TranslateButton kind="document" id={doc.id} variant="button" openHref={(id) => `/dashboard/documents/${id}`} />}
             <span className="flex items-center gap-1.5 text-xs text-muted">
             {saveState === "saving" && (
               <>

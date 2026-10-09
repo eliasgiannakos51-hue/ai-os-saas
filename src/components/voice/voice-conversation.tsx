@@ -114,6 +114,18 @@ export function VoiceConversation({
     void recorder.start();
   }, [recorder, stopSpeaking]);
 
+  // PRESS ONCE (package 29). The press on «Μίλα» that opened this is the
+  // press that starts the first turn: until 2026-10-08 the conversation
+  // opened idle and waited for a second tap on the globe, which is two
+  // presses for what the heading above promises as one.
+  // scripts/tests/voice-conversation.prodtest.mjs went red on exactly that.
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    listen();
+  }, [listen]);
+
   async function handleTurn(blob: Blob, seconds: number) {
     if (abandonedRef.current) return;
     setState("thinking");
@@ -255,7 +267,7 @@ export function VoiceConversation({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-background/85 backdrop-blur-sm">
+    <div data-testid="voice-conversation" data-state={state} className="fixed inset-0 z-[70] flex flex-col bg-background/85 backdrop-blur-sm">
       <div className="flex items-center justify-between px-4 py-3">
         <p className="text-xs text-muted">{t("conversation.title")}</p>
         <button
@@ -277,6 +289,7 @@ export function VoiceConversation({
           else if (state === "idle") listen();
         }}
         aria-label={state === "speaking" ? t("conversation.interrupt") : t("conversation.speak")}
+        data-testid="voice-conversation-area"
         className="flex flex-1 flex-col items-center justify-center gap-5 px-6"
       >
         <VoiceOrb state={state} readLevel={level.readLevel} size={200} />

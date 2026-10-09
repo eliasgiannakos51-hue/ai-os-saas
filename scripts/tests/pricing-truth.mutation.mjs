@@ -90,7 +90,7 @@ const MUTANTS = [
     // for.
     name: 'a MAKE row is pointed at a route that reaches no model',
     file: CATALOG,
-    from: '    routes: ["posts/generate"],',
+    from: '    routes: ["posts/generate", "posts/[id]/image"],',
     to: '    routes: ["projects"],',
     expect: 'every row under MAKE really makes something',
   },

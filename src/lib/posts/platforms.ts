@@ -22,6 +22,8 @@
  * against the real values.
  */
 
+import { parsePostImage, type PostImage } from "@/lib/posts/post-images";
+
 export const POST_PLATFORMS = ["linkedin", "x", "instagram", "facebook", "threads"] as const;
 export type PostPlatform = (typeof POST_PLATFORMS)[number];
 
@@ -133,6 +135,9 @@ export type PostSet = {
   /** The language the posts are WRITTEN in. */
   locale: string;
   posts: Post[];
+  /** The one picture every post carries, at its own platform's size
+   *  (package 15, lib/posts/post-images.ts). Absent on sets made before. */
+  image?: PostImage | null;
 };
 
 /**
@@ -166,7 +171,7 @@ export function cutToLength(text: string, max: number): string {
   return (lastSpace > max * 0.8 ? hard.slice(0, lastSpace) : hard).trimEnd();
 }
 
-export type PostsVerdict = { ok: true; set: PostSet } | { ok: false; reason: "no_posts" };
+export type PostsVerdict = { ok: true; set: PostSet; imageQuery: string | null } | { ok: false; reason: "no_posts" };
 
 /**
  * The model's tool input, made safe.
@@ -209,7 +214,10 @@ export function parsePostsToolInput(
   }
   const posts = context.platforms.map((p) => byPlatform.get(p)).filter((p): p is Post => Boolean(p));
   if (posts.length === 0) return { ok: false, reason: "no_posts" };
-  return { ok: true, set: { version: 1, locale: context.locale, posts } };
+  // WHAT TO SEARCH FOR, when a picture from Unsplash was asked for: words
+  // the route searches with, never shown and never a picture by itself.
+  const query = String(input.imageQuery ?? "").replace(/\s+/g, " ").trim().slice(0, 60);
+  return { ok: true, set: { version: 1, locale: context.locale, posts }, imageQuery: query || null };
 }
 
 /**
@@ -223,7 +231,10 @@ export function parseStoredPostSet(raw: unknown): PostSet | null {
     Array.isArray(input.posts) ? input.posts.map((p) => (p as { platform?: unknown })?.platform) : []
   );
   const verdict = parsePostsToolInput(input, { platforms, locale });
-  return verdict.ok ? verdict.set : null;
+  if (!verdict.ok) return null;
+  // The picture as stored, checked again: a row is not a type.
+  const image = parsePostImage(input.image);
+  return image ? { ...verdict.set, image } : verdict.set;
 }
 
 /**

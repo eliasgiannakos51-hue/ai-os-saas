@@ -16,14 +16,16 @@ import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-condu
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
 import { languageNameFor } from "@/lib/text/language-name";
-import type { Deck } from "@/lib/presentations/deck";
+import type { Deck, SlideChart } from "@/lib/presentations/deck";
 import {
   MAX_BULLETS,
   MAX_BULLET_CHARS,
+  MAX_CHART_BULLETS,
   MAX_NOTES_CHARS,
   MAX_TITLE_CHARS,
   SLIDE_LAYOUTS,
   clampSlideCount,
+  deckCharts,
 } from "@/lib/presentations/deck";
 
 export const PRESENTATION_MODEL = "claude-sonnet-4-6";
@@ -51,6 +53,7 @@ WHAT A GOOD DECK LOOKS LIKE:
 - Bullets are fragments a presenter expands on, not paragraphs. Numbers and names beat adjectives.
 - Speaker notes say what to SAY on that slide, in the presenter's voice: two to five sentences. Never repeat the bullets in the notes.
 - Use "section" slides to mark the two or three parts of a longer deck. Use "quote" for a striking sentence or a customer's words — the bullet is the quote, the title is who said it. Use "image" when a picture would carry the slide better than text: the title is the caption.
+- Layout "chart" exists ONLY when the user turn lists CHARTS, computed from the person's own file. Put one on a slide by setting that slide's "chart" to the chart's number from the list, with layout "chart", a title saying what it shows, and at most ${MAX_CHART_BULLETS} bullets reading it. Any figure you write about a chart must be one printed in its list. Without a list, never use "chart" and leave "chart" null.
 - Set imageQuery ONLY on slides where a photograph would genuinely help — a place, an object, a scene, a mood. Two to five words in English, concrete ("solar panels on a farmhouse roof"), never abstract ("success", "growth"). Roughly one slide in three; a title slide usually deserves one. Leave it null otherwise.
 
 LIMITS (they are enforced after you answer; exceeding them wastes your words):
@@ -95,6 +98,10 @@ export const WRITE_DECK_TOOL: ToolDefinition = {
               type: ["string", "null"],
               description: "Two to five English words describing a photo for this slide, or null.",
             },
+            chart: {
+              type: ["integer", "null"],
+              description: "The number of a chart from the CHARTS list in the user turn, for a slide with layout \"chart\"; null otherwise.",
+            },
           },
           required: ["layout", "title", "bullets", "notes", "imageQuery"],
         },
@@ -118,16 +125,39 @@ export function buildDeckUserMessage(
   description: string,
   slideCount: number,
   locale: string,
-  businessContext = ""
+  businessContext = "",
+  charts: readonly SlideChart[] = []
 ): string {
   const scrub = (text: string) =>
     text.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)");
   const context = businessContext.trim() ? `\n${scrub(businessContext.trim())}\n\n---\n` : "";
+  // THE FILE IS DATA TOO: its column names and its labels are text the
+  // person's spreadsheet contains, so the list goes inside the markers.
+  const chartList = charts.length > 0 ? `\n${scrub(renderChartsForModel(charts))}\n\n---\n` : "";
   return `Write a deck of exactly ${clampSlideCount(slideCount)} slides, in ${languageNameFor(locale)}.
-${context ? "\nThe block below has two parts: this account's own records first, then the brief. Prefer a real name or number from the records over one you would otherwise invent; never state a figure the records do not contain." : ""}
-${UNTRUSTED_OPEN}${context}
+${context ? "\nThe block below has two parts: this account's own records first, then the brief. Prefer a real name or number from the records over one you would otherwise invent; never state a figure the records do not contain." : ""}${chartList ? `\nThe block below starts with CHARTS computed from the person's file. Put at least one of them on a slide of its own (layout "chart", "chart": its number), where the brief's story needs it; the figures printed there are the only figures about the file you may state.` : ""}
+${UNTRUSTED_OPEN}${chartList}${context}
 ${scrub(description)}
 ${UNTRUSTED_CLOSE}`;
+}
+
+/**
+ * THE CHARTS AS THE MODEL READS THEM: a number, what is measured and
+ * how, and every point with its value — so a slide can say "North led
+ * with 1,200" and the 1,200 is the file's. The numbers in this list are
+ * the ones lib/presentations/deck-charts.ts computed; parseDeckToolInput
+ * resolves the number the model answers with to the same object.
+ */
+export function renderChartsForModel(charts: readonly SlideChart[]): string {
+  const lines = ["CHARTS (computed from the person's file; refer to one by its number):"];
+  charts.forEach((chart, i) => {
+    const how = chart.source.aggregation === "count" ? `rows counted by ${chart.source.x}` : `${chart.source.aggregation} of ${chart.source.y} by ${chart.source.x}`;
+    lines.push(
+      `${i + 1}. ${chart.kind} chart "${chart.title}" — ${how}, from the file "${chart.source.file}" (${chart.source.rows} rows)${chart.gathered ? `; the last point gathers every smaller category` : ""}:`,
+      `   ${chart.points.map((p) => `${p.label}: ${p.value}`).join("; ")}`
+    );
+  });
+  return lines.join("\n");
 }
 
 /**
@@ -140,15 +170,23 @@ ${UNTRUSTED_CLOSE}`;
  * — so the same tool can return the same shape.
  */
 function renderDeckForEditing(deck: Deck): string {
-  const lines = [`TITLE: ${deck.title}`];
+  // A CHART IS SHOWN BY ITS NUMBER, as a generation showed it: the list
+  // first, then `chart: n` on the slide that carries it. The same numbers
+  // resolve back to the same charts (lib/presentations/deck.ts deckCharts,
+  // in api/presentations/[id]/edit), so an edit keeps the file's figures.
+  const charts = deckCharts(deck);
+  const lines = charts.length > 0 ? [renderChartsForModel(charts), ""] : [];
+  lines.push(`TITLE: ${deck.title}`);
   deck.slides.forEach((slide, i) => {
+    const chart = slide.chart ? charts.findIndex((c) => JSON.stringify(c) === JSON.stringify(slide.chart)) + 1 : 0;
     lines.push(
       "",
       `SLIDE ${i + 1} (${slide.layout})`,
       `title: ${slide.title}`,
       ...slide.bullets.map((b) => `- ${b}`),
       `notes: ${slide.notes}`,
-      ...(slide.imageQuery ? [`imageQuery: ${slide.imageQuery}`] : [])
+      ...(slide.imageQuery ? [`imageQuery: ${slide.imageQuery}`] : []),
+      ...(chart > 0 ? [`chart: ${chart}`] : [])
     );
   });
   return lines.join("\n");
@@ -173,7 +211,10 @@ function renderDeckForEditing(deck: Deck): string {
 export function buildDeckEditUserMessage(deck: Deck, instruction: string, locale: string): string {
   const clean = (s: string) =>
     s.split(UNTRUSTED_OPEN).join("(marker removed)").split(UNTRUSTED_CLOSE).join("(marker removed)");
-  return `Here is a deck you wrote. Apply the change asked for and return the WHOLE deck, with the same number of slides unless the change asks for a different number, in ${languageNameFor(locale)}.
+  const charted = deck.slides.some((slide) => slide.chart)
+    ? ` A slide that shows "chart: n" keeps "chart": n unless the change is about that chart; a chart can only be one from the CHARTS list at the top of the deck.`
+    : "";
+  return `Here is a deck you wrote. Apply the change asked for and return the WHOLE deck, with the same number of slides unless the change asks for a different number, in ${languageNameFor(locale)}.${charted}
 
 THE DECK:
 ${UNTRUSTED_OPEN}

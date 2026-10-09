@@ -147,8 +147,8 @@ const MUTANTS = [
   {
     name: "the row is stamped with a user id the browser sent",
     file: ROUTE,
-    from: "        user_id: user.id,\n        description,\n        platforms,\n        posts: outcome.set,",
-    to: "        user_id: String(body.userId ?? user.id),\n        description,\n        platforms,\n        posts: outcome.set,",
+    from: "        user_id: user.id,\n        description,\n        platforms,\n        posts: set,",
+    to: "        user_id: String(body.userId ?? user.id),\n        description,\n        platforms,\n        posts: set,",
     expect: "every row is stamped with the session's user",
   },
   {

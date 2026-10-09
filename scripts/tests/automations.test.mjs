@@ -265,12 +265,12 @@ check("with a box chosen, the field changes that box alone", /if \(shown && chos
 check("an answer to the one question goes back with the sentence", /const said = pending \? `\$\{pending\.said\}\\n\$\{pending\.question\}\\n\$\{text\}` : text;/.test(shell));
 check("every price is on the screen before it is spent, and large ones ask again", /withConfirm\(prices\.build,/.test(shell) && /withConfirm\(runPrice, \(\) => void runIt\(shown, true\)\)/.test(shell) && /needsLargeActionConfirmation\(credits, DEFAULTS\)/.test(shell));
 // ON A PHONE the boxes and the history are the shell's full-screen work
-// area, and the tab bar is drawn over its last 57px: the area keeps room
-// for it below md, or the last run of the history cannot be scrolled into
-// sight (found 2026-10-08 by scripts/tests/connections-automations-edges.prodtest.mjs).
+// area, and the tab bar is drawn over its bottom: the area ends above it
+// below md, or the last run of the history cannot be scrolled into sight
+// (found 2026-10-08 by scripts/tests/connections-automations-edges.prodtest.mjs).
 const shellWork = code("src/components/shell/tool-shell.tsx");
 const barHeight = Number((/min-h-\[(\d+)px\]/.exec(code("src/components/dashboard/mobile-tab-bar.tsx")) ?? [])[1] ?? 0);
-const room = /overflow-y-auto px-4 pt-5 pb-\[calc\((\d+(?:\.\d+)?)rem\+env\(safe-area-inset-bottom\)\)\] sm:px-6 md:pb-5">\{work\.body\}/.exec(shellWork);
+const room = /data-testid="tool-shell-work"\s*className="fixed inset-0 z-\[60\] flex flex-col bg-workspace pb-\[calc\((\d+(?:\.\d+)?)rem\+env\(safe-area-inset-bottom\)\)\] md:pb-0 /.exec(shellWork);
 check(`on a phone the work area keeps room for the tab bar under it (${room ? Number(room[1]) * 16 : 0}px for a ${barHeight}px bar and the safe area)`,
   barHeight > 0 && Boolean(room) && Number(room[1]) * 16 >= barHeight + 1 && /fixed inset-x-0 bottom-0 z-40 [^"]*pb-\[env\(safe-area-inset-bottom\)\] md:hidden/.test(code("src/components/dashboard/mobile-tab-bar.tsx")));
 check("a box that needs a connection says which, and leads to it", /data-testid="flow-needs"/.test(code("src/components/automations/flow-boxes.tsx")) && /<Link href=\{CONNECT_AT\[need\]\}/.test(code("src/components/automations/flow-boxes.tsx")));

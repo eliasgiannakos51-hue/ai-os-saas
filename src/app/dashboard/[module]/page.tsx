@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { GenericList } from "@/components/modules/generic-list";
+import { FinanceQuickEntry } from "@/components/finance/finance-quick-entry";
+import { SalesStages, type StagedLead } from "@/components/sales/sales-stages";
 import { getModule } from "@/lib/modules";
 import { RECORD_CAP } from "@/lib/record-cap";
 import { MODULE_ICONS } from "@/lib/module-icons";
@@ -115,6 +117,12 @@ export default async function ModulePage(
     userAutomations = (automationRows as UserAutomation[] | null) ?? [];
   }
 
+  // FINANCES AND SALES (MASTER 16, package 18), behind the switch
+  // "finance-sales": a sentence that becomes an entry above the finance
+  // list, and every contact's stage with its reminder above the leads.
+  const financeSales =
+    (moduleConfig.slug === "finance" || moduleConfig.slug === "sales") && (await isFeatureOn("finance-sales", user));
+
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -131,6 +139,17 @@ export default async function ModulePage(
 
         {isAutomationModule && <AutomationActiveList automations={userAutomations} />}
         {isAutomationModule && <AutomationRealizeList records={(records as ModuleRecord[]) ?? []} />}
+        {financeSales && moduleConfig.slug === "finance" ? <FinanceQuickEntry /> : null}
+        {financeSales && moduleConfig.slug === "sales" ? (
+          <SalesStages
+            leads={((records as ModuleRecord[] | null) ?? []).map((r) => ({
+              id: String(r.id),
+              lead_name: String((r as Record<string, unknown>).lead_name ?? ""),
+              stage: ((r as Record<string, unknown>).stage as string | null) ?? null,
+              remind_at: ((r as Record<string, unknown>).remind_at as string | null) ?? null,
+            })) satisfies StagedLead[]}
+          />
+        ) : null}
 
         <GenericList
           module={moduleConfig}

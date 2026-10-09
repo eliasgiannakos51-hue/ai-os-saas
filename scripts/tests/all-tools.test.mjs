@@ -68,13 +68,16 @@ console.log("== 0. the population ==");
 check(`the sidebar's tools were read (${allDrawn.length} in ${drawn.length} groups and Settings)`, allDrawn.length >= 20 && drawn.length >= 4);
 
 console.log("\n== 0b. every tool is in exactly one group, or hidden with a reason ==");
-const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS } = await loadTs("src/lib/nav/all-tools.ts");
+const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS, SWITCH_ONLY_ITEMS, SWITCHED_SQUARES } = await loadTs("src/lib/nav/all-tools.ts");
 const grouped = ALL_TOOLS_GROUPS.flatMap((g) => g.hrefs);
 const hidden = Object.keys(HIDDEN_FROM_ALL_TOOLS);
 check("the four groups, in the design's order", ALL_TOOLS_GROUPS.map((g) => g.key).join(",") === "make,ask,organise,business");
 // THE POPULATION IS WHAT THE GRID CAN DRAW: the owner's view, which is
 // every member tool plus the owner-only ones, minus the Settings block.
-const ownerTools = drawnFor(true).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href));
+// ...and the tools with no sidebar row, drawn only behind their switch
+// (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS, Games).
+const switchOnly = Object.keys(SWITCH_ONLY_ITEMS);
+const ownerTools = [...drawnFor(true).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href)), ...switchOnly];
 const memberTools = drawnFor(false).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href));
 check(`the population was read (${ownerTools.length} for the owner, ${memberTools.length} for a member)`, ownerTools.length >= memberTools.length && memberTools.length >= 20);
 const unplaced = ownerTools.filter((h) => !grouped.includes(h) && !hidden.includes(h));
@@ -89,6 +92,13 @@ check(
   "the grid draws the tools through those groups, and nothing else",
   /return ALL_TOOLS_GROUPS\.map\(/.test(grid) && /g\.hrefs\.map\(\(h\) => byHref\.get\(h\)\)/.test(grid)
 );
+
+// A TOOL WITH NO SIDEBAR ROW (package 26: Games) exists only behind its
+// switch, so it is in no group and is drawn only as a switched square.
+check("a tool with no sidebar row is drawn only behind its switch, never in a group",
+  switchOnly.length >= 1 && switchOnly.every((h) => SWITCHED_SQUARES.some((s) => s.href === h) && !grouped.includes(h)) &&
+    /SWITCH_ONLY_ITEMS\[href\] \? \{ href, \.\.\.SWITCH_ONLY_ITEMS\[href\], icon: SWITCH_ONLY_ICONS\[href\] \?\? LayoutGrid \} : undefined/.test(grid) &&
+    switchOnly.every((h) => new RegExp(`"${h.replace(/\//g, "\\/")}": [A-Z_]+_ICON`).test(grid)));
 check("...and no Settings block: Settings, Integrations and Help are reached from Settings (MASTER 14.1)",
   !/SETTINGS_GROUP|\.\.\.settings\b/.test(grid));
 
@@ -111,7 +121,6 @@ check("...and the English names are exactly 14.1's list, Document aside",
   [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
 check("...and no name is given to a tool that is not shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h)));
 check("Document is hidden, with the reason 14.1 gives (notes only)", /notes/.test(HIDDEN_FROM_ALL_TOOLS["/dashboard/documents"] ?? ""));
-const { SWITCHED_SQUARES } = await loadTs("src/lib/nav/all-tools.ts");
 for (const l of LOCALES) {
   const n = messages[l].dashboard?.tools?.names ?? {};
   const keys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)];
@@ -160,17 +169,22 @@ for (const sq of SWITCHED_SQUARES) {
   const pageSrc = existsSync(pagePath) ? stripComments(readFileSync(pagePath, "utf8")) : "";
   check(`${sq.href}: names a switch that exists in lib/flags/flags.ts ("${sq.flag}")`, flagKeys.includes(sq.flag));
   check(`${sq.href}: ...and its page reads that same switch`, pageSrc.includes(`isFeatureOn("${sq.flag}"`));
-  check(`${sq.href}: ...is a row of the sidebar's list, and in no group and not hidden here`,
-    new RegExp(`href: "${sq.href.replace(/\//g, "\\/")}"`).test(navSrc) && !grouped.includes(sq.href) && !hidden.includes(sq.href));
+  check(`${sq.href}: ...is a row of the sidebar's list or a switch-only tool, and in no group`,
+    (new RegExp(`href: "${sq.href.replace(/\//g, "\\/")}"`).test(navSrc) || switchOnly.includes(sq.href)) && !grouped.includes(sq.href));
+  // Hidden here exactly when the grid's population would otherwise hold
+  // it (a drawn sidebar row, or a switch-only tool), with a reason that
+  // sends the reader to this list.
+  check(`${sq.href}: ...hidden here exactly when the grid would otherwise draw it, and saying where it comes back`,
+    hidden.includes(sq.href) === ownerTools.includes(sq.href) && (!hidden.includes(sq.href) || /SWITCHED_SQUARES/.test(HIDDEN_FROM_ALL_TOOLS[sq.href])));
   check(`${sq.href}: ...in one of the four groups`, ["make", "ask", "organise", "business"].includes(sq.group));
-  check(`${sq.href}: ...named as 14.1 names it ("${messages.en.dashboard.tools.names[sq.name]}")`, MASTER_14_1_NEW.includes(messages.en.dashboard.tools.names[sq.name]));
+  check(`${sq.href}: ...named as 14.1 names it ("${messages.en.dashboard.tools.names[sq.name]}")`, [...MASTER_14_1_NEW, "Document"].includes(messages.en.dashboard.tools.names[sq.name]));
 }
 const toolsPage = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
 check("the page asks each square's switch for THIS person, and hands the grid what is on",
   /for \(const square of SWITCHED_SQUARES\) \{\s*if \(isFlagKey\(square\.flag\) && \(await isFeatureOn\(square\.flag, user\)\)\) switchedOn\.push\(square\.href\);\s*\}/.test(toolsPage) &&
     /switchedOn=\{switchedOn\}/.test(toolsPage));
 check("...and the grid draws a new tool's square only when its switch is on",
-  /\.\.\.SWITCHED_SQUARES\.filter\(\(s\) => s\.group === g\.key && switchedOn\.includes\(s\.href\)\)\.map\(\(s\) => everyItem\.get\(s\.href\)\)/.test(grid));
+  /\.\.\.SWITCHED_SQUARES\.filter\(\(s\) => s\.group === g\.key && switchedOn\.includes\(s\.href\)\)\.map\(\(s\) => everyItem\.get\(s\.href\) \?\? switchOnly\(s\.href\)\)/.test(grid));
 check("...with no pin, because Recent tools takes only what the sidebar lists",
   /!SWITCHED_SQUARES\.some\(\(s\) => s\.href === item\.href\)/.test(grid));
 

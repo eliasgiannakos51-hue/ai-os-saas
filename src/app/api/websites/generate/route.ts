@@ -23,7 +23,7 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { settleReservation } from "@/lib/billing/reservations";
 import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
-import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
+import { FAIR_USE_WINDOW_MS, MAX_GENERATIONS_PER_DAY, isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 
@@ -32,21 +32,9 @@ export const dynamic = "force-dynamic";
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
 
-// Fair-use daily cap — applies even to "unlimited" plans (Ultimate/
-// Enterprise's marketing copy is "unlimited team seats/AI agents", never
-// "unlimited generations"; credits are the real per-plan limit for
-// everyone else, but Ultimate/Enterprise's large monthly credit
-// allotment plus admin/beta bypass accounts have no natural ceiling on
-// requests/day). 50/day is far above realistic use (realistically 1-5/
-// day) — this exists purely to catch runaway automation/bugs/abuse, not
-// to constrain any real user. Applied to every plan uniformly (simpler
-// and still harmless for lower tiers, which hit their credit limit
-// first in every realistic scenario) rather than only Ultimate.
-// Independent of, and in addition to, the platform-wide circuit breaker
-// (lib/ai-circuit-breaker.ts) below, which is the final safety net
-// across the whole platform regardless of plan or per-feature caps.
-const MAX_GENERATIONS_PER_DAY = 50;
-const FAIR_USE_WINDOW_MS = 24 * 60 * 60 * 1000;
+// The fair-use daily cap (MAX_GENERATIONS_PER_DAY) lives in
+// lib/website-generation-limits.ts since package 28: a translated copy of
+// a site is a new row too, and api/translate counts against the same cap.
 
 // Website Builder — job START. Deliberately fast: validates the request,
 // runs the (small, ~300-token) off-topic classifier, checks the user has
@@ -175,7 +163,8 @@ export async function POST(request: Request) {
     );
 
     // Fair-use daily cap — applies to every account, including admin/beta
-    // (see MAX_GENERATIONS_PER_DAY above for why no exception is made).
+    // (see MAX_GENERATIONS_PER_DAY in lib/website-generation-limits.ts for
+    // why no exception is made).
     // Cheap COUNT, no AI call, so it's checked before anything that costs
     // real money. A rolling 24h window (not calendar-day) so it can't be
     // reset early by waiting for local midnight.

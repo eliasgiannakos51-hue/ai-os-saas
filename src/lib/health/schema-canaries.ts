@@ -428,6 +428,19 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "column",
+    table: "leads",
+    column: "stage",
+    migration: "20261023000000_lead_stages.sql",
+    breaks: "Sales stages (switch \"finance-sales\") cannot move a contact or set its reminder: every move answers «it could not be saved», and no reminder is ever sent",
+  },
+  {
+    kind: "table",
+    table: "user_games",
+    migration: "20261024000000_user_games.sql",
+    breaks: "Games (switch \"games\") plan a game, charge for the plan, and cannot keep it: the person pays and sees «it could not be saved»; the page itself shows no games",
+  },
+  {
+    kind: "column",
     table: "project_flows",
     column: "steps",
     migration: "20261022000000_project_flows.sql",

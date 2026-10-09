@@ -121,7 +121,7 @@ check("...only when it is finished", /const made = report\.status === "ready" \?
 const plan = route.indexOf('accountHasCapability(await resolveEffectivePlanSlug(user), "presentations"');
 const read = route.indexOf('.from("research_reports")');
 const hold = route.indexOf("await reserveCredits(");
-check("...after the plan gate and before the hold, so it is estimated and held as a description is", plan > 0 && read > plan && hold > read && /inputChars: deckEstimateInputChars\(description\.length \+ businessContext\.length, slideCount\)/.test(route));
+check("...after the plan gate and before the hold, so it is estimated and held as a description is", plan > 0 && read > plan && hold > read && /inputChars: deckEstimateInputChars\(description\.length \+ businessContext\.length( \+ deckChartsChars\(charts\))?, slideCount\)/.test(route));
 check("room is left for the sources slides", /slideCount = Math\.max\(MIN_SLIDES, Math\.min\(slideCount, MAX_SLIDES - Math\.ceil\(reportSources\.length \/ MAX_BULLETS\)\)\);/.test(route));
 check("the sources slides come from the stored list, after the model", /let deck: Deck = withSourcesSlides\(outcome\.deck, reportSources\);/.test(route));
 

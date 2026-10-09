@@ -4,14 +4,18 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Pin, PinOff, Search } from "lucide-react";
+import { LayoutGrid, Pin, PinOff, Search, type LucideIcon } from "lucide-react";
 import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, SWITCHED_SQUARES, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
+import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, SWITCHED_SQUARES, SWITCH_ONLY_ITEMS, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
+import { GAMES_ICON } from "@/lib/module-icons";
+
+/** The icon of each tool with no sidebar row (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS). */
+const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON };
 
 /**
  * ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05): big square tiles, four in a
@@ -58,6 +62,11 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
       sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))
     );
     const everyItem = new Map(ALL_SIDEBAR_GROUPS.flatMap((g) => g.items.map((i) => [i.href, i] as const)));
+    // A tool with no sidebar row at all (lib/nav/all-tools.ts
+    // SWITCH_ONLY_ITEMS): drawn only through SWITCHED_SQUARES below, so only
+    // when its switch is on.
+    const switchOnly = (href: string): SidebarItem | undefined =>
+      SWITCH_ONLY_ITEMS[href] ? { href, ...SWITCH_ONLY_ITEMS[href], icon: SWITCH_ONLY_ICONS[href] ?? LayoutGrid } : undefined;
     // Literal keys, so the message slicer can bound what this page needs
     // (lib/i18n/message-slices.ts): a template-literal key is unbounded.
     const headings: Record<AllToolsGroupKey, string> = {
@@ -73,7 +82,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
       heading: headings[g.key],
       items: [
         ...g.hrefs.map((h) => byHref.get(h)),
-        ...SWITCHED_SQUARES.filter((s) => s.group === g.key && switchedOn.includes(s.href)).map((s) => everyItem.get(s.href)),
+        ...SWITCHED_SQUARES.filter((s) => s.group === g.key && switchedOn.includes(s.href)).map((s) => everyItem.get(s.href) ?? switchOnly(s.href)),
       ].filter((i): i is SidebarItem => Boolean(i)),
     })).filter((g) => g.items.length > 0);
   }, [isOwner, t, switchedOn]);
@@ -98,6 +107,8 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     trading: t("names.trading"),
     image: t("names.image"),
     connections: t("names.connections"),
+    document: t("names.document"),
+    games: t("names.games"),
   };
   // THE ONE LINE UNDER EACH NAME (MASTER 14.1: «όνομα μίας λέξης, μία
   // γραμμή»), short enough that the square stays square on a phone.
@@ -119,6 +130,8 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     trading: t("lines.trading"),
     image: t("lines.image"),
     connections: t("lines.connections"),
+    document: t("lines.document"),
+    games: t("lines.games"),
   };
   const nameKey = (href: string): AllToolsNameKey | undefined =>
     ALL_TOOLS_NAMES[href] ?? SWITCHED_SQUARES.find((s) => s.href === href)?.name;

@@ -11,6 +11,14 @@ import { DocumentsList, type DocumentListItem } from "@/components/documents/doc
 import { loadFavoriteIds } from "@/lib/favorites";
 import { documentPreviewText } from "@/lib/document-preview";
 import type { DocumentContent, UserDocument } from "@/types/document";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { planMeetsMinimum } from "@/lib/billing/plans";
+import { htmlToBlocks } from "@/lib/pdf/blocks";
+import { DOCUMENT_WRITER_MIN_PLAN } from "@/lib/documents/writer-access";
+import { DocumentsShell, type WrittenDocRow } from "@/components/documents/documents-shell";
+import { readRequestedId } from "@/lib/library/requested";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.documents");
@@ -23,7 +31,8 @@ export function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export default async function DocumentsPage() {
+export default async function DocumentsPage(props: { searchParams?: Promise<{ record?: string }> }) {
+  const searchParams = await props.searchParams;
   const t = await getTranslations("dashboard.documents");
   const supabase = await createClient();
 
@@ -52,6 +61,26 @@ export default async function DocumentsPage() {
     updated_at: doc.updated_at,
     preview: documentPreviewText(doc.content),
   }));
+
+  // THE WRITER (MASTER 16, package 14), behind the switch "document-writer"
+  // and for the plans that include it (lib/documents/writer-access.ts; the
+  // routes refuse the same two): every document of the person's, written
+  // or typed, opens beside the conversation as its blocks. The notes list
+  // below stays the page for everybody else, and the editor stays one
+  // press away from the writer.
+  if ((await isFeatureOn("document-writer", user)) && (isAdminEmail(user.email) || planMeetsMinimum(await resolveEffectivePlanSlug(user), DOCUMENT_WRITER_MIN_PLAN))) {
+    const written: WrittenDocRow[] = rows.map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      blocks: htmlToBlocks(typeof doc.content?.html === "string" ? doc.content.html : ""),
+      updatedAt: doc.updated_at,
+    }));
+    return (
+      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+        <DocumentsShell initialOpenId={readRequestedId(typeof searchParams?.record === "string" ? searchParams.record : null)} docs={written} translate={await isFeatureOn("translate", user)} />
+      </div>
+    );
+  }
 
   // Batched, same as every other list — one query for the whole page.
   const favoritedDocIds = await loadFavoriteIds(

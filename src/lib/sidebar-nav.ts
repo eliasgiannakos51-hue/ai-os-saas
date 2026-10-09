@@ -133,7 +133,7 @@ import type { SidebarGroupConfig } from "@/lib/sidebar-visibility";
 // inside the overview and the owner-only business-health screen. See
 // each page's header for what was already there.
 //
-// NOTHING WAS DELETED. Twenty-nine entries carry `hidden: true`: each
+// NOTHING WAS DELETED. Every entry that carries `hidden: true`
 // keeps its translation, its owner-only flag, its row in the command
 // palette (which flattens `visibleGroups`, not `sidebarGroups`) and its
 // place on the hub at /dashboard/records.

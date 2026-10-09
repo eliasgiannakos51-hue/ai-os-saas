@@ -55,10 +55,17 @@ type Props = {
   /** What the tool made, beside the conversation. */
   work?: { title: string; actions?: ReactNode; body: ReactNode } | null;
   onCloseWork?: () => void;
+  /** Files given to the field — the «+», a paste, a drop — and what they
+   *  are, drawn above the text; the same as Chat's (package 9). Slides
+   *  passes them for a spreadsheet to chart (package 13). */
+  attach?: { accept: string; label: string; onFiles: (files: File[]) => void };
+  tray?: ReactNode;
+  /** Send waits while a file is still being read. */
+  holdSend?: boolean;
 };
 
 export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(
-  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork },
+  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend },
   ref
 ) {
   const t = useTranslations("dashboard.toolShell");
@@ -115,6 +122,9 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
               initialText={initialText}
               placeholder={placeholder}
               onLengthChange={onLengthChange}
+              attach={attach}
+              tray={tray}
+              holdSend={holdSend}
             >
               {options.length > 0 && (
                 <div data-testid="tool-shell-options" className="mt-2 flex flex-wrap gap-2">
@@ -127,11 +137,20 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
         </div>
       </div>
 
+      {/* ON A PHONE THE WORK IS THE WHOLE SCREEN, ABOVE THE TAB BAR'S 64px.
+          Its z-[60] is counted inside the dashboard's z-10 layer
+          (app/dashboard/layout.tsx), and the tab bar
+          (components/dashboard/mobile-tab-bar.tsx, z-40, md:hidden) sits
+          outside it, so the bar is drawn over the work's last 64px: a
+          game's versions, a Site's last section and an automation's
+          history were under it, unreachable (measured 2026-10-08, the last
+          by scripts/tests/connections-automations-edges.prodtest.mjs). The
+          same room main keeps, and the scrolling area ends above the bar. */}
       {work && (
         <section
           aria-label={work.title}
           data-testid="tool-shell-work"
-          className="fixed inset-0 z-[60] flex flex-col bg-workspace lg:static lg:z-auto lg:w-[60%] lg:shrink-0"
+          className="fixed inset-0 z-[60] flex flex-col bg-workspace pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 lg:static lg:z-auto lg:w-[60%] lg:shrink-0"
         >
           <div className="flex items-center gap-1 px-2 py-1.5">
             <button type="button" onClick={onCloseWork} aria-label={t("back")} data-testid="tool-shell-back" className={`${ACTION} lg:hidden`}>
@@ -143,13 +162,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          {/* ROOM FOR THE TAB BAR. Under md the phone's tab bar
-              (components/dashboard/mobile-tab-bar.tsx: 56px and the safe
-              area) is painted over this pane, which sits in the page's
-              own layer; without this the last 57px could not be scrolled
-              into sight — an automation's history among them (found
-              2026-10-08 by scripts/tests/connections-automations-edges.prodtest.mjs). */}
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 md:pb-5">{work.body}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">{work.body}</div>
         </section>
       )}
     </div>

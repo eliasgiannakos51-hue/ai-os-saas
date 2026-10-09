@@ -91,6 +91,7 @@ export function VoiceOrb({
   return (
     <div
       ref={wrapRef}
+      data-testid="voice-orb"
       className="voice-orb relative flex items-center justify-center"
       style={
         {

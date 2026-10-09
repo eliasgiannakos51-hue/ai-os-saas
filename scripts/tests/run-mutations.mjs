@@ -135,7 +135,12 @@ if (suites.length === 0) {
 // 247 -> 248 on 2026-10-07: first-task (MASTER 16, package 39).
 // 248 -> 250 on 2026-10-07: owner-manual and acceptance (MASTER 16,
 // package 40).
-const FLOOR = 250;
+// 250 -> 261 on 2026-10-09, when the checks branch was stacked on
+// packages 13-29: slides-charts, document-writer, posts-images,
+// analysis-numbers, meeting-goal, finance-sales, translate,
+// voice-conversation, games (MASTER 16), owner-alerts and
+// plan-limit-writes (the 17-package check).
+const FLOOR = 261;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

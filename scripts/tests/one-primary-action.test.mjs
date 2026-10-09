@@ -384,13 +384,21 @@ const BASELINE = {
   "dashboard/create/page.tsx": 1,
   "dashboard/data-analysis/page.tsx": 1,
   "dashboard/deep-research/page.tsx": 1,
-  "dashboard/documents/page.tsx": 1,
+  // TWO, and never on one screen: the page draws EITHER the writer
+  // (package 14, behind the switch "document-writer"), whose one filled
+  // control is the field's send, OR the notes list, whose one is «New
+  // document» — the same either-or as the images page below.
+  "dashboard/documents/page.tsx": 2,
   "dashboard/files/page.tsx": 1,
   // TWO, and never on one screen: the page draws EITHER the Image tool
   // (package 19, behind the switch "image-studio"), whose one filled
   // control is the field's send, OR the old list for everyone else, whose
   // one is "add". Back to 1 when the switch is everyone's and the list goes.
   "dashboard/images/page.tsx": 2,
+  // ONE: the field's send. The page is Games (package 26), born in the
+  // shell; without the switch it does not exist, and without the plan it
+  // is the wall, returned early.
+  "dashboard/games/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.

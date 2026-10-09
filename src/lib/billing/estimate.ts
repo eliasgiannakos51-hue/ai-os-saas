@@ -578,6 +578,69 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 1,
   },
+  // A DOCUMENT FROM A DESCRIPTION (api/documents/generate) — MASTER 16,
+  // package 14. The deck's shape: one forced-tool call whose output is the
+  // whole document, so the call site passes docEstimateInputChars() from
+  // lib/documents/writer.ts — the description and the records plus
+  // DOC_OUTPUT_ALLOWANCE_CHARS (9,000, a long two-page document) — and the
+  // ratio of 1 turns the allowance into expected output. Over-stated on
+  // the input side in the same safe direction as the deck. The system
+  // prompt is rules + conduct + checklist, the size of the deck's.
+  documentGenerate: {
+    systemPromptTokens: 1500,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
+  // THE WHOLE DOCUMENT CHANGED (api/documents/[id]/edit, no block): the
+  // document goes up and comes back, presentationEdit's shape.
+  documentEdit: {
+    systemPromptTokens: 1500,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
+  // ONE BLOCK CHANGED: the whole document goes up, so the words fit; one
+  // block comes back, at most a paragraph (MAX_PARAGRAPH_CHARS, 2,000) —
+  // so the output does not grow with the document.
+  documentBlockEdit: {
+    systemPromptTokens: 1500,
+    auxiliaryCalls: [],
+    baseOutputChars: 2200,
+    outputCharsPerInputChar: 0,
+  },
+  // GAMES (MASTER 16, package 26; api/games and api/games/[id]). Each
+  // call site passes EVERY character it sends — the system prompt and the
+  // message (lib/games/game-plan.ts) — so systemPromptTokens is only the
+  // tool schema's few lines. The plan is five boxes of at most 600
+  // characters and a title; one box is one box; a written game is held
+  // at the most the prompt allows (30,000 characters); a change sends the
+  // whole game up and gets the whole game back, so its output tracks its
+  // input one to one.
+  gamePlan: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 3200,
+    outputCharsPerInputChar: 0,
+  },
+  gameBoxEdit: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 700,
+    outputCharsPerInputChar: 0,
+  },
+  gameWrite: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 30000,
+    outputCharsPerInputChar: 0,
+  },
+  gameChange: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
   // One set of social posts (api/posts/generate) — V5 #22. The same
   // shape as presentationGenerate: one forced-tool call, and the cost is
   // set by WHICH platforms were asked for rather than by the brief, so

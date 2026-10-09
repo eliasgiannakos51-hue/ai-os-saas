@@ -224,7 +224,8 @@
       "personalFinance": "Persönliche Finanzen",
       "personalJournal": "Tagebuch",
       "personalLifeOs": "Life OS",
-      "activity": "Aktivität"
+      "activity": "Aktivität",
+      "games": "Spiele"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -287,7 +288,8 @@
       "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
-      "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen"
+      "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen",
+      "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto."
     },
     "closeMenu": "Menü schließen",
     "rail": {
@@ -1285,6 +1287,44 @@
         "insufficient": "Nicht genug Credits für diese Übersetzung. Nichts wurde berechnet.",
         "charged": "Übersetzt und heruntergeladen — {count, plural, one {# Credit} other {# Credits}} berechnet.",
         "chargedNothing": "Übersetzt und heruntergeladen — nichts berechnet."
+      },
+      "writer": {
+        "kind": "Art des Dokuments",
+        "placeholder": "Beschreibe das Dokument, das du brauchst: was es ist, für wen, was darin stehen muss",
+        "changePlaceholder": "Sag, was im Dokument geändert werden soll",
+        "block": "Abschnitt {n}",
+        "boxHint": "Tippe auf einen Abschnitt, um nur diesen zu ändern.",
+        "writing": "Das Dokument wird geschrieben…",
+        "changing": "Wird geändert…",
+        "done": "Ich habe „{title}“ geschrieben. Es ist neben dem Gespräch geöffnet; was du jetzt schreibst, ändert es.",
+        "changed": "Geändert. Die neue Fassung ist neben dem Gespräch geöffnet.",
+        "blockChanged": "Abschnitt {n} wurde geändert; alles andere ist geblieben.",
+        "recent": "Früher geschrieben",
+        "noneYet": "Noch nichts geschrieben.",
+        "new": "Neues Dokument",
+        "word": "Word herunterladen (.docx)",
+        "openEditor": "Im Editor öffnen",
+        "kinds": {
+          "free": "Beliebiges Dokument",
+          "offer": "Angebot",
+          "letter": "Brief",
+          "cv": "Lebenslauf",
+          "report": "Bericht",
+          "invoice": "Rechnung",
+          "script": "Drehbuch"
+        },
+        "errors": {
+          "tooShort": "Erzähl zuerst etwas mehr über das Dokument.",
+          "tooLong": "Das ist länger als eine Beschreibung. Beschreibe das Dokument, statt es einzufügen.",
+          "insufficient": "Nicht genug Credits für dieses Dokument.",
+          "rateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
+          "unavailable": "Der KI-Dienst war nicht verfügbar. Es wurde nichts berechnet.",
+          "unusable": "Das Modell hat etwas zurückgegeben, das kein Dokument war. Beschreibe es anders.",
+          "notIncluded": "Das Schreiben von Dokumenten ist in deinem Tarif nicht enthalten.",
+          "notSaved": "Die Änderung wurde gemacht, konnte aber nicht gespeichert werden. Nichts ging verloren; versuche es erneut.",
+          "failed": "Das hat nicht geklappt. Versuche es erneut.",
+          "exportFailed": "Die Datei konnte nicht erstellt werden."
+        }
       }
     },
     "chat": {
@@ -2882,6 +2922,20 @@
         "rate_limited": "Zu viele Aufnahmen in der letzten Stunde. Versuche es später.",
         "empty": "Diese Aufnahme war leer.",
         "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet."
+      },
+      "goal": {
+        "title": "{count, plural, one {Diese Aufgabe zu einem Schritt eines Ziels machen} other {Diese # Aufgaben zu Schritten eines Ziels machen}}",
+        "goalLabel": "Das Ziel",
+        "projectLabel": "Im Projekt",
+        "newProject": "Ein neues Projekt…",
+        "newProjectName": "Name des neuen Projekts",
+        "make": "{count, plural, one {Ziel mit 1 Schritt erstellen} other {Ziel mit # Schritten erstellen}}",
+        "done": "{count, plural, one {Das Ziel wurde mit 1 Schritt im Projekt erstellt.} other {Das Ziel wurde mit # Schritten im Projekt erstellt.}}",
+        "openProject": "Projekt öffnen",
+        "openGoals": "In Ziele ansehen",
+        "projectLimit": "Alle Projekte deines Tarifs sind belegt. Wähle eines davon oder archiviere zuerst eines.",
+        "projectName": "Gib dem neuen Projekt einen Namen mit mindestens zwei Buchstaben.",
+        "projectFull": "Dieses Projekt ist voll. Wähle ein anderes."
       }
     },
     "voicePage": {
@@ -2971,7 +3025,9 @@
         "sales": "Vertrieb",
         "trading": "Trading",
         "image": "Bild",
-        "connections": "Verbindungen"
+        "connections": "Verbindungen",
+        "document": "Dokument",
+        "games": "Spiele"
       },
       "lines": {
         "site": "Eine Website aus einer Beschreibung.",
@@ -2990,7 +3046,9 @@
         "sales": "Kontakte, Ansprache und nächste Schritte.",
         "trading": "Ein Journal deiner Trades.",
         "image": "Vier Bilder aus einer Beschreibung.",
-        "connections": "Verbinde deine Dienste mit einem Klick."
+        "connections": "Verbinde deine Dienste mit einem Klick.",
+        "document": "Ein Dokument aus einer Beschreibung.",
+        "games": "Ein Spiel aus einer Beschreibung."
       }
     },
     "home": {
@@ -3426,6 +3484,109 @@
       "send": "Los",
       "import": "Bring deine Daten aus einer CSV-Datei mit",
       "skip": "Überspringen"
+    },
+    "financeQuick": {
+      "title": "Schreib, was du bezahlt oder erhalten hast",
+      "placeholder": "z. B. 50 Euro Strom bezahlt",
+      "save": "Erfassen",
+      "hint": "Ein Betrag und ob bezahlt oder erhalten. So gelesen, wie geschrieben – nichts wird geraten.",
+      "doneExpense": "Erfasst: eine Ausgabe von {amount} – {description}.",
+      "doneIncome": "Erfasst: eine Einnahme von {amount} – {description}.",
+      "open": "Öffnen",
+      "missingAmount": "Ich habe nicht genau einen Betrag gefunden. Schreib einen, z. B. „50 € Strom bezahlt“.",
+      "missingType": "Ich weiß nicht, ob bezahlt oder erhalten. Schreib „bezahlt“ oder „erhalten“.",
+      "missingBoth": "Schreib einen Betrag und ob bezahlt oder erhalten, z. B. „50 € Strom bezahlt“.",
+      "failed": "Das konnte nicht erfasst werden. Versuch es erneut."
+    },
+    "sales": {
+      "title": "Kontakte nach Phase",
+      "empty": "Noch keine Kontakte.",
+      "dueTitle": "Fällige Erinnerungen",
+      "moveTo": "Verschieben nach",
+      "remind": "Erinnern am",
+      "move": "Verschieben",
+      "remindOn": "Erinnerung {date}",
+      "badReminder": "Wähle einen Erinnerungstag nach heute, innerhalb eines Jahres.",
+      "failed": "Das konnte nicht gespeichert werden. Versuch es erneut.",
+      "stages": {
+        "new": "Neu",
+        "contacted": "Kontaktiert",
+        "meeting": "Termin",
+        "proposal": "Angebot",
+        "won": "Gewonnen",
+        "lost": "Verloren"
+      },
+      "reminder": {
+        "title": "Erinnerung: {name}",
+        "body": "Phase: {stage}"
+      }
+    },
+    "translate": {
+      "button": "Übersetzen",
+      "title": "In eine andere Sprache übersetzen",
+      "language": "Sprache",
+      "copyNoteSite": "Deine Website bleibt unverändert. Die Übersetzung wird eine neue Website daneben, mit denselben Seiten, Farben und Bildern.",
+      "copyNoteDocument": "Dein Dokument bleibt unverändert. Die Übersetzung wird ein neues Dokument daneben, in derselben Form.",
+      "estimating": "Preis wird berechnet…",
+      "estimate": "Die Übersetzung kostet etwa {count, plural, one {# Credit} other {# Credits}}. Berechnet erst, wenn du auf Übersetzen drückst.",
+      "bypassFree": "Die Übersetzung ist auf diesem Konto kostenlos.",
+      "sameLanguage": "Es ist bereits in dieser Sprache geschrieben. Wähle eine andere.",
+      "nothing": "Es gibt keinen Text zu übersetzen.",
+      "tooLong": "Das ist zu lang für eine Übersetzung ({chars} Zeichen; das Limit ist {limit}).",
+      "estimateFailed": "Der Preis konnte nicht berechnet werden. Versuche es erneut.",
+      "go": "Übersetzen",
+      "running": "Wird übersetzt…",
+      "stop": "Stoppen",
+      "stopped": "Gestoppt. Nichts wurde berechnet und nichts geschrieben.",
+      "done": "Fertig: „{name}“.",
+      "kept": "{count, plural, one {# Abschnitt blieb unverändert} other {# Abschnitte blieben unverändert}}, weil ihre Übersetzung die Form nicht behielt.",
+      "charged": "{count, plural, one {# Credit} other {# Credits}} berechnet.",
+      "chargedNothing": "Nichts berechnet.",
+      "open": "Öffnen",
+      "insufficient": "Nicht genug Credits für diese Übersetzung. Nichts wurde berechnet.",
+      "dailyLimit": "Du hast das heutige Limit für neue Websites erreicht. Versuche es morgen.",
+      "notIncluded": "Die Website ist in deinem Tarif nicht enthalten.",
+      "unusable": "Die Antwort war nicht brauchbar, und nichts wurde geschrieben. Berechnet wird nur, was verbraucht wurde.",
+      "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
+    },
+    "games": {
+      "placeholder": "Beschreibe ein Spiel: was der Spieler tut, was ihn aufhält, wie er gewinnt…",
+      "placeholderBox": "Sag, was sich in diesem Kasten ändern soll…",
+      "placeholderChange": "Sag, was sich im Spiel ändern soll, z. B. „ein schnellerer Gegner“…",
+      "boxes": {
+        "rules": "Regeln",
+        "levels": "Level",
+        "characters": "Figuren",
+        "controls": "Steuerung",
+        "win": "Wie man gewinnt"
+      },
+      "boxHint": "Das ist der Plan. Tippe auf einen Kasten und sag, was sich ändern soll; nur er ändert sich. Wenn du so weit bist, erstelle das Spiel.",
+      "planned": "Der Plan für „{title}“ ist fertig. Sieh dir die Kästen rechts an.",
+      "boxChanged": "Der Kasten „{box}“ hat sich geändert. Die anderen sind geblieben.",
+      "build": "Spiel erstellen",
+      "building": "Das Spiel wird geschrieben…",
+      "built": "Das Spiel ist fertig. Spiel es rechts und sag, was sich ändern soll.",
+      "changed": "Geändert. Die neue Version läuft rechts; die vorherige ist gespeichert.",
+      "restored": "Version {n} ist zurück.",
+      "recent": "Deine Spiele",
+      "noneYet": "Du hast noch kein Spiel erstellt.",
+      "download": "Code herunterladen",
+      "play": "Das Spiel",
+      "sealed": "Es läuft abgeschottet: Es sieht nichts von deinem Konto und geht nicht ins Internet.",
+      "versions": "{count, plural, one {# Version} other {# Versionen}}",
+      "version": "Fassung {n}",
+      "first": "die erste",
+      "restore": "Wiederherstellen",
+      "errors": {
+        "insufficient": "Nicht genug Credits. Nichts wurde berechnet.",
+        "unavailable": "Der Dienst antwortet gerade nicht. Nichts wurde berechnet.",
+        "unusable": "Die Antwort war kein spielbares Spiel und wurde nicht behalten. Berechnet wird nur, was verbraucht wurde.",
+        "rateLimited": "Zu viele Anfragen auf einmal. Versuche es gleich noch einmal.",
+        "notIncluded": "Spiele gibt es in den Tarifen mit der Website.",
+        "tooLong": "Die Beschreibung ist zu lang.",
+        "stopped": "Gestoppt. Nichts wurde berechnet.",
+        "failed": "Etwas ist schiefgelaufen. Versuche es erneut."
+      }
     }
   },
   "module": {
@@ -4152,6 +4313,11 @@
       "is": "Eine Karte von ganz Ionexa, auf einer Seite.",
       "does": "Zeigt jedes Werkzeug mit einer Zeile dazu, was es tut – gruppiert danach, was du erstellst, fragst, laufen lässt und ansiehst.",
       "doesNot": "Es ist nicht der einzige Weg: Schreib in das Feld auf der Startseite, was du willst, oder drücke ⌘K – du landest beim selben Werkzeug."
+    },
+    "games": {
+      "is": "Ein eigenes kleines Spiel, aus einer Beschreibung.",
+      "does": "Zuerst zeigt es den Plan in fünf Feldern; ändere jedes davon mit Worten, dann schreibt es das Spiel und du spielst es hier, mit Tastatur oder per Touch.",
+      "doesNot": "Es sieht dein Konto nicht und geht nicht ins Internet: Das Spiel läuft abgeschottet, ebenso die Datei, die du herunterlädst."
     }
   },
   "helpCentre": {
@@ -4491,6 +4657,35 @@
     "chart": {
       "nothingToPlot": "Hier gibt es nichts zu zeichnen.",
       "truncated": "Zeigt die größten {count}; der Rest ist gruppiert oder weggelassen."
+    },
+    "how": {
+      "title": "Wie die Zahlen entstanden sind",
+      "press": "Tippe auf eine Zahl, um zu sehen, wie sie entstanden ist.",
+      "rows": "Die Zeilen der Datei, einzeln gezählt.",
+      "duplicates": "Zeilen, die in jeder Spalte einer früheren Zeile gleichen (Zeilen der Datei: {rows}).",
+      "sum": "Die Summe der Spalte „{column}“ (Zeilen mit Wert: {rows}).",
+      "mean": "Der Mittelwert von „{column}“: die Summe geteilt durch die Zeilen mit Wert ({rows}).",
+      "median": "Der Median von „{column}“: der mittlere Wert, wenn sie sortiert sind (Zeilen mit Wert: {rows}).",
+      "min": "Der kleinste Wert in „{column}“ (Zeilen mit Wert: {rows}).",
+      "max": "Der größte Wert in „{column}“ (Zeilen mit Wert: {rows}).",
+      "missing": "Zeilen ohne Wert in „{column}“ (Zeilen der Datei: {rows}).",
+      "distinct": "Verschiedene Werte in „{column}“ (Zeilen mit Wert: {rows}).",
+      "outliers": "Werte von „{column}“, die mehr als 3 Standardabweichungen von ihrem Mittelwert entfernt sind (Zeilen mit Wert: {rows}).",
+      "topCount": "Zeilen, in denen „{column}“ den Wert „{label}“ hat (Zeilen mit Wert: {rows}).",
+      "r": "Pearson-Korrelation zwischen „{column}“ und „{other}“, über die Zeilen, die beide haben. Von −1 bis 1; sie sagt nicht, was was verursacht.",
+      "from": "Das erste Datum in „{column}“.",
+      "to": "Das letzte Datum in „{column}“.",
+      "chartTitle": "Wie jeder Wert entstanden ist",
+      "point": "Zeilen: {rows}",
+      "other": "Was nicht ins Diagramm passt, zusammengefasst.",
+      "dropped": "Ergebnisse mit einer Zahl, die nicht aus der Datei berechnet wurde, wurden weggelassen: {count}.",
+      "chart": {
+        "sum": "Für jedes „{x}“ die Summe von „{y}“.",
+        "mean": "Für jedes „{x}“ der Mittelwert von „{y}“.",
+        "count": "Für jedes „{x}“ die Anzahl der Zeilen.",
+        "min": "Für jedes „{x}“ der kleinste Wert von „{y}“.",
+        "max": "Für jedes „{x}“ der größte Wert von „{y}“."
+      }
     }
   },
   "coding": {
@@ -4603,7 +4798,8 @@
         "bullets": "Stichpunkte",
         "section": "Abschnitt",
         "quote": "Zitat",
-        "image": "Foto"
+        "image": "Foto",
+        "chart": "Diagramm"
       }
     },
     "errors": {
@@ -4637,6 +4833,33 @@
       "notSaved": "Die Änderung wurde vorgenommen, konnte aber nicht gespeichert werden. Nichts ging verloren — bitte erneut versuchen.",
       "noDeck": "Dieser Eintrag hat keine Präsentation zum Ändern.",
       "notIncluded": "Präsentationen sind in Ihrem Tarif nicht enthalten."
+    },
+    "chart": {
+      "attach": "Tabelle (CSV oder Excel) für ein Diagramm hinzufügen",
+      "reading": "Datei wird gelesen…",
+      "ready": "{rows, plural, one {# Zeile} other {# Zeilen}} – die Präsentation bekommt ein Diagramm daraus",
+      "remove": "{name} entfernen",
+      "failed": {
+        "type": "Nur eine CSV- oder Excel-Datei (.xlsx) kann zum Diagramm werden.",
+        "tooLarge": "Die Datei ist größer als {mb} MB.",
+        "unreadable": "Diese Datei konnte nicht als Tabelle gelesen werden.",
+        "tooMany": "Zu viele Dateien in der letzten Stunde. Versuche es später erneut.",
+        "other": "Die Datei konnte nicht gelesen werden. Versuche es erneut."
+      },
+      "noData": "Diese Datei hat keine Spalte mit Zahlen oder Kategorien zum Darstellen, daher wurde keine Präsentation erstellt und nichts berechnet.",
+      "gone": "Diese Datei ist nicht mehr da. Füge sie mit „+“ erneut hinzu.",
+      "other": "Sonstige",
+      "fallbackTitle": "{y} nach {x}",
+      "fallbackCount": "Anzahl der Zeilen je {x}",
+      "how": {
+        "sum": "die Summe von {y} je {x}",
+        "mean": "der Durchschnitt von {y} je {x}",
+        "count": "die Anzahl der Zeilen je {x}",
+        "min": "der kleinste Wert von {y} je {x}",
+        "max": "der größte Wert von {y} je {x}"
+      },
+      "source": "Aus {file} ({rows} Zeilen): {how}.",
+      "openFile": "Datei in Analysieren öffnen"
     }
   },
   "posts": {
@@ -4678,6 +4901,21 @@
       "failed": "fehlgeschlagen",
       "delete": "Löschen",
       "deleteConfirm": "Diese Beiträge löschen? Das lässt sich nicht rückgängig machen."
+    },
+    "picture": {
+      "option": "Bild",
+      "none": "Kein Bild",
+      "own": "Mein Foto",
+      "unsplash": "Ein Foto von Unsplash",
+      "attach": "Füge dein Foto hinzu (JPEG oder PNG)",
+      "uploading": "Das Foto wird hochgeladen…",
+      "ready": "Jeder Beitrag bekommt dieses Foto im Format seiner Plattform",
+      "failed": "Das Foto konnte nicht hochgeladen werden. Versuche es erneut.",
+      "rejected": "Nur ein JPEG oder PNG unter 5 MB.",
+      "needPhoto": "Füge zuerst dein Foto mit „+“ hinzu oder wähle ein anderes Bild.",
+      "download": "Bild für {platform} herunterladen",
+      "credit": "Foto von <author>{name}</author> auf <unsplash>Unsplash</unsplash>",
+      "noneFound": "Kein Foto passte zu diesen Beiträgen, daher haben sie kein Bild."
     }
   },
   "projects": {

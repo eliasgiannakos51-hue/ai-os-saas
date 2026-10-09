@@ -189,10 +189,6 @@ const NOT_PROBEABLE = {
     "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261014000000_server_written_tables.sql":
     "drops nine write policies and revokes INSERT, UPDATE and DELETE on three tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write any of them, and server-written-tables.dbtest.mjs checks it against a real Postgres",
-  "20261013000000_cost_columns_server_only.sql":
-    "narrows SELECT on two tables to listed columns. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can read a server-only column or has lost a listed one, and cost-columns.dbtest.mjs checks it against a real Postgres",
-  "20261012000000_cost_log_server_reads.sql":
-    "drops two select policies and revokes SELECT on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still read either table, and cost-log-reads.dbtest.mjs checks it against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

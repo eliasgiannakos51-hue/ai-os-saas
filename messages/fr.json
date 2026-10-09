@@ -224,7 +224,8 @@
       "personalFinance": "Finances personnelles",
       "personalJournal": "Journal",
       "personalLifeOs": "Life OS",
-      "activity": "Activité"
+      "activity": "Activité",
+      "games": "Jeux"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -287,7 +288,8 @@
       "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
       "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
       "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez.",
-      "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres"
+      "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres",
+      "games": "Décrivez un jeu, changez son plan avec des mots et jouez-y ici, isolé de votre compte."
     },
     "closeMenu": "Fermer le menu",
     "rail": {
@@ -1285,6 +1287,44 @@
         "insufficient": "Pas assez de crédits pour cette traduction. Rien n'a été facturé.",
         "charged": "Traduit et téléchargé — {count, plural, one {# crédit facturé} other {# crédits facturés}}.",
         "chargedNothing": "Traduit et téléchargé — rien facturé."
+      },
+      "writer": {
+        "kind": "Type de document",
+        "placeholder": "Décrivez le document dont vous avez besoin : ce que c’est, pour qui, ce qu’il doit dire",
+        "changePlaceholder": "Dites ce qu’il faut changer dans le document",
+        "block": "bloc {n}",
+        "boxHint": "Appuyez sur un bloc pour ne changer que celui-ci.",
+        "writing": "Rédaction du document…",
+        "changing": "Modification…",
+        "done": "J’ai rédigé « {title} ». Il est ouvert à côté de la conversation ; ce que vous écrivez maintenant le modifie.",
+        "changed": "Modifié. La nouvelle version est ouverte à côté de la conversation.",
+        "blockChanged": "Le bloc {n} a changé ; tout le reste est resté tel quel.",
+        "recent": "Rédigés avant",
+        "noneYet": "Rien n’a encore été rédigé.",
+        "new": "Nouveau document",
+        "word": "Télécharger Word (.docx)",
+        "openEditor": "Ouvrir dans l’éditeur",
+        "kinds": {
+          "free": "Tout document",
+          "offer": "Offre",
+          "letter": "Lettre",
+          "cv": "CV",
+          "report": "Rapport",
+          "invoice": "Facture",
+          "script": "Scénario"
+        },
+        "errors": {
+          "tooShort": "Dites-en un peu plus sur le document d’abord.",
+          "tooLong": "C’est plus long qu’une description. Décrivez le document, ne le collez pas.",
+          "insufficient": "Pas assez de crédits pour ce document.",
+          "rateLimited": "Trop de demandes. Attendez une minute et réessayez.",
+          "unavailable": "Le service d’IA n’était pas disponible. Rien n’a été facturé.",
+          "unusable": "Le modèle a renvoyé autre chose qu’un document. Essayez de le décrire autrement.",
+          "notIncluded": "La rédaction de documents n’est pas incluse dans votre offre.",
+          "notSaved": "La modification a été faite mais n’a pas pu être enregistrée. Rien n’est perdu ; réessayez.",
+          "failed": "Cela n’a pas fonctionné. Réessayez.",
+          "exportFailed": "Le fichier n’a pas pu être créé."
+        }
       }
     },
     "chat": {
@@ -2882,6 +2922,20 @@
         "rate_limited": "Trop d'enregistrements dans la dernière heure. Réessayez plus tard.",
         "empty": "Cet enregistrement était vide.",
         "failed": "Une erreur est survenue. Rien n'a été facturé."
+      },
+      "goal": {
+        "title": "{count, plural, one {Faire de cette action une étape d’un objectif} other {Faire de ces # actions les étapes d’un objectif}}",
+        "goalLabel": "L’objectif",
+        "projectLabel": "Dans le projet",
+        "newProject": "Un nouveau projet…",
+        "newProjectName": "Nom du nouveau projet",
+        "make": "{count, plural, one {Créer l’objectif avec 1 étape} other {Créer l’objectif avec # étapes}}",
+        "done": "{count, plural, one {L’objectif a été créé avec 1 étape, dans le projet.} other {L’objectif a été créé avec # étapes, dans le projet.}}",
+        "openProject": "Ouvrir le projet",
+        "openGoals": "Le voir dans Objectifs",
+        "projectLimit": "Tous les projets de votre offre sont utilisés. Choisissez-en un, ou archivez-en un d’abord.",
+        "projectName": "Donnez au nouveau projet un nom d’au moins deux lettres.",
+        "projectFull": "Ce projet est plein. Choisissez-en un autre."
       }
     },
     "voicePage": {
@@ -2971,7 +3025,9 @@
         "sales": "Ventes",
         "trading": "Trading",
         "image": "Image",
-        "connections": "Connexions"
+        "connections": "Connexions",
+        "document": "Document",
+        "games": "Jeux"
       },
       "lines": {
         "site": "Un site à partir d'une description.",
@@ -2990,7 +3046,9 @@
         "sales": "Contacts, relances et prochaines étapes.",
         "trading": "Le journal de vos trades.",
         "image": "Quatre images à partir d'une description.",
-        "connections": "Connectez vos services en un clic."
+        "connections": "Connectez vos services en un clic.",
+        "document": "Un document à partir d'une description.",
+        "games": "Un jeu à partir d'une description."
       }
     },
     "home": {
@@ -3426,6 +3484,109 @@
       "send": "Commencer",
       "import": "Importe tes données depuis un fichier CSV",
       "skip": "Passer"
+    },
+    "financeQuick": {
+      "title": "Écrivez ce que vous avez payé ou reçu",
+      "placeholder": "p. ex. j’ai payé 50 euros d’électricité",
+      "save": "Enregistrer",
+      "hint": "Un montant, et s’il a été payé ou reçu. Lu tel qu’écrit : rien n’est deviné.",
+      "doneExpense": "Enregistré : une dépense de {amount} — {description}.",
+      "doneIncome": "Enregistré : une recette de {amount} — {description}.",
+      "open": "L’ouvrir",
+      "missingAmount": "Je n’ai pas trouvé un seul montant. Écrivez-en un seul, p. ex. « j’ai payé 50 € d’électricité ».",
+      "missingType": "Je ne sais pas s’il a été payé ou reçu. Commencez par « j’ai payé » ou « j’ai reçu ».",
+      "missingBoth": "Écrivez un montant et s’il a été payé ou reçu, p. ex. « j’ai payé 50 € d’électricité ».",
+      "failed": "L’enregistrement a échoué. Réessayez."
+    },
+    "sales": {
+      "title": "Contacts par étape",
+      "empty": "Aucun contact pour l’instant.",
+      "dueTitle": "Rappels arrivés",
+      "moveTo": "Passer à",
+      "remind": "Me le rappeler le",
+      "move": "Déplacer",
+      "remindOn": "rappel {date}",
+      "badReminder": "Choisissez un jour de rappel après aujourd’hui, dans l’année.",
+      "failed": "L’enregistrement a échoué. Réessayez.",
+      "stages": {
+        "new": "Nouveau",
+        "contacted": "Contacté",
+        "meeting": "Rendez-vous",
+        "proposal": "Proposition",
+        "won": "Gagné",
+        "lost": "Perdu"
+      },
+      "reminder": {
+        "title": "Rappel : {name}",
+        "body": "Étape : {stage}"
+      }
+    },
+    "translate": {
+      "button": "Traduire",
+      "title": "Traduire dans une autre langue",
+      "language": "Langue",
+      "copyNoteSite": "Votre site ne change pas. La traduction devient un nouveau site à côté, avec les mêmes pages, couleurs et images.",
+      "copyNoteDocument": "Votre document ne change pas. La traduction devient un nouveau document à côté, dans la même forme.",
+      "estimating": "Calcul du prix…",
+      "estimate": "La traduction coûte environ {count, plural, one {# crédit} other {# crédits}}. Débité seulement quand vous appuyez sur Traduire.",
+      "bypassFree": "La traduction est gratuite sur ce compte.",
+      "sameLanguage": "C'est déjà écrit dans cette langue. Choisissez-en une autre.",
+      "nothing": "Il n'y a aucun texte à traduire.",
+      "tooLong": "C'est trop long pour une traduction ({chars} caractères ; la limite est {limit}).",
+      "estimateFailed": "Le prix n'a pas pu être calculé. Réessayez.",
+      "go": "Traduire",
+      "running": "Traduction…",
+      "stop": "Arrêter",
+      "stopped": "Arrêté. Rien n'a été débité et rien n'a été écrit.",
+      "done": "Terminé : « {name} ».",
+      "kept": "{count, plural, one {# passage est resté tel quel} other {# passages sont restés tels quels}}, car leur traduction ne gardait pas la forme.",
+      "charged": "{count, plural, one {# crédit débité} other {# crédits débités}}.",
+      "chargedNothing": "Aucun débit.",
+      "open": "L'ouvrir",
+      "insufficient": "Pas assez de crédits pour cette traduction. Rien n'a été débité.",
+      "dailyLimit": "Vous avez atteint la limite de nouveaux sites pour aujourd'hui. Réessayez demain.",
+      "notIncluded": "Le Site n'est pas inclus dans votre offre.",
+      "unusable": "La réponse n'était pas utilisable, et rien n'a été écrit. Seul ce qui a été dépensé est débité.",
+      "failed": "La traduction n'a pas pu être faite. Aucun crédit n'a été débité."
+    },
+    "games": {
+      "placeholder": "Décrivez un jeu : ce que fait le joueur, ce qui l'en empêche, comment il gagne…",
+      "placeholderBox": "Dites ce qu'il faut changer dans ce bloc…",
+      "placeholderChange": "Dites ce qu'il faut changer dans le jeu, p. ex. « un ennemi plus rapide »…",
+      "boxes": {
+        "rules": "Règles",
+        "levels": "Niveaux",
+        "characters": "Personnages",
+        "controls": "Commandes",
+        "win": "Comment gagner"
+      },
+      "boxHint": "Voici le plan. Appuyez sur un bloc et dites quoi changer ; seul ce bloc change. Quand vous êtes prêt, créez le jeu.",
+      "planned": "Le plan de « {title} » est prêt. Voyez les blocs à droite.",
+      "boxChanged": "Le bloc « {box} » a changé. Les autres sont restés tels quels.",
+      "build": "Créer le jeu",
+      "building": "Écriture du jeu…",
+      "built": "Le jeu est prêt. Jouez à droite et dites ce qu'il faut changer.",
+      "changed": "Modifié. La nouvelle version se joue à droite ; la précédente est conservée.",
+      "restored": "La version {n} est revenue.",
+      "recent": "Vos jeux",
+      "noneYet": "Vous n'avez pas encore créé de jeu.",
+      "download": "Télécharger le code",
+      "play": "Le jeu",
+      "sealed": "Il se joue isolé : il ne voit rien de votre compte et n'accède pas à internet.",
+      "versions": "{count, plural, one {# version du jeu} other {# versions du jeu}}",
+      "version": "Version n° {n}",
+      "first": "la première",
+      "restore": "Restaurer",
+      "errors": {
+        "insufficient": "Pas assez de crédits. Rien n'a été débité.",
+        "unavailable": "Le service ne répond pas pour le moment. Rien n'a été débité.",
+        "unusable": "La réponse n'était pas un jeu jouable et n'a pas été conservée. Seul ce qui a été dépensé est débité.",
+        "rateLimited": "Trop de demandes à la fois. Réessayez dans un instant.",
+        "notIncluded": "Les jeux sont inclus dans les offres qui ont le Site.",
+        "tooLong": "La description est trop longue.",
+        "stopped": "Arrêté. Rien n'a été débité.",
+        "failed": "Un problème est survenu. Réessayez."
+      }
     }
   },
   "module": {
@@ -4152,6 +4313,11 @@
       "is": "Une carte de tout Ionexa, sur une page.",
       "does": "Montre chaque outil avec une ligne sur ce qu’il fait, regroupés selon ce que vous créez, demandez, lancez et consultez.",
       "doesNot": "Ce n’est pas le seul chemin : écrivez ce que vous voulez dans le champ de l’accueil ou appuyez sur ⌘K, et vous arrivez au même outil."
+    },
+    "games": {
+      "is": "Un petit jeu à vous, à partir d'une description.",
+      "does": "Il vous montre d'abord le plan en cinq cases ; changez-en une avec des mots, puis il écrit le jeu et vous y jouez ici, au clavier ou au toucher.",
+      "doesNot": "Il ne voit pas votre compte et n'accède pas à internet : le jeu tourne isolé, tout comme le fichier que vous téléchargez."
     }
   },
   "helpCentre": {
@@ -4491,6 +4657,35 @@
     "chart": {
       "nothingToPlot": "Rien à tracer pour celui-ci.",
       "truncated": "Affichage des {count} plus grands ; le reste est regroupé ou omis."
+    },
+    "how": {
+      "title": "Comment les chiffres ont été obtenus",
+      "press": "Appuyez sur un chiffre pour voir comment il a été obtenu.",
+      "rows": "Les lignes du fichier, comptées une à une.",
+      "duplicates": "Lignes identiques à une ligne précédente dans toutes les colonnes (lignes du fichier : {rows}).",
+      "sum": "La somme de la colonne « {column} » (lignes avec une valeur : {rows}).",
+      "mean": "La moyenne de « {column} » : la somme divisée par les lignes avec une valeur ({rows}).",
+      "median": "La médiane de « {column} » : la valeur du milieu une fois triées (lignes avec une valeur : {rows}).",
+      "min": "La plus petite valeur de « {column} » (lignes avec une valeur : {rows}).",
+      "max": "La plus grande valeur de « {column} » (lignes avec une valeur : {rows}).",
+      "missing": "Lignes sans valeur dans « {column} » (lignes du fichier : {rows}).",
+      "distinct": "Valeurs différentes dans « {column} » (lignes avec une valeur : {rows}).",
+      "outliers": "Valeurs de « {column} » à plus de 3 écarts-types de sa moyenne (lignes avec une valeur : {rows}).",
+      "topCount": "Lignes où « {column} » vaut « {label} » (lignes avec une valeur : {rows}).",
+      "r": "Corrélation de Pearson entre « {column} » et « {other} », sur les lignes qui ont les deux. De −1 à 1 ; elle ne dit pas ce qui cause quoi.",
+      "from": "La première date de « {column} ».",
+      "to": "La dernière date de « {column} ».",
+      "chartTitle": "Comment chaque valeur a été obtenue",
+      "point": "lignes : {rows}",
+      "other": "Ce qui ne tient pas sur le graphique, regroupé.",
+      "dropped": "Les constats contenant un chiffre qui n’a pas été calculé à partir du fichier ont été écartés : {count}.",
+      "chart": {
+        "sum": "Pour chaque « {x} », la somme de « {y} ».",
+        "mean": "Pour chaque « {x} », la moyenne de « {y} ».",
+        "count": "Pour chaque « {x} », le nombre de lignes.",
+        "min": "Pour chaque « {x} », le plus petit « {y} ».",
+        "max": "Pour chaque « {x} », le plus grand « {y} »."
+      }
     }
   },
   "coding": {
@@ -4603,7 +4798,8 @@
         "bullets": "Idées clés",
         "section": "Partie",
         "quote": "Citation",
-        "image": "Image"
+        "image": "Image",
+        "chart": "Graphique"
       }
     },
     "errors": {
@@ -4637,6 +4833,33 @@
       "notSaved": "La modification a été faite mais n'a pas pu être enregistrée. Rien n'est perdu — réessayez.",
       "noDeck": "Cette ligne n'a pas de présentation à modifier.",
       "notIncluded": "Les présentations ne sont pas incluses dans votre forfait."
+    },
+    "chart": {
+      "attach": "Ajoutez un tableur (CSV ou Excel) pour en faire un graphique",
+      "reading": "Lecture du fichier…",
+      "ready": "{rows, plural, one {# ligne} other {# lignes}} — la présentation aura un graphique tiré de ce fichier",
+      "remove": "Retirer {name}",
+      "failed": {
+        "type": "Seul un fichier CSV ou Excel (.xlsx) peut devenir un graphique.",
+        "tooLarge": "Le fichier dépasse {mb} Mo.",
+        "unreadable": "Ce fichier n’a pas pu être lu comme un tableau.",
+        "tooMany": "Trop de fichiers au cours de la dernière heure. Réessayez plus tard.",
+        "other": "Le fichier n’a pas pu être lu. Réessayez."
+      },
+      "noData": "Ce fichier n’a aucune colonne de nombres ou de catégories à représenter : aucune présentation n’a été créée et rien n’a été facturé.",
+      "gone": "Ce fichier n’est plus là. Ajoutez-le à nouveau avec « + ».",
+      "other": "Autres",
+      "fallbackTitle": "{y} par {x}",
+      "fallbackCount": "Nombre de lignes pour chaque {x}",
+      "how": {
+        "sum": "la somme de {y} pour chaque {x}",
+        "mean": "la moyenne de {y} pour chaque {x}",
+        "count": "le nombre de lignes pour chaque {x}",
+        "min": "la plus petite valeur de {y} pour chaque {x}",
+        "max": "la plus grande valeur de {y} pour chaque {x}"
+      },
+      "source": "Tiré de {file} ({rows} lignes) : {how}.",
+      "openFile": "Ouvrir le fichier dans Analyser"
     }
   },
   "posts": {
@@ -4678,6 +4901,21 @@
       "failed": "échec",
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer ces publications ? C'est irréversible."
+    },
+    "picture": {
+      "option": "Image",
+      "none": "Sans image",
+      "own": "Ma photo",
+      "unsplash": "Une photo d’Unsplash",
+      "attach": "Ajoutez votre photo (JPEG ou PNG)",
+      "uploading": "Envoi de la photo…",
+      "ready": "Chaque publication reçoit cette photo au format de sa plateforme",
+      "failed": "La photo n’a pas pu être envoyée. Réessayez.",
+      "rejected": "Uniquement un JPEG ou PNG de moins de 5 Mo.",
+      "needPhoto": "Ajoutez d’abord votre photo avec « + », ou choisissez une autre image.",
+      "download": "Télécharger l’image pour {platform}",
+      "credit": "Photo de <author>{name}</author> sur <unsplash>Unsplash</unsplash>",
+      "noneFound": "Aucune photo ne correspondait à ces publications, elles n’ont donc pas d’image."
     }
   },
   "projects": {

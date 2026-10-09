@@ -77,7 +77,7 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
 export type AllToolsNameKey =
   | "site" | "slides" | "posts" | "research" | "analyze" | "files" | "automations" | "projects"
   | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading"
-  | "image" | "connections";
+  | "image" | "connections" | "document" | "games";
 
 /**
  * THE NEW TOOLS, EACH BEHIND ITS OWN SWITCH (MASTER Μέρος 14.1: «Κάθε νέο
@@ -100,7 +100,26 @@ export type AllToolsNameKey =
 export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey; flag: string; name: AllToolsNameKey }[] = [
   { href: "/dashboard/images", group: "make", flag: "image-studio", name: "image" },
   { href: "/dashboard/integrations", group: "organise", flag: "connections", name: "connections" },
+  // Package 14: without its switch the page keeps notes and is hidden
+  // below (HIDDEN_FROM_ALL_TOOLS); with it, it writes documents.
+  { href: "/dashboard/documents", group: "make", flag: "document-writer", name: "document" },
+  // Package 26: no sidebar row at all (SWITCH_ONLY_ITEMS below).
+  { href: "/dashboard/games", group: "make", flag: "games", name: "games" },
 ];
+
+/**
+ * A TOOL THAT EXISTS ONLY BEHIND ITS SWITCH (Games, package 26), with no
+ * row in the sidebar's config. That config is also the search (⌘K) and
+ * the records hub, which read no switch: a row there would be a door to
+ * a page that, for everybody the switch does not admit, does not exist.
+ * So its square is described here, and All tools draws it through
+ * SWITCHED_SQUARES only for those whose switch is on. Pure, like the rest
+ * of this file; the grid gives it its icon
+ * (components/tools/tools-grid.tsx SWITCH_ONLY_ICONS).
+ */
+export const SWITCH_ONLY_ITEMS: Readonly<Record<string, { label: string; hintKey: string }>> = {
+  "/dashboard/games": { label: "Games", hintKey: "games" },
+};
 
 /**
  * Hidden from All tools, each with the reason. NOTHING HERE IS REMOVED:
@@ -110,8 +129,10 @@ export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey;
 export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
+  "/dashboard/games":
+    "without the switch games the page does not exist (package 26); with it on, its square is drawn under Make (SWITCHED_SQUARES)",
   "/dashboard/documents":
-    "today it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does)",
+    "without the switch document-writer it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does); with the switch on it writes them, and its square is drawn under Make (SWITCHED_SQUARES)",
   "/dashboard/chat":
     "Ask me is a row of the sidebar itself (MASTER 14.1), so a square here would be a second door to the same room",
   "/dashboard/coding":

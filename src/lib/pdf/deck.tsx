@@ -1,10 +1,11 @@
 import React from "react";
-import { Document, Page, Text, View, Image as PdfImage, Link, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image as PdfImage, Link, StyleSheet, Svg, Rect, Polyline, Path, Line } from "@react-pdf/renderer";
 import { pdfFontFamily } from "@/lib/pdf/font-stack";
 import { isRtlLocale } from "@/lib/pdf/rtl";
 import { breakCjkRuns, cjkCharsPerLine } from "@/lib/pdf/cjk-wrap";
 import { UNSPLASH_HOME_URL, withUnsplashUtm } from "@/lib/website-image-placeholders";
-import type { Deck, Slide } from "@/lib/presentations/deck";
+import type { Deck, Slide, SlideChart } from "@/lib/presentations/deck";
+import { chartShapes, formatChartValue } from "@/lib/presentations/chart-geometry";
 import type { LoadedImage } from "@/lib/presentations/images";
 
 /**
@@ -47,6 +48,7 @@ function sheetFor(fontFamily: string[]) {
     caption: { fontFamily, fontSize: 11, fontWeight: 700, marginTop: 6 },
     notes: { fontFamily, fontSize: 7.5, color: "#6b7280" },
     credit: { fontFamily, fontSize: 7, color: "#9ca3af" },
+    chartValues: { fontFamily, fontSize: 8, color: "#1a1a1a", marginTop: 6 },
     footer: { position: "absolute", bottom: 12, left: PAD, right: PAD, fontFamily, fontSize: 7, color: "#9ca3af" },
     accentBar: { width: 6, backgroundColor: "#f97316", marginRight: 12 },
   });
@@ -84,6 +86,36 @@ function Credit({ slide, styles, align }: { slide: Slide; styles: Sheet; align: 
   );
 }
 
+const CHART_COLOURS = ["#f97316", "#1a1a1a", "#6b7280", "#fdba74", "#9ca3af", "#c2410c", "#d1d5db", "#fed7aa"];
+
+/**
+ * A CHART, DRAWN: the shapes from lib/presentations/chart-geometry.ts (the
+ * same the page draws), then every point with its value in words under it
+ * — on paper there is no hover, and a bar without its number is a claim
+ * the reader cannot check — then where the numbers came from.
+ */
+function ChartBlock({ chart, width, height, styles, align, locale, source }: { chart: SlideChart; width: number; height: number; styles: Sheet; align: "left" | "right"; locale: string; source: string }) {
+  const shapes = chartShapes(chart, width, height);
+  return (
+    <View>
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        {chart.kind !== "pie" ? <Line x1={0} y1={shapes.zero} x2={width} y2={shapes.zero} stroke="#d1d5db" strokeWidth={0.75} /> : null}
+        {shapes.bars.map((b, i) => (
+          <Rect key={i} x={b.x} y={b.y} width={b.w} height={Math.max(b.h, 0.5)} fill="#f97316" />
+        ))}
+        {shapes.line.length > 0 ? <Polyline points={shapes.line.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ")} stroke="#f97316" strokeWidth={2} fill="none" /> : null}
+        {shapes.slices.map((sl, i) => (
+          <Path key={i} d={sl.path} fill={CHART_COLOURS[i % CHART_COLOURS.length]} />
+        ))}
+      </Svg>
+      <Text style={[styles.chartValues, { textAlign: align }]}>
+        {wrap(chart.points.map((p) => `${p.label}: ${formatChartValue(p.value, locale)}`).join("   ·   "), width, 8)}
+      </Text>
+      <Text style={[styles.credit, { textAlign: align, marginTop: 3 }]}>{wrap(source, width, 7)}</Text>
+    </View>
+  );
+}
+
 function SlidePage({
   slide,
   image,
@@ -91,6 +123,8 @@ function SlidePage({
   total,
   styles,
   rtl,
+  locale,
+  sourceText,
 }: {
   slide: Slide;
   image: LoadedImage | undefined;
@@ -98,6 +132,8 @@ function SlidePage({
   total: number;
   styles: Sheet;
   rtl: boolean;
+  locale: string;
+  sourceText: (chart: SlideChart) => string;
 }) {
   const align = rtl ? ("right" as const) : ("left" as const);
   let body: React.ReactNode;
@@ -147,6 +183,33 @@ function SlidePage({
         </View>
       );
       break;
+    case "chart": {
+      if (!slide.chart) {
+        body = (
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.heading, { textAlign: align }]}>{wrap(slide.title, COLUMN_W, 18)}</Text>
+            <Bullets slide={slide} styles={styles} width={COLUMN_W} align={align} />
+          </View>
+        );
+        break;
+      }
+      const chartW = slide.bullets.length > 0 ? COLUMN_W * 0.62 : COLUMN_W;
+      const textW = COLUMN_W - chartW - 16;
+      body = (
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.heading, { textAlign: align }]}>{wrap(slide.title, COLUMN_W, 18)}</Text>
+          <View style={{ flexDirection: rtl ? "row-reverse" : "row" }}>
+            <ChartBlock chart={slide.chart} width={chartW} height={slide.notes ? 170 : 200} styles={styles} align={align} locale={locale} source={sourceText(slide.chart)} />
+            {slide.bullets.length > 0 ? (
+              <View style={{ width: textW, marginLeft: rtl ? 0 : 16, marginRight: rtl ? 16 : 0 }}>
+                <Bullets slide={slide} styles={styles} width={textW} align={align} />
+              </View>
+            ) : null}
+          </View>
+        </View>
+      );
+      break;
+    }
     default: {
       const textW = image ? COLUMN_W * 0.56 : COLUMN_W;
       body = (
@@ -178,7 +241,22 @@ function SlidePage({
   );
 }
 
-export function PdfDeck({ deck, images }: { deck: Deck; images: Map<number, LoadedImage> }) {
+/** Where a chart's numbers came from, in English when the caller has no
+ *  translator for the deck's language. The route passes one. */
+function englishSource(chart: SlideChart): string {
+  const { file, rows, aggregation, x, y } = chart.source;
+  return `From ${file} (${rows} rows): ${aggregation === "count" ? `rows counted for each ${x}` : `the ${aggregation} of ${y} for each ${x}`}`;
+}
+
+export function PdfDeck({
+  deck,
+  images,
+  sourceText = englishSource,
+}: {
+  deck: Deck;
+  images: Map<number, LoadedImage>;
+  sourceText?: (chart: SlideChart) => string;
+}) {
   const rtl = isRtlLocale(deck.locale);
   const fontFamily = pdfFontFamily(deck.locale);
   const styles = sheetFor(fontFamily);
@@ -193,6 +271,8 @@ export function PdfDeck({ deck, images }: { deck: Deck; images: Map<number, Load
           total={deck.slides.length}
           styles={styles}
           rtl={rtl}
+          locale={deck.locale}
+          sourceText={sourceText}
         />
       ))}
     </Document>

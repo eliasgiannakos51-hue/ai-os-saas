@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Clock, Download, Sparkles, Upload } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useToast } from "@/components/toast/toast-context";
 import { AnalysisChart } from "@/components/data-analysis/analysis-chart";
+import { FactText, useExplainFact } from "@/components/data-analysis/fact-text";
+import { formatFact } from "@/lib/data-analysis/facts";
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import { MAX_UPLOAD_BYTES } from "@/lib/data-analysis/limits";
 import { useErrorText } from "@/lib/errors/use-error-text";
@@ -24,9 +26,24 @@ import { describeColumn, type AnalysisSummary, type AnalysisView } from "@/lib/d
  * one. The file itself — what its columns are, what was found, the charts
  * — is the work beside the conversation. Three options: upload a file,
  * find patterns in this one, and the files uploaded before.
+ *
+ * WITH THE SWITCH "analysis-provenance" (package 16), every number in what
+ * was found is a fact computed from the file and pressable, all of them
+ * are listed under «How the numbers were made», and every chart says how
+ * each value was made and from how many rows.
  */
-export function AnalysisShell({ analyses, current }: { analyses: AnalysisSummary[]; current: AnalysisView | null }) {
+export function AnalysisShell({
+  analyses,
+  current,
+  provenance = false,
+}: {
+  analyses: AnalysisSummary[];
+  current: AnalysisView | null;
+  provenance?: boolean;
+}) {
   const t = useTranslations("dataAnalysis");
+  const locale = useLocale();
+  const explain = useExplainFact();
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
   const router = useRouter();
@@ -81,13 +98,18 @@ export function AnalysisShell({ analyses, current }: { analyses: AnalysisSummary
     if (!current) return;
     setAnalysing(true);
     try {
-      const response = await fetch(`/api/data-analysis/${current.id}/analyse`, { method: "POST" });
+      const response = await fetch(`/api/data-analysis/${current.id}/analyse`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale }),
+      });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         note("tool", refusal(response.status, body?.error, t("analyse.failed")));
         return;
       }
       note("tool", t("analyse.done"));
+      if (provenance && Number(body?.dropped) > 0) note("tool", t("how.dropped", { count: Number(body.dropped) }));
       setPane("file");
       router.refresh();
     } finally {
@@ -168,6 +190,8 @@ export function AnalysisShell({ analyses, current }: { analyses: AnalysisSummary
     ...notes,
   ];
 
+  const facts = current?.findings?.facts ?? [];
+
   const work =
     pane === "file" && current
       ? {
@@ -196,15 +220,37 @@ export function AnalysisShell({ analyses, current }: { analyses: AnalysisSummary
               {current.findings ? (
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">{t("findings.title")}</h3>
-                  {current.findings.summary ? <p className="mt-1 text-sm text-body">{current.findings.summary}</p> : null}
+                  {provenance && facts.length > 0 ? <p className="mt-1 text-[11px] text-muted">{t("how.press")}</p> : null}
+                  {current.findings.summary ? (
+                    <p className="mt-1 text-sm text-body">
+                      {provenance && current.findings.summaryParts ? <FactText parts={current.findings.summaryParts} facts={facts} /> : current.findings.summary}
+                    </p>
+                  ) : null}
                   <ul className="mt-2 space-y-2">
                     {current.findings.findings.map((finding) => (
-                      <li key={finding.headline}>
-                        <p className="text-sm text-foreground">{finding.headline}</p>
-                        <p className="text-xs text-muted">{finding.detail}</p>
+                      <li key={finding.headline} data-testid="analysis-finding">
+                        <p className="text-sm text-foreground">
+                          {provenance && finding.headlineParts ? <FactText parts={finding.headlineParts} facts={facts} /> : finding.headline}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {provenance && finding.detailParts ? <FactText parts={finding.detailParts} facts={facts} /> : finding.detail}
+                        </p>
                       </li>
                     ))}
                   </ul>
+                  {provenance && facts.length > 0 ? (
+                    <details data-testid="analysis-how" className="mt-3 text-xs">
+                      <summary className="flex min-h-[44px] cursor-pointer items-center text-foreground">{t("how.title")}</summary>
+                      <ul className="space-y-1">
+                        {facts.map((fact) => (
+                          <li key={fact.id} data-testid="analysis-how-fact">
+                            <span className="font-medium text-foreground">{formatFact(fact, locale)}</span>
+                            <span className="text-muted"> — {explain(fact)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
                 </div>
               ) : (
                 <p className="text-xs text-muted">{t("findings.none")}</p>
@@ -212,7 +258,7 @@ export function AnalysisShell({ analyses, current }: { analyses: AnalysisSummary
               {current.charts.length > 0 && (
                 <div className="grid gap-4 xl:grid-cols-2">
                   {current.charts.map((chart, index) => (
-                    <AnalysisChart key={`${chart.spec.title}-${index}`} chart={chart} />
+                    <AnalysisChart key={`${chart.spec.title}-${index}`} chart={chart} how={provenance} />
                   ))}
                 </div>
               )}

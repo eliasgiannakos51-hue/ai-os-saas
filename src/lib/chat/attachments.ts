@@ -110,3 +110,25 @@ export function isMissingColumn(error: { code?: string; message?: string } | nul
   if (!error) return false;
   return error.code === "42703" || error.code === "PGRST204" || /column .* does not exist|Could not find the '.*' column/i.test(error.message ?? "");
 }
+
+/**
+ * Whether any earlier question in a conversation carried a file. A
+ * follow-up with nothing new attached is still about them: «Πόσο
+ * κοστίζει;» after a photograph asks the price of what is in it, and the
+ * chat route (src/app/api/chat/route.ts) does not answer it with a help
+ * article (found 2026-10-09, scripts/tests/chat-attachments-edges.prodtest.mjs).
+ * Read through the signed-in session, so a conversation that is not the
+ * sender's has no rows here. Any error, a missing column included, answers
+ * false, and the route behaves as it did before package 9.
+ */
+export async function conversationCarriesFiles(supabase: SupabaseClient, conversationId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("chat_messages")
+    .select("id")
+    .eq("conversation_id", conversationId)
+    .eq("role", "user")
+    .not("attachments", "is", null)
+    .limit(1);
+  if (error) return false;
+  return (data ?? []).length > 0;
+}

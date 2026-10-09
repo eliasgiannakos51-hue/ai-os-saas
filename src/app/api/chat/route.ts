@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { readChatAttachments, parseStoredAttachments, conversationAttachments } from "@/lib/chat/attachment-types";
-import { loadAttachmentContent, attachmentInputChars, isMissingColumn } from "@/lib/chat/attachments";
+import { loadAttachmentContent, attachmentInputChars, isMissingColumn, conversationCarriesFiles } from "@/lib/chat/attachments";
 import { memoryCitationInstruction, MemoryMarkerHoldback, takeMemoryMarker, citedMemories, MEMORY_MARK_OPEN } from "@/lib/chat/memory-citations";
 import { loadDeepDive } from "@/lib/ai/deep-dive-load";
 import {
@@ -414,7 +414,7 @@ export async function POST(request: Request) {
     // with the article (found 2026-10-08,
     // scripts/tests/chat-attachments-edges.prodtest.mjs).
     const carriesFiles = Array.isArray(rawAttachments) && rawAttachments.length > 0;
-    const cannedMatch = mentorMode
+    const articleMatch = mentorMode
       ? null
       : carriesFiles
         ? null
@@ -423,6 +423,19 @@ export async function POST(request: Request) {
             await loadCannedArticles(locale),
             conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
           );
+    // ...AND SO IS A FOLLOW-UP IN A CONVERSATION THAT CARRIES ONE: the
+    // files within the history window go to the model with it
+    // (earlierAttachments below), and
+    // «Πόσο κοστίζει;» after a photograph is still about the photograph
+    // (found 2026-10-09, the same prodtest). Asked only when an article
+    // matched mid-conversation, so an ordinary message reads nothing more.
+    const cannedMatch =
+      articleMatch &&
+      conversationId &&
+      (await isFeatureOn("chat-attachments", user)) &&
+      (await conversationCarriesFiles(supabase, conversationId))
+        ? null
+        : articleMatch;
     if (cannedMatch) {
       return await answerFromKnowledgeBase({
         supabase,

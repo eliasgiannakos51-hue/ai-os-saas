@@ -194,6 +194,12 @@ check("`done` says which memories were used", /memoriesUsed: memoriesUsed\.lengt
 check("a message that carries a file is never answered by a help article",
   /const carriesFiles = Array\.isArray\(rawAttachments\) && rawAttachments\.length > 0;/.test(route) &&
   /: carriesFiles\s*\?\s*null\s*:\s*matchCannedAnswer\(/.test(route));
+// A follow-up with nothing new attached, in a conversation whose earlier
+// questions carried a file (found 2026-10-09 by the check of the report
+// above): its files go to the model with it, so it is about them too.
+check("...nor a follow-up in a conversation whose earlier questions carried one",
+  /articleMatch &&\s*conversationId &&\s*\(await isFeatureOn\("chat-attachments", user\)\) &&\s*\(await conversationCarriesFiles\(supabase, conversationId\)\)\s*\?\s*null\s*:\s*articleMatch;/.test(route) &&
+  /\.eq\("conversation_id", conversationId\)\s*\.eq\("role", "user"\)\s*\.not\("attachments", "is", null\)\s*\.limit\(1\);\s*if \(error\) return false;\s*return \(data \?\? \[\]\)\.length > 0;/.test(code("src/lib/chat/attachments.ts")));
 check("...and its opening question is not checked for clarity without the file",
   /history\.length === 0 && !isFreeMessage && !skipClarification && currentAttachments\.length === 0\)/.test(route));
 check("out of credits, the route says so in a flag the screen reads",

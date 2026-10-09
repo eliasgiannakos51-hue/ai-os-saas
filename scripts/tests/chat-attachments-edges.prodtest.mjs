@@ -17,7 +17,8 @@
  * Around the walk, in Greek and in English, on a desktop with a mouse and a
  * phone with real touch:
  *   - an account with nothing yet;
- *   - the same question again in the same conversation, and after a reload;
+ *   - the next question in the same conversation, one that is also a help
+ *     article's trigger, and the conversation after a reload;
  *   - the provider failing, and the question asked again;
  *   - out of credits;
  *   - a Free account: no memory, a message with a file is never free, the
@@ -38,6 +39,11 @@
  *      sideways;
  *   6. «remove» on a chip (32px) and «From memory» (18px tall) were
  *      smaller than a 44px touch target.
+ * And a seventh, found on 2026-10-09 by the check of that round:
+ *   7. a FOLLOW-UP with nothing new attached, in a conversation whose
+ *      earlier question carried a file, that matched a help article was
+ *      still answered with the article («Πόσο κοστίζει;» after a menu and
+ *      a photograph); fix 1 looked only at the message's own attachments.
  *
  * Run: node scripts/tests/chat-attachments-edges.prodtest.mjs
  *      SKIP_BUILD=1 node scripts/tests/chat-attachments-edges.prodtest.mjs
@@ -581,6 +587,16 @@ try {
       await ask(Q.desserts);
       await settled([Q.six, "I see no menu", "Δεν βλέπω κατάλογο"]);
       check("a follow-up in the same conversation is answered from the same PDF", (await thread.innerText()).includes(Q.six) && answerCalls(since).length === 1);
+      // A follow-up that is also a help-article trigger, with nothing new
+      // attached: the conversation is still about its files. «Πόσο
+      // κοστίζει;» after a photograph and a menu got the pricing article
+      // (found 2026-10-09, by the check of this file's own report).
+      since = calls();
+      await ask(Q.canned);
+      await settled([Q.twelve, Q.noDoc, cannedBody.slice(0, 40)]);
+      check("«" + Q.canned + "» as a follow-up, nothing new attached, reaches the model with the conversation's files",
+        answerCalls(since).length === 1 && answerCalls(since)[0].messages.at(-1).content.some?.((b) => b.type === "image"));
+      check("...and is not answered with the help article", !(await thread.innerText()).includes(cannedBody.slice(0, 40)));
 
       await measureSideways("step 3");
       // ---- 4. a reload shows it all again
@@ -588,9 +604,13 @@ try {
       await page.goto(`${ON}/dashboard/chat?c=${conversationId}`, { waitUntil: "networkidle" });
       await page.locator('[data-testid="chat-sent-attachments"]').first().waitFor({ timeout: 8000 }).catch(() => null);
       await page.waitForFunction(() => !!document.querySelector('[data-testid="chat-sent-attachments"] img'), null, { timeout: 5000 }).catch(() => null);
+      // The picture is drawn from a signed link to the stand-in's storage,
+      // and drawn means its pixels arrived, not that an <img> exists.
+      await page.waitForFunction(() => (document.querySelector('[data-testid="chat-sent-attachments"] img')?.naturalWidth ?? 0) > 0, null, { timeout: 5000 }).catch(() => null);
       check("after a reload: the PDF, the picture and «From memory»",
         (await page.locator('[data-testid="chat-sent-attachments"]').first().innerText().catch(() => "")).includes("menu.pdf") &&
           (await page.locator('[data-testid="chat-sent-attachments"] img').count()) === 1 &&
+          (await page.locator('[data-testid="chat-sent-attachments"] img').first().evaluate((img) => img.naturalWidth > 0 && /\/storage\/v1\/object\/sign\//.test(img.src)).catch(() => false)) &&
           (await page.locator('[data-testid="chat-memories-used"]').first().innerText().catch(() => "")).includes(plural(A.memoryUsed, 1)));
       check("...and not a word of the other language", foreignOn(locale, await visible()).length === 0, foreignOn(locale, await visible()).join(" | "));
 
@@ -647,13 +667,18 @@ try {
       await chipsSettled();
       since = calls();
       const imagesBefore = [...objects.keys()].filter((k) => k.startsWith("create-attachments/")).length;
+      const imageUploads = () => supa.hits.filter((h) => /^(POST|PUT) \/storage\/v1\/object\/create-attachments\//.test(h)).length;
+      const uploadsBefore = imageUploads();
       await ask(Q.price);
       await settled([E.codes.insufficientCredits.what, "Not enough credits"]);
       const broke = await visible();
       check("out of credits: said in the screen's language", broke.includes(E.codes.insufficientCredits.what), broke.slice(-300));
       check("...and nothing in the other", foreignOn(locale, broke).length === 0, foreignOn(locale, broke).join(" | "));
       check("...nothing asked of the model, nothing held", calls() === since && !rpcs.slice(-6).some((r) => r.name === "reserve_credits" && r.args.p_credits <= 0));
-      check("...the picture that went up for it is removed, the tray kept", [...objects.keys()].filter((k) => k.startsWith("create-attachments/")).length === imagesBefore && (await chips.count()) === 2);
+      // It did go up (at send), so "removed" is measured, not vacuous.
+      check("...the picture that went up for it is removed, the tray kept",
+        imageUploads() === uploadsBefore + 1 && [...objects.keys()].filter((k) => k.startsWith("create-attachments/")).length === imagesBefore && (await chips.count()) === 2,
+        `uploads ${uploadsBefore}->${imageUploads()}`);
       state.credits = 3000;
 
       await measureSideways("step 8");

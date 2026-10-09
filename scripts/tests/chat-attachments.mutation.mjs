@@ -14,7 +14,9 @@
  * a question about a file answered by a help article, or met with a
  * clarifying question that never saw the file; out of credits said in
  * English; a refused PDF's reason in the route's English; a chip's
- * «remove» back under a 44px touch target.
+ * «remove» or «From memory» back under a 44px touch target. And one found
+ * on 2026-10-09 checking that round: a follow-up about the conversation's
+ * files answered by a help article.
  *
  * Run: node scripts/tests/chat-attachments.mutation.mjs
  */
@@ -139,6 +141,34 @@ const MUTANTS = [
     from: "      : carriesFiles\n        ? null\n        : matchCannedAnswer(",
     to: "      : false\n        ? null\n        : matchCannedAnswer(",
     expect: "a message that carries a file is never answered by a help article",
+  },
+  {
+    name: "a follow-up about the conversation's files is answered with a help article",
+    file: ROUTE,
+    from: "      (await conversationCarriesFiles(supabase, conversationId))\n        ? null\n        : articleMatch;",
+    to: "      false\n        ? null\n        : articleMatch;",
+    expect: "...nor a follow-up in a conversation whose earlier questions carried one",
+  },
+  {
+    name: "a conversation's files are looked for in the wrong place",
+    file: CONTENT,
+    from: '    .not("attachments", "is", null)\n',
+    to: '    .not("provenance", "is", null)\n',
+    expect: "...nor a follow-up in a conversation whose earlier questions carried one",
+  },
+  {
+    name: "«From memory» is 18px tall again",
+    file: UI,
+    from: '<summary className="flex min-h-[44px] cursor-pointer',
+    to: '<summary className="flex cursor-pointer',
+    expect: "«remove» on a chip and «From memory» are 44px targets",
+  },
+  {
+    name: "the hourly upload limit is said in the route's English",
+    file: CLIENT,
+    from: "        ? words.uploadLimit\n",
+    to: "        ? outcome.error\n",
+    expect: "a PDF Files refused says why in the reader's words: the plan's limit, the hourly limit, or ours",
   },
   {
     name: "the opening question is checked for clarity without its file",

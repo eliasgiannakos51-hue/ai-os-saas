@@ -681,6 +681,11 @@
       "failed": "Die E-Mail konnte nicht gesendet werden. Versuche es in ein paar Minuten erneut.",
       "rateLimited": "Zu viele Links in der letzten Stunde. Versuche es später erneut.",
       "signedOut": "Melde dich mit E-Mail und Passwort an, dann wird ein neuer Link gesendet."
+    },
+    "splash": {
+      "loading": "Arbeitsbereich wird geladen…",
+      "syncing": "Daten werden synchronisiert…",
+      "ready": "Bereit."
     }
   },
   "settings": {

@@ -906,8 +906,10 @@ export async function POST(request: Request) {
           // The case by name (`code`, and the `outOfCredits` flag the
           // stream's own refusal carries too) and the two numbers, so the
           // screen says it in the reader's language
-          // (components/chat/chat-workspace.tsx); `message` is the English
-          // sentence for logs and anything that reads this route raw.
+          // (components/chat/chat-workspace.tsx) — a Free account whose
+          // free messages ran out read the English on a Greek screen
+          // (scripts/tests/first-task-edges.prodtest.mjs); `message` is the
+          // English sentence for logs and anything that reads this route raw.
           code: "insufficientCredits",
           outOfCredits: true,
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),

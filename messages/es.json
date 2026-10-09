@@ -681,6 +681,11 @@
       "failed": "No se pudo enviar el correo. Inténtalo de nuevo en unos minutos.",
       "rateLimited": "Demasiados enlaces en la última hora. Inténtalo más tarde.",
       "signedOut": "Inicia sesión con tu correo y contraseña y se enviará un enlace nuevo."
+    },
+    "splash": {
+      "loading": "Cargando tu espacio de trabajo…",
+      "syncing": "Sincronizando datos…",
+      "ready": "Listo."
     }
   },
   "settings": {

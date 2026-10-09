@@ -359,7 +359,7 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: φτιάχνω νέο λογαριασμό και δεν διαβάζω καμία οδηγία.
 - Βλέπω: τρεις εργασίες· πατάω μία και έχω την απάντηση.
 - Χρόνος: 5 λεπτά
-- Αυτόματα: `scripts/tests/first-task.prodtest.mjs` (από την Αρχική ως την απάντηση, με λογαριασμό Free)
+- Αυτόματα: `scripts/tests/first-task.prodtest.mjs` (από την Αρχική ως την απάντηση, με λογαριασμό Free), `scripts/tests/first-task-edges.prodtest.mjs` (από τη «Σύνδεση» ως την απάντηση, μέσα από το Chat και το μοντέλο τοπικά· σφάλμα του μοντέλου· χωρίς δωρεάν μηνύματα και credits· ελληνικά και αγγλικά)
 - Σήμερα: φτιαγμένο, πίσω από τον διακόπτη `first-task`
 
 ### Α40. OWNER.md και ACCEPTANCE.md
@@ -367,7 +367,7 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: ανοίγω το `docs/OWNER.md` και ακολουθώ μία οδηγία του· τρέχω `npm run acceptance`.
 - Βλέπω: κάθε σελίδα, κουμπί και αρχείο που λέει υπάρχει· ο πίνακας λέει ποιες εργασίες περνούν.
 - Χρόνος: 15 λεπτά
-- Αυτόματα: `scripts/tests/owner-manual.test.mjs`, `scripts/tests/acceptance.test.mjs`
+- Αυτόματα: `scripts/tests/owner-manual.test.mjs`, `scripts/tests/owner-manual.prodtest.mjs` (κάθε σελίδα και κάθε ετικέτα του εγχειριδίου στην οθόνη, και ο διακόπτης «Κανείς» ως το τέλος), `scripts/tests/acceptance.test.mjs`
 - Σήμερα: φτιαγμένο
 
 ## ΑΠΟ ΤΗΝ ΕΓΓΡΑΦΗ ΩΣ ΤΗΝ ΑΚΥΡΩΣΗ

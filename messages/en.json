@@ -681,6 +681,11 @@
       "failed": "The email could not be sent. Try again in a few minutes.",
       "rateLimited": "Too many links in the last hour. Try again later.",
       "signedOut": "Sign in with your email and password, and a new link will be sent."
+    },
+    "splash": {
+      "loading": "Loading workspace...",
+      "syncing": "Syncing data...",
+      "ready": "Ready."
     }
   },
   "settings": {

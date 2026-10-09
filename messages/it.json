@@ -681,6 +681,11 @@
       "failed": "Non è stato possibile inviare l’email. Riprova tra qualche minuto.",
       "rateLimited": "Troppi link nell’ultima ora. Riprova più tardi.",
       "signedOut": "Accedi con email e password e ti verrà inviato un nuovo link."
+    },
+    "splash": {
+      "loading": "Caricamento dell’area di lavoro…",
+      "syncing": "Sincronizzazione dei dati…",
+      "ready": "Pronto."
     }
   },
   "settings": {

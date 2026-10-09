@@ -681,6 +681,11 @@
       "failed": "L’e-mail n’a pas pu être envoyé. Réessayez dans quelques minutes.",
       "rateLimited": "Trop de liens au cours de la dernière heure. Réessayez plus tard.",
       "signedOut": "Connectez-vous avec votre e-mail et votre mot de passe, et un nouveau lien sera envoyé."
+    },
+    "splash": {
+      "loading": "Chargement de votre espace de travail…",
+      "syncing": "Synchronisation des données…",
+      "ready": "Prêt."
     }
   },
   "settings": {

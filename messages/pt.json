@@ -681,6 +681,11 @@
       "failed": "Não foi possível enviar o email. Tente novamente dentro de alguns minutos.",
       "rateLimited": "Demasiados links na última hora. Tente mais tarde.",
       "signedOut": "Inicie sessão com o seu email e palavra-passe e será enviado um novo link."
+    },
+    "splash": {
+      "loading": "A carregar o seu espaço de trabalho…",
+      "syncing": "A sincronizar os dados…",
+      "ready": "Pronto."
     }
   },
   "settings": {

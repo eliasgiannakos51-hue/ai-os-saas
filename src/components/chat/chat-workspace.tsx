@@ -715,7 +715,8 @@ export function ChatWorkspace({
           // (outOfCreditsText, above); every other code through the shared
           // error words, and a refusal with no code as held back — never
           // the route's English sentence (found 2026-10-08,
-          // scripts/tests/chat-attachments-edges.prodtest.mjs).
+          // scripts/tests/chat-attachments-edges.prodtest.mjs and
+          // scripts/tests/first-task-edges.prodtest.mjs).
           setError(
             data.outOfCredits === true
               ? outOfCreditsText(data.available, data.needed)

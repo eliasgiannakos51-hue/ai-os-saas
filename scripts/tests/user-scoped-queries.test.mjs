@@ -44,6 +44,13 @@ function check(name, cond, detail) {
 // EVERY ENTRY IS A CLAIM SOMEBODY CAN CHECK. "It is fine" is not a reason.
 const ALLOWED = new Map([
   [
+    "src/lib/account/erase-storage.ts::eraseUserStorage",
+    "Queries no table. The userId is the storage FOLDER every listing and " +
+      "removal is confined to (`<userId>/` in each bucket), refused unless it " +
+      "is a UUID, and it comes from the deletion token the route claimed, " +
+      "not from the request.",
+  ],
+  [
     "src/app/dashboard/costs/page.tsx::CostsPage",
     "An admin-only page reading cost_alert_log GLOBALLY through the admin " +
       "client. There is no per-user scope to apply — the whole point of the " +

@@ -9,6 +9,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 
 type Status = "idle" | "loading" | "done";
 
+
 // Reads the token from window.location instead of useSearchParams() so this
 // page doesn't need a Suspense boundary — same pattern as login-form.tsx's
 // ?mode= handling. Deletion only fires on an explicit button click, never
@@ -19,6 +20,22 @@ export function ConfirmDeleteAccountForm() {
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+
+  // The codes /api/delete-account/confirm answers with, each said here in
+  // the reader's language (auth.deleteAccount.errors in messages/*.json).
+  // One literal key per code, so the page's message slice can see them.
+  function deletionError(code: unknown): string {
+    switch (code) {
+      case "rate_limited": return t("errors.rate_limited");
+      case "invalid_request": return t("errors.invalid_request");
+      case "link_invalid": return t("errors.link_invalid");
+      case "retry": return t("errors.retry");
+      case "contact_support": return t("errors.contact_support");
+      case "files_retry": return t("errors.files_retry");
+      case "subscription_retry": return t("errors.subscription_retry");
+      default: return t("confirmFailed");
+    }
+  }
 
   useEffect(() => {
     setToken(new URLSearchParams(window.location.search).get("token"));
@@ -39,7 +56,9 @@ export function ConfirmDeleteAccountForm() {
 
       if (!res.ok || !data.ok) {
         setStatus("idle");
-        setError(getErrorMessage(data.error, "Could not delete the account."));
+        // The route answers with a code; the words are this page's, in the
+        // reader's language. Its `error` sentence is English only.
+        setError(deletionError(data.code));
         return;
       }
 

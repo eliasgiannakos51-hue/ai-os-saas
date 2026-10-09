@@ -35,7 +35,7 @@ const MUTANTS = [
     // that was true.
     name: "a baseline is left three above what it measures",
     file: I18N,
-    from: "const CLIENT_FALLBACK_BASELINE = 27;",
+    from: "const CLIENT_FALLBACK_BASELINE = 26;",
     to: "const CLIENT_FALLBACK_BASELINE = 30;",
     expect: "no baseline has more room than it is allowed",
   },

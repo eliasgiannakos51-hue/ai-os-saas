@@ -345,6 +345,9 @@ try {
     check("nothing is remembered and the extractor is not asked", remembered().length === 0 && memoryCalls() === 0, JSON.stringify({ remembered: remembered(), calls: memoryCalls() }));
     const said = await screenText(page);
     check("Chat says the credits ran out, in Greek", said.includes(msgs.el.errors.codes.insufficientCredits.what), said.slice(-400));
+    // With the numbers the route sent: 0 left, and what the message needed.
+    const leftWith = (n) => msgs.el.credits.outOfCredits.detailWithNumbers.split("{needed}")[0].replace("{available}", String(n));
+    check("...with the numbers", said.includes(leftWith(0)), `${leftWith(0)} ∉ ${said.slice(-400)}`);
     const wrong = englishOnGreek(said, [...GREEK_UI_LATIN, ...CONTENT]);
     check("...with no English sentence on the Greek screen", wrong.length === 0, wrong.slice(0, 12).join(" | "));
     // The balance read before the answer says enough; the hold, a moment
@@ -357,6 +360,7 @@ try {
     await page.waitForTimeout(500);
     const late = await screenText(page);
     check("the hold refused inside the answer: Chat says the credits ran out, in Greek", late.includes(msgs.el.errors.codes.insufficientCredits.what), late.slice(-400));
+    check("...with the numbers the hold saw", late.includes(leftWith(3)), `${leftWith(3)} ∉ ${late.slice(-400)}`);
     check("...and nothing is remembered", remembered().length === 0 && memoryCalls() === 0);
     state.holdRefused = false;
     await context.close();

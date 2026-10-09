@@ -217,6 +217,7 @@ try {
       check("one press makes it, through /api/websites/generate and its worker, and draws it", drawn && ((await page.locator('[data-testid="chat-site-preview"] iframe').getAttribute("srcdoc")) ?? "").includes("Σκηνές δίπλα στη θάλασσα."));
       check("...one site, made from the sentence", db.store.user_websites.length === 1 && db.store.user_websites[0].status === "completed", JSON.stringify(db.store.user_websites.map((w) => ({ name: w.name, status: w.status }))));
       check("...and the model was asked for a site once", model.seen.filter((s) => s.kind === "site").length === 1);
+      check("...drawn sandboxed, with no scripts", (await page.locator('[data-testid="chat-site-preview"] iframe').getAttribute("sandbox")) === "");
       await language(page, locale, "the finished site");
       const id = db.store.user_websites[0]?.id ?? "none";
       await press(page.locator('[data-testid="chat-site-open"]'));
@@ -245,6 +246,7 @@ try {
       const text = await pane(page).innerText().catch(() => "");
       check("Free: the Site opens and says it is not on this plan", text.includes(M.common.upgradeRequired.title), text.slice(0, 300));
       check("...with the plan's own button", (await pane(page).locator('a[href^="/pricing#plan-"]').count()) === 1);
+      check("...naming the plan and its price", PLAN_NAMES.some((n) => text.includes(n)) && /€\s?\d/.test(text), text.slice(0, 300));
       const make = page.locator('[data-testid="chat-site-make"]');
       check("...and nothing to press that the server would refuse", (await make.count()) === 0);
       if ((await make.count()) === 1) {
@@ -270,6 +272,9 @@ try {
       await page.waitForTimeout(3000);
       const text = await pane(page).innerText().catch(() => "");
       check("no credits: the pane says the credits ran out", text.includes(M.credits.outOfCredits.title), text.slice(0, 400));
+      // The numbers the route sent: 0 left, and what it needed.
+      const withNumbers = M.credits.outOfCredits.detailWithNumbers.split("{needed}")[0].replace("{available}", "0");
+      check("...with the numbers", text.includes(withNumbers), `${withNumbers} ∉ ${text.slice(0, 400)}`);
       check("...and nothing was made", db.store.user_websites.length === 0 && !model.seen.some((s) => s.kind === "site"));
       await language(page, "el", "no credits");
       await context.close();

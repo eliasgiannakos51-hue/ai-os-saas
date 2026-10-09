@@ -108,9 +108,10 @@ const silent = [];
 const spoke = [];
 const started = Date.now();
 
-// EACH GATE WRITES TO A FILE, NOT A PIPE. 346 of the 348 gates call
-// process.exit() (counted 2026-10-08), and process.exit() with output
-// still queued on a pipe drops the tail — the tally line — so a passing
+// EACH GATE WRITES TO A FILE, NOT A PIPE. 342 of the 348 gates call
+// process.exit() in their code (counted 2026-10-09, comments left out),
+// and process.exit() with output still queued on a pipe drops the
+// tail — the tally line — so a passing
 // gate read as one that printed no count and failed the run. Measured:
 // schema-canaries (12 KB of output) in 1 of 12 runs, security-posture
 // (47 KB) in 1 of 8; two full runs of this file in a row failed, each on

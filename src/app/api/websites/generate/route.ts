@@ -329,12 +329,13 @@ export async function POST(request: Request) {
     }
 
     // THE CLASSIFIER IS PAID TOO, so an account that cannot pay for a
-    // pre-check is not given one: the same read-only check the
-    // clarification block makes above, here for a request that skipped
-    // that block — the resubmission after the questions, and every site
-    // a flow asks for (lib/flows/run-step.ts). Without it a balance of 0
-    // paid for the classifier and was then refused for the site below
-    // (found 2026-10-08 by scripts/tests/flows-edges.prodtest.mjs).
+    // pre-check is not given one: the credit check the clarification
+    // block makes above (it holds and charges nothing), here for a request
+    // that skipped that block — the resubmission after the questions, and
+    // every site a flow asks for (lib/flows/run-step.ts) — and not for a
+    // bypass account, which the classifier charges nothing. Without it a
+    // balance of 0 paid for the classifier and was then refused for the
+    // site below (found 2026-10-08 by scripts/tests/flows-edges.prodtest.mjs).
     if (skipClarification && !bypassCredits) {
       const check = await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, precheckPlan);
       if (!check.ok) {

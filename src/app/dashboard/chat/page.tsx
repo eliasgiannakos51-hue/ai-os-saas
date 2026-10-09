@@ -15,6 +15,9 @@ import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readWorkMode } from "@/lib/chat/work-modes";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { greetingName } from "@/lib/greeting";
+import { getTranslations } from "next-intl/server";
+import { accountHasCapability } from "@/lib/billing/capability-gate";
+import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.chat");
@@ -42,7 +45,7 @@ export default async function ChatPage(
   // independent reads and were three sequential waits. The favourites
   // lookup below genuinely depends on the list — it is keyed by the ids —
   // so it stays behind it; nothing else does.
-  const [{ data: conversationRows }, bypassesCredits, plan] = await Promise.all([
+  const [{ data: conversationRows }, bypassesCredits, plan, opensTools] = await Promise.all([
     supabase
       .from("chat_conversations")
       .select("id, title, is_pinned, created_at, updated_at")
@@ -52,6 +55,10 @@ export default async function ChatPage(
     // the allowance for those accounts entirely.
     isAdminEmail(user.email) ? Promise.resolve(true) : hasActiveBetaBypass(user),
     resolveEffectivePlan(user),
+    // THE SWITCH "chat-opens-tools" (package 7), read beside the others
+    // rather than after them: as its own wait it was the page's fifth in
+    // sequence, one over what scripts/tests/navigation-cost.test.mjs allows.
+    isFeatureOn("chat-opens-tools", user),
   ]);
 
   // Starred state comes from user_favorites, not from a column here — one
@@ -81,6 +88,16 @@ export default async function ChatPage(
   const freeChat = bypassesCredits
     ? null
     : await getFreeChatStatus(user.id, plan?.slug ?? "free", legacy);
+
+  // THE SITE OPENED FROM CHAT, ON A PLAN WITHOUT THE SITE (package 7): the
+  // same gate /dashboard/website-builder and /api/websites/generate ask,
+  // so the pane shows the plan's wall instead of a «Φτιάξ' το» the route
+  // refuses with an English sentence (found 2026-10-08 by
+  // scripts/tests/chat-opens-tools-edges.prodtest.mjs).
+  const siteWall =
+    opensTools && !accountHasCapability(plan.slug, "websiteBuilder", isAdminEmail(user.email))
+      ? upgradeWallProps("websiteBuilder", (await getTranslations("dashboard.websiteBuilder"))("title"))
+      : null;
 
   const initialMentorPreset =
     searchParams.preset === "trading" ? "trading" : searchParams.preset === "product" ? "product" : undefined;
@@ -117,7 +134,8 @@ export default async function ChatPage(
         workArea={await isFeatureOn("chat-work-area", user)}
         // THE SWITCH "chat-opens-tools" (package 7): «φτιάξε μου site»
         // opens the Site beside the conversation.
-        opensTools={await isFeatureOn("chat-opens-tools", user)}
+        opensTools={opensTools}
+        siteWall={siteWall}
         attachments={await isFeatureOn("chat-attachments", user)}
         // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
         // it can be chosen. It is validated against the person's OWN

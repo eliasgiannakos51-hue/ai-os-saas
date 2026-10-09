@@ -8,6 +8,16 @@
  *   3. package.json goes back to the old sharp range.
  *   4. the version comparison degrades to string order, under which
  *      "3.3.9" sorts above "3.3.18".
+ *   5. image-size goes back to the 1.x pptxgenjs declares, or the
+ *      override that lifts it is dropped; source-map-js goes back below
+ *      its fix (ΑΣ-8.1, 2026-10-08).
+ *
+ * The clause that pptxgenjs never loads image-size has no mutant here:
+ * its target is a file pptxgenjs ships, under node_modules, which a
+ * suite must not write (the local install is shared with other
+ * checkouts). It was settled by hand instead, on 2026-10-08 and again on
+ * 2026-10-09: a deck with a picture was written with image-size made
+ * unloadable (docs/PROGRESS.md, 2026-10-09).
  *
  * Run: node scripts/tests/dependency-floors.mutation.mjs
  */
@@ -52,6 +62,27 @@ const MUTANTS = [
     from: '"next": "^16.3.8"',
     to: '"next": "^14.2.35"',
     expect: "package.json declares next at or above",
+  },
+  {
+    name: "the lockfile goes back to the image-size pptxgenjs declares",
+    file: LOCK,
+    from: '"node_modules/image-size": {\n      "version": "2.0.4"',
+    to: '"node_modules/image-size": {\n      "version": "1.2.1"',
+    expect: "every copy of image-size is at least",
+  },
+  {
+    name: "the override that lifts image-size is dropped",
+    file: PKG,
+    from: '"overrides": {\n    "image-size": "^2.0.4"\n  }',
+    to: '"overrides": {}',
+    expect: "package.json overrides image-size at or above",
+  },
+  {
+    name: "the lockfile goes back to the source-map-js with the advisory",
+    file: LOCK,
+    from: '"node_modules/source-map-js": {\n      "version": "1.2.2"',
+    to: '"node_modules/source-map-js": {\n      "version": "1.2.1"',
+    expect: "every copy of source-map-js is at least",
   },
   {
     name: "the comparison degrades to string order",

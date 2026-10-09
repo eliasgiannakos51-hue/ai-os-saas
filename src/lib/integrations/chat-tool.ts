@@ -3,6 +3,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
 import { logApiError } from "@/lib/log-error";
 import { searchUserData, formatItemsForModel, MAX_RESULTS, type SearchSource } from "@/lib/integrations/read";
+import { todayIn } from "@/lib/integrations/calendar-window";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { maxIntegrationReadsPerHour } from "@/lib/integrations/limits";
 import type { IntegrationSummary, ProviderId } from "@/lib/integrations/providers";
@@ -98,11 +99,14 @@ export function buildSearchTool(integrations: IntegrationSummary[]): Anthropic.T
  * just text arriving in the model's context with no marking to say it is
  * not from us.
  */
-export function searchToolInstruction(sources: string[]): string {
+export function searchToolInstruction(sources: string[], timeZone?: string | null): string {
   const list = sources.join(", ");
+  // TODAY WHERE THE PERSON IS (lib/integrations/calendar-window.ts): the
+  // date that «αύριο» counts from, and the zone its days are read in.
+  const today = timeZone ? `${todayIn(timeZone)} (${timeZone})` : todayIn(null);
   return `
 
-Έχεις πρόσβαση στο εργαλείο ${SEARCH_TOOL_NAME}, που ψάχνει ΜΟΝΟ στους δικούς του λογαριασμούς που ο χρήστης έχει συνδέσει (${list}). Χρησιμοποίησέ το όταν η ερώτηση αφορά τα ΔΙΚΑ ΤΟΥ δεδομένα ("τι μου έστειλε ο λογιστής", "βρες το τιμολόγιο", "τι έχω αύριο;", "τι αποφασίστηκε στο κανάλι"). Για το ημερολόγιο δώσε τις ημέρες (from, to) και query "*" όταν η ερώτηση είναι για μια μέρα· σήμερα είναι ${new Date().toISOString().slice(0, 10)}. ΜΗΝ το χρησιμοποιείς για γενικές γνώσεις και ΜΗΝ το χρησιμοποιείς προληπτικά — διαβάζει ιδιωτικά δεδομένα, οπότε ψάξε μόνο όταν η ερώτηση το απαιτεί πραγματικά.
+Έχεις πρόσβαση στο εργαλείο ${SEARCH_TOOL_NAME}, που ψάχνει ΜΟΝΟ στους δικούς του λογαριασμούς που ο χρήστης έχει συνδέσει (${list}). Χρησιμοποίησέ το όταν η ερώτηση αφορά τα ΔΙΚΑ ΤΟΥ δεδομένα ("τι μου έστειλε ο λογιστής", "βρες το τιμολόγιο", "τι έχω αύριο;", "τι αποφασίστηκε στο κανάλι"). Για το ημερολόγιο δώσε τις ημέρες (from, to) και query "*" όταν η ερώτηση είναι για μια μέρα· σήμερα είναι ${today}. ΜΗΝ το χρησιμοποιείς για γενικές γνώσεις και ΜΗΝ το χρησιμοποιείς προληπτικά — διαβάζει ιδιωτικά δεδομένα, οπότε ψάξε μόνο όταν η ερώτηση το απαιτεί πραγματικά.
 
 Όταν απαντάς από αποτελέσματα, ΑΝΑΦΕΡΕ ΠΑΝΤΑ από πού προήλθε κάθε στοιχείο (ποιο email, ποιο αρχείο, ποια συνάντηση, ποιο κανάλι). Αν δεν βρέθηκε κάτι σχετικό, πες το ρητά — ΜΗΝ συμπληρώνεις με εικασίες.
 
@@ -126,6 +130,8 @@ export type ToolExecution = {
 export async function executeSearchTool(params: {
   userId: string;
   input: unknown;
+  /** The person's zone, from their browser: a day the model names is their day. */
+  timeZone?: string | null;
 }): Promise<ToolExecution> {
   const input = (params.input ?? {}) as Record<string, unknown>;
   const source = input.source;
@@ -162,7 +168,7 @@ export async function executeSearchTool(params: {
       source: source as SearchSource,
       query,
       limit,
-      period: { from: input.from, to: input.to },
+      period: { from: input.from, to: input.to, timeZone: params.timeZone ?? undefined },
       trigger: "chat",
     });
 

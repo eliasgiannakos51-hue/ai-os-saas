@@ -213,7 +213,7 @@ check("a waiting run is taken once: approve and cancel move it only from waiting
   /\.update\(\{ status: "running", approval_expires_at: null \}\)\s*\.eq\("id", runId\)\s*\.eq\("user_id", user\.id\)\s*\.eq\("status", "waiting_approval"\)/.test(code(ROUTES.approve)) &&
     /\.eq\("id", runId\)\s*\.eq\("user_id", user\.id\)\s*\.eq\("status", "waiting_approval"\)/.test(code(ROUTES.cancel)));
 check("...and an approval past its deadline is refused", /if \(run\.approval_expires_at && new Date\(run\.approval_expires_at as string\)\.getTime\(\) < Date\.now\(\)\) return refuse\("expired", 409\);/.test(code(ROUTES.approve)));
-check("an automation is switched on only with everything it needs connected", /const missing = await missingConnections\(user\.id, verdict\.boxes\);\s*if \(missing\.length > 0\) return refuse\("needs_connection", 409, \{ missing \}\);/.test(code(ROUTES.active)));
+check("an automation is switched on only with everything it needs connected", /const missing = await missingConnections\(user, verdict\.boxes\);\s*if \(missing\.length > 0\) return refuse\("needs_connection", 409, \{ missing \}\);/.test(code(ROUTES.active)));
 check("a change to one that is on that now needs a connection switches it off, and says so", /if \(missing\.length > 0\) return \{ patch: \{ is_active: false, next_run_at: null \}, paused: missing \};/.test(code("src/lib/automations/flow-access.ts")));
 check("one thing at a time on one automation", /\.or\(`busy_since\.is\.null,busy_since\.lt\.\$\{cutoff\}`\)/.test(code("src/lib/automations/flow-access.ts")) && ["change", "undo", "run"].every((n) => /if \(!\(await claimFlow\(id, user\.id\)\)\) return refuse\("busy", 409\);/.test(code(ROUTES[n])) && /finally \{\s*await releaseFlow\(id, user\.id\);/.test(code(ROUTES[n]))));
 check("the events route runs the caller's queued runs, nobody else's", /\.eq\("user_id", user\.id\)\s*\.eq\("status", "queued"\)/.test(code(ROUTES.events)) && /if \(run\.user_id !== user\.id\) continue;/.test(code(ROUTES.events)));
@@ -264,6 +264,15 @@ const shell = code("src/components/automations/automation-shell.tsx");
 check("with a box chosen, the field changes that box alone", /if \(shown && chosenBox\) \{[\s\S]{0,200}changeWithWords\(flow, box, text\)/.test(shell));
 check("an answer to the one question goes back with the sentence", /const said = pending \? `\$\{pending\.said\}\\n\$\{pending\.question\}\\n\$\{text\}` : text;/.test(shell));
 check("every price is on the screen before it is spent, and large ones ask again", /withConfirm\(prices\.build,/.test(shell) && /withConfirm\(runPrice, \(\) => void runIt\(shown, true\)\)/.test(shell) && /needsLargeActionConfirmation\(credits, DEFAULTS\)/.test(shell));
+// ON A PHONE the boxes and the history are the shell's full-screen work
+// area, and the tab bar is drawn over its bottom: the area ends above it
+// below md, or the last run of the history cannot be scrolled into sight
+// (found 2026-10-08 by scripts/tests/connections-automations-edges.prodtest.mjs).
+const shellWork = code("src/components/shell/tool-shell.tsx");
+const barHeight = Number((/min-h-\[(\d+)px\]/.exec(code("src/components/dashboard/mobile-tab-bar.tsx")) ?? [])[1] ?? 0);
+const room = /data-testid="tool-shell-work"\s*className="fixed inset-0 z-\[60\] flex flex-col bg-workspace pb-\[calc\((\d+(?:\.\d+)?)rem\+env\(safe-area-inset-bottom\)\)\] md:pb-0 /.exec(shellWork);
+check(`on a phone the work area keeps room for the tab bar under it (${room ? Number(room[1]) * 16 : 0}px for a ${barHeight}px bar and the safe area)`,
+  barHeight > 0 && Boolean(room) && Number(room[1]) * 16 >= barHeight + 1 && /fixed inset-x-0 bottom-0 z-40 [^"]*pb-\[env\(safe-area-inset-bottom\)\] md:hidden/.test(code("src/components/dashboard/mobile-tab-bar.tsx")));
 check("a box that needs a connection says which, and leads to it", /data-testid="flow-needs"/.test(code("src/components/automations/flow-boxes.tsx")) && /<Link href=\{CONNECT_AT\[need\]\}/.test(code("src/components/automations/flow-boxes.tsx")));
 
 // THE WORDS: every key the screen uses, in every language, read from the

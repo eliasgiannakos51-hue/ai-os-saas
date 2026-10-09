@@ -12,9 +12,15 @@
  *      owner's, behind the switch, rate limited, signed briefly, a PDF only.
  *   4. THE SCREEN: the Files shell and the Files page, behind the switch.
  *   5. The words, in ten languages.
+ *   6. IN THE READER'S LANGUAGE (the package check of 2026-10-08): every
+ *      page label the screens show («Σελίδα 37», never the stored «Page
+ *      37» on a Greek screen), and what goes wrong — a question refused or
+ *      failed, an upload refused, a file that could not be read — said by
+ *      what it is, never in the route's or the provider's English.
  *
  * A real 51-page PDF through extraction, the model's context, the checker
- * and the page read back: file-pages.itest.mjs. The same in a browser:
+ * and the page read back: file-pages.itest.mjs. The same in a browser, and
+ * the upload, the question and every refusal through the real routes:
  * file-pages.prodtest.mjs.
  *
  * Run: node scripts/tests/file-pages.test.mjs
@@ -37,6 +43,9 @@ function check(name, cond, detail) {
 const code = (p) => stripComments(readFileSync(p, "utf8"));
 
 const refs = await loadTs("src/lib/files/page-refs.ts");
+const { askFailure } = await loadTs("src/lib/files/ask-failure.ts");
+const words = await loadTs("src/lib/files/refusal-words.ts");
+const { answerForClipboard } = await loadTs("src/lib/files/answer.ts");
 
 console.log("file-pages");
 
@@ -101,7 +110,7 @@ check("the page shows its own words, read from the file", /fetch\(`\/api\/files\
 check("...and for a PDF, opens the file at that page in a new tab", /href=\{pdfPageHref\(fileId, page\)\}\s*target="_blank"\s*rel="noopener noreferrer"/.test(cited));
 check("...and says when a page is gone or did not open", /state\.status === "missing" \? t\("missing"\) : t\("failed"\)/.test(cited));
 const shell = code("src/components/files/files-shell.tsx");
-check("shell: the answer is drawn with its pages pressable, with the switch", /\{pages && <CitedAnswerText answer=\{turn\.answer\}/.test(shell) && /text: pages && turn\.answer \? "" : turn\.text,/.test(shell));
+check("shell: the answer is drawn with its pages pressable, with the switch", /\{pages && <CitedAnswerText answer=\{turn\.answer\}/.test(shell) && /text: pages && turn\.answer \? "" : turn\.answer \? relabelAnswer\(turn\.text, turn\.answer\.citations, show\) : turn\.text,/.test(shell));
 check("shell: the page opens under its own answer", /\{pages && openPage\?\.turnId === turn\.id && openPage\.citation\.fileId && \(\s*<PageView/.test(shell));
 check("shell: a file read only in part says so on its line", /pages && pagesRead\(file\.file_type, file\.page_count\)/.test(shell));
 const ws = code("src/components/files/files-workspace.tsx");
@@ -123,6 +132,64 @@ for (const file of LOCALES) {
   const empty = KEYS.filter((k) => typeof m[k] !== "string" || !m[k].trim());
   check(`${file}: the words (${KEYS.length}), the file line, and the page count kept as it was`,
     empty.length === 0 && /\{read\}/.test(m.unread ?? "") && /\{total\}/.test(files.pagesPartRead ?? "") && /\{count/.test(files.pages ?? ""), empty.join(", "));
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 6. in the reader's language ==");
+// ---------------------------------------------------------------------
+check("a stored label is read for what it is: a page, a slice of rows, or a name of the person's own",
+  JSON.stringify(refs.labelParts("Page 12")) === JSON.stringify({ unit: "page", n: 12 }) && JSON.stringify(refs.labelParts("Rows 3")) === JSON.stringify({ unit: "rows", n: 3 }) && refs.labelParts("Πωλήσεις 2025") === null && refs.labelParts("Pages 2") === null);
+const greek = (l) => { const p = refs.labelParts(l); return p ? `${p.unit === "page" ? "Σελίδα" : "Γραμμές"} ${p.n}` : l; };
+check("the answer's text shows each checked reference in the reader's language",
+  refs.relabelAnswer("Total [contract.pdf, Page 37] and [contract.pdf, Page 37].", [C37], greek) === "Total [contract.pdf, Σελίδα 37] and [contract.pdf, Σελίδα 37].");
+check("...brackets that are not a checked reference stay as written",
+  refs.relabelAnswer("See [other.pdf, Page 3] and [not, a reference].", [C37], greek) === "See [other.pdf, Page 3] and [not, a reference].");
+const copied = answerForClipboard({ text: "Total [contract.pdf, Page 37].", citations: [C37] }, greek);
+check("...and so does what is copied, its list too", copied === "Total [contract.pdf, Σελίδα 37].\n\n- contract.pdf — Σελίδα 37", JSON.stringify(copied));
+check("every label the screens show goes through the reader's language",
+  /\{show\(piece\.citation\.label\)\}/.test(cited) && /— \{show\(c\.label\)\}/.test(cited) && /\{citation\.filename\} — \{show\(state\.status === "ready" \? state\.label : citation\.label\)\}/.test(cited) &&
+    (cited.match(/label: show\(/g) ?? []).length === 3 && !/\{(?:piece\.citation|c|citation)\.label\}/.test(cited));
+check("...with the switch off as well, on both screens",
+  /\{c\.filename\} — \{show\(c\.label\)\}/.test(shell) && /\{relabelAnswer\(answer\.text, answer\.citations, show\)\}/.test(ws) && (ws.match(/\{citation\.filename\} — \{show\(citation\.label\)\}/g) ?? []).length === 2 && !/(?<!\$)\{(?:c|citation)\.label\}/.test(shell + ws));
+check("a question that got no answer says which: still running, stalled, no credits, too many, the AI did not answer",
+  askFailure({ code: "still_running" }) === "askStillRunning" && askFailure({ code: "stalled", jobId: "j" }) === "askStalled" && askFailure({ code: "insufficient" }) === "askNoCredits" && askFailure({ code: "rate_limited" }) === "askRateLimited" && askFailure({ code: null }) === "askError");
+check("...a job that ran and failed says the AI did not answer, whatever its row says",
+  askFailure({ code: '529 {"type":"error","error":{"type":"overloaded_error"}}', jobId: "j" }) === "askFailed" && askFailure({ code: "insufficient", jobId: "j" }) === "askFailed");
+check("...the route names its refusals", /\{ ok: false, reason: "insufficient", insufficientCredits: true,/.test(code("src/app/api/files/ask/route.ts")) && (code("src/app/api/files/ask/route.ts").match(/reason: "rate_limited"/g) ?? []).length === 3);
+check("...and neither screen shows the route's or the provider's own words",
+  !/outcome\.error \|\|/.test(shell + ws) && (shell.match(/failures\.ask\(/g) ?? []).length === 2 && (ws.match(/failures\.ask\(/g) ?? []).length === 2);
+check("an upload refusal is said by what it is",
+  words.uploadRefusal({ stage: "file_cap", limitReached: true }, 403) === "uploadFileCap" && words.uploadRefusal({ stage: "storage_cap", limitReached: true }, 403) === "uploadStorageCap" &&
+    words.uploadRefusal({ error: "Too many uploads" }, 429) === "uploadRateLimited" && words.uploadRefusal({ stage: "type" }, 415) === "unsupportedType" &&
+    words.uploadRefusal({ stage: "size" }, 413) === "tooLarge" && words.uploadRefusal({ stage: "size" }, 400) === "emptyFile" && words.uploadRefusal(null, 413) === "tooLargeForTransfer" &&
+    words.uploadRefusal({ stage: "file_cap" }, 503) === "uploadError" && words.uploadRefusal({ stage: "storage_download" }, 502) === "uploadError");
+check("...on the shell and on the page, never as the route wrote it",
+  /refused: \(refusal\) => failures\.refused\(refusal, file\.name\)/.test(shell) && /addToast\(failures\.refused\(uploadRefusal\(data, data\.status \?\? 0\), file\.name\), "error"\)/.test(ws) &&
+    (code("src/lib/files/upload-file.ts").match(/error: refused\(data, response\.status\)/g) ?? []).length === 2);
+check("nothing a request answers is shown as it came, on either Files screen: every failure is Files' own sentence",
+  !/getErrorMessage\(|data\??\.error \?\?|\.error \|\| t\(/.test(shell + ws), (shell + ws).match(/.*(?:getErrorMessage\(|data\??\.error \?\?|\.error \|\| t\().*/g)?.slice(0, 3).join(" | "));
+// The sentences extraction stores, read out of the files that write them,
+// so a reworded one cannot slip past the matcher.
+const thrown = (path, cls) => [...readFileSync(path, "utf8").matchAll(new RegExp(`new ${cls}\\(\\s*"([^"]+)"`, "g"))].map((m) => m[1]);
+const stored = [...thrown("src/lib/files/extract.ts", "ExtractionError"), ...thrown("src/lib/files/pdf.ts", "PdfError")];
+const expect = { "no text layer": "scan", "font encoding": "encoding", "password-protected": "locked", "appears to be empty": "empty", "no readable pages": "empty" };
+const found = Object.entries(expect).map(([needle, reason]) => {
+  const sentence = stored.find((s) => s.includes(needle));
+  return sentence && words.unreadableReason(sentence) === reason ? null : `${needle} -> ${sentence ? words.unreadableReason(sentence) : "no such sentence"}`;
+}).filter(Boolean);
+check(`a file that could not be read says why, for each reason extraction stores (${stored.length} sentences read)`, stored.length >= 6 && found.length === 0, found.join(", "));
+check("...and an unknown or empty one falls back to the screen's own sentence", words.unreadableReason("this file could not be read") === null && words.unreadableReason(null) === null);
+check("...the file's own reason, on the shell and on the page",
+  /failures\.unreadable\(outcome\.file\.error, t\("uploadUnreadable", \{ name: file\.name \}\)\)/.test(shell) && /failures\.unreadable\(data\.file\.error, t\("uploadUnreadable", \{ name: file\.name \}\)\)/.test(ws) && /failures\.unreadable\(file\.error, t\("failedHint"\)\)/.test(ws) && !/file\.error \?\?/.test(shell + ws));
+const NEW_KEYS = ["askNoCredits", "askRateLimited", "askFailed", "uploadFileCap", "uploadStorageCap", "uploadRateLimited"];
+for (const file of LOCALES) {
+  const files = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.files ?? {};
+  const missing = [
+    ...NEW_KEYS.filter((k) => typeof files[k] !== "string" || !files[k].trim()),
+    ...["scan", "encoding", "locked", "empty"].filter((k) => typeof files.unreadable?.[k] !== "string" || !files.unreadable[k].trim()).map((k) => `unreadable.${k}`),
+    ...["page", "rows"].filter((k) => !/\{n\}/.test(files.pageRefs?.[k] ?? "")).map((k) => `pageRefs.${k}`),
+  ];
+  check(`${file}: a page and its rows by number, and what goes wrong (${NEW_KEYS.length + 6})`, missing.length === 0, missing.join(", "));
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

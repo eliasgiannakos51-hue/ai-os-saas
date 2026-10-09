@@ -5,6 +5,8 @@ import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X,
 import { Earth } from "@/components/brand/earth";
 import { useLocale, useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { ApiError } from "@/lib/errors/api-error";
+import { isErrorCode } from "@/lib/errors/error-codes";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -31,7 +33,7 @@ import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
 import { AnswerActions } from "@/components/chat/answer-actions";
 import { ResultCard, WorkArea } from "@/components/chat/work-area";
-import { SitePane, type SitePaneHandle } from "@/components/chat/site-pane";
+import { SitePane, type SitePaneHandle, type SiteWall } from "@/components/chat/site-pane";
 import { openSiteFor } from "@/lib/chat/open-tool";
 import { workItemFrom, type WorkItem } from "@/lib/chat/work-area";
 import type { Provenance } from "@/lib/chat/provenance";
@@ -45,6 +47,7 @@ import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
 import type { WorkMode } from "@/lib/chat/work-modes";
 import { chatTimelineWorthShowing, isChatStep, readChatStepFrame, type ChatStep } from "@/lib/chat/chat-timeline";
+import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
 
 // What each phase of an answer is called on screen (lib/chat/chat-timeline.ts).
 // Named rather than built from the step, so every message is a literal.
@@ -102,6 +105,7 @@ export function ChatWorkspace({
   initialWorkMode,
   workArea = false,
   opensTools = false,
+  siteWall = null,
   attachments = false,
   greeting = null,
 }: {
@@ -141,6 +145,10 @@ export function ChatWorkspace({
   /** The switch "chat-opens-tools" (package 7): a request for a site opens
    *  the Site beside the conversation instead of being answered in words. */
   opensTools?: boolean;
+  /** This account's plan has no Site: the Site opened from Chat shows the
+   *  plan's wall instead of offering what /api/websites/generate refuses.
+   *  Decided by the page from the same gate the route asks. */
+  siteWall?: SiteWall | null;
   /** The switch "chat-attachments" (package 9): PDFs and images given to a
    *  message, and under each answer the remembered facts it used. */
   attachments?: boolean;
@@ -163,6 +171,19 @@ export function ChatWorkspace({
   const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
+  const tOutOfCredits = useTranslations("credits.outOfCredits");
+  const tErrors = useTranslations("errors");
+  // OUT OF CREDITS, IN THE SCREEN'S LANGUAGE. The route's sentence is
+  // English (insufficientCreditsMessage in lib/billing/credits.ts) and was
+  // shown as it came, on a Greek screen too — found 2026-10-08 by
+  // scripts/tests/brand-memory.prodtest.mjs. The route sends a code and
+  // the two numbers for this.
+  const outOfCreditsText = (available: unknown, needed: unknown) =>
+    `${tErrors("codes.insufficientCredits.what")} ${
+      typeof available === "number" && typeof needed === "number"
+        ? tOutOfCredits("detailWithNumbers", { available, needed })
+        : tOutOfCredits("detail")
+    }`;
   const t = useTranslations("dashboard.chat");
   const tSteps = useTranslations("aiSteps");
   const chatStepLabel = (label: string | null) => (isChatStep(label) ? tSteps(CHAT_STEP_MESSAGE[label]) : null);
@@ -668,6 +689,8 @@ export function ChatWorkspace({
           ...(mentorPreset ? { mentorPreset } : {}),
           ...(workMode ? { workMode } : {}),
           ...(options.skipClarification ? { skipClarification: true } : {}),
+          // Where the person is: what «αύριο» means when Chat reads their calendar.
+          timeZone: resolveBrowserTimeZone(),
           ...(carried ? { attachments: carried.attachments } : {}),
         }),
       });
@@ -683,8 +706,24 @@ export function ChatWorkspace({
         } else if (data?.reason === "bad_attachments") {
           setError(t("attach.refused"));
         } else if (data?.rateLimited) {
+          // IN THE READER'S LANGUAGE (2026-10-08): the route's `message`
+          // is English prose, and a Greek screen showed it as it was. The
+          // route names the case in `code`; refused before anything ran,
+          // so nothing was charged (a 4xx to creditOutcomeForStatus).
           setIsRateLimitNotice(true);
-          setError(data.message);
+          // Out of credits is said with the two numbers the route sends
+          // (outOfCreditsText, above); every other code through the shared
+          // error words, and a refusal with no code as held back — never
+          // the route's English sentence (found 2026-10-08,
+          // scripts/tests/chat-attachments-edges.prodtest.mjs and
+          // scripts/tests/first-task-edges.prodtest.mjs).
+          setError(
+            data.outOfCredits === true
+              ? outOfCreditsText(data.available, data.needed)
+              : isErrorCode(data.code)
+                ? describe(new ApiError(429, { code: data.code })).text
+                : describeStatus(429).text
+          );
         } else {
           setError(describeStatus(res.status).text);
         }
@@ -771,7 +810,17 @@ export function ChatWorkspace({
             });
           }
         } else if (event.type === "error") {
-          streamError = describeStatus(500).text;
+          // WHAT THE ROUTE KNOWS, SAID (lib/errors/error-codes.ts): no
+          // credits for the hold, with the two numbers — not a failure on
+          // our side — or the AI service did not answer and nothing was
+          // kept, and the free message it gave back.
+          if (typeof event.freeRemaining === "number") setFreeRemaining(event.freeRemaining);
+          streamError =
+            event.outOfCredits === true
+              ? outOfCreditsText(event.available, event.needed)
+              : event.code === "upstreamUnavailable"
+                ? describeStatus(503, event.creditsRefunded === true).text
+                : describeStatus(500).text;
         }
       });
 
@@ -1310,9 +1359,14 @@ export function ChatWorkspace({
                   {tFree("largeMessage", { count: largeMessageCredits })}
                 </p>
               )}
-              {freeRemaining !== null && (
+              {/* NOT ON THE EMPTY CHAT (MASTER 14.2: «τίποτα άλλο»): the
+                  count waits for a conversation. Used up is the one
+                  exception — the next message costs credits, and that is
+                  said before it is typed, in one line and without the
+                  icon («Όχι άλλο εικονίδιο»). */}
+              {freeRemaining !== null && (!isEmpty || freeRemaining === 0) && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
-                  <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />
+                  {!isEmpty && <Gift className="h-3 w-3 text-success/80" aria-hidden="true" />}
                   {freeRemaining > 0
                     ? tFree("remaining", { count: freeRemaining })
                     : tFree("exhausted")}
@@ -1333,6 +1387,7 @@ export function ChatWorkspace({
           ref={sitePaneRef}
           key={siteBrief}
           brief={siteBrief}
+          wall={siteWall}
           hidden={siteHidden}
           onBack={() => setSiteHidden(true)}
           onClose={() => setSiteBrief(null)}

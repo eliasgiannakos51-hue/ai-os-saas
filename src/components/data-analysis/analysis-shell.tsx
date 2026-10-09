@@ -11,6 +11,8 @@ import { FactText, useExplainFact } from "@/components/data-analysis/fact-text";
 import { formatFact } from "@/lib/data-analysis/facts";
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import { MAX_UPLOAD_BYTES } from "@/lib/data-analysis/limits";
+import { useErrorText } from "@/lib/errors/use-error-text";
+import { ApiError } from "@/lib/errors/api-error";
 import { describeColumn, type AnalysisSummary, type AnalysisView } from "@/lib/data-analysis/view";
 
 /**
@@ -47,6 +49,12 @@ export function AnalysisShell({
   const router = useRouter();
   const { addToast } = useToast();
   const fileInput = useRef<HTMLInputElement>(null);
+  const describe = useErrorText();
+  // WHY A QUESTION WAS NOT ANSWERED (checked 2026-10-08 by
+  // scripts/tests/tool-shell-edges.prodtest.mjs): out of credits and the
+  // model unreachable are said as such, not as "not answered".
+  const refusal = (status: number, code: unknown, fallback: string) =>
+    status === 402 ? describe(new ApiError(402, null)).text : code === "ai_unavailable" ? t("analyse.unavailable") : fallback;
 
   const [uploading, setUploading] = useState(false);
   const [analysing, setAnalysing] = useState(false);
@@ -97,7 +105,7 @@ export function AnalysisShell({
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
-        note("tool", body?.error === "ai_unavailable" ? t("analyse.unavailable") : t("analyse.failed"));
+        note("tool", refusal(response.status, body?.error, t("analyse.failed")));
         return;
       }
       note("tool", t("analyse.done"));
@@ -125,7 +133,7 @@ export function AnalysisShell({
       const body = await response.json().catch(() => null);
       if (!response.ok) {
         note("user", question);
-        note("tool", t("ask.failed"));
+        note("tool", refusal(response.status, body?.error, t("ask.failed")));
         return;
       }
       if (body?.cannotAnswer) {

@@ -260,6 +260,7 @@
       "team": "Gib anderen deinen Tarif, jedem auf seinem eigenen Konto.",
       "apps": "Behalten Sie geplante oder bereits veröffentlichte Apps im Blick. Baut sie nicht.",
       "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
+      "imageTool": "Vier Bilder aus einer Beschreibung; ändere eines mit Worten und lade es in voller Auflösung herunter.",
       "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
       "coding": "Codeausschnitte schreiben, erklären, korrigieren, umwandeln und testen. Führt keinen Code aus und öffnet kein Repository.",
       "presentations": "Beschreibe eine Präsentation und erhalte die Folien – PowerPoint oder PDF, mit Fotos von Unsplash oder deinen eigenen. Es zeichnet keine Diagramme.",
@@ -691,6 +692,11 @@
       "failed": "Die E-Mail konnte nicht gesendet werden. Versuche es in ein paar Minuten erneut.",
       "rateLimited": "Zu viele Links in der letzten Stunde. Versuche es später erneut.",
       "signedOut": "Melde dich mit E-Mail und Passwort an, dann wird ein neuer Link gesendet."
+    },
+    "splash": {
+      "loading": "Arbeitsbereich wird geladen…",
+      "syncing": "Daten werden synchronisiert…",
+      "ready": "Bereit."
     }
   },
   "settings": {
@@ -1410,7 +1416,8 @@
         "building": "Die Website wird erstellt… das dauert ein paar Minuten.",
         "changing": "Die Website wird geändert…",
         "nextChanges": "Was du jetzt im Gespräch schreibst, ändert diese Website.",
-        "reopen": "Website zeigen"
+        "reopen": "Website zeigen",
+        "failed": "Die Website konnte nicht erstellt werden. Die Erstellung wurde nicht berechnet; versuch es noch einmal."
       },
       "attach": {
         "label": "PDF oder Bild anhängen",
@@ -1419,7 +1426,9 @@
         "readyPdf": "Bereit",
         "readyImage": "Geht mit der Nachricht",
         "remove": "„{name}“ entfernen",
-        "unreadable": "In „{name}“ wurde kein Text gefunden. Ist es ein Scan, hängen Sie es als Bild an.",
+        "unreadable": "Der Text in „{name}“ konnte nicht gelesen werden. Ist es ein Scan, hängen Sie es als Bild an; ist es mit einem Passwort geschützt, entfernen Sie es und hängen Sie die Datei erneut an.",
+        "fileLimit": "„{name}“: Damit wäre das Limit Ihres Tarifs unter Dateien überschritten. Löschen Sie eine Datei unter Dateien oder wechseln Sie den Tarif.",
+        "uploadLimit": "Zu viele Datei-Uploads in der letzten Stunde. Versuchen Sie es in Kürze erneut.",
         "offline": "Keine Verbindung. Prüfen Sie das Netzwerk und versuchen Sie es erneut.",
         "type": "„{name}“: nur PDF, JPG oder PNG.",
         "pdfTooLarge": "„{name}“: Das PDF ist größer als 20 MB.",
@@ -1709,6 +1718,8 @@
       "statusCompleted": "Fertig",
       "statusFlagged": "Markiert",
       "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
+      "flaggedBody": "Unsere Sicherheitsprüfung hat diese Website angehalten, daher kann sie so nicht veröffentlicht werden.",
+      "flaggedDetails": "Was die Prüfung gefunden hat",
       "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
       "design": {
         "title": "Design",
@@ -2203,6 +2214,10 @@
       "publishChanges": "Änderungen veröffentlichen",
       "publishSuccess": "Ihre Seite ist live.",
       "publishError": "Die Seite konnte nicht veröffentlicht werden. Bitte erneut versuchen.",
+      "limitReached": "Du hast das Limit deines Plans für Live-Websites erreicht. Nimm eine offline oder wechsle zu einem größeren Plan.",
+      "paidOnly": "Veröffentlichen ist in den kostenpflichtigen Plänen enthalten.",
+      "tooManyToday": "Du hast heute viele Änderungen veröffentlicht. Versuche es morgen noch einmal.",
+      "securityBlocked": "Die Sicherheitsprüfung hat etwas gefunden, das nicht online gehen sollte. Die Website wurde nicht veröffentlicht.",
       "unpublish": "Offline nehmen",
       "unpublishSuccess": "Ihre Seite ist nicht mehr öffentlich.",
       "unpublishError": "Die Seite konnte nicht offline genommen werden. Bitte erneut versuchen.",
@@ -2308,7 +2323,7 @@
         "googleCalendar": {
           "summary": "Liest deine Termine, damit die KI „Was habe ich morgen?“ beantworten kann.",
           "sees": "Titel, Uhrzeit, Ort und Organisator der Termine an den Tagen, nach denen du fragst. Nie die Beschreibung einer Einladung, nie einen anderen Kalender als deinen Hauptkalender.",
-          "consent": "Die KI kann die Termine deines Hauptkalenders lesen, um deine Fragen zu beantworten. Sie liest nur, wenn eine Frage es braucht — nie im Hintergrund — und kann nichts anlegen, ändern oder löschen."
+          "consent": "Die KI kann die Termine deines Hauptkalenders lesen, um deine Fragen zu beantworten. Sie liest nur, wenn eine deiner Fragen oder eine Automation, die du eingeschaltet hast, es braucht — sonst nie — und kann nichts anlegen, ändern oder löschen."
         },
         "slack": {
           "summary": "Kanäle lesen, in denen die App ist, und Agenten dort posten lassen.",
@@ -2381,8 +2396,17 @@
       "askDisabledNoQuestion": "Gib deine Frage ein, um fortzufahren.",
       "processingHint": "Die Datei wird gelesen — meist ein paar Sekunden. Sobald sie fertig ist, kannst du dazu fragen.",
       "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch.",
+      "unreadable": {
+        "scan": "Dieses PDF hat keine Textebene: Es ist ein Scan oder nur ein Bild und bräuchte Texterkennung (OCR), bevor die KI es lesen kann.",
+        "encoding": "Dieses PDF enthält Text, aber seine Schriftkodierung konnte nicht gelesen werden — eine Grenze auf unserer Seite, kein Fehler deiner Datei. Neu speichern aus der ursprünglichen Anwendung oder als neues PDF drucken ergibt meist eines, das lesbar ist.",
+        "locked": "Diese Datei ist passwortgeschützt. Entferne das Passwort und lade sie erneut hoch.",
+        "empty": "Diese Datei scheint leer zu sein — es gab nichts zu lesen."
+      },
       "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
       "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "askNoCredits": "Nicht genug Credits für diese Frage. Es wurde nichts berechnet.",
+      "askRateLimited": "Zu viele Fragen in der letzten Stunde. Versuche es gleich noch einmal — es wurde nichts berechnet.",
+      "askFailed": "Die Frage wurde nicht beantwortet: Der KI-Dienst hat nicht geantwortet. Es wurde nichts berechnet — versuche es gleich noch einmal.",
       "questionLength": "{used, number} von {max, number} Zeichen",
       "questionAtLimit": "Du hast das Limit von {max, number} Zeichen für eine Frage erreicht.",
       "readInParts": "Deine Dokumente waren zu lang, um sie auf einmal zu lesen — sie wurden in {parts} Teilen gelesen und die Antworten zusammengeführt.",
@@ -2394,6 +2418,9 @@
       "uploadStorageMissing": "Der Dateispeicher ist auf dieser Installation nicht eingerichtet — der Bucket 'user-files' fehlt. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
       "uploadStoragePolicy": "Der Dateispeicher hat den Upload abgelehnt — die Zugriffsrichtlinien des Buckets fehlen. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
       "tooLargeForTransfer": "Die Hosting-Plattform hat den Upload abgelehnt, bevor er die App erreichte. Bitte gleich noch einmal versuchen.",
+      "uploadFileCap": "Du hast die Anzahl an Dateien erreicht, die dein Tarif umfasst. Lösche eine oder führe ein Upgrade durch.",
+      "uploadStorageCap": "Diese Datei passt nicht mehr in den Speicher deines Tarifs. Lösche Dateien oder führe ein Upgrade durch.",
+      "uploadRateLimited": "Zu viele Uploads in der letzten Stunde. Versuche es gleich noch einmal.",
       "sharedStored": "{count, plural, one {# Datei} other {# Dateien}} aus der Freigabe hinzugefügt.",
       "sharedFailed": "{count, plural, one {# Datei} other {# Dateien}} konnten nicht hinzugefügt werden.",
       "sharedReason": "Grund: {reason}",
@@ -2402,6 +2429,8 @@
       "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet.",
       "pagesPartRead": "Die ersten {read} von {total} Seiten werden gelesen",
       "pageRefs": {
+        "page": "Seite {n}",
+        "rows": "Zeilen, Teil {n}",
         "open": "Öffnen: {name}, {label}",
         "close": "Seite schließen",
         "loading": "Die Seite wird geöffnet…",
@@ -2428,6 +2457,19 @@
       "start": "Recherche starten",
       "notNow": "Jetzt nicht",
       "runError": "Der Bericht konnte nicht fertiggestellt werden.",
+      "refused": {
+        "noCredits": "Nicht genug Credits für einen Recherchebericht. Es wurde nichts berechnet.",
+        "rateLimited": "Zu viele Berichte in kurzer Zeit. Versuche es gleich noch einmal.",
+        "unavailable": "Der KI-Dienst hat nicht geantwortet. Es wurde nichts berechnet — versuche es gleich noch einmal."
+      },
+      "failed": {
+        "noFindings": "Die Suchen haben zu diesem Thema nichts Brauchbares gefunden.",
+        "unavailable": "Der KI-Dienst hat auf die Recherchefragen nicht geantwortet. Starte den Bericht gleich noch einmal.",
+        "notWritten": "Aus den Funden ließ sich kein Bericht schreiben.",
+        "interrupted": "Der Bericht hat vor dem Ende angehalten. Es wurden keine Credits berechnet — starte ihn erneut.",
+        "notStarted": "Der Bericht ist nicht gestartet.",
+        "noCredits": "Es gab nicht genug Credits, um den Bericht auszuführen."
+      },
       "finished": "Dein Bericht ist fertig",
       "inProgress": "Sucht und schreibt…",
       "statusPending": "Geplant",
@@ -2552,6 +2594,23 @@
           "staff": "Du und das Testkonto",
           "everyone": "Alle"
         }
+      },
+      "alerts": {
+        "title": "Warnungen an dich",
+        "hint": "Fehler in der Produktion, ein plötzlicher Kostenanstieg, eine Marge unter der Grenze und eine Welle fehlgeschlagener Anmeldungen gehen per E-Mail an ADMIN_EMAILS.",
+        "recipients": "Empfänger: {count, plural, one {# Adresse} other {# Adressen}} aus ADMIN_EMAILS",
+        "recipientsNone": "Empfänger: niemand — ADMIN_EMAILS ist nicht gesetzt",
+        "mailerOk": "Versand: eingerichtet, von deiner eigenen Adresse (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Versand: RESEND_API_KEY ist nicht gesetzt — keine Warnung geht hinaus",
+        "mailerTestSender": "Versand: von der Testadresse von Resend, die nur die E-Mail deines Resend-Kontos erreicht. Setze RESEND_FROM_EMAIL auf eine Adresse deiner eigenen Domain.",
+        "send": "Testwarnung senden",
+        "sending": "Wird gesendet…",
+        "sent": "Gesendet an {count, plural, one {# Adresse} other {# Adressen}}. Wenn sie in ein paar Minuten nicht da ist, sieh auch im Spam nach.",
+        "refused": "Nicht gesendet. Resend antwortete:",
+        "notConfigured": "Nicht gesendet: RESEND_API_KEY ist nicht gesetzt.",
+        "noRecipients": "Nicht gesendet: ADMIN_EMAILS ist nicht gesetzt.",
+        "rateLimited": "Zu viele Tests in dieser Stunde. Versuche es später erneut.",
+        "failed": "Nicht gesendet. Versuche es erneut."
       }
     },
     "ideas": {
@@ -2974,8 +3033,31 @@
         "finances": "Finanzen",
         "sales": "Vertrieb",
         "trading": "Trading",
+        "image": "Bild",
+        "connections": "Verbindungen",
         "document": "Dokument",
         "games": "Spiele"
+      },
+      "lines": {
+        "site": "Eine Website aus einer Beschreibung.",
+        "slides": "Eine Präsentation aus einer Beschreibung.",
+        "posts": "Ein Beitrag für jede Plattform.",
+        "research": "Ein Bericht mit Quellen zu jedem Thema.",
+        "analyze": "Erkenntnisse aus einer Datendatei.",
+        "files": "Stell Fragen zu deinen Dokumenten.",
+        "automations": "Aufgaben, die von selbst laufen.",
+        "projects": "Ein Ordner mit einem Ziel.",
+        "goals": "Ein Ziel, in Schritte zerlegt.",
+        "meetings": "Zusammenfassung und Aufgaben aus einer Aufnahme.",
+        "library": "Alles, was du gemacht hast, an einem Ort.",
+        "memory": "Was Ionexa sich über dich merkt.",
+        "finances": "Einnahmen und Ausgaben erfassen.",
+        "sales": "Kontakte, Ansprache und nächste Schritte.",
+        "trading": "Ein Journal deiner Trades.",
+        "image": "Vier Bilder aus einer Beschreibung.",
+        "connections": "Verbinde deine Dienste mit einem Klick.",
+        "document": "Ein Dokument aus einer Beschreibung.",
+        "games": "Ein Spiel aus einer Beschreibung."
       }
     },
     "home": {
@@ -3013,7 +3095,10 @@
         "questions": "Bevor ich anfange, ein paar Fragen. Beantworte sie im Feld oder mach ohne weiter:",
         "skip": "Ohne weitermachen",
         "new": "Neue Website",
-        "design": "Design"
+        "design": "Design",
+        "held": "Unsere Sicherheitsprüfung hat diese Änderung zurückgehalten, die Website ist unverändert.",
+        "busy": "An dieser Website wird gerade schon etwas geändert. Warte, bis es fertig ist, und sag es dann noch einmal.",
+        "offTopic": "Hier erstelle ich Websites. Sag mir, welche Website du möchtest: für welches Unternehmen oder welchen Zweck, welche Bereiche, welcher Stil."
       },
       "box": {
         "only": "Nur ändern: {name}",

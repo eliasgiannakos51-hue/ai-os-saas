@@ -260,6 +260,7 @@
       "team": "Faites profiter d’autres personnes de votre forfait, chacune sur son propre compte.",
       "apps": "Suivez les applis que vous préparez ou avez déjà livrées. Ne les construit pas.",
       "images": "Suivez les images que vous préparez ou avez déjà faites. Ne les génère pas.",
+      "imageTool": "Quatre images à partir d’une description ; modifie-en une avec des mots et télécharge-la en pleine résolution.",
       "videos": "Suivez les vidéos que vous préparez ou avez déjà faites. Ne les génère pas.",
       "coding": "Écrivez, expliquez, corrigez, convertissez et testez des extraits de code. N'exécute pas de code et n'ouvre pas de dépôt.",
       "presentations": "Décrivez une présentation et obtenez les diapositives : PowerPoint ou PDF, avec des photos d'Unsplash ou les vôtres. Aucun graphique.",
@@ -691,6 +692,11 @@
       "failed": "L’e-mail n’a pas pu être envoyé. Réessayez dans quelques minutes.",
       "rateLimited": "Trop de liens au cours de la dernière heure. Réessayez plus tard.",
       "signedOut": "Connectez-vous avec votre e-mail et votre mot de passe, et un nouveau lien sera envoyé."
+    },
+    "splash": {
+      "loading": "Chargement de votre espace de travail…",
+      "syncing": "Synchronisation des données…",
+      "ready": "Prêt."
     }
   },
   "settings": {
@@ -1410,7 +1416,8 @@
         "building": "Création du site… cela prend quelques minutes.",
         "changing": "Modification du site…",
         "nextChanges": "Ce que vous écrivez maintenant dans la conversation modifie ce site.",
-        "reopen": "Afficher le site"
+        "reopen": "Afficher le site",
+        "failed": "Le site n’a pas pu être créé. La création n’a pas été facturée ; réessayez."
       },
       "attach": {
         "label": "Joindre un PDF ou une image",
@@ -1419,7 +1426,9 @@
         "readyPdf": "Prêt",
         "readyImage": "Part avec le message",
         "remove": "Retirer « {name} »",
-        "unreadable": "Aucun texte trouvé dans « {name} ». S’il s’agit d’un scan, joignez-le comme image.",
+        "unreadable": "Impossible de lire le texte de « {name} ». S’il s’agit d’un scan, joignez-le comme image ; s’il est protégé par un mot de passe, retirez-le et joignez-le à nouveau.",
+        "fileLimit": "« {name} » : cela dépasserait la limite de votre offre dans Fichiers. Supprimez un fichier dans Fichiers ou changez d’offre.",
+        "uploadLimit": "Trop de fichiers envoyés au cours de la dernière heure. Réessayez dans un moment.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez.",
         "type": "« {name} » : uniquement PDF, JPG ou PNG.",
         "pdfTooLarge": "« {name} » : le PDF dépasse 20 Mo.",
@@ -1709,6 +1718,8 @@
       "statusCompleted": "Prêt",
       "statusFlagged": "Signalé",
       "flaggedTitle": "Signalé par notre contrôle de sécurité",
+      "flaggedBody": "Notre contrôle de sécurité a retenu ce site : il ne peut pas être publié en l’état.",
+      "flaggedDetails": "Ce que le contrôle a trouvé",
       "editUnavailable": "Vous pourrez demander des modifications une fois le site généré.",
       "design": {
         "title": "Design",
@@ -2203,6 +2214,10 @@
       "publishChanges": "Publier les modifications",
       "publishSuccess": "Votre site est en ligne.",
       "publishError": "Impossible de publier ce site. Réessayez.",
+      "limitReached": "Vous avez atteint la limite de sites en ligne de votre offre. Retirez-en un ou passez à une offre supérieure.",
+      "paidOnly": "La publication est disponible avec les offres payantes.",
+      "tooManyToday": "Vous avez publié beaucoup de modifications aujourd’hui. Réessayez demain.",
+      "securityBlocked": "Le contrôle de sécurité a trouvé quelque chose qui ne doit pas être mis en ligne : le site n’a pas été publié.",
       "unpublish": "Retirer",
       "unpublishSuccess": "Votre site n'est plus public.",
       "unpublishError": "Impossible de retirer ce site. Réessayez.",
@@ -2308,7 +2323,7 @@
         "googleCalendar": {
           "summary": "Lit tes rendez-vous pour que l’IA puisse répondre « qu’est-ce que j’ai demain ? ».",
           "sees": "Le titre, l’heure, le lieu et l’organisateur des rendez-vous des jours que tu demandes. Jamais la description d’une invitation, jamais un autre agenda que le principal.",
-          "consent": "L’IA pourra lire les événements de ton agenda principal pour répondre à tes questions. Elle ne lit que lorsqu’une question le demande — jamais en arrière-plan — et ne peut rien créer, modifier ni supprimer."
+          "consent": "L’IA pourra lire les événements de ton agenda principal pour répondre à tes questions. Elle ne lit que lorsqu’une de tes questions, ou une automatisation que tu as activée, le demande — rien d’autre — et ne peut rien créer, modifier ni supprimer."
         },
         "slack": {
           "summary": "Lire les canaux où se trouve l'app et y laisser les agents publier.",
@@ -2381,8 +2396,17 @@
       "askDisabledNoQuestion": "Saisissez votre question pour continuer.",
       "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
       "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
+      "unreadable": {
+        "scan": "Ce PDF n’a pas de couche de texte : c’est un scan ou une simple image, et il faudrait un OCR pour que l’IA puisse le lire.",
+        "encoding": "Ce PDF contient du texte, mais l’encodage de sa police n’a pas pu être décodé — une limite de notre côté, pas un problème de ton fichier. L’enregistrer à nouveau depuis l’application d’origine, ou l’imprimer dans un nouveau PDF, en produit généralement un lisible.",
+        "locked": "Ce fichier est protégé par un mot de passe. Retire le mot de passe et envoie-le à nouveau.",
+        "empty": "Ce fichier semble vide — il n’y avait rien à lire."
+      },
       "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
       "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "askNoCredits": "Pas assez de crédits pour cette question. Rien n’a été facturé.",
+      "askRateLimited": "Trop de questions au cours de la dernière heure. Réessaie dans un instant — rien n’a été facturé.",
+      "askFailed": "La question n’a pas reçu de réponse : le service d’IA n’a pas répondu. Rien n’a été facturé — réessaie dans un instant.",
       "questionLength": "{used, number} sur {max, number} caractères",
       "questionAtLimit": "Vous avez atteint la limite de {max, number} caractères pour une question.",
       "readInParts": "Vos documents étaient trop longs pour être lus d'un seul tenant : ils ont été lus en {parts} parties et les réponses combinées.",
@@ -2394,6 +2418,9 @@
       "uploadStorageMissing": "Le stockage de fichiers n'est pas configuré sur ce déploiement — le bucket 'user-files' est manquant. Un administrateur doit exécuter le SQL de réparation (System Health → File storage).",
       "uploadStoragePolicy": "Le stockage a refusé l'envoi — les politiques d'accès du bucket sont manquantes. Un administrateur doit exécuter le SQL de réparation (System Health → File storage).",
       "tooLargeForTransfer": "La plateforme d'hébergement a refusé l'envoi avant qu'il n'atteigne l'application. Réessayez dans un instant.",
+      "uploadFileCap": "Tu as atteint le nombre de fichiers inclus dans ton forfait. Supprimes-en un ou passe à un forfait supérieur.",
+      "uploadStorageCap": "Ce fichier ne tient pas dans le stockage de ton forfait. Supprime des fichiers ou passe à un forfait supérieur.",
+      "uploadRateLimited": "Trop d’envois au cours de la dernière heure. Réessaie dans un instant.",
       "sharedStored": "{count, plural, one {# fichier ajouté} other {# fichiers ajoutés}} depuis le partage.",
       "sharedFailed": "{count, plural, one {# fichier n'a pas pu être ajouté} other {# fichiers n'ont pas pu être ajoutés}}.",
       "sharedReason": "Raison : {reason}",
@@ -2402,6 +2429,8 @@
       "openedFromDevice": "{count, plural, one {# fichier ouvert} other {# fichiers ouverts}} depuis votre appareil.",
       "pagesPartRead": "Les {read} premières pages sur {total} sont lues",
       "pageRefs": {
+        "page": "Page {n}",
+        "rows": "Lignes, partie {n}",
         "open": "Ouvrir : {name}, {label}",
         "close": "Fermer la page",
         "loading": "Ouverture de la page…",
@@ -2428,6 +2457,19 @@
       "start": "Lancer la recherche",
       "notNow": "Pas maintenant",
       "runError": "Le rapport n'a pas pu être terminé.",
+      "refused": {
+        "noCredits": "Pas assez de crédits pour un rapport de recherche. Rien n’a été facturé.",
+        "rateLimited": "Trop de rapports en peu de temps. Réessaie dans un instant.",
+        "unavailable": "Le service d’IA n’a pas répondu. Rien n’a été facturé — réessaie dans un instant."
+      },
+      "failed": {
+        "noFindings": "Les recherches n’ont rien trouvé d’utile sur ce sujet.",
+        "unavailable": "Le service d’IA n’a pas répondu aux questions de la recherche. Relance-le dans un instant.",
+        "notWritten": "Le rapport n’a pas pu être rédigé à partir de ce qui a été trouvé.",
+        "interrupted": "Le rapport s’est arrêté avant la fin. Aucun crédit n’a été facturé — relance-le.",
+        "notStarted": "Le rapport n’a pas démarré.",
+        "noCredits": "Il n’y avait pas assez de crédits pour lancer le rapport."
+      },
       "finished": "Votre rapport est prêt",
       "inProgress": "Recherche et rédaction…",
       "statusPending": "Planifié",
@@ -2552,6 +2594,23 @@
           "staff": "Vous et le compte de test",
           "everyone": "Tout le monde"
         }
+      },
+      "alerts": {
+        "title": "Alertes pour vous",
+        "hint": "Les erreurs en production, une hausse soudaine des coûts, une marge sous le seuil et une vague de connexions échouées sont envoyées par email à ADMIN_EMAILS.",
+        "recipients": "Destinataires : {count, plural, one {# adresse} other {# adresses}} depuis ADMIN_EMAILS",
+        "recipientsNone": "Destinataires : personne — ADMIN_EMAILS n’est pas défini",
+        "mailerOk": "Envoi : configuré, depuis votre propre adresse (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Envoi : RESEND_API_KEY n’est pas défini — aucune alerte ne part",
+        "mailerTestSender": "Envoi : depuis l’adresse de test de Resend, qui n’atteint que l’email de votre compte Resend. Définissez RESEND_FROM_EMAIL avec une adresse de votre propre domaine.",
+        "send": "Envoyer une alerte de test",
+        "sending": "Envoi…",
+        "sent": "Envoyée à {count, plural, one {# adresse} other {# adresses}}. Si elle n’arrive pas d’ici quelques minutes, regardez aussi dans les spams.",
+        "refused": "Non envoyée. Resend a répondu :",
+        "notConfigured": "Non envoyée : RESEND_API_KEY n’est pas défini.",
+        "noRecipients": "Non envoyée : ADMIN_EMAILS n’est pas défini.",
+        "rateLimited": "Trop de tests cette heure-ci. Réessayez plus tard.",
+        "failed": "Non envoyée. Réessayez."
       }
     },
     "ideas": {
@@ -2974,8 +3033,31 @@
         "finances": "Finances",
         "sales": "Ventes",
         "trading": "Trading",
+        "image": "Image",
+        "connections": "Connexions",
         "document": "Document",
         "games": "Jeux"
+      },
+      "lines": {
+        "site": "Un site à partir d'une description.",
+        "slides": "Une présentation à partir d'une description.",
+        "posts": "Une publication pour chaque plateforme.",
+        "research": "Un rapport sourcé sur n'importe quel sujet.",
+        "analyze": "Des résultats tirés d'un fichier de données.",
+        "files": "Posez vos questions sur vos documents.",
+        "automations": "Des tâches qui tournent toutes seules.",
+        "projects": "Un dossier avec un objectif.",
+        "goals": "Un objectif, découpé en étapes.",
+        "meetings": "Résumé et actions à partir d'un enregistrement.",
+        "library": "Tout ce que vous avez créé, au même endroit.",
+        "memory": "Ce qu'Ionexa retient de vous.",
+        "finances": "Notez vos revenus et dépenses.",
+        "sales": "Contacts, relances et prochaines étapes.",
+        "trading": "Le journal de vos trades.",
+        "image": "Quatre images à partir d'une description.",
+        "connections": "Connectez vos services en un clic.",
+        "document": "Un document à partir d'une description.",
+        "games": "Un jeu à partir d'une description."
       }
     },
     "home": {
@@ -3013,7 +3095,10 @@
         "questions": "Avant de commencer, quelques questions. Réponds dans le champ, ou continue sans :",
         "skip": "Continuer sans",
         "new": "Nouveau site",
-        "design": "Apparence"
+        "design": "Apparence",
+        "held": "Notre contrôle de sécurité a retenu cette modification : le site est resté tel quel.",
+        "busy": "Une modification de ce site est déjà en cours. Attendez qu’elle se termine, puis redemandez-la.",
+        "offTopic": "Ici, je crée des sites web. Dites-moi quel site vous voulez : pour quelle activité ou quel but, quelles sections, quel style."
       },
       "box": {
         "only": "Seulement : {name}",

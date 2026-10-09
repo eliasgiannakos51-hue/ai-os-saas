@@ -6,8 +6,11 @@
 //
 //   ONE ACCOUNT'S FOLDER IS NOT ANOTHER'S. Section 3 reads the policies
 //   out of the migration and the routes out of their own source: every
-//   query on the person's own client, no admin client anywhere, and the
-//   membership routes reading the project back before they write.
+//   query on the person's own client but one — the create, which since
+//   2026-10-08 is the server's (the plan's project cap holds only if the
+//   account cannot create a project any other way) and takes its user_id
+//   from the session — and the membership routes reading the project back
+//   before they write.
 //
 //   NOBODY ADDS TO A PROJECT THAT IS NOT THEIRS. Same section: the
 //   read-back answers 404 for "yours does not exist" and "it is not
@@ -34,7 +37,7 @@
 // skipped rather than green.
 //
 // Run: node scripts/tests/projects.test.mjs
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -52,6 +55,7 @@ const lookup = (obj, dotted) => dotted.split(".").reduce((n, p) => (n == null ? 
 const PROJECT_TS = "src/lib/projects/project.ts";
 const EXTRAS_TS = "src/lib/projects/linkable-extras.ts";
 const MIGRATION = "supabase/migrations/20261001000000_projects.sql";
+const SERVER_CREATE_MIGRATION = "supabase/migrations/20261023100000_projects_site_versions_server_written.sql";
 const ROUTE = "src/app/api/projects/route.ts";
 const MEMBERS_ROUTE = "src/app/api/projects/[id]/members/route.ts";
 const LIST_PAGE = "src/app/dashboard/projects/page.tsx";
@@ -153,11 +157,29 @@ console.log("\n== 3. ONE ACCOUNT'S FOLDER IS NOT ANOTHER'S ==");
   }
   ok("the grant travels with the policies", /grant select, insert, update, delete on public\.projects to authenticated;/.test(sql));
   ok("anon holds nothing", /revoke all on public\.projects from anon;/.test(sql));
+  // THE CREATE MOVED TO THE SERVER (2026-10-08, ΑΣ-4.11): the plan's
+  // project cap is checked in the two routes that create, and held only
+  // while the account cannot create one any other way.
+  const serverCreate = existsSync(SERVER_CREATE_MIGRATION) ? stripComments(readFileSync(SERVER_CREATE_MIGRATION, "utf8").replace(/--.*$/gm, "")) : "";
+  ok("...and a later migration takes the account's INSERT back, keeping the other three",
+    /drop policy if exists projects_insert_own on public\.projects;/.test(serverCreate)
+      && /revoke insert on public\.projects from anon, authenticated;/.test(serverCreate)
+      && !/revoke[^;]*(select|update|delete)[^;]*on public\.projects/.test(serverCreate));
 
   for (const [file, label] of [[ROUTE, "api/projects"], [MEMBERS_ROUTE, "api/projects/[id]/members"]]) {
     const src = stripComments(readFileSync(file, "utf8"));
-    ok(`${label}: no admin client anywhere in it`, !/createAdminClient/.test(src),
-      "the service role bypasses RLS, which is the one thing keeping these apart");
+    // The service role bypasses RLS, which is the one thing keeping these
+    // apart — so it appears exactly where the account may not write
+    // itself, the create, and nowhere else.
+    const adminUses = (src.match(/createAdminClient\(\)/g) ?? []).length;
+    const adminCreate = /createAdminClient\(\)\s*\.from\("projects"\)\s*\.insert\(\{\s*user_id: user\.id,/.test(src);
+    if (file === ROUTE) {
+      ok(`${label}: the service role only for the create, after the cap, with the session's user`,
+        adminUses === 1 && adminCreate && src.indexOf("createAdminClient()") > src.indexOf("project_limit_reached"),
+        `${adminUses} use(s)`);
+    } else {
+      ok(`${label}: no admin client anywhere in it`, adminUses === 0 && !/createAdminClient/.test(src));
+    }
     ok(`${label}: the user comes from the session`, /supabase\.auth\.getUser\(\)/.test(src));
     ok(`${label}: an unsigned request is refused before anything is read`, /not_signed_in/.test(src) && src.indexOf("not_signed_in") < src.indexOf("try {"));
     ok(`${label}: user_id is never taken from the body`, !/body\.user_id|body\.userId/.test(src));

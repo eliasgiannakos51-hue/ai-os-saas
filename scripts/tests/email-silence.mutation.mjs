@@ -7,7 +7,9 @@
 //
 // Both bugs it was written for are mutations here: an empty catch in the
 // error alerter, and an empty catch in the margin alerter. Those two are
-// the mail that would have reported the problem.
+// the mail that would have reported the problem. Since 2026-10-08 both
+// send through lib/email/owner-alert.ts, so the mutations go there — with
+// the third silence, a refusal Resend returns that nobody read.
 //
 // EVERY MUTATION IS A DELETION OR AN EDIT OF REAL CODE, never an
 // `if (false)`.
@@ -21,7 +23,7 @@ const GATE = "scripts/tests/email-silence.test.mjs";
 const CONFIG = "src/lib/email/resend-config.ts";
 const CLIENT = "src/lib/resend.ts";
 const ERROR_ALERT = "src/lib/email/error-alert.ts";
-const MARGIN_ALERT = "src/lib/email/margin-alert.ts";
+const OWNER_ALERT = "src/lib/email/owner-alert.ts";
 const ENV = "src/lib/env-check.ts";
 const SHARED = "src/lib/email/shared-sender.ts";
 const DISPATCH = "src/lib/notify/dispatch.ts";
@@ -94,25 +96,34 @@ const MUTATIONS = [
 
   // ---- the two silences this file was written for ----
   {
-    name: "the error alerter goes back to swallowing its own failure",
-    file: ERROR_ALERT,
-    from: "    console.error(\n      \"[error-alert] could not send the alert:\",\n      err instanceof Error ? err.message : String(err)\n    );",
+    // Since 2026-10-08 the alerts send through lib/email/owner-alert.ts,
+    // and its one console.error is the line that says a failure.
+    name: "the owner-alert sender goes back to swallowing its own failure",
+    file: OWNER_ALERT,
+    from: "  if (!outcome.ok) console.error(`[${tag}] could not send the alert:`, outcome.detail);",
     to: "",
-    expect: "no sender swallows it in an empty catch",
+    expect: "the error alert reports its own failure",
   },
   {
     name: "...and reports it through logApiError instead, which re-enters the alert path",
-    file: ERROR_ALERT,
-    from: '    console.error(\n      "[error-alert] could not send the alert:",',
-    to: '    logApiError("email:error-alert", err);\n    console.error(\n      "[error-alert] could not send the alert:",',
+    file: OWNER_ALERT,
+    from: "  if (!outcome.ok) console.error(`[${tag}] could not send the alert:`, outcome.detail);",
+    to: "  if (!outcome.ok) logApiError(tag, outcome.detail);",
     expect: "does NOT do it through logApiError",
   },
   {
-    name: "the margin alerter goes back to swallowing its own failure",
-    file: MARGIN_ALERT,
-    from: "    console.error(\n      \"[margin-alert] could not send the alert:\",\n      err instanceof Error ? err.message : String(err)\n    );",
-    to: "",
-    expect: "no sender swallows it in an empty catch",
+    name: "the error alerter goes back to a send of its own",
+    file: ERROR_ALERT,
+    from: '  await sendOwnerAlert("error-alert", {',
+    to: '  await sendOwnerAlert("errors", {',
+    expect: "the error alert sends through the owner-alert sender",
+  },
+  {
+    name: "a send stops reading what Resend returns, so a refusal reads as delivered",
+    file: OWNER_ALERT,
+    from: "      const { error } = await createResendClient().emails.send({",
+    to: "      const error = null;\n      await createResendClient().emails.send({",
+    expect: "every send reads the refusal Resend returns",
   },
 
   // ---- the operator's own warning ----

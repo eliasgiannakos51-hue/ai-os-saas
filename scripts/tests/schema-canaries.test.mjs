@@ -181,14 +181,14 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
+  "20261023100000_projects_site_versions_server_written.sql":
+    "drops the insert policy on projects and the insert and delete policies on site_versions, and revokes INSERT on the first and INSERT, UPDATE and DELETE on the second from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not or lost what it keeps, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261020000000_google_calendar_connection.sql":
     "widens a CHECK constraint on user_integrations to a fourth provider name. It creates no object, and a constraint is not in the database API's OpenAPI document, so /api/health cannot see it; the migration raises at the end if the constraint does not name google_calendar, and until it runs the Calendar callback's save is refused and says so",
   "20261015000000_agents_websites_server_written.sql":
     "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261014000000_server_written_tables.sql":
     "drops nine write policies and revokes INSERT, UPDATE and DELETE on three tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write any of them, and server-written-tables.dbtest.mjs checks it against a real Postgres",
-  "20261013000000_cost_columns_server_only.sql":
-    "narrows SELECT on two tables to listed columns. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can read a server-only column or has lost a listed one, and cost-columns.dbtest.mjs checks it against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

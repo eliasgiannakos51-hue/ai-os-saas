@@ -161,8 +161,8 @@ const MUTANTS = [
     // A mutant that edits a name is testing the name.
     name: "postgres is installed after the suites that need it",
     file: WF,
-    from: '      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"\n\n      - name: mutation suites\n        timeout-minutes: 75\n        run: npm run test:mutation',
-    to: '      - name: mutation suites\n        timeout-minutes: 75\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
+    from: '      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"\n\n      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation',
+    to: '      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
     expect: "before the mutation suites",
   },
 ];

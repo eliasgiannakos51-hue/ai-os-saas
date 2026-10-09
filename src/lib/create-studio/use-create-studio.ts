@@ -67,6 +67,7 @@ const POLL_INTERVAL_MS = 2500;
 export function useCreateStudio() {
   const tCommon = useTranslations("common");
   const tStudio = useTranslations("dashboard.createStudio");
+  const tSite = useTranslations("dashboard.websiteBuilder");
   const { refresh: refreshCredits } = useCredits();
   const [steps, setSteps] = useState<StudioProgressStep[]>([]);
   const [result, setResult] = useState<StudioResult | null>(null);
@@ -110,10 +111,18 @@ export function useCreateStudio() {
             return;
           }
           void refreshCredits();
+          // A site the safety review held is said in the reader's
+          // language, never with the stored sentence: that one is English
+          // whatever the reader's language, and it speaks of a button this
+          // page does not have (src/lib/websites/flagged-notice.ts).
           finishStep(
             "generate",
             record.status === "completed" ? "done" : "failed",
-            record.status === "completed" ? undefined : record.error_message ?? undefined
+            record.status === "completed"
+              ? undefined
+              : record.status === "flagged"
+                ? `${tSite("flaggedTitle")}. ${tSite("flaggedBody")}`
+                : record.error_message ?? undefined
           );
         } catch {
           if (mountedRef.current) setTimeout(tick, POLL_INTERVAL_MS);
@@ -121,7 +130,7 @@ export function useCreateStudio() {
       }
       void tick();
     },
-    [finishStep, refreshCredits]
+    [finishStep, refreshCredits, tSite]
   );
 
   const create = useCallback(

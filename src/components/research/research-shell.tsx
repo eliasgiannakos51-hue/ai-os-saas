@@ -13,12 +13,15 @@ import { useToast } from "@/components/toast/toast-context";
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { formatDateTime } from "@/lib/format-number";
-import { getErrorMessage } from "@/lib/get-error-message";
-import { isStoppedMessage } from "@/lib/stop-message";
+import { useErrorText } from "@/lib/errors/use-error-text";
+import { ApiError } from "@/lib/errors/api-error";
+import type { ApiErrorPayload } from "@/lib/errors/error-codes";
+import { researchRefusal } from "@/lib/research/failure";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
 import type { ResearchReport } from "@/lib/research/report";
 import { CitedBody } from "@/components/research/cited-body";
 import { SendToSlides } from "@/components/research/send-to-slides";
+import { useResearchFailureWords } from "@/components/research/failure-words";
 
 /** A report takes minutes; five seconds is responsive enough (as on the page). */
 const POLL_MS = 5000;
@@ -67,6 +70,19 @@ export function ResearchShell({
   const router = useRouter();
   const { addToast } = useToast();
   const composerRef = useRef<ChatComposerHandle>(null);
+  // What goes wrong, in the reader's language (components/research/failure-words.ts).
+  const failures = useResearchFailureWords();
+  // A REFUSAL IN THE READER'S LANGUAGE (checked 2026-10-08 by
+  // scripts/tests/tool-shell-edges.prodtest.mjs): the research routes answer
+  // in English prose, which is for logs. What failure-words names (no
+  // credits, the month's reports used up, too many, the AI service down) is
+  // said in its words, and a 502 with a body is the plan the model did not
+  // give; anything else — the host's own 504 page, a server error — from
+  // the status and the code (lib/errors/use-error-text.ts).
+  const describe = useErrorText();
+  const named = (data: Record<string, unknown> | null, status: number) => researchRefusal(data, status) !== "other" || (status === 502 && data !== null);
+  const refusalText = (status: number, body: (ApiErrorPayload & { limitReached?: boolean }) | null) =>
+    describe(new ApiError(status, body?.limitReached ? { ...body, code: "planLimit" } : body)).text;
 
   const [reports, setReports] = useState(initialReports);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -124,14 +140,14 @@ export function ResearchShell({
             setPane("report");
             router.refresh();
           } else if (report.status === "failed") {
-            say({ role: "tool", text: isStoppedMessage(report.error) ? tSteps("stopped") : report.error ?? t("runError") });
+            say({ role: "tool", text: failures.failed(report.error) });
             router.refresh();
           }
         });
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [activeKey, refresh, t, tSteps, router]);
+  }, [activeKey, refresh, t, tSteps, router, failures]);
 
   // One immediate read on mount for anything already in flight.
   useEffect(() => {
@@ -151,16 +167,20 @@ export function ResearchShell({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: value, language: locale }),
       });
-      const data = await response.json();
-      if (!data.ok) {
-        say({ role: "tool", text: data.error ?? t("planError") });
+      // An answer that is not JSON (the host's own 504 page when the
+      // function runs out of time) reached the server: it is said from its
+      // status, never as the connection (checked 2026-10-09 by
+      // scripts/tests/tool-shell-edges.prodtest.mjs).
+      const data = await response.json().catch(() => null);
+      if (!data?.ok) {
+        say({ role: "tool", text: named(data, response.status) ? failures.refused(data, response.status, "plan") : refusalText(response.status, data) });
         return;
       }
       const report = data.report as ResearchReport;
       setReports((current) => [{ ...report, sections: [], sources: [] }, ...current]);
       say({ role: "tool", text: t("planIntro"), plan: { report, credits: Number(data.estimate?.credits ?? 0) } });
     } catch (err) {
-      say({ role: "tool", text: getErrorMessage(err, t("planError")) });
+      say({ role: "tool", text: describe(err).text });
     } finally {
       setPlanning(false);
     }
@@ -175,7 +195,7 @@ export function ResearchShell({
       .then(async (response) => {
         const data = await response.json().catch(() => null);
         if (data && !data.ok) {
-          say({ role: "tool", text: data.error ?? t("runError") });
+          say({ role: "tool", text: named(data, response.status) ? failures.refused(data, response.status, "run") : refusalText(response.status, data) });
           void refresh(id);
         }
       })
@@ -188,14 +208,14 @@ export function ResearchShell({
       const response = await fetch(`/api/research/${id}`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("deleteError"), "error");
+        addToast(t("deleteError"), "error");
         return;
       }
       setReports((current) => current.filter((r) => r.id !== id));
       setOpen((current) => (current?.id === id ? null : current));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("deleteError")), "error");
+    } catch {
+      addToast(t("deleteError"), "error");
     }
   }
 

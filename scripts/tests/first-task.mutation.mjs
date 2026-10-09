@@ -7,7 +7,9 @@
  * sending what it was handed; a press that leaves before it records, or
  * records nothing, so Home sends the person back; a press that stays put
  * when the record fails; two presses, two answers; the questionnaire gone;
- * an account that finished meeting it again; the switch not deciding it.
+ * an account that finished meeting it again; the switch not deciding it;
+ * and, on the way there, English on a Greek screen: the sign-in splash,
+ * and Chat's out-of-credits refusal.
  *
  * Run: node scripts/tests/first-task.mutation.mjs
  */
@@ -18,6 +20,9 @@ const LIB = "src/lib/onboarding/first-tasks.ts";
 const SCREEN = "src/components/onboarding/first-task.tsx";
 const PAGE = "src/app/onboarding/page.tsx";
 const CHAT = "src/app/dashboard/chat/page.tsx";
+const SPLASH = "src/components/auth/login-splash.tsx";
+const CHAT_ROUTE = "src/app/api/chat/route.ts";
+const CHAT_SCREEN = "src/components/chat/chat-workspace.tsx";
 
 const MUTANTS = [
   {
@@ -90,11 +95,32 @@ const MUTANTS = [
     to: "  if (true) {",
     expect: "behind the switch, instead of the questionnaire, which ?classic=1 still opens",
   },
+  {
+    name: "the sign-in splash says a line in English on every screen",
+    file: SPLASH,
+    from: '    loading: t("loading"),',
+    to: '    loading: "Loading workspace...",',
+    expect: "the sign-in splash says its three lines from the catalogue",
+  },
+  {
+    name: "the out-of-credits refusal carries only its English sentence",
+    file: CHAT_ROUTE,
+    from: '          code: "insufficientCredits",\n          outOfCredits: true,\n',
+    to: "",
+    expect: "Chat's out-of-credits refusal is named, not only an English sentence",
+  },
+  {
+    name: "the Chat screen prints the route's English sentence",
+    file: CHAT_SCREEN,
+    from: "          setError(\n            data.outOfCredits === true\n              ? outOfCreditsText(data.available, data.needed)\n              : isErrorCode(data.code)\n                ? describe(new ApiError(429, { code: data.code })).text\n                : describeStatus(429).text\n          );",
+    to: "          setError(data.message);",
+    expect: "...and the Chat screen says it in the reader's language",
+  },
 ];
 
 runMutations({
   name: "first-task",
   gate: GATE,
-  targets: [LIB, SCREEN, PAGE, CHAT],
+  targets: [LIB, SCREEN, PAGE, CHAT, SPLASH, CHAT_ROUTE, CHAT_SCREEN],
   mutants: MUTANTS,
 });

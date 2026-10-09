@@ -1,6 +1,6 @@
 {
-  "total": 4177,
-  "onPath": 603,
+  "total": 4250,
+  "onPath": 606,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 370
+      "count": 373
     },
     {
       "n": 3,
@@ -617,6 +617,24 @@
           "depth": 1,
           "tier": 2,
           "file": "src/components/auth/social-auth-buttons.tsx"
+        },
+        {
+          "key": "auth.splash.loading",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/login-splash.tsx"
+        },
+        {
+          "key": "auth.splash.ready",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/login-splash.tsx"
+        },
+        {
+          "key": "auth.splash.syncing",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/auth/login-splash.tsx"
         },
         {
           "key": "common.hidePassword",

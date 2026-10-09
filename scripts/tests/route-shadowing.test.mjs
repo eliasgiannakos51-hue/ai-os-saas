@@ -202,7 +202,8 @@ const layout = readFileSync("src/app/dashboard/layout.tsx", "utf8");
 check(
   "and the layout tells both surfaces who is looking",
   /<Sidebar[^>]*isOwner=\{isAdmin\}/.test(layout) &&
-    /<CommandPalette isOwner=\{isAdmin\} \/>/.test(layout),
+    // Other props may follow (switchedOn, lib/nav/switched-names.ts); who is looking is this one.
+    /<CommandPalette isOwner=\{isAdmin\}[^>]*\/>/.test(layout),
 );
 
 console.log("\n== 3. the module that was shadowed is reachable again ==");

@@ -80,14 +80,21 @@ for (const [text, locale] of STAYS) check(`stays in the conversation: «${text}�
 console.log("\n== 3. the chat, behind the switch ==");
 // ---------------------------------------------------------------------
 check('"chat-opens-tools" is declared as a switch', /\n  "chat-opens-tools": "/.test(code("src/lib/flags/flags.ts")));
-check("the Chat page reads it", /opensTools=\{await isFeatureOn\("chat-opens-tools", user\)\}/.test(code("src/app/dashboard/chat/page.tsx")));
+const chatPage = code("src/app/dashboard/chat/page.tsx");
+check("the Chat page reads it", /bypassesCredits, plan, opensTools\] = await Promise\.all\(\[[\s\S]*?isFeatureOn\("chat-opens-tools", user\),\s*\]\);/.test(chatPage) && /opensTools=\{opensTools\}/.test(chatPage));
+// A PLAN WITHOUT THE SITE GETS ITS WALL, from the gate /api/websites/generate
+// asks — not a «Φτιάξ' το» the route refuses in English (2026-10-08,
+// scripts/tests/chat-opens-tools-edges.prodtest.mjs).
+check("a plan without the Site gets the plan's wall in the pane, from the route's own gate",
+  /opensTools && !accountHasCapability\(plan\.slug, "websiteBuilder", isAdminEmail\(user\.email\)\)\s*\?\s*upgradeWallProps\("websiteBuilder"/.test(chatPage) &&
+    /siteWall=\{siteWall\}/.test(chatPage));
 const chat = code("src/components/chat/chat-workspace.tsx");
 const decide = chat.indexOf("if (opensTools && openSiteFor(text, locale)) {");
 const paid = chat.indexOf('const res = await fetch("/api/chat"');
 check("the decision is made before /api/chat is called, so no model is paid to decide", decide > 0 && paid > decide);
 check("...and a request for a site opens it and returns", /if \(opensTools && openSiteFor\(text, locale\)\) \{\s*showMine\(\);\s*setOpenWorkId\(null\);\s*setSiteHidden\(false\);\s*setSiteBrief\(text\);\s*return;\s*\}/.test(chat));
 check("what is said next goes to the open site first", /if \(siteBrief !== null && sitePaneRef\.current\?\.take\(text\)\) \{\s*showMine\(\);\s*setSiteHidden\(false\);\s*return;\s*\}/.test(chat) && chat.indexOf("sitePaneRef.current?.take(text)") < paid);
-check("the pane is drawn beside the conversation", /<SitePane\s+ref=\{sitePaneRef\}\s+key=\{siteBrief\}\s+brief=\{siteBrief\}\s+hidden=\{siteHidden\}\s+onBack=\{\(\) => setSiteHidden\(true\)\}\s+onClose=\{\(\) => setSiteBrief\(null\)\}/.test(chat));
+check("the pane is drawn beside the conversation", /<SitePane\s+ref=\{sitePaneRef\}\s+key=\{siteBrief\}\s+brief=\{siteBrief\}\s+wall=\{siteWall\}\s+hidden=\{siteHidden\}\s+onBack=\{\(\) => setSiteHidden\(true\)\}\s+onClose=\{\(\) => setSiteBrief\(null\)\}/.test(chat));
 check("on a phone, back to the conversation keeps the site open, and one press shows it again",
   /\{siteBrief !== null && siteHidden && \(\s*<button type="button" onClick=\{\(\) => setSiteHidden\(false\)\} data-testid="chat-site-reopen"/.test(chat) && /onClick=\{onBack\}[^>]*data-testid="chat-site-back"/.test(code("src/components/chat/site-pane.tsx")));
 check("...and a change said from the conversation shows it again", /sitePaneRef\.current\?\.take\(text\)\) \{\s*showMine\(\);\s*setSiteHidden\(false\);/.test(chat));
@@ -115,7 +122,39 @@ check("the preview is sandboxed, with no scripts, and marked as made by AI", /<A
 check("only a whole document is drawn", /looksLikeCompleteHtmlDocument\(html\)/.test(pane));
 check("all through the shared requests, with none of its own", /from "@\/lib\/website-builder\/site-requests"/.test(pane) && !/fetch\(/.test(pane));
 check("refusals and no connection are said, never swallowed",
-  /if \(outcome\.kind === "refused"\) \{[\s\S]{0,120}failWith\(getErrorMessage\(outcome\.error/.test(pane) && /err instanceof TypeError \? tCommon\("networkErrorCheckConnection"\)/.test(pane));
+  /if \(outcome\.kind === "refused"\) \{[\s\S]{0,120}failWith\([\s\S]{0,200}serverSaid\(getErrorMessage\(outcome\.error/.test(pane) && /err instanceof TypeError \? tCommon\("networkErrorCheckConnection"\)/.test(pane));
+// IN THE SCREEN'S LANGUAGE (2026-10-08): the route's and the worker's
+// sentences are English, and a provider's own error reached the pane as
+// `529 {"type":"error",…}`.
+check("the plan's wall, before anything is offered", /useState<Stage>\(wall \? "locked" : "confirm"\)/.test(pane) && /\{stage === "locked" && wall && \([\s\S]{0,300}<UpgradeRequired \{\.\.\.wall\} \/>/.test(pane));
+check("a site that failed is said in the pane's own words, never the worker's sentence",
+  /failWith\(whyNotMade\(done\)\)/.test(pane) && /return t\("failed"\);/.test(pane) && !/error_message/.test(pane));
+check("a server sentence is shown as it came only on an English screen", /const serverSaid = \(text: string \| null \| undefined, ours: string\) => \(locale\.startsWith\("en"\) && text \? text : ours\);/.test(pane));
+check("no credits is said by the credits notice, from the code and numbers the route sends",
+  /if \(outcome\.kind === "refused" && outcome\.code === "insufficientCredits"\) \{\s*void refreshCredits\(\);\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("failed"\);/.test(pane) && /<OutOfCreditsNotice/.test(pane) &&
+    // Every credit refusal the route has, with its numbers (three since
+    // 2026-10-08: the classifier's own check came with none).
+    (code("src/app/api/websites/generate/route.ts").match(/code: "insufficientCredits",\s*message: insufficientCreditsMessage\([^)]*\),\s*available: check\.remaining,/g) ?? []).length ===
+      (code("src/app/api/websites/generate/route.ts").match(/insufficientCreditsMessage\(/g) ?? []).length &&
+    /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\), \.\.\.routeSaid\(data\) \};/.test(code("src/lib/website-builder/site-requests.ts")) &&
+    /return \{ code: str\(data\?\.code\), available: num\(data\?\.available\), needed: num\(data\?\.needed\) \};/.test(code("src/lib/website-builder/site-requests.ts")));
+// AND A CHANGE SAID AFTER THE SITE IS MADE, out of credits (2026-10-09,
+// scripts/tests/chat-opens-tools-edges.prodtest.mjs part 5): a non-English
+// screen said «could not create the website» for a site that existed.
+check("no credits for a change is said by the credits notice too, and the site stays",
+  /if \(outcome\.kind === "refused" && outcome\.code === "insufficientCredits"\) \{\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("done"\);\s*return;/.test(pane) &&
+    (code("src/app/api/websites/edit/route.ts").match(/code: "insufficientCredits"/g) ?? []).length === 2 &&
+    /return \{ kind: "refused", reason, error, \.\.\.routeSaid\(data\) \};/.test(code("src/lib/website-builder/site-requests.ts")));
+{
+  // AND THE CHAT ITSELF, out of credits: the same English sentence was set
+  // as the chat's error on every screen (scripts/tests/brand-memory.prodtest.mjs).
+  const chatRoute = code("src/app/api/chat/route.ts");
+  check("Chat says no credits in its own words, before the answer and inside it",
+    /code: "insufficientCredits",\s*outOfCredits: true,\s*message: insufficientCreditsMessage\(check\.remaining, estimate\.reserveCredits\),\s*available: check\.remaining,\s*needed: estimate\.reserveCredits,/.test(chatRoute) &&
+      /available: reservation\.available, needed: streamEstimate\.reserveCredits/.test(chatRoute) &&
+      /setError\(\s*data\.outOfCredits === true\s*\?\s*outOfCreditsText\(data\.available, data\.needed\)\s*:/.test(chat) &&
+      /streamError =\s*event\.outOfCredits === true\s*\?\s*outOfCreditsText\(event\.available, event\.needed\)/.test(chat));
+}
 check('"Open in Site" opens that site, or the brief when there is no site yet', /\/dashboard\/website-builder\?project=\$\{encodeURIComponent\(site\.id\)\}/.test(pane) && /\/dashboard\/website-builder\?brief=\$\{encodeURIComponent\(description\.slice\(0, 500\)\)\}/.test(pane));
 check("what the brief took from memory is said, as in the Site", /const fromMemory = remembered\.forRecord\(done\);/.test(pane));
 check("the Site shell makes its site through the same requests", /startSiteGeneration\(/.test(code("src/components/website-builder/website-shell.tsx")) && !/fetch\("\/api\/websites\/generate/.test(code("src/components/website-builder/website-shell.tsx")));

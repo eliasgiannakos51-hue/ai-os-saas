@@ -793,9 +793,10 @@ afterwards.
    never sent to the browser. `RESEND_FROM_EMAIL` is optional — it falls
    back to Resend's shared sandbox address, which only delivers to the
    email on your own Resend account, so set it to a verified sending
-   address before real users sign up. `ADMIN_EMAILS` is optional and
-   additive to the founder account already hardcoded in
-   `src/lib/auth/admin-emails.ts` — see [Admin access](#admin-access) below.
+   address before real users sign up. `ADMIN_EMAILS` is the only source of
+   the admin list in `src/lib/auth/admin-emails.ts` (no address is written
+   in the code since 2026-10-04): unset, nobody is an admin and no owner
+   alert is sent — see [Admin access](#admin-access) below.
    `BETA_INVITE_CODE`/`BETA_FEEDBACK_URL` are optional — see
    [Beta testers](#beta-testers) below. `UNSPLASH_ACCESS_KEY` is optional —
    see [Website Builder photos](#website-builder-photos) below; without it,
@@ -1169,8 +1170,9 @@ own rows, every write goes through the service-role client).
 
 ## Admin access
 
-`src/lib/auth/admin-emails.ts` defines an `ADMIN_EMAILS` allowlist (the founder account
-is hardcoded there; extend it via the `ADMIN_EMAILS` env var). Any signed-in
+`src/lib/auth/admin-emails.ts` defines an `ADMIN_EMAILS` allowlist, read only from
+the `ADMIN_EMAILS` env var (no address is written in the code since 2026-10-04;
+unset, nobody is an admin). Any signed-in
 user whose email is on that list is treated as Enterprise tier with
 unlimited credits and full plan capabilities everywhere the app would
 otherwise check `subscription_tier` or a credit balance — no real Stripe

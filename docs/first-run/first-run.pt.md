@@ -1,8 +1,8 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **603 strings**. The whole product is 4177, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **606 strings**. The whole product is 4250, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 370 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Isso parece uma pergunta. Respondo ou registo?
 
 Descreva qualquer coisa — uma ideia de produto, uma operação, o feedback de um utilizador, uma métrica — e vai parar automaticamente ao módulo certo.
 
-## Tier 2 — The labels — skim these (370)
+## Tier 2 — The labels — skim these (373)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -739,6 +739,24 @@ Não foi possível iniciar o login com Google. Tente novamente.
 > EN — or continue with email
 
 ou continuar com email
+
+**`auth.splash.loading`**
+
+> EN — Loading workspace...
+
+A carregar o seu espaço de trabalho…
+
+**`auth.splash.ready`**
+
+> EN — Ready.
+
+Pronto.
+
+**`auth.splash.syncing`**
+
+> EN — Syncing data...
+
+A sincronizar os dados…
 
 **`common.hidePassword`**
 

@@ -286,7 +286,13 @@ export async function POST(request: Request) {
             ok: true,
             generated: false,
             rateLimited: true,
+            // The screen says this in its reader's language from the code
+            // and the two numbers; the message is English, for logs
+            // (lib/website-builder/site-requests.ts).
+            code: "insufficientCredits",
             message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
+            available: check.remaining,
+            needed: CREDIT_COSTS.clarificationCheck,
           });
         }
       }
@@ -317,10 +323,38 @@ export async function POST(request: Request) {
       }
     }
 
+    // THE CLASSIFIER IS PAID TOO, so an account that cannot pay for a
+    // pre-check is not given one: the credit check the clarification
+    // block makes above (it holds and charges nothing), here for a request
+    // that skipped that block — the resubmission after the questions, and
+    // every site a flow asks for (lib/flows/run-step.ts) — and not for a
+    // bypass account, which the classifier charges nothing. Without it a
+    // balance of 0 paid for the classifier and was then refused for the
+    // site below (found 2026-10-08 by scripts/tests/flows-edges.prodtest.mjs).
+    if (skipClarification && !bypassCredits) {
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, precheckPlan);
+      if (!check.ok) {
+        return NextResponse.json({
+          ok: true,
+          generated: false,
+          rateLimited: true,
+          // Named, with the two numbers, as the other two credit refusals
+          // here: the Site's requests read a 200 `rateLimited` without this
+          // code as a limit, not as the balance
+          // (lib/website-builder/site-requests.ts, refusedBeforeWork).
+          code: "insufficientCredits",
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
+          available: check.remaining,
+          needed: CREDIT_COSTS.clarificationCheck,
+        });
+      }
+    }
+
     // Off-topic guard — a cheap classification call BEFORE any credits are
-    // touched or any row is created, so a request like "write me a poem"
-    // costs the user nothing and gets a real, helpful message instead of
-    // an AI call that just wraps the poem in an HTML page (see
+    // held or any row is created, so a request like "write me a poem"
+    // costs the user only that call (settled below by settlePrechecks, as
+    // the clarification check is) and gets a real, helpful message instead
+    // of an AI call that just wraps the poem in an HTML page (see
     // lib/website-builder.ts).
     try {
       void recordAiCallForDailySpend(1);
@@ -329,7 +363,10 @@ export async function POST(request: Request) {
         // Same reasoning as the clarification branch: the call ran and
         // cost money, so it is settled even though nothing gets generated.
         await settlePrechecks(clarificationRecord);
-        return NextResponse.json({ ok: true, generated: false, message: classification.message });
+        // Named, so the Site says what it makes in the reader's language
+        // (lib/website-builder/site-requests.ts); `message` may be the
+        // classifier's English default.
+        return NextResponse.json({ ok: true, generated: false, offTopic: true, message: classification.message });
       }
     } catch (err) {
       // Best-effort: a classifier hiccup shouldn't block a real website
@@ -380,7 +417,10 @@ export async function POST(request: Request) {
           ok: true,
           generated: false,
           rateLimited: true,
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, estimatedCost),
+          available: check.remaining,
+          needed: estimatedCost,
         });
       }
     }

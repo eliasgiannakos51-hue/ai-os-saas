@@ -12,7 +12,6 @@ import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-est
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { createClient } from "@/lib/supabase/client";
-import { getErrorMessage } from "@/lib/get-error-message";
 import {
   ACCEPTED_ATTACHMENT_IMAGE_TYPES,
   CREATE_ATTACHMENT_BUCKET,
@@ -124,7 +123,7 @@ export function PostsShell({
     const path = buildAttachmentImagePath(user.id, ownPhoto.file.name);
     const { error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).upload(path, ownPhoto.file, { contentType: ownPhoto.file.type });
     if (error) {
-      addToast(getErrorMessage(error, t("picture.failed")), "error");
+      addToast(t("picture.failed"), "error");
       return null;
     }
     return path;
@@ -230,7 +229,8 @@ export function PostsShell({
     if (!window.confirm(t("history.deleteConfirm"))) return;
     const { error } = await supabase.from("generated_posts").delete().eq("id", id);
     if (error) {
-      addToast(getErrorMessage(error, t("errors.failed")), "error");
+      // The database's own message is English; the reader gets the screen's words.
+      addToast(t("errors.failed"), "error");
       return;
     }
     // THE PERSON'S OWN PHOTO GOES WITH THE POSTS THAT HELD IT: nothing

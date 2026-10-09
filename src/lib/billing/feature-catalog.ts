@@ -1293,7 +1293,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "/dashboard/system-health",
     ],
     pages: ["business-health", "costs", "routing", "system-health"],
-    routes: ["system-health/files", "system-health/flags", "system-health/keys", "system-health/resolve", "cron/cost-alerts"],
+    routes: ["system-health/files", "system-health/flags", "system-health/keys", "system-health/resolve", "system-health/test-alert", "cron/cost-alerts"],
     charges: false,
     enforcedIn: "src/lib/auth/admin-emails.ts",
     enforcedSymbol: "isAdminEmail",

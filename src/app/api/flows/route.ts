@@ -7,7 +7,7 @@ import { isFeatureOn } from "@/lib/flags/flags";
 import { resolveEffectivePlan, resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxProjectsForPlan } from "@/lib/projects/project-limits";
 import { checkProjectName } from "@/lib/projects/project";
-import { MAX_FLOW_SAID, planFlow, projectNameFor, withoutUnavailable } from "@/lib/flows/plan";
+import { MAX_FLOW_SAID, canRun, planFlow, projectNameFor, withoutUnavailable } from "@/lib/flows/plan";
 import { flowAvailability } from "@/lib/flows/availability";
 import { readColour } from "@/lib/flows/brief";
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });
 
   const available = await flowAvailability(user, await resolveEffectivePlan(user));
-  const plan = withoutUnavailable(planFlow(said), (kind) => available[kind]);
+  const plan = withoutUnavailable(planFlow(said), (step) => canRun(available, step));
   if (plan.steps.length === 0) {
     const code = plan.notYet.length > 0 ? "not_yet" : plan.unavailable.length > 0 ? "unavailable" : "nothing";
     return NextResponse.json({ ok: false, code, notYet: plan.notYet, unavailable: plan.unavailable }, { status: 422 });
@@ -68,8 +68,10 @@ export async function POST(request: Request) {
     }
     const name = checkProjectName(projectNameFor(said));
     if (!name.ok) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
-    // The project through the person's own client, as api/projects makes it.
-    const { data: project, error: projectError } = await supabase
+    // The project as api/projects makes it: by the server, after the cap
+    // above, user_id from the session (the account holds no INSERT on
+    // projects: 20261023100000_projects_site_versions_server_written.sql).
+    const { data: project, error: projectError } = await createAdminClient()
       .from("projects")
       .insert({ user_id: user.id, name: name.name, goal: said.slice(0, 500), status: "active" })
       .select("id, name")

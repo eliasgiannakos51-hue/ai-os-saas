@@ -259,6 +259,21 @@ check('a page\'s tags are not its words ("hero" is a class)', (await search("her
   check("a match in the name shows no snippet", items.length === 1 && items[0].id === "b1" && items[0].snippet === null);
 }
 check("a search for nothing they made finds nothing", (await search("ποδήλατο")).items.length === 0);
+{
+  // A file's text as extraction stores it (lib/files/extract.ts): each page
+  // behind a marker whose label is English. The snippet is the file's
+  // words; a sheet's own name stays searchable (2026-10-08).
+  ROWS.user_files.push({
+    id: "e1", user_id: ME, filename: "Symvasi.pdf", processing_status: "ready", uploaded_at: "2026-10-07T06:00:00Z",
+    extracted_text: "[[PAGE 1|Page 1]]\nΚείμενο.\n\n[[PAGE 2|Page 2]]\nΤο μίσθωμα είναι 4.820 ευρώ.\n\n[[PAGE 3|Πωλήσεις Ιουνίου]]\nΤέλος.",
+  });
+  const { items } = await search("μισθωμα");
+  check("a file is found by what it says, its snippet its words with no page marker or English label",
+    items.length === 1 && items[0].id === "e1" && (items[0].snippet ?? "").includes("4.820") && !/\[\[PAGE|Page \d/.test(items[0].snippet ?? ""), items[0]?.snippet);
+  check("...the markers are not its words (\"page\" finds nothing), a sheet's own name is",
+    (await search("page")).items.length === 0 && (await search("πωλησεις ιουνιου")).items.length === 1);
+  ROWS.user_files.length = 0;
+}
 check("textOfHtml drops scripts and styles", sources.textOfHtml("<style>.x{}</style><script>var y</script><p>ναι</p>") === "ναι");
 check("a long search is cut at the page (200 characters)", /searchParams\.q\.slice\(0, 200\)/.test(code("src/app/dashboard/timeline/page.tsx")));
 
@@ -304,6 +319,13 @@ const SHELL_OPENS = [
 for (const [file, shape] of SHELL_OPENS) {
   check(`${file.split("/").pop()} opens on the asked item`, shape.test(code(file)));
 }
+
+// NOTHING SHOWN IS NOT "NOTHING MADE" (2026-10-08,
+// scripts/tests/library-edges.prodtest.mjs): with every table failing,
+// the page said «Δεν έχεις φτιάξει τίποτα ακόμη» under the line naming
+// what did not load.
+check("a tool that did not load is never followed by «nothing made» or «nothing says»",
+  /\{items\.length === 0 && failed\.length > 0 \? null : items\.length === 0 \? \(/.test(code("src/components/library/library-view.tsx")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the words, in every language ==");

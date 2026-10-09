@@ -142,8 +142,10 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
           (app/dashboard/layout.tsx), and the tab bar
           (components/dashboard/mobile-tab-bar.tsx, z-40, md:hidden) sits
           outside it, so the bar is drawn over the work's last 64px: a
-          game's versions and a Site's last section were under it,
-          unreachable (measured 2026-10-08). The same room main keeps. */}
+          game's versions, a Site's last section and an automation's
+          history were under it, unreachable (measured 2026-10-08, the last
+          by scripts/tests/connections-automations-edges.prodtest.mjs). The
+          same room main keeps, and the scrolling area ends above the bar. */}
       {work && (
         <section
           aria-label={work.title}

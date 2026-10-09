@@ -1,8 +1,8 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **603 strings**. The whole product is 4177, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **606 strings**. The whole product is 4250, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 370 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.
 
-## Tier 2 — The labels — skim these (370)
+## Tier 2 — The labels — skim these (373)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -739,6 +739,24 @@ Website Builder
 > EN — or continue with email
 
 ή συνέχεια με email
+
+**`auth.splash.loading`**
+
+> EN — Loading workspace...
+
+Φόρτωση του χώρου σου…
+
+**`auth.splash.ready`**
+
+> EN — Ready.
+
+Έτοιμο.
+
+**`auth.splash.syncing`**
+
+> EN — Syncing data...
+
+Συγχρονισμός δεδομένων…
 
 **`common.hidePassword`**
 
@@ -2658,13 +2676,13 @@ _Reachable from these screens but deeper in: shared components, error states, th
 
 > EN — This action needs more credits than you have left. Buy a credit pack or upgrade your plan to continue.
 
-Αυτή η ενέργεια χρειάζεται περισσότερα credits από όσα σου απομένουν. Αγόρασε ένα pack ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
+Αυτή η ενέργεια χρειάζεται περισσότερα credits από όσα σου απομένουν. Αγόρασε ένα πακέτο credits ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
 
 **`credits.outOfCredits.detailWithNumbers`**
 
 > EN — You have {available} credits left and this needs about {needed}. Buy a credit pack or upgrade your plan to continue.
 
-Σου απομένουν {available} credits και αυτό χρειάζεται περίπου {needed}. Αγόρασε ένα pack ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
+Σου απομένουν {available} credits και αυτό χρειάζεται περίπου {needed}. Αγόρασε ένα πακέτο credits ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
 
 **`credits.outOfCredits.title`**
 

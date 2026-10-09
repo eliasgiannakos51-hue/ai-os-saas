@@ -260,6 +260,7 @@
       "team": "Dai il tuo piano ad altre persone, ognuna sul proprio account.",
       "apps": "Tieni traccia delle app che stai pianificando o hai già pubblicato. Non le costruisce.",
       "images": "Tieni traccia delle immagini che stai pianificando o hai già fatto. Non le genera.",
+      "imageTool": "Quattro immagini da una descrizione; cambiane una a parole e scaricala alla massima risoluzione.",
       "videos": "Tieni traccia dei video che stai pianificando o hai già fatto. Non li genera.",
       "coding": "Scrivi, spiega, correggi, converti e testa frammenti di codice. Non esegue codice e non apre un repository.",
       "presentations": "Descrivi una presentazione e ottieni le slide: PowerPoint o PDF, con foto da Unsplash o tue. Non disegna grafici.",
@@ -691,6 +692,11 @@
       "failed": "Non è stato possibile inviare l’email. Riprova tra qualche minuto.",
       "rateLimited": "Troppi link nell’ultima ora. Riprova più tardi.",
       "signedOut": "Accedi con email e password e ti verrà inviato un nuovo link."
+    },
+    "splash": {
+      "loading": "Caricamento dell’area di lavoro…",
+      "syncing": "Sincronizzazione dei dati…",
+      "ready": "Pronto."
     }
   },
   "settings": {
@@ -1410,7 +1416,8 @@
         "building": "Creo il sito… ci vogliono alcuni minuti.",
         "changing": "Modifico il sito…",
         "nextChanges": "Ciò che scrivi ora nella conversazione modifica questo sito.",
-        "reopen": "Mostra il sito"
+        "reopen": "Mostra il sito",
+        "failed": "Non è stato possibile creare il sito. La creazione non è stata addebitata; riprova."
       },
       "attach": {
         "label": "Allega un PDF o un’immagine",
@@ -1419,7 +1426,9 @@
         "readyPdf": "Pronto",
         "readyImage": "Parte con il messaggio",
         "remove": "Rimuovi «{name}»",
-        "unreadable": "Nessun testo trovato in «{name}». Se è una scansione, allegala come immagine.",
+        "unreadable": "Impossibile leggere il testo di «{name}». Se è una scansione, allegala come immagine; se ha una password, rimuovila e allegalo di nuovo.",
+        "fileLimit": "«{name}»: supererebbe il limite del tuo piano in File. Elimina un file in File o passa a un piano superiore.",
+        "uploadLimit": "Troppi caricamenti di file nell’ultima ora. Riprova tra poco.",
         "offline": "Nessuna connessione. Controlla la rete e riprova.",
         "type": "«{name}»: solo PDF, JPG o PNG.",
         "pdfTooLarge": "«{name}»: il PDF supera i 20 MB.",
@@ -1709,6 +1718,8 @@
       "statusCompleted": "Pronto",
       "statusFlagged": "Segnalato",
       "flaggedTitle": "Segnalato dal nostro controllo di sicurezza",
+      "flaggedBody": "Il nostro controllo di sicurezza ha bloccato questo sito, quindi non può essere pubblicato così com’è.",
+      "flaggedDetails": "Cosa ha trovato il controllo",
       "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
       "design": {
         "title": "Design",
@@ -2203,6 +2214,10 @@
       "publishChanges": "Pubblica le modifiche",
       "publishSuccess": "Il tuo sito è online.",
       "publishError": "Non è stato possibile pubblicare il sito. Riprova.",
+      "limitReached": "Hai raggiunto il limite di siti online del tuo piano. Ritirane uno o passa a un piano superiore.",
+      "paidOnly": "La pubblicazione è disponibile nei piani a pagamento.",
+      "tooManyToday": "Oggi hai pubblicato molte modifiche. Riprova domani.",
+      "securityBlocked": "Il controllo di sicurezza ha trovato qualcosa che non deve andare online, quindi il sito non è stato pubblicato.",
       "unpublish": "Rimuovi",
       "unpublishSuccess": "Il tuo sito non è più pubblico.",
       "unpublishError": "Non è stato possibile rimuovere il sito. Riprova.",
@@ -2308,7 +2323,7 @@
         "googleCalendar": {
           "summary": "Legge i tuoi impegni perché l’IA possa rispondere «cosa ho domani?».",
           "sees": "Titolo, ora, luogo e organizzatore degli impegni nei giorni che chiedi. Mai la descrizione di un invito, mai un calendario diverso da quello principale.",
-          "consent": "L’IA potrà leggere gli eventi del tuo calendario principale per rispondere alle tue domande. Legge solo quando una domanda lo richiede — mai in background — e non può creare, modificare o eliminare nulla."
+          "consent": "L’IA potrà leggere gli eventi del tuo calendario principale per rispondere alle tue domande. Legge solo quando lo richiede una tua domanda o un’automazione che hai attivato — nient’altro — e non può creare, modificare o eliminare nulla."
         },
         "slack": {
           "summary": "Leggere i canali in cui si trova l'app e far pubblicare lì gli agenti.",
@@ -2381,8 +2396,17 @@
       "askDisabledNoQuestion": "Scrivi la tua domanda per continuare.",
       "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
       "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
+      "unreadable": {
+        "scan": "Questo PDF non ha un livello di testo: è una scansione o solo un’immagine, e servirebbe l’OCR perché l’IA possa leggerlo.",
+        "encoding": "Questo PDF contiene testo, ma la codifica del suo carattere non è stata decodificata — un limite nostro, non un problema del tuo file. Salvarlo di nuovo dall’applicazione originale, o stamparlo in un nuovo PDF, di solito ne produce uno leggibile.",
+        "locked": "Questo file è protetto da password. Rimuovi la password e caricalo di nuovo.",
+        "empty": "Questo file sembra vuoto — non c’era niente da leggere."
+      },
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
       "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
+      "askNoCredits": "Crediti insufficienti per questa domanda. Non è stato addebitato nulla.",
+      "askRateLimited": "Troppe domande nell’ultima ora. Riprova tra poco — non è stato addebitato nulla.",
+      "askFailed": "La domanda non ha avuto risposta: il servizio di IA non ha risposto. Non è stato addebitato nulla — riprova tra poco.",
       "questionLength": "{used, number} di {max, number} caratteri",
       "questionAtLimit": "Hai raggiunto il limite di {max, number} caratteri per una domanda.",
       "readInParts": "I tuoi documenti erano troppo lunghi per essere letti in una volta: sono stati letti in {parts} parti e le risposte combinate.",
@@ -2394,6 +2418,9 @@
       "uploadStorageMissing": "Lo storage dei file non è configurato su questa installazione: manca il bucket 'user-files'. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
       "uploadStoragePolicy": "Lo storage ha rifiutato il caricamento: mancano le politiche di accesso del bucket. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
       "tooLargeForTransfer": "La piattaforma di hosting ha rifiutato il caricamento prima che raggiungesse l'app. Riprova tra un momento.",
+      "uploadFileCap": "Hai raggiunto il numero di file incluso nel tuo piano. Eliminane uno o passa a un piano superiore.",
+      "uploadStorageCap": "Questo file non entra nello spazio del tuo piano. Elimina qualche file o passa a un piano superiore.",
+      "uploadRateLimited": "Troppi caricamenti nell’ultima ora. Riprova tra poco.",
       "sharedStored": "{count, plural, one {# file aggiunto} other {# file aggiunti}} dalla condivisione.",
       "sharedFailed": "{count, plural, one {# file non è stato aggiunto} other {# file non sono stati aggiunti}}.",
       "sharedReason": "Motivo: {reason}",
@@ -2402,6 +2429,8 @@
       "openedFromDevice": "{count, plural, one {# file aperto} other {# file aperti}} dal tuo dispositivo.",
       "pagesPartRead": "Si leggono le prime {read} di {total} pagine",
       "pageRefs": {
+        "page": "Pagina {n}",
+        "rows": "Righe, parte {n}",
         "open": "Apri: {name}, {label}",
         "close": "Chiudi la pagina",
         "loading": "Apertura della pagina…",
@@ -2428,6 +2457,19 @@
       "start": "Avvia la ricerca",
       "notNow": "Non ora",
       "runError": "Impossibile completare il report.",
+      "refused": {
+        "noCredits": "Crediti insufficienti per un report di ricerca. Non è stato addebitato nulla.",
+        "rateLimited": "Troppi report in poco tempo. Riprova tra poco.",
+        "unavailable": "Il servizio di IA non ha risposto. Non è stato addebitato nulla — riprova tra poco."
+      },
+      "failed": {
+        "noFindings": "Le ricerche non hanno trovato nulla di utile su questo tema.",
+        "unavailable": "Il servizio di IA non ha risposto alle domande della ricerca. Avvialo di nuovo tra poco.",
+        "notWritten": "Non è stato possibile scrivere il report da quanto trovato.",
+        "interrupted": "Il report si è fermato prima della fine. Non sono stati addebitati crediti — avvialo di nuovo.",
+        "notStarted": "Il report non è partito.",
+        "noCredits": "Non c’erano crediti sufficienti per eseguire il report."
+      },
       "finished": "Il tuo report è pronto",
       "inProgress": "Ricerca e scrittura…",
       "statusPending": "Pianificato",
@@ -2552,6 +2594,23 @@
           "staff": "Tu e l’account di prova",
           "everyone": "Tutti"
         }
+      },
+      "alerts": {
+        "title": "Avvisi per te",
+        "hint": "Gli errori in produzione, un aumento improvviso dei costi, un margine sotto la soglia e un’ondata di accessi falliti arrivano via email a ADMIN_EMAILS.",
+        "recipients": "Destinatari: {count, plural, one {# indirizzo} other {# indirizzi}} da ADMIN_EMAILS",
+        "recipientsNone": "Destinatari: nessuno — ADMIN_EMAILS non è impostato",
+        "mailerOk": "Invio: configurato, dal tuo indirizzo (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Invio: RESEND_API_KEY non è impostato — nessun avviso parte",
+        "mailerTestSender": "Invio: dall’indirizzo di prova di Resend, che arriva solo all’email del tuo account Resend. Imposta RESEND_FROM_EMAIL su un indirizzo del tuo dominio.",
+        "send": "Invia un avviso di prova",
+        "sending": "Invio in corso…",
+        "sent": "Inviato a {count, plural, one {# indirizzo} other {# indirizzi}}. Se non arriva entro pochi minuti, guarda anche nello spam.",
+        "refused": "Non inviato. Resend ha risposto:",
+        "notConfigured": "Non inviato: RESEND_API_KEY non è impostato.",
+        "noRecipients": "Non inviato: ADMIN_EMAILS non è impostato.",
+        "rateLimited": "Troppe prove in quest’ora. Riprova più tardi.",
+        "failed": "Non inviato. Riprova."
       }
     },
     "ideas": {
@@ -2974,8 +3033,31 @@
         "finances": "Finanze",
         "sales": "Vendite",
         "trading": "Trading",
+        "image": "Immagine",
+        "connections": "Connessioni",
         "document": "Documento",
         "games": "Giochi"
+      },
+      "lines": {
+        "site": "Un sito da una descrizione.",
+        "slides": "Una presentazione da una descrizione.",
+        "posts": "Un post per ogni piattaforma.",
+        "research": "Un report con fonti su qualsiasi tema.",
+        "analyze": "Risultati da un file di dati.",
+        "files": "Fai domande sui tuoi documenti.",
+        "automations": "Attività che vanno da sole.",
+        "projects": "Una cartella con un obiettivo.",
+        "goals": "Un obiettivo, diviso in passi.",
+        "meetings": "Riepilogo e azioni da una registrazione.",
+        "library": "Tutto ciò che hai creato, in un unico posto.",
+        "memory": "Ciò che Ionexa ricorda di te.",
+        "finances": "Registra entrate e uscite.",
+        "sales": "Contatti, follow-up e prossimi passi.",
+        "trading": "Il diario delle tue operazioni.",
+        "image": "Quattro immagini da una descrizione.",
+        "connections": "Collega i tuoi servizi con un clic.",
+        "document": "Un documento da una descrizione.",
+        "games": "Un gioco da una descrizione."
       }
     },
     "home": {
@@ -3013,7 +3095,10 @@
         "questions": "Prima di iniziare, qualche domanda. Rispondi nel campo, o continua senza:",
         "skip": "Continua senza",
         "new": "Nuovo sito",
-        "design": "Aspetto"
+        "design": "Aspetto",
+        "held": "Il nostro controllo di sicurezza ha trattenuto questa modifica: il sito è rimasto com’era.",
+        "busy": "È già in corso una modifica a questo sito. Aspetta che finisca, poi chiedila di nuovo.",
+        "offTopic": "Qui creo siti web. Dimmi che sito vuoi: per quale attività o scopo, quali sezioni, che stile."
       },
       "box": {
         "only": "Cambia solo: {name}",

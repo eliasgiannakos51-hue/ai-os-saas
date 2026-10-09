@@ -54,7 +54,9 @@ check("a duplicate the server suppressed starts no second worker", !calls.some((
 
 answers = { "/api/websites/generate": { status: 402, body: { ok: false, error: "Δεν έχεις αρκετά credits." } } };
 out = await req.startSiteGeneration({ name: "Camping", description: "x", skipClarification: true });
-check("a refusal carries the server's own reason (credits)", out.kind === "refused" && out.error === "Δεν έχεις αρκετά credits.");
+// A refusal is an ApiError (lib/errors/api-error.ts): its status for the
+// screen's own words, the route's sentence kept as its message.
+check("a refusal carries the server's own reason (credits)", out.kind === "refused" && out.error.status === 402 && out.error.message === "Δεν έχεις αρκετά credits.");
 answers = { "/api/websites/generate": { body: { ok: true, generated: false, message: "Αυτό δεν είναι site." } } };
 out = await req.startSiteGeneration({ name: "Camping", description: "x", skipClarification: true });
 check("a site the server would not make says why", out.kind === "notMade" && out.message === "Αυτό δεν είναι site.");

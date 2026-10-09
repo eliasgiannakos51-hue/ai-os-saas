@@ -12,6 +12,7 @@ import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/web
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
@@ -58,6 +59,7 @@ import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import type { WebsitePage } from "@/lib/publishing/website-pages";
 import { readPageRequest } from "@/lib/websites/page-request";
+import { flaggedMessage } from "@/lib/websites/flagged-notice";
 import type { Evidence } from "@/lib/jobs/job-timeline";
 import {
   attachWebsiteEvidence,
@@ -538,9 +540,9 @@ export async function POST(request: Request) {
       const memoryBlock = memoryActiveFor({
         surface: "website",
         user,
-        planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+        planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin),
       })
-        ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+        ? await memoryPromptFor(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
         : "";
       // THE BUSINESS, REMEMBERED (package 6, behind the switch
       // "brand-memory"): a name and colours said in Chat reach this brief
@@ -549,9 +551,9 @@ export async function POST(request: Request) {
       // note on the row, so the screen says it. Not in the hold above: at
       // most four short lines, like the memory block beside it.
       const brand =
-        memoryActiveFor({ surface: "website", user, planLimit: plan?.capabilities.chatMemoryLimit ?? 0 }) &&
+        memoryActiveFor({ surface: "website", user, planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin) }) &&
         (await isFeatureOn("brand-memory", user))
-          ? brandBriefFor(readBrand(await loadMemories(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)), description)
+          ? brandBriefFor(readBrand(await loadMemories(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))), description)
           : null;
       if (brand && (brand.used.name !== null || brand.used.colours.length > 0)) {
         notes.push({ kind: "fromMemory", name: brand.used.name, colours: brand.used.colours });
@@ -985,9 +987,9 @@ export async function POST(request: Request) {
         // not to move until a manual reload. The final status is written
         // after settlement instead.
         status: "processing",
-        error_message: isFlagged
-          ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it; the button shows what that costs.`
-          : null,
+        // The sentence from src/lib/websites/flagged-notice.ts, whose
+        // reader is the only thing a screen shows of it.
+        error_message: isFlagged ? flaggedMessage(flaggedSummary) : null,
       })
       .eq("id", websiteId)
       .eq("user_id", writerUserId)

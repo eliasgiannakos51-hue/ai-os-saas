@@ -1,4 +1,4 @@
-import { readUnreadPages, type UnreadPages } from "@/lib/files/page-refs";
+import { readUnreadPages, relabelAnswer, type UnreadPages } from "@/lib/files/page-refs";
 
 export type WorkspaceFile = {
   id: string;
@@ -30,11 +30,16 @@ export type Citation = { filename: string; label: string; fileId?: string; page?
  * the pages the model was shown; pasting the prose without the list
  * behind it turns a verifiable answer into an assertion, and the person
  * it is pasted to has no way back to the document.
+ *
+ * `show` puts each page's label in the reader's language, as the screen
+ * shows it (components/files/cited-answer.tsx, usePageLabel), so what is
+ * pasted reads like what was read.
  */
-export function answerForClipboard(answer: Answer): string {
-  if (answer.citations.length === 0) return answer.text;
-  const sources = answer.citations.map((c) => `- ${c.filename} — ${c.label}`).join("\n");
-  return `${answer.text}\n\n${sources}`;
+export function answerForClipboard(answer: Answer, show: (label: string) => string = (label) => label): string {
+  const text = relabelAnswer(answer.text, answer.citations, show);
+  if (answer.citations.length === 0) return text;
+  const sources = answer.citations.map((c) => `- ${c.filename} — ${show(c.label)}`).join("\n");
+  return `${text}\n\n${sources}`;
 }
 
 export type Answer = {

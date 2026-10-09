@@ -360,7 +360,7 @@ is in the twelve:
 | 19 | `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` | api.slack.com/apps → Create New App → Basic Information → App Credentials. Redirect URL: `<site>/api/integrations/slack/callback` |
 | 20 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | console.cloud.google.com → APIs & Services → Credentials → OAuth client ID → Web application. Enable the Gmail and Drive APIs on the same project first |
 | 21 | `VAPID_SUBJECT` | Your own `mailto:` |
-| 22 | `ADMIN_EMAILS` | Comma-separated. Who receives the cost, margin and error alerts |
+| 22 | `ADMIN_EMAILS` | Comma-separated. Who the owner is: the admin pages, and who receives the cost, margin, error and failed sign-in alerts (test on /dashboard/system-health, 2026-10-09) |
 
 ### Never
 

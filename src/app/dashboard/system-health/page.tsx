@@ -10,7 +10,9 @@ import { CapabilityStatus, type CapabilityRow } from "@/components/system-health
 import { ENV_REQUIREMENTS, environmentWarnings } from "@/lib/env-check";
 import { EnvWarnings } from "@/components/system-health/env-warnings";
 import { DbExposure, type ExposureRow } from "@/components/system-health/db-exposure";
-import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { ADMIN_EMAILS, isAdminEmail } from "@/lib/auth/admin-emails";
+import { senderStatus } from "@/lib/email/resend-config";
+import { OwnerAlerts } from "@/components/system-health/owner-alerts";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
 import { StorageDiagnostics } from "@/components/system-health/storage-diagnostics";
@@ -189,6 +191,11 @@ export default async function SystemHealthPage() {
         <FeatureFlags
           rows={(Object.keys(FLAGS) as FlagKey[]).map((key) => ({ key, description: FLAGS[key], audience: flagAudiences[key] }))}
         />
+
+        {/* WHETHER THE ALERTS REACH YOU (ΑΣ-8.5): how many addresses, whether
+            mail can leave, and one press that sends a real test the way the
+            alerts are sent. A count and a state cross; no address does. */}
+        <OwnerAlerts readiness={{ recipients: ADMIN_EMAILS.length, mailer: senderStatus() }} />
 
         {failed ? (
           <p className="rounded-card border border-danger/30 bg-danger/[0.05] p-4 text-xs text-danger">

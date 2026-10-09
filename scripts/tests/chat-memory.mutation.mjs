@@ -30,8 +30,27 @@ const ROUTE = "src/app/api/chat/route.ts";
 const MEMORY = "src/lib/chat/memory.ts";
 const PANEL = "src/components/settings/chat-memory-settings.tsx";
 const BASELINE = "supabase/migrations/20260803000000_baseline_schema.sql";
+const WINDOW = "src/lib/memory/memory-window.ts";
 
 const MUTANTS = [
+  {
+    // 2026-10-08: the owner's exemption, gone again — package 6 does
+    // nothing on his account when his own tier is free.
+    name: "the owner keeps his subscription's zero",
+    file: WINDOW,
+    from: "  return isOwner ? Math.max(planLimit, OWNER_MEMORY_WINDOW) : planLimit;",
+    to: "  return planLimit;",
+    expect: "the owner on a free subscription reads and writes that window",
+  },
+  {
+    // And the other way: every account gets the owner's window — a second
+    // charged model call per message on Free, writing rows Free never reads.
+    name: "every account gets the owner's window",
+    file: WINDOW,
+    from: "  return isOwner ? Math.max(planLimit, OWNER_MEMORY_WINDOW) : planLimit;",
+    to: "  return Math.max(planLimit, OWNER_MEMORY_WINDOW);",
+    expect: "anyone else on Free keeps Free's zero",
+  },
   {
     // THE BUG ITSELF. Without `planLimit > 0` a Free account is "active"
     // again: a second Claude call per message, charged, for rows the read

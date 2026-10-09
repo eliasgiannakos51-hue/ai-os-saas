@@ -195,9 +195,18 @@ try {
     check(`the answer on screen, ${seconds.toFixed(1)} s after Home opened — inside five minutes`, done && seconds < 300);
     check("the address no longer carries the task, so a reload does not send it again", !new URL(page.url()).searchParams.has("ask"), page.url());
     check("what began the account is kept, and it counts as finished", Boolean(row()?.completed_at) && row()?.goal === "first-task:write", JSON.stringify(row()));
-    await page.goto(`${ON}/dashboard/overview`, { waitUntil: "networkidle" });
+    // "load", not "networkidle", leaving a page that has just answered:
+    // Chat's sidebar may start a prefetch of /dashboard/settings in the
+    // same instant, the navigation cancels it, and Playwright went on
+    // counting it as in flight until the 30 s timeout. Measured on
+    // 2026-10-08: 4 runs in 34 stopped here; the 2 that logged their
+    // requests each had that one prefetch pending, with no response
+    // headers and Chat as its referer, while the server answers the same
+    // request in under 0.3 s. The redirect is the server's, so the address
+    // is final once the document has loaded.
+    await page.goto(`${ON}/dashboard/overview`, { waitUntil: "load" });
     check("Home is Home from now on", new URL(page.url()).pathname === "/dashboard/overview");
-    await page.goto(`${ON}/onboarding`, { waitUntil: "networkidle" });
+    await page.goto(`${ON}/onboarding`, { waitUntil: "load" });
     check("...and the first task is not offered again", new URL(page.url()).pathname === "/dashboard/overview");
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();

@@ -1,6 +1,5 @@
 "use client";
 
-import { isStoppedMessage } from "@/lib/stop-message";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -23,7 +22,6 @@ import { EmptyState } from "@/components/empty-state";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
-import { getErrorMessage } from "@/lib/get-error-message";
 import { MAX_TOPIC_CHARS, RESEARCH_WRITING_LABEL } from "@/lib/research/research-limits";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
@@ -38,6 +36,7 @@ export type { ResearchReport } from "@/lib/research/report";
 import type { ResearchReport } from "@/lib/research/report";
 import { CitedBody } from "@/components/research/cited-body";
 import { SendToSlides } from "@/components/research/send-to-slides";
+import { useResearchFailureWords } from "@/components/research/failure-words";
 
 /** Poll interval while a report runs. A report takes minutes, so a
  *  one-second poll would be 300 pointless requests; five seconds is
@@ -89,6 +88,8 @@ export function ResearchWorkspace({
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
+  // What goes wrong, in the reader's language (components/research/failure-words.ts).
+  const failures = useResearchFailureWords();
 
   const [reports, setReports] = useState(initialReports);
   const [topic, setTopic] = useState(initialTopic ?? "");
@@ -183,7 +184,7 @@ export function ResearchWorkspace({
           if (report.status === "ready" || report.status === "failed") {
             setRunning((current) => (current === id ? null : current));
             if (report.status === "ready") addToast(t("finished"));
-            else addToast(isStoppedMessage(report.error) ? tSteps("stopped") : report.error ?? t("runError"), "error");
+            else addToast(failures.failed(report.error), "error");
             router.refresh();
           }
         });
@@ -193,7 +194,7 @@ export function ResearchWorkspace({
       if (pollRef.current) clearInterval(pollRef.current);
       pollRef.current = null;
     };
-  }, [activeKey, refresh, addToast, t, tSteps, router]);
+  }, [activeKey, refresh, addToast, t, tSteps, router, failures]);
 
   // One immediate read on mount for anything already in flight, so a user
   // returning to the page does not stare at a stale status for a whole
@@ -217,17 +218,17 @@ export function ResearchWorkspace({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: value, language: locale }),
       });
-      const data = await response.json();
-      if (!data.ok) {
-        addToast(data.error ?? t("planError"), "error");
+      const data = await response.json().catch(() => null);
+      if (!data?.ok) {
+        addToast(failures.refused(data, response.status, "plan"), "error");
         return;
       }
       const report = data.report as ResearchReport;
       setDraft({ report, credits: Number(data.estimate?.credits ?? 0) });
       setReports((current) => [{ ...report, sections: [], sources: [] }, ...current]);
       setTopic("");
-    } catch (err) {
-      addToast(getErrorMessage(err, t("planError")), "error");
+    } catch {
+      addToast(t("planError"), "error");
     } finally {
       setPlanning(false);
     }
@@ -246,7 +247,7 @@ export function ResearchWorkspace({
       .then(async (response) => {
         const data = await response.json().catch(() => null);
         if (data && !data.ok) {
-          addToast(data.error ?? t("runError"), "error");
+          addToast(failures.refused(data, response.status, "run"), "error");
           setRunning(null);
           void refresh(id);
         }
@@ -264,15 +265,15 @@ export function ResearchWorkspace({
       const response = await fetch(`/api/research/${id}`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("deleteError"), "error");
+        addToast(t("deleteError"), "error");
         return;
       }
       setReports((current) => current.filter((r) => r.id !== id));
       setOpen((current) => (current?.id === id ? null : current));
       addToast(t("deleteSuccess"));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("deleteError")), "error");
+    } catch {
+      addToast(t("deleteError"), "error");
     } finally {
       setBusy(null);
     }
@@ -470,7 +471,7 @@ export function ResearchWorkspace({
               {report.error && (
                 <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-warning/90">
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-                  {isStoppedMessage(report.error) ? tSteps("stopped") : report.error}
+                  {failures.failed(report.error)}
                 </p>
               )}
               {/* Real progress, not a spinner.

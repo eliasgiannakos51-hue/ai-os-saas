@@ -12,7 +12,6 @@ import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } fr
 import { DeckSlides } from "@/components/presentations/deck-slides";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { createClient } from "@/lib/supabase/client";
-import { getErrorMessage } from "@/lib/get-error-message";
 import {
   ACCEPTED_ATTACHMENT_IMAGE_TYPES,
   CREATE_ATTACHMENT_BUCKET,
@@ -173,7 +172,8 @@ export function PresentationsShell({
       })
     );
     const failures = results.filter((r) => r.error);
-    if (failures.length > 0) addToast(getErrorMessage(failures[0].error, t("errors.uploadFailed")), "error");
+    // Storage's own message is English; the reader gets the screen's words.
+    if (failures.length > 0) addToast(t("errors.uploadFailed"), "error");
     const ok = results.filter((r) => !r.error);
     setLocalImageUrls((prev) => ({ ...prev, ...Object.fromEntries(ok.map((r) => [r.path, r.preview])) }));
     return ok.map((r) => r.path);
@@ -314,10 +314,17 @@ export function PresentationsShell({
       return;
     }
     setRunning(true);
+    // STOP REACHES A CHANGE TOO (found 2026-10-08 by
+    // scripts/tests/tool-shell-edges.prodtest.mjs): the field shows Stop while
+    // this runs, and the edit route stops the model on the request's own
+    // abort (api/presentations/[id]/edit, `signal: request.signal`).
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const response = await fetch(`/api/presentations/${open.id}/edit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({ instruction: instruction.slice(0, MAX_INSTRUCTION_CHARS), ...(box === null ? {} : { slideIndex: box }) }),
       });
       const body = await response.json().catch(() => null);
@@ -332,8 +339,9 @@ export function PresentationsShell({
       setPane("deck");
       router.refresh();
     } catch {
-      say("tool", t("errors.failed"));
+      say("tool", controller.signal.aborted ? tSteps("stopped") : t("errors.failed"));
     } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       setRunning(false);
     }
   }
@@ -359,7 +367,7 @@ export function PresentationsShell({
     if (!window.confirm(t("history.deleteConfirm"))) return;
     const { error } = await supabase.from("ai_presentations").delete().eq("id", id);
     if (error) {
-      addToast(getErrorMessage(error, t("errors.failed")), "error");
+      addToast(t("errors.failed"), "error");
       return;
     }
     if (open?.id === id) setOpen(null);

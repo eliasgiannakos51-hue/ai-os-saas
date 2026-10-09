@@ -243,6 +243,9 @@ export async function POST(request: Request) {
       return NextResponse.json({
         ok: true,
         edited: false,
+        // Named, so the Site says it in the reader's language
+        // (lib/website-builder/site-requests.ts); `message` is for logs.
+        busy: true,
         message: "A generation is already in progress for this — please wait for it to finish.",
       });
     }
@@ -305,7 +308,13 @@ export async function POST(request: Request) {
           ok: true,
           edited: false,
           rateLimited: true,
+          // The screen says this in its reader's language from the code
+          // and the two numbers; the message is English, for logs
+          // (lib/website-builder/site-requests.ts).
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
+          available: check.remaining,
+          needed: estimate.reserveCredits,
         });
       }
     }
@@ -335,10 +344,12 @@ export async function POST(request: Request) {
           ok: true,
           edited: false,
           rateLimited: true,
+          ...(reservation.reason === "insufficient" ? { code: "insufficientCredits" } : {}),
           message:
             reservation.reason === "insufficient"
               ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
               : "Could not reserve credits for this edit. No credits were charged — please try again.",
+          ...(reservation.reason === "insufficient" ? { available: reservation.available, needed: estimate.reserveCredits } : {}),
         });
       }
       reservationId = reservation.reservationId;
@@ -478,8 +489,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: false, reason: BOX_LOST }, { status: 502 });
       }
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";
+      // `error` carries the provider's own words and is for logs; the
+      // screen says it from the code, and that the hold went back when
+      // there was one (an admin or beta account holds nothing).
       return NextResponse.json(
-        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        // `error` carries the provider's own words and is for logs; the
+        // screen says it from the code, and that the hold went back when
+        // there was one (an admin or beta account holds nothing) — released
+        // just above (lib/errors/error-codes.ts).
+        {
+          ok: false,
+          code: "upstreamUnavailable",
+          ...(reservationId ? { creditsRefunded: true } : {}),
+          error: `${errMessage} No credits were charged — please try again.`,
+        },
         { status: 502 }
       );
     }

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
 import { listIntegrations } from "@/lib/integrations/store";
+import { providersOpenTo } from "@/lib/integrations/switches";
 import { listDeliveryChannels } from "@/lib/agents/delivery-store";
 import { FLOW_COLUMNS, MAX_FLOWS, RUN_COLUMNS, UUID } from "@/lib/automations/flow-access";
 import { flowPrices, type FlowPrices } from "@/lib/automations/flow-pricing";
@@ -32,13 +33,14 @@ export type AutomationPageData = {
 export async function loadAutomationPage(user: User, runParam: string | undefined): Promise<AutomationPageData> {
   const supabase = await createClient();
   const runId = runParam && UUID.test(runParam) ? runParam : null;
-  const [flowsResult, olderResult, plan, packPrice, integrations, channels] = await Promise.all([
+  const [flowsResult, olderResult, plan, packPrice, integrations, channels, open] = await Promise.all([
     supabase.from("automation_flows").select(FLOW_COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(MAX_FLOWS),
     supabase.from("user_automations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
     resolveEffectivePlan(user),
     getPurchasedPackCreditPriceEur(user.id),
     listIntegrations(user.id),
     listDeliveryChannels(user.id),
+    providersOpenTo(user),
   ]);
   if (flowsResult.error) logApiError("dashboard/automation", flowsResult.error, { stage: "flows" });
   const flows = (flowsResult.data ?? []) as Record<string, unknown>[];
@@ -66,7 +68,8 @@ export async function loadAutomationPage(user: User, runParam: string | undefine
     runId: openId ? runId : null,
     prices: flowPrices(plan, packPrice),
     connected: {
-      google_calendar: integrations.some((i) => i.provider === "google_calendar" && i.status === "connected"),
+      // Connected, and the switch "connections" open to this person — as the routes count it (lib/automations/flow-access.ts).
+      google_calendar: open.has("google_calendar") && integrations.some((i) => i.provider === "google_calendar" && i.status === "connected"),
       telegram: channels.some((c) => c.channel === "telegram"),
     },
     older: (olderResult.data ?? []) as UserAutomation[],

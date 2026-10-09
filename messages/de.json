@@ -1370,7 +1370,7 @@
         "readyPdf": "Bereit",
         "readyImage": "Geht mit der Nachricht",
         "remove": "„{name}“ entfernen",
-        "unreadable": "In „{name}“ wurde kein Text gefunden. Ist es ein Scan, hängen Sie es als Bild an.",
+        "unreadable": "Der Text in „{name}“ konnte nicht gelesen werden. Ist es ein Scan, hängen Sie es als Bild an; ist es mit einem Passwort geschützt, entfernen Sie es und hängen Sie die Datei erneut an.",
         "fileLimit": "„{name}“: Das Dateilimit Ihres Tarifs ist erreicht. Löschen Sie eine Datei unter Dateien oder wechseln Sie den Tarif.",
         "uploadLimit": "Zu viele Datei-Uploads in der letzten Stunde. Versuchen Sie es in Kürze erneut.",
         "offline": "Keine Verbindung. Prüfen Sie das Netzwerk und versuchen Sie es erneut.",

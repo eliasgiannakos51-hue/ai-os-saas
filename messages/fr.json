@@ -1370,7 +1370,7 @@
         "readyPdf": "Prêt",
         "readyImage": "Part avec le message",
         "remove": "Retirer « {name} »",
-        "unreadable": "Aucun texte trouvé dans « {name} ». S’il s’agit d’un scan, joignez-le comme image.",
+        "unreadable": "Impossible de lire le texte de « {name} ». S’il s’agit d’un scan, joignez-le comme image ; s’il est protégé par un mot de passe, retirez-le et joignez-le à nouveau.",
         "fileLimit": "« {name} » : vous avez atteint la limite de fichiers de votre offre. Supprimez un fichier dans Fichiers ou changez d’offre.",
         "uploadLimit": "Trop de fichiers envoyés au cours de la dernière heure. Réessayez dans un moment.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez.",

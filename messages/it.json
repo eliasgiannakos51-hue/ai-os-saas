@@ -1370,7 +1370,7 @@
         "readyPdf": "Pronto",
         "readyImage": "Parte con il messaggio",
         "remove": "Rimuovi «{name}»",
-        "unreadable": "Nessun testo trovato in «{name}». Se è una scansione, allegala come immagine.",
+        "unreadable": "Impossibile leggere il testo di «{name}». Se è una scansione, allegala come immagine; se ha una password, rimuovila e allegalo di nuovo.",
         "fileLimit": "«{name}»: hai raggiunto il limite di file del tuo piano. Elimina un file in File o passa a un piano superiore.",
         "uploadLimit": "Troppi caricamenti di file nell’ultima ora. Riprova tra poco.",
         "offline": "Nessuna connessione. Controlla la rete e riprova.",

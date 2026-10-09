@@ -713,7 +713,7 @@ try {
       await attach([scanFile]);
       await chipsSettled();
       const scanned = await chips.first().innerText().catch(() => "");
-      check("a scanned PDF: the chip says it has no text, in the screen's language", (await chips.first().getAttribute("data-state")) === "failed" && scanned.includes(fill(A.unreadable, { name: "scan.pdf" })), scanned);
+      check("a scanned PDF: the chip says its text could not be read, in the screen's language", (await chips.first().getAttribute("data-state")) === "failed" && scanned.includes(fill(A.unreadable, { name: "scan.pdf" })), scanned);
       check("...nothing in the other language", foreignOn(locale, await visible()).length === 0, foreignOn(locale, await visible()).join(" | "));
       await measureSideways("step 10");
 

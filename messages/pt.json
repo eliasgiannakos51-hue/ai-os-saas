@@ -1370,7 +1370,7 @@
         "readyPdf": "Pronto",
         "readyImage": "Vai com a mensagem",
         "remove": "Remover «{name}»",
-        "unreadable": "Não foi encontrado texto em «{name}». Se for uma digitalização, anexe-a como imagem.",
+        "unreadable": "Não foi possível ler o texto de «{name}». Se for uma digitalização, anexe-a como imagem; se tiver palavra-passe, remova-a e anexe-o de novo.",
         "fileLimit": "«{name}»: atingiu o limite de ficheiros do seu plano. Apague um ficheiro em Ficheiros ou mude de plano.",
         "uploadLimit": "Demasiados carregamentos de ficheiros na última hora. Tente novamente daqui a pouco.",
         "offline": "Sem ligação. Verifique a rede e tente novamente.",

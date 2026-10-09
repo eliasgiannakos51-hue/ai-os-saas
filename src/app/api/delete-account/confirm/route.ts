@@ -5,6 +5,7 @@ import { hashDeleteAccountToken } from "@/lib/delete-account-token";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
+import { eraseUserStorage } from "@/lib/account/erase-storage";
 
 // @service-role-justified token-auth — the 256-bit single-use token from
 // the emailed link IS the proof of identity (see the file comment below);
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     });
     if (!allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many attempts. Please try again later." },
+        { ok: false, code: "rate_limited", error: "Too many attempts. Please try again later." },
         { status: 429 }
       );
     }
@@ -43,11 +44,11 @@ export async function POST(request: Request) {
       const body = await request.json();
       token = typeof body?.token === "string" ? body.token : "";
     } catch {
-      return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+      return NextResponse.json({ ok: false, code: "invalid_request", error: "Invalid request." }, { status: 400 });
     }
 
     if (!token) {
-      return NextResponse.json({ ok: false, error: "Missing token." }, { status: 400 });
+      return NextResponse.json({ ok: false, code: "invalid_request", error: "Missing token." }, { status: 400 });
     }
 
     const admin = createAdminClient();
@@ -68,14 +69,14 @@ export async function POST(request: Request) {
     if (claimError) {
       logApiError("/api/delete-account/confirm", claimError);
       return NextResponse.json(
-        { ok: false, error: "Something went wrong. Please try again." },
+        { ok: false, code: "retry", error: "Something went wrong. Please try again." },
         { status: 500 }
       );
     }
 
     if (!claimed) {
       return NextResponse.json(
-        { ok: false, error: "This link is invalid or has expired." },
+        { ok: false, code: "link_invalid", error: "This link is invalid or has expired." },
         { status: 400 }
       );
     }
@@ -91,19 +92,34 @@ export async function POST(request: Request) {
     // account that exists. A failure here stops the deletion rather than
     // proceeding, because "we deleted your account" must not be said
     // while the files are still there.
-    // ALL THREE BUCKETS, not just user-files. delete_user_file_objects()
-    // deleted from 'user-files' alone, so photographs attached to a Create
-    // prompt or to a deck ('create-attachments') and reference images for
-    // a generated site ('website-references', a PUBLIC bucket) survived
-    // the account that uploaded them. See the migration
-    // 20261005000000_delete_user_storage_objects_all_buckets.sql.
-    const { error: objectsError } = await admin.rpc("delete_user_storage_objects", {
-      target_user_id: claimed.user_id,
-    });
-    if (objectsError) {
+    // EVERY BUCKET, through the Storage API (src/lib/account/erase-storage.ts).
+    // The SQL function this called, delete_user_storage_objects(), is
+    // refused by Supabase on every hosted project since 2026-03, so every
+    // deletion stopped here. The list of buckets is USER_BUCKETS, held to
+    // the application's bucket constants by gdpr-coverage.test.mjs.
+    try {
+      await eraseUserStorage(admin.storage, claimed.user_id);
+    } catch (objectsError) {
       logApiError("/api/delete-account/confirm", objectsError, { stage: "delete_file_objects" });
+      // The account is still there, so the link goes back to working, as
+      // after a refused subscription below: the claim made it single-use.
+      const { error: giveBackError } = await admin
+        .from("account_deletion_requests")
+        .update({ used_at: null })
+        .eq("token_hash", tokenHash);
+      if (giveBackError) {
+        logApiError("/api/delete-account/confirm", giveBackError, { stage: "release_deletion_token" });
+        return NextResponse.json(
+          { ok: false, code: "contact_support", error: "Could not delete the account. Please contact support." },
+          { status: 500 }
+        );
+      }
       return NextResponse.json(
-        { ok: false, error: "Could not delete the account. Please contact support." },
+        {
+          ok: false,
+          code: "files_retry",
+          error: "Could not delete the files on this account, so the account was not deleted. Your link still works — please try again.",
+        },
         { status: 500 }
       );
     }
@@ -127,7 +143,7 @@ export async function POST(request: Request) {
         hint: "if this says the function was not found, apply supabase/migrations/20260808_gdpr_erasure_gaps.sql",
       });
       return NextResponse.json(
-        { ok: false, error: "Could not delete the account. Please contact support." },
+        { ok: false, code: "contact_support", error: "Could not delete the account. Please contact support." },
         { status: 500 }
       );
     }
@@ -207,13 +223,14 @@ export async function POST(request: Request) {
           // advice anyway once the token is spent. What is NOT reused is
           // the reassuring one below it.
           return NextResponse.json(
-            { ok: false, error: "Could not delete the account. Please contact support." },
+            { ok: false, code: "contact_support", error: "Could not delete the account. Please contact support." },
             { status: 500 }
           );
         }
         return NextResponse.json(
           {
             ok: false,
+            code: "subscription_retry",
             error:
               "Could not cancel the subscription on this account, so nothing was deleted. Your link still works — please try again.",
           },
@@ -227,7 +244,7 @@ export async function POST(request: Request) {
     if (deleteError) {
       logApiError("/api/delete-account/confirm", deleteError, { stage: "deleteUser" });
       return NextResponse.json(
-        { ok: false, error: "Could not delete the account. Please contact support." },
+        { ok: false, code: "contact_support", error: "Could not delete the account. Please contact support." },
         { status: 500 }
       );
     }
@@ -236,7 +253,7 @@ export async function POST(request: Request) {
   } catch (err) {
     logApiError("/api/delete-account/confirm", err);
     return NextResponse.json(
-      { ok: false, error: "Something went wrong. Please try again." },
+      { ok: false, code: "retry", error: "Something went wrong. Please try again." },
       { status: 500 }
     );
   }

@@ -670,7 +670,16 @@
       "deleting": "Eliminazione…",
       "confirmButton": "Elimina definitivamente il tuo account",
       "cancel": "Annulla e torna indietro",
-      "confirmFailed": "Non siamo riusciti a completare l'eliminazione. Il tuo account esiste ancora — riprova il link o contatta l'assistenza."
+      "confirmFailed": "Non siamo riusciti a completare l'eliminazione. Il tuo account esiste ancora — riprova il link o contatta l'assistenza.",
+      "errors": {
+        "rate_limited": "Troppi tentativi. Riprova più tardi.",
+        "invalid_request": "Questo link non è completo. Usa il link dell'email esattamente come è stato inviato.",
+        "link_invalid": "Questo link non è valido o è scaduto. Puoi richiederne uno nuovo dalle Impostazioni.",
+        "retry": "Qualcosa è andato storto. Riprova.",
+        "contact_support": "Non siamo riusciti a eliminare l'account. Contatta l'assistenza.",
+        "files_retry": "Non siamo riusciti a eliminare i file di questo account, quindi l'account non è stato eliminato. Il tuo link funziona ancora — riprova.",
+        "subscription_retry": "Non siamo riusciti ad annullare l'abbonamento di questo account, quindi non è stato eliminato nulla. Il tuo link funziona ancora — riprova."
+      }
     },
     "generateStrongPassword": "Genera una password sicura",
     "verifyEmail": {

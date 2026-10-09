@@ -670,7 +670,16 @@
       "deleting": "正在删除…",
       "confirmButton": "永久删除你的账户",
       "cancel": "取消并返回",
-      "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
+      "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。",
+      "errors": {
+        "rate_limited": "尝试次数过多。请稍后再试。",
+        "invalid_request": "此链接不完整。请按邮件中发送的原样使用链接。",
+        "link_invalid": "此链接无效或已过期。你可以在设置中重新申请。",
+        "retry": "出了点问题。请重试。",
+        "contact_support": "我们无法删除该账户。请联系支持团队。",
+        "files_retry": "我们无法删除此账户中的文件，因此账户未被删除。你的链接仍然有效——请重试。",
+        "subscription_retry": "我们无法取消此账户的订阅，因此没有删除任何内容。你的链接仍然有效——请重试。"
+      }
     },
     "generateStrongPassword": "生成高强度密码",
     "verifyEmail": {

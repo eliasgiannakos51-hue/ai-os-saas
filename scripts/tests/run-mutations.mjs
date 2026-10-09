@@ -140,7 +140,8 @@ if (suites.length === 0) {
 // analysis-numbers, meeting-goal, finance-sales, translate,
 // voice-conversation, games (MASTER 16), owner-alerts and
 // plan-limit-writes (the 17-package check).
-const FLOOR = 261;
+// 261 -> 262 on 2026-10-09: erase-storage (#273, account deletion).
+const FLOOR = 262;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

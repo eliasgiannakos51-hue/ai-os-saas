@@ -280,6 +280,9 @@ const DECLARED = {
   // --- flows (package 36) ---
   "flows": { bound: "limited", scope: "flow_create", why: "makes a project and the row that follows a flow; calls no model and charges nothing — the model and storage in its closure are the image tool's, imported to ask whether pictures are available to this person" },
 
+  // --- account deletion (2026-10-08) ---
+  "delete-account/confirm": { bound: "limited", scope: "delete_account_confirm", why: "lists and removes the person's own files through the Storage API (lib/account/erase-storage.ts), once per single-use token claimed before any storage call; scope delete_account_confirm, ten an hour per address" },
+
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },

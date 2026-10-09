@@ -792,7 +792,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // memory (posts, presentations, the website worker, coding, the agent
 // executor) plus the settings route, and each carries the sentence about
 // which predicate decides whether the feature participates.
-const SERVER_PROSE_BASELINE = 670;
+// 670 -> 671 on 2026-10-08: one refusal SITE, api/delete-account/confirm,
+// when the files cannot be removed through the Storage API and the link
+// is given back. The page no longer renders this route's English at all:
+// every answer carries a `code`, and confirm-delete-account-form.tsx says
+// it in the reader's language (auth.deleteAccount.errors, ten locales),
+// which is also why CLIENT_FALLBACK_BASELINE went down by one.
+const SERVER_PROSE_BASELINE = 671;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error
@@ -847,7 +853,7 @@ const SERVER_PROSE_BASELINE = 670;
 // baselines.test.mjs.
 // 28 -> 27 (2026-10-05): the login form's unconfirmed-address case reads a
 // translated key instead of falling back to English.
-const CLIENT_FALLBACK_BASELINE = 27;
+const CLIENT_FALLBACK_BASELINE = 26;
 reportBaseline("SERVER_PROSE_BASELINE", SERVER_PROSE_BASELINE, serverErrorProse.length);
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,

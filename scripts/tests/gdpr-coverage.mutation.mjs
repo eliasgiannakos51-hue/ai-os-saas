@@ -28,9 +28,9 @@ const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
 // The export route joined the targets when section 6 was added: a
 // mutation whose file is not restored here would be left in the tree.
 const EXPORT_ROUTE = "src/app/api/account/export/route.ts";
-const ERASE_MIGRATION = "supabase/migrations/20261019000000_generated_images.sql";
+const ERASE_LIST = "src/lib/account/erase-storage.ts";
 const DELETE_ROUTE = "src/app/api/delete-account/confirm/route.ts";
-const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_MIGRATION, DELETE_ROUTE];
+const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_LIST, DELETE_ROUTE];
 
 const MUTANTS = [
   {
@@ -69,35 +69,42 @@ const MUTANTS = [
     // PUBLIC 'website-references' survived every account deletion. The
     // check that existed asserted the CALL was made, which stayed true
     // throughout.
-    name: "the erasure function goes back to one bucket of four",
-    file: ERASE_MIGRATION,
-    from: "array['user-files', 'create-attachments', 'website-references', 'ai-images']",
-    to: "array['user-files']",
-    expect: "the array holds every bucket",
+    name: "the erasure goes back to one bucket of four",
+    file: ERASE_LIST,
+    from: 'USER_BUCKETS = ["user-files", "create-attachments", "website-references", "ai-images"]',
+    to: 'USER_BUCKETS = ["user-files"]',
+    expect: "the list holds every bucket",
   },
   {
-    name: "the bucket list stops being one array the gate can read",
-    file: ERASE_MIGRATION,
-    from: "  v_buckets text[] := array['user-files', 'create-attachments', 'website-references', 'ai-images'];",
-    to: "  v_buckets text[] := string_to_array('user-files,create-attachments,website-references,ai-images', ',');",
-    expect: "declares its bucket list as one array",
+    // The Image tool's bucket arrived last; leaving it out is the
+    // 2026-10-05 defect again, one bucket later.
+    name: "the Image tool's bucket is left out of the erasure",
+    file: ERASE_LIST,
+    from: 'USER_BUCKETS = ["user-files", "create-attachments", "website-references", "ai-images"]',
+    to: 'USER_BUCKETS = ["user-files", "create-attachments", "website-references"]',
+    expect: "the list holds every bucket",
   },
   {
-    // THE NEWEST DEFINITION IS THE ONE THAT RUNS. The Image tool's bucket
-    // arrived in a later migration that replaces the function; leaving it
-    // out there is the 2026-10-05 defect again, one bucket later.
-    name: "the Image tool's bucket is left out of the function that runs",
-    file: ERASE_MIGRATION,
-    from: "array['user-files', 'create-attachments', 'website-references', 'ai-images']",
-    to: "array['user-files', 'create-attachments', 'website-references']",
-    expect: "the array holds every bucket",
+    name: "the erasure names a bucket the application does not write",
+    file: ERASE_LIST,
+    from: 'USER_BUCKETS = ["user-files", "create-attachments", "website-references", "ai-images"]',
+    to: 'USER_BUCKETS = ["user-files", "create-attachments", "website-references", "ai-images", "old-uploads"]',
+    expect: "no bucket the application does not use",
   },
   {
     name: "account deletion stops removing storage objects at all",
     file: DELETE_ROUTE,
-    from: 'await admin.rpc("delete_user_storage_objects", {',
-    to: 'await admin.rpc("forget_user_in_production_errors", {',
+    from: "      await eraseUserStorage(admin.storage, claimed.user_id);",
+    to: "      void eraseUserStorage;",
     expect: "storage objects are still deleted too",
+  },
+  {
+    // The defect of 2026-10-08: the SQL function Supabase refuses.
+    name: "account deletion goes back to the SQL function Supabase refuses",
+    file: DELETE_ROUTE,
+    from: "      await eraseUserStorage(admin.storage, claimed.user_id);",
+    to: '      void eraseUserStorage; const { error: sqlError } = await admin.rpc("delete_user_storage_objects", { target_user_id: claimed.user_id }); if (sqlError) throw sqlError;',
+    expect: "not through delete_user_storage_objects",
   },
   {
     name: "a legacy table is dropped from the registry, as instructed",

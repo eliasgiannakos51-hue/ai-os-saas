@@ -35,7 +35,7 @@ const MUTANTS = [
     // that was true.
     name: "a baseline is left three above what it measures",
     file: I18N,
-    from: "const CLIENT_FALLBACK_BASELINE = 27;",
+    from: "const CLIENT_FALLBACK_BASELINE = 26;",
     to: "const CLIENT_FALLBACK_BASELINE = 30;",
     expect: "no baseline has more room than it is allowed",
   },
@@ -52,10 +52,10 @@ const MUTANTS = [
     // running the full sweep before a push rather than the suites whose
     // names look related: the round that raised this floor ran thirteen
     // suites by hand and neither of the two that went red was among them.
-    // 250 -> 261 on 2026-10-09 (scripts/tests/run-mutations.mjs says
-    // which eleven).
-    from: "const FLOOR = 261;",
-    to: "const FLOOR = 242;",
+    // 250 -> 262 on 2026-10-09 (scripts/tests/run-mutations.mjs says
+    // which twelve).
+    from: "const FLOOR = 262;",
+    to: "const FLOOR = 243;",
     expect: "no baseline has more room than it is allowed",
   },
   // WHAT USED TO STAND HERE AND CANNOT, and the reason is worth more than

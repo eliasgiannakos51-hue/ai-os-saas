@@ -41,11 +41,16 @@
  *      provider that answers Anthropic's own overloaded error, and the
  *      screen says so in its language and keeps what was written.
  *
+ *   ALL TOOLS IN EVERY OTHER LANGUAGE OF messages/ (added 2026-10-09)
+ *  12. Every square, the new tools' included, drawn with its name in that
+ *      language, measured as drawn (width against height), its one-word
+ *      name on one line, and no «beta».
+ *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with Input.dispatchTouchEvent.
  */
 import http from "node:http";
 import { spawn } from "node:child_process";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 import { chromiumPath } from "./lib/chromium.mjs";
@@ -490,6 +495,54 @@ try {
       check(`${tag}: ...and what was written is still on the screen`,
         await page.getByTestId("chat-thread").getByText(ask, { exact: true }).first().isVisible().catch(() => false));
       await shot("5-chat-provider-error");
+      await context.close();
+    }
+  }
+
+  // ======================= ALL TOOLS IN EVERY OTHER LANGUAGE =======================
+  // The walks above are Greek and English. Every other language draws the
+  // same grid, and a longer name or line is what makes a square taller
+  // than wide (Slides and Posts were, on a 390px phone, 2026-10-08), so
+  // each one is measured as drawn too — with the new tools switched on, so
+  // their squares are measured with the rest. The languages are the files
+  // in messages/, not a list kept here.
+  const OTHER_LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5)).filter((l) => !LOCALES.includes(l));
+  check(`the other languages were found in messages/ (${OTHER_LOCALES.length})`, OTHER_LOCALES.length >= 1, OTHER_LOCALES.join(", "));
+  for (const device of DEVICES) {
+    for (const locale of OTHER_LOCALES) {
+      const names = JSON.parse(readFileSync(`messages/${locale}.json`, "utf8")).dashboard.tools.names;
+      const tag = `${device.label}/${locale}`;
+      const context = await browser.newContext({
+        viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch, deviceScaleFactor: device.touch ? 3 : 1,
+      });
+      await context.addCookies([
+        { ...supa.authCookie, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+        { name: "NEXT_LOCALE", value: locale, domain: "127.0.0.1", path: "/" },
+      ]);
+      const page = await context.newPage();
+      account({ tier: "growth", flags: SWITCHED.map((s) => ({ key: s.flag, audience: "everyone" })) });
+      await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "networkidle" });
+      const drawn = await page.locator('[data-testid="tool-tile"]').evaluateAll((els) => els.map((a) => {
+        const r = a.getBoundingClientRect();
+        const name = a.querySelector("span > span");
+        const lineHeight = parseFloat(getComputedStyle(name).lineHeight) || 20;
+        return {
+          href: a.getAttribute("href"), w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10,
+          name: (name?.textContent ?? "").trim(), nameLines: Math.round(name.getBoundingClientRect().height / lineHeight),
+        };
+      }));
+      const want = [...GROUPED, ...SWITCHED.map((s) => s.href)];
+      const keyOf = (href) => ALL_TOOLS_NAMES[href] ?? SWITCHED.find((s) => s.href === href)?.name;
+      const misnamed = drawn.filter((t) => t.name !== names[keyOf(t.href)]);
+      check(`${tag}: all ${want.length} squares, each with its ${locale} name`,
+        drawn.length === want.length && want.every((h) => drawn.some((t) => t.href === h)) && misnamed.length === 0,
+        `${drawn.length} drawn; ${misnamed.map((t) => `${t.href}="${t.name}"`).join(", ")}`);
+      const notSquare = drawn.filter((t) => Math.abs(t.w - t.h) > 1);
+      check(`${tag}: ...every one of them IS a square, as drawn`, drawn.length > 0 && notSquare.length === 0,
+        notSquare.map((t) => `${t.name} ${t.w}x${t.h}`).join(" · "));
+      const broken = drawn.filter((t) => t.nameLines > 1);
+      check(`${tag}: ...and every one-word name stays on one line`, drawn.length > 0 && broken.length === 0, broken.map((t) => t.name).join(", "));
+      check(`${tag}: ...with no «beta»`, !/\bbeta\b/i.test(await page.evaluate(() => document.body.innerText)));
       await context.close();
     }
   }

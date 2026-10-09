@@ -63,6 +63,11 @@ export type ResearchFinding = {
   finishedAt?: string;
   /** How many cost entries the report had at that moment — a count, not money. */
   usageCount?: number;
+  /** The AI service never answered this question (the request threw), as
+   *  opposed to answering with nothing. Set by researchQuestion's catch;
+   *  run-research.ts reads it to tell "the service did not answer" from
+   *  "the searches found nothing" when no question has a summary. */
+  failed?: boolean;
 };
 
 const WEB_SEARCH_TOOL: Anthropic.ToolUnion = {
@@ -251,7 +256,7 @@ export async function researchQuestion(params: {
     // silently drops a third of its own plan is a report that overstates
     // how thoroughly it looked.
     return {
-      finding: { question: params.question.question, summary: "", sources: [] },
+      finding: { question: params.question.question, summary: "", sources: [], failed: true },
       searches: 0,
     };
   }

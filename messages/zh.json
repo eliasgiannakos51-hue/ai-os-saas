@@ -2339,8 +2339,17 @@
       "askDisabledNoQuestion": "请输入你的问题以继续。",
       "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
       "failedHint": "未找到可读文本。请上传文字可选中的版本。",
+      "unreadable": {
+        "scan": "这个 PDF 没有文字层：它是扫描件或纯图片，需要先做文字识别（OCR），AI 才能读取。",
+        "encoding": "这个 PDF 里有文字，但它的字体编码无法解码——这是我们这边的限制，不是你的文件有问题。用原来的应用重新保存，或打印成新的 PDF，通常就能读取。",
+        "locked": "这个文件设置了密码。请移除密码后重新上传。",
+        "empty": "这个文件似乎是空的——没有可读取的内容。"
+      },
       "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
       "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
+      "askNoCredits": "点数不足，无法回答这个问题。没有扣除任何点数。",
+      "askRateLimited": "过去一小时内提问太多。请稍后再试——没有扣除任何点数。",
+      "askFailed": "这个问题没有得到回答：AI 服务没有响应。没有扣除任何点数——请稍后再试。",
       "questionLength": "{used, number} / {max, number} 个字符",
       "questionAtLimit": "单个问题已达到 {max, number} 个字符的上限。",
       "readInParts": "你的文档太长，无法一次读完，因此分成 {parts} 部分阅读，再把答案合并。",
@@ -2352,6 +2361,9 @@
       "uploadStorageMissing": "此部署尚未配置文件存储 — 缺少 'user-files' 存储桶。管理员需要运行修复 SQL（System Health → File storage）。",
       "uploadStoragePolicy": "存储拒绝了上传 — 缺少存储桶的访问策略。管理员需要运行修复 SQL（System Health → File storage）。",
       "tooLargeForTransfer": "托管平台在上传到达应用之前拒绝了它。请稍后再试。",
+      "uploadFileCap": "你已达到当前套餐包含的文件数量。请删除一个文件或升级套餐。",
+      "uploadStorageCap": "这个文件超出了你套餐的存储空间。请删除一些文件或升级套餐。",
+      "uploadRateLimited": "过去一小时内上传太多。请稍后再试。",
       "sharedStored": "已从共享添加 {count} 个文件。",
       "sharedFailed": "有 {count} 个文件无法添加。",
       "sharedReason": "原因：{reason}",
@@ -2360,6 +2372,8 @@
       "openedFromDevice": "已从你的设备打开 {count} 个文件。",
       "pagesPartRead": "读取 {total} 页中的前 {read} 页",
       "pageRefs": {
+        "page": "第 {n} 页",
+        "rows": "行，第 {n} 部分",
         "open": "打开：{name}，{label}",
         "close": "关闭页面",
         "loading": "正在打开页面…",
@@ -2386,6 +2400,19 @@
       "start": "开始研究",
       "notNow": "暂不",
       "runError": "报告无法完成。",
+      "refused": {
+        "noCredits": "点数不足，无法生成研究报告。没有扣除任何点数。",
+        "rateLimited": "短时间内的报告太多。请稍后再试。",
+        "unavailable": "AI 服务没有响应。没有扣除任何点数——请稍后再试。"
+      },
+      "failed": {
+        "noFindings": "搜索没有找到与这个主题相关的有用内容。",
+        "unavailable": "AI 服务没有回答研究问题。请稍后重新运行。",
+        "notWritten": "无法根据找到的内容写出报告。",
+        "interrupted": "报告在完成前停止了。没有扣除点数——请重新运行。",
+        "notStarted": "报告没有开始。",
+        "noCredits": "点数不足，报告无法运行。"
+      },
       "finished": "你的报告已就绪",
       "inProgress": "正在搜索并撰写…",
       "statusPending": "已规划",

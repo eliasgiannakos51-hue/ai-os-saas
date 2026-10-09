@@ -442,9 +442,12 @@ try {
         ["posts", "/dashboard/posts", M.posts.errors.insufficient],
         ["slides", "/dashboard/presentations", M.presentations.errors.insufficient],
         ["site", "/dashboard/website-builder", W.insufficient],
-        ["research", "/dashboard/deep-research", W.insufficient],
+        // Research and Files say it in their own words since the package
+        // check of packages 11 and 12 (components/research/failure-words.ts,
+        // components/files/failure-words.ts).
+        ["research", "/dashboard/deep-research", M.dashboard.deepResearch.refused.noCredits],
         ["analyze", "/dashboard/data-analysis", W.insufficient],
-        ["files", "/dashboard/files", W.insufficient],
+        ["files", "/dashboard/files", M.dashboard.files.askNoCredits],
       ];
       for (const [tool, path, expected] of credits) {
         await page.goto(`${TEST}${path}`, { waitUntil: "networkidle" });
@@ -469,7 +472,7 @@ try {
       const provider = [
         ["posts", "/dashboard/posts", M.posts.errors.unavailable],
         ["slides", "/dashboard/presentations", M.presentations.errors.unavailable],
-        ["research", "/dashboard/deep-research", M.dashboard.deepResearch.planError],
+        ["research", "/dashboard/deep-research", M.dashboard.deepResearch.refused.unavailable],
         ["analyze", "/dashboard/data-analysis", M.dataAnalysis.analyse.unavailable],
       ];
       for (const [tool, path, expected] of provider) {
@@ -553,7 +556,7 @@ try {
         const before = await toolTurns();
         await say(brief.files);
         const said = await lastToolTurn(before, 20000);
-        check(`${run}: files — a question that fails in the worker says so`, said !== null && said.includes(M.dashboard.files.askError), said ?? "nothing was said");
+        check(`${run}: files — a question that fails in the worker says so`, said !== null && said.includes(M.dashboard.files.askFailed), said ?? "nothing was said");
         inLanguage("files question, model down", await shellText());
       }
       await page.unrouteAll({ behavior: "ignoreErrors" });
@@ -726,7 +729,7 @@ try {
         await page.locator('[data-testid="files-shell-input"]').setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("Cancellation requires thirty days written notice.\n") });
         const said = await lastToolTurn(before, 20000);
         check(`${run}: files on Free, with its three files — a fourth is refused as the plan's limit`,
-          said !== null && said.includes(M.errors.codes.planLimit.what), said ?? "nothing was said");
+          said !== null && said.includes(M.dashboard.files.uploadFileCap), said ?? "nothing was said");
         inLanguage("files on Free, the fourth file", await shellText());
         await backToField();
       }

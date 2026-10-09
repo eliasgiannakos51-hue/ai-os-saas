@@ -1,5 +1,6 @@
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { truncate } from "@/lib/text/truncate";
+import { labelParts } from "@/lib/files/page-refs";
 
 /**
  * THE LIBRARY'S SOURCES (MASTER 4.1, package 5): «φτιάχνω κάτι σε τρία
@@ -139,12 +140,26 @@ export function textOfHtml(html: string): string {
     .trim();
 }
 
+/**
+ * A file's text without its page markers. Extraction stores each page
+ * behind one (`[[PAGE 37|Page 37]]`, lib/files/extract.ts, serialisePages):
+ * structure, not the file's words, and the label in it is English — so a
+ * snippet built from the raw text showed «[[PAGE 37|Page 37]]» on a Greek
+ * Library (found 2026-10-08, scripts/tests/file-pages.prodtest.mjs). A
+ * label extraction wrote ("Page 12", "Rows 3") goes; a sheet's own name
+ * is the person's words and stays, to be searched.
+ */
+export function textOfFile(stored: string): string {
+  return stored.replace(/\[\[PAGE \d+\|([^\]]*)\]\]/g, (_marker, label: string) => (labelParts(label) ? " " : ` ${label} `));
+}
+
 /** What a search reads for one row: its title and everything it says. */
 export function searchableText(source: LibrarySource, row: Record<string, unknown>): string {
   const parts: string[] = [source.titleOf(row)];
   for (const column of source.contentColumns.split(",").map((c) => c.trim()).filter(Boolean)) {
     const value = row[column];
     if (column === "html_content") parts.push(textOfHtml(text(value)));
+    else if (column === "extracted_text") parts.push(textOfFile(text(value)));
     else stringsIn(value, parts);
   }
   return parts.join(" \n ");

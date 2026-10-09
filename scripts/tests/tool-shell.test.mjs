@@ -164,9 +164,9 @@ check("selection is still the subject: nothing is asked with nothing ticked",
 check("the field asks the ticked files, as a background job through the page's route",
   /startAndWatchJob\(\s*"\/api\/files\/ask",\s*\{ question: text, fileIds: selected, language: locale \}/.test(filesShell));
 check("every answer says the page it came from, or that it is not in the documents",
-  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{c\.label\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
+  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{show\(c\.label\)\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
 check("...built by the same function as on the page, and copied with its sources",
-  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
+  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!, show\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
 check("an answer that finished elsewhere is put back, and one running is watched", /\/api\/jobs\?kind=file_ask/.test(filesShell) && /watchJob\(String\(job\.id\)/.test(filesShell) && /<JobSeen jobId=\{turn\.answer\.jobId\} \/>/.test(filesShell));
 check("an upload whose registration does not land is removed from the bucket",
   /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));
@@ -225,8 +225,12 @@ for (const route of ["src/app/api/websites/generate/route.ts", "src/app/api/webs
 }
 check("Site: a build the worker could not finish is said in the screen's words, a stop by its note",
   /say\(\{ role: "tool", text: failedText\(record\) \}\)/.test(site) && /if \(stopped\) return describeNote\(stopped\);/.test(site));
-check("Research: a plan or a run refused is said from the status", /response\.status === 502 && data \? t\("planError"\) : refusalText\(response\.status, data\)/.test(research) &&
-  /text: refusalText\(response\.status, data\)/.test(research));
+// What components/research/failure-words.ts names (package 11's check,
+// scripts/tests/research-slides.test.mjs) is said in its words; the rest
+// from the status.
+check("Research: a plan or a run refused is said from the status",
+  /const named = \(data: Record<string, unknown> \| null, status: number\) => researchRefusal\(data, status\) !== "other" \|\| \(status === 502 && data !== null\);/.test(research) &&
+  (research.match(/named\(data, response\.status\) \? failures\.refused\(data, response\.status, "(?:plan|run)"\) : refusalText\(response\.status, data\)/g) ?? []).length === 2);
 // Checked 2026-10-09 by tool-shell-edges.prodtest.mjs: a 504 text page from
 // the host made `response.json()` throw, and the catch said "your device
 // could not reach us" — and "you were not charged" — about a request that
@@ -241,7 +245,7 @@ check("Files: a file over the route's limit, with storage unreachable, is the co
     /unanswered = typeof \(error as \{ status\?: unknown \}\)\.status !== "number"/.test(uploadLib) &&
     /offline: describe\(new ApiError\(0, null\)\)\.text/.test(filesShell));
 check("Files: a question refused is said from the status, a failed job in the screen's words",
-  /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*t\("askError"\)/.test(filesShell) &&
+  /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /text: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*askFailure\(outcome\) === "askError" && outcome\.status\s*\?\s*describe\(new ApiError\(outcome\.status,/.test(filesShell) &&
     /status: response\.status, body: started/.test(read("src/lib/jobs/start-and-watch.ts")));
 check("Files: a file the plan has no room for is the plan's limit",
   /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(filesShell) && (uploadLib.match(/body: data,\s*status: response\.status/g) ?? []).length === 2);

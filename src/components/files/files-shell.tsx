@@ -17,11 +17,14 @@ import { useErrorText } from "@/lib/errors/use-error-text";
 import { ApiError } from "@/lib/errors/api-error";
 import type { ApiErrorPayload } from "@/lib/errors/error-codes";
 import { isStoppedMessage } from "@/lib/stop-message";
+import { askFailure } from "@/lib/files/ask-failure";
+import { uploadRefusal } from "@/lib/files/refusal-words";
 import { ACCEPT_ATTRIBUTE, MAX_FILE_BYTES, MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS, formatBytes, kindFromExtension } from "@/lib/files/file-types";
 import { answerForClipboard, answerFromResult, type Answer, type WorkspaceFile } from "@/lib/files/answer";
 import { uploadFile } from "@/lib/files/upload-file";
-import { CitedAnswerText, CitedPages, PageView } from "@/components/files/cited-answer";
-import { pagesRead } from "@/lib/files/page-refs";
+import { CitedAnswerText, CitedPages, PageView, usePageLabel } from "@/components/files/cited-answer";
+import { pagesRead, relabelAnswer } from "@/lib/files/page-refs";
+import { useFilesFailureWords } from "@/components/files/failure-words";
 import type { Citation } from "@/lib/files/answer";
 
 type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer };
@@ -60,6 +63,10 @@ export function FilesShell({
   const router = useRouter();
   const { addToast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
+  // Every page label this screen shows, in the reader's language, and what
+  // goes wrong said in it too (components/files/failure-words.ts).
+  const show = usePageLabel();
+  const failures = useFilesFailureWords();
 
   const [files, setFiles] = useState(initialFiles);
   const asked = initialOpenId ? initialFiles.find((f) => f.id === initialOpenId) : undefined;
@@ -125,7 +132,7 @@ export function FilesShell({
           const answer = answerFromResult(outcome.result, Number(outcome.creditsCharged ?? 0), String(job.id));
           say({ role: "tool", text: answer.text, answer });
         } else if (!outcome.ok && outcome.code !== "still_running") {
-          say({ role: "tool", text: outcome.code === "stalled" ? t("askStalled") : t("askError") });
+          say({ role: "tool", text: failures.ask({ code: outcome.code, jobId: String(job.id) }) });
         }
       } catch {
         /* nothing in flight is the common answer */
@@ -164,25 +171,27 @@ export function FilesShell({
           storagePolicy: t("uploadStoragePolicy"),
           tooLargeForTransfer: t("tooLargeForTransfer"),
           offline: describe(new ApiError(0, null)).text,
+          refused: (refusal) => failures.refused(refusal, file.name),
         });
         if (!outcome.ok) {
-          // The server's refusal, in the reader's language: a plan's file
-          // or storage limit is the plan's limit (lib/files/ingest.ts,
-          // `limitReached`); a body the host refused before the route ran
-          // has no answer to read; with no status, the words passed in.
+          // The server's refusal, in the reader's language: what it names
+          // (lib/files/refusal-words.ts — the plan's file or storage limit,
+          // too many uploads, the type, the size, a body the host refused
+          // before the route ran) in the words passed in above; any other
+          // from its status, a plan limit as the plan's limit
+          // (lib/files/ingest.ts, `limitReached`); with no status, the words
+          // passed in.
           say({
             role: "tool",
-            text: !outcome.status
+            text: !outcome.status || uploadRefusal(outcome.body ?? null, outcome.status) !== "uploadError"
               ? outcome.error
-              : outcome.status === 413 && !outcome.body
-                ? t("tooLargeForTransfer")
-                : describe(new ApiError(outcome.status, (outcome.body?.limitReached ? { ...outcome.body, code: "planLimit" } : outcome.body ?? null) as ApiErrorPayload | null)).text,
+              : describe(new ApiError(outcome.status, (outcome.body?.limitReached ? { ...outcome.body, code: "planLimit" } : outcome.body ?? null) as ApiErrorPayload | null)).text,
           });
           continue;
         }
         setFiles((current) => [outcome.file, ...current]);
         // A file that stored but could not be READ is not a success.
-        if (outcome.file.processing_status === "failed") say({ role: "tool", text: outcome.file.error ?? t("uploadUnreadable", { name: file.name }) });
+        if (outcome.file.processing_status === "failed") say({ role: "tool", text: failures.unreadable(outcome.file.error, t("uploadUnreadable", { name: file.name })) });
         else {
           say({ role: "tool", text: t("uploadSuccess", { name: outcome.file.filename }) });
           if (outcome.file.processing_status === "ready") setSelected((current) => (current.length < MAX_FILES_PER_QUESTION ? [...current, outcome.file.id] : current));
@@ -236,22 +245,20 @@ export function FilesShell({
       );
       if (!outcome.ok) {
         // IN THE READER'S LANGUAGE (checked 2026-10-08 by
-        // scripts/tests/tool-shell-edges.prodtest.mjs): a refusal is said
-        // from the route's status (lib/errors/use-error-text.ts), and a job
-        // that failed carries the worker's or the provider's own English,
-        // which is for logs.
+        // scripts/tests/tool-shell-edges.prodtest.mjs and
+        // scripts/tests/file-pages.prodtest.mjs): a stop as a stop; what
+        // components/files/failure-words.ts names (still running, stalled,
+        // no credits, too many, a job the AI did not answer) in its words;
+        // any other refusal from the route's status
+        // (lib/errors/use-error-text.ts). Never the route's or the
+        // provider's own English, which is for logs.
         say({
           role: "tool",
-          text:
-            outcome.code === "still_running"
-              ? t("askStillRunning")
-              : outcome.code === "stalled"
-                ? t("askStalled")
-                : outcome.status
-                  ? describe(new ApiError(outcome.status, (outcome.body ?? null) as ApiErrorPayload | null)).text
-                  : isStoppedMessage(outcome.error)
-                    ? tSteps("stopped")
-                    : t("askError"),
+          text: isStoppedMessage(outcome.error)
+            ? tSteps("stopped")
+            : askFailure(outcome) === "askError" && outcome.status
+              ? describe(new ApiError(outcome.status, (outcome.body ?? null) as ApiErrorPayload | null)).text
+              : failures.ask(outcome),
         });
         return;
       }
@@ -277,8 +284,9 @@ export function FilesShell({
     ...turns.map((turn) => ({
       id: turn.id,
       role: turn.role,
-      // With the switch, the answer is drawn below with its pages pressable.
-      text: pages && turn.answer ? "" : turn.text,
+      // With the switch, the answer is drawn below with its pages pressable;
+      // without it, the text itself, its page labels in the reader's language.
+      text: pages && turn.answer ? "" : turn.answer ? relabelAnswer(turn.text, turn.answer.citations, show) : turn.text,
       extra: turn.answer ? (
         <div data-testid="files-answer" className="mt-2 space-y-2">
           {!turn.answer.fromDocuments && <p className="text-xs text-warning">{t("notInDocuments")}</p>}
@@ -296,7 +304,7 @@ export function FilesShell({
               <ul data-testid="files-citations" className="mt-1 space-y-0.5">
                 {turn.answer.citations.map((c, i) => (
                   <li key={`${c.filename}-${c.label}-${i}`} className="text-xs text-foreground">
-                    {c.filename} — {c.label}
+                    {c.filename} — {show(c.label)}
                   </li>
                 ))}
               </ul>
@@ -312,7 +320,7 @@ export function FilesShell({
           {turn.answer.truncated && <p className="text-[11px] text-warning">{t("truncatedWarning")}</p>}
           {turn.answer.skippedFiles.length > 0 && <p className="text-[11px] text-muted">{t("skippedFiles", { names: turn.answer.skippedFiles.join(", ") })}</p>}
           {turn.answer.disclosure && <p className="text-[11px] text-muted">{turn.answer.disclosure}</p>}
-          <CopyButton text={() => answerForClipboard(turn.answer!)} variant="icon" />
+          <CopyButton text={() => answerForClipboard(turn.answer!, show)} variant="icon" />
           {turn.answer.jobId && <JobSeen jobId={turn.answer.jobId} />}
         </div>
       ) : undefined,

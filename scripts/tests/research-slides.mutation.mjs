@@ -10,7 +10,11 @@
  * deck's bounds, or left to the model; another person's report read, an
  * unfinished one presented, the switch ignored, a typed description let
  * past the field's limit; the button sending the text instead of the id,
- * or spending a large amount with no second press.
+ * or spending a large amount with no second press. And (since 2026-10-08)
+ * every way back to English on a Greek Research screen: a stored reason no
+ * longer recognised, a refusal said in the route's words, a failed plan
+ * that no longer says it was the AI service — and a run the AI service never
+ * answered blamed on the topic.
  *
  * Run: node scripts/tests/research-slides.mutation.mjs
  */
@@ -22,6 +26,13 @@ const CITED = "src/lib/research/cited-markdown.ts";
 const BRIEF = "src/lib/research/research-to-slides.ts";
 const ROUTE = "src/app/api/presentations/generate/route.ts";
 const SEND = "src/components/research/send-to-slides.tsx";
+// In the reader's language (the package check of 2026-10-08).
+const FAILURE = "src/lib/research/failure.ts";
+const PLAN = "src/app/api/research/route.ts";
+const RSHELL = "src/components/research/research-shell.tsx";
+const RPAGE = "src/components/research/research-workspace.tsx";
+const QUESTION = "src/lib/research/research.ts";
+const RUNNER = "src/lib/research/run-research.ts";
 
 const MUTANTS = [
   {
@@ -123,11 +134,74 @@ const MUTANTS = [
     to: '    if (false && state !== "confirm") {',
     expect: "...a large one asks once more",
   },
+  {
+    name: "a report that found nothing is no longer recognised, and says only that it failed",
+    file: FAILURE,
+    from: '  noFindings: "The searches did not return anything usable on this topic.",',
+    to: '  noFindings: "The searches did not return anything.",',
+    expect: "every sentence a failed report is stored with is said in the reader's language",
+  },
+  {
+    name: "a question the AI service never answered is no longer marked",
+    file: QUESTION,
+    from: '      finding: { question: params.question.question, summary: "", sources: [], failed: true },',
+    to: '      finding: { question: params.question.question, summary: "", sources: [] },',
+    expect: "a question the AI service never answered is marked so (research.ts, the catch)",
+  },
+  {
+    name: "a run the AI service never answered says the topic gave nothing",
+    file: RUNNER,
+    from: "    const serviceDown = findings.length > 0 && findings.every((f) => f.failed === true);",
+    to: "    const serviceDown = false && findings.every((f) => f.failed === true);",
+    expect: "...and a run where every question is so marked says the service did not answer, never that the topic gave nothing",
+  },
+  {
+    name: "the service's sentence is no longer recognised, and says only that the report failed",
+    file: FAILURE,
+    from: '  unavailable: "The AI service did not answer the research questions. Please run it again in a moment.",\n',
+    to: "",
+    expect: "every sentence a failed report is stored with is said in the reader's language",
+  },
+  {
+    name: "out of credits is said as a failed plan",
+    file: FAILURE,
+    from: '  if (body?.insufficientCredits === true || status === 402) return "noCredits";\n',
+    to: "",
+    expect: "a refused plan or start is said by what it is",
+  },
+  {
+    name: "the plan route stops saying the AI service did not answer",
+    file: PLAN,
+    from: '          code: planned.reason === "api_error" ? "ai_unavailable" : "plan_unusable",\n',
+    to: "",
+    expect: "...the plan route says which kind of failed plan it was",
+  },
+  {
+    name: "the shell says a failed report's stored English",
+    file: RSHELL,
+    from: '            say({ role: "tool", text: failures.failed(report.error) });',
+    to: '            say({ role: "tool", text: report.error ?? failures.failed(report.error) });',
+    expect: "shell: nothing a request answers, and no stored reason, is shown as it came",
+  },
+  {
+    name: "the shell says the plan route's English",
+    file: RSHELL,
+    from: 'say({ role: "tool", text: named(data, response.status) ? failures.refused(data, response.status, "plan") : refusalText(response.status, data) });',
+    to: 'say({ role: "tool", text: data?.error ?? failures.refused(data, response.status, "plan") });',
+    expect: "shell: nothing a request answers, and no stored reason, is shown as it came",
+  },
+  {
+    name: "the page lists a failed report with its stored English",
+    file: RPAGE,
+    from: "{failures.failed(report.error)}",
+    to: "{report.error}",
+    expect: "page: a failed report's line in the list says why, in the reader's language",
+  },
 ];
 
 runMutations({
   name: "research-slides",
   gate: GATE,
-  targets: [CITED, BRIEF, ROUTE, SEND],
+  targets: [CITED, BRIEF, ROUTE, SEND, FAILURE, PLAN, RSHELL, RPAGE, QUESTION, RUNNER],
   mutants: MUTANTS,
 });

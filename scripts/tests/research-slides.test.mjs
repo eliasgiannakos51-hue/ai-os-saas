@@ -16,9 +16,13 @@
  *   5. THE SCREEN: the numbers and the button on the Research shell and the
  *      Research page, the price before the press, the deck opened in Slides.
  *   6. The words, in ten languages.
+ *   7. IN THE READER'S LANGUAGE (the package check of 2026-10-08): a plan or
+ *      a start that was refused, and a report that failed, said by what it
+ *      is — never in the route's English or the sentence the run stored.
  *
  * The rendered links, by react-markdown itself: research-slides.itest.mjs.
- * The same in a browser: research-slides.prodtest.mjs.
+ * The same in a browser, and the research itself the whole way through
+ * the real routes: research-slides.prodtest.mjs.
  *
  * Run: node scripts/tests/research-slides.test.mjs
  */
@@ -42,6 +46,7 @@ const code = (p) => stripComments(readFileSync(p, "utf8"));
 const cited = await loadTs("src/lib/research/cited-markdown.ts");
 const toSlides = await loadTs("src/lib/research/research-to-slides.ts");
 const deck = await loadTs("src/lib/presentations/deck.ts");
+const failure = await loadTs("src/lib/research/failure.ts");
 
 console.log("research-slides");
 
@@ -151,6 +156,49 @@ for (const file of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.deepResearch?.toSlides ?? {};
   const empty = KEYS.filter((k) => typeof m[k] !== "string" || !m[k].trim());
   check(`${file}: the words (${KEYS.length})`, empty.length === 0 && /\{count/.test(m.price ?? "") && /\{count/.test(m.confirm ?? ""), empty.join(", "));
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 7. in the reader's language ==");
+// ---------------------------------------------------------------------
+// Every sentence a failed report is stored with, read out of the files
+// that store it, so a reworded one cannot slip past the matcher.
+const storedSentences = ["src/lib/research/run-research.ts", "src/app/api/research/[id]/run/route.ts"].flatMap((f) =>
+  [...readFileSync(f, "utf8").matchAll(/status: "failed" satisfies ResearchStatus,\s*error: "([^"]+)"/g)].map((m) => m[1])
+);
+const unsaid = storedSentences.filter((sentence) => failure.researchFailure(sentence) === null);
+check(`every sentence a failed report is stored with is said in the reader's language (${storedSentences.length} read)`, storedSentences.length >= 5 && unsaid.length === 0, unsaid.join(" | "));
+check("...anything else falls back to the screen's own sentence", failure.researchFailure("something new") === null && failure.researchFailure(null) === null);
+// The AI service, not the topic: a question whose request threw is marked,
+// and a run where every question is marked stores the sentence that says
+// the service did not answer — not "nothing usable on this topic".
+const runResearch = code("src/lib/research/run-research.ts");
+check("a question the AI service never answered is marked so (research.ts, the catch)",
+  /\}\s*catch\s*\{\s*return\s*\{\s*finding:\s*\{[^}]*summary:\s*"",[^}]*failed:\s*true\s*\}/.test(code("src/lib/research/research.ts")));
+check("...and a run where every question is so marked says the service did not answer, never that the topic gave nothing",
+  /const serviceDown = findings\.length > 0 && findings\.every\(\(f\) => f\.failed === true\);/.test(runResearch) &&
+    /serviceDown\s*\?\s*\{ status: "failed" satisfies ResearchStatus, error: "The AI service did not answer the research questions\. Please run it again in a moment\." \}/.test(runResearch) &&
+    failure.researchFailure("The AI service did not answer the research questions. Please run it again in a moment.") === "unavailable");
+check("a refused plan or start is said by what it is",
+  failure.researchRefusal({ insufficientCredits: true }, 402) === "noCredits" && failure.researchRefusal({ limitReached: true }, 403) === "capReached" &&
+    failure.researchRefusal({ code: "rate_limited" }, 429) === "rateLimited" && failure.researchRefusal({ code: "ai_unavailable" }, 502) === "unavailable" &&
+    failure.researchRefusal({ code: "plan_unusable" }, 502) === "other" && failure.researchRefusal(null, 500) === "other");
+check("...the plan route says which kind of failed plan it was", /code: planned\.reason === "api_error" \? "ai_unavailable" : "plan_unusable",/.test(code("src/app/api/research/route.ts")));
+const researchScreens = { shell: code("src/components/research/research-shell.tsx"), page: code("src/components/research/research-workspace.tsx") };
+for (const [label, src] of Object.entries(researchScreens)) {
+  check(`${label}: nothing a request answers, and no stored reason, is shown as it came`,
+    !/getErrorMessage\(|data\??\.error \?\?|report\.error \?\?|: report\.error\}/.test(src), src.match(/.*(?:getErrorMessage\(|data\??\.error \?\?|report\.error \?\?|: report\.error\}).*/g)?.slice(0, 3).join(" | "));
+  check(`${label}: a refused plan and a refused start, and a failed report, are said through the words`,
+    /failures\.refused\(data, response\.status, "plan"\)/.test(src) && /failures\.refused\(data, response\.status, "run"\)/.test(src) && /failures\.failed\(report\.error\)/.test(src));
+}
+check("page: a failed report's line in the list says why, in the reader's language", /\{failures\.failed\(report\.error\)\}/.test(researchScreens.page));
+for (const file of LOCALES) {
+  const r = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.deepResearch ?? {};
+  const missing = [
+    ...["noCredits", "rateLimited", "unavailable"].filter((k) => typeof r.refused?.[k] !== "string" || !r.refused[k].trim()).map((k) => `refused.${k}`),
+    ...["noFindings", "unavailable", "notWritten", "interrupted", "notStarted", "noCredits"].filter((k) => typeof r.failed?.[k] !== "string" || !r.failed[k].trim()).map((k) => `failed.${k}`),
+  ];
+  check(`${file}: what goes wrong (9)`, missing.length === 0, missing.join(", "));
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

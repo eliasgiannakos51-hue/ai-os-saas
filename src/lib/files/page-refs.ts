@@ -39,6 +39,38 @@ export function splitAnswer(text: string, citations: readonly Citation[]): Answe
   return pieces;
 }
 
+/**
+ * A PAGE'S LABEL, IN THE READER'S LANGUAGE (the package check of
+ * 2026-10-08: «Page 12» on a Greek screen).
+ *
+ * The label is stored as extraction wrote it — lib/files/extract.ts writes
+ * "Page 12" for a page of a PDF or a text file, "Rows 3" for a slice of a
+ * CSV, and a workbook sheet's own name — and lib/files/ask.ts matches it
+ * character for character, so it stays as it is in the database, in the
+ * answer's text, in the model's prompt and in every link. Only what is
+ * SHOWN is translated: these are the two labels extraction writes in
+ * English; anything else (a sheet's name is the person's own) is shown as
+ * it is. components/files/cited-answer.tsx, usePageLabel, does the words.
+ */
+export type LabelParts = { unit: "page" | "rows"; n: number };
+
+export function labelParts(label: string): LabelParts | null {
+  const m = /^(Page|Rows) (\d{1,6})$/.exec(label.trim());
+  return m ? { unit: m[1] === "Page" ? "page" : "rows", n: Number(m[2]) } : null;
+}
+
+/**
+ * The answer's text with every checked reference's label shown through
+ * `show` — for where the text itself is printed (the switch off, and the
+ * clipboard). Brackets that are not a checked reference stay as written.
+ */
+export function relabelAnswer(text: string, citations: readonly Citation[], show: (label: string) => string): string {
+  const known = new Set(citations.map((c) => `${c.filename}|${c.label}`));
+  return text.replace(CITATION, (whole, file: string, label: string) =>
+    known.has(`${file.trim()}|${label.trim()}`) ? `[${file.trim()}, ${show(label.trim())}]` : whole
+  );
+}
+
 /** Each page once, in the order the answer first cites it. */
 export function uniquePages(citations: readonly Citation[]): Citation[] {
   const seen = new Set<string>();

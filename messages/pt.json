@@ -2339,8 +2339,17 @@
       "askDisabledNoQuestion": "Escreve a tua pergunta para continuar.",
       "processingHint": "A ler o ficheiro — normalmente alguns segundos. Podes perguntar assim que estiver pronto.",
       "failedHint": "Não foi encontrado texto legível. Carrega uma versão com texto selecionável.",
+      "unreadable": {
+        "scan": "Este PDF não tem camada de texto: é uma digitalização ou só uma imagem, e precisaria de OCR para a IA o conseguir ler.",
+        "encoding": "Este PDF tem texto, mas a codificação da sua fonte não pôde ser descodificada — um limite do nosso lado, não um problema do teu ficheiro. Guardá-lo de novo na aplicação original, ou imprimi-lo para um PDF novo, costuma produzir um que se lê.",
+        "locked": "Este ficheiro está protegido por palavra-passe. Remove a palavra-passe e envia-o de novo.",
+        "empty": "Este ficheiro parece estar vazio — não havia nada para ler."
+      },
       "askStillRunning": "Ainda a ler — está a demorar. Continua com a página fechada; volta e pergunta de novo para veres a resposta.",
       "askStalled": "A pergunta parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
+      "askNoCredits": "Créditos insuficientes para esta pergunta. Nada foi cobrado.",
+      "askRateLimited": "Demasiadas perguntas na última hora. Tenta de novo daqui a pouco — nada foi cobrado.",
+      "askFailed": "A pergunta não foi respondida: o serviço de IA não respondeu. Nada foi cobrado — tenta de novo daqui a pouco.",
       "questionLength": "{used, number} de {max, number} caracteres",
       "questionAtLimit": "Atingiu o limite de {max, number} caracteres para uma pergunta.",
       "readInParts": "Os seus documentos eram demasiado longos para ler de uma vez, por isso foram lidos em {parts} partes e as respostas combinadas.",
@@ -2352,6 +2361,9 @@
       "uploadStorageMissing": "O armazenamento de ficheiros não está configurado nesta instalação — falta o bucket 'user-files'. Um administrador deve executar o SQL de reparação (System Health → File storage).",
       "uploadStoragePolicy": "O armazenamento recusou o envio — faltam as políticas de acesso do bucket. Um administrador deve executar o SQL de reparação (System Health → File storage).",
       "tooLargeForTransfer": "A plataforma de alojamento recusou o envio antes de chegar à aplicação. Tente novamente daqui a pouco.",
+      "uploadFileCap": "Chegaste ao número de ficheiros incluído no teu plano. Apaga um ou faz upgrade.",
+      "uploadStorageCap": "Esse ficheiro não cabe no armazenamento do teu plano. Apaga alguns ficheiros ou faz upgrade.",
+      "uploadRateLimited": "Demasiados envios na última hora. Tenta de novo daqui a pouco.",
       "sharedStored": "{count, plural, one {# ficheiro adicionado} other {# ficheiros adicionados}} a partir da partilha.",
       "sharedFailed": "{count, plural, one {# ficheiro não pôde ser adicionado} other {# ficheiros não puderam ser adicionados}}.",
       "sharedReason": "Motivo: {reason}",
@@ -2360,6 +2372,8 @@
       "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo.",
       "pagesPartRead": "São lidas as primeiras {read} de {total} páginas",
       "pageRefs": {
+        "page": "Página {n}",
+        "rows": "Linhas, parte {n}",
         "open": "Abrir: {name}, {label}",
         "close": "Fechar a página",
         "loading": "A abrir a página…",
@@ -2386,6 +2400,19 @@
       "start": "Iniciar a investigação",
       "notNow": "Agora não",
       "runError": "Não foi possível concluir o relatório.",
+      "refused": {
+        "noCredits": "Créditos insuficientes para um relatório de pesquisa. Nada foi cobrado.",
+        "rateLimited": "Demasiados relatórios em pouco tempo. Tenta de novo daqui a pouco.",
+        "unavailable": "O serviço de IA não respondeu. Nada foi cobrado — tenta de novo daqui a pouco."
+      },
+      "failed": {
+        "noFindings": "As pesquisas não encontraram nada útil sobre este tema.",
+        "unavailable": "O serviço de IA não respondeu às perguntas da pesquisa. Executa-o de novo daqui a pouco.",
+        "notWritten": "Não foi possível escrever o relatório a partir do que foi encontrado.",
+        "interrupted": "O relatório parou antes de terminar. Não foram cobrados créditos — executa-o de novo.",
+        "notStarted": "O relatório não começou.",
+        "noCredits": "Não havia créditos suficientes para executar o relatório."
+      },
       "finished": "O teu relatório está pronto",
       "inProgress": "A pesquisar e a escrever…",
       "statusPending": "Planeado",

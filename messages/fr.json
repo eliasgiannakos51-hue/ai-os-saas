@@ -2339,8 +2339,17 @@
       "askDisabledNoQuestion": "Saisissez votre question pour continuer.",
       "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
       "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
+      "unreadable": {
+        "scan": "Ce PDF n’a pas de couche de texte : c’est un scan ou une simple image, et il faudrait un OCR pour que l’IA puisse le lire.",
+        "encoding": "Ce PDF contient du texte, mais l’encodage de sa police n’a pas pu être décodé — une limite de notre côté, pas un problème de ton fichier. L’enregistrer à nouveau depuis l’application d’origine, ou l’imprimer dans un nouveau PDF, en produit généralement un lisible.",
+        "locked": "Ce fichier est protégé par un mot de passe. Retire le mot de passe et envoie-le à nouveau.",
+        "empty": "Ce fichier semble vide — il n’y avait rien à lire."
+      },
       "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
       "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "askNoCredits": "Pas assez de crédits pour cette question. Rien n’a été facturé.",
+      "askRateLimited": "Trop de questions au cours de la dernière heure. Réessaie dans un instant — rien n’a été facturé.",
+      "askFailed": "La question n’a pas reçu de réponse : le service d’IA n’a pas répondu. Rien n’a été facturé — réessaie dans un instant.",
       "questionLength": "{used, number} sur {max, number} caractères",
       "questionAtLimit": "Vous avez atteint la limite de {max, number} caractères pour une question.",
       "readInParts": "Vos documents étaient trop longs pour être lus d'un seul tenant : ils ont été lus en {parts} parties et les réponses combinées.",
@@ -2352,6 +2361,9 @@
       "uploadStorageMissing": "Le stockage de fichiers n'est pas configuré sur ce déploiement — le bucket 'user-files' est manquant. Un administrateur doit exécuter le SQL de réparation (System Health → File storage).",
       "uploadStoragePolicy": "Le stockage a refusé l'envoi — les politiques d'accès du bucket sont manquantes. Un administrateur doit exécuter le SQL de réparation (System Health → File storage).",
       "tooLargeForTransfer": "La plateforme d'hébergement a refusé l'envoi avant qu'il n'atteigne l'application. Réessayez dans un instant.",
+      "uploadFileCap": "Tu as atteint le nombre de fichiers inclus dans ton forfait. Supprimes-en un ou passe à un forfait supérieur.",
+      "uploadStorageCap": "Ce fichier ne tient pas dans le stockage de ton forfait. Supprime des fichiers ou passe à un forfait supérieur.",
+      "uploadRateLimited": "Trop d’envois au cours de la dernière heure. Réessaie dans un instant.",
       "sharedStored": "{count, plural, one {# fichier ajouté} other {# fichiers ajoutés}} depuis le partage.",
       "sharedFailed": "{count, plural, one {# fichier n'a pas pu être ajouté} other {# fichiers n'ont pas pu être ajoutés}}.",
       "sharedReason": "Raison : {reason}",
@@ -2360,6 +2372,8 @@
       "openedFromDevice": "{count, plural, one {# fichier ouvert} other {# fichiers ouverts}} depuis votre appareil.",
       "pagesPartRead": "Les {read} premières pages sur {total} sont lues",
       "pageRefs": {
+        "page": "Page {n}",
+        "rows": "Lignes, partie {n}",
         "open": "Ouvrir : {name}, {label}",
         "close": "Fermer la page",
         "loading": "Ouverture de la page…",
@@ -2386,6 +2400,19 @@
       "start": "Lancer la recherche",
       "notNow": "Pas maintenant",
       "runError": "Le rapport n'a pas pu être terminé.",
+      "refused": {
+        "noCredits": "Pas assez de crédits pour un rapport de recherche. Rien n’a été facturé.",
+        "rateLimited": "Trop de rapports en peu de temps. Réessaie dans un instant.",
+        "unavailable": "Le service d’IA n’a pas répondu. Rien n’a été facturé — réessaie dans un instant."
+      },
+      "failed": {
+        "noFindings": "Les recherches n’ont rien trouvé d’utile sur ce sujet.",
+        "unavailable": "Le service d’IA n’a pas répondu aux questions de la recherche. Relance-le dans un instant.",
+        "notWritten": "Le rapport n’a pas pu être rédigé à partir de ce qui a été trouvé.",
+        "interrupted": "Le rapport s’est arrêté avant la fin. Aucun crédit n’a été facturé — relance-le.",
+        "notStarted": "Le rapport n’a pas démarré.",
+        "noCredits": "Il n’y avait pas assez de crédits pour lancer le rapport."
+      },
       "finished": "Votre rapport est prêt",
       "inProgress": "Recherche et rédaction…",
       "statusPending": "Planifié",

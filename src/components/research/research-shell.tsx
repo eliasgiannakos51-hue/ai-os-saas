@@ -16,11 +16,12 @@ import { formatDateTime } from "@/lib/format-number";
 import { useErrorText } from "@/lib/errors/use-error-text";
 import { ApiError } from "@/lib/errors/api-error";
 import type { ApiErrorPayload } from "@/lib/errors/error-codes";
-import { isStoppedMessage } from "@/lib/stop-message";
+import { researchRefusal } from "@/lib/research/failure";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
 import type { ResearchReport } from "@/lib/research/report";
 import { CitedBody } from "@/components/research/cited-body";
 import { SendToSlides } from "@/components/research/send-to-slides";
+import { useResearchFailureWords } from "@/components/research/failure-words";
 
 /** A report takes minutes; five seconds is responsive enough (as on the page). */
 const POLL_MS = 5000;
@@ -69,12 +70,17 @@ export function ResearchShell({
   const router = useRouter();
   const { addToast } = useToast();
   const composerRef = useRef<ChatComposerHandle>(null);
+  // What goes wrong, in the reader's language (components/research/failure-words.ts).
+  const failures = useResearchFailureWords();
   // A REFUSAL IN THE READER'S LANGUAGE (checked 2026-10-08 by
   // scripts/tests/tool-shell-edges.prodtest.mjs): the research routes answer
-  // in English prose, which is for logs; the conversation says it from the
-  // status and the code (lib/errors/use-error-text.ts). A month's reports
-  // used up is the plan's limit, not a missing feature.
+  // in English prose, which is for logs. What failure-words names (no
+  // credits, the month's reports used up, too many, the AI service down) is
+  // said in its words, and a 502 with a body is the plan the model did not
+  // give; anything else — the host's own 504 page, a server error — from
+  // the status and the code (lib/errors/use-error-text.ts).
   const describe = useErrorText();
+  const named = (data: Record<string, unknown> | null, status: number) => researchRefusal(data, status) !== "other" || (status === 502 && data !== null);
   const refusalText = (status: number, body: (ApiErrorPayload & { limitReached?: boolean }) | null) =>
     describe(new ApiError(status, body?.limitReached ? { ...body, code: "planLimit" } : body)).text;
 
@@ -134,15 +140,14 @@ export function ResearchShell({
             setPane("report");
             router.refresh();
           } else if (report.status === "failed") {
-            // report.error is the worker's English sentence, for logs.
-            say({ role: "tool", text: isStoppedMessage(report.error) ? tSteps("stopped") : t("runError") });
+            say({ role: "tool", text: failures.failed(report.error) });
             router.refresh();
           }
         });
       }
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [activeKey, refresh, t, tSteps, router]);
+  }, [activeKey, refresh, t, tSteps, router, failures]);
 
   // One immediate read on mount for anything already in flight.
   useEffect(() => {
@@ -168,8 +173,7 @@ export function ResearchShell({
       // scripts/tests/tool-shell-edges.prodtest.mjs).
       const data = await response.json().catch(() => null);
       if (!data?.ok) {
-        // 502 from the route: the model gave no plan, or could not be reached.
-        say({ role: "tool", text: response.status === 502 && data ? t("planError") : refusalText(response.status, data) });
+        say({ role: "tool", text: named(data, response.status) ? failures.refused(data, response.status, "plan") : refusalText(response.status, data) });
         return;
       }
       const report = data.report as ResearchReport;
@@ -191,7 +195,7 @@ export function ResearchShell({
       .then(async (response) => {
         const data = await response.json().catch(() => null);
         if (data && !data.ok) {
-          say({ role: "tool", text: refusalText(response.status, data) });
+          say({ role: "tool", text: named(data, response.status) ? failures.refused(data, response.status, "run") : refusalText(response.status, data) });
           void refresh(id);
         }
       })

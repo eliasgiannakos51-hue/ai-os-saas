@@ -251,15 +251,15 @@ const MUTANTS = [
   {
     name: "Research: a refused plan says the route's English",
     file: RESEARCH,
-    from: 'say({ role: "tool", text: response.status === 502 && data ? t("planError") : refusalText(response.status, data) });',
+    from: 'say({ role: "tool", text: named(data, response.status) ? failures.refused(data, response.status, "plan") : refusalText(response.status, data) });',
     to: 'say({ role: "tool", text: data.error ?? t("planError") });',
     expect: "no route's English is said to the reader",
   },
   {
     name: "Files: a failed question says the provider's own message",
     file: FILES,
-    from: ': isStoppedMessage(outcome.error)\n                    ? tSteps("stopped")\n                    : t("askError"),',
-    to: ": outcome.error || t(\"askError\"),",
+    from: "              : failures.ask(outcome),\n        });",
+    to: "              : outcome.error || t(\"askError\"),\n        });",
     expect: "no route's English is said to the reader",
   },
   {
@@ -272,8 +272,8 @@ const MUTANTS = [
   {
     name: "Files: a file over the plan's limit is said as the route wrote it",
     file: FILES,
-    from: "            text: !outcome.status\n              ? outcome.error",
-    to: "            text: outcome.error,\n            unread: !outcome.status\n              ? outcome.error",
+    from: "            text: !outcome.status || uploadRefusal",
+    to: "            text: outcome.error,\n            unread: !outcome.status || uploadRefusal",
     expect: "no route's English is said to the reader",
   },
   {

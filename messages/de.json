@@ -2339,8 +2339,17 @@
       "askDisabledNoQuestion": "Gib deine Frage ein, um fortzufahren.",
       "processingHint": "Die Datei wird gelesen — meist ein paar Sekunden. Sobald sie fertig ist, kannst du dazu fragen.",
       "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch.",
+      "unreadable": {
+        "scan": "Dieses PDF hat keine Textebene: Es ist ein Scan oder nur ein Bild und bräuchte Texterkennung (OCR), bevor die KI es lesen kann.",
+        "encoding": "Dieses PDF enthält Text, aber seine Schriftkodierung konnte nicht gelesen werden — eine Grenze auf unserer Seite, kein Fehler deiner Datei. Neu speichern aus der ursprünglichen Anwendung oder als neues PDF drucken ergibt meist eines, das lesbar ist.",
+        "locked": "Diese Datei ist passwortgeschützt. Entferne das Passwort und lade sie erneut hoch.",
+        "empty": "Diese Datei scheint leer zu sein — es gab nichts zu lesen."
+      },
       "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
       "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "askNoCredits": "Nicht genug Credits für diese Frage. Es wurde nichts berechnet.",
+      "askRateLimited": "Zu viele Fragen in der letzten Stunde. Versuche es gleich noch einmal — es wurde nichts berechnet.",
+      "askFailed": "Die Frage wurde nicht beantwortet: Der KI-Dienst hat nicht geantwortet. Es wurde nichts berechnet — versuche es gleich noch einmal.",
       "questionLength": "{used, number} von {max, number} Zeichen",
       "questionAtLimit": "Du hast das Limit von {max, number} Zeichen für eine Frage erreicht.",
       "readInParts": "Deine Dokumente waren zu lang, um sie auf einmal zu lesen — sie wurden in {parts} Teilen gelesen und die Antworten zusammengeführt.",
@@ -2352,6 +2361,9 @@
       "uploadStorageMissing": "Der Dateispeicher ist auf dieser Installation nicht eingerichtet — der Bucket 'user-files' fehlt. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
       "uploadStoragePolicy": "Der Dateispeicher hat den Upload abgelehnt — die Zugriffsrichtlinien des Buckets fehlen. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
       "tooLargeForTransfer": "Die Hosting-Plattform hat den Upload abgelehnt, bevor er die App erreichte. Bitte gleich noch einmal versuchen.",
+      "uploadFileCap": "Du hast die Anzahl an Dateien erreicht, die dein Tarif umfasst. Lösche eine oder führe ein Upgrade durch.",
+      "uploadStorageCap": "Diese Datei passt nicht mehr in den Speicher deines Tarifs. Lösche Dateien oder führe ein Upgrade durch.",
+      "uploadRateLimited": "Zu viele Uploads in der letzten Stunde. Versuche es gleich noch einmal.",
       "sharedStored": "{count, plural, one {# Datei} other {# Dateien}} aus der Freigabe hinzugefügt.",
       "sharedFailed": "{count, plural, one {# Datei} other {# Dateien}} konnten nicht hinzugefügt werden.",
       "sharedReason": "Grund: {reason}",
@@ -2360,6 +2372,8 @@
       "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet.",
       "pagesPartRead": "Die ersten {read} von {total} Seiten werden gelesen",
       "pageRefs": {
+        "page": "Seite {n}",
+        "rows": "Zeilen, Teil {n}",
         "open": "Öffnen: {name}, {label}",
         "close": "Seite schließen",
         "loading": "Die Seite wird geöffnet…",
@@ -2386,6 +2400,19 @@
       "start": "Recherche starten",
       "notNow": "Jetzt nicht",
       "runError": "Der Bericht konnte nicht fertiggestellt werden.",
+      "refused": {
+        "noCredits": "Nicht genug Credits für einen Recherchebericht. Es wurde nichts berechnet.",
+        "rateLimited": "Zu viele Berichte in kurzer Zeit. Versuche es gleich noch einmal.",
+        "unavailable": "Der KI-Dienst hat nicht geantwortet. Es wurde nichts berechnet — versuche es gleich noch einmal."
+      },
+      "failed": {
+        "noFindings": "Die Suchen haben zu diesem Thema nichts Brauchbares gefunden.",
+        "unavailable": "Der KI-Dienst hat auf die Recherchefragen nicht geantwortet. Starte den Bericht gleich noch einmal.",
+        "notWritten": "Aus den Funden ließ sich kein Bericht schreiben.",
+        "interrupted": "Der Bericht hat vor dem Ende angehalten. Es wurden keine Credits berechnet — starte ihn erneut.",
+        "notStarted": "Der Bericht ist nicht gestartet.",
+        "noCredits": "Es gab nicht genug Credits, um den Bericht auszuführen."
+      },
       "finished": "Dein Bericht ist fertig",
       "inProgress": "Sucht und schreibt…",
       "statusPending": "Geplant",

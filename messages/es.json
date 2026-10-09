@@ -2339,8 +2339,17 @@
       "askDisabledNoQuestion": "Escribe tu pregunta para continuar.",
       "processingHint": "Leyendo el archivo — suele tardar unos segundos. Podrás preguntar en cuanto esté listo.",
       "failedHint": "No se encontró texto legible. Sube una versión con texto seleccionable.",
+      "unreadable": {
+        "scan": "Este PDF no tiene capa de texto: es un escaneo o solo una imagen, y necesitaría OCR para que la IA pueda leerlo.",
+        "encoding": "Este PDF tiene texto, pero no se pudo descodificar su tipografía — es un límite nuestro, no un problema de tu archivo. Guardarlo de nuevo desde la aplicación original, o imprimirlo a un PDF nuevo, suele producir uno legible.",
+        "locked": "Este archivo está protegido con contraseña. Quita la contraseña y vuelve a subirlo.",
+        "empty": "Este archivo parece vacío — no había nada que leer."
+      },
       "askStillRunning": "Sigue leyendo — está tardando. Continúa con la página cerrada; vuelve y pregunta de nuevo para ver la respuesta.",
       "askStalled": "La pregunta se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
+      "askNoCredits": "No hay créditos suficientes para esta pregunta. No se ha cobrado nada.",
+      "askRateLimited": "Demasiadas preguntas en la última hora. Vuelve a intentarlo en un momento — no se ha cobrado nada.",
+      "askFailed": "La pregunta no se respondió: el servicio de IA no contestó. No se ha cobrado nada — vuelve a intentarlo en un momento.",
       "questionLength": "{used, number} de {max, number} caracteres",
       "questionAtLimit": "Has alcanzado el límite de {max, number} caracteres para una pregunta.",
       "readInParts": "Tus documentos eran demasiado largos para leerlos de una vez, así que se leyeron en {parts} partes y se combinaron las respuestas.",
@@ -2352,6 +2361,9 @@
       "uploadStorageMissing": "El almacenamiento de archivos no está configurado en esta instalación: falta el bucket 'user-files'. Un administrador debe ejecutar el SQL de reparación (System Health → File storage).",
       "uploadStoragePolicy": "El almacenamiento rechazó la subida: faltan las políticas de acceso del bucket. Un administrador debe ejecutar el SQL de reparación (System Health → File storage).",
       "tooLargeForTransfer": "La plataforma de alojamiento rechazó la subida antes de llegar a la aplicación. Inténtalo de nuevo en un momento.",
+      "uploadFileCap": "Has alcanzado el número de archivos que incluye tu plan. Borra uno o mejora tu plan.",
+      "uploadStorageCap": "Ese archivo no cabe en el almacenamiento de tu plan. Borra algunos archivos o mejora tu plan.",
+      "uploadRateLimited": "Demasiadas subidas en la última hora. Vuelve a intentarlo en un momento.",
       "sharedStored": "{count, plural, one {# archivo añadido} other {# archivos añadidos}} desde la compartición.",
       "sharedFailed": "{count, plural, one {# archivo no se pudo añadir} other {# archivos no se pudieron añadir}}.",
       "sharedReason": "Motivo: {reason}",
@@ -2360,6 +2372,8 @@
       "openedFromDevice": "{count, plural, one {# archivo abierto} other {# archivos abiertos}} desde tu dispositivo.",
       "pagesPartRead": "Se leen las primeras {read} de {total} páginas",
       "pageRefs": {
+        "page": "Página {n}",
+        "rows": "Filas, parte {n}",
         "open": "Abrir: {name}, {label}",
         "close": "Cerrar la página",
         "loading": "Abriendo la página…",
@@ -2386,6 +2400,19 @@
       "start": "Iniciar la investigación",
       "notNow": "Ahora no",
       "runError": "No se pudo completar el informe.",
+      "refused": {
+        "noCredits": "No hay créditos suficientes para un informe de investigación. No se ha cobrado nada.",
+        "rateLimited": "Demasiados informes en poco tiempo. Vuelve a intentarlo en un momento.",
+        "unavailable": "El servicio de IA no respondió. No se ha cobrado nada — vuelve a intentarlo en un momento."
+      },
+      "failed": {
+        "noFindings": "Las búsquedas no encontraron nada útil sobre este tema.",
+        "unavailable": "El servicio de IA no respondió a las preguntas de la investigación. Vuelve a ejecutarlo en un momento.",
+        "notWritten": "No se pudo escribir el informe a partir de lo encontrado.",
+        "interrupted": "El informe se detuvo antes de terminar. No se cobraron créditos — vuelve a ejecutarlo.",
+        "notStarted": "El informe no empezó.",
+        "noCredits": "No había créditos suficientes para ejecutar el informe."
+      },
       "finished": "Tu informe está listo",
       "inProgress": "Buscando y redactando…",
       "statusPending": "Planificado",

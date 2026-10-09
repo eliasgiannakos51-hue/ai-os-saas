@@ -2339,8 +2339,17 @@
       "askDisabledNoQuestion": "Scrivi la tua domanda per continuare.",
       "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
       "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
+      "unreadable": {
+        "scan": "Questo PDF non ha un livello di testo: è una scansione o solo un’immagine, e servirebbe l’OCR perché l’IA possa leggerlo.",
+        "encoding": "Questo PDF contiene testo, ma la codifica del suo carattere non è stata decodificata — un limite nostro, non un problema del tuo file. Salvarlo di nuovo dall’applicazione originale, o stamparlo in un nuovo PDF, di solito ne produce uno leggibile.",
+        "locked": "Questo file è protetto da password. Rimuovi la password e caricalo di nuovo.",
+        "empty": "Questo file sembra vuoto — non c’era niente da leggere."
+      },
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
       "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
+      "askNoCredits": "Crediti insufficienti per questa domanda. Non è stato addebitato nulla.",
+      "askRateLimited": "Troppe domande nell’ultima ora. Riprova tra poco — non è stato addebitato nulla.",
+      "askFailed": "La domanda non ha avuto risposta: il servizio di IA non ha risposto. Non è stato addebitato nulla — riprova tra poco.",
       "questionLength": "{used, number} di {max, number} caratteri",
       "questionAtLimit": "Hai raggiunto il limite di {max, number} caratteri per una domanda.",
       "readInParts": "I tuoi documenti erano troppo lunghi per essere letti in una volta: sono stati letti in {parts} parti e le risposte combinate.",
@@ -2352,6 +2361,9 @@
       "uploadStorageMissing": "Lo storage dei file non è configurato su questa installazione: manca il bucket 'user-files'. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
       "uploadStoragePolicy": "Lo storage ha rifiutato il caricamento: mancano le politiche di accesso del bucket. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
       "tooLargeForTransfer": "La piattaforma di hosting ha rifiutato il caricamento prima che raggiungesse l'app. Riprova tra un momento.",
+      "uploadFileCap": "Hai raggiunto il numero di file incluso nel tuo piano. Eliminane uno o passa a un piano superiore.",
+      "uploadStorageCap": "Questo file non entra nello spazio del tuo piano. Elimina qualche file o passa a un piano superiore.",
+      "uploadRateLimited": "Troppi caricamenti nell’ultima ora. Riprova tra poco.",
       "sharedStored": "{count, plural, one {# file aggiunto} other {# file aggiunti}} dalla condivisione.",
       "sharedFailed": "{count, plural, one {# file non è stato aggiunto} other {# file non sono stati aggiunti}}.",
       "sharedReason": "Motivo: {reason}",
@@ -2360,6 +2372,8 @@
       "openedFromDevice": "{count, plural, one {# file aperto} other {# file aperti}} dal tuo dispositivo.",
       "pagesPartRead": "Si leggono le prime {read} di {total} pagine",
       "pageRefs": {
+        "page": "Pagina {n}",
+        "rows": "Righe, parte {n}",
         "open": "Apri: {name}, {label}",
         "close": "Chiudi la pagina",
         "loading": "Apertura della pagina…",
@@ -2386,6 +2400,19 @@
       "start": "Avvia la ricerca",
       "notNow": "Non ora",
       "runError": "Impossibile completare il report.",
+      "refused": {
+        "noCredits": "Crediti insufficienti per un report di ricerca. Non è stato addebitato nulla.",
+        "rateLimited": "Troppi report in poco tempo. Riprova tra poco.",
+        "unavailable": "Il servizio di IA non ha risposto. Non è stato addebitato nulla — riprova tra poco."
+      },
+      "failed": {
+        "noFindings": "Le ricerche non hanno trovato nulla di utile su questo tema.",
+        "unavailable": "Il servizio di IA non ha risposto alle domande della ricerca. Avvialo di nuovo tra poco.",
+        "notWritten": "Non è stato possibile scrivere il report da quanto trovato.",
+        "interrupted": "Il report si è fermato prima della fine. Non sono stati addebitati crediti — avvialo di nuovo.",
+        "notStarted": "Il report non è partito.",
+        "noCredits": "Non c’erano crediti sufficienti per eseguire il report."
+      },
       "finished": "Il tuo report è pronto",
       "inProgress": "Ricerca e scrittura…",
       "statusPending": "Pianificato",

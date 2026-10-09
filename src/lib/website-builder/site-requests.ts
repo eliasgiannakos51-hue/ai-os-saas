@@ -1,5 +1,6 @@
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { ApiError } from "@/lib/errors/api-error";
+import type { ApiErrorPayload } from "@/lib/errors/error-codes";
 import type { UserWebsite } from "@/types/user-website";
 
 /**
@@ -58,6 +59,20 @@ function refusedBeforeWork(data: { code?: unknown; message?: unknown } | null): 
   });
 }
 
+/**
+ * Any other refusal, as an ApiError whose `message` is the route's own
+ * sentence, or empty when it gave none — what `error` was before it became
+ * an ApiError. Chat's Site pane (components/chat/site-pane.tsx) still says
+ * a refusal through getErrorMessage, which shows a message and falls back
+ * to its own translated sentence on an empty one; with ApiError's default
+ * it read «Request failed with 200» for a change the safety review held
+ * back (found 2026-10-09). The shell reads only the status, the code and
+ * the credits (lib/errors/use-error-text.ts).
+ */
+function refusal(status: number, data: ApiErrorPayload | null, prose: unknown): ApiError {
+  return new ApiError(status, { ...(data ?? {}), error: typeof prose === "string" ? prose : "" });
+}
+
 export async function startSiteGeneration(input: {
   name: string;
   description: string;
@@ -69,7 +84,7 @@ export async function startSiteGeneration(input: {
     body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) return { kind: "refused", error: new ApiError(res.status, data) };
+  if (!res.ok || !data?.ok) return { kind: "refused", error: refusal(res.status, data, data?.error) };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
   if (!data.generated) {
     if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data) };
@@ -167,7 +182,7 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
             : data?.busy === true
               ? "busy"
               : "other";
-    const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : new ApiError(res.status, data);
+    const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : refusal(res.status, data, data?.error ?? data?.message);
     return { kind: "refused", reason, error };
   }
   return { kind: "changed", record: data.record as UserWebsite };

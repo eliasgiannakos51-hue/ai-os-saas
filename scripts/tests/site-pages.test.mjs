@@ -30,7 +30,7 @@
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { crc32 as nodeCrc32 } from "node:zlib";
-import { loadTs } from "./load-ts.mjs";
+import { loadTs, loadTsLinked } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
@@ -220,11 +220,44 @@ check("no server sentence reaches the conversation: not error_message, not getEr
 check("a site that was not made is said from its status and notes", /say\(\{ role: "tool", text: failedText\(record\) \}\);/.test(shell) && /\{running\(current\) \? t\("generating"\) : failedText\(current\)\}/.test(shell));
 check("...free only when no whole document was written; a stop says what it cost",
   /if \(stopped\) return describeNote\(stopped\);\s*const written = looksLikeCompleteHtmlDocument\(record\.html_content \?\? ""\);\s*return `\$\{t\("generateFailed"\)\} \$\{written \? tErrors\("credits\.unverified"\) : tErrors\("credits\.notCharged"\)\}`;/.test(shell));
-check("a refusal carries the route's status and code", /if \(!res\.ok \|\| !data\?\.ok\) return \{ kind: "refused", error: new ApiError\(res\.status, data\) \};/.test(requests));
+check("a refusal carries the route's status and code", /if \(!res\.ok \|\| !data\?\.ok\) return \{ kind: "refused", error: refusal\(res\.status, data, data\?\.error\) \};/.test(requests));
 check("...a refusal answered 200 is one before any work: short credits, or a limit",
   /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\) \};/.test(requests) && /new ApiError\(short \? 402 : 429, \{/.test(requests) && /const short = data\?\.code === "insufficientCredits";/.test(requests));
 check("...and a change's refusal names a held change and a busy site",
-  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : new ApiError\(res\.status, data\);/.test(requests));
+  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : refusal\(res\.status, data, data\?\.error \?\? data\?\.message\);/.test(requests));
+// EXECUTED, not read: what Chat's Site pane (components/chat/site-pane.tsx)
+// shows for a refusal — getErrorMessage over the ApiError — with fetch
+// answering as the routes do. With ApiError's default message it read
+// «Request failed with 200» for a change the safety review held back
+// (found 2026-10-09); it is the route's sentence, or the pane's own.
+{
+  const live = await loadTsLinked("src/lib/website-builder/site-requests.ts");
+  const { getErrorMessage } = await loadTs("src/lib/get-error-message.ts");
+  const realFetch = globalThis.fetch;
+  const answer = (status, body) => {
+    globalThis.fetch = async () => new Response(body === null ? "<html>Bad gateway</html>" : JSON.stringify(body), { status });
+  };
+  const OWN = "the pane's own sentence";
+  const seen = {};
+  try {
+    answer(200, { ok: true, edited: false, flagged: true, message: "Held back: X." });
+    const held = await live.requestSiteChange({ websiteId: "w1", changeRequest: "x" });
+    seen.held = [held.reason, getErrorMessage(held.error, OWN)];
+    answer(200, { ok: true, edited: false, busy: true, message: "Busy." });
+    const busy = await live.requestSiteChange({ websiteId: "w1", changeRequest: "x" });
+    seen.busy = [busy.reason, getErrorMessage(busy.error, OWN)];
+    answer(502, null);
+    const proxy = await live.requestSiteChange({ websiteId: "w1", changeRequest: "x" });
+    seen.proxy = [proxy.error.code, getErrorMessage(proxy.error, OWN)];
+    const start = await live.startSiteGeneration({ name: "n", description: "d", skipClarification: true });
+    seen.start = [start.kind, start.kind === "refused" ? getErrorMessage(start.error, OWN) : null];
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  check("Chat's Site pane says a refusal in the route's sentence or its own, never «Request failed with …»",
+    JSON.stringify(seen) === JSON.stringify({ held: ["held", "Held back: X."], busy: ["busy", "Busy."], proxy: ["upstreamUnavailable", OWN], start: ["refused", OWN] }),
+    JSON.stringify(seen));
+}
 const generateRoute = code("src/app/api/websites/generate/route.ts");
 check("making a site: both credit refusals carry the code", (generateRoute.match(/rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(/g) ?? []).length === 2);
 const editRoute = code("src/app/api/websites/edit/route.ts");

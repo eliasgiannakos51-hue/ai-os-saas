@@ -548,6 +548,8 @@ try {
       console.log(`\n== ${locale} · ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);
       account.tier = "growth";
       resetDb(3000);
+      // Per run, so each run's «reserved, then settled» is its own.
+      rpcSeen.length = 0;
       model.down = false;
       model.safe = true;
       model.offTopic = false;

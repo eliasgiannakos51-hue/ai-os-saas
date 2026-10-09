@@ -27,8 +27,8 @@
   3. αλλαγή που κράτησε ο έλεγχος ασφαλείας: η αγγλική πρόταση του server·
   4. αλλαγή ενώ τρέχει άλλη: το ίδιο·
   5. η λίστα «Πρόσφατα» με το αγγλικό σφάλμα του site που απέτυχε·
-  6. δημοσίευση στο όριο του πλάνου (Starter: ένα ζωντανό site): «You've
-     reached your plan's limit of 5 published sites…»·
+  6. δημοσίευση στο όριο του πλάνου (στη δοκιμή Growth: πέντε ζωντανά
+     site): «You've reached your plan's limit of 5 published sites…»·
   7. «γράψε μου ένα ποίημα» στο Site: «Website Builder generates real
      websites from a description…».
 - Τώρα το Site λέει κάθε αποτυχία από τον κωδικό της, στη γλώσσα σου, και
@@ -46,6 +46,18 @@
   `src/components/chat/site-pane.tsx`) και στην παλιά σελίδα του Site
   (`src/components/website-builder/website-builder-workspace.tsx`, όσο ο
   διακόπτης `tool-shell` είναι κλειστός).
+- Επαλήθευση, 2026-10-09: η αλλαγή στο
+  `src/lib/website-builder/site-requests.ts` χάλασε το Site μέσα στο Chat
+  (`src/components/chat/site-pane.tsx`) — αλλαγή που κράτησε ο έλεγχος
+  ασφαλείας, ή ενώ τρέχει άλλη, έγραφε «Request failed with 200» αντί για
+  την πρόταση του server, και μια απάντηση 502 χωρίς JSON «Request failed
+  with 502» αντί για τη δική του μεταφρασμένη φράση. Διορθώθηκε στο ίδιο
+  αρχείο· το κρατά ένας έλεγχος στο `scripts/tests/site-pages.test.mjs`
+  που τρέχει τον κώδικα (τώρα 103 έλεγχοι, `site-pages.mutation.mjs`
+  31/31, μετρήθηκαν 2026-10-09). Μένει ανοιχτό: το όριο των 50 sites το
+  24ωρο (`src/app/api/websites/generate/route.ts`) λέγεται τώρα «Πολλά
+  αιτήματα σε μικρό διάστημα. Περίμενε περίπου ένα λεπτό», που δεν ισχύει
+  για όριο 24 ωρών.
 
 **Δύο λάθη που βρήκε ο έλεγχος πριν από τα migrations, διορθωμένα στο #272.**
 - Το εργαλείο Εικόνα μπήκε στη λίστα με όσα χωρά ένα Έργο (πακέτο 36) με

@@ -11,7 +11,8 @@
  * change sent to the home page from another page's tab; a part chosen on
  * one page changing another; and a failure said in the server's English
  * on a Greek screen — out of credits, a provider down, a change held back
- * or still running, a site that was not made.
+ * or still running, a site that was not made; and a refusal in Chat's
+ * Site pane read as «Request failed with 200».
  *
  * Run: node scripts/tests/site-pages.mutation.mjs
  */
@@ -223,6 +224,13 @@ const MUTANTS = [
     from: '        say({ role: "tool", text: outcome.offTopic ? tShell("site.offTopic") : t("generateFailed") });',
     to: '        say({ role: "tool", text: outcome.message ?? t("generateFailed") });',
     expect: "a brief that is not a website is said in the reader's words, not the classifier's",
+  },
+  {
+    name: "a refusal's message is ApiError's default again",
+    file: REQUESTS,
+    from: 'return new ApiError(status, { ...(data ?? {}), error: typeof prose === "string" ? prose : "" });',
+    to: "return new ApiError(status, data);",
+    expect: "Chat's Site pane says a refusal in the route's sentence or its own",
   },
   {
     name: "a refused publish shows the route's English",

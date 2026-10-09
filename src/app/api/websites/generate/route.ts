@@ -332,9 +332,10 @@ export async function POST(request: Request) {
     }
 
     // Off-topic guard — a cheap classification call BEFORE any credits are
-    // touched or any row is created, so a request like "write me a poem"
-    // costs the user nothing and gets a real, helpful message instead of
-    // an AI call that just wraps the poem in an HTML page (see
+    // held or any row is created, so a request like "write me a poem"
+    // costs the user only that call (settled below by settlePrechecks, as
+    // the clarification check is) and gets a real, helpful message instead
+    // of an AI call that just wraps the poem in an HTML page (see
     // lib/website-builder.ts).
     try {
       void recordAiCallForDailySpend(1);

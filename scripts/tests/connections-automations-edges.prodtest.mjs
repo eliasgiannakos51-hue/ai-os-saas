@@ -626,8 +626,8 @@ function sentences(node, out = []) {
 }
 function foreignOn(locale, text) {
   if (locale === "el") {
-    const ours = new Set(sentences([L.el.dashboard.integrations, L.el.dashboard.automations, L.el.dashboard.chat]).map(strip));
-    const theirs = sentences([L.en.dashboard.integrations, L.en.dashboard.automations, L.en.dashboard.chat])
+    const ours = new Set(sentences([L.el.dashboard.integrations, L.el.dashboard.automations, L.el.dashboard.chat, L.el.common.upgradeRequired]).map(strip));
+    const theirs = sentences([L.en.dashboard.integrations, L.en.dashboard.automations, L.en.dashboard.chat, L.en.common.upgradeRequired])
       .map(strip)
       .filter((s) => s.length >= 14 && / /.test(s) && !ours.has(s));
     return theirs.filter((s) => text.includes(s));
@@ -905,8 +905,10 @@ try {
     ({ context, page, press } = await open(ON, device, locale));
     await page.goto(`${ON}/dashboard/integrations`, { waitUntil: "networkidle" });
     const main = await page.locator("main").innerText();
+    // The plan wall itself (components/billing/upgrade-required.tsx), not
+    // only the absence of the buttons: its title, in the reader's language.
     check("Free: the page says which plan connections come with, instead of a button that would fail",
-      (await page.locator('[data-testid="integration-connect"]').count()) === 0 && main.includes(I.title) && main.length > 40, main.slice(0, 300));
+      (await page.locator('[data-testid="integration-connect"]').count()) === 0 && main.includes(I.title) && main.includes(T.common.upgradeRequired.title), main.slice(0, 300));
     check("...not a sentence of the other language", foreignOn(locale, main).length === 0, foreignOn(locale, main).join(" | "));
     const refused = await page.request.get(`${ON}/api/integrations/google_calendar/connect`, { maxRedirects: 0 });
     check("...and the route refuses before Google is ever asked", refused.status() === 403 && (await refused.json()).upgradeRequired === true && google.authorize.length === 0);

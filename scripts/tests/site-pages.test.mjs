@@ -259,7 +259,14 @@ check("...and a change's refusal names a held change and a busy site",
     JSON.stringify(seen));
 }
 const generateRoute = code("src/app/api/websites/generate/route.ts");
-check("making a site: both credit refusals carry the code", (generateRoute.match(/rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(/g) ?? []).length === 2);
+{
+  // EVERY refusal for credits in the route, not a count of them: a third
+  // arrived (the classifier's own check, package 36's, 2026-10-08) with no
+  // code, and the Site said it as a limit.
+  const said = (generateRoute.match(/insufficientCreditsMessage\(/g) ?? []).length;
+  const coded = (generateRoute.match(/rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(/g) ?? []).length;
+  check(`making a site: every credit refusal carries the code (${coded} of ${said})`, said >= 3 && coded === said);
+}
 const editRoute = code("src/app/api/websites/edit/route.ts");
 check("changing a site: both credit refusals carry the code",
   /rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(check\.remaining, estimate\.reserveCredits\)/.test(editRoute) &&

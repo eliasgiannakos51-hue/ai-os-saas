@@ -202,7 +202,7 @@ const MUTANTS = [
     file: GENERATE,
     from: '          rateLimited: true,\n          code: "insufficientCredits",\n          message: insufficientCreditsMessage(check.remaining, estimatedCost),',
     to: '          rateLimited: true,\n          message: insufficientCreditsMessage(check.remaining, estimatedCost),',
-    expect: "making a site: both credit refusals carry the code",
+    expect: "making a site: every credit refusal carries the code",
   },
   {
     name: "a site already being changed is not named",

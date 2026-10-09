@@ -349,7 +349,14 @@ export async function POST(request: Request) {
           ok: true,
           generated: false,
           rateLimited: true,
+          // Named, with the two numbers, as the other two credit refusals
+          // here: the Site's requests read a 200 `rateLimited` without this
+          // code as a limit, not as the balance
+          // (lib/website-builder/site-requests.ts, refusedBeforeWork).
+          code: "insufficientCredits",
           message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
+          available: check.remaining,
+          needed: CREDIT_COSTS.clarificationCheck,
         });
       }
     }

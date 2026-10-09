@@ -132,7 +132,10 @@ check("a site that failed is said in the pane's own words, never the worker's se
 check("a server sentence is shown as it came only on an English screen", /const serverSaid = \(text: string \| null \| undefined, ours: string\) => \(locale\.startsWith\("en"\) && text \? text : ours\);/.test(pane));
 check("no credits is said by the credits notice, from the code and numbers the route sends",
   /if \(outcome\.kind === "refused" && outcome\.code === "insufficientCredits"\) \{\s*void refreshCredits\(\);\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("failed"\);/.test(pane) && /<OutOfCreditsNotice/.test(pane) &&
-    (code("src/app/api/websites/generate/route.ts").match(/code: "insufficientCredits",\s*message: insufficientCreditsMessage\([^)]*\),\s*available: check\.remaining,/g) ?? []).length === 2 &&
+    // Every credit refusal the route has, with its numbers (three since
+    // 2026-10-08: the classifier's own check came with none).
+    (code("src/app/api/websites/generate/route.ts").match(/code: "insufficientCredits",\s*message: insufficientCreditsMessage\([^)]*\),\s*available: check\.remaining,/g) ?? []).length ===
+      (code("src/app/api/websites/generate/route.ts").match(/insufficientCreditsMessage\(/g) ?? []).length &&
     /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\), \.\.\.routeSaid\(data\) \};/.test(code("src/lib/website-builder/site-requests.ts")) &&
     /return \{ code: str\(data\?\.code\), available: num\(data\?\.available\), needed: num\(data\?\.needed\) \};/.test(code("src/lib/website-builder/site-requests.ts")));
 // AND A CHANGE SAID AFTER THE SITE IS MADE, out of credits (2026-10-09,

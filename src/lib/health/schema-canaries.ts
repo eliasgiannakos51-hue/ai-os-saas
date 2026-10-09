@@ -458,11 +458,8 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261003000000_chat_memory_dedup_and_retention.sql",
     breaks: "the clean-up button on /dashboard/ai-memory fails",
   },
-  {
-    kind: "function",
-    fn: "delete_user_storage_objects",
-    migration: "20261005000000_delete_user_storage_objects_all_buckets.sql",
-    breaks:
-      "account deletion stops at the storage step and refuses to proceed — which is the safe direction, but the person cannot delete their account at all until the migration is run",
-  },
+  // delete_user_storage_objects (20261005000000) is no longer probed:
+  // account deletion removes files through the Storage API since
+  // 2026-10-08 (src/lib/account/erase-storage.ts), because Supabase
+  // refuses that function's delete, so its absence breaks nothing.
 ];

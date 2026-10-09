@@ -401,5 +401,5 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: ζητώ διαγραφή του λογαριασμού μου και την επιβεβαιώνω.
 - Βλέπω: ο λογαριασμός και ό,τι έφτιαξα σβήνονται.
 - Χρόνος: 2 λεπτά
-- Αυτόματα: χειροκίνητο: `scripts/tests/gdpr-erasure.dbtest.mjs` το κάνει σε αληθινή βάση, που δεν υπάρχει στο build (`DATABASE_URL`)
-- Σήμερα: φτιαγμένο
+- Αυτόματα: `scripts/tests/delete-account.prodtest.mjs`, `scripts/tests/erase-storage.test.mjs`, `scripts/tests/gdpr-coverage.test.mjs`
+- Σήμερα: φτιαγμένο. Ως τις 2026-10-08 αποτύγχανε στην παραγωγή: το Supabase αρνείται από τον Μάρτιο τη διαγραφή αρχείων με SQL, και τώρα τα αρχεία σβήνονται μέσα από το Storage. Ότι κάθε πίνακας σβήνεται μαζί με τον λογαριασμό το ελέγχει σε αληθινή βάση το `scripts/tests/gdpr-erasure.dbtest.mjs` (`npm run test:db`).

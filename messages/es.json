@@ -667,7 +667,16 @@
       "deleting": "Eliminando…",
       "confirmButton": "Eliminar tu cuenta permanentemente",
       "cancel": "Cancelar y volver",
-      "confirmFailed": "No hemos podido completar la eliminación. Tu cuenta sigue existiendo: vuelve a usar el enlace o contacta con soporte."
+      "confirmFailed": "No hemos podido completar la eliminación. Tu cuenta sigue existiendo: vuelve a usar el enlace o contacta con soporte.",
+      "errors": {
+        "rate_limited": "Demasiados intentos. Vuelve a intentarlo más tarde.",
+        "invalid_request": "Este enlace está incompleto. Usa el enlace de tu correo tal como se envió.",
+        "link_invalid": "Este enlace no es válido o ha caducado. Puedes pedir uno nuevo en Configuración.",
+        "retry": "Algo ha salido mal. Vuelve a intentarlo.",
+        "contact_support": "No hemos podido eliminar la cuenta. Contacta con soporte.",
+        "files_retry": "No hemos podido eliminar los archivos de esta cuenta, así que la cuenta no se ha eliminado. Tu enlace sigue funcionando: vuelve a intentarlo.",
+        "subscription_retry": "No hemos podido cancelar la suscripción de esta cuenta, así que no se ha eliminado nada. Tu enlace sigue funcionando: vuelve a intentarlo."
+      }
     },
     "generateStrongPassword": "Generar contraseña segura",
     "verifyEmail": {

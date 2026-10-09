@@ -130,5 +130,18 @@ check("...and the screen reads those values, not the prose",
   /if \(typeof event\.freeRemaining === "number"\) setFreeRemaining\(event\.freeRemaining\);/.test(ws) &&
     /event\.outOfCredits === true\s*\? outOfCreditsText\(event\.available, event\.needed\)\s*: event\.code === "upstreamUnavailable"\s*\? describeStatus\(503, event\.creditsRefunded === true\)\.text\s*: describeStatus\(500\)\.text;/.test(ws));
 
+// ...AND IN GREEK, IN GREEK WORDS. outOfCreditsText puts the code's line
+// and the outOfCredits detail side by side, and the Greek detail said
+// «Αγόρασε ένα pack» — the one English word on the screen, found
+// 2026-10-09 by scripts/tests/all-tools-empty-chat-edges.prodtest.mjs on
+// the merged tree. The product's own words, as that test allows them.
+{
+  const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+  const PRODUCT_WORDS = new Set(["Ionexa", "AI", "credits", "credit"]);
+  const said = [el.errors.codes.insufficientCredits.what, el.credits.outOfCredits.detail, el.credits.outOfCredits.detailWithNumbers];
+  const latin = [...new Set(said.join(" ").replace(/\{[a-z]+\}/g, "").match(/[A-Za-z]+/g) ?? [])].filter((w) => !PRODUCT_WORDS.has(w));
+  check("...and on a Greek screen the out-of-credits words are Greek, the product's own aside", said.every((t) => typeof t === "string" && t.length > 0) && latin.length === 0, latin.join(", "));
+}
+
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

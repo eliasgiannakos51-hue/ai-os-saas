@@ -7,7 +7,8 @@
  * and the field's controls moving back over the text. Since 2026-10-08:
  * the free-message count back under the empty field, the used-up line's
  * icon back on the empty Chat, and the first
- * message's refusal or failure back in the route's English prose.
+ * message's refusal or failure back in the route's English prose. Since
+ * 2026-10-09: an English word back in the Greek out-of-credits line.
  *
  * Run: node scripts/tests/conversation-design.mutation.mjs
  */
@@ -21,9 +22,18 @@ const COMPOSER = "src/components/chat/chat-composer.tsx";
 const ACTIONS = "src/components/chat/answer-actions.tsx";
 const ROUTE = "src/app/api/chat/route.ts";
 const BREAKER = "src/lib/ai-circuit-breaker.ts";
-const TARGETS = [GATE, WS, COMPOSER, ACTIONS, ROUTE, BREAKER];
+const EL = "messages/el.json";
+const TARGETS = [GATE, WS, COMPOSER, ACTIONS, ROUTE, BREAKER, EL];
 
 const MUTANTS = [
+  // 2026-10-09
+  {
+    name: "the Greek out-of-credits line says «pack» again",
+    file: EL,
+    from: "Αγόρασε ένα πακέτο credits ή αναβάθμισε το πλάνο σου για να συνεχίσεις.\",\n      \"detailWithNumbers\"",
+    to: "Αγόρασε ένα pack ή αναβάθμισε το πλάνο σου για να συνεχίσεις.\",\n      \"detailWithNumbers\"",
+    expect: "on a Greek screen the out-of-credits words are Greek",
+  },
   // 2026-10-08
   {
     name: "the free-message count comes back under the empty field",

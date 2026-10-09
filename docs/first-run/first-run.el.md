@@ -2676,13 +2676,13 @@ _Reachable from these screens but deeper in: shared components, error states, th
 
 > EN — This action needs more credits than you have left. Buy a credit pack or upgrade your plan to continue.
 
-Αυτή η ενέργεια χρειάζεται περισσότερα credits από όσα σου απομένουν. Αγόρασε ένα pack ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
+Αυτή η ενέργεια χρειάζεται περισσότερα credits από όσα σου απομένουν. Αγόρασε ένα πακέτο credits ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
 
 **`credits.outOfCredits.detailWithNumbers`**
 
 > EN — You have {available} credits left and this needs about {needed}. Buy a credit pack or upgrade your plan to continue.
 
-Σου απομένουν {available} credits και αυτό χρειάζεται περίπου {needed}. Αγόρασε ένα pack ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
+Σου απομένουν {available} credits και αυτό χρειάζεται περίπου {needed}. Αγόρασε ένα πακέτο credits ή αναβάθμισε το πλάνο σου για να συνεχίσεις.
 
 **`credits.outOfCredits.title`**
 

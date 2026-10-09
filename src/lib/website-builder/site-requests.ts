@@ -109,8 +109,13 @@ export function watchSite(
 
 export type SiteChange =
   | { kind: "changed"; record: UserWebsite }
-  /** "pageGone": the page was renamed or removed; "boxLost": the chosen part did not come back. */
-  | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown };
+  /**
+   * "pageGone": the page was renamed or removed; "boxLost": the chosen part
+   * did not come back. `code` is "insufficient_credits", with the two
+   * numbers, when the balance is short — for a screen to say it in its own
+   * language rather than the route's English sentence.
+   */
+  | { kind: "refused"; reason: "pageGone" | "boxLost" | "other"; error: unknown; code: string | null; available: number | null; needed: number | null };
 
 /**
  * A change in words. `pageSlug` names the page it is about ("" or absent:
@@ -136,7 +141,7 @@ export async function requestSiteChange(input: { websiteId: string; changeReques
         : data?.reason === "box_lost" || data?.reason === "bad_section"
           ? "boxLost"
           : "other";
-    return { kind: "refused", reason, error: data?.error ?? data?.message ?? null };
+    return { kind: "refused", reason, error: data?.error ?? data?.message ?? null, code: str(data?.code), available: num(data?.available), needed: num(data?.needed) };
   }
   return { kind: "changed", record: data.record as UserWebsite };
 }

@@ -25,6 +25,7 @@ const PANE = "src/components/chat/site-pane.tsx";
 const EL = "messages/el.json";
 const GENERATE = "src/app/api/websites/generate/route.ts";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
+const EDIT = "src/app/api/websites/edit/route.ts";
 
 const MUTANTS = [
   {
@@ -203,11 +204,26 @@ const MUTANTS = [
     to: "",
     expect: "Chat says no credits in its own words",
   },
+  // ---- 2026-10-09, a change with no credits (chat-opens-tools-edges part 5)
+  {
+    name: "a change with no credits reads as «could not create the website» again",
+    file: PANE,
+    from: '      if (outcome.kind === "refused" && outcome.code === "insufficient_credits") {',
+    to: '      if (outcome.kind === "refused" && outcome.code === "never") {',
+    expect: "no credits for a change is said by the credits notice too",
+  },
+  {
+    name: "the edit route stops sending its code",
+    file: EDIT,
+    from: '          code: "insufficient_credits",\n          available: check.remaining,\n          needed: estimate.reserveCredits,',
+    to: "",
+    expect: "no credits for a change is said by the credits notice too",
+  },
 ];
 
 runMutations({
   name: "chat-opens-tools",
   gate: GATE,
-  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE],
+  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE, EDIT],
   mutants: MUTANTS,
 });

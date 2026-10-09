@@ -181,10 +181,20 @@ export const SitePane = forwardRef<
 
   async function change(request: string, current: UserWebsite) {
     setStage("changing");
+    setNoCredits(null);
     try {
       const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request });
       void refreshCredits();
       if (!mounted.current) return;
+      if (outcome.kind === "refused" && outcome.code === "insufficient_credits") {
+        // NO CREDITS FOR A CHANGE (2026-10-09): the notice, with the
+        // numbers, and the site as it was — not «could not create the
+        // website», which is what a non-English screen said for every
+        // refused change.
+        setNoCredits({ available: outcome.available, needed: outcome.needed });
+        setStage("done");
+        return;
+      }
       if (outcome.kind === "refused") {
         failWith(outcome.reason === "pageGone" ? tSite("editPageGone") : serverSaid(getErrorMessage(outcome.error, ""), tSite("generateFailed")));
         return;

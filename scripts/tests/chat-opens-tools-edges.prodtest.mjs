@@ -25,6 +25,8 @@
  *   3. No credits left: the press is refused in the screen's language.
  *   4. The model fails while making it: the pane says it in the screen's
  *      language, and that nothing was charged.
+ *   5. No credits left for a change said after the site is made: the
+ *      credits notice, with the numbers, and the site as it was.
  *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with real touch.
  */
@@ -303,6 +305,41 @@ try {
       await context.close();
     }
     state.siteFails = false;
+
+    // ---- 5. no credits left for a change said after the site is made
+    // (2026-10-09). /api/websites/edit refuses before any model call; the
+    // pane said «could not create the website» on a Greek screen — the
+    // site existed, and the reason was gone.
+    console.log(`\n== 5. ${device.label}: no credits left for a change ==`);
+    reset();
+    {
+      const { context, page, press, say } = await open("el");
+      await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+      await say(ASK.el);
+      await pane(page).waitFor({ timeout: 10000 }).catch(() => null);
+      await press(page.locator('[data-testid="chat-site-make"]'));
+      await page.locator('[data-testid="chat-site-preview"] iframe').waitFor({ timeout: 45000 }).catch(() => null);
+      state.credits = 0;
+      if (device.touch) {
+        await press(page.locator('[data-testid="chat-site-back"]'));
+        await page.waitForTimeout(300);
+      }
+      const editCalls = [];
+      page.on("request", (r) => { if (new URL(r.url()).pathname === "/api/websites/edit") editCalls.push(r.url()); });
+      await say("κάνε τα χρώματα πιο σκούρα");
+      await page.waitForTimeout(3000);
+      const text = await pane(page).innerText().catch(() => "");
+      check("no credits for a change: the change was asked of the Site's own route", editCalls.length === 1, String(editCalls.length));
+      check("...and the pane says the credits ran out", text.includes(M.credits.outOfCredits.title), text.slice(0, 400));
+      const withNumbers = M.credits.outOfCredits.detailWithNumbers.split("{needed}")[0].replace("{available}", "0");
+      check("...with the numbers", text.includes(withNumbers), `${withNumbers} ∉ ${text.slice(0, 400)}`);
+      check("...not that the site could not be made", !text.includes(M.dashboard.websiteBuilder.generateFailed) && !text.includes(P.failed), text.slice(0, 400));
+      const srcdoc = (await page.locator('[data-testid="chat-site-preview"] iframe').getAttribute("srcdoc").catch(() => null)) ?? "";
+      check("...and the site is still shown, as it was", srcdoc.includes("Σκηνές δίπλα στη θάλασσα.") && db.store.user_websites.length === 1);
+      await language(page, "el", "no credits for a change");
+      await context.close();
+    }
+    state.credits = 3000;
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
   }
 } catch (err) {

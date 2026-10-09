@@ -306,6 +306,11 @@ export async function POST(request: Request) {
           edited: false,
           rateLimited: true,
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
+          // The sentence is English; a screen says it in its own language
+          // from these (lib/website-builder/site-requests.ts).
+          code: "insufficient_credits",
+          available: check.remaining,
+          needed: estimate.reserveCredits,
         });
       }
     }
@@ -339,6 +344,9 @@ export async function POST(request: Request) {
             reservation.reason === "insufficient"
               ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
               : "Could not reserve credits for this edit. No credits were charged — please try again.",
+          ...(reservation.reason === "insufficient"
+            ? { code: "insufficient_credits", available: reservation.available, needed: estimate.reserveCredits }
+            : {}),
         });
       }
       reservationId = reservation.reservationId;

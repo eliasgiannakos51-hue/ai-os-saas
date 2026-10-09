@@ -134,6 +134,13 @@ check("no credits is said by the credits notice, from the code and numbers the r
   /if \(outcome\.code === "insufficient_credits"\) \{[\s\S]{0,160}setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\)/.test(pane) && /<OutOfCreditsNotice/.test(pane) &&
     (code("src/app/api/websites/generate/route.ts").match(/code: "insufficient_credits",\s*available: check\.remaining,/g) ?? []).length === 2 &&
     /code: str\(data\.code\), available: num\(data\.available\), needed: num\(data\.needed\)/.test(code("src/lib/website-builder/site-requests.ts")));
+// AND A CHANGE SAID AFTER THE SITE IS MADE, out of credits (2026-10-09,
+// scripts/tests/chat-opens-tools-edges.prodtest.mjs part 5): a non-English
+// screen said «could not create the website» for a site that existed.
+check("no credits for a change is said by the credits notice too, and the site stays",
+  /if \(outcome\.kind === "refused" && outcome\.code === "insufficient_credits"\) \{\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("done"\);\s*return;/.test(pane) &&
+    (code("src/app/api/websites/edit/route.ts").match(/code: "insufficient_credits"/g) ?? []).length === 2 &&
+    /error: data\?\.error \?\? data\?\.message \?\? null, code: str\(data\?\.code\), available: num\(data\?\.available\), needed: num\(data\?\.needed\)/.test(code("src/lib/website-builder/site-requests.ts")));
 {
   // AND THE CHAT ITSELF, out of credits: the same English sentence was set
   // as the chat's error on every screen (scripts/tests/brand-memory.prodtest.mjs).

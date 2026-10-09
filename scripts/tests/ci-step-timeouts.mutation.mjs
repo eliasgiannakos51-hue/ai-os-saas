@@ -20,7 +20,7 @@ const MUTANTS = [
   {
     name: "the mutation suites step loses its limit",
     file: WORKFLOW,
-    from: "      - name: mutation suites\n        timeout-minutes: 75\n",
+    from: "      - name: mutation suites\n        timeout-minutes: 120\n",
     to: "      - name: mutation suites\n",
     expect: "verify: every step has timeout-minutes",
   },
@@ -34,8 +34,8 @@ const MUTANTS = [
   {
     name: "a step's limit is raised past its job's",
     file: WORKFLOW,
-    from: "      - name: mutation suites\n        timeout-minutes: 75\n",
-    to: "      - name: mutation suites\n        timeout-minutes: 120\n",
+    from: "      - name: mutation suites\n        timeout-minutes: 120\n",
+    to: "      - name: mutation suites\n        timeout-minutes: 150\n",
     expect: "verify: no step's limit reaches the job's",
   },
 ];

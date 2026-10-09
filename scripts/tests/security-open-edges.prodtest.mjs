@@ -28,7 +28,9 @@
  *      says its price; out of credits, the press is refused and the site
  *      stays as it was. In the tool shell too, and in Chat, where a site
  *      made beside the conversation and held by the review used to be
- *      reported with the stored English sentence (found 2026-10-09).
+ *      reported with the stored English sentence (found 2026-10-09), and
+ *      in Create Studio, whose progress list did the same (found
+ *      2026-10-09, in the check of this branch).
  *   3. ΑΣ-8.5 — System Health says who gets the alerts and whether mail
  *      can leave; «Send a test alert» goes out to the owner and the
  *      screen says so; a refusal shows what Resend said; too many presses
@@ -335,6 +337,40 @@ try {
       const said = await shows(page, W.flaggedBody, 20000);
       const text = await pane.innerText();
       check(`${run.label}: Chat says a held site in the reader's language`, said && text.includes(W.flaggedTitle), text.slice(-400));
+      check(`${run.label}: ...and not the stored sentence`, !text.includes(NEW_FLAG.slice(0, NEW_FLAG.indexOf(":"))) && !text.includes(NEW_FLAG.slice(NEW_FLAG.lastIndexOf(". ") + 2)), text.slice(0, 400));
+      if (run.device.touch) check(`${run.label}: no sideways scroll`, await noSideScroll(page));
+    });
+  }
+  // CREATE STUDIO (/dashboard/create: the app's "Create" shortcut, the
+  // share target and the welcome email's tip). A site made there and held
+  // by the review was listed in its progress with the stored sentence as
+  // well (found 2026-10-09, in the check of this branch).
+  for (const run of RUNS) {
+    const W = M[run.locale].dashboard.websiteBuilder;
+    const C = M[run.locale].dashboard.createStudio;
+    const NEW_FLAG =
+      "This website was flagged by our safety review and can't be published as-is: an inline script that sends form data away. You can regenerate it; the button shows what that costs.";
+    const STUDIO_SITE = (status) => ({ id: "c3333333-3333-4333-8333-333333333333", user_id: MOCK_USER.id, name: "Camping", status, html_content: status === "flagged" ? "<p>x</p>" : "", error_message: status === "flagged" ? NEW_FLAG : null, created_at: "2026-10-09T09:00:00Z" });
+    credits[0].credits_remaining = 3000;
+    await each(`${run.label} create studio`, CUSTOMER, run, async ({ page, press }) => {
+      let polls = 0;
+      const understanding = run.locale === "el" ? "Ένα site για ένα camping." : "A website for a campsite.";
+      await page.route("**/api/create-studio/detect", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, detection: { type: "website", title: "Camping", understanding } }) }));
+      await page.route("**/api/websites/generate/process", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) }));
+      await page.route("**/api/websites/generate", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, generated: true, record: STUDIO_SITE("pending") }) }));
+      await page.route("**/api/websites/status**", (r) => {
+        polls++;
+        return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, record: STUDIO_SITE(polls < 2 ? "processing" : "flagged") }) });
+      });
+      await page.goto(`${CUSTOMER}/dashboard/create`, { waitUntil: "networkidle" });
+      await page.locator("#studio-input").fill(run.locale === "el" ? "φτιάξε μου site για το camping" : "make me a website for the campsite");
+      await press(page.getByRole("button", { name: C.continue, exact: true }));
+      await page.getByText(understanding, { exact: true }).waitFor();
+      await press(page.getByRole("button", { name: C.create, exact: true }));
+      await press(page.getByRole("tab", { name: new RegExp(C.tabProgress) }));
+      const said = await shows(page, W.flaggedBody, 20000);
+      const text = await page.evaluate(() => document.body.innerText);
+      check(`${run.label}: Create Studio says a held site in the reader's language`, said && text.includes(W.flaggedTitle) && polls >= 2, text.slice(-400));
       check(`${run.label}: ...and not the stored sentence`, !text.includes(NEW_FLAG.slice(0, NEW_FLAG.indexOf(":"))) && !text.includes(NEW_FLAG.slice(NEW_FLAG.lastIndexOf(". ") + 2)), text.slice(0, 400));
       if (run.device.touch) check(`${run.label}: no sideways scroll`, await noSideScroll(page));
     });

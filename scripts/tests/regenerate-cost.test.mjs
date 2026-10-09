@@ -22,7 +22,7 @@
  * in English, on a Greek screen. The screen now says it in the reader's
  * language and shows only the findings from the stored sentence
  * (src/lib/websites/flagged-notice.ts), whatever the row was written with.
- * Chat's site pane likewise (2026-10-09).
+ * Chat's site pane and Create Studio's progress list likewise (2026-10-09).
  *
  * Every source check runs on the file WITH ITS COMMENTS STRIPPED.
  *
@@ -148,6 +148,18 @@ console.log("\n== 3. a site flagged before the fix promises nothing either ==");
     /done\.status === "flagged"\) \{\s*failWith\(`\$\{tSite\("flaggedTitle"\)\}\. \$\{tSite\("flaggedBody"\)\}`\)/.test(onDone) &&
       onDone.indexOf('done.status === "flagged"') < onDone.indexOf("done.error_message"),
     onDone.slice(0, 600)
+  );
+  // Create Studio's progress list (src/lib/create-studio/use-create-studio.ts)
+  // put the stored sentence under a failed step the same way (found
+  // 2026-10-09, in the check of this branch).
+  const studio = stripComments(readFileSync("src/lib/create-studio/use-create-studio.ts", "utf8"));
+  const pollAt = studio.indexOf("const pollWebsite = useCallback(");
+  const poll = pollAt >= 0 ? studio.slice(pollAt, studio.indexOf("[finishStep", pollAt)) : "";
+  check(
+    "Create Studio says a held site in the reader's language, before any stored message",
+    /record\.status === "flagged"\s*\?\s*`\$\{tSite\("flaggedTitle"\)\}\. \$\{tSite\("flaggedBody"\)\}`/.test(poll) &&
+      poll.indexOf('record.status === "flagged"') < poll.indexOf("record.error_message"),
+    poll.slice(0, 600)
   );
   // Every locale, every key of the builder that speaks about the flag or
   // the regenerate: none offers it for nothing.

@@ -29,6 +29,9 @@
 --              grant insert, delete on public.site_versions to authenticated,
 --              and re-create "insert_own_site_versions" and
 --              "delete_own_site_versions" from 20260803000000_baseline_schema.sql.
+--              UPDATE on site_versions needs no grant back: no migration
+--              ever made an update policy for it, so the account could not
+--              update a row before this file either.
 -- ---------------------------------------------------------------------------
 
 drop policy if exists projects_insert_own on public.projects;

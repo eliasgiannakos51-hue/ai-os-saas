@@ -15,6 +15,7 @@ const NOTICE = "src/lib/websites/flagged-notice.ts";
 const SHELL = "src/components/website-builder/website-shell.tsx";
 const WORKER = "src/app/api/websites/generate/process/route.ts";
 const CHAT_PANE = "src/components/chat/site-pane.tsx";
+const STUDIO = "src/lib/create-studio/use-create-studio.ts";
 
 const MUTANTS = [
   {
@@ -88,6 +89,13 @@ const MUTANTS = [
     expect: "Chat's site pane says a held site in the reader's language",
   },
   {
+    name: "Create Studio lists a held site with the stored sentence again",
+    file: STUDIO,
+    from: '              : record.status === "flagged"\n                ? `${tSite("flaggedTitle")}. ${tSite("flaggedBody")}`\n                : record.error_message ?? undefined',
+    to: "              : record.error_message ?? undefined",
+    expect: "Create Studio says a held site in the reader's language",
+  },
+  {
     name: "the worker writes its own sentence again",
     file: WORKER,
     from: "error_message: isFlagged ? flaggedMessage(flaggedSummary) : null,",
@@ -96,4 +104,4 @@ const MUTANTS = [
   },
 ];
 
-runMutations({ name: "regenerate-cost", gate: GATE, targets: [ROUTE, WORKSPACE, NOTICE, SHELL, WORKER, CHAT_PANE], mutants: MUTANTS });
+runMutations({ name: "regenerate-cost", gate: GATE, targets: [ROUTE, WORKSPACE, NOTICE, SHELL, WORKER, CHAT_PANE, STUDIO], mutants: MUTANTS });

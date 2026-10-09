@@ -240,7 +240,7 @@ check("Files: a question refused is said from the status, a failed job in the sc
   /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*t\("askError"\)/.test(filesShell) &&
     /status: response\.status, body: started/.test(read("src/lib/jobs/start-and-watch.ts")));
 check("Files: a file the plan has no room for is the plan's limit",
-  /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(filesShell) && (uploadLib.match(/status: response\.status, body: data/g) ?? []).length === 2);
+  /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(filesShell) && (uploadLib.match(/body: data,\s*status: response\.status/g) ?? []).length === 2);
 check("Analyze: out of credits and the model down are said as such", /status === 402 \? describe\(new ApiError\(402, null\)\)\.text : code === "ai_unavailable" \? t\("analyse\.unavailable"\)/.test(analyze) &&
   (analyze.match(/refusal\(response\.status, body\?\.error,/g) ?? []).length === 2);
 check("Slides: Stop reaches a change as well as a new deck",

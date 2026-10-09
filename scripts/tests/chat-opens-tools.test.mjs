@@ -146,9 +146,9 @@ check("no credits for a change is said by the credits notice too, and the site s
   // as the chat's error on every screen (scripts/tests/brand-memory.prodtest.mjs).
   const chatRoute = code("src/app/api/chat/route.ts");
   check("Chat says no credits in its own words, before the answer and inside it",
-    /code: "insufficientCredits",\s*message: insufficientCreditsMessage\(check\.remaining, estimate\.reserveCredits\),\s*available: check\.remaining,\s*needed: estimate\.reserveCredits,/.test(chatRoute) &&
+    /code: "insufficientCredits",\s*outOfCredits: true,\s*message: insufficientCreditsMessage\(check\.remaining, estimate\.reserveCredits\),\s*available: check\.remaining,\s*needed: estimate\.reserveCredits,/.test(chatRoute) &&
       /available: reservation\.available, needed: streamEstimate\.reserveCredits/.test(chatRoute) &&
-      /setError\(\s*data\.code === "insufficientCredits"\s*\?\s*outOfCreditsText\(data\.available, data\.needed\)\s*:/.test(chat) &&
+      /setError\(\s*data\.outOfCredits === true\s*\?\s*outOfCreditsText\(data\.available, data\.needed\)\s*:/.test(chat) &&
       /streamError =\s*event\.outOfCredits === true\s*\?\s*outOfCreditsText\(event\.available, event\.needed\)/.test(chat));
 }
 check('"Open in Site" opens that site, or the brief when there is no site yet', /\/dashboard\/website-builder\?project=\$\{encodeURIComponent\(site\.id\)\}/.test(pane) && /\/dashboard\/website-builder\?brief=\$\{encodeURIComponent\(description\.slice\(0, 500\)\)\}/.test(pane));

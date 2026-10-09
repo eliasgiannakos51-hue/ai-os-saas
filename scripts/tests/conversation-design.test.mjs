@@ -116,9 +116,9 @@ const breaker = stripComments(readFileSync("src/lib/ai-circuit-breaker.ts", "utf
 // Out of credits is said with its two numbers (outOfCreditsText, package 7's
 // check, scripts/tests/chat-opens-tools.test.mjs); every other code here.
 check("a refusal is said from its code, in the reader's language, not from the route's prose",
-  /:\s*isErrorCode\(data\.code\)\s*\?\s*describe\(new ApiError\(429, \{ code: data\.code \}\)\)\.text\s*:\s*data\.message\s*\);/.test(ws));
+  /:\s*isErrorCode\(data\.code\)\s*\?\s*describe\(new ApiError\(429, \{ code: data\.code \}\)\)\.text\s*:\s*describeStatus\(429\)\.text\s*\);/.test(ws));
 check("...the route names the credit refusal by its code",
-  /rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(/.test(route));
+  /rateLimited: true,\s*code: "insufficientCredits",\s*outOfCredits: true,\s*message: insufficientCreditsMessage\(/.test(route));
 check("...and the circuit breaker's, every one of its refusals carrying a code",
   /rateLimited: true, code: breakerCheck\.code, message: breakerCheck\.reason/.test(route) &&
     (breaker.match(/allowed: false,/g) ?? []).length >= 3 &&

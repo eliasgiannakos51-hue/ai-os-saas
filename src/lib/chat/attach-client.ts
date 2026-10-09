@@ -27,14 +27,31 @@ import type { ChatAttachment } from "@/lib/chat/attachment-types";
 
 export { CHAT_ACCEPT, admitFiles, attachKindOf, type AttachKind, type AttachRefusal } from "@/lib/chat/attach-admit";
 
-/** A PDF into Files. Ready means Files read text out of it; anything else is said. */
+/**
+ * A PDF into Files. Ready means Files read text out of it; anything else is
+ * said, IN THE READER'S LANGUAGE: the Files routes give their reasons in
+ * English (lib/files/ingest.ts), and a chip under a Greek field showed
+ * "Your plan includes 3 files" and "this PDF has no text layer" as they
+ * came (found 2026-10-08, scripts/tests/chat-attachments-edges.prodtest.mjs).
+ * Only the words passed in here ever reach the chip.
+ */
 export async function attachPdf(
   file: File,
-  words: UploadMessages & { unreadable: string }
+  words: UploadMessages & { unreadable: string; fileLimit: string; uploadLimit: string }
 ): Promise<{ ok: true; attachment: ChatAttachment; pages: number | null } | { ok: false; error: string }> {
   const outcome = await uploadFile(file, words);
-  if (!outcome.ok) return outcome;
-  if (outcome.file.processing_status !== "ready") return { ok: false, error: outcome.file.error ?? words.unreadable };
+  if (!outcome.ok) {
+    const ours = [words.error, words.storageMissing, words.storagePolicy, words.tooLargeForTransfer];
+    const error = outcome.limitReached
+      ? words.fileLimit
+      : outcome.status === 429
+        ? words.uploadLimit
+        : ours.includes(outcome.error)
+          ? outcome.error
+          : words.error;
+    return { ok: false, error };
+  }
+  if (outcome.file.processing_status !== "ready") return { ok: false, error: words.unreadable };
   return { ok: true, attachment: { kind: "pdf", fileId: outcome.file.id, name: outcome.file.filename }, pages: outcome.file.page_count };
 }
 

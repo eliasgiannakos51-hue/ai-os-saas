@@ -709,14 +709,16 @@ export function ChatWorkspace({
           // so nothing was charged (a 4xx to creditOutcomeForStatus).
           setIsRateLimitNotice(true);
           // Out of credits is said with the two numbers the route sends
-          // (outOfCreditsText, above); every other code through the
-          // shared error words.
+          // (outOfCreditsText, above); every other code through the shared
+          // error words, and a refusal with no code as held back — never
+          // the route's English sentence (found 2026-10-08,
+          // scripts/tests/chat-attachments-edges.prodtest.mjs).
           setError(
-            data.code === "insufficientCredits"
+            data.outOfCredits === true
               ? outOfCreditsText(data.available, data.needed)
               : isErrorCode(data.code)
                 ? describe(new ApiError(429, { code: data.code })).text
-                : data.message
+                : describeStatus(429).text
           );
         } else {
           setError(describeStatus(res.status).text);
@@ -805,9 +807,9 @@ export function ChatWorkspace({
           }
         } else if (event.type === "error") {
           // WHAT THE ROUTE KNOWS, SAID (lib/errors/error-codes.ts): no
-          // credits for the hold, with the two numbers, or the AI service
-          // did not answer and nothing was kept — and the free message it
-          // gave back.
+          // credits for the hold, with the two numbers — not a failure on
+          // our side — or the AI service did not answer and nothing was
+          // kept, and the free message it gave back.
           if (typeof event.freeRemaining === "number") setFreeRemaining(event.freeRemaining);
           streamError =
             event.outOfCredits === true

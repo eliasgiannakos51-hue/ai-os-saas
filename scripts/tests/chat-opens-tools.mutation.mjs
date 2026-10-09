@@ -186,8 +186,8 @@ const MUTANTS = [
   {
     name: "Chat sets the route's English sentence as its error again",
     file: CHAT,
-    from: '            data.code === "insufficientCredits"\n              ? outOfCreditsText(data.available, data.needed)',
-    to: '            data.code === "never"\n              ? outOfCreditsText(data.available, data.needed)',
+    from: "            data.outOfCredits === true\n              ? outOfCreditsText(data.available, data.needed)",
+    to: "            data.outOfCredits === \"never\"\n              ? outOfCreditsText(data.available, data.needed)",
     expect: "Chat says no credits in its own words",
   },
   {

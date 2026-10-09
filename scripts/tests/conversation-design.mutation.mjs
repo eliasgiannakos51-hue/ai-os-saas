@@ -42,8 +42,8 @@ const MUTANTS = [
   {
     name: "a refusal shows the route's English prose again",
     file: WS,
-    from: "              : isErrorCode(data.code)\n                ? describe(new ApiError(429, { code: data.code })).text\n                : data.message",
-    to: "              : data.message",
+    from: "              : isErrorCode(data.code)\n                ? describe(new ApiError(429, { code: data.code })).text\n                : describeStatus(429).text",
+    to: "              : describeStatus(429).text",
     expect: "a refusal is said from its code",
   },
   {

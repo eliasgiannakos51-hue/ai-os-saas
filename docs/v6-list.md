@@ -450,9 +450,13 @@ Nine text points on the STREAMING block — the one inside
 `sending && streamingText !== null`, identified then by having no
 "Listen" button and since 2026-10-08 by its row of actions having no
 copy button — read **15.71:1 at 1440×900 and 15.68:1 at 390×844** on
-2026-09-19. The command above prints the figures of the day it runs:
-six walks since 2026-10-08 (two devices, Greek and English, and a Free
-account), worst 14.09:1 when it was run that day. `chat-ground-dim` is on both the finished and the streaming
+2026-09-19. Those two may be of the FINISHED answer: with neither voice
+key the Listen player draws nothing (src/components/voice/voice-player.tsx),
+so "no Listen button" could not tell the two blocks apart. The command
+above prints the figures of the day it runs: six walks since 2026-10-08
+(two devices, Greek and English, and a Free account), every point with
+ink on up to six lines from the top of the thread to the bottom since
+2026-10-09, worst 14.09:1 on both days. `chat-ground-dim` is on both the finished and the streaming
 answer; the source always said so, and no gate had ever photographed the
 second one. `chat-measure.prodtest.mjs` seeds `chat_messages`, so every
 figure behind the 2026-09-04 choice of `dim` was taken on a finished
@@ -463,10 +467,13 @@ nothing does yet.** Until then the file answered /api/chat with
 `route.fulfill`, which hands the page the whole NDJSON body at once, so
 the component received every delta in one burst. A version of the file
 did measure travel and printed 0px in one second — a number that meant
-nothing, and was removed rather than reported. From 2026-10-05 (React
-19) the same burst was not even drawn: the streaming block never reached
-the screen, and the file was red on "an answer is mid-stream right now"
-until 2026-10-08.
+nothing, and was removed rather than reported. Measured on React 19
+(2026-10-08 and 2026-10-09), the same burst is not even drawn: 0 frames
+of the streaming block. So on React 19 the check "an answer is
+mid-stream right now" can only have been passing on the finished answer,
+which had no button either, and it went red when 4981e8f3 (2026-10-05)
+put a copy button under every finished answer; red until 2026-10-08. Whether React 18 ever drew the
+streaming block under that harness was never measured.
 
 The remaining hypothesis is `hooks/use-stick-to-bottom.ts`: the thread
 sticks to the bottom as tokens arrive, so a line someone has started

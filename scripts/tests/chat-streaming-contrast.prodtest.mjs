@@ -26,13 +26,19 @@
 // WHY THIS FILE WAS RED FROM 2026-10-05 TO 2026-10-08 — THE FILE, NOT THE APP.
 //
 // It answered /api/chat in the browser with `route.fulfill`, which hands
-// the page the whole NDJSON body in one piece. Since React 19 (Next 16,
-// QUEUE Α.9, 2026-10-05) every delta and the end of the turn land in ONE
-// render, so the streaming block was never on the screen at all:
-// measured 2026-10-08 on main at c5257170 with a MutationObserver, 0
-// frames of it on either device, and "an answer is mid-stream right now"
-// could only fail. A real answer arrives over time and the block IS
-// drawn — part 2 below counts the steps it grows in, and requires five.
+// the page the whole NDJSON body in one piece, and every delta and the
+// end of the turn land in ONE render: measured 2026-10-08 and again
+// 2026-10-09 on main at c5257170 (React 19) with a MutationObserver, 0
+// frames of the streaming block on either device. It told the two blocks
+// apart by "no button", and with neither voice key the finished answer
+// had no button either (src/components/voice/voice-player.tsx draws
+// nothing without speech) — so on React 19 the check can only have
+// passed on the FINISHED answer, until 4981e8f3 (2026-10-05) put a copy
+// button under every finished answer, and from then on it could only
+// fail. Whether React 18 ever drew the streaming block under this
+// harness was never measured. A real answer arrives over time and the
+// block IS drawn — part 2 below counts the steps it grows in, and
+// requires five.
 //
 // The phone's "nine points" failure (5 and 8 found in two runs on
 // 2026-10-05) was the file too. The points were taken at the middle of
@@ -554,7 +560,7 @@ const lastAnswer = (page) => page.evaluate(() => {
   };
 });
 
-/** Nine points on the answer being written, or why there are not nine. */
+/** Nine points or more on the answer being written, or why there are not nine. */
 async function measure(page, label) {
   // The rectangles and the pixels must be the same moment. With the model
   // holding nothing arrives, so the page should be still — read, shoot,
@@ -564,7 +570,11 @@ async function measure(page, label) {
       const block = [...document.querySelectorAll(".chat-ground-dim")].at(-1);
       const prose = block?.querySelector(":scope > .leading-relaxed");
       const thread = document.querySelector('[data-testid="chat-thread"]');
-      if (!prose || !thread) return { lines: [], view: null };
+      // STILL BEING WRITTEN in this frame: the same test as WATCH_STREAM.
+      // Without it, a model that does not hold finishes before the
+      // screenshot and every ratio is of the finished answer, green.
+      const writing = Boolean(block?.querySelector('[data-testid="answer-actions"]') && !block.querySelector('[data-testid="answer-copy"]'));
+      if (!prose || !thread) return { lines: [], view: null, writing };
       const t = thread.getBoundingClientRect();
       // WHAT AN EYE CAN SEE: the thread's own box, cut to the window. A
       // line under its bottom edge is behind the composer, not on screen.
@@ -586,22 +596,24 @@ async function measure(page, label) {
         }
       }
       rows.sort((a, b) => a.top - b.top);
-      return { lines: rows.map((r) => ({ x: r.left, y: r.top, w: r.right - r.left, h: r.bottom - r.top })), view };
+      return { lines: rows.map((r) => ({ x: r.left, y: r.top, w: r.right - r.left, h: r.bottom - r.top })), view, writing };
     });
   const same = (a, b) => a.length === b.length && a.every((l, i) => Math.abs(l.x - b[i].x) < 1 && Math.abs(l.y - b[i].y) < 1 && Math.abs(l.w - b[i].w) < 1);
   const shot = `${SHOT_DIR || "/tmp"}/chat-streaming-${label}.png`;
-  let lines = [], stable = false, view = null;
+  let lines = [], stable = false, view = null, writing = false;
   for (let attempt = 0; attempt < 8 && !stable; attempt++) {
     const before = await readLines();
     await page.screenshot({ path: shot });
     const after = await readLines();
     if (before.lines.length > 0 && same(before.lines, after.lines)) {
       ({ lines, view } = after);
+      writing = before.writing && after.writing;
       stable = true;
     } else await sleep(150);
   }
   check("the page held still across the screenshot", stable, "the thread moved between reading the lines and reading the pixels — every ratio would be of a different frame");
   if (!stable) return null;
+  check("...and in that frame the answer was still being written", writing, "it had finished before the screenshot — every ratio below is of the finished answer");
 
   const img = sharp(shot);
   const { width: W, height: H } = await img.metadata();
@@ -614,6 +626,7 @@ async function measure(page, label) {
   // SPREAD OVER THE SCREEN: up to six lines, evenly from the first visible
   // to the last, three points along each — the start, the middle and the
   // end of the line, at the middle of its height, where the letters are.
+  // Up to eighteen candidates, all measured below.
   const chosen = [];
   const step = Math.max(1, (lines.length - 1) / 5);
   for (let k = 0; k < 6 && Math.round(k * step) < lines.length; k++) {
@@ -636,13 +649,16 @@ async function measure(page, label) {
   };
   const all = candidates.map(sample);
   const inked = all.filter((m) => m.contrast >= INK);
-  const measured = inked.slice(0, 9);
+  // EVERY ONE WITH INK IS MEASURED, and at least nine are required. The
+  // first nine alone would be the top three lines only, and the lines
+  // being written are the ones at the bottom, next to the field.
+  const measured = inked;
   const worst = measured.length ? Math.min(...measured.map((m) => m.contrast)) : 0;
   console.log(`      ${lines.length} lines visible in the thread (${Math.round(view.top)}–${Math.round(view.bottom)}px); ${measured.length} points measured:`);
   for (const m of measured) console.log(`      ${String(m.contrast).padStart(6)}:1  @${String(m.x).padStart(4)},${String(m.y).padStart(4)}  dark=${m.dark.join(",")} light=${m.light.join(",")}`);
   // HOW MANY WERE SKIPPED IS PRINTED, never hidden.
   console.log(`      (${all.length - inked.length} of ${all.length} candidate windows held no ink)`);
-  check(`nine points were found on the answer being written (${measured.length})`, measured.length === 9, `${measured.length} — fewer than nine means the sample is smaller than the claim`);
+  check(`at least nine points were found on the answer being written (${measured.length})`, measured.length >= 9, `${measured.length} — fewer than nine means the sample is smaller than the claim`);
   check(`most candidate windows were text (${inked.length}/${all.length})`, all.length > 0 && inked.length / all.length >= 0.5, "the line boxes and the pixels disagree, so the points may not be where the text is");
   check(`the worst of them clears 4.5:1 (${worst}:1)`, worst >= 4.5, `${worst}:1 on ${measured.length} points, while the answer is being written`);
   return { worst, points: measured.length, shot };

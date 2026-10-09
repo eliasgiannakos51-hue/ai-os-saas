@@ -1371,7 +1371,7 @@
         "readyImage": "Goes with the message",
         "remove": "Remove “{name}”",
         "unreadable": "Could not read the text in “{name}”. If it is a scan, attach it as an image; if it has a password, remove it and attach it again.",
-        "fileLimit": "“{name}”: you have reached your plan’s file limit. Delete a file in Files or upgrade your plan.",
+        "fileLimit": "“{name}”: this would go over your plan’s limit in Files. Delete a file in Files or upgrade your plan.",
         "uploadLimit": "Too many file uploads in the last hour. Try again in a little while.",
         "offline": "No connection. Check the network and try again.",
         "type": "“{name}”: only PDF, JPG or PNG.",

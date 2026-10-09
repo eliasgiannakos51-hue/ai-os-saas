@@ -669,7 +669,16 @@
       "deleting": "Deleting…",
       "confirmButton": "Permanently delete your account",
       "cancel": "Cancel and go back",
-      "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
+      "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support.",
+      "errors": {
+        "rate_limited": "Too many attempts. Please try again later.",
+        "invalid_request": "This link is not complete. Please use the link from your email exactly as sent.",
+        "link_invalid": "This link is invalid or has expired. You can ask for a new one in Settings.",
+        "retry": "Something went wrong. Please try again.",
+        "contact_support": "We couldn't delete the account. Please contact support.",
+        "files_retry": "We couldn't delete the files on this account, so the account was not deleted. Your link still works — please try again.",
+        "subscription_retry": "We couldn't cancel the subscription on this account, so nothing was deleted. Your link still works — please try again."
+      }
     },
     "generateStrongPassword": "Generate strong password",
     "verifyEmail": {

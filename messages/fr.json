@@ -669,7 +669,16 @@
       "deleting": "Suppression…",
       "confirmButton": "Supprimer définitivement votre compte",
       "cancel": "Annuler et revenir",
-      "confirmFailed": "Nous n'avons pas pu terminer la suppression. Votre compte existe toujours — réessayez le lien ou contactez le support."
+      "confirmFailed": "Nous n'avons pas pu terminer la suppression. Votre compte existe toujours — réessayez le lien ou contactez le support.",
+      "errors": {
+        "rate_limited": "Trop de tentatives. Réessayez plus tard.",
+        "invalid_request": "Ce lien est incomplet. Utilisez le lien de votre e-mail tel qu'il a été envoyé.",
+        "link_invalid": "Ce lien n'est pas valide ou a expiré. Vous pouvez en demander un nouveau dans les Paramètres.",
+        "retry": "Une erreur s'est produite. Réessayez.",
+        "contact_support": "Nous n'avons pas pu supprimer le compte. Contactez le support.",
+        "files_retry": "Nous n'avons pas pu supprimer les fichiers de ce compte, donc le compte n'a pas été supprimé. Votre lien fonctionne toujours — réessayez.",
+        "subscription_retry": "Nous n'avons pas pu annuler l'abonnement de ce compte, donc rien n'a été supprimé. Votre lien fonctionne toujours — réessayez."
+      }
     },
     "generateStrongPassword": "Générer un mot de passe fort",
     "verifyEmail": {

@@ -137,8 +137,8 @@ const MUTANTS = [
   {
     name: "a change said on another page's tab goes to the home page",
     file: SHELL,
-    from: "section: part, ...(pages ? { pageSlug: slug } : {}) });",
-    to: "section: part });",
+    from: "section: part, ...(pages ? { pageSlug: slug } : {}), referenceImagePaths });",
+    to: "section: part, referenceImagePaths });",
     expect: "the change goes to the open page",
   },
   {

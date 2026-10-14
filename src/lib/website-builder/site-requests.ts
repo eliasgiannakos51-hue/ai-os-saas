@@ -94,11 +94,19 @@ export async function startSiteGeneration(input: {
   name: string;
   description: string;
   skipClarification: boolean;
+  /**
+   * The reference photos already in the account's folder of the reference
+   * bucket (lib/website-builder/site-photos.ts). The route re-checks each
+   * belongs to the caller and stores them for the worker, which reads them
+   * from there — never from this request again. Chat's Site pane sends none.
+   */
+  referenceImagePaths?: string[];
 }): Promise<SiteStart> {
+  const referenceImagePaths = input.referenceImagePaths ?? [];
   const res = await fetchWithAuthRetry("/api/websites/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
+    body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths, skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
   if (!res.ok || !data?.ok) return { kind: "refused", error: refusal(res.status, data, data?.error), ...routeSaid(data) };
@@ -117,7 +125,7 @@ export async function startSiteGeneration(input: {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: true,
-      body: JSON.stringify({ websiteId: record.id, description: input.description, referenceImagePaths: [] }),
+      body: JSON.stringify({ websiteId: record.id, description: input.description, referenceImagePaths }),
     });
   }
   return { kind: "started", record };
@@ -177,14 +185,21 @@ export type SiteChange =
  * A change in words. `pageSlug` names the page it is about ("" or absent:
  * the home page); `section` the part of THAT page, by number.
  */
-export async function requestSiteChange(input: { websiteId: string; changeRequest: string; section?: number | null; pageSlug?: string }): Promise<SiteChange> {
+export async function requestSiteChange(input: {
+  websiteId: string;
+  changeRequest: string;
+  section?: number | null;
+  pageSlug?: string;
+  /** Photos given with this change, as for a new site; the route reads them for this one change. */
+  referenceImagePaths?: string[];
+}): Promise<SiteChange> {
   const res = await fetchWithAuthRetry("/api/websites/edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       websiteId: input.websiteId,
       changeRequest: input.changeRequest,
-      referenceImagePaths: [],
+      referenceImagePaths: input.referenceImagePaths ?? [],
       pageSlug: input.pageSlug ?? "",
       ...(input.section === null || input.section === undefined ? {} : { section: input.section }),
     }),

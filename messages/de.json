@@ -2439,7 +2439,9 @@
         "failed": "Die Seite wurde nicht geöffnet. Versuche es erneut.",
         "openPdf": "PDF auf dieser Seite öffnen",
         "unread": "Von „{name}“ wurden nur die ersten {read} von {total} Seiten gelesen; was danach kommt, ist nicht in dieser Antwort."
-      }
+      },
+      "collectionName": "Wie soll diese Sammlung mit {count, plural, one {# Datei} other {# Dateien}} heißen? Schreib den Namen unten.",
+      "collectionsHint": "Wähle Dateien aus und speichere sie als Sammlung: Ein Tipp wählt sie alle wieder aus."
     },
     "deepResearch": {
       "title": "Gründlich nachsehen",
@@ -3098,7 +3100,15 @@
         "design": "Design",
         "held": "Unsere Sicherheitsprüfung hat diese Änderung zurückgehalten, die Website ist unverändert.",
         "busy": "An dieser Website wird gerade schon etwas geändert. Warte, bis es fertig ist, und sag es dann noch einmal.",
-        "offTopic": "Hier erstelle ich Websites. Sag mir, welche Website du möchtest: für welches Unternehmen oder welchen Zweck, welche Bereiche, welcher Stil."
+        "offTopic": "Hier erstelle ich Websites. Sag mir, welche Website du möchtest: für welches Unternehmen oder welchen Zweck, welche Bereiche, welcher Stil.",
+        "photosAttach": "Fotos hinzufügen — Logo, Produkte, der Ort",
+        "photos": "{count} von {max} Fotos — sie gehen mit deiner nächsten Nachricht mit.",
+        "photoType": "Nur Fotos im Format JPG, PNG oder WebP.",
+        "photosFailed": "Die Fotos konnten nicht hochgeladen werden, daher wurde nichts gesendet. Bitte versuche es erneut.",
+        "versions": "Alle Versionen",
+        "versionsHint": "Tippe auf eine, um sie anzusehen. Was du danach schreibst, ändert weiterhin die neueste.",
+        "liveVersions": "Veröffentlichte Versionen",
+        "undid": "Rückgängig gemacht: {change}"
       },
       "box": {
         "only": "Nur ändern: {name}",

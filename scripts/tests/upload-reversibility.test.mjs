@@ -96,6 +96,11 @@ const SWEPT = {
     sweeper: "src/app/api/cron/website-storage-cleanup/route.ts",
     why: "reference images are uploaded before generate and are meant to outlive it; the daily sweep removes any that no site or website_reference_images row points at",
   },
+  "src/lib/website-builder/site-photos.ts": {
+    bucket: "website-references",
+    sweeper: "src/app/api/cron/website-storage-cleanup/route.ts",
+    why: "the Site shell's reference photos, uploaded before generate or edit exactly as the old page uploads them and meant to outlive the request; the daily sweep removes any that no site or website_reference_images row points at",
+  },
   "src/lib/website-reference-image-server.ts": {
     bucket: "website-references",
     sweeper: "src/app/api/cron/website-storage-cleanup/route.ts",

@@ -172,12 +172,12 @@ check('"site-pages" is declared as a switch', /\n  "site-pages": "/.test(code("s
 check("the Site page reads it for the shell", /<WebsiteShell [^>]*pages=\{await isFeatureOn\("site-pages", user\)\}[^>]*\/>/.test(code("src/app/dashboard/website-builder/page.tsx")));
 const shell = code("src/components/website-builder/website-shell.tsx");
 check("a new site's brief carries the page request, only with the switch",
-  /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: 0 \}\) \+ \(pages \? pageRequestBrief\(pageCount\) : ""\)/.test(shell));
+  /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\) \+ \(pages \? pageRequestBrief\(pageCount\) : ""\)/.test(shell));
 check("the fourth option offers «as many as needed», one, three, five", /\[null, \.\.\.PAGE_COUNT_CHOICES\]\.map\(\(n\) =>/.test(shell) && /data-testid="site-page-count"/.test(shell));
 check("a site's pages are tabs over the preview", /\[\{ slug: "", label: t\("pageHome"\) \}, \.\.\.sitePages\]\.map\(\(p\) =>/.test(shell) && /onClick=\{\(\) => setOpenPage\(\{ siteId: current\.id, slug: p\.slug \}\)\}/.test(shell));
 check("the preview and its parts are the open page's", /const html = pageSlug \? sitePages\.find\(\(p\) => p\.slug === pageSlug\)!\.html : current\?\.html_content \?\? "";/.test(shell) && /const boxes = useMemo\(\(\) => \(complete \? findPageBoxes\(html\) : \[\]\), \[complete, html\]\);/.test(shell));
 check("a chosen part belongs to its page: another page forgets it", /box\.siteId === current\.id && box\.slug === pageSlug && box\.index < boxes\.length/.test(shell));
-check("the change goes to the open page", /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\) \}\)/.test(shell));
+check("the change goes to the open page", /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(shell));
 check("undo is a button on the site, with the switch", /\{pages && \(\s*<button[\s\S]{0,120}onClick=\{\(\) => void undo\(\)\}[\s\S]{0,300}data-testid="site-undo"/.test(shell));
 check("...and what it says when there is nothing to undo", /outcome\.reason === "nothing" \? tShell\("pages\.nothingToUndo"\)/.test(shell));
 check("the download is the whole site, with the switch", /const file = pages \? siteDownload\(site\) :/.test(shell));

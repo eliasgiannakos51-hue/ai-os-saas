@@ -36,6 +36,15 @@
  *   FREE       Site, Slides, Posts and Research are not on Free: the page
  *              says which plan has them, in the screen's language.
  *              Analyze and Files are, and are the shell.
+ *   OLD PAGES  what only the old pages had, used through the shell (the
+ *              owner's decision of 2026-10-09: with the switch on, no
+ *              function is lost): a Files collection pressed and one saved
+ *              through the REAL /api/files/collections; a Site photo given
+ *              to the field, sent with a change through the REAL
+ *              /api/websites/edit to the model, and with a new site to
+ *              /api/websites/generate and its worker; a Site's versions,
+ *              one shown read-only, and a published one put back through
+ *              the REAL /api/published/[id]/rollback.
  *
  * On every screen: no English sentence on a Greek screen, no Greek on an
  * English one, no page error, no sideways scroll.
@@ -49,7 +58,10 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { chromium } from "playwright";
+import sharp from "sharp";
+import IntlMessageFormat from "intl-messageformat";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 
 let pass = 0;
@@ -115,6 +127,44 @@ const state = { credits: 3000, rows: {} };
 // is kept so a check can read what was SAVED.
 const writes = [];
 const bucket = new Map();
+// The reference bucket a Site's photos go into from the browser
+// (lib/website-builder/site-photos.ts) and /api/websites/edit reads back
+// (lib/website-reference-image-server.ts): path -> { type, bytes }.
+const photoBucket = new Map();
+// The browser sends a photo as a multipart form (storage-js, a Blob body);
+// the server sends its optimised copy as the bytes themselves.
+function storedFile(req, raw) {
+  const type = String(req.headers["content-type"] ?? "");
+  const boundary = /boundary=(?:"([^"]+)"|([^;]+))/.exec(type);
+  if (!boundary) return { type, bytes: raw };
+  const marker = Buffer.from(`--${boundary[1] ?? boundary[2]}`);
+  for (let at = raw.indexOf(marker); at >= 0; ) {
+    const next = raw.indexOf(marker, at + marker.length);
+    if (next < 0) break;
+    const part = raw.subarray(at + marker.length + 2, next - 2);
+    const split = part.indexOf("\r\n\r\n");
+    const head = part.subarray(0, split).toString("utf8");
+    if (/filename=/.test(head)) return { type: /content-type:\s*([^\r\n]+)/i.exec(head)?.[1] ?? "application/octet-stream", bytes: Buffer.from(part.subarray(split + 4)) };
+    at = next;
+  }
+  return { type, bytes: raw };
+}
+// ROWS THE ROUTES WRITE and a later read must see: a collection and its
+// files, a version a rollback appends.
+const INSERTED = new Set(["file_collections", "file_collection_items", "site_versions"]);
+// FILTERED where two rows must not both answer: a rollback reads ONE
+// published version by its id, and the newest by order and limit.
+function filtered(rows, params) {
+  let out = rows;
+  for (const [key, value] of params) if (value.startsWith("eq.")) out = out.filter((row) => String(row[key]) === value.slice(3));
+  const order = params.get("order");
+  if (order) {
+    const [column, direction] = order.split(".");
+    out = [...out].sort((a, b) => (direction === "desc" ? -1 : 1) * (a[column] > b[column] ? 1 : a[column] < b[column] ? -1 : 0));
+  }
+  const limit = Number(params.get("limit"));
+  return limit > 0 ? out.slice(0, limit) : out;
+}
 const rowsOf = (table) => {
   if (table === "user_credits") return [{ user_id: MOCK_USER.id, credits_remaining: state.credits, credits_total: 3000, plan_tier: MOCK_USER.user_metadata?.subscription_tier ?? "free", beta_expires_at: null, min_pack_credit_price_eur: null }];
   if (table === "user_onboarding") return [{ user_id: MOCK_USER.id, completed_at: "2026-01-02T00:00:00Z", skipped_at: null }];
@@ -122,7 +172,7 @@ const rowsOf = (table) => {
 };
 const supa = await startMockSupabase({
   port: 54437,
-  handle: ({ req, res, url, body, json }) => {
+  handle: ({ req, res, url, body, raw, json }) => {
     // The private bucket a file goes into from the browser, and is read
     // back from by /api/files/register.
     const object = url.pathname.match(/^\/storage\/v1\/object\/(?:authenticated\/)?user-files\/(.+)$/);
@@ -144,15 +194,44 @@ const supa = await startMockSupabase({
       json(200, []);
       return true;
     }
+    const reference = url.pathname.match(/^\/storage\/v1\/object\/(?:authenticated\/|public\/)?website-references\/(.+)$/);
+    if (reference && (req.method === "POST" || req.method === "PUT")) {
+      photoBucket.set(decodeURIComponent(reference[1]), storedFile(req, raw));
+      json(200, { Key: `website-references/${reference[1]}` });
+      return true;
+    }
+    if (reference && (req.method === "GET" || req.method === "HEAD")) {
+      const photo = photoBucket.get(decodeURIComponent(reference[1]));
+      if (!photo) json(404, { statusCode: "404", error: "not_found", message: "Object not found" });
+      else {
+        res.writeHead(200, { "Content-Type": photo.type, "Content-Length": photo.bytes.length });
+        res.end(req.method === "HEAD" ? undefined : photo.bytes);
+      }
+      return true;
+    }
+    if (url.pathname === "/storage/v1/object/list/website-references") {
+      json(200, []);
+      return true;
+    }
     if (!url.pathname.startsWith("/rest/v1/")) return false;
     const table = url.pathname.slice("/rest/v1/".length).split("?")[0];
+    if (req.method === "POST" && INSERTED.has(table)) {
+      let given = [];
+      try { given = [].concat(JSON.parse(body || "[]")); } catch {}
+      const made = given.map((row) => ({ id: randomUUID(), created_at: new Date().toISOString(), ...row }));
+      state.rows[table] = [...(state.rows[table] ?? []), ...made];
+      for (const row of made) writes.push({ table, insert: row });
+      if ((req.headers.accept ?? "").includes("vnd.pgrst.object")) json(201, made[0]);
+      else json(201, made);
+      return true;
+    }
     if (req.method === "PATCH" && state.rows[table]) {
       let patch = {};
       try { patch = JSON.parse(body || "{}"); } catch {}
       writes.push({ table, patch });
       state.rows[table] = state.rows[table].map((row) => ({ ...row, ...patch }));
     }
-    const rows = rowsOf(table);
+    const rows = req.method === "GET" && table === "site_versions" ? filtered(rowsOf(table), url.searchParams) : rowsOf(table);
     if ((req.headers.prefer ?? "").includes("count=")) {
       res.writeHead(200, { "Content-Type": "application/json", "Content-Range": rows.length > 0 ? `0-${rows.length - 1}/${rows.length}` : "*/0" });
       res.end(JSON.stringify(req.method === "HEAD" ? null : rows));
@@ -178,6 +257,8 @@ const OVERLOADED = { type: "error", error: { type: "overloaded_error", message: 
 const REWRITTEN = "ΞΑΝΑΓΡΑΜΜΕΝΟ";
 let modelMode = "down";
 let modelCalls = 0;
+// How many requests reached the model with a photo in them.
+let modelImages = 0;
 const toolAnswer = (name, input) => ({ id: "msg_edges", type: "message", role: "assistant", model: "claude-sonnet-4-5", content: [{ type: "tool_use", id: "toolu_edges", name, input }], stop_reason: "tool_use", stop_sequence: null, usage: { input_tokens: 900, output_tokens: 300 } });
 function streamText(res, text) {
   const sse = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
@@ -195,6 +276,7 @@ const model = http.createServer((req, res) => {
   req.on("data", (c) => (raw += c));
   req.on("end", () => {
     modelCalls++;
+    if (/"type":"image"/.test(raw)) modelImages++;
     if (modelMode === "down") {
       res.writeHead(529, { "Content-Type": "application/json", "request-id": "req_edges", "x-should-retry": "false" });
       return res.end(JSON.stringify(OVERLOADED));
@@ -248,6 +330,10 @@ const base = {
 };
 
 const fill = (s, vars = {}) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
+const icu = (s, locale, vars) => String(new IntlMessageFormat(s, locale).format(vars));
+// A real photograph, so the route's resize and its optimised copy (sharp)
+// have something to read.
+const PNG = await sharp({ create: { width: 48, height: 48, channels: 3, background: { r: 200, g: 90, b: 40 } } }).png().toBuffer();
 const MESSAGES = {
   el: JSON.parse(readFileSync("messages/el.json", "utf8")),
   en: JSON.parse(readFileSync("messages/en.json", "utf8")),
@@ -623,6 +709,198 @@ try {
         await backToField();
       }
       modelMode = "down";
+
+      // ================================================================
+      console.log(`-- old pages: collections, reference photos, versions, through the shell`);
+      // What only the old Files and Site pages had (the owner's decision of
+      // 2026-10-09), used through the shell and its REAL routes.
+      {
+        const OFFER_ID = "56565656-5656-4565-8565-565656565656";
+        const COLLECTION_ID = "57575757-5757-4575-8575-575757575757";
+        const [contract] = ROWS.file.user_files;
+        const offer = { ...contract, id: OFFER_ID, filename: "offer.pdf", storage_path: `${MOCK_USER.id}/offer.pdf` };
+        const kept = locale === "el" ? "Συμβόλαια" : "Contracts";
+        const named = locale === "el" ? "Προσφορές 2026" : "Offers 2026";
+        state.rows = {
+          user_files: [contract, offer],
+          file_collections: [{ id: COLLECTION_ID, user_id: MOCK_USER.id, name: kept, description: null, created_at: "2026-10-07T07:30:00Z" }],
+          file_collection_items: [{ collection_id: COLLECTION_ID, file_id: contract.id, user_id: MOCK_USER.id }],
+        };
+        writes.length = 0;
+        await page.goto(`${TEST}/dashboard/files`, { waitUntil: "networkidle" });
+        if (device.touch) await press(page.locator('[data-testid="files-shell-files"]'));
+        const chips = page.locator('[data-testid="files-collection"]');
+        const flat = async () => (await chips.allInnerTexts()).map((x) => x.replace(/\s+/g, " ").trim());
+        const shown = await chips.first().waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
+        check(`${run}: files — the collections are there, each with how many files it holds`,
+          shown && JSON.stringify(await flat()) === JSON.stringify([`${kept} · 1`]), shown ? JSON.stringify(await flat()) : "no collection");
+        if (shown) await press(chips.first());
+        const ticks = page.locator('[data-testid="files-shell-list"] input[type=checkbox]');
+        check(`${run}: files — a collection pressed selects its files again`,
+          (await ticks.nth(0).isChecked()) && !(await ticks.nth(1).isChecked()) && (await chips.first().getAttribute("aria-pressed")) === "true");
+        await press(ticks.nth(1));
+        let before = await toolTurns();
+        await press(page.locator('[data-testid="files-collection-save"]'));
+        const question = await lastToolTurn(before, 5000);
+        check(`${run}: files — saving what is selected asks its name in the conversation, and the field says so`,
+          question !== null && question.startsWith(icu(M.dashboard.files.collectionName, locale, { count: 2 })) &&
+            (await field.isVisible()) && (await field.getAttribute("placeholder")) === M.dashboard.files.collectionPlaceholder,
+          JSON.stringify({ question, placeholder: await field.getAttribute("placeholder") }));
+        before = await toolTurns();
+        await say(named);
+        const saved = await lastToolTurn(before, 15000);
+        const made = writes.find((w) => w.table === "file_collections" && w.insert)?.insert;
+        const members = writes.filter((w) => w.table === "file_collection_items" && w.insert).map((w) => w.insert.file_id).sort();
+        check(`${run}: files — the name is saved through the real route, with both files selected`,
+          saved === fill(M.dashboard.files.collectionCreated, { name: named }) && made?.name === named && JSON.stringify(members) === JSON.stringify([contract.id, OFFER_ID].sort()),
+          JSON.stringify({ saved, name: made?.name, members }));
+        if (device.touch) await press(page.locator('[data-testid="files-shell-files"]'));
+        check(`${run}: files — and the new collection is there at once, with its two files, pressed`,
+          JSON.stringify(await flat()) === JSON.stringify([`${named} · 2`, `${kept} · 1`]) && (await chips.first().getAttribute("aria-pressed")) === "true",
+          JSON.stringify(await flat()));
+        check(`${run}: files, collections — the page does not scroll sideways`,
+          (await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) <= 1);
+        inLanguage("files, collections", await shellText());
+        await backToField();
+      }
+      {
+        modelMode = "rewrite";
+        modelImages = 0;
+        state.rows = { ...ROWS.site(locale) };
+        writes.length = 0;
+        photoBucket.clear();
+        const editBodies = [];
+        const onRequest = (request) => {
+          if (/\/api\/websites\/edit$/.test(request.url()) && request.method() === "POST") editBodies.push(request.postDataJSON());
+        };
+        page.on("request", onRequest);
+        await page.goto(`${OWNER}/dashboard/website-builder?project=${SITE_ID}`, { waitUntil: "networkidle" });
+        await backToField();
+        const attach = page.locator('[data-testid="composer-attach-input"]');
+        const tray = page.locator('[data-testid="site-photos"]');
+        let before = await toolTurns();
+        await attach.setInputFiles([
+          { name: "logo.png", mimeType: "image/png", buffer: PNG },
+          { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("not a photograph") },
+        ]);
+        const refused = await lastToolTurn(before, 5000);
+        const trayText = await tray.innerText().catch(() => "");
+        check(`${run}: site — a photo given to the field is shown above it; what is not a photo is refused in the screen's words`,
+          refused === M.dashboard.toolShell.site.photoType && (await tray.locator("img").count()) === 1 && trayText.includes(fill(M.dashboard.toolShell.site.photos, { count: 1, max: 20 })),
+          JSON.stringify({ refused, trayText }));
+        before = await toolTurns();
+        await say(locale === "el" ? "Βάλε το λογότυπο στην κεφαλίδα." : "Put the logo in the header.");
+        const changed = await lastToolTurn(before, 45000);
+        const sent = editBodies.at(-1)?.referenceImagePaths ?? [];
+        check(`${run}: site — the photo goes up to the account's own folder, and with the change through the real route to the model`,
+          changed !== null && changed.startsWith(M.dashboard.toolShell.site.changed) && sent.length === 1 && sent[0].startsWith(`${MOCK_USER.id}/`) &&
+            Boolean(photoBucket.get(sent[0])?.bytes.equals(PNG)) && modelImages > 0,
+          JSON.stringify({ changed, sent, stored: [...photoBucket.keys()], modelImages }));
+        check(`${run}: site — once sent, the photo leaves the field`, (await tray.count()) === 0);
+        inLanguage("site, a change with a photo", await shellText());
+        // A NEW site with a photo: the bytes go up first, and the same path
+        // reaches /api/websites/generate and its worker, as the old page
+        // sends it. Answered here: the build is not what is checked.
+        const NEW_ID = "79797979-7979-4797-8797-797979797979";
+        const bodies = { generate: null, process: null };
+        const building = { ...ROWS.site(locale).user_websites[0], id: NEW_ID, status: "processing", html_content: "" };
+        await page.route("**/api/websites/generate", (r) => {
+          bodies.generate = r.request().postDataJSON();
+          return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, generated: true, record: building }) });
+        });
+        await page.route("**/api/websites/generate/process", (r) => {
+          bodies.process = r.request().postDataJSON();
+          return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
+        });
+        await page.route(`**/api/websites/status?id=${NEW_ID}`, (r) =>
+          r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, record: { ...building, status: "completed", html_content: SITE_HTML[locale] } }) })
+        );
+        await backToField();
+        await press(page.locator('[data-testid="site-new"]'));
+        await attach.setInputFiles({ name: "shop.png", mimeType: "image/png", buffer: PNG });
+        before = await toolTurns();
+        await say(brief.site);
+        await lastToolTurn(before, 15000);
+        for (let i = 0; i < 40 && !bodies.process; i++) await page.waitForTimeout(250);
+        const given = bodies.generate?.referenceImagePaths ?? [];
+        check(`${run}: site — a new site's photo goes up first, and its path reaches the route and its worker`,
+          given.length === 1 && given[0] !== sent[0] && given[0].startsWith(`${MOCK_USER.id}/`) && photoBucket.has(given[0]) &&
+            JSON.stringify(bodies.process?.referenceImagePaths) === JSON.stringify(given) && (await tray.count()) === 0,
+          JSON.stringify({ given, process: bodies.process?.referenceImagePaths ?? null }));
+        page.off("request", onRequest);
+        await page.unrouteAll({ behavior: "ignoreErrors" });
+        modelMode = "down";
+        await backToField();
+      }
+      {
+        const PUBLISHED_ID = "81818181-8181-4818-8818-818181818181";
+        const hours = locale === "el" ? "Βάλε και ωράριο." : "Add opening hours.";
+        const firstHeading = locale === "el" ? "Η πρώτη εκδοχή" : "The first draft";
+        const firstHtml = SITE_HTML[locale].replace(/<h1>[^<]*<\/h1>/, `<h1>${firstHeading}</h1>`);
+        const version = (n, html, said, at) => ({ id: `9${n}9${n}9${n}9${n}-9${n}9${n}-4${n}9${n}-8${n}9${n}-9${n}9${n}9${n}9${n}9${n}9${n}`, website_id: SITE_ID, user_id: MOCK_USER.id, version_number: n, html_content: html, pages: null, change_description: said, created_at: at });
+        const shownAs = (n, html, at) => ({ id: `8${n}8${n}8${n}8${n}-8${n}8${n}-4${n}8${n}-8${n}8${n}-8${n}8${n}8${n}8${n}8${n}8${n}`, published_site_id: PUBLISHED_ID, user_id: MOCK_USER.id, version_number: n, html_content: html, pages: null, change_description: null, published_at: at });
+        state.rows = {
+          ...ROWS.site(locale),
+          website_versions: [
+            version(3, SITE_HTML[locale], `[undo] ${hours}`, "2026-10-07T12:00:00Z"),
+            version(2, SITE_HTML[locale], hours, "2026-10-07T11:00:00Z"),
+            version(1, firstHtml, null, "2026-10-07T10:00:00Z"),
+          ],
+          published_sites: [{ id: PUBLISHED_ID, user_id: MOCK_USER.id, website_id: SITE_ID, subdomain: "bakery", status: "live", is_active: true, view_count: 3, html_content: SITE_HTML[locale], pages: null, published_at: "2026-10-07T12:30:00Z", updated_at: "2026-10-07T12:30:00Z" }],
+          site_versions: [shownAs(2, SITE_HTML[locale], "2026-10-07T12:30:00Z"), shownAs(1, firstHtml, "2026-10-07T10:30:00Z")],
+        };
+        writes.length = 0;
+        await page.goto(`${OWNER}/dashboard/website-builder?project=${SITE_ID}`, { waitUntil: "networkidle" });
+        // Opened by its address, the site is the work on arrival, on a phone too.
+        const open = page.locator('[data-testid="site-history-open"]');
+        const reachable = await open.waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
+        const where = reachable ? await open.boundingBox() : null;
+        check(`${run}: site — the versions' button is on top of the published site, inside the screen`,
+          where !== null && where.x >= 0 && where.x + where.width <= device.viewport.width, JSON.stringify(where));
+        await press(open);
+        const listed = page.locator('[data-testid="site-version"]');
+        const liveRows = page.locator('[data-testid="site-live-versions"] li');
+        const ready = await listed.first().waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
+        await liveRows.first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+        const rows = ready ? await listed.allInnerTexts() : [];
+        const WB = M.dashboard.websiteBuilder;
+        check(`${run}: site — every version is one press away on top of the site, said in the screen's language`,
+          rows.length === 3 && rows[0].includes(fill(WB.versionLabel, { number: 3 })) && rows[0].includes(fill(M.dashboard.toolShell.site.undid, { change: hours })) &&
+            rows[1].includes(hours) && rows[2].includes(WB.versionOriginal) && !rows.join(" ").includes("[undo]"),
+          JSON.stringify(rows));
+        check(`${run}: site — and once published, what the public saw, with Roll back on all but the newest`,
+          (await liveRows.count()) === 2 && (await liveRows.first().innerText()).includes(M.dashboard.publishing.currentlyLive) && (await page.locator('[data-testid="site-rollback"]').count()) === 1,
+          JSON.stringify(await liveRows.allInnerTexts()));
+        check(`${run}: site, versions — the page does not scroll sideways`,
+          (await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) <= 1);
+        inLanguage("site, versions", await shellText());
+        // A version pressed is shown in the latest's place, read-only.
+        await press(listed.nth(2));
+        const viewing = page.locator('[data-testid="site-viewing"]');
+        const earlier = page.locator('[data-testid="site-version-preview"]');
+        const seen = await viewing.waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
+        check(`${run}: site — a version pressed is shown read-only and sandboxed, in the latest's place`,
+          seen && (await viewing.innerText()).includes(fill(WB.viewingOldVersion, { number: 1 })) && ((await earlier.getAttribute("srcdoc")) ?? "").includes(firstHeading) && (await earlier.getAttribute("sandbox")) === "",
+          seen ? await viewing.innerText() : "no version shown");
+        if (seen) await press(page.locator('[data-testid="site-latest"]'));
+        check(`${run}: site — and the latest comes back`, (await viewing.count()) === 0 && (await earlier.count()) === 0);
+        // ROLL BACK, through the real route: the version the public saw before.
+        page.once("dialog", (dialog) => void dialog.accept());
+        await press(open);
+        await liveRows.first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+        await press(page.locator('[data-testid="site-rollback"]'));
+        const deadline = Date.now() + 15000;
+        while (Date.now() < deadline && (await liveRows.count()) !== 3) await page.waitForTimeout(250);
+        const restored = writes.find((w) => w.table === "published_sites" && typeof w.patch?.html_content === "string")?.patch;
+        const appended = writes.find((w) => w.table === "site_versions" && w.insert)?.insert;
+        const newest = (await liveRows.count()) === 3 ? await liveRows.first().innerText() : "";
+        check(`${run}: site — Roll back puts the earlier version live through the real route, and the list says so in the screen's language`,
+          Boolean(restored?.html_content.includes(firstHeading)) && restored?.status === "live" && appended?.version_number === 3 &&
+            newest.includes(fill(M.dashboard.publishing.rollbackSuccess, { number: 1 })) && typeof appended?.change_description === "string" && !newest.includes(appended.change_description),
+          JSON.stringify({ restored: restored?.html_content?.slice(0, 120) ?? null, appended: appended?.version_number ?? null, newest }));
+        inLanguage("site, rolled back", await shellText());
+        await backToField();
+      }
 
       // ================================================================
       console.log(`-- stop: a change to one slide, stopped while it runs`);

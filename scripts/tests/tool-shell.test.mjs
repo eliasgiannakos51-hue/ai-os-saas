@@ -259,8 +259,10 @@ check("Site: a photo refused or not sent is said in the screen's words, never st
 // VERSIONS, the old page's History tab and /dashboard/published's Roll
 // back (components/publishing/published-sites-list.tsx), in
 // components/website-builder/site-history.tsx.
-check("Site: its versions are one press away, on top of it",
-  /onClick=\{\(\) => setHistory\(showingHistory \? null : current\.id\)\}[\s\S]{0,200}data-testid="site-history-open"/.test(site) && /body: showingHistory \? \(\s*<SiteHistory\s/.test(site));
+check("Site: its versions are one press away, above the preview and over the list",
+  /onClick=\{\(\) => setHistory\(showingHistory \? null : current\.id\)\}[\s\S]{0,200}data-testid="site-history-open"/.test(site) &&
+    /body: showingHistory \? \(\s*<div className="flex flex-col gap-3">\s*\{historyToggle\}\s*<SiteHistory\s/.test(site) &&
+    /<div data-testid="site-preview" className="flex h-full flex-col gap-3">\s*<AiGeneratedNotice variant="block" \/>\s*\{historyToggle\}/.test(site));
 check("Site: ...every version, read as the old History tab reads it",
   /\.from\("website_versions"\)\s*\.select\("\*"\)\s*\.eq\("website_id", websiteId\)\s*\.order\("version_number", \{ ascending: false \}\)/.test(siteHistory) &&
     /\.from\("website_versions"\)\s*\.select\("\*"\)\s*\.eq\("website_id", websiteId\)\s*\.order\("version_number", \{ ascending: false \}\)/.test(oldSite) && /onClick=\{\(\) => onView\(version\)\}/.test(siteHistory));

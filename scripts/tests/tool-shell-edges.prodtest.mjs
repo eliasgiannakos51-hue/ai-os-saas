@@ -866,11 +866,12 @@ try {
         };
         writes.length = 0;
         await page.goto(`${OWNER}/dashboard/website-builder?project=${SITE_ID}`, { waitUntil: "networkidle" });
-        // Opened by its address, the site is the work on arrival, on a phone too.
+        // Opened by its address, the site is the work on arrival, on a phone
+        // too; «History» is above its preview.
         const open = page.locator('[data-testid="site-history-open"]');
         const reachable = await open.waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
         const where = reachable ? await open.boundingBox() : null;
-        check(`${run}: site — the versions' button is on top of the published site, inside the screen`,
+        check(`${run}: site — «History» is on the published site, inside the screen`,
           where !== null && where.x >= 0 && where.x + where.width <= device.viewport.width, JSON.stringify(where));
         await press(open);
         const listed = page.locator('[data-testid="site-version"]');

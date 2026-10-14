@@ -439,6 +439,13 @@ const MUTANTS = [
     expect: "its versions are one press away",
   },
   {
+    name: "Site: «History» is not over the preview, so the list cannot be opened",
+    file: SITE,
+    from: '              <AiGeneratedNotice variant="block" />\n              {historyToggle}\n',
+    to: '              <AiGeneratedNotice variant="block" />\n',
+    expect: "its versions are one press away",
+  },
+  {
     name: "Site: an earlier version is previewed with its scripts running",
     file: SITE,
     from: 'srcDoc={shownHtml}\n                  sandbox=""',

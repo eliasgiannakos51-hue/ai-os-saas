@@ -63,10 +63,14 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * and the same `referenceImagePaths` the old page sends. While a new site
  * waits for its questions, the photos it took wait with it.
  *
- * VERSIONS (the old page's History tab, 2026-10-09): a button on top of
- * the site opens every version it has had and, once it is published, what
- * the public saw, with «Roll back» (components/website-builder/site-history.tsx).
+ * VERSIONS (the old page's History tab, 2026-10-09): «History», above the
+ * preview, opens every version the site has had and, once it is published,
+ * what the public saw, with «Roll back» (components/website-builder/site-history.tsx).
  * A version pressed is shown read-only, with the way back to the latest.
+ * Above the preview and not among the icons on top: on a phone those already
+ * fill the row, and one more left the site's name a few pixels wide, its
+ * letters one under the other, pushing the site below the screen (measured
+ * 2026-10-14 by scripts/tests/site-pages-edges.prodtest.mjs, Greek, 390px).
  *
  * BOXES (package 4): the page's parts — header, sections, footer — are
  * listed above the preview and pressed by number; the chosen one is
@@ -414,6 +418,20 @@ export function WebsiteShell({
   const shown = viewing && current && viewing.website_id === current.id ? viewing : null;
   const shownHtml = shown ? normalisePages(shown.pages).pages.find((p) => p.slug === pageSlug)?.html ?? shown.html_content : "";
   const showingHistory = Boolean(current) && history === current!.id;
+  // «History», the same press over the preview and over the list: pressed
+  // again, the site comes back.
+  const historyToggle = current ? (
+    <button
+      type="button"
+      onClick={() => setHistory(showingHistory ? null : current.id)}
+      aria-pressed={showingHistory}
+      data-testid="site-history-open"
+      className={`${OPTION} self-start ${showingHistory ? "border-foreground text-foreground" : ""}`}
+    >
+      <History className="h-3.5 w-3.5" aria-hidden="true" />
+      {t("tabHistory")}
+    </button>
+  ) : null;
 
   const shellTurns: ShellTurn[] = turns.map((turn) => ({
     id: turn.id,
@@ -468,17 +486,6 @@ export function WebsiteShell({
                   <Undo2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               )}
-              <button
-                type="button"
-                onClick={() => setHistory(showingHistory ? null : current.id)}
-                aria-pressed={showingHistory}
-                aria-label={t("tabHistory")}
-                title={t("tabHistory")}
-                data-testid="site-history-open"
-                className={`${ACTION} ${showingHistory ? "bg-panel-hover text-foreground" : ""}`}
-              >
-                <History className="h-4 w-4" aria-hidden="true" />
-              </button>
               <button type="button" onClick={() => download(current)} disabled={current.status !== "completed" || !looksLikeCompleteHtmlDocument(current.html_content)} aria-label={t("downloadButton")} title={t("downloadButton")} data-testid="site-download" className={ACTION}>
                 <Download className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -502,19 +509,23 @@ export function WebsiteShell({
             </>
           ),
           body: showingHistory ? (
-            <SiteHistory
-              websiteId={current.id}
-              reload={historyRound}
-              viewingId={shown?.id ?? null}
-              onView={(version) => {
-                setViewing(version);
-                setBox(null);
-                setHistory(null);
-              }}
-            />
+            <div className="flex flex-col gap-3">
+              {historyToggle}
+              <SiteHistory
+                websiteId={current.id}
+                reload={historyRound}
+                viewingId={shown?.id ?? null}
+                onView={(version) => {
+                  setViewing(version);
+                  setBox(null);
+                  setHistory(null);
+                }}
+              />
+            </div>
           ) : (
             <div data-testid="site-preview" className="flex h-full flex-col gap-3">
               <AiGeneratedNotice variant="block" />
+              {historyToggle}
               {shown && (
                 <p data-testid="site-viewing" className="flex flex-wrap items-center gap-x-2 text-xs text-foreground">
                   {t("viewingOldVersion", { number: shown.version_number })}

@@ -21,6 +21,7 @@ const PAGE = "src/app/dashboard/tools/page.tsx";
 const SITE = "src/app/dashboard/website-builder/page.tsx";
 const JA = "messages/ja.json";
 const HOME_WALK = "scripts/tests/design-home.prodtest.mjs";
+const SMOKE = "scripts/tests/routes-smoke.prodtest.mjs";
 
 const MUTANTS = [
   {
@@ -79,6 +80,15 @@ const MUTANTS = [
     to: "    feature_flags: [],",
     expect: "each of them sets all-tools-tiles",
   },
+  {
+    // The one that is in the set only because the population is the page:
+    // it reads the group headings out of the page's text, never a tile.
+    name: "the smoke test reads the page's headings with the squares at their start",
+    file: SMOKE,
+    from: '  feature_flags: [{ key: "all-tools-tiles", audience: "everyone" }],',
+    to: "  feature_flags: [],",
+    expect: "each of them sets all-tools-tiles",
+  },
 ];
 
-runMutations({ name: "all-tools-tiles", gate: GATE, targets: [LIB, PAGE, SITE, JA, HOME_WALK], mutants: MUTANTS });
+runMutations({ name: "all-tools-tiles", gate: GATE, targets: [LIB, PAGE, SITE, JA, HOME_WALK, SMOKE], mutants: MUTANTS });

@@ -145,9 +145,16 @@ check(`...all ${LOCALES.length} of messages/`, LOCALES.length >= 10);
 const el = JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.tools.tilesHidden;
 check("the Greek line carries no English word", ((el ?? "").replace("⌘K", "").match(/[A-Za-z]+/g) ?? []).length === 0, el);
 
-console.log("\n== 5. every prodtest that walks the squares opens them first ==");
+console.log("\n== 5. every prodtest that reads the page opens the squares first ==");
+// THE POPULATION IS THE PAGE, NOT THE SQUARES. The first version of this
+// counted only the prodtests naming `tool-tile`, and routes-smoke.prodtest.mjs
+// reads the group headings out of /dashboard/tools' main text instead —
+// so it was not in the set, and it was the one that went red in CI
+// («at least four headings actually rendered in Greek (0)»), on a page
+// that was behaving exactly as the owner asked. Anything that opens the
+// page is in.
 const walkers = readdirSync("scripts/tests").filter((f) => f.endsWith(".prodtest.mjs") && f !== "all-tools-tiles.prodtest.mjs")
-  .filter((f) => readFileSync(`scripts/tests/${f}`, "utf8").includes('data-testid="tool-tile"'));
+  .filter((f) => /data-testid="tool-tile"|\/dashboard\/tools/.test(stripComments(readFileSync(`scripts/tests/${f}`, "utf8"))));
 const shut = walkers.filter((f) => !/["']all-tools-tiles["']/.test(stripComments(readFileSync(`scripts/tests/${f}`, "utf8"))));
 check(`each of them sets all-tools-tiles (${walkers.length})`, walkers.length > 0 && shut.length === 0, shut.join(", "));
 

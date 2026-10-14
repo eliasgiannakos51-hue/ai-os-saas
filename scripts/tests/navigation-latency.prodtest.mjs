@@ -115,6 +115,16 @@ const supa = http.createServer((req, res) => {
         const row = { user_id: USER_ID, completed_at: "2026-01-02T00:00:00Z", skipped_at: null };
         return single ? finish(200, row) : finish(200, [row], { "Content-Range": "0-0/1" });
       }
+      // THE SQUARES ARE WHAT SIX OF THE NINE ROUTES ARE CLICKED FROM, and
+      // they are behind `all-tools-tiles`, which starts closed
+      // (src/lib/flags/flags.ts FIRST_AUDIENCE, the owner's decision of
+      // 2026-10-14). An empty answer here is not a neutral default either:
+      // it is an All tools page with no square to click, and this file
+      // would report six routes as "no link" rather than measure them.
+      if (table === "feature_flags") {
+        const rows = [{ key: "all-tools-tiles", audience: "everyone" }];
+        return single ? finish(200, rows[0]) : finish(200, rows, { "Content-Range": "0-0/1" });
+      }
       if (single) return finish(200, null);
       return finish(200, [], { "Content-Range": "0-0/0" });
     }

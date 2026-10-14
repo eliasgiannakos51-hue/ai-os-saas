@@ -156,9 +156,9 @@
       "formSubmissions": "Form submissions",
       "routing": "Which AI is used",
       "businessHealth": "How the business is doing",
-      "mine": "Mine",
+      "mine": "Library",
       "records": "My records",
-      "library": "My stuff",
+      "library": "Library",
       "newEntry": "New entry",
       "costs": "Costs",
       "systemHealth": "System Health",
@@ -314,7 +314,11 @@
       "chat": "Chat",
       "tools": "Tools",
       "you": "You",
-      "label": "Main navigation"
+      "label": "Main navigation",
+      "balance": "Balance: {amount} credits",
+      "balanceLow": "Low balance: {amount} credits",
+      "balanceEmpty": "No credits left",
+      "balanceUnlimited": "Unlimited credits"
     }
   },
   "landing": {
@@ -1479,7 +1483,7 @@
       "routeCostNow": "≈ {credits, plural, one {# credit} other {# credits}} on send"
     },
     "timeline": {
-      "title": "Mine",
+      "title": "Library",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
       "rangeToday": "Today",
@@ -3642,7 +3646,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Everything you record about {module} lives here.",
-    "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
+    "emptyWhy": "Anything you log here joins your Library and becomes something the AI can use when you ask it a question about your work.",
     "emptyExample": "Start with: “{example}”",
     "examples": {
       "competitors": "Notion — closest competitor on pricing",
@@ -4218,7 +4222,7 @@
     },
     "businessModule": {
       "is": "A table you keep yourself, for one kind of work.",
-      "does": "You add rows by hand or through Create Studio, and the AI reads them: Chat, Search my records, History and the weekly reflection all draw on what is here, and any row can be linked to a row in another module.",
+      "does": "You add rows by hand or through Create Studio, and the AI reads them: Chat, Search my records, the Library and the weekly reflection all draw on what is here, and any row can be linked to a row in another module.",
       "doesNot": "It does not fill itself in. Nothing arrives here from your email, your bank or your chats — an empty table is empty because nothing was entered — and deleting a row here removes it everywhere it is shown."
     },
     "documents": {

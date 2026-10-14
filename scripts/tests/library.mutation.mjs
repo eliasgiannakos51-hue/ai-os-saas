@@ -9,7 +9,10 @@
  * with its switch off, an old item read without its owner, a link that
  * opens the tool on the wrong item, a tool's table left out, the
  * search's own words escaped away, and (2026-10-08) a file's page markers
- * read as its words.
+ * read as its words. And (2026-10-14) the name: the row or the heading
+ * back to «Τα δικά μου» / "Mine", the browser tab or the row reading
+ * another key, a sentence naming the old Timeline, the old German name
+ * left on an unused row.
  *
  * Run: node scripts/tests/library.mutation.mjs
  */
@@ -25,6 +28,9 @@ const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
 const SITE_SHELL = "src/components/website-builder/website-shell.tsx";
 const RESEARCH_SHELL = "src/components/research/research-shell.tsx";
 const EL = "messages/el.json";
+const EN = "messages/en.json";
+const DE = "messages/de.json";
+const LABEL_KEYS = "src/lib/sidebar-label-keys.ts";
 const VIEW = "src/components/library/library-view.tsx";
 
 const MUTANTS = [
@@ -162,11 +168,54 @@ const MUTANTS = [
     to: "\"title\": \"Τίποτα δεν λέει '{query}'\",",
     expect: "el: the search is named",
   },
+  {
+    // THE OWNER'S NAME (2026-10-09), undone where most people see it.
+    name: "the Greek row is «Τα δικά μου» again",
+    file: EL,
+    from: '"mine": "Βιβλιοθήκη",',
+    to: '"mine": "Τα δικά μου",',
+    expect: "el: the Library has one name",
+  },
+  {
+    name: "the English heading is «Mine» again",
+    file: EN,
+    from: '      "title": "Library",',
+    to: '      "title": "Mine",',
+    expect: "en: the Library has one name",
+  },
+  {
+    name: "a log's empty state still sends you to the Timeline",
+    file: EL,
+    from: "μπαίνει στη Βιβλιοθήκη σου",
+    to: "μπαίνει στο Χρονολόγιό σου",
+    expect: "el: the sentences that name it in passing",
+  },
+  {
+    name: "the browser tab reads another name",
+    file: TIMELINE,
+    from: 'pageTitle("sidebar.items.mine")',
+    to: 'pageTitle("sidebar.items.timeline")',
+    expect: "the browser tab reads the row's name",
+  },
+  {
+    name: "the row reads another key than the page",
+    file: LABEL_KEYS,
+    from: '  Timeline: "mine",\n',
+    to: '  Timeline: "timeline",\n',
+    expect: "the row (sidebar, ⌘K, records hub) reads the same key",
+  },
+  {
+    name: "the old German name is left on a row",
+    file: DE,
+    from: '"library": "Bibliothek",\n      "newEntry"',
+    to: '"library": "Meine Sachen",\n      "newEntry"',
+    expect: "de: the old name «Meine Sachen» is on no screen",
+  },
 ];
 
 runMutations({
   name: "library",
   gate: GATE,
-  targets: [LOAD, SOURCES, REQUESTED, TIMELINE, FILTERS, SLIDES_PAGE, SITE_SHELL, RESEARCH_SHELL, EL, VIEW],
+  targets: [LOAD, SOURCES, REQUESTED, TIMELINE, FILTERS, SLIDES_PAGE, SITE_SHELL, RESEARCH_SHELL, EL, EN, DE, LABEL_KEYS, VIEW],
   mutants: MUTANTS,
 });

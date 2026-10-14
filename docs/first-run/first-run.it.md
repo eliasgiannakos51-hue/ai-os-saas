@@ -1,8 +1,8 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **606 strings**. The whole product is 4263, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 4267, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Sembra una domanda. La rispondo o la registro?
 
 Descrivi qualsiasi cosa — un'idea di prodotto, un'operazione, il feedback di un utente, una metrica — e finisce automaticamente nel modulo giusto.
 
-## Tier 2 — The labels — skim these (373)
+## Tier 2 — The labels — skim these (377)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1894,9 +1894,9 @@ Apprendimento
 
 **`sidebar.items.library`**
 
-> EN — My stuff
+> EN — Library
 
-Le mie cose
+Libreria
 
 **`sidebar.items.marketplace`**
 
@@ -1918,9 +1918,9 @@ Cerca nei miei dati
 
 **`sidebar.items.mine`**
 
-> EN — Mine
+> EN — Library
 
-Le mie cose
+Libreria
 
 **`sidebar.items.missionControl`**
 
@@ -2281,6 +2281,30 @@ Sblocca {tool}
 > EN — New conversation
 
 Nuova conversazione
+
+**`sidebar.tabs.balance`**
+
+> EN — Balance: {amount} credits
+
+Saldo: {amount} crediti
+
+**`sidebar.tabs.balanceEmpty`**
+
+> EN — No credits left
+
+Nessun credito rimasto
+
+**`sidebar.tabs.balanceLow`**
+
+> EN — Low balance: {amount} credits
+
+Saldo basso: {amount} crediti
+
+**`sidebar.tabs.balanceUnlimited`**
+
+> EN — Unlimited credits
+
+Crediti illimitati
 
 **`sidebar.tabs.label`**
 

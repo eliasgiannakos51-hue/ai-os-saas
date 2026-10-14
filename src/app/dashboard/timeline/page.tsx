@@ -78,10 +78,13 @@ export default async function TimelinePage(
   if (searchParams.view === "fav") redirect("/dashboard/favorites");
 
   // THE LIBRARY (package 5), behind the switch "library". This is the page
-  // All tools already names «Βιβλιοθήκη» (lib/nav/all-tools.ts), so with
+  // All tools names «Βιβλιοθήκη» (lib/nav/all-tools.ts), and since
+  // 2026-10-14 so do its heading, its browser tab and its row, whether the
+  // switch is on or off (the owner's name, 2026-10-09). So with
   // the switch on it opens on what the account MADE, in every tool; the
   // entries this page always listed are one tab along, at ?view=entries,
-  // exactly as before. With the switch off nothing here changes.
+  // exactly as before. With the switch off the page is those entries, as
+  // it always was, under the same name.
   const library = await isFeatureOn("library", user);
   if (library && searchParams.view !== "entries") {
     const kind = isLibraryKind(searchParams.kind) ? searchParams.kind : null;

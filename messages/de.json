@@ -156,9 +156,9 @@
       "formSubmissions": "Formulareingänge",
       "routing": "Welche KI verwendet wird",
       "businessHealth": "Wie das Geschäft läuft",
-      "mine": "Meine Sachen",
+      "mine": "Bibliothek",
       "records": "Meine Einträge",
-      "library": "Meine Sachen",
+      "library": "Bibliothek",
       "newEntry": "Neuer Eintrag",
       "costs": "Kosten",
       "systemHealth": "Systemzustand",
@@ -314,7 +314,11 @@
       "chat": "Chat",
       "tools": "Werkzeuge",
       "you": "Du",
-      "label": "Hauptnavigation"
+      "label": "Hauptnavigation",
+      "balance": "Guthaben: {amount} Credits",
+      "balanceLow": "Niedriges Guthaben: {amount} Credits",
+      "balanceEmpty": "Keine Credits mehr",
+      "balanceUnlimited": "Unbegrenzte Credits"
     }
   },
   "landing": {
@@ -1479,7 +1483,7 @@
       "routeCostNow": "≈ {credits, plural, one {# Credit} other {# Credits}} beim Senden"
     },
     "timeline": {
-      "title": "Meine Sachen",
+      "title": "Bibliothek",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
       "rangeToday": "Heute",
@@ -3642,7 +3646,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Hier lebt alles, was du zu {module} festhältst.",
-    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Chronik und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
+    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Bibliothek und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
     "emptyExample": "Fang an mit: „{example}“",
     "examples": {
       "competitors": "Notion — beim Preis der nächste Wettbewerber",
@@ -4218,7 +4222,7 @@
     },
     "businessModule": {
       "is": "Eine Tabelle, die Sie selbst führen, für eine Art von Arbeit.",
-      "does": "Sie fügen Zeilen von Hand oder über Create Studio hinzu, und die KI liest sie: Chat, Suche in meinen Einträgen, Verlauf und der wöchentliche Rückblick schöpfen von hier, und jede Zeile lässt sich mit einer Zeile eines anderen Moduls verknüpfen.",
+      "does": "Sie fügen Zeilen von Hand oder über Create Studio hinzu, und die KI liest sie: Chat, Suche in meinen Einträgen, Bibliothek und der wöchentliche Rückblick schöpfen von hier, und jede Zeile lässt sich mit einer Zeile eines anderen Moduls verknüpfen.",
       "doesNot": "Sie füllt sich nicht von selbst. Hier kommt nichts aus Ihrer E-Mail, Ihrer Bank oder Ihren Chats an — eine leere Tabelle ist leer, weil nichts eingetragen wurde — und wer hier eine Zeile löscht, entfernt sie überall, wo sie erscheint."
     },
     "documents": {

@@ -156,9 +156,9 @@
       "formSubmissions": "Envios de formulários",
       "routing": "Que IA é usada",
       "businessHealth": "Como vai o negócio",
-      "mine": "As minhas coisas",
+      "mine": "Biblioteca",
       "records": "Os meus registos",
-      "library": "As minhas coisas",
+      "library": "Biblioteca",
       "newEntry": "Nova entrada",
       "costs": "Custos",
       "systemHealth": "Estado do sistema",
@@ -314,7 +314,11 @@
       "chat": "Conversa",
       "tools": "Ferramentas",
       "you": "Você",
-      "label": "Navegação principal"
+      "label": "Navegação principal",
+      "balance": "Saldo: {amount} créditos",
+      "balanceLow": "Saldo baixo: {amount} créditos",
+      "balanceEmpty": "Sem créditos",
+      "balanceUnlimited": "Créditos ilimitados"
     }
   },
   "landing": {
@@ -1479,7 +1483,7 @@
       "routeCostNow": "≈ {credits, plural, one {# crédito} other {# créditos}} ao enviar"
     },
     "timeline": {
-      "title": "As minhas coisas",
+      "title": "Biblioteca",
       "allModules": "Todos os módulos",
       "showOnly": "Mostrar apenas: {module}",
       "rangeToday": "Hoje",
@@ -3642,7 +3646,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Aqui vive tudo o que registas sobre {module}.",
-    "emptyWhy": "Tudo o que registares aqui entra na tua Cronologia e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
+    "emptyWhy": "Tudo o que registares aqui entra na tua Biblioteca e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
     "emptyExample": "Começa com: «{example}»",
     "examples": {
       "competitors": "Notion — o concorrente mais próximo no preço",
@@ -4218,7 +4222,7 @@
     },
     "businessModule": {
       "is": "Uma tabela que mantém você, para um tipo de trabalho.",
-      "does": "Adiciona linhas à mão ou pelo Create Studio, e a IA lê-as: o Chat, a pesquisa nos seus registos, o Histórico e a reflexão semanal bebem daqui, e qualquer linha pode ser ligada a uma linha de outro módulo.",
+      "does": "Adiciona linhas à mão ou pelo Create Studio, e a IA lê-as: o Chat, a pesquisa nos seus registos, a Biblioteca e a reflexão semanal bebem daqui, e qualquer linha pode ser ligada a uma linha de outro módulo.",
       "doesNot": "Não se preenche sozinha. Aqui não chega nada do seu email, do seu banco ou das suas conversas — uma tabela vazia está vazia porque nada foi introduzido — e apagar uma linha aqui retira-a de todo o lado onde aparece."
     },
     "documents": {

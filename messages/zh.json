@@ -156,9 +156,9 @@
       "formSubmissions": "表单提交",
       "routing": "用的是哪个 AI",
       "businessHealth": "生意怎么样",
-      "mine": "我的内容",
+      "mine": "资料库",
       "records": "我的记录",
-      "library": "我的东西",
+      "library": "资料库",
       "newEntry": "新记录",
       "costs": "成本",
       "systemHealth": "系统健康",
@@ -314,7 +314,11 @@
       "chat": "聊天",
       "tools": "工具",
       "you": "我",
-      "label": "主导航"
+      "label": "主导航",
+      "balance": "余额：{amount} 积分",
+      "balanceLow": "余额不足：{amount} 积分",
+      "balanceEmpty": "积分已用完",
+      "balanceUnlimited": "无限积分"
     }
   },
   "landing": {
@@ -1479,7 +1483,7 @@
       "routeCostNow": "发送时约 {credits} 积分"
     },
     "timeline": {
-      "title": "我的内容",
+      "title": "资料库",
       "allModules": "所有模块",
       "showOnly": "仅显示:{module}",
       "rangeToday": "今天",
@@ -3642,7 +3646,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "你记录的所有关于{module}的内容都在这里。",
-    "emptyWhy": "你在这里记录的一切都会进入时间线，并成为 AI 在你询问工作相关问题时可以使用的信息。",
+    "emptyWhy": "你在这里记录的一切都会进入资料库，并成为 AI 在你询问工作相关问题时可以使用的信息。",
     "emptyExample": "从这条开始：「{example}」",
     "examples": {
       "competitors": "Notion — 定价上最接近的竞争对手",
@@ -4218,7 +4222,7 @@
     },
     "businessModule": {
       "is": "一张由你自己维护的表，对应一类工作。",
-      "does": "你手动添加记录，或通过 Create Studio 添加，AI 会读取它们：聊天、搜索我的记录、历史和每周回顾都从这里取材，而每条记录都可以与其他模块的记录相互关联。",
+      "does": "你手动添加记录，或通过 Create Studio 添加，AI 会读取它们：聊天、搜索我的记录、资料库和每周回顾都从这里取材，而每条记录都可以与其他模块的记录相互关联。",
       "doesNot": "它不会自己填满。这里不会自动收到你的邮件、银行或聊天里的任何东西——表是空的，是因为还没有人录入过——而在这里删掉一条，它在所有显示它的地方都会消失。"
     },
     "documents": {

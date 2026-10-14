@@ -3008,6 +3008,7 @@
       "title": "Todas as ferramentas",
       "description": "Cada ferramenta, com uma linha sobre o que faz.",
       "orPress": "Ou carregue em ⌘K e escreva o nome, ou descreva-o no campo do Início.",
+      "tilesHidden": "Descreva o que quer no campo do Início ou, no computador, carregue em ⌘K e escreva o nome de uma ferramenta.",
       "search": "Encontrar uma ferramenta",
       "searchLabel": "Pesquisar ferramentas",
       "noMatch": "Nenhuma ferramenta se chama «{query}». Descreva-a no campo do Início.",

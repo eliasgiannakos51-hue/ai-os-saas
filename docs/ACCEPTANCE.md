@@ -45,8 +45,8 @@ production build πάνω σε ψεύτικη βάση. Γι' αυτό η πλή
 - Κάνω: ανοίγω το All tools.
 - Βλέπω: μόνο μεγάλα τετράγωνα με τα σημαντικά εργαλεία, χωρίς «beta».
 - Χρόνος: 10 δευτερόλεπτα
-- Αυτόματα: `scripts/tests/design-home.prodtest.mjs`, `scripts/tests/all-tools.test.mjs`, `scripts/tests/all-tools-empty-chat-edges.prodtest.mjs`
-- Σήμερα: φτιαγμένο, ελεγμένο σε browser 2026-10-08 (τοπικό production build, υπολογιστής και κινητό, ελληνικά και αγγλικά)· τα τετράγωνα και στις άλλες οκτώ γλώσσες, 2026-10-09
+- Αυτόματα: `scripts/tests/design-home.prodtest.mjs`, `scripts/tests/all-tools.test.mjs`, `scripts/tests/all-tools-empty-chat-edges.prodtest.mjs`, `scripts/tests/all-tools-tiles.test.mjs`, `scripts/tests/all-tools-tiles.prodtest.mjs`
+- Σήμερα: φτιαγμένο, ελεγμένο σε browser 2026-10-08 (τοπικό production build, υπολογιστής και κινητό, ελληνικά και αγγλικά)· τα τετράγωνα και στις άλλες οκτώ γλώσσες, 2026-10-09. Από 2026-10-14, με απόφαση του ιδιοκτήτη, τα τετράγωνα είναι πίσω από τον διακόπτη `all-tools-tiles`, που ξεκινά στο «Κανείς»: η σελίδα δείχνει μόνο τον τίτλο και μία γραμμή. Στο «Όλοι» ισχύει το «Βλέπω» όπως είναι
 
 ### Α2. Chat χωρίς μήνυμα
 - Πακέτο: 2

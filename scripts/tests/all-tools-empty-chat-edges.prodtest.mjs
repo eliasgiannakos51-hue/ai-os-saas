@@ -106,7 +106,10 @@ function handle({ req, res, url, body }) {
       free_chat_period_start: new Date().toISOString(),
     }]);
   }
-  if (p === "/rest/v1/feature_flags") return rows(req, res, STATE.flags);
+  // All tools' squares are behind `all-tools-tiles` since 2026-10-14, and
+  // it starts at «Κανείς»; this walks the squares, so it opens them first
+  // (a row the account's own list may still override).
+  if (p === "/rest/v1/feature_flags") return rows(req, res, [{ key: "all-tools-tiles", audience: "everyone" }, ...STATE.flags]);
   // The platform's calls today, which lib/ai-circuit-breaker.ts holds
   // against MAX_DAILY_AI_CALLS before any AI call.
   if (p === "/rest/v1/daily_ai_spend_tracking" && req.method === "GET") return rows(req, res, STATE.atCapacity ? [{ total_calls: 10_000_000 }] : []);

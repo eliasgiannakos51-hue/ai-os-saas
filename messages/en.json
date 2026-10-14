@@ -3008,6 +3008,7 @@
       "title": "All tools",
       "description": "Every tool, with one line on what it does.",
       "orPress": "Or press ⌘K and type its name — or describe it in the field on Home.",
+      "tilesHidden": "Describe what you want in the field on Home — or, on a computer, press ⌘K and type a tool's name.",
       "search": "Find a tool",
       "searchLabel": "Search tools",
       "noMatch": "No tool is called “{query}”. Describe it in the field on Home instead.",

@@ -3008,6 +3008,7 @@
       "title": "Tous les outils",
       "description": "Chaque outil, avec une ligne sur ce qu’il fait.",
       "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil.",
+      "tilesHidden": "Décrivez ce que vous voulez dans le champ de l’accueil, ou, sur ordinateur, appuyez sur ⌘K et tapez le nom d’un outil.",
       "search": "Trouver un outil",
       "searchLabel": "Rechercher des outils",
       "noMatch": "Aucun outil ne s’appelle « {query} ». Décrivez-le plutôt dans le champ de l’accueil.",

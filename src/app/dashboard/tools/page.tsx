@@ -26,12 +26,32 @@ export function generateMetadata(): Promise<Metadata> {
  * filter; since MASTER 14.1 (2026-10-07) without the Settings block. Each square's pin is the only way to
  * put a tool in the sidebar at once, so the page hands it this person's
  * pins.
+ *
+ * THE SQUARES ARE BEHIND A SWITCH (the owner, 2026-10-14: «Κρύψε όλα τα
+ * εργαλεία από το All tools, χωρίς να σβήσεις τίποτα»). With
+ * `all-tools-tiles` off — where it starts, for everyone — the page draws
+ * its title and one line on how to reach a tool, and no square, group or
+ * search. Nothing else reads that switch: every tool keeps its own page
+ * and address, Chat and ⌘K still open them, the Library keeps what was
+ * made. scripts/tests/all-tools-tiles.test.mjs holds this, and
+ * scripts/tests/all-tools-tiles.prodtest.mjs draws both states.
  */
 export default async function ToolsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const t = await getTranslations("dashboard.tools");
+  if (!(await isFeatureOn("all-tools-tiles", user))) {
+    return (
+      <div className="min-h-full">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <PageHeader icon={LayoutGrid} title={t("title")} />
+          <p className="text-sm text-muted" data-testid="tools-hidden">{t("tilesHidden")}</p>
+        </div>
+      </div>
+    );
+  }
+
   const isOwner = isAdminEmail(user.email);
   // THE NEW TOOLS' SQUARES (MASTER 14.1), each drawn only when its own
   // switch is on for this person — the same switch its page reads.

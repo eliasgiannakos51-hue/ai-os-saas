@@ -19,6 +19,15 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
  * yet run: every case reads as 'staff', so a customer never sees an
  * unfinished thing because something went wrong, and the owner still can.
  * scripts/tests/feature-flags.test.mjs runs this rule.
+ *
+ * ONE EXCEPTION, BY THE OWNER'S CHOICE (2026-10-14): `all-tools-tiles`
+ * does not gate a new thing, it gates the squares All tools has always
+ * drawn, and the owner wants them hidden for everyone, the owner
+ * included, until the switch is turned back. So with no row, or a table
+ * that cannot be read, it reads as 'off' (FIRST_AUDIENCE) — the state the
+ * owner chose — and nothing behind it is lost: every tool still opens at
+ * its own address.
+ * scripts/tests/all-tools-tiles.test.mjs runs this.
  */
 export { FLAG_AUDIENCES, type FlagAudience };
 
@@ -45,11 +54,20 @@ export const FLAGS = {
   "chat-attachments": "Chat reads what you give it: PDFs and images attached to a message, asked about, and under the answer the remembered facts it used (MASTER 16, package 9)",
   "brand-memory": "Memory: a business name and colours said in Chat are remembered as such, and Site uses them without being told again (MASTER 2.2, package 6)",
   library: "The Library: everything made in Site, Slides, Posts, Documents, Research, Analyze and Files in one place, searched in what it says, pressed to open it in its tool (MASTER 4.1, package 5)",
+  "all-tools-tiles": "All tools shows its squares: «Κανείς» and the page shows no tool, no group and no search; «Όλοι» and every square is back as before. Hides nothing else: every tool still opens at its own address, Chat still opens tools, the Library keeps everything. Starts at «Κανείς» for everyone, the owner included (2026-10-14)",
 } as const;
 
 export type FlagKey = keyof typeof FLAGS;
 
 export const DEFAULT_AUDIENCE: FlagAudience = "staff";
+
+/** The switches that start somewhere other than DEFAULT_AUDIENCE, and
+ *  read so when the table has no row or cannot be read (see above). */
+export const FIRST_AUDIENCE: Partial<Record<FlagKey, FlagAudience>> = { "all-tools-tiles": "off" };
+
+export function defaultAudienceOf(key: FlagKey): FlagAudience {
+  return FIRST_AUDIENCE[key] ?? DEFAULT_AUDIENCE;
+}
 
 export function isFlagKey(value: unknown): value is FlagKey {
   return typeof value === "string" && Object.prototype.hasOwnProperty.call(FLAGS, value);
@@ -78,7 +96,7 @@ export function audienceAllows(audience: FlagAudience, staff: boolean): boolean 
 
 /** Every switch with the owner's choice, or the default where there is none. */
 export async function readFlagAudiences(): Promise<Record<FlagKey, FlagAudience>> {
-  const out = Object.fromEntries(Object.keys(FLAGS).map((k) => [k, DEFAULT_AUDIENCE])) as Record<FlagKey, FlagAudience>;
+  const out = Object.fromEntries((Object.keys(FLAGS) as FlagKey[]).map((k) => [k, defaultAudienceOf(k)])) as Record<FlagKey, FlagAudience>;
   try {
     const { data, error } = await createAdminClient().from("feature_flags").select("key, audience");
     if (error) throw error;

@@ -51,12 +51,17 @@ check("the owner is staff", flags.isStaffEmail("Owner@Example.com", env) === tru
 check("the test account is staff, from TEST_ACCOUNT_EMAILS", flags.isStaffEmail("qa@example.com", env) === true);
 check("a customer is not", flags.isStaffEmail("someone@example.com", env) === false && flags.isStaffEmail(null, env) === false);
 check("a switch with no row reads as staff, never everyone", flags.DEFAULT_AUDIENCE === "staff");
+// The one switch the owner chose to start elsewhere (all-tools-tiles,
+// 2026-10-14) starts closed; none may start open.
+const firstElsewhere = Object.keys(flags.FLAGS).filter((k) => flags.defaultAudienceOf(k) !== "staff");
+check("...every switch but the owner's named exception starts there, and none starts at everyone",
+  firstElsewhere.join() === "all-tools-tiles" && Object.keys(flags.FLAGS).every((k) => flags.defaultAudienceOf(k) !== "everyone"), firstElsewhere.join(", "));
 check("only the three settings are accepted", ["off", "staff", "everyone"].every(flags.isFlagAudience) && !flags.isFlagAudience("all") && !flags.isFlagAudience(""));
 check("only declared keys are accepted", Object.keys(flags.FLAGS).every(flags.isFlagKey) && !flags.isFlagKey("toString") && !flags.isFlagKey("nope"));
 
 console.log("\n== 2. reading fails towards staff ==");
 const code = stripComments(src);
-check("the read starts every switch at the default", /const out = Object\.fromEntries\(Object\.keys\(FLAGS\)\.map\(\(k\) => \[k, DEFAULT_AUDIENCE\]\)\)/.test(code));
+check("the read starts every switch at its default", /const out = Object\.fromEntries\(\(Object\.keys\(FLAGS\) as FlagKey\[\]\)\.map\(\(k\) => \[k, defaultAudienceOf\(k\)\]\)\)/.test(code));
 check("...takes only a declared key with a valid setting from the table", /if \(isFlagKey\(row\.key\) && isFlagAudience\(row\.audience\)\) out\[row\.key\] = row\.audience;/.test(code));
 check("...and on any error keeps the defaults", /\} catch \(err\) \{\s*logApiError\("flags:read", err\);\s*\}\s*return out;/.test(code));
 

@@ -3008,6 +3008,7 @@
       "title": "Alle Werkzeuge",
       "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
       "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite.",
+      "tilesHidden": "Beschreibe im Feld auf der Startseite, was du möchtest – oder drücke am Computer ⌘K und tippe den Namen eines Werkzeugs.",
       "search": "Werkzeug finden",
       "searchLabel": "Werkzeuge durchsuchen",
       "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",

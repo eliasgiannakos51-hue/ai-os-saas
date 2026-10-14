@@ -65,6 +65,9 @@ const state = { made: {}, failing: new Set(), credits: 3000 };
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const supa = await startMockSupabase({
   port: 54451,
+  // All tools' squares are behind `all-tools-tiles` since 2026-10-14, and
+  // it starts at «Κανείς»; part 2 arrives from the Library's square.
+  tableRows: { feature_flags: [{ key: "all-tools-tiles", audience: "everyone" }] },
   handle: ({ url, json }) => {
     const table = url.pathname.replace(/^\/rest\/v1\//, "");
     if (table === "user_credits") return json(200, [{ user_id: MOCK_USER.id, credits_remaining: state.credits, credits_total: 3000 }]), true;

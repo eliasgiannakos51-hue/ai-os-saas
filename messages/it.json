@@ -3008,6 +3008,7 @@
       "title": "Tutti gli strumenti",
       "description": "Ogni strumento, con una riga su cosa fa.",
       "orPress": "Oppure premi ⌘K e scrivi il nome, o descrivilo nel campo della Home.",
+      "tilesHidden": "Descrivi quello che vuoi nel campo della Home oppure, dal computer, premi ⌘K e scrivi il nome di uno strumento.",
       "search": "Trova uno strumento",
       "searchLabel": "Cerca strumenti",
       "noMatch": "Nessuno strumento si chiama «{query}». Descrivilo nel campo della Home.",

@@ -35,6 +35,7 @@ const ROUTING = "src/app/dashboard/routing/page.tsx";
 const WORKFLOW = "src/app/dashboard/trading-workflow/page.tsx";
 const MESSAGES = ["en", "el", "zh", "ar"].map((l) => `messages/${l}.json`);
 const CHAT_WORKSPACE = "src/components/chat/chat-workspace.tsx";
+const TOOLS_PAGE = "src/app/dashboard/tools/page.tsx";
 
 const TARGETS = [
   GATE,
@@ -46,6 +47,7 @@ const TARGETS = [
   ROUTING,
   WORKFLOW,
   CHAT_WORKSPACE,
+  TOOLS_PAGE,
   ...MESSAGES,
 ];
 
@@ -58,6 +60,21 @@ const localeEdit = (locale, from, to) => ({
 });
 
 const MUTANTS = [
+  // ---- a header left bare on purpose (BARE_ON_PURPOSE) ---------------
+  {
+    name: "All tools with its squares shown loses its «?», hidden behind the bare one",
+    file: TOOLS_PAGE,
+    from: ' helpKey="help.tools"',
+    to: "",
+    expect: "tools: src/app/dashboard/tools/page.tsx passes helpKey",
+  },
+  {
+    name: "the bare header's exception outlives the branch that needed it",
+    file: TOOLS_PAGE,
+    from: '  if (!(await isFeatureOn("all-tools-tiles", user))) {',
+    to: '  if (!(await isFeatureOn("library", user))) {',
+    expect: "leaves 1 header bare only while it still has the branch that needs it",
+  },
   // ---- the second file of a shared tip ------------------------------
   {
     // THE BUG alsoIn EXISTS FOR. Ideas loses its "?" and the twelve

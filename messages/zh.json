@@ -789,10 +789,12 @@
     },
     "exportData": {
       "title": "导出数据",
-      "description": "将你在全部 13 个模块中记录的所有内容下载为单个 JSON 文件。",
+      "description": "将账户的所有记录下载为一个 JSON 文件。",
+      "descriptionAll": "一个 .zip 文件，包含你的所有数据、你保存的每个文件、每个网站和每个游戏。网站在 Ionexa 之外也能打开。",
       "exportAll": "导出全部数据",
       "exporting": "导出中...",
       "exportFailed": "导出失败——请重试",
+      "tooMany": "导出每小时最多可下载 {count} 次。请在一小时内再试一次,你的数据会保留在这里。",
       "exportDownloaded": "✓ 已下载导出文件"
     },
     "dangerZone": {

@@ -34,6 +34,15 @@ const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_LIST, DELETE_ROUTE];
 
 const MUTANTS = [
   {
+    // The export's second service-role client is the stored-files read
+    // under the session's own id; a third one is a table read past RLS.
+    name: "the export reads the person's sites with the service role",
+    file: EXPORT_ROUTE,
+    from: 'supabase.from("user_websites").select("name, html_content, pages")',
+    to: 'createAdminClient().from("user_websites").select("name, html_content, pages")',
+    expect: "the service role only for the server-read tables and the person's own stored files",
+  },
+  {
     // THE RELATION THAT IS NOT IN THE DATABASE. No foreign key, no
     // cascade and no RLS policy reaches a Stripe subscription; without
     // this call the card keeps being charged for an account that no

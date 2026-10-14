@@ -44,6 +44,18 @@ function check(name, cond, detail) {
 // EVERY ENTRY IS A CLAIM SOMEBODY CAN CHECK. "It is fine" is not a reason.
 const ALLOWED = new Map([
   [
+    "src/lib/account/erase-storage.ts::listUserFiles",
+    "Queries no table. The userId is the storage FOLDER the listing is " +
+      "confined to (`<userId>/` in each bucket), refused unless it is a " +
+      "UUID; its one caller, the export route, passes the session's own id.",
+  ],
+  [
+    "src/lib/account/export-archive.ts::collectExportFiles",
+    "Queries no table. It downloads exactly the paths listUserFiles " +
+      "returned for the same userId — the person's own folder — and that " +
+      "listing refuses anything but a UUID.",
+  ],
+  [
     "src/lib/account/erase-storage.ts::eraseUserStorage",
     "Queries no table. The userId is the storage FOLDER every listing and " +
       "removal is confined to (`<userId>/` in each bucket), refused unless it " +

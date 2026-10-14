@@ -408,14 +408,22 @@ if (existsSync(routeFile)) {
   const route = strip(readFileSync(routeFile, "utf8"));
   check("it builds from the registry, not from CLASSIFIER_MODULES", /exportableTables\(\)/.test(route) && !/CLASSIFIER_MODULES/.test(route));
   check("it filters by the authenticated user's id", /\.eq\("user_id", user\.id\)/.test(route));
-  // THE ONE EXCEPTION (2026-10-05): a table the account cannot read
+  // THE TWO EXCEPTIONS. (2026-10-05) a table the account cannot read
   // itself (registry: serverExportColumns) is read by the server, its own
-  // rows, the listed columns only. Every other table, the user's session.
+  // rows, the listed columns only. (2026-10-14, «Εξαγωγή όλων» behind
+  // `export-all`) the stored files, read through Storage under the
+  // session's own id: the ai-images bucket carries no policy for the
+  // signed-in role at all (migration 20261019000000_generated_images.sql),
+  // so the account deletion and the export both read with the service
+  // role, and lib/account/erase-storage.ts listUserFiles refuses anything
+  // but a user id. Every other read, the user's session.
   const adminUses = [...route.matchAll(/createAdminClient\(\)/g)].length;
+  const storageRead = /collectExportFiles\(createAdminClient\(\)\.storage, user\.id\)/.test(route);
   check(
-    "it uses the user's session (RLS), the service role only for the server-read tables",
+    "it uses the user's session (RLS), the service role only for the server-read tables and the person's own stored files",
     /\(t\.serverExportColumns\s*\?\s*createAdminClient\(\)\.from\(t\.table\)\.select\(t\.serverExportColumns\.join\(", "\)\)\s*:\s*supabase\.from\(t\.table\)\.select\(t\.exportColumns \?\? "\*"\)\)\s*\.eq\("user_id", user\.id\)/.test(route) &&
-      adminUses === 1
+      adminUses === (storageRead ? 2 : 1),
+    `${adminUses} service-role clients, ${storageRead ? "one of them the stored-files read" : "no stored-files read"}`
   );
   check("it redacts on the way out", /redactRow/.test(route));
   check("it reports tables it could not read instead of implying they were empty", /unreadable_tables/.test(route));

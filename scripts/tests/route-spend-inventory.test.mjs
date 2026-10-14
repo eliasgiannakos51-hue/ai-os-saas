@@ -237,6 +237,7 @@ const DECLARED = {
   "files/[id]": { bound: "none", why: "DELETE removes an object. Deleting is the cheap direction and refusing to delete costs the user storage they are paying for." },
   "images/[id]/download": { bound: "limited", scope: "image_download", why: "mints a signed URL to a picture already paid for; the bytes leave Supabase, not this process" },
   "images/[id]": { bound: "none", why: "DELETE removes the person's own pictures and their row. Deleting is the cheap direction, and refusing it keeps files they asked to be rid of." },
+  "account/export": { bound: "limited", scope: "account_export", why: "behind export-all it reads the person's own stored files through Storage into one .zip (lib/account/export-archive.ts); five exports an hour per account, and each archive capped at EXPORT_FILES_MAX_BYTES and EXPORT_FILES_MAX_COUNT, what does not fit named rather than read" },
 
   // --- outbound messages: free APIs, but an unbounded relay all the same ---
   "delivery-channels": { bound: "limited", scope: "delivery_channel_test", why: "sends a test message to a caller-supplied address; scope delivery_channel_test" },

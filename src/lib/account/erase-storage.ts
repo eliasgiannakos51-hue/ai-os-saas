@@ -53,7 +53,7 @@ function failure(step: string, bucket: string, error: unknown): Error {
 
 /** Every object path under `folder`, folders followed. A folder is an
  *  entry with no id: the Storage API lists one level at a time. */
-async function listAll(bucket: BucketApi, bucketName: string, folder: string, depth: number, out: string[]): Promise<void> {
+async function listAll(bucket: Pick<BucketApi, "list">, bucketName: string, folder: string, depth: number, out: string[]): Promise<void> {
   for (let offset = 0; ; offset += PAGE) {
     const { data, error } = await bucket.list(folder, { limit: PAGE, offset });
     if (error) throw failure("list", bucketName, error);
@@ -95,4 +95,20 @@ export async function eraseUserStorage(storage: StorageApi, userId: string): Pro
     removed += paths.length;
   }
   return { removed, byBucket };
+}
+
+/**
+ * Every object path under `<userId>/`, bucket by bucket: what the deletion
+ * above removes is exactly what the export (lib/account/export-archive.ts)
+ * hands back, from the same listing, so the two cannot drift apart.
+ */
+export async function listUserFiles(storage: { from(bucket: string): Pick<BucketApi, "list"> }, userId: string): Promise<{ bucket: string; path: string }[]> {
+  if (!UUID.test(userId)) throw new Error("erase-storage: not a user id");
+  const out: { bucket: string; path: string }[] = [];
+  for (const name of USER_BUCKETS) {
+    const paths: string[] = [];
+    await listAll(storage.from(name), name, userId, 0, paths);
+    for (const path of paths) out.push({ bucket: name, path });
+  }
+  return out;
 }

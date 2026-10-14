@@ -789,10 +789,12 @@
     },
     "exportData": {
       "title": "Exporter les données",
-      "description": "Téléchargez tout ce que vous avez enregistré dans les 13 modules sous forme d'un seul fichier JSON.",
+      "description": "Téléchargez tous les enregistrements de votre compte dans un seul fichier JSON.",
+      "descriptionAll": "Un fichier .zip avec toutes vos données, chaque fichier enregistré, chaque site et chaque jeu. Les sites s’ouvrent aussi en dehors d’Ionexa.",
       "exportAll": "Exporter toutes les données",
       "exporting": "Export en cours...",
       "exportFailed": "Échec de l'export — veuillez réessayer",
+      "tooMany": "L’export peut être téléchargé {count} fois par heure. Réessayez dans l’heure — vos données restent ici.",
       "exportDownloaded": "✓ export téléchargé"
     },
     "dangerZone": {

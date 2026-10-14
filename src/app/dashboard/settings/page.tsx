@@ -17,6 +17,7 @@ import { SampleDataSettings } from "@/components/settings/sample-data-settings";
 import { findSampleImport } from "@/lib/sample-data/apply";
 import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
@@ -408,7 +409,12 @@ export default async function SettingsPage() {
 
         <div className="mb-6 space-y-3 surface">
           <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>
-          <p className="text-xs text-muted">{t("exportData.description")}</p>
+          {/* What the button downloads, said as it is: with the switch
+              `export-all`, one .zip with the files, sites and games beside
+              the data (api/account/export/route.ts); without it, the data
+              as JSON. It said «13 modules» while the export read every
+              table of lib/gdpr/user-data-registry.ts. */}
+          <p className="text-xs text-muted">{(await isFeatureOn("export-all", user)) ? t("exportData.descriptionAll") : t("exportData.description")}</p>
           <ExportDataButton />
         </div>
 

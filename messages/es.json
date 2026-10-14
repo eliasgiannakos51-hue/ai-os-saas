@@ -789,10 +789,12 @@
     },
     "exportData": {
       "title": "Exportar datos",
-      "description": "Descarga todo lo registrado en los 13 módulos como un único archivo JSON.",
+      "description": "Descarga todos los registros de tu cuenta en un solo archivo JSON.",
+      "descriptionAll": "Un archivo .zip con todos tus datos, cada archivo que guardaste, cada sitio y cada juego. Los sitios también se abren fuera de Ionexa.",
       "exportAll": "Exportar todos los datos",
       "exporting": "Exportando...",
       "exportFailed": "La exportación falló — inténtalo de nuevo",
+      "tooMany": "La exportación se puede descargar {count} veces por hora. Vuelve a intentarlo dentro de una hora: tus datos siguen aquí.",
       "exportDownloaded": "✓ exportación descargada"
     },
     "dangerZone": {

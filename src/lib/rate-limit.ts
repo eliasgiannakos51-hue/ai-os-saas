@@ -155,3 +155,41 @@ export async function recordRateLimitHit(options: { scope: string; identifier: s
   const { error } = await admin.from("rate_limit_log").insert({ scope, identifier });
   if (error) logApiError("rate-limit", error, { scope, stage: "record_only" });
 }
+
+/**
+ * WHEN A REFUSED LIMIT OPENS AGAIN, asked only after checkRateLimit said no
+ * (2026-10-14). A refused attempt is not recorded (consume_rate_limit,
+ * supabase/migrations/20260919000000_atomic_rate_limit.sql), so the window
+ * holds at least `maxAttempts` hits; it opens again when the
+ * `maxAttempts`-th newest of them ages out. That hit's time plus the window
+ * is the instant, which lib/ai-circuit-breaker.ts sends as `retryAt` and
+ * lib/errors/use-error-text.ts says as a time on the reader's clock.
+ *
+ * One read, on the refusal only. Null when it cannot say — a failed read,
+ * a window that already opened — and the sentence then names the window.
+ */
+export async function rateLimitOpensAt(options: {
+  scope: string;
+  identifier: string;
+  maxAttempts: number;
+  windowMinutes: number;
+}): Promise<string | null> {
+  const { scope, identifier, maxAttempts, windowMinutes } = options;
+  if (!(maxAttempts >= 1)) return null;
+  const windowMs = windowMinutes * 60 * 1000;
+  const { data, error } = await createAdminClient()
+    .from("rate_limit_log")
+    .select("created_at")
+    .eq("scope", scope)
+    .eq("identifier", identifier)
+    .gte("created_at", new Date(Date.now() - windowMs).toISOString())
+    .order("created_at", { ascending: false })
+    .range(maxAttempts - 1, maxAttempts - 1);
+  if (error) {
+    logApiError("rate-limit", error, { scope, stage: "opens_at" });
+    return null;
+  }
+  const hit = Array.isArray(data) ? (data[0] as { created_at?: unknown } | undefined) : undefined;
+  const at = typeof hit?.created_at === "string" ? Date.parse(hit.created_at) + windowMs : NaN;
+  return Number.isFinite(at) && at > Date.now() ? new Date(at).toISOString() : null;
+}

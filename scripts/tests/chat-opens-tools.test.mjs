@@ -122,14 +122,17 @@ check("the preview is sandboxed, with no scripts, and marked as made by AI", /<A
 check("only a whole document is drawn", /looksLikeCompleteHtmlDocument\(html\)/.test(pane));
 check("all through the shared requests, with none of its own", /from "@\/lib\/website-builder\/site-requests"/.test(pane) && !/fetch\(/.test(pane));
 check("refusals and no connection are said, never swallowed",
-  /if \(outcome\.kind === "refused"\) \{[\s\S]{0,120}failWith\([\s\S]{0,200}serverSaid\(getErrorMessage\(outcome\.error/.test(pane) && /err instanceof TypeError \? tCommon\("networkErrorCheckConnection"\)/.test(pane));
+  /if \(outcome\.kind === "refused"\) \{[\s\S]{0,120}failWith\([\s\S]{0,200}describe\(outcome\.error\)\.text/.test(pane) && /err instanceof TypeError \? tCommon\("networkErrorCheckConnection"\)/.test(pane));
 // IN THE SCREEN'S LANGUAGE (2026-10-08): the route's and the worker's
 // sentences are English, and a provider's own error reached the pane as
 // `529 {"type":"error",…}`.
 check("the plan's wall, before anything is offered", /useState<Stage>\(wall \? "locked" : "confirm"\)/.test(pane) && /\{stage === "locked" && wall && \([\s\S]{0,300}<UpgradeRequired \{\.\.\.wall\} \/>/.test(pane));
 check("a site that failed is said in the pane's own words, never the worker's sentence",
   /failWith\(whyNotMade\(done\)\)/.test(pane) && /return t\("failed"\);/.test(pane) && !/error_message/.test(pane));
-check("a server sentence is shown as it came only on an English screen", /const serverSaid = \(text: string \| null \| undefined, ours: string\) => \(locale\.startsWith\("en"\) && text \? text : ours\);/.test(pane));
+// SINCE 2026-10-14 ON NO SCREEN: an English one read «You've reached
+// today's generation limit…» for a window of 24 hours. Every refusal is
+// said from its code (scripts/tests/limit-texts.test.mjs holds the rest).
+check("a server sentence is never shown as it came, on any screen", !/serverSaid|getErrorMessage/.test(pane) && (pane.match(/describe\(outcome\.error\)\.text/g) ?? []).length === 2);
 check("no credits is said by the credits notice, from the code and numbers the route sends",
   /if \(outcome\.kind === "refused" && outcome\.code === "insufficientCredits"\) \{\s*void refreshCredits\(\);\s*setNoCredits\(\{ available: outcome\.available, needed: outcome\.needed \}\);\s*setStage\("failed"\);/.test(pane) && /<OutOfCreditsNotice/.test(pane) &&
     // Every credit refusal the route has, with its numbers (three since
@@ -152,8 +155,9 @@ check("no credits for a change is said by the credits notice too, and the site s
   check("Chat says no credits in its own words, before the answer and inside it",
     /code: "insufficientCredits",\s*outOfCredits: true,\s*message: insufficientCreditsMessage\(check\.remaining, estimate\.reserveCredits\),\s*available: check\.remaining,\s*needed: estimate\.reserveCredits,/.test(chatRoute) &&
       /available: reservation\.available, needed: streamEstimate\.reserveCredits/.test(chatRoute) &&
-      /setError\(\s*data\.outOfCredits === true\s*\?\s*outOfCreditsText\(data\.available, data\.needed\)\s*:/.test(chat) &&
-      /streamError =\s*event\.outOfCredits === true\s*\?\s*outOfCreditsText\(event\.available, event\.needed\)/.test(chat));
+      // The shared words (components/chat/use-chat-failure-words.ts).
+      /setError\(chatFailure\.refusal\(429, data\)\);/.test(chat) && /if \(data\?\.rateLimited\) return data\.outOfCredits === true \? outOfCredits\(data\.available, data\.needed\) : said\(429, data\);/.test(code("src/components/chat/use-chat-failure-words.ts")) &&
+      /streamError = chatFailure\.streamError\(event\);/.test(chat) && /if \(event\.outOfCredits === true\) return outOfCredits\(event\.available, event\.needed\);/.test(code("src/components/chat/use-chat-failure-words.ts")));
 }
 check('"Open in Site" opens that site, or the brief when there is no site yet', /\/dashboard\/website-builder\?project=\$\{encodeURIComponent\(site\.id\)\}/.test(pane) && /\/dashboard\/website-builder\?brief=\$\{encodeURIComponent\(description\.slice\(0, 500\)\)\}/.test(pane));
 check("what the brief took from memory is said, as in the Site", /const fromMemory = remembered\.forRecord\(done\);/.test(pane));

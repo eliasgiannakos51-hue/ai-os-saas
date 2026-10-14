@@ -147,8 +147,13 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // signing in. It is one key, and it is still declared: a namespace
     // that reaches a group without appearing here is exactly the drift
     // that shipped a dashboard of raw keys.
-    namespaces: ["common", "dashboard", "promise"],
-    unbounded: 3,
+    // "errors" since 2026-10-14: a refused step of the first minutes is
+    // said from its code (components/onboarding/onboarding-flow.tsx,
+    // lib/errors/use-error-text.ts), not in the route's English — and its
+    // keys are reached as `codes.<code>` (lib/errors/failure-text.ts), the
+    // fourth unbounded component here.
+    namespaces: ["common", "dashboard", "errors", "promise"],
+    unbounded: 4,
   },
   {
     name: "marketing",

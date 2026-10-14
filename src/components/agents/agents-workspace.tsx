@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 import {
   Bot,
   Plus,
@@ -166,6 +167,9 @@ export function AgentsWorkspace({
   initialAgent?: string;
 }) {
   const t = useTranslations("dashboard.agents");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const tModule = useTranslations("module");
   const locale = useLocale();
   const router = useRouter();
@@ -348,7 +352,7 @@ export function AgentsWorkspace({
         // rather than being handed a guessed code.
         const code = problemCodeFrom(data);
         if (code) setProblem(code);
-        else addToast(data.error ?? t("buildError"), "error");
+        else addToast(limitText(data) ?? data.error ?? t("buildError"), "error");
         return;
       }
       setProblem(null);
@@ -649,7 +653,7 @@ export function AgentsWorkspace({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("templates.adoptError"), "error");
+        addToast(limitText(data) ?? data.error ?? t("templates.adoptError"), "error");
         return;
       }
       addToast(t("templates.adopted", { subject: String(data.subject ?? "") }));

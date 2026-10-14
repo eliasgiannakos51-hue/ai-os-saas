@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { MessageContent } from "@/components/chat/message-content";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { useChatFailureWords } from "@/components/chat/use-chat-failure-words";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 
 type StudioMessage = { id: number; role: "user" | "assistant"; content: string };
@@ -29,6 +29,9 @@ let messageIdCounter = 0;
 export function StudioChat({ context }: { context: string }) {
   const t = useTranslations("dashboard.createStudio");
   const { reportUsage } = useCredits();
+  // The route's refusals and failures in the reader's language, as the Chat
+  // says them — this showed the route's English sentence (2026-10-14).
+  const chatFailure = useChatFailureWords();
   const [messages, setMessages] = useState<StudioMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState("");
@@ -73,7 +76,7 @@ export function StudioChat({ context }: { context: string }) {
       const contentType = res.headers.get("content-type") ?? "";
       if (!contentType.includes("application/x-ndjson") || !res.body) {
         const data = await res.json().catch(() => null);
-        setError(getErrorMessage(data?.error ?? data?.message, t("chatFailed")));
+        setError(chatFailure.refusal(res.status, data));
         return;
       }
 
@@ -94,7 +97,7 @@ export function StudioChat({ context }: { context: string }) {
             setStreaming(accumulated);
           }
         } else if (event.type === "error") {
-          streamError = typeof event.error === "string" ? event.error : t("chatFailed");
+          streamError = chatFailure.streamError(event);
         }
       });
 

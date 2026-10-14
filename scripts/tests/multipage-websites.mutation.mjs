@@ -307,8 +307,8 @@ const MUTANTS = [
   {
     name: "a stale page list is reported to the customer in English",
     file: WORKSPACE,
-    from: '        if (data?.reason === "unknown_page" || data?.reason === "invalid_page") {',
-    to: "        if (false) {",
+    from: '          refused.reason === "pageGone"\n            ? t("editPageGone")',
+    to: '          refused.reason === "elsewhere"\n            ? t("editPageGone")',
   },
   {
     name: "the route stops saying WHY it refused, so nothing can translate it",

@@ -175,18 +175,37 @@ export async function POST(request: Request) {
       .eq("user_id", user.id)
       .gte("created_at", fairUseCutoff);
     if (!fairUseCountError && (generationsToday ?? 0) >= MAX_GENERATIONS_PER_DAY) {
+      // SAID BY ITS NAME, WITH WHEN IT OPENS AGAIN (2026-10-14). Without a
+      // code the Site read this as any limit and said «wait about a
+      // minute» for a window of 24 hours. The window opens again when the
+      // MAX_GENERATIONS_PER_DAY-th newest site in it is 24 hours old: one
+      // read, on the refusal only; when it cannot say, the screen names
+      // the window instead (lib/errors/use-error-text.ts).
+      const { data: oldestCounted } = await supabase
+        .from("user_websites")
+        .select("created_at")
+        .eq("user_id", user.id)
+        .gte("created_at", fairUseCutoff)
+        .order("created_at", { ascending: false })
+        .range(MAX_GENERATIONS_PER_DAY - 1, MAX_GENERATIONS_PER_DAY - 1);
+      const countedAt = Date.parse(String(oldestCounted?.[0]?.created_at ?? ""));
+      const opensAt = countedAt + FAIR_USE_WINDOW_MS;
       return NextResponse.json({
         ok: true,
         generated: false,
         rateLimited: true,
-        message: "You've reached today's generation limit. Contact support if you need more.",
+        code: "siteDailyLimit",
+        retryAt: Number.isFinite(opensAt) && opensAt > Date.now() ? new Date(opensAt).toISOString() : undefined,
+        message: "You've reached the limit of new sites for the last 24 hours. Contact support if you need more.",
       });
     }
 
     // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    // Which limit, and when it opens again, for the screen to say in its
+    // reader's language (lib/website-builder/site-requests.ts).
     const breakerCheck = await checkAiCallAllowed(user.id, "website_generate", fingerprintRequest(name, description));
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, generated: false, rateLimited: true, message: breakerCheck.reason });
+      return NextResponse.json({ ok: true, generated: false, rateLimited: true, code: breakerCheck.code, retryAt: breakerCheck.retryAt, message: breakerCheck.reason });
     }
 
     const isAdmin = isAdminEmail(user.email);

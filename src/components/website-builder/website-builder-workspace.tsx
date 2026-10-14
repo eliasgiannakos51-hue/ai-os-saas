@@ -33,10 +33,10 @@ import { censusSiteImages, shouldOfferOwnPhotos } from "@/lib/website-image-cens
 import { canUpload, formatBytes, type StorageUsage } from "@/lib/websites/storage-quota";
 import { flaggedFindings } from "@/lib/websites/flagged-notice";
 import { ApiError } from "@/lib/errors/api-error";
-import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { refusedBeforeWork, siteChangeRefusal } from "@/lib/website-builder/site-requests";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { FilePicker } from "@/components/ui/file-picker";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -235,9 +235,24 @@ export function WebsiteBuilderWorkspace({
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
   const describe = useErrorText();
-  const describeStatus = useErrorTextForStatus();
   const locale = useLocale();
   const tCommon = useTranslations("common");
+  const tShell = useTranslations("dashboard.toolShell");
+  const tErrors = useTranslations("errors");
+  const describeNote = useGenerationNoteText();
+  // IN THE READER'S LANGUAGE, AS THE SITE SHELL SAYS IT (2026-10-14;
+  // components/website-builder/website-shell.tsx). This page — the Site
+  // while the switch `tool-shell` is off — showed the routes' English:
+  // the stored `error_message` of a failed site (the provider's own JSON
+  // when it failed), the 24-hour limit's and the AI limits' `message`, a
+  // refused change's `error`. Each is said from its code, its status and
+  // the site's own notes; the English stays in the logs.
+  function failedLine(record: UserWebsite): string {
+    const stopped = parseGenerationNotes(record.generation_notes).find((note) => note.kind === "stopped");
+    if (stopped) return describeNote(stopped);
+    const written = looksLikeCompleteHtmlDocument(record.html_content ?? "");
+    return `${t("generateFailed")} ${written ? tErrors("credits.unverified") : tErrors("credits.notCharged")}`;
+  }
   const tSteps = useTranslations("aiSteps");
   const tPublish = useTranslations("dashboard.publishing");
   const tModule = useTranslations("module");
@@ -401,7 +416,7 @@ export function WebsiteBuilderWorkspace({
       if (record.status === "completed") {
         addToast(t("generated"));
       } else if (record.status === "failed") {
-        addToast(`✗ ${record.error_message ?? t("generateFailed")}`, "error");
+        addToast(`✗ ${failedLine(record)}`, "error");
       } else if (record.status === "flagged") {
         addToast(`⚠ ${t("flaggedTitle")}`, "error");
       }
@@ -431,7 +446,7 @@ export function WebsiteBuilderWorkspace({
         return;
       }
       if (!res.ok || !data.ok) {
-        addToast(`✗ ${getErrorMessage(data?.error, "Could not regenerate this website.")}`, "error");
+        addToast(`✗ ${describe(new ApiError(res.status, data)).text}`, "error");
         return;
       }
       void fetch("/api/websites/generate/process", {
@@ -634,7 +649,7 @@ export function WebsiteBuilderWorkspace({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(describeStatus(res.status).text);
+        setError(describe(new ApiError(res.status, data)).text);
         return;
       }
       if (data.needsClarification) {
@@ -652,7 +667,10 @@ export function WebsiteBuilderWorkspace({
         return;
       }
       if (!data.generated) {
-        setError(data.message ?? "Could not generate the website.");
+        // A limit or the credits by name, with when a limit opens again
+        // (lib/website-builder/site-requests.ts); a brief that is not a
+        // website as the Site shell says it.
+        setError(data.rateLimited ? describe(refusedBeforeWork(data)).text : data.offTopic ? tShell("site.offTopic") : t("generateFailed"));
         return;
       }
 
@@ -821,7 +839,7 @@ export function WebsiteBuilderWorkspace({
         );
         const firstFailure = uploadResults.find((r) => r.uploadError);
         if (firstFailure) {
-          setError(getErrorMessage(firstFailure.uploadError, "Could not upload the reference images."));
+          setError(t("imageUploadFailed"));
           setGenerating(false);
           return;
         }
@@ -923,7 +941,7 @@ export function WebsiteBuilderWorkspace({
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) {
-          setEditError("Not authenticated.");
+          setEditError(tCommon("notAuthenticated"));
           return;
         }
         const uploadResults = await Promise.all(
@@ -937,7 +955,7 @@ export function WebsiteBuilderWorkspace({
         );
         const firstFailure = uploadResults.find((r) => r.uploadError);
         if (firstFailure) {
-          setEditError(getErrorMessage(firstFailure.uploadError, "Could not upload the reference images."));
+          setEditError(t("imageUploadFailed"));
           return;
         }
         referenceImagePaths = uploadResults.map((r) => r.path);
@@ -959,20 +977,22 @@ export function WebsiteBuilderWorkspace({
       const data = await res.json();
       void refreshCredits();
 
-      if (!res.ok || !data.ok) {
-        // The one refusal the user can actually reach: the page list they
-        // are looking at is older than the site. Translated, because
-        // "That page is not part of this site." is a sentence a Greek or
-        // Japanese customer would be shown in English otherwise.
-        if (data?.reason === "unknown_page" || data?.reason === "invalid_page") {
-          setEditError(t("editPageGone"));
-          return;
-        }
-        setEditError(getErrorMessage(data?.error, "Could not apply that change."));
-        return;
-      }
-      if (!data.edited) {
-        setEditError(data.message ?? "Could not apply that change.");
+      if (!res.ok || !data.ok || !data.edited) {
+        // Every refusal of a change by what it is, read as the Site shell
+        // reads it (siteChangeRefusal in lib/website-builder/site-requests.ts):
+        // a page the list is older than, a change the safety review held,
+        // one asked while another runs, and the rest — a limit with when
+        // it opens again, the credits — from its code.
+        const refused = siteChangeRefusal(res, data);
+        setEditError(
+          refused.reason === "pageGone"
+            ? t("editPageGone")
+            : refused.reason === "held"
+              ? `${tShell("site.held")} ${tErrors("credits.notCharged")}`
+              : refused.reason === "busy"
+                ? `${tShell("site.busy")} ${tErrors("credits.notCharged")}`
+                : describe(refused.error).text
+        );
         return;
       }
 
@@ -990,7 +1010,7 @@ export function WebsiteBuilderWorkspace({
       });
       addToast(t("editApplied"));
     } catch {
-      setEditError("Network error — please try again.");
+      setEditError(tCommon("networkErrorCheckConnection"));
     } finally {
       setEditing(false);
     }
@@ -1095,11 +1115,6 @@ export function WebsiteBuilderWorkspace({
     () => (previewWebsite && !viewingVersion ? parseGenerationNotes(previewWebsite.generation_notes) : []),
     [previewWebsite, viewingVersion]
   );
-  const describeNote = useGenerationNoteText();
-  // A run the owner stopped: the row is "failed" with an English sentence
-  // for the logs; the person sees their own language, with the number.
-  const stoppedNote = generationNotes.find((n) => n.kind === "stopped");
-
   // ONE PICKER, TWO TABS. The preview shows a page and the edit form
   // changes THAT page, so they must never disagree about which one is
   // selected — rendering the same element from the same state is the
@@ -1470,7 +1485,7 @@ export function WebsiteBuilderWorkspace({
                   <AlertTriangle className="h-8 w-8 text-danger" aria-hidden="true" />
                   <p className="text-sm font-medium text-danger">{t("generationFailedTitle")}</p>
                   <p className="max-w-md text-xs text-danger/80">
-                    {stoppedNote ? describeNote(stoppedNote) : previewWebsite.error_message ?? t("generateFailed")}
+                    {failedLine(previewWebsite)}
                   </p>
                 </div>
               ) : !viewingVersion && previewWebsite.status === "flagged" ? (

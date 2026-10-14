@@ -37,6 +37,19 @@
  *   5. The model drops the connection mid-answer, on a phone.
  *   6. Out of credits, Greek and English: said in the reader's language,
  *      and the model is never called.
+ *
+ * And the four the package 39 check left open (docs/PROGRESS.md,
+ * 2026-10-08), fixed 2026-10-14:
+ *   - THE FIRST SIGN-IN (walks 1-3): the account, made a minute ago, signs
+ *     in for the first time and its device is recorded with no «new
+ *     sign-in» email; the same account on a second device is told.
+ *   - 4 says «nothing was charged», as the route does, not «we cannot
+ *     confirm whether this was charged».
+ *   7. The credits run short once the conversation's history is counted:
+ *      the hold the stream takes is refused, and the screen says the
+ *      credits with their numbers, not «something broke».
+ *   8. The hour's AI requests are used up: said in the reader's
+ *      language, with its window, never the route's English.
  */
 import http from "node:http";
 import { spawn } from "node:child_process";
@@ -114,12 +127,15 @@ const MODEL_URL = `http://127.0.0.1:${modelServer.address().port}`;
 // ---------------------------------------------------------------------
 // freeUsed is the month's counter, as user_credits keeps it: the route
 // claims against it (consume_free_chat) and the composer reads it.
-const state = { onboarding: [], conversations: [], messages: [], rpc: [], credits: 100, freeUsed: 0 };
+const state = { onboarding: [], conversations: [], messages: [], rpc: [], credits: 100, freeUsed: 0, devices: [], reserveShort: false, hourlyFull: false };
+// THE ACCOUNT IS NEW: made a minute before its first sign-in, as a person
+// who has just signed up is (lib/auth/first-sign-in.ts reads this).
+MOCK_USER.created_at = new Date(Date.now() - 60_000).toISOString();
 let session = null;
 let seq = 0;
 const uuid = () => `c0000000-0000-4000-8000-${String(++seq).padStart(12, "0")}`;
 const eqFilters = (url) => [...url.searchParams].filter(([, v]) => v.startsWith("eq.")).map(([k, v]) => [k, v.slice(3)]);
-function rest({ req, url, body, json }) {
+function rest({ req, res, url, body, json }) {
   if (url.pathname === "/auth/v1/token" && req.method === "POST") {
     const input = JSON.parse(body || "{}");
     if (input.email !== MOCK_USER.email || input.password !== PASSWORD) {
@@ -140,7 +156,7 @@ function rest({ req, url, body, json }) {
     const name = table.slice(4);
     const args = JSON.parse(body || "{}");
     state.rpc.push({ name, args });
-    if (name === "consume_rate_limit") return json(200, true), true;
+    if (name === "consume_rate_limit") return json(200, !(state.hourlyFull && args.p_scope === "ai_hourly_user")), true;
     if (name === "consume_free_chat") {
       const limit = Number(args.p_limit);
       if (state.freeUsed < limit) {
@@ -151,6 +167,9 @@ function rest({ req, url, body, json }) {
     }
     if (name === "release_free_chat") return (state.freeUsed = Math.max(0, state.freeUsed - 1)), json(200, null), true;
     if (name === "reserve_credits") {
+      // The hold the stream takes once the history is counted, refused
+      // with what is left (section 7).
+      if (state.reserveShort) return json(200, [{ reservation_id: null, available: 3 }]), true;
       if (state.credits >= Number(args.p_credits)) {
         state.credits -= Number(args.p_credits);
         return json(200, [{ reservation_id: uuid(), available: state.credits }]), true;
@@ -162,6 +181,25 @@ function rest({ req, url, body, json }) {
   if (table === "user_credits") {
     if (req.method !== "GET" && req.method !== "HEAD") return json(201, []), true;
     return answer([{ user_id: MOCK_USER.id, credits_remaining: state.credits, credits_total: 100, plan_tier: "free", free_chat_used: state.freeUsed, free_chat_period_start: new Date().toISOString() }]), true;
+  }
+  // The devices the account has signed in from (api/auth/device-check):
+  // counted, looked up by fingerprint, recorded.
+  if (table === "known_devices") {
+    const mine = state.devices.filter((r) => r.user_id === MOCK_USER.id);
+    if (req.method === "HEAD" || (req.method === "GET" && (req.headers.prefer ?? "").includes("count="))) {
+      res.writeHead(200, { "Content-Type": "application/json", "Content-Range": mine.length ? `0-${mine.length - 1}/${mine.length}` : "*/0" });
+      return res.end(req.method === "HEAD" ? "" : JSON.stringify(mine)), true;
+    }
+    if (req.method === "GET") {
+      const filters = eqFilters(url);
+      return answer(mine.filter((row) => filters.every(([k, v]) => String(row[k]) === v))), true;
+    }
+    if (req.method === "POST") {
+      for (const row of input()) state.devices.push({ id: uuid(), ...row });
+      return json(201, []), true;
+    }
+    if (req.method === "PATCH") return json(200, []), true;
+    return false;
   }
   if (table === "user_onboarding") {
     const mine = state.onboarding.filter((r) => r.user_id === MOCK_USER.id);
@@ -198,7 +236,7 @@ session = JSON.parse(Buffer.from(supa.authCookie.value.slice("base64-".length), 
 // failure, which is the log working, not a fault on the way.
 let expectedLogs = [];
 const expectedError = (line) => expectedLogs.some((re) => re.test(line));
-function reset({ credits = 100, freeUsed = 0, mode = "answer" } = {}) {
+function reset({ credits = 100, freeUsed = 0, mode = "answer", reserveShort = false, hourlyFull = false } = {}) {
   expectedLogs = [
     // This build has no mailer, and the new-device email says so in the
     // log on a first sign-in (src/app/api/auth/device-check/route.ts): the log
@@ -212,6 +250,8 @@ function reset({ credits = 100, freeUsed = 0, mode = "answer" } = {}) {
   state.rpc.splice(0);
   state.credits = credits;
   state.freeUsed = freeUsed;
+  state.reserveShort = reserveShort;
+  state.hourlyFull = hourlyFull;
   model.mode = mode;
   model.calls.splice(0);
 }
@@ -290,8 +330,8 @@ const SEEN_SCRIPT = `(() => {
   }).observe(document, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["placeholder"] });
 })();`;
 
-async function open(origin, device, locale, { signedIn = false } = {}) {
-  const context = await browser.newContext({ viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch });
+async function open(origin, device, locale, { signedIn = false, userAgent = null } = {}) {
+  const context = await browser.newContext({ viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch, ...(userAgent ? { userAgent } : {}) });
   const cookies = [{ name: "NEXT_LOCALE", value: locale, url: origin }];
   if (signedIn) cookies.push({ name: supa.authCookie.name, value: supa.authCookie.value, url: origin, httpOnly: false, secure: false, sameSite: "Lax" });
   await context.addCookies(cookies);
@@ -389,7 +429,9 @@ try {
   // =================================================================
   const walks = [
     { title: "1. el, desktop", locale: "el", device: desktop, task: "write", mode: "create", nth: 0 },
-    { title: "2. el, phone with real touch", locale: "el", device: phone, task: "plan", mode: "run", nth: 1 },
+    // A phone of its own: another device for the same account, so its
+    // sign-in is the one that is told.
+    { title: "2. el, phone with real touch", locale: "el", device: phone, task: "plan", mode: "run", nth: 1, userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1" },
     { title: "3. en, desktop", locale: "en", device: desktop, task: "explain", mode: "research", nth: 2 },
   ];
   for (const walk of walks) {
@@ -397,10 +439,27 @@ try {
     reset();
     const m = walk.locale === "el" ? EL : EN;
     const taskText = m.dashboard.firstTask.tasks[walk.task].text;
-    const { context, page, press, seen, pageErrors } = await open(ON, walk.device, walk.locale);
+    const { context, page, press, seen, pageErrors } = await open(ON, walk.device, walk.locale, { userAgent: walk.userAgent ?? null });
+    const devicesBefore = state.devices.length;
+    const deviceCheck = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/auth/device-check", { timeout: 30000 }).then((r) => r.json()).catch(() => null);
     const t0 = await signIn(page, press, ON, m);
     await page.locator('[data-testid="first-task"]').waitFor({ timeout: 30000 }).catch(() => null);
     check("signed in, a new account lands on the first task", new URL(page.url()).pathname === "/onboarding" && (await page.locator('[data-testid="first-task"]').count()) === 1, page.url());
+    // THE «NEW SIGN-IN» EMAIL (api/auth/device-check): the mailer here has
+    // no key, so an email that is sent says so in the error log — that line
+    // is the email leaving, and its absence is the email not sent.
+    const checked = await deviceCheck;
+    const mailed = () => loggedErrors().some((l) => l.startsWith("email:send-new-device-login"));
+    for (let i = 0; i < 20 && walk.nth === 1 && !mailed(); i++) await new Promise((r) => setTimeout(r, 200));
+    if (walk.nth === 0) {
+      check("the account's first sign-in: its device is recorded, and no «new sign-in» email is sent",
+        state.devices.length === 1 && devicesBefore === 0 && checked?.firstSignIn === true && !mailed(), JSON.stringify({ devices: state.devices.length, checked, logged: loggedErrors() }));
+    } else if (walk.nth === 1) {
+      check("the same account on a second device: recorded, and the «new sign-in» email is sent",
+        state.devices.length === devicesBefore + 1 && checked?.newDevice === true && checked?.firstSignIn !== true && mailed(), JSON.stringify({ devices: state.devices.length, checked, logged: loggedErrors() }));
+    } else {
+      check("the first device again: known, nothing sent", state.devices.length === devicesBefore && checked?.newDevice === false && !mailed(), JSON.stringify({ devices: state.devices.length, checked, logged: loggedErrors() }));
+    }
     await press(page.locator('[data-testid="first-task-option"]').nth(walk.nth));
     const done = await answered(page, ANSWER[walk.locale]);
     const seconds = (Date.now() - t0) / 1000;
@@ -441,6 +500,9 @@ try {
     check("...their task is still on the screen", body.includes(taskText));
     check(`...the model was asked, and asked again as the SDK retries an overload (${model.calls.length} calls)`, model.calls.length >= 2, String(model.calls.length));
     check("...nothing was charged and the free message came back", charged() === 0 && rpcNamed("release_free_chat").length === 1 && state.freeUsed === 0, JSON.stringify(state.rpc.map((r) => r.name)));
+    // As the route says it (creditsRefunded): «nothing was charged», not
+    // «we cannot confirm from here whether this was charged» (2026-10-14).
+    check(`...and the screen says so: «${err.credits.refunded}», not «${err.credits.unverified}»`, body.includes(err.credits.refunded) && !body.includes(err.credits.unverified), body.slice(-400));
     // The model is back: the same task, sent again from the field.
     model.mode = "answer";
     const field = page.locator("textarea").last();
@@ -497,6 +559,64 @@ try {
     check(`every word on the screen is in ${locale === "el" ? "Greek" : "English"} (${seen.size} pieces of text)`, wrong.length === 0, wrong.slice(0, 8).join(" | "));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     check(`no route logged an error the person did not cause (${loggedErrors().length})`, loggedErrors().every(expectedError), loggedErrors().slice(0, 3).join(" | "));
+    await context.close();
+  }
+
+  // =================================================================
+  // 7. The credits run short once the history is counted: the hold the
+  //    stream takes is refused. Greek and English.
+  // =================================================================
+  for (const [locale, device] of [["el", desktop], ["en", phone]]) {
+    console.log(`\n== 7. the hold refused once the history is counted (${locale}, ${device.touch ? "phone" : "desktop"}) ==`);
+    // No free messages left, credits enough for the check before the
+    // history is read — and the hold, which counts it, refused.
+    reset({ credits: 100, freeUsed: 1000, reserveShort: true });
+    const m = locale === "el" ? EL : EN;
+    const { context, page, press, seen, pageErrors } = await open(ON, device, locale, { signedIn: true });
+    await page.goto(`${ON}/onboarding`, { waitUntil: "domcontentloaded" });
+    await page.locator('[data-testid="first-task-option"]').first().waitFor({ timeout: 30000 });
+    await press(page.locator('[data-testid="first-task-option"]').first());
+    await page.waitForURL(/\/dashboard\/chat/, { timeout: 30000 });
+    const want = m.errors.codes.insufficientCredits.what;
+    const said = await page.waitForFunction((t) => document.body.innerText.includes(t), want, { timeout: 30000 }).then(() => true).catch(() => false);
+    const body = await page.locator("body").innerText();
+    const numbers = m.credits.outOfCredits.detailWithNumbers.split("{needed}")[0].replace("{available}", "3");
+    check(`the person reads that the credits are not enough, with the numbers: «${want}» … «${numbers}»`, said && body.includes(numbers), body.slice(-500));
+    check(`...not «${m.errors.codes.serverError.what}»`, !body.includes(m.errors.codes.serverError.what), body.slice(-500));
+    // The question-check before a first message may reach the model; the
+    // answer, which is streamed, must not.
+    check("...the hold was asked for and refused, no answer was streamed, nothing charged", rpcNamed("reserve_credits").length === 1 && model.calls.filter((c) => c.stream).length === 0 && charged() === 0, JSON.stringify({ rpc: state.rpc.map((r) => r.name), calls: model.calls.length }));
+    const wrong = foreign(seen, locale);
+    check(`every word on the screen is in ${locale === "el" ? "Greek" : "English"} (${seen.size} pieces of text)`, wrong.length === 0, wrong.slice(0, 8).join(" | "));
+    check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+    await context.close();
+  }
+
+  // =================================================================
+  // 8. The hour's AI requests used up. Greek and English.
+  // =================================================================
+  for (const [locale, device] of [["el", phone], ["en", desktop]]) {
+    console.log(`\n== 8. the hour's AI requests used up (${locale}, ${device.touch ? "phone" : "desktop"}) ==`);
+    reset({ hourlyFull: true });
+    const m = locale === "el" ? EL : EN;
+    const { context, page, press, seen, pageErrors } = await open(ON, device, locale, { signedIn: true });
+    await page.goto(`${ON}/onboarding`, { waitUntil: "domcontentloaded" });
+    await page.locator('[data-testid="first-task-option"]').first().waitFor({ timeout: 30000 });
+    const refusal = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/chat" && r.request().method() === "POST", { timeout: 45000 }).then((r) => r.json()).catch(() => null);
+    await press(page.locator('[data-testid="first-task-option"]').first());
+    await page.waitForURL(/\/dashboard\/chat/, { timeout: 30000 });
+    const limit = m.errors.codes.hourlyLimit;
+    const said = await page.waitForFunction((t) => document.body.innerText.includes(t), limit.what, { timeout: 30000 }).then(() => true).catch(() => false);
+    const body = await page.locator("body").innerText();
+    // No log to read back here, so the window: «within the hour».
+    check(`the limit is said in ${locale === "el" ? "Greek" : "English"}, with its window: «${limit.what} ${limit.next}»`, said && body.includes(limit.next), body.slice(-500));
+    const refused = await refusal;
+    check(`...the route named it (${refused?.code}), and the screen says neither «about a minute» nor the route's own sentence`,
+      refused?.code === "hourlyLimit" && !body.includes(m.errors.codes.rateLimited.next) && typeof refused?.message === "string" && !body.includes(refused.message), body.slice(-500));
+    check("...and the model was never called", model.calls.length === 0, String(model.calls.length));
+    const wrong = foreign(seen, locale);
+    check(`every word on the screen is in ${locale === "el" ? "Greek" : "English"} (${seen.size} pieces of text)`, wrong.length === 0, wrong.slice(0, 8).join(" | "));
+    check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }
 } catch (err) {

@@ -156,7 +156,8 @@ export async function POST(request: Request) {
       fingerprintRequest(websiteId, `${pageSlugRaw}\n${typeof sectionRaw === "number" ? sectionRaw : ""}\n${changeRequest}`)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, edited: false, rateLimited: true, message: breakerCheck.reason });
+      // Which limit, and when it opens again (lib/website-builder/site-requests.ts).
+      return NextResponse.json({ ok: true, edited: false, rateLimited: true, code: breakerCheck.code, retryAt: breakerCheck.retryAt, message: breakerCheck.reason });
     }
 
     const { data: website, error: fetchError } = await supabase

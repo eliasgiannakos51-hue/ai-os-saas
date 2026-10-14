@@ -7,6 +7,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import { useCredits } from "@/components/credits/credits-context";
 import { useTranslations } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 
 // Mission Control preset: posts a fixed, product-launch-focused goal
 // straight to the existing Planner (/api/mission/plan, same endpoint +
@@ -28,6 +29,9 @@ export function ProductMissionButton({
   const router = useRouter();
   const { refresh: refreshCredits } = useCredits();
   const tCommon = useTranslations("common");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +56,7 @@ export function ProductMissionButton({
       }
       const data = outcome.result as { planned?: boolean; message?: string };
       if (!data.planned) {
-        setError(data.message ?? "Could not create a plan.");
+        setError(limitText(data) ?? data.message ?? "Could not create a plan.");
         return;
       }
 

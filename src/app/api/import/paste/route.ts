@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
     const breaker = await checkAiCallAllowed(user.id, "import_paste", fingerprintRequest(user.id, text));
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+      return NextResponse.json({ ok: false, code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);

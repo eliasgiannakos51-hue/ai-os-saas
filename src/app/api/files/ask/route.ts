@@ -147,7 +147,8 @@ export async function POST(request: Request) {
 
     const breaker = await checkAiCallAllowed(user.id, "file_ask", fingerprintRequest(user.id, question));
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, reason: "rate_limited", error: breaker.reason }, { status: 429 });
+      // Which limit, and when it opens again (components/files/failure-words.ts).
+      return NextResponse.json({ ok: false, reason: "rate_limited", code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);

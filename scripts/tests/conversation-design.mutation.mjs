@@ -22,8 +22,9 @@ const COMPOSER = "src/components/chat/chat-composer.tsx";
 const ACTIONS = "src/components/chat/answer-actions.tsx";
 const ROUTE = "src/app/api/chat/route.ts";
 const BREAKER = "src/lib/ai-circuit-breaker.ts";
+const WORDS = "src/components/chat/use-chat-failure-words.ts";
 const EL = "messages/el.json";
-const TARGETS = [GATE, WS, COMPOSER, ACTIONS, ROUTE, BREAKER, EL];
+const TARGETS = [GATE, WS, COMPOSER, ACTIONS, ROUTE, BREAKER, WORDS, EL];
 
 const MUTANTS = [
   // 2026-10-09
@@ -52,8 +53,8 @@ const MUTANTS = [
   {
     name: "a refusal shows the route's English prose again",
     file: WS,
-    from: "              : isErrorCode(data.code)\n                ? describe(new ApiError(429, { code: data.code })).text\n                : describeStatus(429).text",
-    to: "              : describeStatus(429).text",
+    from: "          setError(chatFailure.refusal(429, data));",
+    to: "          setError(data.message);",
     expect: "a refusal is said from its code",
   },
   {
@@ -66,14 +67,14 @@ const MUTANTS = [
   {
     name: "one circuit-breaker refusal loses its code",
     file: BREAKER,
-    from: '        reason: "You\'ve made a lot of AI requests in the last hour — please wait a bit and try again.",\n        code: "rateLimited",\n',
-    to: '        reason: "You\'ve made a lot of AI requests in the last hour — please wait a bit and try again.",\n',
+    from: '    code: "hourlyLimit",\n',
+    to: "",
     expect: "every one of its refusals carrying a code",
   },
   {
     name: "the route stops passing the breaker's code",
     file: ROUTE,
-    from: "rateLimited: true, code: breakerCheck.code, message: breakerCheck.reason",
+    from: "rateLimited: true, code: breakerCheck.code, retryAt: breakerCheck.retryAt, message: breakerCheck.reason",
     to: "rateLimited: true, message: breakerCheck.reason",
     expect: "every one of its refusals carrying a code",
   },
@@ -86,9 +87,9 @@ const MUTANTS = [
   },
   {
     name: "the screen says «something broke on our side» for a failed model again",
-    file: WS,
-    from: '              : event.code === "upstreamUnavailable"\n                ? describeStatus(503, event.creditsRefunded === true).text\n                : describeStatus(500).text;',
-    to: "              : describeStatus(500).text;",
+    file: WORDS,
+    from: '        return said(event.code === "upstreamUnavailable" ? 503 : 500, event);',
+    to: "        return said(500, {});",
     expect: "the screen reads those values",
   },
   {

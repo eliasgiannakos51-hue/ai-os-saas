@@ -1,6 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitOpensAt } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { fingerprintRequest } from "@/lib/request-fingerprint";
 
@@ -27,16 +27,42 @@ export { fingerprintRequest };
 // deducting anything — see each route for exactly where).
 
 const USER_HOURLY_MAX_CALLS = 20;
+// The windows, as the sentences in messages/*.json say them (errors.codes.
+// hourlyLimit and repeatLimit): «within the hour», «within 15 minutes».
+// scripts/tests/limit-texts.test.mjs holds the two together.
+export const USER_HOURLY_WINDOW_MINUTES = 60;
 const IDENTICAL_CALL_MAX = 10;
-const IDENTICAL_CALL_WINDOW_MINUTES = 15;
+export const IDENTICAL_CALL_WINDOW_MINUTES = 15;
 const DEFAULT_MAX_DAILY_AI_CALLS = 5000;
 
 // `code` names the case for a screen that translates it (lib/errors/
 // error-codes.ts); `reason` stays the English prose for logs and the
 // routes that still show it.
-export type CircuitBreakerResult =
-  | { allowed: true }
-  | { allowed: false; reason: string; code: "upstreamUnavailable" | "rateLimited" };
+//
+// EACH LIMIT BY ITS OWN NAME, AND WHEN IT OPENS AGAIN (2026-10-14). The
+// three used to share `rateLimited` — «wait about a minute» in every
+// language — and the platform's daily cap was `upstreamUnavailable`,
+// «usually clears within a few minutes». None of the three lasts minutes:
+// the hourly cap counts the last 60 minutes, the identical-request breaker
+// the last 15, and the platform cap is a UTC day. `retryAt` is the instant
+// each opens again when it can be known (rateLimitOpensAt in
+// lib/rate-limit.ts; the next UTC midnight for the day), and
+// lib/errors/use-error-text.ts says it as a time on the reader's clock. A
+// route passes both on as they are (`code: breaker.code, retryAt:
+// breaker.retryAt`); scripts/tests/limit-texts.test.mjs counts that every
+// refusal a screen reads in its own words does.
+export type CircuitBreakerRefusal = {
+  allowed: false;
+  reason: string;
+  code: "platformLimit" | "hourlyLimit" | "repeatLimit";
+  retryAt?: string;
+};
+export type CircuitBreakerResult = { allowed: true } | CircuitBreakerRefusal;
+
+/** The next 00:00 UTC: the day checkDailyPlatformCap counts is the UTC date. */
+export function nextUtcMidnight(now: Date = new Date()): string {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
+}
 
 export async function checkDailyPlatformCap(): Promise<CircuitBreakerResult> {
   const maxDaily = Number(process.env.MAX_DAILY_AI_CALLS) || DEFAULT_MAX_DAILY_AI_CALLS;
@@ -59,27 +85,25 @@ export async function checkDailyPlatformCap(): Promise<CircuitBreakerResult> {
   if ((data?.total_calls ?? 0) >= maxDaily) {
     return {
       allowed: false,
-      reason: "Service temporarily at capacity, please try again later.",
-      code: "upstreamUnavailable",
+      reason: "The AI service has reached today's limit for the whole platform; it opens again at 00:00 UTC.",
+      code: "platformLimit",
+      retryAt: nextUtcMidnight(),
     };
   }
   return { allowed: true };
 }
 
 export async function checkUserHourlyCap(userId: string): Promise<CircuitBreakerResult> {
-  const { allowed } = await checkRateLimit({
-    scope: "ai_hourly_user",
-    identifier: userId,
-    maxAttempts: USER_HOURLY_MAX_CALLS,
-    windowMinutes: 60,
-  });
-  return allowed
-    ? { allowed: true }
-    : {
-        allowed: false,
-        reason: "You've made a lot of AI requests in the last hour — please wait a bit and try again.",
-        code: "rateLimited",
-      };
+  const limit = { scope: "ai_hourly_user", identifier: userId, maxAttempts: USER_HOURLY_MAX_CALLS, windowMinutes: USER_HOURLY_WINDOW_MINUTES };
+  const { allowed } = await checkRateLimit(limit);
+  if (allowed) return { allowed: true };
+  const retryAt = await rateLimitOpensAt(limit);
+  return {
+    allowed: false,
+    reason: "You've reached the limit of AI requests for the last hour; it opens again within the hour.",
+    code: "hourlyLimit",
+    ...(retryAt ? { retryAt } : {}),
+  };
 }
 
 export async function checkIdenticalRequestBreaker(
@@ -87,23 +111,22 @@ export async function checkIdenticalRequestBreaker(
   endpoint: string,
   fingerprint: string
 ): Promise<CircuitBreakerResult> {
-  const identifier = `${userId}:${endpoint}:${fingerprint}`;
-  const { allowed } = await checkRateLimit({
+  const limit = {
     scope: "ai_identical_call",
-    identifier,
+    identifier: `${userId}:${endpoint}:${fingerprint}`,
     maxAttempts: IDENTICAL_CALL_MAX,
     windowMinutes: IDENTICAL_CALL_WINDOW_MINUTES,
-  });
-  if (!allowed) {
-    logApiError("ai-circuit-breaker", "identical-request circuit breaker tripped", { userId, endpoint });
-  }
-  return allowed
-    ? { allowed: true }
-    : {
-        allowed: false,
-        reason: "This exact request has been repeated too many times — please wait a few minutes and try again.",
-        code: "rateLimited",
-      };
+  };
+  const { allowed } = await checkRateLimit(limit);
+  if (allowed) return { allowed: true };
+  logApiError("ai-circuit-breaker", "identical-request circuit breaker tripped", { userId, endpoint });
+  const retryAt = await rateLimitOpensAt(limit);
+  return {
+    allowed: false,
+    reason: "This exact request has been repeated too many times; it opens again within 15 minutes.",
+    code: "repeatLimit",
+    ...(retryAt ? { retryAt } : {}),
+  };
 }
 
 // The single call every AI-calling route makes, right after auth and

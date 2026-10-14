@@ -7,6 +7,7 @@ import { useSmoothedJob, type AiJob } from "@/lib/jobs/use-ai-job";
 import { useRouter } from "next/navigation";
 import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import { useCredits } from "@/components/credits/credits-context";
@@ -36,6 +37,9 @@ export function MissionForm({
   prefill?: { text: string; nonce: number } | null;
 } = {}) {
   const t = useTranslations("dashboard.mission");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const router = useRouter();
   const { refresh: refreshCredits } = useCredits();
   const { addToast } = useToast();
@@ -115,7 +119,7 @@ export function MissionForm({
       }
       const data = outcome.result as { planned?: boolean; message?: string };
       if (!data.planned) {
-        const message = data.message ?? "Could not create a plan.";
+        const message = limitText(data) ?? data.message ?? "Could not create a plan.";
         setError(message);
         addToast(`✗ ${message}`, "error");
         return;

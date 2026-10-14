@@ -39,12 +39,69 @@ export const ERROR_CODES = [
   "serverError",
   "offline",
   "unknown",
+  // THE LIMITS THAT KNOW HOW LONG THEY LAST (2026-10-14). `rateLimited`
+  // said «wait about a minute» for every one of them, and none lasts a
+  // minute: the account's AI requests count the last hour, the same
+  // request repeated counts a quarter of an hour, the platform's AI
+  // budget is a UTC day and new sites count the last 24 hours
+  // (lib/ai-circuit-breaker.ts, api/websites/generate). Each is named so
+  // its sentence can say which window it is, and `retryAt` below, when the
+  // route knows it, when it opens again.
+  "hourlyLimit",
+  "repeatLimit",
+  "platformLimit",
+  "siteDailyLimit",
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 export function isErrorCode(value: unknown): value is ErrorCode {
   return typeof value === "string" && (ERROR_CODES as readonly string[]).includes(value);
+}
+
+/** The limits whose sentence can carry the time they open again (lib/errors/use-error-text.ts). */
+export const TIMED_LIMIT_CODES = ["hourlyLimit", "repeatLimit", "platformLimit", "siteDailyLimit"] as const satisfies readonly ErrorCode[];
+export type TimedLimitCode = (typeof TIMED_LIMIT_CODES)[number];
+
+export function isTimedLimitCode(value: unknown): value is TimedLimitCode {
+  return typeof value === "string" && (TIMED_LIMIT_CODES as readonly string[]).includes(value);
+}
+
+/**
+ * When a refusal opens again, as the route sent it: an ISO instant in the
+ * future, or nothing. Anything else — a past instant, a date a day and more
+ * away (no limit here is longer than a day), text that is not a date — is
+ * nothing, and the sentence then names the window instead of a time.
+ */
+export function readRetryAt(value: unknown, now: number = Date.now()): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const at = Date.parse(value);
+  if (!Number.isFinite(at) || at <= now || at - now > 25 * 60 * 60 * 1000) return undefined;
+  return new Date(at).toISOString();
+}
+
+/**
+ * WHEN A LIMIT OPENS AGAIN, ON THE READER'S OWN CLOCK (2026-10-14).
+ *
+ * The route sends an instant (`retryAt`, lib/ai-circuit-breaker.ts and
+ * api/websites/generate) and lib/errors/use-error-text.ts says it: in the
+ * reader's language and time zone, rounded UP to the minute — «after
+ * 14:05» for 14:05:37 would send them back half a minute early — and with
+ * «tomorrow» when it is not today. No limit here is longer than a day, so anything later than
+ * tomorrow is not said as a time at all, and the window sentence stands.
+ */
+export function retryTime(retryAt: string, locale: string, now: Date = new Date()): { time: string; day: "today" | "tomorrow" } | null {
+  const instant = Date.parse(retryAt);
+  if (!Number.isFinite(instant)) return null;
+  const at = new Date(Math.ceil(instant / 60000) * 60000);
+  const dayOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((dayOf(at) - dayOf(now)) / 86400000);
+  if (days !== 0 && days !== 1) return null;
+  // The 24-hour clock everywhere but English: Greek's default 12-hour form
+  // ends in «μ.μ.», and the sentence it sits in ends in a full stop.
+  const clock: Intl.DateTimeFormatOptions = locale.startsWith("en") ? { timeStyle: "short" } : { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+  const time = new Intl.DateTimeFormat(locale, clock).format(at);
+  return { time, day: days === 0 ? "today" : "tomorrow" };
 }
 
 /** The JSON shape every route already returns, plus the two optional fields. */
@@ -63,6 +120,8 @@ export type ApiErrorPayload = {
    * that might be false.
    */
   creditsRefunded?: boolean;
+  /** For a limit (TIMED_LIMIT_CODES): when it opens again, an ISO instant, when the route knows it. */
+  retryAt?: string;
 };
 
 /**

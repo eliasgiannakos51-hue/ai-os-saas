@@ -193,8 +193,8 @@ const MUTANTS = [
   {
     name: "a held change is said as an unknown failure",
     file: REQUESTS,
-    from: '          : data?.flagged === true\n            ? "held"\n',
-    to: '          : false\n            ? "held"\n',
+    from: '        : data?.flagged === true\n          ? "held"\n',
+    to: '        : false\n          ? "held"\n',
     expect: "...and a change's refusal names a held change and a busy site",
   },
   {
@@ -230,7 +230,7 @@ const MUTANTS = [
     file: REQUESTS,
     from: 'return new ApiError(status, { ...(data ?? {}), error: typeof prose === "string" ? prose : "" });',
     to: "return new ApiError(status, data);",
-    expect: "Chat's Site pane says a refusal in the route's sentence or its own",
+    expect: "a refusal's message is the route's sentence or the caller's own",
   },
   {
     name: "a refused publish shows the route's English",

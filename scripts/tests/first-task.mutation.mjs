@@ -112,7 +112,7 @@ const MUTANTS = [
   {
     name: "the Chat screen prints the route's English sentence",
     file: CHAT_SCREEN,
-    from: "          setError(\n            data.outOfCredits === true\n              ? outOfCreditsText(data.available, data.needed)\n              : isErrorCode(data.code)\n                ? describe(new ApiError(429, { code: data.code })).text\n                : describeStatus(429).text\n          );",
+    from: "          setError(chatFailure.refusal(429, data));",
     to: "          setError(data.message);",
     expect: "...and the Chat screen says it in the reader's language",
   },

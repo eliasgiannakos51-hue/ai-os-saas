@@ -153,7 +153,7 @@ export async function POST(request: Request) {
       fingerprintRequest(user.id, findings.map((f) => f.detector).join("|"))
     );
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+      return NextResponse.json({ ok: false, code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);

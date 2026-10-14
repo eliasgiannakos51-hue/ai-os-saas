@@ -1,6 +1,6 @@
 # The first run — pt
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **606 strings**. The whole product is 4250, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **574 strings**. The whole product is 4260, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2422,7 +2422,7 @@ Ver histórico de créditos
 
 Tentar de novo
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (176)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2923,198 +2923,6 @@ Veredito
 > EN — e.g. pursue / kill / watch
 
 ex.: seguir / descartar / observar
-
-**`errors.codes.conflict.next`**
-
-> EN — Reload the page to see the current version, then redo your change.
-
-Recarrega a página para veres a versão atual e repete a tua alteração.
-
-**`errors.codes.conflict.what`**
-
-> EN — Someone — or another tab — changed this while you were working on it.
-
-Alguém — ou outro separador — alterou isto enquanto trabalhavas nele.
-
-**`errors.codes.fileTooLarge.next`**
-
-> EN — Split it, or upload a smaller version.
-
-Divide-o ou carrega uma versão mais pequena.
-
-**`errors.codes.fileTooLarge.what`**
-
-> EN — That file is too big.
-
-Esse ficheiro é demasiado grande.
-
-**`errors.codes.forbidden.next`**
-
-> EN — Open Settings › Billing to see which plan covers it.
-
-Abre Definições › Faturação para veres que plano o cobre.
-
-**`errors.codes.forbidden.what`**
-
-> EN — Your plan doesn't include this.
-
-O teu plano não inclui isto.
-
-**`errors.codes.insufficientCredits.next`**
-
-> EN — Buy credits in Settings, or wait for your monthly reset.
-
-Compra créditos nas Definições ou espera pela renovação mensal.
-
-**`errors.codes.insufficientCredits.what`**
-
-> EN — You don't have enough credits for this.
-
-Não tens créditos suficientes para isto.
-
-**`errors.codes.invalidInput.next`**
-
-> EN — Check the highlighted fields and send it again.
-
-Verifica os campos assinalados e envia outra vez.
-
-**`errors.codes.invalidInput.what`**
-
-> EN — Something in the form wasn't accepted.
-
-Algo no formulário não foi aceite.
-
-**`errors.codes.notAuthenticated.next`**
-
-> EN — Sign in again and repeat the action — nothing you had entered is lost.
-
-Inicia sessão outra vez e repete a ação — não perdeste nada do que tinhas escrito.
-
-**`errors.codes.notAuthenticated.what`**
-
-> EN — You're signed out.
-
-A tua sessão terminou.
-
-**`errors.codes.notFound.next`**
-
-> EN — It was probably deleted. Go back to the list and pick another one.
-
-Provavelmente foi eliminado. Volta à lista e escolhe outro.
-
-**`errors.codes.notFound.what`**
-
-> EN — This no longer exists.
-
-Isto já não existe.
-
-**`errors.codes.offline.next`**
-
-> EN — Check your connection and try again.
-
-Verifica a tua ligação e tenta outra vez.
-
-**`errors.codes.offline.what`**
-
-> EN — Your device couldn't reach us.
-
-O teu dispositivo não conseguiu contactar-nos.
-
-**`errors.codes.planLimit.next`**
-
-> EN — Delete something you no longer need, or upgrade in Settings › Billing.
-
-Elimina algo de que já não precises, ou muda de plano em Definições › Faturação.
-
-**`errors.codes.planLimit.what`**
-
-> EN — You've reached the limit of your plan.
-
-Chegaste ao limite do teu plano.
-
-**`errors.codes.rateLimited.next`**
-
-> EN — Wait about a minute, then try once more.
-
-Espera cerca de um minuto e tenta mais uma vez.
-
-**`errors.codes.rateLimited.what`**
-
-> EN — Too many requests in a short time.
-
-Demasiados pedidos em pouco tempo.
-
-**`errors.codes.serverError.next`**
-
-> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
-
-Ficou registado. Tenta outra vez daqui a pouco e contacta o apoio se continuar.
-
-**`errors.codes.serverError.what`**
-
-> EN — This broke on our side.
-
-Isto falhou do nosso lado.
-
-**`errors.codes.unknown.next`**
-
-> EN — Try again, and contact support if it happens twice.
-
-Tenta outra vez e contacta o apoio se acontecer de novo.
-
-**`errors.codes.unknown.what`**
-
-> EN — This action didn't complete.
-
-Esta ação não foi concluída.
-
-**`errors.codes.unsupportedType.next`**
-
-> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
-
-Converte-o para PDF, DOCX, CSV ou TXT e carrega outra vez.
-
-**`errors.codes.unsupportedType.what`**
-
-> EN — That file type isn't supported.
-
-Esse tipo de ficheiro não é suportado.
-
-**`errors.codes.upstreamUnavailable.next`**
-
-> EN — This is on our side and usually clears within a few minutes.
-
-É do nosso lado e costuma resolver-se em poucos minutos.
-
-**`errors.codes.upstreamUnavailable.what`**
-
-> EN — The AI service isn't responding right now.
-
-O serviço de IA não está a responder neste momento.
-
-**`errors.credits.charged`**
-
-> EN — This attempt used credits.
-
-Esta tentativa consumiu créditos.
-
-**`errors.credits.notCharged`**
-
-> EN — You were not charged.
-
-Não te foi cobrado nada.
-
-**`errors.credits.refunded`**
-
-> EN — Your credits were returned.
-
-Os teus créditos foram devolvidos.
-
-**`errors.credits.unverified`**
-
-> EN — We can't confirm from here whether this was charged.
-
-Daqui não conseguimos confirmar se foi cobrado.
 
 **`module.exportCsv`**
 

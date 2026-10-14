@@ -27,6 +27,11 @@
  *      language, and that nothing was charged.
  *   5. No credits left for a change said after the site is made: the
  *      credits notice, with the numbers, and the site as it was.
+ *   6. The limits and the other refusals of a change (2026-10-14), Greek
+ *      and English: the 24-hour limit on new sites and the hour's AI
+ *      requests, each by its name with the time it opens again on the
+ *      reader's clock; a change asked while another runs, by what it is —
+ *      never the server's English, never «could not create the website».
  *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with real touch.
  */
@@ -38,6 +43,10 @@ import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 import { standInRows, standInId } from "./lib/stand-in-rows.mjs";
 import { startStandInModel } from "./lib/stand-in-model.mjs";
 import { screenText, englishOnGreek, greekOnEnglish, wordsOf } from "./lib/screen-language.mjs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const IntlMessageFormat = require("intl-messageformat").default ?? require("intl-messageformat").IntlMessageFormat;
 
 let pass = 0;
 const failures = [];
@@ -53,7 +62,7 @@ function check(name, cond, detail) {
 
 const ASK = { el: "φτιάξε μου site για το camping", en: "make me a website for my campsite" };
 const SITE_HTML = '<!DOCTYPE html>\n<html lang="el">\n<head>\n<meta charset="utf-8">\n<title>Camping</title>\n</head>\n<body>\n<header><h1>Camping Νάξος</h1></header>\n<main><section><p>Σκηνές δίπλα στη θάλασσα.</p></section></main>\n<footer><p>2026</p></footer>\n</body>\n</html>\n';
-const state = { siteFails: false, credits: 3000 };
+const state = { siteFails: false, credits: 3000, hourlyFull: false, editBusy: false };
 const model = await startStandInModel(({ kind }) => {
   if (kind === "site") return state.siteFails ? { error: 529, type: "overloaded_error", message: "Overloaded" } : { text: SITE_HTML };
   // The clarification check, the off-topic check and the safety review ask
@@ -62,14 +71,15 @@ const model = await startStandInModel(({ kind }) => {
 });
 
 const db = standInRows({
-  tables: { user_websites: [], chat_conversations: [], chat_messages: [] },
+  tables: { user_websites: [], chat_conversations: [], chat_messages: [], rate_limit_log: [] },
   defaults: { user_websites: () => ({ html_content: "", status: "pending", error_message: null, generation_notes: null, pages: null, attempt_count: 0 }) },
   rpc: {
     reserve_credits: (args) => (state.credits >= args.p_credits ? [{ reservation_id: standInId() }] : [{ reservation_id: null, available: state.credits }]),
     settle_reservation: () => null,
     release_reservation: () => null,
     increment_daily_ai_spend: () => null,
-    consume_rate_limit: () => true,
+    // The hour's AI requests (lib/rate-limit.ts), full while state.hourlyFull.
+    consume_rate_limit: (args) => !(state.hourlyFull && args.p_scope === "ai_hourly_user"),
   },
 });
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
@@ -77,6 +87,9 @@ const supa = await startMockSupabase({
   port: 54451,
   handle: (ctx) => {
     if (ctx.url.pathname === "/rest/v1/user_credits") return ctx.json(200, [{ user_id: MOCK_USER.id, credits_remaining: state.credits, credits_total: 3000, plan_tier: MOCK_USER.user_metadata?.subscription_tier ?? "free", beta_expires_at: null }]), true;
+    // Another change to the site still running: api/websites/edit claims the
+    // site with one conditional update, and finds it already claimed.
+    if (state.editBusy && ctx.req.method === "PATCH" && ctx.url.pathname === "/rest/v1/user_websites" && ctx.url.searchParams.has("or")) return ctx.json(200, []), true;
     return db.handle(ctx);
   },
 });
@@ -340,6 +353,110 @@ try {
       await context.close();
     }
     state.credits = 3000;
+
+    // ---- 6. the limits and the other refusals of a change, in both
+    // languages (2026-10-14)
+    for (const locale of ["el", "en"]) {
+      const L = msgs[locale];
+      console.log(`\n== 6. ${device.label}, ${locale}: the limits, with when they open, and a change while another runs ==`);
+      const opensLine = async (page, iso) => {
+        const values = await page.evaluate(({ iso, locale }) => {
+          const at = new Date(Math.ceil(Date.parse(iso) / 60000) * 60000);
+          const clock = locale.startsWith("en") ? { timeStyle: "short" } : { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+          const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+          return { time: new Intl.DateTimeFormat(locale, clock).format(at), day: day(at) === day(new Date()) ? "today" : "tomorrow" };
+        }, { iso, locale });
+        return new IntlMessageFormat(L.errors.retryAt, locale).format(values);
+      };
+      const old = { el: "Περίμενε περίπου ένα λεπτό", en: "Wait about a minute" }[locale];
+
+      // 6a. Fifty sites in the last 24 hours, the oldest 23 hours ago: it
+      // opens again in an hour.
+      reset();
+      const oldest = Date.now() - 23 * 3600_000;
+      for (let i = 0; i < 50; i++) {
+        db.store.user_websites.push({ id: standInId(), user_id: MOCK_USER.id, name: `site ${i}`, status: "completed", html_content: SITE_HTML, created_at: new Date(oldest + i * 60_000).toISOString(), error_message: null, generation_notes: null, pages: null });
+      }
+      {
+        const { context, page, press, say } = await open(locale);
+        await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+        await say(ASK[locale]);
+        await pane(page).waitFor({ timeout: 10000 }).catch(() => null);
+        const refused = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/websites/generate", { timeout: 20000 }).then((r) => r.json()).catch(() => null);
+        await press(page.locator('[data-testid="chat-site-make"]'));
+        const body = await refused;
+        await page.waitForTimeout(1500);
+        const text = await pane(page).innerText().catch(() => "");
+        const line = await opensLine(page, new Date(oldest + 24 * 3600_000).toISOString());
+        check(`the 24-hour limit on new sites: the route names it and when it opens (${body?.code})`,
+          body?.code === "siteDailyLimit" && Math.abs(Date.parse(body?.retryAt ?? "") - (oldest + 24 * 3600_000)) < 1000, JSON.stringify(body));
+        check(`...the pane says it in ${locale}: «${L.errors.codes.siteDailyLimit.what} ${line}»`,
+          text.includes(L.errors.codes.siteDailyLimit.what) && text.includes(line), text.slice(0, 400));
+        check("...not «about a minute», not «could not create the website», not the route's own sentence",
+          !text.includes(old) && !text.includes(L.dashboard.websiteBuilder.generateFailed) && typeof body?.message === "string" && !text.includes(body.message), text.slice(0, 400));
+        check("...and nothing was made", db.store.user_websites.length === 50 && !model.seen.some((x) => x.kind === "site"));
+        await language(page, locale, "the 24-hour limit");
+        await context.close();
+      }
+
+      // 6b. The hour's AI requests: twenty, the oldest 45 minutes ago — it
+      // opens again in 15 minutes. Full only once the pane is open, so the
+      // sentence that opens it is not the thing refused.
+      reset();
+      {
+        const { context, page, press, say } = await open(locale);
+        await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+        await say(ASK[locale]);
+        await pane(page).waitFor({ timeout: 10000 }).catch(() => null);
+        const first = Date.now() - 45 * 60_000;
+        for (let i = 0; i < 20; i++) db.store.rate_limit_log.push({ id: standInId(), scope: "ai_hourly_user", identifier: MOCK_USER.id, created_at: new Date(first + i * 60_000).toISOString() });
+        state.hourlyFull = true;
+        const refused = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/websites/generate", { timeout: 20000 }).then((r) => r.json()).catch(() => null);
+        await press(page.locator('[data-testid="chat-site-make"]'));
+        const body = await refused;
+        await page.waitForTimeout(1500);
+        const text = await pane(page).innerText().catch(() => "");
+        const line = await opensLine(page, new Date(first + 60 * 60_000).toISOString());
+        check(`the hour's AI requests: the route names the limit and when it opens (${body?.code})`,
+          body?.code === "hourlyLimit" && Math.abs(Date.parse(body?.retryAt ?? "") - (first + 60 * 60_000)) < 1000, JSON.stringify(body));
+        check(`...the pane says it in ${locale}: «${L.errors.codes.hourlyLimit.what} ${line}»`,
+          text.includes(L.errors.codes.hourlyLimit.what) && text.includes(line), text.slice(0, 400));
+        check("...not «about a minute», not «could not create the website»", !text.includes(old) && !text.includes(L.dashboard.websiteBuilder.generateFailed), text.slice(0, 400));
+        await language(page, locale, "the hour's limit");
+        state.hourlyFull = false;
+        await context.close();
+      }
+
+      // 6c. A change asked while another change to the site still runs.
+      reset();
+      {
+        const { context, page, press, say } = await open(locale);
+        await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+        await say(ASK[locale]);
+        await pane(page).waitFor({ timeout: 10000 }).catch(() => null);
+        await press(page.locator('[data-testid="chat-site-make"]'));
+        await page.locator('[data-testid="chat-site-preview"] iframe').waitFor({ timeout: 45000 }).catch(() => null);
+        if (device.touch) {
+          await press(page.locator('[data-testid="chat-site-back"]'));
+          await page.waitForTimeout(300);
+        }
+        state.editBusy = true;
+        const answered = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/websites/edit", { timeout: 20000 }).then((r) => r.json()).catch(() => null);
+        await say(locale === "el" ? "κάνε τα χρώματα πιο σκούρα" : "make the colours darker");
+        const editBody = await answered;
+        await page.waitForTimeout(2000);
+        const text = await pane(page).innerText().catch(() => "");
+        const busy = `${L.dashboard.toolShell.site.busy} ${L.errors.credits.notCharged}`;
+        check(`a change while another runs: the pane says what it is, in ${locale}: «${busy}»`, text.includes(busy), text.slice(0, 400));
+        check(`...the route said busy (${editBody?.busy}), and the pane says neither «could not create the website» nor the route's own sentence`,
+          editBody?.busy === true && !text.includes(L.dashboard.websiteBuilder.generateFailed) && typeof editBody?.message === "string" && !text.includes(editBody.message), text.slice(0, 400));
+        const srcdoc = (await page.locator('[data-testid="chat-site-preview"] iframe').getAttribute("srcdoc").catch(() => null)) ?? "";
+        check("...and the site is still shown, as it was", srcdoc.includes("Σκηνές δίπλα στη θάλασσα."));
+        await language(page, locale, "a change while another runs");
+        state.editBusy = false;
+        await context.close();
+      }
+    }
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
   }
 } catch (err) {

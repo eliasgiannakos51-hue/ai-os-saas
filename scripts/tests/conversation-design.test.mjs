@@ -113,25 +113,30 @@ console.log("\n== 3. the first message, refused or failed, in the reader's langu
 // charged — and the free message it gave back stayed counted as spent.
 const route = stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"));
 const breaker = stripComments(readFileSync("src/lib/ai-circuit-breaker.ts", "utf8"));
-// Out of credits is said with its two numbers (outOfCreditsText, package 7's
-// check, scripts/tests/chat-opens-tools.test.mjs); every other code here.
+// The words are shared with the Studio's and the voice conversation since
+// 2026-10-14 (components/chat/use-chat-failure-words.ts): out of credits
+// with its two numbers, a limit by its name and the time it opens again,
+// a failure with what the route says about the money.
+const words = stripComments(readFileSync("src/components/chat/use-chat-failure-words.ts", "utf8"));
 check("a refusal is said from its code, in the reader's language, not from the route's prose",
-  /:\s*isErrorCode\(data\.code\)\s*\?\s*describe\(new ApiError\(429, \{ code: data\.code \}\)\)\.text\s*:\s*describeStatus\(429\)\.text\s*\);/.test(ws));
+  /setError\(chatFailure\.refusal\(429, data\)\);/.test(ws) &&
+    /if \(data\?\.rateLimited\) return data\.outOfCredits === true \? outOfCredits\(data\.available, data\.needed\) : said\(429, data\);/.test(words));
 check("...the route names the credit refusal by its code",
   /rateLimited: true,\s*code: "insufficientCredits",\s*outOfCredits: true,\s*message: insufficientCreditsMessage\(/.test(route));
 check("...and the circuit breaker's, every one of its refusals carrying a code",
-  /rateLimited: true, code: breakerCheck\.code, message: breakerCheck\.reason/.test(route) &&
+  /rateLimited: true, code: breakerCheck\.code, retryAt: breakerCheck\.retryAt, message: breakerCheck\.reason/.test(route) &&
     (breaker.match(/allowed: false,/g) ?? []).length >= 3 &&
-    (breaker.match(/allowed: false,/g) ?? []).length === (breaker.match(/\bcode: "(upstreamUnavailable|rateLimited)",/g) ?? []).length);
+    (breaker.match(/allowed: false,/g) ?? []).length === (breaker.match(/\bcode: "(platformLimit|hourlyLimit|repeatLimit)",/g) ?? []).length);
 const modelFailures = (route.match(/type: "error",\s*error: [^\n]*No credits were charged — please try again\.[^\n]*\n\s*code: "upstreamUnavailable",\s*creditsRefunded: true,\s*freeRemaining: isFreeMessage && freeGrant\?\.granted \? freeGrant\.remaining \+ 1 : undefined,/g) ?? []).length;
 check(`a model that fails is said as the AI service, with nothing kept and the free message back (${modelFailures} of 2 places)`,
   modelFailures === 2);
 check("...and the screen reads those values, not the prose",
   /if \(typeof event\.freeRemaining === "number"\) setFreeRemaining\(event\.freeRemaining\);/.test(ws) &&
-    /event\.outOfCredits === true\s*\? outOfCreditsText\(event\.available, event\.needed\)\s*: event\.code === "upstreamUnavailable"\s*\? describeStatus\(503, event\.creditsRefunded === true\)\.text\s*: describeStatus\(500\)\.text;/.test(ws));
+    /streamError = chatFailure\.streamError\(event\);/.test(ws) &&
+    /return said\(event\.code === "upstreamUnavailable" \? 503 : 500, event\);/.test(words));
 
-// ...AND IN GREEK, IN GREEK WORDS. outOfCreditsText puts the code's line
-// and the outOfCredits detail side by side, and the Greek detail said
+// ...AND IN GREEK, IN GREEK WORDS. The shared words' outOfCredits puts the
+// code's line and the outOfCredits detail side by side, and the Greek detail said
 // «Αγόρασε ένα pack» — the one English word on the screen, found
 // 2026-10-09 by scripts/tests/all-tools-empty-chat-edges.prodtest.mjs on
 // the merged tree. The product's own words, as that test allows them.

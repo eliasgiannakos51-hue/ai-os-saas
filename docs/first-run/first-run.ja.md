@@ -1,6 +1,6 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **606 strings**. The whole product is 4250, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **574 strings**. The whole product is 4260, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2422,7 +2422,7 @@ credits の履歴を見る
 
 もう一度試す
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (176)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2923,198 +2923,6 @@ Ionexa が読み取ります
 > EN — e.g. pursue / kill / watch
 
 例: 進める / 中止 / 様子見
-
-**`errors.codes.conflict.next`**
-
-> EN — Reload the page to see the current version, then redo your change.
-
-ページを再読み込みして最新の状態を確認し、変更をやり直してください。
-
-**`errors.codes.conflict.what`**
-
-> EN — Someone — or another tab — changed this while you were working on it.
-
-作業中に、他の人または別のタブがこれを変更しました。
-
-**`errors.codes.fileTooLarge.next`**
-
-> EN — Split it, or upload a smaller version.
-
-分割するか、より小さいものをアップロードしてください。
-
-**`errors.codes.fileTooLarge.what`**
-
-> EN — That file is too big.
-
-このファイルは大きすぎます。
-
-**`errors.codes.forbidden.next`**
-
-> EN — Open Settings › Billing to see which plan covers it.
-
-「設定 › お支払い」でどのプランに含まれるか確認してください。
-
-**`errors.codes.forbidden.what`**
-
-> EN — Your plan doesn't include this.
-
-現在のプランには含まれていません。
-
-**`errors.codes.insufficientCredits.next`**
-
-> EN — Buy credits in Settings, or wait for your monthly reset.
-
-「設定」から credits を購入するか、毎月のリセットをお待ちください。
-
-**`errors.codes.insufficientCredits.what`**
-
-> EN — You don't have enough credits for this.
-
-この操作に必要な credits が足りません。
-
-**`errors.codes.invalidInput.next`**
-
-> EN — Check the highlighted fields and send it again.
-
-指摘された項目を確認して、もう一度送信してください。
-
-**`errors.codes.invalidInput.what`**
-
-> EN — Something in the form wasn't accepted.
-
-フォームの内容が受け付けられませんでした。
-
-**`errors.codes.notAuthenticated.next`**
-
-> EN — Sign in again and repeat the action — nothing you had entered is lost.
-
-もう一度サインインして操作をやり直してください。入力した内容は失われていません。
-
-**`errors.codes.notAuthenticated.what`**
-
-> EN — You're signed out.
-
-サインアウトされています。
-
-**`errors.codes.notFound.next`**
-
-> EN — It was probably deleted. Go back to the list and pick another one.
-
-削除された可能性があります。一覧に戻って別のものを選んでください。
-
-**`errors.codes.notFound.what`**
-
-> EN — This no longer exists.
-
-これはもう存在しません。
-
-**`errors.codes.offline.next`**
-
-> EN — Check your connection and try again.
-
-接続を確認して、もう一度お試しください。
-
-**`errors.codes.offline.what`**
-
-> EN — Your device couldn't reach us.
-
-お使いの端末から接続できませんでした。
-
-**`errors.codes.planLimit.next`**
-
-> EN — Delete something you no longer need, or upgrade in Settings › Billing.
-
-不要なものを削除するか、「設定 › お支払い」でアップグレードしてください。
-
-**`errors.codes.planLimit.what`**
-
-> EN — You've reached the limit of your plan.
-
-プランの上限に達しました。
-
-**`errors.codes.rateLimited.next`**
-
-> EN — Wait about a minute, then try once more.
-
-1分ほど待ってから、もう一度お試しください。
-
-**`errors.codes.rateLimited.what`**
-
-> EN — Too many requests in a short time.
-
-短時間にリクエストが多すぎます。
-
-**`errors.codes.serverError.next`**
-
-> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
-
-記録されました。少し待ってからもう一度お試しいただき、続く場合はサポートにご連絡ください。
-
-**`errors.codes.serverError.what`**
-
-> EN — This broke on our side.
-
-こちら側で問題が発生しました。
-
-**`errors.codes.unknown.next`**
-
-> EN — Try again, and contact support if it happens twice.
-
-もう一度お試しいただき、再発する場合はサポートにご連絡ください。
-
-**`errors.codes.unknown.what`**
-
-> EN — This action didn't complete.
-
-この操作は完了しませんでした。
-
-**`errors.codes.unsupportedType.next`**
-
-> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
-
-PDF、DOCX、CSV、TXT のいずれかに変換して、もう一度アップロードしてください。
-
-**`errors.codes.unsupportedType.what`**
-
-> EN — That file type isn't supported.
-
-このファイル形式には対応していません。
-
-**`errors.codes.upstreamUnavailable.next`**
-
-> EN — This is on our side and usually clears within a few minutes.
-
-こちら側の問題で、通常は数分で復旧します。
-
-**`errors.codes.upstreamUnavailable.what`**
-
-> EN — The AI service isn't responding right now.
-
-AI サービスが現在応答していません。
-
-**`errors.credits.charged`**
-
-> EN — This attempt used credits.
-
-この試行で credits を消費しました。
-
-**`errors.credits.notCharged`**
-
-> EN — You were not charged.
-
-請求は発生していません。
-
-**`errors.credits.refunded`**
-
-> EN — Your credits were returned.
-
-credits は返却されました。
-
-**`errors.credits.unverified`**
-
-> EN — We can't confirm from here whether this was charged.
-
-ここからは請求されたかどうかを確認できません。
 
 **`module.exportCsv`**
 

@@ -182,7 +182,7 @@ export async function POST(request: Request) {
       );
       if (!breaker.allowed) {
         await releaseReservation(user.id, reservationId);
-        return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+        return NextResponse.json({ ok: false, code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
       }
       try {
         const filled = await fillTemplateFromRequest({

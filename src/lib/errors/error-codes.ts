@@ -168,12 +168,25 @@ export type CreditOutcome = "refunded" | "notCharged" | "charged" | "unverified"
  *     did not say                        credit history rather than assert
  *                                        something that might be wrong.
  */
+/**
+ * READS THAT CANNOT HAVE CHARGED, whatever they answer.
+ *
+ * The rule above is about a request that MIGHT have spent: a 5xx on one
+ * leaves the reader honestly unsure, so they are told so. A read spends
+ * nothing by construction — listing a site's versions, loading a list —
+ * and telling its reader «we cannot confirm whether you were charged» is
+ * not caution, it is a false worry about an action that has no price at
+ * all. A call site that only ever reads passes `spends: false`.
+ * scripts/tests/limit-texts.test.mjs holds the two apart.
+ */
 export function creditOutcomeForStatus(
   status: number,
-  creditsRefunded: boolean | undefined
+  creditsRefunded: boolean | undefined,
+  spends: boolean = true
 ): CreditOutcome {
   if (creditsRefunded === true) return "refunded";
   if (creditsRefunded === false) return "charged";
+  if (!spends) return "notCharged";
   // A 4xx is a rejection: the route stopped before spending anything. The
   // one exception that ISN'T is 409, which can be raised after a partial
   // write, so it is treated as unverified along with the 5xx family.

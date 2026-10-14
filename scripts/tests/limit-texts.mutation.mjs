@@ -27,6 +27,7 @@ const CODES = "src/lib/errors/error-codes.ts";
 const TEXT = "src/lib/errors/failure-text.ts";
 const RESEARCH = "src/app/api/research/route.ts";
 const GENERATE = "src/app/api/websites/generate/route.ts";
+const HISTORY = "src/components/website-builder/site-history.tsx";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
 const REQUESTS = "src/lib/website-builder/site-requests.ts";
 const PANE = "src/components/chat/site-pane.tsx";
@@ -37,7 +38,7 @@ const WORDS = "src/components/chat/use-chat-failure-words.ts";
 const ONBOARDING = "src/components/onboarding/onboarding-flow.tsx";
 const MISSION = "src/components/mission/mission-detail.tsx";
 const FILES = "src/components/files/failure-words.ts";
-const TARGETS = [GATE, EL, EN, DE, BREAKER, LIMITER, CODES, TEXT, RESEARCH, GENERATE, CHAT_ROUTE, REQUESTS, PANE, PAGE, STUDIO, VOICE, WORDS, ONBOARDING, MISSION, FILES];
+const TARGETS = [GATE, EL, EN, DE, BREAKER, LIMITER, CODES, TEXT, RESEARCH, GENERATE, CHAT_ROUTE, REQUESTS, PANE, PAGE, STUDIO, VOICE, WORDS, ONBOARDING, MISSION, FILES, HISTORY];
 
 const MUTANTS = [
   // ---- the words ----
@@ -240,6 +241,27 @@ const MUTANTS = [
     from: "          return isTimedLimitCode(outcome.body?.code)\n",
     to: "          return isTimedLimitCode(outcome.body?.reason)\n",
     expect: "Files and Research",
+  },
+  {
+    name: "a read that cannot charge is told it might have been",
+    file: CODES,
+    from: '  if (!spends) return "notCharged";',
+    to: "",
+    expect: "a failed read is told plainly that nothing was charged",
+  },
+  {
+    name: "every failure is told nothing was charged, even one that may have spent",
+    file: CODES,
+    from: '  if (!spends) return "notCharged";',
+    to: '  if (true) return "notCharged";',
+    expect: "a write that may have spent still says it cannot be confirmed",
+  },
+  {
+    name: "the version list goes back to the careful answer for an action with no price",
+    file: HISTORY,
+    from: "describe(new ApiError(500, null), { spends: false })",
+    to: "describe(new ApiError(500, null))",
+    expect: "the version list, which only reads, asks for that answer",
   },
 ];
 

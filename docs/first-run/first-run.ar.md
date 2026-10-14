@@ -1,6 +1,6 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **578 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2446,7 +2446,7 @@ DevOps
 
 حاول مرة أخرى
 
-## Tier 3 — Further in — only if you have time (176)
+## Tier 3 — Further in — only if you have time (217)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2523,6 +2523,252 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Good morning
 
 صباح الخير
+
+**`errors.codes.conflict.next`**
+
+> EN — Reload the page to see the current version, then redo your change.
+
+أعد تحميل الصفحة لترى النسخة الحالية، ثم أعد تطبيق تغييرك.
+
+**`errors.codes.conflict.what`**
+
+> EN — Someone — or another tab — changed this while you were working on it.
+
+شخص ما — أو تبويب آخر — غيّر هذا أثناء عملك عليه.
+
+**`errors.codes.fileTooLarge.next`**
+
+> EN — Split it, or upload a smaller version.
+
+قسّمه أو ارفع نسخة أصغر.
+
+**`errors.codes.fileTooLarge.what`**
+
+> EN — That file is too big.
+
+هذا الملف كبير جدًا.
+
+**`errors.codes.forbidden.next`**
+
+> EN — Open Settings › Billing to see which plan covers it.
+
+افتح الإعدادات › الفوترة لمعرفة الخطة التي تشمله.
+
+**`errors.codes.forbidden.what`**
+
+> EN — Your plan doesn't include this.
+
+خطتك الحالية لا تشمل هذا.
+
+**`errors.codes.hourlyLimit.next`**
+
+> EN — It counts the last 60 minutes, so it opens again within the hour.
+
+يحسب آخر 60 دقيقة، لذا يُفتح من جديد خلال ساعة.
+
+**`errors.codes.hourlyLimit.what`**
+
+> EN — You've reached the limit of AI requests for one hour.
+
+بلغت حدّ طلبات الذكاء الاصطناعي في الساعة.
+
+**`errors.codes.insufficientCredits.next`**
+
+> EN — Buy credits in Settings, or wait for your monthly reset.
+
+اشترِ credits من الإعدادات أو انتظر التجديد الشهري.
+
+**`errors.codes.insufficientCredits.what`**
+
+> EN — You don't have enough credits for this.
+
+ليس لديك ما يكفي من الـ credits لهذا.
+
+**`errors.codes.invalidInput.next`**
+
+> EN — Check the highlighted fields and send it again.
+
+راجع الحقول المحددة ثم أرسله مرة أخرى.
+
+**`errors.codes.invalidInput.what`**
+
+> EN — Something in the form wasn't accepted.
+
+هناك شيء في النموذج لم يُقبل.
+
+**`errors.codes.notAuthenticated.next`**
+
+> EN — Sign in again and repeat the action — nothing you had entered is lost.
+
+سجّل الدخول مرة أخرى وأعد المحاولة — لم يُفقد شيء مما أدخلته.
+
+**`errors.codes.notAuthenticated.what`**
+
+> EN — You're signed out.
+
+تم تسجيل خروجك.
+
+**`errors.codes.notFound.next`**
+
+> EN — It was probably deleted. Go back to the list and pick another one.
+
+على الأرجح تم حذفه. عُد إلى القائمة واختر عنصرًا آخر.
+
+**`errors.codes.notFound.what`**
+
+> EN — This no longer exists.
+
+هذا العنصر لم يعد موجودًا.
+
+**`errors.codes.offline.next`**
+
+> EN — Check your connection and try again.
+
+تحقق من اتصالك ثم حاول مرة أخرى.
+
+**`errors.codes.offline.what`**
+
+> EN — Your device couldn't reach us.
+
+لم يتمكن جهازك من الوصول إلينا.
+
+**`errors.codes.planLimit.next`**
+
+> EN — Delete something you no longer need, or upgrade in Settings › Billing.
+
+احذف ما لم تعد بحاجة إليه، أو قم بالترقية من الإعدادات › الفوترة.
+
+**`errors.codes.planLimit.what`**
+
+> EN — You've reached the limit of your plan.
+
+لقد بلغت حد خطتك.
+
+**`errors.codes.platformLimit.next`**
+
+> EN — It opens again when the day changes, at 00:00 UTC.
+
+تُفتح من جديد مع تغيّر اليوم، عند 00:00 بالتوقيت العالمي المنسّق.
+
+**`errors.codes.platformLimit.what`**
+
+> EN — The AI service has reached today's limit for the whole platform.
+
+بلغت خدمة الذكاء الاصطناعي حدّ اليوم للمنصّة كلها.
+
+**`errors.codes.rateLimited.next`**
+
+> EN — The limit clears by itself as time passes — try again later.
+
+يُفرَغ الحدّ من تلقاء نفسه مع مرور الوقت — حاول لاحقًا.
+
+**`errors.codes.rateLimited.what`**
+
+> EN — You've reached the request limit for this.
+
+بلغت حدّ الطلبات لهذا الإجراء.
+
+**`errors.codes.repeatLimit.next`**
+
+> EN — It opens again within 15 minutes.
+
+يُتاح من جديد خلال 15 دقيقة.
+
+**`errors.codes.repeatLimit.what`**
+
+> EN — The same request was sent too many times in a row.
+
+أُرسل الطلب نفسه مرات كثيرة متتالية.
+
+**`errors.codes.serverError.next`**
+
+> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
+
+تم تسجيل ذلك. حاول بعد قليل، وتواصل مع الدعم إذا استمر.
+
+**`errors.codes.serverError.what`**
+
+> EN — This broke on our side.
+
+حدث خلل من جهتنا.
+
+**`errors.codes.siteDailyLimit.next`**
+
+> EN — It counts the last 24 hours, so it opens again within a day.
+
+يحسب آخر 24 ساعة، لذا يُفتح من جديد خلال يوم.
+
+**`errors.codes.siteDailyLimit.what`**
+
+> EN — You've reached the limit of new sites for 24 hours.
+
+بلغت حدّ المواقع الجديدة خلال 24 ساعة.
+
+**`errors.codes.unknown.next`**
+
+> EN — Try again, and contact support if it happens twice.
+
+حاول مرة أخرى، وتواصل مع الدعم إذا تكرر الأمر.
+
+**`errors.codes.unknown.what`**
+
+> EN — This action didn't complete.
+
+لم تكتمل هذه العملية.
+
+**`errors.codes.unsupportedType.next`**
+
+> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
+
+حوّله إلى PDF أو DOCX أو CSV أو TXT ثم ارفعه مجددًا.
+
+**`errors.codes.unsupportedType.what`**
+
+> EN — That file type isn't supported.
+
+نوع الملف هذا غير مدعوم.
+
+**`errors.codes.upstreamUnavailable.next`**
+
+> EN — This is on our side and usually clears within a few minutes.
+
+المشكلة من جهتنا وعادةً ما تُحل خلال بضع دقائق.
+
+**`errors.codes.upstreamUnavailable.what`**
+
+> EN — The AI service isn't responding right now.
+
+خدمة الذكاء الاصطناعي لا تستجيب حاليًا.
+
+**`errors.credits.charged`**
+
+> EN — This attempt used credits.
+
+استهلكت هذه المحاولة بعض الـ credits.
+
+**`errors.credits.notCharged`**
+
+> EN — You were not charged.
+
+لم يتم خصم أي مبلغ.
+
+**`errors.credits.refunded`**
+
+> EN — Nothing was charged.
+
+لم يُخصم أي شيء.
+
+**`errors.credits.unverified`**
+
+> EN — We can't confirm from here whether this was charged.
+
+لا يمكننا التأكد من هنا ما إذا تم الخصم.
+
+**`errors.retryAt`**
+
+> EN — {day, select, today {You can try again after {time}.} other {You can try again tomorrow after {time}.}}
+
+{day, select, today {يمكنك المحاولة مجددًا بعد الساعة {time}.} other {يمكنك المحاولة مجددًا غدًا بعد الساعة {time}.}}
 
 ### dashboard chrome
 

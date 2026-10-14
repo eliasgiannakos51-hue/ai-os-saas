@@ -66,11 +66,22 @@ function TabBalance() {
         : level === "low"
           ? t("balanceLow", { amount })
           : t("balance", { amount });
+  // AND IT STOPS WHERE THE TOP BAR STARTS. This bar is itself hidden from
+  // 768px up, while the top bar's low-credits notice appears from 640px
+  // (components/credits/low-credits-banner.tsx), so between the two the
+  // same number was said twice — once over the page and once under it.
+  // Handing it over at 640px is exactly the width the owner named («κάτω
+  // από 640px»), and the four tabs stay as they were.
+  //
+  // No class name is repeated in this comment on purpose: a mutation suite
+  // anchors on those strings, and a comment that carries one makes the
+  // mutant land in prose instead of code — which is how that suite went
+  // green on a broken bar for one run (2026-10-14).
   return (
     <span
       data-testid="tab-balance"
       data-level={level}
-      className={`inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[10px] font-medium tabular-nums ${BALANCE_TONE[level]}`}
+      className={`inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[10px] font-medium tabular-nums sm:hidden ${BALANCE_TONE[level]}`}
     >
       <Zap className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
       <span aria-hidden="true">{amount}</span>

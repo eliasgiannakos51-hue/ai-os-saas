@@ -19,15 +19,16 @@ export function useErrorText() {
   const locale = useLocale();
 
   return useCallback(
-    function describe(error: unknown): FailureText {
+    function describe(error: unknown, options?: { spends?: boolean }): FailureText {
+      const spends = options?.spends !== false;
       if (isApiError(error)) {
-        return failureParts(t, error.code, error.status, error.creditsRefunded, error.retryAt, locale);
+        return failureParts(t, error.code, error.status, error.creditsRefunded, error.retryAt, locale, spends);
       }
       // Anything that is not an ApiError never reached — or never came back
       // from — a route: a thrown TypeError from fetch, a rejected promise, a
       // bug in a handler. Status 0 keeps the credit answer honest, because
       // a request that never arrived cannot have been charged.
-      return failureParts(t, "offline", 0, undefined);
+      return failureParts(t, "offline", 0, undefined, undefined, undefined, spends);
     },
     [t, locale]
   );

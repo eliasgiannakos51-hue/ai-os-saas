@@ -1,6 +1,6 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **578 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2046,7 +2046,7 @@ See credit history
 
 Try again
 
-## Tier 3 — Further in — only if you have time (176)
+## Tier 3 — Further in — only if you have time (217)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2111,6 +2111,211 @@ Good evening
 
 
 Good morning
+
+**`errors.codes.conflict.next`**
+
+
+Reload the page to see the current version, then redo your change.
+
+**`errors.codes.conflict.what`**
+
+
+Someone — or another tab — changed this while you were working on it.
+
+**`errors.codes.fileTooLarge.next`**
+
+
+Split it, or upload a smaller version.
+
+**`errors.codes.fileTooLarge.what`**
+
+
+That file is too big.
+
+**`errors.codes.forbidden.next`**
+
+
+Open Settings › Billing to see which plan covers it.
+
+**`errors.codes.forbidden.what`**
+
+
+Your plan doesn't include this.
+
+**`errors.codes.hourlyLimit.next`**
+
+
+It counts the last 60 minutes, so it opens again within the hour.
+
+**`errors.codes.hourlyLimit.what`**
+
+
+You've reached the limit of AI requests for one hour.
+
+**`errors.codes.insufficientCredits.next`**
+
+
+Buy credits in Settings, or wait for your monthly reset.
+
+**`errors.codes.insufficientCredits.what`**
+
+
+You don't have enough credits for this.
+
+**`errors.codes.invalidInput.next`**
+
+
+Check the highlighted fields and send it again.
+
+**`errors.codes.invalidInput.what`**
+
+
+Something in the form wasn't accepted.
+
+**`errors.codes.notAuthenticated.next`**
+
+
+Sign in again and repeat the action — nothing you had entered is lost.
+
+**`errors.codes.notAuthenticated.what`**
+
+
+You're signed out.
+
+**`errors.codes.notFound.next`**
+
+
+It was probably deleted. Go back to the list and pick another one.
+
+**`errors.codes.notFound.what`**
+
+
+This no longer exists.
+
+**`errors.codes.offline.next`**
+
+
+Check your connection and try again.
+
+**`errors.codes.offline.what`**
+
+
+Your device couldn't reach us.
+
+**`errors.codes.planLimit.next`**
+
+
+Delete something you no longer need, or upgrade in Settings › Billing.
+
+**`errors.codes.planLimit.what`**
+
+
+You've reached the limit of your plan.
+
+**`errors.codes.platformLimit.next`**
+
+
+It opens again when the day changes, at 00:00 UTC.
+
+**`errors.codes.platformLimit.what`**
+
+
+The AI service has reached today's limit for the whole platform.
+
+**`errors.codes.rateLimited.next`**
+
+
+The limit clears by itself as time passes — try again later.
+
+**`errors.codes.rateLimited.what`**
+
+
+You've reached the request limit for this.
+
+**`errors.codes.repeatLimit.next`**
+
+
+It opens again within 15 minutes.
+
+**`errors.codes.repeatLimit.what`**
+
+
+The same request was sent too many times in a row.
+
+**`errors.codes.serverError.next`**
+
+
+It's been logged. Try again in a moment, and contact support if it keeps happening.
+
+**`errors.codes.serverError.what`**
+
+
+This broke on our side.
+
+**`errors.codes.siteDailyLimit.next`**
+
+
+It counts the last 24 hours, so it opens again within a day.
+
+**`errors.codes.siteDailyLimit.what`**
+
+
+You've reached the limit of new sites for 24 hours.
+
+**`errors.codes.unknown.next`**
+
+
+Try again, and contact support if it happens twice.
+
+**`errors.codes.unknown.what`**
+
+
+This action didn't complete.
+
+**`errors.codes.unsupportedType.next`**
+
+
+Convert it to PDF, DOCX, CSV or TXT and upload it again.
+
+**`errors.codes.unsupportedType.what`**
+
+
+That file type isn't supported.
+
+**`errors.codes.upstreamUnavailable.next`**
+
+
+This is on our side and usually clears within a few minutes.
+
+**`errors.codes.upstreamUnavailable.what`**
+
+
+The AI service isn't responding right now.
+
+**`errors.credits.charged`**
+
+
+This attempt used credits.
+
+**`errors.credits.notCharged`**
+
+
+You were not charged.
+
+**`errors.credits.refunded`**
+
+
+Nothing was charged.
+
+**`errors.credits.unverified`**
+
+
+We can't confirm from here whether this was charged.
+
+**`errors.retryAt`**
+
+
+{day, select, today {You can try again after {time}.} other {You can try again tomorrow after {time}.}}
 
 ### dashboard chrome
 

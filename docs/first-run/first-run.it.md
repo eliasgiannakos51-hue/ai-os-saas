@@ -1,6 +1,6 @@
 # The first run — it
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **578 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2446,7 +2446,7 @@ Vedi la cronologia dei crediti
 
 Riprova
 
-## Tier 3 — Further in — only if you have time (176)
+## Tier 3 — Further in — only if you have time (217)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2523,6 +2523,252 @@ Buonasera
 > EN — Good morning
 
 Buongiorno
+
+**`errors.codes.conflict.next`**
+
+> EN — Reload the page to see the current version, then redo your change.
+
+Ricarica la pagina per vedere la versione attuale, poi rifai la tua modifica.
+
+**`errors.codes.conflict.what`**
+
+> EN — Someone — or another tab — changed this while you were working on it.
+
+Qualcuno — o un'altra scheda — l'ha modificato mentre ci stavi lavorando.
+
+**`errors.codes.fileTooLarge.next`**
+
+> EN — Split it, or upload a smaller version.
+
+Dividilo oppure carica una versione più piccola.
+
+**`errors.codes.fileTooLarge.what`**
+
+> EN — That file is too big.
+
+Questo file è troppo grande.
+
+**`errors.codes.forbidden.next`**
+
+> EN — Open Settings › Billing to see which plan covers it.
+
+Apri Impostazioni › Fatturazione per vedere quale piano lo copre.
+
+**`errors.codes.forbidden.what`**
+
+> EN — Your plan doesn't include this.
+
+Il tuo piano non lo include.
+
+**`errors.codes.hourlyLimit.next`**
+
+> EN — It counts the last 60 minutes, so it opens again within the hour.
+
+Conta gli ultimi 60 minuti, quindi si riapre entro un'ora.
+
+**`errors.codes.hourlyLimit.what`**
+
+> EN — You've reached the limit of AI requests for one hour.
+
+Hai raggiunto il limite di richieste IA per un'ora.
+
+**`errors.codes.insufficientCredits.next`**
+
+> EN — Buy credits in Settings, or wait for your monthly reset.
+
+Acquista crediti nelle Impostazioni oppure aspetta il rinnovo mensile.
+
+**`errors.codes.insufficientCredits.what`**
+
+> EN — You don't have enough credits for this.
+
+Non hai crediti sufficienti per questo.
+
+**`errors.codes.invalidInput.next`**
+
+> EN — Check the highlighted fields and send it again.
+
+Controlla i campi evidenziati e invialo di nuovo.
+
+**`errors.codes.invalidInput.what`**
+
+> EN — Something in the form wasn't accepted.
+
+Qualcosa nel modulo non è stato accettato.
+
+**`errors.codes.notAuthenticated.next`**
+
+> EN — Sign in again and repeat the action — nothing you had entered is lost.
+
+Accedi di nuovo e ripeti l'operazione — non hai perso nulla di ciò che avevi scritto.
+
+**`errors.codes.notAuthenticated.what`**
+
+> EN — You're signed out.
+
+Hai effettuato la disconnessione.
+
+**`errors.codes.notFound.next`**
+
+> EN — It was probably deleted. Go back to the list and pick another one.
+
+Probabilmente è stato eliminato. Torna all'elenco e scegline un altro.
+
+**`errors.codes.notFound.what`**
+
+> EN — This no longer exists.
+
+Questo non esiste più.
+
+**`errors.codes.offline.next`**
+
+> EN — Check your connection and try again.
+
+Controlla la connessione e riprova.
+
+**`errors.codes.offline.what`**
+
+> EN — Your device couldn't reach us.
+
+Il tuo dispositivo non è riuscito a raggiungerci.
+
+**`errors.codes.planLimit.next`**
+
+> EN — Delete something you no longer need, or upgrade in Settings › Billing.
+
+Elimina qualcosa che non ti serve più, oppure passa a un piano superiore da Impostazioni › Fatturazione.
+
+**`errors.codes.planLimit.what`**
+
+> EN — You've reached the limit of your plan.
+
+Hai raggiunto il limite del tuo piano.
+
+**`errors.codes.platformLimit.next`**
+
+> EN — It opens again when the day changes, at 00:00 UTC.
+
+Si riapre al cambio di giorno, alle 00:00 UTC.
+
+**`errors.codes.platformLimit.what`**
+
+> EN — The AI service has reached today's limit for the whole platform.
+
+Il servizio di IA ha raggiunto il limite di oggi per tutta la piattaforma.
+
+**`errors.codes.rateLimited.next`**
+
+> EN — The limit clears by itself as time passes — try again later.
+
+Il limite si libera da solo col passare del tempo: riprova più tardi.
+
+**`errors.codes.rateLimited.what`**
+
+> EN — You've reached the request limit for this.
+
+Hai raggiunto il limite di richieste per questa azione.
+
+**`errors.codes.repeatLimit.next`**
+
+> EN — It opens again within 15 minutes.
+
+Torna disponibile entro 15 minuti.
+
+**`errors.codes.repeatLimit.what`**
+
+> EN — The same request was sent too many times in a row.
+
+La stessa richiesta è stata inviata troppe volte di seguito.
+
+**`errors.codes.serverError.next`**
+
+> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
+
+È stato registrato. Riprova tra poco e contatta l'assistenza se continua.
+
+**`errors.codes.serverError.what`**
+
+> EN — This broke on our side.
+
+Si è rotto qualcosa dalla nostra parte.
+
+**`errors.codes.siteDailyLimit.next`**
+
+> EN — It counts the last 24 hours, so it opens again within a day.
+
+Conta le ultime 24 ore, quindi si riapre entro un giorno.
+
+**`errors.codes.siteDailyLimit.what`**
+
+> EN — You've reached the limit of new sites for 24 hours.
+
+Hai raggiunto il limite di nuovi siti in 24 ore.
+
+**`errors.codes.unknown.next`**
+
+> EN — Try again, and contact support if it happens twice.
+
+Riprova e contatta l'assistenza se succede di nuovo.
+
+**`errors.codes.unknown.what`**
+
+> EN — This action didn't complete.
+
+Questa operazione non è stata completata.
+
+**`errors.codes.unsupportedType.next`**
+
+> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
+
+Convertilo in PDF, DOCX, CSV o TXT e ricaricalo.
+
+**`errors.codes.unsupportedType.what`**
+
+> EN — That file type isn't supported.
+
+Questo tipo di file non è supportato.
+
+**`errors.codes.upstreamUnavailable.next`**
+
+> EN — This is on our side and usually clears within a few minutes.
+
+Dipende da noi e di solito si risolve in pochi minuti.
+
+**`errors.codes.upstreamUnavailable.what`**
+
+> EN — The AI service isn't responding right now.
+
+Il servizio di IA non risponde in questo momento.
+
+**`errors.credits.charged`**
+
+> EN — This attempt used credits.
+
+Questo tentativo ha consumato crediti.
+
+**`errors.credits.notCharged`**
+
+> EN — You were not charged.
+
+Non ti è stato addebitato nulla.
+
+**`errors.credits.refunded`**
+
+> EN — Nothing was charged.
+
+Non è stato addebitato nulla.
+
+**`errors.credits.unverified`**
+
+> EN — We can't confirm from here whether this was charged.
+
+Da qui non possiamo confermare se sia stato addebitato.
+
+**`errors.retryAt`**
+
+> EN — {day, select, today {You can try again after {time}.} other {You can try again tomorrow after {time}.}}
+
+{day, select, today {Potrai riprovare dopo le {time}.} other {Potrai riprovare domani dopo le {time}.}}
 
 ### dashboard chrome
 

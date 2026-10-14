@@ -441,5 +441,22 @@ console.log("\n== 5. a tool's name never follows a Greek article ==");
   check("...the plan wall names it in quotes after «Η λειτουργία»", M.el.common.upgradeRequired.body.includes("«{feature}»"));
 }
 
+console.log("\n== a read that cannot charge says so, and a write that might does not ==");
+// «Δεν μπορούμε να επιβεβαιώσουμε αν χρεώθηκε» is the right answer for a
+// request that might have spent before it failed. For a read — listing a
+// site's versions — it is a false worry about an action with no price, so
+// those call sites pass `spends: false` (2026-10-14, found by review).
+{
+  const outcome = (status, refunded, spends) => codes.creditOutcomeForStatus(status, refunded, spends);
+  check("a failed read is told plainly that nothing was charged", outcome(500, undefined, false) === "notCharged");
+  check("...and so is a read that never reached the server", outcome(0, undefined, false) === "notCharged");
+  check("a write that may have spent still says it cannot be confirmed", outcome(500, undefined, true) === "unverified");
+  check("...and the default, with nothing passed, is the careful one", codes.creditOutcomeForStatus(500, undefined) === "unverified");
+  check("a route that says it gave the credits back still wins", outcome(500, true, false) === "refunded" && outcome(500, false, true) === "charged");
+  const history = stripComments(readFileSync("src/components/website-builder/site-history.tsx", "utf8"));
+  check("the version list, which only reads, asks for that answer",
+    /describe\(new ApiError\(500, null\), \{ spends: false \}\)/.test(history));
+}
+
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\nFAILURES: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

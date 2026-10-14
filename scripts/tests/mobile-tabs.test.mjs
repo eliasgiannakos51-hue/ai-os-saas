@@ -119,7 +119,14 @@ check("small: 10px, on one line, in the tab's own flow — it covers nothing",
 check("a screen reader hears the words, not a bare number",
   /<span aria-hidden="true">\{amount\}<\/span>\s*<span className="sr-only">\{spoken\}<\/span>/.test(balanceFn) &&
     ["balance", "balanceLow", "balanceEmpty", "balanceUnlimited"].every((k) => balanceFn.includes(`t("${k}"`)));
+// AND IT IS SAID ONCE, NOT TWICE. The bar is md:hidden (768px) while the
+// top bar's notice starts at sm (640px), so between the two the same
+// number was over the page and under it at the same time (found by review
+// 2026-10-14). The balance hands over at exactly the width the owner named.
+check("the balance stops at 640px, where the top bar takes over",
+  /whitespace-nowrap text-\[10px\] font-medium tabular-nums sm:hidden/.test(balanceFn), balanceFn.slice(0, 200));
 const banner = stripComments(readFileSync("src/components/credits/low-credits-banner.tsx", "utf8"));
+check("...and the top bar's notice really begins there", /\bsm:inline-flex\b/.test(banner) && /\bhidden\b/.test(banner));
 check("the top bar's notice from 640px up decides «low» by the same rule",
   /const level = creditLevel\(\{ credits, total, isAdmin \}\);/.test(banner) && /level !== "low" && level !== "empty"/.test(banner) && !/credits \/ total|THRESHOLD/.test(banner));
 for (const l of ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"]) {

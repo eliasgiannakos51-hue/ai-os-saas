@@ -159,7 +159,7 @@ export function SiteHistory({
         {versions === null ? (
           <p className="mt-2 text-xs text-muted">{t("historyLoading")}</p>
         ) : failed ? (
-          <p className="mt-2 text-xs text-warning">{describe(new ApiError(500, null)).text}</p>
+          <p className="mt-2 text-xs text-warning">{describe(new ApiError(500, null), { spends: false }).text}</p>
         ) : versions.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("historyEmpty")}</p>
         ) : (

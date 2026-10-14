@@ -41,10 +41,14 @@ export type SiteStart =
   | { kind: "started"; record: UserWebsite }
   /**
    * The server answered but made nothing: a brief that is not a website
-   * (`offTopic`), with the classifier's sentence — which may be its
-   * English default (lib/website-builder.ts, DEFAULT_OFF_TOPIC_MESSAGE).
+   * (`offTopic`), or a failure. The classifier's own sentence is NOT
+   * carried: it may be its English default (lib/website-builder.ts,
+   * DEFAULT_OFF_TOPIC_MESSAGE), and both readers — components/chat/site-pane.tsx
+   * and components/website-builder/website-shell.tsx — say it in the
+   * reader's language from `offTopic` alone. A field nobody reads is an
+   * invitation to put the English back.
    */
-  | { kind: "notMade"; offTopic: boolean; message: string | null }
+  | { kind: "notMade"; offTopic: boolean }
   /**
    * Refused: the plan, the credits, today's limit, the size, a failure.
    * `code` is the route's own ("not_included" when the plan has no Site,
@@ -84,12 +88,18 @@ export function refusedBeforeWork(data: { code?: unknown; message?: unknown; ret
 /**
  * Any other refusal, as an ApiError whose `message` is the route's own
  * sentence, or empty when it gave none — what `error` was before it became
- * an ApiError. Chat's Site pane (components/chat/site-pane.tsx) still says
- * a refusal through getErrorMessage, which shows a message and falls back
- * to its own translated sentence on an empty one; with ApiError's default
- * it read «Request failed with 200» for a change the safety review held
- * back (found 2026-10-09). The shell reads only the status, the code and
- * the credits (lib/errors/use-error-text.ts).
+ * an ApiError.
+ *
+ * NOBODY SHOWS THAT SENTENCE ANY MORE. Chat's Site pane
+ * (components/chat/site-pane.tsx) used to say a refusal through
+ * getErrorMessage, which showed the route's message and fell back to a
+ * translated one when it was empty; with ApiError's default it read
+ * «Request failed with 200» for a change the safety review held back
+ * (found 2026-10-09). Since 2026-10-14 both the pane and the shell say
+ * every refusal from its status, its code and its credits
+ * (lib/errors/use-error-text.ts), in the reader's language. The empty
+ * string is kept so a future reader of `message` still gets nothing
+ * English rather than ApiError's default.
  */
 function refusal(status: number, data: ApiErrorPayload | null, prose: unknown): ApiError {
   return new ApiError(status, { ...(data ?? {}), error: typeof prose === "string" ? prose : "" });
@@ -118,7 +128,7 @@ export async function startSiteGeneration(input: {
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
   if (!data.generated) {
     if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data), ...routeSaid(data) };
-    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };
+    return { kind: "notMade", offTopic: data.offTopic === true };
   }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the

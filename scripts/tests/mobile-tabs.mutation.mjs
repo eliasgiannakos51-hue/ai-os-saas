@@ -176,6 +176,13 @@ const MUTANTS = [
     to: "",
     expect: "ar: the balance's words",
   },
+  {
+    name: "the balance stays on past 640px, so it is said twice over and under the page",
+    file: BAR,
+    from: "whitespace-nowrap text-[10px] font-medium tabular-nums sm:hidden",
+    to: "whitespace-nowrap text-[10px] font-medium tabular-nums",
+    expect: "the balance stops at 640px",
+  },
 ];
 
 function runGate() {

@@ -147,6 +147,27 @@ export function extractKeys(src, file) {
   )) {
     namespaces.set(m[1], m[2] ?? "");
   }
+  // A TRANSLATOR THAT ARRIVES AS A PARAMETER, declared by the file itself.
+  //
+  // The pass above finds a namespace where it is BOUND. On 2026-10-14 the
+  // three sentences of a failure moved out of lib/errors/use-error-text.ts
+  // (where `const t = useTranslations("errors")` is) and into
+  // lib/errors/failure-text.ts, which takes `t` as an argument so a gate
+  // can run it against the real messages/*.json. Nothing was bound there,
+  // so this scanner found nothing, and the first-run pack lost every
+  // sentence of that family — 28 `errors.codes.*` and 4 `errors.credits.*`
+  // — in the same round that rewrote them. The pack went 606 strings to
+  // 574 and said nothing.
+  //
+  // So a file may declare the binding, once, where the reader can see it:
+  //
+  //   // @messages t errors
+  //
+  // first-run-strings.test.mjs holds every such line BOTH ways: the file
+  // must really call that name, and the keys it builds must resolve.
+  for (const m of src.matchAll(/@messages\s+([A-Za-z_$][\w$]*)\s+([\w.]*)/g)) {
+    namespaces.set(m[1], m[2] === "-" ? "" : m[2]);
+  }
   const keys = [];
   const dynamic = [];
   if (namespaces.size === 0) return { keys, dynamic };

@@ -15,7 +15,9 @@ import {
   Check,
 } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { ApiError } from "@/lib/errors/api-error";
+import type { ApiErrorPayload } from "@/lib/errors/error-codes";
+import { useErrorText, useLimitText } from "@/lib/errors/use-error-text";
 import { MAX_CSV_BYTES } from "@/lib/import/csv-parse";
 import { MAX_PASTE_CHARS, MIN_PASTE_CHARS } from "@/lib/import/paste-limits";
 import { formatBytes } from "@/lib/files/file-types";
@@ -73,6 +75,18 @@ export function OnboardingFlow({
   integrationsAvailable: boolean;
 }) {
   const t = useTranslations("dashboard.onboarding");
+  const describe = useErrorText();
+  const limitText = useLimitText();
+  // A REFUSED STEP OF THE FIRST MINUTES, IN THE READER'S LANGUAGE
+  // (2026-10-14). This showed the routes' `error` as it came — English on
+  // every screen, and for an AI limit «You've made a lot of AI requests…».
+  // A limit is said by its name with the time it opens again; signed out,
+  // no credits or another limit from the status (lib/errors/use-error-text.ts);
+  // anything else in this screen's own sentence. A request that never
+  // arrived is the connection, never the browser's English.
+  const refused = (status: number, data: unknown, ours: string): string =>
+    limitText(data) ?? ([401, 402, 429].includes(status) ? describe(new ApiError(status, data as ApiErrorPayload | null)).text : ours);
+  const failed = (err: unknown, ours: string): string => (err instanceof TypeError ? describe(err).text : ours);
   const tPromise = useTranslations("promise");
   const locale = useLocale();
   const router = useRouter();
@@ -170,7 +184,7 @@ export function OnboardingFlow({
       const data = await response.json();
 
       if (!data.ok) {
-        addToast(data.error ?? t("analyseError"), "error");
+        addToast(refused(response.status, data, t("analyseError")), "error");
         return;
       }
       setFile(chosen);
@@ -178,7 +192,7 @@ export function OnboardingFlow({
       setMappings(data.proposal.mappings);
       setDateOrder(data.dateOrder);
     } catch (err) {
-      addToast(getErrorMessage(err, t("analyseError")), "error");
+      addToast(failed(err, t("analyseError")), "error");
     } finally {
       setPending(null);
     }
@@ -197,14 +211,14 @@ export function OnboardingFlow({
       const response = await fetch("/api/import/csv/apply", { method: "POST", body });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("importError"), "error");
+        addToast(refused(response.status, data, t("importError")), "error");
         return;
       }
       setImportedCount(data.imported);
       addToast(t("imported", { count: data.imported }));
       await generateInsights(data.importId);
     } catch (err) {
-      addToast(getErrorMessage(err, t("importError")), "error");
+      addToast(failed(err, t("importError")), "error");
     } finally {
       setPending(null);
     }
@@ -222,7 +236,7 @@ export function OnboardingFlow({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("importError"), "error");
+        addToast(refused(response.status, data, t("importError")), "error");
         return;
       }
       if (data.nothingFound) {
@@ -235,7 +249,7 @@ export function OnboardingFlow({
       addToast(t("imported", { count: data.imported }));
       await generateInsights(data.importId);
     } catch (err) {
-      addToast(getErrorMessage(err, t("importError")), "error");
+      addToast(failed(err, t("importError")), "error");
     } finally {
       setPending(null);
     }
@@ -251,7 +265,7 @@ export function OnboardingFlow({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("insightsError"), "error");
+        addToast(refused(response.status, data, t("insightsError")), "error");
         setStep("insights");
         return;
       }
@@ -260,7 +274,7 @@ export function OnboardingFlow({
       setStep("insights");
       router.refresh();
     } catch (err) {
-      addToast(getErrorMessage(err, t("insightsError")), "error");
+      addToast(failed(err, t("insightsError")), "error");
       setStep("insights");
     }
   }

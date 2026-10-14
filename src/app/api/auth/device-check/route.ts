@@ -6,6 +6,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 import { sendNewDeviceLoginEmail } from "@/lib/email/send-new-device-login-email";
 import { getClientIp } from "@/lib/get-client-ip";
+import { isAccountsFirstSignIn } from "@/lib/auth/first-sign-in";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, newDevice: false });
     }
 
+    // THE ACCOUNT'S FIRST SIGN-IN (lib/auth/first-sign-in.ts): the device
+    // is recorded, and it is not told as a new one. Counted before the
+    // insert; a count that cannot be read is not zero, and the email goes.
+    const { count: devicesOnRecord, error: countError } = await supabase
+      .from("known_devices")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    if (countError) logApiError("/api/auth/device-check", countError, { stage: "count_devices" });
+    const firstSignIn = isAccountsFirstSignIn({
+      devicesOnRecord: countError ? null : (devicesOnRecord ?? null),
+      accountCreatedAt: user.created_at,
+    });
+
     const { error: insertError } = await supabase.from("known_devices").insert({
       user_id: user.id,
       device_fingerprint: fingerprint,
@@ -135,6 +149,8 @@ export async function POST(request: Request) {
       logApiError("/api/auth/device-check", insertError, { stage: "insert" });
       return NextResponse.json({ ok: false, error: "Could not record device." }, { status: 500 });
     }
+
+    if (firstSignIn) return NextResponse.json({ ok: true, newDevice: true, firstSignIn: true });
 
     const { label } = parseUserAgent(userAgent);
     await sendNewDeviceLoginEmail(user.email, {

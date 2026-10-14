@@ -1332,7 +1332,7 @@
           "tooShort": "Di’ qualcosa in più sul documento prima.",
           "tooLong": "È più lungo di una descrizione. Descrivi il documento, non incollarlo.",
           "insufficient": "Crediti insufficienti per questo documento.",
-          "rateLimited": "Troppe richieste. Aspetta un minuto e riprova.",
+          "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
           "unavailable": "Il servizio di IA non era disponibile. Non è stato addebitato nulla.",
           "unusable": "Il modello ha restituito qualcosa che non era un documento. Prova a descriverlo diversamente.",
           "notIncluded": "La scrittura di documenti non è inclusa nel tuo piano.",
@@ -1820,7 +1820,8 @@
         "pagesShort": "Hai chiesto {asked} pagine e ne sono state create {made}. Dimmi quale manca e la aggiungo."
       },
       "regeneratePaid": "Rigenera · circa {count} crediti",
-      "regenerateNoCredits": "Crediti insufficienti per un'altra rigenerazione: ne servono circa {needed}, ne hai {available}. Non è stato avviato nulla."
+      "regenerateNoCredits": "Crediti insufficienti per un'altra rigenerazione: ne servono circa {needed}, ne hai {available}. Non è stato avviato nulla.",
+      "imageUploadFailed": "Le immagini di riferimento non sono state caricate. Non è stato addebitato nulla: riprova."
     },
     "marketplace": {
       "title": "Aiutanti pronti",
@@ -2411,7 +2412,7 @@
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
       "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
       "askNoCredits": "Crediti insufficienti per questa domanda. Non è stato addebitato nulla.",
-      "askRateLimited": "Troppe domande nell’ultima ora. Riprova tra poco — non è stato addebitato nulla.",
+      "askRateLimited": "Hai raggiunto il limite di domande. Si libera da solo col tempo: riprova più tardi. Non è stato addebitato nulla.",
       "askFailed": "La domanda non ha avuto risposta: il servizio di IA non ha risposto. Non è stato addebitato nulla — riprova tra poco.",
       "questionLength": "{used, number} di {max, number} caratteri",
       "questionAtLimit": "Hai raggiunto il limite di {max, number} caratteri per una domanda.",
@@ -2467,7 +2468,7 @@
       "runError": "Impossibile completare il report.",
       "refused": {
         "noCredits": "Crediti insufficienti per un report di ricerca. Non è stato addebitato nulla.",
-        "rateLimited": "Troppi report in poco tempo. Riprova tra poco.",
+        "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "unavailable": "Il servizio di IA non ha risposto. Non è stato addebitato nulla — riprova tra poco."
       },
       "failed": {
@@ -2936,7 +2937,7 @@
         "not_included": "Le riunioni non sono incluse in questo piano.",
         "out_of_minutes": "Hai esaurito i minuti di questo mese.",
         "unsupported_type": "Quel formato audio non è supportato.",
-        "rate_limited": "Troppe registrazioni nell'ultima ora. Riprova più tardi.",
+        "rate_limited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "empty": "Quella registrazione era vuota.",
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla."
       },
@@ -3207,7 +3208,7 @@
         "tooShort": "Di’ qualcosa in più sull’immagine.",
         "tooLong": "È troppo lungo; fino a {limit} caratteri.",
         "insufficient": "Crediti insufficienti per questo.",
-        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "refused": "Il fornitore ha rifiutato di creare questa immagine. Prova un’altra descrizione; non è stato addebitato nulla.",
         "busy": "Questa immagine si sta già modificando. Aspetta che finisca.",
         "gone": "Quell’immagine non esiste più.",
@@ -3389,7 +3390,7 @@
         "empty": "Scrivi qualche parola in più su cosa deve succedere.",
         "tooLong": "Il testo è lungo; massimo {limit} caratteri.",
         "insufficient": "Crediti insufficienti per questo.",
-        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "busy": "Questa automazione è occupata. Aspetta che finisca.",
         "gone": "Questa automazione non esiste più.",
         "unavailable": "L’AI non risponde in questo momento. Non è stato addebitato nulla; riprova.",
@@ -3460,7 +3461,7 @@
         "no_credits": "Crediti insufficienti",
         "not_included": "Non incluso nel tuo piano",
         "not_configured": "Non ancora attivo",
-        "rate_limited": "Troppe richieste insieme",
+        "rate_limited": "Limite di richieste raggiunto: riprova più tardi",
         "refused": "Lo strumento l’ha rifiutato",
         "offline": "Nessuna connessione",
         "stopped": "Interrotto",
@@ -3482,7 +3483,7 @@
       },
       "errors": {
         "projectLimit": "Hai raggiunto il limite di progetti del tuo piano ({limit}).",
-        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "file": "Impossibile leggere il file. Prova con un file CSV o Excel.",
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla.",
         "offline": "Nessuna connessione. Controlla la rete e riprova."
@@ -3570,7 +3571,7 @@
       "chargedNothing": "Nessun addebito.",
       "open": "Aprilo",
       "insufficient": "Crediti insufficienti per questa traduzione. Non è stato addebitato nulla.",
-      "dailyLimit": "Hai raggiunto il limite di nuovi siti di oggi. Riprova domani.",
+      "dailyLimit": "Hai raggiunto il limite di nuovi siti in 24 ore. Conta le ultime 24 ore, quindi si riapre entro un giorno.",
       "notIncluded": "Il Sito non è incluso nel tuo piano.",
       "unusable": "La risposta non era utilizzabile e non è stato scritto nulla. Si addebita solo quanto speso.",
       "failed": "Non è stato possibile fare la traduzione. Nessun credito addebitato."
@@ -3607,7 +3608,7 @@
         "insufficient": "Crediti insufficienti. Non è stato addebitato nulla.",
         "unavailable": "Il servizio non risponde in questo momento. Non è stato addebitato nulla.",
         "unusable": "La risposta non era un gioco giocabile e non è stata conservata. Si addebita solo quanto speso.",
-        "rateLimited": "Troppe richieste insieme. Riprova tra poco.",
+        "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "notIncluded": "I giochi sono inclusi nei piani che hanno il Sito.",
         "tooLong": "La descrizione è troppo lunga.",
         "stopped": "Fermato. Non è stato addebitato nulla.",
@@ -4112,8 +4113,8 @@
       "next": "Compra un pacchetto di credits o passa a un piano più grande: la stessa azione andrà a buon fine, e nulla di ciò che hai scritto è perso."
     },
     "rate_limited": {
-      "what": "Troppe di queste nell'ultima ora",
-      "next": "Questa azione ha un tetto orario perché un account non consumi il budget condiviso. Aspetta qualche minuto e riprova: il tetto scorre, non si azzera all'ora esatta."
+      "what": "Hai raggiunto il limite per questa azione",
+      "next": "Questa azione ha un tetto perché un account non consumi il budget condiviso. Scorre invece di azzerarsi a un'ora fissa e si libera da solo col tempo: riprova più tardi."
     },
     "timeout": {
       "what": "Ci ha messo troppo ed è stato fermato",
@@ -4400,7 +4401,7 @@
     "retry": "Riprova",
     "creditHistory": "Vedi la cronologia dei crediti",
     "credits": {
-      "refunded": "I tuoi crediti sono stati restituiti.",
+      "refunded": "Non è stato addebitato nulla.",
       "notCharged": "Non ti è stato addebitato nulla.",
       "charged": "Questo tentativo ha consumato crediti.",
       "unverified": "Da qui non possiamo confermare se sia stato addebitato."
@@ -4423,8 +4424,8 @@
         "next": "Controlla i campi evidenziati e invialo di nuovo."
       },
       "rateLimited": {
-        "what": "Troppe richieste in poco tempo.",
-        "next": "Aspetta circa un minuto e riprova."
+        "what": "Hai raggiunto il limite di richieste per questa azione.",
+        "next": "Il limite si libera da solo col passare del tempo: riprova più tardi."
       },
       "insufficientCredits": {
         "what": "Non hai crediti sufficienti per questo.",
@@ -4461,6 +4462,22 @@
       "unknown": {
         "what": "Questa operazione non è stata completata.",
         "next": "Riprova e contatta l'assistenza se succede di nuovo."
+      },
+      "siteDailyLimit": {
+        "what": "Hai raggiunto il limite di nuovi siti in 24 ore.",
+        "next": "Conta le ultime 24 ore, quindi si riapre entro un giorno."
+      },
+      "hourlyLimit": {
+        "what": "Hai raggiunto il limite di richieste IA per un'ora.",
+        "next": "Conta gli ultimi 60 minuti, quindi si riapre entro un'ora."
+      },
+      "repeatLimit": {
+        "what": "La stessa richiesta è stata inviata troppe volte di seguito.",
+        "next": "Torna disponibile entro 15 minuti."
+      },
+      "platformLimit": {
+        "what": "Il servizio di IA ha raggiunto il limite di oggi per tutta la piattaforma.",
+        "next": "Si riapre al cambio di giorno, alle 00:00 UTC."
       }
     },
     "boundary": {
@@ -4469,7 +4486,8 @@
       "reload": "Ricarica la pagina",
       "section": "Questa sezione non è stata visualizzata.",
       "sectionBody": "Il resto della pagina non è interessato. Ricaricare di solito risolve."
-    }
+    },
+    "retryAt": "{day, select, today {Potrai riprovare dopo le {time}.} other {Potrai riprovare domani dopo le {time}.}}"
   },
   "aiExamples": {
     "createStudio": {
@@ -4832,7 +4850,7 @@
       "tooShort": "Prima racconta qualcosa in più sulla presentazione.",
       "tooLong": "Supera i {limit} caratteri. Descrivi la presentazione, non tutto il discorso.",
       "insufficient": "Crediti insufficienti per questa presentazione.",
-      "rateLimited": "Troppe richieste: aspetta un minuto e riprova.",
+      "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
       "unavailable": "Il servizio AI non era raggiungibile. Nessun addebito.",
       "unusable": "Il modello ha restituito qualcosa che non era una presentazione. Prova a descriverla in modo diverso.",
       "failed": "Non ha funzionato: riprova.",
@@ -4916,7 +4934,7 @@
       "tooShort": "Prima racconta qualcosa in più.",
       "tooLong": "Supera i {limit} caratteri. Di' di cosa parla il post, non tutta la storia.",
       "insufficient": "Crediti insufficienti per questi post.",
-      "rateLimited": "Troppe richieste: aspetta un minuto e riprova.",
+      "rateLimited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
       "unavailable": "Il servizio AI non era raggiungibile. Nessun addebito.",
       "unusable": "Il modello ha restituito qualcosa che non erano post. Prova a descriverlo in modo diverso.",
       "failed": "Non ha funzionato: riprova."

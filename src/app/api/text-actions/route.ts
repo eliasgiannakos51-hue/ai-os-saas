@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
     const breakerCheck = await checkAiCallAllowed(user.id, "text_action", fingerprintRequest(action, text));
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: false, error: breakerCheck.reason }, { status: 429 });
+      return NextResponse.json({ ok: false, code: breakerCheck.code, retryAt: breakerCheck.retryAt, error: breakerCheck.reason }, { status: 429 });
     }
 
     // Credits: read-only check first, actual deduct only after the

@@ -355,8 +355,11 @@ console.log("\n== 8. LIVE EDITING is per page, not just the first ==");
     /const pageTabs =/.test(ws) && (ws.match(/\{pageTabs\}/g) ?? []).length === 2,
     String((ws.match(/\{pageTabs\}/g) ?? []).length));
   ok("...and the workspace shows a TRANSLATED sentence for it",
-    /data\?\.reason === "unknown_page" \|\| data\?\.reason === "invalid_page"/.test(ws) &&
-    /setEditError\(t\("editPageGone"\)\)/.test(ws));
+    // Read by siteChangeRefusal (lib/website-builder/site-requests.ts) since
+    // 2026-10-14, the one reader of a refused change for both screens.
+    /data\?\.reason === "unknown_page" \|\| data\?\.reason === "invalid_page"/.test(readFileSync("src/lib/website-builder/site-requests.ts", "utf8")) &&
+    /const refused = siteChangeRefusal\(res, data\);/.test(ws) &&
+    /refused\.reason === "pageGone"\s*\? t\("editPageGone"\)/.test(ws));
   ok("the shown page is derived, so an unknown slug falls back home",
     /const activePage = displayedPages\.find\(\(pg\) => pg\.slug === pageSlug\) \?\? null;/.test(ws) &&
     /displayedHtml = activePage\?\.html \?\? displayedSource\?\.html_content/.test(ws));

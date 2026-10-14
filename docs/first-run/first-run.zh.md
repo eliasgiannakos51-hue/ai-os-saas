@@ -1,6 +1,6 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **610 strings**. The whole product is 4267, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **578 strings**. The whole product is 4277, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2446,7 +2446,7 @@ DevOps
 
 重试
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (176)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2947,198 +2947,6 @@ Safari 从不会主动提示，三步即可完成。
 > EN — e.g. pursue / kill / watch
 
 例如 推进 / 放弃 / 观望
-
-**`errors.codes.conflict.next`**
-
-> EN — Reload the page to see the current version, then redo your change.
-
-请重新加载页面查看当前版本，然后重做你的修改。
-
-**`errors.codes.conflict.what`**
-
-> EN — Someone — or another tab — changed this while you were working on it.
-
-在你操作期间，其他人或另一个标签页修改了它。
-
-**`errors.codes.fileTooLarge.next`**
-
-> EN — Split it, or upload a smaller version.
-
-请拆分文件，或上传较小的版本。
-
-**`errors.codes.fileTooLarge.what`**
-
-> EN — That file is too big.
-
-该文件过大。
-
-**`errors.codes.forbidden.next`**
-
-> EN — Open Settings › Billing to see which plan covers it.
-
-打开「设置 › 账单」查看哪个方案包含它。
-
-**`errors.codes.forbidden.what`**
-
-> EN — Your plan doesn't include this.
-
-你的方案不包含此功能。
-
-**`errors.codes.insufficientCredits.next`**
-
-> EN — Buy credits in Settings, or wait for your monthly reset.
-
-可在「设置」中购买 credits，或等待每月重置。
-
-**`errors.codes.insufficientCredits.what`**
-
-> EN — You don't have enough credits for this.
-
-你的 credits 不足以完成此操作。
-
-**`errors.codes.invalidInput.next`**
-
-> EN — Check the highlighted fields and send it again.
-
-请检查标记出的字段后重新提交。
-
-**`errors.codes.invalidInput.what`**
-
-> EN — Something in the form wasn't accepted.
-
-表单中有内容未被接受。
-
-**`errors.codes.notAuthenticated.next`**
-
-> EN — Sign in again and repeat the action — nothing you had entered is lost.
-
-请重新登录并再次执行该操作 — 你输入的内容都还在。
-
-**`errors.codes.notAuthenticated.what`**
-
-> EN — You're signed out.
-
-你已退出登录。
-
-**`errors.codes.notFound.next`**
-
-> EN — It was probably deleted. Go back to the list and pick another one.
-
-它可能已被删除。请返回列表另选一项。
-
-**`errors.codes.notFound.what`**
-
-> EN — This no longer exists.
-
-该内容已不存在。
-
-**`errors.codes.offline.next`**
-
-> EN — Check your connection and try again.
-
-请检查网络连接后重试。
-
-**`errors.codes.offline.what`**
-
-> EN — Your device couldn't reach us.
-
-你的设备无法连接到我们。
-
-**`errors.codes.planLimit.next`**
-
-> EN — Delete something you no longer need, or upgrade in Settings › Billing.
-
-删除不再需要的内容，或在「设置 › 账单」中升级。
-
-**`errors.codes.planLimit.what`**
-
-> EN — You've reached the limit of your plan.
-
-你已达到当前方案的上限。
-
-**`errors.codes.rateLimited.next`**
-
-> EN — Wait about a minute, then try once more.
-
-请等待约一分钟后再试一次。
-
-**`errors.codes.rateLimited.what`**
-
-> EN — Too many requests in a short time.
-
-短时间内请求过多。
-
-**`errors.codes.serverError.next`**
-
-> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
-
-已记录该问题。请稍后重试，若持续出现请联系客服。
-
-**`errors.codes.serverError.what`**
-
-> EN — This broke on our side.
-
-我们这边出错了。
-
-**`errors.codes.unknown.next`**
-
-> EN — Try again, and contact support if it happens twice.
-
-请重试，若再次出现请联系客服。
-
-**`errors.codes.unknown.what`**
-
-> EN — This action didn't complete.
-
-此操作未能完成。
-
-**`errors.codes.unsupportedType.next`**
-
-> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
-
-请转换为 PDF、DOCX、CSV 或 TXT 后重新上传。
-
-**`errors.codes.unsupportedType.what`**
-
-> EN — That file type isn't supported.
-
-不支持该文件类型。
-
-**`errors.codes.upstreamUnavailable.next`**
-
-> EN — This is on our side and usually clears within a few minutes.
-
-这是我们这边的问题，通常几分钟内会恢复。
-
-**`errors.codes.upstreamUnavailable.what`**
-
-> EN — The AI service isn't responding right now.
-
-AI 服务当前没有响应。
-
-**`errors.credits.charged`**
-
-> EN — This attempt used credits.
-
-此次尝试消耗了 credits。
-
-**`errors.credits.notCharged`**
-
-> EN — You were not charged.
-
-未向你收费。
-
-**`errors.credits.refunded`**
-
-> EN — Your credits were returned.
-
-你的 credits 已退回。
-
-**`errors.credits.unverified`**
-
-> EN — We can't confirm from here whether this was charged.
-
-我们无法在此确认是否已扣费。
 
 **`module.exportCsv`**
 

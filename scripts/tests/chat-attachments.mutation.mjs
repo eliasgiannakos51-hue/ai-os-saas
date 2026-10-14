@@ -33,6 +33,7 @@ const CHAT = "src/components/chat/chat-workspace.tsx";
 const COMPOSER = "src/components/chat/chat-composer.tsx";
 const CLIENT = "src/lib/chat/attach-client.ts";
 const UI = "src/components/chat/chat-attachments.tsx";
+const WORDS = "src/components/chat/use-chat-failure-words.ts";
 
 const MUTANTS = [
   {
@@ -187,15 +188,15 @@ const MUTANTS = [
   {
     name: "out of credits is said in the route's English again",
     file: CHAT,
-    from: "          setError(\n            data.outOfCredits === true\n              ? outOfCreditsText(data.available, data.needed)\n              : isErrorCode(data.code)\n                ? describe(new ApiError(429, { code: data.code })).text\n                : describeStatus(429).text\n          );",
+    from: "          setError(chatFailure.refusal(429, data));",
     to: "          setError(data.message);",
     expect: "out of credits, or held back, the Chat says so in its own language",
   },
   {
     name: "a hold refused mid-answer reads as our failure",
-    file: CHAT,
-    from: "            event.outOfCredits === true\n              ? outOfCreditsText(event.available, event.needed)\n              : event.code",
-    to: "            false\n              ? outOfCreditsText(event.available, event.needed)\n              : event.code",
+    file: WORDS,
+    from: "        if (event.outOfCredits === true) return outOfCredits(event.available, event.needed);",
+    to: "        if (event.outOfCredits === \"never\") return outOfCredits(event.available, event.needed);",
     expect: "...and a hold refused once the answer started is not called our failure",
   },
   {
@@ -224,6 +225,6 @@ const MUTANTS = [
 runMutations({
   name: "chat-attachments",
   gate: GATE,
-  targets: [TYPES, CITE, ADMIT, CONTENT, ROUTE, CHAT, COMPOSER, CLIENT, UI],
+  targets: [TYPES, CITE, ADMIT, CONTENT, ROUTE, CHAT, COMPOSER, CLIENT, UI, WORDS],
   mutants: MUTANTS,
 });

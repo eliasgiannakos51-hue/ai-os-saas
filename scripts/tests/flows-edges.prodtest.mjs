@@ -27,6 +27,10 @@
  *             research is not offered, the research is.
  *   CREDITS   a balance of 0: the REAL routes of the pictures and the
  *             posts refuse, nothing is held, nothing goes in the project.
+ *   LIMIT     the hour's AI requests used up (2026-10-14): the REAL posts
+ *             route refuses before anything is held, and the step says a
+ *             limit was reached and to try later — not «too many requests
+ *             at once», which a limit counted over an hour is not.
  *   PROVIDER  the model answers 529 overloaded_error, in the shape the
  *             Anthropic API answers it, from a local stand-in that the
  *             REAL posts route calls (ANTHROPIC_BASE_URL, which the SDK
@@ -63,7 +67,7 @@ function check(name, cond, detail) {
 // ---------------------------------------------------------------------
 const STATEFUL = ["project_flows", "projects", "entity_links", "user_websites", "generated_images", "generated_posts", "research_reports", "ai_presentations", "data_analyses", "data_analysis_charts"];
 const store = Object.fromEntries(STATEFUL.map((t) => [t, []]));
-const state = { credits: 3000, total: 3000, tier: "growth" };
+const state = { credits: 3000, total: 3000, tier: "growth", hourlyFull: false };
 const flags = [];
 const rpcs = [];
 // Every tool request the browser made, in order, answered here or not.
@@ -78,6 +82,7 @@ function reset({ tier, credits, total = 3000 }) {
   state.tier = tier;
   state.credits = credits;
   state.total = total;
+  state.hourlyFull = false;
   MOCK_USER.user_metadata = { subscription_tier: tier };
 }
 function matches(row, url) {
@@ -107,7 +112,7 @@ function handle({ req, res, url, body, json }) {
     let args = {};
     try { args = JSON.parse(body || "{}"); } catch {}
     rpcs.push({ name, args });
-    if (name === "consume_rate_limit") return json(200, true), true;
+    if (name === "consume_rate_limit") return json(200, !(state.hourlyFull && args.p_scope === "ai_hourly_user")), true;
     if (name === "reserve_credits") {
       const enough = state.credits >= Number(args.p_credits ?? 0);
       return json(200, [{ reservation_id: enough ? `hold-${rpcs.length}` : null, available: state.credits }]), true;
@@ -628,6 +633,28 @@ try {
       check(`${run}: ...nothing held, nothing charged — not even the site's pre-check — nothing in the project, the flow reads as failed`,
         rpcOf("reserve_credits").length === 0 && rpcOf("settle_reservation").length === 0 && linksInto(broke?.project_id).length === 0 && broke?.status === "failed", JSON.stringify(rpcs.filter((r) => /reserve|settle|release|deduct/.test(r.name)).map((r) => `${r.name}:${r.args.p_credits_to_charge ?? r.args.p_credits ?? ""}`)));
       await screenChecks("no credits", { lowBalance: true });
+      check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+
+      // ================================================================
+      console.log("-- limit: the hour's AI requests used up, the real posts route");
+      reset({ tier: "growth", credits: 3000 });
+      stubbed.clear();
+      stubbed.add("site");
+      stubbed.add("images");
+      model.mode = "up";
+      state.hourlyFull = true;
+      await open();
+      await say(F.example.site);
+      await page.locator('[data-testid="flow-plan"]').waitFor({ timeout: 10000 });
+      await approve();
+      await page.locator('[data-testid="flow-step"]').first().waitFor({ timeout: 15000 });
+      await allFinished(3);
+      const limitText = await stepText("posts");
+      check(`${run}: the hour's AI requests used up: the posts step says «${F.stepErrors.rate_limited}»`,
+        (await statuses()) === "site:done,images:done,posts:failed" && limitText.includes(F.stepErrors.rate_limited), `${await statuses()} | ${limitText}`);
+      check(`${run}: ...refused before anything was held for it`, rpcOf("reserve_credits").length === 0 && rpcOf("settle_reservation").length === 0, JSON.stringify(rpcs.filter((r) => /reserve|settle|release/.test(r.name)).map((r) => r.name)));
+      await screenChecks("the hour's limit");
+      state.hourlyFull = false;
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
 
       // ================================================================

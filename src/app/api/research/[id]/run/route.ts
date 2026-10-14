@@ -113,7 +113,8 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
       fingerprintRequest(String(report.id), String(report.topic))
     );
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+      // Which limit, and when it opens again (components/research/failure-words.ts).
+      return NextResponse.json({ ok: false, code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);

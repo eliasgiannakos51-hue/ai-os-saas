@@ -247,10 +247,13 @@ check("a PDF Files refused says why in the reader's words: the plan's limit, the
   /outcome\.limitReached\s*\?\s*words\.fileLimit\s*:\s*outcome\.status === 429\s*\?\s*words\.uploadLimit\s*:\s*ours\.includes\(outcome\.error\)\s*\?\s*outcome\.error\s*:\s*words\.error/.test(client) &&
   (code("src/lib/files/upload-file.ts").match(/status: response\.status,?\s*limitReached: data\?\.limitReached === true/g) ?? []).length === 2 &&
   /fileLimit: t\("fileLimit", \{ name: file\.name \}\),\s*uploadLimit: t\("uploadLimit"\),/.test(ui));
+// The words are shared with the Studio and the voice conversation since
+// 2026-10-14 (components/chat/use-chat-failure-words.ts).
+const chatWords = code("src/components/chat/use-chat-failure-words.ts");
 check("out of credits, or held back, the Chat says so in its own language",
-  /setError\(\s*data\.outOfCredits === true\s*\?\s*outOfCreditsText\(data\.available, data\.needed\)\s*:[^;]*:\s*describeStatus\(429\)\.text\s*\);/.test(ws) && !/setError\(data\.message\)/.test(ws));
+  /setError\(chatFailure\.refusal\(429, data\)\);/.test(ws) && /if \(data\?\.rateLimited\) return data\.outOfCredits === true \? outOfCredits\(data\.available, data\.needed\) : said\(429, data\);/.test(chatWords) && !/setError\(data\.message\)/.test(ws));
 check("...and a hold refused once the answer started is not called our failure",
-  /streamError =\s*event\.outOfCredits === true\s*\?\s*outOfCreditsText\(event\.available, event\.needed\)\s*:/.test(ws));
+  /streamError = chatFailure\.streamError\(event\);/.test(ws) && /if \(event\.outOfCredits === true\) return outOfCredits\(event\.available, event\.needed\);/.test(chatWords));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. the migration and the words ==");

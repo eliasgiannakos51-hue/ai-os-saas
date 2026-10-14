@@ -1332,7 +1332,7 @@
           "tooShort": "请先多说一点关于这份文档的内容。",
           "tooLong": "这比描述还长。请描述文档，不要直接粘贴。",
           "insufficient": "积分不足，无法生成这份文档。",
-          "rateLimited": "请求过多。请等一分钟再试。",
+          "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
           "unavailable": "AI 服务暂时不可用。未扣除任何积分。",
           "unusable": "模型返回的内容不是文档。请换一种方式描述。",
           "notIncluded": "你的套餐不包含撰写文档。",
@@ -1820,7 +1820,8 @@
         "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。"
       },
       "regeneratePaid": "重新生成 · 约 {count} 积分",
-      "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。"
+      "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。",
+      "imageUploadFailed": "参考图片没有上传成功。没有扣除任何费用——请再试一次。"
     },
     "marketplace": {
       "title": "现成的助手",
@@ -2411,7 +2412,7 @@
       "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
       "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
       "askNoCredits": "点数不足，无法回答这个问题。没有扣除任何点数。",
-      "askRateLimited": "过去一小时内提问太多。请稍后再试——没有扣除任何点数。",
+      "askRateLimited": "已达到提问上限。上限会随时间自动恢复——请稍后再试。没有扣除任何点数。",
       "askFailed": "这个问题没有得到回答：AI 服务没有响应。没有扣除任何点数——请稍后再试。",
       "questionLength": "{used, number} / {max, number} 个字符",
       "questionAtLimit": "单个问题已达到 {max, number} 个字符的上限。",
@@ -2467,7 +2468,7 @@
       "runError": "报告无法完成。",
       "refused": {
         "noCredits": "点数不足，无法生成研究报告。没有扣除任何点数。",
-        "rateLimited": "短时间内的报告太多。请稍后再试。",
+        "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "unavailable": "AI 服务没有响应。没有扣除任何点数——请稍后再试。"
       },
       "failed": {
@@ -2936,7 +2937,7 @@
         "not_included": "此套餐不包含会议功能。",
         "out_of_minutes": "你已用完本月的分钟数。",
         "unsupported_type": "不支持该音频格式。",
-        "rate_limited": "过去一小时内录音次数过多。请稍后再试。",
+        "rate_limited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "empty": "该录音是空的。",
         "failed": "出了点问题。未收取任何费用。"
       },
@@ -3207,7 +3208,7 @@
         "tooShort": "请再多描述一点这张图片。",
         "tooLong": "内容太长；最多 {limit} 个字符。",
         "insufficient": "积分不足。",
-        "rateLimited": "请求太多。请稍后再试。",
+        "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "refused": "服务商拒绝生成这张图片。请换个描述；没有扣费。",
         "busy": "这张图片正在修改中。请等它完成。",
         "gone": "这张图片已不存在。",
@@ -3389,7 +3390,7 @@
         "empty": "再多写几个字,说明应该发生什么。",
         "tooLong": "文字太长;最多 {limit} 个字符。",
         "insufficient": "积分不足。",
-        "rateLimited": "同时请求太多。请稍后再试。",
+        "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "busy": "这个自动化正忙。请等它完成。",
         "gone": "这个自动化已不存在。",
         "unavailable": "AI 现在没有回应。没有收费;请再试一次。",
@@ -3460,7 +3461,7 @@
         "no_credits": "积分不足",
         "not_included": "你的套餐不包含此项",
         "not_configured": "尚未启用",
-        "rate_limited": "同时请求过多",
+        "rate_limited": "已达到请求上限，请稍后再试",
         "refused": "工具拒绝了该请求",
         "offline": "无网络连接",
         "stopped": "已停止",
@@ -3482,7 +3483,7 @@
       },
       "errors": {
         "projectLimit": "你已达到套餐的项目上限（{limit}）。",
-        "rateLimited": "同时请求过多，请稍后再试。",
+        "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "file": "无法读取该文件。请尝试 CSV 或 Excel 文件。",
         "failed": "出了点问题，未收取任何费用。",
         "offline": "无网络连接。请检查网络后重试。"
@@ -3570,7 +3571,7 @@
       "chargedNothing": "未扣费。",
       "open": "打开",
       "insufficient": "积分不足，无法进行此次翻译。没有扣费。",
-      "dailyLimit": "你已达到今天新建网站的上限。请明天再试。",
+      "dailyLimit": "你已达到 24 小时内新建网站的上限。它按最近 24 小时计算，一天之内会重新开放。",
       "notIncluded": "你的套餐不包含网站功能。",
       "unusable": "回答不可用，没有写入任何内容。只收取已消耗的部分。",
       "failed": "翻译未能完成。没有扣除积分。"
@@ -3607,7 +3608,7 @@
         "insufficient": "积分不足。没有扣费。",
         "unavailable": "服务暂时没有响应。没有扣费。",
         "unusable": "回答不是可玩的游戏，未保留。只收取已消耗的部分。",
-        "rateLimited": "请求太多，请稍后再试。",
+        "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "notIncluded": "游戏包含在拥有网站功能的套餐中。",
         "tooLong": "描述太长。",
         "stopped": "已停止。没有扣费。",
@@ -4112,8 +4113,8 @@
       "next": "买一个额度包，或者换一个更大的套餐，同样的操作就能通过——你写的内容一点都没丢。"
     },
     "rate_limited": {
-      "what": "过去一小时内这类操作太多了",
-      "next": "这个操作有每小时上限，免得单个账号占掉共享额度。等几分钟再试——上限是滚动计算的，不是整点清零。"
+      "what": "这个操作已达到上限",
+      "next": "这个操作有上限，免得单个账号占掉共享额度。上限是滚动计算的，不会在固定时间清零，会随时间自动恢复——请稍后再试。"
     },
     "timeout": {
       "what": "这一步耗时过长，已经停止",
@@ -4400,7 +4401,7 @@
     "retry": "重试",
     "creditHistory": "查看 credits 记录",
     "credits": {
-      "refunded": "你的 credits 已退回。",
+      "refunded": "没有扣除任何费用。",
       "notCharged": "未向你收费。",
       "charged": "此次尝试消耗了 credits。",
       "unverified": "我们无法在此确认是否已扣费。"
@@ -4423,8 +4424,8 @@
         "next": "请检查标记出的字段后重新提交。"
       },
       "rateLimited": {
-        "what": "短时间内请求过多。",
-        "next": "请等待约一分钟后再试一次。"
+        "what": "此操作已达到请求上限。",
+        "next": "上限会随时间自动恢复——请稍后再试。"
       },
       "insufficientCredits": {
         "what": "你的 credits 不足以完成此操作。",
@@ -4461,6 +4462,22 @@
       "unknown": {
         "what": "此操作未能完成。",
         "next": "请重试，若再次出现请联系客服。"
+      },
+      "siteDailyLimit": {
+        "what": "你已达到 24 小时内新建网站的上限。",
+        "next": "它按最近 24 小时计算，一天之内会重新开放。"
+      },
+      "hourlyLimit": {
+        "what": "你已达到每小时 AI 请求的上限。",
+        "next": "它按最近 60 分钟计算，一小时内会重新开放。"
+      },
+      "repeatLimit": {
+        "what": "同一个请求连续发送了太多次。",
+        "next": "15 分钟内会重新开放。"
+      },
+      "platformLimit": {
+        "what": "AI 服务已达到整个平台今天的上限。",
+        "next": "日期变更时（00:00 UTC）会重新开放。"
       }
     },
     "boundary": {
@@ -4469,7 +4486,8 @@
       "reload": "重新加载页面",
       "section": "无法显示此板块。",
       "sectionBody": "页面其余部分不受影响。刷新通常可以解决。"
-    }
+    },
+    "retryAt": "{day, select, today {你可以在 {time} 之后再试。} other {你可以在明天 {time} 之后再试。}}"
   },
   "aiExamples": {
     "createStudio": {
@@ -4832,7 +4850,7 @@
       "tooShort": "请先多说一点这份演示的内容。",
       "tooLong": "超过了 {limit} 个字符。请描述演示本身，而不是整场演讲。",
       "insufficient": "积分不足，无法生成这份演示。",
-      "rateLimited": "请求过多——请稍等一分钟再试。",
+      "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
       "unavailable": "无法连接 AI 服务。未产生任何扣费。",
       "unusable": "模型返回的内容不是一份演示。试着换一种方式描述。",
       "failed": "没有成功——请再试一次。",
@@ -4916,7 +4934,7 @@
       "tooShort": "请先多说一点。",
       "tooLong": "超过了 {limit} 个字符。说说帖子要讲什么，不必讲完整个故事。",
       "insufficient": "积分不足，无法生成这些帖子。",
-      "rateLimited": "请求过多——请稍等一分钟再试。",
+      "rateLimited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
       "unavailable": "无法连接 AI 服务。未产生任何扣费。",
       "unusable": "模型返回的内容不是帖子。试着换一种方式描述。",
       "failed": "没有成功——请再试一次。"

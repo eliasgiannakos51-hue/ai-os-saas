@@ -1,4 +1,4 @@
-import { codeForStatus, isErrorCode, type ApiErrorPayload, type ErrorCode } from "./error-codes";
+import { codeForStatus, isErrorCode, readRetryAt, type ApiErrorPayload, type ErrorCode } from "./error-codes";
 
 /**
  * A failed request, carrying the two things the UI needs and the old code
@@ -18,6 +18,8 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: ErrorCode;
   readonly creditsRefunded: boolean | undefined;
+  /** When a limit opens again, as the route said it (readRetryAt), or undefined. */
+  readonly retryAt: string | undefined;
 
   constructor(status: number, payload: ApiErrorPayload | null) {
     // `message` stays the server's English prose on purpose: it is what
@@ -30,6 +32,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = isErrorCode(payload?.code) ? payload.code : codeForStatus(status);
     this.creditsRefunded = payload?.creditsRefunded;
+    this.retryAt = readRetryAt(payload?.retryAt);
   }
 }
 

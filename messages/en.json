@@ -1332,7 +1332,7 @@
           "tooShort": "Say a little more about the document first.",
           "tooLong": "That is longer than a description. Describe the document; do not paste it.",
           "insufficient": "Not enough credits for this document.",
-          "rateLimited": "Too many requests. Wait a minute and try again.",
+          "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
           "unavailable": "The AI service was not available. Nothing was charged.",
           "unusable": "The model returned something that was not a document. Try describing it differently.",
           "notIncluded": "Writing documents is not included on your plan.",
@@ -1820,7 +1820,8 @@
         "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it."
       },
       "regeneratePaid": "Regenerate · about {count} credits",
-      "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started."
+      "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started.",
+      "imageUploadFailed": "The reference images did not upload. Nothing was charged — try again."
     },
     "marketplace": {
       "title": "Ready-made helpers",
@@ -2411,7 +2412,7 @@
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
       "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
       "askNoCredits": "Not enough credits for this question. Nothing was charged.",
-      "askRateLimited": "Too many questions in the last hour. Try again shortly — nothing was charged.",
+      "askRateLimited": "You've reached the limit of questions. It clears by itself as time passes — try again later. Nothing was charged.",
       "askFailed": "The question was not answered: the AI service did not respond. Nothing was charged — try again in a moment.",
       "questionLength": "{used, number} of {max, number} characters",
       "questionAtLimit": "You've reached the {max, number}-character limit for one question.",
@@ -2467,7 +2468,7 @@
       "runError": "The report could not be completed.",
       "refused": {
         "noCredits": "Not enough credits for a research report. Nothing was charged.",
-        "rateLimited": "Too many reports in a short time. Try again shortly.",
+        "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "unavailable": "The AI service did not respond. Nothing was charged — try again in a moment."
       },
       "failed": {
@@ -2936,7 +2937,7 @@
         "not_included": "Meetings are not included on this plan.",
         "out_of_minutes": "You have used this month's minutes.",
         "unsupported_type": "That audio format is not supported.",
-        "rate_limited": "Too many recordings in the last hour. Try again later.",
+        "rate_limited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "empty": "That recording was empty.",
         "failed": "Something went wrong. Nothing was charged."
       },
@@ -3207,7 +3208,7 @@
         "tooShort": "Say a little more about the image.",
         "tooLong": "That is too long; up to {limit} characters.",
         "insufficient": "Not enough credits for this.",
-        "rateLimited": "Too many requests at once. Try again shortly.",
+        "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "refused": "The provider declined to make this image. Try another description; nothing was charged.",
         "busy": "This image is already changing. Wait for it to finish.",
         "gone": "That image no longer exists.",
@@ -3389,7 +3390,7 @@
         "empty": "Write a few more words about what should happen.",
         "tooLong": "The text is long; up to {limit} characters.",
         "insufficient": "Not enough credits for this.",
-        "rateLimited": "Too many requests at once. Try again shortly.",
+        "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "busy": "This automation is busy. Wait for it to finish.",
         "gone": "This automation no longer exists.",
         "unavailable": "The AI is not answering right now. Nothing was charged; try again.",
@@ -3460,7 +3461,7 @@
         "no_credits": "Not enough credits",
         "not_included": "Not included in your plan",
         "not_configured": "Not active yet",
-        "rate_limited": "Too many requests at once",
+        "rate_limited": "A request limit was reached — try later",
         "refused": "The tool refused it",
         "offline": "No connection",
         "stopped": "Stopped",
@@ -3482,7 +3483,7 @@
       },
       "errors": {
         "projectLimit": "You have reached your plan's project limit ({limit}).",
-        "rateLimited": "Too many requests at once. Try again shortly.",
+        "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "file": "That file could not be read. Try a CSV or Excel file.",
         "failed": "Something went wrong. Nothing was charged.",
         "offline": "No connection. Check the network and try again."
@@ -3570,7 +3571,7 @@
       "chargedNothing": "Nothing charged.",
       "open": "Open it",
       "insufficient": "Not enough credits for this translation. Nothing was charged.",
-      "dailyLimit": "You have reached today's limit of new sites. Try tomorrow.",
+      "dailyLimit": "You've reached the limit of new sites for 24 hours. It counts the last 24 hours, so it opens again within a day.",
       "notIncluded": "The Site is not included in your plan.",
       "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
       "failed": "The translation could not be made. No credits were charged."
@@ -3607,7 +3608,7 @@
         "insufficient": "Not enough credits. Nothing was charged.",
         "unavailable": "The service is not answering right now. Nothing was charged.",
         "unusable": "The answer was not a playable game and was not kept. Only what was spent is charged.",
-        "rateLimited": "Too many requests at once. Try again shortly.",
+        "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "notIncluded": "Games come with the plans that have the Site.",
         "tooLong": "The description is too long.",
         "stopped": "Stopped. Nothing was charged.",
@@ -4112,8 +4113,8 @@
       "next": "Buy a credit pack or move to a bigger plan, and the same action will go through — nothing you have written is lost."
     },
     "rate_limited": {
-      "what": "Too many of these in the last hour",
-      "next": "There is an hourly cap on this action so one account cannot spend the shared budget. Wait a few minutes and try again — the cap slides, it does not reset on the hour."
+      "what": "You've reached the limit for this action",
+      "next": "There is a cap on this action so one account cannot spend the shared budget. It slides rather than resetting at a set time, and clears by itself as time passes — try again later."
     },
     "timeout": {
       "what": "This took too long and was stopped",
@@ -4400,7 +4401,7 @@
     "retry": "Try again",
     "creditHistory": "See credit history",
     "credits": {
-      "refunded": "Your credits were returned.",
+      "refunded": "Nothing was charged.",
       "notCharged": "You were not charged.",
       "charged": "This attempt used credits.",
       "unverified": "We can't confirm from here whether this was charged."
@@ -4423,8 +4424,8 @@
         "next": "Check the highlighted fields and send it again."
       },
       "rateLimited": {
-        "what": "Too many requests in a short time.",
-        "next": "Wait about a minute, then try once more."
+        "what": "You've reached the request limit for this.",
+        "next": "The limit clears by itself as time passes — try again later."
       },
       "insufficientCredits": {
         "what": "You don't have enough credits for this.",
@@ -4461,6 +4462,22 @@
       "unknown": {
         "what": "This action didn't complete.",
         "next": "Try again, and contact support if it happens twice."
+      },
+      "siteDailyLimit": {
+        "what": "You've reached the limit of new sites for 24 hours.",
+        "next": "It counts the last 24 hours, so it opens again within a day."
+      },
+      "hourlyLimit": {
+        "what": "You've reached the limit of AI requests for one hour.",
+        "next": "It counts the last 60 minutes, so it opens again within the hour."
+      },
+      "repeatLimit": {
+        "what": "The same request was sent too many times in a row.",
+        "next": "It opens again within 15 minutes."
+      },
+      "platformLimit": {
+        "what": "The AI service has reached today's limit for the whole platform.",
+        "next": "It opens again when the day changes, at 00:00 UTC."
       }
     },
     "boundary": {
@@ -4469,7 +4486,8 @@
       "reload": "Reload the page",
       "section": "This section could not be displayed.",
       "sectionBody": "The rest of the page is unaffected. Reloading usually fixes it."
-    }
+    },
+    "retryAt": "{day, select, today {You can try again after {time}.} other {You can try again tomorrow after {time}.}}"
   },
   "aiExamples": {
     "createStudio": {
@@ -4832,7 +4850,7 @@
       "tooShort": "Say a little more about the presentation first.",
       "tooLong": "That's longer than {limit} characters. Describe the deck, not the whole talk.",
       "insufficient": "Not enough credits for this deck.",
-      "rateLimited": "Too many requests — please wait a minute and try again.",
+      "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
       "unavailable": "The AI service couldn't be reached. Nothing was charged.",
       "unusable": "The model returned something that wasn't a deck. Try describing it differently.",
       "failed": "That didn't work — try again.",
@@ -4916,7 +4934,7 @@
       "tooShort": "Say a little more first.",
       "tooLong": "That's longer than {limit} characters. Say what the post is about, not the whole story.",
       "insufficient": "Not enough credits for these posts.",
-      "rateLimited": "Too many requests — please wait a minute and try again.",
+      "rateLimited": "You've reached a request limit. It clears by itself as time passes — try again later.",
       "unavailable": "The AI service couldn't be reached. Nothing was charged.",
       "unusable": "The model returned something that wasn't a set of posts. Try describing it differently.",
       "failed": "That didn't work — try again."

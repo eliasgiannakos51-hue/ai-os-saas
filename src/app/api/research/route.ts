@@ -141,7 +141,8 @@ export async function POST(request: Request) {
       fingerprintRequest(user.id, topicCheck.topic)
     );
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+      // Which limit, and when it opens again (components/research/failure-words.ts).
+      return NextResponse.json({ ok: false, code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
     }
 
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));

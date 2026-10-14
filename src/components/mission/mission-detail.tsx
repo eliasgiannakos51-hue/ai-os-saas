@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { createClient } from "@/lib/supabase/client";
 import { StepControls, StepUndoStrip, UNDO_WINDOW_MS, type PendingUndo } from "@/components/mission/step-controls";
@@ -113,6 +114,9 @@ export function MissionDetail({
   const tKey = useTranslations();
   const locale = useLocale();
   const tCommon = useTranslations("common");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const router = useRouter();
   const supabase = createClient();
   const { refresh: refreshCredits } = useCredits();
@@ -415,7 +419,7 @@ export function MissionDetail({
         return;
       }
       if (data.rateLimited) {
-        setError(data.message);
+        setError(limitText(data) ?? data.message);
         return;
       }
 

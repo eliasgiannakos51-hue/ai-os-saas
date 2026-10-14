@@ -137,7 +137,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       fingerprintRequest(params.id, lang)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ error: "rate_limited", detail: breakerCheck.reason }, { status: 429 });
+      return NextResponse.json({ error: "rate_limited", code: breakerCheck.code, retryAt: breakerCheck.retryAt, detail: breakerCheck.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);

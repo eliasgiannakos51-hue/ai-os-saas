@@ -183,7 +183,9 @@ check("it announces itself", /role="alert"/.test(notice));
 console.log("\n== 7. a converted caller prefers the code to the prose ==");
 const agents = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
 check("agents reads the code off the body", /problemCodeFrom\(data\)/.test(agents));
-check("and falls back to the route's prose when there is none", /else addToast\(data\.error/.test(agents));
+// An AI limit before the prose since 2026-10-14 (lib/errors/use-error-text.ts,
+// useLimitText): its name and the time it opens, in the reader's language.
+check("and falls back to the route's prose when there is none", /else addToast\(limitText\(data\) \?\? data\.error/.test(agents));
 check("a failed fetch becomes network or timeout", /problemCodeForFetchFailure\(err\)/.test(agents));
 check("and the notice is rendered where the action was", /<ProblemNotice/.test(agents));
 

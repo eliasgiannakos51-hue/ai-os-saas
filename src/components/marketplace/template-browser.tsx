@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 import { Store, Loader2, Sparkles, User, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast/toast-context";
@@ -66,6 +67,9 @@ export function TemplateBrowser({
   templates: BrowsableTemplate[];
 }) {
   const t = useTranslations("dashboard.marketplace");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const { addToast } = useToast();
   const router = useRouter();
   const scheduleLabel = useScheduleLabel();
@@ -138,7 +142,7 @@ export function TemplateBrowser({
       });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) {
-        addToast(data?.error ?? t("adoptError"), "error");
+        addToast(limitText(data) ?? data?.error ?? t("adoptError"), "error");
         return;
       }
       // ADOPTING A TEMPLATE RUNS A MODEL CALL AND CHARGES FOR IT.

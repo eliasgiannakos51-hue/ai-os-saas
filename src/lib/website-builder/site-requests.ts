@@ -1,6 +1,6 @@
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { ApiError } from "@/lib/errors/api-error";
-import type { ApiErrorPayload } from "@/lib/errors/error-codes";
+import { isTimedLimitCode, type ApiErrorPayload } from "@/lib/errors/error-codes";
 import type { UserWebsite } from "@/types/user-website";
 
 /**
@@ -66,13 +66,18 @@ function routeSaid(data: Record<string, unknown> | null): RouteSaid {
  * A refusal the routes answer with 200 and `rateLimited` — before any work,
  * so nothing was charged. Short credits are a 402 in lib/errors/error-codes.ts
  * terms (the route names them with `code: "insufficientCredits"`); a limit
- * is a 429.
+ * is a 429, by its own name when the route gives one — the 24-hour limit
+ * on new sites, the hour's AI requests, the same request repeated, the
+ * platform's day (`siteDailyLimit`, `hourlyLimit`, `repeatLimit`,
+ * `platformLimit`) — with `retryAt`, when it opens again. Before
+ * 2026-10-14 every limit here was `rateLimited`, «wait about a minute».
  */
-function refusedBeforeWork(data: { code?: unknown; message?: unknown } | null): ApiError {
+export function refusedBeforeWork(data: { code?: unknown; message?: unknown; retryAt?: unknown } | null): ApiError {
   const short = data?.code === "insufficientCredits";
   return new ApiError(short ? 402 : 429, {
     error: typeof data?.message === "string" ? data.message : undefined,
-    code: short ? "insufficientCredits" : "rateLimited",
+    code: short ? "insufficientCredits" : isTimedLimitCode(data?.code) ? data.code : "rateLimited",
+    retryAt: typeof data?.retryAt === "string" ? data.retryAt : undefined,
   });
 }
 
@@ -205,21 +210,29 @@ export async function requestSiteChange(input: {
     }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok || !data.edited) {
-    const reason =
-      data?.reason === "unknown_page" || data?.reason === "invalid_page"
-        ? "pageGone"
-        : data?.reason === "box_lost" || data?.reason === "bad_section"
-          ? "boxLost"
-          : data?.flagged === true
-            ? "held"
-            : data?.busy === true
-              ? "busy"
-              : "other";
-    const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : refusal(res.status, data, data?.error ?? data?.message);
-    return { kind: "refused", reason, error, ...routeSaid(data) };
-  }
+  if (!res.ok || !data?.ok || !data.edited) return siteChangeRefusal(res, data);
   return { kind: "changed", record: data.record as UserWebsite };
+}
+
+/**
+ * A change api/websites/edit did not make, read once: by requestSiteChange
+ * above and by the Site page that sends its own reference images
+ * (components/website-builder/website-builder-workspace.tsx, while the
+ * switch `tool-shell` is off), so both say the same refusal the same way.
+ */
+export function siteChangeRefusal(res: { ok: boolean; status: number }, data: Record<string, unknown> | null): Extract<SiteChange, { kind: "refused" }> {
+  const reason =
+    data?.reason === "unknown_page" || data?.reason === "invalid_page"
+      ? "pageGone"
+      : data?.reason === "box_lost" || data?.reason === "bad_section"
+        ? "boxLost"
+        : data?.flagged === true
+          ? "held"
+          : data?.busy === true
+            ? "busy"
+            : "other";
+  const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : refusal(res.status, data as ApiErrorPayload | null, data?.error ?? data?.message);
+  return { kind: "refused", reason, error, ...routeSaid(data) };
 }
 
 /** Ask the worker to stop a site that is being made. True when the server took the request. */

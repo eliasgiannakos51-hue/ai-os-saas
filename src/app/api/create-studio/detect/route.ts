@@ -174,7 +174,7 @@ export async function POST(request: Request) {
       fingerprintRequest(message)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: false, error: breakerCheck.reason }, { status: 429 });
+      return NextResponse.json({ ok: false, code: breakerCheck.code, retryAt: breakerCheck.retryAt, error: breakerCheck.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);

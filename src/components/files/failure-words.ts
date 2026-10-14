@@ -3,6 +3,9 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { askFailure } from "@/lib/files/ask-failure";
+import { ApiError } from "@/lib/errors/api-error";
+import { isTimedLimitCode, type ApiErrorPayload } from "@/lib/errors/error-codes";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { unreadableReason, type UploadRefusal } from "@/lib/files/refusal-words";
 import { MAX_FILE_BYTES, formatBytes } from "@/lib/files/file-types";
 
@@ -15,8 +18,9 @@ import { MAX_FILE_BYTES, formatBytes } from "@/lib/files/file-types";
  */
 export function useFilesFailureWords() {
   const t = useTranslations("dashboard.files");
+  const describe = useErrorText();
   return useMemo(() => ({
-    ask(outcome: { code: string | null; jobId?: string | null }): string {
+    ask(outcome: { code: string | null; jobId?: string | null; body?: Record<string, unknown> | null }): string {
       switch (askFailure(outcome)) {
         case "askStillRunning":
           return t("askStillRunning");
@@ -25,7 +29,12 @@ export function useFilesFailureWords() {
         case "askNoCredits":
           return t("askNoCredits");
         case "askRateLimited":
-          return t("askRateLimited");
+          // An AI limit by its own name and the time it opens again, when
+          // the route sends them (lib/ai-circuit-breaker.ts, 2026-10-14);
+          // this screen's own limit sentence otherwise.
+          return isTimedLimitCode(outcome.body?.code)
+            ? describe(new ApiError(429, outcome.body as ApiErrorPayload)).text
+            : t("askRateLimited");
         case "askFailed":
           return t("askFailed");
         default:
@@ -67,5 +76,5 @@ export function useFilesFailureWords() {
           return fallback;
       }
     },
-  }), [t]);
+  }), [t, describe]);
 }

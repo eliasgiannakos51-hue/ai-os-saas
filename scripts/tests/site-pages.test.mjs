@@ -224,12 +224,17 @@ check("a refusal carries the route's status and code", /if \(!res\.ok \|\| !data
 check("...a refusal answered 200 is one before any work: short credits, or a limit",
   /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\), \.\.\.routeSaid\(data\) \};/.test(requests) && /new ApiError\(short \? 402 : 429, \{/.test(requests) && /const short = data\?\.code === "insufficientCredits";/.test(requests));
 check("...and a change's refusal names a held change and a busy site",
-  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : refusal\(res\.status, data, data\?\.error \?\? data\?\.message\);/.test(requests));
-// EXECUTED, not read: what Chat's Site pane (components/chat/site-pane.tsx)
-// shows for a refusal — getErrorMessage over the ApiError — with fetch
-// answering as the routes do. With ApiError's default message it read
-// «Request failed with 200» for a change the safety review held back
-// (found 2026-10-09); it is the route's sentence, or the pane's own.
+  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : refusal\(res\.status, data as ApiErrorPayload \| null, data\?\.error \?\? data\?\.message\);/.test(requests) &&
+    // One reader for both screens that change a site (siteChangeRefusal,
+    // 2026-10-14): the Site beside Chat and the Site page.
+    /if \(!res\.ok \|\| !data\?\.ok \|\| !data\.edited\) return siteChangeRefusal\(res, data\);/.test(requests));
+// EXECUTED, not read: the message a refusal carries — getErrorMessage over
+// the ApiError — with fetch answering as the routes do. With ApiError's
+// default message it read «Request failed with 200» for a change the
+// safety review held back (found 2026-10-09); it is the route's sentence,
+// or the caller's own. Chat's Site pane (components/chat/site-pane.tsx)
+// showed that message until 2026-10-14; it now says every refusal from its
+// code (scripts/tests/limit-texts.test.mjs), and the message is for logs.
 {
   const live = await loadTsLinked("src/lib/website-builder/site-requests.ts");
   const { getErrorMessage } = await loadTs("src/lib/get-error-message.ts");
@@ -254,7 +259,7 @@ check("...and a change's refusal names a held change and a busy site",
   } finally {
     globalThis.fetch = realFetch;
   }
-  check("Chat's Site pane says a refusal in the route's sentence or its own, never «Request failed with …»",
+  check("a refusal's message is the route's sentence or the caller's own, never «Request failed with …»",
     JSON.stringify(seen) === JSON.stringify({ held: ["held", "Held back: X."], busy: ["busy", "Busy."], proxy: ["upstreamUnavailable", OWN], start: ["refused", OWN] }),
     JSON.stringify(seen));
 }

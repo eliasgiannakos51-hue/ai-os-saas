@@ -1,59 +1,12 @@
 "use client";
 
 import { useCallback } from "react";
-import { useTranslations } from "next-intl";
-import { isApiError } from "./api-error";
-import { codeForStatus, creditOutcomeForStatus, type CreditOutcome, type ErrorCode } from "./error-codes";
+import { useLocale, useTranslations } from "next-intl";
+import { ApiError, isApiError } from "./api-error";
+import { codeForStatus, isTimedLimitCode } from "./error-codes";
+import { failureParts, type FailureText } from "./failure-text";
 
-export type FailureText = {
-  /** What happened, in the reader's language. */
-  what: string;
-  /** What they can do about it. Never "try again" unless retrying is the fix. */
-  next: string;
-  /** Whether they were charged. Always answered. */
-  credits: string;
-  /** Whether to offer the credit-history link alongside `credits`. */
-  showCreditHistory: boolean;
-  /** The three joined, for a toast or any other single-line surface. */
-  text: string;
-};
-
-type Translate = (key: string) => string;
-
-/**
- * The three sentences, from a code and a status.
- *
- * THE SHAPE IS FIXED, and it is fixed because the old messages failed the
- * same way every time. "Something went wrong. Please try again." tells the
- * reader nothing they did not already know — not what broke, not whether
- * retrying is even the right move, and not the thing they actually want to
- * know, which is whether that failed run just cost them money.
- *
- *   1. WHAT HAPPENED   — specific enough to differ from every other error.
- *   2. WHAT YOU CAN DO — an action, not a shrug.
- *   3. YOUR CREDITS    — answered on every single error, including the ones
- *                        that never touched credits, because an unanswered
- *                        "did that cost me anything" reads as "yes".
- */
-function failureParts(
-  t: Translate,
-  code: ErrorCode,
-  status: number,
-  creditsRefunded: boolean | undefined
-): FailureText {
-  const outcome: CreditOutcome = creditOutcomeForStatus(status, creditsRefunded);
-  const what = t(`codes.${code}.what`);
-  const next = t(`codes.${code}.next`);
-  const credits = t(`credits.${outcome}`);
-
-  return {
-    what,
-    next,
-    credits,
-    showCreditHistory: outcome === "unverified" || outcome === "charged",
-    text: `${what} ${next} ${credits}`,
-  };
-}
+export type { FailureText } from "./failure-text";
 
 /** Turn whatever a catch block caught into the three sentences. */
 // STABLE ACROSS RENDERS, on purpose. Callers put `describe` inside effects
@@ -63,11 +16,12 @@ function failureParts(
 // a stale closure. It depends on nothing but the translator.
 export function useErrorText() {
   const t = useTranslations("errors");
+  const locale = useLocale();
 
   return useCallback(
     function describe(error: unknown): FailureText {
       if (isApiError(error)) {
-        return failureParts(t, error.code, error.status, error.creditsRefunded);
+        return failureParts(t, error.code, error.status, error.creditsRefunded, error.retryAt, locale);
       }
       // Anything that is not an ApiError never reached — or never came back
       // from — a route: a thrown TypeError from fetch, a rejected promise, a
@@ -75,7 +29,7 @@ export function useErrorText() {
       // a request that never arrived cannot have been charged.
       return failureParts(t, "offline", 0, undefined);
     },
-    [t]
+    [t, locale]
   );
 }
 
@@ -90,5 +44,27 @@ export function useErrorTextForStatus() {
     (status: number, creditsRefunded?: boolean): FailureText =>
       failureParts(t, codeForStatus(status), status, creditsRefunded),
     [t]
+  );
+}
+
+/**
+ * A LIMIT A ROUTE NAMED, SAID WITH ITS TIME — or null, for the screen to
+ * say anything else its own way (2026-10-14).
+ *
+ * For the screens that read a refusal's body themselves: a route that
+ * passes on what lib/ai-circuit-breaker.ts says (`code` one of
+ * TIMED_LIMIT_CODES, and `retryAt`) is said here — the limit, its window or
+ * the time it opens again, and that nothing was charged — instead of the
+ * route's English `message`, which those screens showed as it came.
+ */
+export function useLimitText() {
+  const describe = useErrorText();
+  return useCallback(
+    (body: unknown): string | null => {
+      const value = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
+      if (!isTimedLimitCode(value?.code)) return null;
+      return describe(new ApiError(429, { code: value.code, retryAt: typeof value.retryAt === "string" ? value.retryAt : undefined })).text;
+    },
+    [describe]
   );
 }

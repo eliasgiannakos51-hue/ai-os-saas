@@ -4,6 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 import { formatNumber } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
@@ -33,6 +34,9 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
   const locale = useLocale();
   const tKey = useTranslations();
   const tCommon = useTranslations("common");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const { reportUsage } = useCredits();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +63,7 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
         return;
       }
       if (!data.generated) {
-        setError(data.message ?? "Could not generate a reflection.");
+        setError(limitText(data) ?? data.message ?? "Could not generate a reflection.");
         return;
       }
 

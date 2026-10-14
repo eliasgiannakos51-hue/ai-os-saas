@@ -200,7 +200,7 @@ export async function POST(request: Request) {
 
     const breaker = await checkAiCallAllowed(user.id, "agent_build", fingerprintRequest(userRequest));
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+      return NextResponse.json({ ok: false, code: breaker.code, retryAt: breaker.retryAt, error: breaker.reason }, { status: 429 });
     }
 
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));

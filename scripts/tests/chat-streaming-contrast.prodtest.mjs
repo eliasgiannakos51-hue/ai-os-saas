@@ -751,8 +751,13 @@ try {
       await Promise.race([failing.holding, sleep(30000)]);
       const errorLine = page.locator("p.text-danger");
       await errorLine.first().waitFor({ timeout: 15000 }).catch(() => null);
-      const codes = T.errors.codes.serverError;
-      const expected = `${codes.what} ${codes.next} ${T.errors.credits.unverified}`;
+      // What the route says when the provider fails mid-answer (it gives
+      // the hold back and says so, src/app/api/chat/route.ts): the AI
+      // service, and that nothing was charged — the sentence the Chat has
+      // said since that code arrived, and «nothing was charged» since
+      // 2026-10-14 (components/chat/use-chat-failure-words.ts).
+      const codes = T.errors.codes.upstreamUnavailable;
+      const expected = `${codes.what} ${codes.next} ${T.errors.credits.refunded}`;
       const after = await lastAnswer(page);
       check("provider error: what was written stays on screen", after?.count === 2 && squash(after.text) === squash(partial), JSON.stringify({ count: after?.count, chars: squash(after?.text).length }));
       check("...and the screen says it failed, in the reader's language", (await errorLine.count()) === 1 && (await errorLine.innerText()).trim() === expected, `${await errorLine.allInnerTexts()} — want ${expected}`);

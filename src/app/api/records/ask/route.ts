@@ -184,7 +184,7 @@ export async function POST(request: Request) {
       fingerprintRequest(moduleSlug, recordId, message)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, rateLimited: true, message: breakerCheck.reason });
+      return NextResponse.json({ ok: true, rateLimited: true, code: breakerCheck.code, retryAt: breakerCheck.retryAt, message: breakerCheck.reason });
     }
 
     // Ask AI used to charge a flat CREDIT_COSTS.chatMessage — 1 credit,

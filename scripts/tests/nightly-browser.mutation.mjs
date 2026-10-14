@@ -97,10 +97,28 @@ const MUTANTS = [
     expect: PROBE,
   },
   {
+    // NOT A REORDER: THE REORDER WAS INVISIBLE ON THE MACHINE THAT MATTERS.
+    // This first swapped the two branches so BUNDLED was consulted before
+    // the variable. That is only a defect where BUNDLED exists — on a
+    // GitHub runner the path is absent, the swapped branch falls through,
+    // the function returns the variable exactly as before, and the clause
+    // stayed green: the sweep reported `nightly-browser (1 mutation not
+    // caught)` while the same suite printed 7/7 in this container.
+    //
+    // It is the shape CLAUDE.md records for merge commit aec56a2, with the
+    // direction reversed: there a gate passed locally because a variable
+    // was MISSING and failed in CI because it was SET; here a mutation was
+    // caught locally because a FILE was present and missed in CI because it
+    // was absent. A mutant whose verdict depends on the filesystem under it
+    // is not a test of the code.
+    //
+    // Cutting the variable out of the answer altogether has one outcome
+    // everywhere: with BUNDLED present it returns BUNDLED, without it
+    // undefined, and neither is the value the gate set.
     name: "the resolver stops letting the environment win",
     file: RESOLVER,
-    from: "  const fromEnv = process.env.CHROMIUM_PATH;\n  if (fromEnv && fromEnv.trim().length > 0) return fromEnv;\n  if (existsSync(BUNDLED)) return BUNDLED;",
-    to: "  const fromEnv = process.env.CHROMIUM_PATH;\n  if (existsSync(BUNDLED)) return BUNDLED;\n  if (fromEnv && fromEnv.trim().length > 0) return fromEnv;",
+    from: "  const fromEnv = process.env.CHROMIUM_PATH;",
+    to: "  const fromEnv = undefined;",
     expect: "CHROMIUM_PATH overrides the built-in path",
   },
 ];

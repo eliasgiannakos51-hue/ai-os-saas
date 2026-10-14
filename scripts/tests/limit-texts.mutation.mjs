@@ -56,6 +56,20 @@ const MUTANTS = [
     expect: "de: no limit sentence says «a minute»",
   },
   {
+    name: "the Greek Flows step says «too many requests at once» again",
+    file: EL,
+    from: '"rate_limited": "Έφτασε όριο αιτημάτων — δοκίμασε αργότερα",',
+    to: '"rate_limited": "Πολλά αιτήματα μαζί",',
+    expect: "el: no limit sentence says «a minute»",
+  },
+  {
+    name: "the English Automations limit says «try again shortly» again",
+    file: EN,
+    from: '"rateLimited": "You\'ve reached a request limit. It clears by itself as time passes — try again later.",\n        "busy": "This automation',
+    to: '"rateLimited": "Too many requests at once. Try again shortly.",\n        "busy": "This automation',
+    expect: "en: no limit sentence says «a minute»",
+  },
+  {
     name: "the hourly limit stops naming its window",
     file: EN,
     from: '"next": "It counts the last 60 minutes, so it opens again within the hour."',

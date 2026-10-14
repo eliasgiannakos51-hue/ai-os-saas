@@ -89,10 +89,24 @@ for (const [limit, window] of Object.entries(TIMED)) {
   });
   check(`${limit}: said in every language, naming its window «${window}»`, missing.length === 0, missing.join(", "));
 }
-// «A minute», in each language: no limit sentence may promise it. The
-// windows are an hour, a quarter of an hour and a day — and every one of
-// these was «wait about a minute» or «shortly» before 2026-10-14.
-const MINUTE = { en: /\bminutes?\b/i, el: /λεπτ/i, de: /minute/i, fr: /minute/i, es: /minuto/i, it: /minut/i, pt: /minuto/i, ar: /دقيق/, ja: /分/, zh: /分钟/ };
+// «A minute», «shortly», «at once», in each language: no limit sentence
+// may promise them. The windows are an hour, a quarter of an hour and a
+// day — and every one of these said «wait about a minute», «try again
+// shortly» or «too many requests at once» before 2026-10-14 (123 matches
+// across the ten catalogues, counted that day against
+// origin/claude/keen-turing-bv8gw4-checks; 0 after).
+const SOON = {
+  en: /\bminutes?\b|\bshortly\b|\bin a moment\b|\bat once\b/i,
+  el: /λεπτ|σε λίγο\b|μαζί|λίγη ώρα/i,
+  de: /minute|gleich|auf einmal|kurzer Zeit/i,
+  fr: /minute|dans un instant|à la fois|peu de temps/i,
+  es: /minuto|en un momento|a la vez|poco tiempo/i,
+  it: /minut|tra poco|insieme|poco tempo/i,
+  pt: /minuto|daqui a pouco|ao mesmo tempo|pouco tempo/i,
+  ar: /دقيق|بعد قليل|في وقت واحد|دفعة واحدة|وقت قصير/,
+  ja: /分|少し待って|集中|短時間|同時/,
+  zh: /分钟|同时|短时间/,
+};
 const LIMIT_SENTENCES = [
   "errors.codes.rateLimited.what",
   "errors.codes.rateLimited.next",
@@ -115,9 +129,9 @@ const LIMIT_SENTENCES = [
 ];
 check("every one of those sentences exists in English", LIMIT_SENTENCES.every((k) => typeof get(M.en, k) === "string"), LIMIT_SENTENCES.filter((k) => typeof get(M.en, k) !== "string").join(", "));
 for (const l of LOCALES) {
-  const minute = MINUTE[l];
-  const promising = LIMIT_SENTENCES.filter((k) => minute && minute.test(String(get(M[l], k) ?? "")));
-  check(`${l}: no limit sentence says «a minute» (${LIMIT_SENTENCES.length} sentences)`, Boolean(minute) && promising.length === 0, promising.map((k) => `${k}: ${get(M[l], k)}`).join(" | "));
+  const soon = SOON[l];
+  const promising = LIMIT_SENTENCES.filter((k) => soon && soon.test(String(get(M[l], k) ?? "")));
+  check(`${l}: no limit sentence says «a minute», «shortly» or «at once» (${LIMIT_SENTENCES.length} sentences)`, Boolean(soon) && promising.length === 0, promising.map((k) => `${k}: ${get(M[l], k)}`).join(" | "));
 }
 for (const l of LOCALES) {
   const message = get(M[l], "errors.retryAt");

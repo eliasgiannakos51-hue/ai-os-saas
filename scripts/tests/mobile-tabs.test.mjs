@@ -126,7 +126,16 @@ check("a screen reader hears the words, not a bare number",
 check("the balance stops at 640px, where the top bar takes over",
   /whitespace-nowrap text-\[10px\] font-medium tabular-nums sm:hidden/.test(balanceFn), balanceFn.slice(0, 200));
 const banner = stripComments(readFileSync("src/components/credits/low-credits-banner.tsx", "utf8"));
-check("...and the top bar's notice really begins there", /\bsm:inline-flex\b/.test(banner) && /\bhidden\b/.test(banner));
+// ONE LITERAL, NOT TWO WORDS ANYWHERE IN THE FILE. The pair used to be
+// /\bsm:inline-flex\b/ && /\bhidden\b/, and `-` is not a word character,
+// so the `aria-hidden="true"` on the dot inside this same component
+// satisfied the second half on its own: deleting `hidden ` from the
+// Link's own class list left the clause green while the notice came back
+// on a phone — beside the bottom-bar balance this round just stopped
+// duplicating. Matching the start of that one class string cannot be
+// satisfied from anywhere else.
+check("...and the top bar's notice really begins there",
+  /"hidden items-center [^"]*\bsm:inline-flex\b/.test(banner), banner.slice(0, 200));
 check("the top bar's notice from 640px up decides «low» by the same rule",
   /const level = creditLevel\(\{ credits, total, isAdmin \}\);/.test(banner) && /level !== "low" && level !== "empty"/.test(banner) && !/credits \/ total|THRESHOLD/.test(banner));
 for (const l of ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"]) {

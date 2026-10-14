@@ -183,6 +183,19 @@ const MUTANTS = [
     to: "whitespace-nowrap text-[10px] font-medium tabular-nums",
     expect: "the balance stops at 640px",
   },
+  {
+    // `-` IS NOT A WORD CHARACTER, so the pair this replaced
+    // (/\bsm:inline-flex\b/ && /\bhidden\b/) was satisfied by the
+    // `aria-hidden="true"` on the dot inside the same component: the
+    // notice could lose `hidden` from its own class list, come back on a
+    // phone beside the balance this round just stopped duplicating, and
+    // the clause stayed green. Found by review, 2026-10-14.
+    name: "the top bar's notice loses `hidden` and returns to the phone",
+    file: BANNER,
+    from: '"hidden items-center gap-1.5 rounded-full',
+    to: '"items-center gap-1.5 rounded-full',
+    expect: "the top bar's notice really begins there",
+  },
 ];
 
 function runGate() {

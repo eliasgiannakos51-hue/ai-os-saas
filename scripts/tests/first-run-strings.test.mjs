@@ -269,12 +269,23 @@ console.log("\n== 7. a translator passed as an argument still counts ==");
   // and they are the ones that vanished. The count comes from the
   // catalogue, never from a number typed here.
   const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
-  const wantCodes = Object.keys(en.errors?.codes ?? {}).length;
+  // THE POPULATION IS THE SENTENCES, NOT THE CODES THAT GROUP THEM.
+  // This counted the 18 names under errors.codes and matched
+  // `errors.codes.(X).` out of the pack — so the pack satisfied it with
+  // ONE sentence per code. Deleting all 18 `.next` sentences, which is
+  // exactly half of the regression this section was written for, left it
+  // printing «18 of 18» and green; ranging over the leaves it reads
+  // «18 of 36» and goes red. Measured 2026-10-14, by deleting them.
+  const leavesOf = (group) =>
+    Object.entries(group ?? {}).flatMap(([code, fields]) =>
+      (fields && typeof fields === "object" ? Object.keys(fields) : []).map((f) => `${code}.${f}`)
+    );
+  const wantCodes = leavesOf(en.errors?.codes).length;
   const wantCredits = Object.keys(en.errors?.credits ?? {}).length;
   const pack = readFileSync("docs/first-run/first-run.en.md", "utf8");
-  const haveCodes = new Set([...pack.matchAll(/errors\.codes\.([\w-]+)\./g)].map((m) => m[1])).size;
+  const haveCodes = new Set([...pack.matchAll(/errors\.codes\.([\w-]+\.[\w-]+)/g)].map((m) => m[1])).size;
   const haveCredits = new Set([...pack.matchAll(/errors\.credits\.([\w-]+)/g)].map((m) => m[1])).size;
-  check(`every failure sentence the catalogue has is in the pack (${haveCodes} of ${wantCodes} codes)`,
+  check(`every failure sentence the catalogue has is in the pack (${haveCodes} of ${wantCodes} sentences)`,
     wantCodes > 0 && haveCodes === wantCodes, `${haveCodes} of ${wantCodes}`);
   check(`...and every credit answer (${haveCredits} of ${wantCredits})`,
     wantCredits > 0 && haveCredits === wantCredits, `${haveCredits} of ${wantCredits}`);

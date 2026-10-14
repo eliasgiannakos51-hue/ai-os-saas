@@ -238,7 +238,7 @@ check("Site: photos are given to the field, as Chat's are, except while its ques
   /attach=\{pending \? undefined : \{ accept: ACCEPTED_REFERENCE_IMAGE_TYPES\.join\(","\), label: tShell\("site\.photosAttach"\), onFiles: addPhotos \}\}/.test(site) &&
     /const \{ accepted, refused \} = admitPhotos\(photos\.length, files\);/.test(site));
 check("Site: ...taken by the old page's rules: the type, 5MB, how many",
-  /\(ACCEPTED_REFERENCE_IMAGE_TYPES as readonly string\[\]\)\.includes\(file\.type\)/.test(sitePhotos) && /file\.size > MAX_REFERENCE_IMAGE_BYTES/.test(sitePhotos) && /const room = MAX_REFERENCE_IMAGES - heldCount;/.test(sitePhotos));
+  /\(ACCEPTED_REFERENCE_IMAGE_TYPES as readonly string\[\]\)\.includes\(file\.type\)/.test(sitePhotos) && /if \(file\.size > MAX_REFERENCE_IMAGE_BYTES\) \{/.test(sitePhotos) && /const room = MAX_REFERENCE_IMAGES - heldCount;/.test(sitePhotos));
 check("Site: ...shown above the field, each with its remove, and counted",
   /tray=\{\s*photos\.length > 0 \? \(\s*<div data-testid="site-photos"/.test(site) && /onClick=\{\(\) => removePhoto\(p\.preview\)\}/.test(site) && /tShell\("site\.photos", \{ count: photos\.length, max: MAX_REFERENCE_IMAGES \}\)/.test(site));
 check("Site: every photo goes up to the account's own folder of the reference bucket, and none is counted if one fails",

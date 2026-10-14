@@ -797,7 +797,9 @@ try {
             Boolean(photoBucket.get(sent[0])?.bytes.equals(PNG)) && modelImages > 0,
           JSON.stringify({ changed, sent, stored: [...photoBucket.keys()], modelImages }));
         check(`${run}: site — once sent, the photo leaves the field`, (await tray.count()) === 0);
-        inLanguage("site, a change with a photo", await shellText());
+        // The conversation only: the stand-in model writes its marker into
+        // the site's own headings, which the parts above the preview show.
+        inLanguage("site, a change with a photo", await page.locator('[data-testid="tool-shell-thread"]').innerText());
         // A NEW site with a photo: the bytes go up first, and the same path
         // reaches /api/websites/generate and its worker, as the old page
         // sends it. Answered here: the build is not what is checked.
@@ -808,9 +810,18 @@ try {
           bodies.generate = r.request().postDataJSON();
           return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, generated: true, record: building }) });
         });
-        await page.route("**/api/websites/generate/process", (r) => {
-          bodies.process = r.request().postDataJSON();
-          return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
+        // The worker is started with a keepalive request, which the browser
+        // sends past page.route: what the page hands it is read where the
+        // page calls fetch, and answered there.
+        await page.evaluate(() => {
+          const send = window.fetch.bind(window);
+          window.__workerBodies = [];
+          window.fetch = (input, init) => {
+            const address = typeof input === "string" ? input : input.url;
+            if (!address.includes("/api/websites/generate/process")) return send(input, init);
+            window.__workerBodies.push(typeof init?.body === "string" ? init.body : null);
+            return Promise.resolve(new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } }));
+          };
         });
         await page.route(`**/api/websites/status?id=${NEW_ID}`, (r) =>
           r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, record: { ...building, status: "completed", html_content: SITE_HTML[locale] } }) })
@@ -821,7 +832,11 @@ try {
         before = await toolTurns();
         await say(brief.site);
         await lastToolTurn(before, 15000);
-        for (let i = 0; i < 40 && !bodies.process; i++) await page.waitForTimeout(250);
+        for (let i = 0; i < 40 && !bodies.process; i++) {
+          const handed = await page.evaluate(() => window.__workerBodies?.[0] ?? null);
+          if (handed) bodies.process = JSON.parse(handed);
+          else await page.waitForTimeout(250);
+        }
         const given = bodies.generate?.referenceImagePaths ?? [];
         check(`${run}: site — a new site's photo goes up first, and its path reaches the route and its worker`,
           given.length === 1 && given[0] !== sent[0] && given[0].startsWith(`${MOCK_USER.id}/`) && photoBucket.has(given[0]) &&
@@ -896,7 +911,9 @@ try {
         const newest = (await liveRows.count()) === 3 ? await liveRows.first().innerText() : "";
         check(`${run}: site — Roll back puts the earlier version live through the real route, and the list says so in the screen's language`,
           Boolean(restored?.html_content.includes(firstHeading)) && restored?.status === "live" && appended?.version_number === 3 &&
-            newest.includes(fill(M.dashboard.publishing.rollbackSuccess, { number: 1 })) && typeof appended?.change_description === "string" && !newest.includes(appended.change_description),
+            newest.includes(fill(M.dashboard.publishing.rollbackSuccess, { number: 1 })) && typeof appended?.change_description === "string" &&
+            // In English the screen's words and the row's are the same words.
+            (locale === "en" || !newest.includes(appended.change_description)),
           JSON.stringify({ restored: restored?.html_content?.slice(0, 120) ?? null, appended: appended?.version_number ?? null, newest }));
         inLanguage("site, rolled back", await shellText());
         await backToField();

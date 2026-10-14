@@ -314,7 +314,11 @@
       "chat": "Chat",
       "tools": "Werkzeuge",
       "you": "Du",
-      "label": "Hauptnavigation"
+      "label": "Hauptnavigation",
+      "balance": "Guthaben: {amount} Credits",
+      "balanceLow": "Niedriges Guthaben: {amount} Credits",
+      "balanceEmpty": "Keine Credits mehr",
+      "balanceUnlimited": "Unbegrenzte Credits"
     }
   },
   "landing": {

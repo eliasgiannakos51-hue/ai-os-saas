@@ -314,7 +314,11 @@
       "chat": "Discussion",
       "tools": "Outils",
       "you": "Vous",
-      "label": "Navigation principale"
+      "label": "Navigation principale",
+      "balance": "Solde : {amount} crédits",
+      "balanceLow": "Solde faible : {amount} crédits",
+      "balanceEmpty": "Plus de crédits",
+      "balanceUnlimited": "Crédits illimités"
     }
   },
   "landing": {

@@ -314,7 +314,11 @@
       "chat": "聊天",
       "tools": "工具",
       "you": "我",
-      "label": "主导航"
+      "label": "主导航",
+      "balance": "余额：{amount} 积分",
+      "balanceLow": "余额不足：{amount} 积分",
+      "balanceEmpty": "积分已用完",
+      "balanceUnlimited": "无限积分"
     }
   },
   "landing": {

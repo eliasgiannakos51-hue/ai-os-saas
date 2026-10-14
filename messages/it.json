@@ -314,7 +314,11 @@
       "chat": "Chat",
       "tools": "Strumenti",
       "you": "Tu",
-      "label": "Navigazione principale"
+      "label": "Navigazione principale",
+      "balance": "Saldo: {amount} crediti",
+      "balanceLow": "Saldo basso: {amount} crediti",
+      "balanceEmpty": "Nessun credito rimasto",
+      "balanceUnlimited": "Crediti illimitati"
     }
   },
   "landing": {

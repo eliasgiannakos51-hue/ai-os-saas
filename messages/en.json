@@ -314,7 +314,11 @@
       "chat": "Chat",
       "tools": "Tools",
       "you": "You",
-      "label": "Main navigation"
+      "label": "Main navigation",
+      "balance": "Balance: {amount} credits",
+      "balanceLow": "Low balance: {amount} credits",
+      "balanceEmpty": "No credits left",
+      "balanceUnlimited": "Unlimited credits"
     }
   },
   "landing": {

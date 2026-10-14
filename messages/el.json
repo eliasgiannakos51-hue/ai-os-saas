@@ -314,7 +314,11 @@
       "chat": "Συνομιλία",
       "tools": "Εργαλεία",
       "you": "Εσύ",
-      "label": "Κύρια πλοήγηση"
+      "label": "Κύρια πλοήγηση",
+      "balance": "Υπόλοιπο: {amount} credits",
+      "balanceLow": "Χαμηλό υπόλοιπο: {amount} credits",
+      "balanceEmpty": "Δεν απομένουν credits",
+      "balanceUnlimited": "Απεριόριστα credits"
     }
   },
   "landing": {

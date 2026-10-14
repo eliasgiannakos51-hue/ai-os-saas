@@ -314,7 +314,11 @@
       "chat": "チャット",
       "tools": "ツール",
       "you": "あなた",
-      "label": "メインナビゲーション"
+      "label": "メインナビゲーション",
+      "balance": "残高: {amount} クレジット",
+      "balanceLow": "残高が少なくなっています: {amount} クレジット",
+      "balanceEmpty": "クレジットが残っていません",
+      "balanceUnlimited": "クレジット無制限"
     }
   },
   "landing": {

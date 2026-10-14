@@ -314,7 +314,11 @@
       "chat": "الدردشة",
       "tools": "الأدوات",
       "you": "أنت",
-      "label": "التنقل الرئيسي"
+      "label": "التنقل الرئيسي",
+      "balance": "الرصيد: {amount}",
+      "balanceLow": "رصيد منخفض: {amount}",
+      "balanceEmpty": "لم يتبقَّ أي رصيد",
+      "balanceUnlimited": "رصيد غير محدود"
     }
   },
   "landing": {

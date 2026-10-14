@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Clock, Download, Files, Palette, Plus, Square, Undo2 } from "lucide-react";
+import { Clock, Download, Files, History, Palette, Plus, Square, Undo2, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
+import { SiteHistory } from "@/components/website-builder/site-history";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { isSiteRunning, requestSiteChange, requestSiteStop, requestSiteUndo, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
+import { admitPhotos, uploadSitePhotos } from "@/lib/website-builder/site-photos";
+import { ACCEPTED_REFERENCE_IMAGE_TYPES, MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
+import { formatBytes } from "@/lib/format-bytes";
 import { useGenerationNoteText } from "@/components/website-builder/use-generation-note-text";
 import { parseGenerationNotes } from "@/lib/website-generation-notes";
 import { normalisePages } from "@/lib/publishing/website-pages";
@@ -30,7 +35,7 @@ import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { findPageBoxes, outlineBoxes, type PageBox } from "@/lib/website-boxes";
 import { useErrorText } from "@/lib/errors/use-error-text";
-import type { UserWebsite } from "@/types/user-website";
+import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 
 const MAX_NAME_LENGTH = 100;
@@ -51,6 +56,21 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * changes it (/api/websites/edit). Three options: the design, the sites
  * made before, and a new site. Price before, as on the page: the same
  * estimator the server reserves against.
+ *
+ * REFERENCE PHOTOS (the old page's, 2026-10-09): given to the field — the
+ * «+», a paste, a drop — and shown above it; they go up with the next
+ * message, a new site's or a change's, through lib/website-builder/site-photos.ts
+ * and the same `referenceImagePaths` the old page sends. While a new site
+ * waits for its questions, the photos it took wait with it.
+ *
+ * VERSIONS (the old page's History tab, 2026-10-09): «History», above the
+ * preview, opens every version the site has had and, once it is published,
+ * what the public saw, with «Roll back» (components/website-builder/site-history.tsx).
+ * A version pressed is shown read-only, with the way back to the latest.
+ * Above the preview and not among the icons on top: on a phone those already
+ * fill the row, and one more left the site's name a few pixels wide, its
+ * letters one under the other, pushing the site below the screen (measured
+ * 2026-10-14 by scripts/tests/site-pages-edges.prodtest.mjs, Greek, 390px).
  *
  * BOXES (package 4): the page's parts — header, sections, footer — are
  * listed above the preview and pressed by number; the chosen one is
@@ -110,7 +130,15 @@ export function WebsiteShell({
   const [busy, setBusy] = useState(false);
   const [length, setLength] = useState(initialBrief?.length ?? 0);
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [pending, setPending] = useState<{ questions: string[]; name: string; description: string } | null>(null);
+  // The photos a new site's questions wait with are already uploaded: their paths.
+  const [pending, setPending] = useState<{ questions: string[]; name: string; description: string; paths: string[] } | null>(null);
+  // The photos given to the field, not sent yet, each with its preview.
+  const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
+  // The versions, open over the site they belong to; a version shown in
+  // the latest's place; and a count that has them read again after a change.
+  const [history, setHistory] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<WebsiteVersion | null>(null);
+  const [historyRound, setHistoryRound] = useState(0);
   // What was asked of each site in THIS conversation, so the invented-number
   // check does not accuse a number the person typed themselves.
   const [asked, setAsked] = useState<Record<string, string[]>>({});
@@ -181,16 +209,54 @@ export function WebsiteShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function generate(name: string, description: string, skipClarification: boolean) {
+  // THE PHOTOS, given to the field, taken as the old page takes them (its
+  // handleImageChange): the type, the size, how many; what is refused is
+  // said in the conversation.
+  function addPhotos(files: File[]) {
+    const { accepted, refused } = admitPhotos(photos.length, files);
+    if (refused) say({ role: "tool", text: refused === "type" ? tShell("site.photoType") : refused === "size" ? t("imageTooLarge") : t("imageTooMany", { max: MAX_REFERENCE_IMAGES }) });
+    if (accepted.length > 0) setPhotos((prev) => [...prev, ...accepted.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
+  }
+  function removePhoto(preview: string) {
+    URL.revokeObjectURL(preview);
+    setPhotos((prev) => prev.filter((p) => p.preview !== preview));
+  }
+  // The photos that were sent, not any given while they went up.
+  function clearPhotos(sent = photos) {
+    for (const p of sent) URL.revokeObjectURL(p.preview);
+    setPhotos((prev) => prev.filter((p) => !sent.includes(p)));
+  }
+  // Every photo up before anything is asked of the model; null when they
+  // could not all go, said in the screen's words — never storage's.
+  async function sendPhotos(): Promise<string[] | null> {
+    try {
+      const outcome = await uploadSitePhotos(photos.map((p) => p.file));
+      if (outcome.ok) return outcome.paths;
+      say({
+        role: "tool",
+        text:
+          outcome.reason === "full"
+            ? t("storageFull", { needed: formatBytes(outcome.neededBytes), free: formatBytes(outcome.remainingBytes) })
+            : outcome.reason === "signedOut"
+              ? tCommon("notAuthenticated")
+              : tShell("site.photosFailed"),
+      });
+    } catch {
+      say({ role: "tool", text: tCommon("networkErrorCheckConnection") });
+    }
+    return null;
+  }
+
+  async function generate(name: string, description: string, skipClarification: boolean, referenceImagePaths: string[]) {
     setBusy(true);
     try {
-      const outcome = await startSiteGeneration({ name, description, skipClarification });
+      const outcome = await startSiteGeneration({ name, description, skipClarification, referenceImagePaths });
       if (outcome.kind === "refused") {
         say({ role: "tool", text: describe(outcome.error).text });
         return;
       }
       if (outcome.kind === "questions") {
-        setPending({ questions: outcome.questions, name, description });
+        setPending({ questions: outcome.questions, name, description, paths: referenceImagePaths });
         say({ role: "tool", text: tShell("site.questions"), questions: outcome.questions });
         void refreshCredits();
         return;
@@ -201,6 +267,7 @@ export function WebsiteShell({
       }
       const record = outcome.record;
       setPending(null);
+      clearPhotos();
       setWebsites((prev) => (prev.some((w) => w.id === record.id) ? prev : [record, ...prev]));
       setCurrentId(record.id);
       setAsked((prev) => ({ ...prev, [record.id]: [description] }));
@@ -220,7 +287,9 @@ export function WebsiteShell({
     const slug = pageSlug;
     setBusy(true);
     try {
-      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, ...(pages ? { pageSlug: slug } : {}) });
+      const referenceImagePaths = await sendPhotos();
+      if (referenceImagePaths === null) return;
+      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, ...(pages ? { pageSlug: slug } : {}), referenceImagePaths });
       void refreshCredits();
       if (outcome.kind === "refused") {
         say({
@@ -240,6 +309,12 @@ export function WebsiteShell({
       }
       const record = outcome.record;
       setWebsites((prev) => prev.map((w) => (w.id === record.id ? record : w)));
+      clearPhotos();
+      // The changed site is what is shown next, not an earlier version or
+      // the list; the list is read again the next time it is opened.
+      setViewing(null);
+      setHistory(null);
+      setHistoryRound((n) => n + 1);
       setAsked((prev) => ({ ...prev, [record.id]: [...(prev[record.id] ?? []), request] }));
       say({ role: "tool", text: part === null ? tShell("site.changed") : tShell("box.partChanged", { name: partLabel }), siteId: record.id });
       setPane("site");
@@ -262,6 +337,9 @@ export function WebsiteShell({
       const record = outcome.record;
       setWebsites((prev) => prev.map((w) => (w.id === record.id ? record : w)));
       setBox(null);
+      setViewing(null);
+      setHistory(null);
+      setHistoryRound((n) => n + 1);
       say({ role: "tool", text: tShell("pages.undone"), siteId: record.id });
       setPane("site");
     } catch {
@@ -276,15 +354,24 @@ export function WebsiteShell({
     if (pending) {
       // THE ANSWERS, said in the field: one message answers the questions.
       const enriched = appendClarificationAnswers(pending.description, pending.questions, pending.questions.map((_, i) => (i === 0 ? text : "")));
-      void generate(pending.name, enriched, true);
+      void generate(pending.name, enriched, true, pending.paths);
       return;
     }
     if (current && current.status === "completed") {
       void change(text);
       return;
     }
-    const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: 0 }) + (pages ? pageRequestBrief(pageCount) : "");
-    void generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false);
+    void (async () => {
+      setBusy(true);
+      const paths = await sendPhotos();
+      if (paths === null) {
+        setBusy(false);
+        return;
+      }
+      // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
+      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + (pages ? pageRequestBrief(pageCount) : "");
+      await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);
+    })();
   }
 
   function download(site: UserWebsite) {
@@ -296,7 +383,7 @@ export function WebsiteShell({
   // PRICE BEFORE, the same estimator the server reserves against (as on the page).
   const estimatedCost = estimateForAction(
     "websiteGenerate",
-    { model: WEBSITE_BUILDER_MODEL, inputChars: length, imageCount: 0, planSlug },
+    { model: WEBSITE_BUILDER_MODEL, inputChars: length, imageCount: photos.length, planSlug },
     DEFAULTS,
     accountCreditPriceEur ?? undefined
   ).estimatedCredits;
@@ -324,6 +411,27 @@ export function WebsiteShell({
           ? tShell("box.nav")
           : tShell("box.part", { n: i + 1 }));
   const chosenLabel = chosen === null ? "" : boxLabel(boxes[chosen], chosen);
+  // AN EARLIER VERSION, shown in the latest's place: the open page of it,
+  // or its home page when it had no such page — as on the old page. Only
+  // the preview is the version's; the parts, the checks and the next
+  // change stay the latest's.
+  const shown = viewing && current && viewing.website_id === current.id ? viewing : null;
+  const shownHtml = shown ? normalisePages(shown.pages).pages.find((p) => p.slug === pageSlug)?.html ?? shown.html_content : "";
+  const showingHistory = Boolean(current) && history === current!.id;
+  // «History», the same press over the preview and over the list: pressed
+  // again, the site comes back.
+  const historyToggle = current ? (
+    <button
+      type="button"
+      onClick={() => setHistory(showingHistory ? null : current.id)}
+      aria-pressed={showingHistory}
+      data-testid="site-history-open"
+      className={`${OPTION} self-start ${showingHistory ? "border-foreground text-foreground" : ""}`}
+    >
+      <History className="h-3.5 w-3.5" aria-hidden="true" />
+      {t("tabHistory")}
+    </button>
+  ) : null;
 
   const shellTurns: ShellTurn[] = turns.map((turn) => ({
     id: turn.id,
@@ -339,7 +447,7 @@ export function WebsiteShell({
           ))}
         </ol>
         {pending && pending.questions === turn.questions && (
-          <button type="button" onClick={() => void generate(pending.name, pending.description, true)} data-testid="site-skip-questions" className={OPTION}>
+          <button type="button" onClick={() => void generate(pending.name, pending.description, true, pending.paths)} data-testid="site-skip-questions" className={OPTION}>
             {tShell("site.skip")}
           </button>
         )}
@@ -400,10 +508,33 @@ export function WebsiteShell({
               )}
             </>
           ),
-          body: (
+          body: showingHistory ? (
+            <div className="flex flex-col gap-3">
+              {historyToggle}
+              <SiteHistory
+                websiteId={current.id}
+                reload={historyRound}
+                viewingId={shown?.id ?? null}
+                onView={(version) => {
+                  setViewing(version);
+                  setBox(null);
+                  setHistory(null);
+                }}
+              />
+            </div>
+          ) : (
             <div data-testid="site-preview" className="flex h-full flex-col gap-3">
               <AiGeneratedNotice variant="block" />
-              {notes.length > 0 && (
+              {historyToggle}
+              {shown && (
+                <p data-testid="site-viewing" className="flex flex-wrap items-center gap-x-2 text-xs text-foreground">
+                  {t("viewingOldVersion", { number: shown.version_number })}
+                  <button type="button" onClick={() => setViewing(null)} data-testid="site-latest" className="min-h-[44px] font-semibold underline hover:no-underline">
+                    {t("backToLatest")}
+                  </button>
+                </p>
+              )}
+              {!shown && notes.length > 0 && (
                 <ul data-testid="site-notes" className="space-y-1 text-xs text-muted">
                   {notes.map((note, i) => (
                     <li key={`${note.kind}-${i}`}>{describeNote(note)}</li>
@@ -426,9 +557,9 @@ export function WebsiteShell({
                   ))}
                 </nav>
               )}
-              {unfilled.length > 0 && <p className="text-xs text-warning">{t("unfilledTitle", { count: unfilled.length })} {t("unfilledBody")}</p>}
-              {invented.length > 0 && <p className="text-xs text-warning">{t("inventedTitle", { count: invented.length })} {t("inventedBody")}</p>}
-              {complete && boxes.length > 1 && (
+              {!shown && unfilled.length > 0 && <p className="text-xs text-warning">{t("unfilledTitle", { count: unfilled.length })} {t("unfilledBody")}</p>}
+              {!shown && invented.length > 0 && <p className="text-xs text-warning">{t("inventedTitle", { count: invented.length })} {t("inventedBody")}</p>}
+              {!shown && complete && boxes.length > 1 && (
                 <div role="group" aria-label={tShell("box.boxes")} data-testid="site-boxes">
                   <p className="mb-1.5 text-xs text-muted">{tShell("box.hint")}</p>
                   <div className="flex flex-wrap gap-1.5">
@@ -452,7 +583,16 @@ export function WebsiteShell({
                   </div>
                 </div>
               )}
-              {complete ? (
+              {shown ? (
+                <iframe
+                  key={`${shown.id}:${pageSlug}`}
+                  srcDoc={shownHtml}
+                  sandbox=""
+                  title={t("viewingOldVersion", { number: shown.version_number })}
+                  data-testid="site-version-preview"
+                  className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
+                />
+              ) : complete ? (
                 <iframe
                   key={`${current.id}:${pageSlug}:${html.length}`}
                   srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
@@ -533,6 +673,34 @@ export function WebsiteShell({
       onSend={send}
       initialText={initialBrief}
       onLengthChange={setLength}
+      attach={pending ? undefined : { accept: ACCEPTED_REFERENCE_IMAGE_TYPES.join(","), label: tShell("site.photosAttach"), onFiles: addPhotos }}
+      tray={
+        photos.length > 0 ? (
+          <div data-testid="site-photos" className="mb-2">
+            <ul className="flex flex-wrap gap-1.5">
+              {photos.map((p) => (
+                <li key={p.preview} className="flex items-center rounded-item bg-panel ps-1">
+                  <Image src={p.preview} alt={p.file.name} width={36} height={36} unoptimized className="h-9 w-9 rounded-item object-cover" />
+                  {/* While a new site waits for its questions, its photos are already up and go with it. */}
+                  {!pending && (
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(p.preview)}
+                      aria-label={t("imageRemove")}
+                      title={t("imageRemove")}
+                      data-testid="site-photo-remove"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-[11px] text-muted">{tShell("site.photos", { count: photos.length, max: MAX_REFERENCE_IMAGES })}</p>
+          </div>
+        ) : undefined
+      }
       options={[
         <span key="design" className="relative">
           <button type="button" onClick={() => setChoosingDesign((v) => !v)} aria-expanded={choosingDesign} data-testid="site-design" className={OPTION}>
@@ -541,7 +709,7 @@ export function WebsiteShell({
           </button>
           {choosingDesign && (
             <div className="surface absolute bottom-full start-0 z-10 mb-2 max-h-[60vh] w-80 overflow-y-auto">
-              <DesignControls value={design} onChange={setDesign} imageCount={0} />
+              <DesignControls value={design} onChange={setDesign} imageCount={photos.length} />
             </div>
           )}
         </span>,
@@ -593,6 +761,9 @@ export function WebsiteShell({
           onClick={() => {
             setCurrentId(null);
             setPending(null);
+            clearPhotos();
+            setViewing(null);
+            setHistory(null);
             setPane(null);
           }}
           disabled={!current && !pending}

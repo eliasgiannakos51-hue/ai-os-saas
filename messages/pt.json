@@ -2441,7 +2441,9 @@
         "failed": "A página não abriu. Tente novamente.",
         "openPdf": "Abrir o PDF nesta página",
         "unread": "De «{name}» só foram lidas as primeiras {read} de {total} páginas; o que vem depois não está nesta resposta."
-      }
+      },
+      "collectionName": "Que nome dar a esta coleção de {count, plural, one {# ficheiro} other {# ficheiros}}? Escreve o nome abaixo.",
+      "collectionsHint": "Seleciona ficheiros e guarda-os como coleção: com um toque ficam todos selecionados de novo."
     },
     "deepResearch": {
       "title": "Procura a fundo",
@@ -3101,7 +3103,15 @@
         "design": "Aspeto",
         "held": "A nossa revisão de segurança reteve esta alteração, por isso o site ficou como estava.",
         "busy": "Já está a ser feita uma alteração a este site. Espera que termine e volta a pedi-la.",
-        "offTopic": "Aqui faço sites. Diz-me que site queres: para que negócio ou objetivo, que secções, que estilo."
+        "offTopic": "Aqui faço sites. Diz-me que site queres: para que negócio ou objetivo, que secções, que estilo.",
+        "photosAttach": "Adicionar fotos — logótipo, produtos, o espaço",
+        "photos": "{count} de {max} fotos — seguem com a tua próxima mensagem.",
+        "photoType": "Apenas fotos JPG, PNG ou WebP.",
+        "photosFailed": "Não foi possível carregar as fotos, por isso nada foi enviado. Tenta novamente.",
+        "versions": "Todas as versões",
+        "versionsHint": "Toca numa para a veres. O que escreveres a seguir continua a alterar a mais recente.",
+        "liveVersions": "Versões publicadas",
+        "undid": "Anulado: {change}"
       },
       "box": {
         "only": "Muda só: {name}",

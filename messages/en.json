@@ -2441,7 +2441,9 @@
         "failed": "The page did not open. Try again.",
         "openPdf": "Open the PDF at this page",
         "unread": "Only the first {read} of the {total} pages of “{name}” were read; anything after them is not in this answer."
-      }
+      },
+      "collectionName": "What should this collection of {count, plural, one {# file} other {# files}} be called? Write its name below.",
+      "collectionsHint": "Select files, then save them as a collection: one press selects them all again."
     },
     "deepResearch": {
       "title": "Look into it properly",
@@ -3101,7 +3103,15 @@
         "design": "Design",
         "held": "Our safety review held this change back, so the site is as it was.",
         "busy": "A change to this site is already being made. Wait for it to finish, then say it again.",
-        "offTopic": "Here I make websites. Tell me what site you want: for which business or purpose, which sections, what style."
+        "offTopic": "Here I make websites. Tell me what site you want: for which business or purpose, which sections, what style.",
+        "photosAttach": "Add photos — your logo, products, the place",
+        "photos": "{count} of {max} photos — they go with your next message.",
+        "photoType": "Only JPG, PNG or WebP photos.",
+        "photosFailed": "The photos could not be uploaded, so nothing was sent. Please try again.",
+        "versions": "Every version",
+        "versionsHint": "Press one to see it. What you write next still changes the latest.",
+        "liveVersions": "Published versions",
+        "undid": "Undid: {change}"
       },
       "box": {
         "only": "Changing only: {name}",

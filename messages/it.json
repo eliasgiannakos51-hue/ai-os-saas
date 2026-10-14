@@ -2441,7 +2441,9 @@
         "failed": "La pagina non si è aperta. Riprova.",
         "openPdf": "Apri il PDF a questa pagina",
         "unread": "Di «{name}» sono state lette solo le prime {read} di {total} pagine; ciò che segue non è in questa risposta."
-      }
+      },
+      "collectionName": "Come vuoi chiamare questa raccolta di {count, plural, one {# file} other {# file}}? Scrivi il nome qui sotto.",
+      "collectionsHint": "Seleziona i file e salvali come raccolta: con un tocco li riselezioni tutti."
     },
     "deepResearch": {
       "title": "Cercalo a fondo",
@@ -3101,7 +3103,15 @@
         "design": "Aspetto",
         "held": "Il nostro controllo di sicurezza ha trattenuto questa modifica: il sito è rimasto com’era.",
         "busy": "È già in corso una modifica a questo sito. Aspetta che finisca, poi chiedila di nuovo.",
-        "offTopic": "Qui creo siti web. Dimmi che sito vuoi: per quale attività o scopo, quali sezioni, che stile."
+        "offTopic": "Qui creo siti web. Dimmi che sito vuoi: per quale attività o scopo, quali sezioni, che stile.",
+        "photosAttach": "Aggiungi foto: logo, prodotti, il locale",
+        "photos": "{count} di {max} foto: partono con il tuo prossimo messaggio.",
+        "photoType": "Solo foto JPG, PNG o WebP.",
+        "photosFailed": "Non è stato possibile caricare le foto, quindi non è stato inviato nulla. Riprova.",
+        "versions": "Tutte le versioni",
+        "versionsHint": "Tocca una versione per vederla. Quello che scrivi dopo modifica sempre la più recente.",
+        "liveVersions": "Versioni pubblicate",
+        "undid": "Annullato: {change}"
       },
       "box": {
         "only": "Cambia solo: {name}",

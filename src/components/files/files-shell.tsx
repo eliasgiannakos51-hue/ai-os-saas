@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { FileText, Trash2, Upload } from "lucide-react";
+import { FileText, FolderPlus, Trash2, Upload } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { CopyButton } from "@/components/ui/copy-button";
 import { useToast } from "@/components/toast/toast-context";
@@ -20,14 +20,18 @@ import { isStoppedMessage } from "@/lib/stop-message";
 import { askFailure } from "@/lib/files/ask-failure";
 import { uploadRefusal } from "@/lib/files/refusal-words";
 import { ACCEPT_ATTRIBUTE, MAX_FILE_BYTES, MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS, formatBytes, kindFromExtension } from "@/lib/files/file-types";
-import { answerForClipboard, answerFromResult, type Answer, type WorkspaceFile } from "@/lib/files/answer";
+import { answerForClipboard, answerFromResult, type Answer, type WorkspaceCollection, type WorkspaceFile } from "@/lib/files/answer";
 import { uploadFile } from "@/lib/files/upload-file";
 import { CitedAnswerText, CitedPages, PageView, usePageLabel } from "@/components/files/cited-answer";
 import { pagesRead, relabelAnswer } from "@/lib/files/page-refs";
 import { useFilesFailureWords } from "@/components/files/failure-words";
 import type { Citation } from "@/lib/files/answer";
+import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 
-type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer };
+/** The longest name /api/files/collections keeps (its MAX_NAME). */
+const MAX_COLLECTION_NAME = 80;
+
+type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer; naming?: boolean };
 
 /**
  * FILES IN THE SHELL (MASTER 14.3, package 3), behind the switch
@@ -42,13 +46,22 @@ type Turn = { id: string; role: "user" | "tool"; text: string; answer?: Answer }
  * the documents. Two options: upload, and the files (with how many are
  * ticked). An answer that finished while the person was elsewhere is put
  * back, as on the page.
+ *
+ * COLLECTIONS (the page's, 2026-10-09): above the files, each collection
+ * is pressed to tick its files again, and what is ticked is saved as a new
+ * one through the page's own /api/files/collections. Its name is said in
+ * the shell's one field: the conversation asks for it, the field's words
+ * say so, and the next thing sent is the name, not a question.
  */
 export function FilesShell({
   initialFiles,
+  initialCollections = [],
   initialOpenId = null,
   pages = false,
 }: {
   initialFiles: WorkspaceFile[];
+  /** The account's collections, read by the page as for the old one. */
+  initialCollections?: WorkspaceCollection[];
   /** A file to open on arrival — `?record=` from the Library: it is ticked, so the next question is asked of it. */
   initialOpenId?: string | null;
   /** The switch "file-pages" (package 12): an answer's pages are pressed to open them. */
@@ -58,17 +71,23 @@ export function FilesShell({
   const tAsk = useTranslations("aiSteps.file_ask");
   const tNames = useTranslations("dashboard.tools.names");
   const tSteps = useTranslations("aiSteps");
+  const tCommon = useTranslations("common");
   const describe = useErrorText();
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<ChatComposerHandle>(null);
   // Every page label this screen shows, in the reader's language, and what
   // goes wrong said in it too (components/files/failure-words.ts).
   const show = usePageLabel();
   const failures = useFilesFailureWords();
 
   const [files, setFiles] = useState(initialFiles);
+  const [collections, setCollections] = useState(initialCollections);
+  // While true, what is sent next is the name of a new collection.
+  const [naming, setNaming] = useState(false);
+  const [savingCollection, setSavingCollection] = useState(false);
   const asked = initialOpenId ? initialFiles.find((f) => f.id === initialOpenId) : undefined;
   const [selected, setSelected] = useState<string[]>(asked?.processing_status === "ready" ? [asked.id] : []);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -223,6 +242,58 @@ export function FilesShell({
     }
   }
 
+  // A COLLECTION PRESSED TICKS ITS FILES AGAIN, as on the page — those of
+  // them that can be asked: a file still being read, or one that could not
+  // be, has no tick to take off here.
+  const readyIds = (collection: WorkspaceCollection) => collection.fileIds.filter((id) => askable.some((f) => f.id === id));
+  const isChosen = (collection: WorkspaceCollection) => {
+    const ids = readyIds(collection);
+    return ids.length > 0 && ids.length === selected.length && ids.every((id) => selected.includes(id));
+  };
+
+  function startNaming() {
+    if (selected.length === 0 || naming) return;
+    setNaming(true);
+    say({ role: "tool", text: t("collectionName", { count: selected.length }), naming: true });
+    // On a phone the files cover the field: back to it.
+    if (!window.matchMedia("(min-width: 1024px)").matches) setPane(null);
+    composerRef.current?.focus();
+  }
+
+  async function saveCollection(text: string) {
+    const name = text.trim().slice(0, MAX_COLLECTION_NAME);
+    if (!name || savingCollection) return;
+    say({ role: "user", text: name });
+    // Every tick taken off while the name was being written: a collection
+    // of nothing is not saved, and the conversation says what to do.
+    if (selected.length < 1) {
+      say({ role: "tool", text: t("selectFirst") });
+      setPane("files");
+      return;
+    }
+    setSavingCollection(true);
+    try {
+      const response = await fetch("/api/files/collections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, fileIds: selected }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!data?.ok || !data.collection) {
+        say({ role: "tool", text: t("collectionError") });
+        return;
+      }
+      const made = data.collection as WorkspaceCollection;
+      setCollections((current) => [made, ...current]);
+      setNaming(false);
+      say({ role: "tool", text: t("collectionCreated", { name: made.name }) });
+    } catch (err) {
+      say({ role: "tool", text: describe(err).text });
+    } finally {
+      setSavingCollection(false);
+    }
+  }
+
   async function ask(question: string) {
     const text = question.trim().slice(0, MAX_QUESTION_CHARS);
     if (!text || asking) return;
@@ -277,6 +348,7 @@ export function FilesShell({
     }
   }
 
+  const lastNamingId = [...turns].reverse().find((turn) => turn.naming)?.id ?? null;
   const shellTurns: ShellTurn[] = [
     ...(selectedFiles.length > 0
       ? [{ id: "subject", role: "tool" as const, text: t("askSelected", { count: selectedFiles.length, names: selectedFiles.map((f) => f.filename).join(", ") }) }]
@@ -287,7 +359,13 @@ export function FilesShell({
       // With the switch, the answer is drawn below with its pages pressable;
       // without it, the text itself, its page labels in the reader's language.
       text: pages && turn.answer ? "" : turn.answer ? relabelAnswer(turn.text, turn.answer.citations, show) : turn.text,
-      extra: turn.answer ? (
+      extra: turn.naming ? (
+        naming && turn.id === lastNamingId ? (
+          <button type="button" onClick={() => setNaming(false)} data-testid="files-collection-cancel" className={`${OPTION} mt-2`}>
+            {tCommon("cancel")}
+          </button>
+        ) : undefined
+      ) : turn.answer ? (
         <div data-testid="files-answer" className="mt-2 space-y-2">
           {!turn.answer.fromDocuments && <p className="text-xs text-warning">{t("notInDocuments")}</p>}
           {pages && <CitedAnswerText answer={turn.answer} onOpen={(citation) => setOpenPage({ turnId: turn.id, citation })} />}
@@ -336,6 +414,31 @@ export function FilesShell({
               {/* The terms of handing a contract to an AI, said where it is
                   handed over: one line, not a box. */}
               <p className="text-[11px] leading-relaxed text-muted">{t("privacyNotice")}</p>
+              {/* COLLECTIONS. Deliberately small, as on the page: a
+                  collection is a shortcut for "these files again", not a
+                  filing system. */}
+              <section aria-label={t("collections")} data-testid="files-collections">
+                <p className="text-xs font-medium text-muted">{t("collections")}</p>
+                {collections.length === 0 && <p className="mt-0.5 text-[11px] text-muted">{t("collectionsHint")}</p>}
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {collections.map((collection) => (
+                    <button
+                      key={collection.id}
+                      type="button"
+                      onClick={() => setSelected(readyIds(collection))}
+                      aria-pressed={isChosen(collection)}
+                      data-testid="files-collection"
+                      className={`${OPTION} ${isChosen(collection) ? "border-foreground text-foreground" : ""}`}
+                    >
+                      <span className="break-words">{collection.name}</span> · {collection.fileIds.length}
+                    </button>
+                  ))}
+                  <button type="button" onClick={startNaming} disabled={selected.length === 0 || naming} data-testid="files-collection-save" className={`${OPTION} disabled:opacity-40`}>
+                    <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("saveSelection", { count: selected.length })}
+                  </button>
+                </div>
+              </section>
               {files.length === 0 ? (
               <p className="text-xs text-muted">{t("empty")}</p>
             ) : (
@@ -395,9 +498,10 @@ export function FilesShell({
           </span>
         ) : null
       }
-      placeholder={t("askPlaceholder")}
-      sending={asking}
-      onSend={(text) => void ask(text)}
+      ref={composerRef}
+      placeholder={naming ? t("collectionPlaceholder") : t("askPlaceholder")}
+      sending={asking || savingCollection}
+      onSend={(text) => void (naming ? saveCollection(text) : ask(text))}
       options={[
         <span key="upload">
           <input ref={inputRef} type="file" accept={ACCEPT_ATTRIBUTE} multiple className="sr-only" aria-label={t("choose")} data-testid="files-shell-input" onChange={(e) => { void upload(e.target.files); e.target.value = ""; }} />

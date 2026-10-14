@@ -2441,7 +2441,9 @@
         "failed": "La página no se abrió. Inténtalo de nuevo.",
         "openPdf": "Abrir el PDF en esta página",
         "unread": "De «{name}» solo se leyeron las primeras {read} de {total} páginas; lo que viene después no está en esta respuesta."
-      }
+      },
+      "collectionName": "¿Cómo se llamará esta colección de {count, plural, one {# archivo} other {# archivos}}? Escribe su nombre abajo.",
+      "collectionsHint": "Selecciona archivos y guárdalos como colección: con un toque se vuelven a seleccionar todos."
     },
     "deepResearch": {
       "title": "Investígalo a fondo",
@@ -3101,7 +3103,15 @@
         "design": "Diseño",
         "held": "Nuestra revisión de seguridad ha retenido este cambio, así que el sitio sigue como estaba.",
         "busy": "Ya se está haciendo un cambio en este sitio. Espera a que termine y vuelve a decirlo.",
-        "offTopic": "Aquí hago sitios web. Dime qué sitio quieres: para qué negocio o propósito, qué secciones, qué estilo."
+        "offTopic": "Aquí hago sitios web. Dime qué sitio quieres: para qué negocio o propósito, qué secciones, qué estilo.",
+        "photosAttach": "Añadir fotos: tu logo, productos, el local",
+        "photos": "{count} de {max} fotos: se envían con tu próximo mensaje.",
+        "photoType": "Solo fotos JPG, PNG o WebP.",
+        "photosFailed": "No se pudieron subir las fotos, así que no se envió nada. Inténtalo de nuevo.",
+        "versions": "Todas las versiones",
+        "versionsHint": "Toca una para verla. Lo que escribas después sigue cambiando la más reciente.",
+        "liveVersions": "Versiones publicadas",
+        "undid": "Deshecho: {change}"
       },
       "box": {
         "only": "Solo cambia: {name}",

@@ -2441,7 +2441,9 @@
         "failed": "La page ne s’est pas ouverte. Réessayez.",
         "openPdf": "Ouvrir le PDF à cette page",
         "unread": "Seules les {read} premières des {total} pages de « {name} » ont été lues ; la suite n’est pas dans cette réponse."
-      }
+      },
+      "collectionName": "Quel nom donner à cette collection de {count, plural, one {# fichier} other {# fichiers}} ? Écrivez-le ci-dessous.",
+      "collectionsHint": "Sélectionnez des fichiers, puis enregistrez-les comme collection : un appui les sélectionne tous à nouveau."
     },
     "deepResearch": {
       "title": "Cherche à fond",
@@ -3101,7 +3103,15 @@
         "design": "Apparence",
         "held": "Notre contrôle de sécurité a retenu cette modification : le site est resté tel quel.",
         "busy": "Une modification de ce site est déjà en cours. Attendez qu’elle se termine, puis redemandez-la.",
-        "offTopic": "Ici, je crée des sites web. Dites-moi quel site vous voulez : pour quelle activité ou quel but, quelles sections, quel style."
+        "offTopic": "Ici, je crée des sites web. Dites-moi quel site vous voulez : pour quelle activité ou quel but, quelles sections, quel style.",
+        "photosAttach": "Ajouter des photos — logo, produits, le lieu",
+        "photos": "{count} photos sur {max} — elles partent avec votre prochain message.",
+        "photoType": "Photos JPG, PNG ou WebP uniquement.",
+        "photosFailed": "Les photos n'ont pas pu être téléversées, donc rien n'a été envoyé. Veuillez réessayer.",
+        "versions": "Toutes les versions",
+        "versionsHint": "Appuyez sur une version pour la voir. Ce que vous écrivez ensuite modifie toujours la plus récente.",
+        "liveVersions": "Versions publiées",
+        "undid": "Annulé : {change}"
       },
       "box": {
         "only": "Seulement : {name}",

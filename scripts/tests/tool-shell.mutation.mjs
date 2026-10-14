@@ -6,6 +6,8 @@
  * limits coming back, the work no longer beside the conversation or no
  * way back from it on a phone, the shell drawn without its switch or on
  * top of the old page, and Posts losing its price, its stop or its route.
+ * And (2026-10-09) the three things only the old pages had: the Files
+ * collections, a Site's reference photos and its versions with Roll back.
  *
  * Run: node scripts/tests/tool-shell.mutation.mjs
  */
@@ -27,7 +29,10 @@ const SITE = "src/components/website-builder/website-shell.tsx";
 const SITE_REQUESTS = "src/lib/website-builder/site-requests.ts";
 const SITE_GENERATE = "src/app/api/websites/generate/route.ts";
 const JOBS = "src/lib/jobs/start-and-watch.ts";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS];
+const FILES_PAGE = "src/app/dashboard/files/page.tsx";
+const SITE_PHOTOS = "src/lib/website-builder/site-photos.ts";
+const SITE_HISTORY = "src/components/website-builder/site-history.tsx";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, SITE_PHOTOS, SITE_HISTORY];
 
 const MUTANTS = [
   {
@@ -332,6 +337,155 @@ const MUTANTS = [
     from: '        say({ role: "tool", text: describe(err).text });',
     to: '        say({ role: "tool", text: getErrorMessage(err, t("uploadError")) });',
     expect: "no route's English is said to the reader",
+  },
+  // ---- 2026-10-09: what the old pages had, inside the shell (the owner's
+  // decision: with the switch on, no function is lost)
+  {
+    name: "Files: the page no longer hands the shell its collections",
+    file: FILES_PAGE,
+    from: "initialOpenId={readRequestedId(searchParams.record)} initialCollections={collectionRows} ",
+    to: "initialOpenId={readRequestedId(searchParams.record)} ",
+    expect: "the collections the page reads are handed to the shell",
+  },
+  {
+    name: "Files: a collection pressed no longer selects its files",
+    file: FILES,
+    from: "onClick={() => setSelected(readyIds(collection))}",
+    to: "onClick={() => setSelected([])}",
+    expect: "pressed to select its files again",
+  },
+  {
+    name: "Files: the collection is saved without the files that are selected",
+    file: FILES,
+    from: "body: JSON.stringify({ name, fileIds: selected }),",
+    to: "body: JSON.stringify({ name }),",
+    expect: "through the page's route, with the page's body",
+  },
+  {
+    name: "Files: the name typed is asked of the files as a question",
+    file: FILES,
+    from: "onSend={(text) => void (naming ? saveCollection(text) : ask(text))}",
+    to: "onSend={(text) => void ask(text)}",
+    expect: "the next thing sent is the name",
+  },
+  {
+    name: "Files: a refused collection says the route's English",
+    file: FILES,
+    from: 'say({ role: "tool", text: t("collectionError") });',
+    to: 'say({ role: "tool", text: data?.error ?? t("collectionError") });',
+    expect: "no route's English is said to the reader",
+  },
+  {
+    name: "Site: photos are no longer offered to the field",
+    file: SITE,
+    from: '      attach={pending ? undefined : { accept: ACCEPTED_REFERENCE_IMAGE_TYPES.join(","), label: tShell("site.photosAttach"), onFiles: addPhotos }}\n',
+    to: "",
+    expect: "photos are given to the field",
+  },
+  {
+    name: "Site: a photo over 5MB is taken",
+    file: SITE_PHOTOS,
+    from: "    if (file.size > MAX_REFERENCE_IMAGE_BYTES) {",
+    to: "    if (file.size > MAX_REFERENCE_IMAGE_BYTES * 100) {",
+    expect: "the old page's rules",
+  },
+  {
+    name: "Site: a new site is made without its photos",
+    file: SITE,
+    from: "await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);",
+    to: "await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, []);",
+    expect: "the paths go with the next message",
+  },
+  {
+    name: "Site: the answers to its questions drop the photos",
+    file: SITE,
+    from: "void generate(pending.name, enriched, true, pending.paths);",
+    to: "void generate(pending.name, enriched, true, []);",
+    expect: "the paths go with the next message",
+  },
+  {
+    name: "Site: a change is sent without its photos",
+    file: SITE,
+    from: "...(pages ? { pageSlug: slug } : {}), referenceImagePaths });",
+    to: "...(pages ? { pageSlug: slug } : {}) });",
+    expect: "what is said changes it",
+  },
+  {
+    name: "Site: the shared request leaves the photos behind on the way to the route",
+    file: SITE_REQUESTS,
+    from: "body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths, skipClarification: input.skipClarification }),",
+    to: "body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),",
+    expect: "hand them to the routes",
+  },
+  {
+    name: "Site: a photo that did not go up is quietly left out",
+    file: SITE_PHOTOS,
+    from: '  if (results.some((r) => r.error)) return { ok: false, reason: "failed" };\n',
+    to: "",
+    expect: "none is counted if one fails",
+  },
+  {
+    name: "Site: the price leaves the photos out",
+    file: SITE,
+    from: "{ model: WEBSITE_BUILDER_MODEL, inputChars: length, imageCount: photos.length, planSlug }",
+    to: "{ model: WEBSITE_BUILDER_MODEL, inputChars: length, imageCount: 0, planSlug }",
+    expect: "the price counts the photos",
+  },
+  {
+    name: "Site: the versions are no longer drawn",
+    file: SITE,
+    from: "body: showingHistory ? (",
+    to: "body: !current ? (",
+    expect: "its versions are one press away",
+  },
+  {
+    name: "Site: «History» is not over the preview, so the list cannot be opened",
+    file: SITE,
+    from: '              <AiGeneratedNotice variant="block" />\n              {historyToggle}\n',
+    to: '              <AiGeneratedNotice variant="block" />\n',
+    expect: "its versions are one press away",
+  },
+  {
+    name: "Site: an earlier version is previewed with its scripts running",
+    file: SITE,
+    from: 'srcDoc={shownHtml}\n                  sandbox=""',
+    to: 'srcDoc={shownHtml}\n                  sandbox="allow-scripts"',
+    expect: "read-only and sandboxed",
+  },
+  {
+    name: "Site: no way back to the latest",
+    file: SITE,
+    from: 'onClick={() => setViewing(null)} data-testid="site-latest"',
+    to: 'onClick={() => setBox(null)} data-testid="site-latest"',
+    expect: "the way back to the latest",
+  },
+  {
+    name: "Site: Roll back is offered on the version that is live now",
+    file: SITE_HISTORY,
+    from: "{index > 0 && (",
+    to: "{index >= 0 && (",
+    expect: "Roll back on every one but the newest",
+  },
+  {
+    name: "Site: Roll back is sent without the version",
+    file: SITE_HISTORY,
+    from: "body: JSON.stringify({ versionId: version.id }),",
+    to: "body: JSON.stringify({ version: version.version_number }),",
+    expect: "Roll back on every one but the newest",
+  },
+  {
+    name: "Site: the rollback's English row is shown as the server wrote it",
+    file: SITE_HISTORY,
+    from: "const back = description?.match(/^Rolled back to version (\\d+)$/);",
+    to: "const back = description?.match(/^Restored version (\\d+)$/);",
+    expect: "are said in the screen's words",
+  },
+  {
+    name: "Site: a refused rollback says the route's English",
+    file: SITE_HISTORY,
+    from: '        addToast(tPub("rollbackError"), "error");\n        return;',
+    to: '        addToast(data?.error ?? tPub("rollbackError"), "error");\n        return;',
+    expect: "are said in the screen's words",
   },
 ];
 

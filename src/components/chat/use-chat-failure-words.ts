@@ -23,8 +23,9 @@ import { useErrorText } from "@/lib/errors/use-error-text";
  *     route says about the money (`creditsRefunded`: nothing was charged)
  *     rather than «we cannot confirm whether this was charged»;
  *   - anything it did not name, from its status (lib/errors/error-codes.ts).
- * The two Chat screens before this one said a limit in English (the Studio
- * and the voice conversation showed the route's sentence as it came).
+ * Before 2026-10-14 the Studio showed the route's English as it came, and
+ * the voice conversation showed a failed stream's English and took a
+ * refusal (a JSON answer, not a stream) for an empty reply, saying nothing.
  */
 export function useChatFailureWords() {
   const describe = useErrorText();

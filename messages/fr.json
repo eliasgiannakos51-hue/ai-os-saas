@@ -156,9 +156,9 @@
       "formSubmissions": "Envois de formulaires",
       "routing": "Quelle IA est utilisée",
       "businessHealth": "Comment va l’activité",
-      "mine": "Mes éléments",
+      "mine": "Bibliothèque",
       "records": "Mes enregistrements",
-      "library": "Mes affaires",
+      "library": "Bibliothèque",
       "newEntry": "Nouvelle entrée",
       "costs": "Coûts",
       "systemHealth": "État du système",
@@ -1481,7 +1481,7 @@
       "routeCostNow": "≈ {credits, plural, one {# crédit} other {# crédits}} à l’envoi"
     },
     "timeline": {
-      "title": "Mes éléments",
+      "title": "Bibliothèque",
       "allModules": "Tous les modules",
       "showOnly": "Afficher uniquement : {module}",
       "rangeToday": "Aujourd'hui",
@@ -3633,7 +3633,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Tout ce que vous consignez sur {module} vit ici.",
-    "emptyWhy": "Tout ce que vous consignez ici rejoint votre Chronologie et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
+    "emptyWhy": "Tout ce que vous consignez ici rejoint votre Bibliothèque et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
     "emptyExample": "Commencez par : « {example} »",
     "examples": {
       "competitors": "Notion — le concurrent le plus proche sur les prix",
@@ -4209,7 +4209,7 @@
     },
     "businessModule": {
       "is": "Un tableau que vous tenez vous-même, pour un type de travail.",
-      "does": "Vous ajoutez des lignes à la main ou via Create Studio, et l'IA les lit : le Chat, la recherche dans vos enregistrements, l'Historique et la réflexion hebdomadaire puisent ici, et toute ligne peut être reliée à une ligne d'un autre module.",
+      "does": "Vous ajoutez des lignes à la main ou via Create Studio, et l'IA les lit : le Chat, la recherche dans vos enregistrements, la Bibliothèque et la réflexion hebdomadaire puisent ici, et toute ligne peut être reliée à une ligne d'un autre module.",
       "doesNot": "Il ne se remplit pas tout seul. Rien n'arrive ici depuis votre messagerie, votre banque ou vos conversations — un tableau vide est vide parce que rien n'a été saisi — et supprimer une ligne ici la retire partout où elle apparaît."
     },
     "documents": {

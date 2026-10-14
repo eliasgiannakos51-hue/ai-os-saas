@@ -108,9 +108,17 @@ const orphans = aliasKeys.filter((k) => !itemKeys.has(k));
 ok("every alias key is an item the sidebar actually renders",
   orphans.length === 0,
   `not in the sidebar: ${orphans.join(", ")}`);
-ok("the covered locales are exactly the ones the file claims",
-  aliases.aliasLocales().join(",") === "el,en",
-  `covers ${aliases.aliasLocales().join(", ")} — update lib/palette-aliases.ts's own paragraph if this changed`);
+// English and Greek for every item that has aliases; the other eight
+// for ONE item, `mine` — the Library's old name in each language
+// (2026-10-14). Anything wider is a claim the file does not make.
+{
+  const beyondTwo = Object.entries(aliases.PALETTE_ALIASES)
+    .filter(([key, perLocale]) => key !== "mine" && Object.keys(perLocale).some((l) => l !== "el" && l !== "en"))
+    .map(([key]) => key);
+  ok("the covered locales are exactly the ones the file claims",
+    aliases.aliasLocales().join(",") === [...LOCALES].sort().join(",") && beyondTwo.length === 0,
+    `covers ${aliases.aliasLocales().join(", ")}; beyond el/en: ${beyondTwo.join(", ") || "none"} — update lib/palette-aliases.ts's own paragraph if this changed`);
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. every alias reaches its own item, FIRST ==");
@@ -149,6 +157,31 @@ for (const [locale, query, wantKey] of [
   ok(`${locale}: "${query}" reaches ${wantKey}`,
     hits[0]?.key === wantKey,
     `reached ${hits[0]?.key ?? "(nothing)"}`);
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 3b. the Library, under its new name and its old one ==");
+// THE OWNER'S NAME (2026-10-09): «Βιβλιοθήκη» in Greek, "Library" in
+// English, the same word as its All tools square in the other eight. The
+// row's own label is that name now, and the name it carried until
+// 2026-10-14 — written here as it was shown, a record rather than a copy
+// of the table — still reaches it, first, in every language.
+const OLD_NAMES = {
+  en: "Mine", el: "Τα δικά μου", de: "Meine Sachen", fr: "Mes éléments", es: "Lo mío",
+  it: "Le mie cose", pt: "As minhas coisas", ar: "ما أنشأته", ja: "自分のもの", zh: "我的内容",
+};
+for (const locale of LOCALES) {
+  const entries = entriesFor(locale);
+  const shown = lookup(messages[locale], "sidebar.items.mine");
+  ok(`${locale}: the row is called the Library ("${shown}")`,
+    typeof shown === "string" && shown === lookup(messages[locale], "dashboard.tools.names.library") && shown !== OLD_NAMES[locale],
+    `${shown} vs the square's ${lookup(messages[locale], "dashboard.tools.names.library")}`);
+  for (const query of [shown, OLD_NAMES[locale]]) {
+    const hits = match.filterAndRankCandidates(entries, query);
+    ok(`${locale}: "${query}" reaches the Library first`,
+      hits[0]?.key === "mine",
+      `reached ${hits.slice(0, 3).map((h) => h.key).join(", ") || "(nothing)"}`);
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -209,19 +242,21 @@ ok("words come back longest first",
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. coverage, printed rather than assumed ==");
-// English and Greek only. Eight locales have none, and an item with no
-// alias is exactly as reachable as it was before — by its own name.
+// English and Greek, and the Library's old name in the other eight. An
+// item with no alias is exactly as reachable as it was before — by its
+// own name.
 for (const locale of LOCALES) {
   const covered = Object.values(aliases.PALETTE_ALIASES).filter((e) => (e[locale] ?? []).length > 0).length;
   const words = Object.values(aliases.PALETTE_ALIASES).reduce((n, e) => n + (e[locale] ?? []).length, 0);
   console.log(`  ${locale}   ${String(covered).padStart(3)} of ${LABELS.length} items   ${String(words).padStart(4)} words`);
 }
 console.log(
-  "\n  Hand-written 2026-09-19, English and Greek only. The other eight\n" +
-  "  locales have none — an item with no alias in the reader's language\n" +
-  "  is reachable exactly as before, by its own displayed name and by\n" +
-  "  its English one. Inventing synonyms in six more languages to make\n" +
-  "  this table look finished is how a catalogue starts lying."
+  "\n  Hand-written 2026-09-19, English and Greek. The other eight locales\n" +
+  "  have one item, the Library's old name in that language (2026-10-14).\n" +
+  "  An item with no alias in the reader's language is reachable exactly\n" +
+  "  as before, by its own displayed name and by its English one.\n" +
+  "  Inventing synonyms in six more languages to make this table look\n" +
+  "  finished is how a catalogue starts lying."
 );
 
 // ---------------------------------------------------------------------

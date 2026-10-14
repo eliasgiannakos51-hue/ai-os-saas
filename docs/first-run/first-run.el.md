@@ -1894,9 +1894,9 @@ DevOps
 
 **`sidebar.items.library`**
 
-> EN — My stuff
+> EN — Library
 
-Τα πράγματά μου
+Βιβλιοθήκη
 
 **`sidebar.items.marketplace`**
 
@@ -1918,9 +1918,9 @@ DevOps
 
 **`sidebar.items.mine`**
 
-> EN — Mine
+> EN — Library
 
-Τα δικά μου
+Βιβλιοθήκη
 
 **`sidebar.items.missionControl`**
 

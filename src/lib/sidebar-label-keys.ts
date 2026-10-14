@@ -91,9 +91,13 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Home: "home",
   Activity: "activity",
   // The four routes that were in no nav config at all until round 5, and
-  // the timeline row, which the owner's structure renames from "Mine".
-  // The row the owner's structure calls Timeline; the product has always
-  // displayed it as "Mine", and scripts/tests/sidebar-naming.test.mjs
+  // the timeline row. The row the owner's structure calls Timeline was
+  // displayed as "Mine" / «Τα δικά μου» until 2026-10-14; it is the
+  // Library now, by the owner's decision of 2026-10-09 («Βιβλιοθήκη»,
+  // "Library"). The key stays `mine` so nothing that reads it moves;
+  // its value is the Library's name in all ten languages, the same word
+  // as the All tools square (lib/nav/all-tools.ts) — held by
+  // scripts/tests/library.test.mjs §7. scripts/tests/sidebar-naming.test.mjs
   // pairs this label with sidebar.items.mine and dashboard.timeline.title.
   Timeline: "mine",
   Costs: "costs",

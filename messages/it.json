@@ -156,9 +156,9 @@
       "formSubmissions": "Invii dei moduli",
       "routing": "Quale IA viene usata",
       "businessHealth": "Come va l’attività",
-      "mine": "Le mie cose",
+      "mine": "Libreria",
       "records": "I miei record",
-      "library": "Le mie cose",
+      "library": "Libreria",
       "newEntry": "Nuova voce",
       "costs": "Costi",
       "systemHealth": "Stato del sistema",
@@ -1481,7 +1481,7 @@
       "routeCostNow": "≈ {credits, plural, one {# credito} other {# crediti}} all’invio"
     },
     "timeline": {
-      "title": "Le mie cose",
+      "title": "Libreria",
       "allModules": "Tutti i moduli",
       "showOnly": "Mostra solo: {module}",
       "rangeToday": "Oggi",
@@ -3633,7 +3633,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Qui vive tutto quello che annoti su {module}.",
-    "emptyWhy": "Tutto quello che annoti qui entra nella tua Cronologia e diventa qualcosa che l'IA può usare quando le fai una domanda sul tuo lavoro.",
+    "emptyWhy": "Tutto quello che annoti qui entra nella tua Libreria e diventa qualcosa che l'IA può usare quando le fai una domanda sul tuo lavoro.",
     "emptyExample": "Inizia con: «{example}»",
     "examples": {
       "competitors": "Notion — il concorrente più vicino sul prezzo",
@@ -4209,7 +4209,7 @@
     },
     "businessModule": {
       "is": "Una tabella che tieni tu, per un tipo di lavoro.",
-      "does": "Aggiungi righe a mano o tramite Create Studio, e l'IA le legge: Chat, Cerca nei miei dati, Cronologia e la riflessione settimanale attingono da qui, e ogni riga può essere collegata a una riga di un altro modulo.",
+      "does": "Aggiungi righe a mano o tramite Create Studio, e l'IA le legge: Chat, Cerca nei miei dati, Libreria e la riflessione settimanale attingono da qui, e ogni riga può essere collegata a una riga di un altro modulo.",
       "doesNot": "Non si riempie da sola. Qui non arriva nulla dalla tua email, dalla tua banca o dalle tue conversazioni — una tabella vuota è vuota perché non è stato inserito niente — e cancellare una riga qui la toglie ovunque compaia."
     },
     "documents": {

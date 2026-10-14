@@ -1894,9 +1894,9 @@ Apprentissage
 
 **`sidebar.items.library`**
 
-> EN — My stuff
+> EN — Library
 
-Mes affaires
+Bibliothèque
 
 **`sidebar.items.marketplace`**
 
@@ -1918,9 +1918,9 @@ Chercher dans mes données
 
 **`sidebar.items.mine`**
 
-> EN — Mine
+> EN — Library
 
-Mes éléments
+Bibliothèque
 
 **`sidebar.items.missionControl`**
 

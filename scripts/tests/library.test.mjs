@@ -21,6 +21,8 @@
  *      the id to its shell, and an item older than the page's list is read
  *      on its own, by id AND owner.
  *   6. The words, in all ten languages.
+ *   7. One name everywhere it is shown (the owner, 2026-10-09): the row,
+ *      the page, the browser tab, the square and the tab, in all ten.
  *
  * Run: node scripts/tests/library.test.mjs
  */
@@ -341,6 +343,65 @@ for (const locale of readdirSync("messages").filter((f) => f.endsWith(".json")).
   check(`${locale}: the tools that failed are named`, /\{tools\}/.test(get("failed") ?? ""));
 }
 check("the Library says how far a search reaches, from the number the code uses", /60/.test(JSON.parse(read("messages/el.json")).dashboard.library.searchScope) && load.PER_SOURCE_LIMIT === 60);
+
+// ---------------------------------------------------------------------
+console.log("\n== 7. one name, everywhere it is shown ==");
+// ---------------------------------------------------------------------
+// THE OWNER'S DECISION (2026-10-09): «Όνομα: "Βιβλιοθήκη" στα ελληνικά,
+// "Library" στα αγγλικά». Until 2026-10-14 the All tools square and the
+// tab said Library while the row (sidebar, ⌘K, records hub, recent
+// tools), the page's heading and the browser tab said «Τα δικά μου» /
+// "Mine". Every place reads one of four keys; all four must say the same
+// word in every language, the square's word. The other eight are the
+// square's: de Bibliothek, fr Bibliothèque, es Biblioteca, it Libreria,
+// pt Biblioteca, ar المكتبة, ja ライブラリ, zh 资料库.
+const NAME_KEYS = ["sidebar.items.mine", "dashboard.timeline.title", "dashboard.tools.names.library", "dashboard.library.tab"];
+// The old names as they were shown on 2026-10-13: a record, so a revert
+// to any of them is caught by name.
+const OLD_NAMES = { en: "Mine", el: "Τα δικά μου", de: "Meine Sachen", fr: "Mes éléments", es: "Lo mío", it: "Le mie cose", pt: "As minhas coisas", ar: "ما أنشأته", ja: "自分のもの", zh: "我的内容" };
+const LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
+check(`the ten languages (${LOCALES.length})`, LOCALES.length === 10 && LOCALES.every((l) => l in OLD_NAMES), LOCALES.join(","));
+const dig = (obj, path) => path.split(".").reduce((o, p) => (o ? o[p] : undefined), obj);
+const NAME = {};
+for (const locale of LOCALES) {
+  const m = JSON.parse(read(`messages/${locale}.json`));
+  const values = NAME_KEYS.map((k) => dig(m, k));
+  NAME[locale] = values[0];
+  check(`${locale}: the Library has one name, «${values[0]}»`,
+    values.length === 4 && typeof values[0] === "string" && values[0].length > 0 && values.every((v) => v === values[0]),
+    NAME_KEYS.map((k, i) => `${k}=${values[i]}`).join(" · "));
+  // Every string in the catalogue, not the four keys: the old name
+  // somewhere else on a screen is the same two-names defect.
+  const strings = [];
+  (function walk(node, path) {
+    if (typeof node === "string") strings.push([path, node]);
+    else if (node && typeof node === "object") for (const [k, v] of Object.entries(node)) walk(v, path ? `${path}.${k}` : k);
+  })(m, "");
+  const old = strings.filter(([, s]) => s === OLD_NAMES[locale] || s.includes(`«${OLD_NAMES[locale]}»`)).map(([p]) => p);
+  // Floored: "on no screen" is trivially true of a catalogue nothing read.
+  check(`${locale}: the old name «${OLD_NAMES[locale]}» is on no screen (of ${strings.length} strings)`, strings.length > 3000 && old.length === 0, old.join(", ") || `${strings.length} strings read`);
+  // The two sentences that name the page in passing (a log module's empty
+  // state, the help on what reads a log) say the Library too.
+  const square = dig(m, "dashboard.tools.names.library");
+  const passing = ["module.emptyWhy", "help.businessModule.does"].filter((k) => !String(dig(m, k)).includes(square));
+  check(`${locale}: the sentences that name it in passing say «${square}»`, passing.length === 0, passing.join(", "));
+}
+check("Greek says «Βιβλιοθήκη» and English says «Library»", NAME.el === "Βιβλιοθήκη" && NAME.en === "Library", `${NAME.el} / ${NAME.en}`);
+{
+  // Where each key is read, with the comments stripped: the browser tab
+  // and the heading on both of the page's branches (Library on and off),
+  // the row through its label key, the square through its name key.
+  const page = code("src/app/dashboard/timeline/page.tsx");
+  check("the browser tab reads the row's name", /pageTitle\("sidebar\.items\.mine"\)/.test(page));
+  check("...and the heading, with the switch on and off, the page's title",
+    /const t = await getTranslations\("dashboard\.timeline"\);/.test(page) &&
+      (page.match(/<PageHeader helpKey="help\.timeline" icon=\{TIMELINE_ICON\} title=\{t\("title"\)\}/g) ?? []).length === 2);
+  const labelKeys = await loadTs("src/lib/sidebar-label-keys.ts");
+  check("the row (sidebar, ⌘K, records hub) reads the same key", labelKeys.ITEM_LABEL_KEYS.Timeline === "mine" &&
+    /\{ href: TIMELINE_NAV_ITEM\.href, label: "Timeline",/.test(code("src/lib/sidebar-nav.ts")), labelKeys.ITEM_LABEL_KEYS.Timeline);
+  const allTools = await loadTs("src/lib/nav/all-tools.ts");
+  check("the All tools square reads the square's name key", allTools.ALL_TOOLS_NAMES["/dashboard/timeline"] === "library");
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

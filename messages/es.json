@@ -156,9 +156,9 @@
       "formSubmissions": "Envíos de formularios",
       "routing": "Qué IA se usa",
       "businessHealth": "Cómo va el negocio",
-      "mine": "Lo mío",
+      "mine": "Biblioteca",
       "records": "Mis registros",
-      "library": "Mis cosas",
+      "library": "Biblioteca",
       "newEntry": "Nueva entrada",
       "costs": "Costes",
       "systemHealth": "Estado del sistema",
@@ -1481,7 +1481,7 @@
       "routeCostNow": "≈ {credits, plural, one {# crédito} other {# créditos}} al enviar"
     },
     "timeline": {
-      "title": "Lo mío",
+      "title": "Biblioteca",
       "allModules": "Todos los módulos",
       "showOnly": "Mostrar solo: {module}",
       "rangeToday": "Hoy",
@@ -3633,7 +3633,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Aquí vive todo lo que registras sobre {module}.",
-    "emptyWhy": "Todo lo que registres aquí se añade a tu Cronología y pasa a ser algo que la IA puede usar cuando le preguntes sobre tu trabajo.",
+    "emptyWhy": "Todo lo que registres aquí se añade a tu Biblioteca y pasa a ser algo que la IA puede usar cuando le preguntes sobre tu trabajo.",
     "emptyExample": "Empieza con: «{example}»",
     "examples": {
       "competitors": "Notion: el competidor más cercano en precio",
@@ -4209,7 +4209,7 @@
     },
     "businessModule": {
       "is": "Una tabla que mantienes tú, para un tipo de trabajo.",
-      "does": "Añades filas a mano o desde Create Studio, y la IA las lee: el Chat, Buscar en mis registros, el Historial y la reflexión semanal beben de aquí, y cualquier fila puede enlazarse con una fila de otro módulo.",
+      "does": "Añades filas a mano o desde Create Studio, y la IA las lee: el Chat, Buscar en mis registros, la Biblioteca y la reflexión semanal beben de aquí, y cualquier fila puede enlazarse con una fila de otro módulo.",
       "doesNot": "No se rellena solo. Aquí no llega nada desde tu correo, tu banco o tus conversaciones — una tabla vacía está vacía porque no se introdujo nada — y borrar una fila aquí la quita de todas partes donde se muestra."
     },
     "documents": {

@@ -1587,7 +1587,7 @@ Learning
 **`sidebar.items.library`**
 
 
-My stuff
+Library
 
 **`sidebar.items.marketplace`**
 
@@ -1607,7 +1607,7 @@ Search my records
 **`sidebar.items.mine`**
 
 
-Mine
+Library
 
 **`sidebar.items.missionControl`**
 

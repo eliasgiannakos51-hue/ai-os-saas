@@ -132,7 +132,7 @@ const PREVIOUSLY_MISSING = [
 const LEFT_THE_SIDEBAR = {
   "TIMELINE_NAV_ITEM.href": {
     file: "src/app/dashboard/timeline/page.tsx",
-    reason: "reachable from Mine; the starred tab carries favourites and search",
+    reason: "reachable from the Library; the starred tab carries favourites and search",
   },
 };
 for (const href of PREVIOUSLY_MISSING) {

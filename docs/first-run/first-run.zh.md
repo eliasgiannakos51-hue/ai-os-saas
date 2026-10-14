@@ -1894,9 +1894,9 @@ DevOps
 
 **`sidebar.items.library`**
 
-> EN — My stuff
+> EN — Library
 
-我的东西
+资料库
 
 **`sidebar.items.marketplace`**
 
@@ -1918,9 +1918,9 @@ DevOps
 
 **`sidebar.items.mine`**
 
-> EN — Mine
+> EN — Library
 
-我的内容
+资料库
 
 **`sidebar.items.missionControl`**
 

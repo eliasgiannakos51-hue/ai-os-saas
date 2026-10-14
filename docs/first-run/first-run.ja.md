@@ -1894,9 +1894,9 @@ DevOps
 
 **`sidebar.items.library`**
 
-> EN — My stuff
+> EN — Library
 
-わたしのもの
+ライブラリ
 
 **`sidebar.items.marketplace`**
 
@@ -1918,9 +1918,9 @@ DevOps
 
 **`sidebar.items.mine`**
 
-> EN — Mine
+> EN — Library
 
-自分のもの
+ライブラリ
 
 **`sidebar.items.missionControl`**
 

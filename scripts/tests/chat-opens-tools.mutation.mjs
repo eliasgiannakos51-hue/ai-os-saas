@@ -220,6 +220,17 @@ const MUTANTS = [
     to: "          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),",
     expect: "no credits for a change is said by the credits notice too",
   },
+  {
+    // The field was removed on 2026-10-14 because nobody read it and a
+    // dead field invites the English back. This is the check that the
+    // shape really stops carrying it.
+    name: "the classifier's own sentence is carried to the screen again",
+    file: REQ,
+    gate: RUN,
+    from: '    return { kind: "notMade", offTopic: data.offTopic === true };',
+    to: '    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };',
+    expect: "the server's own sentence is not carried to the screen",
+  },
 ];
 
 runMutations({

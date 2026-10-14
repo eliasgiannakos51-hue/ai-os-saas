@@ -57,9 +57,21 @@ out = await req.startSiteGeneration({ name: "Camping", description: "x", skipCla
 // A refusal is an ApiError (lib/errors/api-error.ts): its status for the
 // screen's own words, the route's sentence kept as its message.
 check("a refusal carries the server's own reason (credits)", out.kind === "refused" && out.error.status === 402 && out.error.message === "Δεν έχεις αρκετά credits.");
-answers = { "/api/websites/generate": { body: { ok: true, generated: false, message: "Αυτό δεν είναι site." } } };
+// A BRIEF THE SERVER WOULD NOT BUILD, and the classifier's own sentence
+// LEFT BEHIND on purpose: it may be the English default
+// (lib/website-builder.ts DEFAULT_OFF_TOPIC_MESSAGE), and both screens say
+// it in the reader's language from `offTopic` alone — components/chat/site-pane.tsx
+// and components/website-builder/website-shell.tsx. Carrying a field
+// nobody reads is an invitation to put the English back (2026-10-14).
+answers = { "/api/websites/generate": { body: { ok: true, generated: false, offTopic: true, message: "This is not a website." } } };
 out = await req.startSiteGeneration({ name: "Camping", description: "x", skipClarification: true });
-check("a site the server would not make says why", out.kind === "notMade" && out.message === "Αυτό δεν είναι site.");
+check("a brief that is not a website says so, in a word the screen can translate",
+  out.kind === "notMade" && out.offTopic === true);
+check("...and the server's own sentence is not carried to the screen",
+  !("message" in out) && !JSON.stringify(out).includes("This is not a website."), JSON.stringify(out));
+answers = { "/api/websites/generate": { body: { ok: true, generated: false, message: "Κάτι έσπασε." } } };
+out = await req.startSiteGeneration({ name: "Camping", description: "x", skipClarification: true });
+check("a failure that is not off-topic is told apart from one that is", out.kind === "notMade" && out.offTopic === false);
 answers = { "/api/websites/generate": "throw" };
 let threw = null;
 try { await req.startSiteGeneration({ name: "C", description: "x", skipClarification: true }); } catch (e) { threw = e; }

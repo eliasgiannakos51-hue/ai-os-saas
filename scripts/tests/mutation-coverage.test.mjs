@@ -300,7 +300,10 @@ console.log(
 // covered gate buy evidence, not ratio. The same round added
 // security-audit-summary.test.mjs with no suite, so the denominator
 // grew by two and the covered count by one.
-const RATCHET = 290;
+// 290 -> 291 on 2026-10-15: provider-text.test.mjs is a new gate and
+// provider-text.mutation.mjs covers it, so both the denominator and the
+// covered count grew by one. Read off the run with `git stash -u`.
+const RATCHET = 291;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

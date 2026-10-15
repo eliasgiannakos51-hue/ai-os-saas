@@ -155,6 +155,7 @@ const FAILOVER_NAMES = {
   "src/lib/meetings/meeting-analyse-call.ts": "η σύνοψη των συναντήσεων",
   "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",
   "src/lib/lead-classification.ts": "η διαλογή των μηνυμάτων της φόρμας",
+  "src/lib/website-security-review.ts": "ο έλεγχος ασφαλείας του Site",
 };
 const callers = [];
 (function walkSrc(dir) {

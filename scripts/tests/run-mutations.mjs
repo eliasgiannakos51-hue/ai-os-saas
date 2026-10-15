@@ -154,7 +154,14 @@ if (suites.length === 0) {
 // `ls scripts/tests/*.mutation.mjs | wc -l`, before and after, with
 // `git stash -u` so the new untracked files are not counted on both
 // sides.
-const FLOOR = 271;
+// 271 -> 273 on 2026-10-15, SAME DAY, SAME ARREAR AS THE ENTRY ABOVE.
+// 271 was counted part-way through that round and two more suites
+// (provider-text, flow-languages) landed after it; the slack absorbed
+// them, so nothing went red and nobody looked. Twice in one day is the
+// argument for counting LAST, after the round's files are all written:
+// `ls scripts/tests/*.mutation.mjs | wc -l`, with `git stash -u` so the
+// new untracked ones are not counted on both sides.
+const FLOOR = 273;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

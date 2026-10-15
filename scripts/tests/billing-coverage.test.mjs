@@ -70,7 +70,6 @@ const M = config.marginMultiplier;
 const DECLARED = {
   "src/lib/website-builder.ts": { calls: 4, billing: "settled", note: "generate/edit stream + classifier + patch, all via CostAccumulator" },
   "src/lib/mission-agents.ts": { calls: 3, billing: "settled", note: "planner/reviewer, costs passed in" },
-  "src/lib/website-security-review.ts": { calls: 1, billing: "settled", note: "recorded onto the generation's accumulator" },
   "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
   "src/lib/clarification.ts": { calls: 1, billing: "settled" },
   // Moved out of api/create when Create Anything became a background job:
@@ -229,6 +228,9 @@ const DECLARED = {
  * naming a file that no longer calls runCompletion fails too.
  */
 const ROUTED = {
+  "src/lib/website-security-review.ts": {
+    note: "recorded onto the generation's accumulator — it is folded into an already-reserved generation or edit, not a separate credit-gated call. Moved onto runCompletion 2026-10-15. It fails OPEN by design, and that now includes a provider failure and a Stop, which used to arrive as a thrown error: written out in the file rather than inherited from the catch, because \"the security review returns safe\" has to be a deliberate sentence.",
+  },
   "src/lib/lead-classification.ts": {
     note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after. Moved onto runCompletion 2026-10-15; the accumulator is a REQUIRED parameter, because an optional one is how this call spent money with no cost log in the first place.",
   },
@@ -309,13 +311,23 @@ console.log("\n== 1b. every runCompletion() caller pays for what it used ==");
     .filter((f) => /\brunCompletion\(/.test(readFileSync(f, "utf8")))
     .filter((f) => !f.includes("lib/ai/providers/"));
   check("at least one feature uses the provider layer", callers.length > 0, true);
-  const silent = callers.filter((f) => {
-    const text = readFileSync(f, "utf8");
-    // The usage must reach an accumulator: `costs.record(...)`,
-    // `costs.recordBatch(...)` or `addBreakdown(...)` with the outcome's
-    // usage. Anything else is a call whose tokens are never charged.
-    return !/costs\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s.test(text);
-  });
+  // The usage must reach an accumulator: `costs.record(...)`,
+  // `costs.recordBatch(...)` or `addBreakdown(...)` with the outcome's
+  // usage. Anything else is a call whose tokens are never charged.
+  //
+  // `costs?.record` COUNTS, and that is a deliberate narrowing of what
+  // this check claims. Its claim is that the tokens reach the one
+  // settlement path, not that the parameter is non-optional: an
+  // accumulator the caller does pass is recorded into either way.
+  // Where the OPTIONALITY itself is the hazard — lib/lead-classification
+  // spent real money with no cost-log row in exactly that shape — it is
+  // asserted separately, by name, in section 3.
+  const RECORDS_THE_OUTCOME = /costs\??\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s;
+  checkTrue("the detector accepts a plain accumulator", RECORDS_THE_OUTCOME.test('costs.record("x", outcome.usage, m)'));
+  checkTrue("...and an optional one the caller passes", RECORDS_THE_OUTCOME.test('costs?.record("x", outcome.usage, m)'));
+  checkTrue("...and rejects a call that records something else", !RECORDS_THE_OUTCOME.test('costs.record("x", response.usage, m)'));
+  checkTrue("...and one that records nothing at all", !RECORDS_THE_OUTCOME.test("const outcome = await runCompletion(req);"));
+  const silent = callers.filter((f) => !RECORDS_THE_OUTCOME.test(readFileSync(f, "utf8")));
   check("no runCompletion() call site drops its usage on the floor", silent, []);
 
   // AND IT STILL SAYS HOW IT BILLS. Dropping out of DECLARED by leaving

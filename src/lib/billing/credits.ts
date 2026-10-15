@@ -477,15 +477,60 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
   // also the only way to do it without a race: reading the purchased
   // figure here and writing the sum back would lose any spend that landed
   // in between.
+  // THE RESET IS CLAIMED BEFORE IT HAPPENS, and the claim is the gate.
+  //
+  // WHAT THIS COSTS WHEN IT IS MISSING. reset_monthly_credits SETS the
+  // balance to monthly + purchased. Run it twice in one billing period
+  // and the customer is handed back everything they spent in between: a
+  // Growth account billed on the 1st, down to 200 of 5,000 by the 20th,
+  // goes back to 5,000 on a redelivery — 4,800 credits of AI the
+  // business paid a provider for and nobody paid us for. Stripe delivers
+  // at least once by design, a dashboard "Resend" is one click, and a
+  // function that times out after this write commits is retried with the
+  // write already done. Nothing logged it, because a second reset looks
+  // exactly like the first.
+  //
+  // grantMonthlyPlanCredits — the ANNUAL path, right beside this one —
+  // has had `plan_month:<user>:<month>` since it was written, and says in
+  // its own comment that the key is "the whole safety property". The
+  // monthly path, which is where almost every paying customer is, had no
+  // key at all.
+  //
+  // THE PLAN IS IN THE KEY ON PURPOSE. Keyed by month alone, an upgrade
+  // inside the same month would find the claim taken and skip the reset,
+  // and a customer who just paid for Growth would keep Starter's
+  // balance — a worse bug than the one being fixed, and in the direction
+  // that costs the customer rather than us.
+  //
+  // CLAIM FIRST, THEN RESET. The ledger row is the claim (the partial
+  // unique index credit_transactions_idempotency_key_idx), so winning the
+  // insert is what grants the right to reset. If the reset then fails the
+  // claim is handed back, because a claim without a reset would turn one
+  // failed webhook into a customer who never gets that month's credits.
+  const resetKey = `plan_reset:${userId}:${planSlug}:${creditMonthKey()}`;
+  const { error: claimError } = await admin.from("credit_transactions").insert({
+    user_id: userId,
+    amount: total,
+    action_type: "plan_renewal",
+    description: reason,
+    idempotency_key: resetKey,
+  });
+  if (claimError) {
+    // 23505 is unique_violation: this plan's reset already happened this
+    // month. A replay, not a failure — the balance is already right.
+    if (claimError.code === "23505") return;
+    throw claimError;
+  }
+
   const { error: resetError } = await admin.rpc("reset_monthly_credits", {
     p_user_id: userId,
     p_monthly: total,
     p_plan_tier: planSlug,
   });
-  if (resetError) throw resetError;
-  await admin
-    .from("credit_transactions")
-    .insert({ user_id: userId, amount: total, action_type: "plan_renewal", description: reason });
+  if (resetError) {
+    await admin.from("credit_transactions").delete().eq("idempotency_key", resetKey);
+    throw resetError;
+  }
 }
 
 /**

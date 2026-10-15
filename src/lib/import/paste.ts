@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { PASTE_MODEL } from "@/lib/insights/insight-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
@@ -25,10 +26,10 @@ const MAX_OUTPUT_TOKENS = 4000;
 
 export type PasteEntry = { targetSlug: string; row: BuiltRow };
 
-const PASTE_TOOL: Anthropic.Tool = {
+const PASTE_TOOL: AiToolSpec = {
   name: "extract_entries",
   description: "Extract structured entries from the user's text.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       entries: {
@@ -83,30 +84,41 @@ export type PasteOutcome =
   | { ok: false; reason: "api_error" | "invalid" };
 
 export async function extractFromPaste(params: {
-  anthropic: Anthropic;
   text: string;
   language: string;
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
 }): Promise<PasteOutcome> {
-  let response: Anthropic.Message;
+  // THROUGH THE ROUTER, NOT THE SDK (step 1.4). Same purpose as
+  // lib/import/map-columns.ts: one knob for the Import, not one per
+  // file.
+  let outcome;
   try {
-    response = await params.anthropic.messages.create({
-      model: PASTE_MODEL,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      system: pasteSystemPrompt(params.language),
-      tools: [PASTE_TOOL],
-      tool_choice: { type: "tool", name: PASTE_TOOL.name },
-      messages: [{ role: "user", content: wrapUntrusted(params.text) }],
-    });
+    outcome = await runCompletion(
+      {
+        purpose: "create",
+        model: PASTE_MODEL,
+        maxTokens: MAX_OUTPUT_TOKENS,
+        system: [{ type: "text", text: pasteSystemPrompt(params.language) }],
+        tools: [PASTE_TOOL],
+        // The tool's input IS the entries. Left to decide, a model
+        // answers "here is what I found" in prose and nothing is saved
+        // after the tokens were spent.
+        toolChoice: { type: "tool", name: PASTE_TOOL.name },
+        requires: ["tool_calling"],
+        messages: [{ role: "user", content: wrapUntrusted(params.text) }],
+      },
+      { userId: params.userId }
+    );
   } catch {
     return { ok: false, reason: "api_error" };
   }
+  if (!outcome.ok) return { ok: false, reason: "api_error" };
 
-  params.costs.record("generation", response.usage, response.model || PASTE_MODEL);
+  params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
-  const use = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === PASTE_TOOL.name
-  );
+  const use = outcome.toolCalls.find((call) => call.name === PASTE_TOOL.name);
   if (!use) return { ok: false, reason: "invalid" };
 
   const input = use.input as { entries?: unknown; nothingFound?: unknown };

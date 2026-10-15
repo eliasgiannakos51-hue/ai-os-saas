@@ -393,7 +393,7 @@ const MUTANTS = [
   {
     name: "a fill call happens even when the user already typed the subject",
     file: ADOPT,
-    from: "    const needsFill = Boolean(apiKey) && !subjectOverride;",
+    from: "    const needsFill = anyProviderConfigured(process.env) && !subjectOverride;",
     to: "    const needsFill = true;",
   },
   {

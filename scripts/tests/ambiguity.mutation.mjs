@@ -170,7 +170,7 @@ const MUTANTS = [
     file: CLAR,
     from: "  const assessment = assessAmbiguity(userText, { hasContext: Boolean(knownContext) });",
     to: "",
-    expect: "the free assessment runs before the API client is built",
+    expect: "the free assessment runs before the paid call is made",
   },
   {
     // THE APOSTROPHE COUNTS AS A QUOTE AGAIN - the shape this file had

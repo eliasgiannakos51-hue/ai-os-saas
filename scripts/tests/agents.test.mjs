@@ -721,14 +721,17 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
     !/await buildAgentFromRequest/.test(buildRoute) && /status: 202/.test(buildRoute)
   );
   checkTrue("build refuses before spending when the plan owns no agents", /agentCap <= 0/.test(buildRoute));
-  // Whitespace-tolerant: the call grew a fifth argument (the AI Life
-  // Context, so the check cannot ask for what the app already knows) and
-  // wrapped onto several lines. The claim is unchanged — the handler runs
-  // the SHARED check, for kind "agent" — so the pattern matches the call
-  // rather than one particular way of formatting it.
+  // Whitespace-tolerant: the call grew arguments twice (the AI Life
+  // Context, so the check cannot ask for what the app already knows;
+  // then the user id for the provider log) and LOST one — the api key
+  // stopped being the first argument when this call moved onto the
+  // router on 2026-10-15, which is why the kind is now what the pattern
+  // opens on. The claim is unchanged — the handler runs the SHARED
+  // check, for kind "agent" — so the pattern matches the call rather
+  // than one particular way of formatting it.
   checkTrue(
     "build runs the shared clarification pre-check",
-    /checkNeedsClarification\(\s*ctx\.apiKey,\s*"agent"/.test(buildHandler)
+    /checkNeedsClarification\(\s*"agent"/.test(buildHandler)
   );
   const createRoute = read("src/app/api/agents/route.ts");
   checkTrue("create re-validates the draft server-side", /validateAgentDraft\(/.test(createRoute));

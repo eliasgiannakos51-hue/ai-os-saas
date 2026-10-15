@@ -60,7 +60,6 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
   if (!skipClarification) {
     try {
       const clarification = await checkNeedsClarification(
-        ctx.apiKey,
         "agent",
         request,
         ctx.costs,
@@ -70,7 +69,8 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
         // no user_id filter and relies entirely on RLS to scope it, so
         // calling it here with the worker's admin client would put other
         // people's missions into this user's prompt.
-        typeof ctx.input.knownContext === "string" ? ctx.input.knownContext : null
+        typeof ctx.input.knownContext === "string" ? ctx.input.knownContext : null,
+        ctx.userId
       );
       clarificationRecord = clarificationMetadata(clarification);
       if (clarification.needsClarification) {

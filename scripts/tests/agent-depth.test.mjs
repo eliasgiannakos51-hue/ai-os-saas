@@ -561,8 +561,12 @@ console.log("\n11. The routes");
     adoptSrc.indexOf("checkAgentActivationCap(user.id") !== -1 &&
       adoptSrc.indexOf("checkAgentActivationCap(user.id") < adoptSrc.indexOf("reserveCredits(user.id"),
     "a user at their cap must not pay for a fill call that cannot become an agent");
+  // "CONFIGURED" IS ASKED OF THE REGISTRY since the fill moved onto the
+  // router (step 1.4): the call can be served by any provider that has
+  // a key, so reading ANTHROPIC_API_KEY here would refuse the fill on a
+  // deployment that is perfectly able to do it.
   ok("no model call when the subject is already known",
-    /const needsFill = Boolean\(apiKey\) && !subjectOverride;/.test(adoptSrc));
+    /const needsFill = anyProviderConfigured\(process\.env\) && !subjectOverride;/.test(adoptSrc));
   // THIS READ THE COMMENT, NOT THE CODE. The check was
   // /NOT FATAL[\s\S]{0,300}logApiError/ — and on 2026-09-19 adding
   // `throw err;` one line BELOW that logApiError left it green, which

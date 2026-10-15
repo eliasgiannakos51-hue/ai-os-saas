@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { assessAmbiguity, willSpendOnQuestion } from "@/lib/ai/ambiguity";
 import {
@@ -60,7 +61,7 @@ const CLARIFICATION_MAX_TOKENS = 500;
 // has to decide which unknown actually changes the outcome, and that is a
 // better question than any of the three would have been. The tokens saved
 // are the smaller half of the gain.
-function clarificationTool(cap: number): Anthropic.Tool {
+function clarificationTool(cap: number): AiToolSpec {
   const budget =
     cap === 1
       ? "exactly ONE question — the single most important unknown"
@@ -68,7 +69,7 @@ function clarificationTool(cap: number): Anthropic.Tool {
   return {
   name: "evaluate_request_clarity",
   description: `Decide whether the given request is missing information important enough that asking ${budget} first would meaningfully improve the result.`,
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       needsClarification: {
@@ -223,7 +224,6 @@ SAFETY CHECK (this agent runs repeatedly, unsupervised, and emails the user its 
 };
 
 export async function checkNeedsClarification(
-  apiKey: string,
   kind: ClarificationKind,
   userText: string,
   costs?: CostAccumulator,
@@ -231,7 +231,9 @@ export async function checkNeedsClarification(
    *  something the app already knows. Optional: every caller works
    *  without it, and a context lookup that failed must never be the
    *  reason a build does not happen. */
-  knownContext?: string | null
+  knownContext?: string | null,
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string
 ): Promise<ClarificationDecision> {
   // DECIDED BEFORE ANYTHING IS SPENT, where it can be.
   //
@@ -270,24 +272,39 @@ export async function checkNeedsClarification(
   // gives us its first question rather than its most important one.
   const cap = questionCapFor(kind);
 
-  const anthropic = new Anthropic({ apiKey });
-  const response = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: CLARIFICATION_MAX_TOKENS,
-    system: `${SYSTEM_PROMPTS[kind]}${knownContextSection(knownContext)}`,
-    messages: [{ role: "user", content: userText }],
-    tools: [clarificationTool(cap)],
-    tool_choice: { type: "tool", name: "evaluate_request_clarity" },
-  });
+  // THROUGH THE ROUTER, NOT THE SDK (step 1.4). The key is no longer a
+  // parameter: which provider serves this is a configuration question
+  // (lib/ai/providers/registry.ts), and the forced tool — which is the
+  // whole call, since the tool's input IS the decision — is carried in
+  // the shared request rather than in one vendor's field.
+  const outcome = await runCompletion(
+    {
+      purpose: "classification",
+      model: MODEL,
+      maxTokens: CLARIFICATION_MAX_TOKENS,
+      system: [{ type: "text", text: `${SYSTEM_PROMPTS[kind]}${knownContextSection(knownContext)}` }],
+      messages: [{ role: "user", content: userText }],
+      tools: [clarificationTool(cap)],
+      toolChoice: { type: "tool", name: "evaluate_request_clarity" },
+      requires: ["tool_calling"],
+    },
+    { userId }
+  );
+  // A FAILED CALL THROWS, AND THAT IS KEPT ON PURPOSE. All five callers
+  // already wrap this in a try/catch that degrades to "check skipped",
+  // and each catch does something different — one settles its
+  // reservation, one releases it, one records nothing. Returning a
+  // fail-open decision instead would walk every one of them down its
+  // SUCCESS path carrying a decision nobody made, and settle a
+  // reservation against a call that never happened.
+  if (!outcome.ok) throw new Error(`clarification: ${outcome.kind} ${outcome.detail}`);
 
   // Recorded before the parse: a call that came back in an unusable shape
   // still cost real tokens, and the action that triggered it has to carry
   // that cost.
-  costs?.record("clarification", response.usage, response.model || MODEL);
+  costs?.record("clarification", outcome.usage, outcome.reportedModel || outcome.model);
 
-  const toolUse = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
-  );
+  const toolUse = outcome.toolCalls.find((call) => call.name === "evaluate_request_clarity");
   // Fail open (treat as already clear) on a malformed response — same
   // "best-effort, don't block the real feature" tolerance as every other
   // classifier in this app.

@@ -506,7 +506,7 @@ const NOT_ON_THE_REQUEST_PATH = new Map([
   ],
   [
     "/api/agents/templates/adopt",
-    // needsFill = Boolean(apiKey) && !subjectOverride, and
+    // needsFill = anyProviderConfigured(process.env) && !subjectOverride, and
     // components/marketplace/template-browser.tsx refuses to submit an
     // empty subject ("subjectRequired"), so subjectOverride is always
     // set from that button and the fill branch is unreachable from it.

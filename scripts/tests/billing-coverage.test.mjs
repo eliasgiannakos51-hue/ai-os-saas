@@ -71,7 +71,6 @@ const DECLARED = {
   "src/lib/website-builder.ts": { calls: 4, billing: "settled", note: "generate/edit stream + classifier + patch, all via CostAccumulator" },
   "src/lib/mission-agents.ts": { calls: 3, billing: "settled", note: "planner/reviewer, costs passed in" },
   "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
-  "src/lib/clarification.ts": { calls: 1, billing: "settled" },
   // Moved out of api/create when Create Anything became a background job:
   // the route awaited a vision-capable classification under a 120-second
   // ceiling, and vision is the slow case because the images travel with
@@ -169,21 +168,6 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
   },
-  "src/lib/import/map-columns.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Task 16 Instant Value. One forced-tool-use call that decides what a spreadsheet is and maps its columns. It sees the HEADERS and a dozen sample rows, never the whole file — so a 5,000-row upload and a 20-row one cost the same, which is why the importMap profile does not scale with file size. Settled by api/import/csv/analyse whether or not a usable mapping came back; the confirm step (api/import/csv/apply) makes NO AI call and charges nothing, because applying a mapping the user already approved is arithmetic.",
-  },
-  "src/lib/import/paste.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way.",
-  },
-  "src/lib/agents/template-fill.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
-  },
   "src/lib/documents/write-call.ts": {
     calls: 1,
     billing: "settled",
@@ -240,6 +224,18 @@ const ROUTED = {
   },
   "src/lib/translate/translate-call.ts": {
     note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then. Moved onto runCompletion 2026-10-15: the two failures a batch can have are still told apart, because a Stop is the person and a provider failure is not, and only the first is theirs.",
+  },
+  "src/lib/clarification.ts": {
+    note: "The clarifying-questions pre-check, run by six surfaces (Site, Chat, Automations, Agents, Create Anything, Mission) BEFORE the expensive call they are about to make. Settled as its own feature, clarification_check, by whichever surface ran it — a run that stops at the question and a run that generates are different actions with an order of magnitude between their costs. The free reader in lib/ai/ambiguity.ts decides most requests for nothing and this call is never made for those. Moved onto runCompletion 2026-10-15; a provider failure still THROWS rather than returning a fail-open decision, because each of the five callers does something different in its catch and a fabricated 'it was clear' would settle a reservation against a call that never happened.",
+  },
+  "src/lib/import/map-columns.ts": {
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that decides what a spreadsheet is and maps its columns. It sees the HEADERS and a dozen sample rows, never the whole file — so a 5,000-row upload and a 20-row one cost the same, which is why the importMap profile does not scale with file size. Settled by api/import/csv/analyse whether or not a usable mapping came back; the confirm step (api/import/csv/apply) makes NO AI call and charges nothing, because applying a mapping the user already approved is arithmetic. Moved onto runCompletion 2026-10-15, sharing purpose \"create\" with lib/import/paste.ts so the Import is one routing knob rather than two.",
+  },
+  "src/lib/import/paste.ts": {
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way. Moved onto runCompletion 2026-10-15; a provider failure still comes back as api_error, which is the shape the route already releases on.",
+  },
+  "src/lib/agents/template-fill.ts": {
+    note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that produced no response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or no provider is configured, which is why the route creates the agent either way. Moved onto runCompletion 2026-10-15, and \"configured\" is now asked of the registry rather than of one variable's name.",
   },
   "src/lib/posts/generate.ts": {
     note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph. Moved onto runCompletion 2026-10-15.",

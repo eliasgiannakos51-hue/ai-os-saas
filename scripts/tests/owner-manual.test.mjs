@@ -160,6 +160,10 @@ const FAILOVER_NAMES = {
   "src/lib/posts/generate.ts": "τα Posts",
   "src/lib/presentations/generate.ts": "οι Παρουσιάσεις",
   "src/lib/translate/translate-call.ts": "η Μετάφραση",
+  "src/lib/import/map-columns.ts": "η εισαγωγή αρχείου",
+  "src/lib/import/paste.ts": "η εισαγωγή αρχείου",
+  "src/lib/agents/template-fill.ts": "τα έτοιμα πρότυπα βοηθών",
+  "src/lib/clarification.ts": "οι διευκρινιστικές ερωτήσεις",
 };
 const callers = [];
 (function walkSrc(dir) {

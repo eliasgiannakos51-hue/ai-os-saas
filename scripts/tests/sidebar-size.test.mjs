@@ -331,8 +331,9 @@ console.log("\n== 5. A SMALLER SIDEBAR IS NOT A SMALLER APP ==");
 //
 // Every href the eight-group sidebar carried, listed so the loss of any
 // one of them is a build failure rather than a thing somebody notices in
-// a month. /dashboard/timeline is here under its new label ("Mine"); the
-// label is allowed to change, the destination is not.
+// a month. /dashboard/timeline is here under its newer label ("Mine",
+// then "Library" from 2026-10-14); the label is allowed to change, the
+// destination is not.
 const BEFORE_V46_3 = [
   "/dashboard/overview", "/dashboard/create", "/dashboard/chat", "/dashboard/timeline",
   "/dashboard/favorites", "/dashboard/mission", "/dashboard/reflection", "/dashboard/memory",

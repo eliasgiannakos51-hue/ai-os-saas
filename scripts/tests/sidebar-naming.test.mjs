@@ -1097,7 +1097,7 @@ for (const row of navRows) {
   }
   compared++;
   const differing = LOCALES.filter((l) => lookup(messages[l], sidebarKey) !== lookup(messages[l], verdict.key));
-  // Favorites is a deliberate alias: the row opens the "Mine" page, where
+  // Favorites is a deliberate alias: the row opens the Library's page, where
   // the starred list is a tab. It is named in the exceptions rather than
   // silently skipped.
   if (labelKey === "favorites") continue;

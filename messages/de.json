@@ -156,9 +156,9 @@
       "formSubmissions": "Formulareingänge",
       "routing": "Welche KI verwendet wird",
       "businessHealth": "Wie das Geschäft läuft",
-      "mine": "Meine Sachen",
+      "mine": "Bibliothek",
       "records": "Meine Einträge",
-      "library": "Meine Sachen",
+      "library": "Bibliothek",
       "newEntry": "Neuer Eintrag",
       "costs": "Kosten",
       "systemHealth": "Systemzustand",
@@ -314,7 +314,11 @@
       "chat": "Chat",
       "tools": "Werkzeuge",
       "you": "Du",
-      "label": "Hauptnavigation"
+      "label": "Hauptnavigation",
+      "balance": "Guthaben: {amount} Credits",
+      "balanceLow": "Niedriges Guthaben: {amount} Credits",
+      "balanceEmpty": "Keine Credits mehr",
+      "balanceUnlimited": "Unbegrenzte Credits"
     }
   },
   "landing": {
@@ -789,10 +793,12 @@
     },
     "exportData": {
       "title": "Daten exportieren",
-      "description": "Lade alles, was du in allen 13 Modulen erfasst hast, als einzelne JSON-Datei herunter.",
+      "description": "Lade alle Einträge deines Kontos als eine JSON-Datei herunter.",
+      "descriptionAll": "Eine .zip-Datei mit all deinen Daten, jeder gespeicherten Datei, jeder Website und jedem Spiel. Die Websites öffnen sich auch außerhalb von Ionexa.",
       "exportAll": "Alle Daten exportieren",
       "exporting": "Wird exportiert...",
       "exportFailed": "Export fehlgeschlagen — bitte erneut versuchen",
+      "tooMany": "Der Export lässt sich {count}-mal pro Stunde herunterladen. Versuche es innerhalb der nächsten Stunde erneut – deine Daten bleiben hier.",
       "exportDownloaded": "✓ Export heruntergeladen"
     },
     "dangerZone": {
@@ -1326,7 +1332,7 @@
           "tooShort": "Erzähl zuerst etwas mehr über das Dokument.",
           "tooLong": "Das ist länger als eine Beschreibung. Beschreibe das Dokument, statt es einzufügen.",
           "insufficient": "Nicht genug Credits für dieses Dokument.",
-          "rateLimited": "Zu viele Anfragen. Warte eine Minute und versuche es erneut.",
+          "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
           "unavailable": "Der KI-Dienst war nicht verfügbar. Es wurde nichts berechnet.",
           "unusable": "Das Modell hat etwas zurückgegeben, das kein Dokument war. Beschreibe es anders.",
           "notIncluded": "Das Schreiben von Dokumenten ist in deinem Tarif nicht enthalten.",
@@ -1477,7 +1483,7 @@
       "routeCostNow": "≈ {credits, plural, one {# Credit} other {# Credits}} beim Senden"
     },
     "timeline": {
-      "title": "Meine Sachen",
+      "title": "Bibliothek",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
       "rangeToday": "Heute",
@@ -1814,7 +1820,8 @@
         "pagesShort": "Du hast {asked} Seiten angefordert, {made} wurden erstellt. Sag, welche fehlt, und ich füge sie hinzu."
       },
       "regeneratePaid": "Neu erstellen · etwa {count} Credits",
-      "regenerateNoCredits": "Nicht genug Credits für eine weitere Neugenerierung: Sie braucht etwa {needed}, Sie haben {available}. Es wurde nichts gestartet."
+      "regenerateNoCredits": "Nicht genug Credits für eine weitere Neugenerierung: Sie braucht etwa {needed}, Sie haben {available}. Es wurde nichts gestartet.",
+      "imageUploadFailed": "Die Referenzbilder wurden nicht hochgeladen. Es wurde nichts berechnet – versuch es noch einmal."
     },
     "marketplace": {
       "title": "Fertige Helfer",
@@ -2405,7 +2412,7 @@
       "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
       "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
       "askNoCredits": "Nicht genug Credits für diese Frage. Es wurde nichts berechnet.",
-      "askRateLimited": "Zu viele Fragen in der letzten Stunde. Versuche es gleich noch einmal — es wurde nichts berechnet.",
+      "askRateLimited": "Du hast das Limit für Fragen erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal. Es wurde nichts berechnet.",
       "askFailed": "Die Frage wurde nicht beantwortet: Der KI-Dienst hat nicht geantwortet. Es wurde nichts berechnet — versuche es gleich noch einmal.",
       "questionLength": "{used, number} von {max, number} Zeichen",
       "questionAtLimit": "Du hast das Limit von {max, number} Zeichen für eine Frage erreicht.",
@@ -2439,7 +2446,9 @@
         "failed": "Die Seite wurde nicht geöffnet. Versuche es erneut.",
         "openPdf": "PDF auf dieser Seite öffnen",
         "unread": "Von „{name}“ wurden nur die ersten {read} von {total} Seiten gelesen; was danach kommt, ist nicht in dieser Antwort."
-      }
+      },
+      "collectionName": "Wie soll diese Sammlung mit {count, plural, one {# Datei} other {# Dateien}} heißen? Schreib den Namen unten.",
+      "collectionsHint": "Wähle Dateien aus und speichere sie als Sammlung: Ein Tipp wählt sie alle wieder aus."
     },
     "deepResearch": {
       "title": "Gründlich nachsehen",
@@ -2459,7 +2468,7 @@
       "runError": "Der Bericht konnte nicht fertiggestellt werden.",
       "refused": {
         "noCredits": "Nicht genug Credits für einen Recherchebericht. Es wurde nichts berechnet.",
-        "rateLimited": "Zu viele Berichte in kurzer Zeit. Versuche es gleich noch einmal.",
+        "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "unavailable": "Der KI-Dienst hat nicht geantwortet. Es wurde nichts berechnet — versuche es gleich noch einmal."
       },
       "failed": {
@@ -2928,7 +2937,7 @@
         "not_included": "Besprechungen sind in diesem Tarif nicht enthalten.",
         "out_of_minutes": "Du hast die Minuten dieses Monats aufgebraucht.",
         "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
-        "rate_limited": "Zu viele Aufnahmen in der letzten Stunde. Versuche es später.",
+        "rate_limited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "empty": "Diese Aufnahme war leer.",
         "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet."
       },
@@ -3008,6 +3017,7 @@
       "title": "Alle Werkzeuge",
       "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
       "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite.",
+      "tilesHidden": "Beschreibe im Feld auf der Startseite, was du möchtest – oder drücke am Computer ⌘K und tippe den Namen eines Werkzeugs.",
       "search": "Werkzeug finden",
       "searchLabel": "Werkzeuge durchsuchen",
       "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",
@@ -3098,7 +3108,15 @@
         "design": "Design",
         "held": "Unsere Sicherheitsprüfung hat diese Änderung zurückgehalten, die Website ist unverändert.",
         "busy": "An dieser Website wird gerade schon etwas geändert. Warte, bis es fertig ist, und sag es dann noch einmal.",
-        "offTopic": "Hier erstelle ich Websites. Sag mir, welche Website du möchtest: für welches Unternehmen oder welchen Zweck, welche Bereiche, welcher Stil."
+        "offTopic": "Hier erstelle ich Websites. Sag mir, welche Website du möchtest: für welches Unternehmen oder welchen Zweck, welche Bereiche, welcher Stil.",
+        "photosAttach": "Fotos hinzufügen — Logo, Produkte, der Ort",
+        "photos": "{count} von {max} Fotos — sie gehen mit deiner nächsten Nachricht mit.",
+        "photoType": "Nur Fotos im Format JPG, PNG oder WebP.",
+        "photosFailed": "Die Fotos konnten nicht hochgeladen werden, daher wurde nichts gesendet. Bitte versuche es erneut.",
+        "versions": "Alle Versionen",
+        "versionsHint": "Tippe auf eine, um sie anzusehen. Was du danach schreibst, ändert weiterhin die neueste.",
+        "liveVersions": "Veröffentlichte Versionen",
+        "undid": "Rückgängig gemacht: {change}"
       },
       "box": {
         "only": "Nur ändern: {name}",
@@ -3190,7 +3208,7 @@
         "tooShort": "Beschreibe das Bild etwas genauer.",
         "tooLong": "Das ist zu lang; bis zu {limit} Zeichen.",
         "insufficient": "Nicht genug Credits dafür.",
-        "rateLimited": "Zu viele Anfragen auf einmal. Versuche es gleich noch einmal.",
+        "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "refused": "Der Anbieter hat abgelehnt, dieses Bild zu erstellen. Versuche eine andere Beschreibung; es wurde nichts berechnet.",
         "busy": "Dieses Bild wird gerade geändert. Warte, bis es fertig ist.",
         "gone": "Dieses Bild gibt es nicht mehr.",
@@ -3372,7 +3390,7 @@
         "empty": "Schreib noch ein paar Worte dazu, was passieren soll.",
         "tooLong": "Der Text ist zu lang; höchstens {limit} Zeichen.",
         "insufficient": "Nicht genug Credits dafür.",
-        "rateLimited": "Zu viele Anfragen auf einmal. Versuch es gleich noch einmal.",
+        "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "busy": "Diese Automation ist beschäftigt. Warte, bis sie fertig ist.",
         "gone": "Diese Automation gibt es nicht mehr.",
         "unavailable": "Die AI antwortet gerade nicht. Es wurde nichts berechnet; versuch es noch einmal.",
@@ -3443,7 +3461,7 @@
         "no_credits": "Nicht genug Credits",
         "not_included": "Nicht in deinem Tarif enthalten",
         "not_configured": "Noch nicht aktiv",
-        "rate_limited": "Zu viele Anfragen auf einmal",
+        "rate_limited": "Anfragelimit erreicht – später erneut versuchen",
         "refused": "Das Tool hat es abgelehnt",
         "offline": "Keine Verbindung",
         "stopped": "Gestoppt",
@@ -3465,7 +3483,7 @@
       },
       "errors": {
         "projectLimit": "Du hast das Projektlimit deines Tarifs erreicht ({limit}).",
-        "rateLimited": "Zu viele Anfragen auf einmal. Versuch es gleich noch einmal.",
+        "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "file": "Die Datei konnte nicht gelesen werden. Versuch es mit einer CSV- oder Excel-Datei.",
         "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet.",
         "offline": "Keine Verbindung. Prüf das Netzwerk und versuch es noch einmal."
@@ -3553,7 +3571,7 @@
       "chargedNothing": "Nichts berechnet.",
       "open": "Öffnen",
       "insufficient": "Nicht genug Credits für diese Übersetzung. Nichts wurde berechnet.",
-      "dailyLimit": "Du hast das heutige Limit für neue Websites erreicht. Versuche es morgen.",
+      "dailyLimit": "Du hast das Limit für neue Websites in 24 Stunden erreicht. Es zählt die letzten 24 Stunden und gibt innerhalb eines Tages wieder frei.",
       "notIncluded": "Die Website ist in deinem Tarif nicht enthalten.",
       "unusable": "Die Antwort war nicht brauchbar, und nichts wurde geschrieben. Berechnet wird nur, was verbraucht wurde.",
       "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
@@ -3590,7 +3608,7 @@
         "insufficient": "Nicht genug Credits. Nichts wurde berechnet.",
         "unavailable": "Der Dienst antwortet gerade nicht. Nichts wurde berechnet.",
         "unusable": "Die Antwort war kein spielbares Spiel und wurde nicht behalten. Berechnet wird nur, was verbraucht wurde.",
-        "rateLimited": "Zu viele Anfragen auf einmal. Versuche es gleich noch einmal.",
+        "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "notIncluded": "Spiele gibt es in den Tarifen mit der Website.",
         "tooLong": "Die Beschreibung ist zu lang.",
         "stopped": "Gestoppt. Nichts wurde berechnet.",
@@ -3629,7 +3647,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Hier lebt alles, was du zu {module} festhältst.",
-    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Chronik und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
+    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Bibliothek und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
     "emptyExample": "Fang an mit: „{example}“",
     "examples": {
       "competitors": "Notion — beim Preis der nächste Wettbewerber",
@@ -4095,8 +4113,8 @@
       "next": "Kauf ein Credit-Paket oder wechsel in einen größeren Tarif — dieselbe Aktion geht dann durch, und nichts von dem, was du geschrieben hast, ist weg."
     },
     "rate_limited": {
-      "what": "Zu viele davon in der letzten Stunde",
-      "next": "Für diese Aktion gilt ein Stundenlimit, damit ein Konto nicht das gemeinsame Budget aufbraucht. Warte ein paar Minuten und versuch es erneut — das Limit gleitet, es springt nicht zur vollen Stunde zurück."
+      "what": "Limit für diese Aktion erreicht",
+      "next": "Für diese Aktion gilt ein Limit, damit ein Konto nicht das gemeinsame Budget aufbraucht. Es gleitet, statt zu einer festen Zeit zurückzuspringen, und leert sich mit der Zeit von selbst – versuch es später erneut."
     },
     "timeout": {
       "what": "Das hat zu lange gedauert und wurde gestoppt",
@@ -4205,7 +4223,7 @@
     },
     "businessModule": {
       "is": "Eine Tabelle, die Sie selbst führen, für eine Art von Arbeit.",
-      "does": "Sie fügen Zeilen von Hand oder über Create Studio hinzu, und die KI liest sie: Chat, Suche in meinen Einträgen, Verlauf und der wöchentliche Rückblick schöpfen von hier, und jede Zeile lässt sich mit einer Zeile eines anderen Moduls verknüpfen.",
+      "does": "Sie fügen Zeilen von Hand oder über Create Studio hinzu, und die KI liest sie: Chat, Suche in meinen Einträgen, Bibliothek und der wöchentliche Rückblick schöpfen von hier, und jede Zeile lässt sich mit einer Zeile eines anderen Moduls verknüpfen.",
       "doesNot": "Sie füllt sich nicht von selbst. Hier kommt nichts aus Ihrer E-Mail, Ihrer Bank oder Ihren Chats an — eine leere Tabelle ist leer, weil nichts eingetragen wurde — und wer hier eine Zeile löscht, entfernt sie überall, wo sie erscheint."
     },
     "documents": {
@@ -4383,7 +4401,7 @@
     "retry": "Erneut versuchen",
     "creditHistory": "Credit-Verlauf ansehen",
     "credits": {
-      "refunded": "Deine Credits wurden zurückgebucht.",
+      "refunded": "Es wurde nichts berechnet.",
       "notCharged": "Dir wurde nichts berechnet.",
       "charged": "Dieser Versuch hat Credits verbraucht.",
       "unverified": "Wir können von hier aus nicht bestätigen, ob das berechnet wurde."
@@ -4406,8 +4424,8 @@
         "next": "Prüfe die markierten Felder und sende es erneut."
       },
       "rateLimited": {
-        "what": "Zu viele Anfragen in kurzer Zeit.",
-        "next": "Warte etwa eine Minute und versuch es dann noch einmal."
+        "what": "Du hast das Anfragelimit dafür erreicht.",
+        "next": "Das Limit leert sich mit der Zeit von selbst – versuch es später noch einmal."
       },
       "insufficientCredits": {
         "what": "Du hast dafür nicht genug Credits.",
@@ -4444,6 +4462,22 @@
       "unknown": {
         "what": "Diese Aktion wurde nicht abgeschlossen.",
         "next": "Versuch es erneut und wende dich an den Support, wenn es zweimal passiert."
+      },
+      "siteDailyLimit": {
+        "what": "Du hast das Limit für neue Websites in 24 Stunden erreicht.",
+        "next": "Es zählt die letzten 24 Stunden und gibt innerhalb eines Tages wieder frei."
+      },
+      "hourlyLimit": {
+        "what": "Du hast das Limit für KI-Anfragen in einer Stunde erreicht.",
+        "next": "Es zählt die letzten 60 Minuten und gibt innerhalb einer Stunde wieder frei."
+      },
+      "repeatLimit": {
+        "what": "Dieselbe Anfrage wurde zu oft hintereinander gesendet.",
+        "next": "Sie ist innerhalb von 15 Minuten wieder möglich."
+      },
+      "platformLimit": {
+        "what": "Der KI-Dienst hat das heutige Limit der gesamten Plattform erreicht.",
+        "next": "Er öffnet wieder beim Tageswechsel, um 00:00 UTC."
       }
     },
     "boundary": {
@@ -4452,7 +4486,8 @@
       "reload": "Seite neu laden",
       "section": "Dieser Abschnitt konnte nicht angezeigt werden.",
       "sectionBody": "Der Rest der Seite ist nicht betroffen. Ein Neuladen behebt es meistens."
-    }
+    },
+    "retryAt": "{day, select, today {Du kannst es nach {time} Uhr erneut versuchen.} other {Du kannst es morgen nach {time} Uhr erneut versuchen.}}"
   },
   "aiExamples": {
     "createStudio": {
@@ -4815,7 +4850,7 @@
       "tooShort": "Sag zuerst etwas mehr über die Präsentation.",
       "tooLong": "Das sind mehr als {limit} Zeichen. Beschreibe die Präsentation, nicht den ganzen Vortrag.",
       "insufficient": "Nicht genug Credits für diese Präsentation.",
-      "rateLimited": "Zu viele Anfragen – warte eine Minute und versuche es erneut.",
+      "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
       "unavailable": "Der KI-Dienst war nicht erreichbar. Nichts wurde berechnet.",
       "unusable": "Das Modell hat etwas zurückgegeben, das keine Präsentation war. Beschreibe sie anders.",
       "failed": "Das hat nicht geklappt – versuche es erneut.",
@@ -4899,7 +4934,7 @@
       "tooShort": "Sag zuerst etwas mehr.",
       "tooLong": "Das sind mehr als {limit} Zeichen. Sag, worum es im Beitrag geht, nicht die ganze Geschichte.",
       "insufficient": "Nicht genug Credits für diese Beiträge.",
-      "rateLimited": "Zu viele Anfragen – warte eine Minute und versuche es erneut.",
+      "rateLimited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
       "unavailable": "Der KI-Dienst war nicht erreichbar. Nichts wurde berechnet.",
       "unusable": "Das Modell hat etwas zurückgegeben, das keine Beiträge waren. Beschreibe es anders.",
       "failed": "Das hat nicht geklappt – versuche es erneut."

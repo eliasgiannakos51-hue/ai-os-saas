@@ -1,6 +1,6 @@
 {
-  "total": 4250,
-  "onPath": 606,
+  "total": 4277,
+  "onPath": 619,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,13 +16,13 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 373
+      "count": 377
     },
     {
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 208
+      "count": 217
     }
   ],
   "screens": [
@@ -1253,6 +1253,252 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/overview/greeting-header.tsx"
+        },
+        {
+          "key": "errors.codes.conflict.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.conflict.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.fileTooLarge.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.fileTooLarge.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.forbidden.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.forbidden.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.hourlyLimit.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.hourlyLimit.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.insufficientCredits.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.insufficientCredits.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.invalidInput.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.invalidInput.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.notAuthenticated.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.notAuthenticated.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.notFound.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.notFound.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.offline.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.offline.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.planLimit.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.planLimit.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.platformLimit.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.platformLimit.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.rateLimited.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.rateLimited.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.repeatLimit.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.repeatLimit.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.serverError.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.serverError.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.siteDailyLimit.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.siteDailyLimit.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.unknown.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.unknown.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.unsupportedType.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.unsupportedType.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.upstreamUnavailable.next",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.codes.upstreamUnavailable.what",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.credits.charged",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.credits.notCharged",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.credits.refunded",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.credits.unverified",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
+        },
+        {
+          "key": "errors.retryAt",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/lib/errors/failure-text.ts"
         }
       ]
     },
@@ -2353,6 +2599,30 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.tabs.balance",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/mobile-tab-bar.tsx"
+        },
+        {
+          "key": "sidebar.tabs.balanceEmpty",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/mobile-tab-bar.tsx"
+        },
+        {
+          "key": "sidebar.tabs.balanceLow",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/mobile-tab-bar.tsx"
+        },
+        {
+          "key": "sidebar.tabs.balanceUnlimited",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/mobile-tab-bar.tsx"
+        },
+        {
           "key": "sidebar.tabs.label",
           "depth": 1,
           "tier": 2,
@@ -2933,198 +3203,6 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/ideas/add-idea-form.tsx"
-        },
-        {
-          "key": "errors.codes.conflict.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.conflict.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.fileTooLarge.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.fileTooLarge.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.forbidden.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.forbidden.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.insufficientCredits.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.insufficientCredits.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.invalidInput.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.invalidInput.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.notAuthenticated.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.notAuthenticated.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.notFound.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.notFound.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.offline.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.offline.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.planLimit.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.planLimit.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.rateLimited.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.rateLimited.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.serverError.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.serverError.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.unknown.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.unknown.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.unsupportedType.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.unsupportedType.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.upstreamUnavailable.next",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.codes.upstreamUnavailable.what",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.credits.charged",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.credits.notCharged",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.credits.refunded",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
-        },
-        {
-          "key": "errors.credits.unverified",
-          "depth": 2,
-          "tier": 3,
-          "file": "src/lib/errors/use-error-text.ts"
         },
         {
           "key": "module.exportCsv",

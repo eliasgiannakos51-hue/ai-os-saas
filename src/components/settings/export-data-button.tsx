@@ -32,9 +32,14 @@ export function ExportDataButton() {
       const res = await fetch("/api/account/export");
       if (!res.ok) {
         // The route replies JSON on failure and a file on success, so a
-        // failed export says why instead of downloading an error page.
+        // failed export says why instead of downloading an error page —
+        // in the reader's language: the route's `error` is English, and it
+        // was the toast on every screen.
         const body = await res.json().catch(() => null);
-        addToast(body?.error ?? t("exportFailed"), "error");
+        addToast(
+          body?.code === "export_rate_limited" && typeof body.limit === "number" ? t("tooMany", { count: body.limit }) : t("exportFailed"),
+          "error"
+        );
         return;
       }
 

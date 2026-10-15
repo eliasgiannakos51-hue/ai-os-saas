@@ -53,8 +53,9 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
  * the sidebar's longer hints made two of them taller than wide (measured
  * 2026-10-08, scripts/tests/all-tools-empty-chat-edges.prodtest.mjs). The
  * grid reads both through literal maps, so the message slicer can bound
- * them. "Mine" is Library and "What it remembers"
- * is Memory from here on.
+ * them. "What it remembers" is Memory from here on, and the row that
+ * was "Mine" is called the Library everywhere since 2026-10-14
+ * (sidebar.items.mine, scripts/tests/library.test.mjs §7).
  */
 export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/website-builder": "site",

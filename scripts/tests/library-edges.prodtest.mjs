@@ -22,6 +22,11 @@
  *   4. No table answers: it must not say «you have made nothing».
  *   5. A Free account, and one with no credits left: the Library reads,
  *      it spends nothing, so it opens for both with what they made.
+ *   6. ITS NAME (the owner, 2026-10-09: «Βιβλιοθήκη» in Greek, "Library"
+ *      in English): the heading, the browser tab, the All tools square,
+ *      the records hub (pressed, it opens the page) and, on the computer,
+ *      ⌘K — found by the new name and by the old one, «Τα δικά μου» /
+ *      "Mine", which is what it was called until 2026-10-14.
  *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with real touch.
  */
@@ -65,6 +70,9 @@ const state = { made: {}, failing: new Set(), credits: 3000 };
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const supa = await startMockSupabase({
   port: 54451,
+  // All tools' squares are behind `all-tools-tiles` since 2026-10-14, and
+  // it starts at «Κανείς»; part 2 arrives from the Library's square.
+  tableRows: { feature_flags: [{ key: "all-tools-tiles", audience: "everyone" }] },
   handle: ({ url, json }) => {
     const table = url.pathname.replace(/^\/rest\/v1\//, "");
     if (table === "user_credits") return json(200, [{ user_id: MOCK_USER.id, credits_remaining: state.credits, credits_total: 3000 }]), true;
@@ -93,6 +101,10 @@ const base = {
 };
 
 const msgs = { el: JSON.parse(readFileSync("messages/el.json", "utf8")), en: JSON.parse(readFileSync("messages/en.json", "utf8")) };
+// The Library's name (the owner, 2026-10-09) and the one it had until
+// 2026-10-14, which ⌘K must still find.
+const NAME = { el: "Βιβλιοθήκη", en: "Library" };
+const OLD_NAME = { el: "Τα δικά μου", en: "Mine" };
 // What the Greek interface itself writes in Latin letters on these screens.
 const GREEK_UI_LATIN = ["Ionexa", "credits", "credit", "Site", "Chat", "Slides", "Posts", "PDF"];
 
@@ -181,6 +193,10 @@ try {
       // The heading is the sidebar row's name, as every page's is
       // (scripts/tests/sidebar-naming.test.mjs); the tab is the Library's.
       check("new account: the page has its sidebar row's name", (await heading()) === M.sidebar.items.mine, await heading());
+      // THE OWNER'S NAME (2026-10-09), written out rather than read from
+      // the catalogue it is checking: «Βιβλιοθήκη», "Library".
+      check(`...which is «${NAME[locale]}», the All tools square's word`, (await heading()) === NAME[locale] && M.dashboard.tools.names.library === NAME[locale], await heading());
+      check("...and so is the browser tab", (await page.title()).includes(NAME[locale]), await page.title());
       check("...it opens on the Library tab", (await page.getByRole("tab", { name: L.tab }).getAttribute("aria-selected")) === "true");
       check("...and says nothing was made yet, and where things will come from", (await page.getByText(L.empty.title).count()) === 1 && (await page.getByText(L.empty.why).count()) === 1);
       await language("new account");
@@ -229,6 +245,37 @@ try {
       await page.goto(`${ON}/dashboard/timeline`, { waitUntil: "networkidle" });
       check("no credits left: the Library opens, with all of it", (await kinds()) === "posts,site,slides", await kinds());
       state.credits = 3000;
+
+      // ---- 6. its name, wherever it is shown
+      await page.goto(`${ON}/dashboard/tools`, { waitUntil: "networkidle" });
+      const square = page.locator('[data-testid="tool-tile"][href="/dashboard/timeline"]');
+      check(`the All tools square says «${NAME[locale]}»`, (await square.innerText()).split("\n").map((l) => l.trim()).includes(NAME[locale]), await square.innerText());
+      await page.goto(`${ON}/dashboard/records`, { waitUntil: "networkidle" });
+      const row = page.locator('main a[href="/dashboard/timeline"]');
+      const rowName = ((await row.locator("span > span").first().innerText().catch(() => "")) || "").trim();
+      check(`the records hub lists it as «${NAME[locale]}»`, (await row.count()) === 1 && rowName === NAME[locale], `${await row.count()} row(s), «${rowName}»`);
+      await press(row);
+      await page.waitForURL(/\/dashboard\/timeline$/, { timeout: 15000 }).catch(() => null);
+      await page.locator("main h1").first().waitFor({ timeout: 15000 }).catch(() => null);
+      check("...and pressed, it opens the page under the same name", new URL(page.url()).pathname === "/dashboard/timeline" && (await heading()) === NAME[locale], `${page.url()} «${await heading().catch(() => "")}»`);
+      if (!device.touch) {
+        // ⌘K: the row is the first page it offers for the new name and
+        // for the old one, and Enter opens it.
+        for (const query of [NAME[locale], OLD_NAME[locale]]) {
+          await page.goto(`${ON}/dashboard/overview`, { waitUntil: "networkidle" });
+          await page.keyboard.press("Control+KeyK");
+          const dialog = page.locator('[role="dialog"][aria-modal="true"]');
+          await dialog.locator("input").waitFor({ timeout: 10000 });
+          await dialog.locator("input").fill(query);
+          await page.waitForTimeout(400);
+          // The list of what it offers, not the filter chips above it.
+          const first = ((await dialog.locator(".overflow-y-auto button").first().innerText().catch(() => "")) || "").trim();
+          check(`⌘K «${query}»: the first page offered is «${NAME[locale]}»`, first === NAME[locale], `«${first}»`);
+          await dialog.locator("input").press("Enter");
+          await page.waitForURL(/\/dashboard\/timeline$/, { timeout: 15000 }).catch(() => null);
+          check("...and Enter opens it", new URL(page.url()).pathname === "/dashboard/timeline", page.url());
+        }
+      }
 
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();

@@ -26,7 +26,11 @@
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with touch. In Greek, then
  * the conversation's words in English. Around it: speech not configured
  * (no Talk button), no minutes left (no Talk button), and the transcription
- * provider down (said, and the loop stops rather than charging).
+ * provider down (said, and the loop stops rather than charging). And
+ * (2026-10-14) the hour's AI requests used up: the Chat route refuses with
+ * a JSON answer, not a stream — which the conversation once took for an
+ * empty reply and said nothing — and it is said in the reader's language,
+ * Greek and English (components/chat/use-chat-failure-words.ts).
  */
 import http from "node:http";
 import { spawn } from "node:child_process";
@@ -82,13 +86,14 @@ const reserved = [];
 const settled = [];
 const consumed = [];
 let usedSeconds = 0;
+let hourlyFull = false;
 function matches(row, url) {
   for (const [k, v] of url.searchParams) if (v.startsWith("eq.") && String(row[k]) !== v.slice(3)) return false;
   return true;
 }
 function rest({ req, res, url, body, json }) {
   const table = url.pathname.replace(/^\/rest\/v1\//, "");
-  if (table === "rpc/consume_rate_limit") return json(200, true), true;
+  if (table === "rpc/consume_rate_limit") return json(200, !(hourlyFull && JSON.parse(body || "{}").p_scope === "ai_hourly_user")), true;
   if (table === "rpc/reserve_credits") {
     const args = JSON.parse(body || "{}");
     reserved.push(args);
@@ -422,6 +427,28 @@ try {
     check("...and the person is told, in their language", (await down.page.locator("body").innerText()).includes(EL.voice.errors.provider_error));
     transcribeDown = false;
     await down.context.close();
+
+    // The hour's AI requests used up, in Greek and in English.
+    for (const locale of ["el", "en"]) {
+      const M = locale === "el" ? EL : EN;
+      lang = locale;
+      hourlyFull = true;
+      for (const k of Object.keys(providerLog)) providerLog[k].length = 0;
+      const limited = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false }, locale);
+      await limited.page.goto(`${APP}/dashboard/chat`, { waitUntil: "networkidle" });
+      const refusal = limited.page.waitForResponse((r) => new URL(r.url()).pathname === "/api/chat" && r.request().method() === "POST", { timeout: 45_000 }).then((r) => r.json()).catch(() => null);
+      await startTalking(limited.page, limited.press);
+      const refused = await refusal;
+      const told = await limited.page.waitForFunction((t) => document.body.innerText.includes(t), M.errors.codes.hourlyLimit.what, { timeout: 15_000 }).then(() => true, () => false);
+      const body = await limited.page.locator("body").innerText();
+      check(`${locale}: the hour's AI requests used up: the route refuses by name (${refused?.code}), and the conversation says it — «${M.errors.codes.hourlyLimit.what} ${M.errors.codes.hourlyLimit.next}»`,
+        refused?.code === "hourlyLimit" && told && body.includes(M.errors.codes.hourlyLimit.next), body.slice(-300));
+      check(`${locale}: ...not the route's own sentence, and nothing was answered or spoken`,
+        typeof refused?.message === "string" && !body.includes(refused.message) && providerLog.speak.length === 0 && !providerLog.chat.some((c) => c.stream), JSON.stringify({ speak: providerLog.speak.length, chat: providerLog.chat.length }));
+      hourlyFull = false;
+      await limited.context.close();
+    }
+    lang = "el";
   }
 } catch (err) {
   check("the run completed", false, String(err?.stack ?? err) + (pageErrors.length ? `\n        page errors: ${pageErrors.slice(0, 3).join(" | ")}` : ""));

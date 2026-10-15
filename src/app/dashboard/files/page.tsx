@@ -73,13 +73,15 @@ export default async function FilesPage(props: { searchParams: Promise<{ record?
     fileIds: byCollection.get(String(c.id)) ?? [],
   }));
 
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same files
-  // and the same answers, drawn as conversation and work. Collections stay
-  // on the page; the shell asks of what is ticked.
+  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same files,
+  // the same collections and the same answers, drawn as conversation and
+  // work. The collections are read above, for both: with the switch on,
+  // nothing the old page offered is lost (the owner's decision of
+  // 2026-10-09, held by scripts/tests/tool-shell.test.mjs, section 8).
   if (await isFeatureOn("tool-shell", user)) {
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} pages={await isFeatureOn("file-pages", user)} />
+        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} initialCollections={collectionRows} pages={await isFeatureOn("file-pages", user)} />
       </div>
     );
   }

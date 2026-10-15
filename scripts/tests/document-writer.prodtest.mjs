@@ -82,7 +82,9 @@ const flags = [];
 const credits = [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }];
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const supa = await startMockSupabase({ port: 54399, tableRows: { feature_flags: flags, user_credits: credits }, handle: rest });
-const setFlags = (audiences) => flags.splice(0, flags.length, ...Object.entries(audiences).map(([key, audience]) => ({ key, audience })));
+// All tools' squares are behind `all-tools-tiles` since 2026-10-14, and it
+// starts at «Κανείς»; this looks for Document's square, so it opens them.
+const setFlags = (audiences) => flags.splice(0, flags.length, ...Object.entries({ "all-tools-tiles": "everyone", ...audiences }).map(([key, audience]) => ({ key, audience })));
 
 // ---------------------------------------------------------------------
 // The model: a whole document, or one block's new words.

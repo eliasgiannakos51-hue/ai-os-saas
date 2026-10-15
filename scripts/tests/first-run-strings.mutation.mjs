@@ -26,7 +26,8 @@ const GATE = "scripts/tests/first-run-strings.test.mjs";
 const REGISTER_GATE = "scripts/tests/address-register.test.mjs";
 const SCRIPT = "scripts/first-run-strings.mjs";
 const EL = "messages/el.json";
-const TARGETS = [GATE, REGISTER_GATE, SCRIPT, EL];
+const PACK = "docs/first-run/first-run.en.md";
+const TARGETS = [GATE, REGISTER_GATE, SCRIPT, EL, PACK];
 
 const MUTANTS = [
   {
@@ -106,6 +107,19 @@ const MUTANTS = [
     from: 'const B0 = "(?<![\\\\p{L}\\\\p{N}])";',
     to: 'const B0 = "\\\\b";',
     expect: "the informal reader matches",
+  },
+  {
+    // THE CLAUSE COUNTED CODES AND THE CATALOGUE HOLDS SENTENCES. Each of
+    // the 18 codes carries a `.what` and a `.next`; counting the names
+    // meant one surviving sentence per code satisfied it, so losing every
+    // `.next` in the pack — half of the very regression section 7 exists
+    // for — still printed «18 of 18». Ranging over the 36 leaves, one
+    // missing sentence is one missing sentence.
+    name: "a failure sentence disappears from the pack and only its code name survives",
+    file: PACK,
+    from: "**`errors.codes.conflict.next`**",
+    to: "**`errors.codes.conflict.what`**",
+    expect: "every failure sentence the catalogue has is in the pack",
   },
 ];
 

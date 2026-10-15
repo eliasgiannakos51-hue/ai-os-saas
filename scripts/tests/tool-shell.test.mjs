@@ -13,7 +13,7 @@
 // scripts/tests/tool-shell.prodtest.mjs is where it is watched.
 //
 // Run: node scripts/tests/tool-shell.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -29,6 +29,9 @@ function check(name, cond, detail) {
   }
 }
 const read = (f) => stripComments(readFileSync(f, "utf8"));
+// A file this gate requires that is not there is every check on it red,
+// not a crash that hides the checks after it.
+const readIfThere = (f) => (existsSync(f) ? read(f) : "");
 function walk(dir) {
   const out = [];
   for (const entry of readdirSync(dir)) {
@@ -183,6 +186,26 @@ check("an answer that finished elsewhere is put back, and one running is watched
 check("an upload whose registration does not land is removed from the bucket",
   /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));
 check("a file that stored but could not be read is not called a success", /outcome\.file\.processing_status === "failed"/.test(filesShell));
+// COLLECTIONS, the old page's (the owner's decision of 2026-10-09: with
+// the switch on, nothing the old page offered is lost). The old page is
+// components/files/files-workspace.tsx; both call the same route with the
+// same body, and the shell's name for a new one is said in its one field.
+const filesPage = read("src/app/dashboard/files/page.tsx");
+const filesWorkspace = read("src/components/files/files-workspace.tsx");
+check("Files: the collections the page reads are handed to the shell, as to the old page",
+  /<FilesShell initialFiles=\{rows\} initialOpenId=\{readRequestedId\(searchParams\.record\)\} initialCollections=\{collectionRows\}/.test(filesPage) && /initialCollections=\{collectionRows\}/.test(filesPage.slice(filesPage.indexOf("<FilesWorkspace"))));
+check("Files: each collection is pressed to select its files again",
+  /collections\.map\(\(collection\) => \(\s*<button[\s\S]{0,120}onClick=\{\(\) => setSelected\(readyIds\(collection\)\)\}[\s\S]{0,200}data-testid="files-collection"/.test(filesShell) &&
+    /const readyIds = \(collection: WorkspaceCollection\) => collection\.fileIds\.filter\(\(id\) => askable\.some\(\(f\) => f\.id === id\)\);/.test(filesShell));
+check("Files: what is selected is saved as a collection through the page's route, with the page's body",
+  /fetch\("\/api\/files\/collections", \{\s*method: "POST",[\s\S]{0,120}body: JSON\.stringify\(\{ name, fileIds: selected \}\),/.test(filesShell) &&
+    /fetch\("\/api\/files\/collections", \{\s*method: "POST",[\s\S]{0,120}body: JSON\.stringify\(\{ name, fileIds: selected \}\),/.test(filesWorkspace));
+check("Files: ...its name said in the shell's one field, which says so, and the next thing sent is the name",
+  /onClick=\{startNaming\}[\s\S]{0,160}data-testid="files-collection-save"/.test(filesShell) && /setNaming\(true\);\s*say\(\{ role: "tool", text: t\("collectionName", \{ count: selected\.length \}\), naming: true \}\);/.test(filesShell) &&
+    /placeholder=\{naming \? t\("collectionPlaceholder"\) : t\("askPlaceholder"\)\}/.test(filesShell) && /onSend=\{\(text\) => void \(naming \? saveCollection\(text\) : ask\(text\)\)\}/.test(filesShell));
+check("Files: ...and the new collection is there at once, said in the screen's words",
+  /setCollections\(\(current\) => \[made, \.\.\.current\]\);\s*setNaming\(false\);\s*say\(\{ role: "tool", text: t\("collectionCreated", \{ name: made\.name \}\) \}\);/.test(filesShell) &&
+    /if \(!data\?\.ok \|\| !data\.collection\) \{\s*say\(\{ role: "tool", text: t\("collectionError"\) \}\);/.test(filesShell));
 
 console.log("\n== 9. Site, in the shell ==");
 const site = read("src/components/website-builder/website-shell.tsx");
@@ -192,18 +215,78 @@ const siteRequests = read("src/lib/website-builder/site-requests.ts");
 check("the shared requests: generate, then the worker, then the status is watched",
   /fetchWithAuthRetry\("\/api\/websites\/generate"/.test(siteRequests) && /fetch\("\/api\/websites\/generate\/process"/.test(siteRequests) && /fetch\(`\/api\/websites\/status\?id=\$\{encodeURIComponent\(id\)\}`\)/.test(siteRequests));
 check("a description said in the field builds the site through them, then the status is watched",
-  /await startSiteGeneration\(\{ name, description, skipClarification \}\)/.test(site) && /watchSite\(id, \{/.test(site) && !/fetch\("\/api\/websites\/generate/.test(site));
+  /await startSiteGeneration\(\{ name, description, skipClarification, referenceImagePaths \}\)/.test(site) && /watchSite\(id, \{/.test(site) && !/fetch\("\/api\/websites\/generate/.test(site));
 check("...asking its questions first, answered in the field or skipped",
   /if \(data\.needsClarification\) return \{ kind: "questions"/.test(siteRequests) && /if \(outcome\.kind === "questions"\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
-check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: 0 \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
+check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
 check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site) && /requestSiteStop\(current\.id\)/.test(site) && /\/api\/websites\/\$\{encodeURIComponent\(websiteId\)\}\/cancel/.test(siteRequests));
-check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\) \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
+check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
 check("the price shows before sending, from the server's own estimator", /estimateForAction\(\s*"websiteGenerate"/.test(site) && /t\("estimatedCost", \{ count: estimatedCost \}\)/.test(site));
 check("the site beside the conversation is sandboxed, marked as made by AI, and says what it still lacks",
   /srcDoc=\{chosen === null \? html : outlineBoxes\(html, chosen\)\}\s*sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));
 check("...and accuses no number the person typed: only for a site whose every request is in this conversation",
   /asked\[current\.id\] \? findInventedNumbers\(html, asked\[current\.id\]\.join\("\\n"\)\) : \[\]/.test(site));
 check("Publish is on top of it", /<PublishControl websiteId=\{current\.id\}/.test(site));
+// REFERENCE PHOTOS, the old page's (2026-10-09): given to the field — its
+// «+», a paste, a drop — and sent with the next message, a new site's or a
+// change's, as the old page's form and its change box send them
+// (components/website-builder/website-builder-workspace.tsx).
+const sitePhotos = readIfThere("src/lib/website-builder/site-photos.ts");
+const siteHistory = readIfThere("src/components/website-builder/site-history.tsx");
+const oldSite = read("src/components/website-builder/website-builder-workspace.tsx");
+check("Site: photos are given to the field, as Chat's are, except while its questions wait",
+  /attach=\{pending \? undefined : \{ accept: ACCEPTED_REFERENCE_IMAGE_TYPES\.join\(","\), label: tShell\("site\.photosAttach"\), onFiles: addPhotos \}\}/.test(site) &&
+    /const \{ accepted, refused \} = admitPhotos\(photos\.length, files\);/.test(site));
+check("Site: ...taken by the old page's rules: the type, 5MB, how many",
+  /\(ACCEPTED_REFERENCE_IMAGE_TYPES as readonly string\[\]\)\.includes\(file\.type\)/.test(sitePhotos) && /if \(file\.size > MAX_REFERENCE_IMAGE_BYTES\) \{/.test(sitePhotos) && /const room = MAX_REFERENCE_IMAGES - heldCount;/.test(sitePhotos));
+check("Site: ...shown above the field, each with its remove, and counted",
+  /tray=\{\s*photos\.length > 0 \? \(\s*<div data-testid="site-photos"/.test(site) && /onClick=\{\(\) => removePhoto\(p\.preview\)\}/.test(site) && /tShell\("site\.photos", \{ count: photos\.length, max: MAX_REFERENCE_IMAGES \}\)/.test(site));
+check("Site: every photo goes up to the account's own folder of the reference bucket, and none is counted if one fails",
+  /const path = buildReferenceImagePath\(user\.id, file\.name\);\s*const \{ error \} = await supabase\.storage\.from\(REFERENCE_IMAGE_BUCKET\)\.upload\(path, file, \{ contentType: file\.type \}\);/.test(sitePhotos) &&
+    /if \(results\.some\(\(r\) => r\.error\)\) return \{ ok: false, reason: "failed" \};/.test(sitePhotos) && /canUpload\(data\.usage as StorageUsage, files\.map\(\(f\) => f\.size\)\)/.test(sitePhotos));
+check("Site: ...before anything is asked, and the paths go with the next message: a new site, its answers or its skip, a change",
+  /const paths = await sendPhotos\(\);\s*if \(paths === null\) \{/.test(site) && /await generate\(websiteNameFrom\(text\)\.slice\(0, MAX_NAME_LENGTH\), description, false, paths\);/.test(site) &&
+    /void generate\(pending\.name, enriched, true, pending\.paths\);/.test(site) && /onClick=\{\(\) => void generate\(pending\.name, pending\.description, true, pending\.paths\)\}/.test(site) &&
+    /const referenceImagePaths = await sendPhotos\(\);\s*if \(referenceImagePaths === null\) return;/.test(site));
+check("Site: the shared requests hand them to the routes, as the old page does",
+  /body: JSON\.stringify\(\{ name: input\.name, description: input\.description, referenceImagePaths, skipClarification: input\.skipClarification \}\)/.test(siteRequests) &&
+    /body: JSON\.stringify\(\{ websiteId: record\.id, description: input\.description, referenceImagePaths \}\)/.test(siteRequests) && /referenceImagePaths: input\.referenceImagePaths \?\? \[\],/.test(siteRequests) &&
+    /referenceImagePaths,\s*skipClarification,/.test(oldSite));
+check("Site: the price counts the photos, as on the page", /\{ model: WEBSITE_BUILDER_MODEL, inputChars: length, imageCount: photos\.length, planSlug \}/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\} imageCount=\{photos\.length\} \/>/.test(site));
+check("Site: a photo refused or not sent is said in the screen's words, never storage's",
+  /refused === "type" \? tShell\("site\.photoType"\) : refused === "size" \? t\("imageTooLarge"\) : t\("imageTooMany", \{ max: MAX_REFERENCE_IMAGES \}\)/.test(site) &&
+    /: tShell\("site\.photosFailed"\),/.test(site) && !/error\.message|getErrorMessage/.test(sitePhotos));
+// VERSIONS, the old page's History tab and /dashboard/published's Roll
+// back (components/publishing/published-sites-list.tsx), in
+// components/website-builder/site-history.tsx.
+check("Site: its versions are one press away, above the preview and over the list",
+  /onClick=\{\(\) => setHistory\(showingHistory \? null : current\.id\)\}[\s\S]{0,200}data-testid="site-history-open"/.test(site) &&
+    /body: showingHistory \? \(\s*<div className="flex flex-col gap-3">\s*\{historyToggle\}\s*<SiteHistory\s/.test(site) &&
+    /<div data-testid="site-preview" className="flex h-full flex-col gap-3">\s*<AiGeneratedNotice variant="block" \/>\s*\{historyToggle\}/.test(site));
+check("Site: ...every version, read as the old History tab reads it",
+  /\.from\("website_versions"\)\s*\.select\("\*"\)\s*\.eq\("website_id", websiteId\)\s*\.order\("version_number", \{ ascending: false \}\)/.test(siteHistory) &&
+    /\.from\("website_versions"\)\s*\.select\("\*"\)\s*\.eq\("website_id", websiteId\)\s*\.order\("version_number", \{ ascending: false \}\)/.test(oldSite) && /onClick=\{\(\) => onView\(version\)\}/.test(siteHistory));
+check("Site: a version pressed is shown read-only and sandboxed, with the way back to the latest",
+  /srcDoc=\{shownHtml\}\s*sandbox=""/.test(site) && /onClick=\{\(\) => setViewing\(null\)\} data-testid="site-latest"/.test(site) && /t\("viewingOldVersion", \{ number: shown\.version_number \}\)/.test(site) &&
+    /const shown = viewing && current && viewing\.website_id === current\.id \? viewing : null;/.test(site));
+check("Site: once published, what the public saw, with Roll back on every one but the newest, through /dashboard/published's route",
+  /\.from\("site_versions"\)\s*\.select\("id, published_site_id, version_number, published_at, change_description"\)\s*\.eq\("published_site_id", site\.id\)/.test(siteHistory) &&
+    /fetch\(`\/api\/published\/\$\{encodeURIComponent\(live\.siteId\)\}\/rollback`, \{\s*method: "POST",[\s\S]{0,80}body: JSON\.stringify\(\{ versionId: version\.id \}\),/.test(siteHistory) &&
+    /\{index > 0 && \(\s*<button type="button" onClick=\{\(\) => void rollback\(version\)\}/.test(siteHistory) && /window\.confirm\(tPub\("confirmRollback", \{ number: version\.version_number \}\)\)/.test(siteHistory) &&
+    /fetch\(`\/api\/published\/\$\{site\.id\}\/rollback`, \{\s*method: "POST",[\s\S]{0,80}body: JSON\.stringify\(\{ versionId: version\.id \}\),/.test(read("src/components/publishing/published-sites-list.tsx")));
+check("Site: as many published versions are listed as a publish keeps",
+  Number(/const LIVE_VERSIONS_SHOWN = (\d+);/.exec(siteHistory)?.[1]) === Number(/export const MAX_SITE_VERSIONS = (\d+);/.exec(read("src/lib/publishing/publish-limits.ts"))?.[1]) &&
+    /\.limit\(LIVE_VERSIONS_SHOWN\)/.test(siteHistory));
+// The two rows a server writes in English are said in the screen's words:
+// the rollback's own (the route's literal, read here so a new wording
+// breaks this rather than leaking) and an undo's mark.
+{
+  const rollbackRoute = readFileSync("src/app/api/published/[id]/rollback/route.ts", "utf8");
+  check("Site: the rows a server writes in English — a rollback, an undo — are said in the screen's words, a refused rollback too",
+    /change_description: `Rolled back to version \$\{version\.version_number\}`/.test(rollbackRoute) && /description\?\.match\(\/\^Rolled back to version \(\\d\+\)\$\/\)/.test(siteHistory) &&
+      /back \? tPub\("rollbackSuccess", \{ number: Number\(back\[1\]\) \}\)/.test(siteHistory) && /description\.startsWith\(UNDO_MARK\) \? tShell\("site\.undid"/.test(siteHistory) &&
+      /if \(!data\?\.ok\) \{\s*addToast\(tPub\("rollbackError"\), "error"\);/.test(siteHistory) && !/(?:data|body)\??\.error\b/.test(siteHistory));
+}
 
 console.log("\n== 10. a refusal is said in the reader's language ==");
 // Checked 2026-10-08 in the built app by scripts/tests/tool-shell-edges.prodtest.mjs:
@@ -268,12 +351,16 @@ check("Slides: Stop reaches a change as well as a new deck",
 
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
-  const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard?.toolShell ?? {};
+  const all = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard ?? {};
+  const m = all.toolShell ?? {};
+  const files = all.files ?? {};
   check(`${l}: the shell's words`, ["open", "isOpen", "back", "close"].every((k) => typeof m[k] === "string" && m[k]) &&
     ["done", "platforms", "copyAll", "copyOne"].every((k) => typeof m.posts?.[k] === "string" && m.posts[k]) && /\{count, plural/.test(m.posts?.done ?? "") &&
     ["done", "changed", "new"].every((k) => typeof m.slides?.[k] === "string" && m.slides[k]) && /\{title\}[\s\S]*\{count, plural/.test(m.slides?.done ?? "") &&
     typeof m.recent === "string" && m.recent && typeof m.analyze?.needFile === "string" && m.analyze.needFile &&
-    ["done", "changed", "building", "questions", "skip", "new", "design"].every((k) => typeof m.site?.[k] === "string" && m.site[k]));
+    ["done", "changed", "building", "questions", "skip", "new", "design", "photosAttach", "photoType", "photosFailed", "versions", "versionsHint", "liveVersions"].every((k) => typeof m.site?.[k] === "string" && m.site[k]) &&
+    /\{count\}[\s\S]*\{max\}/.test(m.site?.photos ?? "") && /\{change\}/.test(m.site?.undid ?? "") &&
+    /\{count/.test(files.collectionName ?? "") && typeof files.collectionsHint === "string" && files.collectionsHint && typeof files.collectionCreated === "string" && /\{name\}/.test(files.collectionCreated));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

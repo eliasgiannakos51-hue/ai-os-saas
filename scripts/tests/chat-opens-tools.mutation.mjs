@@ -26,6 +26,7 @@ const EL = "messages/el.json";
 const GENERATE = "src/app/api/websites/generate/route.ts";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
 const EDIT = "src/app/api/websites/edit/route.ts";
+const WORDS = "src/components/chat/use-chat-failure-words.ts";
 
 const MUTANTS = [
   {
@@ -163,11 +164,11 @@ const MUTANTS = [
     expect: "a site that failed is said in the pane's own words",
   },
   {
-    name: "a server sentence is shown on every screen",
+    name: "a refused change shows the server's sentence again",
     file: PANE,
-    from: '(locale.startsWith("en") && text ? text : ours)',
-    to: "(text ? text : ours)",
-    expect: "a server sentence is shown as it came only on an English screen",
+    from: "                  : describe(outcome.error).text\n",
+    to: "                  : outcome.error.message\n",
+    expect: "a server sentence is never shown as it came, on any screen",
   },
   {
     name: "no credits is said in the route's English",
@@ -185,16 +186,16 @@ const MUTANTS = [
   },
   {
     name: "Chat sets the route's English sentence as its error again",
-    file: CHAT,
-    from: "            data.outOfCredits === true\n              ? outOfCreditsText(data.available, data.needed)",
-    to: "            data.outOfCredits === \"never\"\n              ? outOfCreditsText(data.available, data.needed)",
+    file: WORDS,
+    from: "if (data?.rateLimited) return data.outOfCredits === true ? outOfCredits(data.available, data.needed) : said(429, data);",
+    to: "if (data?.rateLimited) return data.outOfCredits === \"never\" ? outOfCredits(data.available, data.needed) : said(429, data);",
     expect: "Chat says no credits in its own words",
   },
   {
     name: "a hold refused inside the answer reads as our own failure again",
-    file: CHAT,
-    from: "              ? outOfCreditsText(event.available, event.needed)\n              : event.code",
-    to: "              ? describeStatus(500).text\n              : event.code",
+    file: WORDS,
+    from: "        if (event.outOfCredits === true) return outOfCredits(event.available, event.needed);",
+    to: "        if (event.outOfCredits === true) return said(500, {});",
     expect: "Chat says no credits in its own words",
   },
   {
@@ -219,11 +220,22 @@ const MUTANTS = [
     to: "          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),",
     expect: "no credits for a change is said by the credits notice too",
   },
+  {
+    // The field was removed on 2026-10-14 because nobody read it and a
+    // dead field invites the English back. This is the check that the
+    // shape really stops carrying it.
+    name: "the classifier's own sentence is carried to the screen again",
+    file: REQ,
+    gate: RUN,
+    from: '    return { kind: "notMade", offTopic: data.offTopic === true };',
+    to: '    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };',
+    expect: "the server's own sentence is not carried to the screen",
+  },
 ];
 
 runMutations({
   name: "chat-opens-tools",
   gate: GATE,
-  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE, EDIT],
+  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE, EDIT, WORDS],
   mutants: MUTANTS,
 });

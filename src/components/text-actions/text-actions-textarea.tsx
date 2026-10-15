@@ -4,7 +4,7 @@ import { useState, type ChangeEvent } from "react";
 import { Wand2, Languages, Sparkles, HelpCircle, Check, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useTranslations } from "next-intl";
-import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { useLimitText, useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { useCredits } from "@/components/credits/credits-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
@@ -49,6 +49,9 @@ export function TextActionsTextarea({
   required?: boolean;
 }) {
   const tCommon = useTranslations("common");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const describe = useErrorText();
   const describeStatus = useErrorTextForStatus();
   const { reportUsage } = useCredits();
@@ -97,7 +100,7 @@ export function TextActionsTextarea({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(describeStatus(res.status).text);
+        setError(limitText(data) ?? describeStatus(res.status).text);
         return;
       }
 

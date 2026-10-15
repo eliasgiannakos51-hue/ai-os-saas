@@ -100,7 +100,9 @@ function reset({ tier = "growth", credits = 3000, flag = "staff" } = {}) {
   table("user_onboarding").push({ user_id: MOCK_USER.id, completed_at: "2026-01-02T00:00:00Z", skipped_at: null });
   setFlag(flag);
 }
-const setFlag = (audience) => tables.set("feature_flags", [{ key: "image-studio", audience }]);
+// All tools' squares are behind `all-tools-tiles` since 2026-10-14, and it
+// starts at «Κανείς»; this looks for Image's square, so it opens them.
+const setFlag = (audience) => tables.set("feature_flags", [{ key: "all-tools-tiles", audience: "everyone" }, { key: "image-studio", audience }]);
 
 const PASS_THROUGH = new Set(["select", "order", "limit", "offset", "on_conflict", "columns"]);
 function matches(row, params) {

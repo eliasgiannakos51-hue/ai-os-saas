@@ -78,7 +78,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     });
 
     const breaker = await checkAiCallAllowed(user.id, "data_question", fingerprintRequest(params.id, question));
-    if (!breaker.allowed) return NextResponse.json({ error: "rate_limited", detail: breaker.reason }, { status: 429 });
+    if (!breaker.allowed) return NextResponse.json({ error: "rate_limited", code: breaker.code, retryAt: breaker.retryAt, detail: breaker.reason }, { status: 429 });
 
     const isAdmin = isAdminEmail(user.email);
     const isBeta = await hasActiveBetaBypass(user);

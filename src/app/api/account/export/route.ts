@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { exportableTables, redactRow } from "@/lib/gdpr/user-data-registry";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { buildExportArchive, collectExportFiles } from "@/lib/account/export-archive";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +68,11 @@ export async function GET() {
       return NextResponse.json(
         {
           ok: false,
-          error: `You can download a full export ${EXPORT_MAX_PER_HOUR} times an hour. Please try again shortly — your data is not going anywhere.`,
+          error: `You can download a full export ${EXPORT_MAX_PER_HOUR} times an hour. Please try again within the hour — your data is not going anywhere.`,
+          // The button says it in the reader's language from these two
+          // (components/settings/export-data-button.tsx), not the sentence.
+          code: "export_rate_limited",
+          limit: EXPORT_MAX_PER_HOUR,
         },
         { status: 429 }
       );
@@ -131,6 +137,52 @@ export async function GET() {
       },
       data,
     };
+
+    // «ΕΞΑΓΩΓΗ ΟΛΩΝ» (MASTER Μέρος 18 §2.4), behind the switch `export-all`:
+    // the same data, beside every file, site and game, in one .zip
+    // (lib/account/export-archive.ts). The files are read with the service
+    // role, as the account deletion removes them
+    // (api/delete-account/confirm/route.ts), and only under this person's
+    // own folder: the id is the session's, never the request's.
+    if (await isFeatureOn("export-all", user)) {
+      const [sites, games, files] = await Promise.all([
+        supabase.from("user_websites").select("name, html_content, pages").eq("user_id", user.id).limit(MAX_ROWS_PER_TABLE),
+        supabase.from("user_games").select("title, html").eq("user_id", user.id).limit(MAX_ROWS_PER_TABLE),
+        collectExportFiles(createAdminClient().storage, user.id),
+      ]);
+      const archived = {
+        ...payload,
+        notes: {
+          ...payload.notes,
+          files_included: files.included.length,
+          ...(files.left.length > 0
+            ? {
+                files_not_included: files.left,
+                files_not_included_note:
+                  "These files did not fit in one download (size or count) or could not be read. They are still in your account; contact support for them.",
+              }
+            : {}),
+          ...(sites.error ? { sites_unreadable: sites.error.message } : {}),
+          ...(games.error ? { games_unreadable: games.error.message } : {}),
+        },
+      };
+      const zip = buildExportArchive({
+        data: archived,
+        userId: user.id,
+        files: files.included,
+        sites: sites.data ?? [],
+        games: games.data ?? [],
+      });
+      const zipName = `ionexa_export_${new Date().toISOString().slice(0, 10)}.zip`;
+      return new NextResponse(Buffer.from(zip), {
+        headers: {
+          "Content-Type": "application/zip",
+          "Content-Disposition": `attachment; filename="${zipName}"; filename*=UTF-8''${encodeURIComponent(zipName)}`,
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
+    }
 
     const filename = `ionexa_export_${new Date().toISOString().slice(0, 10)}.json`;
     return new NextResponse(JSON.stringify(payload, null, 2), {

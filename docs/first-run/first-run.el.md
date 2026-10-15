@@ -1,8 +1,8 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **606 strings**. The whole product is 4250, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.
 
-## Tier 2 — The labels — skim these (373)
+## Tier 2 — The labels — skim these (377)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1894,9 +1894,9 @@ DevOps
 
 **`sidebar.items.library`**
 
-> EN — My stuff
+> EN — Library
 
-Τα πράγματά μου
+Βιβλιοθήκη
 
 **`sidebar.items.marketplace`**
 
@@ -1918,9 +1918,9 @@ DevOps
 
 **`sidebar.items.mine`**
 
-> EN — Mine
+> EN — Library
 
-Τα δικά μου
+Βιβλιοθήκη
 
 **`sidebar.items.missionControl`**
 
@@ -2256,7 +2256,7 @@ Projects
 
 > EN — Remove {tool} from Recent tools
 
-Αφαίρεση του {tool} από τα πρόσφατα
+Αφαίρεση από τα πρόσφατα: {tool}
 
 **`sidebar.rail.saveFailed`**
 
@@ -2281,6 +2281,30 @@ Projects
 > EN — New conversation
 
 Νέα συνομιλία
+
+**`sidebar.tabs.balance`**
+
+> EN — Balance: {amount} credits
+
+Υπόλοιπο: {amount} credits
+
+**`sidebar.tabs.balanceEmpty`**
+
+> EN — No credits left
+
+Δεν απομένουν credits
+
+**`sidebar.tabs.balanceLow`**
+
+> EN — Low balance: {amount} credits
+
+Χαμηλό υπόλοιπο: {amount} credits
+
+**`sidebar.tabs.balanceUnlimited`**
+
+> EN — Unlimited credits
+
+Απεριόριστα credits
 
 **`sidebar.tabs.label`**
 
@@ -2422,7 +2446,7 @@ Projects
 
 Δοκίμασε ξανά
 
-## Tier 3 — Further in — only if you have time (208)
+## Tier 3 — Further in — only if you have time (217)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2499,6 +2523,252 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Good morning
 
 Καλημέρα
+
+**`errors.codes.conflict.next`**
+
+> EN — Reload the page to see the current version, then redo your change.
+
+Ανανέωσε τη σελίδα για να δεις την τρέχουσα εκδοχή και ξανακάνε την αλλαγή σου.
+
+**`errors.codes.conflict.what`**
+
+> EN — Someone — or another tab — changed this while you were working on it.
+
+Κάποιος — ή μια άλλη καρτέλα — το άλλαξε ενώ δούλευες πάνω του.
+
+**`errors.codes.fileTooLarge.next`**
+
+> EN — Split it, or upload a smaller version.
+
+Χώρισέ το ή ανέβασε μια μικρότερη εκδοχή.
+
+**`errors.codes.fileTooLarge.what`**
+
+> EN — That file is too big.
+
+Αυτό το αρχείο είναι πολύ μεγάλο.
+
+**`errors.codes.forbidden.next`**
+
+> EN — Open Settings › Billing to see which plan covers it.
+
+Άνοιξε Ρυθμίσεις › Χρέωση για να δεις ποιο πλάνο το καλύπτει.
+
+**`errors.codes.forbidden.what`**
+
+> EN — Your plan doesn't include this.
+
+Το πλάνο σου δεν το περιλαμβάνει αυτό.
+
+**`errors.codes.hourlyLimit.next`**
+
+> EN — It counts the last 60 minutes, so it opens again within the hour.
+
+Μετρά τα τελευταία 60 λεπτά, οπότε ξανανοίγει μέσα στην ώρα.
+
+**`errors.codes.hourlyLimit.what`**
+
+> EN — You've reached the limit of AI requests for one hour.
+
+Έφτασες το όριο αιτημάτων AI για μία ώρα.
+
+**`errors.codes.insufficientCredits.next`**
+
+> EN — Buy credits in Settings, or wait for your monthly reset.
+
+Αγόρασε credits από τις Ρυθμίσεις ή περίμενε τη μηνιαία ανανέωση.
+
+**`errors.codes.insufficientCredits.what`**
+
+> EN — You don't have enough credits for this.
+
+Δεν έχεις αρκετά credits γι' αυτό.
+
+**`errors.codes.invalidInput.next`**
+
+> EN — Check the highlighted fields and send it again.
+
+Έλεγξε τα πεδία που επισημαίνονται και στείλ' το ξανά.
+
+**`errors.codes.invalidInput.what`**
+
+> EN — Something in the form wasn't accepted.
+
+Κάτι στη φόρμα δεν έγινε δεκτό.
+
+**`errors.codes.notAuthenticated.next`**
+
+> EN — Sign in again and repeat the action — nothing you had entered is lost.
+
+Συνδέσου ξανά και επανάλαβε την ενέργεια — δεν χάθηκε τίποτα από όσα έγραψες.
+
+**`errors.codes.notAuthenticated.what`**
+
+> EN — You're signed out.
+
+Έχεις αποσυνδεθεί.
+
+**`errors.codes.notFound.next`**
+
+> EN — It was probably deleted. Go back to the list and pick another one.
+
+Μάλλον διαγράφηκε. Γύρνα στη λίστα και διάλεξε άλλο.
+
+**`errors.codes.notFound.what`**
+
+> EN — This no longer exists.
+
+Αυτό δεν υπάρχει πια.
+
+**`errors.codes.offline.next`**
+
+> EN — Check your connection and try again.
+
+Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.
+
+**`errors.codes.offline.what`**
+
+> EN — Your device couldn't reach us.
+
+Η συσκευή σου δεν μπόρεσε να μας βρει.
+
+**`errors.codes.planLimit.next`**
+
+> EN — Delete something you no longer need, or upgrade in Settings › Billing.
+
+Διάγραψε κάτι που δεν χρειάζεσαι ή αναβάθμισε από Ρυθμίσεις › Χρέωση.
+
+**`errors.codes.planLimit.what`**
+
+> EN — You've reached the limit of your plan.
+
+Έφτασες στο όριο του πλάνου σου.
+
+**`errors.codes.platformLimit.next`**
+
+> EN — It opens again when the day changes, at 00:00 UTC.
+
+Ξανανοίγει με την αλλαγή της μέρας, στις 00:00 ώρα Γκρίνουιτς.
+
+**`errors.codes.platformLimit.what`**
+
+> EN — The AI service has reached today's limit for the whole platform.
+
+Η υπηρεσία AI έφτασε το σημερινό όριο όλης της πλατφόρμας.
+
+**`errors.codes.rateLimited.next`**
+
+> EN — The limit clears by itself as time passes — try again later.
+
+Το όριο αδειάζει μόνο του με τον χρόνο — δοκίμασε ξανά αργότερα.
+
+**`errors.codes.rateLimited.what`**
+
+> EN — You've reached the request limit for this.
+
+Έφτασες το όριο αιτημάτων γι' αυτό.
+
+**`errors.codes.repeatLimit.next`**
+
+> EN — It opens again within 15 minutes.
+
+Ξανανοίγει μέσα σε 15 λεπτά.
+
+**`errors.codes.repeatLimit.what`**
+
+> EN — The same request was sent too many times in a row.
+
+Το ίδιο ακριβώς αίτημα στάλθηκε πολλές φορές στη σειρά.
+
+**`errors.codes.serverError.next`**
+
+> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
+
+Καταγράφηκε. Δοκίμασε ξανά σε λίγο και επικοινώνησε με την υποστήριξη αν συνεχιστεί.
+
+**`errors.codes.serverError.what`**
+
+> EN — This broke on our side.
+
+Κάτι έσπασε από τη δική μας πλευρά.
+
+**`errors.codes.siteDailyLimit.next`**
+
+> EN — It counts the last 24 hours, so it opens again within a day.
+
+Μετρά τις τελευταίες 24 ώρες, οπότε ξανανοίγει μέσα σε μία μέρα.
+
+**`errors.codes.siteDailyLimit.what`**
+
+> EN — You've reached the limit of new sites for 24 hours.
+
+Έφτασες το όριο νέων site για 24 ώρες.
+
+**`errors.codes.unknown.next`**
+
+> EN — Try again, and contact support if it happens twice.
+
+Δοκίμασε ξανά και επικοινώνησε με την υποστήριξη αν συμβεί δεύτερη φορά.
+
+**`errors.codes.unknown.what`**
+
+> EN — This action didn't complete.
+
+Αυτή η ενέργεια δεν ολοκληρώθηκε.
+
+**`errors.codes.unsupportedType.next`**
+
+> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
+
+Μετέτρεψέ το σε PDF, DOCX, CSV ή TXT και ανέβασέ το ξανά.
+
+**`errors.codes.unsupportedType.what`**
+
+> EN — That file type isn't supported.
+
+Αυτός ο τύπος αρχείου δεν υποστηρίζεται.
+
+**`errors.codes.upstreamUnavailable.next`**
+
+> EN — This is on our side and usually clears within a few minutes.
+
+Είναι δικό μας θέμα και συνήθως αποκαθίσταται μέσα σε λίγα λεπτά.
+
+**`errors.codes.upstreamUnavailable.what`**
+
+> EN — The AI service isn't responding right now.
+
+Η υπηρεσία AI δεν αποκρίνεται αυτή τη στιγμή.
+
+**`errors.credits.charged`**
+
+> EN — This attempt used credits.
+
+Αυτή η προσπάθεια κατανάλωσε credits.
+
+**`errors.credits.notCharged`**
+
+> EN — You were not charged.
+
+Δεν χρεώθηκες.
+
+**`errors.credits.refunded`**
+
+> EN — Nothing was charged.
+
+Δεν χρεώθηκε τίποτα.
+
+**`errors.credits.unverified`**
+
+> EN — We can't confirm from here whether this was charged.
+
+Δεν μπορούμε να επιβεβαιώσουμε από εδώ αν χρεώθηκε.
+
+**`errors.retryAt`**
+
+> EN — {day, select, today {You can try again after {time}.} other {You can try again tomorrow after {time}.}}
+
+{day, select, today {Μπορείς να δοκιμάσεις ξανά μετά τις {time}.} other {Μπορείς να δοκιμάσεις ξανά αύριο μετά τις {time}.}}
 
 ### dashboard chrome
 
@@ -2923,198 +3193,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — e.g. pursue / kill / watch
 
 π.χ. προχωράμε / ακύρωση / παρακολούθηση
-
-**`errors.codes.conflict.next`**
-
-> EN — Reload the page to see the current version, then redo your change.
-
-Ανανέωσε τη σελίδα για να δεις την τρέχουσα εκδοχή και ξανακάνε την αλλαγή σου.
-
-**`errors.codes.conflict.what`**
-
-> EN — Someone — or another tab — changed this while you were working on it.
-
-Κάποιος — ή μια άλλη καρτέλα — το άλλαξε ενώ δούλευες πάνω του.
-
-**`errors.codes.fileTooLarge.next`**
-
-> EN — Split it, or upload a smaller version.
-
-Χώρισέ το ή ανέβασε μια μικρότερη εκδοχή.
-
-**`errors.codes.fileTooLarge.what`**
-
-> EN — That file is too big.
-
-Αυτό το αρχείο είναι πολύ μεγάλο.
-
-**`errors.codes.forbidden.next`**
-
-> EN — Open Settings › Billing to see which plan covers it.
-
-Άνοιξε Ρυθμίσεις › Χρέωση για να δεις ποιο πλάνο το καλύπτει.
-
-**`errors.codes.forbidden.what`**
-
-> EN — Your plan doesn't include this.
-
-Το πλάνο σου δεν το περιλαμβάνει αυτό.
-
-**`errors.codes.insufficientCredits.next`**
-
-> EN — Buy credits in Settings, or wait for your monthly reset.
-
-Αγόρασε credits από τις Ρυθμίσεις ή περίμενε τη μηνιαία ανανέωση.
-
-**`errors.codes.insufficientCredits.what`**
-
-> EN — You don't have enough credits for this.
-
-Δεν έχεις αρκετά credits γι' αυτό.
-
-**`errors.codes.invalidInput.next`**
-
-> EN — Check the highlighted fields and send it again.
-
-Έλεγξε τα πεδία που επισημαίνονται και στείλ' το ξανά.
-
-**`errors.codes.invalidInput.what`**
-
-> EN — Something in the form wasn't accepted.
-
-Κάτι στη φόρμα δεν έγινε δεκτό.
-
-**`errors.codes.notAuthenticated.next`**
-
-> EN — Sign in again and repeat the action — nothing you had entered is lost.
-
-Συνδέσου ξανά και επανάλαβε την ενέργεια — δεν χάθηκε τίποτα από όσα έγραψες.
-
-**`errors.codes.notAuthenticated.what`**
-
-> EN — You're signed out.
-
-Έχεις αποσυνδεθεί.
-
-**`errors.codes.notFound.next`**
-
-> EN — It was probably deleted. Go back to the list and pick another one.
-
-Μάλλον διαγράφηκε. Γύρνα στη λίστα και διάλεξε άλλο.
-
-**`errors.codes.notFound.what`**
-
-> EN — This no longer exists.
-
-Αυτό δεν υπάρχει πια.
-
-**`errors.codes.offline.next`**
-
-> EN — Check your connection and try again.
-
-Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.
-
-**`errors.codes.offline.what`**
-
-> EN — Your device couldn't reach us.
-
-Η συσκευή σου δεν μπόρεσε να μας βρει.
-
-**`errors.codes.planLimit.next`**
-
-> EN — Delete something you no longer need, or upgrade in Settings › Billing.
-
-Διάγραψε κάτι που δεν χρειάζεσαι ή αναβάθμισε από Ρυθμίσεις › Χρέωση.
-
-**`errors.codes.planLimit.what`**
-
-> EN — You've reached the limit of your plan.
-
-Έφτασες στο όριο του πλάνου σου.
-
-**`errors.codes.rateLimited.next`**
-
-> EN — Wait about a minute, then try once more.
-
-Περίμενε περίπου ένα λεπτό και δοκίμασε άλλη μία φορά.
-
-**`errors.codes.rateLimited.what`**
-
-> EN — Too many requests in a short time.
-
-Πολλά αιτήματα σε μικρό διάστημα.
-
-**`errors.codes.serverError.next`**
-
-> EN — It's been logged. Try again in a moment, and contact support if it keeps happening.
-
-Καταγράφηκε. Δοκίμασε ξανά σε λίγο και επικοινώνησε με την υποστήριξη αν συνεχιστεί.
-
-**`errors.codes.serverError.what`**
-
-> EN — This broke on our side.
-
-Κάτι έσπασε από τη δική μας πλευρά.
-
-**`errors.codes.unknown.next`**
-
-> EN — Try again, and contact support if it happens twice.
-
-Δοκίμασε ξανά και επικοινώνησε με την υποστήριξη αν συμβεί δεύτερη φορά.
-
-**`errors.codes.unknown.what`**
-
-> EN — This action didn't complete.
-
-Αυτή η ενέργεια δεν ολοκληρώθηκε.
-
-**`errors.codes.unsupportedType.next`**
-
-> EN — Convert it to PDF, DOCX, CSV or TXT and upload it again.
-
-Μετέτρεψέ το σε PDF, DOCX, CSV ή TXT και ανέβασέ το ξανά.
-
-**`errors.codes.unsupportedType.what`**
-
-> EN — That file type isn't supported.
-
-Αυτός ο τύπος αρχείου δεν υποστηρίζεται.
-
-**`errors.codes.upstreamUnavailable.next`**
-
-> EN — This is on our side and usually clears within a few minutes.
-
-Είναι δικό μας θέμα και συνήθως αποκαθίσταται μέσα σε λίγα λεπτά.
-
-**`errors.codes.upstreamUnavailable.what`**
-
-> EN — The AI service isn't responding right now.
-
-Η υπηρεσία AI δεν αποκρίνεται αυτή τη στιγμή.
-
-**`errors.credits.charged`**
-
-> EN — This attempt used credits.
-
-Αυτή η προσπάθεια κατανάλωσε credits.
-
-**`errors.credits.notCharged`**
-
-> EN — You were not charged.
-
-Δεν χρεώθηκες.
-
-**`errors.credits.refunded`**
-
-> EN — Your credits were returned.
-
-Τα credits σου επιστράφηκαν.
-
-**`errors.credits.unverified`**
-
-> EN — We can't confirm from here whether this was charged.
-
-Δεν μπορούμε να επιβεβαιώσουμε από εδώ αν χρεώθηκε.
 
 **`module.exportCsv`**
 

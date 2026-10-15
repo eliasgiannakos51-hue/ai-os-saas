@@ -11,7 +11,7 @@ import {
 import { ArrowDown, ArrowUp, Sparkles, X } from "lucide-react";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { useTranslations } from "next-intl";
-import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { useLimitText, useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
@@ -57,6 +57,9 @@ export function AskAiModal({
   const describe = useErrorText();
   const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const { reportUsage } = useCredits();
   const [messages, setMessages] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -119,7 +122,7 @@ export function AskAiModal({
         const data = await res.json().catch(() => null);
         if (data?.rateLimited) {
           setIsRateLimitNotice(true);
-          setError(data.message);
+          setError(limitText(data) ?? data.message);
         } else {
           setError(describeStatus(res.status).text);
         }

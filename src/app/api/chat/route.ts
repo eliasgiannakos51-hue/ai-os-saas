@@ -454,13 +454,15 @@ export async function POST(request: Request) {
     }
 
     // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    // Which limit, and when it opens again: the screen says both in the
+    // reader's language (components/chat/chat-workspace.tsx).
     const breakerCheck = await checkAiCallAllowed(
       user.id,
       "chat",
       fingerprintRequest(message, conversationId, String(mentorMode), mentorPreset)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, rateLimited: true, code: breakerCheck.code, message: breakerCheck.reason });
+      return NextResponse.json({ ok: true, rateLimited: true, code: breakerCheck.code, retryAt: breakerCheck.retryAt, message: breakerCheck.reason });
     }
 
     const plan = await resolveEffectivePlan(user);
@@ -1265,7 +1267,12 @@ export async function POST(request: Request) {
                     ? `Not enough credits for this message (you have ${reservation.available}, this needs about ${streamEstimate.reserveCredits}). No credits were charged.`
                     : "Could not reserve credits for this message. No credits were charged — please try again.",
                 outOfCredits: reservation.reason === "insufficient",
-                ...(reservation.reason === "insufficient" ? { available: reservation.available, needed: streamEstimate.reserveCredits } : {}),
+                // The hold itself failed: nothing was held, so nothing was
+                // charged, and the screen says so rather than «we cannot
+                // confirm» (components/chat/use-chat-failure-words.ts).
+                ...(reservation.reason === "insufficient"
+                  ? { available: reservation.available, needed: streamEstimate.reserveCredits }
+                  : { code: "serverError", creditsRefunded: true }),
               })
             );
             controller.close();

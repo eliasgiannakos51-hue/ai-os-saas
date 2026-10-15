@@ -156,9 +156,9 @@
       "formSubmissions": "Envios de formulários",
       "routing": "Que IA é usada",
       "businessHealth": "Como vai o negócio",
-      "mine": "As minhas coisas",
+      "mine": "Biblioteca",
       "records": "Os meus registos",
-      "library": "As minhas coisas",
+      "library": "Biblioteca",
       "newEntry": "Nova entrada",
       "costs": "Custos",
       "systemHealth": "Estado do sistema",
@@ -314,7 +314,11 @@
       "chat": "Conversa",
       "tools": "Ferramentas",
       "you": "Você",
-      "label": "Navegação principal"
+      "label": "Navegação principal",
+      "balance": "Saldo: {amount} créditos",
+      "balanceLow": "Saldo baixo: {amount} créditos",
+      "balanceEmpty": "Sem créditos",
+      "balanceUnlimited": "Créditos ilimitados"
     }
   },
   "landing": {
@@ -789,10 +793,12 @@
     },
     "exportData": {
       "title": "Exportar dados",
-      "description": "Baixe tudo que você registrou nos 13 módulos como um único arquivo JSON.",
+      "description": "Descarrega todos os registos da tua conta num único ficheiro JSON.",
+      "descriptionAll": "Um ficheiro .zip com todos os teus dados, cada ficheiro que guardaste, cada site e cada jogo. Os sites também abrem fora do Ionexa.",
       "exportAll": "Exportar todos os dados",
       "exporting": "Exportando...",
       "exportFailed": "A exportação falhou — tente novamente",
+      "tooMany": "A exportação pode ser transferida {count} vezes por hora. Tente novamente dentro de uma hora — os seus dados ficam aqui.",
       "exportDownloaded": "✓ exportação transferida"
     },
     "dangerZone": {
@@ -1326,7 +1332,7 @@
           "tooShort": "Diga um pouco mais sobre o documento primeiro.",
           "tooLong": "Isso é mais longo do que uma descrição. Descreva o documento; não o cole.",
           "insufficient": "Não há créditos suficientes para este documento.",
-          "rateLimited": "Demasiados pedidos. Aguarde um minuto e tente novamente.",
+          "rateLimited": "Atingiu um limite de pedidos. Liberta-se sozinho com o tempo — tente mais tarde.",
           "unavailable": "O serviço de IA não estava disponível. Nada foi cobrado.",
           "unusable": "O modelo devolveu algo que não era um documento. Tente descrevê-lo de outra forma.",
           "notIncluded": "A redação de documentos não está incluída no seu plano.",
@@ -1477,7 +1483,7 @@
       "routeCostNow": "≈ {credits, plural, one {# crédito} other {# créditos}} ao enviar"
     },
     "timeline": {
-      "title": "As minhas coisas",
+      "title": "Biblioteca",
       "allModules": "Todos os módulos",
       "showOnly": "Mostrar apenas: {module}",
       "rangeToday": "Hoje",
@@ -1814,7 +1820,8 @@
         "pagesShort": "Pediu {asked} páginas e foram criadas {made}. Diga qual falta e eu acrescento-a."
       },
       "regeneratePaid": "Regenerar · cerca de {count} créditos",
-      "regenerateNoCredits": "Créditos insuficientes para outra regeneração: são precisos cerca de {needed} e tem {available}. Nada foi iniciado."
+      "regenerateNoCredits": "Créditos insuficientes para outra regeneração: são precisos cerca de {needed} e tem {available}. Nada foi iniciado.",
+      "imageUploadFailed": "As imagens de referência não foram carregadas. Nada foi cobrado — tenta de novo."
     },
     "marketplace": {
       "title": "Ajudantes prontos",
@@ -2405,7 +2412,7 @@
       "askStillRunning": "Ainda a ler — está a demorar. Continua com a página fechada; volta e pergunta de novo para veres a resposta.",
       "askStalled": "A pergunta parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
       "askNoCredits": "Créditos insuficientes para esta pergunta. Nada foi cobrado.",
-      "askRateLimited": "Demasiadas perguntas na última hora. Tenta de novo daqui a pouco — nada foi cobrado.",
+      "askRateLimited": "Atingiste o limite de perguntas. Liberta-se sozinho com o tempo — tenta mais tarde. Nada foi cobrado.",
       "askFailed": "A pergunta não foi respondida: o serviço de IA não respondeu. Nada foi cobrado — tenta de novo daqui a pouco.",
       "questionLength": "{used, number} de {max, number} caracteres",
       "questionAtLimit": "Atingiu o limite de {max, number} caracteres para uma pergunta.",
@@ -2439,7 +2446,9 @@
         "failed": "A página não abriu. Tente novamente.",
         "openPdf": "Abrir o PDF nesta página",
         "unread": "De «{name}» só foram lidas as primeiras {read} de {total} páginas; o que vem depois não está nesta resposta."
-      }
+      },
+      "collectionName": "Que nome dar a esta coleção de {count, plural, one {# ficheiro} other {# ficheiros}}? Escreve o nome abaixo.",
+      "collectionsHint": "Seleciona ficheiros e guarda-os como coleção: com um toque ficam todos selecionados de novo."
     },
     "deepResearch": {
       "title": "Procura a fundo",
@@ -2459,7 +2468,7 @@
       "runError": "Não foi possível concluir o relatório.",
       "refused": {
         "noCredits": "Créditos insuficientes para um relatório de pesquisa. Nada foi cobrado.",
-        "rateLimited": "Demasiados relatórios em pouco tempo. Tenta de novo daqui a pouco.",
+        "rateLimited": "Atingiste um limite de pedidos. Liberta-se sozinho com o tempo — tenta mais tarde.",
         "unavailable": "O serviço de IA não respondeu. Nada foi cobrado — tenta de novo daqui a pouco."
       },
       "failed": {
@@ -2928,7 +2937,7 @@
         "not_included": "As reuniões não estão incluídas neste plano.",
         "out_of_minutes": "Usaste os minutos deste mês.",
         "unsupported_type": "Esse formato de áudio não é suportado.",
-        "rate_limited": "Demasiadas gravações na última hora. Tenta mais tarde.",
+        "rate_limited": "Atingiste um limite de pedidos. Liberta-se sozinho com o tempo — tenta mais tarde.",
         "empty": "Essa gravação estava vazia.",
         "failed": "Algo correu mal. Nada foi cobrado."
       },
@@ -3008,6 +3017,7 @@
       "title": "Todas as ferramentas",
       "description": "Cada ferramenta, com uma linha sobre o que faz.",
       "orPress": "Ou carregue em ⌘K e escreva o nome, ou descreva-o no campo do Início.",
+      "tilesHidden": "Descreva o que quer no campo do Início ou, no computador, carregue em ⌘K e escreva o nome de uma ferramenta.",
       "search": "Encontrar uma ferramenta",
       "searchLabel": "Pesquisar ferramentas",
       "noMatch": "Nenhuma ferramenta se chama «{query}». Descreva-a no campo do Início.",
@@ -3098,7 +3108,15 @@
         "design": "Aspeto",
         "held": "A nossa revisão de segurança reteve esta alteração, por isso o site ficou como estava.",
         "busy": "Já está a ser feita uma alteração a este site. Espera que termine e volta a pedi-la.",
-        "offTopic": "Aqui faço sites. Diz-me que site queres: para que negócio ou objetivo, que secções, que estilo."
+        "offTopic": "Aqui faço sites. Diz-me que site queres: para que negócio ou objetivo, que secções, que estilo.",
+        "photosAttach": "Adicionar fotos — logótipo, produtos, o espaço",
+        "photos": "{count} de {max} fotos — seguem com a tua próxima mensagem.",
+        "photoType": "Apenas fotos JPG, PNG ou WebP.",
+        "photosFailed": "Não foi possível carregar as fotos, por isso nada foi enviado. Tenta novamente.",
+        "versions": "Todas as versões",
+        "versionsHint": "Toca numa para a veres. O que escreveres a seguir continua a alterar a mais recente.",
+        "liveVersions": "Versões publicadas",
+        "undid": "Anulado: {change}"
       },
       "box": {
         "only": "Muda só: {name}",
@@ -3190,7 +3208,7 @@
         "tooShort": "Diz um pouco mais sobre a imagem.",
         "tooLong": "É demasiado longo; até {limit} caracteres.",
         "insufficient": "Não há créditos suficientes para isto.",
-        "rateLimited": "Demasiados pedidos ao mesmo tempo. Tenta novamente daqui a pouco.",
+        "rateLimited": "Atingiste um limite de pedidos. Liberta-se sozinho com o tempo — tenta mais tarde.",
         "refused": "O fornecedor recusou criar esta imagem. Tenta outra descrição; nada foi cobrado.",
         "busy": "Esta imagem já está a mudar. Espera que termine.",
         "gone": "Essa imagem já não existe.",
@@ -3372,7 +3390,7 @@
         "empty": "Escreva mais algumas palavras sobre o que deve acontecer.",
         "tooLong": "O texto está longo; até {limit} caracteres.",
         "insufficient": "Créditos insuficientes para isso.",
-        "rateLimited": "Muitos pedidos ao mesmo tempo. Tente de novo daqui a pouco.",
+        "rateLimited": "Atingiu um limite de pedidos. Liberta-se sozinho com o tempo — tente mais tarde.",
         "busy": "Esta automação está ocupada. Espere ela terminar.",
         "gone": "Esta automação não existe mais.",
         "unavailable": "A AI não está respondendo agora. Nada foi cobrado; tente de novo.",
@@ -3443,7 +3461,7 @@
         "no_credits": "Créditos insuficientes",
         "not_included": "Não incluído no seu plano",
         "not_configured": "Ainda não está ativo",
-        "rate_limited": "Demasiados pedidos ao mesmo tempo",
+        "rate_limited": "Limite de pedidos atingido — tente mais tarde",
         "refused": "A ferramenta recusou",
         "offline": "Sem ligação",
         "stopped": "Parado",
@@ -3465,7 +3483,7 @@
       },
       "errors": {
         "projectLimit": "Atingiu o limite de projetos do seu plano ({limit}).",
-        "rateLimited": "Demasiados pedidos ao mesmo tempo. Tente novamente daqui a pouco.",
+        "rateLimited": "Atingiu um limite de pedidos. Liberta-se sozinho com o tempo — tente mais tarde.",
         "file": "Não foi possível ler esse ficheiro. Experimente um ficheiro CSV ou Excel.",
         "failed": "Algo correu mal. Nada foi cobrado.",
         "offline": "Sem ligação. Verifique a rede e tente novamente."
@@ -3553,7 +3571,7 @@
       "chargedNothing": "Sem custos.",
       "open": "Abrir",
       "insufficient": "Créditos insuficientes para esta tradução. Nada foi cobrado.",
-      "dailyLimit": "Atingiu o limite de novos sites de hoje. Tente amanhã.",
+      "dailyLimit": "Atingiu o limite de novos sites em 24 horas. Conta as últimas 24 horas, por isso volta a abrir dentro de um dia.",
       "notIncluded": "O Site não está incluído no seu plano.",
       "unusable": "A resposta não era utilizável e nada foi escrito. Só é cobrado o que foi gasto.",
       "failed": "Não foi possível fazer a tradução. Não foram cobrados créditos."
@@ -3590,7 +3608,7 @@
         "insufficient": "Créditos insuficientes. Nada foi cobrado.",
         "unavailable": "O serviço não está a responder agora. Nada foi cobrado.",
         "unusable": "A resposta não era um jogo jogável e não foi guardada. Só é cobrado o que foi gasto.",
-        "rateLimited": "Demasiados pedidos ao mesmo tempo. Tente daqui a pouco.",
+        "rateLimited": "Atingiu um limite de pedidos. Liberta-se sozinho com o tempo — tente mais tarde.",
         "notIncluded": "Os jogos vêm com os planos que têm o Site.",
         "tooLong": "A descrição é demasiado longa.",
         "stopped": "Parado. Nada foi cobrado.",
@@ -3629,7 +3647,7 @@
       "za": "Z–A"
     },
     "emptyWhat": "Aqui vive tudo o que registas sobre {module}.",
-    "emptyWhy": "Tudo o que registares aqui entra na tua Cronologia e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
+    "emptyWhy": "Tudo o que registares aqui entra na tua Biblioteca e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
     "emptyExample": "Começa com: «{example}»",
     "examples": {
       "competitors": "Notion — o concorrente mais próximo no preço",
@@ -4095,8 +4113,8 @@
       "next": "Compre um pacote de créditos ou mude para um plano maior e a mesma ação passa — nada do que escreveu se perdeu."
     },
     "rate_limited": {
-      "what": "Demasiadas destas na última hora",
-      "next": "Esta ação tem um limite por hora para que uma conta não gaste o orçamento partilhado. Espere alguns minutos e tente de novo — o limite é deslizante, não reinicia à hora certa."
+      "what": "Atingiu o limite desta ação",
+      "next": "Esta ação tem um limite para que uma conta não gaste o orçamento partilhado. É deslizante, não reinicia a uma hora fixa, e liberta-se sozinho com o tempo — tente de novo mais tarde."
     },
     "timeout": {
       "what": "Isto demorou demasiado e foi parado",
@@ -4205,7 +4223,7 @@
     },
     "businessModule": {
       "is": "Uma tabela que mantém você, para um tipo de trabalho.",
-      "does": "Adiciona linhas à mão ou pelo Create Studio, e a IA lê-as: o Chat, a pesquisa nos seus registos, o Histórico e a reflexão semanal bebem daqui, e qualquer linha pode ser ligada a uma linha de outro módulo.",
+      "does": "Adiciona linhas à mão ou pelo Create Studio, e a IA lê-as: o Chat, a pesquisa nos seus registos, a Biblioteca e a reflexão semanal bebem daqui, e qualquer linha pode ser ligada a uma linha de outro módulo.",
       "doesNot": "Não se preenche sozinha. Aqui não chega nada do seu email, do seu banco ou das suas conversas — uma tabela vazia está vazia porque nada foi introduzido — e apagar uma linha aqui retira-a de todo o lado onde aparece."
     },
     "documents": {
@@ -4383,7 +4401,7 @@
     "retry": "Tentar de novo",
     "creditHistory": "Ver histórico de créditos",
     "credits": {
-      "refunded": "Os teus créditos foram devolvidos.",
+      "refunded": "Nada foi cobrado.",
       "notCharged": "Não te foi cobrado nada.",
       "charged": "Esta tentativa consumiu créditos.",
       "unverified": "Daqui não conseguimos confirmar se foi cobrado."
@@ -4406,8 +4424,8 @@
         "next": "Verifica os campos assinalados e envia outra vez."
       },
       "rateLimited": {
-        "what": "Demasiados pedidos em pouco tempo.",
-        "next": "Espera cerca de um minuto e tenta mais uma vez."
+        "what": "Atingiste o limite de pedidos para isto.",
+        "next": "O limite liberta-se sozinho com o tempo — tenta mais tarde."
       },
       "insufficientCredits": {
         "what": "Não tens créditos suficientes para isto.",
@@ -4444,6 +4462,22 @@
       "unknown": {
         "what": "Esta ação não foi concluída.",
         "next": "Tenta outra vez e contacta o apoio se acontecer de novo."
+      },
+      "siteDailyLimit": {
+        "what": "Atingiste o limite de novos sites em 24 horas.",
+        "next": "Conta as últimas 24 horas, por isso volta a abrir dentro de um dia."
+      },
+      "hourlyLimit": {
+        "what": "Atingiste o limite de pedidos de IA numa hora.",
+        "next": "Conta os últimos 60 minutos, por isso volta a abrir dentro de uma hora."
+      },
+      "repeatLimit": {
+        "what": "O mesmo pedido foi enviado vezes demais seguidas.",
+        "next": "Volta a estar disponível dentro de 15 minutos."
+      },
+      "platformLimit": {
+        "what": "O serviço de IA atingiu o limite de hoje de toda a plataforma.",
+        "next": "Volta a abrir na mudança de dia, às 00:00 UTC."
       }
     },
     "boundary": {
@@ -4452,7 +4486,8 @@
       "reload": "Recarregar a página",
       "section": "Não foi possível mostrar esta secção.",
       "sectionBody": "O resto da página não é afetado. Recarregar costuma resolver."
-    }
+    },
+    "retryAt": "{day, select, today {Podes tentar de novo depois das {time}.} other {Podes tentar de novo amanhã depois das {time}.}}"
   },
   "aiExamples": {
     "createStudio": {
@@ -4815,7 +4850,7 @@
       "tooShort": "Conta um pouco mais sobre a apresentação primeiro.",
       "tooLong": "Ultrapassa os {limit} caracteres. Descreve a apresentação, não a palestra inteira.",
       "insufficient": "Créditos insuficientes para esta apresentação.",
-      "rateLimited": "Demasiados pedidos: espera um minuto e tenta de novo.",
+      "rateLimited": "Atingiste um limite de pedidos. Liberta-se sozinho com o tempo — tenta mais tarde.",
       "unavailable": "Não foi possível contactar o serviço de IA. Nada foi cobrado.",
       "unusable": "O modelo devolveu algo que não era uma apresentação. Tenta descrevê-la de outra forma.",
       "failed": "Não funcionou: tenta de novo.",
@@ -4899,7 +4934,7 @@
       "tooShort": "Conta um pouco mais primeiro.",
       "tooLong": "Ultrapassa os {limit} caracteres. Diz sobre o que é a publicação, não a história toda.",
       "insufficient": "Créditos insuficientes para estas publicações.",
-      "rateLimited": "Demasiados pedidos: espera um minuto e tenta de novo.",
+      "rateLimited": "Atingiste um limite de pedidos. Liberta-se sozinho com o tempo — tenta mais tarde.",
       "unavailable": "Não foi possível contactar o serviço de IA. Nada foi cobrado.",
       "unusable": "O modelo devolveu algo que não eram publicações. Tenta descrevê-lo de outra forma.",
       "failed": "Não funcionou: tenta de novo."

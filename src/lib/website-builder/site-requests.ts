@@ -1,6 +1,6 @@
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { ApiError } from "@/lib/errors/api-error";
-import type { ApiErrorPayload } from "@/lib/errors/error-codes";
+import { isTimedLimitCode, type ApiErrorPayload } from "@/lib/errors/error-codes";
 import type { UserWebsite } from "@/types/user-website";
 
 /**
@@ -41,10 +41,14 @@ export type SiteStart =
   | { kind: "started"; record: UserWebsite }
   /**
    * The server answered but made nothing: a brief that is not a website
-   * (`offTopic`), with the classifier's sentence — which may be its
-   * English default (lib/website-builder.ts, DEFAULT_OFF_TOPIC_MESSAGE).
+   * (`offTopic`), or a failure. The classifier's own sentence is NOT
+   * carried: it may be its English default (lib/website-builder.ts,
+   * DEFAULT_OFF_TOPIC_MESSAGE), and both readers — components/chat/site-pane.tsx
+   * and components/website-builder/website-shell.tsx — say it in the
+   * reader's language from `offTopic` alone. A field nobody reads is an
+   * invitation to put the English back.
    */
-  | { kind: "notMade"; offTopic: boolean; message: string | null }
+  | { kind: "notMade"; offTopic: boolean }
   /**
    * Refused: the plan, the credits, today's limit, the size, a failure.
    * `code` is the route's own ("not_included" when the plan has no Site,
@@ -66,25 +70,36 @@ function routeSaid(data: Record<string, unknown> | null): RouteSaid {
  * A refusal the routes answer with 200 and `rateLimited` — before any work,
  * so nothing was charged. Short credits are a 402 in lib/errors/error-codes.ts
  * terms (the route names them with `code: "insufficientCredits"`); a limit
- * is a 429.
+ * is a 429, by its own name when the route gives one — the 24-hour limit
+ * on new sites, the hour's AI requests, the same request repeated, the
+ * platform's day (`siteDailyLimit`, `hourlyLimit`, `repeatLimit`,
+ * `platformLimit`) — with `retryAt`, when it opens again. Before
+ * 2026-10-14 every limit here was `rateLimited`, «wait about a minute».
  */
-function refusedBeforeWork(data: { code?: unknown; message?: unknown } | null): ApiError {
+export function refusedBeforeWork(data: { code?: unknown; message?: unknown; retryAt?: unknown } | null): ApiError {
   const short = data?.code === "insufficientCredits";
   return new ApiError(short ? 402 : 429, {
     error: typeof data?.message === "string" ? data.message : undefined,
-    code: short ? "insufficientCredits" : "rateLimited",
+    code: short ? "insufficientCredits" : isTimedLimitCode(data?.code) ? data.code : "rateLimited",
+    retryAt: typeof data?.retryAt === "string" ? data.retryAt : undefined,
   });
 }
 
 /**
  * Any other refusal, as an ApiError whose `message` is the route's own
  * sentence, or empty when it gave none — what `error` was before it became
- * an ApiError. Chat's Site pane (components/chat/site-pane.tsx) still says
- * a refusal through getErrorMessage, which shows a message and falls back
- * to its own translated sentence on an empty one; with ApiError's default
- * it read «Request failed with 200» for a change the safety review held
- * back (found 2026-10-09). The shell reads only the status, the code and
- * the credits (lib/errors/use-error-text.ts).
+ * an ApiError.
+ *
+ * NOBODY SHOWS THAT SENTENCE ANY MORE. Chat's Site pane
+ * (components/chat/site-pane.tsx) used to say a refusal through
+ * getErrorMessage, which showed the route's message and fell back to a
+ * translated one when it was empty; with ApiError's default it read
+ * «Request failed with 200» for a change the safety review held back
+ * (found 2026-10-09). Since 2026-10-14 both the pane and the shell say
+ * every refusal from its status, its code and its credits
+ * (lib/errors/use-error-text.ts), in the reader's language. The empty
+ * string is kept so a future reader of `message` still gets nothing
+ * English rather than ApiError's default.
  */
 function refusal(status: number, data: ApiErrorPayload | null, prose: unknown): ApiError {
   return new ApiError(status, { ...(data ?? {}), error: typeof prose === "string" ? prose : "" });
@@ -94,18 +109,26 @@ export async function startSiteGeneration(input: {
   name: string;
   description: string;
   skipClarification: boolean;
+  /**
+   * The reference photos already in the account's folder of the reference
+   * bucket (lib/website-builder/site-photos.ts). The route re-checks each
+   * belongs to the caller and stores them for the worker, which reads them
+   * from there — never from this request again. Chat's Site pane sends none.
+   */
+  referenceImagePaths?: string[];
 }): Promise<SiteStart> {
+  const referenceImagePaths = input.referenceImagePaths ?? [];
   const res = await fetchWithAuthRetry("/api/websites/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),
+    body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths, skipClarification: input.skipClarification }),
   });
   const data = await res.json().catch(() => null);
   if (!res.ok || !data?.ok) return { kind: "refused", error: refusal(res.status, data, data?.error), ...routeSaid(data) };
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
   if (!data.generated) {
     if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data), ...routeSaid(data) };
-    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };
+    return { kind: "notMade", offTopic: data.offTopic === true };
   }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the
@@ -117,7 +140,7 @@ export async function startSiteGeneration(input: {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: true,
-      body: JSON.stringify({ websiteId: record.id, description: input.description, referenceImagePaths: [] }),
+      body: JSON.stringify({ websiteId: record.id, description: input.description, referenceImagePaths }),
     });
   }
   return { kind: "started", record };
@@ -177,34 +200,49 @@ export type SiteChange =
  * A change in words. `pageSlug` names the page it is about ("" or absent:
  * the home page); `section` the part of THAT page, by number.
  */
-export async function requestSiteChange(input: { websiteId: string; changeRequest: string; section?: number | null; pageSlug?: string }): Promise<SiteChange> {
+export async function requestSiteChange(input: {
+  websiteId: string;
+  changeRequest: string;
+  section?: number | null;
+  pageSlug?: string;
+  /** Photos given with this change, as for a new site; the route reads them for this one change. */
+  referenceImagePaths?: string[];
+}): Promise<SiteChange> {
   const res = await fetchWithAuthRetry("/api/websites/edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       websiteId: input.websiteId,
       changeRequest: input.changeRequest,
-      referenceImagePaths: [],
+      referenceImagePaths: input.referenceImagePaths ?? [],
       pageSlug: input.pageSlug ?? "",
       ...(input.section === null || input.section === undefined ? {} : { section: input.section }),
     }),
   });
   const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok || !data.edited) {
-    const reason =
-      data?.reason === "unknown_page" || data?.reason === "invalid_page"
-        ? "pageGone"
-        : data?.reason === "box_lost" || data?.reason === "bad_section"
-          ? "boxLost"
-          : data?.flagged === true
-            ? "held"
-            : data?.busy === true
-              ? "busy"
-              : "other";
-    const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : refusal(res.status, data, data?.error ?? data?.message);
-    return { kind: "refused", reason, error, ...routeSaid(data) };
-  }
+  if (!res.ok || !data?.ok || !data.edited) return siteChangeRefusal(res, data);
   return { kind: "changed", record: data.record as UserWebsite };
+}
+
+/**
+ * A change api/websites/edit did not make, read once: by requestSiteChange
+ * above and by the Site page that sends its own reference images
+ * (components/website-builder/website-builder-workspace.tsx, while the
+ * switch `tool-shell` is off), so both say the same refusal the same way.
+ */
+export function siteChangeRefusal(res: { ok: boolean; status: number }, data: Record<string, unknown> | null): Extract<SiteChange, { kind: "refused" }> {
+  const reason =
+    data?.reason === "unknown_page" || data?.reason === "invalid_page"
+      ? "pageGone"
+      : data?.reason === "box_lost" || data?.reason === "bad_section"
+        ? "boxLost"
+        : data?.flagged === true
+          ? "held"
+          : data?.busy === true
+            ? "busy"
+            : "other";
+  const error = res.ok && data?.ok && data.rateLimited ? refusedBeforeWork(data) : refusal(res.status, data as ApiErrorPayload | null, data?.error ?? data?.message);
+  return { kind: "refused", reason, error, ...routeSaid(data) };
 }
 
 /** Ask the worker to stop a site that is being made. True when the server took the request. */

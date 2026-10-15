@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { X, Mic } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
+import { useChatFailureWords } from "@/components/chat/use-chat-failure-words";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { useRecorder } from "@/components/voice/use-recorder";
 import { useAudioLevel, type AudioLevelSource } from "@/components/voice/use-audio-level";
@@ -61,6 +62,11 @@ export function VoiceConversation({
   const t = useTranslations("voice");
   const locale = useLocale();
   const { addToast } = useToast();
+  // What /api/chat says when it does not answer, in the reader's language
+  // (components/chat/use-chat-failure-words.ts): a limit by its name and
+  // when it opens again, out of credits with the numbers, a failure with
+  // what the route says about the money.
+  const chatFailure = useChatFailureWords();
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const availability = useVoiceAvailability();
   const voiceError = useVoiceErrorText();
@@ -162,8 +168,13 @@ export function VoiceConversation({
         // Where the person is: what «αύριο» means when Chat reads their calendar.
         body: JSON.stringify({ message: question, conversationId: conversationIdRef.current, timeZone: resolveBrowserTimeZone() }),
       });
-      if (!chatResponse.ok || !chatResponse.body) {
-        addToast(t("errors.failed"), "error");
+      // A refusal comes back as JSON, not as the stream: a limit or no
+      // credits is a 200 with `rateLimited`. Read as a stream it held no
+      // event this loop knows, and the turn ended in silence; the route's
+      // English sentence, where one was shown, was English on every screen.
+      if (!(chatResponse.headers.get("content-type") ?? "").includes("application/x-ndjson") || !chatResponse.body) {
+        const data = await chatResponse.json().catch(() => null);
+        addToast(chatFailure.refusal(chatResponse.status, data), "error");
         setState("idle");
         return;
       }
@@ -187,8 +198,8 @@ export function VoiceConversation({
           conversationIdRef.current = event.conversationId;
         } else if (event.type === "delta" && typeof event.text === "string") {
           answer += event.text;
-        } else if (event.type === "error" && typeof event.error === "string") {
-          addToast(event.error, "error");
+        } else if (event.type === "error") {
+          addToast(chatFailure.streamError(event), "error");
         }
       });
       if (abandonedRef.current) return;

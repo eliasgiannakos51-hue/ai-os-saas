@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     // check since it's cheaper and should reject first.
     const breakerCheck = await checkAiCallAllowed(user.id, "create", fingerprintRequest(message));
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, matched: false, message: breakerCheck.reason });
+      return NextResponse.json({ ok: true, matched: false, code: breakerCheck.code, retryAt: breakerCheck.retryAt, message: breakerCheck.reason });
     }
 
     // The clarifying-questions pre-check moved into the worker with the

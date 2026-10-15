@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useLimitText } from "@/lib/errors/use-error-text";
 import { HelpTip } from "@/components/ui/help-tip";
 import {
   AlertTriangle,
@@ -86,6 +87,9 @@ export function CreateStudio() {
   // so this component stays sliceable; destinationLabelKey does the split.
   const tDestination = useTranslations(DESTINATION_NAMESPACE);
   const tCommon = useTranslations("common");
+  // A limit the route named, with the time it opens again, in the reader's
+  // language (lib/errors/use-error-text.ts) — not the route's English `message`.
+  const limitText = useLimitText();
   const { accountCreditPriceEur, planSlug } = useCredits();
   const studio = useCreateStudio();
 
@@ -160,7 +164,7 @@ export function CreateStudio() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setDetectError(getErrorMessage(data?.error, t("detectFailed")));
+        setDetectError(limitText(data) ?? getErrorMessage(data?.error, t("detectFailed")));
         return;
       }
       if (data.outOfCredits) {

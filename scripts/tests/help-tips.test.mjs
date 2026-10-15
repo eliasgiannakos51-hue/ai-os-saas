@@ -491,6 +491,19 @@ check(
 );
 
 console.log("\n== 5. the pages render it ==");
+// A HEADER LEFT BARE ON PURPOSE, each with the code that makes it so and
+// why. All tools with its squares hidden (the switch all-tools-tiles,
+// 2026-10-14) draws its title over one line and nothing else; its tip
+// says the page "shows every tool", which is then false. The exception is
+// held both ways: it applies only while that branch is in the file, and a
+// file that no longer has it fails here until the entry goes.
+const BARE_ON_PURPOSE = {
+  "src/app/dashboard/tools/page.tsx": {
+    headers: 1,
+    while: 'if (!(await isFeatureOn("all-tools-tiles", user))) {',
+    why: "the squares are hidden, and help.tools describes them",
+  },
+};
 // ON EVERY <PageHeader> THE PAGE HAS, not on one of them.
 //
 // THIS CHECK USED TO BE `src.includes(helpKey="...")` AND IT PASSED WHILE
@@ -555,10 +568,19 @@ for (const tip of HELP_TIPS) {
         (n, prefix) => n + (src.match(new RegExp(`helpKey="${prefix}"`, "g")) ?? []).length,
         0,
       );
+      const bare = BARE_ON_PURPOSE[path];
+      if (bare) {
+        check(
+          `${tip.id}: ${path} leaves ${bare.headers} header bare only while it still has the branch that needs it (${bare.why})`,
+          src.includes(bare.while),
+          `the exception names ${bare.while}, which is no longer in ${path}: remove it from BARE_ON_PURPOSE`,
+        );
+      }
+      const bareHere = bare && src.includes(bare.while) ? bare.headers : 0;
       check(
-        `${tip.id}: all ${headers} headers in ${path} carry one of its ${keysForFile.length} tips`,
-        covered === headers,
-        `${covered} of ${headers} <PageHeader> carry one of ${keysForFile.join(", ")} — ${path}`,
+        `${tip.id}: all ${headers - bareHere} headers in ${path} carry one of its ${keysForFile.length} tips`,
+        covered === headers - bareHere,
+        `${covered} of ${headers - bareHere} <PageHeader> carry one of ${keysForFile.join(", ")} — ${path}`,
       );
     }
   }

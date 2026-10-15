@@ -184,8 +184,10 @@ export function CommandPalette({
   // is called that. A third of this sidebar is a friendly phrase rather
   // than a noun («Δες τι λένε τα νούμερα» for analytics), so the label
   // is the one word a user is least likely to have in mind.
-  // lib/palette-aliases.ts holds the extra names, English and Greek
-  // only, and says so.
+  // lib/palette-aliases.ts holds the extra names: English and Greek by
+  // hand, and in the other eight locales one item each — the name the
+  // Library had in that language until 2026-10-14, so the old name still
+  // finds it. That file says exactly this, and its gate holds it.
   const pageResults = useMemo(
     () =>
       filterAndRankCandidates(

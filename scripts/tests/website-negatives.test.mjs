@@ -319,7 +319,10 @@ console.log("\n== 6. the owner is told, in their language ==");
   check("parseGenerationNotes keeps the five well-formed notes (a stop with 0 credits included) and drops ten malformed ones", parsed.length === 5 && parsed.map((n) => n.kind).join() === "removedFeature,removedPage,pageCap,mapZoom,stopped", JSON.stringify(parsed));
   const proc2 = read(PROCESS);
   check("a stop writes its own note beside the failed status, with the credits charged", /generation_notes: \[\.\.\.notes, \{ kind: "stopped", credits: settlement\.creditsCharged \}\],/.test(proc2));
-  check("...and the workspace shows THAT, translated, in place of the English sentence", /stoppedNote \? describeNote\(stoppedNote\) : previewWebsite\.error_message/.test(read(WORKSPACE)));
+  // failedLine (2026-10-14): the stop's own note, else the page's sentence
+  // with what is known about the credits — never error_message.
+  check("...and the workspace shows THAT, translated, in place of the English sentence",
+    /if \(stopped\) return describeNote\(stopped\);/.test(read(WORKSPACE)) && /\{failedLine\(previewWebsite\)\}/.test(read(WORKSPACE)) && !/previewWebsite\.error_message \?\?/.test(read(WORKSPACE)));
   for (const bad of [undefined, null, "[]", {}, 0]) check(`parseGenerationNotes(${JSON.stringify(bad) ?? "undefined"}) is []`, same(notes.parseGenerationNotes(bad), []));
 }
 

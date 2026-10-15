@@ -39,7 +39,11 @@
  *      language, through the real /api/chat.
  *  11. The model provider fails: the first message reaches a stand-in
  *      provider that answers Anthropic's own overloaded error, and the
- *      screen says so in its language and keeps what was written.
+ *      screen says so in its language and keeps what was written — and
+ *      that nothing was charged, as the route says (2026-10-14).
+ *  11b. The limits (2026-10-14): the platform's day and the hour's AI
+ *      requests, each said by its name with the time it opens again on
+ *      the reader's clock — never «about a minute» or «a few minutes».
  *
  *   ALL TOOLS IN EVERY OTHER LANGUAGE OF messages/ (added 2026-10-09)
  *  12. Every square, the new tools' included, drawn with its name in that
@@ -55,6 +59,10 @@ import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 import { chromiumPath } from "./lib/chromium.mjs";
 import { loadTs } from "./load-ts.mjs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const IntlMessageFormat = require("intl-messageformat").default ?? require("intl-messageformat").IntlMessageFormat;
 
 let pass = 0;
 const failures = [];
@@ -71,7 +79,7 @@ function check(name, cond, detail) {
 // ---- the accounts, as the stand-in answers them
 const MEMBER = "owner@example.com";
 const STAFF = "tester@example.com";
-const STATE = { credits: 3000, freeUsed: 0, flags: [], conversationSeq: 0, consumed: 0, released: 0, limit: 0, atCapacity: false };
+const STATE = { credits: 3000, freeUsed: 0, flags: [], conversationSeq: 0, consumed: 0, released: 0, limit: 0, atCapacity: false, hourly: [] };
 function account({ email = MEMBER, tier = "growth", name = null, credits = 3000, freeUsed = 0, flags = [] } = {}) {
   MOCK_USER.email = email;
   MOCK_USER.user_metadata = { subscription_tier: tier, ...(name ? { display_name: name } : {}) };
@@ -79,6 +87,7 @@ function account({ email = MEMBER, tier = "growth", name = null, credits = 3000,
   STATE.freeUsed = freeUsed;
   STATE.flags = flags;
   STATE.atCapacity = false;
+  STATE.hourly = [];
 }
 // The same answer shape the stand-in gives for a table: an object when
 // the client asked for one row, a count in the header when it asked.
@@ -106,10 +115,30 @@ function handle({ req, res, url, body }) {
       free_chat_period_start: new Date().toISOString(),
     }]);
   }
-  if (p === "/rest/v1/feature_flags") return rows(req, res, STATE.flags);
+  // All tools' squares are behind `all-tools-tiles` since 2026-10-14, and
+  // it starts at «Κανείς»; this walks the squares, so it opens them first
+  // (a row the account's own list may still override).
+  if (p === "/rest/v1/feature_flags") return rows(req, res, [{ key: "all-tools-tiles", audience: "everyone" }, ...STATE.flags]);
   // The platform's calls today, which lib/ai-circuit-breaker.ts holds
   // against MAX_DAILY_AI_CALLS before any AI call.
   if (p === "/rest/v1/daily_ai_spend_tracking" && req.method === "GET") return rows(req, res, STATE.atCapacity ? [{ total_calls: 10_000_000 }] : []);
+  // The hour's AI requests (lib/rate-limit.ts): the atomic limiter says no
+  // while STATE.hourly holds a full hour, and the log is read back, newest
+  // first, for when the hour opens again.
+  if (p === "/rest/v1/rpc/consume_rate_limit") {
+    let scope = "";
+    try { scope = JSON.parse(body || "{}").p_scope ?? ""; } catch {}
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(!(scope === "ai_hourly_user" && STATE.hourly.length >= 20)));
+    return true;
+  }
+  if (p === "/rest/v1/rate_limit_log" && req.method === "GET") {
+    const scope = url.searchParams.get("scope")?.replace(/^eq\./, "");
+    const offset = Number(url.searchParams.get("offset") ?? 0);
+    const limit = Number(url.searchParams.get("limit") ?? 1000);
+    const hits = scope === "ai_hourly_user" ? [...STATE.hourly].sort((a, b) => b.localeCompare(a)) : [];
+    return rows(req, res, hits.slice(offset, offset + limit).map((created_at) => ({ created_at })));
+  }
   // The free message, claimed and given back as the RPCs of
   // supabase/migrations do it: one row, granted or not.
   if (p === "/rest/v1/rpc/consume_free_chat") {
@@ -450,21 +479,61 @@ try {
       check(`${tag}: ...with nothing in another language`, wrongLanguage(locale, refusedText).length === 0, wrongLanguage(locale, refusedText).join(", "));
       await shot("4-chat-out-of-credits");
 
-      // ---- the service at its daily limit (the circuit breaker)
+      // ---- the limits (the circuit breaker, lib/ai-circuit-breaker.ts),
+      // each by its name and the time it opens again, on the reader's
+      // clock (2026-10-14: the platform's day read «usually clears within a
+      // few minutes», the hour's AI requests «wait about a minute»).
+      const opensAt = (iso) =>
+        page.evaluate(({ iso, locale }) => {
+          const at = new Date(Math.ceil(Date.parse(iso) / 60000) * 60000);
+          const clock = locale.startsWith("en") ? { timeStyle: "short" } : { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+          const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+          return { time: new Intl.DateTimeFormat(locale, clock).format(at), day: day(at) === day(new Date()) ? "today" : "tomorrow" };
+        }, { iso, locale });
+      const opensLine = (values) => new IntlMessageFormat(L.errors.retryAt, locale).format(values);
+      const limitText = async () => {
+        await press(field);
+        await field.fill(ask);
+        const reply = page.waitForResponse((r) => r.url().endsWith("/api/chat") && r.request().method() === "POST", { timeout: 30000 }).catch(() => null);
+        await press(page.locator('form button[type="submit"]').first());
+        const answered = await reply;
+        await page.waitForTimeout(500);
+        const body = answered ? await answered.json().catch(() => null) : null;
+        const text = (await page.locator('[data-testid="chat-thread"]').evaluate((n) => n.parentElement.parentElement.innerText)).replace(ask, "");
+        return { body, text };
+      };
       account({ tier: "growth", name: "Ελένη" });
       STATE.atCapacity = true;
       await openChat();
-      await press(field);
-      await field.fill(ask);
-      sent = page.waitForResponse((r) => r.url().endsWith("/api/chat") && r.request().method() === "POST", { timeout: 30000 }).catch(() => null);
-      await press(page.locator('form button[type="submit"]').first());
-      await sent;
-      await page.waitForTimeout(500);
-      const capacityText = (await page.locator('[data-testid="chat-thread"]').evaluate((n) => n.parentElement.parentElement.innerText)).replace(ask, "");
-      check(`${tag}: the service at its daily limit: said in ${locale} — «${L.errors.codes.upstreamUnavailable.what}»`,
-        capacityText.includes(L.errors.codes.upstreamUnavailable.what), capacityText.slice(-300));
-      check(`${tag}: ...with nothing in another language`, wrongLanguage(locale, capacityText).length === 0, wrongLanguage(locale, capacityText).join(", "));
+      const capacity = await limitText();
+      const midnight = new Date();
+      midnight.setUTCHours(24, 0, 0, 0);
+      const capacityOpens = opensLine(await opensAt(midnight.toISOString()));
+      check(`${tag}: the platform's day: the route names it and when it opens (${capacity.body?.code}, ${capacity.body?.retryAt})`,
+        capacity.body?.code === "platformLimit" && capacity.body?.retryAt === midnight.toISOString(), JSON.stringify(capacity.body));
+      check(`${tag}: ...said in ${locale}: «${L.errors.codes.platformLimit.what} ${capacityOpens}»`,
+        capacity.text.includes(L.errors.codes.platformLimit.what) && capacity.text.includes(capacityOpens), capacity.text.slice(-300));
+      check(`${tag}: ...not «the AI service is not answering… a few minutes»`,
+        !capacity.text.includes(L.errors.codes.upstreamUnavailable.what) && !capacity.text.includes(L.errors.codes.upstreamUnavailable.next), capacity.text.slice(-300));
+      check(`${tag}: ...with nothing in another language`, wrongLanguage(locale, capacity.text).length === 0, wrongLanguage(locale, capacity.text).join(", "));
       STATE.atCapacity = false;
+
+      // The hour's AI requests: twenty in the last hour, the oldest 40
+      // minutes ago — it opens again in 20 minutes.
+      account({ tier: "growth", name: "Ελένη" });
+      const oldest = Date.now() - 40 * 60_000;
+      STATE.hourly = Array.from({ length: 20 }, (_, i) => new Date(oldest + i * 60_000).toISOString());
+      await openChat();
+      const hourly = await limitText();
+      const hourOpens = opensLine(await opensAt(new Date(oldest + 60 * 60_000).toISOString()));
+      check(`${tag}: the hour's AI requests: the route names it and when it opens (${hourly.body?.code}, ${hourly.body?.retryAt})`,
+        hourly.body?.code === "hourlyLimit" && Math.abs(Date.parse(hourly.body?.retryAt ?? "") - (oldest + 60 * 60_000)) < 1000, JSON.stringify(hourly.body));
+      check(`${tag}: ...said in ${locale}: «${L.errors.codes.hourlyLimit.what} ${hourOpens}»`,
+        hourly.text.includes(L.errors.codes.hourlyLimit.what) && hourly.text.includes(hourOpens) && hourly.text.includes(L.errors.credits.notCharged), hourly.text.slice(-300));
+      check(`${tag}: ...not «wait about a minute»`, !hourly.text.includes(L.errors.codes.rateLimited.next) && !/ένα λεπτό|a minute/.test(hourly.text), hourly.text.slice(-300));
+      check(`${tag}: ...with nothing in another language`, wrongLanguage(locale, hourly.text).length === 0, wrongLanguage(locale, hourly.text).join(", "));
+      await shot("4b-chat-hourly-limit");
+      STATE.hourly = [];
 
       // ---- the model provider fails on the first message
       account({ tier: "growth", name: "Ελένη" });
@@ -485,7 +554,8 @@ try {
       // nothing was kept (lib/errors/error-codes.ts: «the route said so ->
       // say what it said»).
       check(`${tag}: ...naming the AI service, not «something broke on our side»`, failText.includes(L.errors.codes.upstreamUnavailable.what), `"${failText}"`);
-      check(`${tag}: ...and saying nothing was kept`, failText.includes(L.errors.credits.refunded), `"${failText}"`);
+      check(`${tag}: ...and saying nothing was charged: «${L.errors.credits.refunded}», not «${L.errors.credits.unverified}»`,
+        failText.includes(L.errors.credits.refunded) && !failText.includes(L.errors.credits.unverified), `"${failText}"`);
       const left = STATE.limit - STATE.freeUsed;
       const leftLine = L.credits.freeChat.remaining
         .replace(/\{count, plural, one \{[^}]*\} other \{([^}]*)\}\}/, (_, other) => other)

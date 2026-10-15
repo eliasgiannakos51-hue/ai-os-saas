@@ -44,6 +44,14 @@
  *      earlier question carried a file, that matched a help article was
  *      still answered with the article («Πόσο κοστίζει;» after a menu and
  *      a photograph); fix 1 looked only at the message's own attachments.
+ * And what fix 5 left open, decided by the owner on 2026-10-09 («Υπόλοιπο
+ * credits στο κινητό: να φαίνεται, μικρό και διακριτικό») and built on
+ * 2026-10-14:
+ *   8. below 640px nothing said the balance was low or gone. The number is
+ *      now beside «You» in the bottom bar (components/dashboard/mobile-tab-bar.tsx):
+ *      measured here after steps 1, 8 and 9 (healthy, gone, low), and at
+ *      the end in all ten languages, Arabic right to left, at 390px and
+ *      at 320px.
  *
  * Run: node scripts/tests/chat-attachments-edges.prodtest.mjs
  *      SKIP_BUILD=1 node scripts/tests/chat-attachments-edges.prodtest.mjs
@@ -431,6 +439,93 @@ function foreignOn(locale, text) {
   return (text.match(/[^\s.,;:!?«»“”()]*[α-ωά-ώΑ-ΩΆ-Ώ][^\s.,;:!?«»“”()]*/g) ?? []).slice(0, 6);
 }
 
+// ---------------------------------------------------------------------
+// THE BALANCE BESIDE «YOU» (item 8 above). Everything a person would see
+// of it, measured in the page: where it is, how big, in what colour, and
+// whether anything covers it or it covers anything.
+// ---------------------------------------------------------------------
+const STATUS_RGB = { low: "rgb(232, 197, 71)", empty: "rgb(240, 113, 120)" }; // --warning, --danger (src/app/globals.css)
+const writeNumber = (n, locale) => new Intl.NumberFormat(locale, { useGrouping: "always" }).format(n);
+async function measureBalance(page) {
+  return page.evaluate(() => {
+    const bar = document.querySelector('[data-testid="mobile-tab-bar"]');
+    const bal = document.querySelector('[data-testid="tab-balance"]');
+    const barShown = Boolean(bar) && getComputedStyle(bar).display !== "none" && bar.getBoundingClientRect().height > 0;
+    // Without a balance there is nothing to measure: every field below
+    // reads as absent, so each check names the absence instead of the run
+    // stopping on it.
+    if (!bar || !bal) return { barShown, present: false, wideLeaves: [], sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    const link = bal.closest("a");
+    const word = bal.previousElementSibling;
+    const r = bal.getBoundingClientRect();
+    const lr = link.getBoundingClientRect();
+    const wr = word.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    const links = [...bar.querySelectorAll("a")];
+    const tops = (sel) => links.map((a) => a.querySelector(sel)?.getBoundingClientRect().top ?? NaN);
+    const spread = (xs) => Math.max(...xs) - Math.min(...xs);
+    return {
+      barShown,
+      present: true,
+      shown: r.width > 0 && r.height > 0 && getComputedStyle(bal).visibility !== "hidden",
+      level: bal.getAttribute("data-level"),
+      text: bal.querySelector('span[aria-hidden="true"]')?.textContent ?? "",
+      spoken: bal.querySelector(".sr-only")?.textContent ?? "",
+      fontPx: parseFloat(getComputedStyle(bal).fontSize),
+      iconPx: Math.round(bal.querySelector("svg").getBoundingClientRect().width * 10) / 10,
+      w: Math.round(r.width * 10) / 10,
+      h: Math.round(r.height * 10) / 10,
+      tabPx: Math.round(lr.height),
+      color: getComputedStyle(bal).color,
+      tabColor: getComputedStyle(link).color,
+      inside: r.left >= lr.left - 0.5 && r.right <= lr.right + 0.5 && r.top >= lr.top - 0.5 && r.bottom <= lr.bottom + 0.5,
+      overlapsWord: !(r.right <= wr.left + 0.5 || r.left >= wr.right - 0.5 || r.bottom <= wr.top + 0.5 || r.top >= wr.bottom - 0.5),
+      sameLine: Math.abs((r.top + r.bottom) / 2 - (wr.top + wr.bottom) / 2) <= 2,
+      // Reading order: after the word, which is to its right in English and
+      // to its left in Arabic.
+      after: getComputedStyle(bar).direction === "rtl" ? r.right <= wr.left + 0.5 : r.left >= wr.right - 0.5,
+      rtl: getComputedStyle(bar).direction === "rtl",
+      uncovered: Boolean(hit) && (hit === bal || bal.contains(hit)),
+      wordLines: word.getClientRects().length,
+      wordH: Math.round(wr.height * 10) / 10,
+      iconsLevel: spread(tops("svg")) <= 0.5,
+      sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      // Anything inside the bar past the bar's own edges, and how tall it
+      // is: the page keeps 64px free under its content (pb-16,
+      // app/dashboard/layout.tsx).
+      barOut: (() => { const br = bar.getBoundingClientRect(); return [...bar.querySelectorAll("*")].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > br.right + 0.5 || b.left < br.left - 0.5); }).length; })(),
+      barH: Math.round(bar.getBoundingClientRect().height),
+      // And when the page does scroll sideways, what does it, outside
+      // anything fixed (the measureSideways rule above).
+      wideLeaves: (() => {
+        const width = document.documentElement.clientWidth;
+        const inFixed = (e) => { for (let n = e; n; n = n.parentElement) if (getComputedStyle(n).position === "fixed") return true; return false; };
+        const wide = (e) => e.getBoundingClientRect().right > width + 1;
+        return [...document.querySelectorAll("body *")].filter((e) => wide(e) && !inFixed(e) && ![...e.children].some(wide)).slice(0, 3)
+          .map((e) => `${e.tagName.toLowerCase()} in ${e.closest("[data-testid]")?.getAttribute("data-testid") ?? e.closest("header,main,nav,aside")?.tagName.toLowerCase() ?? "(page)"} to ${Math.round(e.getBoundingClientRect().right)}px`);
+      })(),
+    };
+  });
+}
+/** The checks for one state of the balance on a phone; `tag` names it. */
+function checkBalance(tag, m, { level, text, spoken }) {
+  check(`${tag}: the balance shows «${text}» beside «You» (${level})`, m.present && m.shown && m.level === level && m.text === text,
+    JSON.stringify({ present: m.present, shown: m.shown, level: m.level, text: m.text }));
+  const toneOk = level === "low" || level === "empty" ? m.color === STATUS_RGB[level] : m.color === m.tabColor;
+  check(`${tag}: ...small (${m.fontPx}px text, ${m.iconPx}px mark), ${level === "ok" ? "as quiet as the tab" : "in the status colour"}`,
+    m.fontPx === 10 && m.iconPx === 10 && toneOk, `${m.fontPx}px / ${m.iconPx}px, ${m.color} (tab ${m.tabColor})`);
+  check(`${tag}: ...in «You»'s own line, after the word, covering nothing and covered by nothing`,
+    m.inside && !m.overlapsWord && m.sameLine && m.after && m.uncovered, JSON.stringify({ inside: m.inside, overlapsWord: m.overlapsWord, sameLine: m.sameLine, after: m.after, uncovered: m.uncovered }));
+  check(`${tag}: ...the four tabs stay level, ${m.tabPx}px tall, and the page does not scroll sideways`,
+    m.iconsLevel && m.tabPx >= 44 && m.sideways <= 1, JSON.stringify({ iconsLevel: m.iconsLevel, tabPx: m.tabPx, sideways: m.sideways }));
+  check(`${tag}: ...and a screen reader hears «${spoken}»`, m.spoken === spoken, `«${m.spoken}»`);
+  console.log(`        measured: ${m.w}x${m.h}px, ${m.fontPx}px text, ${m.iconPx}px mark, ${m.color}, in a ${m.tabPx}px tab`);
+}
+// A catalogue without the words gives a sentence nothing can equal, so the
+// check names it rather than the run stopping.
+const spokenFor = (T, level, amount) =>
+  level === "empty" ? T.sidebar.tabs.balanceEmpty ?? "(no words)" : fill((level === "low" ? T.sidebar.tabs.balanceLow : T.sidebar.tabs.balance) ?? "(no words)", { amount });
+
 try {
   if (process.env.SKIP_BUILD) {
     console.log("SKIP_BUILD=1 — reusing the existing .next");
@@ -543,6 +638,19 @@ try {
       check("empty: the Chat opens with the «+» in the field, a 44px target", (await plus.count()) === 1 && ((await plus.boundingBox())?.height ?? 0) >= 44 && (await plus.getAttribute("aria-label")) === A.label);
       check("...nothing on the tray, nothing to send yet", (await chips.count()) === 0 && (await sendButton.isDisabled()));
       check("...and not a word of the other language", foreignOn(locale, await visible()).length === 0, foreignOn(locale, await visible()).join(" | "));
+      // The balance (item 8): a phone has it beside «You»; a computer has
+      // no bottom bar and the number in the top bar, as before.
+      async function balanceNow(step, level, credits) {
+        const m = await measureBalance(page);
+        if (device.touch) {
+          checkBalance(`balance, ${step}`, m, { level, text: writeNumber(credits, locale), spoken: spokenFor(T, level, writeNumber(credits, locale)) });
+        } else {
+          const top = page.locator('header a[href="/dashboard/settings#buy-credits"]');
+          check(`balance, ${step}: no bottom bar on a computer; the top bar says ${writeNumber(credits, locale)}`,
+            !m.barShown && (await top.isVisible()) && (await top.innerText()).trim() === writeNumber(credits, locale), JSON.stringify({ barShown: m.barShown, top: await top.innerText().catch(() => null) }));
+        }
+      }
+      await balanceNow("healthy", "ok", 3000);
 
       await measureSideways("step 1");
       // ---- 2. a PDF and a picture, asked about, through the real routes
@@ -679,6 +787,8 @@ try {
       check("...the picture that went up for it is removed, the tray kept",
         imageUploads() === uploadsBefore + 1 && [...objects.keys()].filter((k) => k.startsWith("create-attachments/")).length === imagesBefore && (await chips.count()) === 2,
         `uploads ${uploadsBefore}->${imageUploads()}`);
+      await fresh();
+      await balanceNow("nothing left", "empty", 0);
       state.credits = 3000;
 
       await measureSideways("step 8");
@@ -696,6 +806,15 @@ try {
       check("Free: a question about a PDF is answered", (await thread.innerText()).includes(Q.twelve));
       check("...paid from its credits, not as a free message", rpcs.slice(rpcsBefore).some((r) => r.name === "reserve_credits") && !rpcs.slice(rpcsBefore).some((r) => r.name === "consume_free_chat"));
       check("...and Free remembers nothing, so there is no «From memory»", (await page.locator('[data-testid="chat-memories-used"]').count()) === 0 && !answerCalls(since).some((c) => JSON.stringify(c.system ?? "").includes(MEMORY[locale])));
+      // After the checks on this answer: a reload starts a new chat.
+      await fresh();
+      await balanceNow("low", "low", state.credits);
+      if (!device.touch) {
+        // From 640px up the top bar's notice says it in words, decided by
+        // the same rule (lib/billing/credit-level.ts).
+        const notice = page.locator('header a[href="/dashboard/settings#credits"]');
+        check("...and from 640px up the top bar's notice says it in words", (await notice.isVisible()) && (await notice.innerText()).trim() === plural(T.credits.low.remaining, state.credits), await notice.innerText().catch(() => null));
+      }
       // At the Files allowance (3 on Free, lib/files/limits.ts).
       while (table("user_files").length < 3) table("user_files").push({ id: randomUUID(), user_id: MOCK_USER.id, filename: "old.pdf", processing_status: "ready", size_bytes: 10 });
       await fresh();
@@ -728,6 +847,57 @@ try {
       state.uploadsBlocked = false;
       await measureSideways("step 11");
       check("the page never scrolls sideways, at any step", sideways.length === 0, sideways.slice(0, 3).join("\n        "));
+      check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+      await context.close();
+    }
+  }
+  where = "";
+
+  // ---- the balance beside «You», on a phone, in all ten languages
+  console.log("\n== the balance beside «You», on a phone, in all ten languages ==");
+  for (const locale of ["el", "en", "de", "fr", "es", "it", "pt", "ar", "ja", "zh"]) {
+    const T = JSON.parse(readFileSync(`messages/${locale}.json`, "utf8"));
+    for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 640 }]) {
+      where = `${locale} ${viewport.width}px`;
+      const context = await browser.newContext({ viewport, hasTouch: true, isMobile: true });
+      await context.addCookies(
+        [
+          { ...supa.authCookie, url: ON, httpOnly: false, secure: false, sameSite: "Lax" },
+          { name: "NEXT_LOCALE", value: locale, url: ON },
+        ].map(({ domain, path, ...c }) => c)
+      );
+      const page = await context.newPage();
+      currentPage = page;
+      pageErrors.length = 0;
+      page.on("pageerror", (err) => pageErrors.push(String(err?.message ?? err)));
+      const states = viewport.width === 390
+        ? [["low", 3000, 100], ["ok", 10000, 10000], ["empty", 3000, 0]]
+        : [["ok", 10000, 10000]];
+      for (const [level, total, credits] of states) {
+        reset({ locale: locale === "el" ? "el" : "en", credits: total });
+        state.credits = credits;
+        await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+        const m = await measureBalance(page);
+        if (viewport.width === 390) {
+          checkBalance(level, m, { level, text: writeNumber(credits, locale), spoken: spokenFor(T, level, writeNumber(credits, locale)) });
+          if (locale === "ar") check("Arabic reads right to left, the number after the word", m.rtl && m.after, JSON.stringify({ rtl: m.rtl, after: m.after }));
+        } else {
+          // The narrowest phone: the word may push the number under it, but
+          // the word stays whole, the icons level, nothing covered, nothing
+          // past the bar's own edges, and the bar no taller than the room
+          // the page leaves it.
+          check(`${level} at 320px: «${writeNumber(credits, locale)}» shown, the word whole on one line, the icons level, nothing covered, all inside the bar`,
+            m.present && m.shown && m.text === writeNumber(credits, locale) && m.inside && !m.overlapsWord && m.uncovered && m.wordLines === 1 && m.iconsLevel && m.barOut === 0 && m.barH <= 64,
+            JSON.stringify({ shown: m.shown, text: m.text, inside: m.inside, overlapsWord: m.overlapsWord, uncovered: m.uncovered, wordLines: m.wordLines, iconsLevel: m.iconsLevel, barOut: m.barOut, barH: m.barH }));
+          // NOT THE BAR'S, AND NOT JUDGED HERE: at 320px the page itself
+          // scrolls sideways by 7-12px, from the top bar's controls
+          // (components/dashboard/top-nav.tsx, measured from 375px up) and,
+          // in Arabic, from inside the page too. Found 2026-10-14, named below;
+          // in Arabic it carries the fixed bar 12px past the left edge with
+          // the page. `barOut` above holds that none of it is the bar's.
+          console.log(`        measured at 320px: ${m.sameLine ? "beside the word" : "under the word"}, ${m.w}x${m.h}px; the page scrolls sideways by ${m.sideways}px${m.wideLeaves.length ? ": " + m.wideLeaves.join(", ") : ""}`);
+        }
+      }
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();
     }

@@ -4,9 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { useLocale, useTranslations } from "next-intl";
-import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
-import { ApiError } from "@/lib/errors/api-error";
-import { isErrorCode } from "@/lib/errors/error-codes";
+import { useChatFailureWords } from "@/components/chat/use-chat-failure-words";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -166,24 +164,16 @@ export function ChatWorkspace({
   initialProjectId?: string;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
-  const describe = useErrorText();
-  const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
-  const tOutOfCredits = useTranslations("credits.outOfCredits");
-  const tErrors = useTranslations("errors");
-  // OUT OF CREDITS, IN THE SCREEN'S LANGUAGE. The route's sentence is
-  // English (insufficientCreditsMessage in lib/billing/credits.ts) and was
-  // shown as it came, on a Greek screen too — found 2026-10-08 by
-  // scripts/tests/brand-memory.prodtest.mjs. The route sends a code and
-  // the two numbers for this.
-  const outOfCreditsText = (available: unknown, needed: unknown) =>
-    `${tErrors("codes.insufficientCredits.what")} ${
-      typeof available === "number" && typeof needed === "number"
-        ? tOutOfCredits("detailWithNumbers", { available, needed })
-        : tOutOfCredits("detail")
-    }`;
+  // WHAT THE ROUTE SAYS WHEN IT DOES NOT ANSWER, IN THE SCREEN'S LANGUAGE:
+  // out of credits with the two numbers (found 2026-10-08 by
+  // scripts/tests/brand-memory.prodtest.mjs, English on a Greek screen), a
+  // limit by its name and the time it opens again, the AI service failing
+  // with «nothing was charged» when the route says so — shared with the
+  // Studio's and the voice conversation (components/chat/use-chat-failure-words.ts).
+  const chatFailure = useChatFailureWords();
   const t = useTranslations("dashboard.chat");
   const tSteps = useTranslations("aiSteps");
   const chatStepLabel = (label: string | null) => (isChatStep(label) ? tSteps(CHAT_STEP_MESSAGE[label]) : null);
@@ -710,22 +700,16 @@ export function ChatWorkspace({
           // is English prose, and a Greek screen showed it as it was. The
           // route names the case in `code`; refused before anything ran,
           // so nothing was charged (a 4xx to creditOutcomeForStatus).
+          // Out of credits with the two numbers; a limit by its own name
+          // and, when the route knows it, the time it opens again
+          // (2026-10-14: «wait about a minute» was said for a limit that
+          // counts the last hour); never the route's English sentence
+          // (found 2026-10-08, scripts/tests/chat-attachments-edges.prodtest.mjs
+          // and scripts/tests/first-task-edges.prodtest.mjs).
           setIsRateLimitNotice(true);
-          // Out of credits is said with the two numbers the route sends
-          // (outOfCreditsText, above); every other code through the shared
-          // error words, and a refusal with no code as held back — never
-          // the route's English sentence (found 2026-10-08,
-          // scripts/tests/chat-attachments-edges.prodtest.mjs and
-          // scripts/tests/first-task-edges.prodtest.mjs).
-          setError(
-            data.outOfCredits === true
-              ? outOfCreditsText(data.available, data.needed)
-              : isErrorCode(data.code)
-                ? describe(new ApiError(429, { code: data.code })).text
-                : describeStatus(429).text
-          );
+          setError(chatFailure.refusal(429, data));
         } else {
-          setError(describeStatus(res.status).text);
+          setError(chatFailure.refusal(res.status, data));
         }
         return;
       }
@@ -811,16 +795,13 @@ export function ChatWorkspace({
           }
         } else if (event.type === "error") {
           // WHAT THE ROUTE KNOWS, SAID (lib/errors/error-codes.ts): no
-          // credits for the hold, with the two numbers — not a failure on
-          // our side — or the AI service did not answer and nothing was
-          // kept, and the free message it gave back.
+          // credits for the hold once the history is counted, with the two
+          // numbers — not a failure on our side — or the AI service did not
+          // answer, and «nothing was charged» because the route says so
+          // (`creditsRefunded`), not «we cannot confirm» (2026-10-14); and
+          // the free message it gave back.
           if (typeof event.freeRemaining === "number") setFreeRemaining(event.freeRemaining);
-          streamError =
-            event.outOfCredits === true
-              ? outOfCreditsText(event.available, event.needed)
-              : event.code === "upstreamUnavailable"
-                ? describeStatus(503, event.creditsRefunded === true).text
-                : describeStatus(500).text;
+          streamError = chatFailure.streamError(event);
         }
       });
 

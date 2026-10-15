@@ -29,12 +29,14 @@
  * business synonyms to keep a gate quiet is how a catalogue starts
  * lying.
  *
- * WHAT IS COVERED, SAID PLAINLY: **English and Greek only**, written by
- * hand on 2026-09-19. The other eight locales have none, and
- * scripts/tests/palette-aliases.test.mjs prints that coverage on every
- * run rather than leaving it to be assumed. An item with no alias in
- * the reader's language is exactly as reachable as it was before — by
- * its own displayed name, and by its English one.
+ * WHAT IS COVERED, SAID PLAINLY: **English and Greek**, written by hand
+ * on 2026-09-19. The other eight locales have one item each, `mine`:
+ * the name the Library had in that language until 2026-10-14, so the
+ * old name still finds it. scripts/tests/palette-aliases.test.mjs holds
+ * exactly that and prints the coverage on every run rather than leaving
+ * it to be assumed. An item with no alias in the reader's language is
+ * exactly as reachable as it was before — by its own displayed name, and
+ * by its English one.
  *
  * Keys are the item keys of lib/sidebar-label-keys.ts's ITEM_LABEL_KEYS,
  * checked BOTH ways by the gate so neither side can go stale.
@@ -136,9 +138,23 @@ export const PALETTE_ALIASES: PaletteAliases = {
     en: ["integrations", "connect", "connections", "slack", "email"],
     el: ["συνδέσεις", "ενσωματώσεις", "σύνδεση"],
   },
+  // THE LIBRARY'S OLD NAMES. The row was «Τα δικά μου» / "Mine" until the
+  // owner named it the Library on 2026-10-09 (sidebar.items.mine now
+  // carries that name). Somebody who learned it under the old one still
+  // types it, in every language it was shown in — which is why this one
+  // item has all ten. scripts/tests/palette-aliases.test.mjs holds that
+  // each reaches the Library first.
   mine: {
-    en: ["history", "timeline", "activity", "past", "everything"],
-    el: ["ιστορικό", "χρονολόγιο", "δραστηριότητα"],
+    en: ["history", "timeline", "activity", "past", "everything", "mine", "my stuff"],
+    el: ["ιστορικό", "χρονολόγιο", "δραστηριότητα", "τα δικά μου", "τα πράγματά μου"],
+    de: ["meine sachen"],
+    fr: ["mes éléments"],
+    es: ["lo mío"],
+    it: ["le mie cose"],
+    pt: ["as minhas coisas"],
+    ar: ["ما أنشأته"],
+    ja: ["自分のもの"],
+    zh: ["我的内容"],
   },
   voice: {
     en: ["voice", "speak", "microphone", "audio"],

@@ -7,6 +7,12 @@
 // (src/lib/nav/tabs.ts); the bar and the pages that make room for it are
 // read with their comments stripped.
 //
+// And since 2026-10-14 the balance beside «You» (owner, 2026-10-09: «να
+// φαίνεται, μικρό και διακριτικό»): when it is low is run
+// (src/lib/billing/credit-level.ts), where it sits and what it reads are
+// read. In a browser, on a phone, in all ten languages:
+// scripts/tests/chat-attachments-edges.prodtest.mjs.
+//
 // Run: node scripts/tests/mobile-tabs.test.mjs
 import { readFileSync } from "node:fs";
 import { stripComments } from "../check-mutation-markers.mjs";
@@ -64,6 +70,79 @@ console.log("\n== 4. in every language ==");
 for (const l of ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"]) {
   const tabs = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).sidebar?.tabs ?? {};
   check(`${l}: the four tabs and the bar's name`, ["home", "chat", "tools", "you", "label"].every((k) => typeof tabs[k] === "string" && tabs[k].length > 0));
+}
+
+console.log("\n== 5. the balance, on a phone ==");
+// THE OWNER'S DECISION (2026-10-09): «Υπόλοιπο credits στο κινητό: να
+// φαίνεται, μικρό και διακριτικό». Below 640px nothing said a balance was
+// low or gone (docs/PROGRESS.md, «Έλεγχος του ελέγχου του πακέτου 9»): the
+// number shows from lg in the top bar, the low notice from sm, and the
+// top bar has no room below that. So the number sits beside «You».
+const level = await loadTs("src/lib/billing/credit-level.ts");
+const levels = [
+  [{ credits: 0, total: 0, isAdmin: true }, "unlimited", "an admin-listed account is unlimited, whatever its row says"],
+  [{ credits: null, total: 1000, isAdmin: false }, "unknown", "a balance not read yet says nothing"],
+  [{ credits: Number.NaN, total: 1000, isAdmin: false }, "unknown", "...nor one that is not a number"],
+  [{ credits: 0, total: 0, isAdmin: false }, "unknown", "0 of 0 (the layout's fallback when the row cannot be read) says nothing"],
+  [{ credits: 40, total: null, isAdmin: false }, "ok", "a balance with no known allowance is shown, never called low"],
+  [{ credits: 0, total: 1000, isAdmin: false }, "empty", "nothing left of a known allowance is empty"],
+  [{ credits: -3, total: 1000, isAdmin: false }, "empty", "...and so is less than nothing"],
+  [{ credits: 1, total: 1000, isAdmin: false }, "low", "one credit left is low"],
+  [{ credits: 200, total: 1000, isAdmin: false }, "low", "at 20% exactly it is low"],
+  [{ credits: 201, total: 1000, isAdmin: false }, "ok", "just above 20% it is not"],
+  [{ credits: 3000, total: 3000, isAdmin: false }, "ok", "a full allowance is ok"],
+];
+for (const [input, want, name] of levels) {
+  const got = level.creditLevel(input);
+  check(`${name} (${want})`, got === want, `got ${got}`);
+}
+check("the threshold is a fifth of the allowance", level.LOW_CREDITS_THRESHOLD === 0.2, String(level.LOW_CREDITS_THRESHOLD));
+check("the You tab carries the balance, in its label's line",
+  /<span className="([^"]*)">\s*<span className="([^"]*)">\{t\(tab\.key\)\}<\/span>\s*\{tab\.key === "you" && <TabBalance \/>\}\s*<\/span>/.test(bar));
+{
+  const line = bar.match(/<span className="([^"]*)">\s*<span className="([^"]*)">\{t\(tab\.key\)\}<\/span>/) ?? [];
+  check("the four icons hang from one line, so a tab that wraps keeps its icon level with the rest",
+  /className=\{`flex min-h-\[56px\] flex-col items-center justify-start gap-1 pt-2 /.test(bar));
+check("...which wraps under the word on a narrow phone rather than squeezing it, in tight lines that fit the page's 64px",
+    /\bflex-wrap\b/.test(line[1] ?? "") && /\bleading-tight\b/.test(line[1] ?? "") && !/\bmin-w-0\b/.test(line[2] ?? "") && /\bbreak-words\b/.test(line[2] ?? ""), `${line[1]} / ${line[2]}`);
+}
+const balanceFn = bar.slice(bar.indexOf("function TabBalance"), bar.indexOf("export function MobileTabBar"));
+check("the number is the credits context's, with no request of its own",
+  /const \{ credits, total, isAdmin \} = useCredits\(\);/.test(balanceFn) && /creditLevel\(\{ credits, total, isAdmin \}\)/.test(balanceFn) && !/\bfetch\(|useEffect|\/api\//.test(bar));
+check("it says nothing while the balance is unknown", /if \(level === "unknown"\) return null;/.test(balanceFn));
+check("the number is written the reader's way", /const locale = useLocale\(\);/.test(balanceFn) && /formatNumber\(credits \?\? 0, locale\)/.test(balanceFn));
+const tone = Object.fromEntries([...(bar.match(/const BALANCE_TONE[^{]*\{([^}]*)\}/)?.[1] ?? "").matchAll(/(\w+): "([^"]+)"/g)].map((m) => [m[1], m[2]]));
+check("quiet when healthy, a warning when low, an error when gone (status colours only)",
+  tone.ok === "text-muted" && tone.unlimited === "text-muted" && tone.low === "text-warning" && tone.empty === "text-danger", JSON.stringify(tone));
+check("small: 10px, on one line, in the tab's own flow — it covers nothing",
+  /data-testid="tab-balance"[\s\S]{0,80}className=\{`inline-flex shrink-0 items-center gap-0\.5 whitespace-nowrap text-\[10px\]/.test(balanceFn) && !/\b(absolute|fixed|-top-|-translate)/.test(balanceFn));
+check("a screen reader hears the words, not a bare number",
+  /<span aria-hidden="true">\{amount\}<\/span>\s*<span className="sr-only">\{spoken\}<\/span>/.test(balanceFn) &&
+    ["balance", "balanceLow", "balanceEmpty", "balanceUnlimited"].every((k) => balanceFn.includes(`t("${k}"`)));
+// AND IT IS SAID ONCE, NOT TWICE. The bar is md:hidden (768px) while the
+// top bar's notice starts at sm (640px), so between the two the same
+// number was over the page and under it at the same time (found by review
+// 2026-10-14). The balance hands over at exactly the width the owner named.
+check("the balance stops at 640px, where the top bar takes over",
+  /whitespace-nowrap text-\[10px\] font-medium tabular-nums sm:hidden/.test(balanceFn), balanceFn.slice(0, 200));
+const banner = stripComments(readFileSync("src/components/credits/low-credits-banner.tsx", "utf8"));
+// ONE LITERAL, NOT TWO WORDS ANYWHERE IN THE FILE. The pair used to be
+// /\bsm:inline-flex\b/ && /\bhidden\b/, and `-` is not a word character,
+// so the `aria-hidden="true"` on the dot inside this same component
+// satisfied the second half on its own: deleting `hidden ` from the
+// Link's own class list left the clause green while the notice came back
+// on a phone — beside the bottom-bar balance this round just stopped
+// duplicating. Matching the start of that one class string cannot be
+// satisfied from anywhere else.
+check("...and the top bar's notice really begins there",
+  /"hidden items-center [^"]*\bsm:inline-flex\b/.test(banner), banner.slice(0, 200));
+check("the top bar's notice from 640px up decides «low» by the same rule",
+  /const level = creditLevel\(\{ credits, total, isAdmin \}\);/.test(banner) && /level !== "low" && level !== "empty"/.test(banner) && !/credits \/ total|THRESHOLD/.test(banner));
+for (const l of ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"]) {
+  const tabs = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).sidebar?.tabs ?? {};
+  check(`${l}: the balance's words, with the number in them`,
+    ["balance", "balanceLow", "balanceEmpty", "balanceUnlimited"].every((k) => typeof tabs[k] === "string" && tabs[k].trim().length > 0) &&
+      /\{amount\}/.test(tabs.balance) && /\{amount\}/.test(tabs.balanceLow));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
-
-// Below this share of the monthly allowance, the user gets a heads-up.
-// 20% is early enough to act on and late enough not to nag.
-export const LOW_CREDITS_THRESHOLD = 0.2;
+import { creditLevel } from "@/lib/billing/credit-level";
 
 /**
  * Discrete "X credits left this month" notice.
@@ -22,11 +19,12 @@ export function LowCreditsBanner({ variant = "banner" }: { variant?: "banner" | 
   const { credits, total, isAdmin } = useCredits();
   const t = useTranslations("credits.low");
 
-  if (isAdmin) return null;
-  if (credits === null || total === null || total <= 0) return null;
-  if (credits / total > LOW_CREDITS_THRESHOLD) return null;
+  // The threshold and what counts as "nothing left" are lib/billing/credit-level.ts,
+  // shared with the phone's bottom bar so the two can never disagree.
+  const level = creditLevel({ credits, total, isAdmin });
+  if (credits === null || (level !== "low" && level !== "empty")) return null;
 
-  const isEmpty = credits <= 0;
+  const isEmpty = level === "empty";
   const label = isEmpty ? t("none") : t("remaining", { count: credits });
 
   // The top-nav variant has to survive in a dense row, so it is a compact
@@ -36,8 +34,10 @@ export function LowCreditsBanner({ variant = "banner" }: { variant?: "banner" | 
     // counts it at 344px of 375), and this pill pushed the account button
     // out of it: every page scrolled sideways, by 33px at 390px in Greek
     // and 15px in English, whenever the balance was low (found 2026-10-08,
-    // scripts/tests/chat-attachments-edges.prodtest.mjs). The balance
-    // itself is not in a phone's top bar either (it shows from lg).
+    // scripts/tests/chat-attachments-edges.prodtest.mjs). On a phone the
+    // balance is in the bottom bar instead, beside «You», coloured by the
+    // same level (components/dashboard/mobile-tab-bar.tsx; the owner's
+    // decision of 2026-10-09, built 2026-10-14).
     return (
       <Link
         href="/dashboard/settings#credits"

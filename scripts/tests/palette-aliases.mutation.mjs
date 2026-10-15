@@ -11,7 +11,8 @@
  * Both halves of the fix are put back here as the defects they were,
  * plus the hole the gate was written around: a ratio with no negative
  * control. command-palette-language.test.mjs printed 520 of 520 with a
- * matcher that returned everything.
+ * matcher that returned everything. And (2026-10-14) the Library's old
+ * name in Greek and German dropped from the table.
  *
  * Run: node scripts/tests/palette-aliases.mutation.mjs
  */
@@ -105,6 +106,22 @@ const MUTANTS = [
     from: '  finance: {\n    en: [',
     to: '  finance: {\n    ja: ["収益"],\n    en: [',
     expect: "the covered locales are exactly the ones the file claims",
+  },
+  {
+    // THE LIBRARY'S OLD NAME (2026-10-14): somebody who learned the row
+    // as «Τα δικά μου» types that, and it must still reach the Library.
+    name: "the Library's old Greek name is dropped from its aliases",
+    file: ALIASES,
+    from: '"τα δικά μου", ',
+    to: "",
+    expect: 'el: "Τα δικά μου" reaches the Library first',
+  },
+  {
+    name: "the Library's old German name is dropped",
+    file: ALIASES,
+    from: '    de: ["meine sachen"],\n',
+    to: "",
+    expect: 'de: "Meine Sachen" reaches the Library first',
   },
 ];
 

@@ -224,7 +224,10 @@ check(
 // a translation job, not a sweep; recording them is what stops a 39th.
 // 37 since 2026-10-08: the flagged-site toast in the website builder now
 // says it in the reader's language (src/lib/websites/flagged-notice.ts).
-const INDIRECT_ENGLISH_BASELINE = 37;
+// 34 since 2026-10-14: the Site page (components/website-builder/
+// website-builder-workspace.tsx) and Chat's Site pane say a refusal, a
+// failed site and a lost connection from their codes, not in English.
+const INDIRECT_ENGLISH_BASELINE = 34;
 reportBaseline("INDIRECT_ENGLISH_BASELINE", INDIRECT_ENGLISH_BASELINE, indirect.length);
 checkTrue(
   `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,
@@ -853,7 +856,10 @@ const SERVER_PROSE_BASELINE = 671;
 // baselines.test.mjs.
 // 28 -> 27 (2026-10-05): the login form's unconfirmed-address case reads a
 // translated key instead of falling back to English.
-const CLIENT_FALLBACK_BASELINE = 26;
+// 26 -> 22 (2026-10-14): the Site page's refused change and its reference
+// images, the Studio's conversation and onboarding's three refused steps
+// say them in the reader's language.
+const CLIENT_FALLBACK_BASELINE = 22;
 reportBaseline("SERVER_PROSE_BASELINE", SERVER_PROSE_BASELINE, serverErrorProse.length);
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,

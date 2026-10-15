@@ -134,7 +134,9 @@ check(
 );
 check(
   "...and the Chat screen says it in the reader's language",
-  /setError\(\s*data\.outOfCredits === true\s*\?\s*outOfCreditsText\(data\.available, data\.needed\)/.test(code("src/components/chat/chat-workspace.tsx")) &&
+  // Through the shared words since 2026-10-14 (components/chat/use-chat-failure-words.ts).
+  /setError\(chatFailure\.refusal\(429, data\)\);/.test(code("src/components/chat/chat-workspace.tsx")) &&
+    /if \(data\?\.rateLimited\) return data\.outOfCredits === true \? outOfCredits\(data\.available, data\.needed\) : said\(429, data\);/.test(code("src/components/chat/use-chat-failure-words.ts")) &&
     !/setError\(data\.message\)/.test(code("src/components/chat/chat-workspace.tsx"))
 );
 

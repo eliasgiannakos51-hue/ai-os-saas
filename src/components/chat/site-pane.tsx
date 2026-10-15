@@ -2,7 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, ExternalLink, Globe, Square, X, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
@@ -11,7 +11,7 @@ import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
-import { getErrorMessage } from "@/lib/get-error-message";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { estimateForAction } from "@/lib/billing/estimate";
@@ -62,7 +62,15 @@ export type SiteWall = { featureName: string; planName: string; planSlug: string
  * anything is offered (`wall`); no credits is said by OutOfCreditsNotice
  * from the code and numbers the route sends; a site that failed is said
  * by this pane's own sentence, or by the stopped note when it was stopped.
- * A server sentence is shown as it came only on an English screen.
+ *
+ * EVERY OTHER REFUSAL FROM ITS CODE, ON EVERY SCREEN (2026-10-14), as the
+ * Site shell says it (components/website-builder/website-shell.tsx): the
+ * 24-hour limit on new sites and the AI limits by their own names, with
+ * the time they open again (lib/errors/use-error-text.ts); a change the
+ * safety review held, or one asked while another runs, by what it is. A
+ * server sentence used to be shown as it came on an English screen — the
+ * 24-hour limit said «today's generation limit» — and every one of these
+ * was «could not create the website» on the others, for a site that existed.
  */
 export const SitePane = forwardRef<
   SitePaneHandle,
@@ -83,7 +91,7 @@ export const SitePane = forwardRef<
   const tSteps = useTranslations("aiSteps");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
-  const locale = useLocale();
+  const describe = useErrorText();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
   const remembered = useRememberedLine();
@@ -102,9 +110,6 @@ export const SitePane = forwardRef<
     say(line);
     setStage(site && site.status === "completed" ? "done" : "failed");
   };
-  // A sentence the server wrote is English: shown as it came only where
-  // the screen is English, and the pane's own words everywhere else.
-  const serverSaid = (text: string | null | undefined, ours: string) => (locale.startsWith("en") && text ? text : ours);
   // Why a site that was being made ended without being made.
   const whyNotMade = (done: UserWebsite): string => {
     if (done.status === "flagged") return tSite("flaggedTitle");
@@ -164,7 +169,7 @@ export const SitePane = forwardRef<
         failWith(
           outcome.code === "not_included"
             ? `${tErrors("codes.forbidden.what")} ${tErrors("codes.forbidden.next")}`
-            : serverSaid(getErrorMessage(outcome.error, ""), tSite("generateFailed"))
+            : describe(outcome.error).text
         );
         return;
       }
@@ -176,14 +181,17 @@ export const SitePane = forwardRef<
         return;
       }
       if (outcome.kind === "notMade") {
-        failWith(outcome.message ?? tSite("generateFailed"));
+        // The classifier's sentence may be its English default
+        // (lib/website-builder.ts); what the Site makes is said in the
+        // reader's language, as the Site shell says it.
+        failWith(outcome.offTopic ? tShell("site.offTopic") : tSite("generateFailed"));
         return;
       }
       setSite(outcome.record);
       say(tShell("site.building", { name: outcome.record.name }));
       watch(outcome.record);
     } catch (err) {
-      failWith(err instanceof TypeError ? tCommon("networkErrorCheckConnection") : getErrorMessage(err, tSite("generateFailed")));
+      failWith(err instanceof TypeError ? tCommon("networkErrorCheckConnection") : tSite("generateFailed"));
     }
   }
 
@@ -204,7 +212,18 @@ export const SitePane = forwardRef<
         return;
       }
       if (outcome.kind === "refused") {
-        failWith(outcome.reason === "pageGone" ? tSite("editPageGone") : serverSaid(getErrorMessage(outcome.error, ""), tSite("generateFailed")));
+        // Each refusal of a change by what it is, as the Site shell says it.
+        failWith(
+          outcome.reason === "pageGone"
+            ? tSite("editPageGone")
+            : outcome.reason === "boxLost"
+              ? tShell("box.lost")
+              : outcome.reason === "held"
+                ? `${tShell("site.held")} ${tErrors("credits.notCharged")}`
+                : outcome.reason === "busy"
+                  ? `${tShell("site.busy")} ${tErrors("credits.notCharged")}`
+                  : describe(outcome.error).text
+        );
         return;
       }
       setSite(outcome.record);

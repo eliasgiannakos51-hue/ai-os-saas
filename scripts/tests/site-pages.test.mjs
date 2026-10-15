@@ -172,12 +172,12 @@ check('"site-pages" is declared as a switch', /\n  "site-pages": "/.test(code("s
 check("the Site page reads it for the shell", /<WebsiteShell [^>]*pages=\{await isFeatureOn\("site-pages", user\)\}[^>]*\/>/.test(code("src/app/dashboard/website-builder/page.tsx")));
 const shell = code("src/components/website-builder/website-shell.tsx");
 check("a new site's brief carries the page request, only with the switch",
-  /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: 0 \}\) \+ \(pages \? pageRequestBrief\(pageCount\) : ""\)/.test(shell));
+  /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\) \+ \(pages \? pageRequestBrief\(pageCount\) : ""\)/.test(shell));
 check("the fourth option offers «as many as needed», one, three, five", /\[null, \.\.\.PAGE_COUNT_CHOICES\]\.map\(\(n\) =>/.test(shell) && /data-testid="site-page-count"/.test(shell));
 check("a site's pages are tabs over the preview", /\[\{ slug: "", label: t\("pageHome"\) \}, \.\.\.sitePages\]\.map\(\(p\) =>/.test(shell) && /onClick=\{\(\) => setOpenPage\(\{ siteId: current\.id, slug: p\.slug \}\)\}/.test(shell));
 check("the preview and its parts are the open page's", /const html = pageSlug \? sitePages\.find\(\(p\) => p\.slug === pageSlug\)!\.html : current\?\.html_content \?\? "";/.test(shell) && /const boxes = useMemo\(\(\) => \(complete \? findPageBoxes\(html\) : \[\]\), \[complete, html\]\);/.test(shell));
 check("a chosen part belongs to its page: another page forgets it", /box\.siteId === current\.id && box\.slug === pageSlug && box\.index < boxes\.length/.test(shell));
-check("the change goes to the open page", /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\) \}\)/.test(shell));
+check("the change goes to the open page", /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(shell));
 check("undo is a button on the site, with the switch", /\{pages && \(\s*<button[\s\S]{0,120}onClick=\{\(\) => void undo\(\)\}[\s\S]{0,300}data-testid="site-undo"/.test(shell));
 check("...and what it says when there is nothing to undo", /outcome\.reason === "nothing" \? tShell\("pages\.nothingToUndo"\)/.test(shell));
 check("the download is the whole site, with the switch", /const file = pages \? siteDownload\(site\) :/.test(shell));
@@ -224,12 +224,17 @@ check("a refusal carries the route's status and code", /if \(!res\.ok \|\| !data
 check("...a refusal answered 200 is one before any work: short credits, or a limit",
   /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\), \.\.\.routeSaid\(data\) \};/.test(requests) && /new ApiError\(short \? 402 : 429, \{/.test(requests) && /const short = data\?\.code === "insufficientCredits";/.test(requests));
 check("...and a change's refusal names a held change and a busy site",
-  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : refusal\(res\.status, data, data\?\.error \?\? data\?\.message\);/.test(requests));
-// EXECUTED, not read: what Chat's Site pane (components/chat/site-pane.tsx)
-// shows for a refusal — getErrorMessage over the ApiError — with fetch
-// answering as the routes do. With ApiError's default message it read
-// «Request failed with 200» for a change the safety review held back
-// (found 2026-10-09); it is the route's sentence, or the pane's own.
+  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : refusal\(res\.status, data as ApiErrorPayload \| null, data\?\.error \?\? data\?\.message\);/.test(requests) &&
+    // One reader for both screens that change a site (siteChangeRefusal,
+    // 2026-10-14): the Site beside Chat and the Site page.
+    /if \(!res\.ok \|\| !data\?\.ok \|\| !data\.edited\) return siteChangeRefusal\(res, data\);/.test(requests));
+// EXECUTED, not read: the message a refusal carries — getErrorMessage over
+// the ApiError — with fetch answering as the routes do. With ApiError's
+// default message it read «Request failed with 200» for a change the
+// safety review held back (found 2026-10-09); it is the route's sentence,
+// or the caller's own. Chat's Site pane (components/chat/site-pane.tsx)
+// showed that message until 2026-10-14; it now says every refusal from its
+// code (scripts/tests/limit-texts.test.mjs), and the message is for logs.
 {
   const live = await loadTsLinked("src/lib/website-builder/site-requests.ts");
   const { getErrorMessage } = await loadTs("src/lib/get-error-message.ts");
@@ -254,7 +259,7 @@ check("...and a change's refusal names a held change and a busy site",
   } finally {
     globalThis.fetch = realFetch;
   }
-  check("Chat's Site pane says a refusal in the route's sentence or its own, never «Request failed with …»",
+  check("a refusal's message is the route's sentence or the caller's own, never «Request failed with …»",
     JSON.stringify(seen) === JSON.stringify({ held: ["held", "Held back: X."], busy: ["busy", "Busy."], proxy: ["upstreamUnavailable", OWN], start: ["refused", OWN] }),
     JSON.stringify(seen));
 }

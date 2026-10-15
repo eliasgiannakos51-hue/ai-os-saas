@@ -22,7 +22,7 @@
  *
  * Run: node scripts/tests/first-run-strings.test.mjs
  */
-import { readFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, existsSync, mkdtempSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -55,6 +55,16 @@ function check(name, cond, detail) {
 }
 
 const PACK = "docs/first-run";
+
+/** Every .ts/.tsx under a directory, for the scan of section 7. */
+function walkSrc(dir, out = []) {
+  for (const entry of readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    if (statSync(full).isDirectory()) walkSrc(full, out);
+    else if (/\.tsx?$/.test(entry)) out.push(full);
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------------
 console.log("== 1. the path is declared, not inferred ==");
@@ -224,6 +234,61 @@ console.log("\n== 6. the pack is readable by the person it is for ==");
     readFileSync("scripts/first-run-strings.mjs", "utf8")
   ));
   check("one file exists per locale", LOCALES.every((l) => existsSync(path.join(PACK, `first-run.${l}.md`))));
+}
+
+console.log("\n== 7. a translator passed as an argument still counts ==");
+// WHAT THIS IS FOR. On 2026-10-14 the three sentences of a failure moved
+// into src/lib/errors/failure-text.ts, which takes its translator as an
+// argument. The scanner finds a namespace where it is BOUND, so it found
+// nothing there, and the pack lost 28 `errors.codes.*` and 4
+// `errors.credits.*` sentences — the family that same round rewrote —
+// going from 606 strings to 574 without a word. A file may now declare the
+// binding with `// @messages <name> <namespace>`; this holds every such
+// line BOTH ways, so the declaration cannot outlive the code it describes
+// and the code cannot lose its declaration.
+{
+  const declared = [];
+  for (const file of walkSrc("src")) {
+    const src = readFileSync(file, "utf8");
+    for (const m of src.matchAll(/@messages\s+([A-Za-z_$][\w$]*)\s+([\w.]*)/g)) {
+      declared.push({ file, binding: m[1], ns: m[2], src });
+    }
+  }
+  check(`at least one file declares a passed translator (${declared.length})`, declared.length > 0);
+  for (const d of declared) {
+    check(`${d.file}: calls ${d.binding}(…), so the line is not stale`,
+      new RegExp(`\\b${d.binding}\\(`).test(d.src.replace(/@messages[^\n]*/g, "")), d.binding);
+    const { keys, dynamic } = extractKeys(d.src, d.file);
+    check(`${d.file}: ...and the scanner reads keys through it`, keys.length + dynamic.length > 0,
+      `${keys.length} fixed, ${dynamic.length} runtime-built`);
+    check(`${d.file}: ...all under the namespace it declares (${d.ns || "absolute"})`,
+      [...keys.map((k) => k.key), ...dynamic.map((x) => x.namespace)].every((k) => !d.ns || String(k).startsWith(d.ns)));
+  }
+  // AND THE FAMILY ITSELF, in the committed pack: the sentences a person
+  // reads when something fails are the ones the owner most needs to see,
+  // and they are the ones that vanished. The count comes from the
+  // catalogue, never from a number typed here.
+  const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
+  // THE POPULATION IS THE SENTENCES, NOT THE CODES THAT GROUP THEM.
+  // This counted the 18 names under errors.codes and matched
+  // `errors.codes.(X).` out of the pack — so the pack satisfied it with
+  // ONE sentence per code. Deleting all 18 `.next` sentences, which is
+  // exactly half of the regression this section was written for, left it
+  // printing «18 of 18» and green; ranging over the leaves it reads
+  // «18 of 36» and goes red. Measured 2026-10-14, by deleting them.
+  const leavesOf = (group) =>
+    Object.entries(group ?? {}).flatMap(([code, fields]) =>
+      (fields && typeof fields === "object" ? Object.keys(fields) : []).map((f) => `${code}.${f}`)
+    );
+  const wantCodes = leavesOf(en.errors?.codes).length;
+  const wantCredits = Object.keys(en.errors?.credits ?? {}).length;
+  const pack = readFileSync("docs/first-run/first-run.en.md", "utf8");
+  const haveCodes = new Set([...pack.matchAll(/errors\.codes\.([\w-]+\.[\w-]+)/g)].map((m) => m[1])).size;
+  const haveCredits = new Set([...pack.matchAll(/errors\.credits\.([\w-]+)/g)].map((m) => m[1])).size;
+  check(`every failure sentence the catalogue has is in the pack (${haveCodes} of ${wantCodes} sentences)`,
+    wantCodes > 0 && haveCodes === wantCodes, `${haveCodes} of ${wantCodes}`);
+  check(`...and every credit answer (${haveCredits} of ${wantCredits})`,
+    wantCredits > 0 && haveCredits === wantCredits, `${haveCredits} of ${wantCredits}`);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

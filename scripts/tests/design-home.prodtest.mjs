@@ -53,7 +53,12 @@ function check(name, cond, detail) {
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const supa = await startMockSupabase({
   port: 54353,
-  tableRows: { user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }] },
+  tableRows: {
+    user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }],
+    // All tools' squares are behind `all-tools-tiles` since 2026-10-14, and
+    // it starts at «Κανείς»; part 4 walks the squares, so it opens them.
+    feature_flags: [{ key: "all-tools-tiles", audience: "everyone" }],
+  },
 });
 
 const PORT = await new Promise((resolve) => {

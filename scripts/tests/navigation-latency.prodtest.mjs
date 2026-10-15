@@ -115,6 +115,16 @@ const supa = http.createServer((req, res) => {
         const row = { user_id: USER_ID, completed_at: "2026-01-02T00:00:00Z", skipped_at: null };
         return single ? finish(200, row) : finish(200, [row], { "Content-Range": "0-0/1" });
       }
+      // THE SQUARES ARE WHAT SIX OF THE NINE ROUTES ARE CLICKED FROM, and
+      // they are behind `all-tools-tiles`, which starts closed
+      // (src/lib/flags/flags.ts FIRST_AUDIENCE, the owner's decision of
+      // 2026-10-14). An empty answer here is not a neutral default either:
+      // it is an All tools page with no square to click, and this file
+      // would report six routes as "no link" rather than measure them.
+      if (table === "feature_flags") {
+        const rows = OPEN_SWITCHES.map((key) => ({ key, audience: "everyone" }));
+        return single ? finish(200, rows[0]) : finish(200, rows, { "Content-Range": `0-${rows.length - 1}/${rows.length}` });
+      }
       if (single) return finish(200, null);
       return finish(200, [], { "Content-Range": "0-0/0" });
     }
@@ -214,6 +224,19 @@ console.log(`production server up on :${PORT}\n`);
 // design (Agents left the sidebar on purpose, and Ideas is a hidden row).
 const ALL_TOOLS = "/dashboard/tools";
 const HOME = "/dashboard/overview";
+
+// THE SWITCHES THIS RUN OPENS, and the only ones. A tool behind a switch
+// this list does not name is not drawn, so a route that needs one is not
+// measured here and is not counted as unreachable either: it was never
+// supposed to be on the screen.
+//
+// /dashboard/documents is the case that taught this. It is a SWITCHED_SQUARE
+// behind `document-writer` (lib/nav/all-tools.ts), no row here opens that
+// switch, so All tools correctly draws no square for it — and this file
+// called that "every route is reachable from where the design links it
+// (7/8)" and went red over a product doing exactly what its switch says.
+const OPEN_SWITCHES = ["all-tools-tiles"];
+
 const ROUTES = [
   { path: HOME, name: "Home", from: HOME },
   { path: "/dashboard/chat", name: "Chat", from: HOME },
@@ -223,8 +246,12 @@ const ROUTES = [
   { path: "/dashboard/mission", name: "Mission Control", from: ALL_TOOLS },
   { path: "/dashboard/timeline", name: "Timeline", from: ALL_TOOLS },
   { path: "/dashboard/website-builder", name: "Website Builder", from: ALL_TOOLS },
-  { path: "/dashboard/documents", name: "Documents", from: ALL_TOOLS },
+  { path: "/dashboard/documents", name: "Documents", from: ALL_TOOLS, needs: "document-writer" },
 ];
+// Split once, so both the measuring loop and the reachability check below
+// range over the same set rather than each deciding for itself.
+const MEASURED = ROUTES.filter((r) => !r.needs || OPEN_SWITCHES.includes(r.needs));
+const BEHIND_A_CLOSED_SWITCH = ROUTES.filter((r) => r.needs && !OPEN_SWITCHES.includes(r.needs));
 
 // ---------------------------------------------------------------------------
 console.log("== 1. server time to first byte, per route ==\n");
@@ -344,7 +371,12 @@ await page.waitForSelector("h1", { timeout: 30000 }).catch(() => null);
 }
 
 const SAMPLES = 3;
-for (const route of ROUTES) {
+for (const route of BEHIND_A_CLOSED_SWITCH) {
+  // SAID, not skipped silently: a route absent from the table because its
+  // switch is shut reads exactly like one that was forgotten.
+  console.log(`  ....  ${route.path} not measured — behind \`${route.needs}\`, which this run leaves shut`);
+}
+for (const route of MEASURED) {
   if (route.path === HOME) continue;
   label = route.path;
   await page.goto(`http://127.0.0.1:${PORT}${route.from}`, { waitUntil: "domcontentloaded", timeout: 60000 });
@@ -407,12 +439,29 @@ for (const route of ROUTES) {
     } else {
       await page.mouse.move(640, 20);
     }
-    const before = await page.locator("h1").first().textContent().catch(() => null);
     const measured = await page.evaluate(
-      ([href, previous]) =>
+      ([href]) =>
         new Promise((resolve) => {
           const started = performance.now();
           let inDomAt = null;
+          // WHAT "THE NEW PAGE IS IN THE DOM" MEANS HERE: the page wrapper
+          // has been replaced. components/page-transition.tsx renders
+          // `<div key={pathname} className="page-enter">`, and a changed
+          // key makes React mount a NEW node rather than update the old
+          // one — so node identity is the route change itself, and it
+          // carries no text.
+          //
+          // IT USED TO BE "an h1 whose text differs from the previous
+          // page's", and /dashboard/chat could never satisfy it. Chat's
+          // empty state greets with the same sentence Home does — both
+          // render `greeting.<part>` + the name (overview/greeting-header
+          // .tsx and chat/chat-workspace.tsx), because MASTER 14.2 asks
+          // for exactly that — so the texts matched, the poll ran its
+          // full 15 seconds and the table said TIMEOUT. Nothing was wrong
+          // with the product: the rail's link is there, the click works
+          // and the page renders. The measurement was reading a proxy
+          // that is not unique, and one route happened to prove it.
+          const wrapperBefore = document.querySelector(".page-enter");
           // Polled per animation frame rather than watched with a
           // MutationObserver over the whole body: on a page this size the
           // observer fires hundreds of times during a route change and its
@@ -422,14 +471,11 @@ for (const route of ROUTES) {
               resolve({ inDom: inDomAt ?? -1, visible: -1 });
               return;
             }
-            if (inDomAt === null) {
-              const h1 = document.querySelector("h1");
-              if (h1 && h1.textContent && h1.textContent.trim() !== (previous ?? "").trim()) {
-                inDomAt = performance.now() - started;
-              }
+            const wrapper = document.querySelector(".page-enter");
+            if (inDomAt === null && wrapper && wrapper !== wrapperBefore) {
+              inDomAt = performance.now() - started;
             }
             if (inDomAt !== null) {
-              const wrapper = document.querySelector(".page-enter");
               const opacity = wrapper ? Number(getComputedStyle(wrapper).opacity) : 1;
               if (!wrapper || opacity >= 0.99) {
                 resolve({ inDom: inDomAt, visible: performance.now() - started });
@@ -446,7 +492,7 @@ for (const route of ROUTES) {
           requestAnimationFrame(tick);
           anchor.click();
         }),
-      [route.path, before]
+      [route.path]
     );
     if (measured) {
       if (warm) {
@@ -571,7 +617,7 @@ for (const route of ROUTES) {
 // the old excuse — "hidden in lib/sidebar-nav.ts" — with the routes it
 // excused, 2026-10-05).
 check(
-  `every route is reachable from where the design links it (${ROUTES.length - 1 - missingLinks.length}/${ROUTES.length - 1})`,
+  `every route is reachable from where the design links it (${MEASURED.length - 1 - missingLinks.length}/${MEASURED.length - 1})`,
   missingLinks.length === 0,
   missingLinks.join("\n        ")
 );

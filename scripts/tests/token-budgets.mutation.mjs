@@ -88,8 +88,8 @@ const MUTANTS = [
   {
     name: "a deliverable hand-rolls its extraction again",
     suite: TOKENS, file: RESEARCH,
-    from: "    const synthesised = modelText(response);",
-    to: '    const synthesised = { text: response.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join(""), truncated: false };',
+    from: "    const synthesised = modelTextFrom({ text: outcome.text, stopReason: outcome.stopReason });",
+    to: '    const synthesised = { text: outcome.text, truncated: false };',
   },
   {
     name: "the notice stops saying the output is unfinished",

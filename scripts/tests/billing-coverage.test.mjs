@@ -69,7 +69,6 @@ const M = config.marginMultiplier;
 // ---------------------------------------------------------------------
 const DECLARED = {
   "src/lib/website-builder.ts": { calls: 4, billing: "settled", note: "generate/edit stream + classifier + patch, all via CostAccumulator" },
-  "src/lib/mission-agents.ts": { calls: 3, billing: "settled", note: "planner/reviewer, costs passed in" },
   // Moved out of api/create when Create Anything became a background job:
   // the route awaited a vision-capable classification under a 120-second
   // ceiling, and vision is the slow case because the images travel with
@@ -111,15 +110,10 @@ const DECLARED = {
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
   },
-  "src/lib/jobs/handlers/file-ask.ts": {
-    calls: 3,
-    billing: "settled",
-    note: "V3 File Workspace, moved out of api/files/ask when asking became a background job — the route sent a whole document set through one model call under a 60-second ceiling, which is the request most likely to be killed, and a kill lost the answer while keeping the hold. Unchanged in billing: one grounded call, the reservation still sized AFTER the documents load (the cost is dominated by document text, so a hold sized from the question alone is off by orders of magnitude on a long contract), and a call that throws still SETTLES via run-job rather than releasing, because the tokens were spent. The one REFUND path is 'no readable files', where no model call happens at all. 1 -> 3 call sites when a corpus larger than one context window stopped being TRUNCATED and started being read in passes: the single-pass call (unchanged, and still what nearly every question is), the per-part call, and the synthesis that combines the parts. All three record onto the SAME accumulator, so a five-part question is one charge covering six calls — and the reservation in api/files/ask is sized over every pass rather than the first, because a hold sized for one call and settled against six is not a discount, it is an overdraft on an account that was told it could afford the question.",
-  },
   "src/lib/research/research.ts": {
-    calls: 3,
+    calls: 1,
     billing: "settled",
-    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
+    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens. TWO of its three calls moved onto runCompletion on 2026-10-15 — the planning half and the synthesis, neither of which needs the web. The per-question call did NOT, and the reason is the citations rather than the search: AiResult carries text, tool calls, usage and a stop reason, and every source under every finding comes from the citations Anthropic attaches to its text blocks. Moving it today would produce a report whose claims point nowhere. The file's own header says what it needs.",
   },
 };
 
@@ -203,6 +197,15 @@ const ROUTED = {
   },
   "src/app/api/documents/[id]/pdf/route.ts": {
     note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing. Moved onto runCompletion 2026-10-15, and the cut-translation refusal went through modelTextFrom — the router's door onto the same truncation rule, so half a document still never becomes a PDF somebody pays for.",
+  },
+  "src/lib/research/research.ts": {
+    note: "V3 Deep Research, the two halves that moved. planResearch turns the topic into questions (forced tool, no web) and synthesiseReport writes the report from what the questions found (no tool, no web) — both record onto the ONE accumulator per report that api/research/[id]/run settles, failure paths included, since every phase that ran spent tokens. The per-question call is the third and is still on the SDK; it is also DECLARED above, with the reason. The synthesis keeps its wall-clock limit as the router's per-ATTEMPT budget, which is the same guarantee with failover added.",
+  },
+  "src/lib/mission-agents.ts": {
+    note: "planner/reviewer, costs passed in All three calls moved onto runCompletion 2026-10-15; the research pass asks for serverWebSearch and REQUIRES it, so a provider with no search is ruled out before the call rather than answering a planning question from training data.",
+  },
+  "src/lib/jobs/handlers/file-ask.ts": {
+    note: "V3 File Workspace, moved out of api/files/ask when asking became a background job — the route sent a whole document set through one model call under a 60-second ceiling, which is the request most likely to be killed, and a kill lost the answer while keeping the hold. Unchanged in billing: one grounded call, the reservation still sized AFTER the documents load (the cost is dominated by document text, so a hold sized from the question alone is off by orders of magnitude on a long contract), and a call that throws still SETTLES via run-job rather than releasing, because the tokens were spent. The one REFUND path is 'no readable files', where no model call happens at all. 1 -> 3 call sites when a corpus larger than one context window stopped being TRUNCATED and started being read in passes: the single-pass call (unchanged, and still what nearly every question is), the per-part call, and the synthesis that combines the parts. All three record onto the SAME accumulator, so a five-part question is one charge covering six calls — and the reservation in api/files/ask is sized over every pass rather than the first, because a hold sized for one call and settled against six is not a discount, it is an overdraft on an account that was told it could afford the question. Moved onto runCompletion 2026-10-15, all three calls. A part that fails is skipped and the others still answer; a synthesis that fails returns the parts joined, because they are already paid for.",
   },
   "src/lib/clarification.ts": {
     note: "The clarifying-questions pre-check, run by six surfaces (Site, Chat, Automations, Agents, Create Anything, Mission) BEFORE the expensive call they are about to make. Settled as its own feature, clarification_check, by whichever surface ran it — a run that stops at the question and a run that generates are different actions with an order of magnitude between their costs. The free reader in lib/ai/ambiguity.ts decides most requests for nothing and this call is never made for those. Moved onto runCompletion 2026-10-15; a provider failure still THROWS rather than returning a fail-open decision, because each of the five callers does something different in its catch and a fabricated 'it was clear' would settle a reservation against a call that never happened.",

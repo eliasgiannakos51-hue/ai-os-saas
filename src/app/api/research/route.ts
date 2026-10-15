@@ -211,12 +211,11 @@ export async function POST(request: Request) {
     }
     void recordAiCallForDailySpend(planEstimate.estimatedCredits);
 
-    const anthropic = new Anthropic({ apiKey });
     const planned = await planResearch({
-      anthropic,
       topic: topicCheck.topic,
       language,
       costs,
+      userId: user.id,
     });
 
     // Settled either way — but "either way" means the two outcomes of a

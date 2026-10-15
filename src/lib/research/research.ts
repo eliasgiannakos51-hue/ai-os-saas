@@ -1,7 +1,9 @@
 import "server-only";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import Anthropic from "@anthropic-ai/sdk";
-import { modelText } from "@/lib/verification/truncation";
+import { modelText, modelTextFrom } from "@/lib/verification/truncation";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
@@ -80,10 +82,10 @@ const WEB_SEARCH_TOOL: Anthropic.ToolUnion = {
 // Phase 1 — planning.
 // ---------------------------------------------------------------------
 
-const PLAN_TOOL: Anthropic.Tool = {
+const PLAN_TOOL: AiToolSpec = {
   name: "research_plan",
   description: "Return the research questions that together answer the user's topic.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       questions: {
@@ -121,28 +123,34 @@ export function planSystemPrompt(language: string): string {
 }
 
 export async function planResearch(params: {
-  anthropic: Anthropic;
   topic: string;
   language: string;
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
 }): Promise<{ ok: true; questions: ResearchQuestion[] } | { ok: false; reason: string }> {
   try {
-    const response = await params.anthropic.messages.create({
+    // THROUGH THE ROUTER, NOT THE SDK (step 1.4). The planning half
+    // needs no web search — it turns the topic into questions — so it
+    // is the half of this file that can move today. See
+    // researchQuestion below for the one that cannot.
+    const outcome = await runCompletion({
+      purpose: "research",
       model: RESEARCH_MODEL,
-      max_tokens: PLAN_MAX_TOKENS,
-      system: planSystemPrompt(params.language),
+      maxTokens: PLAN_MAX_TOKENS,
+      system: [{ type: "text", text: planSystemPrompt(params.language) }],
       tools: [PLAN_TOOL],
       // Forced, so the answer is a structure rather than prose that has
       // to be parsed back into one. A model that decides to reply in
       // sentences is a parse failure waiting to happen.
-      tool_choice: { type: "tool", name: PLAN_TOOL.name },
+      toolChoice: { type: "tool", name: PLAN_TOOL.name },
+      requires: ["tool_calling"],
       messages: [{ role: "user", content: `Topic:\n${wrapUntrusted(params.topic)}` }],
-    });
-    params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
+    }, { userId: params.userId });
+    if (!outcome.ok) return { ok: false, reason: "no_plan" };
+    params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
-    const use = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === PLAN_TOOL.name
-    );
+    const use = outcome.toolCalls.find((call) => call.name === PLAN_TOOL.name);
     if (!use) return { ok: false, reason: "no_plan" };
 
     const raw = (use.input as { questions?: unknown })?.questions;
@@ -207,6 +215,25 @@ function sourcesFrom(response: Anthropic.Message): ResearchSource[] {
   return [...seen.values()];
 }
 
+/**
+ * THE ONE CALL IN THIS FILE THAT HAS NOT MOVED ONTO THE ROUTER, and the
+ * reason is `sourcesFrom` below rather than the search.
+ *
+ * The search itself the router can do — `serverWebSearch` plus
+ * `requires: ["server_web_search"]`, which is how lib/agents/agent-runner
+ * and lib/mission-agents ask for it. What it cannot yet hand back is the
+ * CITATIONS Anthropic attaches to each text block: AiResult carries
+ * text, tool calls, usage and a stop reason, and nothing else. Every
+ * source under every finding in a report comes from those citations, so
+ * moving this call today would produce a report whose claims have
+ * nowhere to point — which is worse than one provider's worth of
+ * failover is good.
+ *
+ * What it needs is a `citations` field on AiResult, mapped by the
+ * Anthropic adapter and absent (not empty, ABSENT) from the three that
+ * cannot produce them, with ai-providers.test.mjs driving it through a
+ * stubbed fetch like every other adapter claim. That is its own change.
+ */
 export async function researchQuestion(params: {
   anthropic: Anthropic;
   topic: string;
@@ -355,7 +382,6 @@ export function buildSynthesisInput(params: {
 }
 
 export async function synthesiseReport(params: {
-  anthropic: Anthropic;
   topic: string;
   findings: ResearchFinding[];
   sources: ResearchSource[];
@@ -363,29 +389,39 @@ export async function synthesiseReport(params: {
   accountSummary?: string;
   language: string;
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
   // `truncated` is on the SUCCESS shape deliberately. A severed report is
   // still a report — throwing it away loses eight thousand tokens the
   // user has paid for, and a retry costs the same again with no reason to
   // end differently. The caller decides what to say about it.
 }): Promise<{ ok: true; markdown: string; truncated: boolean } | { ok: false; reason: string }> {
   try {
-    const response = await params.anthropic.messages.create(
+    // THROUGH THE ROUTER, NOT THE SDK (step 1.4). No tool and no
+    // search: the synthesis reads what the questions already found.
+    // The per-call timeout is the router's per-ATTEMPT budget, which is
+    // the same guarantee with failover added — a hung provider is cut
+    // off and the next one is tried rather than the whole report dying
+    // with it.
+    const outcome = await runCompletion(
       {
+        purpose: "research",
         model: RESEARCH_MODEL,
-        max_tokens: SYNTHESIS_MAX_TOKENS,
-        system: synthesisSystemPrompt(params.language, params.entries?.length ?? 0),
+        maxTokens: SYNTHESIS_MAX_TOKENS,
+        system: [{ type: "text", text: synthesisSystemPrompt(params.language, params.entries?.length ?? 0) }],
         messages: [{ role: "user", content: buildSynthesisInput(params) }],
       },
-      { timeout: RESEARCH_SYNTHESIS_TIMEOUT_MS }
+      { timeoutMs: RESEARCH_SYNTHESIS_TIMEOUT_MS, userId: params.userId }
     );
-    params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
+    if (!outcome.ok) return { ok: false, reason: "api_error" };
+    params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
     // TAKEN THROUGH modelText SO THE stop_reason CANNOT BE SKIPPED. This
     // validated its output with `markdown.length < 100` and nothing else,
     // so a report severed at the 8,000-token ceiling — far longer than
     // 100 characters — passed as finished and was written to a document
     // with a conclusion that does not exist.
-    const synthesised = modelText(response);
+    const synthesised = modelTextFrom({ text: outcome.text, stopReason: outcome.stopReason });
     const markdown = synthesised.text.trim();
 
     if (markdown.length < 100) return { ok: false, reason: "empty_report" };

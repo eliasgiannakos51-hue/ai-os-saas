@@ -176,6 +176,9 @@ const FAILOVER_NAMES = {
   "src/app/api/transitions/detect/route.ts": "οι προτάσεις επόμενου βήματος",
   "src/app/api/text-actions/route.ts": "οι ενέργειες κειμένου",
   "src/app/api/documents/[id]/pdf/route.ts": "η μετάφραση του PDF",
+  "src/lib/mission-agents.ts": "το Mission Control",
+  "src/lib/jobs/handlers/file-ask.ts": "οι ερωτήσεις στα αρχεία",
+  "src/lib/research/research.ts": "η Έρευνα",
 };
 const callers = [];
 (function walkSrc(dir) {

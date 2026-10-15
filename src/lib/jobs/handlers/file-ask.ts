@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiOutcome } from "@/lib/ai/providers/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 import { FILE_ASK_MODEL } from "@/lib/files/file-models";
@@ -16,7 +17,7 @@ import {
 import { wrapUntrusted } from "@/lib/agents/agent-config";
 import { JOB_STEPS } from "@/lib/jobs/job-types";
 import type { JobContext, JobHandler, JobHandlerResult } from "@/lib/jobs/run-job";
-import { modelText, truncationNotice } from "@/lib/verification/truncation";
+import { modelTextFrom, truncationNotice } from "@/lib/verification/truncation";
 import { unreadPages } from "@/lib/files/page-refs";
 
 /**
@@ -94,7 +95,6 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
 
   await ctx.progress(2, steps[1], { key: "parts", count: context.passes.length });
 
-  const anthropic = new Anthropic({ apiKey: ctx.apiKey });
   const filenames = files.map((f) => f.filename);
 
   // ONE PLACE, because this file makes up to three calls — a single pass,
@@ -102,8 +102,11 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
   // its ceiling, and the answer the user reads is built from whichever
   // ran. A flag set here catches all three without three checks.
   let hitTokenCeiling = false;
-  function textOf(response: Anthropic.Message): string {
-    const extracted = modelText(response);
+  // THROUGH THE ROUTER, NOT THE SDK (step 1.4) — and `modelTextFrom` is
+  // the router's door onto the same truncation rule `modelText` applies
+  // to an SDK response, so the one flag still catches all three calls.
+  function textOf(outcome: Extract<AiOutcome, { ok: true }>): string {
+    const extracted = modelTextFrom({ text: outcome.text, stopReason: outcome.stopReason });
     if (extracted.truncated) hitTokenCeiling = true;
     return extracted.text.trim();
   }
@@ -113,14 +116,16 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
   // token, nothing to pay for a mechanism it does not need.
   let answer: string;
   if (context.passes.length === 1) {
-    const response = await anthropic.messages.create({
+    const outcome = await runCompletion({
+      purpose: "file_ask",
       model: FILE_ASK_MODEL,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      system: askSystemPrompt({ language, filenames, truncated: context.truncated }),
+      maxTokens: MAX_OUTPUT_TOKENS,
+      system: [{ type: "text", text: askSystemPrompt({ language, filenames, truncated: context.truncated }) }],
       messages: [{ role: "user", content: `${context.passes[0].text}\n\nQuestion: ${question}` }],
-    });
-    ctx.costs.record("generation", response.usage, response.model || FILE_ASK_MODEL);
-    answer = textOf(response);
+    }, { userId: ctx.userId });
+    if (!outcome.ok) return { refund: true, result: { answered: false, reason: "ai_unavailable" } };
+    ctx.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+    answer = textOf(outcome);
   } else {
     // MORE TEXT THAN FITS IN ONE CALL. It used to be dropped: the first
     // 260k characters were answered from and the rest was reported as
@@ -129,19 +134,25 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
     // it.
     const partials: string[] = [];
     for (const [index, pass] of context.passes.entries()) {
-      const response = await anthropic.messages.create({
+      const outcome = await runCompletion({
+        purpose: "file_ask",
         model: FILE_ASK_MODEL,
-        max_tokens: MAX_PART_TOKENS,
-        system: askSystemPrompt({
+        maxTokens: MAX_PART_TOKENS,
+        system: [{ type: "text", text: askSystemPrompt({
           language,
           filenames,
           truncated: context.truncated,
           part: { index: index + 1, total: context.passes.length },
-        }),
+        }) }],
         messages: [{ role: "user", content: `${pass.text}\n\nQuestion: ${question}` }],
-      });
-      ctx.costs.record("generation", response.usage, response.model || FILE_ASK_MODEL);
-      const partial = textOf(response);
+      }, { userId: ctx.userId });
+      // ONE PART FAILING IS NOT THE QUESTION FAILING. The others are
+      // still read, and the synthesis is built from what came back — the
+      // same tolerance the loop already had for a part that found
+      // nothing.
+      if (!outcome.ok) continue;
+      ctx.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+      const partial = textOf(outcome);
       if (partial && !isNotInDocuments(partial)) {
         partials.push(`--- PART ${index + 1} OF ${context.passes.length} ---\n${partial}`);
       }
@@ -161,23 +172,31 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
       answer = partials[0].replace(/^--- PART \d+ OF \d+ ---\n/, "");
     } else {
       await ctx.progress(3, steps[2]);
-      const response = await anthropic.messages.create({
+      const outcome = await runCompletion({
+        purpose: "file_ask",
         model: FILE_ASK_MODEL,
-        max_tokens: MAX_OUTPUT_TOKENS,
-        system: synthesisSystemPrompt({
+        maxTokens: MAX_OUTPUT_TOKENS,
+        system: [{ type: "text", text: synthesisSystemPrompt({
           language,
           parts: partials.length,
           truncated: context.truncated,
-        }),
+        }) }],
         messages: [
           {
             role: "user",
             content: `${wrapUntrusted(partials.join("\n\n"))}\n\nQuestion: ${question}`,
           },
         ],
-      });
-      ctx.costs.record("generation", response.usage, response.model || FILE_ASK_MODEL);
-      answer = textOf(response);
+      }, { userId: ctx.userId });
+      // THE PARTS ARE ALREADY PAID FOR. A synthesis that could not be
+      // made must not throw them away: the parts are joined as they
+      // are, which is less polished and strictly more than nothing.
+      if (!outcome.ok) {
+        answer = partials.join("\n\n");
+      } else {
+        ctx.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+        answer = textOf(outcome);
+      }
     }
   }
 

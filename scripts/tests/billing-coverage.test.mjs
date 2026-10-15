@@ -184,30 +184,15 @@ const DECLARED = {
     billing: "settled",
     note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
   },
-  "src/lib/presentations/generate.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V5 #21 Presentations. ONE forced-tool-use call that returns the whole deck, reached from api/presentations/generate and reserved there against the presentationGenerate profile (sized per slide asked for, see estimate.ts). Recorded onto the route's accumulator BEFORE the deck is parsed, so a response that came back unusable still SETTLES — the tokens were spent — and only the Stop button and a provider failure release the hold. Unsplash searches and the image bytes an export embeds are not model calls and cost no credits.",
-  },
   "src/lib/documents/write-call.ts": {
     calls: 1,
     billing: "settled",
     note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing.",
   },
-  "src/lib/translate/translate-call.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then.",
-  },
   "src/lib/games/game-call.ts": {
     calls: 1,
     billing: "settled",
     note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing.",
-  },
-  "src/lib/posts/generate.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph.",
   },
 };
 
@@ -249,6 +234,15 @@ const ROUTED = {
   },
   "src/lib/websites-greek-spelling-check.ts": {
     note: "The spelling pass over a generated site. Recorded onto the website generation's own accumulator, so it is part of that generation's settlement rather than a second charge.",
+  },
+  "src/lib/presentations/generate.ts": {
+    note: "V5 #21 Presentations. TWO entry points on ONE forced-tool-use call — write a deck (api/presentations/generate, reserved against presentationGenerate, sized per slide asked for) and change one (api/presentations/[id]/edit, presentationEdit). Recorded onto the route's accumulator BEFORE the deck is parsed, so a response that came back unusable still SETTLES — the tokens were spent — and only the Stop button and a provider failure release the hold. Unsplash searches and the image bytes an export embeds are not model calls and cost no credits. Moved onto runCompletion 2026-10-15; the forced tool and the truncation refusal came with it, the second now in the router's one spelling of 'it ran out of room' so a deck cut short by a failover provider is refused exactly as one cut by Anthropic.",
+  },
+  "src/lib/translate/translate-call.ts": {
+    note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then. Moved onto runCompletion 2026-10-15: the two failures a batch can have are still told apart, because a Stop is the person and a provider failure is not, and only the first is theirs.",
+  },
+  "src/lib/posts/generate.ts": {
+    note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph. Moved onto runCompletion 2026-10-15.",
   },
 };
 

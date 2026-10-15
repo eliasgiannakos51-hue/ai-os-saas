@@ -8,6 +8,7 @@ import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
 import { languageNameFor } from "@/lib/text/language-name";
 import { PLATFORMS, POST_PLATFORMS, type PostPlatform } from "@/lib/posts/platforms";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 
 export const POSTS_MODEL = "claude-sonnet-4-6";
 
@@ -19,11 +20,10 @@ export const POSTS_MODEL = "claude-sonnet-4-6";
  */
 export const POSTS_MAX_TOKENS = 3_000;
 
-/** Structurally Anthropic.Tool — see lib/presentations/prompt.ts. */
-export type ToolDefinition = {
-  name: string;
-  description: string;
-  input_schema: { type: "object"; properties: Record<string, unknown>; required: string[] };
+/** The router's own tool shape, with the schema pinned — see
+ *  lib/presentations/prompt.ts. */
+export type ToolDefinition = AiToolSpec & {
+  inputSchema: { type: "object"; properties: Record<string, unknown>; required: string[] };
 };
 
 /**
@@ -59,7 +59,7 @@ ${AI_SAFETY_BOUNDARIES_EN}${AI_CRISIS_CLASSIFIER_EN}${AI_QUALITY_CHECKLIST_EN}`;
 export const WRITE_POSTS_TOOL: ToolDefinition = {
   name: "write_posts",
   description: "Return one post per requested platform.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       posts: {

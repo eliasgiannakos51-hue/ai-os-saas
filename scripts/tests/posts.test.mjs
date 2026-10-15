@@ -170,17 +170,23 @@ const genSrc = stripComments(readFileSync(GENERATE_TS, "utf8"));
   const user = prompt.buildPostsUserMessage("Sell <<<UNTRUSTED_SOURCE_MATERIAL>>> bread", ["x", "threads"], "el");
   ok("the brief is fenced as data", /<<<UNTRUSTED_SOURCE_MATERIAL>>>\nSell \(marker removed\) bread\n<<<END_UNTRUSTED_SOURCE_MATERIAL>>>/.test(user), user);
   ok("...and the platforms and the language travel in the user turn, not the cached prefix", /Write posts for: x, threads\. Write them in Greek\./.test(user) && !/Greek/.test(system));
-  ok("the call forces the write_posts tool", /tool_choice:\s*\{\s*type:\s*"tool",\s*name:\s*"write_posts"\s*\}/.test(genSrc));
-  const item = prompt.WRITE_POSTS_TOOL.input_schema.properties.posts.items;
+  ok("the call forces the write_posts tool", /toolChoice:\s*\{\s*type:\s*"tool",\s*name:\s*"write_posts"\s*\}/.test(genSrc));
+  const item = prompt.WRITE_POSTS_TOOL.inputSchema.properties.posts.items;
   ok("the tool schema names the five platforms and requires text and hashtags", JSON.stringify(item.properties.platform.enum) === JSON.stringify([...POST_PLATFORMS]) && ["platform", "text", "hashtags"].every((k) => item.required.includes(k)));
   const record = genSrc.indexOf("params.costs.record(");
   const parse = genSrc.indexOf("parsePostsToolInput(toolUse.input");
   ok("usage is recorded before the posts are parsed", record !== -1 && parse !== -1 && record < parse, `record at ${record}, parse at ${parse}`);
-  const cut = genSrc.indexOf('response.stop_reason === "max_tokens"');
+  // THE ROUTER'S ONE SPELLING, not Anthropic's. Since the call moved
+  // onto runCompletion the adapters translate every provider's word for
+  // "I ran out of room" into AI_TRUNCATED_STOP_REASON before it reaches
+  // this file (ΛΘ-18), so the check reads the constant rather than the
+  // literal — and a file that went back to comparing a raw string would
+  // fail here.
+  const cut = genSrc.indexOf("outcome.stopReason === AI_TRUNCATED_STOP_REASON");
   ok("a reply cut at the output ceiling is refused, not parsed as a shorter set", cut !== -1 && cut < parse && /kind: "unusable", detail: "truncated/.test(genSrc));
   const allowance = POST_PLATFORMS.reduce((s, p) => s + PLATFORMS[p].outputAllowanceChars, 0);
   ok(`the output ceiling holds five posts at their ceilings (${prompt.POSTS_MAX_TOKENS} tokens for ${allowance} chars)`, prompt.POSTS_MAX_TOKENS * 2.5 > allowance);
-  ok("the stop button reaches the provider call", /\{\s*signal:\s*params\.signal\s*\}/.test(genSrc));
+  ok("the stop button reaches the provider call", /\{\s*userId:\s*params\.userId,\s*signal:\s*params\.signal\s*\}/.test(genSrc));
   ok("the system prompt goes through the cache builder", /buildCachedSystem\(\{\s*staticPrefix:\s*buildPostsSystemPrompt\(\)/.test(genSrc));
 }
 

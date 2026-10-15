@@ -1,6 +1,7 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
 import { buildCachedSystem } from "@/lib/ai/cached-system";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import { AI_TRUNCATED_STOP_REASON, type AiOutcome } from "@/lib/ai/providers/types";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { deckCharts, parseDeckToolInput, type Deck, type ImageSource, type SlideChart } from "@/lib/presentations/deck";
 import {
@@ -16,7 +17,7 @@ import {
  * ONE FORCED-TOOL CALL THAT WRITES A DECK.
  *
  * The same shape as Create Studio's detector and the agent builder: the
- * model is handed a tool whose schema IS the deck, tool_choice forces it,
+ * model is handed a tool whose schema IS the deck, toolChoice forces it,
  * and what comes back is parsed by lib/presentations/deck.ts, which
  * clamps every field. No streaming — a deck is produced whole or not at
  * all, which is what lets the route release the hold in full when the
@@ -31,14 +32,15 @@ import {
  * yields a Greek deck whatever the interface is set to.
  *
  * The prompt, the tool schema and the user turn live in
- * lib/presentations/prompt.ts, which has no SDK in it so the build gate
- * can load them; this file is the part that speaks to Anthropic.
+ * lib/presentations/prompt.ts, which the build gate loads; this file is
+ * the part that makes the call.
+ *
+ * THROUGH THE ROUTER, NOT THE SDK (step 1.4). No api key travels in:
+ * which provider serves a deck is a configuration question
+ * (lib/ai/providers/registry.ts), and a provider with no key is simply
+ * not in the chain — with only ANTHROPIC_API_KEY set, as production has
+ * today, both calls are served exactly as they were.
  */
-
-/** The shape is checked HERE, once: prompt.ts declares the tool without
- *  the SDK type so a gate can load it, and this binding is what makes a
- *  drift between the two a compile error rather than a 400. */
-const writeDeckTool: Anthropic.Tool = WRITE_DECK_TOOL;
 
 export type GenerateDeckResult =
   | { ok: true; deck: Deck }
@@ -53,7 +55,6 @@ export type GenerateDeckResult =
  * a provider failure record nothing, because nothing was delivered.
  */
 export async function generateDeck(params: {
-  apiKey: string;
   description: string;
   slideCount: number;
   locale: string;
@@ -86,6 +87,8 @@ export async function generateDeck(params: {
    *  resolved to the chart itself by the parser. */
   charts?: readonly SlideChart[];
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
   return runDeckCall({
@@ -118,13 +121,14 @@ export async function generateDeck(params: {
  * with the tool schema.
  */
 export async function editDeck(params: {
-  apiKey: string;
   deck: Deck;
   instruction: string;
   locale: string;
   imageSource: ImageSource;
   memoryBlock?: string;
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
   return runDeckCall({
@@ -141,7 +145,6 @@ export async function editDeck(params: {
 }
 
 async function runDeckCall(params: {
-  apiKey: string;
   userMessage: string;
   fallbackTitle: string;
   charts: readonly SlideChart[];
@@ -149,32 +152,46 @@ async function runDeckCall(params: {
   imageSource: ImageSource;
   memoryBlock?: string;
   costs: CostAccumulator;
+  userId?: string;
   signal?: AbortSignal;
 }): Promise<GenerateDeckResult> {
-  const anthropic = new Anthropic({ apiKey: params.apiKey });
-  let response: Anthropic.Message;
+  // THIS FUNCTION DOES NOT THROW, AND THAT IS A MONEY PROPERTY, not a
+  // style — see lib/posts/generate.ts for the whole reasoning. The
+  // route holds credits before it calls and releases them on
+  // `ok: false`; its outer catch returns 500 without releasing.
+  let outcome: AiOutcome;
   try {
-    response = await anthropic.messages.create(
+    outcome = await runCompletion(
       {
+        purpose: "create",
         model: PRESENTATION_MODEL,
-        max_tokens: PRESENTATION_MAX_TOKENS,
+        maxTokens: PRESENTATION_MAX_TOKENS,
         system: buildCachedSystem({
           staticPrefix: buildDeckSystemPrompt(),
           perUserBlock: params.memoryBlock ?? "",
           model: PRESENTATION_MODEL,
         }),
         messages: [{ role: "user", content: params.userMessage }],
-        tools: [writeDeckTool],
-        tool_choice: { type: "tool", name: "write_deck" },
+        tools: [WRITE_DECK_TOOL],
+        // The tool's schema IS the deck, so a model left to decide for
+        // itself writes the slides in prose and the person pays for a
+        // reply this function has nothing to read.
+        toolChoice: { type: "tool", name: "write_deck" },
+        requires: ["tool_calling"],
       },
-      { signal: params.signal }
+      { userId: params.userId, signal: params.signal }
     );
   } catch (err) {
     if (params.signal?.aborted) return { ok: false, kind: "aborted", detail: "stopped by the user" };
     return { ok: false, kind: "provider", detail: err instanceof Error ? err.message : String(err) };
   }
+  if (!outcome.ok) {
+    return outcome.kind === "aborted"
+      ? { ok: false, kind: "aborted", detail: "stopped by the user" }
+      : { ok: false, kind: "provider", detail: outcome.detail };
+  }
 
-  params.costs.record("generation", response.usage, response.model || PRESENTATION_MODEL);
+  params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
   // A SEVERED DECK IS NOT A SHORT DECK. When the output ceiling cuts the
   // tool call, whatever partial input survived would parse as a deck with
@@ -183,13 +200,15 @@ async function runDeckCall(params: {
   // is rare, and when it happens the honest answer is "unusable": the
   // tokens were spent and the route settles them, as it does for any
   // answer that is not a deck.
-  if (response.stop_reason === "max_tokens") {
+  //
+  // Each provider has its own word for it and the adapters translate
+  // all four into this one before it gets here (ΛΘ-18), so the rule
+  // holds whoever served the call.
+  if (outcome.stopReason === AI_TRUNCATED_STOP_REASON) {
     return { ok: false, kind: "unusable", detail: "truncated at the output ceiling" };
   }
 
-  const toolUse = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
-  );
+  const toolUse = outcome.toolCalls.find((call) => call.name === "write_deck");
   if (!toolUse) return { ok: false, kind: "no_tool_use", detail: "the model returned no deck" };
 
   const verdict = parseDeckToolInput(toolUse.input, { locale: params.locale, imageSource: params.imageSource, fallbackTitle: params.fallbackTitle }, { charts: params.charts });

@@ -1,3 +1,4 @@
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import { describeLocale, TRANSLATION_MODEL } from "@/lib/documents/translation";
 import { batchPieces, type Piece } from "@/lib/translate/segments";
 
@@ -39,10 +40,10 @@ export function translateSystemPrompt(target: string): string {
   ].join(" ");
 }
 
-export const TRANSLATE_TOOL = {
+export const TRANSLATE_TOOL: AiToolSpec = {
   name: "translations",
   description: "The translated pieces, one for each piece sent, in the same order.",
-  input_schema: {
+  inputSchema: {
     type: "object" as const,
     properties: { translations: { type: "array", items: { type: "string" } } },
     required: ["translations"],

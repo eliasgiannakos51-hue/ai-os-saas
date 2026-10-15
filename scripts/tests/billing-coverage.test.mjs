@@ -179,11 +179,6 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way.",
   },
-  "src/lib/insights/narrate.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged.",
-  },
   "src/lib/agents/template-fill.ts": {
     calls: 1,
     billing: "settled",
@@ -230,6 +225,9 @@ const DECLARED = {
 const ROUTED = {
   "src/lib/website-security-review.ts": {
     note: "recorded onto the generation's accumulator — it is folded into an already-reserved generation or edit, not a separate credit-gated call. Moved onto runCompletion 2026-10-15. It fails OPEN by design, and that now includes a provider failure and a Stop, which used to arrive as a thrown error: written out in the file rather than inherited from the catch, because \"the security review returns safe\" has to be a deliberate sentence.",
+  },
+  "src/lib/insights/narrate.ts": {
+    note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged. Moved onto runCompletion 2026-10-15, once the router's graph stopped reaching a vendor package (ΛΘ-17) and this file's own gate could load it again. The forced tool is what makes the narration happen at all; any failure returns the detectors' own true sentences, and the hold stays the route's to settle — this helper never releases one it does not own.",
   },
   "src/lib/lead-classification.ts": {
     note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after. Moved onto runCompletion 2026-10-15; the accumulator is a REQUIRED parameter, because an optional one is how this call spent money with no cost log in the first place.",

@@ -807,7 +807,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // answer "Could not remove member. Please try again." — the SAME string
 // the route's two existing dead ends already use, and the one the
 // component renders through getErrorMessage. Measured, not added.
-const SERVER_PROSE_BASELINE = 673;
+// 673 -> 672 on 2026-10-15, and DOWN for once. api/insights/generate
+// no longer answers "The AI service is not configured." on a missing
+// ANTHROPIC_API_KEY: the narration goes through the provider router,
+// which decides from configuration, and a narration that cannot be
+// made falls back to the detectors' own true sentences instead of a
+// 503 on a page whose findings are already computed.
+const SERVER_PROSE_BASELINE = 672;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

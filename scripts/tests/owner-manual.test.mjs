@@ -156,6 +156,7 @@ const FAILOVER_NAMES = {
   "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",
   "src/lib/lead-classification.ts": "η διαλογή των μηνυμάτων της φόρμας",
   "src/lib/website-security-review.ts": "ο έλεγχος ασφαλείας του Site",
+  "src/lib/insights/narrate.ts": "η διατύπωση των ευρημάτων",
 };
 const callers = [];
 (function walkSrc(dir) {

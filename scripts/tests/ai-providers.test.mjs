@@ -30,7 +30,7 @@
 //   computed from the same halved cost. Section 6.
 //
 // Run: node scripts/tests/ai-providers.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
@@ -94,6 +94,88 @@ const stripTs = (text) =>
   text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 const stripSql = (text) =>
   text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/--.*$/gm, "");
+
+// ===========================================================================
+console.log("== 0b. THE ROUTING RULES CARRY NO PATH TO A VENDOR PACKAGE ==");
+// ===========================================================================
+//
+// WHAT THIS BUYS, and it is not tidiness. scripts/tests/load-ts.mjs
+// refuses to load a module whose import graph reaches a node_modules
+// package — deliberately, because "a silent stub would be a lie". So
+// the moment runCompletion's graph contains one, EVERY gate that loads
+// a module which calls runCompletion stops being able to load it, and
+// that is most of them. It happened (ΛΘ-17): the first call site to
+// move onto the router took its own suite down with it, through the
+// Anthropic SDK in the adapter and the Supabase client in the provider
+// log.
+//
+// Both are now imported where they are used rather than at the top, so
+// a reader of the rules never reaches either. This check walks the
+// graph instead of naming those two files, because the next one will
+// be added by somebody who has not read this comment.
+{
+  const resolveLocal = (spec) => {
+    if (!spec.startsWith("@/")) return null;
+    const base = `src/${spec.slice(2)}`;
+    for (const candidate of [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`]) {
+      if (existsSync(candidate)) return candidate;
+    }
+    return null;
+  };
+  // The same three exemptions load-ts.mjs makes: a side-effect marker
+  // package, and anything from node:.
+  const MARKER_ONLY = new Set(["server-only", "client-only"]);
+  const walked = new Set();
+  /** Every import the walk read, so the offender list below has a
+   *  population to be empty OF. A walk that resolved nothing finds no
+   *  packages and would otherwise pass. */
+  const imports = [];
+  const queue = ["src/lib/ai/providers/complete.ts"];
+  while (queue.length > 0) {
+    const file = queue.pop();
+    if (walked.has(file) || !existsSync(file)) continue;
+    walked.add(file);
+    for (const line of readFileSync(file, "utf8").split("\n")) {
+      const trimmed = line.trim();
+      const sideEffect = /^import\s+["']([^"']+)["'];?$/.exec(trimmed);
+      if (sideEffect) {
+        const spec = sideEffect[1];
+        imports.push({ file, spec });
+        continue;
+      }
+      const from = /^(?:import|export)\s.*from\s+["']([^"']+)["'];?$/.exec(trimmed);
+      if (!from) continue;
+      const spec = from[1];
+      imports.push({ file, spec });
+      if (spec.startsWith("@/")) {
+        const local = resolveLocal(spec);
+        if (local) queue.push(local);
+      }
+    }
+  }
+  // A FLOOR ON THE WALK. "no offenders" is also what a walk that
+  // resolved nothing prints, and it prints it green.
+  ok(`the router's graph was walked (${walked.size} modules, ${imports.length} imports)`,
+    walked.size >= 8 && imports.length >= 18,
+    "a walk that stopped at the first file would find no packages and pass on nothing");
+  const isVendor = ({ spec }) =>
+    !MARKER_ONLY.has(spec) && !spec.startsWith("@/") && !spec.startsWith(".") && !spec.startsWith("node:");
+  ok("the vendor detector says yes to a package", isVendor({ spec: "@anthropic-ai/sdk" }));
+  // A REAL LOCAL PATH IN THE FIXTURE, not a made-up one:
+  // gate-import-paths.test.mjs requires every `@/` path written into a
+  // gate to resolve, and a fixture is not exempt from that.
+  ok("...and no to a local module, a node builtin and a marker",
+    !isVendor({ spec: "@/lib/ai/providers/types" }) &&
+      !isVendor({ spec: "node:crypto" }) &&
+      !isVendor({ spec: "server-only" }));
+  const offenders = imports.filter(isVendor).map(({ file, spec }) => `${file} -> ${spec}`);
+  ok("the graph reaches no vendor package", offenders.length === 0,
+    offenders.join("\n        ") + "\n        Import it where it is used, as complete.ts's ADAPTERS and provider-log.ts do.");
+  // AND THE POSITIVE HALF, because "no bare specifier" is a proxy for
+  // the thing that matters: can a build gate actually load this?
+  const loaded = await loadTs("src/lib/ai/providers/complete.ts");
+  ok("...so a gate can load runCompletion itself", typeof loaded.runCompletion === "function");
+}
 
 // ===========================================================================
 console.log("\n== 1. the catalog, and the prices everything downstream trusts ==");

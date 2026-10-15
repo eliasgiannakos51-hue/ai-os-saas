@@ -3,10 +3,6 @@ import { catalogModel, substituteModel, type CatalogModel } from "@/lib/ai/provi
 import { cacheImpactOfRoute, cachedPrefixTokens } from "@/lib/ai/providers/cache-policy";
 import { ATTEMPT_TIMEOUT_MS, classifyError } from "@/lib/ai/providers/failover";
 import { resolveChain, warnIfPricesUnverified, PROVIDER_KEY_ENV_VARS } from "@/lib/ai/providers/registry";
-import { callAnthropic } from "@/lib/ai/providers/adapters/anthropic";
-import { callOpenAi } from "@/lib/ai/providers/adapters/openai";
-import { callGoogle } from "@/lib/ai/providers/adapters/google";
-import { callGroq } from "@/lib/ai/providers/adapters/groq";
 import type { Adapter } from "@/lib/ai/providers/adapters/shared";
 import { recordProviderAttempts } from "@/lib/ai/providers/provider-log";
 import type { AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";
@@ -32,11 +28,35 @@ import type { AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/provi
  * retry loop inside a chain turns one slow incident into four.
  */
 
-const ADAPTERS: Record<AiProvider, Adapter> = {
-  anthropic: callAnthropic,
-  openai: callOpenAi,
-  google: callGoogle,
-  groq: callGroq,
+/**
+ * THE ADAPTERS ARE LOADED WHEN ONE IS CHOSEN, NOT WHEN THIS FILE IS —
+ * and the reason is the build gate, not start-up time.
+ *
+ * adapters/anthropic.ts imports the vendor SDK, and a static import
+ * here put that SDK on the import graph of EVERY module that reaches
+ * runCompletion. scripts/tests/load-ts.mjs refuses to load a module
+ * whose graph contains a bare-specifier package — deliberately, because
+ * "a silent stub would be a lie" — so the first call site that moved
+ * onto the router took its own gate down with it: a suite that loads
+ * the module to exercise two pure functions could no longer load it at
+ * all. That would happen to every gate that loads a migrated module,
+ * which is most of them (ΛΘ-17).
+ *
+ * The answer is not to teach the loader to stub a vendor package. It is
+ * for the routing rules — which types.ts's own header says must be
+ * inside the build gate — to carry no static path to one. A dynamic
+ * import is evaluated when a provider is actually chosen, so a gate
+ * that makes no call never reaches it, and Node caches the module after
+ * the first import, so the cost is one resolution per process.
+ *
+ * ai-providers.test.mjs §0b holds the graph at zero bare packages, by
+ * walking it rather than by naming these four files.
+ */
+const ADAPTERS: Record<AiProvider, () => Promise<Adapter>> = {
+  anthropic: async () => (await import("@/lib/ai/providers/adapters/anthropic")).callAnthropic,
+  openai: async () => (await import("@/lib/ai/providers/adapters/openai")).callOpenAi,
+  google: async () => (await import("@/lib/ai/providers/adapters/google")).callGoogle,
+  groq: async () => (await import("@/lib/ai/providers/adapters/groq")).callGroq,
 };
 
 export type CompleteOptions = {
@@ -158,7 +178,8 @@ export async function runCompletion(
     options.signal?.addEventListener("abort", onCallerAbort);
     const startedAt = Date.now();
     try {
-      const response = await ADAPTERS[provider]({
+      const adapter = await ADAPTERS[provider]();
+      const response = await adapter({
         apiKey,
         model: model.id,
         request,

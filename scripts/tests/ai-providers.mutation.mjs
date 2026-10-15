@@ -52,6 +52,8 @@ const LOG_SQL = "supabase/migrations/20260828000000_ai_provider_log.sql";
 const BATCH_SQL = "supabase/migrations/20260829000000_agent_run_batches.sql";
 const VERCEL = "vercel.json";
 const WORKSPACE = "src/components/agents/agents-workspace.tsx";
+const COMPLETE = "src/lib/ai/providers/complete.ts";
+const PROVIDER_LOG = "src/lib/ai/providers/provider-log.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -547,6 +549,26 @@ const MUTANTS = [
     file: SHARED,
     from: "  if (!choice || !request.tools?.length) return undefined;",
     to: "  if (!choice) return undefined;",
+  },
+  // ------------------------------------------------------------------
+  // THE GRAPH (ΛΘ-17). One static vendor import anywhere in the routing
+  // rules makes every gate that loads a module calling runCompletion
+  // unloadable — which is most of them, and it fails as a crash with no
+  // FAIL line rather than as a named check.
+  // ------------------------------------------------------------------
+  {
+    name: "the SDK is back on the routing rules' import graph",
+    file: COMPLETE,
+    from: 'import type { Adapter } from "@/lib/ai/providers/adapters/shared";',
+    to: 'import { callAnthropic as eagerAnthropic } from "@/lib/ai/providers/adapters/anthropic";\nimport type { Adapter } from "@/lib/ai/providers/adapters/shared";\nvoid eagerAnthropic;',
+    expect: "the graph reaches no vendor package",
+  },
+  {
+    name: "the provider log reaches its database client at the top again",
+    file: PROVIDER_LOG,
+    from: 'import { logApiError } from "@/lib/log-error";',
+    to: 'import { createAdminClient as eagerAdmin } from "@/lib/supabase/admin";\nimport { logApiError } from "@/lib/log-error";\nvoid eagerAdmin;',
+    expect: "the graph reaches no vendor package",
   },
 ];
 

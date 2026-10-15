@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { INSIGHT_MODEL } from "@/lib/insights/insight-models";
 import type { Finding } from "@/lib/insights/detectors";
@@ -50,10 +51,10 @@ export type NarratedInsight = {
   narrated: boolean;
 };
 
-const NARRATE_TOOL: Anthropic.Tool = {
+const NARRATE_TOOL: AiToolSpec = {
   name: "phrase_findings",
   description: "Rewrite each supplied finding as a headline and one supporting sentence.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       findings: {
@@ -187,10 +188,14 @@ export function fallbackNarration(finding: Finding): { headline: string; detail:
 }
 
 export async function narrateFindings(params: {
-  anthropic: Anthropic;
   findings: Finding[];
   language: string;
   costs: CostAccumulator;
+  /** For the provider log only. Without it these attempts are recorded
+   *  against nobody (lib/ai/providers/provider-log.ts). */
+  userId?: string;
+  /** The caller's own abort signal, so pressing Stop stops the spend. */
+  signal?: AbortSignal;
 }): Promise<NarratedInsight[]> {
   const { findings, language } = params;
   if (findings.length === 0) return [];
@@ -203,14 +208,20 @@ export async function narrateFindings(params: {
     narrated: false,
   }));
 
-  let response: Anthropic.Message;
-  try {
-    response = await params.anthropic.messages.create({
+  // THE TOOL IS FORCED, and that is the whole call. The parse below
+  // reads the tool's input and nothing else, so a model left to decide
+  // would answer in prose, `written` would not be an array, and every
+  // finding would keep the detector's English wording — silently, after
+  // the tokens were spent. See AiToolChoice in lib/ai/providers/types.ts.
+  const outcome = await runCompletion(
+    {
+      purpose: "summarisation",
       model: INSIGHT_MODEL,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      system: narrateSystemPrompt(language),
+      maxTokens: MAX_OUTPUT_TOKENS,
+      system: [{ type: "text", text: narrateSystemPrompt(language) }],
       tools: [NARRATE_TOOL],
-      tool_choice: { type: "tool", name: NARRATE_TOOL.name },
+      toolChoice: { type: "tool", name: NARRATE_TOOL.name },
+      requires: ["tool_calling"],
       messages: [
         {
           role: "user",
@@ -219,18 +230,26 @@ export async function narrateFindings(params: {
             .join("\n\n")}`,
         },
       ],
-    });
-  } catch {
-    // The user still gets true sentences. A model outage degrades the
-    // prose, not the product.
-    return result;
-  }
-
-  params.costs.record("generation", response.usage, response.model || INSIGHT_MODEL);
-
-  const use = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === NARRATE_TOOL.name
+    },
+    { userId: params.userId, signal: params.signal }
   );
+
+  // ONE BRANCH FOR EVERY FAILURE, THE STOP BUTTON INCLUDED. The user
+  // still gets true sentences: an outage, an unconfigured chain or a
+  // stop degrades the prose, not the product — which is exactly what
+  // the try/catch here used to do.
+  //
+  // AND NO RELEASE HERE. The hold belongs to api/insights/generate,
+  // which settles unconditionally because this function returns a value
+  // rather than throwing (reservation-lifecycle.test.mjs records it as
+  // settles_unconditionally). Copying the coding route's
+  // releaseReservation branch into this helper would release a hold it
+  // does not own.
+  if (!outcome.ok) return result;
+
+  params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+
+  const use = outcome.toolCalls.find((call) => call.name === NARRATE_TOOL.name);
   const written = (use?.input as { findings?: unknown })?.findings;
   if (!Array.isArray(written)) return result;
 

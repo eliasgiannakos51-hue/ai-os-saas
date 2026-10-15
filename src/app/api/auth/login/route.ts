@@ -105,7 +105,23 @@ export async function POST(request: Request) {
       // The waves the per-IP block cannot see (ΑΣ-8.5): many addresses at
       // once, or one account from many. lib/auth/login-failure-alert.ts.
       await noteLoginFailure(email);
-      return NextResponse.json({ ok: false, error: signInError.message }, { status: 401 });
+      // A CODE, NOT THE PROVIDER'S SENTENCE (ΑΣ-3.3). This used to
+      // return signInError.message, so Supabase's own English —
+      // "Invalid login credentials", and whatever it says next release
+      // — was what a Greek reader saw on the sign-in page, and what an
+      // unauthenticated caller could read back. The page now says
+      // auth.login.failed in the reader's language, which it already
+      // used as its fallback when no error text came.
+      //
+      // RECORDED, BUT NOT ONE ROW PER TYPO. A wrong password is not an
+      // incident and there are thousands of them; anything else the
+      // auth provider says — a schema error, an outage — is, and
+      // dropping the message from the response would otherwise put it
+      // nowhere at all.
+      if (!/invalid login credentials/i.test(signInError.message ?? "")) {
+        logApiError("/api/auth/login", signInError, { stage: "sign_in" });
+      }
+      return NextResponse.json({ ok: false, code: "sign_in_failed" }, { status: 401 });
     }
 
     return NextResponse.json({ ok: true });

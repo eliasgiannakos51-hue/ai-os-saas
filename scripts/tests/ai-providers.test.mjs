@@ -516,6 +516,59 @@ ok("flattenSystem joins the blocks in order, losing nothing",
   ok("agent_run is one of them — the layer is exercised, not merely present", used.includes("agent_run"));
 }
 
+// ===========================================================================
+// HOW MUCH OF THE PRODUCT ACTUALLY GOES THROUGH THE ROUTER — PRINTED,
+// NOT GATED.
+//
+// ΛΘ-2 says "a router that does not run, and a page that says it does",
+// and half of it is fixed: the router runs. The other half is this
+// number, and until now nothing produced it, so every statement about it
+// was somebody's recollection. The owner was told "about half" more than
+// once; it is not half.
+//
+// REPORTED, NOT GATED, and the reason is the same one mutation-coverage
+// gives: a ratio with a ratchet on it buys a number that only ever goes
+// up by one, and what is wanted here is the list of what is left. Three
+// of the remaining call sites cannot move until AiRequest can carry a
+// stream and an image — see the breakdown this prints.
+//
+// WHERE IT IS VISIBLE, said exactly: when this file is run on its own
+// (`node scripts/tests/ai-providers.test.mjs`). `npm run gates` runs it
+// too, but folds a green gate's whole output into one `ok` line, so the
+// number does not appear there — the same is true of
+// mutation-coverage's ratio, and saying otherwise would be one more
+// claim a reader could follow to nothing.
+{
+  const tsFiles = readdirSync("src", { recursive: true })
+    .filter((f) => typeof f === "string" && (f.endsWith(".ts") || f.endsWith(".tsx")))
+    .map((f) => join("src", f))
+    .filter((f) => statSync(f).isFile() && !f.includes("providers/adapters"));
+  ok(`the tree was walked (${tsFiles.length} files)`, tsFiles.length >= 400,
+    "an empty walk would print 0 of 0 and read as perfect coverage");
+
+  let direct = 0;
+  let routed = 0;
+  const blockedBy = { stream: new Set(), image: new Set() };
+  const directFiles = [];
+  for (const f of tsFiles) {
+    const text = stripComments(readFileSync(f, "utf8"));
+    const here = (text.match(/\.messages\.(?:create|stream)\(/g) ?? []).length;
+    const through = (text.match(/\brunCompletion\(/g) ?? []).length;
+    routed += through;
+    if (here === 0) continue;
+    direct += here;
+    directFiles.push(f);
+    if (/\.messages\.stream\(|stream:\s*true/.test(text)) blockedBy.stream.add(f);
+    if (/type:\s*"(?:image|document)"/.test(text)) blockedBy.image.add(f);
+  }
+  const total = direct + routed;
+  const pct = total === 0 ? 0 : Math.round((routed / total) * 1000) / 10;
+  console.log(`        ROUTER COVERAGE: ${routed} of ${total} model call sites = ${pct}%   (${directFiles.length} files still call the SDK directly)`);
+  console.log(`        of those files, ${blockedBy.stream.size} need streaming and ${blockedBy.image.size} need an image or a PDF in a message — neither is expressible in AiRequest today`);
+  ok(`the scan sees both sides (${routed} routed, ${direct} direct)`, routed > 0 && direct > 0,
+    "a scan that saw one side only would print a ratio of 0% or 100% and mean nothing either way");
+}
+
 // THE USER NEVER SEES ANY OF THIS.
 {
   const componentFiles = readdirSync("src/components", { recursive: true })

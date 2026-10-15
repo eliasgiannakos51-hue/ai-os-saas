@@ -16,6 +16,7 @@ import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readRequestedId } from "@/lib/library/requested";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { ResearchShell } from "@/components/research/research-shell";
+import { countResearchRunsThisMonth } from "@/lib/research/research-usage";
 
 export const dynamic = "force-dynamic";
 
@@ -58,26 +59,22 @@ export default async function DeepResearchPage(
     );
   }
 
-  // The same calendar-month window the API enforces. Computed here rather
-  // than passed from the client so the number on the screen is the number
-  // the server will act on.
-  const since = new Date();
-  since.setUTCDate(1);
-  since.setUTCHours(0, 0, 0, 0);
-
+  // THE SAME FUNCTION THE API ENFORCES WITH, not a second query that
+  // means the same thing today. Both used to count research_reports rows
+  // created since the 1st, side by side, with a comment here promising
+  // they matched; when the route's count moved to the ledger (a deleted
+  // report used to hand the allowance back — see
+  // lib/research/research-usage.ts) a copy here would have gone on
+  // showing the old number while the server refused on the new one.
   const REPORT_COLUMNS = "id, topic, status, questions, document_id, credits_charged, error, created_at, completed_at";
-  const [{ data: listed }, { count }] = await Promise.all([
+  const [{ data: listed }, used] = await Promise.all([
     supabase
       .from("research_reports")
       .select(REPORT_COLUMNS)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(100),
-    supabase
-      .from("research_reports")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", since.toISOString()),
+    countResearchRunsThisMonth(user.id),
   ]);
   // `?record=` (the Library): a report older than the newest 100 still
   // opens — read on its own, by id AND owner.
@@ -98,7 +95,7 @@ export default async function DeepResearchPage(
           initialReports={reports as unknown as ResearchReport[]}
           initialOpenId={wanted}
           monthlyCap={isAdmin ? null : cap}
-          usedThisMonth={count ?? 0}
+          usedThisMonth={used ?? 0}
           slides={await isFeatureOn("research-slides", user)}
         />
       </div>
@@ -122,7 +119,7 @@ export default async function DeepResearchPage(
           initialReports={reports as unknown as ResearchReport[]}
           initialOpenId={wanted}
           monthlyCap={isAdmin ? null : cap}
-          usedThisMonth={count ?? 0}
+          usedThisMonth={used ?? 0}
           slides={await isFeatureOn("research-slides", user)}
         />
       </div>

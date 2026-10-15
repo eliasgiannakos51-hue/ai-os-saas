@@ -18,7 +18,7 @@ import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/plan-limit-writes.test.mjs";
 const MIGRATION = "supabase/migrations/20261023100000_projects_site_versions_server_written.sql";
-const AUDIT = "docs/SECURITY-AUDIT.md";
+const COUNTER = "src/lib/research/research-usage.ts";
 
 const MUTANTS = [
   {
@@ -57,12 +57,24 @@ const MUTANTS = [
     expect: "the catalog was read",
   },
   {
-    name: "the research row is marked fixed while the ledger calls it open",
-    file: AUDIT,
-    from: "| ΑΣ-4.13 | Το μηνιαίο όριο έρευνας | ανοιχτό |",
-    to: "| ΑΣ-4.13 | Το μηνιαίο όριο έρευνας | διορθώθηκε |",
-    expect: "deepResearch: still open as ΑΣ-4.13",
+    // WAS "the research row is marked fixed while the ledger calls it
+    // open" — the ledger no longer calls it open, because the month is
+    // counted from a table the account cannot touch. The question the
+    // mutant asks is the same one in its new form: point the count back
+    // at rows the account can delete and the ledger must notice.
+    name: "the research month is counted from rows the account can delete again",
+    file: GATE,
+    from: 'deepResearch: { counter: ["ai_cost_log"], countedIn: "src/lib/research/research-usage.ts", countedBy: \'.from("ai_cost_log")\' },',
+    to: 'deepResearch: { counter: ["research_reports"], countedIn: "src/lib/research/research-usage.ts", countedBy: \'.from("ai_cost_log")\' },',
+    expect: "deepResearch: the account cannot move research_reports",
+  },
+  {
+    name: "the counter stops reading the cost log and nothing notices",
+    file: COUNTER,
+    from: '      .from("ai_cost_log")',
+    to: '      .from("research_reports")',
+    expect: 'deepResearch: counted in src/lib/research/research-usage.ts, by .from("ai_cost_log")',
   },
 ];
 
-runMutations({ name: "plan-limit-writes", gate: GATE, targets: [GATE, MIGRATION, AUDIT], mutants: MUTANTS });
+runMutations({ name: "plan-limit-writes", gate: GATE, targets: [GATE, MIGRATION, COUNTER], mutants: MUTANTS });

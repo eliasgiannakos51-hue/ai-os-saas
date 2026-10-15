@@ -1,5 +1,5 @@
 import { matchProducer } from "@/lib/create-studio/producer-routes";
-import { foldForMatch } from "@/lib/text/unicode-patterns";
+import { boundedPattern, foldForMatch, stem, word } from "@/lib/text/unicode-patterns";
 import { truncate } from "@/lib/text/truncate";
 
 /**
@@ -41,21 +41,138 @@ export type FlowPlan = { steps: FlowStep[]; notYet: NotYet[] };
 /** The most of one sentence a flow is made from. */
 export const MAX_FLOW_SAID = 1200;
 
-// Words, folded (lib/text/unicode-patterns.ts foldForMatch: lower case, no
-// accents, final sigma as σ). Greek as STEMS, so every ending counts.
-const CUES: Record<"images" | "analysis" | NotYet, { stems: string[]; words: string[] }> = {
-  images: { stems: ["εικον", "φωτογραφ", "εικονογραφ"], words: ["image", "images", "picture", "pictures", "photo", "photos", "imagen", "imagenes", "bild", "bilder", "immagine", "immagini", "imagem", "imagens"] },
-  analysis: { stems: ["γραφημα", "γραφηματ", "αρχειο πωλησ", "αρχειο με τισ πωλησ"], words: ["chart", "charts", "graph", "graphs", "spreadsheet", "excel"] },
-  video: { stems: ["βιντεο", "ταινι"], words: ["video", "videos", "tiktok", "reel", "reels", "film"] },
-  translation: { stems: ["μεταφρασ", "μεταφρασε"], words: ["translate", "translation"] },
-  game: { stems: ["παιχνιδ"], words: ["game", "games"] },
-  meeting: { stems: ["συναντησ"], words: ["meeting", "meetings"] },
+/**
+ * What a sentence calls each thing, folded
+ * (lib/text/unicode-patterns.ts foldForMatch: lower case, no accents,
+ * final sigma as σ). Greek as STEMS, so every ending counts.
+ *
+ * TEN LANGUAGES, NOT TWO. This table used to hold Greek and English,
+ * plus four European words for pictures and nothing else — so
+ * «φτιάξε μου εικόνες» planned an images step and "créez-moi des
+ * illustrations", "erstelle Diagramme", "翻訳して", "أريد لعبة" planned
+ * nothing. The two halves of that are different sizes of wrong: a
+ * missed `images` loses a step, and a missed NOT_YET word (video,
+ * translation, game, meeting) starts a flow for something no tool here
+ * can make — which is the case the file's own comment below says must
+ * never happen. lib/create-studio/producer-routes.ts has had all ten
+ * since it was written; this is the same table for the words it does
+ * not cover. Measured in scripts/tests/flows.test.mjs §7, one sentence
+ * per language per cue.
+ *
+ * `cjk` IS SEPARATE BECAUSE THE MATCH IS. Chinese and Japanese put no
+ * spaces between words, so a word-boundary pattern finds nothing in
+ * 「画像を作って」 — those cues are matched by containment instead, the
+ * same split producer-routes.ts makes.
+ *
+ * NOT_YET CUES ARE DELIBERATELY NARROW. A false positive there refuses
+ * the whole flow, so the words here are the ones that can only mean the
+ * thing: "clip" and the German "Termin" were left out for that reason.
+ */
+type Cue = {
+  /** Greek stems, matched by containment — some are phrases. */
+  stems: string[];
+  /**
+   * Latin-script STEMS, matched with a word-end boundary and up to
+   * MAX_INFLECTION letters of ending.
+   *
+   * WHY A SECOND KIND OF STEM EXISTS. Whole words are enough for a
+   * noun — "imagen", "Diagramm", "jogo" — and useless for a verb a
+   * person conjugates or hangs a pronoun off. The sixty-sentence
+   * measurement in scripts/tests/flows.test.mjs §7 failed on exactly
+   * five rows and all five were the same verb: "tradúcelo",
+   * "traduis-le", "übersetze", "traducilo", "traduza". One stem each
+   * for the Romance and German families reads all of them.
+   */
+  roots: string[];
+  words: string[];
+  cjk: string[];
 };
 
-function names(folded: string, cue: { stems: string[]; words: string[] }): boolean {
+const CUES: Record<"images" | "analysis" | NotYet, Cue> = {
+  images: {
+    stems: ["εικον", "φωτογραφ", "εικονογραφ"],
+    roots: [],
+    words: [
+      "image", "images", "picture", "pictures", "photo", "photos", "illustration", "illustrations",
+      "imagen", "imagenes", "foto", "fotos", "ilustracion", "ilustraciones",
+      "visuel", "visuels",
+      "bild", "bilder", "abbildung",
+      "immagine", "immagini", "illustrazione", "illustrazioni",
+      "imagem", "imagens", "ilustracao", "ilustracoes",
+      "صورة", "صور", "رسم",
+    ],
+    cjk: ["画像", "写真", "イラスト", "图片", "图像", "照片", "配图"],
+  },
+  analysis: {
+    stems: ["γραφημα", "γραφηματ", "αρχειο πωλησ", "αρχειο με τισ πωλησ"],
+    roots: [],
+    words: [
+      "chart", "charts", "graph", "graphs", "spreadsheet", "spreadsheets", "excel",
+      "grafico", "graficos", "grafica", "graficas", "hoja de calculo",
+      "graphique", "graphiques", "tableur",
+      "diagramm", "diagramme", "tabellenkalkulation",
+      "grafici", "foglio di calcolo",
+      "planilha", "planilhas",
+      "رسم بياني", "جدول بيانات",
+    ],
+    cjk: ["图表", "表格", "数据分析", "グラフ", "表計算", "データ分析"],
+  },
+  video: {
+    stems: ["βιντεο", "ταινι"],
+    roots: [],
+    words: [
+      "video", "videos", "tiktok", "reel", "reels", "film", "films",
+      "pelicula", "peliculas", "filmato", "filmati", "filme", "filmes",
+      "فيديو",
+    ],
+    cjk: ["動画", "ビデオ", "映像", "视频", "短视频", "影片"],
+  },
+  translation: {
+    stems: ["μεταφρασ", "μεταφρασε"],
+    // "tradu" covers traduire / traduis / traducir / tradúcelo /
+    // traduzir / traduza / tradurre / traducilo and every noun built on
+    // them; "ubersetz" covers übersetze / übersetzen / Übersetzung;
+    // "translat" covers translate / translating / translation.
+    roots: ["tradu", "ubersetz", "translat"],
+    words: [
+      "translate", "translation", "translations",
+      "traducir", "traduccion", "traducciones",
+      "traduire", "traduction", "traductions",
+      "ubersetzen", "ubersetzung",
+      "tradurre", "traduzione", "traduzioni",
+      "traduzir", "traducao", "traducoes",
+      "ترجمة", "ترجم",
+    ],
+    cjk: ["翻訳", "翻译", "译文"],
+  },
+  game: {
+    stems: ["παιχνιδ"],
+    roots: [],
+    words: [
+      "game", "games", "juego", "juegos", "jeu", "jeux", "spiel", "spiele",
+      "gioco", "giochi", "jogo", "jogos", "لعبة", "ألعاب",
+    ],
+    cjk: ["ゲーム", "游戏", "遊戲"],
+  },
+  meeting: {
+    stems: ["συναντησ"],
+    roots: [],
+    words: [
+      "meeting", "meetings", "reunion", "reuniones", "reunions",
+      "besprechung", "riunione", "riunioni", "reuniao", "reunioes",
+      "اجتماع",
+    ],
+    cjk: ["会議", "ミーティング", "会议"],
+  },
+};
+
+function names(folded: string, cue: Cue): boolean {
   if (cue.stems.some((s) => folded.includes(s))) return true;
-  const tokens = new Set(folded.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
-  return cue.words.some((w) => tokens.has(w));
+  if (cue.cjk.some((c) => folded.includes(c))) return true;
+  // Built per call, both of them: boundedPattern returns a /g/ regex,
+  // whose lastIndex survives between tests on a shared instance.
+  if (cue.roots.length > 0 && boundedPattern(stem(...cue.roots)).test(folded)) return true;
+  return cue.words.length > 0 && boundedPattern(word(...cue.words)).test(folded);
 }
 
 export function planFlow(said: string): FlowPlan {

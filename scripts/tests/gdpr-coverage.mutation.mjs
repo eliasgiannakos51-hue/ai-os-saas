@@ -30,7 +30,8 @@ const REGISTRY = "src/lib/gdpr/user-data-registry.ts";
 const EXPORT_ROUTE = "src/app/api/account/export/route.ts";
 const ERASE_LIST = "src/lib/account/erase-storage.ts";
 const DELETE_ROUTE = "src/app/api/delete-account/confirm/route.ts";
-const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_LIST, DELETE_ROUTE];
+const CRON = "src/app/api/cron/scheduled-runs/route.ts";
+const TARGETS = [GATE, REGISTRY, EXPORT_ROUTE, ERASE_LIST, DELETE_ROUTE, CRON];
 
 const MUTANTS = [
   {
@@ -194,6 +195,24 @@ const MUTANTS = [
     from: "        { status: 429 }",
     to: "        { status: 200 }",
     expect: "says so with a 429 rather than an empty file",
+  },
+  {
+    // ΛΘ-13. The sentence that was false, put back. The entry stays in
+    // NON_PERSONAL_TABLES either way — what changes is whether the
+    // reason given can be followed to anything.
+    name: "the rate-limit log is excluded for the reason that was not true",
+    file: REGISTRY,
+    from: "  // NOT \"keyed by IP, not by user\" — that is what this line used to say,",
+    to: "  // Keyed by IP/route fingerprint, not by user.\n  // NOT a real reason —",
+    expect: "so the registry no longer says it is not",
+  },
+  {
+    // The code half of the same reason: "nothing here survives a day".
+    name: "the rate-limit log is kept for a week instead of a day",
+    file: CRON,
+    from: "const rateLimitCleanupCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000)",
+    to: "const rateLimitCleanupCutoff = new Date(Date.now() - 168 * 60 * 60 * 1000)",
+    expect: "the sweep exists and its window is",
   },
 ];
 

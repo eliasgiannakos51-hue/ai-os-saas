@@ -96,6 +96,37 @@ checkTrue(
     /`signup_grant:\$\{/.test(readFileSync("src/app/auth/callback/route.ts", "utf8"))
 );
 
+// ONE GRANT PER EVENT, FROM ONE PLACE (ΛΘ-15). An add-on arrives as
+// checkout.session.completed in BOTH Stripe modes — "payment" for a
+// one-off, "subscription" for a recurring one bought on top of a plan —
+// and the handler used to call grantAddon from inside the "payment"
+// branch AND again below it. Nothing was granted twice: the unique
+// constraint on account_addons.stripe_event_id refused the second
+// insert and grantCredits refused the second grant on its session key.
+// What the second pass DID produce was "duplicate addon credit grant
+// suppressed" in the log, on every legitimate one-off credit add-on —
+// a diagnostic firing on the happy path, which trains the reader to
+// scroll past the line that will one day mean something.
+const sessionHandler = readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8");
+const grantAddonCalls = [...sessionHandler.matchAll(/await grantAddon\(/g)].length;
+// The count goes in the FAILURE text, not the clause name: a mutation
+// suite anchors on the name, and a name that moves with the data is an
+// anchor that only holds while the code is right.
+check("an add-on is granted from exactly one place", grantAddonCalls, 1);
+checkTrue(
+  "...and the one-off branch leaves it to that place",
+  /session\.mode === "payment" && !session\.metadata\?\.addon_slug/.test(sessionHandler)
+);
+checkTrue(
+  "...which still covers a one-off, so a paid add-on is never simply missed",
+  /if \(session\.metadata\?\.addon_slug\) await grantAddon\(session, event\.id\);/.test(sessionHandler)
+);
+// The key that made the double call harmless is still the thing that
+// makes a REDELIVERY harmless, so it is checked here rather than
+// assumed by the three above.
+checkTrue("an add-on grant is keyed on the event", /stripe_event_id: eventId/.test(sessionHandler));
+checkTrue("...and its credits on the session", /stripe_addon:\$\{session\.id\}/.test(sessionHandler));
+
 const credits = readFileSync("src/lib/billing/credits.ts", "utf8");
 checkTrue("grantCredits goes through the RPC", credits.includes('rpc("grant_credits_idempotent"'));
 check(

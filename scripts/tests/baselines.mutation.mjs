@@ -54,7 +54,9 @@ const MUTANTS = [
     // suites by hand and neither of the two that went red was among them.
     // 250 -> 263 (scripts/tests/run-mutations.mjs says which, and why
     // merging main after #285 moved it again).
-    from: "const FLOOR = 263;",
+    // 263 -> 271 on 2026-10-15: four new suites this round, and four the
+    // previous entry had already under-counted.
+    from: "const FLOOR = 271;",
     to: "const FLOOR = 244;",
     expect: "no baseline has more room than it is allowed",
   },

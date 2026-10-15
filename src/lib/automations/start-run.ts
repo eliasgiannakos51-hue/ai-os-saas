@@ -53,7 +53,6 @@ export async function latestReadyFile(userId: string): Promise<string | null> {
 }
 
 export async function startRun(params: {
-  apiKey: string;
   flow: FlowRow;
   user: User;
   account: Account;
@@ -79,7 +78,6 @@ export async function startRun(params: {
   }
   const runId = row.id as string;
   const result = await go({
-    apiKey: params.apiKey,
     flow: params.flow,
     runId,
     user: { id: params.user.id, email: params.user.email ?? null },

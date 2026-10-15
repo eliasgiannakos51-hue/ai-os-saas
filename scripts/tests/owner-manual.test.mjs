@@ -168,6 +168,10 @@ const FAILOVER_NAMES = {
   "src/lib/documents/write-call.ts": "τα Έγγραφα",
   "src/lib/automations/builder.ts": "οι Αυτοματισμοί",
   "src/lib/chat/memory.ts": "η μνήμη του Chat",
+  "src/lib/reflection-agent.ts": "η εβδομαδιαία ανασκόπηση",
+  "src/lib/mission-step-runner.ts": "τα προγραμματισμένα βήματα",
+  "src/lib/automations/runner.ts": "οι Αυτοματισμοί",
+  "src/lib/agents/agent-builder.ts": "οι βοηθοί",
 };
 const callers = [];
 (function walkSrc(dir) {

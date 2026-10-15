@@ -342,7 +342,15 @@ console.log("\n== 3. a deliverable cannot be shipped severed ==");
 // THE PART THAT GETS SKIPPED, and the reason this file exists.
 for (const file of CLASSIFIED.deliverable) {
   const src = strip(readFileSync(file, "utf8"));
-  const readsStopReason = /modelText\(/.test(src) || /stop_reason/.test(src);
+  // THREE DOORS ONTO ONE RULE, and the third arrived with the router.
+  // `modelText(` reads an SDK response, `modelTextFrom(` reads a
+  // runCompletion outcome (lib/verification/truncation.ts says why
+  // there are two), and a file may also compare the stop reason itself
+  // — as `stop_reason` on the SDK or as AI_TRUNCATED_STOP_REASON on the
+  // router. A file that moved onto the router and kept the rule would
+  // have dropped out of this check on the old pattern alone, which is
+  // the silent half of what step 1.4 keeps finding.
+  const readsStopReason = /modelText(From)?\(/.test(src) || /stop_reason/.test(src) || /AI_TRUNCATED_STOP_REASON/.test(src);
   ok(`${file.split("/").pop()} reads the stop reason`, readsStopReason, file);
   // AND DOES NOT ALSO HAND-ROLL THE EXTRACTION. A file that calls
   // modelText for one response and joins the blocks itself for another
@@ -355,7 +363,7 @@ for (const file of CLASSIFIED.deliverable) {
   // before reaching the thing it was looking for. An extraction is one
   // statement, so the bound is the semicolon.
   const handRolled = /\.filter\([^;]{0,200}?\btype === "text"/.test(src);
-  ok(`${file.split("/").pop()} has no hand-rolled extraction left`, !handRolled || /stop_reason/.test(src), file);
+  ok(`${file.split("/").pop()} has no hand-rolled extraction left`, !handRolled || /stop_reason/.test(src) || /AI_TRUNCATED_STOP_REASON/.test(src), file);
 }
 
 // =====================================================================

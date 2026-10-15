@@ -70,7 +70,6 @@ const M = config.marginMultiplier;
 const DECLARED = {
   "src/lib/website-builder.ts": { calls: 4, billing: "settled", note: "generate/edit stream + classifier + patch, all via CostAccumulator" },
   "src/lib/mission-agents.ts": { calls: 3, billing: "settled", note: "planner/reviewer, costs passed in" },
-  "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
   // Moved out of api/create when Create Anything became a background job:
   // the route awaited a vision-capable classification under a 120-second
   // ceiling, and vision is the slow case because the images travel with
@@ -115,16 +114,6 @@ const DECLARED = {
     billing: "settled",
     note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing.",
   },
-  "src/lib/reflection-agent.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "was a flat 2 credits with NO usage tracking at all — the only call whose tokens reached no cost log.",
-  },
-  "src/lib/agents/agent-builder.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent.",
-  },
   "src/lib/ai/providers/adapters/anthropic.ts": {
     calls: 1,
     billing: "settled",
@@ -137,11 +126,6 @@ const DECLARED = {
       "THE HOLE IS CLOSED BELOW rather than noted: the check after this table requires every " +
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
-  },
-  "src/lib/automations/runner.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "Package 30. One call per AI box of a run, tried at most twice onto ONE accumulator per box; each box is held (automationStep, sized on the most of a read that reaches the model) and settled on its own before the next box runs, so the automation's own cost limit is checked against what was really charged. A box whose two attempts both fail releases its hold.",
   },
   "src/lib/agents/agent-runner.ts": {
     calls: 1,
@@ -216,6 +200,18 @@ const ROUTED = {
   },
   "src/lib/chat/memory.ts": {
     note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls. Moved onto runCompletion 2026-10-15. No tools in this one — it asks for a line of text or the word NONE — and a failure returns without storing anything, which is what it already did: the chat reply it rides behind has been sent, and this was never allowed to fail it.",
+  },
+  "src/lib/reflection-agent.ts": {
+    note: "was a flat 2 credits with NO usage tracking at all — the only call whose tokens reached no cost log. Moved onto runCompletion 2026-10-15. It still THROWS on a provider failure, because the route settles only after it returns and its catch is what releases the hold — an empty string would be settled as a reflection the person never got.",
+  },
+  "src/lib/mission-step-runner.ts": {
+    note: "A scheduled Mission step, run by api/cron/scheduled-runs. ONE forced-tool-use classification that decides which module the step's text belongs in and fills its fields; the cron route reserves against it before the call and settles only on a confirmed success, releasing otherwise — it never deducts from inside this file. Moved onto runCompletion 2026-10-15.",
+  },
+  "src/lib/automations/runner.ts": {
+    note: "Package 30. One call per AI box of a run, tried at most twice onto ONE accumulator per box; each box is held (automationStep, sized on the most of a read that reaches the model) and settled on its own before the next box runs, so the automation's own cost limit is checked against what was really charged. A box whose two attempts both fail releases its hold. Moved onto runCompletion 2026-10-15. The two-attempt loop is unchanged and a router failure counts as one attempt, exactly as a thrown SDK error did. The cut-reply check went through modelTextFrom, the router's door onto the same truncation rule modelText applies to an SDK response.",
+  },
+  "src/lib/agents/agent-builder.ts": {
+    note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent. Moved onto runCompletion 2026-10-15.",
   },
   "src/lib/clarification.ts": {
     note: "The clarifying-questions pre-check, run by six surfaces (Site, Chat, Automations, Agents, Create Anything, Mission) BEFORE the expensive call they are about to make. Settled as its own feature, clarification_check, by whichever surface ran it — a run that stops at the question and a run that generates are different actions with an order of magnitude between their costs. The free reader in lib/ai/ambiguity.ts decides most requests for nothing and this call is never made for those. Moved onto runCompletion 2026-10-15; a provider failure still THROWS rather than returning a fail-open decision, because each of the five callers does something different in its catch and a fabricated 'it was clear' would settle a reservation against a call that never happened.",
@@ -760,7 +756,10 @@ for (const [label, file, feature] of [
   const body = readFileSync(file, "utf8");
   checkTrue(`${label}: estimates from real input size`, /estimateForAction\(/.test(body));
   checkTrue(`${label}: reserves before calling`, /reserveCredits\(/.test(body));
-  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /, costs\)/.test(body));
+  // `, costs)` was the only shape until a call site moved onto the
+  // router and gained an argument after the accumulator. The claim is
+  // that the usage reaches one, not that it is the last thing passed.
+  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /,\s*costs\s*[,)]/.test(body));
   checkTrue(`${label}: settles as ${feature}`, new RegExp(`feature: "${feature}"`).test(body));
   checkTrue(`${label}: releases the hold on failure`, /releaseReservation\(/.test(body));
   checkTrue(`${label}: at the account's own rate`, /effectiveCreditPriceEurForAccount\(/.test(body) || /plan,/.test(body));

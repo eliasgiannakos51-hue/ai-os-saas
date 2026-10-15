@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { sendPushToUser } from "@/lib/push/web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -133,10 +134,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the call below goes
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json(
-        { ok: false, error: "ANTHROPIC_API_KEY is not configured on the server." },
+        { ok: false, error: "No AI provider is configured on the server." },
         { status: 500 }
       );
     }
@@ -322,7 +325,6 @@ export async function GET(request: Request) {
         }
         void recordAiCallForDailySpend(runEstimate.estimatedCredits);
         const result = await runMissionStepForUser(
-          apiKey,
           admin,
           userId,
           run.step_text,
@@ -627,7 +629,6 @@ export async function GET(request: Request) {
         }
         void recordAiCallForDailySpend(autoEstimate.estimatedCredits);
         const result = await runMissionStepForUser(
-          apiKey,
           admin,
           userId,
           automation.description,

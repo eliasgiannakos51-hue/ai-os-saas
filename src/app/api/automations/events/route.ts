@@ -58,7 +58,7 @@ export async function POST() {
   try {
     for (const run of (data ?? []) as QueuedRun[]) {
       if (run.user_id !== user.id) continue;
-      if (await runQueued(apiKey, run, user)) ran++;
+      if (await runQueued(run, user)) ran++;
     }
   } catch (err) {
     // What ran is closed by its own row (lib/automations/start-run.ts go);

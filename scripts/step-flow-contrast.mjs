@@ -83,7 +83,7 @@ function over(fg, bgs) {
   return ratio(f, out);
 }
 
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const rows = [];
 // One theme since 2026-10-04 (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN).
 for (const theme of ["dark"]) {

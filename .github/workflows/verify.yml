@@ -287,7 +287,13 @@ jobs:
       - run: npm ci
         timeout-minutes: 10
       # Every prodtest reads CHROMIUM_PATH before falling back to the
-      # image-local path this repo's own sandbox uses.
+      # image-local path this repo's own sandbox uses — held by
+      # scripts/tests/portable-paths.test.mjs section 3, which until
+      # 2026-10-14 accepted the word `executablePath` as proof of that and
+      # so could not go red. Three prodtests were not reading it: two
+      # threw here and, because test:prod stops at the first failure, took
+      # the other 63 files with them (issue #280); the third skipped its
+      # browser section and reported green.
       - name: chromium
         timeout-minutes: 10
         run: |

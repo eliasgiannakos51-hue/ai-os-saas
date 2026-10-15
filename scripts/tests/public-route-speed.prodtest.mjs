@@ -24,7 +24,7 @@
  * Run: node scripts/tests/public-route-speed.prodtest.mjs
  *      BASE_URL=... to point it somewhere else
  */
-import { existsSync } from "node:fs";
+import { chromiumPath } from "./lib/chromium.mjs";
 import { execFileSync } from "node:child_process";
 
 const BASE = process.env.BASE_URL ?? "https://ai-os-saas-five.vercel.app";
@@ -139,11 +139,22 @@ check(
 
 // ------------------------------------------------------------- browser
 console.log("\n== 2. what a browser sees ==");
-const CHROMIUM = "/opt/pw-browsers/chromium";
+// A SECTION THAT ANNOUNCED ITSELF AND THEN RAN NOTHING, on every CI
+// machine there is. This read `if (!existsSync("/opt/pw-browsers/chromium"))
+// ... SKIP`, naming the path this repository's own container uses. A
+// GitHub runner does not have it — it installs Playwright's own browser
+// and says where in CHROMIUM_PATH (.github/workflows/verify.yml, the
+// `chromium` step) — so the whole of section 2 printed one SKIP line and
+// the file reported green having opened no browser at all. That is the
+// sibling of the defect in CLAUDE.md's "a number PRINTED and never
+// judged": a section ANNOUNCED and never run.
+//
+// chromiumPath() prefers CHROMIUM_PATH, falls back to the container's
+// browser only when it is really there, and otherwise returns undefined
+// so Playwright uses its own managed download.
+const CHROMIUM = chromiumPath();
 let browser = null;
-if (!existsSync(CHROMIUM)) {
-  console.log("  SKIP  no chromium at /opt/pw-browsers/chromium");
-} else {
+try {
   const { chromium } = await import("playwright");
   // --ssl-version-max=tls1.2 is not a nicety here: without it every
   // navigation to production dies with ERR_CONNECTION_RESET before a
@@ -155,6 +166,14 @@ if (!existsSync(CHROMIUM)) {
     executablePath: CHROMIUM,
     args: ["--ssl-version-max=tls1.2"],
   });
+} catch (err) {
+  const why = String(err && err.message).split("\n")[0];
+  // A laptop with no browser installed may skip this section. A machine
+  // that NAMED one in CHROMIUM_PATH may not: there, failing to launch it
+  // is a real failure and has to be seen rather than skipped past.
+  const wasNamed = (process.env.CHROMIUM_PATH ?? "").trim().length > 0;
+  if (wasNamed) check(`the browser named in CHROMIUM_PATH launches (${CHROMIUM})`, false, why);
+  else console.log(`  SKIP  no browser on this machine (${why})`);
 }
 
 if (browser) {

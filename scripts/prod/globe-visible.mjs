@@ -7,7 +7,7 @@
 // frames of the real thing.
 import { chromium } from "playwright";
 const SITE = "https://ai-os-saas-five.vercel.app";
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--ssl-version-max=tls1.2"] });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--ssl-version-max=tls1.2"] });
 const page = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
 for (const path of ["/", "/login", "/signup", "/pricing"]) {
   await page.goto(SITE + path, { waitUntil: "networkidle", timeout: 60000 }).catch(() => undefined);

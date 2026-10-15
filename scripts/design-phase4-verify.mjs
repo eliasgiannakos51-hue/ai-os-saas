@@ -192,7 +192,7 @@ const curl = (url, cookie) =>
 
 // No proxy settings: this browser makes no network requests at all. The
 // HTML and the CSS are already in hand.
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
 const rows = [];
 const skipped = [];
 for (const [locale, localeName] of LOCALES) {

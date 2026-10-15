@@ -21,7 +21,7 @@ import { startMockSupabase } from "./lib/mock-supabase.mjs";
 
 const PORT = 38473;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
-const CHROMIUM = "/opt/pw-browsers/chromium";
+const CHROMIUM = process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium";
 
 const supa = await startMockSupabase({ port: 54343 });
 

@@ -307,7 +307,9 @@
       "label": "Menu principal",
       "saveFailed": "La modification n’a pas été enregistrée. Réessayez.",
       "recentChats": "Discussions récentes",
-      "untitledChat": "Nouvelle conversation"
+      "untitledChat": "Nouvelle conversation",
+      "chats": "Discussions",
+      "allConversations": "Toutes les discussions"
     },
     "tabs": {
       "home": "Accueil",
@@ -1365,7 +1367,7 @@
       "pin": "Épingler",
       "unpin": "Désépingler",
       "rename": "Renommer",
-      "deleteConfirm": "Supprimer « {title} » ? Action irréversible.",
+      "deleteConfirm": "Supprimer « {title} » ? Vous aurez quelques secondes pour annuler.",
       "pinLimitReached": "Vous avez épinglé {limit} conversations, le maximum que votre offre garde en haut. Détachez-en une pour épingler celle-ci.",
       "pinError": "L'épinglage n'a pas été enregistré. Réessayez.",
       "renameError": "Le nouveau nom n'a pas été enregistré — l'ancien reste.",
@@ -1449,7 +1451,15 @@
         "openInFiles": "Ouvrir dans Fichiers",
         "memoryUsed": "De la mémoire ({count})",
         "manageMemory": "Ce dont Ionexa se souvient"
-      }
+      },
+      "deleteFailed": "Cette discussion n'a pas été supprimée. Elle est toujours là.",
+      "undo": "Annuler",
+      "moveToProject": "Déplacer vers un projet",
+      "noProjects": "Aucun projet pour l'instant.",
+      "moved": "Déplacée vers {project}.",
+      "moveFailed": "Le déplacement a échoué. Réessayez.",
+      "projectFull": "Ce projet contient déjà {limit} éléments, son maximum.",
+      "selectOne": "Sélectionner « {title} »"
     },
     "create": {
       "title": "Créer N'importe Quoi",
@@ -3614,6 +3624,19 @@
         "stopped": "Arrêté. Rien n'a été débité.",
         "failed": "Un problème est survenu. Réessayez."
       }
+    },
+    "chats": {
+      "title": "Discussions",
+      "searchPlaceholder": "Rechercher dans vos discussions",
+      "searching": "Recherche dans ce qui a été dit…",
+      "searchedContent": "Les titres, et les {scanned} messages les plus récents.",
+      "searchTruncated": "Des messages plus anciens n'ont peut-être pas été atteints.",
+      "noMatches": "Aucune discussion ne correspond à « {query} ».",
+      "selectedCount": "{count} sélectionnées",
+      "deleteSelected": "Supprimer la sélection",
+      "deleteSelectedConfirm": "Supprimer {count} discussions ? Vous aurez quelques secondes pour annuler chacune.",
+      "deleteSelectedFailed": "Tout n'a pas été supprimé. Ce qui reste ne l'a pas été.",
+      "atCap": "Les {cap} plus récentes. Recherchez pour en trouver une plus ancienne."
     }
   },
   "module": {
@@ -4345,6 +4368,11 @@
       "is": "Un petit jeu à vous, à partir d'une description.",
       "does": "Il vous montre d'abord le plan en cinq cases ; changez-en une avec des mots, puis il écrit le jeu et vous y jouez ici, au clavier ou au toucher.",
       "doesNot": "Il ne voit pas votre compte et n'accède pas à internet : le jeu tourne isolé, tout comme le fichier que vous téléchargez."
+    },
+    "chats": {
+      "is": "Toutes les discussions que vous avez eues, au même endroit.",
+      "does": "Les affiche de la plus récente à la plus ancienne, cherche dans les titres et dans ce qui a été dit, et renomme, épingle, classe ou supprime n'importe laquelle.",
+      "doesNot": "La recherche ne lit pas tous les messages jamais envoyés : elle lit les 400 plus récents, et la page le dit pendant que vous tapez."
     }
   },
   "helpCentre": {
@@ -4395,7 +4423,8 @@
     "aiTransparencyDescription": "Quels modèles d'IA Ionexa utilise, ce qu'ils font et quelles données ils voient.",
     "contactDescription": "Contactez l'équipe d'Ionexa AI.",
     "verifyEmail": "Confirmez votre e-mail",
-    "verifyEmailDescription": "Confirmez l’adresse e-mail de votre compte Ionexa AI."
+    "verifyEmailDescription": "Confirmez l’adresse e-mail de votre compte Ionexa AI.",
+    "chats": "Discussions"
   },
   "errors": {
     "retry": "Réessayer",
@@ -4996,7 +5025,7 @@
       "rowsPerModule": "{count, plural, one {# ligne par module dans le chat} other {# lignes par module dans le chat}}"
     },
     "startChat": "Démarrer une conversation dans ce projet",
-    "chatFixed": "Une conversation appartient au projet où elle a commencé, pour toute sa durée.",
+    "chatFixed": "Une discussion démarre dans le projet que vous choisissez, et vous pouvez la déplacer ensuite depuis son menu « ⋯ ».",
     "noGoal": "Aucun objectif écrit pour l'instant.",
     "untitled": "Sans titre",
     "delete": "Supprimer",

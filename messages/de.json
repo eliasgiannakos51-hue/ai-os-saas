@@ -307,7 +307,9 @@
       "label": "Hauptmenü",
       "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen.",
       "recentChats": "Letzte Chats",
-      "untitledChat": "Neue Unterhaltung"
+      "untitledChat": "Neue Unterhaltung",
+      "chats": "Chats",
+      "allConversations": "Alle Unterhaltungen"
     },
     "tabs": {
       "home": "Start",
@@ -1365,7 +1367,7 @@
       "pin": "Anheften",
       "unpin": "Lösen",
       "rename": "Umbenennen",
-      "deleteConfirm": "„{title}“ löschen? Das lässt sich nicht rückgängig machen.",
+      "deleteConfirm": "„{title}“ löschen? Du hast ein paar Sekunden, um es rückgängig zu machen.",
       "pinLimitReached": "Du hast {limit} Unterhaltungen angeheftet — mehr hält dein Tarif nicht oben. Löse eine, um diese anzuheften.",
       "pinError": "Das Anheften wurde nicht gespeichert. Versuch es noch einmal.",
       "renameError": "Der neue Name wurde nicht gespeichert — der alte bleibt.",
@@ -1449,7 +1451,15 @@
         "openInFiles": "In Dateien öffnen",
         "memoryUsed": "Aus dem Gedächtnis ({count})",
         "manageMemory": "Was Ionexa sich merkt"
-      }
+      },
+      "deleteFailed": "Diese Unterhaltung wurde nicht gelöscht. Sie ist noch da.",
+      "undo": "Rückgängig",
+      "moveToProject": "In ein Projekt verschieben",
+      "noProjects": "Noch keine Projekte.",
+      "moved": "Nach {project} verschoben.",
+      "moveFailed": "Das Verschieben hat nicht geklappt. Versuche es erneut.",
+      "projectFull": "Dieses Projekt enthält bereits {limit} Dinge — mehr behält es nicht.",
+      "selectOne": "„{title}“ auswählen"
     },
     "create": {
       "title": "Alles Erstellen",
@@ -3614,6 +3624,19 @@
         "stopped": "Gestoppt. Nichts wurde berechnet.",
         "failed": "Etwas ist schiefgelaufen. Versuche es erneut."
       }
+    },
+    "chats": {
+      "title": "Chats",
+      "searchPlaceholder": "Deine Unterhaltungen durchsuchen",
+      "searching": "Suche in dem, was gesagt wurde…",
+      "searchedContent": "Titel und die neuesten {scanned} Nachrichten.",
+      "searchTruncated": "Es kann ältere Nachrichten geben, die nicht erreicht wurden.",
+      "noMatches": "Keine Unterhaltung passt zu „{query}“.",
+      "selectedCount": "{count} ausgewählt",
+      "deleteSelected": "Ausgewählte löschen",
+      "deleteSelectedConfirm": "{count} Unterhaltungen löschen? Du hast für jede ein paar Sekunden, um es rückgängig zu machen.",
+      "deleteSelectedFailed": "Es wurde nicht alles gelöscht. Was noch da ist, wurde nicht gelöscht.",
+      "atCap": "Die neuesten {cap}. Suche, um eine ältere zu finden."
     }
   },
   "module": {
@@ -4345,6 +4368,11 @@
       "is": "Ein eigenes kleines Spiel, aus einer Beschreibung.",
       "does": "Zuerst zeigt es den Plan in fünf Feldern; ändere jedes davon mit Worten, dann schreibt es das Spiel und du spielst es hier, mit Tastatur oder per Touch.",
       "doesNot": "Es sieht dein Konto nicht und geht nicht ins Internet: Das Spiel läuft abgeschottet, ebenso die Datei, die du herunterlädst."
+    },
+    "chats": {
+      "is": "Jede Unterhaltung, die du geführt hast, an einem Ort.",
+      "does": "Zeigt sie neueste zuerst, durchsucht sowohl die Titel als auch das Gesagte, und benennt um, heftet an, legt ab oder löscht jede davon.",
+      "doesNot": "Die Suche liest nicht jede je gesendete Nachricht: sie liest die neuesten 400, und die Seite sagt das, während du tippst."
     }
   },
   "helpCentre": {
@@ -4395,7 +4423,8 @@
     "aiTransparencyDescription": "Welche KI-Modelle Ionexa nutzt, was sie tun und welche Daten sie sehen.",
     "contactDescription": "Nehmen Sie Kontakt mit dem Ionexa-AI-Team auf.",
     "verifyEmail": "E-Mail bestätigen",
-    "verifyEmailDescription": "Bestätige die E-Mail-Adresse deines Ionexa-AI-Kontos."
+    "verifyEmailDescription": "Bestätige die E-Mail-Adresse deines Ionexa-AI-Kontos.",
+    "chats": "Chats"
   },
   "errors": {
     "retry": "Erneut versuchen",
@@ -4996,7 +5025,7 @@
       "rowsPerModule": "{count, plural, one {# Zeile pro Modul im Chat} other {# Zeilen pro Modul im Chat}}"
     },
     "startChat": "Chat in diesem Projekt starten",
-    "chatFixed": "Eine Unterhaltung gehört zu dem Projekt, in dem sie begonnen hat — ihr Leben lang.",
+    "chatFixed": "Eine Unterhaltung beginnt in dem Projekt, das du wählst, und du kannst sie später über ihr „⋯“-Menü verschieben.",
     "noGoal": "Noch kein Ziel geschrieben.",
     "untitled": "Ohne Titel",
     "delete": "Löschen",

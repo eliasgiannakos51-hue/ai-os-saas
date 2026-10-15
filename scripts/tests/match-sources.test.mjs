@@ -280,6 +280,15 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // accents is "φτιάξε"); scripts/tests/chat-opens-tools.test.mjs runs it
     // on sentences in five languages, both ways.
     "src/lib/create-studio/intent-signals.ts",
+    // THE CHATS PAGE'S SNIPPET, AND IT DOES NOT MATCH ANYTHING. The
+    // match happened in the database (an ILIKE in
+    // api/conversations/search) and in the browser (matchesSearch over
+    // the titles); this file folds only to find WHERE in a message the
+    // words landed, so the hundred-odd characters shown under the title
+    // are cut around them instead of from the start. It decides nothing
+    // about what is or is not a hit, so it cannot disagree with the
+    // matcher — which is the risk this section is here to price.
+    "src/lib/chat/conversation-search.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

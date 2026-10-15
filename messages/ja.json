@@ -307,7 +307,9 @@
       "label": "メインメニュー",
       "saveFailed": "変更を保存できませんでした。もう一度お試しください。",
       "recentChats": "最近のチャット",
-      "untitledChat": "新しい会話"
+      "untitledChat": "新しい会話",
+      "chats": "チャット",
+      "allConversations": "すべての会話"
     },
     "tabs": {
       "home": "ホーム",
@@ -1365,7 +1367,7 @@
       "pin": "ピン留め",
       "unpin": "ピン留めを解除",
       "rename": "名前を変更",
-      "deleteConfirm": "「{title}」を削除しますか？元に戻せません。",
+      "deleteConfirm": "「{title}」を削除しますか？数秒のあいだ元に戻せます。",
       "pinLimitReached": "ピン留めは {limit} 件までで、いまのプランの上限です。ひとつ解除してから、こちらをピン留めしてください。",
       "pinError": "ピン留めを保存できませんでした。もう一度お試しください。",
       "renameError": "新しい名前を保存できませんでした。前の名前のままです。",
@@ -1449,7 +1451,15 @@
         "openInFiles": "ファイルで開く",
         "memoryUsed": "メモリーから ({count})",
         "manageMemory": "Ionexa が覚えていること"
-      }
+      },
+      "deleteFailed": "その会話は削除されませんでした。まだここにあります。",
+      "undo": "元に戻す",
+      "moveToProject": "プロジェクトへ移動",
+      "noProjects": "プロジェクトはまだありません。",
+      "moved": "{project} へ移動しました。",
+      "moveFailed": "移動できませんでした。もう一度お試しください。",
+      "projectFull": "そのプロジェクトはすでに {limit} 件を保持しており、これが上限です。",
+      "selectOne": "「{title}」を選択"
     },
     "create": {
       "title": "何でも作成",
@@ -3614,6 +3624,19 @@
         "stopped": "停止しました。請求はありません。",
         "failed": "問題が発生しました。もう一度お試しください。"
       }
+    },
+    "chats": {
+      "title": "チャット",
+      "searchPlaceholder": "会話を検索",
+      "searching": "話した内容を検索しています…",
+      "searchedContent": "タイトルと、最新の {scanned} 件のメッセージ。",
+      "searchTruncated": "届かなかった古いメッセージがあるかもしれません。",
+      "noMatches": "「{query}」に一致する会話はありません。",
+      "selectedCount": "{count} 件選択中",
+      "deleteSelected": "選択したものを削除",
+      "deleteSelectedConfirm": "{count} 件の会話を削除しますか？それぞれ数秒のあいだ元に戻せます。",
+      "deleteSelectedFailed": "すべては削除されませんでした。残っているものは削除されていません。",
+      "atCap": "最新の {cap} 件。古いものは検索してください。"
     }
   },
   "module": {
@@ -4345,6 +4368,11 @@
       "is": "説明から作る、あなただけの小さなゲーム。",
       "does": "まず計画を5つの枠で見せます。どれでも言葉で変えられ、そのあとゲームを書き、ここでキーボードやタッチで遊べます。",
       "doesNot": "アカウントを見ることも、インターネットにつながることもありません。ゲームは隔離されて動き、ダウンロードしたファイルも同じです。"
+    },
+    "chats": {
+      "is": "これまでのすべての会話が、ひとつの場所に。",
+      "does": "新しい順に並べ、タイトルと会話の中で話した内容の両方を検索し、名前の変更・ピン留め・プロジェクトへの移動・削除ができます。",
+      "doesNot": "検索はこれまでのすべてのメッセージを読むわけではありません。最新の400件を読み、入力中にそのことをページが伝えます。"
     }
   },
   "helpCentre": {
@@ -4395,7 +4423,8 @@
     "aiTransparencyDescription": "Ionexa が使う AI モデル、その役割、そして見えるデータについて。",
     "contactDescription": "Ionexa AI チームにご連絡ください。",
     "verifyEmail": "メールアドレスの確認",
-    "verifyEmailDescription": "Ionexa AI アカウントのメールアドレスを確認します。"
+    "verifyEmailDescription": "Ionexa AI アカウントのメールアドレスを確認します。",
+    "chats": "チャット"
   },
   "errors": {
     "retry": "もう一度試す",
@@ -4996,7 +5025,7 @@
       "rowsPerModule": "チャットでモジュールごとに {count} 行"
     },
     "startChat": "このプロジェクトでチャットを始める",
-    "chatFixed": "会話は開始したプロジェクトに、その一生のあいだ属します。",
+    "chatFixed": "会話は選んだプロジェクトで始まり、あとから「⋯」メニューで移動できます。",
     "noGoal": "目標はまだ書かれていません。",
     "untitled": "無題",
     "delete": "削除",

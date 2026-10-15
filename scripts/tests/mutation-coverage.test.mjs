@@ -285,7 +285,13 @@ console.log(
 // 276 -> 282 on 2026-10-09, when the checks branch was stacked on
 // packages 13-29 and #273: their suites covered six more together. Read
 // off the run.
-const RATCHET = 282;
+// 282 -> 288 on 2026-10-15. FIVE OF THE SIX ARRIVED BEFORE THIS ROUND
+// DID: #279, #281, #282 and #286 all landed on main that afternoon and
+// their suites covered five more, which left the declared number
+// exactly on its slack of 5 — green, and one suite away from not
+// being. The sixth is sidebar-chats (the Chats page and the
+// conversation actions). Read off the run, not reasoned to.
+const RATCHET = 288;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

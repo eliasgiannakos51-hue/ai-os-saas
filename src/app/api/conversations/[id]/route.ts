@@ -4,6 +4,7 @@ import { logApiError } from "@/lib/log-error";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { pinLimitFor } from "@/lib/chat/pin-limits";
 import { normaliseConversationTitle, autoTitleFromMessage } from "@/lib/chat/conversation-title";
+import { parseStoredAttachments } from "@/lib/chat/attachment-types";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export const dynamic = "force-dynamic";
  */
 type ConversationErrorCode =
   | "not_authenticated"
+  | "not_found"
   | "nothing_to_update"
   | "title_not_text"
   | "title_empty"
@@ -177,6 +179,87 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     return NextResponse.json({ ok: true, conversation: data });
   } catch (err) {
     logApiError("/api/conversations/[id]", err, { stage: "unhandled" });
+    return fail("unexpected", 500);
+  }
+}
+
+
+/**
+ * DELETING A CONVERSATION, ON THE SERVER — and it used to be on the
+ * client.
+ *
+ * chat-workspace.tsx deleted the row straight from the browser with the
+ * account's own client. RLS made that safe (one account cannot reach
+ * another's row) but it meant the only place this could be done was a
+ * screen that had the whole conversation list loaded, and the owner's
+ * instruction of 2026-10-15 puts Delete in the sidebar and on the Chats
+ * page as well. Three copies of a delete is three places for one of them
+ * to forget the images.
+ *
+ * NOTHING HERE IS A SOFT DELETE, and the Undo the person sees is not
+ * this route being reversed — it is this route NOT BEING CALLED YET.
+ * The browser hides the row, waits out the undo window, and only then
+ * sends this. Leaving within the window therefore leaves the
+ * conversation alive, which is the direction a mistake should fail in;
+ * the client sends it on `pagehide` so closing the tab still commits
+ * (components/chat/delete-later.ts).
+ *
+ * THE IMAGES COME BACK RATHER THAN BEING REMOVED HERE. They live in a
+ * Storage bucket the person's own session can write, and that is where
+ * every other image path in this app is removed from
+ * (lib/chat/attach-client.ts). Moving the removal to the server would
+ * mean the service role deleting user objects, which is a bigger change
+ * than this feature needs — so the route answers with the paths and the
+ * caller discards them exactly as chat-workspace did.
+ *
+ * A ROW THAT WAS NOT THERE ANSWERS 404, NOT 200. The delete is scoped by
+ * user_id as well as id, so another account's conversation deletes zero
+ * rows — and a 200 for that would tell the caller it had just deleted
+ * something it never owned. scripts/tests/conversation-isolation.dbtest.mjs
+ * drives this with two real accounts.
+ */
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return fail("not_authenticated", 401);
+    }
+
+    // Read before the rows go, exactly as the client path did. Without
+    // the column (migration 20261018000000 not yet run) this answers an
+    // error, there is nothing to read, and nothing is removed.
+    const { data: attachedRows } = await supabase
+      .from("chat_messages")
+      .select("attachments")
+      .eq("conversation_id", params.id)
+      .eq("user_id", user.id)
+      .not("attachments", "is", null);
+
+    const { data: deleted, error } = await supabase
+      .from("chat_conversations")
+      .delete()
+      .eq("id", params.id)
+      .eq("user_id", user.id)
+      .select("id");
+
+    if (error) {
+      logApiError("/api/conversations/[id]", error, { stage: "delete" });
+      return fail("update_failed", 500);
+    }
+    if (!deleted || deleted.length === 0) {
+      return fail("not_found", 404);
+    }
+
+    const imagePaths = ((attachedRows ?? []) as { attachments?: unknown }[]).flatMap((row) =>
+      parseStoredAttachments(row.attachments).flatMap((a) => (a.kind === "image" ? [a.path] : []))
+    );
+    return NextResponse.json({ ok: true, imagePaths });
+  } catch (err) {
+    logApiError("/api/conversations/[id]", err, { stage: "delete_unhandled" });
     return fail("unexpected", 500);
   }
 }

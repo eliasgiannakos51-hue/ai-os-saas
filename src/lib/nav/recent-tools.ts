@@ -46,10 +46,45 @@ export const NEVER_RECENT: readonly string[] = ["/dashboard/chat", "/dashboard/c
 export type RecentPrefs = { pinned: string[]; removed: Record<string, string> };
 export type RecentTool = { href: string; pinned: boolean; lastUsed: string | null };
 
-/** The sidebar's «Πρόσφατες συνομιλίες»: the latest conversations, by
- *  last activity (app/dashboard/layout.tsx reads them). */
-export const RECENT_CONVERSATIONS = 5;
+/**
+ * The sidebar's «Πρόσφατες συνομιλίες»: the latest conversations, by
+ * last activity (app/dashboard/layout.tsx reads them).
+ *
+ * FIFTEEN, NOT FIVE, SINCE 2026-10-15 — «Το πολύ 15 στο sidebar, και
+ * από κάτω "Όλες οι συνομιλίες"». Five was the right number while the
+ * rows were dead links and the real list lived inside Chat; now that
+ * they open, rename, pin and delete, this IS the list, and the page
+ * underneath it (app/dashboard/chats) is the overflow rather than the
+ * only place anything can be done.
+ */
+export const RECENT_CONVERSATIONS = 15;
 export type RecentConversation = { id: string; title: string };
+
+/**
+ * What a sidebar row needs to be more than a name: whether it is
+ * pinned (it sorts into its own group) and when it last changed (the
+ * Chats page shows it). Read in the same query as the titles, so the
+ * extra columns cost nothing.
+ */
+export type SidebarConversation = {
+  id: string;
+  title: string;
+  is_pinned: boolean;
+  updated_at: string;
+  /** Starred, from user_favorites — NOT a column on the conversation
+   *  (lib/favoritable.ts: favourites are one shared table across every
+   *  module). Loaded only by the Chats page, which is where the star
+   *  moved to when the list inside Chat went: the sidebar's «⋯» menu
+   *  has the four actions the owner named and the star is not one of
+   *  them, so the full list is where it has room to live. Absent in
+   *  the sidebar, which never draws it. */
+  is_favorited?: boolean;
+};
+
+/** The projects «Μεταφορά σε Έργο» can file a conversation into. Read
+ *  on the server because there is no GET /api/projects — the route has
+ *  only POST and DELETE (app/api/projects/route.ts). */
+export type SidebarProject = { id: string; name: string };
 /** One finished piece of work: where it happened, and when. */
 export type NavEvent = { path: string; created_at: string };
 export type RecentAction = "pin" | "unpin" | "remove";

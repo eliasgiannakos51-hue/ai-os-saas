@@ -129,7 +129,7 @@ const server = http.createServer((req, res) => {
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const URL = "http://127.0.0.1:" + server.address().port + "/ionexa-3d.html";
 const DEVICES = { desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 }, phone: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true } };
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--enable-webgl", "--ignore-gpu-blocklist"] });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--enable-webgl", "--ignore-gpu-blocklist"] });
 const failures = [];
 const check = (name, ok, detail) => { console.log((ok ? "  PASS  " : "  FAIL  ") + name + (ok || !detail ? "" : "\n        " + detail)); if (!ok) failures.push(name); };
 const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };

@@ -26,6 +26,7 @@
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -134,10 +135,60 @@ console.log("== 3. the shared locations that ARE allowed, named ==");
     "if none is used, this list has outlived what it was written for");
   // And each of those is overridable, so a machine that puts them
   // elsewhere is not stuck.
-  const chromium = files.filter((f) => readFileSync(f, "utf8").includes("/opt/pw-browsers"));
-  const withoutOverride = chromium.filter((f) => !/CHROMIUM_PATH|executablePath/.test(readFileSync(f, "utf8")));
-  check("every /opt/pw-browsers use has an env override beside it", withoutOverride.length === 0,
-    withoutOverride.slice(0, 5).join(", "));
+  //
+  // THIS CHECK WAS SATISFIED BY THE DEFECT IT WAS WRITTEN TO CATCH, for
+  // five weeks. It accepted either word of /CHROMIUM_PATH|executablePath/
+  // as proof of an override — and a file that names the bundled browser
+  // outright is OBLIGED to write `executablePath` beside it. So the two
+  // files doing exactly the wrong thing matched the alternation and were
+  // filtered out of the offender list. The check could not go red.
+  //
+  // What it cost, measured 2026-10-14: chat-dictation.prodtest.mjs and
+  // voice-command.prodtest.mjs named the container path outright, so on a
+  // GitHub runner — where that path does not exist — they threw at launch.
+  // `npm run test:prod` (package.json) is a shell loop with `|| exit 1`,
+  // chat-dictation is the 11th of 74 files alphabetically, and the
+  // nightly `prodtests` job therefore died there every night from
+  // 2026-10-10 (issue #280) with 63 files never started. A prodtest that
+  // never starts is not passing and not failing, which is the same hole
+  // scripts/tests/lib/chromium.mjs was written to close.
+  //
+  // Two checks now, because the rule has two halves and one of them is
+  // about an exact shape rather than a file's contents somewhere.
+  // Read WITHOUT comments, so that a paragraph explaining the defect
+  // cannot be mistaken for the defect, nor stand in for the fix.
+  const code = new Map(files.map((f) => [f, stripComments(readFileSync(f, "utf8"))]));
+  // The shared resolver answers this question for everyone, preferring
+  // the variable and falling back only when the bundled browser is
+  // really there. Reading the variable directly is the older way and
+  // still correct. Writing `executablePath` is neither — that was the
+  // whole defect.
+  const letsEnvWin = (s) => /\bchromiumPath\s*\(/.test(s) || /process\.env\.CHROMIUM_PATH/.test(s);
+  // THE DETECTOR, PINNED TO FIXTURES, because an empty offender list and
+  // a detector that cannot say no print the same line. These three are
+  // the rungs: the shape that must be caught, and the two that must not
+  // be (CLAUDE.md, "a detector that says yes to everything looks exactly
+  // like a working one"). Under the alternation this check shipped with,
+  // the first fixture passed — which is the entire bug, stated as a test.
+  check("the rule says no to a hard-coded browser path",
+    !letsEnvWin('executablePath: "/opt/pw-browsers/chromium"'));
+  check("...yes to the shared resolver",
+    letsEnvWin("executablePath: chromiumPath()"));
+  check("...and yes to the variable read directly",
+    letsEnvWin('executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium"'));
+  const chromium = files.filter((f) => code.get(f).includes("/opt/pw-browsers"));
+  const withoutOverride = chromium.filter((f) => !letsEnvWin(code.get(f)));
+  check(`every /opt/pw-browsers use lets the environment win (${chromium.length} name it)`,
+    chromium.length > 0 && withoutOverride.length === 0,
+    withoutOverride.slice(0, 5).join(", ") + " — resolve through scripts/tests/lib/chromium.mjs");
+  // THE EXACT SHAPE, ranged over every file rather than the ones that
+  // happen to launch a browser today: the bundled path as a literal
+  // executablePath is the thing that cannot work off this container.
+  const namedOutright = files.filter((f) =>
+    /executablePath:\s*["'`]\/opt\/pw-browsers/.test(code.get(f)));
+  check(`no file hands Playwright the container's path as a literal (${namedOutright.length})`,
+    namedOutright.length === 0,
+    namedOutright.join(", ") + " — chromiumPath() returns undefined where that file is absent, which is the right answer there");
 }
 
 console.log(`\n${pass} passed, ${failures.length} failed`);

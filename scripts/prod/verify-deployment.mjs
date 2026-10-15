@@ -18,7 +18,7 @@ function check(name, cond, detail) {
 const note = (t) => { notes.push(t); console.log(`  ....  ${t}`); };
 
 const browser = await chromium.launch({
-  executablePath: "/opt/pw-browsers/chromium",
+  executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium",
   args: ["--no-sandbox", "--ssl-version-max=tls1.2"],
 });
 

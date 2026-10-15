@@ -108,7 +108,7 @@ const MUST_READ = ["Λαδάδικα Catering", "Φαγητό για σαράν�
 const DISHES = 12;
 
 mkdirSync(SHOT_DIR, { recursive: true });
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium",
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium",
   args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const rows = [];
 let failed = 0;

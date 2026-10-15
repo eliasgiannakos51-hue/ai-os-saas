@@ -38,7 +38,7 @@ const args = process.argv.slice(2);
 // ---------------------------------------------------------------- posters
 if (args[0] === "--posters") {
   const { chromium } = await import("playwright");
-  const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
   const page = await browser.newPage();
   const POSTERS = [
     // [source, file, width, height, t, the page's own colours]

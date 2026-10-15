@@ -21,6 +21,7 @@
  * impossible to obtain the text without.
  */
 import type Anthropic from "@anthropic-ai/sdk";
+import { AI_TRUNCATED_STOP_REASON } from "@/lib/ai/providers/types";
 
 export type ModelText = {
   text: string;
@@ -41,7 +42,12 @@ export type ModelText = {
  */
 /** The one string that means "cut off at the ceiling". Named so the two
  *  entry points below cannot disagree about it. */
-export const TRUNCATION_STOP_REASON = "max_tokens";
+// ONE LITERAL, and it is not here. The adapters have to agree with
+// this rule and cannot import this file (it carries a type import of
+// the Anthropic SDK, and the router's graph must stay free of vendor
+// packages — ΛΘ-17), so the string lives in lib/ai/providers/types.ts
+// and this is its name for the rest of the codebase.
+export const TRUNCATION_STOP_REASON = AI_TRUNCATED_STOP_REASON;
 
 export function modelText(response: {
   content: Array<{ type: string; text?: string }> | Anthropic.ContentBlock[];

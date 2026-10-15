@@ -2,6 +2,7 @@ import "server-only";
 import {
   flattenContent,
   flattenSystem,
+  normaliseStopReason,
   openAiToolChoice,
   postJson,
   refuseUnsupported,
@@ -92,7 +93,7 @@ export async function callGroq(call: AdapterCall): Promise<AdapterResponse> {
       input_tokens: raw.usage?.prompt_tokens ?? 0,
       output_tokens: raw.usage?.completion_tokens ?? 0,
     },
-    stopReason: choice?.finish_reason ?? null,
+    stopReason: normaliseStopReason(choice?.finish_reason),
     reportedModel: raw.model ?? call.model,
   };
 }

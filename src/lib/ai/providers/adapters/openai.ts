@@ -2,6 +2,7 @@ import "server-only";
 import {
   flattenContent,
   flattenSystem,
+  normaliseStopReason,
   openAiToolChoice,
   postJson,
   refuseUnsupported,
@@ -107,7 +108,7 @@ export async function callOpenAi(call: AdapterCall): Promise<AdapterResponse> {
       // OpenAI does not charge a write premium and does not report one,
       // so a confident 0 here would claim a measurement nobody made.
     },
-    stopReason: choice?.finish_reason ?? null,
+    stopReason: normaliseStopReason(choice?.finish_reason),
     reportedModel: raw.model ?? call.model,
   };
 }

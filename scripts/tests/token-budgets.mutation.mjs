@@ -54,10 +54,18 @@ const MUTANTS = [
     // AND THE CONSTANT ITSELF. One wrong string and BOTH doors stop
     // recognising truncation together — the exact failure the constant was
     // introduced to make impossible, which nothing was checking.
+    //
+    // RE-ANCHORED 2026-10-15. The literal moved to
+    // lib/ai/providers/types.ts as AI_TRUNCATED_STOP_REASON, because the
+    // four adapters have to agree with this rule and cannot import this
+    // file: it carries a type import of the Anthropic SDK, and the
+    // router's graph must stay free of vendor packages (ΛΘ-17). This
+    // file now names that one constant, so the mutation moves with it —
+    // and it still breaks BOTH doors at once, which is the point.
     name: "the constant names a stop reason no model ever returns",
     suite: TOKENS, file: TRUNC,
-    from: 'export const TRUNCATION_STOP_REASON = "max_tokens";',
-    to: 'export const TRUNCATION_STOP_REASON = "length";',
+    from: "export const TRUNCATION_STOP_REASON = AI_TRUNCATED_STOP_REASON;",
+    to: 'export const TRUNCATION_STOP_REASON = "no_model_says_this";',
   },
   {
     name: "a research report goes back to a length check as its only validation",

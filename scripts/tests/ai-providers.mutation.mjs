@@ -563,6 +563,40 @@ const MUTANTS = [
     to: 'import { callAnthropic as eagerAnthropic } from "@/lib/ai/providers/adapters/anthropic";\nimport type { Adapter } from "@/lib/ai/providers/adapters/shared";\nvoid eagerAnthropic;',
     expect: "the graph reaches no vendor package",
   },
+  // ------------------------------------------------------------------
+  // "IT RAN OUT OF ROOM", from four vendors with four words for it.
+  // ------------------------------------------------------------------
+  {
+    name: "OpenAI's and Groq's word for a cut answer is passed through untranslated",
+    file: SHARED,
+    from: 'const TRUNCATION_WORDS = new Set(["max_tokens", "length", "MAX_TOKENS"]);',
+    to: 'const TRUNCATION_WORDS = new Set(["max_tokens", "MAX_TOKENS"]);',
+    expect: '"length" normalises to the canonical word',
+  },
+  {
+    name: "Gemini's word is passed through untranslated",
+    file: SHARED,
+    from: 'const TRUNCATION_WORDS = new Set(["max_tokens", "length", "MAX_TOKENS"]);',
+    to: 'const TRUNCATION_WORDS = new Set(["max_tokens", "length"]);',
+    expect: '"MAX_TOKENS" normalises to the canonical word',
+  },
+  {
+    // THE OTHER DIRECTION, and it is the one that makes the three above
+    // mean something: a normaliser that answers "cut off" to everything
+    // marks every finished answer truncated.
+    name: "every stop reason is called a truncation",
+    file: SHARED,
+    from: "  return TRUNCATION_WORDS.has(raw) ? AI_TRUNCATED_STOP_REASON : raw;",
+    to: "  return AI_TRUNCATED_STOP_REASON;",
+    expect: '"stop" is left alone',
+  },
+  {
+    name: "one adapter forgets to translate its vendor's word",
+    file: OPENAI,
+    from: "    stopReason: normaliseStopReason(choice?.finish_reason),",
+    to: "    stopReason: choice?.finish_reason ?? null,",
+    expect: "openai: a reply cut at the ceiling says so in our word",
+  },
   {
     name: "the provider log reaches its database client at the top again",
     file: PROVIDER_LOG,

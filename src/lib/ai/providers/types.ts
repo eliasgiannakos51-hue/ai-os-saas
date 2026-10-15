@@ -119,6 +119,25 @@ export type AiToolSpec = {
  * serverWebSearch is refused in adapters/shared.ts — dropping it and
  * answering anyway is the failure that looks like success.
  */
+/**
+ * THE ONE SPELLING OF "IT RAN OUT OF ROOM", across four vendors.
+ *
+ * Each provider has its own word for it — Anthropic's stop_reason is
+ * "max_tokens", OpenAI and Groq say finish_reason "length", Gemini says
+ * finishReason "MAX_TOKENS" — and the adapters translate theirs into
+ * this one before it leaves them, exactly as splitPromptTokens gives
+ * input_tokens one meaning across all four.
+ *
+ * WHY IT LIVES HERE rather than in lib/verification/truncation.ts,
+ * which is where the rule is applied: that file carries a type import
+ * of the Anthropic SDK, and anything the adapters' shared helpers
+ * import ends up on runCompletion's graph, which must stay free of
+ * vendor packages (ΛΘ-17, ai-providers.test.mjs §0b). truncation.ts
+ * re-exports this as TRUNCATION_STOP_REASON, so there is still exactly
+ * one literal and every existing reader is unchanged.
+ */
+export const AI_TRUNCATED_STOP_REASON = "max_tokens";
+
 export type AiToolChoice =
   | { type: "auto" }
   | { type: "any" }

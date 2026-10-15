@@ -690,6 +690,77 @@ ok("flattenSystem joins the blocks in order, losing nothing",
 
 // ===========================================================================
 // ===========================================================================
+console.log("\n== 5c. \"IT RAN OUT OF ROOM\" MEANS THE SAME THING FROM ALL FOUR ==");
+// ===========================================================================
+//
+// WHAT WAS WRONG, and it was live before any call site migrated.
+// lib/verification/truncation.ts decides `truncated` by comparing the
+// stop reason to Anthropic's "max_tokens", and the three fetch adapters
+// handed their provider's own word straight on: OpenAI and Groq report
+// finish_reason "length", Gemini reports finishReason "MAX_TOKENS". So
+// an answer cut off at the ceiling by any provider but Anthropic came
+// back truncated: false — delivered whole, unmarked, reading as a short
+// answer. lib/agents/agent-runner.ts already routes, so this was
+// reachable the day a second key was set.
+//
+// DRIVEN, like §5b: each adapter is called with a stubbed fetch that
+// replies with that vendor's own truncation word, and the stopReason it
+// RETURNS is asserted.
+{
+  const { normaliseStopReason } = await loadTs("src/lib/ai/providers/adapters/shared.ts");
+  const { AI_TRUNCATED_STOP_REASON } = await loadTs("src/lib/ai/providers/types.ts");
+  ok(`the canonical word is Anthropic's ("${AI_TRUNCATED_STOP_REASON}")`, AI_TRUNCATED_STOP_REASON === "max_tokens");
+  const truncation = await loadTs("src/lib/verification/truncation.ts");
+  ok("...and lib/verification/truncation.ts uses that same one, not a copy",
+    truncation.TRUNCATION_STOP_REASON === AI_TRUNCATED_STOP_REASON);
+  for (const word of ["length", "MAX_TOKENS", "max_tokens"]) {
+    ok(`"${word}" normalises to the canonical word`, normaliseStopReason(word) === AI_TRUNCATED_STOP_REASON);
+  }
+  // NOT EVERYTHING, which is the half that makes the above mean
+  // something: a normaliser that answered "max_tokens" to every input
+  // would pass all three lines above and mark every answer truncated.
+  for (const word of ["stop", "STOP", "tool_calls", "end_turn", "content_filter"]) {
+    ok(`"${word}" is left alone`, normaliseStopReason(word) === word);
+  }
+  ok("and a missing reason stays missing", normaliseStopReason(null) === null && normaliseStopReason(undefined) === null);
+
+  const CUT = [
+    ["google", "src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "half an ans" }] }, finishReason: "MAX_TOKENS" }], usageMetadata: {} }],
+    ["openai", "src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "half an ans" }, finish_reason: "length" }], usage: {} }],
+    ["groq", "src/lib/ai/providers/adapters/groq.ts", "callGroq", "groq/llama-3.3-70b-versatile",
+      { choices: [{ message: { content: "half an ans" }, finish_reason: "length" }], usage: {} }],
+  ];
+  for (const [name, file, exportName, model, reply] of CUT) {
+    const mod = await loadTs(file);
+    const real = globalThis.fetch;
+    let out;
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+    try {
+      out = await mod[exportName]({
+        apiKey: "k",
+        model,
+        signal: AbortSignal.timeout(5_000),
+        request: {
+          purpose: "chat",
+          system: [{ type: "text", text: "s" }],
+          messages: [{ role: "user", content: "u" }],
+          maxTokens: 8,
+        },
+      });
+    } finally {
+      globalThis.fetch = real;
+    }
+    ok(`${name}: a reply cut at the ceiling says so in our word`,
+      out?.stopReason === AI_TRUNCATED_STOP_REASON, JSON.stringify(out?.stopReason));
+    ok(`${name}: ...so modelTextFrom calls it truncated`,
+      truncation.modelTextFrom({ text: out?.text ?? "", stopReason: out?.stopReason ?? null }).truncated === true);
+  }
+}
+
+// ===========================================================================
 console.log("\n== 5b. FORCING A TOOL: the field 21 call sites depend on ==");
 // ===========================================================================
 //

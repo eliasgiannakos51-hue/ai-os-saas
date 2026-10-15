@@ -2,6 +2,7 @@ import "server-only";
 import {
   flattenContent,
   flattenSystem,
+  normaliseStopReason,
   postJson,
   refuseUnsupported,
   splitPromptTokens,
@@ -136,7 +137,7 @@ export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
       output_tokens: raw.usageMetadata?.candidatesTokenCount ?? 0,
       cache_read_input_tokens: split.cache_read_input_tokens,
     },
-    stopReason: candidate?.finishReason ?? null,
+    stopReason: normaliseStopReason(candidate?.finishReason),
     reportedModel: raw.modelVersion ?? call.model,
   };
 }

@@ -1,4 +1,4 @@
-import type { AiRequest, AiToolCall, AiUsage } from "@/lib/ai/providers/types";
+import { AI_TRUNCATED_STOP_REASON, type AiRequest, type AiToolCall, type AiUsage } from "@/lib/ai/providers/types";
 
 /**
  * What every adapter is, and the small amount they can share.
@@ -164,6 +164,35 @@ export function openAiToolChoice(
   if (choice.type === "auto") return "auto";
   if (choice.type === "any") return "required";
   return { type: "function", function: { name: choice.name } };
+}
+
+/**
+ * EVERY VENDOR'S WORD FOR "IT RAN OUT OF ROOM", TURNED INTO OURS.
+ *
+ * WHAT WAS WRONG, and it was live before any of this migration.
+ * lib/verification/truncation.ts decides `truncated` by comparing the
+ * stop reason to Anthropic's "max_tokens", and the three fetch adapters
+ * passed their provider's own word through untouched: OpenAI and Groq
+ * report finish_reason "length", Gemini reports finishReason
+ * "MAX_TOKENS". So an answer cut off at the ceiling by any provider but
+ * Anthropic came back with truncated: false — delivered whole, with no
+ * mark, reading as a short answer. agent-runner.ts already goes through
+ * the router, so this was reachable the day a second key was set.
+ *
+ * Same reasoning as splitPromptTokens above: ONE meaning for a field,
+ * made here, rather than four meanings and a comparison that is right
+ * for one of them.
+ *
+ * A reason this does not recognise is passed through unchanged, which
+ * is what the adapters did for all of them before — so a vendor that
+ * invents a new word is no worse off than today, and the gate asserts
+ * the three it does know.
+ */
+const TRUNCATION_WORDS = new Set(["max_tokens", "length", "MAX_TOKENS"]);
+
+export function normaliseStopReason(raw: string | null | undefined): string | null {
+  if (raw === null || raw === undefined) return null;
+  return TRUNCATION_WORDS.has(raw) ? AI_TRUNCATED_STOP_REASON : raw;
 }
 
 export function emptyUsage(): AiUsage {

@@ -5,6 +5,7 @@ import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest } from "@/lib/ai-circuit-breaker";
@@ -154,9 +155,9 @@ export async function POST(request: Request) {
     const memoryBlock = memoryActiveFor({
       surface: "coding",
       user,
-      planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+      planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin),
     })
-      ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
+      ? await memoryPromptFor(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
       : "";
     const costs = new CostAccumulator();
     const outcome = await runCompletion(

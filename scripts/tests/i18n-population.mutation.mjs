@@ -64,9 +64,20 @@ const MUTANTS = [
     // file existed.
     name: "an email sender drops out of the register",
     file: GATE,
-    from: '  "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",\n',
+    from: "  \"src/lib/email/owner-alert.ts\":\n    \"every message it sends is an operator alert to ADMIN_EMAILS (the constant, never a user's address) and to nobody else. The reader is the owner, and the bodies carry a route name, a provider message, a cost figure, a margin and a count of failed sign-ins, which do not translate.\",\n",
     to: "",
     expect: "says why it is English",
+  },
+  {
+    // THE DETECTOR THAT ONLY KNEW ONE RECEIVER. Narrowed back to
+    // `resend.emails.send(`, it cannot see the owner-alert sender, which
+    // calls createResendClient().emails.send( — and that sender's
+    // declaration then reads as stale (2026-10-09).
+    name: "the send detector goes back to one receiver name",
+    file: GATE,
+    from: "const SENDS = /\\.emails\\.send\\s*\\(|\\bsendEmail\\s*\\(/;",
+    to: "const SENDS = /resend\\.emails\\.send\\s*\\(|\\bsendEmail\\s*\\(/;",
+    expect: "no email declaration outlives its module",
   },
   {
     // THE WALK THAT NARROWS BACK TO ONE FOLDER. This is how

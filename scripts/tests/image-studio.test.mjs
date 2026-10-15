@@ -15,6 +15,10 @@
  *   5. THE DATABASE: the table written by the server only, a private
  *      bucket, the account erasure that empties it.
  *   6. THE SCREEN AND THE WORDS.
+ *   7. THE TOOL'S NAME WHERE THE TOOL IS NAMED: the tab, the ⌘K menu and
+ *      the records hub say «Εικόνα» for whom the switch is on, and the
+ *      ideas list keeps «Ιδέες για εικόνες» for everybody else
+ *      (lib/nav/switched-names.ts).
  *
  * The provider's request and the prices against the settlement formula:
  * image-studio.itest.mjs. The screen in a browser: image-studio.prodtest.mjs.
@@ -197,6 +201,40 @@ for (const file of LOCALES) {
   ];
   check(`${file}: every word, and the prices carry their number`, missing.length === 0 && /\{count/.test(m.price ?? "") && /\{count/.test(m.priceVariants ?? "") && /\{limit\}/.test(m.errors?.tooLong ?? ""), missing.join(", "));
 }
+
+// ---------------------------------------------------------------------
+console.log("\n== 7. the tool's name, where the switch is on ==");
+// ---------------------------------------------------------------------
+// Until 2026-10-08 every menu read only the ideas list's name, so the
+// person with the tool saw the tab and ⌘K call it «Ιδέες για εικόνες»,
+// with the hint «Δεν τις δημιουργεί». In a browser:
+// scripts/tests/image-studio-edges.prodtest.mjs, section 9.
+const switched = await loadTs("src/lib/nav/switched-names.ts");
+const entry = switched.SWITCHED_NAMES.find((s) => s.href === "/dashboard/images");
+check("the Image tool's page is named by the switch its page reads",
+  entry?.flag === "image-studio" && /^\s*"image-studio":/m.test(code("src/lib/flags/flags.ts")) && entry.labelKey === "imageTool" && entry.hintKey === "imageTool" && /isFeatureOn\("image-studio", user\)/.test(code("src/app/dashboard/images/page.tsx")));
+check("...by that name only for whom the switch is on", switched.switchedName("/dashboard/images", ["/dashboard/images"]) === entry && switched.switchedName("/dashboard/images", []) === null && switched.switchedName("/dashboard/videos", ["/dashboard/videos"]) === null);
+for (const file of LOCALES) {
+  const side = JSON.parse(readFileSync(`messages/${file}`, "utf8")).sidebar ?? {};
+  check(`${file}: the tool's name and its line, not the ideas list's`,
+    Boolean(side.items?.imageTool?.trim()) && Boolean(side.hints?.imageTool?.trim()) && side.items.imageTool !== side.items.images && side.hints.imageTool !== side.hints.images);
+}
+const on = code("src/lib/nav/switched-on.ts");
+check("whom it is on for is the switch's own rule, read once per request", /isFlagKey\(s\.flag\) && audienceAllows\(audiences\[s\.flag\], staff\)/.test(on) && /= cache\(/.test(on));
+const palette = code("src/components/dashboard/command-palette.tsx");
+check("the ⌘K menu shows and matches every page row by that name",
+  /switchedName\(item\.href, switchedOn\)/.test(palette) && /candidates: \[\s*translatedLabel\(item\.label\),\s*item\.label,\s*\.\.\.aliasesFor\([^\n]*\),\s*itemLabel\(item\),/.test(palette) && /label: itemLabel\(item\),/.test(palette) && /\{itemLabel\(item\)\}/.test(palette) &&
+    !/\{translatedLabel\(item\.label\)\}|label: translatedLabel\(item\.label\)/.test(palette));
+check("...and is told by the layout for whom it is on", /<CommandPalette[^>]*\sswitchedOn=\{switchedOn\}/.test(code("src/app/dashboard/layout.tsx")) && /switchedOnFor\(user\.email\)/.test(code("src/app/dashboard/layout.tsx")));
+const records = code("src/app/dashboard/records/page.tsx");
+check("the records hub names it the same way, with the tool's line",
+  /const switched = switchedName\(item\.href, switchedOn\);/.test(records) && /label: switched\s*\?\s*tSidebar\(`items\.\$\{switched\.labelKey\}`\)/.test(records) && /hint: switched \? tSidebar\(`hints\.\$\{switched\.hintKey\}`\)/.test(records));
+const imagesPage = code("src/app/dashboard/images/page.tsx");
+check("the tab says it",
+  /const TOOL = SWITCHED_NAMES\.find\(\(s\) => s\.href === "\/dashboard\/images"\)!;\s*const TOOL_TITLE_KEY = `sidebar\.items\.\$\{TOOL\.labelKey\}`;/.test(imagesPage) &&
+    /return switchedName\("\/dashboard\/images", await switchedOnFor\(user\?\.email\)\) \? pageTitle\(TOOL_TITLE_KEY\) : pageTitle\(CONFIG\.titleKey\);/.test(imagesPage));
+check("...and a plan below the tool's meets a wall under the tool's name, not the ideas list's",
+  /if \(switchedName\("\/dashboard\/images", await switchedOnFor\(user\.email\)\)\) \{\s*const t = await getTranslations\(\);\s*const name = t\(TOOL_TITLE_KEY\);[\s\S]{0,300}<h1 [^>]*>\{name\}<\/h1>\s*<UpgradeRequired\s+featureName=\{name\}/.test(imagesPage));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

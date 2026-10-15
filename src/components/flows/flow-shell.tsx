@@ -20,11 +20,13 @@ import { runStep } from "@/lib/flows/run-step";
 import {
   MAX_FLOW_SAID,
   STEP_TABLE,
+  canRun,
   planFlow,
   readPlan,
   readStepStates,
   readySteps,
   withoutUnavailable,
+  type FlowAvailability,
   type FlowKind,
   type FlowPlan,
   type StepState,
@@ -84,7 +86,7 @@ export function FlowShell({
   initialFlows: FlowRow[];
   projects: FlowProject[];
   prices: FlowPrices;
-  available: Record<FlowKind, boolean>;
+  available: FlowAvailability;
   /** The business's colour from memory, when there is one. */
   brandColour: string | null;
 }) {
@@ -216,7 +218,7 @@ export function FlowShell({
     const said = text.trim().slice(0, MAX_FLOW_SAID);
     if (!said) return;
     say("user", said);
-    const plan = withoutUnavailable(planFlow(said), (k) => available[k]);
+    const plan = withoutUnavailable(planFlow(said), (step) => canRun(available, step));
     if (plan.steps.length === 0) {
       if (plan.notYet.length > 0) say("tool", t("notYet", { names: plan.notYet.map((n) => notYet[n]).join(", ") }));
       else if (plan.unavailable.length > 0) say("tool", t("unavailable", { names: plan.unavailable.map((k) => kind[k]).join(", ") }));

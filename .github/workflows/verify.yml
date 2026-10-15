@@ -74,7 +74,13 @@ jobs:
     # nothing said which. `node scripts/tests/run-mutations.mjs` prints
     # each suite's time. The default six-hour cap is not a limit, it is an
     # absence of one; this is set to something a stuck run will still hit.
-    timeout-minutes: 100
+    # RAISED 2026-10-09, the job 100 -> 140 and its mutation step 75 -> 120:
+    # 260 suites took 71 and 72 minutes (jobs 113702994392, 113702975312),
+    # 262 took 59 and 74 (jobs 113716369257, 113716145720), and a third run
+    # of those 262, on the same commit, was cut at 75 with every suite it
+    # had reached green (job 113716293180). The step's 75 was set on
+    # 2026-10-04, when it took 56 (scripts/tests/ci-step-timeouts.test.mjs).
+    timeout-minutes: 140
     steps:
       - uses: actions/checkout@v4
         timeout-minutes: 5
@@ -151,7 +157,7 @@ jobs:
           echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
 
       - name: mutation suites
-        timeout-minutes: 75
+        timeout-minutes: 120
         run: npm run test:mutation
 
       # A mutation suite that dies part-way leaves its edit in the working

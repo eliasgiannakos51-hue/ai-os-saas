@@ -8,7 +8,11 @@
  * writing somewhere else or appearing on Chat, and a beta tag coming back.
  * Since MASTER 14.1 (2026-10-07): the Settings block coming back, the
  * long name replacing the one word, a square losing its name, and Settings
- * no longer linking to what left All tools.
+ * no longer linking to what left All tools. Since 2026-10-08: the square
+ * drawing the sidebar's long hint again, a line missing or grown past one
+ * line, and a new tool's square drawn without its switch, named after a
+ * switch that does not exist, given a pin Recent tools refuses, or named
+ * outside 14.1's list.
  *
  * Run: node scripts/tests/all-tools.mutation.mjs
  */
@@ -21,14 +25,19 @@ const GRID = "src/components/tools/tools-grid.tsx";
 const GROUPS = "src/lib/nav/all-tools.ts";
 const ALIASES = "src/lib/palette-aliases.ts";
 const SETTINGS = "src/app/dashboard/settings/page.tsx";
-const TARGETS = [GATE, GRID, GROUPS, ALIASES, SETTINGS];
+const PAGE = "src/app/dashboard/tools/page.tsx";
+const INTEGRATIONS = "src/app/dashboard/integrations/page.tsx";
+const EN = "messages/en.json";
+const EL = "messages/el.json";
+const DE = "messages/de.json";
+const TARGETS = [GATE, GRID, GROUPS, ALIASES, SETTINGS, PAGE, INTEGRATIONS, EN, EL, DE];
 
 const MUTANTS = [
   {
     name: "the search stops knowing synonyms",
     file: GRID,
-    from: '            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item)],',
-    to: "            candidates: [label(item), longLabel(item), item.label, hint(item)],",
+    from: '            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item), sidebarHint(item)],',
+    to: "            candidates: [label(item), longLabel(item), item.label, hint(item), sidebarHint(item)],",
     expect: "the grid builds its candidates the way the palette does",
   },
   {
@@ -107,8 +116,8 @@ const MUTANTS = [
   {
     name: "Chat and Coding get a pin, though they are never in Recent tools",
     file: GRID,
-    from: "    const canPin = !NEVER_RECENT.includes(item.href) && ",
-    to: "    const canPin = ",
+    from: "      !NEVER_RECENT.includes(item.href) && !item.href.startsWith",
+    to: "      !item.href.startsWith",
     expect: "have no pin",
   },
   {
@@ -122,14 +131,14 @@ const MUTANTS = [
   {
     name: "the Settings block comes back onto All tools",
     file: GRID,
-    from: 'import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
-    to: 'import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    from: 'import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
+    to: 'import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
     expect: "no Settings block",
   },
   {
     name: "the square shows the sidebar's long name instead of the one word",
     file: GRID,
-    from: "  const label = (item: SidebarItem) => (ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : longLabel(item));",
+    from: "  const label = (item: SidebarItem) => { const k = nameKey(item.href); return k ? names[k] : longLabel(item); };",
     to: "  const label = (item: SidebarItem) => longLabel(item);",
     expect: "the square draws the one-word name",
   },
@@ -146,6 +155,70 @@ const MUTANTS = [
     from: '              { href: "/dashboard/integrations", label: tKey("sidebar.items.integrations") },\n',
     to: "",
     expect: "Settings links to each of them",
+  },
+  // 2026-10-08: one line per square, and the new tools behind their switches.
+  {
+    name: "the square draws the sidebar's two-sentence hint again",
+    file: GRID,
+    from: "  const hint = (item: SidebarItem) => { const k = nameKey(item.href); return k ? lines[k] : sidebarHint(item); };",
+    to: "  const hint = (item: SidebarItem) => sidebarHint(item);",
+    expect: "the square draws its own line",
+  },
+  {
+    name: "a German line grows into two sentences",
+    file: DE,
+    from: '"meetings": "Zusammenfassung und Aufgaben aus einer Aufnahme."',
+    to: '"meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst."',
+    expect: "de: every square has its one line",
+  },
+  {
+    name: "Image's line goes missing in Greek",
+    file: EL,
+    from: '        "image": "Τέσσερις εικόνες από μία περιγραφή.",\n',
+    to: "",
+    expect: "el: every square has its one line",
+  },
+  {
+    name: "a new tool's square is drawn for everyone, switch or not",
+    file: GRID,
+    from: "SWITCHED_SQUARES.filter((s) => s.group === g.key && switchedOn.includes(s.href))",
+    to: "SWITCHED_SQUARES.filter((s) => s.group === g.key)",
+    expect: "only when its switch is on",
+  },
+  {
+    name: "the page stops asking the switch for this person",
+    file: PAGE,
+    from: "if (isFlagKey(square.flag) && (await isFeatureOn(square.flag, user))) switchedOn.push(square.href);",
+    to: "if (isFlagKey(square.flag)) switchedOn.push(square.href);",
+    expect: "asks each square's switch for THIS person",
+  },
+  {
+    name: "a new tool names a switch that does not exist",
+    file: GROUPS,
+    from: 'flag: "image-studio", name: "image"',
+    to: 'flag: "images", name: "image"',
+    expect: "names a switch that exists",
+  },
+  {
+    name: "a new tool's page stops reading its switch, so the square and the page disagree",
+    file: INTEGRATIONS,
+    from: 'connectButton={await isFeatureOn("connections", user)}',
+    to: "connectButton={true}",
+    expect: "its page reads that same switch",
+  },
+  {
+    name: "a new tool's square gets a pin Recent tools will refuse",
+    file: GRID,
+    from: " &&\n      !SWITCHED_SQUARES.some((s) => s.href === item.href);",
+    to: ";",
+    expect: "with no pin, because Recent tools",
+  },
+  {
+    name: "a new tool is named outside 14.1's list",
+    file: EN,
+    from: '"image": "Image",\n        "connections": "Connections"',
+    to: '"image": "Pictures",\n        "connections": "Connections"',
+    expect: "named as 14.1 names it",
   },
 ];
 

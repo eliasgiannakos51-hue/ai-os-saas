@@ -123,15 +123,15 @@ check("the answer has a copy button", /data-testid="files-copy-answer"/.test(wor
 // The builder lives in lib/files/answer.ts since 2026-10-07, shared with
 // Files in the shell; the page must still use it for its copy button.
 const answerLib = stripComments(readFileSync("src/lib/files/answer.ts", "utf8"));
-check("and it takes the citations with it", /export function answerForClipboard/.test(answerLib) && /answerForClipboard\(answer\)/.test(workspace));
+check("and it takes the citations with it", /export function answerForClipboard/.test(answerLib) && /answerForClipboard\(answer, show\)/.test(workspace));
 check(
   "the sources are appended, not summarised away",
-  /answer\.citations\.map\(\(c\) => `- \$\{c\.filename\} — \$\{c\.label\}`\)/.test(answerLib)
+  /answer\.citations\.map\(\(c\) => `- \$\{c\.filename\} — \$\{show\(c\.label\)\}`\)/.test(answerLib)
 );
-check("an uncited answer copies as itself", /if \(answer\.citations\.length === 0\) return answer\.text;/.test(answerLib));
+check("an uncited answer copies as itself", /if \(answer\.citations\.length === 0\) return text;/.test(answerLib) && /const text = relabelAnswer\(answer\.text, answer\.citations, show\);/.test(answerLib));
 // (b) each citation on its own.
 check("every citation has its own button", /data-testid="files-copy-citation"/.test(workspace));
-check("and it copies the file and the page", /text=\{`\$\{citation\.filename\} — \$\{citation\.label\}`\}/.test(workspace));
+check("and it copies the file and the page", /text=\{`\$\{citation\.filename\} — \$\{show\(citation\.label\)\}`\}/.test(workspace));
 // (c) the file's text.
 check("a file can hand back its text", /key: "copy-text"/.test(workspace));
 check("through a route that returns it", /export async function GET/.test(fileRoute));

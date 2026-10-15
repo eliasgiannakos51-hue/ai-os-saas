@@ -12,7 +12,8 @@
  *   - every link into the product opens a page or a route that exists;
  *   - every «label» is on screen: a value in messages/el.json, or a string
  *     in the code for the few owner screens that are English only;
- *   - every file, every `npm run`, every setting name is real.
+ *   - every file, every `npm run`, every setting name is real;
+ *   - what it says goes to the next provider by itself is what does.
  *
  * Run: node scripts/tests/owner-manual.test.mjs
  */
@@ -134,6 +135,46 @@ const srcEnv = (() => {
 })();
 const unknown = names.filter((n) => !srcEnv.has(n) && !known.includes(n));
 check(`setting names (${names.length}) are ones the code or the key inventory knows`, names.length >= 15 && unknown.length === 0, unknown.join(" "));
+
+// ---------------------------------------------------------------------
+console.log("\n== 5. what the manual says goes to the next provider, does ==");
+// ---------------------------------------------------------------------
+// «Τι κάνω αν πέσει ένας πάροχος AI» said, until 2026-10-08, that the
+// product tries the next provider by itself. Only the callers of
+// runCompletion (src/lib/ai/providers/complete.ts) do, and Chat is not
+// one: with the model answering an error, Chat says so and goes nowhere
+// else (first-task-edges.prodtest.mjs, section 4). So the callers are
+// read from the code, each has the name the manual gives it, and the
+// section names exactly those.
+const { stripComments } = await import("../check-mutation-markers.mjs");
+const FAILOVER_NAMES = {
+  "src/app/api/data-analysis/[id]/ask/route.ts": "η Ανάλυση δεδομένων",
+  "src/app/api/data-analysis/[id]/analyse/route.ts": "η Ανάλυση δεδομένων",
+  "src/app/api/coding/run/route.ts": "το Coding",
+  "src/lib/agents/agent-runner.ts": "οι βοηθοί",
+  "src/lib/meetings/meeting-analyse-call.ts": "η σύνοψη των συναντήσεων",
+  "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",
+};
+const callers = [];
+(function walkSrc(dir) {
+  for (const n of readdirSync(dir).sort()) {
+    const full = join(dir, n);
+    if (statSync(full).isDirectory()) walkSrc(full);
+    else if (/\.tsx?$/.test(n) && full !== join("src", "lib", "ai", "providers", "complete.ts") && /\brunCompletion\(/.test(stripComments(readFileSync(full, "utf8")))) callers.push(full);
+  }
+})("src");
+check(`the callers of runCompletion, read from the code (${callers.length})`, callers.length >= 1);
+const unnamed = callers.filter((f) => !(f in FAILOVER_NAMES));
+check("...each has the name the manual gives it", unnamed.length === 0, unnamed.join(" "));
+const gone = Object.keys(FAILOVER_NAMES).filter((f) => !callers.includes(f));
+check("...and every name here is still a caller", gone.length === 0, gone.join(" "));
+const providerAt = doc.indexOf("## Τι κάνω αν πέσει ένας πάροχος AI");
+const providerSection = flat(doc.slice(providerAt, doc.indexOf("\n## ", providerAt + 3)));
+const unsaid = [...new Set(callers.map((f) => FAILOVER_NAMES[f]).filter(Boolean))].filter((n) => !providerSection.includes(n));
+check("the manual names every one of them", providerAt > 0 && unsaid.length === 0, unsaid.join(" | "));
+const chatFailsOver = /\brunCompletion\(/.test(stripComments(readFileSync("src/app/api/chat/route.ts", "utf8")));
+const manualSaysChatStays = /Το Chat, .{0,200}?\*\*δεν\*\* πηγαίνει μόνο του σε άλλον πάροχο/.test(providerSection);
+check("...and says what Chat does when its provider fails", chatFailsOver !== manualSaysChatStays, `Chat goes on: ${chatFailsOver}; the manual says it stays: ${manualSaysChatStays}`);
 
 console.log(failures.length ? `\nFAILED: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);
 process.exit(failures.length === 0 ? 0 : 1);

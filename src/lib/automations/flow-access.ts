@@ -9,6 +9,7 @@ import type { Plan } from "@/lib/billing/plans";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 import { listIntegrations } from "@/lib/integrations/store";
+import { providersOpenTo } from "@/lib/integrations/switches";
 import { listDeliveryChannels } from "@/lib/agents/delivery-store";
 import { connectionsNeeded, cronFor, type Box, type StartBox } from "@/lib/automations/boxes";
 
@@ -83,17 +84,23 @@ export function nextRunFor(boxes: Box[], timeZone: string, from = new Date()): s
  * WHAT IS NOT CONNECTED YET, of what the boxes need. An automation that
  * reads a calendar nobody connected, or sends to a Telegram that is not
  * set up, is not switched on: it would fail at its first run, unseen.
+ *
+ * The calendar counts as connected only while the switch "connections"
+ * is open to this person (lib/integrations/switches.ts): the switch that
+ * takes the calendar off the page takes it out of the automations too.
  */
-export async function missingConnections(userId: string, boxes: Box[]): Promise<("google_calendar" | "telegram")[]> {
+export async function missingConnections(user: { id: string; email?: string | null }, boxes: Box[]): Promise<("google_calendar" | "telegram")[]> {
   const needs = connectionsNeeded(boxes);
   if (needs.length === 0) return [];
-  const [integrations, channels] = await Promise.all([
-    needs.includes("google_calendar") ? listIntegrations(userId) : Promise.resolve([]),
-    needs.includes("telegram") ? listDeliveryChannels(userId) : Promise.resolve([]),
+  const calendar = needs.includes("google_calendar");
+  const [integrations, channels, open] = await Promise.all([
+    calendar ? listIntegrations(user.id) : Promise.resolve([]),
+    needs.includes("telegram") ? listDeliveryChannels(user.id) : Promise.resolve([]),
+    calendar ? providersOpenTo(user) : Promise.resolve(new Set<string>()),
   ]);
   return needs.filter((need) =>
     need === "google_calendar"
-      ? !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")
+      ? !open.has("google_calendar") || !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")
       : !channels.some((c) => c.channel === "telegram")
   );
 }
@@ -177,12 +184,12 @@ export async function saveVersion(params: { flowId: string; userId: string; vers
  * on and fail at its next run.
  */
 export async function scheduleAfterChange(
-  userId: string,
+  user: { id: string; email?: string | null },
   flow: { is_active: boolean; time_zone: string },
   boxes: Box[]
 ): Promise<{ patch: Record<string, unknown>; paused: ("google_calendar" | "telegram")[] }> {
   if (!flow.is_active) return { patch: {}, paused: [] };
-  const missing = await missingConnections(userId, boxes);
+  const missing = await missingConnections(user, boxes);
   if (missing.length > 0) return { patch: { is_active: false, next_run_at: null }, paused: missing };
   return { patch: { next_run_at: nextRunFor(boxes, flow.time_zone) }, paused: [] };
 }

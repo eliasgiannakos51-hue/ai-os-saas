@@ -198,7 +198,12 @@ const emailModules = [];
     else if (entry.endsWith(".ts")) emailModules.push(full.replace(/\\/g, "/"));
   }
 })("src/lib");
-const SENDS = /resend\.emails\.send\s*\(|\bsendEmail\s*\(/;
+// ANY RECEIVER. This read `resend.emails.send(` until 2026-10-09, and the
+// sender every owner alert now goes through (src/lib/email/owner-alert.ts)
+// calls `createResendClient().emails.send(` — a sender the narrower
+// pattern could not see, while the four alerts it replaced stayed
+// declared below as if they still sent.
+const SENDS = /\.emails\.send\s*\(|\bsendEmail\s*\(/;
 const senders = emailModules.filter((f) => SENDS.test(strip(readFileSync(f, "utf8"))));
 check(`modules that send mail (${senders.length})`, senders.length >= 9, "the email-send detector matched almost nothing");
 check(
@@ -208,16 +213,15 @@ check(
 );
 
 const EMAIL_ENGLISH_ON_PURPOSE = {
-  "src/lib/email/error-alert.ts": "an operator alert to ADMIN_EMAILS. The reader is the owner, and the subject carries a route name and a provider message that do not translate.",
-  "src/lib/email/margin-alert.ts": "the same: a margin figure and a feature name, sent to the owner and to nobody else.",
-  "src/lib/email/login-failure-alert.ts": "the same: a count of failed sign-ins, sent to ADMIN_EMAILS and to nobody else.",
-  // FOUND BY WIDENING THE WALK, not by anybody remembering it. It sends
-  // to ADMIN_EMAILS with a subject that begins "[Ionexa cost alert]" and
-  // it sat outside every i18n instrument this project has, purely because
-  // it lives under src/lib/billing. Harmless — and the point is that
-  // nothing said so.
-  "src/lib/billing/cost-alert-delivery.ts":
-    "an operator alert, addressed to ADMIN_EMAILS (the constant, not a user's address) and subject-prefixed [Ionexa cost alert]. Same class as the two above: the reader is the owner, and the body carries a cost figure and an alert type.",
+  // SINCE 2026-10-09 ONE SENDER FOR ALL FOUR OWNER ALERTS: errors
+  // (lib/email/error-alert.ts), cost (lib/billing/cost-alert-delivery.ts,
+  // found by widening the walk, outside every i18n instrument because it
+  // lives under src/lib/billing), margin (lib/email/margin-alert.ts) and
+  // failed sign-ins (lib/email/login-failure-alert.ts) compose their
+  // message and hand it here, and so does the test button on
+  // /dashboard/system-health.
+  "src/lib/email/owner-alert.ts":
+    "every message it sends is an operator alert to ADMIN_EMAILS (the constant, never a user's address) and to nobody else. The reader is the owner, and the bodies carry a route name, a provider message, a cost figure, a margin and a count of failed sign-ins, which do not translate.",
   "src/lib/email/send-team-invite-email.ts":
     "it goes to an address that may have no account at all, so there is no raw_user_meta_data.preferred_locale to read — the plumbing every other sender now uses has nothing to read FROM here. The inviter's language is the only guess available, and it is a guess about a third party. The footer still comes out of the catalogue so it moves with the other nine when somebody decides what an invite should do.",
   "src/lib/notify/dispatch.ts":

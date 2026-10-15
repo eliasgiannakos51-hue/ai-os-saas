@@ -364,9 +364,9 @@ export async function readCalendar(
   accessToken: string,
   query: string,
   limit: number,
-  period: { from?: unknown; to?: unknown } = {}
+  period: { from?: unknown; to?: unknown; timeZone?: unknown } = {}
 ): Promise<ReadResult> {
-  const { timeMin, timeMax } = calendarWindow(period.from, period.to);
+  const { timeMin, timeMax } = calendarWindow(period.from, period.to, new Date(), period.timeZone);
   const url = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
   url.searchParams.set("timeMin", timeMin);
   url.searchParams.set("timeMax", timeMax);
@@ -421,8 +421,8 @@ export async function searchUserData(params: {
   source: SearchSource;
   query: string;
   limit?: number;
-  /** The days a calendar read covers (calendarWindow); ignored elsewhere. */
-  period?: { from?: unknown; to?: unknown };
+  /** The days a calendar read covers (calendarWindow), in the person's zone; ignored elsewhere. */
+  period?: { from?: unknown; to?: unknown; timeZone?: unknown };
   /** What caused the read, for the user-visible audit trail. */
   trigger: "chat" | "agent" | "life_context" | "manual";
 }): Promise<ReadResult> {

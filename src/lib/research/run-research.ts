@@ -395,11 +395,19 @@ async function runResearchChunkInner(
       bypassCharge: await isBypass(report.user_id),
       metadata: { reportId, outcome: "no_findings", chunks: (report.chunk_count ?? 0) + 1 },
     });
+    // THE SERVICE, NOT THE TOPIC (the package check of 2026-10-08). When
+    // every question threw — research.ts, researchQuestion, marks each one
+    // `failed` — no search ran at all, and "nothing usable on this topic"
+    // would send the person off to reword a topic nobody looked at. Both
+    // sentences are said in the reader's language by lib/research/failure.ts.
+    const serviceDown = findings.length > 0 && findings.every((f) => f.failed === true);
+    const failure = serviceDown
+      ? { status: "failed" satisfies ResearchStatus, error: "The AI service did not answer the research questions. Please run it again in a moment." }
+      : { status: "failed" satisfies ResearchStatus, error: "The searches did not return anything usable on this topic." };
     await admin
       .from("research_reports")
       .update({
-        status: "failed" satisfies ResearchStatus,
-        error: "The searches did not return anything usable on this topic.",
+        ...failure,
         credits_charged: settlement.creditsCharged,
         completed_at: new Date().toISOString(),
         chunk_running: false,

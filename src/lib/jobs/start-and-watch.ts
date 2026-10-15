@@ -34,7 +34,7 @@ export async function startAndWatchJob(
   url: string,
   body: unknown,
   options: { onProgress?: (job: AiJob) => void } = {}
-): Promise<JobOutcome & { jobId?: string }> {
+): Promise<JobOutcome & { jobId?: string; status?: number; body?: Record<string, unknown> | null }> {
   // Every AI action in the app starts here, which makes it the one place
   // worth telling the offline banner about: a press that fails on the
   // transport is the earliest honest evidence that the server cannot be
@@ -57,7 +57,10 @@ export async function startAndWatchJob(
   reportNetworkSuccess();
   const started = await response.json();
   if (!started.ok || !started.jobId) {
-    return { ok: false, error: String(started.error ?? started.message ?? ""), code: started.reason ?? null };
+    // The route's status and body ride along, so a screen can say the
+    // refusal in its reader's language instead of the route's English
+    // (components/files/files-shell.tsx).
+    return { ok: false, error: String(started.error ?? started.message ?? ""), code: started.reason ?? null, status: response.status, body: started };
   }
   const jobId = String(started.jobId);
   const outcome = await watchJob(jobId, options.onProgress);

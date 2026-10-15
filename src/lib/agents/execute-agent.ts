@@ -5,6 +5,7 @@ import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   hasEnoughCredits,
@@ -345,9 +346,9 @@ export async function executeAgent(params: {
   const memoryBlock = memoryActiveFor({
     surface: "agent",
     user,
-    planLimit: plan?.capabilities.chatMemoryLimit ?? 0,
+    planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin),
   })
-    ? await memoryPromptFor(admin, userId, plan?.capabilities.chatMemoryLimit ?? 0)
+    ? await memoryPromptFor(admin, userId, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
     : "";
 
   let attempts = 0;

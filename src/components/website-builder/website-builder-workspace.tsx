@@ -31,6 +31,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { normalisePages, type WebsitePage } from "@/lib/publishing/website-pages";
 import { censusSiteImages, shouldOfferOwnPhotos } from "@/lib/website-image-census";
 import { canUpload, formatBytes, type StorageUsage } from "@/lib/websites/storage-quota";
+import { flaggedFindings } from "@/lib/websites/flagged-notice";
 import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
@@ -402,7 +403,7 @@ export function WebsiteBuilderWorkspace({
       } else if (record.status === "failed") {
         addToast(`✗ ${record.error_message ?? t("generateFailed")}`, "error");
       } else if (record.status === "flagged") {
-        addToast(`⚠ ${record.error_message ?? "This website was flagged by our safety review."}`, "error");
+        addToast(`⚠ ${t("flaggedTitle")}`, "error");
       }
     }
     void tick();
@@ -1476,7 +1477,17 @@ export function WebsiteBuilderWorkspace({
                 <div className="notice-warning flex h-[500px] w-full flex-col items-center justify-center gap-3 px-6 text-center">
                   <AlertTriangle className="h-8 w-8 text-warning" aria-hidden="true" />
                   <p className="text-sm font-medium text-warning">{t("flaggedTitle")}</p>
-                  <p className="max-w-md text-xs text-warning/80">{previewWebsite.error_message}</p>
+                  {/* NEVER THE STORED SENTENCE (src/lib/websites/flagged-notice.ts):
+                      rows flagged before 2026-10-05 still promise a free
+                      regeneration in English. The reader's language says
+                      what happened; the findings are behind one press. */}
+                  <p className="max-w-md text-xs text-warning/80" data-testid="flagged-body">{t("flaggedBody")}</p>
+                  {flaggedFindings(previewWebsite.error_message) ? (
+                    <details className="max-w-md text-start text-xs text-warning/80">
+                      <summary className="flex min-h-[44px] cursor-pointer items-center justify-center">{t("flaggedDetails")}</summary>
+                      <p className="mt-1 break-words">{flaggedFindings(previewWebsite.error_message)}</p>
+                    </details>
+                  ) : null}
                   {/* THE OFFER, OR WHY THERE IS NOT ONE.
                       The button used to simply vanish when the free retry
                       was spent or the original brief was never stored, so

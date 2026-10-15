@@ -32,11 +32,17 @@ export function LowCreditsBanner({ variant = "banner" }: { variant?: "banner" | 
   // The top-nav variant has to survive in a dense row, so it is a compact
   // pill; the Home variant can afford a full-width strip with the action.
   if (variant === "inline") {
+    // FROM sm UP ONLY. The top bar is full on a phone (components/dashboard/top-nav.tsx
+    // counts it at 344px of 375), and this pill pushed the account button
+    // out of it: every page scrolled sideways, by 33px at 390px in Greek
+    // and 15px in English, whenever the balance was low (found 2026-10-08,
+    // scripts/tests/chat-attachments-edges.prodtest.mjs). The balance
+    // itself is not in a phone's top bar either (it shows from lg).
     return (
       <Link
         href="/dashboard/settings#credits"
         className={[
-          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors duration-200",
+          "hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors duration-200 sm:inline-flex",
           isEmpty
             ? "bg-danger/15 text-danger hover:bg-danger/25"
             : "bg-foreground/15 text-foreground hover:bg-foreground/25",

@@ -176,9 +176,9 @@ check("selection is still the subject: nothing is asked with nothing ticked",
 check("the field asks the ticked files, as a background job through the page's route",
   /startAndWatchJob\(\s*"\/api\/files\/ask",\s*\{ question: text, fileIds: selected, language: locale \}/.test(filesShell));
 check("every answer says the page it came from, or that it is not in the documents",
-  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{c\.label\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
+  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{show\(c\.label\)\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
 check("...built by the same function as on the page, and copied with its sources",
-  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
+  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!, show\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
 check("an answer that finished elsewhere is put back, and one running is watched", /\/api\/jobs\?kind=file_ask/.test(filesShell) && /watchJob\(String\(job\.id\)/.test(filesShell) && /<JobSeen jobId=\{turn\.answer\.jobId\} \/>/.test(filesShell));
 check("an upload whose registration does not land is removed from the bucket",
   /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));
@@ -204,6 +204,67 @@ check("the site beside the conversation is sandboxed, marked as made by AI, and 
 check("...and accuses no number the person typed: only for a site whose every request is in this conversation",
   /asked\[current\.id\] \? findInventedNumbers\(html, asked\[current\.id\]\.join\("\\n"\)\) : \[\]/.test(site));
 check("Publish is on top of it", /<PublishControl websiteId=\{current\.id\}/.test(site));
+
+console.log("\n== 10. a refusal is said in the reader's language ==");
+// Checked 2026-10-08 in the built app by scripts/tests/tool-shell-edges.prodtest.mjs:
+// out of credits, the model down, a Free account's limit. The routes answer
+// with English prose for logs; a shell that puts it in the conversation or a
+// toast shows English on a Greek screen. Ranges over every tool in the shell.
+const PROSE = [
+  [/(?:text:|addToast\(|note\("tool",)\s*(?:data|body|outcome|report)\??\.error\b/, "a route's `error` said as it is"],
+  [/\b(?:data|body|outcome|report)\??\.error \?\? t\(/, "a route's `error`, with a translation only when it is missing"],
+  [/\boutcome\.error \|\|/, "a job's or a route's `error`, before the translation"],
+  [/\b(?:record|current|w)\.error_message \?\?(?! "")/, "the site worker's `error_message`"],
+  [/getErrorMessage\(/, "getErrorMessage, which prefers any English message to the translation"],
+];
+for (const f of users) {
+  const src = read(f);
+  const said = PROSE.filter(([re]) => re.test(src)).map(([, what]) => what);
+  check(`${f}: no route's English is said to the reader`, said.length === 0, said.join("; "));
+}
+// The Site's requests make every refusal an ApiError (lib/website-builder/
+// site-requests.ts, package 10's check, scripts/tests/site-pages.test.mjs):
+// out of credits a 402 by its code, a limit a 429, and the shell says it.
+check("Site: out of credits and the limits are read from the code, not from the sentence",
+  /if \(outcome\.kind === "refused"\) \{\s*say\(\{ role: "tool", text: describe\(outcome\.error\)\.text \}\);/.test(site) && /:\s*describe\(outcome\.error\)\.text,/.test(site) &&
+    /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\)/.test(siteRequests) && /const short = data\?\.code === "insufficientCredits";/.test(siteRequests) &&
+    /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\)/.test(siteRequests));
+for (const route of ["src/app/api/websites/generate/route.ts", "src/app/api/websites/edit/route.ts"]) {
+  const src = read(route);
+  const said = (src.match(/insufficientCreditsMessage\(/g) ?? []).length;
+  const coded = (src.match(/code: "insufficientCredits"/g) ?? []).length;
+  check(`${route}: every "not enough credits" carries its code (${coded} of ${said})`, said >= 1 && coded >= said);
+}
+check("Site: a build the worker could not finish is said in the screen's words, a stop by its note",
+  /say\(\{ role: "tool", text: failedText\(record\) \}\)/.test(site) && /if \(stopped\) return describeNote\(stopped\);/.test(site));
+// What components/research/failure-words.ts names (package 11's check,
+// scripts/tests/research-slides.test.mjs) is said in its words; the rest
+// from the status.
+check("Research: a plan or a run refused is said from the status",
+  /const named = \(data: Record<string, unknown> \| null, status: number\) => researchRefusal\(data, status\) !== "other" \|\| \(status === 502 && data !== null\);/.test(research) &&
+  (research.match(/named\(data, response\.status\) \? failures\.refused\(data, response\.status, "(?:plan|run)"\) : refusalText\(response\.status, data\)/g) ?? []).length === 2);
+// Checked 2026-10-09 by tool-shell-edges.prodtest.mjs: a 504 text page from
+// the host made `response.json()` throw, and the catch said "your device
+// could not reach us" — and "you were not charged" — about a request that
+// had reached the server.
+check("Research: a plan answered with something that is not JSON is not the connection",
+  /const data = await response\.json\(\)\.catch\(\(\) => null\);\s*if \(!data\?\.ok\)/.test(research));
+// Checked the same day: over 4MB the bytes go to storage alone, and
+// storage that could not be reached answered «Failed to fetch» into the
+// conversation. Storage's own words are never what the reader is told.
+check("Files: a file over the route's limit, with storage unreachable, is the connection — never storage's English",
+  !/error: fallback/.test(uploadLib) && /unanswered \? \(words\.offline \?\? words\.error\) : words\.error/.test(uploadLib) &&
+    /unanswered = typeof \(error as \{ status\?: unknown \}\)\.status !== "number"/.test(uploadLib) &&
+    /offline: describe\(new ApiError\(0, null\)\)\.text/.test(filesShell));
+check("Files: a question refused is said from the status, a failed job in the screen's words",
+  /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /text: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*askFailure\(outcome\) === "askError" && outcome\.status\s*\?\s*describe\(new ApiError\(outcome\.status,/.test(filesShell) &&
+    /status: response\.status, body: started/.test(read("src/lib/jobs/start-and-watch.ts")));
+check("Files: a file the plan has no room for is the plan's limit",
+  /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(filesShell) && (uploadLib.match(/body: data,\s*status: response\.status/g) ?? []).length === 2);
+check("Analyze: out of credits and the model down are said as such", /status === 402 \? describe\(new ApiError\(402, null\)\)\.text : code === "ai_unavailable" \? t\("analyse\.unavailable"\)/.test(analyze) &&
+  (analyze.match(/refusal\(response\.status, body\?\.error,/g) ?? []).length === 2);
+check("Slides: Stop reaches a change as well as a new deck",
+  (slides.match(/signal: controller\.signal/g) ?? []).length === 2 && (slides.match(/abortRef\.current = controller;/g) ?? []).length === 2);
 
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {

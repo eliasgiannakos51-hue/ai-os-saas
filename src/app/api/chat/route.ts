@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { readChatAttachments, parseStoredAttachments, conversationAttachments } from "@/lib/chat/attachment-types";
-import { loadAttachmentContent, attachmentInputChars, isMissingColumn } from "@/lib/chat/attachments";
+import { loadAttachmentContent, attachmentInputChars, isMissingColumn, conversationCarriesFiles } from "@/lib/chat/attachments";
 import { memoryCitationInstruction, MemoryMarkerHoldback, takeMemoryMarker, citedMemories, MEMORY_MARK_OPEN } from "@/lib/chat/memory-citations";
 import { loadDeepDive } from "@/lib/ai/deep-dive-load";
 import {
@@ -16,6 +16,7 @@ import {
 import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
 import { providersOpenTo } from "@/lib/integrations/switches";
+import { isValidTimeZone } from "@/lib/agents/cron-expression";
 import {
   buildSearchTool,
   searchToolInstruction,
@@ -24,6 +25,7 @@ import {
   MAX_TOOL_ROUNDS,
 } from "@/lib/integrations/chat-tool";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -327,6 +329,7 @@ export async function POST(request: Request) {
     let skipClarification = false;
     let workMode: WorkMode | null = null;
     let rawAttachments: unknown = undefined;
+    let timeZone: string | null = null;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -353,6 +356,10 @@ export async function POST(request: Request) {
       // (lib/chat/work-modes.ts) — one of four, or none.
       workMode = readWorkMode(body?.workMode);
       rawAttachments = body?.attachments;
+      // The person's time zone, from their browser: what «αύριο» means for
+      // a calendar read (lib/integrations/calendar-window.ts). Only a real
+      // IANA zone is kept; anything else reads Greenwich's days, as before.
+      timeZone = typeof body?.timeZone === "string" && body.timeZone.length <= 64 && isValidTimeZone(body.timeZone) ? body.timeZone : null;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -406,13 +413,36 @@ export async function POST(request: Request) {
     // to the model — which is what the old CANNED_ANSWER_LOCALE guard did
     // for nine locales, now as a consequence of the data rather than as a
     // check somebody has to remember.
-    const cannedMatch = mentorMode
+    //
+    // A MESSAGE THAT CARRIES A FILE IS EXCLUDED TOO (package 9): it is
+    // about the file. «Πόσο κοστίζει;» under a photograph asks the price of
+    // what is in it, and "What is this?" under a picture asks what the
+    // picture shows; both are help-article triggers, and both were answered
+    // with the article (found 2026-10-08,
+    // scripts/tests/chat-attachments-edges.prodtest.mjs).
+    const carriesFiles = Array.isArray(rawAttachments) && rawAttachments.length > 0;
+    const articleMatch = mentorMode
       ? null
-      : matchCannedAnswer(
-          message,
-          await loadCannedArticles(locale),
-          conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
-        );
+      : carriesFiles
+        ? null
+        : matchCannedAnswer(
+            message,
+            await loadCannedArticles(locale),
+            conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
+          );
+    // ...AND SO IS A FOLLOW-UP IN A CONVERSATION THAT CARRIES ONE: the
+    // files within the history window go to the model with it
+    // (earlierAttachments below), and
+    // «Πόσο κοστίζει;» after a photograph is still about the photograph
+    // (found 2026-10-09, the same prodtest). Asked only when an article
+    // matched mid-conversation, so an ordinary message reads nothing more.
+    const cannedMatch =
+      articleMatch &&
+      conversationId &&
+      (await isFeatureOn("chat-attachments", user)) &&
+      (await conversationCarriesFiles(supabase, conversationId))
+        ? null
+        : articleMatch;
     if (cannedMatch) {
       return await answerFromKnowledgeBase({
         supabase,
@@ -430,7 +460,7 @@ export async function POST(request: Request) {
       fingerprintRequest(message, conversationId, String(mentorMode), mentorPreset)
     );
     if (!breakerCheck.allowed) {
-      return NextResponse.json({ ok: true, rateLimited: true, message: breakerCheck.reason });
+      return NextResponse.json({ ok: true, rateLimited: true, code: breakerCheck.code, message: breakerCheck.reason });
     }
 
     const plan = await resolveEffectivePlan(user);
@@ -449,14 +479,19 @@ export async function POST(request: Request) {
     // one — "Chat: Off" did nothing to the chat. memoryActiveFor() is the
     // predicate every other feature asks; scripts/tests/memory-universal
     // §7 checks every surface in lib/memory/surfaces.ts is asked about.
+    //
+    // THE OWNER READS AND WRITES THE MOST ANY PLAN KEEPS, whatever his own
+    // subscription says — every other plan gate already opens to him
+    // (lib/memory/memory-window.ts).
+    const memoryWindow = memoryWindowFor(plan.capabilities.chatMemoryLimit, isAdminEmail(user.email));
     const memoryActive = chatMemoryActive({
       userEnabled:
         isChatMemoryEnabled(user) &&
-        memoryActiveFor({ surface: "chat", user, planLimit: plan.capabilities.chatMemoryLimit }),
-      planLimit: plan.capabilities.chatMemoryLimit,
+        memoryActiveFor({ surface: "chat", user, planLimit: memoryWindow }),
+      planLimit: memoryWindow,
     });
     const memories = memoryActive
-      ? await loadRecentMemories(supabase, user.id, plan.capabilities.chatMemoryLimit)
+      ? await loadRecentMemories(supabase, user.id, memoryWindow)
       : [];
 
     // PDFS AND IMAGES, AND WHICH MEMORIES AN ANSWER USED (MASTER 16,
@@ -683,7 +718,8 @@ export async function POST(request: Request) {
       integrationSearchTool = buildSearchTool(integrations);
       if (integrationSearchTool) {
         integrationInstruction = searchToolInstruction(
-          integrations.filter((i) => i.status === "connected").map((i) => i.provider)
+          integrations.filter((i) => i.status === "connected").map((i) => i.provider),
+          timeZone
         );
       }
     } catch (err) {
@@ -867,7 +903,18 @@ export async function POST(request: Request) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
+          // The case by name (`code`, and the `outOfCredits` flag the
+          // stream's own refusal carries too) and the two numbers, so the
+          // screen says it in the reader's language
+          // (components/chat/chat-workspace.tsx) — a Free account whose
+          // free messages ran out read the English on a Greek screen
+          // (scripts/tests/first-task-edges.prodtest.mjs); `message` is the
+          // English sentence for logs and anything that reads this route raw.
+          code: "insufficientCredits",
+          outOfCredits: true,
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
+          available: check.remaining,
+          needed: estimate.reserveCredits,
         });
       }
     }
@@ -1124,7 +1171,14 @@ export async function POST(request: Request) {
         // tokens — settled under its own feature, so a thread that ended
         // in a question and one that ended in an answer are separate rows
         // rather than an average of the two.
-        if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification) {
+        //
+        // NOT WHEN THE MESSAGE CARRIES A FILE (package 9). The check reads
+        // the words alone, and «Κάνε μου περίληψη» without the PDF it is
+        // about reads as a request with nothing to summarise: the person
+        // who attached the document was asked which one (found 2026-10-08,
+        // scripts/tests/chat-attachments-edges.prodtest.mjs). The file is
+        // what "this" is.
+        if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification && currentAttachments.length === 0) {
           try {
             const decision = await checkNeedsClarification(apiKey, "chat", message, costs);
             clarificationRecord = clarificationMetadata(decision);
@@ -1211,6 +1265,7 @@ export async function POST(request: Request) {
                     ? `Not enough credits for this message (you have ${reservation.available}, this needs about ${streamEstimate.reserveCredits}). No credits were charged.`
                     : "Could not reserve credits for this message. No credits were charged — please try again.",
                 outOfCredits: reservation.reason === "insufficient",
+                ...(reservation.reason === "insufficient" ? { available: reservation.available, needed: streamEstimate.reserveCredits } : {}),
               })
             );
             controller.close();
@@ -1384,7 +1439,7 @@ export async function POST(request: Request) {
             markStep("searching_data");
             const results = await Promise.all(
               toolUses.map(async (toolUse) => {
-                const executed = await executeSearchTool({ userId: user.id, input: toolUse.input });
+                const executed = await executeSearchTool({ userId: user.id, input: toolUse.input, timeZone });
                 return {
                   type: "tool_result" as const,
                   tool_use_id: toolUse.id,
@@ -1400,7 +1455,16 @@ export async function POST(request: Request) {
           if (isFreeMessage) await releaseFreeChatMessage(user.id);
           const errMessage = err instanceof Error ? err.message : "Chat request failed.";
           controller.enqueue(
-            ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
+            ndjsonLine({
+              type: "error",
+              error: `${errMessage} No credits were charged — please try again.`,
+              // Said as values too, so the screen says it in its language:
+              // the AI service failed, nothing was kept, and the free
+              // message is back.
+              code: "upstreamUnavailable",
+              creditsRefunded: true,
+              freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining + 1 : undefined,
+            })
           );
           controller.close();
           return;
@@ -1422,6 +1486,9 @@ export async function POST(request: Request) {
             ndjsonLine({
               type: "error",
               error: "The model did not return a response. No credits were charged — please try again.",
+              code: "upstreamUnavailable",
+              creditsRefunded: true,
+              freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining + 1 : undefined,
             })
           );
           controller.close();

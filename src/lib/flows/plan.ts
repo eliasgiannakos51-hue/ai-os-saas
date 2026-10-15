@@ -160,6 +160,19 @@ export function projectNameFor(said: string): string {
 }
 
 /**
+ * What this person can run (lib/flows/availability.ts): each kind, and a
+ * deck made FROM a research, which api/presentations/generate makes only
+ * behind package 11's switch, `research-slides`.
+ */
+export type FlowAvailability = Record<FlowKind, boolean> & { slidesFromResearch: boolean };
+
+/** Whether this step can run for this person: its tool, and for a deck after a research, the deck made from it. */
+export function canRun(available: FlowAvailability, step: FlowStep): boolean {
+  if (!available[step.kind]) return false;
+  return !(step.kind === "slides" && step.after.includes("research") && !available.slidesFromResearch);
+}
+
+/**
  * A PLAN WITHOUT WHAT THIS PERSON CANNOT USE YET: a tool behind a switch
  * that is closed for them, or above their plan, or without its provider's
  * key. Taken out BEFORE the price is shown and the project is made — a
@@ -167,8 +180,8 @@ export function projectNameFor(said: string): string {
  * not — and named, so the screen can say why it is not there. A step
  * that waits for one taken out goes with it.
  */
-export function withoutUnavailable(plan: FlowPlan, available: (kind: FlowKind) => boolean): FlowPlan & { unavailable: FlowKind[] } {
-  const out = new Set(plan.steps.filter((s) => !available(s.kind)).map((s) => s.id));
+export function withoutUnavailable(plan: FlowPlan, available: (step: FlowStep) => boolean): FlowPlan & { unavailable: FlowKind[] } {
+  const out = new Set(plan.steps.filter((s) => !available(s)).map((s) => s.id));
   let grew = true;
   while (grew) {
     grew = false;

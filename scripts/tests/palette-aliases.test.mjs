@@ -237,7 +237,7 @@ console.log("\n== 7. and the palette actually uses this seam ==");
     /candidates: \[[\s\S]{0,200}aliasesFor\(ITEM_LABEL_KEYS\[item\.label\][\s\S]{0,40}locale\)/.test(palette),
     palette.slice(palette.indexOf("candidates: ["), palette.indexOf("candidates: [") + 220));
   ok("...for the READER's locale, not a fixed one",
-    /const locale = useLocale\(\);/.test(palette) && /\[query, isOwner, translatedLabel, locale\]/.test(palette));
+    /const locale = useLocale\(\);/.test(palette) && /\[query, isOwner, translatedLabel, locale(?:, \w+)*\]/.test(palette));
 }
 
 console.log("");

@@ -52,8 +52,10 @@ const MUTANTS = [
     // running the full sweep before a push rather than the suites whose
     // names look related: the round that raised this floor ran thirteen
     // suites by hand and neither of the two that went red was among them.
-    from: "const FLOOR = 261;",
-    to: "const FLOOR = 242;",
+    // 250 -> 263 (scripts/tests/run-mutations.mjs says which, and why
+    // merging main after #285 moved it again).
+    from: "const FLOOR = 263;",
+    to: "const FLOOR = 244;",
     expect: "no baseline has more room than it is allowed",
   },
   // WHAT USED TO STAND HERE AND CANNOT, and the reason is worth more than

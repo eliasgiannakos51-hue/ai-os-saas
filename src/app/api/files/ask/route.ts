@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many questions in the last hour. Try again shortly." },
+        { ok: false, reason: "rate_limited", error: "Too many questions in the last hour. Try again shortly." },
         { status: 429 }
       );
     }
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
 
     const breaker = await checkAiCallAllowed(user.id, "file_ask", fingerprintRequest(user.id, question));
     if (!breaker.allowed) {
-      return NextResponse.json({ ok: false, error: breaker.reason }, { status: 429 });
+      return NextResponse.json({ ok: false, reason: "rate_limited", error: breaker.reason }, { status: 429 });
     }
 
     const isAdmin = isAdminEmail(user.email);
@@ -160,7 +160,7 @@ export async function POST(request: Request) {
     if (bypassCredits) {
       const ceiling = await checkBypassCeiling(user.id, isAdmin, bypassCredits && !isAdmin);
       if (!ceiling.allowed) {
-        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+        return NextResponse.json({ ok: false, reason: "rate_limited", error: ceiling.reason }, { status: 429 });
       }
     }
     const plan = await resolveEffectivePlan(user);
@@ -220,7 +220,7 @@ export async function POST(request: Request) {
     if (!started.ok) {
       if (started.reason === "insufficient") {
         return NextResponse.json(
-          { ok: false, insufficientCredits: true, error: "Not enough credits for this question." },
+          { ok: false, reason: "insufficient", insufficientCredits: true, error: "Not enough credits for this question." },
           { status: 402 }
         );
       }

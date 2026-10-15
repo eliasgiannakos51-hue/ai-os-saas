@@ -76,14 +76,6 @@ const NONE_IS_FINE = {
     "a CORPUS. The rule ('no Greek string addresses the reader in the polite plural') " +
     "ranges over 546 real strings in messages/*.json, so a new offending string reddens " +
     "it. Settled by adding one: RED.",
-  "conversation-design.test.mjs":
-    "the SOURCE of two components, comments stripped: the chat workspace (which mark stands " +
-    "beside an answer, which one moves) and the composer (where its controls sit), held " +
-    "against Home's field in create-chat.tsx. None of it runs without a browser. Settled " +
-    "2026-10-04 by conversation-design.mutation.mjs: 6 of 6 — the earth swapped for an " +
-    "empty span, the writing answer not speeding up, every old answer animating, the " +
-    "empty state losing its earth, the microphone moved back over the text and the " +
-    "controls' row removed: RED every time.",
   "cost-before.test.mjs":
     "EXECUTION through a shared module. Its population is what lib/billing/estimate.ts " +
     "prices each of the 30 actions on each plan, computed by scripts/lib/price-rows.mjs " +

@@ -56,7 +56,7 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
 
   if (!(await claimFlow(id, user.id))) return refuse("busy", 409);
   try {
-    const schedule = await scheduleAfterChange(user.id, flow, verdict.boxes);
+    const schedule = await scheduleAfterChange(user, flow, verdict.boxes);
     const { error } = await createAdminClient()
       .from("automation_flows")
       .update({ boxes: verdict.boxes, version: flow.version - 1, ...schedule.patch })

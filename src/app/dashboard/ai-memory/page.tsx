@@ -23,6 +23,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
@@ -112,7 +113,8 @@ export default async function AiMemoryPage() {
     );
   }
 
-  const planLimit = getPlan(planSlug)?.capabilities.chatMemoryLimit ?? 0;
+  // The owner reads the most any plan keeps (lib/memory/memory-window.ts).
+  const planLimit = memoryWindowFor(getPlan(planSlug)?.capabilities.chatMemoryLimit ?? 0, isAdmin);
   const active = chatMemoryActive({ userEnabled: isChatMemoryEnabled(user), planLimit });
 
   return (

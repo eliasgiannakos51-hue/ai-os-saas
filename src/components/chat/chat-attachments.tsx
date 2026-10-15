@@ -23,6 +23,10 @@ import type { MemoryUsed } from "@/lib/chat/memory-citations";
  * SentAttachments draws them again on the message they went with, also
  * after a reload; MemoriesUsed lists, under an answer, the remembered
  * facts it said it used. Held by scripts/tests/chat-attachments.test.mjs.
+ *
+ * Every control here is a 44px touch target (docs/CONTEXT.md); «remove» was
+ * 32px and «From memory» 18px tall until 2026-10-08, measured by
+ * scripts/tests/chat-attachments-edges.prodtest.mjs.
  */
 
 export type TrayItem = {
@@ -84,6 +88,8 @@ export function useChatAttachments(onRefused: (lines: string[]) => void) {
         storagePolicy: tFiles("uploadStoragePolicy"),
         tooLargeForTransfer: tFiles("tooLargeForTransfer"),
         unreadable: t("unreadable", { name: file.name }),
+        fileLimit: t("fileLimit", { name: file.name }),
+        uploadLimit: t("uploadLimit"),
       }).then(
         (outcome) =>
           outcome.ok
@@ -189,7 +195,7 @@ export function AttachmentTray({ items, onRemove, holdReason }: { items: TrayIte
               onClick={() => onRemove(item.key)}
               aria-label={t("remove", { name: item.name })}
               data-testid="chat-attach-remove"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
@@ -270,7 +276,7 @@ export function MemoriesUsed({ memories }: { memories: MemoryUsed[] | undefined 
   if (!memories || memories.length === 0) return null;
   return (
     <details className="mt-2 border-t border-border/60 pt-2" data-testid="chat-memories-used">
-      <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs text-muted hover:text-foreground/80">
+      <summary className="flex min-h-[44px] cursor-pointer list-none items-center gap-1.5 text-xs text-muted hover:text-foreground/80">
         <Brain className="h-3 w-3" aria-hidden="true" />
         {t("memoryUsed", { count: memories.length })}
       </summary>

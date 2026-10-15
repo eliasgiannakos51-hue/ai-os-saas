@@ -14,6 +14,10 @@
  *   4. THE ROUTES: signed in, the switch, the plan made again on the
  *      server, a project under the plan's cap, a step's row read back as
  *      the person's own before it goes in the project, a step claimed once.
+ *   4b. WHAT THIS PERSON CAN RUN: for every plan and for the owner, a step
+ *      is in the plan exactly when its own route would let it start — so
+ *      a Free account is offered the analysis and nothing it would be
+ *      refused; a deck from a research only behind its own switch.
  *   5. THE PROJECT: it can hold what a flow makes, and opens each one.
  *   6. THE DATABASE and THE WORDS.
  *
@@ -72,9 +76,9 @@ for (const [said, missing] of NOT_YET) {
 check("a sentence naming no tool is no plan", plan.planFlow("καλημέρα").steps.length === 0 && plan.planFlow("καλημέρα").notYet.length === 0);
 const p2 = plan.planFlow("Κάνε έρευνα και φτιάξε παρουσίαση");
 check("a step starts only once what it waits for is done", plan.readySteps(p2, new Set(), new Set()).map((s) => s.id).join() === "research" && plan.readySteps(p2, new Set(["research"]), new Set(["research"])).map((s) => s.id).join() === "slides");
-const cut = plan.withoutUnavailable(plan.planFlow("Φτιάξε site, εικόνες και posts"), (k) => k !== "images");
+const cut = plan.withoutUnavailable(plan.planFlow("Φτιάξε site, εικόνες και posts"), (s) => s.kind !== "images");
 check("a step this person cannot use is taken out before the price, and named", cut.steps.map((s) => s.kind).join() === "site,posts" && cut.unavailable.join() === "images");
-const chain = plan.withoutUnavailable(p2, (k) => k !== "research");
+const chain = plan.withoutUnavailable(p2, (s) => s.kind !== "research");
 check("...and a step that waits for it goes with it", chain.steps.length === 0 && chain.unavailable.join() === "research,slides");
 check("a stored plan is read defensively", plan.readPlan({ steps: [{ kind: "site" }, { kind: "site" }, { kind: "hack" }, { kind: "slides", after: ["research", "slides"] }], notYet: ["video", "x"] }).steps.map((s) => `${s.kind}:${s.after.join("+")}`).join() === "site:,slides:" && plan.readPlan(null).steps.length === 0);
 const states = { site: { status: "done", row: "r1" }, images: { status: "failed", error: "no_credits" } };
@@ -134,7 +138,7 @@ const steps = code("src/app/api/flows/[id]/steps/route.ts");
 for (const [name, src] of [["create", create], ["steps", steps]]) {
   check(`${name}: signs in, then the switch`, /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);\s*if \(!\(await isFeatureOn\("flows", user\)\)\) return NextResponse\.json\(\{ ok: false, code: "not_enabled" \}, \{ status: 403 \}\);/.test(src));
 }
-check("the plan is made again on the server, from the sentence, without what this person cannot use", /const plan = withoutUnavailable\(planFlow\(said\), \(kind\) => available\[kind\]\);/.test(create) && !/body\.plan|body\.steps/.test(create));
+check("the plan is made again on the server, from the sentence, without what this person cannot use", /const available = await flowAvailability\(user, await resolveEffectivePlan\(user\)\);\s*const plan = withoutUnavailable\(planFlow\(said\), \(step\) => canRun\(available, step\)\);/.test(create) && !/body\.plan|body\.steps/.test(create));
 check("a sentence that needs what does not exist makes no project", create.indexOf("if (plan.steps.length === 0)") < create.indexOf('.from("projects")\n      .insert('));
 check("the project under the plan's own cap", /const cap = maxProjectsForPlan\(await resolveEffectivePlanSlug\(user\)\);/.test(create) && /if \(\(count \?\? 0\) >= cap\) return NextResponse\.json\(\{ ok: false, code: "project_limit_reached", limit: cap \}, \{ status: 402 \}\);/.test(create));
 check("the flow row through the server, with the person's id", /\.from\("project_flows"\)\s*\.insert\(\{ user_id: user\.id, project_id: project\.id,/.test(create));
@@ -147,11 +151,69 @@ check("two steps finishing together lose neither", /\.eq\("updated_at", current\
 check("the creating route is bounded", /checkRateLimit\(\{ scope: "flow_create", identifier: user\.id,/.test(create));
 const run = code("src/lib/flows/run-step.ts");
 check("each step is its own tool's request", ['startSiteGeneration(', '"/api/images/generate"', '"/api/posts/generate"', '"/api/research"', '"/api/presentations/generate"', '"/api/data-analysis/upload"'].every((s) => run.includes(s)) && !/\.from\(|createAdminClient|reserveCredits/.test(run));
+// A SITE REFUSED FOR CREDITS SAYS SO (docs/BUGS.md 36.4): the refusal's
+// status and route code go through the same codeOf as every other step,
+// and only what it does not name stays "refused".
+check("a site refused for credits is no_credits, like every other step",
+  /function siteRefusal\(start: \{ error: \{ status: number \}; code: string \| null \}\): string \{\s*const said = codeOf\(start\.error\.status, \{ code: start\.code === "insufficientCredits" \? "insufficient_credits" : start\.code \}\);\s*return said === "failed" \? "refused" : said;\s*\}/.test(run) &&
+    /error: start\.kind === "refused" \? siteRefusal\(start\) : "failed"/.test(run) &&
+    /if \(status === 402 \|\| data\?\.error === "insufficient_credits" \|\| data\?\.code === "insufficient_credits"\) return "no_credits";/.test(run));
 check("a deck after a research is made from it", /\.\.\.\(input\.researchId \? \{ researchId: input\.researchId \} : \{\}\)/.test(run));
 const shell = code("src/components/flows/flow-shell.tsx");
 check("nothing starts before «Έγκριση», and a large total asks again", /onApprove=\{\(\) => withConfirm\(totalOf\(draft\), \(\) => void approve\(id\)\)\}/.test(shell) && /async function approve\([\s\S]*?fetch\("\/api\/flows"[\s\S]*?if \(!response\.ok \|\| !data\?\.ok\) \{[\s\S]*?return;[\s\S]*?advance\(flow\.id/.test(shell));
 check("a step that ends is seen by the next at once, so what waited for it starts", /flowsRef\.current = \{ \.\.\.flowsRef\.current, \[flowId\]: \{ \.\.\.flow, states \} \};\s*setFlows\(flowsRef\.current\);/.test(shell) && /finally \{\s*runningHere\.current\.delete\(key\);\s*if \(mounted\.current\) advance\(flowId\);/.test(shell));
 check("a site or research left running is followed, not started again", /if \(state\?\.status === "running" && state\.row && \(step\.kind === "site" \|\| step\.kind === "research"\)\) void runOne\(flow\.id, step\.id, state\.row, true\);/.test(shell));
+
+// ---------------------------------------------------------------------
+console.log("\n== 4b. what this person can run ==");
+// ---------------------------------------------------------------------
+// The step's own route, read for the capability its gate refuses on, and
+// the same question asked of every plan, as the owner and not: a step is
+// offered exactly when its route would let it start.
+const includes = await loadTs("src/lib/flows/plan-includes.ts");
+const capGate = await loadTs("src/lib/billing/capability-gate.ts");
+const limits = await loadTs("src/lib/files/limits.ts");
+const GATED = { site: "src/app/api/websites/generate/route.ts", posts: "src/app/api/posts/generate/route.ts", slides: "src/app/api/presentations/generate/route.ts" };
+const routeCapability = (file) => (code(file).match(/accountHasCapability\(\s*[^,()]*(?:\([^()]*\))?[^,()]*,\s*"(\w+)",\s*isAdminEmail\(user\.email\)\s*\)/) ?? [])[1] ?? null;
+for (const [kind, file] of Object.entries(GATED)) {
+  check(`${kind}: the step names the capability its route refuses on (${routeCapability(file)})`, routeCapability(file) !== null && includes.STEP_CAPABILITY[kind] === routeCapability(file), `${includes.STEP_CAPABILITY[kind]} vs ${routeCapability(file)}`);
+}
+const researchRoute = code("src/app/api/research/route.ts");
+check("research: the route refuses where the plan's monthly runs are none",
+  /const monthlyCap = isAdmin \? Number\.POSITIVE_INFINITY : maxResearchRunsForPlan\(planSlug\);\s*if \(monthlyCap <= 0\) \{\s*return NextResponse\.json\(/.test(researchRoute));
+const disagree = [];
+for (const { slug } of plans.PLANS) {
+  for (const owner of [false, true]) {
+    const got = includes.planIncludes(slug, owner);
+    for (const [kind, file] of Object.entries(GATED)) {
+      if (got[kind] !== capGate.accountHasCapability(slug, routeCapability(file), owner)) disagree.push(`${slug}${owner ? "+owner" : ""}:${kind}`);
+    }
+    if (got.research !== !((owner ? Number.POSITIVE_INFINITY : limits.maxResearchRunsForPlan(slug)) <= 0)) disagree.push(`${slug}${owner ? "+owner" : ""}:research`);
+    if (got.analysis !== true) disagree.push(`${slug}:analysis`);
+  }
+}
+check(`for every plan (${plans.PLANS.length}), and for the owner, a step is in the plan exactly when its own route lets it start`, plans.PLANS.length >= 6 && disagree.length === 0, disagree.join(", "));
+check("Free is offered the analysis, and none of what it would be refused",
+  JSON.stringify(includes.planIncludes("free", false)) === JSON.stringify({ research: false, site: false, posts: false, slides: false, analysis: true }), JSON.stringify(includes.planIncludes("free", false)));
+const avail = code("src/lib/flows/availability.ts");
+check("the screen and the route ask it of this person's own plan", /return \{ \.\.\.planIncludes\(plan\?\.slug \?\? "free", isAdmin\), images, slidesFromResearch: researchSlides \};/.test(avail) && /const isAdmin = isAdminEmail\(user\.email\);/.test(avail));
+check("the pictures: their switch, their plan, their provider's key", /isFeatureOn\("image-studio", user\)/.test(avail) && /const images = Boolean\(imageApiKey\(\)\) && imageSwitch && \(isAdmin \|\| planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\);/.test(avail));
+const ALL = { research: true, site: true, images: true, posts: true, slides: true, analysis: true };
+const deck = plan.planFlow("Κάνε έρευνα για τα camping και φτιάξε παρουσίαση");
+const alone = plan.planFlow("Φτιάξε παρουσίαση για το camping μου");
+check("a deck made FROM a research only where its switch is open; a deck alone does not need it",
+  plan.withoutUnavailable(deck, (s) => plan.canRun({ ...ALL, slidesFromResearch: false }, s)).unavailable.join() === "slides" &&
+  plan.withoutUnavailable(deck, (s) => plan.canRun({ ...ALL, slidesFromResearch: true }, s)).unavailable.length === 0 &&
+  plan.withoutUnavailable(alone, (s) => plan.canRun({ ...ALL, slidesFromResearch: false }, s)).steps.map((s) => s.kind).join() === "slides");
+check("...the switch the deck's route asks before it reads the report",
+  /const \[imageSwitch, researchSlides\] = await Promise\.all\(\[isFeatureOn\("image-studio", user\), isFeatureOn\("research-slides", user\)\]\);/.test(avail) &&
+  /if \(researchId !== null\) \{\s*if \(!\(await isFeatureOn\("research-slides", user\)\)\) return NextResponse\.json\(/.test(code("src/app/api/presentations/generate/route.ts")));
+const siteRoute = code("src/app/api/websites/generate/route.ts");
+check("a site a flow asks for: an account that cannot pay for a pre-check is refused before the paid classifier, not after it",
+  /if \(skipClarification && !bypassCredits\) \{\s*const check = await hasEnoughCredits\(user\.id, CREDIT_COSTS\.clarificationCheck, precheckPlan\);\s*if \(!check\.ok\) \{\s*return NextResponse\.json\(/.test(siteRoute) &&
+  siteRoute.indexOf("if (skipClarification && !bypassCredits)") > -1 && siteRoute.indexOf("if (skipClarification && !bypassCredits)") < siteRoute.indexOf("classifyWebsiteDescription(apiKey") &&
+  /startSiteGeneration\(\{ name: input\.name, description: input\.brief, skipClarification: true \}\)/.test(code("src/lib/flows/run-step.ts")));
+check("the screen takes out what cannot run the same way the route does", /const plan = withoutUnavailable\(planFlow\(said\), \(step\) => canRun\(available, step\)\);/.test(code("src/components/flows/flow-shell.tsx")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. the project ==");

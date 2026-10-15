@@ -33,6 +33,12 @@
 //  13. Agents and sites likewise: no insert or update of either through
 //      the user's client, every site update scoped by user_id as well as
 //      id, and the only user-client write left is the builder's delete.
+//  14. A project is created by the server only, after the plan's project
+//      cap, and a published site's history is written by the server only
+//      (2026-10-08, ΑΣ-4.11 and ΑΣ-1.14): the migration takes the verbs
+//      from the account, every such write in src/ goes through the admin
+//      client with the session's user, and the history delete is scoped
+//      to the caller.
 //
 // The behaviour of the migration itself is run against a real Postgres by
 // scripts/tests/entitlement-metadata.dbtest.mjs, and that of the research
@@ -42,7 +48,7 @@
 // three-table one by scripts/tests/server-written-tables.dbtest.mjs.
 //
 // Run: node scripts/tests/entitlement-trust.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 let pass = 0;
@@ -341,6 +347,51 @@ console.log("\n== 13. agents and sites are written by the server only ==");
     `every site update in the routes is scoped to the caller (${routeUpdates.length})`,
     routeUpdates.length >= 12 && unscoped.length === 0,
     unscoped.map((w) => w.file).join("\n        ")
+  );
+}
+
+// =====================================================================
+console.log("\n== 14. projects are created, and site history written, by the server only ==");
+// =====================================================================
+{
+  const MIG_FILE = "supabase/migrations/20261023100000_projects_site_versions_server_written.sql";
+  ok("the migration is there", existsSync(MIG_FILE));
+  const MIG = existsSync(MIG_FILE) ? strip(readFileSync(MIG_FILE, "utf8").replace(/--.*$/gm, "")) : "";
+  ok(
+    "projects: the account loses INSERT and keeps the other three",
+    /drop policy if exists projects_insert_own on public\.projects;/.test(MIG) &&
+      /revoke insert on public\.projects from anon, authenticated;/.test(MIG) &&
+      !/revoke[^;]*(select|update|delete)[^;]*on public\.projects/.test(MIG)
+  );
+  ok(
+    "site_versions: the account loses INSERT, UPDATE and DELETE",
+    /revoke insert, update, delete on public\.site_versions from anon, authenticated;/.test(MIG) &&
+      ["insert", "update", "delete"].every((v) => MIG.includes(`drop policy if exists "${v}_own_site_versions" on public.site_versions;`))
+  );
+  const writes = [];
+  for (const f of walk("src")) {
+    const src = read(f);
+    for (const m of src.matchAll(/([\w.]+(?:\(\))?)\s*\.from\(\s*"(projects|site_versions)"\s*\)\s*\.(insert|update|upsert|delete)\(/g)) {
+      writes.push({ file: f, receiver: m[1], table: m[2], verb: m[3], tail: src.slice(m.index, m.index + 600) });
+    }
+  }
+  const creates = writes.filter((w) => w.table === "projects" && w.verb === "insert");
+  ok("the scan found the writes", creates.length >= 2 && writes.filter((w) => w.table === "site_versions").length >= 3, `${writes.length} writes`);
+  // The account still renames and deletes its own projects: those stay on
+  // its own client, where RLS decides.
+  const userWrites = writes.filter((w) => !["admin", "createAdminClient()"].includes(w.receiver) && !(w.table === "projects" && ["update", "delete"].includes(w.verb)));
+  ok(
+    "every create and every history write goes through the admin client",
+    userWrites.length === 0,
+    userWrites.map((w) => `${w.file}: ${w.receiver} ${w.verb} ${w.table}`).join("\n        ")
+  );
+  const unstamped = writes.filter((w) => w.verb === "insert" && !/user_id: user\.id/.test(w.tail.split(/\}\)/)[0]));
+  ok("...each insert stamped with the session's user", unstamped.length === 0, unstamped.map((w) => w.file).join(", "));
+  const historyDeletes = writes.filter((w) => w.table === "site_versions" && w.verb === "delete");
+  ok(
+    "...and the history trim is scoped to the caller",
+    historyDeletes.length >= 1 && historyDeletes.every((w) => /\.eq\("user_id", userId\)/.test(w.tail.split(";")[0])),
+    historyDeletes.map((w) => w.tail.split(";")[0]).join("\n        ")
   );
 }
 

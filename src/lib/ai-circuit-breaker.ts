@@ -31,7 +31,12 @@ const IDENTICAL_CALL_MAX = 10;
 const IDENTICAL_CALL_WINDOW_MINUTES = 15;
 const DEFAULT_MAX_DAILY_AI_CALLS = 5000;
 
-export type CircuitBreakerResult = { allowed: true } | { allowed: false; reason: string };
+// `code` names the case for a screen that translates it (lib/errors/
+// error-codes.ts); `reason` stays the English prose for logs and the
+// routes that still show it.
+export type CircuitBreakerResult =
+  | { allowed: true }
+  | { allowed: false; reason: string; code: "upstreamUnavailable" | "rateLimited" };
 
 export async function checkDailyPlatformCap(): Promise<CircuitBreakerResult> {
   const maxDaily = Number(process.env.MAX_DAILY_AI_CALLS) || DEFAULT_MAX_DAILY_AI_CALLS;
@@ -55,6 +60,7 @@ export async function checkDailyPlatformCap(): Promise<CircuitBreakerResult> {
     return {
       allowed: false,
       reason: "Service temporarily at capacity, please try again later.",
+      code: "upstreamUnavailable",
     };
   }
   return { allowed: true };
@@ -72,6 +78,7 @@ export async function checkUserHourlyCap(userId: string): Promise<CircuitBreaker
     : {
         allowed: false,
         reason: "You've made a lot of AI requests in the last hour — please wait a bit and try again.",
+        code: "rateLimited",
       };
 }
 
@@ -95,6 +102,7 @@ export async function checkIdenticalRequestBreaker(
     : {
         allowed: false,
         reason: "This exact request has been repeated too many times — please wait a few minutes and try again.",
+        code: "rateLimited",
       };
 }
 

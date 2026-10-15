@@ -27,7 +27,6 @@ import { stepLabelKey } from "@/lib/jobs/step-labels";
 import { useHeldStepLabel } from "@/lib/jobs/use-ai-job";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
-import { getErrorMessage } from "@/lib/get-error-message";
 import { startAndWatchJob, watchJob } from "@/lib/jobs/start-and-watch";
 import { markJobConsumed } from "@/lib/jobs/consume";
 import { JobSeen } from "@/components/jobs/job-seen";
@@ -51,8 +50,10 @@ import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 export type { WorkspaceFile, WorkspaceCollection } from "@/lib/files/answer";
 import type { WorkspaceFile, WorkspaceCollection, Answer } from "@/lib/files/answer";
 import { answerFromResult, answerForClipboard, type Citation } from "@/lib/files/answer";
-import { CitedAnswerText, CitedPages, PageView } from "@/components/files/cited-answer";
-import { pagesRead, uniquePages } from "@/lib/files/page-refs";
+import { CitedAnswerText, CitedPages, PageView, usePageLabel } from "@/components/files/cited-answer";
+import { pagesRead, relabelAnswer, uniquePages } from "@/lib/files/page-refs";
+import { useFilesFailureWords } from "@/components/files/failure-words";
+import { uploadRefusal } from "@/lib/files/refusal-words";
 import { startQueuedAutomations } from "@/lib/automations/kick";
 
 /**
@@ -89,6 +90,10 @@ export function FilesWorkspace({
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
+  // Every page label this screen shows, in the reader's language, and what
+  // goes wrong said in it too (components/files/failure-words.ts).
+  const show = usePageLabel();
+  const failures = useFilesFailureWords();
 
   const [files, setFiles] = useState(initialFiles);
   const [collections, setCollections] = useState(initialCollections);
@@ -160,6 +165,11 @@ export function FilesWorkspace({
   type IngestResponse = {
     ok?: boolean;
     error?: string;
+    /** Which refusal it is (lib/files/ingest.ts), and the response's status:
+     *  what the person reads is chosen from these, never `error`. */
+    stage?: string;
+    limitReached?: boolean;
+    status?: number;
     file?: WorkspaceFile;
     /** Automations this file started (lib/automations/file-event.ts). */
     automations?: number;
@@ -167,7 +177,7 @@ export function FilesWorkspace({
 
   function applyIngest(data: IngestResponse, file: File) {
     if (!data.ok || !data.file) {
-      addToast(data.error ?? t("uploadError"), "error");
+      addToast(failures.refused(uploadRefusal(data, data.status ?? 0), file.name), "error");
       return;
     }
     setFiles((current) => [data.file as WorkspaceFile, ...current]);
@@ -176,7 +186,7 @@ export function FilesWorkspace({
     // saying "uploaded" over it is how somebody comes to believe the AI
     // can see a scan that it cannot.
     if (data.file.processing_status === "failed") {
-      addToast(data.file.error ?? t("uploadUnreadable", { name: file.name }), "error");
+      addToast(failures.unreadable(data.file.error, t("uploadUnreadable", { name: file.name })), "error");
     } else {
       addToast(t("uploadSuccess", { name: data.file.filename }));
     }
@@ -240,7 +250,8 @@ export function FilesWorkspace({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path, filename: file.name }),
     });
-    const data = await parseJson(response);
+    const parsed = await parseJson(response);
+    const data = parsed ? { ...parsed, status: response.status } : null;
     const registered = Boolean(data?.ok);
     // THE UPLOAD IS UNDONE IF THE REGISTRATION DOES NOT LAND.
     //
@@ -265,7 +276,7 @@ export function FilesWorkspace({
         /* the object stays; the person still sees the upload error above */
       }
     }
-    return { kind: "done", data: data ?? { ok: false, error: t("uploadError") } };
+    return { kind: "done", data: data ?? { ok: false, status: response.status } };
   }
 
   /** FALLBACK path: the bytes in a multipart body. Kept because it needs
@@ -279,11 +290,8 @@ export function FilesWorkspace({
     body.append("file", file);
     const response = await fetch("/api/files/upload", { method: "POST", body });
     const data = await parseJson(response);
-    if (data) return data;
-    return {
-      ok: false,
-      error: response.status === 413 ? t("tooLargeForTransfer") : t("uploadError"),
-    };
+    // No body is the host's own 413, or worse: uploadRefusal says which.
+    return { ...(data ?? { ok: false }), status: response.status };
   }
 
   async function uploadOne(file: File) {
@@ -320,12 +328,12 @@ export function FilesWorkspace({
       // small files; a large one would die at the host's body limit, so
       // the honest answer there is the storage failure, not a second one.
       if (file.size > ROUTE_BODY_LIMIT) {
-        addToast(direct.message ?? t("uploadError"), "error");
+        addToast(t("uploadError"), "error");
         return;
       }
       applyIngest(await uploadViaRoute(file), file);
-    } catch (err) {
-      addToast(getErrorMessage(err, t("uploadError")), "error");
+    } catch {
+      addToast(t("uploadError"), "error");
     } finally {
       setUploading(null);
     }
@@ -467,7 +475,7 @@ export function FilesWorkspace({
       const response = await fetch(`/api/files/${id}/download`);
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("downloadError"), "error");
+        addToast(t("downloadError"), "error");
         return;
       }
       // A plain navigation, not a fetch: the signed URL is a download,
@@ -479,8 +487,8 @@ export function FilesWorkspace({
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("downloadError")), "error");
+    } catch {
+      addToast(t("downloadError"), "error");
     } finally {
       setBusy(null);
     }
@@ -493,15 +501,15 @@ export function FilesWorkspace({
       const response = await fetch(`/api/files/${id}`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("deleteError"), "error");
+        addToast(t("deleteError"), "error");
         return;
       }
       setFiles((current) => current.filter((f) => f.id !== id));
       setSelected((current) => current.filter((x) => x !== id));
       addToast(t("deleteSuccess"));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("deleteError")), "error");
+    } catch {
+      addToast(t("deleteError"), "error");
     } finally {
       setBusy(null);
     }
@@ -574,7 +582,7 @@ export function FilesWorkspace({
             void markJobConsumed(String(job.id));
           }
         } else if (outcome.code !== "still_running") {
-          addToast(outcome.code === "stalled" ? t("askStalled") : t("askError"), "error");
+          addToast(failures.ask({ code: outcome.code, jobId: String(job.id) }), "error");
         }
       } catch {
         // Nothing in flight is the common answer, and a failed check is
@@ -610,14 +618,7 @@ export function FilesWorkspace({
         { onProgress: (job) => setAskStep(job.stepLabel) }
       );
       if (!outcome.ok) {
-        addToast(
-          outcome.code === "still_running"
-            ? t("askStillRunning")
-            : outcome.code === "stalled"
-              ? t("askStalled")
-              : outcome.error || t("askError"),
-          outcome.code === "still_running" ? "success" : "error"
-        );
+        addToast(failures.ask(outcome), outcome.code === "still_running" ? "success" : "error");
         return;
       }
       const data = outcome.result as Record<string, unknown>;
@@ -627,8 +628,8 @@ export function FilesWorkspace({
       }
       setAnswer(answerFromResult(data, Number(outcome.creditsCharged ?? 0), outcome.jobId ?? null));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("askError")), "error");
+    } catch {
+      addToast(t("askError"), "error");
     } finally {
       setAsking(false);
     }
@@ -646,14 +647,14 @@ export function FilesWorkspace({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("collectionError"), "error");
+        addToast(t("collectionError"), "error");
         return;
       }
       setCollections((current) => [data.collection as WorkspaceCollection, ...current]);
       setNewCollectionName("");
       addToast(t("collectionCreated", { name }));
-    } catch (err) {
-      addToast(getErrorMessage(err, t("collectionError")), "error");
+    } catch {
+      addToast(t("collectionError"), "error");
     } finally {
       setCreatingCollection(false);
     }
@@ -904,7 +905,7 @@ export function FilesWorkspace({
                     {file.processing_status === "failed" && (
                       <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-warning/90">
                         <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
-                        {file.error ?? t("failedHint")}
+                        {failures.unreadable(file.error, t("failedHint"))}
                       </p>
                     )}
                   </div>
@@ -1077,7 +1078,7 @@ export function FilesWorkspace({
                 {openPage?.fileId && <PageView key={`${openPage.fileId}-${openPage.page}`} citation={openPage} onClose={() => setOpenPage(null)} />}
               </>
             ) : (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{answer.text}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{relabelAnswer(answer.text, answer.citations, show)}</p>
             )}
 
             {/* THE ANSWER, ON THE CLIPBOARD.
@@ -1091,7 +1092,7 @@ export function FilesWorkspace({
               <CopyButton
                 data-testid="files-copy-answer"
                 label={t("copyAnswer")}
-                text={() => answerForClipboard(answer)}
+                text={() => answerForClipboard(answer, show)}
               />
             </div>
 
@@ -1111,11 +1112,11 @@ export function FilesWorkspace({
                           data-testid="files-page"
                           className="min-h-[44px] min-w-0 break-words text-start underline decoration-dotted underline-offset-2 hover:text-foreground"
                         >
-                          {citation.filename} — {citation.label}
+                          {citation.filename} — {show(citation.label)}
                         </button>
                       ) : (
                         <span className="min-w-0 break-words">
-                          {citation.filename} — {citation.label}
+                          {citation.filename} — {show(citation.label)}
                         </span>
                       )}
                       {/* Each one on its own, because a citation is what
@@ -1125,7 +1126,7 @@ export function FilesWorkspace({
                         data-testid="files-copy-citation"
                         variant="icon"
                         label={t("copyCitation")}
-                        text={`${citation.filename} — ${citation.label}`}
+                        text={`${citation.filename} — ${show(citation.label)}`}
                       />
                     </li>
                   ))}

@@ -94,7 +94,15 @@ console.log("\n== 4. the route derives BOTH sides from the one predicate ==");
 const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 const route = strip(readFileSync("src/app/api/chat/route.ts", "utf8"));
 check("the route computes memoryActive from chatMemoryActive(...)", /const memoryActive = chatMemoryActive\(/.test(route));
-check("...passing the plan's own limit in", /planLimit: plan\.capabilities\.chatMemoryLimit/.test(route));
+// The plan's own limit — through memoryWindowFor, which gives the owner
+// the most any plan keeps and everyone else exactly their plan's
+// (src/lib/memory/memory-window.ts) — and that one window on both sides.
+check(
+  "...passing the plan's own limit in, as the one window both sides use",
+  /const memoryWindow = memoryWindowFor\(plan\.capabilities\.chatMemoryLimit, isAdminEmail\(user\.email\)\)/.test(route) &&
+    /planLimit: memoryWindow\b/.test(route) &&
+    /loadRecentMemories\(supabase, user\.id, memoryWindow\)/.test(route)
+);
 check("the READ is gated on it", /memoryActive[\s\S]{0,80}loadRecentMemories\(/.test(route));
 check("the WRITE is gated on it", /if \(memoryActive\)[\s\S]{0,120}extractAndStoreMemory\(/.test(route));
 // The old split condition must be gone, or the two can drift apart again.
@@ -104,6 +112,24 @@ check(
   "route.ts still has `if (memoryEnabled)` — the write can run on a plan whose read is capped at 0."
 );
 check("memories still reach the system prompt", /buildMemoryPromptAddition\(memories(, \{ numbered: citeMemories \})?\)/.test(route));
+
+// THE OWNER'S WINDOW, RUN (src/lib/memory/memory-window.ts). Every other
+// plan gate opens to ADMIN_EMAILS; memory did not, so an owner whose own
+// subscription_tier was free remembered nothing — and package 6 did
+// nothing on the account its switch opens to first (2026-10-08,
+// scripts/tests/brand-memory.prodtest.mjs). The test account is NOT the
+// owner and keeps its plan's window: it is there to see what a customer
+// sees.
+{
+  const win = await loadTs("src/lib/memory/memory-window.ts");
+  const most = Math.max(...PLANS.map((p) => p.capabilities.chatMemoryLimit));
+  const limitOf = (slug) => PLANS.find((p) => p.slug === slug).capabilities.chatMemoryLimit;
+  check("the owner's window is the most any plan keeps", win.OWNER_MEMORY_WINDOW === most && most > 0, String(win.OWNER_MEMORY_WINDOW));
+  check("the owner on a free subscription reads and writes that window", win.memoryWindowFor(limitOf("free"), true) === most);
+  check("...and on a plan that keeps more, his plan's", win.memoryWindowFor(most + 5, true) === most + 5);
+  check("anyone else on Free keeps Free's zero — no second model call, nothing written", win.memoryWindowFor(limitOf("free"), false) === 0 && limitOf("free") === 0);
+  check("...and on a paid plan, exactly that plan's window", win.memoryWindowFor(limitOf("growth"), false) === limitOf("growth"));
+}
 
 console.log("\n== 5. in-conversation history is a separate mechanism and still there ==");
 // (γ) of the brief: remembering WITHIN one conversation never went

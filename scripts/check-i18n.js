@@ -48,8 +48,9 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 const LOCALE_ALLOWED = new Set([
   // The one-word tool names on All tools (MASTER 14.1, 2026-10-07).
   // "Trading" is the word the de, fr, es, it and pt trading apps use;
-  // "Site" is the everyday French and Portuguese word for a website, and
-  // "Finances" is French for finances.
+  // "Site" is the everyday French and Portuguese word for a website,
+  // "Finances" is French for finances, and "Image" is French for image
+  // (the Image square, 2026-10-08).
   "de:dashboard.tools.names.trading",
   "fr:dashboard.tools.names.trading",
   "es:dashboard.tools.names.trading",
@@ -58,6 +59,10 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.tools.names.site",
   "pt:dashboard.tools.names.site",
   "fr:dashboard.tools.names.finances",
+  "fr:dashboard.tools.names.image",
+  // "Page" is the French word for a page of a document (the package check
+  // of 2026-10-08: a cited page, «Page 12», in the reader's language).
+  "fr:dashboard.files.pageRefs.page",
   // The kinds of box in an automation (package 30): "Condition" and
   // "Action" are the French words, "Start" is the German one (as on
   // every German start button).

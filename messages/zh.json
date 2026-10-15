@@ -260,6 +260,7 @@
       "team": "把你的套餐分给其他人，每人使用自己的账户。",
       "apps": "记录你正在筹划或已经上线的应用。它不会构建应用。",
       "images": "记录你正在筹划或已经做好的图片。它不会生成图片。",
+      "imageTool": "一段描述生成四张图片；用文字修改其中一张，并以最高分辨率下载。",
       "videos": "记录你正在筹划或已经做好的视频。它不会生成视频。",
       "coding": "编写、解释、修复、转换和测试代码片段。它不运行代码，也不访问代码仓库。",
       "presentations": "描述一份演示并获得幻灯片——PowerPoint 或 PDF，配图来自 Unsplash 或你自己的照片。它不绘制图表。",
@@ -691,6 +692,11 @@
       "failed": "邮件发送失败。请几分钟后重试。",
       "rateLimited": "过去一小时内发送的链接过多。请稍后再试。",
       "signedOut": "使用邮箱和密码登录，系统会发送新链接。"
+    },
+    "splash": {
+      "loading": "正在加载工作区…",
+      "syncing": "正在同步数据…",
+      "ready": "准备就绪。"
     }
   },
   "settings": {
@@ -1410,7 +1416,8 @@
         "building": "正在制作网站… 需要几分钟。",
         "changing": "正在修改网站…",
         "nextChanges": "你现在在对话中写的内容会修改这个网站。",
-        "reopen": "显示网站"
+        "reopen": "显示网站",
+        "failed": "无法制作这个网站。本次制作未收费，请重试。"
       },
       "attach": {
         "label": "附加 PDF 或图片",
@@ -1419,7 +1426,9 @@
         "readyPdf": "就绪",
         "readyImage": "将随消息发送",
         "remove": "移除“{name}”",
-        "unreadable": "在“{name}”中未找到文字。如果是扫描件，请作为图片附加。",
+        "unreadable": "无法读取“{name}”中的文字。如果是扫描件，请作为图片附加；如果设有密码，请先移除密码再重新附加。",
+        "fileLimit": "“{name}”：将超出你的套餐在“文件”中的上限。请在“文件”中删除一个文件，或升级套餐。",
+        "uploadLimit": "过去一小时内上传的文件过多。请稍后再试。",
         "offline": "没有网络连接。请检查网络后重试。",
         "type": "“{name}”：仅支持 PDF、JPG 或 PNG。",
         "pdfTooLarge": "“{name}”：PDF 超过 20 MB。",
@@ -1709,6 +1718,8 @@
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
+      "flaggedBody": "我们的安全审查拦下了这个网站，因此无法按现状发布。",
+      "flaggedDetails": "审查发现了什么",
       "editUnavailable": "网站生成完成后即可提出修改要求。",
       "design": {
         "title": "设计",
@@ -2203,6 +2214,10 @@
       "publishChanges": "发布更改",
       "publishSuccess": "你的网站已上线。",
       "publishError": "无法发布该网站，请重试。",
+      "limitReached": "你已达到套餐的上线网站数量上限。请下线一个网站或升级套餐。",
+      "paidOnly": "发布功能仅在付费套餐中提供。",
+      "tooManyToday": "你今天发布的修改太多了。请明天再试。",
+      "securityBlocked": "安全检查发现了不应上线的内容，因此网站未发布。",
       "unpublish": "下线",
       "unpublishSuccess": "你的网站已不再公开。",
       "unpublishError": "无法将网站下线，请重试。",
@@ -2308,7 +2323,7 @@
         "googleCalendar": {
           "summary": "读取你的日程，让 AI 能回答“我明天有什么安排？”。",
           "sees": "你询问的日期中日程的标题、时间、地点和组织者。从不读取邀请的描述，也不读取主日历以外的日历。",
-          "consent": "AI 将能读取你主日历中的日程来回答你的问题。只在问题需要时读取——从不在后台读取——并且不能创建、更改或删除任何内容。"
+          "consent": "AI 将能读取你主日历中的日程来回答你的问题。只在你的问题或你开启的自动化需要时读取——其他时候从不读取——并且不能创建、更改或删除任何内容。"
         },
         "slack": {
           "summary": "读取应用所在的频道，并让智能体把结果发到那里。",
@@ -2381,8 +2396,17 @@
       "askDisabledNoQuestion": "请输入你的问题以继续。",
       "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
       "failedHint": "未找到可读文本。请上传文字可选中的版本。",
+      "unreadable": {
+        "scan": "这个 PDF 没有文字层：它是扫描件或纯图片，需要先做文字识别（OCR），AI 才能读取。",
+        "encoding": "这个 PDF 里有文字，但它的字体编码无法解码——这是我们这边的限制，不是你的文件有问题。用原来的应用重新保存，或打印成新的 PDF，通常就能读取。",
+        "locked": "这个文件设置了密码。请移除密码后重新上传。",
+        "empty": "这个文件似乎是空的——没有可读取的内容。"
+      },
       "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
       "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
+      "askNoCredits": "点数不足，无法回答这个问题。没有扣除任何点数。",
+      "askRateLimited": "过去一小时内提问太多。请稍后再试——没有扣除任何点数。",
+      "askFailed": "这个问题没有得到回答：AI 服务没有响应。没有扣除任何点数——请稍后再试。",
       "questionLength": "{used, number} / {max, number} 个字符",
       "questionAtLimit": "单个问题已达到 {max, number} 个字符的上限。",
       "readInParts": "你的文档太长，无法一次读完，因此分成 {parts} 部分阅读，再把答案合并。",
@@ -2394,6 +2418,9 @@
       "uploadStorageMissing": "此部署尚未配置文件存储 — 缺少 'user-files' 存储桶。管理员需要运行修复 SQL（System Health → File storage）。",
       "uploadStoragePolicy": "存储拒绝了上传 — 缺少存储桶的访问策略。管理员需要运行修复 SQL（System Health → File storage）。",
       "tooLargeForTransfer": "托管平台在上传到达应用之前拒绝了它。请稍后再试。",
+      "uploadFileCap": "你已达到当前套餐包含的文件数量。请删除一个文件或升级套餐。",
+      "uploadStorageCap": "这个文件超出了你套餐的存储空间。请删除一些文件或升级套餐。",
+      "uploadRateLimited": "过去一小时内上传太多。请稍后再试。",
       "sharedStored": "已从共享添加 {count} 个文件。",
       "sharedFailed": "有 {count} 个文件无法添加。",
       "sharedReason": "原因：{reason}",
@@ -2402,6 +2429,8 @@
       "openedFromDevice": "已从你的设备打开 {count} 个文件。",
       "pagesPartRead": "读取 {total} 页中的前 {read} 页",
       "pageRefs": {
+        "page": "第 {n} 页",
+        "rows": "行，第 {n} 部分",
         "open": "打开：{name}，{label}",
         "close": "关闭页面",
         "loading": "正在打开页面…",
@@ -2428,6 +2457,19 @@
       "start": "开始研究",
       "notNow": "暂不",
       "runError": "报告无法完成。",
+      "refused": {
+        "noCredits": "点数不足，无法生成研究报告。没有扣除任何点数。",
+        "rateLimited": "短时间内的报告太多。请稍后再试。",
+        "unavailable": "AI 服务没有响应。没有扣除任何点数——请稍后再试。"
+      },
+      "failed": {
+        "noFindings": "搜索没有找到与这个主题相关的有用内容。",
+        "unavailable": "AI 服务没有回答研究问题。请稍后重新运行。",
+        "notWritten": "无法根据找到的内容写出报告。",
+        "interrupted": "报告在完成前停止了。没有扣除点数——请重新运行。",
+        "notStarted": "报告没有开始。",
+        "noCredits": "点数不足，报告无法运行。"
+      },
       "finished": "你的报告已就绪",
       "inProgress": "正在搜索并撰写…",
       "statusPending": "已规划",
@@ -2552,6 +2594,23 @@
           "staff": "你和测试账户",
           "everyone": "所有人"
         }
+      },
+      "alerts": {
+        "title": "发给你的提醒",
+        "hint": "生产环境错误、成本骤增、利润率低于下限以及大量登录失败，都会通过邮件发送到 ADMIN_EMAILS。",
+        "recipients": "收件人：来自 ADMIN_EMAILS 的 {count, plural, other {# 个地址}}",
+        "recipientsNone": "收件人：无 — 未设置 ADMIN_EMAILS",
+        "mailerOk": "发送：已设置，使用你自己的地址（RESEND_API_KEY、RESEND_FROM_EMAIL）",
+        "mailerMissing": "发送：未设置 RESEND_API_KEY — 不会发出任何提醒",
+        "mailerTestSender": "发送：使用 Resend 的测试地址，只能送达你 Resend 账户的邮箱。请把 RESEND_FROM_EMAIL 设为你自己域名下的地址。",
+        "send": "发送测试提醒",
+        "sending": "正在发送…",
+        "sent": "已发送到 {count, plural, other {# 个地址}}。如果几分钟内没有收到，也请查看垃圾邮件。",
+        "refused": "未发送。Resend 的回复：",
+        "notConfigured": "未发送：未设置 RESEND_API_KEY。",
+        "noRecipients": "未发送：未设置 ADMIN_EMAILS。",
+        "rateLimited": "本小时测试次数过多，请稍后再试。",
+        "failed": "未发送，请重试。"
       }
     },
     "ideas": {
@@ -2974,8 +3033,31 @@
         "finances": "财务",
         "sales": "销售",
         "trading": "交易",
+        "image": "图片",
+        "connections": "连接",
         "document": "文档",
         "games": "游戏"
+      },
+      "lines": {
+        "site": "根据描述生成网站。",
+        "slides": "根据描述生成演示文稿。",
+        "posts": "每个平台一条帖子。",
+        "research": "任何主题的带来源报告。",
+        "analyze": "从数据文件得出结论。",
+        "files": "就你的文档提问。",
+        "automations": "自动运行的任务。",
+        "projects": "带目标的文件夹。",
+        "goals": "把目标拆成步骤。",
+        "meetings": "从录音得到摘要和行动项。",
+        "library": "你做过的一切，集中一处。",
+        "memory": "Ionexa 记得的关于你的事。",
+        "finances": "记录收入和支出。",
+        "sales": "联系人、跟进和下一步。",
+        "trading": "你的交易记录。",
+        "image": "一段描述生成四张图片。",
+        "connections": "一键连接你的服务。",
+        "document": "根据描述生成文档。",
+        "games": "根据描述生成游戏。"
       }
     },
     "home": {
@@ -3013,7 +3095,10 @@
         "questions": "开始之前有几个问题。请在输入框中回答，或直接继续：",
         "skip": "直接继续",
         "new": "新建网站",
-        "design": "设计"
+        "design": "设计",
+        "held": "安全审查拦下了这次修改，网站保持原样。",
+        "busy": "这个网站正在进行另一项修改。请等它完成后再说一次。",
+        "offTopic": "这里用来制作网站。告诉我你想要什么样的网站：为哪个企业或用途、包含哪些板块、什么风格。"
       },
       "box": {
         "only": "只改：{name}",

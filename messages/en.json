@@ -260,6 +260,7 @@
       "team": "Give people your plan, each on their own account.",
       "apps": "Keep track of apps you are planning or have already shipped. It does not build them.",
       "images": "Keep track of images you are planning or have already made. It does not generate them.",
+      "imageTool": "Four pictures from one description; change one in words and download it at full resolution.",
       "videos": "Keep track of videos you are planning or have already made. It does not generate them.",
       "coding": "Write, explain, fix, convert and test snippets of code. It does not run code or open a repository.",
       "presentations": "Describe a deck and get the slides — PowerPoint or PDF, with photos from Unsplash or your own. It draws no charts.",
@@ -691,6 +692,11 @@
       "failed": "The email could not be sent. Try again in a few minutes.",
       "rateLimited": "Too many links in the last hour. Try again later.",
       "signedOut": "Sign in with your email and password, and a new link will be sent."
+    },
+    "splash": {
+      "loading": "Loading workspace...",
+      "syncing": "Syncing data...",
+      "ready": "Ready."
     }
   },
   "settings": {
@@ -1410,7 +1416,8 @@
         "building": "Building the site… it takes a few minutes.",
         "changing": "Changing the site…",
         "nextChanges": "Anything you write in the conversation now changes this site.",
-        "reopen": "Show the site"
+        "reopen": "Show the site",
+        "failed": "The site could not be made. Making it was not charged; try again."
       },
       "attach": {
         "label": "Attach a PDF or image",
@@ -1419,7 +1426,9 @@
         "readyPdf": "Ready",
         "readyImage": "Goes with the message",
         "remove": "Remove “{name}”",
-        "unreadable": "No text found in “{name}”. If it is a scan, attach it as an image.",
+        "unreadable": "Could not read the text in “{name}”. If it is a scan, attach it as an image; if it has a password, remove it and attach it again.",
+        "fileLimit": "“{name}”: this would go over your plan’s limit in Files. Delete a file in Files or upgrade your plan.",
+        "uploadLimit": "Too many file uploads in the last hour. Try again in a little while.",
         "offline": "No connection. Check the network and try again.",
         "type": "“{name}”: only PDF, JPG or PNG.",
         "pdfTooLarge": "“{name}”: the PDF is over 20 MB.",
@@ -1709,6 +1718,8 @@
       "statusCompleted": "Ready",
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
+      "flaggedBody": "Our safety review held this site, so it can’t be published as it is.",
+      "flaggedDetails": "What the review found",
       "editUnavailable": "You can request changes once this website has finished generating.",
       "design": {
         "title": "Design",
@@ -2203,6 +2214,10 @@
       "publishChanges": "Publish changes",
       "publishSuccess": "Your site is live.",
       "publishError": "Could not publish that site. Please try again.",
+      "limitReached": "You have reached your plan’s limit of live sites. Unpublish one or upgrade your plan.",
+      "paidOnly": "Publishing is available on paid plans.",
+      "tooManyToday": "You have published a lot of changes today. Try again tomorrow.",
+      "securityBlocked": "The security check found something that should not go live, so the site was not published.",
       "unpublish": "Unpublish",
       "unpublishSuccess": "Your site is no longer public.",
       "unpublishError": "Could not unpublish that site. Please try again.",
@@ -2308,7 +2323,7 @@
         "googleCalendar": {
           "summary": "Read your meetings so the AI can answer “what do I have tomorrow?”.",
           "sees": "The title, time, place and organiser of meetings on the days you ask about. Never an invitation's description, never any calendar but your main one.",
-          "consent": "The AI will be able to read the events in your main calendar to answer the questions you ask. It reads only when a question needs it — never in the background — and it can't create, change or delete anything."
+          "consent": "The AI will be able to read the events in your main calendar to answer the questions you ask. It reads only when one of your questions, or an automation you switched on, needs it — nothing else — and it can't create, change or delete anything."
         },
         "slack": {
           "summary": "Read channels the app is in, and let agents post results there.",
@@ -2381,8 +2396,17 @@
       "askDisabledNoQuestion": "Type your question to continue.",
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
+      "unreadable": {
+        "scan": "This PDF has no text layer: it is a scan or an image-only export, and it would need OCR before the AI can read it.",
+        "encoding": "This PDF has text in it, but its font encoding could not be decoded — a limitation on our side, not a problem with your file. Re-saving it from the original application, or printing it to a new PDF, usually produces one that can be read.",
+        "locked": "This file is password-protected. Remove the password and upload it again.",
+        "empty": "This file appears to be empty — there was nothing in it to read."
+      },
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
       "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
+      "askNoCredits": "Not enough credits for this question. Nothing was charged.",
+      "askRateLimited": "Too many questions in the last hour. Try again shortly — nothing was charged.",
+      "askFailed": "The question was not answered: the AI service did not respond. Nothing was charged — try again in a moment.",
       "questionLength": "{used, number} of {max, number} characters",
       "questionAtLimit": "You've reached the {max, number}-character limit for one question.",
       "readInParts": "Your documents were too long to read in one go, so they were read in {parts} parts and the answers combined.",
@@ -2394,6 +2418,9 @@
       "uploadStorageMissing": "File storage is not set up on this deployment — the 'user-files' bucket is missing. An administrator must run the storage repair SQL (System Health → File storage).",
       "uploadStoragePolicy": "File storage refused the upload — the bucket's access policies are missing. An administrator must run the storage repair SQL (System Health → File storage).",
       "tooLargeForTransfer": "The hosting platform refused the upload before it reached the app. Try again in a moment.",
+      "uploadFileCap": "You have reached the number of files your plan includes. Delete one or upgrade.",
+      "uploadStorageCap": "That file does not fit in your plan's storage. Delete some files or upgrade.",
+      "uploadRateLimited": "Too many uploads in the last hour. Try again shortly.",
       "sharedStored": "{count, plural, one {# file} other {# files}} added from the share.",
       "sharedFailed": "{count, plural, one {# file} other {# files}} could not be added.",
       "sharedReason": "Why: {reason}",
@@ -2402,6 +2429,8 @@
       "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device.",
       "pagesPartRead": "First {read} of {total} pages are read",
       "pageRefs": {
+        "page": "Page {n}",
+        "rows": "Rows {n}",
         "open": "Open: {name}, {label}",
         "close": "Close the page",
         "loading": "Opening the page…",
@@ -2428,6 +2457,19 @@
       "start": "Start the research",
       "notNow": "Not now",
       "runError": "The report could not be completed.",
+      "refused": {
+        "noCredits": "Not enough credits for a research report. Nothing was charged.",
+        "rateLimited": "Too many reports in a short time. Try again shortly.",
+        "unavailable": "The AI service did not respond. Nothing was charged — try again in a moment."
+      },
+      "failed": {
+        "noFindings": "The searches did not find anything usable on this topic.",
+        "unavailable": "The AI service did not answer the research questions. Run it again in a moment.",
+        "notWritten": "The report could not be written from what was found.",
+        "interrupted": "The report stopped before it finished. No credits were charged — run it again.",
+        "notStarted": "The report did not start.",
+        "noCredits": "There were not enough credits to run the report."
+      },
       "finished": "Your report is ready",
       "inProgress": "Searching and writing…",
       "statusPending": "Planned",
@@ -2552,6 +2594,23 @@
           "staff": "You and the test account",
           "everyone": "Everyone"
         }
+      },
+      "alerts": {
+        "title": "Alerts to you",
+        "hint": "Production errors, a sudden cost rise, a margin below the floor and a wave of failed sign-ins are emailed to ADMIN_EMAILS.",
+        "recipients": "Recipients: {count, plural, one {# address} other {# addresses}} from ADMIN_EMAILS",
+        "recipientsNone": "Recipients: nobody — ADMIN_EMAILS is not set",
+        "mailerOk": "Sending: set up, from your own address (RESEND_API_KEY, RESEND_FROM_EMAIL)",
+        "mailerMissing": "Sending: RESEND_API_KEY is not set — no alert leaves",
+        "mailerTestSender": "Sending: from Resend’s test address, which only reaches the email of your Resend account. Set RESEND_FROM_EMAIL to an address on your own domain.",
+        "send": "Send a test alert",
+        "sending": "Sending…",
+        "sent": "Sent to {count, plural, one {# address} other {# addresses}}. If it has not arrived in a few minutes, look in spam too.",
+        "refused": "Not sent. Resend answered:",
+        "notConfigured": "Not sent: RESEND_API_KEY is not set.",
+        "noRecipients": "Not sent: ADMIN_EMAILS is not set.",
+        "rateLimited": "Too many tests this hour. Try again later.",
+        "failed": "Not sent. Try again."
       }
     },
     "ideas": {
@@ -2974,8 +3033,31 @@
         "finances": "Finances",
         "sales": "Sales",
         "trading": "Trading",
+        "image": "Image",
+        "connections": "Connections",
         "document": "Document",
         "games": "Games"
+      },
+      "lines": {
+        "site": "A website from a description.",
+        "slides": "A presentation from a description.",
+        "posts": "One post for each platform.",
+        "research": "A sourced report on any topic.",
+        "analyze": "Findings from a data file.",
+        "files": "Ask about your documents.",
+        "automations": "Tasks that run on their own.",
+        "projects": "A folder with a goal.",
+        "goals": "A goal, broken into steps.",
+        "meetings": "Summary and actions from a recording.",
+        "library": "Everything you made and did, in one place.",
+        "memory": "What Ionexa remembers about you.",
+        "finances": "Log income and expenses.",
+        "sales": "Contacts, outreach and next steps.",
+        "trading": "A log of your trades.",
+        "image": "Four pictures from one description.",
+        "connections": "Connect your services in one press.",
+        "document": "A document from a description.",
+        "games": "A game from a description."
       }
     },
     "home": {
@@ -3013,7 +3095,10 @@
         "questions": "Before I start, a few questions. Answer them in the field, or go on without:",
         "skip": "Go on without",
         "new": "New site",
-        "design": "Design"
+        "design": "Design",
+        "held": "Our safety review held this change back, so the site is as it was.",
+        "busy": "A change to this site is already being made. Wait for it to finish, then say it again.",
+        "offTopic": "Here I make websites. Tell me what site you want: for which business or purpose, which sections, what style."
       },
       "box": {
         "only": "Changing only: {name}",

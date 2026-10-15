@@ -171,7 +171,9 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     // The new version records what was actually served, pages included —
     // otherwise rolling back a rollback would hit the same defect one
     // level down.
-    const { error: versionError } = await supabase.from("site_versions").insert({
+    // The server's write, as in the publish route: the account holds no
+    // write on site_versions (20261023100000_projects_site_versions_server_written.sql).
+    const { error: versionError } = await createAdminClient().from("site_versions").insert({
       published_site_id: publishedSiteId,
       user_id: user.id,
       html_content: html,

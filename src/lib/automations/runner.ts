@@ -18,6 +18,7 @@ import { getPurchasedPackCreditPriceEur, hasEnoughCredits } from "@/lib/billing/
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
+import { providersOpenTo } from "@/lib/integrations/switches";
 import { readFlow, type ActionBox, type Box, type ReadBox } from "@/lib/automations/boxes";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
 import { periodFor, readAiAnswer, textToDocumentHtml, type AiOutcome, type Resume } from "@/lib/automations/answers";
@@ -86,7 +87,12 @@ export const MAX_OUTPUT_CHARS = 8000;
 async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text: string; count: number } | { ok: false; note: "not_connected" | "no_file" | "failed" }> {
   const admin = createAdminClient();
   if (box.source.startsWith("calendar_")) {
-    const result = await searchUserData({ userId: ctx.user.id, source: "calendar", query: "*", limit: 10, period: periodFor(box.source, ctx.flow.time_zone), trigger: "agent" });
+    // THE SWITCH THAT TAKES THE CALENDAR OFF THE PAGE STOPS THIS READ TOO,
+    // as it stops Chat's (lib/integrations/switches.ts): an automation
+    // switched on before "connections" was closed reads nothing after it.
+    if (!(await providersOpenTo(ctx.user)).has("google_calendar")) return { ok: false, note: "not_connected" };
+    // The days are the person's: the automation's own zone, midnight to midnight.
+    const result = await searchUserData({ userId: ctx.user.id, source: "calendar", query: "*", limit: 10, period: { ...periodFor(box.source, ctx.flow.time_zone), timeZone: ctx.flow.time_zone }, trigger: "agent" });
     if (!result.ok) return { ok: false, note: result.reason === "not_connected" || result.reason === "revoked" || result.reason === "expired" ? "not_connected" : "failed" };
     return { ok: true, text: result.items.length ? formatItemsForModel(result.items) : "", count: result.items.length };
   }

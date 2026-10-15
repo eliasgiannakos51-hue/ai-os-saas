@@ -15,15 +15,22 @@
  *      of the open page, undo, the whole-site download, the notes, the
  *      address to publish at (PublishControl).
  *   6. The words, in ten languages.
+ *   7. FAILURES IN THE READER'S LANGUAGE: out of credits, a provider down,
+ *      a change held back or still running, a site that was not made, a
+ *      brief that is not a website, a publish the plan refuses —
+ *      said from a status, a code and the row's notes, never from the
+ *      server's English (found 2026-10-08: a Greek screen read «Not enough
+ *      credits (you have: 0, need: 15)» and the provider's own JSON).
  *
- * The same in a browser: scripts/tests/site-pages.prodtest.mjs. The archive
- * opened by Python's zipfile: scripts/tests/site-pages.itest.mjs.
+ * The same in a browser: scripts/tests/site-pages.prodtest.mjs, and through
+ * the real routes with every edge: scripts/tests/site-pages-edges.prodtest.mjs.
+ * The archive opened by Python's zipfile: scripts/tests/site-pages.itest.mjs.
  *
  * Run: node scripts/tests/site-pages.test.mjs
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { crc32 as nodeCrc32 } from "node:zlib";
-import { loadTs } from "./load-ts.mjs";
+import { loadTs, loadTsLinked } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
@@ -193,6 +200,95 @@ for (const file of LOCALES) {
   const empty = KEYS.filter((k) => typeof p[k] !== "string" || !p[k].trim());
   const short = m.websiteBuilder?.notes?.pagesShort ?? "";
   check(`${file}: the words (${KEYS.length}), and the note with both numbers`, empty.length === 0 && /\{asked\}/.test(short) && /\{made\}/.test(short), empty.join(", "));
+}
+// A change held back or still running, in every language and not English
+// in any other (scripts/check-i18n.js holds the copy rule for the rest).
+const enSite = JSON.parse(readFileSync("messages/en.json", "utf8")).dashboard.toolShell.site;
+for (const file of LOCALES) {
+  const site = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.toolShell?.site ?? {};
+  const own = ["held", "busy", "offTopic"].every((k) => typeof site[k] === "string" && site[k].trim() && (file === "en.json" || site[k] !== enSite[k]));
+  check(`${file}: a change held back, one still running, and a brief that is not a website, in its own words`, own, JSON.stringify({ held: site.held, busy: site.busy, offTopic: site.offTopic }));
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 7. failures in the reader's language ==");
+// ---------------------------------------------------------------------
+check("a refusal to make a site is said through the shared error sentences", /if \(outcome\.kind === "refused"\) \{\s*say\(\{ role: "tool", text: describe\(outcome\.error\)\.text \}\);/.test(shell));
+check("...and so is a refused change, after its own four reasons",
+  /outcome\.reason === "held"\s*\?\s*`\$\{tShell\("site\.held"\)\} \$\{tErrors\("credits\.notCharged"\)\}`\s*:\s*outcome\.reason === "busy"\s*\?\s*`\$\{tShell\("site\.busy"\)\} \$\{tErrors\("credits\.notCharged"\)\}`\s*:\s*describe\(outcome\.error\)\.text/.test(shell));
+check("no server sentence reaches the conversation: not error_message, not getErrorMessage", !/\berror_message\b/.test(shell) && !/getErrorMessage/.test(shell));
+check("a site that was not made is said from its status and notes", /say\(\{ role: "tool", text: failedText\(record\) \}\);/.test(shell) && /\{running\(current\) \? t\("generating"\) : current\.status === "flagged" \? t\("flaggedBody"\) : failedText\(current\)\}/.test(shell));
+check("...free only when no whole document was written; a stop says what it cost",
+  /if \(stopped\) return describeNote\(stopped\);\s*const written = looksLikeCompleteHtmlDocument\(record\.html_content \?\? ""\);\s*return `\$\{t\("generateFailed"\)\} \$\{written \? tErrors\("credits\.unverified"\) : tErrors\("credits\.notCharged"\)\}`;/.test(shell));
+check("a refusal carries the route's status and code", /if \(!res\.ok \|\| !data\?\.ok\) return \{ kind: "refused", error: refusal\(res\.status, data, data\?\.error\), \.\.\.routeSaid\(data\) \};/.test(requests));
+check("...a refusal answered 200 is one before any work: short credits, or a limit",
+  /if \(data\.rateLimited\) return \{ kind: "refused", error: refusedBeforeWork\(data\), \.\.\.routeSaid\(data\) \};/.test(requests) && /new ApiError\(short \? 402 : 429, \{/.test(requests) && /const short = data\?\.code === "insufficientCredits";/.test(requests));
+check("...and a change's refusal names a held change and a busy site",
+  /: data\?\.flagged === true\s*\? "held"\s*: data\?\.busy === true\s*\? "busy"/.test(requests) && /const error = res\.ok && data\?\.ok && data\.rateLimited \? refusedBeforeWork\(data\) : refusal\(res\.status, data, data\?\.error \?\? data\?\.message\);/.test(requests));
+// EXECUTED, not read: what Chat's Site pane (components/chat/site-pane.tsx)
+// shows for a refusal — getErrorMessage over the ApiError — with fetch
+// answering as the routes do. With ApiError's default message it read
+// «Request failed with 200» for a change the safety review held back
+// (found 2026-10-09); it is the route's sentence, or the pane's own.
+{
+  const live = await loadTsLinked("src/lib/website-builder/site-requests.ts");
+  const { getErrorMessage } = await loadTs("src/lib/get-error-message.ts");
+  const realFetch = globalThis.fetch;
+  const answer = (status, body) => {
+    globalThis.fetch = async () => new Response(body === null ? "<html>Bad gateway</html>" : JSON.stringify(body), { status });
+  };
+  const OWN = "the pane's own sentence";
+  const seen = {};
+  try {
+    answer(200, { ok: true, edited: false, flagged: true, message: "Held back: X." });
+    const held = await live.requestSiteChange({ websiteId: "w1", changeRequest: "x" });
+    seen.held = [held.reason, getErrorMessage(held.error, OWN)];
+    answer(200, { ok: true, edited: false, busy: true, message: "Busy." });
+    const busy = await live.requestSiteChange({ websiteId: "w1", changeRequest: "x" });
+    seen.busy = [busy.reason, getErrorMessage(busy.error, OWN)];
+    answer(502, null);
+    const proxy = await live.requestSiteChange({ websiteId: "w1", changeRequest: "x" });
+    seen.proxy = [proxy.error.code, getErrorMessage(proxy.error, OWN)];
+    const start = await live.startSiteGeneration({ name: "n", description: "d", skipClarification: true });
+    seen.start = [start.kind, start.kind === "refused" ? getErrorMessage(start.error, OWN) : null];
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  check("Chat's Site pane says a refusal in the route's sentence or its own, never «Request failed with …»",
+    JSON.stringify(seen) === JSON.stringify({ held: ["held", "Held back: X."], busy: ["busy", "Busy."], proxy: ["upstreamUnavailable", OWN], start: ["refused", OWN] }),
+    JSON.stringify(seen));
+}
+const generateRoute = code("src/app/api/websites/generate/route.ts");
+{
+  // EVERY refusal for credits in the route, not a count of them: a third
+  // arrived (the classifier's own check, package 36's, 2026-10-08) with no
+  // code, and the Site said it as a limit.
+  const said = (generateRoute.match(/insufficientCreditsMessage\(/g) ?? []).length;
+  const coded = (generateRoute.match(/rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(/g) ?? []).length;
+  check(`making a site: every credit refusal carries the code (${coded} of ${said})`, said >= 3 && coded === said);
+}
+const editRoute = code("src/app/api/websites/edit/route.ts");
+check("changing a site: both credit refusals carry the code",
+  /rateLimited: true,\s*code: "insufficientCredits",\s*message: insufficientCreditsMessage\(check\.remaining, estimate\.reserveCredits\)/.test(editRoute) &&
+    /\.\.\.\(reservation\.reason === "insufficient" \? \{ code: "insufficientCredits" \} : \{\}\)/.test(editRoute));
+check("...a site already being changed says so", /edited: false,\s*busy: true,/.test(editRoute));
+check("a brief that is not a website is said in the reader's words, not the classifier's",
+  /say\(\{ role: "tool", text: outcome\.offTopic \? tShell\("site\.offTopic"\) : t\("generateFailed"\) \}\);/.test(shell) &&
+    /offTopic: data\.offTopic === true/.test(requests) && /generated: false, offTopic: true, message: classification\.message/.test(generateRoute));
+check("...a provider failure is named, and says the hold went back", /code: "upstreamUnavailable",\s*\.\.\.\(reservationId \? \{ creditsRefunded: true \} : \{\}\),/.test(editRoute));
+const publishControl = code("src/components/publishing/publish-control.tsx");
+const liveList = code("src/components/publishing/published-sites-list.tsx");
+const REFUSAL = /if \(data\?\.limitReached === true\) return t\("limitReached"\);\s*if \(data\?\.upgradeRequired === true\) return t\("paidOnly"\);\s*if \(data\?\.securityBlocked === true\) return t\("securityBlocked"\);\s*if \(status === 429\) return t\("tooManyToday"\);/;
+check("a refused publish is said from what the route names: the plan's limit, paid plans only, the security scan, today's limit",
+  REFUSAL.test(publishControl) && /addToast\(refusalText\(response\.status, data\), "error"\);/.test(publishControl) &&
+    REFUSAL.test(liveList) && /addToast\(refusalText\(response\.status, data\), "error"\);/.test(liveList));
+check("...and no publishing control shows the route's own sentence", ![publishControl, liveList].some((src) => /data\??\.error\b|getErrorMessage/.test(src)));
+const PUBLISH_KEYS = ["limitReached", "paidOnly", "tooManyToday", "securityBlocked"];
+const enPublishing = JSON.parse(readFileSync("messages/en.json", "utf8")).dashboard.publishing;
+for (const file of LOCALES) {
+  const pub = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.publishing ?? {};
+  const missing = PUBLISH_KEYS.filter((k) => typeof pub[k] !== "string" || !pub[k].trim() || (file !== "en.json" && pub[k] === enPublishing[k]));
+  check(`${file}: a refused publish in its own words (${PUBLISH_KEYS.length})`, missing.length === 0, missing.join(", "));
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

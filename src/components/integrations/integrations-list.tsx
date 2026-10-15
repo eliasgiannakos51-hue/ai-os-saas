@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Plug, Link2, Unlink, ShieldCheck, SearchX, Eye } from "lucide-react";
@@ -297,10 +297,28 @@ function ConsentPanel({
 }) {
   const t = useTranslations("dashboard.integrations");
   const provider = PROVIDERS.find((p) => p.id === providerId)!;
+  // THE PRESS SHOWS ITS ANSWER. The panel is drawn under the last card,
+  // below the fold on a phone and on a 1440x900 desktop alike (measured
+  // 2026-10-08: 1146px down a 900px screen, 1310px down an 844px phone),
+  // so the press that opened it seemed to do nothing. It is brought into
+  // view, and focus moves to it so a keyboard or a screen reader arrives
+  // where the next step is
+  // (scripts/tests/connections-automations-edges.prodtest.mjs).
+  const panelRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    panelRef.current?.scrollIntoView({ block: "center" });
+    panelRef.current?.focus({ preventScroll: true });
+  }, [providerId]);
 
   return (
-    <section className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+    <section
+      ref={panelRef}
+      tabIndex={-1}
+      aria-labelledby="integration-consent-title"
+      data-testid="integration-consent"
+      className="space-y-3 rounded-card border border-foreground/30 bg-foreground/[0.04] p-4 outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
+    >
+      <h2 id="integration-consent-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <ShieldCheck className="h-4 w-4 text-foreground" aria-hidden="true" />
         {t("consentTitle", { name: provider.name })}
       </h2>

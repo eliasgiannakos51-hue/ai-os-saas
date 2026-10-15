@@ -15,7 +15,6 @@ import { useToast } from "@/components/toast/toast-context";
 import { BadgeRemoval } from "@/components/publishing/badge-removal";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTime, formatNumber } from "@/lib/format-number";
-import { getErrorMessage } from "@/lib/get-error-message";
 import { matchesSearch } from "@/lib/text/search-match";
 
 export type PublishedSiteRow = {
@@ -93,6 +92,18 @@ export function PublishedSitesList({
     addToast(t("copyFailed"), "error");
   }
 
+  // A REFUSAL, IN THE READER'S LANGUAGE: the route's `error` is English
+  // for logs and a curl, so the case is read from what it names — the same
+  // reading as components/publishing/publish-control.tsx. Literal keys, so
+  // the message slicer can bound them (lib/i18n/message-slices.ts).
+  function refusalText(status: number, data: { limitReached?: unknown; upgradeRequired?: unknown; securityBlocked?: unknown } | null): string {
+    if (data?.limitReached === true) return t("limitReached");
+    if (data?.upgradeRequired === true) return t("paidOnly");
+    if (data?.securityBlocked === true) return t("securityBlocked");
+    if (status === 429) return t("tooManyToday");
+    return t("publishError");
+  }
+
   async function unpublish(site: PublishedSiteRow) {
     if (!window.confirm(t("confirmUnpublish"))) return;
     setBusyId(site.id);
@@ -100,13 +111,13 @@ export function PublishedSitesList({
       const response = await fetch(`/api/websites/${site.website_id}/publish`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("unpublishError"), "error");
+        addToast(t("unpublishError"), "error");
         return;
       }
       addToast(t("unpublishSuccess"));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("unpublishError")), "error");
+    } catch {
+      addToast(t("unpublishError"), "error");
     } finally {
       setBusyId(null);
     }
@@ -120,15 +131,15 @@ export function PublishedSitesList({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subdomain: site.subdomain }),
       });
-      const data = await response.json();
-      if (!data.ok) {
-        addToast(data.error ?? t("publishError"), "error");
+      const data = await response.json().catch(() => null);
+      if (!data?.ok) {
+        addToast(refusalText(response.status, data), "error");
         return;
       }
       addToast(t("publishSuccess"));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("publishError")), "error");
+    } catch {
+      addToast(t("publishError"), "error");
     } finally {
       setBusyId(null);
     }
@@ -145,13 +156,13 @@ export function PublishedSitesList({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("rollbackError"), "error");
+        addToast(t("rollbackError"), "error");
         return;
       }
       addToast(t("rollbackSuccess", { number: version.version_number }));
       router.refresh();
-    } catch (err) {
-      addToast(getErrorMessage(err, t("rollbackError")), "error");
+    } catch {
+      addToast(t("rollbackError"), "error");
     } finally {
       setBusyId(null);
     }

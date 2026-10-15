@@ -65,7 +65,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   if (on) {
     const verdict = readFlow(flow.boxes);
     if (!verdict.ok) return refuse("bad_boxes", 409, { reason: verdict.reason });
-    const missing = await missingConnections(user.id, verdict.boxes);
+    const missing = await missingConnections(user, verdict.boxes);
     if (missing.length > 0) return refuse("needs_connection", 409, { missing });
     const { count, error: countError } = await supabase
       .from("automation_flows")

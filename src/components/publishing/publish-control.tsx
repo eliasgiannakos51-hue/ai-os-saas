@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { Globe, Loader2, Check, ExternalLink, EyeOff, X, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { CopyButton } from "@/components/ui/copy-button";
-import { getErrorMessage } from "@/lib/get-error-message";
 import {
   validateSubdomain,
   suggestSubdomain,
@@ -172,6 +171,22 @@ export function PublishControl({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // A REFUSED PUBLISH, IN THE READER'S LANGUAGE. The route's `error` is
+  // English, for logs and a curl (api/websites/[id]/publish); the case is
+  // read from what the route names. Shown as it came, a Greek screen at the
+  // plan's limit read «You've reached your plan's limit of 5 published
+  // sites — unpublish one or upgrade.» (found 2026-10-08 by
+  // scripts/tests/site-pages-edges.prodtest.mjs). Literal keys, so the
+  // message slicer can bound them (lib/i18n/message-slices.ts).
+  function refusalText(status: number, data: { reason?: unknown; limitReached?: unknown; upgradeRequired?: unknown; securityBlocked?: unknown } | null): string {
+    if (data?.limitReached === true) return t("limitReached");
+    if (data?.upgradeRequired === true) return t("paidOnly");
+    if (data?.securityBlocked === true) return t("securityBlocked");
+    if (status === 429) return t("tooManyToday");
+    if (typeof data?.reason === "string" && REASON_KEY[data.reason]) return t(REASON_KEY[data.reason]);
+    return t("publishError");
+  }
+
   async function publish() {
     if (!check.ok) return;
     setBusy(true);
@@ -181,18 +196,18 @@ export function PublishControl({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subdomain: check.subdomain }),
       });
-      const data = await response.json();
-      if (!data.ok) {
+      const data = await response.json().catch(() => null);
+      if (!data?.ok) {
         // "Taken" is the one failure the user can fix right here, so it
         // belongs on the field rather than in a toast that slides away
         // while they are still looking at the input. Recording the value
         // it applies to re-disables the button, so the same address cannot
         // simply be submitted again.
-        if (data.reason === "taken") {
+        if (data?.reason === "taken") {
           setTakenMessage({ subdomain: check.subdomain });
           return;
         }
-        addToast(data.error ?? t("publishError"), "error");
+        addToast(refusalText(response.status, data), "error");
         return;
       }
       setTakenMessage(null);
@@ -205,8 +220,8 @@ export function PublishControl({
       });
       setOpen(false);
       addToast(t("publishSuccess"));
-    } catch (err) {
-      addToast(getErrorMessage(err, t("publishError")), "error");
+    } catch {
+      addToast(t("publishError"), "error");
     } finally {
       setBusy(false);
     }
@@ -219,13 +234,13 @@ export function PublishControl({
       const response = await fetch(`/api/websites/${websiteId}/publish`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("unpublishError"), "error");
+        addToast(t("unpublishError"), "error");
         return;
       }
       setSite(site ? { ...site, status: "unpublished" } : null);
       addToast(t("unpublishSuccess"));
-    } catch (err) {
-      addToast(getErrorMessage(err, t("unpublishError")), "error");
+    } catch {
+      addToast(t("unpublishError"), "error");
     } finally {
       setBusy(false);
     }

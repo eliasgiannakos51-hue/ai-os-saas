@@ -37,6 +37,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# database copies from `npm run db:backup` — personal data, never committed
+/backups/
+
 # vercel
 .vercel
 

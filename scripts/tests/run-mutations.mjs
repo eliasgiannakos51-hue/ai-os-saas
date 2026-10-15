@@ -135,7 +135,18 @@ if (suites.length === 0) {
 // 247 -> 248 on 2026-10-07: first-task (MASTER 16, package 39).
 // 248 -> 250 on 2026-10-07: owner-manual and acceptance (MASTER 16,
 // package 40).
-const FLOOR = 261;
+// 250 -> 261 on 2026-10-09, when the checks branch was stacked on
+// packages 13-29: slides-charts, document-writer, posts-images,
+// analysis-numbers, meeting-goal, finance-sales, translate,
+// voice-conversation, games (MASTER 16), owner-alerts and
+// plan-limit-writes (the 17-package check).
+// 261 -> 262 on 2026-10-09: erase-storage (#273, account deletion).
+// 262 -> 263 on 2026-10-15, merging main after #285: nightly-browser came
+// from there, which had raised the same line to 261 on a tree without
+// these twelve. NEITHER SIDE'S NUMBER IS THE MERGED TREE'S — this is
+// counted from scripts/tests/*.mutation.mjs after the merge, which is
+// the only way a conflict in a tally can be resolved.
+const FLOOR = 263;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

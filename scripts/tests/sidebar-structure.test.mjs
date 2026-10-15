@@ -598,7 +598,11 @@ ok("SETTINGS_GROUP is declared apart from MAIN_SIDEBAR_GROUPS",
   /export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig\[\] = \[/.test(navSrc));
 // The page renders components/tools/tools-grid.tsx, and that is where the
 // blocks are assembled: the tools in the four groups of
-// lib/nav/all-tools.ts, looked up among the main groups, and nothing else.
+// lib/nav/all-tools.ts, looked up among the main groups. The one other
+// lookup, among every group, is for SWITCHED_SQUARES in that same file
+// and only while each one's switch is on (Integrations, as Connections,
+// is a row of the Settings group); all-tools.test.mjs §0e holds it. The
+// Settings block itself is never drawn.
 const toolsSrc = stripComments(readFileSync("src/components/tools/tools-grid.tsx", "utf8"));
 ok("...and All tools draws the main groups' tools only, not the Settings block",
   toolsSrc.includes("sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner)") && !toolsSrc.includes("SETTINGS_GROUP") &&

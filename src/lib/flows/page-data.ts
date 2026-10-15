@@ -6,6 +6,8 @@ import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/bill
 import { isFeatureOn } from "@/lib/flags/flags";
 import { loadMemories } from "@/lib/memory/store";
 import { readBrand } from "@/lib/memory/brand";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { MAX_FLOW_SAID, type FlowKind } from "@/lib/flows/plan";
 import { flowPrices, type FlowPrices } from "@/lib/flows/flow-pricing";
 import { flowAvailability } from "@/lib/flows/availability";
@@ -22,7 +24,7 @@ const FLOWS_SHOWN = 20;
  * never under the price held — which steps they can run, and the
  * business's colour from memory, when Memory knows one.
  */
-export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; prices: FlowPrices; available: Record<FlowKind, boolean>; brandColour: string | null }> {
+export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; prices: FlowPrices; available: Record<FlowKind, boolean> & { slidesFromResearch: boolean }; brandColour: string | null }> {
   const supabase = await createClient();
   const plan = await resolveEffectivePlan(user);
   const [{ data, error }, packPrice, available] = await Promise.all([
@@ -38,7 +40,7 @@ export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; pric
   });
   let brandColour: string | null = null;
   if (await isFeatureOn("brand-memory", user)) {
-    const brand = readBrand(await loadMemories(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0));
+    const brand = readBrand(await loadMemories(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdminEmail(user.email))));
     brandColour = brand.colours.find((c) => c.hex)?.hex ?? null;
   }
   return { flows, prices: flowPrices(plan, packPrice, MAX_FLOW_SAID + MAX_COLOUR_CHARS), available, brandColour };

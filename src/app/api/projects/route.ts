@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { maxProjectsForPlan } from "@/lib/projects/project-limits";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
@@ -10,11 +11,16 @@ export const dynamic = "force-dynamic";
 /**
  * CREATE AND DELETE A PROJECT — the folder, never the contents.
  *
- * EVERY QUERY HERE GOES THROUGH THE PERSON'S OWN CLIENT, so RLS is what
- * decides, not a filter this file remembers to write. There is no admin
- * client in this file on purpose: a project is a name the person chose,
- * not a receipt for work that cost money, so there is nothing here that
- * needs the service role and nothing to forge by creating one.
+ * THE CREATE IS THE SERVER'S, EVERYTHING ELSE IS THE PERSON'S OWN CLIENT.
+ * Until 2026-10-08 this file had no admin client at all, on the reasoning
+ * that a project is a name and not a receipt for work that cost money. The
+ * plan's project cap is the part that reasoning missed: the cap is sold on
+ * the pricing page, and a cap checked only here held only for requests
+ * that came here. The account no longer holds INSERT on projects
+ * (supabase/migrations/20261023100000_projects_site_versions_server_written.sql),
+ * so the one write below goes through the service role, after the cap,
+ * with user_id from the session. The count, the delete and every read stay
+ * on the person's own client, so RLS still decides those.
  *
  * DELETE REMOVES THE FOLDER AND ITS MEMBERSHIP EDGES, and the edges go
  * through the database trigger (20261001000000_projects.sql), not through
@@ -68,12 +74,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await createAdminClient()
       .from("projects")
       .insert({
-        // FROM THE SESSION, NEVER FROM THE BODY. The insert policy would
-        // refuse a foreign user_id anyway; writing it from the session
-        // means the route never even asks the question.
+        // FROM THE SESSION, NEVER FROM THE BODY. The service role checks
+        // nothing, so this line is the whole of what makes the project the
+        // caller's.
         user_id: user.id,
         name: verdict.name,
         goal: clampGoal(body.goal),

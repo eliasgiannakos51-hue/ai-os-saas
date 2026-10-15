@@ -1,8 +1,7 @@
 import "server-only";
 import { escapeHtml } from "@/lib/html-escape";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createResendClient } from "@/lib/resend";
-import { senderAddress } from "@/lib/email/resend-config";
+import { sendOwnerAlert } from "@/lib/email/owner-alert";
 import { ADMIN_EMAILS, isAdminEmail } from "@/lib/auth/admin-emails";
 import { createNotification } from "@/lib/notifications/store";
 import { logApiError } from "@/lib/log-error";
@@ -29,10 +28,8 @@ import type { CostAlert } from "@/lib/billing/cost-alerts";
  * exactly that, visible on the owner's page.
  */
 
-// The From address, from ONE definition — see lib/email/resend-config.ts.
-// This was one of fourteen copies of the same line — the constant AND
-// its fallback, repeated per file. The fallback is the half that decides
-// whether mail reaches anybody, so it now has one definition.
+// The From address, the recipients and the delivery verdict come from
+// lib/email/owner-alert.ts, shared with the other owner alerts.
 
 /** One hour, as the brief asks. */
 export const COST_ALERT_MIN_INTERVAL_SECONDS = 3600;
@@ -92,32 +89,30 @@ export async function deliverCostAlert(alert: CostAlert): Promise<DeliveryOutcom
 
 async function emailOwners(alert: CostAlert): Promise<boolean> {
   if (ADMIN_EMAILS.length === 0) return false;
-  try {
-    const resend = createResendClient();
-    const rows = Object.entries(alert.detail)
-      .map(
-        ([key, value]) =>
-          `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(key)}</td>` +
-          `<td style="padding:4px 0"><strong>${escapeHtml(String(value ?? "—"))}</strong></td></tr>`
-      )
-      .join("");
-    await resend.emails.send({
-      from: senderAddress(),
-      to: ADMIN_EMAILS,
-      subject: `[Ionexa cost alert] ${alert.title}`,
-      html:
-        `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">` +
-        `<h2 style="margin:0 0 8px;font-size:16px">${escapeHtml(alert.title)}</h2>` +
-        `<p style="margin:0 0 16px">${escapeHtml(alert.body)}</p>` +
-        `<table style="border-collapse:collapse">${rows}</table>` +
-        `<p style="margin:16px 0 0;color:#666">At most one alert of this kind per hour.</p>` +
-        `</div>`,
-    });
-    return true;
-  } catch (err) {
-    logApiError("cost-alerts:email", err, { alertType: alert.type });
-    return false;
-  }
+  const rows = Object.entries(alert.detail)
+    .map(
+      ([key, value]) =>
+        `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(key)}</td>` +
+        `<td style="padding:4px 0"><strong>${escapeHtml(String(value ?? "—"))}</strong></td></tr>`
+    )
+    .join("");
+  // DELIVERED MEANS RESEND TOOK IT. This returned true whenever the send
+  // call came back, and the Resend SDK comes back with `{ error }` when it
+  // refuses — so a refused alert was marked delivered, the one state this
+  // file exists to keep honest (ΑΣ-8.5, 2026-10-08). The verdict is now
+  // lib/email/owner-alert.ts's.
+  const sent = await sendOwnerAlert("cost-alerts:email", {
+    subject: `[Ionexa cost alert] ${alert.title}`,
+    html:
+      `<div style="font-family:system-ui,sans-serif;font-size:14px;line-height:1.6">` +
+      `<h2 style="margin:0 0 8px;font-size:16px">${escapeHtml(alert.title)}</h2>` +
+      `<p style="margin:0 0 16px">${escapeHtml(alert.body)}</p>` +
+      `<table style="border-collapse:collapse">${rows}</table>` +
+      `<p style="margin:16px 0 0;color:#666">At most one alert of this kind per hour.</p>` +
+      `</div>`,
+  });
+  if (!sent.ok) logApiError("cost-alerts:email", new Error(sent.detail), { alertType: alert.type });
+  return sent.ok;
 }
 
 /**

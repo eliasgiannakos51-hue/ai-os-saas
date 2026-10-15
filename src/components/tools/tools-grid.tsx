@@ -5,17 +5,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { LayoutGrid, Pin, PinOff, Search, type LucideIcon } from "lucide-react";
-import { MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
+import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, groupHrefs, SWITCH_ONLY_ITEMS, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
+import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, SWITCHED_SQUARES, SWITCH_ONLY_ITEMS, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
+import { useToast } from "@/components/toast/toast-context";
 import { GAMES_ICON } from "@/lib/module-icons";
 
 /** The icon of each tool with no sidebar row (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS). */
 const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON };
-import { useToast } from "@/components/toast/toast-context";
 
 /**
  * ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05): big square tiles, four in a
@@ -40,6 +40,12 @@ import { useToast } from "@/components/toast/toast-context";
  * Recent tools rule, ΣΥΣΤΗΜΑ DESIGN §3); it writes through the same
  * /api/nav/recent-tools the sidebar uses. Chat and Coding have rows of
  * their own and are never in Recent tools, so their squares have no pin.
+ *
+ * THE NEW TOOLS (MASTER 14.1, lib/nav/all-tools.ts SWITCHED_SQUARES) join
+ * their group only for the hrefs the page found switched on for this
+ * person (`switchedOn`). Neither is a row of the main groups the grid
+ * draws from — Image's row is hidden, and Integrations sits in the
+ * Settings group — so they are looked up in the whole list.
  */
 export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: boolean; pinned?: string[]; switchedOn?: string[] }) {
   const t = useTranslations("dashboard.tools");
@@ -55,10 +61,12 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const byHref = new Map(
       sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))
     );
+    const everyItem = new Map(ALL_SIDEBAR_GROUPS.flatMap((g) => g.items.map((i) => [i.href, i] as const)));
     // A tool with no sidebar row at all (lib/nav/all-tools.ts
-    // SWITCH_ONLY_ITEMS): drawn only through groupHrefs, so only when its
-    // switch is on.
-    for (const [href, item] of Object.entries(SWITCH_ONLY_ITEMS)) if (!byHref.has(href)) byHref.set(href, { href, ...item, icon: SWITCH_ONLY_ICONS[href] ?? LayoutGrid });
+    // SWITCH_ONLY_ITEMS): drawn only through SWITCHED_SQUARES below, so only
+    // when its switch is on.
+    const switchOnly = (href: string): SidebarItem | undefined =>
+      SWITCH_ONLY_ITEMS[href] ? { href, ...SWITCH_ONLY_ITEMS[href], icon: SWITCH_ONLY_ICONS[href] ?? LayoutGrid } : undefined;
     // Literal keys, so the message slicer can bound what this page needs
     // (lib/i18n/message-slices.ts): a template-literal key is unbounded.
     const headings: Record<AllToolsGroupKey, string> = {
@@ -72,7 +80,10 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     return ALL_TOOLS_GROUPS.map((g) => ({
       key: g.key,
       heading: headings[g.key],
-      items: groupHrefs(g, switchedOn).map((h) => byHref.get(h)).filter((i): i is SidebarItem => Boolean(i)),
+      items: [
+        ...g.hrefs.map((h) => byHref.get(h)),
+        ...SWITCHED_SQUARES.filter((s) => s.group === g.key && switchedOn.includes(s.href)).map((s) => everyItem.get(s.href) ?? switchOnly(s.href)),
+      ].filter((i): i is SidebarItem => Boolean(i)),
     })).filter((g) => g.items.length > 0);
   }, [isOwner, t, switchedOn]);
 
@@ -94,11 +105,38 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     finances: t("names.finances"),
     sales: t("names.sales"),
     trading: t("names.trading"),
+    image: t("names.image"),
+    connections: t("names.connections"),
     document: t("names.document"),
     games: t("names.games"),
   };
+  // THE ONE LINE UNDER EACH NAME (MASTER 14.1: «όνομα μίας λέξης, μία
+  // γραμμή»), short enough that the square stays square on a phone.
+  const lines: Record<AllToolsNameKey, string> = {
+    site: t("lines.site"),
+    slides: t("lines.slides"),
+    posts: t("lines.posts"),
+    research: t("lines.research"),
+    analyze: t("lines.analyze"),
+    files: t("lines.files"),
+    automations: t("lines.automations"),
+    projects: t("lines.projects"),
+    goals: t("lines.goals"),
+    meetings: t("lines.meetings"),
+    library: t("lines.library"),
+    memory: t("lines.memory"),
+    finances: t("lines.finances"),
+    sales: t("lines.sales"),
+    trading: t("lines.trading"),
+    image: t("lines.image"),
+    connections: t("lines.connections"),
+    document: t("lines.document"),
+    games: t("lines.games"),
+  };
+  const nameKey = (href: string): AllToolsNameKey | undefined =>
+    ALL_TOOLS_NAMES[href] ?? SWITCHED_SQUARES.find((s) => s.href === href)?.name;
 
-  const label = (item: SidebarItem) => (ALL_TOOLS_NAMES[item.href] ? names[ALL_TOOLS_NAMES[item.href]] : longLabel(item));
+  const label = (item: SidebarItem) => { const k = nameKey(item.href); return k ? names[k] : longLabel(item); };
   // The sidebar's longer name stays a search word: "Build a site" still
   // finds Site, and "παρουσ" still finds Slides in Greek.
   const longLabel = (item: SidebarItem) =>
@@ -107,7 +145,9 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
       : ITEM_LABEL_KEYS[item.label]
         ? tSidebar(`items.${ITEM_LABEL_KEYS[item.label]}`)
         : item.label;
-  const hint = (item: SidebarItem) => (item.hintKey ? tSidebar(`hints.${item.hintKey}`) : "");
+  // The sidebar's longer hint stays a search word; the square draws its line.
+  const sidebarHint = (item: SidebarItem) => (item.hintKey ? tSidebar(`hints.${item.hintKey}`) : "");
+  const hint = (item: SidebarItem) => { const k = nameKey(item.href); return k ? lines[k] : sidebarHint(item); };
 
   const results = query.trim()
     ? filterAndRankCandidates(
@@ -115,7 +155,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
           .flatMap((g) => g.items)
           .map((item) => ({
             item,
-            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item)],
+            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item), sidebarHint(item)],
           })),
         query
       )
@@ -143,7 +183,14 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const Icon = item.icon;
     const name = label(item);
     const description = hint(item);
-    const canPin = !NEVER_RECENT.includes(item.href) && !item.href.startsWith("/help") && item.href !== "/dashboard/settings";
+    // NO PIN ON A SWITCHED SQUARE: Recent tools (api/nav/recent-tools)
+    // takes only the visible rows of the main groups, and neither of these
+    // is one (Image's row is hidden, Integrations is in the Settings
+    // group), so a pin would be refused every time — a button that does
+    // nothing.
+    const canPin =
+      !NEVER_RECENT.includes(item.href) && !item.href.startsWith("/help") && item.href !== "/dashboard/settings" &&
+      !SWITCHED_SQUARES.some((s) => s.href === item.href);
     const isPinned = pins.includes(item.href);
     return (
       <li key={item.href} className="relative">

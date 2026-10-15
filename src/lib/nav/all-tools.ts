@@ -48,8 +48,12 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
  * THE ONE-WORD NAME ON EACH SQUARE (MASTER Μέρος 14.1, 2026-10-07: «Μεγάλα
  * τετράγωνα: εικονίδιο, όνομα μίας λέξης, μία γραμμή», and the names it
  * lists). The value is the key under dashboard.tools.names in
- * messages/*.json; the grid reads it through a literal map, so the
- * message slicer can bound it. "Mine" is Library and "What it remembers"
+ * messages/*.json, and under dashboard.tools.lines for the one line under
+ * it — short enough to keep the square a square on a 390px phone, where
+ * the sidebar's longer hints made two of them taller than wide (measured
+ * 2026-10-08, scripts/tests/all-tools-empty-chat-edges.prodtest.mjs). The
+ * grid reads both through literal maps, so the message slicer can bound
+ * them. "Mine" is Library and "What it remembers"
  * is Memory from here on.
  */
 export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
@@ -68,45 +72,54 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/finance": "finances",
   "/dashboard/sales": "sales",
   "/dashboard/trading": "trading",
-  // Shown only behind its switch: SHOWN_BY_SWITCH below.
-  "/dashboard/documents": "document",
-  "/dashboard/games": "games",
 };
 
 export type AllToolsNameKey =
   | "site" | "slides" | "posts" | "research" | "analyze" | "files" | "automations" | "projects"
-  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading" | "document" | "games";
+  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading"
+  | "image" | "connections" | "document" | "games";
 
 /**
- * A HIDDEN TOOL THAT COMES BACK WITH ITS SWITCH (MASTER 14.1: «Κάθε νέο
- * εργαλείο μπαίνει εδώ μόλις γίνει λειτουργικό»). For whoever the switch
- * admits, the square is drawn in its group; for everybody else the reason
- * in HIDDEN_FROM_ALL_TOOLS still holds. The page reads the switches
- * (app/dashboard/tools/page.tsx) and hands the grid the hrefs that are on.
+ * THE NEW TOOLS, EACH BEHIND ITS OWN SWITCH (MASTER Μέρος 14.1: «Κάθε νέο
+ * εργαλείο μπαίνει εδώ μόλις γίνει λειτουργικό: Image, … Connections»).
+ * A square here is drawn for exactly the people its switch in
+ * lib/flags/flags.ts is on for — the owner and the test account first,
+ * everyone once he opens it on /dashboard/system-health — and the page
+ * behind it reads the same switch (app/dashboard/images/page.tsx,
+ * app/dashboard/integrations/page.tsx, where it is the Connect button).
+ * Turning the switch off takes the square away again. `flag` is a plain
+ * string so that this file, which the browser loads, imports nothing from
+ * lib/flags/flags.ts (it reads the database);
+ * scripts/tests/all-tools.test.mjs holds that every one names a switch
+ * that exists. Found missing on 2026-10-08: both tools were built
+ * (packages 19 and 31) and neither had a square, so opening them to
+ * everyone would have left Image reachable only by its address and ⌘K,
+ * and Connections only from Settings, where 14.1 put Integrations
+ * (app/dashboard/settings/page.tsx).
  */
-export const SHOWN_BY_SWITCH: Readonly<Record<string, { flag: "document-writer" | "games"; group: AllToolsGroupKey }>> = {
-  "/dashboard/documents": { flag: "document-writer", group: "make" },
-  "/dashboard/games": { flag: "games", group: "make" },
-};
+export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey; flag: string; name: AllToolsNameKey }[] = [
+  { href: "/dashboard/images", group: "make", flag: "image-studio", name: "image" },
+  { href: "/dashboard/integrations", group: "organise", flag: "connections", name: "connections" },
+  // Package 14: without its switch the page keeps notes and is hidden
+  // below (HIDDEN_FROM_ALL_TOOLS); with it, it writes documents.
+  { href: "/dashboard/documents", group: "make", flag: "document-writer", name: "document" },
+  // Package 26: no sidebar row at all (SWITCH_ONLY_ITEMS below).
+  { href: "/dashboard/games", group: "make", flag: "games", name: "games" },
+];
 
 /**
  * A TOOL THAT EXISTS ONLY BEHIND ITS SWITCH (Games, package 26), with no
  * row in the sidebar's config. That config is also the search (⌘K) and
  * the records hub, which read no switch: a row there would be a door to
  * a page that, for everybody the switch does not admit, does not exist.
- * So its square is described here, and All tools draws it only for those
- * whose switch is on (SHOWN_BY_SWITCH, app/dashboard/tools/page.tsx).
- * Pure, like the rest of this file; the grid gives it its icon
+ * So its square is described here, and All tools draws it through
+ * SWITCHED_SQUARES only for those whose switch is on. Pure, like the rest
+ * of this file; the grid gives it its icon
  * (components/tools/tools-grid.tsx SWITCH_ONLY_ICONS).
  */
 export const SWITCH_ONLY_ITEMS: Readonly<Record<string, { label: string; hintKey: string }>> = {
   "/dashboard/games": { label: "Games", hintKey: "games" },
 };
-
-/** The hrefs a group draws: its own, then those its switches turned on. */
-export function groupHrefs(group: { key: AllToolsGroupKey; hrefs: readonly string[] }, switchedOn: readonly string[]): string[] {
-  return [...group.hrefs, ...switchedOn.filter((h) => SHOWN_BY_SWITCH[h]?.group === group.key && !group.hrefs.includes(h))];
-}
 
 /**
  * Hidden from All tools, each with the reason. NOTHING HERE IS REMOVED:
@@ -114,12 +127,12 @@ export function groupHrefs(group: { key: AllToolsGroupKey; hrefs: readonly strin
  * where 14.1 says so, from Settings or the sidebar.
  */
 export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
-  "/dashboard/games":
-    "without the switch games the page does not exist (package 26); with it on, it is drawn under Make (SHOWN_BY_SWITCH)",
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
+  "/dashboard/games":
+    "without the switch games the page does not exist (package 26); with it on, its square is drawn under Make (SWITCHED_SQUARES)",
   "/dashboard/documents":
-    "without the switch document-writer it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does); with the switch on it writes them, and is drawn under Make (SHOWN_BY_SWITCH)",
+    "without the switch document-writer it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does); with the switch on it writes them, and its square is drawn under Make (SWITCHED_SQUARES)",
   "/dashboard/chat":
     "Ask me is a row of the sidebar itself (MASTER 14.1), so a square here would be a second door to the same room",
   "/dashboard/coding":

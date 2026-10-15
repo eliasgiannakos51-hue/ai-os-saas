@@ -8,8 +8,8 @@ import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ToolsGrid } from "@/components/tools/tools-grid";
 import { readRecentPrefs } from "@/lib/nav/recent-tools";
-import { SHOWN_BY_SWITCH } from "@/lib/nav/all-tools";
-import { isFeatureOn } from "@/lib/flags/flags";
+import { SWITCHED_SQUARES } from "@/lib/nav/all-tools";
+import { isFeatureOn, isFlagKey } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +33,11 @@ export default async function ToolsPage() {
 
   const t = await getTranslations("dashboard.tools");
   const isOwner = isAdminEmail(user.email);
-  // A hidden tool whose switch admits this person comes back to its group.
+  // THE NEW TOOLS' SQUARES (MASTER 14.1), each drawn only when its own
+  // switch is on for this person — the same switch its page reads.
   const switchedOn: string[] = [];
-  for (const [href, { flag }] of Object.entries(SHOWN_BY_SWITCH)) {
-    if (await isFeatureOn(flag, user)) switchedOn.push(href);
+  for (const square of SWITCHED_SQUARES) {
+    if (isFlagKey(square.flag) && (await isFeatureOn(square.flag, user))) switchedOn.push(square.href);
   }
 
   return (

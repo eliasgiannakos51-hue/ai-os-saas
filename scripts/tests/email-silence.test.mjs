@@ -134,11 +134,33 @@ check("no sender swallows it in an empty catch", emptyCatch.length === 0, emptyC
 
 // THE ONE THAT MAY NOT USE logApiError, said out loud. sendErrorAlertEmail
 // is called BY logApiError; using it here would re-enter the alert path
-// on every failure of a persistent fault.
+// on every failure of a persistent fault. Since 2026-10-08 it sends
+// through lib/email/owner-alert.ts with the other three owner alerts, so
+// the rule holds for both files.
 const alert = stripComments(readFileSync("src/lib/email/error-alert.ts", "utf8"));
-check("the error alert reports its own failure", /console\.error\(/.test(alert));
+const ownerAlert = stripComments(readFileSync("src/lib/email/owner-alert.ts", "utf8"));
+check("the error alert sends through the owner-alert sender", /await sendOwnerAlert\("error-alert",/.test(alert));
+check("the error alert reports its own failure", /console\.error\(/.test(ownerAlert) && /if \(!outcome\.ok\) console\.error\(/.test(ownerAlert));
 check("...and does NOT do it through logApiError, which would recurse",
-  !/logApiError/.test(alert));
+  !/logApiError/.test(alert) && !/logApiError/.test(ownerAlert));
+
+// A REFUSAL IS RETURNED, NOT THROWN (ΑΣ-8.5, 2026-10-08). The Resend SDK
+// answers a message it will not send with `{ error }` and does not throw,
+// so a send whose result is not read reports every refusal as delivered —
+// the four owner alerts did exactly that, and the cost alert marked
+// itself delivered. The population is every send in src/: each must read
+// the error it gets back.
+const sends = [];
+for (const file of sources) {
+  const code = stripComments(readFileSync(file, "utf8"));
+  for (const m of code.matchAll(/\.emails\.send\(/g)) {
+    const before = code.slice(Math.max(0, m.index - 160), m.index);
+    sends.push({ file, reads: /const\s*\{[^}]*\berror\b[^}]*\}\s*=\s*await\s+[\w.()]*$/.test(before) });
+  }
+}
+check(`the send scan found them (${sends.length})`, sends.length >= 12);
+const unread = sends.filter((x) => !x.reads).map((x) => x.file);
+check("every send reads the refusal Resend returns", unread.length === 0, unread.join("\n        "));
 
 // ---------------------------------------------------------------------
 console.log("\n== 3b. the scanner, asked about samples rather than about src/ ==");

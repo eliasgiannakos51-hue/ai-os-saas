@@ -282,7 +282,10 @@ console.log(
 // one more. Read off the run.
 // 268 -> 270 on 2026-10-07: owner-manual and acceptance (MASTER 16,
 // package 40) covered two more. Read off the run.
-const RATCHET = 276;
+// 276 -> 282 on 2026-10-09, when the checks branch was stacked on
+// packages 13-29 and #273: their suites covered six more together. Read
+// off the run.
+const RATCHET = 282;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

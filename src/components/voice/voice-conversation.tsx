@@ -14,6 +14,7 @@ import { useVoiceErrorText } from "@/components/voice/use-voice-error-text";
 import { MAX_SPEAK_CHARS } from "@/lib/voice/voice-pricing";
 import { DEFAULT_VOICE } from "@/lib/voice/voice-config";
 import type { VoiceState } from "@/lib/voice/voice-visual";
+import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
 
 /**
  * PRESS ONCE, TALK, IT ANSWERS, KEEP GOING (#2).
@@ -158,7 +159,8 @@ export function VoiceConversation({
       const chatResponse = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, conversationId: conversationIdRef.current }),
+        // Where the person is: what «αύριο» means when Chat reads their calendar.
+        body: JSON.stringify({ message: question, conversationId: conversationIdRef.current, timeZone: resolveBrowserTimeZone() }),
       });
       if (!chatResponse.ok || !chatResponse.body) {
         addToast(t("errors.failed"), "error");

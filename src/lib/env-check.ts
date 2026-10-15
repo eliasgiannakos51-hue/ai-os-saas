@@ -300,15 +300,25 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "the speaker button is not rendered, and the hands-free conversation cannot be started",
     secret: true,
   },
-  { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
+  {
+    // NOT "extra admins with a hardcoded fallback", which is what this row
+    // said until 2026-10-08: the owner's address left the code on
+    // 2026-10-04 (src/lib/auth/admin-emails.ts), and since then an unset
+    // variable means NO admin and no owner alert at all. The row is read by
+    // /dashboard/system-health, so it said the opposite of the truth to the
+    // one person who can fix it.
+    name: "ADMIN_EMAILS",
+    level: "recommended",
+    what: "Who the owner is, comma-separated: the admin pages, and where error, cost, margin and failed sign-in alerts are emailed",
+    fallback: "nobody is an admin: the admin pages answer 404, and no alert is sent to anyone",
+  },
   {
     // The address /contact offers when the mailer is not configured.
     //
     // OPTIONAL, AND DELIBERATELY NOT DEFAULTED TO ADMIN_EMAILS[0]. That
-    // value is a personal mailbox hardcoded in lib/auth/admin-emails.ts,
-    // and /contact is linked from the landing footer — defaulting would
-    // publish it to every scraper that reads the page, as a side effect
-    // of a variable nobody set.
+    // value is the owner's personal mailbox, and /contact is linked from
+    // the landing footer — defaulting would publish it to every scraper
+    // that reads the page, as a side effect of a variable nobody set.
     name: "SUPPORT_EMAIL",
     level: "optional",
     what: "The address shown on /contact when the contact form cannot send",

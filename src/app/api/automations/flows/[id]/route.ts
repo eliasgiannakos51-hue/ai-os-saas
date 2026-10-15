@@ -74,7 +74,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     if (!verdict.ok) return refuse("bad_boxes", 400, { reason: verdict.reason });
     if (!(await claimFlow(id, user.id))) return refuse("busy", 409);
     try {
-      const schedule = await scheduleAfterChange(user.id, flow, verdict.boxes);
+      const schedule = await scheduleAfterChange(user, flow, verdict.boxes);
       paused = schedule.paused;
       const saved = await saveVersion({ flowId: id, userId: user.id, version: flow.version + 1, boxes: verdict.boxes, said: BY_HAND, extra: { ...schedule.patch, ...plain } });
       if (!saved) return refuse("save_failed", 500);

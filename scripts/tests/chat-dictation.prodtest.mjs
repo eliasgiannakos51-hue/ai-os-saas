@@ -28,6 +28,7 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { chromium } from "playwright";
+import { chromiumPath } from "./lib/chromium.mjs";
 
 let pass = 0;
 const failures = [];
@@ -171,7 +172,7 @@ try {
   if (!up) { console.log("  FAIL  the production server did not start"); cleanup(); process.exit(1); }
 
   browser = await chromium.launch({
-    executablePath: "/opt/pw-browsers/chromium",
+    executablePath: chromiumPath(),
     args: ["--no-sandbox", "--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
   });
   const DEVICES = [

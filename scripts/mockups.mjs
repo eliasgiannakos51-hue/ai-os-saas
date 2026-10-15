@@ -85,7 +85,7 @@ const DEVICES = { desktop: [1440, 900], phone: [390, 844] };
 const lum = (rgb) => { const m = rgb.match(/\d+/g).map(Number); return (0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]) / 255; };
 
 mkdirSync(SHOT_DIR, { recursive: true });
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
 const bg = {};
 let n = 0;
 try {

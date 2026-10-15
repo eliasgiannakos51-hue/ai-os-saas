@@ -35,6 +35,7 @@
 // Run: node scripts/tests/prodtest-hygiene.test.mjs
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { spawn } from "node:child_process";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -68,6 +69,47 @@ check(
   `no prodtest falls back to undefined (${blindFallback.length})`,
   blindFallback.length === 0,
   blindFallback.join(", ") + " — resolve through lib/chromium.mjs instead"
+);
+
+// AND THE OTHER WAY A PRODTEST LOSES ITS BROWSER, which the clause above
+// does not reach and which cost more than it did. A prodtest may not
+// decide WHETHER to open a browser by probing one hard-coded absolute
+// path:
+//
+//     const CHROMIUM = "/opt/pw-browsers/chromium";
+//     if (!existsSync(CHROMIUM)) { console.log("  SKIP  no chromium"); }
+//
+// public-route-speed.prodtest.mjs opened section 2, "what a browser
+// sees", with exactly that. The path is this container's; a GitHub
+// runner installs Playwright's own browser and names it in
+// CHROMIUM_PATH instead (.github/workflows/verify.yml, the `chromium`
+// step). So on every CI machine the section printed one SKIP line, ran
+// nothing, and the file reported green — for as long as it has existed.
+//
+// The sibling defect in the same family, found the same day: two
+// prodtests named that path as a literal `executablePath` and THREW, and
+// because `npm run test:prod` is a shell loop with `|| exit 1`, the
+// nightly job died at the 11th file of 74 and the other 63 never
+// started (issue #280, red from 2026-10-10). The literal is held by
+// scripts/tests/portable-paths.test.mjs section 3, over the whole tree;
+// the probe is held here, over the prodtests, because this is the gate
+// whose heading promises every one of them can find a browser.
+//
+// READ WITHOUT COMMENTS, and the first draft of this clause proved why:
+// the paragraph above quotes the defect it describes, so the clause
+// matched its own explanation and named a file that had already been
+// fixed. A check that a comment can turn red is a check a comment can
+// also keep green (CLAUDE.md, "a gate that reads a COMMENT instead of
+// the code under it").
+const HARDCODED_PROBE = /existsSync\(\s*(["'`]\/opt\/pw-browsers|[A-Z_][A-Z0-9_]*\s*\))/;
+const probesOnePath = [...src]
+  .map(([f, s]) => [f, stripComments(s)])
+  .filter(([, s]) => /\/opt\/pw-browsers/.test(s) && HARDCODED_PROBE.test(s))
+  .map(([f]) => f);
+check(
+  `no prodtest decides on a browser by probing one fixed path (${probesOnePath.length})`,
+  probesOnePath.length === 0,
+  probesOnePath.join(", ") + " — ask lib/chromium.mjs, and let a launch failure be a failure"
 );
 // AND THE HELPER ITSELF ANSWERS, rather than being imported and unused.
 const helper = "scripts/tests/lib/chromium.mjs";

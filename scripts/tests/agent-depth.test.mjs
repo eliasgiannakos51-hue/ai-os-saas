@@ -171,12 +171,23 @@ console.log("\n3. The runner does what the tier says");
   // the research pass still calls the SDK directly. Accepting either
   // would let the cap be dropped from one of them; requiring both is
   // what keeps the tier's budget attached to the tier.
-  ok("the output cap comes from the spec, on the routed generation call",
+  ok("the output cap comes from the spec, on the write call",
     /maxTokens: spec\.outputTokens/.test(runnerSrc));
-  ok("...and the research budget comes from the spec on the direct call",
-    /max_tokens: spec\.researchTokens/.test(runnerSrc));
-  ok("the research cap comes from the spec", /max_tokens: spec\.researchTokens/.test(runnerSrc));
-  ok("the search cap comes from the round budget", /webSearchTool\(searches\)/.test(runnerSrc));
+  // RE-ANCHORED 2026-10-15, when the research pass moved onto the router
+  // too: it was `max_tokens: spec.researchTokens` and there were THREE
+  // checks here, two of them testing the identical regex because one was
+  // written for "the routed call" and one for "the direct call". There
+  // is no direct call any more, so the duplicate is gone and what
+  // replaces it is a claim the pair could not make: the two caps are
+  // DIFFERENT fields of the spec, so a research pass given the write
+  // budget (or the reverse) goes red here.
+  ok("...and the research cap too, now that both calls are routed",
+    /maxTokens: spec\.researchTokens/.test(runnerSrc));
+  ok("...and they are not the same field, so neither can borrow the other's budget",
+    /maxTokens: spec\.outputTokens/.test(runnerSrc) && /maxTokens: spec\.researchTokens/.test(runnerSrc) &&
+      AGENT_DEPTH_SPECS.standard.outputTokens !== AGENT_DEPTH_SPECS.standard.researchTokens);
+  ok("the search cap comes from the round budget",
+    /serverWebSearch: \{ maxUses: searches \}/.test(runnerSrc) && /searchesForRound\(depth, round\)/.test(runnerSrc));
   // BOTH SITES. The research return truncates, and so does the
   // accumulation across rounds — a `.replace` that fixed one would leave
   // the other pinned to a constant, which is exactly what the mutation

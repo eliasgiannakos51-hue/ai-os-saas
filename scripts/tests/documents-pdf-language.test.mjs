@@ -95,20 +95,39 @@ console.log("\n== 2. the route charges only for a translation, and only after it
   const freePath = split > 0 ? route.slice(0, split) : "";
   const paidPath = split > 0 ? route.slice(split) : "";
   check("the route has the two paths in this order", freePath.length > 0 && paidPath.length > 0, "the size-cap check that opens the paid path was not found");
-  check("the free path makes no model call", !/messages\.create/.test(freePath));
+  check("the free path makes no model call", !/messages\.create/.test(freePath) && !/runCompletion\(/.test(freePath));
   check("...and reserves nothing", !/reserveCredits\(/.test(freePath));
   check("...and returns the PDF before the paid path is reached", /return await pdfResponse\(/.test(freePath));
   check("the free path is taken when lang is absent OR equals the document's language", /lang === null \|\| !needsTranslation\(detectedLocale, lang\)/.test(freePath));
 
   check("the paid path estimates from the real input", /estimateForAction\(\s*"documentTranslate"/.test(paidPath));
-  check("...and reserves before calling", paidPath.indexOf("reserveCredits(") < paidPath.indexOf("messages.create"));
-  check("...records measured usage", /costs\.record\("generation", response\.usage/.test(paidPath));
+  // RE-ANCHORED 2026-10-15: the translation moved onto the router, so
+  // "before the call" is before runCompletion rather than before
+  // messages.create. The ordering claim is unchanged.
+  check("...and reserves before calling", paidPath.indexOf("reserveCredits(") < paidPath.indexOf("runCompletion("));
+  check("...records measured usage", /costs\.record\("generation", outcome\.usage/.test(paidPath));
   check("...settles as document_translate", /feature: "document_translate"/.test(paidPath));
   check("...only after the translated blocks exist", paidPath.indexOf("htmlToBlocks(translated.html)") < paidPath.indexOf("settleReservation("));
+  // AN EXACT COUNT, NOT A FLOOR, SINCE 2026-10-15 — and the reason is a
+  // mutant that stopped going red. `>= 3` was true of three releases and
+  // of four, so when the router added a fourth (the provider failure
+  // that used to arrive as a throw), deleting one of the other three
+  // left the gate green: documents-pdf-language.mutation.mjs's "a failed
+  // translation no longer releases the hold" reported the gate as not
+  // load-bearing. The four are: the model answered nothing usable, the
+  // provider call failed, the translation was cut at its ceiling, and
+  // the PDF render threw. A fifth failure path is welcome — it just has
+  // to say so here.
   const releases = (paidPath.match(/releaseReservation\(/g) ?? []).length;
-  check(`...and releases the hold on every failure (${releases} release sites)`, releases >= 3);
+  // `check(name, cond, detail)` — the third argument is a DETAIL STRING,
+  // not an expected value. Written as `check(label, releases, 4)` this
+  // line passed a truthy number as the condition and could never fail;
+  // documents-pdf-language.mutation.mjs caught it within the minute, on
+  // the same mutant that exposed the `>= 3` floor. Both halves of that
+  // are worth leaving written down.
+  check(`...and releases the hold on every failure (${releases} release sites)`, releases === 4, `expected 4 release sites, found ${releases}`);
   check("an unsupported lang is refused before anything is read", route.indexOf("unsupported_language") < route.indexOf("user_documents"));
-  check("an oversized document is refused before any call, naming the limit", /error: "too_long", chars: storedHtml\.length, limit: MAX_TRANSLATION_CHARS/.test(paidPath) && paidPath.indexOf("too_long") < paidPath.indexOf("messages.create"));
+  check("an oversized document is refused before any call, naming the limit", /error: "too_long", chars: storedHtml\.length, limit: MAX_TRANSLATION_CHARS/.test(paidPath) && paidPath.indexOf("too_long") < paidPath.indexOf("runCompletion("));
   check("the charge is reported back in a header the dialog reads", /X-Ionexa-Credits-Charged/.test(paidPath));
   check("the plan is always resolved, never null on a bypass", /const plan = await resolveEffectivePlan\(user\)/.test(paidPath));
 

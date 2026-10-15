@@ -112,11 +112,18 @@ console.log("\n== 4. stopping is not failing ==");
   // the old form could not make — that there is only ONE write, so a
   // second one cannot be added below the budget check where nothing
   // would notice.
-  const writeCalls = (runner.match(/runCompletion\(/g) ?? []).length;
+  // NAMED BY PURPOSE, NOT BY FUNCTION, SINCE 2026-10-15. Counting
+  // `runCompletion(` identified the write call only while the research
+  // pass still went through the SDK; now BOTH calls are routed and the
+  // count is two, so the old form would have gone red on a file whose
+  // property was untouched — the same failure mode the comment above
+  // describes, one layer along. The write call is the one that asks for
+  // `purpose: "agent_run"`; the research pass asks for "research".
+  const writeCalls = (runner.match(/purpose: "agent_run"/g) ?? []).length;
   ok(`there is exactly one write call in the runner (${writeCalls})`, writeCalls === 1);
   ok(
     "the budget is checked BEFORE it, not after both calls",
-    runner.indexOf("budgetStop(") > 0 && runner.indexOf("budgetStop(") < runner.indexOf("runCompletion(")
+    runner.indexOf("budgetStop(") > 0 && runner.indexOf("budgetStop(") < runner.indexOf('purpose: "agent_run"')
   );
   // The research call is the CHEAP half and comes first by design; the
   // ordering above is only meaningful if the research call is genuinely

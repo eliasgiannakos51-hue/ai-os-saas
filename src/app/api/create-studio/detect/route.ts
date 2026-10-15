@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
+import { runCompletion } from "@/lib/ai/providers/complete";
 import { createClient } from "@/lib/supabase/server";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { logApiError } from "@/lib/log-error";
@@ -71,11 +73,11 @@ Rules:
 ${AI_SAFETY_BOUNDARIES_EN}${AI_CRISIS_CLASSIFIER_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
-const DETECT_TOOL: Anthropic.Tool = {
+const DETECT_TOOL: AiToolSpec = {
   name: "detect_intent",
   description:
     "Decide which kind of thing the user wants to create, name it, and restate the request back to them.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       type: {
@@ -113,10 +115,12 @@ const DETECT_TOOL: Anthropic.Tool = {
  */
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the call below goes
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json(
-        { ok: false, error: "ANTHROPIC_API_KEY is not configured on the server." },
+        { ok: false, error: "No AI provider is configured on the server." },
         { status: 500 }
       );
     }
@@ -240,21 +244,33 @@ export async function POST(request: Request) {
     let detection: CreateStudioDetection;
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      const anthropic = new Anthropic({ apiKey });
-      const response = await anthropic.messages.create({
-        model: STUDIO_MODEL,
-        max_tokens: 512,
-        system: buildSystemPrompt(),
-        messages: [{ role: "user", content: message }],
-        tools: [DETECT_TOOL],
-        tool_choice: { type: "tool", name: "detect_intent" },
-      });
-
-      costs.record("classification", response.usage, response.model || STUDIO_MODEL);
-
-      const toolUse = response.content.find(
-        (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+      // THROUGH THE ROUTER, NOT THE SDK (step 1.4). The tool's input IS
+      // the detection; left to decide, the model answers in prose and
+      // this route has nothing to read after the tokens were spent.
+      const outcome = await runCompletion(
+        {
+          purpose: "classification",
+          model: STUDIO_MODEL,
+          maxTokens: 512,
+          system: [{ type: "text", text: buildSystemPrompt() }],
+          messages: [{ role: "user", content: message }],
+          tools: [DETECT_TOOL],
+          toolChoice: { type: "tool", name: "detect_intent" },
+          requires: ["tool_calling"],
+        },
+        { userId: user.id }
       );
+      // ONE REFUSAL FOR BOTH EMPTY HANDS, and that is deliberate rather
+      // than lazy: "the provider never answered" and "the provider
+      // answered without calling the tool" are the same thing to this
+      // route — no detection, nothing to charge for, release the hold.
+      // A second English sentence for the first case would be a second
+      // string nobody translates (the SERVER_PROSE ratchet in
+      // scripts/tests/i18n-coverage.test.mjs counts exactly that), for a
+      // difference the caller cannot act on. The reason the call failed
+      // is in the provider log, where an operator can read it.
+      if (outcome.ok) costs.record("classification", outcome.usage, outcome.reportedModel || outcome.model);
+      const toolUse = outcome.ok ? outcome.toolCalls.find((call) => call.name === "detect_intent") : undefined;
       if (!toolUse) {
         await releaseReservation(user.id, reservationId);
         return NextResponse.json(

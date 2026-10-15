@@ -81,7 +81,6 @@ const DECLARED = {
   // a real answer the user reads), and an insert that fails still refunds
   // (nothing was saved).
   "src/lib/jobs/handlers/create.ts": { calls: 1, billing: "settled" },
-  "src/app/api/create-studio/detect/route.ts": { calls: 1, billing: "settled" },
   // SETTLED WHETHER OR NOT IT FOUND ANYTHING, which is the unusual part
   // and the reason it is worth a note. The call happened and the tokens
   // were spent even when the model answers "none"; charging only for the
@@ -92,27 +91,12 @@ const DECLARED = {
   // AND IT ONLY RUNS AFTER THE FREE READER FAILED — the route re-checks
   // that itself (lib/transitions/destinations.ts) before reserving, so a
   // caller cannot make it cost money the free path would have saved.
-  "src/app/api/transitions/detect/route.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "settles even when the answer is 'none'; the free reader runs first, inside the route, before any reservation.",
-  },
   "src/app/api/chat/route.ts": { calls: 1, billing: "settled" },
 
   "src/app/api/records/ask/route.ts": {
     calls: 1,
     billing: "settled",
     note: "was a flat 1 credit; the input is the WHOLE record, so the price now tracks the record's size. Reservation sized after the record loads.",
-  },
-  "src/app/api/text-actions/route.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "was a flat 1 credit whether rewriting a sentence or a document.",
-  },
-  "src/app/api/documents/[id]/pdf/route.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing.",
   },
   "src/lib/ai/providers/adapters/anthropic.ts": {
     calls: 1,
@@ -126,11 +110,6 @@ const DECLARED = {
       "THE HOLE IS CLOSED BELOW rather than noted: the check after this table requires every " +
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
-  },
-  "src/lib/agents/agent-runner.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V4 #12: 2 -> 1 direct calls. The main generation moved onto lib/ai/providers/ (runCompletion), so only the optional web_search research pass still speaks to the SDK here — it needs the server-side search tool, which no other provider in the catalog offers, and an adapter that answered without searching would return a confident unsourced report. Both halves still record onto ONE accumulator per execution. V3 note, unchanged: the optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
   },
   "src/lib/jobs/handlers/file-ask.ts": {
     calls: 3,
@@ -175,7 +154,7 @@ const ROUTED = {
     note: "A follow-up question on an analysis. Same reserve-then-settle as the analysis itself, at its own estimate.",
   },
   "src/lib/agents/agent-runner.ts": {
-    note: "Agent runs. Settled by the run path against agent_run, pricing outcome.reportedModel rather than the model asked for, so a failover that served a different model is charged as what actually answered.",
+    note: "Agent runs. Settled by the run path against agent_run, pricing outcome.reportedModel rather than the model asked for, so a failover that served a different model is charged as what actually answered. The RESEARCH pass joined it on 2026-10-15: it asks for serverWebSearch and REQUIRES the capability, so the three providers that cannot search are ruled out before the call rather than answering from training data alone — and its tokens are recorded as web_search onto the same accumulator, so one run is still one settlement. The 'no other provider offers the server-side search' worry that kept this call on the SDK is answered by `requires` rather than by the SDK: the three adapters that cannot search REFUSE the request (adapters/shared.ts refuseUnsupported) instead of answering without searching, and the router rules them out before any call. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
   },
   "src/lib/meetings/meeting-analyse-call.ts": {
     note: "Meetings. One call, recorded onto the caller's accumulator and settled by the route that made it.",
@@ -212,6 +191,18 @@ const ROUTED = {
   },
   "src/lib/agents/agent-builder.ts": {
     note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent. Moved onto runCompletion 2026-10-15.",
+  },
+  "src/app/api/create-studio/detect/route.ts": {
+    note: "Moved onto runCompletion 2026-10-15; a call that never completed releases the hold rather than settling, because nothing was detected and nothing was spent.",
+  },
+  "src/app/api/transitions/detect/route.ts": {
+    note: "settles even when the answer is 'none'; the free reader runs first, inside the route, before any reservation. Moved onto runCompletion 2026-10-15. A provider failure throws into the route's own catch, which is what releases the hold — the free reader's answer then stands on its own, which is the correct outcome and not a silent one.",
+  },
+  "src/app/api/text-actions/route.ts": {
+    note: "was a flat 1 credit whether rewriting a sentence or a document. Moved onto runCompletion 2026-10-15. No tool: the action returns rewritten prose, so only the prompt travels.",
+  },
+  "src/app/api/documents/[id]/pdf/route.ts": {
+    note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing. Moved onto runCompletion 2026-10-15, and the cut-translation refusal went through modelTextFrom — the router's door onto the same truncation rule, so half a document still never becomes a PDF somebody pays for.",
   },
   "src/lib/clarification.ts": {
     note: "The clarifying-questions pre-check, run by six surfaces (Site, Chat, Automations, Agents, Create Anything, Mission) BEFORE the expensive call they are about to make. Settled as its own feature, clarification_check, by whichever surface ran it — a run that stops at the question and a run that generates are different actions with an order of magnitude between their costs. The free reader in lib/ai/ambiguity.ts decides most requests for nothing and this call is never made for those. Moved onto runCompletion 2026-10-15; a provider failure still THROWS rather than returning a fail-open decision, because each of the five callers does something different in its catch and a fabricated 'it was clear' would settle a reservation against a call that never happened.",

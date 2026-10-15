@@ -152,20 +152,25 @@ const MUTANTS = [
   {
     name: "the research budget stops following the tier",
     file: RUNNER,
-    from: "      max_tokens: spec.researchTokens,",
-    to: "      max_tokens: 1500,",
+    from: "        maxTokens: spec.researchTokens,",
+    to: "        maxTokens: 1500,",
   },
   {
-    name: "the research cap stops following the tier",
+    // WAS A BYTE-FOR-BYTE DUPLICATE of the one above until 2026-10-15 —
+    // same file, same `from`, same `to` — so it re-introduced one defect
+    // and counted it twice. This is the OTHER way the research budget
+    // can stop being its own: borrowing the write call's, which the
+    // gate's "they are not the same field" clause is there to catch.
+    name: "the research pass borrows the write call's budget",
     file: RUNNER,
-    from: "      max_tokens: spec.researchTokens,",
-    to: "      max_tokens: 1500,",
+    from: "        maxTokens: spec.researchTokens,",
+    to: "        maxTokens: spec.outputTokens,",
   },
   {
-    name: "the search tool is built with a fixed cap, so deep runs at four",
+    name: "the search cap is fixed, so deep runs at four",
     file: RUNNER,
-    from: "      tools: [webSearchTool(searches)],",
-    to: "      tools: [webSearchTool(4)],",
+    from: "        serverWebSearch: { maxUses: searches },",
+    to: "        serverWebSearch: { maxUses: 4 },",
   },
   {
     name: "deep stops running its second pass",

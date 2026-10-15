@@ -52,7 +52,15 @@ export async function callAnthropic(call: AdapterCall): Promise<AdapterResponse>
               ]
             : []),
         ];
-        return tools.length ? { tools } : {};
+        if (!tools.length) return {};
+        // SENT ONLY ALONGSIDE TOOLS, and the shape is already ours:
+        // AiToolChoice was defined as Anthropic's three cases, so there
+        // is nothing to translate here and three things to translate in
+        // the other adapters. See types.ts for why forcing a tool is a
+        // request field rather than a per-provider option.
+        return request.toolChoice
+          ? { tools, tool_choice: request.toolChoice as Anthropic.ToolChoice }
+          : { tools };
       })(),
     },
     { signal: call.signal }

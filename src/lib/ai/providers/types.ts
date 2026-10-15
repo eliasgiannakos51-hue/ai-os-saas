@@ -91,6 +91,39 @@ export type AiToolSpec = {
   inputSchema: Record<string, unknown>;
 };
 
+/**
+ * WHETHER THE MODEL MAY CALL A TOOL, MUST CALL ONE, OR MUST CALL A NAMED
+ * ONE — and this is not a convenience.
+ *
+ * Twenty-one of this repository's model calls give the model exactly one
+ * tool and force it, because the tool's input schema IS the answer: the
+ * caller reads `toolCalls[0].input` and parses nothing. Posts, slides,
+ * the website builder, the planner, every classifier. Left to decide for
+ * itself, a model answers some of those in prose — and then `toolCalls`
+ * is empty, the caller has nothing to read, and the account has been
+ * charged for a call that produced no usable output.
+ *
+ * So this is in the request, not smuggled into a provider's own options,
+ * and every adapter forwards it in its own spelling:
+ *
+ *   anthropic  tool_choice: { type: "auto" | "any" | "tool", name? }
+ *   openai     tool_choice: "auto" | "required" | { type: "function", … }
+ *   groq       the same, OpenAI-compatible
+ *   google     toolConfig.functionCallingConfig.mode AUTO | ANY, with
+ *              allowedFunctionNames for a named one
+ *
+ * All four can express all three, which is what makes it part of the
+ * intersection this type is allowed to carry rather than an
+ * Anthropic-only field with three silent drops behind it. A provider that
+ * could NOT force a tool would have to refuse the request the way
+ * serverWebSearch is refused in adapters/shared.ts — dropping it and
+ * answering anyway is the failure that looks like success.
+ */
+export type AiToolChoice =
+  | { type: "auto" }
+  | { type: "any" }
+  | { type: "tool"; name: string };
+
 export type AiRequest = {
   purpose: AiPurpose;
   system: AiSystemBlock[];
@@ -98,6 +131,10 @@ export type AiRequest = {
   maxTokens: number;
   temperature?: number;
   tools?: AiToolSpec[];
+  /** Ignored when `tools` is empty — every provider rejects a choice with
+   *  nothing to choose from, so the adapters send it only alongside
+   *  tools. See AiToolChoice for why this is in the request at all. */
+  toolChoice?: AiToolChoice;
   /**
    * Anthropic's server-side web search, when the call genuinely needs the
    * model to go and look things up.

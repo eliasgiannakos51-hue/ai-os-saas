@@ -607,6 +607,161 @@ ok("flattenSystem joins the blocks in order, losing nothing",
 }
 
 // ===========================================================================
+// ===========================================================================
+console.log("\n== 5b. FORCING A TOOL: the field 21 call sites depend on ==");
+// ===========================================================================
+//
+// WHY THIS IS NOT A CONVENIENCE. Twenty-one of this repository's model
+// calls give the model one tool and force it, because the tool's input
+// schema IS the answer: the caller reads toolCalls[0].input and parses
+// nothing. If a provider is handed the tools and not the choice, the
+// model may answer in prose instead — toolCalls comes back empty, the
+// caller has nothing to read, and the account has been charged for a
+// call that produced no usable output. That is the same shape as the
+// dropped web search refuseUnsupported exists for: a failure that looks
+// like a success.
+//
+// DRIVEN, NOT READ, for the three fetch adapters. Each one is called
+// with a stubbed fetch and the BYTES IT SENT are asserted — a field
+// written into the source and spelled wrong, or assembled into an object
+// the body never receives, passes a grep and fails here. Anthropic's
+// adapter goes through the vendor SDK, which load-ts.mjs will not load,
+// so that one is read as source and says so.
+{
+  const { openAiToolChoice } = await loadTs("src/lib/ai/providers/adapters/shared.ts");
+  const withTools = (extra) => ({
+    purpose: "classification",
+    system: [{ type: "text", text: "s" }],
+    messages: [{ role: "user", content: "u" }],
+    maxTokens: 64,
+    tools: [{ name: "answer", description: "d", inputSchema: { type: "object" } }],
+    ...extra,
+  });
+
+  ok("openAiToolChoice: auto", openAiToolChoice(withTools({ toolChoice: { type: "auto" } })) === "auto");
+  ok("openAiToolChoice: any becomes OpenAI's 'required'",
+    openAiToolChoice(withTools({ toolChoice: { type: "any" } })) === "required");
+  ok("openAiToolChoice: a named tool",
+    JSON.stringify(openAiToolChoice(withTools({ toolChoice: { type: "tool", name: "answer" } }))) ===
+      JSON.stringify({ type: "function", function: { name: "answer" } }));
+  ok("openAiToolChoice: nothing to send when no choice was made",
+    openAiToolChoice(withTools({})) === undefined);
+  // BOTH APIs REJECT A CHOICE WITH NO TOOLS, and a 400 from that is
+  // classified bad_request, which does not fail over — so a request that
+  // was fine would stop the chain.
+  ok("openAiToolChoice: nothing to send when there are no tools",
+    openAiToolChoice({ purpose: "chat", system: [], messages: [], maxTokens: 1, toolChoice: { type: "any" } }) ===
+      undefined);
+
+  // --- the bytes each fetch adapter actually sends -----------------------
+  const ADAPTERS = [
+    ["google", "src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "hi" }] } }], usageMetadata: {} }],
+    ["openai", "src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "hi" } }], usage: {} }],
+    ["groq", "src/lib/ai/providers/adapters/groq.ts", "callGroq", "groq/llama-3.3-70b-versatile",
+      { choices: [{ message: { content: "hi" } }], usage: {} }],
+  ];
+
+  /** Call an adapter with fetch stubbed; give back the body it posted. */
+  async function bodySentBy(file, exportName, model, reply, request) {
+    const mod = await loadTs(file);
+    const real = globalThis.fetch;
+    let body = null;
+    globalThis.fetch = async (_url, init) => {
+      body = JSON.parse(init.body);
+      return new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+    };
+    try {
+      await mod[exportName]({ apiKey: "k", model, signal: AbortSignal.timeout(5_000), request });
+    } finally {
+      globalThis.fetch = real;
+    }
+    return body;
+  }
+
+  for (const [name, file, exportName, model, reply] of ADAPTERS) {
+    const forced = await bodySentBy(file, exportName, model, reply,
+      withTools({ toolChoice: { type: "tool", name: "answer" } }));
+    // A FLOOR ON THE PROBE. An adapter that never called fetch would
+    // leave `body` null, and every "the body does not contain X" below
+    // would pass on nothing.
+    ok(`${name}: the probe captured a request body`, forced !== null && typeof forced === "object",
+      "the adapter did not call fetch — every assertion below it would pass on nothing");
+
+    if (name === "google") {
+      ok("google: a named tool becomes mode ANY plus allowedFunctionNames",
+        JSON.stringify(forced?.toolConfig) ===
+          JSON.stringify({ functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["answer"] } }),
+        JSON.stringify(forced?.toolConfig));
+      const any = await bodySentBy(file, exportName, model, reply, withTools({ toolChoice: { type: "any" } }));
+      ok("google: any is ANY with no name list",
+        JSON.stringify(any?.toolConfig) === JSON.stringify({ functionCallingConfig: { mode: "ANY" } }),
+        JSON.stringify(any?.toolConfig));
+      const auto = await bodySentBy(file, exportName, model, reply, withTools({ toolChoice: { type: "auto" } }));
+      ok("google: auto is AUTO",
+        JSON.stringify(auto?.toolConfig) === JSON.stringify({ functionCallingConfig: { mode: "AUTO" } }),
+        JSON.stringify(auto?.toolConfig));
+    } else {
+      ok(`${name}: a named tool is sent as OpenAI's tool_choice`,
+        JSON.stringify(forced?.tool_choice) ===
+          JSON.stringify({ type: "function", function: { name: "answer" } }),
+        JSON.stringify(forced?.tool_choice));
+      const any = await bodySentBy(file, exportName, model, reply, withTools({ toolChoice: { type: "any" } }));
+      ok(`${name}: any is 'required'`, any?.tool_choice === "required", JSON.stringify(any?.tool_choice));
+    }
+
+    // And the two cases where nothing may be sent.
+    const noChoice = await bodySentBy(file, exportName, model, reply, withTools({}));
+    ok(`${name}: no choice made, nothing sent`,
+      noChoice?.tool_choice === undefined && noChoice?.toolConfig === undefined,
+      JSON.stringify({ tool_choice: noChoice?.tool_choice, toolConfig: noChoice?.toolConfig }));
+    const noTools = await bodySentBy(file, exportName, model, reply, {
+      purpose: "chat",
+      system: [{ type: "text", text: "s" }],
+      messages: [{ role: "user", content: "u" }],
+      maxTokens: 64,
+      toolChoice: { type: "any" },
+    });
+    ok(`${name}: a choice with no tools is not sent`,
+      noTools?.tool_choice === undefined && noTools?.toolConfig === undefined,
+      JSON.stringify({ tool_choice: noTools?.tool_choice, toolConfig: noTools?.toolConfig }));
+  }
+
+  // --- anthropic, by source, because the SDK cannot be loaded here -------
+  const anthropicSrc = stripTs(src("src/lib/ai/providers/adapters/anthropic.ts"));
+  ok("anthropic: the choice is forwarded", /tool_choice: request\.toolChoice/.test(anthropicSrc), anthropicSrc.slice(0, 0));
+  ok("anthropic: ...only alongside tools",
+    /if \(!tools\.length\) return \{\};/.test(anthropicSrc) &&
+      anthropicSrc.indexOf("if (!tools.length) return {};") < anthropicSrc.indexOf("tool_choice: request.toolChoice"),
+    "a tool_choice with no tools is a 400 Anthropic classifies as bad_request, which does not fail over");
+
+  // EVERY ADAPTER, RANGED OVER — not the four this section names. A
+  // fifth provider added without forwarding the choice would send the
+  // tools and let the model decide, which is the silent failure above.
+  //
+  // THIS IS A TRIPWIRE, NOT THE PROOF. The proof is the driven probes
+  // above, which read the bytes; this only answers "does this adapter
+  // deal with a tool choice at all", so a new file that ignores the
+  // field cannot slip in unnoticed. Case-insensitive on purpose: two of
+  // them reach it through openAiToolChoice() and never write the field
+  // name, and a detector that missed those would be a tripwire across
+  // half the doorway.
+  const DEALS_WITH_CHOICE = /toolchoice/i;
+  ok("the tripwire says yes to the field by name", DEALS_WITH_CHOICE.test("tool_choice: request.toolChoice"));
+  ok("...yes to reaching it through the shared mapping",
+    DEALS_WITH_CHOICE.test("const choice = openAiToolChoice(request);"));
+  ok("...and no to an adapter that only sends tools",
+    !DEALS_WITH_CHOICE.test("if (request.tools?.length) body.tools = request.tools.map(toWire);"));
+  const adapterFiles = readdirSync("src/lib/ai/providers/adapters")
+    .filter((f) => f.endsWith(".ts") && f !== "shared.ts")
+    .map((f) => `src/lib/ai/providers/adapters/${f}`);
+  ok(`the adapter directory was read (${adapterFiles.length})`, adapterFiles.length >= 4,
+    "an empty list makes the next check pass on nothing");
+  const silent = adapterFiles.filter((f) => !DEALS_WITH_CHOICE.test(stripTs(src(f))));
+  ok("every adapter deals with the tool choice", silent.length === 0, silent.join(", "));
+}
+
 console.log("\n== 6. #13 batch: what qualifies, and the discount applied once ==");
 // ===========================================================================
 

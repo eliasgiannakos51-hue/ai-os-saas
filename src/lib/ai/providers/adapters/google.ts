@@ -81,6 +81,22 @@ export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
         })),
       },
     ];
+    // GEMINI SPELLS IT SOMEWHERE ELSE ENTIRELY: not a field beside
+    // `tools` but a `toolConfig` object, with the forced NAME in a list
+    // rather than on the choice. Written out here rather than bent into
+    // the OpenAI-shaped helper in shared.ts, which two adapters use
+    // verbatim — one helper serving both would serve neither clearly.
+    if (request.toolChoice) {
+      const mode = request.toolChoice.type === "auto" ? "AUTO" : "ANY";
+      body.toolConfig = {
+        functionCallingConfig: {
+          mode,
+          ...(request.toolChoice.type === "tool"
+            ? { allowedFunctionNames: [request.toolChoice.name] }
+            : {}),
+        },
+      };
+    }
   }
 
   const raw = (await postJson({

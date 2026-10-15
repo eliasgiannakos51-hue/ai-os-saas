@@ -2,6 +2,7 @@ import "server-only";
 import {
   flattenContent,
   flattenSystem,
+  openAiToolChoice,
   postJson,
   refuseUnsupported,
   splitPromptTokens,
@@ -69,6 +70,8 @@ export async function callOpenAi(call: AdapterCall): Promise<AdapterResponse> {
       type: "function",
       function: { name: t.name, description: t.description, parameters: t.inputSchema },
     }));
+    const choice = openAiToolChoice(request);
+    if (choice !== undefined) body.tool_choice = choice;
   }
 
   const raw = (await postJson({

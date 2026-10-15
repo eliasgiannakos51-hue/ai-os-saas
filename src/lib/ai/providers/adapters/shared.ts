@@ -144,6 +144,28 @@ export function refuseUnsupported(provider: string, request: AiRequest): void {
   }
 }
 
+/**
+ * A tool choice in the shape OpenAI defined and Groq copied.
+ *
+ * Shared because two adapters send exactly this; Google's is a different
+ * object in a different place and lives in google.ts rather than being
+ * bent into one helper that serves neither clearly.
+ *
+ * Returns undefined when there is nothing to send, so a caller can spread
+ * it conditionally — and when `tools` is empty, because both APIs reject
+ * a tool_choice with no tools and a 400 here would be classified as
+ * bad_request and stop the chain for a request that was fine.
+ */
+export function openAiToolChoice(
+  request: AiRequest
+): "auto" | "required" | { type: "function"; function: { name: string } } | undefined {
+  const choice = request.toolChoice;
+  if (!choice || !request.tools?.length) return undefined;
+  if (choice.type === "auto") return "auto";
+  if (choice.type === "any") return "required";
+  return { type: "function", function: { name: choice.name } };
+}
+
 export function emptyUsage(): AiUsage {
   return { input_tokens: 0, output_tokens: 0 };
 }

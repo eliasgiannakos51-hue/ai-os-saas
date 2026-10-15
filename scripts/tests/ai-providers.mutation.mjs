@@ -495,6 +495,59 @@ const MUTANTS = [
     from: "  costs.record(\"generation\", outcome.usage, outcome.reportedModel || outcome.model);",
     to: "  costs.record(\"generation\", outcome.usage, spec.model);",
   },
+  // ------------------------------------------------------------------
+  // FORCING A TOOL. Twenty-one call sites read toolCalls[0].input and
+  // parse nothing; a provider handed the tools and not the choice may
+  // answer in prose, and the charge happens either way.
+  // ------------------------------------------------------------------
+  {
+    name: "Anthropic is handed the tools and left to decide",
+    file: ANTHROPIC,
+    from: "        return request.toolChoice\n          ? { tools, tool_choice: request.toolChoice as Anthropic.ToolChoice }\n          : { tools };",
+    to: "        return { tools };",
+  },
+  {
+    name: "Anthropic is sent a choice even when there are no tools to choose from",
+    file: ANTHROPIC,
+    from: "        if (!tools.length) return {};",
+    to: "        if (!tools.length) return request.toolChoice ? { tool_choice: request.toolChoice as Anthropic.ToolChoice } : {};",
+  },
+  {
+    name: "Gemini's forced tool loses the name, so ANY tool satisfies it",
+    file: GOOGLE,
+    from: "          ...(request.toolChoice.type === \"tool\"\n            ? { allowedFunctionNames: [request.toolChoice.name] }\n            : {}),",
+    to: "",
+  },
+  {
+    name: "Gemini is told AUTO whatever the caller asked for",
+    file: GOOGLE,
+    from: '      const mode = request.toolChoice.type === "auto" ? "AUTO" : "ANY";',
+    to: '      const mode = "AUTO";',
+  },
+  {
+    name: "OpenAI drops the choice and sends only the tools",
+    file: OPENAI,
+    from: "    const choice = openAiToolChoice(request);\n    if (choice !== undefined) body.tool_choice = choice;",
+    to: "",
+  },
+  {
+    name: "Groq drops the choice and sends only the tools",
+    file: GROQ,
+    from: "    const choice = openAiToolChoice(request);\n    if (choice !== undefined) body.tool_choice = choice;",
+    to: "",
+  },
+  {
+    name: '"must call one of them" becomes OpenAI\'s "may"',
+    file: SHARED,
+    from: '  if (choice.type === "any") return "required";',
+    to: '  if (choice.type === "any") return "auto";',
+  },
+  {
+    name: "a choice with no tools is sent anyway, which both APIs answer with a 400",
+    file: SHARED,
+    from: "  if (!choice || !request.tools?.length) return undefined;",
+    to: "  if (!choice) return undefined;",
+  },
 ];
 
 let caught = 0;

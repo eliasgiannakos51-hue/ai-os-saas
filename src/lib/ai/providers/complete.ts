@@ -3,9 +3,8 @@ import { catalogModel, substituteModel, type CatalogModel } from "@/lib/ai/provi
 import { cacheImpactOfRoute, cachedPrefixTokens } from "@/lib/ai/providers/cache-policy";
 import { ATTEMPT_TIMEOUT_MS, classifyError } from "@/lib/ai/providers/failover";
 import { resolveChain, warnIfPricesUnverified, PROVIDER_KEY_ENV_VARS } from "@/lib/ai/providers/registry";
-import type { Adapter } from "@/lib/ai/providers/adapters/shared";
 import { recordProviderAttempts } from "@/lib/ai/providers/provider-log";
-import type { AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";
+import type { Adapter, AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";
 
 /**
  * THE ONE CALL. Everything above this line is a rule; this is where a

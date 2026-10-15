@@ -7,10 +7,8 @@ import {
   refuseUnsupported,
   splitPromptTokens,
   wireModelId,
-  type AdapterCall,
-  type AdapterResponse,
 } from "@/lib/ai/providers/adapters/shared";
-import type { AiToolCall } from "@/lib/ai/providers/types";
+import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
 
 /**
  * GOOGLE, over the Gemini generateContent API.

@@ -559,8 +559,16 @@ const MUTANTS = [
   {
     name: "the SDK is back on the routing rules' import graph",
     file: COMPLETE,
-    from: 'import type { Adapter } from "@/lib/ai/providers/adapters/shared";',
-    to: 'import { callAnthropic as eagerAnthropic } from "@/lib/ai/providers/adapters/anthropic";\nimport type { Adapter } from "@/lib/ai/providers/adapters/shared";\nvoid eagerAnthropic;',
+    // ANCHORED ON THE TYPE IMPORT THAT REPLACED IT, and the move is the
+    // reason this line changed: Adapter, AdapterCall and AdapterResponse
+    // used to live in adapters/shared.ts, so `import type { Adapter }`
+    // from there put that file's ten top-level names into every flat
+    // load-ts bundle of every migrated caller — and automations.itest
+    // went red on «postJson is declared at the top level of BOTH». The
+    // three types live in types.ts now; the mutant still reintroduces
+    // the defect it names, which is a VALUE import of an adapter.
+    from: 'import type { Adapter, AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";',
+    to: 'import { callAnthropic as eagerAnthropic } from "@/lib/ai/providers/adapters/anthropic";\nimport type { Adapter, AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";\nvoid eagerAnthropic;',
     expect: "the graph reaches no vendor package",
   },
   // ------------------------------------------------------------------

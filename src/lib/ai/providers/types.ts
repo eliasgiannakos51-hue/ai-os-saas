@@ -236,6 +236,55 @@ export type AiResult = {
   attempts: AiAttempt[];
 };
 
+/**
+ * THE ADAPTER'S OWN SHAPE — here rather than in adapters/shared.ts, and
+ * the reason is the same one that made the adapters lazy (ΛΘ-17), found
+ * one layer along on 2026-10-15.
+ *
+ * complete.ts needs the `Adapter` TYPE to declare its lazy loader map.
+ * While that type lived in adapters/shared.ts, a `import type` was
+ * enough to put that whole module on complete.ts's static graph — and
+ * therefore on the graph of EVERY file that calls runCompletion.
+ * scripts/tests/load-ts.mjs bundles a module and its imports into ONE
+ * FLAT SCOPE, so those files inherited ten more top-level names
+ * (postJson, ProviderHttpError, splitPromptTokens, emptyUsage,
+ * flattenSystem, flattenContent, wireModelId, refuseUnsupported,
+ * openAiToolChoice, normaliseStopReason) and any app module that
+ * happens to declare one of them can no longer be loaded beside them.
+ *
+ * It happened the same day: lib/agents/deliver.ts has its own private
+ * `postJson`, automations.itest.mjs loads the automation runner and the
+ * delivery path together, and the suite died with "postJson is declared
+ * at the top level of BOTH". A type import is free at runtime and is
+ * NOT free to the loader — which is the whole point of this note.
+ *
+ * These three reference only types already in this file, so moving them
+ * here adds no import anywhere. ai-providers.test.mjs §0b holds the
+ * graph: no bare package, and no path from complete.ts to
+ * adapters/shared.ts.
+ */
+export type AdapterCall = {
+  apiKey: string;
+  /** The PROVIDER's own model id — the catalog id with its namespace
+   *  prefix removed. See wireModelId in adapters/shared.ts. */
+  model: string;
+  request: AiRequest;
+  signal: AbortSignal;
+};
+
+export type AdapterResponse = {
+  text: string;
+  toolCalls: AiToolCall[];
+  usage: AiUsage;
+  stopReason: string | null;
+  /** Whatever the provider said it served. Kept verbatim so a silent
+   *  model substitution shows up in the log rather than being normalised
+   *  away. */
+  reportedModel: string;
+};
+
+export type Adapter = (call: AdapterCall) => Promise<AdapterResponse>;
+
 export type AiFailureKind =
   /** The caller's abort signal fired — the person pressed Stop (V4.6).
    *  Not a provider fault and never failed over. */

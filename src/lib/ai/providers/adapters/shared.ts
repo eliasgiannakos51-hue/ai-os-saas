@@ -16,27 +16,12 @@ import { AI_TRUNCATED_STOP_REASON, type AiRequest, type AiToolCall, type AiUsage
  * headers this app already depends on.
  */
 
-export type AdapterCall = {
-  apiKey: string;
-  /** The PROVIDER's own model id — the catalog id with its namespace
-   *  prefix removed. See wireModelId. */
-  model: string;
-  request: AiRequest;
-  signal: AbortSignal;
-};
-
-export type AdapterResponse = {
-  text: string;
-  toolCalls: AiToolCall[];
-  usage: AiUsage;
-  stopReason: string | null;
-  /** Whatever the provider said it served. Kept verbatim so a silent
-   *  model substitution shows up in the log rather than being normalised
-   *  away. */
-  reportedModel: string;
-};
-
-export type Adapter = (call: AdapterCall) => Promise<AdapterResponse>;
+// AdapterCall, AdapterResponse and Adapter now live in
+// lib/ai/providers/types.ts — see the note there. They moved because
+// complete.ts needs `Adapter` and a TYPE import of this file was enough
+// to put every function below onto the graph of every call site in the
+// app, which broke a test suite that loads one of them beside a module
+// with its own `postJson`.
 
 /** `openai/gpt-5` -> `gpt-5`. Anthropic ids carry no namespace. */
 export function wireModelId(catalogId: string): string {

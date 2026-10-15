@@ -65,6 +65,19 @@ const server = http.createServer((req, res) => {
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 process.env.ANTHROPIC_BASE_URL = `http://127.0.0.1:${server.address().port}`;
 process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+// AND NO SECOND PROVIDER, whatever this machine happens to hold. The
+// extractor went onto the router, failover is on by default, and a
+// GROQ_API_KEY sitting in the environment would send this test's
+// prompts to a real provider over the network the moment the local
+// server answered anything but 200. See CLAUDE.md, «The build that
+// matters is the one in CI».
+delete process.env.OPENAI_API_KEY;
+delete process.env.GOOGLE_API_KEY;
+delete process.env.GROQ_API_KEY;
+delete process.env.AI_PROVIDER_ORDER;
+for (const name of Object.keys(process.env)) {
+  if (name.startsWith("AI_PROVIDER_ORDER_")) delete process.env[name];
+}
 // The daily-spend counter the extractor bumps writes through the admin
 // client; here it writes to a port that answers everything with nothing.
 const nowhere = http.createServer((req, res) => { req.resume(); res.writeHead(200, { "Content-Type": "application/json" }); res.end("[]"); });
@@ -78,6 +91,23 @@ const memory = await loadTsWithDeps("src/lib/chat/memory.ts");
 const brand = await loadTsWithDeps("src/lib/memory/brand.ts");
 const wb = await loadTsWithDeps("src/lib/website-builder.ts");
 const { CostAccumulator } = await loadTsWithDeps("src/lib/billing/cost-accumulator.ts");
+
+// THE SYSTEM PROMPT ARRIVES AS BLOCKS, NOT AS A STRING. The router
+// (lib/ai/providers/complete.ts) sends `system` as an array of text
+// blocks so the cache breakpoints lib/ai/cached-system.ts places survive
+// the wire; the Anthropic API accepts both shapes, and this file used to
+// read the string one. `String([{type,text}])` is "[object Object]",
+// which is exactly as long as it is useless: the POSITIVE check below
+// would have gone red and said so, but the NEGATIVE one — "the
+// extractor's prompt is as before" — would have passed on an empty
+// reading, for ever. Hence the join, and hence the floor each check
+// carries that the text it searched was not empty.
+const systemText = (sent) => {
+  const system = sent?.system;
+  if (typeof system === "string") return system;
+  if (!Array.isArray(system)) return "";
+  return system.map((block) => (typeof block?.text === "string" ? block.text : "")).join("\n");
+};
 
 function fakeSupabase() {
   const recorded = [];
@@ -98,7 +128,8 @@ try {
   console.log("== 1. Chat, with the switch on ==");
   const db = fakeSupabase();
   await turn(db, true);
-  const system = String(seen.extraction[0]?.system ?? "");
+  const system = systemText(seen.extraction[0]);
+  check("the extractor was asked at all, with a prompt that is not empty", system.length > 0, `${seen.extraction.length} call(s), system ${system.length} chars`);
   check("the extractor asked for the name line and the colours line", system.includes(brand.BRAND_NAME_PREFIX) && system.includes(brand.BRAND_COLOURS_PREFIX));
   const texts = db.recorded.map((r) => r.args.p_memory_text);
   check("three rows recorded, through chat_memory_record", db.recorded.length === 3 && db.recorded.every((r) => r.name === "chat_memory_record"), JSON.stringify(texts));
@@ -120,7 +151,8 @@ try {
   seen.extraction.length = 0;
   const off = fakeSupabase();
   await turn(off, false);
-  check("the extractor's prompt is as before", !String(seen.extraction[0]?.system ?? "").includes(brand.BRAND_NAME_PREFIX));
+  const systemOff = systemText(seen.extraction[0]);
+  check("the extractor's prompt is as before", systemOff.length > 0 && !systemOff.includes(brand.BRAND_NAME_PREFIX), `system ${systemOff.length} chars`);
   check("...and the answer is one row, as before", off.recorded.length === 1 && off.recorded[0].args.p_memory_text === EXTRACTED);
 } catch (err) {
   check("the run completed", false, err?.stack ?? err);

@@ -7,10 +7,8 @@ import {
   postJson,
   refuseUnsupported,
   wireModelId,
-  type AdapterCall,
-  type AdapterResponse,
 } from "@/lib/ai/providers/adapters/shared";
-import type { AiToolCall } from "@/lib/ai/providers/types";
+import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
 
 /**
  * GROQ, serving open models over an OpenAI-compatible endpoint.

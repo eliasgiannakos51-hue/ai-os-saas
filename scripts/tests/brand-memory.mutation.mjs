@@ -67,8 +67,8 @@ const MUTANTS = [
   {
     name: "the chat asks for the brand lines whatever the switch says",
     file: EXTRACTOR,
-    from: "system: brand ? `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` : EXTRACTION_SYSTEM_PROMPT,",
-    to: "system: `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}`,",
+    from: "text: brand ? `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` : EXTRACTION_SYSTEM_PROMPT }],",
+    to: "text: `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` }],",
     expect: "the extractor asks for the brand lines only with the switch on",
   },
   {

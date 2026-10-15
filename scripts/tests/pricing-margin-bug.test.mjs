@@ -382,7 +382,11 @@ check("api/chat shares CHAT_MODEL with the free-chat economics", /const MODEL = 
 const memSrc = strip(readFileSync("src/lib/chat/memory.ts", "utf8"));
 check(
   "memory extraction records ITS response model too",
-  /costs\?\.record\("other", result\.usage, result\.model \|\| MEMORY_MODEL\)/.test(memSrc)
+  // The router reports the model it ACTUALLY served under
+  // `reportedModel`, which is the same property this check was always
+  // about: a silent substitution must be priced as what answered, not
+  // as what was asked for.
+  /costs\?\.record\("other", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(memSrc)
 );
 // No call site anywhere still records a bare hardcoded model constant.
 const { execSync } = await import("node:child_process");

@@ -107,10 +107,10 @@ console.log("\n== 4. what the model is told ==");
   const rw = P.buildRewriteBlockMessage(OFFER.title, blocks, 5, "βάλε τιμή 12 ευρώ", "el");
   ok("a box change names the block by number, and shows the whole document numbered", /Rewrite ONLY block \[6\]/.test(rw) && /\[6\] \(paragraph\) \[τιμή ανά άτομο\]/.test(rw) && /\[1\] \(heading 1\) Τι προσφέρουμε/.test(rw));
   ok("...both the document and the instruction fenced", rw.split(UNTRUSTED_OPEN).length === 3 && rw.split(UNTRUSTED_CLOSE).length === 3);
-  ok("the block change has its own tool, which returns only text", P.REWRITE_BLOCK_TOOL.name === "rewrite_block" && JSON.stringify(P.REWRITE_BLOCK_TOOL.input_schema.required) === '["text"]');
+  ok("the block change has its own tool, which returns only text", P.REWRITE_BLOCK_TOOL.name === "rewrite_block" && JSON.stringify(P.REWRITE_BLOCK_TOOL.inputSchema.required) === '["text"]');
   const call = read("src/lib/documents/write-call.ts");
-  ok("every call forces its tool and records usage before the parse", /tool_choice: \{ type: "tool", name: params\.tool\.name \}/.test(call) && call.indexOf("params.costs.record(") < call.indexOf("toolUse"));
-  ok("a cut-off answer is unusable, not a short document", /stop_reason === "max_tokens"\) return \{ ok: false, kind: "unusable"/.test(call));
+  ok("every call forces its tool and records usage before the parse", /toolChoice: \{ type: "tool", name: params\.tool\.name \}/.test(call) && call.indexOf("params.costs.record(") < call.indexOf("toolUse"));
+  ok("a cut-off answer is unusable, not a short document", /outcome\.stopReason === AI_TRUNCATED_STOP_REASON\) return \{ ok: false, kind: "unusable"/.test(call));
 }
 
 console.log("\n== 5. the routes ==");

@@ -1514,7 +1514,6 @@ export async function POST(request: Request) {
         // before the response stream closes (see lib/chat/memory.ts).
         if (memoryActive) {
           await extractAndStoreMemory({
-            apiKey,
             supabase,
             userId: user.id,
             conversationId: finalConversationId!,

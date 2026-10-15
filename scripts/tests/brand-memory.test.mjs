@@ -119,7 +119,7 @@ console.log("\n== 5. the wiring, behind the switch ==");
 // ---------------------------------------------------------------------
 check('"brand-memory" is declared as a switch', /\n  "brand-memory": "/.test(code("src/lib/flags/flags.ts")));
 const extractor = code("src/lib/chat/memory.ts");
-check("the extractor asks for the brand lines only with the switch on", /system: brand \? `\$\{EXTRACTION_SYSTEM_PROMPT\}\$\{BRAND_EXTRACTION_RULE\}` : EXTRACTION_SYSTEM_PROMPT/.test(extractor));
+check("the extractor asks for the brand lines only with the switch on", /text: brand \? `\$\{EXTRACTION_SYSTEM_PROMPT\}\$\{BRAND_EXTRACTION_RULE\}` : EXTRACTION_SYSTEM_PROMPT/.test(extractor));
 check("...naming both prefixes", /BRAND_EXTRACTION_RULE =[\s\S]{0,200}\$\{BRAND_NAME_PREFIX\}[\s\S]{0,400}\$\{BRAND_COLOURS_PREFIX\}/.test(extractor));
 check("...and records each row on its own", /for \(const row of brand \? splitBrandLines\(extracted\) : \[extracted\]\) \{[\s\S]{0,200}p_memory_text: row,/.test(extractor));
 check("the chat passes the switch", /extractAndStoreMemory\(\{[\s\S]{0,300}brand: await isFeatureOn\("brand-memory", user\)/.test(code("src/app/api/chat/route.ts")));

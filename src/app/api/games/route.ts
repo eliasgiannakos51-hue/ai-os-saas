@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
@@ -26,8 +27,10 @@ export const maxDuration = 120; // @function-limit 120
  * game went through lib/games/game-html.ts's check.
  */
 export async function POST(request: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused before the hold.
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
   let body: Record<string, unknown>;
   try {
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
       fingerprint: description,
       route: "/api/games",
       metadata: { step: "plan", descriptionChars: description.length },
-      run: (costs) => planGame({ apiKey, description, locale, costs, signal: request.signal }),
+      run: (costs) => planGame({ description, locale, costs, userId: user.id, signal: request.signal }),
     });
     if (!step.ok) return step.response;
 

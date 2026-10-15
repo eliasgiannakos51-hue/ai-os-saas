@@ -120,11 +120,6 @@ const DECLARED = {
     billing: "settled",
     note: "was a flat 2 credits with NO usage tracking at all — the only call whose tokens reached no cost log.",
   },
-  "src/lib/chat/memory.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls.",
-  },
   "src/lib/agents/agent-builder.ts": {
     calls: 1,
     billing: "settled",
@@ -142,11 +137,6 @@ const DECLARED = {
       "THE HOLE IS CLOSED BELOW rather than noted: the check after this table requires every " +
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
-  },
-  "src/lib/automations/builder.ts": {
-    calls: 2,
-    billing: "settled",
-    note: "Package 30, automations as boxes. Two forced-tool calls: making a row of boxes from a sentence (api/automations/flows) and changing one box with words (api/automations/flows/[id]/change). Each route holds the automationBuild estimate before and settles on the usage recorded here — a question back, or an answer that is not a row of boxes, still SETTLES rather than releasing, because the tokens were spent; only a provider failure releases.",
   },
   "src/lib/automations/runner.ts": {
     calls: 1,
@@ -167,16 +157,6 @@ const DECLARED = {
     calls: 3,
     billing: "settled",
     note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
-  },
-  "src/lib/documents/write-call.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing.",
-  },
-  "src/lib/games/game-call.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing.",
   },
 };
 
@@ -224,6 +204,18 @@ const ROUTED = {
   },
   "src/lib/translate/translate-call.ts": {
     note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then. Moved onto runCompletion 2026-10-15: the two failures a batch can have are still told apart, because a Stop is the person and a provider failure is not, and only the first is theirs.",
+  },
+  "src/lib/games/game-call.ts": {
+    note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing. Moved onto runCompletion 2026-10-15; the forced tool, the truncation refusal and the Stop button came with it, the second now in the router's one spelling so a game cut short by a failover provider is refused exactly as one cut by Anthropic.",
+  },
+  "src/lib/documents/write-call.ts": {
+    note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing. Moved onto runCompletion 2026-10-15, all three entry points at once — they share one private `call`, so there was never a way to move one of them.",
+  },
+  "src/lib/automations/builder.ts": {
+    note: "Package 30, automations as boxes. Two forced-tool calls: making a row of boxes from a sentence (api/automations/flows) and changing one box with words (api/automations/flows/[id]/change). Each route holds the automationBuild estimate before and settles on the usage recorded here — a question back, or an answer that is not a row of boxes, still SETTLES rather than releasing, because the tokens were spent; only a provider failure releases. Moved onto runCompletion 2026-10-15; both calls, and both still refuse a row cut at the ceiling rather than reading it as a shorter row.",
+  },
+  "src/lib/chat/memory.ts": {
+    note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls. Moved onto runCompletion 2026-10-15. No tools in this one — it asks for a line of text or the word NONE — and a failure returns without storing anything, which is what it already did: the chat reply it rides behind has been sent, and this was never allowed to fail it.",
   },
   "src/lib/clarification.ts": {
     note: "The clarifying-questions pre-check, run by six surfaces (Site, Chat, Automations, Agents, Create Anything, Mission) BEFORE the expensive call they are about to make. Settled as its own feature, clarification_check, by whichever surface ran it — a run that stops at the question and a run that generates are different actions with an order of magnitude between their costs. The free reader in lib/ai/ambiguity.ts decides most requests for nothing and this call is never made for those. Moved onto runCompletion 2026-10-15; a provider failure still THROWS rather than returning a fail-open decision, because each of the five callers does something different in its catch and a fabricated 'it was clear' would settle a reservation against a call that never happened.",
@@ -801,7 +793,7 @@ checkTrue(
     chat.indexOf('feature: isFreeMessage ? "chat_free" : "chat_message"')
 );
 checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
-checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, result\.model \|\| MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
+checkTrue("the extractor records its own usage", /costs\?\.record\("other", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
 // If the hold does not cover the second call, every chat message is
 // short by exactly one Claude call.
 const est = readFileSync("src/lib/billing/estimate.ts", "utf8");

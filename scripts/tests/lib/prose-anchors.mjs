@@ -42,6 +42,15 @@ export const PROSE_ANCHORS = {
       { file: "src/app/dashboard/layout.tsx", changed: "pages instead of 8, and the four components below" },
     ],
   },
+  "gdpr-coverage.mutation.mjs": {
+    reason:
+      "The registry's reason for leaving a table out of the export IS prose, and a reason that " +
+      "cannot be followed to the code is the defect ΛΘ-13 names: rate_limit_log was excluded as " +
+      "'keyed by IP, not by user' while 63 of 71 call sites pass the user's id. The mutant puts " +
+      "that sentence back; the two checks beside it — the sweep exists, and its window is 24 " +
+      "hours — are code, and have their own mutant in the cron route.",
+    anchors: [{ file: "src/lib/gdpr/user-data-registry.ts", changed: "keyed by IP, not by user" }],
+  },
   "help-tips.mutation.mjs": {
     reason:
       "The mutant inserts a COMMENTED-OUT <PageHeader /> as a cheap stand-in for a new page " +

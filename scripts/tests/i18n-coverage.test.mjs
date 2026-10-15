@@ -801,7 +801,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // every answer carries a `code`, and confirm-delete-account-form.tsx says
 // it in the reader's language (auth.deleteAccount.errors, ten locales),
 // which is also why CLIENT_FALLBACK_BASELINE went down by one.
-const SERVER_PROSE_BASELINE = 671;
+// 671 -> 673 on 2026-10-15: two refusal SITES in api/team/remove, zero
+// new sentences. ΛΘ-9: a removal whose revoke failed used to be a log
+// line and a green "Member removed" toast, so both failure paths now
+// answer "Could not remove member. Please try again." — the SAME string
+// the route's two existing dead ends already use, and the one the
+// component renders through getErrorMessage. Measured, not added.
+const SERVER_PROSE_BASELINE = 673;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

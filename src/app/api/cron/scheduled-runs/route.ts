@@ -153,7 +153,7 @@ export async function GET(request: Request) {
 
     if (dueError) {
       logApiError("/api/cron/scheduled-runs", dueError, { stage: "load_due_runs" });
-      return NextResponse.json({ ok: false, error: dueError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not load the runs that are due." }, { status: 500 });
     }
 
     const runsByUser = new Map<string, ScheduledAgentRun[]>();

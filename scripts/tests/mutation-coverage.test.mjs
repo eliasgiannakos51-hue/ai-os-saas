@@ -292,7 +292,15 @@ console.log(
 // the run, with and without the new files, because `git stash` leaves
 // untracked ones behind and the first reading counted them on both
 // sides.
-const RATCHET = 289;
+// 289 -> 290 on 2026-10-15: ONE gate newly covered, not two. This round
+// added two mutation suites and the ratchet moved by one, which is the
+// honest arithmetic: research-monthly-cap.test.mjs is a new gate and
+// its suite covers it, while team-remove-order mutates team-grant,
+// which team-grant.mutation.mjs already covered — more mutants on a
+// covered gate buy evidence, not ratio. The same round added
+// security-audit-summary.test.mjs with no suite, so the denominator
+// grew by two and the covered count by one.
+const RATCHET = 290;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

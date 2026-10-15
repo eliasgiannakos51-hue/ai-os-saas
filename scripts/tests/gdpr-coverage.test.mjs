@@ -217,6 +217,49 @@ for (const t of derived) {
   check(`${t.table} does not also claim to need explicit erasure`, !t.needsExplicitErasure);
 }
 
+console.log("\n== 1b. a table left out of the export is left out for a TRUE reason ==");
+// WHAT WAS REPORTED (ΛΘ-13): the registry excluded `rate_limit_log`
+// with the words "keyed by IP/route fingerprint, not by user", and that
+// is not what the column holds. `identifier` is plain text and almost
+// every caller passes the signed-in user's id; only the sign-in scopes
+// pass an email or an address. The classification happens to be right
+// and the REASON was wrong, which is the worse half: a reason nobody can
+// check is a reason nobody will revisit, and the next table excluded
+// "for the same reason" gets no scrutiny at all.
+//
+// So the two facts the real reason rests on are checked against the
+// code, and the false one is checked for its absence.
+const rateLimitCallers = srcFiles
+  .map((f) => [f, readFileSync(f, "utf8")])
+  .filter(([, text]) => /checkRateLimit\(\{/.test(text));
+const byUserId = rateLimitCallers.filter(([, text]) => /identifier:\s*user\.id/.test(text));
+check(
+  `the rate-limit log IS keyed by user at most call sites (${byUserId.length} of ${rateLimitCallers.length})`,
+  rateLimitCallers.length >= 10 && byUserId.length > rateLimitCallers.length / 2,
+  "if this ever stops being true the registry's entry has to be rewritten again"
+);
+const registrySrc = readFileSync("src/lib/gdpr/user-data-registry.ts", "utf8");
+check(
+  "...so the registry no longer says it is not",
+  !/Keyed by IP\/route fingerprint, not by user/.test(registrySrc),
+  "the sentence that was false"
+);
+// The reason that IS true: nothing in the table survives a day. This is
+// the code half, and it is what makes the exclusion defensible.
+const cron = readFileSync("src/app/api/cron/scheduled-runs/route.ts", "utf8");
+const sweep = cron.match(
+  /const rateLimitCleanupCutoff = new Date\(Date\.now\(\) - (\d+) \* (\d+) \* (\d+) \* (\d+)\)/
+);
+const sweepHours = sweep ? (Number(sweep[1]) * Number(sweep[2]) * Number(sweep[3]) * Number(sweep[4])) / 3_600_000 : null;
+check(`the sweep exists and its window is ${sweepHours ?? "unreadable"}h`,
+  sweepHours !== null && sweepHours <= 24,
+  "the registry's reason is that nothing here outlives a day; a longer window makes that false");
+check("...and it really deletes from that table",
+  /\.from\("rate_limit_log"\)\s*\.delete\(\)\s*\.lt\("created_at", rateLimitCleanupCutoff\)/.test(cron));
+check("...and the registry names the sweep as the reason",
+  /scheduled-runs deletes every row older than/.test(registrySrc),
+  "a reader has to be able to follow the reason to the code that makes it true");
+
 console.log("\n== 2. the export actually covers what the old one missed ==");
 const labels = new Set(exportableTables().map((t) => t.label));
 // The specific omissions named in the brief.

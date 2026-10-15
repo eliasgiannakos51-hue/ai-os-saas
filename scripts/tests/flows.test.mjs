@@ -246,5 +246,120 @@ for (const file of LOCALES) {
   check(`${file}: every word, the total with its number`, missing.length === 0 && /\{count/.test(m.total ?? "") && /\{names\}/.test(m.notYet ?? ""), missing.join(", "));
 }
 
+// ---------------------------------------------------------------------
+console.log("\n== 7. SIXTY SENTENCES, TEN LANGUAGES — what the planner can read ==");
+// ---------------------------------------------------------------------
+// WHAT WAS WRONG. lib/flows/plan.ts named its own cues in Greek and
+// English, plus four European words for pictures. Everything else — a
+// chart in French, a translation in German, a game in Arabic, a video
+// in Japanese — was invisible to it, in a product that ships ten
+// languages and whose OTHER reader of the same sentence
+// (lib/create-studio/producer-routes.ts) has had all ten since it was
+// written.
+//
+// The two halves are different sizes of wrong. A missed `images` or
+// `analysis` loses a step from a plan. A missed NOT_YET word starts a
+// flow for something no tool here can make, which the planner's own
+// comment says must never happen: «Φτιάξε βίντεο για το site μου»
+// names the site because the video goes ON it.
+//
+// SIX CUES × TEN LANGUAGES, one real sentence each. The phrase table is
+// the measurement, the same shape producer-routes.test.mjs §2 uses for
+// its thirty. Measured on the table as it stood before this round, by
+// running this very section against it: **20 of 60**. After: all 60.
+// (An earlier, smaller sweep of this had reported "17 wrong of 30" —
+// it was a different and narrower table, and the figure is recorded
+// here as superseded rather than quietly dropped.)
+const SAYS = [
+  // images
+  ["en", "make me a few images for the shop", "images"],
+  ["el", "φτιάξε μου εικόνες για το μαγαζί", "images"],
+  ["es", "hazme unas imágenes para la tienda", "images"],
+  ["fr", "créez-moi des illustrations pour la boutique", "images"],
+  ["de", "erstelle mir Bilder für den Laden", "images"],
+  ["it", "fammi delle immagini per il negozio", "images"],
+  ["pt", "faça-me algumas imagens para a loja", "images"],
+  ["zh", "帮我做几张图片", "images"],
+  ["ja", "お店の画像を作って", "images"],
+  ["ar", "اصنع لي صور للمتجر", "images"],
+  // analysis
+  ["en", "turn this spreadsheet into charts", "analysis"],
+  ["el", "βγάλε μου γραφήματα από αυτό", "analysis"],
+  ["es", "hazme gráficos con esto", "analysis"],
+  ["fr", "fais-moi des graphiques avec ça", "analysis"],
+  ["de", "mach mir Diagramme daraus", "analysis"],
+  ["it", "fammi dei grafici con questo", "analysis"],
+  ["pt", "faça gráficos com isto", "analysis"],
+  ["zh", "帮我做个图表", "analysis"],
+  ["ja", "これでグラフを作って", "analysis"],
+  ["ar", "اعمل لي رسم بياني من هذا", "analysis"],
+  // video — NOT YET
+  ["en", "make a short video about the shop", "video"],
+  ["el", "φτιάξε ένα βίντεο για το μαγαζί", "video"],
+  ["es", "haz un vídeo corto de la tienda", "video"],
+  ["fr", "fais une vidéo courte de la boutique", "video"],
+  ["de", "mach ein kurzes Video vom Laden", "video"],
+  ["it", "fai un filmato breve del negozio", "video"],
+  ["pt", "faz um vídeo curto da loja", "video"],
+  ["zh", "做一个短视频", "video"],
+  ["ja", "お店の動画を作って", "video"],
+  ["ar", "اصنع فيديو قصير عن المتجر", "video"],
+  // translation — NOT YET
+  ["en", "translate this into German", "translation"],
+  ["el", "μετάφρασέ το στα γερμανικά", "translation"],
+  ["es", "tradúcelo al alemán", "translation"],
+  ["fr", "traduis-le en allemand", "translation"],
+  ["de", "übersetze das ins Englische", "translation"],
+  ["it", "traducilo in tedesco", "translation"],
+  ["pt", "traduza isto para alemão", "translation"],
+  ["zh", "把这个翻译成德语", "translation"],
+  ["ja", "これをドイツ語に翻訳して", "translation"],
+  ["ar", "ترجمة هذا إلى الألمانية", "translation"],
+  // game — NOT YET
+  ["en", "build me a small game for the kids", "game"],
+  ["el", "φτιάξε μου ένα παιχνίδι για τα παιδιά", "game"],
+  ["es", "hazme un juego pequeño", "game"],
+  ["fr", "fais-moi un petit jeu", "game"],
+  ["de", "bau mir ein kleines Spiel", "game"],
+  ["it", "fammi un piccolo gioco", "game"],
+  ["pt", "faz-me um jogo pequeno", "game"],
+  ["zh", "给我做个小游戏", "game"],
+  ["ja", "小さなゲームを作って", "game"],
+  ["ar", "اصنع لي لعبة صغيرة", "game"],
+  // meeting — NOT YET
+  ["en", "set up a meeting with the team", "meeting"],
+  ["el", "κανόνισε μια συνάντηση με την ομάδα", "meeting"],
+  ["es", "organiza una reunión con el equipo", "meeting"],
+  ["fr", "organise une réunion avec l'équipe", "meeting"],
+  ["de", "plane eine Besprechung mit dem Team", "meeting"],
+  ["it", "organizza una riunione con il team", "meeting"],
+  ["pt", "marca uma reunião com a equipa", "meeting"],
+  ["zh", "安排一个会议", "meeting"],
+  ["ja", "チームとの会議を設定して", "meeting"],
+  ["ar", "رتب اجتماع مع الفريق", "meeting"],
+];
+check(`the table is six cues in ten languages (${SAYS.length})`, SAYS.length === 60,
+  "an empty table would make the next check pass on nothing");
+const NOT_YET_CUES = new Set(plan.NOT_YET);
+const unread = [];
+for (const [locale, said, want] of SAYS) {
+  const got = plan.planFlow(said);
+  const read = NOT_YET_CUES.has(want)
+    ? got.notYet.includes(want)
+    : got.steps.some((s) => s.kind === want);
+  if (!read) unread.push(`${locale}/${want}: ${said}`);
+}
+check(`every one of the sixty is read (${SAYS.length - unread.length} of ${SAYS.length})`,
+  unread.length === 0, unread.join("\n        "));
+// AND NOT BY READING EVERYTHING. A cue list wide enough to match any
+// sentence would pass the check above and refuse every real flow, so
+// the same planner is shown a sentence that names none of the six.
+{
+  const innocent = plan.planFlow("φτιάξε μου ιστοσελίδα για το γραφείο");
+  check("a sentence that names none of the six gets none of them",
+    innocent.notYet.length === 0 && innocent.steps.every((s) => s.kind === "site"),
+    JSON.stringify(innocent));
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

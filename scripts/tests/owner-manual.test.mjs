@@ -154,6 +154,7 @@ const FAILOVER_NAMES = {
   "src/lib/agents/agent-runner.ts": "οι βοηθοί",
   "src/lib/meetings/meeting-analyse-call.ts": "η σύνοψη των συναντήσεων",
   "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",
+  "src/lib/lead-classification.ts": "η διαλογή των μηνυμάτων της φόρμας",
 };
 const callers = [];
 (function walkSrc(dir) {

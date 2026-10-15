@@ -215,10 +215,40 @@ const DECLARED = {
     billing: "settled",
     note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph.",
   },
+};
+
+/**
+ * THE SAME DECLARATION, FOR CALL SITES THAT HAVE LEFT THE SDK.
+ *
+ * Step 1.4 moves every model call onto runCompletion. A file that moves
+ * drops out of DECLARED above — it no longer matches `messages.create(`
+ * — and the sentence saying how it bills would go with it, which is the
+ * one thing that must not happen while thirty files are in motion. So it
+ * moves here instead, and §1b below holds this table against the tree
+ * BOTH WAYS: a runCompletion caller missing from it fails, and an entry
+ * naming a file that no longer calls runCompletion fails too.
+ */
+const ROUTED = {
   "src/lib/lead-classification.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after.",
+    note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after. Moved onto runCompletion 2026-10-15; the accumulator is a REQUIRED parameter, because an optional one is how this call spent money with no cost log in the first place.",
+  },
+  "src/app/api/coding/run/route.ts": {
+    note: "V5 Coding. Reserved against codeAssist before the call and settled after, with the Stop button releasing the hold whole — a non-streaming call has no partial output to charge for.",
+  },
+  "src/app/api/data-analysis/[id]/analyse/route.ts": {
+    note: "Data analysis. Reserved before, settled after; a call that returned nothing releases rather than settles (lib/billing/reservations.ts decides that once for all forty call sites).",
+  },
+  "src/app/api/data-analysis/[id]/ask/route.ts": {
+    note: "A follow-up question on an analysis. Same reserve-then-settle as the analysis itself, at its own estimate.",
+  },
+  "src/lib/agents/agent-runner.ts": {
+    note: "Agent runs. Settled by the run path against agent_run, pricing outcome.reportedModel rather than the model asked for, so a failover that served a different model is charged as what actually answered.",
+  },
+  "src/lib/meetings/meeting-analyse-call.ts": {
+    note: "Meetings. One call, recorded onto the caller's accumulator and settled by the route that made it.",
+  },
+  "src/lib/websites-greek-spelling-check.ts": {
+    note: "The spelling pass over a generated site. Recorded onto the website generation's own accumulator, so it is part of that generation's settlement rather than a second charge.",
   },
 };
 
@@ -288,6 +318,21 @@ console.log("\n== 1b. every runCompletion() caller pays for what it used ==");
   });
   check("no runCompletion() call site drops its usage on the floor", silent, []);
 
+  // AND IT STILL SAYS HOW IT BILLS. Dropping out of DECLARED by leaving
+  // the SDK must not drop the sentence too — see ROUTED's own comment.
+  const unexplained = callers.filter((f) => !ROUTED[f]);
+  check("every runCompletion() caller says how it bills", unexplained, []);
+  if (unexplained.length) {
+    console.log("        A call site moved onto the router without its billing note.");
+    console.log("        Add it to ROUTED in scripts/tests/billing-coverage.test.mjs");
+  }
+  // Both ways: an entry for a file that no longer calls runCompletion is
+  // a sentence about nothing, and the next reader believes it.
+  const stale = Object.keys(ROUTED).filter((f) => !callers.includes(f));
+  check("no ROUTED entry names a file that has stopped using the router", stale, []);
+  const thin = Object.entries(ROUTED).filter(([, m]) => typeof m.note !== "string" || m.note.length < 80);
+  check("every ROUTED note says something", thin.map(([f]) => f), []);
+
   // AND EVERY ONE OF THEM NAMES ITS MODEL, which is a different question
   // with the same answer shape.
   //
@@ -351,13 +396,23 @@ const form = readFileSync("src/app/api/websites/[id]/submit-form/route.ts", "utf
 checkTrue("it settles against the website owner", /userId: website\.user_id,[\s\S]{0,200}feature: "lead_classification"/.test(form));
 checkTrue("with real measured usage, not a flat fee", /costs,/.test(form) && /new CostAccumulator\(\)/.test(form));
 checkTrue("at the owner's own plan rate", /plan: ownerPlan/.test(form));
-checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(apiKey"));
+checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(fields"));
 checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{0,400}settleReservation/.test(form));
-checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, response\.model \|\| MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
+{
+  // THE ACCUMULATOR IS NO LONGER OPTIONAL. It used to be `costs?:`, and
+  // `costs?.record(...)` with no caller passing one is the same loss
+  // this check was written for wearing a question mark. The classifier
+  // now goes through runCompletion, so §1b above also ranges over it.
+  const classifier = readFileSync("src/lib/lead-classification.ts", "utf8");
+  checkTrue("the classifier records its own usage",
+    /costs\.record\("classification", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(classifier));
+  checkTrue("...and cannot be called without something to record into",
+    /costs: CostAccumulator\n\): Promise<LeadClassification \| null>/.test(classifier) && !/costs\?: CostAccumulator/.test(classifier));
+}
 // The abuse ceiling that was already there, asserted so it cannot be
 // removed without noticing: an unpaid flood is capped per website/hour.
 checkTrue("a per-website hourly cap still gates the endpoint", /MAX_SUBMISSIONS_PER_HOUR = \d+/.test(form));
-checkTrue("checked before the AI call, not after", form.indexOf("MAX_SUBMISSIONS_PER_HOUR") < form.indexOf("classifyLeadMessage(apiKey"));
+checkTrue("checked before the AI call, not after", form.indexOf("MAX_SUBMISSIONS_PER_HOUR") < form.indexOf("classifyLeadMessage(fields"));
 checkTrue("and a honeypot rejects bots earlier still", /_hp/.test(form));
 // A visitor must never see the form fail because the OWNER is broke.
 checkTrue("an unaffordable classification degrades, it does not 4xx", /if \(affordable\.ok\)/.test(form));

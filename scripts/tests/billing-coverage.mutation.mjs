@@ -28,7 +28,8 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/billing-coverage.test.mjs";
 const SPELLING = "src/lib/websites-greek-spelling-check.ts";
 const RESERVATIONS = "src/lib/billing/reservations.ts";
-const TARGETS = [GATE, SPELLING, RESERVATIONS];
+const CLASSIFIER = "src/lib/lead-classification.ts";
+const TARGETS = [GATE, SPELLING, RESERVATIONS, CLASSIFIER];
 
 const MUTANTS = [
   {
@@ -62,6 +63,25 @@ const MUTANTS = [
     from: "margin < expectedMargin - 1e-9",
     to: "margin < marginPolicy.margin - 1e-9",
     expect: "the shortfall alert fires on null as well as on a low number",
+  },
+  {
+    // 4. A MIGRATED CALL SITE THAT STOPS SAYING HOW IT BILLS. Leaving
+    // the SDK drops a file out of DECLARED automatically; the whole
+    // point of ROUTED is that the sentence does not go with it.
+    name: "a router call site records nothing, as it would if the usage were forgotten",
+    file: CLASSIFIER,
+    from: '  costs.record("classification", outcome.usage, outcome.reportedModel || outcome.model);',
+    to: "  void outcome;",
+    expect: "no runCompletion() call site drops its usage on the floor",
+  },
+  {
+    // 5. THE ACCUMULATOR GOES BACK TO BEING OPTIONAL — which is the
+    // shape in which this exact call once spent money with no cost log.
+    name: "the classifier's accumulator becomes optional again",
+    file: CLASSIFIER,
+    from: "  costs: CostAccumulator\n): Promise<LeadClassification | null> {",
+    to: "  costs?: CostAccumulator\n): Promise<LeadClassification | null> {",
+    expect: "cannot be called without something to record into",
   },
 ];
 

@@ -220,20 +220,27 @@ try {
     check("...without asking the model in the conversation", asked.chat === 0);
     check("...and the changed site is shown", (await pane.isVisible()) && ((await page.locator('[data-testid="chat-site-preview"] iframe').getAttribute("srcdoc")) ?? "").includes("Ωράριο: 9–21"));
 
-    // ---- «Νέα συνομιλία» leaves the site behind
-    // A site opened in a conversation that never reached /api/chat has no
-    // conversation id to change, so «Νέα συνομιλία» changed nothing the pane
-    // was closed on, and the next sentence went to the site as a charged
-    // change instead of starting the new conversation.
+    // ---- a NEW conversation leaves the site behind
+    //
+    // THE SAME MONEY QUESTION, ASKED OF THE ROUTE THAT REPLACED THE
+    // BUTTON. A site opened in a conversation that never reached
+    // /api/chat has no conversation id, so until package 7 the pane
+    // outlived «Νέα συνομιλία» and the next sentence went to the site
+    // as a CHARGED change instead of starting the new conversation.
+    //
+    // That button lived in the conversation drawer inside this screen,
+    // and the drawer went on 2026-10-16 when the owner had the
+    // conversation list taken out of the sidebar. Starting a new
+    // conversation is a navigation now — the rail's «New» — so this
+    // asks the same question of a navigation: the workspace remounts,
+    // and nothing may carry the pane across it.
     if (device.touch) {
       await press(page.locator('[data-testid="chat-site-back"]'));
       await page.waitForTimeout(300);
     }
     const chatsBefore = asked.chat;
-    await press(page.getByRole("button", { name: el.dashboard.chat.showConversations }));
-    await press(page.getByRole("button", { name: el.dashboard.chat.newChat }));
-    await page.waitForTimeout(300);
-    check("«Νέα συνομιλία» closes the site", (await pane.count()) === 0 && (await page.locator('[data-testid="chat-site-reopen"]').count()) === 0);
+    await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+    check("a new conversation leaves the site behind", (await pane.count()) === 0 && (await page.locator('[data-testid="chat-site-reopen"]').count()) === 0);
     await say("καλημέρα");
     check("...and the next sentence starts the new conversation, not a change to the site", asked.chat === chatsBefore + 1 && asked.edit.length === 1, JSON.stringify(asked));
 

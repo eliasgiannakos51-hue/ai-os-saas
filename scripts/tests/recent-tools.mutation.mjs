@@ -40,26 +40,38 @@ const MUTANTS = [
     to: "export const DAYS_TO_APPEAR = 1;",
     expect: "three finished tasks on the same day: not yet",
   },
+  // THREE MUTANTS WERE HERE AND THEIR TARGETS ARE GONE (2026-10-16).
+  //
+  // They broke the layout's read of the latest conversations — as the
+  // server rather than as the person, throwing on a failed read, and
+  // drawing the heading over an empty list. All three were about the
+  // sidebar's seventh row, which the owner had taken out:
+  // «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR».
+  //
+  // The three below replace them, against the three checks that
+  // replaced those: a query that comes back, a list handed down, and
+  // rows drawn. Each one is the removal being undone by hand, which is
+  // the only way this can regress now.
   {
-    name: "the layout reads conversations as the server, not as the person",
+    name: "the layout starts reading conversations again",
     file: "src/app/dashboard/layout.tsx",
-    from: '      supabase\n        .from("chat_conversations")',
-    to: '      createAdminClient()\n        .from("chat_conversations")',
-    expect: "through the person's own session",
+    from: "  let recent: RecentTool[] = [];",
+    to: '  let recent: RecentTool[] = [];\n  await supabase.from("chat_conversations").select("id").limit(15);',
+    expect: "the layout asks for no conversations at all",
   },
   {
-    name: "a failed conversations read takes Recent tools down with it",
+    name: "...and hands them to the sidebar",
     file: "src/app/dashboard/layout.tsx",
-    from: "    if (!chats.error) {",
-    to: "    if (chats.error) throw chats.error;\n    {",
-    expect: "a failed read leaves the list empty",
+    from: "<Sidebar",
+    to: "<Sidebar conversations={[]}",
+    expect: "hands the sidebar neither",
   },
   {
-    name: "an empty conversations list still shows its heading",
+    name: "the sidebar draws a list of conversations again",
     file: "src/components/dashboard/sidebar.tsx",
-    from: "{conversations.length > 0 && !collapsed && (",
-    to: "{!collapsed && (",
-    expect: "with no heading while there is none",
+    from: '        <div className="space-y-1 border-t border-divider px-2 py-3">',
+    to: '        <div data-testid="recent-conversations"><ConversationRows /></div>\n        <div className="space-y-1 border-t border-divider px-2 py-3">',
+    expect: "the sidebar draws no conversation rows",
   },
   {
     name: "the window is no longer thirty days",

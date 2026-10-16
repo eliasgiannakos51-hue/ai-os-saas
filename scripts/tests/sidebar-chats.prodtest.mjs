@@ -1,7 +1,13 @@
 /*
- * THE SIDEBAR'S CONVERSATIONS, AND THE CHATS PAGE, AS A PERSON MEETS
- * THEM — on a computer with a mouse and on a phone with a real finger,
- * in Greek and in English, on a production build.
+ * THE CHATS PAGE AS A PERSON MEETS IT — on a computer with a mouse and
+ * on a phone with a real finger, in Greek and in English, on a
+ * production build.
+ *
+ * IT WAS «THE SIDEBAR'S CONVERSATIONS AND THE CHATS PAGE» until
+ * 2026-10-16, when the owner had the conversations taken out of the
+ * sidebar. What they could do there they do here; that they are
+ * nowhere in the sidebar is the other half, and it is
+ * scripts/tests/sidebar-no-chats.prodtest.mjs.
  *
  * Run: node scripts/tests/sidebar-chats.prodtest.mjs
  *      SKIP_BUILD=1 CHATS_SHOTS=/tmp/shots node scripts/tests/sidebar-chats.prodtest.mjs
@@ -11,7 +17,7 @@
  *   1. The sidebar says «New» and «Chats», not «Chat».
  *   2. Pressing «Chats» shows every conversation, with a search that
  *      finds one by its title AND one by something said inside it.
- *   3. In the sidebar, «⋯» renames a conversation, pins it (and it
+ *   3. On the Chats page, «⋯» renames a conversation, pins it (and it
  *      moves to the group above), and deletes it with an Undo that
  *      brings it back.
  *   4. The same from the phone — including the long press, which is a
@@ -48,7 +54,11 @@ function check(name, cond, detail) {
 
 const OWNER = "boss@example.com";
 const OTHER_ID = "00000000-0000-4000-8000-00000000b000";
-const state = { flags: [{ key: "chats-page", audience: "everyone" }], credits: 3000 };
+// NO SWITCH TO SEED. The Chats page was behind `chats-page` for a day;
+// the switch was removed on 2026-10-16 when the page opened to
+// everybody, and a seed for a flag nothing declares would read as a
+// precondition this file still has.
+const state = { flags: [], credits: 3000 };
 
 // Three of this account's conversations and ONE that is not, so every
 // list assertion has something it must leave out.
@@ -225,10 +235,12 @@ try {
 
       // ---- 2. the Chats page, and its two searches -----------------
       await page.goto(`${ORIGIN}/dashboard/chats`, { waitUntil: "networkidle" });
-      // SCOPED TO <main>. The same component draws the sidebar's rows
-      // and the page's, and the sidebar is on this page too — reading
-      // the document found every conversation twice and the filter
-      // "failed" because the sidebar's copy does not filter.
+      // SCOPED TO <main>, WHICH COST A ROUND TO LEARN. The sidebar drew
+      // the same rows from the same component until 2026-10-16, so
+      // reading the document found every conversation twice and the
+      // filter "failed" because that copy did not filter. The sidebar
+      // has no rows now and this would pass unscoped — it stays scoped
+      // because a page's list assertion should read the page.
       const titlesOn = () =>
         page.evaluate(() =>
           [...(document.querySelector("main") ?? document.body).querySelectorAll('[data-testid="conversation-row"]')].map((r) =>

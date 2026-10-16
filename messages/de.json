@@ -306,10 +306,8 @@
       "expand": "Seitenleiste ausklappen",
       "label": "Hauptmenü",
       "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen.",
-      "recentChats": "Letzte Chats",
       "untitledChat": "Neue Unterhaltung",
-      "chats": "Chats",
-      "allConversations": "Alle Unterhaltungen"
+      "chats": "Chats"
     },
     "tabs": {
       "home": "Start",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "Ionexa Chat",
-      "hideConversations": "Unterhaltungen ausblenden",
-      "showConversations": "Unterhaltungen einblenden",
-      "focusMode": "Fokusmodus",
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
       "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
-      "hideConversationsHint": "Blendet die Unterhaltungsliste aus und gibt dem Verlauf die volle Breite.",
-      "showConversationsHint": "Die Unterhaltungsliste wieder anzeigen.",
       "send": "Senden",
       "emptyBody": "Frag alles — Allgemeinwissen, Ideenfindung, Hilfe beim Schreiben oder einfach ein Gespräch. An kein Ionexa-AI-Modul gebunden.",
       "composerPlaceholder": "Nachricht an Ionexa...",
       "mentorMode": "Mentor-Modus",
       "mentorModeHint": "Mentor-Modus: strategische Begleitung statt bloßer Antworten — benennt Risiken, stellt Rückfragen, schlägt Alternativen vor und nutzt deine erfassten Daten als Kontext.",
-      "newChat": "Neuer Chat",
       "noConversations": "Noch keine Chats.",
       "groupPinned": "Angeheftet",
       "groupToday": "Heute",

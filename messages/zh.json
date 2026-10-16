@@ -306,10 +306,8 @@
       "expand": "展开侧边栏",
       "label": "主菜单",
       "saveFailed": "无法保存此更改，请重试。",
-      "recentChats": "最近的对话",
       "untitledChat": "新对话",
-      "chats": "对话",
-      "allConversations": "全部对话"
+      "chats": "对话"
     },
     "tabs": {
       "home": "首页",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "Ionexa 聊天",
-      "hideConversations": "隐藏对话列表",
-      "showConversations": "显示对话列表",
-      "focusMode": "专注模式",
       "streamInterrupted": "连接在回复完成前中断。",
       "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
-      "hideConversationsHint": "隐藏会话列表，让对话占据整个宽度。",
-      "showConversationsHint": "再次显示会话列表。",
       "send": "发送",
       "emptyBody": "什么都可以问——常识、头脑风暴、写作帮助，或者只是聊聊天。不与任何 Ionexa AI 模块绑定。",
       "composerPlaceholder": "给 Ionexa 发消息…",
       "mentorMode": "导师模式",
       "mentorModeHint": "导师模式：给出战略性的引导而不只是答案——指出风险、提出澄清问题、给出替代方案，并把你记录的数据作为上下文。",
-      "newChat": "新建对话",
       "noConversations": "还没有对话。",
       "groupPinned": "已置顶",
       "groupToday": "今天",

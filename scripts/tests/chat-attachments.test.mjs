@@ -221,8 +221,24 @@ check("the request carries them", /\.\.\.\(carried \? \{ attachments: carried\.a
 check("a refused message's images are removed, and the refusal said",
   /if \(carried\) void discardChatImages\(carried\.imagePaths\);\s*if \(data\?\.reason === "attachment_not_ready"\) \{\s*setError\(t\("attach\.notReady"/.test(ws) && /data\?\.reason === "bad_attachments"\) \{\s*setError\(t\("attach\.refused"\)\)/.test(ws));
 check("...and once the message is saved the tray empties", /if \(carried\) attach\.clear\(\);/.test(ws));
+// THE DELETE MOVED TO THE ROUTE, so this reads the route and the row
+// that calls it. It was a `.delete()` from the browser inside Chat's
+// drawer; the drawer went with the sidebar's «Recent chats» on
+// 2026-10-16 and the only delete left is api/conversations/[id].
+// BOTH HALVES OR NEITHER: the route must gather the paths AFTER its
+// own two failure returns, and the caller must discard them only on a
+// successful answer. A check on one half alone would stay green while
+// the other deleted pictures for a conversation that is still there.
+const delRoute = code("src/app/api/conversations/[id]/route.ts");
+const delRow = code("src/components/dashboard/conversation-rows.tsx");
 check("a deleted conversation's images go with it, only after the delete succeeded",
-  /if \(deleteError\) \{[\s\S]{0,160}return;\s*\}\s*const imagePaths = [\s\S]{0,200}void discardChatImages\(imagePaths\);/.test(ws));
+  /if \(error\) \{[\s\S]{0,200}return fail\("update_failed", 500\);\s*\}\s*if \(!deleted \|\| deleted\.length === 0\) \{\s*return fail\("not_found", 404\);\s*\}\s*const imagePaths = [\s\S]{0,240}return NextResponse\.json\(\{ ok: true, imagePaths \}\);/.test(delRoute) &&
+  /if \(!res\.ok \|\| !json\.ok\) \{[\s\S]{0,200}return;\s*\}\s*void discardChatImages\(json\.imagePaths \?\? \[\]\);/.test(delRow));
+// AND NOTHING IN CHAT STILL DOES IT THE OLD WAY — the half a check on
+// the new path cannot see.
+check("...and no screen deletes a conversation straight from the browser",
+  !/from\("chat_conversations"\)[\s\S]{0,120}\.delete\(\)/.test(ws) &&
+  !/from\("chat_conversations"\)[\s\S]{0,120}\.delete\(\)/.test(delRow));
 check("a reload shows what the stream showed", /const basis = readAnswerBasis\(stored\);[\s\S]{0,200}attachments: parseStoredAttachments\(storedAttachments\),\s*provenance: basis\.modules \?\? undefined,\s*memoriesUsed: basis\.memories,/.test(ws));
 check("the memories used arrive on `done` and are drawn under the answer", /memoriesUsed = readMemoriesUsed\(event\.memoriesUsed\);/.test(ws) && /<MemoriesUsed memories=\{msg\.memoriesUsed\} \/>/.test(ws));
 check("the message shows what it carried", /<SentAttachments attachments=\{msg\.attachments\} previews=\{msg\.previews\} \/>/.test(ws));

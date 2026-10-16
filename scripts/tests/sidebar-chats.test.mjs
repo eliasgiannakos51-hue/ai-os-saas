@@ -58,10 +58,21 @@ const CHAT_WORKSPACE = "src/components/chat/chat-workspace.tsx";
 const src = (p) => stripComments(readFileSync(p, "utf8"));
 
 // ---------------------------------------------------------------------
-console.log("== 1. the switch, run ==");
+console.log("== 1. there is no switch left to read ==");
 // ---------------------------------------------------------------------
+// IT WAS `chats-page`, AND IT IS GONE (owner, 2026-10-16): «Για ΟΛΟΥΣ
+// τους χρήστες. Όχι μόνο για μένα.» This section used to run flags.ts
+// with the database stood in and ask who saw Chats at each of the
+// owner's three positions. There is nothing to ask now — the rail's
+// second row is «Chats» for everybody and the page is open to
+// everybody — so what is held instead is that no corner of the code
+// still waits for a switch that will never arrive.
+// RUN, NOT READ, for the same reason the old section ran it: flags.ts
+// imports the admin client, so load-ts refuses it outright and a plain
+// text search for the key would pass on a file that still declared it
+// in another spelling. The stand-ins are the ones that were here.
 const standIn = [
-  'const createAdminClient = () => ({ from: () => ({ select: async () => globalThis.__flagsDb() }) });',
+  'const createAdminClient = () => ({ from: () => ({ select: async () => ({ data: [], error: null }) }) });',
   'const isAdminEmail = (email) => String(email).trim().toLowerCase() === "owner@example.com";',
   "const logApiError = () => {};",
 ].join("\n");
@@ -74,67 +85,58 @@ const runnable = readFileSync("src/lib/flags/flags.ts", "utf8")
 const dir = mkdtempSync(join(tmpdir(), "sidebar-chats-"));
 writeFileSync(join(dir, "flags.ts"), runnable);
 const flags = await loadTs(join(dir, "flags.ts"));
-const OWNER = { email: "owner@example.com" };
-const CUSTOMER = { email: "someone@example.com" };
-async function seen(db) {
-  globalThis.__flagsDb = db;
-  return {
-    owner: await flags.isFeatureOn(KEY, OWNER),
-    customer: await flags.isFeatureOn(KEY, CUSTOMER),
-    audience: (await flags.readFlagAudiences())[KEY],
-  };
-}
-check(`${KEY} is a declared switch`, flags.isFlagKey(KEY));
-const none = await seen(async () => ({ data: [], error: null }));
-check(
-  "with no row it is «Εσύ και ο λογαριασμός δοκιμής»: the owner sees Chats, a customer does not",
-  none.audience === "staff" && none.owner && !none.customer,
-  JSON.stringify(none)
-);
-const broken = await seen(async () => ({ data: null, error: { message: "no such table" } }));
-check(
-  "a table that cannot be read falls back to the same place, not to «Όλοι»",
-  broken.audience === "staff" && !broken.customer,
-  JSON.stringify(broken)
-);
-const everyone = await seen(async () => ({ data: [{ key: KEY, audience: "everyone" }], error: null }));
-check("«Όλοι»: a customer sees it too", everyone.owner && everyone.customer);
-const off = await seen(async () => ({ data: [{ key: KEY, audience: "off" }], error: null }));
-check("«Κανείς»: not even the owner", !off.owner && !off.customer);
+check("chats-page is no longer a declared switch", !flags.isFlagKey("chats-page"));
+// AND THE SCAN STILL SEES SWITCHES, so the line above cannot pass by
+// a loader that returns nothing — the shape of an empty check.
+check("...while the switches that remain are still declared", flags.isFlagKey("all-tools-tiles"));
+const namesIt = ["src/lib/nav/rail.ts", SIDEBAR, PAGE, "src/app/dashboard/layout.tsx", CHAT_WORKSPACE, "src/app/dashboard/chat/page.tsx"]
+  .filter((f) => existsSync(f) && /isFeatureOn\(\s*["']chats-page["']/.test(readFileSync(f, "utf8")));
+check(`nothing asks for it any more (${namesIt.length})`, namesIt.length === 0, namesIt.join(", "));
+// A switch nobody reads is what feature-flags.test.mjs fails the build
+// over, and a READ with no switch behind it is the same fault pointing
+// the other way: it would resolve to the default for ever, silently.
 
 // ---------------------------------------------------------------------
-console.log("\n== 2. the rail differs in exactly one row ==");
+console.log("\n== 2. there is one rail, and its second row is Chats ==");
 // ---------------------------------------------------------------------
+// THERE WERE TWO RAILS HERE, and this section held that they differed
+// in exactly one row. There is one now: railRows(chatsPage) is gone
+// with the switch and RAIL_ROWS is what the sidebar draws.
 const rail = await loadTs("src/lib/nav/rail.ts");
-const shut = rail.railRows(false);
-const open = rail.railRows(true);
-check("the two rails are the same length", shut.length === open.length && shut.length > 0, `${shut.length} vs ${open.length}`);
-const differing = shut.map((r, i) => (r.key === open[i].key && r.href === open[i].href ? null : i)).filter((i) => i !== null);
+const rows = rail.RAIL_ROWS;
+check("the rail is Logo, New, Chats, Coding, All tools", rows.map((r) => r.key).join() === "new,chats,coding,allTools", JSON.stringify(rows.map((r) => r.key)));
 // INDEX 1, NOT 2: the Logo is row 1 of the DESIGN and is not a rail
 // row at all — RAIL_ROWS starts at New. Written out because counting
 // it is the obvious mistake, and this check made it once.
-check("exactly one row differs, and it is the Chat one", differing.length === 1 && differing[0] === 1, JSON.stringify(differing));
 check(
-  "shut, the third row is Chat at /dashboard/chat",
-  shut[1].key === "chat" && shut[1].href === "/dashboard/chat",
-  JSON.stringify(shut[1])
+  "the second row is Chats, and it opens the page with every conversation",
+  rows[1].key === "chats" && rows[1].href === rail.CHATS_HREF && rail.CHATS_HREF === "/dashboard/chats",
+  JSON.stringify(rows[1])
 );
+check("no row goes to /dashboard/chat any more", !rows.some((r) => r.href === "/dashboard/chat"), JSON.stringify(rows));
+// READ FROM THE EXPORT LIST, NOT BY TOUCHING THE NAME. `rail.railRows`
+// would be the suite reading a symbol its subject does not export —
+// undefined today, a TypeError the day somebody calls it — which
+// test-export-drift.test.mjs §6 exists to catch. Naming every export
+// and requiring this one to be absent is the same claim, made of
+// something that is actually there.
+check("there is no second rail to build", !Object.keys(rail).includes("railRows"), Object.keys(rail).join(", "));
 check(
-  "open, the third row is Chats at /dashboard/chats",
-  open[1].key === "chats" && open[1].href === rail.CHATS_HREF && rail.CHATS_HREF === "/dashboard/chats",
-  JSON.stringify(open[1])
+  "activeRail lights Chats on /dashboard/chats",
+  JSON.stringify(rail.activeRail("/dashboard/chats", [], [], rows)) === '{"key":"chats"}'
 );
+// AGAINST A RAIL THAT IS NOT THE DEFAULT, because `rows` IS the default
+// now and a function that ignored its argument would answer this
+// identically. The phone's bottom bar is the real second caller: it
+// passes RAIL_ROWS plus a Chat tab the sidebar does not have
+// (lib/nav/tabs.ts), so /dashboard/chat lights Chat there and All tools
+// here — and that only works if the given list wins.
+const phoneRail = [...rows, { key: "chat", href: "/dashboard/chat" }];
 check(
-  "the order is Logo, New, Chats, Coding, All tools either way",
-  open.map((r) => r.key).join() === "new,chats,coding,allTools" && shut.map((r) => r.key).join() === "new,chat,coding,allTools"
-);
-check(
-  "activeRail follows the rail it is given: /dashboard/chats is the Chats row",
-  JSON.stringify(rail.activeRail("/dashboard/chats", [], [], open)) === '{"key":"chats"}'
-);
-check(
-  "...and with the old rail it is not a rail row at all",
-  rail.activeRail("/dashboard/chats", [], [], shut) === null
+  "...and follows the rail it is GIVEN, not the one it knows",
+  JSON.stringify(rail.activeRail("/dashboard/chat", [], [], phoneRail)) === '{"key":"chat"}' &&
+    rail.activeRail("/dashboard/chat", [], [], rows) === null,
+  `${JSON.stringify(rail.activeRail("/dashboard/chat", [], [], phoneRail))} / ${JSON.stringify(rail.activeRail("/dashboard/chat", [], [], rows))}`
 );
 
 // ---------------------------------------------------------------------
@@ -206,18 +208,22 @@ console.log("\n== 5. nothing the drawer did is lost ==");
 check("the page and its workspace exist", existsSync(PAGE) && existsSync(WORKSPACE));
 const pageSrc = src(PAGE);
 const workSrc = src(WORKSPACE);
-check("the page is behind the switch and 404s when it is shut", /isFeatureOn\("chats-page", user\)/.test(pageSrc) && /notFound\(\)/.test(pageSrc));
-check("the sidebar reads the switch through its parent, not itself", /chatsPage/.test(src(SIDEBAR)) && /isFeatureOn\("chats-page", user\)/.test(src("src/app/dashboard/layout.tsx")));
+check("the page is open to everybody, with no switch in front of it", !/isFeatureOn/.test(pageSrc) && !/notFound\(\)/.test(pageSrc));
+check("the sidebar draws no conversations and takes no list to draw", !/<ConversationRows/.test(src(SIDEBAR)) && !/conversations/.test(src(SIDEBAR)));
 // THE DRAWER ITSELF, NOT THE SCRIM. Both are guarded by the same
 // words, so a regex for `sidebarOpen && !chatsPage` went on matching
 // the scrim after the drawer's own guard had been removed — the list
 // came back and the gate did not notice. Anchored on the className
 // that decides whether the drawer is laid out at all.
-check(
-  "the drawer inside Chat is not drawn when the switch is on",
-  /sidebarOpen && !chatsPage \? "flex" : "hidden"/.test(src(CHAT_WORKSPACE))
-);
-check("...and the button that opened it is not drawn either", /\{!chatsPage && \(/.test(src(CHAT_WORKSPACE)));
+// THE DRAWER IS DELETED NOW, NOT MERELY UNDRAWN. It was kept behind
+// the switch so «Πώς γυρίζει πίσω» could be one press; with the switch
+// gone, its own comment's instruction applies —
+// «conversation-sidebar.tsx is removed in the round that removes this
+// switch». Absence is checked three ways because a half-removal is the
+// likely one: the file, the import, and the state it needed.
+check("the drawer inside Chat is gone from the tree", !existsSync("src/components/chat/conversation-sidebar.tsx"));
+check("...and Chat no longer imports or lays it out", !/ConversationSidebar/.test(src(CHAT_WORKSPACE)));
+check("...nor keeps the open/closed state it needed", !/sidebarOpen|toggleSidebar/.test(src(CHAT_WORKSPACE)));
 
 // EVERY ACTION THE DRAWER HAD, AND WHERE IT WENT. The list is the
 // population this ranges over: a fifth action added to the drawer that
@@ -231,16 +237,32 @@ const CARRIED = [
   ["the favourite star", () => /<FavoriteButton/.test(rowsSrc)],
   ["pinned grouped above the rest", () => /groupPinned/.test(rowsSrc)],
   ["an empty state", () => /noConversations/.test(rowsSrc)],
-  ["a new conversation", () => open[0].key === "new" && /rows\.map\(\(r\) => row\(r\.href/.test(src(SIDEBAR))],
+  ["a new conversation", () => rows[0].key === "new" && /rows\.map\(\(r\) => row\(r\.href/.test(src(SIDEBAR))],
 ];
 for (const [what, held] of CARRIED) check(`carried over: ${what}`, held());
-check("the drawer's own file is still there, so the switch can go back", existsSync("src/components/chat/conversation-sidebar.tsx"));
+// THE FILE WAS KEPT ON PURPOSE WHILE THE SWITCH EXISTED, so «Πώς
+// γυρίζει πίσω» could be one press on /dashboard/system-health. With
+// the switch gone, going back is a Revert, and the file's own comment
+// said this round is the one that removes it. Held the other way now,
+// in section 5 above: it must NOT be there.
 
 check("the Chats page searches titles with the folding matcher, not toLowerCase", /matchesSearch\(/.test(workSrc) && !/toLowerCase\(\)\.includes/.test(workSrc));
 check("...and asks the server for what was said", /\/api\/conversations\/search\?q=/.test(workSrc));
 check("the content search says what it looked at", /searchedContent/.test(workSrc) && /CONTENT_ROWS_SCANNED/.test(workSrc));
 check("several at once share the single delete's route", /conversationDeleteUrl\(id\), \{ method: "DELETE" \}/.test(workSrc));
-check("the sidebar caps the list and offers the way out", /RECENT_CONVERSATIONS/.test(src(SIDEBAR)) && /rail\.allConversations/.test(src(SIDEBAR)));
+// THE CAP AND ITS «Όλες οι συνομιλίες» LINK WERE THE SIDEBAR'S, and
+// the sidebar has no list to cap any more. The Chats page has its own
+// bound and says it out loud (CHATS_LIST_CAP, «atCap»), which is the
+// claim worth holding now: a page that quietly renders its newest 500
+// is indistinguishable from one that is broken.
+check("the Chats page says so when its own list is capped", /CHATS_LIST_CAP/.test(workSrc) && /atCap/.test(workSrc));
+check("...and the sidebar has no list left to cap", !/RECENT_CONVERSATIONS/.test(src(SIDEBAR)) && !/allConversations/.test(src(SIDEBAR)));
+// AND THE WORDS WENT WITH IT, in all ten. A heading left in the
+// message files is a heading the next person puts back without
+// thinking about it, and `sidebar.rail.*` is a dynamic namespace —
+// orphan-i18n-keys.test.mjs counts every key under it as reachable,
+// so nothing else would have noticed these two going dead.
+const DELETED_WORDS = [["sidebar", "rail", "recentChats"], ["sidebar", "rail", "allConversations"]];
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the words, in all ten languages ==");
@@ -250,7 +272,6 @@ const messages = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSy
 check("ten locale files were read", Object.keys(messages).length === 10);
 const NEEDED = [
   ["sidebar", "rail", "chats"],
-  ["sidebar", "rail", "allConversations"],
   ["dashboard", "chat", "moveToProject"],
   ["dashboard", "chat", "undo"],
   ["dashboard", "chat", "deleteFailed"],
@@ -260,6 +281,10 @@ const NEEDED = [
   ["pageTitle", "chats"],
 ];
 const at = (o, path) => path.reduce((v, k) => (v == null ? v : v[k]), o);
+for (const path of DELETED_WORDS) {
+  const left = LOCALES.filter((l) => at(messages[l], path) !== undefined);
+  check(`${path.join(".")} is gone from all ten`, left.length === 0, left.join(", "));
+}
 for (const path of NEEDED) {
   const missing = LOCALES.filter((l) => typeof at(messages[l], path) !== "string" || !at(messages[l], path).trim());
   check(`${path.join(".")} is written in all ten`, missing.length === 0, missing.join(", "));

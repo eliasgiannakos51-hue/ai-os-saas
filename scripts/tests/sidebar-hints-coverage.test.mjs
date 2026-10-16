@@ -184,18 +184,27 @@ for (const loc of LOCALES) {
   check(`${loc}: …and none for a row that is not built yet`, premature, []);
 }
 
-console.log("\n== 3. the chat focus-mode toggle is discoverable ==");
+console.log("\n== 3. the chat focus-mode toggle, and the six words it left behind ==");
+// THE TOGGLE IS GONE, AND THIS SECTION IS THE RECORD OF WHY IT WAS HERE.
+//
 // It shipped as a bare 36x36 icon whose only affordance was a native
-// `title`. It rendered correctly and no user found it. "Renders" is not
-// the same claim as "is findable".
+// `title`: it rendered correctly and no user found it — "renders" is
+// not the same claim as "is findable" — so this section held it to a
+// visible label and a real Tooltip. What it opened was the drawer of
+// conversations inside Chat, and on 2026-10-16 the owner had the
+// conversations taken out of the sidebar; the drawer went with them
+// and the toggle had nothing left to show.
+//
+// SO THE CHECK FLIPS, rather than being deleted. A control nobody can
+// find is this project's own scar, and the six strings it used are the
+// loose end that would have outlived it in ten languages — one of them
+// («Focus mode») reading as a feature the product no longer has.
 const chat = readFileSync("src/components/chat/chat-workspace.tsx", "utf8");
-checkTrue("the toggle exists", /aria-expanded=\{sidebarOpen\}/.test(chat));
-checkTrue("it has a VISIBLE text label, not just an icon", /\{sidebarOpen \? t\("hideConversations"\) : t\("focusMode"\)\}/.test(chat));
-checkTrue("it uses the real Tooltip, not a native title", /<Tooltip[\s\S]{0,400}aria-expanded=\{sidebarOpen\}/.test(chat));
-check("no native title attribute on it", /title=\{sidebarOpen \? t\("hideConversations"\)/.test(chat), false);
-for (const key of ["hideConversationsHint", "showConversationsHint", "focusMode", "hideConversations"]) {
-  const missing = LOCALES.filter((l) => typeof messages[l]?.dashboard?.chat?.[key] !== "string");
-  check(`dashboard.chat.${key} in every locale`, missing, []);
+check("there is no conversation drawer left to toggle", /aria-expanded=\{sidebarOpen\}/.test(chat), false);
+check("...nor any trace of its open/closed state", /sidebarOpen|toggleSidebar|CHAT_SIDEBAR_STORAGE_KEY/.test(chat), false);
+for (const key of ["hideConversationsHint", "showConversationsHint", "focusMode", "hideConversations", "showConversations", "newChat"]) {
+  const left = LOCALES.filter((l) => messages[l]?.dashboard?.chat?.[key] !== undefined);
+  check(`dashboard.chat.${key} is gone from every locale`, left, []);
 }
 
 console.log("\n== 4. the Tooltip renders nothing without content ==");

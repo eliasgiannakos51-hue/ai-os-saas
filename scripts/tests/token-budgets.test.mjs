@@ -175,7 +175,19 @@ const CLASSIFIED = {
   ],
   internal: [
     "src/lib/chat/memory.ts",
+    // The per-operation ceiling TABLE Coding reads (spec.maxTokens).
+    // Visible since the population stopped being spelt the SDK's way;
+    // it makes no call of its own, and the call that uses it is in
+    // routedUnmarked below.
+    "src/lib/coding/operations.ts",
+    // THROUGH THE ROUTER SINCE 2026-10-15, so it writes `maxTokens`
+    // rather than `max_tokens`; 200 tokens for one forced tool call
+    // whose answer is one word from a four-item enum. A cut reply
+    // carries no complete tool_use block, the parse returns null, and
+    // the submission is saved and emailed with no badge — which is the
+    // same outcome as "unclear".
     "src/lib/lead-classification.ts",
+
     "src/lib/website-security-review.ts",
     "src/lib/insights/narrate.ts",
     "src/lib/reflection-agent.ts",
@@ -187,6 +199,55 @@ const CLASSIFIED = {
     "src/app/api/text-actions/route.ts",
   ],
 };
+
+//   routedUnmarked — chooses a ceiling through runCompletion, the answer
+//                 reaches a person, and NOTHING reads the stop reason.
+//
+// THIS LIST IS A FINDING, NOT AN EXEMPTION, and it is written down
+// rather than filed under "internal" because filing it there would have
+// been a sentence that is not true.
+//
+// HOW IT STAYED INVISIBLE. The population above was `max_tokens:`, the
+// SDK's spelling. A call site that moves onto runCompletion writes
+// `maxTokens:` and leaves the population entirely — so these five were
+// not failing section 3, they were not being looked at. They were found
+// on 2026-10-15 by widening the population for step 1.4, which moves
+// twenty-nine more files the same way.
+//
+// WHAT IS MISSING, concretely: AiResult carries `stopReason`
+// (lib/ai/providers/types.ts) and lib/verification/truncation.ts has
+// modelTextFrom({ text, stopReason }) for exactly this path. None of
+// the five calls it. A reply cut at the ceiling is therefore shown
+// whole, with no mark, and reads as a short answer.
+//
+// The list is held at its size: a sixth cannot be added silently, and
+// each entry is checked BOTH ways, so one that gains its stop-reason
+// handling must be taken out rather than left here looking handled.
+CLASSIFIED.routedUnmarked = [
+  "src/app/api/coding/run/route.ts",
+  "src/app/api/data-analysis/[id]/analyse/route.ts",
+  "src/app/api/data-analysis/[id]/ask/route.ts",
+  "src/lib/meetings/meeting-analyse-call.ts",
+  "src/lib/websites-greek-spelling-check.ts",
+];
+{
+  const ceiling = 5;
+  ok(`the unmarked list has not grown (${CLASSIFIED.routedUnmarked.length} of at most ${ceiling})`,
+    CLASSIFIED.routedUnmarked.length <= ceiling,
+    "a sixth call site reaching a person with no truncation mark needs a decision, not a line here");
+  for (const f of CLASSIFIED.routedUnmarked) {
+    const src = strip(readFileSync(f, "utf8"));
+    ok(`${f.split("/").pop()}: still a router call site that picks a ceiling`,
+      /\brunCompletion\(/.test(src) && /maxTokens\s*:/.test(src), f);
+    // BOTH WAYS. An entry that has since started reading the stop
+    // reason is a sentence about a problem that is gone, and the next
+    // reader believes it.
+    ok(`${f.split("/").pop()}: and still does not read the stop reason`,
+      !/modelTextFrom\(|stopReason/.test(src),
+      `${f} now handles truncation — move it to deliverable and delete this line`);
+  }
+}
+
 //   passthrough — chooses NO budget of its own. The provider adapters and
 //                 the batch client hand on whatever the caller asked for,
 //                 so there is nothing here to classify by outcome — and a
@@ -199,25 +260,57 @@ CLASSIFIED.passthrough = [
   "src/lib/ai/providers/adapters/anthropic.ts",
   "src/lib/ai/providers/adapters/groq.ts",
   "src/lib/ai/batch/batch-client.ts",
+  // Both became visible on 2026-10-15 with the population above. The
+  // batch builder hands on `spec.outputTokens`, and types.ts only
+  // DECLARES the field — neither picks a number.
+  "src/lib/ai/batch/agent-batch.ts",
+  "src/lib/ai/providers/types.ts",
 ];
 {
   const literal = CLASSIFIED.passthrough.filter((f) => {
     const src = strip(readFileSync(f, "utf8"));
-    return /max_tokens\s*:\s*(\d|[A-Z_]{3,})/.test(src);
+    return /(?:max_tokens|maxTokens)\s*:\s*(\d|[A-Z_]{3,})/.test(src);
   });
   list("a passthrough never chooses a budget of its own", literal);
-  const forwards = CLASSIFIED.passthrough.filter((f) =>
-    /max_tokens\s*:\s*[a-z][A-Za-z.]*maxTokens/.test(strip(readFileSync(f, "utf8")))
-  );
+  // FORWARDS, OR ONLY DECLARES. Three hand the caller's ceiling to a
+  // provider (`max_tokens: request.maxTokens`); the batch builder hands
+  // on the spec's (`maxTokens: spec.outputTokens`); types.ts declares
+  // the field and carries no call at all. All three shapes are
+  // "chooses nothing of its own", and spelling the difference out is
+  // what keeps a hardcoded number from hiding behind the word
+  // passthrough.
+  const FORWARDS = /(?:max_tokens|maxTokens)\s*:\s*[a-z][A-Za-z.]*\.?(?:maxTokens|outputTokens)/;
+  const DECLARES_ONLY = /maxTokens\s*:\s*number\s*;/;
+  ok("the forwarding shape is recognised", FORWARDS.test("max_tokens: request.maxTokens"));
+  ok("...and the batch builder's", FORWARDS.test("maxTokens: spec.outputTokens"));
+  ok("...and a hardcoded ceiling is not forwarding", !FORWARDS.test("max_tokens: 4096"));
+  ok("the declaration shape is recognised", DECLARES_ONLY.test("  maxTokens: number;"));
+  ok("...and a value is not a declaration", !DECLARES_ONLY.test("maxTokens: 4096,"));
+  const forwards = CLASSIFIED.passthrough.filter((f) => {
+    const src = strip(readFileSync(f, "utf8"));
+    return FORWARDS.test(src) || DECLARES_ONLY.test(src);
+  });
   ok(
-    `every passthrough forwards the caller's ceiling (${forwards.length}/${CLASSIFIED.passthrough.length})`,
+    `every passthrough forwards the caller's ceiling or only declares it (${forwards.length}/${CLASSIFIED.passthrough.length})`,
     forwards.length === CLASSIFIED.passthrough.length,
     CLASSIFIED.passthrough.filter((f) => !forwards.includes(f)).join(", ")
   );
 }
 
 const KNOWN = new Set(Object.values(CLASSIFIED).flat());
-const withBudget = SOURCES.filter((f) => /max_tokens\s*:/.test(strip(readFileSync(f, "utf8"))));
+// BOTH SPELLINGS, AND THE SECOND ONE IS WHY THIS GATE WAS SHRINKING.
+//
+// The population used to be `max_tokens:`, the SDK's spelling. A call
+// site that moves onto runCompletion writes `maxTokens:` instead and
+// drops straight out of it — silently, because "every classified file
+// still calls one" is the only check that would notice and it reads as
+// a stale ENTRY rather than a lost file. Six files had already left
+// this way before anyone looked: the two data-analysis routes, Coding,
+// the agents runner, the meetings summary and the Site spelling pass.
+// Step 1.4 moves twenty-nine more, so the population is the CHOICE of a
+// ceiling, in whichever spelling the caller uses.
+const CHOOSES_A_CEILING = /(?:max_tokens|maxTokens)\s*:/;
+const withBudget = SOURCES.filter((f) => CHOOSES_A_CEILING.test(strip(readFileSync(f, "utf8"))));
 ok(`call sites were actually found (${withBudget.length})`, withBudget.length >= 20, String(withBudget.length));
 list("every max_tokens call site is classified", withBudget.filter((f) => !KNOWN.has(f)));
 list("and no classified file has stopped calling one", [...KNOWN].filter((f) => !withBudget.includes(f)));
@@ -249,8 +342,29 @@ console.log("\n== 3. a deliverable cannot be shipped severed ==");
 // THE PART THAT GETS SKIPPED, and the reason this file exists.
 for (const file of CLASSIFIED.deliverable) {
   const src = strip(readFileSync(file, "utf8"));
-  const readsStopReason = /modelText\(/.test(src) || /stop_reason/.test(src);
-  ok(`${file.split("/").pop()} reads the stop reason`, readsStopReason, file);
+  // ONE RULE, AND IT IS CHECKED PER KIND OF CALL — which matters now
+  // that a file can make both kinds. `modelText(` reads an SDK
+  // response, `modelTextFrom(` reads a runCompletion outcome
+  // (lib/verification/truncation.ts says why there are two), and a file
+  // may also compare the stop reason itself.
+  //
+  // A SINGLE FILE-WIDE FLAG WAS NOT ENOUGH, and the mutation suite is
+  // what said so: lib/research/research.ts makes three calls, two
+  // routed and one still on the SDK, and while the SDK one kept
+  // `modelText(` the whole file read as compliant — the synthesis could
+  // write `truncated: false` by hand and nothing went red. Each kind of
+  // call now has to show its own door.
+  const makesSdkCall = /\bmessages\s*\.\s*(create|stream)\s*\(/.test(src);
+  const makesRoutedCall = /\brunCompletion\s*\(/.test(src);
+  ok(`${file.split("/").pop()} makes a model call this check can see`, makesSdkCall || makesRoutedCall, file);
+  if (makesSdkCall) {
+    ok(`${file.split("/").pop()} reads the stop reason of its SDK call`,
+      /\bmodelText\(/.test(src) || /stop_reason/.test(src), file);
+  }
+  if (makesRoutedCall) {
+    ok(`${file.split("/").pop()} reads the stop reason of its routed call`,
+      /\bmodelTextFrom\(/.test(src) || /AI_TRUNCATED_STOP_REASON/.test(src), file);
+  }
   // AND DOES NOT ALSO HAND-ROLL THE EXTRACTION. A file that calls
   // modelText for one response and joins the blocks itself for another
   // has a hole exactly the size of the second call.

@@ -167,7 +167,7 @@ export async function POST(request: Request) {
           }
           try {
             void recordAiCallForDailySpend(estimate.estimatedCredits);
-            const clarification = await checkNeedsClarification(apiKey, "automation", description, costs);
+            const clarification = await checkNeedsClarification("automation", description, costs, null, user.id);
             await settleReservation({
               userId: user.id,
               reservationId,

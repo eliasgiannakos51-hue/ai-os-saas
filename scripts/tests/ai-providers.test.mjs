@@ -30,7 +30,7 @@
 //   computed from the same halved cost. Section 6.
 //
 // Run: node scripts/tests/ai-providers.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
@@ -94,6 +94,88 @@ const stripTs = (text) =>
   text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 const stripSql = (text) =>
   text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/--.*$/gm, "");
+
+// ===========================================================================
+console.log("== 0b. THE ROUTING RULES CARRY NO PATH TO A VENDOR PACKAGE ==");
+// ===========================================================================
+//
+// WHAT THIS BUYS, and it is not tidiness. scripts/tests/load-ts.mjs
+// refuses to load a module whose import graph reaches a node_modules
+// package — deliberately, because "a silent stub would be a lie". So
+// the moment runCompletion's graph contains one, EVERY gate that loads
+// a module which calls runCompletion stops being able to load it, and
+// that is most of them. It happened (ΛΘ-17): the first call site to
+// move onto the router took its own suite down with it, through the
+// Anthropic SDK in the adapter and the Supabase client in the provider
+// log.
+//
+// Both are now imported where they are used rather than at the top, so
+// a reader of the rules never reaches either. This check walks the
+// graph instead of naming those two files, because the next one will
+// be added by somebody who has not read this comment.
+{
+  const resolveLocal = (spec) => {
+    if (!spec.startsWith("@/")) return null;
+    const base = `src/${spec.slice(2)}`;
+    for (const candidate of [`${base}.ts`, `${base}.tsx`, `${base}/index.ts`]) {
+      if (existsSync(candidate)) return candidate;
+    }
+    return null;
+  };
+  // The same three exemptions load-ts.mjs makes: a side-effect marker
+  // package, and anything from node:.
+  const MARKER_ONLY = new Set(["server-only", "client-only"]);
+  const walked = new Set();
+  /** Every import the walk read, so the offender list below has a
+   *  population to be empty OF. A walk that resolved nothing finds no
+   *  packages and would otherwise pass. */
+  const imports = [];
+  const queue = ["src/lib/ai/providers/complete.ts"];
+  while (queue.length > 0) {
+    const file = queue.pop();
+    if (walked.has(file) || !existsSync(file)) continue;
+    walked.add(file);
+    for (const line of readFileSync(file, "utf8").split("\n")) {
+      const trimmed = line.trim();
+      const sideEffect = /^import\s+["']([^"']+)["'];?$/.exec(trimmed);
+      if (sideEffect) {
+        const spec = sideEffect[1];
+        imports.push({ file, spec });
+        continue;
+      }
+      const from = /^(?:import|export)\s.*from\s+["']([^"']+)["'];?$/.exec(trimmed);
+      if (!from) continue;
+      const spec = from[1];
+      imports.push({ file, spec });
+      if (spec.startsWith("@/")) {
+        const local = resolveLocal(spec);
+        if (local) queue.push(local);
+      }
+    }
+  }
+  // A FLOOR ON THE WALK. "no offenders" is also what a walk that
+  // resolved nothing prints, and it prints it green.
+  ok(`the router's graph was walked (${walked.size} modules, ${imports.length} imports)`,
+    walked.size >= 8 && imports.length >= 18,
+    "a walk that stopped at the first file would find no packages and pass on nothing");
+  const isVendor = ({ spec }) =>
+    !MARKER_ONLY.has(spec) && !spec.startsWith("@/") && !spec.startsWith(".") && !spec.startsWith("node:");
+  ok("the vendor detector says yes to a package", isVendor({ spec: "@anthropic-ai/sdk" }));
+  // A REAL LOCAL PATH IN THE FIXTURE, not a made-up one:
+  // gate-import-paths.test.mjs requires every `@/` path written into a
+  // gate to resolve, and a fixture is not exempt from that.
+  ok("...and no to a local module, a node builtin and a marker",
+    !isVendor({ spec: "@/lib/ai/providers/types" }) &&
+      !isVendor({ spec: "node:crypto" }) &&
+      !isVendor({ spec: "server-only" }));
+  const offenders = imports.filter(isVendor).map(({ file, spec }) => `${file} -> ${spec}`);
+  ok("the graph reaches no vendor package", offenders.length === 0,
+    offenders.join("\n        ") + "\n        Import it where it is used, as complete.ts's ADAPTERS and provider-log.ts do.");
+  // AND THE POSITIVE HALF, because "no bare specifier" is a proxy for
+  // the thing that matters: can a build gate actually load this?
+  const loaded = await loadTs("src/lib/ai/providers/complete.ts");
+  ok("...so a gate can load runCompletion itself", typeof loaded.runCompletion === "function");
+}
 
 // ===========================================================================
 console.log("\n== 1. the catalog, and the prices everything downstream trusts ==");
@@ -516,6 +598,59 @@ ok("flattenSystem joins the blocks in order, losing nothing",
   ok("agent_run is one of them — the layer is exercised, not merely present", used.includes("agent_run"));
 }
 
+// ===========================================================================
+// HOW MUCH OF THE PRODUCT ACTUALLY GOES THROUGH THE ROUTER — PRINTED,
+// NOT GATED.
+//
+// ΛΘ-2 says "a router that does not run, and a page that says it does",
+// and half of it is fixed: the router runs. The other half is this
+// number, and until now nothing produced it, so every statement about it
+// was somebody's recollection. The owner was told "about half" more than
+// once; it is not half.
+//
+// REPORTED, NOT GATED, and the reason is the same one mutation-coverage
+// gives: a ratio with a ratchet on it buys a number that only ever goes
+// up by one, and what is wanted here is the list of what is left. Three
+// of the remaining call sites cannot move until AiRequest can carry a
+// stream and an image — see the breakdown this prints.
+//
+// WHERE IT IS VISIBLE, said exactly: when this file is run on its own
+// (`node scripts/tests/ai-providers.test.mjs`). `npm run gates` runs it
+// too, but folds a green gate's whole output into one `ok` line, so the
+// number does not appear there — the same is true of
+// mutation-coverage's ratio, and saying otherwise would be one more
+// claim a reader could follow to nothing.
+{
+  const tsFiles = readdirSync("src", { recursive: true })
+    .filter((f) => typeof f === "string" && (f.endsWith(".ts") || f.endsWith(".tsx")))
+    .map((f) => join("src", f))
+    .filter((f) => statSync(f).isFile() && !f.includes("providers/adapters"));
+  ok(`the tree was walked (${tsFiles.length} files)`, tsFiles.length >= 400,
+    "an empty walk would print 0 of 0 and read as perfect coverage");
+
+  let direct = 0;
+  let routed = 0;
+  const blockedBy = { stream: new Set(), image: new Set() };
+  const directFiles = [];
+  for (const f of tsFiles) {
+    const text = stripComments(readFileSync(f, "utf8"));
+    const here = (text.match(/\.messages\.(?:create|stream)\(/g) ?? []).length;
+    const through = (text.match(/\brunCompletion\(/g) ?? []).length;
+    routed += through;
+    if (here === 0) continue;
+    direct += here;
+    directFiles.push(f);
+    if (/\.messages\.stream\(|stream:\s*true/.test(text)) blockedBy.stream.add(f);
+    if (/type:\s*"(?:image|document)"/.test(text)) blockedBy.image.add(f);
+  }
+  const total = direct + routed;
+  const pct = total === 0 ? 0 : Math.round((routed / total) * 1000) / 10;
+  console.log(`        ROUTER COVERAGE: ${routed} of ${total} model call sites = ${pct}%   (${directFiles.length} files still call the SDK directly)`);
+  console.log(`        of those files, ${blockedBy.stream.size} need streaming and ${blockedBy.image.size} need an image or a PDF in a message — neither is expressible in AiRequest today`);
+  ok(`the scan sees both sides (${routed} routed, ${direct} direct)`, routed > 0 && direct > 0,
+    "a scan that saw one side only would print a ratio of 0% or 100% and mean nothing either way");
+}
+
 // THE USER NEVER SEES ANY OF THIS.
 {
   const componentFiles = readdirSync("src/components", { recursive: true })
@@ -554,6 +689,232 @@ ok("flattenSystem joins the blocks in order, losing nothing",
 }
 
 // ===========================================================================
+// ===========================================================================
+console.log("\n== 5c. \"IT RAN OUT OF ROOM\" MEANS THE SAME THING FROM ALL FOUR ==");
+// ===========================================================================
+//
+// WHAT WAS WRONG, and it was live before any call site migrated.
+// lib/verification/truncation.ts decides `truncated` by comparing the
+// stop reason to Anthropic's "max_tokens", and the three fetch adapters
+// handed their provider's own word straight on: OpenAI and Groq report
+// finish_reason "length", Gemini reports finishReason "MAX_TOKENS". So
+// an answer cut off at the ceiling by any provider but Anthropic came
+// back truncated: false — delivered whole, unmarked, reading as a short
+// answer. lib/agents/agent-runner.ts already routes, so this was
+// reachable the day a second key was set.
+//
+// DRIVEN, like §5b: each adapter is called with a stubbed fetch that
+// replies with that vendor's own truncation word, and the stopReason it
+// RETURNS is asserted.
+{
+  const { normaliseStopReason } = await loadTs("src/lib/ai/providers/adapters/shared.ts");
+  const { AI_TRUNCATED_STOP_REASON } = await loadTs("src/lib/ai/providers/types.ts");
+  ok(`the canonical word is Anthropic's ("${AI_TRUNCATED_STOP_REASON}")`, AI_TRUNCATED_STOP_REASON === "max_tokens");
+  const truncation = await loadTs("src/lib/verification/truncation.ts");
+  ok("...and lib/verification/truncation.ts uses that same one, not a copy",
+    truncation.TRUNCATION_STOP_REASON === AI_TRUNCATED_STOP_REASON);
+  for (const word of ["length", "MAX_TOKENS", "max_tokens"]) {
+    ok(`"${word}" normalises to the canonical word`, normaliseStopReason(word) === AI_TRUNCATED_STOP_REASON);
+  }
+  // NOT EVERYTHING, which is the half that makes the above mean
+  // something: a normaliser that answered "max_tokens" to every input
+  // would pass all three lines above and mark every answer truncated.
+  for (const word of ["stop", "STOP", "tool_calls", "end_turn", "content_filter"]) {
+    ok(`"${word}" is left alone`, normaliseStopReason(word) === word);
+  }
+  ok("and a missing reason stays missing", normaliseStopReason(null) === null && normaliseStopReason(undefined) === null);
+
+  const CUT = [
+    ["google", "src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "half an ans" }] }, finishReason: "MAX_TOKENS" }], usageMetadata: {} }],
+    ["openai", "src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "half an ans" }, finish_reason: "length" }], usage: {} }],
+    ["groq", "src/lib/ai/providers/adapters/groq.ts", "callGroq", "groq/llama-3.3-70b-versatile",
+      { choices: [{ message: { content: "half an ans" }, finish_reason: "length" }], usage: {} }],
+  ];
+  for (const [name, file, exportName, model, reply] of CUT) {
+    const mod = await loadTs(file);
+    const real = globalThis.fetch;
+    let out;
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+    try {
+      out = await mod[exportName]({
+        apiKey: "k",
+        model,
+        signal: AbortSignal.timeout(5_000),
+        request: {
+          purpose: "chat",
+          system: [{ type: "text", text: "s" }],
+          messages: [{ role: "user", content: "u" }],
+          maxTokens: 8,
+        },
+      });
+    } finally {
+      globalThis.fetch = real;
+    }
+    ok(`${name}: a reply cut at the ceiling says so in our word`,
+      out?.stopReason === AI_TRUNCATED_STOP_REASON, JSON.stringify(out?.stopReason));
+    ok(`${name}: ...so modelTextFrom calls it truncated`,
+      truncation.modelTextFrom({ text: out?.text ?? "", stopReason: out?.stopReason ?? null }).truncated === true);
+  }
+}
+
+// ===========================================================================
+console.log("\n== 5b. FORCING A TOOL: the field 21 call sites depend on ==");
+// ===========================================================================
+//
+// WHY THIS IS NOT A CONVENIENCE. Twenty-one of this repository's model
+// calls give the model one tool and force it, because the tool's input
+// schema IS the answer: the caller reads toolCalls[0].input and parses
+// nothing. If a provider is handed the tools and not the choice, the
+// model may answer in prose instead — toolCalls comes back empty, the
+// caller has nothing to read, and the account has been charged for a
+// call that produced no usable output. That is the same shape as the
+// dropped web search refuseUnsupported exists for: a failure that looks
+// like a success.
+//
+// DRIVEN, NOT READ, for the three fetch adapters. Each one is called
+// with a stubbed fetch and the BYTES IT SENT are asserted — a field
+// written into the source and spelled wrong, or assembled into an object
+// the body never receives, passes a grep and fails here. Anthropic's
+// adapter goes through the vendor SDK, which load-ts.mjs will not load,
+// so that one is read as source and says so.
+{
+  const { openAiToolChoice } = await loadTs("src/lib/ai/providers/adapters/shared.ts");
+  const withTools = (extra) => ({
+    purpose: "classification",
+    system: [{ type: "text", text: "s" }],
+    messages: [{ role: "user", content: "u" }],
+    maxTokens: 64,
+    tools: [{ name: "answer", description: "d", inputSchema: { type: "object" } }],
+    ...extra,
+  });
+
+  ok("openAiToolChoice: auto", openAiToolChoice(withTools({ toolChoice: { type: "auto" } })) === "auto");
+  ok("openAiToolChoice: any becomes OpenAI's 'required'",
+    openAiToolChoice(withTools({ toolChoice: { type: "any" } })) === "required");
+  ok("openAiToolChoice: a named tool",
+    JSON.stringify(openAiToolChoice(withTools({ toolChoice: { type: "tool", name: "answer" } }))) ===
+      JSON.stringify({ type: "function", function: { name: "answer" } }));
+  ok("openAiToolChoice: nothing to send when no choice was made",
+    openAiToolChoice(withTools({})) === undefined);
+  // BOTH APIs REJECT A CHOICE WITH NO TOOLS, and a 400 from that is
+  // classified bad_request, which does not fail over — so a request that
+  // was fine would stop the chain.
+  ok("openAiToolChoice: nothing to send when there are no tools",
+    openAiToolChoice({ purpose: "chat", system: [], messages: [], maxTokens: 1, toolChoice: { type: "any" } }) ===
+      undefined);
+
+  // --- the bytes each fetch adapter actually sends -----------------------
+  const ADAPTERS = [
+    ["google", "src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "hi" }] } }], usageMetadata: {} }],
+    ["openai", "src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "hi" } }], usage: {} }],
+    ["groq", "src/lib/ai/providers/adapters/groq.ts", "callGroq", "groq/llama-3.3-70b-versatile",
+      { choices: [{ message: { content: "hi" } }], usage: {} }],
+  ];
+
+  /** Call an adapter with fetch stubbed; give back the body it posted. */
+  async function bodySentBy(file, exportName, model, reply, request) {
+    const mod = await loadTs(file);
+    const real = globalThis.fetch;
+    let body = null;
+    globalThis.fetch = async (_url, init) => {
+      body = JSON.parse(init.body);
+      return new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+    };
+    try {
+      await mod[exportName]({ apiKey: "k", model, signal: AbortSignal.timeout(5_000), request });
+    } finally {
+      globalThis.fetch = real;
+    }
+    return body;
+  }
+
+  for (const [name, file, exportName, model, reply] of ADAPTERS) {
+    const forced = await bodySentBy(file, exportName, model, reply,
+      withTools({ toolChoice: { type: "tool", name: "answer" } }));
+    // A FLOOR ON THE PROBE. An adapter that never called fetch would
+    // leave `body` null, and every "the body does not contain X" below
+    // would pass on nothing.
+    ok(`${name}: the probe captured a request body`, forced !== null && typeof forced === "object",
+      "the adapter did not call fetch — every assertion below it would pass on nothing");
+
+    if (name === "google") {
+      ok("google: a named tool becomes mode ANY plus allowedFunctionNames",
+        JSON.stringify(forced?.toolConfig) ===
+          JSON.stringify({ functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["answer"] } }),
+        JSON.stringify(forced?.toolConfig));
+      const any = await bodySentBy(file, exportName, model, reply, withTools({ toolChoice: { type: "any" } }));
+      ok("google: any is ANY with no name list",
+        JSON.stringify(any?.toolConfig) === JSON.stringify({ functionCallingConfig: { mode: "ANY" } }),
+        JSON.stringify(any?.toolConfig));
+      const auto = await bodySentBy(file, exportName, model, reply, withTools({ toolChoice: { type: "auto" } }));
+      ok("google: auto is AUTO",
+        JSON.stringify(auto?.toolConfig) === JSON.stringify({ functionCallingConfig: { mode: "AUTO" } }),
+        JSON.stringify(auto?.toolConfig));
+    } else {
+      ok(`${name}: a named tool is sent as OpenAI's tool_choice`,
+        JSON.stringify(forced?.tool_choice) ===
+          JSON.stringify({ type: "function", function: { name: "answer" } }),
+        JSON.stringify(forced?.tool_choice));
+      const any = await bodySentBy(file, exportName, model, reply, withTools({ toolChoice: { type: "any" } }));
+      ok(`${name}: any is 'required'`, any?.tool_choice === "required", JSON.stringify(any?.tool_choice));
+    }
+
+    // And the two cases where nothing may be sent.
+    const noChoice = await bodySentBy(file, exportName, model, reply, withTools({}));
+    ok(`${name}: no choice made, nothing sent`,
+      noChoice?.tool_choice === undefined && noChoice?.toolConfig === undefined,
+      JSON.stringify({ tool_choice: noChoice?.tool_choice, toolConfig: noChoice?.toolConfig }));
+    const noTools = await bodySentBy(file, exportName, model, reply, {
+      purpose: "chat",
+      system: [{ type: "text", text: "s" }],
+      messages: [{ role: "user", content: "u" }],
+      maxTokens: 64,
+      toolChoice: { type: "any" },
+    });
+    ok(`${name}: a choice with no tools is not sent`,
+      noTools?.tool_choice === undefined && noTools?.toolConfig === undefined,
+      JSON.stringify({ tool_choice: noTools?.tool_choice, toolConfig: noTools?.toolConfig }));
+  }
+
+  // --- anthropic, by source, because the SDK cannot be loaded here -------
+  const anthropicSrc = stripTs(src("src/lib/ai/providers/adapters/anthropic.ts"));
+  ok("anthropic: the choice is forwarded", /tool_choice: request\.toolChoice/.test(anthropicSrc), anthropicSrc.slice(0, 0));
+  ok("anthropic: ...only alongside tools",
+    /if \(!tools\.length\) return \{\};/.test(anthropicSrc) &&
+      anthropicSrc.indexOf("if (!tools.length) return {};") < anthropicSrc.indexOf("tool_choice: request.toolChoice"),
+    "a tool_choice with no tools is a 400 Anthropic classifies as bad_request, which does not fail over");
+
+  // EVERY ADAPTER, RANGED OVER — not the four this section names. A
+  // fifth provider added without forwarding the choice would send the
+  // tools and let the model decide, which is the silent failure above.
+  //
+  // THIS IS A TRIPWIRE, NOT THE PROOF. The proof is the driven probes
+  // above, which read the bytes; this only answers "does this adapter
+  // deal with a tool choice at all", so a new file that ignores the
+  // field cannot slip in unnoticed. Case-insensitive on purpose: two of
+  // them reach it through openAiToolChoice() and never write the field
+  // name, and a detector that missed those would be a tripwire across
+  // half the doorway.
+  const DEALS_WITH_CHOICE = /toolchoice/i;
+  ok("the tripwire says yes to the field by name", DEALS_WITH_CHOICE.test("tool_choice: request.toolChoice"));
+  ok("...yes to reaching it through the shared mapping",
+    DEALS_WITH_CHOICE.test("const choice = openAiToolChoice(request);"));
+  ok("...and no to an adapter that only sends tools",
+    !DEALS_WITH_CHOICE.test("if (request.tools?.length) body.tools = request.tools.map(toWire);"));
+  const adapterFiles = readdirSync("src/lib/ai/providers/adapters")
+    .filter((f) => f.endsWith(".ts") && f !== "shared.ts")
+    .map((f) => `src/lib/ai/providers/adapters/${f}`);
+  ok(`the adapter directory was read (${adapterFiles.length})`, adapterFiles.length >= 4,
+    "an empty list makes the next check pass on nothing");
+  const silent = adapterFiles.filter((f) => !DEALS_WITH_CHOICE.test(stripTs(src(f))));
+  ok("every adapter deals with the tool choice", silent.length === 0, silent.join(", "));
+}
+
 console.log("\n== 6. #13 batch: what qualifies, and the discount applied once ==");
 // ===========================================================================
 

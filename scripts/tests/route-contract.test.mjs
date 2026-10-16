@@ -103,7 +103,17 @@ check(`routes found (${routes.length})`, routes.length >= 100, "the walk found a
 const invokerFns = securityInvokerFunctions();
 const OWNERSHIP = ownershipTable(invokerFns);
 const INSERTS = /\.from\(\s*"[a-z_0-9]+"\s*\)\s*\n?\s*\.insert\s*\(/;
-const REACHES_MODEL = /\bmessages\s*\.\s*(create|stream)\s*\(|generativelanguage\.googleapis\.com|api\.groq\.com|api\.openai\.com|api\.elevenlabs\.io/;
+// TWO DOORS ONTO A MODEL, AND THIS LIST HELD ONLY ONE until 2026-10-15.
+// Step 1.4 moves every call onto lib/ai/providers/complete.ts, and a
+// route that goes through `runCompletion(` matches none of the patterns
+// below — so it left the 'spend' population without going red and
+// without being asked whether it holds credits before it spends them.
+// The floor on this population is what caught it (2 routes, floor 5),
+// which is the only reason it is a bug report rather than a silence:
+// the same shape blinded token-budgets, rate-limits, billing-coverage's
+// DECLARED table and token-budgets' stop-reason check, and those had to
+// be found by hand.
+const REACHES_MODEL = /\bmessages\s*\.\s*(create|stream)\s*\(|\brunCompletion\s*\(|generativelanguage\.googleapis\.com|api\.groq\.com|api\.openai\.com|api\.elevenlabs\.io/;
 const RATE_LIMITED = BOUNDS.rate_limit;
 const SPEND = {
   reservation: (s) => /\breserveCredits\s*\(|\bstartJob\s*\(|\bsettleReservation\s*\(/.test(s),
@@ -364,6 +374,10 @@ check(
 check("control: a limiter nobody branches on is not either", !RATE_LIMITED('await checkRateLimit({ scope: "x", identifier: user.id });'));
 check("control: all three together are", RATE_LIMITED('const l = await checkRateLimit({ scope: "x", identifier: user.id }); if (!l.allowed) return x;'));
 check("control: a model call puts a route in the spend population", QUESTIONS[3].asks("const r = await anthropic.messages.create({});"));
+// AND THE ROUTER'S DOOR, pinned for the same reason: the SDK pattern on
+// its own went from matching most of this population to matching two.
+check("control: a routed model call does too", QUESTIONS[3].asks("const outcome = await runCompletion({ purpose: \"create\" }, {});"));
+check("control: and a route that calls no model does not", !QUESTIONS[3].asks("const rows = await supabase.from(\"x\").select();"));
 check("control: an ownership claim in a comment does not count", Object.values(OWNERSHIP).every((t) => !t(strip('// reads it with .eq("user_id", user.id)\nconst x = 1;'))));
 // THE THREE MECHANISMS THE SWEEP OF 2026-09-18 ADDED, each driven rather
 // than described — and the pair that separates an RPC scoped by RLS from

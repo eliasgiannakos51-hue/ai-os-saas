@@ -253,7 +253,7 @@ console.log("\n== no prompt decides the user's language FOR them ==");
   check("the reflection language is a parameter", /generateWeeklyReflection\([\s\S]{0,220}?language: string,/.test(agent));
   check("and the old Greek default is gone", !/Απάντα στα ελληνικά/.test(agent));
   const route = readFileSync("src/app/api/reflection/generate/route.ts", "utf8");
-  check("the route passes the user's real locale", /const locale = await getLocale\(\);[\s\S]{0,200}?generateWeeklyReflection\(apiKey, userMessage, locale/.test(route));
+  check("the route passes the user's real locale", /const locale = await getLocale\(\);[\s\S]{0,200}?generateWeeklyReflection\(userMessage, locale/.test(route));
 }
 
 console.log(`\n${pass} passed, ${failures.length} failed`);

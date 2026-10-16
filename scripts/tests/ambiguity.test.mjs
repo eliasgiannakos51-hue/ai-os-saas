@@ -359,14 +359,19 @@ console.log("\n== 8. at most ONE question, and the paid check is skipped when it
       trimmed.suggestions[0].length === 1);
 
   // THE SHORT-CIRCUIT, read from source: checkNeedsClarification must
-  // consult the free assessment before it constructs an Anthropic client,
-  // or "decides before spending" is not true of the path that runs.
+  // consult the free assessment before it makes the paid call, or
+  // "decides before spending" is not true of the path that runs.
+  //
+  // RE-ANCHORED 2026-10-15, when this call moved onto the router: there
+  // is no `new Anthropic({ apiKey })` to be earlier than any more. The
+  // property is unchanged and so is its direction — the free read first,
+  // the paid call second.
   const src = readFileSync("src/lib/clarification.ts", "utf8");
   const assessAt = src.indexOf("assessAmbiguity(userText");
-  const clientAt = src.indexOf("new Anthropic({ apiKey })");
-  ok("the free assessment runs before the API client is built",
+  const clientAt = src.indexOf("await runCompletion(");
+  ok("the free assessment runs before the paid call is made",
     assessAt !== -1 && clientAt !== -1 && assessAt < clientAt,
-    "the paid call is constructed first, so nothing is saved");
+    "the paid call is made first, so nothing is saved");
   // RE-ANCHORED 2026-09-07. The condition moved into
   // willSpendOnQuestion (one policy, one place — see the note above), and
   // the return grew the verdict it used to throw away. What this clause

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -45,8 +46,10 @@ export const maxDuration = 120; // @function-limit 120
  */
 export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused before the hold.
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
   let instruction = "";
   let blockIndex: unknown;
@@ -134,13 +137,13 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     let next: ReturnType<typeof keepOnlyBlock> = null;
     let failure: { kind: "aborted" | "provider" | "unusable"; detail: string } | null = null;
     if (box !== null) {
-      const out = await rewriteBlock({ apiKey, title, blocks: stored, index: box, instruction, locale, memoryBlock, costs, signal: request.signal });
+      const out = await rewriteBlock({ title, blocks: stored, index: box, instruction, locale, memoryBlock, costs, userId: user.id, signal: request.signal });
       if (out.ok) {
         next = keepOnlyBlock(stored, box, out.value);
         if (!next) failure = { kind: "unusable", detail: "the rewritten block could not take its place" };
       } else failure = out;
     } else {
-      const out = await rewriteDocument({ apiKey, title, blocks: stored, instruction, locale, memoryBlock, costs, signal: request.signal });
+      const out = await rewriteDocument({ title, blocks: stored, instruction, locale, memoryBlock, costs, userId: user.id, signal: request.signal });
       if (out.ok) {
         next = out.value.blocks;
         nextTitle = out.value.title;

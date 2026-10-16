@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
@@ -45,8 +46,10 @@ export async function POST(request: Request) {
   if (said.length > MAX_SAID_CHARS) return refuse("too_long", 400, { limit: MAX_SAID_CHARS });
   const timeZone = readTimeZone(body.timeZone);
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return refuse("not_configured", 503);
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused before the hold.
+  if (!anyProviderConfigured(process.env)) return refuse("not_configured", 503);
   const supabase = await createClient();
   const {
     data: { user },
@@ -89,7 +92,7 @@ export async function POST(request: Request) {
     void recordAiCallForDailySpend(price);
 
     const costs = new CostAccumulator();
-    const built = await buildFlow({ apiKey, said, timeZone, costs, signal: request.signal });
+    const built = await buildFlow({ said, timeZone, costs, userId: user.id, signal: request.signal });
     if (!built.ok && built.kind === "provider") {
       await releaseReservation(user.id, reservationId);
       logApiError("/api/automations/flows", new Error(built.detail), { stage: "build" });

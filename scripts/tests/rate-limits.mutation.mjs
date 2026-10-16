@@ -160,11 +160,23 @@ const MUTATIONS = [
     expect: "the whitespace-only case — the Headers class would have hidden this",
   },
   {
-    name: "the provider-client detector matches nothing, so no route 'reaches AI'",
+    name: "the provider detector matches nothing, so no route 'reaches AI'",
     file: GATE,
-    from: "  const CONSTRUCTS = /new Anthropic|anthropic\\.messages\\.create/;",
+    from: "  const CONSTRUCTS = /new Anthropic|anthropic\\.messages\\.create|\\brunCompletion\\s*\\(/;",
     to: "  const CONSTRUCTS = /NOTHING_MATCHES_THIS/;",
-    expect: "the floor on modules that construct the client",
+    expect: "some module reaches a provider call",
+  },
+  {
+    // THE HALF THAT WENT BLIND SILENTLY. Dropping the router door
+    // leaves the SDK door working, so the section still inspects
+    // something and still passes its floor — it simply stops seeing
+    // every route behind a migrated call site. Step 1.4 moves
+    // twenty-five more of those.
+    name: "the detector forgets the router door and only sees the SDK",
+    file: GATE,
+    from: "  const CONSTRUCTS = /new Anthropic|anthropic\\.messages\\.create|\\brunCompletion\\s*\\(/;",
+    to: "  const CONSTRUCTS = /new Anthropic|anthropic\\.messages\\.create/;",
+    expect: "and the router door",
   },
   {
     name: "the exception list grows an entry that nothing needs",

@@ -63,7 +63,11 @@ checkTrue(`${START}: builds a CostAccumulator`, /new CostAccumulator\(\)/.test(s
 // The bug, stated directly: these two calls were made without one.
 checkTrue(
   `${START}: passes it to the clarification check`,
-  /checkNeedsClarification\([^)]*costs\)/.test(startSrc)
+  // The accumulator is the third argument since the key stopped being
+  // the first (step 1.4), so this pins it by POSITION rather than by
+  // being last — a call that dropped it would otherwise still match a
+  // looser "costs appears somewhere" regex.
+  /checkNeedsClarification\([^)]*,\s*costs\s*,/.test(startSrc)
 );
 checkTrue(
   `${START}: passes it to the off-topic classifier`,

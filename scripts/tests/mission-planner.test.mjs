@@ -13,48 +13,32 @@
 //
 // Run: node scripts/tests/mission-planner.test.mjs
 import { readFileSync } from "node:fs";
-import ts from "typescript";
+import { loadTs } from "./load-ts.mjs";
 
-// mission-agents.ts imports the Anthropic SDK, which the shared
-// dependency-free loader deliberately refuses. parsePlanMissionToolInput
-// is pure — it never touches the client — so the import is stubbed out
-// and the module is transpiled directly. The tool constants that
-// reference Anthropic types erase at compile time.
-function loadMissionAgents() {
-  let src = readFileSync("src/lib/mission-agents.ts", "utf8");
-  src = src.replace('import "server-only";', "");
-  src = src.replace('import Anthropic from "@anthropic-ai/sdk";', "const Anthropic = class {};");
-  src = src.replace(
-    /import \{ AI_QUALITY_CHECKLIST_EL \} from "@\/lib\/ai-quality-checklist";/,
-    'const AI_QUALITY_CHECKLIST_EL = "";'
-  );
-  // Same stubbing reason as the checklist above: the conduct block is a
-  // constant string, and this test is about the PLANNER's parsing logic.
-  // scripts/tests/ai-conduct.test.mjs is what asserts the real block is
-  // present and correct.
-  src = src.replace(
-    /import \{ AI_CONDUCT_EL \} from "@\/lib\/ai-conduct";/,
-    'const AI_CONDUCT_EL = "";'
-  );
-  src = src.replace(/import type \{ CostAccumulator \} from "@\/lib\/billing\/cost-accumulator";/, "");
-  // lib/ai/cached-system.ts is INLINED, not stubbed.
-  //
-  // It has no external imports at all (that is deliberate — see the note
-  // in that file), so the real implementation can be pasted in here and
-  // the module under test ends up calling the real buildCachedSystem
-  // rather than a lookalike. A stub would let this test keep passing
-  // while the actual block-splitting broke; the real thing cannot.
-  src = src.replace(
-    /import \{ buildCachedSystem \} from "@\/lib\/ai\/cached-system";/,
-    readFileSync("src/lib/ai/cached-system.ts", "utf8").replace(/^export /gm, "")
-  );
-  const js = ts.transpileModule(src, {
-    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  return import("data:text/javascript;base64," + Buffer.from(js).toString("base64"));
-}
-
-const { parsePlanMissionToolInput } = await loadMissionAgents();
+// THE HAND-ROLLED LOADER IS GONE, and that is what the migration bought.
+//
+// mission-agents.ts used to import the Anthropic SDK, which the shared
+// loader deliberately refuses ("a silent stub would be a lie"), so this
+// file transpiled the module itself with FIVE imports stubbed or
+// inlined by regex — including the SDK, the conduct block and the
+// quality checklist. Every one of those stubs was a place where this
+// test could keep passing while the real module broke, and the regexes
+// themselves were one rename away from silently matching nothing.
+//
+// Since the three calls moved onto lib/ai/providers/complete.ts
+// (2026-10-15) the module's graph carries no vendor package, so the
+// shared loader loads the REAL thing — the real conduct block, the real
+// checklist, the real buildCachedSystem — and there is nothing left to
+// stub.
+//
+// CALLED DIRECTLY, NOT THROUGH A ONE-LINE WRAPPER: the first version of
+// this kept `loadMissionAgents()` around the call, and
+// scripts/scan-gate-independence.mjs — which reads `await loadTs(` to
+// decide that a gate RUNS the code rather than reading it — stopped
+// being able to see it and reported this file at NONE. An indirection
+// that hides what a gate does from the instrument that measures gates
+// is not worth the line it saves.
+const { parsePlanMissionToolInput } = await loadTs("src/lib/mission-agents.ts");
 
 let pass = 0,
   fail = 0;
@@ -176,7 +160,18 @@ check("a one-step plan falls back to clarification", degraded.clarificationNeede
 
 console.log("\n== 5. research runs before planning and is priced ==");
 const agents = readFileSync("src/lib/mission-agents.ts", "utf8");
-checkTrue("a web search tool is offered to the research pass", agents.includes("web_search_20250305"));
+// RE-ANCHORED 2026-10-15. The wire name `web_search_20250305` is no
+// longer written here: the research pass asks the router for the
+// CAPABILITY and the Anthropic adapter writes the wire shape, which
+// ai-providers.test.mjs drives with a stubbed fetch. Asking for it
+// without REQUIRING it would be the dangerous version — the request
+// would be routed to a provider with no search and come back with a
+// confident plan built from training data — so both halves are pinned.
+checkTrue(
+  "a web search is asked for, and required, on the research pass",
+  /serverWebSearch: \{ maxUses: SEARCHES_PER_PLAN \}/.test(agents) &&
+    /requires: \["server_web_search"\]/.test(agents)
+);
 checkTrue("research is a SEPARATE call from planning", agents.includes("export async function researchGoal"));
 checkTrue(
   "research failure is swallowed so planning still runs",

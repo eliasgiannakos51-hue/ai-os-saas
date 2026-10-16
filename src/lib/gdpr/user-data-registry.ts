@@ -500,7 +500,21 @@ export const USER_DATA_TABLES: UserDataTable[] = [
 export const NON_PERSONAL_TABLES = [
   // Per-day aggregate spend counter, no user column.
   "daily_ai_spend_tracking",
-  // Keyed by IP/route fingerprint, not by user.
+  // NOT "keyed by IP, not by user" — that is what this line used to say,
+  // and it was simply false. `identifier` is a plain text column and
+  // almost every caller passes the signed-in user's id (the sign-in
+  // scopes are the exception: api/auth/login passes the email, and the
+  // device check an address). So the table does hold a per-user record
+  // of which scopes an account hit and when.
+  //
+  // THE REAL REASON IT IS NOT EXPORTED AND NOT ERASED, which is a
+  // different reason and has to be the one written down: nothing here
+  // survives a day. api/cron/scheduled-runs deletes every row older than
+  // 24 hours, and every rate-limit window the app uses is well under an
+  // hour. There is no history to hand over and nothing left to erase —
+  // the table empties itself faster than a subject access request can be
+  // answered. gdpr-coverage.test.mjs holds that sweep in place; without
+  // it this entry would be wrong again.
   "rate_limit_log",
   // Keyed by team + invited email; rows belong to the team owner's
   // account and are covered via the team tables' own cascade.

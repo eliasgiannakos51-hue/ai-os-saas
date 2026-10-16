@@ -19,6 +19,7 @@ import { isSupportedTargetLocale } from "@/lib/documents/translation";
 import { FAIR_USE_WINDOW_MS, MAX_GENERATIONS_PER_DAY } from "@/lib/website-generation-limits";
 import { MAX_TRANSLATE_CHARS, TRANSLATE_MODEL, textChars, translateInputChars } from "@/lib/translate/translate-prompt";
 import { planDocument, planSite } from "@/lib/translate/sources";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { translatePieces } from "@/lib/translate/translate-call";
 
 export const dynamic = "force-dynamic";
@@ -152,8 +153,10 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused BEFORE the hold.
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
   try {
     const loaded = await load(supabase, user, kind, id);
@@ -196,7 +199,7 @@ export async function POST(request: Request) {
 
     const costs = new CostAccumulator();
     void recordAiCallForDailySpend(estimate.estimatedCredits);
-    const outcome = await translatePieces({ apiKey, pieces, target, costs, signal: request.signal });
+    const outcome = await translatePieces({ pieces, target, costs, userId: user.id, signal: request.signal });
     if (!outcome.ok) {
       await releaseReservation(user.id, reservationId);
       if (outcome.kind === "aborted") return NextResponse.json({ ok: false, code: "stopped" }, { status: 499 });

@@ -1,7 +1,7 @@
 import "server-only";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { WeeklyReflectionStats } from "@/lib/reflection";
 import { enModuleTitle } from "@/lib/module-labels";
@@ -44,28 +44,37 @@ ${missionLine}`;
 }
 
 export async function generateWeeklyReflection(
-  apiKey: string,
   userMessage: string,
   /** The user's language, e.g. "el" / "en" / "de". */
   language: string,
   // This call recorded nothing at all — the route charged a flat 2
   // credits and the tokens never reached a cost log. See CREDITS.md.
-  costs?: CostAccumulator
+  costs?: CostAccumulator,
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string
 ): Promise<string> {
-  const anthropic = new Anthropic({ apiKey });
-  const response = await anthropic.messages.create({
-    model: REFLECTION_MODEL,
-    max_tokens: 700,
-    system: reflectionSystemPrompt(language),
-    messages: [{ role: "user", content: userMessage }],
-  });
-  // Before the parse below, which can still bail out on an empty reply.
-  costs?.record("generation", response.usage, response.model || REFLECTION_MODEL);
-
-  const textBlock = response.content.find(
-    (block): block is Anthropic.TextBlock => block.type === "text"
+  // THROUGH THE ROUTER, NOT THE SDK (step 1.4). No tool here — the
+  // reflection is prose — so only the prompt travels. A provider with
+  // no key is not in the chain (lib/ai/providers/registry.ts).
+  const outcome = await runCompletion(
+    {
+      purpose: "summarisation",
+      model: REFLECTION_MODEL,
+      maxTokens: 700,
+      system: [{ type: "text", text: reflectionSystemPrompt(language) }],
+      messages: [{ role: "user", content: userMessage }],
+    },
+    { userId }
   );
-  const text = textBlock?.text.trim();
+  // A THROW, BECAUSE THAT IS WHAT THIS FUNCTION ALWAYS DID. The route
+  // settles only after this returns, and its catch is what releases the
+  // hold; returning an empty string instead would be settled as a
+  // reflection the person never got.
+  if (!outcome.ok) throw new Error(`reflection: ${outcome.kind} ${outcome.detail}`);
+  // Before the parse below, which can still bail out on an empty reply.
+  costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+
+  const text = outcome.text.trim();
   if (!text) {
     throw new Error("The model did not return a reflection.");
   }

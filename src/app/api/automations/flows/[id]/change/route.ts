@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -49,8 +50,10 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   if (instruction.length < 2) return refuse("empty", 400);
   if (instruction.length > MAX_SAID_CHARS) return refuse("too_long", 400, { limit: MAX_SAID_CHARS });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return refuse("not_configured", 503);
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused before the hold.
+  if (!anyProviderConfigured(process.env)) return refuse("not_configured", 503);
   const supabase = await createClient();
   const {
     data: { user },
@@ -100,7 +103,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     void recordAiCallForDailySpend(price);
 
     const costs = new CostAccumulator();
-    const changed = await changeBox({ apiKey, boxes: current.boxes, id: boxId, instruction, timeZone: flow.time_zone, costs, signal: request.signal });
+    const changed = await changeBox({ boxes: current.boxes, id: boxId, instruction, timeZone: flow.time_zone, costs, userId: user.id, signal: request.signal });
     if (!changed.ok && changed.kind === "provider") {
       await releaseReservation(user.id, reservationId);
       logApiError("/api/automations/flows/[id]/change", new Error(changed.detail), { stage: "change" });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -52,8 +53,10 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   } catch {
     return refuse("invalid_body", 400);
   }
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return refuse("not_configured", 503);
+  // NOT "is the Anthropic key set" any more: the run goes through the
+  // router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts).
+  if (!anyProviderConfigured(process.env)) return refuse("not_configured", 503);
   const supabase = await createClient();
   const {
     data: { user },
@@ -109,7 +112,6 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
   if (!(await claimFlow(id, user.id))) return refuse("busy", 409);
   try {
     const started = await startRun({
-      apiKey,
       flow: { id: flow.id, user_id: user.id, name: flow.name, boxes: verdict.boxes, cost_limit: flow.cost_limit, time_zone: flow.time_zone },
       user,
       account,

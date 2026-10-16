@@ -1,7 +1,8 @@
-import { modelText } from "@/lib/verification/truncation";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import { modelTextFrom } from "@/lib/verification/truncation";
 import { NextResponse } from "next/server";
 import React from "react";
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { htmlToBlocks } from "@/lib/pdf/blocks";
@@ -125,8 +126,9 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         { status: 413 }
       );
     }
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the translation below
+    // goes through the router (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json({ error: "not_configured" }, { status: 503 });
     }
 
@@ -197,22 +199,31 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       reservationId = reservation.reservationId;
     }
 
-    const anthropic = new Anthropic({ apiKey });
     const costs = new CostAccumulator();
     let translated: { title: string; html: string };
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      const response = await anthropic.messages.create({
-        model: TRANSLATION_MODEL,
-        max_tokens: translationMaxTokens(input.length),
-        system,
-        messages: [{ role: "user", content: input }],
-      });
-      costs.record("generation", response.usage, response.model || TRANSLATION_MODEL);
+      // THROUGH THE ROUTER, NOT THE SDK (step 1.4).
+      const outcome = await runCompletion(
+        {
+          purpose: "create",
+          model: TRANSLATION_MODEL,
+          maxTokens: translationMaxTokens(input.length),
+          system: [{ type: "text", text: system }],
+          messages: [{ role: "user", content: input }],
+        },
+        { userId: user.id }
+      );
+      if (!outcome.ok) {
+        await releaseReservation(user.id, reservationId);
+        return NextResponse.json({ error: "translation_failed" }, { status: 502 });
+      }
+      costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
       // A DELIVERABLE READS ITS STOP REASON (scripts/tests/token-budgets
       // .test.mjs): a translation cut at max_tokens is half a document,
       // and half a document must not become a PDF someone pays for.
-      const { text: rawText, truncated } = modelText(response);
+      // modelTextFrom is the router's door onto that same rule.
+      const { text: rawText, truncated } = modelTextFrom({ text: outcome.text, stopReason: outcome.stopReason });
       const text = rawText.trim();
       if (!text || truncated) {
         if (truncated) logApiError("/api/documents/[id]/pdf", "translation truncated at max_tokens", { lang, chars: input.length });

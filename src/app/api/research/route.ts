@@ -27,6 +27,7 @@ import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { RESEARCH_MAX_SEARCHES, type ResearchStatus } from "@/lib/research/research-limits";
 import { planResearch, validateTopic } from "@/lib/research/research";
+import { countResearchRunsThisMonth } from "@/lib/research/research-usage";
 import { resolveLanguage } from "@/lib/text/resolve-language";
 
 export const dynamic = "force-dynamic";
@@ -106,24 +107,18 @@ export async function POST(request: Request) {
       );
     }
     if (Number.isFinite(monthlyCap)) {
-      // Calendar month, matching how the plan allowance is described.
-      const since = new Date();
-      since.setUTCDate(1);
-      since.setUTCHours(0, 0, 0, 0);
-
-      const { count, error } = await supabase
-        .from("research_reports")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .gte("created_at", since.toISOString());
-
       // Fails CLOSED. This cap bounds the most expensive action in the
-      // product; a counting error must not be the way around it.
-      if (error) {
-        logApiError("/api/research", error, { stage: "count_monthly" });
+      // product; a counting error must not be the way around it — and
+      // neither must a deletion, which is why the count comes from the
+      // append-only ledger and not from the reports that still exist.
+      // lib/research/research-usage.ts carries the whole reasoning, and
+      // src/app/dashboard/deep-research/page.tsx calls the same function
+      // so the number on the screen stays the number the server acts on.
+      const used = await countResearchRunsThisMonth(user.id);
+      if (used === null) {
         return NextResponse.json({ ok: false, error: "Could not check your research allowance." }, { status: 503 });
       }
-      if ((count ?? 0) >= monthlyCap) {
+      if (used >= monthlyCap) {
         return NextResponse.json(
           {
             ok: false,
@@ -216,12 +211,11 @@ export async function POST(request: Request) {
     }
     void recordAiCallForDailySpend(planEstimate.estimatedCredits);
 
-    const anthropic = new Anthropic({ apiKey });
     const planned = await planResearch({
-      anthropic,
       topic: topicCheck.topic,
       language,
       costs,
+      userId: user.id,
     });
 
     // Settled either way — but "either way" means the two outcomes of a

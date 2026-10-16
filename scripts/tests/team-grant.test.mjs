@@ -154,6 +154,43 @@ check(
   !/reset THEIR OWN\n\/\/ subscription_tier back to "free"/.test(remove)
 );
 
+console.log("\n== 4b. a removal that could not revoke does not answer «done» ==");
+// WHAT WAS REPORTED (ΛΘ-9): "Η αφαίρεση μέλους ομάδας λέει «έγινε»
+// ακόμα κι όταν η αλλαγή αποτύχει." The route deleted the team_members
+// row first and revoked the grant after, with both failure paths of the
+// revoke reduced to a log line — then returned { ok: true } regardless.
+// components/team/team-members-list.tsx decides by that flag, so the
+// owner saw "Member removed" over a member who still held the tier the
+// team had lent them, and the row that recorded the grant was already
+// gone. Section 6's end-of-period revoke covers the owner who stops
+// paying; this is the owner who presses the button.
+//
+// The fix is the ORDER, not an extra error message: a 500 after the
+// delete would be honest and useless, because the retry finds no row
+// and answers 404. Revoking first makes the retry the repair.
+// THE CODE, NOT THE PROSE. The paragraph above quotes `{ ok: true }`
+// to say what the bug was, and the first version of the check below
+// matched its own explanation and went red on the fixed route.
+const removeCodeOnly = remove.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+const revokeAt = removeCodeOnly.indexOf("mergeUserMetadata(");
+const deleteAt = removeCodeOnly.indexOf('.from("team_members")\n      .delete()');
+check("both halves of the removal are in the route", revokeAt !== -1 && deleteAt !== -1,
+  `revoke at ${revokeAt}, delete at ${deleteAt}`);
+check("the grant is taken back BEFORE the row that records it", revokeAt < deleteAt,
+  "delete-then-revoke leaves a failed revoke unrepairable: the retry answers 404");
+// Every exit between the two is a refusal. A `return NextResponse.json({ ok: true })`
+// reachable before the delete is the old bug wearing the new order.
+const beforeDelete = removeCodeOnly.slice(0, deleteAt);
+check("nothing answers «done» before the member is actually removed",
+  !/ok:\s*true/.test(beforeDelete),
+  beforeDelete.slice(Math.max(0, beforeDelete.length - 200)));
+check("a member account that cannot be read is a refusal",
+  /if \(getUserError \|\| !memberData\?\.user\) \{[\s\S]{0,400}?status: 500/.test(remove),
+  "without the account's metadata there is nothing to revoke, and no way to know whether there was");
+check("a revoke that failed is a refusal",
+  /if \(!merged\) \{[\s\S]{0,400}?status: 500/.test(remove),
+  "mergeUserMetadata returning false used to be a log line and a green toast");
+
 console.log("\n== 5. only Stripe and signup may write subscription_tier ==");
 // The structural half. One field, one owner: if team code can write it
 // again, the bug comes back with a different name.

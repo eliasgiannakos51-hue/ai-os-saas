@@ -259,7 +259,15 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // both halves of 20261007000000 fail QUIETLY and differently, the
   // column making every feature read an empty memory and the function
   // making nothing ever be learned again, each as one log line.
-  const CENSUS_CEILING = 70;
+  // 70 -> 72 ON 2026-10-15: two limitations a reader cannot derive.
+  // lib/billing/credits.ts — the reset key carries the PLAN as well as
+  // the month, because keyed by month alone an upgrade inside that month
+  // would find its own claim taken and leave a customer who just paid
+  // for Growth on Starter's balance. lib/data-analysis/store.ts — CSV
+  // out lives in one place now, and the sentence records that a second
+  // writer here is what let a formula reach a user's spreadsheet, so the
+  // next person does not add one back for convenience.
+  const CENSUS_CEILING = 72;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

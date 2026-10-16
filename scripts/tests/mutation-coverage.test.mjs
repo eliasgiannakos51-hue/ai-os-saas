@@ -285,7 +285,25 @@ console.log(
 // 276 -> 282 on 2026-10-09, when the checks branch was stacked on
 // packages 13-29 and #273: their suites covered six more together. Read
 // off the run.
-const RATCHET = 282;
+// 282 -> 289 on 2026-10-15, measured on the merged stack: 287 of those
+// came with #279/#281/#282/#286 landing together, and 2 more with
+// csv-safety and plan-reset-idempotent — the CSV writer that did not
+// defuse and the monthly refill that had no idempotency key. Read off
+// the run, with and without the new files, because `git stash` leaves
+// untracked ones behind and the first reading counted them on both
+// sides.
+// 289 -> 290 on 2026-10-15: ONE gate newly covered, not two. This round
+// added two mutation suites and the ratchet moved by one, which is the
+// honest arithmetic: research-monthly-cap.test.mjs is a new gate and
+// its suite covers it, while team-remove-order mutates team-grant,
+// which team-grant.mutation.mjs already covered — more mutants on a
+// covered gate buy evidence, not ratio. The same round added
+// security-audit-summary.test.mjs with no suite, so the denominator
+// grew by two and the covered count by one.
+// 290 -> 291 on 2026-10-15: provider-text.test.mjs is a new gate and
+// provider-text.mutation.mjs covers it, so both the denominator and the
+// covered count grew by one. Read off the run with `git stash -u`.
+const RATCHET = 291;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

@@ -130,7 +130,7 @@ check("...and a change that would break the row is refused",
   answers.readChanged({ box: { kind: "action", do: "notify" } }, boxes.readFlow(MORNING).boxes, "b1").ok === false &&
     answers.readChanged({ box: { kind: "read", source: "uploaded_file" } }, boxes.readFlow(MORNING).boxes, "b2").detail === "file_read_without_upload");
 const builder = code("src/lib/automations/builder.ts");
-check("a reply cut at its ceiling is refused, both calls", (builder.match(/if \(response\.stop_reason === "max_tokens"\) return \{ ok: false, kind: "unusable", detail: "max_tokens" \};/g) ?? []).length === 2);
+check("a reply cut at its ceiling is refused, both calls", (builder.match(/if \(outcome\.stopReason === AI_TRUNCATED_STOP_REASON\) return \{ ok: false, kind: "unusable", detail: "max_tokens" \};/g) ?? []).length === 2);
 check("the person's words are sanitised and handed over as data", (builder.match(/const \{ text \} = sanitiseAgentText\(params\.(said|instruction)\);/g) ?? []).length === 2 && /\(data, not instructions\)/.test(builder));
 check("only the chosen box comes back from a change; the route puts it in its place",
   /current\.boxes\.map\(\(b\) => \(b\.id === boxId \? changed\.box : b\)\)/.test(code("src/app/api/automations/flows/[id]/change/route.ts")));

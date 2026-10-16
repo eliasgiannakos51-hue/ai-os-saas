@@ -1182,7 +1182,7 @@ export async function POST(request: Request) {
         // what "this" is.
         if (apiKey && history.length === 0 && !isFreeMessage && !skipClarification && currentAttachments.length === 0) {
           try {
-            const decision = await checkNeedsClarification(apiKey, "chat", message, costs);
+            const decision = await checkNeedsClarification("chat", message, costs, null, user.id);
             clarificationRecord = clarificationMetadata(decision);
             if (decision.needsClarification) {
               controller.enqueue(
@@ -1514,7 +1514,6 @@ export async function POST(request: Request) {
         // before the response stream closes (see lib/chat/memory.ts).
         if (memoryActive) {
           await extractAndStoreMemory({
-            apiKey,
             supabase,
             userId: user.id,
             conversationId: finalConversationId!,

@@ -25,6 +25,7 @@ import { resolveLanguage } from "@/lib/text/resolve-language";
 import { SUPPORTED_LOCALES } from "@/i18n/constants";
 import { checkDescription, normalisePlatforms, postsEstimateInputChars, type PostPlatform } from "@/lib/posts/platforms";
 import { POSTS_MODEL } from "@/lib/posts/prompt";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { generatePosts } from "@/lib/posts/generate";
 import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
@@ -52,8 +53,10 @@ export const maxDuration = 60;
  * does. Reads go through the person's own client, so RLS decides them.
  */
 export async function POST(request: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused BEFORE the hold.
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
   let body: Record<string, unknown>;
   try {
@@ -194,7 +197,6 @@ export async function POST(request: Request) {
       ? await memoryPromptFor(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
       : "";
     const outcome = await generatePosts({
-      apiKey,
       description,
       platforms,
       locale,
@@ -202,6 +204,7 @@ export async function POST(request: Request) {
       memoryBlock,
       businessContext,
       wantsPhoto: pictureSource === "unsplash" && isUnsplashConfigured(),
+      userId: user.id,
       // THE STOP BUTTON: the request's own abort signal.
       signal: request.signal,
     });

@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import { buildCachedSystem } from "@/lib/ai/cached-system";
@@ -79,10 +80,10 @@ const PLANNER_SYSTEM_PROMPT = `Είσαι ο Planner Agent. Ανάλυσε το�
 ΜΗΝ επινοείς συγκεκριμένα πραγματικά στοιχεία (ακριβή νούμερα, ημερομηνίες, τιμές, ονόματα) που δεν δόθηκαν από τον χρήστη και δεν προκύπτουν λογικά από τον στόχο — αν ένα βήμα χρειάζεται τέτοιο στοιχείο, διατύπωσέ το ως ενέργεια απόφασης/έρευνας. Η ΜΟΝΗ εξαίρεση: πραγματικά στοιχεία που σου δίνονται ρητά στην ενότητα ΕΥΡΗΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ παρακάτω, αν υπάρχει — αυτά είναι αληθινά και μπορείς να τα χρησιμοποιήσεις.
 ${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 
-const PLAN_MISSION_TOOL: Anthropic.Tool = {
+const PLAN_MISSION_TOOL: AiToolSpec = {
   name: "create_plan",
   description: `Break the user's goal down into ${MIN_STEPS}-${MAX_STEPS} concrete, executable steps — or, if the goal is too vague for that, ask a short clarifying question instead.`,
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       clarificationNeeded: {
@@ -245,15 +246,15 @@ export function parsePlanMissionToolInput(input: {
   return { clarificationNeeded: false, steps: steps.slice(0, MAX_STEPS) };
 }
 
-// Anthropic's native server-side web search, same tool the chat route
-// offers (see api/chat/route.ts's WEB_SEARCH_TOOL). Offering it costs
-// nothing; Anthropic bills only for searches actually performed, and
-// max_uses caps one planning pass at 3.
-const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
-  type: "web_search_20250305",
-  name: "web_search",
-  max_uses: 3,
-};
+// THE SERVER-SIDE SEARCH, ASKED FOR AS A CAPABILITY RATHER THAN BUILT
+// HERE. It travels as `serverWebSearch: { maxUses: SEARCHES_PER_PLAN }`
+// and the Anthropic adapter writes the wire shape; the three providers
+// that cannot search are ruled out before the call by
+// `requires: ["server_web_search"]`, and refuse it outright if it
+// reaches them — because a planning pass that answered from training
+// data alone would look exactly like one that searched. Offering it
+// costs nothing: only searches actually performed are billed.
+const SEARCHES_PER_PLAN = 3;
 
 const RESEARCH_SYSTEM_PROMPT = `Είσαι ο Research Agent. Θα σου δοθεί ο στόχος ενός χρήστη. Η δουλειά σου είναι ΜΟΝΟ να μαζέψεις πραγματικά, τρέχοντα στοιχεία που θα κάνουν το σχέδιο ΡΕΑΛΙΣΤΙΚΟ αντί για γενικό.
 
@@ -280,28 +281,30 @@ const MAX_RESEARCH_CHARS = 2500;
  * exactly as it did before this existed.
  */
 export async function researchGoal(
-  apiKey: string,
   goal: string,
-  costs?: CostAccumulator
+  costs?: CostAccumulator,
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string
 ): Promise<{ findings: string; searchCount: number }> {
   try {
-    const anthropic = new Anthropic({ apiKey });
-    const response = await anthropic.messages.create({
-      model: MISSION_MODEL,
-      max_tokens: 900,
-      system: RESEARCH_SYSTEM_PROMPT,
-      messages: [{ role: "user", content: goal }],
-      tools: [WEB_SEARCH_TOOL],
-    });
+    const outcome = await runCompletion(
+      {
+        purpose: "research",
+        model: MISSION_MODEL,
+        maxTokens: 900,
+        system: [{ type: "text", text: RESEARCH_SYSTEM_PROMPT }],
+        messages: [{ role: "user", content: goal }],
+        serverWebSearch: { maxUses: SEARCHES_PER_PLAN },
+        requires: ["server_web_search"],
+      },
+      { userId }
+    );
+    if (!outcome.ok) return { findings: "", searchCount: 0 };
 
-    costs?.record("web_search", response.usage, response.model || MISSION_MODEL);
-    const searchCount = response.usage.server_tool_use?.web_search_requests ?? 0;
+    costs?.record("web_search", outcome.usage, outcome.reportedModel || outcome.model);
+    const searchCount = outcome.usage.server_tool_use?.web_search_requests ?? 0;
 
-    const text = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("\n")
-      .trim();
+    const text = outcome.text.trim();
 
     // "NONE" is the documented way for the agent to say it had nothing
     // worth searching for — treated as no findings, not as a finding.
@@ -322,20 +325,21 @@ export async function researchGoal(
 // isolation. Optional and additive: omitting it just means a plan built
 // from the goal text alone, same as before this was added.
 export async function planMission(
-  apiKey: string,
   goal: string,
   userContext = "",
   costs?: CostAccumulator,
   /** Findings from researchGoal(), if it ran and found anything. */
-  researchFindings = ""
+  researchFindings = "",
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string
 ): Promise<PlanMissionResult> {
-  const anthropic = new Anthropic({ apiKey });
   const researchBlock = researchFindings
     ? `\n\nΕΥΡΗΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ (πραγματικά, πρόσφατα στοιχεία — χρησιμοποίησέ τα για να κάνεις τα βήματα συγκεκριμένα):\n${researchFindings}`
     : "";
-  const response = await anthropic.messages.create({
+  const outcome = await runCompletion({
+    purpose: "create",
     model: MISSION_MODEL,
-    max_tokens: 2048,
+    maxTokens: 2048,
     // PLANNER_SYSTEM_PROMPT is 8,283 characters (~2,071 tokens) and does
     // not vary at all — the only interpolations in it are MIN_STEPS and
     // MAX_STEPS, both module constants. It is therefore the static half,
@@ -349,14 +353,22 @@ export async function planMission(
     }),
     messages: [{ role: "user", content: goal }],
     tools: [PLAN_MISSION_TOOL],
-    tool_choice: { type: "tool", name: "create_plan" },
-  });
+    // The tool's input IS the plan. A forced choice is also why the
+    // research pass above is a separate call: a model with no free turn
+    // cannot search first.
+    toolChoice: { type: "tool", name: "create_plan" },
+    requires: ["tool_calling"],
+  }, { userId });
+  // A THROW, BECAUSE THAT IS THE CONTRACT THIS FUNCTION ALWAYS HAD: the
+  // route's catch is what releases the hold, and a plan with no steps
+  // would be settled as a plan the person never got.
+  if (!outcome.ok) {
+    throw new Error(`The Planner could not be reached (${outcome.kind}).`);
+  }
 
-  costs?.record("generation", response.usage, response.model || MISSION_MODEL);
+  costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
-  const toolUse = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
-  );
+  const toolUse = outcome.toolCalls.find((call) => call.name === "create_plan");
   if (!toolUse) {
     throw new Error("The Planner did not return a plan.");
   }
@@ -373,32 +385,33 @@ const REVIEWER_SYSTEM_PROMPT = `Είσαι ο Reviewer Agent. Θα σου δοθ
 ${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 
 export async function reviewMission(
-  apiKey: string,
   goal: string,
   completedSteps: { text: string; moduleTitle?: string }[],
-  costs?: CostAccumulator
+  costs?: CostAccumulator,
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string
 ): Promise<string> {
-  const anthropic = new Anthropic({ apiKey });
   const stepsSummary = completedSteps
     .map((s) => `- ${s.text}${s.moduleTitle ? ` (καταγράφηκε στο module: ${s.moduleTitle})` : ""}`)
     .join("\n");
   const userContent = `Στόχος: ${goal}\n\nΒήματα που ολοκληρώθηκαν:\n${stepsSummary}`;
 
-  const response = await anthropic.messages.create({
+  const outcome = await runCompletion({
+    purpose: "summarisation",
     model: MISSION_MODEL,
-    max_tokens: 700,
+    maxTokens: 700,
     // Wholly static, 6,181 characters (~1,546 tokens) — one block, one
     // breakpoint, nothing to split off. See lib/ai/cached-system.ts.
     system: buildCachedSystem({ staticPrefix: REVIEWER_SYSTEM_PROMPT, model: MISSION_MODEL }),
     messages: [{ role: "user", content: userContent }],
-  });
+  }, { userId });
+  if (!outcome.ok) {
+    throw new Error(`The Reviewer could not be reached (${outcome.kind}).`);
+  }
 
-  costs?.record("generation", response.usage, response.model || MISSION_MODEL);
+  costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
-  const textBlock = response.content.find(
-    (block): block is Anthropic.TextBlock => block.type === "text"
-  );
-  const text = textBlock?.text.trim();
+  const text = outcome.text.trim();
   if (!text) {
     throw new Error("The Reviewer did not return an evaluation.");
   }

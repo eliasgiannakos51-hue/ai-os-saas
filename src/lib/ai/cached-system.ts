@@ -93,19 +93,38 @@ export function modelCacheMinimumTokens(model: string | undefined): number {
   );
 }
 
-// The same 4-chars-per-token figure lib/billing/estimate.ts prices every
-// pre-action estimate with, reused here on purpose so one constant governs
-// both. It is calibrated for English prose and it UNDER-counts Greek,
-// which is most of this app's prompt text — Greek needs more tokens per
-// character than English, not fewer. That bias is in the safe direction
-// for this specific decision: a prompt this function judges to be over the
-// minimum is, in Greek, further over it than the arithmetic says. It would
-// be the wrong direction for a charge, which is why this is only ever used
-// to answer "is this worth a cache breakpoint", never to price anything.
-const CHARS_PER_TOKEN = 4;
+// THE SAME FIGURE AS lib/billing/estimate.ts's CHARS_PER_TOKEN, WRITTEN
+// TWICE ON PURPOSE — and the comment that used to sit here said the
+// opposite.
+//
+// It read "reused here on purpose so one constant governs both", while
+// the line under it declared a second `const CHARS_PER_TOKEN = 4`. Two
+// constants, one of them claiming to be the other. It was found on
+// 2026-10-15 by a flat-scope collision, not by reading: this file joined
+// the graph of every runCompletion caller, estimate.ts was already on
+// the automation runner's, and scripts/tests/load-ts.mjs refused to
+// bundle two top-level names that are the same word.
+//
+// It cannot import the real one. This module has NO imports at all, and
+// that is load-bearing — mission-planner.test.mjs used to paste it in
+// whole, and estimate.ts is the pricing engine, which would drag the
+// whole of it onto every call site's graph. So the figure is duplicated,
+// the name says which job it does, and
+// scripts/tests/prompt-caching.test.mjs holds the two numbers equal so
+// they cannot drift apart silently.
+//
+// It is calibrated for English prose and it UNDER-counts Greek, which is
+// most of this app's prompt text — Greek needs more tokens per character
+// than English, not fewer. That bias is in the safe direction for this
+// specific decision: a prompt this function judges to be over the
+// minimum is, in Greek, further over it than the arithmetic says. It
+// would be the wrong direction for a charge, which is why this is only
+// ever used to answer "is this worth a cache breakpoint", never to price
+// anything.
+const CHARS_PER_TOKEN_FOR_CACHE_MINIMUM = 4;
 
 export function approximateTokens(text: string): number {
-  return Math.ceil(text.length / CHARS_PER_TOKEN);
+  return Math.ceil(text.length / CHARS_PER_TOKEN_FOR_CACHE_MINIMUM);
 }
 
 /**

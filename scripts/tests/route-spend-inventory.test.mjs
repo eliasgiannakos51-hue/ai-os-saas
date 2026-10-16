@@ -133,8 +133,20 @@ function reachableFrom(entry) {
 // broken — measured on charge-sees-input.test.mjs, 2026-09-14.
 // ---------------------------------------------------------------------
 const SPEND_KINDS = {
-  // Tokens. Anthropic through the SDK, or another provider over HTTP.
-  model: /\bmessages\s*\.\s*(create|stream)\s*\(|generativelanguage\.googleapis\.com|api\.groq\.com|api\.openai\.com/,
+  // Tokens, IN BOTH SPELLINGS — and the second one was added on
+  // 2026-10-16 because this population was being blinded one file at a
+  // time, which is ΛΘ-16's exact shape for the sixth time.
+  //
+  // Step 1.4 moves every model call from `anthropic.messages.create(` to
+  // `runCompletion(`, and the adapters that still name a provider's host
+  // are loaded with a DYNAMIC import (ΛΘ-17), so the graph walk below
+  // does not follow them. A route that moved therefore stopped reaching
+  // a model call as far as this file could see — silently, while still
+  // spending exactly as many tokens as before. It was caught by the
+  // claim table a few lines down naming research/[id]/continue, not by
+  // the floor: 49 routes is a long way above 20, so the floor would have
+  // let the whole population drain first.
+  model: /\bmessages\s*\.\s*(create|stream)\s*\(|\brunCompletion\s*\(|generativelanguage\.googleapis\.com|api\.groq\.com|api\.openai\.com/,
   audio: /api\.elevenlabs\.io/,
   image_api: /api\.unsplash\.com/,
   oauth_api: /gmail\.googleapis\.com|www\.googleapis\.com\/(calendar|drive)|googleapis\.com\/(gmail|calendar)/,
@@ -388,7 +400,22 @@ const CLAIMS = /claimJob\s*\(|claimChunk\s*\(|claim_activation_run|\.eq\(\s*"run
 // as neither, which called five correct routes unbounded.
 const BOUNDS_ITSELF = /\breserveCredits\s*\(|\bstartJob\s*\(|checkRateLimit\s*\(|checkCronAuth\s*\(/;
 const modelRoutes = classified.filter((c) => c.kinds.includes("model"));
-checkTrue(`routes that reach a model call (${modelRoutes.length})`, modelRoutes.length >= 20, "the model detector matched almost nothing");
+// A FLOOR THAT IS ACTUALLY NEAR THE NUMBER. It was 20 against a real 49,
+// so the population could have lost more than half of itself — which is
+// what it was quietly doing — without this line moving. 55 measured
+// 2026-10-16, after the router's spelling was added to SPEND_KINDS.model
+// above; raise it when the number rises, never lower it to meet a drop.
+checkTrue(`routes that reach a model call (${modelRoutes.length})`, modelRoutes.length >= 50,
+  "the model detector lost routes — a spelling it does not know, or a graph edge it stopped following");
+// AND IT KNOWS BOTH SPELLINGS, driven rather than read: the regex is
+// applied to each, so a migration that renames the router cannot leave
+// this matching only the SDK.
+checkTrue("the model detector sees a call through the router",
+  SPEND_KINDS.model.test("const outcome = await runCompletion(request, { userId });"));
+checkTrue("...and one straight through the SDK",
+  SPEND_KINDS.model.test("await client.messages.create({ model, max_tokens: 10 });"));
+checkTrue("...and matches neither on an unrelated call",
+  !SPEND_KINDS.model.test("await supabase.from(\"x\").select(\"id\");"));
 
 const CONTINUES_SOMEBODY_ELSES_HOLD = {
   "jobs/[id]/continue": {

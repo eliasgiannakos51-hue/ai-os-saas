@@ -761,6 +761,169 @@ console.log("\n== 5c. \"IT RAN OUT OF ROOM\" MEANS THE SAME THING FROM ALL FOUR 
 }
 
 // ===========================================================================
+console.log("\n== 5d. THE SOURCES UNDER A REPORT'S CLAIMS ==");
+// ===========================================================================
+//
+// WHAT THIS IS FOR. Deep Research puts a numbered source under every
+// finding, and until 2026-10-16 the per-question call was the last one
+// in the product still speaking to the SDK directly — not because of the
+// search, which the router has done for lib/agents since 2026-10-15, but
+// because AiResult could not carry the CITATIONS Anthropic attaches to
+// its text blocks. Moving it without them would have produced a report
+// whose claims point nowhere, which is worse than one provider's worth
+// of failover is good.
+//
+// THE MAPPING IS RUN, NOT READ, and that is why it is its own file.
+// adapters/anthropic.ts imports the vendor SDK, so load-ts.mjs refuses
+// it and a build gate can only read its text. lib/ai/providers/citations.ts
+// imports nothing, so the rules below are EXECUTED against the shape the
+// API really sends. The one line that joins the two — the adapter
+// calling this function — is checked as source here and driven end to
+// end, through a stubbed fetch, by scripts/tests/research-citations.itest.mjs.
+{
+  const { citationsFromAnthropicContent, citedSources, CITATION_URL_MAX, CITATION_TITLE_MAX } =
+    await loadTs("src/lib/ai/providers/citations.ts");
+
+  const block = (text, citations) => ({ type: "text", text, citations });
+  const cite = (url, title) => ({ type: "web_search_result_location", url, title, cited_text: "…" });
+
+  const two = citationsFromAnthropicContent([
+    block("First.", [cite("https://a.example/1", "One")]),
+    block("Second.", [cite("http://b.example/2", "Two")]),
+  ]);
+  ok("both citations survive, in the order they were cited",
+    two.map((c) => c.url).join(",") === "https://a.example/1,http://b.example/2", JSON.stringify(two));
+  ok("...with their titles", two.map((c) => c.title).join(",") === "One,Two", JSON.stringify(two));
+
+  // A FLOOR UNDER EVERY "IT DROPS X" BELOW. A mapper that returned []
+  // for everything would satisfy each of them and report no sources at
+  // all — which is the failure, not the fix.
+  ok("the mapper returns something at all", two.length === 2, `${two.length}`);
+
+  const deduped = citationsFromAnthropicContent([
+    block("A sentence.", [cite("https://a.example/1", "One"), cite("https://a.example/1", "One again")]),
+    block("Another.", [cite("https://a.example/1", "One a third time")]),
+  ]);
+  ok("one page cited three times is one source", deduped.length === 1, JSON.stringify(deduped));
+  ok("...kept as the FIRST title it was given", deduped[0]?.title === "One", JSON.stringify(deduped));
+
+  // A REPORT TURNS EVERY ONE OF THESE INTO AN ANCHOR
+  // (lib/research/report-to-html.ts), which is the one place a URL stops
+  // being text.
+  for (const bad of ["javascript:alert(1)", "data:text/html,<script>", "/relative", "ftp://x.example", "", "httpsa://x"]) {
+    const got = citationsFromAnthropicContent([block("t", [cite(bad, "t")])]);
+    ok(`"${bad.slice(0, 24)}" is not a source`, got.length === 0, JSON.stringify(got));
+  }
+
+  // CITATIONS RIDE ON THE PROSE THEY SUPPORT. The raw search result
+  // blocks list pages the model looked at and did NOT use; a source list
+  // is what the answer rests on.
+  const nonText = citationsFromAnthropicContent([
+    { type: "web_search_tool_result", content: [cite("https://looked.example", "Looked at")] },
+    { type: "tool_use", id: "t1", name: "x", input: {}, citations: [cite("https://nope.example", "No")] },
+    block("The answer.", [cite("https://used.example", "Used")]),
+  ]);
+  ok("only the text blocks are read",
+    nonText.length === 1 && nonText[0].url === "https://used.example", JSON.stringify(nonText));
+
+  const long = "https://x.example/" + "a".repeat(CITATION_URL_MAX * 2);
+  const capped = citationsFromAnthropicContent([block("t", [cite(long, "T".repeat(CITATION_TITLE_MAX * 2))])]);
+  ok(`a URL is cut at ${CITATION_URL_MAX}`, capped[0]?.url.length === CITATION_URL_MAX, `${capped[0]?.url.length}`);
+  ok(`a title is cut at ${CITATION_TITLE_MAX}`, capped[0]?.title.length === CITATION_TITLE_MAX, `${capped[0]?.title.length}`);
+  // CUT FIRST, THEN DEDUPE. Keying on the raw URL and storing the cut one
+  // would give two entries the same href — [3] and [4] pointing at one
+  // page.
+  const twins = citationsFromAnthropicContent([
+    block("t", [cite(long + "ONE", "a"), cite(long + "TWO", "b")]),
+  ]);
+  ok("two URLs that differ only past the cap become ONE source",
+    twins.length === 1, JSON.stringify(twins.map((c) => c.url.length)));
+
+  ok("an answer with no citations is an empty list, not a crash",
+    JSON.stringify(citationsFromAnthropicContent([block("No search was needed.", undefined)])) === "[]");
+  ok("...and so is no content at all", JSON.stringify(citationsFromAnthropicContent([])) === "[]");
+  ok("a citation with no title falls back to its URL",
+    citationsFromAnthropicContent([block("t", [{ url: "https://u.example/p" }])])[0]?.title === "https://u.example/p");
+
+  // --- and the wiring, which this file can only read ------------------
+  ok("the Anthropic adapter fills citations from this function",
+    /citations:\s*citationsFromAnthropicContent\(response\.content\)/.test(stripTs(anthropicSrc)),
+    "adapters/anthropic.ts must call the mapper, not re-implement it");
+  for (const [name, text] of [["openai", openaiSrc], ["google", googleSrc], ["groq", groqSrc]]) {
+    ok(`${name} leaves citations ABSENT — it cannot report any`,
+      !/\bcitations\b/.test(stripTs(text)),
+      "an empty array here would read as \"the searches found nothing\", which is a different answer");
+  }
+  // SPREAD, NOT ASSIGNED. `{ citations: undefined }` has the key, so
+  // `"citations" in result` answers yes for a provider that cannot
+  // produce any — the one question Deep Research asks.
+  ok("runCompletion spreads the field rather than assigning it",
+    /\.\.\.\(response\.citations \? \{ citations: response\.citations \} : \{\}\)/.test(
+      stripTs(src("src/lib/ai/providers/complete.ts"))
+    ),
+    "complete.ts must not write citations: undefined onto the result");
+
+  // --- ABSENT AND EMPTY, AS A FUNCTION RATHER THAN A SPELLING -------
+  //
+  // RUN, NOT READ. This is the whole distinction the field exists for,
+  // so it is one exported decision that the gate executes — a
+  // `!outcome.citations` written out at each call site could be checked
+  // only as text, and a `?? []` slipped into one of them would read as
+  // "the searches found nothing" for ever.
+  ok("a result that cites nothing has NO sources — null, not []",
+    citedSources({}) === null, JSON.stringify(citedSources({})));
+  ok("...and one that cites an empty list has an empty list",
+    JSON.stringify(citedSources({ citations: [] })) === "[]", JSON.stringify(citedSources({ citations: [] })));
+  ok("the sources themselves come through",
+    JSON.stringify(citedSources({ citations: [{ url: "https://u.example", title: "U" }] })) ===
+      JSON.stringify([{ url: "https://u.example", title: "U" }]));
+  // A COPY, so a caller that sorts or splices a report's source list
+  // cannot reach back into the result the log was written from.
+  {
+    const given = [{ url: "https://u.example", title: "U" }];
+    const got = citedSources({ citations: given });
+    got.push({ url: "https://v.example", title: "V" });
+    ok("...as a copy, not the result's own array", given.length === 1, `${given.length}`);
+  }
+
+  // AND THE CALLER REFUSES THE ABSENCE. A finding whose sources are
+  // unknown must not reach a report as a finding with no sources.
+  const researchSrc = stripTs(src("src/lib/research/research.ts"));
+  ok("research refuses an answer whose provider could not cite",
+    /const sources = citedSources\(outcome\);[\s\S]{0,40}if \(!sources\) \{/.test(researchSrc),
+    "the guard in researchQuestion is gone");
+  ok("...and no longer imports the SDK at all",
+    !/@anthropic-ai\/sdk/.test(researchSrc), "lib/research/research.ts still reaches for the vendor package");
+  // EVERY CALL SITE THAT SEARCHES, NOT JUST THE ONE I REMEMBERED. The
+  // rule is "a request carrying serverWebSearch also REQUIRES the
+  // capability" — the field tells the ADAPTER what to send, `requires`
+  // tells the ROUTER who may be sent it, and a request with the first
+  // and not the second can be handed to a provider with no web access.
+  // That provider refuses with a 400 (refuseUnsupported), which is
+  // classified bad_request and does NOT fail over, so the call dies on
+  // a provider that was never eligible. Ranged over the tree rather
+  // than over the three files I happened to think of.
+  {
+    const searchers = readdirSync("src", { recursive: true })
+      .filter((f) => typeof f === "string" && f.endsWith(".ts"))
+      .map((f) => join("src", f))
+      .filter((f) => statSync(f).isFile() && !f.includes("providers/adapters"))
+      .map((f) => [f, stripComments(readFileSync(f, "utf8"))])
+      .filter(([, text]) => /serverWebSearch:\s*\{/.test(text));
+    ok(`the scan found the call sites that search (${searchers.length})`, searchers.length >= 3,
+      "an empty list would make the check below pass on nothing");
+    const unguarded = searchers
+      .filter(([, text]) => !/requires:\s*\[[^\]]*"server_web_search"/.test(text))
+      .map(([f]) => f);
+    ok("every call that asks for the web also REQUIRES it", unguarded.length === 0, unguarded.join(", "));
+  }
+
+  ok("...and its sources come from that one list, not from parsed prose",
+    /sources,\n/.test(researchSrc) && !/sources: \[\]/.test(researchSrc.split("const sources")[1] ?? ""),
+    researchSrc.split("\n").filter((l) => l.trim().startsWith("sources")).join(" | "));
+}
+
+// ===========================================================================
 console.log("\n== 5b. FORCING A TOOL: the field 21 call sites depend on ==");
 // ===========================================================================
 //

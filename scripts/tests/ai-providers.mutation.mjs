@@ -54,6 +54,8 @@ const VERCEL = "vercel.json";
 const WORKSPACE = "src/components/agents/agents-workspace.tsx";
 const COMPLETE = "src/lib/ai/providers/complete.ts";
 const PROVIDER_LOG = "src/lib/ai/providers/provider-log.ts";
+const CITATIONS = "src/lib/ai/providers/citations.ts";
+const RESEARCH = "src/lib/research/research.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -611,6 +613,90 @@ const MUTANTS = [
     from: 'import { logApiError } from "@/lib/log-error";',
     to: 'import { createAdminClient as eagerAdmin } from "@/lib/supabase/admin";\nimport { logApiError } from "@/lib/log-error";\nvoid eagerAdmin;',
     expect: "the graph reaches no vendor package",
+  },
+
+  // ------------------------------------------------------------------
+  // THE SOURCES UNDER A REPORT'S CLAIMS (§5d).
+  //
+  // Every one of these ships a Deep Research report that LOOKS finished.
+  // The prose is the same, the headings are the same, the [n] markers
+  // are in the same places — only the list they point into is wrong,
+  // short, or empty. A reader cannot tell any of them from the real
+  // thing without clicking, and the one who clicks finds a page that
+  // was never read.
+  // ------------------------------------------------------------------
+  {
+    file: ANTHROPIC,
+    name: "the adapter stops reporting citations, so every report's sources vanish",
+    from: "    citations: citationsFromAnthropicContent(response.content),\n",
+    to: "",
+    expect: "the Anthropic adapter fills citations from this function",
+  },
+  {
+    file: COMPLETE,
+    name: "runCompletion writes citations: undefined, so the key exists and the absence cannot be seen",
+    from: "...(response.citations ? { citations: response.citations } : {}),",
+    to: "citations: response.citations,",
+    expect: "runCompletion spreads the field rather than assigning it",
+  },
+  {
+    file: CITATIONS,
+    name: "a provider that cannot cite is read as one that found nothing",
+    from: "  return result.citations ? [...result.citations] : null;",
+    to: "  return [...(result.citations ?? [])];",
+    expect: "a result that cites nothing has NO sources",
+  },
+  {
+    file: CITATIONS,
+    name: "the raw search results are counted as sources, so pages the answer never used are cited",
+    from: '    if (b?.type !== "text") continue;',
+    to: "    if (false) continue;",
+    expect: "only the text blocks are read",
+  },
+  {
+    file: CITATIONS,
+    name: "any URL scheme becomes an anchor in the report",
+    from: "      if (!/^https?:\\/\\//i.test(raw)) continue;",
+    to: "      if (!raw) continue;",
+    expect: "is not a source",
+  },
+  {
+    file: CITATIONS,
+    name: "one page cited five times becomes five numbered sources",
+    from: "      if (seen.has(url)) continue;",
+    to: "      if (false) continue;",
+    expect: "one page cited three times is one source",
+  },
+  {
+    file: CITATIONS,
+    name: "the URL is cut AFTER the dedupe, so two entries can share one href",
+    edits: [
+      { from: "      const url = raw.slice(0, CITATION_URL_MAX);", to: "      const url = raw;" },
+      { from: "      seen.set(url, { url, title:", to: "      seen.set(url, { url: url.slice(0, CITATION_URL_MAX), title:" },
+    ],
+    expect: "two URLs that differ only past the cap become ONE source",
+  },
+  {
+    file: CITATIONS,
+    name: "the caller is handed the result's own array to mutate",
+    from: "  return result.citations ? [...result.citations] : null;",
+    to: "  return result.citations ? (result.citations as AiCitation[]) : null;",
+    expect: "as a copy, not the result's own array",
+  },
+  {
+    file: RESEARCH,
+    name: "an answer whose provider could not cite is written into the report with no sources",
+    edits: [
+      { from: "  const sources = citedSources(outcome);\n  if (!sources) {", to: "  const sources = citedSources(outcome) ?? [];\n  if (false) {" },
+    ],
+    expect: "research refuses an answer whose provider could not cite",
+  },
+  {
+    file: RESEARCH,
+    name: "the research question goes back to the SDK, and the router loses its last call site",
+    from: '      requires: ["server_web_search"],',
+    to: "",
+    expect: "every call that asks for the web also REQUIRES it",
   },
 ];
 

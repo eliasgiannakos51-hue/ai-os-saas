@@ -1,5 +1,4 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { STOPPED_MESSAGE, isStopRequested } from "@/lib/stop-requests";
@@ -184,7 +183,6 @@ async function handOff(reportId: string): Promise<boolean> {
  */
 export async function runResearchChunk(params: {
   reportId: string;
-  apiKey: string;
   startedAt: number;
 }): Promise<ChunkOutcome> {
   const counted = { accumulator: null as CostAccumulator | null, before: 0 };
@@ -199,12 +197,11 @@ export async function runResearchChunk(params: {
 async function runResearchChunkInner(
   params: {
     reportId: string;
-    apiKey: string;
     startedAt: number;
   },
   counted: { accumulator: CostAccumulator | null; before: number }
 ): Promise<ChunkOutcome> {
-  const { reportId, apiKey, startedAt } = params;
+  const { reportId, startedAt } = params;
   const admin = createAdminClient();
   const budgetMs = Math.min(functionBudgetMs(), RESEARCH_DEADLINE_MS);
 
@@ -265,7 +262,6 @@ async function runResearchChunkInner(
   counted.accumulator = costs;
   counted.before = costs.callCount;
   const language = String(report.language ?? "en");
-  const anthropic = new Anthropic({ apiKey });
 
   // Where the previous chunks got to. Derived from the findings array
   // rather than from questions_done, so the two cannot disagree — the
@@ -365,11 +361,11 @@ async function runResearchChunkInner(
     }
 
     const result = await researchQuestion({
-      anthropic,
       topic: String(report.topic),
       question: questions[answered],
       language,
       costs,
+      userId: report.user_id,
     });
     // Stamped with when it finished and how many cost entries the report
     // had by then — a count, never money, because partial_findings is

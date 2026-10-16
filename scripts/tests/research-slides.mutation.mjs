@@ -144,9 +144,13 @@ const MUTANTS = [
   {
     name: "a question the AI service never answered is no longer marked",
     file: QUESTION,
-    from: '      finding: { question: params.question.question, summary: "", sources: [], failed: true },',
-    to: '      finding: { question: params.question.question, summary: "", sources: [] },',
-    expect: "a question the AI service never answered is marked so (research.ts, the catch)",
+    // RE-ANCHORED 2026-10-16. The three ways a question can go
+    // unanswered — the router refusing, a provider that cannot cite, a
+    // failed call — write the finding through one `unanswered` helper
+    // now, so the shape moved out two spaces and out of a `catch`.
+    from: '    finding: { question: params.question.question, summary: "", sources: [], failed: true },',
+    to: '    finding: { question: params.question.question, summary: "", sources: [] },',
+    expect: "a question the AI service never answered is marked so (research.ts, unanswered)",
   },
   {
     name: "a run the AI service never answered says the topic gave nothing",

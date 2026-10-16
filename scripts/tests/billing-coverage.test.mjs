@@ -110,11 +110,6 @@ const DECLARED = {
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
   },
-  "src/lib/research/research.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens. TWO of its three calls moved onto runCompletion on 2026-10-15 — the planning half and the synthesis, neither of which needs the web. The per-question call did NOT, and the reason is the citations rather than the search: AiResult carries text, tool calls, usage and a stop reason, and every source under every finding comes from the citations Anthropic attaches to its text blocks. Moving it today would produce a report whose claims point nowhere. The file's own header says what it needs.",
-  },
 };
 
 /**
@@ -199,7 +194,7 @@ const ROUTED = {
     note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing. Moved onto runCompletion 2026-10-15, and the cut-translation refusal went through modelTextFrom — the router's door onto the same truncation rule, so half a document still never becomes a PDF somebody pays for.",
   },
   "src/lib/research/research.ts": {
-    note: "V3 Deep Research, the two halves that moved. planResearch turns the topic into questions (forced tool, no web) and synthesiseReport writes the report from what the questions found (no tool, no web) — both record onto the ONE accumulator per report that api/research/[id]/run settles, failure paths included, since every phase that ran spent tokens. The per-question call is the third and is still on the SDK; it is also DECLARED above, with the reason. The synthesis keeps its wall-clock limit as the router's per-ATTEMPT budget, which is the same guarantee with failover added.",
+    note: "V3 Deep Research, all three calls. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool, no web), researchQuestion (web search, once per question, sequential), synthesiseReport (no tool, no web). All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run including the failure paths, since every phase that ran spent tokens. The first two moved onto runCompletion 2026-10-15; the per-question call moved 2026-10-16, once AiResult could carry citations — it is the only one of the three that asks for serverWebSearch and REQUIRES the capability, so the three providers with no web access are ruled out before the call rather than answering a research question from training data. Its sources come from outcome.citations and nowhere else, and an outcome WITHOUT that field (absent, as opposed to an empty array) is refused: the question is marked failed and the searches it did run are still reported, rather than a finding reaching the report with no sources under it. Each call keeps its wall-clock limit as the router's per-ATTEMPT budget, which is the same guarantee with failover added.",
   },
   "src/lib/mission-agents.ts": {
     note: "planner/reviewer, costs passed in All three calls moved onto runCompletion 2026-10-15; the research pass asks for serverWebSearch and REQUIRES it, so a provider with no search is ruled out before the call rather than answering a planning question from training data.",

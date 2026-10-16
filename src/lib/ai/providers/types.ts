@@ -217,6 +217,26 @@ export type AiToolCall = {
   input: Record<string, unknown>;
 };
 
+/**
+ * ONE SOURCE A MODEL ACTUALLY READ, as the provider reported it.
+ *
+ * NOT A URL THE MODEL TYPED. Anthropic's server-side web search attaches
+ * citation blocks to the text it wrote, and those name pages the tool
+ * really fetched. A model asked for its sources in prose will happily
+ * produce a plausible URL that 404s, and a source list nobody can open
+ * is worse than none: it reads as evidence. So this comes from the
+ * provider's own citation blocks and from nowhere else.
+ *
+ * TWO FIELDS, BECAUSE THAT IS WHAT EVERY READER USES. Anthropic's blocks
+ * also carry `cited_text` and an encrypted index; lib/research only ever
+ * numbers and links the page. Carrying more would be carrying a shape
+ * only one provider can fill.
+ */
+export type AiCitation = {
+  url: string;
+  title: string;
+};
+
 export type AiResult = {
   ok: true;
   provider: AiProvider;
@@ -228,6 +248,25 @@ export type AiResult = {
   reportedModel: string;
   text: string;
   toolCalls: AiToolCall[];
+  /**
+   * ABSENT AND EMPTY ARE DIFFERENT ANSWERS, and this field exists
+   * because the difference is the whole point.
+   *
+   * `[]` means the provider CAN report citations and this answer had
+   * none — the searches found nothing worth citing. `undefined` means
+   * the provider cannot report them at all, so the answer's sources are
+   * unknown rather than absent. A caller that needs sources (Deep
+   * Research puts one under every finding) must refuse the second case;
+   * if the two were the same value it could not tell them apart, and a
+   * report whose claims point nowhere looks exactly like one whose
+   * searches came back empty.
+   *
+   * Today only Anthropic fills it, because only Anthropic's models carry
+   * the `server_web_search` capability (catalog.ts) and the other three
+   * adapters refuse such a request outright (refuseUnsupported in
+   * adapters/shared.ts) rather than answering without the web.
+   */
+  citations?: AiCitation[];
   usage: AiUsage;
   stopReason: string | null;
   /** Every attempt, in order, including the ones that failed. This is
@@ -275,6 +314,9 @@ export type AdapterCall = {
 export type AdapterResponse = {
   text: string;
   toolCalls: AiToolCall[];
+  /** Set only by an adapter whose provider reports them; left ABSENT,
+   *  never `[]`, by the three that cannot. See AiResult.citations. */
+  citations?: AiCitation[];
   usage: AiUsage;
   stopReason: string | null;
   /** Whatever the provider said it served. Kept verbatim so a silent

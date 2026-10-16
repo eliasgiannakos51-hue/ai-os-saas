@@ -22,6 +22,8 @@
  * Run: node scripts/tests/ci-coverage.test.mjs
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { createRequire } from "node:module";
+import { resolve } from "node:path";
 
 let pass = 0;
 const failures = [];
@@ -55,6 +57,16 @@ const wfCode = wf
   .split("\n")
   .filter((l) => !/^\s*#/.test(l))
   .join("\n");
+// ONE JOB'S BLOCK, COMMENTS STRIPPED. Hoisted here because sections 3b,
+// 5 and 6 all ask "what does this job actually say", and a second copy
+// of the parser is a second thing to get subtly different.
+const yamlCode = (text) => text.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
+const jobBlock = (name) => {
+  const at = wf.indexOf(`\n  ${name}:`);
+  if (at < 0) return "";
+  const next = wf.slice(at + 1).search(/\n  [a-z][a-z-]*:\n/);
+  return yamlCode(next < 0 ? wf.slice(at) : wf.slice(at, at + 1 + next));
+};
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const suites = readdirSync("scripts/tests");
 
@@ -306,7 +318,15 @@ console.log("== 3b. a red run tells somebody ==");
   check(`the workflow's jobs were parsed (${jobNames.join(", ")})`, jobNames.length >= 3, jobNames.join(","));
   const needsLine = alertBlock.match(/needs:\s*\[([^\]]*)\]/);
   const alertNeeds = needsLine ? needsLine[1].split(",").map((x) => x.trim()).filter(Boolean) : [];
-  const unwatched = jobNames.filter((j) => j !== "alert" && !alertNeeds.includes(j));
+  // THE REPORTERS ARE DERIVED, NOT NAMED. There are two of them now —
+  // the alert and the all-clear — and neither watches the other, which
+  // is right: they are the watching, not the work. Spelling them out
+  // here is the same mistake this check's own comment above describes,
+  // so a job counts as a reporter when it CALLS the reporting module.
+  const reporters = jobNames.filter((j) => /ci-red-issue\.cjs/.test(jobBlock(j)));
+  check(`the reporting jobs were found by what they call (${reporters.join(", ") || "none"})`,
+    reporters.length >= 1, "no job calls the module, so every job below reads as unwatched");
+  const unwatched = jobNames.filter((j) => !reporters.includes(j) && !alertNeeds.includes(j));
   check(
     `...and it waits for every job it reports on (${alertNeeds.length}/${jobNames.length - 1})`,
     needsLine !== null && unwatched.length === 0,
@@ -314,13 +334,20 @@ console.log("== 3b. a red run tells somebody ==");
       ? `${unwatched.join(", ")} can fail without opening an issue`
       : "a job with no `needs` runs before the thing it is meant to report has finished"
   );
+  // THESE THREE READ THE MODULE, because that is where the behaviour
+  // moved on 2026-10-16. They are the cheap structural half; section 6
+  // RUNS the same module and asks what it does, which is the half that
+  // would have caught `per_page: 10`.
+  const alertModule = existsSync(".github/scripts/ci-red-issue.cjs")
+    ? readFileSync(".github/scripts/ci-red-issue.cjs", "utf8")
+    : "";
   check("...it opens an issue, which survives a closed tab",
-    /issues\.create\(/.test(alertBlock) && /issues: write/.test(wf));
+    /issues\.create\(/.test(alertModule) && /issues: write/.test(wf));
   check("...and de-duplicates rather than filing one per push",
-    /listForRepo/.test(alertBlock) && /createComment/.test(alertBlock),
+    /listForRepo/.test(alertModule) && /createComment/.test(alertModule),
     "an issue per failing push turns the tracker into a log nobody reads");
   check("...linking the run, the commit and the branch",
-    /actions\/runs\/\$\{context\.runId\}/.test(alertBlock) && /context\.sha/.test(alertBlock));
+    /actions\/runs\/\$\{context\.runId\}/.test(alertModule) && /context\.sha/.test(alertModule));
 }
 
 console.log("== 3c. an expression the workflow pastes into JavaScript is a literal, not a template ==");
@@ -401,13 +428,6 @@ console.log("== 5. one answer per push, and no branch cancels another's ==");
   // the gate would have gone on passing while the hour-long job ran
   // three times again. CLAUDE.md: "if I deleted every comment in the
   // target, would this still pass?"
-  const yamlCode = (text) => text.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
-  const jobBlock = (name) => {
-    const at = wf.indexOf(`\n  ${name}:`);
-    if (at < 0) return "";
-    const next = wf.slice(at + 1).search(/\n  [a-z][a-z-]*:\n/);
-    return yamlCode(next < 0 ? wf.slice(at) : wf.slice(at, at + 1 + next));
-  };
   const stillRunning = HEAVY.filter((n) => !/deployment_status/.test(jobBlock(n)));
   check(`the heavy jobs skip a deployment report (${HEAVY.length} checked)`,
     HEAVY.length >= 2 && stillRunning.length === 0,
@@ -417,6 +437,167 @@ console.log("== 5. one answer per push, and no branch cancels another's ==");
   check("...while the bot job still runs on one",
     /deployment_status/.test(jobBlock("bot-on-deploy")),
     "the event would then be received by nothing at all");
+}
+
+console.log("== 6. the alarm resets, and it can see past the first page ==");
+{
+  // THIS SECTION RUNS THE CODE. Sections 1-5 read the workflow, which is
+  // the only thing available for a `run:` line; the alert's logic is now
+  // a module, so the question "does it open a duplicate when thirty are
+  // already open" can be ASKED rather than inferred from a regex. That
+  // is the exact question the old `per_page: 10` got wrong, and no
+  // amount of reading the YAML would have answered it.
+  const require_ = createRequire(import.meta.url);
+  const MODULE = ".github/scripts/ci-red-issue.cjs";
+  check("the alert's logic is a module both paths can share", existsSync(MODULE),
+    "two copies in two `script:` blocks agree only while somebody remembers");
+  const mod = require_(resolve(MODULE));
+
+  // A FAKE CLIENT THAT TRUNCATES THE WAY THE REAL ONE DOES, which is
+  // the whole point of it. `issues.listForRepo` returns ONE page and
+  // says nothing about there being more; `paginate` walks them and
+  // returns every row. The old code called the endpoint directly, so
+  // the fake has to behave differently for the two or a module with the
+  // defect would still pass. Asserting `per_page: 100` alone would be a
+  // check on a literal; this is a check on what happens.
+  function client(issues) {
+    const calls = { paged: [], oneShot: [], created: [], commented: [], updated: [] };
+    const listForRepo = async (params) => {
+      calls.oneShot.push(params);
+      return { data: issues.slice(0, Number(params.per_page) || 30) };
+    };
+    const github = {
+      paginate: async (fn, params) => {
+        calls.paged.push(params);
+        if (fn !== listForRepo) throw new Error("paginate was handed something other than the endpoint");
+        return issues;
+      },
+      rest: { issues: {
+        listForRepo,
+        create: async (a) => { calls.created.push(a); },
+        createComment: async (a) => { calls.commented.push(a); },
+        update: async (a) => { calls.updated.push(a); },
+      } },
+    };
+    return { github, calls };
+  }
+  const ctx = (over = {}) => ({
+    repo: { owner: "o", repo: "r" },
+    ref: "refs/heads/main",
+    sha: "0123456789abcdef",
+    runId: 1,
+    serverUrl: "https://github.com",
+    workflow: "verify",
+    payload: {},
+    ...over,
+  });
+
+  // THE DEFECT, REPRODUCED AS A TEST. Thirty open ci-red issues with the
+  // matching one LAST: under `per_page: 10` it was invisible and a
+  // duplicate was opened. Measured on the real tracker 2026-10-16 —
+  // #280 and #302 are both "CI red on main", #270 and #301 are both
+  // "CI red on ".
+  {
+    const many = Array.from({ length: 29 }, (_, i) => ({ number: i + 1, title: `CI red on branch-${i}` }));
+    many.push({ number: 99, title: "CI red on main" });
+    const { github, calls } = client(many);
+    const out = await mod.run({ github, context: ctx(), mode: "red" });
+    check(`with 30 open issues the matching one is still found (opened ${out.opened}, commented ${out.commented})`,
+      out.opened === 0 && out.commented === 1 && calls.created.length === 0,
+      "this is the per_page: 10 defect — a duplicate was opened instead");
+    check("...and it commented on that issue, not another",
+      calls.commented.length === 1 && calls.commented[0].issue_number === 99,
+      JSON.stringify(calls.commented.map((c) => c.issue_number)));
+    check(`...by paging, not by reading one page and assuming that is all (paged ${calls.paged.length}, one-shot ${calls.oneShot.length})`,
+      calls.paged.length === 1 && calls.oneShot.length === 0,
+      "this is the shape of the defect: listForRepo returns a page and no hint there are more");
+    const capped = calls.paged.filter((p) => Number(p.per_page) < 100);
+    check(`...asking for whole pages while it is at it (${calls.paged.map((p) => p.per_page).join(", ")})`,
+      capped.length === 0,
+      "a page smaller than 100 makes paginate do more requests for the same answer");
+  }
+
+  // NOTHING OPEN YET -> one issue, labelled so the next run finds it.
+  {
+    const { github, calls } = client([]);
+    const out = await mod.run({ github, context: ctx(), mode: "red" });
+    check(`with nothing open it opens exactly one (${out.opened})`,
+      out.opened === 1 && calls.created.length === 1 && calls.commented.length === 0);
+    check("...labelled ci-red, or the next run cannot find it",
+      (calls.created[0]?.labels ?? []).includes("ci-red"),
+      JSON.stringify(calls.created[0]?.labels));
+  }
+
+  // GREEN CLOSES EVERY MATCH, not the first. That is what clears the
+  // duplicates the ten-row window already made, without anybody tidying
+  // up by hand.
+  {
+    const { github, calls } = client([
+      { number: 7, title: "CI red on main" },
+      { number: 8, title: "CI red on main" },
+      { number: 9, title: "CI red on other" },
+    ]);
+    const out = await mod.run({ github, context: ctx(), mode: "green" });
+    // THE RECORDED CALLS, NOT THE RETURNED NUMBER. A count the module
+    // computes from the list it MEANT to close survives a loop that
+    // closes one of them; the fake's record does not.
+    check(`green closes every open issue for the ref (closed ${out.closed}, calls ${calls.updated.length})`,
+      out.closed === 2 && calls.updated.length === 2,
+      JSON.stringify(calls.updated.map((u) => u.issue_number)));
+    check("...both of them, and not the one for another branch",
+      calls.updated.map((u) => u.issue_number).join(",") === "7,8"
+        && calls.updated.every((u) => u.state === "closed"),
+      JSON.stringify(calls.updated));
+  }
+
+  // NO EVENT PRODUCES A NAMELESS ISSUE. «CI red on » is two of the
+  // thirty-three, and the cause is that context.ref is only a branch on
+  // a push. Ranged over the event shapes this workflow actually
+  // receives rather than written for the one that broke.
+  {
+    const shapes = [
+      ["push", ctx()],
+      ["pull_request", ctx({ ref: "refs/pull/294/merge", payload: { pull_request: { head: { ref: "a-branch" } } } })],
+      ["deployment_status", ctx({ ref: "" })],
+      ["nothing at all", ctx({ ref: "", sha: "" })],
+    ];
+    const nameless = shapes.filter(([, c]) => /^CI red on\s*$/.test(mod.titleFor(c)));
+    check(`no event shape produces a nameless issue (${shapes.length} shapes)`,
+      shapes.length >= 4 && nameless.length === 0,
+      nameless.map(([n]) => n).join(", "));
+    check("...and a pull request is named after its own branch, not refs/pull/N/merge",
+      mod.titleFor(shapes[1][1]) === "CI red on a-branch", mod.titleFor(shapes[1][1]));
+  }
+
+  // THE TWO JOBS, AND THAT THEY WATCH THE SAME THINGS. The alert's
+  // `needs` list carries its own comment — "EVERY job above, not the two
+  // I happened to remember" — and the all-clear is worth nothing if it
+  // watches fewer: CI would go "green" while a job the alert counts is
+  // still red. Derived from the file, not written out here.
+  const needsOf = (name) => (/needs:\s*\[([^\]]*)\]/.exec(jobBlock(name))?.[1] ?? "")
+    .split(",").map((n) => n.trim()).filter(Boolean).sort().join(",");
+  check("there is an all-clear job at all", /\n  all-clear:/.test(wf),
+    "with only a red path, the tracker only ever grows");
+  check(`the all-clear watches exactly what the alert watches (${needsOf("alert") || "none"})`,
+    needsOf("alert").length > 0 && needsOf("all-clear") === needsOf("alert"),
+    `alert: ${needsOf("alert")}\n        all-clear: ${needsOf("all-clear")}`);
+  check("the alert runs on failure and the all-clear on success",
+    /if:\s*failure\(\)/.test(jobBlock("alert")) && /if:\s*success\(\)/.test(jobBlock("all-clear")),
+    "one of them would fire on the wrong colour");
+  // BOTH CALL THE MODULE, in the two modes, so neither can quietly grow
+  // its own copy of the logic again.
+  const modes = (name) => [...jobBlock(name).matchAll(/mode:\s*'(\w+)'/g)].map((m) => m[1]).join(",");
+  check(`the alert calls the module in red mode (${modes("alert") || "none"})`,
+    /ci-red-issue\.cjs/.test(jobBlock("alert")) && modes("alert") === "red");
+  check(`the all-clear calls the same module in green mode (${modes("all-clear") || "none"})`,
+    /ci-red-issue\.cjs/.test(jobBlock("all-clear")) && modes("all-clear") === "green");
+  // A require() needs the file on disk; github-script alone does not
+  // check the repository out.
+  for (const name of ["alert", "all-clear"]) {
+    check(`${name} checks the repository out before requiring the module`,
+      /actions\/checkout@/.test(jobBlock(name)),
+      "require('./.github/scripts/...') resolves against an empty workspace otherwise");
+  }
 }
 
 console.log(`\n${pass} passed, ${failures.length} failed`);

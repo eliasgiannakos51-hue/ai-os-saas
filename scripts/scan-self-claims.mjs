@@ -106,7 +106,29 @@ function commentsOf(file) {
 // required to carry an extension so a bare directory reference is not
 // treated as a file that must exist.
 const PATH_RE =
-  /\b((?:src|scripts|supabase|messages|public|docs|app|lib|components|types|\.github)\/[A-Za-z0-9_./[\]@-]*\.[a-z]{2,4})\b/g;
+  /(?<![\w-])((?:src|scripts|supabase|messages|public|docs|app|lib|components|types|\.github)\/[A-Za-z0-9_./[\]@-]*\.[a-z]{2,4})\b/g;
+
+/**
+ * THE PATHS ONE PIECE OF TEXT NAMES. Exported so self-claims.test.mjs can
+ * ask the matcher directly about shapes whose answers are known, rather
+ * than only asserting that a list came out empty.
+ *
+ * WHY IT STARTS WITH A LOOKBEHIND AND NOT `\b`. It used to be `\b`, and
+ * `\b` cannot match before a dot: between a quote and the `.` of
+ * `.github` both sides are non-word, so the `\.github` branch of the
+ * alternation above was DEAD — it had never once matched. What happened
+ * instead was worse than nothing: the scan moved on and matched from the
+ * `scripts/` inside the path, so a comment naming a file under
+ * `.github/scripts/` was checked as though the leading directory had not
+ * been written at all, and reported as a file that is not there.
+ * Found 2026-10-16 by a comment that named a real file and was told it
+ * did not exist. The lookbehind excludes a word character or a dash and
+ * nothing else, so `@/lib/x.ts` and `./src/x.ts` still resolve as before,
+ * and the scan went from 7034 claims to 7052.
+ */
+export function pathClaimsIn(text) {
+  return [...String(text).matchAll(PATH_RE)].map((m) => m[1]);
+}
 
 /**
  * Resolve a path written in a comment against the roots it could be under.

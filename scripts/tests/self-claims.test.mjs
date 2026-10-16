@@ -82,7 +82,7 @@ import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { ABSENT_ON_PURPOSE, ROUTES_ABSENT_ON_PURPOSE } from "./lib/absent-on-purpose.mjs";
-import { resolveRoute, routeAbsenceSuppresses, hasChildRoute } from "../scan-self-claims.mjs";
+import { resolveRoute, routeAbsenceSuppresses, hasChildRoute, pathClaimsIn } from "../scan-self-claims.mjs";
 
 let pass = 0;
 const failures = [];
@@ -173,6 +173,39 @@ check(
 // resolver that answers "yes" to everything passes every check in this
 // section. So the resolver is asked directly, about routes whose answers
 // are known, including the two shapes that made it hard to write.
+// THE BRANCH THAT COULD NEVER FIRE, pinned both ways. PATH_RE listed
+// `.github` among its roots and opened with `\b`, which cannot match
+// before a dot — so that branch had never matched once. The scan did not
+// simply skip those paths: it moved along and matched from the
+// `scripts/` inside them, so a comment naming a file under
+// .github/scripts/ was checked as though the leading directory were not
+// written at all, and reported missing. Found 2026-10-16 by a comment
+// that named a real file and was told it did not exist; the scan sees
+// 7052 claims with the lookbehind where it saw 7034 with the `\b`.
+{
+  const seen = (text) => pathClaimsIn(text);
+  check(
+    "a path under .github is seen, whole",
+    seen('see ".github/workflows/verify.yml" for it').includes(".github/workflows/verify.yml"),
+    JSON.stringify(seen('see ".github/workflows/verify.yml" for it'))
+  );
+  check(
+    "...and never as that path with the .github cut off its front",
+    !seen('".github/scripts/ci-red-issue.cjs"').includes("scripts/ci-red-issue.cjs"),
+    JSON.stringify(seen('".github/scripts/ci-red-issue.cjs"'))
+  );
+  // THE OTHER HALF: the lookbehind must not have narrowed what it was
+  // already seeing. An alias import and a dot-relative path are the two
+  // shapes a stricter one would have dropped, and the first is in the
+  // exception table, so dropping it would have gone unnoticed as a
+  // PASS.
+  check("an alias import is still seen", seen('"@/lib/pdf/render/.test"').includes("lib/pdf/render/.test"),
+    JSON.stringify(seen('"@/lib/pdf/render/.test"')));
+  check("a dot-relative path is still seen", seen("./src/lib/flags/flags.ts").includes("src/lib/flags/flags.ts"),
+    JSON.stringify(seen("./src/lib/flags/flags.ts")));
+  check("...while a path glued to the end of a word is still not a claim",
+    seen("mysrc/thing.ts").length === 0, JSON.stringify(seen("mysrc/thing.ts")));
+}
 check(
   "the route scan can still SEE a route that does not resolve",
   report.findings.routes.length >= 3,

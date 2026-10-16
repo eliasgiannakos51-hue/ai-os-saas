@@ -147,7 +147,37 @@ export async function planResearch(params: {
       requires: ["tool_calling"],
       messages: [{ role: "user", content: `Topic:\n${wrapUntrusted(params.topic)}` }],
     }, { userId: params.userId });
-    if (!outcome.ok) return { ok: false, reason: "no_plan" };
+    // A PROVIDER THAT NEVER ANSWERED IS NOT A TOPIC THAT CANNOT BE
+    // PLANNED, and between af1006b9 and 2026-10-16 this line said it was.
+    //
+    // That commit migrated two calls in this file from the SDK to the
+    // router IN ONE GO, and wrote a different reason for each: the
+    // synthesis below returns "api_error" for `!outcome.ok`, this one
+    // returned "no_plan". The SDK THREW on a provider 529, so before the
+    // migration a provider outage landed in the catch at the end of this
+    // function as "api_error"; runCompletion RETURNS instead, so the
+    // catch is never reached for one and the reason had to be written by
+    // hand.
+    //
+    // WHAT THE READER WAS TOLD INSTEAD. api/research/route.ts turns
+    // "api_error" into the body code `ai_unavailable` and anything else
+    // into `plan_unusable`; lib/research/failure.ts reads the first as
+    // «the AI service did not answer — nothing was charged» and has no
+    // match for the second, so components/research/failure-words.ts fell
+    // back to «your topic could not be turned into research questions».
+    // The hold WAS given back — the prodtest's money checks pass either
+    // way — and the sentence the person got is the one this route uses
+    // for an unusable plan, which it describes as «a real charge for real
+    // tokens». Told they had been charged for a topic that was fine,
+    // when nothing had run and nothing had been taken.
+    //
+    // "no_plan" stays for the three cases it is actually about, all
+    // below: no tool use came back, the questions were not an array, and
+    // (as too_few_questions) too few survived. Caught by
+    // scripts/tests/research-slides.prodtest.mjs and by
+    // tool-shell-edges.prodtest.mjs, where Slides says it right and
+    // Research did not.
+    if (!outcome.ok) return { ok: false, reason: "api_error" };
     params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
     const use = outcome.toolCalls.find((call) => call.name === PLAN_TOOL.name);

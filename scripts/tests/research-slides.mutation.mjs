@@ -33,6 +33,7 @@ const RSHELL = "src/components/research/research-shell.tsx";
 const RPAGE = "src/components/research/research-workspace.tsx";
 const QUESTION = "src/lib/research/research.ts";
 const RUNNER = "src/lib/research/run-research.ts";
+const RESEARCH = "src/lib/research/research.ts";
 
 const MUTANTS = [
   {
@@ -197,11 +198,35 @@ const MUTANTS = [
     to: "{report.error}",
     expect: "page: a failed report's line in the list says why, in the reader's language",
   },
+
+  // ---------------------------------------------------------------------
+  // A PROVIDER THAT NEVER ANSWERED, REPORTED AS A TOPIC THAT COULD NOT BE
+  // PLANNED (2026-10-16). af1006b9 migrated two calls in research.ts in
+  // one go and wrote a different reason for each; the route's ternary was
+  // pinned but the value feeding it was not.
+  // ---------------------------------------------------------------------
+  {
+    name: "a plan call the router could not complete is called a topic problem again",
+    file: RESEARCH,
+    from: '    if (!outcome.ok) return { ok: false, reason: "api_error" };\n    params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);\n\n    const use = outcome.toolCalls.find',
+    to: '    if (!outcome.ok) return { ok: false, reason: "no_plan" };\n    params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);\n\n    const use = outcome.toolCalls.find',
+    expect: "every one of them is api_error, not a content reason",
+  },
+  {
+    // THE OTHER HALF, so the rule cannot be met by calling every failure
+    // a provider outage: a topic the model answered about, badly, is
+    // still the topic's problem and the reader should hear that.
+    name: "a tool call that never came back is called a provider outage",
+    file: RESEARCH,
+    from: '    if (!use) return { ok: false, reason: "no_plan" };',
+    to: '    if (!use) return { ok: false, reason: "api_error" };',
+    expect: "while the content failures keep theirs",
+  },
 ];
 
 runMutations({
   name: "research-slides",
   gate: GATE,
-  targets: [CITED, BRIEF, ROUTE, SEND, FAILURE, PLAN, RSHELL, RPAGE, QUESTION, RUNNER],
+  targets: [CITED, BRIEF, ROUTE, SEND, FAILURE, PLAN, RSHELL, RPAGE, QUESTION, RUNNER, RESEARCH],
   mutants: MUTANTS,
 });

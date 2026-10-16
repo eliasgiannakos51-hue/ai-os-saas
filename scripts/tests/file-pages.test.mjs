@@ -155,6 +155,38 @@ check("a question that got no answer says which: still running, stalled, no cred
   askFailure({ code: "still_running" }) === "askStillRunning" && askFailure({ code: "stalled", jobId: "j" }) === "askStalled" && askFailure({ code: "insufficient" }) === "askNoCredits" && askFailure({ code: "rate_limited" }) === "askRateLimited" && askFailure({ code: null }) === "askError");
 check("...a job that ran and failed says the AI did not answer, whatever its row says",
   askFailure({ code: '529 {"type":"error","error":{"type":"overloaded_error"}}', jobId: "j" }) === "askFailed" && askFailure({ code: "insufficient", jobId: "j" }) === "askFailed");
+// A CALL THAT NEVER LANDED IS NOT A JOB THAT FINISHED (2026-10-16).
+//
+// askFailure() above can only say «the AI did not answer, nothing was
+// charged» for a job that FAILED — that is what the jobId in its input
+// means. So the handler has to fail the job, and between af1006b9 and
+// this commit it returned a finished one instead, because the SDK call
+// it replaced threw and runCompletion returns. Both screens then showed
+// a bare "not answered", and ai_jobs recorded every provider outage as
+// a job that completed.
+//
+// RANGED OVER THE HANDLER'S FINISHED-JOB REASONS rather than grepping
+// for the throw: the rule is "a provider failure is never one of the
+// reasons a job finishes with", so the population is every reason it
+// finishes with. A seventh reason added tomorrow is read by this same
+// line, and `refund: true` stays available for the cases it is right
+// for — work that ran and produced nothing worth charging for.
+{
+  const handler = code("src/lib/jobs/handlers/file-ask.ts");
+  const finishedWith = [...new Set([...handler.matchAll(/answered: false, reason: "(\w+)"/g)].map((m) => m[1]))];
+  check(`the reasons this handler can FINISH a job with were read (${finishedWith.join(", ") || "none"})`,
+    finishedWith.length >= 2, finishedWith.join(","));
+  check("...and a provider that never answered is not one of them",
+    !finishedWith.includes("ai_unavailable"),
+    "a finished job has no failure for askFailure() to read, so the reader is told nothing about the money");
+  // THE OTHER HALF, so the rule above cannot be satisfied by failing
+  // every job: the two reasons that ARE the user's own files stay
+  // finished-and-refunded, because nothing failed.
+  check("...while a question whose files could not be read still finishes and refunds",
+    finishedWith.includes("no_readable_files") && /reason: "no_readable_files" \} \};/.test(handler)
+      && /refund: true, result: \{ answered: false, reason: "no_readable_files"/.test(handler),
+    finishedWith.join(","));
+}
 check("...the route names its refusals", /\{ ok: false, reason: "insufficient", insufficientCredits: true,/.test(code("src/app/api/files/ask/route.ts")) && (code("src/app/api/files/ask/route.ts").match(/reason: "rate_limited"/g) ?? []).length === 3);
 check("...and neither screen shows the route's or the provider's own words",
   !/outcome\.error \|\|/.test(shell + ws) && (shell.match(/failures\.ask\(/g) ?? []).length === 2 && (ws.match(/failures\.ask\(/g) ?? []).length === 2);

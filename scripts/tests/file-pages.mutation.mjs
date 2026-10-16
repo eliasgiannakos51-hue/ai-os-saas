@@ -209,6 +209,29 @@ const MUTANTS = [
     to: '        addToast(data.error ?? t("deleteError"), "error");\n        return;',
     expect: "nothing a request answers is shown as it came",
   },
+
+  // ---------------------------------------------------------------------
+  // A CALL THAT NEVER LANDED, FILED AS A JOB THAT FINISHED (2026-10-16).
+  // ---------------------------------------------------------------------
+  {
+    // Exactly what af1006b9 left behind: runCompletion returns where the
+    // SDK threw, so the job completes, askFailure() has no failure to
+    // read, and the reader is told nothing about the money.
+    name: "a provider that never answered finishes the job instead of failing it",
+    file: HANDLER,
+    from: 'if (!outcome.ok) throw new Error("The AI service did not answer this question.");',
+    to: 'if (!outcome.ok) return { refund: true, result: { answered: false, reason: "ai_unavailable" } };',
+    expect: "a provider that never answered is not one of them",
+  },
+  {
+    // THE OTHER HALF, so the rule cannot be met by failing everything:
+    // the user's own unreadable files are not a failure of ours.
+    name: "unreadable files start failing the job instead of refunding it",
+    file: HANDLER,
+    from: 'return { refund: true, result: { answered: false, reason: "no_readable_files" } };',
+    to: 'throw new Error("No readable files.");',
+    expect: "while a question whose files could not be read still finishes and refunds",
+  },
 ];
 
 runMutations({

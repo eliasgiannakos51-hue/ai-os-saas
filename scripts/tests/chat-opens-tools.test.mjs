@@ -100,12 +100,31 @@ check("on a phone, back to the conversation keeps the site open, and one press s
 check("...and a change said from the conversation shows it again", /sitePaneRef\.current\?\.take\(text\)\) \{\s*showMine\(\);\s*setSiteHidden\(false\);/.test(chat));
 check("...and closed when the conversation changes", /useEffect\(\(\) => setSiteBrief\(null\), \[activeId\]\)/.test(chat));
 {
-  // «Νέα συνομιλία» from a conversation that never reached /api/chat: its
-  // id is already null, so the effect above does not run, and the pane has
-  // to be closed by startNewChat itself (the prodtest drives it).
-  const start = chat.indexOf("function startNewChat() {");
-  const body = start > 0 ? chat.slice(start, chat.indexOf("\n  }\n", start)) : "";
-  check("...and «Νέα συνομιλία» closes it even when there was no conversation yet", /setSiteBrief\(null\);/.test(body) && /setOpenWorkId\(null\);/.test(body), body.slice(0, 200));
+  // A SITE OPENED IN A CONVERSATION THAT NEVER REACHED /api/chat has no
+  // id, so the effect above never fires for it — and the next sentence
+  // used to reach the site as a CHARGED change instead of starting the
+  // new conversation. A «Νέα συνομιλία» button inside the drawer closed
+  // the pane by hand to stop that; the drawer went with the sidebar's
+  // «Recent chats» on 2026-10-16 and the button went with it.
+  //
+  // WHAT CLOSES IT NOW IS THE NAVIGATION. Starting a conversation is
+  // the rail's «New», which is a <Link> to another route: the workspace
+  // unmounts and `siteBrief` is seeded null again. So the three things
+  // that have to hold are that nothing starts a conversation in place,
+  // that the rail's «New» really is a link to a different page, and
+  // that the pane's state is the component's own rather than anything
+  // that outlives it.
+  check("...and nothing starts a conversation in place any more",
+    !/function startNewChat/.test(chat) && !/onNewChat|newConversation\(/.test(chat));
+  const sidebarSrc = code("src/components/dashboard/sidebar.tsx");
+  check("...«New» is a link to another page, so the workspace unmounts",
+    /const row = \(href: string[\s\S]{0,200}<Link\s+href=\{href\}/.test(sidebarSrc) &&
+    /\{ key: "new", href: "\/dashboard\/overview" \}/.test(code("src/lib/nav/rail.ts")));
+  check("...and the pane's state cannot survive that unmount",
+    /const \[siteBrief, setSiteBrief\] = useState<string \| null>\(null\)/.test(chat) &&
+    !/siteBrief[\s\S]{0,40}(localStorage|sessionStorage|useRef)/.test(chat),
+    "a pane kept outside the component would reopen on the new conversation, charged."
+  );
 }
 
 // ---------------------------------------------------------------------

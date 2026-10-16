@@ -159,7 +159,7 @@ for (const m of blob.matchAll(/["'`]([a-zA-Z][a-zA-Z0-9_-]*(?:\.[a-zA-Z][a-zA-Z0
 //    `TYPES = [{ stem: "agentResults" }, ...]` then `t(type.stem)` is
 //    this exactly: "agentResults" is a real, verifiable string in the
 //    source, just never dotted and never a direct t()-call argument.
-//    conversation-sidebar.tsx's `{ label: "groupPinned" as const, ... }`
+//    the conversation list's `{ label: "groupPinned" as const, ... }`
 //    is the same shape for chat's date-group headers. A key is
 //    reachable this way if its OWN LEAF (last segment) matches such a
 //    bare word — deliberately just the leaf, not the full path, since

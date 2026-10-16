@@ -20,7 +20,7 @@ import {
 import type { SidebarConversation, SidebarProject } from "@/lib/nav/recent-tools";
 
 /**
- * THE CONVERSATIONS IN THE SIDEBAR, WHICH USED TO BE JUST NAMES.
+ * THE CONVERSATIONS ON THE CHATS PAGE, WHICH USED TO BE JUST NAMES.
  *
  * Before 2026-10-15 these rows were links and nothing else: to rename,
  * pin or delete a conversation you had to open Chat and then open a
@@ -28,6 +28,14 @@ import type { SidebarConversation, SidebarProject } from "@/lib/nav/recent-tools
  * says there is not. The owner's instruction moved all of it here and
  * onto the Chats page, and the second list went. Every action it had is
  * in one of those two places; nothing it could do is gone.
+ *
+ * AND SINCE 2026-10-16 THERE IS ONE PLACE, NOT TWO. These rows were
+ * also the sidebar's «Recent chats» until the owner had that section
+ * taken out — «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR» —
+ * so the `variant` that trimmed the chrome for a narrow column went
+ * with it, along with the `onNavigate` the sidebar used to close
+ * itself on a phone. app/dashboard/chats/page.tsx is the only caller,
+ * through components/chats/chats-workspace.tsx.
  *
  * WHY EVERY ACTION GOES TO A ROUTE AND NOT TO THE DATABASE. Renaming
  * and pinning already did (api/conversations/[id] — it caps pins per
@@ -38,42 +46,36 @@ import type { SidebarConversation, SidebarProject } from "@/lib/nav/recent-tools
  * route, and «μόνο στις δικές μου συνομιλίες» is proved there against
  * two real accounts rather than assumed here.
  *
- * THE MENU IS THE SAME ON BOTH, AND SO IS THE CODE. This component is
- * the sidebar's list and the Chats page's list, because two lists with
- * the same four actions written twice is how the favourite star ended
- * up with two states that disagreed (inline-title.tsx's header records
- * that). `variant` changes the chrome, never the behaviour.
+ * ONE LIST, ONE SET OF ACTIONS, ONE PIECE OF CODE. Two lists with the
+ * same four actions written twice is how the favourite star ended up
+ * with two states that disagreed (inline-title.tsx's header records
+ * that), which is why this stayed a single component even while it
+ * drew two surfaces.
  */
-export type ConversationRowsVariant = "sidebar" | "page";
-
 export function ConversationRows({
   conversations,
   projects,
   activeId,
-  variant,
   selectable = false,
   selected,
   onSelectedChange,
-  onNavigate,
 }: {
   conversations: readonly SidebarConversation[];
   /** The account's active projects, for «Μεταφορά σε Έργο». Read on the
    *  server (there is no GET /api/projects) and handed down. */
   projects: readonly SidebarProject[];
   activeId: string | null;
-  variant: ConversationRowsVariant;
-  /** The Chats page only: tick boxes for deleting several at once. */
+  /** Tick boxes for deleting several at once. */
   selectable?: boolean;
   selected?: ReadonlySet<string>;
   onSelectedChange?: (next: Set<string>) => void;
-  onNavigate?: () => void;
 }) {
   // THE WORDING COMES FROM WHERE IT ALREADY WAS. These actions lived in
-  // components/chat/conversation-sidebar.tsx and their strings are
-  // already written in ten languages under dashboard.chat.* and
-  // module.*. Coining a parallel sidebar.chats.rename would have left
-  // nine translations behind on a feature whose whole point is that
-  // nothing it could do is lost.
+  // the drawer inside Chat, and their strings are already written in
+  // ten languages under dashboard.chat.* and module.*. Coining a
+  // parallel sidebar.chats.rename would have left nine translations
+  // behind on a feature whose whole point is that nothing it could do
+  // is lost.
   const t = useTranslations("dashboard.chat");
   const tModule = useTranslations("module");
   const tRail = useTranslations("sidebar.rail");
@@ -230,8 +232,6 @@ export function ConversationRows({
     pressTimer.current = null;
   };
 
-  const sidebar = variant === "sidebar";
-
   function renderRow(row: SidebarConversation) {
     const title0 = displayConversationTitle(row.title) ?? tRail("untitledChat");
     if (undoable.has(row.id)) {
@@ -291,7 +291,6 @@ export function ConversationRows({
             // The click the browser fires at the end of a long press
             // would navigate away from the menu that press just opened.
             if (isRenaming || longPressed.current) return;
-            onNavigate?.();
             router.push(`/dashboard/chat?c=${encodeURIComponent(row.id)}`);
           }}
           onTouchStart={() => startPress(row.id)}
@@ -316,11 +315,9 @@ export function ConversationRows({
             onRename={(next) => rename(row.id, next)}
             className="min-w-0 flex-1 break-words"
           />
-          {!sidebar && (
-            <span className="shrink-0 text-xs text-muted" suppressHydrationWarning>
-              {formatDate(row.updated_at, locale)}
-            </span>
-          )}
+          <span className="shrink-0 text-xs text-muted" suppressHydrationWarning>
+            {formatDate(row.updated_at, locale)}
+          </span>
         </button>
 
         {/* THE STAR, WHICH CAME FROM THE LIST THAT WENT. It was on every
@@ -330,21 +327,19 @@ export function ConversationRows({
             dropped. Pin and favourite are different things on purpose:
             pin orders THIS list, favourite surfaces the conversation on
             /dashboard/favorites beside everything else starred. */}
-        {!sidebar && (
-          <div
-            className={`shrink-0 transition-opacity duration-150 ${
-              row.is_favorited ? "opacity-100" : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"
-            }`}
-          >
-            <FavoriteButton
-              table="chat_conversations"
-              recordId={row.id}
-              headline={title}
-              initialFavorited={Boolean(row.is_favorited)}
-              variant="inline"
-            />
-          </div>
-        )}
+        <div
+          className={`shrink-0 transition-opacity duration-150 ${
+            row.is_favorited ? "opacity-100" : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"
+          }`}
+        >
+          <FavoriteButton
+            table="chat_conversations"
+            recordId={row.id}
+            headline={title}
+            initialFavorited={Boolean(row.is_favorited)}
+            variant="inline"
+          />
+        </div>
 
         {/* ALWAYS THERE ON A PHONE, ON HOVER ON A DESKTOP. `md:` guards
             the hiding, not the showing, so a touch device — which never
@@ -402,7 +397,7 @@ export function ConversationRows({
   }
 
   if (rows.length === 0) {
-    return sidebar ? null : <p className="px-3 py-6 text-sm text-muted">{t("noConversations")}</p>;
+    return <p className="px-3 py-6 text-sm text-muted">{t("noConversations")}</p>;
   }
 
   return (

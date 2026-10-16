@@ -25,7 +25,7 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/chat-favorites.test.mjs";
 const REGISTRY = "src/lib/favoritable.ts";
 const PAGE = "src/app/dashboard/chat/page.tsx";
-const SIDEBAR = "src/components/chat/conversation-sidebar.tsx";
+const LIST = "src/components/dashboard/conversation-rows.tsx";
 const WORKSPACE = "src/components/chat/chat-workspace.tsx";
 const BUTTON = "src/components/favorites/favorite-button.tsx";
 const FAV_LIB = "src/lib/favorites.ts";
@@ -86,20 +86,32 @@ const MUTANTS = [
     // aid; a starred row that looks identical to an unstarred one at rest
     // has none of that value.
     name: "a starred row's star fades out again at rest",
-    file: SIDEBAR,
-    from: '                          conversation.is_favorited\n                            ? "opacity-100"',
-    to: '                          conversation.is_favorited\n                            ? "opacity-0 group-hover/row:opacity-100"',
+    file: LIST,
+    from: 'row.is_favorited ? "opacity-100" : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"',
+    to: 'row.is_favorited ? "opacity-0 group-hover/row:opacity-100" : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"',
     expect: "keeps its star visible at rest",
   },
   {
-    // THE TWO COPIES STOP AGREEING. The header button is keyed on the
-    // conversation AND its starred state so it re-mounts when the sidebar
-    // copy is clicked; without that the header keeps showing the old star.
-    name: "the header star stops re-mounting when the sidebar copy is toggled",
+    // THE STAR GOES BEHIND A CONDITION AGAIN. It was drawn only when the
+    // list was NOT the sidebar's, because a 240px column had no room —
+    // and the sidebar's list is gone, so any such guard now hides the
+    // star on the only screen that has one.
+    name: "the star is put back behind a variant that no list satisfies",
+    file: LIST,
+    from: "        <div\n          className={`shrink-0 transition-opacity duration-150 ${",
+    to: "        {!sidebar && (\n        <div\n          className={`shrink-0 transition-opacity duration-150 ${",
+    expect: "with nothing deciding whether it appears",
+  },
+  {
+    // THE HEADER KEEPS A STAR THAT IS NO LONGER TRUE. The button seeds
+    // itself from `initialFavorited` once, so without the starred state
+    // in its key it shows what it mounted with — the stale star you come
+    // back to after starring the same conversation on the Chats page.
+    name: "the header star stops re-mounting when the row behind it changes",
     file: WORKSPACE,
     from: "key={`${activeConversation.id}:${activeConversation.is_favorited}`}",
     to: "key={activeConversation.id}",
-    expect: "re-mounts when the sidebar copy toggles",
+    expect: "re-mounts when the row behind it changes",
   },
   {
     // BELOW THE MINIMUM TAP TARGET. 36px is what this was, and

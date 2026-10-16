@@ -1,9 +1,16 @@
 // THE SIDEBAR IS THE DESIGN'S, AND THE BROWSER PAINTS IT THAT WAY.
 //
-// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §3 (2026-10-04): «SIDEBAR, ΕΝΑ ΚΑΙ ΙΔΙΟ
-// ΠΑΝΤΟΥ» — logo, New, Chat, Coding, All tools, Recent tools, recent
-// conversations, and Settings at the bottom. Nothing else is ever there;
-// every tool is in All tools and ⌘K (src/lib/nav/rail.ts).
+// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §3 — logo, New, Chats, Coding, All
+// tools, Recent tools, and Settings at the bottom. Nothing else is ever
+// there; every tool is in All tools and ⌘K (src/lib/nav/rail.ts).
+//
+// TWO ROWS LEFT THAT LIST SINCE IT WAS WRITTEN. «Chat» became «Chats»
+// on 2026-10-15 and opens the page with every conversation, and the
+// recent conversations under it were taken out on 2026-10-16 —
+// «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR» (owner). This
+// file still seeds conversations, and now requires NONE of them to be
+// in the aside: an empty account would prove nothing, because the old
+// sidebar drew nothing for one either.
 //
 // REWRITTEN 2026-10-05 (QUEUE Α.13). This file measured the sidebar it
 // replaced: six group headings and 26 or more rows, of which at least 15
@@ -36,7 +43,7 @@ function checkTrue(name, cond, detail) {
 // The words the account sees, read from the shipped messages so a
 // rewording moves the needles rather than breaking them.
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
-const RAIL = ["new", "chat", "coding", "allTools"].map((k) => en.sidebar.rail[k]);
+const RAIL = ["new", "chats", "coding", "allTools"].map((k) => en.sidebar.rail[k]);
 const SETTINGS = en.sidebar.rail.settings;
 
 const CONVERSATIONS = [
@@ -106,22 +113,13 @@ try {
       const headings = [...aside.querySelectorAll("p, h2, h3")]
         .map((e) => (e.textContent ?? "").trim())
         .filter(Boolean);
-      // THE CONVERSATIONS ARE NOT LINKS ANY MORE. Since #293 each row is
-      // a <button> that calls router.push, because a link navigates on
-      // the click the browser fires at the end of the long press that
-      // opens the «⋯» menu. They carry the id they open instead
-      // (components/dashboard/conversation-rows.tsx), so they are read
-      // here rather than being quietly absent from `links`.
-      const conversations = [...aside.querySelectorAll('[data-testid="conversation-row"]')].map((el) => {
-        const r = el.getBoundingClientRect();
-        return {
-          id: el.getAttribute("data-conversation-id") ?? "",
-          text: (el.textContent ?? "").trim(),
-          visible: r.width > 0 && r.height > 0 && r.top >= box.top && r.bottom <= Math.min(box.bottom, window.innerHeight) + 0.5,
-          h: r.height,
-        };
-      });
-      return { links, conversations, headings, scrolls: aside.scrollHeight > aside.clientHeight + 1 };
+      return {
+        links,
+        headings,
+        text: aside.textContent ?? "",
+        rows: aside.querySelectorAll('[data-testid="conversation-row"]').length,
+        scrolls: aside.scrollHeight > aside.clientHeight + 1,
+      };
     });
     checkTrue(`${label}: the sidebar is in the page`, read !== null);
     if (!read) {
@@ -131,22 +129,32 @@ try {
 
     const texts = read.links.map((l) => l.text);
     const order = RAIL.map((name) => texts.findIndex((t) => t === name));
-    checkTrue(`${label}: New, Chat, Coding, All tools, each once`, RAIL.every((n) => texts.filter((t) => t === n).length === 1), JSON.stringify(texts));
+    checkTrue(`${label}: New, Chats, Coding, All tools, each once`, RAIL.every((n) => texts.filter((t) => t === n).length === 1), JSON.stringify(texts));
+    // AND NEVER «Chat», exactly — the row that used to open a new
+    // conversation. «Chats» must not be allowed to satisfy a check for
+    // it, which is why this compares whole strings.
+    checkTrue(`${label}: and never «${en.sidebar.rail.chat}»`, !texts.includes(en.sidebar.rail.chat), JSON.stringify(texts));
     checkTrue(`${label}: ...in that order`, order.every((i, k) => i >= 0 && (k === 0 || i > order[k - 1])), JSON.stringify(order));
     checkTrue(`${label}: Settings is the last row`, texts[texts.length - 1] === SETTINGS, JSON.stringify(texts.slice(-2)));
-    const convoRows = read.conversations;
-    checkTrue(`${label}: the latest conversations are listed, each opening itself (${convoRows.length})`,
-      convoRows.length === CONVERSATIONS.length && CONVERSATIONS.every((c) => convoRows.some((r) => r.id === c.id)), JSON.stringify(convoRows));
+    // NOT ONE CONVERSATION, THOUGH THE ACCOUNT HAS TWO. Checked three
+    // ways because each would survive the other two being wrong: no
+    // link into a conversation, no row the list component draws, and
+    // neither title anywhere in the aside's text — a row rendered as a
+    // button or a bare div is still a conversation on the screen.
+    const convoRows = read.links.filter((l) => /\/dashboard\/chat\?c=/.test(l.href));
+    checkTrue(`${label}: not one conversation in the sidebar (${convoRows.length} links, ${read.rows} rows)`,
+      convoRows.length === 0 && read.rows === 0, JSON.stringify(convoRows));
+    const titlesSeen = CONVERSATIONS.filter((c) => read.text.includes(c.title)).map((c) => c.title);
+    checkTrue(`${label}: ...nor a title of one, drawn as anything at all`, titlesSeen.length === 0, titlesSeen.join(" | "));
     // NOTHING ELSE. The fixed rows, the account's recent tools (none for
-    // this account, so no heading either), its conversations and Settings
-    // — and the logo, which links Home (known by where it goes: its word
-    // is set in capitals, IONEXA, so a text match missed it).
+    // this account, so no heading either) and Settings — and the logo,
+    // which links Home (known by where it goes: its word is set in
+    // capitals, IONEXA, so a text match missed it). A conversation is
+    // no longer excused here: it would be «another row», which is the
+    // point.
     const known = new Set([...RAIL, SETTINGS]);
     const isLogo = (l) => l.href === "/dashboard/overview";
-    // The chat?c= clause stays: it costs nothing and the day a row goes
-    // back to being a link, this line must not start calling it an
-    // intruder.
-    const other = read.links.filter((l) => !known.has(l.text) && !/\/dashboard\/chat\?c=/.test(l.href) && !isLogo(l));
+    const other = read.links.filter((l) => !known.has(l.text) && !isLogo(l));
     checkTrue(`${label}: no other row is in the sidebar`, other.length === 0, JSON.stringify(other));
     checkTrue(`${label}: no Recent tools heading over an empty list`, !read.headings.includes(en.sidebar.rail.recentTools), JSON.stringify(read.headings));
     checkTrue(`${label}: every row is readable without scrolling`, read.links.every((l) => l.visible), JSON.stringify(read.links.filter((l) => !l.visible)));

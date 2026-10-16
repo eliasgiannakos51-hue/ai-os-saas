@@ -3,9 +3,15 @@
  *
  *   1. Logo: the earth and the word IONEXA
  *   2. New      3. Chats     4. Coding      5. All tools
- *   6. Recent tools
- *   7. Recent conversations
- *   8. At the bottom: Settings (the account is inside it)
+ *   6. Recent tools (only when there are any)
+ *   7. At the bottom: Settings, the name and plan, Collapse sidebar
+ *
+ * SEVEN ROWS, AND THE SEVENTH USED TO BE EIGHTH. «Recent
+ * conversations» sat between Recent tools and Settings until
+ * 2026-10-16, when the owner had it taken out —
+ * «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR». Nothing draws
+ * them in any width, on any page, for any account; they are all on
+ * the Chats page that row 3 opens.
  *
  * NEW AND CHATS ARE TWO DIFFERENT THINGS, and until 2026-10-15 they were
  * not. Both rows led to a place with an empty field and a greeting, so
@@ -25,35 +31,33 @@
  * ⌘K, which read lib/sidebar-nav.ts — the full list was never in this
  * file and never needs to be.
  */
+export const CHATS_HREF = "/dashboard/chats";
+
+/**
+ * THE FOUR ROWS, THE SAME FOR EVERY ACCOUNT (owner, 2026-10-16).
+ *
+ * The third row said «Chat» and opened a new conversation until
+ * 2026-10-15, then said «Chats» for staff only while the switch
+ * `chats-page` was being tried. The switch is gone and «Chats» is what
+ * everybody sees: it opens the page with every conversation, where the
+ * «⋯» renames, pins, moves to a Project and deletes.
+ *
+ * NOTHING ELSE IS EVER HERE. No conversations — they were a seventh row
+ * of this rail until 2026-10-16 and the owner had them taken out:
+ * «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR». Every tool is in
+ * All tools and ⌘K. scripts/tests/sidebar-no-chats.prodtest.mjs opens
+ * ten pages on a computer and a phone and fails on a single one.
+ */
 export const RAIL_ROWS = [
   { key: "new", href: "/dashboard/overview" },
-  { key: "chat", href: "/dashboard/chat" },
+  { key: "chats", href: CHATS_HREF },
   { key: "coding", href: "/dashboard/coding" },
   { key: "allTools", href: "/dashboard/tools" },
 ] as const;
 
-/** Where the third row goes once the switch `chats-page` is on: the list
- *  of every conversation, instead of a second way into a new one. */
-export const CHATS_HREF = "/dashboard/chats";
-
-/**
- * The rows to draw, which differ in exactly one place.
- *
- * A FUNCTION RATHER THAN TWO CONSTANTS, so that the switch cannot change
- * the LENGTH or the ORDER of the rail by accident: both arrays are built
- * from the same one, and the only thing the flag decides is what the
- * third row's key and href are. scripts/tests/sidebar-chats.test.mjs
- * holds that the two differ in that one row and nowhere else.
- */
-export function railRows(chatsPage: boolean): readonly { key: RailKey; href: string }[] {
-  return RAIL_ROWS.map((row) =>
-    chatsPage && row.key === "chat" ? { key: "chats" as const, href: CHATS_HREF } : { key: row.key, href: row.href }
-  );
-}
-
 export const SETTINGS_HREF = "/dashboard/settings";
 
-export type RailKey = (typeof RAIL_ROWS)[number]["key"] | "chats" | "settings";
+export type RailKey = (typeof RAIL_ROWS)[number]["key"] | "chat" | "settings";
 
 function under(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -69,8 +73,9 @@ export function activeRail(
   pathname: string | null,
   recentHrefs: readonly string[],
   toolHrefs: readonly string[],
-  /** The rows actually drawn; defaults to the pre-switch rail so every
-   *  existing caller keeps the behaviour it had. */
+  /** The rows actually drawn. Defaults to RAIL_ROWS; the phone's
+   *  bottom bar passes its own list, which has a Chat tab the sidebar
+   *  does not (lib/nav/tabs.ts). */
   rows: readonly { key: RailKey; href: string }[] = RAIL_ROWS
 ): { key: RailKey } | { recent: string } | null {
   if (!pathname) return null;

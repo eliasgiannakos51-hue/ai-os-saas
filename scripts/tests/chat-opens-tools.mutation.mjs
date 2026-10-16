@@ -27,6 +27,8 @@ const GENERATE = "src/app/api/websites/generate/route.ts";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
 const EDIT = "src/app/api/websites/edit/route.ts";
 const WORDS = "src/components/chat/use-chat-failure-words.ts";
+const RAIL = "src/lib/nav/rail.ts";
+const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 
 const MUTANTS = [
   {
@@ -132,15 +134,51 @@ const MUTANTS = [
     to: '"make": "",',
     expect: "el.json: the pane's words",
   },
+  // THE «Νέα συνομιλία» MUTANT WAS HERE, AND ITS TARGET IS GONE.
+  //
+  // It re-introduced package 7's defect: startNewChat() cleared the site
+  // pane by hand, because a Site opened in a conversation that never
+  // reached /api/chat has no id, so setActiveId(null) changed nothing
+  // the pane was watching and the next sentence went to the site as a
+  // CHARGED change. Deleting the two setters brought that back and this
+  // suite caught it.
+  //
+  // On 2026-10-16 the owner had the conversation list taken out of the
+  // sidebar, and the drawer inside Chat — which held the only «Νέα
+  // συνομιλία» button — went with it. startNewChat() had no caller left
+  // and was removed. Starting a new conversation is a NAVIGATION now,
+  // so the workspace remounts and no state can survive it: there is no
+  // line left to break, which is why this mutant is deleted rather than
+  // re-pointed. chat-opens-tools.prodtest.mjs still proves the money
+  // half — it opens a Site, navigates the way the rail's «New» does,
+  // and requires the next sentence to start a conversation rather than
+  // edit the site.
+  // AND THE THREE THAT REPLACED IT. The money half is now carried by a
+  // navigation rather than by two setters, so what has to be broken is
+  // the navigation: a conversation started in place, a «New» that does
+  // not leave the page, or a pane kept where an unmount cannot reach.
   {
-    // The defect as it shipped in package 7: the pane outlives «Νέα
-    // συνομιλία» when the conversation had no id yet.
-    name: "«Νέα συνομιλία» leaves the site pane open",
+    name: "a new conversation is started in place again, without closing the pane",
     file: CHAT,
-    from: "    setSiteBrief(null);\n    setOpenWorkId(null);\n    setActiveId(null);",
-    to: "    setActiveId(null);",
-    expect: "«Νέα συνομιλία» closes it even when there was no conversation yet",
+    from: "  // THE «NEW CHAT» BUTTON THAT USED TO LIVE HERE IS GONE WITH ITS",
+    to: "  function startNewChat() { setActiveId(null); setMessages([]); }\n  // THE «NEW CHAT» BUTTON THAT USED TO LIVE HERE IS GONE WITH ITS",
+    expect: "nothing starts a conversation in place any more",
   },
+  {
+    name: "«New» stops being a link and the workspace never unmounts",
+    file: SIDEBAR,
+    from: "      <Link\n        href={href}",
+    to: "      <button\n        data-href={href}",
+    expect: "«New» is a link to another page, so the workspace unmounts",
+  },
+  {
+    name: "the open Site is kept where a remount cannot clear it",
+    file: CHAT,
+    from: "  const [siteBrief, setSiteBrief] = useState<string | null>(null);",
+    to: "  const siteBriefRef = useRef<string | null>(null);\n  const [siteBrief, setSiteBrief] = useState<string | null>(siteBriefRef.current);",
+    expect: "the pane's state cannot survive that unmount",
+  },
+
   // ---- 2026-10-08, the edges (scripts/tests/chat-opens-tools-edges.prodtest.mjs)
   {
     name: "a Free account is offered «Φτιάξ' το» and refused in English",
@@ -236,6 +274,6 @@ const MUTANTS = [
 runMutations({
   name: "chat-opens-tools",
   gate: GATE,
-  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE, EDIT, WORDS],
+  targets: [OPEN, INTENT, REQ, CHAT, PAGE, PANE, EL, GENERATE, CHAT_ROUTE, EDIT, WORDS, RAIL, SIDEBAR],
   mutants: MUTANTS,
 });

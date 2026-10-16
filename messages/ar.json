@@ -306,10 +306,8 @@
       "expand": "توسيع الشريط الجانبي",
       "label": "القائمة الرئيسية",
       "saveFailed": "تعذّر حفظ التغيير. حاول مرة أخرى.",
-      "recentChats": "المحادثات الأخيرة",
       "untitledChat": "محادثة جديدة",
-      "chats": "المحادثات",
-      "allConversations": "كل المحادثات"
+      "chats": "المحادثات"
     },
     "tabs": {
       "home": "الرئيسية",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "محادثة Ionexa",
-      "hideConversations": "إخفاء المحادثات",
-      "showConversations": "إظهار المحادثات",
-      "focusMode": "وضع التركيز",
       "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
       "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
-      "hideConversationsHint": "إخفاء قائمة المحادثات ومنح المحادثة العرض الكامل.",
-      "showConversationsHint": "إظهار قائمة المحادثات مرة أخرى.",
       "send": "إرسال",
       "emptyBody": "اسأل عن أي شيء — معلومات عامة، أفكار، مساعدة في الكتابة، أو مجرد محادثة. غير مرتبط بأي وحدة في Ionexa AI.",
       "composerPlaceholder": "اكتب إلى Ionexa...",
       "mentorMode": "وضع الإرشاد",
       "mentorModeHint": "وضع الإرشاد: توجيه استراتيجي بدل الإجابات المجردة — يشير إلى المخاطر، ويطرح أسئلة توضيحية، ويقترح بدائل، ويستخدم بياناتك المسجّلة كسياق.",
-      "newChat": "محادثة جديدة",
       "noConversations": "لا توجد محادثات بعد.",
       "groupPinned": "مثبّتة",
       "groupToday": "اليوم",

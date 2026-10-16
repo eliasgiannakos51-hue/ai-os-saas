@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Code2, LayoutGrid, MessageCircle, MessagesSquare, PanelLeftClose, PanelLeftOpen, Pin, PinOff, Plus, Settings, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -10,27 +10,34 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { Logo } from "@/components/logo";
 import { displayNameFromEmail } from "@/lib/greeting";
 import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
-import { RECENT_CONVERSATIONS } from "@/lib/nav/recent-tools";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
-import { CHATS_HREF, SETTINGS_HREF, activeRail, railRows, type RailKey } from "@/lib/nav/rail";
-import type { RecentAction, RecentTool, SidebarConversation, SidebarProject } from "@/lib/nav/recent-tools";
-import { ConversationRows } from "@/components/dashboard/conversation-rows";
+import { RAIL_ROWS, SETTINGS_HREF, activeRail, type RailKey } from "@/lib/nav/rail";
+import type { RecentAction, RecentTool } from "@/lib/nav/recent-tools";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { useToast } from "@/components/toast/toast-context";
 
 /**
  * THE SIDEBAR — ΣΥΣΤΗΜΑ DESIGN (docs/CONTEXT.md): the same on every
- * page. Logo, New, Chats, Coding, All tools, Recent tools, Recent
- * conversations, and Settings at the bottom with the account inside it.
- * Nothing else is ever here; every tool is in All tools and ⌘K
- * (lib/nav/rail.ts).
+ * page. Logo, New, Chats, Coding, All tools, Recent tools, and
+ * Settings at the bottom with the account inside it. Nothing else is
+ * ever here; every tool is in All tools and ⌘K (lib/nav/rail.ts).
  *
- * THE THIRD ROW CHANGED NAME AND DESTINATION ON 2026-10-15, behind the
- * switch `chats-page`. It said «Chat» and went to the chat page; it
- * says «Chats» and goes to the list of every conversation, because
- * «New» already opened an empty one and two rows doing the same thing
- * meant one of them earned nothing. The conversations below are no
- * longer names either — see components/dashboard/conversation-rows.
+ * NO CONVERSATIONS. A «Recent chats» section was row 7 of this list
+ * until 2026-10-16, when the owner had it taken out —
+ * «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR». It is not
+ * hidden and not behind a switch: this component is handed no
+ * conversations and renders none, at any width, on any page, for any
+ * account. scripts/tests/sidebar-no-chats.prodtest.mjs opens ten
+ * pages on a computer and a phone and fails on one conversation
+ * title.
+ *
+ * THE SECOND ROW SAYS «Chats» AND OPENS THE LIST, since 2026-10-15.
+ * It said «Chat» and went to the chat page; «New» already opens an
+ * empty one, so two rows were doing the same thing and one of them
+ * earned nothing. Everything a conversation could do from the
+ * sidebar — open, rename, pin, move to a Project, delete with an Undo
+ * — is on that page (app/dashboard/chats/page.tsx, which draws
+ * components/dashboard/conversation-rows.tsx).
  *
  * WHY THE OLD "All tools changes the sidebar" BUG CANNOT HAPPEN. The
  * Recent list used to be rebuilt from localStorage on every page change,
@@ -62,9 +69,6 @@ export function Sidebar({
   planName = "",
   isOwner = false,
   recent = [],
-  conversations = [],
-  projects = [],
-  chatsPage = false,
 }: {
   email?: string;
   planName?: string;
@@ -72,22 +76,9 @@ export function Sidebar({
   isOwner?: boolean;
   /** Recent tools, computed by the dashboard layout from the account. */
   recent?: RecentTool[];
-  /** The latest conversations, also computed by the layout. */
-  conversations?: SidebarConversation[];
-  /** Active projects, for «Μεταφορά σε Έργο» in a conversation's menu. */
-  projects?: SidebarProject[];
-  /** The switch `chats-page`, resolved on the server by the layout. */
-  chatsPage?: boolean;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
-  // WHICH CONVERSATION IS OPEN, so its row reads as selected. The chat
-  // page carries it in `?c=` and validates it against the account's own
-  // list before using it (app/dashboard/chat/page.tsx) — here it only
-  // decides a highlight, so an id that is not the reader's simply
-  // matches no row.
-  const openConversationId = pathname === "/dashboard/chat" ? searchParams.get("c") : null;
   const t = useTranslations("sidebar");
   const { open, setOpen } = useSidebar();
   const { addToast } = useToast();
@@ -143,7 +134,7 @@ export function Sidebar({
     }
   };
 
-  const rows = useMemo(() => railRows(chatsPage), [chatsPage]);
+  const rows = RAIL_ROWS;
   const active = activeRail(
     pathname,
     list.map((r) => r.href),
@@ -278,35 +269,15 @@ export function Sidebar({
             </div>
           )}
 
-          {/* RECENT CONVERSATIONS (ΣΥΣΤΗΜΑ DESIGN §3, row 7). Each opens
-              that conversation (?c=, read by the chat page). Hidden in the
-              narrow sidebar, where a title cannot be read, and hidden with
-              its heading when there is none yet. */}
-          {conversations.length > 0 && !collapsed && (
-            <div className="pt-5" data-testid="recent-conversations">
-              <p className="px-3 pb-2 text-xs text-muted">{t("rail.recentChats")}</p>
-              <ConversationRows
-                conversations={conversations}
-                projects={projects}
-                activeId={openConversationId}
-                variant="sidebar"
-                onNavigate={closeOnMobile}
-              />
-              {/* THE WAY OUT OF A LIST THAT IS CAPPED. Fifteen rows is a
-                  sidebar; everything the account has ever said is a
-                  page. Drawn whenever the cap could be hiding
-                  something, which is as soon as the list is full. */}
-              {chatsPage && conversations.length >= RECENT_CONVERSATIONS && (
-                <Link
-                  href={CHATS_HREF}
-                  onClick={closeOnMobile}
-                  className="mt-1 flex min-h-[44px] items-center px-3 text-sm text-muted underline hover:text-foreground"
-                >
-                  {t("rail.allConversations")}
-                </Link>
-              )}
-            </div>
-          )}
+          {/* NO CONVERSATIONS HERE. They were row 7 of this rail until
+              2026-10-16, when the owner had them taken out —
+              «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR». They
+              are not hidden with CSS and not behind a switch: nothing
+              renders them, in any width, on any page, for any account.
+              Everything they could do — open, rename, pin, move to a
+              Project, delete with an Undo — is on the «Chats» page
+              above (app/dashboard/chats/page.tsx), which is where the
+              second row now goes. */}
         </nav>
 
         <div className="space-y-1 border-t border-divider px-2 py-3">

@@ -10,7 +10,6 @@ import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
-import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { InlineTitle } from "@/components/chat/inline-title";
 import { HelpTip } from "@/components/ui/help-tip";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
@@ -56,32 +55,6 @@ const CHAT_STEP_MESSAGE = {
   writing: "chatTimeline.writing",
 } as const satisfies Record<ChatStep, string>;
 
-// Remembered across visits, per the focus-mode toggle below.
-const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
-// Tailwind's `md`. Only used for the FIRST-visit default, never for
-// layout — the layout itself is done with real md: classes.
-// THE FIRST FIX COUNTED ONE SIDEBAR AND THERE ARE TWO — V4.6 #12.
-//
-// This was 768 (`md`), moved there because "at 375px a 256px in-flow
-// sidebar left the thread 119px wide, which is not a layout, it is a
-// squeeze". That was true and the fix was partial: at 768 the DASHBOARD
-// nav is in flow as well, so the arithmetic is 768 - 240 (nav) - 256
-// (this sidebar) - 48 (padding) and the reading column is what is left.
-//
-// Measured on a real build at 768 before this changed
-// (scripts/tests/chat-measure.prodtest.mjs):
-//   column 182px of a 224px measure at 15px — TWENTY-FOUR characters
-//   per line, against a brief asking for 60-75. The 390px phone, with
-//   no sidebars at all, held 41.
-// A tablet reading a narrower column than a phone is the signal that
-// something is being counted once and paid for twice.
-//
-// 1280 (`xl`) is the width at which both columns and a 60-75 character
-// measure fit at the same time: 1280 - 240 - 256 - 48 = 736px of thread,
-// which the 68ch cap then limits to about 71 characters at 16px. At 1024
-// the same sum leaves 480px, about 58 characters — under the band, so
-// `lg` is not enough and is not used.
-const SIDEBAR_BREAKPOINT_PX = 1280;
 
 let localIdCounter = 0;
 function nextLocalId(prefix: string) {
@@ -106,7 +79,6 @@ export function ChatWorkspace({
   siteWall = null,
   attachments = false,
   greeting = null,
-  chatsPage = false,
 }: {
   initialConversations: ChatConversation[];
   /** Conversation to open on load — the `?c=` deep link a starred
@@ -154,21 +126,6 @@ export function ChatWorkspace({
   /** The name the empty Chat greets with (lib/greeting.ts, greetingName),
    *  or null when it is not known — then the greeting has no name. */
   greeting?: string | null;
-  /**
-   * The switch `chats-page` (owner, 2026-10-15): the conversation list
-   * that lives INSIDE this screen is not drawn, because the app's own
-   * sidebar now opens, renames, pins, moves and deletes conversations,
-   * and the Chats page holds every one of them. ΣΥΣΤΗΜΑ DESIGN §3 says
-   * there is one sidebar; until today there were two on this screen.
-   *
-   * THE DRAWER IS NOT DELETED, IT IS NOT RENDERED, and that is what a
-   * switch is for: «Πώς γυρίζει πίσω» has to be one press on
-   * /dashboard/system-health, and it cannot be if the code it would go
-   * back to is gone. components/chat/conversation-sidebar.tsx is
-   * removed in the round that removes this switch, not in the one that
-   * adds it.
-   */
-  chatsPage?: boolean;
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -320,40 +277,20 @@ export function ChatWorkspace({
   const talkAvailable =
     voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;
 
-  // THE CONVERSATION LIST IS A DRAWER, CLOSED UNTIL ASKED FOR (Δ.2,
-  // 2026-10-05). ΣΥΣΤΗΜΑ DESIGN §3: one sidebar, the same everywhere —
-  // and the app's sidebar already lists the latest conversations. This
-  // list stays one press away because it is the only place that holds
-  // EVERY conversation, with rename, pin, star and delete; removing it
-  // would lose those («Καμία λειτουργία δεν χάνεται», §9). Opened once,
-  // the choice is remembered on this device.
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarResolved, setSidebarResolved] = useState(false);
+  // THERE IS NO CONVERSATION LIST ON THIS SCREEN ANY MORE.
+  //
+  // It was a drawer here from 2026-10-05, because the app's sidebar
+  // showed only the latest few and this was the one place with every
+  // conversation and its rename, pin, star and delete. Both halves of
+  // that reason are gone: /dashboard/chats holds every conversation
+  // with all of those actions, and on 2026-10-16 the owner had the
+  // sidebar's own list taken out too. A second list on this screen was
+  // always against ΣΥΣΤΗΜΑ DESIGN §3 — one sidebar, the same
+  // everywhere — and it no longer buys anything to set against that.
+  //
+  // Nothing is lost («Καμία λειτουργία δεν χάνεται»): the rail's
+  // «Chats» row is one press away on every page.
 
-  useEffect(() => {
-    let stored: string | null = null;
-    try {
-      stored = window.localStorage.getItem(CHAT_SIDEBAR_STORAGE_KEY);
-    } catch {
-      // Private browsing / storage disabled — fall through to the
-      // width-based default rather than failing to render a sidebar.
-    }
-    // No stored preference is closed, at every width.
-    setSidebarOpen(stored === "open");
-    setSidebarResolved(true);
-  }, []);
-
-  function toggleSidebar() {
-    setSidebarOpen((open) => {
-      const next = !open;
-      try {
-        window.localStorage.setItem(CHAT_SIDEBAR_STORAGE_KEY, next ? "open" : "closed");
-      } catch {
-        // Preference just won't persist; the toggle still works.
-      }
-      return next;
-    });
-  }
   // ASKED ON ARRIVAL. Runs once per mount and only for a brand-new
   // thread: `sentAskRef` is what stops React's development double-invoke
   // — and any later re-render — from sending the same question twice and
@@ -445,63 +382,27 @@ export function ChatWorkspace({
     loadMessages(id);
   }
 
-  function startNewChat() {
-    requestTokenRef.current += 1;
-    // Closed here, not only by the [activeId] effects above: a Site opened
-    // in a conversation that never reached /api/chat has no id, so
-    // setActiveId(null) changes nothing, and the next sentence went to the
-    // site as a charged change (chat-opens-tools.prodtest.mjs).
-    setSiteBrief(null);
-    setOpenWorkId(null);
-    setActiveId(null);
-    setMessages([]);
-    setError(null);
-    setLoadingMessages(false);
-    resetToBottom();
-    composerRef.current?.focus();
-  }
+  // THE «NEW CHAT» BUTTON THAT USED TO LIVE HERE IS GONE WITH ITS
+  // DRAWER, and so is the defect it had to guard against.
+  //
+  // It cleared the Site pane by hand, because a Site opened in a
+  // conversation that had never reached /api/chat has no id: setting
+  // the active id to null changed nothing the pane was watching, and
+  // the next sentence went to the site as a CHARGED change instead of
+  // starting the new conversation (chat-opens-tools.prodtest.mjs).
+  //
+  // Starting a new conversation is a navigation now — the rail's «New»
+  // — so the workspace remounts and the pane cannot survive it. The
+  // prodtest still proves that: it opens a Site, navigates the way the
+  // rail does, and requires the next sentence to start a conversation
+  // rather than edit the site.
 
-  // Through the route rather than straight at the table: the per-plan cap
-  // on pinned conversations has to be decided by the server, or it is not
-  // a cap. RLS still owns the ownership half.
-  async function togglePin(id: string) {
-    const target = conversations.find((c) => c.id === id);
-    if (!target) return;
-    const nextPinned = !target.is_pinned;
-    setConversations((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, is_pinned: nextPinned } : c))
-    );
-    const revert = () =>
-      setConversations((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, is_pinned: !nextPinned } : c))
-      );
-    try {
-      const res = await fetch(`/api/conversations/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_pinned: nextPinned }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.ok) {
-        revert();
-        // Hitting the pin cap is a tidiness problem, not a billing one,
-        // so it gets its own sentence with the numbers in it — never an
-        // upgrade prompt. Every other code falls to one translated line:
-        // the route returns identifiers rather than English prose, so
-        // there is nothing here that could leak an English sentence into
-        // a Greek sidebar.
-        setError(
-          data?.code === "pin_limit"
-            ? t("pinLimitReached", { limit: data.limit })
-            : t("pinError")
-        );
-      }
-    } catch {
-      revert();
-      setError(t("pinError"));
-    }
-  }
-
+  // NO PIN AND NO DELETE HERE ANY MORE. Both were the drawer's, and
+  // the drawer went with the sidebar's «Recent chats» on 2026-10-16.
+  // They live on the Chats page, on the row's «⋯» menu
+  // (components/dashboard/conversation-rows.tsx), which reaches the
+  // same route — and the delete, which used to be a `.delete()` straight
+  // from this browser, now goes through api/conversations/[id] with it.
   // Favourite state lives here rather than inside each star, because the
   // same conversation is drawn twice (list + header) and two independent
   // copies of the state disagree the moment one is clicked.
@@ -561,37 +462,6 @@ export function ChatWorkspace({
     }
   }
 
-  async function deleteConversation(id: string) {
-    const previous = conversations;
-    setConversations((prev) => prev.filter((c) => c.id !== id));
-    if (activeId === id) {
-      requestTokenRef.current += 1;
-      setActiveId(null);
-      setMessages([]);
-      setLoadingMessages(false);
-    }
-    const supabase = createClient();
-    // THE IMAGES GO WITH THE CONVERSATION (package 9): read before the
-    // rows are deleted, removed after. A PDF is a file in Files and stays
-    // there. Without the column (migration 20261018000000 not yet run)
-    // there is nothing to read and nothing is removed.
-    const { data: attachedRows } = attachments
-      ? await supabase.from("chat_messages").select("attachments").eq("conversation_id", id).not("attachments", "is", null)
-      : { data: null };
-    const { error: deleteError } = await supabase
-      .from("chat_conversations")
-      .delete()
-      .eq("id", id);
-    if (deleteError) {
-      setConversations(previous);
-      setError(getErrorMessage(deleteError, "Could not delete conversation."));
-      return;
-    }
-    const imagePaths = ((attachedRows ?? []) as { attachments?: unknown }[]).flatMap((row) =>
-      parseStoredAttachments(row.attachments).flatMap((a) => (a.kind === "image" ? [a.path] : []))
-    );
-    void discardChatImages(imagePaths);
-  }
 
   // THE QUESTION THE SERVER ASKED INSTEAD OF ANSWERING — V5 #6.
   //
@@ -900,85 +770,8 @@ export function ChatWorkspace({
 
   return (
     <div className="relative flex h-full overflow-hidden">
-      {/* On xl+ the sidebar is a real in-flow column; below that it is an
-          overlay drawer. See SIDEBAR_BREAKPOINT_PX for the arithmetic —
-          and for why `md` was the wrong answer to the same question. */}
-      <div
-        className={`absolute inset-y-0 start-0 z-30 xl:relative xl:z-auto ${
-          sidebarOpen && !chatsPage ? "flex" : "hidden"
-        }`}
-      >
-        <ConversationSidebar
-          conversations={conversations}
-          activeId={activeId}
-          onSelect={(id) => {
-            selectConversation(id);
-            if (window.innerWidth < SIDEBAR_BREAKPOINT_PX) toggleSidebar();
-          }}
-          onNewChat={() => {
-            startNewChat();
-            if (window.innerWidth < SIDEBAR_BREAKPOINT_PX) toggleSidebar();
-          }}
-          onTogglePin={togglePin}
-          onRename={renameConversation}
-          onDelete={deleteConversation}
-          onToggleFavorite={toggleFavorite}
-        />
-      </div>
-
-      {/* Tap-anywhere-else to close, wherever the sidebar is an overlay —
-          the in-flow column at xl+ has nothing to dismiss. This said
-          `md:hidden` while the drawer itself became an overlay below xl,
-          so between 768 and 1279 the drawer covered the thread with no
-          way to dismiss it except the toggle. */}
-      {sidebarOpen && !chatsPage && (
-        <button
-          type="button"
-          aria-label={t("hideConversations")}
-          onClick={toggleSidebar}
-          className="absolute inset-0 z-20 bg-background/50 xl:hidden"
-        />
-      )}
-
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2 border-b border-border px-2 py-1.5">
-          {/* DEFECT this fixes: this was a bare 36x36 icon whose only
-              affordance was a native `title` tooltip — the exact thing the
-              user reported never seeing. The feature worked and shipped;
-              nobody could find it. It now carries a VISIBLE text label
-              (the icon alone never said what it did) and the real Tooltip
-              component for the longer explanation. */}
-          {/* THE TOGGLE GOES WITH WHAT IT TOGGLES. With `chats-page` on
-              there is no drawer to open, so a button whose whole job is
-              to open it would be a control that does nothing — the
-              exact defect its own comment below records being fixed
-              once already. */}
-          {!chatsPage && (
-          <Tooltip
-            content={sidebarOpen ? t("hideConversationsHint") : t("showConversationsHint")}
-            side="top"
-          >
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              aria-expanded={sidebarOpen}
-              aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
-            >
-              {sidebarOpen ? (
-                <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
-              ) : (
-                <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
-              )}
-              {/* Hidden below sm only — at 375px the composer needs the
-                  width more than the label does. */}
-              <span className="hidden break-words text-xs sm:inline">
-                {sidebarOpen ? t("hideConversations") : t("focusMode")}
-              </span>
-            </button>
-          </Tooltip>
-          )}
-
           {/* THE "?" FOR THE WHOLE PAGE, in the one row that is always
               here. Chat is <main className="h-[calc(100vh-4rem)]"> — full
               viewport by design, with no PageHeader to hang a tip from —

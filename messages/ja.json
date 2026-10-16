@@ -306,10 +306,8 @@
       "expand": "サイドバーを広げる",
       "label": "メインメニュー",
       "saveFailed": "変更を保存できませんでした。もう一度お試しください。",
-      "recentChats": "最近のチャット",
       "untitledChat": "新しい会話",
-      "chats": "チャット",
-      "allConversations": "すべての会話"
+      "chats": "チャット"
     },
     "tabs": {
       "home": "ホーム",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "Ionexa チャット",
-      "hideConversations": "会話一覧を隠す",
-      "showConversations": "会話一覧を表示",
-      "focusMode": "集中モード",
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
       "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
-      "hideConversationsHint": "会話リストを隠して、スレッドに全幅を使います。",
-      "showConversationsHint": "会話リストを再表示します。",
       "send": "送信",
       "emptyBody": "何でも聞いてください — 一般的な知識、アイデア出し、文章のお手伝い、ただの雑談でも。Ionexa AI のどのモジュールにも紐づいていません。",
       "composerPlaceholder": "Ionexa にメッセージ…",
       "mentorMode": "メンターモード",
       "mentorModeHint": "メンターモード: 単なる回答ではなく戦略的な助言をします — リスクを指摘し、確認の質問をし、代替案を示し、記録したデータを文脈として使います。",
-      "newChat": "新しいチャット",
       "noConversations": "まだ会話がありません。",
       "groupPinned": "ピン留め",
       "groupToday": "今日",

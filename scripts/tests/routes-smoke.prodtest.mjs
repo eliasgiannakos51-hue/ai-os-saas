@@ -1661,13 +1661,22 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
     timeout: 45000,
   });
   const chat = await textAndPlaceholders();
-  for (const [what, needle] of [
-    ["the composer placeholder", "Γράψε στο Ionexa..."],
-    ["the new-chat button", "Νέα συνομιλία"],
-    ["the empty conversation list", "Καμία συνομιλία ακόμα."],
-  ]) {
-    checkTrue(`${what} is Greek`, chat.includes(needle));
-  }
+  checkTrue("the composer placeholder is Greek", chat.includes("Γράψε στο Ionexa..."));
+  // «Νέα συνομιλία» AND «Καμία συνομιλία ακόμα.» WERE READ HERE, and
+  // both were the drawer's: the list of conversations that used to sit
+  // inside this screen. On 2026-10-16 the owner had the conversations
+  // taken out of the sidebar and that drawer went with them, so neither
+  // string is on /dashboard/chat any longer — and «Νέα συνομιλία» is
+  // not anywhere: its key was deleted in the same round, because
+  // starting a conversation is the rail's «Νέο».
+  //
+  // CHECKED AS AN ABSENCE, not simply dropped. A check deleted because
+  // it went red is a check that stopped asking its question; this one
+  // asks the opposite question now, which is the one that matters —
+  // scripts/tests/sidebar-no-chats.prodtest.mjs holds the thorough
+  // version across ten pages and three widths.
+  checkTrue("...and no second list of conversations is on the chat screen",
+    !chat.includes("Νέα συνομιλία") && !chat.includes("Καμία συνομιλία ακόμα."), chat.slice(0, 200));
   // THE EMPTY CHAT GREETS (MASTER 14.2, 2026-10-07): the earth, the
   // hour's greeting and the field. The greeting depends on the hour, so
   // any of the three Greek ones, read from messages/el.json; and the
@@ -1687,6 +1696,25 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
     chat.slice(0, 200)
   );
   await page.screenshot({ path: "/tmp/ionexa-a3-chat-el.png" });
+
+  // ---- Chats, where the conversations went ----------------------------
+  // The two strings above did not stop mattering, they moved. This is
+  // the screen that owns them now, and it is read in the same pass so
+  // the Greek is proved where it is drawn rather than assumed from the
+  // message file.
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/chats`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const chats = await textAndPlaceholders();
+  for (const [what, needle] of [
+    ["the page heading", "Συνομιλίες"],
+    ["the search box", "Αναζήτηση στις συνομιλίες σου"],
+    ["the empty conversation list", "Καμία συνομιλία ακόμα."],
+  ]) {
+    checkTrue(`Chats: ${what} is Greek`, chats.includes(needle), chats.slice(0, 200));
+  }
+  checkTrue("Chats: no unresolved key on the page", !/\b(dashboard|sidebar)\.[a-z]+\.[a-z]/i.test(chats), chats.slice(0, 200));
 
   // ---- Memory ---------------------------------------------------------
   // AI Memory is Starter-and-above (memory/page.tsx gates it on

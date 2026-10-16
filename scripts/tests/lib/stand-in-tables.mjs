@@ -20,7 +20,20 @@ function matches(row, url) {
     if (["select", "order", "limit", "offset", "on_conflict", "columns"].includes(key)) continue;
     const [op, ...rest] = raw.split(".");
     const value = rest.join(".");
-    const cell = row[key];
+    // A FIELD INSIDE A jsonb COLUMN. PostgREST spells it
+    // `metadata->>outcome`, and lib/research/research-usage.ts is the
+    // first place in this repo to filter on one — so the first stand-in
+    // to be asked for it read `row["metadata->>outcome"]`, found
+    // undefined, and answered "no rows" to a filter the real database
+    // answers properly. A mock that cannot express a filter must not
+    // quietly report zero.
+    const cell = key.includes("->>")
+      ? (() => {
+          const [col, field] = key.split("->>");
+          const json = row[col];
+          return json && typeof json === "object" ? json[field] : undefined;
+        })()
+      : row[key];
     if (op === "eq" && String(cell) !== value) return false;
     if (op === "neq" && String(cell) === value) return false;
     if (op === "is" && value === "null" && cell !== null && cell !== undefined) return false;

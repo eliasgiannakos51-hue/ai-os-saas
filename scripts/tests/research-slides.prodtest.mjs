@@ -89,7 +89,7 @@ const DECK_INPUT = {
   ],
 };
 
-const store = { research_reports: [], ai_presentations: [], user_credits: [], feature_flags: [], user_documents: [] };
+const store = { research_reports: [], ai_presentations: [], user_credits: [], feature_flags: [], user_documents: [], ai_cost_log: [] };
 const tables = statefulTables(store, {
   // As the database fills a report the plan route writes.
   defaults: {
@@ -387,7 +387,22 @@ try {
   // =====================================================================
   const SAID = (L) => L.dashboard.deepResearch;
   const MONTH = new Date().toISOString().slice(0, 7);
-  const capFull = Array.from({ length: 10 }, (_, i) => ({ ...REPORT, id: `c${i}111111-1111-4111-8111-111111111111`, created_at: `${MONTH}-02T10:00:00Z` }));
+  // THE CAP IS COUNTED FROM THE LEDGER, NOT FROM THE REPORTS THAT STILL
+  // EXIST. be5d2753 moved it to ai_cost_log on purpose: deleting a report
+  // is a hard delete, so counting research_reports handed the allowance
+  // back — delete, run another, delete, run another. ai_cost_log is
+  // append-only and the plan route settles exactly one `research_plan`
+  // row per report it plans. This fixture seeded ten REPORTS until
+  // 2026-10-16 and the server had stopped counting them, so the scenario
+  // was not the one it said: the screen's own footer read «0 από 10
+  // αυτόν τον μήνα» and the plan went ahead, correctly.
+  const capFull = Array.from({ length: 10 }, (_, i) => ({
+    id: `c${i}111111-1111-4111-8111-111111111111`,
+    user_id: MOCK_USER.id,
+    feature: "research_plan",
+    metadata: { outcome: "planned" },
+    created_at: `${MONTH}-02T10:00:00Z`,
+  }));
   const FAILED = { ...REPORT, id: "f2222222-2222-4222-8222-222222222222", status: "failed", sections: [], sources: [], error: "The searches did not return anything usable on this topic." };
   const WHOLE = [
     { name: "a topic, planned, run, and sent to Slides — the shell", device: DESKTOP, flags: {}, mode: "ok" },
@@ -398,7 +413,7 @@ try {
     { name: "the provider overloaded at the plan — the page", device: PHONE, flags: { "tool-shell": "off" }, mode: "overloaded", expect: (L) => SAID(L).refused?.unavailable },
     // The footer says the month is used up already; the answer to the
     // press is read from the conversation, where the footer is not.
-    { name: "the month's reports used up", device: PHONE, flags: {}, mode: "ok", reports: capFull, expect: (L) => SAID(L).capReached, thread: true },
+    { name: "the month's reports used up", device: PHONE, flags: {}, mode: "ok", ledger: capFull, expect: (L) => SAID(L).capReached, thread: true },
     // Every question's request fails: the service did not answer, and the
     // screen says so — never that the topic gave nothing (2026-10-08).
     { name: "the provider overloaded during the run", device: DESKTOP, flags: {}, mode: "runOverloaded", expect: (L) => SAID(L).failed?.unavailable },
@@ -416,6 +431,7 @@ try {
     const L = W[locale];
     console.log(`\n== ${run.name} — ${device.label} ${device.viewport.width}x${device.viewport.height}, ${locale} ==`);
     store.research_reports.splice(0, Infinity, ...(run.reports ?? []).map((r) => structuredClone(r)));
+    store.ai_cost_log.splice(0, Infinity, ...(run.ledger ?? []).map((r) => structuredClone(r)));
     store.ai_presentations.splice(0, Infinity);
     store.user_documents.splice(0, Infinity);
     store.user_credits.splice(0, Infinity, { user_id: MOCK_USER.id, credits_remaining: run.credits ?? 3000, credits_total: 3000 });
@@ -484,7 +500,7 @@ try {
         const found = englishIn(said, RUNS_EN, [...ROUTE_ENGLISH, ...ROUTE_RESEARCH_ENGLISH]);
         check("...with no English sentence on the Greek screen", found.length === 0, found.join(" | "));
       }
-      if (run.credits === 0 || run.reports) check("...and the model was never asked", model.calls.length === 0, String(model.calls.length));
+      if (run.credits === 0 || run.reports || run.ledger) check("...and the model was never asked", model.calls.length === 0, String(model.calls.length));
       // The screen says nothing was charged (refused.unavailable), so the
       // plan's hold must be given back, never settled: a call that never
       // returned is a release (lib/billing/reservations.ts, settleReservation).

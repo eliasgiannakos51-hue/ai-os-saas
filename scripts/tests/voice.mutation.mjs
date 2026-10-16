@@ -42,6 +42,7 @@ const INPUT = "src/components/voice/voice-input.tsx";
 const PLAYER = "src/components/voice/voice-player.tsx";
 const CONVERSATION = "src/components/voice/voice-conversation.tsx";
 const PROVIDERS = "src/lib/voice/voice-providers.ts";
+const WORKBENCH = "src/components/voice/voice-workbench.tsx";
 const CSS = "src/app/globals.css";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
@@ -444,6 +445,33 @@ const MUTANTS = [
     file: MEETINGS_ROUTE,
     from: "      units: billedSeconds,",
     to: "      units: seconds,",
+  },
+
+  // ------------------------------------------------------------------
+  // THE FIELD STOPS WHERE THE VOICE STOPS (§9). Each of these puts the
+  // page back to telling a person a number that is not true: the box
+  // takes more than will ever be read aloud, and the half that is cut
+  // is cut in silence.
+  // ------------------------------------------------------------------
+  {
+    name: "the field goes back to its own 5000 while the voice still stops at 2500",
+    file: WORKBENCH,
+    edits: [
+      { from: "maxLength={MAX_SPEAK_CHARS}", to: "maxLength={5000}" },
+      { from: "e.target.value.slice(0, MAX_SPEAK_CHARS)", to: "e.target.value.slice(0, 5000)" },
+    ],
+  },
+  {
+    name: "the counter alone names a different maximum from the field",
+    file: WORKBENCH,
+    from: 't("charCount", { count: toRead.length, max: MAX_SPEAK_CHARS })',
+    to: 't("charCount", { count: toRead.length, max: 5000 })',
+  },
+  {
+    name: "the provider stops cutting at the shared constant, so the two can drift again",
+    file: PROVIDERS,
+    from: "const text = params.text.slice(0, MAX_SPEAK_CHARS);",
+    to: "const text = params.text.slice(0, 2500);",
   },
 ];
 

@@ -1435,6 +1435,65 @@ console.log("\n== 8. a transcription is billed on the provider's length (2026-10
 }
 
 // ===========================================================================
+console.log("\n== 9. THE FIELD STOPS WHERE THE VOICE STOPS (2026-10-16) ==");
+// ===========================================================================
+//
+// WHAT WAS WRONG, and it was a screen telling a person a number that
+// was not true. components/voice/voice-workbench.tsx had its own
+// `MAX_TEXT_LENGTH = 5000`: the box took five thousand characters and
+// the counter under it said «x από 5000». What is read aloud is
+// MAX_SPEAK_CHARS — 2,500 — and both the player and the provider cut to
+// it in silence (`text.trim().slice(0, MAX_SPEAK_CHARS)`). Paste four
+// thousand characters, be told it is fine, hear the first half, and be
+// told nothing about the rest.
+//
+// RANGED OVER THE DIRECTORY, not over the one file that was wrong. Any
+// future screen that caps text before handing it to the speak path has
+// to cap at the same constant, and a second copy of the number is the
+// only way the two could disagree again.
+{
+  const COMMENTS = /\/\*[\s\S]*?\*\/|(^|[^:])\/\/.*$/gm;
+  const codeOf = (p) => readFileSync(p, "utf8").replace(COMMENTS, "$1");
+
+  // The screens that take text FROM A PERSON and send it to be spoken.
+  const speakers = voiceSources
+    .filter((p) => /\.tsx$/.test(p))
+    .map((p) => [p, codeOf(p)])
+    .filter(([, src]) => /<textarea|<input/.test(src) && /VoicePlayer|\/voice\/speak/.test(src));
+  ok(
+    `the scan found the screens that take text to be spoken (${speakers.length})`,
+    speakers.length >= 1,
+    "an empty list would make every check below it pass on nothing",
+  );
+
+  for (const [path, src] of speakers) {
+    const file = path.split("/").pop();
+    // A LITERAL IS THE DEFECT. maxLength={2500} would be right today and
+    // wrong the day the provider's limit moves, which is exactly how the
+    // two numbers came apart the first time.
+    const literalCap = /maxLength=\{\s*\d|\.slice\(\s*0\s*,\s*\d/.test(src);
+    ok(`${file}: no number of its own caps the text`, !literalCap,
+      "the cap must be MAX_SPEAK_CHARS, imported, not a copy of it");
+    ok(`${file}: it caps at MAX_SPEAK_CHARS`,
+      /maxLength=\{\s*MAX_SPEAK_CHARS\s*\}/.test(src),
+      "the field must refuse what the voice will not read");
+    ok(`${file}: ...and the counter says that same number`,
+      /charCount[\s\S]{0,120}?max:\s*MAX_SPEAK_CHARS/.test(src),
+      "a counter naming a different maximum is the screen lying to the reader");
+  }
+
+  // AND THE NUMBER ITSELF IS THE ONE THE PROVIDER IS GIVEN. The check
+  // above is about agreement; this is about which of the two they agree
+  // on, so raising the field's cap by changing the shared constant
+  // cannot quietly raise what is sent.
+  const providers = codeOf("src/lib/voice/voice-providers.ts");
+  ok("the provider cuts at MAX_SPEAK_CHARS too",
+    /\.slice\(\s*0\s*,\s*MAX_SPEAK_CHARS\s*\)/.test(providers), "voice-providers.ts");
+  ok(`and MAX_SPEAK_CHARS is ${MAX_SPEAK_CHARS}, under the field's old 5000`,
+    MAX_SPEAK_CHARS === 2500, String(MAX_SPEAK_CHARS));
+}
+
+// ===========================================================================
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   console.log("FAILURES:\n  " + failures.join("\n  "));

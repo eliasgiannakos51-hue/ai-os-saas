@@ -32,6 +32,7 @@ import {
   slidesWantingImages,
   type Deck,
 } from "@/lib/presentations/deck";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { editDeck } from "@/lib/presentations/generate";
 import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
@@ -74,8 +75,10 @@ export const maxDuration = 120; // @function-limit 120
  */
 export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused BEFORE the hold.
+  if (!anyProviderConfigured(process.env)) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
 
@@ -201,13 +204,13 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       : "";
 
     const outcome = await editDeck({
-      apiKey,
       deck: stored,
       instruction: box === null ? instruction : scopeInstructionToSlide(instruction, box, stored.slides.length),
       locale,
       imageSource: stored.imageSource,
       costs,
       memoryBlock,
+      userId: user.id,
       signal: request.signal,
     });
 

@@ -30,7 +30,7 @@ async function cancel(runId: string, reason: string): Promise<void> {
 }
 
 /** Runs one queued run for a person already loaded. True when it was taken here. */
-export async function runQueued(apiKey: string, run: QueuedRun, user: User): Promise<boolean> {
+export async function runQueued(run: QueuedRun, user: User): Promise<boolean> {
   const admin = createAdminClient();
   const { data: taken, error: takeError } = await admin
     .from("automation_runs")
@@ -66,7 +66,6 @@ export async function runQueued(apiKey: string, run: QueuedRun, user: User): Pro
     return true;
   }
   await go({
-    apiKey,
     flow: { id: flow.id as string, user_id: run.user_id, name: flow.name as string, boxes: verdict.boxes, cost_limit: flow.cost_limit as number, time_zone: flow.time_zone as string },
     runId: run.id,
     user: { id: user.id, email: user.email ?? null },

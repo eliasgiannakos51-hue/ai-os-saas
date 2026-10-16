@@ -41,6 +41,7 @@ import {
 import { deckChartsFrom, ensureChartSlide } from "@/lib/presentations/deck-charts";
 import { emailTranslator } from "@/lib/email/email-locale";
 import type { TableProfile } from "@/lib/data-analysis/profile";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { generateDeck } from "@/lib/presentations/generate";
 import { memoryPromptFor } from "@/lib/memory/store";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
@@ -95,8 +96,10 @@ export const maxDuration = 120; // @function-limit 120
  * them (ensureChartSlide), with the file's numbers, whatever was written.
  */
 export async function POST(request: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused BEFORE the hold.
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ error: "not_configured" }, { status: 503 });
 
   let body: Record<string, unknown>;
   try {
@@ -294,7 +297,6 @@ export async function POST(request: Request) {
       ? await memoryPromptFor(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
       : "";
     const outcome = await generateDeck({
-      apiKey,
       description,
       slideCount,
       locale,
@@ -303,6 +305,7 @@ export async function POST(request: Request) {
       memoryBlock,
       businessContext,
       charts,
+      userId: user.id,
       // THE STOP BUTTON: the request's own abort signal. When the person
       // stops, the provider call is aborted with it.
       signal: request.signal,

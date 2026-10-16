@@ -317,7 +317,7 @@ export async function POST(request: Request) {
       }
       try {
         void recordAiCallForDailySpend(1);
-        const clarification = await checkNeedsClarification(apiKey, "website", description, costs);
+        const clarification = await checkNeedsClarification("website", description, costs, null, user.id);
         // RECORDED EITHER WAY, and the `clear` branch is the one that
         // matters: it is the common case, it costs nothing, and until now
         // it left no trace at all.

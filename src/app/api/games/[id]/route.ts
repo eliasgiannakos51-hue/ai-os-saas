@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
@@ -88,8 +89,11 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       return answer({ html: chosen.html, versions: pushVersion(versions, { html: chosen.html, at: new Date().toISOString(), note: "restore" }) }, 0);
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
+    // NOT "is the Anthropic key set" any more: the calls below go
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts). Still refused before the
+    // hold.
+    if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
     if (action === "box") {
       const kind = body.kind as Parameters<typeof withBox>[1];
@@ -99,7 +103,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
         inputChars: gameSystemPrompt().length + message.length,
         fingerprint: `${params.id}:${kind}:${instruction}`, route: "/api/games/[id]",
         metadata: { step: "box", kind, gameId: params.id },
-        run: (costs) => rewriteGameBox({ apiKey, plan, kind, instruction, locale, costs, signal: request.signal }),
+        run: (costs) => rewriteGameBox({ plan, kind, instruction, locale, costs, userId: user.id, signal: request.signal }),
       });
       if (!step.ok) return step.response;
       return answer({ plan: withBox(plan, kind, step.value) }, step.creditsCharged);
@@ -112,7 +116,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
         inputChars: gameSystemPrompt().length + message.length,
         fingerprint: `${params.id}:build`, route: "/api/games/[id]",
         metadata: { step: "build", gameId: params.id },
-        run: (costs) => writeGame({ apiKey, plan, locale, costs, signal: request.signal }),
+        run: (costs) => writeGame({ plan, locale, costs, userId: user.id, signal: request.signal }),
       });
       if (!step.ok) return step.response;
       return answer({ html: step.value, versions: pushVersion(game.versions, { html: step.value, at: new Date().toISOString(), note: "build" }) }, step.creditsCharged);
@@ -126,7 +130,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       inputChars: gameSystemPrompt().length + message.length,
       fingerprint: `${params.id}:${instruction}`, route: "/api/games/[id]",
       metadata: { step: "change", gameId: params.id, htmlChars: html.length },
-      run: (costs) => changeGame({ apiKey, html, instruction, locale, costs, signal: request.signal }),
+      run: (costs) => changeGame({ html, instruction, locale, costs, userId: user.id, signal: request.signal }),
     });
     if (!step.ok) return step.response;
     return answer({ html: step.value, versions: pushVersion(game.versions, { html: step.value, at: new Date().toISOString(), note: instruction.slice(0, 120) }) }, step.creditsCharged);

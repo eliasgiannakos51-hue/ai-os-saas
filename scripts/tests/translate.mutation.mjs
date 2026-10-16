@@ -116,7 +116,7 @@ const MUTANTS = [
   {
     name: "a wrong list is never asked again",
     file: CALL,
-    from: "      if (result.ok && result.list === null) result = await callBatch(anthropic, system, message, indexes.length, params.costs, signal);",
+    from: "      if (result.ok && result.list === null) result = await callBatch(system, message, indexes.length, params.costs, params.userId, signal);",
     to: "",
     expect: "the calls: usage recorded before the list is read, a wrong list asked once more",
   },

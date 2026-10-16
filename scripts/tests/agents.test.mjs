@@ -20,6 +20,7 @@
 // Run: node scripts/tests/agents.test.mjs
 import { readFileSync } from "node:fs";
 import { stripSqlComments } from "../lib/sql-text.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -623,11 +624,26 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
   checkTrue("...and emails the owner when it does", /sendAgentDisabledEmail/.test(exec));
 }
 {
-  const runner = read("src/lib/agents/agent-runner.ts");
+  // COMMENTS STRIPPED, AND THAT IS NOT TIDINESS. Every check in this
+  // block is a pattern over the runner's source, and the first version
+  // of the capability check below went red against correct code because
+  // the explanatory comment one screen up contained the very string it
+  // was counting. A check that a comment can satisfy — or break — is
+  // measuring the prose, which is the exact disease
+  // scripts/scan-self-confirming-gates.mjs exists for.
+  const runner = stripComments(read("src/lib/agents/agent-runner.ts"));
   // The capability model IS the security boundary. Only the server-side
-  // web_search tool is ever offered.
+  // web search is ever asked for.
+  // RE-ANCHORED 2026-10-15. The runner used to build Anthropic's
+  // web_search tool itself and hand it over in a `tools:` array; it now
+  // asks the router for the CAPABILITY (`serverWebSearch`, with
+  // `requires: ["server_web_search"]`) and the adapter writes the wire
+  // shape — which scripts/tests/ai-providers.test.mjs drives with a
+  // stubbed fetch and checks byte for byte. So the claim here gets
+  // STRONGER rather than weaker: this file may now offer no tool list at
+  // all, which is the thing that would let an agent reach an app tool.
   const toolLists = [...runner.matchAll(/tools:\s*\[([^\]]*)\]/g)].map((m) => m[1].trim());
-  check("the runner offers exactly one tool list", toolLists.length, 1);
+  check("the runner offers no tool list at all", toolLists.length, 0);
   // ASSERTED ON THE TOOL'S TYPE, not on the name of the constant holding
   // it. This used to compare against the literal "WEB_SEARCH_TOOL", which
   // meant renaming the identifier failed the check while ADDING a second
@@ -649,18 +665,25 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
   const NON_TOOL_TYPES = ["text"];
   const allTypes = [...new Set([...runner.matchAll(/type:\s*"([a-z_0-9]+)"/g)].map((m) => m[1]))];
   const toolTypes = allTypes.filter((t) => !NON_TOOL_TYPES.includes(t));
-  check("...and every tool it can construct is a web search", toolTypes, ["web_search_20250305"]);
+  // THE FLOOR ON THE POPULATION, required by
+  // scripts/tests/gate-vacuity.test.mjs and required by common sense:
+  // "no tool types" means nothing if the scan found no type literals at
+  // all. A runner rewritten so that this file contains no `type: "..."`
+  // anywhere would satisfy the empty list and prove nothing.
+  checkTrue(`the scan found type literals to judge (${allTypes.length})`, allTypes.length >= 1);
+  check("...and constructs no tool of its own", toolTypes, []);
   check(
     "...and the non-tool type literals are only the ones accounted for",
     allTypes.filter((t) => NON_TOOL_TYPES.includes(t)),
     ["text"]
   );
-  checkTrue("...built through one helper, so the cap cannot be set twice",
-    (runner.match(/function webSearchTool\(/g) ?? []).length === 1);
+  checkTrue("...and asks for exactly one capability, which is the server-side search",
+    (runner.match(/serverWebSearch:/g) ?? []).length === 1 &&
+      /requires: \["server_web_search"\]/.test(runner));
   // THE CAP IS THE TIER'S, not a constant. A tool built with a fixed
   // max_uses would let `deep` be held for ten searches and run with four.
   checkTrue("...whose cap comes from the depth spec",
-    /webSearchTool\(searches\)/.test(runner) && /searchesForRound\(depth, round\)/.test(runner));
+    /serverWebSearch: \{ maxUses: searches \}/.test(runner) && /searchesForRound\(depth, round\)/.test(runner));
   checkTrue("every model call is recorded onto the accumulator", (runner.match(/costs\.record\(/g) ?? []).length >= 2);
   checkTrue("the task text is fenced as untrusted", /wrapUntrusted\(safePrompt\)/.test(runner));
   checkTrue("web findings are fenced as untrusted", /wrapUntrusted\(findings\)/.test(runner));
@@ -721,14 +744,17 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
     !/await buildAgentFromRequest/.test(buildRoute) && /status: 202/.test(buildRoute)
   );
   checkTrue("build refuses before spending when the plan owns no agents", /agentCap <= 0/.test(buildRoute));
-  // Whitespace-tolerant: the call grew a fifth argument (the AI Life
-  // Context, so the check cannot ask for what the app already knows) and
-  // wrapped onto several lines. The claim is unchanged — the handler runs
-  // the SHARED check, for kind "agent" — so the pattern matches the call
-  // rather than one particular way of formatting it.
+  // Whitespace-tolerant: the call grew arguments twice (the AI Life
+  // Context, so the check cannot ask for what the app already knows;
+  // then the user id for the provider log) and LOST one — the api key
+  // stopped being the first argument when this call moved onto the
+  // router on 2026-10-15, which is why the kind is now what the pattern
+  // opens on. The claim is unchanged — the handler runs the SHARED
+  // check, for kind "agent" — so the pattern matches the call rather
+  // than one particular way of formatting it.
   checkTrue(
     "build runs the shared clarification pre-check",
-    /checkNeedsClarification\(\s*ctx\.apiKey,\s*"agent"/.test(buildHandler)
+    /checkNeedsClarification\(\s*"agent"/.test(buildHandler)
   );
   const createRoute = read("src/app/api/agents/route.ts");
   checkTrue("create re-validates the draft server-side", /validateAgentDraft\(/.test(createRoute));

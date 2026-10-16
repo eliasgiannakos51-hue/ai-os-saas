@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 const MODEL = "claude-sonnet-4-6";
@@ -26,10 +27,10 @@ Flag isSafe: false ONLY if the page contains something like:
 
 Do NOT flag: ordinary business sites, opinions you disagree with, aggressive-but-legal sales copy, or unfinished/placeholder content — those are normal, expected output, not safety issues.`;
 
-const REVIEW_TOOL: Anthropic.Tool = {
+const REVIEW_TOOL: AiToolSpec = {
   name: "review_content_safety",
   description: "Report whether this generated website's content is safe to publish, or flag specific harmful/deceptive content found.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       isSafe: {
@@ -83,25 +84,44 @@ export async function reviewWebsiteContentSafety(
   costs?: CostAccumulator
 ): Promise<ContentSafetyReviewResult> {
   try {
-    const anthropic = new Anthropic({ apiKey });
     const trimmed = html.length > MAX_HTML_CHARS_FOR_REVIEW ? html.slice(0, MAX_HTML_CHARS_FOR_REVIEW) : html;
-    const response = await anthropic.messages.create({
+    // THROUGH THE ROUTER, AND THE FORCED TOOL IS THE SAFETY PROPERTY.
+    // Everything below reads the tool's input; a model left to decide
+    // could answer "this looks fine" in prose, `toolCalls` would be
+    // empty, and this layer would report SAFE on every site forever
+    // while still being charged for. The file's own header says the
+    // static scan "structurally cannot catch" what this is here for.
+    //
+    // `apiKey` is kept as a parameter although runCompletion reads the
+    // key from the environment itself: every caller already has it
+    // (api/websites/generate/process, api/websites/edit) and
+    // multipage-websites.test.mjs pins the one-call-for-the-whole-site
+    // shape on the argument list. Removing it is a separate change to
+    // two routes, not part of moving this call.
+    const outcome = await runCompletion({
+      purpose: "classification",
       model: MODEL,
-      max_tokens: REVIEW_MAX_TOKENS,
-      system: SYSTEM_PROMPT,
+      maxTokens: REVIEW_MAX_TOKENS,
+      system: [{ type: "text", text: SYSTEM_PROMPT }],
       messages: [{ role: "user", content: trimmed }],
       tools: [REVIEW_TOOL],
-      tool_choice: { type: "tool", name: "review_content_safety" },
+      toolChoice: { type: "tool", name: "review_content_safety" },
+      requires: ["tool_calling"],
     });
+
+    // FAIL OPEN, AS THIS LAYER ALWAYS HAS — and now that includes a
+    // provider failure and a Stop, which used to arrive as a thrown
+    // error and land in the catch below. Written out rather than
+    // inherited, because "the security review returns safe" is a
+    // sentence that has to be deliberate.
+    if (!outcome.ok) return { isSafe: true, concerns: [] };
 
     // Recorded before the parse: this review is a real billed call whose
     // cost the user's action incurred whether or not the response came
     // back in a shape we could use.
-    costs?.record("security_review", response.usage, response.model || MODEL);
+    costs?.record("security_review", outcome.usage, outcome.reportedModel || outcome.model);
 
-    const toolUse = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
-    );
+    const toolUse = outcome.toolCalls[0];
     if (!toolUse) return { isSafe: true, concerns: [] };
 
     return parseContentSafetyReviewInput(

@@ -1,6 +1,5 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import type { AiAttempt, AiPurpose } from "@/lib/ai/providers/types";
 
@@ -28,6 +27,14 @@ export async function recordProviderAttempts(params: {
 }): Promise<void> {
   if (params.attempts.length === 0) return;
   try {
+    // LOADED HERE, NOT AT THE TOP, for the same reason the adapters are
+    // (see complete.ts's ADAPTERS): lib/supabase/admin.ts imports the
+    // Supabase client, and a static import put that package on the
+    // import graph of every module that reaches runCompletion, which
+    // scripts/tests/load-ts.mjs then refuses to load. This function
+    // writes a row after a call has already been made, so nothing that
+    // only READS the routing rules ever evaluates it.
+    const { createAdminClient } = await import("@/lib/supabase/admin");
     const admin = createAdminClient();
     const requestId = randomUUID();
     const rows = params.attempts.map((attempt, index) => ({

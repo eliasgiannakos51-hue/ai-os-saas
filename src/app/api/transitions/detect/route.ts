@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
+import { runCompletion } from "@/lib/ai/providers/complete";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -74,11 +76,11 @@ THE LANGUAGE OF THE ANSWER DOES NOT MATTER. This app ships in English, Greek, Sp
 When in doubt, answer "none". A missing button costs the user one navigation they were going to make anyway; a wrong one costs their trust in the next.`;
 }
 
-const DETECT_TOOL: Anthropic.Tool = {
+const DETECT_TOOL: AiToolSpec = {
   name: "name_destination",
   description:
     "Name the one place in the product this answer points the reader at, or 'none' if it does not point anywhere.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       destination: {
@@ -123,16 +125,19 @@ const DETECT_TOOL: Anthropic.Tool = {
  */
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      // NOT `source: "skipped"`, WHICH IS THE ONE PLACE THIS ROUTE MUST
-      // NOT FAIL QUIET. A deployment with no key would otherwise answer
-      // 200 for ever and look exactly like a deployment where the free
-      // reader simply placed everything — a broken install hidden behind
-      // a green response. The operator gets a 500, a code and a log line;
-      // the user still gets no button and no error, because the caller
-      // ignores the body either way.
-      logApiError("/api/transitions/detect", new Error("ANTHROPIC_API_KEY missing"), {
+    // NOT `source: "skipped"`, WHICH IS THE ONE PLACE THIS ROUTE MUST
+    // NOT FAIL QUIET. A deployment with no provider would otherwise
+    // answer 200 for ever and look exactly like a deployment where the
+    // free reader simply placed everything — a broken install hidden
+    // behind a green response. The operator gets a 500, a code and a log
+    // line; the user still gets no button and no error, because the
+    // caller ignores the body either way.
+    //
+    // Asked of the registry rather than of one variable's name since
+    // this call moved onto the router (lib/ai/providers/registry.ts):
+    // a deployment holding another provider's key is NOT broken.
+    if (!anyProviderConfigured(process.env)) {
+      logApiError("/api/transitions/detect", new Error("no AI provider configured"), {
         stage: "config",
       });
       return NextResponse.json({ ok: false, reason: "no_api_key" }, { status: 500 });
@@ -238,20 +243,28 @@ export async function POST(request: Request) {
     let chosen: string | null = null;
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      const anthropic = new Anthropic({ apiKey });
-      const response = await anthropic.messages.create({
-        model: TRANSITION_MODEL,
-        max_tokens: 128,
-        system: buildSystemPrompt(),
-        messages: [{ role: "user", content: answer }],
-        tools: [DETECT_TOOL],
-        tool_choice: { type: "tool", name: "name_destination" },
-      });
-      costs.record("classification", response.usage, response.model || TRANSITION_MODEL);
-
-      const toolUse = response.content.find(
-        (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+      // THROUGH THE ROUTER, NOT THE SDK (step 1.4). The tool's input IS
+      // the named destination.
+      const outcome = await runCompletion(
+        {
+          purpose: "classification",
+          model: TRANSITION_MODEL,
+          maxTokens: 128,
+          system: [{ type: "text", text: buildSystemPrompt() }],
+          messages: [{ role: "user", content: answer }],
+          tools: [DETECT_TOOL],
+          toolChoice: { type: "tool", name: "name_destination" },
+          requires: ["tool_calling"],
+        },
+        { userId: user.id }
       );
+      // A call that never completed has no usage to record and names no
+      // destination: the free reader's answer stands, and the route
+      // releases rather than settles.
+      if (!outcome.ok) throw new Error(`transitions: ${outcome.kind} ${outcome.detail}`);
+      costs.record("classification", outcome.usage, outcome.reportedModel || outcome.model);
+
+      const toolUse = outcome.toolCalls.find((call) => call.name === "name_destination");
       const raw = (toolUse?.input ?? {}) as Record<string, unknown>;
       // THE ENUM IS A REQUEST, NOT A GUARANTEE. destinationById() is what
       // makes "the id can only come from the closed list" true, and it is

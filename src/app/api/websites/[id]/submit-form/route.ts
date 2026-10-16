@@ -231,8 +231,13 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const ownerPlan = await resolveEffectivePlan(owner);
 
     let classification: string | null = null;
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (apiKey && owner) {
+    // NO LONGER GUARDED ON ANTHROPIC_API_KEY. classifyLeadMessage goes
+    // through the provider router now, which decides from configuration
+    // which provider serves it and answers kind "no_provider" when none
+    // is configured — so a key check here would be one provider's name
+    // standing in for "is any of them set up", and would stop the
+    // classification on a deployment configured with a different one.
+    if (owner) {
       const costs = new CostAccumulator();
       try {
         const affordable = await hasEnoughCredits(
@@ -241,7 +246,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
           ownerPlan
         );
         if (affordable.ok) {
-          classification = await classifyLeadMessage(apiKey, fields, costs);
+          classification = await classifyLeadMessage(fields, costs);
         }
       } catch (err) {
         logApiError("/api/websites/[id]/submit-form", err, { stage: "lead_classification" });

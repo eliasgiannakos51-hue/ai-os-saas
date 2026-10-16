@@ -31,6 +31,7 @@
 // Run: node scripts/tests/prompt-caching.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -385,6 +386,47 @@ for (const col of selected) {
 // The three the panel depends on must specifically be there.
 for (const col of ["input_tokens", "cache_read_tokens", "cache_write_tokens"]) {
   ok(`the panel actually selects "${col}"`, selected.includes(col));
+}
+
+// ---------------------------------------------------------------------
+// THE SAME NUMBER IN TWO FILES, HELD EQUAL.
+//
+// lib/ai/cached-system.ts answers "is this prefix long enough to be
+// worth a cache breakpoint" by dividing characters by four, and
+// lib/billing/estimate.ts prices every pre-action estimate by dividing
+// characters by four. It is the same figure doing two jobs, and it is
+// written down TWICE because cached-system.ts has no imports at all —
+// deliberately: it is pasted whole into a gate, and importing the
+// pricing engine would drag all of it onto the graph of every call site
+// that reaches the router.
+//
+// Until 2026-10-15 the comment above the duplicate claimed the opposite
+// ("reused here on purpose so one constant governs both"), which was a
+// sentence about code that did not exist. The duplicate is now named
+// for its job, and this check is what makes the comment true: the two
+// numbers cannot drift apart without going red. Read as LITERALS from
+// the source, not imported, because importing estimate.ts here would
+// make this check pass by construction for one of the two.
+// ---------------------------------------------------------------------
+{
+  const cacheSrc = readFileSync("src/lib/ai/cached-system.ts", "utf8");
+  const estimateSrc = readFileSync("src/lib/billing/estimate.ts", "utf8");
+  const forCache = cacheSrc.match(/const CHARS_PER_TOKEN_FOR_CACHE_MINIMUM = (\d+);/)?.[1];
+  const forPrice = estimateSrc.match(/export const CHARS_PER_TOKEN = (\d+);/)?.[1];
+  ok("the cache minimum's chars-per-token figure was found", Boolean(forCache));
+  ok("the estimate's chars-per-token figure was found", Boolean(forPrice));
+  ok(`the two are the same number (${forCache} and ${forPrice})`, Boolean(forCache) && forCache === forPrice);
+  // AND THE NAMES STAY APART. They share one flat scope whenever a gate
+  // loads a module that reaches both (scripts/tests/load-ts.mjs), which
+  // is now every caller of runCompletion: automations.itest.mjs died on
+  // exactly that collision.
+  //
+  // COMMENTS STRIPPED, and the first version of this line proves why it
+  // is not pedantry: the note above quotes the old declaration, so the
+  // check matched its own explanation and went red against correct
+  // code. "If I deleted every comment in the target, would this still
+  // pass?" — CLAUDE.md asks it for a reason.
+  ok("the cache one does not reclaim the bare name", !/const CHARS_PER_TOKEN\s*=/.test(stripComments(cacheSrc)));
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

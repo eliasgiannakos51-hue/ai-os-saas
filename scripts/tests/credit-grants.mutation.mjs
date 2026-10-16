@@ -112,6 +112,18 @@ const MUTANTS = [
     all: true,
     expect: "the webhook returns early on a replay",
   },
+  {
+    // THE ADD-ON GRANTED FROM TWO PLACES AGAIN (ΛΘ-15). Harmless to the
+    // customer — the event key and the session key both refuse the
+    // second pass — and not harmless to the log, which then carries
+    // "duplicate addon credit grant suppressed" on every legitimate
+    // one-off credit add-on.
+    name: "a one-off add-on is granted from inside the payment branch as well",
+    file: WEBHOOK,
+    from: '} else if (session.mode === "payment" && !session.metadata?.addon_slug) {',
+    to: '} else if (session.mode === "payment") {\n          if (session.metadata?.addon_slug) await grantAddon(session, event.id);',
+    expect: "an add-on is granted from exactly one place",
+  },
 ];
 
 function runGate() {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -41,8 +42,10 @@ export const maxDuration = 120; // @function-limit 120
  * beside it reads it, without a new table or migration.
  */
 export async function POST(request: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
+  // NOT "is the Anthropic key set" any more: the call below goes through
+  // the router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts). Still refused before the hold.
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
   let body: Record<string, unknown>;
   try {
@@ -110,7 +113,7 @@ export async function POST(request: Request) {
     const memoryBlock = memoryActiveFor({ surface: "chat", user, planLimit: plan?.capabilities.chatMemoryLimit ?? 0 })
       ? await memoryPromptFor(supabase, user.id, plan?.capabilities.chatMemoryLimit ?? 0)
       : "";
-    const outcome = await writeDocument({ apiKey, description, kind, locale, businessContext, memoryBlock, costs, signal: request.signal });
+    const outcome = await writeDocument({ description, kind, locale, businessContext, memoryBlock, costs, userId: user.id, signal: request.signal });
 
     if (!outcome.ok && (outcome.kind === "aborted" || outcome.kind === "provider")) {
       await releaseReservation(user.id, reservationId);

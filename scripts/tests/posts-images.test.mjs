@@ -79,8 +79,8 @@ console.log("\n== 3. the set keeps its picture; the model says what to look for 
   ok("a stored set keeps its picture", stored?.image?.kind === "own" && stored.image.path === "u1/a.jpg");
   ok("...and a stored picture that is not one is dropped, the posts kept", (() => { const s = parseStoredPostSet({ version: 1, locale: "el", posts: raw.posts, image: { kind: "own", path: "../x" } }); return s && s.posts.length === 2 && !s.image; })());
   ok("a set made before has no picture and still reads", (() => { const s = parseStoredPostSet({ version: 1, locale: "el", posts: raw.posts }); return s && s.posts.length === 2 && !s.image; })());
-  const props = WRITE_POSTS_TOOL.input_schema.properties;
-  ok("the tool can say what to search for, and need not", props.imageQuery && !WRITE_POSTS_TOOL.input_schema.required.includes("imageQuery"));
+  const props = WRITE_POSTS_TOOL.inputSchema.properties;
+  ok("the tool can say what to search for, and need not", props.imageQuery && !WRITE_POSTS_TOOL.inputSchema.required.includes("imageQuery"));
   const asked = buildPostsUserMessage("Νέο μενού", ["linkedin"], "el", "", true);
   const notAsked = buildPostsUserMessage("Νέο μενού", ["linkedin"], "el", "", false);
   ok("the model is asked for search words only when a photo is wanted", /imageQuery/.test(asked) && !/imageQuery/.test(notAsked));

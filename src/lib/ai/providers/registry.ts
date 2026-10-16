@@ -137,6 +137,30 @@ export function providerStatuses(env: ProviderEnv): ProviderStatus[] {
   });
 }
 
+/**
+ * IS THERE ANY PROVIDER AT ALL? — the refusal a route makes BEFORE it
+ * holds credits.
+ *
+ * Every route that calls a model used to open with
+ * `process.env.ANTHROPIC_API_KEY` and refuse with "not_configured" when
+ * it was absent. That sentence stopped being true the moment a call
+ * could be served by one of four providers: a deployment with only
+ * GROQ_API_KEY set would have refused every request while a provider
+ * sat there able to answer it.
+ *
+ * The question a route actually wants answered is this one, and it is
+ * asked of the registry rather than of one variable's name. It is
+ * deliberately coarser than resolveChain: a route refusing up front
+ * should not have to repeat the purpose and the capabilities it is
+ * about to send — that is runCompletion's own job, and a chain that is
+ * empty for THIS purpose comes back as `no_provider`, which the route
+ * already handles. This only answers "there is nothing configured
+ * anywhere", which is the case worth refusing before any reservation.
+ */
+export function anyProviderConfigured(env: ProviderEnv): boolean {
+  return providerStatuses(env).some((status) => status.enabled);
+}
+
 export type ResolvedChain = {
   purpose: AiPurpose;
   /** In the order they will be tried. */

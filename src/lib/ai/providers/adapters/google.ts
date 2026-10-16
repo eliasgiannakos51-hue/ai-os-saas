@@ -2,14 +2,13 @@ import "server-only";
 import {
   flattenContent,
   flattenSystem,
+  normaliseStopReason,
   postJson,
   refuseUnsupported,
   splitPromptTokens,
   wireModelId,
-  type AdapterCall,
-  type AdapterResponse,
 } from "@/lib/ai/providers/adapters/shared";
-import type { AiToolCall } from "@/lib/ai/providers/types";
+import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
 
 /**
  * GOOGLE, over the Gemini generateContent API.
@@ -81,6 +80,22 @@ export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
         })),
       },
     ];
+    // GEMINI SPELLS IT SOMEWHERE ELSE ENTIRELY: not a field beside
+    // `tools` but a `toolConfig` object, with the forced NAME in a list
+    // rather than on the choice. Written out here rather than bent into
+    // the OpenAI-shaped helper in shared.ts, which two adapters use
+    // verbatim — one helper serving both would serve neither clearly.
+    if (request.toolChoice) {
+      const mode = request.toolChoice.type === "auto" ? "AUTO" : "ANY";
+      body.toolConfig = {
+        functionCallingConfig: {
+          mode,
+          ...(request.toolChoice.type === "tool"
+            ? { allowedFunctionNames: [request.toolChoice.name] }
+            : {}),
+        },
+      };
+    }
   }
 
   const raw = (await postJson({
@@ -120,7 +135,7 @@ export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
       output_tokens: raw.usageMetadata?.candidatesTokenCount ?? 0,
       cache_read_input_tokens: split.cache_read_input_tokens,
     },
-    stopReason: candidate?.finishReason ?? null,
+    stopReason: normaliseStopReason(candidate?.finishReason),
     reportedModel: raw.modelVersion ?? call.model,
   };
 }

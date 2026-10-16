@@ -52,6 +52,8 @@ const LOG_SQL = "supabase/migrations/20260828000000_ai_provider_log.sql";
 const BATCH_SQL = "supabase/migrations/20260829000000_agent_run_batches.sql";
 const VERCEL = "vercel.json";
 const WORKSPACE = "src/components/agents/agents-workspace.tsx";
+const COMPLETE = "src/lib/ai/providers/complete.ts";
+const PROVIDER_LOG = "src/lib/ai/providers/provider-log.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -494,6 +496,121 @@ const MUTANTS = [
     file: RUNNER,
     from: "  costs.record(\"generation\", outcome.usage, outcome.reportedModel || outcome.model);",
     to: "  costs.record(\"generation\", outcome.usage, spec.model);",
+  },
+  // ------------------------------------------------------------------
+  // FORCING A TOOL. Twenty-one call sites read toolCalls[0].input and
+  // parse nothing; a provider handed the tools and not the choice may
+  // answer in prose, and the charge happens either way.
+  // ------------------------------------------------------------------
+  {
+    name: "Anthropic is handed the tools and left to decide",
+    file: ANTHROPIC,
+    from: "        return request.toolChoice\n          ? { tools, tool_choice: request.toolChoice as Anthropic.ToolChoice }\n          : { tools };",
+    to: "        return { tools };",
+  },
+  {
+    name: "Anthropic is sent a choice even when there are no tools to choose from",
+    file: ANTHROPIC,
+    from: "        if (!tools.length) return {};",
+    to: "        if (!tools.length) return request.toolChoice ? { tool_choice: request.toolChoice as Anthropic.ToolChoice } : {};",
+  },
+  {
+    name: "Gemini's forced tool loses the name, so ANY tool satisfies it",
+    file: GOOGLE,
+    from: "          ...(request.toolChoice.type === \"tool\"\n            ? { allowedFunctionNames: [request.toolChoice.name] }\n            : {}),",
+    to: "",
+  },
+  {
+    name: "Gemini is told AUTO whatever the caller asked for",
+    file: GOOGLE,
+    from: '      const mode = request.toolChoice.type === "auto" ? "AUTO" : "ANY";',
+    to: '      const mode = "AUTO";',
+  },
+  {
+    name: "OpenAI drops the choice and sends only the tools",
+    file: OPENAI,
+    from: "    const choice = openAiToolChoice(request);\n    if (choice !== undefined) body.tool_choice = choice;",
+    to: "",
+  },
+  {
+    name: "Groq drops the choice and sends only the tools",
+    file: GROQ,
+    from: "    const choice = openAiToolChoice(request);\n    if (choice !== undefined) body.tool_choice = choice;",
+    to: "",
+  },
+  {
+    name: '"must call one of them" becomes OpenAI\'s "may"',
+    file: SHARED,
+    from: '  if (choice.type === "any") return "required";',
+    to: '  if (choice.type === "any") return "auto";',
+  },
+  {
+    name: "a choice with no tools is sent anyway, which both APIs answer with a 400",
+    file: SHARED,
+    from: "  if (!choice || !request.tools?.length) return undefined;",
+    to: "  if (!choice) return undefined;",
+  },
+  // ------------------------------------------------------------------
+  // THE GRAPH (ΛΘ-17). One static vendor import anywhere in the routing
+  // rules makes every gate that loads a module calling runCompletion
+  // unloadable — which is most of them, and it fails as a crash with no
+  // FAIL line rather than as a named check.
+  // ------------------------------------------------------------------
+  {
+    name: "the SDK is back on the routing rules' import graph",
+    file: COMPLETE,
+    // ANCHORED ON THE TYPE IMPORT THAT REPLACED IT, and the move is the
+    // reason this line changed: Adapter, AdapterCall and AdapterResponse
+    // used to live in adapters/shared.ts, so `import type { Adapter }`
+    // from there put that file's ten top-level names into every flat
+    // load-ts bundle of every migrated caller — and automations.itest
+    // went red on «postJson is declared at the top level of BOTH». The
+    // three types live in types.ts now; the mutant still reintroduces
+    // the defect it names, which is a VALUE import of an adapter.
+    from: 'import type { Adapter, AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";',
+    to: 'import { callAnthropic as eagerAnthropic } from "@/lib/ai/providers/adapters/anthropic";\nimport type { Adapter, AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";\nvoid eagerAnthropic;',
+    expect: "the graph reaches no vendor package",
+  },
+  // ------------------------------------------------------------------
+  // "IT RAN OUT OF ROOM", from four vendors with four words for it.
+  // ------------------------------------------------------------------
+  {
+    name: "OpenAI's and Groq's word for a cut answer is passed through untranslated",
+    file: SHARED,
+    from: 'const TRUNCATION_WORDS = new Set(["max_tokens", "length", "MAX_TOKENS"]);',
+    to: 'const TRUNCATION_WORDS = new Set(["max_tokens", "MAX_TOKENS"]);',
+    expect: '"length" normalises to the canonical word',
+  },
+  {
+    name: "Gemini's word is passed through untranslated",
+    file: SHARED,
+    from: 'const TRUNCATION_WORDS = new Set(["max_tokens", "length", "MAX_TOKENS"]);',
+    to: 'const TRUNCATION_WORDS = new Set(["max_tokens", "length"]);',
+    expect: '"MAX_TOKENS" normalises to the canonical word',
+  },
+  {
+    // THE OTHER DIRECTION, and it is the one that makes the three above
+    // mean something: a normaliser that answers "cut off" to everything
+    // marks every finished answer truncated.
+    name: "every stop reason is called a truncation",
+    file: SHARED,
+    from: "  return TRUNCATION_WORDS.has(raw) ? AI_TRUNCATED_STOP_REASON : raw;",
+    to: "  return AI_TRUNCATED_STOP_REASON;",
+    expect: '"stop" is left alone',
+  },
+  {
+    name: "one adapter forgets to translate its vendor's word",
+    file: OPENAI,
+    from: "    stopReason: normaliseStopReason(choice?.finish_reason),",
+    to: "    stopReason: choice?.finish_reason ?? null,",
+    expect: "openai: a reply cut at the ceiling says so in our word",
+  },
+  {
+    name: "the provider log reaches its database client at the top again",
+    file: PROVIDER_LOG,
+    from: 'import { logApiError } from "@/lib/log-error";',
+    to: 'import { createAdminClient as eagerAdmin } from "@/lib/supabase/admin";\nimport { logApiError } from "@/lib/log-error";\nvoid eagerAdmin;',
+    expect: "the graph reaches no vendor package",
   },
 ];
 

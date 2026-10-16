@@ -452,7 +452,6 @@ async function runResearchChunkInner(
   );
 
   const synthesis = await synthesiseReport({
-    anthropic,
     topic: String(report.topic),
     findings,
     sources,
@@ -460,6 +459,7 @@ async function runResearchChunkInner(
     accountSummary: context.accountSummary,
     language,
     costs,
+    userId: report.user_id,
   });
 
   const plan = await planFor(report.user_id);

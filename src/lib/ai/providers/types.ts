@@ -34,9 +34,31 @@ export function isAiProvider(value: unknown): value is AiProvider {
  */
 export const AI_CAPABILITIES = [
   "tool_calling",
+  /**
+   * DECLARED BY NO MODEL TODAY, AND THAT IS THE HONEST STATE.
+   *
+   * Until 2026-10-16 every one of the eleven catalog rows claimed this,
+   * through BASE in catalog.ts — and no adapter streams. `requires:
+   * ["streaming"]` therefore passed resolveChain's filter, routed
+   * happily, and came back buffered: the router acting on a declaration
+   * that was false. Nothing asked for it yet, so nothing was broken;
+   * the lie was waiting for the first caller.
+   *
+   * The name stays in this list so a request CAN ask, and get the true
+   * answer — an empty chain, kind "unsupported". It goes back into
+   * catalog.ts the same day an adapter can stream, and
+   * ai-providers.test.mjs holds the two together BOTH WAYS.
+   */
   "streaming",
   "prompt_caching",
   "server_web_search",
+  /**
+   * An image inside a user message. Per MODEL rather than per provider:
+   * Groq's two Llama rows cannot see one and Gemini's two can, so a
+   * request carrying a picture must be routed by this and not by a
+   * provider name.
+   */
+  "vision",
   "batch",
 ] as const;
 export type AiCapability = (typeof AI_CAPABILITIES)[number];
@@ -78,9 +100,57 @@ export type AiSystemBlock = {
   cache_control?: { type: "ephemeral" };
 };
 
+/** The picture formats every vision model in the catalog accepts, and
+ *  the only ones the app produces: lib/attachment-image-server.ts
+ *  re-encodes to JPEG or PNG, and the website builder's reference images
+ *  add WEBP. A format outside this list is a format one of the four
+ *  providers would reject at the wire, which is a 400 nobody can act on. */
+export const AI_IMAGE_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export type AiImageMediaType = (typeof AI_IMAGE_MEDIA_TYPES)[number];
+
+/**
+ * A PICTURE IN A MESSAGE, AS BYTES — never as a URL.
+ *
+ * Every image this app sends is already in its own storage and is
+ * downloaded, resized and base64-encoded on the server before the call
+ * (lib/attachment-image-server.ts, the website builder's reference
+ * images). A URL variant would be a second code path whose only user
+ * would be a provider fetching a link we did not check, which is a
+ * request made from our account to somewhere a person chose.
+ *
+ * NO DOCUMENT BLOCK. A PDF reaches the model as TEXT today, extracted
+ * page by page with its page markers kept (lib/chat/attachments.ts), and
+ * that is what every citation of a page number is built from. A native
+ * document block would be an Anthropic-only shape with three silent
+ * drops behind it — exactly what AiRequest exists to prevent.
+ */
+export type AiImageBlock = {
+  type: "image";
+  source: { type: "base64"; media_type: AiImageMediaType; data: string };
+};
+
+/** What a message may carry. The system prompt stays text-only: a cache
+ *  breakpoint on a picture is not a thing any provider offers. */
+export type AiContentBlock = AiSystemBlock | AiImageBlock;
+
+export function isImageBlock(block: AiContentBlock): block is AiImageBlock {
+  return block.type === "image";
+}
+
 export type AiMessage = {
   role: "user" | "assistant";
-  content: string | AiSystemBlock[];
+  /**
+   * A REQUEST CARRYING AN IMAGE MUST ALSO REQUIRE "vision", for the same
+   * reason serverWebSearch must require server_web_search: `requires` is
+   * what the ROUTER filters on before any call, and this is what the
+   * ADAPTER sends. Without the first, a picture can be handed to a model
+   * that cannot see — and the three adapters that build their body from
+   * flattened text would drop it and answer about the words alone, which
+   * is the failure that looks like success. flattenContent REFUSES a
+   * non-text block rather than skipping it, and
+   * scripts/tests/ai-providers.test.mjs ranges the rule over the tree.
+   */
+  content: string | AiContentBlock[];
 };
 
 export type AiToolSpec = {

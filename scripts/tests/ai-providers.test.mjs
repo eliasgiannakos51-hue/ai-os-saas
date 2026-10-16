@@ -646,7 +646,11 @@ ok("flattenSystem joins the blocks in order, losing nothing",
   const total = direct + routed;
   const pct = total === 0 ? 0 : Math.round((routed / total) * 1000) / 10;
   console.log(`        ROUTER COVERAGE: ${routed} of ${total} model call sites = ${pct}%   (${directFiles.length} files still call the SDK directly)`);
-  console.log(`        of those files, ${blockedBy.stream.size} need streaming and ${blockedBy.image.size} need an image or a PDF in a message — neither is expressible in AiRequest today`);
+  // WHICH OF THE TWO DOORS IS STILL SHUT, said each time rather than
+  // written as prose that goes stale. The image door opened on
+  // 2026-10-16 (AiImageBlock, the "vision" capability, §5e below); the
+  // streaming door has not.
+  console.log(`        of those files, ${blockedBy.stream.size} need streaming (not expressible in AiRequest today) and ${blockedBy.image.size} send an image (expressible since 2026-10-16, but blocked by the stream in the same file)`);
   ok(`the scan sees both sides (${routed} routed, ${direct} direct)`, routed > 0 && direct > 0,
     "a scan that saw one side only would print a ratio of 0% or 100% and mean nothing either way");
 }
@@ -1076,6 +1080,225 @@ console.log("\n== 5b. FORCING A TOOL: the field 21 call sites depend on ==");
     "an empty list makes the next check pass on nothing");
   const silent = adapterFiles.filter((f) => !DEALS_WITH_CHOICE.test(stripTs(src(f))));
   ok("every adapter deals with the tool choice", silent.length === 0, silent.join(", "));
+}
+
+// ===========================================================================
+console.log("\n== 5e. THE IMAGE DOOR, AND THE CAPABILITY THAT WAS DECLARED WITHOUT EXISTING ==");
+// ===========================================================================
+//
+// TWO HALVES OF ONE RULE: a capability is what the router FILTERS on, so
+// every one of them has to be true of the model it is written against.
+//
+// "streaming" was not. All eleven rows claimed it through BASE and no
+// adapter streams — anthropic.ts awaits one whole messages.create and
+// the three fetch adapters go through postJson, which does
+// `await response.json()`. So `requires: ["streaming"]` passed the
+// filter, routed, and came back buffered. Nothing asked for it yet, so
+// nothing broke; the first caller would have been api/chat.
+//
+// "vision" is the one being added, and it is declared per MODEL because
+// the answer differs inside a provider: Gemini's two rows can see a
+// picture and Groq's two Llama rows cannot.
+{
+  const sharedMod = await loadTs("src/lib/ai/providers/adapters/shared.ts");
+  const { flattenContent, refuseUnsupported, imageBlocksOf } = sharedMod;
+  const { AI_IMAGE_MEDIA_TYPES, isImageBlock } = await loadTs("src/lib/ai/providers/types.ts");
+
+  const img = (media = "image/png") => ({ type: "image", source: { type: "base64", media_type: media, data: "AAAA" } });
+  const withImage = () => ({
+    purpose: "classification",
+    system: [{ type: "text", text: "s" }],
+    messages: [{ role: "user", content: [img(), { type: "text", text: "what is this?" }] }],
+    maxTokens: 16,
+  });
+  const textOnly = { purpose: "classification", system: [], messages: [{ role: "user", content: "hello" }], maxTokens: 16 };
+
+  // --- the declaration, against the catalog itself --------------------
+  ok('"vision" is a capability a request can require', AI_CAPABILITIES.includes("vision"));
+  const seeing = AI_CATALOG.filter((m) => m.capabilities.includes("vision")).map((m) => m.id);
+  ok(`${seeing.length} of ${AI_CATALOG.length} models can see a picture`,
+    seeing.length > 0 && seeing.length < AI_CATALOG.length,
+    "a capability every model has, or none has, is a capability the router cannot route on");
+  ok("...and the two Groq models are the ones that cannot",
+    AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).every((m) => m.provider === "groq") &&
+      !providerSupports("groq", "vision"),
+    AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).map((m) => m.id).join(","));
+
+  // --- "streaming": declared by nobody, because nobody implements it ---
+  const adapterFiles = ["anthropic", "openai", "google", "groq"].map((n) => `src/lib/ai/providers/adapters/${n}.ts`);
+  const anyAdapterStreams = adapterFiles.some((f) =>
+    /\.messages\.stream\s*\(|["']?stream["']?\s*:\s*true|streamSSE|ReadableStream/.test(stripComments(src(f)))
+  );
+  const catalogClaimsStreaming = AI_CATALOG.some((m) => m.capabilities.includes("streaming"));
+  // BOTH WAYS, which is the only version of this check worth having: the
+  // day an adapter can stream, the catalog must say so in the same
+  // commit, and the day the catalog says so, an adapter must do it.
+  ok(`the catalog claims streaming (${catalogClaimsStreaming}) exactly when an adapter can stream (${anyAdapterStreams})`,
+    catalogClaimsStreaming === anyAdapterStreams,
+    "a capability the router filters on must be true of the code underneath it");
+  ok('"streaming" stays a NAME a request can ask for, so the answer can be an honest no',
+    AI_CAPABILITIES.includes("streaming"));
+  {
+    const env = { ANTHROPIC_API_KEY: "k", OPENAI_API_KEY: "k", GOOGLE_API_KEY: "k", GROQ_API_KEY: "k", AI_PROVIDER_ORDER: "anthropic,openai,google,groq" };
+    const chain = resolveChain({ env, purpose: "chat", requires: ["streaming"] });
+    ok("...and asking for it empties the chain rather than routing and buffering",
+      chain.order.length === 0, chain.order.join(","));
+    ok("...with every provider's reason naming the capability",
+      chain.skipped.length === 4 && chain.skipped.every((s) => s.reason.includes("streaming")),
+      chain.skipped.map((s) => `${s.provider}: ${s.reason}`).join("; "));
+  }
+
+  // --- the routing of a picture, run ----------------------------------
+  {
+    const env = { ANTHROPIC_API_KEY: "k", OPENAI_API_KEY: "k", GOOGLE_API_KEY: "k", GROQ_API_KEY: "k", AI_PROVIDER_ORDER: "groq,anthropic,openai,google" };
+    const chain = resolveChain({ env, purpose: "classification", requires: ["vision"] });
+    ok("a request that requires vision skips groq and keeps the other three",
+      chain.order.join(",") === "anthropic,openai,google", chain.order.join(","));
+    ok("...and says why groq was left out",
+      chain.skipped.some((s) => s.provider === "groq" && s.reason.includes("vision")),
+      chain.skipped.map((s) => `${s.provider}: ${s.reason}`).join("; "));
+    ok("...while a text-only classification still reaches groq first",
+      resolveChain({ env, purpose: "classification" }).order[0] === "groq");
+    ok("substituteModel finds no groq model that can see",
+      substituteModel("groq", "mid", ["vision"]) === null);
+    ok(`...and does find one at anthropic (${substituteModel("anthropic", "mid", ["vision"])?.id})`,
+      substituteModel("anthropic", "mid", ["vision"]) !== null);
+    // AND AT THE TWO THAT ARE NOT ANTHROPIC, which is the whole point of
+    // declaring this per model: a picture is the one case where the
+    // cheap providers are genuinely usable.
+    ok(`...and at openai (${substituteModel("openai", "small", ["vision"])?.id}) and google (${substituteModel("google", "small", ["vision"])?.id})`,
+      substituteModel("openai", "small", ["vision"]) !== null && substituteModel("google", "small", ["vision"]) !== null);
+  }
+
+  // --- nothing is flattened away --------------------------------------
+  ok("imageBlocksOf finds the picture in a message", imageBlocksOf(withImage()).length === 1);
+  ok("...and finds none in a text-only request", imageBlocksOf(textOnly).length === 0);
+  ok("isImageBlock tells the two block kinds apart",
+    isImageBlock(img()) === true && isImageBlock({ type: "text", text: "x" }) === false);
+  let flattenThrew = null;
+  try {
+    flattenContent(withImage().messages[0].content);
+  } catch (err) {
+    flattenThrew = err;
+  }
+  // THE DEFECT THIS REPLACES: `content.map((b) => b.text).join()` turned
+  // an image block into the literal string "undefined" and the model
+  // answered about the words alone.
+  ok('flattenContent REFUSES a picture rather than turning it into "undefined"',
+    flattenThrew !== null && flattenThrew.status === 400, String(flattenThrew));
+  ok("...and still flattens plain text",
+    flattenContent([{ type: "text", text: "a" }, { type: "text", text: "b" }]) === "a\n\nb");
+  ok("...and a plain string", flattenContent("a") === "a");
+
+  let groqRefused = null;
+  try {
+    refuseUnsupported("groq", withImage());
+  } catch (err) {
+    groqRefused = err;
+  }
+  ok("groq refuses a request carrying a picture", groqRefused?.status === 400, String(groqRefused));
+  ok("...and the three that can see do not", ["anthropic", "openai", "google"].every((p) => {
+    try {
+      refuseUnsupported(p, withImage());
+      return true;
+    } catch {
+      return false;
+    }
+  }));
+  ok("...and groq still answers a text-only request", (() => {
+    try {
+      refuseUnsupported("groq", textOnly);
+      return true;
+    } catch {
+      return false;
+    }
+  })());
+
+  // --- the bytes each fetch adapter actually sends ---------------------
+  async function bodyFor(file, exportName, model, reply, request) {
+    const mod = await loadTs(file);
+    const real = globalThis.fetch;
+    let body = null;
+    globalThis.fetch = async (_url, init) => {
+      body = JSON.parse(init.body);
+      return new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+    };
+    try {
+      await mod[exportName]({ apiKey: "k", model, signal: AbortSignal.timeout(5_000), request });
+    } finally {
+      globalThis.fetch = real;
+    }
+    return body;
+  }
+
+  {
+    const sent = await bodyFor("src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "a cat" } }], usage: {} }, withImage());
+    ok("openai: the probe captured a body", sent !== null, "the adapter did not call fetch");
+    const parts = sent?.messages?.[sent.messages.length - 1]?.content;
+    ok("openai: the picture is sent as a part, not dropped",
+      Array.isArray(parts) && parts.some((p) => p.type === "image_url"), JSON.stringify(parts)?.slice(0, 200));
+    ok("openai: ...as a base64 data URL carrying the media type",
+      parts?.find((p) => p.type === "image_url")?.image_url?.url === "data:image/png;base64,AAAA",
+      JSON.stringify(parts?.find((p) => p.type === "image_url")));
+    ok("openai: ...and the question travels with it, in the order it was given",
+      parts?.map((p) => p.type).join(",") === "image_url,text", JSON.stringify(parts?.map((p) => p.type)));
+    const plain = await bodyFor("src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "hi" } }], usage: {} }, textOnly);
+    ok("openai: a text-only message is still a plain string, byte-for-byte as before",
+      plain?.messages?.[plain.messages.length - 1]?.content === "hello",
+      JSON.stringify(plain?.messages?.[plain.messages.length - 1]));
+  }
+  {
+    const sent = await bodyFor("src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "a cat" }] } }], usageMetadata: {} }, withImage());
+    ok("google: the probe captured a body", sent !== null, "the adapter did not call fetch");
+    const parts = sent?.contents?.[0]?.parts;
+    ok("google: the picture is an inlineData part",
+      Array.isArray(parts) && parts.some((p) => p.inlineData), JSON.stringify(parts)?.slice(0, 200));
+    ok("google: ...camelCase mimeType, which is this API's spelling",
+      parts?.find((p) => p.inlineData)?.inlineData?.mimeType === "image/png" &&
+        parts?.find((p) => p.inlineData)?.inlineData?.data === "AAAA",
+      JSON.stringify(parts?.find((p) => p.inlineData)));
+    const plain = await bodyFor("src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "hi" }] } }], usageMetadata: {} }, textOnly);
+    ok("google: a text-only message is still exactly one text part",
+      JSON.stringify(plain?.contents?.[0]?.parts) === JSON.stringify([{ text: "hello" }]),
+      JSON.stringify(plain?.contents?.[0]?.parts));
+  }
+  {
+    let threw = null;
+    try {
+      await bodyFor("src/lib/ai/providers/adapters/groq.ts", "callGroq", "groq/llama-3.3-70b-versatile",
+        { choices: [{ message: { content: "hi" } }], usage: {} }, withImage());
+    } catch (err) {
+      threw = err;
+    }
+    ok("groq: a picture is refused at the adapter too, as a 400 that does not fail over",
+      threw?.status === 400, String(threw));
+  }
+
+  // --- and the rule, over the whole tree ------------------------------
+  //
+  // THE SAME SHAPE AS THE WEB-SEARCH RULE ABOVE. A call site that builds
+  // an image block must also require "vision", or the router can hand
+  // the picture to a model that cannot see it.
+  {
+    const senders = readdirSync("src", { recursive: true })
+      .filter((f) => typeof f === "string" && f.endsWith(".ts"))
+      .map((f) => join("src", f))
+      .filter((f) => statSync(f).isFile() && !f.includes("providers/"))
+      .map((f) => [f, stripComments(readFileSync(f, "utf8"))])
+      .filter(([, text]) => /\brunCompletion\s*\(/.test(text) && /type:\s*"image"/.test(text));
+    ok(`the scan found the call sites that send a picture (${senders.length})`, senders.length >= 1,
+      "an empty list would make the check below pass on nothing");
+    const unguarded = senders.filter(([, text]) => !/"vision"/.test(text)).map(([f]) => f);
+    ok("every routed call that sends a picture also REQUIRES vision", unguarded.length === 0, unguarded.join(", "));
+  }
+
+  ok(`the media types are the ones the app produces (${AI_IMAGE_MEDIA_TYPES.join(", ")})`,
+    AI_IMAGE_MEDIA_TYPES.includes("image/jpeg") && AI_IMAGE_MEDIA_TYPES.includes("image/png") &&
+      AI_IMAGE_MEDIA_TYPES.includes("image/webp") && AI_IMAGE_MEDIA_TYPES.length === 3);
 }
 
 console.log("\n== 6. #13 batch: what qualifies, and the discount applied once ==");

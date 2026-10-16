@@ -56,6 +56,7 @@ const COMPLETE = "src/lib/ai/providers/complete.ts";
 const PROVIDER_LOG = "src/lib/ai/providers/provider-log.ts";
 const CITATIONS = "src/lib/ai/providers/citations.ts";
 const RESEARCH = "src/lib/research/research.ts";
+const CREATE_JOB = "src/lib/jobs/handlers/create.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -697,6 +698,86 @@ const MUTANTS = [
     from: '      requires: ["server_web_search"],',
     to: "",
     expect: "every call that asks for the web also REQUIRES it",
+  },
+
+  // ------------------------------------------------------------------
+  // THE IMAGE DOOR (§5e), AND THE CAPABILITY THAT WAS DECLARED WITHOUT
+  // EXISTING.
+  //
+  // Every one of these answers a question about a picture using the
+  // words around it. The reply is fluent, it is about roughly the right
+  // subject, and the person cannot tell from reading it that the model
+  // never saw what they sent.
+  // ------------------------------------------------------------------
+  {
+    file: CATALOG,
+    name: "the catalog claims streaming again, so requires:[\"streaming\"] routes and comes back buffered",
+    from: 'const BASE: readonly AiCapability[] = ["tool_calling"];',
+    to: 'const BASE: readonly AiCapability[] = ["tool_calling", "streaming"];',
+    expect: "the catalog claims streaming",
+  },
+  {
+    file: CATALOG,
+    name: "every model is declared able to see, so a picture goes to a Llama that cannot",
+    from: "    cacheMinimumTokens: null,\n    tier: \"mid\",\n    capabilities: [...BASE],",
+    to: "    cacheMinimumTokens: null,\n    tier: \"mid\",\n    capabilities: [...BASE, \"vision\"],",
+    expect: "...and the two Groq models are the ones that cannot",
+  },
+  {
+    file: SHARED,
+    name: "a picture is flattened to the string \"undefined\" instead of refused",
+    from: "  const picture = content.find(isImageBlock);\n  if (picture) {",
+    to: "  const picture = content.find(isImageBlock);\n  if (false) {",
+    expect: "flattenContent REFUSES a picture",
+  },
+  {
+    file: SHARED,
+    name: "the adapter's last-resort refusal is dropped, so a provider with no vision answers about the text",
+    from: '  if (!providerSupports(provider, "vision") && imageBlocksOf(request).length > 0) {',
+    to: "  if (false) {",
+    expect: "groq refuses a request carrying a picture",
+  },
+  {
+    file: SHARED,
+    name: "imageBlocksOf looks only at the first message, so a picture in a later turn is invisible",
+    from: "  return request.messages.flatMap((m) =>",
+    to: "  return request.messages.slice(0, 0).flatMap((m) =>",
+    expect: "imageBlocksOf finds the picture in a message",
+  },
+  {
+    file: OPENAI,
+    name: "openai drops the picture and sends the words alone",
+    from: "  if (!blocks.some(isImageBlock)) return flattenContent(content);",
+    to: "  return flattenContent(content);\n  if (!blocks.some(isImageBlock)) return flattenContent(content);",
+    expect: "openai: the picture is sent as a part, not dropped",
+  },
+  {
+    file: OPENAI,
+    name: "openai sends the data URL without its media type, which the API rejects",
+    from: "image_url: { url: `data:${b.source.media_type};base64,${b.source.data}` }",
+    to: "image_url: { url: `data:;base64,${b.source.data}` }",
+    expect: "openai: ...as a base64 data URL carrying the media type",
+  },
+  {
+    file: GOOGLE,
+    name: "google sends snake_case mime_type, which Gemini ignores",
+    from: "{ inlineData: { mimeType: b.source.media_type, data: b.source.data } }",
+    to: "{ inlineData: { mime_type: b.source.media_type, data: b.source.data } }",
+    expect: "google: ...camelCase mimeType",
+  },
+  {
+    file: GOOGLE,
+    name: "google turns every text-only message into an array of parts, changing the bytes of every existing call",
+    from: "  if (typeof content === \"string\") return [{ text: content }];",
+    to: "  if (typeof content === \"string\") return [{ text: content }, { text: \"\" }];",
+    expect: "google: a text-only message is still exactly one text part",
+  },
+  {
+    file: CREATE_JOB,
+    name: "Create Anything stops requiring vision, so a picture can be sent to a model that cannot see",
+    from: '    attachmentImages.length > 0 ? ["tool_calling", "vision"] : ["tool_calling"];',
+    to: '    ["tool_calling"];',
+    expect: "every routed call that sends a picture also REQUIRES vision",
   },
 ];
 

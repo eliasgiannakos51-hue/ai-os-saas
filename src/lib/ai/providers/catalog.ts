@@ -74,9 +74,44 @@ export type CatalogModel = {
   capabilities: readonly AiCapability[];
 };
 
-/** What every text model here can do, so the per-model lists show only
- *  what is genuinely unusual about that model. */
-const BASE: readonly AiCapability[] = ["tool_calling", "streaming"];
+/**
+ * What every text model here can do, so the per-model lists show only
+ * what is genuinely unusual about that model.
+ *
+ * "streaming" LEFT THIS LIST ON 2026-10-16, and it is the only
+ * capability ever to leave it. All eleven rows claimed it and no adapter
+ * streams: anthropic.ts awaits one whole `messages.create`, and the
+ * three fetch adapters go through postJson, which does
+ * `await response.json()`. So `requires: ["streaming"]` passed
+ * resolveChain's filter, routed, and came back buffered — the router
+ * acting on a declaration that was false. Nothing asked for it yet, so
+ * nothing broke; the lie was waiting for the first caller, which would
+ * have been api/chat the day it migrated.
+ *
+ * With no row declaring it, that request now resolves to an empty chain
+ * and `kind: "unsupported"`, which is the true answer. The day an
+ * adapter can stream, the capability comes back here in the same commit
+ * — scripts/tests/ai-providers.test.mjs ties the two together BOTH WAYS,
+ * so neither half can move alone.
+ */
+const BASE: readonly AiCapability[] = ["tool_calling"];
+
+/**
+ * CAN THIS MODEL SEE A PICTURE. Per model, not per provider, because the
+ * answer differs inside a provider: Gemini's two rows can and Groq's two
+ * Llama rows cannot.
+ *
+ * MEASURED FROM DOCUMENTATION, NOT FROM A CALL (2026-10-16), the same
+ * standing as the prices of the three providers in
+ * UNVERIFIED_PRICE_PROVIDERS below: no key for them exists in this
+ * environment, so nothing here has been asked a question with a picture
+ * in it. What protects the user from a wrong entry is not this comment
+ * but the adapters: a provider with no vision row REFUSES a request
+ * carrying an image (refuseUnsupported in adapters/shared.ts) instead of
+ * dropping it and answering about the words — so a false "yes" here
+ * becomes a 400 from the vendor, and a false "no" becomes a provider
+ * skipped. Neither is an answer built from half the question.
+ */
 
 /**
  * ANTHROPIC. Prices come from lib/billing/model-pricing.ts, which is the
@@ -93,7 +128,7 @@ const ANTHROPIC_MODELS: CatalogModel[] = [
     outputPerMTok: 15,
     cacheMinimumTokens: 1024,
     tier: "mid",
-    capabilities: [...BASE, "prompt_caching", "server_web_search", "batch"],
+    capabilities: [...BASE, "prompt_caching", "server_web_search", "vision", "batch"],
   },
   {
     id: "claude-opus-4-6",
@@ -102,7 +137,7 @@ const ANTHROPIC_MODELS: CatalogModel[] = [
     outputPerMTok: 25,
     cacheMinimumTokens: 4096,
     tier: "large",
-    capabilities: [...BASE, "prompt_caching", "server_web_search", "batch"],
+    capabilities: [...BASE, "prompt_caching", "server_web_search", "vision", "batch"],
   },
   {
     // The "deep" agent depth (lib/agents/agent-depth.ts) asks for this id.
@@ -117,7 +152,7 @@ const ANTHROPIC_MODELS: CatalogModel[] = [
     outputPerMTok: 25,
     cacheMinimumTokens: 4096,
     tier: "large",
-    capabilities: [...BASE, "prompt_caching", "server_web_search", "batch"],
+    capabilities: [...BASE, "prompt_caching", "server_web_search", "vision", "batch"],
   },
   {
     id: "claude-haiku-4-5",
@@ -128,7 +163,7 @@ const ANTHROPIC_MODELS: CatalogModel[] = [
     // the reason cache-policy.ts exists.
     cacheMinimumTokens: 4096,
     tier: "small",
-    capabilities: [...BASE, "prompt_caching", "server_web_search", "batch"],
+    capabilities: [...BASE, "prompt_caching", "server_web_search", "vision", "batch"],
   },
 ];
 
@@ -146,7 +181,7 @@ const OPENAI_MODELS: CatalogModel[] = [
     outputPerMTok: 10,
     cacheMinimumTokens: 1024,
     tier: "large",
-    capabilities: [...BASE, "prompt_caching", "batch"],
+    capabilities: [...BASE, "prompt_caching", "vision", "batch"],
   },
   {
     id: "openai/gpt-5-mini",
@@ -155,7 +190,7 @@ const OPENAI_MODELS: CatalogModel[] = [
     outputPerMTok: 2,
     cacheMinimumTokens: 1024,
     tier: "small",
-    capabilities: [...BASE, "prompt_caching", "batch"],
+    capabilities: [...BASE, "prompt_caching", "vision", "batch"],
   },
   {
     id: "openai/gpt-4.1",
@@ -164,7 +199,7 @@ const OPENAI_MODELS: CatalogModel[] = [
     outputPerMTok: 8,
     cacheMinimumTokens: 1024,
     tier: "mid",
-    capabilities: [...BASE, "prompt_caching", "batch"],
+    capabilities: [...BASE, "prompt_caching", "vision", "batch"],
   },
 ];
 
@@ -182,7 +217,7 @@ const GOOGLE_MODELS: CatalogModel[] = [
     outputPerMTok: 10,
     cacheMinimumTokens: 2048,
     tier: "large",
-    capabilities: [...BASE, "prompt_caching"],
+    capabilities: [...BASE, "prompt_caching", "vision"],
   },
   {
     id: "google/gemini-2.5-flash",
@@ -191,7 +226,7 @@ const GOOGLE_MODELS: CatalogModel[] = [
     outputPerMTok: 2.5,
     cacheMinimumTokens: 1024,
     tier: "small",
-    capabilities: [...BASE, "prompt_caching"],
+    capabilities: [...BASE, "prompt_caching", "vision"],
   },
 ];
 

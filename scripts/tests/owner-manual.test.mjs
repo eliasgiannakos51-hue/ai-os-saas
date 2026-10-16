@@ -179,6 +179,7 @@ const FAILOVER_NAMES = {
   "src/lib/mission-agents.ts": "το Mission Control",
   "src/lib/jobs/handlers/file-ask.ts": "οι ερωτήσεις στα αρχεία",
   "src/lib/research/research.ts": "η Έρευνα",
+  "src/lib/jobs/handlers/create.ts": "το «Φτιάξε κάτι»",
 };
 const callers = [];
 (function walkSrc(dir) {

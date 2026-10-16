@@ -9,7 +9,7 @@ import {
   splitPromptTokens,
   wireModelId,
 } from "@/lib/ai/providers/adapters/shared";
-import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
+import { isImageBlock, type AdapterCall, type AdapterResponse, type AiContentBlock, type AiRequest, type AiToolCall } from "@/lib/ai/providers/types";
 
 /**
  * OPENAI, over the Chat Completions API.
@@ -50,6 +50,33 @@ type OpenAiResponse = {
   } | null;
 };
 
+/**
+ * A message's content in OpenAI's shape, which is a plain string when
+ * there is no picture and an array of parts when there is.
+ *
+ * THE STRING CASE IS KEPT ON PURPOSE. Every call this app makes today
+ * is text, and sending `[{type:"text",text}]` for all of them would
+ * change the bytes of every existing request to no end — the kind of
+ * change that is invisible until a provider treats the two differently.
+ *
+ * ORDER IS PRESERVED. The caller decides whether the picture comes
+ * before the question or after it, and for an image-plus-instruction
+ * prompt that order is part of the prompt.
+ *
+ * A BASE64 data URL, not a link. See AiImageBlock in types.ts for why
+ * there is no URL variant to translate.
+ */
+function openAiContent(content: AiRequest["messages"][number]["content"]): unknown {
+  if (typeof content === "string") return content;
+  const blocks = content as AiContentBlock[];
+  if (!blocks.some(isImageBlock)) return flattenContent(content);
+  return blocks.map((b) =>
+    isImageBlock(b)
+      ? { type: "image_url", image_url: { url: `data:${b.source.media_type};base64,${b.source.data}` } }
+      : { type: "text", text: b.text }
+  );
+}
+
 export async function callOpenAi(call: AdapterCall): Promise<AdapterResponse> {
   const { request } = call;
   refuseUnsupported("openai", request);
@@ -60,7 +87,7 @@ export async function callOpenAi(call: AdapterCall): Promise<AdapterResponse> {
     max_completion_tokens: request.maxTokens,
     messages: [
       ...(system ? [{ role: "system", content: system }] : []),
-      ...request.messages.map((m) => ({ role: m.role, content: flattenContent(m.content) })),
+      ...request.messages.map((m) => ({ role: m.role, content: openAiContent(m.content) })),
     ],
   };
   if (request.temperature !== undefined) body.temperature = request.temperature;

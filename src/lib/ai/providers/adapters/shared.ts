@@ -1,4 +1,5 @@
-import { AI_TRUNCATED_STOP_REASON, type AiRequest, type AiToolCall, type AiUsage } from "@/lib/ai/providers/types";
+import { AI_TRUNCATED_STOP_REASON, isImageBlock, type AiContentBlock, type AiImageBlock, type AiProvider, type AiRequest, type AiToolCall, type AiUsage } from "@/lib/ai/providers/types";
+import { providerSupports } from "@/lib/ai/providers/catalog";
 
 /**
  * What every adapter is, and the small amount they can share.
@@ -37,8 +38,41 @@ export function flattenSystem(request: AiRequest): string {
   return request.system.map((b) => b.text).join("\n\n");
 }
 
+/**
+ * A message as one string, for a body that has no notion of parts.
+ *
+ * IT REFUSES A PICTURE RATHER THAN SKIPPING ONE, and that line is the
+ * whole point of the function now. It used to be
+ * `content.map((b) => b.text).join()`, which on an image block yields
+ * the literal string "undefined" — the model would answer about the
+ * words alone, confidently, with a stray word in the prompt, and
+ * nothing anywhere would say a picture had been dropped. That is the
+ * failure refuseUnsupported exists to prevent for the web search, one
+ * field along.
+ *
+ * It throws rather than returns, because every caller of this is
+ * mid-way through building a request body and has nowhere to put an
+ * error. A ProviderHttpError(400) is classified bad_request, which does
+ * NOT fail over — correct here: handing the same picture to the next
+ * provider that cannot see is not resilience.
+ */
 export function flattenContent(content: AiRequest["messages"][number]["content"]): string {
-  return typeof content === "string" ? content : content.map((b) => b.text).join("\n\n");
+  if (typeof content === "string") return content;
+  const picture = content.find(isImageBlock);
+  if (picture) {
+    throw new ProviderHttpError(
+      400,
+      "a message carries an image and this body can only carry text; the request should have required \"vision\""
+    );
+  }
+  return content.map((b) => (b as { text: string }).text).join("\n\n");
+}
+
+/** Every image block in the request, in the order they were sent. */
+export function imageBlocksOf(request: AiRequest): AiImageBlock[] {
+  return request.messages.flatMap((m) =>
+    typeof m.content === "string" ? [] : (m.content as AiContentBlock[]).filter(isImageBlock)
+  );
 }
 
 /**
@@ -120,11 +154,24 @@ export function splitPromptTokens(totalPromptTokens: number, cachedTokens: numbe
  * is told, rather than three providers taking turns to answer without
  * searching.
  */
-export function refuseUnsupported(provider: string, request: AiRequest): void {
+export function refuseUnsupported(provider: AiProvider, request: AiRequest): void {
   if (request.serverWebSearch) {
     throw new ProviderHttpError(
       400,
       `${provider} has no server-side web search; refusing to answer a research request without it`
+    );
+  }
+  // THE SECOND THING THAT MUST NOT BE QUIETLY DROPPED. The router should
+  // never send a picture here — a request carrying one declares
+  // `requires: ["vision"]` and resolveChain rules out a provider with no
+  // vision model before any call. This is the refusal of last resort, in
+  // the same place and for the same reason as the search above: an
+  // answer about the words of a question whose subject was the picture
+  // is wrong in a way the person cannot see.
+  if (!providerSupports(provider, "vision") && imageBlocksOf(request).length > 0) {
+    throw new ProviderHttpError(
+      400,
+      `${provider} has no model that can see an image; refusing to answer about the text alone`
     );
   }
 }

@@ -123,7 +123,30 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
       system: [{ type: "text", text: askSystemPrompt({ language, filenames, truncated: context.truncated }) }],
       messages: [{ role: "user", content: `${context.passes[0].text}\n\nQuestion: ${question}` }],
     }, { userId: ctx.userId });
-    if (!outcome.ok) return { refund: true, result: { answered: false, reason: "ai_unavailable" } };
+    // THE PROVIDER NEVER ANSWERED, SO THE JOB FAILED — it did not finish.
+    //
+    // This RETURNED a finished job with `{ answered: false, reason:
+    // "ai_unavailable" }` between af1006b9 and 2026-10-16, and the
+    // change was a side effect rather than a decision: the line it
+    // replaced called the SDK directly, and the SDK THROWS on an
+    // overloaded provider. runCompletion returns instead, so the throw
+    // had to be written back by hand and was not.
+    //
+    // Two things went with it. The reader lost the sentence that says
+    // nothing was charged — components/files/failure-words.ts reaches it
+    // through askFailure(), which needs a FAILED job to know that is
+    // what happened, so both screens fell through to a bare "the
+    // question was not answered". And every provider outage was filed in
+    // ai_jobs as a job that finished, so anything counting failures saw
+    // none. Caught by scripts/tests/file-pages.prodtest.mjs, whose
+    // «after the model was really asked» check reads the row's status.
+    //
+    // run-job.ts's failJob gives the hold back before it writes the row,
+    // so the sentence it unlocks is true. `refund: true` is for work
+    // that RAN and produced nothing worth charging for — the two
+    // no_readable_files returns above — not for a call that never
+    // landed.
+    if (!outcome.ok) throw new Error("The AI service did not answer this question.");
     ctx.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
     answer = textOf(outcome);
   } else {

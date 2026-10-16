@@ -273,7 +273,11 @@ for (const l of favLinks) {
 // app/onboarding/page.tsx.
 // 64 -> 65 (2026-10-08): the Translate dialog (package 28) asks
 // /api/translate?kind=&id=&target= for the price, read by that route's GET.
-const DEEP_LINK_FLOOR = 65;
+// 65 -> 66 (2026-10-15): the Chats page asks
+// /api/conversations/search?q= for the conversations whose MESSAGES
+// match, read by that route's GET — the titles are filtered in the
+// browser and only this half needs the server.
+const DEEP_LINK_FLOOR = 66;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

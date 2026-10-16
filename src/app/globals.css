@@ -297,6 +297,18 @@ body {
      /dashboard/settings. Three lists wrote the same outline inline;
      declared here it is one decision, and the border count went down
      when the second list of them was added (design-density.test.mjs). */
+  /* THE PANEL WITH A FRAME, DECLARED ONCE. Three places in the Chats
+     work draw the same thing — the search box, the bar that appears
+     when rows are ticked, and the «⋯» menu — and written inline that is
+     three more bare `border` tokens against the ceiling in
+     scripts/tests/design-density.test.mjs. The ceiling exists so that a
+     new screen pays for its frames by naming them here instead of
+     repeating them, which is what the three rounds before this one did.
+     Same token as .surface-tight, plus the outline it does not have. */
+  .panel-frame {
+    @apply rounded-card border border-divider bg-panel;
+  }
+
   .chip-link {
     @apply inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-xs
            text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground;

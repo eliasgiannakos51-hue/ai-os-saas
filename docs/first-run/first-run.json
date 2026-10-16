@@ -1,6 +1,6 @@
 {
-  "total": 4277,
-  "onPath": 619,
+  "total": 4302,
+  "onPath": 640,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,13 +16,13 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 377
+      "count": 379
     },
     {
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 217
+      "count": 236
     }
   ],
   "screens": [
@@ -2509,6 +2509,12 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.rail.allConversations",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.rail.allTools",
           "depth": 1,
           "tier": 2,
@@ -2516,6 +2522,12 @@
         },
         {
           "key": "sidebar.rail.chat",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.rail.chats",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -2677,6 +2689,108 @@
           "file": "src/components/credits/low-credits-banner.tsx"
         },
         {
+          "key": "dashboard.chat.deleteConfirm",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.deleteFailed",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.groupPinned",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.moved",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.moveFailed",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.moveToProject",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.noConversations",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.noProjects",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.pin",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.pinError",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.pinLimitReached",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.projectFull",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.rename",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.renameError",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.selectOne",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.undo",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "dashboard.chat.unpin",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
           "key": "language.label",
           "depth": 2,
           "tier": 3,
@@ -2687,6 +2801,18 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/i18n/language-selector.tsx"
+        },
+        {
+          "key": "module.actionsFor",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
+        },
+        {
+          "key": "module.delete",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/dashboard/conversation-rows.tsx"
         },
         {
           "key": "pwa.install",
@@ -2759,6 +2885,24 @@
           "depth": 2,
           "tier": 3,
           "file": "src/components/pwa/install-invitation.tsx"
+        },
+        {
+          "key": "dashboard.chat.renameLabel",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/chat/inline-title.tsx"
+        },
+        {
+          "key": "favorites.add",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/favorites/favorite-button.tsx"
+        },
+        {
+          "key": "favorites.remove",
+          "depth": 3,
+          "tier": 3,
+          "file": "src/components/favorites/favorite-button.tsx"
         }
       ]
     },
@@ -3635,24 +3779,6 @@
           "depth": 4,
           "tier": 3,
           "file": "src/components/entity-links/linked-entities.tsx"
-        },
-        {
-          "key": "favorites.add",
-          "depth": 4,
-          "tier": 3,
-          "file": "src/components/favorites/favorite-button.tsx"
-        },
-        {
-          "key": "favorites.remove",
-          "depth": 4,
-          "tier": 3,
-          "file": "src/components/favorites/favorite-button.tsx"
-        },
-        {
-          "key": "module.delete",
-          "depth": 4,
-          "tier": 3,
-          "file": "src/components/delete-button.tsx"
         },
         {
           "key": "module.deleteConfirm",

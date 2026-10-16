@@ -303,7 +303,15 @@ console.log(
 // 290 -> 291 on 2026-10-15: provider-text.test.mjs is a new gate and
 // provider-text.mutation.mjs covers it, so both the denominator and the
 // covered count grew by one. Read off the run with `git stash -u`.
-const RATCHET = 291;
+// 291 -> 292 on 2026-10-16, on the merge of the router branch into this
+// one. Two chains of readings meet here: the router's (282 -> 291) and
+// this branch's (282 -> 288). They are NOT added: five of the six each
+// side counted are the SAME five — #279/#281/#282/#286 landing on main
+// that afternoon — so the arithmetic that looks right (291 + 6) is the
+// one that double-counts. The merged tree adds exactly one suite the
+// router branch did not have, sidebar-chats.mutation.mjs. Measured on
+// the merged tree, not reasoned to: declared=291 measured=292.
+const RATCHET = 292;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

@@ -1,8 +1,8 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **640 strings**. The whole product is 4302, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?
 
 Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.
 
-## Tier 2 — The labels — skim these (377)
+## Tier 2 — The labels — skim these (379)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2192,6 +2192,12 @@ Projets de sites
 
 Flux de travail
 
+**`sidebar.rail.allConversations`**
+
+> EN — All conversations
+
+Toutes les discussions
+
 **`sidebar.rail.allTools`**
 
 > EN — All tools
@@ -2203,6 +2209,12 @@ Tous les outils
 > EN — Chat
 
 Discussion
+
+**`sidebar.rail.chats`**
+
+> EN — Chats
+
+Discussions
 
 **`sidebar.rail.coding`**
 
@@ -2446,7 +2458,7 @@ Voir l'historique des crédits
 
 Réessayer
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (236)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2820,6 +2832,108 @@ Plus de crédits ce mois-ci
 
 Recharger
 
+**`dashboard.chat.deleteConfirm`**
+
+> EN — Delete “{title}”? You'll have a few seconds to undo it.
+
+Supprimer « {title} » ? Vous aurez quelques secondes pour annuler.
+
+**`dashboard.chat.deleteFailed`**
+
+> EN — That conversation wasn't deleted. It is still here.
+
+Cette discussion n'a pas été supprimée. Elle est toujours là.
+
+**`dashboard.chat.groupPinned`**
+
+> EN — Pinned
+
+Épinglées
+
+**`dashboard.chat.moved`**
+
+> EN — Moved to {project}.
+
+Déplacée vers {project}.
+
+**`dashboard.chat.moveFailed`**
+
+> EN — That didn't move. Try again.
+
+Le déplacement a échoué. Réessayez.
+
+**`dashboard.chat.moveToProject`**
+
+> EN — Move to project
+
+Déplacer vers un projet
+
+**`dashboard.chat.noConversations`**
+
+> EN — No conversations yet.
+
+Aucune discussion pour l'instant.
+
+**`dashboard.chat.noProjects`**
+
+> EN — No projects yet.
+
+Aucun projet pour l'instant.
+
+**`dashboard.chat.pin`**
+
+> EN — Pin
+
+Épingler
+
+**`dashboard.chat.pinError`**
+
+> EN — The pin didn't save. Try again.
+
+L'épinglage n'a pas été enregistré. Réessayez.
+
+**`dashboard.chat.pinLimitReached`**
+
+> EN — You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.
+
+Vous avez épinglé {limit} conversations, le maximum que votre offre garde en haut. Détachez-en une pour épingler celle-ci.
+
+**`dashboard.chat.projectFull`**
+
+> EN — That project already holds {limit} things, which is the most it keeps.
+
+Ce projet contient déjà {limit} éléments, son maximum.
+
+**`dashboard.chat.rename`**
+
+> EN — Rename
+
+Renommer
+
+**`dashboard.chat.renameError`**
+
+> EN — The new name didn't save — the old one is still there.
+
+Le nouveau nom n'a pas été enregistré — l'ancien reste.
+
+**`dashboard.chat.selectOne`**
+
+> EN — Select {title}
+
+Sélectionner « {title} »
+
+**`dashboard.chat.undo`**
+
+> EN — Undo
+
+Annuler
+
+**`dashboard.chat.unpin`**
+
+> EN — Unpin
+
+Désépingler
+
 **`language.label`**
 
 > EN — Language
@@ -2831,6 +2945,18 @@ Langue
 > EN — Couldn't save your language — nothing was changed.
 
 Impossible d'enregistrer la langue — rien n'a été modifié.
+
+**`module.actionsFor`**
+
+> EN — Actions for {name}
+
+Actions pour {name}
+
+**`module.delete`**
+
+> EN — Delete
+
+Supprimer
 
 **`pwa.install`**
 
@@ -2903,6 +3029,24 @@ Pas maintenant
 > EN — Show me how
 
 Montrez-moi comment
+
+**`dashboard.chat.renameLabel`**
+
+> EN — New name for "{title}"
+
+Nouveau nom pour « {title} »
+
+**`favorites.add`**
+
+> EN — Add to favorites
+
+Ajouter aux favoris
+
+**`favorites.remove`**
+
+> EN — Remove from favorites
+
+Retirer des favoris
 
 ### first result
 
@@ -3625,24 +3769,6 @@ Dissocier
 > EN — Unlink {name}
 
 Dissocier {name}
-
-**`favorites.add`**
-
-> EN — Add to favorites
-
-Ajouter aux favoris
-
-**`favorites.remove`**
-
-> EN — Remove from favorites
-
-Retirer des favoris
-
-**`module.delete`**
-
-> EN — Delete
-
-Supprimer
 
 **`module.deleteConfirm`**
 

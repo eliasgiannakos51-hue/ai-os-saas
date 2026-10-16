@@ -52,10 +52,11 @@ const MUTANTS = [
     // RE-ANCHORED 2026-09-23 (46 -> 47) when /dashboard/meetings landed,
     // and 2026-10-02 (47 -> 48) when /dashboard/tools did, and
     // 2026-10-04 (48 -> 49) when /dashboard/activity did, and
-    // 2026-10-08 (49 -> 50) when /dashboard/games did.
+    // 2026-10-08 (49 -> 50) when /dashboard/games did, and 2026-10-15
+    // (50 -> 51) when /dashboard/chats did.
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    50 pages instead of 8, and the four components below",
+    from: "                    51 pages instead of 8, and the four components below",
     to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

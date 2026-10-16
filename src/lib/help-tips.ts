@@ -131,6 +131,17 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that this page is the only way to open a tool",
   },
   {
+    id: "chats",
+    file: "src/app/dashboard/chats/page.tsx",
+    keyPrefix: "help.chats",
+    // The search reads the titles AND what was said, which a list of
+    // names does not imply — and it reads the newest 400 messages, not
+    // all of them. Somebody who searches a word they said last year,
+    // finds nothing, and concludes the conversation is gone has been
+    // misled by a bound nobody told them about.
+    corrects: "that searching inside the conversations reads every message ever sent",
+  },
+  {
     id: "agents",
     article: "create-agent",
     file: "src/app/dashboard/agents/page.tsx",

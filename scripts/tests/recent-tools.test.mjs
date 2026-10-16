@@ -138,7 +138,16 @@ check("a page that is none of them lights nothing", act("/somewhere") === "null"
 
 console.log("\n== 5. the sidebar draws exactly that, and nothing else ==");
 const S = stripComments(readFileSync("src/components/dashboard/sidebar.tsx", "utf8"));
-check("the fixed rows come from the one constant", /\{RAIL_ROWS\.map\(\(r\) => row\(r\.href, t\(`rail\.\$\{r\.key\}`\)/.test(S));
+// RE-ANCHORED 2026-10-15. The rows are still one constant — railRows()
+// is RAIL_ROWS.map with the third entry swapped when `chats-page` is on
+// (lib/nav/rail.ts) — but the sidebar now draws `rows`, the array that
+// function returned, rather than RAIL_ROWS itself. The claim is
+// unchanged and sidebar-chats.test.mjs holds the half this cannot see:
+// that the two rails differ in exactly one row.
+check(
+  "the fixed rows come from the one constant",
+  /\{rows\.map\(\(r\) => row\(r\.href, t\(`rail\.\$\{r\.key\}`\)/.test(S) && /railRows\(chatsPage\)/.test(S)
+);
 check("no group of tools is drawn as rows", !/MAIN_SIDEBAR_GROUPS\)\.map|renderGroup|groups\.map/.test(S));
 check("Recent tools, and its heading, only when there is something in it", /\{list\.length > 0 && \(/.test(S));
 check("the list is the server's, not the browser's", !/localStorage\.(get|set)Item\(\s*["'`]ionexa\.recentTools/.test(S) && /recent = \[\]/.test(S));
@@ -161,18 +170,30 @@ check(
   "...and feeds the rule only those, never page opens",
   /const events = \[\.\.\.completionEvents\(settled\.data \?\? \[\]\), \.\.\.savedEvents\(saved\.data \?\? \[\]\)\];/.test(L)
 );
-check("and hands the result to the sidebar", /<Sidebar [^>]*recent=\{recent\}[^>]*\/>/.test(L));
+// The props outgrew one line when the conversations gained their
+// actions, so the tag spans several — `[^>]*` stopped at the newline.
+check("and hands the result to the sidebar", /<Sidebar[\s\S]{0,400}recent=\{recent\}/.test(L));
 
 // RECENT CONVERSATIONS, the sidebar's seventh row (ΣΥΣΤΗΜΑ DESIGN §3).
 check(
   "the layout reads the latest conversations through the person's own session",
-  /supabase\s*\.from\("chat_conversations"\)\s*\.select\("id, title"\)\s*\.eq\("user_id", user\.id\)\s*\.order\("updated_at", \{ ascending: false \}\)\s*\.limit\(RECENT_CONVERSATIONS\)/.test(L),
+  // `is_pinned` and `updated_at` joined the two columns on 2026-10-15:
+  // the pinned ones group above the rest and the Chats page shows when
+  // each last changed. The shape this check is about — the person's own
+  // session, their own rows, newest first, bounded by the one constant
+  // — is unchanged, and the constant moved 5 -> 15 in the same round.
+  /supabase\s*\.from\("chat_conversations"\)\s*\.select\("id, title, is_pinned, updated_at"\)\s*\.eq\("user_id", user\.id\)\s*\.order\("updated_at", \{ ascending: false \}\)\s*\.limit\(RECENT_CONVERSATIONS\)/.test(L),
 );
 check("...a failed read leaves the list empty rather than failing Recent tools", /if \(!chats\.error\) \{\s*conversations = /.test(L));
-check("...and hands them to the sidebar", /<Sidebar [^>]*conversations=\{conversations\}/.test(L));
+check("...and hands them to the sidebar", /<Sidebar[\s\S]{0,400}conversations=\{conversations\}/.test(L));
+// The row moved into components/dashboard/conversation-rows.tsx when it
+// stopped being a link and became a thing you can rename, pin, file and
+// delete. The sidebar hands it the list; the push lives there.
 check(
   "each conversation opens that conversation",
-  /`\/dashboard\/chat\?c=\$\{c\.id\}`/.test(S),
+  /router\.push\(`\/dashboard\/chat\?c=\$\{encodeURIComponent\(row\.id\)\}`\)/.test(
+    stripComments(readFileSync("src/components/dashboard/conversation-rows.tsx", "utf8"))
+  ) && /<ConversationRows/.test(S),
 );
 check("...with no heading while there is none, and none in the narrow sidebar", /\{conversations\.length > 0 && !collapsed && \(/.test(S));
 check(

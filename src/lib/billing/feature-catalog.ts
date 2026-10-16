@@ -460,8 +460,14 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "ask",
     minPlan: "free",
     sidebar: ["/dashboard/chat"],
-    pages: ["chat"],
-    routes: ["chat", "chat/messages/[id]/rating", "conversations/[id]"],
+    // `chats` (the list of every conversation) and
+    // `conversations/search` (the half of its search that has to ask the
+    // server, because the messages are not on the page) belong to Chat
+    // and to no plan of their own: reading and tidying what you already
+    // said is not a feature anybody is sold. minPlan stays `free` and
+    // `charges` stays about the MESSAGES, which is what costs.
+    pages: ["chat", "chats"],
+    routes: ["chat", "chat/messages/[id]/rating", "conversations/[id]", "conversations/search"],
     charges: true,
     enforcedIn: "src/app/api/chat/route.ts",
     enforcedSymbol: "resolveEffectivePlan",

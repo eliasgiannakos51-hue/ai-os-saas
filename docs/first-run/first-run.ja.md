@@ -1,8 +1,8 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **640 strings**. The whole product is 4302, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。
 
-## Tier 2 — The labels — skim these (377)
+## Tier 2 — The labels — skim these (379)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2192,6 +2192,12 @@ DevOps
 
 ワークフロー
 
+**`sidebar.rail.allConversations`**
+
+> EN — All conversations
+
+すべての会話
+
 **`sidebar.rail.allTools`**
 
 > EN — All tools
@@ -2201,6 +2207,12 @@ DevOps
 **`sidebar.rail.chat`**
 
 > EN — Chat
+
+チャット
+
+**`sidebar.rail.chats`**
+
+> EN — Chats
 
 チャット
 
@@ -2446,7 +2458,7 @@ credits の履歴を見る
 
 もう一度試す
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (236)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2820,6 +2832,108 @@ AI サービスが現在応答していません。
 
 補充
 
+**`dashboard.chat.deleteConfirm`**
+
+> EN — Delete “{title}”? You'll have a few seconds to undo it.
+
+「{title}」を削除しますか？数秒のあいだ元に戻せます。
+
+**`dashboard.chat.deleteFailed`**
+
+> EN — That conversation wasn't deleted. It is still here.
+
+その会話は削除されませんでした。まだここにあります。
+
+**`dashboard.chat.groupPinned`**
+
+> EN — Pinned
+
+ピン留め
+
+**`dashboard.chat.moved`**
+
+> EN — Moved to {project}.
+
+{project} へ移動しました。
+
+**`dashboard.chat.moveFailed`**
+
+> EN — That didn't move. Try again.
+
+移動できませんでした。もう一度お試しください。
+
+**`dashboard.chat.moveToProject`**
+
+> EN — Move to project
+
+プロジェクトへ移動
+
+**`dashboard.chat.noConversations`**
+
+> EN — No conversations yet.
+
+まだ会話がありません。
+
+**`dashboard.chat.noProjects`**
+
+> EN — No projects yet.
+
+プロジェクトはまだありません。
+
+**`dashboard.chat.pin`**
+
+> EN — Pin
+
+ピン留め
+
+**`dashboard.chat.pinError`**
+
+> EN — The pin didn't save. Try again.
+
+ピン留めを保存できませんでした。もう一度お試しください。
+
+**`dashboard.chat.pinLimitReached`**
+
+> EN — You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.
+
+ピン留めは {limit} 件までで、いまのプランの上限です。ひとつ解除してから、こちらをピン留めしてください。
+
+**`dashboard.chat.projectFull`**
+
+> EN — That project already holds {limit} things, which is the most it keeps.
+
+そのプロジェクトはすでに {limit} 件を保持しており、これが上限です。
+
+**`dashboard.chat.rename`**
+
+> EN — Rename
+
+名前を変更
+
+**`dashboard.chat.renameError`**
+
+> EN — The new name didn't save — the old one is still there.
+
+新しい名前を保存できませんでした。前の名前のままです。
+
+**`dashboard.chat.selectOne`**
+
+> EN — Select {title}
+
+「{title}」を選択
+
+**`dashboard.chat.undo`**
+
+> EN — Undo
+
+元に戻す
+
+**`dashboard.chat.unpin`**
+
+> EN — Unpin
+
+ピン留めを解除
+
 **`language.label`**
 
 > EN — Language
@@ -2831,6 +2945,18 @@ AI サービスが現在応答していません。
 > EN — Couldn't save your language — nothing was changed.
 
 言語を保存できませんでした。変更は行われていません。
+
+**`module.actionsFor`**
+
+> EN — Actions for {name}
+
+{name} の操作
+
+**`module.delete`**
+
+> EN — Delete
+
+削除
 
 **`pwa.install`**
 
@@ -2903,6 +3029,24 @@ Ionexa をホーム画面に追加
 > EN — Show me how
 
 手順を見る
+
+**`dashboard.chat.renameLabel`**
+
+> EN — New name for "{title}"
+
+「{title}」の新しい名前
+
+**`favorites.add`**
+
+> EN — Add to favorites
+
+お気に入りに追加
+
+**`favorites.remove`**
+
+> EN — Remove from favorites
+
+お気に入りから削除
 
 ### first result
 
@@ -3625,24 +3769,6 @@ AI に質問
 > EN — Unlink {name}
 
 {name} のリンクを解除
-
-**`favorites.add`**
-
-> EN — Add to favorites
-
-お気に入りに追加
-
-**`favorites.remove`**
-
-> EN — Remove from favorites
-
-お気に入りから削除
-
-**`module.delete`**
-
-> EN — Delete
-
-削除
 
 **`module.deleteConfirm`**
 

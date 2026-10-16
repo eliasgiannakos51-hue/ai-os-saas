@@ -219,6 +219,17 @@ const supa = http.createServer((req, res) => {
         // The sidebar's Recent tools count SAVED work from here
         // (src/lib/nav/recent-tools.ts); an account with none reads empty.
         "search_index",
+        // EVERY DASHBOARD PAGE READS THE SWITCHES, twice in one
+        // Promise.all (src/app/dashboard/layout.tsx — switchedOnFor and
+        // isFeatureOn("chats-page")). This allowlist was last widened on
+        // 2026-10-05 and the layout began reading the table on 2026-10-08,
+        // so from then every render 500'd on the switch read and the
+        // product correctly recorded a production error — which is what
+        // section 8's mock-hygiene checks were reporting. Empty is the
+        // truthful answer for a database with no row: src/lib/flags/flags.ts
+        // then falls back to each switch's default, which is exactly what
+        // the failed read already produced, so no assertion above moves.
+        "feature_flags",
         // The 13 classifier modules the shell scans.
         "ai_jobs", "security_check_log", "website_versions", "credit_transactions",
         "ideas", "competitors", "research", "finance_entries", "learning_entries", "trades",

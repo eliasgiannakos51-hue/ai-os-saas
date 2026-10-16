@@ -257,7 +257,20 @@ export function ConversationRows({
     const isActive = row.id === activeId;
     const title = title0;
     return (
-      <div key={row.id} className="group/row relative flex items-center" data-testid="conversation-row">
+      // WHICH CONVERSATION THIS ROW OPENS, in the DOM. The row stopped
+      // being an <a href> when the «⋯» menu arrived: a link navigates on
+      // the click the browser fires at the end of a long press, which is
+      // the press that opens the menu. So the href that used to say which
+      // conversation a row was for is gone, and scripts/tests/
+      // sidebar-density.prodtest.mjs — which checks that the newest
+      // conversations are listed and that each opens ITSELF — had nothing
+      // left to read and reported zero rows at every width.
+      <div
+        key={row.id}
+        className="group/row relative flex items-center"
+        data-testid="conversation-row"
+        data-conversation-id={row.id}
+      >
         {selectable && (
           <input
             type="checkbox"

@@ -43,6 +43,17 @@ const supa = await startMockSupabase({
   port: 54365,
   tableRows: {
     user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }],
+    // THE ONE SWITCH THIS SUITE HAS TO PIN, and it is not the one it
+    // tests. This file drives the conversation drawer INSIDE Chat, and
+    // #293 stopped drawing that drawer and its toggle whenever
+    // `chats-page` is on — rightly, because the sidebar's own rows do
+    // the job now and ΣΥΣΤΗΜΑ DESIGN §3 allows one sidebar per screen.
+    // `chats-page` is staff-default and this server's account IS the
+    // test account, so without this row the button the suite presses
+    // does not exist. Pinned off here, for the test, not for anybody.
+    // When the drawer is deleted for good, this block moves to the
+    // rail's «New» row and this row goes with it.
+    feature_flags: [{ key: "chats-page", audience: "off" }],
   },
 });
 

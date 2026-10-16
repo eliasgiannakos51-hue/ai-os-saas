@@ -165,6 +165,38 @@ const MUTANTS = [
     to: '      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
     expect: "before the mutation suites",
   },
+
+  // ------------------------------------------------------------------
+  // ONE ANSWER PER PUSH, AND NO BRANCH CANCELS ANOTHER'S (§5).
+  // ------------------------------------------------------------------
+  {
+    // The state of 2026-10-16, watched cancelling a different branch's
+    // checks: for a deployment_status event github.ref is the same for
+    // every branch, so one preview deployment killed another branch's
+    // run and the pull request showed a cancelled job with nothing in
+    // its diff to explain it.
+    name: "the concurrency group forgets the event, so one branch's deploy cancels another's checks",
+    file: WF,
+    from: "  group: verify-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref }}",
+    to: "  group: verify-${{ github.ref }}",
+    expect: "the concurrency group distinguishes the event",
+  },
+  {
+    name: "the hour-long job runs again on every deployment report",
+    file: WF,
+    from: "    if: github.event_name != 'deployment_status'\n    runs-on: ubuntu-latest\n    # THE MUTATION SUITES ARE MOST OF THIS JOB.",
+    to: "    runs-on: ubuntu-latest\n    # THE MUTATION SUITES ARE MOST OF THIS JOB.",
+    expect: "the heavy jobs skip a deployment report",
+  },
+  {
+    // THE OTHER HALF, so the guard above cannot become a way to turn CI
+    // off: the event has to still reach the job it exists for.
+    name: "the bot job stops listening for the deploy it exists for",
+    file: WF,
+    from: "  bot-on-deploy:",
+    to: "  bot-on-deploy-disabled:",
+    expect: "while the bot job still runs on one",
+  },
 ];
 
 function runGate() {

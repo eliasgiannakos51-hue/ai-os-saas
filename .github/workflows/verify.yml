@@ -59,12 +59,34 @@ permissions:
 concurrency:
   # A second push to the same branch cancels the first: the answer that
   # matters is the one about the current head.
-  group: verify-${{ github.ref }}
+  #
+  # THE EVENT NAME IS PART OF THE GROUP, AND IT WAS NOT UNTIL 2026-10-16.
+  # `github.ref` is the branch for a push, `refs/pull/N/merge` for a
+  # pull_request — and for a deployment_status it is neither: Vercel
+  # reports a deployment and the ref GitHub hands this workflow is the
+  # same one for EVERY branch. So one branch's preview deployment
+  # cancelled another branch's checks. It was watched happening: the
+  # vision branch's deployment_status run at 07:07 cancelled the sidebar
+  # branch's run (38853807995), which had been re-run deliberately, and
+  # that pull request then showed a cancelled check nobody could explain
+  # from its own diff.
+  #
+  # With the event name in the group a deployment_status run can only
+  # cancel another deployment_status run, which is the behaviour the
+  # sentence above describes and the only one anybody wants.
+  group: verify-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
     name: typecheck · lint · build · mutations · database
+    # NOT ON A DEPLOYMENT REPORT. `deployment_status` is here for
+    # bot-on-deploy below — Vercel emits one per deployment, several per
+    # deployment in fact (queued, building, ready). Without this line
+    # every one of them started this hour-long job again on bytes that
+    # had already been checked by the push and the pull_request, which is
+    # the same answer paid for three times.
+    if: github.event_name != 'deployment_status'
     runs-on: ubuntu-latest
     # THE MUTATION SUITES ARE MOST OF THIS JOB. Measured on 2026-10-03:
     # 201 suites took 38.5 minutes (run of 30908b2d) and 204 took more than
@@ -235,6 +257,9 @@ jobs:
   # five hundred assertions for a single `next build`.
   prodtest-smoke:
     name: browser smoke (every push)
+    # Same reason as verify above: its name says "every push", and a
+    # deployment report is not one.
+    if: github.event_name != 'deployment_status'
     runs-on: ubuntu-latest
     # One `next build` plus thirty-nine routes at four widths. If it has
     # not finished in twenty-five minutes something is wedged.

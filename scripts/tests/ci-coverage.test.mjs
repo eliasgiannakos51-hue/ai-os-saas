@@ -369,5 +369,55 @@ console.log("== 4. the build gate needs no secret ==");
     "run-dbtests.mjs exits 0 when no Postgres is reachable");
 }
 
+console.log("== 5. one answer per push, and no branch cancels another's ==");
+{
+  // WHAT WENT WRONG, watched happening on 2026-10-16. The concurrency
+  // group was `verify-${{ github.ref }}`. For a push that is the
+  // branch; for a pull_request it is refs/pull/N/merge; for a
+  // deployment_status — which Vercel emits several times per preview
+  // deployment, on every branch — it is NEITHER, and the ref GitHub
+  // hands the workflow is the same one whatever branch deployed. So the
+  // vision branch's preview cancelled the sidebar branch's checks, and
+  // that pull request showed a cancelled job with nothing in its own
+  // diff to explain it.
+  //
+  // The same event list also ran the hour-long `verify` job three times
+  // on identical bytes: once for the push, once for the pull_request,
+  // and once more for each deployment report.
+  const group = /concurrency:[\s\S]{0,1200}?group:\s*(.+)/.exec(wf)?.[1] ?? "";
+  check("the concurrency group distinguishes the event",
+    /github\.event_name/.test(group), group.trim());
+  check("...and still distinguishes the branch",
+    /github\.ref|head\.ref/.test(group), group.trim());
+
+  // THE TWO HEAVY JOBS DO NOT RUN ON A DEPLOYMENT REPORT. Ranged over
+  // the jobs rather than written as two names: a third heavy job added
+  // later would be caught by the same line.
+  const HEAVY = ["verify", "prodtest-smoke"];
+  // COMMENTS STRIPPED FIRST, and this line is here because the mutation
+  // suite caught its absence on the first run. The job carries a comment
+  // saying WHY it skips a deployment report, so a block that still held
+  // the comment matched `deployment_status` with the `if:` deleted —
+  // the gate would have gone on passing while the hour-long job ran
+  // three times again. CLAUDE.md: "if I deleted every comment in the
+  // target, would this still pass?"
+  const yamlCode = (text) => text.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
+  const jobBlock = (name) => {
+    const at = wf.indexOf(`\n  ${name}:`);
+    if (at < 0) return "";
+    const next = wf.slice(at + 1).search(/\n  [a-z][a-z-]*:\n/);
+    return yamlCode(next < 0 ? wf.slice(at) : wf.slice(at, at + 1 + next));
+  };
+  const stillRunning = HEAVY.filter((n) => !/deployment_status/.test(jobBlock(n)));
+  check(`the heavy jobs skip a deployment report (${HEAVY.length} checked)`,
+    HEAVY.length >= 2 && stillRunning.length === 0,
+    stillRunning.join(", ") || "one of them has no deployment_status guard");
+  // AND THE JOB THAT EVENT EXISTS FOR STILL RUNS ON IT, which is the
+  // half that stops the guard above from being a way to disable CI.
+  check("...while the bot job still runs on one",
+    /deployment_status/.test(jobBlock("bot-on-deploy")),
+    "the event would then be received by nothing at all");
+}
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) { for (const f of failures) console.log(`  - ${f}`); process.exit(1); }

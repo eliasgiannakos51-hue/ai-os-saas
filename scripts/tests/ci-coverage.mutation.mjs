@@ -29,6 +29,7 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/ci-coverage.test.mjs";
 const PKG = "package.json";
 const WF = ".github/workflows/verify.yml";
+const ALERT = ".github/scripts/ci-red-issue.cjs";
 
 const BUILD = '"build": "node scripts/apply-function-limits.mjs && next build"';
 
@@ -196,6 +197,77 @@ const MUTANTS = [
     from: "  bot-on-deploy:",
     to: "  bot-on-deploy-disabled:",
     expect: "while the bot job still runs on one",
+  },
+
+  // --------------------------------------------------------------------
+  // THE ALARM THAT NEVER RESET (section 6). Each of these puts back one
+  // of the three faults that left 33 ci-red issues open with one of them
+  // real, measured 2026-10-16.
+  // --------------------------------------------------------------------
+  {
+    // THE EXPENSIVE ONE. listForRepo returns a page and no hint there
+    // are more, so once ten were open the matching issue was invisible
+    // and a duplicate was filed: #280 and #302 are both "CI red on
+    // main". The gate must notice by OPENING A DUPLICATE, not by
+    // reading the number 100.
+    name: "the lookup reads one page again, so a duplicate issue is filed",
+    file: ALERT,
+    from: [
+      "  return github.paginate(github.rest.issues.listForRepo, {",
+      "    owner: context.repo.owner,",
+      "    repo: context.repo.repo,",
+      '    state: "open",',
+      '    labels: "ci-red",',
+      "    per_page: 100,",
+      "  });",
+    ].join("\n"),
+    to: [
+      "  return (await github.rest.issues.listForRepo({",
+      "    owner: context.repo.owner,",
+      "    repo: context.repo.repo,",
+      '    state: "open",',
+      '    labels: "ci-red",',
+      "    per_page: 10,",
+      "  })).data;",
+    ].join("\n"),
+    expect: "with 30 open issues the matching one is still found",
+  },
+  {
+    name: "green closes only the first match, leaving the duplicates open forever",
+    file: ALERT,
+    from: "  for (const issue of matching) {",
+    to: "  for (const issue of matching.slice(0, 1)) {",
+    expect: "green closes every open issue for the ref",
+  },
+  {
+    name: "the title goes back to reading context.ref, so some events name no branch",
+    file: ALERT,
+    from: "  return `CI red on ${refName(context)}`;",
+    to: "  return `CI red on ${String(context.ref || \"\").replace(\"refs/heads/\", \"\")}`;",
+    expect: "no event shape produces a nameless issue",
+  },
+  {
+    name: "the all-clear never runs, so the tracker only ever grows",
+    file: WF,
+    from: "  all-clear:",
+    to: "  all-clear-disabled:",
+    expect: "there is an all-clear job at all",
+  },
+  {
+    // THE TWO HAVE TO WATCH THE SAME JOBS or CI reads as green while a
+    // job the alert counts is still red.
+    name: "the all-clear stops watching the nightly, so a red nightly closes its own issue",
+    file: WF,
+    from: "    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy]\n    if: success()",
+    to: "    needs: [verify, prodtest-smoke, unmerged-branches, bot-on-deploy]\n    if: success()",
+    expect: "the all-clear watches exactly what the alert watches",
+  },
+  {
+    name: "the job stops checking the repository out, so the require finds nothing",
+    file: WF,
+    from: "    steps:\n      - uses: actions/checkout@v4\n        timeout-minutes: 5\n      # ONE OPEN ISSUE AT A TIME",
+    to: "    steps:\n      # ONE OPEN ISSUE AT A TIME",
+    expect: "alert checks the repository out before requiring the module",
   },
 ];
 

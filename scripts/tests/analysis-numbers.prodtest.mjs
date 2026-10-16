@@ -361,8 +361,40 @@ try {
     await charged.page.goto(`${CHARGED}/dashboard/data-analysis?id=${store.data_analyses.at(-1).id}`, { waitUntil: "networkidle" });
     const before = modelAsked.length;
     await charged.press(charged.page.locator('[data-testid="analysis-analyse"]'));
-    await charged.page.getByText(EL.dataAnalysis.analyse.failed).first().waitFor({ timeout: 30_000 });
+    // NOT «Η ανάλυση δεν ολοκληρώθηκε.», AND THAT IS THE POINT.
+    //
+    // This waited for dataAnalysis.analyse.failed and timed out, which
+    // read as a refusal that had stopped working. The refusal had not
+    // stopped working. Instrumented on 2026-10-16: the route answered
+    // 402, `modelAsked` did not move, and the screen said something
+    // BETTER than the generic sentence — analysis-shell.tsx's `refusal()`
+    // turns a 402 into errors.codes.insufficientCredits plus the credit
+    // answer. Package 3 put that there on 2026-10-08 (23cf59a4); this
+    // file arrived with package 16 afterwards (364d01df) and copied the
+    // generic expectation without checking the 402 path.
+    //
+    // THE TEST WAS WRONG AND THE PRODUCT WAS RIGHT, which is the harder
+    // of the two to notice: a red that says «the screen did not say what
+    // I expected» looks exactly like a red that says «the screen is
+    // broken».
+    //
+    // The expectation is the specific one now, and it is the stronger of
+    // the two: a product that regressed to the generic «did not
+    // complete» goes red here, where the old line would have gone green.
+    //
+    // First seen in the nightly of 2026-10-16, run 38867971725. It was
+    // not seen on 2026-10-15 because that night stopped at an earlier
+    // prodtest and this file never ran (test:prod is fail-fast by
+    // convention — see scripts/db/run-dbtests.mjs's closing comment).
+    const refused = `${EL.errors.codes.insufficientCredits.what} ${EL.errors.codes.insufficientCredits.next} ${EL.errors.credits.notCharged}`;
+    await charged.page.getByText(refused).first().waitFor({ timeout: 30_000 });
     check("no credits left: refused before the model is asked", modelAsked.length === before);
+    const said = await charged.page.locator('[data-testid="tool-shell-thread"]').innerText();
+    check(
+      "...and the screen names the credits and says nothing was charged, rather than «did not complete»",
+      said.includes(refused) && !said.includes(EL.dataAnalysis.analyse.failed),
+      said.replace(/\n+/g, " | ").slice(-300)
+    );
     credits[0].credits_remaining = 3000;
     MOCK_USER.user_metadata = { subscription_tier: "free" };
     const holds = reserved.length;

@@ -307,7 +307,9 @@
       "label": "Main",
       "saveFailed": "Could not save that change. Try again.",
       "recentChats": "Recent chats",
-      "untitledChat": "New conversation"
+      "untitledChat": "New conversation",
+      "chats": "Chats",
+      "allConversations": "All conversations"
     },
     "tabs": {
       "home": "Home",
@@ -1365,7 +1367,7 @@
       "pin": "Pin",
       "unpin": "Unpin",
       "rename": "Rename",
-      "deleteConfirm": "Delete \"{title}\"? This can't be undone.",
+      "deleteConfirm": "Delete “{title}”? You'll have a few seconds to undo it.",
       "pinLimitReached": "You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.",
       "pinError": "The pin didn't save. Try again.",
       "renameError": "The new name didn't save — the old one is still there.",
@@ -1449,7 +1451,15 @@
         "openInFiles": "Open in Files",
         "memoryUsed": "From memory ({count})",
         "manageMemory": "What Ionexa remembers"
-      }
+      },
+      "deleteFailed": "That conversation wasn't deleted. It is still here.",
+      "undo": "Undo",
+      "moveToProject": "Move to project",
+      "noProjects": "No projects yet.",
+      "moved": "Moved to {project}.",
+      "moveFailed": "That didn't move. Try again.",
+      "projectFull": "That project already holds {limit} things, which is the most it keeps.",
+      "selectOne": "Select {title}"
     },
     "create": {
       "title": "Create Anything",
@@ -3614,6 +3624,19 @@
         "stopped": "Stopped. Nothing was charged.",
         "failed": "Something went wrong. Try again."
       }
+    },
+    "chats": {
+      "title": "Chats",
+      "searchPlaceholder": "Search your conversations",
+      "searching": "Searching what was said…",
+      "searchedContent": "Titles, and the newest {scanned} messages.",
+      "searchTruncated": "There may be older messages this didn't reach.",
+      "noMatches": "No conversation matches “{query}”.",
+      "selectedCount": "{count} selected",
+      "deleteSelected": "Delete selected",
+      "deleteSelectedConfirm": "Delete {count} conversations? You'll have a few seconds to undo each one.",
+      "deleteSelectedFailed": "Not everything was deleted. What is still here was not.",
+      "atCap": "The newest {cap}. Search to find an older one."
     }
   },
   "module": {
@@ -4345,6 +4368,11 @@
       "is": "A small game of your own, from a description.",
       "does": "It shows you the plan in five boxes first; change any of them in words, then it writes the game and you play it here, with the keyboard or by touch.",
       "doesNot": "It does not see your account and does not reach the internet: the game plays sealed off, and so does the file you download."
+    },
+    "chats": {
+      "is": "Every conversation you have had, in one place.",
+      "does": "Lists them newest first, searches both their titles and what was said inside them, and renames, pins, files or deletes any of them.",
+      "doesNot": "The search does not read every message ever sent: it reads the newest 400, and the page says so while you type."
     }
   },
   "helpCentre": {
@@ -4395,7 +4423,8 @@
     "aiTransparencyDescription": "Which AI models Ionexa uses, what they do, and what data they see.",
     "contactDescription": "Get in touch with the Ionexa AI team.",
     "verifyEmail": "Confirm Your Email",
-    "verifyEmailDescription": "Confirm the email address of your Ionexa AI account."
+    "verifyEmailDescription": "Confirm the email address of your Ionexa AI account.",
+    "chats": "Chats"
   },
   "errors": {
     "retry": "Try again",
@@ -4996,7 +5025,7 @@
       "rowsPerModule": "{count, plural, one {# row per module in chat} other {# rows per module in chat}}"
     },
     "startChat": "Start a chat in this project",
-    "chatFixed": "A conversation belongs to the project it was started in, for its whole life.",
+    "chatFixed": "A conversation starts in the project you choose, and you can move it later from its ⋯ menu.",
     "noGoal": "No goal written yet.",
     "untitled": "Untitled",
     "delete": "Delete",

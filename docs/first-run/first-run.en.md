@@ -1,8 +1,8 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **640 strings**. The whole product is 4302, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -147,7 +147,7 @@ That looks like a question. Should I answer it, or record it?
 
 Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.
 
-## Tier 2 — The labels — skim these (377)
+## Tier 2 — The labels — skim these (379)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1834,6 +1834,11 @@ Website plans
 
 Workflows
 
+**`sidebar.rail.allConversations`**
+
+
+All conversations
+
 **`sidebar.rail.allTools`**
 
 
@@ -1843,6 +1848,11 @@ All tools
 
 
 Chat
+
+**`sidebar.rail.chats`**
+
+
+Chats
 
 **`sidebar.rail.coding`**
 
@@ -2046,7 +2056,7 @@ See credit history
 
 Try again
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (236)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2359,6 +2369,91 @@ No credits left this month
 
 Top up
 
+**`dashboard.chat.deleteConfirm`**
+
+
+Delete “{title}”? You'll have a few seconds to undo it.
+
+**`dashboard.chat.deleteFailed`**
+
+
+That conversation wasn't deleted. It is still here.
+
+**`dashboard.chat.groupPinned`**
+
+
+Pinned
+
+**`dashboard.chat.moved`**
+
+
+Moved to {project}.
+
+**`dashboard.chat.moveFailed`**
+
+
+That didn't move. Try again.
+
+**`dashboard.chat.moveToProject`**
+
+
+Move to project
+
+**`dashboard.chat.noConversations`**
+
+
+No conversations yet.
+
+**`dashboard.chat.noProjects`**
+
+
+No projects yet.
+
+**`dashboard.chat.pin`**
+
+
+Pin
+
+**`dashboard.chat.pinError`**
+
+
+The pin didn't save. Try again.
+
+**`dashboard.chat.pinLimitReached`**
+
+
+You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.
+
+**`dashboard.chat.projectFull`**
+
+
+That project already holds {limit} things, which is the most it keeps.
+
+**`dashboard.chat.rename`**
+
+
+Rename
+
+**`dashboard.chat.renameError`**
+
+
+The new name didn't save — the old one is still there.
+
+**`dashboard.chat.selectOne`**
+
+
+Select {title}
+
+**`dashboard.chat.undo`**
+
+
+Undo
+
+**`dashboard.chat.unpin`**
+
+
+Unpin
+
 **`language.label`**
 
 
@@ -2368,6 +2463,16 @@ Language
 
 
 Couldn't save your language — nothing was changed.
+
+**`module.actionsFor`**
+
+
+Actions for {name}
+
+**`module.delete`**
+
+
+Delete
 
 **`pwa.install`**
 
@@ -2428,6 +2533,21 @@ Not now
 
 
 Show me how
+
+**`dashboard.chat.renameLabel`**
+
+
+New name for "{title}"
+
+**`favorites.add`**
+
+
+Add to favorites
+
+**`favorites.remove`**
+
+
+Remove from favorites
 
 ### first result
 
@@ -3030,21 +3150,6 @@ Unlink
 
 
 Unlink {name}
-
-**`favorites.add`**
-
-
-Add to favorites
-
-**`favorites.remove`**
-
-
-Remove from favorites
-
-**`module.delete`**
-
-
-Delete
 
 **`module.deleteConfirm`**
 

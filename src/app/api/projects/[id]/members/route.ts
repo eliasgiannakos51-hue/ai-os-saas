@@ -18,10 +18,46 @@ export const dynamic = "force-dynamic";
  * REMOVING A MEMBER DELETES THE EDGE AND NOTHING ELSE. There is no path
  * in this file that touches the member row itself, and
  * scripts/tests/projects.test.mjs reads this file for the absence.
+ *
+ * AND THE MEMBER IS READ BACK TOO, WHICH IT WAS NOT UNTIL 2026-10-15.
+ * The route validated the TABLE NAME and then inserted whatever id it
+ * was handed. entity_links has no foreign key on either end — it cannot,
+ * it links across twenty-odd tables — so nothing downstream would have
+ * rejected another account's id, and the row would sit in this person's
+ * project claiming a membership they do not own. RLS never saw a
+ * problem: the edge's own user_id is the caller's. The read below is
+ * therefore the ONLY thing standing between "put this in my project" and
+ * "put THAT in my project", and it is the same read api/flows/[id]/steps
+ * already does for the same reason.
+ *
+ * A SECOND ADD IS A MOVE, NOT A SECOND MEMBERSHIP. The old edge for this
+ * row is deleted before the new one is written. Two reasons, and the
+ * second is the one that bites: projects/page.tsx counts RAW edges for
+ * its "N things" badge, so a duplicate inflates it; and
+ * lib/projects/conversation-scope.ts reads a conversation's project with
+ * .limit(1).maybeSingle(), so a conversation in two projects is scoped
+ * to an ARBITRARY one of them, silently, on its next message.
  */
 async function loadOwnProject(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, id: string) {
   const { data } = await supabase.from("projects").select("id").eq("id", id).eq("user_id", userId).maybeSingle();
   return data;
+}
+
+/** The member row, only if it is this account's. Null for anything else,
+ *  including a row that does not exist and a row that is someone's
+ *  else's — the caller cannot tell those apart, which is the point. */
+async function ownsMember(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  table: string,
+  memberId: string
+): Promise<boolean> {
+  const { data, error } = await supabase.from(table).select("id").eq("id", memberId).eq("user_id", userId).maybeSingle();
+  if (error) {
+    logApiError("/api/projects/[id]/members", error, { stage: "own_member", table });
+    return false;
+  }
+  return Boolean(data);
 }
 
 export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
@@ -48,6 +84,10 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const project = await loadOwnProject(supabase, user.id, params.id);
     if (!project) return NextResponse.json({ error: "no_such_project" }, { status: 404 });
 
+    if (!(await ownsMember(supabase, user.id, String(table), memberId))) {
+      return NextResponse.json({ error: "no_such_member" }, { status: 404 });
+    }
+
     const { count } = await supabase
       .from("entity_links")
       .select("id", { count: "exact", head: true })
@@ -57,6 +97,25 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       .eq("target_id", params.id);
     if ((count ?? 0) >= MAX_MEMBERS) {
       return NextResponse.json({ error: "project_full", limit: MAX_MEMBERS }, { status: 400 });
+    }
+
+    // THE MOVE. Every edge this row already has to a project goes first,
+    // so adding is idempotent and re-filing is one membership rather
+    // than two. entity_links has no UPDATE policy and no UPDATE grant
+    // (the baseline creates select/insert/delete only), so repointing an
+    // edge with .update() would change zero rows and report no error —
+    // delete-then-insert is not a style choice here.
+    const { error: clearError } = await supabase
+      .from("entity_links")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("relationship_type", IN_PROJECT)
+      .eq("source_table", String(table))
+      .eq("source_id", memberId)
+      .eq("target_table", PROJECTS_TABLE);
+    if (clearError) {
+      logApiError("/api/projects/[id]/members", clearError, { stage: "clear_previous" });
+      return NextResponse.json({ error: "add_failed" }, { status: 500 });
     }
 
     const { error } = await supabase.from("entity_links").insert({

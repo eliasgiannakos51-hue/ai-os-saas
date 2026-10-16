@@ -307,7 +307,9 @@
       "label": "Menu principal",
       "saveFailed": "Não foi possível guardar a alteração. Tente de novo.",
       "recentChats": "Conversas recentes",
-      "untitledChat": "Nova conversa"
+      "untitledChat": "Nova conversa",
+      "chats": "Conversas",
+      "allConversations": "Todas as conversas"
     },
     "tabs": {
       "home": "Início",
@@ -1365,7 +1367,7 @@
       "pin": "Fixar",
       "unpin": "Desafixar",
       "rename": "Mudar o nome",
-      "deleteConfirm": "Eliminar «{title}»? Não é possível anular.",
+      "deleteConfirm": "Eliminar «{title}»? Vais ter uns segundos para anular.",
       "pinLimitReached": "Fixou {limit} conversas, o máximo que o seu plano mantém no topo. Solte uma para fixar esta.",
       "pinError": "A fixação não foi guardada. Tente de novo.",
       "renameError": "O novo nome não foi guardado — fica o anterior.",
@@ -1449,7 +1451,15 @@
         "openInFiles": "Abrir em Ficheiros",
         "memoryUsed": "Da memória ({count})",
         "manageMemory": "O que o Ionexa lembra"
-      }
+      },
+      "deleteFailed": "Essa conversa não foi eliminada. Continua aqui.",
+      "undo": "Desfazer",
+      "moveToProject": "Mover para um projeto",
+      "noProjects": "Ainda não há projetos.",
+      "moved": "Movida para {project}.",
+      "moveFailed": "Não foi movida. Tenta de novo.",
+      "projectFull": "Esse projeto já tem {limit} coisas, o máximo que guarda.",
+      "selectOne": "Selecionar «{title}»"
     },
     "create": {
       "title": "Criar Qualquer Coisa",
@@ -3614,6 +3624,19 @@
         "stopped": "Parado. Nada foi cobrado.",
         "failed": "Algo correu mal. Tente novamente."
       }
+    },
+    "chats": {
+      "title": "Conversas",
+      "searchPlaceholder": "Procurar nas tuas conversas",
+      "searching": "A procurar no que foi dito…",
+      "searchedContent": "Títulos, e as {scanned} mensagens mais recentes.",
+      "searchTruncated": "Pode haver mensagens mais antigas que não foram alcançadas.",
+      "noMatches": "Nenhuma conversa corresponde a «{query}».",
+      "selectedCount": "{count} selecionadas",
+      "deleteSelected": "Eliminar selecionadas",
+      "deleteSelectedConfirm": "Eliminar {count} conversas? Vais ter uns segundos para anular cada uma.",
+      "deleteSelectedFailed": "Não foi tudo eliminado. O que continua aqui não foi.",
+      "atCap": "As {cap} mais recentes. Procura para encontrar uma mais antiga."
     }
   },
   "module": {
@@ -4345,6 +4368,11 @@
       "is": "Um pequeno jogo seu, a partir de uma descrição.",
       "does": "Primeiro mostra o plano em cinco caixas; mude qualquer uma com palavras, depois escreve o jogo e você joga aqui, com o teclado ou pelo toque.",
       "doesNot": "Não vê sua conta e não acessa a internet: o jogo roda isolado, assim como o arquivo que você baixa."
+    },
+    "chats": {
+      "is": "Todas as conversas que tiveste, num só lugar.",
+      "does": "Mostra-as das mais recentes para as mais antigas, procura nos títulos e no que foi dito, e renomeia, fixa, arquiva ou elimina qualquer uma.",
+      "doesNot": "A procura não lê todas as mensagens enviadas: lê as 400 mais recentes, e a página di-lo enquanto escreves."
     }
   },
   "helpCentre": {
@@ -4395,7 +4423,8 @@
     "aiTransparencyDescription": "Que modelos de IA o Ionexa usa, o que fazem e que dados veem.",
     "contactDescription": "Fale com a equipa do Ionexa AI.",
     "verifyEmail": "Confirmar email",
-    "verifyEmailDescription": "Confirme o endereço de email da sua conta Ionexa AI."
+    "verifyEmailDescription": "Confirme o endereço de email da sua conta Ionexa AI.",
+    "chats": "Conversas"
   },
   "errors": {
     "retry": "Tentar de novo",
@@ -4996,7 +5025,7 @@
       "rowsPerModule": "{count, plural, one {# linha por módulo no chat} other {# linhas por módulo no chat}}"
     },
     "startChat": "Iniciar uma conversa neste projeto",
-    "chatFixed": "Uma conversa pertence ao projeto onde começou, durante toda a sua vida.",
+    "chatFixed": "Uma conversa começa no projeto que escolheres, e podes movê-la depois a partir do menu «⋯».",
     "noGoal": "Ainda sem objetivo escrito.",
     "untitled": "Sem título",
     "delete": "Eliminar",

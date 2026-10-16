@@ -82,8 +82,13 @@ const MUTANTS = [
   {
     name: "the members route stops reading the project back",
     file: MEMBERS,
-    from: "    const project = await loadOwnProject(supabase, user.id, params.id);\n    if (!project) return NextResponse.json({ error: \"no_such_project\" }, { status: 404 });\n\n    const { count }",
-    to: "    const { count }",
+    // RE-ANCHORED 2026-10-15: the member read-back went in between
+    // this read and the count, so the old `from` no longer existed —
+    // and its `to` ("    const { count }") then matched the real file,
+    // which check-mutation-tree reports as a mutation left applied.
+    // The defect is unchanged: the project is not read back.
+    from: "    const project = await loadOwnProject(supabase, user.id, params.id);\n    if (!project) return NextResponse.json({ error: \"no_such_project\" }, { status: 404 });\n\n    if (!(await ownsMember(",
+    to: "    if (!(await ownsMember(",
     expect: "adding: the project is read back on the person's own client first",
   },
   {

@@ -54,3 +54,25 @@ export function autoTitleFromMessage(message: string): string {
   // this constant exists to state. See lib/text/truncate.ts.
   return truncate(message, AUTO_TITLE_MAX_LENGTH, { collapseWhitespace: true });
 }
+
+/**
+ * The title a conversation has before anything is said in it.
+ *
+ * NOT A UI STRING — it is the DEFAULT ON THE COLUMN,
+ * `title text not null default 'New conversation'`
+ * (20260803000000_baseline_schema.sql), so it is the literal English
+ * sitting in the database for every conversation nobody has written to.
+ * Every list therefore has to recognise it and show the reader's own
+ * language instead, and it was being recognised by a bare string
+ * comparison written out twice. Named here so the day the default
+ * changes there is one place that is wrong instead of two silently
+ * printing "New conversation" to a Greek reader.
+ */
+export const STORED_DEFAULT_TITLE = "New conversation";
+
+/** The name to show, or null when the stored one is just the column's
+ *  default and the caller should use its own translated fallback. */
+export function displayConversationTitle(title: string | null | undefined): string | null {
+  const t = (title ?? "").trim();
+  return t && t !== STORED_DEFAULT_TITLE ? t : null;
+}

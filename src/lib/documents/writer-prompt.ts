@@ -3,6 +3,7 @@
  * half with no SDK in it, so scripts/tests/document-writer.test.mjs can load
  * it (the reason lib/presentations/prompt.ts stands apart from its call).
  */
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-conduct";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
@@ -53,16 +54,16 @@ Write every word in the language you are told to use. Do not invent names, amoun
 ${AI_SAFETY_BOUNDARIES_EN}${AI_CRISIS_CLASSIFIER_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
-export type ToolDefinition = {
-  name: string;
-  description: string;
-  input_schema: { type: "object"; properties: Record<string, unknown>; required: string[] };
+/** The router's tool shape with the schema pinned — see
+ *  lib/presentations/prompt.ts for why the narrowing is kept. */
+export type ToolDefinition = AiToolSpec & {
+  inputSchema: { type: "object"; properties: Record<string, unknown>; required: string[] };
 };
 
 export const WRITE_DOCUMENT_TOOL: ToolDefinition = {
   name: "write_document",
   description: "Return the complete document: its title and every block, in reading order.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       title: { type: "string" },
@@ -88,7 +89,7 @@ export const WRITE_DOCUMENT_TOOL: ToolDefinition = {
 export const REWRITE_BLOCK_TOOL: ToolDefinition = {
   name: "rewrite_block",
   description: "Return the new text of the ONE block that was asked to change.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: { text: { type: "string", description: "The block's new text, in the document's language. **bold** and *italic* only." } },
     required: ["text"],

@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import { AI_TRUNCATED_STOP_REASON, type AiOutcome } from "@/lib/ai/providers/types";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { readTranslations, type Piece } from "@/lib/translate/segments";
 import {
@@ -24,6 +25,14 @@ import {
  *
  * A provider failure or a stop ends the whole translation: the route
  * releases the hold, and nothing is written.
+ *
+ * THROUGH THE ROUTER, NOT THE SDK (step 1.4). No api key travels in:
+ * which provider serves a batch is a configuration question
+ * (lib/ai/providers/registry.ts), and a provider with no key is simply
+ * not in the chain, so with only ANTHROPIC_API_KEY set — production
+ * today — every batch is served exactly as it was. The two reasons a
+ * batch can fail are unchanged and still told apart: a Stop is the
+ * person, a provider failure is not, and only the first is theirs.
  */
 export type TranslateOutcome =
   | { ok: true; value: (string | null)[]; unanswered: number }
@@ -31,39 +40,55 @@ export type TranslateOutcome =
 
 type BatchResult = { ok: true; list: string[] | null } | { ok: false; kind: "aborted" | "provider"; detail: string };
 
-async function callBatch(anthropic: Anthropic, system: string, message: string, expected: number, costs: CostAccumulator, signal?: AbortSignal): Promise<BatchResult> {
-  let response: Anthropic.Message;
+async function callBatch(system: string, message: string, expected: number, costs: CostAccumulator, userId?: string, signal?: AbortSignal): Promise<BatchResult> {
+  // THIS FUNCTION DOES NOT THROW, AND THAT IS A MONEY PROPERTY, not a
+  // style — see lib/posts/generate.ts. The route holds credits before
+  // the first batch and releases them on `ok: false`; its outer catch
+  // returns 500 without releasing.
+  let outcome: AiOutcome;
   try {
-    response = await anthropic.messages.create(
+    outcome = await runCompletion(
       {
+        purpose: "create",
         model: TRANSLATE_MODEL,
-        max_tokens: batchMaxTokens(message.length),
-        system,
+        maxTokens: batchMaxTokens(message.length),
+        system: [{ type: "text", text: system }],
         messages: [{ role: "user", content: message }],
         tools: [TRANSLATE_TOOL],
-        tool_choice: { type: "tool", name: TRANSLATE_TOOL.name },
+        // The tool's input IS the list of translations; a model left to
+        // decide answers a batch in prose and the page keeps its old
+        // text after the tokens were spent.
+        toolChoice: { type: "tool", name: TRANSLATE_TOOL.name },
+        requires: ["tool_calling"],
       },
-      { signal }
+      { userId, signal }
     );
   } catch (err) {
     if (signal?.aborted) return { ok: false, kind: "aborted", detail: "stopped by the user" };
     return { ok: false, kind: "provider", detail: err instanceof Error ? err.message : String(err) };
   }
-  costs.record("generation", response.usage, response.model || TRANSLATE_MODEL);
+  if (!outcome.ok) {
+    return outcome.kind === "aborted"
+      ? { ok: false, kind: "aborted", detail: "stopped by the user" }
+      : { ok: false, kind: "provider", detail: outcome.detail };
+  }
+  costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
   // A list cut at the output ceiling is a list with its end missing.
-  if (response.stop_reason === "max_tokens") return { ok: true, list: null };
-  const toolUse = response.content.find((block): block is Anthropic.ToolUseBlock => block.type === "tool_use");
+  // Whoever served it: the adapters give all four providers' spellings
+  // of that one word (ΛΘ-18).
+  if (outcome.stopReason === AI_TRUNCATED_STOP_REASON) return { ok: true, list: null };
+  const toolUse = outcome.toolCalls.find((call) => call.name === TRANSLATE_TOOL.name);
   return { ok: true, list: toolUse ? readTranslations(toolUse.input, expected) : null };
 }
 
 export async function translatePieces(params: {
-  apiKey: string;
   pieces: readonly Piece[];
   target: string;
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
   signal?: AbortSignal;
 }): Promise<TranslateOutcome> {
-  const anthropic = new Anthropic({ apiKey: params.apiKey });
   const system = translateSystemPrompt(params.target);
   const batches = translateBatches(params.pieces);
   const value: (string | null)[] = params.pieces.map(() => null);
@@ -78,8 +103,8 @@ export async function translatePieces(params: {
     while (failure === null && next < batches.length) {
       const indexes = batches[next++];
       const message = batchMessage(params.pieces, indexes, params.target);
-      let result = await callBatch(anthropic, system, message, indexes.length, params.costs, signal);
-      if (result.ok && result.list === null) result = await callBatch(anthropic, system, message, indexes.length, params.costs, signal);
+      let result = await callBatch(system, message, indexes.length, params.costs, params.userId, signal);
+      if (result.ok && result.list === null) result = await callBatch(system, message, indexes.length, params.costs, params.userId, signal);
       if (!result.ok) {
         failure ??= { kind: params.signal?.aborted ? "aborted" : result.kind, detail: result.detail };
         stop.abort();

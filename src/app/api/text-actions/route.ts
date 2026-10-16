@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
+import { runCompletion } from "@/lib/ai/providers/complete";
 import { createClient } from "@/lib/supabase/server";
 import { AI_QUALITY_CYCLE_TRANSFORM_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_COMPACT_EL } from "@/lib/ai-conduct";
@@ -71,10 +72,12 @@ const SYSTEM_PROMPTS_WITH_QUALITY_CYCLE: Record<TextAction, string> = Object.fro
 // not a conversation.
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the call below goes
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json(
-        { ok: false, error: "ANTHROPIC_API_KEY is not configured on the server." },
+        { ok: false, error: "No AI provider is configured on the server." },
         { status: 500 }
       );
     }
@@ -190,24 +193,30 @@ export async function POST(request: Request) {
       reservationId = reservation.reservationId;
     }
 
-    const anthropic = new Anthropic({ apiKey });
     const costs = new CostAccumulator();
 
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.textAction);
-      const response = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action],
-        messages: [{ role: "user", content: text }],
-      });
-
-      costs.record("generation", response.usage, response.model || MODEL);
-
-      const block = response.content.find(
-        (b): b is Anthropic.TextBlock => b.type === "text"
+      // THROUGH THE ROUTER, NOT THE SDK (step 1.4). No tool here — the
+      // action returns rewritten prose — so only the prompt travels.
+      const outcome = await runCompletion(
+        {
+          purpose: "create",
+          model: MODEL,
+          maxTokens: MAX_TOKENS,
+          system: [{ type: "text", text: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action] }],
+          messages: [{ role: "user", content: text }],
+        },
+        { userId: user.id }
       );
-      const result = block?.text?.trim();
+      // Nothing came back, so there is nothing to record: the empty
+      // result below releases the hold, which is what a failed call has
+      // always done here.
+      if (!outcome.ok) throw new Error(`text-actions: ${outcome.kind} ${outcome.detail}`);
+
+      costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+
+      const result = outcome.text.trim();
 
       if (!result) {
         await releaseReservation(user.id, reservationId);

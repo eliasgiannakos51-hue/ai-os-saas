@@ -91,6 +91,58 @@ export type AiToolSpec = {
   inputSchema: Record<string, unknown>;
 };
 
+/**
+ * WHETHER THE MODEL MAY CALL A TOOL, MUST CALL ONE, OR MUST CALL A NAMED
+ * ONE — and this is not a convenience.
+ *
+ * Twenty-one of this repository's model calls give the model exactly one
+ * tool and force it, because the tool's input schema IS the answer: the
+ * caller reads `toolCalls[0].input` and parses nothing. Posts, slides,
+ * the website builder, the planner, every classifier. Left to decide for
+ * itself, a model answers some of those in prose — and then `toolCalls`
+ * is empty, the caller has nothing to read, and the account has been
+ * charged for a call that produced no usable output.
+ *
+ * So this is in the request, not smuggled into a provider's own options,
+ * and every adapter forwards it in its own spelling:
+ *
+ *   anthropic  tool_choice: { type: "auto" | "any" | "tool", name? }
+ *   openai     tool_choice: "auto" | "required" | { type: "function", … }
+ *   groq       the same, OpenAI-compatible
+ *   google     toolConfig.functionCallingConfig.mode AUTO | ANY, with
+ *              allowedFunctionNames for a named one
+ *
+ * All four can express all three, which is what makes it part of the
+ * intersection this type is allowed to carry rather than an
+ * Anthropic-only field with three silent drops behind it. A provider that
+ * could NOT force a tool would have to refuse the request the way
+ * serverWebSearch is refused in adapters/shared.ts — dropping it and
+ * answering anyway is the failure that looks like success.
+ */
+/**
+ * THE ONE SPELLING OF "IT RAN OUT OF ROOM", across four vendors.
+ *
+ * Each provider has its own word for it — Anthropic's stop_reason is
+ * "max_tokens", OpenAI and Groq say finish_reason "length", Gemini says
+ * finishReason "MAX_TOKENS" — and the adapters translate theirs into
+ * this one before it leaves them, exactly as splitPromptTokens gives
+ * input_tokens one meaning across all four.
+ *
+ * WHY IT LIVES HERE rather than in lib/verification/truncation.ts,
+ * which is where the rule is applied: that file carries a type import
+ * of the Anthropic SDK, and anything the adapters' shared helpers
+ * import ends up on runCompletion's graph, which must stay free of
+ * vendor packages (ΛΘ-17, ai-providers.test.mjs §0b). truncation.ts
+ * re-exports this as TRUNCATION_STOP_REASON, so there is still exactly
+ * one literal and every existing reader is unchanged.
+ */
+export const AI_TRUNCATED_STOP_REASON = "max_tokens";
+
+export type AiToolChoice =
+  | { type: "auto" }
+  | { type: "any" }
+  | { type: "tool"; name: string };
+
 export type AiRequest = {
   purpose: AiPurpose;
   system: AiSystemBlock[];
@@ -98,6 +150,10 @@ export type AiRequest = {
   maxTokens: number;
   temperature?: number;
   tools?: AiToolSpec[];
+  /** Ignored when `tools` is empty — every provider rejects a choice with
+   *  nothing to choose from, so the adapters send it only alongside
+   *  tools. See AiToolChoice for why this is in the request at all. */
+  toolChoice?: AiToolChoice;
   /**
    * Anthropic's server-side web search, when the call genuinely needs the
    * model to go and look things up.
@@ -179,6 +235,55 @@ export type AiResult = {
    *  RESULT rather than only in a table so a caller can act on it. */
   attempts: AiAttempt[];
 };
+
+/**
+ * THE ADAPTER'S OWN SHAPE — here rather than in adapters/shared.ts, and
+ * the reason is the same one that made the adapters lazy (ΛΘ-17), found
+ * one layer along on 2026-10-15.
+ *
+ * complete.ts needs the `Adapter` TYPE to declare its lazy loader map.
+ * While that type lived in adapters/shared.ts, a `import type` was
+ * enough to put that whole module on complete.ts's static graph — and
+ * therefore on the graph of EVERY file that calls runCompletion.
+ * scripts/tests/load-ts.mjs bundles a module and its imports into ONE
+ * FLAT SCOPE, so those files inherited ten more top-level names
+ * (postJson, ProviderHttpError, splitPromptTokens, emptyUsage,
+ * flattenSystem, flattenContent, wireModelId, refuseUnsupported,
+ * openAiToolChoice, normaliseStopReason) and any app module that
+ * happens to declare one of them can no longer be loaded beside them.
+ *
+ * It happened the same day: lib/agents/deliver.ts has its own private
+ * `postJson`, automations.itest.mjs loads the automation runner and the
+ * delivery path together, and the suite died with "postJson is declared
+ * at the top level of BOTH". A type import is free at runtime and is
+ * NOT free to the loader — which is the whole point of this note.
+ *
+ * These three reference only types already in this file, so moving them
+ * here adds no import anywhere. ai-providers.test.mjs §0b holds the
+ * graph: no bare package, and no path from complete.ts to
+ * adapters/shared.ts.
+ */
+export type AdapterCall = {
+  apiKey: string;
+  /** The PROVIDER's own model id — the catalog id with its namespace
+   *  prefix removed. See wireModelId in adapters/shared.ts. */
+  model: string;
+  request: AiRequest;
+  signal: AbortSignal;
+};
+
+export type AdapterResponse = {
+  text: string;
+  toolCalls: AiToolCall[];
+  usage: AiUsage;
+  stopReason: string | null;
+  /** Whatever the provider said it served. Kept verbatim so a silent
+   *  model substitution shows up in the log rather than being normalised
+   *  away. */
+  reportedModel: string;
+};
+
+export type Adapter = (call: AdapterCall) => Promise<AdapterResponse>;
 
 export type AiFailureKind =
   /** The caller's abort signal fired — the person pressed Stop (V4.6).

@@ -76,7 +76,7 @@ const fence = (s: string) => `${UNTRUSTED_OPEN}\n${s}\n${UNTRUSTED_CLOSE}`;
 export const PLAN_TOOL = {
   name: "plan_game",
   description: "The game's plan: a title and exactly five boxes — rules, levels, characters, controls, win.",
-  input_schema: {
+  inputSchema: {
     type: "object" as const,
     properties: {
       title: { type: "string" },
@@ -96,13 +96,13 @@ export const PLAN_TOOL = {
 export const BOX_TOOL = {
   name: "rewrite_box",
   description: "The one box, rewritten as asked.",
-  input_schema: { type: "object" as const, properties: { text: { type: "string" } }, required: ["text"] },
+  inputSchema: { type: "object" as const, properties: { text: { type: "string" } }, required: ["text"] },
 };
 
 export const GAME_TOOL = {
   name: "write_game",
   description: "The whole game as ONE complete HTML document.",
-  input_schema: { type: "object" as const, properties: { html: { type: "string" } }, required: ["html"] },
+  inputSchema: { type: "object" as const, properties: { html: { type: "string" } }, required: ["html"] },
 };
 
 export function planMessage(description: string, locale: string): string {

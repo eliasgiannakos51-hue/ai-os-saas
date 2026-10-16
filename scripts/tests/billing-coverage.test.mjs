@@ -69,10 +69,6 @@ const M = config.marginMultiplier;
 // ---------------------------------------------------------------------
 const DECLARED = {
   "src/lib/website-builder.ts": { calls: 4, billing: "settled", note: "generate/edit stream + classifier + patch, all via CostAccumulator" },
-  "src/lib/mission-agents.ts": { calls: 3, billing: "settled", note: "planner/reviewer, costs passed in" },
-  "src/lib/website-security-review.ts": { calls: 1, billing: "settled", note: "recorded onto the generation's accumulator" },
-  "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
-  "src/lib/clarification.ts": { calls: 1, billing: "settled" },
   // Moved out of api/create when Create Anything became a background job:
   // the route awaited a vision-capable classification under a 120-second
   // ceiling, and vision is the slow case because the images travel with
@@ -84,7 +80,6 @@ const DECLARED = {
   // a real answer the user reads), and an insert that fails still refunds
   // (nothing was saved).
   "src/lib/jobs/handlers/create.ts": { calls: 1, billing: "settled" },
-  "src/app/api/create-studio/detect/route.ts": { calls: 1, billing: "settled" },
   // SETTLED WHETHER OR NOT IT FOUND ANYTHING, which is the unusual part
   // and the reason it is worth a note. The call happened and the tokens
   // were spent even when the model answers "none"; charging only for the
@@ -95,42 +90,12 @@ const DECLARED = {
   // AND IT ONLY RUNS AFTER THE FREE READER FAILED — the route re-checks
   // that itself (lib/transitions/destinations.ts) before reserving, so a
   // caller cannot make it cost money the free path would have saved.
-  "src/app/api/transitions/detect/route.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "settles even when the answer is 'none'; the free reader runs first, inside the route, before any reservation.",
-  },
   "src/app/api/chat/route.ts": { calls: 1, billing: "settled" },
 
   "src/app/api/records/ask/route.ts": {
     calls: 1,
     billing: "settled",
     note: "was a flat 1 credit; the input is the WHOLE record, so the price now tracks the record's size. Reservation sized after the record loads.",
-  },
-  "src/app/api/text-actions/route.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "was a flat 1 credit whether rewriting a sentence or a document.",
-  },
-  "src/app/api/documents/[id]/pdf/route.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing.",
-  },
-  "src/lib/reflection-agent.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "was a flat 2 credits with NO usage tracking at all — the only call whose tokens reached no cost log.",
-  },
-  "src/lib/chat/memory.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls.",
-  },
-  "src/lib/agents/agent-builder.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent.",
   },
   "src/lib/ai/providers/adapters/anthropic.ts": {
     calls: 1,
@@ -145,80 +110,117 @@ const DECLARED = {
       "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
       "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
   },
-  "src/lib/automations/builder.ts": {
-    calls: 2,
-    billing: "settled",
-    note: "Package 30, automations as boxes. Two forced-tool calls: making a row of boxes from a sentence (api/automations/flows) and changing one box with words (api/automations/flows/[id]/change). Each route holds the automationBuild estimate before and settles on the usage recorded here — a question back, or an answer that is not a row of boxes, still SETTLES rather than releasing, because the tokens were spent; only a provider failure releases.",
-  },
-  "src/lib/automations/runner.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "Package 30. One call per AI box of a run, tried at most twice onto ONE accumulator per box; each box is held (automationStep, sized on the most of a read that reaches the model) and settled on its own before the next box runs, so the automation's own cost limit is checked against what was really charged. A box whose two attempts both fail releases its hold.",
-  },
-  "src/lib/agents/agent-runner.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V4 #12: 2 -> 1 direct calls. The main generation moved onto lib/ai/providers/ (runCompletion), so only the optional web_search research pass still speaks to the SDK here — it needs the server-side search tool, which no other provider in the catalog offers, and an adapter that answered without searching would return a confident unsourced report. Both halves still record onto ONE accumulator per execution. V3 note, unchanged: the optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
-  },
-  "src/lib/jobs/handlers/file-ask.ts": {
-    calls: 3,
-    billing: "settled",
-    note: "V3 File Workspace, moved out of api/files/ask when asking became a background job — the route sent a whole document set through one model call under a 60-second ceiling, which is the request most likely to be killed, and a kill lost the answer while keeping the hold. Unchanged in billing: one grounded call, the reservation still sized AFTER the documents load (the cost is dominated by document text, so a hold sized from the question alone is off by orders of magnitude on a long contract), and a call that throws still SETTLES via run-job rather than releasing, because the tokens were spent. The one REFUND path is 'no readable files', where no model call happens at all. 1 -> 3 call sites when a corpus larger than one context window stopped being TRUNCATED and started being read in passes: the single-pass call (unchanged, and still what nearly every question is), the per-part call, and the synthesis that combines the parts. All three record onto the SAME accumulator, so a five-part question is one charge covering six calls — and the reservation in api/files/ask is sized over every pass rather than the first, because a hold sized for one call and settled against six is not a discount, it is an overdraft on an account that was told it could afford the question.",
-  },
   "src/lib/research/research.ts": {
-    calls: 3,
-    billing: "settled",
-    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
-  },
-  "src/lib/import/map-columns.ts": {
     calls: 1,
     billing: "settled",
-    note: "V3 Task 16 Instant Value. One forced-tool-use call that decides what a spreadsheet is and maps its columns. It sees the HEADERS and a dozen sample rows, never the whole file — so a 5,000-row upload and a 20-row one cost the same, which is why the importMap profile does not scale with file size. Settled by api/import/csv/analyse whether or not a usable mapping came back; the confirm step (api/import/csv/apply) makes NO AI call and charges nothing, because applying a mapping the user already approved is arithmetic.",
+    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens. TWO of its three calls moved onto runCompletion on 2026-10-15 — the planning half and the synthesis, neither of which needs the web. The per-question call did NOT, and the reason is the citations rather than the search: AiResult carries text, tool calls, usage and a stop reason, and every source under every finding comes from the citations Anthropic attaches to its text blocks. Moving it today would produce a report whose claims point nowhere. The file's own header says what it needs.",
   },
-  "src/lib/import/paste.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way.",
+};
+
+/**
+ * THE SAME DECLARATION, FOR CALL SITES THAT HAVE LEFT THE SDK.
+ *
+ * Step 1.4 moves every model call onto runCompletion. A file that moves
+ * drops out of DECLARED above — it no longer matches `messages.create(`
+ * — and the sentence saying how it bills would go with it, which is the
+ * one thing that must not happen while thirty files are in motion. So it
+ * moves here instead, and §1b below holds this table against the tree
+ * BOTH WAYS: a runCompletion caller missing from it fails, and an entry
+ * naming a file that no longer calls runCompletion fails too.
+ */
+const ROUTED = {
+  "src/lib/website-security-review.ts": {
+    note: "recorded onto the generation's accumulator — it is folded into an already-reserved generation or edit, not a separate credit-gated call. Moved onto runCompletion 2026-10-15. It fails OPEN by design, and that now includes a provider failure and a Stop, which used to arrive as a thrown error: written out in the file rather than inherited from the catch, because \"the security review returns safe\" has to be a deliberate sentence.",
   },
   "src/lib/insights/narrate.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged.",
-  },
-  "src/lib/agents/template-fill.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
-  },
-  "src/lib/presentations/generate.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V5 #21 Presentations. ONE forced-tool-use call that returns the whole deck, reached from api/presentations/generate and reserved there against the presentationGenerate profile (sized per slide asked for, see estimate.ts). Recorded onto the route's accumulator BEFORE the deck is parsed, so a response that came back unusable still SETTLES — the tokens were spent — and only the Stop button and a provider failure release the hold. Unsplash searches and the image bytes an export embeds are not model calls and cost no credits.",
-  },
-  "src/lib/documents/write-call.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing.",
-  },
-  "src/lib/translate/translate-call.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then.",
-  },
-  "src/lib/games/game-call.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing.",
-  },
-  "src/lib/posts/generate.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph.",
+    note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged. Moved onto runCompletion 2026-10-15, once the router's graph stopped reaching a vendor package (ΛΘ-17) and this file's own gate could load it again. The forced tool is what makes the narration happen at all; any failure returns the detectors' own true sentences, and the hold stays the route's to settle — this helper never releases one it does not own.",
   },
   "src/lib/lead-classification.ts": {
-    calls: 1,
-    billing: "settled",
-    note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after.",
+    note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after. Moved onto runCompletion 2026-10-15; the accumulator is a REQUIRED parameter, because an optional one is how this call spent money with no cost log in the first place.",
+  },
+  "src/app/api/coding/run/route.ts": {
+    note: "V5 Coding. Reserved against codeAssist before the call and settled after, with the Stop button releasing the hold whole — a non-streaming call has no partial output to charge for.",
+  },
+  "src/app/api/data-analysis/[id]/analyse/route.ts": {
+    note: "Data analysis. Reserved before, settled after; a call that returned nothing releases rather than settles (lib/billing/reservations.ts decides that once for all forty call sites).",
+  },
+  "src/app/api/data-analysis/[id]/ask/route.ts": {
+    note: "A follow-up question on an analysis. Same reserve-then-settle as the analysis itself, at its own estimate.",
+  },
+  "src/lib/agents/agent-runner.ts": {
+    note: "Agent runs. Settled by the run path against agent_run, pricing outcome.reportedModel rather than the model asked for, so a failover that served a different model is charged as what actually answered. The RESEARCH pass joined it on 2026-10-15: it asks for serverWebSearch and REQUIRES the capability, so the three providers that cannot search are ruled out before the call rather than answering from training data alone — and its tokens are recorded as web_search onto the same accumulator, so one run is still one settlement. The 'no other provider offers the server-side search' worry that kept this call on the SDK is answered by `requires` rather than by the SDK: the three adapters that cannot search REFUSE the request (adapters/shared.ts refuseUnsupported) instead of answering without searching, and the router rules them out before any call. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
+  },
+  "src/lib/meetings/meeting-analyse-call.ts": {
+    note: "Meetings. One call, recorded onto the caller's accumulator and settled by the route that made it.",
+  },
+  "src/lib/websites-greek-spelling-check.ts": {
+    note: "The spelling pass over a generated site. Recorded onto the website generation's own accumulator, so it is part of that generation's settlement rather than a second charge.",
+  },
+  "src/lib/presentations/generate.ts": {
+    note: "V5 #21 Presentations. TWO entry points on ONE forced-tool-use call — write a deck (api/presentations/generate, reserved against presentationGenerate, sized per slide asked for) and change one (api/presentations/[id]/edit, presentationEdit). Recorded onto the route's accumulator BEFORE the deck is parsed, so a response that came back unusable still SETTLES — the tokens were spent — and only the Stop button and a provider failure release the hold. Unsplash searches and the image bytes an export embeds are not model calls and cost no credits. Moved onto runCompletion 2026-10-15; the forced tool and the truncation refusal came with it, the second now in the router's one spelling of 'it ran out of room' so a deck cut short by a failover provider is refused exactly as one cut by Anthropic.",
+  },
+  "src/lib/translate/translate-call.ts": {
+    note: "MASTER 16, package 28 Translate. ONE forced-tool-use call site, made once per batch of a site's or a document's pieces (lib/translate/translate-prompt.ts), reached from api/translate and reserved there against the documentTranslate profile on the input of EVERY batch — the same estimate GET api/translate shows before the press. Recorded onto the route's accumulator BEFORE the list is read, so a list of the wrong length still SETTLES (it is asked once more, and its pieces then stay as they were); only the Stop button and a provider failure release the hold, and nothing is written then. Moved onto runCompletion 2026-10-15: the two failures a batch can have are still told apart, because a Stop is the person and a provider failure is not, and only the first is theirs.",
+  },
+  "src/lib/games/game-call.ts": {
+    note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing. Moved onto runCompletion 2026-10-15; the forced tool, the truncation refusal and the Stop button came with it, the second now in the router's one spelling so a game cut short by a failover provider is refused exactly as one cut by Anthropic.",
+  },
+  "src/lib/documents/write-call.ts": {
+    note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing. Moved onto runCompletion 2026-10-15, all three entry points at once — they share one private `call`, so there was never a way to move one of them.",
+  },
+  "src/lib/automations/builder.ts": {
+    note: "Package 30, automations as boxes. Two forced-tool calls: making a row of boxes from a sentence (api/automations/flows) and changing one box with words (api/automations/flows/[id]/change). Each route holds the automationBuild estimate before and settles on the usage recorded here — a question back, or an answer that is not a row of boxes, still SETTLES rather than releasing, because the tokens were spent; only a provider failure releases. Moved onto runCompletion 2026-10-15; both calls, and both still refuse a row cut at the ceiling rather than reading it as a shorter row.",
+  },
+  "src/lib/chat/memory.ts": {
+    note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls. Moved onto runCompletion 2026-10-15. No tools in this one — it asks for a line of text or the word NONE — and a failure returns without storing anything, which is what it already did: the chat reply it rides behind has been sent, and this was never allowed to fail it.",
+  },
+  "src/lib/reflection-agent.ts": {
+    note: "was a flat 2 credits with NO usage tracking at all — the only call whose tokens reached no cost log. Moved onto runCompletion 2026-10-15. It still THROWS on a provider failure, because the route settles only after it returns and its catch is what releases the hold — an empty string would be settled as a reflection the person never got.",
+  },
+  "src/lib/mission-step-runner.ts": {
+    note: "A scheduled Mission step, run by api/cron/scheduled-runs. ONE forced-tool-use classification that decides which module the step's text belongs in and fills its fields; the cron route reserves against it before the call and settles only on a confirmed success, releasing otherwise — it never deducts from inside this file. Moved onto runCompletion 2026-10-15.",
+  },
+  "src/lib/automations/runner.ts": {
+    note: "Package 30. One call per AI box of a run, tried at most twice onto ONE accumulator per box; each box is held (automationStep, sized on the most of a read that reaches the model) and settled on its own before the next box runs, so the automation's own cost limit is checked against what was really charged. A box whose two attempts both fail releases its hold. Moved onto runCompletion 2026-10-15. The two-attempt loop is unchanged and a router failure counts as one attempt, exactly as a thrown SDK error did. The cut-reply check went through modelTextFrom, the router's door onto the same truncation rule modelText applies to an SDK response.",
+  },
+  "src/lib/agents/agent-builder.ts": {
+    note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent. Moved onto runCompletion 2026-10-15.",
+  },
+  "src/app/api/create-studio/detect/route.ts": {
+    note: "Moved onto runCompletion 2026-10-15; a call that never completed releases the hold rather than settling, because nothing was detected and nothing was spent.",
+  },
+  "src/app/api/transitions/detect/route.ts": {
+    note: "settles even when the answer is 'none'; the free reader runs first, inside the route, before any reservation. Moved onto runCompletion 2026-10-15. A provider failure throws into the route's own catch, which is what releases the hold — the free reader's answer then stands on its own, which is the correct outcome and not a silent one.",
+  },
+  "src/app/api/text-actions/route.ts": {
+    note: "was a flat 1 credit whether rewriting a sentence or a document. Moved onto runCompletion 2026-10-15. No tool: the action returns rewritten prose, so only the prompt travels.",
+  },
+  "src/app/api/documents/[id]/pdf/route.ts": {
+    note: "V4.6. A PDF download translated into another language: ONE Sonnet call over the document's HTML, reserved against the same documentTranslate estimate the dialog quoted BEFORE the download (../pdf/estimate), settled as document_translate once the translated PDF is about to be sent. The untranslated download makes no call and touches nothing. Moved onto runCompletion 2026-10-15, and the cut-translation refusal went through modelTextFrom — the router's door onto the same truncation rule, so half a document still never becomes a PDF somebody pays for.",
+  },
+  "src/lib/research/research.ts": {
+    note: "V3 Deep Research, the two halves that moved. planResearch turns the topic into questions (forced tool, no web) and synthesiseReport writes the report from what the questions found (no tool, no web) — both record onto the ONE accumulator per report that api/research/[id]/run settles, failure paths included, since every phase that ran spent tokens. The per-question call is the third and is still on the SDK; it is also DECLARED above, with the reason. The synthesis keeps its wall-clock limit as the router's per-ATTEMPT budget, which is the same guarantee with failover added.",
+  },
+  "src/lib/mission-agents.ts": {
+    note: "planner/reviewer, costs passed in All three calls moved onto runCompletion 2026-10-15; the research pass asks for serverWebSearch and REQUIRES it, so a provider with no search is ruled out before the call rather than answering a planning question from training data.",
+  },
+  "src/lib/jobs/handlers/file-ask.ts": {
+    note: "V3 File Workspace, moved out of api/files/ask when asking became a background job — the route sent a whole document set through one model call under a 60-second ceiling, which is the request most likely to be killed, and a kill lost the answer while keeping the hold. Unchanged in billing: one grounded call, the reservation still sized AFTER the documents load (the cost is dominated by document text, so a hold sized from the question alone is off by orders of magnitude on a long contract), and a call that throws still SETTLES via run-job rather than releasing, because the tokens were spent. The one REFUND path is 'no readable files', where no model call happens at all. 1 -> 3 call sites when a corpus larger than one context window stopped being TRUNCATED and started being read in passes: the single-pass call (unchanged, and still what nearly every question is), the per-part call, and the synthesis that combines the parts. All three record onto the SAME accumulator, so a five-part question is one charge covering six calls — and the reservation in api/files/ask is sized over every pass rather than the first, because a hold sized for one call and settled against six is not a discount, it is an overdraft on an account that was told it could afford the question. Moved onto runCompletion 2026-10-15, all three calls. A part that fails is skipped and the others still answer; a synthesis that fails returns the parts joined, because they are already paid for.",
+  },
+  "src/lib/clarification.ts": {
+    note: "The clarifying-questions pre-check, run by six surfaces (Site, Chat, Automations, Agents, Create Anything, Mission) BEFORE the expensive call they are about to make. Settled as its own feature, clarification_check, by whichever surface ran it — a run that stops at the question and a run that generates are different actions with an order of magnitude between their costs. The free reader in lib/ai/ambiguity.ts decides most requests for nothing and this call is never made for those. Moved onto runCompletion 2026-10-15; a provider failure still THROWS rather than returning a fail-open decision, because each of the five callers does something different in its catch and a fabricated 'it was clear' would settle a reservation against a call that never happened.",
+  },
+  "src/lib/import/map-columns.ts": {
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that decides what a spreadsheet is and maps its columns. It sees the HEADERS and a dozen sample rows, never the whole file — so a 5,000-row upload and a 20-row one cost the same, which is why the importMap profile does not scale with file size. Settled by api/import/csv/analyse whether or not a usable mapping came back; the confirm step (api/import/csv/apply) makes NO AI call and charges nothing, because applying a mapping the user already approved is arithmetic. Moved onto runCompletion 2026-10-15, sharing purpose \"create\" with lib/import/paste.ts so the Import is one routing knob rather than two.",
+  },
+  "src/lib/import/paste.ts": {
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way. Moved onto runCompletion 2026-10-15; a provider failure still comes back as api_error, which is the shape the route already releases on.",
+  },
+  "src/lib/agents/template-fill.ts": {
+    note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that produced no response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or no provider is configured, which is why the route creates the agent either way. Moved onto runCompletion 2026-10-15, and \"configured\" is now asked of the registry rather than of one variable's name.",
+  },
+  "src/lib/posts/generate.ts": {
+    note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph. Moved onto runCompletion 2026-10-15.",
   },
 };
 
@@ -279,14 +281,39 @@ console.log("\n== 1b. every runCompletion() caller pays for what it used ==");
     .filter((f) => /\brunCompletion\(/.test(readFileSync(f, "utf8")))
     .filter((f) => !f.includes("lib/ai/providers/"));
   check("at least one feature uses the provider layer", callers.length > 0, true);
-  const silent = callers.filter((f) => {
-    const text = readFileSync(f, "utf8");
-    // The usage must reach an accumulator: `costs.record(...)`,
-    // `costs.recordBatch(...)` or `addBreakdown(...)` with the outcome's
-    // usage. Anything else is a call whose tokens are never charged.
-    return !/costs\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s.test(text);
-  });
+  // The usage must reach an accumulator: `costs.record(...)`,
+  // `costs.recordBatch(...)` or `addBreakdown(...)` with the outcome's
+  // usage. Anything else is a call whose tokens are never charged.
+  //
+  // `costs?.record` COUNTS, and that is a deliberate narrowing of what
+  // this check claims. Its claim is that the tokens reach the one
+  // settlement path, not that the parameter is non-optional: an
+  // accumulator the caller does pass is recorded into either way.
+  // Where the OPTIONALITY itself is the hazard — lib/lead-classification
+  // spent real money with no cost-log row in exactly that shape — it is
+  // asserted separately, by name, in section 3.
+  const RECORDS_THE_OUTCOME = /costs\??\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s;
+  checkTrue("the detector accepts a plain accumulator", RECORDS_THE_OUTCOME.test('costs.record("x", outcome.usage, m)'));
+  checkTrue("...and an optional one the caller passes", RECORDS_THE_OUTCOME.test('costs?.record("x", outcome.usage, m)'));
+  checkTrue("...and rejects a call that records something else", !RECORDS_THE_OUTCOME.test('costs.record("x", response.usage, m)'));
+  checkTrue("...and one that records nothing at all", !RECORDS_THE_OUTCOME.test("const outcome = await runCompletion(req);"));
+  const silent = callers.filter((f) => !RECORDS_THE_OUTCOME.test(readFileSync(f, "utf8")));
   check("no runCompletion() call site drops its usage on the floor", silent, []);
+
+  // AND IT STILL SAYS HOW IT BILLS. Dropping out of DECLARED by leaving
+  // the SDK must not drop the sentence too — see ROUTED's own comment.
+  const unexplained = callers.filter((f) => !ROUTED[f]);
+  check("every runCompletion() caller says how it bills", unexplained, []);
+  if (unexplained.length) {
+    console.log("        A call site moved onto the router without its billing note.");
+    console.log("        Add it to ROUTED in scripts/tests/billing-coverage.test.mjs");
+  }
+  // Both ways: an entry for a file that no longer calls runCompletion is
+  // a sentence about nothing, and the next reader believes it.
+  const stale = Object.keys(ROUTED).filter((f) => !callers.includes(f));
+  check("no ROUTED entry names a file that has stopped using the router", stale, []);
+  const thin = Object.entries(ROUTED).filter(([, m]) => typeof m.note !== "string" || m.note.length < 80);
+  check("every ROUTED note says something", thin.map(([f]) => f), []);
 
   // AND EVERY ONE OF THEM NAMES ITS MODEL, which is a different question
   // with the same answer shape.
@@ -351,13 +378,23 @@ const form = readFileSync("src/app/api/websites/[id]/submit-form/route.ts", "utf
 checkTrue("it settles against the website owner", /userId: website\.user_id,[\s\S]{0,200}feature: "lead_classification"/.test(form));
 checkTrue("with real measured usage, not a flat fee", /costs,/.test(form) && /new CostAccumulator\(\)/.test(form));
 checkTrue("at the owner's own plan rate", /plan: ownerPlan/.test(form));
-checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(apiKey"));
+checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(fields"));
 checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{0,400}settleReservation/.test(form));
-checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, response\.model \|\| MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
+{
+  // THE ACCUMULATOR IS NO LONGER OPTIONAL. It used to be `costs?:`, and
+  // `costs?.record(...)` with no caller passing one is the same loss
+  // this check was written for wearing a question mark. The classifier
+  // now goes through runCompletion, so §1b above also ranges over it.
+  const classifier = readFileSync("src/lib/lead-classification.ts", "utf8");
+  checkTrue("the classifier records its own usage",
+    /costs\.record\("classification", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(classifier));
+  checkTrue("...and cannot be called without something to record into",
+    /costs: CostAccumulator\n\): Promise<LeadClassification \| null>/.test(classifier) && !/costs\?: CostAccumulator/.test(classifier));
+}
 // The abuse ceiling that was already there, asserted so it cannot be
 // removed without noticing: an unpaid flood is capped per website/hour.
 checkTrue("a per-website hourly cap still gates the endpoint", /MAX_SUBMISSIONS_PER_HOUR = \d+/.test(form));
-checkTrue("checked before the AI call, not after", form.indexOf("MAX_SUBMISSIONS_PER_HOUR") < form.indexOf("classifyLeadMessage(apiKey"));
+checkTrue("checked before the AI call, not after", form.indexOf("MAX_SUBMISSIONS_PER_HOUR") < form.indexOf("classifyLeadMessage(fields"));
 checkTrue("and a honeypot rejects bots earlier still", /_hp/.test(form));
 // A visitor must never see the form fail because the OWNER is broke.
 checkTrue("an unaffordable classification degrades, it does not 4xx", /if \(affordable\.ok\)/.test(form));
@@ -713,7 +750,10 @@ for (const [label, file, feature] of [
   const body = readFileSync(file, "utf8");
   checkTrue(`${label}: estimates from real input size`, /estimateForAction\(/.test(body));
   checkTrue(`${label}: reserves before calling`, /reserveCredits\(/.test(body));
-  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /, costs\)/.test(body));
+  // `, costs)` was the only shape until a call site moved onto the
+  // router and gained an argument after the accumulator. The claim is
+  // that the usage reaches one, not that it is the last thing passed.
+  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /,\s*costs\s*[,)]/.test(body));
   checkTrue(`${label}: settles as ${feature}`, new RegExp(`feature: "${feature}"`).test(body));
   checkTrue(`${label}: releases the hold on failure`, /releaseReservation\(/.test(body));
   checkTrue(`${label}: at the account's own rate`, /effectiveCreditPriceEurForAccount\(/.test(body) || /plan,/.test(body));
@@ -746,7 +786,7 @@ checkTrue(
     chat.indexOf('feature: isFreeMessage ? "chat_free" : "chat_message"')
 );
 checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
-checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, result\.model \|\| MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
+checkTrue("the extractor records its own usage", /costs\?\.record\("other", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
 // If the hold does not cover the second call, every chat message is
 // short by exactly one Claude call.
 const est = readFileSync("src/lib/billing/estimate.ts", "utf8");

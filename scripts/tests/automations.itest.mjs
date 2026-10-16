@@ -39,6 +39,29 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-test";
 process.env.RESEND_API_KEY = "re_test";
 process.env.RESEND_FROM_EMAIL = "Ionexa <results@example.test>";
 
+// THE KEY IS NOW READ FROM THE ENVIRONMENT, NOT PASSED IN. Since
+// lib/automations/builder.ts and lib/automations/runner.ts went onto the
+// router, the provider is chosen by lib/ai/providers/registry.ts from
+// process.env: with no key set, resolveChain returns an empty chain and
+// nothing is ever sent, so every assertion about the request below would
+// read `undefined` rather than go red on the thing it names.
+process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+// AND THE REST OF THE CHAIN IS CLEARED ON PURPOSE. The 400 further down
+// asserts "a provider failure is a provider failure"; with failover on
+// (the default) and a second provider configured on the machine, that
+// request would be retried against a REAL provider over the network.
+// The build that matters is the one in CI, and this is the direction
+// that bit before: a gate that passes here because a variable happens
+// to be missing. See CLAUDE.md, «The build that matters is the one in
+// CI», and scripts/tests/env-independence.test.mjs.
+delete process.env.OPENAI_API_KEY;
+delete process.env.GOOGLE_API_KEY;
+delete process.env.GROQ_API_KEY;
+delete process.env.AI_PROVIDER_ORDER;
+for (const name of Object.keys(process.env)) {
+  if (name.startsWith("AI_PROVIDER_ORDER_")) delete process.env[name];
+}
+
 // ---------------------------------------------------------------------
 // Every outside call, answered here and written down.
 // ---------------------------------------------------------------------

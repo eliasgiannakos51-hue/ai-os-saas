@@ -16,6 +16,7 @@ import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-condu
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
 import { languageNameFor } from "@/lib/text/language-name";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { Deck, SlideChart } from "@/lib/presentations/deck";
 import {
   MAX_BULLETS,
@@ -68,20 +69,23 @@ ${AI_SAFETY_BOUNDARIES_EN}${AI_CRISIS_CLASSIFIER_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
 /**
- * Structurally Anthropic.Tool — the SDK type is not imported here (see
- * the header); generate.ts assigns this to an `Anthropic.Tool` binding,
- * which is where the shape is checked.
+ * THE ROUTER'S TOOL SHAPE, WITH THE SCHEMA PINNED.
+ *
+ * lib/ai/providers/types.ts types `inputSchema` as
+ * Record<string, unknown>, because an adapter forwards whatever JSON
+ * Schema it is handed. Here it is narrowed back down: a tool whose
+ * schema lost its `required` list would still be a valid AiToolSpec,
+ * and the model would then be free to answer with a slide that has no
+ * title. This type is what makes that a compile error.
  */
-export type ToolDefinition = {
-  name: string;
-  description: string;
-  input_schema: { type: "object"; properties: Record<string, unknown>; required: string[] };
+export type ToolDefinition = AiToolSpec & {
+  inputSchema: { type: "object"; properties: Record<string, unknown>; required: string[] };
 };
 
 export const WRITE_DECK_TOOL: ToolDefinition = {
   name: "write_deck",
   description: "Return the complete presentation: a title and every slide, in order.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       title: { type: "string", description: "The deck's title, also the first slide's." },

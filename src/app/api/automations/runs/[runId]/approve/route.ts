@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
@@ -32,8 +33,9 @@ export async function POST(_request: Request, props: { params: Promise<{ runId: 
   const runId = params.runId;
   if (!UUID.test(runId)) return refuse("not_found", 404);
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return refuse("not_configured", 503);
+    // NOT "is the Anthropic key set" any more: the step below goes
+    // through the router (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) return refuse("not_configured", 503);
     const supabase = await createClient();
     const {
       data: { user },
@@ -98,7 +100,6 @@ export async function POST(_request: Request, props: { params: Promise<{ runId: 
     if (!taken || taken.length !== 1) return refuse("not_waiting", 409);
 
     const result = await go({
-      apiKey,
       flow: { id: flow.id, user_id: user.id, name: flow.name, boxes: verdict.boxes, cost_limit: flow.cost_limit, time_zone: flow.time_zone },
       runId,
       user: { id: user.id, email: user.email ?? null },

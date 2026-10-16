@@ -1,4 +1,4 @@
-import type { AiRequest, AiToolCall, AiUsage } from "@/lib/ai/providers/types";
+import { AI_TRUNCATED_STOP_REASON, type AiRequest, type AiToolCall, type AiUsage } from "@/lib/ai/providers/types";
 
 /**
  * What every adapter is, and the small amount they can share.
@@ -16,27 +16,12 @@ import type { AiRequest, AiToolCall, AiUsage } from "@/lib/ai/providers/types";
  * headers this app already depends on.
  */
 
-export type AdapterCall = {
-  apiKey: string;
-  /** The PROVIDER's own model id — the catalog id with its namespace
-   *  prefix removed. See wireModelId. */
-  model: string;
-  request: AiRequest;
-  signal: AbortSignal;
-};
-
-export type AdapterResponse = {
-  text: string;
-  toolCalls: AiToolCall[];
-  usage: AiUsage;
-  stopReason: string | null;
-  /** Whatever the provider said it served. Kept verbatim so a silent
-   *  model substitution shows up in the log rather than being normalised
-   *  away. */
-  reportedModel: string;
-};
-
-export type Adapter = (call: AdapterCall) => Promise<AdapterResponse>;
+// AdapterCall, AdapterResponse and Adapter now live in
+// lib/ai/providers/types.ts — see the note there. They moved because
+// complete.ts needs `Adapter` and a TYPE import of this file was enough
+// to put every function below onto the graph of every call site in the
+// app, which broke a test suite that loads one of them beside a module
+// with its own `postJson`.
 
 /** `openai/gpt-5` -> `gpt-5`. Anthropic ids carry no namespace. */
 export function wireModelId(catalogId: string): string {
@@ -142,6 +127,57 @@ export function refuseUnsupported(provider: string, request: AiRequest): void {
       `${provider} has no server-side web search; refusing to answer a research request without it`
     );
   }
+}
+
+/**
+ * A tool choice in the shape OpenAI defined and Groq copied.
+ *
+ * Shared because two adapters send exactly this; Google's is a different
+ * object in a different place and lives in google.ts rather than being
+ * bent into one helper that serves neither clearly.
+ *
+ * Returns undefined when there is nothing to send, so a caller can spread
+ * it conditionally — and when `tools` is empty, because both APIs reject
+ * a tool_choice with no tools and a 400 here would be classified as
+ * bad_request and stop the chain for a request that was fine.
+ */
+export function openAiToolChoice(
+  request: AiRequest
+): "auto" | "required" | { type: "function"; function: { name: string } } | undefined {
+  const choice = request.toolChoice;
+  if (!choice || !request.tools?.length) return undefined;
+  if (choice.type === "auto") return "auto";
+  if (choice.type === "any") return "required";
+  return { type: "function", function: { name: choice.name } };
+}
+
+/**
+ * EVERY VENDOR'S WORD FOR "IT RAN OUT OF ROOM", TURNED INTO OURS.
+ *
+ * WHAT WAS WRONG, and it was live before any of this migration.
+ * lib/verification/truncation.ts decides `truncated` by comparing the
+ * stop reason to Anthropic's "max_tokens", and the three fetch adapters
+ * passed their provider's own word through untouched: OpenAI and Groq
+ * report finish_reason "length", Gemini reports finishReason
+ * "MAX_TOKENS". So an answer cut off at the ceiling by any provider but
+ * Anthropic came back with truncated: false — delivered whole, with no
+ * mark, reading as a short answer. agent-runner.ts already goes through
+ * the router, so this was reachable the day a second key was set.
+ *
+ * Same reasoning as splitPromptTokens above: ONE meaning for a field,
+ * made here, rather than four meanings and a comparison that is right
+ * for one of them.
+ *
+ * A reason this does not recognise is passed through unchanged, which
+ * is what the adapters did for all of them before — so a vendor that
+ * invents a new word is no worse off than today, and the gate asserts
+ * the three it does know.
+ */
+const TRUNCATION_WORDS = new Set(["max_tokens", "length", "MAX_TOKENS"]);
+
+export function normaliseStopReason(raw: string | null | undefined): string | null {
+  if (raw === null || raw === undefined) return null;
+  return TRUNCATION_WORDS.has(raw) ? AI_TRUNCATED_STOP_REASON : raw;
 }
 
 export function emptyUsage(): AiUsage {

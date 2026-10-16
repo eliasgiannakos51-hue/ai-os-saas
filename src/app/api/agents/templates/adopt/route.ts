@@ -26,6 +26,7 @@ import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import { parseAgentDepth, TEMPLATE_FILL_MODEL } from "@/lib/agents/agent-depth";
 import { fillTemplate, TEMPLATE_SLOT } from "@/lib/agents/agent-templates";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { fillTemplateFromRequest } from "@/lib/agents/template-fill";
 
 export const dynamic = "force-dynamic";
@@ -129,11 +130,15 @@ export async function POST(request: Request) {
       }
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
     // NO MODEL CALL AT ALL when the user already typed the subject, or
     // when the service is not configured. Both paths charge nothing,
     // because nothing is spent.
-    const needsFill = Boolean(apiKey) && !subjectOverride;
+    //
+    // "Configured" is asked of the registry, not of one variable's
+    // name: the fill goes through the router now, and a deployment
+    // holding any provider's key can serve it
+    // (lib/ai/providers/registry.ts).
+    const needsFill = anyProviderConfigured(process.env) && !subjectOverride;
 
     const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
@@ -174,7 +179,7 @@ export async function POST(request: Request) {
     let description = String(template.description ?? "");
     let language = "en";
 
-    if (needsFill && apiKey) {
+    if (needsFill) {
       const breaker = await checkAiCallAllowed(
         user.id,
         "agent_build",
@@ -186,11 +191,11 @@ export async function POST(request: Request) {
       }
       try {
         const filled = await fillTemplateFromRequest({
-          apiKey,
           request: userRequest,
           templateTitle: String(template.title),
           templateDescription: String(template.description ?? ""),
           costs,
+          userId: user.id,
         });
         if (filled.ok) {
           subject = filled.fill.subject || userRequest.slice(0, 200);

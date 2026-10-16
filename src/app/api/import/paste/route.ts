@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -54,8 +54,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the call below goes
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts). Still refused before the
+    // hold.
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json({ ok: false, error: "The AI service is not configured." }, { status: 503 });
     }
 
@@ -159,8 +162,7 @@ export async function POST(request: Request) {
     }
     void recordAiCallForDailySpend(estimate.estimatedCredits);
 
-    const anthropic = new Anthropic({ apiKey });
-    const outcome = await extractFromPaste({ anthropic, text, language, costs });
+    const outcome = await extractFromPaste({ text, language, costs, userId: user.id });
 
     // Settled before the outcome is examined, on purpose: extractFromPaste
     // records usage the moment the model answers, so `reason: "invalid"`

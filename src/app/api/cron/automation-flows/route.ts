@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
@@ -43,8 +44,10 @@ type DueFlow = { id: string; user_id: string; name: string; boxes: unknown; cost
 export async function GET(request: Request) {
   const auth = checkCronAuth(request);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return NextResponse.json({ ok: false, error: "not_configured" }, { status: 500 });
+  // NOT "is the Anthropic key set" any more: the run goes through the
+  // router, which can be served by any configured provider
+  // (lib/ai/providers/registry.ts).
+  if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, error: "not_configured" }, { status: 500 });
 
   const admin = createAdminClient();
   const now = new Date();
@@ -139,7 +142,6 @@ export async function GET(request: Request) {
             continue;
           }
           const started = await startRun({
-            apiKey,
             flow: { ...flow, boxes: verdict.boxes },
             user,
             account,
@@ -165,7 +167,7 @@ export async function GET(request: Request) {
     for (const run of (queued ?? []) as QueuedRun[]) {
       const user = await userFor(run.user_id);
       if (!user) continue;
-      if (await runQueued(apiKey, run, user)) report.events++;
+      if (await runQueued(run, user)) report.events++;
     }
 
     return NextResponse.json({ ok: true, ...report });

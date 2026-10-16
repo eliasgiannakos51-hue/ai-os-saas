@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getLocale } from "next-intl/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { loadWeeklyReflectionStats } from "@/lib/reflection";
 import { buildReflectionUserMessage, generateWeeklyReflection, REFLECTION_MODEL } from "@/lib/reflection-agent";
@@ -60,10 +61,12 @@ export async function POST(request: Request) {
     const tableFilter =
       scope === "trading" ? TRADING_SCOPE_TABLES : scope === "product" ? PRODUCT_SCOPE_TABLES : undefined;
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the call below goes
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json(
-        { ok: false, error: "ANTHROPIC_API_KEY is not configured on the server." },
+        { ok: false, error: "No AI provider is configured on the server." },
         { status: 500 }
       );
     }
@@ -159,7 +162,7 @@ export async function POST(request: Request) {
       // The user's own language, the same way api/chat reads it. The
       // reflection prompt used to default to Greek for everyone.
       const locale = await getLocale();
-      reflection = await generateWeeklyReflection(apiKey, userMessage, locale, costs);
+      reflection = await generateWeeklyReflection(userMessage, locale, costs, user.id);
     } catch (err) {
       logApiError("/api/reflection/generate", err, { stage: "reflection_call" });
       await releaseReservation(user.id, reservationId);

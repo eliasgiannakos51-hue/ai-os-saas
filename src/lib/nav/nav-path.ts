@@ -66,6 +66,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "business-health",
   "campaigns",
   "chat",
+  "chats",
   "coding",
   "costs",
   "create",

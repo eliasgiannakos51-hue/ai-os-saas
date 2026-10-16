@@ -142,7 +142,7 @@ console.log("\n== 3. the price, the calls, the route ==");
   ok("the hold comes before the model, and a failure or a stop releases it", route.indexOf("reserveCredits(") < route.indexOf("translatePieces(") && /if \(!outcome\.ok\) \{\s*await releaseReservation\(user\.id, reservationId\);/.test(route));
   ok("an answer with nothing usable is paid for and writes nothing", /if \(outcome\.unanswered >= pieces\.length\) \{\s*const settlement = await settle\(\{ outcome: "unusable" \}\);\s*return NextResponse\.json\(\{ ok: false, code: "unusable"/.test(route));
   ok("the original is never written: one insert of a NEW row each, no update", !/\.update\(/.test(route) && /createAdminClient\(\)\s*\.from\("user_websites"\)\s*\.insert\(\{ user_id: user\.id, name: site\.name,/.test(route) && /\.from\("user_documents"\)\s*\.insert\(\{ user_id: user\.id, title: doc\.title,/.test(route));
-  ok("the calls: usage recorded before the list is read, a wrong list asked once more, a stop ends them all", call.indexOf('costs.record("generation"') < call.indexOf("readTranslations(") && /if \(result\.ok && result\.list === null\) result = await callBatch\(/.test(call) && /stop\.abort\(\);/.test(call) && /if \(response\.stop_reason === "max_tokens"\) return \{ ok: true, list: null \};/.test(call));
+  ok("the calls: usage recorded before the list is read, a wrong list asked once more, a stop ends them all", call.indexOf('costs.record("generation"') < call.indexOf("readTranslations(") && /if \(result\.ok && result\.list === null\) result = await callBatch\(/.test(call) && /stop\.abort\(\);/.test(call) && /if \(outcome\.stopReason === AI_TRUNCATED_STOP_REASON\) return \{ ok: true, list: null \};/.test(call));
 }
 
 console.log("\n== 4. the screen, the words, the switch ==");

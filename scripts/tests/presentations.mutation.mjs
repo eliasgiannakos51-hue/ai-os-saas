@@ -66,7 +66,7 @@ const MUTANTS = [
   {
     name: "the tool is offered, not forced",
     file: GENERATE,
-    from: '        tool_choice: { type: "tool", name: "write_deck" },\n',
+    from: '        toolChoice: { type: "tool", name: "write_deck" },\n',
     to: "",
     expect: "the deck call forces the write_deck tool",
   },
@@ -85,14 +85,14 @@ const MUTANTS = [
   {
     name: "the stop button no longer reaches the provider",
     file: GENERATE,
-    from: "      { signal: params.signal }",
-    to: "      {}",
+    from: "      { userId: params.userId, signal: params.signal }",
+    to: "      { userId: params.userId }",
     expect: "the stop button reaches the provider call",
   },
   {
     name: "usage is recorded only after a successful parse",
     file: GENERATE,
-    from: '  params.costs.record("generation", response.usage, response.model || PRESENTATION_MODEL);\n',
+    from: '  params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);\n',
     to: "",
     expect: "usage is recorded before the deck is parsed",
   },

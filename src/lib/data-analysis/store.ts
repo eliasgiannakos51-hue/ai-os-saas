@@ -81,13 +81,10 @@ export function readUpload(bytes: Buffer, sheet?: string): ReadOutcome {
   };
 }
 
-/** CSV out. Quoted properly — a value containing a comma, a quote or a
- *  newline round-trips back through parseCsv unchanged, which is the
- *  only definition of "export" that means anything. */
-export function toCsv(headers: readonly string[], rows: readonly (readonly string[])[]): string {
-  const cell = (value: string) =>
-    /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-  const lines = [headers.map(cell).join(",")];
-  for (const row of rows) lines.push(row.map((v) => cell(String(v ?? ""))).join(","));
-  return lines.join("\n");
-}
+/* CSV OUT LIVES IN ONE PLACE: lib/download/table-csv.ts. There was a
+ * toCsv here too, and it was the half that forgot to defuse — it quoted
+ * a cell and shipped `=cmd|'/c calc'!A1` to the user's spreadsheet. The
+ * rule in lib/import/csv-parse.ts asks for both halves on the way out,
+ * and two writers is how one of them came to have only one. Removed
+ * rather than patched: scripts/tests/duplicate-implementations.test.mjs
+ * exists because this repository has had this shape before. */

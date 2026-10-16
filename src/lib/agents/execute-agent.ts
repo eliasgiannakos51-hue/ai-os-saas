@@ -213,6 +213,13 @@ export async function executeAgent(params: {
   const { admin, user, agent, triggerSource, apiKey } = params;
   const userId = user.id;
 
+  // STILL THE ANTHROPIC KEY SPECIFICALLY, and that is not an oversight.
+  // The task itself goes through the router now (lib/agents/agent-runner.ts),
+  // but the batch path below submits to Anthropic's Message Batches API,
+  // which has no door in the provider layer — so a run that may be
+  // batched needs this key whatever else is configured. When batching
+  // gets a router door, this becomes anyProviderConfigured like the
+  // routes.
   if (!apiKey) {
     return { ok: false, reason: "no_api_key", message: "The AI service is not configured." };
   }
@@ -352,7 +359,7 @@ export async function executeAgent(params: {
     : "";
 
   let attempts = 0;
-  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, memoryBlock, shouldStop: params.shouldStop });
+  let outcome = await runAgentTask({ prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, memoryBlock, shouldStop: params.shouldStop });
   attempts = 1;
   while (
     !outcome.ok &&
@@ -360,7 +367,7 @@ export async function executeAgent(params: {
     attempts < AGENT_MAX_ATTEMPTS
   ) {
     attempts++;
-    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, memoryBlock, shouldStop: params.shouldStop });
+    outcome = await runAgentTask({ prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId, memoryBlock, shouldStop: params.shouldStop });
   }
 
   // 8. Settle. Always — every attempt above spent real tokens, including

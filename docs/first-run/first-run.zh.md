@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4277, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **640 strings**. The whole product is 4302, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (377)
+## Tier 2 — The labels — skim these (379)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2192,6 +2192,12 @@ DevOps
 
 工作流
 
+**`sidebar.rail.allConversations`**
+
+> EN — All conversations
+
+全部对话
+
 **`sidebar.rail.allTools`**
 
 > EN — All tools
@@ -2201,6 +2207,12 @@ DevOps
 **`sidebar.rail.chat`**
 
 > EN — Chat
+
+对话
+
+**`sidebar.rail.chats`**
+
+> EN — Chats
 
 对话
 
@@ -2446,7 +2458,7 @@ DevOps
 
 重试
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (236)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2820,6 +2832,108 @@ AI 服务当前没有响应。
 
 充值
 
+**`dashboard.chat.deleteConfirm`**
+
+> EN — Delete “{title}”? You'll have a few seconds to undo it.
+
+确定删除“{title}”？你有几秒钟可以撤销。
+
+**`dashboard.chat.deleteFailed`**
+
+> EN — That conversation wasn't deleted. It is still here.
+
+该对话未被删除，它还在。
+
+**`dashboard.chat.groupPinned`**
+
+> EN — Pinned
+
+已置顶
+
+**`dashboard.chat.moved`**
+
+> EN — Moved to {project}.
+
+已移动到 {project}。
+
+**`dashboard.chat.moveFailed`**
+
+> EN — That didn't move. Try again.
+
+没有移动成功，请重试。
+
+**`dashboard.chat.moveToProject`**
+
+> EN — Move to project
+
+移动到项目
+
+**`dashboard.chat.noConversations`**
+
+> EN — No conversations yet.
+
+还没有对话。
+
+**`dashboard.chat.noProjects`**
+
+> EN — No projects yet.
+
+还没有项目。
+
+**`dashboard.chat.pin`**
+
+> EN — Pin
+
+置顶
+
+**`dashboard.chat.pinError`**
+
+> EN — The pin didn't save. Try again.
+
+置顶没有保存成功，请再试一次。
+
+**`dashboard.chat.pinLimitReached`**
+
+> EN — You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.
+
+你已置顶 {limit} 个对话，这是当前方案能置顶的上限。先取消一个，再置顶这个。
+
+**`dashboard.chat.projectFull`**
+
+> EN — That project already holds {limit} things, which is the most it keeps.
+
+该项目已有 {limit} 项，这是它能存放的上限。
+
+**`dashboard.chat.rename`**
+
+> EN — Rename
+
+重命名
+
+**`dashboard.chat.renameError`**
+
+> EN — The new name didn't save — the old one is still there.
+
+新名称没有保存，仍然是原来的名称。
+
+**`dashboard.chat.selectOne`**
+
+> EN — Select {title}
+
+选择“{title}”
+
+**`dashboard.chat.undo`**
+
+> EN — Undo
+
+撤销
+
+**`dashboard.chat.unpin`**
+
+> EN — Unpin
+
+取消置顶
+
 **`language.label`**
 
 > EN — Language
@@ -2831,6 +2945,18 @@ AI 服务当前没有响应。
 > EN — Couldn't save your language — nothing was changed.
 
 无法保存语言设置——没有任何更改。
+
+**`module.actionsFor`**
+
+> EN — Actions for {name}
+
+{name} 的操作
+
+**`module.delete`**
+
+> EN — Delete
+
+删除
 
 **`pwa.install`**
 
@@ -2903,6 +3029,24 @@ Safari 从不会主动提示，三步即可完成。
 > EN — Show me how
 
 看看怎么做
+
+**`dashboard.chat.renameLabel`**
+
+> EN — New name for "{title}"
+
+「{title}」的新名称
+
+**`favorites.add`**
+
+> EN — Add to favorites
+
+添加到收藏
+
+**`favorites.remove`**
+
+> EN — Remove from favorites
+
+从收藏中移除
 
 ### first result
 
@@ -3625,24 +3769,6 @@ Safari 从不会主动提示，三步即可完成。
 > EN — Unlink {name}
 
 取消与 {name} 的关联
-
-**`favorites.add`**
-
-> EN — Add to favorites
-
-添加到收藏
-
-**`favorites.remove`**
-
-> EN — Remove from favorites
-
-从收藏中移除
-
-**`module.delete`**
-
-> EN — Delete
-
-删除
 
 **`module.deleteConfirm`**
 

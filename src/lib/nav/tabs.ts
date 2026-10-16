@@ -7,7 +7,7 @@
  * Chat is Chat; Coding, All tools and every tool — a recent one
  * included — are Tools; Settings is You.
  */
-import { activeRail } from "@/lib/nav/rail";
+import { CHATS_HREF, RAIL_ROWS, activeRail } from "@/lib/nav/rail";
 
 export const TABS = [
   { key: "home", href: "/dashboard/overview" },
@@ -25,10 +25,17 @@ export type TabKey = (typeof TABS)[number]["key"];
  */
 export function activeTab(pathname: string | null): TabKey | null {
   if (!pathname) return null;
-  const rail = activeRail(pathname, [], []);
+  // BOTH ROWS, because activeRail is asked with the DEFAULT rails here
+  // and the switch `chats-page` is not readable from a pure function.
+  // Without the second case /dashboard/chats would light the Tools tab
+  // on a phone — the page is under /dashboard and nothing else claims
+  // it — and the bottom bar would disagree with the sidebar about
+  // where the reader is. Listing both is also right when the switch is
+  // off: /dashboard/chats is simply never reached then.
+  const rail = activeRail(pathname, [], [], [...RAIL_ROWS, { key: "chats" as const, href: CHATS_HREF }]);
   if (rail && "key" in rail) {
     if (rail.key === "new") return "home";
-    if (rail.key === "chat") return "chat";
+    if (rail.key === "chat" || rail.key === "chats") return "chat";
     if (rail.key === "settings") return "you";
     return "tools";
   }

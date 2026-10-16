@@ -111,7 +111,7 @@ const MUTANTS = [
   {
     name: "a game cut at the output ceiling is kept",
     file: CALL,
-    from: '  if (response.stop_reason === "max_tokens") return { ok: false, kind: "unusable", detail: "truncated at the output ceiling" };\n',
+    from: '  if (outcome.stopReason === AI_TRUNCATED_STOP_REASON) return { ok: false, kind: "unusable", detail: "truncated at the output ceiling" };\n',
     to: "",
     expect: "a game cut at the output ceiling is not a game",
   },

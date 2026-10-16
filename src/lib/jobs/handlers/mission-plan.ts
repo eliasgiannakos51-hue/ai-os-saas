@@ -46,8 +46,8 @@ export const missionPlanHandler: JobHandler = async (ctx: JobContext): Promise<J
   // Research first, plan second. Self-limiting: it searches only when the
   // goal depends on external facts, caps itself at 3 searches, and returns
   // nothing on any failure.
-  const research = await researchGoal(ctx.apiKey, goal, ctx.costs);
-  const planResult = await planMission(ctx.apiKey, goal, userContext, ctx.costs, research.findings);
+  const research = await researchGoal(goal, ctx.costs, ctx.userId);
+  const planResult = await planMission(goal, userContext, ctx.costs, research.findings, ctx.userId);
 
   // A vague goal: the Planner asked for clarification instead of inventing
   // generic filler steps. No mission is created, but a real model call

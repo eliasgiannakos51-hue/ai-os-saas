@@ -234,9 +234,21 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
         .filter(Boolean)
     );
   }
-  const CONSTRUCTS = /new Anthropic|anthropic\.messages\.create/;
+  // BOTH DOORS TO A PROVIDER, and the second one is why this had to
+  // change. The seed used to be the SDK's spelling alone, so a call
+  // site that moves onto runCompletion stops counting as reaching a
+  // provider — and this whole section stops looking at the routes
+  // behind it. It is not a stale-entry problem: it is a rate-limit
+  // gate going blind one file at a time, the same shape
+  // token-budgets.test.mjs had (ΛΘ-16). Step 1.4 moves twenty-five
+  // more.
+  const CONSTRUCTS = /new Anthropic|anthropic\.messages\.create|\brunCompletion\s*\(/;
+  check("the seed recognises the SDK door", CONSTRUCTS.test("const r = await anthropic.messages.create({"));
+  check("...and the router door", CONSTRUCTS.test("const outcome = await runCompletion({"));
+  check("...and not a file that merely mentions the word",
+    !CONSTRUCTS.test("// runCompletion is described in this comment"));
   const reaches = new Set(files.filter((f) => CONSTRUCTS.test(read(f))));
-  check(`some module constructs the provider client (${reaches.size})`, reaches.size >= 10,
+  check(`some module reaches a provider call (${reaches.size})`, reaches.size >= 10,
     "if this is 0 the whole section is inspecting nothing");
   for (let changed = true; changed; ) {
     changed = false;

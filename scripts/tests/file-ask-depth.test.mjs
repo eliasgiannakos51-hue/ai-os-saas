@@ -183,7 +183,7 @@ checkList(
 );
 check("the handler plans passes", /planContext\(files\)/.test(handlerCode));
 check("and branches on how many there are", /context\.passes\.length === 1/.test(handlerCode));
-check("one pass is still exactly one call", /max_tokens: MAX_OUTPUT_TOKENS[\s\S]{0,300}?context\.passes\[0\]\.text/.test(handlerCode));
+check("one pass is still exactly one call", /maxTokens: MAX_OUTPUT_TOKENS[\s\S]{0,300}?context\.passes\[0\]\.text/.test(handlerCode));
 check("several passes are read in a loop", /for \(const \[index, pass\] of context\.passes\.entries\(\)\)/.test(handlerCode));
 check("and combined afterwards", /synthesisSystemPrompt\(/.test(handlerCode));
 // The synthesis sees model output derived from the user's files, which is
@@ -234,7 +234,12 @@ check("the route no longer sizes from one buffer", !/context\.charCount/.test(ro
 // Every call records onto the SAME accumulator, so one question is one
 // charge however many calls it took.
 check("every call records its usage", (handlerCode.match(/ctx\.costs\.record\("generation"/g) ?? []).length === 3);
-check("and billing-coverage declares all three", /"src\/lib\/jobs\/handlers\/file-ask\.ts": \{\s*calls: 3/.test(readFileSync("scripts/tests/billing-coverage.test.mjs", "utf8")));
+// RE-ANCHORED 2026-10-15: the handler left the SDK, so it left
+// billing-coverage's DECLARED table (which is keyed on
+// `messages.create`) and moved to its ROUTED table. What has to stay
+// true is the same sentence — that this file's billing is written down
+// somewhere a reader will find it — so that is what is checked.
+check("and billing-coverage says how it bills", /"src\/lib\/jobs\/handlers\/file-ask\.ts": \{\s*note: "/.test(readFileSync("scripts/tests/billing-coverage.test.mjs", "utf8")));
 // Two calls that can be skipped, and both are skipped for a reason.
 check("no synthesis when only one part answered", /partials\.length === 1/.test(handlerCode));
 check("and none when no part did", /partials\.length === 0/.test(handlerCode));

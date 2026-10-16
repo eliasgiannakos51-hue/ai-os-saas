@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createClient } from "@/lib/supabase/server";
 import { MISSION_AGENT_MODEL, reviewMission } from "@/lib/mission-agents";
 import { logApiError } from "@/lib/log-error";
@@ -35,10 +36,12 @@ export const maxDuration = 90; // @function-limit 90
 // separate column for it, per the given schema).
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // NOT "is the Anthropic key set" any more: the calls below go
+    // through the router, which can be served by any configured
+    // provider (lib/ai/providers/registry.ts).
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json(
-        { ok: false, error: "ANTHROPIC_API_KEY is not configured on the server." },
+        { ok: false, error: "No AI provider is configured on the server." },
         { status: 500 }
       );
     }
@@ -173,10 +176,10 @@ export async function POST(request: Request) {
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
       reviewText = await reviewMission(
-        apiKey,
         typedMission.goal,
         steps.map((s) => ({ text: s.text, moduleTitle: s.moduleTitleKey })),
-        costs
+        costs,
+        user.id
       );
     } catch (err) {
       logApiError("/api/mission/review", err, { stage: "reviewer_call" });

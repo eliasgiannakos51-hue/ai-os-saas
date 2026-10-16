@@ -68,9 +68,13 @@ const LEDGER = {
     exempt:
       "the account pins and unpins its own conversations directly; src/lib/chat/pin-limits.ts calls the cap a usability floor, not a cost, and nothing is charged or sold per pin",
   },
-  // Counted per calendar month from rows the account may still DELETE:
-  // the create is the server's, the delete is ΑΣ-4.13's.
-  deepResearch: { rows: ["research_reports"], window: true, countedIn: "src/app/api/research/route.ts", countedBy: '.from("research_reports")', open: "ΑΣ-4.13" },
+  // WAS the rows the account may still DELETE, which is what ΑΣ-4.13
+  // owned: the create was the server's and the delete handed the month's
+  // allowance back. Since 2026-10-15 the month is counted from the
+  // append-only cost log instead, which the account can neither write
+  // nor delete from (20261012000000_cost_log_server_reads.sql took its
+  // SELECT away too), so there is no open row left to name.
+  deepResearch: { counter: ["ai_cost_log"], countedIn: "src/lib/research/research-usage.ts", countedBy: '.from("ai_cost_log")' },
   aiAgents: { rows: ["user_agents"], countedIn: "src/lib/agents/agent-cap.ts", countedBy: '.from("user_agents")' },
   files: { rows: ["user_files"], countedIn: "src/lib/files/ingest.ts", countedBy: '.from("user_files")' },
   // The rows are held; the bytes in the bucket are ΑΣ-5.5's.

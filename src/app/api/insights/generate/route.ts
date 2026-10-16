@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { accountHasCapability } from "@/lib/billing/capability-gate";
@@ -84,10 +83,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, error: "The AI service is not configured." }, { status: 503 });
-    }
+    // NO KEY CHECK HERE ANY MORE. narrateFindings goes through the
+    // provider router, which picks from configuration and answers
+    // kind "no_provider" when nothing is set up — so asking for
+    // ANTHROPIC_API_KEY by name would be one provider's name standing
+    // in for "is any of them configured", and would refuse on a
+    // deployment set up with a different one. A narration that cannot
+    // be made falls back to the detectors' own true sentences, which is
+    // better than a 503 on a page whose findings are already computed.
 
     const limited = await checkRateLimit({
       scope: "insights_generate",
@@ -216,8 +219,7 @@ export async function POST(request: Request) {
     }
     void recordAiCallForDailySpend(estimate.estimatedCredits);
 
-    const anthropic = new Anthropic({ apiKey });
-    const narrated = await narrateFindings({ anthropic, findings, language, costs });
+    const narrated = await narrateFindings({ findings, language, costs, userId: user.id, signal: request.signal });
 
     const settlement = await settleReservation({
       userId: user.id,

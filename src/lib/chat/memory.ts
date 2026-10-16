@@ -1,5 +1,5 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
@@ -61,7 +61,6 @@ const BRAND_EXTRACTION_RULE =
 // runs on serverless functions with no guaranteed post-response background
 // execution) but never allowed to fail the chat itself.
 export async function extractAndStoreMemory({
-  apiKey,
   supabase,
   userId,
   conversationId,
@@ -70,7 +69,6 @@ export async function extractAndStoreMemory({
   costs,
   brand = false,
 }: {
-  apiKey: string;
   supabase: SupabaseClient;
   userId: string;
   conversationId: string;
@@ -92,25 +90,33 @@ export async function extractAndStoreMemory({
     // Still recorded for daily spend visibility (see
     // lib/ai-circuit-breaker.ts), since it IS a second real Claude call.
     void recordAiCallForDailySpend(1);
-    const anthropic = new Anthropic({ apiKey });
-    const result = await anthropic.messages.create({
-      model: MEMORY_MODEL,
-      max_tokens: MEMORY_MAX_TOKENS,
-      system: brand ? `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` : EXTRACTION_SYSTEM_PROMPT,
-      messages: [
-        {
-          role: "user",
-          content: `User: ${userMessage}\n\nAssistant: ${assistantMessage}`,
-        },
-      ],
-    });
-
-    costs?.record("other", result.usage, result.model || MEMORY_MODEL);
-
-    const textBlock = result.content.find(
-      (block): block is Anthropic.TextBlock => block.type === "text"
+    // THROUGH THE ROUTER, NOT THE SDK (step 1.4). No tools here — this
+    // one asks for a line of text or the word NONE — so the only thing
+    // that travels is the prompt. A provider with no key is not in the
+    // chain (lib/ai/providers/registry.ts).
+    const outcome = await runCompletion(
+      {
+        purpose: "summarisation",
+        model: MEMORY_MODEL,
+        maxTokens: MEMORY_MAX_TOKENS,
+        system: [{ type: "text", text: brand ? `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` : EXTRACTION_SYSTEM_PROMPT }],
+        messages: [
+          {
+            role: "user",
+            content: `User: ${userMessage}\n\nAssistant: ${assistantMessage}`,
+          },
+        ],
+      },
+      { userId }
     );
-    const extracted = textBlock?.text.trim() ?? "";
+    // Nothing came back, so there is nothing to record and nothing to
+    // store. The chat reply it rode behind has already been sent — this
+    // was never allowed to fail it.
+    if (!outcome.ok) return;
+
+    costs?.record("other", outcome.usage, outcome.reportedModel || outcome.model);
+
+    const extracted = outcome.text.trim();
 
     if (!extracted || extracted.toUpperCase() === "NONE") return;
 

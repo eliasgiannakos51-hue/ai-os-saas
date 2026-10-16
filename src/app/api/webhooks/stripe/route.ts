@@ -469,18 +469,29 @@ export async function POST(request: Request) {
             session.metadata?.supabase_user_id,
             event.id
           );
-        } else if (session.mode === "payment") {
-          // An add-on pack and a credit pack are both one-off payments,
-          // and they are told apart by the metadata the checkout put on
+        } else if (session.mode === "payment" && !session.metadata?.addon_slug) {
+          // A credit pack. An add-on pack is also a one-off payment, and
+          // the two are told apart by the metadata the checkout put on
           // the session — not by the amount, which two products could
-          // share.
-          if (session.metadata?.addon_slug) await grantAddon(session, event.id);
-          else await grantPurchasedCredits(session, event.id);
+          // share. The add-on is granted once, below, in the one place
+          // that covers both modes.
+          await grantPurchasedCredits(session, event.id);
         }
-        // A SUBSCRIPTION CHECKOUT CAN ALSO BE AN ADD-ON. The branch above
-        // syncs the plan; a session carrying addon_slug is a recurring
-        // add-on bought on top of it, and without this it would be paid
-        // for and never granted.
+        // AN ADD-ON ARRIVES IN BOTH MODES, AND IS GRANTED EXACTLY ONCE.
+        // A one-off add-on is mode "payment"; a recurring one rides a
+        // subscription checkout, where the branch above syncs the plan
+        // and nothing else would grant it.
+        //
+        // IT USED TO BE GRANTED TWICE for a one-off: once inside the
+        // "payment" branch and once here. Nothing was double-granted —
+        // the unique constraint on account_addons.stripe_event_id
+        // refused the second insert and grantCredits refused the second
+        // grant on its session key — but the second pass through
+        // grantAddon logged "duplicate addon credit grant suppressed" on
+        // every legitimate credit add-on purchase. A diagnostic that
+        // fires on the happy path is worse than none: it trains whoever
+        // reads the log to scroll past the line that will one day mean
+        // something.
         if (session.metadata?.addon_slug) await grantAddon(session, event.id);
         break;
       }

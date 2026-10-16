@@ -307,7 +307,9 @@
       "label": "主菜单",
       "saveFailed": "无法保存此更改，请重试。",
       "recentChats": "最近的对话",
-      "untitledChat": "新对话"
+      "untitledChat": "新对话",
+      "chats": "对话",
+      "allConversations": "全部对话"
     },
     "tabs": {
       "home": "首页",
@@ -1365,7 +1367,7 @@
       "pin": "置顶",
       "unpin": "取消置顶",
       "rename": "重命名",
-      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。",
+      "deleteConfirm": "确定删除“{title}”？你有几秒钟可以撤销。",
       "pinLimitReached": "你已置顶 {limit} 个对话，这是当前方案能置顶的上限。先取消一个，再置顶这个。",
       "pinError": "置顶没有保存成功，请再试一次。",
       "renameError": "新名称没有保存，仍然是原来的名称。",
@@ -1449,7 +1451,15 @@
         "openInFiles": "在文件中打开",
         "memoryUsed": "来自记忆（{count}）",
         "manageMemory": "Ionexa 记住的内容"
-      }
+      },
+      "deleteFailed": "该对话未被删除，它还在。",
+      "undo": "撤销",
+      "moveToProject": "移动到项目",
+      "noProjects": "还没有项目。",
+      "moved": "已移动到 {project}。",
+      "moveFailed": "没有移动成功，请重试。",
+      "projectFull": "该项目已有 {limit} 项，这是它能存放的上限。",
+      "selectOne": "选择“{title}”"
     },
     "create": {
       "title": "创建任何内容",
@@ -3614,6 +3624,19 @@
         "stopped": "已停止。没有扣费。",
         "failed": "出了点问题。请重试。"
       }
+    },
+    "chats": {
+      "title": "对话",
+      "searchPlaceholder": "搜索你的对话",
+      "searching": "正在搜索说过的内容…",
+      "searchedContent": "标题，以及最新的 {scanned} 条消息。",
+      "searchTruncated": "可能还有更早的消息未被搜索到。",
+      "noMatches": "没有对话匹配“{query}”。",
+      "selectedCount": "已选 {count} 个",
+      "deleteSelected": "删除所选",
+      "deleteSelectedConfirm": "确定删除 {count} 个对话？每一个你都有几秒钟可以撤销。",
+      "deleteSelectedFailed": "没有全部删除。还在的就是没删掉的。",
+      "atCap": "最新的 {cap} 个。搜索可以找到更早的。"
     }
   },
   "module": {
@@ -4345,6 +4368,11 @@
       "is": "根据一段描述，做一个属于你自己的小游戏。",
       "does": "先用五个框展示计划；用文字修改其中任意一个，然后写出游戏，你就在这里用键盘或触摸来玩。",
       "doesNot": "它看不到你的账户，也不会连接互联网：游戏在隔离环境中运行，你下载的文件也一样。"
+    },
+    "chats": {
+      "is": "你所有的对话，都在一个地方。",
+      "does": "按最新排列，既搜索标题也搜索对话中说过的内容，并可以重命名、置顶、归档或删除其中任意一个。",
+      "doesNot": "搜索不会读取曾经发出的每一条消息：它只读取最新的 400 条，并在你输入时说明这一点。"
     }
   },
   "helpCentre": {
@@ -4395,7 +4423,8 @@
     "aiTransparencyDescription": "Ionexa 使用哪些 AI 模型、它们做什么，以及它们能看到哪些数据。",
     "contactDescription": "与 Ionexa AI 团队取得联系。",
     "verifyEmail": "确认邮箱",
-    "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。"
+    "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。",
+    "chats": "对话"
   },
   "errors": {
     "retry": "重试",
@@ -4996,7 +5025,7 @@
       "rowsPerModule": "聊天中每个模块 {count} 行"
     },
     "startChat": "在此项目中开始聊天",
-    "chatFixed": "一次对话属于它开始时所在的项目，终其一生不变。",
+    "chatFixed": "对话在你选择的项目中开始，之后可以从它的“⋯”菜单移动。",
     "noGoal": "还没有写目标。",
     "untitled": "无标题",
     "delete": "删除",

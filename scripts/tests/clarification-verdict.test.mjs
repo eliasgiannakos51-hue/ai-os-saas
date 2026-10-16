@@ -174,7 +174,7 @@ console.log("\n== 4. the cheap path still leaves a row ==");
 console.log("\n== 5. chat stops before it holds anything ==");
 {
   const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
-  const checkAt = chat.indexOf("checkNeedsClarification(apiKey, \"chat\"");
+  const checkAt = chat.indexOf("checkNeedsClarification(\"chat\"");
   const reserveAt = chat.indexOf("await reserveCredits(");
   check("chat runs the check", checkAt > 0);
   check("chat reserves credits somewhere", reserveAt > 0);

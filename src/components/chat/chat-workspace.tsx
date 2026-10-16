@@ -106,6 +106,7 @@ export function ChatWorkspace({
   siteWall = null,
   attachments = false,
   greeting = null,
+  chatsPage = false,
 }: {
   initialConversations: ChatConversation[];
   /** Conversation to open on load — the `?c=` deep link a starred
@@ -153,6 +154,21 @@ export function ChatWorkspace({
   /** The name the empty Chat greets with (lib/greeting.ts, greetingName),
    *  or null when it is not known — then the greeting has no name. */
   greeting?: string | null;
+  /**
+   * The switch `chats-page` (owner, 2026-10-15): the conversation list
+   * that lives INSIDE this screen is not drawn, because the app's own
+   * sidebar now opens, renames, pins, moves and deletes conversations,
+   * and the Chats page holds every one of them. ΣΥΣΤΗΜΑ DESIGN §3 says
+   * there is one sidebar; until today there were two on this screen.
+   *
+   * THE DRAWER IS NOT DELETED, IT IS NOT RENDERED, and that is what a
+   * switch is for: «Πώς γυρίζει πίσω» has to be one press on
+   * /dashboard/system-health, and it cannot be if the code it would go
+   * back to is gone. components/chat/conversation-sidebar.tsx is
+   * removed in the round that removes this switch, not in the one that
+   * adds it.
+   */
+  chatsPage?: boolean;
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -889,7 +905,7 @@ export function ChatWorkspace({
           and for why `md` was the wrong answer to the same question. */}
       <div
         className={`absolute inset-y-0 start-0 z-30 xl:relative xl:z-auto ${
-          sidebarOpen ? "flex" : "hidden"
+          sidebarOpen && !chatsPage ? "flex" : "hidden"
         }`}
       >
         <ConversationSidebar
@@ -915,7 +931,7 @@ export function ChatWorkspace({
           `md:hidden` while the drawer itself became an overlay below xl,
           so between 768 and 1279 the drawer covered the thread with no
           way to dismiss it except the toggle. */}
-      {sidebarOpen && (
+      {sidebarOpen && !chatsPage && (
         <button
           type="button"
           aria-label={t("hideConversations")}
@@ -932,6 +948,12 @@ export function ChatWorkspace({
               nobody could find it. It now carries a VISIBLE text label
               (the icon alone never said what it did) and the real Tooltip
               component for the longer explanation. */}
+          {/* THE TOGGLE GOES WITH WHAT IT TOGGLES. With `chats-page` on
+              there is no drawer to open, so a button whose whole job is
+              to open it would be a control that does nothing — the
+              exact defect its own comment below records being fixed
+              once already. */}
+          {!chatsPage && (
           <Tooltip
             content={sidebarOpen ? t("hideConversationsHint") : t("showConversationsHint")}
             side="top"
@@ -955,6 +977,7 @@ export function ChatWorkspace({
               </span>
             </button>
           </Tooltip>
+          )}
 
           {/* THE "?" FOR THE WHOLE PAGE, in the one row that is always
               here. Chat is <main className="h-[calc(100vh-4rem)]"> — full

@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { CLASSIFIER_MODULES, getClassifierModule, moduleHref } from "@/lib/classifier-modules";
@@ -57,11 +58,11 @@ Rules:
 ${AI_SAFETY_BOUNDARIES_EN}${AI_CRISIS_CLASSIFIER_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
-const ROUTE_ENTRY_TOOL: Anthropic.Tool = {
+const ROUTE_ENTRY_TOOL: AiToolSpec = {
   name: "route_entry",
   description:
     "Classify the user's message into exactly one Ionexa AI module (or none) and extract the structured fields for that module's table.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       module: {
@@ -120,7 +121,6 @@ export type MissionStepRunResult =
 // deducts, same "only after confirmed success" pattern as every other
 // AI-calling endpoint in this app.
 export async function runMissionStepForUser(
-  apiKey: string,
   admin: SupabaseClient,
   userId: string,
   stepText: string,
@@ -128,12 +128,14 @@ export async function runMissionStepForUser(
   priorStepsContext: string,
   costs?: CostAccumulator
 ): Promise<MissionStepRunResult> {
-  const anthropic = new Anthropic({ apiKey });
   let toolInput: RouteEntryInput;
   try {
-    const response = await anthropic.messages.create({
+    // THROUGH THE ROUTER, NOT THE SDK (step 1.4). The key stopped being
+    // a parameter; the user id travels instead, and only to the log.
+    const outcome = await runCompletion({
+      purpose: "classification",
       model: MODEL,
-      max_tokens: 1024,
+      maxTokens: 1024,
       // Same shape as lib/jobs/handlers/create.ts: this file's own copy of
       // the module catalogue measures 7,147 characters (~1,787 tokens) and
       // never varies, while both additions after it are per-step and each
@@ -147,14 +149,17 @@ export async function runMissionStepForUser(
       }),
       messages: [{ role: "user", content: stepText }],
       tools: [ROUTE_ENTRY_TOOL],
-      tool_choice: { type: "tool", name: "route_entry" },
-    });
+      // The tool's input IS the routing decision: which module, which
+      // fields. Left to decide, the model answers in prose and the step
+      // files nothing after the tokens were spent.
+      toolChoice: { type: "tool", name: "route_entry" },
+      requires: ["tool_calling"],
+    }, { userId });
+    if (!outcome.ok) return { ok: false, error: "AI classification request failed." };
 
-    costs?.record("classification", response.usage, response.model || MODEL);
+    costs?.record("classification", outcome.usage, outcome.reportedModel || outcome.model);
 
-    const toolUse = response.content.find(
-      (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
-    );
+    const toolUse = outcome.toolCalls.find((call) => call.name === "route_entry");
     if (!toolUse) return { ok: false, error: "The model did not return a classification." };
     toolInput = toolUse.input as RouteEntryInput;
   } catch (err) {

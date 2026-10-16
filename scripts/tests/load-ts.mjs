@@ -409,14 +409,70 @@ export async function loadTsLinked(entry) {
   return mod;
 }
 
+/**
+ * THE BUNDLE, PLUS A SIBLING BUNDLE FOR EVERY MODULE IT LOADS LAZILY.
+ *
+ * `collect` follows STATIC imports and inlines them. A DYNAMIC one —
+ * `await import("@/lib/…")` — is left in the emitted text, and `@/…` is
+ * not a specifier Node can resolve from inside
+ * node_modules/.ionexa-test-bundles/. The call therefore threw
+ * "Cannot find package '@/lib'" at the moment it ran.
+ *
+ * That was invisible for as long as nothing loaded here did it. Then the
+ * provider router made its four adapters lazy on purpose (ΛΘ-17: a
+ * static import put the vendor SDK on the graph of every call site and
+ * broke the gates that load them), and every migrated module inherited
+ * a runCompletion that cannot reach an adapter. The failure was silent
+ * where it mattered most: lib/chat/memory.ts wraps its call in a
+ * try/catch that must never fail a chat turn, so brand-memory.itest.mjs
+ * recorded zero rows and reported eight dead assertions instead of one
+ * dead import.
+ *
+ * So each lazily-imported module gets its OWN bundle beside this one and
+ * the specifier is rewritten to point at it. The lazy import stays lazy:
+ * nothing is inlined, so loadTs's refusal of vendor packages is
+ * untouched, and a module nobody loads at runtime is still never loaded.
+ *
+ * Named by path from src/, not by basename: two modules called x.ts in
+ * different folders would otherwise write to one file and the second
+ * would silently be the first.
+ *
+ * loadTs and loadTsLinked do NOT do this, deliberately. They import from
+ * a data: URL with nowhere to put a sibling, and a build gate that
+ * reached an adapter would be pulling a vendor package into the build —
+ * which is the thing ΛΘ-17 exists to prevent. There it still throws, by
+ * design and loudly.
+ */
+function writeBundleTree(entry, dir) {
+  const DYNAMIC = /\bimport\(\s*["'](@\/[^"']+)["']\s*\)/g;
+  const nameFor = (abs) => path.relative(path.join(ROOT, "src"), abs).replace(/\W/g, "_") + ".mjs";
+  const written = new Map();
+  const queue = [path.resolve(entry)];
+  let entryFile = null;
+  while (queue.length > 0) {
+    const abs = queue.shift();
+    if (written.has(abs)) continue;
+    const fileName = nameFor(abs);
+    written.set(abs, fileName);
+    const text = bundleOf(abs, true).replace(DYNAMIC, (whole, spec) => {
+      const target = resolveSpecifier(spec, abs);
+      if (!target) return whole;
+      if (!written.has(target)) queue.push(target);
+      return `import("./${nameFor(target)}")`;
+    });
+    writeFileSync(path.join(dir, fileName), text);
+    if (entryFile === null) entryFile = fileName;
+  }
+  return entryFile;
+}
+
 export async function loadTsWithDeps(entry) {
   const key = `deps:${path.resolve(entry)}`;
   if (cache.has(key)) return cache.get(key);
 
   const dir = path.join(ROOT, "node_modules", ".ionexa-test-bundles");
   mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `${path.basename(entry).replace(/\W/g, "_")}.mjs`);
-  writeFileSync(file, bundleOf(entry, true));
+  const file = path.join(dir, writeBundleTree(entry, dir));
   // pathToFileURL, not the bare path. `import("/abs/path.mjs?v=1")` is
   // accepted on POSIX Node 22 but is not a valid module specifier — the
   // query string makes it look like a bare specifier to stricter

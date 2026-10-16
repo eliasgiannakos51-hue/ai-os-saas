@@ -2,14 +2,14 @@ import "server-only";
 import {
   flattenContent,
   flattenSystem,
+  normaliseStopReason,
+  openAiToolChoice,
   postJson,
   refuseUnsupported,
   splitPromptTokens,
   wireModelId,
-  type AdapterCall,
-  type AdapterResponse,
 } from "@/lib/ai/providers/adapters/shared";
-import type { AiToolCall } from "@/lib/ai/providers/types";
+import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
 
 /**
  * OPENAI, over the Chat Completions API.
@@ -69,6 +69,8 @@ export async function callOpenAi(call: AdapterCall): Promise<AdapterResponse> {
       type: "function",
       function: { name: t.name, description: t.description, parameters: t.inputSchema },
     }));
+    const choice = openAiToolChoice(request);
+    if (choice !== undefined) body.tool_choice = choice;
   }
 
   const raw = (await postJson({
@@ -104,7 +106,7 @@ export async function callOpenAi(call: AdapterCall): Promise<AdapterResponse> {
       // OpenAI does not charge a write premium and does not report one,
       // so a confident 0 here would claim a measurement nobody made.
     },
-    stopReason: choice?.finish_reason ?? null,
+    stopReason: normaliseStopReason(choice?.finish_reason),
     reportedModel: raw.model ?? call.model,
   };
 }

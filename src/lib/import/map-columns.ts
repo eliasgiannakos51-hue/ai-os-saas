@@ -1,5 +1,6 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { IMPORT_MAPPER_MODEL } from "@/lib/insights/insight-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
@@ -46,10 +47,10 @@ export type MappingProposal = {
   summary: string;
 };
 
-const MAP_TOOL: Anthropic.Tool = {
+const MAP_TOOL: AiToolSpec = {
   name: "map_spreadsheet",
   description: "Decide what this spreadsheet is and which column maps onto which field.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       target: {
@@ -121,32 +122,46 @@ export type MappingOutcome =
   | { ok: false; reason: "no_match" | "invalid" | "api_error" };
 
 export async function proposeMapping(params: {
-  anthropic: Anthropic;
   parsed: ParsedCsv;
   sample: string[][];
   costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
 }): Promise<MappingOutcome> {
-  let response: Anthropic.Message;
+  // THROUGH THE ROUTER, NOT THE SDK (step 1.4). No client is handed in
+  // any more: which provider serves this is a configuration question
+  // (lib/ai/providers/registry.ts), and a provider with no key is not
+  // in the chain at all. `purpose: "create"` is shared with
+  // lib/import/paste.ts on purpose — an operator routing "the import"
+  // somewhere else wants one knob for the feature, not one per file.
+  let outcome;
   try {
-    response = await params.anthropic.messages.create({
-      model: IMPORT_MAPPER_MODEL,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      system: mapperSystemPrompt(),
-      tools: [MAP_TOOL],
-      tool_choice: { type: "tool", name: MAP_TOOL.name },
-      messages: [
-        { role: "user", content: wrapUntrusted(buildMapperInput(params.parsed, params.sample)) },
-      ],
-    });
+    outcome = await runCompletion(
+      {
+        purpose: "create",
+        model: IMPORT_MAPPER_MODEL,
+        maxTokens: MAX_OUTPUT_TOKENS,
+        system: [{ type: "text", text: mapperSystemPrompt() }],
+        tools: [MAP_TOOL],
+        // The tool's input IS the mapping. A model left to decide
+        // describes the spreadsheet in prose and the import offers the
+        // person nothing to confirm.
+        toolChoice: { type: "tool", name: MAP_TOOL.name },
+        requires: ["tool_calling"],
+        messages: [
+          { role: "user", content: wrapUntrusted(buildMapperInput(params.parsed, params.sample)) },
+        ],
+      },
+      { userId: params.userId }
+    );
   } catch {
     return { ok: false, reason: "api_error" };
   }
+  if (!outcome.ok) return { ok: false, reason: "api_error" };
 
-  params.costs.record("generation", response.usage, response.model || IMPORT_MAPPER_MODEL);
+  params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
-  const use = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === MAP_TOOL.name
-  );
+  const use = outcome.toolCalls.find((call) => call.name === MAP_TOOL.name);
   if (!use) return { ok: false, reason: "invalid" };
 
   const input = use.input as { target?: unknown; summary?: unknown; columns?: unknown };

@@ -72,7 +72,7 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
 
   if (!skipClarification) {
     try {
-      const clarification = await checkNeedsClarification(ctx.apiKey, "create", message, ctx.costs);
+      const clarification = await checkNeedsClarification("create", message, ctx.costs, null, ctx.userId);
       clarificationRecord = clarificationMetadata(clarification);
       if (clarification.needsClarification) {
         return {

@@ -35,9 +35,11 @@ import {
   readRecentPrefs,
   recentTools,
   savedEvents,
-  type RecentConversation,
   type RecentTool,
+  type SidebarConversation,
+  type SidebarProject,
 } from "@/lib/nav/recent-tools";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export default async function DashboardLayout({
   children,
@@ -59,7 +61,17 @@ export default async function DashboardLayout({
 
   // THE PAGES NAMED BY THEIR SWITCH (lib/nav/switched-names.ts), read
   // beside the plan rather than after it: one more read, not one more wait.
-  const [plan, switchedOn] = await Promise.all([resolveEffectivePlan(user), switchedOnFor(user.email)]);
+  // THE SWITCH `chats-page` IS READ BESIDE THESE, NOT AFTER THEM. As
+  // its own `await` it was this layout's fourth wait in sequence, one
+  // over what scripts/tests/navigation-cost.test.mjs allows — and the
+  // layout is on EVERY dashboard page, so a round trip added here is a
+  // round trip added to all 51 of them. The chat page learned the same
+  // thing with `chat-opens-tools`.
+  const [plan, switchedOn, chatsPage] = await Promise.all([
+    resolveEffectivePlan(user),
+    switchedOnFor(user.email),
+    isFeatureOn("chats-page", user),
+  ]);
   const isAdmin = isAdminEmail(user.email);
 
   // getOrInitCredits creates a service-role Supabase client under the hood
@@ -111,10 +123,16 @@ export default async function DashboardLayout({
   // the five this person touched last, through their own session, in the
   // same wave as Recent tools. A failed read is an empty list and no
   // heading, never a broken sidebar.
-  let conversations: RecentConversation[] = [];
+  let conversations: SidebarConversation[] = [];
+  // THE PROJECTS «Μεταφορά σε Έργο» CAN FILE A CONVERSATION INTO, read
+  // here rather than fetched: api/projects has only POST and DELETE —
+  // there is no GET — and the sidebar is rendered on the server anyway.
+  // Active ones only; a finished or archived project is not somewhere
+  // you are still putting things.
+  let projects: SidebarProject[] = [];
   try {
     const since = new Date(Date.now() - RECENT_WINDOW_DAYS * 86_400_000).toISOString();
-    const [settled, saved, chats] = await Promise.all([
+    const [settled, saved, chats, ownProjects] = await Promise.all([
       // THE SERVER'S READ: the account cannot read ai_cost_log itself
       // (20261012000000_cost_log_server_reads.sql). Two columns, its own rows.
       createAdminClient()
@@ -133,13 +151,34 @@ export default async function DashboardLayout({
         .limit(2000),
       supabase
         .from("chat_conversations")
-        .select("id, title")
+        // is_pinned and updated_at joined the two columns that were
+        // here when the rows became more than names (2026-10-15): the
+        // pinned ones group above the rest, and the Chats page shows
+        // when each last changed.
+        .select("id, title, is_pinned, updated_at")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
         .limit(RECENT_CONVERSATIONS),
+      chatsPage
+        ? supabase
+            .from("projects")
+            .select("id, name")
+            .eq("user_id", user.id)
+            .eq("status", "active")
+            .order("created_at", { ascending: false })
+            .limit(50)
+        : Promise.resolve({ data: [], error: null }),
     ]);
     if (!chats.error) {
-      conversations = (chats.data ?? []).map((c) => ({ id: String(c.id), title: String(c.title ?? "") }));
+      conversations = (chats.data ?? []).map((c) => ({
+        id: String(c.id),
+        title: String(c.title ?? ""),
+        is_pinned: Boolean(c.is_pinned),
+        updated_at: String(c.updated_at ?? ""),
+      }));
+    }
+    if (!ownProjects.error) {
+      projects = (ownProjects.data ?? []).map((p) => ({ id: String(p.id), name: String(p.name ?? "") }));
     }
     if (settled.error) throw settled.error;
     if (saved.error) throw saved.error;
@@ -185,7 +224,15 @@ export default async function DashboardLayout({
                 updating. Renders nothing while the connection is fine. */}
             <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} recent={recent} conversations={conversations} />
+              <Sidebar
+                email={user.email ?? ""}
+                planName={plan.name}
+                isOwner={isAdmin}
+                recent={recent}
+                conversations={conversations}
+                projects={projects}
+                chatsPage={chatsPage}
+              />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Below the top bar and ABOVE the page transition, so it
@@ -205,8 +252,8 @@ export default async function DashboardLayout({
                     had nothing to land on, and so did the page's own
                     outline.
                     Putting it in the layout is what makes it true for all
-                    50 pages instead of 8, and the four components below
-                    COUNT: 50 /page\.tsx$/ in src/app/dashboard/
+                    51 pages instead of 8, and the four components below
+                    COUNT: 51 /page\.tsx$/ in src/app/dashboard/
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}

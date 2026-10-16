@@ -145,6 +145,19 @@ const LOCALE_ALLOWED = new Set([
   "de:sidebar.rail.chat",
   "es:sidebar.rail.chat",
   "it:sidebar.rail.chat",
+  // And its plural, for the row that lists them all (2026-10-15).
+  // German and Spanish form it the English way — die Chats, los chats —
+  // so the word is identical twice over and not for want of
+  // translating. Italian's is invariant ("Chat"), which differs from
+  // the English "Chats" on its own and needs no entry here.
+  "de:sidebar.rail.chats",
+  "es:sidebar.rail.chats",
+  // The same word again, as the page's own heading and its browser
+  // tab. One word, three places, and the same reason in all three.
+  "de:dashboard.chats.title",
+  "es:dashboard.chats.title",
+  "de:pageTitle.chats",
+  "es:pageTitle.chats",
   // The phone's bottom bar names the same place the same way (design
   // D.10), and Italian's own apps call the start screen "Home".
   "de:sidebar.tabs.chat",

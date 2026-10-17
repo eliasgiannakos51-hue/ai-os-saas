@@ -303,23 +303,26 @@ checkTrue("the composer is present", await composer.isVisible());
 // affordance was a native `title`, rendered correctly, and no user
 // found it — "renders" is not the same claim as "is findable".
 //
-// What it opened was the drawer of conversations inside Chat. On
-// 2026-10-16 the owner had the conversations taken out of the sidebar
-// and that drawer went with them, so there is nothing left to toggle.
-// The flow now drives the thing that replaced it: Chat has ONE sidebar
-// beside it, the app's, and no list of conversations anywhere on the
-// screen — which is the claim the removal has to keep true in a real
-// browser, on a real build.
+// WHAT IT OPENED HAS NOW MOVED TWICE. It was a drawer of conversations
+// inside Chat; on 2026-10-16 the owner had the conversations taken out
+// of the sidebar and the drawer went with them; on 2026-10-17 he asked
+// for the list back inside Chat, behind a [◧] in the title row, with
+// the sidebar reduced to one «Ionexa Chat» row. So the claim this
+// flow keeps true in a real browser is BOTH halves: Chat has ONE
+// sidebar beside it with no conversations in it, and its own column is
+// CLOSED until somebody opens it.
 //
 // (scripts/tests/sidebar-no-chats.prodtest.mjs is the thorough version:
-// ten pages, two devices, ten seeded conversations. This is the one
+// ten pages, three widths, ten seeded conversations. This is the one
 // line of it that belongs in the end-to-end walk.)
 const asides = await page.locator('[data-testid="sidebar"]').count();
 check("Chat has exactly one sidebar beside it", asides, 1);
 const chatRows = await page.locator('[data-testid="conversation-row"]').count();
 check("...and no conversation rows anywhere on the screen", chatRows, 0);
-const chatDrawers = await page.locator('[data-testid="recent-conversations"], [data-testid="chat-conversation-sidebar"]').count();
-check("...and no drawer to open one from", chatDrawers, 0);
+const chatDrawers = await page
+  .locator('[data-testid="recent-conversations"], [data-testid="chat-conversation-sidebar"], [data-testid="chat-conversation-column"]')
+  .count();
+check("...and its own column is closed until it is asked for", chatDrawers, 0);
 
 // AND THE WAY TO THEM IS PRESSED, not merely found. The toggle this
 // flow used to click was the one interaction in the whole walk; taking
@@ -329,13 +332,22 @@ check("...and no drawer to open one from", chatDrawers, 0);
 // a test that stopped clicking reads exactly like a device that was
 // added.
 //
-// So the press is the owner's own route out of Chat: the rail's second
-// row, which says «Chats» and opens the page that now holds every
-// conversation. One click, a real navigation, and the rows that are
-// not in the sidebar are there.
-const chatsRow = page.locator('[data-testid="sidebar"] a[href="/dashboard/chats"]').first();
-checkTrue("the rail has a row to the Chats page", (await chatsRow.count()) > 0);
-await chatsRow.click();
+// SO THE PRESSES ARE THE OWNER'S OWN ROUTE, and there are two of them
+// now because that is the route: «Στο Chat πατάω [◧] και ανοίγουν οι
+// συνομιλίες μου στο πλάι», then «Όλες οι συνομιλίες» at the foot of
+// that column opens the page that holds every one of them. The rail no
+// longer has a row to it — /dashboard/chats belongs to «Ionexa Chat»
+// now (src/lib/nav/rail.ts) — so a check for that row would be looking
+// for something the owner removed.
+const columnToggle = page.locator('[data-testid="chat-column-toggle"]');
+checkTrue("the [◧] is in Chat's title row", (await columnToggle.count()) > 0);
+await columnToggle.click();
+const chatColumn = page.locator('[data-testid="chat-conversation-column"]');
+await chatColumn.waitFor({ state: "visible", timeout: 15_000 }).catch(() => {});
+checkTrue("pressing it opens the conversations beside the thread", (await chatColumn.count()) > 0);
+const allConversations = page.locator('[data-testid="chat-all-conversations"]');
+checkTrue("...with «Όλες οι συνομιλίες» at its foot", (await allConversations.count()) > 0);
+await allConversations.click();
 await page.waitForURL("**/dashboard/chats", { timeout: 15_000 }).catch(() => {});
 check("pressing it opens the Chats page", new URL(page.url()).pathname, "/dashboard/chats");
 const stillOneSidebar = await page.locator('[data-testid="sidebar"]').count();

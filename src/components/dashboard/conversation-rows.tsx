@@ -29,13 +29,28 @@ import type { SidebarConversation, SidebarProject } from "@/lib/nav/recent-tools
  * onto the Chats page, and the second list went. Every action it had is
  * in one of those two places; nothing it could do is gone.
  *
- * AND SINCE 2026-10-16 THERE IS ONE PLACE, NOT TWO. These rows were
+ * AND SINCE 2026-10-16 THERE IS ONE SET OF ROWS, NOT TWO. These were
  * also the sidebar's «Recent chats» until the owner had that section
  * taken out — «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR» —
  * so the `variant` that trimmed the chrome for a narrow column went
- * with it, along with the `onNavigate` the sidebar used to close
- * itself on a phone. app/dashboard/chats/page.tsx is the only caller,
- * through components/chats/chats-workspace.tsx.
+ * with it.
+ *
+ * TWO CALLERS AGAIN SINCE 2026-10-17, and the same component for both:
+ * the Chats page (components/chats/chats-workspace.tsx) and the column
+ * inside Chat (components/chat/conversation-column.tsx). The column is
+ * why `onNavigate` is back — on a phone it lies over the thread, so
+ * choosing a conversation has to close it. It went out on 2026-10-16
+ * when its only caller did, which was right then and is wrong now.
+ *
+ * AND IT IS WHY `onOpen` EXISTS. From the Chats page, choosing a
+ * conversation is a NAVIGATION to another route and the chat screen
+ * mounts around it. From the column, the chat screen is already the
+ * screen: a push to /dashboard/chat?c=… changes a prop and remounts
+ * nothing, so the second conversation somebody opened would have left
+ * the address saying one thread and the page showing another, and
+ * re-opening the one you had just left would have done nothing at all.
+ * When a caller passes `onOpen` the row hands it the id and lets the
+ * caller decide; when none does, the push is unchanged.
  *
  * WHY EVERY ACTION GOES TO A ROUTE AND NOT TO THE DATABASE. Renaming
  * and pinning already did (api/conversations/[id] — it caps pins per
@@ -59,6 +74,8 @@ export function ConversationRows({
   selectable = false,
   selected,
   onSelectedChange,
+  onNavigate,
+  onOpen,
 }: {
   conversations: readonly SidebarConversation[];
   /** The account's active projects, for «Μεταφορά σε Έργο». Read on the
@@ -69,6 +86,14 @@ export function ConversationRows({
   selectable?: boolean;
   selected?: ReadonlySet<string>;
   onSelectedChange?: (next: Set<string>) => void;
+  /** Run when a row navigates. The phone's overlay closes behind it;
+   *  on a computer nothing passes this and nothing happens. */
+  onNavigate?: () => void;
+  /** Open this conversation WITHOUT navigating. Passed only from the
+   *  column inside Chat, where the chat screen is already mounted —
+   *  see the header. Without it the row pushes /dashboard/chat?c=…,
+   *  which is right from every other screen. */
+  onOpen?: (id: string) => void;
 }) {
   // THE WORDING COMES FROM WHERE IT ALREADY WAS. These actions lived in
   // the drawer inside Chat, and their strings are already written in
@@ -291,6 +316,11 @@ export function ConversationRows({
             // The click the browser fires at the end of a long press
             // would navigate away from the menu that press just opened.
             if (isRenaming || longPressed.current) return;
+            onNavigate?.();
+            if (onOpen) {
+              onOpen(row.id);
+              return;
+            }
             router.push(`/dashboard/chat?c=${encodeURIComponent(row.id)}`);
           }}
           onTouchStart={() => startPress(row.id)}

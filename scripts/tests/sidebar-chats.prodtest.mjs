@@ -12,17 +12,35 @@
  * Run: node scripts/tests/sidebar-chats.prodtest.mjs
  *      SKIP_BUILD=1 CHATS_SHOTS=/tmp/shots node scripts/tests/sidebar-chats.prodtest.mjs
  *
- * The owner's «ΤΕΛΕΙΩΣΕ ΟΤΑΝ», 2026-10-15, point by point:
+ * AND IT CARRIES THE 2026-10-17 ROUND TOO, because that round moved
+ * the conversations a third time — out of the Chats page's monopoly
+ * and into a column inside Chat — and the two halves have to be proved
+ * against the same browser, the same database and the same account or
+ * they prove nothing about each other.
  *
- *   1. The sidebar says «New» and «Chats», not «Chat».
- *   2. Pressing «Chats» shows every conversation, with a search that
- *      finds one by its title AND one by something said inside it.
- *   3. On the Chats page, «⋯» renames a conversation, pins it (and it
+ * The owner's «ΤΕΛΕΙΩΣΕ ΟΤΑΝ» of 2026-10-17, point by point:
+ *
+ *   1. The sidebar has only «Ionexa Chat», «Coding», «All tools» and,
+ *      at the bottom, «Settings» — no «New», no «Chats», no «Collapse
+ *      sidebar», in any form, at any width (§1).
+ *   2. In Chat, [◧] opens the conversations in a column beside the
+ *      thread, and pressing it again closes them (§1b).
+ *   3. «Νέα συνομιλία» starts an empty one (§1b).
+ *   4. From that column, «⋯» renames and deletes (§1b).
+ *   5. The same from the phone, where the column lies OVER the thread
+ *      and one tap outside closes it (§1b, both devices).
+ *
+ * And the 2026-10-15 round it was written for, which still holds:
+ *
+ *   1. Pressing «Όλες οι συνομιλίες» shows every conversation, with a
+ *      search that finds one by its title AND one by something said
+ *      inside it (§2).
+ *   2. On the Chats page, «⋯» renames a conversation, pins it (and it
  *      moves to the group above), and deletes it with an Undo that
- *      brings it back.
- *   4. The same from the phone — including the long press, which is a
+ *      brings it back (§3).
+ *   3. The same from the phone — including the long press, which is a
  *      touch screen's only right-click and which no other prodtest in
- *      this repo performs.
+ *      this repo performs (§4).
  *
  * AND THE ONE THE OWNER ASKED FOR SEPARATELY: user A cannot rename or
  * delete user B's conversation. That is proved HERE rather than in a
@@ -224,14 +242,253 @@ try {
           [...document.querySelectorAll('[data-testid="sidebar"] nav a')].map((a) => (a.textContent ?? "").trim()).filter(Boolean)
         );
 
-      // ---- 1. «New» and «Chats», not «Chat» -----------------------
+      // ---- 1. ONE row for the chat, and it says «Ionexa Chat» -----
       await page.goto(`${ORIGIN}/dashboard/overview`, { waitUntil: "networkidle" });
       if (device.touch) await page.locator('[data-testid="sidebar"]').evaluate((n) => n.classList.remove("-translate-x-full"));
       const names = await railNames();
-      check(`[${tag}] the rail says «${L.sidebar.rail.chats}»`, names.includes(L.sidebar.rail.chats), names.join(" | "));
-      check(`[${tag}] ...and no longer «${L.sidebar.rail.chat}»`, !names.includes(L.sidebar.rail.chat), names.join(" | "));
-      check(`[${tag}] «${L.sidebar.rail.new}» is still there`, names.includes(L.sidebar.rail.new), names.join(" | "));
+      check(`[${tag}] the rail says «${L.sidebar.rail.ionexaChat}»`, names.includes(L.sidebar.rail.ionexaChat), names.join(" | "));
+      // THE WORDS OF THE ROWS THAT WENT, WRITTEN OUT. «New», «Chats»
+      // and «Collapse sidebar» were removed on 2026-10-17 and their
+      // keys were deleted from all ten message files in the same
+      // round, so there is nothing left to read them back from. These
+      // are what the sidebar printed, in this pass's own language, and
+      // what it may not print again.
+      //
+      // EXACT MATCHES, not substrings: «Συνομιλίες» is a word that
+      // lives inside other Greek labels, and the point of this check
+      // is a ROW, not a mention.
+      const REMOVED_ROWS = locale === "el"
+        ? ["Νέο", "Συνομιλία", "Συνομιλίες", "Σύμπτυξη πλαϊνής μπάρας", "Ανάπτυξη πλαϊνής μπάρας"]
+        : ["New", "Chat", "Chats", "Collapse sidebar", "Expand sidebar"];
+      const stillThere = REMOVED_ROWS.filter((w) => names.includes(w));
+      check(`[${tag}] ...and «New», «Chats» and «Collapse sidebar» are gone from it`, stillThere.length === 0, stillThere.join(" | "));
+      // THE BUTTON, NOT ONLY THE ROW. «Collapse sidebar» was a
+      // <button> with an aria-label and no text, so a check that read
+      // the <a> elements would have called it gone while it sat there.
+      const spoken = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-testid="sidebar"] [aria-label]')].map((e) => (e.getAttribute("aria-label") ?? "").trim())
+      );
+      const stillSpoken = REMOVED_ROWS.filter((w) => spoken.includes(w));
+      check(`[${tag}] ...nor is any of them a button with no words`, stillSpoken.length === 0, stillSpoken.join(" | "));
+      const chatRow = await page.evaluate((label) => {
+        const a = [...document.querySelectorAll('[data-testid="sidebar"] nav a')].find((e) => (e.textContent ?? "").trim() === label);
+        return a?.getAttribute("href") ?? null;
+      }, L.sidebar.rail.ionexaChat);
+      check(`[${tag}] ...and the one row opens the chat`, chatRow === "/dashboard/chat", String(chatRow));
       await shot("1-rail");
+
+      // ---- 1b. the conversations, INSIDE the chat -----------------
+      // The owner's «ΤΕΛΕΙΩΣΕ ΟΤΑΝ» of 2026-10-17, points 2 to 5:
+      // «Στο Chat πατάω [◧] και ανοίγουν οι συνομιλίες μου στο πλάι ·
+      // Πατάω "Νέα συνομιλία" και ανοίγει καινούργια · Από τη λίστα,
+      // "⋯" σε μια συνομιλία: μετονομασία και διαγραφή · Τα ίδια από
+      // το κινητό.»
+      await page.goto(`${ORIGIN}/dashboard/chat`, { waitUntil: "networkidle" });
+      const toggle = page.locator('[data-testid="chat-column-toggle"]');
+      const column = page.locator('[data-testid="chat-conversation-column"]');
+      const slot = page.locator('[data-testid="chat-column-slot"]');
+      check(`[${tag}] the [◧] is in the chat's title row`, await toggle.isVisible());
+      // CLOSED ON ARRIVAL, which is what the component's own comment
+      // says and the honest default: localStorage cannot be read while
+      // the server renders, so an open default would flash a column
+      // away for everybody who had closed it.
+      check(`[${tag}] ...and the column starts closed`, (await column.count()) === 0, String(await column.count()));
+      check(`[${tag}] ...and says so to a screen reader`, (await toggle.getAttribute("aria-expanded")) === "false");
+
+      await press(toggle);
+      await page.waitForTimeout(400);
+      check(`[${tag}] pressing it opens the conversations`, await column.isVisible());
+      check(`[${tag}] ...and aria-expanded follows`, (await toggle.getAttribute("aria-expanded")) === "true");
+      const inColumn = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-testid="chat-conversation-column"] [data-testid="conversation-row"]')].map(
+          (r) => (r.innerText ?? "").split("\n")[0].trim()
+        )
+      );
+      check(`[${tag}] ...with this account's conversations in it`,
+        MINE.every((c) => inColumn.some((t) => t.includes(c.title))), inColumn.join(" | "));
+      check(`[${tag}] ...and not the other account's`, !inColumn.some((t) => t.includes(THEIRS.title)), inColumn.join(" | "));
+      await shot("1b-column-open");
+
+      // ON A PHONE IT LIES OVER THE THREAD, because 280px of a 390px
+      // screen is not a column, it is the screen — and the way out is
+      // a tap anywhere else, which is what the owner asked for:
+      // «κλείνει με ένα πάτημα έξω από αυτήν».
+      if (device.touch) {
+        const over = await page.evaluate(() => {
+          const el = document.querySelector('[data-testid="chat-column-slot"]');
+          return el ? getComputedStyle(el).position : null;
+        });
+        check(`[${tag}] on a phone the column lies over the thread`, over === "absolute", String(over));
+        const scrim = page.locator('[data-testid="chat-column-scrim"]');
+        check(`[${tag}] ...and there is something to tap outside it`, await scrim.isVisible());
+        await press(scrim);
+        await page.waitForTimeout(400);
+        check(`[${tag}] ...and one tap outside closes it`, (await column.count()) === 0);
+        await press(toggle);
+        await page.waitForTimeout(400);
+      } else {
+        const over = await page.evaluate(() => {
+          const el = document.querySelector('[data-testid="chat-column-slot"]');
+          return el ? getComputedStyle(el).position : null;
+        });
+        check(`[${tag}] on a computer it sits beside the thread, not over it`, over === "relative", String(over));
+      }
+
+      // IT IS REMEMBERED. «Θυμάται αν την άφησα ανοιχτή ή κλειστή» —
+      // per device, in this browser, across a full reload.
+      await page.reload({ waitUntil: "networkidle" });
+      await page.waitForTimeout(400);
+      check(`[${tag}] left open, it is open again after a reload`, await column.isVisible());
+      check(`[${tag}] ...and the slot says so in the DOM`, (await slot.getAttribute("data-open")) === "true");
+
+      // «ΟΛΕΣ ΟΙ ΣΥΝΟΜΙΛΙΕΣ» at the foot — «Η σελίδα με όλες τις
+      // συνομιλίες μένει, και ανοίγει από το "Όλες οι συνομιλίες"».
+      const allLink = page.locator('[data-testid="chat-all-conversations"]');
+      check(`[${tag}] «${L.dashboard.chat.allConversations}» is at the foot of the column`, await allLink.isVisible());
+      check(`[${tag}] ...and it opens the page with every conversation`,
+        (await allLink.getAttribute("href")) === "/dashboard/chats", String(await allLink.getAttribute("href")));
+
+      // THE SEARCH FILTERS THE TITLES IT ALREADY HAS, folded rather
+      // than lowercased — «Αύρα» found by «αυρα», which toLowerCase
+      // cannot do in Greek.
+      const colSearch = page.locator('[data-testid="chat-conversation-search"]');
+      await colSearch.fill("αυρα");
+      await page.waitForTimeout(400);
+      const filtered = await page.evaluate(() =>
+        [...document.querySelectorAll('[data-testid="chat-conversation-column"] [data-testid="conversation-row"]')].map(
+          (r) => (r.innerText ?? "").split("\n")[0].trim()
+        )
+      );
+      check(`[${tag}] the column's search finds a title without its accents`,
+        filtered.length === 1 && filtered[0].includes("Αύρα"), filtered.join(" | "));
+      await colSearch.fill("");
+      await page.waitForTimeout(300);
+
+      // «⋯» FROM THE COLUMN: rename and delete, which is the owner's
+      // point 4. The same component as the page's list, so this is
+      // about the column having given it what it needs — the projects
+      // for «Μεταφορά σε Έργο» among them — not about the actions
+      // themselves, which §3 below exercises in full.
+      const colRow = (title) =>
+        page.locator('[data-testid="chat-conversation-column"] [data-testid="conversation-row"]').filter({ hasText: title }).first();
+      await press(colRow("Αύρα Camping").locator('[data-testid="conversation-actions"]'));
+      await page.waitForTimeout(300);
+      const colMenu = page.locator('[data-testid="conversation-menu"]').first();
+      check(`[${tag}] «⋯» in the column opens the menu`, await colMenu.isVisible());
+      for (const label of [L.dashboard.chat.rename, L.module.delete, L.dashboard.chat.pin, L.dashboard.chat.moveToProject]) {
+        check(`[${tag}] ...and it offers «${label}»`, await colMenu.getByRole("button", { name: label }).isVisible().catch(() => false));
+      }
+      const colIndex = await page
+        .locator('[data-testid="chat-conversation-column"] [data-testid="conversation-row"]')
+        .evaluateAll((rows) => rows.findIndex((r) => (r.innerText ?? "").includes("Αύρα Camping")));
+      await press(colMenu.getByRole("button", { name: L.dashboard.chat.rename }));
+      const colField = page
+        .locator('[data-testid="chat-conversation-column"] [data-testid="conversation-row"]')
+        .nth(colIndex)
+        .locator('input:not([type="checkbox"])')
+        .first();
+      await colField.fill("Αύρα από το Chat");
+      await colField.press("Enter");
+      await page.waitForTimeout(600);
+      check(`[${tag}] a rename from the column is saved on the server`,
+        db.store.chat_conversations.find((c) => c.id === MINE[0].id)?.title === "Αύρα από το Chat",
+        db.store.chat_conversations.find((c) => c.id === MINE[0].id)?.title);
+
+      await press(colRow("Παλιά κουβέντα").locator('[data-testid="conversation-actions"]'));
+      await page.waitForTimeout(300);
+      page.once("dialog", (d) => d.accept());
+      await press(page.locator('[data-testid="conversation-menu"]').first().getByRole("button", { name: L.module.delete }));
+      await page.waitForTimeout(400);
+      check(`[${tag}] a delete from the column offers its Undo first`,
+        await page.locator('[data-testid="conversation-undo"]').first().isVisible());
+      check(`[${tag}] ...and has deleted nothing yet`, db.store.chat_conversations.some((c) => c.id === MINE[2].id));
+      await press(page.locator('[data-testid="conversation-undo"]').first().getByRole("button", { name: L.dashboard.chat.undo }));
+      await page.waitForTimeout(400);
+      check(`[${tag}] ...and Undo keeps it`, db.store.chat_conversations.some((c) => c.id === MINE[2].id));
+
+      // OPENING A CONVERSATION FROM THE COLUMN, AND THEN A SECOND ONE.
+      //
+      // THE SECOND IS THE WHOLE POINT. Every other list of
+      // conversations is on another route, so choosing one MOUNTS this
+      // screen; the column is on it already, and the effect that reads
+      // `?c=` ran once per mount until 2026-10-17. With that guard the
+      // first conversation opened and every one after it left the
+      // address saying one thread while the page showed another —
+      // green on a check that read the URL alone, which is what the
+      // first version of this one did.
+      //
+      // SO THE THREAD IS READ, NOT THE ADDRESS. The header carries the
+      // open conversation's own name (InlineTitle, testid
+      // chat-header-title), and that is what has to change.
+      const headerTitle = () => page.locator('[data-testid="chat-header-title"]').first().innerText().catch(() => "");
+      // ON A PHONE THE COLUMN CLOSES BEHIND THE ROW YOU CHOSE, because
+      // it lies over the thread you are about to read. So it is opened
+      // again before each of the presses below, rather than assumed —
+      // assuming it would make every check after the first one a
+      // check against a locator that matches nothing.
+      const ensureColumn = async () => {
+        if ((await column.count()) === 0) {
+          await press(toggle);
+          await page.waitForTimeout(400);
+        }
+      };
+      await ensureColumn();
+      await press(colRow("Τιμοκατάλογος"));
+      await page.waitForTimeout(900);
+      check(`[${tag}] a conversation opens from the column`,
+        /[?&]c=/.test(page.url()) && (await headerTitle()).includes("Τιμοκατάλογος"),
+        `${page.url()} / ${await headerTitle()}`);
+      await ensureColumn();
+      await press(colRow("Αύρα από το Chat"));
+      await page.waitForTimeout(900);
+      check(`[${tag}] ...and so does a SECOND one, without a reload`,
+        (await headerTitle()).includes("Αύρα από το Chat"), `${page.url()} / ${await headerTitle()}`);
+      check(`[${tag}] ...and the address followed the thread`,
+        page.url().includes(`c=${MINE[0].id}`), page.url());
+
+      const newChat = page.locator('[data-testid="chat-new-conversation"]');
+      check(`[${tag}] «${L.dashboard.chat.newChat}» is beside the [◧]`, await newChat.isVisible());
+      await press(newChat);
+      await page.waitForTimeout(600);
+      // A CHANGE, NOT THE STATE IT WAS ALREADY IN. A conversation is
+      // open on the line above, so an empty thread here is this button
+      // having done something — which is the only version of this
+      // check a button wired to nothing cannot pass.
+      check(`[${tag}] ...and pressing it starts an empty conversation`, await page.locator('[data-testid="chat-empty"]').isVisible());
+      check(`[${tag}] ...and the open conversation's name is gone from the title row`,
+        (await page.locator('[data-testid="chat-header-title"]').count()) === 0);
+      // AND THE ONE YOU JUST LEFT OPENS AGAIN. The address still
+      // carries its `?c=`, so a column that navigated instead of
+      // selecting would send the browser to a URL it is already on and
+      // nothing at all would happen.
+      await ensureColumn();
+      await press(colRow("Αύρα από το Chat"));
+      await page.waitForTimeout(900);
+      check(`[${tag}] ...and the conversation just left can be re-opened`,
+        (await headerTitle()).includes("Αύρα από το Chat"), `${page.url()} / ${await headerTitle()}`);
+
+      // AND IT CLOSES AGAIN, which is the other half of «ανοίγει και
+      // κλείνει» and the half a one-way toggle passes without.
+      //
+      // BY A DIFFERENT CONTROL ON A PHONE, AND THAT IS THE DESIGN, not
+      // a concession to the test. «Στο κινητό ανοίγει πάνω από το Chat
+      // και κλείνει με ένα πάτημα έξω από αυτήν» — the column covers
+      // the title row there, the [◧] with it, and the tap outside is
+      // the way out. On a computer the column sits beside the thread
+      // and the [◧] is reachable throughout, so the [◧] is what is
+      // pressed. Written out because «pressing [◧] again closes it»
+      // would have been a true sentence about one device and a false
+      // one about the other.
+      await ensureColumn();
+      await press(device.touch ? page.locator('[data-testid="chat-column-scrim"]') : toggle);
+      await page.waitForTimeout(400);
+      check(
+        `[${tag}] ${device.touch ? "a tap outside closes the column" : "pressing [◧] again closes the column"}`,
+        (await column.count()) === 0
+      );
+      check(`[${tag}] ...and the slot says so`, (await slot.getAttribute("data-open")) === "false");
+      await shot("1b-column-closed");
+      reset();
 
       // ---- 2. the Chats page, and its two searches -----------------
       await page.goto(`${ORIGIN}/dashboard/chats`, { waitUntil: "networkidle" });

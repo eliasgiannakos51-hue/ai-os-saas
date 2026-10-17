@@ -182,28 +182,36 @@ checkTrue(
     /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
   "the page's four groups drop any that end up empty; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
-// WHAT THE SIDEBAR MAY REMEMBER. Until 2026-10-02 the answer was
-// "nothing"; from then to 2026-10-04 it was the recent-tools list, kept
-// per device. That list is the ACCOUNT's now (src/lib/nav/recent-tools.ts,
-// computed by the dashboard layout), so the one thing a browser keeps is
-// whether the sidebar is narrow — every storage call names COLLAPSED_KEY,
-// none is sessionStorage, and every one sits inside a try (blocked
-// storage in a private window must leave the wide sidebar, not a broken
-// one). STRIPPED, because the component explains what it stores and what
-// it does not, and a sentence about storage is not storage.
+// WHAT THE SIDEBAR MAY REMEMBER: NOTHING, AND THAT IS NOW THE WHOLE
+// ANSWER. Until 2026-10-02 it was nothing; from then to 2026-10-04 it
+// was the recent-tools list, kept per device; that list is the
+// ACCOUNT's now (src/lib/nav/recent-tools.ts, computed by the dashboard
+// layout). The last stored thing was whether the sidebar is narrow, and
+// it went on 2026-10-17 with the «Collapse sidebar» button the owner
+// had removed.
+//
+// THE CHECK ASKS FOR ZERO, NOT FOR "every call names the right key".
+// The older wording passed on an empty list too — `.every()` on nothing
+// is true — so it could not tell a sidebar that stores one thing from
+// one that stores none, which is exactly the distinction today's change
+// turns on. STRIPPED, because the component explains what it does not
+// store, and a sentence about storage is not storage.
 const sidebarCode = stripComments(sidebarForOpen);
 const storageCalls = sidebarCode.match(/localStorage\.\w+\([^)]*\)/g) ?? [];
 checkTrue(
-  `...and the only thing remembered across a reload is whether the sidebar is narrow (${storageCalls.length} storage calls)`,
-  storageCalls.length >= 1 &&
-    storageCalls.every((c) => c.includes("COLLAPSED_KEY")) &&
-    !/sessionStorage/.test(sidebarCode),
-  storageCalls.join(" | ") || "no storage call found — the narrow sidebar cannot survive a reload",
+  `...and nothing at all is remembered across a reload (${storageCalls.length} storage calls)`,
+  storageCalls.length === 0 && !/sessionStorage|document\.cookie/.test(sidebarCode),
+  storageCalls.join(" | ") || "none",
 );
+// AND THE REASON THERE IS NOTHING TO REMEMBER, held from the code that
+// replaced it rather than from the absence alone: the narrow rail is a
+// width. Icons only between md and lg, the full rail beyond — so the
+// first paint cannot contradict the screen, which is what a remembered
+// choice did on every device whose width disagreed with the last one.
 checkTrue(
-  "...and every storage call is guarded",
-  (sidebarCode.match(/try\s*\{[^}]*localStorage\./g) ?? []).length === storageCalls.length,
-  "a storage call outside a try throws in a private window and takes the sidebar with it",
+  "...because the narrow form is a width, not a stored choice",
+  /md:w-16/.test(sidebarCode) && /lg:w-60/.test(sidebarCode) && !/collapsed/i.test(sidebarCode),
+  "md:w-16 lg:w-60 on the <aside>, and no collapse state anywhere in it",
 );
 // V4.6: the config carries items marked hidden — trackers reachable from
 // the records hub and ⌘K, kept out of the sidebar on purpose. Every list

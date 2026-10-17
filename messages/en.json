@@ -293,8 +293,7 @@
     },
     "closeMenu": "Close menu",
     "rail": {
-      "new": "New",
-      "chat": "Chat",
+      "ionexaChat": "Ionexa Chat",
       "coding": "Coding",
       "allTools": "All tools",
       "recentTools": "Recent tools",
@@ -302,12 +301,9 @@
       "pin": "Pin {tool}",
       "unpin": "Unpin {tool}",
       "remove": "Remove {tool} from Recent tools",
-      "collapse": "Collapse sidebar",
-      "expand": "Expand sidebar",
       "label": "Main",
       "saveFailed": "Could not save that change. Try again.",
-      "untitledChat": "New conversation",
-      "chats": "Chats"
+      "untitledChat": "New conversation"
     },
     "tabs": {
       "home": "Home",
@@ -1344,6 +1340,11 @@
     },
     "chat": {
       "title": "Ionexa Chat",
+      "newChat": "New Chat",
+      "hideConversations": "Hide conversations",
+      "showConversations": "Show conversations",
+      "searchConversations": "Search titles",
+      "allConversations": "All conversations",
       "streamInterrupted": "The connection dropped before the reply finished.",
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
       "send": "Send",

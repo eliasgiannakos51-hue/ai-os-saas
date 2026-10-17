@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { useLocale, useTranslations } from "next-intl";
@@ -13,6 +14,9 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { InlineTitle } from "@/components/chat/inline-title";
 import { HelpTip } from "@/components/ui/help-tip";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { ConversationColumn } from "@/components/chat/conversation-column";
+import { PanelLeft, Plus } from "lucide-react";
+import type { SidebarProject } from "@/lib/nav/recent-tools";
 import { MessageContent } from "@/components/chat/message-content";
 import { SourceCards } from "@/components/chat/source-cards";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
@@ -56,6 +60,9 @@ const CHAT_STEP_MESSAGE = {
 } as const satisfies Record<ChatStep, string>;
 
 
+// Remembered per device: see the column's state below.
+const CONVERSATION_COLUMN_KEY = "ionexa.chatConversationColumn";
+
 let localIdCounter = 0;
 function nextLocalId(prefix: string) {
   localIdCounter += 1;
@@ -79,6 +86,7 @@ export function ChatWorkspace({
   siteWall = null,
   attachments = false,
   greeting = null,
+  projects = [],
 }: {
   initialConversations: ChatConversation[];
   /** Conversation to open on load — the `?c=` deep link a starred
@@ -126,6 +134,10 @@ export function ChatWorkspace({
   /** The name the empty Chat greets with (lib/greeting.ts, greetingName),
    *  or null when it is not known — then the greeting has no name. */
   greeting?: string | null;
+  /** The account's active projects, for «Μεταφορά σε Έργο» in the
+   *  conversation column's «⋯». Read on the server: there is no
+   *  GET /api/projects (app/api/projects/route.ts is POST and DELETE). */
+  projects?: readonly SidebarProject[];
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -160,6 +172,26 @@ export function ChatWorkspace({
   }, []);
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
+  // AND IT FOLLOWS THE SERVER AGAIN WHEN THE SERVER SPEAKS.
+  //
+  // Seeded once was enough while nothing on this screen changed a
+  // conversation's name. The column does (owner, 2026-10-17): its «⋯»
+  // renames, pins, moves and deletes through api/conversations/[id]
+  // and then calls router.refresh(), which re-renders the page and
+  // hands this component a fresh list — which it used to ignore.
+  //
+  // WHAT THAT LOOKED LIKE, measured by sidebar-chats.prodtest.mjs §1b
+  // on 2026-10-17: the renamed conversation carried its new name in
+  // the column (components/dashboard/conversation-rows.tsx keeps its
+  // own rows and had updated them) and its OLD name in the title row
+  // above the thread. Two copies of one conversation's name, visible
+  // at the same time, disagreeing — the same shape as the favourite
+  // star that is recorded in components/chat/inline-title.tsx.
+  //
+  // The optimistic updates below are not lost to this: nothing that
+  // makes one calls router.refresh(), so no server render lands on
+  // top of them.
+  useEffect(() => setConversations(initialConversations), [initialConversations]);
   const [activeId, setActiveId] = useState<string | null>(null);
   // THE WORK AREA (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2): which answer is open beside
   // the conversation, if any. Closed when the conversation changes.
@@ -277,19 +309,48 @@ export function ChatWorkspace({
   const talkAvailable =
     voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;
 
-  // THERE IS NO CONVERSATION LIST ON THIS SCREEN ANY MORE.
+  // THE CONVERSATION COLUMN, AND WHETHER IT IS OPEN (owner, 2026-10-17:
+  // «Θυμάται αν την άφησα ανοιχτή ή κλειστή»).
   //
-  // It was a drawer here from 2026-10-05, because the app's sidebar
-  // showed only the latest few and this was the one place with every
-  // conversation and its rename, pin, star and delete. Both halves of
-  // that reason are gone: /dashboard/chats holds every conversation
-  // with all of those actions, and on 2026-10-16 the owner had the
-  // sidebar's own list taken out too. A second list on this screen was
-  // always against ΣΥΣΤΗΜΑ DESIGN §3 — one sidebar, the same
-  // everywhere — and it no longer buys anything to set against that.
+  // CLOSED UNTIL THE STORED ANSWER ARRIVES, and that is the honest
+  // default rather than a guess: localStorage cannot be read while the
+  // server renders, so opening by default would mean every first paint
+  // shows a column that then vanishes for anybody who had closed it.
+  // `columnReady` keeps the width animation from running on that first
+  // resolve, so the remembered state appears rather than slides in.
   //
-  // Nothing is lost («Καμία λειτουργία δεν χάνεται»): the rail's
-  // «Chats» row is one press away on every page.
+  // THE SIDEBAR'S OWN «Collapse» KEY IS NOT THIS ONE. That was
+  // ionexa.sidebarCollapsed and it is gone (the rail's narrow form is
+  // CSS now); this is the chat's column and it is remembered per
+  // device, because how much room a thread should have is a property
+  // of the screen rather than of the account.
+  // For openFromColumn below: the thread switches in place and the
+  // address is corrected after it, so a reload still opens the same
+  // conversation.
+  const router = useRouter();
+  const [columnOpen, setColumnOpen] = useState(false);
+  const [columnReady, setColumnReady] = useState(false);
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage.getItem(CONVERSATION_COLUMN_KEY);
+    } catch {
+      /* private window or storage off: closed, which is the default */
+    }
+    setColumnOpen(stored === "open");
+    setColumnReady(true);
+  }, []);
+  function toggleColumn() {
+    setColumnOpen((open) => {
+      const next = !open;
+      try {
+        window.localStorage.setItem(CONVERSATION_COLUMN_KEY, next ? "open" : "closed");
+      } catch {
+        /* the toggle still works; it just will not be remembered */
+      }
+      return next;
+    });
+  }
 
   // ASKED ON ARRIVAL. Runs once per mount and only for a brand-new
   // thread: `sentAskRef` is what stops React's development double-invoke
@@ -382,20 +443,31 @@ export function ChatWorkspace({
     loadMessages(id);
   }
 
-  // THE «NEW CHAT» BUTTON THAT USED TO LIVE HERE IS GONE WITH ITS
-  // DRAWER, and so is the defect it had to guard against.
+  // «ΝΕΑ ΣΥΝΟΜΙΛΙΑ», BACK IN THE TITLE ROW (owner, 2026-10-17). The
+  // rail's «New» is gone; starting an empty conversation is a button
+  // where you already are.
   //
-  // It cleared the Site pane by hand, because a Site opened in a
-  // conversation that had never reached /api/chat has no id: setting
-  // the active id to null changed nothing the pane was watching, and
-  // the next sentence went to the site as a CHARGED change instead of
-  // starting the new conversation (chat-opens-tools.prodtest.mjs).
-  //
-  // Starting a new conversation is a navigation now — the rail's «New»
-  // — so the workspace remounts and the pane cannot survive it. The
-  // prodtest still proves that: it opens a Site, navigates the way the
-  // rail does, and requires the next sentence to start a conversation
-  // rather than edit the site.
+  // THE SITE PANE IS CLOSED BY HAND HERE, AND THAT LINE IS LOAD-BEARING
+  // (package 7, chat-opens-tools.prodtest.mjs). A Site opened in a
+  // conversation that never reached /api/chat has no id, so setting the
+  // active id to null changes nothing the pane is watching — and the
+  // next sentence went to the SITE as a charged change instead of
+  // starting the new conversation. It was briefly safe to drop this,
+  // between 2026-10-16 and today, because the only way to a new
+  // conversation was a navigation that remounted the workspace. It is
+  // a button again, so the defect is reachable again, and so is its
+  // guard.
+  function startNewChat() {
+    requestTokenRef.current += 1;
+    setSiteBrief(null);
+    setOpenWorkId(null);
+    setActiveId(null);
+    setMessages([]);
+    setError(null);
+    setLoadingMessages(false);
+    resetToBottom();
+    composerRef.current?.focus();
+  }
 
   // NO PIN AND NO DELETE HERE ANY MORE. Both were the drawer's, and
   // the drawer went with the sidebar's «Recent chats» on 2026-10-16.
@@ -406,16 +478,50 @@ export function ChatWorkspace({
   // Favourite state lives here rather than inside each star, because the
   // same conversation is drawn twice (list + header) and two independent
   // copies of the state disagree the moment one is clicked.
-  // Opening a starred conversation from /dashboard/favorites. Runs once:
-  // it has to go through selectConversation rather than just seeding
-  // activeId, because that is what loads the thread's messages.
-  const deepLinkedRef = useRef(false);
+  // THE ADDRESS, FOLLOWED EVERY TIME IT CHANGES — not once per mount.
+  //
+  // Opening a starred conversation from /dashboard/favorites, or one
+  // from the Chats page, arrives here as `?c=`. It has to go through
+  // selectConversation rather than just seeding activeId, because that
+  // is what loads the thread's messages.
+  //
+  // IT RAN ONCE UNTIL 2026-10-17, and once was right while every way
+  // in was another route: the workspace mounted on arrival and a
+  // second `?c=` could not happen without a second mount. The column
+  // inside Chat is on this screen, so it can — which is why the guard
+  // is now the LAST id honoured rather than a boolean. A boolean would
+  // have left the address saying one thread while the page showed
+  // another, from the second conversation onwards.
+  //
+  // The column does not rely on this: it calls openFromColumn below,
+  // which selects the thread itself and seeds this ref so the address
+  // change that follows is recognised as its own echo rather than a
+  // second instruction. This stays the path for every OTHER screen,
+  // and the double-invoke React performs in development is why it is a
+  // ref at all.
+  const lastDeepLink = useRef<string | null>(null);
   useEffect(() => {
-    if (deepLinkedRef.current || !initialConversationId) return;
-    deepLinkedRef.current = true;
+    if (!initialConversationId || lastDeepLink.current === initialConversationId) return;
+    lastDeepLink.current = initialConversationId;
     selectConversation(initialConversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialConversationId]);
+
+  /**
+   * A CONVERSATION CHOSEN IN THE COLUMN, WITHOUT LEAVING THE SCREEN.
+   *
+   * The thread is switched here and the address is corrected after, so
+   * a reload, a share or the browser's Back all still land on the
+   * conversation that is open. `replace` rather than `push`: switching
+   * threads inside one screen is not a place in the history, and a
+   * person who presses Back expects the page they came from, not the
+   * eleven conversations they skimmed.
+   */
+  function openFromColumn(id: string) {
+    lastDeepLink.current = id;
+    selectConversation(id);
+    router.replace(`/dashboard/chat?c=${encodeURIComponent(id)}`, { scroll: false });
+  }
 
   function toggleFavorite(id: string, favorited: boolean) {
     setConversations((prev) =>
@@ -770,8 +876,99 @@ export function ChatWorkspace({
 
   return (
     <div className="relative flex h-full overflow-hidden">
+      {/* THE COLUMN. On a computer it is in flow and the thread moves
+          over to make room; below md it lies OVER the thread, because
+          280px of a 390px screen is not a column, it is the screen.
+          `columnReady` holds the width transition until the remembered
+          state has been read, so the first paint does not animate. */}
+      <div
+        data-testid="chat-column-slot"
+        data-open={columnOpen}
+        className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:w-[280px] md:max-w-none ${
+          columnReady ? "transition-[width,transform] duration-200 ease-out" : ""
+        } ${columnOpen ? "translate-x-0 md:w-[280px]" : "-translate-x-full rtl:translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-e-0"}`}
+      >
+        {columnOpen && (
+          <ConversationColumn
+            conversations={conversations}
+            projects={projects}
+            activeId={activeId}
+            onOpen={openFromColumn}
+            onNavigate={() => {
+              // Only the overlay needs closing. At md and above the
+              // column is in flow and choosing a row leaves it open,
+              // which is the point of having it beside the thread.
+              if (typeof window !== "undefined" && window.innerWidth < 768) toggleColumn();
+            }}
+          />
+        )}
+      </div>
+
+      {/* TAP ANYWHERE ELSE TO CLOSE, on the widths where the column
+          covers the thread — «κλείνει με ένα πάτημα έξω από αυτήν».
+          Above md there is nothing to dismiss. */}
+      {columnOpen && (
+        <button
+          type="button"
+          aria-label={t("hideConversations")}
+          data-testid="chat-column-scrim"
+          onClick={toggleColumn}
+          className="absolute inset-0 z-20 bg-background/50 md:hidden"
+        />
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2 border-b border-border px-2 py-1.5">
+          {/* [◧] AND «Νέα συνομιλία», TOP LEFT (owner, 2026-10-17).
+              aria-expanded is what says open or closed to a screen
+              reader, and it is what the test reads too — a class name
+              would be a claim about CSS, this is a claim about state.
+
+              A REAL Tooltip, NOT a `title`. The control this replaces
+              shipped in 2026-10-05 as a bare 36x36 icon whose only
+              affordance was the browser's own tooltip, and the result
+              is this project's clearest scar: it rendered correctly,
+              every check passed, and the owner never found it —
+              "renders" was never the same claim as "is findable". A
+              native `title` waits a second or two, is styled by the
+              operating system, and appears on neither touch nor
+              keyboard focus (components/ui/tooltip.tsx says so at
+              length). So: 44px, an icon with no words beside it, and
+              the hint that makes it findable.
+              scripts/tests/sidebar-hints-coverage.test.mjs §3 holds
+              all three. */}
+          <Tooltip content={t(columnOpen ? "hideConversations" : "showConversations")} side="right">
+            <button
+              type="button"
+              onClick={toggleColumn}
+              aria-expanded={columnOpen}
+              aria-label={t(columnOpen ? "hideConversations" : "showConversations")}
+              data-testid="chat-column-toggle"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+            >
+              <PanelLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </Tooltip>
+          {/* THE WORDS GO BELOW 640px, THE BUTTON DOES NOT. Measured at
+              375px: this row already holds [◧], the «?», the title and
+              the star, and «Νέα συνομιλία» spelled out takes about 135
+              of those pixels — it leaves the conversation's own name
+              roughly five characters, which is the title gone rather
+              than shortened. The accessible name is the same words at
+              every width, so a screen reader and
+              scripts/tests/sidebar-chats.prodtest.mjs §1b find the
+              button by what it says, not by whether the pixels for it
+              were there. */}
+          <button
+            type="button"
+            onClick={startNewChat}
+            aria-label={t("newChat")}
+            data-testid="chat-new-conversation"
+            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-item px-2 text-sm text-muted hover:bg-panel-hover hover:text-foreground"
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="hidden whitespace-nowrap sm:inline">{t("newChat")}</span>
+          </button>
           {/* THE "?" FOR THE WHOLE PAGE, in the one row that is always
               here. Chat is <main className="h-[calc(100vh-4rem)]"> — full
               viewport by design, with no PageHeader to hang a tip from —

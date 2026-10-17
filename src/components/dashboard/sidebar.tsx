@@ -4,21 +4,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Code2, LayoutGrid, MessageCircle, MessagesSquare, PanelLeftClose, PanelLeftOpen, Pin, PinOff, Plus, Settings, X } from "lucide-react";
+import { Code2, LayoutGrid, MessageCircle, Pin, PinOff, Settings, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Logo } from "@/components/logo";
 import { displayNameFromEmail } from "@/lib/greeting";
 import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
-import { RAIL_ROWS, SETTINGS_HREF, activeRail, type RailKey } from "@/lib/nav/rail";
+import { RAIL_ROWS, SETTINGS_HREF, activeRail, type DrawnRailKey, type RailKey } from "@/lib/nav/rail";
 import type { RecentAction, RecentTool } from "@/lib/nav/recent-tools";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { useToast } from "@/components/toast/toast-context";
 
 /**
  * THE SIDEBAR — ΣΥΣΤΗΜΑ DESIGN (docs/CONTEXT.md): the same on every
- * page. Logo, New, Chats, Coding, All tools, Recent tools, and
+ * page. Logo, Ionexa Chat, Coding, All tools, Recent tools, and
  * Settings at the bottom with the account inside it. Nothing else is
  * ever here; every tool is in All tools and ⌘K (lib/nav/rail.ts).
  *
@@ -31,13 +31,20 @@ import { useToast } from "@/components/toast/toast-context";
  * pages on a computer and a phone and fails on one conversation
  * title.
  *
- * THE SECOND ROW SAYS «Chats» AND OPENS THE LIST, since 2026-10-15.
- * It said «Chat» and went to the chat page; «New» already opens an
- * empty one, so two rows were doing the same thing and one of them
- * earned nothing. Everything a conversation could do from the
- * sidebar — open, rename, pin, move to a Project, delete with an Undo
- * — is on that page (app/dashboard/chats/page.tsx, which draws
- * components/dashboard/conversation-rows.tsx).
+ * ONE ROW FOR THE CHAT, since 2026-10-17. «New» and «Chats» were two
+ * rows for one place — start an empty conversation, list them all —
+ * and both are errands you run once you are inside it. They are the
+ * [◧] and «Νέα συνομιλία» of the chat's own title row now
+ * (components/chat/conversation-column.tsx), and the rail names the
+ * place: «Ionexa Chat».
+ *
+ * AND THERE IS NO «Collapse sidebar». The narrow, icons-only form is
+ * what a screen under 1024px gets and the wide one what it gets above,
+ * decided by CSS alone — `md:w-16 lg:w-60`, with every label
+ * `md:sr-only lg:not-sr-only` so a screen reader keeps all of them at
+ * every width. It was a button and a localStorage key until today; a
+ * stored choice is one more thing that can be wrong on the first
+ * paint, and it could disagree with the screen it was being read on.
  *
  * WHY THE OLD "All tools changes the sidebar" BUG CANNOT HAPPEN. The
  * Recent list used to be rebuilt from localStorage on every page change,
@@ -51,18 +58,17 @@ import { useToast } from "@/components/toast/toast-context";
  * accessible name. Kept per device (localStorage, guarded), because how
  * wide a sidebar should be is a property of the screen, not the account.
  */
-const RAIL_ICONS: Record<RailKey, LucideIcon> = {
-  new: Plus,
-  chat: MessageCircle,
-  // A STACK OF BUBBLES, NOT ONE. The row means "all of them" now, and
-  // leaving the single bubble would have been the clearest possible way
-  // to say nothing had changed.
-  chats: MessagesSquare,
+// ONLY THE ROWS THIS FILE DRAWS. Typed as DrawnRailKey rather than
+// RailKey so the two extra keys the phone's bottom bar uses cannot
+// oblige this map to carry icons nothing here ever renders.
+const RAIL_ICONS: Record<DrawnRailKey, LucideIcon> = {
+  // ONE BUBBLE, FOR ONE PLACE. It was a stack while the row meant "all
+  // of them"; the row is the chat itself again, and the conversations
+  // are a column inside it.
+  ionexaChat: MessageCircle,
   coding: Code2,
   allTools: LayoutGrid,
-  settings: Settings,
 };
-const COLLAPSED_KEY = "ionexa.sidebarCollapsed";
 
 export function Sidebar({
   email = "",
@@ -83,25 +89,6 @@ export function Sidebar({
   const { open, setOpen } = useSidebar();
   const { addToast } = useToast();
   const closeOnMobile = () => setOpen(false);
-
-  const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => {
-    try {
-      setCollapsed(window.localStorage.getItem(COLLAPSED_KEY) === "1");
-    } catch {
-      /* storage blocked: the wide sidebar, which is the default */
-    }
-  }, []);
-  const toggleCollapsed = () => {
-    setCollapsed((c) => {
-      try {
-        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");
-      } catch {
-        /* storage blocked: this page only */
-      }
-      return !c;
-    });
-  };
 
   // The tools a Recent row may name, with their icons and labels.
   const tools = useMemo(
@@ -169,26 +156,28 @@ export function Sidebar({
         onMouseEnter={() => warm(href)}
         onFocus={() => warm(href)}
         onTouchStart={() => warm(href)}
-        aria-label={collapsed ? label : undefined}
         aria-current={isActive ? "page" : undefined}
         data-active={isActive}
+        // NARROW BETWEEN md AND lg, WIDE ABOVE IT — and the name is in
+        // the DOM at every width, only hidden from the eye in between
+        // (`md:sr-only lg:not-sr-only`). That is why there is no
+        // aria-label: the accessible name is the text itself, so it
+        // cannot drift from what a wide screen reads.
         className={`nav-item flex min-h-[44px] flex-1 items-center gap-3 px-3 py-2 text-sm ${
           isActive ? "text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
-        } ${collapsed ? "md:justify-center md:px-0" : ""}`}
+        } md:justify-center md:px-0 lg:justify-start lg:px-3`}
       >
         <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className={`min-w-0 break-words ${collapsed ? "md:sr-only" : ""}`}>{label}</span>
+        <span className="min-w-0 break-words md:sr-only lg:not-sr-only">{label}</span>
       </Link>
     );
     return (
       <div key={href} className="group relative flex items-center">
-        {collapsed ? (
-          <Tooltip content={label} side="right">
-            {link}
-          </Tooltip>
-        ) : (
-          link
-        )}
+        {/* The tooltip earns its place only where the name is hidden;
+            above lg the name is already on screen beside the icon. */}
+        <Tooltip content={label} side="right">
+          {link}
+        </Tooltip>
         {extra}
       </div>
     );
@@ -206,14 +195,17 @@ export function Sidebar({
 
       <aside
         data-testid="sidebar"
-        data-collapsed={collapsed}
-        className={`fixed inset-y-0 start-0 z-50 flex w-64 flex-col overflow-y-auto border-e border-divider bg-background transition-[transform,width] duration-200 ease-out md:sticky md:top-0 md:z-auto md:h-screen md:shrink-0 md:translate-x-0 ${
-          collapsed ? "md:w-16" : "md:w-60"
-        } ${open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"}`}
+        className={`fixed inset-y-0 start-0 z-50 flex w-64 flex-col overflow-y-auto border-e border-divider bg-background transition-[transform,width] duration-200 ease-out md:sticky md:top-0 md:z-auto md:h-screen md:w-16 md:shrink-0 md:translate-x-0 lg:w-60 ${
+          open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full md:rtl:translate-x-0"
+        }`}
       >
-        <div className={`flex items-center gap-2 px-3 py-4 ${collapsed ? "md:justify-center md:px-0" : ""}`}>
+        <div className="flex items-center gap-2 px-3 py-4 md:justify-center md:px-0 lg:justify-start lg:px-3">
           <Link href="/dashboard/overview" onClick={closeOnMobile} className="flex min-h-[44px] items-center rounded-item px-1" aria-label="Ionexa">
-            {collapsed ? <Logo iconOnly px={26} /> : <Logo px={24} />}
+            {/* Both marks are rendered and CSS picks one, so the swap
+                happens at the breakpoint without a re-render and
+                without a first paint that shows the wrong one. */}
+            <span className="hidden md:inline lg:hidden"><Logo iconOnly px={26} /></span>
+            <span className="md:hidden lg:inline"><Logo px={24} /></span>
           </Link>
           <button
             type="button"
@@ -230,7 +222,7 @@ export function Sidebar({
 
           {list.length > 0 && (
             <div className="pt-5" data-testid="recent-tools">
-              {!collapsed && <p className="px-3 pb-2 text-xs text-muted">{t("rail.recentTools")}</p>}
+              <p className="px-3 pb-2 text-xs text-muted md:sr-only lg:not-sr-only">{t("rail.recentTools")}</p>
               <div className="space-y-1">
                 {list.map((r) => {
                   const item = toolFor(r.href);
@@ -242,8 +234,8 @@ export function Sidebar({
                     label,
                     item.icon,
                     isActive,
-                    collapsed ? null : (
-                      <span className="absolute end-1 flex items-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                    (
+                      <span className="absolute end-1 hidden items-center opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100 md:hidden lg:flex">
                         <button
                           type="button"
                           onClick={() => act(r.pinned ? "unpin" : "pin", r.href)}
@@ -288,23 +280,19 @@ export function Sidebar({
             isRowActive("settings"),
             null
           )}
-          {email && !collapsed && (
-            <p className="px-3 text-xs text-muted">
+          {email && (
+            <p className="px-3 text-xs text-muted md:sr-only lg:not-sr-only">
               <span className="block break-words text-foreground">{displayNameFromEmail(email)}</span>
               {planName && <span className="block break-words">{planName}</span>}
             </p>
           )}
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            aria-label={t(collapsed ? "rail.expand" : "rail.collapse")}
-            className={`hidden min-h-[44px] w-full items-center gap-3 rounded-item px-3 text-sm text-muted hover:bg-panel-hover hover:text-foreground md:flex ${
-              collapsed ? "md:justify-center md:px-0" : ""
-            }`}
-          >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" aria-hidden="true" /> : <PanelLeftClose className="h-4 w-4" aria-hidden="true" />}
-            <span className={collapsed ? "sr-only" : ""}>{t(collapsed ? "rail.expand" : "rail.collapse")}</span>
-          </button>
+          {/* NO «Collapse sidebar» BUTTON. It was here until 2026-10-17
+              with a localStorage key behind it; the owner had it taken
+              out and the narrow form made automatic. What it did is in
+              the widths on the <aside> above — icons only between md
+              and lg, the full rail beyond — so there is no state to
+              store, nothing to be wrong on the first paint, and no way
+              for a remembered choice to contradict the screen. */}
         </div>
       </aside>
     </>

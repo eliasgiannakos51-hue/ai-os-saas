@@ -145,16 +145,25 @@ const MUTANTS = [
     expect: "every row is drawn, unconditionally",
   },
   {
-    gate: TOOLTIPS,
-    // Whether the sidebar is narrow is the ONE thing a browser keeps;
-    // anything else stored is a regression on its own — and the check
-    // reads the source with comments STRIPPED, because the component
-    // explains what it stores.
-    name: "the sidebar starts storing something besides whether it is narrow",
+    // AGAINST sidebar-structure's OWN CLAUSE, not the tooltips gate's.
+    // Both files grew the same zero-storage check in the same round
+    // and this mutant used to run against the other one, which left
+    // this file's copy unproven — the hole a mutation suite exists to
+    // close. sidebar-groups.mutation.mjs covers the tooltips gate's.
+    gate: STRUCTURE,
+    // THE SIDEBAR KEEPS NOTHING, since 2026-10-17. Whether it is narrow
+    // was the last stored thing and it went with the «Collapse sidebar»
+    // button; the narrow rail is a width now. So ANY storage call in
+    // this file is the regression, and this mutant adds one — hung on
+    // the pin/remove handler, because the line it used to hang on was
+    // the storage call that no longer exists. The check reads the
+    // source with comments STRIPPED, because the component explains at
+    // length what it does not store.
+    name: "the sidebar starts storing something again",
     file: SIDEBAR,
-    from: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");',
-    to: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");\n        window.localStorage.setItem("ionexa:sidebar-open", "1");',
-    expect: "the only thing remembered across a reload is whether the sidebar is narrow",
+    from: "  const act = async (action: RecentAction, href: string) => {\n    const before = list;",
+    to: '  const act = async (action: RecentAction, href: string) => {\n    const before = list;\n    window.localStorage.setItem("ionexa:sidebar-open", "1");',
+    expect: "the sidebar stores nothing at all",
   },
 
   // ---- the order, the names, the count ------------------------------

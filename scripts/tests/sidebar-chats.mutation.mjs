@@ -17,6 +17,8 @@ const PAGE = "src/app/dashboard/chats/page.tsx";
 const FLAGS = "src/lib/flags/flags.ts";
 const EN = "messages/en.json";
 const WORKSPACE = "src/components/chats/chats-workspace.tsx";
+const COLUMN = "src/components/chat/conversation-column.tsx";
+const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
 
 // A NAMED ARRAY, NOT AN INLINE ONE. scripts/tests/lib/mutant-list.mjs
 // finds the declaration below by name and EVALUATES it; anything else
@@ -32,18 +34,31 @@ const WORKSPACE = "src/components/chats/chats-workspace.tsx";
 const MUTANTS = [
     // ---- the rail --------------------------------------------------
     {
-      name: "the second row goes back to Chat and the old chat page",
+      name: "the two rows the owner removed come back",
       file: RAIL,
-      from: '  { key: "chats", href: CHATS_HREF },',
-      to: '  { key: "chat", href: "/dashboard/chat" },',
-      expect: "the rail is Logo, New, Chats, Coding, All tools",
+      from: '  { key: "ionexaChat", href: "/dashboard/chat", match: [CHATS_HREF] },',
+      to: '  { key: "new", href: "/dashboard/overview" },\n  { key: "chats", href: CHATS_HREF },',
+      expect: "the rail is Logo, Ionexa Chat, Coding, All tools",
     },
     {
-      name: "the row keeps its name but opens a new conversation again",
+      name: "the row keeps its key but opens the list instead of the chat",
       file: RAIL,
-      from: 'export const CHATS_HREF = "/dashboard/chats";',
-      to: 'export const CHATS_HREF = "/dashboard/chat";',
-      expect: "the second row is Chats, and it opens the page with every conversation",
+      from: '  { key: "ionexaChat", href: "/dashboard/chat", match: [CHATS_HREF] },',
+      to: '  { key: "ionexaChat", href: CHATS_HREF },',
+      expect: "the first row is Ionexa Chat, and it opens the Chat",
+    },
+    {
+      // WITHOUT THE match LIST, THE LIST PAGE LIGHTS NOTHING. under()
+      // compares path segments, and /dashboard/chats is not under
+      // /dashboard/chat — so «Όλες οι συνομιλίες» would land the person
+      // on a page whose own rail says they are nowhere.
+      // (No backtick in this comment on purpose: the strict reader this
+      // file's header describes treats one as opening a string.)
+      name: "the list page stops belonging to the row that leads to it",
+      file: RAIL,
+      from: '  { key: "ionexaChat", href: "/dashboard/chat", match: [CHATS_HREF] },',
+      to: '  { key: "ionexaChat", href: "/dashboard/chat" },',
+      expect: "the page with every conversation belongs to that same row",
     },
     {
       name: "the switch comes back as a second rail builder",
@@ -55,8 +70,8 @@ const MUTANTS = [
     {
       name: "activeRail ignores the rail it was given and always uses the old one",
       file: RAIL,
-      from: "  for (const row of rows) if (under(pathname, row.href)) return { key: row.key };",
-      to: "  for (const row of RAIL_ROWS) if (under(pathname, row.href)) return { key: row.key };",
+      from: "  for (const row of rows) {\n    if (under(pathname, row.href)) return { key: row.key };",
+      to: "  for (const row of RAIL_ROWS) {\n    if (under(pathname, row.href)) return { key: row.key };",
       expect: "follows the rail it is GIVEN, not the one it knows",
     },
 
@@ -138,8 +153,8 @@ const MUTANTS = [
     {
       name: "the sidebar gets its capped list back, and the link out of it",
       file: SIDEBAR,
-      from: "const COLLAPSED_KEY =",
-      to: "const RECENT_CONVERSATIONS = 15;\nconst COLLAPSED_KEY =",
+      from: "const RAIL_ICONS: Record<DrawnRailKey, LucideIcon> =",
+      to: "const RECENT_CONVERSATIONS = 15;\nconst RAIL_ICONS: Record<DrawnRailKey, LucideIcon> =",
       expect: "and the sidebar has no list left to cap",
     },
     {
@@ -175,8 +190,8 @@ const MUTANTS = [
     {
       name: "the heading comes back to the message files, ready to be drawn again",
       file: EN,
-      from: '      "chats": "Chats"',
-      to: '      "recentChats": "Recent chats",\n      "chats": "Chats"',
+      from: '      "ionexaChat": "Ionexa Chat",',
+      to: '      "recentChats": "Recent chats",\n      "ionexaChat": "Ionexa Chat",',
       expect: "sidebar.rail.recentChats is gone from all ten",
     },
     {
@@ -193,11 +208,62 @@ const MUTANTS = [
       to: '{searching ? t("searching") : ""}',
       expect: "the content search says what it looked at",
     },
+
+    // ---- the column, and the defect it brought back ----------------
+    {
+      name: "the column's rows navigate to the screen they are already on",
+      file: ROWS,
+      from: "            if (onOpen) {\n              onOpen(row.id);\n              return;\n            }",
+      to: "",
+      expect: "a row hands its id to the caller when the caller wants it",
+    },
+    {
+      name: "the column stops asking to open the thread in place",
+      file: COLUMN,
+      from: "          onOpen={onOpen}",
+      to: "",
+      expect: "the column is the caller that wants it",
+    },
+    {
+      name: "opening from the column changes the address and nothing else",
+      file: CHAT_WORKSPACE,
+      from: "    lastDeepLink.current = id;\n    selectConversation(id);",
+      to: "    lastDeepLink.current = id;",
+      expect: "opening from the column switches the thread, then corrects the address",
+    },
+    {
+      name: "the deep link goes back to running once per mount",
+      file: CHAT_WORKSPACE,
+      from: "  const lastDeepLink = useRef<string | null>(null);\n  useEffect(() => {\n    if (!initialConversationId || lastDeepLink.current === initialConversationId) return;\n    lastDeepLink.current = initialConversationId;",
+      to: "  const deepLinkedRef = useRef(false);\n  const lastDeepLink = useRef<string | null>(null);\n  useEffect(() => {\n    if (deepLinkedRef.current || !initialConversationId) return;\n    deepLinkedRef.current = true;",
+      expect: "the deep link follows the address every time it changes, not once per mount",
+    },
+    {
+      name: "the chat screen stops following the server after a rename",
+      file: CHAT_WORKSPACE,
+      from: "  useEffect(() => setConversations(initialConversations), [initialConversations]);",
+      to: "",
+      expect: "the list follows the server after the column writes to it",
+    },
+    {
+      name: "the chat page leaves its conversation list to the policy alone",
+      file: CHAT_PAGE,
+      from: '      .select("id, title, is_pinned, created_at, updated_at")\n      .eq("user_id", user.id)',
+      to: '      .select("id, title, is_pinned, created_at, updated_at")',
+      expect: "the chat page asks for this account's conversations by name",
+    },
+    {
+      name: "...and its projects too",
+      file: CHAT_PAGE,
+      from: '    .eq("user_id", user.id)\n    .order("created_at", { ascending: false })',
+      to: '    .order("created_at", { ascending: false })',
+      expect: "and for its projects the same way",
+    },
 ];
 
 runMutations({
   name: "sidebar-chats",
   gate: "scripts/tests/sidebar-chats.test.mjs",
-  targets: [RAIL, ROWS, ROUTE, MEMBERS, LATER, CHAT_WORKSPACE, SIDEBAR, FLAGS, EN, PAGE, WORKSPACE],
+  targets: [RAIL, ROWS, ROUTE, MEMBERS, LATER, CHAT_WORKSPACE, SIDEBAR, FLAGS, EN, PAGE, WORKSPACE, COLUMN, CHAT_PAGE],
   mutants: MUTANTS,
 });

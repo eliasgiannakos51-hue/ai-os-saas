@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { ChatWorkspace } from "@/components/chat/chat-workspace";
 import type { ChatConversation } from "@/types/chat";
+import type { SidebarProject } from "@/lib/nav/recent-tools";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 import { getFreeChatStatus } from "@/lib/billing/free-chat-usage";
@@ -48,7 +49,14 @@ export default async function ChatPage(
   const [{ data: conversationRows }, bypassesCredits, plan, opensTools] = await Promise.all([
     supabase
       .from("chat_conversations")
+      // SCOPED HERE AS WELL AS BY RLS. The Chats page has always said
+      // `.eq("user_id", …)` on the same table (app/dashboard/chats/page.tsx);
+      // this query left it to the policy alone, which is one layer where
+      // the other screen has two. Found on 2026-10-17 by the prodtest for
+      // the conversation column, which seeds a second account's row and
+      // requires the list not to carry it.
       .select("id, title, is_pinned, created_at, updated_at")
+      .eq("user_id", user.id)
       .order("updated_at", { ascending: false }),
     // Admins and beta testers already pay nothing, so a "free messages
     // left" counter would be meaningless noise for them — the route skips
@@ -75,11 +83,40 @@ export default async function ChatPage(
     is_favorited: favoritedIds.has(c.id),
   }));
 
-  // THE PROJECTS THIS PERSON OWNS, read only to validate `?project=`.
-  // RLS scopes it, and the ids are compared rather than the parameter
-  // trusted, for the same reason `?c=` is validated above.
-  const { data: projectRows } = await supabase.from("projects").select("id").limit(200);
+  // THE PROJECTS THIS PERSON OWNS, for two different jobs out of ONE
+  // read. RLS scopes it, and the ids are compared rather than the
+  // parameter trusted, for the same reason `?c=` is validated above.
+  //
+  // Job one is validating `?project=`, which is what this query was for
+  // until 2026-10-17 and which still ranges over every project the
+  // person has, archived included: an id that was legal yesterday does
+  // not stop being theirs.
+  //
+  // Job two is «Μεταφορά σε Έργο» in the conversation column's ⋯ menu
+  // (components/chat/conversation-column.tsx). That menu lists only
+  // ACTIVE projects, the same fifty in the same order as the Chats page
+  // (app/dashboard/chats/page.tsx), so the same conversation offers the
+  // same folders in both places.
+  //
+  // It stays ONE query on purpose: scripts/tests/navigation-cost.test.mjs
+  // counts this page's sequential awaits and a second read would be one
+  // over, which is the whole reason the four above share a Promise.all.
+  const { data: projectRows } = await supabase
+    .from("projects")
+    .select("id, name, status")
+    // The owner's id as well as the policy, for the same reason as the
+    // conversation query above and as app/dashboard/chats/page.tsx.
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(200);
   const ownProjectIds = new Set((projectRows ?? []).map((row) => String((row as { id?: unknown }).id ?? "")));
+  const projects: SidebarProject[] = (projectRows ?? [])
+    .filter((row) => String((row as { status?: unknown }).status ?? "") === "active")
+    .slice(0, 50)
+    .map((row) => ({
+      id: String((row as { id?: unknown }).id ?? ""),
+      name: String((row as { name?: unknown }).name ?? ""),
+    }));
 
   // Same entitlements the route honours, so the counter the user sees and
   // the allowance the server enforces cannot disagree for a grandfathered
@@ -108,6 +145,9 @@ export default async function ChatPage(
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={conversations}
+        // THE FOLDERS «Μεταφορά σε Έργο» offers, in the conversation
+        // column's ⋯ menu. Same list, same order as the Chats page.
+        projects={projects}
         initialMentorPreset={initialMentorPreset}
         // THE NAME THE EMPTY CHAT GREETS WITH (MASTER 14.2), the same one
         // Home uses: the display name, never the email.

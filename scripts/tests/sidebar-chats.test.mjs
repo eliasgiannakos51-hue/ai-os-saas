@@ -97,23 +97,38 @@ check(`nothing asks for it any more (${namesIt.length})`, namesIt.length === 0, 
 // the other way: it would resolve to the default for ever, silently.
 
 // ---------------------------------------------------------------------
-console.log("\n== 2. there is one rail, and its second row is Chats ==");
+console.log("\n== 2. there is one rail, and its first row is Ionexa Chat ==");
 // ---------------------------------------------------------------------
 // THERE WERE TWO RAILS HERE, and this section held that they differed
 // in exactly one row. There is one now: railRows(chatsPage) is gone
 // with the switch and RAIL_ROWS is what the sidebar draws.
+//
+// AND THE ROW THAT WAS «Chats» IS «Ionexa Chat» (owner, 2026-10-17:
+// «Φεύγουν εντελώς: New, Chats, Collapse sidebar. Μπαίνει ένα
+// στοιχείο: Ionexa Chat»). The page with every conversation did NOT go
+// — «Η σελίδα με όλες τις συνομιλίες μένει» — it is reached from
+// «Όλες οι συνομιλίες» at the foot of the column inside Chat, and
+// /dashboard/chats still answers. What changed is which row of the
+// rail owns it: Ionexa Chat carries CHATS_HREF in its own `match`, so
+// the page lights the row that leads to it rather than lighting
+// nothing.
 const rail = await loadTs("src/lib/nav/rail.ts");
 const rows = rail.RAIL_ROWS;
-check("the rail is Logo, New, Chats, Coding, All tools", rows.map((r) => r.key).join() === "new,chats,coding,allTools", JSON.stringify(rows.map((r) => r.key)));
-// INDEX 1, NOT 2: the Logo is row 1 of the DESIGN and is not a rail
-// row at all — RAIL_ROWS starts at New. Written out because counting
-// it is the obvious mistake, and this check made it once.
+check("the rail is Logo, Ionexa Chat, Coding, All tools", rows.map((r) => r.key).join() === "ionexaChat,coding,allTools", JSON.stringify(rows.map((r) => r.key)));
+// INDEX 0, NOT 1: the Logo is row 1 of the DESIGN and is not a rail
+// row at all — RAIL_ROWS starts at Ionexa Chat. Written out because
+// counting it is the obvious mistake, and this check made it once.
 check(
-  "the second row is Chats, and it opens the page with every conversation",
-  rows[1].key === "chats" && rows[1].href === rail.CHATS_HREF && rail.CHATS_HREF === "/dashboard/chats",
-  JSON.stringify(rows[1])
+  "the first row is Ionexa Chat, and it opens the Chat",
+  rows[0].key === "ionexaChat" && rows[0].href === "/dashboard/chat",
+  JSON.stringify(rows[0])
 );
-check("no row goes to /dashboard/chat any more", !rows.some((r) => r.href === "/dashboard/chat"), JSON.stringify(rows));
+check(
+  "...and the page with every conversation belongs to that same row",
+  rows[0].match?.includes(rail.CHATS_HREF) === true && rail.CHATS_HREF === "/dashboard/chats",
+  JSON.stringify(rows[0])
+);
+check("no row of its own goes to /dashboard/chats any more", !rows.some((r) => r.href === rail.CHATS_HREF), JSON.stringify(rows));
 // READ FROM THE EXPORT LIST, NOT BY TOUCHING THE NAME. `rail.railRows`
 // would be the suite reading a symbol its subject does not export —
 // undefined today, a TypeError the day somebody calls it — which
@@ -122,21 +137,27 @@ check("no row goes to /dashboard/chat any more", !rows.some((r) => r.href === "/
 // something that is actually there.
 check("there is no second rail to build", !Object.keys(rail).includes("railRows"), Object.keys(rail).join(", "));
 check(
-  "activeRail lights Chats on /dashboard/chats",
-  JSON.stringify(rail.activeRail("/dashboard/chats", [], [], rows)) === '{"key":"chats"}'
+  "activeRail lights Ionexa Chat on /dashboard/chats",
+  JSON.stringify(rail.activeRail("/dashboard/chats", [], [], rows)) === '{"key":"ionexaChat"}',
+  JSON.stringify(rail.activeRail("/dashboard/chats", [], [], rows))
+);
+check(
+  "...and on /dashboard/chat itself",
+  JSON.stringify(rail.activeRail("/dashboard/chat", [], [], rows)) === '{"key":"ionexaChat"}',
+  JSON.stringify(rail.activeRail("/dashboard/chat", [], [], rows))
 );
 // AGAINST A RAIL THAT IS NOT THE DEFAULT, because `rows` IS the default
 // now and a function that ignored its argument would answer this
 // identically. The phone's bottom bar is the real second caller: it
-// passes RAIL_ROWS plus a Chat tab the sidebar does not have
-// (lib/nav/tabs.ts), so /dashboard/chat lights Chat there and All tools
-// here — and that only works if the given list wins.
-const phoneRail = [...rows, { key: "chat", href: "/dashboard/chat" }];
+// passes RAIL_ROWS plus a Home tab the sidebar does not have
+// (lib/nav/tabs.ts), so /dashboard/overview lights Home there and
+// nothing here — and that only works if the given list wins.
+const phoneRail = [...rows, { key: "home", href: "/dashboard/overview" }];
 check(
   "...and follows the rail it is GIVEN, not the one it knows",
-  JSON.stringify(rail.activeRail("/dashboard/chat", [], [], phoneRail)) === '{"key":"chat"}' &&
-    rail.activeRail("/dashboard/chat", [], [], rows) === null,
-  `${JSON.stringify(rail.activeRail("/dashboard/chat", [], [], phoneRail))} / ${JSON.stringify(rail.activeRail("/dashboard/chat", [], [], rows))}`
+  JSON.stringify(rail.activeRail("/dashboard/overview", [], [], phoneRail)) === '{"key":"home"}' &&
+    rail.activeRail("/dashboard/overview", [], [], rows) === null,
+  `${JSON.stringify(rail.activeRail("/dashboard/overview", [], [], phoneRail))} / ${JSON.stringify(rail.activeRail("/dashboard/overview", [], [], rows))}`
 );
 
 // ---------------------------------------------------------------------
@@ -237,9 +258,85 @@ const CARRIED = [
   ["the favourite star", () => /<FavoriteButton/.test(rowsSrc)],
   ["pinned grouped above the rest", () => /groupPinned/.test(rowsSrc)],
   ["an empty state", () => /noConversations/.test(rowsSrc)],
-  ["a new conversation", () => rows[0].key === "new" && /rows\.map\(\(r\) => row\(r\.href/.test(src(SIDEBAR))],
+  // «Νέα συνομιλία» came OFF the rail on 2026-10-17 and went INTO the
+  // Chat's own title row, which is where the owner asked for it. So
+  // this entry reads the button rather than a rail row — and it reads
+  // the handler as well as the label, because a button wired to
+  // nothing renders exactly as well as one that works.
+  ["a new conversation", () => /onClick=\{startNewChat\}[\s\S]{0,240}data-testid="chat-new-conversation"/.test(src(CHAT_WORKSPACE))],
 ];
 for (const [what, held] of CARRIED) check(`carried over: ${what}`, held());
+
+// AND THE ONE THING THE COLUMN HAD TO DO DIFFERENTLY, which is the
+// defect this section would otherwise have missed entirely.
+//
+// Every other list of conversations is on ANOTHER route, so choosing
+// one mounts the chat screen around it and `?c=` is read on the way
+// in. The column is ON that screen: a push to /dashboard/chat?c=…
+// changes a prop and remounts nothing. With the once-per-mount guard
+// the deep-link effect carried until 2026-10-17, the FIRST
+// conversation opened and every one after it left the address saying
+// one thread while the page showed another — and re-opening the one
+// you had just left did nothing at all, because the address was
+// already its own.
+//
+// THREE HALVES, because any one of them alone passes on the broken
+// version: the row hands the id to its caller instead of navigating,
+// the caller selects the thread and corrects the address, and the
+// effect follows the address every time rather than once.
+{
+  const rowsSrc2 = src(ROWS);
+  const workspace = src(CHAT_WORKSPACE);
+  const column = src("src/components/chat/conversation-column.tsx");
+  check(
+    "a row hands its id to the caller when the caller wants it",
+    /if \(onOpen\) \{\s*onOpen\(row\.id\);\s*return;\s*\}/.test(rowsSrc2) &&
+      /router\.push\(`\/dashboard\/chat\?c=\$\{encodeURIComponent\(row\.id\)\}`\)/.test(rowsSrc2),
+    "and still navigates for the screens that are not the chat"
+  );
+  check("...and the column is the caller that wants it", /onOpen=\{onOpen\}/.test(column) && /onOpen=\{openFromColumn\}/.test(workspace));
+  check(
+    "...and opening from the column switches the thread, then corrects the address",
+    /function openFromColumn\(id: string\) \{[\s\S]{0,200}selectConversation\(id\);[\s\S]{0,200}router\.replace\(`\/dashboard\/chat\?c=\$\{encodeURIComponent\(id\)\}`/.test(workspace),
+    "a reload, a share and Back all have to land on the conversation that is open"
+  );
+  check(
+    "...and the deep link follows the address every time it changes, not once per mount",
+    /lastDeepLink\.current === initialConversationId\) return;/.test(workspace) && !/deepLinkedRef/.test(workspace),
+    "a boolean here is the defect: it opens the first conversation and silently ignores the second"
+  );
+  // AND THE NAME IN THE TITLE ROW IS THE NAME IN THE COLUMN.
+  //
+  // The rows keep their own copy and refresh the page after every
+  // write; the workspace seeded its list once and ignored what came
+  // back, so a conversation renamed in the column carried its new
+  // name there and its OLD name above the thread, both on screen at
+  // once. Measured by sidebar-chats.prodtest.mjs §1b on 2026-10-17.
+  check(
+    "...and the list follows the server after the column writes to it",
+    /useEffect\(\(\) => setConversations\(initialConversations\), \[initialConversations\]\);/.test(workspace) &&
+      /router\.refresh\(\)/.test(rowsSrc2),
+    "two copies of one conversation's name, visible at the same time, disagreeing"
+  );
+}
+
+// AND THE LIST THE COLUMN DRAWS IS THIS ACCOUNT'S, said by the query
+// and not only by the policy. app/dashboard/chats/page.tsx has always
+// named the owner on the same table; the chat page left it to RLS
+// alone, which is one layer where the other screen has two. Found on
+// 2026-10-17 by sidebar-chats.prodtest.mjs §1b, which seeds a second
+// account's conversation and requires the column not to carry it.
+{
+  const chatPage = src("src/app/dashboard/chat/page.tsx");
+  check(
+    "the chat page asks for this account's conversations by name",
+    /from\("chat_conversations"\)[\s\S]{0,400}\.eq\("user_id", user\.id\)/.test(chatPage)
+  );
+  check(
+    "...and for its projects the same way",
+    /from\("projects"\)[\s\S]{0,400}\.eq\("user_id", user\.id\)/.test(chatPage)
+  );
+}
 // THE FILE WAS KEPT ON PURPOSE WHILE THE SWITCH EXISTED, so «Πώς
 // γυρίζει πίσω» could be one press on /dashboard/system-health. With
 // the switch gone, going back is a Revert, and the file's own comment
@@ -262,7 +359,22 @@ check("...and the sidebar has no list left to cap", !/RECENT_CONVERSATIONS/.test
 // thinking about it, and `sidebar.rail.*` is a dynamic namespace —
 // orphan-i18n-keys.test.mjs counts every key under it as reachable,
 // so nothing else would have noticed these two going dead.
-const DELETED_WORDS = [["sidebar", "rail", "recentChats"], ["sidebar", "rail", "allConversations"]];
+//
+// FIVE MORE WENT ON 2026-10-17 with the rows they named: «New»,
+// «Chats», «Collapse sidebar», «Expand sidebar», and the bare «Chat»
+// the first row used before it became «Ionexa Chat». Same reason, and
+// one of them worse than a heading — a message file that still says
+// «Collapse sidebar» in ten languages is a control the next person
+// rebuilds.
+const DELETED_WORDS = [
+  ["sidebar", "rail", "recentChats"],
+  ["sidebar", "rail", "allConversations"],
+  ["sidebar", "rail", "new"],
+  ["sidebar", "rail", "chat"],
+  ["sidebar", "rail", "chats"],
+  ["sidebar", "rail", "collapse"],
+  ["sidebar", "rail", "expand"],
+];
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the words, in all ten languages ==");
@@ -271,7 +383,10 @@ const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 const messages = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`messages/${l}.json`, "utf8"))]));
 check("ten locale files were read", Object.keys(messages).length === 10);
 const NEEDED = [
-  ["sidebar", "rail", "chats"],
+  ["sidebar", "rail", "ionexaChat"],
+  ["dashboard", "chat", "newChat"],
+  ["dashboard", "chat", "searchConversations"],
+  ["dashboard", "chat", "allConversations"],
   ["dashboard", "chat", "moveToProject"],
   ["dashboard", "chat", "undo"],
   ["dashboard", "chat", "deleteFailed"],

@@ -293,8 +293,7 @@
     },
     "closeMenu": "Menü schließen",
     "rail": {
-      "new": "Neu",
-      "chat": "Chat",
+      "ionexaChat": "Ionexa Chat",
       "coding": "Code",
       "allTools": "Alle Werkzeuge",
       "recentTools": "Zuletzt genutzt",
@@ -302,12 +301,9 @@
       "pin": "{tool} anheften",
       "unpin": "{tool} lösen",
       "remove": "{tool} aus „Zuletzt genutzt“ entfernen",
-      "collapse": "Seitenleiste einklappen",
-      "expand": "Seitenleiste ausklappen",
       "label": "Hauptmenü",
       "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte erneut versuchen.",
-      "untitledChat": "Neue Unterhaltung",
-      "chats": "Chats"
+      "untitledChat": "Neue Unterhaltung"
     },
     "tabs": {
       "home": "Start",
@@ -1344,6 +1340,11 @@
     },
     "chat": {
       "title": "Ionexa Chat",
+      "newChat": "Neuer Chat",
+      "hideConversations": "Unterhaltungen ausblenden",
+      "showConversations": "Unterhaltungen einblenden",
+      "searchConversations": "Titel durchsuchen",
+      "allConversations": "Alle Unterhaltungen",
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
       "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
       "send": "Senden",

@@ -270,7 +270,15 @@ console.log("\n== 5. THE BUDGET, AND THE CACHE IT MUST NOT BREAK ==");
   const workspace = stripComments(readFileSync(CHAT_WORKSPACE, "utf8"));
   ok("the chat page reads ?project= and validates it against the person's own",
     /searchParams\.project/.test(chatPage) && /ownProjectIds\.has\(searchParams\.project\)/.test(chatPage));
-  ok("...from a query scoped by RLS, not from the URL", /from\("projects"\)\s*\.select\("id"\)/.test(chatPage));
+  // The same read now also feeds «Μεταφορά σε Έργο» in the chat's
+  // conversation column, so it selects a name and a status beside the
+  // id (2026-10-17). What this check is about is unchanged and is
+  // pinned in both halves: the ids come OUT of a Supabase query, and
+  // ownProjectIds is built from that query's rows rather than from
+  // anything the URL carried.
+  ok("...from a query scoped by RLS, not from the URL",
+    /from\("projects"\)[\s\n]*\.select\("id[,"]/.test(chatPage) &&
+      /ownProjectIds = new Set\(\(projectRows \?\? \[\]\)/.test(chatPage));
   ok("the workspace takes it as an INITIAL value", /initialProjectId/.test(workspace));
   ok("...and there is no setter for it anywhere",
     !/setProjectId|setInitialProjectId|changeProject|switchProject/.test(workspace + chatPage + stripComments(readFileSync(DETAIL_COMPONENT, "utf8"))),

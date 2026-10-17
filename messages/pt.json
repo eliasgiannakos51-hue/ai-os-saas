@@ -293,8 +293,7 @@
     },
     "closeMenu": "Fechar o menu",
     "rail": {
-      "new": "Novo",
-      "chat": "Conversa",
+      "ionexaChat": "Ionexa Conversa",
       "coding": "Código",
       "allTools": "Todas as ferramentas",
       "recentTools": "Ferramentas recentes",
@@ -302,12 +301,9 @@
       "pin": "Fixar {tool}",
       "unpin": "Desafixar {tool}",
       "remove": "Retirar {tool} das recentes",
-      "collapse": "Recolher a barra lateral",
-      "expand": "Expandir a barra lateral",
       "label": "Menu principal",
       "saveFailed": "Não foi possível guardar a alteração. Tente de novo.",
-      "untitledChat": "Nova conversa",
-      "chats": "Conversas"
+      "untitledChat": "Nova conversa"
     },
     "tabs": {
       "home": "Início",
@@ -1344,6 +1340,11 @@
     },
     "chat": {
       "title": "Ionexa Conversa",
+      "newChat": "Nova conversa",
+      "hideConversations": "Ocultar conversas",
+      "showConversations": "Mostrar conversas",
+      "searchConversations": "Procurar títulos",
+      "allConversations": "Todas as conversas",
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
       "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
       "send": "Enviar",

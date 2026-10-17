@@ -293,8 +293,7 @@
     },
     "closeMenu": "إغلاق القائمة",
     "rail": {
-      "new": "جديد",
-      "chat": "محادثة",
+      "ionexaChat": "محادثة Ionexa",
       "coding": "البرمجة",
       "allTools": "كل الأدوات",
       "recentTools": "الأدوات الأخيرة",
@@ -302,12 +301,9 @@
       "pin": "تثبيت {tool}",
       "unpin": "إلغاء تثبيت {tool}",
       "remove": "إزالة {tool} من الأدوات الأخيرة",
-      "collapse": "طي الشريط الجانبي",
-      "expand": "توسيع الشريط الجانبي",
       "label": "القائمة الرئيسية",
       "saveFailed": "تعذّر حفظ التغيير. حاول مرة أخرى.",
-      "untitledChat": "محادثة جديدة",
-      "chats": "المحادثات"
+      "untitledChat": "محادثة جديدة"
     },
     "tabs": {
       "home": "الرئيسية",
@@ -1344,6 +1340,11 @@
     },
     "chat": {
       "title": "محادثة Ionexa",
+      "newChat": "محادثة جديدة",
+      "hideConversations": "إخفاء المحادثات",
+      "showConversations": "إظهار المحادثات",
+      "searchConversations": "ابحث في العناوين",
+      "allConversations": "كل المحادثات",
       "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
       "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
       "send": "إرسال",

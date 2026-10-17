@@ -103,24 +103,29 @@ check("...and closed when the conversation changes", /useEffect\(\(\) => setSite
   // A SITE OPENED IN A CONVERSATION THAT NEVER REACHED /api/chat has no
   // id, so the effect above never fires for it — and the next sentence
   // used to reach the site as a CHARGED change instead of starting the
-  // new conversation. A «Νέα συνομιλία» button inside the drawer closed
-  // the pane by hand to stop that; the drawer went with the sidebar's
-  // «Recent chats» on 2026-10-16 and the button went with it.
+  // new conversation. A «Νέα συνομιλία» button closed the pane by hand
+  // to stop that.
   //
-  // WHAT CLOSES IT NOW IS THE NAVIGATION. Starting a conversation is
-  // the rail's «New», which is a <Link> to another route: the workspace
-  // unmounts and `siteBrief` is seeded null again. So the three things
-  // that have to hold are that nothing starts a conversation in place,
-  // that the rail's «New» really is a link to a different page, and
-  // that the pane's state is the component's own rather than anything
-  // that outlives it.
-  check("...and nothing starts a conversation in place any more",
-    !/function startNewChat/.test(chat) && !/onNewChat|newConversation\(/.test(chat));
-  const sidebarSrc = code("src/components/dashboard/sidebar.tsx");
-  check("...«New» is a link to another page, so the workspace unmounts",
-    /const row = \(href: string[\s\S]{0,200}<Link\s+href=\{href\}/.test(sidebarSrc) &&
-    /\{ key: "new", href: "\/dashboard\/overview" \}/.test(code("src/lib/nav/rail.ts")));
-  check("...and the pane's state cannot survive that unmount",
+  // THE GUARD CAME OUT ON 2026-10-16 AND WENT BACK IN ON 2026-10-17,
+  // and the reason is worth keeping because it is the whole shape of
+  // this defect. For one day the only way to a new conversation was a
+  // navigation — the rail's «New», a <Link> to another route — so the
+  // workspace unmounted and `siteBrief` was seeded null for free. That
+  // day the honest check was the ABSENCE of an in-place start. The
+  // owner then asked for the button back in the title row
+  // («Δίπλα του, "Νέα συνομιλία"»), so there is no unmount any more,
+  // the defect is reachable again, and the guard is load-bearing
+  // again.
+  //
+  // IT MUST BE IN THE SAME FUNCTION AS THE CLEARED CONVERSATION, not in
+  // an effect on `activeId`: the effect is exactly the thing that
+  // cannot fire when the id was never set in the first place.
+  check("«Νέα συνομιλία» closes the Site pane by hand, before it clears the conversation",
+    /function startNewChat\(\) \{[\s\S]{0,160}setSiteBrief\(null\);[\s\S]{0,120}setActiveId\(null\);/.test(chat) &&
+    /function startNewChat\(\) \{[\s\S]{0,200}setOpenWorkId\(null\);/.test(chat));
+  check("...and that function is what the title row's button runs",
+    /onClick=\{startNewChat\}[\s\S]{0,240}data-testid="chat-new-conversation"/.test(chat));
+  check("...and the pane's state is the component's own, so nothing outlives it",
     /const \[siteBrief, setSiteBrief\] = useState<string \| null>\(null\)/.test(chat) &&
     !/siteBrief[\s\S]{0,40}(localStorage|sessionStorage|useRef)/.test(chat),
     "a pane kept outside the component would reopen on the new conversation, charged."

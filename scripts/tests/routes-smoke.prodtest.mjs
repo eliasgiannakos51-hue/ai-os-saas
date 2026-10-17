@@ -1662,21 +1662,35 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   });
   const chat = await textAndPlaceholders();
   checkTrue("the composer placeholder is Greek", chat.includes("Γράψε στο Ionexa..."));
-  // «Νέα συνομιλία» AND «Καμία συνομιλία ακόμα.» WERE READ HERE, and
-  // both were the drawer's: the list of conversations that used to sit
-  // inside this screen. On 2026-10-16 the owner had the conversations
-  // taken out of the sidebar and that drawer went with them, so neither
-  // string is on /dashboard/chat any longer — and «Νέα συνομιλία» is
-  // not anywhere: its key was deleted in the same round, because
-  // starting a conversation is the rail's «Νέο».
+  // THIS CHECK HAS NOW BEEN WRITTEN THREE WAYS IN THREE DAYS, which is
+  // worth saying out loud because each version was true when it was
+  // written and false a day later.
   //
-  // CHECKED AS AN ABSENCE, not simply dropped. A check deleted because
-  // it went red is a check that stopped asking its question; this one
-  // asks the opposite question now, which is the one that matters —
-  // scripts/tests/sidebar-no-chats.prodtest.mjs holds the thorough
-  // version across ten pages and three widths.
-  checkTrue("...and no second list of conversations is on the chat screen",
-    !chat.includes("Νέα συνομιλία") && !chat.includes("Καμία συνομιλία ακόμα."), chat.slice(0, 200));
+  //   2026-10-05: «Νέα συνομιλία» and «Καμία συνομιλία ακόμα.» had to
+  //     be ON this screen — they were the drawer's, the conversation
+  //     list that lived inside Chat.
+  //   2026-10-16: the owner took the conversations out of the sidebar,
+  //     the drawer went with them, and the check became the ABSENCE of
+  //     both.
+  //   2026-10-17: the owner asked for the list back, inside Chat and
+  //     behind a [◧] — «Στο Chat πατάω [◧] και ανοίγουν οι συνομιλίες
+  //     μου στο πλάι». So «Νέα συνομιλία» is a button in the title row
+  //     again, and the list is one press away rather than on arrival.
+  //
+  // WHAT IS CHECKED HERE IS THE ARRIVAL STATE, which is the only thing
+  // a smoke test that never presses anything can honestly claim: the
+  // button is there and the conversations are NOT, because the column
+  // is closed until somebody opens it. The pressing half — open, close,
+  // remembered, on a phone, in two languages — is
+  // scripts/tests/sidebar-chats.prodtest.mjs §1b, which is a prodtest
+  // and does not run on every push.
+  // SCOPED TO <main>: the aside is read into `chat` too, and three of
+  // the strings this section is about are now also the rail's own
+  // words. The Chat SCREEN is what these two are claims about.
+  const chatMain = (await page.locator("main").allInnerTexts()).join("\n");
+  checkTrue("«Νέα συνομιλία» is in the chat's title row", chatMain.includes("Νέα συνομιλία"), chatMain.slice(0, 200));
+  checkTrue("...and the conversations are not open until they are asked for",
+    !chatMain.includes("Καμία συνομιλία ακόμα."), chatMain.slice(0, 200));
   // THE EMPTY CHAT GREETS (MASTER 14.2, 2026-10-07): the earth, the
   // hour's greeting and the field. The greeting depends on the hour, so
   // any of the three Greek ones, read from messages/el.json; and the
@@ -1684,8 +1698,13 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   const { readFileSync: readMessages } = await import("node:fs");
   const chatGreetings = Object.values(JSON.parse(readMessages("messages/el.json", "utf8")).promise.greeting);
   checkTrue("the empty-state greeting is Greek", chatGreetings.some((g) => chat.includes(g)), chatGreetings.join(" / "));
+  // `chatMain` ABOVE, AND THAT IS WHY IT EXISTS. `chat` is main AND
+  // aside, and the sidebar's first row is now «Ionexa Συνομιλία» —
+  // the same words this check is about. Read together, a correct page
+  // failed on 2026-10-17: the rail naming the place is not the Chat
+  // screen wearing its old heading.
   checkTrue("...and the old title and the Mentor Mode chip are not on it",
-    !chat.includes("Ionexa Συνομιλία") && !chat.includes("Λειτουργία μέντορα"), chat.slice(0, 200));
+    !chatMain.includes("Ionexa Συνομιλία") && !chatMain.includes("Λειτουργία μέντορα"), chatMain.slice(0, 200));
   // The empty-state BODY was pinned to "Ρώτησε ό,τι θέλεις", which the
   // copy no longer says. The five above are labels on controls and are
   // stable; a body paragraph is prose and will be rewritten again. So the

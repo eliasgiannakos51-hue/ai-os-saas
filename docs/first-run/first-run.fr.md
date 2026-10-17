@@ -1,8 +1,8 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4294, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **615 strings**. The whole product is 4295, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?
 
 Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.
 
-## Tier 2 — The labels — skim these (377)
+## Tier 2 — The labels — skim these (373)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2198,47 +2198,23 @@ Flux de travail
 
 Tous les outils
 
-**`sidebar.rail.chat`**
-
-> EN — Chat
-
-Discussion
-
-**`sidebar.rail.chats`**
-
-> EN — Chats
-
-Discussions
-
 **`sidebar.rail.coding`**
 
 > EN — Coding
 
 Code
 
-**`sidebar.rail.collapse`**
+**`sidebar.rail.ionexaChat`**
 
-> EN — Collapse sidebar
+> EN — Ionexa Chat
 
-Réduire la barre latérale
-
-**`sidebar.rail.expand`**
-
-> EN — Expand sidebar
-
-Développer la barre latérale
+Ionexa Discussion
 
 **`sidebar.rail.label`**
 
 > EN — Main
 
 Menu principal
-
-**`sidebar.rail.new`**
-
-> EN — New
-
-Nouveau
 
 **`sidebar.rail.pin`**
 

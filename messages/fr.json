@@ -293,8 +293,7 @@
     },
     "closeMenu": "Fermer le menu",
     "rail": {
-      "new": "Nouveau",
-      "chat": "Discussion",
+      "ionexaChat": "Ionexa Discussion",
       "coding": "Code",
       "allTools": "Tous les outils",
       "recentTools": "Outils récents",
@@ -302,12 +301,9 @@
       "pin": "Épingler {tool}",
       "unpin": "Désépingler {tool}",
       "remove": "Retirer {tool} des outils récents",
-      "collapse": "Réduire la barre latérale",
-      "expand": "Développer la barre latérale",
       "label": "Menu principal",
       "saveFailed": "La modification n’a pas été enregistrée. Réessayez.",
-      "untitledChat": "Nouvelle conversation",
-      "chats": "Discussions"
+      "untitledChat": "Nouvelle conversation"
     },
     "tabs": {
       "home": "Accueil",
@@ -1344,6 +1340,11 @@
     },
     "chat": {
       "title": "Ionexa Discussion",
+      "newChat": "Nouvelle discussion",
+      "hideConversations": "Masquer les conversations",
+      "showConversations": "Afficher les conversations",
+      "searchConversations": "Rechercher par titre",
+      "allConversations": "Toutes les discussions",
       "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
       "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète.",
       "send": "Envoyer",

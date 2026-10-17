@@ -28,11 +28,13 @@ import { PageTransition } from "@/components/page-transition";
 import { MAIN_SIDEBAR_GROUPS, sidebarGroups } from "@/lib/sidebar-nav";
 import {
   NEVER_RECENT,
+  RECENT_CONVERSATIONS,
   RECENT_WINDOW_DAYS,
   completionEvents,
   readRecentPrefs,
   recentTools,
   savedEvents,
+  type RecentConversation,
   type RecentTool,
 } from "@/lib/nav/recent-tools";
 
@@ -102,9 +104,14 @@ export default async function DashboardLayout({
   // pages — the design's "δεν αλλάζει ποτέ από σελίδα σε σελίδα". A
   // failed read is an empty list, which is also what a new account sees.
   let recent: RecentTool[] = [];
+  // RECENT CONVERSATIONS, the sidebar's seventh row (ΣΥΣΤΗΜΑ DESIGN §3):
+  // the five this person touched last, through their own session, in the
+  // same wave as Recent tools. A failed read is an empty list and no
+  // heading, never a broken sidebar.
+  let conversations: RecentConversation[] = [];
   try {
     const since = new Date(Date.now() - RECENT_WINDOW_DAYS * 86_400_000).toISOString();
-    const [settled, saved] = await Promise.all([
+    const [settled, saved, chats] = await Promise.all([
       // THE SERVER'S READ: the account cannot read ai_cost_log itself
       // (20261012000000_cost_log_server_reads.sql). Two columns, its own rows.
       createAdminClient()
@@ -121,7 +128,16 @@ export default async function DashboardLayout({
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(2000),
+      supabase
+        .from("chat_conversations")
+        .select("id, title")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(RECENT_CONVERSATIONS),
     ]);
+    if (!chats.error) {
+      conversations = (chats.data ?? []).map((c) => ({ id: String(c.id), title: String(c.title ?? "") }));
+    }
     if (settled.error) throw settled.error;
     if (saved.error) throw saved.error;
     const events = [...completionEvents(settled.data ?? []), ...savedEvents(saved.data ?? [])];
@@ -166,7 +182,7 @@ export default async function DashboardLayout({
                 updating. Renders nothing while the connection is fine. */}
             <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} recent={recent} />
+              <Sidebar email={user.email ?? ""} planName={plan.name} isOwner={isAdmin} recent={recent} conversations={conversations} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Below the top bar and ABOVE the page transition, so it

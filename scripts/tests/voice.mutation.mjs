@@ -149,21 +149,27 @@ const MUTANTS = [
     to: "  useEffect(() => {\n    void start();\n    return () => {\n      cleanup();",
   },
   {
-    // V4.6: the mic no longer vanishes — it is drawn inert, with the reason
-    // in its title. The defect is now a mic that is LIVE without a
-    // provider: pressing it would start a recording nothing can transcribe.
-    name: "the microphone button renders LIVE with no transcription provider, so pressing it wastes somebody's breath",
+    // RE-ANCHORED 2026-10-05. V4.6 drew the mic inert with no provider;
+    // the owner's rule since is that a button which cannot record is not
+    // drawn at all (the voice brief «ΦΩΝΗ ΣΤΟ CHAT», Μέρος Α). The defect is the
+    // same one it always was: a microphone on the screen with nothing
+    // behind it.
+    name: "the microphone is drawn with no transcription provider, so pressing it does nothing",
     file: INPUT,
-    // RE-ANCHORED 2026-09-06. This pinned `disabled` + `aria-disabled`
-    // together. `disabled` is GONE on purpose: a disabled button fires no
-    // event, so a phone — which cannot hover — had no way to be told WHY
-    // the microphone was off, and the reason lived only in `title`.
-    // aria-disabled keeps it inert and announced while the tap still
-    // reveals the reason in the page. The mutant is the same defect (the
-    // button becomes live with no provider behind it); only the line it
-    // replaces moved, and the suite reported STALE.
-    from: "          aria-disabled=\"true\"\n          onClick={() => setReasonShown((shown) => !shown)}",
-    to: "          onClick={() => void start()}",
+    from: "  if (!availability.transcribeAvailable || !availability.hasMinutes) return null;",
+    to: "  if (!availability.hasMinutes) return null;",
+  },
+  {
+    name: "the microphone is drawn with no minutes left, a button that cannot record",
+    file: INPUT,
+    from: "  if (!availability.transcribeAvailable || !availability.hasMinutes) return null;",
+    to: "  if (!availability.transcribeAvailable) return null;",
+  },
+  {
+    name: "Talk is drawn without a speech provider (scenario 11: neither button without a key)",
+    file: "src/components/chat/chat-workspace.tsx",
+    from: "voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;",
+    to: "voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.hasMinutes;",
   },
   {
     name: "the explanation is skipped and the browser's bare permission prompt is the first thing seen",

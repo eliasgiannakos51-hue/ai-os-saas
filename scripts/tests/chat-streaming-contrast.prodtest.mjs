@@ -13,9 +13,13 @@
 //      absent does not promise.
 //      components/publishing/publish-control.tsx already had the right
 //      shape and said so in its own words — the reason is "rendered as
-//      VISIBLE text". This measures that the Talk button now does the
-//      same, with BOTH provider keys removed from the server's
-//      environment rather than stubbed.
+//      VISIBLE text". That fix drew it inert with the reason painted.
+//      SUPERSEDED 2026-10-05 by the owner's rule (the voice brief
+//      «ΦΩΝΗ ΣΤΟ CHAT», Μέρος Α): «Κουμπί που δεν κάνει τίποτα δεν μένει στην οθόνη» —
+//      with no keys the Talk button is not drawn at all, and the reason
+//      is on the Voice settings screen. This measures that, with BOTH
+//      provider keys removed from the server's environment rather than
+//      stubbed. chat-dictation.prodtest.mjs holds every other state.
 //
 //   2. "While the AI is writing I cannot read what it says."
 //      `dim` was chosen on 2026-09-04 and measured at 6.57:1 worst —
@@ -354,7 +358,7 @@ try {
     await page.waitForTimeout(800);
 
     // ---------------------------------------------------------------
-    // 1. THE TALK BUTTON SAYS WHY.
+    // 1. NO KEYS, NO TALK BUTTON.
     // ---------------------------------------------------------------
     const talk = await page.evaluate(() => {
       const btn = document.querySelector('[data-testid="voice-conversation-start"]');
@@ -371,24 +375,11 @@ try {
         reasonPainted: Boolean(r && r.width > 0 && r.height > 0),
       };
     });
-    checkTrue(`${vp.name}: the Talk button is on screen`, talk.present, "it was hidden, which is the older defect");
-    checkTrue(`${vp.name}: ...and disabled, because neither key is set`, talk.disabled === true, JSON.stringify(talk));
     checkTrue(
-      `${vp.name}: ...and carries NO title attribute`,
-      talk.title === null,
-      `title=${JSON.stringify(talk.title)} — a hover is not an explanation, and a phone has no hover`
+      `${vp.name}: with neither voice key, there is no Talk button to press`,
+      talk.present === false,
+      JSON.stringify(talk)
     );
-    checkTrue(
-      `${vp.name}: ...and the reason is painted text next to it`,
-      talk.reasonPainted && talk.reasonText.length > 30,
-      `describedBy=${talk.describedBy} painted=${talk.reasonPainted} text=${JSON.stringify(talk.reasonText)}`
-    );
-    checkTrue(
-      `${vp.name}: ...naming what is missing rather than saying "unavailable"`,
-      /key|provider/i.test(talk.reasonText),
-      talk.reasonText
-    );
-    if (vp.name === "1440x900") results.reason = talk.reasonText;
 
     // ---------------------------------------------------------------
     // 2. CONTRAST WHILE THE ANSWER IS STILL BEING WRITTEN.
@@ -633,8 +624,6 @@ try {
 
 console.log("\n  NOT MEASURED HERE: how far the answer moves while it is being written.");
 console.log("  See section 3 — this harness delivers the stream in one piece, so it cannot say.");
-console.log("\n  the sentence the user sees when neither voice key is set:");
-console.log(`      ${results.reason ?? "(not captured)"}`);
 for (const vp of VIEWPORTS) {
   const r = results[vp.name];
   if (r) console.log(`  ${vp.name}: worst ${r.worst}:1 over ${r.points} points, mid-stream — ${r.shot}`);

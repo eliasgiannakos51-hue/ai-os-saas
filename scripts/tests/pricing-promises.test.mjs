@@ -70,6 +70,13 @@ const workspace = strings(en).filter((s) => /inside your workspace|full access/i
 check("no English pricing text promises access inside the owner's workspace", workspace.length === 0, workspace.join(" | "));
 check("the Greek banner says the same", /στον δικό του λογαριασμό/.test(msgs.el.pricing.teamBannerBody) && !/μέσα στον χώρο εργασίας/.test(msgs.el.pricing.teamBannerBody));
 check("the team card no longer says any plan can be a team's base", !/any plan/.test(en.businessCardDescription), en.businessCardDescription);
+// THE SIDEBAR AND ALL TOOLS SAY IT TOO: the Team tool's one line under
+// its name read "Invite people to your workspace" in every locale, which
+// is the promise the pricing page stopped making (2026-10-05).
+const teamHint = Object.fromEntries(LOCALES.map((l) => [l, msgs[l].sidebar?.hints?.team ?? ""]));
+check("the Team tool's line says each person is on their own account", /own account/.test(teamHint.en), teamHint.en);
+const hintWorkspace = LOCALES.filter((l) => /workspace|χώρο εργασίας|Arbeitsbereich|votre espace|tu espacio|tuo spazio|seu espaço|ワークスペース|工作区|مساحة عملك/i.test(teamHint[l]));
+check("...and no locale's line invites people into the owner's workspace", hintWorkspace.length === 0, hintWorkspace.map((l) => `${l}: ${teamHint[l]}`).join(" | "));
 
 console.log("\n== 4. the record lists are counted from the code ==");
 const modules = readFileSync("src/lib/modules.ts", "utf8");

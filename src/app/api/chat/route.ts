@@ -1392,12 +1392,18 @@ export async function POST(request: Request) {
         // and the definitions go INTO the stored text, so a reload shows
         // what the stream showed (lib/chat/web-sources.ts says why).
         const sourced = attachWebSources(assistantText, lastRoundBlocks);
-        const { error: assistantMessageError } = await supabase.from("chat_messages").insert({
-          conversation_id: finalConversationId,
-          user_id: user.id,
-          role: "assistant",
-          content: sourced.text,
-        });
+        // The row's id goes back on `done`: the rating under the answer
+        // (src/app/api/chat/messages/[id]/rating/route.ts) names it.
+        const { data: assistantRow, error: assistantMessageError } = await supabase
+          .from("chat_messages")
+          .insert({
+            conversation_id: finalConversationId,
+            user_id: user.id,
+            role: "assistant",
+            content: sourced.text,
+          })
+          .select("id")
+          .single();
         if (assistantMessageError) {
           logApiError("/api/chat", assistantMessageError, { stage: "save_assistant_message" });
         }
@@ -1419,6 +1425,7 @@ export async function POST(request: Request) {
         controller.enqueue(
           ndjsonLine({
             type: "done",
+            messageId: assistantRow?.id ?? undefined,
             // The final text, only when it differs from what streamed — the
             // client swaps it in so the numbers appear without a reload.
             content: sourced.sources.length > 0 ? sourced.text : undefined,

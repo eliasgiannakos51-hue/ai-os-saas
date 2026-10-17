@@ -32,10 +32,14 @@ const config: Config = {
       background: "rgb(var(--background) / <alpha-value>)",
       panel: "rgb(var(--panel) / <alpha-value>)",
       "panel-hover": "rgb(var(--panel-hover) / <alpha-value>)",
+      // The work area and code blocks, one step darker than a panel.
+      workspace: "rgb(var(--workspace) / <alpha-value>)",
       border: "rgb(var(--border) / <alpha-value>)",
       divider: "rgb(var(--divider) / <alpha-value>)",
       tag: "rgb(var(--tag) / <alpha-value>)",
       foreground: "rgb(var(--foreground) / <alpha-value>)",
+      // Running text; headings use foreground.
+      body: "rgb(var(--body) / <alpha-value>)",
       muted: "rgb(var(--muted) / <alpha-value>)",
       button: "rgb(var(--button) / <alpha-value>)",
       "button-ink": "rgb(var(--button-ink) / <alpha-value>)",
@@ -73,10 +77,12 @@ const config: Config = {
         ],
       },
       borderRadius: {
-        // The design's three radii: 18px the main field, 14px cards, 10px
+        // The design's three radii: 18px the main field, 16px cards and tool
+        // squares (the design allows 14-16; the final spec of 2026-10-05
+        // chose 16 for the All tools squares, and cards follow), 10px
         // menu items (tags are rounded-full).
         field: "18px",
-        card: "14px",
+        card: "16px",
         item: "10px",
       },
       /*

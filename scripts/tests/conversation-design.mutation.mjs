@@ -15,7 +15,8 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/conversation-design.test.mjs";
 const WS = "src/components/chat/chat-workspace.tsx";
 const COMPOSER = "src/components/chat/chat-composer.tsx";
-const TARGETS = [GATE, WS, COMPOSER];
+const ACTIONS = "src/components/chat/answer-actions.tsx";
+const TARGETS = [GATE, WS, COMPOSER, ACTIONS];
 
 const MUTANTS = [
   {
@@ -26,25 +27,62 @@ const MUTANTS = [
     expect: "rather than losing its top",
   },
   {
-    name: "the answer's mark goes back to a chat icon",
-    file: WS,
-    from: '  return <Earth variant="small" px={32} working={working} still={still} className="mt-0.5 shrink-0" />;',
-    to: '  return <span className="h-8 w-8" />;',
-    expect: "the answer's mark is the small earth",
+    // RE-ANCHORED 2026-10-05 (Δ.2): the earth is 26px in the row UNDER
+    // the answer (components/chat/answer-actions.tsx), not 32px beside it.
+    name: "the answer's mark goes back to a plain square",
+    file: ACTIONS,
+    from: '      <Earth variant="small" px={26} working={working} still={still} className="me-1.5 shrink-0" />',
+    to: '      <span className="h-6 w-6" />',
+    expect: "the answer's mark is the small earth at 26px",
   },
   {
     name: "the answer being written does not speed up",
     file: WS,
-    from: "                  <AssistantAvatar working />",
-    to: "                  <AssistantAvatar />",
+    from: '<AnswerActions messageId="streaming" text={streamingText} persisted={false} working />',
+    to: '<AnswerActions messageId="streaming" text={streamingText} persisted={false} />',
     expect: "the answer being written turns faster",
   },
   {
     name: "every old answer animates",
     file: WS,
-    from: "<AssistantAvatar still={sending || msg.id !== lastAnswerId} />",
-    to: "<AssistantAvatar />",
+    from: "                        still={sending || msg.id !== lastAnswerId}\n",
+    to: "",
     expect: "older ones are drawn still",
+  },
+  {
+    name: "again is offered under every answer",
+    file: WS,
+    from: "onRetry={!sending && msg.id === lastAnswerId && retryText ? () => void handleSend(retryText) : undefined}",
+    to: "onRetry={retryText ? () => void handleSend(retryText) : undefined}",
+    expect: "again is offered only under the latest answer",
+  },
+  {
+    name: "thumbs on an answer the server has no row for, saving nothing",
+    file: ACTIONS,
+    from: "          {persisted && (",
+    to: "          {(persisted || true) && (",
+    expect: "the thumbs exist only on an answer the server has a row for",
+  },
+  {
+    name: "a failed rating leaves the thumb lit",
+    file: ACTIONS,
+    from: "      setCurrent(before);\n",
+    to: "",
+    expect: "putting the thumb back if it fails",
+  },
+  {
+    name: "the row's buttons shrink below 44px",
+    file: ACTIONS,
+    from: '"inline-flex h-11 w-11 shrink-0',
+    to: '"inline-flex h-8 w-8 shrink-0',
+    expect: "every target in it is 44px",
+  },
+  {
+    name: "the grid that opens All tools leaves the field",
+    file: COMPOSER,
+    from: '            href="/dashboard/tools"',
+    to: '            href="/dashboard/overview"',
+    expect: "the grid that opens All tools sits beside the microphone",
   },
   {
     name: "the empty conversation loses its earth",
@@ -56,8 +94,8 @@ const MUTANTS = [
   {
     name: "the microphone moves back to the right, over the text",
     file: COMPOSER,
-    from: '        <div className="absolute bottom-2 start-2">',
-    to: '        <div className="absolute bottom-2 end-14">',
+    from: '        <div className="absolute bottom-2 start-2 flex items-center gap-1">',
+    to: '        <div className="absolute bottom-2 end-14 flex items-center gap-1">',
     expect: "voice bottom-left",
   },
   {

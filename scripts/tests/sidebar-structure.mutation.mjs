@@ -296,11 +296,12 @@ const MUTANTS = [
     expect: "rows drawn,",
   },
   {
-    // RE-ANCHORED 2026-10-04: the block is drawn on All tools now.
+    // RE-ANCHORED 2026-10-05: All tools draws the four groups of
+    // lib/nav/all-tools.ts, then the Settings block.
     name: "Settings stops being its own block",
     file: TOOLS_PAGE,
-    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)],",
-    to: ", ...sidebarGroups([], isOwner)],",
+    from: "    return [...tools, ...settings];",
+    to: "    return [...tools];",
     expect: "...and All tools draws the main groups before it, and it last",
   },
 

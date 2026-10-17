@@ -42,6 +42,13 @@ const MUTANTS = [
     to: '"title": "12 Business Entry Lists",',
     expect: "record lists, the number the hub serves",
   },
+  {
+    name: "the Team tool's line invites people into a shared workspace again",
+    file: EN,
+    from: '"team": "Give people your plan, each on their own account.",',
+    to: '"team": "Invite people to your workspace.",',
+    expect: "the Team tool's line says each person is on their own account",
+  },
 ];
 
 runMutations({ name: "pricing-promises", gate: GATE, targets: [EN], mutants: MUTANTS });

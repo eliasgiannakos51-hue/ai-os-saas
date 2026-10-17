@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Code2, LayoutGrid, MessageCircle, PanelLeftClose, PanelLeftOpen, Pin, PinOff, Plus, Settings, X } from "lucide-react";
+import { Code2, LayoutGrid, MessageCircle, MessageSquare, PanelLeftClose, PanelLeftOpen, Pin, PinOff, Plus, Settings, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Logo } from "@/components/logo";
@@ -12,14 +12,15 @@ import { displayNameFromEmail } from "@/lib/greeting";
 import { MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { RAIL_ROWS, SETTINGS_HREF, activeRail, type RailKey } from "@/lib/nav/rail";
-import type { RecentAction, RecentTool } from "@/lib/nav/recent-tools";
+import type { RecentAction, RecentConversation, RecentTool } from "@/lib/nav/recent-tools";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { useToast } from "@/components/toast/toast-context";
 
 /**
  * THE SIDEBAR — ΣΥΣΤΗΜΑ DESIGN (docs/CONTEXT.md, 2026-10-04): the same
- * on every page. Logo, New, Chat, Coding, All tools, Recent tools, and
- * Settings at the bottom with the account inside it. Nothing else is
+ * on every page. Logo, New, Chat, Coding, All tools, Recent tools,
+ * Recent conversations, and Settings at the bottom with the account inside
+ * it. Nothing else is
  * ever here; every tool is in All tools and ⌘K (lib/nav/rail.ts).
  *
  * WHY THE OLD "All tools changes the sidebar" BUG CANNOT HAPPEN. The
@@ -48,6 +49,7 @@ export function Sidebar({
   planName = "",
   isOwner = false,
   recent = [],
+  conversations = [],
 }: {
   email?: string;
   planName?: string;
@@ -55,6 +57,8 @@ export function Sidebar({
   isOwner?: boolean;
   /** Recent tools, computed by the dashboard layout from the account. */
   recent?: RecentTool[];
+  /** The latest conversations, also computed by the layout. */
+  conversations?: RecentConversation[];
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -226,7 +230,7 @@ export function Sidebar({
                           onClick={() => act(r.pinned ? "unpin" : "pin", r.href)}
                           aria-label={t(r.pinned ? "rail.unpin" : "rail.pin", { tool: label })}
                           aria-pressed={r.pinned}
-                          className="flex h-8 w-8 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+                          className="flex h-11 w-11 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
                         >
                           {r.pinned ? <PinOff className="h-3.5 w-3.5" aria-hidden="true" /> : <Pin className="h-3.5 w-3.5" aria-hidden="true" />}
                         </button>
@@ -234,7 +238,7 @@ export function Sidebar({
                           type="button"
                           onClick={() => act("remove", r.href)}
                           aria-label={t("rail.remove", { tool: label })}
-                          className="flex h-8 w-8 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+                          className="flex h-11 w-11 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
                         >
                           <X className="h-3.5 w-3.5" aria-hidden="true" />
                         </button>
@@ -242,6 +246,27 @@ export function Sidebar({
                     )
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* RECENT CONVERSATIONS (ΣΥΣΤΗΜΑ DESIGN §3, row 7). Each opens
+              that conversation (?c=, read by the chat page). Hidden in the
+              narrow sidebar, where a title cannot be read, and hidden with
+              its heading when there is none yet. */}
+          {conversations.length > 0 && !collapsed && (
+            <div className="pt-5" data-testid="recent-conversations">
+              <p className="px-3 pb-2 text-xs text-muted">{t("rail.recentChats")}</p>
+              <div className="space-y-1">
+                {conversations.map((c) =>
+                  row(
+                    `/dashboard/chat?c=${c.id}`,
+                    c.title && c.title !== "New conversation" ? c.title : t("rail.untitledChat"),
+                    MessageSquare,
+                    false,
+                    null
+                  )
+                )}
               </div>
             </div>
           )}

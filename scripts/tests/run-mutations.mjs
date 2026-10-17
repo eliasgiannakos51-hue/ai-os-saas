@@ -122,7 +122,9 @@ if (suites.length === 0) {
 // ci-step-timeouts, early-redirects and the rest of that round).
 // 208 -> 220 on 2026-10-05: the design round's suites and E.2's three
 // (router-classify, router-model-table, routing-report).
-const FLOOR = 220;
+// 220 -> 231 on 2026-10-05: group 1's suites (#244), the Next 16 round,
+// login-failure-alert, pricing-promises, regenerate-cost and chat-rating.
+const FLOOR = 231;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

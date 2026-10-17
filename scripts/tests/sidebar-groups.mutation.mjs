@@ -194,10 +194,11 @@ const MUTANTS = [
     dimension: "D. one action",
     gate: TOOLTIPS,
     name: "Settings stops being its own group",
-    // RE-ANCHORED 2026-10-04: drawn on All tools now.
+    // RE-ANCHORED 2026-10-05: All tools draws its four groups, then
+    // this block (ΣΥΣΤΗΜΑ DESIGN §6).
     file: TOOLS_PAGE,
-    from: ", ...sidebarGroups([SETTINGS_GROUP], isOwner)],",
-    to: "],",
+    from: "    return [...tools, ...settings];",
+    to: "    return [...tools];",
     expect: "Settings",
   },
 ];

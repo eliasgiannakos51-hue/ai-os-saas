@@ -20,4 +20,8 @@ export type ChatMessage = {
   role: ChatRole;
   content: string;
   created_at: string;
+  /** Thumbs up (1) or down (-1) on an answer, null for none — the column
+   *  20261016000000_chat_message_rating.sql adds. Absent on a row read
+   *  before that migration ran. */
+  rating?: number | null;
 };

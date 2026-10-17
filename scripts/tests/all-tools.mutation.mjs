@@ -2,10 +2,10 @@
 /*
  * CAN all-tools.test.mjs SEE ALL TOOLS DRIFT FROM THE DESIGN?
  *
- * The search losing its synonyms, the alias table losing one, a beta tag
- * on a tool that is not beta and none on one that is, a name cut with an
- * ellipsis, the description gone from hover and from screen readers, and
- * a layout that no longer fits one screen.
+ * The search losing its synonyms, a tool falling out of every group or
+ * sitting in two, a stale entry, a hidden tool with no reason, the square
+ * losing its 28px icon or its shape, a name cut with an ellipsis, the pin
+ * writing somewhere else or appearing on Chat, and a beta tag coming back.
  *
  * Run: node scripts/tests/all-tools.mutation.mjs
  */
@@ -15,9 +15,9 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/all-tools.test.mjs";
 const GRID = "src/components/tools/tools-grid.tsx";
-const STATUS = "src/lib/nav/tool-status.ts";
+const GROUPS = "src/lib/nav/all-tools.ts";
 const ALIASES = "src/lib/palette-aliases.ts";
-const TARGETS = [GATE, GRID, STATUS, ALIASES];
+const TARGETS = [GATE, GRID, GROUPS, ALIASES];
 
 const MUTANTS = [
   {
@@ -38,46 +38,81 @@ const MUTANTS = [
     expect: "where the English synonyms still count",
   },
   {
-    name: "a tool that is not beta is tagged",
-    file: STATUS,
-    from: '  "/dashboard/website-builder",',
-    to: '  "/dashboard/website-builder",\n  "/dashboard/documents",',
-    expect: "no tool carries it that TOOLS-STATUS does not call beta",
+    name: "a tool falls out of every group, so it is on no road but ⌘K",
+    file: GROUPS,
+    from: '      "/dashboard/meetings",\n',
+    to: "",
+    expect: "every tool the grid can draw is in a group or hidden on purpose",
   },
   {
-    name: "a beta tool loses its tag",
-    file: STATUS,
-    from: '  "/dashboard/coding",\n',
-    to: "",
-    expect: "every beta tool in TOOLS-STATUS carries the tag",
+    name: "a group names a screen the grid cannot draw",
+    file: GROUPS,
+    from: '      "/dashboard/coding",\n',
+    to: '      "/dashboard/coding",\n      "/dashboard/films",\n',
+    expect: "every href in all-tools.ts is a tool the grid can draw",
+  },
+  {
+    name: "a tool sits in two groups",
+    file: GROUPS,
+    from: '    hrefs: ["/dashboard/finance",',
+    to: '    hrefs: ["/dashboard/chat", "/dashboard/finance",',
+    expect: "in exactly one place",
+  },
+  {
+    name: "a hidden tool stops saying why",
+    file: GROUPS,
+    from: '    "the name promises forecasts; today it finds patterns in the account\'s own rows, with the sample each rests on, and forecasts nothing",',
+    to: '    "",',
+    expect: "every hidden tool says why",
+  },
+  {
+    name: "the icon shrinks back to 16px",
+    file: GRID,
+    from: '<Icon className="h-7 w-7 text-foreground" aria-hidden="true" />',
+    to: '<Icon className="h-4 w-4 text-foreground" aria-hidden="true" />',
+    expect: "with a 28px icon",
+  },
+  {
+    name: "the square stops being square",
+    file: GRID,
+    from: "flex aspect-square flex-col",
+    to: "flex min-h-[44px] flex-col",
+    expect: "1:1, on the card radius",
   },
   {
     name: "a long name is cut with an ellipsis",
     file: GRID,
-    from: '<span className="min-w-0 break-words">{label(item)}</span>',
-    to: '<span className="min-w-0 truncate">{label(item)}</span>',
+    from: '<span className="block break-words text-sm font-medium text-foreground">{name}</span>',
+    to: '<span className="block truncate text-sm font-medium text-foreground">{name}</span>',
     expect: "no name is cut with an ellipsis",
   },
   {
-    name: "the description leaves the hover",
+    name: "three to a row on a computer",
     file: GRID,
-    from: '        <Tooltip content={description} side="top">',
-    to: '        <Tooltip content={label(item)} side="top">',
-    expect: "the description is in a tooltip",
+    from: '"grid grid-cols-2 gap-3 lg:grid-cols-4"',
+    to: '"grid grid-cols-2 gap-3 lg:grid-cols-3"',
+    expect: "four in a row on a computer",
   },
   {
-    name: "a screen reader no longer hears the description",
+    name: "the pin writes somewhere the sidebar does not read",
     file: GRID,
-    from: '            {description && <span className="sr-only">{description}</span>}',
-    to: "",
-    expect: "read to a screen reader",
+    from: '      const res = await fetch("/api/nav/recent-tools", {',
+    to: '      const res = await fetch("/api/nav/pins", {',
+    expect: "writing through the sidebar's own route",
   },
   {
-    name: "the grid narrows to three columns and runs off the screen",
+    name: "Chat and Coding get a pin, though they are never in Recent tools",
     file: GRID,
-    from: "lg:grid-cols-4 xl:grid-cols-5",
-    to: "lg:grid-cols-3 xl:grid-cols-3",
-    expect: "everything fits on a 1440×900 screen",
+    from: "    const canPin = !NEVER_RECENT.includes(item.href) && ",
+    to: "    const canPin = ",
+    expect: "have no pin",
+  },
+  {
+    name: "a beta tag comes back",
+    file: GRID,
+    from: '            <span className="block break-words text-sm font-medium text-foreground">{name}</span>',
+    to: '            <span className="block break-words text-sm font-medium text-foreground">{name}</span>\n            <span className="bg-tag">beta</span>',
+    expect: "the grid draws no tag",
   },
 ];
 

@@ -1,17 +1,17 @@
-// ALL TOOLS IS THE DESIGN'S: TILES IN GROUPS, A SEARCH THAT KNOWS
-// SYNONYMS, A DISCREET BETA TAG, AND ONE DESKTOP SCREEN.
+// ALL TOOLS IS THE DESIGN'S: BIG SQUARES IN FOUR GROUPS, A SEARCH THAT
+// KNOWS SYNONYMS, A PIN ON EACH, AND NO «BETA» ANYWHERE.
 //
-// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN — «ALL TOOLS»; BUILD-SPECS 2.4
-// scenarios 9–12: every tool within three presses, "slides" finds
-// Presentations, everything on one 1440×900 screen with no scroll, and
-// no name cut with an ellipsis. The beta tag's source is
-// docs/TOOLS-STATUS.md, held against src/lib/nav/tool-status.ts BOTH ways.
+// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §6 (2026-10-05): 1:1 squares, four in a
+// row on a computer and two on a phone; a 28px icon top left, a small pin
+// top right, the name and one plain line at the bottom; groups Make, Ask,
+// Organise, Business; a search on top; no beta tag, so what is not working
+// is not shown. WHICH tools is the owner's rule of 2026-10-05 (NEEDS 19),
+// in src/lib/nav/all-tools.ts — held here BOTH ways against the tools the
+// grid can draw, for a member and for the owner.
 //
 // The search is RUN — the palette's own matcher over the same candidates
 // the grid builds (the grid's line that builds them is checked to be
-// that line). The one-screen figure is ARITHMETIC from the grid's own
-// classes and the drawn rows, with the page chrome stated below; the
-// browser pass of the site audit (docs/QUEUE.md D.11) measures it.
+// that line). BUILD-SPECS 2.4 scenario 10: "slides" finds Presentations.
 //
 // Run: node scripts/tests/all-tools.test.mjs
 import { readFileSync } from "node:fs";
@@ -67,6 +67,29 @@ console.log("== 0. the population ==");
 check(`the drawn tools were read (${tools.length} in ${drawn.length} groups)`, tools.length >= 20 && drawn.length >= 4);
 check("the Settings block is drawn last", drawn[drawn.length - 1]?.heading === "Settings");
 
+console.log("\n== 0b. every tool is in exactly one group, or hidden with a reason ==");
+const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS } = await loadTs("src/lib/nav/all-tools.ts");
+const grouped = ALL_TOOLS_GROUPS.flatMap((g) => g.hrefs);
+const hidden = Object.keys(HIDDEN_FROM_ALL_TOOLS);
+check("the four groups, in the design's order", ALL_TOOLS_GROUPS.map((g) => g.key).join(",") === "make,ask,organise,business");
+// THE POPULATION IS WHAT THE GRID CAN DRAW: the owner's view, which is
+// every member tool plus the owner-only ones, minus the Settings block.
+const ownerTools = drawnFor(true).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href));
+const memberTools = drawnFor(false).filter((g) => g.heading !== "Settings").flatMap((g) => g.items.map((i) => i.href));
+check(`the population was read (${ownerTools.length} for the owner, ${memberTools.length} for a member)`, ownerTools.length >= memberTools.length && memberTools.length >= 20);
+const unplaced = ownerTools.filter((h) => !grouped.includes(h) && !hidden.includes(h));
+check("every tool the grid can draw is in a group or hidden on purpose", unplaced.length === 0, unplaced.join(", "));
+const phantom = [...grouped, ...hidden].filter((h) => !ownerTools.includes(h));
+check("...and every href in all-tools.ts is a tool the grid can draw (no stale entry)", phantom.length === 0, phantom.join(", "));
+const twice = grouped.filter((h, i) => grouped.indexOf(h) !== i || hidden.includes(h));
+check("...in exactly one place: no tool in two groups, none both grouped and hidden", twice.length === 0, twice.join(", "));
+const bare = hidden.filter((h) => String(HIDDEN_FROM_ALL_TOOLS[h] ?? "").trim().length < 20);
+check("...and every hidden tool says why, in a sentence", bare.length === 0, bare.join(", "));
+check(
+  "the grid draws the tools through those groups, and the Settings block after them",
+  /ALL_TOOLS_GROUPS\.map\(/.test(grid) && /g\.hrefs\.map\(\(h\) => byHref\.get\(h\)\)/.test(grid) && /\[\.\.\.tools, \.\.\.settings\]/.test(grid)
+);
+
 console.log("\n== 1. the search finds a tool by a word it is not called ==");
 const match = await loadTs("src/lib/command-palette-match.ts");
 const { ITEM_LABEL_KEYS } = await loadTs("src/lib/sidebar-label-keys.ts");
@@ -97,66 +120,35 @@ check("a word that is nothing finds nothing", search("en", "qqzzxx").length === 
 check("an empty search is every tool, in order", search("en", "").length === tools.length);
 for (const l of LOCALES) {
   const t = messages[l].dashboard?.tools ?? {};
-  check(`${l}: the search, its label, the empty result and the beta tag are worded`,
-    ["search", "searchLabel", "beta", "betaHint"].every((k) => typeof t[k] === "string" && t[k].length > 0) && /\{query\}/.test(t.noMatch ?? ""));
+  check(`${l}: the search, its label, the empty result and the four group headings are worded`,
+    ["search", "searchLabel"].every((k) => typeof t[k] === "string" && t[k].length > 0) && /\{query\}/.test(t.noMatch ?? "") &&
+      ["make", "ask", "organise", "business"].every((k) => typeof t.groups?.[k] === "string" && t.groups[k].length > 0));
 }
 
-console.log("\n== 2. the tile: icon, name, the description on hover, nothing cut ==");
-check("each tile is a link with its icon and its name", /<Link\s+href=\{item\.href\}/.test(grid) && /<Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" \/>/.test(grid) && /\{label\(item\)\}/.test(grid));
-check("the description is in a tooltip on hover and focus", /<Tooltip content=\{description\} side="top">/.test(grid));
-check("...and read to a screen reader with the name", /\{description && <span className="sr-only">\{description\}<\/span>\}/.test(grid));
-check("a tile is a 44px target", /<Link[^>]*\n?[^>]*min-h-\[44px\]/.test(grid) || /min-h-\[44px\] items-center gap-2\.5 rounded-item/.test(grid));
+console.log("\n== 2. the square: 1:1, a 28px icon, the name and one line, nothing cut ==");
+check("each square is a link to its tool", /<Link\s+href=\{item\.href\}/.test(grid));
+check("...1:1, on the card radius and surface, its edge lit on hover",
+  /aspect-square[^"]*rounded-card[^"]*border border-border[^"]*bg-panel[^"]*hover:border-foreground/.test(grid));
+check("...with a 28px icon", /<Icon className="h-7 w-7[^"]*" aria-hidden="true" \/>/.test(grid));
+check("...its name, and the plain line under it", /\{name\}/.test(grid) && /\{description && <span[^>]*>\{description\}<\/span>\}/.test(grid) && /const name = label\(item\);/.test(grid));
 check("no name is cut with an ellipsis", !/\btruncate\b|line-clamp|text-ellipsis/.test(grid));
+check("four in a row on a computer, two on a phone", /grid grid-cols-2 gap-3 lg:grid-cols-4/.test(grid));
+check("the groups are headed by their translated names",
+  ["make", "ask", "organise", "business"].every((k) => new RegExp(`${k}: t\\("groups\\.${k}"\\)`).test(grid)) && /heading: headings\[g\.key\]/.test(grid));
 
-console.log("\n== 3. beta, from TOOLS-STATUS, both ways ==");
-const status = readFileSync("docs/TOOLS-STATUS.md", "utf8");
-const betaNames = [...status.matchAll(/^\| ([^|]+?) \| [^|]+ \| beta \|/gm)].map((m) => m[1].trim());
-// The table names a tool the way a person does; this is where each name
-// meets its screen. A name missing here fails below, so a new beta row
-// cannot go untagged.
-const NAME_TO_HREF = {
-  Site: "/dashboard/website-builder", "Παρουσίαση": "/dashboard/presentations", Posts: "/dashboard/posts",
-  "Κώδικας": "/dashboard/coding", Chat: "/dashboard/chat", "Έρευνα": "/dashboard/deep-research",
-  "Ανάλυση": "/dashboard/data-analysis", "Προβλέψεις": "/dashboard/predictions", "Φωνή": "/dashboard/voice",
-  "Έργα": "/dashboard/projects", "Στόχοι": "/dashboard/mission", "Συναντήσεις": "/dashboard/meetings",
-  "Η εβδομάδα μου": "/dashboard/reflection", "Ομάδα": "/dashboard/team", "Αρχεία": "/dashboard/files",
-  "Οικονομικά": "/dashboard/finance", "Πωλήσεις": "/dashboard/sales", Trading: "/dashboard/trading",
-  "Μνήμη": "/dashboard/ai-memory", "Αυτοματισμοί": "/dashboard/automation", "Βοηθοί": "/dashboard/agents",
-};
-const { BETA_TOOLS } = await loadTs("src/lib/nav/tool-status.ts");
-check(`the table's beta rows were read (${betaNames.length})`, betaNames.length >= 10);
-const unmapped = betaNames.filter((n) => !NAME_TO_HREF[n]);
-check("every beta row names a screen this gate knows", unmapped.length === 0, unmapped.join(", "));
-const shouldBe = new Set(betaNames.map((n) => NAME_TO_HREF[n]).filter(Boolean));
-const untagged = [...shouldBe].filter((h) => !BETA_TOOLS.includes(h));
-const stale = BETA_TOOLS.filter((h) => !shouldBe.has(h));
-check("every beta tool in TOOLS-STATUS carries the tag", untagged.length === 0, untagged.join(", "));
-check("...and no tool carries it that TOOLS-STATUS does not call beta", stale.length === 0, stale.join(", "));
-check("the tile shows the tag through the same list", /\{isBetaTool\(item\.href\) && \(/.test(grid) && /bg-tag/.test(grid));
+console.log("\n== 3. the pin: the one way to put a tool in the sidebar at once ==");
+check("a 44px pin on the square, its state announced", /data-testid="tool-pin"/.test(grid) && /aria-pressed=\{isPinned\}/.test(grid) && /h-11 w-11/.test(grid));
+check("...writing through the sidebar's own route", /fetch\("\/api\/nav\/recent-tools"/.test(grid) && /JSON\.stringify\(\{ action, href \}\)/.test(grid));
+check("...and a failed write puts the pin back and says so", /setPins\(before\)/.test(grid) && /addToast\(/.test(grid));
+check("Chat and Coding (never in Recent tools), Settings and Help have no pin",
+  /const canPin = !NEVER_RECENT\.includes\(item\.href\) && !item\.href\.startsWith\("\/help"\) && item\.href !== "\/dashboard\/settings";/.test(grid) && /\{canPin && \(/.test(grid));
+const page = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
+check("the page hands the grid this person's pins", /pinned=\{readRecentPrefs\(user\.user_metadata\)\.pinned\}/.test(page));
 
-console.log("\n== 4. one desktop screen, no scroll (1440×900, arithmetic) ==");
-// The grid's own figures, read from its classes.
-const cols = Number(grid.match(/xl:grid-cols-(\d+)/)?.[1] ?? 0);
-const tile = Number(grid.match(/min-h-\[(\d+)px\] items-center gap-2\.5/)?.[1] ?? 0);
-const gap = Number(grid.match(/grid grid-cols-1 gap-(\d+)/)?.[1] ?? 0) * 4;
-const groupGap = Number(grid.match(/<div className="mt-5 space-y-(\d+)">/)?.[1] ?? 0) * 4;
-const headingH = 16 + Number(grid.match(/<h2 id=\{`tools-\$\{group\.heading\}`\} className="mb-(\d+)/)?.[1] ?? 0) * 4;
-// THE CHROME, STATED, not measured: the top bar (64), the page's py-6
-// (48), a PageHeader with one line of description (~92), its mt-4 (16),
-// the search (44) and its mt-5 (20), and the ⌘K line under the grid
-// (mt-6 + one line, 40). Measured in a browser by D.11.
-const CHROME = 64 + 48 + 92 + 16 + 44 + 20 + 40;
-const body = drawn.reduce((h, g) => {
-  const rows = Math.ceil(g.items.length / cols);
-  return h + headingH + rows * tile + (rows - 1) * gap;
-}, 0) + (drawn.length - 1) * groupGap;
-const total = CHROME + body;
-console.log(`        ${tools.length} tiles · ${cols} columns · ${drawn.length} groups → ${total}px of 900`);
-check("the grid's figures were read", cols > 0 && tile >= 44 && gap > 0 && groupGap > 0 && headingH > 16);
-check(`everything fits on a 1440×900 screen (${total}px)`, total <= 900, `${total}px`);
-const owner = drawnFor(true).flatMap((g) => g.items).length;
-const ownerTotal = CHROME + drawnFor(true).reduce((h, g) => h + headingH + Math.ceil(g.items.length / cols) * tile + (Math.ceil(g.items.length / cols) - 1) * gap, 0) + (drawnFor(true).length - 1) * groupGap;
-check(`...and for the owner, who sees ${owner} (${ownerTotal}px)`, ownerTotal <= 900, `${ownerTotal}px`);
+console.log("\n== 4. no «beta», anywhere on the page ==");
+check("the grid draws no tag", !/isBetaTool|BETA_TOOLS|bg-tag|\bbeta\b/i.test(grid));
+const betaLeft = LOCALES.filter((l) => "beta" in (messages[l].dashboard?.tools ?? {}) || "betaHint" in (messages[l].dashboard?.tools ?? {}));
+check("...and no locale still carries the tag's words", betaLeft.length === 0, betaLeft.join(", "));
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

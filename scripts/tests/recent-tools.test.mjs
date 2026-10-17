@@ -161,7 +161,24 @@ check(
   "...and feeds the rule only those, never page opens",
   /const events = \[\.\.\.completionEvents\(settled\.data \?\? \[\]\), \.\.\.savedEvents\(saved\.data \?\? \[\]\)\];/.test(L)
 );
-check("and hands the result to the sidebar", /<Sidebar [^>]*recent=\{recent\} \/>/.test(L));
+check("and hands the result to the sidebar", /<Sidebar [^>]*recent=\{recent\}[^>]*\/>/.test(L));
+
+// RECENT CONVERSATIONS, the sidebar's seventh row (ΣΥΣΤΗΜΑ DESIGN §3).
+check(
+  "the layout reads the latest conversations through the person's own session",
+  /supabase\s*\.from\("chat_conversations"\)\s*\.select\("id, title"\)\s*\.eq\("user_id", user\.id\)\s*\.order\("updated_at", \{ ascending: false \}\)\s*\.limit\(RECENT_CONVERSATIONS\)/.test(L),
+);
+check("...a failed read leaves the list empty rather than failing Recent tools", /if \(!chats\.error\) \{\s*conversations = /.test(L));
+check("...and hands them to the sidebar", /<Sidebar [^>]*conversations=\{conversations\}/.test(L));
+check(
+  "each conversation opens that conversation",
+  /`\/dashboard\/chat\?c=\$\{c\.id\}`/.test(S),
+);
+check("...with no heading while there is none, and none in the narrow sidebar", /\{conversations\.length > 0 && !collapsed && \(/.test(S));
+check(
+  "the pin and remove buttons are 44px targets",
+  /aria-label=\{t\(r\.pinned \? "rail\.unpin" : "rail\.pin"[\s\S]{0,120}className="flex h-11 w-11/.test(S) && !/h-8 w-8/.test(S),
+);
 
 const API = stripComments(readFileSync("src/app/api/nav/recent-tools/route.ts", "utf8"));
 check("a pin is stored on the account, through the person's own session", /supabase\.auth\.updateUser\(\{ data: \{ recent_tools: next \} \}\)/.test(API) && !/createAdminClient/.test(API));

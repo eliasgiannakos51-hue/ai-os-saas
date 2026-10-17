@@ -303,7 +303,11 @@ try {
     walk(main, 0);
     return out;
   });
-  checkTrue(`the page has blocks to measure (${blocks.length})`, blocks.length >= 8, String(blocks.length));
+  // THE CENTRED HOME (ΣΥΣΤΗΜΑ DESIGN §4, 2026-10-04) is three rows — the
+  // greeting, the field, the quick actions — where the Home this was
+  // written for had eight or more. Three is the design, not a page that
+  // failed to draw; fewer than that is (QUEUE Α.13, 2026-10-05).
+  checkTrue(`the page has blocks to measure (${blocks.length})`, blocks.length >= 3, String(blocks.length));
 
   const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
   const fold = 900;
@@ -397,7 +401,11 @@ try {
     const walker = document.createTreeWalker(document.querySelector("main"), NodeFilter.SHOW_ELEMENT);
     while (walker.nextNode()) {
       const el = walker.currentNode;
-      if (el.children.length > 0) continue;              // leaves only
+      // Elements that carry text of their OWN, not only leaves: a quick
+      // action is an icon and a word in one button, and leaves-only saw
+      // the greeting and nothing else on the centred Home.
+      const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent ?? "").join("");
+      if (!own.trim()) continue;
       const t = (el.textContent ?? "").trim();
       if (t.length < 3) continue;
       const r = el.getBoundingClientRect();
@@ -410,7 +418,8 @@ try {
     }
     return out;
   });
-  checkTrue(`the page renders text to measure (${textBoxes.length} leaf nodes)`, textBoxes.length >= 20, String(textBoxes.length));
+  // The greeting and the four quick actions at least.
+  checkTrue(`the page renders text to measure (${textBoxes.length} text-bearing elements)`, textBoxes.length >= 5, String(textBoxes.length));
 
   // Spread over the whole page rather than clustered in one card.
   const sorted = [...textBoxes].sort((a, b) => a.y - b.y);

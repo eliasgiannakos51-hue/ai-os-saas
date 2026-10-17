@@ -1336,6 +1336,17 @@
         "bad": "Risposta pessima",
         "retry": "Chiedi di nuovo",
         "ratingFailed": "La valutazione non è stata salvata. Riprova."
+      },
+      "workArea": {
+        "label": "Risultato",
+        "back": "Torna alla conversazione",
+        "tabText": "Testo",
+        "tabCode": "Codice",
+        "copy": "Copia",
+        "download": "Scarica {file}",
+        "close": "Chiudi l’area di lavoro",
+        "open": "Apri accanto alla conversazione",
+        "isOpen": "Aperto accanto alla conversazione · premi per chiudere"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "Impossibile ignorarlo."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostra o nascondi lo stack trace"
+      "toggleStackTrace": "Mostra o nascondi lo stack trace",
+      "flags": {
+        "title": "Interruttori",
+        "hint": "Chi vede ogni nuovo strumento o grande modifica. Vale subito, senza un nuovo deploy.",
+        "saveFailed": "L’interruttore non è stato salvato. Riprova.",
+        "audience": {
+          "off": "Nessuno",
+          "staff": "Tu e l’account di prova",
+          "everyone": "Tutti"
+        }
+      }
     },
     "ideas": {
       "new": "Nuova idea",

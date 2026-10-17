@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { useTranslations } from "next-intl";
@@ -30,6 +30,8 @@ import type { ChatConversation, ChatMessage } from "@/types/chat";
 import { ProvenanceLine } from "@/components/chat/provenance-line";
 import { TransitionButton } from "@/components/transitions/transition-button";
 import { AnswerActions } from "@/components/chat/answer-actions";
+import { ResultCard, WorkArea } from "@/components/chat/work-area";
+import { workItemFrom, type WorkItem } from "@/lib/chat/work-area";
 import type { Provenance } from "@/lib/chat/provenance";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
@@ -91,6 +93,7 @@ export function ChatWorkspace({
   initialAsk,
   initialProjectId,
   initialWorkMode,
+  workArea = false,
 }: {
   initialConversations: ChatConversation[];
   /** Conversation to open on load — the `?c=` deep link a starred
@@ -122,6 +125,9 @@ export function ChatWorkspace({
    * Sent with every message until the person clears it.
    */
   initialWorkMode?: WorkMode;
+  /** The switch "chat-work-area" (src/lib/flags/flags.ts), read by the
+   *  page: whether a produced answer opens beside the conversation. */
+  workArea?: boolean;
   /**
    * The project a conversation STARTED here belongs to, for the whole of
    * its life. Chosen on arrival (/dashboard/projects/[id] links here with
@@ -145,6 +151,10 @@ export function ChatWorkspace({
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // THE WORK AREA (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2): which answer is open beside
+  // the conversation, if any. Closed when the conversation changes.
+  const [openWorkId, setOpenWorkId] = useState<string | null>(null);
+  useEffect(() => setOpenWorkId(null), [activeId]);
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
   const [headerRenaming, setHeaderRenaming] = useState(false);
   // The provenance rides on the message it belongs to rather than in a
@@ -154,6 +164,19 @@ export function ChatWorkspace({
   const [messages, setMessages] = useState<(ChatMessage & { provenance?: Provenance; timeline?: ClientStep[] })[]>([]);
   // The one answer whose earth keeps turning, calmly, once it is done.
   const lastAnswerId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+  // What each finished answer produced, if anything (lib/chat/work-area.ts).
+  // Empty while the switch is off, so nothing below draws a card.
+  const workItems = useMemo(() => {
+    const map = new Map<string, WorkItem>();
+    if (!workArea) return map;
+    for (const m of messages) {
+      if (m.role !== "assistant") continue;
+      const item = workItemFrom(m.content);
+      if (item) map.set(m.id, item);
+    }
+    return map;
+  }, [messages, workArea]);
+  const openWorkItem = openWorkId ? workItems.get(openWorkId) ?? null : null;
   // What "again" asks: the person's message right before the latest answer.
   const retryText = (() => {
     const at = messages.findIndex((m) => m.id === lastAnswerId);
@@ -617,12 +640,16 @@ export function ChatWorkspace({
       });
 
       if (accumulatedText) {
+        const answerId = savedId ?? nextLocalId("assistant");
+        // An answer that produced something opens beside the conversation
+        // at once — «η οθόνη χωρίζεται στα δύο».
+        if (workArea && workItemFrom(finalContent ?? accumulatedText)) setOpenWorkId(answerId);
         setMessages((m) => [
           ...m,
           {
             // The server's id when it sent one, so the answer can be rated
             // at once; a local one otherwise (a stopped or cut-off reply).
-            id: savedId ?? nextLocalId("assistant"),
+            id: answerId,
             conversation_id: resolvedConversationId ?? "",
             role: "assistant",
             content: finalContent ?? accumulatedText,
@@ -931,6 +958,15 @@ export function ChatWorkspace({
                         onRetry={!sending && msg.id === lastAnswerId && retryText ? () => void handleSend(retryText) : undefined}
                         onRated={(rating) => setMessages((m) => m.map((x) => (x.id === msg.id ? { ...x, rating } : x)))}
                       />
+                      {/* THE CARD THAT REOPENS THE WORK AREA (§5), on an
+                          answer that produced something. */}
+                      {workItems.get(msg.id) && (
+                        <ResultCard
+                          item={workItems.get(msg.id)!}
+                          open={openWorkId === msg.id}
+                          onOpen={() => setOpenWorkId((id) => (id === msg.id ? null : msg.id))}
+                        />
+                      )}
                       {/* "LISTEN" — on the finished answer only. Never on
                           the one still streaming: half a sentence read
                           aloud is a clip charged for text that changed a
@@ -1128,6 +1164,8 @@ export function ChatWorkspace({
           </div>
         </div>
       </div>
+
+      {openWorkItem && <WorkArea item={openWorkItem} onClose={() => setOpenWorkId(null)} />}
 
       {/* THE HANDS-FREE LOOP. Seeded with the conversation that is open,
           so what is said out loud lands in the same thread rather than in

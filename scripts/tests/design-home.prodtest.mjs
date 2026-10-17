@@ -22,8 +22,9 @@
  *      nothing reaches /api/create while typing.
  *   4. ALL TOOLS. Every card has a name and a one-line hint, and the grid
  *      fits a 390px screen.
- *   5. RECENT. A tool opened from All tools appears under Recent in the
- *      rail afterwards.
+ *   5. RECENT, by the rule of 2026-10-05 (src/lib/nav/recent-tools.ts):
+ *      a tool merely OPENED from All tools does not appear under Recent
+ *      tools; one PINNED there does, at once.
  *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with Input.dispatchTouchEvent.
  */
@@ -79,7 +80,7 @@ const W = {
   websiteBuilder: el.sidebar.items.websiteBuilder,
   railNew: el.sidebar.rail.new,
   railAll: el.sidebar.rail.allTools,
-  railRecent: el.sidebar.rail.recent,
+  railRecent: el.sidebar.rail.recentTools,
   posts: el.sidebar.items.posts,
   oldHeadings: ["make", "ask", "run", "see", "organise"].map((k) => el.sidebar.groups[k]),
   menu: el.common.toggleMenu,
@@ -128,6 +129,8 @@ try {
   ];
 
   for (const device of DEVICES) {
+    // Each device starts with no pins: the mock keeps what the app writes.
+    MOCK_USER.user_metadata = { subscription_tier: "growth" };
     console.log(`\n== ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);
     const context = await browser.newContext({
       viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch, deviceScaleFactor: device.touch ? 3 : 1,
@@ -184,10 +187,14 @@ try {
     const railText = await aside.evaluate((n) => n.textContent ?? "");
     check("the rail offers New", railText.includes(W.railNew), railText.slice(0, 200));
     check("...and All tools", railText.includes(W.railAll));
-    const headings = await aside.locator("p.uppercase").evaluateAll((ps) => ps.map((p) => (p.textContent ?? "").trim()));
-    const oldShown = W.oldHeadings.filter((h) => headings.includes(h));
-    check(`the rail's headings were read (${headings.join(" · ")})`, headings.length >= 1);
-    check("...and none of them is an old group heading", oldShown.length === 0, oldShown.join(", "));
+    // The design's rail has no group headings — only "Recent tools" and
+    // "Recent conversations" when there is something under them — so the
+    // old six are looked for in every paragraph of it, not in a heading
+    // style the new rail does not use.
+    const paragraphs = await aside.locator("p").evaluateAll((ps) => ps.map((p) => (p.textContent ?? "").trim()));
+    const oldShown = W.oldHeadings.filter((h) => paragraphs.includes(h) || railText.includes(h));
+    check("none of the old group headings is in the rail", oldShown.length === 0, oldShown.join(", "));
+    check("...and no Recent tools heading over an empty list", !paragraphs.includes(W.railRecent), paragraphs.join(" · "));
     await shot("1-rail");
     if (cdp) { await page.keyboard.press("Escape"); await page.goto(`${ORIGIN}/dashboard/overview`, { waitUntil: "networkidle" }); }
 
@@ -227,7 +234,7 @@ try {
 
     // ---- 4. all tools
     await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "networkidle" });
-    const cards = page.locator("a.tool-card");
+    const cards = page.locator('[data-testid="tool-tile"]');
     const n = await cards.count();
     const cardInfo = await cards.evaluateAll((els) => els.map((a) => ({ text: a.innerText.trim(), lines: a.innerText.trim().split("\n").filter(Boolean).length })));
     check(`All tools draws the tool list (${n} cards)`, n >= 20);
@@ -237,14 +244,32 @@ try {
     await shot("4-all-tools");
 
     // ---- 5. recent
+    const railNow = async () => {
+      await page.goto(`${ORIGIN}/dashboard/overview`, { waitUntil: "networkidle" });
+      await openRail();
+      return page.locator("aside").first().evaluate((n) => n.textContent ?? "");
+    };
     const postsCard = cards.filter({ hasText: W.posts }).first();
-    if ((await postsCard.count()) > 0) await press(postsCard);
+    const postsThere = (await postsCard.count()) > 0;
+    check("All tools has a Posts square to open and pin", postsThere);
+    if (postsThere) await press(postsCard);
     await page.waitForURL(/\/dashboard\/posts/, { timeout: 15000 }).catch(() => {});
     await page.waitForLoadState("networkidle");
-    await page.goto(`${ORIGIN}/dashboard/overview`, { waitUntil: "networkidle" });
-    await openRail();
-    const railAfter = await page.locator("aside").first().evaluate((n) => n.textContent ?? "");
-    check("a tool opened from All tools appears under Recent", railAfter.includes(W.railRecent) && railAfter.includes(W.posts), railAfter.slice(0, 300));
+    const railOpened = await railNow();
+    check("a tool only OPENED from All tools is not under Recent tools", !railOpened.includes(W.railRecent), railOpened.slice(0, 300));
+    if (cdp) await page.keyboard.press("Escape");
+
+    await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "networkidle" });
+    const pin = page.locator("li", { has: cards.filter({ hasText: W.posts }) }).locator('[data-testid="tool-pin"]').first();
+    let pinned = false;
+    if ((await pin.count()) > 0) {
+      const saved = page.waitForResponse((r) => r.url().includes("/api/nav/recent-tools"), { timeout: 10000 });
+      await press(pin);
+      pinned = await saved.then((r) => r.ok(), () => false);
+    }
+    check("...pinning it from All tools is saved", pinned);
+    const railPinned = await railNow();
+    check("...and then it IS under Recent tools", railPinned.includes(W.railRecent) && railPinned.includes(W.posts), railPinned.slice(0, 300));
     await shot("5-recent");
     await context.close();
   }

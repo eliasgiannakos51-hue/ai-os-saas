@@ -135,7 +135,11 @@ const MEASURE = () => {
     mainOverflowY: main ? getComputedStyle(main).overflowY : null,
     main: box(main),
     h1: box(document.querySelector("h1")),
-    logo: box(document.querySelector("main svg")),
+    // THE WHOLE MARK, earth and word together (components/logo.tsx draws
+    // them as one role="img" row). "main svg" found the earth alone — the
+    // left 40px of a centred row — and called it off centre by 133px
+    // (QUEUE Α.13, 2026-10-05).
+    logo: box(document.querySelector('main [role="img"][aria-label="Ionexa"]') ?? document.querySelector("main svg")),
     description: box(document.querySelector("h1 + p")),
     cta: box(login && signup ? login.parentElement : null),
     footer: box(document.querySelector("footer")),

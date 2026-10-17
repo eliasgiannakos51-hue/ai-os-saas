@@ -1336,6 +1336,17 @@
         "bad": "Schlechte Antwort",
         "retry": "Noch einmal fragen",
         "ratingFailed": "Die Bewertung wurde nicht gespeichert. Versuch es noch einmal."
+      },
+      "workArea": {
+        "label": "Ergebnis",
+        "back": "Zurück zum Gespräch",
+        "tabText": "Fließtext",
+        "tabCode": "Quelltext",
+        "copy": "Kopieren",
+        "download": "{file} herunterladen",
+        "close": "Arbeitsbereich schließen",
+        "open": "Neben dem Gespräch öffnen",
+        "isOpen": "Neben dem Gespräch geöffnet · zum Schließen tippen"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "Das konnte nicht ausgeblendet werden."
     },
     "systemHealth": {
-      "toggleStackTrace": "Stacktrace ein- oder ausblenden"
+      "toggleStackTrace": "Stacktrace ein- oder ausblenden",
+      "flags": {
+        "title": "Schalter",
+        "hint": "Wer jedes neue Werkzeug oder jede große Änderung sieht. Gilt sofort, ohne neues Deployment.",
+        "saveFailed": "Der Schalter wurde nicht gespeichert. Versuch es noch einmal.",
+        "audience": {
+          "off": "Niemand",
+          "staff": "Du und das Testkonto",
+          "everyone": "Alle"
+        }
+      }
     },
     "ideas": {
       "new": "Neue Idee",

@@ -13,6 +13,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { loadFavoriteIds } from "@/lib/favorites";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readWorkMode } from "@/lib/chat/work-modes";
+import { isFeatureOn } from "@/lib/flags/flags";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.chat");
@@ -107,6 +108,9 @@ export default async function ChatPage(
         // (lib/chat/work-modes.ts). Read through readWorkMode, so a URL
         // anyone can edit names one of four modes or none.
         initialWorkMode={readWorkMode(searchParams.mode) ?? undefined}
+        // THE SWITCH "chat-work-area" (MASTER Μέρος 13 Β): the work area
+        // beside the conversation, for you and the test account first.
+        workArea={await isFeatureOn("chat-work-area", user)}
         // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
         // it can be chosen. It is validated against the person's OWN
         // projects rather than trusted, exactly as `?c=` is above: an id

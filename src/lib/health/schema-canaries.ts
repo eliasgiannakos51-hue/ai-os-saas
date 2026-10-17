@@ -386,6 +386,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "a website generation records no phases, so the builder falls back to rotating messages and shows no timeline or per-step credits",
   },
   {
+    kind: "table",
+    table: "feature_flags",
+    migration: "20261017000000_feature_flags.sql",
+    breaks: "every switch on /dashboard/system-health reads as 'you and the test account' and cannot be changed, so a finished tool cannot be opened to everyone",
+  },
+  {
     kind: "column",
     table: "chat_messages",
     column: "rating",

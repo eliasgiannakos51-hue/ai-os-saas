@@ -55,32 +55,32 @@ const MUTATIONS = [
   {
     name: "the widest breakpoint's cap is removed",
     file: CSS,
-    from: "    font-size: 17px;\n    max-width: 61ch;",
+    from: "    font-size: 17px;\n    max-width: 51ch;",
     to: "    font-size: 17px;",
   },
   {
     name: "the caps stop ascending (the wide screen gets the shorter line)",
     file: CSS,
-    from: "    font-size: 16px;\n    max-width: 61ch;",
+    from: "    font-size: 16px;\n    max-width: 51ch;",
     to: "    font-size: 16px;\n    max-width: 50ch;",
   },
   {
     name: "the font stops growing, so a wider screen is only emptier",
     file: CSS,
-    from: "    font-size: 17px;\n    max-width: 61ch;",
-    to: "    max-width: 61ch;",
+    from: "    font-size: 17px;\n    max-width: 51ch;",
+    to: "    max-width: 51ch;",
   },
   {
     name: "a cap is pushed past 75 characters",
     file: CSS,
-    from: "    max-width: 60ch;",
-    to: "    max-width: 72ch;",
+    from: "@media (min-width: 640px) {\n  .chat-measure {\n    max-width: 51ch;",
+    to: "@media (min-width: 640px) {\n  .chat-measure {\n    max-width: 72ch;",
   },
   {
     name: "a cap is pulled under 60 characters",
     file: CSS,
-    from: "    max-width: 60ch;",
-    to: "    max-width: 40ch;",
+    from: "@media (min-width: 640px) {\n  .chat-measure {\n    max-width: 51ch;",
+    to: "@media (min-width: 640px) {\n  .chat-measure {\n    max-width: 40ch;",
   },
   {
     name: "the base rule stops filling the width, so mobile is no longer full-width",
@@ -201,7 +201,7 @@ const MUTATIONS = [
   {
     name: "the measured ch-to-character ratio is dropped back to 1",
     file: GATE,
-    from: "const CHARS_PER_CH = { en: 1.22, el: 1.11 };",
+    from: "const CHARS_PER_CH = { en: 1.41, el: 1.26 };",
     to: "const CHARS_PER_CH = { en: 1, el: 1 };",
   },
 ];

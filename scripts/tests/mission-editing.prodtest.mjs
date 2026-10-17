@@ -38,6 +38,9 @@ const user = () => ({
   aud: "authenticated",
   role: "authenticated",
   email: "owner@example.com",
+  // An unconfirmed account is sent to "Confirm your email" by src/proxy.ts,
+  // and this fixture had none, so the mission never opened (QUEUE Α.13).
+  email_confirmed_at: "2026-01-01T00:00:00Z",
   user_metadata: { subscription_tier: "ultimate" },
   app_metadata: {},
   created_at: "2026-01-01T00:00:00Z",
@@ -139,6 +142,9 @@ const supa = http.createServer((req, res) => {
       if (fn === "voice_usage_this_month") {
         return json(200, [{ transcribe_seconds: 0, speak_seconds: 0 }]);
       }
+      // The atomic limiter (src/lib/rate-limit.ts) returns a boolean; one
+      // account editing one mission is under every limit.
+      if (fn === "consume_rate_limit") return json(200, true);
       unexpected.push(`RPC ${fn}`);
       return json(500, { message: `mock: unimplemented rpc ${fn}` });
     }
@@ -210,6 +216,9 @@ const supa = http.createServer((req, res) => {
         // sitemap.xml reads this on the way in; empty is the truthful
         // answer for an account with no published site.
         "published_sites",
+        // The sidebar's Recent tools count SAVED work from here
+        // (src/lib/nav/recent-tools.ts); an account with none reads empty.
+        "search_index",
         // The 13 classifier modules the shell scans.
         "ai_jobs", "security_check_log", "website_versions", "credit_transactions",
         "ideas", "competitors", "research", "finance_entries", "learning_entries", "trades",

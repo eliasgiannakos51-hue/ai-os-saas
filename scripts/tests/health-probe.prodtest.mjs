@@ -83,16 +83,29 @@ try {
   const keys = Object.keys(b1).sort();
   // `schema` joined the body on 2026-09-01 (66ae4c4): the canary sweep,
   // which names missing objects on purpose so a broken page can be
-  // diagnosed without a secret. Everything else stays closed.
+  // diagnosed without a secret. `deployment`, `ai`, `nav` and `derived`
+  // joined between 2026-09-11 and 2026-09-26, each for a monitor or the
+  // bot; since 2026-10-05 a stranger gets only each one's VERDICT — no
+  // provider names, no ages, no row or account counts. Everything else
+  // stays closed.
+  const ALLOWED = ["ai", "db", "deployment", "derived", "ms", "nav", "ok", "reason", "schema", "stage"];
   check(
-    "the body has exactly {ok, db, ms, reason, schema, stage} and nothing else",
-    JSON.stringify(keys) === JSON.stringify(["db", "ms", "ok", "reason", "schema", "stage"]),
+    "the body has exactly {ok, db, ms, reason, stage, schema, deployment, ai, nav, derived} and nothing else",
+    keys.every((k) => ALLOWED.includes(k)) && ["db", "ms", "ok", "reason", "stage"].every((k) => keys.includes(k)),
     `keys were ${JSON.stringify(keys)}`
+  );
+  check(
+    "...and each of the four says only what a monitor acts on: a verdict, or whether a model can be called",
+    (!b1.ai || JSON.stringify(Object.keys(b1.ai)) === JSON.stringify(["canCallModel"])) &&
+      (!b1.nav || JSON.stringify(Object.keys(b1.nav)) === JSON.stringify(["verdict"])) &&
+      (!b1.derived || JSON.stringify(Object.keys(b1.derived)) === JSON.stringify(["verdict"])) &&
+      (!b1.deployment || Object.keys(b1.deployment).every((k) => ["age_days", "level", "source", "reason"].includes(k))),
+    JSON.stringify({ ai: b1.ai, nav: b1.nav, derived: b1.derived, deployment: b1.deployment })
   );
   check("the schema sweep says how many canaries it checked, and that all were found", b1.schema && b1.schema.ok === true && b1.schema.checked >= 10 && Array.isArray(b1.schema.missing) && b1.schema.missing.length === 0, JSON.stringify(b1.schema));
   check("a healthy answer says so in the vocabulary", b1.reason === "ok" && b1.stage === "query", JSON.stringify(b1));
   check("no detail reaches an anonymous caller on a healthy probe", !("detail" in b1));
-  const bodyText = JSON.stringify({ ...b1, schema: undefined });
+  const bodyText = JSON.stringify({ ...b1, schema: undefined, deployment: undefined });
   check(
     "no table name, no error text, no version string anywhere in the body",
     !/agent_templates|supabase|postgres|error|version|stack|[0-9]+\.[0-9]+\.[0-9]+/i.test(bodyText),
@@ -123,7 +136,8 @@ try {
   check("the stage names the step that failed", b2.stage === "query", JSON.stringify(b2));
   check(
     "the failure body still discloses NOTHING an anonymous caller can map — outside the canary names",
-    JSON.stringify(Object.keys(b2).sort()) === JSON.stringify(["db", "ms", "ok", "reason", "schema", "stage"]) &&
+    Object.keys(b2).every((k) => ALLOWED.includes(k)) &&
+      (!b2.ai || JSON.stringify(Object.keys(b2.ai)) === JSON.stringify(["canCallModel"])) &&
       !/PGRST205|schema cache|public\./i.test(JSON.stringify({ ...b2, schema: undefined })),
     JSON.stringify(b2)
   );

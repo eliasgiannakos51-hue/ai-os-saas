@@ -296,7 +296,22 @@ try {
   check(`the dialog is a real size (${Math.round(box.width)}x${Math.round(box.height)}px)`, box.width >= 380 && box.height >= 300);
   const centreOffset = Math.abs(box.x + box.width / 2 - vw / 2);
   check(`it is centred, not pushed to an edge (${Math.round(centreOffset)}px off centre)`, centreOffset <= 24);
-  check("there is a dimmed backdrop behind it", (await page.locator(".fixed.inset-0.bg-black\\/60").count()) > 0);
+  // BY WHAT IT DOES, not by its colour class: the design moved the
+  // backdrop from bg-black/60 to bg-background/60 with a blur, and the
+  // class needle went red on a backdrop that was there (QUEUE Α.13,
+  // 2026-10-05). A backdrop covers the whole viewport and paints
+  // something — a colour that is not transparent, or a blur.
+  const backdrop = await page.evaluate(() =>
+    [...document.querySelectorAll('[aria-hidden="true"]')].some((el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const covers = r.left <= 0 && r.top <= 0 && r.right >= innerWidth && r.bottom >= innerHeight;
+      const alpha = (cs.backgroundColor.match(/[\d.]+(?=\)$)/) ?? ["1"])[0];
+      const paints = (cs.backgroundColor !== "rgba(0, 0, 0, 0)" && Number(alpha) > 0) || cs.backdropFilter !== "none";
+      return cs.position === "fixed" && covers && paints;
+    })
+  );
+  check("there is a dimmed backdrop behind it", backdrop);
 
   console.log("\n== 2. it is obvious that something must be typed ==");
   const input = page.locator(INPUT);
@@ -329,7 +344,7 @@ try {
 
   console.log("\n== 4. every rejection says which one it is ==");
   const feedback = page.locator("#publish-address-feedback");
-  const publishNow = page.locator(`${DIALOG} button.bg-orange-500`);
+  const publishNow = page.locator(`${DIALOG} button.bg-button`);
   const messages = {};
   for (const [label, value] of [
     ["valid", "camping-chalkidiki"],
@@ -415,16 +430,16 @@ try {
   await p3.waitForSelector(DIALOG, { timeout: 10000 });
   await p3.locator(INPUT).fill("taken-name");
   await p3.waitForTimeout(150);
-  await p3.locator(`${DIALOG} button.bg-orange-500`).click();
+  await p3.locator(`${DIALOG} button.bg-button`).click();
   await p3.waitForTimeout(1500);
   const takenText = (await p3.locator("#publish-address-feedback").innerText()).trim();
   check(`the field says the address is taken ("${takenText}")`, /taken|πιασμ/i.test(takenText), takenText);
-  check("and the button is disabled again", !(await p3.locator(`${DIALOG} button.bg-orange-500`).isEnabled()));
+  check("and the button is disabled again", !(await p3.locator(`${DIALOG} button.bg-button`).isEnabled()));
   await p3.screenshot({ path: path.join(outDir, "after-1280-taken.png"), fullPage: false });
   // Editing the value must clear it, or the user is stuck.
   await p3.locator(INPUT).fill("taken-name-2");
   await p3.waitForTimeout(150);
-  check("changing the address clears the rejection", await p3.locator(`${DIALOG} button.bg-orange-500`).isEnabled());
+  check("changing the address clears the rejection", await p3.locator(`${DIALOG} button.bg-button`).isEnabled());
   await ctx3.close();
   subdomainTaken = false;
 

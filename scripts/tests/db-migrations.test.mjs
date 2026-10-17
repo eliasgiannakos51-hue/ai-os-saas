@@ -608,7 +608,9 @@ if (!DB) {
   // own and this copy was not, and neither moved for meetings — the
   // database step runs after the mutation suites in CI, which were red or
   // timed out on every push in between, so nothing reached either.
-  check(`111 tables`, tables === 111, `got ${tables}`);
+  // 111 -> 112 on 2026-10-05: feature_flags (20261017), the owner's
+  // switches for new tools (MASTER Μέρος 13 Β).
+  check(`112 tables`, tables === 112, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -634,6 +636,7 @@ if (!DB) {
     account_deletion_requests: "erasure queue; the requester already knows, nobody else may",
     daily_ai_spend_tracking: "the platform's own spend ledger, not the customer's",
     production_errors: "stack traces and affected user ids; admin-only page reads it via service role",
+    feature_flags: "the owner's switches for new tools; read and written only by the server with the service role (src/lib/flags/flags.ts), the write behind isAdminEmail",
     cost_alert_log:
       "what every customer's spend triggered, with the numbers; owner-only page reads it via service role, and a customer who could read it would learn the shape of the whole business",
     // V4 #26. The four tables the financial dashboard is built from. Each

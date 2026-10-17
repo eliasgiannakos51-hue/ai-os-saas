@@ -53,7 +53,7 @@ const chatRoute = stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"
 check("the chat route sends the saved answer's id on done", /\.select\("id"\)\s*\.single\(\);/.test(chatRoute) && /messageId: assistantRow\?\.id \?\? undefined,/.test(chatRoute));
 const ws = stripComments(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
 check("...and the page keeps it, so the new answer can be rated at once",
-  /if \(typeof event\.messageId === "string" && PERSISTED_ID\.test\(event\.messageId\)\) savedId = event\.messageId;/.test(ws) && /id: savedId \?\? nextLocalId\("assistant"\),/.test(ws));
+  /if \(typeof event\.messageId === "string" && PERSISTED_ID\.test\(event\.messageId\)\) savedId = event\.messageId;/.test(ws) && /const answerId = savedId \?\? nextLocalId\("assistant"\);/.test(ws) && /id: answerId,/.test(ws));
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

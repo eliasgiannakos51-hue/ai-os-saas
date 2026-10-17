@@ -182,7 +182,10 @@ console.log("== 0. the database really is the one the migrations build ==");
 // meeting_actions (V6 #1). It went unnoticed for days because this step
 // runs after the mutation suites in CI, and they were red or timed out
 // on every push in between — a gate nothing reaches reports nothing.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 111);
+// 111 -> 112 on 2026-10-05: 20261017000000_feature_flags.sql adds
+// feature_flags, the owner's switches for new tools (MASTER Μέρος 13 Β).
+// Caught by this line in CI on the first push that carried it (#248).
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 112);
 eq(
   "the credit functions exist",
   Number(

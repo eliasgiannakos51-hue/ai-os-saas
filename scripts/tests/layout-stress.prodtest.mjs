@@ -100,13 +100,16 @@ const DASHBOARD_ROUTES = [
   "/dashboard/website-builder",
   "/dashboard/mission",
   "/dashboard/documents",
-  // NOT "/dashboard/favorites": V4.6 #3 merged the starred list into the
-  // timeline and left that path as a redirect, so measuring it measured
-  // the redirect target while calling it favorites. The list is still
-  // here — it is a tab now, and this is the URL it lives at.
-  "/dashboard/timeline?view=fav",
+  // THE STARRED LIST LIVES AT /dashboard/favorites again (V4.6 round 5,
+  // app/dashboard/favorites/page.tsx), and "?view=fav" is the alias that
+  // redirects there (app/dashboard/timeline/page.tsx). Measuring the alias
+  // measured the redirect target under the wrong name — the same mistake
+  // the other way round, re-found by QUEUE Α.13 on 2026-10-05.
+  "/dashboard/favorites",
   "/dashboard/timeline",
-  "/dashboard/memory",
+  // Not "/dashboard/memory": a permanent move to Search
+  // (PERMANENT_MOVES in src/lib/nav/early-redirects.ts).
+  "/dashboard/search",
   "/dashboard/marketplace",
   "/dashboard/settings",
   "/dashboard/reflection",
@@ -411,7 +414,7 @@ async function sweep(context, route, locale) {
   // onboarding wizard, and nothing said so.
   const landedOn = new URL(page.url()).pathname;
   // PATHNAME AGAINST PATHNAME. A route in the list may carry a query
-  // ("/dashboard/timeline?view=fav" is where the starred list lives now),
+  // (one did: "/dashboard/timeline?view=fav", before it became an alias),
   // and comparing that whole string to a bare pathname reports every such
   // route as a redirect — a false alarm in the check whose whole purpose
   // is to catch false measurements.

@@ -1,10 +1,10 @@
-# The ten basic checks
+# The basic checks
 
-Ten things that must be true of a signed-in account before anything else is
+The things that must be true of a signed-in account before anything else is
 worth asking. Written 2026-09-26. The language is in `checks/README.md`.
 
-Nine of these are free. The tenth spends credits and runs only with
-`--allow-cost`.
+All of these are free except the Website Builder check (10), which spends
+credits and runs only with `--allow-cost`. Check 11 was added on 2026-10-05.
 
 ## Selectors, in one place
 
@@ -103,6 +103,19 @@ A non-empty `missing` means a migration in `supabase/migrations/` has not
 been pasted into the SQL editor — the failure mode CLAUDE.md opens with.
 On 2026-09-26 this was failing in production: `delete_user_storage_objects()`
 absent, so account deletion stops at the storage step.
+
+## 11 — billing answers: the account's balance is read
+
+    CHECK The credit balance is read
+    OPEN /api/credits/balance
+    EXPECT STATUS 200
+    EXPECT TEXT "\"ok\":true"
+    EXPECT NO TEXT "\"credits\":null"
+
+Added 2026-10-05 for MASTER Μέρος 13 Β: after every merge the production
+check covers sign-in, Home, Chat, one tool and billing. Free: it reads the
+balance, it spends nothing. Placed before the one billable check so that
+check's cost cap never decides whether this one runs.
 
 ## 10 — the Website Builder actually produces a site
 

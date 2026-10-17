@@ -1336,6 +1336,17 @@
         "bad": "不好的回答",
         "retry": "再问一次",
         "ratingFailed": "评分未保存，请重试。"
+      },
+      "workArea": {
+        "label": "结果",
+        "back": "返回对话",
+        "tabText": "文本",
+        "tabCode": "代码",
+        "copy": "复制",
+        "download": "下载 {file}",
+        "close": "关闭工作区",
+        "open": "在对话旁打开",
+        "isOpen": "已在对话旁打开 · 点击关闭"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "无法忽略该项。"
     },
     "systemHealth": {
-      "toggleStackTrace": "展开或收起调用栈"
+      "toggleStackTrace": "展开或收起调用栈",
+      "flags": {
+        "title": "开关",
+        "hint": "每个新工具或重大更改对谁可见。立即生效，无需重新部署。",
+        "saveFailed": "开关未保存，请重试。",
+        "audience": {
+          "off": "所有人都不可见",
+          "staff": "你和测试账户",
+          "everyone": "所有人"
+        }
+      }
     },
     "ideas": {
       "new": "新建创意",

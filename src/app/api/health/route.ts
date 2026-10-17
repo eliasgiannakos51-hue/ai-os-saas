@@ -375,6 +375,24 @@ export async function GET(request: Request) {
     }
   }
 
+  // A STRANGER GETS VERDICTS, NOT FIGURES (2026-10-05). The fields above
+  // were added one round at a time for the owner and the bot, and each
+  // carried numbers and names a monitor does not need: which providers are
+  // configured, how long ago the product was used, how many accounts have
+  // search entries. health-probe.prodtest.mjs holds the anonymous body to a
+  // closed set; that check was red in the nightly run while each field
+  // landed. Unauthorised callers keep the one thing each field is for —
+  // can it call a model, and each verdict — and `?verbose=1` with the cron
+  // secret still gets everything.
+  if (!authorised) {
+    const ai = body.ai as { canCallModel?: boolean } | undefined;
+    if (ai) body.ai = { canCallModel: ai.canCallModel === true };
+    const nav = body.nav as { verdict?: unknown } | undefined;
+    if (nav) body.nav = { verdict: nav.verdict };
+    const derived = body.derived as { verdict?: unknown } | undefined;
+    if (derived) body.derived = { verdict: derived.verdict };
+  }
+
   return NextResponse.json(body, {
     status: probe.ok ? 200 : 503,
     // A CDN or proxy caching a 503 keeps reporting an outage that has

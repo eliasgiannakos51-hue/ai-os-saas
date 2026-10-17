@@ -26,6 +26,7 @@
 import { startProdHarness } from "../lib/prod-harness.mjs";
 import { chromium } from "playwright";
 import { chromiumPath } from "./lib/chromium.mjs";
+import { readFileSync } from "node:fs";
 
 // The threshold is Safari's, not ours. At exactly 16px it does not zoom.
 const MIN_MOBILE_FONT_PX = 16;
@@ -305,7 +306,7 @@ try {
   // ====================================================================
   // The fix must be a MOBILE floor, not a global font bump: raising every
   // field to 16px on a 1280px screen would redesign every form on the
-  // desktop the product is mostly used on. `.input` stays 14px there.
+  // desktop the product is mostly used on. `.input` stays at text-sm there.
   console.log("\n== C. desktop keeps its own size ==");
   const deskCtx = await harness.signedIn(browser, DESKTOP);
   const deskPage = await deskCtx.newPage();
@@ -323,8 +324,13 @@ try {
     return px;
   });
   console.log(`  .input at 1280px: ${deskSize}px`);
-  check("`.input` is still 14px on desktop (the floor is mobile-only)", deskSize === 14,
-    `was ${deskSize}px`);
+  // `.input` is `text-sm`, and what that means is the type scale's
+  // (tailwind.config.ts, 14px until redesign phase 4, 15px since) — read
+  // from there, so the scale can move without this going stale, while a
+  // floor that leaked onto desktop (16px) still fails.
+  const smRem = Number(readFileSync("tailwind.config.ts", "utf8").match(/\bsm: \["([\d.]+)rem"/)?.[1]);
+  check("`.input` keeps the type scale's text-sm on desktop (the floor is mobile-only)",
+    smRem > 0 && deskSize === smRem * 16 && deskSize < 16, `was ${deskSize}px, text-sm is ${smRem * 16}px`);
   await deskCtx.close();
 
   // ====================================================================

@@ -328,8 +328,13 @@ page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${e.message}`));
 // --- the loop ---------------------------------------------------------
 await page.setViewportSize({ width: 1440, height: 1000 });
 
+// THE PAGE THE SAMPLE IS OFFERED ON. It was Home; the centred Home
+// (ΣΥΣΤΗΜΑ DESIGN §4, 2026-10-04) moved the load button, the score and
+// the stat cards to Activity (app/dashboard/activity/page.tsx), so the
+// loop runs there (QUEUE Α.13, 2026-10-05).
+const ACTIVITY = "/dashboard/activity";
 async function goHome() {
-  await page.goto(`http://127.0.0.1:${PORT}/dashboard/overview`, { waitUntil: "networkidle" });
+  await page.goto(`http://127.0.0.1:${PORT}${ACTIVITY}`, { waitUntil: "networkidle" });
   const accept = await page.$("button:has-text('Accept')");
   if (accept) {
     await accept.click();
@@ -362,7 +367,7 @@ const state = async () => {
 console.log("\n== 1. an empty account is offered the sample ==");
 await goHome();
 let s = await state();
-checkTrue(`landed on the dashboard (${s.url})`, s.url === "/dashboard/overview", s.url);
+checkTrue(`landed on Activity (${s.url})`, s.url === ACTIVITY, s.url);
 checkTrue("the load button is offered", s.hasLoadButton);
 checkTrue("no banner yet", !s.hasBanner);
 checkTrue("and no score yet", s.scoreLabel === null, String(s.scoreLabel));

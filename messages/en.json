@@ -1336,6 +1336,17 @@
         "bad": "Bad answer",
         "retry": "Ask again",
         "ratingFailed": "The rating was not saved. Try again."
+      },
+      "workArea": {
+        "label": "Result",
+        "back": "Back to the conversation",
+        "tabText": "Text",
+        "tabCode": "Code",
+        "copy": "Copy",
+        "download": "Download {file}",
+        "close": "Close the work area",
+        "open": "Open beside the conversation",
+        "isOpen": "Open beside the conversation · press to close"
       }
     },
     "create": {
@@ -2412,7 +2423,17 @@
       "dismissError": "That could not be dismissed."
     },
     "systemHealth": {
-      "toggleStackTrace": "Toggle stack trace"
+      "toggleStackTrace": "Toggle stack trace",
+      "flags": {
+        "title": "Switches",
+        "hint": "Who sees each new tool or big change. Changes apply at once, with no deploy.",
+        "saveFailed": "The switch was not saved. Try again.",
+        "audience": {
+          "off": "Nobody",
+          "staff": "You and the test account",
+          "everyone": "Everyone"
+        }
+      }
     },
     "ideas": {
       "new": "New Idea",

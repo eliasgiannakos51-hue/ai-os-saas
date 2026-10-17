@@ -49,7 +49,14 @@ export default async function ChatPage(
   const [{ data: conversationRows }, bypassesCredits, plan, opensTools] = await Promise.all([
     supabase
       .from("chat_conversations")
+      // SCOPED HERE AS WELL AS BY RLS. The Chats page has always said
+      // `.eq("user_id", …)` on the same table (app/dashboard/chats/page.tsx);
+      // this query left it to the policy alone, which is one layer where
+      // the other screen has two. Found on 2026-10-17 by the prodtest for
+      // the conversation column, which seeds a second account's row and
+      // requires the list not to carry it.
       .select("id, title, is_pinned, created_at, updated_at")
+      .eq("user_id", user.id)
       .order("updated_at", { ascending: false }),
     // Admins and beta testers already pay nothing, so a "free messages
     // left" counter would be meaningless noise for them — the route skips
@@ -97,6 +104,9 @@ export default async function ChatPage(
   const { data: projectRows } = await supabase
     .from("projects")
     .select("id, name, status")
+    // The owner's id as well as the policy, for the same reason as the
+    // conversation query above and as app/dashboard/chats/page.tsx.
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(200);
   const ownProjectIds = new Set((projectRows ?? []).map((row) => String((row as { id?: unknown }).id ?? "")));

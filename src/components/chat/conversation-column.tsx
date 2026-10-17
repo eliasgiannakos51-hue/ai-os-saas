@@ -42,6 +42,7 @@ export function ConversationColumn({
   projects,
   activeId,
   onNavigate,
+  onOpen,
 }: {
   conversations: readonly SidebarConversation[];
   /** For «Μεταφορά σε Έργο»: read on the server, since there is no
@@ -51,6 +52,9 @@ export function ConversationColumn({
   /** Called when a row navigates, so the phone's overlay can close
    *  behind it. Nothing on a computer, where the column stays put. */
   onNavigate?: () => void;
+  /** Opens a conversation in the thread this column sits beside,
+   *  rather than by navigating to the screen we are already on. */
+  onOpen?: (id: string) => void;
 }) {
   const t = useTranslations("dashboard.chat");
   const [query, setQuery] = useState("");
@@ -80,7 +84,13 @@ export function ConversationColumn({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-1 py-2">
-        <ConversationRows conversations={shown} projects={projects} activeId={activeId} onNavigate={onNavigate} />
+        <ConversationRows
+          conversations={shown}
+          projects={projects}
+          activeId={activeId}
+          onNavigate={onNavigate}
+          onOpen={onOpen}
+        />
       </div>
 
       {/* THE WAY OUT OF A COLUMN THAT IS NOT THE WHOLE LIST. The chat

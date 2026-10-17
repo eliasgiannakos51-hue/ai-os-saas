@@ -406,24 +406,86 @@ try {
       await page.waitForTimeout(400);
       check(`[${tag}] ...and Undo keeps it`, db.store.chat_conversations.some((c) => c.id === MINE[2].id));
 
-      // «ΝΕΑ ΣΥΝΟΜΙΛΙΑ». Open one of the saved conversations first, so
-      // "the thread is empty" is a change rather than the state the
-      // screen was already in — which is the way this check would
-      // otherwise pass on a button that does nothing at all.
+      // OPENING A CONVERSATION FROM THE COLUMN, AND THEN A SECOND ONE.
+      //
+      // THE SECOND IS THE WHOLE POINT. Every other list of
+      // conversations is on another route, so choosing one MOUNTS this
+      // screen; the column is on it already, and the effect that reads
+      // `?c=` ran once per mount until 2026-10-17. With that guard the
+      // first conversation opened and every one after it left the
+      // address saying one thread while the page showed another —
+      // green on a check that read the URL alone, which is what the
+      // first version of this one did.
+      //
+      // SO THE THREAD IS READ, NOT THE ADDRESS. The header carries the
+      // open conversation's own name (InlineTitle, testid
+      // chat-header-title), and that is what has to change.
+      const headerTitle = () => page.locator('[data-testid="chat-header-title"]').first().innerText().catch(() => "");
+      // ON A PHONE THE COLUMN CLOSES BEHIND THE ROW YOU CHOSE, because
+      // it lies over the thread you are about to read. So it is opened
+      // again before each of the presses below, rather than assumed —
+      // assuming it would make every check after the first one a
+      // check against a locator that matches nothing.
+      const ensureColumn = async () => {
+        if ((await column.count()) === 0) {
+          await press(toggle);
+          await page.waitForTimeout(400);
+        }
+      };
+      await ensureColumn();
       await press(colRow("Τιμοκατάλογος"));
-      await page.waitForTimeout(800);
-      check(`[${tag}] a conversation opens from the column`, /[?&]c=/.test(page.url()), page.url());
+      await page.waitForTimeout(900);
+      check(`[${tag}] a conversation opens from the column`,
+        /[?&]c=/.test(page.url()) && (await headerTitle()).includes("Τιμοκατάλογος"),
+        `${page.url()} / ${await headerTitle()}`);
+      await ensureColumn();
+      await press(colRow("Αύρα από το Chat"));
+      await page.waitForTimeout(900);
+      check(`[${tag}] ...and so does a SECOND one, without a reload`,
+        (await headerTitle()).includes("Αύρα από το Chat"), `${page.url()} / ${await headerTitle()}`);
+      check(`[${tag}] ...and the address followed the thread`,
+        page.url().includes(`c=${MINE[0].id}`), page.url());
+
       const newChat = page.locator('[data-testid="chat-new-conversation"]');
       check(`[${tag}] «${L.dashboard.chat.newChat}» is beside the [◧]`, await newChat.isVisible());
       await press(newChat);
       await page.waitForTimeout(600);
+      // A CHANGE, NOT THE STATE IT WAS ALREADY IN. A conversation is
+      // open on the line above, so an empty thread here is this button
+      // having done something — which is the only version of this
+      // check a button wired to nothing cannot pass.
       check(`[${tag}] ...and pressing it starts an empty conversation`, await page.locator('[data-testid="chat-empty"]').isVisible());
+      check(`[${tag}] ...and the open conversation's name is gone from the title row`,
+        (await page.locator('[data-testid="chat-header-title"]').count()) === 0);
+      // AND THE ONE YOU JUST LEFT OPENS AGAIN. The address still
+      // carries its `?c=`, so a column that navigated instead of
+      // selecting would send the browser to a URL it is already on and
+      // nothing at all would happen.
+      await ensureColumn();
+      await press(colRow("Αύρα από το Chat"));
+      await page.waitForTimeout(900);
+      check(`[${tag}] ...and the conversation just left can be re-opened`,
+        (await headerTitle()).includes("Αύρα από το Chat"), `${page.url()} / ${await headerTitle()}`);
 
       // AND IT CLOSES AGAIN, which is the other half of «ανοίγει και
       // κλείνει» and the half a one-way toggle passes without.
-      await press(toggle);
+      //
+      // BY A DIFFERENT CONTROL ON A PHONE, AND THAT IS THE DESIGN, not
+      // a concession to the test. «Στο κινητό ανοίγει πάνω από το Chat
+      // και κλείνει με ένα πάτημα έξω από αυτήν» — the column covers
+      // the title row there, the [◧] with it, and the tap outside is
+      // the way out. On a computer the column sits beside the thread
+      // and the [◧] is reachable throughout, so the [◧] is what is
+      // pressed. Written out because «pressing [◧] again closes it»
+      // would have been a true sentence about one device and a false
+      // one about the other.
+      await ensureColumn();
+      await press(device.touch ? page.locator('[data-testid="chat-column-scrim"]') : toggle);
       await page.waitForTimeout(400);
-      check(`[${tag}] pressing [◧] again closes the column`, (await column.count()) === 0);
+      check(
+        `[${tag}] ${device.touch ? "a tap outside closes the column" : "pressing [◧] again closes the column"}`,
+        (await column.count()) === 0
+      );
       check(`[${tag}] ...and the slot says so`, (await slot.getAttribute("data-open")) === "false");
       await shot("1b-column-closed");
       reset();

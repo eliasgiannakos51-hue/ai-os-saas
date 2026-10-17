@@ -42,6 +42,16 @@ import type { SidebarConversation, SidebarProject } from "@/lib/nav/recent-tools
  * choosing a conversation has to close it. It went out on 2026-10-16
  * when its only caller did, which was right then and is wrong now.
  *
+ * AND IT IS WHY `onOpen` EXISTS. From the Chats page, choosing a
+ * conversation is a NAVIGATION to another route and the chat screen
+ * mounts around it. From the column, the chat screen is already the
+ * screen: a push to /dashboard/chat?c=… changes a prop and remounts
+ * nothing, so the second conversation somebody opened would have left
+ * the address saying one thread and the page showing another, and
+ * re-opening the one you had just left would have done nothing at all.
+ * When a caller passes `onOpen` the row hands it the id and lets the
+ * caller decide; when none does, the push is unchanged.
+ *
  * WHY EVERY ACTION GOES TO A ROUTE AND NOT TO THE DATABASE. Renaming
  * and pinning already did (api/conversations/[id] — it caps pins per
  * plan and bounds the title, which RLS has no opinion about). Deleting
@@ -65,6 +75,7 @@ export function ConversationRows({
   selected,
   onSelectedChange,
   onNavigate,
+  onOpen,
 }: {
   conversations: readonly SidebarConversation[];
   /** The account's active projects, for «Μεταφορά σε Έργο». Read on the
@@ -78,6 +89,11 @@ export function ConversationRows({
   /** Run when a row navigates. The phone's overlay closes behind it;
    *  on a computer nothing passes this and nothing happens. */
   onNavigate?: () => void;
+  /** Open this conversation WITHOUT navigating. Passed only from the
+   *  column inside Chat, where the chat screen is already mounted —
+   *  see the header. Without it the row pushes /dashboard/chat?c=…,
+   *  which is right from every other screen. */
+  onOpen?: (id: string) => void;
 }) {
   // THE WORDING COMES FROM WHERE IT ALREADY WAS. These actions lived in
   // the drawer inside Chat, and their strings are already written in
@@ -301,6 +317,10 @@ export function ConversationRows({
             // would navigate away from the menu that press just opened.
             if (isRenaming || longPressed.current) return;
             onNavigate?.();
+            if (onOpen) {
+              onOpen(row.id);
+              return;
+            }
             router.push(`/dashboard/chat?c=${encodeURIComponent(row.id)}`);
           }}
           onTouchStart={() => startPress(row.id)}

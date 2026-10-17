@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowDown, AudioLines, Compass, Gift, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { useLocale, useTranslations } from "next-intl";
@@ -303,6 +304,10 @@ export function ChatWorkspace({
   // CSS now); this is the chat's column and it is remembered per
   // device, because how much room a thread should have is a property
   // of the screen rather than of the account.
+  // For openFromColumn below: the thread switches in place and the
+  // address is corrected after it, so a reload still opens the same
+  // conversation.
+  const router = useRouter();
   const [columnOpen, setColumnOpen] = useState(false);
   const [columnReady, setColumnReady] = useState(false);
   useEffect(() => {
@@ -453,16 +458,50 @@ export function ChatWorkspace({
   // Favourite state lives here rather than inside each star, because the
   // same conversation is drawn twice (list + header) and two independent
   // copies of the state disagree the moment one is clicked.
-  // Opening a starred conversation from /dashboard/favorites. Runs once:
-  // it has to go through selectConversation rather than just seeding
-  // activeId, because that is what loads the thread's messages.
-  const deepLinkedRef = useRef(false);
+  // THE ADDRESS, FOLLOWED EVERY TIME IT CHANGES — not once per mount.
+  //
+  // Opening a starred conversation from /dashboard/favorites, or one
+  // from the Chats page, arrives here as `?c=`. It has to go through
+  // selectConversation rather than just seeding activeId, because that
+  // is what loads the thread's messages.
+  //
+  // IT RAN ONCE UNTIL 2026-10-17, and once was right while every way
+  // in was another route: the workspace mounted on arrival and a
+  // second `?c=` could not happen without a second mount. The column
+  // inside Chat is on this screen, so it can — which is why the guard
+  // is now the LAST id honoured rather than a boolean. A boolean would
+  // have left the address saying one thread while the page showed
+  // another, from the second conversation onwards.
+  //
+  // The column does not rely on this: it calls openFromColumn below,
+  // which selects the thread itself and seeds this ref so the address
+  // change that follows is recognised as its own echo rather than a
+  // second instruction. This stays the path for every OTHER screen,
+  // and the double-invoke React performs in development is why it is a
+  // ref at all.
+  const lastDeepLink = useRef<string | null>(null);
   useEffect(() => {
-    if (deepLinkedRef.current || !initialConversationId) return;
-    deepLinkedRef.current = true;
+    if (!initialConversationId || lastDeepLink.current === initialConversationId) return;
+    lastDeepLink.current = initialConversationId;
     selectConversation(initialConversationId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialConversationId]);
+
+  /**
+   * A CONVERSATION CHOSEN IN THE COLUMN, WITHOUT LEAVING THE SCREEN.
+   *
+   * The thread is switched here and the address is corrected after, so
+   * a reload, a share or the browser's Back all still land on the
+   * conversation that is open. `replace` rather than `push`: switching
+   * threads inside one screen is not a place in the history, and a
+   * person who presses Back expects the page they came from, not the
+   * eleven conversations they skimmed.
+   */
+  function openFromColumn(id: string) {
+    lastDeepLink.current = id;
+    selectConversation(id);
+    router.replace(`/dashboard/chat?c=${encodeURIComponent(id)}`, { scroll: false });
+  }
 
   function toggleFavorite(id: string, favorited: boolean) {
     setConversations((prev) =>
@@ -834,6 +873,7 @@ export function ChatWorkspace({
             conversations={conversations}
             projects={projects}
             activeId={activeId}
+            onOpen={openFromColumn}
             onNavigate={() => {
               // Only the overlay needs closing. At md and above the
               // column is in flow and choosing a row leaves it open,

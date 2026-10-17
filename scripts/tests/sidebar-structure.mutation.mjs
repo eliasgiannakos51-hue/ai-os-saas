@@ -145,7 +145,12 @@ const MUTANTS = [
     expect: "every row is drawn, unconditionally",
   },
   {
-    gate: TOOLTIPS,
+    // AGAINST sidebar-structure's OWN CLAUSE, not the tooltips gate's.
+    // Both files grew the same zero-storage check in the same round
+    // and this mutant used to run against the other one, which left
+    // this file's copy unproven — the hole a mutation suite exists to
+    // close. sidebar-groups.mutation.mjs covers the tooltips gate's.
+    gate: STRUCTURE,
     // THE SIDEBAR KEEPS NOTHING, since 2026-10-17. Whether it is narrow
     // was the last stored thing and it went with the «Collapse sidebar»
     // button; the narrow rail is a width now. So ANY storage call in

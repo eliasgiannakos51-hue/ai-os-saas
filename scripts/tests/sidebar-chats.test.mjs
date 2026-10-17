@@ -266,6 +266,64 @@ const CARRIED = [
   ["a new conversation", () => /onClick=\{startNewChat\}[\s\S]{0,240}data-testid="chat-new-conversation"/.test(src(CHAT_WORKSPACE))],
 ];
 for (const [what, held] of CARRIED) check(`carried over: ${what}`, held());
+
+// AND THE ONE THING THE COLUMN HAD TO DO DIFFERENTLY, which is the
+// defect this section would otherwise have missed entirely.
+//
+// Every other list of conversations is on ANOTHER route, so choosing
+// one mounts the chat screen around it and `?c=` is read on the way
+// in. The column is ON that screen: a push to /dashboard/chat?c=…
+// changes a prop and remounts nothing. With the once-per-mount guard
+// the deep-link effect carried until 2026-10-17, the FIRST
+// conversation opened and every one after it left the address saying
+// one thread while the page showed another — and re-opening the one
+// you had just left did nothing at all, because the address was
+// already its own.
+//
+// THREE HALVES, because any one of them alone passes on the broken
+// version: the row hands the id to its caller instead of navigating,
+// the caller selects the thread and corrects the address, and the
+// effect follows the address every time rather than once.
+{
+  const rowsSrc2 = src(ROWS);
+  const workspace = src(CHAT_WORKSPACE);
+  const column = src("src/components/chat/conversation-column.tsx");
+  check(
+    "a row hands its id to the caller when the caller wants it",
+    /if \(onOpen\) \{\s*onOpen\(row\.id\);\s*return;\s*\}/.test(rowsSrc2) &&
+      /router\.push\(`\/dashboard\/chat\?c=\$\{encodeURIComponent\(row\.id\)\}`\)/.test(rowsSrc2),
+    "and still navigates for the screens that are not the chat"
+  );
+  check("...and the column is the caller that wants it", /onOpen=\{onOpen\}/.test(column) && /onOpen=\{openFromColumn\}/.test(workspace));
+  check(
+    "...and opening from the column switches the thread, then corrects the address",
+    /function openFromColumn\(id: string\) \{[\s\S]{0,200}selectConversation\(id\);[\s\S]{0,200}router\.replace\(`\/dashboard\/chat\?c=\$\{encodeURIComponent\(id\)\}`/.test(workspace),
+    "a reload, a share and Back all have to land on the conversation that is open"
+  );
+  check(
+    "...and the deep link follows the address every time it changes, not once per mount",
+    /lastDeepLink\.current === initialConversationId\) return;/.test(workspace) && !/deepLinkedRef/.test(workspace),
+    "a boolean here is the defect: it opens the first conversation and silently ignores the second"
+  );
+}
+
+// AND THE LIST THE COLUMN DRAWS IS THIS ACCOUNT'S, said by the query
+// and not only by the policy. app/dashboard/chats/page.tsx has always
+// named the owner on the same table; the chat page left it to RLS
+// alone, which is one layer where the other screen has two. Found on
+// 2026-10-17 by sidebar-chats.prodtest.mjs §1b, which seeds a second
+// account's conversation and requires the column not to carry it.
+{
+  const chatPage = src("src/app/dashboard/chat/page.tsx");
+  check(
+    "the chat page asks for this account's conversations by name",
+    /from\("chat_conversations"\)[\s\S]{0,400}\.eq\("user_id", user\.id\)/.test(chatPage)
+  );
+  check(
+    "...and for its projects the same way",
+    /from\("projects"\)[\s\S]{0,400}\.eq\("user_id", user\.id\)/.test(chatPage)
+  );
+}
 // THE FILE WAS KEPT ON PURPOSE WHILE THE SWITCH EXISTED, so «Πώς
 // γυρίζει πίσω» could be one press on /dashboard/system-health. With
 // the switch gone, going back is a Revert, and the file's own comment

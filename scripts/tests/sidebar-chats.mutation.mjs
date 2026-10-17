@@ -32,18 +32,31 @@ const WORKSPACE = "src/components/chats/chats-workspace.tsx";
 const MUTANTS = [
     // ---- the rail --------------------------------------------------
     {
-      name: "the second row goes back to Chat and the old chat page",
+      name: "the two rows the owner removed come back",
       file: RAIL,
-      from: '  { key: "chats", href: CHATS_HREF },',
-      to: '  { key: "chat", href: "/dashboard/chat" },',
-      expect: "the rail is Logo, New, Chats, Coding, All tools",
+      from: '  { key: "ionexaChat", href: "/dashboard/chat", match: [CHATS_HREF] },',
+      to: '  { key: "new", href: "/dashboard/overview" },\n  { key: "chats", href: CHATS_HREF },',
+      expect: "the rail is Logo, Ionexa Chat, Coding, All tools",
     },
     {
-      name: "the row keeps its name but opens a new conversation again",
+      name: "the row keeps its key but opens the list instead of the chat",
       file: RAIL,
-      from: 'export const CHATS_HREF = "/dashboard/chats";',
-      to: 'export const CHATS_HREF = "/dashboard/chat";',
-      expect: "the second row is Chats, and it opens the page with every conversation",
+      from: '  { key: "ionexaChat", href: "/dashboard/chat", match: [CHATS_HREF] },',
+      to: '  { key: "ionexaChat", href: CHATS_HREF },',
+      expect: "the first row is Ionexa Chat, and it opens the Chat",
+    },
+    {
+      // WITHOUT THE match LIST, THE LIST PAGE LIGHTS NOTHING. under()
+      // compares path segments, and /dashboard/chats is not under
+      // /dashboard/chat — so «Όλες οι συνομιλίες» would land the person
+      // on a page whose own rail says they are nowhere.
+      // (No backtick in this comment on purpose: the strict reader this
+      // file's header describes treats one as opening a string.)
+      name: "the list page stops belonging to the row that leads to it",
+      file: RAIL,
+      from: '  { key: "ionexaChat", href: "/dashboard/chat", match: [CHATS_HREF] },',
+      to: '  { key: "ionexaChat", href: "/dashboard/chat" },',
+      expect: "the page with every conversation belongs to that same row",
     },
     {
       name: "the switch comes back as a second rail builder",
@@ -55,8 +68,8 @@ const MUTANTS = [
     {
       name: "activeRail ignores the rail it was given and always uses the old one",
       file: RAIL,
-      from: "  for (const row of rows) if (under(pathname, row.href)) return { key: row.key };",
-      to: "  for (const row of RAIL_ROWS) if (under(pathname, row.href)) return { key: row.key };",
+      from: "  for (const row of rows) {\n    if (under(pathname, row.href)) return { key: row.key };",
+      to: "  for (const row of RAIL_ROWS) {\n    if (under(pathname, row.href)) return { key: row.key };",
       expect: "follows the rail it is GIVEN, not the one it knows",
     },
 
@@ -138,8 +151,8 @@ const MUTANTS = [
     {
       name: "the sidebar gets its capped list back, and the link out of it",
       file: SIDEBAR,
-      from: "const COLLAPSED_KEY =",
-      to: "const RECENT_CONVERSATIONS = 15;\nconst COLLAPSED_KEY =",
+      from: "const RAIL_ICONS: Record<DrawnRailKey, LucideIcon> =",
+      to: "const RECENT_CONVERSATIONS = 15;\nconst RAIL_ICONS: Record<DrawnRailKey, LucideIcon> =",
       expect: "and the sidebar has no list left to cap",
     },
     {
@@ -175,8 +188,8 @@ const MUTANTS = [
     {
       name: "the heading comes back to the message files, ready to be drawn again",
       file: EN,
-      from: '      "chats": "Chats"',
-      to: '      "recentChats": "Recent chats",\n      "chats": "Chats"',
+      from: '      "ionexaChat": "Ionexa Chat",',
+      to: '      "recentChats": "Recent chats",\n      "ionexaChat": "Ionexa Chat",',
       expect: "sidebar.rail.recentChats is gone from all ten",
     },
     {

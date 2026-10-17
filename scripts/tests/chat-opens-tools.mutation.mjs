@@ -134,49 +134,45 @@ const MUTANTS = [
     to: '"make": "",',
     expect: "el.json: the pane's words",
   },
-  // THE «Νέα συνομιλία» MUTANT WAS HERE, AND ITS TARGET IS GONE.
+  // THE «Νέα συνομιλία» MUTANT, GONE FOR ONE DAY AND BACK.
   //
-  // It re-introduced package 7's defect: startNewChat() cleared the site
+  // It re-introduces package 7's defect: startNewChat() clears the site
   // pane by hand, because a Site opened in a conversation that never
-  // reached /api/chat has no id, so setActiveId(null) changed nothing
-  // the pane was watching and the next sentence went to the site as a
-  // CHARGED change. Deleting the two setters brought that back and this
-  // suite caught it.
+  // reached /api/chat has no id, so setActiveId(null) changes nothing
+  // the pane is watching and the next sentence goes to the site as a
+  // CHARGED change. Deleting the two setters brings that back.
   //
-  // On 2026-10-16 the owner had the conversation list taken out of the
-  // sidebar, and the drawer inside Chat — which held the only «Νέα
-  // συνομιλία» button — went with it. startNewChat() had no caller left
-  // and was removed. Starting a new conversation is a NAVIGATION now,
-  // so the workspace remounts and no state can survive it: there is no
-  // line left to break, which is why this mutant is deleted rather than
-  // re-pointed. chat-opens-tools.prodtest.mjs still proves the money
-  // half — it opens a Site, navigates the way the rail's «New» does,
-  // and requires the next sentence to start a conversation rather than
-  // edit the site.
-  // AND THE THREE THAT REPLACED IT. The money half is now carried by a
-  // navigation rather than by two setters, so what has to be broken is
-  // the navigation: a conversation started in place, a «New» that does
-  // not leave the page, or a pane kept where an unmount cannot reach.
+  // On 2026-10-16 the conversation list came out of the sidebar, the
+  // drawer that held the only «Νέα συνομιλία» button went with it, and
+  // startNewChat() was removed for want of a caller: the only way to a
+  // new conversation was a navigation, which unmounts the workspace, so
+  // there was no line left to break and the mutant pointed at an
+  // absence instead. On 2026-10-17 the owner asked for the button back,
+  // in the Chat's own title row. No navigation, no unmount, the defect
+  // reachable again — so the original mutant is the right one again.
   {
-    name: "a new conversation is started in place again, without closing the pane",
+    name: "the two setters that close the Site pane are deleted again",
     file: CHAT,
-    from: "  // THE «NEW CHAT» BUTTON THAT USED TO LIVE HERE IS GONE WITH ITS",
-    to: "  function startNewChat() { setActiveId(null); setMessages([]); }\n  // THE «NEW CHAT» BUTTON THAT USED TO LIVE HERE IS GONE WITH ITS",
-    expect: "nothing starts a conversation in place any more",
+    from: "    setSiteBrief(null);\n    setOpenWorkId(null);\n    setActiveId(null);",
+    to: "    setActiveId(null);",
+    expect: "closes the Site pane by hand, before it clears the conversation",
   },
   {
-    name: "«New» stops being a link and the workspace never unmounts",
-    file: SIDEBAR,
-    from: "      <Link\n        href={href}",
-    to: "      <button\n        data-href={href}",
-    expect: "«New» is a link to another page, so the workspace unmounts",
+    // A BUTTON WIRED TO NOTHING RENDERS EXACTLY AS WELL AS ONE THAT
+    // WORKS, which is why the check reads the handler and the testid
+    // together rather than either alone.
+    name: "«Νέα συνομιλία» is drawn but does nothing",
+    file: CHAT,
+    from: "            onClick={startNewChat}",
+    to: "            onClick={() => {}}",
+    expect: "that function is what the title row's button runs",
   },
   {
-    name: "the open Site is kept where a remount cannot clear it",
+    name: "the open Site is kept where a new conversation cannot clear it",
     file: CHAT,
     from: "  const [siteBrief, setSiteBrief] = useState<string | null>(null);",
     to: "  const siteBriefRef = useRef<string | null>(null);\n  const [siteBrief, setSiteBrief] = useState<string | null>(siteBriefRef.current);",
-    expect: "the pane's state cannot survive that unmount",
+    expect: "the pane's state is the component's own, so nothing outlives it",
   },
 
   // ---- 2026-10-08, the edges (scripts/tests/chat-opens-tools-edges.prodtest.mjs)

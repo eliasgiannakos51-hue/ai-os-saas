@@ -31,6 +31,7 @@
 //
 // Run: node scripts/tests/sidebar-hints-coverage.test.mjs
 import { readFileSync, existsSync } from "node:fs";
+import { stripComments } from "../lib/test-export-drift.mjs";
 
 let pass = 0,
   fail = 0;
@@ -184,25 +185,68 @@ for (const loc of LOCALES) {
   check(`${loc}: …and none for a row that is not built yet`, premature, []);
 }
 
-console.log("\n== 3. the chat focus-mode toggle, and the six words it left behind ==");
-// THE TOGGLE IS GONE, AND THIS SECTION IS THE RECORD OF WHY IT WAS HERE.
+console.log("\n== 3. the control inside Chat that nobody could find ==");
+// THIS SECTION IS THE RECORD OF THIS PROJECT'S CLEAREST SCAR, and the
+// control it is about has now existed in three forms.
 //
-// It shipped as a bare 36x36 icon whose only affordance was a native
-// `title`: it rendered correctly and no user found it — "renders" is
-// not the same claim as "is findable" — so this section held it to a
-// visible label and a real Tooltip. What it opened was the drawer of
-// conversations inside Chat, and on 2026-10-16 the owner had the
-// conversations taken out of the sidebar; the drawer went with them
-// and the toggle had nothing left to show.
+// 2026-10-05: a bare 36x36 icon that opened a drawer of conversations,
+// whose only affordance was the browser's own `title`. It rendered
+// correctly, every check passed, and the owner never found it —
+// "renders" is not the same claim as "is findable". The fix was a real
+// Tooltip (components/ui/tooltip.tsx says at length why a native
+// `title` is not one: 1-2s of delay, OS styling, and nothing at all on
+// touch or on keyboard focus) and a 44px target.
 //
-// SO THE CHECK FLIPS, rather than being deleted. A control nobody can
-// find is this project's own scar, and the six strings it used are the
-// loose end that would have outlived it in ten languages — one of them
-// («Focus mode») reading as a feature the product no longer has.
+// 2026-10-16: the conversations came out of the sidebar, the drawer
+// went with them, and the toggle had nothing left to show. The check
+// flipped to the absence, holding six strings out of ten languages.
+//
+// 2026-10-17: the owner asked for the list back, inside Chat —
+// «Ένα κουμπί [◧] που ανοίγει και κλείνει τη λίστα συνομιλιών.» So the
+// control is back, and the question this section asks is the ORIGINAL
+// one, which is the only version of it that was ever about the defect:
+// can it be found? Three properties, all three of which the 2026-10-05
+// version failed: a real Tooltip rather than a `title`, an accessible
+// name, and a target a thumb can hit.
+//
+// Three of the six strings come back with it. Three do not, and stay
+// held out of all ten languages: the two «…Hint» keys the old
+// bare-icon version needed, and «Focus mode», which would read as a
+// feature the product does not have.
 const chat = readFileSync("src/components/chat/chat-workspace.tsx", "utf8");
-check("there is no conversation drawer left to toggle", /aria-expanded=\{sidebarOpen\}/.test(chat), false);
-check("...nor any trace of its open/closed state", /sidebarOpen|toggleSidebar|CHAT_SIDEBAR_STORAGE_KEY/.test(chat), false);
-for (const key of ["hideConversationsHint", "showConversationsHint", "focusMode", "hideConversations", "showConversations", "newChat"]) {
+const chatCode = stripComments(chat);
+checkTrue(
+  "the [◧] toggle carries a real Tooltip, not a `title`",
+  /<Tooltip content=\{t\(columnOpen \? "hideConversations" : "showConversations"\)\}/.test(chatCode) &&
+    !/title=\{t\("(hide|show)Conversations"\)\}/.test(chatCode),
+  "a native title waits seconds, is styled by the OS, and never appears on touch or on focus",
+);
+checkTrue(
+  "...and an accessible name that says which way it goes",
+  /aria-label=\{t\(columnOpen \? "hideConversations" : "showConversations"\)\}/.test(chatCode) &&
+    /aria-expanded=\{columnOpen\}/.test(chatCode),
+  "aria-expanded is the state; the label is what it will do next",
+);
+checkTrue(
+  "...and a 44px target, like every other control on a phone",
+  /data-testid="chat-column-toggle"/.test(chatCode) &&
+    /h-11 w-11 shrink-0 items-center justify-center[\s\S]{0,120}data-testid="chat-column-toggle"|data-testid="chat-column-toggle"[\s\S]{0,200}h-11 w-11/.test(chatCode),
+  "h-11 is 44px",
+);
+// «Νέα συνομιλία» beside it, from the same owner sentence. Its words
+// are hidden below 640px — the row has the title and the star in it
+// too — so the accessible name is what makes it the same button at
+// every width.
+checkTrue(
+  "«Νέα συνομιλία» has a name at every width, not only where its words fit",
+  /aria-label=\{t\("newChat"\)\}/.test(chatCode) && /data-testid="chat-new-conversation"/.test(chatCode),
+  "the words are sm:inline; the label is not",
+);
+for (const key of ["hideConversations", "showConversations", "newChat", "searchConversations", "allConversations"]) {
+  const missing = LOCALES.filter((l) => typeof messages[l]?.dashboard?.chat?.[key] !== "string");
+  check(`dashboard.chat.${key} is written in all ten`, missing, []);
+}
+for (const key of ["hideConversationsHint", "showConversationsHint", "focusMode"]) {
   const left = LOCALES.filter((l) => messages[l]?.dashboard?.chat?.[key] !== undefined);
   check(`dashboard.chat.${key} is gone from every locale`, left, []);
 }

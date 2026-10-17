@@ -164,11 +164,19 @@ const MUTANTS = [
     gate: TOOLTIPS,
     // RE-ANCHORED 2026-10-04: the recent list is the account's now, and
     // the regression is the browser keeping it again.
+    //
+    // AND AGAIN 2026-10-17, because the line this hung on is gone. It
+    // used to append a second storage call beside the sidebar's one
+    // legitimate one, the «Collapse sidebar» key; the owner removed
+    // that button and the narrow rail is CSS now, so the sidebar makes
+    // no storage call at all and there was nothing to append to. It
+    // hangs on the pin/remove handler instead — the only place in the
+    // file where a browser-kept list would plausibly be written.
     name: "the sidebar starts keeping the recent list in the browser again",
     file: SIDEBAR,
-    from: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");',
-    to: '        window.localStorage.setItem(COLLAPSED_KEY, c ? "0" : "1");\n        window.localStorage.setItem("ionexa.recentTools", "[]");',
-    expect: "the only thing remembered across a reload",
+    from: "  const act = async (action: RecentAction, href: string) => {\n    const before = list;",
+    to: '  const act = async (action: RecentAction, href: string) => {\n    const before = list;\n    window.localStorage.setItem("ionexa.recentTools", "[]");',
+    expect: "nothing at all is remembered across a reload",
   },
   {
     dimension: "R. the rail",

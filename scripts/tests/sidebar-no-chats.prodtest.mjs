@@ -116,14 +116,20 @@ const GONE_HEADINGS = [
 ];
 
 // THREE FORMS, BECAUSE THE OWNER NAMED THREE: «υπολογιστής, στενή
-// μορφή με εικονίδια, κινητό». The narrow one is not a width — it is a
-// per-device choice kept in localStorage (`ionexa.sidebarCollapsed`,
-// components/dashboard/sidebar.tsx), so it is seeded rather than
-// resized into, and the pass asserts it really took: at 1440 the
-// collapsed rail is 64px against the wide rail's 240.
+// μορφή με εικονίδια, κινητό».
+//
+// THE NARROW ONE IS A WIDTH NOW. It was a per-device choice kept in
+// localStorage until 2026-10-17, seeded here rather than resized into;
+// the owner had the «Collapse sidebar» button removed and the narrow
+// form made automatic — «γίνεται αυτόματα σε μικρές οθόνες» — so it is
+// reached by opening a 900px window, between the md breakpoint where
+// the rail becomes icons-only and the lg one where it widens again.
+// The pass still asserts it really took: 64px against the wide rail's
+// 240, which is what stops a seed-that-did-nothing from quietly
+// re-running the wide pass twice.
 const DEVICES = [
   ["computer", { width: 1440, height: 900 }, false, false],
-  ["narrow  ", { width: 1440, height: 900 }, false, true],
+  ["narrow  ", { width: 900, height: 900 }, false, true],
   ["phone   ", { width: 390, height: 844 }, true, false],
 ];
 
@@ -131,15 +137,6 @@ try {
   for (const [label, viewport, touch, collapsed] of DEVICES) {
     console.log(`\n== ${label}: ten pages, ten conversations in the database ==`);
     const context = await harness.signedIn(browser, viewport);
-    if (collapsed) {
-      await context.addInitScript(() => {
-        try {
-          window.localStorage.setItem("ionexa.sidebarCollapsed", "1");
-        } catch {
-          /* storage blocked — the check below will say the rail is wide */
-        }
-      });
-    }
     const page = await context.newPage();
 
     for (const path of PAGES) {
@@ -180,9 +177,10 @@ try {
       check(`${label} ${path}: the sidebar is on the page at all`, seen !== null,
         "no [data-testid=\"sidebar\"] — this test would otherwise pass by finding nothing");
       if (!seen) continue;
-      // THE NARROW FORM IS REALLY NARROW. Without this, a seed that did
-      // not take would quietly re-run the wide pass and report the
-      // icons-only sidebar as clean without ever having drawn it.
+      // THE NARROW FORM IS REALLY NARROW. Without this, a viewport that
+      // landed on the wrong side of a breakpoint would quietly re-run
+      // the wide pass and report the icons-only sidebar as clean
+      // without ever having drawn it.
       if (collapsed) {
         check(`${label} ${path}: ...in its narrow, icons-only form (${seen.width}px)`,
           seen.width > 0 && seen.width < 120, `${seen.width}px — the wide rail is 240`);
@@ -205,9 +203,10 @@ try {
         said.length === 0, said.join(" | "));
     }
 
-    // THE SECOND THING THE OWNER ASKED FOR: the row says «Chats» and
-    // goes to the page with every conversation — for everybody, with no
-    // switch to turn it on.
+    // THE SECOND THING THE OWNER ASKED FOR (2026-10-17): the rail has
+    // ONE row for the chat, it says «Ionexa Chat», it opens the chat —
+    // and «New», «Chats» and «Collapse sidebar» are not on the screen
+    // in any form, at any width, for anybody.
     await page.goto(`${harness.origin}/dashboard/chat`, { waitUntil: "networkidle" });
     if (touch) {
       const menu = page.locator("header button[aria-label]").first();
@@ -223,24 +222,55 @@ try {
     const rail = await page.evaluate(() => {
       const aside = document.querySelector('[data-testid="sidebar"]');
       if (!aside) return null;
-      return [...aside.querySelectorAll("a")].map((a) => ({
-        text: (a.textContent ?? "").trim() || a.getAttribute("aria-label") || "",
-        href: a.getAttribute("href") ?? "",
-      }));
+      return {
+        links: [...aside.querySelectorAll("a")].map((a) => ({
+          text: (a.textContent ?? "").trim() || a.getAttribute("aria-label") || "",
+          href: a.getAttribute("href") ?? "",
+        })),
+        // EVERY NAME IN THE ASIDE, not only the links'. «Collapse
+        // sidebar» was a <button> with an aria-label and no text: a
+        // check that read <a> elements would have reported it gone
+        // while it sat there.
+        spoken: [...aside.querySelectorAll("[aria-label]")].map((e) => (e.getAttribute("aria-label") ?? "").trim()),
+        text: aside.textContent ?? "",
+      };
     });
-    check(`${label}: the rail was read`, Array.isArray(rail) && rail.length > 0, JSON.stringify(rail));
-    // THE NAME IS READ FROM aria-label WHEN THERE IS NO TEXT, which is
-    // exactly the narrow form: icons only, the name in the tooltip AND
-    // as the link's accessible name (components/dashboard/sidebar.tsx).
-    // So the same three checks hold in all three forms.
-    const names = (rail ?? []).map((r) => r.text);
-    check(`${label}: the sidebar says «${en.sidebar.rail.chats}»`, names.includes(en.sidebar.rail.chats), names.join(" | "));
-    // EXACT, so «Chats» cannot satisfy a check for «Chat».
-    check(`${label}: ...and never «${en.sidebar.rail.chat}»`,
-      !names.some((n) => n === en.sidebar.rail.chat), names.join(" | "));
-    const chats = (rail ?? []).find((r) => r.text === en.sidebar.rail.chats);
-    check(`${label}: ...and it opens the page with every conversation`,
-      chats?.href === "/dashboard/chats", JSON.stringify(chats));
+    check(`${label}: the rail was read`, rail !== null && rail.links.length > 0, JSON.stringify(rail));
+    // THE NAME IS READ FROM aria-label WHEN THERE IS NO TEXT. In the
+    // narrow form the label is still in the DOM, hidden with sr-only
+    // (md:sr-only lg:not-sr-only), so textContent finds it either way
+    // — the fallback is for a row that ever goes icon-only for real.
+    const names = (rail?.links ?? []).map((r) => r.text);
+    check(`${label}: the sidebar says «${en.sidebar.rail.ionexaChat}»`,
+      names.includes(en.sidebar.rail.ionexaChat), names.join(" | "));
+    const chat = (rail?.links ?? []).find((r) => r.text === en.sidebar.rail.ionexaChat);
+    check(`${label}: ...and it opens the chat`, chat?.href === "/dashboard/chat", JSON.stringify(chat));
+    check(`${label}: ...and it is the only row that leads there`,
+      (rail?.links ?? []).filter((r) => r.href === "/dashboard/chat").length === 1,
+      JSON.stringify((rail?.links ?? []).filter((r) => r.href === "/dashboard/chat")));
+    // AND THE THREE THE OWNER HAD REMOVED, WRITTEN OUT. Their keys —
+    // sidebar.rail.new, .chats, .collapse, .expand — were deleted from
+    // all ten message files in the same round, so there is nothing to
+    // read them back from; the English words are what the sidebar
+    // printed and what it may not print again. English only, because
+    // the browser runs in one language per pass and this one is `en`
+    // (userMetadata above); the ten-language half is GONE_HEADINGS.
+    //
+    // A ROW, A BUTTON OR A TOOLTIP ALIKE. Checked against every
+    // accessible name in the aside and against its whole text, not
+    // against the links: two of the four never were links.
+    const REMOVED = ["New", "Chats", "Collapse sidebar", "Expand sidebar"];
+    // ON A WORD BOUNDARY in the free text, because «New» is four
+    // letters that sit inside other words and the aside also carries
+    // the account's own name and plan. An exact match where there is a
+    // name to match exactly, a whole word where there is only prose.
+    const still = REMOVED.filter(
+      (w) =>
+        names.includes(w) ||
+        (rail?.spoken ?? []).includes(w) ||
+        new RegExp(`(^|[^\\p{L}])${w}([^\\p{L}]|$)`, "u").test(rail?.text ?? "")
+    );
+    check(`${label}: ...and «New», «Chats» and «Collapse sidebar» are nowhere in it`, still.length === 0, still.join(" | "));
 
     await context.close();
   }

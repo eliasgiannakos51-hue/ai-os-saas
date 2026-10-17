@@ -87,7 +87,7 @@ const W = {
   routeAsk: el.dashboard.goal.routeAsk,
   change: el.dashboard.goal.routeChange,
   websiteBuilder: el.sidebar.items.websiteBuilder,
-  railNew: el.sidebar.rail.new,
+  railChat: el.sidebar.rail.ionexaChat,
   railAll: el.sidebar.rail.allTools,
   railRecent: el.sidebar.rail.recentTools,
   // The square's one-word name since MASTER 14.1 (2026-10-07).
@@ -217,7 +217,9 @@ try {
     // textContent, not innerText: the headings are CSS-uppercased, and
     // Greek uppercase drops the accent — "Πρόσφατα" paints as "ΠΡΟΣΦΑΤΑ".
     const railText = await aside.evaluate((n) => n.textContent ?? "");
-    check("the rail offers New", railText.includes(W.railNew), railText.slice(0, 200));
+    // «Ionexa Chat», since 2026-10-17: the row that was «New» went
+    // with «Chats» and the two became one (lib/nav/rail.ts).
+    check("the rail offers Ionexa Chat", railText.includes(W.railChat), railText.slice(0, 200));
     check("...and All tools", railText.includes(W.railAll));
     // The design's rail has no group headings — only "Recent tools" and
     // "Recent conversations" when there is something under them — so the

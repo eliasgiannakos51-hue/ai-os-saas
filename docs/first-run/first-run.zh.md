@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4294, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **615 strings**. The whole product is 4295, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (377)
+## Tier 2 — The labels — skim these (373)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2198,47 +2198,23 @@ DevOps
 
 全部工具
 
-**`sidebar.rail.chat`**
-
-> EN — Chat
-
-对话
-
-**`sidebar.rail.chats`**
-
-> EN — Chats
-
-对话
-
 **`sidebar.rail.coding`**
 
 > EN — Coding
 
 编程
 
-**`sidebar.rail.collapse`**
+**`sidebar.rail.ionexaChat`**
 
-> EN — Collapse sidebar
+> EN — Ionexa Chat
 
-收起侧边栏
-
-**`sidebar.rail.expand`**
-
-> EN — Expand sidebar
-
-展开侧边栏
+Ionexa 聊天
 
 **`sidebar.rail.label`**
 
 > EN — Main
 
 主菜单
-
-**`sidebar.rail.new`**
-
-> EN — New
-
-新建
 
 **`sidebar.rail.pin`**
 

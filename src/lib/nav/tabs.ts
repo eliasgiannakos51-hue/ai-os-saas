@@ -3,9 +3,10 @@
  * ΣΥΣΤΗΜΑ DESIGN, «ΚΙΝΗΤΟ»), and which one a page belongs to.
  *
  * Built on lib/nav/rail.ts's activeRail, so the phone and the desktop
- * sidebar can never disagree about where a page lives: New is Home;
- * Chat is Chat; Coding, All tools and every tool — a recent one
- * included — are Tools; Settings is You.
+ * sidebar can never disagree about where a page lives: Ionexa Chat and
+ * the Chats page are Chat; Coding, All tools and every tool — a recent
+ * one included — are Tools; Settings is You; Home is this bar's own
+ * tab, since the rail stopped having a «New» row on 2026-10-17.
  */
 import { RAIL_ROWS, activeRail } from "@/lib/nav/rail";
 
@@ -25,17 +26,22 @@ export type TabKey = (typeof TABS)[number]["key"];
  */
 export function activeTab(pathname: string | null): TabKey | null {
   if (!pathname) return null;
-  // THE CHAT ROUTE IS ADDED BACK FOR THIS ONE QUESTION, because the
-  // bottom bar still has a Chat tab and the sidebar no longer has a
-  // Chat row. RAIL_ROWS's second entry is «Chats» → /dashboard/chats
-  // since 2026-10-16, so asking activeRail alone would hand the chat
-  // page — and anything under it — to the Tools tab: every chat screen
-  // lighting the wrong tab on every phone. Both rows are in the list
-  // below, and both lead to the same tab.
-  const rail = activeRail(pathname, [], [], [...RAIL_ROWS, { key: "chat" as const, href: "/dashboard/chat" }]);
+  // HOME IS ADDED FOR THIS ONE QUESTION. The bottom bar has a Home tab
+  // and the rail no longer has a «New» row — it went on 2026-10-17 with
+  // «Chats», both replaced by one «Ionexa Chat». Without this entry
+  // /dashboard/overview would match no row and fall to Tools: the phone
+  // would light the wrong tab on the first screen anybody sees.
+  //
+  // «Ionexa Chat» already carries /dashboard/chats in its own `match`
+  // (lib/nav/rail.ts), so the Chats page lights the Chat tab here for
+  // free rather than through a second rule that could drift.
+  const rail = activeRail(pathname, [], [], [
+    ...RAIL_ROWS,
+    { key: "home" as const, href: "/dashboard/overview" },
+  ]);
   if (rail && "key" in rail) {
-    if (rail.key === "new") return "home";
-    if (rail.key === "chat" || rail.key === "chats") return "chat";
+    if (rail.key === "home") return "home";
+    if (rail.key === "ionexaChat" || rail.key === "chat") return "chat";
     if (rail.key === "settings") return "you";
     return "tools";
   }

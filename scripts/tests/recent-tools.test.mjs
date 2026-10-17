@@ -125,18 +125,23 @@ check("no metadata is no preferences", JSON.stringify(R.readRecentPrefs(null)) =
 
 console.log("\n== 4. the rows, and which is active ==");
 check(
-  "the fixed rows are New, Chats, Coding, All tools, in that order",
-  RAIL.RAIL_ROWS.map((r) => r.key).join() === "new,chats,coding,allTools"
+  "the fixed rows are Ionexa Chat, Coding, All tools, in that order",
+  RAIL.RAIL_ROWS.map((r) => r.key).join() === "ionexaChat,coding,allTools"
 );
 const act = (p, recent = []) => JSON.stringify(RAIL.activeRail(p, recent, TOOLS));
-check("Home is New", act("/dashboard/overview") === '{"key":"new"}');
-// NOT A RAIL ROW ANY MORE. The second row is «Chats» → the page with
-// every conversation; /dashboard/chat has no row of its own, so the
-// rail lights nothing for it — which is right, and is why
-// lib/nav/tabs.ts adds the route back for the phone's bottom bar,
-// where a Chat tab still exists (mobile-tabs.test.mjs).
-check("the list of every conversation is Chats", act("/dashboard/chats") === '{"key":"chats"}');
-check("a conversation itself lights no rail row", act("/dashboard/chat/abc") === '{"key":"allTools"}');
+// HOME LIGHTS NOTHING IN THE RAIL, and that is not an omission. The
+// rail had a «New» row pointing at Home until 2026-10-17; the owner
+// had it removed, and the logo above the rows is what opens Home now.
+// The phone's bottom bar still has a Home tab, so lib/nav/tabs.ts adds
+// that route back for its own question (mobile-tabs.test.mjs).
+check("Home lights no rail row", act("/dashboard/overview") === "null");
+check("Chat is Ionexa Chat", act("/dashboard/chat") === '{"key":"ionexaChat"}');
+// AND SO IS THE PAGE WITH EVERY CONVERSATION. It has no row of its
+// own; it belongs to the row that leads to it, through that row's
+// `match` (lib/nav/rail.ts) — so «Όλες οι συνομιλίες» does not land
+// the person on a page the rail says they are not on.
+check("the list of every conversation is Ionexa Chat too", act("/dashboard/chats") === '{"key":"ionexaChat"}');
+check("a conversation itself is Ionexa Chat", act("/dashboard/chat/abc") === '{"key":"ionexaChat"}');
 check("a recent tool is its own row", act("/dashboard/posts", ["/dashboard/posts"]) === '{"recent":"/dashboard/posts"}');
 check("any other tool is All tools, where it lives", act("/dashboard/posts") === '{"key":"allTools"}');
 check("the account's pages are Settings", act("/dashboard/settings/billing") === '{"key":"settings"}');
@@ -144,12 +149,12 @@ check("a page that is none of them lights nothing", act("/somewhere") === "null"
 
 console.log("\n== 5. the sidebar draws exactly that, and nothing else ==");
 const S = stripComments(readFileSync("src/components/dashboard/sidebar.tsx", "utf8"));
-// RE-ANCHORED 2026-10-15. The rows are still one constant — railRows()
-// is RAIL_ROWS.map with the third entry swapped when `chats-page` is on
-// (lib/nav/rail.ts) — but the sidebar now draws `rows`, the array that
-// function returned, rather than RAIL_ROWS itself. The claim is
-// unchanged and sidebar-chats.test.mjs holds the half this cannot see:
-// that the two rails differ in exactly one row.
+// RE-ANCHORED 2026-10-15, and again 2026-10-17. There was briefly a
+// second rail behind the `chats-page` switch; that is gone and so is
+// the switch, so `rows` is RAIL_ROWS and nothing else. The sidebar
+// draws that array and derives every label from each row's own key,
+// which is what stops a row from being added to the rail and drawn
+// with a hand-written name that no locale file has.
 check(
   "the fixed rows come from the one constant",
   /\{rows\.map\(\(r\) => row\(r\.href, t\(`rail\.\$\{r\.key\}`\)/.test(S) && /const rows = RAIL_ROWS;/.test(S)
@@ -158,7 +163,19 @@ check("no group of tools is drawn as rows", !/MAIN_SIDEBAR_GROUPS\)\.map|renderG
 check("Recent tools, and its heading, only when there is something in it", /\{list\.length > 0 && \(/.test(S));
 check("the list is the server's, not the browser's", !/localStorage\.(get|set)Item\(\s*["'`]ionexa\.recentTools/.test(S) && /recent = \[\]/.test(S));
 check("Settings sits at the bottom", S.lastIndexOf("SETTINGS_HREF,") > S.indexOf('data-testid="recent-tools"'));
-check("the narrow sidebar keeps the name for a tooltip and a screen reader", /<Tooltip content=\{label\} side="right">/.test(S) && /aria-label=\{collapsed \? label : undefined\}/.test(S) && /md:sr-only/.test(S));
+// THE NARROW SIDEBAR IS A WIDTH NOW, NOT A STORED CHOICE (owner,
+// 2026-10-17: «Ό,τι έκανε το "Collapse sidebar" γίνεται αυτόματα σε
+// μικρές οθόνες»). So the name is not conditionally an aria-label any
+// more — the label text is always in the DOM, hidden with `sr-only`
+// between md and lg — and the Tooltip is unconditional rather than
+// drawn only while a `collapsed` flag was true. Both halves matter:
+// `md:sr-only lg:not-sr-only` is what makes the icon rail still have
+// names, and a Tooltip behind a condition is a hint that disappears at
+// exactly the width that needs it.
+check("the narrow sidebar keeps the name for a tooltip and a screen reader",
+  /<Tooltip content=\{label\} side="right">/.test(S) &&
+  /md:sr-only lg:not-sr-only/.test(S) &&
+  !/collapsed/i.test(S));
 check("no name is cut with an ellipsis", !/\btruncate\b/.test(S));
 check("pin and remove are buttons with names", /aria-label=\{t\(r\.pinned \? "rail\.unpin" : "rail\.pin", \{ tool: label \}\)\}/.test(S) && /aria-label=\{t\("rail\.remove", \{ tool: label \}\)\}/.test(S));
 check("the active row is the active surface", /data-active=\{isActive\}/.test(S) && /className=\{`nav-item /.test(S));
@@ -210,10 +227,21 @@ check("only a tool this person can see may be stored", /if \(!tools\.includes\(h
 
 const locales = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 const en = JSON.parse(readFileSync("messages/en.json", "utf8")).sidebar.rail;
-check("the English rows are the design's words", en.new === "New" && en.chat === "Chat" && en.coding === "Coding" && en.allTools === "All tools" && en.recentTools === "Recent tools" && en.settings === "Settings");
+check("the English rows are the design's words", en.ionexaChat === "Ionexa Chat" && en.coding === "Coding" && en.allTools === "All tools" && en.recentTools === "Recent tools" && en.settings === "Settings");
+// AND THE WORDS OF THE ROWS THAT WENT ARE NOT STILL SITTING THERE.
+// «New», «Chats», «Collapse sidebar» and «Expand sidebar» were removed
+// from the rail on 2026-10-17; a message file that still carries them
+// in ten languages is how a removed control gets rebuilt by the next
+// person. Held BOTH ways in the same loop, so neither half can rot:
+// every row the rail draws is worded, and no row it does not draw is.
+const WORDED = ["ionexaChat", "coding", "allTools", "recentTools", "settings", "pin", "unpin", "remove", "label", "saveFailed", "untitledChat"];
+const GONE = ["new", "chat", "chats", "collapse", "expand"];
 for (const l of locales) {
   const r = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).sidebar?.rail ?? {};
-  check(`${l}: every row and control is worded`, ["new", "chat", "coding", "allTools", "recentTools", "settings", "pin", "unpin", "remove", "collapse", "expand", "label", "saveFailed"].every((k) => typeof r[k] === "string" && r[k].length > 0));
+  check(`${l}: every row and control is worded`, WORDED.every((k) => typeof r[k] === "string" && r[k].length > 0),
+    WORDED.filter((k) => typeof r[k] !== "string" || !r[k].length).join(", "));
+  check(`${l}: ...and the removed rows left no words behind`, GONE.every((k) => r[k] === undefined),
+    GONE.filter((k) => r[k] !== undefined).join(", "));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

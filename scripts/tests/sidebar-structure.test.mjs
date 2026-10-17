@@ -364,24 +364,29 @@ console.log("\n== 1c. the flag comes off, the state is not stored, and a shut gr
     builtAnyway.join(", ")
   );
 
-  // 2. NO GROUP STATE IS STORED. The open/shut state was a pure function
-  //    of the URL plus what the user touched THIS visit; a sidebar that
-  //    restores three groups from yesterday is thirty-odd lines again,
-  //    on the one visit where the person has no idea why. Since the rail
-  //    of 2026-10-02 there are no groups in the sidebar at all. Since the
-  //    design of 2026-10-04 the Recent tools list is the account's and
-  //    comes from the server (src/lib/nav/recent-tools.ts), so the one
-  //    thing the browser keeps is whether the sidebar is narrow — every
-  //    storage call must name that key (sidebar-and-tooltips.test.mjs
-  //    also holds that each is guarded). No cookie, no session storage.
-  //    Comments stripped first: the component explains what it stores.
+  // 2. THE SIDEBAR STORES NOTHING. The open/shut state of the old
+  //    groups was a pure function of the URL plus what the user touched
+  //    THIS visit; a sidebar that restores three groups from yesterday
+  //    is thirty-odd lines again, on the one visit where the person has
+  //    no idea why. Since the rail of 2026-10-02 there are no groups in
+  //    it at all. Since the design of 2026-10-04 the Recent tools list
+  //    is the account's and comes from the server
+  //    (src/lib/nav/recent-tools.ts). And on 2026-10-17 the last stored
+  //    thing went with «Collapse sidebar»: the narrow form is decided
+  //    by width alone, so there is no choice to remember and no first
+  //    paint that can contradict the screen.
+  //
+  //    THE NUMBER IS ZERO AND THE CHECK SAYS SO. It read "every call
+  //    names COLLAPSED_KEY" until today, which would have passed just
+  //    as happily on a sidebar that stored nothing at all — an empty
+  //    list satisfies `.every()`. No cookie, no session storage.
+  //    Comments stripped first: the component explains what it does not
+  //    store, and a sentence about storage is not storage.
   const storageCalls = componentSrc.match(/localStorage\.\w+\([^)]*\)/g) ?? [];
   ok(
-    `the sidebar stores no group state — only whether it is narrow (${storageCalls.length} storage calls)`,
-    storageCalls.length > 0 &&
-      storageCalls.every((c) => c.includes("COLLAPSED_KEY")) &&
-      !/sessionStorage|document\.cookie/.test(componentSrc),
-    storageCalls.join(" | ")
+    `the sidebar stores nothing at all (${storageCalls.length} storage calls)`,
+    storageCalls.length === 0 && !/sessionStorage|document\.cookie/.test(componentSrc),
+    storageCalls.join(" | ") || "none"
   );
   // 3. THERE IS NO SHUT GROUP ANY MORE, and the four checks that used to
   //    stand here were the most carefully-written wrong thing in this

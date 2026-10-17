@@ -293,8 +293,7 @@
     },
     "closeMenu": "メニューを閉じる",
     "rail": {
-      "new": "新規",
-      "chat": "チャット",
+      "ionexaChat": "Ionexa チャット",
       "coding": "コーディング",
       "allTools": "すべてのツール",
       "recentTools": "最近使ったツール",
@@ -302,12 +301,9 @@
       "pin": "{tool}をピン留め",
       "unpin": "{tool}のピン留めを外す",
       "remove": "{tool}を最近使ったツールから外す",
-      "collapse": "サイドバーを折りたたむ",
-      "expand": "サイドバーを広げる",
       "label": "メインメニュー",
       "saveFailed": "変更を保存できませんでした。もう一度お試しください。",
-      "untitledChat": "新しい会話",
-      "chats": "チャット"
+      "untitledChat": "新しい会話"
     },
     "tabs": {
       "home": "ホーム",
@@ -1344,6 +1340,11 @@
     },
     "chat": {
       "title": "Ionexa チャット",
+      "newChat": "新しいチャット",
+      "hideConversations": "会話一覧を隠す",
+      "showConversations": "会話一覧を表示",
+      "searchConversations": "タイトルを検索",
+      "allConversations": "すべての会話",
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
       "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
       "send": "送信",

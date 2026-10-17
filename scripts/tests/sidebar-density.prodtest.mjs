@@ -1,15 +1,16 @@
 // THE SIDEBAR IS THE DESIGN'S, AND THE BROWSER PAINTS IT THAT WAY.
 //
-// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §3 — logo, New, Chats, Coding, All
+// docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §3 — logo, Ionexa Chat, Coding, All
 // tools, Recent tools, and Settings at the bottom. Nothing else is ever
 // there; every tool is in All tools and ⌘K (src/lib/nav/rail.ts).
 //
-// TWO ROWS LEFT THAT LIST SINCE IT WAS WRITTEN. «Chat» became «Chats»
-// on 2026-10-15 and opens the page with every conversation, and the
-// recent conversations under it were taken out on 2026-10-16 —
-// «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR» (owner). This
-// file still seeds conversations, and now requires NONE of them to be
-// in the aside: an empty account would prove nothing, because the old
+// FOUR ROWS HAVE LEFT THAT LIST SINCE IT WAS WRITTEN. «Chat» became
+// «Chats» on 2026-10-15; the recent conversations under it were taken
+// out on 2026-10-16 — «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ
+// SIDEBAR»; and on 2026-10-17 «New», «Chats» and «Collapse sidebar»
+// went together, the first two replaced by one «Ionexa Chat». This
+// file still seeds conversations, and requires NONE of them to be in
+// the aside: an empty account would prove nothing, because the old
 // sidebar drew nothing for one either.
 //
 // REWRITTEN 2026-10-05 (QUEUE Α.13). This file measured the sidebar it
@@ -43,7 +44,12 @@ function checkTrue(name, cond, detail) {
 // The words the account sees, read from the shipped messages so a
 // rewording moves the needles rather than breaking them.
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
-const RAIL = ["new", "chats", "coding", "allTools"].map((k) => en.sidebar.rail[k]);
+const RAIL = ["ionexaChat", "coding", "allTools"].map((k) => en.sidebar.rail[k]);
+// The English words of the rows the owner removed on 2026-10-17. Their
+// keys went from all ten message files in the same round, so there is
+// nothing to read them back from; these are what the sidebar printed
+// and what it may not print again.
+const REMOVED = ["New", "Chat", "Chats", "Collapse sidebar", "Expand sidebar"];
 const SETTINGS = en.sidebar.rail.settings;
 
 const CONVERSATIONS = [
@@ -129,11 +135,12 @@ try {
 
     const texts = read.links.map((l) => l.text);
     const order = RAIL.map((name) => texts.findIndex((t) => t === name));
-    checkTrue(`${label}: New, Chats, Coding, All tools, each once`, RAIL.every((n) => texts.filter((t) => t === n).length === 1), JSON.stringify(texts));
-    // AND NEVER «Chat», exactly — the row that used to open a new
-    // conversation. «Chats» must not be allowed to satisfy a check for
-    // it, which is why this compares whole strings.
-    checkTrue(`${label}: and never «${en.sidebar.rail.chat}»`, !texts.includes(en.sidebar.rail.chat), JSON.stringify(texts));
+    checkTrue(`${label}: Ionexa Chat, Coding, All tools, each once`, RAIL.every((n) => texts.filter((t) => t === n).length === 1), JSON.stringify(texts));
+    // AND NEVER «New», «Chat», «Chats» or «Collapse sidebar», exactly.
+    // Whole strings, because «Ionexa Chat» contains «Chat» and a
+    // substring test here would report a row that is not there.
+    const ghosts = REMOVED.filter((n) => texts.includes(n));
+    checkTrue(`${label}: and never «New», «Chats» or «Collapse sidebar»`, ghosts.length === 0, ghosts.join(" | "));
     checkTrue(`${label}: ...in that order`, order.every((i, k) => i >= 0 && (k === 0 || i > order[k - 1])), JSON.stringify(order));
     checkTrue(`${label}: Settings is the last row`, texts[texts.length - 1] === SETTINGS, JSON.stringify(texts.slice(-2)));
     // NOT ONE CONVERSATION, THOUGH THE ACCOUNT HAS TWO. Checked three
@@ -163,24 +170,33 @@ try {
   }
 
   console.log("\n== the narrow sidebar: icons, and every name still there ==");
-  const context = await harness.signedIn(browser, { width: 1440, height: 900 });
+  // A WIDTH, NOT A SEEDED CHOICE. Until 2026-10-17 this opened a
+  // 1440px window and put `ionexa.sidebarCollapsed` in localStorage;
+  // the owner had the «Collapse sidebar» button removed and the narrow
+  // form made automatic, so the way in is a 900px window — past md,
+  // where the rail becomes icons-only, and short of lg, where it
+  // widens again.
+  const context = await harness.signedIn(browser, { width: 900, height: 900 });
   await context.addCookies([{ name: "NEXT_LOCALE", value: "en", domain: "127.0.0.1", path: "/" }]);
-  await context.addInitScript(() => {
-    try {
-      window.localStorage.setItem("ionexa.sidebarCollapsed", "1");
-    } catch {}
-  });
   const page = await context.newPage();
   await page.goto(`${harness.origin}/dashboard/overview`, { waitUntil: "networkidle", timeout: 45000 });
   const narrow = await page.evaluate(() => {
     const aside = document.querySelector('[data-testid="sidebar"]');
     return {
-      collapsed: aside?.getAttribute("data-collapsed"),
       width: aside?.getBoundingClientRect().width ?? 0,
-      names: [...(aside?.querySelectorAll("a[aria-label]") ?? [])].map((a) => a.getAttribute("aria-label")),
+      // THE ACCESSIBLE NAME, which is the row's own text now: the
+      // aria-label went on 2026-10-17 because the name was being
+      // carried twice and two copies of a string are two strings that
+      // can disagree. It is hidden from the eye here with sr-only, and
+      // `painted` is what says so.
+      names: [...(aside?.querySelectorAll("nav a, a[href$='/settings']") ?? [])].map((a) => (a.textContent ?? "").trim()),
+      painted: [...(aside?.querySelectorAll("nav a span") ?? [])]
+        .map((e) => Math.round(e.getBoundingClientRect().width))
+        .filter((w) => w > 20).length,
     };
   });
-  checkTrue("the narrow sidebar is drawn narrow", narrow.collapsed === "true" && narrow.width <= 80, JSON.stringify(narrow));
+  checkTrue("the narrow sidebar is drawn narrow", narrow.width > 0 && narrow.width <= 80, JSON.stringify(narrow));
+  checkTrue("...and not one name is painted at this width", narrow.painted === 0, JSON.stringify(narrow));
   checkTrue("...and every fixed row keeps its name for a screen reader", [...RAIL, SETTINGS].every((n) => narrow.names.includes(n)), JSON.stringify(narrow.names));
   await context.close();
 } finally {

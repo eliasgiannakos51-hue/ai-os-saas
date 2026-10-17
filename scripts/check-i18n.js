@@ -139,21 +139,24 @@ const LOCALE_ALLOWED = new Set([
   // "Conectar", business "Negocio", engineering "Ingeniería", verify
   // "Verificar" — the block was translated, this word coincides.
   "es:sidebar.groups.personal",
-  // "Chat" is the word for it in German, Spanish and Italian: der Chat,
-  // el chat, la chat — what those products' own menus say. French has
-  // "Discussion" and Portuguese "Conversa", and they are used.
-  "de:sidebar.rail.chat",
-  "es:sidebar.rail.chat",
-  "it:sidebar.rail.chat",
-  // And its plural, for the row that lists them all (2026-10-15).
-  // German and Spanish form it the English way — die Chats, los chats —
-  // so the word is identical twice over and not for want of
-  // translating. Italian's is invariant ("Chat"), which differs from
-  // the English "Chats" on its own and needs no entry here.
-  "de:sidebar.rail.chats",
-  "es:sidebar.rail.chats",
-  // The same word again, as the page's own heading and its browser
-  // tab. One word, three places, and the same reason in all three.
+  // THE RAIL'S FIRST ROW, «Ionexa Chat» (owner, 2026-10-17). It carries
+  // the Chat page's own title — dashboard.chat.title, three entries
+  // below — so the row and the heading it opens cannot say two
+  // different things, which also means it inherits that key's
+  // coincidences: "Chat" is the word for it in German, Spanish and
+  // Italian (der Chat, el chat, la chat), so «Ionexa Chat» is the
+  // German, Spanish and Italian for it too. French has "Ionexa
+  // Discussion", Portuguese "Ionexa Conversa", Greek «Ionexa
+  // Συνομιλία», and they are used.
+  //
+  // The rows this one replaced — rail.new, rail.chat, rail.chats,
+  // rail.collapse, rail.expand — are gone from messages/*.json
+  // entirely, so their entries are gone from here with them.
+  "de:sidebar.rail.ionexaChat",
+  "es:sidebar.rail.ionexaChat",
+  "it:sidebar.rail.ionexaChat",
+  // The word on the page that lists them all, as its heading and its
+  // browser tab. Two places, the same reason in both.
   "de:dashboard.chats.title",
   "es:dashboard.chats.title",
   "de:pageTitle.chats",

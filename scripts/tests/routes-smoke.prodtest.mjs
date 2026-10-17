@@ -1662,21 +1662,31 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   });
   const chat = await textAndPlaceholders();
   checkTrue("the composer placeholder is Greek", chat.includes("Γράψε στο Ionexa..."));
-  // «Νέα συνομιλία» AND «Καμία συνομιλία ακόμα.» WERE READ HERE, and
-  // both were the drawer's: the list of conversations that used to sit
-  // inside this screen. On 2026-10-16 the owner had the conversations
-  // taken out of the sidebar and that drawer went with them, so neither
-  // string is on /dashboard/chat any longer — and «Νέα συνομιλία» is
-  // not anywhere: its key was deleted in the same round, because
-  // starting a conversation is the rail's «Νέο».
+  // THIS CHECK HAS NOW BEEN WRITTEN THREE WAYS IN THREE DAYS, which is
+  // worth saying out loud because each version was true when it was
+  // written and false a day later.
   //
-  // CHECKED AS AN ABSENCE, not simply dropped. A check deleted because
-  // it went red is a check that stopped asking its question; this one
-  // asks the opposite question now, which is the one that matters —
-  // scripts/tests/sidebar-no-chats.prodtest.mjs holds the thorough
-  // version across ten pages and three widths.
-  checkTrue("...and no second list of conversations is on the chat screen",
-    !chat.includes("Νέα συνομιλία") && !chat.includes("Καμία συνομιλία ακόμα."), chat.slice(0, 200));
+  //   2026-10-05: «Νέα συνομιλία» and «Καμία συνομιλία ακόμα.» had to
+  //     be ON this screen — they were the drawer's, the conversation
+  //     list that lived inside Chat.
+  //   2026-10-16: the owner took the conversations out of the sidebar,
+  //     the drawer went with them, and the check became the ABSENCE of
+  //     both.
+  //   2026-10-17: the owner asked for the list back, inside Chat and
+  //     behind a [◧] — «Στο Chat πατάω [◧] και ανοίγουν οι συνομιλίες
+  //     μου στο πλάι». So «Νέα συνομιλία» is a button in the title row
+  //     again, and the list is one press away rather than on arrival.
+  //
+  // WHAT IS CHECKED HERE IS THE ARRIVAL STATE, which is the only thing
+  // a smoke test that never presses anything can honestly claim: the
+  // button is there and the conversations are NOT, because the column
+  // is closed until somebody opens it. The pressing half — open, close,
+  // remembered, on a phone, in two languages — is
+  // scripts/tests/sidebar-chats.prodtest.mjs §1b, which is a prodtest
+  // and does not run on every push.
+  checkTrue("«Νέα συνομιλία» is in the chat's title row", chat.includes("Νέα συνομιλία"), chat.slice(0, 200));
+  checkTrue("...and the conversations are not open until they are asked for",
+    !chat.includes("Καμία συνομιλία ακόμα."), chat.slice(0, 200));
   // THE EMPTY CHAT GREETS (MASTER 14.2, 2026-10-07): the earth, the
   // hour's greeting and the field. The greeting depends on the hour, so
   // any of the three Greek ones, read from messages/el.json; and the

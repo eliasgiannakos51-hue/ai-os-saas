@@ -236,6 +236,30 @@ try {
         await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
       }
       const shot = async (name) => SHOT_DIR && page.screenshot({ path: `${SHOT_DIR}/${device.label}-${locale}-${name}.png`, fullPage: true });
+      /**
+       * A TAP ON THE PART OF THE SCRIM A PERSON CAN SEE.
+       *
+       * The scrim behind the conversation column is `inset-0`, so its
+       * bounding box is the whole chat area and its CENTRE is under
+       * the column — 320px of a 390px screen is the column. Pressing
+       * it the usual way (the middle of its box) lands on the list it
+       * is supposed to dismiss, which is what this test did until
+       * 2026-10-17 and why «one tap outside closes it» read as broken
+       * when it was not. The free strip is at the end edge.
+       *
+       * TOUCH ONLY, AND THERE IS NO MOUSE FALLBACK ON PURPOSE. The
+       * scrim is `md:hidden`: above 768px the column sits beside the
+       * thread, nothing covers anything and there is nothing to
+       * dismiss. A mouse branch here would be a line no run ever
+       * reaches, and interaction-coverage.test.mjs counts a
+       * mouse-only driver whether it runs or not.
+       */
+      const tapOutsideColumn = async () => {
+        const x = device.viewport.width - 20;
+        const y = Math.round(device.viewport.height / 2);
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      };
 
       const railNames = () =>
         page.evaluate(() =>
@@ -321,7 +345,7 @@ try {
         check(`[${tag}] on a phone the column lies over the thread`, over === "absolute", String(over));
         const scrim = page.locator('[data-testid="chat-column-scrim"]');
         check(`[${tag}] ...and there is something to tap outside it`, await scrim.isVisible());
-        await press(scrim);
+        await tapOutsideColumn();
         await page.waitForTimeout(400);
         check(`[${tag}] ...and one tap outside closes it`, (await column.count()) === 0);
         await press(toggle);
@@ -480,7 +504,8 @@ try {
       // would have been a true sentence about one device and a false
       // one about the other.
       await ensureColumn();
-      await press(device.touch ? page.locator('[data-testid="chat-column-scrim"]') : toggle);
+      if (device.touch) await tapOutsideColumn();
+      else await press(toggle);
       await page.waitForTimeout(400);
       check(
         `[${tag}] ${device.touch ? "a tap outside closes the column" : "pressing [◧] again closes the column"}`,

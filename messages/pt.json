@@ -306,10 +306,8 @@
       "expand": "Expandir a barra lateral",
       "label": "Menu principal",
       "saveFailed": "Não foi possível guardar a alteração. Tente de novo.",
-      "recentChats": "Conversas recentes",
       "untitledChat": "Nova conversa",
-      "chats": "Conversas",
-      "allConversations": "Todas as conversas"
+      "chats": "Conversas"
     },
     "tabs": {
       "home": "Início",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "Ionexa Conversa",
-      "hideConversations": "Ocultar conversas",
-      "showConversations": "Mostrar conversas",
-      "focusMode": "Modo de foco",
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
       "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
-      "hideConversationsHint": "Oculta a lista de conversas e dá toda a largura ao tópico.",
-      "showConversationsHint": "Mostrar novamente a lista de conversas.",
       "send": "Enviar",
       "emptyBody": "Pergunte o que quiser — conhecimento geral, ideias, ajuda com a escrita ou apenas uma conversa. Não está ligado a nenhum módulo do Ionexa AI.",
       "composerPlaceholder": "Escreva para o Ionexa...",
       "mentorMode": "Modo mentor",
       "mentorModeHint": "Modo mentor: orientação estratégica em vez de apenas respostas — assinala riscos, faz perguntas de esclarecimento, sugere alternativas e usa como contexto os dados que registou.",
-      "newChat": "Nova conversa",
       "noConversations": "Ainda não há conversas.",
       "groupPinned": "Fixadas",
       "groupToday": "Hoje",

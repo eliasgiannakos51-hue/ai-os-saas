@@ -105,7 +105,14 @@ const FILES = [
     page_count: 4,
     char_count: 0,
     processing_status: "failed",
-    error: "No readable text — this looks like a scan without OCR.",
+    // A SENTENCE THE EXTRACTOR ACTUALLY WRITES, copied from
+    // src/lib/files/extract.ts. The old fixture was invented, and since
+    // 3211949b the card no longer echoes the server's English: it maps
+    // the sentences the extractor stores to localized ones and falls
+    // back to the generic hint for anything else. An invented string
+    // could only ever reach the fallback, so the check below was
+    // testing the fallback while claiming to test the explanation.
+    error: "this PDF has no text layer — it is a scan or an image-only export, and it would need OCR before the AI can read it",
     uploaded_at: "2026-02-03T14:15:00Z",
   },
 ];
@@ -549,7 +556,19 @@ try {
     // A file that could not be read must say so on its own card, not only
     // as a status word.
     const cardsText = await page.locator('[data-testid="files-list"]').innerText();
-    check("the unreadable file explains itself", /scan without OCR/i.test(cardsText), cardsText.slice(0, 400));
+    check(
+      "the unreadable file explains itself, in the reader's language",
+      containsUi(cardsText, await uiTextStrict(page, "dashboard.files.unreadable.scan")),
+      cardsText.slice(0, 400)
+    );
+    // AND NOT THE GENERIC HINT, which is the regression actually worth
+    // catching: a card that stops recognising the extractor's sentence
+    // still says SOMETHING, so without this line it would stay green.
+    check(
+      "...and not the sentence the card falls back to when it knows nothing",
+      !containsUi(cardsText, await uiTextStrict(page, "dashboard.files.failedHint")),
+      cardsText.slice(0, 400)
+    );
     check(
       "and says it cannot be asked about",
       /cannot be asked|not be asked/i.test(cardsText)

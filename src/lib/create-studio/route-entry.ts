@@ -1,5 +1,5 @@
 import "server-only";
-import type Anthropic from "@anthropic-ai/sdk";
+import type { AiToolSpec } from "@/lib/ai/providers/types";
 import type { FieldConfig } from "@/lib/modules";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
@@ -57,11 +57,20 @@ Rules for the "record" case:
 ${AI_CONDUCT_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
-export const ROUTE_ENTRY_TOOL: Anthropic.Tool = {
+/**
+ * ONE SPELLING FOR A TOOL'S SCHEMA, and this was the last prompt file in
+ * the SDK's. It declared `input_schema` and `Anthropic.Tool`; it declares
+ * `inputSchema` and the ROUTER's type now, so the field the model is
+ * actually sent is decided in one place (adapters/anthropic.ts writes
+ * Anthropic's spelling, openai.ts and groq.ts write `parameters`,
+ * google.ts writes `functionDeclarations`). `required` stays pinned by
+ * AiToolSpec rather than by a vendor type that could relax it.
+ */
+export const ROUTE_ENTRY_TOOL: AiToolSpec = {
   name: "route_entry",
   description:
     "Decide whether the user is asking a question or giving something to record. If recording, classify it into exactly one Ionexa AI module (or none) and extract the structured fields for that module's table. If asking, answer it.",
-  input_schema: {
+  inputSchema: {
     type: "object",
     properties: {
       intent: {

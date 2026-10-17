@@ -12,7 +12,10 @@ const ROUTE = "src/app/api/conversations/[id]/route.ts";
 const MEMBERS = "src/app/api/projects/[id]/members/route.ts";
 const LATER = "src/lib/chat/delete-later.ts";
 const CHAT_WORKSPACE = "src/components/chat/chat-workspace.tsx";
+const SIDEBAR = "src/components/dashboard/sidebar.tsx";
 const PAGE = "src/app/dashboard/chats/page.tsx";
+const FLAGS = "src/lib/flags/flags.ts";
+const EN = "messages/en.json";
 const WORKSPACE = "src/components/chats/chats-workspace.tsx";
 
 // A NAMED ARRAY, NOT AN INLINE ONE. scripts/tests/lib/mutant-list.mjs
@@ -29,25 +32,32 @@ const WORKSPACE = "src/components/chats/chats-workspace.tsx";
 const MUTANTS = [
     // ---- the rail --------------------------------------------------
     {
-      name: "the switch changes nothing: the third row stays Chat",
+      name: "the second row goes back to Chat and the old chat page",
       file: RAIL,
-      from: 'chatsPage && row.key === "chat" ? { key: "chats" as const, href: CHATS_HREF }',
-      to: 'false && row.key === "chat" ? { key: "chats" as const, href: CHATS_HREF }',
-      expect: "open, the third row is Chats at /dashboard/chats",
+      from: '  { key: "chats", href: CHATS_HREF },',
+      to: '  { key: "chat", href: "/dashboard/chat" },',
+      expect: "the rail is Logo, New, Chats, Coding, All tools",
     },
     {
-      name: "the switch also drops a row, so the rails are different lengths",
+      name: "the row keeps its name but opens a new conversation again",
       file: RAIL,
-      from: "  return RAIL_ROWS.map((row) =>",
-      to: "  return RAIL_ROWS.filter((r) => !chatsPage || r.key !== \"coding\").map((row) =>",
-      expect: "the two rails are the same length",
+      from: 'export const CHATS_HREF = "/dashboard/chats";',
+      to: 'export const CHATS_HREF = "/dashboard/chat";',
+      expect: "the second row is Chats, and it opens the page with every conversation",
+    },
+    {
+      name: "the switch comes back as a second rail builder",
+      file: RAIL,
+      from: "export const SETTINGS_HREF",
+      to: "export function railRows(on: boolean) { return on ? RAIL_ROWS : RAIL_ROWS; }\nexport const SETTINGS_HREF",
+      expect: "there is no second rail to build",
     },
     {
       name: "activeRail ignores the rail it was given and always uses the old one",
       file: RAIL,
       from: "  for (const row of rows) if (under(pathname, row.href)) return { key: row.key };",
       to: "  for (const row of RAIL_ROWS) if (under(pathname, row.href)) return { key: row.key };",
-      expect: "activeRail follows the rail it is given",
+      expect: "follows the rail it is GIVEN, not the one it knows",
     },
 
     // ---- the delete, and whose row it is ---------------------------
@@ -105,17 +115,38 @@ const MUTANTS = [
 
     // ---- one sidebar, and nothing lost -----------------------------
     {
-      name: "the drawer inside Chat is drawn again, so there are two lists",
+      name: "Chat keeps the open/closed state the deleted drawer needed",
       file: CHAT_WORKSPACE,
-      from: "          sidebarOpen && !chatsPage ? \"flex\" : \"hidden\"",
-      to: '          sidebarOpen ? "flex" : "hidden"',
-      expect: "the drawer inside Chat is not drawn when the switch is on",
+      from: "export function ChatWorkspace({",
+      to: "const sidebarOpen = false;\nexport function ChatWorkspace({",
+      expect: "nor keeps the open/closed state it needed",
+    },
+    {
+      name: "the sidebar is handed the conversations again",
+      file: SIDEBAR,
+      from: "  recent = [],\n}: {",
+      to: "  recent = [],\n  conversations = [],\n}: {",
+      expect: "the sidebar draws no conversations and takes no list to draw",
+    },
+    {
+      name: "the sidebar draws its own list of conversations again",
+      file: SIDEBAR,
+      from: "        <div className=\"space-y-1 border-t border-divider px-2 py-3\">",
+      to: "        <ConversationRows />\n        <div className=\"space-y-1 border-t border-divider px-2 py-3\">",
+      expect: "the sidebar draws no conversations and takes no list to draw",
+    },
+    {
+      name: "the sidebar gets its capped list back, and the link out of it",
+      file: SIDEBAR,
+      from: "const COLLAPSED_KEY =",
+      to: "const RECENT_CONVERSATIONS = 15;\nconst COLLAPSED_KEY =",
+      expect: "and the sidebar has no list left to cap",
     },
     {
       name: "the favourite star does not come across from the drawer",
       file: ROWS,
-      from: "            <FavoriteButton",
-      to: "            <span data-not-the-star",
+      from: "          <FavoriteButton",
+      to: "          <span data-not-the-star",
       expect: "carried over: the favourite star",
     },
     {
@@ -128,11 +159,25 @@ const MUTANTS = [
 
     // ---- the page --------------------------------------------------
     {
-      name: "the Chats page is reachable with the switch shut",
+      name: "the Chats page goes back behind a switch, so most accounts 404",
       file: PAGE,
-      from: '  if (!(await isFeatureOn("chats-page", user))) notFound();',
-      to: "",
-      expect: "the page is behind the switch and 404s when it is shut",
+      from: "export default async function ChatsPage(",
+      to: "async function gate(user: { id: string }) { if (!(await isFeatureOn(\"chats-page\", user))) notFound(); }\nexport default async function ChatsPage(",
+      expect: "the page is open to everybody, with no switch in front of it",
+    },
+    {
+      name: "the switch is declared again, with nothing reading it",
+      file: FLAGS,
+      from: '  "all-tools-tiles":',
+      to: '  "chats-page": "Η σελίδα με όλες τις συνομιλίες",\n  "all-tools-tiles":',
+      expect: "chats-page is no longer a declared switch",
+    },
+    {
+      name: "the heading comes back to the message files, ready to be drawn again",
+      file: EN,
+      from: '      "chats": "Chats"',
+      to: '      "recentChats": "Recent chats",\n      "chats": "Chats"',
+      expect: "sidebar.rail.recentChats is gone from all ten",
     },
     {
       name: "the title search goes back to toLowerCase, which is wrong in Greek",
@@ -153,6 +198,6 @@ const MUTANTS = [
 runMutations({
   name: "sidebar-chats",
   gate: "scripts/tests/sidebar-chats.test.mjs",
-  targets: [RAIL, ROWS, ROUTE, MEMBERS, LATER, CHAT_WORKSPACE, PAGE, WORKSPACE],
+  targets: [RAIL, ROWS, ROUTE, MEMBERS, LATER, CHAT_WORKSPACE, SIDEBAR, FLAGS, EN, PAGE, WORKSPACE],
   mutants: MUTANTS,
 });

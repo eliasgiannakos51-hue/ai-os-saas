@@ -1,8 +1,8 @@
 # The first run — ar
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **640 strings**. The whole product is 4302, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 4294, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV أو مفصول بعلامات جدولة، حتى {max}. نقرؤه ونع�
 
 صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.
 
-## Tier 2 — The labels — skim these (379)
+## Tier 2 — The labels — skim these (377)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -2192,12 +2192,6 @@ DevOps
 
 سير العمل
 
-**`sidebar.rail.allConversations`**
-
-> EN — All conversations
-
-كل المحادثات
-
 **`sidebar.rail.allTools`**
 
 > EN — All tools
@@ -2251,12 +2245,6 @@ DevOps
 > EN — Pin {tool}
 
 تثبيت {tool}
-
-**`sidebar.rail.recentChats`**
-
-> EN — Recent chats
-
-المحادثات الأخيرة
 
 **`sidebar.rail.recentTools`**
 
@@ -2458,7 +2446,7 @@ DevOps
 
 حاول مرة أخرى
 
-## Tier 3 — Further in — only if you have time (236)
+## Tier 3 — Further in — only if you have time (217)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -2832,108 +2820,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 
 إعادة الشحن
 
-**`dashboard.chat.deleteConfirm`**
-
-> EN — Delete “{title}”? You'll have a few seconds to undo it.
-
-هل تريد حذف «{title}»؟ ستحصل على بضع ثوانٍ للتراجع.
-
-**`dashboard.chat.deleteFailed`**
-
-> EN — That conversation wasn't deleted. It is still here.
-
-لم تُحذف تلك المحادثة. ما زالت هنا.
-
-**`dashboard.chat.groupPinned`**
-
-> EN — Pinned
-
-مثبّتة
-
-**`dashboard.chat.moved`**
-
-> EN — Moved to {project}.
-
-نُقلت إلى {project}.
-
-**`dashboard.chat.moveFailed`**
-
-> EN — That didn't move. Try again.
-
-لم يتم النقل. حاول مرة أخرى.
-
-**`dashboard.chat.moveToProject`**
-
-> EN — Move to project
-
-نقل إلى مشروع
-
-**`dashboard.chat.noConversations`**
-
-> EN — No conversations yet.
-
-لا توجد محادثات بعد.
-
-**`dashboard.chat.noProjects`**
-
-> EN — No projects yet.
-
-لا توجد مشاريع بعد.
-
-**`dashboard.chat.pin`**
-
-> EN — Pin
-
-تثبيت
-
-**`dashboard.chat.pinError`**
-
-> EN — The pin didn't save. Try again.
-
-لم يُحفظ التثبيت. حاول مرة أخرى.
-
-**`dashboard.chat.pinLimitReached`**
-
-> EN — You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.
-
-لقد ثبّتّ {limit} محادثة، وهو أقصى ما تُبقيه خطتك في الأعلى. أزل تثبيت واحدة لتثبيت هذه.
-
-**`dashboard.chat.projectFull`**
-
-> EN — That project already holds {limit} things, which is the most it keeps.
-
-هذا المشروع يضم بالفعل {limit} عنصرًا، وهو أقصى ما يحتفظ به.
-
-**`dashboard.chat.rename`**
-
-> EN — Rename
-
-إعادة التسمية
-
-**`dashboard.chat.renameError`**
-
-> EN — The new name didn't save — the old one is still there.
-
-لم يُحفظ الاسم الجديد — الاسم السابق ما زال كما هو.
-
-**`dashboard.chat.selectOne`**
-
-> EN — Select {title}
-
-اختر «{title}»
-
-**`dashboard.chat.undo`**
-
-> EN — Undo
-
-تراجع
-
-**`dashboard.chat.unpin`**
-
-> EN — Unpin
-
-إلغاء التثبيت
-
 **`language.label`**
 
 > EN — Language
@@ -2945,18 +2831,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Couldn't save your language — nothing was changed.
 
 تعذّر حفظ اللغة — لم يتغيّر شيء.
-
-**`module.actionsFor`**
-
-> EN — Actions for {name}
-
-إجراءات {name}
-
-**`module.delete`**
-
-> EN — Delete
-
-حذف
 
 **`pwa.install`**
 
@@ -3029,24 +2903,6 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Show me how
 
 أرِني الطريقة
-
-**`dashboard.chat.renameLabel`**
-
-> EN — New name for "{title}"
-
-اسم جديد لـ «{title}»
-
-**`favorites.add`**
-
-> EN — Add to favorites
-
-إضافة إلى المفضلة
-
-**`favorites.remove`**
-
-> EN — Remove from favorites
-
-إزالة من المفضلة
 
 ### first result
 
@@ -3769,6 +3625,24 @@ _Reachable from these screens but deeper in: shared components, error states, th
 > EN — Unlink {name}
 
 إلغاء الربط بـ {name}
+
+**`favorites.add`**
+
+> EN — Add to favorites
+
+إضافة إلى المفضلة
+
+**`favorites.remove`**
+
+> EN — Remove from favorites
+
+إزالة من المفضلة
+
+**`module.delete`**
+
+> EN — Delete
+
+حذف
 
 **`module.deleteConfirm`**
 

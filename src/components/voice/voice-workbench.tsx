@@ -6,9 +6,30 @@ import { Copy, Check } from "lucide-react";
 import { VoicePlayer } from "@/components/voice/voice-player";
 import { VoiceInput } from "@/components/voice/voice-input";
 import { useVoiceAvailability } from "@/components/voice/voice-availability";
+import { MAX_SPEAK_CHARS } from "@/lib/voice/voice-pricing";
 import { useToast } from "@/components/toast/toast-context";
 
-const MAX_TEXT_LENGTH = 5000;
+/**
+ * THE FIELD STOPS WHERE THE VOICE STOPS, and until 2026-10-16 it did
+ * not.
+ *
+ * This file had its own `MAX_TEXT_LENGTH = 5000`: the box accepted five
+ * thousand characters and the counter under it said «x από 5000». What
+ * is actually read aloud is MAX_SPEAK_CHARS — 2,500 — and both the
+ * player and the provider cut to it SILENTLY
+ * (voice-player.tsx `text.trim().slice(0, MAX_SPEAK_CHARS)`,
+ * voice-providers.ts the same). So somebody who pasted four thousand
+ * characters was told by the screen that it was fine, heard the first
+ * half, and was told nothing about the second: the page said 5000 and
+ * meant 2500.
+ *
+ * ONE CONSTANT NOW, imported rather than copied, because the two
+ * numbers could only ever agree by somebody remembering. The price the
+ * player quotes was always computed from what gets SPOKEN, so nothing
+ * about money changes — what changes is that the field refuses the
+ * characters it was going to throw away, while they can still be
+ * edited.
+ */
 
 /**
  * THE TWO THINGS VOICE ACTUALLY DOES, ON ONE SCREEN.
@@ -67,9 +88,9 @@ export function VoiceWorkbench() {
             <textarea
               id="voice-to-read"
               value={toRead}
-              onChange={(e) => setToRead(e.target.value.slice(0, MAX_TEXT_LENGTH))}
+              onChange={(e) => setToRead(e.target.value.slice(0, MAX_SPEAK_CHARS))}
               rows={4}
-              maxLength={MAX_TEXT_LENGTH}
+              maxLength={MAX_SPEAK_CHARS}
               placeholder={t("speakPlaceholder")}
               className="mt-3 w-full rounded-card border border-border bg-background/60 p-3 text-sm text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
             />
@@ -78,7 +99,7 @@ export function VoiceWorkbench() {
                   when the allowance is spent — nothing is duplicated here. */}
               <VoicePlayer text={toRead.trim()} />
               <span className="text-[11px] text-muted">
-                {t("charCount", { count: toRead.length, max: MAX_TEXT_LENGTH })}
+                {t("charCount", { count: toRead.length, max: MAX_SPEAK_CHARS })}
               </span>
             </div>
           </>

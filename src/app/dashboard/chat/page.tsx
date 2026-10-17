@@ -137,11 +137,6 @@ export default async function ChatPage(
         opensTools={opensTools}
         siteWall={siteWall}
         attachments={await isFeatureOn("chat-attachments", user)}
-        // The switch `chats-page`: with it on, the conversation list
-        // inside this screen is not drawn — the app's sidebar and
-        // /dashboard/chats hold every conversation and every action
-        // that list had.
-        chatsPage={await isFeatureOn("chats-page", user)}
         // THE PROJECT A NEW CONVERSATION STARTS IN, and the only moment
         // it can be chosen. It is validated against the person's OWN
         // projects rather than trusted, exactly as `?c=` is above: an id

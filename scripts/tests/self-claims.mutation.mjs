@@ -160,6 +160,19 @@ const MUTANTS = [
     to: "// IT SAID the wrong thing until V5 #13, the same wrong route",
     expect: "no route exception describes a comment that is gone",
   },
+  {
+    // 12. THE LOOKBEHIND BACK TO `\\b`, which is the state the scanner
+    // shipped in: the `.github` branch of the alternation cannot match
+    // after a non-word character, so it never fired, and the scan read
+    // a path under .github/scripts/ as though the leading directory had
+    // not been written. Restoring the `\\b` must make the fixture go red,
+    // or the alternation is decorative again.
+    name: "the path matcher goes back to a word boundary, so the .github branch is dead again",
+    file: SCANNER,
+    from: "  /(?<![\\w-])((?:src|scripts|supabase",
+    to: "  /\\b((?:src|scripts|supabase",
+    expect: "a path under .github is seen, whole",
+  },
 ];
 
 function runGate() {

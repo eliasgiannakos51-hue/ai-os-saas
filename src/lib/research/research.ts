@@ -1,9 +1,10 @@
 import "server-only";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
-import Anthropic from "@anthropic-ai/sdk";
-import { modelText, modelTextFrom } from "@/lib/verification/truncation";
+import { modelTextFrom } from "@/lib/verification/truncation";
 import { runCompletion } from "@/lib/ai/providers/complete";
-import type { AiToolSpec } from "@/lib/ai/providers/types";
+import type { AiCitation, AiToolSpec } from "@/lib/ai/providers/types";
+import { citedSources } from "@/lib/ai/providers/citations";
+import { logApiError } from "@/lib/log-error";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
@@ -54,7 +55,11 @@ const QUESTION_MAX_TOKENS = 2500;
 const SYNTHESIS_MAX_TOKENS = 8000;
 
 export type ResearchQuestion = { question: string; why: string };
-export type ResearchSource = { title: string; url: string };
+/** THE SAME SHAPE THE ROUTER HANDS BACK, not a copy of it. A report's
+ *  source IS a citation the provider reported; two structurally equal
+ *  types would let one grow a field the other does not have, and the
+ *  mapping between them would be the place the URL goes missing. */
+export type ResearchSource = AiCitation;
 export type ResearchSection = { heading: string; body: string };
 
 export type ResearchFinding = {
@@ -72,11 +77,6 @@ export type ResearchFinding = {
   failed?: boolean;
 };
 
-const WEB_SEARCH_TOOL: Anthropic.ToolUnion = {
-  type: "web_search_20250305",
-  name: "web_search",
-  max_uses: RESEARCH_SEARCHES_PER_QUESTION,
-};
 
 // ---------------------------------------------------------------------
 // Phase 1 — planning.
@@ -147,7 +147,37 @@ export async function planResearch(params: {
       requires: ["tool_calling"],
       messages: [{ role: "user", content: `Topic:\n${wrapUntrusted(params.topic)}` }],
     }, { userId: params.userId });
-    if (!outcome.ok) return { ok: false, reason: "no_plan" };
+    // A PROVIDER THAT NEVER ANSWERED IS NOT A TOPIC THAT CANNOT BE
+    // PLANNED, and between af1006b9 and 2026-10-16 this line said it was.
+    //
+    // That commit migrated two calls in this file from the SDK to the
+    // router IN ONE GO, and wrote a different reason for each: the
+    // synthesis below returns "api_error" for `!outcome.ok`, this one
+    // returned "no_plan". The SDK THREW on a provider 529, so before the
+    // migration a provider outage landed in the catch at the end of this
+    // function as "api_error"; runCompletion RETURNS instead, so the
+    // catch is never reached for one and the reason had to be written by
+    // hand.
+    //
+    // WHAT THE READER WAS TOLD INSTEAD. api/research/route.ts turns
+    // "api_error" into the body code `ai_unavailable` and anything else
+    // into `plan_unusable`; lib/research/failure.ts reads the first as
+    // «the AI service did not answer — nothing was charged» and has no
+    // match for the second, so components/research/failure-words.ts fell
+    // back to «your topic could not be turned into research questions».
+    // The hold WAS given back — the prodtest's money checks pass either
+    // way — and the sentence the person got is the one this route uses
+    // for an unusable plan, which it describes as «a real charge for real
+    // tokens». Told they had been charged for a topic that was fine,
+    // when nothing had run and nothing had been taken.
+    //
+    // "no_plan" stays for the three cases it is actually about, all
+    // below: no tool use came back, the questions were not an array, and
+    // (as too_few_questions) too few survived. Caught by
+    // scripts/tests/research-slides.prodtest.mjs and by
+    // tool-shell-edges.prodtest.mjs, where Slides says it right and
+    // Research did not.
+    if (!outcome.ok) return { ok: false, reason: "api_error" };
     params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
     const use = outcome.toolCalls.find((call) => call.name === PLAN_TOOL.name);
@@ -193,100 +223,107 @@ export function questionSystemPrompt(language: string): string {
   ].join("\n");
 }
 
-/** Pull the citations Anthropic's server-side web search attaches to the
- *  response. Taken from the API's own citation blocks rather than from
- *  URLs the model typed into its prose — a model can type a plausible
- *  URL, and a source list nobody can open is not a source list. */
-function sourcesFrom(response: Anthropic.Message): ResearchSource[] {
-  const seen = new Map<string, ResearchSource>();
-
-  for (const block of response.content) {
-    if (block.type !== "text") continue;
-    const citations = (block as Anthropic.TextBlock).citations ?? [];
-    for (const citation of citations) {
-      const url = (citation as { url?: string }).url;
-      const title = (citation as { title?: string }).title;
-      if (typeof url !== "string" || !/^https?:\/\//i.test(url)) continue;
-      if (!seen.has(url)) {
-        seen.set(url, { url: url.slice(0, 500), title: (title ?? url).slice(0, 200) });
-      }
-    }
-  }
-  return [...seen.values()];
-}
-
 /**
- * THE ONE CALL IN THIS FILE THAT HAS NOT MOVED ONTO THE ROUTER, and the
- * reason is `sourcesFrom` below rather than the search.
+ * THE LAST CALL IN THIS FILE TO MOVE ONTO THE ROUTER (2026-10-16), and
+ * what was in the way was never the search.
  *
- * The search itself the router can do — `serverWebSearch` plus
+ * The search the router could already do — `serverWebSearch` plus
  * `requires: ["server_web_search"]`, which is how lib/agents/agent-runner
- * and lib/mission-agents ask for it. What it cannot yet hand back is the
- * CITATIONS Anthropic attaches to each text block: AiResult carries
- * text, tool calls, usage and a stop reason, and nothing else. Every
- * source under every finding in a report comes from those citations, so
- * moving this call today would produce a report whose claims have
- * nowhere to point — which is worse than one provider's worth of
- * failover is good.
+ * and lib/mission-agents ask for it, and which makes the router rule out
+ * the three providers that have none BEFORE the call rather than after
+ * it fails. What AiResult could not hand back was the CITATIONS: every
+ * source under every finding comes from the citation blocks Anthropic
+ * attaches to its own text, and a report whose claims point nowhere is
+ * worse than one provider's worth of failover is good.
  *
- * What it needs is a `citations` field on AiResult, mapped by the
- * Anthropic adapter and absent (not empty, ABSENT) from the three that
- * cannot produce them, with ai-providers.test.mjs driving it through a
- * stubbed fetch like every other adapter claim. That is its own change.
+ * It carries them now (`AiResult.citations`, mapped by
+ * lib/ai/providers/citations.ts), and the two cases are kept apart:
+ * `[]` is "the searches found nothing worth citing", `undefined` is "the
+ * provider cannot tell us". The second is refused below rather than
+ * written into a report as an empty source list.
  */
 export async function researchQuestion(params: {
-  anthropic: Anthropic;
   topic: string;
   question: ResearchQuestion;
   language: string;
   costs: CostAccumulator;
+  userId?: string;
 }): Promise<{ finding: ResearchFinding; searches: number }> {
-  try {
-    const response = await params.anthropic.messages.create(
-      {
-        model: RESEARCH_MODEL,
-        max_tokens: QUESTION_MAX_TOKENS,
-        system: questionSystemPrompt(params.language),
-        tools: [WEB_SEARCH_TOOL],
-        messages: [
-          {
-            role: "user",
-            content: `Overall topic:\n${wrapUntrusted(params.topic)}\n\nResearch this question and report what you find:\n${wrapUntrusted(params.question.question)}`,
-          },
-        ],
-      },
-      // A hung request used to consume the whole run's wall clock, so
-      // every later question was skipped and the platform killed the
-      // function mid-report. One question failing is already survivable
-      // (see the catch below); one question hanging was not.
-      { timeout: RESEARCH_QUESTION_TIMEOUT_MS }
-    );
-    params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
+  // ONE QUESTION FAILING DOES NOT FAIL THE REPORT, whichever way it
+  // failed: no provider that can serve it, a call that did not return,
+  // or a provider that could not say where it read. Those arrive at the
+  // two exits below and write the finding through here, so the mark
+  // cannot be forgotten at one of them — scripts/tests/research-slides
+  // holds that this is the only place in the file that sets it.
+  //
+  // The synthesis is told which questions came back empty and says so: a
+  // report that silently drops a third of its own plan is a report that
+  // overstates how thoroughly it looked.
+  const unanswered = (searches: number) => ({
+    finding: { question: params.question.question, summary: "", sources: [], failed: true },
+    searches,
+  });
 
-    // Through modelText like every other call in this file. This one is a
-    // per-question summary rather than the report, so a cut is less
-    // visible — which is exactly why it should not be the one place the
-    // stop reason is unavailable.
-    const summary = modelText(response).text.trim();
+  const outcome = await runCompletion(
+    {
+      purpose: "research",
+      model: RESEARCH_MODEL,
+      maxTokens: QUESTION_MAX_TOKENS,
+      system: [{ type: "text", text: questionSystemPrompt(params.language) }],
+      messages: [
+        {
+          role: "user",
+          content: `Overall topic:\n${wrapUntrusted(params.topic)}\n\nResearch this question and report what you find:\n${wrapUntrusted(params.question.question)}`,
+        },
+      ],
+      serverWebSearch: { maxUses: RESEARCH_SEARCHES_PER_QUESTION },
+      // THE SEARCH IS NOT OPTIONAL HERE. Without this the router could
+      // hand the question to a provider with no web access, which would
+      // answer it confidently from training data — right-looking,
+      // unsourced, and indistinguishable from a real finding.
+      requires: ["server_web_search"],
+    },
+    // A hung request used to consume the whole run's wall clock, so every
+    // later question was skipped and the platform killed the function
+    // mid-report. The router applies this PER ATTEMPT (failover.ts), which
+    // is the same guarantee the SDK's own `timeout` gave before.
+    { timeoutMs: RESEARCH_QUESTION_TIMEOUT_MS, userId: params.userId }
+  );
+  if (!outcome.ok) return unanswered(0);
 
-    return {
-      finding: {
-        question: params.question.question,
-        summary,
-        sources: sourcesFrom(response),
-      },
-      searches: response.usage.server_tool_use?.web_search_requests ?? 0,
-    };
-  } catch {
-    // One question failing does not fail the report. The synthesis is
-    // told which questions came back empty, and says so — a report that
-    // silently drops a third of its own plan is a report that overstates
-    // how thoroughly it looked.
-    return {
-      finding: { question: params.question.question, summary: "", sources: [], failed: true },
-      searches: 0,
-    };
+  params.costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+  const searched = outcome.usage.server_tool_use?.web_search_requests ?? 0;
+
+  // THE FIELD'S ABSENCE IS A REFUSAL, NOT AN EMPTY LIST. Only Anthropic's
+  // models carry server_web_search in the catalog, so reaching this with
+  // no citations means the answer came from somewhere that cannot say
+  // where it read — and the finding would arrive in the report as prose
+  // with no sources under it, which is the exact failure this whole
+  // field exists to prevent. The searches that did run are still
+  // reported: they were made, and they were billed.
+  const sources = citedSources(outcome);
+  if (!sources) {
+    logApiError("research:question", new Error("provider returned no citations"), {
+      provider: outcome.provider,
+      model: outcome.model,
+    });
+    return unanswered(searched);
   }
+
+  // Through modelTextFrom like every other call in this file. This one is
+  // a per-question summary rather than the report, so a cut is less
+  // visible — which is exactly why it should not be the one place the
+  // stop reason is unavailable.
+  const summary = modelTextFrom({ text: outcome.text, stopReason: outcome.stopReason }).text.trim();
+
+  return {
+    finding: {
+      question: params.question.question,
+      summary,
+      sources,
+    },
+    searches: searched,
+  };
 }
 
 // ---------------------------------------------------------------------

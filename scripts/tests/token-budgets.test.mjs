@@ -364,6 +364,36 @@ for (const file of CLASSIFIED.deliverable) {
   if (makesRoutedCall) {
     ok(`${file.split("/").pop()} reads the stop reason of its routed call`,
       /\bmodelTextFrom\(/.test(src) || /AI_TRUNCATED_STOP_REASON/.test(src), file);
+    // EVERY ROUTED ANSWER, NOT THE FIRST ONE THAT HAPPENS TO PASS — and
+    // this line is here because the mutation suite went MISSED on
+    // 2026-10-16, the day lib/research/research.ts gained a SECOND
+    // routed call that reads text.
+    //
+    // The check above asks whether the FILE contains a door. With one
+    // routed answer that is the same question; with two it is not. The
+    // synthesis could go back to `{ text: outcome.text, truncated:
+    // false }` and the per-question call's door kept the file
+    // compliant — a report severed at its 8,000-token ceiling would
+    // have been written into a document as finished, which is the exact
+    // defect section 3 exists for. The comment four lines up already
+    // said "each kind of call now has to show its own door"; it was
+    // true per KIND and not per CALL.
+    //
+    // So: take the doors out of the source, and no read of a routed
+    // outcome's text may survive. It ranges over the calls because it
+    // ranges over the BINDINGS — `const x = await runCompletion(` — so
+    // a third call added tomorrow is covered by the same line.
+    const bindings = [...src.matchAll(/const\s+(\w+)\s*=\s*await\s+runCompletion\s*\(/g)].map((m) => m[1]);
+    // THE COUNT IS THE CALL SITES, THE TEST IS THE NAMES. Printing
+    // `names.length` would have said "1 call" for a file that makes
+    // three, because all three bind `outcome` — a number that reads as
+    // coverage and is not.
+    const names = [...new Set(bindings)];
+    const withoutDoors = src.replace(/modelTextFrom\s*\(\s*\{[^}]*\}\s*\)/g, "«door»");
+    const barefaced = names.filter((name) => new RegExp(`\\b${name}\\.text\\b`).test(withoutDoors));
+    ok(`${file.split("/").pop()}: every routed answer goes through the door (${bindings.length} call site(s))`,
+      barefaced.length === 0,
+      barefaced.map((n) => `${n}.text is read outside modelTextFrom`).join(", "));
   }
   // AND DOES NOT ALSO HAND-ROLL THE EXTRACTION. A file that calls
   // modelText for one response and joins the blocks itself for another

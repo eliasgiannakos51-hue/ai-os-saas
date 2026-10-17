@@ -173,8 +173,23 @@ check("...anything else falls back to the screen's own sentence", failure.resear
 // and a run where every question is marked stores the sentence that says
 // the service did not answer — not "nothing usable on this topic".
 const runResearch = code("src/lib/research/run-research.ts");
-check("a question the AI service never answered is marked so (research.ts, the catch)",
-  /\}\s*catch\s*\{\s*return\s*\{\s*finding:\s*\{[^}]*summary:\s*"",[^}]*failed:\s*true\s*\}/.test(code("src/lib/research/research.ts")));
+// RE-ANCHORED 2026-10-16, when the per-question call moved onto the
+// router. There is no `catch` any more: runCompletion returns an outcome
+// instead of throwing, so the three ways a question can go unanswered —
+// no provider for it, a provider that could not say where it read, a
+// call that failed — write the finding through ONE helper.
+const researchCode = code("src/lib/research/research.ts");
+check("a question the AI service never answered is marked so (research.ts, unanswered)",
+  /const unanswered = \([^)]*\) => \(\{\s*finding:\s*\{[^}]*summary:\s*"",[^}]*failed:\s*true\s*\}/.test(researchCode));
+// AND NOTHING WRITES THAT MARK ANY OTHER WAY. A second place to build an
+// unanswered finding is a second place to forget the mark — which is the
+// defect this pair of checks exists for, one layer up.
+check("...and it is the only place in the file that marks one",
+  (researchCode.match(/failed: true/g) ?? []).length === 1,
+  `${(researchCode.match(/failed: true/g) ?? []).length} places`);
+check("...reached from every exit that is not an answer",
+  (researchCode.match(/return unanswered\(/g) ?? []).length >= 2,
+  `${(researchCode.match(/return unanswered\(/g) ?? []).length} exits`);
 check("...and a run where every question is so marked says the service did not answer, never that the topic gave nothing",
   /const serviceDown = findings\.length > 0 && findings\.every\(\(f\) => f\.failed === true\);/.test(runResearch) &&
     /serviceDown\s*\?\s*\{ status: "failed" satisfies ResearchStatus, error: "The AI service did not answer the research questions\. Please run it again in a moment\." \}/.test(runResearch) &&
@@ -184,6 +199,39 @@ check("a refused plan or start is said by what it is",
     failure.researchRefusal({ code: "rate_limited" }, 429) === "rateLimited" && failure.researchRefusal({ code: "ai_unavailable" }, 502) === "unavailable" &&
     failure.researchRefusal({ code: "plan_unusable" }, 502) === "other" && failure.researchRefusal(null, 500) === "other");
 check("...the plan route says which kind of failed plan it was", /code: planned\.reason === "api_error" \? "ai_unavailable" : "plan_unusable",/.test(code("src/app/api/research/route.ts")));
+// AND THE VALUE THAT FEEDS THAT TERNARY, which nothing held until
+// 2026-10-16 — so it changed underneath a green anchor.
+//
+// The line above pins the ROUTE. af1006b9 changed what research.ts puts
+// INTO planned.reason: it migrated two calls to the router in one go and
+// wrote "no_plan" for the plan call where it wrote "api_error" for the
+// synthesis. runCompletion RETURNS on a provider outage where the SDK
+// THREW, so the catch that used to make it "api_error" is not reached,
+// and the reader was told their topic could not be planned — the
+// sentence this route reserves for «a real charge for real tokens» —
+// when nothing had run and the hold had gone back.
+//
+// RANGED OVER EVERY ROUTER FAILURE IN THE FILE, not the one that broke:
+// the rule is "a call the router could not complete is always api_error",
+// so the population is every `if (!outcome.ok)` in research.ts. A third
+// migrated call tomorrow is read by this same line.
+{
+  const research = code("src/lib/research/research.ts");
+  const routerFailures = [...research.matchAll(/if \(!outcome\.ok\) return \{ ok: false, reason: "(\w+)" \};/g)].map((m) => m[1]);
+  check(`research.ts's router failures were read (${routerFailures.join(", ") || "none"})`,
+    routerFailures.length >= 2, routerFailures.join(","));
+  const mislabelled = routerFailures.filter((r) => r !== "api_error");
+  check(`...and every one of them is api_error, not a content reason (${routerFailures.length})`,
+    mislabelled.length === 0,
+    `${mislabelled.join(", ")} — the route turns anything but api_error into plan_unusable, which reads as "your topic was no good"`);
+  // THE OTHER HALF, so the rule cannot be met by calling everything a
+  // provider outage: the three real content failures keep their own
+  // reason, and the reader keeps being told the topic was the problem
+  // when it was.
+  const contentFailures = [...research.matchAll(/if \([^)]*\) return \{ ok: false, reason: "(no_plan|too_few_questions|empty_report)" \};/g)].map((m) => m[1]);
+  check(`...while the content failures keep theirs (${contentFailures.join(", ") || "none"})`,
+    contentFailures.length >= 3, contentFailures.join(","));
+}
 const researchScreens = { shell: code("src/components/research/research-shell.tsx"), page: code("src/components/research/research-workspace.tsx") };
 for (const [label, src] of Object.entries(researchScreens)) {
   check(`${label}: nothing a request answers, and no stored reason, is shown as it came`,

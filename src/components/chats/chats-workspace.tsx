@@ -178,7 +178,6 @@ export function ChatsWorkspace({
           conversations={shown}
           projects={projects}
           activeId={null}
-          variant="page"
           selectable
           selected={selected}
           onSelectedChange={setSelected}

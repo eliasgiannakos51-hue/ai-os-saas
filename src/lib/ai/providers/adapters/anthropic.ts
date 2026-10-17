@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
+import { citationsFromAnthropicContent } from "@/lib/ai/providers/citations";
 
 /**
  * ANTHROPIC, through the SDK this app already depends on.
@@ -82,6 +83,14 @@ export async function callAnthropic(call: AdapterCall): Promise<AdapterResponse>
   return {
     text,
     toolCalls,
+    // ALWAYS AN ARRAY FROM HERE, EVEN AN EMPTY ONE — the opposite of the
+    // three adapters below, which leave the field absent. Anthropic CAN
+    // report citations, so `[]` from this provider is the answer "there
+    // were none", and Deep Research is allowed to believe it. See
+    // AiResult.citations in types.ts for why the two cases must not wear
+    // the same value, and lib/ai/providers/citations.ts for why the
+    // mapping is not written inline here.
+    citations: citationsFromAnthropicContent(response.content),
     // Passed through WHOLE, not rebuilt field by field. The usage shape in
     // types.ts is deliberately Anthropic's, and
     // scripts/tests/usage-field-coverage.test.mjs already requires every

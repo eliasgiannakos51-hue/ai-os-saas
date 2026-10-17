@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { MessagesSquare } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ChatsWorkspace } from "@/components/chats/chats-workspace";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { loadFavoriteIds } from "@/lib/favorites";
 import { pageTitle } from "@/lib/page-title";
 import { CHATS_LIST_CAP } from "@/lib/chat/conversation-search";
@@ -22,20 +21,18 @@ export function generateMetadata(): Promise<Metadata> {
  * «ΠΑΤΑΩ "CHATS" ΚΑΙ ΒΛΕΠΩ ΟΛΕΣ ΤΙΣ ΣΥΝΟΜΙΛΙΕΣ, ΜΕ ΑΝΑΖΗΤΗΣΗ»
  * (owner, 2026-10-15).
  *
- * WHAT THIS PAGE REPLACES. Until today the only place that held EVERY
- * conversation — rather than the newest few — was a drawer inside Chat
- * (components/chat/conversation-sidebar.tsx), i.e. a second sidebar on
- * one screen, which ΣΥΣΤΗΜΑ DESIGN §3 says there is not. Everything
- * that drawer could do is here or in the sidebar's own rows, and the
- * two lists are the SAME COMPONENT so they cannot drift
+ * WHAT THIS PAGE REPLACES. Until 2026-10-15 the only place that held
+ * EVERY conversation — rather than the newest few — was a drawer
+ * inside Chat, i.e. a second sidebar on one screen, which ΣΥΣΤΗΜΑ
+ * DESIGN §3 says there is not. That drawer is deleted and everything
+ * it could do is here, on the rows this page draws
  * (components/dashboard/conversation-rows.tsx).
  *
- * NOT FOUND WHEN THE SWITCH IS OFF, rather than an explanatory page.
- * All tools draws an explanation when its squares are hidden because
- * the page still exists and is linked from the rail; this address is
- * not linked from anywhere while the switch is off, so the honest
- * answer for somebody who types it in is that there is no such page
- * yet.
+ * OPEN TO EVERYBODY SINCE 2026-10-16. It was behind the switch
+ * `chats-page` while the new sidebar was being tried; the switch is
+ * gone, the rail's second row points here, and this is now the ONLY
+ * place the conversations live — the owner had them taken out of the
+ * sidebar the same day.
  *
  * THE LIST IS BOUNDED AND THE BOUND IS SAID OUT LOUD. "Every
  * conversation" is a promise that gets slower every month a person
@@ -46,7 +43,6 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function ChatsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!(await isFeatureOn("chats-page", user))) notFound();
 
   const t = await getTranslations("dashboard.chats");
   const supabase = await createClient();

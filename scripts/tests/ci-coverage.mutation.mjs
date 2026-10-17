@@ -29,6 +29,7 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/ci-coverage.test.mjs";
 const PKG = "package.json";
 const WF = ".github/workflows/verify.yml";
+const ALERT = ".github/scripts/ci-red-issue.cjs";
 
 const BUILD = '"build": "node scripts/apply-function-limits.mjs && next build"';
 
@@ -164,6 +165,109 @@ const MUTANTS = [
     from: '      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"\n\n      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation',
     to: '      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
     expect: "before the mutation suites",
+  },
+
+  // ------------------------------------------------------------------
+  // ONE ANSWER PER PUSH, AND NO BRANCH CANCELS ANOTHER'S (§5).
+  // ------------------------------------------------------------------
+  {
+    // The state of 2026-10-16, watched cancelling a different branch's
+    // checks: for a deployment_status event github.ref is the same for
+    // every branch, so one preview deployment killed another branch's
+    // run and the pull request showed a cancelled job with nothing in
+    // its diff to explain it.
+    name: "the concurrency group forgets the event, so one branch's deploy cancels another's checks",
+    file: WF,
+    from: "  group: verify-${{ github.event_name }}-${{ github.event.pull_request.head.ref || github.ref }}",
+    to: "  group: verify-${{ github.ref }}",
+    expect: "the concurrency group distinguishes the event",
+  },
+  {
+    name: "the hour-long job runs again on every deployment report",
+    file: WF,
+    from: "    if: github.event_name != 'deployment_status'\n    runs-on: ubuntu-latest\n    # THE MUTATION SUITES ARE MOST OF THIS JOB.",
+    to: "    runs-on: ubuntu-latest\n    # THE MUTATION SUITES ARE MOST OF THIS JOB.",
+    expect: "the heavy jobs skip a deployment report",
+  },
+  {
+    // THE OTHER HALF, so the guard above cannot become a way to turn CI
+    // off: the event has to still reach the job it exists for.
+    name: "the bot job stops listening for the deploy it exists for",
+    file: WF,
+    from: "  bot-on-deploy:",
+    to: "  bot-on-deploy-disabled:",
+    expect: "while the bot job still runs on one",
+  },
+
+  // --------------------------------------------------------------------
+  // THE ALARM THAT NEVER RESET (section 6). Each of these puts back one
+  // of the three faults that left 33 ci-red issues open with one of them
+  // real, measured 2026-10-16.
+  // --------------------------------------------------------------------
+  {
+    // THE EXPENSIVE ONE. listForRepo returns a page and no hint there
+    // are more, so once ten were open the matching issue was invisible
+    // and a duplicate was filed: #280 and #302 are both "CI red on
+    // main". The gate must notice by OPENING A DUPLICATE, not by
+    // reading the number 100.
+    name: "the lookup reads one page again, so a duplicate issue is filed",
+    file: ALERT,
+    from: [
+      "  return github.paginate(github.rest.issues.listForRepo, {",
+      "    owner: context.repo.owner,",
+      "    repo: context.repo.repo,",
+      '    state: "open",',
+      '    labels: "ci-red",',
+      "    per_page: 100,",
+      "  });",
+    ].join("\n"),
+    to: [
+      "  return (await github.rest.issues.listForRepo({",
+      "    owner: context.repo.owner,",
+      "    repo: context.repo.repo,",
+      '    state: "open",',
+      '    labels: "ci-red",',
+      "    per_page: 10,",
+      "  })).data;",
+    ].join("\n"),
+    expect: "with 30 open issues the matching one is still found",
+  },
+  {
+    name: "green closes only the first match, leaving the duplicates open forever",
+    file: ALERT,
+    from: "  for (const issue of matching) {",
+    to: "  for (const issue of matching.slice(0, 1)) {",
+    expect: "green closes every open issue for the ref",
+  },
+  {
+    name: "the title goes back to reading context.ref, so some events name no branch",
+    file: ALERT,
+    from: "  return `CI red on ${refName(context)}`;",
+    to: "  return `CI red on ${String(context.ref || \"\").replace(\"refs/heads/\", \"\")}`;",
+    expect: "no event shape produces a nameless issue",
+  },
+  {
+    name: "the all-clear never runs, so the tracker only ever grows",
+    file: WF,
+    from: "  all-clear:",
+    to: "  all-clear-disabled:",
+    expect: "there is an all-clear job at all",
+  },
+  {
+    // THE TWO HAVE TO WATCH THE SAME JOBS or CI reads as green while a
+    // job the alert counts is still red.
+    name: "the all-clear stops watching the nightly, so a red nightly closes its own issue",
+    file: WF,
+    from: "    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy]\n    if: success()",
+    to: "    needs: [verify, prodtest-smoke, unmerged-branches, bot-on-deploy]\n    if: success()",
+    expect: "the all-clear watches exactly what the alert watches",
+  },
+  {
+    name: "the job stops checking the repository out, so the require finds nothing",
+    file: WF,
+    from: "    steps:\n      - uses: actions/checkout@v4\n        timeout-minutes: 5\n      # ONE OPEN ISSUE AT A TIME",
+    to: "    steps:\n      # ONE OPEN ISSUE AT A TIME",
+    expect: "alert checks the repository out before requiring the module",
   },
 ];
 

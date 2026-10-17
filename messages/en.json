@@ -306,10 +306,8 @@
       "expand": "Expand sidebar",
       "label": "Main",
       "saveFailed": "Could not save that change. Try again.",
-      "recentChats": "Recent chats",
       "untitledChat": "New conversation",
-      "chats": "Chats",
-      "allConversations": "All conversations"
+      "chats": "Chats"
     },
     "tabs": {
       "home": "Home",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "Ionexa Chat",
-      "hideConversations": "Hide conversations",
-      "showConversations": "Show conversations",
-      "focusMode": "Focus mode",
       "streamInterrupted": "The connection dropped before the reply finished.",
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
-      "hideConversationsHint": "Hide the conversation list and give the thread the full width.",
-      "showConversationsHint": "Show the conversation list again.",
       "send": "Send",
       "emptyBody": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation. Not tied to any Ionexa AI module.",
       "composerPlaceholder": "Message Ionexa...",
       "mentorMode": "Mentor Mode",
       "mentorModeHint": "Mentor Mode: strategic guidance instead of just answers — flags risks, asks clarifying questions, suggests alternatives, and uses your logged data as context.",
-      "newChat": "New Chat",
       "noConversations": "No conversations yet.",
       "groupPinned": "Pinned",
       "groupToday": "Today",

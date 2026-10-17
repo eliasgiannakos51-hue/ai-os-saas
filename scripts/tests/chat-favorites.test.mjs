@@ -51,14 +51,28 @@ const slugs = FAVORITABLE.map((f) => f.slug);
 check("no duplicate slug in the registry", new Set(slugs).size === slugs.length);
 
 console.log("\n== 2. the star in the conversation list (α) ==");
-const sidebar = strip(readFileSync("src/components/chat/conversation-sidebar.tsx", "utf8"));
-check("the list renders the shared FavoriteButton", /<FavoriteButton/.test(sidebar));
-check("...against chat_conversations", /table="chat_conversations"/.test(sidebar));
-check("...seeded from the row's own state", /initialFavorited=\{conversation\.is_favorited\}/.test(sidebar));
-check("...and reports the toggle up so the header copy stays in step", /onToggled=\{\(fav\) => onToggleFavorite\(conversation\.id, fav\)\}/.test(sidebar));
+// WHERE THE LIST IS NOW. There were two for a day — a drawer inside
+// Chat and the sidebar's «Recent chats» — and on 2026-10-16 the owner
+// had the sidebar section taken out and the drawer was deleted with it
+// (sidebar-chats.test.mjs asserts the file is gone). One file draws
+// one list, on the Chats page, and this is it.
+const list = strip(readFileSync("src/components/dashboard/conversation-rows.tsx", "utf8"));
+check("the list renders the shared FavoriteButton", /<FavoriteButton/.test(list));
+check("...against chat_conversations", /table="chat_conversations"/.test(list));
+check("...seeded from the row's own state", /initialFavorited=\{Boolean\(row\.is_favorited\)\}/.test(list));
+// NOT BEHIND A VARIANT ANY MORE. The star used to be drawn only when the
+// list was NOT the sidebar's (`{!sidebar && (`), because a 240px column
+// had no room for it. There is no sidebar list, so there is no condition
+// left — and a new one would hide the star on the only screen that has
+// it, which is why its absence is asserted rather than assumed.
+check(
+  "...on every row, with nothing deciding whether it appears",
+  !/\{!sidebar && \(/.test(list) && !/ConversationRowsVariant/.test(list),
+  "a variant around the star would hide it on the only list there is."
+);
 // A starred row must not vanish when the pointer leaves it.
-check("a starred row keeps its star visible at rest", /is_favorited\s*\?\s*"opacity-100"/.test(sidebar));
-check("an unstarred one appears on hover or focus", /focus-within:opacity-100 group-hover\/row:opacity-100/.test(sidebar));
+check("a starred row keeps its star visible at rest", /is_favorited\s*\?\s*"opacity-100"/.test(list));
+check("an unstarred one appears on hover or focus", /focus-within:opacity-100 group-hover\/row:opacity-100/.test(list));
 
 console.log("\n== 3. the star in the open conversation (β) ==");
 const ws = strip(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
@@ -71,8 +85,13 @@ check("...only once a conversation exists", /activeConversation && \(/.test(ws))
 // rename: it still names one exact class pair, and it now names the one
 // that is right in all ten.
 check("...pinned to the trailing edge of the header bar", /ms-auto shrink-0/.test(ws));
-check("...and re-mounts when the sidebar copy toggles", /key=\{`\$\{activeConversation\.id\}:\$\{activeConversation\.is_favorited\}`\}/.test(ws));
-check("the two copies share ONE piece of state", /function toggleFavorite\(id: string, favorited: boolean\)/.test(ws));
+// KEYED ON THE STARRED STATE, NOT JUST THE ID. The button seeds itself
+// from `initialFavorited` once, so without the state in the key it
+// keeps the star it mounted with when the row behind it changes —
+// which is what happens the moment you come back from the Chats page
+// having starred the conversation there.
+check("...and re-mounts when the row behind it changes", /key=\{`\$\{activeConversation\.id\}:\$\{activeConversation\.is_favorited\}`\}/.test(ws));
+check("the header writes the click back onto the row", /function toggleFavorite\(id: string, favorited: boolean\)/.test(ws));
 check("a brand-new conversation starts unstarred", /is_favorited: false/.test(ws));
 
 console.log("\n== 4. the page actually resolves starred state (α+β need real data) ==");
@@ -123,7 +142,7 @@ check("the star fills only when favourited", /fill=\{favorited \? "currentColor"
 check("corner variant still pins at 12px from the trailing corner", /absolute end-3 top-3/.test(btn));
 // Both chat surfaces use the shared button rather than a copy.
 check("the chat surfaces import the shared component, not a fork",
-  /from "@\/components\/favorites\/favorite-button"/.test(sidebar) &&
+  /from "@\/components\/favorites\/favorite-button"/.test(list) &&
   /from "@\/components\/favorites\/favorite-button"/.test(ws));
 
 console.log("\n== 6. the favourites page groups them (γ) ==");

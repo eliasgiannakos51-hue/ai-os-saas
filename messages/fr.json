@@ -306,10 +306,8 @@
       "expand": "Développer la barre latérale",
       "label": "Menu principal",
       "saveFailed": "La modification n’a pas été enregistrée. Réessayez.",
-      "recentChats": "Discussions récentes",
       "untitledChat": "Nouvelle conversation",
-      "chats": "Discussions",
-      "allConversations": "Toutes les discussions"
+      "chats": "Discussions"
     },
     "tabs": {
       "home": "Accueil",
@@ -1346,19 +1344,13 @@
     },
     "chat": {
       "title": "Ionexa Discussion",
-      "hideConversations": "Masquer les conversations",
-      "showConversations": "Afficher les conversations",
-      "focusMode": "Mode concentration",
       "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
       "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète.",
-      "hideConversationsHint": "Masquer la liste des conversations et donner toute la largeur au fil.",
-      "showConversationsHint": "Afficher à nouveau la liste des conversations.",
       "send": "Envoyer",
       "emptyBody": "Posez n'importe quelle question — culture générale, idées, aide à la rédaction ou simple conversation. Sans lien avec un module d'Ionexa AI.",
       "composerPlaceholder": "Écrire à Ionexa...",
       "mentorMode": "Mode mentor",
       "mentorModeHint": "Mode mentor : un accompagnement stratégique plutôt que de simples réponses — signale les risques, pose des questions de clarification, propose des alternatives et s'appuie sur les données que vous avez enregistrées.",
-      "newChat": "Nouvelle discussion",
       "noConversations": "Aucune discussion pour l'instant.",
       "groupPinned": "Épinglées",
       "groupToday": "Aujourd'hui",

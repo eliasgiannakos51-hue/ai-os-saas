@@ -47,24 +47,19 @@ export type RecentPrefs = { pinned: string[]; removed: Record<string, string> };
 export type RecentTool = { href: string; pinned: boolean; lastUsed: string | null };
 
 /**
- * The sidebar's «Πρόσφατες συνομιλίες»: the latest conversations, by
- * last activity (app/dashboard/layout.tsx reads them).
+ * THERE IS NO CAP ON A LIST IN THE SIDEBAR, BECAUSE THERE IS NO LIST.
+ * `RECENT_CONVERSATIONS = 15` lived here — «Το πολύ 15 στο sidebar,
+ * και από κάτω "Όλες οι συνομιλίες"» — until 2026-10-16, when the
+ * owner had the conversations taken out of the sidebar altogether.
+ * The Chats page shows every conversation and carries its own cap,
+ * CHATS_LIST_CAP in lib/chat/conversation-search.ts, which says so on
+ * screen when it bites.
  *
- * FIFTEEN, NOT FIVE, SINCE 2026-10-15 — «Το πολύ 15 στο sidebar, και
- * από κάτω "Όλες οι συνομιλίες"». Five was the right number while the
- * rows were dead links and the real list lived inside Chat; now that
- * they open, rename, pin and delete, this IS the list, and the page
- * underneath it (app/dashboard/chats) is the overflow rather than the
- * only place anything can be done.
- */
-export const RECENT_CONVERSATIONS = 15;
-export type RecentConversation = { id: string; title: string };
-
-/**
- * What a sidebar row needs to be more than a name: whether it is
- * pinned (it sorts into its own group) and when it last changed (the
- * Chats page shows it). Read in the same query as the titles, so the
- * extra columns cost nothing.
+ * What a conversation row needs to be more than a name: whether it is
+ * pinned (it sorts into its own group) and when it last changed. Read
+ * in the same query as the titles, so the extra columns cost nothing.
+ * The name is still Sidebar* because the row component still lives
+ * under components/dashboard and these are its props.
  */
 export type SidebarConversation = {
   id: string;
@@ -73,11 +68,10 @@ export type SidebarConversation = {
   updated_at: string;
   /** Starred, from user_favorites — NOT a column on the conversation
    *  (lib/favoritable.ts: favourites are one shared table across every
-   *  module). Loaded only by the Chats page, which is where the star
-   *  moved to when the list inside Chat went: the sidebar's «⋯» menu
-   *  has the four actions the owner named and the star is not one of
-   *  them, so the full list is where it has room to live. Absent in
-   *  the sidebar, which never draws it. */
+   *  module). Loaded by the Chats page, the only place the rows are
+   *  drawn: the «⋯» has the four actions the owner named and the star
+   *  is not one of them, so it sits beside the menu where there is
+   *  room. */
   is_favorited?: boolean;
 };
 

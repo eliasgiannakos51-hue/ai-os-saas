@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -64,8 +65,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // THE KEY IS NOT A PARAMETER ANY MORE. This asked for
+    // ANTHROPIC_API_KEY by name, so an install holding only another
+    // provider's key refused every report while a provider sat there
+    // able to answer — and it then carried the key down through
+    // runResearchChunk into research.ts, which no longer touches an SDK
+    // at all. The registry answers "is anything configured" instead; a
+    // chain that is empty for THIS purpose comes back from runCompletion
+    // as no_provider, which the paths below already settle.
+    if (!anyProviderConfigured(process.env)) {
       return NextResponse.json({ ok: false, error: "The AI service is not configured." }, { status: 503 });
     }
 

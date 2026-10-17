@@ -201,6 +201,12 @@ export async function runCompletion(
         reportedModel: response.reportedModel,
         text: response.text,
         toolCalls: response.toolCalls,
+        // SPREAD, NOT ASSIGNED, so an adapter that reports no citations
+        // leaves the key OFF the result rather than setting it to
+        // undefined. `"citations" in result` is the question Deep
+        // Research asks, and `{ citations: undefined }` answers it the
+        // wrong way round — see AiResult.citations in types.ts.
+        ...(response.citations ? { citations: response.citations } : {}),
         usage: response.usage,
         stopReason: response.stopReason,
         attempts,

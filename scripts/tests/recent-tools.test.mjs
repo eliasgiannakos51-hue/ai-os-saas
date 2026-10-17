@@ -125,12 +125,18 @@ check("no metadata is no preferences", JSON.stringify(R.readRecentPrefs(null)) =
 
 console.log("\n== 4. the rows, and which is active ==");
 check(
-  "the fixed rows are New, Chat, Coding, All tools, in that order",
-  RAIL.RAIL_ROWS.map((r) => r.key).join() === "new,chat,coding,allTools"
+  "the fixed rows are New, Chats, Coding, All tools, in that order",
+  RAIL.RAIL_ROWS.map((r) => r.key).join() === "new,chats,coding,allTools"
 );
 const act = (p, recent = []) => JSON.stringify(RAIL.activeRail(p, recent, TOOLS));
 check("Home is New", act("/dashboard/overview") === '{"key":"new"}');
-check("a conversation is Chat", act("/dashboard/chat/abc") === '{"key":"chat"}');
+// NOT A RAIL ROW ANY MORE. The second row is «Chats» → the page with
+// every conversation; /dashboard/chat has no row of its own, so the
+// rail lights nothing for it — which is right, and is why
+// lib/nav/tabs.ts adds the route back for the phone's bottom bar,
+// where a Chat tab still exists (mobile-tabs.test.mjs).
+check("the list of every conversation is Chats", act("/dashboard/chats") === '{"key":"chats"}');
+check("a conversation itself lights no rail row", act("/dashboard/chat/abc") === '{"key":"allTools"}');
 check("a recent tool is its own row", act("/dashboard/posts", ["/dashboard/posts"]) === '{"recent":"/dashboard/posts"}');
 check("any other tool is All tools, where it lives", act("/dashboard/posts") === '{"key":"allTools"}');
 check("the account's pages are Settings", act("/dashboard/settings/billing") === '{"key":"settings"}');
@@ -146,7 +152,7 @@ const S = stripComments(readFileSync("src/components/dashboard/sidebar.tsx", "ut
 // that the two rails differ in exactly one row.
 check(
   "the fixed rows come from the one constant",
-  /\{rows\.map\(\(r\) => row\(r\.href, t\(`rail\.\$\{r\.key\}`\)/.test(S) && /railRows\(chatsPage\)/.test(S)
+  /\{rows\.map\(\(r\) => row\(r\.href, t\(`rail\.\$\{r\.key\}`\)/.test(S) && /const rows = RAIL_ROWS;/.test(S)
 );
 check("no group of tools is drawn as rows", !/MAIN_SIDEBAR_GROUPS\)\.map|renderGroup|groups\.map/.test(S));
 check("Recent tools, and its heading, only when there is something in it", /\{list\.length > 0 && \(/.test(S));
@@ -174,28 +180,25 @@ check(
 // actions, so the tag spans several — `[^>]*` stopped at the newline.
 check("and hands the result to the sidebar", /<Sidebar[\s\S]{0,400}recent=\{recent\}/.test(L));
 
-// RECENT CONVERSATIONS, the sidebar's seventh row (ΣΥΣΤΗΜΑ DESIGN §3).
-check(
-  "the layout reads the latest conversations through the person's own session",
-  // `is_pinned` and `updated_at` joined the two columns on 2026-10-15:
-  // the pinned ones group above the rest and the Chats page shows when
-  // each last changed. The shape this check is about — the person's own
-  // session, their own rows, newest first, bounded by the one constant
-  // — is unchanged, and the constant moved 5 -> 15 in the same round.
-  /supabase\s*\.from\("chat_conversations"\)\s*\.select\("id, title, is_pinned, updated_at"\)\s*\.eq\("user_id", user\.id\)\s*\.order\("updated_at", \{ ascending: false \}\)\s*\.limit\(RECENT_CONVERSATIONS\)/.test(L),
-);
-check("...a failed read leaves the list empty rather than failing Recent tools", /if \(!chats\.error\) \{\s*conversations = /.test(L));
-check("...and hands them to the sidebar", /<Sidebar[\s\S]{0,400}conversations=\{conversations\}/.test(L));
-// The row moved into components/dashboard/conversation-rows.tsx when it
-// stopped being a link and became a thing you can rename, pin, file and
-// delete. The sidebar hands it the list; the push lives there.
-check(
-  "each conversation opens that conversation",
-  /router\.push\(`\/dashboard\/chat\?c=\$\{encodeURIComponent\(row\.id\)\}`\)/.test(
-    stripComments(readFileSync("src/components/dashboard/conversation-rows.tsx", "utf8"))
-  ) && /<ConversationRows/.test(S),
-);
-check("...with no heading while there is none, and none in the narrow sidebar", /\{conversations\.length > 0 && !collapsed && \(/.test(S));
+// NO CONVERSATIONS, ANYWHERE IN HERE (owner, 2026-10-16).
+//
+// Three checks stood here: that the layout read the latest
+// conversations through the person's own session, that a failed read
+// left the list empty, and that it handed them to the sidebar. All
+// three described the sidebar's seventh row, which the owner had taken
+// out — «ΑΦΑΙΡΕΣΕ ΤΙΣ ΠΡΟΣΦΑΤΕΣ ΣΥΝΟΜΙΛΙΕΣ ΑΠΟ ΤΟ SIDEBAR». The layout
+// makes neither query now, on any dashboard page.
+//
+// What replaces them is the opposite claim, held where it can be seen:
+// scripts/tests/sidebar-no-chats.prodtest.mjs opens ten pages on a
+// computer and a phone, with ten conversations in the database, and
+// fails on a single one inside the aside. A regex here could only say
+// the markup is absent from one file; the sidebar is drawn by three.
+check("the layout asks for no conversations at all", !/chat_conversations/.test(L), "the sidebar has no list to fill");
+check("...and for no projects either, which only that list needed", !/\.from\("projects"\)/.test(L));
+check("...and hands the sidebar neither", !/conversations=\{/.test(L) && !/projects=\{/.test(L));
+check("the sidebar draws no conversation rows", !/<ConversationRows/.test(S) && !/recent-conversations/.test(S));
+
 check(
   "the pin and remove buttons are 44px targets",
   /aria-label=\{t\(r\.pinned \? "rail\.unpin" : "rail\.pin"[\s\S]{0,120}className="flex h-11 w-11/.test(S) && !/h-8 w-8/.test(S),

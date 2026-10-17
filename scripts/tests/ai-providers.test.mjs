@@ -646,7 +646,11 @@ ok("flattenSystem joins the blocks in order, losing nothing",
   const total = direct + routed;
   const pct = total === 0 ? 0 : Math.round((routed / total) * 1000) / 10;
   console.log(`        ROUTER COVERAGE: ${routed} of ${total} model call sites = ${pct}%   (${directFiles.length} files still call the SDK directly)`);
-  console.log(`        of those files, ${blockedBy.stream.size} need streaming and ${blockedBy.image.size} need an image or a PDF in a message — neither is expressible in AiRequest today`);
+  // WHICH OF THE TWO DOORS IS STILL SHUT, said each time rather than
+  // written as prose that goes stale. The image door opened on
+  // 2026-10-16 (AiImageBlock, the "vision" capability, §5e below); the
+  // streaming door has not.
+  console.log(`        of those files, ${blockedBy.stream.size} need streaming (not expressible in AiRequest today) and ${blockedBy.image.size} send an image (expressible since 2026-10-16, but blocked by the stream in the same file)`);
   ok(`the scan sees both sides (${routed} routed, ${direct} direct)`, routed > 0 && direct > 0,
     "a scan that saw one side only would print a ratio of 0% or 100% and mean nothing either way");
 }
@@ -758,6 +762,169 @@ console.log("\n== 5c. \"IT RAN OUT OF ROOM\" MEANS THE SAME THING FROM ALL FOUR 
     ok(`${name}: ...so modelTextFrom calls it truncated`,
       truncation.modelTextFrom({ text: out?.text ?? "", stopReason: out?.stopReason ?? null }).truncated === true);
   }
+}
+
+// ===========================================================================
+console.log("\n== 5d. THE SOURCES UNDER A REPORT'S CLAIMS ==");
+// ===========================================================================
+//
+// WHAT THIS IS FOR. Deep Research puts a numbered source under every
+// finding, and until 2026-10-16 the per-question call was the last one
+// in the product still speaking to the SDK directly — not because of the
+// search, which the router has done for lib/agents since 2026-10-15, but
+// because AiResult could not carry the CITATIONS Anthropic attaches to
+// its text blocks. Moving it without them would have produced a report
+// whose claims point nowhere, which is worse than one provider's worth
+// of failover is good.
+//
+// THE MAPPING IS RUN, NOT READ, and that is why it is its own file.
+// adapters/anthropic.ts imports the vendor SDK, so load-ts.mjs refuses
+// it and a build gate can only read its text. lib/ai/providers/citations.ts
+// imports nothing, so the rules below are EXECUTED against the shape the
+// API really sends. The one line that joins the two — the adapter
+// calling this function — is checked as source here and driven end to
+// end, through a stubbed fetch, by scripts/tests/research-citations.itest.mjs.
+{
+  const { citationsFromAnthropicContent, citedSources, CITATION_URL_MAX, CITATION_TITLE_MAX } =
+    await loadTs("src/lib/ai/providers/citations.ts");
+
+  const block = (text, citations) => ({ type: "text", text, citations });
+  const cite = (url, title) => ({ type: "web_search_result_location", url, title, cited_text: "…" });
+
+  const two = citationsFromAnthropicContent([
+    block("First.", [cite("https://a.example/1", "One")]),
+    block("Second.", [cite("http://b.example/2", "Two")]),
+  ]);
+  ok("both citations survive, in the order they were cited",
+    two.map((c) => c.url).join(",") === "https://a.example/1,http://b.example/2", JSON.stringify(two));
+  ok("...with their titles", two.map((c) => c.title).join(",") === "One,Two", JSON.stringify(two));
+
+  // A FLOOR UNDER EVERY "IT DROPS X" BELOW. A mapper that returned []
+  // for everything would satisfy each of them and report no sources at
+  // all — which is the failure, not the fix.
+  ok("the mapper returns something at all", two.length === 2, `${two.length}`);
+
+  const deduped = citationsFromAnthropicContent([
+    block("A sentence.", [cite("https://a.example/1", "One"), cite("https://a.example/1", "One again")]),
+    block("Another.", [cite("https://a.example/1", "One a third time")]),
+  ]);
+  ok("one page cited three times is one source", deduped.length === 1, JSON.stringify(deduped));
+  ok("...kept as the FIRST title it was given", deduped[0]?.title === "One", JSON.stringify(deduped));
+
+  // A REPORT TURNS EVERY ONE OF THESE INTO AN ANCHOR
+  // (lib/research/report-to-html.ts), which is the one place a URL stops
+  // being text.
+  for (const bad of ["javascript:alert(1)", "data:text/html,<script>", "/relative", "ftp://x.example", "", "httpsa://x"]) {
+    const got = citationsFromAnthropicContent([block("t", [cite(bad, "t")])]);
+    ok(`"${bad.slice(0, 24)}" is not a source`, got.length === 0, JSON.stringify(got));
+  }
+
+  // CITATIONS RIDE ON THE PROSE THEY SUPPORT. The raw search result
+  // blocks list pages the model looked at and did NOT use; a source list
+  // is what the answer rests on.
+  const nonText = citationsFromAnthropicContent([
+    { type: "web_search_tool_result", content: [cite("https://looked.example", "Looked at")] },
+    { type: "tool_use", id: "t1", name: "x", input: {}, citations: [cite("https://nope.example", "No")] },
+    block("The answer.", [cite("https://used.example", "Used")]),
+  ]);
+  ok("only the text blocks are read",
+    nonText.length === 1 && nonText[0].url === "https://used.example", JSON.stringify(nonText));
+
+  const long = "https://x.example/" + "a".repeat(CITATION_URL_MAX * 2);
+  const capped = citationsFromAnthropicContent([block("t", [cite(long, "T".repeat(CITATION_TITLE_MAX * 2))])]);
+  ok(`a URL is cut at ${CITATION_URL_MAX}`, capped[0]?.url.length === CITATION_URL_MAX, `${capped[0]?.url.length}`);
+  ok(`a title is cut at ${CITATION_TITLE_MAX}`, capped[0]?.title.length === CITATION_TITLE_MAX, `${capped[0]?.title.length}`);
+  // CUT FIRST, THEN DEDUPE. Keying on the raw URL and storing the cut one
+  // would give two entries the same href — [3] and [4] pointing at one
+  // page.
+  const twins = citationsFromAnthropicContent([
+    block("t", [cite(long + "ONE", "a"), cite(long + "TWO", "b")]),
+  ]);
+  ok("two URLs that differ only past the cap become ONE source",
+    twins.length === 1, JSON.stringify(twins.map((c) => c.url.length)));
+
+  ok("an answer with no citations is an empty list, not a crash",
+    JSON.stringify(citationsFromAnthropicContent([block("No search was needed.", undefined)])) === "[]");
+  ok("...and so is no content at all", JSON.stringify(citationsFromAnthropicContent([])) === "[]");
+  ok("a citation with no title falls back to its URL",
+    citationsFromAnthropicContent([block("t", [{ url: "https://u.example/p" }])])[0]?.title === "https://u.example/p");
+
+  // --- and the wiring, which this file can only read ------------------
+  ok("the Anthropic adapter fills citations from this function",
+    /citations:\s*citationsFromAnthropicContent\(response\.content\)/.test(stripTs(anthropicSrc)),
+    "adapters/anthropic.ts must call the mapper, not re-implement it");
+  for (const [name, text] of [["openai", openaiSrc], ["google", googleSrc], ["groq", groqSrc]]) {
+    ok(`${name} leaves citations ABSENT — it cannot report any`,
+      !/\bcitations\b/.test(stripTs(text)),
+      "an empty array here would read as \"the searches found nothing\", which is a different answer");
+  }
+  // SPREAD, NOT ASSIGNED. `{ citations: undefined }` has the key, so
+  // `"citations" in result` answers yes for a provider that cannot
+  // produce any — the one question Deep Research asks.
+  ok("runCompletion spreads the field rather than assigning it",
+    /\.\.\.\(response\.citations \? \{ citations: response\.citations \} : \{\}\)/.test(
+      stripTs(src("src/lib/ai/providers/complete.ts"))
+    ),
+    "complete.ts must not write citations: undefined onto the result");
+
+  // --- ABSENT AND EMPTY, AS A FUNCTION RATHER THAN A SPELLING -------
+  //
+  // RUN, NOT READ. This is the whole distinction the field exists for,
+  // so it is one exported decision that the gate executes — a
+  // `!outcome.citations` written out at each call site could be checked
+  // only as text, and a `?? []` slipped into one of them would read as
+  // "the searches found nothing" for ever.
+  ok("a result that cites nothing has NO sources — null, not []",
+    citedSources({}) === null, JSON.stringify(citedSources({})));
+  ok("...and one that cites an empty list has an empty list",
+    JSON.stringify(citedSources({ citations: [] })) === "[]", JSON.stringify(citedSources({ citations: [] })));
+  ok("the sources themselves come through",
+    JSON.stringify(citedSources({ citations: [{ url: "https://u.example", title: "U" }] })) ===
+      JSON.stringify([{ url: "https://u.example", title: "U" }]));
+  // A COPY, so a caller that sorts or splices a report's source list
+  // cannot reach back into the result the log was written from.
+  {
+    const given = [{ url: "https://u.example", title: "U" }];
+    const got = citedSources({ citations: given });
+    got.push({ url: "https://v.example", title: "V" });
+    ok("...as a copy, not the result's own array", given.length === 1, `${given.length}`);
+  }
+
+  // AND THE CALLER REFUSES THE ABSENCE. A finding whose sources are
+  // unknown must not reach a report as a finding with no sources.
+  const researchSrc = stripTs(src("src/lib/research/research.ts"));
+  ok("research refuses an answer whose provider could not cite",
+    /const sources = citedSources\(outcome\);[\s\S]{0,40}if \(!sources\) \{/.test(researchSrc),
+    "the guard in researchQuestion is gone");
+  ok("...and no longer imports the SDK at all",
+    !/@anthropic-ai\/sdk/.test(researchSrc), "lib/research/research.ts still reaches for the vendor package");
+  // EVERY CALL SITE THAT SEARCHES, NOT JUST THE ONE I REMEMBERED. The
+  // rule is "a request carrying serverWebSearch also REQUIRES the
+  // capability" — the field tells the ADAPTER what to send, `requires`
+  // tells the ROUTER who may be sent it, and a request with the first
+  // and not the second can be handed to a provider with no web access.
+  // That provider refuses with a 400 (refuseUnsupported), which is
+  // classified bad_request and does NOT fail over, so the call dies on
+  // a provider that was never eligible. Ranged over the tree rather
+  // than over the three files I happened to think of.
+  {
+    const searchers = readdirSync("src", { recursive: true })
+      .filter((f) => typeof f === "string" && f.endsWith(".ts"))
+      .map((f) => join("src", f))
+      .filter((f) => statSync(f).isFile() && !f.includes("providers/adapters"))
+      .map((f) => [f, stripComments(readFileSync(f, "utf8"))])
+      .filter(([, text]) => /serverWebSearch:\s*\{/.test(text));
+    ok(`the scan found the call sites that search (${searchers.length})`, searchers.length >= 3,
+      "an empty list would make the check below pass on nothing");
+    const unguarded = searchers
+      .filter(([, text]) => !/requires:\s*\[[^\]]*"server_web_search"/.test(text))
+      .map(([f]) => f);
+    ok("every call that asks for the web also REQUIRES it", unguarded.length === 0, unguarded.join(", "));
+  }
+
+  ok("...and its sources come from that one list, not from parsed prose",
+    /sources,\n/.test(researchSrc) && !/sources: \[\]/.test(researchSrc.split("const sources")[1] ?? ""),
+    researchSrc.split("\n").filter((l) => l.trim().startsWith("sources")).join(" | "));
 }
 
 // ===========================================================================
@@ -913,6 +1080,225 @@ console.log("\n== 5b. FORCING A TOOL: the field 21 call sites depend on ==");
     "an empty list makes the next check pass on nothing");
   const silent = adapterFiles.filter((f) => !DEALS_WITH_CHOICE.test(stripTs(src(f))));
   ok("every adapter deals with the tool choice", silent.length === 0, silent.join(", "));
+}
+
+// ===========================================================================
+console.log("\n== 5e. THE IMAGE DOOR, AND THE CAPABILITY THAT WAS DECLARED WITHOUT EXISTING ==");
+// ===========================================================================
+//
+// TWO HALVES OF ONE RULE: a capability is what the router FILTERS on, so
+// every one of them has to be true of the model it is written against.
+//
+// "streaming" was not. All eleven rows claimed it through BASE and no
+// adapter streams — anthropic.ts awaits one whole messages.create and
+// the three fetch adapters go through postJson, which does
+// `await response.json()`. So `requires: ["streaming"]` passed the
+// filter, routed, and came back buffered. Nothing asked for it yet, so
+// nothing broke; the first caller would have been api/chat.
+//
+// "vision" is the one being added, and it is declared per MODEL because
+// the answer differs inside a provider: Gemini's two rows can see a
+// picture and Groq's two Llama rows cannot.
+{
+  const sharedMod = await loadTs("src/lib/ai/providers/adapters/shared.ts");
+  const { flattenContent, refuseUnsupported, imageBlocksOf } = sharedMod;
+  const { AI_IMAGE_MEDIA_TYPES, isImageBlock } = await loadTs("src/lib/ai/providers/types.ts");
+
+  const img = (media = "image/png") => ({ type: "image", source: { type: "base64", media_type: media, data: "AAAA" } });
+  const withImage = () => ({
+    purpose: "classification",
+    system: [{ type: "text", text: "s" }],
+    messages: [{ role: "user", content: [img(), { type: "text", text: "what is this?" }] }],
+    maxTokens: 16,
+  });
+  const textOnly = { purpose: "classification", system: [], messages: [{ role: "user", content: "hello" }], maxTokens: 16 };
+
+  // --- the declaration, against the catalog itself --------------------
+  ok('"vision" is a capability a request can require', AI_CAPABILITIES.includes("vision"));
+  const seeing = AI_CATALOG.filter((m) => m.capabilities.includes("vision")).map((m) => m.id);
+  ok(`${seeing.length} of ${AI_CATALOG.length} models can see a picture`,
+    seeing.length > 0 && seeing.length < AI_CATALOG.length,
+    "a capability every model has, or none has, is a capability the router cannot route on");
+  ok("...and the two Groq models are the ones that cannot",
+    AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).every((m) => m.provider === "groq") &&
+      !providerSupports("groq", "vision"),
+    AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).map((m) => m.id).join(","));
+
+  // --- "streaming": declared by nobody, because nobody implements it ---
+  const adapterFiles = ["anthropic", "openai", "google", "groq"].map((n) => `src/lib/ai/providers/adapters/${n}.ts`);
+  const anyAdapterStreams = adapterFiles.some((f) =>
+    /\.messages\.stream\s*\(|["']?stream["']?\s*:\s*true|streamSSE|ReadableStream/.test(stripComments(src(f)))
+  );
+  const catalogClaimsStreaming = AI_CATALOG.some((m) => m.capabilities.includes("streaming"));
+  // BOTH WAYS, which is the only version of this check worth having: the
+  // day an adapter can stream, the catalog must say so in the same
+  // commit, and the day the catalog says so, an adapter must do it.
+  ok(`the catalog claims streaming (${catalogClaimsStreaming}) exactly when an adapter can stream (${anyAdapterStreams})`,
+    catalogClaimsStreaming === anyAdapterStreams,
+    "a capability the router filters on must be true of the code underneath it");
+  ok('"streaming" stays a NAME a request can ask for, so the answer can be an honest no',
+    AI_CAPABILITIES.includes("streaming"));
+  {
+    const env = { ANTHROPIC_API_KEY: "k", OPENAI_API_KEY: "k", GOOGLE_API_KEY: "k", GROQ_API_KEY: "k", AI_PROVIDER_ORDER: "anthropic,openai,google,groq" };
+    const chain = resolveChain({ env, purpose: "chat", requires: ["streaming"] });
+    ok("...and asking for it empties the chain rather than routing and buffering",
+      chain.order.length === 0, chain.order.join(","));
+    ok("...with every provider's reason naming the capability",
+      chain.skipped.length === 4 && chain.skipped.every((s) => s.reason.includes("streaming")),
+      chain.skipped.map((s) => `${s.provider}: ${s.reason}`).join("; "));
+  }
+
+  // --- the routing of a picture, run ----------------------------------
+  {
+    const env = { ANTHROPIC_API_KEY: "k", OPENAI_API_KEY: "k", GOOGLE_API_KEY: "k", GROQ_API_KEY: "k", AI_PROVIDER_ORDER: "groq,anthropic,openai,google" };
+    const chain = resolveChain({ env, purpose: "classification", requires: ["vision"] });
+    ok("a request that requires vision skips groq and keeps the other three",
+      chain.order.join(",") === "anthropic,openai,google", chain.order.join(","));
+    ok("...and says why groq was left out",
+      chain.skipped.some((s) => s.provider === "groq" && s.reason.includes("vision")),
+      chain.skipped.map((s) => `${s.provider}: ${s.reason}`).join("; "));
+    ok("...while a text-only classification still reaches groq first",
+      resolveChain({ env, purpose: "classification" }).order[0] === "groq");
+    ok("substituteModel finds no groq model that can see",
+      substituteModel("groq", "mid", ["vision"]) === null);
+    ok(`...and does find one at anthropic (${substituteModel("anthropic", "mid", ["vision"])?.id})`,
+      substituteModel("anthropic", "mid", ["vision"]) !== null);
+    // AND AT THE TWO THAT ARE NOT ANTHROPIC, which is the whole point of
+    // declaring this per model: a picture is the one case where the
+    // cheap providers are genuinely usable.
+    ok(`...and at openai (${substituteModel("openai", "small", ["vision"])?.id}) and google (${substituteModel("google", "small", ["vision"])?.id})`,
+      substituteModel("openai", "small", ["vision"]) !== null && substituteModel("google", "small", ["vision"]) !== null);
+  }
+
+  // --- nothing is flattened away --------------------------------------
+  ok("imageBlocksOf finds the picture in a message", imageBlocksOf(withImage()).length === 1);
+  ok("...and finds none in a text-only request", imageBlocksOf(textOnly).length === 0);
+  ok("isImageBlock tells the two block kinds apart",
+    isImageBlock(img()) === true && isImageBlock({ type: "text", text: "x" }) === false);
+  let flattenThrew = null;
+  try {
+    flattenContent(withImage().messages[0].content);
+  } catch (err) {
+    flattenThrew = err;
+  }
+  // THE DEFECT THIS REPLACES: `content.map((b) => b.text).join()` turned
+  // an image block into the literal string "undefined" and the model
+  // answered about the words alone.
+  ok('flattenContent REFUSES a picture rather than turning it into "undefined"',
+    flattenThrew !== null && flattenThrew.status === 400, String(flattenThrew));
+  ok("...and still flattens plain text",
+    flattenContent([{ type: "text", text: "a" }, { type: "text", text: "b" }]) === "a\n\nb");
+  ok("...and a plain string", flattenContent("a") === "a");
+
+  let groqRefused = null;
+  try {
+    refuseUnsupported("groq", withImage());
+  } catch (err) {
+    groqRefused = err;
+  }
+  ok("groq refuses a request carrying a picture", groqRefused?.status === 400, String(groqRefused));
+  ok("...and the three that can see do not", ["anthropic", "openai", "google"].every((p) => {
+    try {
+      refuseUnsupported(p, withImage());
+      return true;
+    } catch {
+      return false;
+    }
+  }));
+  ok("...and groq still answers a text-only request", (() => {
+    try {
+      refuseUnsupported("groq", textOnly);
+      return true;
+    } catch {
+      return false;
+    }
+  })());
+
+  // --- the bytes each fetch adapter actually sends ---------------------
+  async function bodyFor(file, exportName, model, reply, request) {
+    const mod = await loadTs(file);
+    const real = globalThis.fetch;
+    let body = null;
+    globalThis.fetch = async (_url, init) => {
+      body = JSON.parse(init.body);
+      return new Response(JSON.stringify(reply), { status: 200, headers: { "Content-Type": "application/json" } });
+    };
+    try {
+      await mod[exportName]({ apiKey: "k", model, signal: AbortSignal.timeout(5_000), request });
+    } finally {
+      globalThis.fetch = real;
+    }
+    return body;
+  }
+
+  {
+    const sent = await bodyFor("src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "a cat" } }], usage: {} }, withImage());
+    ok("openai: the probe captured a body", sent !== null, "the adapter did not call fetch");
+    const parts = sent?.messages?.[sent.messages.length - 1]?.content;
+    ok("openai: the picture is sent as a part, not dropped",
+      Array.isArray(parts) && parts.some((p) => p.type === "image_url"), JSON.stringify(parts)?.slice(0, 200));
+    ok("openai: ...as a base64 data URL carrying the media type",
+      parts?.find((p) => p.type === "image_url")?.image_url?.url === "data:image/png;base64,AAAA",
+      JSON.stringify(parts?.find((p) => p.type === "image_url")));
+    ok("openai: ...and the question travels with it, in the order it was given",
+      parts?.map((p) => p.type).join(",") === "image_url,text", JSON.stringify(parts?.map((p) => p.type)));
+    const plain = await bodyFor("src/lib/ai/providers/adapters/openai.ts", "callOpenAi", "openai/gpt-5",
+      { choices: [{ message: { content: "hi" } }], usage: {} }, textOnly);
+    ok("openai: a text-only message is still a plain string, byte-for-byte as before",
+      plain?.messages?.[plain.messages.length - 1]?.content === "hello",
+      JSON.stringify(plain?.messages?.[plain.messages.length - 1]));
+  }
+  {
+    const sent = await bodyFor("src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "a cat" }] } }], usageMetadata: {} }, withImage());
+    ok("google: the probe captured a body", sent !== null, "the adapter did not call fetch");
+    const parts = sent?.contents?.[0]?.parts;
+    ok("google: the picture is an inlineData part",
+      Array.isArray(parts) && parts.some((p) => p.inlineData), JSON.stringify(parts)?.slice(0, 200));
+    ok("google: ...camelCase mimeType, which is this API's spelling",
+      parts?.find((p) => p.inlineData)?.inlineData?.mimeType === "image/png" &&
+        parts?.find((p) => p.inlineData)?.inlineData?.data === "AAAA",
+      JSON.stringify(parts?.find((p) => p.inlineData)));
+    const plain = await bodyFor("src/lib/ai/providers/adapters/google.ts", "callGoogle", "google/gemini-2.5-flash",
+      { candidates: [{ content: { parts: [{ text: "hi" }] } }], usageMetadata: {} }, textOnly);
+    ok("google: a text-only message is still exactly one text part",
+      JSON.stringify(plain?.contents?.[0]?.parts) === JSON.stringify([{ text: "hello" }]),
+      JSON.stringify(plain?.contents?.[0]?.parts));
+  }
+  {
+    let threw = null;
+    try {
+      await bodyFor("src/lib/ai/providers/adapters/groq.ts", "callGroq", "groq/llama-3.3-70b-versatile",
+        { choices: [{ message: { content: "hi" } }], usage: {} }, withImage());
+    } catch (err) {
+      threw = err;
+    }
+    ok("groq: a picture is refused at the adapter too, as a 400 that does not fail over",
+      threw?.status === 400, String(threw));
+  }
+
+  // --- and the rule, over the whole tree ------------------------------
+  //
+  // THE SAME SHAPE AS THE WEB-SEARCH RULE ABOVE. A call site that builds
+  // an image block must also require "vision", or the router can hand
+  // the picture to a model that cannot see it.
+  {
+    const senders = readdirSync("src", { recursive: true })
+      .filter((f) => typeof f === "string" && f.endsWith(".ts"))
+      .map((f) => join("src", f))
+      .filter((f) => statSync(f).isFile() && !f.includes("providers/"))
+      .map((f) => [f, stripComments(readFileSync(f, "utf8"))])
+      .filter(([, text]) => /\brunCompletion\s*\(/.test(text) && /type:\s*"image"/.test(text));
+    ok(`the scan found the call sites that send a picture (${senders.length})`, senders.length >= 1,
+      "an empty list would make the check below pass on nothing");
+    const unguarded = senders.filter(([, text]) => !/"vision"/.test(text)).map(([f]) => f);
+    ok("every routed call that sends a picture also REQUIRES vision", unguarded.length === 0, unguarded.join(", "));
+  }
+
+  ok(`the media types are the ones the app produces (${AI_IMAGE_MEDIA_TYPES.join(", ")})`,
+    AI_IMAGE_MEDIA_TYPES.includes("image/jpeg") && AI_IMAGE_MEDIA_TYPES.includes("image/png") &&
+      AI_IMAGE_MEDIA_TYPES.includes("image/webp") && AI_IMAGE_MEDIA_TYPES.length === 3);
 }
 
 console.log("\n== 6. #13 batch: what qualifies, and the discount applied once ==");

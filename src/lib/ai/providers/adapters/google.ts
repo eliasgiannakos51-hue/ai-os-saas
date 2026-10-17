@@ -8,7 +8,7 @@ import {
   splitPromptTokens,
   wireModelId,
 } from "@/lib/ai/providers/adapters/shared";
-import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/providers/types";
+import { isImageBlock, type AdapterCall, type AdapterResponse, type AiContentBlock, type AiRequest, type AiToolCall } from "@/lib/ai/providers/types";
 
 /**
  * GOOGLE, over the Gemini generateContent API.
@@ -35,7 +35,16 @@ import type { AdapterCall, AdapterResponse, AiToolCall } from "@/lib/ai/provider
  * kind of thing nobody thinks to check. catalog.ts carries both numbers.
  */
 
-const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+// RENAMED FROM `BASE` ON 2026-10-16, and the reason is the loader, not
+// taste. adapters/shared.ts now imports providerSupports from
+// catalog.ts (refuseUnsupported has to know whether this provider has a
+// model that can see), and catalog.ts has its own top-level `BASE` —
+// the capability list every row spreads. scripts/tests/load-ts.mjs
+// bundles a module and its imports into ONE FLAT SCOPE and refuses two
+// files declaring the same top-level name, so the gate died on
+// "BASE is declared at the top level of BOTH". The URL is the one with
+// the vaguer name, so it is the one that moved.
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
 type GeminiResponse = {
   modelVersion?: string;
@@ -52,6 +61,29 @@ type GeminiResponse = {
   } | null;
 };
 
+/**
+ * A message's content as Gemini's `parts`, which is always an array.
+ *
+ * ONE TEXT PART WHEN THERE IS NO PICTURE, which is byte-for-byte what
+ * this adapter sent before — a picture adds parts rather than changing
+ * the shape of every existing request.
+ *
+ * `inlineData`, camelCase, with `mimeType`: the REST v1beta body uses
+ * camelCase throughout while Anthropic's uses snake_case, which is
+ * exactly the sort of difference an adapter exists to absorb. Order is
+ * preserved for the same reason as OpenAI's.
+ */
+function googleParts(content: AiRequest["messages"][number]["content"]): unknown[] {
+  if (typeof content === "string") return [{ text: content }];
+  const blocks = content as AiContentBlock[];
+  if (!blocks.some(isImageBlock)) return [{ text: flattenContent(content) }];
+  return blocks.map((b) =>
+    isImageBlock(b)
+      ? { inlineData: { mimeType: b.source.media_type, data: b.source.data } }
+      : { text: b.text }
+  );
+}
+
 export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
   const { request } = call;
   refuseUnsupported("google", request);
@@ -62,7 +94,7 @@ export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
     contents: request.messages.map((m) => ({
       // "model", not "assistant".
       role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: flattenContent(m.content) }],
+      parts: googleParts(m.content),
     })),
     generationConfig: {
       maxOutputTokens: request.maxTokens,
@@ -99,7 +131,7 @@ export async function callGoogle(call: AdapterCall): Promise<AdapterResponse> {
   }
 
   const raw = (await postJson({
-    url: `${BASE}/${encodeURIComponent(model)}:generateContent`,
+    url: `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent`,
     headers: { "x-goog-api-key": call.apiKey },
     body,
     signal: call.signal,

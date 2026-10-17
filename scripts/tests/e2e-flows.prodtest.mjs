@@ -18,7 +18,6 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { label, labelPattern } from "./lib/label.mjs";
 
 let pass = 0,
   fail = 0;
@@ -293,54 +292,65 @@ for (let round = 1; round <= 3; round++) {
   );
 }
 
-console.log("\n== FLOW 5: Chat — composer, focus mode ==");
+console.log("\n== FLOW 5: Chat — the composer, and no second sidebar ==");
 await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat`, { waitUntil: "networkidle" });
 check("chat loads", new URL(page.url()).pathname, "/dashboard/chat");
 const composer = page.locator("textarea").first();
 checkTrue("the composer is present", await composer.isVisible());
 
-// The focus-mode toggle shipped once as a bare 36x36 icon whose only
-// affordance was a native `title`. It rendered correctly and no user
-// found it. "Renders" is not the same claim as "is findable", so this
-// asserts a VISIBLE text label, not merely existence.
-// IDENTIFIED BY ITS OWN LABEL, not by position.
+// THIS FLOW USED TO DRIVE THE FOCUS-MODE TOGGLE, and the reason is
+// worth keeping: it shipped once as a bare 36x36 icon whose only
+// affordance was a native `title`, rendered correctly, and no user
+// found it — "renders" is not the same claim as "is findable".
 //
-// The previous version built exactly the right locator on the line above
-// — every `[aria-expanded]` that has text, first one — and then MEASURED
-// `button[aria-expanded]` .last() instead. There are eight
-// aria-expanded buttons on the chat page (the help tip, the notification
-// bell, the language selector, the user menu, the sidebar groups); the
-// last of them is an icon-only "?" with no text, so this reported the
-// focus-mode toggle as unlabelled and the assertion below as unchanged,
-// on a toggle that is correctly labelled and does change. The locator
-// was right and unused: a check that inspects something other than what
-// it names.
+// What it opened was the drawer of conversations inside Chat. On
+// 2026-10-16 the owner had the conversations taken out of the sidebar
+// and that drawer went with them, so there is nothing left to toggle.
+// The flow now drives the thing that replaced it: Chat has ONE sidebar
+// beside it, the app's, and no list of conversations anywhere on the
+// screen — which is the claim the removal has to keep true in a real
+// browser, on a real build.
 //
-// The label comes from messages/*.json rather than being spelled here,
-// for the reason lib/label.mjs exists: four other suites waited for a
-// button named "Design my agent" while the product said "Design your
-// agent", and every one of them had the string typed in by hand.
-const toggleCount = await page.locator("button[aria-expanded]").count();
-checkTrue(`a focus-mode toggle exists (${toggleCount} aria-expanded buttons)`, toggleCount >= 1);
-const focusBtn = page
-  .getByRole("button", { name: labelPattern("dashboard.chat.showConversations", ["en"]) })
-  .or(page.getByRole("button", { name: labelPattern("dashboard.chat.hideConversations", ["en"]) }))
-  .first();
-checkTrue("...and it is the one named after conversations, not whichever is last in the DOM",
-  (await focusBtn.count()) > 0,
-  `neither "${label("dashboard.chat.showConversations", "en")}" nor "${label("dashboard.chat.hideConversations", "en")}" is on the page`);
-const labelBefore = (await focusBtn.innerText()).trim();
-checkTrue(`it carries a visible text label ("${labelBefore}")`, labelBefore.length > 2);
-const expandedBefore = await focusBtn.getAttribute("aria-expanded");
-await focusBtn.click();
-await page.waitForTimeout(350);
-const expandedAfter = await focusBtn.getAttribute("aria-expanded");
-checkTrue(`toggling flips aria-expanded (${expandedBefore} -> ${expandedAfter})`, expandedBefore !== expandedAfter);
-const labelAfter = (await focusBtn.innerText()).trim();
-checkTrue(`and the label changes with it ("${labelAfter}")`, labelAfter !== labelBefore);
-await focusBtn.click();
-await page.waitForTimeout(350);
-check("toggling back restores the original state", await focusBtn.getAttribute("aria-expanded"), expandedBefore);
+// (scripts/tests/sidebar-no-chats.prodtest.mjs is the thorough version:
+// ten pages, two devices, ten seeded conversations. This is the one
+// line of it that belongs in the end-to-end walk.)
+const asides = await page.locator('[data-testid="sidebar"]').count();
+check("Chat has exactly one sidebar beside it", asides, 1);
+const chatRows = await page.locator('[data-testid="conversation-row"]').count();
+check("...and no conversation rows anywhere on the screen", chatRows, 0);
+const chatDrawers = await page.locator('[data-testid="recent-conversations"], [data-testid="chat-conversation-sidebar"]').count();
+check("...and no drawer to open one from", chatDrawers, 0);
+
+// AND THE WAY TO THEM IS PRESSED, not merely found. The toggle this
+// flow used to click was the one interaction in the whole walk; taking
+// it out without putting one back would have dropped this file out of
+// interaction-coverage.test.mjs's «drives the page» population, and the
+// two ceilings there would have fallen by one for the wrong reason —
+// a test that stopped clicking reads exactly like a device that was
+// added.
+//
+// So the press is the owner's own route out of Chat: the rail's second
+// row, which says «Chats» and opens the page that now holds every
+// conversation. One click, a real navigation, and the rows that are
+// not in the sidebar are there.
+const chatsRow = page.locator('[data-testid="sidebar"] a[href="/dashboard/chats"]').first();
+checkTrue("the rail has a row to the Chats page", (await chatsRow.count()) > 0);
+await chatsRow.click();
+await page.waitForURL("**/dashboard/chats", { timeout: 15_000 }).catch(() => {});
+check("pressing it opens the Chats page", new URL(page.url()).pathname, "/dashboard/chats");
+const stillOneSidebar = await page.locator('[data-testid="sidebar"]').count();
+check("...which still has one sidebar and no conversations in it", stillOneSidebar, 1);
+// WAITED FOR, NOT COUNTED ON ARRIVAL. waitForURL resolves on the URL,
+// which a client navigation changes before the new page has rendered;
+// counting straight after it read zero on a page that was about to
+// draw the search box. The search is the right anchor either way: the
+// list itself is absent on an account with no conversations, and this
+// walk's account has none.
+const chatsSearch = page.locator('main [data-testid="chats-search"]');
+await chatsSearch.waitFor({ state: "visible", timeout: 15_000 }).catch(() => {});
+checkTrue("...and the conversation list is in the page, not the sidebar",
+  (await chatsSearch.count()) > 0 &&
+    (await page.locator('[data-testid="sidebar"] [data-testid="chats-search"]').count()) === 0);
 
 console.log("\n== FLOW 8: Settings — every tab opens ==");
 await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, { waitUntil: "networkidle" });

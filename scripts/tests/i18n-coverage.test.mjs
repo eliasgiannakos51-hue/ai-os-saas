@@ -871,7 +871,15 @@ const SERVER_PROSE_BASELINE = 672;
 // 26 -> 22 (2026-10-14): the Site page's refused change and its reference
 // images, the Studio's conversation and onboarding's three refused steps
 // say them in the reader's language.
-const CLIENT_FALLBACK_BASELINE = 22;
+// 22 -> 21 (2026-10-16): «Could not delete conversation.» went with the
+// code that said it. Deleting a conversation from inside Chat was a
+// `.delete()` straight from the browser, with getErrorMessage printing
+// the database's own English; the drawer that called it was removed
+// with the sidebar's «Recent chats», and the Chats page's delete goes
+// through api/conversations/[id], which answers codes. Paid off by
+// deletion, not by translation — but a fallback that no longer exists
+// is one that cannot be read, so the ceiling comes down with it.
+const CLIENT_FALLBACK_BASELINE = 21;
 reportBaseline("SERVER_PROSE_BASELINE", SERVER_PROSE_BASELINE, serverErrorProse.length);
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,

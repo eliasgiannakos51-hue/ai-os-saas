@@ -7,7 +7,7 @@
  * Chat is Chat; Coding, All tools and every tool — a recent one
  * included — are Tools; Settings is You.
  */
-import { CHATS_HREF, RAIL_ROWS, activeRail } from "@/lib/nav/rail";
+import { RAIL_ROWS, activeRail } from "@/lib/nav/rail";
 
 export const TABS = [
   { key: "home", href: "/dashboard/overview" },
@@ -25,14 +25,14 @@ export type TabKey = (typeof TABS)[number]["key"];
  */
 export function activeTab(pathname: string | null): TabKey | null {
   if (!pathname) return null;
-  // BOTH ROWS, because activeRail is asked with the DEFAULT rails here
-  // and the switch `chats-page` is not readable from a pure function.
-  // Without the second case /dashboard/chats would light the Tools tab
-  // on a phone — the page is under /dashboard and nothing else claims
-  // it — and the bottom bar would disagree with the sidebar about
-  // where the reader is. Listing both is also right when the switch is
-  // off: /dashboard/chats is simply never reached then.
-  const rail = activeRail(pathname, [], [], [...RAIL_ROWS, { key: "chats" as const, href: CHATS_HREF }]);
+  // THE CHAT ROUTE IS ADDED BACK FOR THIS ONE QUESTION, because the
+  // bottom bar still has a Chat tab and the sidebar no longer has a
+  // Chat row. RAIL_ROWS's second entry is «Chats» → /dashboard/chats
+  // since 2026-10-16, so asking activeRail alone would hand the chat
+  // page — and anything under it — to the Tools tab: every chat screen
+  // lighting the wrong tab on every phone. Both rows are in the list
+  // below, and both lead to the same tab.
+  const rail = activeRail(pathname, [], [], [...RAIL_ROWS, { key: "chat" as const, href: "/dashboard/chat" }]);
   if (rail && "key" in rail) {
     if (rail.key === "new") return "home";
     if (rail.key === "chat" || rail.key === "chats") return "chat";

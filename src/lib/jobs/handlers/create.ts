@@ -1,7 +1,8 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildCachedSystem } from "@/lib/ai/cached-system";
+import { runCompletion } from "@/lib/ai/providers/complete";
+import type { AiCapability, AiContentBlock, AiImageBlock } from "@/lib/ai/providers/types";
 import { logApiError } from "@/lib/log-error";
 import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarification";
 import { getUserFullContext, buildUserContextPromptAdditionEnglish } from "@/lib/user-context";
@@ -125,12 +126,14 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
 
   await ctx.progress(2, steps[1]);
 
-  const anthropic = new Anthropic({ apiKey: ctx.apiKey });
-  const userContent: Anthropic.MessageParam["content"] =
+  // THE PICTURES FIRST, THE QUESTION LAST, which is the order the prompt
+  // was written for: "log this as a new product idea" reads as being
+  // about the photographs above it.
+  const userContent: string | AiContentBlock[] =
     attachmentImages.length > 0
       ? [
           ...attachmentImages.map(
-            (image): Anthropic.ImageBlockParam => ({
+            (image): AiImageBlock => ({
               type: "image",
               source: { type: "base64", media_type: image.mediaType, data: image.base64 },
             })
@@ -139,31 +142,50 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
         ]
       : message;
 
-  const response = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 1024,
-    // buildSystemPrompt() is the Create Studio module catalogue — 11,022
-    // characters (~2,756 tokens) generated from CLASSIFIER_MODULES, and
-    // identical on every Create Anything call in the app. The three
-    // additions after it are per-request and each starts with "\n\n" or
-    // is empty, so the split is byte-exact. See lib/ai/cached-system.ts.
-    system: buildCachedSystem({
-      staticPrefix: buildSystemPrompt(),
-      dynamicSuffix:
-        agentRoleSystemPromptAddition(agentRole) +
-        userContext +
-        buildMissionContextSystemPromptAddition(priorStepsContext ?? ""),
-      model: MODEL,
-    }),
-    messages: [{ role: "user", content: userContent }],
-    tools: [ROUTE_ENTRY_TOOL],
-    tool_choice: { type: "tool", name: "route_entry" },
-  });
-  ctx.costs.record("classification", response.usage, response.model || MODEL);
+  // AND THE ROUTER IS TOLD, not left to find out. A provider with no
+  // vision model is ruled out BEFORE the call rather than answering
+  // about the words of a message whose subject is the picture — and the
+  // adapters refuse one that reached them anyway (refuseUnsupported).
+  // Asked for only when there IS a picture: a text-only classification
+  // must still be servable by a model that cannot see.
+  const requires: AiCapability[] =
+    attachmentImages.length > 0 ? ["tool_calling", "vision"] : ["tool_calling"];
 
-  const toolUse = response.content.find(
-    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  const outcome = await runCompletion(
+    {
+      purpose: "classification",
+      model: MODEL,
+      maxTokens: 1024,
+      // buildSystemPrompt() is the Create Studio module catalogue — 11,022
+      // characters (~2,756 tokens) generated from CLASSIFIER_MODULES, and
+      // identical on every Create Anything call in the app. The three
+      // additions after it are per-request and each starts with "\n\n" or
+      // is empty, so the split is byte-exact. See lib/ai/cached-system.ts.
+      system: buildCachedSystem({
+        staticPrefix: buildSystemPrompt(),
+        dynamicSuffix:
+          agentRoleSystemPromptAddition(agentRole) +
+          userContext +
+          buildMissionContextSystemPromptAddition(priorStepsContext ?? ""),
+        model: MODEL,
+      }),
+      messages: [{ role: "user", content: userContent }],
+      tools: [ROUTE_ENTRY_TOOL],
+      // Forced: the tool's schema IS the answer. Left to decide, the
+      // model can reply in prose, toolCalls comes back empty, and the
+      // account has already paid for a call with nothing to read.
+      toolChoice: { type: "tool", name: "route_entry" },
+      requires,
+    },
+    { userId: ctx.userId }
   );
+  // IT STILL THROWS, deliberately. The job framework's own catch is what
+  // marks the job failed and refunds the hold (lib/jobs/run-job.ts); a
+  // quiet "no classification" return here would file nothing AND charge.
+  if (!outcome.ok) throw new Error("The AI service did not answer the classification.");
+  ctx.costs.record("classification", outcome.usage, outcome.reportedModel || outcome.model);
+
+  const toolUse = outcome.toolCalls.find((callMade) => callMade.name === ROUTE_ENTRY_TOOL.name);
   if (!toolUse) throw new Error("The model did not return a classification.");
   const toolInput = toolUse.input as RouteEntryInput;
 

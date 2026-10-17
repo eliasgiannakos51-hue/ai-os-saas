@@ -43,6 +43,17 @@ const supa = await startMockSupabase({
   port: 54365,
   tableRows: {
     user_credits: [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }],
+    // THE ONE SWITCH THIS SUITE HAS TO PIN, and it is not the one it
+    // tests. This file drives the conversation drawer INSIDE Chat, and
+    // #293 stopped drawing that drawer and its toggle whenever
+    // `chats-page` is on — rightly, because the sidebar's own rows do
+    // the job now and ΣΥΣΤΗΜΑ DESIGN §3 allows one sidebar per screen.
+    // `chats-page` is staff-default and this server's account IS the
+    // test account, so without this row the button the suite presses
+    // does not exist. Pinned off here, for the test, not for anybody.
+    // When the drawer is deleted for good, this block moves to the
+    // rail's «New» row and this row goes with it.
+    feature_flags: [{ key: "chats-page", audience: "off" }],
   },
 });
 
@@ -220,20 +231,27 @@ try {
     check("...without asking the model in the conversation", asked.chat === 0);
     check("...and the changed site is shown", (await pane.isVisible()) && ((await page.locator('[data-testid="chat-site-preview"] iframe').getAttribute("srcdoc")) ?? "").includes("Ωράριο: 9–21"));
 
-    // ---- «Νέα συνομιλία» leaves the site behind
-    // A site opened in a conversation that never reached /api/chat has no
-    // conversation id to change, so «Νέα συνομιλία» changed nothing the pane
-    // was closed on, and the next sentence went to the site as a charged
-    // change instead of starting the new conversation.
+    // ---- a NEW conversation leaves the site behind
+    //
+    // THE SAME MONEY QUESTION, ASKED OF THE ROUTE THAT REPLACED THE
+    // BUTTON. A site opened in a conversation that never reached
+    // /api/chat has no conversation id, so until package 7 the pane
+    // outlived «Νέα συνομιλία» and the next sentence went to the site
+    // as a CHARGED change instead of starting the new conversation.
+    //
+    // That button lived in the conversation drawer inside this screen,
+    // and the drawer went on 2026-10-16 when the owner had the
+    // conversation list taken out of the sidebar. Starting a new
+    // conversation is a navigation now — the rail's «New» — so this
+    // asks the same question of a navigation: the workspace remounts,
+    // and nothing may carry the pane across it.
     if (device.touch) {
       await press(page.locator('[data-testid="chat-site-back"]'));
       await page.waitForTimeout(300);
     }
     const chatsBefore = asked.chat;
-    await press(page.getByRole("button", { name: el.dashboard.chat.showConversations }));
-    await press(page.getByRole("button", { name: el.dashboard.chat.newChat }));
-    await page.waitForTimeout(300);
-    check("«Νέα συνομιλία» closes the site", (await pane.count()) === 0 && (await page.locator('[data-testid="chat-site-reopen"]').count()) === 0);
+    await page.goto(`${ON}/dashboard/chat`, { waitUntil: "networkidle" });
+    check("a new conversation leaves the site behind", (await pane.count()) === 0 && (await page.locator('[data-testid="chat-site-reopen"]').count()) === 0);
     await say("καλημέρα");
     check("...and the next sentence starts the new conversation, not a change to the site", asked.chat === chatsBefore + 1 && asked.edit.length === 1, JSON.stringify(asked));
 

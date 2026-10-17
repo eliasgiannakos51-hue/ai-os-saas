@@ -51,7 +51,12 @@ const { MAX_CONVERSATION_TITLE_LENGTH, normaliseConversationTitle } = await load
 );
 
 const routeSrc = readFileSync("src/app/api/conversations/[id]/route.ts", "utf8");
-const sidebarSrc = readFileSync("src/components/chat/conversation-sidebar.tsx", "utf8");
+// THE LIST OF CONVERSATIONS. It was a drawer inside Chat, then also the
+// sidebar's «Recent chats», and since 2026-10-16 it is the Chats page
+// and nothing else — the owner had the sidebar section taken out and
+// the drawer file was deleted in the same round
+// (scripts/tests/sidebar-chats.test.mjs asserts it is gone).
+const listSrc = readFileSync("src/components/dashboard/conversation-rows.tsx", "utf8");
 const workspaceSrc = readFileSync("src/components/chat/chat-workspace.tsx", "utf8");
 // The editor itself moved out of the sidebar: the name is shown in TWO
 // places now — the list, and the header above the open conversation —
@@ -65,7 +70,7 @@ function stripComments(src) {
   return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 }
 const routeCode = stripComments(routeSrc);
-const sidebarCode = stripComments(sidebarSrc);
+const listCode = stripComments(listSrc);
 const workspaceCode = stripComments(workspaceSrc);
 const inlineCode = stripComments(inlineSrc);
 
@@ -130,8 +135,16 @@ check("counted excluding the conversation being changed", /\.neq\("id", params\.
 // The one that matters most. Unpinning is never checked against the cap,
 // or lowering a limit locks the account above it forever.
 check("the cap is checked only when pinning", /if \(pinned\) \{/.test(routeCode));
-check("the client no longer writes is_pinned straight to the table", !/from\("chat_conversations"\)[\s\S]{0,200}is_pinned/.test(workspaceCode));
-check("it PATCHes the route instead", /fetch\(`\/api\/conversations\/\$\{id\}`/.test(workspaceCode));
+// READ ACROSS BOTH SURFACES, not just the one that happens to pin
+// today. Pinning moved from the open conversation to the list's «⋯»
+// menu on 2026-10-16; a check that only looked at the file the code
+// LEFT would have gone green by the code being deleted.
+const pinSurfaces = [["list", listCode], ["header", workspaceCode]];
+checkList(
+  "no surface writes is_pinned straight to the table",
+  pinSurfaces.filter(([, code]) => /from\("chat_conversations"\)[\s\S]{0,200}is_pinned/.test(code)).map(([w]) => w)
+);
+check("it PATCHes the route instead", /method: "PATCH"/.test(listCode) && /conversationDeleteUrl\(id\)/.test(listCode));
 // RLS is still the ownership control, and the route says so rather than
 // pretending its own .eq is what keeps accounts apart.
 check("ownership is still checked server-side", /\.eq\("user_id", user\.id\)/.test(routeCode));
@@ -140,7 +153,7 @@ check("and unauthenticated callers are refused", /fail\("not_authenticated", 401
 console.log("\n== 4. running out of pins is not a billing event ==");
 check("the route returns the cap and the count", /fail\("pin_limit", 409, \{ limit, pinned/.test(routeCode));
 check("as 409, not 402", /"pin_limit", 409/.test(routeCode) && !/402/.test(routeCode));
-check("the client shows the numbers", /code === "pin_limit"/.test(workspaceCode) && /limit: data\.limit/.test(workspaceCode));
+check("the client shows the numbers", /json\.code === "pin_limit"/.test(listCode) && /limit: json\.limit \?\? 0/.test(listCode));
 // Every locale has to say "unpin one", and none of them may reach for
 // the upgrade vocabulary — that is the difference between a tidiness
 // limit and a paywall, and it is invisible in code review.
@@ -236,23 +249,24 @@ check("and there is no auto_title column to drift", !/auto_title/.test(routeCode
 check("a title survives unchanged when it is already fine", normaliseConversationTitle("  Quarterly plan ") === "Quarterly plan");
 
 console.log("\n== 6. inline edit: four ways in, autosave, Escape out ==");
-// ONE EDITOR, TWO PLACES. The name is in the sidebar list and above the
-// open conversation, and both have to be editable — the sidebar is
-// hidden in focus mode and hidden by default at 375px, so before this
-// the open conversation had no name on screen at all on a phone.
-check("the sidebar uses the shared editor", /<InlineTitle/.test(sidebarCode));
+// ONE EDITOR, TWO PLACES. The name is on the Chats page's list and
+// above the open conversation, and both have to be editable — the list
+// is a different screen from the open conversation now, so without the
+// header the name could not be changed from the thread you were
+// reading at all.
+check("the list uses the shared editor", /<InlineTitle/.test(listCode));
 check("so does the header", /<InlineTitle/.test(workspaceCode));
 checkList(
   "and neither keeps an editor of its own",
   [
-    ["sidebar", /onKeyDown=\{\(e\) =>[\s\S]{0,200}Escape/.test(sidebarCode)],
+    ["list", /onKeyDown=\{\(e\) =>[\s\S]{0,200}Escape/.test(listCode)],
     ["header", /maxLength=/.test(workspaceCode)],
   ]
     .filter(([, bad]) => bad)
     .map(([where]) => where)
 );
 check("double-click starts a rename", /onDoubleClick=\{start\}/.test(inlineCode));
-check('the "..." menu still does too', /onClick=\{\(\) => startRename\(conversation\)\}/.test(sidebarCode));
+check('the "..." menu still does too', /label=\{t\("rename"\)\} onClick=\{\(\) => \{ setMenuFor\(null\); setRenamingId\(row\.id\); \}\}/.test(listCode));
 // A touch screen has no double-click. Without this the gesture people
 // try first does nothing at all on a phone, and the menu is the only
 // route — on the device where menus are hardest to hit.
@@ -265,7 +279,7 @@ check(
 check("and its timer is cleared on unmount", /clearTimeout\(longPressRef\.current\)/.test(inlineCode));
 // The click that ENDS a long press would otherwise navigate away from
 // the row that just opened for editing.
-check("the click ending a long press does not change conversation", /if \(isRenaming\) return;/.test(sidebarCode));
+check("the click ending a long press does not change conversation", /if \(isRenaming \|\| longPressed\.current\) return;/.test(listCode));
 check("leaving the field saves", /onBlur=\{commit\}/.test(inlineCode));
 check("Enter saves", /e\.key === "Enter"/.test(inlineCode));
 check("Escape cancels", /e\.key === "Escape"\)\s*\{[\s\S]{0,120}?cancel\(\);/.test(inlineCode));
@@ -290,9 +304,25 @@ check("the rename goes through the route", /fetch\(`\/api\/conversations\/\$\{id
 // 100 until the next reload.
 check("and the saved row is echoed back over the optimistic title", /data\.conversation\.title/.test(workspaceCode));
 check("a failed rename puts the old name back", /previousTitle/.test(workspaceCode));
-check("a failed pin puts the old state back", /revert\(\)/.test(workspaceCode));
+// PIN IS THE LIST'S, NOT THE OPEN CONVERSATION'S. Pinning and deleting
+// were on the drawer inside Chat; the drawer went with the sidebar's
+// «Recent chats» on 2026-10-16 and both moved to the row's «⋯» menu.
+// The header above an open conversation still renames and still stars,
+// which is why rename is read from the workspace and pin from the list.
+check("the pin goes through the route too", /patch\(row\.id, \{ is_pinned: next \}/.test(listCode));
+check("a failed pin puts the old state back", /if \(!ok\) setRows\(\(prev\) => prev\.map\(\(c\) => \(c\.id === row\.id \? \{ \.\.\.c, is_pinned: !next \}/.test(listCode));
+// AND THE DELETE DOES NOT GO STRAIGHT AT THE TABLE. It used to be a
+// `.delete()` from this browser, which RLS made safe but which only
+// worked on a screen holding the whole list. There are no such screens
+// in Chat any more, and the route is where «μόνο στις δικές μου» is
+// proved against two real accounts.
+check(
+  "nothing in Chat deletes a conversation from the browser",
+  !/from\("chat_conversations"\)[\s\S]{0,80}\.delete\(\)/.test(workspaceCode),
+  "api/conversations/[id] owns the delete; a second path around it is what the route was written to replace."
+);
 
-console.log("\n== 7. no English error reaches a Greek sidebar ==");
+console.log("\n== 7. no English error reaches a Greek screen ==");
 // Every other route in this app answers with an English sentence that the
 // client prints verbatim; i18n-coverage.test.mjs counts them because that
 // is a known gap, and the fix it names is stable error CODES with the
@@ -305,18 +335,30 @@ checkList(
   [...routeCode.matchAll(/error: "[A-Z][^"]{8,}"/g)].map((m) => m[0])
 );
 check("every failure is an identifier", /type ConversationErrorCode/.test(routeSrc) && /return fail\(/.test(routeCode));
-// Scoped to the two functions that talk to this route. The rest of the
+// Scoped to the code that talks to THIS route, which is now in two
+// files: renameConversation in the header, and the shared `patch` the
+// list's rename, pin and move all go through. The rest of either
 // component still surfaces other routes' English prose, which is the
-// app-wide gap i18n-coverage.test.mjs already counts — asserting it here
-// would be asserting someone else's work.
-const pinAndRename = workspaceCode.slice(
-  workspaceCode.indexOf("async function togglePin"),
-  workspaceCode.indexOf("async function deleteConversation")
+// app-wide gap i18n-coverage.test.mjs already counts — asserting it
+// here would be asserting someone else's work.
+const renameFn = workspaceCode.slice(
+  workspaceCode.indexOf("async function renameConversation"),
+  workspaceCode.indexOf("async function deleteMessage") + 1 || workspaceCode.length
 );
-check("the slice really covers both functions", pinAndRename.includes("renameConversation") && pinAndRename.length > 400);
+const patchFn = listCode.slice(
+  listCode.indexOf("const patch = useCallback("),
+  listCode.indexOf("function rename(id: string, title: string)")
+);
+check(
+  "the slices really cover the code that calls the route",
+  renameFn.includes("renameError") && renameFn.length > 400 &&
+    patchFn.includes("conversationDeleteUrl(id)") && patchFn.length > 400,
+  `rename ${renameFn.length} chars, patch ${patchFn.length} chars`
+);
 check(
   "and the client never renders the server's own words",
-  !/getErrorMessage\(|data\?\.error|data\.error/.test(pinAndRename)
+  !/getErrorMessage\(|data\?\.error|data\.error|json\.error/.test(renameFn) &&
+    !/getErrorMessage\(|json\?\.error|json\.error/.test(patchFn)
 );
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

@@ -425,11 +425,34 @@ try {
         return { seen, greeting: (empty.querySelector("h1")?.textContent ?? "").trim(), column: column.innerText ?? "" };
       });
       const greetings = Object.values(L.promise.greeting);
+      // ONE PRESS FROM HOME ON A PHONE; ON A COMPUTER, NO PRESS AT ALL.
+      //
+      // #293 turned the rail's «Chat» row into «Chats» → /dashboard/chats,
+      // because «New» already opens an empty conversation and two rows
+      // doing the same thing meant one of them earned nothing. It was
+      // behind the switch `chats-page` for a day; on 2026-10-16 the owner
+      // had the conversations taken out of the sidebar and the switch
+      // went with them, so the computer's rail has no row to the chat for
+      // ANY account now — not just the staff one. The phone's bottom bar
+      // still has a Chat tab (lib/nav/tabs.ts TABS), so only the computer
+      // loses the press.
+      //
+      // The property under test is THE EMPTY CHAT — the earth, the
+      // greeting, the field and nothing else. Which control reaches it is
+      // sidebar-no-chats.prodtest.mjs's to hold, and it does: the rail
+      // says «Chats», never «Chat», and goes to /dashboard/chats.
       const openChat = async () => {
         await page.goto(`${ORIGIN}/dashboard/overview`, { waitUntil: "networkidle" });
-        const toChat = navLink("/dashboard/chat", "chat", "chat");
-        if ((await toChat.count()) > 0) await press(toChat.first());
-        await page.waitForURL(/\/dashboard\/chat/, { timeout: 15000 }).catch(() => {});
+        if (device.touch) {
+          const toChat = navLink("/dashboard/chat", "chat", "chat");
+          if ((await toChat.count()) > 0) await press(toChat.first());
+          // ANCHORED, because /dashboard/chats also matches
+          // /dashboard/chat and a press that landed on the list of every
+          // conversation would have satisfied the loose pattern.
+          await page.waitForURL(/\/dashboard\/chat(\?|$)/, { timeout: 15000 }).catch(() => {});
+        } else {
+          await page.goto(`${ORIGIN}/dashboard/chat`, { waitUntil: "networkidle" });
+        }
         return page.getByTestId("chat-empty").waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
       };
 
@@ -437,11 +460,20 @@ try {
         { label: "a paid account", set: { tier: "growth", name: "Ελένη" }, name: "Ελένη" },
         { label: "a new account with no name", set: { tier: "growth" }, name: null },
         { label: "a Free account", set: { tier: "free", name: "Ελένη" }, name: "Ελένη" },
+        // ON A COMPUTER NO ACCOUNT HAS A RAIL ROW TO THE CHAT, so this
+        // persona carries no `railRow` of its own: openChat decides from
+        // the device alone. It DID carry one for a day, when the rail's
+        // «Chats» row was behind `chats-page` and the switch was on for
+        // the test account only — the split went with the switch.
         { label: "the test account, every switch on", set: { email: STAFF, tier: "growth", name: "Ελένη" }, name: "Ελένη" },
       ]) {
         account(who.set);
         const shown = await openChat();
-        check(`${tag}: ${who.label}: the Chat opens empty, one press from Home`, shown && /\/dashboard\/chat/.test(page.url()), page.url());
+        check(
+          `${tag}: ${who.label}: the Chat opens empty${device.touch ? ", one press from Home" : ""}`,
+          shown && /\/dashboard\/chat(\?|$)/.test(page.url()),
+          page.url()
+        );
         const e = shown ? await extras() : null;
         check(`${tag}: ${who.label}: the earth, the greeting and the field — nothing else in the column, under the field included`,
           Boolean(e) && e.seen.length === 0, JSON.stringify(e?.seen));

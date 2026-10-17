@@ -305,6 +305,19 @@ for (const [what, held] of CARRIED) check(`carried over: ${what}`, held());
     /lastDeepLink\.current === initialConversationId\) return;/.test(workspace) && !/deepLinkedRef/.test(workspace),
     "a boolean here is the defect: it opens the first conversation and silently ignores the second"
   );
+  // AND THE NAME IN THE TITLE ROW IS THE NAME IN THE COLUMN.
+  //
+  // The rows keep their own copy and refresh the page after every
+  // write; the workspace seeded its list once and ignored what came
+  // back, so a conversation renamed in the column carried its new
+  // name there and its OLD name above the thread, both on screen at
+  // once. Measured by sidebar-chats.prodtest.mjs §1b on 2026-10-17.
+  check(
+    "...and the list follows the server after the column writes to it",
+    /useEffect\(\(\) => setConversations\(initialConversations\), \[initialConversations\]\);/.test(workspace) &&
+      /router\.refresh\(\)/.test(rowsSrc2),
+    "two copies of one conversation's name, visible at the same time, disagreeing"
+  );
 }
 
 // AND THE LIST THE COLUMN DRAWS IS THIS ACCOUNT'S, said by the query

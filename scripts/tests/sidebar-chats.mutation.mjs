@@ -239,6 +239,13 @@ const MUTANTS = [
       expect: "the deep link follows the address every time it changes, not once per mount",
     },
     {
+      name: "the chat screen stops following the server after a rename",
+      file: CHAT_WORKSPACE,
+      from: "  useEffect(() => setConversations(initialConversations), [initialConversations]);",
+      to: "",
+      expect: "the list follows the server after the column writes to it",
+    },
+    {
       name: "the chat page leaves its conversation list to the policy alone",
       file: CHAT_PAGE,
       from: '      .select("id, title, is_pinned, created_at, updated_at")\n      .eq("user_id", user.id)',

@@ -172,6 +172,26 @@ export function ChatWorkspace({
   }, []);
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
+  // AND IT FOLLOWS THE SERVER AGAIN WHEN THE SERVER SPEAKS.
+  //
+  // Seeded once was enough while nothing on this screen changed a
+  // conversation's name. The column does (owner, 2026-10-17): its «⋯»
+  // renames, pins, moves and deletes through api/conversations/[id]
+  // and then calls router.refresh(), which re-renders the page and
+  // hands this component a fresh list — which it used to ignore.
+  //
+  // WHAT THAT LOOKED LIKE, measured by sidebar-chats.prodtest.mjs §1b
+  // on 2026-10-17: the renamed conversation carried its new name in
+  // the column (components/dashboard/conversation-rows.tsx keeps its
+  // own rows and had updated them) and its OLD name in the title row
+  // above the thread. Two copies of one conversation's name, visible
+  // at the same time, disagreeing — the same shape as the favourite
+  // star that is recorded in components/chat/inline-title.tsx.
+  //
+  // The optimistic updates below are not lost to this: nothing that
+  // makes one calls router.refresh(), so no server render lands on
+  // top of them.
+  useEffect(() => setConversations(initialConversations), [initialConversations]);
   const [activeId, setActiveId] = useState<string | null>(null);
   // THE WORK AREA (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2): which answer is open beside
   // the conversation, if any. Closed when the conversation changes.

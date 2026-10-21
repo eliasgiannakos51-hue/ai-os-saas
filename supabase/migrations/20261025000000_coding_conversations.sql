@@ -119,7 +119,17 @@ create policy "delete_own_code_messages" on public.code_messages
 -- needed and code_messages does not: a turn is written once and is
 -- never edited in place. (chat_messages' own update policy is for its
 -- rating column, added later — 20261016000000_chat_message_rating.sql —
--- which code_messages has no equivalent of yet.)
+-- which code_messages has no equivalent of yet.) With RLS on and no
+-- UPDATE policy, `authenticated` is already refused — but Supabase's
+-- own ALTER DEFAULT PRIVILEGES still hands every new table's UPDATE
+-- grant to `authenticated` regardless, which is exactly the
+-- (table, verb) shape db_exposure_report() calls grant_without_policy
+-- (20260917000000_db_exposure_report.sql) and
+-- 20260926000000_revoke_authenticated_grants_without_policy.sql swept
+-- for every table that existed before it — a one-time sweep, not a
+-- standing rule, so a table created after it (this one) still has to
+-- revoke its own uncovered verb.
+revoke update on public.code_messages from authenticated;
 
 drop trigger if exists set_updated_at on public.code_conversations;
 create trigger set_updated_at before update on public.code_conversations

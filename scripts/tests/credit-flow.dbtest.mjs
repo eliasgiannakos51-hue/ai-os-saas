@@ -218,11 +218,18 @@ console.log("== 0. the database really is the one the migrations build ==");
 // project_flows (package 36).
 // 117 -> 118 on 2026-10-08: 20261024000000_user_games.sql adds
 // user_games (package 26); db-migrations.test.mjs moved in the same commit.
-// 118 -> 119 on 2026-10-21 (security audit): 20261026000000_migration_ledger.sql
+// 118 -> 120 on 2026-10-18 (Coding as a conversation, Βήμα 3):
+// 20261025000000_coding_conversations.sql adds code_conversations and
+// code_messages — missed here when that PR shipped, since this line runs
+// after the mutation suites and nothing had gone red on it in the
+// meantime. Only caught now, 2026-10-21, when the next migration's own
+// bump (below) exposed the count was already off by two.
+// 120 -> 121 on 2026-10-21 (security audit): 20261026000000_migration_ledger.sql
 // adds schema_migrations, the table that lets `npm run db:pending` and
 // /api/health tell a migration that registered itself from one nobody
-// pasted. Caught by this line in CI (#318) on the first push that carried it.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 119);
+// pasted. Caught by this line in CI (#327, the combined pull request) on
+// the first push that carried both this migration and the one above.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 121);
 eq(
   "the credit functions exist",
   Number(

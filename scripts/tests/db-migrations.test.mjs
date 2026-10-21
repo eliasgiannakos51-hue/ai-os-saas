@@ -616,10 +616,14 @@ if (!DB) {
   // 116 -> 117 on 2026-10-07: project_flows (20261022, package 36).
   // 117 -> 118 on 2026-10-08: user_games (20261024, package 26), moved
   // here and in credit-flow.dbtest.mjs in the same commit.
-  // 118 -> 119 on 2026-10-21 (security audit): schema_migrations
+  // 118 -> 120 on 2026-10-18 (Coding as a conversation, Βήμα 3):
+  // code_conversations, code_messages (20261025000000_coding_conversations.sql)
+  // — missed here too when that PR shipped; only caught 2026-10-21 (see
+  // the next entry) and moved in both files in the same commit.
+  // 120 -> 121 on 2026-10-21 (security audit): schema_migrations
   // (20261026000000_migration_ledger.sql), moved here and in
   // credit-flow.dbtest.mjs in the same commit.
-  check(`119 tables`, tables === 119, `got ${tables}`);
+  check(`121 tables`, tables === 121, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

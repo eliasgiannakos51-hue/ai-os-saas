@@ -305,7 +305,7 @@ try {
     await each(`${run.label} tool shell`, OWNER, run, async ({ page, press }) => {
       await page.goto(`${OWNER}/dashboard/website-builder?project=${SID}`, { waitUntil: "networkidle" });
       check(`${run.label}: in the tool shell too, the reader's language and not the row`, (await shows(page, W.flaggedBody)) && !(await page.evaluate(() => document.body.innerText)).includes(OLD_PROMISE));
-      await press(page.locator('[data-testid="site-recent"]'));
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       check(`${run.label}: ...and the list of sites names it flagged, in its language`, await shows(page, W.flaggedTitle));
     });
   }

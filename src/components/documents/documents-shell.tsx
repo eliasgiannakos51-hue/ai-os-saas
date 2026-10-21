@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ChevronDown, Clock, FileDown, PenLine, Plus } from "lucide-react";
+import { ChevronDown, FileDown, PenLine } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { saveFileResponse } from "@/components/ui/download-pdf-button";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { DocumentPdfButton } from "@/components/documents/document-pdf-button";
 import { TranslateButton } from "@/components/translate/translate-button";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
@@ -60,12 +61,33 @@ export function DocumentsShell({ initialOpenId = null, docs, translate = false }
     return asked ? { id: asked.id, title: asked.title, blocks: asked.blocks } : null;
   });
   const [box, setBox] = useState<number | null>(null);
-  const [pane, setPane] = useState<"doc" | "recent" | null>(() => (open ? "doc" : null));
+  const [pane, setPane] = useState<"doc" | null>(() => (open ? "doc" : null));
   const [exporting, setExporting] = useState(false);
   const setOpen = (next: Open | null) => {
     setOpenDoc(next);
     setBox(null);
   };
+  // THE [◧] COLUMN, remembered per device — same key shape as
+  // Chat's own (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.documentsHistoryColumn") === "open");
+    } catch {
+      /* private window or storage off: closed, which is the default */
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.documentsHistoryColumn", next ? "open" : "closed");
+      } catch {
+        /* nothing to persist to; the toggle still works for this visit */
+      }
+      return next;
+    });
+  }
 
   const editing = Boolean(open);
   const estimate = useCostEstimate("documentGenerate", { inputChars: docEstimateInputChars(length) });
@@ -257,33 +279,7 @@ export function DocumentsShell({ initialOpenId = null, docs, translate = false }
             </>
           ),
         }
-      : pane === "recent"
-        ? {
-            title: t("recent"),
-            body:
-              docs.length === 0 ? (
-                <p className="text-xs text-muted">{t("noneYet")}</p>
-              ) : (
-                <ul className="row-list">
-                  {docs.map((row) => (
-                    <li key={row.id} className="py-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpen({ id: row.id, title: row.title, blocks: row.blocks });
-                          setPane("doc");
-                        }}
-                        className="min-h-[44px] w-full text-start"
-                      >
-                        <p className="break-words text-sm text-foreground">{row.title}</p>
-                        <p className="text-[11px] text-muted">{new Date(row.updatedAt).toLocaleDateString(locale)}</p>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ),
-          }
-        : null;
+      : null;
 
   return (
     <ToolShell
@@ -329,26 +325,40 @@ export function DocumentsShell({ initialOpenId = null, docs, translate = false }
             </div>
           )}
         </span>,
-        <button key="recent" type="button" onClick={() => setPane((v) => (v === "recent" ? null : "recent"))} aria-pressed={pane === "recent"} data-testid="document-recent" className={OPTION}>
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          {t("recent")}
-        </button>,
-        <button
-          key="new"
-          type="button"
-          onClick={() => {
-            setOpen(null);
-            setPane(null);
-            composerRef.current?.focus();
-          }}
-          disabled={!open}
-          data-testid="document-new"
-          className={`${OPTION} disabled:opacity-40`}
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-          {t("new")}
-        </button>,
       ]}
+      empty={{
+        heading: t("empty.heading"),
+        examples: [
+          { key: "offer", label: t("empty.examples.offer") },
+          { key: "cv", label: t("empty.examples.cv") },
+          { key: "letter", label: t("empty.examples.letter") },
+        ],
+      }}
+      history={{
+        open: historyOpen,
+        onToggle: toggleHistory,
+        onNew: () => {
+          setOpen(null);
+          setPane(null);
+          composerRef.current?.focus();
+        },
+        newLabel: t("new"),
+        column: (
+          <ShellHistoryColumn
+            rows={docs.map((row) => ({ id: row.id, title: row.title }))}
+            activeId={open?.id ?? null}
+            onOpen={(id) => {
+              const row = docs.find((d) => d.id === id);
+              if (!row) return;
+              setOpen({ id: row.id, title: row.title, blocks: row.blocks });
+              setPane("doc");
+            }}
+            onNavigate={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+            }}
+          />
+        ),
+      }}
       footer={
         <>
           {editing && box !== null && <ChosenBox label={t("block", { n: box + 1 })} onClear={() => setBox(null)} />}

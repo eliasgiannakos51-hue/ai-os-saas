@@ -1335,6 +1335,14 @@
           "notSaved": "La modification a été faite mais n’a pas pu être enregistrée. Rien n’est perdu ; réessayez.",
           "failed": "Cela n’a pas fonctionné. Réessayez.",
           "exportFailed": "Le fichier n’a pas pu être créé."
+        },
+        "empty": {
+          "heading": "Qu’écrivons-nous ?",
+          "examples": {
+            "offer": "Une lettre d’offre pour un projet indépendant",
+            "cv": "Un CV pour un poste en marketing",
+            "letter": "Une lettre demandant un délai supplémentaire"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Décrivez le site, obtenez le site",
         "why": "Écrivez à quoi il sert et à qui il s'adresse : les pages, les textes et la mise en page en découlent, et vous continuez à modifier en langage courant.",
-        "example": "Site d'une page pour une boulangerie, avec carte et horaires"
+        "example": "Site d'une page pour une boulangerie, avec carte et horaires",
+        "heading": "Quel site créons-nous ?",
+        "examples": {
+          "bakery": "Un site pour une boulangerie de quartier",
+          "portfolio": "Un portfolio pour un photographe",
+          "restaurant": "Un site pour un restaurant, avec le menu"
+        }
       },
       "pageSelectLabel": "Pages de ce site",
       "pageHome": "Accueil",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Posez une question qui demande de creuser",
         "why": "Une question à plusieurs heures : le plan vous est d'abord présenté, puis le travail est fait et revient avec ses sources.",
-        "example": "Qui d'autre vend cela en Grèce, et à quel prix"
+        "example": "Qui d'autre vend cela en Grèce, et à quel prix",
+        "heading": "Que veux-tu découvrir ?",
+        "examples": {
+          "marketCompetitors": "Qui sont les concurrents sur le marché grec du café ?",
+          "compareTools": "Compare deux outils de comptabilité pour une petite entreprise",
+          "trend": "Qu’est-ce qui change dans les prix des panneaux solaires cette année ?"
+        }
       },
       "usedThisMonth": "{used} sur {cap} ce mois-ci",
       "usedUnlimited": "{used} ce mois-ci",
@@ -2518,7 +2538,8 @@
         "working": "Création de la présentation…",
         "notReady": "La recherche n’est pas encore terminée : il n’y a rien à présenter.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez."
-      }
+      },
+      "new": "Nouvelle recherche"
     },
     "onboarding": {
       "title": "Faisons-en le vôtre",
@@ -3142,6 +3163,14 @@
         "undo": "Annuler la dernière modification",
         "undone": "La dernière modification a été annulée.",
         "nothingToUndo": "Rien à annuler : le site est tel qu’il a été créé."
+      },
+      "showHistory": "Afficher les travaux précédents",
+      "hideHistory": "Masquer les travaux précédents",
+      "history": {
+        "search": "Rechercher",
+        "empty": "Rien ici pour l’instant.",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer « {title} » ?"
       }
     },
     "library": {
@@ -4926,6 +4955,14 @@
       },
       "source": "Tiré de {file} ({rows} lignes) : {how}.",
       "openFile": "Ouvrir le fichier dans Analyser"
+    },
+    "empty": {
+      "heading": "De quoi parle la présentation ?",
+      "examples": {
+        "pitch": "Un pitch deck pour une nouvelle application",
+        "quarterly": "Un résumé des résultats trimestriels",
+        "training": "Une présentation de formation pour les nouvelles recrues"
+      }
     }
   },
   "posts": {

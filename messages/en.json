@@ -1335,6 +1335,14 @@
           "notSaved": "The change was made but could not be saved. Nothing was lost; try again.",
           "failed": "It did not work. Try again.",
           "exportFailed": "The file could not be made."
+        },
+        "empty": {
+          "heading": "What are we writing?",
+          "examples": {
+            "offer": "An offer letter for a freelance project",
+            "cv": "A CV for a marketing role",
+            "letter": "A letter asking for an extension"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Describe the site, get the site",
         "why": "Write what the site is for and who it is for — the pages, the copy and the layout are generated from that description, and you can keep editing in plain words.",
-        "example": "A one-page site for a small bakery, with menu and hours"
+        "example": "A one-page site for a small bakery, with menu and hours",
+        "heading": "What site are we building?",
+        "examples": {
+          "bakery": "A site for a neighbourhood bakery",
+          "portfolio": "A portfolio for a photographer",
+          "restaurant": "A site for a restaurant, with the menu"
+        }
       },
       "pageSelectLabel": "Pages of this site",
       "pageHome": "Home",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Ask something that takes real digging",
         "why": "A question worth several hours: this reads a plan back to you first, then goes and does the work and comes back with sources.",
-        "example": "Who else sells this in Greece, and at what price"
+        "example": "Who else sells this in Greece, and at what price",
+        "heading": "What do you want to find out?",
+        "examples": {
+          "marketCompetitors": "Who are the competitors in the Greek coffee market?",
+          "compareTools": "Compare two accounting tools for a small business",
+          "trend": "What is changing in solar panel prices this year?"
+        }
       },
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
@@ -2518,7 +2538,8 @@
         "working": "Making the presentation…",
         "notReady": "The research is not finished yet, so there is nothing to present.",
         "offline": "No connection. Check the network and try again."
-      }
+      },
+      "new": "New research"
     },
     "onboarding": {
       "title": "Let's make this yours",
@@ -3142,6 +3163,14 @@
         "undo": "Undo the last change",
         "undone": "Undid the last change.",
         "nothingToUndo": "Nothing to undo: the site is as it was made."
+      },
+      "showHistory": "Show previous work",
+      "hideHistory": "Hide previous work",
+      "history": {
+        "search": "Search",
+        "empty": "Nothing here yet.",
+        "delete": "Delete",
+        "deleteConfirm": "Delete “{title}”?"
       }
     },
     "library": {
@@ -4926,6 +4955,14 @@
       },
       "source": "From {file} ({rows} rows): {how}.",
       "openFile": "Open the file in Analyze"
+    },
+    "empty": {
+      "heading": "What's the deck about?",
+      "examples": {
+        "pitch": "A pitch deck for a new app",
+        "quarterly": "A quarterly results summary",
+        "training": "A training deck for new hires"
+      }
     }
   },
   "posts": {

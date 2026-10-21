@@ -1335,6 +1335,14 @@
           "notSaved": "修改已完成但未能保存。没有丢失任何内容；请重试。",
           "failed": "没有成功。请重试。",
           "exportFailed": "无法生成文件。"
+        },
+        "empty": {
+          "heading": "我们要写什么?",
+          "examples": {
+            "offer": "一份自由职业项目的报价函",
+            "cv": "一份市场营销职位的简历",
+            "letter": "一封申请延期的信"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "描述这个网站，拿到这个网站",
         "why": "写清它是做什么的、给谁看——页面、文案和排版都由这段描述生成，之后还能用大白话继续改。",
-        "example": "面包店的单页网站，含产品和营业时间"
+        "example": "面包店的单页网站，含产品和营业时间",
+        "heading": "我们要做一个什么样的网站?",
+        "examples": {
+          "bakery": "一个社区面包店的网站",
+          "portfolio": "一个摄影师的作品集网站",
+          "restaurant": "一个带菜单的餐厅网站"
+        }
       },
       "pageSelectLabel": "本站页面",
       "pageHome": "首页",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "问一个真要下功夫查的问题",
         "why": "值得花几小时的问题：先把调研计划给你看，然后真的去查，带着出处回来。",
-        "example": "在希腊还有谁在卖这个，卖什么价"
+        "example": "在希腊还有谁在卖这个，卖什么价",
+        "heading": "你想了解什么?",
+        "examples": {
+          "marketCompetitors": "希腊咖啡市场的竞争对手有哪些?",
+          "compareTools": "比较两款适合小企业的记账工具",
+          "trend": "今年太阳能板价格有什么变化?"
+        }
       },
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
@@ -2518,7 +2538,8 @@
         "working": "正在制作演示文稿…",
         "notReady": "研究尚未完成，暂时没有可演示的内容。",
         "offline": "没有网络连接。请检查网络后重试。"
-      }
+      },
+      "new": "新建研究"
     },
     "onboarding": {
       "title": "让它成为你的",
@@ -3142,6 +3163,14 @@
         "undo": "撤销上一次更改",
         "undone": "已撤销上一次更改。",
         "nothingToUndo": "没有可撤销的更改：网站仍是生成时的样子。"
+      },
+      "showHistory": "显示以前的工作",
+      "hideHistory": "隐藏以前的工作",
+      "history": {
+        "search": "搜索",
+        "empty": "这里还没有内容。",
+        "delete": "删除",
+        "deleteConfirm": "删除「{title}」吗?"
       }
     },
     "library": {
@@ -4926,6 +4955,14 @@
       },
       "source": "来自 {file}（{rows} 行）：{how}。",
       "openFile": "在“分析”中打开文件"
+    },
+    "empty": {
+      "heading": "这个演示文稿是关于什么的?",
+      "examples": {
+        "pitch": "一份新应用的路演演示文稿",
+        "quarterly": "一份季度业绩总结",
+        "training": "一份新员工培训演示文稿"
+      }
     }
   },
   "posts": {

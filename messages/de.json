@@ -1335,6 +1335,14 @@
           "notSaved": "Die Änderung wurde gemacht, konnte aber nicht gespeichert werden. Nichts ging verloren; versuche es erneut.",
           "failed": "Das hat nicht geklappt. Versuche es erneut.",
           "exportFailed": "Die Datei konnte nicht erstellt werden."
+        },
+        "empty": {
+          "heading": "Was schreiben wir?",
+          "examples": {
+            "offer": "Ein Angebotsschreiben für ein freies Projekt",
+            "cv": "Einen Lebenslauf für eine Marketingstelle",
+            "letter": "Einen Brief mit der Bitte um Fristverlängerung"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Beschreib die Website, bekomm die Website",
         "why": "Schreib, wofür sie da ist und für wen — Seiten, Texte und Layout entstehen aus dieser Beschreibung, und du änderst sie weiter in normalen Worten.",
-        "example": "Einseitige Website für eine Bäckerei, mit Sortiment und Öffnungszeiten"
+        "example": "Einseitige Website für eine Bäckerei, mit Sortiment und Öffnungszeiten",
+        "heading": "Welche Website bauen wir?",
+        "examples": {
+          "bakery": "Eine Website für eine Bäckerei im Viertel",
+          "portfolio": "Ein Portfolio für einen Fotografen",
+          "restaurant": "Eine Website für ein Restaurant, mit der Speisekarte"
+        }
       },
       "pageSelectLabel": "Seiten dieser Website",
       "pageHome": "Startseite",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Frag etwas, das echtes Graben braucht",
         "why": "Eine Frage, die Stunden kostet: hier siehst du zuerst den Plan, dann wird die Arbeit gemacht und kommt mit Quellen zurück.",
-        "example": "Wer verkauft das noch in Griechenland, und zu welchem Preis"
+        "example": "Wer verkauft das noch in Griechenland, und zu welchem Preis",
+        "heading": "Was möchtest du herausfinden?",
+        "examples": {
+          "marketCompetitors": "Wer sind die Wettbewerber auf dem griechischen Kaffeemarkt?",
+          "compareTools": "Vergleiche zwei Buchhaltungstools für ein kleines Unternehmen",
+          "trend": "Was ändert sich dieses Jahr bei den Solarmodulpreisen?"
+        }
       },
       "usedThisMonth": "{used} von {cap} in diesem Monat",
       "usedUnlimited": "{used} in diesem Monat",
@@ -2518,7 +2538,8 @@
         "working": "Die Präsentation wird erstellt…",
         "notReady": "Die Recherche ist noch nicht fertig, daher gibt es nichts zu präsentieren.",
         "offline": "Keine Verbindung. Prüfe das Netzwerk und versuche es erneut."
-      }
+      },
+      "new": "Neue Recherche"
     },
     "onboarding": {
       "title": "Machen wir es zu deinem",
@@ -3142,6 +3163,14 @@
         "undo": "Letzte Änderung rückgängig machen",
         "undone": "Die letzte Änderung wurde rückgängig gemacht.",
         "nothingToUndo": "Nichts rückgängig zu machen: Die Website ist so, wie sie erstellt wurde."
+      },
+      "showHistory": "Frühere Arbeiten anzeigen",
+      "hideHistory": "Frühere Arbeiten ausblenden",
+      "history": {
+        "search": "Suchen",
+        "empty": "Hier ist noch nichts.",
+        "delete": "Löschen",
+        "deleteConfirm": "„{title}“ löschen?"
       }
     },
     "library": {
@@ -4926,6 +4955,14 @@
       },
       "source": "Aus {file} ({rows} Zeilen): {how}.",
       "openFile": "Datei in Analysieren öffnen"
+    },
+    "empty": {
+      "heading": "Worum geht es in der Präsentation?",
+      "examples": {
+        "pitch": "Ein Pitch-Deck für eine neue App",
+        "quarterly": "Eine Zusammenfassung der Quartalsergebnisse",
+        "training": "Eine Schulungspräsentation für neue Mitarbeitende"
+      }
     }
   },
   "posts": {

@@ -196,6 +196,9 @@ const base = {
 const msg = (loc) => JSON.parse(readFileSync(`messages/${loc}.json`, "utf8")).presentations;
 const EL = msg("el");
 const EN = msg("en");
+// THE [◧] HISTORY COLUMN'S OWN WORDS (Batch 1, 2026-10-21) — shared
+// across every tool that has one, not Slides' own `presentations.history`.
+const EL_SHELL = JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.toolShell;
 const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 const plural = (s, n) => s.replace(/\{rows, plural, one \{# ([^}]*)\} other \{# ([^}]*)\}\}/, (_, one, other) => `${n} ${n === 1 ? one : other}`);
 
@@ -334,9 +337,10 @@ try {
     await page.goto(`${ON}/dashboard/presentations`, { waitUntil: "networkidle" });
     check("Slides opens in the shell, with the «+» in its field", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator('[data-testid="composer-attach"]').isVisible()));
     check("...whose name says what it takes", (await page.locator('[data-testid="composer-attach"]').getAttribute("aria-label")) === EL.chart.attach);
-    await press(page.locator('[data-testid="slides-recent"]'));
-    check("a new account's history is empty, and says so", (await page.locator('[data-testid="tool-shell-work"]').innerText()).includes(EL.history.empty));
-    await press(page.locator('[data-testid="tool-shell-close"]:visible, [data-testid="tool-shell-back"]:visible').first());
+    // THE [◧] HISTORY COLUMN (Batch 1, 2026-10-21), not the old option.
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    check("a new account's history is empty, and says so", (await page.locator('[data-testid="shell-history-column"]').innerText()).includes(EL_SHELL.history.empty));
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
 
     const uploadsBefore = asked.uploads;
     await giveFile(page, press, { name: "πωλήσεις.xlsx", mimeType: XLSX_TYPE, buffer: SALES_EL });

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Clock, Download, Files, History, Palette, Plus, Square, Undo2, X } from "lucide-react";
+import { Download, Files, History, Palette, Square, Undo2, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
@@ -13,6 +13,7 @@ import { DesignControls } from "@/components/website-builder/design-controls";
 import { SiteHistory } from "@/components/website-builder/site-history";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { isSiteRunning, requestSiteChange, requestSiteStop, requestSiteUndo, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
 import { admitPhotos, uploadSitePhotos } from "@/lib/website-builder/site-photos";
 import { ACCEPTED_REFERENCE_IMAGE_TYPES, MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
@@ -124,7 +125,28 @@ export function WebsiteShell({
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
   const opened = initialOpenId && initialWebsites.some((w) => w.id === initialOpenId) ? initialOpenId : null;
   const [currentId, setCurrentId] = useState<string | null>(opened);
-  const [pane, setPane] = useState<"site" | "recent" | null>(opened ? "site" : null);
+  const [pane, setPane] = useState<"site" | null>(opened ? "site" : null);
+  // THE [◧] COLUMN, remembered per device — same key shape as
+  // Chat's own (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.siteHistoryColumn") === "open");
+    } catch {
+      /* private window or storage off: closed, which is the default */
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.siteHistoryColumn", next ? "open" : "closed");
+      } catch {
+        /* nothing to persist to; the toggle still works for this visit */
+      }
+      return next;
+    });
+  }
   const [design, setDesign] = useState<WebsiteDesignChoices>(DEFAULT_DESIGN_CHOICES);
   const [choosingDesign, setChoosingDesign] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -606,30 +628,7 @@ export function WebsiteShell({
             </div>
           ),
         }
-      : pane === "recent"
-        ? {
-            title: tNames("site"),
-            body: (
-              <ul className="row-list">
-                {websites.map((w) => (
-                  <li key={w.id} className="py-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentId(w.id);
-                        setPane("site");
-                      }}
-                      className="w-full min-w-0 text-start"
-                    >
-                      <p className="break-words text-sm text-foreground">{w.name}</p>
-                      <p className="text-[11px] text-muted">{w.status === "completed" ? "✓" : running(w) ? t("generating") : w.status === "flagged" ? t("flaggedTitle") : t("statusFailed")}</p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ),
-          }
-        : null;
+      : null;
 
   const buildingNow = running(current);
 
@@ -713,11 +712,7 @@ export function WebsiteShell({
             </div>
           )}
         </span>,
-        <button key="recent" type="button" onClick={() => setPane((v) => (v === "recent" ? null : "recent"))} aria-pressed={pane === "recent"} disabled={websites.length === 0} data-testid="site-recent" className={`${OPTION} disabled:opacity-40`}>
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          {tShell("recent")}
-        </button>,
-        // HOW MANY PAGES (package 10): the fourth option, for a new site.
+        // HOW MANY PAGES (package 10): the third option, for a new site.
         ...(pages
           ? [
               <span key="pages" className="relative">
@@ -755,25 +750,45 @@ export function WebsiteShell({
               </span>,
             ]
           : []),
-        <button
-          key="new"
-          type="button"
-          onClick={() => {
-            setCurrentId(null);
-            setPending(null);
-            clearPhotos();
-            setViewing(null);
-            setHistory(null);
-            setPane(null);
-          }}
-          disabled={!current && !pending}
-          data-testid="site-new"
-          className={`${OPTION} disabled:opacity-40`}
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-          {tShell("site.new")}
-        </button>,
       ]}
+      empty={{
+        heading: t("empty.heading"),
+        examples: [
+          { key: "bakery", label: t("empty.examples.bakery") },
+          { key: "portfolio", label: t("empty.examples.portfolio") },
+          { key: "restaurant", label: t("empty.examples.restaurant") },
+        ],
+      }}
+      history={{
+        open: historyOpen,
+        onToggle: toggleHistory,
+        onNew: () => {
+          setCurrentId(null);
+          setPending(null);
+          clearPhotos();
+          setViewing(null);
+          setHistory(null);
+          setPane(null);
+        },
+        newLabel: tShell("site.new"),
+        column: (
+          <ShellHistoryColumn
+            rows={websites.map((w) => ({
+              id: w.id,
+              title: w.name,
+              status: w.status === "completed" ? "✓" : running(w) ? t("generating") : w.status === "flagged" ? t("flaggedTitle") : t("statusFailed"),
+            }))}
+            activeId={currentId}
+            onOpen={(id) => {
+              setCurrentId(id);
+              setPane("site");
+            }}
+            onNavigate={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+            }}
+          />
+        ),
+      }}
       footer={
         <>
           {chosen !== null && !pending && <ChosenBox label={chosenLabel} onClear={() => setBox(null)} />}

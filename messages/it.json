@@ -1335,6 +1335,14 @@
           "notSaved": "La modifica è stata fatta ma non è stato possibile salvarla. Non si è perso nulla; riprova.",
           "failed": "Non ha funzionato. Riprova.",
           "exportFailed": "Non è stato possibile creare il file."
+        },
+        "empty": {
+          "heading": "Cosa stiamo scrivendo?",
+          "examples": {
+            "offer": "Una lettera di offerta per un progetto freelance",
+            "cv": "Un CV per un ruolo di marketing",
+            "letter": "Una lettera che chiede una proroga"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Descrivi il sito, ottieni il sito",
         "why": "Scrivi a cosa serve e a chi si rivolge: pagine, testi e impaginazione nascono da quella descrizione, e continui a modificarli a parole.",
-        "example": "Sito di una pagina per un piccolo forno, con menù e orari"
+        "example": "Sito di una pagina per un piccolo forno, con menù e orari",
+        "heading": "Che sito stiamo creando?",
+        "examples": {
+          "bakery": "Un sito per un panificio di quartiere",
+          "portfolio": "Un portfolio per un fotografo",
+          "restaurant": "Un sito per un ristorante, con il menù"
+        }
       },
       "pageSelectLabel": "Pagine di questo sito",
       "pageHome": "Home",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Chiedi qualcosa che richiede scavare davvero",
         "why": "Una domanda da diverse ore: prima ti mostra il piano, poi fa il lavoro e torna con le fonti.",
-        "example": "Chi altro lo vende in Grecia, e a che prezzo"
+        "example": "Chi altro lo vende in Grecia, e a che prezzo",
+        "heading": "Cosa vuoi scoprire?",
+        "examples": {
+          "marketCompetitors": "Chi sono i concorrenti nel mercato greco del caffè?",
+          "compareTools": "Confronta due strumenti di contabilità per una piccola azienda",
+          "trend": "Cosa sta cambiando quest’anno nei prezzi dei pannelli solari?"
+        }
       },
       "usedThisMonth": "{used} di {cap} questo mese",
       "usedUnlimited": "{used} questo mese",
@@ -2518,7 +2538,8 @@
         "working": "Sto creando la presentazione…",
         "notReady": "La ricerca non è ancora finita, quindi non c’è niente da presentare.",
         "offline": "Nessuna connessione. Controlla la rete e riprova."
-      }
+      },
+      "new": "Nuova ricerca"
     },
     "onboarding": {
       "title": "Rendiamolo tuo",
@@ -3142,6 +3163,14 @@
         "undo": "Annulla l’ultima modifica",
         "undone": "Ho annullato l’ultima modifica.",
         "nothingToUndo": "Niente da annullare: il sito è come è stato creato."
+      },
+      "showHistory": "Mostra i lavori precedenti",
+      "hideHistory": "Nascondi i lavori precedenti",
+      "history": {
+        "search": "Cerca",
+        "empty": "Non c’è ancora nulla qui.",
+        "delete": "Elimina",
+        "deleteConfirm": "Eliminare «{title}»?"
       }
     },
     "library": {
@@ -4926,6 +4955,14 @@
       },
       "source": "Da {file} ({rows} righe): {how}.",
       "openFile": "Apri il file in Analizza"
+    },
+    "empty": {
+      "heading": "Di cosa parla la presentazione?",
+      "examples": {
+        "pitch": "Un pitch deck per una nuova app",
+        "quarterly": "Un riepilogo dei risultati trimestrali",
+        "training": "Una presentazione di formazione per i nuovi assunti"
+      }
     }
   },
   "posts": {

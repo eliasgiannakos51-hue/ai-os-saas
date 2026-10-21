@@ -312,7 +312,7 @@ for (const [page, param, table, shell] of PAGES) {
 }
 check("files: the shell is given the asked file", /<FilesShell initialFiles=\{rows\} initialOpenId=\{readRequestedId\(searchParams\.record\)\}/.test(code("src/app/dashboard/files/page.tsx")));
 const SHELL_OPENS = [
-  ["src/components/website-builder/website-shell.tsx", /useState<string \| null>\(opened\)[\s\S]*?useState<"site" \| "recent" \| null>\(opened \? "site" : null\)/],
+  ["src/components/website-builder/website-shell.tsx", /useState<string \| null>\(opened\)[\s\S]*?useState<"site" \| null>\(opened \? "site" : null\)/],
   ["src/components/presentations/presentations-shell.tsx", /decks\.find\(\(d\) => d\.id === initialOpenId\)[\s\S]*?open \? "deck"/],
   ["src/components/posts/posts-shell.tsx", /history\.find\(\(row\) => row\.id === initialOpenId && row\.set\)[\s\S]*?asked \? "posts" : null/],
   ["src/components/research/research-shell.tsx", /initialReports\.find\(\(r\) => r\.id === initialOpenId\)[\s\S]*?asked \? "report" : null[\s\S]*?if \(askedId\) void refresh\(askedId\)/],

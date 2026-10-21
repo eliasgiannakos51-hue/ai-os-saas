@@ -1335,6 +1335,14 @@
           "notSaved": "A alteração foi feita, mas não foi possível guardá-la. Nada se perdeu; tente novamente.",
           "failed": "Não funcionou. Tente novamente.",
           "exportFailed": "Não foi possível criar o ficheiro."
+        },
+        "empty": {
+          "heading": "O que estamos escrevendo?",
+          "examples": {
+            "offer": "Uma carta de proposta para um projeto freelance",
+            "cv": "Um currículo para uma vaga de marketing",
+            "letter": "Uma carta pedindo uma prorrogação"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Descreva o site e receba o site",
         "why": "Escreva para que serve e a quem se dirige — as páginas, os textos e o layout saem dessa descrição, e continua a editar por palavras.",
-        "example": "Site de uma página para uma padaria, com ementa e horário"
+        "example": "Site de uma página para uma padaria, com ementa e horário",
+        "heading": "Que site estamos construindo?",
+        "examples": {
+          "bakery": "Um site para uma padaria de bairro",
+          "portfolio": "Um portfólio para um fotógrafo",
+          "restaurant": "Um site para um restaurante, com o menu"
+        }
       },
       "pageSelectLabel": "Páginas deste site",
       "pageHome": "Início",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Pergunte algo que exija mesmo escavar",
         "why": "Uma pergunta de várias horas: primeiro mostra-lhe o plano, depois faz o trabalho e volta com as fontes.",
-        "example": "Quem mais vende isto na Grécia, e a que preço"
+        "example": "Quem mais vende isto na Grécia, e a que preço",
+        "heading": "O que você quer descobrir?",
+        "examples": {
+          "marketCompetitors": "Quem são os concorrentes no mercado grego de café?",
+          "compareTools": "Compare duas ferramentas de contabilidade para uma pequena empresa",
+          "trend": "O que está mudando este ano nos preços dos painéis solares?"
+        }
       },
       "usedThisMonth": "{used} de {cap} este mês",
       "usedUnlimited": "{used} este mês",
@@ -2518,7 +2538,8 @@
         "working": "A criar a apresentação…",
         "notReady": "A pesquisa ainda não terminou, por isso não há nada para apresentar.",
         "offline": "Sem ligação. Verifique a rede e tente novamente."
-      }
+      },
+      "new": "Nova pesquisa"
     },
     "onboarding": {
       "title": "Vamos torná-lo teu",
@@ -3142,6 +3163,14 @@
         "undo": "Anular a última alteração",
         "undone": "Anulei a última alteração.",
         "nothingToUndo": "Nada para anular: o site está como foi criado."
+      },
+      "showHistory": "Mostrar trabalhos anteriores",
+      "hideHistory": "Ocultar trabalhos anteriores",
+      "history": {
+        "search": "Pesquisar",
+        "empty": "Ainda não há nada aqui.",
+        "delete": "Excluir",
+        "deleteConfirm": "Excluir “{title}”?"
       }
     },
     "library": {
@@ -4926,6 +4955,14 @@
       },
       "source": "De {file} ({rows} linhas): {how}.",
       "openFile": "Abrir o ficheiro em Analisar"
+    },
+    "empty": {
+      "heading": "Sobre o que é a apresentação?",
+      "examples": {
+        "pitch": "Uma apresentação de pitch para um novo aplicativo",
+        "quarterly": "Um resumo dos resultados trimestrais",
+        "training": "Uma apresentação de treinamento para novos contratados"
+      }
     }
   },
   "posts": {

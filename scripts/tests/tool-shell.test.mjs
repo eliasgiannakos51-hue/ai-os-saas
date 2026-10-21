@@ -62,6 +62,13 @@ check("...and on a phone the work is the whole screen, with a button back to the
 check("a card in the conversation opens the work again", /data-testid="tool-shell-card"/.test(shell) && /onClick=\{turn\.card\.onOpen\}/.test(shell));
 check("no steps on top and no tabs in the shell itself", !/<StepFlow\b|role="tablist"/.test(shell));
 check("the most options a tool may have is four", /export const MAX_SHELL_OPTIONS = 4;/.test(shell));
+check("and the most examples on the empty landing is three", /export const MAX_SHELL_EXAMPLES = 3;/.test(shell));
+check("with no turns and no work open, the empty landing is the small globe, one heading and its examples — never a second field",
+  /const showEmpty = Boolean\(empty\) && turns\.length === 0 && !work;/.test(shell) &&
+    /<Earth variant="small" px=\{96\} \/>/.test(shell) && /\{empty!\.heading\}/.test(shell) && /onClick=\{\(\) => onSend\(ex\.label\)\}/.test(shell));
+check("the [◧] history column slides over the whole shell, same shape as Chat's and Coding's own, with New beside it",
+  /data-testid="tool-shell-history"/.test(shell) && /data-testid="tool-shell-history-toggle"/.test(shell) &&
+    /data-testid="tool-shell-new"/.test(shell) && /onClick=\{history\.onToggle\}/.test(shell) && /onClick=\{history\.onNew\}/.test(shell));
 
 console.log("\n== 2. every tool in it ==");
 const files = walk("src").filter((f) => f !== join("src", "components", "shell", "tool-shell.tsx"));
@@ -88,6 +95,23 @@ for (const f of users) {
   // needs each to carry a key, so the keys are the options.
   const options = (block.match(/\bkey="[^"]+"/g) ?? []).length;
   check(`${f}: ${options} options, at most four`, options <= 4 && (at < 0 || options >= 1), block.slice(0, 120));
+  // EXAMPLES ON THE EMPTY LANDING, the same bracket-matched reasoning as
+  // options above (a key inside an example's own text could end "]" early
+  // too), at most three (MAX_SHELL_EXAMPLES).
+  const examplesAt = src.indexOf("examples: [");
+  let exBlock = "";
+  if (examplesAt >= 0) {
+    let depth = 0;
+    for (let i = examplesAt + "examples: ".length; i < src.length; i++) {
+      if (src[i] === "[") depth++;
+      else if (src[i] === "]" && --depth === 0) {
+        exBlock = src.slice(examplesAt, i + 1);
+        break;
+      }
+    }
+  }
+  const examples = (exBlock.match(/\bkey:\s*"[^"]+"/g) ?? []).length;
+  check(`${f}: ${examples} examples on the empty landing, at most three`, examples <= 3, exBlock.slice(0, 120));
   // A checkbox, a radio or a file picker takes no text; anything else does.
   check(`${f}: nothing to type into but the shell's field`, !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(src));
   check(`${f}: no steps on top, no box of limits`, !/<StepFlow\b|_LIMITS\.map\(/.test(src));
@@ -351,7 +375,8 @@ check("Slides: Stop reaches a change as well as a new deck",
 
 const LOCALES = ["el", "en", "de", "fr", "es", "it", "pt", "ja", "zh", "ar"];
 for (const l of LOCALES) {
-  const all = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard ?? {};
+  const root = JSON.parse(readFileSync(`messages/${l}.json`, "utf8"));
+  const all = root.dashboard ?? {};
   const m = all.toolShell ?? {};
   const files = all.files ?? {};
   check(`${l}: the shell's words`, ["open", "isOpen", "back", "close"].every((k) => typeof m[k] === "string" && m[k]) &&
@@ -361,6 +386,27 @@ for (const l of LOCALES) {
     ["done", "changed", "building", "questions", "skip", "new", "design", "photosAttach", "photoType", "photosFailed", "versions", "versionsHint", "liveVersions"].every((k) => typeof m.site?.[k] === "string" && m.site[k]) &&
     /\{count\}[\s\S]*\{max\}/.test(m.site?.photos ?? "") && /\{change\}/.test(m.site?.undid ?? "") &&
     /\{count/.test(files.collectionName ?? "") && typeof files.collectionsHint === "string" && files.collectionsHint && typeof files.collectionCreated === "string" && /\{name\}/.test(files.collectionCreated));
+  // THE [◧] HISTORY COLUMN, shared across every tool that has moved to it
+  // (package 3 of Μέρος 16, Batch 1): one set of words, not one per tool.
+  check(`${l}: the history column's words`,
+    typeof m.showHistory === "string" && m.showHistory && typeof m.hideHistory === "string" && m.hideHistory &&
+      ["search", "empty", "delete"].every((k) => typeof m.history?.[k] === "string" && m.history[k]) &&
+      typeof m.history?.deleteConfirm === "string" && /\{title\}/.test(m.history.deleteConfirm));
+  // THE EMPTY LANDING, one per tool (its own namespace, as Coding's own
+  // "coding.empty" is) — one heading, up to three examples that send.
+  check(`${l}: Research's empty landing`,
+    typeof all.deepResearch?.empty?.heading === "string" && all.deepResearch.empty.heading &&
+      ["marketCompetitors", "compareTools", "trend"].every((k) => typeof all.deepResearch.empty?.examples?.[k] === "string" && all.deepResearch.empty.examples[k]) &&
+      typeof all.deepResearch?.new === "string" && all.deepResearch.new);
+  check(`${l}: Site's empty landing`,
+    typeof all.websiteBuilder?.empty?.heading === "string" && all.websiteBuilder.empty.heading &&
+      ["bakery", "portfolio", "restaurant"].every((k) => typeof all.websiteBuilder.empty?.examples?.[k] === "string" && all.websiteBuilder.empty.examples[k]));
+  check(`${l}: Document's empty landing`,
+    typeof all.documents?.writer?.empty?.heading === "string" && all.documents.writer.empty.heading &&
+      ["offer", "cv", "letter"].every((k) => typeof all.documents.writer.empty?.examples?.[k] === "string" && all.documents.writer.empty.examples[k]));
+  check(`${l}: Slides' empty landing`,
+    typeof root.presentations?.empty?.heading === "string" && root.presentations.empty.heading &&
+      ["pitch", "quarterly", "training"].every((k) => typeof root.presentations.empty?.examples?.[k] === "string" && root.presentations.empty.examples[k]));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

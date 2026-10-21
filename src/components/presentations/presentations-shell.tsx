@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { BarChart3, ChevronDown, Clock, FileDown, Image as ImageIcon, Plus, Trash2, X } from "lucide-react";
+import { BarChart3, ChevronDown, FileDown, Image as ImageIcon, Plus, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton, saveFileResponse } from "@/components/ui/download-pdf-button";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { DeckSlides } from "@/components/presentations/deck-slides";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { createClient } from "@/lib/supabase/client";
@@ -118,12 +119,31 @@ export function PresentationsShell({
   // Opened from a link: the deck is shown at once, beside the conversation
   // on a computer and over it on a phone; a note, which has no slides,
   // opens what was made before, where it is listed.
-  const [pane, setPane] = useState<"deck" | "recent" | null>(() =>
-    open ? "deck" : initialOpenId && notes.some((n) => n.id === initialOpenId) ? "recent" : null
-  );
+  const [pane, setPane] = useState<"deck" | null>(() => (open ? "deck" : null));
   const [exporting, setExporting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const [dataFile, setDataFile] = useState<DataFile | null>(null);
+  // THE [◧] COLUMN, remembered per device — same key shape as
+  // Chat's own (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.slidesHistoryColumn") === "open");
+    } catch {
+      /* private window or storage off: closed, which is the default */
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.slidesHistoryColumn", next ? "open" : "closed");
+      } catch {
+        /* nothing to persist to; the toggle still works for this visit */
+      }
+      return next;
+    });
+  }
 
   // WHILE A SAVED DECK IS THE CURRENT ONE, THE FIELD CHANGES IT — also
   // with the work area closed, which on a phone is the only way to reach
@@ -363,8 +383,9 @@ export function PresentationsShell({
     }
   }
 
-  async function remove(id: string) {
-    if (!window.confirm(t("history.deleteConfirm"))) return;
+  // THE CONFIRM IS THE HISTORY COLUMN'S OWN (ShellHistoryColumn): this
+  // deletes outright once it has already been asked.
+  async function removeDeck(id: string): Promise<void> {
     const { error } = await supabase.from("ai_presentations").delete().eq("id", id);
     if (error) {
       addToast(t("errors.failed"), "error");
@@ -431,53 +452,7 @@ export function PresentationsShell({
             <DeckSlides deck={open.deck} imageUrlFor={imageUrlFor} />
           ),
         }
-      : pane === "recent"
-        ? {
-            title: t("history.title"),
-            body:
-              decks.length === 0 && notes.length === 0 ? (
-                <p className="text-xs text-muted">{t("history.empty")}</p>
-              ) : (
-                <ul className="row-list">
-                  {decks.map((row) => (
-                    <li key={row.id} className="flex items-center justify-between gap-3 py-2">
-                      <button
-                        type="button"
-                        disabled={!row.deck}
-                        onClick={() => {
-                          if (!row.deck) return;
-                          setOpen({ id: row.id, deck: row.deck });
-                          setPane("deck");
-                        }}
-                        className="min-w-0 flex-1 text-start disabled:cursor-default"
-                      >
-                        <p className="break-words text-sm text-foreground">{row.title}</p>
-                        <p className="text-[11px] text-muted">
-                          {row.deck ? t("result.slidesCount", { count: row.deck.slides.length }) : t("history.failed")}
-                          {" · "}
-                          {new Date(row.createdAt).toLocaleDateString(locale)}
-                        </p>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => remove(row.id)}
-                        aria-label={t("history.delete")}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-item text-muted hover:text-foreground"
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
-                      </button>
-                    </li>
-                  ))}
-                  {notes.map((note) => (
-                    <li key={note.id} className="py-2">
-                      <p className="break-words text-sm text-foreground">{note.title}</p>
-                      <p className="text-[11px] text-muted">{new Date(note.createdAt).toLocaleDateString(locale)}</p>
-                    </li>
-                  ))}
-                </ul>
-              ),
-          }
-        : null;
+      : null;
 
   // Literal keys, for the same reason as in components/presentations/deck-slides.tsx.
   const sourceNames: Record<ImageSource, string> = {
@@ -602,26 +577,41 @@ export function PresentationsShell({
             </fieldset>
           )}
         </span>,
-        <button key="recent" type="button" onClick={() => setPane((v) => (v === "recent" ? null : "recent"))} aria-pressed={pane === "recent"} data-testid="slides-recent" className={OPTION}>
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          {t("history.title")}
-        </button>,
-        <button
-          key="new"
-          type="button"
-          onClick={() => {
-            setOpen(null);
-            setPane(null);
-            composerRef.current?.focus();
-          }}
-          disabled={!open}
-          data-testid="slides-new"
-          className={`${OPTION} disabled:opacity-40`}
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-          {tShell("slides.new")}
-        </button>,
       ]}
+      empty={{
+        heading: t("empty.heading"),
+        examples: [
+          { key: "pitch", label: t("empty.examples.pitch") },
+          { key: "quarterly", label: t("empty.examples.quarterly") },
+          { key: "training", label: t("empty.examples.training") },
+        ],
+      }}
+      history={{
+        open: historyOpen,
+        onToggle: toggleHistory,
+        onNew: () => {
+          setOpen(null);
+          setPane(null);
+          composerRef.current?.focus();
+        },
+        newLabel: tShell("slides.new"),
+        column: (
+          <ShellHistoryColumn
+            rows={decks.filter((row) => row.deck).map((row) => ({ id: row.id, title: row.title }))}
+            activeId={open?.id ?? null}
+            onOpen={(id) => {
+              const row = decks.find((d) => d.id === id);
+              if (!row?.deck) return;
+              setOpen({ id: row.id, deck: row.deck });
+              setPane("deck");
+            }}
+            onDelete={removeDeck}
+            onNavigate={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+            }}
+          />
+        ),
+      }}
       footer={
         <>
           {editing && box !== null && <ChosenBox label={tShell("box.slide", { n: box + 1 })} onClear={() => setBox(null)} />}

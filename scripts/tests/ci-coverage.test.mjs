@@ -600,5 +600,69 @@ console.log("== 6. the alarm resets, and it can see past the first page ==");
   }
 }
 
+console.log("== 7. the heavy suites are gated to pre-merge and nightly; the fast checks run on every push ==");
+// ---------------------------------------------------------------------
+// Βήμα 2 (CI for a private repository, owner, 2026-10-05): "fast checks
+// ... on every push" and "the big stuff ... moves to pre-merge and
+// nightly only — no check is lost, only rescheduled". Added 2026-10-21,
+// after a measurement by hand found the SAME hour-long job running on
+// identical bytes for `push` and for `pull_request` on one commit — this
+// section is what stops that redesign from drifting back to "everything,
+// every time" (reintroducing the cost) or to "heavy steps dropped for
+// good" (reintroducing the exact gap section 2 above already guards, one
+// job over).
+{
+  const HEAVY_STEPS = [
+    "postgres, for the suites that need one",
+    "mutation suites",
+    "the mutation suites put the tree back",
+    "database suites",
+    "chromium, for the integration suite that needs one",
+    "integration suites",
+  ];
+  const FAST_STEPS = ["secret scan", "dependency audit"];
+  const verifyBlock = jobBlock("verify");
+  check(`the verify job was read (${verifyBlock.length} chars)`, verifyBlock.length > 500,
+    "an empty block makes every check below vacuous");
+
+  // ONE STEP AT A TIME, because a single regex over the whole job block
+  // would let one gated step's `if:` satisfy the check for a step with
+  // none of its own — the exact way a block-wide search misses a hole.
+  const stepBlock = (label) => {
+    const marker = `- name: ${label}`;
+    const at = verifyBlock.indexOf(marker);
+    if (at < 0) return "";
+    const next = verifyBlock.slice(at + marker.length).search(/\n {6}- /);
+    return next < 0 ? verifyBlock.slice(at) : verifyBlock.slice(at, at + marker.length + next);
+  };
+  const HEAVY_IF = /if:\s*>-\s*\n\s*github\.event_name == 'pull_request' \|\| github\.ref == 'refs\/heads\/main' \|\|\s*\n\s*github\.event_name == 'schedule' \|\| github\.event_name == 'workflow_dispatch'/;
+  for (const label of HEAVY_STEPS) {
+    const block = stepBlock(label);
+    check(`  "${label}" exists in the verify job`, block.length > 0, "no step with that name was found");
+    check(`  ...and is gated to pull_request / push-to-main / schedule / workflow_dispatch`,
+      HEAVY_IF.test(block), block || "(step not found)");
+  }
+  for (const label of FAST_STEPS) {
+    const block = stepBlock(label.includes("secret scan") ? "secret scan (this push's diff)" : label);
+    check(`  "${label}" exists in the verify job`, block.length > 0, "no step with that name was found");
+    check(`  ...and runs UNCONDITIONALLY (no step-level if:)`, !/\n\s+if:/.test(block), block);
+  }
+
+  // THE JOB THAT TELLS THE OWNER THE QUOTA IS CLOSE. Nightly-only, same
+  // shape as unmerged-branches, and it must feed the same alert/all-clear
+  // pair as every other job — section 3b above already enforces THAT
+  // half by deriving the job list rather than naming it, so this only
+  // adds the part specific to this job: that it exists and is not run on
+  // every push (which would spend the minutes it exists to watch).
+  const quotaBlock = jobBlock("quota-alert");
+  check("a nightly job checks Actions usage against the quota", quotaBlock.length > 0,
+    "no quota-alert job was found");
+  check("...scoped to schedule / workflow_dispatch, not every push",
+    /if:\s*github\.event_name == 'schedule' \|\| github\.event_name == 'workflow_dispatch'/.test(quotaBlock),
+    "running this on every push would spend the minutes it is meant to watch");
+  check("...reading the secret by the name scripts/ci/quota-alert.mjs expects",
+    /ACTIONS_BILLING_PAT/.test(quotaBlock), "the job and the script must agree on the secret's name");
+}
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) { for (const f of failures) console.log(`  - ${f}`); process.exit(1); }

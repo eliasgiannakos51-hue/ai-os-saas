@@ -259,6 +259,42 @@ const MUTANTS = [
       to: '    .order("created_at", { ascending: false })',
       expect: "and for its projects the same way",
     },
+  // ---- the closed column's width, and the ref-read delete guard -----
+  {
+    name: "md:w-[280px] goes back into the unconditional base, beside the conditional one",
+    file: CHAT_WORKSPACE,
+    from: "bg-background md:relative md:z-auto md:max-w-none ${",
+    to: "bg-background md:relative md:z-auto md:w-[280px] md:max-w-none ${",
+    expect: "the unconditional base never claims a width Tailwind would have to arbitrate",
+  },
+  {
+    name: "a confirmed delete stops telling its caller",
+    file: ROWS,
+    from: "          onDeleted?.(row.id);\n          router.refresh();",
+    to: "          router.refresh();",
+    expect: "a confirmed delete tells its caller, after the server confirms it",
+  },
+  {
+    name: "the column stops forwarding onDeleted",
+    file: COLUMN,
+    from: "          onDeleted={onDeleted}",
+    to: "",
+    expect: "the column forwards it",
+  },
+  {
+    name: "the delete guard reads activeId directly, stale by the time it fires",
+    file: CHAT_WORKSPACE,
+    from: "              if (id === activeIdRef.current) startNewChat();",
+    to: "              if (id === activeId) startNewChat();",
+    expect: "reads a REF for",
+  },
+  {
+    name: "the ref stops tracking activeId, so the guard reads whatever it was on first render",
+    file: CHAT_WORKSPACE,
+    from: "  useEffect(() => {\n    activeIdRef.current = activeId;\n  }, [activeId]);",
+    to: "",
+    expect: "reads a REF for",
+  },
 ];
 
 runMutations({

@@ -423,6 +423,68 @@ check("«this can't be undone» is gone from the delete, in all ten", stillSaysN
 const present = LOCALES.filter((l) => typeof at(messages[l], ["projects", "chatFixed"]) === "string");
 check("...and both sentences were actually found to be read", present.length === 10, `${present.length} of 10`);
 
+console.log("\n== 7. the column's closed width is not a Tailwind coin-flip ==");
+// `md:w-[280px]` used to sit in the slot's UNCONDITIONAL base classes
+// AND in the open branch — harmless together (the same class twice —
+// but ALSO in the closed branch's `md:w-0`, at the same time as the
+// base's `md:w-[280px]`. Two same-specificity utilities on one element
+// resolve by the order Tailwind emits them in the compiled stylesheet,
+// not by where they sit in this string, so whether the column actually
+// collapsed was a build detail rather than something this file
+// controlled. Found 2026-10-17, after it happened to render correctly
+// in every screenshot taken that day — which was the emitted order
+// being favourable, not a guarantee.
+{
+  const ws = src(CHAT_WORKSPACE);
+  const slotMatch = ws.match(/data-testid="chat-column-slot"[\s\S]{0,400}data-open=\{columnOpen\}[\s\S]{0,400}className=\{`([\s\S]*?)`\}/);
+  const slotClass = slotMatch ? slotMatch[1] : "";
+  check("the slot's className was found", Boolean(slotMatch), "chat-column-slot's class template literal");
+  const base = slotClass.split("${columnOpen")[0];
+  // NO \b AFTER A BRACKET. `]` is not a word character, and neither is
+  // the space that follows it — a trailing \b there finds no boundary
+  // to match and silently never fires, which is how this check passed
+  // on the very mutation it was written to catch the first time it was
+  // run. The literal bracketed class name is specific enough on its
+  // own; this needs no \b at all.
+  check(
+    "...and the unconditional base never claims a width Tailwind would have to arbitrate",
+    !base.includes("md:w-[280px]") && !/\bmd:w-0\b/.test(base),
+    base
+  );
+  check(
+    "...each conditional branch still sets its own width",
+    /columnOpen \? "translate-x-0 md:w-\[280px\]"/.test(slotClass) && /: "-translate-x-full[\s\S]{0,40}md:w-0/.test(slotClass)
+  );
+}
+
+console.log("\n== 8. deleting the open conversation closes it — read seconds late, correctly ==");
+// NEW SINCE 2026-10-17, not carried over: delete used to live only on
+// the Chats page, which has no open thread beside it to invalidate.
+// The column does, and a delete commits several seconds after the
+// press that scheduled it (the Undo window) — by which point the
+// person may have opened a DIFFERENT conversation. `activeId` read
+// directly inside that late callback would be whatever it was at
+// click time, not now; the three checks below are the three places
+// that have to agree for "was the one I deleted still open, right
+// now" to be answered with the right "now".
+{
+  const rows = src(ROWS);
+  const column = src("src/components/chat/conversation-column.tsx");
+  const ws = src(CHAT_WORKSPACE);
+  check(
+    "a confirmed delete tells its caller, after the server confirms it — not when it is only scheduled",
+    /forget\(row\.id\);\s*onDeleted\?\.\(row\.id\);\s*router\.refresh\(\);/.test(rows)
+  );
+  check("...and the column forwards it", /onDeleted=\{onDeleted\}/.test(column));
+  check(
+    "...and the workspace reads a REF for \"is this still open\", not the activeId closed over at click time",
+    /const activeIdRef = useRef<string \| null>\(null\);/.test(ws) &&
+      /activeIdRef\.current = activeId;/.test(ws) &&
+      /onDeleted=\{\(id\) => \{\s*if \(id === activeIdRef\.current\) startNewChat\(\);/.test(ws),
+    "a plain `activeId` read inside this callback would be the value from the render at click time, stale by the time the Undo window elapses"
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) for (const f of failures) console.log(`  - ${f}`);
 process.exit(failures.length === 0 ? 0 : 1);

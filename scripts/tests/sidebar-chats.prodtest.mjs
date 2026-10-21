@@ -491,6 +491,36 @@ try {
       check(`[${tag}] ...and the conversation just left can be re-opened`,
         (await headerTitle()).includes("Αύρα από το Chat"), `${page.url()} / ${await headerTitle()}`);
 
+      // DELETING THE CONVERSATION THAT IS OPEN, RIGHT NOW BESIDE IT.
+      //
+      // NEW SINCE 2026-10-17, not carried over: delete used to live
+      // only on the Chats page, a screen with no open thread of its
+      // own. The column sits beside one, so this is now reachable —
+      // «Αύρα από το Chat» is the open conversation on this line, from
+      // the re-open two checks above.
+      //
+      // THE DELETE COMMITS AFTER THE UNDO WINDOW, not on the press, so
+      // the thread must still be clearing itself several seconds
+      // later rather than only right away.
+      await ensureColumn();
+      await press(colRow("Αύρα από το Chat").locator('[data-testid="conversation-actions"]'));
+      await page.waitForTimeout(300);
+      page.once("dialog", (d) => d.accept());
+      await press(page.locator('[data-testid="conversation-menu"]').first().getByRole("button", { name: L.module.delete }));
+      await page.waitForTimeout(400);
+      check(`[${tag}] the open thread is untouched while Undo is still offered`,
+        (await headerTitle()).includes("Αύρα από το Chat"), await headerTitle());
+      await page.waitForTimeout(6500);
+      check(`[${tag}] ...and clears once the delete actually commits`,
+        (await page.locator('[data-testid="chat-header-title"]').count()) === 0 &&
+          (await page.locator('[data-testid="chat-empty"]').isVisible()));
+      // AND NOT THE WRONG THREAD. Had the guard read a stale id, this
+      // is where it would have cleared whichever conversation was
+      // deleted on an earlier line (already gone by now) instead of
+      // the one that was actually open.
+      check(`[${tag}] ...and nothing else in the database went with it`,
+        db.store.chat_conversations.some((c) => c.id === MINE[1].id) && db.store.chat_conversations.some((c) => c.id === MINE[2].id));
+
       // AND IT CLOSES AGAIN, which is the other half of «ανοίγει και
       // κλείνει» and the half a one-way toggle passes without.
       //

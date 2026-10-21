@@ -189,8 +189,6 @@ const NOT_PROBEABLE = {
     "replaces the body of deduct_credits_atomic, which already existed — a canary can only ask whether a function EXISTS, and the buggy version would answer that just as happily as the fixed one. It creates no new object; credit-flow.dbtest.mjs section 10 runs it against a real Postgres and requires the fix's behaviour specifically (a deduction that would overdraw past an active reservation's hold is refused)",
   "20261028000000_reserve_zero_credit_actions.sql":
     "widens a CHECK constraint on credit_reservations from credits > 0 to credits >= 0. It creates no object, and a constraint is not in the database API's OpenAPI document, so /api/health cannot see it; the migration raises at the end if a zero-credit row is still refused or a negative one is now accepted, and credit-flow.dbtest.mjs section 11 proves the behaviour this constraint exists to unlock: a zero-credit reservation now holds a real row, and settle_reservation's own replay guard protects it the same as any other",
-  "20261015000000_agents_websites_server_written.sql":
-    "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

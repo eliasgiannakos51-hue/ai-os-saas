@@ -30,7 +30,7 @@ request ανά βήμα· δεν πιάνεται το επόμενο πριν �
 | Βήμα | Τι | Κατάσταση |
 |---|---|---|
 | 1 | Ασφάλεια, από το security audit: migration ledger, `deduct_credits_atomic` να βλέπει τις ενεργές κρατήσεις, το `GET /api/publishing/badge` να ελέγχει ιδιοκτησία, CSP με nonce, replay fix, εργαλεία για `storage.objects` RLS και ιστορικό git | **PR ανοιχτό**: pull request #318 (`claude/keen-turing-bv8gw4-security`) |
-| 2 | CI για ιδιωτικό repository: γρήγοροι έλεγχοι + έλεγχος μυστικών + dependency audit σε κάθε push· τα βαριά (mutations, database, integration) μόνο σε pull request / push στο main / νυχτερινό· ειδοποίηση στο 80% της ποσόστωσης· Vercel ανεπηρέαστο | **φτιαγμένο**, PR σε προετοιμασία (`claude/keen-turing-bv8gw4-ci`) |
+| 2 | CI για ιδιωτικό repository: γρήγοροι έλεγχοι + έλεγχος μυστικών + dependency audit σε κάθε push· τα βαριά (mutations, database, integration) μόνο σε pull request / push στο main / νυχτερινό· ειδοποίηση στο 80% της ποσόστωσης· Vercel ανεπηρέαστο | **PR ανοιχτό**: pull request #321 (`claude/keen-turing-bv8gw4-ci`) |
 | 3 | Coding, σαν Claude Code: αφαίρεση βημάτων/πλήκτρων/μετρητή/εναλλαγής, άδεια κατάσταση, δύο στήλες, πράσινο/κόκκινο στις αλλαγές, [◧] ιστορικό | **σε εξέλιξη από πριν** (`claude/keen-turing-bv8gw4-coding`): gates πράσινα, εκκρεμεί commit/push/PR |
 | 4 | All Tools: αναζήτηση με συνώνυμα, έξι ομάδες, μεγάλα/μικρά πλακίδια, χωρίς beta, μόνο ό,τι δουλεύει | **εκκρεμεί** |
 | 5 | Run/GitHub για το Coding (Μέρος 20Γ): απομονωμένος χώρος, εκτέλεση, tests, σύνδεση GitHub, branch, PR | **εκκρεμεί** — πρώτα αναφορά κόστους/GitHub App, μετά ό,τι δεν εξαρτάται από αυτό |

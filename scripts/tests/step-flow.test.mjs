@@ -1,9 +1,9 @@
-// THE SAME FOUR STEPS, IN THE SAME SHAPE, ON THE FOUR SCREENS THAT HAVE
-// STEPS — and the one place where the brief and the product disagree.
+// THE SAME STEPS, IN THE SAME SHAPE, ON THE SCREENS THAT HAVE STEPS — and
+// the one screen that was given one and then had it taken away.
 //
-// Redesign phase 4 asked for a consistent step flow on Website,
-// Research, Files and Coding: "same button position, same step names,
-// same progress shape". Before it there was ONE step list in the whole
+// Redesign phase 4 asked for a consistent step flow on Website, Research,
+// Files and Coding: "same button position, same step names, same
+// progress shape". Before it there was ONE step list in the whole
 // product — files-workspace.tsx's, written in classes only that file
 // had, with its own message keys and its own numbering. It existed
 // because of a real report ("I do not understand how it works and I
@@ -15,12 +15,16 @@
 // stops them drifting apart again.
 //
 // WHERE THE BRIEF IS NOT FOLLOWED, asserted rather than apologised for:
-// Coding's flow is three steps, not the Describe/Build/Test/Fix/Deploy
-// the brief named, because lib/coding/operations.ts's four declared
-// absences say that screen RUNS NOTHING and MAKES NO COMMITS. Section 4
-// checks that the flow contains none of those three words and that the
-// absences it defers to are still declared — if that page ever does run
-// code, this check goes red and the flow gets its steps back.
+// Coding kept a three-step flow of its own — Describe, Generate, Review
+// — from 2026-10-05 to 2026-10-18, standing in for the brief's
+// Describe/Build/Test/Fix/Deploy for the same reason lib/ui/step-flows.ts
+// gives: that screen RUNS NOTHING and MAKES NO COMMITS. On 2026-10-18 the
+// owner turned Coding into a conversation («Το Coding καταλαβαίνει μόνο
+// του τι ζητάω») with no fixed number of moves, so it has no flow at
+// all now — not a shorter one, none — and section 4 checks that absence
+// stays true: no <StepFlow> in its workspace, and the same absences
+// (no repository, no execution, no whole project) still said in its
+// prompt instead.
 //
 // Run: node scripts/tests/step-flow.test.mjs
 import { readFileSync } from "node:fs";
@@ -53,16 +57,15 @@ for (const m of flowsSrc.matchAll(/^\s{2}(\w+): \[([^\]]+)\],$/gm)) {
 }
 
 // ---------------------------------------------------------------------
-console.log("== 1. the four flows, and the brief's steps ==");
-check(`the declaration was read (${Object.keys(FLOWS).length} flows)`, Object.keys(FLOWS).length === 4, JSON.stringify(FLOWS));
-// THE BRIEF'S OWN WORDS for three of the four. Written out here so a
-// step cannot quietly be dropped from a flow to make some other check
-// pass — that is the direction this kind of list actually rots in.
+console.log("== 1. the three flows, and the brief's steps ==");
+check(`the declaration was read (${Object.keys(FLOWS).length} flows)`, Object.keys(FLOWS).length === 3, JSON.stringify(FLOWS));
+// THE BRIEF'S OWN WORDS for all three. Written out here so a step
+// cannot quietly be dropped from a flow to make some other check pass —
+// that is the direction this kind of list actually rots in.
 const EXPECTED = {
   website: ["describe", "generate", "edit", "preview", "publish"],
   research: ["question", "research", "sources", "answer"],
   files: ["upload", "ask", "answer"],
-  coding: ["describe", "generate", "review"],
 };
 for (const [flow, steps] of Object.entries(EXPECTED)) {
   check(
@@ -71,6 +74,10 @@ for (const [flow, steps] of Object.entries(EXPECTED)) {
     JSON.stringify(FLOWS[flow])
   );
 }
+// THE ABSENCE ITSELF, not just the silence of a missing clause above. A
+// typo that renamed `coding` to `code` would pass EXPECTED (no entry
+// named "coding" to compare) just as happily as the real thing.
+check("coding has no flow of its own", !("coding" in FLOWS), Object.keys(FLOWS).join(", "));
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. one word per step, shared between flows ==");
@@ -117,7 +124,6 @@ const SCREENS = {
   website: "src/components/website-builder/website-builder-workspace.tsx",
   research: "src/components/research/research-workspace.tsx",
   files: "src/components/files/files-workspace.tsx",
-  coding: "src/components/coding/coding-workspace.tsx",
 };
 // The design's filled control since 2026-10-04 is the white button
 // (bg-button); it was bg-orange-500/400 before.
@@ -171,23 +177,34 @@ for (const [flow, file] of Object.entries(SCREENS)) {
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 4. the three steps coding does not have ==");
-const coding = stripComments(readFileSync("src/lib/coding/operations.ts", "utf8"));
-// The absences the flow defers to, still declared in the product.
-for (const clause of ["IT RUNS NOTHING", "IT MAKES NO COMMITS", "IT DOES NOT BUILD A PROJECT"]) {
-  const raw = readFileSync("src/lib/coding/operations.ts", "utf8");
-  check(`coding still declares: ${clause}`, raw.includes(clause));
+console.log("\n== 4. coding draws no step flow at all ==");
+// NOT "fewer steps than the brief" — NONE. A conversation has no step 2
+// of 3, so the screen must carry no <StepFlow> and import nothing from
+// the component that draws one.
+const codingUi = stripComments(readFileSync("src/components/coding/coding-workspace.tsx", "utf8"));
+check(
+  "the workspace renders no <StepFlow>",
+  !/<StepFlow\b/.test(codingUi),
+  "a conversation has no fixed number of moves to draw a bar across"
+);
+check(
+  "...and does not even import it",
+  !/\bStepFlow\b/.test(codingUi.replace(/<StepFlow\b[^>]*>/g, "")) &&
+    !/from ["']@\/components\/ui\/step-flow["']/.test(codingUi),
+  "an unused import is the first sign a flow is about to be drawn again"
+);
+// THE ABSENCES THE OLD BOX ON THE SCREEN SAID, now standing instructions
+// inside the prompt instead («Ό,τι πρέπει να ξέρει ο χρήστης το λέει μία
+// γραμμή μέσα στη συνομιλία, όταν χρειάζεται») — still declared
+// somewhere, just no longer in a box competing with the conversation.
+const codingPrompt = readFileSync("src/lib/coding/coding-prompt.ts", "utf8");
+for (const clause of [
+  /no access to any repository/i,
+  /cannot run, execute, test, build, deploy or commit/i,
+  /not a whole multi-service application/i,
+]) {
+  check(`coding still tells the model: ${clause}`, clause.test(codingPrompt));
 }
-check(
-  "the coding flow claims none of test, fix or deploy",
-  !FLOWS.coding.some((s) => ["test", "fix", "deploy", "build"].includes(s)),
-  FLOWS.coding.join(", ")
-);
-check(
-  "and CODE_OPERATIONS has not gained one that runs code",
-  /CODE_OPERATIONS = \["generate", "explain", "find_bugs", "convert", "write_tests"\]/.test(coding),
-  "if this page learns to run or deploy, the flow above owes it those steps"
-);
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. the indicator does not compete with the action ==");

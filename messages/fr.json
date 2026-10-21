@@ -4253,9 +4253,9 @@
       "doesNot": "Vous ne pouvez pas vous parrainer vous-même, et une personne déjà parrainée par un autre affilié ne compte pas pour vous. La commission démarre à son premier paiement, pas à l'inscription, et s'arrête après douze mois."
     },
     "coding": {
-      "is": "Un assistant de code qui travaille exactement sur le texte que vous collez.",
-      "does": "Cinq choses : écrire un extrait, expliquer du code, trouver des bugs en nommant l'entrée qui les déclenche, convertir d'un langage à l'autre et écrire des tests.",
-      "doesNot": "Il n'a aucun dépôt. Il ne voit pas votre base de code, il n'exécute rien — ni votre code, ni celui qu'il écrit — et il ne fait ni commit, ni branche, ni pull request. Une fonction, un fichier, un collage."
+      "is": "Une conversation qui écrit et modifie du code, dans votre propre espace de travail.",
+      "does": "Comprend seule ce que vous demandez : écrire quelque chose de nouveau, expliquer un collage, trouver et corriger des bugs, convertir entre langages, ajouter des tests — en un seul message, sans liste à choisir d'abord.",
+      "doesNot": "Elle n'a accès à aucun dépôt et ne peut rien exécuter, tester, construire, déployer ou commiter. Elle écrit les fichiers dont il est question dans cette conversation, pas une application entière — et le dit, en une phrase, chaque fois que ce qui est demandé le suppose."
     },
     "dataAnalysis": {
       "is": "Un tableur, lu correctement.",
@@ -4756,66 +4756,61 @@
   },
   "coding": {
     "title": "Code",
-    "description": "Cinq choses qu'il fait, quatre qu'il ne fait pas. Tout porte exactement sur le texte de la zone.",
+    "description": "Une conversation qui écrit et modifie du code — rien ne s'exécute, rien n'est commité, et elle le dit quand c'est important.",
     "code": "Code",
     "copy": "Copier",
     "copied": "Copié",
-    "language": "Langage",
-    "targetLanguage": "Convertir en",
-    "useWorkspace": "Utiliser vos autres modules comme contexte",
-    "run": "Exécuter",
-    "running": "En cours…",
-    "result": "Résultat",
-    "limits": {
-      "title": "Ce qu'il ne fait PAS",
-      "no_repository": "Il n'a pas de dépôt. Il ne voit ni votre base de code ni le fichier d'à côté.",
-      "no_execution": "Il n'exécute rien. Ni votre code, ni celui qu'il écrit, ni les tests qu'il écrit.",
-      "no_commits": "Il ne fait ni commit, ni branche, ni pull request.",
-      "no_whole_project": "Il ne construit pas de projet. Une fonction, un fichier, un collage.",
-      "later": "Ces quatre-là, c'est la version suivante, pas celle-ci."
-    },
-    "operations": {
-      "generate": {
-        "label": "Écrire un extrait",
-        "description": "Décrivez ce qu'il vous faut et recevez une fonction, avec ses hypothèses et ses manques énoncés.",
-        "placeholder": "Une fonction qui prend une liste de commandes et renvoie la marge par client…"
-      },
-      "explain": {
-        "label": "Expliquer ceci",
-        "description": "Collez du code et recevez ce qu'il fait, dans l'ordre, en nommant les lignes concernées.",
-        "placeholder": "Collez le code à expliquer…"
-      },
-      "find_bugs": {
-        "label": "Trouver des bugs",
-        "description": "Chaque constat nomme l'entrée ou l'état qui le déclenche. Un constat sans cas d'échec est une préférence.",
-        "placeholder": "Collez le code à vérifier…"
-      },
-      "convert": {
-        "label": "Convertir",
-        "description": "Réécrivez-le dans un autre langage, avec la liste de tout ce qui NE passe PAS.",
-        "placeholder": "Collez le code à convertir…"
-      },
-      "write_tests": {
-        "label": "Écrire des tests",
-        "description": "Le cas ordinaire, les bornes et les façons d'échouer. Pas seulement le chemin heureux.",
-        "placeholder": "Collez le code à tester…"
-      }
-    },
     "errors": {
-      "tooLong": "Cela dépasse {limit} caractères. Ceci porte sur un fichier, pas un projet.",
+      "tooLong": "C'est plus long que {limit} caractères. Ceci fonctionne avec les fichiers d'une conversation, pas avec un projet entier.",
       "unavailable": "Le service d'IA est injoignable. Rien n'a été facturé.",
-      "failed": "Ça n'a pas marché — réessayez."
+      "failed": "Ça n'a pas marché — réessayez.",
+      "tooShort": "Dites un peu plus que cela.",
+      "insufficientCredits": "Pas assez de crédits pour cela."
     },
     "history": {
-      "title": "Historique",
       "search": "Rechercher",
-      "folder": "Dossier",
-      "allFolders": "Tous les dossiers",
       "empty": "Rien ici pour l'instant.",
       "input": "Entrée",
       "output": "Sortie",
-      "importedNote": "note d'avant",
-      "failed": "échec"
+      "failed": "échec",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer « {title} » ?"
+    },
+    "download": "Télécharger",
+    "empty": {
+      "heading": "Qu'est-ce qu'on fait ?",
+      "placeholder": "Décrivez ce que vous voulez, ou collez du code",
+      "send": "Envoyer",
+      "examples": {
+        "vat": "Une fonction qui calcule la TVA",
+        "explain": "Expliquez-moi ce code",
+        "findBugs": "Trouvez les bugs dans ceci"
+      }
+    },
+    "composerPlaceholder": "Écrire à Coding…",
+    "thinking": "Réflexion…",
+    "wroteFiles": "A écrit {count, plural, one {un fichier} other {# fichiers}}",
+    "newConversation": "Nouveau",
+    "showHistory": "Afficher le travail précédent",
+    "hideHistory": "Masquer le travail précédent",
+    "mobile": {
+      "viewCode": "Voir le code",
+      "back": "Retour"
+    },
+    "editFile": {
+      "button": "Modifier",
+      "open": "Modifier {path}",
+      "placeholder": "Que faut-il changer dans ce fichier ?",
+      "cancel": "Annuler",
+      "submit": "Modifier"
+    },
+    "legacy": {
+      "title": "Travaux précédents ({count, plural, one {# entrée} other {# entrées}})",
+      "untitled": "Sans titre"
+    },
+    "dataScope": {
+      "title": "Ce qu'il peut voir",
+      "body": "Il voit les fichiers déjà présents dans cette conversation, et — comme le Chat — vos propres données et votre chat récent, pour répondre à partir de vos propres données. Il ne voit rien que vous ne lui avez pas montré."
     }
   },
   "presentations": {

@@ -327,7 +327,7 @@ const WIRED = [
   "src/app/api/posts/generate/route.ts",
   "src/app/api/presentations/generate/route.ts",
   "src/app/api/websites/generate/process/route.ts",
-  "src/app/api/coding/run/route.ts",
+  "src/app/api/coding/send/route.ts",
   "src/lib/agents/execute-agent.ts",
 ];
 check(`five call sites are named (${WIRED.length})`, WIRED.length === 5);

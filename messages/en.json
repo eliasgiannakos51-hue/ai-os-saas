@@ -4253,9 +4253,9 @@
       "doesNot": "You cannot refer yourself, and somebody already referred by another affiliate does not count for you. Commission starts at their first payment, not at signup, and stops after twelve months."
     },
     "coding": {
-      "is": "A code assistant that works on exactly the text you paste.",
-      "does": "Five things: writes a snippet, explains code, finds bugs and names the input that breaks them, converts between languages, and writes tests.",
-      "doesNot": "It has no repository. It cannot see your codebase, it runs nothing — not your code, not the code it writes — and it makes no commits, branches or pull requests. One function, one file, one paste."
+      "is": "A conversation that writes and changes code, inside your own workspace.",
+      "does": "Understands what you ask on its own: write something new, explain a paste, find and fix bugs, convert between languages, add tests — in one message, with no picker to choose from first.",
+      "doesNot": "It has no access to any repository and cannot run, test, build, deploy or commit anything. It writes the files this conversation is about, not a whole application — and says so, in one sentence, whenever what you ask assumes otherwise."
     },
     "dataAnalysis": {
       "is": "A spreadsheet, read properly.",
@@ -4756,66 +4756,61 @@
   },
   "coding": {
     "title": "Coding",
-    "description": "Five things it does, and four it doesn't. Everything works on exactly the text in the box.",
+    "description": "A conversation that writes and changes code — nothing runs, nothing is committed, and it says so when it matters.",
     "code": "Code",
     "copy": "Copy",
     "copied": "Copied",
-    "language": "Language",
-    "targetLanguage": "Convert to",
-    "useWorkspace": "Use your other modules for context",
-    "run": "Run",
-    "running": "Working…",
-    "result": "Result",
-    "limits": {
-      "title": "What this does NOT do",
-      "no_repository": "It has no repository. It cannot see your codebase or the file next to the one you paste.",
-      "no_execution": "It runs nothing. Not your code, not the code it writes, not the tests it writes.",
-      "no_commits": "It makes no commits, branches or pull requests.",
-      "no_whole_project": "It does not build a project. One function, one file, one paste.",
-      "later": "Those four are the next version, not this one."
-    },
-    "operations": {
-      "generate": {
-        "label": "Write a snippet",
-        "description": "Describe what you need and get one function, with its assumptions and its gaps stated.",
-        "placeholder": "A function that takes a list of orders and returns the margin per customer…"
-      },
-      "explain": {
-        "label": "Explain this",
-        "description": "Paste code and get what it does, in order, naming the lines it is talking about.",
-        "placeholder": "Paste the code you want explained…"
-      },
-      "find_bugs": {
-        "label": "Find bugs",
-        "description": "Every finding names the input or state that makes it go wrong. A finding with no failing case is a preference.",
-        "placeholder": "Paste the code you want checked…"
-      },
-      "convert": {
-        "label": "Convert",
-        "description": "Rewrite it in another language, with a list of everything that does not carry across.",
-        "placeholder": "Paste the code you want converted…"
-      },
-      "write_tests": {
-        "label": "Write tests",
-        "description": "The ordinary case, the boundaries, and the ways it fails. Not just the happy path.",
-        "placeholder": "Paste the code you want tested…"
-      }
-    },
     "errors": {
-      "tooLong": "That's longer than {limit} characters. This works on one file, not a project.",
+      "tooLong": "That's longer than {limit} characters. This works on one conversation's worth of files, not a whole project.",
       "unavailable": "The AI service couldn't be reached. Nothing was charged.",
-      "failed": "That didn't work — try again."
+      "failed": "That didn't work — try again.",
+      "tooShort": "Say a little more than that.",
+      "insufficientCredits": "Not enough credits for this."
     },
     "history": {
-      "title": "History",
       "search": "Search",
-      "folder": "Folder",
-      "allFolders": "All folders",
       "empty": "Nothing here yet.",
       "input": "Input",
       "output": "Output",
-      "importedNote": "note from before",
-      "failed": "failed"
+      "failed": "failed",
+      "delete": "Delete",
+      "deleteConfirm": "Delete “{title}”?"
+    },
+    "download": "Download",
+    "empty": {
+      "heading": "What are we making?",
+      "placeholder": "Describe what you want, or paste code",
+      "send": "Send",
+      "examples": {
+        "vat": "A function that calculates VAT",
+        "explain": "Explain this code",
+        "findBugs": "Find the bugs in this"
+      }
+    },
+    "composerPlaceholder": "Message Coding…",
+    "thinking": "Thinking…",
+    "wroteFiles": "Wrote {count, plural, one {one file} other {# files}}",
+    "newConversation": "New",
+    "showHistory": "Show previous work",
+    "hideHistory": "Hide previous work",
+    "mobile": {
+      "viewCode": "Code",
+      "back": "Back"
+    },
+    "editFile": {
+      "button": "Change",
+      "open": "Change {path}",
+      "placeholder": "What should change in this file?",
+      "cancel": "Cancel",
+      "submit": "Change"
+    },
+    "legacy": {
+      "title": "Older work ({count, plural, one {# entry} other {# entries}})",
+      "untitled": "Untitled"
+    },
+    "dataScope": {
+      "title": "What it can see",
+      "body": "It sees the files already in this conversation, and — the same as Chat — your own records and recent chat, so it can answer from your own data. It sees nothing you have not shown it."
     }
   },
   "presentations": {

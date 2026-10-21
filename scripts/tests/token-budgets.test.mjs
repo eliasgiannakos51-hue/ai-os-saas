@@ -116,6 +116,13 @@ console.log("\n== 1. the inventory is complete and nothing is unclassified ==");
 const CLASSIFIED = {
   deliverable: [
     "src/app/api/documents/[id]/pdf/route.ts",
+    // A CODING TURN'S REPLY, read straight by the person on the other
+    // side of the conversation (owner, 2026-10-18, replacing the
+    // single-shot api/coding/run this inventory used to carry in
+    // routedUnmarked below). Through modelTextFrom, and a cut reply's
+    // own truncation notice rides the prose a half-finished file block
+    // would otherwise hide inside.
+    "src/app/api/coding/send/route.ts",
     "src/lib/research/research.ts",
     "src/lib/agents/agent-runner.ts",
     // Package 30: an AI box's answer is what the automation sends or
@@ -175,11 +182,6 @@ const CLASSIFIED = {
   ],
   internal: [
     "src/lib/chat/memory.ts",
-    // The per-operation ceiling TABLE Coding reads (spec.maxTokens).
-    // Visible since the population stopped being spelt the SDK's way;
-    // it makes no call of its own, and the call that uses it is in
-    // routedUnmarked below.
-    "src/lib/coding/operations.ts",
     // THROUGH THE ROUTER SINCE 2026-10-15, so it writes `maxTokens`
     // rather than `max_tokens`; 200 tokens for one forced tool call
     // whose answer is one word from a four-item enum. A cut reply
@@ -224,7 +226,6 @@ const CLASSIFIED = {
 // each entry is checked BOTH ways, so one that gains its stop-reason
 // handling must be taken out rather than left here looking handled.
 CLASSIFIED.routedUnmarked = [
-  "src/app/api/coding/run/route.ts",
   "src/app/api/data-analysis/[id]/analyse/route.ts",
   "src/app/api/data-analysis/[id]/ask/route.ts",
   "src/lib/meetings/meeting-analyse-call.ts",

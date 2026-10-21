@@ -474,4 +474,10 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   // account deletion removes files through the Storage API since
   // 2026-10-08 (src/lib/account/erase-storage.ts), because Supabase
   // refuses that function's delete, so its absence breaks nothing.
+  {
+    kind: "table",
+    table: "code_conversations",
+    migration: "20261025000000_coding_conversations.sql",
+    breaks: "Coding (the conversational shell) cannot create or load a conversation: every open attempt answers «it could not be saved», and /dashboard/coding shows only the read-only code_sessions history from before this migration",
+  },
 ];

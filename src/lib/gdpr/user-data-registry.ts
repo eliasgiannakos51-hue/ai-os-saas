@@ -380,6 +380,11 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // tracker (source = 'note'). ai_coding_requests stays registered too —
   // the import copied rows, it did not move them.
   { table: "code_sessions", label: "code_sessions", scope: "user_content" },
+  // The conversation that replaced it (owner, 2026-10-18) — a second
+  // table, not a migration, so code_sessions above stays exactly as it
+  // was (supabase/migrations/20261025000000_coding_conversations.sql).
+  { table: "code_conversations", label: "code_conversations", scope: "user_content" },
+  { table: "code_messages", label: "code_messages", scope: "user_content" },
   // V4 #25. What the customer agreed to and what they were charged for
   // it. Both are theirs and both are exported: an overage bill they
   // cannot reconstruct is a bill they have to take on trust, and the

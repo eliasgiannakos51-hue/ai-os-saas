@@ -4253,9 +4253,9 @@
       "doesNot": "Não pode indicar-se a si próprio, e alguém já indicado por outro afiliado não conta para si. A comissão começa no primeiro pagamento, não no registo, e termina ao fim de doze meses."
     },
     "coding": {
-      "is": "Um assistente de código que trabalha exatamente sobre o texto que cola.",
-      "does": "Cinco coisas: escreve um excerto, explica código, encontra erros nomeando a entrada que os provoca, converte entre linguagens e escreve testes.",
-      "doesNot": "Não tem repositório. Não vê o seu código, não executa nada — nem o seu código nem o que escreve — e não faz commits, ramos ou pull requests. Uma função, um ficheiro, uma colagem."
+      "is": "Uma conversa que escreve e altera código, dentro do teu próprio espaço de trabalho.",
+      "does": "Entende por si só o que pedes: escrever algo novo, explicar uma colagem, encontrar e corrigir erros, converter entre linguagens, adicionar testes — numa só mensagem, sem escolher antes de uma lista.",
+      "doesNot": "Não tem acesso a nenhum repositório e não pode executar, testar, compilar, implementar ou fazer commit de nada. Escreve os ficheiros de que trata esta conversa, não uma aplicação inteira — e diz isso, numa frase, sempre que o pedido pressupõe o contrário."
     },
     "dataAnalysis": {
       "is": "Uma folha de cálculo, lida como deve ser.",
@@ -4756,66 +4756,61 @@
   },
   "coding": {
     "title": "Código",
-    "description": "Cinco coisas que faz e quatro que não faz. Tudo trabalha exatamente sobre o texto da caixa.",
+    "description": "Uma conversa que escreve e altera código — nada é executado, nada é commitado, e isso é dito quando importa.",
     "code": "Código",
     "copy": "Copiar",
     "copied": "Copiado",
-    "language": "Linguagem",
-    "targetLanguage": "Converter para",
-    "useWorkspace": "Usar os teus outros módulos como contexto",
-    "run": "Executar",
-    "running": "A trabalhar…",
-    "result": "Resultado",
-    "limits": {
-      "title": "O que NÃO faz",
-      "no_repository": "Não tem repositório. Não vê o teu código nem o ficheiro ao lado do que colaste.",
-      "no_execution": "Não executa nada. Nem o teu código, nem o que escreve, nem os testes que escreve.",
-      "no_commits": "Não faz commits, ramos nem pull requests.",
-      "no_whole_project": "Não constrói um projeto. Uma função, um ficheiro, uma colagem.",
-      "later": "Esses quatro são a próxima versão, não esta."
-    },
-    "operations": {
-      "generate": {
-        "label": "Escrever um excerto",
-        "description": "Descreve o que precisas e recebe uma função, com os pressupostos e as falhas ditos.",
-        "placeholder": "Uma função que recebe uma lista de encomendas e devolve a margem por cliente…"
-      },
-      "explain": {
-        "label": "Explica isto",
-        "description": "Cola código e recebe o que ele faz, por ordem, nomeando as linhas de que fala.",
-        "placeholder": "Cola o código que queres explicado…"
-      },
-      "find_bugs": {
-        "label": "Encontrar erros",
-        "description": "Cada achado nomeia a entrada ou o estado que o provoca. Um achado sem caso que falhe é uma preferência.",
-        "placeholder": "Cola o código que queres verificado…"
-      },
-      "convert": {
-        "label": "Converter",
-        "description": "Reescreve-o noutra linguagem, com a lista de tudo o que NÃO transita.",
-        "placeholder": "Cola o código que queres converter…"
-      },
-      "write_tests": {
-        "label": "Escrever testes",
-        "description": "O caso normal, os limites e as formas de falhar. Não só o caminho feliz.",
-        "placeholder": "Cola o código que queres testar…"
-      }
-    },
     "errors": {
-      "tooLong": "Isso tem mais de {limit} caracteres. Isto trabalha sobre um ficheiro, não um projeto.",
+      "tooLong": "Isso tem mais de {limit} caracteres. Isto funciona com os ficheiros de uma conversa, não com um projeto inteiro.",
       "unavailable": "Não foi possível contactar o serviço de IA. Não foi cobrado nada.",
-      "failed": "Não resultou — tenta outra vez."
+      "failed": "Não resultou — tenta outra vez.",
+      "tooShort": "Diz um pouco mais do que isso.",
+      "insufficientCredits": "Não tens créditos suficientes para isto."
     },
     "history": {
-      "title": "Histórico",
       "search": "Procurar",
-      "folder": "Pasta",
-      "allFolders": "Todas as pastas",
       "empty": "Ainda não há nada aqui.",
       "input": "Entrada",
       "output": "Saída",
-      "importedNote": "nota anterior",
-      "failed": "falhou"
+      "failed": "falhou",
+      "delete": "Eliminar",
+      "deleteConfirm": "Eliminar “{title}”?"
+    },
+    "download": "Transferir",
+    "empty": {
+      "heading": "O que estamos a fazer?",
+      "placeholder": "Descreve o que queres, ou cola código",
+      "send": "Enviar",
+      "examples": {
+        "vat": "Uma função que calcula o IVA",
+        "explain": "Explica-me este código",
+        "findBugs": "Encontra os erros nisto"
+      }
+    },
+    "composerPlaceholder": "Escreve ao Coding…",
+    "thinking": "A pensar…",
+    "wroteFiles": "Escreveu {count, plural, one {um ficheiro} other {# ficheiros}}",
+    "newConversation": "Novo",
+    "showHistory": "Mostrar trabalho anterior",
+    "hideHistory": "Ocultar trabalho anterior",
+    "mobile": {
+      "viewCode": "Código",
+      "back": "Voltar"
+    },
+    "editFile": {
+      "button": "Alterar",
+      "open": "Alterar {path}",
+      "placeholder": "O que deve mudar neste ficheiro?",
+      "cancel": "Cancelar",
+      "submit": "Alterar"
+    },
+    "legacy": {
+      "title": "Trabalho anterior ({count, plural, one {# entrada} other {# entradas}})",
+      "untitled": "Sem título"
+    },
+    "dataScope": {
+      "title": "O que pode ver",
+      "body": "Vê os ficheiros que esta conversa já tem, e — tal como o Chat — os teus próprios registos e o teu chat recente, para poder responder a partir dos teus próprios dados. Não vê nada que não lhe tenhas mostrado."
     }
   },
   "presentations": {

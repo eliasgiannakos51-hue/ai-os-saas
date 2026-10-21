@@ -23,7 +23,7 @@ import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/charged-party.test.mjs";
 const RUN = "src/app/api/agents/[id]/run/route.ts";
-const CODING = "src/app/api/coding/run/route.ts";
+const CODING = "src/app/api/coding/send/route.ts";
 const SIGNUP = "src/app/api/signup/route.ts";
 const RENEWAL = "src/lib/publishing/badge-renewal.ts";
 

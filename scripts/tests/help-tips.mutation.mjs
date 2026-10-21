@@ -196,8 +196,8 @@ const MUTANTS = [
     name: "a Chinese tip repeats itself across two of its three parts",
     ...localeEdit(
       "zh",
-      '"doesNot": "它没有代码仓库。',
-      '"doesNot": "五件事：写一段代码、解释代码、找出缺陷并指明触发它的输入、在语言之间转换、编写测试。它没有代码仓库。',
+      '"doesNot": "它无法访问任何代码仓库，',
+      '"doesNot": "能自己理解你的请求：写一些新东西、解释一段粘贴的代码、找出并修复错误、在语言之间转换、添加测试——都在一条消息里完成，不需要先从列表里选择。它无法访问任何代码仓库，',
     ),
     expect: 'zh: no tip repeats one string across its three parts',
   },

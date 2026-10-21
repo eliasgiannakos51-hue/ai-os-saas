@@ -16,12 +16,30 @@ const GATE = "scripts/tests/ci-step-timeouts.test.mjs";
 const WORKFLOW = ".github/workflows/verify.yml";
 const TARGETS = [GATE, WORKFLOW];
 
+// THE STEP'S OWN `if:`, SPELLED OUT IN FULL (added 2026-10-21, Βήμα 2:
+// the heavy/fast split). A `from` anchored on just the name and the
+// timeout line went stale the moment this step gained a condition
+// between them — not a text match any more, so `from` has to include
+// it, in full, or this mutant silently stops applying. The same text is
+// read back from the live file by scripts/tests/ci-coverage.test.mjs
+// section 7, so a future change to the condition breaks THAT gate first.
+// ONE LINE ON PURPOSE. scripts/tests/lib/mutant-list.mjs evaluates this
+// file's MUTANTS array with a `new Function`, and the only `const`
+// declarations it is willing to pull into scope are ones that are a
+// single physical line ending in `;` — a multi-line declaration (which
+// this was, split across three lines with string concatenation, in the
+// first draft) is invisible to it, so MUTANTS below throws
+// "HEAVY_IF is not defined" at evaluation time and this whole suite
+// falls back to the weaker, edits-blind reader. Confirmed by mutating:
+// splitting this back across lines reproduces exactly that fallback.
+const HEAVY_IF = "        if: >-\n          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||\n          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'\n";
+
 const MUTANTS = [
   {
     name: "the mutation suites step loses its limit",
     file: WORKFLOW,
-    from: "      - name: mutation suites\n        timeout-minutes: 120\n",
-    to: "      - name: mutation suites\n",
+    from: `      - name: mutation suites\n${HEAVY_IF}        timeout-minutes: 120\n`,
+    to: `      - name: mutation suites\n${HEAVY_IF}`,
     expect: "verify: every step has timeout-minutes",
   },
   {
@@ -34,8 +52,8 @@ const MUTANTS = [
   {
     name: "a step's limit is raised past its job's",
     file: WORKFLOW,
-    from: "      - name: mutation suites\n        timeout-minutes: 120\n",
-    to: "      - name: mutation suites\n        timeout-minutes: 150\n",
+    from: `      - name: mutation suites\n${HEAVY_IF}        timeout-minutes: 120\n`,
+    to: `      - name: mutation suites\n${HEAVY_IF}        timeout-minutes: 150\n`,
     expect: "verify: no step's limit reaches the job's",
   },
 ];

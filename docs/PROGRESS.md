@@ -85,6 +85,79 @@ migrations δεν μπόρεσαν να τρέξουν εδώ σε πραγμα�
 20261027000000_deduct_credits_atomic_respects_reservations.sql,
 20261028000000_reserve_zero_credit_actions.sql**
 
+## 2026-10-21 (Βήμα 2 από 5: CI για ιδιωτικό repository)
+
+**Η ΜΕΤΡΗΣΗ, ΜΕ ΗΜΕΡΟΜΗΝΙΑ.** Μετρημένο με το χέρι στις 2026-10-21, από
+το ιστορικό των runs (GitHub Actions API) — αριθμός που δεν παράγεται
+από κάποιο εργαλείο αυτού του repository, άρα φέρει την ημερομηνία του
+αντί να ξαναπαραχθεί: περίπου 28.500 λεπτά/μήνα, απέναντι στα 2.000
+δωρεάν λεπτά/μήνα ενός ιδιωτικού repository — περίπου 14 φορές πάνω
+από την ποσόστωση. Η κύρια αιτία: το ίδιο, ωριαίο `verify` job έτρεχε
+ΔΥΟ (ή τρεις) φορές στα ίδια bytes για ένα push — μία για το `push`,
+μία για το `pull_request`, και μία ακόμα ανά αναφορά deployment· ήδη
+καταγραμμένο ως το #19 της ουράς.
+
+**Η ΛΥΣΗ: ΔΙΑΧΩΡΙΣΜΟΣ ΓΡΗΓΟΡΟΥ/ΒΑΡΙΟΥ ΜΕ `if:` ΣΕ ΕΠΙΠΕΔΟ STEP, ΟΧΙ
+JOB.** Το job `verify` παραμένει ένα — το όνομα `verify` και το βήμα
+του `mutation suites` είναι ό,τι το `ci-step-timeouts.test.mjs` και το
+`ci-coverage.test.mjs` ελέγχουν με ακρίβεια, κι ένα rename θα έσπαζε
+και τα δύο χωρίς λόγο. Αντί γι' αυτό, τα έξι βαριά βήματα (postgres,
+mutation suites, καθαρισμός δέντρου, database suites, chromium,
+integration suites) πήραν το ίδιο `if:`: τρέχουν μόνο σε
+`pull_request`, σε push στο `main`, σε `schedule` ή σε
+`workflow_dispatch`. Ένα απλό push σε feature branch κρατά μόνο
+typecheck/lint/gates/build/audit/secret-scan. **Τίποτα δεν χάνεται**:
+κάθε commit περνά είτε από το pull_request run όσο είναι σε review,
+είτε, όταν φτάσει στο `main`, από το ίδιο αυτό push event.
+
+**ΔΥΟ ΝΕΑ, ΣΕ ΚΑΘΕ PUSH.** `scripts/security/push-secret-scan.mjs`:
+13 σχήματα κλειδιού (Anthropic, OpenAI, Google, Groq, Stripe/Resend/
+ElevenLabs, Stripe webhook, Supabase, JWT, GitHub, AWS, Slack,
+Telegram, private key block· τα σχήματα από `docs/api-keys.md`), πάνω
+ΜΟΝΟ στις γραμμές που αυτό το push προσθέτει (`git diff` έναντι της
+βάσης του event· χωρίς βάση — νέο branch, schedule — σκανάρει όλο το
+δέντρο, ποτέ δεν προσπερνά σιωπηλά). Εξαιρούνται τα αρχεία δοκιμών που
+χρειάζονται ψεύτικο κλειδί (`.test.mjs` έως `.repro.mjs`) και ο
+scrubber. Και `npm audit --omit=dev --audit-level=high`.
+
+**ΤΟ 80%-ΤΗΣ-ΠΟΣΟΣΤΩΣΗΣ.** Νέο νυχτερινό job `quota-alert`,
+`scripts/ci/quota-alert.mjs`: διαβάζει το billing API του GitHub
+(ρωτά πρώτα αν ο λογαριασμός είναι User ή Organization, ανώνυμα, μετά
+διαβάζει `total_minutes_used`/`included_minutes` με το νέο secret
+`ACTIONS_BILLING_PAT`) και κοκκινίζει στο 80%. Το `GITHUB_TOKEN` κάθε
+job δεν βλέπει billing — θέλει personal access token του ίδιου
+λογαριασμού, γι' αυτό το νέο secret (βλέπε `docs/NEEDS-FROM-ELIAS.md`).
+Λείπον secret = κόκκινο, ηθελημένα: ίδια επιλογή με το `bot-on-deploy`
+για `BOT_EMAIL`/`BOT_PASSWORD` — ένα σιωπηλό skip θα έδειχνε «όλα
+καλά» χωρίς να έχει μετρηθεί τίποτα.
+
+**ΤΙ ΤΡΕΞΕ.** `npm run gates`: 372 gates πράσινα. Δύο νέα mutation-free
+`.test.mjs` (`push-secret-scan.test.mjs` σε πραγματικό throwaway git
+repository — προστιθέμενο κλειδί πιάνεται, αφαιρούμενο όχι, fixture σε
+`.test.mjs` εξαιρείται, fallback σε μη-αναγνωρίσιμη βάση σκανάρει το
+δέντρο· `quota-alert.test.mjs` με ψεύτικο `fetch`). Επαληθεύτηκε με το
+χέρι, μεταλλάσσοντας το ίδιο το `.github/workflows/verify.yml`: η
+αφαίρεση του `if:` από ένα βαριά βήμα κοκκινίζει τη νέα ενότητα 7 του
+`ci-coverage.test.mjs`· η προσθήκη του ίδιου `if:` σε ένα γρήγορο βήμα
+κοκκινίζει την ίδια ενότητα από την άλλη πλευρά· και τα τρία mutants
+του `ci-step-timeouts.mutation.mjs` πιάστηκαν (ξαναγραμμένα, γιατί το
+νέο `if:` άλλαξε τι βρίσκεται δίπλα σε τι). Δύο ξένα bugs βρέθηκαν και
+διορθώθηκαν στην πορεία: το `check-mutation-tree.mjs` θεωρούσε τον
+εαυτό του «mutation εφαρμοσμένο στο δέντρο» επειδή το rewrite του
+mutant άλλαξε τη γειτονική γραμμή (διορθώθηκε με την πλήρη αγκύρωση
+στο ίδιο string)· και το `scripts/tests/lib/mutant-list.mjs` δεν
+μπορούσε να διαβάσει μια πολυ-γραμμική `const` δήλωση (διορθώθηκε σε
+μία γραμμή, επαληθεύτηκε μεταλλάσσοντας πίσω στην πολυ-γραμμική μορφή
+και βλέποντας το fallback ξανά). Το `gate-independence.test.mjs`
+χρειάστηκε μία νέα καταχώρηση (`quota-alert.test.mjs`, NONE στο σκανάρισμα
+γιατί χρησιμοποιεί ψεύτικο `fetch` αντί για `loadTs`) — επαληθεύτηκε με
+τρία mutations στο ίδιο αρχείο, και τα τρία κόκκινα.
+
+Vercel ανεπηρέαστο: κανένα αρχείο έξω από `.github/` και `scripts/`
+άλλαξε.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-10-21 (τρία πραγματικά bugs από τις ίδιες τις εικόνες οθόνης)
 
 **Η ΣΤΕΝΗ ΣΤΗΛΗ ΕΚΟΒΕ ΟΝΟΜΑΤΑ ΣΤΗ ΜΕΣΗ.** Στα 280px μιας πραγματικής

@@ -162,8 +162,13 @@ const MUTANTS = [
     // A mutant that edits a name is testing the name.
     name: "postgres is installed after the suites that need it",
     file: WF,
-    from: '      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"\n\n      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation',
-    to: '      - name: mutation suites\n        timeout-minutes: 120\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
+    // THE if: CARRIED ON BOTH STEPS, IN FULL (Βήμα 2, 2026-10-21 — the
+    // heavy/fast split). Anchored on just the name and timeout-minutes
+    // went stale the moment a condition landed between them, the same
+    // way ci-step-timeouts.mutation.mjs's own anchor did — the fix here
+    // is the same one: spell out the whole step, condition included.
+    from: '      - name: postgres, for the suites that need one\n        if: >-\n          github.event_name == \'pull_request\' || github.ref == \'refs/heads/main\' ||\n          github.event_name == \'schedule\' || github.event_name == \'workflow_dispatch\'\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"\n\n      - name: mutation suites\n        if: >-\n          github.event_name == \'pull_request\' || github.ref == \'refs/heads/main\' ||\n          github.event_name == \'schedule\' || github.event_name == \'workflow_dispatch\'\n        timeout-minutes: 120\n        run: npm run test:mutation',
+    to: '      - name: mutation suites\n        if: >-\n          github.event_name == \'pull_request\' || github.ref == \'refs/heads/main\' ||\n          github.event_name == \'schedule\' || github.event_name == \'workflow_dispatch\'\n        timeout-minutes: 120\n        run: npm run test:mutation\n\n      - name: postgres, for the suites that need one\n        if: >-\n          github.event_name == \'pull_request\' || github.ref == \'refs/heads/main\' ||\n          github.event_name == \'schedule\' || github.event_name == \'workflow_dispatch\'\n        timeout-minutes: 5\n        run: |\n          sudo apt-get update -qq\n          sudo apt-get install -y -qq postgresql\n          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"',
     expect: "before the mutation suites",
   },
 
@@ -258,8 +263,11 @@ const MUTANTS = [
     // job the alert counts is still red.
     name: "the all-clear stops watching the nightly, so a red nightly closes its own issue",
     file: WF,
-    from: "    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy]\n    if: success()",
-    to: "    needs: [verify, prodtest-smoke, unmerged-branches, bot-on-deploy]\n    if: success()",
+    // quota-alert joined the needs list 2026-10-21 (Βήμα 2) — both
+    // literals below have to carry it or this anchor goes stale the
+    // same way the one above did.
+    from: "    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy, quota-alert]\n    if: success()",
+    to: "    needs: [verify, prodtest-smoke, unmerged-branches, bot-on-deploy, quota-alert]\n    if: success()",
     expect: "the all-clear watches exactly what the alert watches",
   },
   {

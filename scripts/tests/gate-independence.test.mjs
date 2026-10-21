@@ -120,6 +120,15 @@ const NONE_IS_FINE = {
     "a SHAPE over the write paths it finds. Every update must re-assert what it read. " +
     "Settled twice — dropping the .or() guard, and moving the comparison back into " +
     "TypeScript, which is the incident it was written for: RED both times.",
+  "quota-alert.test.mjs":
+    "EXECUTION of scripts/ci/quota-alert.mjs's exported functions against a faked " +
+    "`globalThis.fetch`, which the scan does not see: its EXECUTION detector is keyed to " +
+    "the loadTs idiom (cost-before.test.mjs, email-confirmation.test.mjs above), and this " +
+    "suite imports a plain .mjs module instead, because the module under test is itself " +
+    "the Actions job's own script, not TypeScript loadTs can load. Settled 2026-10-21 by " +
+    "hand (Βήμα 2, CI for a private repository): flipping quotaVerdict's `>=` to `>`, " +
+    "dropping the `Bearer` prefix from the Authorization header, and hard-coding " +
+    "accountType to always return \"users\" — RED all three times.",
 };
 const rows = scanAll();
 const noneBuild = rows.filter((r) => r.suite === "build" && r.rung === "NONE").map((r) => r.file);

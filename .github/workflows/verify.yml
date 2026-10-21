@@ -113,12 +113,41 @@ jobs:
           node-version: "22"
           cache: npm
 
+      # FAST, AND ON EVERY PUSH (owner, Βήμα 2 — CI for a private
+      # repository, 2026-10-05): scripts/security/push-secret-scan.mjs
+      # diffs only the lines THIS push adds against the event's own base
+      # — seconds, not the minutes scripts/security/git-history-keys.mjs
+      # needs to walk all of history. SCAN_BASE is empty for schedule and
+      # workflow_dispatch and for a brand-new branch's first push
+      # (`before` is the all-zero SHA); the script's own fallback is a
+      # diff against git's empty-tree hash, which reads the WHOLE current
+      # tree as "added" rather than skipping — slower-safe, not silent.
+      - name: secret scan (this push's diff)
+        timeout-minutes: 5
+        env:
+          SCAN_BASE: ${{ github.event.before || github.event.pull_request.base.sha || '' }}
+        run: |
+          if [ -n "$SCAN_BASE" ]; then
+            git fetch --no-tags --depth=50 origin "$SCAN_BASE" 2>/dev/null || true
+          fi
+          node scripts/security/push-secret-scan.mjs
+
       # `npm ci`, not `npm install`: the lockfile is the input, and a
       # resolution that drifts silently in CI is a build that does not
       # describe the commit.
       - name: install
         timeout-minutes: 10
         run: npm ci
+
+      # ALSO FAST, ALSO EVERY PUSH. `--omit=dev` because a vulnerable
+      # devDependency cannot reach production; `--audit-level=high`
+      # because npm audit's own "moderate" bar includes advisories this
+      # repository cannot act on today (a transitive tool with no fix
+      # available) — the owner asked for a check that gates, not one that
+      # reports and is learned to ignore.
+      - name: dependency audit
+        timeout-minutes: 10
+        run: npm audit --omit=dev --audit-level=high
 
       - name: typecheck
         timeout-minutes: 10
@@ -171,7 +200,27 @@ jobs:
       #
       # Installing it earlier costs the same minute and removes a whole
       # class of suite that cannot run where it is asked to.
+      #
+      # EVERYTHING FROM HERE DOWN IS THE "HEAVY" HALF (owner, Βήμα 2 —
+      # CI for a private repository, 2026-10-05: "τα μεγάλα... περνάνε σε
+      # pre-merge και νυχτερινό μόνο"). A measurement by hand on
+      # 2026-10-21 (docs/PROGRESS.md) found this job running three times
+      # on identical bytes for one push — once for the push itself, once
+      # for the pull_request, once more per deployment report — at
+      # 62-94 minutes each, which is most of why a private repo's 2,000
+      # free minutes/month were already being spent at roughly 14x. The
+      # six steps below are the expensive ones (postgres, both suite
+      # runs, the browser install, the integration suites), so a plain
+      # push to a feature branch now skips them and keeps only
+      # typecheck/lint/gates/build/audit/secret-scan above. NOTHING IS
+      # LOST: every commit still gets them, either through the
+      # pull_request run while it is in review or through this same push
+      # event when the ref IS main — which is the one push a feature
+      # branch's pushes are not.
       - name: postgres, for the suites that need one
+        if: >-
+          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||
+          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 5
         run: |
           sudo apt-get update -qq
@@ -179,6 +228,9 @@ jobs:
           echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
 
       - name: mutation suites
+        if: >-
+          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||
+          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 120
         run: npm run test:mutation
 
@@ -187,6 +239,9 @@ jobs:
       # A green run that left the tree dirty is not a green run, and the
       # next step would otherwise inherit somebody else's mutant.
       - name: the mutation suites put the tree back
+        if: >-
+          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||
+          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 5
         run: |
           if [ -n "$(git status --porcelain)" ]; then
@@ -207,6 +262,9 @@ jobs:
       # passed AT THE EXIT CODE". In CI that is the difference between a
       # gate and a green tick, so the log is read for the skip it prints.
       - name: database suites
+        if: >-
+          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||
+          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 10
         run: |
           set -o pipefail
@@ -231,10 +289,16 @@ jobs:
       # df83449e, 2026-10-03 — every earlier run stopped before it) it died
       # on "Executable doesn't exist". Same install as the smoke job.
       - name: chromium, for the integration suite that needs one
+        if: >-
+          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||
+          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 10
         run: npx playwright install --with-deps chromium
 
       - name: integration suites
+        if: >-
+          github.event_name == 'pull_request' || github.ref == 'refs/heads/main' ||
+          github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 15
         run: npm run test:integration
 
@@ -408,6 +472,44 @@ jobs:
             }
 
   # ---------------------------------------------------------------------
+  # THE 80%-OF-QUOTA ALERT (owner, Βήμα 2 — CI for a private repository,
+  # 2026-10-05: "80%-of-quota alert to the owner"). A private repository's
+  # Actions minutes are capped and billed; a measurement by hand on
+  # 2026-10-21 (docs/PROGRESS.md) found roughly 14x the free 2,000/month
+  # quota already spent. Nightly, like unmerged-branches above: usage
+  # does not move fast enough to need checking on every push, and
+  # checking it on every push would itself spend the minutes it exists
+  # to watch.
+  #
+  # NO REPOSITORY TOKEN CAN READ THIS. GITHUB_TOKEN is scoped to the repo;
+  # GitHub's billing endpoints take a personal access token belonging to
+  # the ACCOUNT, full stop — scripts/ci/quota-alert.mjs's own header says
+  # so. ACTIONS_BILLING_PAT is that token, a secret the owner adds once.
+  #
+  # A MISSING SECRET FAILS LOUDLY, the same choice bot-on-deploy made
+  # below for BOT_EMAIL/BOT_PASSWORD: this job is schedule-only, so a
+  # missing secret costs one red item in the existing ci-red issue, never
+  # a blocked push or deploy — and a quiet skip would read as "usage is
+  # fine" when nothing was measured.
+  quota-alert:
+    name: GitHub Actions usage vs. the free quota (nightly)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        timeout-minutes: 5
+      - uses: actions/setup-node@v4
+        timeout-minutes: 5
+        with:
+          node-version: "22"
+      - name: measure usage against the free quota
+        timeout-minutes: 5
+        env:
+          ACTIONS_BILLING_PAT: ${{ secrets.ACTIONS_BILLING_PAT }}
+        run: node scripts/ci/quota-alert.mjs
+
+  # ---------------------------------------------------------------------
   # THE PRODUCT, TRIED ON THE THING THAT JUST SHIPPED.
   #
   # Every other job in this file reads the repository. This one signs in
@@ -562,7 +664,7 @@ jobs:
     # a skipped dependency does not stop this: `failure()` is true when
     # ANY ancestor failed, and false when they are merely skipped.
     # Enforced by scripts/tests/ci-coverage.test.mjs.
-    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy]
+    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy, quota-alert]
     if: failure()
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -594,7 +696,7 @@ jobs:
   # on a push and must not hold the all-clear back.
   all-clear:
     name: close the issue when CI goes green
-    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy]
+    needs: [verify, prodtest-smoke, prodtests, unmerged-branches, bot-on-deploy, quota-alert]
     if: success()
     runs-on: ubuntu-latest
     timeout-minutes: 10

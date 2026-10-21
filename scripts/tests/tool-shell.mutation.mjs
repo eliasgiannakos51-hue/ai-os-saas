@@ -113,10 +113,15 @@ const MUTANTS = [
     expect: "imports no page component",
   },
   {
+    // THREE EXTRA, NOT ONE: Slides moved «Πρόσφατα»/«Νέο» into the [◧]
+    // history column (Batch 1, 2026-10-21), so the real count today is
+    // two (count, images) — one more button would still be at most four
+    // and this mutant would go MISSED, the way it did the moment that
+    // move landed. Three pushes any count from 0 to 4 over the line.
     name: "Slides: a fifth option",
     file: SLIDES,
     from: '      options={[\n',
-    to: '      options={[\n        <button key="x" type="button" />,\n',
+    to: '      options={[\n        <button key="x1" type="button" />,\n        <button key="x2" type="button" />,\n        <button key="x3" type="button" />,\n',
     expect: "at most four",
   },
   {

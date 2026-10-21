@@ -120,11 +120,21 @@ function reserve(credits, action = "test", minutes = 10) {
   const [id, available] = row.split("|");
   return { id: id === "REFUSED" ? null : id, available: Number(available) };
 }
-/** deduct_credits_atomic returns TABLE(ok boolean, remaining integer). */
+/**
+ * deduct_credits_atomic returns TABLE(ok boolean, remaining integer).
+ *
+ * `ok::text` IS 'true'/'false', not psql's single-letter 't'/'f' — that
+ * abbreviation is psql's own default COLUMN display, not what `||`
+ * produces when it coerces a boolean into the concatenation. The first
+ * draft decoded against "t" and so read every result as false, success
+ * included: the refusal checks below happened to still pass (false
+ * really is false), which is what let it hide until the two SUCCESS
+ * checks went red in CI's real Postgres.
+ */
 function deductAtomic(amount, initial = 0, tier = "growth") {
-  const row = sql(`select ok || '|' || remaining from deduct_credits_atomic('${USER}', ${amount}, ${initial}, '${tier}')`);
+  const row = sql(`select ok::text || '|' || remaining from deduct_credits_atomic('${USER}', ${amount}, ${initial}, '${tier}')`);
   const [ok, remaining] = row.split("|");
-  return { ok: ok === "t", remaining: Number(remaining) };
+  return { ok: ok === "true", remaining: Number(remaining) };
 }
 /** settle_reservation returns void; call it for its side effects only. */
 function settle(reservationId, creditsToCharge, feature = "test_feature") {
@@ -208,7 +218,11 @@ console.log("== 0. the database really is the one the migrations build ==");
 // project_flows (package 36).
 // 117 -> 118 on 2026-10-08: 20261024000000_user_games.sql adds
 // user_games (package 26); db-migrations.test.mjs moved in the same commit.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 118);
+// 118 -> 119 on 2026-10-21 (security audit): 20261026000000_migration_ledger.sql
+// adds schema_migrations, the table that lets `npm run db:pending` and
+// /api/health tell a migration that registered itself from one nobody
+// pasted. Caught by this line in CI (#318) on the first push that carried it.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 119);
 eq(
   "the credit functions exist",
   Number(

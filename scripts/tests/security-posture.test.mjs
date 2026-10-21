@@ -184,6 +184,11 @@ const ADMIN_ONLY_TABLES = new Set([
   // who could read it would learn our per-request margin. Reached only
   // through createAdminClient(), behind that gate.
   "routing_decisions",
+  // The migration ledger (security audit, 2026-10-21): which files have
+  // run, not any one user's data. Deny-all for the same reason as the
+  // rest of this list — read only by /api/health's schema sweep and
+  // scripts/db/pending-migrations.mjs, both through the service role.
+  "schema_migrations",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

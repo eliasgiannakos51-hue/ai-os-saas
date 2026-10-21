@@ -464,6 +464,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261003000000_chat_memory_dedup_and_retention.sql",
     breaks: "the clean-up button on /dashboard/ai-memory fails",
   },
+  {
+    kind: "table",
+    table: "schema_migrations",
+    migration: "20261026000000_migration_ledger.sql",
+    breaks: "npm run db:pending and /api/health lose the one signal that tells a migration from 20261026000000 on that registered itself from one nobody pasted — the ledger goes silent, not the product",
+  },
   // delete_user_storage_objects (20261005000000) is no longer probed:
   // account deletion removes files through the Storage API since
   // 2026-10-08 (src/lib/account/erase-storage.ts), because Supabase

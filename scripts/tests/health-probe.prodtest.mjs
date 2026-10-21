@@ -86,21 +86,23 @@ try {
   // diagnosed without a secret. `deployment`, `ai`, `nav` and `derived`
   // joined between 2026-09-11 and 2026-09-26, each for a monitor or the
   // bot; since 2026-10-05 a stranger gets only each one's VERDICT — no
-  // provider names, no ages, no row or account counts. Everything else
-  // stays closed.
-  const ALLOWED = ["ai", "db", "deployment", "derived", "ms", "nav", "ok", "reason", "schema", "stage"];
+  // provider names, no ages, no row or account counts. `migrations`
+  // joined 2026-10-21 (the migration ledger) under the same rule.
+  // Everything else stays closed.
+  const ALLOWED = ["ai", "db", "deployment", "derived", "migrations", "ms", "nav", "ok", "reason", "schema", "stage"];
   check(
-    "the body has exactly {ok, db, ms, reason, stage, schema, deployment, ai, nav, derived} and nothing else",
+    "the body has exactly {ok, db, ms, reason, stage, schema, deployment, ai, nav, derived, migrations} and nothing else",
     keys.every((k) => ALLOWED.includes(k)) && ["db", "ms", "ok", "reason", "stage"].every((k) => keys.includes(k)),
     `keys were ${JSON.stringify(keys)}`
   );
   check(
-    "...and each of the four says only what a monitor acts on: a verdict, or whether a model can be called",
+    "...and each of the five says only what a monitor acts on: a verdict, or whether a model can be called",
     (!b1.ai || JSON.stringify(Object.keys(b1.ai)) === JSON.stringify(["canCallModel"])) &&
       (!b1.nav || JSON.stringify(Object.keys(b1.nav)) === JSON.stringify(["verdict"])) &&
       (!b1.derived || JSON.stringify(Object.keys(b1.derived)) === JSON.stringify(["verdict"])) &&
+      (!b1.migrations || JSON.stringify(Object.keys(b1.migrations)) === JSON.stringify(["verdict"])) &&
       (!b1.deployment || Object.keys(b1.deployment).every((k) => ["age_days", "level", "source", "reason"].includes(k))),
-    JSON.stringify({ ai: b1.ai, nav: b1.nav, derived: b1.derived, deployment: b1.deployment })
+    JSON.stringify({ ai: b1.ai, nav: b1.nav, derived: b1.derived, migrations: b1.migrations, deployment: b1.deployment })
   );
   check("the schema sweep says how many canaries it checked, and that all were found", b1.schema && b1.schema.ok === true && b1.schema.checked >= 10 && Array.isArray(b1.schema.missing) && b1.schema.missing.length === 0, JSON.stringify(b1.schema));
   check("a healthy answer says so in the vocabulary", b1.reason === "ok" && b1.stage === "query", JSON.stringify(b1));

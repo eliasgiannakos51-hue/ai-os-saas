@@ -222,6 +222,33 @@ export function expectedObjects(dir = MIG_DIR) {
 
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
 
+// THE LEDGER'S OWN CUTOFF, same shape as migration-undo.test.mjs's
+// FIRST_UNDER_THE_RULE: 20261026000000_migration_ledger.sql is the first
+// file that registers itself in public.schema_migrations, so it is the
+// first file this tool can ask the LEDGER about rather than only the
+// shape of what it creates. Earlier files are unaffected: the
+// object-derived check above is still their only answer.
+export const LEDGER_CUTOFF = "20261026000000";
+
+/**
+ * Which cutoff-and-later files have NOT registered themselves in
+ * public.schema_migrations. This is the case the object-derived query
+ * above cannot see at all: a migration whose only changes are policies,
+ * grants or data — zero CREATE TABLE/COLUMN/FUNCTION for objectsOf to
+ * name — reports "nothing to check" there even when nobody ran it.
+ */
+export function ledgerMissingQuery(files) {
+  const covered = files.filter((f) => f.slice(0, 14) >= LEDGER_CUTOFF);
+  if (covered.length === 0) return "select null::text as filename where false;";
+  const rows = covered.map((f) => `(${q(f)})`).join(",\n");
+  return `with candidates(filename) as (values
+${rows}
+)
+select c.filename from candidates c
+where not exists (select 1 from public.schema_migrations m where m.filename = c.filename)
+order by c.filename;`;
+}
+
 /**
  * ONE query: every expected object that the catalog does not have. Names
  * are literal values, so the same text works in psql and in the editor.
@@ -258,10 +285,25 @@ export function report(psqlArgs, migrations = expectedObjects()) {
   const missing = out.trim() ? out.trim().split("\n").map((l) => { const [migration, kind, name, extra] = l.split("\t"); return { migration, kind, name, extra }; }) : [];
   const byFile = new Map(migrations.map((m) => [m.file, { file: m.file, expected: m.objects.length, missing: [] }]));
   for (const x of missing) byFile.get(x.migration)?.missing.push(x);
-  return [...byFile.values()].map((r) => ({
-    ...r,
-    status: r.expected === 0 ? "nothing to check" : r.missing.length === 0 ? "applied" : r.missing.length === r.expected ? "PENDING" : "PARTIAL",
-  }));
+
+  // THE LEDGER, ASKED SEPARATELY: a second round trip rather than folding
+  // into the query above, because it reads a different table with no
+  // `extra`/`kind` of its own. Only files from LEDGER_CUTOFF on are asked.
+  const ledgerSql = ledgerMissingQuery(migrations.map((m) => m.file));
+  const ledgerOut = execFileSync("psql", [...psqlArgs, "-v", "ON_ERROR_STOP=1", "-At", "-c", ledgerSql], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  const ledgerMissing = new Set(ledgerOut.trim() ? ledgerOut.trim().split("\n") : []);
+
+  return [...byFile.values()].map((r) => {
+    const objectStatus = r.expected === 0 ? "nothing to check" : r.missing.length === 0 ? "applied" : r.missing.length === r.expected ? "PENDING" : "PARTIAL";
+    if (r.file < LEDGER_CUTOFF) return { ...r, status: objectStatus };
+    const inLedger = !ledgerMissing.has(r.file);
+    // THE CASE THE OBJECT QUERY CANNOT SEE: nothing to check, yet never
+    // registered — a policy/grant/data-only file nobody pasted reports
+    // "nothing to check" above and only the ledger says otherwise.
+    if (objectStatus === "nothing to check") return { ...r, status: inLedger ? "applied" : "PENDING", ledger: inLedger };
+    if (objectStatus === "applied" && !inLedger) return { ...r, status: "PARTIAL", ledger: false };
+    return { ...r, status: objectStatus, ledger: inLedger };
+  });
 }
 
 function psqlArgsFromEnv() {
@@ -275,6 +317,8 @@ if (isMain) {
   const migrations = expectedObjects();
   if (process.argv.includes("--sql")) {
     console.log(missingObjectsQuery(migrations));
+    console.log("\n-- which files have not registered in the ledger (LEDGER_CUTOFF on):");
+    console.log(ledgerMissingQuery(migrations.map((m) => m.file)));
     process.exit(0);
   }
   const args = psqlArgsFromEnv();
@@ -286,7 +330,8 @@ if (isMain) {
   const pending = rows.filter((r) => r.status === "PENDING" || r.status === "PARTIAL");
   for (const r of rows) {
     const tag = r.status.padEnd(16);
-    console.log(`${tag} ${r.file}${r.missing.length ? `  (${r.missing.length}/${r.expected} missing)` : ""}`);
+    const ledgerNote = r.file >= LEDGER_CUTOFF ? ` [ledger: ${r.ledger ? "registered" : "MISSING"}]` : "";
+    console.log(`${tag} ${r.file}${r.missing.length ? `  (${r.missing.length}/${r.expected} missing)` : ""}${ledgerNote}`);
     for (const m of r.missing) console.log(`                   - ${m.kind} ${m.name}${m.extra ? ` (${m.kind === "function" ? `${m.extra} args` : m.extra})` : ""}`);
   }
   console.log(`\n${rows.length} migrations, ${pending.length} pending or partial.`);

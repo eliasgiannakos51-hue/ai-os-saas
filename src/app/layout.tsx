@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { headers } from "next/headers";
 // THE TYPEFACE IS COMMISSIONER, by Kostas Bartsokas (SIL OFL 1.1) — the
 // owner's choice with the design, 2026-10-02 (docs/mockups/README.md, "The
 // typeface, and why not the obvious one"). The faces that read most like
@@ -105,6 +106,11 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  // THE SAME NONCE src/proxy.ts PUT IN THE CSP, read back rather than
+  // regenerated — a second nonce here would not match the header the
+  // browser is enforcing (security audit, 2026-10-21; lib/security/csp.ts
+  // has the reasoning for why this is a nonce and not a fixed hash).
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   // THE WHOLE CATALOGUE, ON EVERY PAGE, AND THIS IS A REVERT.
   //
@@ -143,7 +149,7 @@ export default async function RootLayout({
     <html lang={locale} dir={dirAttribute(locale)} data-theme="dark" className="h-full" suppressHydrationWarning>
       <head>
         {/* eslint-disable-next-line react/no-danger */}
-        <script dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }} />
       </head>
       <body className="min-h-full bg-background text-foreground antialiased" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={clientMessages}>

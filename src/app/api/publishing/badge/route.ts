@@ -52,6 +52,17 @@ export async function GET(request: Request) {
 
   try {
     const siteId = new URL(request.url).searchParams.get("siteId") ?? "";
+    if (!siteId) return NextResponse.json({ error: "unknown_site" }, { status: 400 });
+    // THE SAME CHECK AS POST, AND FOR THE SAME REASON (security audit,
+    // 2026-10-21): without it, any signed-in session could read whether
+    // a STRANGER'S site has paid for badge removal and whether its
+    // auto-renewal was cancelled, just by passing that site's id — not
+    // this account's money, but another account's purchase, learned by
+    // guessing an id.
+    if (!(await ownedSite(user.id, siteId))) {
+      return NextResponse.json({ error: "not_owner" }, { status: 404 });
+    }
+
     const plan = await resolveEffectivePlan(user);
     const credits = await getOrInitCredits(user.id, plan);
     const creditPriceEur = effectiveCreditPriceEurForAccount(
@@ -60,7 +71,7 @@ export async function GET(request: Request) {
       resolvePricingConfig()
     );
 
-    const removal = siteId ? await loadRemoval(siteId) : null;
+    const removal = await loadRemoval(siteId);
     const verdict = checkBadgeRemovalPurchase({
       planSlug: plan?.slug ?? null,
       removal,

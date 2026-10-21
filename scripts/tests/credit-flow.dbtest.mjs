@@ -120,6 +120,21 @@ function reserve(credits, action = "test", minutes = 10) {
   const [id, available] = row.split("|");
   return { id: id === "REFUSED" ? null : id, available: Number(available) };
 }
+/** deduct_credits_atomic returns TABLE(ok boolean, remaining integer). */
+function deductAtomic(amount, initial = 0, tier = "growth") {
+  const row = sql(`select ok || '|' || remaining from deduct_credits_atomic('${USER}', ${amount}, ${initial}, '${tier}')`);
+  const [ok, remaining] = row.split("|");
+  return { ok: ok === "t", remaining: Number(remaining) };
+}
+/** settle_reservation returns void; call it for its side effects only. */
+function settle(reservationId, creditsToCharge, feature = "test_feature") {
+  const idLiteral = reservationId === null ? "null" : `'${reservationId}'`;
+  sql(
+    `select settle_reservation('${USER}', ${idLiteral}, ${creditsToCharge}, '${feature}', 1, 1, 0, 0, 0, 1, 0.01, 0.009, 4.0, 4.0, '{}'::jsonb, '{}'::jsonb)`
+  );
+}
+const costLogRows = (feature) =>
+  Number(sql(`select count(*) from public.ai_cost_log where user_id = '${USER}' and feature = '${feature}'`));
 /** What reserve_credits would see right now: balance minus live holds. */
 const availableNow = () =>
   Number(
@@ -375,6 +390,65 @@ const overloaded = sql(`select coalesce(string_agg(proname || ' x' || n, ', '), 
      where ns.nspname='public' and d.objid is null and p.prokind='f'
      group by p.proname having count(*) > 1) s`);
 check(`no function in public is overloaded${overloaded ? " — found: " + overloaded : ""}`, overloaded === "");
+
+console.log("\n== 10. deduct_credits_atomic sees the same holds reserve_credits does ==");
+// THE BUG THIS CLOSES (security audit, 2026-10-21). deduct_credits_atomic
+// used to check only the raw credits_remaining, never the active holds
+// reserve_credits already tracks — so an account with an 80-credit
+// reservation open (available: 20) could still spend up to its full,
+// un-held balance through this function. The two charges together could
+// add up to more than the account ever had: badge removal
+// (src/lib/publishing/badge-credits-store.ts) and module creation
+// (src/app/api/modules/create/route.ts) are its only two callers today.
+reset(100);
+const r6 = reserve(80);
+check(`the 80-credit hold took (${r6.id})`, r6.id !== null);
+eq("available with the hold open", availableNow(), 20);
+const overHold = deductAtomic(50);
+check("spending 50 against only 20 truly available is refused", overHold.ok === false, JSON.stringify(overHold));
+eq("the refusal leaves the balance untouched", balance(), 100);
+const withinHold = deductAtomic(15);
+check("spending 15, which fits in the 20 available, succeeds", withinHold.ok === true, JSON.stringify(withinHold));
+eq("the balance reflects the deduction", balance(), 85);
+sql(`select release_reservation('${USER}', '${r6.id}')`);
+eq("released, so the rest is available again", availableNow(), 85);
+// AND THE FIRST-TIME INITIALISATION STILL WORKS — the one behaviour this
+// migration must not have disturbed while adding the hold check.
+sql(`delete from public.credit_reservations where user_id = '${USER}'`);
+sql(`delete from public.user_credits where user_id = '${USER}'`);
+const firstTime = deductAtomic(10, 200, "starter");
+check("a brand-new row is initialised at the real plan amount, then deducted", firstTime.ok === true && firstTime.remaining === 190, JSON.stringify(firstTime));
+
+console.log("\n== 11. a zero-credit reservation now holds a row, and a replay of it charges once ==");
+// THE GAP 20260920000000_settle_reservation_replay.sql SAID PLAINLY IT
+// LEFT OPEN (security audit, 2026-10-21): "a settlement with
+// p_reservation_id = null ... There is no row to compare against, so a
+// replay charges twice." reserveCredits(credits<=0) used to return
+// reservationId: "" without ever calling reserve_credits — there was no
+// row BECAUSE credit_reservations' own CHECK refused one at zero. Now it
+// does not: credit_reservations_credits_check allows credits >= 0, and
+// reserve_credits inserts a real row.
+reset(100);
+const zero = reserve(0, "zero-estimate");
+check(`a zero-credit reservation still returns a real id (${zero.id})`, zero.id !== null, JSON.stringify(zero));
+eq("...and holds nothing — the balance is still fully available", availableNow(), 100);
+const FEATURE = "zero_estimate_feature";
+sql(`delete from public.ai_cost_log where user_id = '${USER}' and feature = '${FEATURE}'`);
+// The estimate was zero; the measured cost turned out not to be — the
+// exact shape that used to slip through the null path uncaught.
+settle(zero.id, 12, FEATURE);
+eq("the first settlement charged the measured cost", balance(), 88);
+eq("...and wrote one cost-log row", costLogRows(FEATURE), 1);
+// THE REPLAY. Same reservation id, called again — a retried request, a
+// duplicated webhook, a second nudge from the client.
+settle(zero.id, 12, FEATURE);
+eq("the replay did NOT charge a second time", balance(), 88);
+eq("...and did not write a second cost-log row either", costLogRows(FEATURE), 1);
+eq(
+  "the reservation reads as settled, which is what stopped the replay",
+  sql(`select status from public.credit_reservations where id = '${zero.id}'`),
+  "settled"
+);
 
 console.log("\n== A SETTLEMENT REPLAYED: charged once, or charged twice? ==");
 // THE DEFECT, AND BOTH HALVES OF THE QUESTION IT SITS BETWEEN.

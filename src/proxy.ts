@@ -4,6 +4,7 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/
 import { NextResponse, type NextRequest } from "next/server";
 import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@/lib/nav/early-redirects";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { buildCsp } from "@/lib/security/csp";
 
 export async function proxy(request: NextRequest) {
   // NO x-pathname HEADER. One was set here for a single deploy, so the
@@ -13,6 +14,19 @@ export async function proxy(request: NextRequest) {
   // and the sidebar rendered its own key names. Reverted with the layout;
   // see app/layout.tsx.
   const requestHeaders = request.headers;
+
+  // ONE NONCE, SET ON BOTH SIDES, BEFORE ANYTHING ELSE RUNS (security
+  // audit, 2026-10-21; see lib/security/csp.ts for why this has to be a
+  // nonce rather than a fixed hash). Written onto requestHeaders — the
+  // same object every NextResponse.next() below reuses — so every path
+  // through this function, redirects included, carries it. The CSP
+  // string on the REQUEST is what Next's own renderer reads to stamp
+  // its own inline scripts with this exact nonce; the one set on the
+  // RESPONSE below is what the browser actually enforces.
+  const nonce = btoa(crypto.randomUUID());
+  const csp = buildCsp(nonce);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp);
 
   let response = NextResponse.next({
     request: { headers: requestHeaders },
@@ -213,6 +227,12 @@ export async function proxy(request: NextRequest) {
     return withRefreshedCookies(NextResponse.redirect(url));
   }
 
+  // ONLY HERE, because this is the only return in this function that
+  // actually serves a rendered page rather than a redirect or a JSON
+  // error — a redirect's browser never executes a script from this
+  // response, and the request it makes next runs this function again
+  // and gets a CSP of its own.
+  response.headers.set("Content-Security-Policy", csp);
   return response;
 }
 

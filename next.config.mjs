@@ -115,10 +115,24 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  *
  * The microphone stays allowed for the app's own origin: voice input
  * (src/components/voice/) asks for it.
+ *
+ * NO Content-Security-Policy HERE (security audit, 2026-10-21; moved to
+ * src/proxy.ts, lib/security/csp.ts). The App Router streams Server
+ * Component data to the client through its own inline
+ * `<script>self.__next_f.push(...)</script>` tags — different content on
+ * every request, so no fixed value here could ever allow them. A real
+ * `next build && next start` under Playwright proved this the hard way:
+ * a static script-src (even one correctly hashing this app's own single
+ * inline script, layout.tsx's INIT_SCRIPT) broke hydration on every page
+ * with a CSP violation and a React #412. The header has to vary per
+ * request with a nonce, which only the per-request proxy can generate —
+ * two CSP headers from two sources would both be sent and BOTH enforced,
+ * so this file must not set one of its own while proxy.ts does.
+ * X-Frame-Options stays here as the older browsers' fallback for
+ * frame-ancestors, which is now in proxy.ts's own CSP.
  */
 export const APP_SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },

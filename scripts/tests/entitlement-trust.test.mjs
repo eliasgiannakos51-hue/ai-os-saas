@@ -152,12 +152,45 @@ console.log("\n== 7. the app's own security headers ==");
 // =====================================================================
 const config = await import(path.resolve("next.config.mjs"));
 const headers = Object.fromEntries((config.APP_SECURITY_HEADERS ?? []).map((h) => [h.key, h.value]));
-ok("framing refused", headers["X-Frame-Options"] === "DENY" && /frame-ancestors 'none'/.test(headers["Content-Security-Policy"] ?? ""));
+ok("framing refused by the fallback header", headers["X-Frame-Options"] === "DENY");
 ok("no content-type guessing", headers["X-Content-Type-Options"] === "nosniff");
 ok("a referrer policy and a permissions policy", Boolean(headers["Referrer-Policy"]) && /camera=\(\)/.test(headers["Permissions-Policy"] ?? ""));
 const resolved = await config.default.headers();
 ok("applied to every path but the published sites", resolved.length === 1 && resolved[0].source === "/((?!s/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
 ok("the framework is not announced", config.default.poweredByHeader === false);
+// NO Content-Security-Policy HERE — it moved to src/proxy.ts because it
+// needs a fresh nonce every request (see lib/security/csp.ts for why a
+// fixed value broke every page under a real browser). Two sources for
+// one header is how the weaker one wins, so this file must not set one.
+ok("next.config.mjs sets no CSP of its own", !("Content-Security-Policy" in headers));
+
+// SCRIPT-SRC, OBJECT-SRC, BASE-URI, PER REQUEST (security audit,
+// 2026-10-21). buildCsp is pure, so it is called directly rather than
+// through a running proxy.
+const { buildCsp } = await import(path.resolve("src/lib/security/csp.ts"));
+const csp = buildCsp("TEST-NONCE");
+ok("frame-ancestors, object-src and base-uri are all locked down", /frame-ancestors 'none'/.test(csp) && /object-src 'none'/.test(csp) && /base-uri 'none'/.test(csp));
+ok("script-src names 'self' and the exact nonce given, with no 'unsafe-inline'/'unsafe-eval'", /script-src [^;]*'self'[^;]*'nonce-TEST-NONCE'/.test(csp) && !/unsafe-inline|unsafe-eval/.test(csp));
+ok("two different nonces produce two different headers", buildCsp("a") !== buildCsp("b"));
+
+// PROXY.TS GENERATES ONE NONCE, BEFORE ANYTHING ELSE CAN RETURN EARLY,
+// AND PUTS IT ON BOTH SIDES. On requestHeaders so Next's own renderer
+// discovers it and stamps the same nonce on the __next_f.push scripts it
+// writes itself; on the response so the browser enforces it.
+const PROXY = read("src/proxy.ts");
+const nonceAt = PROXY.indexOf("crypto.randomUUID()");
+const firstReturn = PROXY.indexOf("return ");
+ok("the nonce is generated before any early return", nonceAt > 0 && nonceAt < firstReturn, `nonce at ${nonceAt}, first return at ${firstReturn}`);
+ok("it is written onto requestHeaders", /requestHeaders\.set\("x-nonce", nonce\)/.test(PROXY));
+ok("...and the CSP string is written onto requestHeaders too, for Next's renderer to read", /requestHeaders\.set\("Content-Security-Policy", csp\)/.test(PROXY));
+ok("...and onto the actual response the browser receives", /response\.headers\.set\("Content-Security-Policy", csp\)/.test(PROXY));
+ok("proxy.ts builds the CSP through the one shared function, not a copy of its own", /buildCsp\(nonce\)/.test(PROXY) && /from "@\/lib\/security\/csp"/.test(PROXY));
+
+// LAYOUT.TSX READS THE SAME NONCE BACK, rather than generating its own —
+// a second nonce would not match the header the browser is enforcing.
+const LAYOUT = read("src/app/layout.tsx");
+ok("the root layout reads x-nonce from headers()", /headers\(\)\)\.get\("x-nonce"\)/.test(LAYOUT));
+ok("...and puts it on the one inline script this app writes itself", /<script nonce={nonce} dangerouslySetInnerHTML/.test(LAYOUT));
 
 // =====================================================================
 console.log("\n== 8. the internal hand-off secret, in constant time ==");

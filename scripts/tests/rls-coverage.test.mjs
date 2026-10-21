@@ -171,6 +171,7 @@ const DENY_ALL_ON_PURPOSE = {
   business_inputs: "the owner's own figures for the margin report, reached only through an admin-gated route.",
   account_deletion_requests: "the emailed single-use deletion tokens. A user who could read this table could delete another account; the route claims a token atomically under the service role.",
   routing_decisions: "which model served which request, granted explicitly to service_role and to nobody else.",
+  schema_migrations: "the migration ledger (security audit, 2026-10-21): which files have run, not any one user's data. A client that could read it would learn the exact shape of the schema between releases; one that could write it could make a migration that never ran look applied.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

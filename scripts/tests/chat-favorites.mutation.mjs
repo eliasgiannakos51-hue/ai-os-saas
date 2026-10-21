@@ -26,6 +26,8 @@ const GATE = "scripts/tests/chat-favorites.test.mjs";
 const REGISTRY = "src/lib/favoritable.ts";
 const PAGE = "src/app/dashboard/chat/page.tsx";
 const LIST = "src/components/dashboard/conversation-rows.tsx";
+const COLUMN = "src/components/chat/conversation-column.tsx";
+const CHATS_WORKSPACE = "src/components/chats/chats-workspace.tsx";
 const WORKSPACE = "src/components/chat/chat-workspace.tsx";
 const BUTTON = "src/components/favorites/favorite-button.tsx";
 const FAV_LIB = "src/lib/favorites.ts";
@@ -92,15 +94,24 @@ const MUTANTS = [
     expect: "keeps its star visible at rest",
   },
   {
-    // THE STAR GOES BEHIND A CONDITION AGAIN. It was drawn only when the
-    // list was NOT the sidebar's, because a 240px column had no room —
-    // and the sidebar's list is gone, so any such guard now hides the
-    // star on the only screen that has one.
+    // THE OLD VARIANT COMES BACK BESIDE THE NEW ONE. The star was drawn
+    // only when the list was NOT the sidebar's, because a 240px column
+    // had no room. That guard went with the sidebar's list; `dense`
+    // replaced it on 2026-10-17 for the 280px column inside Chat, and
+    // it is a DIFFERENT thing — one flag, two decorations, no action.
+    // A second guard named after a surface that no longer exists is
+    // the drift, not the narrow form.
+    // ANCHORED ON THE WHOLE LIST, NOT ON THE STAR'S OWN GUARD. Hung on
+    // the star, this mutant was caught — but by the clause about the
+    // narrow form, whose regex pins that guard exactly, so the clause
+    // it is written for was never the one that went red. Wrapping the
+    // list is what «the old variant came back» actually looks like,
+    // and it leaves the narrow form's two guards untouched.
     name: "the star is put back behind a variant that no list satisfies",
     file: LIST,
-    from: "        <div\n          className={`shrink-0 transition-opacity duration-150 ${",
-    to: "        {!sidebar && (\n        <div\n          className={`shrink-0 transition-opacity duration-150 ${",
-    expect: "with nothing deciding whether it appears",
+    from: '    <div className="space-y-1" data-testid="conversation-rows">',
+    to: '    <div className="space-y-1" data-testid="conversation-rows">\n      {!sidebar && (',
+    expect: "no older variant came back with it",
   },
   {
     // THE HEADER KEEPS A STAR THAT IS NO LONGER TRUE. The button seeds
@@ -142,6 +153,28 @@ const MUTANTS = [
     from: "for (const config of FAVORITABLE) {",
     to: "for (const config of FAVORITABLE.filter((c) => c.slug !== \"chat\")) {",
     expect: "group order walks the registry",
+  },
+  // ---- the narrow form, and the drift it must not become -----------
+  {
+    name: "the Chats page starts asking for the narrow form too, so its stars vanish",
+    file: CHATS_WORKSPACE,
+    from: "        <ConversationRows",
+    to: "        <ConversationRows\n          dense",
+    expect: "the Chats page does not, so every row there keeps its star",
+  },
+  {
+    name: "the column stops asking for it, and 280px cuts the names again",
+    file: COLUMN,
+    from: "          onDeleted={onDeleted}\n          dense",
+    to: "          onDeleted={onDeleted}",
+    expect: "the column asks for it",
+  },
+  {
+    name: "an ACTION goes behind the narrow form — the drift the old variant was",
+    file: LIST,
+    from: '          aria-label={tModule("actionsFor", { name: title })}',
+    to: '          hidden={dense}\n          aria-label={tModule("actionsFor", { name: title })}',
+    expect: "the narrow form is the date and the star, nothing else",
   },
 ];
 

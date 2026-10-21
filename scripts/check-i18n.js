@@ -140,14 +140,18 @@ const LOCALE_ALLOWED = new Set([
   // "Verificar" — the block was translated, this word coincides.
   "es:sidebar.groups.personal",
   // THE RAIL'S FIRST ROW, «Ionexa Chat» (owner, 2026-10-17). It carries
-  // the Chat page's own title — dashboard.chat.title, three entries
-  // below — so the row and the heading it opens cannot say two
-  // different things, which also means it inherits that key's
-  // coincidences: "Chat" is the word for it in German, Spanish and
-  // Italian (der Chat, el chat, la chat), so «Ionexa Chat» is the
-  // German, Spanish and Italian for it too. French has "Ionexa
+  // the Chat SCREEN's own title — dashboard.chat.title, singular,
+  // src/app/dashboard/chat/page.tsx — so the row and the heading it
+  // opens cannot say two different things, which also means it inherits
+  // that key's coincidences: "Chat" is the word for it in German,
+  // Spanish and Italian (der Chat, el chat, la chat), so «Ionexa Chat»
+  // is the German, Spanish and Italian for it too. French has "Ionexa
   // Discussion", Portuguese "Ionexa Conversa", Greek «Ionexa
   // Συνομιλία», and they are used.
+  //
+  // NOT dashboard.chatS.title, plural, a few lines below this block —
+  // that is the unrelated Chats LISTING page's own heading
+  // (app/dashboard/chats/page.tsx) and has its own entries further down.
   //
   // The rows this one replaced — rail.new, rail.chat, rail.chats,
   // rail.collapse, rail.expand — are gone from messages/*.json

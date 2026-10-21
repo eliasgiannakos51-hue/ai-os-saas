@@ -76,6 +76,8 @@ export function ConversationRows({
   onSelectedChange,
   onNavigate,
   onOpen,
+  onDeleted,
+  dense = false,
 }: {
   conversations: readonly SidebarConversation[];
   /** The account's active projects, for «Μεταφορά σε Έργο». Read on the
@@ -94,6 +96,31 @@ export function ConversationRows({
    *  see the header. Without it the row pushes /dashboard/chat?c=…,
    *  which is right from every other screen. */
   onOpen?: (id: string) => void;
+  /** THE 280px FORM, for the column inside Chat. Measured on a real
+   *  build, 2026-10-17: a row there has 58px left for the title once
+   *  the icon, the date, the «⋯» and the star have taken theirs, and
+   *  `break-words` then cuts a name mid-syllable — «Τιμοκα|τάλογο|ς».
+   *  So the two things that are decoration rather than function come
+   *  off: the date and the star.
+   *
+   *  IT HIDES NOTHING THAT DOES ANYTHING. The owner's four actions —
+   *  rename, pin, move to a Project, delete with an Undo — the pinned
+   *  group, the selected row and the long press are untouched by this
+   *  flag, and scripts/tests/chat-favorites.test.mjs holds that: a
+   *  narrow form that forked the ACTIONS is what left the favourite
+   *  star with two states that disagreed, and that is the mistake this
+   *  prop must not repeat. The date and the star are both on the Chats
+   *  page, one press away at the foot of the column. */
+  dense?: boolean;
+  /** CALLED ONCE A DELETE ACTUALLY COMMITS — after the Undo window, not
+   *  on the press that schedules it. The column inside Chat is the only
+   *  caller that passes this: it is how chat-workspace.tsx learns the
+   *  thread on screen beside this list was just deleted out from under
+   *  it, which could not happen before 2026-10-17 — delete lived only on
+   *  the Chats page, a screen with no open thread of its own. Without
+   *  it, deleting the open conversation leaves its messages on screen
+   *  and the composer pointed at a row that no longer exists. */
+  onDeleted?: (id: string) => void;
 }) {
   // THE WORDING COMES FROM WHERE IT ALREADY WAS. These actions lived in
   // the drawer inside Chat, and their strings are already written in
@@ -226,6 +253,7 @@ export function ConversationRows({
           // old in-Chat delete did. A PDF is a file in Files and stays.
           void discardChatImages(json.imagePaths ?? []);
           forget(row.id);
+          onDeleted?.(row.id);
           router.refresh();
         } catch {
           unhide(row.id);
@@ -345,9 +373,11 @@ export function ConversationRows({
             onRename={(next) => rename(row.id, next)}
             className="min-w-0 flex-1 break-words"
           />
-          <span className="shrink-0 text-xs text-muted" suppressHydrationWarning>
-            {formatDate(row.updated_at, locale)}
-          </span>
+          {!dense && (
+            <span className="shrink-0 text-xs text-muted" suppressHydrationWarning>
+              {formatDate(row.updated_at, locale)}
+            </span>
+          )}
         </button>
 
         {/* THE STAR, WHICH CAME FROM THE LIST THAT WENT. It was on every
@@ -357,19 +387,21 @@ export function ConversationRows({
             dropped. Pin and favourite are different things on purpose:
             pin orders THIS list, favourite surfaces the conversation on
             /dashboard/favorites beside everything else starred. */}
-        <div
-          className={`shrink-0 transition-opacity duration-150 ${
-            row.is_favorited ? "opacity-100" : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"
-          }`}
-        >
-          <FavoriteButton
-            table="chat_conversations"
-            recordId={row.id}
-            headline={title}
-            initialFavorited={Boolean(row.is_favorited)}
-            variant="inline"
-          />
-        </div>
+        {!dense && (
+          <div
+            className={`shrink-0 transition-opacity duration-150 ${
+              row.is_favorited ? "opacity-100" : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"
+            }`}
+          >
+            <FavoriteButton
+              table="chat_conversations"
+              recordId={row.id}
+              headline={title}
+              initialFavorited={Boolean(row.is_favorited)}
+              variant="inline"
+            />
+          </div>
+        )}
 
         {/* ALWAYS THERE ON A PHONE, ON HOVER ON A DESKTOP. `md:` guards
             the hiding, not the showing, so a touch device — which never

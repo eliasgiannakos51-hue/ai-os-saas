@@ -1068,9 +1068,10 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   // required this equality either: its empty state asks a question
   // ("Τι θέλεις να μάθεις;" style prose), not a repeat of the sidebar's
   // one word. Coding's empty state now does the same ("Τι φτιάχνουμε;"),
-  // so the heading===sidebar-label assertion would fail by design, not
-  // by regression. What still has to hold is that the heading is real
-  // Greek, not English and not an unresolved key.
+  // so the new shell is EXPECTED to fail a heading===sidebar-label
+  // assertion, not a regression caught by one. What still has to hold
+  // is that the heading is real Greek, not English and not an
+  // unresolved key.
   //
   // Read from messages/el.json rather than typed out, so a sidebar
   // rename is still caught on its own line.
@@ -1086,8 +1087,8 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   // THE OLD DISCLAIMER IS GONE, ON PURPOSE. The owner's spec for the new
   // shell (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN) says plainly: no permanent
   // "what this does not do" box. "Δεν εκτελεί κώδικα" is the sentence
-  // this check used to REQUIRE present; what it watches for now is the
-  // opposite — a regression back to the old tracking-page chrome.
+  // this check used to REQUIRE present; it watches the opposite
+  // direction today — a regression back to the old tracking-page chrome.
   await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
   const main = await page.locator(mainCount >= 1 ? "main" : "body").innerText();
   checkTrue(

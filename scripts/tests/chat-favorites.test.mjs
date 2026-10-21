@@ -54,21 +54,61 @@ console.log("\n== 2. the star in the conversation list (α) ==");
 // WHERE THE LIST IS NOW. There were two for a day — a drawer inside
 // Chat and the sidebar's «Recent chats» — and on 2026-10-16 the owner
 // had the sidebar section taken out and the drawer was deleted with it
-// (sidebar-chats.test.mjs asserts the file is gone). One file draws
-// one list, on the Chats page, and this is it.
+// (sidebar-chats.test.mjs asserts the file is gone). ONE FILE draws
+// every list there is; since 2026-10-17 it draws two surfaces, the
+// Chats page and the column inside Chat.
 const list = strip(readFileSync("src/components/dashboard/conversation-rows.tsx", "utf8"));
+const column = strip(readFileSync("src/components/chat/conversation-column.tsx", "utf8"));
+const chatsPageList = strip(readFileSync("src/components/chats/chats-workspace.tsx", "utf8"));
 check("the list renders the shared FavoriteButton", /<FavoriteButton/.test(list));
 check("...against chat_conversations", /table="chat_conversations"/.test(list));
 check("...seeded from the row's own state", /initialFavorited=\{Boolean\(row\.is_favorited\)\}/.test(list));
-// NOT BEHIND A VARIANT ANY MORE. The star used to be drawn only when the
-// list was NOT the sidebar's (`{!sidebar && (`), because a 240px column
-// had no room for it. There is no sidebar list, so there is no condition
-// left — and a new one would hide the star on the only screen that has
-// it, which is why its absence is asserted rather than assumed.
+// AND IT IS BEHIND A CONDITION AGAIN — ON PURPOSE, AND SAID OUT LOUD.
+//
+// The star was drawn only when the list was NOT the sidebar's
+// (`{!sidebar && (`) until 2026-10-16, because a 240px column had no
+// room. That went with the sidebar's list, and this check asserted
+// that NO condition was left, because a new one would have hidden the
+// star on the only screen that had it.
+//
+// There are two screens again since 2026-10-17, and the narrow one is
+// 280px. Measured on a real build that day: a row there had 58px for
+// the title and `break-words` cut a name mid-syllable. So `dense`
+// takes the date and the star off in the column — and this check is
+// now the pair of claims that replaces the absence, held BOTH ways so
+// neither half can rot:
+//
+//   the Chats page does NOT ask for dense, so its rows keep the star;
+//   the column DOES, deliberately, and the star is one press away at
+//   «Όλες οι συνομιλίες».
+//
+// THE THIRD CLAIM IS THE ONE THAT MATTERS. What made the old variant a
+// defect was not that it hid a star: it was that a second form of the
+// list could drift from the first. So `dense` is required to appear
+// exactly four times in the file — the parameter, its type, and two
+// guards — and those two guards are required to be the date and the
+// star. An action behind it would be a fifth.
+const denseUses = (list.match(/\bdense\b/g) ?? []).length;
 check(
-  "...on every row, with nothing deciding whether it appears",
-  !/\{!sidebar && \(/.test(list) && !/ConversationRowsVariant/.test(list),
-  "a variant around the star would hide it on the only list there is."
+  `...and the narrow form is the date and the star, nothing else (${denseUses} uses of dense)`,
+  denseUses === 4 &&
+    /\{!dense && \(\s*<span className="shrink-0 text-xs text-muted"/.test(list) &&
+    /\{!dense && \(\s*<div\s*className=\{`shrink-0 transition-opacity/.test(list),
+  "a fifth use of `dense` is a second form of the list, which is how the star got two states that disagreed"
+);
+check(
+  "...the column asks for it",
+  /<ConversationRows[\s\S]{0,240}\bdense\b/.test(column),
+  "the 280px surface"
+);
+check(
+  "...and the Chats page does not, so every row there keeps its star",
+  /<ConversationRows/.test(chatsPageList) && !/\bdense\b/.test(chatsPageList),
+  "the page with room is where the star lives"
+);
+check(
+  "...and no older variant came back with it",
+  !/\{!sidebar && \(/.test(list) && !/ConversationRowsVariant/.test(list)
 );
 // A starred row must not vanish when the pointer leaves it.
 check("a starred row keeps its star visible at rest", /is_favorited\s*\?\s*"opacity-100"/.test(list));

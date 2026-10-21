@@ -193,6 +193,21 @@ export function ChatWorkspace({
   // top of them.
   useEffect(() => setConversations(initialConversations), [initialConversations]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // READ BY A CALLBACK THAT CAN FIRE SECONDS LATE, NOT BY RENDER.
+  //
+  // A delete from the column commits after the Undo window — several
+  // seconds after the press that scheduled it — and by then the person
+  // may have opened a different conversation. The closure that function
+  // runs in was built at CLICK time; `activeId` read directly inside it
+  // would be the value from that render, not whatever is open when the
+  // delete actually lands. The ref is kept current by the effect below
+  // and read only inside onDeleted, so "was the conversation I just
+  // deleted still the open one, right now" is answered with the right
+  // "now".
+  const activeIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
   // THE WORK AREA (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2): which answer is open beside
   // the conversation, if any. Closed when the conversation changes.
   const [openWorkId, setOpenWorkId] = useState<string | null>(null);
@@ -884,7 +899,20 @@ export function ChatWorkspace({
       <div
         data-testid="chat-column-slot"
         data-open={columnOpen}
-        className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:w-[280px] md:max-w-none ${
+        // THE WIDTH IS ONLY EVER SET ONCE PER BREAKPOINT, ON PURPOSE.
+        // `md:w-[280px]` used to sit in this base, unconditional string
+        // AND in the open branch below — harmless while open (the same
+        // class twice), but while closed the element carried BOTH
+        // `md:w-[280px]` (base) and `md:w-0` (closed) at once. Two
+        // same-specificity utilities on one element resolve by the
+        // order Tailwind EMITS them in the compiled stylesheet, not by
+        // their order in this string, so which one wins is a build
+        // detail rather than something this file controls. It rendered
+        // collapsed in every screenshot taken so far — that was the
+        // emitted order being favourable, not a guarantee the next
+        // build keeps it. md:max-w-none stays in the base: both
+        // branches want it, so there is nothing for it to conflict with.
+        className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:max-w-none ${
           columnReady ? "transition-[width,transform] duration-200 ease-out" : ""
         } ${columnOpen ? "translate-x-0 md:w-[280px]" : "-translate-x-full rtl:translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-e-0"}`}
       >
@@ -894,6 +922,16 @@ export function ChatWorkspace({
             projects={projects}
             activeId={activeId}
             onOpen={openFromColumn}
+            // THE DEFECT THIS GUARDS AGAINST IS NEW HERE, not carried
+            // over: delete used to live only on the Chats page, which
+            // has no open thread beside it to invalidate. Closing the
+            // thread only when the DELETED id still matches the one
+            // that is actually open — read from the ref above, not
+            // from `activeId` — is what stops a delete made seconds
+            // ago from clearing whatever conversation was opened since.
+            onDeleted={(id) => {
+              if (id === activeIdRef.current) startNewChat();
+            }}
             onNavigate={() => {
               // Only the overlay needs closing. At md and above the
               // column is in flow and choosing a row leaves it open,
@@ -936,8 +974,17 @@ export function ChatWorkspace({
               length). So: 44px, an icon with no words beside it, and
               the hint that makes it findable.
               scripts/tests/sidebar-hints-coverage.test.mjs §3 holds
-              all three. */}
-          <Tooltip content={t(columnOpen ? "hideConversations" : "showConversations")} side="right">
+              all three.
+
+              ABOVE, NOT BESIDE. `side="right"` is what every sidebar
+              row uses, because a sidebar row has empty page to its
+              right. This button has «Νέα συνομιλία» there, and the
+              hint covered it — on hover AND for as long as the button
+              held keyboard focus, which is a hint that hides a
+              control. Seen on a screenshot of a real build, 2026-10-17;
+              no test had asked. Above it there is only the bar's own
+              padding and the top nav. */}
+          <Tooltip content={t(columnOpen ? "hideConversations" : "showConversations")} side="top">
             <button
               type="button"
               onClick={toggleColumn}

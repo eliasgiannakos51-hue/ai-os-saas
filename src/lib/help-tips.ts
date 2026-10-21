@@ -405,8 +405,15 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that it forecasts the future, or that it will invent a pattern rather than say there is not enough data",
   },
   {
+    // MOUNTED ON THE COMPONENT, NOT THE PAGE — same shape as chat's own
+    // entry below, and for the same reason: since 2026-10-18 this page
+    // renders no <PageHeader> at all (it is a conversation, full
+    // viewport, the same shell Chat uses), so `route` is what tells
+    // this file's own check that /dashboard/coding/page.tsx is still
+    // answered even though it carries no header of its own.
     id: "coding",
-    file: "src/app/dashboard/coding/page.tsx",
+    file: "src/components/coding/coding-workspace.tsx",
+    route: "src/app/dashboard/coding/page.tsx",
     keyPrefix: "help.coding",
     corrects:
       "that it can see your project, run what it writes, or open a pull request",

@@ -4253,9 +4253,9 @@
       "doesNot": "Sie können sich nicht selbst empfehlen, und wer bereits von einem anderen Partner geworben wurde, zählt nicht für Sie. Die Provision beginnt mit der ersten Zahlung, nicht mit der Anmeldung, und endet nach zwölf Monaten."
     },
     "coding": {
-      "is": "Ein Code-Assistent, der genau auf dem Text arbeitet, den Sie einfügen.",
-      "does": "Fünf Dinge: einen Codeausschnitt schreiben, Code erklären, Fehler finden und dabei die auslösende Eingabe benennen, zwischen Sprachen übersetzen und Tests schreiben.",
-      "doesNot": "Es hat kein Repository. Es sieht Ihre Codebasis nicht, es führt nichts aus — weder Ihren Code noch den, den es schreibt — und es macht keine Commits, Branches oder Pull Requests. Eine Funktion, eine Datei, ein Einfügen."
+      "is": "Eine Unterhaltung, die Code schreibt und ändert, innerhalb deines eigenen Arbeitsbereichs.",
+      "does": "Versteht von sich aus, was du fragst: etwas Neues schreiben, einen Einfügetext erklären, Fehler finden und beheben, zwischen Sprachen konvertieren, Tests hinzufügen — in einer Nachricht, ohne vorher aus einer Liste zu wählen.",
+      "doesNot": "Sie hat keinen Zugriff auf ein Repository und kann nichts ausführen, testen, bauen, deployen oder committen. Sie schreibt die Dateien, um die es in dieser Unterhaltung geht, nicht eine ganze Anwendung — und sagt das in einem Satz, wann immer die Anfrage das voraussetzt."
     },
     "dataAnalysis": {
       "is": "Eine Tabelle, richtig gelesen.",
@@ -4756,66 +4756,61 @@
   },
   "coding": {
     "title": "Code",
-    "description": "Fünf Dinge, die es tut, und vier, die es nicht tut. Alles arbeitet genau auf dem Text im Feld.",
+    "description": "Eine Unterhaltung, die Code schreibt und ändert — nichts wird ausgeführt, nichts wird committet, und das wird gesagt, wenn es wichtig ist.",
     "code": "Code",
     "copy": "Kopieren",
     "copied": "Kopiert",
-    "language": "Sprache",
-    "targetLanguage": "Umwandeln in",
-    "useWorkspace": "Deine anderen Module als Kontext nutzen",
-    "run": "Ausführen",
-    "running": "Arbeite…",
-    "result": "Ergebnis",
-    "limits": {
-      "title": "Was es NICHT tut",
-      "no_repository": "Es hat kein Repository. Es sieht weder deine Codebasis noch die Datei nebenan.",
-      "no_execution": "Es führt nichts aus. Weder deinen Code, noch den geschriebenen, noch die Tests.",
-      "no_commits": "Es macht keine Commits, Branches oder Pull Requests.",
-      "no_whole_project": "Es baut kein Projekt. Eine Funktion, eine Datei, ein Einfügen.",
-      "later": "Diese vier sind die nächste Version, nicht diese."
-    },
-    "operations": {
-      "generate": {
-        "label": "Schnipsel schreiben",
-        "description": "Beschreibe, was du brauchst, und bekomme eine Funktion — mit genannten Annahmen und Lücken.",
-        "placeholder": "Eine Funktion, die eine Liste von Bestellungen nimmt und die Marge pro Kunde zurückgibt…"
-      },
-      "explain": {
-        "label": "Das erklären",
-        "description": "Code einfügen und erfahren, was er tut — der Reihe nach, mit Nennung der Zeilen.",
-        "placeholder": "Füge den Code ein, der erklärt werden soll…"
-      },
-      "find_bugs": {
-        "label": "Fehler finden",
-        "description": "Jeder Befund nennt die Eingabe oder den Zustand, der ihn auslöst. Ein Befund ohne Fehlerfall ist eine Vorliebe.",
-        "placeholder": "Füge den zu prüfenden Code ein…"
-      },
-      "convert": {
-        "label": "Umwandeln",
-        "description": "Schreib ihn in einer anderen Sprache neu — mit der Liste von allem, was NICHT übertragbar ist.",
-        "placeholder": "Füge den umzuwandelnden Code ein…"
-      },
-      "write_tests": {
-        "label": "Tests schreiben",
-        "description": "Der Normalfall, die Grenzen und die Fehlerwege. Nicht nur der glückliche Pfad.",
-        "placeholder": "Füge den zu testenden Code ein…"
-      }
-    },
     "errors": {
-      "tooLong": "Das sind mehr als {limit} Zeichen. Das hier arbeitet auf einer Datei, nicht auf einem Projekt.",
+      "tooLong": "Das ist länger als {limit} Zeichen. Das funktioniert mit den Dateien einer Unterhaltung, nicht mit einem ganzen Projekt.",
       "unavailable": "Der KI-Dienst war nicht erreichbar. Es wurde nichts berechnet.",
-      "failed": "Hat nicht geklappt — versuch es noch einmal."
+      "failed": "Hat nicht geklappt — versuch es noch einmal.",
+      "tooShort": "Sag etwas mehr als das.",
+      "insufficientCredits": "Nicht genug Credits dafür."
     },
     "history": {
-      "title": "Verlauf",
       "search": "Suchen",
-      "folder": "Ordner",
-      "allFolders": "Alle Ordner",
       "empty": "Hier ist noch nichts.",
       "input": "Eingabe",
       "output": "Ausgabe",
-      "importedNote": "frühere Notiz",
-      "failed": "fehlgeschlagen"
+      "failed": "fehlgeschlagen",
+      "delete": "Löschen",
+      "deleteConfirm": "„{title}“ löschen?"
+    },
+    "download": "Herunterladen",
+    "empty": {
+      "heading": "Was bauen wir?",
+      "placeholder": "Beschreibe, was du willst, oder füge Code ein",
+      "send": "Senden",
+      "examples": {
+        "vat": "Eine Funktion, die die Mehrwertsteuer berechnet",
+        "explain": "Erkläre mir diesen Code",
+        "findBugs": "Finde die Fehler darin"
+      }
+    },
+    "composerPlaceholder": "An Coding schreiben…",
+    "thinking": "Denkt nach…",
+    "wroteFiles": "Hat {count, plural, one {eine Datei} other {# Dateien}} geschrieben",
+    "newConversation": "Neu",
+    "showHistory": "Frühere Arbeit anzeigen",
+    "hideHistory": "Frühere Arbeit ausblenden",
+    "mobile": {
+      "viewCode": "Code anzeigen",
+      "back": "Zurück"
+    },
+    "editFile": {
+      "button": "Ändern",
+      "open": "{path} ändern",
+      "placeholder": "Was soll an dieser Datei geändert werden?",
+      "cancel": "Abbrechen",
+      "submit": "Ändern"
+    },
+    "legacy": {
+      "title": "Frühere Arbeit ({count, plural, one {# Eintrag} other {# Einträge}})",
+      "untitled": "Ohne Titel"
+    },
+    "dataScope": {
+      "title": "Was es sehen kann",
+      "body": "Es sieht die Dateien, die diese Unterhaltung schon hat, und — genau wie Chat — deine eigenen Einträge und deinen letzten Chat, damit es aus deinen eigenen Daten antworten kann. Es sieht nichts, was du ihm nicht gezeigt hast."
     }
   },
   "presentations": {

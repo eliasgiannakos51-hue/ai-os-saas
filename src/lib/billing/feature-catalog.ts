@@ -362,9 +362,15 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "free",
     sidebar: ["/dashboard/coding"],
     pages: ["coding"],
-    routes: ["coding/run"],
+    // coding/run (the five-operation form's own route) ended 2026-10-18
+    // with the owner's «Το Coding καταλαβαίνει μόνο του τι ζητάω» —
+    // api/coding/send/route.ts is its replacement, one route for every
+    // turn of the conversation. conversations/[id] only deletes a
+    // conversation; it spends nothing, so it is claimed here rather
+    // than left for the charge scan below to wonder about.
+    routes: ["coding/send", "coding/conversations/[id]"],
     charges: true,
-    enforcedIn: "src/app/api/coding/run/route.ts",
+    enforcedIn: "src/app/api/coding/send/route.ts",
     enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "check" }),
   },

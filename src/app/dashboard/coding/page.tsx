@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { MODULE_ICONS } from "@/lib/module-icons";
 import { CodingWorkspace, type CodeSession } from "@/components/coding/coding-workspace";
+import type { CodeConversationRow } from "@/components/coding/coding-history-column";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +19,11 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle(MODULE_TITLE_KEYS.coding);
 }
 
-// /dashboard/coding was a CRUD form for describing code the user would go
-// and write themselves. This is the version that writes it: five
-// operations, and four things it still does not do — stated on the screen
-// by CodingWorkspace rather than left to the name.
+// /dashboard/coding WAS a form: five fixed operations and a permanent
+// "what this does NOT do" box above the input. Since 2026-10-18 (owner:
+// «Το Coding καταλαβαίνει μόνο του τι ζητάω») it is a conversation, the
+// same shell shape as Ionexa Chat — no PageHeader, no max-w wrapper, a
+// full-viewport two-pane layout CodingWorkspace itself draws.
 // The brief Home routed here, read through the shared clamp — see the
 // note in the deep-research page for why the name is checked by a gate.
 export default async function CodingPage(
@@ -33,21 +32,35 @@ export default async function CodingPage(
   }
 ) {
   const searchParams = await props.searchParams;
-  const t = await getTranslations("coding");
   const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  // RLS scopes this to the caller. The imported notes from the old
-  // tracker are in here too, marked `source = 'note'` — see the
-  // migration's section 5.
-  const { data: rows } = await supabase
-    .from("code_sessions")
-    .select("id, operation, title, input, language, target_language, output, folder, status, source, created_at")
-    .order("created_at", { ascending: false })
-    .limit(60);
+  // TWO INDEPENDENT READS, not sequential: the live conversations this
+  // screen now drives, and the old form's own runs — read-only, still
+  // RLS-scoped to the caller, so "τίποτα δεν χάνεται" without the two
+  // lists depending on each other.
+  const [{ data: conversationRows }, { data: sessionRows }] = await Promise.all([
+    supabase
+      .from("code_conversations")
+      .select("id, title")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(60),
+    supabase
+      .from("code_sessions")
+      .select("id, operation, title, input, language, target_language, output, folder, status, source, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(60),
+  ]);
 
-  const sessions: CodeSession[] = (rows ?? []).map((row) => ({
+  const conversations: CodeConversationRow[] = (conversationRows ?? []).map((row) => ({
+    id: String(row.id),
+    title: String(row.title ?? ""),
+  }));
+
+  const legacySessions: CodeSession[] = (sessionRows ?? []).map((row) => ({
     id: String(row.id),
     operation: String(row.operation ?? "generate"),
     title: String(row.title ?? ""),
@@ -61,17 +74,16 @@ export default async function CodingPage(
     createdAt: String(row.created_at ?? ""),
   }));
 
-  const folders = [...new Set(sessions.map((s) => s.folder).filter((f): f is string => Boolean(f)))].sort();
-
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader
-        icon={MODULE_ICONS.coding}
-        title={t("title")}
-        description={t("description")}
-        helpKey="help.coding"
+    // Below md the bottom bar takes 4rem more (mobile-tab-bar.tsx), and
+    // the composer must stay above it — same wrapper Chat's own page
+    // uses, for the same reason.
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <CodingWorkspace
+        conversations={conversations}
+        legacySessions={legacySessions}
+        initialTask={readExampleParam(searchParams.brief)}
       />
-      <CodingWorkspace sessions={sessions} folders={folders} initialTask={readExampleParam(searchParams.brief)} />
     </div>
   );
 }

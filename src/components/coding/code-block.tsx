@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { highlight, type TokenKind } from "@/lib/coding/highlight";
 
 // TOKENS TO <span>, never markup to innerHTML.
@@ -28,10 +28,16 @@ export function CodeBlock({
   code,
   language,
   label,
+  fileName,
 }: {
   code: string;
   language?: string | null;
   label?: string;
+  /** When set, a Download button sits beside Copy and saves `code` as
+   *  this name. Coding's per-file cards pass their own path; chat's
+   *  code blocks (work-area.tsx) pass none and stay copy-only — a
+   *  snippet quoted in an answer is not a file to save. */
+  fileName?: string;
 }) {
   const t = useTranslations("coding");
   const [copied, setCopied] = useState(false);
@@ -53,21 +59,48 @@ export function CodeBlock({
     }
   }
 
+  function download() {
+    // A LOCAL FILE, NOT A REQUEST. No fetch, no route — the content is
+    // already on this page, so a Blob URL the browser saves and revokes
+    // itself is the whole mechanism.
+    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName || "code.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="rounded-card border border-border bg-workspace">
       <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
         <span className="break-words text-[11px] uppercase tracking-wider text-muted">
           {label ?? language ?? t("code")}
         </span>
-        <button
-          type="button"
-          onClick={() => void copy()}
-          aria-label={t("copy")}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-[11px] text-foreground hover:bg-panel-hover"
-        >
-          {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-          {copied ? t("copied") : t("copy")}
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {fileName && (
+            <button
+              type="button"
+              onClick={download}
+              aria-label={t("download")}
+              data-testid="coding-download"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item px-3 text-[11px] text-muted hover:bg-panel-hover hover:text-foreground"
+            >
+              <Download className="h-3 w-3" />
+              {t("download")}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => void copy()}
+            aria-label={t("copy")}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-[11px] text-foreground hover:bg-panel-hover"
+          >
+            {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+            {copied ? t("copied") : t("copy")}
+          </button>
+        </div>
       </div>
       {/* SCROLLS INSIDE ITSELF. A long line in a paste must not make the
           whole page scroll sideways. */}

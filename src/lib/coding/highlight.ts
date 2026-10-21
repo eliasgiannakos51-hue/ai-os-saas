@@ -341,3 +341,39 @@ export function guessLanguage(code: string): string | null {
   }
   return null;
 }
+
+const EXTENSION_LANGUAGE: Record<string, string> = {
+  ts: "typescript",
+  tsx: "typescript",
+  js: "javascript",
+  jsx: "javascript",
+  mjs: "javascript",
+  cjs: "javascript",
+  py: "python",
+  go: "go",
+  rs: "rust",
+  java: "java",
+  cs: "csharp",
+  php: "php",
+  rb: "ruby",
+  sql: "sql",
+  sh: "bash",
+  bash: "bash",
+  json: "json",
+  css: "css",
+  scss: "css",
+  html: "html",
+  htm: "html",
+};
+
+/** The language a CODING FILE TAB highlights with, from its path's
+ *  extension — every file here has one (file-blocks.ts's ParsedFile),
+ *  and an extension is a far more reliable signal than guessing from
+ *  content: a ten-line Python stub guesses as confidently as a ten-line
+ *  file of anything else. Falls back to guessLanguage on the content
+ *  for a path this map does not recognise (no extension, or one it has
+ *  never seen), and to null — plain text — when neither says anything. */
+export function languageFromPath(path: string, content: string): string | null {
+  const ext = path.split(".").pop()?.toLowerCase() ?? "";
+  return EXTENSION_LANGUAGE[ext] ?? guessLanguage(content);
+}

@@ -17,20 +17,28 @@
  * WHERE THIS DIFFERS FROM THE BRIEF, AND WHY.
  *
  * The brief named Coding as Describe -> Build -> Test -> Fix -> Deploy.
- * Three of those five do not exist and drawing them would be the exact
- * defect lib/coding/operations.ts spends its header on: that screen RUNS
- * NOTHING, MAKES NO COMMITS and DOES NOT BUILD A PROJECT — it writes
- * text into a box from text in another box. A progress bar with a
- * greyed-out "Deploy" at the end is a promise, not a state, and the
- * previous version of that page was renamed precisely because its name
- * promised more than the screen delivered. So coding's flow is the three
- * steps it has. The other three flows are the brief's, unchanged.
+ * Three of those five did not exist and drawing them would have been
+ * the exact defect lib/coding/operations.ts's header spends itself on:
+ * that screen RUNS NOTHING, MAKES NO COMMITS and DOES NOT BUILD A
+ * PROJECT. From 2026-10-05 to 2026-10-18 coding kept a three-step flow
+ * of its own — Describe, Generate, Review — for the same reason the
+ * other three screens have one: a single form, one submission, one
+ * result, same shape as the others with steps.
+ *
+ * ON 2026-10-18 CODING STOPPED HAVING A FORM AT ALL. The owner's own
+ * words: «Το Coding καταλαβαίνει μόνο του τι ζητάω» — it is a
+ * conversation now, the same shell as Ionexa Chat, and a conversation
+ * has no "step 2 of 3": a reply can ask a question, write one file,
+ * change three, or answer in prose with no file at all, in any order,
+ * any number of times. There is no progress to draw a bar across — Chat
+ * itself draws none, for the identical reason — so coding has no entry
+ * here, and src/components/coding/coding-workspace.tsx has no
+ * <StepFlow>. The other three flows are the brief's, unchanged.
  */
 export const STEP_FLOWS = {
   website: ["describe", "generate", "edit", "preview", "publish"],
   research: ["question", "research", "sources", "answer"],
   files: ["upload", "ask", "answer"],
-  coding: ["describe", "generate", "review"],
 } as const;
 
 export type FlowName = keyof typeof STEP_FLOWS;

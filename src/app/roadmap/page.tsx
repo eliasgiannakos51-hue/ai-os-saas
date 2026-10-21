@@ -101,7 +101,7 @@ const SECTIONS: RoadmapSection[] = [
       // feature. /dashboard/images exists too and stays in "future",
       // because build-modules.ts declares it a LOG with "no AI call
       // anywhere in it". These four produce:
-      //   coding        five real operations through lib/coding/operations.ts
+      //   coding        a real conversation, through api/coding/send
       //   dataAnalysis  parses an uploaded sheet, profiles it, charts it
       //   marketplace   agent_templates, browsed and adopted
       // (A fourth, router, was moved back to "soon" on 2026-10-05: route.ts

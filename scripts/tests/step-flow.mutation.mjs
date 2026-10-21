@@ -2,7 +2,7 @@
 /*
  * CAN step-flow.test.mjs SEE A FLOW THAT HAS DRIFTED?
  *
- * Six mutants, one per way this particular consistency rots:
+ * Eight mutants, one per way this particular consistency rots:
  *
  *   1. a flow loses a step — the direction a list like this actually
  *      rots, because dropping a step is how you make some other check
@@ -19,7 +19,13 @@
  *      primary action on four screens at once
  *   7. the current step's digit goes back to the accent that measured
  *      4.44:1 in the light theme
- *   8. coding's flow claims a step that page does not have
+ *   8. a flow claims a step its own page does not have
+ *
+ * Coding is not a target here any more: since 2026-10-18 it draws no
+ * <StepFlow> at all (lib/ui/step-flows.ts has no entry for it), and
+ * section 4 of the gate checks that absence directly — mutants 2, 4 and
+ * 8 used to exercise that code through `coding`'s three-step flow and
+ * now exercise the same clauses through `research` and `website`.
  *
  * Run: node scripts/tests/step-flow.mutation.mjs
  */
@@ -31,10 +37,9 @@ const GATE = "scripts/tests/step-flow.test.mjs";
 const FLOWS = "src/lib/ui/step-flows.ts";
 const SHAPE = "src/components/ui/step-flow.tsx";
 const EL = "messages/el.json";
-const CODING = "src/components/coding/coding-workspace.tsx";
 const RESEARCH = "src/components/research/research-workspace.tsx";
 
-const TARGETS = [GATE, FLOWS, SHAPE, EL, CODING, RESEARCH];
+const TARGETS = [GATE, FLOWS, SHAPE, EL, RESEARCH];
 
 const MUTANTS = [
   {
@@ -45,10 +50,14 @@ const MUTANTS = [
     expect: "research: question -> research -> sources -> answer",
   },
   {
+    // "answer" is research's last step and files'. Giving research its
+    // own key breaks the sharing the same way the old coding/website
+    // "describe" split would have — missing stepFlow.steps.answerResearch
+    // in every locale.
     name: "a step name stops being shared between two flows",
     file: FLOWS,
-    from: '  coding: ["describe", "generate", "review"],',
-    to: '  coding: ["describeCode", "generateCode", "review"],',
+    from: '  research: ["question", "research", "sources", "answer"],',
+    to: '  research: ["question", "research", "sources", "answerResearch"],',
     expect: "every step has a word and a hint",
   },
   {
@@ -60,10 +69,10 @@ const MUTANTS = [
   },
   {
     name: "a screen stops drawing its flow",
-    file: CODING,
-    from: '<StepFlow flow="coding" current={codingStep} />',
+    file: RESEARCH,
+    from: '<StepFlow flow="research" current={researchStep} />',
     to: "",
-    expect: "coding: the screen renders its own flow",
+    expect: "research: the screen renders its own flow",
   },
   {
     // THE ORDER, NOT THE PRESENCE. All four real files satisfy this
@@ -96,11 +105,11 @@ const MUTANTS = [
     expect: "the current step's digit uses the text colour that measured above 4.5:1",
   },
   {
-    name: "coding's flow claims a step that page does not have",
+    name: "a flow claims a step its own page does not have",
     file: FLOWS,
-    from: '  coding: ["describe", "generate", "review"],',
-    to: '  coding: ["describe", "generate", "test", "deploy"],',
-    expect: "the coding flow claims none of test, fix or deploy",
+    from: '  website: ["describe", "generate", "edit", "preview", "publish"],',
+    to: '  website: ["describe", "generate", "edit", "preview", "publish", "deploy"],',
+    expect: "website: describe -> generate -> edit -> preview -> publish",
   },
 ];
 

@@ -304,7 +304,7 @@ console.log("\n== 8. BOTH DIRECTIONS ARE ACTUALLY WIRED ==");
 // =====================================================================
 {
   const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
-  const coding = readFileSync("src/app/api/coding/run/route.ts", "utf8");
+  const coding = readFileSync("src/app/api/coding/send/route.ts", "utf8");
   ok("chat loads the coding context", /loadCodingContextForChat\(/.test(chat));
   ok("…from the user's own message", /loadCodingContextForChat\(supabase, message\)/.test(chat));
   ok("coding loads the chat context", /loadChatContextForCoding\(/.test(coding));

@@ -358,23 +358,25 @@ check(
   /Refer yourself/.test(affiliateRules) &&
     /already someone else's referral/.test(affiliateRules),
 );
-// Coding: the four refusals the tip repeats are the four the page itself
-// prints, so they cannot drift apart into two different lists.
-const codingLimits = messages.en.coding.limits;
-for (const limit of [
-  "no_repository",
-  "no_execution",
-  "no_commits",
-  "no_whole_project",
-]) {
-  check(
-    `coding: the page states ${limit}`,
-    typeof codingLimits[limit] === "string",
-  );
-}
+// Coding: since 2026-10-18 the absences are not a box with four message
+// keys any more — they are standing instructions in the system prompt
+// (lib/coding/coding-prompt.ts's ABSENCES), said in the model's own
+// reply, in one sentence, only when what was asked assumes one of them.
+// The tip's `doesNot` is checked against that prompt instead, so the two
+// cannot drift the way the four limits and the page's own box once could.
+const codingPrompt = readFileSync("src/lib/coding/coding-prompt.ts", "utf8");
+const codingDoesNot = messages.en.help.coding.doesNot;
 check(
-  "coding: and there really are five operations",
-  Object.keys(messages.en.coding.operations).length === 5,
+  "coding: the prompt still says it has no repository",
+  /no access to any repository/i.test(codingPrompt) && /repository/i.test(codingDoesNot),
+);
+check(
+  "coding: the prompt still says it cannot run or commit anything",
+  /cannot run, execute, test, build, deploy or commit/i.test(codingPrompt) && /run/i.test(codingDoesNot),
+);
+check(
+  "coding: the tip no longer claims a fixed list of operations",
+  !/five (things|operations)/i.test(messages.en.help.coding.does),
 );
 // Data analysis: the tip promises the first 50,000 rows, by that number.
 const csv = readFileSync("src/lib/data-analysis/csv.ts", "utf8");

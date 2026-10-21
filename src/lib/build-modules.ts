@@ -9,9 +9,11 @@ import type { ModuleConfig } from "@/lib/modules";
 // the thing it will not do.
 //
 // TWO ENTRIES LEFT THIS FILE IN V4 #19 + #20. `coding` and `data-analysis`
-// were trackers and are now tools: /dashboard/coding runs five real
-// operations through lib/coding/operations.ts, and /dashboard/data-analysis
-// parses an uploaded spreadsheet, profiles it and charts it. Neither is a
+// were trackers and are now tools: /dashboard/coding is a conversation
+// through api/coding/send (lib/coding/operations.ts now holds only the
+// input-length ceiling; the five fixed operations it used to dispatch
+// ended on 2026-10-18), and /dashboard/data-analysis parses an uploaded
+// spreadsheet, profiles it and charts it. Neither is a
 // CRUD table any more, so neither belongs in a registry whose whole
 // meaning is "this produces nothing" — and the gate now checks that
 // claim MECHANICALLY, in both directions, rather than trusting the

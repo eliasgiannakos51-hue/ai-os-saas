@@ -156,7 +156,7 @@ const mentions = walk("src/app/api").filter((f) => {
 // pass. These four are the ones wired on 2026-09-27; a fifth is held to
 // the same rules by the derived set above without being listed here.
 const MUST_SEND_CONTEXT = [
-  "coding/run",
+  "coding/send",
   "posts/generate",
   "presentations/generate",
   "websites/generate/process",

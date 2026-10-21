@@ -42,7 +42,7 @@ const RUNNER = "src/lib/agents/agent-runner.ts";
 const EXECUTE = "src/lib/agents/execute-agent.ts";
 const AGENT_HANDLER = "src/lib/jobs/handlers/agent-run.ts";
 const COMPLETE = "src/lib/ai/providers/complete.ts";
-const CODING_ROUTE = "src/app/api/coding/run/route.ts";
+const CODING_ROUTE = "src/app/api/coding/send/route.ts";
 const PROGRESS = "src/components/ui/ai-job-progress.tsx";
 const SITE_UI = "src/components/website-builder/website-builder-workspace.tsx";
 const RESEARCH_UI = "src/components/research/research-workspace.tsx";
@@ -134,7 +134,7 @@ console.log("\n== 3. the boundaries, and the money at each ==");
   const coding = read(CODING_ROUTE);
   check("code: the route passes the request's signal", /signal: request\.signal/.test(coding));
   check("code: a stop releases the hold — nothing delivered, nothing charged", /outcome\.kind === "aborted"\) \{[\s\S]*?releaseReservation\(user\.id, reservationId\)/.test(coding));
-  check("code: ...and writes no 'failed' row for it", !/outcome\.kind === "aborted"\) \{[\s\S]*?code_sessions/.test(coding.slice(coding.indexOf('outcome.kind === "aborted"'), coding.indexOf("if (!outcome.ok) {"))));
+  check("code: ...and writes no 'failed' row for it", !/outcome\.kind === "aborted"\) \{[\s\S]*?code_messages/.test(coding.slice(coding.indexOf('outcome.kind === "aborted"'), coding.indexOf("if (!outcome.ok) {"))));
 }
 
 console.log("\n== 4. a button, on each surface ==");

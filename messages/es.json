@@ -3027,6 +3027,7 @@
       "groups": {
         "make": "Crear",
         "ask": "Preguntar",
+        "automate": "Automatizar",
         "organise": "Organizar",
         "business": "Negocio"
       },
@@ -4253,9 +4254,9 @@
       "doesNot": "No puedes referirte a ti mismo, y alguien ya referido por otro afiliado no cuenta para ti. La comisión empieza con su primer pago, no con el registro, y se detiene tras doce meses."
     },
     "coding": {
-      "is": "Un asistente de código que trabaja exactamente sobre el texto que pegas.",
-      "does": "Cinco cosas: escribe un fragmento, explica código, encuentra errores nombrando la entrada que los provoca, convierte entre lenguajes y escribe pruebas.",
-      "doesNot": "No tiene repositorio. No ve tu código base, no ejecuta nada — ni tu código ni el que escribe — y no hace commits, ramas ni pull requests. Una función, un archivo, un pegado."
+      "is": "Una conversación que escribe y cambia código, dentro de tu propio espacio de trabajo.",
+      "does": "Entiende por sí sola lo que pides: escribir algo nuevo, explicar un pegado, encontrar y arreglar errores, convertir entre lenguajes, añadir pruebas — en un solo mensaje, sin elegir antes de una lista.",
+      "doesNot": "No tiene acceso a ningún repositorio y no puede ejecutar, probar, compilar, desplegar ni hacer commit de nada. Escribe los archivos de los que trata esta conversación, no una aplicación entera — y lo dice, en una frase, cuando lo que pides lo supone."
     },
     "dataAnalysis": {
       "is": "Una hoja de cálculo, leída como es debido.",
@@ -4756,66 +4757,61 @@
   },
   "coding": {
     "title": "Código",
-    "description": "Cinco cosas que hace y cuatro que no. Todo funciona exactamente sobre el texto de la caja.",
+    "description": "Una conversación que escribe y cambia código — no ejecuta nada, no hace ningún commit, y lo dice cuando importa.",
     "code": "Código",
     "copy": "Copiar",
     "copied": "Copiado",
-    "language": "Lenguaje",
-    "targetLanguage": "Convertir a",
-    "useWorkspace": "Usar tus otros módulos como contexto",
-    "run": "Ejecutar",
-    "running": "Trabajando…",
-    "result": "Resultado",
-    "limits": {
-      "title": "Lo que NO hace",
-      "no_repository": "No tiene repositorio. No ve tu código ni el archivo de al lado.",
-      "no_execution": "No ejecuta nada. Ni tu código, ni el que escribe, ni las pruebas que escribe.",
-      "no_commits": "No hace commits, ramas ni pull requests.",
-      "no_whole_project": "No construye un proyecto. Una función, un archivo, un pegado.",
-      "later": "Esas cuatro son la próxima versión, no esta."
-    },
-    "operations": {
-      "generate": {
-        "label": "Escribir un fragmento",
-        "description": "Describe lo que necesitas y recibe una función, con sus supuestos y sus lagunas dichos.",
-        "placeholder": "Una función que toma una lista de pedidos y devuelve el margen por cliente…"
-      },
-      "explain": {
-        "label": "Explicar esto",
-        "description": "Pega código y recibe qué hace, en orden, nombrando las líneas de las que habla.",
-        "placeholder": "Pega el código que quieres que se explique…"
-      },
-      "find_bugs": {
-        "label": "Buscar errores",
-        "description": "Cada hallazgo nombra la entrada o el estado que lo provoca. Un hallazgo sin caso que falle es una preferencia.",
-        "placeholder": "Pega el código que quieres revisar…"
-      },
-      "convert": {
-        "label": "Convertir",
-        "description": "Reescríbelo en otro lenguaje, con la lista de todo lo que NO se traslada.",
-        "placeholder": "Pega el código que quieres convertir…"
-      },
-      "write_tests": {
-        "label": "Escribir pruebas",
-        "description": "El caso normal, los límites y las formas de fallar. No sólo el camino feliz.",
-        "placeholder": "Pega el código que quieres probar…"
-      }
-    },
     "errors": {
-      "tooLong": "Eso supera los {limit} caracteres. Esto funciona sobre un archivo, no un proyecto.",
+      "tooLong": "Eso tiene más de {limit} caracteres. Esto funciona con los archivos de una conversación, no con un proyecto entero.",
       "unavailable": "No se pudo contactar con el servicio de IA. No se cobró nada.",
-      "failed": "No funcionó — inténtalo de nuevo."
+      "failed": "No funcionó — inténtalo de nuevo.",
+      "tooShort": "Di un poco más que eso.",
+      "insufficientCredits": "No tienes suficientes créditos para esto."
     },
     "history": {
-      "title": "Historial",
       "search": "Buscar",
-      "folder": "Carpeta",
-      "allFolders": "Todas las carpetas",
       "empty": "Aquí todavía no hay nada.",
       "input": "Entrada",
       "output": "Salida",
-      "importedNote": "nota anterior",
-      "failed": "falló"
+      "failed": "falló",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar “{title}”?"
+    },
+    "download": "Descargar",
+    "empty": {
+      "heading": "¿Qué estamos haciendo?",
+      "placeholder": "Describe lo que quieres, o pega código",
+      "send": "Enviar",
+      "examples": {
+        "vat": "Una función que calcula el IVA",
+        "explain": "Explica este código",
+        "findBugs": "Encuentra los errores en esto"
+      }
+    },
+    "composerPlaceholder": "Escribe a Coding…",
+    "thinking": "Pensando…",
+    "wroteFiles": "Escribió {count, plural, one {un archivo} other {# archivos}}",
+    "newConversation": "Nuevo",
+    "showHistory": "Mostrar trabajo anterior",
+    "hideHistory": "Ocultar trabajo anterior",
+    "mobile": {
+      "viewCode": "Código",
+      "back": "Atrás"
+    },
+    "editFile": {
+      "button": "Cambiar",
+      "open": "Cambiar {path}",
+      "placeholder": "¿Qué debería cambiar en este archivo?",
+      "cancel": "Cancelar",
+      "submit": "Cambiar"
+    },
+    "legacy": {
+      "title": "Trabajo anterior ({count, plural, one {# entrada} other {# entradas}})",
+      "untitled": "Sin título"
+    },
+    "dataScope": {
+      "title": "Lo que puede ver",
+      "body": "Ve los archivos que ya tiene esta conversación, y — igual que el Chat — tus propios registros y tu chat reciente, para poder responder con tus propios datos. No ve nada que no le hayas mostrado."
     }
   },
   "presentations": {

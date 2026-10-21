@@ -122,8 +122,8 @@ const ROUTED = {
   "src/lib/lead-classification.ts": {
     note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after. Moved onto runCompletion 2026-10-15; the accumulator is a REQUIRED parameter, because an optional one is how this call spent money with no cost log in the first place.",
   },
-  "src/app/api/coding/run/route.ts": {
-    note: "V5 Coding. Reserved against codeAssist before the call and settled after, with the Stop button releasing the hold whole — a non-streaming call has no partial output to charge for.",
+  "src/app/api/coding/send/route.ts": {
+    note: "Coding, conversational since 2026-10-18 (replaces api/coding/run). Reserved against codeAssist before the call and settled after, with the Stop button releasing the hold whole — a non-streaming call has no partial output to charge for. A scoped single-file edit (editPath set) reserves and settles exactly the same way as a plain turn; the file it touches is narrower, the billing path is not.",
   },
   "src/app/api/data-analysis/[id]/analyse/route.ts": {
     note: "Data analysis. Reserved before, settled after; a call that returned nothing releases rather than settles (lib/billing/reservations.ts decides that once for all forty call sites).",

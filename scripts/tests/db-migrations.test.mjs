@@ -616,7 +616,14 @@ if (!DB) {
   // 116 -> 117 on 2026-10-07: project_flows (20261022, package 36).
   // 117 -> 118 on 2026-10-08: user_games (20261024, package 26), moved
   // here and in credit-flow.dbtest.mjs in the same commit.
-  check(`118 tables`, tables === 118, `got ${tables}`);
+  // 118 -> 120 on 2026-10-18 (Coding as a conversation, Βήμα 3):
+  // code_conversations, code_messages (20261025000000_coding_conversations.sql)
+  // — missed here too when that PR shipped; only caught 2026-10-21 (see
+  // the next entry) and moved in both files in the same commit.
+  // 120 -> 121 on 2026-10-21 (security audit): schema_migrations
+  // (20261026000000_migration_ledger.sql), moved here and in
+  // credit-flow.dbtest.mjs in the same commit.
+  check(`121 tables`, tables === 121, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -661,6 +668,11 @@ if (!DB) {
     // through the service role, scoped to the caller.
     ai_cost_log: "the real cost, margin and model breakdown behind every charge; the account's screens read the columns they need via service role",
     ai_provider_log: "which provider and model answered and why it failed over; the export reads purpose and outcome via service role",
+    // Security audit, 2026-10-21, 20261026000000_migration_ledger.sql.
+    // Same reasoning as rls-coverage.test.mjs's own entry for this table:
+    // which files have run, not any user's data — but a client that could
+    // read it would learn the exact shape of the schema between releases.
+    schema_migrations: "the migration ledger: which files have run, not any one user's data. A client that could read it would learn the exact shape of the schema between releases; one that could write it could make a migration that never ran look applied",
   };
   const noPolicy = sql(`select coalesce(string_agg(c.relname, ', '), '') from pg_class c
       join pg_namespace ns on ns.oid = c.relnamespace

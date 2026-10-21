@@ -1057,34 +1057,46 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
     "no <main> means no skip-to-content target and no landmark to navigate by"
   );
 
-  // THE HEADING AND THE SIDEBAR AGREE. This is the assertion that would
-  // have caught renaming one and not the other.
-  const heading = (await page.locator("h1").first().innerText()).trim();
-  // "Αιτήματα κώδικα" WAS the heading. /dashboard/coding stopped being a
-  // CRUD form for describing code somebody else would write and became a
-  // workspace that writes it — the label is "Κώδικας με AI" now, in the
-  // sidebar, the heading and the tab. Three assertions here still named
-  // the old one, and one of them asserted that the page says it "does not
-  // write code", which is the opposite of what the module now does. That
-  // sentence survives only as the empty state of the old tracking table
-  // (messages/el.json: emptyCoding).
+  // THE SIDEBAR NAMES THE PAGE. This used to also require the <h1> to
+  // read the same word, which held while /dashboard/coding was a CRUD
+  // form for describing code somebody else would write ("Αιτήματα
+  // κώδικα", later "Κώδικας με AI" — the same words as the sidebar,
+  // the heading and the tab, all three).
   //
-  // Read from messages/el.json rather than typed out, so the next rename
-  // moves both at once.
+  // Βήμα 3 (2026-10-21) made it a conversational shell instead, the
+  // same shape as Chat — and Chat's own smoke checks below never
+  // required this equality either: its empty state asks a question
+  // ("Τι θέλεις να μάθεις;" style prose), not a repeat of the sidebar's
+  // one word. Coding's empty state now does the same ("Τι φτιάχνουμε;"),
+  // so the new shell is EXPECTED to fail a heading===sidebar-label
+  // assertion, not a regression caught by one. What still has to hold
+  // is that the heading is real Greek, not English and not an
+  // unresolved key.
+  //
+  // Read from messages/el.json rather than typed out, so a sidebar
+  // rename is still caught on its own line.
+  const heading = (await page.locator("h1").first().innerText()).trim();
   const codingLabel = elMessages.sidebar?.items?.coding;
   checkTrue(`the sidebar names this page in Greek ("${codingLabel}")`, typeof codingLabel === "string" && codingLabel.length > 0, String(codingLabel));
-  checkTrue(`the page heading is Greek too ("${heading}")`, fold(heading) === fold(String(codingLabel)), `${heading} vs ${codingLabel}`);
-  checkTrue("...and matches what the sidebar calls it", foldedNav.includes(fold(heading)), `${heading} not in nav`);
+  checkTrue(
+    `the page heading is Greek ("${heading}")`,
+    heading.length > 0 && !/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/u.test(heading),
+    heading
+  );
 
-  // A tracking page states, on screen, that it produces nothing.
+  // THE OLD DISCLAIMER IS GONE, ON PURPOSE. The owner's spec for the new
+  // shell (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN) says plainly: no permanent
+  // "what this does not do" box. "Δεν εκτελεί κώδικα" is the sentence
+  // this check used to REQUIRE present; it watches the opposite
+  // direction today — a regression back to the old tracking-page chrome.
   await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
   const main = await page.locator(mainCount >= 1 ? "main" : "body").innerText();
   checkTrue(
-    "the AI Coding page states what it does and does not do",
-    /Δεν εκτελεί κώδικα/.test(main) || /δεν κάνει/.test(main),
+    "the old 'does not execute code' disclaimer is NOT back",
+    !/Δεν εκτελεί κώδικα/.test(main),
     main.replace(/\s+/g, " ").slice(0, 300)
   );
-  checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
+  checkTrue("no raw i18n key leaks into it", !/coding\.[a-z]+\.[a-z]/i.test(main) && !/module\.empty/.test(main));
 
   // THE BROWSER TAB, in Greek. It was the last piece of English on an
   // otherwise translated screen, and the piece that survives the page

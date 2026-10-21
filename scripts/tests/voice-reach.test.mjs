@@ -42,10 +42,11 @@
  * "A microphone on every input" cannot be decided statically, and
  * pretending otherwise would be the more impressive-looking mistake:
  * whether a <textarea> wants dictation depends on whether a person
- * types SENTENCES into it. coding-workspace.tsx's box is font-mono and
- * serves five operations, four of which take source code. The onboarding
- * paste box exists to receive text that already exists somewhere else.
- * No regex knows that.
+ * types SENTENCES into it. coding-workspace.tsx's box takes a
+ * conversational ask AND a multi-line paste of somebody else's code,
+ * and nobody dictates a paste. The onboarding paste box exists to
+ * receive text that already exists somewhere else. No regex knows
+ * that.
  *
  * So the list is written down, both halves of it, each with its reason —
  * MIC_REQUIRED goes red if an input LOSES its microphone, NO_MIC goes
@@ -140,7 +141,17 @@ check(
 const NO_MIC = new Map([
   [
     "src/components/coding/coding-workspace.tsx",
-    "one font-mono box serves five operations and four of them take SOURCE CODE; a microphone there would be right one time in five",
+    // RE-ANCHORED, 2026-10-18. The five-operation picker this reason
+    // used to describe is gone — the field is one conversational
+    // composer now, the same shape as chat-composer.tsx, which DOES
+    // carry a microphone. What keeps this one off MIC_REQUIRED is not
+    // the old shape, it is that the same box routinely receives a
+    // multi-line paste of somebody else's code: a thing a person
+    // dictates is a sentence, and a thing a person pastes is not one.
+    // The owner's own brief for this screen (ALL TOOLS ΜΕ ΤΕΤΡΑΓΩΝΑ,
+    // ΚΑΙ CODING ΣΑΝ ΤΟ CLAUDE CODE) names no microphone either way; if
+    // that changes, this moves to MIC_REQUIRED and says why.
+    "the same field takes a sentence AND a multi-line code paste; dictating a paste is not a thing a person does",
   ],
   [
     "src/components/onboarding/onboarding-flow.tsx",

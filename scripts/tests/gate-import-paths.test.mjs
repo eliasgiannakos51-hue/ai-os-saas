@@ -100,6 +100,13 @@ const DELIBERATE = new Map([
     // This file's own red-proof.
     "@/lib/zz-no-such-module",
   ]],
+  ["coding-file-blocks.test.mjs", [
+    // Fixture paths for parseReply/formatFileBlock's round-trip and
+    // isValidFilePath's "a normal relative path is accepted" check —
+    // never real files, chosen only to look like plausible ones.
+    "src/vat.ts",
+    "src/lib/vat.ts",
+  ]],
   ["pricing-truth.mutation.mjs", [
     // THE MUTANT IS A MOVED FILE, so the path has to be one that is not
     // there. pricing-truth.test.mjs requires every pricing claim to name

@@ -16,7 +16,7 @@
  *   2. «Κανείς», chosen: the same.
  *   3. «Όλοι»: every square is back, exactly the ones it had before — the
  *      grouped ones for a customer, and the new tools' too for the test
- *      account, whose switches let them in — with the four headings and the
+ *      account, whose switches let them in — with the five headings and the
  *      search, each square a square.
  *   4. «Εσύ και ο λογαριασμός δοκιμής»: the test account sees them, a
  *      customer not.
@@ -266,8 +266,8 @@ try {
       const back = await visit();
       check(`${tag}: «${L.dashboard.systemHealth.flags.audience.everyone}», a customer: the ${GROUPED.length} squares, as before`,
         back.tiles.map((t) => t.href).join() === GROUPED.join(), back.tiles.map((t) => t.href).join(", "));
-      check(`${tag}: ...under the four headings, with the search`,
-        back.headings.join() === ["make", "ask", "organise", "business"].map((k) => L.dashboard.tools.groups[k]).join() && back.search === 1 && back.line === "", summary(back));
+      check(`${tag}: ...under the five headings, with the search`,
+        back.headings.join() === ["make", "ask", "automate", "organise", "business"].map((k) => L.dashboard.tools.groups[k]).join() && back.search === 1 && back.line === "", summary(back));
       const odd = back.tiles.filter((t) => Math.abs(t.w - t.h) > 1);
       check(`${tag}: ...each one a square, as drawn`, back.tiles.length > 0 && odd.length === 0, odd.map((t) => `${t.href} ${t.w}x${t.h}`).join(" · "));
       check(`${tag}: ...and nothing wider than the screen`, !back.wide);

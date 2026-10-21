@@ -165,6 +165,11 @@ const LOCAL_ENUMERATIONS = [
     phrase: "first shape",
     why: "the first version of that suite's own `expect` field, not a catalogue entry",
   },
+  {
+    file: "supabase/migrations/20261025000000_coding_conversations.sql",
+    phrase: "second shape",
+    why: "ordinary English — a reviewer learning a second table layout, not a catalogue entry",
+  },
 ];
 
 console.log("shape-names");

@@ -18,11 +18,13 @@ import { GAMES_ICON } from "@/lib/module-icons";
 const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON };
 
 /**
- * ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05): big square tiles, four in a
- * row on a computer and two on a phone, in four groups — Make, Ask,
- * Organise, Business — with a search on top and no «beta» anywhere. Each
- * square: a 28px icon top left, a pin top right, and at the bottom the
- * name with one plain line on what it does.
+ * ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05; MASTER Μέρος 20 Α4,
+ * 2026-10-14 for the group names): big square tiles, four in a row on a
+ * computer and two on a phone, in groups — Make, Ask, Automate, Organise,
+ * Business, and Learn once it has ready-work shortcuts to show — with a
+ * search on top and no «beta» anywhere. Each square: a 28px icon top
+ * left, a pin top right, and at the bottom the name with one plain line
+ * on what it does.
  *
  * WHICH TOOLS, AND WHERE: lib/nav/all-tools.ts, by the owner's rule of
  * 2026-10-05 (shown when it does its main job end to end; hidden when it
@@ -72,6 +74,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const headings: Record<AllToolsGroupKey, string> = {
       make: t("groups.make"),
       ask: t("groups.ask"),
+      automate: t("groups.automate"),
       organise: t("groups.organise"),
       business: t("groups.business"),
     };

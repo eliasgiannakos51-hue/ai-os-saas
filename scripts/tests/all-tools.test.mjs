@@ -1,11 +1,14 @@
-// ALL TOOLS IS THE DESIGN'S: BIG SQUARES IN FOUR GROUPS, A SEARCH THAT
+// ALL TOOLS IS THE DESIGN'S: BIG SQUARES IN GROUPS, A SEARCH THAT
 // KNOWS SYNONYMS, A PIN ON EACH, AND NO «BETA» ANYWHERE.
 //
 // docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §6 (2026-10-05): 1:1 squares, four in a
 // row on a computer and two on a phone; a 28px icon top left, a small pin
 // top right, the name and one plain line at the bottom; groups Make, Ask,
 // Organise, Business; a search on top; no beta tag, so what is not working
-// is not shown. WHICH tools is the owner's rule of 2026-10-05 (NEEDS 19),
+// is not shown. A FIFTH GROUP, Automate, was added by MASTER Μέρος 20 Α4
+// (owner, 2026-10-14) and built in Βήμα 4 (2026-10-21) — see
+// src/lib/nav/all-tools.ts's own header for why. WHICH tools is the
+// owner's rule of 2026-10-05 (NEEDS 19),
 // in src/lib/nav/all-tools.ts — held here BOTH ways against the tools the
 // grid can draw, for a member and for the owner. Since 2026-10-07 (MASTER
 // Μέρος 14.1) that is exactly the tools 14.1 names, each under its
@@ -71,7 +74,7 @@ console.log("\n== 0b. every tool is in exactly one group, or hidden with a reaso
 const { ALL_TOOLS_GROUPS, HIDDEN_FROM_ALL_TOOLS, SWITCH_ONLY_ITEMS, SWITCHED_SQUARES } = await loadTs("src/lib/nav/all-tools.ts");
 const grouped = ALL_TOOLS_GROUPS.flatMap((g) => g.hrefs);
 const hidden = Object.keys(HIDDEN_FROM_ALL_TOOLS);
-check("the four groups, in the design's order", ALL_TOOLS_GROUPS.map((g) => g.key).join(",") === "make,ask,organise,business");
+check("the five groups, in the design's order", ALL_TOOLS_GROUPS.map((g) => g.key).join(",") === "make,ask,automate,organise,business");
 // THE POPULATION IS WHAT THE GRID CAN DRAW: the owner's view, which is
 // every member tool plus the owner-only ones, minus the Settings block.
 // ...and the tools with no sidebar row, drawn only behind their switch
@@ -176,7 +179,7 @@ for (const sq of SWITCHED_SQUARES) {
   // sends the reader to this list.
   check(`${sq.href}: ...hidden here exactly when the grid would otherwise draw it, and saying where it comes back`,
     hidden.includes(sq.href) === ownerTools.includes(sq.href) && (!hidden.includes(sq.href) || /SWITCHED_SQUARES/.test(HIDDEN_FROM_ALL_TOOLS[sq.href])));
-  check(`${sq.href}: ...in one of the four groups`, ["make", "ask", "organise", "business"].includes(sq.group));
+  check(`${sq.href}: ...in one of the five groups`, ["make", "ask", "automate", "organise", "business"].includes(sq.group));
   check(`${sq.href}: ...named as 14.1 names it ("${messages.en.dashboard.tools.names[sq.name]}")`, [...MASTER_14_1_NEW, "Document"].includes(messages.en.dashboard.tools.names[sq.name]));
 }
 const toolsPage = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
@@ -224,9 +227,9 @@ check("a word that is nothing finds nothing", search("en", "qqzzxx").length === 
 check(`an empty search is every square, in order (${tools.length})`, search("en", "").length === tools.length && tools.length === grouped.length);
 for (const l of LOCALES) {
   const t = messages[l].dashboard?.tools ?? {};
-  check(`${l}: the search, its label, the empty result and the four group headings are worded`,
+  check(`${l}: the search, its label, the empty result and the five group headings are worded`,
     ["search", "searchLabel"].every((k) => typeof t[k] === "string" && t[k].length > 0) && /\{query\}/.test(t.noMatch ?? "") &&
-      ["make", "ask", "organise", "business"].every((k) => typeof t.groups?.[k] === "string" && t.groups[k].length > 0));
+      ["make", "ask", "automate", "organise", "business"].every((k) => typeof t.groups?.[k] === "string" && t.groups[k].length > 0));
 }
 
 console.log("\n== 2. the square: 1:1, a 28px icon, the name and one line, nothing cut ==");
@@ -238,7 +241,7 @@ check("...its name, and the plain line under it", /\{name\}/.test(grid) && /\{de
 check("no name is cut with an ellipsis", !/\btruncate\b|line-clamp|text-ellipsis/.test(grid));
 check("four in a row on a computer, two on a phone", /grid grid-cols-2 gap-3 lg:grid-cols-4/.test(grid));
 check("the groups are headed by their translated names",
-  ["make", "ask", "organise", "business"].every((k) => new RegExp(`${k}: t\\("groups\\.${k}"\\)`).test(grid)) && /heading: headings\[g\.key\]/.test(grid));
+  ["make", "ask", "automate", "organise", "business"].every((k) => new RegExp(`${k}: t\\("groups\\.${k}"\\)`).test(grid)) && /heading: headings\[g\.key\]/.test(grid));
 
 console.log("\n== 3. the pin: the one way to put a tool in the sidebar at once ==");
 check("a 44px pin on the square, its state announced", /data-testid="tool-pin"/.test(grid) && /aria-pressed=\{isPinned\}/.test(grid) && /h-11 w-11/.test(grid));

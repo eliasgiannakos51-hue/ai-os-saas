@@ -150,7 +150,7 @@ const { stripComments } = await import("../check-mutation-markers.mjs");
 const FAILOVER_NAMES = {
   "src/app/api/data-analysis/[id]/ask/route.ts": "η Ανάλυση δεδομένων",
   "src/app/api/data-analysis/[id]/analyse/route.ts": "η Ανάλυση δεδομένων",
-  "src/app/api/coding/run/route.ts": "το Coding",
+  "src/app/api/coding/send/route.ts": "το Coding",
   "src/lib/agents/agent-runner.ts": "οι βοηθοί",
   "src/lib/meetings/meeting-analyse-call.ts": "η σύνοψη των συναντήσεων",
   "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",

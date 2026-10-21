@@ -13,6 +13,7 @@ import { scrubSecrets } from "@/lib/scrub-secrets";
 import { SCHEMA_CANARIES } from "@/lib/health/schema-canaries";
 import { navFreshness } from "@/lib/health/nav-freshness";
 import { derivedDataHealth } from "@/lib/health/derived-data";
+import { migrationLedgerHealth } from "@/lib/health/migration-ledger";
 import { providerStatuses } from "@/lib/ai/providers/registry";
 
 export const dynamic = "force-dynamic";
@@ -373,6 +374,18 @@ export async function GET(request: Request) {
         verdict: "unchecked",
       };
     }
+
+    // AND WHETHER THE MIGRATION LEDGER ITSELF IS BEING WRITTEN (security
+    // audit, 2026-10-21). `schema.missing` already says whether
+    // schema_migrations exists at all; this says whether anything has
+    // registered in it — the question CLAUDE.md's "Migrations are
+    // applied by hand" exists to keep answering, now with its own signal
+    // instead of only the shape of what a migration happens to create.
+    try {
+      body.migrations = await migrationLedgerHealth();
+    } catch {
+      body.migrations = { registered: null, newest: null, verdict: "unchecked" };
+    }
   }
 
   // A STRANGER GETS VERDICTS, NOT FIGURES (2026-10-05). The fields above
@@ -391,6 +404,8 @@ export async function GET(request: Request) {
     if (nav) body.nav = { verdict: nav.verdict };
     const derived = body.derived as { verdict?: unknown } | undefined;
     if (derived) body.derived = { verdict: derived.verdict };
+    const migrations = body.migrations as { verdict?: unknown } | undefined;
+    if (migrations) body.migrations = { verdict: migrations.verdict };
   }
 
   return NextResponse.json(body, {

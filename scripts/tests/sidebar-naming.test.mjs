@@ -301,11 +301,13 @@ check(
 // a new entry a decision somebody has to write down.
 const BUILD_ALLOWED = {
   "/dashboard/website-builder": "the site builder — really builds sites",
-  // V4 #19 + #20. It was a tracker and stopped being one: five operations
-  // that return code, an explanation, a bug list, a conversion or tests.
-  // Not in build-modules.ts any more, and section 3b below proves the
-  // claim from the CODE rather than from this comment.
-  "/dashboard/coding": "five operations that really produce code",
+  // V4 #19 + #20. It was a tracker and stopped being one: a conversation
+  // that writes and changes code (since 2026-10-18, a conversation with
+  // no fixed menu of operations at all — src/lib/coding/coding-prompt.ts
+  // decides what is being asked, not a picker). Not in build-modules.ts
+  // any more, and section 3b below proves the claim from the CODE rather
+  // than from this comment.
+  "/dashboard/coding": "a conversation that really produces code",
   // A document is written here and translated on its way out —
   // api/documents/[id]/pdf calls the model before it renders, which is
   // what section 3b finds.

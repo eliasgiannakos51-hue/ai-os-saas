@@ -83,9 +83,14 @@ export async function reserveCredits(
   action: string,
   metadata: Record<string, unknown> = {}
 ): Promise<ReservationResult> {
-  if (credits <= 0) {
-    // Nothing to hold. Still returns ok so callers don't need a special
-    // case for free/admin paths.
+  if (credits < 0) {
+    // Not a real estimate — defensive only, should never happen. A real
+    // zero-credit action DOES reserve now (20261028000000_reserve_zero_
+    // credit_actions.sql): an empty reservationId was the one thing
+    // settle_reservation's own replay guard could not protect, because
+    // there was no row for its compare-and-swap to lock. Reserving zero
+    // gives every caller — not just the ones estimated above zero — the
+    // same row settle_reservation already checks before it charges twice.
     return { ok: true, reservationId: "", reserved: 0 };
   }
 

@@ -85,7 +85,7 @@ const CONTEXT = "src/lib/ai/cross-module-context.ts";
 const STORE = "src/lib/ai/cross-module-store.ts";
 const RELEVANCE = "src/lib/ai/module-relevance.ts";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
-const CODING_ROUTE = "src/app/api/coding/run/route.ts";
+const CODING_ROUTE = "src/app/api/coding/send/route.ts";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -256,10 +256,7 @@ const MUTANTS = [
   {
     name: "the coding route stops loading the user's chat turns",
     file: CODING_ROUTE,
-    from:
-      "    const chatContext = useWorkspace\n" +
-      "      ? await loadChatContextForCoding(supabase, `${input} ${operation}`)\n" +
-      "      : { text: \"\", selection: { chosen: [], reason: \"workspace off\", chars: 0 }, pool: 0 };",
+    from: "    const chatContext = await loadChatContextForCoding(supabase, text);",
     to: "    const chatContext = { text: \"\", selection: { chosen: [], reason: \"workspace off\", chars: 0 }, pool: 0 };",
   },
   {

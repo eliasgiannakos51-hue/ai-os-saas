@@ -86,7 +86,7 @@ days, 2026-10-03, not measurements** — one system per round, gate + mutations
 | Agent Orchestrator | Partly | Background jobs with reserve → worker → settle (`src/lib/jobs/run-job.ts`); missions with steps (`mission-step-runner.ts`) | One planner that splits a goal into tasks and hands them out | 3 | 6–8 |
 | Subagents | Missing | — | Delegated workers with their own context and budget | 3 | 5 |
 | Parallel Execution | Partly | Jobs run in parallel across users | **Inside one task nothing is parallel: Deep Research answers its questions in a `while` loop (`src/lib/research/run-research.ts:316`), "up to six sequential, search-enabled model calls" at 60–90 s each (that file's own header)** | 1 | 2 |
-| Coding Agent | Partly | AI Coding: one request → code + diff (`src/app/api/coding/run/route.ts`) | Running the code, reading the error, trying again — needs Sandbox first | 3 | 6 |
+| Coding Agent | Partly | AI Coding: a conversation, each turn writing or changing files (`src/app/api/coding/send/route.ts`) | Running the code, reading the error, trying again — needs Sandbox first | 3 | 6 |
 | Browser Agent | Missing | — | Everything; only after Sandbox + Permission System | 4 | 8+ |
 | Computer Use | Missing | — | Everything; only after Sandbox + Permission System, never an action without approval | 4 | 8+ |
 | Tool/API Builder | Partly | Integrations / connectors (`src/lib/integrations/`) | Building a NEW tool from a description | 5 | 6 |

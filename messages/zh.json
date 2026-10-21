@@ -3027,6 +3027,7 @@
       "groups": {
         "make": "创建",
         "ask": "提问",
+        "automate": "自动化",
         "organise": "整理",
         "business": "业务"
       },
@@ -4253,9 +4254,9 @@
       "doesNot": "你不能推荐自己，已经被别的推广者介绍过的人也不算在你名下。佣金从对方第一次付款开始算，而不是从注册开始，并在十二个月后停止。"
     },
     "coding": {
-      "is": "一个只针对你粘贴进来的那段文字工作的代码助手。",
-      "does": "五件事：写一段代码、解释代码、找出缺陷并指明触发它的输入、在语言之间转换、编写测试。",
-      "doesNot": "它没有代码仓库。它看不到你的项目，什么都不会运行——既不运行你的代码，也不运行它自己写的——而且不会提交、开分支或发起合并请求。一个函数、一个文件、一次粘贴。"
+      "is": "一个在你自己的工作区里编写和修改代码的对话。",
+      "does": "能自己理解你的请求：写一些新东西、解释一段粘贴的代码、找出并修复错误、在语言之间转换、添加测试——都在一条消息里完成，不需要先从列表里选择。",
+      "doesNot": "它无法访问任何代码仓库，也不能运行、测试、构建、部署或提交任何东西。它只编写这个对话涉及的文件，不是一整个应用程序——而且每当你的请求假定了相反的情况，它会用一句话说明这一点。"
     },
     "dataAnalysis": {
       "is": "一张被认真读过的表格。",
@@ -4756,66 +4757,61 @@
   },
   "coding": {
     "title": "编程",
-    "description": "五件它会做的事，四件它不做的事。所有操作都只针对框里的那段文本。",
+    "description": "一个能编写和修改代码的对话——不运行任何东西，不做任何提交，在重要的时候会明确说出来。",
     "code": "代码",
     "copy": "复制",
     "copied": "已复制",
-    "language": "语言",
-    "targetLanguage": "转换为",
-    "useWorkspace": "用你的其他模块作为上下文",
-    "run": "运行",
-    "running": "处理中…",
-    "result": "结果",
-    "limits": {
-      "title": "它不做什么",
-      "no_repository": "它没有代码仓库。看不到你的代码库，也看不到你粘贴的那个文件旁边的文件。",
-      "no_execution": "它不运行任何东西。不运行你的代码，不运行它写的代码，也不运行它写的测试。",
-      "no_commits": "它不做提交、分支或合并请求。",
-      "no_whole_project": "它不搭建整个项目。一个函数、一个文件、一次粘贴。",
-      "later": "这四项属于下一个版本，不属于这一版。"
-    },
-    "operations": {
-      "generate": {
-        "label": "写一段代码",
-        "description": "描述你要什么，得到一个函数，并写明它的假设和没有覆盖的地方。",
-        "placeholder": "一个接收订单列表并返回每位客户利润率的函数…"
-      },
-      "explain": {
-        "label": "解释这段",
-        "description": "粘贴代码，按顺序说明它做了什么，并指名所讲的那几行。",
-        "placeholder": "粘贴你想让它解释的代码…"
-      },
-      "find_bugs": {
-        "label": "找出缺陷",
-        "description": "每条结论都要指明触发它的输入或状态。没有失败用例的结论只是偏好。",
-        "placeholder": "粘贴你想检查的代码…"
-      },
-      "convert": {
-        "label": "转换语言",
-        "description": "用另一种语言重写，并列出所有无法直接迁移的部分。",
-        "placeholder": "粘贴你想转换的代码…"
-      },
-      "write_tests": {
-        "label": "写测试",
-        "description": "常规情况、边界情况，以及它失败的方式。不只是顺利路径。",
-        "placeholder": "粘贴你想测试的代码…"
-      }
-    },
     "errors": {
-      "tooLong": "超过了 {limit} 个字符。这个功能针对单个文件，不是整个项目。",
+      "tooLong": "超过了 {limit} 个字符。这里处理的是一次对话里的文件，不是整个项目。",
       "unavailable": "无法连接 AI 服务。未产生任何费用。",
-      "failed": "没有成功——请再试一次。"
+      "failed": "没有成功——请再试一次。",
+      "tooShort": "再多说一点。",
+      "insufficientCredits": "积分不足，无法执行此操作。"
     },
     "history": {
-      "title": "历史",
       "search": "搜索",
-      "folder": "文件夹",
-      "allFolders": "全部文件夹",
       "empty": "这里还没有内容。",
       "input": "输入",
       "output": "输出",
-      "importedNote": "以前的笔记",
-      "failed": "失败"
+      "failed": "失败",
+      "delete": "删除",
+      "deleteConfirm": "删除“{title}”？"
+    },
+    "download": "下载",
+    "empty": {
+      "heading": "我们要做什么？",
+      "placeholder": "描述你想要的，或粘贴代码",
+      "send": "发送",
+      "examples": {
+        "vat": "一个计算增值税的函数",
+        "explain": "解释一下这段代码",
+        "findBugs": "找出这里的错误"
+      }
+    },
+    "composerPlaceholder": "给 Coding 发消息…",
+    "thinking": "正在思考…",
+    "wroteFiles": "写了 {count} 个文件",
+    "newConversation": "新建",
+    "showHistory": "显示以前的工作",
+    "hideHistory": "隐藏以前的工作",
+    "mobile": {
+      "viewCode": "代码",
+      "back": "返回"
+    },
+    "editFile": {
+      "button": "修改",
+      "open": "修改 {path}",
+      "placeholder": "这个文件应该改什么？",
+      "cancel": "取消",
+      "submit": "修改"
+    },
+    "legacy": {
+      "title": "以前的工作（{count} 条记录）",
+      "untitled": "无标题"
+    },
+    "dataScope": {
+      "title": "它能看到什么",
+      "body": "它能看到这个对话里已有的文件，并且——和 Chat 一样——能看到你自己的记录和最近的聊天内容，这样才能依据你自己的数据回答。你没有展示给它的东西，它看不到。"
     }
   },
   "presentations": {

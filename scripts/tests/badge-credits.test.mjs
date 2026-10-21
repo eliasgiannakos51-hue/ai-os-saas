@@ -344,6 +344,21 @@ console.log("\n== 9. THE SCHEMA, AND WHAT IT REFUSES ==");
   // THE BADGED PLAN LIST AGREES IN ALL THREE PLACES.
   eq("badge.ts and badge-credits.ts agree on who is badged",
     [...badge.BADGED_PLANS].sort(), [...bc.BADGE_REMOVAL_APPLIES_TO].sort());
+
+  // GET CHECKS OWNERSHIP BEFORE IT LOADS, THE SAME AS POST (security
+  // audit, 2026-10-21). Without this, any signed-in session could pass a
+  // stranger's siteId and learn whether that site paid for badge removal
+  // and whether its auto-renewal was cancelled — not this account's
+  // money, but another account's purchase, read off a guessed id.
+  // resource-ownership.test.mjs cannot see this: its scan is per FILE,
+  // and POST already carried an ownership check before GET did, so the
+  // file-level signal it reports would stay green either way.
+  const route = readFileSync("src/app/api/publishing/badge/route.ts", "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const get = route.slice(route.indexOf("export async function GET"), route.indexOf("export async function POST"));
+  const ownedAt = get.indexOf("ownedSite(user.id, siteId)");
+  ok("GET calls ownedSite before it loads the removal", ownedAt > 0 && ownedAt < get.indexOf("loadRemoval("), get);
+  ok("...and refuses with the same shape as POST", /if \(!\(await ownedSite\(user\.id, siteId\)\)\) \{\s*return NextResponse\.json\(\{ error: "not_owner" \}, \{ status: 404 \}\);/.test(get), get);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

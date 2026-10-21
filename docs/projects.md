@@ -72,10 +72,10 @@ because everything except the last 80 tokens sits behind a cache boundary.
 | coding cross-module | `src/lib/ai/cross-module-store.ts` + `cross-module-context.ts` | pool 40, ≤ 90 days, 4 items × 280 chars, 900 chars total |
 
 An eighth exists and chat does not use it: `loadWorkspaceContext` in
-`src/lib/ai/workspace-context.ts` has **exactly one caller**,
-`src/app/api/coding/run/route.ts`. Its four stated rules — the user's own
+`src/lib/ai/workspace-context.ts`. Its four stated rules — the user's own
 RLS client, headlines only, bounded twice, explicit — are the right rules,
-and they govern one route.
+and five generation routes call it with `include: true` today:
+`src/app/api/{websites/generate/process,posts/generate,presentations/generate,documents/generate,coding/send}/route.ts`.
 
 ### So a project changes seven things, not one
 
@@ -310,9 +310,13 @@ Ideas and Competitors. `omittedModules` counts them honestly, so the UI
 says "5 further modules were not included" — the count is true, the
 selection is by position.
 
-This is one route (`/api/coding/run`), so the blast radius is small. It
-matters here because it is the same defect a project fixes by construction:
-selection by declaration instead of by array index.
+This is one route (`/api/coding/send`, the only caller of
+`loadWorkspaceContext` that passes no `brief` — the other four
+(`websites/generate/process`, `posts/generate`, `presentations/generate`,
+`documents/generate`) pass one and get `modulesByRelevance`'s sort
+instead), so the blast radius is small. It matters here because it is
+the same defect a project fixes by construction: selection by
+declaration instead of by array index.
 
 A second, smaller thing in the same loop: `omittedModules` is incremented
 only when the cap is hit, so a module whose query *threw* is silently

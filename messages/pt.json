@@ -3078,7 +3078,7 @@
         "slides": "Uma apresentação a partir de uma descrição.",
         "posts": "Uma publicação para cada plataforma.",
         "research": "Um relatório com fontes sobre qualquer tema.",
-        "analyze": "Conclusões a partir de um arquivo de dados.",
+        "analyze": "Conclusões a partir de arquivos, documentos ou texto.",
         "files": "Pergunta sobre os teus documentos.",
         "automations": "Tarefas que correm sozinhas.",
         "projects": "Uma pasta com um objetivo.",
@@ -4806,7 +4806,14 @@
         "compare": "Compara este mês com o anterior"
       }
     },
-    "new": "Novo ficheiro"
+    "new": "Novo ficheiro",
+    "pastedText": {
+      "filename": "Notas",
+      "button": "Colar texto",
+      "prompt": "Escreve ou cola o texto que queres analisar.",
+      "placeholder": "Escreve ou cola o texto…",
+      "autoQuestion": "Dá um resumo, os pontos principais e quaisquer números deste texto."
+    }
   },
   "coding": {
     "title": "Código",

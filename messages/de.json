@@ -3078,7 +3078,7 @@
         "slides": "Eine Präsentation aus einer Beschreibung.",
         "posts": "Ein Beitrag für jede Plattform.",
         "research": "Ein Bericht mit Quellen zu jedem Thema.",
-        "analyze": "Erkenntnisse aus einer Datendatei.",
+        "analyze": "Erkenntnisse aus Dateien, Dokumenten oder Text.",
         "files": "Stell Fragen zu deinen Dokumenten.",
         "automations": "Aufgaben, die von selbst laufen.",
         "projects": "Ein Ordner mit einem Ziel.",
@@ -4806,7 +4806,14 @@
         "compare": "Vergleiche diesen Monat mit dem letzten"
       }
     },
-    "new": "Neue Datei"
+    "new": "Neue Datei",
+    "pastedText": {
+      "filename": "Notizen",
+      "button": "Text einfügen",
+      "prompt": "Schreib oder füge den Text ein, den ich analysieren soll.",
+      "placeholder": "Text schreiben oder einfügen…",
+      "autoQuestion": "Gib eine Zusammenfassung, die wichtigsten Punkte und alle Zahlen aus diesem Text."
+    }
   },
   "coding": {
     "title": "Code",

@@ -15,7 +15,7 @@
  * the AI did not answer and that nothing was charged, which failJob makes
  * true by giving the hold back before it writes the row.
  *
- * Used by components/files/files-shell.tsx and files-workspace.tsx; held
+ * Used by components/analyze/analyze-shell.tsx and files-workspace.tsx; held
  * by scripts/tests/file-pages.test.mjs.
  */
 export type AskFailure = "askStillRunning" | "askStalled" | "askNoCredits" | "askRateLimited" | "askFailed" | "askError";

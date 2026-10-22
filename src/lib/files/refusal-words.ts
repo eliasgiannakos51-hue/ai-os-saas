@@ -13,7 +13,7 @@
  * `stage` (and `limitReached`), and the stored sentence is matched here to
  * the reason it gives. The screens show a key; a reason not listed falls
  * back to the screen's own general sentence. Used by lib/files/upload-file.ts
- * and components/files/files-shell.tsx and files-workspace.tsx; held by
+ * and components/analyze/analyze-shell.tsx and files-workspace.tsx; held by
  * scripts/tests/file-pages.test.mjs, which reads the sentences straight out
  * of extract.ts and pdf.ts so a reworded one cannot slip past.
  */

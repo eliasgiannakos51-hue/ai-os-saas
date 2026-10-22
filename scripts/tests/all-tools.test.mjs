@@ -123,7 +123,14 @@ const MASTER_14_1 = ["Site", "Document", "Slides", "Posts", "Research", "Analyze
 const enNames = messages.en.dashboard?.tools?.names ?? {};
 const shownNames = grouped.map((h) => enNames[ALL_TOOLS_NAMES[h]]);
 const HIDDEN_2026_10_22 = ["Document", "Slides", "Posts", "Meetings", "Library", "Memory", "Finances", "Sales", "Trading"];
-const expected = [...MASTER_14_1.filter((n) => !HIDDEN_2026_10_22.includes(n)), "Deep Research"].filter((n) => n !== "Research");
+// MERGED, NOT HIDDEN: Files stopped being its own square the same day,
+// but for a different reason than the list above — it did not pause
+// waiting on a decision, it became part of Analyze's square
+// (components/analyze/analyze-shell.tsx, the owner's message after
+// #332, item 4). Named separately so a reader does not read "Files" as
+// one more "on the way to being replaced" pause.
+const MERGED_2026_10_22 = ["Files"];
+const expected = [...MASTER_14_1.filter((n) => !HIDDEN_2026_10_22.includes(n) && !MERGED_2026_10_22.includes(n)), "Deep Research"].filter((n) => n !== "Research");
 check(`every grouped tool has a one-word name (${grouped.length} squares)`, grouped.every((h) => ALL_TOOLS_NAMES[h]), grouped.filter((h) => !ALL_TOOLS_NAMES[h]).join(", "));
 check("...and the English names are exactly 14.1's list, Document aside",
   [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
@@ -167,6 +174,11 @@ const lineKeys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s)
 // block on a deliberate pause and so the list of what is paused is
 // readable in one place.
 const PAUSED_SQUARE_KEYS = ["slides", "posts", "meetings", "library", "memory", "finances", "sales", "trading"];
+// MERGED, NOT PAUSED (same distinction as MERGED_2026_10_22 above):
+// "files" still names.files/lines.files because analyze-shell.tsx
+// reads the first for its work pane's title — it is a live key, just
+// not one with its own square any more.
+const MERGED_SQUARE_KEYS = ["files"];
 for (const l of LOCALES) {
   const lines = messages[l].dashboard?.tools?.lines ?? {};
   const bad = lineKeys.filter((k) => typeof lines[k] !== "string" || lines[k].trim() === "" || lines[k].length > LINE_MAX);
@@ -174,7 +186,7 @@ for (const l of LOCALES) {
     bad.map((k) => `${k}=${JSON.stringify(lines[k])}`).join(", "));
 }
 check("...and no line is kept for a square that does not exist, or is not one of the paused ones",
-  Object.keys(messages.en.dashboard.tools.lines ?? {}).every((k) => lineKeys.includes(k) || PAUSED_SQUARE_KEYS.includes(k)));
+  Object.keys(messages.en.dashboard.tools.lines ?? {}).every((k) => lineKeys.includes(k) || PAUSED_SQUARE_KEYS.includes(k) || MERGED_SQUARE_KEYS.includes(k)));
 check("the square draws its own line, and the sidebar's longer hint only for a tool without one",
   /const hint = \(item: SidebarItem\) => \{ const k = nameKey\(item\.href\); return k \? lines\[k\] : sidebarHint\(item\); \};/.test(grid) &&
     lineKeys.every((k) => grid.includes(`${k}: t("lines.${k}")`)));

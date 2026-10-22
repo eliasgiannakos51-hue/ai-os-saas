@@ -10,7 +10,7 @@ import { uploadRefusal, type UploadRefusal } from "@/lib/files/refusal-words";
  *
  *  `refused` says a refusal from the route by what it is
  *  (lib/files/refusal-words.ts), never in the route's own English; Files
- *  passes it (components/files/files-shell.tsx). A caller that does not —
+ *  passes it (components/analyze/analyze-shell.tsx). A caller that does not —
  *  Chat's attachments, lib/chat/attach-client.ts, as of 2026-10-08 — still
  *  gets the route's `error`, with the status and `limitReached` beside it
  *  to say the refusal from. */
@@ -42,7 +42,7 @@ export type UploadOutcome =
 const ROUTE_BODY_LIMIT = 4 * 1024 * 1024;
 
 /**
- * ONE FILE INTO FILES, for Files in the shell (components/files/files-shell.tsx).
+ * ONE FILE INTO FILES, for Files in the shell (components/analyze/analyze-shell.tsx).
  *
  * The same two paths as the page (components/files/files-workspace.tsx,
  * uploadDirect and uploadViaRoute): the bytes go from the browser into the

@@ -5,7 +5,17 @@ import { useTranslations } from "next-intl";
 import { Search, Trash2 } from "lucide-react";
 import { matchesSearch } from "@/lib/text/search-match";
 
-export type ShellHistoryRow = { id: string; title: string; /** A short line under the title: status, a count, a date. */ status?: string };
+export type ShellHistoryRow = {
+  id: string;
+  title: string;
+  /** A short line under the title: status, a count, a date. */
+  status?: string;
+  /** False hides the trash button on THIS row even though the column has
+   *  an `onDelete` — Analyze's merge (2026-10-22) mixes rows from two
+   *  tables, one of which (data_analyses) has no delete route yet.
+   *  Omitted or true behaves exactly as before `onDelete` existed. */
+  deletable?: boolean;
+};
 
 /**
  * [◧]'S OWN LIST, SHARED (MASTER Μέρος 20 Δ, 2026-10-21) — the same shape
@@ -95,7 +105,7 @@ export function ShellHistoryColumn({
                   <span className="block truncate">{r.title}</span>
                   {r.status && <span className="block truncate text-[11px] text-muted">{r.status}</span>}
                 </button>
-                {onDelete && (
+                {onDelete && r.deletable !== false && (
                   <button
                     type="button"
                     onClick={() => void remove(r.id, r.title)}

@@ -26,7 +26,7 @@ const HANDLER = "src/lib/jobs/handlers/file-ask.ts";
 const WS = "src/components/files/files-workspace.tsx";
 // In the reader's language (the package check of 2026-10-08).
 const CITED = "src/components/files/cited-answer.tsx";
-const SHELL = "src/components/files/files-shell.tsx";
+const SHELL = "src/components/analyze/analyze-shell.tsx";
 const ANSWER = "src/lib/files/answer.ts";
 const ASK_FAILURE = "src/lib/files/ask-failure.ts";
 const WORDS = "src/lib/files/refusal-words.ts";

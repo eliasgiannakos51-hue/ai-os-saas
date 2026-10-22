@@ -102,14 +102,21 @@ check("...a page number is checked before anything is read", view.indexOf('code:
 console.log("\n== 4. the screen ==");
 // ---------------------------------------------------------------------
 check('"file-pages" is no longer declared as a switch (removed, the owner\'s critical message)', !/\n  "file-pages": "/.test(code("src/lib/flags/flags.ts")));
-const page = code("src/app/dashboard/files/page.tsx");
-check("the Files page sets it unconditionally for both screens", (page.match(/\bpages\b/g) ?? []).length >= 2 && !/isFeatureOn\("file-pages"/.test(page));
+const filesPage = code("src/app/dashboard/files/page.tsx");
+const analyzePage = code("src/app/dashboard/data-analysis/page.tsx");
+// FILES AND ANALYZE MERGED 2026-10-22: the shell path moved to the merged
+// page (/dashboard/data-analysis), which now carries the one `pages` the
+// Files page used to pass on each of its two paths; the Files page keeps
+// its OWN one, for the switch-off screen it still answers unconditionally.
+check("neither page gates `pages` behind the old switch", !/isFeatureOn\("file-pages"/.test(filesPage) && !/isFeatureOn\("file-pages"/.test(analyzePage));
+check("the Files page still sets it unconditionally for its own (switch-off) screen", (filesPage.match(/\bpages\b/g) ?? []).length >= 1);
+check("the merged Analyze page sets it unconditionally for the shell", /\bpages\b/.test(analyzePage));
 const cited = code("src/components/files/cited-answer.tsx");
 check("a reference in the answer is a button that opens its page", /data-testid="files-cite"/.test(cited) && /onClick=\{\(\) => onOpen\(piece\.citation\)\}/.test(cited));
 check("the page shows its own words, read from the file", /fetch\(`\/api\/files\/\$\{encodeURIComponent\(fileId\)\}\?page=\$\{page\}`\)/.test(cited) && /data-testid="files-page-text"/.test(cited));
 check("...and for a PDF, opens the file at that page in a new tab", /href=\{pdfPageHref\(fileId, page\)\}\s*target="_blank"\s*rel="noopener noreferrer"/.test(cited));
 check("...and says when a page is gone or did not open", /state\.status === "missing" \? t\("missing"\) : t\("failed"\)/.test(cited));
-const shell = code("src/components/files/files-shell.tsx");
+const shell = code("src/components/analyze/analyze-shell.tsx");
 check("shell: the answer is drawn with its pages pressable, with the switch", /\{pages && <CitedAnswerText answer=\{turn\.answer\}/.test(shell) && /text: pages && turn\.answer \? "" : turn\.answer \? relabelAnswer\(turn\.text, turn\.answer\.citations, show\) : turn\.text,/.test(shell));
 check("shell: the page opens under its own answer", /\{pages && openPage\?\.turnId === turn\.id && openPage\.citation\.fileId && \(\s*<PageView/.test(shell));
 check("shell: a file read only in part says so on its line", /pages && pagesRead\(file\.file_type, file\.page_count\)/.test(shell));
@@ -212,7 +219,7 @@ const found = Object.entries(expect).map(([needle, reason]) => {
 check(`a file that could not be read says why, for each reason extraction stores (${stored.length} sentences read)`, stored.length >= 6 && found.length === 0, found.join(", "));
 check("...and an unknown or empty one falls back to the screen's own sentence", words.unreadableReason("this file could not be read") === null && words.unreadableReason(null) === null);
 check("...the file's own reason, on the shell and on the page",
-  /failures\.unreadable\(outcome\.file\.error, t\("uploadUnreadable", \{ name: file\.name \}\)\)/.test(shell) && /failures\.unreadable\(data\.file\.error, t\("uploadUnreadable", \{ name: file\.name \}\)\)/.test(ws) && /failures\.unreadable\(file\.error, t\("failedHint"\)\)/.test(ws) && !/file\.error \?\?/.test(shell + ws));
+  /failures\.unreadable\(outcome\.file\.error, tFiles\("uploadUnreadable", \{ name: file\.name \}\)\)/.test(shell) && /failures\.unreadable\(data\.file\.error, t\("uploadUnreadable", \{ name: file\.name \}\)\)/.test(ws) && /failures\.unreadable\(file\.error, t\("failedHint"\)\)/.test(ws) && !/file\.error \?\?/.test(shell + ws));
 const NEW_KEYS = ["askNoCredits", "askRateLimited", "askFailed", "uploadFileCap", "uploadStorageCap", "uploadRateLimited"];
 for (const file of LOCALES) {
   const files = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.files ?? {};

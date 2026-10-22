@@ -45,7 +45,7 @@ import {
 import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 
 // The shapes, and the one function that builds an answer, live in
-// lib/files/answer.ts so Files in the shell (components/files/files-shell.tsx)
+// lib/files/answer.ts so Files in the shell (components/analyze/analyze-shell.tsx)
 // shares them rather than keeping a second copy that could drift.
 export type { WorkspaceFile, WorkspaceCollection } from "@/lib/files/answer";
 import type { WorkspaceFile, WorkspaceCollection, Answer } from "@/lib/files/answer";

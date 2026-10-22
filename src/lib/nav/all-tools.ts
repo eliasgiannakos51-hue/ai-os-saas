@@ -43,7 +43,7 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
   },
   {
     key: "ask",
-    hrefs: ["/dashboard/data-analysis", "/dashboard/files"],
+    hrefs: ["/dashboard/data-analysis"],
   },
   {
     key: "automate",
@@ -91,7 +91,6 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/website-builder": "site",
   "/dashboard/deep-research": "research",
   "/dashboard/data-analysis": "analyze",
-  "/dashboard/files": "files",
   "/dashboard/automation": "automations",
   "/dashboard/projects": "projects",
   "/dashboard/mission": "goals",
@@ -158,6 +157,8 @@ export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
     "Meetings left the grid 2026-10-22; unchanged otherwise, same as Slides above",
   "/dashboard/timeline":
     "the Library left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+  "/dashboard/files":
+    "Files merged into Analyze 2026-10-22 (the owner's message after #332): one square, at /dashboard/data-analysis, reads both data files and documents now (components/analyze/analyze-shell.tsx). With the switch on, this address redirects there (carrying ?record=); with it off, the old page is unchanged",
   "/dashboard/ai-memory":
     "Memory left the grid 2026-10-22; unchanged otherwise, same as Slides above",
   "/dashboard/finance":

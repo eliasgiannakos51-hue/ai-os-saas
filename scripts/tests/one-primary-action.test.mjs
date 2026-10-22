@@ -498,19 +498,15 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Research in the shell: the field's send plans; the plan's start is an outline, as on the page",
   },
+  // Analyze and Files merged into one tool, one file (2026-10-22, the
+  // owner's message after #332): components/analyze/analyze-shell.tsx
+  // replaces both of the entries this used to be.
   {
-    file: "src/components/data-analysis/analysis-shell.tsx",
-    tag: "<AnalysisShell",
+    file: "src/components/analyze/analyze-shell.tsx",
+    tag: "<AnalyzeShell",
     budget: 1,
     walk: true,
-    why: "Analyze in the shell: the field's send asks the file; upload and find patterns are options",
-  },
-  {
-    file: "src/components/files/files-shell.tsx",
-    tag: "<FilesShell",
-    budget: 1,
-    walk: true,
-    why: "Files in the shell: the field's send asks the ticked files; upload is an option",
+    why: "Analyze, merged with Files, in the shell: the field's send asks the file or the ticked files; upload, paste text and find patterns are options",
   },
   {
     file: "src/components/website-builder/website-shell.tsx",

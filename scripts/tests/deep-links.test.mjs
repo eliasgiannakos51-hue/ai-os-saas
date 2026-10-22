@@ -277,6 +277,15 @@ for (const l of favLinks) {
 // /api/conversations/search?q= for the conversations whose MESSAGES
 // match, read by that route's GET — the titles are filtered in the
 // browser and only this half needs the server.
+// 66 -> 67 (2026-10-22): Analyze and Files merged into one tool
+// (components/analyze/analyze-shell.tsx); /dashboard/files?record=
+// (above) now redirects to /dashboard/data-analysis?record=, read by
+// the merged page the same way the old one read it.
+// 67 -> 68 (2026-10-22): Projects §6 ("κέντρο όλων") reads
+// /dashboard/automation?projectId=, /dashboard/website-builder?projectId=
+// and /dashboard/deep-research?projectId= to resume work inside the
+// project it started from, each read by that page the same way
+// ?record= already was.
 const DEEP_LINK_FLOOR = 68;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(

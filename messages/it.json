@@ -3079,7 +3079,7 @@
         "slides": "Una presentazione da una descrizione.",
         "posts": "Un post per ogni piattaforma.",
         "research": "Un report con fonti su qualsiasi tema.",
-        "analyze": "Risultati da un file di dati.",
+        "analyze": "Risultati da file, documenti o testo.",
         "files": "Fai domande sui tuoi documenti.",
         "automations": "Attività che vanno da sole.",
         "projects": "Una cartella con un obiettivo.",
@@ -4808,7 +4808,14 @@
         "compare": "Confronta questo mese con il precedente"
       }
     },
-    "new": "Nuovo file"
+    "new": "Nuovo file",
+    "pastedText": {
+      "filename": "Note",
+      "button": "Incolla testo",
+      "prompt": "Scrivi o incolla il testo che vuoi analizzare.",
+      "placeholder": "Scrivi o incolla il testo…",
+      "autoQuestion": "Fornisci un riassunto, i punti principali e i numeri presenti in questo testo."
+    }
   },
   "coding": {
     "title": "Codice",

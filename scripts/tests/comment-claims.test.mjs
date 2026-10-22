@@ -267,7 +267,15 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // out lives in one place now, and the sentence records that a second
   // writer here is what let a formula reach a user's spreadsheet, so the
   // next person does not add one back for convenience.
-  const CENSUS_CEILING = 72;
+  // 72 -> 73 ON 2026-10-22: components/analyze/analyze-shell.tsx. Its
+  // header says a video link and a web link are NOT built, on purpose —
+  // not an omission a reader could spot from the code (nothing there
+  // tries and fails), but a decision: the owner asked to be told what a
+  // YouTube link costs and whether it works before anything is built,
+  // and that answer had not yet turned into a "build it" when this PR
+  // was written. Deleting the sentence would read as the feature simply
+  // not having been gotten to.
+  const CENSUS_CEILING = 73;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

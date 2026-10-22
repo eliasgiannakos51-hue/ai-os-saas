@@ -37,8 +37,13 @@ export const ABSENT_ON_PURPOSE = {
     reason:
       "A DATED LOG, NOT A DESCRIPTION OF TODAY. The D.6 entry of 2026-10-04 says where the beta " +
       "tag came from; the tag and its list were removed on 2026-10-05 (Δ.3, ΣΥΣΤΗΜΑ DESIGN §6: no " +
-      "beta anywhere). Rewriting a past entry to match the present would make the log lie about the past.",
-    paths: ["src/lib/nav/tool-status.ts"],
+      "beta anywhere). Rewriting a past entry to match the present would make the log lie about the past. " +
+      "The 2026-10-22 «Γύρος Β4, Παρτίδα 2/4» entry names src/components/data-analysis/analysis-shell.tsx, " +
+      "true the moment it was written; later the same day the «Βήμα 3/4» entry merged it (and " +
+      "files-shell.tsx) into src/components/analyze/analyze-shell.tsx and deleted both old files. " +
+      "Editing the earlier entry to point at the merged file would make it describe a splice that had " +
+      "not happened yet.",
+    paths: ["src/lib/nav/tool-status.ts", "src/components/data-analysis/analysis-shell.tsx"],
   },
   "docs/MASTER.md": {
     reason:

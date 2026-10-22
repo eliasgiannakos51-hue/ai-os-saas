@@ -93,6 +93,12 @@ const HANDLED = {
   "src/app/dashboard/overview/page.tsx": "middleware: onboardingRedirectTarget",
   "src/app/dashboard/team/page.tsx": "middleware: teamRedirectTarget",
   "src/app/dashboard/memory/page.tsx": "middleware: PERMANENT_MOVES",
+  // Analyze and Files merged 2026-10-22 (the owner's message after
+  // #332): with the switch "tool-shell" on, this address redirects to
+  // /dashboard/data-analysis (carrying ?record= forward); with it off,
+  // the page still answers as it always has — not middleware, a plain
+  // decision in the page itself.
+  "src/app/dashboard/files/page.tsx": "the page itself: isFeatureOn(\"tool-shell\") redirects to the merged Analyze",
 };
 const UNREACHABLE = {
   // getModule("products") is the static module table; it cannot be absent

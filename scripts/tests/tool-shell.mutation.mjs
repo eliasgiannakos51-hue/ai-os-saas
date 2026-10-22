@@ -22,14 +22,19 @@ const PAGE = "src/app/dashboard/posts/page.tsx";
 const SLIDES = "src/components/presentations/presentations-shell.tsx";
 const SLIDES_PAGE = "src/app/dashboard/presentations/page.tsx";
 const RESEARCH = "src/components/research/research-shell.tsx";
-const ANALYZE = "src/components/data-analysis/analysis-shell.tsx";
-const FILES = "src/components/files/files-shell.tsx";
+// ANALYZE AND FILES MERGED INTO ONE FILE 2026-10-22 (the owner's message
+// after #332, item 4) — both names point at it now, kept separate so each
+// mutation below still reads as "which half of the merge this is".
+const ANALYZE = "src/components/analyze/analyze-shell.tsx";
+const FILES = "src/components/analyze/analyze-shell.tsx";
 const UPLOAD = "src/lib/files/upload-file.ts";
 const SITE = "src/components/website-builder/website-shell.tsx";
 const SITE_REQUESTS = "src/lib/website-builder/site-requests.ts";
 const SITE_GENERATE = "src/app/api/websites/generate/route.ts";
 const JOBS = "src/lib/jobs/start-and-watch.ts";
-const FILES_PAGE = "src/app/dashboard/files/page.tsx";
+// The collections prop moved to the merged page when Files redirected
+// into Analyze (2026-10-22) — FILES_PAGE now names where it actually is.
+const FILES_PAGE = "src/app/dashboard/data-analysis/page.tsx";
 const SITE_PHOTOS = "src/lib/website-builder/site-photos.ts";
 const SITE_HISTORY = "src/components/website-builder/site-history.tsx";
 const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, SITE_PHOTOS, SITE_HISTORY];
@@ -176,7 +181,7 @@ const MUTANTS = [
   {
     name: "Analyze: a question with no file goes nowhere and says nothing",
     file: ANALYZE,
-    from: '      note("tool", tShell("analyze.needFile"));\n',
+    from: '    if (!current) {\n      note("user", question);\n      note("tool", tShell("analyze.needFile"));\n      return;\n    }',
     to: "",
     expect: "it says to upload one",
   },
@@ -289,9 +294,9 @@ const MUTANTS = [
   {
     name: "Files: a file over the plan's limit is said as the route wrote it",
     file: FILES,
-    from: "            text: !outcome.status || uploadRefusal",
-    to: "            text: outcome.error,\n            unread: !outcome.status || uploadRefusal",
-    expect: "no route's English is said to the reader",
+    from: '          !outcome.status || uploadRefusal(outcome.body ?? null, outcome.status) !== "uploadError"',
+    to: "          true",
+    expect: "a file the plan has no room for is the plan's limit",
   },
   {
     name: "Files: the plan's limit is said as a missing feature",
@@ -332,15 +337,15 @@ const MUTANTS = [
   {
     name: "Files: the shell gives the upload no words for the connection",
     file: FILES,
-    from: "          offline: describe(new ApiError(0, null)).text,\n",
+    from: "        offline: describe(new ApiError(0, null)).text,\n",
     to: "",
     expect: "never storage's English",
   },
   {
     name: "Files: an upload with no connection says the browser's English",
     file: FILES,
-    from: '        say({ role: "tool", text: describe(err).text });',
-    to: '        say({ role: "tool", text: getErrorMessage(err, t("uploadError")) });',
+    from: '    } catch (err) {\n      addToast(describe(err).text, "error");\n    } finally {\n      setFilesUploading(null);',
+    to: '    } catch (err) {\n      addToast(getErrorMessage(err, tFiles("uploadError")), "error");\n    } finally {\n      setFilesUploading(null);',
     expect: "no route's English is said to the reader",
   },
   // ---- 2026-10-09: what the old pages had, inside the shell (the owner's
@@ -348,9 +353,9 @@ const MUTANTS = [
   {
     name: "Files: the page no longer hands the shell its collections",
     file: FILES_PAGE,
-    from: "initialOpenId={readRequestedId(searchParams.record)} initialCollections={collectionRows} ",
-    to: "initialOpenId={readRequestedId(searchParams.record)} ",
-    expect: "the collections the page reads are handed to the shell",
+    from: "          initialCollections={initialCollections}\n",
+    to: "",
+    expect: "the collections the merged page reads are handed to the shell",
   },
   {
     name: "Files: a collection pressed no longer selects its files",
@@ -369,15 +374,15 @@ const MUTANTS = [
   {
     name: "Files: the name typed is asked of the files as a question",
     file: FILES,
-    from: "onSend={(text) => void (naming ? saveCollection(text) : ask(text))}",
-    to: "onSend={(text) => void ask(text)}",
+    from: "    if (naming) return void saveCollection(text);\n",
+    to: "",
     expect: "the next thing sent is the name",
   },
   {
     name: "Files: a refused collection says the route's English",
     file: FILES,
-    from: 'say({ role: "tool", text: t("collectionError") });',
-    to: 'say({ role: "tool", text: data?.error ?? t("collectionError") });',
+    from: 'say({ role: "tool", text: tFiles("collectionError") });',
+    to: 'say({ role: "tool", text: data?.error ?? tFiles("collectionError") });',
     expect: "no route's English is said to the reader",
   },
   {

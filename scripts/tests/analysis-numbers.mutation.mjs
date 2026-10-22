@@ -20,7 +20,7 @@ const ANALYSE = "src/lib/data-analysis/analyse.ts";
 const CHARTS = "src/lib/data-analysis/charts.ts";
 const ROUTE = "src/app/api/data-analysis/[id]/analyse/route.ts";
 const PRICE = "src/app/api/data-analysis/[id]/price/route.ts";
-const SHELL = "src/components/data-analysis/analysis-shell.tsx";
+const SHELL = "src/components/analyze/analyze-shell.tsx";
 
 const MUTANTS = [
   {

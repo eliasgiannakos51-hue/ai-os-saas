@@ -7,7 +7,17 @@ import { matchesSearch } from "@/lib/text/search-match";
 import { AddToProjectButton } from "@/components/entity-links/add-to-project-button";
 import { CardMenu } from "@/components/ui/card-menu";
 
-export type ShellHistoryRow = { id: string; title: string; /** A short line under the title: status, a count, a date. */ status?: string };
+export type ShellHistoryRow = {
+  id: string;
+  title: string;
+  /** A short line under the title: status, a count, a date. */
+  status?: string;
+  /** False hides the trash button on THIS row even though the column has
+   *  an `onDelete` — Analyze's merge (2026-10-22) mixes rows from two
+   *  tables, one of which (data_analyses) has no delete route yet.
+   *  Omitted or true behaves exactly as before `onDelete` existed. */
+  deletable?: boolean;
+};
 
 /**
  * [◧]'S OWN LIST, SHARED (MASTER Μέρος 20 Δ, 2026-10-21) — the same shape

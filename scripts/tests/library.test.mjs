@@ -317,13 +317,17 @@ for (const [page, param, table, shell] of PAGES) {
   check(`${page}: an item older than the list is read by id AND owner`, new RegExp(`\\.from\\("${table}"\\)\\.select\\((?:[A-Z_]+|"\\*")\\)\\.eq\\("id",wanted\\)\\.eq\\("user_id",user\\.id\\)\\.maybeSingle\\(\\)`).test(flat));
   check(`${page}: the shell is given it`, new RegExp(`<${shell}[\\s\\S]*?initialOpenId=\\{wanted\\}`).test(src));
 }
-check("files: the shell is given the asked file", /<FilesShell initialFiles=\{rows\} initialOpenId=\{readRequestedId\(searchParams\.record\)\}/.test(code("src/app/dashboard/files/page.tsx")));
+// Files merged into Analyze (2026-10-22, the owner's message after #332):
+// /dashboard/files redirects to /dashboard/data-analysis with the switch on
+// (early-redirects.test.mjs holds that), which now hands the merged shell
+// both halves' data, including the asked file.
+check("files: the shell is given the asked file", /<AnalyzeShell[\s\S]{0,300}initialFiles=\{initialFiles\}[\s\S]{0,300}initialOpenId=\{readRequestedId\(searchParams\.record\)\}/.test(code("src/app/dashboard/data-analysis/page.tsx")));
 const SHELL_OPENS = [
   ["src/components/website-builder/website-shell.tsx", /useState<string \| null>\(opened\)[\s\S]*?useState<"site" \| null>\(opened \? "site" : null\)/],
   ["src/components/presentations/presentations-shell.tsx", /decks\.find\(\(d\) => d\.id === initialOpenId\)[\s\S]*?open \? "deck"/],
   ["src/components/posts/posts-shell.tsx", /history\.find\(\(row\) => row\.id === initialOpenId && row\.set\)[\s\S]*?asked \? "posts" : null/],
   ["src/components/research/research-shell.tsx", /initialReports\.find\(\(r\) => r\.id === initialOpenId\)[\s\S]*?asked \? "report" : null[\s\S]*?if \(askedId\) void refresh\(askedId\)/],
-  ["src/components/files/files-shell.tsx", /initialFiles\.find\(\(f\) => f\.id === initialOpenId\)[\s\S]*?\[asked\.id\][\s\S]*?asked \? "files" : null/],
+  ["src/components/analyze/analyze-shell.tsx", /initialOpenId \? initialFiles\.find\(\(f\) => f\.id === initialOpenId\) : undefined[\s\S]*?\[requestedFile\.id\][\s\S]*?requestedFile\) \{\s*setMode\("files"\)/],
 ];
 for (const [file, shape] of SHELL_OPENS) {
   check(`${file.split("/").pop()} opens on the asked item`, shape.test(code(file)));

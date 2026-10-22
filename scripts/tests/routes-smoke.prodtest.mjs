@@ -1074,13 +1074,19 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   checkTrue(`the page heading is Greek too ("${heading}")`, fold(heading) === fold(String(codingLabel)), `${heading} vs ${codingLabel}`);
   checkTrue("...and matches what the sidebar calls it", foldedNav.includes(fold(heading)), `${heading} not in nav`);
 
-  // A tracking page states, on screen, that it produces nothing.
+  // WHAT IT DOES AND DOES NOT DO moved off the standing screen on
+  // 2026-10-22 (the owner's critical message) and into the "?" beside
+  // the name — lib/help-tips.ts's `coding` entry, read through the "?"
+  // the same way Chat's own "?" is read. The sentence is still there;
+  // it is reached by a press now, not printed above the field.
   await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
   const main = await page.locator(mainCount >= 1 ? "main" : "body").innerText();
+  await page.locator('[data-testid="help-tip-coding"]').click();
+  const helpTipText = await page.locator('[role="dialog"]').innerText();
   checkTrue(
-    "the AI Coding page states what it does and does not do",
-    /Δεν εκτελεί κώδικα/.test(main) || /δεν κάνει/.test(main),
-    main.replace(/\s+/g, " ").slice(0, 300)
+    "the AI Coding page states what it does and does not do, behind the \"?\"",
+    /Δεν εκτελεί κώδικα/.test(helpTipText) || /δεν κάνει/.test(helpTipText),
+    helpTipText.replace(/\s+/g, " ").slice(0, 300)
   );
   checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
 

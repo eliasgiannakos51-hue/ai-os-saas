@@ -1005,13 +1005,46 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
       listText.slice(0, 400)
     );
   }
-  // AND THE FLOOR UNDER IT. "Absent is allowed" is satisfied by a
-  // sidebar that renders no headings at all, which is the vacuity shape
-  // gate-vacuity.test.mjs caught in this very block once already. Six
-  // groups are drawn on /dashboard/tools (scripts/sidebar-census.mjs); the floor is set
-  // below that so adding a group does not break it, and above zero so
-  // an empty nav cannot pass.
-  checkTrue(`at least four headings actually rendered in Greek on /dashboard/tools (${headingsShown})`, headingsShown >= 4, listText.slice(0, 400));
+  // AND THE FLOOR UNDER IT — but NOT `headingsShown`. That counter is
+  // GROUP_HEADING_KEYS (the sidebar RAIL's own six-of-eleven groups:
+  // Make/Ask/Run/See/Organise/Settings), which only looked like the
+  // right measure for /dashboard/tools because some of its Greek words
+  // happen to collide with lib/nav/all-tools.ts's ALL_TOOLS_GROUPS
+  // (make→Φτιάξε, ask→Ρώτα, organise→Οργάνωσε, business→Επιχείρηση all
+  // match by coincidence). /dashboard/tools has rendered through
+  // ALL_TOOLS_GROUPS, not sidebarGroups(), since the six-group regroup
+  // of 2026-10-22 — this comment block's own claim above ("moved
+  // unchanged to app/dashboard/tools/page.tsx through the same
+  // sidebarGroups()") is the stale half of that move. The removal of
+  // Finance/Sales/Trading on 2026-10-22 emptied the business group,
+  // which is how the coincidence broke: "Επιχείρηση" stopped rendering,
+  // headingsShown dropped from 4 to 3, and a check that was never
+  // actually measuring ALL_TOOLS_GROUPS went red for the right reason
+  // measured the wrong way.
+  //
+  // So: read the REAL group keys from ALL_TOOLS_GROUPS and their REAL
+  // Greek words from dashboard.tools.groups, and count against those.
+  // "Absent is allowed" is satisfied by a sidebar that renders no
+  // headings at all, which is the vacuity shape gate-vacuity.test.mjs
+  // caught in this very block once already; the floor is set below the
+  // six declared groups so adding one does not break it, and above zero
+  // so an empty page cannot pass. A group with no visible item (today:
+  // business, until Finance/Sales/Trading's replacement lands) legitimately
+  // renders no heading — same "absent is allowed" rule as above.
+  const groupsSrc = readSrc("src/lib/nav/all-tools.ts", "utf8");
+  const allToolsGroupKeys = [...groupsSrc.matchAll(/key:\s*"([a-z]+)"/g)].map((m) => m[1]);
+  checkTrue(`ALL_TOOLS_GROUPS keys were parsed (${allToolsGroupKeys.length})`, allToolsGroupKeys.length >= 4, groupsSrc.slice(0, 200));
+  let allToolsHeadingsShown = 0;
+  for (const key of allToolsGroupKeys) {
+    const word = elMessages.dashboard?.tools?.groups?.[key];
+    if (typeof word !== "string" || !word) continue;
+    if (foldedList.includes(fold(word))) allToolsHeadingsShown++;
+  }
+  checkTrue(
+    `at least four of ALL_TOOLS_GROUPS' own headings actually rendered in Greek on /dashboard/tools (${allToolsHeadingsShown})`,
+    allToolsHeadingsShown >= 4,
+    listText.slice(0, 400)
+  );
   for (const [english, key] of items) {
     const word = greekItem(key);
     if (typeof word !== "string" || !word) {

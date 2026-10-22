@@ -14,7 +14,9 @@
 //
 // The search is RUN — the palette's own matcher over the same candidates
 // the grid builds (the grid's line that builds them is checked to be
-// that line). BUILD-SPECS 2.4 scenario 10: "slides" finds Presentations.
+// that line). BUILD-SPECS 2.4 scenario 10 was "slides" finds
+// Presentations; Presentations left the grid 2026-10-22, so the search
+// below runs the same mechanism against "research" instead.
 //
 // Run: node scripts/tests/all-tools.test.mjs
 import { existsSync, readFileSync } from "node:fs";
@@ -111,21 +113,34 @@ console.log("\n== 0c. exactly the tools MASTER 14.1 names, each under its one-wo
 const { ALL_TOOLS_NAMES } = await loadTs("src/lib/nav/all-tools.ts");
 // MASTER 14.1, word for word: «Site, Document, Slides, Posts, Research,
 // Analyze, Files, Automations, Projects, Goals, Meetings, Finances, Sales,
-// Trading, Library, Memory». Document is the one hidden today (below).
+// Trading, Library, Memory». Document is the one hidden today (below);
+// since 2026-10-22 (the owner's message after #332) Slides, Posts,
+// Meetings, Library, Memory, Finances, Sales and Trading left the grid
+// too (HIDDEN_FROM_ALL_TOOLS, same mechanism), Research was renamed
+// "Deep Research", and — in the owner's follow-up the same day — Goals
+// left the grid for the Projects hub (not built yet) — this is 14.1 as
+// the owner has since amended it twice, not a drift from it.
 const MASTER_14_1 = ["Site", "Document", "Slides", "Posts", "Research", "Analyze", "Files", "Automations", "Projects", "Goals", "Meetings", "Finances", "Sales", "Trading", "Library", "Memory"];
 const enNames = messages.en.dashboard?.tools?.names ?? {};
 const shownNames = grouped.map((h) => enNames[ALL_TOOLS_NAMES[h]]);
-const expected = MASTER_14_1.filter((n) => n !== "Document");
+const HIDDEN_2026_10_22 = ["Document", "Slides", "Posts", "Meetings", "Library", "Memory", "Finances", "Sales", "Trading", "Goals"];
+const expected = [...MASTER_14_1.filter((n) => !HIDDEN_2026_10_22.includes(n)), "Deep Research"].filter((n) => n !== "Research");
 check(`every grouped tool has a one-word name (${grouped.length} squares)`, grouped.every((h) => ALL_TOOLS_NAMES[h]), grouped.filter((h) => !ALL_TOOLS_NAMES[h]).join(", "));
 check("...and the English names are exactly 14.1's list, Document aside",
   [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
 check("...and no name is given to a tool that is not shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h)));
 check("Document is hidden, with the reason 14.1 gives (notes only)", /notes/.test(HIDDEN_FROM_ALL_TOOLS["/dashboard/documents"] ?? ""));
+// ONE NAMED EXCEPTION: "research" became "Deep Research" (and its
+// per-locale equivalents) on 2026-10-22, by the owner's own wording —
+// a compound name, not a square that ran out of room. Every other key
+// is still held to one word.
+const ONE_WORD_EXCEPTIONS = new Set(["research"]);
 for (const l of LOCALES) {
   const n = messages[l].dashboard?.tools?.names ?? {};
-  const keys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)];
+  const keys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)].filter((k) => !ONE_WORD_EXCEPTIONS.has(k));
   const bad = keys.filter((k) => typeof n[k] !== "string" || n[k].trim() === "" || /\s/.test(n[k].trim()));
   check(`${l}: every square's name is one word`, bad.length === 0, bad.map((k) => `${k}=${JSON.stringify(n[k])}`).join(", "));
+  check(`${l}: "Deep Research" itself still resolves and is not empty`, typeof n.research === "string" && n.research.trim().length > 0, String(n.research));
 }
 check("the square draws the one-word name, and falls back to the sidebar's only for a tool without one",
   /const label = \(item: SidebarItem\) => \{ const k = nameKey\(item\.href\); return k \? names\[k\] : longLabel\(item\); \};/.test(grid) &&
@@ -143,13 +158,26 @@ console.log("\n== 0d. one line under each name, short enough to keep the square 
 // lines of the narrowest square with room to spare.
 const LINE_MAX = 60;
 const lineKeys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)];
+// PAUSED, NOT GONE: Slides, Posts, Meetings, Library, Memory, Finances,
+// Sales and Trading left the grid 2026-10-22, by the owner's own
+// instruction not to delete anything yet ("Μην σβήσεις κώδικα ακόμα.
+// Γράψε μου τι θα σβηνόταν, και το αποφασίζω μετά" — docs/PROGRESS.md,
+// 2026-10-22 entry, has the full list). Goals joined them the same day,
+// moving toward the Projects hub instead of staying its own square.
+// Their names/lines keys are kept for the same reason their routes and
+// tables are: the owner has not decided yet / the hub is not built yet.
+// Named here, both so the orphan check below does not block on a
+// deliberate pause and so the list of what is paused is readable in one
+// place.
+const PAUSED_SQUARE_KEYS = ["slides", "posts", "meetings", "library", "memory", "finances", "sales", "trading", "goals"];
 for (const l of LOCALES) {
   const lines = messages[l].dashboard?.tools?.lines ?? {};
   const bad = lineKeys.filter((k) => typeof lines[k] !== "string" || lines[k].trim() === "" || lines[k].length > LINE_MAX);
   check(`${l}: every square has its one line, and it is short enough to stay one line (≤ ${LINE_MAX})`, bad.length === 0,
     bad.map((k) => `${k}=${JSON.stringify(lines[k])}`).join(", "));
 }
-check("...and no line is kept for a square that does not exist", Object.keys(messages.en.dashboard.tools.lines ?? {}).every((k) => lineKeys.includes(k)));
+check("...and no line is kept for a square that does not exist, or is not one of the paused ones",
+  Object.keys(messages.en.dashboard.tools.lines ?? {}).every((k) => lineKeys.includes(k) || PAUSED_SQUARE_KEYS.includes(k)));
 check("the square draws its own line, and the sidebar's longer hint only for a tool without one",
   /const hint = \(item: SidebarItem\) => \{ const k = nameKey\(item\.href\); return k \? lines\[k\] : sidebarHint\(item\); \};/.test(grid) &&
     lineKeys.every((k) => grid.includes(`${k}: t("lines.${k}")`)));
@@ -215,9 +243,15 @@ const search = (locale, query) => {
   );
 };
 const hrefsOf = (r) => r.map((i) => i.href);
-check('"slides" finds Presentations, in English', hrefsOf(search("en", "slides"))[0] === "/dashboard/presentations", hrefsOf(search("en", "slides")).join(", "));
-check('...and in Greek, where the English synonyms still count', hrefsOf(search("el", "slides")).includes("/dashboard/presentations"));
-check('"παρουσ" finds it by its Greek name', hrefsOf(search("el", "παρουσ")).includes("/dashboard/presentations"));
+// PRESENTATIONS LEFT THE GRID 2026-10-22 — "slides" must find nothing
+// drawn here any more; the search is only ever run over `tools`
+// (built from `grouped`, which no longer includes it), so this is the
+// shape that removal is SUPPOSED to produce, not a regression.
+check('"slides" no longer finds anything drawn here (Presentations left the grid 2026-10-22)', !hrefsOf(search("en", "slides")).includes("/dashboard/presentations"));
+check('"research" finds Deep Research, in English', hrefsOf(search("en", "research"))[0] === "/dashboard/deep-research", hrefsOf(search("en", "research")).join(", "));
+check('...and "investigate" finds it too, an alias with no Greek label anywhere near it', hrefsOf(search("en", "investigate")).includes("/dashboard/deep-research"));
+check('...and in Greek, where the English alias still counts', hrefsOf(search("el", "investigate")).includes("/dashboard/deep-research"));
+check('"βαθι" finds it by its Greek name ("Βαθιά έρευνα")', hrefsOf(search("el", "βαθι")).includes("/dashboard/deep-research"));
 check('"site" finds Site', hrefsOf(search("en", "site"))[0] === "/dashboard/website-builder", hrefsOf(search("en", "site")).join(", "));
 check('"ιστότ" finds it by its one-word Greek name', hrefsOf(search("el", "ιστότ")).includes("/dashboard/website-builder"));
 check("a word that is nothing finds nothing", search("en", "qqzzxx").length === 0);
@@ -229,19 +263,23 @@ for (const l of LOCALES) {
       ["make", "ask", "automate", "organise", "business", "learn"].every((k) => typeof t.groups?.[k] === "string" && t.groups[k].length > 0));
 }
 
-console.log("\n== 2. the square: 1:1, a 28px icon, the name and one line, nothing cut ==");
+console.log("\n== 2. the square: smaller, icon and name on one row, nothing cut ==");
 check("each square is a link to its tool", /<Link\s+href=\{item\.href\}/.test(grid));
-check("...1:1, on the card radius and surface, its edge lit on hover",
-  /aspect-square[^"]*rounded-card[^"]*border border-border[^"]*bg-panel[^"]*hover:border-foreground/.test(grid));
-check("...with a 28px icon", /<Icon className="h-7 w-7[^"]*" aria-hidden="true" \/>/.test(grid));
+check("...on the card radius and surface, its edge lit on hover (2026-10-22: no longer 1:1)",
+  /rounded-card[^"]*border border-border[^"]*bg-panel[^"]*hover:border-foreground/.test(grid) && !/aspect-square/.test(grid));
+check("...icon and name share one row", /<Icon className="h-5 w-5 shrink-0[^"]*" aria-hidden="true" \/>/.test(grid) && /items-center gap-2"[\s\S]{0,80}<Icon /.test(grid));
 check("...its name, and the plain line under it", /\{name\}/.test(grid) && /\{description && <span[^>]*>\{description\}<\/span>\}/.test(grid) && /const name = label\(item\);/.test(grid));
 check("no name is cut with an ellipsis", !/\btruncate\b|line-clamp|text-ellipsis/.test(grid));
-check("four in a row on a computer, two on a phone", /grid grid-cols-2 gap-3 lg:grid-cols-4/.test(grid));
+check("5-6 in a row on a computer, two on a phone", /grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6/.test(grid));
 check("the groups are headed by their translated names",
   ["make", "ask", "automate", "organise", "business", "learn"].every((k) => new RegExp(`${k}: t\\("groups\\.${k}"\\)`).test(grid)) && /heading: headings\[g\.key\]/.test(grid));
 
 console.log("\n== 3. the pin: the one way to put a tool in the sidebar at once ==");
 check("a 44px pin on the square, its state announced", /data-testid="tool-pin"/.test(grid) && /aria-pressed=\{isPinned\}/.test(grid) && /h-11 w-11/.test(grid));
+check("the pin shows only on hover on a computer (2026-10-22), always on touch",
+  /md:opacity-0/.test(grid) && /md:group-hover:opacity-100/.test(grid) && /md:focus-visible:opacity-100/.test(grid));
+check("...but a tool already pinned keeps its pin visible on a computer too",
+  /isPinned \? "text-foreground" : "text-muted md:opacity-0"/.test(grid));
 check("...writing through the sidebar's own route", /fetch\("\/api\/nav\/recent-tools"/.test(grid) && /JSON\.stringify\(\{ action, href \}\)/.test(grid));
 check("...and a failed write puts the pin back and says so", /setPins\(before\)/.test(grid) && /addToast\(/.test(grid));
 check("Chat and Coding (never in Recent tools), Settings and Help have no pin",

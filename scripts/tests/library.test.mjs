@@ -400,7 +400,14 @@ check("Greek says «Βιβλιοθήκη» and English says «Library»", NAME.e
   check("the row (sidebar, ⌘K, records hub) reads the same key", labelKeys.ITEM_LABEL_KEYS.Timeline === "mine" &&
     /\{ href: TIMELINE_NAV_ITEM\.href, label: "Timeline",/.test(code("src/lib/sidebar-nav.ts")), labelKeys.ITEM_LABEL_KEYS.Timeline);
   const allTools = await loadTs("src/lib/nav/all-tools.ts");
-  check("the All tools square reads the square's name key", allTools.ALL_TOOLS_NAMES["/dashboard/timeline"] === "library");
+  // The Library left the All tools grid 2026-10-22 (the owner's message
+  // after #332) — paused, not deleted: its route, page and data are
+  // unchanged, only HIDDEN_FROM_ALL_TOOLS names a reason now, where
+  // ALL_TOOLS_NAMES used to name its square's one-word key.
+  check("the Library is paused out of All tools, not drawn, with its reason on record",
+    allTools.ALL_TOOLS_NAMES["/dashboard/timeline"] === undefined &&
+      typeof allTools.HIDDEN_FROM_ALL_TOOLS["/dashboard/timeline"] === "string" &&
+      allTools.HIDDEN_FROM_ALL_TOOLS["/dashboard/timeline"].length > 0);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

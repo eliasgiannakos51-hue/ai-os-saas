@@ -3172,6 +3172,7 @@
         "search": "Pesquisar",
         "empty": "Ainda não há nada aqui.",
         "delete": "Excluir",
+        "rename": "Renomear",
         "deleteConfirm": "Excluir “{title}”?"
       }
     },
@@ -4835,10 +4836,14 @@
     "errors": {
       "tooLong": "Isso tem mais de {limit} caracteres. Isto trabalha sobre um ficheiro, não um projeto.",
       "unavailable": "Não foi possível contactar o serviço de IA. Não foi cobrado nada.",
-      "failed": "Não resultou — tenta outra vez."
+      "failed": "Não resultou — tenta outra vez.",
+      "folderEmpty": "Nenhum arquivo legível nessa pasta."
     },
     "history": {
-      "failed": "falhou"
+      "failed": "falhou",
+      "noRepository": "—",
+      "folderUploaded": "{count, plural, one {# arquivo carregado} other {# arquivos carregados}}.",
+      "folderUploadedTruncated": "{count, plural, one {# arquivo carregado} other {# arquivos carregados}} — o resto não cabia e foi deixado de fora."
     },
     "new": "Novo",
     "placeholder": "Descreva o que precisa, cole código, ou peça uma alteração…",
@@ -4851,7 +4856,8 @@
       "function": "Uma função que recebe uma lista de pedidos e devolve a margem por cliente",
       "explain": "Explique o que este código faz",
       "tests": "Escreva testes para esta função"
-    }
+    },
+    "uploadFolder": "Enviar pasta"
   },
   "presentations": {
     "title": "Apresentações",

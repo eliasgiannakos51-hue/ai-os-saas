@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, PanelLeft } from "lucide-react";
+import { Plus, PanelLeft, Upload } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { HelpTip } from "@/components/ui/help-tip";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -13,6 +13,8 @@ import { CodeBlock } from "@/components/coding/code-block";
 import { diffLines } from "@/lib/coding/diff";
 import { guessLanguage } from "@/lib/coding/highlight";
 import { MAX_INPUT_CHARS, OPERATION_SPECS, type CodeOperation } from "@/lib/coding/operations";
+import { foldUploadedFiles, readUploadedFolder } from "@/lib/coding/folder-upload";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 
 export type CodeSession = {
   id: string;
@@ -25,6 +27,7 @@ export type CodeSession = {
   status: string;
   source: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 type Turn = { id: string; role: "user" | "tool"; text: string };
@@ -60,21 +63,35 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
   const { addToast } = useToast();
   const composerRef = useRef<ChatComposerHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
   const turnCounter = useRef(0);
+  const formatRelative = useFormatRelativeTime();
 
-  const rows = sessions;
+  const [rows, setRows] = useState<CodeSession[]>(sessions);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [code, setCode] = useState<Code | null>(null);
   const [sending, setSending] = useState(false);
+  const [uploadingFolder, setUploadingFolder] = useState(false);
   const [openedId, setOpenedId] = useState<string | null>(null);
 
+  // OPEN BY DEFAULT ON A SCREEN WITH ROOM FOR IT (the owner's message
+  // right after #332, 2026-10-22): "the sessions list, open on the left,
+  // like Claude Code, [◧] CLOSES it" — the opposite default from every
+  // other ToolShell tool's history column, which starts closed. A phone
+  // keeps the old default (closed, opened by [◧]) since the column is a
+  // full-screen overlay there, not a side panel.
   const [historyOpen, setHistoryOpen] = useState(false);
   useEffect(() => {
     try {
-      setHistoryOpen(window.localStorage.getItem("ionexa.codingHistoryColumn") === "open");
+      const stored = window.localStorage.getItem("ionexa.codingHistoryColumn");
+      if (stored === "open" || stored === "closed") {
+        setHistoryOpen(stored === "open");
+        return;
+      }
     } catch {
-      // private window or storage off: closed, which is the default
+      // private window or storage off: fall through to the viewport default
     }
+    setHistoryOpen(typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches);
   }, []);
   function toggleHistory() {
     setHistoryOpen((open) => {
@@ -144,6 +161,60 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
     }
   }
 
+  // BARE DELETE AND RENAME, no confirm of their own — ShellHistoryColumn's
+  // own "⋯" menu confirms delete before calling this, the same single-
+  // confirm rule every other tool's history list follows.
+  async function deleteSession(id: string) {
+    const response = await fetch(`/api/coding/sessions/${id}`, { method: "DELETE" });
+    if (!response.ok) {
+      addToast(t("errors.failed"), "error");
+      return;
+    }
+    setRows((prev) => prev.filter((row) => row.id !== id));
+    if (openedId === id) startNew();
+  }
+
+  async function renameSession(id: string, title: string) {
+    const response = await fetch(`/api/coding/sessions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+    if (!response.ok) {
+      addToast(t("errors.failed"), "error");
+      return;
+    }
+    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, title } : row)));
+  }
+
+  // "ΑΝΕΒΑΣΜΑ ΦΑΚΕΛΟΥ" — local files only, no GitHub App needed (lib/
+  // coding/folder-upload.ts has the budget and the binary-skip rules).
+  // The result becomes the current code, the same slot a paste or a
+  // generated answer fills, so the next remark edits it like anything
+  // else `planTurn` already knows how to treat as `prior.code`.
+  async function handleFolderUpload(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return;
+    setUploadingFolder(true);
+    try {
+      const files = await readUploadedFolder(fileList);
+      if (files.length === 0) {
+        addToast(t("errors.folderEmpty"), "error");
+        return;
+      }
+      const folded = foldUploadedFiles(files);
+      setCode({ content: folded.text, language: null, isEdit: false, priorContent: null });
+      say(
+        "tool",
+        folded.truncated
+          ? t("history.folderUploadedTruncated", { count: folded.includedCount })
+          : t("history.folderUploaded", { count: folded.includedCount })
+      );
+    } finally {
+      setUploadingFolder(false);
+      if (folderInputRef.current) folderInputRef.current.value = "";
+    }
+  }
+
   function openFromHistory(id: string) {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
@@ -162,11 +233,19 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
     if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
   }
 
-  const historyRows: ShellHistoryRow[] = rows.map((row) => ({
-    id: row.id,
-    title: row.title,
-    status: row.status === "failed" ? t("history.failed") : t(`operations.${row.operation}.label`),
-  }));
+  // NAME, REPOSITORY, WHEN IT LAST CHANGED (the owner's message right
+  // after #332). There is no repository yet — NEEDS 11's GitHub App
+  // does not exist in this environment, so every row says "—" rather
+  // than inventing one; the day a session is actually tied to a repo,
+  // this line reads it instead.
+  const historyRows: ShellHistoryRow[] = rows.map((row) => {
+    const when = row.updatedAt ? formatRelative(row.updatedAt) : null;
+    return {
+      id: row.id,
+      title: row.title,
+      status: row.status === "failed" ? t("history.failed") : [t("history.noRepository"), when].filter(Boolean).join(" · "),
+    };
+  });
 
   const showEmpty = turns.length === 0 && !code;
 
@@ -204,7 +283,15 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
               data-testid="coding-history"
               className="absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:w-[280px]"
             >
-              <ShellHistoryColumn rows={historyRows} activeId={openedId} onOpen={openFromHistory} onNavigate={toggleHistory} linkTable="code_sessions" />
+              <ShellHistoryColumn
+                rows={historyRows}
+                activeId={openedId}
+                onOpen={openFromHistory}
+                onDelete={deleteSession}
+                onRename={renameSession}
+                onNavigate={toggleHistory}
+                linkTable="code_sessions"
+              />
             </div>
             <button
               type="button"
@@ -263,6 +350,37 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
             <div className="p-4 sm:p-6">
               <div className="chat-measure">
                 <ChatComposer ref={composerRef} sending={sending} onSend={send} onStop={() => abortRef.current?.abort()} initialText={initialTask} placeholder={t("placeholder")} />
+                {/* THE SMALL BUTTON ROW UNDER THE FIELD (the owner's message
+                    right after #332). "Σύνδεση GitHub" and "Άνοιγμα repository"
+                    are NOT here: NEEDS 11's GitHub App does not exist yet, and
+                    the owner's own instruction is that the button stays absent,
+                    not disabled, until it works. "Ανέβασμα φακέλου" needs no
+                    GitHub — local files only. */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <input
+                    ref={folderInputRef}
+                    type="file"
+                    multiple
+                    hidden
+                    // webkitdirectory: non-standard, no React/DOM type, but
+                    // honoured by every browser this product supports; its
+                    // only effect missing is the picker defaulting to a
+                    // multi-file choice instead of a folder one.
+                    {...{ webkitdirectory: "" }}
+                    onChange={(e) => void handleFolderUpload(e.target.files)}
+                    data-testid="coding-folder-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => folderInputRef.current?.click()}
+                    disabled={uploadingFolder}
+                    data-testid="coding-upload-folder"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:opacity-40"
+                  >
+                    <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("uploadFolder")}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

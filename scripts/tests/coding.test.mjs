@@ -45,6 +45,7 @@ const ops = await loadTs("src/lib/coding/operations.ts");
 const diffLib = await loadTs("src/lib/coding/diff.ts");
 const hl = await loadTs("src/lib/coding/highlight.ts");
 const workspace = await loadTs("src/lib/ai/workspace-context.ts");
+const folderUpload = await loadTs("src/lib/coding/folder-upload.ts");
 
 const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 const messages = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`messages/${l}.json`, "utf8"))]));
@@ -357,6 +358,33 @@ for (const [lang, sample] of [
   eq("json is recognised", hl.guessLanguage('{"a": 1}'), "json");
   ok("a bare sentence is NOT guessed at", hl.guessLanguage("hello there, how are you") === null);
   ok("…nor is an empty paste", hl.guessLanguage("") === null);
+}
+
+console.log("\n== 6. folder upload: binary skipped, budget respected ==");
+{
+  ok("an image is skipped by extension", folderUpload.isSkippedPath("src/logo.png"));
+  ok("node_modules is skipped wholesale", folderUpload.isSkippedPath("node_modules/left-pad/index.js"));
+  ok("…while an ordinary source file is not", !folderUpload.isSkippedPath("index.ts"));
+  ok("…and a dotfile with no extension is not", !folderUpload.isSkippedPath("README"));
+
+  const small = [{ path: "a.ts", text: "const a = 1;" }, { path: "b.ts", text: "const b = 2;" }];
+  const folded = folderUpload.foldUploadedFiles(small);
+  eq("both small files are included", folded.includedCount, 2);
+  ok("…and nothing is marked truncated", !folded.truncated);
+  ok("…and both paths are named in the text", folded.text.includes("a.ts") && folded.text.includes("b.ts"));
+
+  const tooMany = Array.from({ length: folderUpload.FOLDER_UPLOAD_MAX_FILES + 5 }, (_, i) => ({
+    path: `f${i}.ts`,
+    text: "x",
+  }));
+  const foldedMany = folderUpload.foldUploadedFiles(tooMany);
+  eq("the file count is capped", foldedMany.includedCount, folderUpload.FOLDER_UPLOAD_MAX_FILES);
+  ok("…and the cap is reported as truncation", foldedMany.truncated);
+
+  const huge = [{ path: "big.ts", text: "x".repeat(folderUpload.FOLDER_UPLOAD_CHAR_BUDGET + 1000) }, { path: "small.ts", text: "y" }];
+  const foldedHuge = folderUpload.foldUploadedFiles(huge);
+  eq("a file past the budget stops the fold before it, not mid-file", foldedHuge.includedCount, 0);
+  ok("…and is reported as truncation, not a quiet drop", foldedHuge.truncated);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

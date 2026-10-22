@@ -281,12 +281,16 @@ for (const l of favLinks) {
 // (components/analyze/analyze-shell.tsx); /dashboard/files?record=
 // (above) now redirects to /dashboard/data-analysis?record=, read by
 // the merged page the same way the old one read it.
-// 67 -> 68 (2026-10-22): Projects §6 ("κέντρο όλων") reads
-// /dashboard/automation?projectId=, /dashboard/website-builder?projectId=
-// and /dashboard/deep-research?projectId= to resume work inside the
-// project it started from, each read by that page the same way
-// ?record= already was.
-const DEEP_LINK_FLOOR = 68;
+// 67 -> 69 (2026-10-22): Projects §6 ("κέντρο όλων"). Two new emitters,
+// both in components/projects/project-detail.tsx: a project's own
+// automation-flow member opens at /dashboard/automation?flow=<id>
+// (project-detail.tsx's own reader), and the project page's
+// "Αυτοματοποίησέ το" button opens /dashboard/automation?projectId=<id>
+// (&said=<goal>) to resume work inside the project it started from —
+// the same ?projectId= contract /dashboard/website-builder and
+// /dashboard/deep-research already read for a result started from
+// inside a project.
+const DEEP_LINK_FLOOR = 69;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

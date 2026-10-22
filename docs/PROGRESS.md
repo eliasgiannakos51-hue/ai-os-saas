@@ -203,6 +203,25 @@ first-run reachable (στο tier 2 των ετικετών), γι' αυτό τα
 νούμερο, όχι ένα στρογγυλό πάνω από αυτό) με τη συνηθισμένη εγγραφή
 ιστορικού μέσα στο ίδιο το `design-density.test.mjs`.
 
+**ΤΡΙΤΗ ΚΑΙ ΤΕΤΑΡΤΗ ΓΝΗΣΙΑ ΠΑΛΙΝΔΡΟΜΗΣΗ, ΒΡΗΚΑΝ ΣΤΟ ΙΔΙΟ REBASE.** Δύο
+ακόμα προβλήματα, και τα δύο διορθωμένα, όχι αγνοημένα:
+(3) `scripts/tests/baselines.test.mjs` κοκκίνισε — `DEEP_LINK_FLOOR`
+δηλωμένο 68, μετρημένο 69: το `project-detail.tsx` εκπέμπει ΔΥΟ νέους
+συνδέσμους, όχι έναν όπως είχε γραφτεί αρχικά στο σχόλιο
+(`/dashboard/automation?flow=<id>` ΚΑΙ `/dashboard/automation?projectId=
+<id>&said=<goal>`), όχι τρεις όπως υποθέτηκε πριν ελεγχθεί. Διορθώθηκε:
+`DEEP_LINK_FLOOR = 69`, σχόλιο ξαναγραμμένο με τους δύο πραγματικούς
+εκπομπούς.
+(4) `scripts/tests/gate-import-paths.test.mjs` κοκκίνισε μετά το merge
+του #339: το `scripts/tests/projects.test.mjs` ακόμα έλεγχε το ΠΑΛΙΟ
+`src/components/data-analysis/analysis-shell.tsx`, που το #339 (ξεχωριστό
+PR, Analyze+Files) διέγραψε και αντικατέστησε με
+`src/components/analyze/analyze-shell.tsx`. Διορθώθηκε η διαδρομή· ο
+ίδιος έλεγχος («το Analyze's shell ΔΕΝ περνά linkTable — ξεχωριστή,
+ανεξάρτητη δουλειά») ξαναεπαληθεύτηκε αληθινός στο νέο αρχείο.
+`npm run gates` ξανατρέχτηκε ολόκληρο μετά και τις τέσσερις διορθώσεις:
+**ALL 368 GATES PASSED, 25555 checks, 0 failed, 442.3s**.
+
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261025000000_projects_colours.sql**
 ## 2026-10-22 (Βήμα 3/4 του δεύτερου μηνύματος: Analyze και Files γίνονται ένα)
 

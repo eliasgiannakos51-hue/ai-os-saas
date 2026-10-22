@@ -78,7 +78,10 @@ const AUTOMATION_SHELL = "src/components/automations/automation-shell.tsx";
 const WEBSITE_GENERATE_ROUTE = "src/app/api/websites/generate/route.ts";
 const SITE_REQUESTS = "src/lib/website-builder/site-requests.ts";
 const RESEARCH_ROUTE = "src/app/api/research/route.ts";
-const ANALYSIS_SHELL = "src/components/data-analysis/analysis-shell.tsx";
+// Renamed/merged 2026-10-22 by #339 (Analyze+Files, a separate PR from
+// this one): the old src/components/data-analysis/analysis-shell.tsx no
+// longer exists, replaced by src/components/analyze/analyze-shell.tsx.
+const ANALYSIS_SHELL = "src/components/analyze/analyze-shell.tsx";
 const COLOURS_MIGRATION = "supabase/migrations/20261025000000_projects_colours.sql";
 
 const project = await loadTs(PROJECT_TS);
@@ -544,7 +547,7 @@ console.log("\n== 8. ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, poi
   ]) {
     ok(`${label}'s shell passes linkTable`, /linkTable=/.test(stripComments(readFileSync(file, "utf8"))));
   }
-  ok("Analyze's shell does NOT — a separate, independent effort, untouched by this round",
+  ok("Analyze's shell does NOT — a separate, independent effort (#339), untouched by this round",
     !/linkTable=/.test(stripComments(readFileSync(ANALYSIS_SHELL, "utf8"))));
 
   console.log("-- starting work from a project auto-joins it, before anything is spent --");

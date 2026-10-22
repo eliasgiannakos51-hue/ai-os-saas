@@ -616,7 +616,9 @@ if (!DB) {
   // 116 -> 117 on 2026-10-07: project_flows (20261022, package 36).
   // 117 -> 118 on 2026-10-08: user_games (20261024, package 26), moved
   // here and in credit-flow.dbtest.mjs in the same commit.
-  check(`118 tables`, tables === 118, `got ${tables}`);
+  // 118 -> 119 on 2026-10-22: my_stuff_sessions (20261024100000, «Τα δικά
+  // μου»), moved here and in credit-flow.dbtest.mjs in the same commit.
+  check(`119 tables`, tables === 119, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

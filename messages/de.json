@@ -3200,6 +3200,14 @@
       "noMatch": {
         "title": "Nichts enthält „{query}“",
         "why": "Versuche weniger Wörter oder eine andere Art."
+      },
+      "onboarding": {
+        "heading": "Durchsuche alles, was du erstellt hast",
+        "examples": {
+          "offer": "Angebot",
+          "report": "Bericht",
+          "customers": "Kunden"
+        }
       }
     },
     "images": {
@@ -3214,8 +3222,6 @@
         "wide": "Breit 16:9",
         "story": "Story-Format 9:16"
       },
-      "recent": "Frühere",
-      "recentEmpty": "Du hast noch keine Bilder erstellt.",
       "made": "{made} von {asked} fertig.",
       "changed": "Nur Bild {n} wurde geändert.",
       "fullReady": "Bild {n} in voller Auflösung wird heruntergeladen.",
@@ -3247,7 +3253,16 @@
         "unavailable": "Der Bildanbieter antwortet gerade nicht. Es wurde nichts berechnet; versuche es noch einmal.",
         "failed": "Etwas ist schiefgelaufen. Nichts, was nicht entstanden ist, wurde berechnet.",
         "offline": "Keine Verbindung. Prüfe das Netzwerk und versuche es erneut."
-      }
+      },
+      "empty": {
+        "heading": "Was sollen wir erstellen?",
+        "examples": {
+          "logo": "Ein Logo für ein Café namens Nest",
+          "poster": "Ein Poster für einen Sommerschlussverkauf, 20% Rabatt",
+          "avatar": "Ein einfaches Avatar-Symbol für eine Tech-App"
+        }
+      },
+      "new": "Neues Bild"
     },
     "automations": {
       "name": "Automationen",
@@ -4781,7 +4796,16 @@
         "min": "Für jedes „{x}“ der kleinste Wert von „{y}“.",
         "max": "Für jedes „{x}“ der größte Wert von „{y}“."
       }
-    }
+    },
+    "empty": {
+      "heading": "Was möchtest du in deinen Daten finden?",
+      "examples": {
+        "trend": "Welcher Monat hatte die meisten Verkäufe?",
+        "outliers": "Gibt es ungewöhnliche Zeilen?",
+        "compare": "Vergleiche diesen Monat mit dem letzten"
+      }
+    },
+    "new": "Neue Datei"
   },
   "coding": {
     "title": "Code",

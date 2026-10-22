@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Clock, Download, Maximize2, Trash2, Zap } from "lucide-react";
+import { ChevronDown, Download, Maximize2, Trash2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
 import { ToolShell, ACTION, ChosenBox, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
@@ -70,13 +71,35 @@ export function ImageShell({
   const [images, setImages] = useState<ShownImage[]>(initialImages);
   const asked = initialOpenId ? initialImages.find((image) => image.id === initialOpenId) : undefined;
   const [shownId, setShownId] = useState<string | null>(asked?.id ?? null);
-  const [open, setOpen] = useState<"image" | "recent" | null>(asked ? "image" : null);
+  const [open, setOpen] = useState<"image" | null>(asked ? "image" : null);
   const [chosen, setChosen] = useState<number | null>(null);
   const [aspect, setAspect] = useState<ImageAspect>(IMAGE_ASPECTS[0]);
   const [choosingAspect, setChoosingAspect] = useState(false);
   const [running, setRunning] = useState<Running>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [confirming, setConfirming] = useState<{ credits: number; go: () => void } | null>(null);
+
+  // THE [◧] COLUMN, remembered per device — same key shape as Chat's own
+  // (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.imageHistoryColumn") === "open");
+    } catch {
+      // private window or storage off: closed, which is the default
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.imageHistoryColumn", next ? "open" : "closed");
+      } catch {
+        // nothing to persist to; the toggle still works for this visit
+      }
+      return next;
+    });
+  }
 
   // LITERAL KEYS, so the message slicer can see every word this screen uses.
   const aspectLabel: Record<ImageAspect, string> = {
@@ -194,8 +217,10 @@ export function ImageShell({
     window.location.assign(data.url);
   }
 
-  async function remove(image: ShownImage) {
-    if (!window.confirm(t("deleteConfirm"))) return;
+  // BARE DELETE, no confirm of its own — the work panel's trash button
+  // confirms before calling this, and the [◧] column (ShellHistoryColumn)
+  // confirms its own way; neither should ask twice.
+  async function removeImage(image: ShownImage) {
     try {
       const response = await fetch(`/api/images/${image.id}`, { method: "DELETE" });
       const data = await response.json().catch(() => null);
@@ -258,7 +283,16 @@ export function ImageShell({
       ? {
           title: shown.prompt,
           actions: (
-            <button type="button" onClick={() => void remove(shown)} aria-label={t("delete")} title={t("delete")} data-testid="image-delete" className={ACTION}>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(t("deleteConfirm"))) void removeImage(shown);
+              }}
+              aria-label={t("delete")}
+              title={t("delete")}
+              data-testid="image-delete"
+              className={ACTION}
+            >
               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           ),
@@ -325,38 +359,7 @@ export function ImageShell({
             </div>
           ),
         }
-      : open === "recent"
-        ? {
-            title: t("recent"),
-            body:
-              images.length === 0 ? (
-                <p className="text-xs text-muted">{t("recentEmpty")}</p>
-              ) : (
-                <ul data-testid="image-recent" className="grid grid-cols-3 gap-2">
-                  {images.map((image) => (
-                    <li key={image.id}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShownId(image.id);
-                          setChosen(null);
-                          setOpen("image");
-                        }}
-                        aria-label={image.prompt}
-                        title={image.prompt}
-                        className="block aspect-square w-full overflow-hidden rounded-item bg-panel"
-                      >
-                        {image.variants[0] && (
-                          // eslint-disable-next-line @next/next/no-img-element -- see above
-                          <img src={image.variants[0].url} alt="" className="h-full w-full object-cover" />
-                        )}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ),
-          }
-        : null;
+      : null;
 
   const working =
     running === "variants" ? t("working.variants") : running === "edit" ? t("working.edit", { n: (chosen ?? 0) + 1 }) : running === "full" ? t("working.full") : null;
@@ -405,17 +408,6 @@ export function ImageShell({
               </fieldset>
             )}
           </span>,
-          <button
-            key="recent"
-            type="button"
-            onClick={() => setOpen((v) => (v === "recent" ? null : "recent"))}
-            aria-pressed={open === "recent"}
-            data-testid="image-recent-open"
-            className={OPTION}
-          >
-            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("recent")}
-          </button>,
         ]}
         footer={
           <>
@@ -433,6 +425,43 @@ export function ImageShell({
             )}
           </>
         }
+        empty={{
+          heading: t("empty.heading"),
+          examples: [
+            { key: "logo", label: t("empty.examples.logo") },
+            { key: "poster", label: t("empty.examples.poster") },
+            { key: "avatar", label: t("empty.examples.avatar") },
+          ],
+        }}
+        history={{
+          open: historyOpen,
+          onToggle: toggleHistory,
+          onNew: () => {
+            setTurns([]);
+            setShownId(null);
+            setChosen(null);
+            setOpen(null);
+          },
+          newLabel: t("new"),
+          column: (
+            <ShellHistoryColumn
+              rows={images.map((image) => ({ id: image.id, title: image.prompt }))}
+              activeId={open === "image" ? shownId : null}
+              onOpen={(id) => {
+                setShownId(id);
+                setChosen(null);
+                setOpen("image");
+              }}
+              onDelete={async (id) => {
+                const image = images.find((i) => i.id === id);
+                if (image) await removeImage(image);
+              }}
+              onNavigate={() => {
+                if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+              }}
+            />
+          ),
+        }}
         work={work}
         onCloseWork={() => setOpen(null)}
       />

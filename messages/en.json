@@ -3200,6 +3200,14 @@
       "noMatch": {
         "title": "Nothing says “{query}”",
         "why": "Try fewer words, or another kind."
+      },
+      "onboarding": {
+        "heading": "Search everything you've made",
+        "examples": {
+          "offer": "offer",
+          "report": "report",
+          "customers": "customers"
+        }
       }
     },
     "images": {
@@ -3214,8 +3222,6 @@
         "wide": "Wide 16:9",
         "story": "Story 9:16"
       },
-      "recent": "Earlier",
-      "recentEmpty": "You have not made any images yet.",
       "made": "{made} of {asked} ready.",
       "changed": "Only image {n} changed.",
       "fullReady": "Image {n} at full resolution is downloading.",
@@ -3247,7 +3253,16 @@
         "unavailable": "The image provider is not answering right now. Nothing was charged; try again.",
         "failed": "Something went wrong. Nothing that was not made was charged.",
         "offline": "No connection. Check the network and try again."
-      }
+      },
+      "empty": {
+        "heading": "What should we make?",
+        "examples": {
+          "logo": "A logo for a coffee shop called Nest",
+          "poster": "A poster for a summer sale, 20% off",
+          "avatar": "A simple avatar icon for a tech app"
+        }
+      },
+      "new": "New image"
     },
     "automations": {
       "name": "Automations",
@@ -4781,7 +4796,16 @@
         "min": "For each «{x}», the smallest «{y}».",
         "max": "For each «{x}», the largest «{y}»."
       }
-    }
+    },
+    "empty": {
+      "heading": "What do you want to find in your data?",
+      "examples": {
+        "trend": "Which month had the most sales?",
+        "outliers": "Are there any unusual rows?",
+        "compare": "Compare this month to last month"
+      }
+    },
+    "new": "New file"
   },
   "coding": {
     "title": "Coding",

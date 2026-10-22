@@ -3200,6 +3200,14 @@
       "noMatch": {
         "title": "没有内容包含“{query}”",
         "why": "试试更少的词，或换一种类型。"
+      },
+      "onboarding": {
+        "heading": "搜索你做过的一切",
+        "examples": {
+          "offer": "优惠",
+          "report": "报告",
+          "customers": "客户"
+        }
       }
     },
     "images": {
@@ -3214,8 +3222,6 @@
         "wide": "横版 16:9",
         "story": "快拍 9:16"
       },
-      "recent": "之前的",
-      "recentEmpty": "你还没有生成过图片。",
       "made": "已完成 {made}/{asked}。",
       "changed": "只改了图片 {n}。",
       "fullReady": "图片 {n} 的最高分辨率版本正在下载。",
@@ -3247,7 +3253,16 @@
         "unavailable": "图片服务商暂时没有响应。没有扣费；请再试一次。",
         "failed": "出了点问题。没有完成的部分不会扣费。",
         "offline": "没有网络连接。请检查网络后再试。"
-      }
+      },
+      "empty": {
+        "heading": "我们要做什么?",
+        "examples": {
+          "logo": "一个名为 Nest 的咖啡店标志",
+          "poster": "一张夏季促销海报,八折优惠",
+          "avatar": "一个科技应用的简单头像图标"
+        }
+      },
+      "new": "新图片"
     },
     "automations": {
       "name": "自动化",
@@ -4781,7 +4796,16 @@
         "min": "按每个「{x}」，最小的「{y}」。",
         "max": "按每个「{x}」，最大的「{y}」。"
       }
-    }
+    },
+    "empty": {
+      "heading": "你想在数据里找到什么?",
+      "examples": {
+        "trend": "哪个月的销售额最高?",
+        "outliers": "有没有异常的数据行?",
+        "compare": "把这个月和上个月比较一下"
+      }
+    },
+    "new": "新文件"
   },
   "coding": {
     "title": "编程",

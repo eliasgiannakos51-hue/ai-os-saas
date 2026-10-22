@@ -3200,6 +3200,14 @@
       "noMatch": {
         "title": "Niente dice «{query}»",
         "why": "Prova con meno parole o con un altro tipo."
+      },
+      "onboarding": {
+        "heading": "Cerca in tutto ciò che hai creato",
+        "examples": {
+          "offer": "offerta",
+          "report": "rapporto",
+          "customers": "clienti"
+        }
       }
     },
     "images": {
@@ -3214,8 +3222,6 @@
         "wide": "Orizzontale 16:9",
         "story": "Formato story 9:16"
       },
-      "recent": "Precedenti",
-      "recentEmpty": "Non hai ancora creato immagini.",
       "made": "{made} su {asked} pronte.",
       "changed": "È cambiata solo l’immagine {n}.",
       "fullReady": "L’immagine {n} alla massima risoluzione si sta scaricando.",
@@ -3247,7 +3253,16 @@
         "unavailable": "Il fornitore di immagini ora non risponde. Non è stato addebitato nulla; riprova.",
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla di ciò che non è stato fatto.",
         "offline": "Nessuna connessione. Controlla la rete e riprova."
-      }
+      },
+      "empty": {
+        "heading": "Cosa dovremmo creare?",
+        "examples": {
+          "logo": "Un logo per una caffetteria chiamata Nest",
+          "poster": "Un poster per una svendita estiva, 20% di sconto",
+          "avatar": "Una semplice icona avatar per un'app tech"
+        }
+      },
+      "new": "Nuova immagine"
     },
     "automations": {
       "name": "Automazioni",
@@ -4781,7 +4796,16 @@
         "min": "Per ogni «{x}», il valore più piccolo di «{y}».",
         "max": "Per ogni «{x}», il valore più grande di «{y}»."
       }
-    }
+    },
+    "empty": {
+      "heading": "Cosa vuoi trovare nei tuoi dati?",
+      "examples": {
+        "trend": "Quale mese ha avuto più vendite?",
+        "outliers": "Ci sono righe inusuali?",
+        "compare": "Confronta questo mese con il precedente"
+      }
+    },
+    "new": "Nuovo file"
   },
   "coding": {
     "title": "Codice",

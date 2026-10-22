@@ -578,11 +578,12 @@ try {
       const priceLine = await page.locator('[data-testid="image-price"]').innerText().catch(() => "");
       const price4 = priceIn(priceLine);
       check(`its price is on the screen before anything is spent (${price4})`, Number.isFinite(price4) && price4 > 0 && priceLine === plural(I.priceVariants, price4, locale, { n: 4 }), priceLine);
-      await press(page.locator('[data-testid="image-recent-open"]'));
+      // THE [◧] HISTORY COLUMN (Batch 2, 2026-10-22), not the old
+      // "image-recent-open" option.
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await sleep(300);
-      check("«earlier» says there is nothing yet", (await page.locator('[data-testid="tool-shell-work"]').innerText().catch(() => "")).includes(I.recentEmpty));
-      if (device.touch) await backToConversation(page, press);
-      else await press(page.locator('[data-testid="image-recent-open"]'));
+      check("the [◧] column says there is nothing yet", (await page.locator('[data-testid="shell-history-column"]').innerText().catch(() => "")).includes(T.dashboard.toolShell.history.empty));
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await language(page, locale, "empty");
 
       // ---------------------------------------------------------------
@@ -690,9 +691,9 @@ try {
       // 5. IT IS THERE TOMORROW
       // ---------------------------------------------------------------
       await page.reload({ waitUntil: "networkidle" });
-      await press(page.locator('[data-testid="image-recent-open"]'));
-      await page.locator('[data-testid="image-recent"] button').first().waitFor({ timeout: 10000 }).catch(() => null);
-      await press(page.locator('[data-testid="image-recent"] button').first());
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+      await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10000 }).catch(() => null);
+      await press(page.locator('[data-testid="shell-history-row"]').first());
       await picturesDrawn(page, 4);
       shown = await shownPictures(page);
       const reopened = await Promise.all(shown.map((s) => bytesOf(s.src)));

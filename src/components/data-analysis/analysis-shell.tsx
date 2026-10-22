@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Clock, Download, Sparkles, Upload } from "lucide-react";
+import { Download, Sparkles, Upload } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useToast } from "@/components/toast/toast-context";
 import { AnalysisChart } from "@/components/data-analysis/analysis-chart";
 import { FactText, useExplainFact } from "@/components/data-analysis/fact-text";
 import { formatFact } from "@/lib/data-analysis/facts";
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { MAX_UPLOAD_BYTES } from "@/lib/data-analysis/limits";
 import { useErrorText } from "@/lib/errors/use-error-text";
 import { ApiError } from "@/lib/errors/api-error";
@@ -60,13 +61,35 @@ export function AnalysisShell({
   const [analysing, setAnalysing] = useState(false);
   const [asking, setAsking] = useState(false);
   const [notes, setNotes] = useState<{ id: string; role: "user" | "tool"; text: string }[]>([]);
-  const [pane, setPane] = useState<"file" | "files" | null>(null);
+  const [pane, setPane] = useState<"file" | null>(null);
 
   // THE FILE IS OPEN BESIDE THE CONVERSATION ON A COMPUTER, where there is
   // room; on a phone it would cover the field, so there it waits for the card.
   useEffect(() => {
     if (current && window.matchMedia("(min-width: 1024px)").matches) setPane("file");
   }, [current]);
+
+  // THE [◧] COLUMN, remembered per device — same key shape as Chat's own
+  // (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.analysisHistoryColumn") === "open");
+    } catch {
+      /* private window or storage off: closed, which is the default */
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.analysisHistoryColumn", next ? "open" : "closed");
+      } catch {
+        /* nothing to persist to; the toggle still works for this visit */
+      }
+      return next;
+    });
+  }
 
   const note = (role: "user" | "tool", text: string) => setNotes((prev) => [...prev, { id: `n${role}${prev.length}`, role, text }]);
 
@@ -305,31 +328,7 @@ export function AnalysisShell({
             </div>
           ),
         }
-      : pane === "files"
-        ? {
-            title: tNames("analyze"),
-            body: (
-              <ul className="row-list">
-                {analyses.map((item) => (
-                  <li key={item.id} className="py-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        router.push(`/dashboard/data-analysis?id=${item.id}`);
-                        setPane("file");
-                      }}
-                      aria-current={current?.id === item.id ? "true" : undefined}
-                      className="w-full min-w-0 text-start"
-                    >
-                      <p className="break-words text-sm text-foreground">{item.title}</p>
-                      <p className="text-[11px] text-muted">{t("upload.done", { rows: item.rowCount })}</p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ),
-          }
-        : null;
+      : null;
 
   return (
     <ToolShell
@@ -370,11 +369,37 @@ export function AnalysisShell({
           <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
           {t("analyse.button")}
         </button>,
-        <button key="files" type="button" onClick={() => setPane((v) => (v === "files" ? null : "files"))} aria-pressed={pane === "files"} disabled={analyses.length === 0} data-testid="analysis-files" className={`${OPTION} disabled:opacity-40`}>
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          {tShell("recent")}
-        </button>,
       ]}
+      empty={{
+        heading: t("empty.heading"),
+        examples: [
+          { key: "trend", label: t("empty.examples.trend") },
+          { key: "outliers", label: t("empty.examples.outliers") },
+          { key: "compare", label: t("empty.examples.compare") },
+        ],
+      }}
+      history={{
+        open: historyOpen,
+        onToggle: toggleHistory,
+        onNew: () => {
+          setPane(null);
+          router.push("/dashboard/data-analysis");
+        },
+        newLabel: t("new"),
+        column: (
+          <ShellHistoryColumn
+            rows={analyses.map((item) => ({ id: item.id, title: item.title, status: t("upload.done", { rows: item.rowCount }) }))}
+            activeId={current?.id ?? null}
+            onOpen={(id) => {
+              router.push(`/dashboard/data-analysis?id=${id}`);
+              setPane("file");
+            }}
+            onNavigate={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+            }}
+          />
+        ),
+      }}
       work={work}
       onCloseWork={() => setPane(null)}
     />

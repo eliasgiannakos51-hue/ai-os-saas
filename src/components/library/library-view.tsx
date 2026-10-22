@@ -14,6 +14,7 @@ import {
   Telescope,
   type LucideIcon,
 } from "lucide-react";
+import { Earth } from "@/components/brand/earth";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { formatDateTime } from "@/lib/format-number";
@@ -71,6 +72,17 @@ export function LibraryView({
     const s = params.toString();
     return s ? `/dashboard/timeline?${s}` : "/dashboard/timeline";
   };
+  // THE SAME QUIET LANDING AS EVERY OTHER TOOL (MASTER Μέρος 16, Batch 2;
+  // the owner's "lighter touch" decision, 2026-10-22) — a globe, a
+  // heading, up to three examples — but Library is a search over real
+  // rows, not a generation step: an example sets `q`, nothing more, and
+  // the grid underneath is the same grid a real search would show.
+  const onboardingHrefFor = (q: string) => {
+    const params = new URLSearchParams();
+    if (kind) params.set("kind", kind);
+    params.set("q", q);
+    return `/dashboard/timeline?${params.toString()}`;
+  };
 
   return (
     <div>
@@ -110,6 +122,30 @@ export function LibraryView({
           );
         })}
       </nav>
+
+      {!query && items.length > 0 && (
+        <div data-testid="library-onboarding" className="mt-6 flex flex-col items-center gap-3 py-4 text-center">
+          <Earth variant="small" px={64} />
+          <p className="text-sm text-muted">{t("onboarding.heading")}</p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {/* LITERAL KEYS, so the message slicer can see every word this block uses. */}
+            {[
+              { key: "offer", label: t("onboarding.examples.offer") },
+              { key: "report", label: t("onboarding.examples.report") },
+              { key: "customers", label: t("onboarding.examples.customers") },
+            ].map((ex) => (
+              <Link
+                key={ex.key}
+                href={onboardingHrefFor(ex.label)}
+                data-testid="library-onboarding-example"
+                className="min-h-[44px] rounded-full bg-panel px-4 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              >
+                {ex.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {failed.length > 0 && (
         <p role="status" className="mt-4 text-sm text-foreground">

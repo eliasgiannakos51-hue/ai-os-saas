@@ -188,7 +188,7 @@ check("the choice outlives the pane: going back to the field on a phone keeps it
   /const editing = shown !== null && chosen !== null;/.test(shell) && /onCloseWork=\{\(\) => setOpen\(null\)\}/.test(shell));
 check("a picture is a button, pressed to choose it", /data-testid="image-variant"/.test(shell) && /aria-pressed=\{chosen === variant\.index\}/.test(shell));
 
-const KEYS = ["name", "help", "placeholder", "placeholderEdit", "aspect", "recent", "recentEmpty", "made", "changed", "fullReady", "choose", "chosen", "picture", "download", "fullMake", "fullDownload", "priceVariants", "priceEdit", "price", "delete", "deleteConfirm", "notConfigured"];
+const KEYS = ["name", "help", "placeholder", "placeholderEdit", "aspect", "made", "changed", "fullReady", "choose", "chosen", "picture", "download", "fullMake", "fullDownload", "priceVariants", "priceEdit", "price", "delete", "deleteConfirm", "notConfigured"];
 const NESTED = { aspects: ["square", "portrait", "wide", "story"], working: ["variants", "edit", "full"], errors: ["tooShort", "tooLong", "insufficient", "rateLimited", "refused", "busy", "gone", "unavailable", "failed", "offline"] };
 const LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json"));
 check(`the ten languages (${LOCALES.length})`, LOCALES.length === 10);

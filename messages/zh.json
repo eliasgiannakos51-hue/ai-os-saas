@@ -3270,10 +3270,6 @@
       "placeholder": "什么事应该自动发生?",
       "placeholderBox": "这个方框里要改什么?",
       "placeholderAnswer": "你的回答",
-      "mine": "我的自动化",
-      "mineCount": "我的自动化({count})",
-      "mineEmpty": "你还没有创建自动化。",
-      "examples": "示例",
       "example": {
         "calendar": "每天早上 9 点在 Telegram 上把我今天的安排发给我",
         "finance": "每周一根据我的财务生成一份报告,等我批准后发给我",
@@ -3453,7 +3449,11 @@
         "broken": "这些方框已无法读取。请删除这个自动化并重新创建。",
         "failed": "出了点问题。未发生的部分不会收费。",
         "offline": "没有网络连接。请检查网络后重试。"
-      }
+      },
+      "empty": {
+        "heading": "什么事情应该自动发生?"
+      },
+      "new": "新建自动化"
     },
     "flows": {
       "name": "项目",

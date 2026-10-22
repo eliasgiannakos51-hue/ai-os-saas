@@ -415,6 +415,13 @@ for (const l of LOCALES) {
     typeof all.images?.empty?.heading === "string" && all.images.empty.heading &&
       ["logo", "poster", "avatar"].every((k) => typeof all.images.empty?.examples?.[k] === "string" && all.images.empty.examples[k]) &&
       typeof all.images?.new === "string" && all.images.new);
+  // Automation's three examples are its own pre-existing example.{calendar,
+  // finance,file} (already translated, 10 locales) — only the heading and
+  // "new" are genuinely new keys.
+  check(`${l}: Automation's empty landing`,
+    typeof all.automations?.empty?.heading === "string" && all.automations.empty.heading &&
+      ["calendar", "finance", "file"].every((k) => typeof all.automations.example?.[k] === "string" && all.automations.example[k]) &&
+      typeof all.automations?.new === "string" && all.automations.new);
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

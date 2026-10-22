@@ -3270,10 +3270,6 @@
       "placeholder": "Was soll von selbst passieren?",
       "placeholderBox": "Was soll sich in diesem Kästchen ändern?",
       "placeholderAnswer": "Deine Antwort",
-      "mine": "Meine Automationen",
-      "mineCount": "Meine Automationen ({count})",
-      "mineEmpty": "Du hast noch keine Automation erstellt.",
-      "examples": "Beispiele",
       "example": {
         "calendar": "Schick mir jeden Morgen um 9 auf Telegram, was ich heute habe",
         "finance": "Erstelle jeden Montag einen Bericht aus meinen Finanzen und schick ihn mir, nachdem ich ihn freigegeben habe",
@@ -3453,7 +3449,11 @@
         "broken": "Diese Kästchen können nicht mehr gelesen werden. Lösche die Automation und erstelle sie neu.",
         "failed": "Etwas ist schiefgelaufen. Für das, was nicht passiert ist, wurde nichts berechnet.",
         "offline": "Keine Verbindung. Prüfe das Netzwerk und versuch es noch einmal."
-      }
+      },
+      "empty": {
+        "heading": "Was soll von selbst passieren?"
+      },
+      "new": "Neue Automatisierung"
     },
     "flows": {
       "name": "Projekte",

@@ -3270,10 +3270,6 @@
       "placeholder": "O que deve acontecer sozinho?",
       "placeholderBox": "O que deve mudar nesta caixa?",
       "placeholderAnswer": "Sua resposta",
-      "mine": "Minhas automações",
-      "mineCount": "Minhas automações ({count})",
-      "mineEmpty": "Você ainda não criou nenhuma automação.",
-      "examples": "Exemplos",
       "example": {
         "calendar": "Toda manhã às 9 me mande no Telegram o que tenho hoje",
         "finance": "Toda segunda-feira faça um relatório das minhas Finanças e me mande, depois que eu aprovar",
@@ -3453,7 +3449,11 @@
         "broken": "Estas caixas não podem mais ser lidas. Exclua a automação e crie de novo.",
         "failed": "Algo deu errado. Nada foi cobrado pelo que não aconteceu.",
         "offline": "Sem conexão. Verifique a rede e tente de novo."
-      }
+      },
+      "empty": {
+        "heading": "O que deve acontecer por si só?"
+      },
+      "new": "Nova automatização"
     },
     "flows": {
       "name": "Projetos",

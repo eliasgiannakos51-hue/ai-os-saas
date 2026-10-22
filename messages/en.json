@@ -3270,10 +3270,6 @@
       "placeholder": "What should happen by itself?",
       "placeholderBox": "What should change in this box?",
       "placeholderAnswer": "Your answer",
-      "mine": "My automations",
-      "mineCount": "My automations ({count})",
-      "mineEmpty": "You have not made an automation yet.",
-      "examples": "Examples",
       "example": {
         "calendar": "Every morning at 9 send me on Telegram what I have today",
         "finance": "Every Monday make a report from my Finances and send it to me, after I approve it",
@@ -3453,7 +3449,11 @@
         "broken": "These boxes cannot be read any more. Delete the automation and make it again.",
         "failed": "Something went wrong. Nothing was charged for what did not happen.",
         "offline": "No connection. Check the network and try again."
-      }
+      },
+      "empty": {
+        "heading": "What should happen by itself?"
+      },
+      "new": "New automation"
     },
     "flows": {
       "name": "Projects",

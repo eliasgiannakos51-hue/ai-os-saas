@@ -3270,10 +3270,6 @@
       "placeholder": "Qu’est-ce qui doit se faire tout seul ?",
       "placeholderBox": "Que faut-il changer dans cette case ?",
       "placeholderAnswer": "Ta réponse",
-      "mine": "Mes automatisations",
-      "mineCount": "Mes automatisations ({count})",
-      "mineEmpty": "Tu n’as pas encore créé d’automatisation.",
-      "examples": "Exemples",
       "example": {
         "calendar": "Chaque matin à 9 h, envoie-moi sur Telegram ce que j’ai aujourd’hui",
         "finance": "Chaque lundi, fais un rapport à partir de mes Finances et envoie-le-moi, après que je l’ai approuvé",
@@ -3453,7 +3449,11 @@
         "broken": "Ces cases ne peuvent plus être lues. Supprime l’automatisation et recrée-la.",
         "failed": "Un problème est survenu. Rien n’a été facturé pour ce qui n’a pas eu lieu.",
         "offline": "Pas de connexion. Vérifie le réseau et réessaie."
-      }
+      },
+      "empty": {
+        "heading": "Que doit-il se passer tout seul ?"
+      },
+      "new": "Nouvelle automatisation"
     },
     "flows": {
       "name": "Projets",

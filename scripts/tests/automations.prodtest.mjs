@@ -454,10 +454,11 @@ try {
   {
     const { context, page, press } = await open(ON, desktop);
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
-    await press(page.locator('[data-testid="flow-examples-open"]'));
-    await press(page.locator('[data-testid="flow-examples"] button').nth(2));
-    check("an example fills the field with its sentence", (await page.locator("textarea").first().inputValue()) === el.example.file);
-    await press(page.locator('button[type="submit"]').first());
+    // THE [◧] EMPTY LANDING'S EXAMPLES SEND IMMEDIATELY (Batch 3,
+    // 2026-10-22) — not "fill the field", the old "flow-examples" panel's
+    // way.
+    await press(page.locator('[data-testid="tool-shell-example"]', { hasText: el.example.file }));
+    check("an example sends immediately", (await page.locator('[data-testid="tool-shell-thread"]').innerText()).includes(el.example.file));
     await settle(page);
     const upload = flowNamed("Σύνοψη αρχείων");
     check("four boxes: a file, read, summarised, into the Library", upload && (await page.locator('[data-testid="flow-box"]').count()) === 4 && (await page.locator('[data-testid="flow-needs"]').count()) === 0);
@@ -485,8 +486,8 @@ try {
       run?.status === "done" && doc?.user_id === MOCK_USER.id && doc.content.html.includes("Σύνοψη: η σύμβαση μίσθωσης ισχύει ως τις 31/12/2027") && doc.title.startsWith("Σύνοψη αρχείων — "), JSON.stringify(run?.steps));
     check("...and what was read was the file, fenced as data", modelAsked.some((m) => JSON.stringify(m.messages).includes("Μίσθωμα 900") && JSON.stringify(m.messages).includes("UNTRUSTED")));
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
-    await press(page.locator('[data-testid="flow-mine"]'));
-    await press(page.locator('[data-testid="flow-list"] button', { hasText: "Σύνοψη αρχείων" }));
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    await press(page.locator('[data-testid="shell-history-row"]', { hasText: "Σύνοψη αρχείων" }));
     await page.locator('[data-testid="flow-run"]').first().waitFor({ timeout: 10000 }).catch(() => null);
     check("the history shows the run from the file, done", (await page.locator('[data-testid="flow-run"]').count()) > 0 && (await page.locator('[data-testid="flow-run"]').first().innerText()).includes(el.by.event) && (await page.locator('[data-testid="flow-run"]').first().innerText()).includes(el.runStatus.done));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
@@ -499,8 +500,8 @@ try {
     const { context, page, press } = await open(ON, { viewport: { width: 390, height: 844 }, touch: true });
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
     check("on a phone the field and the options fit the screen", (await page.evaluate(() => document.documentElement.scrollWidth)) <= 390);
-    await press(page.locator('[data-testid="flow-mine"]'));
-    await press(page.locator('[data-testid="flow-list"] button', { hasText: "Αναφορά Δευτέρας" }));
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    await press(page.locator('[data-testid="shell-history-row"]', { hasText: "Αναφορά Δευτέρας" }));
     await page.locator('[data-testid="tool-shell-work"]').waitFor({ timeout: 10000 });
     check("...the automation covers the screen, with a way back", await page.locator('[data-testid="tool-shell-back"]').isVisible());
     await page.locator('[data-testid="flow-limit"]').fill("1");

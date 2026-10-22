@@ -3270,10 +3270,6 @@
       "placeholder": "Cosa deve succedere da solo?",
       "placeholderBox": "Cosa deve cambiare in questa casella?",
       "placeholderAnswer": "La tua risposta",
-      "mine": "Le mie automazioni",
-      "mineCount": "Le mie automazioni ({count})",
-      "mineEmpty": "Non hai ancora creato un’automazione.",
-      "examples": "Esempi",
       "example": {
         "calendar": "Ogni mattina alle 9 mandami su Telegram cosa ho oggi",
         "finance": "Ogni lunedì fai un report dalle mie Finanze e mandamelo, dopo che l’ho approvato",
@@ -3453,7 +3449,11 @@
         "broken": "Queste caselle non si possono più leggere. Elimina l’automazione e creala di nuovo.",
         "failed": "Qualcosa è andato storto. Non è stato addebitato nulla per ciò che non è successo.",
         "offline": "Nessuna connessione. Controlla la rete e riprova."
-      }
+      },
+      "empty": {
+        "heading": "Cosa dovrebbe succedere da solo?"
+      },
+      "new": "Nuova automazione"
     },
     "flows": {
       "name": "Progetti",

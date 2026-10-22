@@ -3,6 +3,81 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-10-22 (Βήμα 1/4 του δεύτερου μηνύματος: All Tools μικρότερα τετράγωνα, οκτώ βγαίνουν, Research → Deep Research)
+
+**ΤΙ ΖΗΤΗΘΗΚΕ.** Αμέσως μετά το merge του #332, ο ιδιοκτήτης έστειλε
+τέσσερα ακόμα βήματα, με ρητή σειρά: 1. All Tools (μικρότερα τετράγωνα,
+οκτώ εργαλεία βγαίνουν, Research → Deep Research), 2. Coding (κουμπιά
+GitHub/ανέβασμα φακέλου, sessions αριστερά), 3. Analyze (ένα εργαλείο
+για αρχεία/βίντεο/σύνδεσμο/κείμενο), 4. Projects (κέντρο όλων). Ένα pull
+request ανά βήμα. Αυτή η εγγραφή είναι το Βήμα 1.
+
+**ΜΙΚΡΟΤΕΡΑ ΤΕΤΡΑΓΩΝΑ.** `src/components/tools/tools-grid.tsx`: το
+πλέγμα πήγε από `grid-cols-2 lg:grid-cols-4` σε `grid-cols-2
+sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6` (2 σε κινητό, 5-6 σε
+υπολογιστή). Το τετράγωνο έχασε το `aspect-square`/`justify-between`
+(που άφηνε άδειο χώρο στη μέση): εικονίδιο (28px → 20px) και όνομα
+μοιράζονται μία γραμμή (`flex items-center gap-2`), η περιγραφή από
+κάτω. Η καρφίτσα είναι `md:opacity-0`/`group-hover:opacity-100` —
+κρυμμένη με hover μόνο σε υπολογιστή, πάντα ορατή σε αφή (το ίδιο
+σχήμα με το κουμπί ενεργειών του `components/dashboard/conversation-
+rows.tsx`) — και μία ήδη καρφιτσωμένη πλακέτα κρατά την καρφίτσα της
+ορατή πάντα, όπως το αστέρι αγαπημένων στο ίδιο αρχείο.
+
+**ΟΚΤΩ ΕΡΓΑΛΕΙΑ ΒΓΗΚΑΝ ΑΠΟ ΤΟ ΠΛΕΓΜΑ, ΤΙΠΟΤΑ ΔΕΝ ΣΒΗΣΤΗΚΕ.** Slides
+(`/dashboard/presentations`), Posts (`/dashboard/posts`), Meetings
+(`/dashboard/meetings`), η Βιβλιοθήκη (`/dashboard/timeline`), η Μνήμη
+(`/dashboard/ai-memory`), και τα τρία της ομάδας Επιχείρηση — Finances
+(`/dashboard/finance`), Sales (`/dashboard/sales`), Trading
+(`/dashboard/trading`) — πέρασαν από το `ALL_TOOLS_GROUPS`/
+`ALL_TOOLS_NAMES` στο `HIDDEN_FROM_ALL_TOOLS` (`src/lib/nav/all-tools.ts`),
+ο ίδιος μηχανισμός που κρατά ήδη κρυμμένα το Predictions, τη Φωνή, κ.ά.
+Η ομάδα «Επιχείρηση» μένει στο `ALL_TOOLS_GROUPS` με άδειο `hrefs: []`
+(έτσι η σειρά των έξι ομάδων δεν αλλάζει) αλλά δεν σχεδιάζεται καθόλου,
+αφού ο πλέγμα ήδη αγνοεί άδειες ομάδες. Καμία διαδρομή, σελίδα, API,
+πίνακας βάσης ή i18n κλειδί δεν αγγίχτηκε — ό,τι είχε bookmark κάποιος
+χρήστης ανοίγει ακριβώς όπως πριν, και η αναζήτηση ⌘K/records hub δεν
+άλλαξε καθόλου (διαβάζει άλλη λίστα, `ALL_SIDEBAR_GROUPS`).
+
+**ΤΙ ΘΑ ΣΒΗΝΟΤΑΝ, ΑΝ ΤΟ ΕΓΚΡΙΝΕΙ Ο ΙΔΙΟΚΤΗΤΗΣ ΑΡΓΟΤΕΡΑ** (δεν έγινε
+τίποτα — μόνο η λίστα):
+
+| εργαλείο | διαδρομή | κώδικας | διακόπτης | πίνακας(ες) βάσης |
+|---|---|---|---|---|
+| Slides | `/dashboard/presentations` | `src/components/presentations/` (4 αρχεία, ~1488 γραμμές) | κανένας | `ai_presentations` |
+| Posts | `/dashboard/posts` | `src/components/posts/` (2 αρχεία, ~904 γραμμές) | κανένας | `generated_posts` |
+| Meetings | `/dashboard/meetings` | `src/components/meetings/meetings-workspace.tsx` (736 γραμμές) | κανένας | `meetings`, `meeting_actions` (και κοινά `ai_missions`, `entity_links`, `projects`) |
+| Βιβλιοθήκη | `/dashboard/timeline` | `src/components/library/`, `src/components/timeline/` (3 αρχεία, ~241 γραμμές) | κανένας | καμία δική της — διαβάζει τους πίνακες των άλλων εργαλείων |
+| Μνήμη | `/dashboard/ai-memory` | `src/components/memory/ai-memory-list.tsx`, `memory-search.tsx` (~467 γραμμές) | κανένας | `chat_memory` |
+| Finances | `/dashboard/finance` | μοιρασμένο `src/app/dashboard/[module]/page.tsx` (12 modules), `src/lib/modules.ts` slug `finance` | κανένας | `finance_entries` |
+| Sales | `/dashboard/sales` | ίδιο μοιρασμένο route, slug `sales`, + `src/components/sales/sales-stages.tsx` | κανένας | `leads` |
+| Trading | `/dashboard/trading` | ίδιο μοιρασμένο route, slug `trading` | κανένας | `trades` |
+
+Finances, Sales και Trading μοιράζονται ΤΟ ΙΔΙΟ route
+(`src/app/dashboard/[module]/page.tsx`, 12 modules συνολικά) — το
+σβήσιμο τους δεν σβήνει ένα αρχείο, αφαιρεί τρεις εγγραφές από το
+`src/lib/modules.ts` config array, πράγμα που ήδη ταιριάζει με το
+αντικατασταθέν σημείο 3 του μηνύματος («Τα δικά μου»): βλ. tasks/plan,
+δεν είναι αυτού του PR δουλειά.
+
+**ΈΡΕΥΝΑ → DEEP RESEARCH.** `dashboard.tools.names.research` άλλαξε σε
+«Deep Research» (en), «Βαθιά έρευνα» (el), και τα αντίστοιχα στις
+υπόλοιπες 8 γλώσσες (es/fr/de/it/pt/zh/ja/ar). Αυτό ΕΙΝΑΙ δύο λέξεις σε
+αρκετές γλώσσες — εξαίρεση τεκμηριωμένη στο `all-tools.test.mjs`
+(`ONE_WORD_EXCEPTIONS`), αφού ο ίδιος ο ιδιοκτήτης έγραψε το όνομα με
+κενό. Τίποτα άλλο δεν άλλαξε στο εργαλείο: η διαδρομή, το component, η
+άδεια κατάσταση `ToolShell` (ήδη έτοιμη).
+
+**ΕΛΕΓΧΟΙ.** `npm run gates`: **368/368 πράσινα, 25493 έλεγχοι** (ένα
+παραπάνω από το #332 λόγω των νέων ελέγχων στο `all-tools.test.mjs`).
+`node scripts/tests/all-tools.mutation.mjs`: 26/26 mutations πιάστηκαν.
+`npx tsc --noEmit` καθαρό. `npx eslint src --max-warnings=0`: η ίδια
+προϋπάρχουσα άσχετη προειδοποίηση (`voice-input.tsx`). `npm run
+i18n:first-run` ξανατρέχτηκε. Καμία migration, κανένας νέος διακόπτης.
+
+**ΑΠΟΔΕΙΞΗ — ΕΚΚΡΕΜΕΙ**, όπως και για το #332: χρειάζεται merge και
+μετά έλεγχος σε production, ανώνυμο παράθυρο, μη-διαχειριστή.
+
 ## 2026-10-22 (ΚΡΙΣΙΜΟ μήνυμα του ιδιοκτήτη: διακόπτες έξω, All Tools σε ομάδες, Coding ξανά)
 
 **ΤΙ ΖΗΤΗΘΗΚΕ.** Μεσούσης της Παρτίδας 3, ο ιδιοκτήτης διέκοψε με έξι

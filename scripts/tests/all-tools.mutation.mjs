@@ -41,34 +41,36 @@ const MUTANTS = [
     expect: "the grid builds its candidates the way the palette does",
   },
   {
-    name: "the alias table forgets slides",
+    // 2026-10-22: Presentations (Slides) left the grid, so its own alias
+    // entry is no longer exercised by any check here — Deep Research's
+    // "investigate" alias is the one still load-bearing, both in English
+    // (where no literal label contains that word) and in Greek (where
+    // aliasesFor's own-locale-plus-English fallback is what reaches it).
+    name: "the alias table forgets Deep Research's English synonyms",
     file: ALIASES,
-    from: '    en: ["presentations", "slides", "deck", "powerpoint"],',
-    to: '    en: ["presentations", "deck", "powerpoint"],',
-    // Red on the GREEK check, not the English one, and rightly: the
-    // English description of Presentations has the word "slides" in it,
-    // and the description is a candidate. In Greek only the alias reaches.
-    expect: "where the English synonyms still count",
+    from: '    en: ["deep research", "investigate", "dig", "thorough"],',
+    to: '    en: ["deep research", "dig", "thorough"],',
+    expect: "an alias with no Greek label anywhere near it",
   },
   {
     name: "a tool falls out of every group, so it is on no road but ⌘K",
     file: GROUPS,
-    from: '      "/dashboard/meetings",\n',
-    to: "",
+    from: '    hrefs: ["/dashboard/projects", "/dashboard/mission"],',
+    to: '    hrefs: ["/dashboard/projects"],',
     expect: "every tool the grid can draw is in a group or hidden on purpose",
   },
   {
     name: "a group names a screen the grid cannot draw",
     file: GROUPS,
-    from: '      "/dashboard/meetings",\n',
-    to: '      "/dashboard/meetings",\n      "/dashboard/films",\n',
+    from: '    hrefs: ["/dashboard/projects", "/dashboard/mission"],',
+    to: '    hrefs: ["/dashboard/projects", "/dashboard/mission", "/dashboard/films"],',
     expect: "every href in all-tools.ts is a tool the grid can draw",
   },
   {
     name: "a tool sits in two groups",
     file: GROUPS,
-    from: '    hrefs: ["/dashboard/finance",',
-    to: '    hrefs: ["/dashboard/chat", "/dashboard/finance",',
+    from: '    hrefs: ["/dashboard/website-builder"],',
+    to: '    hrefs: ["/dashboard/website-builder", "/dashboard/mission"],',
     expect: "in exactly one place",
   },
   {
@@ -79,32 +81,39 @@ const MUTANTS = [
     expect: "every hidden tool says why",
   },
   {
-    name: "the icon shrinks back to 16px",
+    // 2026-10-22: the icon shrank from 28px to 20px (h-7 w-7 -> h-5 w-5)
+    // when the squares shrank, so this now catches it going smaller
+    // still, not back to a since-removed 28px.
+    name: "the icon shrinks further, to 12px",
     file: GRID,
-    from: '<Icon className="h-7 w-7 text-foreground" aria-hidden="true" />',
-    to: '<Icon className="h-4 w-4 text-foreground" aria-hidden="true" />',
-    expect: "with a 28px icon",
+    from: '<Icon className="h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />',
+    to: '<Icon className="h-3 w-3 shrink-0 text-foreground" aria-hidden="true" />',
+    expect: "icon and name share one row",
   },
   {
-    name: "the square stops being square",
+    // 2026-10-22: the 1:1 square is gone (the owner's message after
+    // #332: "χωρίς άδειο χώρο στη μέση" — icon and name share a row
+    // instead of being pinned to opposite corners of a forced square).
+    // This now catches the icon and name losing that shared row.
+    name: "the icon and name stop sharing a row",
     file: GRID,
-    from: "flex aspect-square flex-col",
-    to: "flex min-h-[44px] flex-col",
-    expect: "1:1, on the card radius",
+    from: '<span className="flex min-w-0 items-center gap-2">',
+    to: '<span className="flex min-w-0 flex-col gap-2">',
+    expect: "icon and name share one row",
   },
   {
     name: "a long name is cut with an ellipsis",
     file: GRID,
-    from: '<span className="block break-words text-sm font-medium text-foreground">{name}</span>',
-    to: '<span className="block truncate text-sm font-medium text-foreground">{name}</span>',
+    from: '<span className="min-w-0 break-words text-sm font-medium text-foreground">{name}</span>',
+    to: '<span className="min-w-0 truncate text-sm font-medium text-foreground">{name}</span>',
     expect: "no name is cut with an ellipsis",
   },
   {
-    name: "three to a row on a computer",
+    name: "the row shrinks back to four-per-row, two-per-phone",
     file: GRID,
-    from: '"grid grid-cols-2 gap-3 lg:grid-cols-4"',
-    to: '"grid grid-cols-2 gap-3 lg:grid-cols-3"',
-    expect: "four in a row on a computer",
+    from: '"grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6"',
+    to: '"grid grid-cols-2 gap-3 lg:grid-cols-4"',
+    expect: "5-6 in a row on a computer",
   },
   {
     name: "the pin writes somewhere the sidebar does not read",
@@ -123,8 +132,8 @@ const MUTANTS = [
   {
     name: "a beta tag comes back",
     file: GRID,
-    from: '            <span className="block break-words text-sm font-medium text-foreground">{name}</span>',
-    to: '            <span className="block break-words text-sm font-medium text-foreground">{name}</span>\n            <span className="bg-tag">beta</span>',
+    from: '<span className="min-w-0 break-words text-sm font-medium text-foreground">{name}</span>',
+    to: '<span className="min-w-0 break-words text-sm font-medium text-foreground">{name}</span>\n            <span className="bg-tag">beta</span>',
     expect: "the grid draws no tag",
   },
   // MASTER 14.1 (2026-10-07).
@@ -145,7 +154,7 @@ const MUTANTS = [
   {
     name: "a square loses its one-word name",
     file: GROUPS,
-    from: '  "/dashboard/timeline": "library",\n',
+    from: '  "/dashboard/mission": "goals",\n',
     to: "",
     expect: "every grouped tool has a one-word name",
   },
@@ -165,10 +174,13 @@ const MUTANTS = [
     expect: "the square draws its own line",
   },
   {
-    name: "a German line grows into two sentences",
+    // 2026-10-22: Meetings paused out of the grid, so its line is no
+    // longer one lineKeys checks — Automations (still grouped) grows
+    // past LINE_MAX instead.
+    name: "a German line grows past the length limit",
     file: DE,
-    from: '"meetings": "Zusammenfassung und Aufgaben aus einer Aufnahme."',
-    to: '"meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst."',
+    from: '"automations": "Aufgaben, die von selbst laufen."',
+    to: '"automations": "Aufgaben, die von selbst laufen, ohne dass du jedes Mal eingreifen musst."',
     expect: "de: every square has its one line",
   },
   {

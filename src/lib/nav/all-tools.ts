@@ -21,10 +21,25 @@
 
 export type AllToolsGroupKey = "make" | "ask" | "automate" | "organise" | "business" | "learn";
 
+// SLIDES, POSTS, MEETINGS, LIBRARY, MEMORY, FINANCES, SALES AND TRADING
+// LEFT THIS GRID ON 2026-10-22 (the owner's message right after #332):
+// their hrefs are gone from the groups below and added to
+// HIDDEN_FROM_ALL_TOOLS instead — same mechanism as Predictions, Voice
+// and the rest of that table. Nothing about the tools themselves moved:
+// every route, page, API route, database table and i18n string is
+// untouched, and what each of them does is still reachable by typing it
+// into Chat. Finance, Sales and Trading were this grid's whole "business"
+// group, so that heading no longer renders at all — nothing hidden here
+// is a bug, ALL_TOOLS_GROUPS.filter((g) => g.items.length > 0) already
+// drops an empty group the same way it always has.
+//
+// WHAT WOULD BE DELETED, if the owner says so later (not done — see the
+// 2026-10-22 entry in docs/PROGRESS.md for the full per-tool list: route,
+// component folder, switch if any, and tables).
 export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly string[] }[] = [
   {
     key: "make",
-    hrefs: ["/dashboard/website-builder", "/dashboard/presentations", "/dashboard/posts"],
+    hrefs: ["/dashboard/website-builder"],
   },
   {
     key: "ask",
@@ -36,20 +51,20 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
   },
   {
     key: "organise",
-    hrefs: [
-      "/dashboard/projects",
-      "/dashboard/mission",
-      "/dashboard/meetings",
-      "/dashboard/timeline",
-    ],
+    hrefs: ["/dashboard/projects", "/dashboard/mission"],
   },
+  // EMPTY ON PURPOSE since 2026-10-22: Finance, Sales and Trading were
+  // this group's only three hrefs, and all three left the grid above.
+  // The key stays, in order, so a reader (and the "six groups, in the
+  // design's order" check) still sees where Business sat; the grid
+  // itself drops an empty group the same way it always has.
   {
     key: "business",
-    hrefs: ["/dashboard/finance", "/dashboard/sales", "/dashboard/trading"],
+    hrefs: [],
   },
   {
     key: "learn",
-    hrefs: ["/dashboard/deep-research", "/dashboard/ai-memory"],
+    hrefs: ["/dashboard/deep-research"],
   },
 ];
 
@@ -66,22 +81,20 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
  * was "Mine" is called the Library everywhere since 2026-10-14
  * (sidebar.items.mine, scripts/tests/library.test.mjs §7).
  */
+// SLIDES, POSTS, MEETINGS, LIBRARY, MEMORY, FINANCES, SALES AND TRADING
+// LOST THEIR ENTRY HERE TOO, 2026-10-22, for the same reason as
+// ALL_TOOLS_GROUPS above — only the ones ALL_TOOLS_GROUPS still draws a
+// square for get a one-word name read off this map. Their keyPrefix,
+// their names/lines record entry below, and every i18n string for them
+// are untouched on purpose (the owner's "don't delete code yet").
 export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/website-builder": "site",
-  "/dashboard/presentations": "slides",
-  "/dashboard/posts": "posts",
   "/dashboard/deep-research": "research",
   "/dashboard/data-analysis": "analyze",
   "/dashboard/files": "files",
   "/dashboard/automation": "automations",
   "/dashboard/projects": "projects",
   "/dashboard/mission": "goals",
-  "/dashboard/meetings": "meetings",
-  "/dashboard/timeline": "library",
-  "/dashboard/ai-memory": "memory",
-  "/dashboard/finance": "finances",
-  "/dashboard/sales": "sales",
-  "/dashboard/trading": "trading",
 };
 
 export type AllToolsNameKey =
@@ -137,6 +150,22 @@ export const SWITCH_ONLY_ITEMS: Readonly<Record<string, { label: string; hintKey
  * where 14.1 says so, from Settings or the sidebar.
  */
 export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
+  "/dashboard/presentations":
+    "Slides left the grid 2026-10-22 (the owner's message after #332); the page, its data and its address are unchanged, and the sidebar's own Slides row is untouched",
+  "/dashboard/posts":
+    "Posts left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+  "/dashboard/meetings":
+    "Meetings left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+  "/dashboard/timeline":
+    "the Library left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+  "/dashboard/ai-memory":
+    "Memory left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+  "/dashboard/finance":
+    "Finances left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
+  "/dashboard/sales":
+    "Sales left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
+  "/dashboard/trading":
+    "Trading left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
   "/dashboard/games":

@@ -196,17 +196,17 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
       !SWITCHED_SQUARES.some((s) => s.href === item.href);
     const isPinned = pins.includes(item.href);
     return (
-      <li key={item.href} className="relative">
+      <li key={item.href} className="group relative">
         <Link
           href={item.href}
           data-testid="tool-tile"
-          className="flex aspect-square flex-col justify-between rounded-card border border-border bg-panel p-4 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
+          className="flex flex-col gap-1 rounded-card border border-border bg-panel p-3 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
         >
-          <Icon className="h-7 w-7 text-foreground" aria-hidden="true" />
-          <span className="min-w-0">
-            <span className="block break-words text-sm font-medium text-foreground">{name}</span>
-            {description && <span className="mt-1 block break-words text-xs text-muted">{description}</span>}
+          <span className="flex min-w-0 items-center gap-2">
+            <Icon className="h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />
+            <span className="min-w-0 break-words text-sm font-medium text-foreground">{name}</span>
           </span>
+          {description && <span className="block break-words text-xs text-muted">{description}</span>}
         </Link>
         {canPin && (
           <button
@@ -215,8 +215,17 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
             aria-pressed={isPinned}
             aria-label={tSidebar(isPinned ? "rail.unpin" : "rail.pin", { tool: name })}
             data-testid="tool-pin"
-            className={`absolute end-1 top-1 flex h-11 w-11 items-center justify-center rounded-item hover:bg-panel-hover hover:text-foreground ${
-              isPinned ? "text-foreground" : "text-muted"
+            // HOVER-ONLY ON A COMPUTER, ALWAYS THERE ON TOUCH — the same
+            // `md:opacity-0 ... md:group-hover:opacity-100` split
+            // components/dashboard/conversation-rows.tsx already uses for
+            // its own per-row buttons, so a phone or tablet (no real
+            // hover) never loses the only way to pin a tool. A tile
+            // that IS pinned keeps its pin visible on a computer too —
+            // the same "already set stays shown" rule the favourite
+            // star on that same file uses — so unpinning never requires
+            // hunting for a hover target first.
+            className={`absolute end-1 top-1 flex h-11 w-11 items-center justify-center rounded-item hover:bg-panel-hover hover:text-foreground md:transition-opacity md:duration-150 md:focus-visible:opacity-100 md:group-hover:opacity-100 ${
+              isPinned ? "text-foreground" : "text-muted md:opacity-0"
             }`}
           >
             {isPinned ? <PinOff className="h-4 w-4" aria-hidden="true" /> : <Pin className="h-4 w-4" aria-hidden="true" />}
@@ -226,7 +235,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     );
   };
 
-  const GRID = "grid grid-cols-2 gap-3 lg:grid-cols-4";
+  const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6";
 
   return (
     <div>

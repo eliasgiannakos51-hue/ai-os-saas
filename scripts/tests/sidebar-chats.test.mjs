@@ -88,7 +88,7 @@ const flags = await loadTs(join(dir, "flags.ts"));
 check("chats-page is no longer a declared switch", !flags.isFlagKey("chats-page"));
 // AND THE SCAN STILL SEES SWITCHES, so the line above cannot pass by
 // a loader that returns nothing — the shape of an empty check.
-check("...while the switches that remain are still declared", flags.isFlagKey("all-tools-tiles"));
+check("...while the switches that remain are still declared", flags.isFlagKey("tool-shell"));
 const namesIt = ["src/lib/nav/rail.ts", SIDEBAR, PAGE, "src/app/dashboard/layout.tsx", CHAT_WORKSPACE, "src/app/dashboard/chat/page.tsx"]
   .filter((f) => existsSync(f) && /isFeatureOn\(\s*["']chats-page["']/.test(readFileSync(f, "utf8")));
 check(`nothing asks for it any more (${namesIt.length})`, namesIt.length === 0, namesIt.join(", "));

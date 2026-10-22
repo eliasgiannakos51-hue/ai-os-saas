@@ -50,7 +50,6 @@ const QUERY = "src/lib/data-analysis/query.ts";
 const OPS = "src/lib/coding/operations.ts";
 const HL = "src/lib/coding/highlight.ts";
 const WORKSPACE = "src/lib/ai/workspace-context.ts";
-const EN = "messages/en.json";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -336,21 +335,16 @@ const MUTANTS = [
 
   // ------------------------------------------------------------------
   // THE CODING PAGE.
+  //
+  // The four absences used to be their own declared array (CODE_LIMITS)
+  // rendered as a standing block on the page; both are gone since
+  // 2026-10-22 (the owner's critical message asked the block off the
+  // screen), so the two mutants that lived here — dropping one of the
+  // four, and the English sentence for "no commits" — no longer have a
+  // target under this gate. What the absences still say now lives in
+  // the "?" tip's doesNot (help.coding), under help-tips.test.mjs and
+  // .mutation.mjs's own, registry-wide checks over every tip's parts.
   // ------------------------------------------------------------------
-  {
-    gate: CODE_GATE,
-    name: "one of the four absences is quietly dropped",
-    file: OPS,
-    from: 'export const CODE_LIMITS = ["no_repository", "no_execution", "no_commits", "no_whole_project"] as const;',
-    to: 'export const CODE_LIMITS = ["no_repository", "no_execution", "no_commits"] as const;',
-  },
-  {
-    gate: CODE_GATE,
-    name: "the page stops saying it makes no commits",
-    file: EN,
-    from: '"no_commits": "It makes no commits, branches or pull requests."',
-    to: '"no_commits": "Commits."',
-  },
   {
     gate: CODE_GATE,
     name: "the user's paste stops being framed as data, so a comment can read as an instruction",

@@ -1,26 +1,26 @@
-// THE SAME FOUR STEPS, IN THE SAME SHAPE, ON THE FOUR SCREENS THAT HAVE
-// STEPS — and the one place where the brief and the product disagree.
+// THE SAME STEPS, IN THE SAME SHAPE, ON THE SCREENS THAT HAVE STEPS.
 //
-// Redesign phase 4 asked for a consistent step flow on Website,
-// Research, Files and Coding: "same button position, same step names,
-// same progress shape". Before it there was ONE step list in the whole
-// product — files-workspace.tsx's, written in classes only that file
-// had, with its own message keys and its own numbering. It existed
-// because of a real report ("I do not understand how it works and I
-// cannot ask a question") and it worked; the other three screens simply
-// never got the answer.
+// Redesign phase 4 asked for a consistent step flow on Website, Research
+// and Files: "same button position, same step names, same progress
+// shape". Before it there was ONE step list in the whole product —
+// files-workspace.tsx's, written in classes only that file had, with its
+// own message keys and its own numbering. It existed because of a real
+// report ("I do not understand how it works and I cannot ask a
+// question") and it worked; the other two screens simply never got the
+// answer.
 //
 // So the shape moved to components/ui/step-flow.tsx, the words to
 // stepFlow.* and the flows to lib/ui/step-flows.ts. This file is what
 // stops them drifting apart again.
 //
-// WHERE THE BRIEF IS NOT FOLLOWED, asserted rather than apologised for:
-// Coding's flow is three steps, not the Describe/Build/Test/Fix/Deploy
-// the brief named, because lib/coding/operations.ts's four declared
-// absences say that screen RUNS NOTHING and MAKES NO COMMITS. Section 4
-// checks that the flow contains none of those three words and that the
-// absences it defers to are still declared — if that page ever does run
-// code, this check goes red and the flow gets its steps back.
+// CODING HAD A FOURTH FLOW HERE until 2026-10-22, three steps rather
+// than the brief's Describe/Build/Test/Fix/Deploy — lib/coding/
+// operations.ts's declared absences said that screen RUNS NOTHING and
+// MAKES NO COMMITS, so drawing the other three would have been a
+// promise, not a state. The owner's critical message of that date asked
+// every step indicator off that screen outright, so there is no longer a
+// flow there to hold to a reduced shape: section 4 now just holds the
+// absences themselves, still declared, with no flow deferring to them.
 //
 // Run: node scripts/tests/step-flow.test.mjs
 import { readFileSync } from "node:fs";
@@ -53,16 +53,15 @@ for (const m of flowsSrc.matchAll(/^\s{2}(\w+): \[([^\]]+)\],$/gm)) {
 }
 
 // ---------------------------------------------------------------------
-console.log("== 1. the four flows, and the brief's steps ==");
-check(`the declaration was read (${Object.keys(FLOWS).length} flows)`, Object.keys(FLOWS).length === 4, JSON.stringify(FLOWS));
-// THE BRIEF'S OWN WORDS for three of the four. Written out here so a
-// step cannot quietly be dropped from a flow to make some other check
-// pass — that is the direction this kind of list actually rots in.
+console.log("== 1. the three flows, and the brief's steps ==");
+check(`the declaration was read (${Object.keys(FLOWS).length} flows)`, Object.keys(FLOWS).length === 3, JSON.stringify(FLOWS));
+// THE BRIEF'S OWN WORDS. Written out here so a step cannot quietly be
+// dropped from a flow to make some other check pass — that is the
+// direction this kind of list actually rots in.
 const EXPECTED = {
   website: ["describe", "generate", "edit", "preview", "publish"],
   research: ["question", "research", "sources", "answer"],
   files: ["upload", "ask", "answer"],
-  coding: ["describe", "generate", "review"],
 };
 for (const [flow, steps] of Object.entries(EXPECTED)) {
   check(
@@ -117,7 +116,6 @@ const SCREENS = {
   website: "src/components/website-builder/website-builder-workspace.tsx",
   research: "src/components/research/research-workspace.tsx",
   files: "src/components/files/files-workspace.tsx",
-  coding: "src/components/coding/coding-workspace.tsx",
 };
 // The design's filled control since 2026-10-04 is the white button
 // (bg-button); it was bg-orange-500/400 before.
@@ -171,22 +169,19 @@ for (const [flow, file] of Object.entries(SCREENS)) {
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 4. the three steps coding does not have ==");
+console.log("\n== 4. coding has no flow to defer, but still declares the absences ==");
 const coding = stripComments(readFileSync("src/lib/coding/operations.ts", "utf8"));
-// The absences the flow defers to, still declared in the product.
+// Coding's own step flow is gone (2026-10-22); what is still checkable
+// is that the three absences it used to defer to are still declared.
 for (const clause of ["IT RUNS NOTHING", "IT MAKES NO COMMITS", "IT DOES NOT BUILD A PROJECT"]) {
   const raw = readFileSync("src/lib/coding/operations.ts", "utf8");
   check(`coding still declares: ${clause}`, raw.includes(clause));
 }
-check(
-  "the coding flow claims none of test, fix or deploy",
-  !FLOWS.coding.some((s) => ["test", "fix", "deploy", "build"].includes(s)),
-  FLOWS.coding.join(", ")
-);
+check("coding is no longer one of the declared flows", FLOWS.coding === undefined, JSON.stringify(Object.keys(FLOWS)));
 check(
   "and CODE_OPERATIONS has not gained one that runs code",
   /CODE_OPERATIONS = \["generate", "explain", "find_bugs", "convert", "write_tests"\]/.test(coding),
-  "if this page learns to run or deploy, the flow above owes it those steps"
+  "if this page learns to run or deploy, the absences above need rewriting, not just a flow"
 );
 
 // ---------------------------------------------------------------------

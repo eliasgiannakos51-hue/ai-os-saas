@@ -77,11 +77,11 @@ const STAYS = [
 for (const [text, locale] of STAYS) check(`stays in the conversation: «${text}»`, open.openSiteFor(text, locale) === false);
 
 // ---------------------------------------------------------------------
-console.log("\n== 3. the chat, behind the switch ==");
+console.log("\n== 3. the chat, unconditional since 2026-10-22 ==");
 // ---------------------------------------------------------------------
-check('"chat-opens-tools" is declared as a switch', /\n  "chat-opens-tools": "/.test(code("src/lib/flags/flags.ts")));
+check('"chat-opens-tools" is no longer declared as a switch (removed, the owner\'s critical message)', !/\n  "chat-opens-tools": "/.test(code("src/lib/flags/flags.ts")));
 const chatPage = code("src/app/dashboard/chat/page.tsx");
-check("the Chat page reads it", /bypassesCredits, plan, opensTools\] = await Promise\.all\(\[[\s\S]*?isFeatureOn\("chat-opens-tools", user\),\s*\]\);/.test(chatPage) && /opensTools=\{opensTools\}/.test(chatPage));
+check("the Chat page sets it unconditionally", /const opensTools = true;/.test(chatPage) && /opensTools=\{opensTools\}/.test(chatPage));
 // A PLAN WITHOUT THE SITE GETS ITS WALL, from the gate /api/websites/generate
 // asks — not a «Φτιάξ' το» the route refuses in English (2026-10-08,
 // scripts/tests/chat-opens-tools-edges.prodtest.mjs).

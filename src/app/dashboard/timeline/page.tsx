@@ -14,7 +14,6 @@ import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
 import { loadFavoriteKeys } from "@/lib/favorites";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { loadLibrary } from "@/lib/library/load";
 import { isLibraryKind } from "@/lib/library/sources";
 import { LibraryView } from "@/components/library/library-view";
@@ -77,15 +76,14 @@ export default async function TimelinePage(
   // two would drift.
   if (searchParams.view === "fav") redirect("/dashboard/favorites");
 
-  // THE LIBRARY (package 5), behind the switch "library". This is the page
-  // All tools names «Βιβλιοθήκη» (lib/nav/all-tools.ts), and since
-  // 2026-10-14 so do its heading, its browser tab and its row, whether the
-  // switch is on or off (the owner's name, 2026-10-09). So with
-  // the switch on it opens on what the account MADE, in every tool; the
-  // entries this page always listed are one tab along, at ?view=entries,
-  // exactly as before. With the switch off the page is those entries, as
-  // it always was, under the same name.
-  const library = await isFeatureOn("library", user);
+  // THE LIBRARY (package 5), unconditional since 2026-10-22 — verified
+  // end-to-end 2026-10-08/09, bug found and fixed. This is the page All
+  // tools names «Βιβλιοθήκη» (lib/nav/all-tools.ts), and since 2026-10-14
+  // so do its heading, its browser tab and its row. It opens on what the
+  // account MADE, in every tool; the entries this page always listed are
+  // one tab along, at ?view=entries, exactly as before — that split stays
+  // a permanent tab, not a flag fallback.
+  const library = true;
   if (library && searchParams.view !== "entries") {
     const kind = isLibraryKind(searchParams.kind) ? searchParams.kind : null;
     const query = typeof searchParams.q === "string" ? searchParams.q.slice(0, 200) : "";

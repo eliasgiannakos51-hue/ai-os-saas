@@ -183,8 +183,8 @@ const MUTANTS = [
     {
       name: "the switch is declared again, with nothing reading it",
       file: FLAGS,
-      from: '  "all-tools-tiles":',
-      to: '  "chats-page": "Η σελίδα με όλες τις συνομιλίες",\n  "all-tools-tiles":',
+      from: '  "export-all":',
+      to: '  "chats-page": "Η σελίδα με όλες τις συνομιλίες",\n  "export-all":',
       expect: "chats-page is no longer a declared switch",
     },
     {

@@ -3041,7 +3041,6 @@
       "title": "Tous les outils",
       "description": "Chaque outil, avec une ligne sur ce qu’il fait.",
       "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil.",
-      "tilesHidden": "Décrivez ce que vous voulez dans le champ de l’accueil, ou, sur ordinateur, appuyez sur ⌘K et tapez le nom d’un outil.",
       "search": "Trouver un outil",
       "searchLabel": "Rechercher des outils",
       "noMatch": "Aucun outil ne s’appelle « {query} ». Décrivez-le plutôt dans le champ de l’accueil.",
@@ -3049,7 +3048,9 @@
         "make": "Créer",
         "ask": "Demander",
         "organise": "Organiser",
-        "business": "Entreprise"
+        "business": "Entreprise",
+        "automate": "Automatiser",
+        "learn": "Apprendre"
       },
       "names": {
         "site": "Site",
@@ -4809,49 +4810,25 @@
   },
   "coding": {
     "title": "Code",
-    "description": "Cinq choses qu'il fait, quatre qu'il ne fait pas. Tout porte exactement sur le texte de la zone.",
+    "description": "Une conversation qui écrit, explique, convertit et teste du code — sur exactement le texte que vous donnez.",
     "code": "Code",
     "copy": "Copier",
     "copied": "Copié",
-    "language": "Langage",
-    "targetLanguage": "Convertir en",
-    "useWorkspace": "Utiliser vos autres modules comme contexte",
-    "run": "Exécuter",
-    "running": "En cours…",
-    "result": "Résultat",
-    "limits": {
-      "title": "Ce qu'il ne fait PAS",
-      "no_repository": "Il n'a pas de dépôt. Il ne voit ni votre base de code ni le fichier d'à côté.",
-      "no_execution": "Il n'exécute rien. Ni votre code, ni celui qu'il écrit, ni les tests qu'il écrit.",
-      "no_commits": "Il ne fait ni commit, ni branche, ni pull request.",
-      "no_whole_project": "Il ne construit pas de projet. Une fonction, un fichier, un collage.",
-      "later": "Ces quatre-là, c'est la version suivante, pas celle-ci."
-    },
     "operations": {
       "generate": {
-        "label": "Écrire un extrait",
-        "description": "Décrivez ce qu'il vous faut et recevez une fonction, avec ses hypothèses et ses manques énoncés.",
-        "placeholder": "Une fonction qui prend une liste de commandes et renvoie la marge par client…"
+        "label": "Écrire un extrait"
       },
       "explain": {
-        "label": "Expliquer ceci",
-        "description": "Collez du code et recevez ce qu'il fait, dans l'ordre, en nommant les lignes concernées.",
-        "placeholder": "Collez le code à expliquer…"
+        "label": "Expliquer ceci"
       },
       "find_bugs": {
-        "label": "Trouver des bugs",
-        "description": "Chaque constat nomme l'entrée ou l'état qui le déclenche. Un constat sans cas d'échec est une préférence.",
-        "placeholder": "Collez le code à vérifier…"
+        "label": "Trouver des bugs"
       },
       "convert": {
-        "label": "Convertir",
-        "description": "Réécrivez-le dans un autre langage, avec la liste de tout ce qui NE passe PAS.",
-        "placeholder": "Collez le code à convertir…"
+        "label": "Convertir"
       },
       "write_tests": {
-        "label": "Écrire des tests",
-        "description": "Le cas ordinaire, les bornes et les façons d'échouer. Pas seulement le chemin heureux.",
-        "placeholder": "Collez le code à tester…"
+        "label": "Écrire des tests"
       }
     },
     "errors": {
@@ -4860,15 +4837,19 @@
       "failed": "Ça n'a pas marché — réessayez."
     },
     "history": {
-      "title": "Historique",
-      "search": "Rechercher",
-      "folder": "Dossier",
-      "allFolders": "Tous les dossiers",
-      "empty": "Rien ici pour l'instant.",
-      "input": "Entrée",
-      "output": "Sortie",
-      "importedNote": "note d'avant",
-      "failed": "échec"
+      "failed": "échoué"
+    },
+    "new": "Nouveau",
+    "placeholder": "Décrivez ce qu'il vous faut, collez du code, ou demandez un changement…",
+    "made": "Voilà, à côté de la conversation.",
+    "changed": "Modifié. La nouvelle version est à côté de la conversation, avec ce qui a changé marqué.",
+    "empty": {
+      "heading": "Qu'est-ce qu'on construit ?"
+    },
+    "example": {
+      "function": "Une fonction qui prend une liste de commandes et renvoie la marge par client",
+      "explain": "Explique ce que fait ce code",
+      "tests": "Écris des tests pour cette fonction"
     }
   },
   "presentations": {

@@ -3041,7 +3041,6 @@
       "title": "Todas las herramientas",
       "description": "Cada herramienta, con una línea sobre lo que hace.",
       "orPress": "O pulsa ⌘K y escribe su nombre, o descríbelo en el campo de Inicio.",
-      "tilesHidden": "Describe lo que quieres en el campo de Inicio o, en el ordenador, pulsa ⌘K y escribe el nombre de una herramienta.",
       "search": "Buscar una herramienta",
       "searchLabel": "Buscar herramientas",
       "noMatch": "Ninguna herramienta se llama «{query}». Descríbela en el campo de Inicio.",
@@ -3049,7 +3048,9 @@
         "make": "Crear",
         "ask": "Preguntar",
         "organise": "Organizar",
-        "business": "Negocio"
+        "business": "Negocio",
+        "automate": "Automatizar",
+        "learn": "Aprender"
       },
       "names": {
         "site": "Sitio",
@@ -4809,49 +4810,25 @@
   },
   "coding": {
     "title": "Código",
-    "description": "Cinco cosas que hace y cuatro que no. Todo funciona exactamente sobre el texto de la caja.",
+    "description": "Una conversación que escribe, explica, convierte y prueba código — sobre exactamente el texto que le das.",
     "code": "Código",
     "copy": "Copiar",
     "copied": "Copiado",
-    "language": "Lenguaje",
-    "targetLanguage": "Convertir a",
-    "useWorkspace": "Usar tus otros módulos como contexto",
-    "run": "Ejecutar",
-    "running": "Trabajando…",
-    "result": "Resultado",
-    "limits": {
-      "title": "Lo que NO hace",
-      "no_repository": "No tiene repositorio. No ve tu código ni el archivo de al lado.",
-      "no_execution": "No ejecuta nada. Ni tu código, ni el que escribe, ni las pruebas que escribe.",
-      "no_commits": "No hace commits, ramas ni pull requests.",
-      "no_whole_project": "No construye un proyecto. Una función, un archivo, un pegado.",
-      "later": "Esas cuatro son la próxima versión, no esta."
-    },
     "operations": {
       "generate": {
-        "label": "Escribir un fragmento",
-        "description": "Describe lo que necesitas y recibe una función, con sus supuestos y sus lagunas dichos.",
-        "placeholder": "Una función que toma una lista de pedidos y devuelve el margen por cliente…"
+        "label": "Escribir un fragmento"
       },
       "explain": {
-        "label": "Explicar esto",
-        "description": "Pega código y recibe qué hace, en orden, nombrando las líneas de las que habla.",
-        "placeholder": "Pega el código que quieres que se explique…"
+        "label": "Explicar esto"
       },
       "find_bugs": {
-        "label": "Buscar errores",
-        "description": "Cada hallazgo nombra la entrada o el estado que lo provoca. Un hallazgo sin caso que falle es una preferencia.",
-        "placeholder": "Pega el código que quieres revisar…"
+        "label": "Buscar errores"
       },
       "convert": {
-        "label": "Convertir",
-        "description": "Reescríbelo en otro lenguaje, con la lista de todo lo que NO se traslada.",
-        "placeholder": "Pega el código que quieres convertir…"
+        "label": "Convertir"
       },
       "write_tests": {
-        "label": "Escribir pruebas",
-        "description": "El caso normal, los límites y las formas de fallar. No sólo el camino feliz.",
-        "placeholder": "Pega el código que quieres probar…"
+        "label": "Escribir pruebas"
       }
     },
     "errors": {
@@ -4860,15 +4837,19 @@
       "failed": "No funcionó — inténtalo de nuevo."
     },
     "history": {
-      "title": "Historial",
-      "search": "Buscar",
-      "folder": "Carpeta",
-      "allFolders": "Todas las carpetas",
-      "empty": "Aquí todavía no hay nada.",
-      "input": "Entrada",
-      "output": "Salida",
-      "importedNote": "nota anterior",
       "failed": "falló"
+    },
+    "new": "Nuevo",
+    "placeholder": "Describe lo que necesitas, pega código, o pide un cambio…",
+    "made": "Aquí está, junto a la conversación.",
+    "changed": "Cambiado. La nueva versión está junto a la conversación, con lo que cambió marcado.",
+    "empty": {
+      "heading": "¿Qué estamos construyendo?"
+    },
+    "example": {
+      "function": "Una función que toma una lista de pedidos y devuelve el margen por cliente",
+      "explain": "Explica qué hace este código",
+      "tests": "Escribe pruebas para esta función"
     }
   },
   "presentations": {

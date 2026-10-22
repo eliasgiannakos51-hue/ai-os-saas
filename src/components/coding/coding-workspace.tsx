@@ -1,23 +1,18 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Play, Square } from "lucide-react";
-import { useToast } from "@/components/toast/toast-context";
-import { StepFlow } from "@/components/ui/step-flow";
-import { CodeBlock } from "@/components/coding/code-block";
+import { Plus, PanelLeft } from "lucide-react";
+import { Earth } from "@/components/brand/earth";
+import { HelpTip } from "@/components/ui/help-tip";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
-import {
-  CODE_LANGUAGES,
-  CODE_LIMITS,
-  CODE_OPERATIONS,
-  MAX_INPUT_CHARS,
-  OPERATION_SPECS,
-  type CodeOperation,
-} from "@/lib/coding/operations";
+import { useToast } from "@/components/toast/toast-context";
+import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
+import { ShellHistoryColumn, type ShellHistoryRow } from "@/components/shell/shell-history-column";
+import { CodeBlock } from "@/components/coding/code-block";
+import { diffLines } from "@/lib/coding/diff";
 import { guessLanguage } from "@/lib/coding/highlight";
-import { matchesSearch } from "@/lib/text/search-match";
+import { MAX_INPUT_CHARS, OPERATION_SPECS, type CodeOperation } from "@/lib/coding/operations";
 
 export type CodeSession = {
   id: string;
@@ -27,70 +22,90 @@ export type CodeSession = {
   language: string | null;
   targetLanguage: string | null;
   output: string | null;
-  folder: string | null;
   status: string;
   source: string;
   createdAt: string;
 };
 
-export function CodingWorkspace({
-  sessions,
-  folders,
-  initialTask,
-}: {
-  sessions: CodeSession[];
-  folders: string[];
-  /** The brief Home routed here, already in the box, never auto-run. */
-  initialTask?: string;
-}) {
+type Turn = { id: string; role: "user" | "tool"; text: string };
+type Code = { content: string; language: string | null; isEdit: boolean; priorContent: string | null };
+
+/**
+ * CODING, AS A CONVERSATION (the owner's critical message, 2026-10-22).
+ *
+ * Bespoke, not `ToolShell` — Coding never used that shell to begin with
+ * (components/shell/tool-shell.tsx explains why in its own header) — but
+ * drawing the same two shapes it standardised: the empty landing (small
+ * globe, one heading, up to three examples that send at once) and the
+ * [◧] history column (components/shell/shell-history-column.tsx, shared
+ * with every tool that has moved onto it).
+ *
+ * One field. What operation runs — generate, explain, find bugs,
+ * convert, write tests — is read off what was typed by `planTurn`
+ * (lib/coding/operations.ts), not chosen from a row of buttons; a plain
+ * remark while code is already on screen is a change to make to it, and
+ * the result is diffed against what was there, green added and red
+ * removed (lib/coding/diff.ts).
+ *
+ * ONE ROW PER TURN IN code_sessions, same as it always was — there is no
+ * migration here. The conversation itself (several turns chained
+ * together with the code they produced) lives in this component's own
+ * state for the length of the visit; [◧] still opens any one past turn
+ * from history, the same single exchange the old page could.
+ */
+export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSession[]; initialTask?: string }) {
   const t = useTranslations("coding");
   const tSteps = useTranslations("aiSteps");
-  const router = useRouter();
+  const tShell = useTranslations("dashboard.toolShell");
   const { addToast } = useToast();
-
-  const [operation, setOperation] = useState<CodeOperation>("generate");
-  const [input, setInput] = useState(initialTask ?? "");
-  const [language, setLanguage] = useState<string>("typescript");
-  const [targetLanguage, setTargetLanguage] = useState<string>("python");
-  const [useWorkspace, setUseWorkspace] = useState(true);
-  const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<{ output: string; kind: "code" | "prose" } | null>(null);
-  const [folderFilter, setFolderFilter] = useState<string>("");
-  const [search, setSearch] = useState("");
-
-  const spec = OPERATION_SPECS[operation];
-
-  // THROUGH THE SHARED MATCHER, not toLowerCase().includes(). A Greek
-  // developer searching "ΣΥΝΑΡΤΗΣΗ" has to find a snippet titled
-  // "συνάρτηση", and lower-casing alone leaves the accents and the final
-  // sigma in place. lib/text/search-match.ts is the one implementation of
-  // that, and accent-search.test.mjs exists to stop a second one.
-  const visible = useMemo(
-    () =>
-      sessions.filter((session) => {
-        if (folderFilter && session.folder !== folderFilter) return false;
-        if (!search.trim()) return true;
-        return (
-          matchesSearch(session.title, search) ||
-          matchesSearch(session.output, search) ||
-          matchesSearch(session.input, search)
-        );
-      }),
-    [sessions, folderFilter, search]
-  );
-
-  // THE STOP BUTTON — V4.6. One controller per run; Stop aborts the fetch,
-  // the route aborts the provider call and releases the hold, nothing is
-  // charged and nothing is recorded as failed.
+  const composerRef = useRef<ChatComposerHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
-  function stopRun() {
-    abortRef.current?.abort();
+  const turnCounter = useRef(0);
+
+  const rows = sessions;
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [code, setCode] = useState<Code | null>(null);
+  const [sending, setSending] = useState(false);
+  const [openedId, setOpenedId] = useState<string | null>(null);
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.codingHistoryColumn") === "open");
+    } catch {
+      // private window or storage off: closed, which is the default
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((open) => {
+      const next = !open;
+      try {
+        window.localStorage.setItem("ionexa.codingHistoryColumn", next ? "open" : "closed");
+      } catch {
+        // nothing to persist to; the toggle still works for this visit
+      }
+      return next;
+    });
   }
 
-  async function run() {
-    if (!input.trim()) return;
-    setRunning(true);
-    setResult(null);
+  function say(role: Turn["role"], text: string) {
+    turnCounter.current += 1;
+    setTurns((prev) => [...prev, { id: `${role}-${turnCounter.current}`, role, text }]);
+  }
+
+  function startNew() {
+    setTurns([]);
+    setCode(null);
+    setOpenedId(null);
+  }
+
+  async function send(text: string) {
+    if (sending) return;
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setOpenedId(null);
+    say("user", trimmed);
+    setSending(true);
     const controller = new AbortController();
     abortRef.current = controller;
     try {
@@ -98,269 +113,203 @@ export function CodingWorkspace({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({
-          operation,
-          input,
-          // codeLanguage: this is typescript/python, not the language the
-          // reply is written in. See the route for why the two must not
-          // share a field name.
-          codeLanguage: spec.inputKind === "code" ? language : null,
-          targetCodeLanguage: spec.needsTargetLanguage ? targetLanguage : null,
-          useWorkspace,
-        }),
+        body: JSON.stringify({ text: trimmed, priorCode: code?.content ?? null, priorLanguage: code?.language ?? null }),
       });
-      const body = await response.json().catch(() => null);
-      if (!response.ok) {
-        addToast(
+      const body = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+      if (!response.ok || !body?.ok) {
+        say(
+          "tool",
           body?.error === "too_long"
             ? t("errors.tooLong", { limit: MAX_INPUT_CHARS })
             : body?.error === "ai_unavailable"
               ? t("errors.unavailable")
-              : t("errors.failed"),
-          "error"
+              : t("errors.failed")
         );
         return;
       }
-      setResult({ output: String(body.output ?? ""), kind: body.outputKind === "prose" ? "prose" : "code" });
-      router.refresh();
-    } catch (err) {
-      // An aborted fetch rejects; that is the stop button, not a fault.
-      if (!controller.signal.aborted) {
-        addToast(t("errors.failed"), "error");
+      const output = String(body.output ?? "");
+      if (body.outputKind === "code") {
+        const isEdit = body.isEdit === true;
+        const language = typeof body.resultLanguage === "string" ? body.resultLanguage : guessLanguage(output);
+        setCode({ content: output, language, isEdit, priorContent: isEdit ? code?.content ?? null : null });
+        say("tool", isEdit ? t("changed") : t("made"));
       } else {
-        addToast(tSteps("stopped"));
+        say("tool", output);
       }
+    } catch {
+      say("tool", controller.signal.aborted ? tSteps("stopped") : t("errors.failed"));
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
-      setRunning(false);
+      setSending(false);
     }
   }
 
-  // THREE STEPS, AND THE BRIEF ASKED FOR FIVE. See lib/ui/step-flows.ts:
-  // Test, Fix and Deploy are not steps this page has, because it runs
-  // nothing and deploys nothing, and drawing them greyed-out would be
-  // the promise the rename of this page was meant to stop making.
-  const codingStep = result ? 2 : running ? 1 : 0;
+  function openFromHistory(id: string) {
+    const row = rows.find((r) => r.id === id);
+    if (!row) return;
+    const spec = OPERATION_SPECS[row.operation as CodeOperation] ?? OPERATION_SPECS.generate;
+    const toolText = row.status === "failed" ? t("errors.failed") : spec.outputKind === "prose" ? row.output ?? "" : t("made");
+    setTurns([
+      { id: `${id}-u`, role: "user", text: row.input },
+      { id: `${id}-t`, role: "tool", text: toolText },
+    ]);
+    setCode(
+      spec.outputKind === "code" && row.output
+        ? { content: row.output, language: row.targetLanguage ?? row.language, isEdit: false, priorContent: null }
+        : null
+    );
+    setOpenedId(id);
+    if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+  }
+
+  const historyRows: ShellHistoryRow[] = rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    status: row.status === "failed" ? t("history.failed") : t(`operations.${row.operation}.label`),
+  }));
+
+  const showEmpty = turns.length === 0 && !code;
 
   return (
-    <div className="space-y-6">
-      <StepFlow flow="coding" current={codingStep} />
-      {/* WHAT IT DOES NOT DO, ON THE SCREEN. The previous version of this
-          page was a form that looked like a code generator and was not;
-          the fix for that is not a better name, it is saying the four
-          absences out loud where somebody about to rely on them reads
-          them. */}
-      <div className="surface">
-        <h2 className="text-sm font-semibold text-foreground">{t("limits.title")}</h2>
-        <ul className="mt-2 space-y-1">
-          {CODE_LIMITS.map((limit) => (
-            <li key={limit} className="text-xs text-muted">
-              — {t(`limits.${limit}`)}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-xs text-muted">{t("limits.later")}</p>
+    <div className="flex h-full flex-col overflow-hidden" data-testid="coding-workspace">
+      <div className="flex items-center gap-2 px-4 py-2">
+        <button
+          type="button"
+          onClick={toggleHistory}
+          aria-expanded={historyOpen}
+          aria-label={tShell(historyOpen ? "hideHistory" : "showHistory")}
+          data-testid="coding-history-toggle"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+        >
+          <PanelLeft className="h-4 w-4" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={startNew}
+          aria-label={t("new")}
+          data-testid="coding-new"
+          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-item px-2 text-sm text-muted hover:bg-panel-hover hover:text-foreground"
+        >
+          <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="hidden whitespace-nowrap sm:inline">{t("new")}</span>
+        </button>
+        <h1 className="min-w-0 break-words text-sm font-semibold text-foreground">{t("title")}</h1>
+        <HelpTip helpKey="help.coding" />
       </div>
 
-      {/* ---- the five operations ---- */}
-      <div className="surface">
-        <div className="flex flex-wrap gap-2">
-          {CODE_OPERATIONS.map((candidate) => (
-            <button
-              key={candidate}
-              type="button"
-              onClick={() => setOperation(candidate)}
-              aria-pressed={operation === candidate}
-              className={`min-h-[44px] rounded-full border px-4 text-xs transition-colors duration-150 ${
-                operation === candidate
-                  ? "border-foreground/40 bg-foreground/10 text-foreground"
-                  : "border-border text-muted hover:text-foreground"
-              }`}
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+        {historyOpen && (
+          <>
+            <div
+              data-testid="coding-history"
+              className="absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:w-[280px]"
             >
-              {t(`operations.${candidate}.label`)}
-            </button>
-          ))}
-        </div>
-        <p className="mt-2 text-xs text-muted">{t(`operations.${operation}.description`)}</p>
-
-        <div className="mt-3 flex flex-wrap gap-3">
-          {spec.inputKind === "code" && (
-            <label className="text-xs text-muted">
-              <span className="mb-1 block">{t("language")}</span>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-sm text-foreground"
-              >
-                {CODE_LANGUAGES.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {spec.needsTargetLanguage && (
-            <label className="text-xs text-muted">
-              <span className="mb-1 block">{t("targetLanguage")}</span>
-              <select
-                value={targetLanguage}
-                onChange={(e) => setTargetLanguage(e.target.value)}
-                className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-sm text-foreground"
-              >
-                {CODE_LANGUAGES.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-
-        <textarea
-          autoFocus
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            // A GUESS, ONLY WHEN IT IS CONFIDENT, and only for a paste
-            // the user has not already labelled. guessLanguage returns
-            // null unless something is distinctive — a wrong guess
-            // colours Python as SQL, which is worse than grey.
-            if (spec.inputKind === "code") {
-              const guessed = guessLanguage(e.target.value);
-              if (guessed) setLanguage(guessed);
-            }
-          }}
-          rows={10}
-          maxLength={MAX_INPUT_CHARS}
-          placeholder={t(`operations.${operation}.placeholder`)}
-          aria-label={t(`operations.${operation}.label`)}
-          className="mt-3 w-full rounded-field border border-border bg-panel px-4 py-3 font-mono text-xs text-foreground outline-none placeholder:text-muted focus:border-foreground/60"
-        />
-        <p className="mt-1 text-end text-[11px] text-muted">
-          {input.length} / {MAX_INPUT_CHARS}
-        </p>
-
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <label className="flex min-h-[44px] items-center gap-2 text-xs text-muted">
-            <input
-              type="checkbox"
-              checked={useWorkspace}
-              onChange={(e) => setUseWorkspace(e.target.checked)}
-              className="h-4 w-4 accent-foreground"
+              <ShellHistoryColumn rows={historyRows} activeId={openedId} onOpen={openFromHistory} onNavigate={toggleHistory} />
+            </div>
+            <button
+              type="button"
+              aria-label={tShell("hideHistory")}
+              onClick={toggleHistory}
+              className="absolute inset-0 z-20 bg-background/50 md:hidden"
             />
-            {t("useWorkspace")}
-          </label>
-          {running && (
-            <button
-              type="button"
-              onClick={stopRun}
-              data-testid="coding-stop"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-foreground/60 px-4 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-foreground/10"
-            >
-              <Square className="h-3 w-3 fill-current" aria-hidden="true" />
-              {tSteps("stop")}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => void run()}
-            disabled={running || !input.trim()}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-button px-5 text-sm font-semibold text-button-ink transition-opacity duration-150 hover:opacity-90 disabled:opacity-40"
-          >
-            {/* THE GLOBE, NOT A SPINNER. Running an operation is the
-                model thinking, which is the one wait this product marks
-                with its own signature; a generic ring would spend the
-                mark on nothing and make the mark mean nothing. The
-                mechanical waits on this page — there are none — would
-                get the ring. */}
-            {running ? <ThinkingIndicator size="sm" tone="inherit" /> : <Play className="h-4 w-4" />}
-            {running ? t("running") : t("run")}
-          </button>
-        </div>
-      </div>
+          </>
+        )}
 
-      {result && (
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-foreground">{t("result")}</h2>
-          {result.kind === "code" ? (
-            <CodeBlock code={result.output} language={spec.needsTargetLanguage ? targetLanguage : language} />
-          ) : (
-            <div className="whitespace-pre-wrap surface-tight text-sm text-foreground">
-              {result.output}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
+          <div className="flex min-h-0 flex-1 flex-col lg:max-w-md lg:border-e lg:border-divider">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+              {showEmpty ? (
+                <div data-testid="coding-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
+                  <Earth variant="small" px={96} />
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t("empty.heading")}</h2>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {(["function", "explain", "tests"] as const).map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => void send(t(`example.${key}`))}
+                        data-testid="coding-example"
+                        className="min-h-[44px] rounded-full bg-panel px-4 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                      >
+                        {t(`example.${key}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <ol className="chat-measure space-y-4">
+                  {turns.map((turn) => (
+                    <li key={turn.id} data-role={turn.role} className={turn.role === "user" ? "flex justify-end" : ""}>
+                      <p
+                        className={
+                          turn.role === "user"
+                            ? "max-w-[85%] whitespace-pre-wrap break-words rounded-card bg-panel px-3 py-2 text-sm text-foreground"
+                            : "whitespace-pre-wrap break-words text-sm leading-relaxed text-body"
+                        }
+                      >
+                        {turn.text}
+                      </p>
+                    </li>
+                  ))}
+                  {sending && (
+                    <li aria-live="polite" className="inline-flex items-center gap-2 text-xs text-muted">
+                      <ThinkingIndicator size="sm" />
+                      {tSteps("working")}
+                    </li>
+                  )}
+                </ol>
+              )}
+            </div>
+            <div className="p-4 sm:p-6">
+              <div className="chat-measure">
+                <ChatComposer ref={composerRef} sending={sending} onSend={send} onStop={() => abortRef.current?.abort()} initialText={initialTask} placeholder={t("placeholder")} />
+              </div>
+            </div>
+          </div>
+
+          {code && (
+            <div className="flex min-h-0 flex-1 flex-col lg:w-[60%]" data-testid="coding-work">
+              <div className="flex items-center gap-2 px-4 py-2 sm:px-6">
+                <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{code.language ?? t("code")}</p>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+                {code.isEdit && code.priorContent ? (
+                  <DiffView oldCode={code.priorContent} newCode={code.content} />
+                ) : (
+                  <CodeBlock code={code.content} language={code.language} />
+                )}
+              </div>
             </div>
           )}
         </div>
-      )}
-
-      {/* ---- history ---- */}
-      <div className="surface">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold text-foreground">{t("history.title")}</h2>
-          <div className="flex flex-wrap gap-2">
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("history.search")}
-              aria-label={t("history.search")}
-              className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-xs text-foreground"
-            />
-            {folders.length > 0 && (
-              <select
-                value={folderFilter}
-                onChange={(e) => setFolderFilter(e.target.value)}
-                aria-label={t("history.folder")}
-                className="min-h-[44px] rounded-item border border-border bg-panel px-3 text-xs text-foreground"
-              >
-                <option value="">{t("history.allFolders")}</option>
-                {folders.map((folder) => (
-                  <option key={folder} value={folder}>
-                    {folder}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        </div>
-
-        {visible.length === 0 ? (
-          <p className="mt-3 text-xs text-muted">{t("history.empty")}</p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {visible.map((session) => (
-              <li key={session.id} className="border-t border-border pt-2">
-                <details>
-                  <summary className="cursor-pointer text-sm text-foreground">
-                    {session.title}
-                    <span className="ms-2 text-[11px] text-muted">
-                      {t(`operations.${session.operation}.label`)}
-                      {session.folder ? ` · ${session.folder}` : ""}
-                      {/* A ROW IMPORTED FROM THE OLD TRACKER SAYS SO. It
-                          has no output and never had one; letting it sit
-                          unmarked among real runs would make the history
-                          claim the tool produced things it did not. */}
-                      {session.source === "note" ? ` · ${t("history.importedNote")}` : ""}
-                      {session.status === "failed" ? ` · ${t("history.failed")}` : ""}
-                    </span>
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    <CodeBlock code={session.input} language={session.language} label={t("history.input")} />
-                    {session.output ? (
-                      <CodeBlock
-                        code={session.output}
-                        language={session.targetLanguage ?? session.language}
-                        label={t("history.output")}
-                      />
-                    ) : null}
-                  </div>
-                </details>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
+    </div>
+  );
+}
+
+/** The change between two versions of the same code, as boxes: green for
+ *  a line added, red (struck through) for a line removed, plain for a
+ *  line neither — lib/coding/diff.ts does the comparing, this only
+ *  draws it. */
+function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
+  const lines = diffLines(oldCode, newCode);
+  return (
+    <div className="overflow-x-auto rounded-card border border-border bg-workspace p-3 font-mono text-xs leading-relaxed">
+      {lines.map((line, index) => (
+        <div
+          key={index}
+          data-testid={line.kind === "added" ? "coding-diff-added" : line.kind === "removed" ? "coding-diff-removed" : "coding-diff-same"}
+          className={
+            line.kind === "added"
+              ? "rounded-item bg-success/10 px-2 text-success"
+              : line.kind === "removed"
+                ? "rounded-item bg-danger/10 px-2 text-danger line-through"
+                : "px-2 text-foreground"
+          }
+        >
+          {line.text.length > 0 ? line.text : " "}
+        </div>
+      ))}
     </div>
   );
 }

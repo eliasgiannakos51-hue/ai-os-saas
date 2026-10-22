@@ -115,17 +115,17 @@ check("a colour this does not know is passed as said", unknown.brief.includes("B
 check("nothing remembered adds nothing", brand.brandBriefFor({ name: null, colours: [] }, "Site.").brief === "");
 
 // ---------------------------------------------------------------------
-console.log("\n== 5. the wiring, behind the switch ==");
+console.log("\n== 5. the wiring, unconditional since 2026-10-22 ==");
 // ---------------------------------------------------------------------
-check('"brand-memory" is declared as a switch', /\n  "brand-memory": "/.test(code("src/lib/flags/flags.ts")));
+check('"brand-memory" is no longer declared as a switch (removed, the owner\'s critical message)', !/\n  "brand-memory": "/.test(code("src/lib/flags/flags.ts")));
 const extractor = code("src/lib/chat/memory.ts");
 check("the extractor asks for the brand lines only with the switch on", /text: brand \? `\$\{EXTRACTION_SYSTEM_PROMPT\}\$\{BRAND_EXTRACTION_RULE\}` : EXTRACTION_SYSTEM_PROMPT/.test(extractor));
 check("...naming both prefixes", /BRAND_EXTRACTION_RULE =[\s\S]{0,200}\$\{BRAND_NAME_PREFIX\}[\s\S]{0,400}\$\{BRAND_COLOURS_PREFIX\}/.test(extractor));
 check("...and records each row on its own", /for \(const row of brand \? splitBrandLines\(extracted\) : \[extracted\]\) \{[\s\S]{0,200}p_memory_text: row,/.test(extractor));
-check("the chat passes the switch", /extractAndStoreMemory\(\{[\s\S]{0,300}brand: await isFeatureOn\("brand-memory", user\)/.test(code("src/app/api/chat/route.ts")));
+check("the chat passes it unconditionally", /extractAndStoreMemory\(\{[\s\S]{0,300}brand: true,/.test(code("src/app/api/chat/route.ts")));
 const site = code("src/app/api/websites/generate/process/route.ts");
-check("the site reads the business under the website memory rule AND the switch",
-  /memoryActiveFor\(\{ surface: "website", user, planLimit: [^}]+\}\) &&\s*\(await isFeatureOn\("brand-memory", user\)\)\s*\?\s*brandBriefFor\(readBrand\(await loadMemories\(supabase, user\.id,/.test(site));
+check("the site reads the business under the website memory rule alone, the switch gone",
+  /memoryActiveFor\(\{ surface: "website", user, planLimit: [^}]+\}\)\s*\?\s*brandBriefFor\(readBrand\(await loadMemories\(supabase, user\.id,/.test(site));
 check("...and the model is sent the brief with it", /generateWebsiteHtml\(\s*apiKey,\s*`\$\{description\}\$\{brand\?\.brief \?\? ""\}`,/.test(site));
 check("...and what was used is a note on the row", /notes\.push\(\{ kind: "fromMemory", name: brand\.used\.name, colours: brand\.used\.colours \}\)/.test(site));
 const line = code("src/components/website-builder/use-remembered-line.ts");

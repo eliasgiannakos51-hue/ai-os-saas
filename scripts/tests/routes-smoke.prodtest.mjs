@@ -70,12 +70,10 @@ function setPlan(tier) {
 // needs to render its shell.
 const TABLE_ROWS = {
   user_credits: [{ user_id: USER.id, credits_remaining: 500, credits_total: 500 }],
-  // All tools draws no square while `all-tools-tiles` is off, which is
-  // where it starts (src/lib/flags/flags.ts FIRST_AUDIENCE, the owner's
-  // decision of 2026-10-14). The group headings are read off that page
-  // below, so this run opens the switch; scripts/tests/all-tools-tiles.prodtest.mjs
-  // is the one that walks the page with it closed.
-  feature_flags: [{ key: "all-tools-tiles", audience: "everyone" }],
+  // All Tools drew no square while `all-tools-tiles` was off. That switch
+  // was removed on 2026-10-22 (the owner's critical message: nothing
+  // behind a verified-working switch should be invisible) — the page now
+  // always renders the squares and group headings this run reads below.
 };
 
 const supaHits = [];

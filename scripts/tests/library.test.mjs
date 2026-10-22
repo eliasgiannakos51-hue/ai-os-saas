@@ -283,14 +283,14 @@ check("a long search is cut at the page (200 characters)", /searchParams\.q\.sli
 console.log("\n== 4. the switch ==");
 // ---------------------------------------------------------------------
 const timeline = code("src/app/dashboard/timeline/page.tsx");
-check('the page reads the switch "library"', /const library = await isFeatureOn\("library", user\)/.test(timeline));
+check('the page sets "library" unconditionally since 2026-10-22', /const library = true;/.test(timeline));
 check("the Library is drawn only with the switch on, and not on the entries tab", /if \(library && searchParams\.view !== "entries"\) \{[\s\S]*?<LibraryView/.test(timeline));
 check("the entries keep their filters on their tab", /<TimelineFilters[^>]*entriesView=\{library\}/.test(timeline));
 const tabs = code("src/components/timeline/timeline-tabs.tsx");
 check("with the switch on, the entries are one tab along", /href: library \? "\/dashboard\/timeline\?view=entries" : "\/dashboard\/timeline"/.test(tabs));
 check("with it off, no Library tab", /\.\.\.\(library \? \[\{ id: "library"/.test(tabs));
 check("the filters stay on the entries tab", /if \(entriesView\) params\.set\("view", "entries"\)/.test(code("src/components/timeline/timeline-filters.tsx")));
-check('"library" is declared as a switch', /\n  library: "/.test(code("src/lib/flags/flags.ts")));
+check('"library" is no longer declared as a switch (removed, the owner\'s critical message)', !/\n  library: "/.test(code("src/lib/flags/flags.ts")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. pressing one opens it in its tool, on that item ==");

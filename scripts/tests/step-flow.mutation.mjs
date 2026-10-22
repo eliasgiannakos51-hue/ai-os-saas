@@ -16,10 +16,10 @@
  *      cannot see, and the one every real file satisfies today, so it
  *      is proved on samples rather than on the tree
  *   6. the indicator grows a filled accent chip, which is a second
- *      primary action on four screens at once
+ *      primary action on three screens at once
  *   7. the current step's digit goes back to the accent that measured
  *      4.44:1 in the light theme
- *   8. coding's flow claims a step that page does not have
+ *   8. coding's flow comes back, with steps that page does not have
  *
  * Run: node scripts/tests/step-flow.mutation.mjs
  */
@@ -31,10 +31,9 @@ const GATE = "scripts/tests/step-flow.test.mjs";
 const FLOWS = "src/lib/ui/step-flows.ts";
 const SHAPE = "src/components/ui/step-flow.tsx";
 const EL = "messages/el.json";
-const CODING = "src/components/coding/coding-workspace.tsx";
 const RESEARCH = "src/components/research/research-workspace.tsx";
 
-const TARGETS = [GATE, FLOWS, SHAPE, EL, CODING, RESEARCH];
+const TARGETS = [GATE, FLOWS, SHAPE, EL, RESEARCH];
 
 const MUTANTS = [
   {
@@ -47,8 +46,8 @@ const MUTANTS = [
   {
     name: "a step name stops being shared between two flows",
     file: FLOWS,
-    from: '  coding: ["describe", "generate", "review"],',
-    to: '  coding: ["describeCode", "generateCode", "review"],',
+    from: '  files: ["upload", "ask", "answer"],',
+    to: '  files: ["upload", "ask", "answerFile"],',
     expect: "every step has a word and a hint",
   },
   {
@@ -60,10 +59,10 @@ const MUTANTS = [
   },
   {
     name: "a screen stops drawing its flow",
-    file: CODING,
-    from: '<StepFlow flow="coding" current={codingStep} />',
+    file: RESEARCH,
+    from: '<StepFlow flow="research" current={researchStep} />',
     to: "",
-    expect: "coding: the screen renders its own flow",
+    expect: "research: the screen renders its own flow",
   },
   {
     // THE ORDER, NOT THE PRESENCE. All four real files satisfy this
@@ -96,11 +95,11 @@ const MUTANTS = [
     expect: "the current step's digit uses the text colour that measured above 4.5:1",
   },
   {
-    name: "coding's flow claims a step that page does not have",
+    name: "coding's flow comes back, with steps that page does not have",
     file: FLOWS,
-    from: '  coding: ["describe", "generate", "review"],',
-    to: '  coding: ["describe", "generate", "test", "deploy"],',
-    expect: "the coding flow claims none of test, fix or deploy",
+    from: '  files: ["upload", "ask", "answer"],\n} as const;',
+    to: '  files: ["upload", "ask", "answer"],\n  coding: ["describe", "generate", "test", "deploy"],\n} as const;',
+    expect: "coding is no longer one of the declared flows",
   },
 ];
 

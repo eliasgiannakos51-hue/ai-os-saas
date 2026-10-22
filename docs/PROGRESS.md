@@ -3,6 +3,129 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-10-22 (ΚΡΙΣΙΜΟ μήνυμα του ιδιοκτήτη: διακόπτες έξω, All Tools σε ομάδες, Coding ξανά)
+
+**ΤΙ ΖΗΤΗΘΗΚΕ.** Μεσούσης της Παρτίδας 3, ο ιδιοκτήτης διέκοψε με έξι
+σημεία: (1) κάθε διακόπτης για λειτουργία ελεγμένη και δουλεμένη βγαίνει
+από τον κώδικα — η λειτουργία ισχύει για όλους· μένουν πίσω από διακόπτη
+μόνο όσα θέλουν κλειδί παρόχου που λείπει· (2) το All Tools σε έξι
+ομάδες (Φτιάξε, Ρώτα, Αυτοματοποίησε, Οργάνωσε, Επιχείρηση, Μάθε), ένα
+τετράγωνο ανά εργαλείο· (3)+(4) το Coding να διαβάζεται σαν το ίδιο το
+Claude Code — άδειο: γη, «Τι φτιάχνουμε;», πεδίο, τρία παραδείγματα· μετά:
+συνομιλία αριστερά, κώδικας δεξιά, αλλαγές σε κουτιά πράσινου/κόκκινου,
+`[◧]` για το ιστορικό, «Νέο» — και το ίδιο σχήμα σε κάθε εργαλείο· (5) το
+`/dashboard/system-health` 404· (6) καμία «τελείωσε» πριν από στιγμιότυπα
+σε production, ανώνυμο παράθυρο, λογαριασμό που δεν είναι διαχειριστής.
+
+**(1) ΕΞΙ ΔΙΑΚΟΠΤΕΣ ΑΦΑΙΡΕΘΗΚΑΝ ΕΝΤΕΛΩΣ.** `all-tools-tiles`,
+`first-task`, `chat-opens-tools`, `file-pages`, `brand-memory`,
+`library` — κάθε `isFeatureOn(...)` κλήση τους αφαιρέθηκε από τον κώδικα
+(`src/app/dashboard/tools/page.tsx`, `src/app/onboarding/page.tsx`,
+`src/app/dashboard/chat/page.tsx`, `src/app/api/files/[id]/view/route.ts`,
+`src/app/dashboard/files/page.tsx`, `src/app/api/websites/generate/process/route.ts`,
+`src/lib/flows/page-data.ts`, `src/app/api/chat/route.ts`,
+`src/app/dashboard/timeline/page.tsx`, `src/app/dashboard/favorites/page.tsx`)
+και οι καταχωρίσεις τους από `src/lib/flags/flags.ts`. Το `image-studio`
+**παραμένει** πίσω από διακόπτη — νόμιμα: `docs/NEEDS-FROM-ELIAS.md`
+σημείο 19 λέει ρητά «καμία εικόνα δεν έχει γίνει με αληθινό κλειδί»,
+θέλει το κλειδί Gemini (NEEDS 5) που δεν έχει μπει ακόμα στο Vercel. Κάθε
+gate που επιβεβαίωνε την ΠΑΛΙΑ μορφή (διακόπτη παρόντα) ξαναγράφτηκε να
+επιβεβαιώνει την ΚΑΙΝΟΥΡΓΙΑ (διακόπτης αφαιρεμένος):
+`brand-memory.test.mjs`, `chat-opens-tools.test.mjs`, `file-pages.test.mjs`,
+`first-task.test.mjs`, `library.test.mjs`, `feature-flags.test.mjs`,
+`help-tips.test.mjs`, `acceptance.test.mjs` — και τα mutation suites τους
+αγκυρώθηκαν ξανά στο νέο, αδιάκριτο κείμενο (`brand-memory.mutation.mjs`,
+`chat-opens-tools.mutation.mjs`, `file-pages.mutation.mjs`,
+`first-task.mutation.mjs`, `help-tips.mutation.mjs`,
+`sidebar-chats.mutation.mjs`, `acceptance.mutation.mjs`). `RATCHET` στο
+`mutation-coverage.test.mjs` κατέβηκε 292 → 291 (ένα suite λιγότερο, το
+`all-tools-tiles.mutation.mjs`, σβήστηκε μαζί με τα `.test.mjs`/`.prodtest.mjs`
+του). `docs/ACCEPTANCE.md` ξαναγράφτηκε σε έξι σημεία («χωρίς διακόπτη
+πια, αφαιρέθηκε 2026-10-22, κρίσιμο μήνυμα του ιδιοκτήτη»).
+
+**(2) ALL TOOLS ΣΕ ΕΞΙ ΟΜΑΔΕΣ.** `src/lib/nav/all-tools.ts`:
+`AllToolsGroupKey` έγινε `"make" | "ask" | "automate" | "organise" |
+"business" | "learn"` (ήταν τέσσερις). Η Αυτοματοποίηση πήρε δική της
+ομάδα (έφυγε από «organise»)· η Έρευνα και η Μνήμη AI πήραν την ομάδα
+«Μάθε» (έφυγαν από «ask»/«organise»). `src/components/tools/tools-grid.tsx`
+πήρε τα δύο νέα `headings`. `scripts/tests/all-tools.test.mjs`
+ξαναγράφτηκε στα τέσσερα σημεία που κρατούν τη σειρά/λίστα ομάδων.
+
+**(3)+(4) ΤΟ CODING ΞΑΝΑΓΡΑΦΤΗΚΕ ΕΝΤΕΛΩΣ.** Το παλιό
+`coding-workspace.tsx` (366 γραμμές) ήταν ακριβώς αυτό που περιγράφει το
+μήνυμα: `<StepFlow flow="coding">` τριών βημάτων, κουτί «what this does
+NOT do» (`CODE_LIMITS`), πέντε κουμπιά-πλήκτρα λειτουργιών
+(`CODE_OPERATIONS`) με επιλογείς γλώσσας, μετρητής
+`{input.length}/{MAX_INPUT_CHARS}`, το πλαίσιο «useWorkspace»
+("use your other modules"), και ενσωματωμένο History (αναζήτηση +
+φίλτρο φακέλου + λίστα `<details>`) πάνω στην ίδια σελίδα. Έγινε
+`ToolShell`-σχήμα σαν τα υπόλοιπα εργαλεία της σειράς: άδεια κατάσταση
+γη + «Τι φτιάχνουμε;» + πεδίο + τρία παραδείγματα· μετά, συνομιλία
+αριστερά / κώδικας δεξιά, `[◧]` για το ιστορικό (`ShellHistoryColumn`),
+«Νέο». Η επιλογή λειτουργίας δεν είναι πια κουμπί — `planTurn()`
+(`src/lib/coding/operations.ts`) τη διαβάζει από το ίδιο το κείμενο
+(λέξεις-κλειδιά σε EN/EL: convert/μεταφερω, tests/δοκιμη, bugs/σφαλμα,
+explain/εξηγησε, μέσω του ίδιου `foldForMatch` που χρησιμοποιεί το
+Chat's `opensWithInstruction`). Οι αλλαγές σε υπάρχοντα κώδικα δείχνονται
+ως διάφανα κουτιά πράσινου/κόκκινου (`diffLines`, νέο αρχείο
+`src/lib/coding/diff.ts`). Το backend route (`src/app/api/coding/run/route.ts`)
+κράτησε ΟΛΗ την ασφάλεια χρημάτων ως είχε (reservation/settlement,
+circuit breaker, bypass ceiling, memory policy, workspace context) και
+τώρα στέλνει στον πελάτη `chatTurnsUsed`/`workspaceModulesUsed` ώστε το
+πλαίσιο να λέει τι διάβασε. **Καμία migration** — το ιστορικό
+`code_sessions` κρατά τη νέα, πολυ-γυριστή μορφή χωρίς αλλαγή στήλης.
+Gates που κωδικοποιούσαν το ΠΑΛΙΟ σχήμα ξαναγράφτηκαν:
+`step-flow.test.mjs`/`.mutation.mjs` (το Coding δεν έχει πια ροή),
+`stop-everywhere.test.mjs`, `coding.test.mjs` (το `planTurn`/`diffLines`
+πήραν τις δικές τους ενότητες 1-2b), `tool-shell.test.mjs` (νέο μπλοκ
+άδειας κατάστασης), `make-as-chat.test.mjs` (το μετρητής "free-text way
+in"/"autoFocus"/"clicks" δεν έβλεπε το μοιρασμένο `<ChatComposer>` — το
+ίδιο κενό θα υπήρχε ήδη και στα άλλα εργαλεία αν δεν είχαν τυχαία ένα
+άσχετο πεδίο στον ίδιο φάκελο· διορθώθηκε να αναγνωρίζει `<ChatComposer`
+ως "γραπτή πόρτα εισόδου" και ως αυτόματο focus), `match-sources.test.mjs`
+(το `operations.ts` προστέθηκε στο `ACCOUNTED`, νέος matcher χρηστικών
+λέξεων), `cross-module-context.mutation.mjs` (η άγκυρα της γραμμής
+`chatContext = useWorkspace ? ... : ...` άλλαξε στη νέα, αδιάκριτη
+κλήση).
+
+**ΔΥΟ ΣΦΑΛΜΑΤΑ ΤΟΥ FORK, ΔΙΟΡΘΩΘΗΚΑΝ ΠΡΙΝ ΤΟ COMMIT.** Το `planTurn`
+καλούσε ανύπαρκτες σταθερές (`CONVERT_WORDS` αντί `matchesWords(remark,
+CONVERT_EN, CONVERT_EL)`, ίδιο λάθος ×4) και το `foldForMatch` δεν ήταν
+εισαγμένο στο `operations.ts` — και τα δύο σταματούσαν το
+`coding.test.mjs` με `ReferenceError`. Το `coding-workspace.tsx` έχασε
+την εισαγωγή `useToast` στην αναδιάταξη — σταματούσε το `tsc --noEmit`.
+Διορθώθηκαν και τα τρία· επαληθεύτηκαν ξανά με `node
+scripts/tests/coding.test.mjs` και `npx tsc --noEmit`.
+
+**(5) ΤΟ 404.** Ο κώδικας ήταν ήδη σωστός — `src/lib/auth/admin-emails.ts`
+διαβάζει `ADMIN_EMAILS` ΜΟΝΟ από το περιβάλλον, από τις 2026-10-04 (πριν
+ήταν literal στον κώδικα). Χωρίς το μεταβλητό στο Vercel, κανείς δεν
+είναι διαχειριστής και οι σελίδες διαχειριστή (`/dashboard/system-health`
+μαζί) δίνουν 404 — η ΑΣΦΑΛΗΣ αποτυχία, σκόπιμα. Τα βήματα είναι ήδη
+γραμμένα στο `docs/NEEDS-FROM-ELIAS.md` σημείο 8: Vercel → το project
+του Ionexa → Settings → Environment Variables → `ADMIN_EMAILS` = το
+email του ιδιοκτήτη, Production + Preview, Save· ισχύει από το επόμενο
+deploy.
+
+**ΕΛΕΓΧΟΙ.** `npm run gates`: **368/368 πράσινα, 25479 έλεγχοι** (ήταν
+369/25522 πριν την αφαίρεση του `all-tools-tiles` suite — ένα gate
+λιγότερο, καμία απώλεια κάλυψης). `npx tsc --noEmit` καθαρό. `npx eslint
+src --max-warnings=0`: μία προϋπάρχουσα, άσχετη προειδοποίηση
+(`voice-input.tsx`, αρχείο που δεν αγγίχτηκε). `npm run i18n:first-run`
+ξανατρέχτηκε δύο φορές (μετά τις αλλαγές διακοπτών, και ξανά μετά το
+Coding) — το πακέτο ενημερώθηκε, `first-run-strings.test.mjs` πράσινο.
+
+**(6) ΑΠΟΔΕΙΞΗ — ΕΚΚΡΕΜΕΙ.** Καμία επαλήθευση σε production/ανώνυμο
+παράθυρο/μη-διαχειριστή λογαριασμό δεν έχει γίνει ακόμα· χρειάζεται
+merge πρώτα. Branch: `claude/keen-turing-bv8gw4-batch3-tools`.
+
+**ΜΕΝΕΙ, ΠΡΙΝ ΤΟ ΕΝΑ PULL REQUEST ΠΟΥ ΖΗΤΗΘΗΚΕ.** Assistants και
+Projects (το υπόλοιπο της Παρτίδας 3) δεν έχουν ακόμα το `ToolShell`
+σχήμα· η Παρτίδα 4 (Business, Trading, Audio) δεν έχει ξεκινήσει. Το
+αίτημα του ιδιοκτήτη αφορά Coding/All Tools/διακόπτες ρητά — αυτά τα
+τρία είναι έτοιμα για το ένα PR· αν τα υπόλοιπα εργαλεία της σειράς
+μπουν στο ίδιο PR ή σε επόμενο αποφασίζεται με τον ιδιοκτήτη.
+
 ## 2026-10-22 (Γύρος Β4, Παρτίδα 2/4: Data, Image, Library → το σχήμα του νέου Coding)
 
 **ΤΟ ΙΔΙΟ ΣΧΗΜΑ, ΔΥΟ ΑΚΟΜΑ ΕΡΓΑΛΕΙΑ.** Analyze (`src/components/data-analysis/analysis-shell.tsx`)

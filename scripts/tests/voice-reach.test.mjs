@@ -42,10 +42,17 @@
  * "A microphone on every input" cannot be decided statically, and
  * pretending otherwise would be the more impressive-looking mistake:
  * whether a <textarea> wants dictation depends on whether a person
- * types SENTENCES into it. coding-workspace.tsx's box is font-mono and
- * serves five operations, four of which take source code. The onboarding
- * paste box exists to receive text that already exists somewhere else.
- * No regex knows that.
+ * types SENTENCES into it. The onboarding paste box exists to receive
+ * text that already exists somewhere else. No regex knows that.
+ *
+ * coding-workspace.tsx was on this exclusion list for its old font-mono
+ * box, built for five operations that mostly took pasted source. The
+ * redesign of 2026-10-22 moved it onto the shared ChatComposer — the
+ * same field Automation's and Image's shells use, neither of which this
+ * file tracks either, since a static `<VoiceInput\b` scan over a shell
+ * component finds nothing: the control is rendered inside ChatComposer,
+ * a different file. Untracked here is the correct, if blind, state for
+ * a composer-based shell, same as the others.
  *
  * So the list is written down, both halves of it, each with its reason —
  * MIC_REQUIRED goes red if an input LOSES its microphone, NO_MIC goes
@@ -138,10 +145,6 @@ check(
 );
 
 const NO_MIC = new Map([
-  [
-    "src/components/coding/coding-workspace.tsx",
-    "one font-mono box serves five operations and four of them take SOURCE CODE; a microphone there would be right one time in five",
-  ],
   [
     "src/components/onboarding/onboarding-flow.tsx",
     "the paste box exists to receive text that already exists somewhere else — dictating a spreadsheet's worth of rows is not the use case it was built for",

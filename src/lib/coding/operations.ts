@@ -1,13 +1,18 @@
 /**
- * FIVE OPERATIONS, AND FOUR THINGS THIS IS NOT.
+ * FIVE OPERATIONS BEHIND ONE FIELD, AND FOUR THINGS THIS IS NOT.
  *
  * /dashboard/coding was a form for describing code you would then go and
- * write yourself. This is the version that writes it — and the most
- * important thing in this file is the list of what it still does not do,
- * because the previous version's whole problem was a name that promised
- * more than the screen delivered.
+ * write yourself, then (V5) a page with five buttons and a disclaimer
+ * block naming four absences out loud. The owner's critical message of
+ * 2026-10-22 ("ΚΡΙΣΙΜΟ: ΤΙΠΟΤΑ ΑΠΟ ΟΣΑ ΧΤΙΣΤΗΚΑΝ ΔΕΝ ΦΑΙΝΕΤΑΙ") asked for
+ * Coding to read like Claude Code itself: one field, a conversation, no
+ * steps, no disclaimer block, no operation buttons. `planTurn` below is
+ * what replaced the buttons — it reads the same five operations off what
+ * was typed, the way asking a person to "convert this to Python" does
+ * not also require them to first press a button labelled "convert".
  *
- * WHAT IT DOES NOT DO, and says so on the page rather than in a comment:
+ * WHAT IT STILL DOES NOT DO (true, and worth keeping true, even with the
+ * disclaimer gone from the screen):
  *
  *   IT HAS NO REPOSITORY. It cannot see your codebase, clone anything,
  *   or know what is in the file next to the one you pasted. Every
@@ -24,12 +29,13 @@
  *   it for an application and you get a plausible sketch of one, which is
  *   the least useful thing it can produce.
  *
- * Those four are V5. Until they exist they are stated as absences, in the
- * product, in ten languages — see LIMITS below and the `coding.limits.*`
- * message keys.
+ * Those four are still said to the person who opens the "?" beside the
+ * name (help.coding.doesNot, src/lib/help-tips.ts) — just no longer as a
+ * standing block above the field.
  *
  * Pure — no SDK, no database. The build gate reads every rule here.
  */
+import { foldForMatch } from "@/lib/text/unicode-patterns";
 
 export const CODE_OPERATIONS = ["generate", "explain", "find_bugs", "convert", "write_tests"] as const;
 export type CodeOperation = (typeof CODE_OPERATIONS)[number];
@@ -37,12 +43,6 @@ export type CodeOperation = (typeof CODE_OPERATIONS)[number];
 export function isCodeOperation(value: unknown): value is CodeOperation {
   return typeof value === "string" && (CODE_OPERATIONS as readonly string[]).includes(value);
 }
-
-/** The four exclusions, as identifiers the UI and the tests both read.
- *  A fifth one appearing here without a message key is a build failure,
- *  which is the point. */
-export const CODE_LIMITS = ["no_repository", "no_execution", "no_commits", "no_whole_project"] as const;
-export type CodeLimit = (typeof CODE_LIMITS)[number];
 
 export type OperationSpec = {
   operation: CodeOperation;
@@ -220,6 +220,107 @@ export function buildCodePrompt(request: CodeRequest, workspaceContext = ""): Bu
   ].join("\n");
 
   return { ok: true, system, user };
+}
+
+export type TurnPlan = {
+  operation: CodeOperation;
+  /** What is actually sent to the model: code for the four that read
+   *  code, a description for `generate`. */
+  input: string;
+  language: CodeLanguage | null;
+  targetLanguage: CodeLanguage | null;
+  /** True only for the generate-based edit path below: the result
+   *  should be diffed against the code already on screen rather than
+   *  shown fresh. `convert` changes language and has nothing sensible to
+   *  diff against; a first `generate` has no prior code either. */
+  isEdit: boolean;
+};
+
+// ASCII \b AND GREEK DO NOT MIX (scripts/tests/ascii-boundaries.test.mjs):
+// `\b` is defined against [A-Za-z0-9_], so a pattern like
+// `/\b(convert|μετάτρεψε)\b/` never matches the Greek half — silently,
+// not an error. The fix already in this codebase (lib/trading/rules.ts)
+// is to keep `\b` for the ASCII word and check the Greek one as a folded
+// substring instead; `matchesWords` below is that split, shared by all
+// four keyword checks.
+const CONVERT_EN = /\b(convert|rewrite (it |this )?in)\b/i;
+const CONVERT_EL = ["μεταφερω", "μετατρεψε", "μετατροπη"];
+const TEST_EN = /\btests?\b/i;
+const TEST_EL = ["δοκιμη", "δοκιμες", "τεστ"];
+const BUG_EN = /\bbugs?\b/i;
+const BUG_EL = ["σφαλμα", "σφαλματα", "λαθος", "λαθη"];
+const EXPLAIN_EN = /\bexplain\b/i;
+const EXPLAIN_EL = ["εξηγησε", "εξηγας", "εξηγα", "τι κανει"];
+
+function matchesWords(text: string, en: RegExp, elFolded: readonly string[]): boolean {
+  if (en.test(text)) return true;
+  const folded = foldForMatch(text);
+  return elFolded.some((word) => folded.includes(word));
+}
+
+function targetLanguageIn(text: string): CodeLanguage | null {
+  const lower = text.toLowerCase();
+  return CODE_LANGUAGES.find((lang) => lang !== "other" && new RegExp(`\\b${lang}\\b`).test(lower)) ?? null;
+}
+
+/** The first fenced code block in a message, and the message with it cut
+ *  out — so a remark like "explain this: ```...```" still has "explain
+ *  this:" left over to match a keyword against. */
+function fencedCode(text: string): { code: string; rest: string } | null {
+  const match = /```[a-zA-Z0-9_-]*\n?([\s\S]*?)```/.exec(text);
+  if (!match) return null;
+  const code = match[1].trim();
+  if (!code) return null;
+  return { code, rest: (text.slice(0, match.index) + text.slice(match.index + match[0].length)).trim() };
+}
+
+/**
+ * ONE FIELD, FIVE OPERATIONS BEHIND IT (the owner's critical message,
+ * 2026-10-22). The old page made a person name an operation before
+ * typing; this reads it from what they typed instead — the same way
+ * telling a person "convert this to Python" does not also require a
+ * button labelled "convert" pressed first.
+ *
+ * A fenced paste is the code to work on. A plain remark while code is
+ * already on screen, with none of the other four keywords in it, is a
+ * change to make to that code — routed through `generate` with the
+ * existing code folded into the prompt, so `buildCodePrompt` below needs
+ * no sixth operation to learn. With neither a paste nor prior code, the
+ * remark itself is the description for `generate`.
+ */
+export function planTurn(text: string, prior: { code: string | null; language: CodeLanguage | null }): TurnPlan {
+  const fence = fencedCode(text);
+  const remark = fence ? fence.rest : text;
+  const code = fence?.code ?? prior.code;
+
+  if (code && matchesWords(remark, CONVERT_EN, CONVERT_EL)) {
+    const target = targetLanguageIn(remark);
+    if (target) return { operation: "convert", input: code, language: prior.language, targetLanguage: target, isEdit: false };
+  }
+  if (code && matchesWords(remark, TEST_EN, TEST_EL)) {
+    return { operation: "write_tests", input: code, language: prior.language, targetLanguage: null, isEdit: false };
+  }
+  if (code && matchesWords(remark, BUG_EN, BUG_EL)) {
+    return { operation: "find_bugs", input: code, language: prior.language, targetLanguage: null, isEdit: false };
+  }
+  if (code && (matchesWords(remark, EXPLAIN_EN, EXPLAIN_EL) || remark.length === 0)) {
+    return { operation: "explain", input: code, language: prior.language, targetLanguage: null, isEdit: false };
+  }
+  if (fence) {
+    // A paste with an instruction that matched none of the above: the
+    // paste stays the subject, so this explains it rather than guessing
+    // at a sixth meaning for the remark.
+    return { operation: "explain", input: fence.code, language: null, targetLanguage: null, isEdit: false };
+  }
+  if (prior.code) {
+    // No fresh paste, but there is code on the screen: the remark is a
+    // change to make to it. No fence marks here — buildCodePrompt wraps
+    // this whole block in ONE fence, and a second pair nested inside it
+    // would close that fence early.
+    const input = ["EXISTING CODE:", prior.code, "", "REQUESTED CHANGE:", text.trim()].join("\n");
+    return { operation: "generate", input, language: prior.language, targetLanguage: null, isEdit: true };
+  }
+  return { operation: "generate", input: text, language: null, targetLanguage: null, isEdit: false };
 }
 
 /** A title for the history list, from what the user actually typed. The

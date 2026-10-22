@@ -23,14 +23,7 @@ import { releaseReservation, reserveCredits, settleReservation } from "@/lib/bil
 import { runCompletion } from "@/lib/ai/providers/complete";
 import { loadWorkspaceContext, renderWorkspaceContext } from "@/lib/ai/workspace-context";
 import { loadChatContextForCoding } from "@/lib/ai/cross-module-store";
-import {
-  MAX_INPUT_CHARS,
-  OPERATION_SPECS,
-  buildCodePrompt,
-  deriveTitle,
-  isCodeLanguage,
-  isCodeOperation,
-} from "@/lib/coding/operations";
+import { MAX_INPUT_CHARS, OPERATION_SPECS, buildCodePrompt, deriveTitle, isCodeLanguage, planTurn } from "@/lib/coding/operations";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // @function-limit 120
@@ -38,18 +31,18 @@ export const maxDuration = 120; // @function-limit 120
 const MODEL = "claude-sonnet-4-6";
 
 /**
- * ONE CODING OPERATION.
+ * ONE TURN OF THE CONVERSATION.
  *
- * Five of them, and four things it does not do — see
- * lib/coding/operations.ts, where the exclusions are the load-bearing
- * part. Nothing here clones a repository, runs anything, or writes
- * anywhere except this account's own history table.
+ * Five operations behind it, and four things it does not do — see
+ * lib/coding/operations.ts, where the exclusions and `planTurn` (what
+ * reads the operation off the message, now that there is no button for
+ * it) are the load-bearing part. Nothing here clones a repository, runs
+ * anything, or writes anywhere except this account's own history table.
  *
- * THE WORKSPACE CONTEXT IS OPTIONAL AND EXPLICIT. When the caller asks
- * for it, the user's OWN modules (through their OWN RLS-scoped client)
- * contribute a short list of headlines, so "a function that calculates
- * the margin" can mean what it means in this account. The flag comes from
- * a visible toggle; nothing reads the workspace because a default said so.
+ * THE WORKSPACE CONTEXT IS ALWAYS INCLUDED (2026-10-22). The visible
+ * "use your other modules" toggle was one of the controls the owner's
+ * critical message asked off the screen — a verified-working capability
+ * applies to everyone, with no switch, per the same message's item 1.
  */
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -60,46 +53,50 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    const operation = body.operation;
-    if (!isCodeOperation(operation)) return NextResponse.json({ error: "unknown_operation" }, { status: 400 });
+    const text = typeof body.text === "string" ? body.text : "";
+    if (!text.trim()) return NextResponse.json({ error: "empty" }, { status: 400 });
 
-    const input = typeof body.input === "string" ? body.input : "";
-    // `codeLanguage`, not `language`. This is a PROGRAMMING language —
-    // typescript, python — and every other route in this app uses
-    // `body.language` for the natural language a reply should be written
-    // in. Two different meanings behind one field name is how somebody
-    // later wires this into resolveLanguage and starts answering Greek
-    // users in Python; scripts/tests/resolve-language.test.mjs was right
-    // to stop on it.
-    const language = isCodeLanguage(body.codeLanguage) ? body.codeLanguage : null;
-    const targetLanguage = isCodeLanguage(body.targetCodeLanguage) ? body.targetCodeLanguage : null;
-    const useWorkspace = body.useWorkspace !== false;
+    // WHAT THE WORK PANEL IS SHOWING RIGHT NOW, sent back by the client
+    // each turn rather than kept server-side: `code_sessions` still holds
+    // one row per turn, as it always did, so there is no multi-turn row
+    // to read this from server-side — the conversation lives in the
+    // browser tab for the visit, each turn still saved on its own.
+    // `priorLanguage`, not `language`: a PROGRAMMING language, and
+    // every other route in this app uses `body.language` for the natural
+    // language a reply is written in. scripts/tests/resolve-language.test.mjs
+    // scans for that second meaning; this field's different name is why
+    // it is not on that list.
+    const priorCode = typeof body.priorCode === "string" && body.priorCode.trim() ? body.priorCode : null;
+    const priorLanguage = isCodeLanguage(body.priorLanguage) ? body.priorLanguage : null;
 
-    const spec = OPERATION_SPECS[operation];
+    const turn = planTurn(text, { code: priorCode, language: priorLanguage });
+    const spec = OPERATION_SPECS[turn.operation];
+    // What gets SAVED and shown in history: the user's own words for the
+    // generate-as-edit path (turn.input there is "EXISTING CODE: ...\n\n
+    // REQUESTED CHANGE: ..." — correct for the model, unreadable as a
+    // title or a history row), the code itself for the other four.
+    const storedInput = turn.isEdit ? text.trim() : turn.input;
 
     // The workspace read happens BEFORE the prompt is built, because the
     // context is part of what is priced.
-    const workspace = await loadWorkspaceContext(supabase, { include: useWorkspace });
+    const workspace = await loadWorkspaceContext(supabase, { include: true });
 
     // THE OTHER HALF OF THE CONVERSATION (V4 #36). The workspace context
     // says what the user is BUILDING; this says what they and the model
     // already SAID about it — which is the only place the answer to "why
-    // did you do it that way?" exists.
-    //
-    // Behind the same toggle as the workspace read, and gated by the same
-    // relevance rule: a request that mentions nothing the user has
-    // discussed adds nothing, and the prompt is byte-identical to what it
-    // was before this existed. Through the RLS-scoped client, never the
-    // admin one.
-    const chatContext = useWorkspace
-      ? await loadChatContextForCoding(supabase, `${input} ${operation}`)
-      : { text: "", selection: { chosen: [], reason: "workspace off", chars: 0 }, pool: 0 };
+    // did you do it that way?" exists. A request that mentions nothing
+    // the user has discussed adds nothing. Through the RLS-scoped
+    // client, never the admin one.
+    const chatContext = await loadChatContextForCoding(supabase, `${turn.input} ${turn.operation}`);
 
     const contextText = [renderWorkspaceContext(workspace), chatContext.text]
       .filter((part) => part.trim() !== "")
       .join("\n\n");
 
-    const prompt = buildCodePrompt({ operation, input, language, targetLanguage }, contextText);
+    const prompt = buildCodePrompt(
+      { operation: turn.operation, input: turn.input, language: turn.language, targetLanguage: turn.targetLanguage },
+      contextText
+    );
     if (!prompt.ok) {
       return NextResponse.json(
         { error: prompt.reason, limit: prompt.reason === "too_long" ? MAX_INPUT_CHARS : undefined },
@@ -107,7 +104,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const breaker = await checkAiCallAllowed(user.id, "code_assist", fingerprintRequest(operation, input));
+    const breaker = await checkAiCallAllowed(user.id, "code_assist", fingerprintRequest(turn.operation, turn.input));
     if (!breaker.allowed) return NextResponse.json({ error: "rate_limited", code: breaker.code, retryAt: breaker.retryAt, detail: breaker.reason }, { status: 429 });
 
     const isAdmin = isAdminEmail(user.email);
@@ -138,7 +135,7 @@ export async function POST(request: Request) {
           { status: 402 }
         );
       }
-      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "code_assist", { operation });
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "code_assist", { operation: turn.operation });
       if (!reservation.ok) return NextResponse.json({ error: "reserve_failed", detail: reservation.reason }, { status: 402 });
       reservationId = reservation.reservationId;
     }
@@ -193,17 +190,17 @@ export async function POST(request: Request) {
     if (!outcome.ok) {
       // Nothing produced, nothing charged — the hold goes back whole.
       await releaseReservation(user.id, reservationId);
-      logApiError("/api/coding/run", new Error(outcome.detail), { operation, kind: outcome.kind });
+      logApiError("/api/coding/run", new Error(outcome.detail), { operation: turn.operation, kind: outcome.kind });
       // The FAILED row is still written, because a run that cost the user
       // a wait and produced nothing is a thing they should be able to see
       // in their history rather than an event that never happened.
       const { error: failError } = await admin.from("code_sessions").insert({
         user_id: user.id,
-        operation,
-        title: deriveTitle({ operation, input }),
-        input,
-        language,
-        target_language: targetLanguage,
+        operation: turn.operation,
+        title: deriveTitle({ operation: turn.operation, input: storedInput }),
+        input: storedInput,
+        language: turn.language,
+        target_language: turn.targetLanguage,
         status: "failed",
         // A REASON CODE in the column, not a sentence: the row is read
         // back by a page that renders its own translated wording, and an
@@ -224,7 +221,7 @@ export async function POST(request: Request) {
       plan,
       bypassCharge: bypass,
       metadata: {
-        operation,
+        operation: turn.operation,
         workspaceModules: workspace.facts.length,
         chatTurnsUsed: chatContext.selection.chosen.length,
       },
@@ -234,11 +231,11 @@ export async function POST(request: Request) {
       .from("code_sessions")
       .insert({
         user_id: user.id,
-        operation,
-        title: deriveTitle({ operation, input }),
-        input,
-        language,
-        target_language: targetLanguage,
+        operation: turn.operation,
+        title: deriveTitle({ operation: turn.operation, input: storedInput }),
+        input: storedInput,
+        language: turn.language,
+        target_language: turn.targetLanguage,
         output: outcome.text,
         status: "done",
         credits_charged: settlement.creditsCharged,
@@ -252,12 +249,14 @@ export async function POST(request: Request) {
       id: row?.id ?? null,
       output: outcome.text,
       outputKind: spec.outputKind,
+      // True only for the generate-based edit path (operations.ts,
+      // planTurn): the panel diffs this against the code it already had.
+      isEdit: turn.isEdit,
+      resultLanguage: turn.targetLanguage ?? turn.language ?? null,
       creditsCharged: settlement.creditsCharged,
-      /** So the panel can say "using 4 of your modules" rather than
-       *  leaving the user to wonder what it read. */
+      // So the panel can say what it read on the user's behalf, rather
+      // than silently reading their modules and conversation.
       workspaceModulesUsed: workspace.facts.length,
-      /** So the panel can say "and 2 turns from your chat" rather than
-       *  silently reading the user's conversation into a code request. */
       chatTurnsUsed: chatContext.selection.chosen.length,
     });
   } catch (err) {

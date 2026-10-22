@@ -311,7 +311,10 @@ console.log(
 // one that double-counts. The merged tree adds exactly one suite the
 // router branch did not have, sidebar-chats.mutation.mjs. Measured on
 // the merged tree, not reasoned to: declared=291 measured=292.
-const RATCHET = 292;
+// 292 -> 291 on 2026-10-22: all-tools-tiles.mutation.mjs deleted — the
+// switch it covered (all-tools-tiles) was removed from the code entirely
+// (the owner's critical message), not renamed or orphaned.
+const RATCHET = 291;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

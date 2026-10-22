@@ -3041,7 +3041,6 @@
       "title": "Alle Werkzeuge",
       "description": "Jedes Werkzeug, mit einer Zeile dazu, was es tut.",
       "orPress": "Oder drücke ⌘K und tippe den Namen – oder beschreibe es im Feld auf der Startseite.",
-      "tilesHidden": "Beschreibe im Feld auf der Startseite, was du möchtest – oder drücke am Computer ⌘K und tippe den Namen eines Werkzeugs.",
       "search": "Werkzeug finden",
       "searchLabel": "Werkzeuge durchsuchen",
       "noMatch": "Kein Werkzeug heißt „{query}“. Beschreibe es stattdessen im Feld auf der Startseite.",
@@ -3049,7 +3048,9 @@
         "make": "Erstellen",
         "ask": "Fragen",
         "organise": "Organisieren",
-        "business": "Geschäft"
+        "business": "Geschäft",
+        "automate": "Automatisieren",
+        "learn": "Lernen"
       },
       "names": {
         "site": "Webseite",
@@ -4809,49 +4810,25 @@
   },
   "coding": {
     "title": "Code",
-    "description": "Fünf Dinge, die es tut, und vier, die es nicht tut. Alles arbeitet genau auf dem Text im Feld.",
+    "description": "Ein Gespräch, das Code schreibt, erklärt, umwandelt und testet — genau auf den Text, den du gibst.",
     "code": "Code",
     "copy": "Kopieren",
     "copied": "Kopiert",
-    "language": "Sprache",
-    "targetLanguage": "Umwandeln in",
-    "useWorkspace": "Deine anderen Module als Kontext nutzen",
-    "run": "Ausführen",
-    "running": "Arbeite…",
-    "result": "Ergebnis",
-    "limits": {
-      "title": "Was es NICHT tut",
-      "no_repository": "Es hat kein Repository. Es sieht weder deine Codebasis noch die Datei nebenan.",
-      "no_execution": "Es führt nichts aus. Weder deinen Code, noch den geschriebenen, noch die Tests.",
-      "no_commits": "Es macht keine Commits, Branches oder Pull Requests.",
-      "no_whole_project": "Es baut kein Projekt. Eine Funktion, eine Datei, ein Einfügen.",
-      "later": "Diese vier sind die nächste Version, nicht diese."
-    },
     "operations": {
       "generate": {
-        "label": "Schnipsel schreiben",
-        "description": "Beschreibe, was du brauchst, und bekomme eine Funktion — mit genannten Annahmen und Lücken.",
-        "placeholder": "Eine Funktion, die eine Liste von Bestellungen nimmt und die Marge pro Kunde zurückgibt…"
+        "label": "Schnipsel schreiben"
       },
       "explain": {
-        "label": "Das erklären",
-        "description": "Code einfügen und erfahren, was er tut — der Reihe nach, mit Nennung der Zeilen.",
-        "placeholder": "Füge den Code ein, der erklärt werden soll…"
+        "label": "Das erklären"
       },
       "find_bugs": {
-        "label": "Fehler finden",
-        "description": "Jeder Befund nennt die Eingabe oder den Zustand, der ihn auslöst. Ein Befund ohne Fehlerfall ist eine Vorliebe.",
-        "placeholder": "Füge den zu prüfenden Code ein…"
+        "label": "Fehler finden"
       },
       "convert": {
-        "label": "Umwandeln",
-        "description": "Schreib ihn in einer anderen Sprache neu — mit der Liste von allem, was NICHT übertragbar ist.",
-        "placeholder": "Füge den umzuwandelnden Code ein…"
+        "label": "Umwandeln"
       },
       "write_tests": {
-        "label": "Tests schreiben",
-        "description": "Der Normalfall, die Grenzen und die Fehlerwege. Nicht nur der glückliche Pfad.",
-        "placeholder": "Füge den zu testenden Code ein…"
+        "label": "Tests schreiben"
       }
     },
     "errors": {
@@ -4860,15 +4837,19 @@
       "failed": "Hat nicht geklappt — versuch es noch einmal."
     },
     "history": {
-      "title": "Verlauf",
-      "search": "Suchen",
-      "folder": "Ordner",
-      "allFolders": "Alle Ordner",
-      "empty": "Hier ist noch nichts.",
-      "input": "Eingabe",
-      "output": "Ausgabe",
-      "importedNote": "frühere Notiz",
       "failed": "fehlgeschlagen"
+    },
+    "new": "Neu",
+    "placeholder": "Beschreibe, was du brauchst, füge Code ein, oder bitte um eine Änderung…",
+    "made": "Hier ist es, neben der Unterhaltung.",
+    "changed": "Geändert. Die neue Version ist neben der Unterhaltung, mit markierten Änderungen.",
+    "empty": {
+      "heading": "Was bauen wir?"
+    },
+    "example": {
+      "function": "Eine Funktion, die eine Liste von Bestellungen nimmt und die Marge pro Kunde zurückgibt",
+      "explain": "Erkläre, was dieser Code macht",
+      "tests": "Schreibe Tests für diese Funktion"
     }
   },
   "presentations": {

@@ -3,7 +3,6 @@ import { scrubSecrets } from "@/lib/scrub-secrets";
 import { loadMemories, memoryPromptFor } from "@/lib/memory/store";
 import { brandBriefFor, readBrand } from "@/lib/memory/brand";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
@@ -544,17 +543,16 @@ export async function POST(request: Request) {
       })
         ? await memoryPromptFor(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))
         : "";
-      // THE BUSINESS, REMEMBERED (package 6, behind the switch
-      // "brand-memory"): a name and colours said in Chat reach this brief
-      // as values, the way the form's own colours do (lib/memory/brand.ts),
-      // under the same memory rule as the block above. What was used is a
-      // note on the row, so the screen says it. Not in the hold above: at
-      // most four short lines, like the memory block beside it.
-      const brand =
-        memoryActiveFor({ surface: "website", user, planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin) }) &&
-        (await isFeatureOn("brand-memory", user))
-          ? brandBriefFor(readBrand(await loadMemories(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))), description)
-          : null;
+      // THE BUSINESS, REMEMBERED (package 6, unconditional since
+      // 2026-10-22, verified end-to-end 2026-10-08/09): a name and
+      // colours said in Chat reach this brief as values, the way the
+      // form's own colours do (lib/memory/brand.ts), under the same
+      // memory rule as the block above. What was used is a note on the
+      // row, so the screen says it. Not in the hold above: at most four
+      // short lines, like the memory block beside it.
+      const brand = memoryActiveFor({ surface: "website", user, planLimit: memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin) })
+        ? brandBriefFor(readBrand(await loadMemories(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdmin))), description)
+        : null;
       if (brand && (brand.used.name !== null || brand.used.colours.length > 0)) {
         notes.push({ kind: "fromMemory", name: brand.used.name, colours: brand.used.colours });
       }

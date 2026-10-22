@@ -507,6 +507,19 @@ export const ACTION_PROFILES = {
     baseOutputChars: 1200,
     outputCharsPerInputChar: 0,
   },
+  // «Τα δικά μου» (api/my-stuff/ask) — one question over a bounded set of
+  // the account's own rows (lib/my-stuff/ask-context.ts, MAX_CONTEXT_CHARS).
+  // The INPUT the call site passes is that rendered context plus the
+  // question, so it already reflects how many rows were actually read —
+  // SAME SHAPE AS dataQuestion, for the same reason: the answer is a
+  // sentence or two about what was found, not a document, so output does
+  // not scale with how much context the question happened to read.
+  myStuffAsk: {
+    systemPromptTokens: 1400,
+    auxiliaryCalls: [],
+    baseOutputChars: 900,
+    outputCharsPerInputChar: 0,
+  },
   // One coding operation (api/coding/run): generate, explain, find bugs,
   // convert or write tests.
   //

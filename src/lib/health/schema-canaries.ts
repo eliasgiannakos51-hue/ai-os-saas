@@ -440,6 +440,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Games (switch \"games\") plan a game, charge for the plan, and cannot keep it: the person pays and sees «it could not be saved»; the page itself shows no games",
   },
   {
+    kind: "table",
+    table: "my_stuff_sessions",
+    migration: "20261024100000_my_stuff_sessions.sql",
+    breaks: "«Τα δικά μου» (switch \"my-stuff\") charges for a question and cannot save the answer: the person pays and sees «it could not be saved», and no session appears in its own history",
+  },
+  {
     kind: "column",
     table: "project_flows",
     column: "steps",

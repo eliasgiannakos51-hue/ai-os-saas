@@ -167,6 +167,7 @@
       "predictions": "Tendances",
       "posts": "Publications",
       "projects": "Projets",
+      "myStuff": "Mes données",
       "aiMemory": "Ce dont il se souvient",
       "meetings": "Réunions",
       "music": "Musique",
@@ -286,6 +287,7 @@
       "predictions": "Des tendances dans vos propres entrées, chacune avec le nombre d'enregistrements sur lequel elle repose et un lien vers eux.",
       "posts": "Dites-le une fois et obtenez une publication par plateforme, à sa longueur et dans son ton. Rien n'est publié : vous copiez et vous publiez.",
       "projects": "Un dossier avec un objectif. Ce que vous mettez est ce qu'il contient — rien n'entre seul.",
+      "myStuff": "Posez une question en langage naturel sur tout ce que vous avez fait dans Ionexa, et obtenez une réponse avec un lien vers la source. Rien n'est modifié — seulement lu.",
       "aiMemory": "Ce que le chat a retenu sur vous, et comment le supprimer.",
       "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez.",
       "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres",
@@ -3063,6 +3065,7 @@
         "projects": "Projets",
         "goals": "Objectifs",
         "meetings": "Réunions",
+        "myStuff": "Mes données",
         "library": "Bibliothèque",
         "memory": "Mémoire",
         "finances": "Finances",
@@ -3084,6 +3087,7 @@
         "projects": "Un dossier avec un objectif.",
         "goals": "Un objectif, découpé en étapes.",
         "meetings": "Résumé et actions à partir d'un enregistrement.",
+        "myStuff": "Demandez tout ce que vous avez fait, avec sources.",
         "library": "Tout ce que vous avez créé, au même endroit.",
         "memory": "Ce qu'Ionexa retient de vous.",
         "finances": "Notez vos revenus et dépenses.",
@@ -3209,6 +3213,54 @@
           "report": "rapport",
           "customers": "clients"
         }
+      }
+    },
+    "myStuff": {
+      "name": "Mes données",
+      "placeholder": "Posez-moi une question sur vos données…",
+      "working": "Recherche dans vos données…",
+      "new": "Nouveau",
+      "empty": {
+        "heading": "Posez-moi une question sur vos données",
+        "examples": {
+          "finance": "Combien ai-je dépensé en septembre ?",
+          "site": "Quel site ai-je créé pour le camping ?",
+          "trading": "Qu'avons-nous dit sur les actions ?"
+        }
+      },
+      "browse": {
+        "open": "Rechercher",
+        "title": "Rechercher dans vos données",
+        "searchLabel": "Rechercher dans vos données",
+        "searchPlaceholder": "Rechercher dans les noms et le contenu",
+        "kindsLabel": "Afficher seulement",
+        "all": "Tout",
+        "empty": "Rien trouvé",
+        "untitled": "Sans titre"
+      },
+      "kinds": {
+        "site": "Sites",
+        "slides": "Diapositives",
+        "posts": "Publications",
+        "document": "Documents",
+        "research": "Recherches",
+        "analysis": "Analyses",
+        "file": "Fichiers",
+        "chat": "Conversations",
+        "coding": "Code",
+        "finance": "Finances",
+        "sales": "Ventes",
+        "trading": "Trading"
+      },
+      "errors": {
+        "empty": "Écrivez une question.",
+        "tooLong": "Une question plus courte, s'il vous plaît.",
+        "insufficient": "Vous n'avez pas assez de crédits pour cette question.",
+        "rateLimited": "Trop de questions à la fois. Réessayez bientôt.",
+        "unavailable": "L'IA n'a pas répondu. Réessayez.",
+        "stopped": "Arrêté.",
+        "failed": "Une erreur s'est produite.",
+        "offline": "Pas de connexion. Réessayez."
       }
     },
     "images": {
@@ -4221,6 +4273,11 @@
       "is": "Une seule recherche sur tout ce que vous avez consigné.",
       "does": "Elle parcourt tous les modules à la fois — idées, pistes, dépenses, positions, sites — et vous mène directement à l'entrée.",
       "doesNot": "Elle ne stocke pas vos conversations et ne retient rien d'elle-même. Tout ici a été écrit par vous dans un module ; l'IA n'ajoute rien."
+    },
+    "myStuff": {
+      "is": "Une question avec IA sur tout ce que vous avez fait dans Ionexa.",
+      "does": "Elle lit les sites, publications, documents, recherches, analyses, fichiers, conversations, sessions de code, finances, ventes et positions, et répond en montrant exactement où elle l'a trouvé, avec un lien.",
+      "doesNot": "Elle ne change rien de ce qu'elle lit et n'ajoute aucun nouvel enregistrement ailleurs — elle garde seulement son propre historique de questions. Supprimer une session ici n'efface rien dans Chat, Finances, Ventes ou Positions."
     },
     "mission": {
       "is": "Un objectif, découpé en étapes datées.",

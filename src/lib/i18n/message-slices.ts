@@ -137,7 +137,15 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // (ΣΥΣΤΗΜΑ DESIGN, one theme), and with it one unbounded component.
     // SIXTY-NINE on 2026-10-04 (design D.4): the Home examples strip
     // (overview/first-screen-examples.tsx) went with the cards.
-    unbounded: 69,
+    // SEVENTY on 2026-10-22 («Τα δικά μου»): my-stuff/my-stuff-shell.tsx
+    // reaches `kinds.<kind>` through a template literal — a citation's
+    // fallback label when the record itself has no title — the same
+    // shape presentations/posts already use above.
+    // SEVENTY-ONE, same day: my-stuff/my-stuff-browse.tsx is its own
+    // file (tool-shell.test.mjs's reason, in its own header comment)
+    // and reaches `kinds.<kind>` the same way, for its filter chips and
+    // result rows.
+    unbounded: 71,
   },
   {
     name: "onboarding",

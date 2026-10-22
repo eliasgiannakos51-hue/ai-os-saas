@@ -400,6 +400,9 @@ const BASELINE = {
   // is the wall, returned early.
   "dashboard/games/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
+  // ONE: the field's send. The page is «Τα δικά μου» (2026-10-22), born
+  // in the shell; without the switch "my-stuff" it does not exist.
+  "dashboard/my-stuff/page.tsx": 1,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.
   // Transcribe is an outline control on purpose; see the comment at that

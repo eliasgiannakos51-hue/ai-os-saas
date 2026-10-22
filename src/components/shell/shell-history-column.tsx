@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search, Trash2 } from "lucide-react";
 import { matchesSearch } from "@/lib/text/search-match";
+import { AddToProjectButton } from "@/components/entity-links/add-to-project-button";
 
 export type ShellHistoryRow = { id: string; title: string; /** A short line under the title: status, a count, a date. */ status?: string };
 
@@ -20,6 +21,15 @@ export type ShellHistoryRow = { id: string; title: string; /** A short line unde
  * search box in the product uses — a Greek title has to be found by its
  * unaccented, un-finalled-sigma spelling, and that is the one
  * implementation of that rule.
+ *
+ * `linkTable`, ADDED 2026-10-22 for the owner's message, point 6: every
+ * tool's result needs a «⋯ → Προσθήκη σε Project», and this column is
+ * already the one shared place every shell's result list is drawn. OPT
+ * IN, not automatic: a caller passes its own linkable table name
+ * (`"user_websites"`, `"automation_flows"`, `"code_sessions"`, …) and
+ * every row gets the button; a caller that omits it — `analysis-shell.tsx`
+ * today, a separate and independent effort — draws exactly the two
+ * buttons it always has, unchanged.
  */
 export function ShellHistoryColumn({
   rows,
@@ -27,6 +37,7 @@ export function ShellHistoryColumn({
   onOpen,
   onDelete,
   onNavigate,
+  linkTable,
 }: {
   rows: readonly ShellHistoryRow[];
   activeId: string | null;
@@ -37,6 +48,8 @@ export function ShellHistoryColumn({
   /** Closes the mobile overlay after a row is chosen; nothing on a
    *  computer, where the column stays open beside the thread. */
   onNavigate?: () => void;
+  /** The linkable table each row belongs to — see the doc comment above. */
+  linkTable?: string;
 }) {
   const t = useTranslations("dashboard.toolShell.history");
   const [query, setQuery] = useState("");
@@ -95,6 +108,11 @@ export function ShellHistoryColumn({
                   <span className="block truncate">{r.title}</span>
                   {r.status && <span className="block truncate text-[11px] text-muted">{r.status}</span>}
                 </button>
+                {linkTable && (
+                  <span className="opacity-0 focus-within:opacity-100 group-hover:opacity-100">
+                    <AddToProjectButton variant="icon" sourceTable={linkTable} sourceId={r.id} sourceHeadline={r.title} />
+                  </span>
+                )}
                 {onDelete && (
                   <button
                     type="button"

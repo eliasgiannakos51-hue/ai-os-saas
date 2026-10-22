@@ -12,6 +12,7 @@ import { releaseReservation, reserveCredits, settleReservation } from "@/lib/bil
 import { buildFlow } from "@/lib/automations/builder";
 import { FLOW_FEATURE, flowPrices } from "@/lib/automations/flow-pricing";
 import { FLOW_COLUMNS, MAX_FLOWS, MAX_SAID_CHARS, flowGate, readTimeZone, refuse } from "@/lib/automations/flow-access";
+import { linkResultToProject, ownedProjectId } from "@/lib/projects/link-result";
 
 export const dynamic = "force-dynamic";
 // One forced-tool call of at most 1,500 tokens.
@@ -57,6 +58,11 @@ export async function POST(request: Request) {
   if (!user) return refuse("not_signed_in", 401);
   const gate = await flowGate(user);
   if (gate instanceof NextResponse) return gate;
+  // STARTING WORK FROM A PROJECT AUTO-JOINS IT (owner's message
+  // 2026-10-22, point 6) — read back as the caller's own BEFORE anything
+  // is spent, same reasoning as every other gate above: a bad id should
+  // not be discovered only after the model has been paid.
+  const projectId = await ownedProjectId(supabase, typeof body.projectId === "string" ? body.projectId : null);
 
   const { count, error: countError } = await supabase
     .from("automation_flows")
@@ -135,6 +141,8 @@ export async function POST(request: Request) {
       .from("automation_flow_versions")
       .insert({ flow_id: id, user_id: user.id, version: 1, boxes: built.boxes, said });
     if (versionError) logApiError("/api/automations/flows", versionError, { stage: "version" });
+
+    if (projectId) await linkResultToProject(supabase, user.id, "automation_flows", id, projectId);
 
     return NextResponse.json({ ok: true, flow: row, unsupported: built.unsupported, creditsCharged: settlement.creditsCharged });
   } catch (err) {

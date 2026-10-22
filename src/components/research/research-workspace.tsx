@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import {
@@ -9,11 +10,18 @@ import {
   Play,
   Trash2,
   FileText,
+  FolderPlus,
   ExternalLink,
   AlertTriangle,
   ListChecks,
   Square,
 } from "lucide-react";
+// Deferred, same reason as every other per-record modal here: a picker
+// that reads every project, on a menu item that sits on every card.
+const AddToProjectModal = dynamic(
+  () => import("@/components/entity-links/add-to-project-modal").then((m) => m.AddToProjectModal),
+  { ssr: false }
+);
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { StepFlow } from "@/components/ui/step-flow";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -85,6 +93,8 @@ export function ResearchWorkspace({
   const t = useTranslations("dashboard.deepResearch");
   const tModule = useTranslations("module");
   const tSteps = useTranslations("aiSteps");
+  const tAddToProject = useTranslations("projects.addToProject");
+  const [addToProjectId, setAddToProjectId] = useState<string | null>(null);
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
@@ -459,6 +469,12 @@ export function ResearchWorkspace({
                     ]
                   : []),
                 {
+                  key: "addToProject",
+                  label: tAddToProject("button"),
+                  icon: FolderPlus,
+                  onSelect: () => setAddToProjectId(report.id),
+                },
+                {
                   key: "delete",
                   label: t("delete"),
                   icon: Trash2,
@@ -546,6 +562,16 @@ export function ResearchWorkspace({
             </EntityCard>
           ))}
         </CardGrid>
+      )}
+
+      {addToProjectId && (
+        <AddToProjectModal
+          open
+          onClose={() => setAddToProjectId(null)}
+          sourceTable="research_reports"
+          sourceId={addToProjectId}
+          sourceHeadline={reports.find((r) => r.id === addToProjectId)?.topic ?? ""}
+        />
       )}
 
       {open?.status === "ready" && (

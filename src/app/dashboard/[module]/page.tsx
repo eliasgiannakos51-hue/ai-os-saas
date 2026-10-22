@@ -21,6 +21,7 @@ import type { UserAutomation } from "@/types/user-automation";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { AutomationShell } from "@/components/automations/automation-shell";
 import { loadAutomationPage } from "@/lib/automations/page-data";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 // The 12 business modules share this one route, so they shared one
 // COUNT: 12 /^ {4}slug: "/ in src/lib/modules.ts
@@ -43,7 +44,7 @@ export async function generateMetadata(
 export default async function ModulePage(
   props: {
     params: Promise<{ module: string }>;
-    searchParams: Promise<{ run?: string }>;
+    searchParams: Promise<{ run?: string; flow?: string; projectId?: string; said?: string }>;
   }
 ) {
   const params = await props.params;
@@ -70,7 +71,7 @@ export default async function ModulePage(
   const isAutomationModule = moduleConfig.slug === "automation";
   if ((await isFeatureOn("automations", user)) && isAutomationModule) {
     const searchParams = await props.searchParams;
-    const data = await loadAutomationPage(user, searchParams.run);
+    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
         <AutomationShell
@@ -82,6 +83,8 @@ export default async function ModulePage(
           configured={Boolean(process.env.ANTHROPIC_API_KEY)}
           connected={data.connected}
           older={data.older}
+          initialProjectId={data.projectId}
+          initialSaid={readExampleParam(searchParams.said)}
         />
       </div>
     );

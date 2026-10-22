@@ -51,6 +51,7 @@ export function ResearchShell({
   monthlyCap,
   usedThisMonth,
   slides = false,
+  initialProjectId = null,
 }: {
   initialTopic?: string;
   initialReports: ResearchReport[];
@@ -61,6 +62,10 @@ export function ResearchShell({
   /** The switch "research-slides" (package 11): the numbers open their
    *  sources, and the report goes to Slides with one press. */
   slides?: boolean;
+  /** From `?projectId=`, read back as the caller's own. Sent on the
+   *  report that creates the NEXT one; no setter, same reason Chat's own
+   *  `initialProjectId` has none. */
+  initialProjectId?: string | null;
 }) {
   const t = useTranslations("dashboard.deepResearch");
   const tNames = useTranslations("dashboard.tools.names");
@@ -186,7 +191,7 @@ export function ResearchShell({
       const response = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: value, language: locale }),
+        body: JSON.stringify({ topic: value, language: locale, ...(initialProjectId ? { projectId: initialProjectId } : {}) }),
       });
       // An answer that is not JSON (the host's own 504 page when the
       // function runs out of time) reached the server: it is said from its
@@ -429,6 +434,7 @@ export function ResearchShell({
             onNavigate={() => {
               if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
             }}
+            linkTable="research_reports"
           />
         ),
       }}

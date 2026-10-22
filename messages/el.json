@@ -146,6 +146,7 @@
       "tradingWorkflow": "Ροή Εργασίας Trading",
       "productWorkflow": "Ροή Εργασίας Product",
       "automation": "Αυτοματισμοί",
+      "automationFlow": "Ροή αυτοματισμού",
       "marketplace": "Έτοιμοι βοηθοί",
       "published": "Ζωντανά site",
       "integrations": "Συνδέσεις",
@@ -5066,6 +5067,29 @@
     "delete": "Διαγραφή",
     "deleteConfirm": "Να διαγραφεί αυτό το project; Τα πράγματα μέσα του μένουν εκεί που είναι.",
     "removeMember": "Βγάλ' το από το project",
+    "addToProject": {
+      "button": "Προσθήκη σε Project",
+      "title": "Προσθήκη σε ένα Project",
+      "loading": "Φόρτωση των Projects σου…",
+      "failed": "Κάτι δεν δούλεψε — δοκίμασε ξανά.",
+      "empty": "Δεν έχεις Projects ακόμα — φτιάξε ένα παρακάτω.",
+      "untitledProject": "Project χωρίς όνομα",
+      "newProject": "Νέο Project",
+      "newProjectPlaceholder": "Λανσάρισμα του φθινοπωρινού καταστήματος",
+      "create": "Δημιουργία & προσθήκη",
+      "added": "Προστέθηκε στο {name}.",
+      "limitReached": "Έχεις χρησιμοποιήσει όλα τα Projects του πλάνου σου. Κάνε αναβάθμιση για περισσότερα."
+    },
+    "colours": {
+      "primary": "Βασικό χρώμα",
+      "secondary": "Δεύτερο χρώμα",
+      "clear": "Καθαρισμός",
+      "none": "Δεν έχει επιλεγεί χρώμα"
+    },
+    "automateIt": {
+      "button": "Αυτοματοποίησέ το",
+      "hint": "Φτιάχνει έναν αυτοματισμό πάνω σε αυτό το Project — διαβάζει όσα έχει μέσα και τον στόχο από πάνω."
+    },
     "errors": {
       "tooShort": "Δώσε του πρώτα ένα όνομα.",
       "tooLong": "Το όνομα ξεπερνά τους {limit} χαρακτήρες.",

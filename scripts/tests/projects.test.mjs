@@ -67,6 +67,20 @@ const CHAT_ROUTE = "src/app/api/chat/route.ts";
 const USER_CONTEXT = "src/lib/user-context.ts";
 const CONV_SCOPE = "src/lib/projects/conversation-scope.ts";
 
+// ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, point 6).
+const LINK_RESULT = "src/lib/projects/link-result.ts";
+const UPDATE_ROUTE = "src/app/api/projects/[id]/route.ts";
+const SHELL_HISTORY = "src/components/shell/shell-history-column.tsx";
+const ADD_BUTTON = "src/components/entity-links/add-to-project-button.tsx";
+const ADD_MODAL = "src/components/entity-links/add-to-project-modal.tsx";
+const AUTOMATION_ROUTE = "src/app/api/automations/flows/route.ts";
+const AUTOMATION_SHELL = "src/components/automations/automation-shell.tsx";
+const WEBSITE_GENERATE_ROUTE = "src/app/api/websites/generate/route.ts";
+const SITE_REQUESTS = "src/lib/website-builder/site-requests.ts";
+const RESEARCH_ROUTE = "src/app/api/research/route.ts";
+const ANALYSIS_SHELL = "src/components/data-analysis/analysis-shell.tsx";
+const COLOURS_MIGRATION = "supabase/migrations/20261025000000_projects_colours.sql";
+
 const project = await loadTs(PROJECT_TS);
 const {
   IN_PROJECT, PROJECTS_TABLE, PROJECT_STATUSES, MAX_MEMBERS,
@@ -75,6 +89,7 @@ const {
   projectMembers, projectModuleTables, projectContextModules, projectMemberTables,
   isUuid, projectEdgeFilter,
   ROWS_PER_MODULE_UNSCOPED, UNSCOPED_MODULE_COUNT, CONTEXT_ROW_BUDGET, rowsPerModuleInProject,
+  isHexColour, checkColour,
 } = project;
 
 ok(`ten locales were read (${LOCALES.length})`, LOCALES.length === 10);
@@ -478,6 +493,103 @@ console.log("\n== 7. THE PAGES ==");
   ok("en: the tip names the absence this feature is built on", /does not pull things in by itself/i.test(lookup(messages.en, "help.projects.doesNot")));
   ok("the member count shown is the edge count, with no expansion in the page",
     /counts\.set\(id, \(counts\.get\(id\) \?\? 0\) \+ 1\)/.test(listPage));
+}
+
+console.log("\n== 8. ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, point 6) ==");
+{
+  console.log("-- colours --");
+  ok("a real hex is recognised", isHexColour("#1d4ed8") && isHexColour("#ABCDEF"));
+  ok("a colour word is not — the picker is a real colour input, not free text", !isHexColour("navy") && !isHexColour(""));
+  ok("checkColour clears on empty/null, lowercases a real one, refuses the rest",
+    checkColour(null).ok && checkColour(null).colour === null &&
+    checkColour("").ok && checkColour("").colour === null &&
+    checkColour("#ABCDEF").ok && checkColour("#ABCDEF").colour === "#abcdef" &&
+    !checkColour("navy").ok);
+  const coloursSql = readFileSync(COLOURS_MIGRATION, "utf8");
+  ok("the migration's CHECK is the exact same hex shape the helper enforces",
+    coloursSql.includes("~ '^#[0-9a-f]{6}$'") && /add column if not exists primary_colour/.test(coloursSql) && /add column if not exists secondary_colour/.test(coloursSql));
+  ok("nothing is dropped or truncated", !/drop table|truncate/i.test(coloursSql.replace(/^\s*--.*$/gm, "")));
+
+  console.log("-- the shared button/modal --");
+  const addButton = stripComments(readFileSync(ADD_BUTTON, "utf8"));
+  const addModal = stripComments(readFileSync(ADD_MODAL, "utf8"));
+  ok("the button follows LinkToButton's own onActivate/onOpen contract",
+    /onActivate\?\.\(\)/.test(addButton) && /if \(onOpen\) onOpen\(\);\s*else setOpen\(true\);/.test(addButton));
+  ok("the modal posts to the EXISTING members route, no new route invented",
+    /fetch\(`\/api\/projects\/\$\{encodeURIComponent\(projectId\)\}\/members`/.test(addModal) && /method: "POST"/.test(addModal));
+  ok("creating a project reuses the EXISTING create route, with its EXISTING plan cap",
+    /fetch\("\/api\/projects"/.test(addModal) && /project_limit_reached/.test(addModal));
+  ok("the project list is read through RLS, not a new admin-backed route",
+    /createClient\(\)/.test(addModal) && !/createAdminClient/.test(addModal));
+
+  console.log("-- the registry closes the gap the message named --");
+  const extras = await loadTs(EXTRAS_TS);
+  ok("automation_flows and code_sessions joined the registry (the two of six that were missing)",
+    extras.LINK_ONLY_MODULES.some((m) => m.table === "automation_flows") &&
+    extras.LINK_ONLY_MODULES.some((m) => m.table === "code_sessions"));
+  ok("automation-flows has its OWN name, distinct from the old one-sentence tracker's",
+    extras.LINK_ONLY_MODULES.find((m) => m.table === "automation_flows")?.titleKey !== "sidebar.items.automation");
+  ok("coding reuses the Coding tool's own sidebar name rather than inventing one",
+    extras.LINK_ONLY_MODULES.find((m) => m.table === "code_sessions")?.titleKey === "sidebar.items.coding");
+
+  console.log("-- ShellHistoryColumn: opt-in, not automatic --");
+  const shellHistory = stripComments(readFileSync(SHELL_HISTORY, "utf8"));
+  ok("the column only draws the button when a caller passes linkTable",
+    /\{linkTable && \(/.test(shellHistory) && /sourceTable=\{linkTable\}/.test(shellHistory));
+  for (const [file, label] of [
+    [AUTOMATION_SHELL, "automation"],
+    ["src/components/coding/coding-workspace.tsx", "coding"],
+    ["src/components/research/research-shell.tsx", "research"],
+    ["src/components/website-builder/website-shell.tsx", "site"],
+  ]) {
+    ok(`${label}'s shell passes linkTable`, /linkTable=/.test(stripComments(readFileSync(file, "utf8"))));
+  }
+  ok("Analyze's shell does NOT — a separate, independent effort, untouched by this round",
+    !/linkTable=/.test(stripComments(readFileSync(ANALYSIS_SHELL, "utf8"))));
+
+  console.log("-- starting work from a project auto-joins it, before anything is spent --");
+  for (const [file, label, callName] of [
+    [AUTOMATION_ROUTE, "automations", "linkResultToProject(supabase, user.id, \"automation_flows\""],
+    [WEBSITE_GENERATE_ROUTE, "site generation", "linkResultToProject(supabase, user.id, \"user_websites\""],
+    [RESEARCH_ROUTE, "research", "linkResultToProject(supabase, user.id, \"research_reports\""],
+  ]) {
+    const src = stripComments(readFileSync(file, "utf8"));
+    ok(`${label}: the project id is read back as the caller's own`, /ownedProjectId\(supabase,/.test(src));
+    ok(`${label}: ...BEFORE the model is called or anything is charged`,
+      src.indexOf("ownedProjectId(supabase,") < src.indexOf(label === "automations" ? "reserveCredits(" : label === "site generation" ? "insertError" : "checkAiCallAllowed("));
+    ok(`${label}: the row is linked with the table named explicitly, not a variable that could drift`, src.includes(callName));
+  }
+  const linkResult = stripComments(readFileSync(LINK_RESULT, "utf8"));
+  ok("linkResultToProject refuses a table the registry does not recognise",
+    /isProjectMemberTable\(table\)/.test(linkResult));
+  ok("...and a project id that is not a uuid",
+    /isUuid\(projectId\)/.test(linkResult));
+  ok("it swallows its own failure rather than failing a request for already-paid-for work",
+    /catch \(err\) \{\s*logApiError/.test(linkResult));
+  ok("ownedProjectId is the SAME function conversation-scope.ts already proved, re-exported rather than re-implemented",
+    /export \{ ownedProjectId \} from "@\/lib\/projects\/conversation-scope"/.test(linkResult));
+
+  console.log("-- «Αυτοματοποίησέ το» --");
+  const detail2 = stripComments(readFileSync(DETAIL_COMPONENT, "utf8"));
+  ok("the button carries both the project id and the goal as the starting sentence",
+    /\/dashboard\/automation\?projectId=\$\{encodeURIComponent\(project\.id\)\}/.test(detail2) && /said=\$\{encodeURIComponent\(project\.goal\)\}/.test(detail2));
+  const pageData = stripComments(readFileSync("src/lib/automations/page-data.ts", "utf8"));
+  ok("the automations page reads ?flow= back as the caller's OWN flow, not any id handed to it",
+    /flows\.some\(\(f\) => \(f as \{ id\?: unknown \}\)\.id === flowIdFromUrl\)/.test(pageData));
+  for (const l of LOCALES) {
+    ok(`${l}: the button's hint and label resolve`,
+      typeof lookup(messages[l], "projects.automateIt.button") === "string" &&
+      typeof lookup(messages[l], "projects.automateIt.hint") === "string");
+  }
+
+  console.log("-- the account's own client updates a project, never the service role --");
+  const updateRoute = stripComments(readFileSync(UPDATE_ROUTE, "utf8"));
+  ok("PATCH validates each field with the SAME functions the create route uses",
+    /checkProjectName\(body\.name\)/.test(updateRoute) && /clampGoal\(body\.goal\)/.test(updateRoute) && /checkColour\(body\.primaryColour\)/.test(updateRoute));
+  ok("...and writes through the person's own client, scoped to them",
+    !/createAdminClient/.test(updateRoute) && /\.eq\("user_id", user\.id\)/.test(updateRoute));
+  ok("an invalid colour is refused with 400, not passed through to the database's own CHECK",
+    (updateRoute.match(/if \(!verdict\.ok\) return NextResponse\.json\(\{ error: "invalid_colour" \}, \{ status: 400 \}\);/g) ?? []).length === 2);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

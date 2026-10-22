@@ -115,8 +115,11 @@ const MUTANTS = [
   {
     name: "the Site shell is drawn without the brief",
     file: WEBSITE_PAGE,
-    from: "<WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} initialOpenId={wanted}",
-    to: "<WebsiteShell initialWebsites={websiteRows} initialOpenId={wanted}",
+    // RE-ANCHORED 2026-10-22: the <WebsiteShell> call went multi-line when
+    // `initialProjectId` joined it (owner's message, point 6). The defect
+    // is unchanged — the brief prop is dropped.
+    from: "        <WebsiteShell\n          initialWebsites={websiteRows}\n          initialBrief={readExampleParam(searchParams.brief)}\n          initialOpenId={wanted}",
+    to: "        <WebsiteShell\n          initialWebsites={websiteRows}\n          initialOpenId={wanted}",
     expect: "website-builder/page.tsx really reads searchParams.brief in <WebsiteShell> too",
   },
   {

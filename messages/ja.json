@@ -146,6 +146,7 @@
       "tradingWorkflow": "トレーディングワークフロー",
       "productWorkflow": "プロダクトワークフロー",
       "automation": "自動化",
+      "automationFlow": "オートメーションフロー",
       "marketplace": "すぐ使える助っ人",
       "published": "公開中のサイト",
       "integrations": "連携",
@@ -5066,6 +5067,29 @@
     "delete": "削除",
     "deleteConfirm": "このプロジェクトを削除しますか？中身はそのまま残ります。",
     "removeMember": "プロジェクトから外す",
+    "addToProject": {
+      "button": "プロジェクトに追加",
+      "title": "プロジェクトに追加",
+      "loading": "プロジェクトを読み込み中…",
+      "failed": "うまくいきませんでした — もう一度お試しください。",
+      "empty": "まだプロジェクトがありません — 下で作成してください。",
+      "untitledProject": "無題のプロジェクト",
+      "newProject": "新しいプロジェクト",
+      "newProjectPlaceholder": "秋のショップ立ち上げ",
+      "create": "作成して追加",
+      "added": "{name}に追加しました。",
+      "limitReached": "プランのプロジェクト数をすべて使い切りました。アップグレードして追加してください。"
+    },
+    "colours": {
+      "primary": "メインカラー",
+      "secondary": "セカンドカラー",
+      "clear": "クリア",
+      "none": "色が選択されていません"
+    },
+    "automateIt": {
+      "button": "自動化する",
+      "hint": "このプロジェクトに基づいたオートメーションを作成します — 中の内容と上の目標を読み取ります。"
+    },
     "errors": {
       "tooShort": "まず名前を付けてください。",
       "tooLong": "その名前は {limit} 文字を超えています。",

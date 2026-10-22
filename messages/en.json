@@ -146,6 +146,7 @@
       "tradingWorkflow": "Trading Workflow",
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
+      "automationFlow": "Automation flow",
       "marketplace": "Ready-made helpers",
       "published": "Live sites",
       "integrations": "Integrations",
@@ -5066,6 +5067,29 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this project? The things in it stay where they are.",
     "removeMember": "Take out of the project",
+    "addToProject": {
+      "button": "Add to project",
+      "title": "Add to a project",
+      "loading": "Loading your projects…",
+      "failed": "That didn't work — try again.",
+      "empty": "You have no projects yet — make one below.",
+      "untitledProject": "Untitled project",
+      "newProject": "New project",
+      "newProjectPlaceholder": "Launch the autumn shop",
+      "create": "Create & add",
+      "added": "Added to {name}.",
+      "limitReached": "You have used all the projects on your plan. Upgrade to add more."
+    },
+    "colours": {
+      "primary": "Primary colour",
+      "secondary": "Secondary colour",
+      "clear": "Clear",
+      "none": "No colour chosen"
+    },
+    "automateIt": {
+      "button": "Automate it",
+      "hint": "Builds an automation scoped to this project — it reads what is in it and the goal above."
+    },
     "errors": {
       "tooShort": "Give it a name first.",
       "tooLong": "That name is longer than {limit} characters.",

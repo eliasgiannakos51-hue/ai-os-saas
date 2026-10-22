@@ -95,6 +95,13 @@ const BOOKKEEPING = {
   user_delivery_channels: "where a result is delivered",
   user_integrations: "a connected service",
   ai_missions: "a goal, the Goals tool's own record, reached from it",
+  // Starting work from a project auto-joins it (owner's message
+  // 2026-10-22, point 6): lib/projects/link-result.ts writes this edge
+  // from inside api/websites/generate and api/research after their own
+  // insert succeeds. It is which project a result belongs to, not a
+  // thing somebody made, and it is public.projects — not a tool here —
+  // that this row is ABOUT.
+  entity_links: "which project a result belongs to, not a thing somebody made",
 };
 function filesUnder(dir) {
   const out = [];

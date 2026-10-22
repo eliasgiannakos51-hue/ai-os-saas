@@ -53,6 +53,8 @@ export function AutomationShell({
   configured,
   connected,
   older,
+  initialProjectId = null,
+  initialSaid,
 }: {
   initialFlows: Record<string, unknown>[];
   /** The runs of the automation opened on arrival. */
@@ -66,6 +68,13 @@ export function AutomationShell({
   connected: Connected;
   /** The one-sentence automations from before: still running, shown as they were. */
   older: UserAutomation[];
+  /** From a project's «Automate it» button (`?projectId=`), already read
+   *  back as the caller's own by `loadAutomationPage`. Sent on the build
+   *  that creates the NEXT automation; there is no setter, same reason
+   *  Chat's own `initialProjectId` has none — see `conversation-scope.ts`. */
+  initialProjectId?: string | null;
+  /** The sentence to start the field with, from the project's own goal. */
+  initialSaid?: string;
 }) {
   const t = useTranslations("dashboard.automations");
   const tSteps = useTranslations("aiSteps");
@@ -229,7 +238,12 @@ export function AutomationShell({
   }
 
   async function build(said: string) {
-    const data = await call("/api/automations/flows", "POST", { said, timeZone: resolveBrowserTimeZone() }, "build");
+    const data = await call(
+      "/api/automations/flows",
+      "POST",
+      { said, timeZone: resolveBrowserTimeZone(), ...(initialProjectId ? { projectId: initialProjectId } : {}) },
+      "build"
+    );
     if (!data) return;
     if (typeof data.question === "string") {
       setPending({ said, question: data.question });
@@ -490,6 +504,7 @@ export function AutomationShell({
         sending={running !== null}
         onSend={send}
         onStop={() => abortRef.current?.abort()}
+        initialText={initialSaid}
         footer={
           <>
             {shown && chosenBox && <ChosenBox label={boxLabel(chosenBox)} onClear={() => setChosen(null)} />}
@@ -539,6 +554,7 @@ export function AutomationShell({
                   onNavigate={() => {
                     if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
                   }}
+                  linkTable="automation_flows"
                 />
               </div>
               {/* THE PRE-"BOXES" AUTOMATIONS (one sentence, no boxes): still

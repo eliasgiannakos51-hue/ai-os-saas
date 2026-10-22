@@ -146,6 +146,7 @@
       "tradingWorkflow": "Flux de Travail Trading",
       "productWorkflow": "Flux de Travail Produit",
       "automation": "Automatisation",
+      "automationFlow": "Flux d'automatisation",
       "marketplace": "Assistants prêts à l’emploi",
       "published": "Sites en ligne",
       "integrations": "Intégrations",
@@ -5066,6 +5067,29 @@
     "delete": "Supprimer",
     "deleteConfirm": "Supprimer ce projet ? Ce qu'il contient reste où c'est.",
     "removeMember": "Retirer du projet",
+    "addToProject": {
+      "button": "Ajouter au projet",
+      "title": "Ajouter à un projet",
+      "loading": "Chargement de vos projets…",
+      "failed": "Cela n'a pas fonctionné — réessayez.",
+      "empty": "Vous n'avez encore aucun projet — créez-en un ci-dessous.",
+      "untitledProject": "Projet sans titre",
+      "newProject": "Nouveau projet",
+      "newProjectPlaceholder": "Lancement de la boutique d'automne",
+      "create": "Créer et ajouter",
+      "added": "Ajouté à {name}.",
+      "limitReached": "Vous avez utilisé tous les projets de votre forfait. Passez à un forfait supérieur pour en ajouter."
+    },
+    "colours": {
+      "primary": "Couleur principale",
+      "secondary": "Couleur secondaire",
+      "clear": "Effacer",
+      "none": "Aucune couleur choisie"
+    },
+    "automateIt": {
+      "button": "Automatiser",
+      "hint": "Crée une automatisation centrée sur ce projet — elle lit ce qu'il contient et l'objectif ci-dessus."
+    },
     "errors": {
       "tooShort": "Donnez-lui d'abord un nom.",
       "tooLong": "Ce nom dépasse {limit} caractères.",

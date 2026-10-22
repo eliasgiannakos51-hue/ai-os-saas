@@ -239,7 +239,10 @@ const siteRequests = read("src/lib/website-builder/site-requests.ts");
 check("the shared requests: generate, then the worker, then the status is watched",
   /fetchWithAuthRetry\("\/api\/websites\/generate"/.test(siteRequests) && /fetch\("\/api\/websites\/generate\/process"/.test(siteRequests) && /fetch\(`\/api\/websites\/status\?id=\$\{encodeURIComponent\(id\)\}`\)/.test(siteRequests));
 check("a description said in the field builds the site through them, then the status is watched",
-  /await startSiteGeneration\(\{ name, description, skipClarification, referenceImagePaths \}\)/.test(site) && /watchSite\(id, \{/.test(site) && !/fetch\("\/api\/websites\/generate/.test(site));
+  // `, projectId: initialProjectId` joined the call 2026-10-22 (starting
+  // work from a project auto-joins it, owner's message point 6) — the
+  // four original arguments are still exactly these, in this order.
+  /await startSiteGeneration\(\{ name, description, skipClarification, referenceImagePaths, projectId: initialProjectId \}\)/.test(site) && /watchSite\(id, \{/.test(site) && !/fetch\("\/api\/websites\/generate/.test(site));
 check("...asking its questions first, answered in the field or skipped",
   /if \(data\.needsClarification\) return \{ kind: "questions"/.test(siteRequests) && /if \(outcome\.kind === "questions"\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
 check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
@@ -273,7 +276,10 @@ check("Site: ...before anything is asked, and the paths go with the next message
     /void generate\(pending\.name, enriched, true, pending\.paths\);/.test(site) && /onClick=\{\(\) => void generate\(pending\.name, pending\.description, true, pending\.paths\)\}/.test(site) &&
     /const referenceImagePaths = await sendPhotos\(\);\s*if \(referenceImagePaths === null\) return;/.test(site));
 check("Site: the shared requests hand them to the routes, as the old page does",
-  /body: JSON\.stringify\(\{ name: input\.name, description: input\.description, referenceImagePaths, skipClarification: input\.skipClarification \}\)/.test(siteRequests) &&
+  // The body went multi-line 2026-10-22 when `projectId` joined it
+  // (starting work from a project auto-joins it) — read as one string
+  // with whitespace folded, so a re-wrap does not itself break this.
+  /body: JSON\.stringify\(\{\s*name: input\.name,\s*description: input\.description,\s*referenceImagePaths,\s*skipClarification: input\.skipClarification,/.test(siteRequests) &&
     /body: JSON\.stringify\(\{ websiteId: record\.id, description: input\.description, referenceImagePaths \}\)/.test(siteRequests) && /referenceImagePaths: input\.referenceImagePaths \?\? \[\],/.test(siteRequests) &&
     /referenceImagePaths,\s*skipClarification,/.test(oldSite));
 check("Site: the price counts the photos, as on the page", /\{ model: WEBSITE_BUILDER_MODEL, inputChars: length, imageCount: photos\.length, planSlug \}/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\} imageCount=\{photos\.length\} \/>/.test(site));

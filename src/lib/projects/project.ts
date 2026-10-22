@@ -53,6 +53,35 @@ export function clampGoal(raw: unknown): string {
 }
 
 /**
+ * A PROJECT'S OWN COLOUR, EXACTLY #rrggbb OR NULL (20261025000000_projects_colours.sql).
+ *
+ * Not the business's colours (lib/memory/brand.ts, global, read by Site
+ * generation) — a project's colour is narrower and additive, offered to a
+ * tool starting work from inside the project rather than written into
+ * every brief. A free-text colour name ("navy") is not accepted here: the
+ * picker is a real colour input, which always produces a hex value, and
+ * accepting words would need the same COLOUR_WORDS table brand.ts already
+ * owns for a different scope.
+ */
+const HEX_COLOUR_RE = /^#[0-9a-f]{6}$/i;
+
+export function isHexColour(value: unknown): value is string {
+  return typeof value === "string" && HEX_COLOUR_RE.test(value);
+}
+
+export type ColourVerdict = { ok: true; colour: string | null } | { ok: false };
+
+/** `null`/`""`/absent clears the colour; a real #rrggbb is lowercased;
+ *  anything else is refused rather than silently dropped or truncated —
+ *  the CHECK constraint would refuse it anyway, and a 400 here is the
+ *  honest place to say so, not a row that fails to insert for a reason
+ *  the caller cannot see. */
+export function checkColour(raw: unknown): ColourVerdict {
+  if (raw === null || raw === undefined || raw === "") return { ok: true, colour: null };
+  return isHexColour(raw) ? { ok: true, colour: String(raw).toLowerCase() } : { ok: false };
+}
+
+/**
  * How many things one project may hold.
  *
  * A CAP, BECAUSE THE CONTEXT BUDGET BELOW IS DIVIDED BY IT. A project of

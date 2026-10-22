@@ -204,7 +204,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
               data-testid="coding-history"
               className="absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:w-[280px]"
             >
-              <ShellHistoryColumn rows={historyRows} activeId={openedId} onOpen={openFromHistory} onNavigate={toggleHistory} />
+              <ShellHistoryColumn rows={historyRows} activeId={openedId} onOpen={openFromHistory} onNavigate={toggleHistory} linkTable="code_sessions" />
             </div>
             <button
               type="button"

@@ -32,8 +32,19 @@ const CONV_SCOPE = "src/lib/projects/conversation-scope.ts";
 const DETAIL_PAGE = "src/app/dashboard/projects/[id]/page.tsx";
 const DOC = "docs/projects.md";
 
+// ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, point 6).
+const LINK_RESULT = "src/lib/projects/link-result.ts";
+const UPDATE_ROUTE = "src/app/api/projects/[id]/route.ts";
+const SHELL_HISTORY = "src/components/shell/shell-history-column.tsx";
+const ADD_MODAL = "src/components/entity-links/add-to-project-modal.tsx";
+const AUTOMATION_ROUTE = "src/app/api/automations/flows/route.ts";
+const WEBSITE_GENERATE_ROUTE = "src/app/api/websites/generate/route.ts";
+const RESEARCH_ROUTE = "src/app/api/research/route.ts";
+const AUTOMATION_SHELL2 = "src/components/automations/automation-shell.tsx";
+
 const TARGETS = [GATE, PROJECT, EXTRAS, MIGRATION, ROUTE, MEMBERS, DETAIL, CHAT_PAGE, CHAT_WS, ZH, KG, DOC,
-  CTX, CHAT_ROUTE, CONV_SCOPE, DETAIL_PAGE, SERVER_CREATE];
+  CTX, CHAT_ROUTE, CONV_SCOPE, DETAIL_PAGE, SERVER_CREATE,
+  LINK_RESULT, UPDATE_ROUTE, SHELL_HISTORY, ADD_MODAL, AUTOMATION_ROUTE, WEBSITE_GENERATE_ROUTE, RESEARCH_ROUTE, AUTOMATION_SHELL2];
 
 const MUTANTS = [
   // ---- the decision itself -------------------------------------------
@@ -301,7 +312,7 @@ const MUTANTS = [
   {
     name: "the document goes back to a total nobody counted",
     file: DOC,
-    from: "> It now lists **28**",
+    from: "> It now lists **30**",
     to: "> It now lists **19**",
     expect: "docs/projects.md prints the real total",
   },
@@ -329,7 +340,7 @@ const MUTANTS = [
     file: EXTRAS,
     from: '    titleKey: "sidebar.items.imageTool",',
     to: '    titleKey: "sidebar.items.images",',
-    expect: "el: no two of the 28 linkable modules share a name",
+    expect: "el: no two of the 30 linkable modules share a name",
   },
   // ---- the copy ---------------------------------------------------------
   {
@@ -346,6 +357,94 @@ const MUTANTS = [
     from: 'const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];',
     to: 'const LOCALES = ["en"];',
     expect: "ten locales were read",
+  },
+  // ---- add to project, everywhere (2026-10-22) -------------------------
+  {
+    name: "linkResultToProject accepts a table the registry does not recognise",
+    file: LINK_RESULT,
+    from: 'if (!isProjectMemberTable(table) || !isUuid(projectId) || typeof id !== "string" || !id) return;',
+    to: 'if (!isUuid(projectId) || typeof id !== "string" || !id) return;',
+    expect: "linkResultToProject refuses a table the registry does not recognise",
+  },
+  {
+    name: "linkResultToProject accepts a project id that is not a uuid",
+    file: LINK_RESULT,
+    from: 'if (!isProjectMemberTable(table) || !isUuid(projectId) || typeof id !== "string" || !id) return;',
+    to: 'if (!isProjectMemberTable(table) || typeof id !== "string" || !id) return;',
+    expect: "and a project id that is not a uuid",
+  },
+  {
+    name: "the update route reaches for the service role",
+    file: UPDATE_ROUTE,
+    from: 'import { createClient } from "@/lib/supabase/server";',
+    to: 'import { createClient } from "@/lib/supabase/server";\nimport { createAdminClient } from "@/lib/supabase/admin";',
+    expect: "writes through the person's own client, scoped to them",
+  },
+  {
+    name: "the update route stops refusing an invalid colour",
+    file: UPDATE_ROUTE,
+    from: `    const verdict = checkColour(body.primaryColour);
+    if (!verdict.ok) return NextResponse.json({ error: "invalid_colour" }, { status: 400 });
+    patch.primary_colour = verdict.colour;`,
+    to: `    const verdict = checkColour(body.primaryColour);
+    patch.primary_colour = verdict.ok ? verdict.colour : body.primaryColour;`,
+    expect: "an invalid colour is refused with 400",
+  },
+  {
+    name: "automations: the project id is spent without being checked as the caller's own",
+    file: AUTOMATION_ROUTE,
+    from: "  const projectId = await ownedProjectId(supabase, typeof body.projectId === \"string\" ? body.projectId : null);",
+    to: "  const projectId = typeof body.projectId === \"string\" ? body.projectId : null;",
+    expect: "automations: the project id is read back as the caller's own",
+  },
+  {
+    name: "automations: the new flow is never filed into the project",
+    file: AUTOMATION_ROUTE,
+    from: '    if (projectId) await linkResultToProject(supabase, user.id, "automation_flows", id, projectId);\n',
+    to: "",
+    expect: "automations: the row is linked with the table named explicitly",
+  },
+  {
+    name: "site generation: the project id is spent without being checked as the caller's own",
+    file: WEBSITE_GENERATE_ROUTE,
+    from: "    const projectId = await ownedProjectId(supabase, requestedProjectId);",
+    to: "    const projectId = requestedProjectId;",
+    expect: "site generation: the project id is read back as the caller's own",
+  },
+  {
+    name: "site generation: the new site is never filed into the project",
+    file: WEBSITE_GENERATE_ROUTE,
+    from: '    if (!insertError && record && projectId) {\n      await linkResultToProject(supabase, user.id, "user_websites", record.id, projectId);\n    }\n\n',
+    to: "",
+    expect: "site generation: the row is linked with the table named explicitly",
+  },
+  {
+    name: "research: the project id is spent without being checked as the caller's own",
+    file: RESEARCH_ROUTE,
+    from: "    const projectId = await ownedProjectId(supabase, typeof body?.projectId === \"string\" ? body.projectId : null);",
+    to: "    const projectId = typeof body?.projectId === \"string\" ? body.projectId : null;",
+    expect: "research: the project id is read back as the caller's own",
+  },
+  {
+    name: "research: the new report is never filed into the project",
+    file: RESEARCH_ROUTE,
+    from: '    if (projectId) await linkResultToProject(supabase, user.id, "research_reports", String(report.id), projectId);\n',
+    to: "",
+    expect: "research: the row is linked with the table named explicitly",
+  },
+  {
+    name: "the shared history column draws the button whether or not a caller opted in",
+    file: SHELL_HISTORY,
+    from: "                {linkTable && (",
+    to: "                {(",
+    expect: "the column only draws the button when a caller passes linkTable",
+  },
+  {
+    name: "the automation shell stops opting its own result list in",
+    file: AUTOMATION_SHELL2,
+    from: '\n                  linkTable="automation_flows"',
+    to: "",
+    expect: "automation's shell passes linkTable",
   },
 ];
 

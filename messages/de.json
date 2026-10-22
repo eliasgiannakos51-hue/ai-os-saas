@@ -146,6 +146,7 @@
       "tradingWorkflow": "Trading-Workflow",
       "productWorkflow": "Produkt-Workflow",
       "automation": "Automatisierung",
+      "automationFlow": "Automatisierungsablauf",
       "marketplace": "Fertige Helfer",
       "published": "Live-Seiten",
       "integrations": "Integrationen",
@@ -5066,6 +5067,29 @@
     "delete": "Löschen",
     "deleteConfirm": "Dieses Projekt löschen? Was darin liegt, bleibt, wo es ist.",
     "removeMember": "Aus dem Projekt nehmen",
+    "addToProject": {
+      "button": "Zum Projekt hinzufügen",
+      "title": "Zu einem Projekt hinzufügen",
+      "loading": "Projekte werden geladen…",
+      "failed": "Das hat nicht funktioniert — versuch es erneut.",
+      "empty": "Du hast noch keine Projekte — erstelle unten eins.",
+      "untitledProject": "Projekt ohne Namen",
+      "newProject": "Neues Projekt",
+      "newProjectPlaceholder": "Start des Herbstladens",
+      "create": "Erstellen & hinzufügen",
+      "added": "Zu {name} hinzugefügt.",
+      "limitReached": "Du hast alle Projekte deines Plans aufgebraucht. Upgrade für mehr."
+    },
+    "colours": {
+      "primary": "Primärfarbe",
+      "secondary": "Sekundärfarbe",
+      "clear": "Entfernen",
+      "none": "Keine Farbe gewählt"
+    },
+    "automateIt": {
+      "button": "Automatisieren",
+      "hint": "Erstellt eine Automatisierung für dieses Projekt — sie liest dessen Inhalt und das Ziel oben."
+    },
     "errors": {
       "tooShort": "Gib ihm zuerst einen Namen.",
       "tooLong": "Der Name ist länger als {limit} Zeichen.",

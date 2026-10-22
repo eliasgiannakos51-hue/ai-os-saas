@@ -28,6 +28,7 @@ import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { RESEARCH_MAX_SEARCHES, type ResearchStatus } from "@/lib/research/research-limits";
 import { planResearch, validateTopic } from "@/lib/research/research";
+import { linkResultToProject, ownedProjectId } from "@/lib/projects/link-result";
 import { countResearchRunsThisMonth } from "@/lib/research/research-usage";
 import { resolveLanguage } from "@/lib/text/resolve-language";
 
@@ -95,6 +96,10 @@ export async function POST(request: Request) {
     if (!topicCheck.ok) {
       return NextResponse.json({ ok: false, error: topicCheck.error }, { status: 400 });
     }
+    // STARTING WORK FROM A PROJECT AUTO-JOINS IT (owner's message
+    // 2026-10-22, point 6) — read back as the caller's own before any
+    // model call, same as the other gates below.
+    const projectId = await ownedProjectId(supabase, typeof body?.projectId === "string" ? body.projectId : null);
     // THE TOPIC DECIDES, not the interface. `body.language` is the UI
     // locale the browser sent; a Greek topic typed into an
     // English-language interface used to produce an English report,
@@ -280,6 +285,8 @@ export async function POST(request: Request) {
       logApiError("/api/research", error, { stage: "insert" });
       return NextResponse.json({ ok: false, error: "Could not save the research plan." }, { status: 500 });
     }
+
+    if (projectId) await linkResultToProject(supabase, user.id, "research_reports", String(report.id), projectId);
 
     return NextResponse.json({
       ok: true,

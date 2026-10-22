@@ -3171,6 +3171,7 @@
         "search": "検索",
         "empty": "まだ何もありません。",
         "delete": "削除",
+        "rename": "名前を変更",
         "deleteConfirm": "「{title}」を削除しますか?"
       }
     },
@@ -4834,10 +4835,14 @@
     "errors": {
       "tooLong": "{limit} 文字を超えています。これはファイル単位のもので、プロジェクト単位ではありません。",
       "unavailable": "AI サービスに接続できませんでした。料金は発生していません。",
-      "failed": "うまくいきませんでした。もう一度お試しください。"
+      "failed": "うまくいきませんでした。もう一度お試しください。",
+      "folderEmpty": "このフォルダには読み取れるファイルがありません。"
     },
     "history": {
-      "failed": "失敗"
+      "failed": "失敗",
+      "noRepository": "—",
+      "folderUploaded": "{count} 件のファイルを読み込みました。",
+      "folderUploadedTruncated": "{count} 件のファイルを読み込みました — 残りは収まらず除外されました。"
     },
     "new": "新規",
     "placeholder": "必要なものを説明する、コードを貼り付ける、または変更を頼む…",
@@ -4850,7 +4855,8 @@
       "function": "注文のリストを受け取り、顧客ごとの利益率を返す関数",
       "explain": "このコードが何をするか説明して",
       "tests": "この関数のテストを書いて"
-    }
+    },
+    "uploadFolder": "フォルダをアップロード"
   },
   "presentations": {
     "title": "プレゼンテーション",

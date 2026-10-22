@@ -43,7 +43,7 @@ export default async function CodingPage(
   // migration's section 5.
   const { data: rows } = await supabase
     .from("code_sessions")
-    .select("id, operation, title, input, language, target_language, output, status, source, created_at")
+    .select("id, operation, title, input, language, target_language, output, status, source, created_at, updated_at")
     .order("created_at", { ascending: false })
     .limit(60);
 
@@ -58,6 +58,7 @@ export default async function CodingPage(
     status: String(row.status ?? "done"),
     source: String(row.source ?? "run"),
     createdAt: String(row.created_at ?? ""),
+    updatedAt: String(row.updated_at ?? row.created_at ?? ""),
   }));
 
   return (

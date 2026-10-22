@@ -5,7 +5,7 @@
  * A colour name not found, the shorter name winning over the longer, the
  * brand lines recorded as one row, the oldest name winning, a name the
  * brief already says added twice, the person's own colours for this site
- * overridden, the switch ignored by the chat or by the site, the brief
+ * overridden, brand stopped being passed to the chat, the brief
  * built and never sent, the note never written, and a language losing
  * the sentence.
  *
@@ -72,18 +72,11 @@ const MUTANTS = [
     expect: "the extractor asks for the brand lines only with the switch on",
   },
   {
-    name: "the chat never passes the switch",
+    name: "the chat stops passing brand at all",
     file: CHAT,
-    from: '            brand: await isFeatureOn("brand-memory", user),\n',
-    to: "",
-    expect: "the chat passes the switch",
-  },
-  {
-    name: "the site reads the business without the switch",
-    file: SITE,
-    from: '        (await isFeatureOn("brand-memory", user))\n',
-    to: "        true\n",
-    expect: "the site reads the business under the website memory rule AND the switch",
+    from: "            brand: true,\n",
+    to: "            brand: false,\n",
+    expect: "the chat passes it unconditionally",
   },
   {
     name: "the brief is built and never sent",

@@ -4,15 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Clock, ExternalLink, FileText, Play, Square, Trash2 } from "lucide-react";
+import { ExternalLink, FileText, Play, Square } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { VoicePlayer } from "@/components/voice/voice-player";
 import { useToast } from "@/components/toast/toast-context";
 import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
-import { formatDateTime } from "@/lib/format-number";
 import { useErrorText } from "@/lib/errors/use-error-text";
 import { ApiError } from "@/lib/errors/api-error";
 import type { ApiErrorPayload } from "@/lib/errors/error-codes";
@@ -64,7 +64,6 @@ export function ResearchShell({
 }) {
   const t = useTranslations("dashboard.deepResearch");
   const tNames = useTranslations("dashboard.tools.names");
-  const tShell = useTranslations("dashboard.toolShell");
   const tSteps = useTranslations("aiSteps");
   const locale = useLocale();
   const router = useRouter();
@@ -90,8 +89,30 @@ export function ResearchShell({
   const [approved, setApproved] = useState<Set<string>>(new Set());
   const asked = initialOpenId ? initialReports.find((r) => r.id === initialOpenId) ?? null : null;
   const [open, setOpen] = useState<ResearchReport | null>(asked);
-  const [pane, setPane] = useState<"report" | "recent" | null>(asked ? "report" : null);
+  const [pane, setPane] = useState<"report" | null>(asked ? "report" : null);
   const lastProgressRef = useRef<Map<string, string>>(new Map());
+
+  // THE [◧] COLUMN, remembered per device — same key shape as
+  // Chat's own (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.researchHistoryColumn") === "open");
+    } catch {
+      /* private window or storage off: closed, which is the default */
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.researchHistoryColumn", next ? "open" : "closed");
+      } catch {
+        /* nothing to persist to; the toggle still works for this visit */
+      }
+      return next;
+    });
+  }
 
   const say = (turn: Omit<Turn, "id">) => setTurns((prev) => [...prev, { ...turn, id: `${turn.role}${prev.length}` }]);
 
@@ -202,8 +223,9 @@ export function ResearchShell({
       .catch(() => undefined);
   }
 
-  async function remove(id: string, name: string) {
-    if (!window.confirm(t("confirmDelete", { name }))) return;
+  // THE CONFIRM IS THE HISTORY COLUMN'S OWN (ShellHistoryColumn): this
+  // deletes outright once it has already been asked.
+  async function removeReport(id: string): Promise<void> {
     try {
       const response = await fetch(`/api/research/${id}`, { method: "DELETE" });
       const data = await response.json();
@@ -326,46 +348,7 @@ export function ResearchShell({
             </div>
           ),
         }
-      : pane === "recent"
-        ? {
-            title: tNames("research"),
-            body:
-              reports.length === 0 ? (
-                <p className="text-xs text-muted">{t("empty.title")}</p>
-              ) : (
-                <ul className="row-list">
-                  {reports.map((report) => (
-                    <li key={report.id} className="flex items-center justify-between gap-3 py-2">
-                      <button
-                        type="button"
-                        disabled={report.status !== "ready"}
-                        onClick={() => {
-                          void refresh(report.id).then((full) => setOpen(full ?? report));
-                          setPane("report");
-                        }}
-                        className="min-w-0 flex-1 text-start disabled:cursor-default"
-                      >
-                        <p className="break-words text-sm text-foreground">{report.topic}</p>
-                        <p className="text-[11px] text-muted">
-                          {report.status === "ready" ? t("statusReady") : report.status === "failed" ? t("statusFailed") : isRunning(report) ? t("inProgress") : t("statusPending")}
-                          {" · "}
-                          {formatDateTime(report.created_at, locale)}
-                        </p>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void remove(report.id, report.topic)}
-                        aria-label={t("delete")}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-item text-muted hover:text-foreground"
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ),
-          }
-        : null;
+      : null;
 
   return (
     <ToolShell
@@ -415,12 +398,40 @@ export function ResearchShell({
       sending={planning}
       onSend={(text) => void plan(text)}
       initialText={initialTopic}
-      options={[
-        <button key="recent" type="button" onClick={() => setPane((v) => (v === "recent" ? null : "recent"))} aria-pressed={pane === "recent"} data-testid="research-recent" className={OPTION}>
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          {tShell("recent")}
-        </button>,
-      ]}
+      empty={{
+        heading: t("empty.heading"),
+        examples: [
+          { key: "marketCompetitors", label: t("empty.examples.marketCompetitors") },
+          { key: "compareTools", label: t("empty.examples.compareTools") },
+          { key: "trend", label: t("empty.examples.trend") },
+        ],
+      }}
+      history={{
+        open: historyOpen,
+        onToggle: toggleHistory,
+        onNew: () => {
+          setOpen(null);
+          setPane(null);
+          composerRef.current?.focus();
+        },
+        newLabel: t("new"),
+        column: (
+          <ShellHistoryColumn
+            rows={reports.map((r) => ({ id: r.id, title: r.topic }))}
+            activeId={open?.id ?? null}
+            onOpen={(id) => {
+              const report = reports.find((r) => r.id === id);
+              if (!report) return;
+              void refresh(id).then((full) => setOpen(full ?? report));
+              setPane("report");
+            }}
+            onDelete={removeReport}
+            onNavigate={() => {
+              if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+            }}
+          />
+        ),
+      }}
       footer={
         <p className="mt-1.5 text-[11px] text-muted">
           {capReached ? t("capReached") : monthlyCap === null ? t("usedUnlimited", { used: usedThisMonth }) : t("usedThisMonth", { used: usedThisMonth, cap: monthlyCap })}

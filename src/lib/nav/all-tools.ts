@@ -1,7 +1,10 @@
-// ALL TOOLS, AS THE DESIGN GROUPS THEM (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05):
-// Make, Ask, Organise, Business — four headings, big squares, no «beta».
-// Since 2026-10-07, exactly the tools MASTER Μέρος 14.1 names, with its
-// one-word names, and nothing from Settings.
+// ALL TOOLS, AS THE DESIGN GROUPS THEM. Six headings, big squares, no
+// «beta»: Make, Ask, Automate, Organise, Business, Learn (the owner's
+// critical message, 2026-10-22 — Automate and Learn are new; Automation
+// and Connections moved out of Organise into Automate, and Research and
+// Memory moved out of Ask into Learn). Since 2026-10-07, exactly the
+// tools MASTER Μέρος 14.1 names, with its one-word names, and nothing
+// from Settings.
 //
 // WHAT IS SHOWN IS THE OWNER'S RULE (NEEDS 19, decided 2026-10-05): a tool
 // is shown when it does its main job end to end today, even if it does
@@ -16,7 +19,7 @@
 // (scripts/tests/all-tools.test.mjs) holds that every visible tool is in
 // exactly one group here or hidden here with a reason — both ways.
 
-export type AllToolsGroupKey = "make" | "ask" | "organise" | "business";
+export type AllToolsGroupKey = "make" | "ask" | "automate" | "organise" | "business" | "learn";
 
 export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly string[] }[] = [
   {
@@ -25,22 +28,28 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
   },
   {
     key: "ask",
-    hrefs: ["/dashboard/deep-research", "/dashboard/data-analysis", "/dashboard/files"],
+    hrefs: ["/dashboard/data-analysis", "/dashboard/files"],
+  },
+  {
+    key: "automate",
+    hrefs: ["/dashboard/automation"],
   },
   {
     key: "organise",
     hrefs: [
-      "/dashboard/automation",
       "/dashboard/projects",
       "/dashboard/mission",
       "/dashboard/meetings",
       "/dashboard/timeline",
-      "/dashboard/ai-memory",
     ],
   },
   {
     key: "business",
     hrefs: ["/dashboard/finance", "/dashboard/sales", "/dashboard/trading"],
+  },
+  {
+    key: "learn",
+    hrefs: ["/dashboard/deep-research", "/dashboard/ai-memory"],
   },
 ];
 
@@ -100,7 +109,7 @@ export type AllToolsNameKey =
  */
 export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey; flag: string; name: AllToolsNameKey }[] = [
   { href: "/dashboard/images", group: "make", flag: "image-studio", name: "image" },
-  { href: "/dashboard/integrations", group: "organise", flag: "connections", name: "connections" },
+  { href: "/dashboard/integrations", group: "automate", flag: "connections", name: "connections" },
   // Package 14: without its switch the page keeps notes and is hidden
   // below (HIDDEN_FROM_ALL_TOOLS); with it, it writes documents.
   { href: "/dashboard/documents", group: "make", flag: "document-writer", name: "document" },

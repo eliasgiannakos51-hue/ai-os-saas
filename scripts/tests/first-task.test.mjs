@@ -83,14 +83,14 @@ check("the data import is one press away", /href="\/onboarding\?classic=1"/.test
 console.log("\n== 4. who meets it ==");
 // ---------------------------------------------------------------------
 const page = code("src/app/onboarding/page.tsx");
-const branch = page.indexOf('if ((await isFeatureOn("first-task", user)) && searchParams.classic !== "1") {');
-check("behind the switch, instead of the questionnaire, which ?classic=1 still opens", branch > 0 && page.indexOf("<FirstTask") > branch && page.indexOf("<FirstTask") < page.indexOf("<OnboardingFlow"));
+const branch = page.indexOf('if (searchParams.classic !== "1") {');
+check("unconditional since 2026-10-22, instead of the questionnaire, which ?classic=1 still opens", branch > 0 && page.indexOf("<FirstTask") > branch && page.indexOf("<FirstTask") < page.indexOf("<OnboardingFlow"));
 const done = page.indexOf('if (!stateError && (state?.completed_at || state?.skipped_at)) {\n    redirect("/dashboard/overview");');
 check("an account that finished or skipped never meets it", done > 0 && branch > done);
 const redirects = await loadTs("src/lib/nav/early-redirects.ts");
 check("a new account opening Home is sent to it", redirects.onboardingRedirectTarget({ error: null, state: null }) === "/onboarding");
 check("...and not once it began a task", redirects.onboardingRedirectTarget({ error: null, state: { completed_at: "2026-10-07T10:00:00Z" } }) === null);
-check("the switch is declared", /\n  "first-task": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
+check("the switch is no longer declared (removed, the owner's critical message)", !/\n  "first-task": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. the words ==");

@@ -1335,6 +1335,14 @@
           "notSaved": "La modification a été faite mais n’a pas pu être enregistrée. Rien n’est perdu ; réessayez.",
           "failed": "Cela n’a pas fonctionné. Réessayez.",
           "exportFailed": "Le fichier n’a pas pu être créé."
+        },
+        "empty": {
+          "heading": "Qu’écrivons-nous ?",
+          "examples": {
+            "offer": "Une lettre d’offre pour un projet indépendant",
+            "cv": "Un CV pour un poste en marketing",
+            "letter": "Une lettre demandant un délai supplémentaire"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Décrivez le site, obtenez le site",
         "why": "Écrivez à quoi il sert et à qui il s'adresse : les pages, les textes et la mise en page en découlent, et vous continuez à modifier en langage courant.",
-        "example": "Site d'une page pour une boulangerie, avec carte et horaires"
+        "example": "Site d'une page pour une boulangerie, avec carte et horaires",
+        "heading": "Quel site créons-nous ?",
+        "examples": {
+          "bakery": "Un site pour une boulangerie de quartier",
+          "portfolio": "Un portfolio pour un photographe",
+          "restaurant": "Un site pour un restaurant, avec le menu"
+        }
       },
       "pageSelectLabel": "Pages de ce site",
       "pageHome": "Accueil",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Posez une question qui demande de creuser",
         "why": "Une question à plusieurs heures : le plan vous est d'abord présenté, puis le travail est fait et revient avec ses sources.",
-        "example": "Qui d'autre vend cela en Grèce, et à quel prix"
+        "example": "Qui d'autre vend cela en Grèce, et à quel prix",
+        "heading": "Que veux-tu découvrir ?",
+        "examples": {
+          "marketCompetitors": "Qui sont les concurrents sur le marché grec du café ?",
+          "compareTools": "Compare deux outils de comptabilité pour une petite entreprise",
+          "trend": "Qu’est-ce qui change dans les prix des panneaux solaires cette année ?"
+        }
       },
       "usedThisMonth": "{used} sur {cap} ce mois-ci",
       "usedUnlimited": "{used} ce mois-ci",
@@ -2518,7 +2538,8 @@
         "working": "Création de la présentation…",
         "notReady": "La recherche n’est pas encore terminée : il n’y a rien à présenter.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez."
-      }
+      },
+      "new": "Nouvelle recherche"
     },
     "onboarding": {
       "title": "Faisons-en le vôtre",
@@ -3020,7 +3041,6 @@
       "title": "Tous les outils",
       "description": "Chaque outil, avec une ligne sur ce qu’il fait.",
       "orPress": "Ou appuyez sur ⌘K et tapez son nom, ou décrivez-le dans le champ de l’accueil.",
-      "tilesHidden": "Décrivez ce que vous voulez dans le champ de l’accueil, ou, sur ordinateur, appuyez sur ⌘K et tapez le nom d’un outil.",
       "search": "Trouver un outil",
       "searchLabel": "Rechercher des outils",
       "noMatch": "Aucun outil ne s’appelle « {query} ». Décrivez-le plutôt dans le champ de l’accueil.",
@@ -3028,7 +3048,9 @@
         "make": "Créer",
         "ask": "Demander",
         "organise": "Organiser",
-        "business": "Entreprise"
+        "business": "Entreprise",
+        "automate": "Automatiser",
+        "learn": "Apprendre"
       },
       "names": {
         "site": "Site",
@@ -3142,6 +3164,14 @@
         "undo": "Annuler la dernière modification",
         "undone": "La dernière modification a été annulée.",
         "nothingToUndo": "Rien à annuler : le site est tel qu’il a été créé."
+      },
+      "showHistory": "Afficher les travaux précédents",
+      "hideHistory": "Masquer les travaux précédents",
+      "history": {
+        "search": "Rechercher",
+        "empty": "Rien ici pour l’instant.",
+        "delete": "Supprimer",
+        "deleteConfirm": "Supprimer « {title} » ?"
       }
     },
     "library": {
@@ -3171,6 +3201,14 @@
       "noMatch": {
         "title": "Rien ne dit « {query} »",
         "why": "Essayez moins de mots, ou un autre type."
+      },
+      "onboarding": {
+        "heading": "Recherche dans tout ce que tu as créé",
+        "examples": {
+          "offer": "offre",
+          "report": "rapport",
+          "customers": "clients"
+        }
       }
     },
     "images": {
@@ -3185,8 +3223,6 @@
         "wide": "Paysage 16:9",
         "story": "Story 9:16"
       },
-      "recent": "Précédentes",
-      "recentEmpty": "Tu n’as encore créé aucune image.",
       "made": "{made} sur {asked} prêtes.",
       "changed": "Seule l’image {n} a changé.",
       "fullReady": "L’image {n} en pleine résolution se télécharge.",
@@ -3218,7 +3254,16 @@
         "unavailable": "Le fournisseur d’images ne répond pas pour l’instant. Rien n’a été facturé ; réessaie.",
         "failed": "Un problème est survenu. Rien de ce qui n’a pas été fait n’a été facturé.",
         "offline": "Pas de connexion. Vérifie le réseau et réessaie."
-      }
+      },
+      "empty": {
+        "heading": "Que devons-nous créer ?",
+        "examples": {
+          "logo": "Un logo pour un café appelé Nest",
+          "poster": "Une affiche pour une vente d'été, 20% de réduction",
+          "avatar": "Une icône d'avatar simple pour une appli tech"
+        }
+      },
+      "new": "Nouvelle image"
     },
     "automations": {
       "name": "Automatisations",
@@ -3226,10 +3271,6 @@
       "placeholder": "Qu’est-ce qui doit se faire tout seul ?",
       "placeholderBox": "Que faut-il changer dans cette case ?",
       "placeholderAnswer": "Ta réponse",
-      "mine": "Mes automatisations",
-      "mineCount": "Mes automatisations ({count})",
-      "mineEmpty": "Tu n’as pas encore créé d’automatisation.",
-      "examples": "Exemples",
       "example": {
         "calendar": "Chaque matin à 9 h, envoie-moi sur Telegram ce que j’ai aujourd’hui",
         "finance": "Chaque lundi, fais un rapport à partir de mes Finances et envoie-le-moi, après que je l’ai approuvé",
@@ -3409,7 +3450,11 @@
         "broken": "Ces cases ne peuvent plus être lues. Supprime l’automatisation et recrée-la.",
         "failed": "Un problème est survenu. Rien n’a été facturé pour ce qui n’a pas eu lieu.",
         "offline": "Pas de connexion. Vérifie le réseau et réessaie."
-      }
+      },
+      "empty": {
+        "heading": "Que doit-il se passer tout seul ?"
+      },
+      "new": "Nouvelle automatisation"
     },
     "flows": {
       "name": "Projets",
@@ -4752,53 +4797,38 @@
         "min": "Pour chaque « {x} », le plus petit « {y} ».",
         "max": "Pour chaque « {x} », le plus grand « {y} »."
       }
-    }
+    },
+    "empty": {
+      "heading": "Que veux-tu trouver dans tes données ?",
+      "examples": {
+        "trend": "Quel mois a eu le plus de ventes ?",
+        "outliers": "Y a-t-il des lignes inhabituelles ?",
+        "compare": "Compare ce mois-ci au mois dernier"
+      }
+    },
+    "new": "Nouveau fichier"
   },
   "coding": {
     "title": "Code",
-    "description": "Cinq choses qu'il fait, quatre qu'il ne fait pas. Tout porte exactement sur le texte de la zone.",
+    "description": "Une conversation qui écrit, explique, convertit et teste du code — sur exactement le texte que vous donnez.",
     "code": "Code",
     "copy": "Copier",
     "copied": "Copié",
-    "language": "Langage",
-    "targetLanguage": "Convertir en",
-    "useWorkspace": "Utiliser vos autres modules comme contexte",
-    "run": "Exécuter",
-    "running": "En cours…",
-    "result": "Résultat",
-    "limits": {
-      "title": "Ce qu'il ne fait PAS",
-      "no_repository": "Il n'a pas de dépôt. Il ne voit ni votre base de code ni le fichier d'à côté.",
-      "no_execution": "Il n'exécute rien. Ni votre code, ni celui qu'il écrit, ni les tests qu'il écrit.",
-      "no_commits": "Il ne fait ni commit, ni branche, ni pull request.",
-      "no_whole_project": "Il ne construit pas de projet. Une fonction, un fichier, un collage.",
-      "later": "Ces quatre-là, c'est la version suivante, pas celle-ci."
-    },
     "operations": {
       "generate": {
-        "label": "Écrire un extrait",
-        "description": "Décrivez ce qu'il vous faut et recevez une fonction, avec ses hypothèses et ses manques énoncés.",
-        "placeholder": "Une fonction qui prend une liste de commandes et renvoie la marge par client…"
+        "label": "Écrire un extrait"
       },
       "explain": {
-        "label": "Expliquer ceci",
-        "description": "Collez du code et recevez ce qu'il fait, dans l'ordre, en nommant les lignes concernées.",
-        "placeholder": "Collez le code à expliquer…"
+        "label": "Expliquer ceci"
       },
       "find_bugs": {
-        "label": "Trouver des bugs",
-        "description": "Chaque constat nomme l'entrée ou l'état qui le déclenche. Un constat sans cas d'échec est une préférence.",
-        "placeholder": "Collez le code à vérifier…"
+        "label": "Trouver des bugs"
       },
       "convert": {
-        "label": "Convertir",
-        "description": "Réécrivez-le dans un autre langage, avec la liste de tout ce qui NE passe PAS.",
-        "placeholder": "Collez le code à convertir…"
+        "label": "Convertir"
       },
       "write_tests": {
-        "label": "Écrire des tests",
-        "description": "Le cas ordinaire, les bornes et les façons d'échouer. Pas seulement le chemin heureux.",
-        "placeholder": "Collez le code à tester…"
+        "label": "Écrire des tests"
       }
     },
     "errors": {
@@ -4807,15 +4837,19 @@
       "failed": "Ça n'a pas marché — réessayez."
     },
     "history": {
-      "title": "Historique",
-      "search": "Rechercher",
-      "folder": "Dossier",
-      "allFolders": "Tous les dossiers",
-      "empty": "Rien ici pour l'instant.",
-      "input": "Entrée",
-      "output": "Sortie",
-      "importedNote": "note d'avant",
-      "failed": "échec"
+      "failed": "échoué"
+    },
+    "new": "Nouveau",
+    "placeholder": "Décrivez ce qu'il vous faut, collez du code, ou demandez un changement…",
+    "made": "Voilà, à côté de la conversation.",
+    "changed": "Modifié. La nouvelle version est à côté de la conversation, avec ce qui a changé marqué.",
+    "empty": {
+      "heading": "Qu'est-ce qu'on construit ?"
+    },
+    "example": {
+      "function": "Une fonction qui prend une liste de commandes et renvoie la marge par client",
+      "explain": "Explique ce que fait ce code",
+      "tests": "Écris des tests pour cette fonction"
     }
   },
   "presentations": {
@@ -4926,6 +4960,14 @@
       },
       "source": "Tiré de {file} ({rows} lignes) : {how}.",
       "openFile": "Ouvrir le fichier dans Analyser"
+    },
+    "empty": {
+      "heading": "De quoi parle la présentation ?",
+      "examples": {
+        "pitch": "Un pitch deck pour une nouvelle application",
+        "quarterly": "Un résumé des résultats trimestriels",
+        "training": "Une présentation de formation pour les nouvelles recrues"
+      }
     }
   },
   "posts": {

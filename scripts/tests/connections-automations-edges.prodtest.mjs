@@ -685,10 +685,11 @@ async function reopenWork(page, press) {
   if ((await card.count()) === 1) await press(card);
   await page.locator('[data-testid="flow-toggle"]').waitFor({ state: "visible", timeout: 10000 }).catch(() => null);
 }
-/** «Mine», then the automation by its name, once the list has finished opening. */
+/** [◧], then the automation by its name, once the column has finished opening
+ *  (Batch 3, 2026-10-22 — the old "flow-mine"/"flow-list" option). */
 async function openFlowNamed(page, press, name) {
-  await press(page.locator('[data-testid="flow-mine"]'));
-  const item = name ? page.locator('[data-testid="flow-list"] button', { hasText: name }) : page.locator('[data-testid="flow-list"] button').first();
+  await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+  const item = name ? page.locator('[data-testid="shell-history-row"]', { hasText: name }) : page.locator('[data-testid="shell-history-row"]').first();
   await item.waitFor({ state: "visible", timeout: 10000 }).catch(() => null);
   await sleep(350);
   await press(item);
@@ -1000,16 +1001,17 @@ try {
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
     let main = await page.locator("main").innerText();
     check("empty: the field, what it does, and the price before anything is spent", main.includes(A.name) && main.includes(A.help) && /\d/.test(await page.locator('[data-testid="flow-price"]').innerText()));
-    await press(page.locator('[data-testid="flow-mine"]'));
-    main = await page.locator("main").innerText();
-    check("...«mine» says there are none yet", main.includes(A.mineEmpty));
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    main = await page.locator('[data-testid="shell-history-column"]').innerText();
+    check("...the [◧] column says there is nothing yet", main.includes(L.en.dashboard.toolShell.history.empty));
     check("...no Greek on the English screen", foreignOn("en", main).length === 0, foreignOn("en", main).join(" | "));
     check("...and it fits the phone", (await sideways(page)) <= 1);
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
-    await press(page.locator('[data-testid="flow-examples-open"]'));
-    await press(page.locator('[data-testid="flow-examples"] button').nth(2));
-    check("the example fills the field with its sentence", (await page.locator("textarea").first().inputValue()) === A.example.file);
-    await press(page.locator('button[type="submit"]').first());
+    // THE EMPTY LANDING'S EXAMPLES SEND IMMEDIATELY (Batch 3, 2026-10-22) —
+    // not "fill the field", the old "flow-examples" panel's way.
+    await press(page.locator('[data-testid="tool-shell-example"]', { hasText: A.example.file }));
+    check("an example sends immediately", (await page.locator('[data-testid="tool-shell-thread"]').innerText()).includes(A.example.file));
     await page.locator('[data-testid="flow-box"]').first().waitFor({ timeout: 20000 }).catch(() => null);
     await sleep(400);
     const boxes = page.locator('[data-testid="flow-box"]');

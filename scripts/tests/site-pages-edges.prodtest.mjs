@@ -608,8 +608,12 @@ try {
       await page.goto(`${ORIGIN}/dashboard/website-builder`, { waitUntil: "networkidle" });
       check("the empty Site is the shell, with its field", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await field.count()) === 1);
       const options = page.locator('[data-testid="tool-shell-options"] > *');
-      check(`...four options, the pages among them (${await options.count()})`, (await options.count()) === 4 && (await page.locator('[data-testid="site-page-count"]').count()) === 1);
-      check("...«sites made before» and «new site» wait until there is one", (await page.locator('[data-testid="site-recent"]').isDisabled()) && (await page.locator('[data-testid="site-new"]').isDisabled()));
+      // DESIGN AND PAGES ONLY (2, not 4): «sites made before» and «new
+      // site» moved into the [◧] history column's own top-bar buttons
+      // (Batch 1, 2026-10-21), always enabled rather than waiting for a
+      // first site — opening the column on an empty account just shows
+      // its own «nothing here yet».
+      check(`...two options, the pages among them (${await options.count()})`, (await options.count()) === 2 && (await page.locator('[data-testid="site-page-count"]').count()) === 1);
       check("...and nothing is open beside it", (await page.locator('[data-testid="tool-shell-work"]').count()) === 0);
       sameLanguage(locale, "the empty Site", await mainText());
 
@@ -763,7 +767,7 @@ try {
       // ---- OUT OF CREDITS, making a new site ---------------------------
       db.user_credits[0].credits_remaining = 0;
       await backToField();
-      await press(page.locator('[data-testid="site-new"]'));
+      await press(page.locator('[data-testid="tool-shell-new"]'));
       const sitesBefore = db.user_websites.length;
       n = await toolTurns.count();
       await field.fill(site.second);
@@ -802,9 +806,9 @@ try {
       check("...and the Site says it could not be made, and that nothing was charged", failSaid.includes(W.generateFailed) && failSaid.includes(E.credits.notCharged), failSaid);
       sameLanguage(locale, "a new site during an outage", failSaid);
       model.down = false;
-      // The failed site, opened from the list of sites: the same words.
+      // The failed site, opened from the [◧] history column: the same words.
       await backToField();
-      await press(page.locator('[data-testid="site-recent"]'));
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await sleep(400);
       sameLanguage(locale, "the list of sites, with a failed one", await mainText());
 

@@ -3,7 +3,6 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { loadMemories } from "@/lib/memory/store";
 import { readBrand } from "@/lib/memory/brand";
 import { memoryWindowFor } from "@/lib/memory/memory-window";
@@ -38,10 +37,7 @@ export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; pric
     const name = Array.isArray(project) ? project[0]?.name : project?.name;
     return { id: String(row.id), project_id: String(row.project_id), said: String(row.said ?? ""), colour: (row.colour as string | null) ?? null, plan: row.plan, steps: row.steps, status: String(row.status ?? "running"), project_name: String(name ?? row.said ?? "") };
   });
-  let brandColour: string | null = null;
-  if (await isFeatureOn("brand-memory", user)) {
-    const brand = readBrand(await loadMemories(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdminEmail(user.email))));
-    brandColour = brand.colours.find((c) => c.hex)?.hex ?? null;
-  }
+  const brand = readBrand(await loadMemories(supabase, user.id, memoryWindowFor(plan?.capabilities.chatMemoryLimit ?? 0, isAdminEmail(user.email))));
+  const brandColour: string | null = brand.colours.find((c) => c.hex)?.hex ?? null;
   return { flows, prices: flowPrices(plan, packPrice, MAX_FLOW_SAID + MAX_COLOUR_CHARS), available, brandColour };
 }

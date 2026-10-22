@@ -289,6 +289,14 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // about what is or is not a hit, so it cannot disagree with the
     // matcher — which is the risk this section is here to price.
     "src/lib/chat/conversation-search.ts",
+    // CODING'S FIVE OPERATIONS, READ FROM THE REMARK (2026-10-22, the
+    // owner's critical message). planTurn() folds the remark against
+    // fixed EN/EL keyword lists ("convert"/"μεταφερω", "tests"/"δοκιμη",
+    // "bugs"/"σφαλμα", "explain"/"εξηγησε") to pick the operation the
+    // old five buttons used to set — the same thing opensWithInstruction
+    // does for Chat's own tool-opening words, above. scripts/tests/
+    // coding.test.mjs section 1 runs it in both languages.
+    "src/lib/coding/operations.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

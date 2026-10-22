@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { FILE_BUCKET, SIGNED_URL_TTL_SECONDS } from "@/lib/files/store";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +35,6 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ ok: false, code: "not_authenticated" }, { status: 401 });
-    if (!(await isFeatureOn("file-pages", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
 
     const limited = await checkRateLimit({ scope: "file_download", identifier: user.id, maxAttempts: 120, windowMinutes: 60 });
     if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });

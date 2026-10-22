@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { FlaskConical, Lightbulb, ListChecks, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
+import { FlaskConical, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
-import { ToolShell, ACTION, ChosenBox, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ACTION, ChosenBox, type ShellTurn } from "@/components/shell/tool-shell";
+import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, RunHistory, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
@@ -41,7 +42,7 @@ import type { UserAutomation } from "@/types/user-automation";
  */
 type Turn = { id: string; role: "user" | "tool"; text: string; flow?: string };
 type Running = "build" | "change" | "try" | "run" | "save" | "approve" | null;
-type Open = "flow" | "list" | "examples" | null;
+type Open = "flow" | null;
 
 export function AutomationShell({
   initialFlows,
@@ -85,6 +86,28 @@ export function AutomationShell({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [pending, setPending] = useState<{ said: string; question: string } | null>(null);
   const [confirming, setConfirming] = useState<{ credits: number; go: () => void } | null>(null);
+
+  // THE [◧] COLUMN, remembered per device — same key shape as Chat's own
+  // (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
+  const [historyOpen, setHistoryOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setHistoryOpen(window.localStorage.getItem("ionexa.automationHistoryColumn") === "open");
+    } catch {
+      // private window or storage off: closed, which is the default
+    }
+  }, []);
+  function toggleHistory() {
+    setHistoryOpen((isOpen) => {
+      const next = !isOpen;
+      try {
+        window.localStorage.setItem("ionexa.automationHistoryColumn", next ? "open" : "closed");
+      } catch {
+        // nothing to persist to; the toggle still works for this visit
+      }
+      return next;
+    });
+  }
 
   const shown = flows.find((f) => f.id === openId) ?? null;
   const chosenBox = shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
@@ -283,8 +306,10 @@ export function AutomationShell({
     }
   }
 
-  async function remove(flow: ShownFlow) {
-    if (!window.confirm(t("deleteConfirm"))) return;
+  // BARE DELETE, no confirm of its own — the work panel's trash button
+  // confirms before calling this, and the [◧] column (ShellHistoryColumn)
+  // confirms its own way; neither should ask twice.
+  async function removeFlow(flow: ShownFlow) {
     const data = await call(`/api/automations/flows/${flow.id}`, "DELETE", null, "save");
     if (!data) return;
     setFlows((prev) => prev.filter((f) => f.id !== flow.id));
@@ -332,7 +357,6 @@ export function AutomationShell({
     }
   };
 
-  const examples = [t("example.calendar"), t("example.finance"), t("example.file")];
   const buttonClass = "inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 text-xs text-foreground hover:bg-panel-hover disabled:opacity-60";
 
   const work =
@@ -344,7 +368,17 @@ export function AutomationShell({
               <button type="button" disabled={running !== null || shown.version <= 1} onClick={() => void undo(shown)} aria-label={t("undo")} title={t("undo")} data-testid="flow-undo" className={`${ACTION} disabled:opacity-40`}>
                 <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
-              <button type="button" disabled={running !== null} onClick={() => void remove(shown)} aria-label={t("delete")} title={t("delete")} data-testid="flow-delete" className={ACTION}>
+              <button
+                type="button"
+                disabled={running !== null}
+                onClick={() => {
+                  if (window.confirm(t("deleteConfirm"))) void removeFlow(shown);
+                }}
+                aria-label={t("delete")}
+                title={t("delete")}
+                data-testid="flow-delete"
+                className={ACTION}
+              >
                 <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </>
@@ -425,60 +459,7 @@ export function AutomationShell({
             </div>
           ),
         }
-      : open === "list"
-        ? {
-            title: t("mine"),
-            body: (
-              <div className="space-y-5">
-                {flows.length === 0 ? (
-                  <p className="text-xs text-muted">{t("mineEmpty")}</p>
-                ) : (
-                  <ul data-testid="flow-list" className="space-y-2">
-                    {flows.map((flow) => (
-                      <li key={flow.id}>
-                        <button type="button" onClick={() => void openFlow(flow.id)} className="flex min-h-[44px] w-full items-center gap-3 rounded-item bg-panel px-3 py-2 text-start hover:bg-panel-hover">
-                          <span className="min-w-0 flex-1 break-words text-sm text-foreground">{flow.name}</span>
-                          <span className={`shrink-0 text-xs ${flow.isActive ? "text-foreground" : "text-muted"}`}>{flow.isActive ? t("status.on") : t("status.off")}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {older.length > 0 && (
-                  <div data-testid="flow-older" className="space-y-2">
-                    <p className="text-xs text-muted">{t("older", { count: older.length })}</p>
-                    <AutomationActiveList automations={older} />
-                  </div>
-                )}
-              </div>
-            ),
-          }
-        : open === "examples"
-          ? {
-              title: t("examples"),
-              body: (
-                <ul data-testid="flow-examples" className="space-y-2">
-                  {examples.map((example) => (
-                    <li key={example}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpen(null);
-                          setChosen(null);
-                          setPending(null);
-                          composerRef.current?.setText(example);
-                          composerRef.current?.focus();
-                        }}
-                        className="flex min-h-[44px] w-full items-center rounded-item bg-panel px-3 py-2 text-start text-sm text-foreground hover:bg-panel-hover"
-                      >
-                        {example}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ),
-            }
-          : null;
+      : null;
 
   const working =
     running === "build"
@@ -509,16 +490,6 @@ export function AutomationShell({
         sending={running !== null}
         onSend={send}
         onStop={() => abortRef.current?.abort()}
-        options={[
-          <button key="mine" type="button" onClick={() => setOpen((v) => (v === "list" ? null : "list"))} aria-pressed={open === "list"} data-testid="flow-mine" className={OPTION}>
-            <ListChecks className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("mineCount", { count: flows.length })}
-          </button>,
-          <button key="examples" type="button" onClick={() => setOpen((v) => (v === "examples" ? null : "examples"))} aria-pressed={open === "examples"} data-testid="flow-examples-open" className={OPTION}>
-            <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("examples")}
-          </button>,
-        ]}
         footer={
           <>
             {shown && chosenBox && <ChosenBox label={boxLabel(chosenBox)} onClear={() => setChosen(null)} />}
@@ -535,6 +506,56 @@ export function AutomationShell({
             )}
           </>
         }
+        empty={{
+          heading: t("empty.heading"),
+          examples: [
+            { key: "calendar", label: t("example.calendar") },
+            { key: "finance", label: t("example.finance") },
+            { key: "file", label: t("example.file") },
+          ],
+        }}
+        history={{
+          open: historyOpen,
+          onToggle: toggleHistory,
+          onNew: () => {
+            setOpenId(null);
+            setChosen(null);
+            setOpen(null);
+            setPending(null);
+            setTurns([]);
+          },
+          newLabel: t("new"),
+          column: (
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <ShellHistoryColumn
+                  rows={flows.map((flow) => ({ id: flow.id, title: flow.name, status: flow.isActive ? t("status.on") : t("status.off") }))}
+                  activeId={open === "flow" ? openId : null}
+                  onOpen={(id) => void openFlow(id)}
+                  onDelete={async (id) => {
+                    const flow = flows.find((f) => f.id === id);
+                    if (flow) await removeFlow(flow);
+                  }}
+                  onNavigate={() => {
+                    if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
+                  }}
+                />
+              </div>
+              {/* THE PRE-"BOXES" AUTOMATIONS (one sentence, no boxes): still
+                  reachable here, unchanged, same as when they lived under
+                  the old "mine" option (MASTER 16, package 30's own note:
+                  "the one-sentence automations from before, shown as they
+                  were"). AutomationActiveList is self-contained — its own
+                  toggle and delete, no change needed for this move. */}
+              {older.length > 0 && (
+                <div className="max-h-[40%] shrink-0 overflow-y-auto px-2 py-2">
+                  <p className="px-1 py-1 text-xs text-muted">{t("older", { count: older.length })}</p>
+                  <AutomationActiveList automations={older} />
+                </div>
+              )}
+            </div>
+          ),
+        }}
         work={work}
         onCloseWork={() => setOpen(null)}
       />

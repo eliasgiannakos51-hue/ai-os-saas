@@ -1,9 +1,11 @@
 "use client";
 
 import { forwardRef, type ReactNode } from "react";
-import { ArrowLeft, FileText, X } from "lucide-react";
+import { ArrowLeft, FileText, PanelLeft, Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
+import { Earth } from "@/components/brand/earth";
+import { Tooltip } from "@/components/ui/tooltip";
 
 /**
  * ONE SHELL FOR EVERY TOOL (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §5, «ΕΝΑ
@@ -20,6 +22,21 @@ import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-co
  * Each tool keeps its own routes and its own state and hands this its
  * turns, its options and its work. scripts/tests/tool-shell.test.mjs holds
  * every tool that uses it to four options and one field.
+ *
+ * THE EMPTY LANDING AND THE [◧] HISTORY COLUMN (MASTER Μέρος 20 Δ,
+ * 2026-10-21): the same shapes Chat already has
+ * (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx),
+ * inside this shell rather than copied with a textarea of its own — the
+ * "Coding, as a conversation" redesign (Βήμα 3) draws the same two
+ * shapes too, but in its own bespoke component, outside `ToolShell`,
+ * since Coding never used this shell to begin with. With no turns yet
+ * and no work open, `empty` draws the small globe, one heading and up to
+ * three examples that send at once — still through the one field, the
+ * `ChatComposer` above stays the only place a key is typed. `history`
+ * draws the same sliding [◧] slot, over the whole shell, that Chat's own
+ * column sits in; the column itself is each tool's content. Both are
+ * opt-in, so a tool that has not moved to them yet keeps its blank
+ * thread and its own "Recent" option exactly as before.
  */
 export type ShellTurn = {
   id: string;
@@ -33,6 +50,10 @@ export type ShellTurn = {
 };
 
 export const MAX_SHELL_OPTIONS = 4;
+export const MAX_SHELL_EXAMPLES = 3;
+
+/** One example on the empty landing: the text it sends, at once, on a press. */
+export type ShellExample = { key: string; label: string };
 
 type Props = {
   /** The tool's one-word name (MASTER 14.1), on top of the conversation. */
@@ -62,21 +83,104 @@ type Props = {
   tray?: ReactNode;
   /** Send waits while a file is still being read. */
   holdSend?: boolean;
+  /** The empty landing: one question and up to three examples, drawn with
+   *  the small globe while there are no turns and no work open. Omit for
+   *  a blank thread (the old behaviour). */
+  empty?: { heading: string; examples?: ShellExample[] };
+  /** The [◧] history column: its open state, what toggles and opens it,
+   *  and its own content (a `ShellHistoryColumn`, typically). Omit to
+   *  keep the tool's own history UI (an option under the field). */
+  history?: { open: boolean; onToggle: () => void; onNew: () => void; newLabel: string; column: ReactNode };
 };
 
 export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(
-  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend },
+  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend, empty, history },
   ref
 ) {
   const t = useTranslations("dashboard.toolShell");
+  const showEmpty = Boolean(empty) && turns.length === 0 && !work;
   return (
     <div data-testid="tool-shell" className="relative flex h-full overflow-hidden">
+      {/* THE [◧] SLOT, the same sliding shape as Chat's own
+          (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx):
+          over the whole shell, so it covers the work area too. */}
+      {history && (
+        <>
+          <div
+            data-testid="tool-shell-history"
+            data-open={history.open}
+            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:w-[280px] md:max-w-none ${
+              history.open
+                ? "translate-x-0 md:w-[280px]"
+                : "-translate-x-full rtl:translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-e-0"
+            }`}
+          >
+            {history.open && history.column}
+          </div>
+          {history.open && (
+            <button
+              type="button"
+              aria-label={t("hideHistory")}
+              data-testid="tool-shell-history-scrim"
+              onClick={history.onToggle}
+              className="absolute inset-0 z-20 bg-background/50 md:hidden"
+            />
+          )}
+        </>
+      )}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2 px-4 py-2">
+          {history && (
+            <>
+              <Tooltip content={t(history.open ? "hideHistory" : "showHistory")} side="right">
+                <button
+                  type="button"
+                  onClick={history.onToggle}
+                  aria-expanded={history.open}
+                  aria-label={t(history.open ? "hideHistory" : "showHistory")}
+                  data-testid="tool-shell-history-toggle"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground"
+                >
+                  <PanelLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </Tooltip>
+              <button
+                type="button"
+                onClick={history.onNew}
+                aria-label={history.newLabel}
+                data-testid="tool-shell-new"
+                className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-item px-2 text-sm text-muted hover:bg-panel-hover hover:text-foreground"
+              >
+                <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="hidden whitespace-nowrap sm:inline">{history.newLabel}</span>
+              </button>
+            </>
+          )}
           <h1 className="min-w-0 break-words text-sm font-semibold text-foreground">{name}</h1>
           {help}
         </div>
         <div data-testid="tool-shell-thread" className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+          {showEmpty ? (
+            <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
+              <Earth variant="small" px={96} />
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{empty!.heading}</h2>
+              {empty!.examples && empty!.examples.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {empty!.examples.map((ex) => (
+                    <button
+                      key={ex.key}
+                      type="button"
+                      onClick={() => onSend(ex.label)}
+                      data-testid="tool-shell-example"
+                      className="min-h-[44px] rounded-full bg-panel px-4 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                    >
+                      {ex.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
           <ol className="chat-measure space-y-4">
             {turns.map((turn) => (
               <li key={turn.id} data-role={turn.role} className={turn.role === "user" ? "flex justify-end" : ""}>
@@ -111,6 +215,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
             ))}
             {working && <li aria-live="polite">{working}</li>}
           </ol>
+          )}
         </div>
         <div className="p-4 sm:p-6">
           <div className="chat-measure">

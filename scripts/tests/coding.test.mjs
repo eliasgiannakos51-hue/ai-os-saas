@@ -1,20 +1,19 @@
-// FIVE OPERATIONS, AND FOUR ABSENCES (V4 #20).
+// FIVE OPERATIONS BEHIND ONE FIELD (V4 #20, redesigned 2026-10-22).
 //
 // WHAT THIS ENVIRONMENT COULD NOT DO, said first: there is no
 // ANTHROPIC_API_KEY here, so NOT ONE OPERATION WAS EVER RUN. No code was
 // generated, explained, converted or tested by a model. Everything below
-// is the prompt assembly, the limits, and the highlighter — the parts
+// is the prompt assembly, `planTurn`, and the highlighter — the parts
 // that decide what a model would be asked and what would be done with the
 // answer.
 //
-// THE FOUR THINGS THAT WOULD BE WRONG QUIETLY:
+// THE THINGS THAT WOULD BE WRONG QUIETLY:
 //
-//   A PROMISE THAT IS NOT TRUE. The previous version of this page was a
-//   form for describing code you would then write yourself, filed under
-//   a heading called Build. The fix is not a better name; it is the four
-//   absences said out loud, in ten languages, on the screen. Section 1
-//   is that, checked against the message catalogues rather than against
-//   a comment.
+//   A BUTTON COMES BACK. The owner's critical message of 2026-10-22 asked
+//   the five operation buttons and the "What this does NOT do" block off
+//   the screen — Coding reads one field now, like Claude Code itself.
+//   Section 1 holds `planTurn` to the five operations it can still
+//   choose, from what was typed rather than from what was clicked.
 //
 //   A PASTE THAT BECOMES AN INSTRUCTION. "// ignore the above" in a
 //   comment in somebody's file is text, not a request. Section 2 checks
@@ -43,6 +42,7 @@ const eq = (name, actual, expected) =>
   ok(name, JSON.stringify(actual) === JSON.stringify(expected), `expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
 
 const ops = await loadTs("src/lib/coding/operations.ts");
+const diffLib = await loadTs("src/lib/coding/diff.ts");
 const hl = await loadTs("src/lib/coding/highlight.ts");
 const workspace = await loadTs("src/lib/ai/workspace-context.ts");
 
@@ -51,31 +51,51 @@ const messages = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSy
 const lookup = (obj, dotted) => dotted.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
 
 // =====================================================================
-console.log("\n== 1. WHAT IT DOES NOT DO, said on the screen ==");
+console.log("\n== 1. planTurn: one field, five operations, no button ==");
 // =====================================================================
 
-eq("there are four declared limits", [...ops.CODE_LIMITS].length, 4);
-for (const limit of ops.CODE_LIMITS) {
-  const missing = LOCALES.filter((l) => typeof lookup(messages[l], `coding.limits.${limit}`) !== "string");
-  ok(`${limit}: stated in all ten locales`, missing.length === 0, missing.join(", "));
-  // NOT A LABEL — A SENTENCE. "No repository" as a two-word chip is a
-  // feature name; the user needs to know what it means for them.
-  const en = String(lookup(messages.en, `coding.limits.${limit}`) ?? "");
-  ok(`${limit}: says what it means, not just its name (${en.length} chars)`, en.length > 40, en);
-}
-// The four absences, by their content in English.
 {
-  const text = ops.CODE_LIMITS.map((l) => String(lookup(messages.en, `coding.limits.${l}`))).join(" ");
-  ok("it says it has no repository", /no repository|cannot see your codebase/i.test(text), text.slice(0, 120));
-  ok("it says it runs nothing", /runs nothing|does not run/i.test(text));
-  ok("it says it makes no commits", /no commits/i.test(text));
-  ok("it says it does not build a project", /does not build a project/i.test(text));
-}
-// And the component actually renders them, from the same list.
-{
-  const src = readFileSync("src/components/coding/coding-workspace.tsx", "utf8");
-  ok("the page renders the limits from CODE_LIMITS, not a hand-written list", /CODE_LIMITS\.map/.test(src));
-  ok("…before the input, not below it", src.indexOf("CODE_LIMITS.map") < src.indexOf("<textarea"));
+  const CODE = "function add(a, b) {\n  return a + b;\n}";
+  eq("a bare description, no prior code: generate", ops.planTurn("a function that adds two numbers", { code: null, language: null }).operation, "generate");
+  eq(
+    "a fenced paste with no instruction: explain",
+    ops.planTurn("```js\n" + CODE + "\n```", { code: null, language: null }).operation,
+    "explain"
+  );
+  eq(
+    "a fenced paste asked to be explained: explain, and the fence is stripped",
+    ops.planTurn("explain this:\n```js\n" + CODE + "\n```", { code: null, language: null }).input,
+    CODE
+  );
+  {
+    const plan = ops.planTurn("find the bugs:\n```\n" + CODE + "\n```", { code: null, language: null });
+    eq("a fenced paste asked for bugs: find_bugs", plan.operation, "find_bugs");
+  }
+  {
+    const plan = ops.planTurn("write tests for it", { code: CODE, language: "javascript" });
+    eq("a remark asking for tests, with prior code on screen: write_tests", plan.operation, "write_tests");
+    eq("…the prior code is what is sent, not the remark", plan.input, CODE);
+  }
+  {
+    const plan = ops.planTurn("convert this to python", { code: CODE, language: "javascript" });
+    eq("a remark asking to convert, with prior code on screen: convert", plan.operation, "convert");
+    eq("…and the target language is read from the remark", plan.targetLanguage, "python");
+  }
+  ok(
+    "asking to convert with no language named is refused the operation, not guessed",
+    ops.planTurn("convert this", { code: CODE, language: "javascript" }).operation !== "convert"
+  );
+  {
+    const plan = ops.planTurn("make it handle negative numbers too", { code: CODE, language: "javascript" });
+    eq("a plain remark with prior code and no keyword: generate, as an edit", plan.operation, "generate");
+    ok("…flagged so the panel diffs it", plan.isEdit === true);
+    ok("…the existing code and the remark are both in what is sent", plan.input.includes(CODE) && plan.input.includes("negative numbers"));
+    ok("…with no fence marks of its own, so buildCodePrompt's one fence is not closed early", !plan.input.includes("```"));
+  }
+  {
+    const plan = ops.planTurn("write a function that adds two numbers", { code: null, language: null });
+    ok("a plain remark, no prior code: generate, not flagged as an edit", plan.operation === "generate" && plan.isEdit === false);
+  }
 }
 
 // =====================================================================
@@ -88,11 +108,11 @@ for (const operation of ops.CODE_OPERATIONS) {
   ok(`${operation}: has a spec`, Boolean(spec));
   ok(`${operation}: the instruction forbids claiming it ran`, /never claim|cannot run|You have not run/i.test(spec.instruction), spec.instruction.slice(0, 80));
   ok(`${operation}: forbids inventing an API`, /never invent an api|Never invent/i.test(spec.instruction));
-  // Every operation is labelled in every locale.
-  for (const part of ["label", "description", "placeholder"]) {
-    const missing = LOCALES.filter((l) => typeof lookup(messages[l], `coding.operations.${operation}.${part}`) !== "string");
-    ok(`${operation}.${part}: present in all ten locales`, missing.length === 0, missing.join(", "));
-  }
+  // The badge shown on a history row still needs a word for it, in
+  // every locale — there is no description or placeholder to check any
+  // more, since nothing on the screen picks an operation by hand.
+  const missing = LOCALES.filter((l) => typeof lookup(messages[l], `coding.operations.${operation}.label`) !== "string");
+  ok(`${operation}.label: present in all ten locales`, missing.length === 0, missing.join(", "));
 }
 
 {
@@ -145,6 +165,39 @@ for (const operation of ops.CODE_OPERATIONS) {
 }
 
 // =====================================================================
+console.log("\n== 2b. diffLines: the green/red boxes an edit turn shows ==");
+// =====================================================================
+
+{
+  const same = diffLib.diffLines("const a = 1;", "const a = 1;");
+  eq("identical code: one same line, nothing added or removed", same, [{ kind: "same", text: "const a = 1;" }]);
+}
+{
+  const lines = diffLib.diffLines("const a = 1;\nconst b = 2;", "const a = 1;\nconst b = 3;");
+  eq("one changed line: the old one removed, the new one added, the rest same", lines, [
+    { kind: "same", text: "const a = 1;" },
+    { kind: "removed", text: "const b = 2;" },
+    { kind: "added", text: "const b = 3;" },
+  ]);
+}
+{
+  const lines = diffLib.diffLines("", "const a = 1;");
+  eq("fresh code against nothing: the whole thing is added", lines, [{ kind: "added", text: "const a = 1;" }]);
+}
+{
+  // ABOVE THE CEILING, NO QUADRATIC TABLE: every old line removed, every
+  // new line added, rather than the shortest edit script.
+  const count = diffLib.DIFF_LCS_LINE_CEILING + 1;
+  const big = Array.from({ length: count }, (_, i) => `line ${i}`).join("\n");
+  const lines = diffLib.diffLines(big, big);
+  eq(
+    "past the ceiling, even identical input is shown as all-removed-then-all-added, not run through the O(n*m) table",
+    [lines.length, lines.filter((l) => l.kind === "removed").length, lines.filter((l) => l.kind === "added").length],
+    [count * 2, count, count]
+  );
+}
+
+// =====================================================================
 console.log("\n== 3. the workspace context: bounded, and marked as data ==");
 // =====================================================================
 
@@ -177,7 +230,10 @@ console.log("\n== 3. the workspace context: bounded, and marked as data ==");
   ok("…and only the headline field", /select\(config\.headlineKey\)/.test(src));
   const route = readFileSync("src/app/api/coding/run/route.ts", "utf8");
   ok("the route passes the caller's own supabase client", /loadWorkspaceContext\(supabase/.test(route));
-  ok("…and the flag is explicit, not a default", /useWorkspace/.test(route));
+  // No more toggle: the owner's critical message of 2026-10-22 asked the
+  // "use your other modules" checkbox off the screen, so the workspace
+  // read is unconditional rather than reading a flag off the body.
+  ok("…unconditionally, not behind a toggle any more", /loadWorkspaceContext\(supabase, \{ include: true \}\)/.test(route));
 }
 
 // =====================================================================

@@ -9,7 +9,6 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { activationAvailable } from "@/lib/import/activation";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import { providerConfigured } from "@/lib/integrations/oauth";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { greetingName } from "@/lib/greeting";
 import { FirstTask } from "@/components/onboarding/first-task";
 
@@ -67,11 +66,11 @@ export default async function OnboardingPage(props: { searchParams: Promise<{ cl
     redirect("/dashboard/overview");
   }
 
-  // THE FIRST TASK (MASTER 16, package 39), behind the switch
-  // "first-task": three tasks that finish on any plan, one press each,
-  // INSTEAD of the questionnaire below — which stays one press away
-  // (?classic=1), because the free first import lives in it.
-  if ((await isFeatureOn("first-task", user)) && searchParams.classic !== "1") {
+  // THE FIRST TASK (MASTER 16, package 39, unconditional since 2026-10-22,
+  // verified end-to-end 2026-10-08): three tasks that finish on any plan,
+  // one press each, INSTEAD of the questionnaire below — which stays one
+  // press away (?classic=1), because the free first import lives in it.
+  if (searchParams.classic !== "1") {
     return (
       <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
         <div className="w-full max-w-2xl">

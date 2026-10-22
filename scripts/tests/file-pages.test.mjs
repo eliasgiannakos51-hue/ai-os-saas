@@ -90,7 +90,7 @@ check("...a page that is not there is a 404, a bad number a 400", /code: "no_suc
 check("...the owner's only", /\.from\("user_files"\)\s*\.select\("id, filename, extracted_text, processing_status"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(one));
 const view = code("src/app/api/files/[id]/view/route.ts");
 check("the PDF opens at the page: a redirect to the file at #page=N", /NextResponse\.redirect\(`\$\{signed\.signedUrl\}#page=\$\{page\}`, 302\)/.test(view));
-check("...behind the switch", /if \(!\(await isFeatureOn\("file-pages", user\)\)\) return NextResponse\.json\(\{ ok: false, code: "not_enabled" \}, \{ status: 403 \}\);/.test(view));
+check("...unconditional since 2026-10-22 (removed, the owner's critical message)", !/isFeatureOn\("file-pages"/.test(view));
 check("...the owner's file only", /\.select\("id, file_type, storage_path"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(view));
 check("...a PDF only", /if \(file\.file_type !== "pdf"\) return NextResponse\.json\(\{ ok: false, code: "not_a_pdf" \}, \{ status: 400 \}\);/.test(view));
 check("...rate limited in the download's own scope, since it mints a link", /checkRateLimit\(\{ scope: "file_download", identifier: user\.id, maxAttempts: 120, windowMinutes: 60 \}\)/.test(view) && /if \(!limited\.allowed\)/.test(view));
@@ -101,9 +101,9 @@ check("...a page number is checked before anything is read", view.indexOf('code:
 // ---------------------------------------------------------------------
 console.log("\n== 4. the screen ==");
 // ---------------------------------------------------------------------
-check('"file-pages" is declared as a switch', /\n  "file-pages": "/.test(code("src/lib/flags/flags.ts")));
+check('"file-pages" is no longer declared as a switch (removed, the owner\'s critical message)', !/\n  "file-pages": "/.test(code("src/lib/flags/flags.ts")));
 const page = code("src/app/dashboard/files/page.tsx");
-check("the Files page reads it for both screens", (page.match(/pages=\{await isFeatureOn\("file-pages", user\)\}/g) ?? []).length === 2);
+check("the Files page sets it unconditionally for both screens", (page.match(/\bpages\b/g) ?? []).length >= 2 && !/isFeatureOn\("file-pages"/.test(page));
 const cited = code("src/components/files/cited-answer.tsx");
 check("a reference in the answer is a button that opens its page", /data-testid="files-cite"/.test(cited) && /onClick=\{\(\) => onOpen\(piece\.citation\)\}/.test(cited));
 check("the page shows its own words, read from the file", /fetch\(`\/api\/files\/\$\{encodeURIComponent\(fileId\)\}\?page=\$\{page\}`\)/.test(cited) && /data-testid="files-page-text"/.test(cited));

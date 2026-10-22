@@ -480,26 +480,38 @@ try {
           (await shell.count()) === 1 && (await shell.locator("h1").innerText()).trim() === name);
         const fields = await page.locator('main textarea, main input:not([type]), main input[type=text], main input[type=search], main input[type=email], main input[type=url], main input[type=number]').count();
         const options = await page.locator('[data-testid="tool-shell-options"] > *').count();
-        check(`${run}: ${tool.key} — one field (${fields}) and at most four options (${options})`, fields === 1 && options >= 1 && options <= 4);
+        // AT MOST FOUR, NEVER A FLOOR: Research's own empty landing
+        // (Batch 1, 2026-10-21) has zero — «what was made before» and
+        // «new» moved into the [◧] history column's own top-bar buttons.
+        check(`${run}: ${tool.key} — one field (${fields}) and at most four options (${options})`, fields === 1 && options <= 4);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         check(`${run}: ${tool.key} — the page does not scroll sideways`, overflow <= 1, `${overflow}px`);
         inLanguage(`${tool.key}, empty`, await shellText());
       }
       // What was made before, with nothing made: said, not blank.
-      for (const [tool, path, option, empty] of [
-        ["posts", "/dashboard/posts", "posts-recent", M.posts.history.empty],
-        ["slides", "/dashboard/presentations", "slides-recent", M.presentations.history.empty],
-        ["research", "/dashboard/deep-research", "research-recent", M.dashboard.deepResearch.empty.title],
-      ]) {
-        await page.goto(`${TEST}${path}`, { waitUntil: "networkidle" });
-        await press(page.locator(`[data-testid="${option}"]`));
+      // Posts keeps its own "Recent" option; Slides, Research and Site
+      // moved to the [◧] history column (Batch 1, 2026-10-21), whose
+      // empty message is the shared one, not each tool's own.
+      {
+        await page.goto(`${TEST}/dashboard/posts`, { waitUntil: "networkidle" });
+        await press(page.locator('[data-testid="posts-recent"]'));
         const work = page.locator('[data-testid="tool-shell-work"]');
         const shown = await work.waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
-        check(`${run}: ${tool} — what was made before says it is empty`, shown && (await work.innerText()).includes(empty), shown ? await work.innerText() : "no work area");
+        check(`${run}: posts — what was made before says it is empty`, shown && (await work.innerText()).includes(M.posts.history.empty), shown ? await work.innerText() : "no work area");
         await backToField();
       }
-      await page.goto(`${TEST}/dashboard/website-builder`, { waitUntil: "networkidle" });
-      check(`${run}: site — with no site yet, what was made before cannot be opened`, await page.locator('[data-testid="site-recent"]').isDisabled());
+      for (const [tool, path] of [
+        ["slides", "/dashboard/presentations"],
+        ["research", "/dashboard/deep-research"],
+        ["site", "/dashboard/website-builder"],
+      ]) {
+        await page.goto(`${TEST}${path}`, { waitUntil: "networkidle" });
+        await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+        const column = page.locator('[data-testid="shell-history-column"]');
+        const shown = await column.waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
+        check(`${run}: ${tool} — the [◧] history column says there is nothing yet`, shown && (await column.innerText()).includes(M.dashboard.toolShell.history.empty), shown ? await column.innerText() : "no history column");
+        await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+      }
       await page.goto(`${TEST}/dashboard/data-analysis`, { waitUntil: "networkidle" });
       await say(locale === "el" ? "Ποια περιοχή πούλησε περισσότερα;" : "Which region sold most?");
       check(`${run}: analyze — a question with no file says to give it a file`, (await lastToolTurn(0, 5000)) === M.dashboard.toolShell.analyze.needFile);
@@ -827,7 +839,7 @@ try {
           r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, record: { ...building, status: "completed", html_content: SITE_HTML[locale] } }) })
         );
         await backToField();
-        await press(page.locator('[data-testid="site-new"]'));
+        await press(page.locator('[data-testid="tool-shell-new"]'));
         await attach.setInputFiles({ name: "shop.png", mimeType: "image/png", buffer: PNG });
         before = await toolTurns();
         await say(brief.site);

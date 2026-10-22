@@ -51,11 +51,13 @@ check("the owner is staff", flags.isStaffEmail("Owner@Example.com", env) === tru
 check("the test account is staff, from TEST_ACCOUNT_EMAILS", flags.isStaffEmail("qa@example.com", env) === true);
 check("a customer is not", flags.isStaffEmail("someone@example.com", env) === false && flags.isStaffEmail(null, env) === false);
 check("a switch with no row reads as staff, never everyone", flags.DEFAULT_AUDIENCE === "staff");
-// The one switch the owner chose to start elsewhere (all-tools-tiles,
-// 2026-10-14) starts closed; none may start open.
+// NO SWITCH STARTS ELSEWHERE any more (the owner's critical message,
+// 2026-10-22: all-tools-tiles, the one exception this used to name, is
+// deleted — a flag that could hide a screen from its own owner should
+// not exist).
 const firstElsewhere = Object.keys(flags.FLAGS).filter((k) => flags.defaultAudienceOf(k) !== "staff");
-check("...every switch but the owner's named exception starts there, and none starts at everyone",
-  firstElsewhere.join() === "all-tools-tiles" && Object.keys(flags.FLAGS).every((k) => flags.defaultAudienceOf(k) !== "everyone"), firstElsewhere.join(", "));
+check("...every switch starts there, and none starts at everyone",
+  firstElsewhere.length === 0 && Object.keys(flags.FLAGS).every((k) => flags.defaultAudienceOf(k) !== "everyone"), firstElsewhere.join(", "));
 check("only the three settings are accepted", ["off", "staff", "everyone"].every(flags.isFlagAudience) && !flags.isFlagAudience("all") && !flags.isFlagAudience(""));
 check("only declared keys are accepted", Object.keys(flags.FLAGS).every(flags.isFlagKey) && !flags.isFlagKey("toString") && !flags.isFlagKey("nope"));
 

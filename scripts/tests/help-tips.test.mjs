@@ -358,20 +358,17 @@ check(
   /Refer yourself/.test(affiliateRules) &&
     /already someone else's referral/.test(affiliateRules),
 );
-// Coding: the four refusals the tip repeats are the four the page itself
-// prints, so they cannot drift apart into two different lists.
-const codingLimits = messages.en.coding.limits;
-for (const limit of [
-  "no_repository",
-  "no_execution",
-  "no_commits",
-  "no_whole_project",
-]) {
-  check(
-    `coding: the page states ${limit}`,
-    typeof codingLimits[limit] === "string",
-  );
-}
+// Coding: the four absences the tip names (help.coding.doesNot) are no
+// longer repeated by a standing block on the page too — the owner's
+// critical message of 2026-10-22 asked that block off the screen — so
+// what is checkable here is that the tip's own sentence still names all
+// four, rather than drifting down to a vaguer one.
+check(
+  "coding: the tip's doesNot still names all four absences",
+  [/no repository/i, /runs nothing/i, /no commits/i, /one function, one file, one paste/i].every((pattern) =>
+    pattern.test(messages.en.help.coding.doesNot),
+  ),
+);
 check(
   "coding: and there really are five operations",
   Object.keys(messages.en.coding.operations).length === 5,
@@ -492,18 +489,15 @@ check(
 
 console.log("\n== 5. the pages render it ==");
 // A HEADER LEFT BARE ON PURPOSE, each with the code that makes it so and
-// why. All tools with its squares hidden (the switch all-tools-tiles,
-// 2026-10-14) draws its title over one line and nothing else; its tip
-// says the page "shows every tool", which is then false. The exception is
-// held both ways: it applies only while that branch is in the file, and a
-// file that no longer has it fails here until the entry goes.
-const BARE_ON_PURPOSE = {
-  "src/app/dashboard/tools/page.tsx": {
-    headers: 1,
-    while: 'if (!(await isFeatureOn("all-tools-tiles", user))) {',
-    why: "the squares are hidden, and help.tools describes them",
-  },
-};
+// why. Empty since 2026-10-22: the one entry it ever held was All tools'
+// now-deleted all-tools-tiles branch (the owner's critical message — a
+// switch that could hide every square from everyone, the owner included,
+// with no way back). The page has one <PageHeader>, and it always
+// carries helpKey="help.tools" now. The exception mechanism is held both
+// ways: it applies only while the named branch is in the file, and a file
+// that no longer has it fails here until the entry goes — which is why
+// this is empty rather than left stale.
+const BARE_ON_PURPOSE = {};
 // ON EVERY <PageHeader> THE PAGE HAS, not on one of them.
 //
 // THIS CHECK USED TO BE `src.includes(helpKey="...")` AND IT PASSED WHILE

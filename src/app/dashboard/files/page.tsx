@@ -81,7 +81,7 @@ export default async function FilesPage(props: { searchParams: Promise<{ record?
   if (await isFeatureOn("tool-shell", user)) {
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} initialCollections={collectionRows} pages={await isFeatureOn("file-pages", user)} />
+        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} initialCollections={collectionRows} pages />
       </div>
     );
   }
@@ -106,7 +106,7 @@ export default async function FilesPage(props: { searchParams: Promise<{ record?
             storageBytes: rows.reduce((sum, f) => sum + Number(f.size_bytes ?? 0), 0),
             storageCap: isAdmin ? null : maxStorageBytesForPlan(planSlug),
           }}
-          pages={await isFeatureOn("file-pages", user)}
+          pages
         />
       </div>
     </div>

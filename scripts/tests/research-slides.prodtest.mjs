@@ -295,9 +295,10 @@ try {
     // ---- a new account: nothing yet
     if (!run.reports) {
       check("empty: no report and no button, only the field", (await page.locator('[data-testid="research-report"]').count()) === 0 && (await page.locator('[data-testid="research-to-slides"]').count()) === 0 && (await page.getByPlaceholder(L.dashboard.deepResearch.topicPlaceholder).count()) === 1);
-      await press(page.locator('[data-testid="research-recent"]'));
+      // THE [◧] HISTORY COLUMN (Batch 1, 2026-10-21), not the old option.
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await page.waitForTimeout(300);
-      check("...and what was made before says there is nothing yet", (await page.locator("main").innerText()).includes(L.dashboard.deepResearch.empty.title));
+      check("...and what was made before says there is nothing yet", (await page.locator("main").innerText()).includes(L.dashboard.toolShell.history.empty));
       await wordsCheck("the empty Research screen");
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check("the page does not scroll sideways", overflow <= 1, `${overflow}px`);

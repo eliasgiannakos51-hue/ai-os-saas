@@ -46,7 +46,7 @@ export default async function ChatPage(
   // independent reads and were three sequential waits. The favourites
   // lookup below genuinely depends on the list — it is keyed by the ids —
   // so it stays behind it; nothing else does.
-  const [{ data: conversationRows }, bypassesCredits, plan, opensTools] = await Promise.all([
+  const [{ data: conversationRows }, bypassesCredits, plan] = await Promise.all([
     supabase
       .from("chat_conversations")
       // SCOPED HERE AS WELL AS BY RLS. The Chats page has always said
@@ -63,11 +63,10 @@ export default async function ChatPage(
     // the allowance for those accounts entirely.
     isAdminEmail(user.email) ? Promise.resolve(true) : hasActiveBetaBypass(user),
     resolveEffectivePlan(user),
-    // THE SWITCH "chat-opens-tools" (package 7), read beside the others
-    // rather than after them: as its own wait it was the page's fifth in
-    // sequence, one over what scripts/tests/navigation-cost.test.mjs allows.
-    isFeatureOn("chat-opens-tools", user),
   ]);
+  // "chat-opens-tools" (package 7) is unconditional since 2026-10-22,
+  // verified end-to-end across several rounds with no open blocker.
+  const opensTools = true;
 
   // Starred state comes from user_favorites, not from a column here — one
   // batched read for the whole list rather than a query per row.

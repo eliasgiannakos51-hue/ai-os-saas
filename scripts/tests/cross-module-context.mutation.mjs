@@ -256,10 +256,7 @@ const MUTANTS = [
   {
     name: "the coding route stops loading the user's chat turns",
     file: CODING_ROUTE,
-    from:
-      "    const chatContext = useWorkspace\n" +
-      "      ? await loadChatContextForCoding(supabase, `${input} ${operation}`)\n" +
-      "      : { text: \"\", selection: { chosen: [], reason: \"workspace off\", chars: 0 }, pool: 0 };",
+    from: "    const chatContext = await loadChatContextForCoding(supabase, `${turn.input} ${turn.operation}`);",
     to: "    const chatContext = { text: \"\", selection: { chosen: [], reason: \"workspace off\", chars: 0 }, pool: 0 };",
   },
   {

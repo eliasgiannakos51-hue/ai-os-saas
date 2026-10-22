@@ -89,11 +89,11 @@ const MUTANTS = [
     expect: "an account that finished or skipped never meets it",
   },
   {
-    name: "the questionnaire is gone for everyone",
+    name: "?classic=1 stops opening the questionnaire",
     file: PAGE,
-    from: '  if ((await isFeatureOn("first-task", user)) && searchParams.classic !== "1") {',
+    from: '  if (searchParams.classic !== "1") {',
     to: "  if (true) {",
-    expect: "behind the switch, instead of the questionnaire, which ?classic=1 still opens",
+    expect: "unconditional since 2026-10-22, instead of the questionnaire, which ?classic=1 still opens",
   },
   {
     name: "the sign-in splash says a line in English on every screen",

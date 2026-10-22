@@ -20,14 +20,13 @@ import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
  * unfinished thing because something went wrong, and the owner still can.
  * scripts/tests/feature-flags.test.mjs runs this rule.
  *
- * ONE EXCEPTION, BY THE OWNER'S CHOICE (2026-10-14): `all-tools-tiles`
- * does not gate a new thing, it gates the squares All tools has always
- * drawn, and the owner wants them hidden for everyone, the owner
- * included, until the switch is turned back. So with no row, or a table
- * that cannot be read, it reads as 'off' (FIRST_AUDIENCE) — the state the
- * owner chose — and nothing behind it is lost: every tool still opens at
- * its own address.
- * scripts/tests/all-tools-tiles.test.mjs runs this.
+ * THE EXCEPTION THAT USED TO BE HERE IS GONE (the owner's critical
+ * message, 2026-10-22): `all-tools-tiles` could hide every All Tools
+ * square from EVERYONE, the owner included, with no way back once
+ * /dashboard/system-health 404s — exactly the failure mode this file's
+ * own "fails towards 'staff'" rule exists to prevent, just inverted. It
+ * is deleted, not set to 'everyone': a flag that can hide a screen from
+ * its own owner should not exist at all.
  */
 export { FLAG_AUDIENCES, type FlagAudience };
 
@@ -41,30 +40,37 @@ export const FLAGS = {
   "posts-images": "Posts with a picture: your own photo, or one from Unsplash, on every post at its platform's own size (LinkedIn 1200x627, X 1600x900, Instagram and Threads 1080x1350, Facebook 1200x630), each downloadable (MASTER 16, package 15)",
   "document-writer": "Document that writes: a document from a description (an offer, a letter, a CV, a report, an invoice, a script, or anything), one paragraph changed with words and nothing else, and downloads in Word and PDF; Document returns to All tools for whoever has it (MASTER 16, package 14)",
   "slides-charts": "Slides from your own file: a spreadsheet given to Slides with «+» becomes a deck with a real chart of its numbers, computed from the file and drawn as a chart PowerPoint can edit (MASTER 16, package 13)",
-  "first-task": "First task: a new account lands on one screen with three tasks that finish on any plan, the free one included, in one press each — instead of the three-step questionnaire — with its own field, and the data import one press away (MASTER 16, package 39)",
   "flows": "Flows: one sentence that names several tools — «φτιάξε site για το camping μου, με εικόνες, και posts» — becomes a plan with its total price, and once approved every result goes into one project, in one colour (MASTER 6.1, 6.3; package 36)",
   "automations": "Automations as boxes: say it in a sentence, see the boxes, change one with words or by hand, try it without sending anything, and it runs by itself on the server with its history and its cost (MASTER 16, package 30)",
   "connections": "Connections in one press: a Connect button on every card that opens what the AI will read, Google Calendar as a connection, and Chat answering «τι έχω αύριο;» from it (MASTER 16, package 31)",
   "image-studio": "Image: four pictures from one description, one of them changed with words, and downloaded at the largest size the provider makes (MASTER 16, package 19)",
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
   "tool-shell": "Every tool in one shell: the conversation on the left, the work on the right, one field and at most four options (MASTER 14.3, package 3)",
-  "chat-opens-tools": "Chat opens tools: «φτιάξε μου site για το camping» opens the Site beside the conversation, with its price, and builds it there on one press (MASTER 2.3, package 7)",
-  "file-pages": "Files that say where: every page an answer cites is pressed to read that page, or to open the PDF at it, and a PDF read only in part says which pages it did not read (MASTER 16, package 12)",
   "research-slides": "Research you can follow and present: every [n] in a report opens its source, and one press makes a presentation of the report in Slides, with its sources (MASTER 16, package 11)",
   "site-pages": "Site with pages: ask for one, three or five pages, see and change every page in the Site, take back the last change, and download the whole site (MASTER 16, package 10)",
   "chat-attachments": "Chat reads what you give it: PDFs and images attached to a message, asked about, and under the answer the remembered facts it used (MASTER 16, package 9)",
-  "brand-memory": "Memory: a business name and colours said in Chat are remembered as such, and Site uses them without being told again (MASTER 2.2, package 6)",
-  library: "The Library: everything made in Site, Slides, Posts, Documents, Research, Analyze and Files in one place, searched in what it says, pressed to open it in its tool (MASTER 4.1, package 5)",
-  "all-tools-tiles": "All tools shows its squares: «Κανείς» and the page shows no tool, no group and no search; «Όλοι» and every square is back as before. Hides nothing else: every tool still opens at its own address, Chat still opens tools, the Library keeps everything. Starts at «Κανείς» for everyone, the owner included (2026-10-14)",
 } as const;
+// REMOVED, UNCONDITIONAL FOR EVERYONE SINCE 2026-10-22 (the owner's
+// critical message — each was verified end-to-end with no open
+// blocker, and a flag that could hide a screen from its own owner,
+// as all-tools-tiles could, should not exist at all):
+// "first-task" (src/app/onboarding/page.tsx), "chat-opens-tools"
+// (src/app/dashboard/chat/page.tsx), "file-pages"
+// (src/app/api/files/[id]/view/route.ts, src/app/dashboard/files/page.tsx),
+// "brand-memory" (src/app/api/websites/generate/process/route.ts,
+// src/lib/flows/page-data.ts, src/app/api/chat/route.ts), "library"
+// (src/app/dashboard/timeline/page.tsx, src/app/dashboard/favorites/page.tsx),
+// "all-tools-tiles" (src/app/dashboard/tools/page.tsx).
 
 export type FlagKey = keyof typeof FLAGS;
 
 export const DEFAULT_AUDIENCE: FlagAudience = "staff";
 
 /** The switches that start somewhere other than DEFAULT_AUDIENCE, and
- *  read so when the table has no row or cannot be read (see above). */
-export const FIRST_AUDIENCE: Partial<Record<FlagKey, FlagAudience>> = { "all-tools-tiles": "off" };
+ *  read so when the table has no row or cannot be read (see above).
+ *  Empty since 2026-10-22 — the one entry it ever held, `all-tools-tiles`,
+ *  is gone (see the doc comment above). */
+export const FIRST_AUDIENCE: Partial<Record<FlagKey, FlagAudience>> = {};
 
 export function defaultAudienceOf(key: FlagKey): FlagAudience {
   return FIRST_AUDIENCE[key] ?? DEFAULT_AUDIENCE;

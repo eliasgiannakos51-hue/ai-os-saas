@@ -1335,6 +1335,14 @@
           "notSaved": "修改已完成但未能保存。没有丢失任何内容；请重试。",
           "failed": "没有成功。请重试。",
           "exportFailed": "无法生成文件。"
+        },
+        "empty": {
+          "heading": "我们要写什么?",
+          "examples": {
+            "offer": "一份自由职业项目的报价函",
+            "cv": "一份市场营销职位的简历",
+            "letter": "一封申请延期的信"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "描述这个网站，拿到这个网站",
         "why": "写清它是做什么的、给谁看——页面、文案和排版都由这段描述生成，之后还能用大白话继续改。",
-        "example": "面包店的单页网站，含产品和营业时间"
+        "example": "面包店的单页网站，含产品和营业时间",
+        "heading": "我们要做一个什么样的网站?",
+        "examples": {
+          "bakery": "一个社区面包店的网站",
+          "portfolio": "一个摄影师的作品集网站",
+          "restaurant": "一个带菜单的餐厅网站"
+        }
       },
       "pageSelectLabel": "本站页面",
       "pageHome": "首页",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "问一个真要下功夫查的问题",
         "why": "值得花几小时的问题：先把调研计划给你看，然后真的去查，带着出处回来。",
-        "example": "在希腊还有谁在卖这个，卖什么价"
+        "example": "在希腊还有谁在卖这个，卖什么价",
+        "heading": "你想了解什么?",
+        "examples": {
+          "marketCompetitors": "希腊咖啡市场的竞争对手有哪些?",
+          "compareTools": "比较两款适合小企业的记账工具",
+          "trend": "今年太阳能板价格有什么变化?"
+        }
       },
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
@@ -2518,7 +2538,8 @@
         "working": "正在制作演示文稿…",
         "notReady": "研究尚未完成，暂时没有可演示的内容。",
         "offline": "没有网络连接。请检查网络后重试。"
-      }
+      },
+      "new": "新建研究"
     },
     "onboarding": {
       "title": "让它成为你的",
@@ -3020,7 +3041,6 @@
       "title": "全部工具",
       "description": "每个工具,一行说明它做什么。",
       "orPress": "或按 ⌘K 输入名称,或在首页的输入框中描述。",
-      "tilesHidden": "在首页的输入框中描述你想做的事,或在电脑上按 ⌘K 输入工具名称。",
       "search": "查找工具",
       "searchLabel": "搜索工具",
       "noMatch": "没有名为“{query}”的工具。请在首页的输入框中描述它。",
@@ -3028,7 +3048,9 @@
         "make": "创建",
         "ask": "提问",
         "organise": "整理",
-        "business": "业务"
+        "business": "业务",
+        "automate": "自动化",
+        "learn": "学习"
       },
       "names": {
         "site": "网站",
@@ -3142,6 +3164,14 @@
         "undo": "撤销上一次更改",
         "undone": "已撤销上一次更改。",
         "nothingToUndo": "没有可撤销的更改：网站仍是生成时的样子。"
+      },
+      "showHistory": "显示以前的工作",
+      "hideHistory": "隐藏以前的工作",
+      "history": {
+        "search": "搜索",
+        "empty": "这里还没有内容。",
+        "delete": "删除",
+        "deleteConfirm": "删除「{title}」吗?"
       }
     },
     "library": {
@@ -3171,6 +3201,14 @@
       "noMatch": {
         "title": "没有内容包含“{query}”",
         "why": "试试更少的词，或换一种类型。"
+      },
+      "onboarding": {
+        "heading": "搜索你做过的一切",
+        "examples": {
+          "offer": "优惠",
+          "report": "报告",
+          "customers": "客户"
+        }
       }
     },
     "images": {
@@ -3185,8 +3223,6 @@
         "wide": "横版 16:9",
         "story": "快拍 9:16"
       },
-      "recent": "之前的",
-      "recentEmpty": "你还没有生成过图片。",
       "made": "已完成 {made}/{asked}。",
       "changed": "只改了图片 {n}。",
       "fullReady": "图片 {n} 的最高分辨率版本正在下载。",
@@ -3218,7 +3254,16 @@
         "unavailable": "图片服务商暂时没有响应。没有扣费；请再试一次。",
         "failed": "出了点问题。没有完成的部分不会扣费。",
         "offline": "没有网络连接。请检查网络后再试。"
-      }
+      },
+      "empty": {
+        "heading": "我们要做什么?",
+        "examples": {
+          "logo": "一个名为 Nest 的咖啡店标志",
+          "poster": "一张夏季促销海报,八折优惠",
+          "avatar": "一个科技应用的简单头像图标"
+        }
+      },
+      "new": "新图片"
     },
     "automations": {
       "name": "自动化",
@@ -3226,10 +3271,6 @@
       "placeholder": "什么事应该自动发生?",
       "placeholderBox": "这个方框里要改什么?",
       "placeholderAnswer": "你的回答",
-      "mine": "我的自动化",
-      "mineCount": "我的自动化({count})",
-      "mineEmpty": "你还没有创建自动化。",
-      "examples": "示例",
       "example": {
         "calendar": "每天早上 9 点在 Telegram 上把我今天的安排发给我",
         "finance": "每周一根据我的财务生成一份报告,等我批准后发给我",
@@ -3409,7 +3450,11 @@
         "broken": "这些方框已无法读取。请删除这个自动化并重新创建。",
         "failed": "出了点问题。未发生的部分不会收费。",
         "offline": "没有网络连接。请检查网络后重试。"
-      }
+      },
+      "empty": {
+        "heading": "什么事情应该自动发生?"
+      },
+      "new": "新建自动化"
     },
     "flows": {
       "name": "项目",
@@ -4752,53 +4797,38 @@
         "min": "按每个「{x}」，最小的「{y}」。",
         "max": "按每个「{x}」，最大的「{y}」。"
       }
-    }
+    },
+    "empty": {
+      "heading": "你想在数据里找到什么?",
+      "examples": {
+        "trend": "哪个月的销售额最高?",
+        "outliers": "有没有异常的数据行?",
+        "compare": "把这个月和上个月比较一下"
+      }
+    },
+    "new": "新文件"
   },
   "coding": {
     "title": "编程",
-    "description": "五件它会做的事，四件它不做的事。所有操作都只针对框里的那段文本。",
+    "description": "一个会写代码、解释代码、转换代码、测试代码的对话——完全基于你给出的文本。",
     "code": "代码",
     "copy": "复制",
     "copied": "已复制",
-    "language": "语言",
-    "targetLanguage": "转换为",
-    "useWorkspace": "用你的其他模块作为上下文",
-    "run": "运行",
-    "running": "处理中…",
-    "result": "结果",
-    "limits": {
-      "title": "它不做什么",
-      "no_repository": "它没有代码仓库。看不到你的代码库，也看不到你粘贴的那个文件旁边的文件。",
-      "no_execution": "它不运行任何东西。不运行你的代码，不运行它写的代码，也不运行它写的测试。",
-      "no_commits": "它不做提交、分支或合并请求。",
-      "no_whole_project": "它不搭建整个项目。一个函数、一个文件、一次粘贴。",
-      "later": "这四项属于下一个版本，不属于这一版。"
-    },
     "operations": {
       "generate": {
-        "label": "写一段代码",
-        "description": "描述你要什么，得到一个函数，并写明它的假设和没有覆盖的地方。",
-        "placeholder": "一个接收订单列表并返回每位客户利润率的函数…"
+        "label": "写一段代码"
       },
       "explain": {
-        "label": "解释这段",
-        "description": "粘贴代码，按顺序说明它做了什么，并指名所讲的那几行。",
-        "placeholder": "粘贴你想让它解释的代码…"
+        "label": "解释这段"
       },
       "find_bugs": {
-        "label": "找出缺陷",
-        "description": "每条结论都要指明触发它的输入或状态。没有失败用例的结论只是偏好。",
-        "placeholder": "粘贴你想检查的代码…"
+        "label": "找出缺陷"
       },
       "convert": {
-        "label": "转换语言",
-        "description": "用另一种语言重写，并列出所有无法直接迁移的部分。",
-        "placeholder": "粘贴你想转换的代码…"
+        "label": "转换语言"
       },
       "write_tests": {
-        "label": "写测试",
-        "description": "常规情况、边界情况，以及它失败的方式。不只是顺利路径。",
-        "placeholder": "粘贴你想测试的代码…"
+        "label": "写测试"
       }
     },
     "errors": {
@@ -4807,15 +4837,19 @@
       "failed": "没有成功——请再试一次。"
     },
     "history": {
-      "title": "历史",
-      "search": "搜索",
-      "folder": "文件夹",
-      "allFolders": "全部文件夹",
-      "empty": "这里还没有内容。",
-      "input": "输入",
-      "output": "输出",
-      "importedNote": "以前的笔记",
       "failed": "失败"
+    },
+    "new": "新建",
+    "placeholder": "描述你需要的内容,粘贴代码,或要求修改……",
+    "made": "好了,在对话旁边。",
+    "changed": "已更改。新版本在对话旁边,标出了改动的地方。",
+    "empty": {
+      "heading": "我们要做什么?"
+    },
+    "example": {
+      "function": "一个接收订单列表并返回每位客户利润的函数",
+      "explain": "解释这段代码做什么",
+      "tests": "为这个函数编写测试"
     }
   },
   "presentations": {
@@ -4926,6 +4960,14 @@
       },
       "source": "来自 {file}（{rows} 行）：{how}。",
       "openFile": "在“分析”中打开文件"
+    },
+    "empty": {
+      "heading": "这个演示文稿是关于什么的?",
+      "examples": {
+        "pitch": "一份新应用的路演演示文稿",
+        "quarterly": "一份季度业绩总结",
+        "training": "一份新员工培训演示文稿"
+      }
     }
   },
   "posts": {

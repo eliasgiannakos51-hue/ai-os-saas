@@ -18,9 +18,10 @@ import { GAMES_ICON } from "@/lib/module-icons";
 const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON };
 
 /**
- * ALL TOOLS (ΣΥΣΤΗΜΑ DESIGN §6, 2026-10-05): big square tiles, four in a
- * row on a computer and two on a phone, in four groups — Make, Ask,
- * Organise, Business — with a search on top and no «beta» anywhere. Each
+ * ALL TOOLS: big square tiles, four in a row on a computer and two on a
+ * phone, in six groups — Make, Ask, Automate, Organise, Business, Learn
+ * (the owner's critical message, 2026-10-22) — with a search on top and
+ * no «beta» anywhere. Each
  * square: a 28px icon top left, a pin top right, and at the bottom the
  * name with one plain line on what it does.
  *
@@ -72,8 +73,10 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const headings: Record<AllToolsGroupKey, string> = {
       make: t("groups.make"),
       ask: t("groups.ask"),
+      automate: t("groups.automate"),
       organise: t("groups.organise"),
       business: t("groups.business"),
+      learn: t("groups.learn"),
     };
     // ONLY THE TOOLS (MASTER 14.1): Settings, Integrations and the Help
     // Centre are in Settings, and the sidebar's Settings row opens it.

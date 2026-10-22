@@ -405,8 +405,13 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that it forecasts the future, or that it will invent a pattern rather than say there is not enough data",
   },
   {
+    // No <PageHeader> here since 2026-10-22 — the "?" moved onto the
+    // bespoke shell itself (components/coding/coding-workspace.tsx),
+    // the same move Chat made: `file` is where the tip is actually
+    // mounted, `route` is the page that has no header.
     id: "coding",
-    file: "src/app/dashboard/coding/page.tsx",
+    file: "src/components/coding/coding-workspace.tsx",
+    route: "src/app/dashboard/coding/page.tsx",
     keyPrefix: "help.coding",
     corrects:
       "that it can see your project, run what it writes, or open a pull request",

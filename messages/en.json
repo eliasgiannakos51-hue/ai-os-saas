@@ -1335,6 +1335,14 @@
           "notSaved": "The change was made but could not be saved. Nothing was lost; try again.",
           "failed": "It did not work. Try again.",
           "exportFailed": "The file could not be made."
+        },
+        "empty": {
+          "heading": "What are we writing?",
+          "examples": {
+            "offer": "An offer letter for a freelance project",
+            "cv": "A CV for a marketing role",
+            "letter": "A letter asking for an extension"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Describe the site, get the site",
         "why": "Write what the site is for and who it is for — the pages, the copy and the layout are generated from that description, and you can keep editing in plain words.",
-        "example": "A one-page site for a small bakery, with menu and hours"
+        "example": "A one-page site for a small bakery, with menu and hours",
+        "heading": "What site are we building?",
+        "examples": {
+          "bakery": "A site for a neighbourhood bakery",
+          "portfolio": "A portfolio for a photographer",
+          "restaurant": "A site for a restaurant, with the menu"
+        }
       },
       "pageSelectLabel": "Pages of this site",
       "pageHome": "Home",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Ask something that takes real digging",
         "why": "A question worth several hours: this reads a plan back to you first, then goes and does the work and comes back with sources.",
-        "example": "Who else sells this in Greece, and at what price"
+        "example": "Who else sells this in Greece, and at what price",
+        "heading": "What do you want to find out?",
+        "examples": {
+          "marketCompetitors": "Who are the competitors in the Greek coffee market?",
+          "compareTools": "Compare two accounting tools for a small business",
+          "trend": "What is changing in solar panel prices this year?"
+        }
       },
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
@@ -2518,7 +2538,8 @@
         "working": "Making the presentation…",
         "notReady": "The research is not finished yet, so there is nothing to present.",
         "offline": "No connection. Check the network and try again."
-      }
+      },
+      "new": "New research"
     },
     "onboarding": {
       "title": "Let's make this yours",
@@ -3020,7 +3041,6 @@
       "title": "All tools",
       "description": "Every tool, with one line on what it does.",
       "orPress": "Or press ⌘K and type its name — or describe it in the field on Home.",
-      "tilesHidden": "Describe what you want in the field on Home — or, on a computer, press ⌘K and type a tool's name.",
       "search": "Find a tool",
       "searchLabel": "Search tools",
       "noMatch": "No tool is called “{query}”. Describe it in the field on Home instead.",
@@ -3028,7 +3048,9 @@
         "make": "Make",
         "ask": "Ask",
         "organise": "Organise",
-        "business": "Business"
+        "business": "Business",
+        "automate": "Automate",
+        "learn": "Learn"
       },
       "names": {
         "site": "Site",
@@ -3142,6 +3164,14 @@
         "undo": "Undo the last change",
         "undone": "Undid the last change.",
         "nothingToUndo": "Nothing to undo: the site is as it was made."
+      },
+      "showHistory": "Show previous work",
+      "hideHistory": "Hide previous work",
+      "history": {
+        "search": "Search",
+        "empty": "Nothing here yet.",
+        "delete": "Delete",
+        "deleteConfirm": "Delete “{title}”?"
       }
     },
     "library": {
@@ -3171,6 +3201,14 @@
       "noMatch": {
         "title": "Nothing says “{query}”",
         "why": "Try fewer words, or another kind."
+      },
+      "onboarding": {
+        "heading": "Search everything you've made",
+        "examples": {
+          "offer": "offer",
+          "report": "report",
+          "customers": "customers"
+        }
       }
     },
     "images": {
@@ -3185,8 +3223,6 @@
         "wide": "Wide 16:9",
         "story": "Story 9:16"
       },
-      "recent": "Earlier",
-      "recentEmpty": "You have not made any images yet.",
       "made": "{made} of {asked} ready.",
       "changed": "Only image {n} changed.",
       "fullReady": "Image {n} at full resolution is downloading.",
@@ -3218,7 +3254,16 @@
         "unavailable": "The image provider is not answering right now. Nothing was charged; try again.",
         "failed": "Something went wrong. Nothing that was not made was charged.",
         "offline": "No connection. Check the network and try again."
-      }
+      },
+      "empty": {
+        "heading": "What should we make?",
+        "examples": {
+          "logo": "A logo for a coffee shop called Nest",
+          "poster": "A poster for a summer sale, 20% off",
+          "avatar": "A simple avatar icon for a tech app"
+        }
+      },
+      "new": "New image"
     },
     "automations": {
       "name": "Automations",
@@ -3226,10 +3271,6 @@
       "placeholder": "What should happen by itself?",
       "placeholderBox": "What should change in this box?",
       "placeholderAnswer": "Your answer",
-      "mine": "My automations",
-      "mineCount": "My automations ({count})",
-      "mineEmpty": "You have not made an automation yet.",
-      "examples": "Examples",
       "example": {
         "calendar": "Every morning at 9 send me on Telegram what I have today",
         "finance": "Every Monday make a report from my Finances and send it to me, after I approve it",
@@ -3409,7 +3450,11 @@
         "broken": "These boxes cannot be read any more. Delete the automation and make it again.",
         "failed": "Something went wrong. Nothing was charged for what did not happen.",
         "offline": "No connection. Check the network and try again."
-      }
+      },
+      "empty": {
+        "heading": "What should happen by itself?"
+      },
+      "new": "New automation"
     },
     "flows": {
       "name": "Projects",
@@ -4752,53 +4797,38 @@
         "min": "For each «{x}», the smallest «{y}».",
         "max": "For each «{x}», the largest «{y}»."
       }
-    }
+    },
+    "empty": {
+      "heading": "What do you want to find in your data?",
+      "examples": {
+        "trend": "Which month had the most sales?",
+        "outliers": "Are there any unusual rows?",
+        "compare": "Compare this month to last month"
+      }
+    },
+    "new": "New file"
   },
   "coding": {
     "title": "Coding",
-    "description": "Five things it does, and four it doesn't. Everything works on exactly the text in the box.",
+    "description": "A conversation that writes, explains, converts and tests code — on exactly the text you give it.",
     "code": "Code",
     "copy": "Copy",
     "copied": "Copied",
-    "language": "Language",
-    "targetLanguage": "Convert to",
-    "useWorkspace": "Use your other modules for context",
-    "run": "Run",
-    "running": "Working…",
-    "result": "Result",
-    "limits": {
-      "title": "What this does NOT do",
-      "no_repository": "It has no repository. It cannot see your codebase or the file next to the one you paste.",
-      "no_execution": "It runs nothing. Not your code, not the code it writes, not the tests it writes.",
-      "no_commits": "It makes no commits, branches or pull requests.",
-      "no_whole_project": "It does not build a project. One function, one file, one paste.",
-      "later": "Those four are the next version, not this one."
-    },
     "operations": {
       "generate": {
-        "label": "Write a snippet",
-        "description": "Describe what you need and get one function, with its assumptions and its gaps stated.",
-        "placeholder": "A function that takes a list of orders and returns the margin per customer…"
+        "label": "Write a snippet"
       },
       "explain": {
-        "label": "Explain this",
-        "description": "Paste code and get what it does, in order, naming the lines it is talking about.",
-        "placeholder": "Paste the code you want explained…"
+        "label": "Explain this"
       },
       "find_bugs": {
-        "label": "Find bugs",
-        "description": "Every finding names the input or state that makes it go wrong. A finding with no failing case is a preference.",
-        "placeholder": "Paste the code you want checked…"
+        "label": "Find bugs"
       },
       "convert": {
-        "label": "Convert",
-        "description": "Rewrite it in another language, with a list of everything that does not carry across.",
-        "placeholder": "Paste the code you want converted…"
+        "label": "Convert"
       },
       "write_tests": {
-        "label": "Write tests",
-        "description": "The ordinary case, the boundaries, and the ways it fails. Not just the happy path.",
-        "placeholder": "Paste the code you want tested…"
+        "label": "Write tests"
       }
     },
     "errors": {
@@ -4807,15 +4837,19 @@
       "failed": "That didn't work — try again."
     },
     "history": {
-      "title": "History",
-      "search": "Search",
-      "folder": "Folder",
-      "allFolders": "All folders",
-      "empty": "Nothing here yet.",
-      "input": "Input",
-      "output": "Output",
-      "importedNote": "note from before",
       "failed": "failed"
+    },
+    "new": "New",
+    "placeholder": "Describe what you need, paste code, or ask for a change…",
+    "made": "Here it is, beside the conversation.",
+    "changed": "Changed. The new version is beside the conversation, with what changed marked.",
+    "empty": {
+      "heading": "What are we building?"
+    },
+    "example": {
+      "function": "A function that takes a list of orders and returns the margin per customer",
+      "explain": "Explain what this code does",
+      "tests": "Write tests for this function"
     }
   },
   "presentations": {
@@ -4926,6 +4960,14 @@
       },
       "source": "From {file} ({rows} rows): {how}.",
       "openFile": "Open the file in Analyze"
+    },
+    "empty": {
+      "heading": "What's the deck about?",
+      "examples": {
+        "pitch": "A pitch deck for a new app",
+        "quarterly": "A quarterly results summary",
+        "training": "A training deck for new hires"
+      }
     }
   },
   "posts": {

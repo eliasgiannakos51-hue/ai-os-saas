@@ -215,7 +215,10 @@ try {
     await page.goto(`${ON}/dashboard/website-builder`, { waitUntil: "networkidle" });
     check("the Site is in the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     const options = await page.locator('[data-testid="tool-shell-options"] > *').count();
-    check(`...with four options, the pages among them (${options})`, options === 4 && (await page.locator('[data-testid="site-page-count"]').count()) === 1);
+    // DESIGN AND PAGES ONLY (2, not 4): «what was made before» and «new
+    // site» moved into the [◧] history column's own top-bar buttons
+    // (Batch 1, 2026-10-21) and are no longer options under the field.
+    check(`...with two options, the pages among them (${options})`, options === 2 && (await page.locator('[data-testid="site-page-count"]').count()) === 1);
 
     // ---- five pages, with one press
     await press(page.locator('[data-testid="site-page-count"]'));

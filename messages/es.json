@@ -1335,6 +1335,14 @@
           "notSaved": "El cambio se hizo pero no se pudo guardar. No se perdió nada; vuelve a intentarlo.",
           "failed": "No ha funcionado. Vuelve a intentarlo.",
           "exportFailed": "No se pudo crear el archivo."
+        },
+        "empty": {
+          "heading": "¿Qué estamos escribiendo?",
+          "examples": {
+            "offer": "Una carta de oferta para un proyecto freelance",
+            "cv": "Un currículum para un puesto de marketing",
+            "letter": "Una carta solicitando una prórroga"
+          }
         }
       }
     },
@@ -1780,7 +1788,13 @@
       "empty": {
         "title": "Describa el sitio y tendrá el sitio",
         "why": "Escriba para qué sirve y a quién va dirigido: las páginas, los textos y el diseño salen de esa descripción, y puede seguir editando con palabras normales.",
-        "example": "Sitio de una página para una panadería, con carta y horario"
+        "example": "Sitio de una página para una panadería, con carta y horario",
+        "heading": "¿Qué sitio vamos a crear?",
+        "examples": {
+          "bakery": "Un sitio para una panadería de barrio",
+          "portfolio": "Un portafolio para un fotógrafo",
+          "restaurant": "Un sitio para un restaurante, con el menú"
+        }
       },
       "pageSelectLabel": "Páginas de este sitio",
       "pageHome": "Inicio",
@@ -2503,7 +2517,13 @@
       "empty": {
         "title": "Pregunte algo que exija investigar de verdad",
         "why": "Una pregunta de varias horas: primero le enseña el plan, después hace el trabajo y vuelve con fuentes.",
-        "example": "Quién más vende esto en Grecia y a qué precio"
+        "example": "Quién más vende esto en Grecia y a qué precio",
+        "heading": "¿Qué quieres averiguar?",
+        "examples": {
+          "marketCompetitors": "¿Quiénes son los competidores en el mercado griego del café?",
+          "compareTools": "Compara dos herramientas de contabilidad para una pequeña empresa",
+          "trend": "¿Qué está cambiando este año en los precios de los paneles solares?"
+        }
       },
       "usedThisMonth": "{used} de {cap} este mes",
       "usedUnlimited": "{used} este mes",
@@ -2518,7 +2538,8 @@
         "working": "Creando la presentación…",
         "notReady": "La investigación aún no ha terminado, así que no hay nada que presentar.",
         "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
-      }
+      },
+      "new": "Nueva investigación"
     },
     "onboarding": {
       "title": "Vamos a hacerlo tuyo",
@@ -3020,7 +3041,6 @@
       "title": "Todas las herramientas",
       "description": "Cada herramienta, con una línea sobre lo que hace.",
       "orPress": "O pulsa ⌘K y escribe su nombre, o descríbelo en el campo de Inicio.",
-      "tilesHidden": "Describe lo que quieres en el campo de Inicio o, en el ordenador, pulsa ⌘K y escribe el nombre de una herramienta.",
       "search": "Buscar una herramienta",
       "searchLabel": "Buscar herramientas",
       "noMatch": "Ninguna herramienta se llama «{query}». Descríbela en el campo de Inicio.",
@@ -3028,7 +3048,9 @@
         "make": "Crear",
         "ask": "Preguntar",
         "organise": "Organizar",
-        "business": "Negocio"
+        "business": "Negocio",
+        "automate": "Automatizar",
+        "learn": "Aprender"
       },
       "names": {
         "site": "Sitio",
@@ -3142,6 +3164,14 @@
         "undo": "Deshacer el último cambio",
         "undone": "Deshice el último cambio.",
         "nothingToUndo": "No hay nada que deshacer: el sitio está como se creó."
+      },
+      "showHistory": "Mostrar trabajos anteriores",
+      "hideHistory": "Ocultar trabajos anteriores",
+      "history": {
+        "search": "Buscar",
+        "empty": "Aún no hay nada aquí.",
+        "delete": "Eliminar",
+        "deleteConfirm": "¿Eliminar «{title}»?"
       }
     },
     "library": {
@@ -3171,6 +3201,14 @@
       "noMatch": {
         "title": "Nada dice «{query}»",
         "why": "Prueba con menos palabras o con otro tipo."
+      },
+      "onboarding": {
+        "heading": "Busca en todo lo que has creado",
+        "examples": {
+          "offer": "oferta",
+          "report": "informe",
+          "customers": "clientes"
+        }
       }
     },
     "images": {
@@ -3185,8 +3223,6 @@
         "wide": "Horizontal 16:9",
         "story": "Formato story 9:16"
       },
-      "recent": "Anteriores",
-      "recentEmpty": "Aún no has creado imágenes.",
       "made": "{made} de {asked} listas.",
       "changed": "Solo cambió la imagen {n}.",
       "fullReady": "La imagen {n} a resolución completa se está descargando.",
@@ -3218,7 +3254,16 @@
         "unavailable": "El proveedor de imágenes no responde ahora. No se cobró nada; inténtalo de nuevo.",
         "failed": "Algo salió mal. No se cobró nada que no se hiciera.",
         "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
-      }
+      },
+      "empty": {
+        "heading": "¿Qué deberíamos crear?",
+        "examples": {
+          "logo": "Un logo para una cafetería llamada Nest",
+          "poster": "Un cartel para una rebaja de verano, 20% de descuento",
+          "avatar": "Un icono de avatar sencillo para una app de tecnología"
+        }
+      },
+      "new": "Imagen nueva"
     },
     "automations": {
       "name": "Automatizaciones",
@@ -3226,10 +3271,6 @@
       "placeholder": "¿Qué debe pasar solo?",
       "placeholderBox": "¿Qué debe cambiar en esta casilla?",
       "placeholderAnswer": "Tu respuesta",
-      "mine": "Mis automatizaciones",
-      "mineCount": "Mis automatizaciones ({count})",
-      "mineEmpty": "Todavía no has creado ninguna automatización.",
-      "examples": "Ejemplos",
       "example": {
         "calendar": "Cada mañana a las 9 mándame por Telegram lo que tengo hoy",
         "finance": "Cada lunes haz un informe de mis Finanzas y mándamelo, después de que lo apruebe",
@@ -3409,7 +3450,11 @@
         "broken": "Estas casillas ya no se pueden leer. Elimina la automatización y créala de nuevo.",
         "failed": "Algo salió mal. No se cobró nada por lo que no ocurrió.",
         "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
-      }
+      },
+      "empty": {
+        "heading": "¿Qué debería pasar solo?"
+      },
+      "new": "Automatización nueva"
     },
     "flows": {
       "name": "Proyectos",
@@ -4752,53 +4797,38 @@
         "min": "Para cada «{x}», el menor «{y}».",
         "max": "Para cada «{x}», el mayor «{y}»."
       }
-    }
+    },
+    "empty": {
+      "heading": "¿Qué quieres encontrar en tus datos?",
+      "examples": {
+        "trend": "¿Qué mes tuvo más ventas?",
+        "outliers": "¿Hay filas inusuales?",
+        "compare": "Compara este mes con el anterior"
+      }
+    },
+    "new": "Archivo nuevo"
   },
   "coding": {
     "title": "Código",
-    "description": "Cinco cosas que hace y cuatro que no. Todo funciona exactamente sobre el texto de la caja.",
+    "description": "Una conversación que escribe, explica, convierte y prueba código — sobre exactamente el texto que le das.",
     "code": "Código",
     "copy": "Copiar",
     "copied": "Copiado",
-    "language": "Lenguaje",
-    "targetLanguage": "Convertir a",
-    "useWorkspace": "Usar tus otros módulos como contexto",
-    "run": "Ejecutar",
-    "running": "Trabajando…",
-    "result": "Resultado",
-    "limits": {
-      "title": "Lo que NO hace",
-      "no_repository": "No tiene repositorio. No ve tu código ni el archivo de al lado.",
-      "no_execution": "No ejecuta nada. Ni tu código, ni el que escribe, ni las pruebas que escribe.",
-      "no_commits": "No hace commits, ramas ni pull requests.",
-      "no_whole_project": "No construye un proyecto. Una función, un archivo, un pegado.",
-      "later": "Esas cuatro son la próxima versión, no esta."
-    },
     "operations": {
       "generate": {
-        "label": "Escribir un fragmento",
-        "description": "Describe lo que necesitas y recibe una función, con sus supuestos y sus lagunas dichos.",
-        "placeholder": "Una función que toma una lista de pedidos y devuelve el margen por cliente…"
+        "label": "Escribir un fragmento"
       },
       "explain": {
-        "label": "Explicar esto",
-        "description": "Pega código y recibe qué hace, en orden, nombrando las líneas de las que habla.",
-        "placeholder": "Pega el código que quieres que se explique…"
+        "label": "Explicar esto"
       },
       "find_bugs": {
-        "label": "Buscar errores",
-        "description": "Cada hallazgo nombra la entrada o el estado que lo provoca. Un hallazgo sin caso que falle es una preferencia.",
-        "placeholder": "Pega el código que quieres revisar…"
+        "label": "Buscar errores"
       },
       "convert": {
-        "label": "Convertir",
-        "description": "Reescríbelo en otro lenguaje, con la lista de todo lo que NO se traslada.",
-        "placeholder": "Pega el código que quieres convertir…"
+        "label": "Convertir"
       },
       "write_tests": {
-        "label": "Escribir pruebas",
-        "description": "El caso normal, los límites y las formas de fallar. No sólo el camino feliz.",
-        "placeholder": "Pega el código que quieres probar…"
+        "label": "Escribir pruebas"
       }
     },
     "errors": {
@@ -4807,15 +4837,19 @@
       "failed": "No funcionó — inténtalo de nuevo."
     },
     "history": {
-      "title": "Historial",
-      "search": "Buscar",
-      "folder": "Carpeta",
-      "allFolders": "Todas las carpetas",
-      "empty": "Aquí todavía no hay nada.",
-      "input": "Entrada",
-      "output": "Salida",
-      "importedNote": "nota anterior",
       "failed": "falló"
+    },
+    "new": "Nuevo",
+    "placeholder": "Describe lo que necesitas, pega código, o pide un cambio…",
+    "made": "Aquí está, junto a la conversación.",
+    "changed": "Cambiado. La nueva versión está junto a la conversación, con lo que cambió marcado.",
+    "empty": {
+      "heading": "¿Qué estamos construyendo?"
+    },
+    "example": {
+      "function": "Una función que toma una lista de pedidos y devuelve el margen por cliente",
+      "explain": "Explica qué hace este código",
+      "tests": "Escribe pruebas para esta función"
     }
   },
   "presentations": {
@@ -4926,6 +4960,14 @@
       },
       "source": "De {file} ({rows} filas): {how}.",
       "openFile": "Abrir el archivo en Analizar"
+    },
+    "empty": {
+      "heading": "¿De qué trata la presentación?",
+      "examples": {
+        "pitch": "Una presentación de pitch para una nueva app",
+        "quarterly": "Un resumen de resultados trimestrales",
+        "training": "Una presentación de formación para nuevas incorporaciones"
+      }
     }
   },
   "posts": {

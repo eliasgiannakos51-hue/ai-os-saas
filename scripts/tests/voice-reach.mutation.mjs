@@ -27,11 +27,11 @@ const AVAIL = "src/components/voice/voice-availability.tsx";
 const LEVEL = "src/components/voice/use-audio-level.ts";
 const PLAYER = "src/components/voice/voice-player.tsx";
 const AGENTS = "src/components/agents/agents-workspace.tsx";
-const CODING = "src/components/coding/coding-workspace.tsx";
+const ONBOARDING = "src/components/onboarding/onboarding-flow.tsx";
 const ZH = "messages/zh.json";
 const AR = "messages/ar.json";
 
-const TARGETS = [GATE, ASK, ANALYSIS, SETTINGS, AVAIL, LEVEL, PLAYER, AGENTS, CODING, ZH, AR];
+const TARGETS = [GATE, ASK, ANALYSIS, SETTINGS, AVAIL, LEVEL, PLAYER, AGENTS, ONBOARDING, ZH, AR];
 
 const MUTANTS = [
   // ---- the two findings, put back ------------------------------------
@@ -89,9 +89,9 @@ const MUTANTS = [
     // constant containing the word, which the gate correctly ignored —
     // it looks for `<VoiceInput`, not for the identifier.
     name: "an excluded input quietly gains a microphone",
-    file: CODING,
-    from: "        <textarea",
-    to: "        <VoiceInput compact onTranscript={() => {}} />\n        <textarea",
+    file: ONBOARDING,
+    from: "          <textarea",
+    to: "          <VoiceInput compact onTranscript={() => {}} />\n          <textarea",
     expect: "no excluded input quietly gained a microphone",
   },
 

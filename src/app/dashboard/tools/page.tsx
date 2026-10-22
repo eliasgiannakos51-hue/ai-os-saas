@@ -20,38 +20,26 @@ export function generateMetadata(): Promise<Metadata> {
 /**
  * ALL TOOLS — the third road to every tool, and the only one a person can
  * browse without knowing a name (docs/mockups/README.md, "Three roads to
- * every tool"). Since ΣΥΣΤΗΜΑ DESIGN §6 (2026-10-05) it is big squares in
- * four groups with a search on top — components/tools/tools-grid.tsx,
- * grouped by lib/nav/all-tools.ts over the same sidebarGroups() and owner
- * filter; since MASTER 14.1 (2026-10-07) without the Settings block. Each square's pin is the only way to
- * put a tool in the sidebar at once, so the page hands it this person's
- * pins.
+ * every tool"). Six groups with a search on top —
+ * components/tools/tools-grid.tsx, grouped by lib/nav/all-tools.ts over
+ * the same sidebarGroups() and owner filter; since MASTER 14.1
+ * (2026-10-07) without the Settings block. Each square's pin is the only
+ * way to put a tool in the sidebar at once, so the page hands it this
+ * person's pins.
  *
- * THE SQUARES ARE BEHIND A SWITCH (the owner, 2026-10-14: «Κρύψε όλα τα
- * εργαλεία από το All tools, χωρίς να σβήσεις τίποτα»). With
- * `all-tools-tiles` off — where it starts, for everyone — the page draws
- * its title and one line on how to reach a tool, and no square, group or
- * search. Nothing else reads that switch: every tool keeps its own page
- * and address, Chat and ⌘K still open them, the Library keeps what was
- * made. scripts/tests/all-tools-tiles.test.mjs holds this, and
- * scripts/tests/all-tools-tiles.prodtest.mjs draws both states.
+ * NO SWITCH HIDES THE SQUARES (the owner's critical message, 2026-10-05
+ * decision reversed 2026-10-22: `all-tools-tiles` is gone — the switch
+ * that could hide every square, from everyone including the owner, is
+ * exactly the shape of bug that left All tools looking empty with no way
+ * back once /dashboard/system-health 404'd). Every tool still keeps its
+ * own page and address, Chat and ⌘K still open them, the Library keeps
+ * what was made — that part is unchanged.
  */
 export default async function ToolsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const t = await getTranslations("dashboard.tools");
-  if (!(await isFeatureOn("all-tools-tiles", user))) {
-    return (
-      <div className="min-h-full">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-          <PageHeader icon={LayoutGrid} title={t("title")} />
-          <p className="text-sm text-muted" data-testid="tools-hidden">{t("tilesHidden")}</p>
-        </div>
-      </div>
-    );
-  }
-
   const isOwner = isAdminEmail(user.email);
   // THE NEW TOOLS' SQUARES (MASTER 14.1), each drawn only when its own
   // switch is on for this person — the same switch its page reads.

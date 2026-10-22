@@ -1520,7 +1520,7 @@ export async function POST(request: Request) {
             userMessage: message,
             assistantMessage: assistantText,
             costs,
-            brand: await isFeatureOn("brand-memory", user),
+            brand: true,
           });
         }
 

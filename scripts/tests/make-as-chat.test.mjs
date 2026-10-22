@@ -94,9 +94,14 @@ function measure(href) {
     ? [...new Set((cond.match(/\b([a-z][A-Za-z0-9]*)\b/g) ?? []))]
         .filter((w) => !BUSY.has(w) && !["trim", "length", "true", "false", "null", "undefined", "status", "completed"].includes(w))
     : [];
+  // A ToolShell-based tool's free-text field is the shared ChatComposer
+  // (components/chat/chat-composer.tsx, which renders its own
+  // `<textarea>`) rather than one typed directly into the tool's own
+  // folder. `<ChatComposer` is evidence of that shared field — the same
+  // "write what you want" way in, just embedded rather than local.
   return {
     files,
-    textareas: (src.match(/<textarea/g) ?? []).length,
+    textareas: (src.match(/<textarea/g) ?? []).length + (src.match(/<ChatComposer\b/g) ?? []).length,
     textInputs: (src.match(/<input\s[^>]*type="text"/g) ?? []).length,
     cond,
     inputs,
@@ -144,9 +149,11 @@ const BASELINE = {
   // fallback, so a panel built from the empty selection would show no
   // platforms beside four posts that exist.
   "/dashboard/posts": 1,
-  // One, after the busy flag is discounted: the operation picker has a
-  // default and the two language selects are optional.
-  "/dashboard/coding": 1,
+  // 1 -> 0 ON 2026-10-22: the operation picker, the language selects and
+  // the busy flag are all gone. planTurn() (lib/coding/operations.ts)
+  // reads the operation from what was typed, so the action waits on
+  // nothing but the text itself, like the other conversational tools.
+  "/dashboard/coding": 0,
   // A FILE is the way in, so no text gates the first result; the
   // follow-up question is a one-line input.
   "/dashboard/data-analysis": 0,
@@ -188,7 +195,10 @@ console.log("\n== 2b. how many clicks between arriving and a result ==");
   const clicksFor = (href) => {
     const src = strip(screenOf(href).map((f) => readFileSync(f, "utf8")).join("\n"));
     const behindAButton = /useState\(\s*initial\w+\.length === 0\s*\)/.test(src);
-    const focused = /autoFocus/.test(src);
+    // The shared ChatComposer (components/chat/chat-composer.tsx)
+    // autofocuses its own textarea unconditionally — a tool that embeds
+    // it carries no literal `autoFocus` of its own to match.
+    const focused = /autoFocus/.test(src) || /<ChatComposer\b/.test(src);
     return (behindAButton ? 1 : 0) + (focused ? 0 : 1) + 1;
   };
   // A CEILING PER ROW, recorded at the measured value on 2026-09-27 and

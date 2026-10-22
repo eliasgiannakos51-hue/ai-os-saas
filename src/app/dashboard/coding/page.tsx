@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { MODULE_ICONS } from "@/lib/module-icons";
 import { CodingWorkspace, type CodeSession } from "@/components/coding/coding-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
@@ -21,10 +18,14 @@ export function generateMetadata(): Promise<Metadata> {
   return pageTitle(MODULE_TITLE_KEYS.coding);
 }
 
-// /dashboard/coding was a CRUD form for describing code the user would go
-// and write themselves. This is the version that writes it: five
-// operations, and four things it still does not do — stated on the screen
-// by CodingWorkspace rather than left to the name.
+// CODING, AS A CONVERSATION (the owner's critical message, 2026-10-22):
+// this page renders no page header component any more — CodingWorkspace
+// draws its own name, its own "?" (HelpTip) and its own [◧] history, the
+// same way Chat's page renders no header and mounts the tip at
+// chat-workspace.tsx instead
+// (src/lib/help-tips.ts's "coding" entry points there now, not here —
+// scripts/tests/help-tips.test.mjs's NO_HEADER_EXEMPT / `routed` logic
+// is what a page with no header has to satisfy).
 // The brief Home routed here, read through the shared clamp — see the
 // note in the deep-research page for why the name is checked by a gate.
 export default async function CodingPage(
@@ -33,7 +34,6 @@ export default async function CodingPage(
   }
 ) {
   const searchParams = await props.searchParams;
-  const t = await getTranslations("coding");
   const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -43,7 +43,7 @@ export default async function CodingPage(
   // migration's section 5.
   const { data: rows } = await supabase
     .from("code_sessions")
-    .select("id, operation, title, input, language, target_language, output, folder, status, source, created_at")
+    .select("id, operation, title, input, language, target_language, output, status, source, created_at")
     .order("created_at", { ascending: false })
     .limit(60);
 
@@ -55,23 +55,14 @@ export default async function CodingPage(
     language: (row.language as string | null) ?? null,
     targetLanguage: (row.target_language as string | null) ?? null,
     output: (row.output as string | null) ?? null,
-    folder: (row.folder as string | null) ?? null,
     status: String(row.status ?? "done"),
     source: String(row.source ?? "run"),
     createdAt: String(row.created_at ?? ""),
   }));
 
-  const folders = [...new Set(sessions.map((s) => s.folder).filter((f): f is string => Boolean(f)))].sort();
-
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader
-        icon={MODULE_ICONS.coding}
-        title={t("title")}
-        description={t("description")}
-        helpKey="help.coding"
-      />
-      <CodingWorkspace sessions={sessions} folders={folders} initialTask={readExampleParam(searchParams.brief)} />
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <CodingWorkspace sessions={sessions} initialTask={readExampleParam(searchParams.brief)} />
     </div>
   );
 }

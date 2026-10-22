@@ -70,12 +70,10 @@ function setPlan(tier) {
 // needs to render its shell.
 const TABLE_ROWS = {
   user_credits: [{ user_id: USER.id, credits_remaining: 500, credits_total: 500 }],
-  // All tools draws no square while `all-tools-tiles` is off, which is
-  // where it starts (src/lib/flags/flags.ts FIRST_AUDIENCE, the owner's
-  // decision of 2026-10-14). The group headings are read off that page
-  // below, so this run opens the switch; scripts/tests/all-tools-tiles.prodtest.mjs
-  // is the one that walks the page with it closed.
-  feature_flags: [{ key: "all-tools-tiles", audience: "everyone" }],
+  // All Tools drew no square while `all-tools-tiles` was off. That switch
+  // was removed on 2026-10-22 (the owner's critical message: nothing
+  // behind a verified-working switch should be invisible) — the page now
+  // always renders the squares and group headings this run reads below.
 };
 
 const supaHits = [];
@@ -1076,13 +1074,19 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   checkTrue(`the page heading is Greek too ("${heading}")`, fold(heading) === fold(String(codingLabel)), `${heading} vs ${codingLabel}`);
   checkTrue("...and matches what the sidebar calls it", foldedNav.includes(fold(heading)), `${heading} not in nav`);
 
-  // A tracking page states, on screen, that it produces nothing.
+  // WHAT IT DOES AND DOES NOT DO moved off the standing screen on
+  // 2026-10-22 (the owner's critical message) and into the "?" beside
+  // the name — lib/help-tips.ts's `coding` entry, read through the "?"
+  // the same way Chat's own "?" is read. The sentence is still there;
+  // it is reached by a press now, not printed above the field.
   await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
   const main = await page.locator(mainCount >= 1 ? "main" : "body").innerText();
+  await page.locator('[data-testid="help-tip-coding"]').click();
+  const helpTipText = await page.locator('[role="dialog"]').innerText();
   checkTrue(
-    "the AI Coding page states what it does and does not do",
-    /Δεν εκτελεί κώδικα/.test(main) || /δεν κάνει/.test(main),
-    main.replace(/\s+/g, " ").slice(0, 300)
+    "the AI Coding page states what it does and does not do, behind the \"?\"",
+    /Δεν εκτελεί κώδικα/.test(helpTipText) || /δεν κάνει/.test(helpTipText),
+    helpTipText.replace(/\s+/g, " ").slice(0, 300)
   );
   checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
 

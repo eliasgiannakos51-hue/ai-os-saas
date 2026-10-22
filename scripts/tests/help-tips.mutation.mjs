@@ -68,13 +68,6 @@ const MUTANTS = [
     to: "",
     expect: "tools: src/app/dashboard/tools/page.tsx passes helpKey",
   },
-  {
-    name: "the bare header's exception outlives the branch that needed it",
-    file: TOOLS_PAGE,
-    from: '  if (!(await isFeatureOn("all-tools-tiles", user))) {',
-    to: '  if (!(await isFeatureOn("library", user))) {',
-    expect: "leaves 1 header bare only while it still has the branch that needs it",
-  },
   // ---- the second file of a shared tip ------------------------------
   {
     // THE BUG alsoIn EXISTS FOR. Ideas loses its "?" and the twelve

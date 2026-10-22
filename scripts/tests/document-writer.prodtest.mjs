@@ -264,9 +264,11 @@ try {
     const { context, page, press } = await open(ON, device);
     await page.goto(`${ON}/dashboard/documents`, { waitUntil: "networkidle" });
     check("Document opens in the shell, under its one-word name", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator('[data-testid="tool-shell"] h1').innerText()).trim() === EL.dashboard.tools.names.document);
-    await press(page.locator('[data-testid="document-recent"]'));
-    check("a new account has written nothing, and is told so", (await page.locator('[data-testid="tool-shell-work"]').innerText()).includes(EL.dashboard.documents.writer.noneYet));
-    await press(page.locator('[data-testid="tool-shell-close"]:visible, [data-testid="tool-shell-back"]:visible').first());
+    // THE [◧] HISTORY COLUMN (Batch 1, 2026-10-21), not the old «Written
+    // before» option: its own shared empty message, not the tool's.
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    check("a new account has written nothing, and is told so", (await page.locator('[data-testid="shell-history-column"]').innerText()).includes(EL.dashboard.toolShell.history.empty));
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
 
     await press(page.locator('[data-testid="document-kind"]'));
     await press(page.locator('[role="option"]').filter({ hasText: EL.dashboard.documents.writer.kinds.offer }));

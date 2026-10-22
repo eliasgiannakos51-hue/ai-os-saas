@@ -144,7 +144,12 @@ console.log("\n== 4. a button, on each surface ==");
   check("websites: the generating panel carries Stop", /data-testid="website-stop"/.test(read(SITE_UI)) && /\/api\/websites\/\$\{previewWebsite\.id\}\/cancel/.test(read(SITE_UI)));
   check("research: the running report carries Stop", /data-testid="research-stop"/.test(read(RESEARCH_UI)) && /\/api\/research\/\$\{report\.id\}\/cancel/.test(read(RESEARCH_UI)));
   const codingUi = read(CODING_UI);
-  check("code: the run button gets a Stop beside it", /data-testid="coding-stop"/.test(codingUi));
+  // Since the 2026-10-22 redesign, Coding's field is the shared
+  // ChatComposer (components/chat/chat-composer.tsx) rather than a run
+  // button of its own, and that component draws the Stop button itself
+  // — `data-testid="chat-stop"` — whenever its own `sending` prop is
+  // true. What this screen owns is wiring `onStop` to abort the fetch.
+  check("code: the field is wired to stop a run in flight", /onStop=\{\(\) => abortRef\.current\?\.abort\(\)\}/.test(codingUi));
   check("code: ...that aborts the fetch", /abortRef\.current\?\.abort\(\)/.test(codingUi) && /signal: controller\.signal/.test(codingUi));
   const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
   for (const l of LOCALES) {

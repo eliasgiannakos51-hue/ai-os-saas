@@ -107,11 +107,11 @@ const MUTANTS = [
     expect: "what is said next goes to the open site first",
   },
   {
-    name: "the switch is ignored",
+    name: "the chat page stops opening tools",
     file: PAGE,
-    from: '    isFeatureOn("chat-opens-tools", user),\n  ]);',
-    to: "    Promise.resolve(true),\n  ]);",
-    expect: "the Chat page reads it",
+    from: "const opensTools = true;",
+    to: "const opensTools = false;",
+    expect: "the Chat page sets it unconditionally",
   },
   {
     name: "the answers are sent back for more questions",

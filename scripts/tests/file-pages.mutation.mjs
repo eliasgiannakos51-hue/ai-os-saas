@@ -91,13 +91,6 @@ const MUTANTS = [
     expect: "...the owner's file only",
   },
   {
-    name: "the PDF link works with the switch off",
-    file: VIEW,
-    from: '    if (!(await isFeatureOn("file-pages", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });\n',
-    to: "",
-    expect: "...behind the switch",
-  },
-  {
     name: "the PDF link mints signed addresses without limit",
     file: VIEW,
     from: '    if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });\n',

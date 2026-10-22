@@ -930,6 +930,28 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       routes: ["src/app/api/integrations/[provider]/connect/route.ts"],
     },
   },
+  // «Τα δικά μου» (2026-10-22, the owner's message after #332): a
+  // read-only aggregator over the account's own rows across every
+  // tool — Library's 7 sources plus chat, coding, finance, sales and
+  // trading. Browsing and deleting its own sessions cost nothing; only
+  // asking a question in words reserves credits, the same shape as
+  // Coding's own "coding/run" above. No sidebar row and no square until
+  // the switch opens it (SWITCH_ONLY_ITEMS, lib/nav/all-tools.ts), the
+  // same reason Games below is not sold yet either.
+  {
+    id: "myStuff",
+    group: "organise",
+    minPlan: "free",
+    notSold:
+      "owner-only for now: the switch my-stuff admits the owner and the test account " +
+      "(isFeatureOn in src/app/dashboard/my-stuff/page.tsx); the tier is confirmed when it opens to everyone",
+    pages: ["my-stuff"],
+    routes: ["my-stuff/ask", "my-stuff/browse", "my-stuff/sessions/[id]"],
+    charges: true,
+    enforcedIn: "src/app/api/my-stuff/ask/route.ts",
+    enforcedSymbol: "reserveCredits",
+    cell: () => ({ type: "check" }),
+  },
   {
     id: "notifications",
     group: "organise",

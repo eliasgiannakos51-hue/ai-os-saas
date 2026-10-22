@@ -103,6 +103,24 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.library.kinds.analysis",
   "pt:dashboard.library.kinds.site",
   "pt:dashboard.library.kinds.slides",
+  // «Τα δικά μου»'s own kinds list (2026-10-22) repeats the SAME twelve
+  // words the Library's kinds and the tool names already use, so the
+  // same loanwords/cognates are allowed again here: "Trading" in de, es,
+  // fr, it, pt (as for the tool's own name above); "Code" in de and fr
+  // (le code / der Code); "Sites" in fr and pt, "Documents" and "Analyses"
+  // in fr, "Conversations" in fr (the everyday French word).
+  "de:dashboard.myStuff.kinds.trading",
+  "es:dashboard.myStuff.kinds.trading",
+  "fr:dashboard.myStuff.kinds.trading",
+  "it:dashboard.myStuff.kinds.trading",
+  "pt:dashboard.myStuff.kinds.trading",
+  "de:dashboard.myStuff.kinds.coding",
+  "fr:dashboard.myStuff.kinds.coding",
+  "fr:dashboard.myStuff.kinds.site",
+  "pt:dashboard.myStuff.kinds.site",
+  "fr:dashboard.myStuff.kinds.document",
+  "fr:dashboard.myStuff.kinds.analysis",
+  "fr:dashboard.myStuff.kinds.chat",
   "fr:dashboard.toolShell.box.nav",
   "it:dashboard.toolShell.box.nav",
   "pt:dashboard.toolShell.box.nav",

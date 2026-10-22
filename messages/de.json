@@ -167,6 +167,7 @@
       "predictions": "Muster",
       "posts": "Beiträge",
       "projects": "Projekte",
+      "myStuff": "Deine Sachen",
       "aiMemory": "Was es sich merkt",
       "meetings": "Besprechungen",
       "music": "Musik",
@@ -286,6 +287,7 @@
       "predictions": "Muster in deinen eigenen Einträgen, jeweils mit der Zahl der Einträge dahinter und einem Link darauf.",
       "posts": "Sag es einmal und erhalte pro Plattform einen Beitrag in ihrer Länge und ihrem Ton. Es veröffentlicht nichts – du kopierst und postest.",
       "projects": "Ein Ordner mit einem Ziel. Was du hineinlegst, ist drin — nichts kommt von selbst.",
+      "myStuff": "Frag in eigenen Worten nach allem, was du in Ionexa gemacht hast, und bekomm eine Antwort mit Link zur Quelle. Nichts wird verändert — nur gelesen.",
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
       "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen",
@@ -3063,6 +3065,7 @@
         "projects": "Projekte",
         "goals": "Ziele",
         "meetings": "Besprechungen",
+        "myStuff": "Deine Sachen",
         "library": "Bibliothek",
         "memory": "Gedächtnis",
         "finances": "Finanzen",
@@ -3084,6 +3087,7 @@
         "projects": "Ein Ordner mit einem Ziel.",
         "goals": "Ein Ziel, in Schritte zerlegt.",
         "meetings": "Zusammenfassung und Aufgaben aus einer Aufnahme.",
+        "myStuff": "Frag nach allem, was du gemacht hast, mit Quellen.",
         "library": "Alles, was du gemacht hast, an einem Ort.",
         "memory": "Was Ionexa sich über dich merkt.",
         "finances": "Einnahmen und Ausgaben erfassen.",
@@ -3210,6 +3214,54 @@
           "report": "Bericht",
           "customers": "Kunden"
         }
+      }
+    },
+    "myStuff": {
+      "name": "Deine Sachen",
+      "placeholder": "Frag mich zu deinen eigenen Daten…",
+      "working": "Durchsuche deine eigenen Daten…",
+      "new": "Neu",
+      "empty": {
+        "heading": "Frag mich zu deinen eigenen Daten",
+        "examples": {
+          "finance": "Wie viel habe ich im September ausgegeben?",
+          "site": "Welche Seite habe ich für den Campingplatz gemacht?",
+          "trading": "Was haben wir über die Aktien gesagt?"
+        }
+      },
+      "browse": {
+        "open": "Suche",
+        "title": "In deinen eigenen Daten suchen",
+        "searchLabel": "In deinen eigenen Daten suchen",
+        "searchPlaceholder": "Namen und Inhalt durchsuchen",
+        "kindsLabel": "Nur zeigen",
+        "all": "Alle",
+        "empty": "Nichts gefunden",
+        "untitled": "Ohne Titel"
+      },
+      "kinds": {
+        "site": "Websites",
+        "slides": "Folien",
+        "posts": "Beiträge",
+        "document": "Dokumente",
+        "research": "Recherchen",
+        "analysis": "Analysen",
+        "file": "Dateien",
+        "chat": "Unterhaltungen",
+        "coding": "Code",
+        "finance": "Finanzen",
+        "sales": "Verkäufe",
+        "trading": "Trading"
+      },
+      "errors": {
+        "empty": "Schreib eine Frage.",
+        "tooLong": "Eine kürzere Frage, bitte.",
+        "insufficient": "Du hast nicht genug Credits für diese Frage.",
+        "rateLimited": "Zu viele Fragen auf einmal. Versuch es gleich noch einmal.",
+        "unavailable": "Die KI hat nicht geantwortet. Versuch es erneut.",
+        "stopped": "Gestoppt.",
+        "failed": "Etwas ist schiefgelaufen.",
+        "offline": "Keine Verbindung. Versuch es erneut."
       }
     },
     "images": {
@@ -4222,6 +4274,11 @@
       "is": "Eine Suche über alles, was du erfasst hast.",
       "does": "Sie durchsucht alle Module auf einmal — Ideen, Leads, Ausgaben, Trades, Sites — und bringt dich direkt zum Eintrag.",
       "doesNot": "Sie speichert deine Gespräche nicht und behält nichts Eigenes. Alles hier hast du in einem Modul geschrieben; die KI fügt nichts hinzu."
+    },
+    "myStuff": {
+      "is": "Eine KI-Frage über alles, was du in Ionexa gemacht hast.",
+      "does": "Sie liest Sites, Beiträge, Dokumente, Recherchen, Analysen, Dateien, Chats, Code-Sitzungen, Finanzen, Verkäufe und Trades und antwortet mit genauer Angabe, wo sie es gefunden hat, mit einem Link.",
+      "doesNot": "Sie ändert nichts von dem, was sie liest, und fügt nirgendwo einen neuen Eintrag hinzu — sie behält nur ihre eigene Frage-Historie. Das Löschen einer Sitzung hier löscht nichts in Chat, Finanzen, Verkäufe oder Trades."
     },
     "mission": {
       "is": "Ein Ziel, in datierte Schritte zerlegt.",

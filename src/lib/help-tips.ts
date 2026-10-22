@@ -544,6 +544,18 @@ export const HELP_TIPS: HelpTip[] = [
     corrects:
       "that these lists were removed or merged when the sidebar stopped listing them one by one",
   },
+  {
+    // «ΤΑ ΔΙΚΑ ΜΟΥ» (2026-10-22). Mounted via ToolShell's own `help` slot
+    // (tool-shell.tsx), same reason as "chat" above: the title it sits
+    // beside is drawn by the shared shell, not by a page-level
+    // <PageHeader>.
+    id: "myStuff",
+    file: "src/components/my-stuff/my-stuff-shell.tsx",
+    route: "src/app/dashboard/my-stuff/page.tsx",
+    keyPrefix: "help.myStuff",
+    corrects:
+      "that asking a question here changes anything it reads, or adds a record to Chat, Finance, Sales or Trading",
+  },
 ];
 
 export type HelpTipPart = "is" | "does" | "doesNot";

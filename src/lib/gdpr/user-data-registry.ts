@@ -380,6 +380,10 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // tracker (source = 'note'). ai_coding_requests stays registered too —
   // the import copied rows, it did not move them.
   { table: "code_sessions", label: "code_sessions", scope: "user_content" },
+  // «Τα δικά μου» (2026-10-22): the question/answer history of its own
+  // cross-tool search — not a copy of anything it reads, just this
+  // tool's own session rows.
+  { table: "my_stuff_sessions", label: "my_stuff_sessions", scope: "user_content" },
   // V4 #25. What the customer agreed to and what they were charged for
   // it. Both are theirs and both are exported: an overage bill they
   // cannot reconstruct is a bill they have to take on trust, and the

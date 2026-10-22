@@ -124,17 +124,21 @@ const MASTER_14_1 = ["Site", "Document", "Slides", "Posts", "Research", "Analyze
 const enNames = messages.en.dashboard?.tools?.names ?? {};
 const shownNames = grouped.map((h) => enNames[ALL_TOOLS_NAMES[h]]);
 const HIDDEN_2026_10_22 = ["Document", "Slides", "Posts", "Meetings", "Library", "Memory", "Finances", "Sales", "Trading", "Goals"];
+// "My Stuff" joined 2026-10-22, same day as the removals above, by the
+// same message's item 3 (the AI-answer half) — read-only over every
+// other tool's tables, but behind its own switch (SWITCHED_SQUARES) like
+// Games: no square until the owner opens it, so it is not in this list.
 const expected = [...MASTER_14_1.filter((n) => !HIDDEN_2026_10_22.includes(n)), "Deep Research"].filter((n) => n !== "Research");
 check(`every grouped tool has a one-word name (${grouped.length} squares)`, grouped.every((h) => ALL_TOOLS_NAMES[h]), grouped.filter((h) => !ALL_TOOLS_NAMES[h]).join(", "));
 check("...and the English names are exactly 14.1's list, Document aside",
   [...shownNames].sort().join(",") === [...expected].sort().join(","), `shown ${shownNames.join(", ")}`);
 check("...and no name is given to a tool that is not shown", Object.keys(ALL_TOOLS_NAMES).every((h) => grouped.includes(h)));
 check("Document is hidden, with the reason 14.1 gives (notes only)", /notes/.test(HIDDEN_FROM_ALL_TOOLS["/dashboard/documents"] ?? ""));
-// ONE NAMED EXCEPTION: "research" became "Deep Research" (and its
-// per-locale equivalents) on 2026-10-22, by the owner's own wording —
-// a compound name, not a square that ran out of room. Every other key
-// is still held to one word.
-const ONE_WORD_EXCEPTIONS = new Set(["research"]);
+// TWO NAMED EXCEPTIONS: "research" became "Deep Research" on 2026-10-22,
+// and "myStuff" is «Τα δικά μου» — the owner's OWN phrase for it, verbatim
+// from his message that day, not a square that ran out of room. Every
+// other key is still held to one word.
+const ONE_WORD_EXCEPTIONS = new Set(["research", "myStuff"]);
 for (const l of LOCALES) {
   const n = messages[l].dashboard?.tools?.names ?? {};
   const keys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s) => s.name)].filter((k) => !ONE_WORD_EXCEPTIONS.has(k));
@@ -205,7 +209,10 @@ for (const sq of SWITCHED_SQUARES) {
   check(`${sq.href}: ...hidden here exactly when the grid would otherwise draw it, and saying where it comes back`,
     hidden.includes(sq.href) === ownerTools.includes(sq.href) && (!hidden.includes(sq.href) || /SWITCHED_SQUARES/.test(HIDDEN_FROM_ALL_TOOLS[sq.href])));
   check(`${sq.href}: ...in one of the six groups`, ["make", "ask", "automate", "organise", "business", "learn"].includes(sq.group));
-  check(`${sq.href}: ...named as 14.1 names it ("${messages.en.dashboard.tools.names[sq.name]}")`, [...MASTER_14_1_NEW, "Document"].includes(messages.en.dashboard.tools.names[sq.name]));
+  // "My Stuff" (2026-10-22, the owner's message after #332) is the new
+  // read-only aggregator — not among 14.1's original names, the same
+  // exception "Document" already is.
+  check(`${sq.href}: ...named as 14.1 names it ("${messages.en.dashboard.tools.names[sq.name]}")`, [...MASTER_14_1_NEW, "Document", "My Stuff"].includes(messages.en.dashboard.tools.names[sq.name]));
 }
 const toolsPage = stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"));
 check("the page asks each square's switch for THIS person, and hands the grid what is on",

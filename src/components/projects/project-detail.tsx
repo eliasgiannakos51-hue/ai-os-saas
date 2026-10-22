@@ -73,17 +73,17 @@ const RESULT_TABLES = new Set([
  */
 function openHref(member: ProjectMemberView): string | null {
   if (member.table === "generated_images") return `/dashboard/images?record=${encodeURIComponent(member.id)}`;
-  // AUTOMATION_FLOWS OPENS THE EXACT ROW: `/dashboard/automation` reads
-  // `?flow=` and verifies it is the caller's own before opening it
+  // THE "automation_flows" ROW OPENS AT THE EXACT ROW: `/dashboard/automation`
+  // reads `?flow=` and verifies it is the caller's own before opening it
   // (added alongside this, same round) — the same `?record=`-shaped
   // contract every other result here has.
   if (member.table === "automation_flows") return `/dashboard/automation?flow=${encodeURIComponent(member.id)}`;
-  // CODE_SESSIONS HAS NO SUCH READER YET. Today's separate redesign of
-  // `/dashboard/coding` (the owner's critical message, same day) rebuilt
-  // it around one running conversation with no deep-link-by-id at all,
-  // for any caller — so this opens the tool, not the specific session,
-  // which is honest about what the page can actually do rather than a
-  // link that silently lands on nothing.
+  // THE "code_sessions" ROW HAS NO SUCH READER YET. Today's separate
+  // redesign of `/dashboard/coding` (the owner's critical message, same
+  // day) rebuilt it around one running conversation with no
+  // deep-link-by-id at all, for any caller — so this opens the tool, not
+  // the specific session, which is honest about what the page can
+  // actually do rather than a link that silently lands on nothing.
   if (member.table === "code_sessions") return "/dashboard/coding";
   const source = LIBRARY_SOURCES.find((s) => s.table === member.table);
   return source ? source.hrefFor(member.id) : null;

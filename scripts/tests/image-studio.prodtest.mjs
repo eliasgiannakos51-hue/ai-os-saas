@@ -231,11 +231,12 @@ try {
     check("the Image tool opens, with what it does and its price before anything is spent",
       main.includes(el.name) && main.includes(el.help) && (await page.locator('[data-testid="image-price"]').innerText()).startsWith(fill(el.priceVariants, { n: 4, count: "" }).split(":")[0]) && /\d/.test(await page.locator('[data-testid="image-price"]').innerText()));
 
-    // ---- what was made before: read, signed, drawn
-    await press(page.locator('[data-testid="image-recent-open"]'));
-    await page.locator('[data-testid="image-recent"] button').first().waitFor({ timeout: 10000 }).catch(() => null);
-    check("an earlier image is in the list", (await page.locator('[data-testid="image-recent"] button').count()) === 1);
-    await press(page.locator('[data-testid="image-recent"] button').first());
+    // ---- what was made before: read, signed, drawn, in the [◧] column
+    // (Batch 2, 2026-10-22), not the old "image-recent-open" option.
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10000 }).catch(() => null);
+    check("an earlier image is in the list", (await page.locator('[data-testid="shell-history-row"]').count()) === 1);
+    await press(page.locator('[data-testid="shell-history-row"]').first());
     await page.waitForFunction(() => document.querySelectorAll('[data-testid="image-grid"] img').length === 4, null, { timeout: 10000 }).catch(() => null);
     await page.waitForTimeout(300);
     const oldLoaded = await loaded(page);
@@ -323,9 +324,9 @@ try {
     check("offline is said", (await page.locator("main").innerText()).includes(el.errors.offline));
 
     // ---- delete: every picture it names, then the row
-    await press(page.locator('[data-testid="image-recent-open"]'));
-    await page.locator('[data-testid="image-recent"] button').first().waitFor({ timeout: 10000 }).catch(() => null);
-    await press(page.locator('[data-testid="image-recent"] button').last());
+    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10000 }).catch(() => null);
+    await press(page.locator('[data-testid="shell-history-row"]').last());
     await page.locator('[data-testid="image-delete"]').waitFor({ timeout: 10000 }).catch(() => null);
     page.once("dialog", (d) => d.accept());
     const deleted = page.waitForResponse((r) => r.url().endsWith(`/api/images/${OLD}`) && r.request().method() === "DELETE", { timeout: 10000 }).catch(() => null);

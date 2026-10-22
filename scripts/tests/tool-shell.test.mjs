@@ -407,6 +407,14 @@ for (const l of LOCALES) {
   check(`${l}: Slides' empty landing`,
     typeof root.presentations?.empty?.heading === "string" && root.presentations.empty.heading &&
       ["pitch", "quarterly", "training"].every((k) => typeof root.presentations.empty?.examples?.[k] === "string" && root.presentations.empty.examples[k]));
+  check(`${l}: Analyze's empty landing`,
+    typeof root.dataAnalysis?.empty?.heading === "string" && root.dataAnalysis.empty.heading &&
+      ["trend", "outliers", "compare"].every((k) => typeof root.dataAnalysis.empty?.examples?.[k] === "string" && root.dataAnalysis.empty.examples[k]) &&
+      typeof root.dataAnalysis?.new === "string" && root.dataAnalysis.new);
+  check(`${l}: Image's empty landing`,
+    typeof all.images?.empty?.heading === "string" && all.images.empty.heading &&
+      ["logo", "poster", "avatar"].every((k) => typeof all.images.empty?.examples?.[k] === "string" && all.images.empty.examples[k]) &&
+      typeof all.images?.new === "string" && all.images.new);
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

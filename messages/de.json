@@ -3171,6 +3171,7 @@
         "search": "Suchen",
         "empty": "Hier ist noch nichts.",
         "delete": "Löschen",
+        "rename": "Umbenennen",
         "deleteConfirm": "„{title}“ löschen?"
       }
     },
@@ -4834,10 +4835,14 @@
     "errors": {
       "tooLong": "Das sind mehr als {limit} Zeichen. Das hier arbeitet auf einer Datei, nicht auf einem Projekt.",
       "unavailable": "Der KI-Dienst war nicht erreichbar. Es wurde nichts berechnet.",
-      "failed": "Hat nicht geklappt — versuch es noch einmal."
+      "failed": "Hat nicht geklappt — versuch es noch einmal.",
+      "folderEmpty": "In diesem Ordner gibt es keine lesbaren Dateien."
     },
     "history": {
-      "failed": "fehlgeschlagen"
+      "failed": "fehlgeschlagen",
+      "noRepository": "—",
+      "folderUploaded": "{count, plural, one {# Datei geladen} other {# Dateien geladen}}.",
+      "folderUploadedTruncated": "{count, plural, one {# Datei geladen} other {# Dateien geladen}} — der Rest hat nicht gepasst und wurde ausgelassen."
     },
     "new": "Neu",
     "placeholder": "Beschreibe, was du brauchst, füge Code ein, oder bitte um eine Änderung…",
@@ -4850,7 +4855,8 @@
       "function": "Eine Funktion, die eine Liste von Bestellungen nimmt und die Marge pro Kunde zurückgibt",
       "explain": "Erkläre, was dieser Code macht",
       "tests": "Schreibe Tests für diese Funktion"
-    }
+    },
+    "uploadFolder": "Ordner hochladen"
   },
   "presentations": {
     "title": "Präsentationen",

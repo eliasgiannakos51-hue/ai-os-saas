@@ -3171,6 +3171,7 @@
         "search": "Cerca",
         "empty": "Non c’è ancora nulla qui.",
         "delete": "Elimina",
+        "rename": "Rinomina",
         "deleteConfirm": "Eliminare «{title}»?"
       }
     },
@@ -4834,10 +4835,14 @@
     "errors": {
       "tooLong": "Supera i {limit} caratteri. Questo lavora su un file, non su un progetto.",
       "unavailable": "Il servizio AI non è raggiungibile. Non è stato addebitato nulla.",
-      "failed": "Non ha funzionato — riprova."
+      "failed": "Non ha funzionato — riprova.",
+      "folderEmpty": "Nessun file leggibile in quella cartella."
     },
     "history": {
-      "failed": "non riuscito"
+      "failed": "non riuscito",
+      "noRepository": "—",
+      "folderUploaded": "{count, plural, one {# file caricato} other {# file caricati}}.",
+      "folderUploadedTruncated": "{count, plural, one {# file caricato} other {# file caricati}} — il resto non c'entrava ed è stato escluso."
     },
     "new": "Nuovo",
     "placeholder": "Descrivi cosa ti serve, incolla del codice, o chiedi una modifica…",
@@ -4850,7 +4855,8 @@
       "function": "Una funzione che prende una lista di ordini e restituisce il margine per cliente",
       "explain": "Spiega cosa fa questo codice",
       "tests": "Scrivi dei test per questa funzione"
-    }
+    },
+    "uploadFolder": "Carica cartella"
   },
   "presentations": {
     "title": "Presentazioni",

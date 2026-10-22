@@ -3171,6 +3171,7 @@
         "search": "Buscar",
         "empty": "Aún no hay nada aquí.",
         "delete": "Eliminar",
+        "rename": "Renombrar",
         "deleteConfirm": "¿Eliminar «{title}»?"
       }
     },
@@ -4841,10 +4842,14 @@
     "errors": {
       "tooLong": "Eso supera los {limit} caracteres. Esto funciona sobre un archivo, no un proyecto.",
       "unavailable": "No se pudo contactar con el servicio de IA. No se cobró nada.",
-      "failed": "No funcionó — inténtalo de nuevo."
+      "failed": "No funcionó — inténtalo de nuevo.",
+      "folderEmpty": "No hay archivos legibles en esa carpeta."
     },
     "history": {
-      "failed": "falló"
+      "failed": "falló",
+      "noRepository": "—",
+      "folderUploaded": "Se {count, plural, one {cargó # archivo} other {cargaron # archivos}}.",
+      "folderUploadedTruncated": "Se {count, plural, one {cargó # archivo} other {cargaron # archivos}} — el resto no cupo y se dejó fuera."
     },
     "new": "Nuevo",
     "placeholder": "Describe lo que necesitas, pega código, o pide un cambio…",
@@ -4857,7 +4862,8 @@
       "function": "Una función que toma una lista de pedidos y devuelve el margen por cliente",
       "explain": "Explica qué hace este código",
       "tests": "Escribe pruebas para esta función"
-    }
+    },
+    "uploadFolder": "Subir carpeta"
   },
   "presentations": {
     "title": "Presentaciones",

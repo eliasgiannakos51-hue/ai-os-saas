@@ -362,7 +362,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "free",
     sidebar: ["/dashboard/coding"],
     pages: ["coding"],
-    routes: ["coding/run"],
+    routes: ["coding/run", "coding/sessions/[id]"],
     charges: true,
     enforcedIn: "src/app/api/coding/run/route.ts",
     enforcedSymbol: "reserveCredits",

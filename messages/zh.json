@@ -3171,6 +3171,7 @@
         "search": "搜索",
         "empty": "这里还没有内容。",
         "delete": "删除",
+        "rename": "重命名",
         "deleteConfirm": "删除「{title}」吗?"
       }
     },
@@ -4841,10 +4842,14 @@
     "errors": {
       "tooLong": "超过了 {limit} 个字符。这个功能针对单个文件，不是整个项目。",
       "unavailable": "无法连接 AI 服务。未产生任何费用。",
-      "failed": "没有成功——请再试一次。"
+      "failed": "没有成功——请再试一次。",
+      "folderEmpty": "该文件夹中没有可读取的文件。"
     },
     "history": {
-      "failed": "失败"
+      "failed": "失败",
+      "noRepository": "—",
+      "folderUploaded": "已加载 {count} 个文件。",
+      "folderUploadedTruncated": "已加载 {count} 个文件——其余的放不下，已略过。"
     },
     "new": "新建",
     "placeholder": "描述你需要的内容,粘贴代码,或要求修改……",
@@ -4857,7 +4862,8 @@
       "function": "一个接收订单列表并返回每位客户利润的函数",
       "explain": "解释这段代码做什么",
       "tests": "为这个函数编写测试"
-    }
+    },
+    "uploadFolder": "上传文件夹"
   },
   "presentations": {
     "title": "演示文稿",

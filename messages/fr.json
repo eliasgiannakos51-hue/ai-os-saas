@@ -3171,6 +3171,7 @@
         "search": "Rechercher",
         "empty": "Rien ici pour l’instant.",
         "delete": "Supprimer",
+        "rename": "Renommer",
         "deleteConfirm": "Supprimer « {title} » ?"
       }
     },
@@ -4841,10 +4842,14 @@
     "errors": {
       "tooLong": "Cela dépasse {limit} caractères. Ceci porte sur un fichier, pas un projet.",
       "unavailable": "Le service d'IA est injoignable. Rien n'a été facturé.",
-      "failed": "Ça n'a pas marché — réessayez."
+      "failed": "Ça n'a pas marché — réessayez.",
+      "folderEmpty": "Aucun fichier lisible dans ce dossier."
     },
     "history": {
-      "failed": "échoué"
+      "failed": "échoué",
+      "noRepository": "—",
+      "folderUploaded": "{count, plural, one {# fichier chargé} other {# fichiers chargés}}.",
+      "folderUploadedTruncated": "{count, plural, one {# fichier chargé} other {# fichiers chargés}} — le reste ne tenait pas et a été laissé de côté."
     },
     "new": "Nouveau",
     "placeholder": "Décrivez ce qu'il vous faut, collez du code, ou demandez un changement…",
@@ -4857,7 +4862,8 @@
       "function": "Une fonction qui prend une liste de commandes et renvoie la marge par client",
       "explain": "Explique ce que fait ce code",
       "tests": "Écris des tests pour cette fonction"
-    }
+    },
+    "uploadFolder": "Importer un dossier"
   },
   "presentations": {
     "title": "Présentations",

@@ -123,6 +123,10 @@ const CLASSIFIED = {
     "src/lib/automations/runner.ts",
     "src/lib/jobs/handlers/file-ask.ts",
     "src/lib/website-builder.ts",
+    // «Τα δικά μου» (2026-10-22): through modelTextFrom, and a cut
+    // answer gets truncationNotice appended before it is shown, saved
+    // or cited — the same shape file-ask.ts uses above.
+    "src/app/api/my-stuff/ask/route.ts",
   ],
   structured: [
     "src/lib/agents/template-fill.ts",

@@ -209,6 +209,9 @@ const ROUTED = {
   "src/lib/posts/generate.ts": {
     note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph. Moved onto runCompletion 2026-10-15.",
   },
+  "src/app/api/my-stuff/ask/route.ts": {
+    note: "«Τα δικά μου», 2026-10-22. ONE call per question, reserved against myStuffAsk after the account's own records are read and the prompt sized from them (lib/my-stuff/ask-context.ts) and settled on measured usage; only the Stop button and a provider failure release the hold. Purely a READ of the account's other tables through the caller's own RLS-scoped client — nothing here writes to finance_entries, leads, trades or any of the other nine kinds, only this tool's own my_stuff_sessions row.",
+  },
 };
 
 function walk(dir, out = []) {

@@ -101,7 +101,16 @@ console.log("\n== 2. the lines ==");
 // chips (the places that left All tools, MASTER 14.1), which written
 // inline took this to 578. The three lists now share `.chip-link` in
 // globals.css, and the count went two below where the change found it.
-ok(`border utilities (${r.counts.borders}), ceiling 575`, r.counts.borders <= 575);
+// 575 -> 573 on 2026-10-22. Projects §6 ("Προσθήκη σε Project") added a
+// new dialog, `add-to-project-modal.tsx`, the same shell shape as the
+// existing `link-to-modal.tsx` (redesign phase 2) — a bordered card, a
+// bordered header strip. Written inline a second time that is four more
+// bare `border` tokens, which combined with `project-detail.tsx`'s own
+// three (unrelated to this trade) would have taken the count past the
+// ceiling to 577. Both dialogs now share `.modal-surface`/`.modal-header`
+// in globals.css, and the count went two below where the two features
+// together found it.
+ok(`border utilities (${r.counts.borders}), ceiling 573`, r.counts.borders <= 573);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

@@ -314,6 +314,22 @@ body {
            text-muted transition-colors duration-150 hover:border-foreground/40 hover:text-foreground;
   }
 
+  /* THE PICK-A-TARGET DIALOG SHELL, DECLARED ONCE (2026-10-22, Projects
+     §6). `link-to-modal.tsx` (redesign phase 2) and the new
+     `add-to-project-modal.tsx` (this round) are the same dialog shape —
+     a bordered card, a bordered header strip — and writing both inline
+     would be two more bare `border` tokens each against
+     design-density.test.mjs's ceiling for a shape that is already drawn
+     once elsewhere. `.modal-surface` is the outer card; `.modal-header`
+     is its header strip. Neither folds into `.panel-frame`, which paints
+     `border-divider`, a different line colour than a modal dialog needs. */
+  .modal-surface {
+    @apply rounded-card border border-border bg-panel;
+  }
+  .modal-header {
+    @apply border-b border-border px-5 py-4;
+  }
+
   /* A LIST OF ROWS, SEPARATED BY ONE RULE INSTEAD OF N OUTLINES.
 
      The trade design-density.test.mjs's divide clause describes, made

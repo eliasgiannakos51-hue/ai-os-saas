@@ -116,13 +116,14 @@ const { ALL_TOOLS_NAMES } = await loadTs("src/lib/nav/all-tools.ts");
 // Trading, Library, Memory». Document is the one hidden today (below);
 // since 2026-10-22 (the owner's message after #332) Slides, Posts,
 // Meetings, Library, Memory, Finances, Sales and Trading left the grid
-// too (HIDDEN_FROM_ALL_TOOLS, same mechanism) and Research was renamed
-// "Deep Research" — this is 14.1 as the owner has since amended it, not
-// a drift from it.
+// too (HIDDEN_FROM_ALL_TOOLS, same mechanism), Research was renamed
+// "Deep Research", and — in the owner's follow-up the same day — Goals
+// left the grid for the Projects hub (not built yet) — this is 14.1 as
+// the owner has since amended it twice, not a drift from it.
 const MASTER_14_1 = ["Site", "Document", "Slides", "Posts", "Research", "Analyze", "Files", "Automations", "Projects", "Goals", "Meetings", "Finances", "Sales", "Trading", "Library", "Memory"];
 const enNames = messages.en.dashboard?.tools?.names ?? {};
 const shownNames = grouped.map((h) => enNames[ALL_TOOLS_NAMES[h]]);
-const HIDDEN_2026_10_22 = ["Document", "Slides", "Posts", "Meetings", "Library", "Memory", "Finances", "Sales", "Trading"];
+const HIDDEN_2026_10_22 = ["Document", "Slides", "Posts", "Meetings", "Library", "Memory", "Finances", "Sales", "Trading", "Goals"];
 // MERGED, NOT HIDDEN: Files stopped being its own square the same day,
 // but for a different reason than the list above — it did not pause
 // waiting on a decision, it became part of Analyze's square
@@ -168,12 +169,14 @@ const lineKeys = [...Object.values(ALL_TOOLS_NAMES), ...SWITCHED_SQUARES.map((s)
 // Sales and Trading left the grid 2026-10-22, by the owner's own
 // instruction not to delete anything yet ("Μην σβήσεις κώδικα ακόμα.
 // Γράψε μου τι θα σβηνόταν, και το αποφασίζω μετά" — docs/PROGRESS.md,
-// 2026-10-22 entry, has the full list). Their names/lines keys are kept
-// for the same reason their routes and tables are: the owner has not
-// decided yet. Named here, both so the orphan check below does not
-// block on a deliberate pause and so the list of what is paused is
-// readable in one place.
-const PAUSED_SQUARE_KEYS = ["slides", "posts", "meetings", "library", "memory", "finances", "sales", "trading"];
+// 2026-10-22 entry, has the full list). Goals joined them the same day,
+// moving toward the Projects hub instead of staying its own square.
+// Their names/lines keys are kept for the same reason their routes and
+// tables are: the owner has not decided yet / the hub is not built yet.
+// Named here, both so the orphan check below does not block on a
+// deliberate pause and so the list of what is paused is readable in one
+// place.
+const PAUSED_SQUARE_KEYS = ["slides", "posts", "meetings", "library", "memory", "finances", "sales", "trading", "goals"];
 // MERGED, NOT PAUSED (same distinction as MERGED_2026_10_22 above):
 // "files" still names.files/lines.files because analyze-shell.tsx
 // reads the first for its work pane's title — it is a live key, just

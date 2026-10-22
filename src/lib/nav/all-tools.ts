@@ -41,17 +41,25 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
     key: "make",
     hrefs: ["/dashboard/website-builder"],
   },
+  // DEEP RESEARCH MOVED HERE from "learn" on 2026-10-22 (the owner's
+  // follow-up after #334 — "Deep Research πηγαίνει στο Ask"). A rename
+  // alone was done in #334; the group reassignment is this line.
   {
     key: "ask",
-    hrefs: ["/dashboard/data-analysis"],
+    hrefs: ["/dashboard/data-analysis", "/dashboard/deep-research"],
   },
   {
     key: "automate",
     hrefs: ["/dashboard/automation"],
   },
+  // GOALS LEFT THIS GROUP ON 2026-10-22 (the owner's follow-up after
+  // #334 — "Goals μπαίνει μέσα στα Projects"). Its href moved to
+  // HIDDEN_FROM_ALL_TOOLS below with a reason; the Projects hub (Μέρος
+  // 20Δ §6, not built yet) is where it is meant to surface instead of a
+  // square of its own.
   {
     key: "organise",
-    hrefs: ["/dashboard/projects", "/dashboard/mission"],
+    hrefs: ["/dashboard/projects"],
   },
   // EMPTY ON PURPOSE since 2026-10-22: Finance, Sales and Trading were
   // this group's only three hrefs, and all three left the grid above.
@@ -62,9 +70,11 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
     key: "business",
     hrefs: [],
   },
+  // EMPTY ON PURPOSE since 2026-10-22 too: Deep Research was this
+  // group's only href, and it just moved to "ask" above.
   {
     key: "learn",
-    hrefs: ["/dashboard/deep-research"],
+    hrefs: [],
   },
 ];
 
@@ -81,8 +91,8 @@ export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly
  * was "Mine" is called the Library everywhere since 2026-10-14
  * (sidebar.items.mine, scripts/tests/library.test.mjs §7).
  */
-// SLIDES, POSTS, MEETINGS, LIBRARY, MEMORY, FINANCES, SALES AND TRADING
-// LOST THEIR ENTRY HERE TOO, 2026-10-22, for the same reason as
+// SLIDES, POSTS, MEETINGS, LIBRARY, MEMORY, FINANCES, SALES, TRADING AND
+// NOW GOALS LOST THEIR ENTRY HERE TOO, 2026-10-22, for the same reason as
 // ALL_TOOLS_GROUPS above — only the ones ALL_TOOLS_GROUPS still draws a
 // square for get a one-word name read off this map. Their keyPrefix,
 // their names/lines record entry below, and every i18n string for them
@@ -93,7 +103,6 @@ export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
   "/dashboard/data-analysis": "analyze",
   "/dashboard/automation": "automations",
   "/dashboard/projects": "projects",
-  "/dashboard/mission": "goals",
 };
 
 export type AllToolsNameKey =
@@ -167,6 +176,8 @@ export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
     "Sales left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
   "/dashboard/trading":
     "Trading left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
+  "/dashboard/mission":
+    "Goals left the grid 2026-10-22 (the owner's follow-up after #334: \"Goals μπαίνει μέσα στα Projects\"), on its way into the Projects hub instead of its own square (Μέρος 20Δ §6, not built yet); unchanged otherwise, same as Slides above",
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
   "/dashboard/games":

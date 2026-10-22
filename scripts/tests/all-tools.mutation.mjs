@@ -55,22 +55,22 @@ const MUTANTS = [
   {
     name: "a tool falls out of every group, so it is on no road but ⌘K",
     file: GROUPS,
-    from: '    hrefs: ["/dashboard/projects", "/dashboard/mission"],',
-    to: '    hrefs: ["/dashboard/projects"],',
+    from: '    hrefs: ["/dashboard/automation"],',
+    to: "    hrefs: [],",
     expect: "every tool the grid can draw is in a group or hidden on purpose",
   },
   {
     name: "a group names a screen the grid cannot draw",
     file: GROUPS,
-    from: '    hrefs: ["/dashboard/projects", "/dashboard/mission"],',
-    to: '    hrefs: ["/dashboard/projects", "/dashboard/mission", "/dashboard/films"],',
+    from: '    hrefs: ["/dashboard/automation"],',
+    to: '    hrefs: ["/dashboard/automation", "/dashboard/films"],',
     expect: "every href in all-tools.ts is a tool the grid can draw",
   },
   {
     name: "a tool sits in two groups",
     file: GROUPS,
     from: '    hrefs: ["/dashboard/website-builder"],',
-    to: '    hrefs: ["/dashboard/website-builder", "/dashboard/mission"],',
+    to: '    hrefs: ["/dashboard/website-builder", "/dashboard/automation"],',
     expect: "in exactly one place",
   },
   {
@@ -154,7 +154,7 @@ const MUTANTS = [
   {
     name: "a square loses its one-word name",
     file: GROUPS,
-    from: '  "/dashboard/mission": "goals",\n',
+    from: '  "/dashboard/projects": "projects",\n',
     to: "",
     expect: "every grouped tool has a one-word name",
   },

@@ -11,7 +11,7 @@ import { AnalysisChart } from "@/components/data-analysis/analysis-chart";
 import { MAX_UPLOAD_BYTES } from "@/lib/data-analysis/limits";
 
 // The shapes the page hands this live in lib/data-analysis/view.ts, so
-// Analyze in the shell (components/data-analysis/analysis-shell.tsx) can
+// Analyze in the shell (components/analyze/analyze-shell.tsx) can
 // name them without importing this page.
 export type { AnalysisSummary, AskRecord, AnalysisView } from "@/lib/data-analysis/view";
 import type { AnalysisSummary, AnalysisView } from "@/lib/data-analysis/view";

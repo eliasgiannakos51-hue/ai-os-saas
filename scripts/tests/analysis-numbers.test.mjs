@@ -169,7 +169,7 @@ console.log("\n== 4. what is sent, priced and held: one function ==");
 
 console.log("\n== 5. the screen ==");
 {
-  const shell = read("src/components/data-analysis/analysis-shell.tsx");
+  const shell = read("src/components/analyze/analyze-shell.tsx");
   const chart = read("src/components/data-analysis/analysis-chart.tsx");
   const factText = read("src/components/data-analysis/fact-text.tsx");
   const page = read("src/app/dashboard/data-analysis/page.tsx");

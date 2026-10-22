@@ -3078,7 +3078,7 @@
         "slides": "Una presentación a partir de una descripción.",
         "posts": "Una publicación para cada plataforma.",
         "research": "Un informe con fuentes sobre cualquier tema.",
-        "analyze": "Hallazgos a partir de un archivo de datos.",
+        "analyze": "Hallazgos a partir de archivos, documentos o texto.",
         "files": "Pregunta sobre tus documentos.",
         "automations": "Tareas que se ejecutan solas.",
         "projects": "Una carpeta con un objetivo.",
@@ -4807,7 +4807,14 @@
         "compare": "Compara este mes con el anterior"
       }
     },
-    "new": "Archivo nuevo"
+    "new": "Archivo nuevo",
+    "pastedText": {
+      "filename": "Notas",
+      "button": "Pegar texto",
+      "prompt": "Escribe o pega el texto que quieres analizar.",
+      "placeholder": "Escribe o pega el texto…",
+      "autoQuestion": "Da un resumen, los puntos clave y cualquier número de este texto."
+    }
   },
   "coding": {
     "title": "Código",

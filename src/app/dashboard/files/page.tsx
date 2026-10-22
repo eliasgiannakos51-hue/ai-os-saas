@@ -15,8 +15,6 @@ import {
   type WorkspaceCollection,
   type WorkspaceFile,
 } from "@/components/files/files-workspace";
-import { FilesShell } from "@/components/files/files-shell";
-import { readRequestedId } from "@/lib/library/requested";
 import { isFeatureOn } from "@/lib/flags/flags";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +31,18 @@ export default async function FilesPage(props: { searchParams: Promise<{ record?
 
   if (!user) {
     redirect("/login");
+  }
+
+  // ANALYZE AND FILES, MERGED (owner's message of 2026-10-22): with the
+  // switch on, this address is a redirect to the merged tool's one home,
+  // carrying `?record=` forward unchanged — chat-attachments.tsx and
+  // lib/library/sources.ts both still link to /dashboard/files?record=,
+  // and neither call site needed to change for that to keep working.
+  // The address below it, the old FilesWorkspace, is untouched: with the
+  // switch off, this page still answers exactly as before.
+  if (await isFeatureOn("tool-shell", user)) {
+    const record = searchParams.record;
+    redirect(record ? `/dashboard/data-analysis?record=${encodeURIComponent(record)}` : "/dashboard/data-analysis");
   }
 
   const t = await getTranslations("dashboard.files");
@@ -72,19 +82,6 @@ export default async function FilesPage(props: { searchParams: Promise<{ record?
     description: c.description === null ? null : String(c.description),
     fileIds: byCollection.get(String(c.id)) ?? [],
   }));
-
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same files,
-  // the same collections and the same answers, drawn as conversation and
-  // work. The collections are read above, for both: with the switch on,
-  // nothing the old page offered is lost (the owner's decision of
-  // 2026-10-09, held by scripts/tests/tool-shell.test.mjs, section 8).
-  if (await isFeatureOn("tool-shell", user)) {
-    return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <FilesShell initialFiles={rows} initialOpenId={readRequestedId(searchParams.record)} initialCollections={collectionRows} pages />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-full">

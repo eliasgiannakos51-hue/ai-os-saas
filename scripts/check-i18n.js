@@ -643,6 +643,10 @@ const LOCALE_ALLOWED = new Set([
   // «Document» and «CV» are the French words (the Document writer, package 14).
   "fr:dashboard.tools.names.document",
   "fr:dashboard.documents.writer.kinds.cv",
+  // «Notes» is the French word too (the pasted-text filename on the
+  // merged Analyze, 2026-10-22) — it is not a loan everywhere else, so
+  // this is the one locale, not INTENTIONALLY_IDENTICAL for all ten.
+  "fr:dataAnalysis.pastedText.filename",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

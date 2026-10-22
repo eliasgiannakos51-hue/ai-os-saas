@@ -184,10 +184,20 @@ check("Stop is offered while it runs", /data-testid="research-stop"/.test(resear
 check("the report opens beside the conversation, marked as made by AI, with numbered sources and its PDF",
   /<AiGeneratedNotice variant="block" \/>/.test(research) && /data-testid="research-sources"/.test(research) && /\[\{i \+ 1\}\]/.test(research) && /href=\{`\/api\/research\/\$\{open\.id\}\/pdf`\}/.test(research));
 
-console.log("\n== 7. Analyze, in the shell ==");
-const analyze = read("src/components/data-analysis/analysis-shell.tsx");
-check("the field asks the open file, through the same route as the page", /onSend=\{\(text\) => void ask\(text\)\}/.test(analyze) && /fetch\(`\/api\/data-analysis\/\$\{current\.id\}\/ask`/.test(analyze));
-check("...and with no file, it says to upload one instead of failing silently", /note\("tool", tShell\("analyze\.needFile"\)\)/.test(analyze));
+console.log("\n== 7/8. Analyze, merged with Files (2026-10-22), in the shell ==");
+// ANALYZE AND FILES MERGED INTO ONE COMPONENT (the owner's message after
+// #332, item 4): components/analyze/analyze-shell.tsx is the two old
+// shells spliced at the top level — a `mode` ("analysis" | "files" | null)
+// decides which half's turns and work pane render, and the ONE field's
+// `onSend` dispatches to whichever half's own ask() already existed.
+// Every route and every literal below is unchanged from the two old
+// shells; only the locals that disambiguate the two halves changed names
+// (t -> tFiles for Files' own strings, ask -> askAnalysis/askFiles).
+const analyze = read("src/components/analyze/analyze-shell.tsx");
+check("the dispatcher routes to the spreadsheet's own ask, through the same route as the page",
+  /if \(mode === "analysis"\) return void askAnalysis\(text\);/.test(analyze) && /fetch\(`\/api\/data-analysis\/\$\{current\.id\}\/ask`/.test(analyze));
+check("...and with no file open, it says to upload one instead of failing silently",
+  /if \(!current\) \{\s*note\("user", question\);\s*note\("tool", tShell\("analyze\.needFile"\)\);\s*return;\s*\}/.test(analyze));
 check("the conversation is the questions asked of this file, each answer with the rows it stands on",
   /\[\.\.\.current\.questions\]\.reverse\(\)/.test(analyze) && /data-testid="analysis-evidence"/.test(analyze) && /t\("ask\.matched"/.test(analyze));
 check("upload and find patterns are options, through the page's routes",
@@ -195,41 +205,44 @@ check("upload and find patterns are options, through the page's routes",
 check("the file beside the conversation says when it was only partly read", /t\("summary\.truncated"\)/.test(analyze) && /t\("summary\.ragged"/.test(analyze));
 check("...and computes nothing: the column line is the page's own", /import \{ describeColumn[^}]*\} from "@\/lib\/data-analysis\/view"/.test(analyze) && !/function describeColumn/.test(analyze));
 
-console.log("\n== 8. Files, in the shell ==");
-const filesShell = read("src/components/files/files-shell.tsx");
 const uploadLib = read("src/lib/files/upload-file.ts");
 check("selection is still the subject: nothing is asked with nothing ticked",
-  /if \(selected\.length === 0\) \{\s*say\(\{ role: "tool", text: t\("selectFirst"\) \}\);/.test(filesShell) && /t\("askSelected", \{ count: selectedFiles\.length/.test(filesShell));
+  /if \(selected\.length === 0\) \{\s*say\(\{ role: "tool", text: tFiles\("selectFirst"\) \}\);/.test(analyze) && /tFiles\("askSelected", \{ count: selectedFiles\.length/.test(analyze));
 check("the field asks the ticked files, as a background job through the page's route",
-  /startAndWatchJob\(\s*"\/api\/files\/ask",\s*\{ question: text, fileIds: selected, language: locale \}/.test(filesShell));
+  /startAndWatchJob\(\s*"\/api\/files\/ask",\s*\{ question: text, fileIds: selected, language: locale \}/.test(analyze));
 check("every answer says the page it came from, or that it is not in the documents",
-  /data-testid="files-citations"/.test(filesShell) && /\{c\.filename\} — \{show\(c\.label\)\}/.test(filesShell) && /t\("notInDocuments"\)/.test(filesShell) && /t\("uncitedAnswer"\)/.test(filesShell));
+  /data-testid="files-citations"/.test(analyze) && /\{c\.filename\} — \{show\(c\.label\)\}/.test(analyze) && /tFiles\("notInDocuments"\)/.test(analyze) && /tFiles\("uncitedAnswer"\)/.test(analyze));
 check("...built by the same function as on the page, and copied with its sources",
-  /answerFromResult\(/.test(filesShell) && /answerForClipboard\(turn\.answer!, show\)/.test(filesShell) && /from "@\/lib\/files\/answer"/.test(filesShell));
-check("an answer that finished elsewhere is put back, and one running is watched", /\/api\/jobs\?kind=file_ask/.test(filesShell) && /watchJob\(String\(job\.id\)/.test(filesShell) && /<JobSeen jobId=\{turn\.answer\.jobId\} \/>/.test(filesShell));
+  /answerFromResult\(/.test(analyze) && /answerForClipboard\(turn\.answer!, show\)/.test(analyze) && /from "@\/lib\/files\/answer"/.test(analyze));
+check("an answer that finished elsewhere is put back, and one running is watched", /\/api\/jobs\?kind=file_ask/.test(analyze) && /watchJob\(String\(job\.id\)/.test(analyze) && /<JobSeen jobId=\{turn\.answer\.jobId\} \/>/.test(analyze));
 check("an upload whose registration does not land is removed from the bucket",
   /if \(data\?\.ok && data\.file\) return \{ ok: true, file: data\.file \};\s*try \{\s*await createBrowserSupabase\(\)\.storage\.from\(FILE_BUCKET\)\.remove\(\[path\]\);/.test(uploadLib));
-check("a file that stored but could not be read is not called a success", /outcome\.file\.processing_status === "failed"/.test(filesShell));
+check("a file that stored but could not be read is not called a success", /outcome\.file\.processing_status === "failed"/.test(analyze));
 // COLLECTIONS, the old page's (the owner's decision of 2026-10-09: with
-// the switch on, nothing the old page offered is lost). The old page is
-// components/files/files-workspace.tsx; both call the same route with the
-// same body, and the shell's name for a new one is said in its one field.
+// the switch on, nothing the old page offered is lost — true again
+// through the merge). The old, non-shell page is still
+// components/files/files-workspace.tsx; both call the same route with
+// the same body, and the merged shell's name for a new one is said in
+// its one field. The shell-path collections are now read by the merged
+// page, /dashboard/data-analysis, not by the Files page any more — it
+// only redirects there (early-redirects.test.mjs holds that).
+const analyzePage = read("src/app/dashboard/data-analysis/page.tsx");
 const filesPage = read("src/app/dashboard/files/page.tsx");
 const filesWorkspace = read("src/components/files/files-workspace.tsx");
-check("Files: the collections the page reads are handed to the shell, as to the old page",
-  /<FilesShell initialFiles=\{rows\} initialOpenId=\{readRequestedId\(searchParams\.record\)\} initialCollections=\{collectionRows\}/.test(filesPage) && /initialCollections=\{collectionRows\}/.test(filesPage.slice(filesPage.indexOf("<FilesWorkspace"))));
+check("Files: the collections the merged page reads are handed to the shell, as to the old Files page",
+  /<AnalyzeShell[\s\S]{0,400}initialCollections=\{initialCollections\}/.test(analyzePage) && /initialCollections=\{collectionRows\}/.test(filesPage.slice(filesPage.indexOf("<FilesWorkspace"))));
 check("Files: each collection is pressed to select its files again",
-  /collections\.map\(\(collection\) => \(\s*<button[\s\S]{0,120}onClick=\{\(\) => setSelected\(readyIds\(collection\)\)\}[\s\S]{0,200}data-testid="files-collection"/.test(filesShell) &&
-    /const readyIds = \(collection: WorkspaceCollection\) => collection\.fileIds\.filter\(\(id\) => askable\.some\(\(f\) => f\.id === id\)\);/.test(filesShell));
+  /collections\.map\(\(collection\) => \(\s*<button[\s\S]{0,120}onClick=\{\(\) => setSelected\(readyIds\(collection\)\)\}[\s\S]{0,200}data-testid="files-collection"/.test(analyze) &&
+    /const readyIds = \(collection: WorkspaceCollection\) => collection\.fileIds\.filter\(\(id\) => askable\.some\(\(f\) => f\.id === id\)\);/.test(analyze));
 check("Files: what is selected is saved as a collection through the page's route, with the page's body",
-  /fetch\("\/api\/files\/collections", \{\s*method: "POST",[\s\S]{0,120}body: JSON\.stringify\(\{ name, fileIds: selected \}\),/.test(filesShell) &&
+  /fetch\("\/api\/files\/collections", \{\s*method: "POST",[\s\S]{0,120}body: JSON\.stringify\(\{ name, fileIds: selected \}\),/.test(analyze) &&
     /fetch\("\/api\/files\/collections", \{\s*method: "POST",[\s\S]{0,120}body: JSON\.stringify\(\{ name, fileIds: selected \}\),/.test(filesWorkspace));
 check("Files: ...its name said in the shell's one field, which says so, and the next thing sent is the name",
-  /onClick=\{startNaming\}[\s\S]{0,160}data-testid="files-collection-save"/.test(filesShell) && /setNaming\(true\);\s*say\(\{ role: "tool", text: t\("collectionName", \{ count: selected\.length \}\), naming: true \}\);/.test(filesShell) &&
-    /placeholder=\{naming \? t\("collectionPlaceholder"\) : t\("askPlaceholder"\)\}/.test(filesShell) && /onSend=\{\(text\) => void \(naming \? saveCollection\(text\) : ask\(text\)\)\}/.test(filesShell));
+  /onClick=\{startNaming\}[\s\S]{0,160}data-testid="files-collection-save"/.test(analyze) && /setNaming\(true\);\s*say\(\{ role: "tool", text: tFiles\("collectionName", \{ count: selected\.length \}\), naming: true \}\);/.test(analyze) &&
+    /naming \? tFiles\("collectionPlaceholder"\)/.test(analyze) && /if \(naming\) return void saveCollection\(text\);/.test(analyze));
 check("Files: ...and the new collection is there at once, said in the screen's words",
-  /setCollections\(\(current\) => \[made, \.\.\.current\]\);\s*setNaming\(false\);\s*say\(\{ role: "tool", text: t\("collectionCreated", \{ name: made\.name \}\) \}\);/.test(filesShell) &&
-    /if \(!data\?\.ok \|\| !data\.collection\) \{\s*say\(\{ role: "tool", text: t\("collectionError"\) \}\);/.test(filesShell));
+  /setCollections\(\(current\) => \[made, \.\.\.current\]\);\s*setNaming\(false\);\s*say\(\{ role: "tool", text: tFiles\("collectionCreated", \{ name: made\.name \}\) \}\);/.test(analyze) &&
+    /if \(!data\?\.ok \|\| !data\.collection\) \{\s*say\(\{ role: "tool", text: tFiles\("collectionError"\) \}\);/.test(analyze));
 
 console.log("\n== 9. Site, in the shell ==");
 const site = read("src/components/website-builder/website-shell.tsx");
@@ -362,12 +375,13 @@ check("Research: a plan answered with something that is not JSON is not the conn
 check("Files: a file over the route's limit, with storage unreachable, is the connection — never storage's English",
   !/error: fallback/.test(uploadLib) && /unanswered \? \(words\.offline \?\? words\.error\) : words\.error/.test(uploadLib) &&
     /unanswered = typeof \(error as \{ status\?: unknown \}\)\.status !== "number"/.test(uploadLib) &&
-    /offline: describe\(new ApiError\(0, null\)\)\.text/.test(filesShell));
+    /offline: describe\(new ApiError\(0, null\)\)\.text/.test(analyze));
 check("Files: a question refused is said from the status, a failed job in the screen's words",
-  /describe\(new ApiError\(outcome\.status,/.test(filesShell) && /text: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*askFailure\(outcome\) === "askError" && outcome\.status\s*\?\s*describe\(new ApiError\(outcome\.status,/.test(filesShell) &&
+  /describe\(new ApiError\(outcome\.status,/.test(analyze) && /text: isStoppedMessage\(outcome\.error\)\s*\?\s*tSteps\("stopped"\)\s*:\s*askFailure\(outcome\) === "askError" && outcome\.status\s*\?\s*describe\(new ApiError\(outcome\.status,/.test(analyze) &&
     /status: response\.status, body: started/.test(read("src/lib/jobs/start-and-watch.ts")));
 check("Files: a file the plan has no room for is the plan's limit",
-  /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(filesShell) && (uploadLib.match(/body: data,\s*status: response\.status/g) ?? []).length === 2);
+  /!outcome\.status \|\| uploadRefusal\(outcome\.body \?\? null, outcome\.status\) !== "uploadError"/.test(analyze) &&
+  /outcome\.body\?\.limitReached \? \{ \.\.\.outcome\.body, code: "planLimit" \}/.test(analyze) && (uploadLib.match(/body: data,\s*status: response\.status/g) ?? []).length === 2);
 check("Analyze: out of credits and the model down are said as such", /status === 402 \? describe\(new ApiError\(402, null\)\)\.text : code === "ai_unavailable" \? t\("analyse\.unavailable"\)/.test(analyze) &&
   (analyze.match(/refusal\(response\.status, body\?\.error,/g) ?? []).length === 2);
 check("Slides: Stop reaches a change as well as a new deck",

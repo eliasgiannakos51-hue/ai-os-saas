@@ -3078,7 +3078,7 @@
         "slides": "根据描述生成演示文稿。",
         "posts": "每个平台一条帖子。",
         "research": "任何主题的带来源报告。",
-        "analyze": "从数据文件得出结论。",
+        "analyze": "从文件、文档或文本中得出结论。",
         "files": "就你的文档提问。",
         "automations": "自动运行的任务。",
         "projects": "带目标的文件夹。",
@@ -4807,7 +4807,14 @@
         "compare": "把这个月和上个月比较一下"
       }
     },
-    "new": "新文件"
+    "new": "新文件",
+    "pastedText": {
+      "filename": "笔记",
+      "button": "粘贴文本",
+      "prompt": "写下或粘贴你想要分析的文本。",
+      "placeholder": "写下或粘贴文本…",
+      "autoQuestion": "给出这段文本的摘要、要点和任何数字。"
+    }
   },
   "coding": {
     "title": "编程",

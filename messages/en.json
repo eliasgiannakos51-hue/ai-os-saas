@@ -3078,7 +3078,7 @@
         "slides": "A presentation from a description.",
         "posts": "One post for each platform.",
         "research": "A sourced report on any topic.",
-        "analyze": "Findings from a data file.",
+        "analyze": "Findings from files, documents or text.",
         "files": "Ask about your documents.",
         "automations": "Tasks that run on their own.",
         "projects": "A folder with a goal.",
@@ -4807,7 +4807,14 @@
         "compare": "Compare this month to last month"
       }
     },
-    "new": "New file"
+    "new": "New file",
+    "pastedText": {
+      "filename": "Notes",
+      "button": "Paste text",
+      "prompt": "Write or paste the text you want analysed.",
+      "placeholder": "Write or paste the text…",
+      "autoQuestion": "Give a summary, key points and any numbers in this text."
+    }
   },
   "coding": {
     "title": "Coding",

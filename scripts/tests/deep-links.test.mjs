@@ -277,7 +277,11 @@ for (const l of favLinks) {
 // /api/conversations/search?q= for the conversations whose MESSAGES
 // match, read by that route's GET — the titles are filtered in the
 // browser and only this half needs the server.
-const DEEP_LINK_FLOOR = 66;
+// 66 -> 67 (2026-10-22): Analyze and Files merged into one tool
+// (components/analyze/analyze-shell.tsx); /dashboard/files?record=
+// (above) now redirects to /dashboard/data-analysis?record=, read by
+// the merged page the same way the old one read it.
+const DEEP_LINK_FLOOR = 67;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

@@ -87,6 +87,8 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "marketplace",
   "memory",
   "mission",
+  // «Τα δικά μου» (2026-10-22).
+  "my-stuff",
   "overview",
   "activity",
   "predictions",

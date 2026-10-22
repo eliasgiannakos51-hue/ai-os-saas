@@ -12,10 +12,10 @@ import { aliasesFor } from "@/lib/palette-aliases";
 import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, SWITCHED_SQUARES, SWITCH_ONLY_ITEMS, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
-import { GAMES_ICON } from "@/lib/module-icons";
+import { GAMES_ICON, MY_STUFF_ICON } from "@/lib/module-icons";
 
 /** The icon of each tool with no sidebar row (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS). */
-const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON };
+const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON, "/dashboard/my-stuff": MY_STUFF_ICON };
 
 /**
  * ALL TOOLS: big square tiles, four in a row on a computer and two on a
@@ -103,6 +103,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     projects: t("names.projects"),
     goals: t("names.goals"),
     meetings: t("names.meetings"),
+    myStuff: t("names.myStuff"),
     library: t("names.library"),
     memory: t("names.memory"),
     finances: t("names.finances"),
@@ -126,6 +127,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     projects: t("lines.projects"),
     goals: t("lines.goals"),
     meetings: t("lines.meetings"),
+    myStuff: t("lines.myStuff"),
     library: t("lines.library"),
     memory: t("lines.memory"),
     finances: t("lines.finances"),

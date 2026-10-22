@@ -93,6 +93,10 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   file_ask: "file",
   record_ask: "file",
   ask_ai_record: "file",
+  // «Τα δικά μου» (2026-10-22): answering from the account's own rows,
+  // the same shape as record_ask above, just read across every tool
+  // instead of one record table.
+  my_stuff_ask: "file",
 
   document_translate: "translation",
 

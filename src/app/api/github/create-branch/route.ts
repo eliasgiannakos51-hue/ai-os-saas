@@ -58,11 +58,9 @@ export async function POST(request: Request) {
       }
     );
     if (!createRes.ok) {
-      const err = (await createRes.json().catch(() => ({}))) as { message?: string };
-      return NextResponse.json(
-        { ok: false, reason: err.message?.includes("already exists") ? "branch_exists" : "create_failed" },
-        { status: 422 }
-      );
+      const ghBody = (await createRes.json().catch(() => ({}))) as { message?: string };
+      const reason = ghBody.message?.includes("already exists") ? "branch_exists" : "create_failed";
+      return NextResponse.json({ ok: false, reason }, { status: 422 });
     }
     return NextResponse.json({ ok: true });
   } catch (err) {

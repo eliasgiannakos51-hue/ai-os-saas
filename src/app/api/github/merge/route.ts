@@ -43,8 +43,9 @@ export async function POST(request: Request) {
       }
     );
     if (!res.ok) {
-      const err = (await res.json().catch(() => ({}))) as { message?: string };
-      return NextResponse.json({ ok: false, reason: err.message ?? "merge_failed" }, { status: 422 });
+      const ghErr = (await res.json().catch(() => ({}))) as { message?: string };
+      logApiError("/api/github/merge", new Error(ghErr.message ?? "merge_failed"));
+      return NextResponse.json({ ok: false, reason: "merge_failed" }, { status: 422 });
     }
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -106,7 +106,7 @@ export function downloadZip(
   ev.setUint16(20, 0, true);                 // comment length
   parts.push(eocd);
 
-  const blob = new Blob(parts, { type: "application/zip" });
+  const blob = new Blob(parts as BlobPart[], { type: "application/zip" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

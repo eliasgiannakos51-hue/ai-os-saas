@@ -3177,6 +3177,7 @@
         "empty": "Δεν υπάρχει τίποτα ακόμα.",
         "delete": "Διαγραφή",
         "rename": "Μετονομασία",
+        "undo": "Αναίρεση",
         "deleteConfirm": "Διαγραφή «{title}»;"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Κώδικας",
     "copy": "Αντιγραφή",
     "copied": "Αντιγράφηκε",
+    "download": "Λήψη",
+    "files": "Αρχεία",
     "operations": {
       "generate": {
         "label": "Γράψε snippet"

@@ -3177,6 +3177,7 @@
         "empty": "Nothing here yet.",
         "delete": "Delete",
         "rename": "Rename",
+        "undo": "Undo",
         "deleteConfirm": "Delete “{title}”?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Code",
     "copy": "Copy",
     "copied": "Copied",
+    "download": "Download",
+    "files": "Files",
     "operations": {
       "generate": {
         "label": "Write a snippet"

@@ -340,6 +340,24 @@ body {
            text-sm text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none;
   }
 
+  /* THE CODE PANEL'S OWN HEADER, DECLARED ONCE (2026-10-22, the owner's
+     critical message — Coding's code viewer needs file tabs, copy,
+     download). `code-block.tsx` already drew this card-and-header pair;
+     `coding-workspace.tsx`'s DiffView needed the identical pair for its
+     own Copy/Download row, which would have been the fourth copy of
+     `.modal-surface`/`.modal-header`'s own shape (a bordered card, a
+     bordered header strip) rather than a new one. `.code-action-button`
+     is the Copy/Download button itself, also written twice before this. */
+  .code-panel {
+    @apply rounded-card border border-border bg-workspace;
+  }
+  .code-panel-header {
+    @apply flex items-center justify-between gap-2 border-b border-border px-3 py-2;
+  }
+  .code-action-button {
+    @apply inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-[11px] text-foreground hover:bg-panel-hover;
+  }
+
   /* A LIST OF ROWS, SEPARATED BY ONE RULE INSTEAD OF N OUTLINES.
 
      The trade design-density.test.mjs's divide clause describes, made

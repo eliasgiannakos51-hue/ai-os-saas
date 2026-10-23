@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, PanelLeft, Upload } from "lucide-react";
+import { Check, Copy, Download, Plus, PanelLeft, Upload } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { HelpTip } from "@/components/ui/help-tip";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -10,10 +10,11 @@ import { useToast } from "@/components/toast/toast-context";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { ShellHistoryColumn, type ShellHistoryRow } from "@/components/shell/shell-history-column";
 import { CodeBlock } from "@/components/coding/code-block";
-import { diffLines } from "@/lib/coding/diff";
-import { guessLanguage } from "@/lib/coding/highlight";
+import { diffLines, replaceLine } from "@/lib/coding/diff";
+import { downloadTextFile, suggestedFileName } from "@/lib/coding/download";
+import { guessLanguage, languageFromPath } from "@/lib/coding/highlight";
 import { MAX_INPUT_CHARS, OPERATION_SPECS, type CodeOperation } from "@/lib/coding/operations";
-import { foldUploadedFiles, readUploadedFolder } from "@/lib/coding/folder-upload";
+import { FOLDER_UPLOAD_MAX_FILES, readUploadedFolder } from "@/lib/coding/folder-upload";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 
 export type CodeSession = {
@@ -31,7 +32,19 @@ export type CodeSession = {
 };
 
 type Turn = { id: string; role: "user" | "tool"; text: string };
-type Code = { content: string; language: string | null; isEdit: boolean; priorContent: string | null };
+
+/** One tab in the code panel — `path` is null for anything that is not
+ *  from a folder upload (a generated answer, a paste), which draws no
+ *  tab row at all when it is the only file. */
+type CodeFile = { path: string | null; content: string; language: string | null };
+type Code = { files: CodeFile[]; activeIndex: number; isEdit: boolean; priorContent: string | null };
+
+/** «Διαγραφή με Αναίρεση» (the owner's critical message, 2026-10-22),
+ *  the same window chat's own sidebar already uses
+ *  (lib/chat/delete-later.ts) — kept as its own constant here rather
+ *  than imported, since that module's URL builder is chat-specific and
+ *  Coding's own ShellHistoryColumn usage needs only the duration. */
+const DELETE_UNDO_WINDOW_MS = 6000;
 
 /**
  * CODING, AS A CONVERSATION (the owner's critical message, 2026-10-22).
@@ -74,24 +87,23 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
   const [uploadingFolder, setUploadingFolder] = useState(false);
   const [openedId, setOpenedId] = useState<string | null>(null);
 
-  // OPEN BY DEFAULT ON A SCREEN WITH ROOM FOR IT (the owner's message
-  // right after #332, 2026-10-22): "the sessions list, open on the left,
-  // like Claude Code, [◧] CLOSES it" — the opposite default from every
-  // other ToolShell tool's history column, which starts closed. A phone
-  // keeps the old default (closed, opened by [◧]) since the column is a
-  // full-screen overlay there, not a side panel.
-  const [historyOpen, setHistoryOpen] = useState(false);
+  // OPEN BY DEFAULT, UNCONDITIONALLY (the owner's critical message,
+  // 2026-10-22: "the sessions list, open on the left, like Claude Code,
+  // from the start" — repeated, this time with no viewport exception).
+  // A first visit this session cannot measure (no stored preference)
+  // starts open on every screen; [◧] closes it, and the choice sticks
+  // through localStorage. A phone still draws it as a full-screen
+  // overlay rather than a side panel (below), so "open from the start"
+  // and "opens above the page" are the same thing there, not a
+  // contradiction.
+  const [historyOpen, setHistoryOpen] = useState(true);
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem("ionexa.codingHistoryColumn");
-      if (stored === "open" || stored === "closed") {
-        setHistoryOpen(stored === "open");
-        return;
-      }
+      if (stored === "open" || stored === "closed") setHistoryOpen(stored === "open");
     } catch {
-      // private window or storage off: fall through to the viewport default
+      // private window or storage off: the open-by-default start stands
     }
-    setHistoryOpen(typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches);
   }, []);
   function toggleHistory() {
     setHistoryOpen((open) => {
@@ -125,12 +137,17 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
     setSending(true);
     const controller = new AbortController();
     abortRef.current = controller;
+    // THE ACTIVE TAB ONLY — a remark edits whichever file is open, the
+    // same "one file, not a project" rule MAX_INPUT_CHARS already
+    // enforces server-side; the other tabs from a folder upload sit
+    // untouched until their own tab is active and asked about.
+    const activeFile = code ? code.files[code.activeIndex] : undefined;
     try {
       const response = await fetch("/api/coding/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ text: trimmed, priorCode: code?.content ?? null, priorLanguage: code?.language ?? null }),
+        body: JSON.stringify({ text: trimmed, priorCode: activeFile?.content ?? null, priorLanguage: activeFile?.language ?? null }),
       });
       const body = (await response.json().catch(() => null)) as Record<string, unknown> | null;
       if (!response.ok || !body?.ok) {
@@ -148,7 +165,12 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
       if (body.outputKind === "code") {
         const isEdit = body.isEdit === true;
         const language = typeof body.resultLanguage === "string" ? body.resultLanguage : guessLanguage(output);
-        setCode({ content: output, language, isEdit, priorContent: isEdit ? code?.content ?? null : null });
+        const newFile: CodeFile = { path: activeFile?.path ?? null, content: output, language };
+        setCode((prev) =>
+          prev
+            ? { ...prev, files: prev.files.map((f, i) => (i === prev.activeIndex ? newFile : f)), isEdit, priorContent: isEdit ? activeFile?.content ?? null : null }
+            : { files: [newFile], activeIndex: 0, isEdit, priorContent: null }
+        );
         say("tool", isEdit ? t("changed") : t("made"));
       } else {
         say("tool", output);
@@ -189,9 +211,11 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
 
   // "ΑΝΕΒΑΣΜΑ ΦΑΚΕΛΟΥ" — local files only, no GitHub App needed (lib/
   // coding/folder-upload.ts has the budget and the binary-skip rules).
-  // The result becomes the current code, the same slot a paste or a
-  // generated answer fills, so the next remark edits it like anything
-  // else `planTurn` already knows how to treat as `prior.code`.
+  // EACH FILE KEEPS ITS OWN TAB (the owner's critical message,
+  // 2026-10-22: "καρτέλες αρχείων") rather than being folded into one
+  // blob — `readUploadedFolder` already returns them separately; only
+  // the ACTIVE tab is ever sent to the AI (`send`, above), the same
+  // "one file, not a project" rule as a paste or a generated answer.
   async function handleFolderUpload(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
     setUploadingFolder(true);
@@ -201,18 +225,44 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
         addToast(t("errors.folderEmpty"), "error");
         return;
       }
-      const folded = foldUploadedFiles(files);
-      setCode({ content: folded.text, language: null, isEdit: false, priorContent: null });
+      const truncated = files.length > FOLDER_UPLOAD_MAX_FILES;
+      const included = files.slice(0, FOLDER_UPLOAD_MAX_FILES);
+      setCode({
+        files: included.map((f) => ({ path: f.path, content: f.text, language: languageFromPath(f.path, f.text) })),
+        activeIndex: 0,
+        isEdit: false,
+        priorContent: null,
+      });
+      setOpenedId(null);
       say(
         "tool",
-        folded.truncated
-          ? t("history.folderUploadedTruncated", { count: folded.includedCount })
-          : t("history.folderUploaded", { count: folded.includedCount })
+        truncated
+          ? t("history.folderUploadedTruncated", { count: included.length })
+          : t("history.folderUploaded", { count: included.length })
       );
     } finally {
       setUploadingFolder(false);
       if (folderInputRef.current) folderInputRef.current.value = "";
     }
+  }
+
+  function selectFile(index: number) {
+    setCode((prev) => (prev ? { ...prev, activeIndex: index, isEdit: false, priorContent: null } : prev));
+  }
+
+  /** CLICK A BOX, TYPE A CHANGE, ONLY THAT CHANGES (the owner's critical
+   *  message, 2026-10-22) — a local, deterministic line replacement in
+   *  the active file, not another AI call: the diff already shows which
+   *  line changed, so the person is editing THAT text directly, and
+   *  every other line in the file is untouched because nothing else is
+   *  ever written. */
+  function editDiffLine(lineIndex: number, newText: string) {
+    setCode((prev) => {
+      if (!prev) return prev;
+      const active = prev.files[prev.activeIndex];
+      const nextFile = { ...active, content: replaceLine(active.content, lineIndex, newText) };
+      return { ...prev, files: prev.files.map((f, i) => (i === prev.activeIndex ? nextFile : f)) };
+    });
   }
 
   function openFromHistory(id: string) {
@@ -226,7 +276,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
     ]);
     setCode(
       spec.outputKind === "code" && row.output
-        ? { content: row.output, language: row.targetLanguage ?? row.language, isEdit: false, priorContent: null }
+        ? { files: [{ path: null, content: row.output, language: row.targetLanguage ?? row.language }], activeIndex: 0, isEdit: false, priorContent: null }
         : null
     );
     setOpenedId(id);
@@ -291,6 +341,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                 onRename={renameSession}
                 onNavigate={toggleHistory}
                 linkTable="code_sessions"
+                deleteUndoWindowMs={DELETE_UNDO_WINDOW_MS}
               />
             </div>
             <button
@@ -387,14 +438,45 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
 
           {code && (
             <div className="flex min-h-0 flex-1 flex-col lg:w-[60%]" data-testid="coding-work">
-              <div className="flex items-center gap-2 px-4 py-2 sm:px-6">
-                <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{code.language ?? t("code")}</p>
-              </div>
+              {code.files.length > 1 && (
+                <div
+                  role="tablist"
+                  aria-label={t("files")}
+                  data-testid="coding-file-tabs"
+                  className="flex gap-1 overflow-x-auto border-b border-divider px-4 py-1.5 sm:px-6"
+                >
+                  {code.files.map((f, i) => (
+                    <button
+                      key={f.path ?? i}
+                      type="button"
+                      role="tab"
+                      aria-selected={i === code.activeIndex}
+                      onClick={() => selectFile(i)}
+                      data-testid="coding-file-tab"
+                      className={`min-h-[44px] shrink-0 rounded-item px-2.5 text-xs ${
+                        i === code.activeIndex ? "bg-panel text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
+                      }`}
+                    >
+                      {f.path ?? t("code")}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
                 {code.isEdit && code.priorContent ? (
-                  <DiffView oldCode={code.priorContent} newCode={code.content} />
+                  <DiffView
+                    oldCode={code.priorContent}
+                    newCode={code.files[code.activeIndex].content}
+                    onEditLine={editDiffLine}
+                    fileName={code.files[code.activeIndex].path}
+                    language={code.files[code.activeIndex].language}
+                  />
                 ) : (
-                  <CodeBlock code={code.content} language={code.language} />
+                  <CodeBlock
+                    code={code.files[code.activeIndex].content}
+                    language={code.files[code.activeIndex].language}
+                    fileName={code.files[code.activeIndex].path}
+                  />
                 )}
               </div>
             </div>
@@ -408,26 +490,125 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
 /** The change between two versions of the same code, as boxes: green for
  *  a line added, red (struck through) for a line removed, plain for a
  *  line neither — lib/coding/diff.ts does the comparing, this only
- *  draws it. */
-function DiffView({ oldCode, newCode }: { oldCode: string; newCode: string }) {
+ *  draws it.
+ *
+ *  CLICK A BOX, TYPE A CHANGE, ONLY THAT CHANGES (the owner's critical
+ *  message, 2026-10-22): a box that exists in the NEW code — "added" or
+ *  "same", never "removed", which has nothing left to retype — opens an
+ *  inline field on click; `onEditLine` splices just that one line, by
+ *  its position in the new file, so every other line is untouched. */
+function DiffView({
+  oldCode,
+  newCode,
+  onEditLine,
+  fileName,
+  language,
+}: {
+  oldCode: string;
+  newCode: string;
+  onEditLine: (lineIndex: number, newText: string) => void;
+  fileName: string | null;
+  language: string | null;
+}) {
+  const t = useTranslations("coding");
+  const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState<number | null>(null);
+  const [draft, setDraft] = useState("");
+
   const lines = diffLines(oldCode, newCode);
+  // Each "added"/"same" line's own position in newCode — the index
+  // `onEditLine` splices at. "removed" lines carry no such position.
+  let newIndex = 0;
+  const withPositions = lines.map((line) => {
+    if (line.kind === "removed") return { line, atIndex: null as number | null };
+    const atIndex = newIndex;
+    newIndex += 1;
+    return { line, atIndex };
+  });
+
+  function startEdit(atIndex: number, text: string) {
+    setEditing(atIndex);
+    setDraft(text);
+  }
+  function commitEdit(atIndex: number) {
+    onEditLine(atIndex, draft);
+    setEditing(null);
+  }
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(newCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2_000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
-    <div className="overflow-x-auto rounded-card border border-border bg-workspace p-3 font-mono text-xs leading-relaxed">
-      {lines.map((line, index) => (
-        <div
-          key={index}
-          data-testid={line.kind === "added" ? "coding-diff-added" : line.kind === "removed" ? "coding-diff-removed" : "coding-diff-same"}
-          className={
-            line.kind === "added"
-              ? "rounded-item bg-success/10 px-2 text-success"
-              : line.kind === "removed"
-                ? "rounded-item bg-danger/10 px-2 text-danger line-through"
-                : "px-2 text-foreground"
-          }
-        >
-          {line.text.length > 0 ? line.text : " "}
+    <div className="code-panel">
+      <div className="code-panel-header">
+        <span className="break-words text-[11px] uppercase tracking-wider text-muted">{fileName ?? language ?? t("code")}</span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => downloadTextFile(newCode, suggestedFileName(fileName, language))}
+            aria-label={t("download")}
+            data-testid="coding-download"
+            className="code-action-button"
+          >
+            <Download className="h-3 w-3" aria-hidden="true" />
+            {t("download")}
+          </button>
+          <button
+            type="button"
+            onClick={() => void copy()}
+            aria-label={t("copy")}
+            data-testid="coding-copy"
+            className="code-action-button"
+          >
+            {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+            {copied ? t("copied") : t("copy")}
+          </button>
         </div>
-      ))}
+      </div>
+      <div className="overflow-x-auto p-3 font-mono text-xs leading-relaxed">
+        {withPositions.map(({ line, atIndex }, index) =>
+          editing === atIndex ? (
+            <input
+              key={index}
+              type="text"
+              value={draft}
+              autoFocus
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={() => commitEdit(atIndex as number)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitEdit(atIndex as number);
+                else if (e.key === "Escape") setEditing(null);
+              }}
+              data-testid="coding-diff-edit-input"
+              className="block w-full rounded-item border border-foreground/40 bg-panel px-2 py-0.5 text-foreground outline-none"
+            />
+          ) : (
+            <button
+              key={index}
+              type="button"
+              disabled={atIndex === null}
+              onClick={() => atIndex !== null && startEdit(atIndex, line.text)}
+              data-testid={line.kind === "added" ? "coding-diff-added" : line.kind === "removed" ? "coding-diff-removed" : "coding-diff-same"}
+              className={`block w-full rounded-item px-2 text-start ${
+                line.kind === "added"
+                  ? "bg-success/10 text-success hover:bg-success/20"
+                  : line.kind === "removed"
+                    ? "bg-danger/10 text-danger line-through"
+                    : "text-foreground hover:bg-panel-hover"
+              }`}
+            >
+              {line.text.length > 0 ? line.text : " "}
+            </button>
+          )
+        )}
+      </div>
     </div>
   );
 }

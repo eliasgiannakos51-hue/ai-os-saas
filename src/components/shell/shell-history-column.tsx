@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Trash2 } from "lucide-react";
+import { RotateCcw, Search, Trash2 } from "lucide-react";
 import { matchesSearch } from "@/lib/text/search-match";
 import { AddToProjectButton } from "@/components/entity-links/add-to-project-button";
 import { CardMenu } from "@/components/ui/card-menu";
@@ -50,6 +50,19 @@ export type ShellHistoryRow = {
  * delete) instead of the bare trash icon; a row with only `onDelete`
  * keeps the old single-button shape unchanged, so nothing already
  * shipped on this column regresses.
+ *
+ * `deleteUndoWindowMs`, ADDED for Coding's own request (the owner's
+ * message of 2026-10-22: «Διαγραφή με Αναίρεση») — OPT IN, same shape as
+ * `linkTable`. Omitted, delete behaves exactly as before: confirm, then
+ * `onDelete` runs immediately. Given, the row that confirmed delete does
+ * NOT call `onDelete` yet — it is hidden in place (greyed, struck
+ * through, the same row the chat sidebar already shows for this, see
+ * components/dashboard/conversation-rows.tsx) with an «Αναίρεση» button
+ * that clears the pending timer. `onDelete` only runs once the window
+ * elapses with no Undo. A tab closed inside the window loses the
+ * pending delete entirely — nothing is sent — which is the safe
+ * direction to fail in: the session is still there next visit, never
+ * half-deleted.
  */
 export function ShellHistoryColumn({
   rows,
@@ -59,6 +72,7 @@ export function ShellHistoryColumn({
   onRename,
   onNavigate,
   linkTable,
+  deleteUndoWindowMs,
 }: {
   rows: readonly ShellHistoryRow[];
   activeId: string | null;
@@ -76,6 +90,8 @@ export function ShellHistoryColumn({
   onNavigate?: () => void;
   /** The linkable table each row belongs to — see the doc comment above. */
   linkTable?: string;
+  /** See the doc comment above. Omitted: delete is immediate, as before. */
+  deleteUndoWindowMs?: number;
 }) {
   const t = useTranslations("dashboard.toolShell.history");
   const [query, setQuery] = useState("");
@@ -84,6 +100,18 @@ export function ShellHistoryColumn({
   const [draftTitle, setDraftTitle] = useState("");
   const [savingRename, setSavingRename] = useState(false);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<ReadonlyMap<string, string>>(new Map());
+  const timersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+
+  // Timers belong to this visit only — a navigation away clears them,
+  // which cancels the pending deletes rather than orphaning them.
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
 
   const shown = useMemo(() => {
     const q = query.trim();
@@ -91,8 +119,34 @@ export function ShellHistoryColumn({
     return rows.filter((r) => matchesSearch(r.title, q));
   }, [rows, query]);
 
+  function undoDelete(id: string) {
+    const timer = timersRef.current.get(id);
+    if (!timer) return;
+    clearTimeout(timer);
+    timersRef.current.delete(id);
+    setPendingDelete((prev) => {
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
+  }
+
   async function remove(id: string, title: string) {
     if (!onDelete || !window.confirm(t("deleteConfirm", { title }))) return;
+    if (deleteUndoWindowMs) {
+      setPendingDelete((prev) => new Map(prev).set(id, title));
+      const timer = setTimeout(() => {
+        timersRef.current.delete(id);
+        setPendingDelete((prev) => {
+          const next = new Map(prev);
+          next.delete(id);
+          return next;
+        });
+        void onDelete(id);
+      }, deleteUndoWindowMs);
+      timersRef.current.set(id, timer);
+      return;
+    }
     setDeletingId(id);
     try {
       await onDelete(id);
@@ -147,7 +201,23 @@ export function ShellHistoryColumn({
           <ul className="space-y-0.5">
             {shown.map((r) => (
               <li key={r.id} className="group flex items-center gap-1" data-row>
-                {renamingId === r.id ? (
+                {pendingDelete.has(r.id) ? (
+                  <div
+                    data-testid="shell-history-undo"
+                    className="flex min-h-[44px] flex-1 items-center gap-2 rounded-item px-3 py-1.5 text-sm text-muted"
+                  >
+                    <span className="min-w-0 flex-1 truncate line-through">{pendingDelete.get(r.id)}</span>
+                    <button
+                      type="button"
+                      onClick={() => undoDelete(r.id)}
+                      data-testid="shell-history-undo-button"
+                      className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-item px-2 text-sm text-foreground underline hover:bg-panel-hover"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                      {t("undo")}
+                    </button>
+                  </div>
+                ) : renamingId === r.id ? (
                   <input
                     ref={renameInputRef}
                     type="text"
@@ -180,33 +250,34 @@ export function ShellHistoryColumn({
                     {r.status && <span className="block truncate text-[11px] text-muted">{r.status}</span>}
                   </button>
                 )}
-                {linkTable && (
+                {linkTable && !pendingDelete.has(r.id) && (
                   <span className="opacity-0 focus-within:opacity-100 group-hover:opacity-100">
                     <AddToProjectButton variant="icon" sourceTable={linkTable} sourceId={r.id} sourceHeadline={r.title} />
                   </span>
                 )}
-                {onDelete && onRename ? (
-                  <CardMenu
-                    label={`${t("delete")}: ${r.title}`}
-                    actions={[
-                      { key: "rename", label: t("rename"), onSelect: () => startRename(r.id, r.title) },
-                      { key: "delete", label: t("delete"), destructive: true, onSelect: () => void remove(r.id, r.title) },
-                    ]}
-                  />
-                ) : (
-                  onDelete && (
-                    <button
-                      type="button"
-                      onClick={() => void remove(r.id, r.title)}
-                      disabled={deletingId === r.id}
-                      aria-label={`${t("delete")}: ${r.title}`}
-                      data-testid="shell-history-delete"
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-item text-muted opacity-0 hover:bg-panel-hover hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-40"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    </button>
-                  )
-                )}
+                {!pendingDelete.has(r.id) &&
+                  (onDelete && onRename ? (
+                    <CardMenu
+                      label={`${t("delete")}: ${r.title}`}
+                      actions={[
+                        { key: "rename", label: t("rename"), onSelect: () => startRename(r.id, r.title) },
+                        { key: "delete", label: t("delete"), destructive: true, onSelect: () => void remove(r.id, r.title) },
+                      ]}
+                    />
+                  ) : (
+                    onDelete && (
+                      <button
+                        type="button"
+                        onClick={() => void remove(r.id, r.title)}
+                        disabled={deletingId === r.id}
+                        aria-label={`${t("delete")}: ${r.title}`}
+                        data-testid="shell-history-delete"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-item text-muted opacity-0 hover:bg-panel-hover hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-40"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    )
+                  ))}
               </li>
             ))}
           </ul>

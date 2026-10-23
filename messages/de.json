@@ -3177,6 +3177,7 @@
         "empty": "Hier ist noch nichts.",
         "delete": "Löschen",
         "rename": "Umbenennen",
+        "undo": "Rückgängig",
         "deleteConfirm": "„{title}“ löschen?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Code",
     "copy": "Kopieren",
     "copied": "Kopiert",
+    "download": "Herunterladen",
+    "files": "Dateien",
     "operations": {
       "generate": {
         "label": "Schnipsel schreiben"

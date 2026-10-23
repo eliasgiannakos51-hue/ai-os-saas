@@ -3177,6 +3177,7 @@
         "empty": "Non c’è ancora nulla qui.",
         "delete": "Elimina",
         "rename": "Rinomina",
+        "undo": "Annulla",
         "deleteConfirm": "Eliminare «{title}»?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Codice",
     "copy": "Copia",
     "copied": "Copiato",
+    "download": "Scarica",
+    "files": "File",
     "operations": {
       "generate": {
         "label": "Scrivi uno snippet"

@@ -3177,6 +3177,7 @@
         "empty": "لا يوجد شيء هنا بعد.",
         "delete": "حذف",
         "rename": "إعادة التسمية",
+        "undo": "تراجع",
         "deleteConfirm": "حذف «{title}»؟"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "شيفرة",
     "copy": "نسخ",
     "copied": "تم النسخ",
+    "download": "تنزيل",
+    "files": "الملفات",
     "operations": {
       "generate": {
         "label": "اكتب مقطعًا"

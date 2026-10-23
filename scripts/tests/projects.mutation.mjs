@@ -435,8 +435,8 @@ const MUTANTS = [
   {
     name: "the shared history column draws the button whether or not a caller opted in",
     file: SHELL_HISTORY,
-    from: "                {linkTable && (",
-    to: "                {(",
+    from: "                {linkTable && !pendingDelete.has(r.id) && (",
+    to: "                {!pendingDelete.has(r.id) && (",
     expect: "the column only draws the button when a caller passes linkTable",
   },
   {

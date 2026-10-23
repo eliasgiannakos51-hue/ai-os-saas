@@ -68,3 +68,20 @@ export function diffLines(oldCode: string, newCode: string): DiffLine[] {
   while (j < m) out.push({ kind: "added", text: b[j++] });
   return out;
 }
+
+/**
+ * CLICK A BOX, TYPE A CHANGE, ONLY THAT CHANGES (the owner's critical
+ * message, 2026-10-22). `lineIndex` is the line's own position in
+ * `content` — every OTHER line is returned byte-identical, which is the
+ * whole point: this is a local edit, not another AI call, so nothing
+ * besides the one line a person clicked can ever move.
+ *
+ * Out-of-range is a no-op, returning `content` unchanged, rather than
+ * padding the file with blank lines it never had.
+ */
+export function replaceLine(content: string, lineIndex: number, newText: string): string {
+  const lines = content === "" ? [] : content.split("\n");
+  if (lineIndex < 0 || lineIndex >= lines.length) return content;
+  lines[lineIndex] = newText;
+  return lines.join("\n");
+}

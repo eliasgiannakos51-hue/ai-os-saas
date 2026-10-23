@@ -312,16 +312,6 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
         >
           <PanelLeft className="h-4 w-4" aria-hidden="true" />
         </button>
-        <button
-          type="button"
-          onClick={startNew}
-          aria-label={t("new")}
-          data-testid="coding-new"
-          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-item px-2 text-sm text-muted hover:bg-panel-hover hover:text-foreground"
-        >
-          <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span className="hidden whitespace-nowrap sm:inline">{t("new")}</span>
-        </button>
         <h1 className="min-w-0 break-words text-sm font-semibold text-foreground">{t("title")}</h1>
         <HelpTip helpKey="help.coding" />
       </div>
@@ -329,20 +319,39 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {historyOpen && (
           <>
+            {/* THE SESSIONS COLUMN IS ITS OWN LITTLE SIDEBAR (the owner's
+                follow-up message, 2026-10-23, "like the second picture"):
+                «+ Νέο session» is the first, full-width thing in it — not a
+                small icon-button sharing a row with the page title and
+                [◧] above. The layout moved; nothing it could do before
+                is gone, "New" still calls the same startNew(). */}
             <div
               data-testid="coding-history"
-              className="absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background md:relative md:z-auto md:w-[280px]"
+              className="absolute inset-y-0 start-0 z-30 flex w-[85%] max-w-[320px] flex-col border-e border-divider bg-background md:relative md:z-auto md:w-[280px]"
             >
-              <ShellHistoryColumn
-                rows={historyRows}
-                activeId={openedId}
-                onOpen={openFromHistory}
-                onDelete={deleteSession}
-                onRename={renameSession}
-                onNavigate={toggleHistory}
-                linkTable="code_sessions"
-                deleteUndoWindowMs={DELETE_UNDO_WINDOW_MS}
-              />
+              <div className="shrink-0 p-2">
+                <button
+                  type="button"
+                  onClick={startNew}
+                  data-testid="coding-new"
+                  className="flex min-h-[44px] w-full items-center gap-2 rounded-item border border-border px-3 text-sm text-foreground hover:bg-panel-hover"
+                >
+                  <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {t("new")}
+                </button>
+              </div>
+              <div className="min-h-0 flex-1">
+                <ShellHistoryColumn
+                  rows={historyRows}
+                  activeId={openedId}
+                  onOpen={openFromHistory}
+                  onDelete={deleteSession}
+                  onRename={renameSession}
+                  onNavigate={toggleHistory}
+                  linkTable="code_sessions"
+                  deleteUndoWindowMs={DELETE_UNDO_WINDOW_MS}
+                />
+              </div>
             </div>
             <button
               type="button"

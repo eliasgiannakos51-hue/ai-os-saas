@@ -128,7 +128,12 @@ console.log("\n== 2. the lines ==");
 // diff-line editor) are the only ones that actually raised the count,
 // and sharing the rest left it two BELOW where it stood before this
 // round even started.
-ok(`border utilities (${r.counts.borders}), ceiling 570`, r.counts.borders <= 570);
+// 570 -> 571 on 2026-10-23. The sessions column's own «+ Νέο session»
+// moved out of the page header into the top of the column itself (the
+// owner's follow-up, "like the second picture") — a new, one-off
+// bordered button with nothing already drawn the same way elsewhere to
+// share a class with.
+ok(`border utilities (${r.counts.borders}), ceiling 571`, r.counts.borders <= 571);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

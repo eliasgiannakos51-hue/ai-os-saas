@@ -6608,3 +6608,27 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 **Μπλοκαρισμένο:** NEEDS 11 (GitHub App), NEEDS 50 (πάροχος εκτέλεσης).
 
 **Migration:** `20261025100000_github_connections.sql` (από προηγούμενο session).
+
+
+---
+
+### 2026-10-23 — All tools: το τελικό grid (Φάση 1)
+
+**Branch:** `claude/keen-turing-bv8gw4`. Εντολή ιδιοκτήτη: 17 εργαλεία, 5 ομάδες, μόνο όσα δουλεύουν, για όλους χωρίς διακόπτες.
+
+**Διάγνωση πριν αλλάξει κάτι.** Το `/dashboard/tools` αποδίδεται από `src/app/dashboard/tools/page.tsx` → `src/components/tools/tools-grid.tsx`, ομάδες από `src/lib/nav/all-tools.ts`. Διακόπτες που έκρυβαν τετράγωνα ή τα εργαλεία πίσω τους: `my-stuff`, `document-writer`, `image-studio`, `connections` (τετράγωνα), και `automations`, `flows`, `tool-shell`, `analysis-provenance`, `site-pages`, `research-slides` (το ίδιο το εργαλείο έδειχνε παλιά οθόνη ή δεν έτρεχε σε απλούς χρήστες). Το τρέχον commit της παραγωγής δεν είναι ορατό από εδώ (το `ionexa.ai` δεν φτάνει).
+
+**Τι έγινε.**
+- `ALL_TOOLS` (17 εγγραφές, με `ready`, `needs`, `waitingFor`) και `availableTools()`· ο πίνακας `HIDDEN_FROM_ALL_TOOLS` κρατά όλα τα παλιά εργαλεία με λόγο (καμία σελίδα δεν χάθηκε).
+- Ο πίνακας `tools-grid.tsx` ξαναγράφτηκε πάνω στο registry· οι ομάδες μοιράζονται σειρές ώστε να χωρά σε μία οθόνη σε υπολογιστή.
+- Κείμενα (17 ονόματα, 17 γραμμές, 5 επικεφαλίδες) σε 10 γλώσσες· τα Ελληνικά του ιδιοκτήτη ακριβώς για τις επικεφαλίδες.
+- Αφαιρέθηκαν 9 διακόπτες από τον κώδικα και από το `flags.ts`· `switched-names.ts` έγινε `tool-names.ts`, το Image είναι πάντα το εργαλείο (το παλιό «ιδέες για εικόνες» δεν ανοίγει πια από αυτή τη διεύθυνση· ο πίνακας και οι γραμμές του δεν πειράχτηκαν).
+- Το Files ανακατευθύνει πάντα στο Analyze· το tip του Files έγινε tip του Analyze, και το Image πήρε δικό του tip (10 γλώσσες).
+- Δύο νεκρά legacy components (`files-workspace.tsx`, `website-builder-workspace.tsx`) μένουν με καταγεγραμμένη εξαίρεση στο `entry-points.test.mjs` γιατί δεκάδες gates διαβάζουν τον κώδικά τους· σβήσιμο = ξεχωριστή δουλειά.
+- **My Stuff: μέτρηση πριν/μετά.** Το εργαλείο μόνο διαβάζει τους πίνακες των Finances, Sales, Trading· ο έλεγχος `my-stuff.test.mjs` §5 κρατά ότι το μόνο που γράφει είναι το δικό του `my_stuff_sessions`. Άρα τίποτα δεν μετακινήθηκε και τα πριν/μετά ταυτίζονται εξ ορισμού. Η αντικατάσταση Finances/Sales/Trading **δεν έγινε**.
+
+**Δοκιμές.** `npm run gates`: 373 gates, 26.167 έλεγχοι, 0 αποτυχίες· mutation suites των αγγιγμένων gates πράσινες (`all-tools` 28/28, `tool-shell` 65/65, κ.ά.)· `all-tools-final-grid.prodtest.mjs` 58/58 σε production build.
+
+**Δεν δοκιμάστηκε.** Η παραγωγή (ionexa.ai) — δεν φτάνει από εδώ. Τα prodtests που άγγιξαν οι forks (`image-studio`, `document-writer`, `flows`, `navigation-latency`) επεξεργάστηκαν αλλά δεν έτρεξαν (θέλουν build και Chromium)· τρέχουν το βράδυ στο CI.
+
+**Ανοιχτό.** My Stuff θέλει το migration `20261024100000_my_stuff_sessions.sql` (χωρίς αυτό απαντά αλλά δεν κρατά ιστορικό). Η Φάση 2 συνεχίζεται: Connect πρώτο.

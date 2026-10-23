@@ -168,6 +168,7 @@
       "predictions": "Predictions",
       "posts": "Posts",
       "projects": "Projects",
+      "myStuff": "My Stuff",
       "aiMemory": "What it remembers",
       "meetings": "Meetings",
       "music": "Music",
@@ -287,6 +288,7 @@
       "predictions": "Patterns found in your own rows, each with the number of entries it rests on and a link to them.",
       "posts": "Say it once and get a post per platform, each at its length and in its register. It publishes nothing — you copy and post.",
       "projects": "A folder with a goal. What you put in is what is in it — nothing is dragged in with it.",
+      "myStuff": "Ask in plain words about everything you have made in Ionexa, and get an answer with a link to the source. It changes nothing — only reads.",
       "aiMemory": "What the chat has kept about you, and how to remove it.",
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
       "activity": "Your next step, what changed, your progress and your numbers",
@@ -3064,6 +3066,7 @@
         "projects": "Projects",
         "goals": "Goals",
         "meetings": "Meetings",
+        "myStuff": "My Stuff",
         "library": "Library",
         "memory": "Memory",
         "finances": "Finances",
@@ -3085,6 +3088,7 @@
         "projects": "A folder with a goal.",
         "goals": "A goal, broken into steps.",
         "meetings": "Summary and actions from a recording.",
+        "myStuff": "Ask about everything you've made, with sources.",
         "library": "Everything you made and did, in one place.",
         "memory": "What Ionexa remembers about you.",
         "finances": "Log income and expenses.",
@@ -3211,6 +3215,54 @@
           "report": "report",
           "customers": "customers"
         }
+      }
+    },
+    "myStuff": {
+      "name": "My Stuff",
+      "placeholder": "Ask me about your own data…",
+      "working": "Searching your own data…",
+      "new": "New",
+      "empty": {
+        "heading": "Ask me about your own data",
+        "examples": {
+          "finance": "How much did I spend in September?",
+          "site": "Which site did I make for the camping?",
+          "trading": "What did we say about the stocks?"
+        }
+      },
+      "browse": {
+        "open": "Search",
+        "title": "Search your own data",
+        "searchLabel": "Search your own data",
+        "searchPlaceholder": "Search names and content",
+        "kindsLabel": "Show only",
+        "all": "All",
+        "empty": "Nothing found",
+        "untitled": "Untitled"
+      },
+      "kinds": {
+        "site": "Sites",
+        "slides": "Slides",
+        "posts": "Posts",
+        "document": "Documents",
+        "research": "Research",
+        "analysis": "Analyses",
+        "file": "Files",
+        "chat": "Conversations",
+        "coding": "Code",
+        "finance": "Finance",
+        "sales": "Sales",
+        "trading": "Trading"
+      },
+      "errors": {
+        "empty": "Write a question.",
+        "tooLong": "A shorter question, please.",
+        "insufficient": "You don't have enough credits for this question.",
+        "rateLimited": "Too many questions at once. Try again shortly.",
+        "unavailable": "The AI did not answer. Try again.",
+        "stopped": "Stopped.",
+        "failed": "Something went wrong.",
+        "offline": "No connection. Try again."
       }
     },
     "images": {
@@ -4223,6 +4275,11 @@
       "is": "One search across everything you have logged.",
       "does": "It looks through every module at once — ideas, leads, expenses, trades, sites — and takes you straight to the entry.",
       "doesNot": "It does not store your conversations, and it keeps nothing of its own. Everything here is something you wrote in a module; nothing is added by the AI."
+    },
+    "myStuff": {
+      "is": "One AI question across everything you have done in Ionexa.",
+      "does": "It reads sites, posts, documents, research, analyses, files, chats, code sessions, finance, sales and trading, and answers showing exactly where it found it, with a link.",
+      "doesNot": "It does not change anything it reads and adds no new record anywhere else — it only keeps its own question history. Deleting a session here deletes nothing in Chat, Finance, Sales or Trading."
     },
     "mission": {
       "is": "One goal, broken into dated steps.",

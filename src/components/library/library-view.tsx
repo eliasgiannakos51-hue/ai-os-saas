@@ -97,7 +97,7 @@ export function LibraryView({
             defaultValue={query}
             placeholder={t("searchPlaceholder")}
             data-testid="library-search"
-            className="min-h-[44px] w-full rounded-full border border-border bg-transparent py-2 pe-4 ps-9 text-sm text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none"
+            className="search-pill-input"
           />
         </label>
         <button type="submit" className="chip-link shrink-0 px-4 text-sm text-foreground">

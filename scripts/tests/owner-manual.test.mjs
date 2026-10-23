@@ -180,6 +180,7 @@ const FAILOVER_NAMES = {
   "src/lib/jobs/handlers/file-ask.ts": "οι ερωτήσεις στα αρχεία",
   "src/lib/research/research.ts": "η Έρευνα",
   "src/lib/jobs/handlers/create.ts": "το «Φτιάξε κάτι»",
+  "src/app/api/my-stuff/ask/route.ts": "το «Τα δικά σου»",
 };
 const callers = [];
 (function walkSrc(dir) {

@@ -168,6 +168,7 @@
       "predictions": "Andamenti",
       "posts": "Post",
       "projects": "Progetti",
+      "myStuff": "Le tue cose",
       "aiMemory": "Cosa ricorda",
       "meetings": "Riunioni",
       "music": "Musica",
@@ -287,6 +288,7 @@
       "predictions": "Andamenti nelle tue voci, ciascuno con il numero di registrazioni su cui si basa e un collegamento a esse.",
       "posts": "Dillo una volta e ricevi un post per piattaforma, nella sua lunghezza e nel suo tono. Non pubblica nulla: copi e pubblichi tu.",
       "projects": "Una cartella con un obiettivo. Ciò che metti è ciò che c'è — niente entra da solo.",
+      "myStuff": "Chiedi con parole tue tutto ciò che hai fatto in Ionexa, e ricevi una risposta con un link alla fonte. Non cambia nulla — legge soltanto.",
       "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
       "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.",
       "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri",
@@ -3064,6 +3066,7 @@
         "projects": "Progetti",
         "goals": "Obiettivi",
         "meetings": "Riunioni",
+        "myStuff": "Le tue cose",
         "library": "Libreria",
         "memory": "Memoria",
         "finances": "Finanze",
@@ -3085,6 +3088,7 @@
         "projects": "Una cartella con un obiettivo.",
         "goals": "Un obiettivo, diviso in passi.",
         "meetings": "Riepilogo e azioni da una registrazione.",
+        "myStuff": "Chiedi tutto ciò che hai fatto, con le fonti.",
         "library": "Tutto ciò che hai creato, in un unico posto.",
         "memory": "Ciò che Ionexa ricorda di te.",
         "finances": "Registra entrate e uscite.",
@@ -3211,6 +3215,54 @@
           "report": "rapporto",
           "customers": "clienti"
         }
+      }
+    },
+    "myStuff": {
+      "name": "Le tue cose",
+      "placeholder": "Chiedimi dei tuoi dati…",
+      "working": "Sto cercando nei tuoi dati…",
+      "new": "Nuovo",
+      "empty": {
+        "heading": "Chiedimi dei tuoi dati",
+        "examples": {
+          "finance": "Quanto ho speso a settembre?",
+          "site": "Quale sito ho fatto per il campeggio?",
+          "trading": "Cosa abbiamo detto sulle azioni?"
+        }
+      },
+      "browse": {
+        "open": "Cerca",
+        "title": "Cerca nei tuoi dati",
+        "searchLabel": "Cerca nei tuoi dati",
+        "searchPlaceholder": "Cerca in nomi e contenuti",
+        "kindsLabel": "Mostra solo",
+        "all": "Tutto",
+        "empty": "Niente trovato",
+        "untitled": "Senza titolo"
+      },
+      "kinds": {
+        "site": "Siti",
+        "slides": "Diapositive",
+        "posts": "Post",
+        "document": "Documenti",
+        "research": "Ricerche",
+        "analysis": "Analisi",
+        "file": "File",
+        "chat": "Conversazioni",
+        "coding": "Codice",
+        "finance": "Finanze",
+        "sales": "Vendite",
+        "trading": "Trading"
+      },
+      "errors": {
+        "empty": "Scrivi una domanda.",
+        "tooLong": "Una domanda più breve, per favore.",
+        "insufficient": "Non hai crediti sufficienti per questa domanda.",
+        "rateLimited": "Troppe domande insieme. Riprova a breve.",
+        "unavailable": "L'IA non ha risposto. Riprova.",
+        "stopped": "Fermato.",
+        "failed": "Qualcosa è andato storto.",
+        "offline": "Nessuna connessione. Riprova."
       }
     },
     "images": {
@@ -4223,6 +4275,11 @@
       "is": "Una ricerca su tutto quello che hai registrato.",
       "does": "Cerca in tutti i moduli insieme — idee, contatti, spese, operazioni, siti — e ti porta dritto alla voce.",
       "doesNot": "Non memorizza le tue conversazioni e non conserva niente di suo. Tutto qui l'hai scritto tu in un modulo; l'AI non aggiunge nulla."
+    },
+    "myStuff": {
+      "is": "Una domanda con l'AI su tutto quello che hai fatto in Ionexa.",
+      "does": "Legge siti, post, documenti, ricerche, analisi, file, chat, sessioni di codice, finanze, vendite e operazioni, e risponde mostrando esattamente dove l'ha trovato, con un link.",
+      "doesNot": "Non cambia nulla di quello che legge e non aggiunge nessun nuovo record altrove — conserva solo la propria cronologia di domande. Eliminare una sessione qui non cancella nulla in Chat, Finanze, Vendite o Operazioni."
     },
     "mission": {
       "is": "Un obiettivo, diviso in passi datati.",

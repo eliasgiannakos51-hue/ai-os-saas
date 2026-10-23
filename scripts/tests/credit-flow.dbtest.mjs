@@ -193,7 +193,9 @@ console.log("== 0. the database really is the one the migrations build ==");
 // project_flows (package 36).
 // 117 -> 118 on 2026-10-08: 20261024000000_user_games.sql adds
 // user_games (package 26); db-migrations.test.mjs moved in the same commit.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 118);
+// 118 -> 119 on 2026-10-22: 20261024100000_my_stuff_sessions.sql adds
+// my_stuff_sessions («Τα δικά μου»'s own question/answer history).
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 119);
 eq(
   "the credit functions exist",
   Number(

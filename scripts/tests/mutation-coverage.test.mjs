@@ -314,7 +314,9 @@ console.log(
 // 292 -> 291 on 2026-10-22: all-tools-tiles.mutation.mjs deleted — the
 // switch it covered (all-tools-tiles) was removed from the code entirely
 // (the owner's critical message), not renamed or orphaned.
-const RATCHET = 291;
+// 291 -> 292 on 2026-10-22, same day: my-stuff.mutation.mjs added, driving
+// the new gate for «Τα δικά μου» (my-stuff.test.mjs). Read off the run.
+const RATCHET = 292;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

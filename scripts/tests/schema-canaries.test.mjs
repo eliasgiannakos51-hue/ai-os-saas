@@ -185,8 +185,6 @@ const NOT_PROBEABLE = {
     "drops the insert policy on projects and the insert and delete policies on site_versions, and revokes INSERT on the first and INSERT, UPDATE and DELETE on the second from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not or lost what it keeps, and server-written-tables.dbtest.mjs checks it against a real Postgres",
   "20261020000000_google_calendar_connection.sql":
     "widens a CHECK constraint on user_integrations to a fourth provider name. It creates no object, and a constraint is not in the database API's OpenAPI document, so /api/health cannot see it; the migration raises at the end if the constraint does not name google_calendar, and until it runs the Calendar callback's save is refused and says so",
-  "20261015000000_agents_websites_server_written.sql":
-    "drops five write policies and revokes INSERT and UPDATE (and DELETE on agents) on two tables from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not, and server-written-tables.dbtest.mjs checks it against a real Postgres",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

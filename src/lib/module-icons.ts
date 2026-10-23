@@ -59,6 +59,7 @@ import {
   Mic,
   AppWindow,
   CircleDashed,
+  Boxes,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -247,6 +248,9 @@ export const PREDICTIONS_ICON: LucideIcon = Compass;
 // project here is a grouping WITH A GOAL and a state, not a directory,
 // and FolderOpen is already the records hub.
 export const PROJECTS_ICON: LucideIcon = FolderKanban;
+
+// «Τα δικά μου» (2026-10-22): everything this account has made, in one place.
+export const MY_STUFF_ICON: LucideIcon = Boxes;
 
 // Package 26: Games, the page and its square in All tools.
 export const GAMES_ICON: LucideIcon = Gamepad2;

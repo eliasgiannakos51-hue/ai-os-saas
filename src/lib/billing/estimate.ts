@@ -520,6 +520,17 @@ export const ACTION_PROFILES = {
     baseOutputChars: 900,
     outputCharsPerInputChar: 0,
   },
+  // Connect by address (api/mcp/[id]/run): one request in words and one
+  // app's tool list in, ONE forced tool call out (a tool name and its
+  // arguments). The input is the rendered tool list plus the request, so it
+  // already reflects how large the app's list was; the answer is a few
+  // hundred characters whatever the input, the same shape as myStuffAsk.
+  mcpAsk: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 700,
+    outputCharsPerInputChar: 0,
+  },
   // One coding operation (api/coding/run): generate, explain, find bugs,
   // convert or write tests.
   //

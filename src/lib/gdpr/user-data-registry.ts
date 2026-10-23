@@ -426,6 +426,14 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     scope: "sensitive_redacted",
     redactColumns: ["access_token_encrypted"],
   },
+  {
+    // Apps connected by address (Connect, MCP): the name, address and tools
+    // are the person's to take with them; the stored token is not.
+    table: "mcp_servers",
+    label: "mcp_servers",
+    scope: "sensitive_redacted",
+    redactColumns: ["auth_token_encrypted"],
+  },
   { table: "integration_sync_log", label: "integration_sync_log", scope: "account" },
   {
     table: "user_delivery_channels",

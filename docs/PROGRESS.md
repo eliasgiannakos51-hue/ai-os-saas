@@ -6632,3 +6632,29 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 **Δεν δοκιμάστηκε.** Η παραγωγή (ionexa.ai) — δεν φτάνει από εδώ. Τα prodtests που άγγιξαν οι forks (`image-studio`, `document-writer`, `flows`, `navigation-latency`) επεξεργάστηκαν αλλά δεν έτρεξαν (θέλουν build και Chromium)· τρέχουν το βράδυ στο CI.
 
 **Ανοιχτό.** My Stuff θέλει το migration `20261024100000_my_stuff_sessions.sql` (χωρίς αυτό απαντά αλλά δεν κρατά ιστορικό). Η Φάση 2 συνεχίζεται: Connect πρώτο.
+
+
+---
+
+### 2026-10-26 — Φάση 2, εργαλείο 1: Connect με MCP, χωρίς διακόπτη
+
+**Branch:** `claude/keen-turing-bv8gw4`
+
+**Τι υπάρχει τώρα** (ό,τι μετριέται, το ξαναβγάζεις με τις εντολές στο τέλος):
+
+- **Client MCP** πάνω από Streamable HTTP (`src/lib/mcp/client.ts`): initialize, notifications/initialized, tools/list με σελιδοποίηση, tools/call· απάντηση ως JSON ή ως event stream· Mcp-Session-Id και MCP-Protocol-Version· χρονικά όρια, όριο μεγέθους απάντησης, όριο εργαλείων· ανακατεύθυνση **δεν** ακολουθείται.
+- **Φύλακας διευθύνσεων** (`src/lib/mcp/ssrf.ts`): μόνο https, χωρίς όνομα/κωδικό μέσα στη διεύθυνση, κανένα private/loopback/link-local/CGNAT/metadata (IPv4 και IPv6, και το IPv4 που κρύβεται μέσα σε IPv6, NAT64, 6to4), και ο έλεγχος γίνεται **μέσα στο DNS lookup της σύνδεσης**, άρα ό,τι ελέγχεται είναι ό,τι συνδέεται (DNS rebinding). `MCP_ALLOW_INSECURE_LOCAL=1` ανοίγει μόνο loopback πάνω από http και υπάρχει για τα tests· **να μη μπει ποτέ στο Vercel**.
+- **Αποθήκευση:** πίνακας `mcp_servers` (migration `20261026000000_mcp_servers.sql`), RLS μόνο ανάγνωση των δικών σου γραμμών και **όχι** της στήλης με το κρυπτογραφημένο token· γράφει μόνο ο server· σβήνεται με τον λογαριασμό· μπαίνει στην εξαγωγή δεδομένων (token κομμένο) και στα schema canaries.
+- **Routes** `src/app/api/mcp/`: λίστα/προσθήκη (ελέγχει διεύθυνση, κάνει handshake, σώζει μόνο αν απάντησε), διαγραφή, ανανέωση εργαλείων, `run` (το μοντέλο διαλέγει ΕΝΑ εργαλείο, χρεώνεται το μοντέλο· read-only τρέχει αμέσως, τα άλλα γυρίζουν ως πλάνο) και `call` (τρέχει ό,τι πατήθηκε, με `approved: true`, δωρεάν).
+- **Οθόνη** στο `/dashboard/integrations`: «Πρόσθεσε μια εφαρμογή με τη διεύθυνσή της», λίστα εργαλείων με ένδειξη read-only / θέλει πάτημα, «Ρώτα» με λόγια, πλάνο με «Τρέξε το / Μην το τρέξεις», αποτέλεσμα ως κείμενο. Δέκα γλώσσες. Plan cap: Free 1, Starter 3, Growth 10, Professional 25, Ultimate/Enterprise 50 (`src/lib/mcp/limits.ts`).
+- **Διακόπτης `connections` αφαιρέθηκε:** οι κάρτες Google/Slack φαίνονται μόνο όταν υπάρχει το OAuth app τους (ποτέ νεκρό κουμπί)· το Calendar δεν είναι πια πίσω από διακόπτη· το αρχείο `switches.ts` του φακέλου integrations σβήστηκε.
+- **Δεν έγινε (σκόπιμα):** το Chat δεν χρησιμοποιεί ακόμα τις εφαρμογές αυτές· δεν υπάρχει OAuth-MCP (εφαρμογές που ζητούν σύνδεση από browser)· ένα εργαλείο που η ίδια η εφαρμογή δηλώνει read-only τρέχει χωρίς πάτημα — η δήλωση είναι δική της, γι' αυτό η οθόνη τη δείχνει πριν.
+
+**Πώς ελέγχθηκε** (2026-10-26, τοπικό production build πάνω από stand-in Supabase/μοντέλου/MCP server, **όχι** η ζωντανή παραγωγή):
+
+- `scripts/tests/mcp-ssrf.test.mjs` 114, `mcp-client.test.mjs` 56 (πραγματικός client, πραγματικό socket, server με περιγραφή και αποτέλεσμα που είναι εντολή), `mcp-security.test.mjs` 42, `mcp-data-not-instructions.test.mjs` 50.
+- Mutations: `mcp-ssrf.mutation.mjs` **34/34**, `mcp-security.mutation.mjs` **37/37** (ένα mutant ανά κανόνα: κάθε εύρος διευθύνσεων, ανακατεύθυνση, token χωρίς δέσιμο στον χρήστη, ερώτημα χωρίς user_id, έλεγχος approval, eval, αποτέλεσμα πίσω στο μοντέλο).
+- `scripts/tests/mcp-connect.prodtest.mjs` **71** ελέγχοι end to end: απορριπτέες διευθύνσεις και λάθος token δεν σώζουν τίποτα· το token αποθηκεύεται κρυπτογραφημένο και δεν βγαίνει σε καμία απάντηση ή σελίδα· read-only τρέχει αμέσως, το άλλο περιμένει το πάτημα (και η route το αρνείται χωρίς `approved: true`)· η εντολή μέσα στο αποτέλεσμα δεν εκτελείται· ο χρήστης Β δεν βλέπει/αγγίζει του Α· Free: μία εφαρμογή, όχι δεύτερη· υπολογιστής και κινητό, 44px.
+- `all-tools-final-grid.prodtest.mjs` 58: το τετράγωνο «Σύνδεση» φαίνεται σε σύνηθες μέλος.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261026000000_mcp_servers.sql**

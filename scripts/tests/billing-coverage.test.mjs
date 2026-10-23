@@ -209,6 +209,9 @@ const ROUTED = {
   "src/lib/posts/generate.ts": {
     note: "V5 #22 Posts. ONE forced-tool-use call that returns one post per requested platform, reached from api/posts/generate and reserved there against the postsGenerate profile (sized per platform asked for). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. Nothing is published anywhere — there is no social API in the call graph. Moved onto runCompletion 2026-10-15.",
   },
+  "src/app/api/mcp/[id]/run/route.ts": {
+    note: "Connect by address, 2026-10-26. ONE forced tool call per request: the request in words and the app's tool list in, ONE tool and its arguments out. Reserved against mcpAsk, sized from the rendered tool list and the request, and settled on measured usage; only the Stop button and a provider failure release the hold. The app's own call is not billed (the app answers, nothing of ours is spent), and a tool that is not read-only does not run here at all: it comes back as a plan and runs through ./call, which makes no model call.",
+  },
   "src/app/api/my-stuff/ask/route.ts": {
     note: "«Τα δικά μου», 2026-10-22. ONE call per question, reserved against myStuffAsk after the account's own records are read and the prompt sized from them (lib/my-stuff/ask-context.ts) and settled on measured usage; only the Stop button and a provider failure release the hold. Purely a READ of the account's other tables through the caller's own RLS-scoped client — nothing here writes to finance_entries, leads, trades or any of the other nine kinds, only this tool's own my_stuff_sessions row.",
   },

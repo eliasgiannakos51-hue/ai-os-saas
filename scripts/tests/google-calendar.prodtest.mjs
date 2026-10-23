@@ -1,6 +1,7 @@
 /*
  * «ΑΝΟΙΓΩ ΤΗ ΣΕΛΙΔΑ, ΣΥΝΔΕΩ ΜΙΑ ΥΠΗΡΕΣΙΑ ΜΕ ΕΝΑ ΚΟΥΜΠΙ» — IN THE BUILT APP
- * (MASTER 16, package 31), behind the switch "connections".
+ * (MASTER 16, package 31). The switch "connections" was removed 2026-10-26: a
+ * provider's card is drawn only where its OAuth app is set up.
  *
  * Run: node scripts/tests/google-calendar.prodtest.mjs
  *      SKIP_BUILD=1 node scripts/tests/google-calendar.prodtest.mjs
@@ -150,14 +151,14 @@ try {
     { label: "phone", viewport: { width: 390, height: 844 }, touch: true },
   ]) {
     console.log(`\n== ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);
-    setFlags({ connections: "staff" });
     const { context, page, press } = await open(SET, device);
     await page.goto(`${SET}/dashboard/integrations`, { waitUntil: "networkidle" });
     const main = await page.locator("main").innerText();
     check("Google Calendar is on the page, saying what it reads before anything is pressed",
       main.includes("Google Calendar") && main.includes(JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.integrations.providers.googleCalendar.sees));
     const buttons = page.locator('[data-testid="integration-connect"]');
-    check("every card has its Connect button, on the card (4)", (await buttons.count()) === 4);
+    // Three: Gmail, Drive and Calendar. Slack's OAuth app is not set up in this run, so it has no card (and no dead button).
+    check("every card drawn has its Connect button, on the card (3)", (await buttons.count()) === 3);
     const calendarButton = page.getByRole("button", { name: fill(el.connectTo, { name: "Google Calendar" }) });
     const box = await calendarButton.boundingBox();
     check("...a 44px target", box && box.height >= 44, JSON.stringify(box));
@@ -192,27 +193,11 @@ try {
 
   console.log("\n== nothing set up, phone ==");
   {
-    setFlags({ connections: "staff" });
     const { context, page } = await open(UNSET, { viewport: { width: 390, height: 844 }, touch: true });
     await page.goto(`${UNSET}/dashboard/integrations`, { waitUntil: "networkidle" });
     const buttons = page.locator('[data-testid="integration-connect"]');
-    check("without the Google client the buttons are there and say they cannot yet", (await buttons.count()) === 4 && !(await buttons.first().isEnabled()));
+    check("without the Google client there is no card and no dead Connect button", (await buttons.count()) === 0 && (await page.locator('[data-testid="mcp-apps"]').count()) === 1);
     check("...and the route refuses before anything", (await page.request.get(`${UNSET}/api/integrations/google_calendar/connect`, { maxRedirects: 0 })).status() === 503);
-    check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
-    await context.close();
-  }
-
-  console.log("\n== the switch off, desktop ==");
-  {
-    setFlags({ connections: "off" });
-    const { context, page } = await open(SET, { viewport: { width: 1440, height: 900 }, touch: false });
-    await page.goto(`${SET}/dashboard/integrations`, { waitUntil: "networkidle" });
-    const main = await page.locator("main").innerText();
-    check("with the switch off: no Calendar, and Connect is back in the menu as before", !main.includes("Google Calendar") && (await page.locator('[data-testid="integration-connect"]').count()) === 0 && main.includes("Gmail"));
-    const refused = await page.request.get(`${SET}/api/integrations/google_calendar/connect`, { maxRedirects: 0 });
-    check("...and the route does not know the calendar", refused.status() === 404 && (await refused.json()).code === "unknown_provider");
-    const gmail = await page.request.get(`${SET}/api/integrations/gmail/connect`, { maxRedirects: 0 });
-    check("...while Gmail connects as it always did", (gmail.status() === 302 || gmail.status() === 307) && new URL(gmail.headers().location).searchParams.get("scope") === "https://www.googleapis.com/auth/gmail.readonly");
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

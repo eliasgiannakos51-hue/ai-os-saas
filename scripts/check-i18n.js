@@ -46,6 +46,8 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // "Name" is the German word too.
+  "de:dashboard.integrations.mcp.nameLabel",
   // The final grid's names (2026-10-23): words that are the same in that
   // language — "Films", "Avatars" and "Agents" are French words too, "Video"
   // is the German and Italian word, and "Coding" is what German-speaking
@@ -687,6 +689,11 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // Connect by address (2026-10-26): an example web address is the same
+  // in every language, and "{credits} credits" uses the word the product
+  // itself uses for its currency everywhere.
+  "dashboard.integrations.mcp.urlPlaceholder",
+  "dashboard.integrations.mcp.credits",
   // "iowork" is a product name, written the same in every language
   // (the final All tools grid, 2026-10-23).
   "dashboard.tools.names.iowork",

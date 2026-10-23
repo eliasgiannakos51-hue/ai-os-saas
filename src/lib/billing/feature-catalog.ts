@@ -946,12 +946,34 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "organise",
     minPlan: "free",
     notSold:
-      "owner-only for now: the switch my-stuff admits the owner and the test account " +
-      "(isFeatureOn in src/app/dashboard/my-stuff/page.tsx); the tier is confirmed when it opens to everyone",
+      "open to everyone since 2026-10-23 (no switch); the plan tier is the owner's to confirm, " +
+      "so it is published as a row when he does",
     pages: ["my-stuff"],
     routes: ["my-stuff/ask", "my-stuff/browse", "my-stuff/sessions/[id]"],
     charges: true,
     enforcedIn: "src/app/api/my-stuff/ask/route.ts",
+    enforcedSymbol: "reserveCredits",
+    cell: () => ({ type: "check" }),
+  },
+  // CONNECT BY ADDRESS (Phase 2 of the final All tools grid, 2026-10-26): an
+  // app that speaks MCP over HTTPS, connected by its address with an optional
+  // token. Connecting, listing, refreshing and removing cost nothing; only
+  // turning a request into a tool call reserves credits (the model call —
+  // the app's own call is free), the same shape as My Stuff's ask. Open to
+  // every plan (a Free account may connect one, lib/mcp/limits.ts) and NOT
+  // SOLD AS A ROW YET: the allowance per plan is a number the owner has not
+  // confirmed, and a row he has not confirmed is the lie this file exists
+  // to stop.
+  {
+    id: "mcpApps",
+    group: "organise",
+    minPlan: "free",
+    notSold:
+      "open to every plan since 2026-10-26 (a Free account may connect one app, src/lib/mcp/limits.ts); " +
+      "the per-plan allowance is published as a row when the owner confirms the numbers",
+    routes: ["mcp", "mcp/[id]", "mcp/[id]/refresh", "mcp/[id]/run", "mcp/[id]/call"],
+    charges: true,
+    enforcedIn: "src/app/api/mcp/[id]/run/route.ts",
     enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "check" }),
   },

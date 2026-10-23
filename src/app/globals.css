@@ -371,6 +371,13 @@ body {
   .notice-warning {
     @apply rounded-card border border-warning/40 bg-warning/10 text-warning;
   }
+  /* A BOXED FIELD, declared once (Connect by address, 2026-10-26): the same
+     44px target, border and surface for every text field and result box on
+     that screen, so the border is drawn by one rule and not repeated on
+     each of them. */
+  .field-box {
+    @apply rounded-field border border-border bg-panel text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60;
+  }
 }
 /* ---------------------------------------------------------------------
    THE 16px FLOOR ON ANYTHING YOU CAN TYPE INTO

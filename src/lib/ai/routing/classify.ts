@@ -77,6 +77,8 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   file_ask: "complex",
   record_ask: "complex",
   my_stuff_ask: "complex",
+  // Connect by address (2026-10-26): arguments must follow the tool's schema.
+  mcp_ask: "complex",
   weekly_reflection: "complex",
   // Added 2026-10-05 (QUEUE E.2): every settlement feature string now has
   // a tier, so the shadow router (lib/ai/routing/shadow.ts) records a

@@ -97,6 +97,9 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   // the same shape as record_ask above, just read across every tool
   // instead of one record table.
   my_stuff_ask: "file",
+  // Connect by address (2026-10-26): choosing one tool of an app and its
+  // arguments from a request, over a bounded list.
+  mcp_ask: "file",
 
   document_translate: "translation",
 

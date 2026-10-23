@@ -45,10 +45,11 @@ export type AllToolsEntry = {
 export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // 1. ΚΑΤΑΓΡΑΨΕ
   { name: "myStuff", group: "record", href: "/dashboard/my-stuff", ready: true },
-  {
-    name: "connect", group: "record", href: "/dashboard/integrations", ready: false,
-    waitingFor: "Phase 2, first: Connect built whole, with MCP — until then the Connections page stays reachable from Settings",
-  },
+  // CONNECT, built whole 2026-10-26: an app is connected by its address (MCP
+  // over HTTPS) with an optional token, needing nothing from the owner; the
+  // Google and Slack cards on the same page appear only where their OAuth
+  // apps are set up. Chat does not use these apps yet.
+  { name: "connect", group: "record", href: "/dashboard/integrations", ready: true },
   // 2. ΡΩΤΑ
   { name: "analyze", group: "ask", href: "/dashboard/data-analysis", ready: true },
   { name: "research", group: "ask", href: "/dashboard/deep-research", ready: true },

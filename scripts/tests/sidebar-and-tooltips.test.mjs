@@ -168,7 +168,7 @@ checkTrue(
 // whatever it is called.
 checkTrue(
   `no group can be collapsed — every row is drawn, unconditionally (${(groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length} conditions)`,
-  (groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length === 0 && /<ul className=\{GRID\}>\{group\.items\.map\(tile\)\}<\/ul>/.test(groupRenderer),
+  (groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length === 0 && /\{group\.items\.map\(tile\)\}\s*<\/ul>/.test(groupRenderer),
   "a condition in the group renderer is a decision about whether rows appear — a collapse under another name",
 );
 checkTrue(

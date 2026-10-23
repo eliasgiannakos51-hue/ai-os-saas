@@ -129,6 +129,11 @@ const CLASSIFIED = {
     "src/app/api/my-stuff/ask/route.ts",
   ],
   structured: [
+    // Connect by address (2026-10-26): 600 tokens for one forced tool call
+    // whose answer is a tool name, its arguments and a sentence. A cut reply
+    // carries no COMPLETE tool_use block, so readPlan gets undefined and the
+    // route answers `unusable_plan`: nobody is shown a severed sentence.
+    "src/app/api/mcp/[id]/run/route.ts",
     "src/lib/agents/template-fill.ts",
     "src/lib/agents/agent-builder.ts",
     // Package 30: one forced tool call returning a row of at most eight

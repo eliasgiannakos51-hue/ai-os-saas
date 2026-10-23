@@ -23,7 +23,7 @@
  *
  * Run: node scripts/tests/google-calendar.test.mjs
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -94,28 +94,33 @@ check("...and the model is told today's date WHERE THE PERSON IS, so «αύρι�
   /const today = timeZone \? `\$\{todayIn\(timeZone\)\} \(\$\{timeZone\}\)` : todayIn\(null\);/.test(tool) && /σήμερα είναι \$\{today\}\./.test(tool));
 
 // ---------------------------------------------------------------------
-console.log("\n== 4. the switch ==");
+console.log("\n== 4. no switch: a card exists only where it can work ==");
 // ---------------------------------------------------------------------
-check('"connections" is declared as a switch', /\n  "connections": "/.test(code("src/lib/flags/flags.ts")) && cal?.behindSwitch === "connections");
-const switches = code("src/lib/integrations/switches.ts");
-check("one answer to which providers are open, read from the switch", /const calendar = await isFeatureOn\("connections", user\);/.test(switches) && /!p\.behindSwitch \|\| \(p\.behindSwitch === "connections" && calendar\)/.test(switches));
-check("the page draws only those", /const open = await providersOpenTo\(user\);\s*const shown = PROVIDERS\.map\(\(p\) => p\.id\)\.filter\(\(id\) => open\.has\(id\)\);/.test(code("src/app/dashboard/integrations/page.tsx")) &&
-  /PROVIDERS\.filter\(\(p\) => shown\.includes\(p\.id\) && matchesSearch\(p\.name, q\)\)/.test(code("src/components/integrations/integrations-list.tsx")));
+// The switch "connections" was removed 2026-10-26 (the owner: everything for
+// everybody, without switches). What keeps a dead button off the screen now
+// is that the page draws a provider's card only when its OAuth app is set
+// up on the deployment.
+check('"connections" is no longer a switch, and Calendar names none', !/\n  "connections": "/.test(code("src/lib/flags/flags.ts")) && cal && !("behindSwitch" in cal));
+check("the file that answered which providers are open is gone", !existsSync("src/lib/integrations/switches.ts"));
+const integrationsPage = code("src/app/dashboard/integrations/page.tsx");
 const list = code("src/components/integrations/integrations-list.tsx");
-check("ONE PRESS: with the switch, Connect is a button on the card that opens what it will read",
-  /connectButton=\{await isFeatureOn\("connections", user\)\}/.test(code("src/app/dashboard/integrations/page.tsx")) &&
-    /\{connectButton && !isConnected && \(\s*<button\s*type="button"\s*disabled=\{!isAvailable\}\s*onClick=\{\(\) => setConsentFor\(provider\.id\)\}/.test(list));
+check("the page draws a provider's card only when its OAuth app is configured",
+  /const shown = cardsAllowed \? configured : \[\];/.test(integrationsPage) &&
+    /PROVIDERS\.filter\(\(p\) => shown\.includes\(p\.id\) && matchesSearch\(p\.name, q\)\)/.test(list));
+check("...and nothing on the page reads a switch", !/isFeatureOn|providersOpenTo/.test(integrationsPage));
+check("ONE PRESS: Connect is a button on the card that opens what it will read",
+  /\{!isConnected && \(\s*<button\s*type="button"\s*disabled=\{!isAvailable\}\s*onClick=\{\(\) => setConsentFor\(provider\.id\)\}/.test(list));
 check("...and the consent step it opens goes on to the provider's own window", /href=\{`\/api\/integrations\/\$\{provider\.id\}\/connect`\}/.test(list));
-check("the connect route refuses the others", /if \(!\(await providersOpenTo\(user\)\)\.has\(provider\.id\)\) \{\s*return NextResponse\.json\(\{ ok: false, code: "unknown_provider" \}, \{ status: 404 \}\);/.test(code("src/app/api/integrations/[provider]/connect/route.ts")));
+const connectRoute = code("src/app/api/integrations/[provider]/connect/route.ts");
+check("the connect route refuses a provider that is not configured here", /if \(!providerConfigured\(provider\.id\)\) \{/.test(connectRoute) && !/providersOpenTo/.test(connectRoute));
 const runner = code("src/lib/automations/runner.ts");
-check("an automation already on stops reading the calendar when the switch closes",
-  /if \(box\.source\.startsWith\("calendar_"\)\) \{\s*if \(!\(await providersOpenTo\(ctx\.user\)\)\.has\("google_calendar"\)\) return \{ ok: false, note: "not_connected" \};\s*const result = await searchUserData\(/.test(runner));
-check("...and the automations count the calendar as connected only while the switch is open: switching on, and the boxes on the screen",
-  /\? !open\.has\("google_calendar"\) \|\| !integrations\.some\(\(i\) => i\.provider === "google_calendar" && i\.status === "connected"\)/.test(code("src/lib/automations/flow-access.ts")) &&
-    /calendar \? providersOpenTo\(user\) : /.test(code("src/lib/automations/flow-access.ts")) &&
-    /google_calendar: open\.has\("google_calendar"\) && integrations\.some\(/.test(code("src/lib/automations/page-data.ts")));
-check("Chat stops reading an account already connected when the switch closes",
-  /const open = await providersOpenTo\(user\);\s*const integrations = \(await listIntegrations\(user\.id\)\)\.filter\(\(i\) => open\.has\(i\.provider\)\);\s*integrationSearchTool = buildSearchTool\(integrations\);/.test(code("src/app/api/chat/route.ts")));
+check("an automation reads the calendar through the connection, with no switch in the way",
+  /if \(box\.source\.startsWith\("calendar_"\)\) \{\s*const result = await searchUserData\(/.test(runner) && !/providersOpenTo/.test(runner));
+check("...and the automations count the calendar as connected when it is: switching on, and the boxes on the screen",
+  /\? !integrations\.some\(\(i\) => i\.provider === "google_calendar" && i\.status === "connected"\)/.test(code("src/lib/automations/flow-access.ts")) &&
+    /google_calendar: integrations\.some\(/.test(code("src/lib/automations/page-data.ts")));
+check("Chat reads every connected account the person has",
+  /const integrations = await listIntegrations\(user\.id\);\s*integrationSearchTool = buildSearchTool\(integrations\);/.test(code("src/app/api/chat/route.ts")));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. the database and the words ==");

@@ -26,8 +26,9 @@
  * the calendar connected through the flow above, Telegram connected
  * through its own route, the automation run by the cron at its hour, and
  * the message that reaches Telegram carrying the calendar's events — on an
- * account that is CHARGED, as a customer's is. Then the connections switch
- * is closed, and the same automation runs again.
+ * account that is CHARGED, as a customer's is. (Until 2026-10-26 the
+ * connections switch was then closed and the same automation run again;
+ * the switch is gone, so that part is too.)
  *
  * Around both, in Greek and in English, on a desktop with a mouse and a
  * phone with real touch: an account with nothing yet; the provider
@@ -39,7 +40,8 @@
  * Five things that were wrong, found by this file on 2026-10-08 and fixed
  * the same day (docs/PROGRESS.md): the consent step opened out of sight;
  * «αύριο» was Greenwich's tomorrow; an automation already on went on
- * reading the calendar with the connections switch closed; the consent
+ * reading the calendar after its switch was closed (the switch is gone
+ * since 2026-10-26); the consent
  * promised no reads «in the background» while an automation reads at its
  * hour; and on a phone the tab bar covered the bottom of every tool's work
  * area. One is open and pinned as it is: NEEDS 43.
@@ -93,7 +95,7 @@ const DEFAULTS = {
   user_integrations: () => ({ last_sync_at: null, metadata: {} }),
 };
 
-function reset({ tier = "growth", credits = 3000, freeChat = true, locale = "el", connections = "staff", automations = "staff" } = {}) {
+function reset({ tier = "growth", credits = 3000, freeChat = true, locale = "el", } = {}) {
   tables.clear();
   rpcs.length = 0;
   objects.clear();
@@ -103,7 +105,6 @@ function reset({ tier = "growth", credits = 3000, freeChat = true, locale = "el"
   MOCK_USER.user_metadata = { subscription_tier: tier, preferred_locale: locale };
   table("user_credits").push({ user_id: MOCK_USER.id, credits_remaining: credits, credits_total: credits, plan_tier: tier, beta_expires_at: null });
   table("user_onboarding").push({ user_id: MOCK_USER.id, completed_at: "2026-01-02T00:00:00Z", skipped_at: null });
-  setFlags({ connections, automations });
   google.reset();
   telegram.length = 0;
   model.calls.length = 0;
@@ -731,7 +732,8 @@ try {
     await page.goto(`${ON}/dashboard/integrations`, { waitUntil: "networkidle" });
     let main = await page.locator("main").innerText();
     check("empty: the page says there is nothing connected yet, and what connecting gives", main.includes(I.emptyTitle) && main.includes(I.emptyBody));
-    check("...with the four cards and their Connect buttons", (await page.locator('[data-testid="integration-connect"]').count()) === 4);
+    // Three cards: Gmail, Drive and Calendar. Slack's OAuth app is not set up in this run, so it has no card (since 2026-10-26).
+    check("...with the three cards and their Connect buttons", (await page.locator('[data-testid="integration-connect"]').count()) === 3);
     check("...and not a sentence of the other language", foreignOn(locale, main).length === 0, foreignOn(locale, main).join(" | "));
 
     // ---- one press, what it will read, Google, back
@@ -758,7 +760,7 @@ try {
     const body = await page.locator("body").innerText();
     check("back on the page, it says «connected», in the reader's language", body.includes(I.status.connected), body.slice(0, 300));
     check("...the card says Connected, with the account it reads", main.includes(I.statusConnected) && main.includes(MOCK_USER.email));
-    check("...and its Connect button is gone (3 left)", (await page.locator('[data-testid="integration-connect"]').count()) === 3);
+    check("...and its Connect button is gone (2 left)", (await page.locator('[data-testid="integration-connect"]').count()) === 2);
     check("...not a sentence of the other language", foreignOn(locale, main).length === 0, foreignOn(locale, main).join(" | "));
     check("...the page does not scroll sideways", (await sideways(page)) <= 1, `${await sideways(page)}px`);
 
@@ -829,7 +831,7 @@ try {
     let body = await page.locator("body").innerText();
     check("cancelled on Google's screen: back on the page, it says so, and nothing is stored or exchanged",
       body.includes(I.status.cancelled) && !integrationRow() && google.tokenCalls.length === 0, body.slice(0, 300));
-    check("...the Connect button is there to try again", (await page.locator('[data-testid="integration-connect"]').count()) === 4);
+    check("...the Connect button is there to try again", (await page.locator('[data-testid="integration-connect"]').count()) === 3);
     await context.close();
 
     // ---- Google refuses the code
@@ -908,8 +910,10 @@ try {
     const main = await page.locator("main").innerText();
     // The plan wall itself (components/billing/upgrade-required.tsx), not
     // only the absence of the buttons: its title, in the reader's language.
-    check("Free: the page says which plan connections come with, instead of a button that would fail",
-      (await page.locator('[data-testid="integration-connect"]').count()) === 0 && main.includes(I.title) && main.includes(T.common.upgradeRequired.title), main.slice(0, 300));
+    // Since 2026-10-26 a Free account has no provider cards (they are for
+    // paid plans) but does have the by-address section, open to every plan.
+    check("Free: no provider card and no button that would fail; the by-address section is there",
+      (await page.locator('[data-testid="integration-connect"]').count()) === 0 && (await page.locator('[data-testid="mcp-apps"]').count()) === 1 && main.includes(I.title), main.slice(0, 300));
     check("...not a sentence of the other language", foreignOn(locale, main).length === 0, foreignOn(locale, main).join(" | "));
     const refused = await page.request.get(`${ON}/api/integrations/google_calendar/connect`, { maxRedirects: 0 });
     check("...and the route refuses before Google is ever asked", refused.status() === 403 && (await refused.json()).upgradeRequired === true && google.authorize.length === 0);
@@ -919,7 +923,7 @@ try {
 
   // =================================================================
   // PACKAGE 30: «Κάθε πρωί στις 9 στείλε μου στο Telegram τι έχω σήμερα»,
-  // all the way, then the connections switch closed
+  // all the way
   // =================================================================
   if (runs("30morning")) {
     where = "30 morning el desktop";
@@ -968,22 +972,6 @@ try {
     check("...and the person's Telegram got today's events", telegram.length === sent + 1 && message.chat_id === "424242" && String(message.text).includes(TODAY_TITLE), JSON.stringify(message));
     check("...charged for its AI box, and the history says so", state.credits < before && run.credits_charged === before - state.credits, `${before} → ${state.credits}, row ${run?.credits_charged}`);
 
-    // ---- the connections switch closed by the owner
-    setFlags({ connections: "off", automations: "staff" });
-    morning.next_run_at = new Date(Date.now() - 60_000).toISOString();
-    const readsBefore = google.calendarCalls.length;
-    const sentBefore = telegram.length;
-    const creditsBefore = state.credits;
-    await page.request.get(`${ON}/api/cron/automation-flows`, { headers: { Authorization: `Bearer ${CRON_SECRET}` } });
-    const closed = table("automation_runs").filter((r) => r.flow_id === morning.id && r.started_by === "time").at(-1);
-    check("with the connections switch closed, an automation already on does NOT read the calendar",
-      google.calendarCalls.length === readsBefore, `${google.calendarCalls.length - readsBefore} read(s) of the calendar after the switch was closed`);
-    check("...sends nothing and charges nothing, and its run says the connection is not there",
-      telegram.length === sentBefore && state.credits === creditsBefore && closed?.status === "failed" && closed.steps.some((s) => s.note === "not_connected"), JSON.stringify(closed?.steps));
-    await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
-    await openFlowNamed(page, press, "Το πρωινό μου");
-    const needs = await page.locator('[data-testid="flow-needs"]').allInnerTexts();
-    check("...the screen agrees: the calendar box asks for the connection again", needs.some((n) => n.includes(fill(A.needsConnection, { name: "Google Calendar" }))), needs.join(" | "));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

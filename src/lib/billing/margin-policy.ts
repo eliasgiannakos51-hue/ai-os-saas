@@ -281,6 +281,9 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   codeAssist: "code_assist",
   // «Τα δικά μου», 2026-10-22: one question over the account's own rows.
   myStuffAsk: "my_stuff_ask",
+  // Connect by address, 2026-10-26: the model call that turns a request
+  // into one tool call of the person's own app. The app's call is free.
+  mcpAsk: "mcp_ask",
   // V5 #21.
   presentationGenerate: "presentation_generate",
   // V5 #22.

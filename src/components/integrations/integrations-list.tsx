@@ -33,7 +33,6 @@ export function IntegrationsList({
   cap,
   configured,
   shown,
-  connectButton = false,
   encryptionReady,
 }: {
   integrations: IntegrationSummary[];
@@ -41,12 +40,9 @@ export function IntegrationsList({
   cap: number;
   /** Providers whose OAuth app is set up on this deployment. */
   configured: ProviderId[];
-  /** Providers this person may see — those behind a closed switch are left
-   *  out on the server (lib/integrations/switches.ts). */
+  /** Providers drawn: only those whose OAuth app is set up here, so there is
+   *  never a Connect button that cannot work. */
   shown: ProviderId[];
-  /** The switch "connections" (package 31): Connect is a button on the
-   *  card, not an item in its menu. It opens the same consent step. */
-  connectButton?: boolean;
   /** False when INTEGRATION_ENCRYPTION_KEY is missing — connecting is
    *  refused server-side, and saying so here beats a 503 after a redirect. */
   encryptionReady: boolean;
@@ -245,7 +241,7 @@ export function IntegrationsList({
                   {/* ONE PRESS TO WHAT IT WILL READ (MASTER 16, package 31):
                       the consent step is the next thing on screen, and from
                       there one more press is Google's own window. */}
-                  {connectButton && !isConnected && (
+                  {!isConnected && (
                     <button
                       type="button"
                       disabled={!isAvailable}

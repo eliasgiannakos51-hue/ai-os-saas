@@ -15,7 +15,6 @@ import {
 } from "@/lib/chat/provenance";
 import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
-import { providersOpenTo } from "@/lib/integrations/switches";
 import { isValidTimeZone } from "@/lib/agents/cron-expression";
 import {
   buildSearchTool,
@@ -713,10 +712,7 @@ export async function POST(request: Request) {
     let integrationSearchTool: Anthropic.Tool | null = null;
     let integrationInstruction = "";
     try {
-      // Only providers this person's switches allow (lib/integrations/switches.ts):
-      // a closed switch stops Chat reading an account already connected.
-      const open = await providersOpenTo(user);
-      const integrations = (await listIntegrations(user.id)).filter((i) => open.has(i.provider));
+      const integrations = await listIntegrations(user.id);
       integrationSearchTool = buildSearchTool(integrations);
       if (integrationSearchTool) {
         integrationInstruction = searchToolInstruction(

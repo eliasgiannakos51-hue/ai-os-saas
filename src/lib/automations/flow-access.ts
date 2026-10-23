@@ -8,7 +8,6 @@ import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/bill
 import type { Plan } from "@/lib/billing/plans";
 import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 import { listIntegrations } from "@/lib/integrations/store";
-import { providersOpenTo } from "@/lib/integrations/switches";
 import { listDeliveryChannels } from "@/lib/agents/delivery-store";
 import { connectionsNeeded, cronFor, type Box, type StartBox } from "@/lib/automations/boxes";
 
@@ -83,22 +82,19 @@ export function nextRunFor(boxes: Box[], timeZone: string, from = new Date()): s
  * reads a calendar nobody connected, or sends to a Telegram that is not
  * set up, is not switched on: it would fail at its first run, unseen.
  *
- * The calendar counts as connected only while the switch "connections"
- * is open to this person (lib/integrations/switches.ts): the switch that
- * takes the calendar off the page takes it out of the automations too.
+ * The calendar counts as connected when the person has connected it.
  */
 export async function missingConnections(user: { id: string; email?: string | null }, boxes: Box[]): Promise<("google_calendar" | "telegram")[]> {
   const needs = connectionsNeeded(boxes);
   if (needs.length === 0) return [];
   const calendar = needs.includes("google_calendar");
-  const [integrations, channels, open] = await Promise.all([
+  const [integrations, channels] = await Promise.all([
     calendar ? listIntegrations(user.id) : Promise.resolve([]),
     needs.includes("telegram") ? listDeliveryChannels(user.id) : Promise.resolve([]),
-    calendar ? providersOpenTo(user) : Promise.resolve(new Set<string>()),
   ]);
   return needs.filter((need) =>
     need === "google_calendar"
-      ? !open.has("google_calendar") || !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")
+      ? !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")
       : !channels.some((c) => c.channel === "telegram")
   );
 }

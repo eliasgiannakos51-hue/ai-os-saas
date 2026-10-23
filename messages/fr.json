@@ -4277,11 +4277,6 @@
       "does": "Publier donne au site une adresse que tout le monde peut ouvrir, et compte ses visiteurs ici.",
       "doesNot": "Cela ne vous donne pas de domaine à vous. L'adresse est aujourd'hui un chemin sur ce site, pas votredomaine.com — y faire pointer un vrai domaine est une autre étape."
     },
-    "files": {
-      "is": "Vos documents, lisibles par l'IA.",
-      "does": "Déposez un PDF, Word, Excel, CSV ou texte : le texte est extrait et vous posez des questions sur ceux que vous sélectionnez.",
-      "doesNot": "Il ne lit pas les scans. Un PDF qui est une photo de page n'a aucun texte à extraire et demande d'abord un OCR, et les documents très longs sont lus jusqu'à une limite."
-    },
     "deepResearch": {
       "is": "Une recherche qui vous coûterait plusieurs heures.",
       "does": "Il vous montre d'abord son plan, puis fait le travail et revient avec des sources vérifiables.",
@@ -4486,6 +4481,11 @@
       "is": "Toutes les discussions que vous avez eues, au même endroit.",
       "does": "Les affiche de la plus récente à la plus ancienne, cherche dans les titres et dans ce qui a été dit, et renomme, épingle, classe ou supprime n'importe laquelle.",
       "doesNot": "La recherche ne lit pas tous les messages jamais envoyés : elle lit les 400 plus récents, et la page le dit pendant que vous tapez."
+    },
+    "images": {
+      "is": "Quatre images à partir d'une description.",
+      "does": "Décrivez ce que vous voulez et obtenez quatre versions. Appuyez sur l'une pour la modifier avec des mots, puis téléchargez-la dans la plus grande taille que fournit le fournisseur. Chaque image reste dans votre Bibliothèque.",
+      "doesNot": "Votre original n'est pas modifié : chaque changement est une nouvelle version. Il ne crée pas d'images de personnes réelles faisant ce qu'elles n'ont pas fait. Sans la clé du fournisseur, rien n'est créé et rien n'est facturé."
     }
   },
   "helpCentre": {

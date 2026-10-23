@@ -7,9 +7,9 @@
  *
  * One production build; the signed-in account is the test account. The
  * switches are rows in the stand-in database's feature_flags, changed
- * between runs, so both screens are walked: the Files shell ("tool-shell"
- * on) and the Files page ("tool-shell" off), each with "file-pages" on,
- * and once with it off.
+ * between runs: the Files shell (the Analyze shell, which /dashboard/files
+ * redirects into; the switch "tool-shell" was removed 2026-10-23) with
+ * "file-pages" on, and once with it off.
  *
  * TWO KINDS OF RUN.
  *
@@ -242,8 +242,9 @@ async function start(env) {
 
 const DESKTOP = { label: "desktop", viewport: { width: 1440, height: 900 }, touch: false };
 const PHONE = { label: "phone", viewport: { width: 390, height: 844 }, touch: true };
-const SHELL = { "tool-shell": "staff", "file-pages": "staff" };
-const PAGE = { "tool-shell": "off", "file-pages": "staff" };
+// The Files page (the walk with the switch "tool-shell" off) is gone: the switch
+// was removed 2026-10-23 and /dashboard/files redirects into the Analyze shell.
+const SHELL = { "file-pages": "staff" };
 const FREE_FILES = [1, 2, 3].map((n) => ({ ...FILE, id: `f${n}111111-1111-4111-8111-11111111111${n}`, filename: `Arxeio-${n}.pdf`, size_bytes: 1000 }));
 
 try {
@@ -310,11 +311,8 @@ try {
   const RUNS = [
     { screen: "shell", flags: SHELL, device: DESKTOP },
     { screen: "shell", flags: SHELL, device: PHONE },
-    { screen: "page", flags: PAGE, device: DESKTOP },
-    { screen: "page", flags: PAGE, device: PHONE },
     { screen: "shell, in English", flags: SHELL, device: DESKTOP, locale: "en" },
-    { screen: "page, in English", flags: PAGE, device: PHONE, locale: "en" },
-    { screen: "shell, switch off", flags: { "tool-shell": "staff", "file-pages": "off" }, device: PHONE },
+    { screen: "shell, switch off", flags: { "file-pages": "off" }, device: PHONE },
   ];
 
   for (const run of RUNS) {
@@ -482,7 +480,6 @@ try {
   const WHOLE = [
     { name: "upload a 51-page PDF and ask — the shell", flags: SHELL, device: DESKTOP },
     { name: "upload a 51-page PDF and ask — the shell", flags: SHELL, device: PHONE },
-    { name: "upload a 51-page PDF and ask — the page", flags: PAGE, device: DESKTOP },
   ];
   for (const run of WHOLE) {
     const { device } = run;
@@ -529,7 +526,7 @@ try {
   }
 
   // ---- a new account, nothing yet
-  for (const run of [{ flags: SHELL, device: PHONE }, { flags: PAGE, device: DESKTOP }]) {
+  for (const run of [{ flags: SHELL, device: PHONE }]) {
     const { device } = run;
     console.log(`\n== a new account, nothing yet — ${run.flags === SHELL ? "the shell" : "the page"}, ${device.label} ==`);
     const { context, page, press } = await open(run);
@@ -553,9 +550,7 @@ try {
   // ---- out of credits; the provider overloaded
   for (const run of [
     { name: "out of credits — the shell", flags: SHELL, device: PHONE, credits: 0, files: [FILE], expect: "askNoCredits" },
-    { name: "out of credits — the page", flags: PAGE, device: DESKTOP, credits: 0, files: [FILE], expect: "askNoCredits" },
     { name: "the provider overloaded — the shell", flags: SHELL, device: DESKTOP, model: "overloaded", files: [FILE], expect: "askFailed" },
-    { name: "the provider overloaded — the page", flags: PAGE, device: PHONE, model: "overloaded", files: [FILE], expect: "askFailed" },
     { name: "the provider overloaded — the shell, in English", flags: SHELL, device: PHONE, model: "overloaded", files: [FILE], expect: "askFailed", locale: "en" },
   ]) {
     const { device } = run;
@@ -594,9 +589,7 @@ try {
   // ---- offline: the question never reaches the server; a delete the server refuses
   for (const run of [
     { name: "offline, the question — the shell", flags: SHELL, device: DESKTOP, files: [FILE], offline: true, expect: "askError" },
-    { name: "offline, the question — the page", flags: PAGE, device: PHONE, files: [FILE], offline: true, expect: "askError" },
     { name: "a delete the server refuses — the shell", flags: SHELL, device: DESKTOP, files: [FILE], storageRefusesDelete: true, expect: "deleteError" },
-    { name: "a delete the server refuses — the page", flags: PAGE, device: PHONE, files: [FILE], storageRefusesDelete: true, expect: "deleteError" },
   ]) {
     const { device } = run;
     console.log(`\n== ${run.name}, ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);
@@ -631,9 +624,7 @@ try {
   // ---- a Free account at its file limit; a scanned PDF
   for (const run of [
     { name: "a Free account at its 3 files — the shell", flags: SHELL, device: PHONE, tier: "free", files: FREE_FILES, upload: [UP, UP_PDF], expect: "uploadFileCap" },
-    { name: "a Free account at its 3 files — the page", flags: PAGE, device: DESKTOP, tier: "free", files: FREE_FILES, upload: [UP, UP_PDF], expect: "uploadFileCap" },
     { name: "a scanned PDF, no text in it — the shell", flags: SHELL, device: DESKTOP, upload: [SCAN, SCAN_PDF], expect: "scan" },
-    { name: "a scanned PDF, no text in it — the page", flags: PAGE, device: PHONE, upload: [SCAN, SCAN_PDF], expect: "scan" },
   ]) {
     const { device } = run;
     console.log(`\n== ${run.name}, ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);

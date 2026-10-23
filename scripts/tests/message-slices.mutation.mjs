@@ -110,7 +110,7 @@ const MUTANTS = [
     // 69 -> 70 -> 71 on 2026-10-22: my-stuff-shell.tsx's and then
     // my-stuff-browse.tsx's `kinds.<kind>` template literals («Τα δικά
     // μου»).
-    from: "    unbounded: 71,",
+    from: "    unbounded: 69,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

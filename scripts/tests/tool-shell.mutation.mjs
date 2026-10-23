@@ -361,8 +361,8 @@ const MUTANTS = [
   {
     name: "Files: the old address stops redirecting to the merged tool",
     file: FILES_OLD,
-    from: '  redirect(record ? `/dashboard/data-analysis?record=${encodeURIComponent(record)}` : "/dashboard/data-analysis");',
-    to: '  void (record ? `/dashboard/data-analysis?record=${encodeURIComponent(record)}` : "/dashboard/data-analysis");',
+    from: '  redirect(query ? `/dashboard/data-analysis?${query}` : "/dashboard/data-analysis");',
+    to: '  void (query ? `/dashboard/data-analysis?${query}` : "/dashboard/data-analysis");',
     expect: "the old address redirects to it unconditionally",
   },
   {
@@ -424,8 +424,8 @@ const MUTANTS = [
   {
     name: "Site: a change is sent without its photos",
     file: SITE,
-    from: "...(pages ? { pageSlug: slug } : {}), referenceImagePaths });",
-    to: "...(pages ? { pageSlug: slug } : {}) });",
+    from: "pageSlug: slug, referenceImagePaths });",
+    to: "pageSlug: slug });",
     expect: "what is said changes it",
   },
   {

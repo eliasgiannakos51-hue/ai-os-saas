@@ -608,8 +608,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "delivery-channels",
       "transitions/detect",
       "transitions/record",
-      // Automations as boxes (package 30), behind the switch "automations":
-      // the same feature, charged the same way, drawn in the shell.
+      // Automations as boxes (package 30): the same feature, charged the
+      // same way, drawn in the shell.
       "automations/flows",
       "automations/flows/[id]",
       "automations/flows/[id]/change",
@@ -937,9 +937,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // tool — Library's 7 sources plus chat, coding, finance, sales and
   // trading. Browsing and deleting its own sessions cost nothing; only
   // asking a question in words reserves credits, the same shape as
-  // Coding's own "coding/run" above. No sidebar row and no square until
-  // the switch opens it (SWITCH_ONLY_ITEMS, lib/nav/all-tools.ts), the
-  // same reason Games below is not sold yet either.
+  // Coding's own "coding/run" above. No sidebar row; its square is the
+  // first of the final All tools grid (lib/nav/all-tools.ts), open to
+  // everyone since 2026-10-23, and not sold as a plan row yet, the same
+  // reason Games below is not sold yet either.
   {
     id: "myStuff",
     group: "organise",
@@ -1186,11 +1187,12 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // Images page already carries (buildLogs above, lib/build-modules.ts) —
   // enforced in every image route before anything is spent. NOT A ROW YET,
   // and not `notBuilt` either, because it is built (pricing-truth holds a
-  // held tier with routes to publishing it): it is behind the switch
-  // "image-studio", which admits the owner and the test account only, and
-  // no picture is made without the provider's key (NEEDS 5). A row a buyer
-  // cannot have is the lie this file exists to stop. It is published when
-  // the switch is opened to everyone (docs/NEEDS-FROM-ELIAS.md, 38).
+  // held tier with routes to publishing it): open to everyone since
+  // 2026-10-23 (no switch), but no picture is made without the provider's
+  // key (NEEDS 5) and its square on All tools is drawn only when the key is
+  // there. A row a buyer cannot have is the lie this file exists to stop,
+  // so it is published when the owner has the key in and confirms the tier
+  // (docs/NEEDS-FROM-ELIAS.md, 38).
   {
     id: "imageStudio",
     group: "make",
@@ -1198,9 +1200,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     routes: ["images/generate", "images/[id]/edit", "images/[id]/full", "images/[id]/download", "images/[id]"],
     charges: true,
     notSold:
-      "owner-only for now: the switch image-studio admits the owner and the test account " +
-      "(isFeatureOn in src/lib/images/image-access.ts), and no picture is made until the image " +
-      "provider's key is set (NEEDS 5)",
+      "open to everyone since 2026-10-23 but no picture is made until the image provider's key " +
+      "is set (NEEDS 5); published as a row when the key is in and the owner confirms the tier",
     enforcedIn: "src/lib/images/image-access.ts",
     enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", IMAGE_MIN_PLAN)",
     cell: (p) => boolCell(p.slug !== "free"),
@@ -1209,11 +1210,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // description, and one paragraph of it changed with words. Starter and
   // up — the tier of Slides and Posts, the other tools that write from a
   // description — enforced in both routes before anything is spent
-  // (lib/documents/writer-access.ts). NOT A ROW YET, for imageStudio's
-  // reason: it is behind the switch "document-writer", which admits the
-  // owner and the test account only, and a row a buyer cannot have is
-  // the lie this file exists to stop. It is published, and the tier
-  // confirmed by the owner, when the switch is opened to everyone.
+  // (lib/documents/writer-access.ts). Open to everyone since 2026-10-23
+  // (no switch). NOT A ROW YET: the tier is the owner's to confirm, and a
+  // row the owner has not confirmed is the lie this file exists to stop.
   {
     id: "documentWriter",
     group: "make",
@@ -1221,8 +1220,8 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     routes: ["documents/generate", "documents/[id]/edit"],
     charges: true,
     notSold:
-      "owner-only for now: the switch document-writer admits the owner and the test account " +
-      "(isFeatureOn in src/lib/documents/writer-access.ts); the tier is confirmed when it opens to everyone",
+      "open to everyone since 2026-10-23 (starter and up is enforced in src/lib/documents/writer-access.ts); " +
+      "published as a row when the owner confirms the tier",
     enforcedIn: "src/lib/documents/writer-access.ts",
     enforcedSymbol: "planMeetsMinimum(plan?.slug ?? \"free\", DOCUMENT_WRITER_MIN_PLAN)",
     cell: (p) => boolCell(p.slug !== "free"),

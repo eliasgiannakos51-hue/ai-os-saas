@@ -25,10 +25,9 @@
  *     provider made it, once, then free;
  *   - the provider down, declining, making three of four, and the reader
  *     pressing Stop while it is slow;
- *   - out of credits; a Free account; the switch off;
+ *   - out of credits; a Free account;
  *   - the tool's name wherever the tool is named: the tab, the ⌘K menu,
- *     the records hub, All tools — and the old ideas page keeping its own
- *     name where the switch is off;
+ *     the records hub, All tools — for everybody, no switch (2026-10-23);
  *   - no word of the other language on the screen.
  *
  * Run: node scripts/tests/image-studio-edges.prodtest.mjs
@@ -89,7 +88,7 @@ const state = { credits: 3000 };
 let clock = Date.parse("2026-10-08T09:00:00Z");
 const now = () => new Date((clock += 1000)).toISOString();
 
-function reset({ tier = "growth", credits = 3000, flag = "staff" } = {}) {
+function reset({ tier = "growth", credits = 3000 } = {}) {
   tables.clear();
   objects.clear();
   rpcs.length = 0;
@@ -98,11 +97,7 @@ function reset({ tier = "growth", credits = 3000, flag = "staff" } = {}) {
   MOCK_USER.user_metadata = { subscription_tier: tier };
   table("user_credits").push({ user_id: MOCK_USER.id, credits_remaining: credits, credits_total: credits, plan_tier: tier, beta_expires_at: null });
   table("user_onboarding").push({ user_id: MOCK_USER.id, completed_at: "2026-01-02T00:00:00Z", skipped_at: null });
-  setFlag(flag);
 }
-// All tools' squares are behind `all-tools-tiles` since 2026-10-14, and it
-// starts at «Κανείς»; this looks for Image's square, so it opens them.
-const setFlag = (audience) => tables.set("feature_flags", [{ key: "all-tools-tiles", audience: "everyone" }, { key: "image-studio", audience }]);
 
 const PASS_THROUGH = new Set(["select", "order", "limit", "offset", "on_conflict", "columns"]);
 function matches(row, params) {
@@ -485,11 +480,11 @@ async function language(page, locale, label) {
 // ---------------------------------------------------------------------
 // THE TOOL'S NAME, WHERE THE TOOL IS NAMED
 // ---------------------------------------------------------------------
-async function names(page, press, origin, device, locale, on) {
+async function names(page, press, origin, device, locale) {
   const T = L[locale];
-  const want = on ? T.sidebar.items.imageTool : T.sidebar.items.images;
-  const other = on ? T.sidebar.items.images : T.sidebar.items.imageTool;
-  const state = on ? "switch on" : "switch off";
+  const want = T.sidebar.items.imageTool;
+  const other = T.sidebar.items.images;
+  const state = "for everybody";
 
   // ⌘K: the search in the top bar, from sm up (below it the bar has no room for it).
   if (!device.touch) {
@@ -515,20 +510,15 @@ async function names(page, press, origin, device, locale, on) {
   const entry = page.locator('a[href="/dashboard/images"]').first();
   const said = (await entry.innerText().catch(() => "")).split("\n").map((s) => s.trim()).filter(Boolean);
   check(`${state}: the records hub names it «${want}»`, said[0] === want, JSON.stringify(said));
-  if (on)
-    check(`${state}: ...with the tool's own line, not the one that says it makes nothing`,
+  check(`${state}: ...with the tool's own line, not the one that says it makes nothing`,
       said.includes(T.sidebar.hints.imageTool) && !said.includes(T.sidebar.hints.images), JSON.stringify(said));
 
   // All tools: never the ideas page's name for the tool; any square it draws for it carries the tool's.
   await page.goto(`${origin}/dashboard/tools`, { waitUntil: "networkidle" });
   const squares = await page.locator('a[data-testid="tool-tile"][href="/dashboard/images"]').allInnerTexts();
   const body = await mainText(page);
-  if (on) {
-    check(`${state}: All tools never calls it «${other}», and its squares (${squares.length}) say «${want}»`,
-      !body.includes(other) && squares.every((s) => s.split("\n")[0].trim() === want), JSON.stringify(squares));
-  } else {
-    check(`${state}: All tools has no square for the ideas page`, squares.length === 0, JSON.stringify(squares));
-  }
+  check(`${state}: All tools never calls it «${other}», and its square (${squares.length}) says «${want}»`,
+    !body.includes(other) && squares.length === 1 && squares.every((s) => s.split("\n")[0].trim() === want), JSON.stringify(squares));
 }
 
 try {
@@ -813,15 +803,10 @@ try {
       await language(page, locale, "free");
 
       // ---------------------------------------------------------------
-      // 9. THE NAME, ON AND OFF
+      // 9. THE NAME, FOR EVERYBODY
       // ---------------------------------------------------------------
       reset({ tier: "growth", credits: 3000 });
-      await names(page, press, ON, device, locale, true);
-      setFlag("off");
-      await page.goto(`${ON}/dashboard/images`, { waitUntil: "networkidle" });
-      check("switch off: the old ideas page, under its own name, in the tab and the heading",
-        (await titleName(page)) === T.sidebar.items.images && (await page.locator("main h1").first().innerText().catch(() => "")) === T.sidebar.items.images && (await page.locator('[data-testid="image-price"]').count()) === 0);
-      await names(page, press, ON, device, locale, false);
+      await names(page, press, ON, device, locale);
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();
     }

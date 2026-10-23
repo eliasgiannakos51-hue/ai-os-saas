@@ -197,7 +197,7 @@ check("Free is offered the analysis, and none of what it would be refused",
   JSON.stringify(includes.planIncludes("free", false)) === JSON.stringify({ research: false, site: false, posts: false, slides: false, analysis: true }), JSON.stringify(includes.planIncludes("free", false)));
 const avail = code("src/lib/flows/availability.ts");
 check("the screen and the route ask it of this person's own plan", /return \{ \.\.\.planIncludes\(plan\?\.slug \?\? "free", isAdmin\), images, slidesFromResearch: true \};/.test(avail) && /const isAdmin = isAdminEmail\(user\.email\);/.test(avail));
-check("the pictures: their switch, their plan, their provider's key", /isFeatureOn\("image-studio", user\)/.test(avail) && /const images = Boolean\(imageApiKey\(\)\) && imageSwitch && \(isAdmin \|\| planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\);/.test(avail));
+check("the pictures: their plan, their provider's key, and no switch", !/image-studio/.test(avail.replace(/\/\*[\s\S]*?\*\//g, "")) && /const images = Boolean\(imageApiKey\(\)\) && \(isAdmin \|\| planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\);/.test(avail));
 const ALL = { research: true, site: true, images: true, posts: true, slides: true, analysis: true };
 const deck = plan.planFlow("Κάνε έρευνα για τα camping και φτιάξε παρουσίαση");
 const alone = plan.planFlow("Φτιάξε παρουσίαση για το camping μου");

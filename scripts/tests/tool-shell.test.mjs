@@ -230,7 +230,7 @@ const analyzePage = read("src/app/dashboard/data-analysis/page.tsx");
 const filesPage = read("src/app/dashboard/files/page.tsx");
 const filesWorkspace = read("src/components/files/files-workspace.tsx");
 check("Files: the collections the merged page reads are handed to the shell, and the old address redirects to it unconditionally",
-  /<AnalyzeShell[\s\S]{0,400}initialCollections=\{initialCollections\}/.test(analyzePage) && /redirect\(record \? `\/dashboard\/data-analysis\?record=\$\{encodeURIComponent\(record\)\}` : "\/dashboard\/data-analysis"\)/.test(filesPage));
+  /<AnalyzeShell[\s\S]{0,400}initialCollections=\{initialCollections\}/.test(analyzePage) && /redirect\(query \? `\/dashboard\/data-analysis\?\$\{query\}` : "\/dashboard\/data-analysis"\)/.test(filesPage));
 check("Files: each collection is pressed to select its files again",
   /collections\.map\(\(collection\) => \(\s*<button[\s\S]{0,120}onClick=\{\(\) => setSelected\(readyIds\(collection\)\)\}[\s\S]{0,200}data-testid="files-collection"/.test(analyze) &&
     /const readyIds = \(collection: WorkspaceCollection\) => collection\.fileIds\.filter\(\(id\) => askable\.some\(\(f\) => f\.id === id\)\);/.test(analyze));
@@ -260,7 +260,7 @@ check("...asking its questions first, answered in the field or skipped",
   /if \(data\.needsClarification\) return \{ kind: "questions"/.test(siteRequests) && /if \(outcome\.kind === "questions"\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
 check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
 check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site) && /requestSiteStop\(current\.id\)/.test(site) && /\/api\/websites\/\$\{encodeURIComponent\(websiteId\)\}\/cancel/.test(siteRequests));
-check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
+check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, pageSlug: slug, referenceImagePaths \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
 check("the price shows before sending, from the server's own estimator", /estimateForAction\(\s*"websiteGenerate"/.test(site) && /t\("estimatedCost", \{ count: estimatedCost \}\)/.test(site));
 check("the site beside the conversation is sandboxed, marked as made by AI, and says what it still lacks",
   /srcDoc=\{chosen === null \? html : outlineBoxes\(html, chosen\)\}\s*sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));

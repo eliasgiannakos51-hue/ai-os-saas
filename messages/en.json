@@ -4277,11 +4277,6 @@
       "does": "Publishing gives a site an address anyone can open, and counts its visitors here.",
       "doesNot": "It does not give you a domain of your own. The address is a path on this site today, not yourdomain.com — pointing a real domain at it is separate."
     },
-    "files": {
-      "is": "Your documents, readable by the AI.",
-      "does": "Upload a PDF, Word, Excel, CSV or text file; the text is pulled out and you can ask questions across the ones you pick.",
-      "doesNot": "It does not read scans. A PDF that is a photo of a page has no text to extract and needs OCR first, and very long documents are read up to a limit."
-    },
     "deepResearch": {
       "is": "Research that would cost you several hours.",
       "does": "It shows you its plan first, then goes and does the work and comes back with sources you can check.",
@@ -4486,6 +4481,11 @@
       "is": "Every conversation you have had, in one place.",
       "does": "Lists them newest first, searches both their titles and what was said inside them, and renames, pins, files or deletes any of them.",
       "doesNot": "The search does not read every message ever sent: it reads the newest 400, and the page says so while you type."
+    },
+    "images": {
+      "is": "Four pictures from one description.",
+      "does": "Describe what you want and get four versions. Press one and change it with words, then download it at the largest size the provider makes. Every picture is kept in your Library.",
+      "doesNot": "It does not change your original: every change is a new version. It does not make pictures of real people doing things they did not do. Without the provider's key it makes nothing and charges nothing."
     }
   },
   "helpCentre": {

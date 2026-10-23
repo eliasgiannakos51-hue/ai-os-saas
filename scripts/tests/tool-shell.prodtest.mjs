@@ -5,13 +5,13 @@
  *      SKIP_BUILD=1 node scripts/tests/tool-shell.prodtest.mjs
  *
  * One production build, two servers: one where the signed-in account is
- * the test account (TEST_ACCOUNT_EMAILS), so the switch "tool-shell" is on
- * for it, and one where it is not, so it is off. With the switch on, Posts
- * is the shell: the field is focused on arrival, at most four options sit
+ * the test account (TEST_ACCOUNT_EMAILS) and one where it is not. Since the
+ * switch "tool-shell" was removed (2026-10-23) both get the same thing:
+ * Posts is the shell: the field is focused on arrival, at most four options sit
  * under it, nothing else on the page takes text, there are no steps on
  * top; a brief sent there writes the posts and they open beside the
  * conversation on a computer and over it on a phone, with a way back.
- * With the switch off, the old page is drawn exactly as before. Slides
+ * An ordinary account gets the shell too, never the old page. Slides
  * the same, and there the second thing said in the field CHANGES the open
  * deck through /api/presentations/[id]/edit rather than writing a new one.
  * Research keeps its stop: the subject is PLANNED, the plan comes back
@@ -207,14 +207,15 @@ try {
       return r.fulfill({ contentType: "application/json", body: JSON.stringify({ id: null, set: SET, creditsCharged: 3 }) });
     });
 
-    // ---- the switch off: the old page, as before
+    // ---- an ordinary account (not the test account): the same shell. The
+    // switch "tool-shell" was removed 2026-10-23, so nobody gets the old page.
     await page.goto(`${OFF}/dashboard/posts`, { waitUntil: "networkidle" });
-    check("switch off: the old page is drawn", (await page.locator('[data-testid="posts-generate"]').count()) === 1 && (await page.locator('[data-testid="tool-shell"]').count()) === 0);
+    check("an ordinary account: Posts is the shell too, not the old page", (await page.locator('[data-testid="posts-generate"]').count()) === 0 && (await page.locator('[data-testid="tool-shell"]').count()) === 1);
 
-    // ---- the switch on: the shell
+    // ---- the test account: the shell
     await page.goto(`${ON}/dashboard/posts`, { waitUntil: "networkidle" });
     const shell = page.locator('[data-testid="tool-shell"]');
-    check("switch on: Posts is the shell", (await shell.count()) === 1 && (await page.locator('[data-testid="posts-generate"]').count()) === 0);
+    check("the test account: Posts is the shell", (await shell.count()) === 1 && (await page.locator('[data-testid="posts-generate"]').count()) === 0);
     check("...named with its one word", (await shell.locator("h1").innerText()).trim() === W.name);
     const focused = await page.evaluate(() => document.activeElement?.tagName === "TEXTAREA");
     check("...the field is focused on arrival", focused);
@@ -280,9 +281,9 @@ try {
       return r.fulfill({ contentType: "application/json", body: JSON.stringify({ id: "11111111-1111-4111-8111-111111111111", deck: { ...DECK, title: "Πρωινό στο γραφείο, σύντομα" }, creditsCharged: 2 }) });
     });
     await page.goto(`${OFF}/dashboard/presentations`, { waitUntil: "networkidle" });
-    check("Slides, switch off: the old page is drawn", (await page.locator('[data-testid="deck-generate"]').count()) === 1 && (await page.locator('[data-testid="tool-shell"]').count()) === 0);
+    check("Slides, an ordinary account: the shell too, not the old page", (await page.locator('[data-testid="deck-generate"]').count()) === 0 && (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     await page.goto(`${ON}/dashboard/presentations`, { waitUntil: "networkidle" });
-    check("Slides, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator('[data-testid="deck-generate"]').count()) === 0);
+    check("Slides, the test account: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator('[data-testid="deck-generate"]').count()) === 0);
     const slideOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();
     check(`...with at most four options (${slideOptions})`, slideOptions >= 1 && slideOptions <= 4);
     const slideField = page.locator("main textarea");
@@ -362,7 +363,7 @@ try {
       })
     );
     await page.goto(`${ON}/dashboard/deep-research`, { waitUntil: "networkidle" });
-    check("Research, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    check("Research: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     const researchField = page.locator("main textarea");
     await researchField.fill("Το EU AI Act για μικρές SaaS");
     await researchField.press("Enter");
@@ -382,7 +383,7 @@ try {
       return r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) });
     });
     await page.goto(`${ON}/dashboard/data-analysis`, { waitUntil: "networkidle" });
-    check("Analyze, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    check("Analyze: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     check("...the question asked before is in the conversation, with the rows its answer stands on",
       (await page.locator('[data-testid="tool-shell-thread"] [data-role="user"]').count()) >= 1 && (await page.locator('[data-testid="analysis-evidence"] tr').count()) === 2);
     const analyzeOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();
@@ -418,7 +419,7 @@ try {
     );
     await page.route("**/api/jobs/*/seen", (r) => r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true }) }));
     await page.goto(`${ON}/dashboard/files`, { waitUntil: "networkidle" });
-    check("Files, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    check("Files: the old address lands in the merged Analyze shell", page.url().includes("/dashboard/data-analysis") && (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     const filesField = page.locator("main textarea");
     await filesField.fill("Τι λέει για την ακύρωση;");
     await filesField.press("Enter");
@@ -469,7 +470,7 @@ try {
     check("Site, switch on: the brief sent from Home is already in the field",
       (await page.locator("main textarea").inputValue()) === "Site για καφετέρια", await page.locator("main textarea").inputValue());
     await page.goto(`${ON}/dashboard/website-builder`, { waitUntil: "networkidle" });
-    check("Site, switch on: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    check("Site: the shell", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
     const siteOptions = await page.locator('[data-testid="tool-shell-options"] > *').count();
     check(`...with at most four options (${siteOptions})`, siteOptions >= 1 && siteOptions <= 4);
     const siteField = page.locator("main textarea");

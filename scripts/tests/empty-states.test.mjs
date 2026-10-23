@@ -135,7 +135,9 @@ check(
 
   // The mirror: a module in BUILD_MODULES with no page of its own is a
   // sidebar link to a 404.
-  const missingPages = BUILD_MODULES.filter((m) => !trackerPages.includes(m.slug));
+  // `images` keeps its config and rows but its page became the Image tool
+  // when the switch image-studio was removed (2026-10-23).
+  const missingPages = BUILD_MODULES.filter((m) => !trackerPages.includes(m.slug) && m.slug !== "images");
   check(
     "every tracking module still has its page",
     missingPages.length === 0,

@@ -107,9 +107,11 @@ const analyzePage = code("src/app/dashboard/data-analysis/page.tsx");
 // FILES AND ANALYZE MERGED 2026-10-22: the shell path moved to the merged
 // page (/dashboard/data-analysis), which now carries the one `pages` the
 // Files page used to pass on each of its two paths; the Files page keeps
-// its OWN one, for the switch-off screen it still answers unconditionally.
+// its OWN one, for the switch-off screen it still answered unconditionally.
+// That screen is gone (2026-10-23, with the switch "tool-shell"): the Files
+// address only redirects now.
 check("neither page gates `pages` behind the old switch", !/isFeatureOn\("file-pages"/.test(filesPage) && !/isFeatureOn\("file-pages"/.test(analyzePage));
-check("the Files page still sets it unconditionally for its own (switch-off) screen", (filesPage.match(/\bpages\b/g) ?? []).length >= 1);
+check("the Files page only redirects into the merged tool, carrying its parameters", /redirect\(query \? `\/dashboard\/data-analysis\?\$\{query\}` : "\/dashboard\/data-analysis"\)/.test(filesPage) && !/FilesWorkspace/.test(filesPage));
 check("the merged Analyze page sets it unconditionally for the shell", /\bpages\b/.test(analyzePage));
 const cited = code("src/components/files/cited-answer.tsx");
 check("a reference in the answer is a button that opens its page", /data-testid="files-cite"/.test(cited) && /onClick=\{\(\) => onOpen\(piece\.citation\)\}/.test(cited));

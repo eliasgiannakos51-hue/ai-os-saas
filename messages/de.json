@@ -4277,11 +4277,6 @@
       "does": "Veröffentlichen gibt einer Site eine Adresse, die jeder öffnen kann, und zählt hier ihre Besucher.",
       "doesNot": "Es gibt dir keine eigene Domain. Die Adresse ist heute ein Pfad auf dieser Seite, nicht deinedomain.de — eine echte Domain daraufzeigen zu lassen ist ein eigener Schritt."
     },
-    "files": {
-      "is": "Deine Dokumente, für die KI lesbar.",
-      "does": "Lad ein PDF, Word, Excel, CSV oder Textdatei hoch: der Text wird herausgezogen und du fragst über die, die du auswählst.",
-      "doesNot": "Sie liest keine Scans. Ein PDF, das ein Foto einer Seite ist, hat keinen Text zum Extrahieren und braucht erst OCR, und sehr lange Dokumente werden nur bis zu einer Grenze gelesen."
-    },
     "deepResearch": {
       "is": "Recherche, die dich mehrere Stunden kosten würde.",
       "does": "Sie zeigt dir zuerst ihren Plan, macht dann die Arbeit und kommt mit überprüfbaren Quellen zurück.",
@@ -4486,6 +4481,11 @@
       "is": "Jede Unterhaltung, die du geführt hast, an einem Ort.",
       "does": "Zeigt sie neueste zuerst, durchsucht sowohl die Titel als auch das Gesagte, und benennt um, heftet an, legt ab oder löscht jede davon.",
       "doesNot": "Die Suche liest nicht jede je gesendete Nachricht: sie liest die neuesten 400, und die Seite sagt das, während du tippst."
+    },
+    "images": {
+      "is": "Vier Bilder aus einer Beschreibung.",
+      "does": "Beschreibe, was du willst, und du bekommst vier Versionen. Tippe eine an und ändere sie mit Worten, dann lade sie in der größten Auflösung herunter, die der Anbieter liefert. Jedes Bild bleibt in deiner Bibliothek.",
+      "doesNot": "Dein Original wird nicht verändert: jede Änderung ist eine neue Version. Es erzeugt keine Bilder von echten Personen bei Dingen, die sie nie getan haben. Ohne den Schlüssel des Anbieters entsteht nichts und es wird nichts berechnet."
     }
   },
   "helpCentre": {

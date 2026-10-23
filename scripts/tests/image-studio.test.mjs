@@ -171,7 +171,7 @@ console.log("\n== 6. the screen and the words ==");
 check('"image-studio" is no longer a switch', !/\n  "image-studio": "/.test(code("src/lib/flags/flags.ts")));
 const page = code("src/app/dashboard/images/page.tsx");
 check("the page draws the tool for a plan that has it, with no switch, and a wall otherwise",
-  !/isFeatureOn/.test(page) && /if \(included\) \{/.test(page) && /<ImageShell/.test(page) && /<UpgradeRequired/.test(page) && !/BuildModulePage/.test(page));
+  !/isFeatureOn/.test(page) && /if \(!included\) \{[\s\S]*<UpgradeRequired[\s\S]*<ImageShell/.test(page) && !/BuildModulePage/.test(page));
 check("...with the prices of this account, and whether pictures can be made at all", /prices=\{imagePrices\(plan, await getPurchasedPackCreditPriceEur\(user\.id\)\)\}/.test(page) && /configured=\{Boolean\(imageApiKey\(\)\)\}/.test(page));
 const shell = code("src/components/images/image-shell.tsx");
 check("the price is on the screen before it is spent: four, one change, the largest size",

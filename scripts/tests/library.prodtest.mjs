@@ -6,8 +6,9 @@
  *      SKIP_BUILD=1 node scripts/tests/library.prodtest.mjs
  *
  * One production build, two servers: one where the signed-in account is
- * the test account (TEST_ACCOUNT_EMAILS), so the switches "library" and
- * "tool-shell" are on for it, and one where they are off.
+ * the test account (TEST_ACCOUNT_EMAILS) and one where it is not. (The
+ * switches "library" and "tool-shell" were removed 2026-10-22 and 2026-10-23,
+ * so both servers draw the same screens.)
  *
  * The account has made a site, a deck and a set of posts (and one site
  * that failed). With the switch on, the page All tools calls «Βιβλιοθήκη»

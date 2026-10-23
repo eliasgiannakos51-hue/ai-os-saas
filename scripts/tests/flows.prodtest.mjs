@@ -333,7 +333,7 @@ try {
   }
   const ON = await start(base);
   browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
-  setFlags({ flows: "staff", "image-studio": "staff" });
+  setFlags({ flows: "staff" });
 
   // =================================================================
   console.log("\n== 1. 6.3 #2: a site, pictures and posts, in one project ==");
@@ -545,7 +545,7 @@ try {
     await context.close();
   }
   {
-    setFlags({ flows: "off", "image-studio": "staff" });
+    setFlags({ flows: "off" });
     const { context, page } = await open(ON, desktop);
     await page.goto(`${ON}/dashboard/projects`, { waitUntil: "networkidle" });
     check("with the switch off the Projects page is the one it always was", (await page.locator('[data-testid="tool-shell"]').count()) === 0 && (await page.locator("main").count()) === 1);

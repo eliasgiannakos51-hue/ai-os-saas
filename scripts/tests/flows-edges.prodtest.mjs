@@ -163,7 +163,7 @@ function handle({ req, res, url, body, json }) {
 }
 const supa = await startMockSupabase({ port: 54523, handle });
 const setFlags = (audiences) => flags.splice(0, flags.length, ...Object.entries(audiences).map(([key, audience]) => ({ key, audience })));
-const ON = { flows: "staff", "image-studio": "staff" };
+const ON = { flows: "staff" };
 
 // ---------------------------------------------------------------------
 // The model, answered locally. "down": 529 overloaded_error, as

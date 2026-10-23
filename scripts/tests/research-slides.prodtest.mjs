@@ -5,9 +5,9 @@
  * Run: node scripts/tests/research-slides.prodtest.mjs
  *      SKIP_BUILD=1 node scripts/tests/research-slides.prodtest.mjs
  *
- * One production build; the signed-in account is the test account, so the
- * switch "tool-shell" is on. A finished report is
- * in the stand-in database.
+ * One production build; the signed-in account is the test account (the
+ * switch "tool-shell" was removed 2026-10-23, so every account gets the
+ * Research shell). A finished report is in the stand-in database.
  *
  * THE PRESS RUNS THE REAL ROUTE (since the package check of 2026-10-08):
  * api/presentations/generate reads the report by its id, holds the credits,
@@ -198,10 +198,6 @@ const RUNS = [
   { name: "a new account, nothing yet", device: PHONE, locale: "el", reports: false, credits: 3000, answer: "deck" },
   { name: "a new account, nothing yet, in English", device: DESKTOP, locale: "en", reports: false, credits: 3000, answer: "deck" },
   { name: "a Free account", device: PHONE, locale: "el", reports: true, credits: 3000, answer: "deck", tier: "free" },
-  // The Research PAGE, for everybody "tool-shell" is off for: the same
-  // numbers and the same button.
-  { name: "the Research page (shell off), to Slides", device: DESKTOP, locale: "el", reports: true, credits: 3000, answer: "deck", flags: { "tool-shell": "off" } },
-  { name: "the Research page (shell off), to Slides", device: PHONE, locale: "el", reports: true, credits: 3000, answer: "deck", flags: { "tool-shell": "off" } },
 ];
 
 try {
@@ -393,10 +389,8 @@ try {
   const WHOLE = [
     { name: "a topic, planned, run, and sent to Slides — the shell", device: DESKTOP, flags: {}, mode: "ok" },
     { name: "a topic, planned, run, and sent to Slides — the shell", device: PHONE, flags: {}, mode: "ok" },
-    { name: "a topic, planned and run — the page", device: DESKTOP, flags: { "tool-shell": "off" }, mode: "ok" },
     { name: "out of credits at the plan", device: PHONE, flags: {}, mode: "ok", credits: 0, expect: (L) => SAID(L).refused?.noCredits },
     { name: "the provider overloaded at the plan", device: DESKTOP, flags: {}, mode: "overloaded", expect: (L) => SAID(L).refused?.unavailable },
-    { name: "the provider overloaded at the plan — the page", device: PHONE, flags: { "tool-shell": "off" }, mode: "overloaded", expect: (L) => SAID(L).refused?.unavailable },
     // The footer says the month is used up already; the answer to the
     // press is read from the conversation, where the footer is not.
     { name: "the month's reports used up", device: PHONE, flags: {}, mode: "ok", ledger: capFull, expect: (L) => SAID(L).capReached, thread: true },
@@ -404,7 +398,6 @@ try {
     // screen says so — never that the topic gave nothing (2026-10-08).
     { name: "the provider overloaded during the run", device: DESKTOP, flags: {}, mode: "runOverloaded", expect: (L) => SAID(L).failed?.unavailable },
     { name: "the provider overloaded during the run, in English", device: PHONE, flags: {}, mode: "runOverloaded", locale: "en", expect: (L) => SAID(L).failed?.unavailable },
-    { name: "a report that failed, in the list — the page", device: DESKTOP, flags: { "tool-shell": "off" }, mode: "ok", reports: [FAILED], expect: (L) => SAID(L).failed?.noFindings },
   ];
   const ROUTE_RESEARCH_ENGLISH = [
     "credits, and you do not have enough", "Not enough credits", "research report a month", "research reports a month",
@@ -460,7 +453,7 @@ try {
       }
       return [...seen].join("\n");
     }
-    const shell = run.flags["tool-shell"] !== "off";
+    const shell = true; // the old Research page is no longer drawn by any address (2026-10-23)
     await page.goto(`${ON}/dashboard/deep-research`, { waitUntil: "networkidle" });
 
     if (run.reports?.[0]?.status === "failed") {

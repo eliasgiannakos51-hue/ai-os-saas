@@ -385,23 +385,21 @@ const BASELINE = {
   "dashboard/data-analysis/page.tsx": 1,
   "dashboard/deep-research/page.tsx": 1,
   // TWO, and never on one screen: the page draws EITHER the writer
-  // (package 14, behind the switch "document-writer"), whose one filled
+  // (package 14, for the plans that include it), whose one filled
   // control is the field's send, OR the notes list, whose one is «New
   // document» — the same either-or as the images page below.
   "dashboard/documents/page.tsx": 2,
-  "dashboard/files/page.tsx": 1,
-  // TWO, and never on one screen: the page draws EITHER the Image tool
-  // (package 19, behind the switch "image-studio"), whose one filled
-  // control is the field's send, OR the old list for everyone else, whose
-  // one is "add". Back to 1 when the switch is everyone's and the list goes.
-  "dashboard/images/page.tsx": 2,
+  "dashboard/files/page.tsx": 0,
+  // ONE: the field's send. A plan below the tool's meets the wall,
+  // returned early (since 2026-10-23 the old ideas list is gone).
+  "dashboard/images/page.tsx": 1,
   // ONE: the field's send. The page is Games (package 26), born in the
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.
   "dashboard/games/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
   // ONE: the field's send. The page is «Τα δικά μου» (2026-10-22), born
-  // in the shell; without the switch "my-stuff" it does not exist.
+  // in the shell, open to everybody since 2026-10-23.
   "dashboard/my-stuff/page.tsx": 1,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.
@@ -452,7 +450,7 @@ const BASELINE = {
   "dashboard/trading-journal/page.tsx": 1,
   "dashboard/trading-workflow/page.tsx": 1,
   "dashboard/videos/page.tsx": 1,
-  "dashboard/website-builder/page.tsx": 1,
+  "dashboard/website-builder/page.tsx": 0,
   "dashboard/websites/page.tsx": 1,
   "forgot-password/page.tsx": 1,
   "help/page.tsx": 1,
@@ -650,7 +648,14 @@ for (const r of REPLACEMENT_SURFACES) {
     // the innocent one and stop.
     const positions = [];
     for (let at = src.indexOf(r.tag); at !== -1; at = src.indexOf(r.tag, at + 1)) positions.push(at);
-    return positions.some((at) => lastReturn === -1 || at > lastReturn);
+    // A SHELL IS THE WHOLE PAGE since the switch "tool-shell" was removed
+    // (2026-10-23): the page's last return is the full-height wrapper and
+    // the shell, nothing else, so there is no page body for it to sit in.
+    // Accepted only for a surface that is walked (a shell), and only when
+    // nothing but that wrapper stands between the return and the tag.
+    const isWholePage = (at) =>
+      Boolean(r.walk) && /return \(\s*<div className="h-\[calc\(100dvh-8rem\)\] md:h-\[calc\(100vh-4rem\)\]">\s*$/.test(src.slice(lastReturn, at));
+    return positions.some((at) => (lastReturn === -1 || at > lastReturn) && !isWholePage(at));
   });
   check(
     `...and every caller returns it EARLY, instead of the page body`,

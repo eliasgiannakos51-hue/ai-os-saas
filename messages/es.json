@@ -4277,11 +4277,6 @@
       "does": "Publicar le da al sitio una dirección que cualquiera puede abrir, y cuenta aquí sus visitas.",
       "doesNot": "No le da un dominio propio. Hoy la dirección es una ruta dentro de este sitio, no sudominio.com; apuntar un dominio real es un paso aparte."
     },
-    "files": {
-      "is": "Sus documentos, legibles por la IA.",
-      "does": "Suba un PDF, Word, Excel, CSV o texto: se extrae el texto y puede preguntar sobre los que elija.",
-      "doesNot": "No lee escaneos. Un PDF que es una foto de una página no tiene texto que extraer y necesita OCR antes, y los documentos muy largos se leen hasta un límite."
-    },
     "deepResearch": {
       "is": "Investigación que le costaría varias horas.",
       "does": "Primero le enseña su plan, después hace el trabajo y vuelve con fuentes que puede comprobar.",
@@ -4486,6 +4481,11 @@
       "is": "Todas las conversaciones que has tenido, en un solo lugar.",
       "does": "Las muestra de la más reciente a la más antigua, busca en los títulos y en lo que se dijo dentro, y renombra, fija, archiva o elimina cualquiera.",
       "doesNot": "La búsqueda no lee todos los mensajes enviados: lee los 400 más recientes, y la página lo dice mientras escribes."
+    },
+    "images": {
+      "is": "Cuatro imágenes a partir de una descripción.",
+      "does": "Describe lo que quieres y obtén cuatro versiones. Pulsa una y cámbiala con palabras, y descárgala en el mayor tamaño que da el proveedor. Cada imagen se guarda en tu Biblioteca.",
+      "doesNot": "No cambia tu original: cada cambio es una versión nueva. No crea imágenes de personas reales haciendo cosas que no hicieron. Sin la clave del proveedor no crea nada y no cobra nada."
     }
   },
   "helpCentre": {

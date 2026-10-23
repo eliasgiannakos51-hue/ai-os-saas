@@ -34,7 +34,7 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
       .maybeSingle();
     if (error) throw error;
     if (!analysis) return NextResponse.json({ error: "not_found" }, { status: 404 });
-    const { brief } = buildProfileBrief(
+    const { brief } = analysisBrief(
       {
         fileName: String(analysis.file_name ?? analysis.title ?? "dataset"),
         profile: analysis.profile as TableProfile,

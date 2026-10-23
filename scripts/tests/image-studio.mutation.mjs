@@ -181,15 +181,15 @@ const MUTANTS = [
   {
     name: "a plan below the tool's is let into the tool",
     file: PAGE,
-    from: "  if (included) {",
-    to: "  if (true) {",
+    from: "  if (!included) {",
+    to: "  if (false) {",
     expect: "the page draws the tool for a plan that has it",
   },
   {
     name: "a switch is read again before the tool opens",
     file: PAGE,
-    from: "  if (included) {",
-    to: '  if (included && (await isFeatureOn("image-studio", user))) {',
+    from: "  if (!included) {",
+    to: '  if (!included || !(await isFeatureOn("image-studio", user))) {',
     expect: "the page draws the tool for a plan that has it",
   },
   {

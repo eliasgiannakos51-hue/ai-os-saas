@@ -262,6 +262,16 @@ console.log("\n== and every component under src/components has an importer ==");
   // unimported. Wire it to a page and this exemption fails, rather than
   // sitting here describing something that stopped being true.
   const EXEMPT_COMPONENTS = {
+    "src/components/files/files-workspace.tsx":
+      "The old Files page, dead since 2026-10-23 when the tool-shell switch was removed and /dashboard/files " +
+      "became a plain redirect into Analyze. Dozens of gates and mutation suites (file-pages, upload-reversibility, " +
+      "file-extraction, share-target and more) still read this file's source for the behaviour they hold, so it " +
+      "is kept until those are re-pointed at components/analyze/analyze-shell.tsx — a separate cleanup, not part of the grid.",
+    "src/components/website-builder/website-builder-workspace.tsx":
+      "The old Site page, dead since 2026-10-23 when the tool-shell switch was removed and the Site page always " +
+      "renders the shell. Many gates and mutation suites (website-timeline, multipage-websites, step-flow, " +
+      "regenerate-cost and more) still read this file's source, so it is kept until they are re-pointed at " +
+      "components/website-builder/website-shell.tsx — a separate cleanup, not part of the grid.",
     "src/components/overview/quick-start-modal.tsx":
       "Quick Start is unwired end to end — this modal, /api/templates/apply which " +
       "only it called, lib/workspace-templates.ts and ten locales of " +

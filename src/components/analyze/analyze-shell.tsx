@@ -33,6 +33,7 @@ import { pagesRead, relabelAnswer } from "@/lib/files/page-refs";
 import { useFilesFailureWords } from "@/components/files/failure-words";
 import type { Citation } from "@/lib/files/answer";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
+import { HelpTip } from "@/components/ui/help-tip";
 
 /** The longest name /api/files/collections keeps (its MAX_NAME). */
 const MAX_COLLECTION_NAME = 80;
@@ -173,6 +174,36 @@ export function AnalyzeShell({
     // Mount + current only, as the two old effects were.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current]);
+
+  // WHAT THE PHONE'S SHARE SHEET DID (src/app/share/route.ts): it ends at
+  // /dashboard/files with `?shared=N` and the counts of what failed, or
+  // `?share_error=rate_limit`; /dashboard/files forwards them here and this
+  // says them, once, as the old Files page did (its switch-off screen no
+  // longer exists, so without this the words would be lost).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("shared") && !params.has("share_error")) return;
+    const stored = Number(params.get("shared") ?? 0);
+    const failed = Number(params.get("share_failed") ?? 0);
+    const dropped = Number(params.get("share_dropped") ?? 0);
+    const reason = params.get("share_reason");
+    if (params.get("share_error") === "rate_limit") {
+      addToast(tFiles("sharedRateLimit"), "error");
+    } else {
+      if (stored > 0) addToast(tFiles("sharedStored", { count: stored }), "success");
+      if (failed > 0) {
+        addToast(
+          reason ? `${tFiles("sharedFailed", { count: failed })} ${tFiles("sharedReason", { reason })}` : tFiles("sharedFailed", { count: failed }),
+          "error"
+        );
+      }
+      if (dropped > 0) addToast(tFiles("sharedDropped", { max: 5 }), "error");
+    }
+    // So a reload does not announce a share that already happened.
+    window.history.replaceState(null, "", window.location.pathname);
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [historyOpen, setHistoryOpen] = useState(false);
   useEffect(() => {
@@ -834,6 +865,7 @@ export function AnalyzeShell({
   return (
     <ToolShell
       name={tNames("analyze")}
+      help={<HelpTip helpKey="help.dataAnalysis" />}
       ref={composerRef}
       turns={turns}
       working={

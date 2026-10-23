@@ -378,16 +378,16 @@ try {
     await context.close();
   }
 
-  console.log("\n== the switch off, desktop ==");
+  console.log("\n== no switch row, desktop ==");
   {
-    setFlags({ "document-writer": "off" });
+    setFlags({});
     const { context, page } = await open(ON, { viewport: { width: 1440, height: 900 }, touch: false });
     await page.goto(`${ON}/dashboard/documents`, { waitUntil: "networkidle" });
-    check("with the switch off, Documents is the notes page it was", (await page.locator('[data-testid="tool-shell"]').count()) === 0);
-    const refused = await page.request.post(`${ON}/api/documents/generate`, { data: { description: "Επιστολή στον δήμο για το πεζοδρόμιο" } });
-    check("...the route refuses", refused.status() === 403 && (await refused.json()).code === "not_enabled");
+    check("with no switch row, Documents is the writer", (await page.locator('[data-testid="tool-shell"]').count()) === 1);
+    const route = await page.request.post(`${ON}/api/documents/generate`, { data: { description: "Επιστολή στον δήμο για το πεζοδρόμιο" } });
+    check("...and the route does not refuse for a switch", (await route.json().catch(() => ({}))).code !== "not_enabled");
     await page.goto(`${ON}/dashboard/tools`, { waitUntil: "networkidle" });
-    check("...and All tools does not show Document", (await page.locator('[data-testid="tool-tile"]').filter({ hasText: EL.dashboard.tools.names.document }).count()) === 0 && (await page.locator('[data-testid="tool-tile"]').count()) > 10);
+    check("...and All tools shows Document", (await page.locator('[data-testid="tool-tile"]').filter({ hasText: EL.dashboard.tools.names.document }).count()) === 1);
     await context.close();
   }
 } catch (err) {

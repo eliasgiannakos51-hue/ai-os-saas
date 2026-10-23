@@ -134,7 +134,7 @@ check("Site: each part is pressed to choose it", /data-testid="site-box"[\s\S]{0
 // The request is shared with the Site beside Chat (lib/website-builder/site-requests.ts).
 const siteRequests = stripComments(readFileSync("src/lib/website-builder/site-requests.ts", "utf8"));
 check("Site: the change goes with the part",
-  /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(site)
+  /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, pageSlug: slug, referenceImagePaths \}\)/.test(site)
     && /\.\.\.\(input\.section === null \|\| input\.section === undefined \? \{\} : \{ section: input\.section \}\)/.test(siteRequests));
 check("Site: a chosen part on another site is no choice", /const chosen = box && current && box\.siteId === current\.id && box\.slug === pageSlug && box\.index < boxes\.length \? box\.index : null;/.test(site));
 check("Site: the preview stays without scripts while a part is chosen",

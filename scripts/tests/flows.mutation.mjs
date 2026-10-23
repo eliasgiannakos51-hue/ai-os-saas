@@ -194,13 +194,10 @@ const MUTANTS = [
     to: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: false };',
     expect: "...and it is open to everybody: no switch in front of the report",
   },
-  {
-    name: "a deck from a research runs where only a deck alone may",
-    file: PLAN,
-    from: '  return !(step.kind === "slides" && step.after.includes("research") && !available.slidesFromResearch);',
-    to: "  return true;",
-    expect: "a deck made FROM a research only where its switch is open; a deck alone does not need it",
-  },
+  // RETIRED 2026-10-23: "a deck from a research runs where only a deck alone
+  // may" was a defect while research-slides was a switch. The switch is
+  // gone and flowAvailability answers slidesFromResearch true for everyone,
+  // so replacing the check with `return true` changes no behaviour.
   {
     name: "the server asks only the kind, not the step",
     file: CREATE,

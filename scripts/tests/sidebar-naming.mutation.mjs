@@ -43,8 +43,12 @@ const MUTANTS = [
     // Copied from messages/en.json as it stands.
     // RE-ANCHORED 2026-10-04: "AI Coding" became "Coding", the design's
     // one name for the rail row, the heading and the tile.
-    from: '"coding": "Coding",\n      "dataAnalysis": "See what the numbers say",',
-    to: '"coding": "Coding notes",\n      "dataAnalysis": "Analysis notes",',
+    // RE-POINTED 2026-10-23: the Analyze page lost its own header with the
+    // switch tool-shell (it is the shell alone now), so it left the scan
+    // and this mutant no longer reached it; Deep Research still names
+    // itself twice, in the nav and in its own heading.
+    from: '"files": "Files",\n      "deepResearch": "Look into it properly",',
+    to: '"files": "Files",\n      "deepResearch": "Research notes",',
     expect: "en: the nav and the heading agree",
   },
   {

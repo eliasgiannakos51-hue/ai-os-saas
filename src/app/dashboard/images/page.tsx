@@ -39,45 +39,46 @@ export default async function ImagesPage(props: { searchParams: Promise<{ record
   // is not drawn (lib/nav/all-tools.ts, availableTools).
   const plan = await resolveEffectivePlan(user);
   const included = isAdminEmail(user.email) || planMeetsMinimum(plan?.slug ?? "free", IMAGE_MIN_PLAN);
-  if (included) {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("generated_images")
-      .select(IMAGE_ROW_COLUMNS)
-      .eq("user_id", user.id)
-      .eq("status", "done")
-      .order("created_at", { ascending: false })
-      .limit(RECENT_IMAGES);
-    const images = await showImages((data ?? []) as ImageRow[], user.id);
-    const searchParams = await props.searchParams;
+  // A PLAN BELOW THE TOOL'S: the wall names the tool and the plan it
+  // comes with, under the same name as the tab.
+  if (!included) {
+    const t = await getTranslations();
+    const name = t(TOOL_TITLE_KEY);
+    const required = getPlan(IMAGE_MIN_PLAN);
     return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <ImageShell
-          initialImages={images}
-          initialOpenId={readRequestedId(searchParams.record)}
-          prices={imagePrices(plan, await getPurchasedPackCreditPriceEur(user.id))}
-          configured={Boolean(imageApiKey())}
-        />
+      <div className="min-h-full">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+          {/* The tool's own header, as the shell draws it: the name alone. */}
+          <h1 className="mb-4 break-words text-2xl font-medium text-foreground">{name}</h1>
+          <UpgradeRequired
+            featureName={name}
+            planName={required?.name ?? IMAGE_MIN_PLAN}
+            planSlug={IMAGE_MIN_PLAN}
+            priceEur={typeof required?.price === "number" ? required.price : null}
+          />
+        </div>
       </div>
     );
   }
-  // A PLAN BELOW THE TOOL'S: the wall names the tool and the plan it
-  // comes with, under the same name as the tab.
-  const t = await getTranslations();
-  const name = t(TOOL_TITLE_KEY);
-  const required = getPlan(IMAGE_MIN_PLAN);
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("generated_images")
+    .select(IMAGE_ROW_COLUMNS)
+    .eq("user_id", user.id)
+    .eq("status", "done")
+    .order("created_at", { ascending: false })
+    .limit(RECENT_IMAGES);
+  const images = await showImages((data ?? []) as ImageRow[], user.id);
+  const searchParams = await props.searchParams;
   return (
-    <div className="min-h-full">
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        {/* The tool's own header, as the shell draws it: the name alone. */}
-        <h1 className="mb-4 break-words text-2xl font-medium text-foreground">{name}</h1>
-        <UpgradeRequired
-          featureName={name}
-          planName={required?.name ?? IMAGE_MIN_PLAN}
-          planSlug={IMAGE_MIN_PLAN}
-          priceEur={typeof required?.price === "number" ? required.price : null}
-        />
-      </div>
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <ImageShell
+        initialImages={images}
+        initialOpenId={readRequestedId(searchParams.record)}
+        prices={imagePrices(plan, await getPurchasedPackCreditPriceEur(user.id))}
+        configured={Boolean(imageApiKey())}
+      />
     </div>
   );
 }

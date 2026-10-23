@@ -4924,7 +4924,14 @@
       "explain": "اشرح ما يفعله هذا الكود",
       "tests": "اكتب اختبارات لهذه الدالة"
     },
-    "uploadFolder": "رفع مجلد"
+    "uploadFolder": "رفع مجلد",
+    "power": {
+      "label": "القوة",
+      "fast": "سريعة",
+      "normal": "عادية",
+      "max": "قصوى",
+      "estimate": "{level} · حوالي {count} رصيد"
+    }
   },
   "presentations": {
     "title": "العروض التقديمية",

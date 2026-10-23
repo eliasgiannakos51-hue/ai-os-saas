@@ -4924,7 +4924,14 @@
       "explain": "Explain what this code does",
       "tests": "Write tests for this function"
     },
-    "uploadFolder": "Upload folder"
+    "uploadFolder": "Upload folder",
+    "power": {
+      "label": "Power",
+      "fast": "Fast",
+      "normal": "Normal",
+      "max": "Max",
+      "estimate": "{level} · about {count} credits"
+    }
   },
   "presentations": {
     "title": "Presentations",

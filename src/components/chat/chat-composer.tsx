@@ -61,6 +61,15 @@ export const ChatComposer = forwardRef<
      *  (docs/MASTER.md, Μέρος 13.2). Drawn by the parent, which knows
      *  whether it can start. */
     beside?: React.ReactNode;
+    /** A control drawn at the OTHER end of the field, immediately before
+     *  the send button — Coding's own «Ισχύς» (the owner's message,
+     *  2026-10-23): "δίπλα το κουμπί αποστολής". Positioned as its own
+     *  sibling rather than inside a wrapper around send/stop, so neither
+     *  button's own className changes — scripts/tests/conversation-
+     *  design.test.mjs matches the send button's exact class string, and
+     *  a wrapper would still satisfy it, but leaving the button alone is
+     *  the smaller diff. Undrawn when omitted, every other field unchanged. */
+    trailingBeside?: React.ReactNode;
     /** The box's placeholder; Chat's own when not given. The tool shell
      *  (components/shell/tool-shell.tsx) passes each tool's. */
     placeholder?: string;
@@ -77,7 +86,7 @@ export const ChatComposer = forwardRef<
     /** Send waits: a file is still being read. Enter does nothing either. */
     holdSend?: boolean;
   }
->(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, placeholder, onLengthChange, attach, tray, holdSend = false }, ref) {
+>(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, trailingBeside, placeholder, onLengthChange, attach, tray, holdSend = false }, ref) {
   const t = useTranslations("dashboard.chat");
   const tRail = useTranslations("sidebar.rail");
   const [input, setInput] = useState(initialText);
@@ -245,6 +254,9 @@ export const ChatComposer = forwardRef<
           />
           {beside}
         </div>
+        {trailingBeside && (
+          <div className="absolute bottom-2 end-14 flex items-center">{trailingBeside}</div>
+        )}
         {sending && onStop ? (
           <button
             type="button"

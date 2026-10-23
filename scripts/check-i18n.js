@@ -668,6 +668,14 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
+  // German and Portuguese all use the same word for this exact sense —
+  // not a strength or a volume, the middle setting of three — and it is
+  // the one entry of the five ("Power"/"Fast"/"Normal"/"Max"/the credit
+  // line) that lands on the English spelling; the other four are
+  // genuinely translated in es/de/pt (Potencia/Leistung/Potência,
+  // Rápida/Schnell/Rápida, Máxima/Maximal/Máxima).
+  "coding.power.normal",
   // THE MODEL TABLE'S PRICE CELL (QUEUE E.2, owner-only /dashboard/costs).
   // Two numbers in US dollars, the currency the providers bill in; the
   // column heading around it (colPrice) is translated in all ten.

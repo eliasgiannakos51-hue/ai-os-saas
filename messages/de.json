@@ -4924,7 +4924,14 @@
       "explain": "Erkläre, was dieser Code macht",
       "tests": "Schreibe Tests für diese Funktion"
     },
-    "uploadFolder": "Ordner hochladen"
+    "uploadFolder": "Ordner hochladen",
+    "power": {
+      "label": "Leistung",
+      "fast": "Schnell",
+      "normal": "Normal",
+      "max": "Maximal",
+      "estimate": "{level} · etwa {count} Credits"
+    }
   },
   "presentations": {
     "title": "Präsentationen",

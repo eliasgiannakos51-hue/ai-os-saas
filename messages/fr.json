@@ -4924,7 +4924,14 @@
       "explain": "Explique ce que fait ce code",
       "tests": "Écris des tests pour cette fonction"
     },
-    "uploadFolder": "Importer un dossier"
+    "uploadFolder": "Importer un dossier",
+    "power": {
+      "label": "Puissance",
+      "fast": "Rapide",
+      "normal": "Normale",
+      "max": "Maximale",
+      "estimate": "{level} · environ {count} crédits"
+    }
   },
   "presentations": {
     "title": "Présentations",

@@ -7,14 +7,18 @@ import { Earth } from "@/components/brand/earth";
 import { HelpTip } from "@/components/ui/help-tip";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useToast } from "@/components/toast/toast-context";
+import { useCredits } from "@/components/credits/credits-context";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { ShellHistoryColumn, type ShellHistoryRow } from "@/components/shell/shell-history-column";
 import { CodeBlock } from "@/components/coding/code-block";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { diffLines, replaceLine } from "@/lib/coding/diff";
 import { downloadTextFile, suggestedFileName } from "@/lib/coding/download";
 import { guessLanguage, languageFromPath } from "@/lib/coding/highlight";
 import { MAX_INPUT_CHARS, OPERATION_SPECS, type CodeOperation } from "@/lib/coding/operations";
 import { FOLDER_UPLOAD_MAX_FILES, readUploadedFolder } from "@/lib/coding/folder-upload";
+import { POWER_LEVELS, modelForPower, type PowerLevel } from "@/lib/coding/power";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 
 export type CodeSession = {
@@ -74,6 +78,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
   const tSteps = useTranslations("aiSteps");
   const tShell = useTranslations("dashboard.toolShell");
   const { addToast } = useToast();
+  const { accountCreditPriceEur, planSlug } = useCredits();
   const composerRef = useRef<ChatComposerHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -86,6 +91,13 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
   const [sending, setSending] = useState(false);
   const [uploadingFolder, setUploadingFolder] = useState(false);
   const [openedId, setOpenedId] = useState<string | null>(null);
+  // «ΙΣΧΥΣ» (the owner's message, 2026-10-23) — the field's own choice,
+  // "normal" being the one model every turn ran on before this control
+  // existed (lib/coding/power.ts), so a person who never touches it sees
+  // no change. `inputLength` only feeds the credit estimate beside each
+  // option; the text itself still lives inside ChatComposer.
+  const [power, setPower] = useState<PowerLevel>("normal");
+  const [inputLength, setInputLength] = useState(0);
 
   // OPEN BY DEFAULT, UNCONDITIONALLY (the owner's critical message,
   // 2026-10-22: "the sessions list, open on the left, like Claude Code,
@@ -147,7 +159,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ text: trimmed, priorCode: activeFile?.content ?? null, priorLanguage: activeFile?.language ?? null }),
+        body: JSON.stringify({ text: trimmed, priorCode: activeFile?.content ?? null, priorLanguage: activeFile?.language ?? null, power }),
       });
       const body = (await response.json().catch(() => null)) as Record<string, unknown> | null;
       if (!response.ok || !body?.ok) {
@@ -299,6 +311,26 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
 
   const showEmpty = turns.length === 0 && !code;
 
+  // ONE ESTIMATE PER CHOICE, same primitive the server reserves against
+  // (lib/billing/estimate.ts) so the number beside "Μέγιστη" and the
+  // credits it actually holds can never disagree. Recomputed on every
+  // keystroke like the Website Builder's and the social posts' own live
+  // estimates (website-shell.tsx, posts-shell.tsx) — three pure, local
+  // calls, nothing worth a second component for.
+  const powerCredits: Record<PowerLevel, number> = Object.fromEntries(
+    POWER_LEVELS.map((level) => [
+      level,
+      Math.round(
+        estimateForAction(
+          "codeAssist",
+          { model: modelForPower(level), inputChars: inputLength, planSlug },
+          DEFAULTS,
+          accountCreditPriceEur ?? undefined
+        ).estimatedCredits
+      ),
+    ])
+  ) as Record<PowerLevel, number>;
+
   return (
     <div className="flex h-full flex-col overflow-hidden" data-testid="coding-workspace">
       <div className="flex items-center gap-2 px-4 py-2">
@@ -327,7 +359,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                 is gone, "New" still calls the same startNew(). */}
             <div
               data-testid="coding-history"
-              className="absolute inset-y-0 start-0 z-30 flex w-[85%] max-w-[320px] flex-col border-e border-divider bg-background md:relative md:z-auto md:w-[280px]"
+              className="absolute inset-y-0 start-0 z-30 flex w-[85%] max-w-[320px] flex-col bg-background md:relative md:z-auto md:w-[280px]"
             >
               <div className="shrink-0 p-2">
                 <button
@@ -362,8 +394,25 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
           </>
         )}
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
-          <div className="flex min-h-0 flex-1 flex-col lg:max-w-md lg:border-e lg:border-divider">
+        {/* THE UNIFIED AREA — ΔΥΟ ΠΕΡΙΟΧΕΣ, ΟΧΙ ΤΡΕΙΣ (the owner's
+            follow-up message, 2026-10-23: "όπως η δεύτερη εικόνα"). Right
+            of the sessions column is now one background (`bg-panel`, one
+            step lighter than the sessions column's own `bg-background` —
+            the two tell apart by shade, no line drawn between them) and
+            one flex container, not a conversation pane with its own
+            border next to a code pane with its own. It only splits into
+            two SIDES once there is code to show one in; until then the
+            conversation column is not capped at `lg:max-w-md` at all —
+            that cap, applied unconditionally before, is what left a
+            wide empty gap to its right whenever there was nothing to put
+            there (the owner's literal complaint, "η δεξιά πλευρά άδεια"),
+            including the plain back-and-forth turns that never produce
+            code (explain, find bugs with nothing shown back). */}
+        <div
+          data-testid="coding-main"
+          className={code ? "flex min-h-0 flex-1 flex-col overflow-y-auto bg-panel lg:flex-row lg:overflow-hidden" : "flex min-h-0 flex-1 flex-col overflow-hidden bg-panel"}
+        >
+          <div className={code ? "flex min-h-0 flex-1 flex-col lg:max-w-md" : "mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"}>
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
               {showEmpty ? (
                 <div data-testid="coding-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
@@ -376,7 +425,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                         type="button"
                         onClick={() => void send(t(`example.${key}`))}
                         data-testid="coding-example"
-                        className="min-h-[44px] rounded-full bg-panel px-4 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                        className="min-h-[44px] rounded-full bg-panel-hover px-4 text-xs text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
                       >
                         {t(`example.${key}`)}
                       </button>
@@ -390,7 +439,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                       <p
                         className={
                           turn.role === "user"
-                            ? "max-w-[85%] whitespace-pre-wrap break-words rounded-card bg-panel px-3 py-2 text-sm text-foreground"
+                            ? "max-w-[85%] whitespace-pre-wrap break-words rounded-card bg-panel-hover px-3 py-2 text-sm text-foreground"
                             : "whitespace-pre-wrap break-words text-sm leading-relaxed text-body"
                         }
                       >
@@ -408,40 +457,73 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
               )}
             </div>
             <div className="p-4 sm:p-6">
-              <div className="chat-measure">
-                <ChatComposer ref={composerRef} sending={sending} onSend={send} onStop={() => abortRef.current?.abort()} initialText={initialTask} placeholder={t("placeholder")} />
-                {/* THE SMALL BUTTON ROW UNDER THE FIELD (the owner's message
-                    right after #332). "Σύνδεση GitHub" and "Άνοιγμα repository"
-                    are NOT here: NEEDS 11's GitHub App does not exist yet, and
-                    the owner's own instruction is that the button stays absent,
-                    not disabled, until it works. "Ανέβασμα φακέλου" needs no
-                    GitHub — local files only. */}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <input
-                    ref={folderInputRef}
-                    type="file"
-                    multiple
-                    hidden
-                    // webkitdirectory: non-standard, no React/DOM type, but
-                    // honoured by every browser this product supports; its
-                    // only effect missing is the picker defaulting to a
-                    // multi-file choice instead of a folder one.
-                    {...{ webkitdirectory: "" }}
-                    onChange={(e) => void handleFolderUpload(e.target.files)}
-                    data-testid="coding-folder-input"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => folderInputRef.current?.click()}
-                    disabled={uploadingFolder}
-                    data-testid="coding-upload-folder"
-                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:opacity-40"
-                  >
-                    <Upload className="h-3.5 w-3.5" aria-hidden="true" />
-                    {t("uploadFolder")}
-                  </button>
-                </div>
+              {/* ΠΑΝΩ ΑΠΟ ΤΟ ΠΕΔΙΟ, ΟΧΙ ΑΠΟ ΚΑΤΩ (the owner's follow-up
+                  message, 2026-10-23, moves this row above the field —
+                  its first message put it below). "Σύνδεση GitHub" and a
+                  repository/branch picker are still NOT here: NEEDS 11's
+                  GitHub App does not exist yet, and NEEDS 50's execution
+                  environment is still undecided (docs/QUEUE.md, 20Γ) — a
+                  picker for a connection that cannot work is exactly the
+                  "screen that produces nothing" NEEDS 19 already ruled
+                  out, so it stays absent, not disabled, the same rule as
+                  before. "Ανέβασμα φακέλου" needs no GitHub — local files
+                  only — so it alone draws here. */}
+              <div data-testid="coding-project-row" className="mb-2 flex flex-wrap gap-2">
+                <input
+                  ref={folderInputRef}
+                  type="file"
+                  multiple
+                  hidden
+                  // webkitdirectory: non-standard, no React/DOM type, but
+                  // honoured by every browser this product supports; its
+                  // only effect missing is the picker defaulting to a
+                  // multi-file choice instead of a folder one.
+                  {...{ webkitdirectory: "" }}
+                  onChange={(e) => void handleFolderUpload(e.target.files)}
+                  data-testid="coding-folder-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => folderInputRef.current?.click()}
+                  disabled={uploadingFolder}
+                  data-testid="coding-upload-folder"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:opacity-40"
+                >
+                  <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("uploadFolder")}
+                </button>
               </div>
+              <ChatComposer
+                ref={composerRef}
+                sending={sending}
+                onSend={send}
+                onStop={() => abortRef.current?.abort()}
+                initialText={initialTask}
+                placeholder={t("placeholder")}
+                onLengthChange={setInputLength}
+                trailingBeside={
+                  // ΚΑΤΩ ΔΕΞΙΑ ΜΕΣΑ ΣΤΟ ΠΕΔΙΟ: ΙΣΧΥΣ (the owner's
+                  // follow-up message, 2026-10-23) — three choices, a
+                  // credit estimate beside each (powerCredits, above),
+                  // never a model's name: lib/coding/power.ts is the only
+                  // place "Κανονική" becomes a model id, and it does that
+                  // on the server, not here.
+                  <select
+                    value={power}
+                    onChange={(e) => setPower(e.target.value as PowerLevel)}
+                    disabled={sending}
+                    aria-label={t("power.label")}
+                    data-testid="coding-power"
+                    className="h-9 max-w-[6.5rem] rounded-item bg-transparent text-[11px] text-muted outline-none hover:text-foreground disabled:opacity-40 sm:max-w-[11rem] sm:text-xs"
+                  >
+                    {POWER_LEVELS.map((level) => (
+                      <option key={level} value={level}>
+                        {t("power.estimate", { level: t(`power.${level}`), count: powerCredits[level] })}
+                      </option>
+                    ))}
+                  </select>
+                }
+              />
             </div>
           </div>
 
@@ -463,7 +545,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                       onClick={() => selectFile(i)}
                       data-testid="coding-file-tab"
                       className={`min-h-[44px] shrink-0 rounded-item px-2.5 text-xs ${
-                        i === code.activeIndex ? "bg-panel text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
+                        i === code.activeIndex ? "bg-panel-hover text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
                       }`}
                     >
                       {f.path ?? t("code")}

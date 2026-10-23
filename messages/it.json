@@ -4924,7 +4924,14 @@
       "explain": "Spiega cosa fa questo codice",
       "tests": "Scrivi dei test per questa funzione"
     },
-    "uploadFolder": "Carica cartella"
+    "uploadFolder": "Carica cartella",
+    "power": {
+      "label": "Potenza",
+      "fast": "Rapida",
+      "normal": "Normale",
+      "max": "Massima",
+      "estimate": "{level} · circa {count} credit"
+    }
   },
   "presentations": {
     "title": "Presentazioni",

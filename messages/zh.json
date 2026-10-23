@@ -4924,7 +4924,14 @@
       "explain": "解释这段代码做什么",
       "tests": "为这个函数编写测试"
     },
-    "uploadFolder": "上传文件夹"
+    "uploadFolder": "上传文件夹",
+    "power": {
+      "label": "算力",
+      "fast": "快速",
+      "normal": "常规",
+      "max": "最强",
+      "estimate": "{level} · 约 {count} 积分"
+    }
   },
   "presentations": {
     "title": "演示文稿",

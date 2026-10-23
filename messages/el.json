@@ -4924,7 +4924,14 @@
       "explain": "Εξήγησε τι κάνει αυτός ο κώδικας",
       "tests": "Γράψε δοκιμές για αυτή τη συνάρτηση"
     },
-    "uploadFolder": "Ανέβασμα φακέλου"
+    "uploadFolder": "Ανέβασμα φακέλου",
+    "power": {
+      "label": "Ισχύς",
+      "fast": "Γρήγορη",
+      "normal": "Κανονική",
+      "max": "Μέγιστη",
+      "estimate": "{level} · περίπου {count} credits"
+    }
   },
   "presentations": {
     "title": "Παρουσιάσεις",

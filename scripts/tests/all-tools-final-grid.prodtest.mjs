@@ -97,7 +97,7 @@ const { ALL_TOOLS, ALL_TOOLS_GROUP_ORDER, availableTools, HIDDEN_FROM_ALL_TOOLS 
 const EXPECTED = availableTools({ imageKey: true });
 const NOT_READY = ALL_TOOLS.filter((t) => !t.ready);
 
-const PRODUCT_WORDS = new Set(["Ionexa", "AI", "PDF", "PowerPoint", "Word", "Excel", "GitHub", "iowork", "MCP", "Deep", "Research", "My", "Stuff"]);
+const PRODUCT_WORDS = new Set(["Ionexa", "AI", "PDF", "PowerPoint", "Word", "Excel", "GitHub", "iowork", "MCP", "K"]);
 const latinWords = (text) => [...new Set((text.match(/[A-Za-z][A-Za-z&]*/g) ?? []).filter((w) => !PRODUCT_WORDS.has(w)))];
 
 const SHOT_DIR = process.env.ALL_TOOLS_SHOTS || "";

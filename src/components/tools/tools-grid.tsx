@@ -234,6 +234,16 @@ export function ToolsGrid({ isOwner, pinned = [], shown = [] }: { isOwner: boole
   };
 
   const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6";
+  // How many of the grid's columns a group of N tiles spans on a wide screen.
+  // Literal class names, so Tailwind can see every one of them.
+  const SPAN: Record<number, string> = {
+    1: "lg:col-span-1 xl:col-span-1",
+    2: "lg:col-span-2 xl:col-span-2",
+    3: "lg:col-span-3 xl:col-span-3",
+    4: "lg:col-span-4 xl:col-span-4",
+    5: "lg:col-span-5 xl:col-span-5",
+    6: "lg:col-span-5 xl:col-span-6",
+  };
 
   return (
     <div>
@@ -257,13 +267,27 @@ export function ToolsGrid({ isOwner, pinned = [], shown = [] }: { isOwner: boole
           <p className="mt-6 text-sm text-muted">{t("noMatch", { query: query.trim() })}</p>
         )
       ) : (
-        <div className="mt-6 space-y-8">
+        // THE GROUPS SHARE ROWS where they fit (the owner's "όλα σε μία
+        // οθόνη αν χωράνε"): on a wide screen each group spans as many of the
+        // grid's columns as it has tiles, so Record and Ask sit side by side
+        // and Make sits beside Run on its own; on a phone every group is a
+        // full-width block. The order is the owner's either way.
+        <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
           {groups.map((group) => (
-            <section key={group.key} aria-labelledby={`tools-${group.key}`}>
-              <h2 id={`tools-${group.key}`} className="mb-3 text-xs text-muted">
+            <section
+              key={group.key}
+              aria-labelledby={`tools-${group.key}`}
+              className={`col-span-2 sm:col-span-3 ${SPAN[Math.min(group.items.length, 6)]}`}
+            >
+              <h2 id={`tools-${group.key}`} className="mb-2 text-xs text-muted">
                 {group.heading}
               </h2>
-              <ul className={GRID}>{group.items.map(tile)}</ul>
+              <ul
+                className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]"
+                style={{ "--n": Math.min(group.items.length, 5) } as React.CSSProperties}
+              >
+                {group.items.map(tile)}
+              </ul>
             </section>
           ))}
         </div>

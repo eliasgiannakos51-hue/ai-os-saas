@@ -50,7 +50,7 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
   // yours" alike, which tells a prober nothing.
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, goal, status, created_at")
+    .select("id, name, goal, status, primary_colour, secondary_colour, created_at")
     .eq("id", params.id)
     .maybeSingle();
   if (!project) notFound();
@@ -108,6 +108,8 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
           name: String(project.name ?? ""),
           goal: (project.goal as string | null) ?? null,
           status: String(project.status ?? "active") as ProjectStatus,
+          primaryColour: (project.primary_colour as string | null) ?? null,
+          secondaryColour: (project.secondary_colour as string | null) ?? null,
           createdAt: String(project.created_at ?? ""),
         }}
         members={views}

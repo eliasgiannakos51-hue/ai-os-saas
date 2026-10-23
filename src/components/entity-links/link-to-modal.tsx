@@ -158,9 +158,9 @@ export function LinkToModal({
         role="dialog"
         aria-modal="true"
         aria-label={`${t("modalTitle")}: ${sourceHeadline}`}
-        className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-card border border-border bg-panel"
+        className="modal-surface relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+        <div className="modal-header flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
             <span
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-foreground/10 text-foreground"

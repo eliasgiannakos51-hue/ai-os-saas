@@ -146,6 +146,7 @@
       "tradingWorkflow": "交易工作流",
       "productWorkflow": "产品工作流",
       "automation": "自动化",
+      "automationFlow": "自动化流程",
       "marketplace": "现成的助手",
       "published": "已上线网站",
       "integrations": "集成",
@@ -5079,6 +5080,29 @@
     "delete": "删除",
     "deleteConfirm": "删除这个项目？里面的内容会留在原处。",
     "removeMember": "移出项目",
+    "addToProject": {
+      "button": "添加到项目",
+      "title": "添加到项目",
+      "loading": "正在加载你的项目…",
+      "failed": "没有成功——再试一次。",
+      "empty": "你还没有项目——在下面创建一个。",
+      "untitledProject": "无标题项目",
+      "newProject": "新建项目",
+      "newProjectPlaceholder": "秋季店铺上线",
+      "create": "创建并添加",
+      "added": "已添加到{name}。",
+      "limitReached": "你已用完套餐内的所有项目。升级以添加更多。"
+    },
+    "colours": {
+      "primary": "主色",
+      "secondary": "辅色",
+      "clear": "清除",
+      "none": "未选择颜色"
+    },
+    "automateIt": {
+      "button": "自动化它",
+      "hint": "创建一个基于此项目的自动化——读取其中的内容和上面的目标。"
+    },
     "errors": {
       "tooShort": "先给它起个名字。",
       "tooLong": "名称超过 {limit} 个字符。",

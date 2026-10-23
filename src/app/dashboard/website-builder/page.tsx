@@ -19,6 +19,7 @@ import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { ownedProjectId } from "@/lib/projects/link-result";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.websiteBuilder");
@@ -54,7 +55,7 @@ export default async function WebsiteBuilderPage(
     // sides — rename it in the link and this page still compiles and still
     // renders, it just stops doing anything — so first-screen.test.mjs
     // compares the two names.
-    searchParams: Promise<{ brief?: string; project?: string }>;
+    searchParams: Promise<{ brief?: string; project?: string; projectId?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -107,9 +108,17 @@ export default async function WebsiteBuilderPage(
   // drawn as conversation and work. Reference photos and the version
   // history stay on the page.
   if (await isFeatureOn("tool-shell", user)) {
+    const projectId = await ownedProjectId(supabase, searchParams.projectId);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <WebsiteShell initialWebsites={websiteRows} initialBrief={readExampleParam(searchParams.brief)} initialOpenId={wanted} pages={await isFeatureOn("site-pages", user)} translate={await isFeatureOn("translate", user)} />
+        <WebsiteShell
+          initialWebsites={websiteRows}
+          initialBrief={readExampleParam(searchParams.brief)}
+          initialOpenId={wanted}
+          pages={await isFeatureOn("site-pages", user)}
+          translate={await isFeatureOn("translate", user)}
+          initialProjectId={projectId}
+        />
       </div>
     );
   }

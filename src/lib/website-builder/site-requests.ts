@@ -116,12 +116,21 @@ export async function startSiteGeneration(input: {
    * from there — never from this request again. Chat's Site pane sends none.
    */
   referenceImagePaths?: string[];
+  /** Starting a site FROM a project auto-joins it (owner's message
+   *  2026-10-22, point 6) — read back as the caller's own by the route. */
+  projectId?: string | null;
 }): Promise<SiteStart> {
   const referenceImagePaths = input.referenceImagePaths ?? [];
   const res = await fetchWithAuthRetry("/api/websites/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths, skipClarification: input.skipClarification }),
+    body: JSON.stringify({
+      name: input.name,
+      description: input.description,
+      referenceImagePaths,
+      skipClarification: input.skipClarification,
+      ...(input.projectId ? { projectId: input.projectId } : {}),
+    }),
   });
   const data = await res.json().catch(() => null);
   if (!res.ok || !data?.ok) return { kind: "refused", error: refusal(res.status, data, data?.error), ...routeSaid(data) };

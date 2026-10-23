@@ -447,6 +447,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Flows (switch \"flows\") cannot be approved: the project is made but the flow is not saved, so no step runs",
   },
   {
+    kind: "column",
+    table: "projects",
+    column: "primary_colour",
+    migration: "20261025000000_projects_colours.sql",
+    breaks: "a project's colour picker (owner's message 2026-10-22, point 6) cannot save either colour: the PATCH route's write fails and the page shows the colour reverting every time",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

@@ -90,6 +90,7 @@ console.log("\n== 2. no colour written straight into a component ==");
 const LITERAL_ALLOWED = {
   "src/components/auth/social-auth-buttons.tsx": "a third party's sign-in mark, drawn in the colours its owner requires",
   "src/components/website-builder/design-controls.tsx": "the colour picker's starting value for the USER'S website palette — their content, not the app",
+  "src/components/projects/project-detail.tsx": "the colour picker's fallback value for a PROJECT'S own two colours (20261025000000_projects_colours.sql) — the user's content, not the app's",
   "src/app/opengraph-image.tsx": "rendered to a PNG at the edge, where there is no stylesheet and no variable",
   "src/app/manifest.ts": "the browser reads theme_color and background_color as literals",
   "src/app/layout.tsx": "viewport.themeColor is read by the browser as a literal",

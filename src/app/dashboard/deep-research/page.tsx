@@ -17,6 +17,7 @@ import { readRequestedId } from "@/lib/library/requested";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { ResearchShell } from "@/components/research/research-shell";
 import { countResearchRunsThisMonth } from "@/lib/research/research-usage";
+import { ownedProjectId } from "@/lib/projects/link-result";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export function generateMetadata(): Promise<Metadata> {
 // against the one lib/create-studio/producer-routes.ts emits.
 export default async function DeepResearchPage(
   props: {
-    searchParams: Promise<{ brief?: string; record?: string }>;
+    searchParams: Promise<{ brief?: string; record?: string; projectId?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -88,6 +89,7 @@ export default async function DeepResearchPage(
   // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
   // reports and the same plan-then-run stop, drawn as conversation and work.
   if (await isFeatureOn("tool-shell", user)) {
+    const projectId = await ownedProjectId(supabase, searchParams.projectId);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
         <ResearchShell
@@ -97,6 +99,7 @@ export default async function DeepResearchPage(
           monthlyCap={isAdmin ? null : cap}
           usedThisMonth={used ?? 0}
           slides={await isFeatureOn("research-slides", user)}
+          initialProjectId={projectId}
         />
       </div>
     );

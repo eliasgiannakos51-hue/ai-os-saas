@@ -26,6 +26,7 @@ import { checkNeedsClarification, clarificationMetadata } from "@/lib/clarificat
 import { FAIR_USE_WINDOW_MS, MAX_GENERATIONS_PER_DAY, isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
+import { linkResultToProject, ownedProjectId } from "@/lib/projects/link-result";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
     let description: string;
     let referenceImagePaths: string[];
     let skipClarification: boolean;
+    let requestedProjectId: string | null;
     try {
       const body = await request.json();
       name = typeof body?.name === "string" ? body.name.trim().slice(0, MAX_NAME_LENGTH) : "";
@@ -79,6 +81,10 @@ export async function POST(request: Request) {
         ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
         : [];
       skipClarification = body?.skipClarification === true;
+      // STARTING WORK FROM A PROJECT AUTO-JOINS IT (owner's message
+      // 2026-10-22, point 6). Read back as the caller's own further down,
+      // once `supabase` exists.
+      requestedProjectId = typeof body?.projectId === "string" ? body.projectId : null;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -124,6 +130,8 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
+
+    const projectId = await ownedProjectId(supabase, requestedProjectId);
 
     // THE PLAN GATE, AND IT IS FIRST FOR A REASON.
     //
@@ -496,6 +504,10 @@ export async function POST(request: Request) {
       })
       .select()
       .single();
+
+    if (!insertError && record && projectId) {
+      await linkResultToProject(supabase, user.id, "user_websites", record.id, projectId);
+    }
 
     if (insertError) {
       // Postgres unique-violation (23505) on user_websites_pending_dedup_idx

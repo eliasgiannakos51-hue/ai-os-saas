@@ -102,6 +102,7 @@ export function WebsiteShell({
   initialOpenId = null,
   pages = false,
   translate = false,
+  initialProjectId = null,
 }: {
   initialWebsites: UserWebsite[];
   initialBrief?: string;
@@ -111,6 +112,12 @@ export function WebsiteShell({
   pages?: boolean;
   /** The switch "translate" (package 28), read by the page. */
   translate?: boolean;
+  /** From `?projectId=` — a DIFFERENT query param from `initialOpenId`'s
+   *  `?project=` on purpose: that one already names a specific SITE to
+   *  open, and reusing its name for "the project to join" would collide.
+   *  Sent on the generation that creates the NEXT site; no setter, same
+   *  reason Chat's own `initialProjectId` has none. */
+  initialProjectId?: string | null;
 }) {
   const t = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
@@ -272,7 +279,7 @@ export function WebsiteShell({
   async function generate(name: string, description: string, skipClarification: boolean, referenceImagePaths: string[]) {
     setBusy(true);
     try {
-      const outcome = await startSiteGeneration({ name, description, skipClarification, referenceImagePaths });
+      const outcome = await startSiteGeneration({ name, description, skipClarification, referenceImagePaths, projectId: initialProjectId });
       if (outcome.kind === "refused") {
         say({ role: "tool", text: describe(outcome.error).text });
         return;
@@ -786,6 +793,7 @@ export function WebsiteShell({
             onNavigate={() => {
               if (typeof window !== "undefined" && window.innerWidth < 768) toggleHistory();
             }}
+            linkTable="user_websites"
           />
         ),
       }}

@@ -221,13 +221,17 @@ defaults to `'related'`.
 > (`src/lib/presentations/`); this document was written afterwards and
 > never caught up.
 >
-> It now lists **28** — the thirteen classifiers, those five, and ten more
+> It now lists **30** — the thirteen classifiers, those five, and twelve more
 > in `src/lib/projects/linkable-extras.ts` so a project can hold the work
-> the person actually came to do: six that redesign phase 2 added, and
-> four that Flows (package 36, 2026-10-07) add because a flow files its
-> site, pictures, research and analysis in a project:
+> the person actually came to do: six that redesign phase 2 added, four
+> that Flows (package 36, 2026-10-07) add because a flow files its site,
+> pictures, research and analysis in a project, and two more for the
+> owner's message of 2026-10-22, point 6 — «κάθε αποτέλεσμα σε κάθε
+> εργαλείο (site, αυτοματισμός, ανάλυση, έρευνα, κώδικας, συνομιλία)»
+> named six tools, and automation (`automation_flows`) and coding
+> (`code_sessions`) were the two of the six still missing:
 >
-> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts, sites, generated-images, research, analyses
+> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts, sites, generated-images, research, analyses, automation-flows, coding
 >
 > Every number and both lists above are read off the registries by
 > `scripts/tests/projects.test.mjs`, which goes red if any of the three
@@ -345,4 +349,101 @@ made.
 
 ---
 
-**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+## 7. 2026-10-22 — section 6 built: the universal «⋯ → Προσθήκη σε Project»
+
+The owner's message of 2026-10-22, point 6, asked for what §§1–6 above had
+already designed and partly built: every tool's result linkable to a
+project through one shared menu, the project view already resolving and
+opening each one, starting work from inside a project auto-joining it, a
+project's own name/colours/goal/files, and an «Αυτοματοποίησέ το» button.
+Most of the edge-and-registry mechanism in §§4–6 was already live; this
+round closed the specific gaps the message named.
+
+**What was already there** (confirmed by reading the code, not assumed):
+`entity_links` as the join, `isProjectMemberTable`, the
+`/api/projects/[id]/members` route, and `ProjectDetail`'s per-table
+sections and `openHref` — all from redesign phase 2, above. Four of the
+six tools the message named by name (site, research, chat, analysis) were
+already in the registry.
+
+**What this round added:**
+- `automation_flows` and `code_sessions` joined `LINK_ONLY_MODULES`
+  (`src/lib/projects/linkable-extras.ts`) — the two of the six named tools
+  that were missing. `LINKABLE_MODULES` is now 30, not 28; §6's paragraph
+  above is the one place that number is written in prose and it is
+  updated in the same commit.
+- A shared `src/components/entity-links/add-to-project-button.tsx` +
+  `add-to-project-modal.tsx`, the same trigger/host-owns-the-modal contract
+  as `LinkToButton`/`LinkToModal` beside them. Rather than wiring it into
+  each tool's own result-row component one at a time, it went into
+  `src/components/shell/shell-history-column.tsx` — the ONE place every
+  shell tool's result list already draws from (`ShellHistoryColumn`,
+  package 3's §20 generalisation) — behind a new, opt-in `linkTable` prop:
+  a caller that passes its table gets the button on every row, a caller
+  that does not (`analysis-shell.tsx` — Analyze, a separate and
+  independent effort today — and the three tools the owner's six did not
+  name: Slides, Documents, Image) draws exactly what it always has. Wired
+  for Site (`WebsiteShell`), Automation, Research and Coding. The OLD
+  (pre-`tool-shell`) Site workspace, which does not use this column at
+  all, got its own menu entry directly on `EntityCard`. Chat needed
+  nothing new: its conversation row already carries «Μεταφορά σε Project»
+  (redesign phase 2), the same one-level membership write this round's
+  button makes, just without the "create a new project" half — left as
+  it was, since it already works and this round's job was closing gaps,
+  not rebuilding a working feature. Analyze/Files is untouched — a
+  separate, independent effort is merging those two tools and this round
+  does not touch anything data-analysis- or files-shaped.
+- `src/lib/projects/link-result.ts`: a generic `linkResultToProject`, the
+  same shape as `conversation-scope.ts`'s `linkConversationToProject` but
+  over any linkable table, so a creation route can honour an optional
+  `projectId` in its body without each route re-inventing the edge write.
+  Wired into `/api/websites/generate`, `/api/automations/flows` and
+  `/api/research`; Coding's creation route is NOT wired (its page has no
+  per-row open-by-id mechanism at all yet — see below — so auto-joining a
+  session nobody can deep-link back to would be a membership the project
+  page could show but never open).
+- Two colour columns on `projects` itself
+  (`20261025000000_projects_colours.sql`), not a reuse of
+  `lib/memory/brand.ts`'s global brand-colour memory — see the migration's
+  own comment for why those are different scopes.
+- `/dashboard/automation` gained `?projectId=` and `?said=`, and
+  `ProjectDetail` gained an «Αυτοματοποίησέ το» button that opens it with
+  both set, pre-filling the sentence from the project's goal.
+
+**What this round deliberately left alone:**
+- **Coding.** `code_sessions` is linkable (the ⋯ menu on a session can add
+  it to a project, and the project page lists it), but there is no
+  `?record=`/`?session=` reader on `/dashboard/coding` — today's separate
+  redesign of that page (the owner's critical message, same day) rebuilt
+  it around one running conversation rather than a list of past sessions,
+  and it has no deep-link-by-id at all, for ANY caller, not only this one.
+  Giving a project a link into a tool that cannot open it would be a
+  promise this page cannot keep; `openHref` for `code_sessions` points at
+  the tool itself (`/dashboard/coding`), not at the specific session, and
+  the "Starting new work FROM a project" auto-join (point 6's third
+  bullet) is not wired for Coding for the same reason — a session created
+  there cannot be opened back from the project either way, so nothing
+  would be gained by linking it automatically that the ⋯ menu does not
+  already give by hand.
+- **The legacy (pre-`tool-shell`) Site and Research workspaces.** Both
+  tools have an older, non-shell page variant still reachable while their
+  shell flags are below `everyone`; the auto-join on creation (point 6's
+  third bullet) is wired into the current shell variant of each
+  (`WebsiteShell`, `ResearchShell`) and not duplicated into the older one,
+  which still carries the universal ⋯ menu for adding a result by hand.
+- **Goals / Mission Control.** `docs/NEEDS-FROM-ELIAS.md` and a separate,
+  already-merged PR hid `/dashboard/mission` from the All Tools grid with
+  the stated intent "move inside Projects". `ai_missions` was ALREADY in
+  `LINK_ONLY_MODULES` (slug `missions`, redesign phase 2, above) before
+  this round touched anything, and a project's `goal` column is a
+  free-text field that already existed and is unrelated to a mission's
+  own `goal` column. Folding the two data models together — making a
+  project's goal literally back a mission, or vice versa — was not done:
+  it is not an obvious, low-risk merge (a mission has its own steps,
+  status and routing that a project's goal field has none of), so Mission
+  Control stays exactly as a hidden-but-intact tool, reachable at its own
+  route, and its rows join a project the same way every other linkable
+  row does — through the ⋯ menu wherever Mission Control gets one, or
+  through `/api/projects/[id]/members` directly.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261025000000_projects_colours.sql**

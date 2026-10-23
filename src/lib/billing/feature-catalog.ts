@@ -823,7 +823,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     pages: ["projects", "projects/[id]"],
     // Flows (package 36) make the project and file each result in it, under
     // the same project cap; each step is charged by its own tool.
-    routes: ["projects", "projects/[id]/members", "flows", "flows/[id]/steps"],
+    // projects/[id] (2026-10-22): name, goal, status and the two colours —
+    // no credit cost, no plan gate, the same free routes as the rest.
+    routes: ["projects", "projects/[id]", "projects/[id]/members", "flows", "flows/[id]/steps"],
     charges: false,
     enforcedIn: "src/app/api/projects/route.ts",
     enforcedSymbol: "maxProjectsForPlan",

@@ -118,4 +118,37 @@ export const LINK_ONLY_MODULES: LinkableModule[] = [
     headlineKey: "title",
     fields: [],
   },
+  // PROJECTS: THE CENTRE OF EVERYTHING (owner's message 2026-10-22, point
+  // 6). «Κάθε αποτέλεσμα σε κάθε εργαλείο (site, αυτοματισμός, ανάλυση,
+  // έρευνα, κώδικας, συνομιλία) έχει «⋯» με «Προσθήκη σε Project»» names
+  // six tools; four of the six (site, research, chat via conversations,
+  // and analysis) were already linkable. These two close the gap —
+  // "ανάλυση" stays untouched (data_analyses, above, already covers it;
+  // the Analyze tool's own UI is a separate, parallel effort and is not
+  // touched by this round).
+  {
+    // DISTINCT FROM "automation" (sidebar.items.automation, the old
+    // one-sentence tracker, lib/modules.ts) ON PURPOSE: the two are
+    // different tables and a picker offering the same name for both
+    // would be the exact defect `projects.test.mjs` section 6 already
+    // holds the Image tool to (the "Ιδέες για εικόνες" collision,
+    // package 36). "sidebar.items.automationFlow" is a new key — no
+    // existing linkable module's title reads as "automation flow" in
+    // any of the ten locales.
+    slug: "automation-flows",
+    titleKey: "sidebar.items.automationFlow",
+    table: "automation_flows",
+    headlineKey: "name",
+    fields: [],
+  },
+  {
+    // Reuses the Coding tool's own sidebar key — it left BUILD_MODULES in
+    // V4 #19 (module-title-keys.ts's comment) and was in no registry at
+    // all until now, so there is no collision to avoid.
+    slug: "coding",
+    titleKey: "sidebar.items.coding",
+    table: "code_sessions",
+    headlineKey: "title",
+    fields: [],
+  },
 ];

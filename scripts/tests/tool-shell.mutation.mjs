@@ -423,8 +423,11 @@ const MUTANTS = [
   {
     name: "Site: the shared request leaves the photos behind on the way to the route",
     file: SITE_REQUESTS,
-    from: "body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths, skipClarification: input.skipClarification }),",
-    to: "body: JSON.stringify({ name: input.name, description: input.description, referenceImagePaths: [], skipClarification: input.skipClarification }),",
+    // RE-ANCHORED 2026-10-22: the body went multi-line when `projectId`
+    // joined it (owner's message, point 6). The defect is unchanged — the
+    // photos never reach the route.
+    from: "      referenceImagePaths,\n      skipClarification: input.skipClarification,",
+    to: "      referenceImagePaths: [],\n      skipClarification: input.skipClarification,",
     expect: "hand them to the routes",
   },
   {

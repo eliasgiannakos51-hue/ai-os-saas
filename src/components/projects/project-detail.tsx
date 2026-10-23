@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { PROJECT_STATUSES, type ProjectStatus } from "@/lib/projects/project";
+import { PROJECT_STATUSES, isHexColour, type ProjectStatus } from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
 
 export type ProjectMemberView = {
@@ -23,6 +23,8 @@ export type ProjectHeader = {
   name: string;
   goal: string | null;
   status: ProjectStatus;
+  primaryColour: string | null;
+  secondaryColour: string | null;
   createdAt: string;
 };
 
@@ -58,6 +60,9 @@ const RESULT_TABLES = new Set([
   "generated_images",
   "research_reports",
   "data_analyses",
+  // The owner's message 2026-10-22, point 6.
+  "automation_flows",
+  "code_sessions",
 ]);
 
 /**
@@ -68,6 +73,18 @@ const RESULT_TABLES = new Set([
  */
 function openHref(member: ProjectMemberView): string | null {
   if (member.table === "generated_images") return `/dashboard/images?record=${encodeURIComponent(member.id)}`;
+  // THE "automation_flows" ROW OPENS AT THE EXACT ROW: `/dashboard/automation`
+  // reads `?flow=` and verifies it is the caller's own before opening it
+  // (added alongside this, same round) — the same `?record=`-shaped
+  // contract every other result here has.
+  if (member.table === "automation_flows") return `/dashboard/automation?flow=${encodeURIComponent(member.id)}`;
+  // THE "code_sessions" ROW HAS NO SUCH READER YET. Today's separate
+  // redesign of `/dashboard/coding` (the owner's critical message, same
+  // day) rebuilt it around one running conversation with no
+  // deep-link-by-id at all, for any caller — so this opens the tool, not
+  // the specific session, which is honest about what the page can
+  // actually do rather than a link that silently lands on nothing.
+  if (member.table === "code_sessions") return "/dashboard/coding";
   const source = LIBRARY_SOURCES.find((s) => s.table === member.table);
   return source ? source.hrefFor(member.id) : null;
 }
@@ -87,6 +104,11 @@ export function ProjectDetail({
   const router = useRouter();
   const { addToast } = useToast();
   const [busy, setBusy] = useState(false);
+  const [savingColour, setSavingColour] = useState<"primaryColour" | "secondaryColour" | null>(null);
+  const [colours, setColours] = useState({
+    primaryColour: project.primaryColour,
+    secondaryColour: project.secondaryColour,
+  });
 
   const sections = useMemo(
     () => [
@@ -103,6 +125,28 @@ export function ProjectDetail({
     ],
     [members]
   );
+
+  async function saveColour(field: "primaryColour" | "secondaryColour", value: string) {
+    if (savingColour) return;
+    if (!isHexColour(value)) return;
+    setSavingColour(field);
+    setColours((c) => ({ ...c, [field]: value }));
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field === "primaryColour" ? "primaryColour" : "secondaryColour"]: value }),
+      });
+      if (!res.ok) {
+        addToast(t("errors.failed"), "error");
+        setColours((c) => ({ ...c, [field]: field === "primaryColour" ? project.primaryColour : project.secondaryColour }));
+      }
+    } catch {
+      addToast(t("errors.failed"), "error");
+    } finally {
+      setSavingColour(null);
+    }
+  }
 
   async function removeMember(member: ProjectMemberView) {
     if (busy) return;
@@ -140,7 +184,31 @@ export function ProjectDetail({
               same budget, because the project narrows which modules. */}
           <span>{t("progress.rowsPerModule", { count: rowsPerModule })}</span>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <label className="flex items-center gap-2 text-xs text-muted">
+            {t("colours.primary")}
+            <input
+              type="color"
+              value={colours.primaryColour ?? "#1d4ed8"}
+              disabled={savingColour !== null}
+              onChange={(e) => void saveColour("primaryColour", e.target.value)}
+              aria-label={t("colours.primary")}
+              className="h-8 w-8 cursor-pointer rounded-item border border-border bg-transparent p-0 disabled:opacity-50"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-xs text-muted">
+            {t("colours.secondary")}
+            <input
+              type="color"
+              value={colours.secondaryColour ?? "#dce2ee"}
+              disabled={savingColour !== null}
+              onChange={(e) => void saveColour("secondaryColour", e.target.value)}
+              aria-label={t("colours.secondary")}
+              className="h-8 w-8 cursor-pointer rounded-item border border-border bg-transparent p-0 disabled:opacity-50"
+            />
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           <Link
             href={`/dashboard/chat?project=${encodeURIComponent(project.id)}`}
             className="inline-flex min-h-[44px] items-center gap-2 rounded-item bg-button px-4 text-sm font-semibold text-button-ink hover:bg-button"
@@ -148,8 +216,17 @@ export function ProjectDetail({
             <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
             {t("startChat")}
           </Link>
-          <p className="mt-1.5 text-[11px] text-muted">{t("chatFixed")}</p>
+          <Link
+            href={`/dashboard/automation?projectId=${encodeURIComponent(project.id)}${project.goal ? `&said=${encodeURIComponent(project.goal)}` : ""}`}
+            data-testid="project-automate-it"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-semibold text-foreground hover:border-foreground/40"
+          >
+            <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
+            {t("automateIt.button")}
+          </Link>
         </div>
+        <p className="mt-1.5 text-[11px] text-muted">{t("chatFixed")}</p>
+        <p className="mt-1 text-[11px] text-muted">{t("automateIt.hint")}</p>
       </div>
 
       {/* TASKS · FILES · AGENTS · RESULTS · ACTIVITY */}

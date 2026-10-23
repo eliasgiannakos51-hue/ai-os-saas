@@ -1,8 +1,8 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **615 strings**. The whole product is 4318, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **616 strings**. The whole product is 4336, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 373 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 374 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Das sieht nach einer Frage aus. Soll ich sie beantworten oder ablegen?
 
 Beschreibe irgendetwas — eine Produktidee, einen Trade, das Feedback eines Nutzers, eine Kennzahl — und es landet automatisch im richtigen Modul.
 
-## Tier 2 — The labels — skim these (373)
+## Tier 2 — The labels — skim these (374)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1537,6 +1537,12 @@ App-Ideen
 > EN — Automation
 
 Automatisierung
+
+**`sidebar.items.automationFlow`**
+
+> EN — Automation flow
+
+Automatisierungsablauf
 
 **`sidebar.items.browserAgent`**
 

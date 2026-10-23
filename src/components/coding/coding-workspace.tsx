@@ -290,6 +290,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                 onDelete={deleteSession}
                 onRename={renameSession}
                 onNavigate={toggleHistory}
+                linkTable="code_sessions"
               />
             </div>
             <button

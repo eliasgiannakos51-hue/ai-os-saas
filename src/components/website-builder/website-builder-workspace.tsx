@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { saveBlob } from "@/components/ui/download-pdf-button";
 import { websiteNameFrom } from "@/lib/website-name";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
@@ -8,6 +9,7 @@ import {
   CheckCircle2,
   Download,
   Eye,
+  FolderPlus,
   History,
   Image as ImageIcon,
   Layout,
@@ -105,6 +107,13 @@ const WEBSITE_STATUS_LABEL_KEYS: Record<string, string> = {
   failed: "statusFailed",
   flagged: "statusFlagged",
 };
+
+// Deferred, same reason as every other per-record modal on this page: a
+// picker that reads every project, on a menu item that sits on every card.
+const AddToProjectModal = dynamic(
+  () => import("@/components/entity-links/add-to-project-modal").then((m) => m.AddToProjectModal),
+  { ssr: false }
+);
 
 const WEBSITE_STATUS_TONES: Record<string, EntityCardStatusTone> = {
   pending: "active",
@@ -256,6 +265,8 @@ export function WebsiteBuilderWorkspace({
   const tSteps = useTranslations("aiSteps");
   const tPublish = useTranslations("dashboard.publishing");
   const tModule = useTranslations("module");
+  const tAddToProject = useTranslations("projects.addToProject");
+  const [addToProjectId, setAddToProjectId] = useState<string | null>(null);
   const supabase = createClient();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
@@ -2097,6 +2108,12 @@ export function WebsiteBuilderWorkspace({
                       onSelect: () => downloadHtml(website),
                     },
                     {
+                      key: "addToProject",
+                      label: tAddToProject("button"),
+                      icon: FolderPlus,
+                      onSelect: () => setAddToProjectId(website.id),
+                    },
+                    {
                       key: "delete",
                       label: t("deleteButton"),
                       icon: Trash2,
@@ -2112,6 +2129,15 @@ export function WebsiteBuilderWorkspace({
           </>
         )}
       </ListLayout>
+      {addToProjectId && (
+        <AddToProjectModal
+          open
+          onClose={() => setAddToProjectId(null)}
+          sourceTable="user_websites"
+          sourceId={addToProjectId}
+          sourceHeadline={websites.find((w) => w.id === addToProjectId)?.name ?? ""}
+        />
+      )}
       </div>
       </div>
     </div>

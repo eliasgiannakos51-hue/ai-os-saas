@@ -362,7 +362,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "free",
     sidebar: ["/dashboard/coding"],
     pages: ["coding"],
-    routes: ["coding/run", "coding/sessions/[id]", "github/branches", "github/callback", "github/commit", "github/connect", "github/disconnect", "github/files", "github/repos", "github/status"],
+    routes: ["coding/run", "coding/sessions/[id]", "github/branches", "github/callback", "github/commit", "github/connect", "github/create-branch", "github/disconnect", "github/files", "github/merge", "github/pr-status", "github/repos", "github/status"],
     charges: true,
     enforcedIn: "src/app/api/coding/run/route.ts",
     enforcedSymbol: "reserveCredits",

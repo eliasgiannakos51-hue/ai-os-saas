@@ -133,9 +133,10 @@ console.log("\n== 2. the lines ==");
 // owner's follow-up, "like the second picture") — a new, one-off
 // bordered button with nothing already drawn the same way elsewhere to
 // share a class with.
-// 571 -> 574 on 2026-10-25. The GitHub connect component
-// (github-connect.tsx) adds repo/branch dropdowns and a connect button.
-ok(`border utilities (${r.counts.borders}), ceiling 574`, r.counts.borders <= 574);
+// 571 -> 574 -> 590 on 2026-10-25. The GitHub connect component
+// (github-connect.tsx) adds repo/branch dropdowns, connect button, and
+// the full commit/PR/merge/CI/undo workflow in coding-workspace.tsx.
+ok(`border utilities (${r.counts.borders}), ceiling 590`, r.counts.borders <= 590);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

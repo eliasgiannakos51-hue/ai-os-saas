@@ -290,7 +290,7 @@ for (const l of favLinks) {
 // the same ?projectId= contract /dashboard/website-builder and
 // /dashboard/deep-research already read for a result started from
 // inside a project.
-const DEEP_LINK_FLOOR = 70;
+const DEEP_LINK_FLOOR = 71;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

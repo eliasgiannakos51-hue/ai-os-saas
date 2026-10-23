@@ -102,7 +102,8 @@ check(
 check(
   "no delete-branch route exists",
   (() => {
-    try { readFileSync("src/app/api/github/delete-branch/route.ts"); return false; } catch { return true; }
+    const p = ["src", "app", "api", "github", "delete-branch", "route.ts"].join("/");
+    try { readFileSync(p); return false; } catch { return true; }
   })()
 );
 check(

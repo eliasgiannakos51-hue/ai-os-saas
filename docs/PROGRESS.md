@@ -3,6 +3,44 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-10-23ε (Coding: Parts E/Ζ/Η — zip download, pricing, security)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** Τα τρία τελευταία μέρη κώδικα (E, Ζ, Η) του MASTER 20Γ:
+
+**Μέρος Ε — zip download:**
+- `downloadZip()` στο `src/lib/coding/download.ts`: bare ZIP format (local
+  headers + central directory + EOCD), store-only, CRC32 lookup table,
+  UTF-8 flag. Χωρίς εξωτερική βιβλιοθήκη.
+- Κουμπί δίπλα στις καρτέλες αρχείων στο `coding-workspace.tsx`, με
+  `data-testid="coding-download-zip"`, i18n `coding.github.downloadZip`
+  σε 10 γλώσσες.
+
+**Μέρος Ζ — τιμολόγηση:**
+- `scripts/tests/coding-pricing.test.mjs`: 15 checks σε 6 ενότητες.
+  Πίνακας περιθωρίου (μέτρηση 2026-10-23):
+  - Fast (claude-haiku-4-5): $0.008575, 2 credits, 5,1× margin
+  - Normal (claude-sonnet-4-6): $0.025725, 5 credits, 4,2× margin
+  - Max (claude-opus-4-6): $0.042875, 8 credits, 4,1× margin
+- Κάθε επίπεδο πάνω από 4×. Κάθε ακριβότερο. Ο estimator είναι ο ίδιος
+  με αυτόν του UI. Το route ελέγχει balance πριν τρέξει.
+
+**Μέρος Η — ασφάλεια:**
+- `github-security.test.mjs` 21→37 checks (+3 ενότητες):
+  §7 user isolation (4), §8 data-not-instructions extended (4),
+  §9 no push to main / no branch delete / no merge without click (7).
+- Guard στο `src/app/api/github/commit/route.ts`:
+  `if (body.newBranch === body.baseBranch)` → 400.
+- Merge uses squash. UI shows confirmation dialog before merge.
+
+**Σύνολο checks:** 76 σε 4 αρχεία (37+14+10+15). ALL PASS.
+
+**Feature flag `coding-github` ΑΦΑΙΡΕΘΗΚΕ** (ιδιοκτήτης, «χωρίς
+διακόπτες»): η εμφάνιση ελέγχεται μόνο από `githubAppConfigured()`.
+
+**Μένει:** deploy + browser test (NEEDS 2), GitHub App (NEEDS 11),
+πάροχος εκτέλεσης (NEEDS 50). Μέρος ΣΤ (environment) αναβλήθηκε μέχρι
+ο ιδιοκτήτης αποφασίσει πάροχο.
+
 ## 2026-10-25 (Coding: GitHub integration — OAuth, repos, branches, files, PRs)
 
 **ΤΙ ΧΤΙΣΤΗΚΕ.** Πλήρης σύνδεση GitHub μέσω GitHub App:

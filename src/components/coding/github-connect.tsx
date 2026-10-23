@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { GitBranch, LogOut, ChevronDown, Search, Plus, Settings, ExternalLink } from "lucide-react";
 import type { GitHubRepo, GitHubBranch } from "@/lib/github/types";
+import { matchesSearch } from "@/lib/text/search-match";
 
 type GitHubStatus = {
   available: boolean;
@@ -225,7 +226,7 @@ export function GitHubConnect({
   }
 
   const filteredRepos = repoSearch
-    ? repos.filter((r) => r.fullName.toLowerCase().includes(repoSearch.toLowerCase()))
+    ? repos.filter((r) => matchesSearch(r.fullName, repoSearch))
     : repos;
 
   return (
@@ -248,7 +249,7 @@ export function GitHubConnect({
           <ChevronDown className="h-3 w-3 shrink-0 text-muted" aria-hidden="true" />
         </button>
         {repoDropdownOpen && (
-          <div className="absolute start-0 top-full z-50 mt-1 w-72 rounded-card border border-border bg-background shadow-lg">
+          <div className="absolute start-0 top-full z-50 mt-1 w-72 rounded-card border border-border bg-background">
             <div className="flex items-center gap-1.5 border-b border-divider px-2 py-1.5">
               <Search className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
               <input
@@ -271,7 +272,7 @@ export function GitHubConnect({
                   type="button"
                   onClick={() => selectRepo(r.fullName)}
                   data-testid="github-repo-option"
-                  className={`flex w-full min-h-[36px] items-center px-3 text-start text-xs hover:bg-panel-hover ${
+                  className={`flex w-full min-h-[44px] items-center px-3 text-start text-xs hover:bg-panel-hover ${
                     selection.repo === r.fullName ? "bg-panel-hover text-foreground" : "text-body"
                   }`}
                 >

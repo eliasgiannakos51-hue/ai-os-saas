@@ -672,7 +672,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                       type="button"
                       onClick={popUndo}
                       data-testid="coding-undo"
-                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
                     >
                       <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
                       {tGh("undo")}
@@ -683,7 +683,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                       type="button"
                       onClick={() => setCommitOpen(true)}
                       data-testid="coding-commit-open"
-                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item bg-foreground px-2.5 text-xs text-background hover:opacity-80"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-foreground px-2.5 text-xs text-background hover:opacity-80"
                     >
                       <GitPullRequest className="h-3.5 w-3.5" aria-hidden="true" />
                       {tGh("commitChanges")}
@@ -696,13 +696,14 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                         target="_blank"
                         rel="noopener noreferrer"
                         data-testid="coding-view-pr"
-                        className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground hover:bg-panel-hover"
+                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground hover:bg-panel-hover"
                       >
                         <GitPullRequest className="h-3.5 w-3.5" aria-hidden="true" />
                         {tGh("viewPr")} #{prResult.number}
                       </a>
                       {ciStatus && (
                         <span className="inline-flex items-center gap-1 text-xs">
+                          <span className="text-muted">{tGh("ciStatus")}:</span>
                           {ciStatus.checks.every((c) => c.conclusion === "success") ? (
                             <><CheckCircle className="h-3.5 w-3.5 text-success" aria-hidden="true" /><span className="text-success">{tGh("ciPassed")}</span></>
                           ) : ciStatus.checks.some((c) => c.conclusion === "failure") ? (
@@ -718,7 +719,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                           onClick={() => setMergeConfirmOpen(true)}
                           disabled={merging}
                           data-testid="coding-merge"
-                          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-success/40 bg-success/5 px-2.5 text-xs text-success hover:bg-success/10 disabled:opacity-40"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-success/40 bg-success/5 px-2.5 text-xs text-success hover:bg-success/10 disabled:opacity-40"
                         >
                           <GitMerge className="h-3.5 w-3.5" aria-hidden="true" />
                           {tGh("merge")}
@@ -735,14 +736,14 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                             onClick={() => void doMerge()}
                             disabled={merging}
                             data-testid="coding-merge-yes"
-                            className="min-h-[36px] rounded-item bg-success px-3 text-xs text-background hover:opacity-80 disabled:opacity-40"
+                            className="min-h-[44px] rounded-item bg-success px-3 text-xs text-background hover:opacity-80 disabled:opacity-40"
                           >
                             {merging ? tGh("merging") : tGh("merge")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setMergeConfirmOpen(false)}
-                            className="min-h-[36px] rounded-item border border-border px-3 text-xs text-muted hover:bg-panel-hover"
+                            className="min-h-[44px] rounded-item border border-border px-3 text-xs text-muted hover:bg-panel-hover"
                           >
                             {tGh("cancel")}
                           </button>
@@ -785,7 +786,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                     )}
                     aria-label={tGh("downloadZip")}
                     data-testid="coding-download-zip"
-                    className="inline-flex min-h-[36px] shrink-0 items-center gap-1 rounded-item px-2 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+                    className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-item px-2 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
                   >
                     <Download className="h-3 w-3" aria-hidden="true" />
                     {tGh("downloadZip")}
@@ -834,7 +835,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                       type="button"
                       onClick={() => void openGitHubFile(f.path)}
                       data-testid="coding-tree-file"
-                      className="flex w-full min-h-[36px] items-center px-4 text-start text-xs text-body hover:bg-panel-hover"
+                      className="flex w-full min-h-[44px] items-center px-4 text-start text-xs text-body hover:bg-panel-hover"
                     >
                       <span className="truncate">{f.path}</span>
                     </button>
@@ -848,7 +849,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
       {/* COMMIT / PR DIALOG */}
       {commitOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60" data-testid="coding-commit-dialog">
-          <div className="w-full max-w-md rounded-card border border-border bg-background p-6 shadow-lg">
+          <div className="w-full max-w-md rounded-card border border-border bg-background p-6">
             <h3 className="mb-4 text-sm font-semibold text-foreground">{tGh("commitChanges")}</h3>
             <div className="space-y-3">
               <div>
@@ -857,7 +858,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                   type="text"
                   value={commitMsg}
                   onChange={(e) => setCommitMsg(e.target.value)}
-                  placeholder="Update code via Ionexa Coding"
+                  placeholder={tGh("commitPlaceholder")}
                   data-testid="coding-commit-msg"
                   className="h-9 w-full rounded-item border border-border bg-transparent px-2 text-xs text-foreground outline-none"
                 />
@@ -898,7 +899,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
               <button
                 type="button"
                 onClick={() => setCommitOpen(false)}
-                className="min-h-[36px] rounded-item border border-border px-3 text-xs text-muted hover:bg-panel-hover"
+                className="min-h-[44px] rounded-item border border-border px-3 text-xs text-muted hover:bg-panel-hover"
               >
                 {tGh("cancel")}
               </button>
@@ -907,7 +908,7 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
                 onClick={() => void doCommitAndPr()}
                 disabled={committing}
                 data-testid="coding-commit-submit"
-                className="min-h-[36px] rounded-item bg-foreground px-3 text-xs text-background hover:opacity-80 disabled:opacity-40"
+                className="min-h-[44px] rounded-item bg-foreground px-3 text-xs text-background hover:opacity-80 disabled:opacity-40"
               >
                 {committing ? tGh("creating") : tGh("createPr")}
               </button>

@@ -813,7 +813,7 @@ const clientFallbacks = sources.flatMap((f) => [
 // which decides from configuration, and a narration that cannot be
 // made falls back to the detectors' own true sentences instead of a
 // 503 on a page whose findings are already computed.
-const SERVER_PROSE_BASELINE = 683;
+const SERVER_PROSE_BASELINE = 687;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

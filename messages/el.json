@@ -4972,7 +4972,8 @@
       "downloadZip": "Λήψη ως .zip",
       "fromComputer": "Κώδικας από τον υπολογιστή",
       "connected": "Συνδέθηκε",
-      "cancel": "Ακύρωση"
+      "cancel": "Ακύρωση",
+      "commitPlaceholder": "Ενημέρωση κώδικα μέσω Ionexa Coding"
     }
   },
   "presentations": {

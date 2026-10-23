@@ -448,6 +448,11 @@ const MECHANICAL = [
   // DOES call the model is the create screen's, which shows the globe
   // itself.
   "src/components/marketplace/template-browser.tsx",
+  // The coding workspace shows a spinner while committing to GitHub,
+  // creating a PR, merging, or waiting for CI — all network round trips,
+  // not model calls. The model call lives in /api/coding/run, which
+  // shows the globe through the coding shell.
+  "src/components/coding/coding-workspace.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

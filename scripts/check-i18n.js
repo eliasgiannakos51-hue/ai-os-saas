@@ -672,6 +672,8 @@ const LOCALE_ALLOWED = new Set([
   "it:coding.github.repoLabel",
   "it:coding.github.branchLabel",
   "pt:coding.github.branchLabel",
+  // «Structure» is the French word for the file-tree section heading.
+  "fr:coding.github.structure",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

@@ -202,12 +202,14 @@
     *Ξεμπλοκάρει:* Μέρος 20Γ1 (η σύνδεση), και η γενική σύνδεση GitHub
     των Συνδέσεων (BUILD-SPECS 2.2, 5.12) — το ίδιο App καλύπτει και τα
     δύο, μία ενσωμάτωση όχι δύο.
-    **Κατάσταση 2026-10-25:** ο κώδικας είναι έτοιμος — OAuth flow,
+    **Κατάσταση 2026-10-23:** ο κώδικας είναι έτοιμος — OAuth flow,
     κρυπτογράφηση, repo/branch picker με αναζήτηση, δημιουργία branch,
-    file tree, commit+PR dialog, CI status, merge με επιβεβαίωση,
-    undo stack, download .zip, **46 security checks** σε 3 αρχεία,
-    migration `20261025100000_github_connections.sql`. **Ο feature flag
-    `coding-github` αφαιρέθηκε** (ιδιοκτήτης 2026-10-23, «χωρίς
+    file tree, commit+PR dialog, CI status, merge με επιβεβαίωση
+    (squash), undo stack, download .zip, **76 checks** σε 4 αρχεία
+    (ασφάλεια 37+14+10, τιμολόγηση 15), migration
+    `20261025100000_github_connections.sql`. Τιμολόγηση: Fast 5,1×,
+    Normal 4,2×, Max 4,1× — κάθε επίπεδο πάνω από 4×. **Ο feature
+    flag `coding-github` αφαιρέθηκε** (ιδιοκτήτης 2026-10-23, «χωρίς
     διακόπτες»): η εμφάνιση ελέγχεται ΜΟΝΟ από `githubAppConfigured()`
     (4 env vars). Admin βλέπει μήνυμα ρύθμισης· χρήστες τίποτα μέχρι τα
     keys. Μόλις φτιάξεις το App και βάλεις τα 4 env vars στο Vercel

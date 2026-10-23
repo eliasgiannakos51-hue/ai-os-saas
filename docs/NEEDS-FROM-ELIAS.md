@@ -202,6 +202,12 @@
     *Ξεμπλοκάρει:* Μέρος 20Γ1 (η σύνδεση), και η γενική σύνδεση GitHub
     των Συνδέσεων (BUILD-SPECS 2.2, 5.12) — το ίδιο App καλύπτει και τα
     δύο, μία ενσωμάτωση όχι δύο.
+    **Κατάσταση 2026-10-25:** ο κώδικας είναι έτοιμος — OAuth flow,
+    κρυπτογράφηση, repo/branch picker, file reader, commit+PR, 21
+    security checks, migration, feature flag `coding-github` (staff).
+    Μόλις φτιάξεις το App και βάλεις τα 4 env vars στο Vercel
+    (`GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`,
+    `GITHUB_APP_PRIVATE_KEY`), το κουμπί εμφανίζεται χωρίς νέο deploy.
 
 12. **Telegram bot token** (δωρεάν, από τον @BotFather). Βήματα στο 2.3.
 

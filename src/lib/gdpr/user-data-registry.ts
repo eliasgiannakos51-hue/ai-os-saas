@@ -420,6 +420,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     // token written into a JSON file in their Downloads folder.
     redactColumns: ["access_token_encrypted", "refresh_token_encrypted"],
   },
+  {
+    table: "github_connections",
+    label: "github_connection",
+    scope: "sensitive_redacted",
+    redactColumns: ["access_token_encrypted"],
+  },
   { table: "integration_sync_log", label: "integration_sync_log", scope: "account" },
   {
     table: "user_delivery_channels",

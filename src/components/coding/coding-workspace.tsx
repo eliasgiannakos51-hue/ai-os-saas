@@ -20,6 +20,7 @@ import { MAX_INPUT_CHARS, OPERATION_SPECS, type CodeOperation } from "@/lib/codi
 import { FOLDER_UPLOAD_MAX_FILES, readUploadedFolder } from "@/lib/coding/folder-upload";
 import { POWER_LEVELS, modelForPower, type PowerLevel } from "@/lib/coding/power";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
+import { GitHubConnect, type GitHubSelection } from "@/components/coding/github-connect";
 
 export type CodeSession = {
   id: string;
@@ -98,6 +99,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
   // option; the text itself still lives inside ChatComposer.
   const [power, setPower] = useState<PowerLevel>("normal");
   const [inputLength, setInputLength] = useState(0);
+  const [github, setGitHub] = useState<GitHubSelection>({ repo: null, branch: null });
 
   // OPEN BY DEFAULT, UNCONDITIONALLY (the owner's critical message,
   // 2026-10-22: "the sessions list, open on the left, like Claude Code,
@@ -457,18 +459,14 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
               )}
             </div>
             <div className="p-4 sm:p-6">
-              {/* ΠΑΝΩ ΑΠΟ ΤΟ ΠΕΔΙΟ, ΟΧΙ ΑΠΟ ΚΑΤΩ (the owner's follow-up
-                  message, 2026-10-23, moves this row above the field —
-                  its first message put it below). "Σύνδεση GitHub" and a
-                  repository/branch picker are still NOT here: NEEDS 11's
-                  GitHub App does not exist yet, and NEEDS 50's execution
-                  environment is still undecided (docs/QUEUE.md, 20Γ) — a
-                  picker for a connection that cannot work is exactly the
-                  "screen that produces nothing" NEEDS 19 already ruled
-                  out, so it stays absent, not disabled, the same rule as
-                  before. "Ανέβασμα φακέλου" needs no GitHub — local files
-                  only — so it alone draws here. */}
-              <div data-testid="coding-project-row" className="mb-2 flex flex-wrap gap-2">
+              {/* ΠΑΝΩ ΑΠΟ ΤΟ ΠΕΔΙΟ (the owner's follow-up message,
+                  2026-10-23). "Σύνδεση GitHub" is gated on the
+                  `coding-github` flag AND the four env vars — the button
+                  does not appear until the owner adds the keys to Vercel
+                  and flips the switch on /dashboard/system-health, with
+                  no code change (MASTER 20 Γ). */}
+              <div data-testid="coding-project-row" className="mb-2 flex flex-wrap items-center gap-2">
+                <GitHubConnect selection={github} onSelectionChange={setGitHub} />
                 <input
                   ref={folderInputRef}
                   type="file"

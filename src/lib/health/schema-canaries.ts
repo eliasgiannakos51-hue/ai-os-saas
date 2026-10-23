@@ -481,4 +481,10 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   // account deletion removes files through the Storage API since
   // 2026-10-08 (src/lib/account/erase-storage.ts), because Supabase
   // refuses that function's delete, so its absence breaks nothing.
+  {
+    kind: "table",
+    table: "github_connections",
+    migration: "20261025100000_github_connections.sql",
+    breaks: "the Coding tool's GitHub connection fails to save after OAuth and the connect flow silently drops the token",
+  },
 ];

@@ -4931,6 +4931,15 @@
       "normal": "Normal",
       "max": "Max",
       "estimate": "{level} · about {count} credits"
+    },
+    "github": {
+      "connect": "Connect GitHub",
+      "disconnect": "Disconnect GitHub",
+      "repoLabel": "Repository",
+      "branchLabel": "Branch",
+      "pickRepo": "Pick a repository…",
+      "pickBranch": "Pick a branch…",
+      "default": "default"
     }
   },
   "presentations": {

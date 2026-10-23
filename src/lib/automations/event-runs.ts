@@ -2,7 +2,6 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { readFlow } from "@/lib/automations/boxes";
 import { accountFor, go } from "@/lib/automations/start-run";
 
@@ -41,10 +40,6 @@ export async function runQueued(run: QueuedRun, user: User): Promise<boolean> {
     .select("id");
   if (takeError || !taken || taken.length !== 1) return false;
 
-  if (!(await isFeatureOn("automations", user))) {
-    await cancel(run.id, "switched_off");
-    return true;
-  }
   const { data: flow, error: flowError } = await admin
     .from("automation_flows")
     .select("id, user_id, name, boxes, cost_limit, time_zone, is_active")

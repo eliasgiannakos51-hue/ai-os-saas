@@ -2,7 +2,7 @@ import { MAX_PAGES_PER_SITE } from "@/lib/publishing/website-pages";
 
 /**
  * HOW MANY PAGES WERE ASKED FOR (MASTER 16, package 10: «παίρνω site πέντε
- * σελίδων»), behind the switch "site-pages".
+ * σελίδων»).
  *
  * Until now the model decided, from the description, how many pages a site
  * needs (lib/website-multipage.ts, "Do not pad") — so "five pages" was a

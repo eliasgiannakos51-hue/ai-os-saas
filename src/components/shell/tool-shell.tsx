@@ -10,7 +10,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 /**
  * ONE SHELL FOR EVERY TOOL (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §5, «ΕΝΑ
  * ΚΕΛΥΦΟΣ ΓΙΑ ΟΛΑ»; docs/MASTER.md Μέρος 14.3 and package 3 of Μέρος 16),
- * behind the switch "tool-shell" (src/lib/flags/flags.ts).
+ * for everybody — the switch "tool-shell" was removed 2026-10-23.
  *
  * The conversation on the left, the work on the right; one field, the
  * same as Chat's (components/chat/chat-composer.tsx), with the tool's own

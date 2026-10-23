@@ -9,46 +9,38 @@ import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarIte
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
-import { ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, SWITCHED_SQUARES, SWITCH_ONLY_ITEMS, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
+import { ALL_TOOLS, ALL_TOOLS_GROUP_ORDER, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
-import { GAMES_ICON, MY_STUFF_ICON } from "@/lib/module-icons";
+import { MY_STUFF_ICON } from "@/lib/module-icons";
 
-/** The icon of each tool with no sidebar row (lib/nav/all-tools.ts SWITCH_ONLY_ITEMS). */
-const SWITCH_ONLY_ICONS: Record<string, LucideIcon> = { "/dashboard/games": GAMES_ICON, "/dashboard/my-stuff": MY_STUFF_ICON };
+/** The icon of a tool that has no sidebar row of its own. */
+const ROWLESS_ICONS: Record<string, LucideIcon> = { "/dashboard/my-stuff": MY_STUFF_ICON };
 
 /**
- * ALL TOOLS: big square tiles, four in a row on a computer and two on a
- * phone, in six groups — Make, Ask, Automate, Organise, Business, Learn
- * (the owner's critical message, 2026-10-22) — with a search on top and
- * no «beta» anywhere. Each
- * square: a 28px icon top left, a pin top right, and at the bottom the
- * name with one plain line on what it does.
+ * ALL TOOLS, THE FINAL GRID (the owner's message, 2026-10-23): square
+ * tiles, five to six in a row on a computer and two on a phone, in five
+ * groups — Record, Ask, Make, Run on its own, Organise — with a search on
+ * top and no «beta» anywhere. Each tile: a 20px icon, the name and one
+ * plain line.
  *
- * WHICH TOOLS, AND WHERE: lib/nav/all-tools.ts, by the owner's rule of
- * 2026-10-05 (shown when it does its main job end to end; hidden when it
- * is only a screen, produces nothing, or its name promises more). Since
- * MASTER 14.1 (2026-10-07) only the tools it names, each under its
- * one-word name; Settings, Integrations, Help and Team are reached from
- * the Settings page (app/dashboard/settings/page.tsx).
+ * WHICH TOOLS, AND IN WHAT ORDER: lib/nav/all-tools.ts ALL_TOOLS, the
+ * seventeen of the owner's list. The page hands this component the
+ * addresses of the ones that work (`shown`, from availableTools): a tool
+ * that does not work end to end has no tile at all.
  *
  * THE SAME SEARCH AS ⌘K: a tile answers to its name on screen, its English
  * name, lib/palette-aliases.ts and its one-line description, ranked by
- * lib/command-palette-match.ts — "slides" finds Presentations here as in
- * the palette.
+ * lib/command-palette-match.ts.
  *
  * THE PIN is the only way to put a tool in the sidebar at once (the
  * Recent tools rule, ΣΥΣΤΗΜΑ DESIGN §3); it writes through the same
  * /api/nav/recent-tools the sidebar uses. Chat and Coding have rows of
- * their own and are never in Recent tools, so their squares have no pin.
- *
- * THE NEW TOOLS (MASTER 14.1, lib/nav/all-tools.ts SWITCHED_SQUARES) join
- * their group only for the hrefs the page found switched on for this
- * person (`switchedOn`). Neither is a row of the main groups the grid
- * draws from — Image's row is hidden, and Integrations sits in the
- * Settings group — so they are looked up in the whole list.
+ * their own and are never in Recent tools, and a tool with no visible
+ * sidebar row cannot be pinned (the route takes only those), so those
+ * tiles have no pin.
  */
-export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: boolean; pinned?: string[]; switchedOn?: string[] }) {
+export function ToolsGrid({ isOwner, pinned = [], shown = [] }: { isOwner: boolean; pinned?: string[]; shown?: string[] }) {
   const t = useTranslations("dashboard.tools");
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
@@ -58,88 +50,95 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
   const [query, setQuery] = useState("");
   const [pins, setPins] = useState<string[]>(pinned);
 
+  const mainRows = useMemo(
+    () => new Map(sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))),
+    [isOwner]
+  );
   const groups = useMemo(() => {
-    const byHref = new Map(
-      sidebarGroups(MAIN_SIDEBAR_GROUPS, isOwner).flatMap((g) => g.items.map((i) => [i.href, i] as const))
-    );
     const everyItem = new Map(ALL_SIDEBAR_GROUPS.flatMap((g) => g.items.map((i) => [i.href, i] as const)));
-    // A tool with no sidebar row at all (lib/nav/all-tools.ts
-    // SWITCH_ONLY_ITEMS): drawn only through SWITCHED_SQUARES below, so only
-    // when its switch is on.
-    const switchOnly = (href: string): SidebarItem | undefined =>
-      SWITCH_ONLY_ITEMS[href] ? { href, ...SWITCH_ONLY_ITEMS[href], icon: SWITCH_ONLY_ICONS[href] ?? LayoutGrid } : undefined;
+    const rowless = (href: string): SidebarItem => ({ href, label: href, icon: ROWLESS_ICONS[href] ?? LayoutGrid });
     // Literal keys, so the message slicer can bound what this page needs
     // (lib/i18n/message-slices.ts): a template-literal key is unbounded.
     const headings: Record<AllToolsGroupKey, string> = {
-      make: t("groups.make"),
+      record: t("groups.record"),
       ask: t("groups.ask"),
-      automate: t("groups.automate"),
+      make: t("groups.make"),
+      runAlone: t("groups.runAlone"),
       organise: t("groups.organise"),
-      business: t("groups.business"),
-      learn: t("groups.learn"),
     };
-    // ONLY THE TOOLS (MASTER 14.1): Settings, Integrations and the Help
-    // Centre are in Settings, and the sidebar's Settings row opens it.
-    return ALL_TOOLS_GROUPS.map((g) => ({
-      key: g.key,
-      heading: headings[g.key],
-      items: [
-        ...g.hrefs.map((h) => byHref.get(h)),
-        ...SWITCHED_SQUARES.filter((s) => s.group === g.key && switchedOn.includes(s.href)).map((s) => everyItem.get(s.href) ?? switchOnly(s.href)),
-      ].filter((i): i is SidebarItem => Boolean(i)),
+    return ALL_TOOLS_GROUP_ORDER.map((key) => ({
+      key,
+      heading: headings[key],
+      items: ALL_TOOLS.filter((tool) => tool.group === key && shown.includes(tool.href)).map(
+        (tool) => everyItem.get(tool.href) ?? rowless(tool.href)
+      ),
     })).filter((g) => g.items.length > 0);
-  }, [isOwner, t, switchedOn]);
+  }, [t, shown]);
 
-  // THE ONE-WORD NAMES (MASTER 14.1), through literal keys for the same
-  // reason as the headings above.
+  // THE NAMES, through literal keys for the same reason as the headings.
   const names: Record<AllToolsNameKey, string> = {
+    myStuff: t("names.myStuff"),
+    connect: t("names.connect"),
+    analyze: t("names.analyze"),
+    research: t("names.research"),
+    rebuild: t("names.rebuild"),
     site: t("names.site"),
+    document: t("names.document"),
+    image: t("names.image"),
+    video: t("names.video"),
+    films: t("names.films"),
+    editing: t("names.editing"),
+    avatars: t("names.avatars"),
+    coding: t("names.coding"),
+    agents: t("names.agents"),
+    automations: t("names.automations"),
+    iowork: t("names.iowork"),
+    projects: t("names.projects"),
+    files: t("names.files"),
     slides: t("names.slides"),
     posts: t("names.posts"),
-    research: t("names.research"),
-    analyze: t("names.analyze"),
-    files: t("names.files"),
-    automations: t("names.automations"),
-    projects: t("names.projects"),
     goals: t("names.goals"),
     meetings: t("names.meetings"),
-    myStuff: t("names.myStuff"),
     library: t("names.library"),
     memory: t("names.memory"),
     finances: t("names.finances"),
     sales: t("names.sales"),
     trading: t("names.trading"),
-    image: t("names.image"),
-    connections: t("names.connections"),
-    document: t("names.document"),
     games: t("names.games"),
   };
-  // THE ONE LINE UNDER EACH NAME (MASTER 14.1: «όνομα μίας λέξης, μία
-  // γραμμή»), short enough that the square stays square on a phone.
+  // THE ONE LINE UNDER EACH NAME, short enough that the tile stays square
+  // on a phone.
   const lines: Record<AllToolsNameKey, string> = {
+    myStuff: t("lines.myStuff"),
+    connect: t("lines.connect"),
+    analyze: t("lines.analyze"),
+    research: t("lines.research"),
+    rebuild: t("lines.rebuild"),
     site: t("lines.site"),
+    document: t("lines.document"),
+    image: t("lines.image"),
+    video: t("lines.video"),
+    films: t("lines.films"),
+    editing: t("lines.editing"),
+    avatars: t("lines.avatars"),
+    coding: t("lines.coding"),
+    agents: t("lines.agents"),
+    automations: t("lines.automations"),
+    iowork: t("lines.iowork"),
+    projects: t("lines.projects"),
+    files: t("lines.files"),
     slides: t("lines.slides"),
     posts: t("lines.posts"),
-    research: t("lines.research"),
-    analyze: t("lines.analyze"),
-    files: t("lines.files"),
-    automations: t("lines.automations"),
-    projects: t("lines.projects"),
     goals: t("lines.goals"),
     meetings: t("lines.meetings"),
-    myStuff: t("lines.myStuff"),
     library: t("lines.library"),
     memory: t("lines.memory"),
     finances: t("lines.finances"),
     sales: t("lines.sales"),
     trading: t("lines.trading"),
-    image: t("lines.image"),
-    connections: t("lines.connections"),
-    document: t("lines.document"),
     games: t("lines.games"),
   };
-  const nameKey = (href: string): AllToolsNameKey | undefined =>
-    ALL_TOOLS_NAMES[href] ?? SWITCHED_SQUARES.find((s) => s.href === href)?.name;
+  const nameKey = (href: string): AllToolsNameKey | undefined => ALL_TOOLS.find((tool) => tool.href === href)?.name;
 
   const label = (item: SidebarItem) => { const k = nameKey(item.href); return k ? names[k] : longLabel(item); };
   // The sidebar's longer name stays a search word: "Build a site" still
@@ -150,7 +149,7 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
       : ITEM_LABEL_KEYS[item.label]
         ? tSidebar(`items.${ITEM_LABEL_KEYS[item.label]}`)
         : item.label;
-  // The sidebar's longer hint stays a search word; the square draws its line.
+  // The sidebar's longer hint stays a search word; the tile draws its line.
   const sidebarHint = (item: SidebarItem) => (item.hintKey ? tSidebar(`hints.${item.hintKey}`) : "");
   const hint = (item: SidebarItem) => { const k = nameKey(item.href); return k ? lines[k] : sidebarHint(item); };
 
@@ -188,14 +187,11 @@ export function ToolsGrid({ isOwner, pinned = [], switchedOn = [] }: { isOwner: 
     const Icon = item.icon;
     const name = label(item);
     const description = hint(item);
-    // NO PIN ON A SWITCHED SQUARE: Recent tools (api/nav/recent-tools)
-    // takes only the visible rows of the main groups, and neither of these
-    // is one (Image's row is hidden, Integrations is in the Settings
-    // group), so a pin would be refused every time — a button that does
-    // nothing.
+    // A PIN needs a visible row of the sidebar's main groups: Recent tools
+    // (api/nav/recent-tools) takes only those, so a pin on any other tile
+    // would be refused every time — a button that does nothing.
     const canPin =
-      !NEVER_RECENT.includes(item.href) && !item.href.startsWith("/help") && item.href !== "/dashboard/settings" &&
-      !SWITCHED_SQUARES.some((s) => s.href === item.href);
+      mainRows.has(item.href) && !NEVER_RECENT.includes(item.href) && !item.href.startsWith("/help") && item.href !== "/dashboard/settings";
     const isPinned = pins.includes(item.href);
     return (
       <li key={item.href} className="group relative">

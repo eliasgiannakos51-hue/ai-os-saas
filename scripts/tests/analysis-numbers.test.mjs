@@ -1,5 +1,5 @@
 // ANALYZE WITH EXCEL: A CHART, AN EXPLANATION, AND HOW EVERY NUMBER WAS
-// MADE (MASTER 16, package 16), behind the switch "analysis-provenance".
+// MADE (MASTER 16, package 16).
 //
 // Analyze already kept the model away from the rows: it is handed
 // statistics computed in TypeScript and asked what they mean. What it
@@ -155,15 +155,14 @@ console.log("\n== 3. the reply: every number a fact, or the finding is not shown
 console.log("\n== 4. what is sent, priced and held: one function ==");
 {
   const params = { fileName: "πωλήσεις.xlsx", profile, headers, rows };
-  const off = A.analysisBrief(params, false);
-  const on = A.analysisBrief(params, true);
-  ok("without the switch, exactly the brief sent before", off.brief === A.buildProfileBrief(params) && off.facts.length === 0);
-  ok("with it, the rule and then the facts follow the brief", on.brief.startsWith(off.brief) && on.brief.indexOf(F.FACTS_RULE.trim()) > off.brief.length && on.brief.endsWith(F.renderFactsForModel(on.facts)));
+  const base = A.buildProfileBrief(params);
+  const on = A.analysisBrief(params);
+  ok("the rule and then the facts follow the profile brief, for everybody", on.facts.length > 0 && on.brief.startsWith(base) && on.brief.indexOf(F.FACTS_RULE.trim()) > base.length && on.brief.endsWith(F.renderFactsForModel(on.facts)));
   const analyse = read("src/app/api/data-analysis/[id]/analyse/route.ts");
   const price = read("src/app/api/data-analysis/[id]/price/route.ts");
-  ok("the analyse route sends what analysisBrief builds, behind the switch, under the same system prompt", /const withFacts = await isFeatureOn\("analysis-provenance", user\);/.test(analyse) && /analysisBrief\(\s*\{[^}]+\},\s*withFacts\s*\)/.test(analyse) && /system: \[\{ type: "text", text: ANALYSIS_SYSTEM \}\]/.test(analyse) && /messages: \[\{ role: "user", content: brief \}\]/.test(analyse));
-  ok("...and reads the reply against the facts it sent", /withFacts \? parseAnalysisWithFacts\(outcome\.text, profile, facts, locale\) : parseAnalysis\(outcome\.text, profile\)/.test(analyse));
-  ok("the hold and the quote are both the system prompt and the brief with its facts", /inputChars: ANALYSIS_SYSTEM\.length \+ brief\.length/.test(analyse) && /inputChars: ANALYSIS_SYSTEM\.length \+ brief\.length/.test(price) && /await isFeatureOn\("analysis-provenance", user\)/.test(price) && /analysisBrief\(/.test(price));
+  ok("the analyse route sends what analysisBrief builds, under the same system prompt", !/isFeatureOn/.test(analyse) && /analysisBrief\(\s*\{[^}]+\}\s*\)/.test(analyse) && /system: \[\{ type: "text", text: ANALYSIS_SYSTEM \}\]/.test(analyse) && /messages: \[\{ role: "user", content: brief \}\]/.test(analyse));
+  ok("...and reads the reply against the facts it sent", /const parsed = parseAnalysisWithFacts\(outcome\.text, profile, facts, locale\);/.test(analyse));
+  ok("the hold and the quote are both the system prompt and the brief with its facts", /inputChars: ANALYSIS_SYSTEM\.length \+ brief\.length/.test(analyse) && /inputChars: ANALYSIS_SYSTEM\.length \+ brief\.length/.test(price) && !/isFeatureOn/.test(price) && /analysisBrief\(/.test(price));
   ok("the reader's language is one the app speaks, or English", /\(SUPPORTED_LOCALES as readonly string\[\]\)\.includes\(body\.locale\) \? body\.locale : "en"/.test(analyse));
 }
 
@@ -173,16 +172,16 @@ console.log("\n== 5. the screen ==");
   const chart = read("src/components/data-analysis/analysis-chart.tsx");
   const factText = read("src/components/data-analysis/fact-text.tsx");
   const page = read("src/app/dashboard/data-analysis/page.tsx");
-  ok("the page passes the switch", /provenance=\{await isFeatureOn\("analysis-provenance", user\)\}/.test(page));
-  ok("with it, the summary and every finding draw their numbers as facts", (shell.match(/provenance && (?:current\.findings\.summaryParts|finding\.headlineParts|finding\.detailParts) \? <FactText parts=/g) ?? []).length === 3);
+  ok("the page passes no switch: provenance is for everybody", !/provenance=/.test(page) && !/analysis-provenance/.test(page));
+  ok("with it, the summary and every finding draw their numbers as facts", (shell.match(/(?:current\.findings\.summaryParts|finding\.headlineParts|finding\.detailParts) \? <FactText parts=/g) ?? []).length === 3);
   ok("a fact is a button that says what it is and from how many rows", /data-testid="fact"/.test(factText) && /onClick=\{\(\) => setOpen\(/.test(factText) && /\{formatFact\(shown, locale\)\} — \{explain\(shown\)\}/.test(factText) && /t\(fact\.kind, \{\s*column: fact\.column \?\? "",\s*other: fact\.other \?\? "",\s*label: fact\.label \?\? "",\s*rows: fact\.rows \?\? 0,/.test(factText));
   ok("every fact used is listed under «How the numbers were made»", /data-testid="analysis-how"/.test(shell) && /facts\.map\(\(fact\) => \(\s*<li key=\{fact\.id\} data-testid="analysis-how-fact">/.test(shell));
-  ok("every chart says how each value was made, with its rows, under the switch", /<AnalysisChart key=\{`\$\{chart\.spec\.title\}-\$\{index\}`\} chart=\{chart\} how=\{provenance\} \/>/.test(shell) && /\{how && spec\.kind !== "scatter" \? <ChartHow chart=\{chart\} \/> : null\}/.test(chart) && /tHow\("point", \{ rows: point\.rows \}\)/.test(chart));
+  ok("every chart says how each value was made, with its rows, ", /<AnalysisChart key=\{`\$\{chart\.spec\.title\}-\$\{index\}`\} chart=\{chart\} \/>/.test(shell) && /\{spec\.kind !== "scatter" \? <ChartHow chart=\{chart\} \/> : null\}/.test(chart) && /tHow\("point", \{ rows: point\.rows \}\)/.test(chart));
   ok("the request says the reader's language", /body: JSON\.stringify\(\{ locale \}\)/.test(shell));
-  ok("findings left out for a number are said", /if \(provenance && Number\(body\?\.dropped\) > 0\) note\("tool", t\("how\.dropped", \{ count: Number\(body\.dropped\) \}\)\);/.test(shell));
+  ok("findings left out for a number are said", /if \(Number\(body\?\.dropped\) > 0\) note\("tool", t\("how\.dropped", \{ count: Number\(body\.dropped\) \}\)\);/.test(shell));
 }
 
-console.log("\n== 6. the words, and the switch ==");
+console.log("\n== 6. the words ==");
 {
   for (const l of LOCALES) {
     const how = messages[l].dataAnalysis?.how ?? {};
@@ -194,7 +193,7 @@ console.log("\n== 6. the words, and the switch ==");
     const columnless = ["sum", "mean", "median", "min", "max", "missing", "distinct", "outliers", "topCount", "r", "from", "to"].filter((k) => !String(how[k] ?? "").includes("{column}"));
     ok(`${l}: every kind of fact and every aggregation is explained, naming its column`, missing.length === 0 && columnless.length === 0 && String(how.r ?? "").includes("{other}") && String(how.topCount ?? "").includes("{label}"), [...missing, ...columnless].join(", "));
   }
-  ok('the switch "analysis-provenance" is declared', /\n  "analysis-provenance": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
+  ok('there is no switch "analysis-provenance": it is on for everybody', !/\n  "analysis-provenance": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
 }
 
 console.log(failures.length ? `\nFAILURES: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);

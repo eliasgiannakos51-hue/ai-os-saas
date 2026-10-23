@@ -406,18 +406,6 @@ try {
     MOCK_USER.user_metadata = { subscription_tier: "growth" };
     await charged.context.close();
   }
-
-  console.log("\n== the switch off, desktop ==");
-  {
-    setFlags({ "analysis-provenance": "off" });
-    const { context, page, press } = await open(ON, { viewport: { width: 1440, height: 900 }, touch: false });
-    const asked = await uploadAndAnalyse(ON, page, press, EL);
-    await showFile(page, press);
-    await findingsDrawn(page);
-    check("the model is sent no facts", !/FACTS \(every number/.test(JSON.stringify(modelAsked[asked]?.messages ?? [])) && !/never type the digits/.test(JSON.stringify(modelAsked[asked]?.messages ?? [])));
-    check("...and the page is Analyze as it was: no pressable numbers, no «how» lists", (await page.locator('[data-testid="fact"], [data-testid="analysis-how"], [data-testid="chart-how"]').count()) === 0 && (await page.locator('[data-testid="analysis-finding"]').count()) === 1);
-    await context.close();
-  }
 } catch (err) {
   check("the run completed", false, String(err?.stack ?? err) + (pageErrors.length ? `\n        page errors: ${pageErrors.slice(0, 3).join(" | ")}` : ""));
 } finally {

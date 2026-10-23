@@ -5,8 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatFact, type Fact, type TextPart } from "@/lib/data-analysis/facts";
 
 /**
- * A FINDING'S WORDS WITH ITS NUMBERS PRESSABLE (package 16, behind the
- * switch "analysis-provenance"). Every number in `parts` is a fact
+ * A FINDING'S WORDS WITH ITS NUMBERS PRESSABLE (package 16). Every number in `parts` is a fact
  * computed from the file (lib/data-analysis/facts.ts); pressing it says,
  * under the sentence, what it is and over how many rows.
  */

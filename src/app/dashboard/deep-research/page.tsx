@@ -11,10 +11,9 @@ import { upgradeWallProps } from "@/lib/billing/feature-catalog";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
-import { ResearchWorkspace, type ResearchReport } from "@/components/research/research-workspace";
+import type { ResearchReport } from "@/components/research/research-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readRequestedId } from "@/lib/library/requested";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { ResearchShell } from "@/components/research/research-shell";
 import { countResearchRunsThisMonth } from "@/lib/research/research-usage";
 import { ownedProjectId } from "@/lib/projects/link-result";
@@ -86,46 +85,20 @@ export default async function DeepResearchPage(
     if (one) reports.push(one);
   }
 
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
-  // reports and the same plan-then-run stop, drawn as conversation and work.
-  if (await isFeatureOn("tool-shell", user)) {
-    const projectId = await ownedProjectId(supabase, searchParams.projectId);
-    return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <ResearchShell
-          initialTopic={readExampleParam(searchParams.brief)}
-          initialReports={reports as unknown as ResearchReport[]}
-          initialOpenId={wanted}
-          monthlyCap={isAdmin ? null : cap}
-          usedThisMonth={used ?? 0}
-          slides={await isFeatureOn("research-slides", user)}
-          initialProjectId={projectId}
-        />
-      </div>
-    );
-  }
-
+  // THE SHELL, FOR EVERYBODY (MASTER 14.3, package 3; its switch was removed
+  // 2026-10-23): the reports and the plan-then-run stop, drawn as
+  // conversation and work.
+  const projectId = await ownedProjectId(supabase, searchParams.projectId);
   return (
-    <div className="min-h-full">
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
-
-        {/* The two things a person should know before spending credits on
-            this: it takes minutes, and it paraphrases rather than
-            reprinting what it finds. */}
-        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
-          {t("intro")}
-        </p>
-
-        <ResearchWorkspace
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <ResearchShell
         initialTopic={readExampleParam(searchParams.brief)}
-          initialReports={reports as unknown as ResearchReport[]}
-          initialOpenId={wanted}
-          monthlyCap={isAdmin ? null : cap}
-          usedThisMonth={used ?? 0}
-          slides={await isFeatureOn("research-slides", user)}
-        />
-      </div>
+        initialReports={reports as unknown as ResearchReport[]}
+        initialOpenId={wanted}
+        monthlyCap={isAdmin ? null : cap}
+        usedThisMonth={used ?? 0}
+        initialProjectId={projectId}
+      />
     </div>
   );
 }

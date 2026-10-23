@@ -19,11 +19,7 @@ import { isUnsplashConfigured } from "@/lib/unsplash";
 import { parseStoredDeck } from "@/lib/presentations/deck";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { PresentationsShell } from "@/components/presentations/presentations-shell";
-import {
-  PresentationsWorkspace,
-  type DeckRow,
-  type NoteRow,
-} from "@/components/presentations/presentations-workspace";
+import type { DeckRow, NoteRow } from "@/components/presentations/presentations-workspace";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +36,7 @@ const OWN_IMAGE_URL_TTL_SECONDS = 60 * 60;
 // /dashboard/presentations was a CRUD form for noting decks the user
 // would go and make elsewhere. This is the version that makes them: a
 // brief in, slides out, .pptx and PDF on the way out — and four things it
-// still does not do, stated on the screen by PresentationsWorkspace
+// still does not do, stated on the screen by PresentationsShell
 // rather than left to the name.
 // `?record=<id>` IS READ HERE. A starred presentation links to
 // /dashboard/presentations?record=<id> (lib/favoritable.ts), and the
@@ -142,39 +138,19 @@ export default async function PresentationsPage(
     }
   }
 
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same decks,
-  // notes and photographs, drawn as conversation and work.
-  if (await isFeatureOn("tool-shell", user)) {
-    return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <PresentationsShell
-          initialDescription={readExampleParam(searchParams?.brief)}
-          initialOpenId={wanted}
-          decks={decks}
-          notes={notes}
-          ownImageUrls={ownImageUrls}
-          unsplashConfigured={isUnsplashConfigured()}
-          chartsFromFile={await isFeatureOn("slides-charts", user)}
-        />
-      </div>
-    );
-  }
-
+  // THE SHELL, FOR EVERYBODY (MASTER 14.3, package 3; its switch was removed
+  // 2026-10-23): the same decks, notes and photographs, drawn as
+  // conversation and work.
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader
-        icon={MODULE_ICONS.presentations}
-        title={t("title")}
-        description={t("description")}
-        helpKey="help.presentations"
-      />
-      <PresentationsWorkspace
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <PresentationsShell
         initialDescription={readExampleParam(searchParams?.brief)}
+        initialOpenId={wanted}
         decks={decks}
         notes={notes}
         ownImageUrls={ownImageUrls}
         unsplashConfigured={isUnsplashConfigured()}
-        requestedRecord={requestedRecord}
+        chartsFromFile={await isFeatureOn("slides-charts", user)}
       />
     </div>
   );

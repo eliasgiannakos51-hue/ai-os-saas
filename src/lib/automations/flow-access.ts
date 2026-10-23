@@ -6,7 +6,6 @@ import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
 import type { Plan } from "@/lib/billing/plans";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 import { listIntegrations } from "@/lib/integrations/store";
 import { providersOpenTo } from "@/lib/integrations/switches";
@@ -59,9 +58,8 @@ export type FlowRecord = {
 
 export type FlowGate = { plan: Plan | null; packPriceEur: number | null; isAdmin: boolean };
 
-/** The switch, for a signed-in person, and the plan the price is worked out on. */
+/** The plan the price is worked out on, for a signed-in person. */
 export async function flowGate(user: User): Promise<FlowGate | NextResponse> {
-  if (!(await isFeatureOn("automations", user))) return refuse("not_enabled", 403);
   const plan = await resolveEffectivePlan(user);
   return { plan, packPriceEur: await getPurchasedPackCreditPriceEur(user.id), isAdmin: isAdminEmail(user.email) };
 }

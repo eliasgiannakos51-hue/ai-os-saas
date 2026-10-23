@@ -3,7 +3,7 @@ import type { TableProfile } from "@/lib/data-analysis/profile";
 /**
  * EVERY NUMBER IN A FINDING SAYS HOW IT WAS MADE (MASTER 16, package 16:
  * «ανεβάζω Excel, παίρνω γράφημα και εξήγηση, και βλέπω πώς βγήκε κάθε
- * αριθμός»), behind the switch "analysis-provenance".
+ * αριθμός»).
  *
  * analyse.ts already keeps the model away from the rows: it is handed
  * statistics computed here and asked what they mean. What it still did was

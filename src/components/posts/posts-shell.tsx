@@ -34,9 +34,10 @@ import {
 type Shown = { id: string | null; set: PostSet; platforms: PostPlatform[] };
 
 /**
- * POSTS IN THE SHELL (MASTER 14.3, package 3), behind the switch
- * "tool-shell". The same routes as components/posts/posts-workspace.tsx,
- * which stays the page for everybody the switch is off for:
+ * POSTS IN THE SHELL (MASTER 14.3, package 3), for everybody (its switch
+ * was removed 2026-10-23). The same routes as
+ * components/posts/posts-workspace.tsx, the older page, which no address
+ * draws any more but which still holds PostRow:
  * /api/posts/generate writes, generated_posts keeps the history.
  *
  * What is said in the field is the brief; the posts open on the right, one

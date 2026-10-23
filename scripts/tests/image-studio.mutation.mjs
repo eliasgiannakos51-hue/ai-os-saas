@@ -6,12 +6,13 @@
  * Four charged when three were made; a hold kept when nothing was made; a
  * failed change charged; a row written after the charge; the largest size
  * charged twice; a change that loses the picture it replaced; a route
- * without its owner filter, its switch, its claim or its rate limit; a
+ * without its owner filter, its plan, its claim or its rate limit; a
  * deletion that leaves pictures behind; a public bucket; the provider's
  * refusal read as an outage; four identical asks; a price off the
  * settlement's formula; a screen that sends without a key. And the tool
- * called by the ideas list's name where its switch is on: in the tab, the
- * ⌘K menu, the records hub, the wall of a plan below it.
+ * called by the ideas list's name: in the tab, the ⌘K menu, the records
+ * hub, the wall of a plan below it. (The switch "image-studio" is gone
+ * since 2026-10-23; what is held now is that nothing brings one back.)
  *
  * Run: node scripts/tests/image-studio.mutation.mjs
  */
@@ -34,8 +35,7 @@ const PAGE = "src/app/dashboard/images/page.tsx";
 const PALETTE = "src/components/dashboard/command-palette.tsx";
 const LAYOUT = "src/app/dashboard/layout.tsx";
 const RECORDS = "src/app/dashboard/records/page.tsx";
-const NAMES = "src/lib/nav/switched-names.ts";
-const NAMES_ON = "src/lib/nav/switched-on.ts";
+const NAMES = "src/lib/nav/tool-names.ts";
 
 const MUTANTS = [
   {
@@ -95,11 +95,11 @@ const MUTANTS = [
     expect: "a deleted image takes every picture it names first",
   },
   {
-    name: "the tool opens with the switch off",
+    name: "the tool opens below the plan's tier",
     file: ACCESS,
-    from: '  if (!(await isFeatureOn("image-studio", user))) return refuse("not_enabled", 403);\n',
+    from: '  if (!isAdmin && !planMeetsMinimum(plan?.slug ?? "free", IMAGE_MIN_PLAN)) return refuse("not_included", 403);\n',
     to: "",
-    expect: "the switch is image-studio",
+    expect: "no switch, the plan Starter and up",
   },
   {
     name: "two changes at once both rewrite the row",
@@ -172,32 +172,32 @@ const MUTANTS = [
     expect: "the question is ABOVE the work pane",
   },
   {
-    name: "the tab keeps the ideas list's name where the switch is on",
+    name: "the tab keeps the ideas list's name",
     file: PAGE,
-    from: "? pageTitle(TOOL_TITLE_KEY) : pageTitle(CONFIG.titleKey);",
-    to: "? pageTitle(CONFIG.titleKey) : pageTitle(CONFIG.titleKey);",
+    from: "  return pageTitle(TOOL_TITLE_KEY);",
+    to: '  return pageTitle("sidebar.items.images");',
     expect: "the tab says it",
   },
   {
-    name: "a plan below the tool's meets the ideas list's wall",
+    name: "a plan below the tool's is let into the tool",
     file: PAGE,
-    from: '  if (switchedName("/dashboard/images", await switchedOnFor(user.email))) {',
-    to: '  if (included && switchedName("/dashboard/images", await switchedOnFor(user.email))) {',
-    expect: "a plan below the tool's meets a wall under the tool's name",
+    from: "  if (included) {",
+    to: "  if (true) {",
+    expect: "the page draws the tool for a plan that has it",
   },
   {
-    name: "the name is the tool's for everybody, switch or not",
+    name: "a switch is read again before the tool opens",
+    file: PAGE,
+    from: "  if (included) {",
+    to: '  if (included && (await isFeatureOn("image-studio", user))) {',
+    expect: "the page draws the tool for a plan that has it",
+  },
+  {
+    name: "the name is the tool's for nobody",
     file: NAMES,
-    from: "  if (!switchedOn.includes(href)) return null;\n",
-    to: "",
-    expect: "...by that name only for whom the switch is on",
-  },
-  {
-    name: "whom the name is for ignores the switch",
-    file: NAMES_ON,
-    from: "isFlagKey(s.flag) && audienceAllows(audiences[s.flag], staff)",
-    to: "isFlagKey(s.flag)",
-    expect: "whom it is on for is the switch's own rule",
+    from: "  return TOOL_NAMES.find((s) => s.href === href) ?? null;",
+    to: "  return null;",
+    expect: "...unconditionally: no switch decides it",
   },
   {
     name: "the ⌘K menu draws the row by the ideas list's name",
@@ -207,16 +207,16 @@ const MUTANTS = [
     expect: "the ⌘K menu shows and matches every page row by that name",
   },
   {
-    name: "the layout never tells the ⌘K menu for whom the switch is on",
+    name: "the layout hands the ⌘K menu a list of pages again",
     file: LAYOUT,
-    from: "<CommandPalette isOwner={isAdmin} switchedOn={switchedOn} />",
-    to: "<CommandPalette isOwner={isAdmin} />",
-    expect: "...and is told by the layout for whom it is on",
+    from: "<CommandPalette isOwner={isAdmin} />",
+    to: "<CommandPalette isOwner={isAdmin} switchedOn={[]} />",
+    expect: "...and the layout hands it nothing but who is looking",
   },
   {
     name: "the records hub keeps the line that says the page makes nothing",
     file: RECORDS,
-    from: "hint: switched ? tSidebar(`hints.${switched.hintKey}`) : item.hintKey",
+    from: "hint: named ? tSidebar(`hints.${named.hintKey}`) : item.hintKey",
     to: "hint: item.hintKey",
     expect: "the records hub names it the same way, with the tool's line",
   },
@@ -225,6 +225,6 @@ const MUTANTS = [
 runMutations({
   name: "image-studio",
   gate: GATE,
-  targets: ["src/components/credits/cost-estimate.tsx", GENERATE, EDIT, FULL, DOWNLOAD, DELETE, REMAKE, ACCESS, ANSWER, STUDIO, PRICING, SHELL, MIGRATION, PAGE, PALETTE, LAYOUT, RECORDS, NAMES, NAMES_ON],
+  targets: ["src/components/credits/cost-estimate.tsx", GENERATE, EDIT, FULL, DOWNLOAD, DELETE, REMAKE, ACCESS, ANSWER, STUDIO, PRICING, SHELL, MIGRATION, PAGE, PALETTE, LAYOUT, RECORDS, NAMES],
   mutants: MUTANTS,
 });

@@ -2,8 +2,7 @@ import { annotateDanglingCitations } from "@/lib/verification/citations";
 
 /**
  * EVERY [n] IN A RESEARCH REPORT OPENS ITS SOURCE (MASTER 16, package 11:
- * «έρευνα με αριθμημένες πηγές που ανοίγουν»), behind the switch
- * "research-slides".
+ * «έρευνα με αριθμημένες πηγές που ανοίγουν»).
  *
  * The report's text cites its sources as [1], [2] (lib/research/research.ts
  * numbers them once across the report, from the search tool's own citation

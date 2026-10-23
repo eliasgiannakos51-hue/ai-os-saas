@@ -19,8 +19,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * AN AUTOMATION FROM ONE SENTENCE (MASTER 16, package 30), behind the
- * switch "automations".
+ * AN AUTOMATION FROM ONE SENTENCE (MASTER 16, package 30), for
+ * everybody since 2026-10-23.
  *
  * «Κάθε πρωί στις 9 στείλε μου στο Telegram τι έχω σήμερα» comes back as
  * boxes; a sentence that leaves out WHEN or WHAT comes back as one

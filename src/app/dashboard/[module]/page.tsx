@@ -63,13 +63,11 @@ export default async function ModulePage(
     redirect("/login");
   }
 
-  // AUTOMATIONS AS BOXES (MASTER 16, package 30), behind the switch
-  // "automations": the tool in the shell, INSTEAD of the list below.
-  // Everybody the switch is off for keeps the page they always had, and
-  // the one-sentence automations keep running for everybody — the shell
-  // shows them too, as they were.
+  // AUTOMATIONS AS BOXES (MASTER 16, package 30), for everybody since
+  // 2026-10-23: the tool in the shell, INSTEAD of the list below. The
+  // one-sentence automations keep running — the shell shows them too.
   const isAutomationModule = moduleConfig.slug === "automation";
-  if ((await isFeatureOn("automations", user)) && isAutomationModule) {
+  if (isAutomationModule) {
     const searchParams = await props.searchParams;
     const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId);
     return (

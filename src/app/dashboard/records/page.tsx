@@ -8,8 +8,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { MY_BUSINESS_ICON } from "@/lib/module-icons";
 import { ALL_SIDEBAR_GROUPS, visibleGroups } from "@/lib/sidebar-nav";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
-import { switchedName } from "@/lib/nav/switched-names";
-import { switchedOnFor } from "@/lib/nav/switched-on";
+import { toolName } from "@/lib/nav/tool-names";
 import {
   RecordsDirectory,
   type DirectoryGroup,
@@ -42,9 +41,8 @@ export default async function RecordsPage() {
   if (!user) {
     redirect("/login");
   }
-  // A page whose switch is on for this person is listed by its tool's name
-  // and line (lib/nav/switched-names.ts), as the ⌘K menu lists it.
-  const switchedOn = await switchedOnFor(user.email);
+  // A page with a tool's name is listed by it and its line
+  // (lib/nav/tool-names.ts), as the ⌘K menu lists it.
 
   const groups: DirectoryGroup[] = visibleGroups(
     ALL_SIDEBAR_GROUPS,
@@ -55,11 +53,11 @@ export default async function RecordsPage() {
       ? tSidebar(`groups.${GROUP_HEADING_KEYS[group.heading]}`)
       : group.heading,
     items: group.items.map((item) => {
-      const switched = switchedName(item.href, switchedOn);
+      const named = toolName(item.href);
       return {
         href: item.href,
-        label: switched
-          ? tSidebar(`items.${switched.labelKey}`)
+        label: named
+          ? tSidebar(`items.${named.labelKey}`)
           : // Create Studio's name lives under `common`, shared with the
             // sidebar and the command palette's identical special case.
             item.label === "Create Studio"
@@ -67,7 +65,7 @@ export default async function RecordsPage() {
             : ITEM_LABEL_KEYS[item.label]
               ? tSidebar(`items.${ITEM_LABEL_KEYS[item.label]}`)
               : item.label,
-        hint: switched ? tSidebar(`hints.${switched.hintKey}`) : item.hintKey ? tSidebar(`hints.${item.hintKey}`) : null,
+        hint: named ? tSidebar(`hints.${named.hintKey}`) : item.hintKey ? tSidebar(`hints.${item.hintKey}`) : null,
       };
     }),
   }));

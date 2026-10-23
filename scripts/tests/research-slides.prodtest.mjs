@@ -6,7 +6,7 @@
  *      SKIP_BUILD=1 node scripts/tests/research-slides.prodtest.mjs
  *
  * One production build; the signed-in account is the test account, so the
- * switches "tool-shell" and "research-slides" are on. A finished report is
+ * switch "tool-shell" is on. A finished report is
  * in the stand-in database.
  *
  * THE PRESS RUNS THE REAL ROUTE (since the package check of 2026-10-08):
@@ -199,11 +199,9 @@ const RUNS = [
   { name: "a new account, nothing yet, in English", device: DESKTOP, locale: "en", reports: false, credits: 3000, answer: "deck" },
   { name: "a Free account", device: PHONE, locale: "el", reports: true, credits: 3000, answer: "deck", tier: "free" },
   // The Research PAGE, for everybody "tool-shell" is off for: the same
-  // numbers and the same button, if "research-slides" is opened first.
+  // numbers and the same button.
   { name: "the Research page (shell off), to Slides", device: DESKTOP, locale: "el", reports: true, credits: 3000, answer: "deck", flags: { "tool-shell": "off" } },
   { name: "the Research page (shell off), to Slides", device: PHONE, locale: "el", reports: true, credits: 3000, answer: "deck", flags: { "tool-shell": "off" } },
-  // Taken back: the report reads as it did before the package.
-  { name: "the switch off", device: PHONE, locale: "el", reports: true, credits: 3000, answer: "deck", flags: { "research-slides": "off" } },
 ];
 
 try {
@@ -302,19 +300,6 @@ try {
       await wordsCheck("the empty Research screen");
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check("the page does not scroll sideways", overflow <= 1, `${overflow}px`);
-      check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
-      await context.close();
-      continue;
-    }
-
-    // ---- the switch off: plain numbers, no button
-    if (run.flags?.["research-slides"] === "off") {
-      await page.waitForFunction(() => document.querySelector("main")?.innerText.includes("Οι αφίξεις αυξήθηκαν"), null, { timeout: 10000 }).catch(() => null);
-      const text = await page.locator("main").innerText();
-      check("switch off: the report is there, as before", text.includes("Οι αφίξεις αυξήθηκαν") && text.includes("[1][2]"));
-      check("...its numbers are text and there is no button to Slides", (await page.locator('[data-testid="research-cited-body"]').count()) === 0 && (await page.locator('[data-testid="research-to-slides"]').count()) === 0);
-      const refused = await page.request.post(`${ON}/api/presentations/generate`, { data: { researchId: RID, slideCount: 10, imageSource: "none", locale } });
-      check("...and the route refuses a report by id, before the model", refused.status() === 403 && model.calls.length === 0, `${refused.status()} calls=${model.calls.length}`);
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
       await context.close();
       continue;

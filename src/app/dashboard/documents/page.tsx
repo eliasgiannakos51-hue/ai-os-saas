@@ -62,13 +62,13 @@ export default async function DocumentsPage(props: { searchParams?: Promise<{ re
     preview: documentPreviewText(doc.content),
   }));
 
-  // THE WRITER (MASTER 16, package 14), behind the switch "document-writer"
-  // and for the plans that include it (lib/documents/writer-access.ts; the
+  // THE WRITER (MASTER 16, package 14), for everybody since 2026-10-23 on
+  // the plans that include it (lib/documents/writer-access.ts; the
   // routes refuse the same two): every document of the person's, written
   // or typed, opens beside the conversation as its blocks. The notes list
   // below stays the page for everybody else, and the editor stays one
   // press away from the writer.
-  if ((await isFeatureOn("document-writer", user)) && (isAdminEmail(user.email) || planMeetsMinimum(await resolveEffectivePlanSlug(user), DOCUMENT_WRITER_MIN_PLAN))) {
+  if ((isAdminEmail(user.email) || planMeetsMinimum(await resolveEffectivePlanSlug(user), DOCUMENT_WRITER_MIN_PLAN))) {
     const written: WrittenDocRow[] = rows.map((doc) => ({
       id: doc.id,
       title: doc.title,

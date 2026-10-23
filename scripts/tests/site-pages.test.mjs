@@ -1,6 +1,6 @@
 /*
  * A SITE OF FIVE PAGES, ONE PART CHANGED IN WORDS, PUBLISHED AT ITS OWN
- * ADDRESS (MASTER 16, package 10), behind the switch "site-pages".
+ * ADDRESS (MASTER 16, package 10).
  *
  * What this holds, against the code rather than its comments:
  *
@@ -108,7 +108,7 @@ check("the history is read in the order it happened, whatever order it arrives i
 check("the undo row says what it took back", undo.undoDescription(row(2, 1, "κόκκινο κουμπί")) === "[undo] κόκκινο κουμπί" && undo.undoDescription(row(7, 1)) === "[undo] v7");
 
 const route = code("src/app/api/websites/[id]/undo/route.ts");
-check("the route is behind the switch", /if \(!\(await isFeatureOn\("site-pages", user\)\)\) return fail\("not_enabled", 403\);/.test(route));
+check("the route reads no switch: undo is for every signed-in owner", !/isFeatureOn/.test(route) && !/not_enabled/.test(route));
 check("...only the owner's site, history and version are read", (route.match(/\.eq\("user_id", user\.id\)/g) ?? []).length === 4);
 check("...a site being made or changed is refused", /if \(site\.status !== "completed"\) return fail\("busy", 409\);/.test(route));
 check("...nothing to undo is said", /if \(!target\) return fail\("nothing_to_undo", 409\);/.test(route));
@@ -168,19 +168,19 @@ check("...on every page", files.every((f) => /href="services\.html"/.test(f.data
 // ---------------------------------------------------------------------
 console.log("\n== 5. the shell ==");
 // ---------------------------------------------------------------------
-check('"site-pages" is declared as a switch', /\n  "site-pages": "/.test(code("src/lib/flags/flags.ts")));
-check("the Site page reads it for the shell", /<WebsiteShell\s[^>]*pages=\{await isFeatureOn\("site-pages", user\)\}[^>]*\/>/.test(code("src/app/dashboard/website-builder/page.tsx")));
+check('there is no "site-pages" switch: pages, undo and the whole-site download are for everybody', !/\n  "site-pages": "/.test(code("src/lib/flags/flags.ts")));
+check("the Site page gives the shell no switch for pages", !/pages=\{/.test(code("src/app/dashboard/website-builder/page.tsx").match(/<WebsiteShell[\s\S]*?\/>/)?.[0] ?? "<none pages={x}"));
 const shell = code("src/components/website-builder/website-shell.tsx");
-check("a new site's brief carries the page request, only with the switch",
-  /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\) \+ \(pages \? pageRequestBrief\(pageCount\) : ""\)/.test(shell));
+check("a new site's brief carries the page request",
+  /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\) \+ pageRequestBrief\(pageCount\)/.test(shell));
 check("the fourth option offers «as many as needed», one, three, five", /\[null, \.\.\.PAGE_COUNT_CHOICES\]\.map\(\(n\) =>/.test(shell) && /data-testid="site-page-count"/.test(shell));
 check("a site's pages are tabs over the preview", /\[\{ slug: "", label: t\("pageHome"\) \}, \.\.\.sitePages\]\.map\(\(p\) =>/.test(shell) && /onClick=\{\(\) => setOpenPage\(\{ siteId: current\.id, slug: p\.slug \}\)\}/.test(shell));
 check("the preview and its parts are the open page's", /const html = pageSlug \? sitePages\.find\(\(p\) => p\.slug === pageSlug\)!\.html : current\?\.html_content \?\? "";/.test(shell) && /const boxes = useMemo\(\(\) => \(complete \? findPageBoxes\(html\) : \[\]\), \[complete, html\]\);/.test(shell));
 check("a chosen part belongs to its page: another page forgets it", /box\.siteId === current\.id && box\.slug === pageSlug && box\.index < boxes\.length/.test(shell));
-check("the change goes to the open page", /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(shell));
-check("undo is a button on the site, with the switch", /\{pages && \(\s*<button[\s\S]{0,120}onClick=\{\(\) => void undo\(\)\}[\s\S]{0,300}data-testid="site-undo"/.test(shell));
+check("the change goes to the open page", /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, pageSlug: slug, referenceImagePaths \}\)/.test(shell));
+check("undo is a button on the site", /<button[\s\S]{0,120}onClick=\{\(\) => void undo\(\)\}[\s\S]{0,300}data-testid="site-undo"/.test(shell));
 check("...and what it says when there is nothing to undo", /outcome\.reason === "nothing" \? tShell\("pages\.nothingToUndo"\)/.test(shell));
-check("the download is the whole site, with the switch", /const file = pages \? siteDownload\(site\) :/.test(shell));
+check("the download is the whole site", /const file = siteDownload\(site\);/.test(shell));
 check("what the code did is said beside the preview", /parseGenerationNotes\(current\.generation_notes\)/.test(shell) && /\{describeNote\(note\)\}/.test(shell));
 check("the site is published at its own address from the shell", /<PublishControl websiteId=\{current\.id\} websiteName=\{current\.name\} disabled=\{current\.status !== "completed"\} \/>/.test(shell));
 const requests = code("src/lib/website-builder/site-requests.ts");

@@ -31,9 +31,10 @@ const isRunning = (report: ResearchReport) => RUNNING_STATUSES.has(report.status
 type Turn = { id: string; role: "user" | "tool"; text: string; plan?: { report: ResearchReport; credits: number }; reportId?: string };
 
 /**
- * RESEARCH IN THE SHELL (MASTER 14.3, package 3), behind the switch
- * "tool-shell". The same routes as components/research/research-workspace.tsx,
- * which stays the page for everybody the switch is off for.
+ * RESEARCH IN THE SHELL (MASTER 14.3, package 3), for everybody (its
+ * switch was removed 2026-10-23). The same routes as
+ * components/research/research-workspace.tsx, the older page, which no
+ * address draws any more but which still holds ResearchReport.
  *
  * The deliberate stop stays: a subject said in the field is PLANNED
  * (/api/research), and the plan comes back into the conversation with
@@ -50,7 +51,6 @@ export function ResearchShell({
   initialOpenId = null,
   monthlyCap,
   usedThisMonth,
-  slides = false,
   initialProjectId = null,
 }: {
   initialTopic?: string;
@@ -59,9 +59,6 @@ export function ResearchShell({
   initialOpenId?: string | null;
   monthlyCap: number | null;
   usedThisMonth: number;
-  /** The switch "research-slides" (package 11): the numbers open their
-   *  sources, and the report goes to Slides with one press. */
-  slides?: boolean;
   /** From `?projectId=`, read back as the caller's own. Sent on the
    *  report that creates the NEXT one; no setter, same reason Chat's own
    *  `initialProjectId` has none. */
@@ -308,7 +305,7 @@ export function ResearchShell({
           title: open.topic,
           actions: (
             <>
-              {slides && <SendToSlides report={open} className={OPTION} />}
+              <SendToSlides report={open} className={OPTION} />
               <DownloadPdfButton href={`/api/research/${open.id}/pdf`} fallbackName="research-report" className={OPTION} />
               {open.document_id && (
                 <Link href={`/dashboard/documents/${open.document_id}`} className={OPTION}>
@@ -327,11 +324,7 @@ export function ResearchShell({
               {(open.sections ?? []).map((section, i) => (
                 <div key={`${section.heading}-${i}`} className="space-y-1">
                   {section.heading && <h3 className="text-sm font-semibold text-foreground">{section.heading}</h3>}
-                  {slides ? (
-                    <CitedBody body={section.body} sources={open.sources ?? []} className="text-sm leading-relaxed text-body" />
-                  ) : (
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{section.body}</p>
-                  )}
+                  <CitedBody body={section.body} sources={open.sources ?? []} className="text-sm leading-relaxed text-body" />
                 </div>
               ))}
               {(open.sources ?? []).length > 0 && (

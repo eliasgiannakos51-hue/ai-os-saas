@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { ALL_SIDEBAR_GROUPS, visibleGroups, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
-import { switchedName } from "@/lib/nav/switched-names";
+import { toolName } from "@/lib/nav/tool-names";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { filterAndRankCandidates } from "@/lib/command-palette-match";
@@ -102,17 +102,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return target.getAttribute("role") === "textbox";
 }
 
-/** One empty list, so a palette given none keeps a stable `itemLabel`. */
-const NONE_SWITCHED: string[] = [];
-
-export function CommandPalette({
-  isOwner = false,
-  switchedOn = NONE_SWITCHED,
-}: {
-  isOwner?: boolean;
-  /** Pages whose switch is on for this person, named by their tool (lib/nav/switched-names.ts). */
-  switchedOn?: string[];
-}) {
+export function CommandPalette({ isOwner = false }: { isOwner?: boolean }) {
   const router = useRouter();
   const tCommon = useTranslations("common");
   const tSidebar = useTranslations("sidebar");
@@ -147,15 +137,15 @@ export function CommandPalette({
     },
     [tCommon, tSidebar],
   );
-  // THE NAME A ROW IS SHOWN AND MATCHED BY: the tool's, where its switch is
-  // on for this person (/dashboard/images is the Image tool then, not the
-  // ideas list), and the sidebar's otherwise.
+  // THE NAME A ROW IS SHOWN AND MATCHED BY: the tool's where it has one
+  // (/dashboard/images is the Image tool, lib/nav/tool-names.ts), and the
+  // sidebar's otherwise.
   const itemLabel = useCallback(
     (item: SidebarItem): string => {
-      const switched = switchedName(item.href, switchedOn);
-      return switched ? tSidebar(`items.${switched.labelKey}`) : translatedLabel(item.label);
+      const named = toolName(item.href);
+      return named ? tSidebar(`items.${named.labelKey}`) : translatedLabel(item.label);
     },
-    [switchedOn, tSidebar, translatedLabel],
+    [tSidebar, translatedLabel],
   );
 
   function moduleLabel(slug: string): string {

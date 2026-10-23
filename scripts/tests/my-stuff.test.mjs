@@ -255,21 +255,20 @@ console.log("\n== 7. the migration: a real undo, and nothing but the tool's own 
 }
 
 // =====================================================================
-console.log("\n== 8. navigation and i18n: every locale, and behind its own switch like Games ==");
+console.log("\n== 8. navigation and i18n: every locale, open to everybody (2026-10-23) ==");
 // =====================================================================
 
 {
   const allTools = await loadTs("src/lib/nav/all-tools.ts");
-  // A WHOLLY NEW TOOL WITH NOTHING TO FALL BACK TO (2026-10-22): Games'
-  // shape, not Documents'/Images' — no square in a plain group, no row
-  // in the sidebar, drawn only through SWITCHED_SQUARES once the switch
-  // "my-stuff" is on for this person.
-  ok("/dashboard/my-stuff is in no plain group", !allTools.ALL_TOOLS_GROUPS.some((g) => g.hrefs.includes("/dashboard/my-stuff")));
-  ok("...it is a switch-only item", "/dashboard/my-stuff" in allTools.SWITCH_ONLY_ITEMS);
-  const square = allTools.SWITCHED_SQUARES.find((s) => s.href === "/dashboard/my-stuff");
-  ok("...with a switched square naming the switch and its name", Boolean(square) && square.flag === "my-stuff" && square.name === "myStuff");
-  ok("...hidden here, saying where it comes back", "/dashboard/my-stuff" in allTools.HIDDEN_FROM_ALL_TOOLS && /SWITCHED_SQUARES/.test(allTools.HIDDEN_FROM_ALL_TOOLS["/dashboard/my-stuff"]));
-  // THE FINANCE/SALES/TRADING FENCE: this round must not touch those entries.
+  // OPEN TO EVERYBODY (the owner, 2026-10-23: "άνοιξέ τα για όλους και
+  // βγάλε τον διακόπτη"): a ready tile of the final grid, in the first
+  // group, with no switch anywhere on the road to the page.
+  const entry = allTools.ALL_TOOLS.find((t) => t.href === "/dashboard/my-stuff");
+  ok("/dashboard/my-stuff is a ready tile of the final grid, first, under Record",
+    Boolean(entry) && entry.name === "myStuff" && entry.ready === true && entry.group === "record" && allTools.ALL_TOOLS[0] === entry);
+  ok("...needing nothing that is not in the code (no key)", entry && !entry.needs);
+  ok("...and not hidden from the grid", !("/dashboard/my-stuff" in allTools.HIDDEN_FROM_ALL_TOOLS));
+  // THE FINANCE/SALES/TRADING FENCE: this tool only READS those tables.
   for (const href of ["/dashboard/finance", "/dashboard/sales", "/dashboard/trading"]) {
     ok(`${href} is still hidden, exactly as the other PR left it`, href in allTools.HIDDEN_FROM_ALL_TOOLS);
   }
@@ -278,9 +277,15 @@ console.log("\n== 8. navigation and i18n: every locale, and behind its own switc
   const navSrc = readFileSync("src/lib/sidebar-nav.ts", "utf8");
   ok("no sidebar row, the same reason Games has none", !/href: "\/dashboard\/my-stuff"/.test(navSrc));
   const flagsSrc = readFileSync("src/lib/flags/flags.ts", "utf8");
-  ok("the switch is declared in flags.ts", /"my-stuff":/.test(flagsSrc));
+  ok("the switch is gone from flags.ts", !/"my-stuff":/.test(flagsSrc));
+  for (const f of ["src/app/dashboard/my-stuff/page.tsx", "src/app/api/my-stuff/ask/route.ts", "src/app/api/my-stuff/browse/route.ts"]) {
+    ok(`${f} reads no switch`, !/isFeatureOn|not_enabled/.test(readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "")));
+  }
   const pageSrc = readFileSync("src/app/dashboard/my-stuff/page.tsx", "utf8");
-  ok("the page reads that same switch", /isFeatureOn\("my-stuff"/.test(pageSrc));
+  ok("...but the page still sends a signed-out visitor to sign in", /if \(!user\) redirect\("\/login"\)/.test(pageSrc));
+  for (const f of ["src/app/api/my-stuff/ask/route.ts", "src/app/api/my-stuff/browse/route.ts"]) {
+    ok(`${f} still refuses a signed-out caller`, /if \(!user\) return NextResponse\.json\(\{ error: "not_signed_in" \}, \{ status: 401 \}\)/.test(readFileSync(f, "utf8")));
+  }
 }
 for (const l of LOCALES) {
   for (const path of [

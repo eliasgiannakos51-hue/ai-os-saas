@@ -11,8 +11,7 @@ import { DEFAULT_SLIDES, deckEstimateInputChars } from "@/lib/presentations/deck
 import { researchBrief } from "@/lib/research/research-to-slides";
 
 /**
- * «ΤΗ ΣΤΕΛΝΩ ΣΤΟ SLIDES ΜΕ ΕΝΑ ΠΑΤΗΜΑ» (MASTER 16, package 11), behind the
- * switch "research-slides". On the Research shell and on the Research page,
+ * «ΤΗ ΣΤΕΛΝΩ ΣΤΟ SLIDES ΜΕ ΕΝΑ ΠΑΤΗΜΑ» (MASTER 16, package 11). On the Research shell and on the Research page,
  * one component.
  *
  * The price is on the button before it is pressed, from the same estimator

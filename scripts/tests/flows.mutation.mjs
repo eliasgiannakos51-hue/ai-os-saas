@@ -111,11 +111,11 @@ const MUTANTS = [
     expect: "the project under the plan's own cap",
   },
   {
-    name: "the flow opens for a person whose switch is closed",
+    name: "the flow is made for a person who is not signed in",
     file: CREATE,
-    from: '  if (!(await isFeatureOn("flows", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });\n',
+    from: '  if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });\n',
     to: "",
-    expect: "create: signs in, then the switch",
+    expect: "create: signs in, and reads no switch",
   },
   {
     name: "a row is filed into the project without being read back as the person's own",
@@ -183,16 +183,16 @@ const MUTANTS = [
   {
     name: "the plan is not asked: every tool on every plan, as before 2026-10-08",
     file: AVAILABILITY,
-    from: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: researchSlides };',
-    to: '  return { research: true, site: true, posts: true, slides: true, analysis: true, images, slidesFromResearch: researchSlides };',
+    from: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: true };',
+    to: '  return { research: true, site: true, posts: true, slides: true, analysis: true, images, slidesFromResearch: true };',
     expect: "the screen and the route ask it of this person's own plan",
   },
   {
-    name: "the deck from a research is offered whatever its switch says",
+    name: "the deck from a research is never offered",
     file: AVAILABILITY,
-    from: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: researchSlides };',
-    to: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: true };',
-    expect: "the screen and the route ask it of this person's own plan",
+    from: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: true };',
+    to: '  return { ...planIncludes(plan?.slug ?? "free", isAdmin), images, slidesFromResearch: false };',
+    expect: "...and it is open to everybody: no switch in front of the report",
   },
   {
     name: "a deck from a research runs where only a deck alone may",

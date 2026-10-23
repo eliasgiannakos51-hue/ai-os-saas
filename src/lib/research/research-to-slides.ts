@@ -1,8 +1,7 @@
 import { MAX_BULLETS, MAX_BULLET_CHARS, MAX_NOTES_CHARS, MAX_SLIDES, MAX_TITLE_CHARS, type Deck, type Slide } from "@/lib/presentations/deck";
 
 /**
- * A RESEARCH REPORT, SENT TO SLIDES WITH ONE PRESS (MASTER 16, package 11),
- * behind the switch "research-slides".
+ * A RESEARCH REPORT, SENT TO SLIDES WITH ONE PRESS (MASTER 16, package 11).
  *
  * THE REPORT TRAVELS AS ITS ID, not as text: the Slides field takes 4,000
  * characters (lib/presentations/deck.ts) and a report is routinely five

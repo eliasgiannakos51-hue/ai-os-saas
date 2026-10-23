@@ -475,9 +475,9 @@ const REPLACEMENT_SURFACES = [
     budget: 1,
     why: "the lock screen a module shows instead of its list; its 'view plans' link is the only control on it",
   },
-  // A TOOL IN THE SHELL (MASTER 14.3, package 3), behind the switch
-  // "tool-shell": the page returns it early INSTEAD of the old body, so
-  // it is its own screen. `walk` measures everything it reaches — its one
+  // A TOOL IN THE SHELL (MASTER 14.3, package 3), for everybody since the
+  // switch "tool-shell" was removed 2026-10-23: the page returns it
+  // instead of an old body, so it is its own screen. `walk` measures everything it reaches — its one
   // filled control is the field's send, in components/chat/chat-composer.tsx
   // — and the page is measured without walking into it.
   {

@@ -4,7 +4,7 @@ import { truncate } from "@/lib/text/truncate";
 
 /**
  * ONE SENTENCE, SEVERAL TOOLS, ONE PROJECT (MASTER 6.1 and 6.3; MASTER 16,
- * package 36), behind the switch "flows".
+ * package 36), for everybody since 2026-10-23.
  *
  * «Φτιάξε site για το camping μου, με εικόνες, και posts για να το
  * ανακοινώσω» names three tools. This reads WHICH, puts them in the order
@@ -278,8 +278,8 @@ export function projectNameFor(said: string): string {
 
 /**
  * What this person can run (lib/flows/availability.ts): each kind, and a
- * deck made FROM a research, which api/presentations/generate makes only
- * behind package 11's switch, `research-slides`.
+ * deck made FROM a research (api/presentations/generate, package 11),
+ * which lib/flows/availability.ts reports as available to everybody.
  */
 export type FlowAvailability = Record<FlowKind, boolean> & { slidesFromResearch: boolean };
 

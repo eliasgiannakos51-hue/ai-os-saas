@@ -1,6 +1,6 @@
 /*
  * RESEARCH WITH NUMBERED SOURCES THAT OPEN, SENT TO SLIDES WITH ONE PRESS
- * (MASTER 16, package 11), behind the switch "research-slides".
+ * (MASTER 16, package 11).
  *
  * What this holds, against the code rather than its comments:
  *
@@ -112,10 +112,10 @@ check("another language, its own word", toSlides.withSourcesSlides({ ...base, lo
 console.log("\n== 4. the route ==");
 // ---------------------------------------------------------------------
 const route = code("src/app/api/presentations/generate/route.ts");
-check('"research-slides" is declared as a switch', /\n  "research-slides": "/.test(code("src/lib/flags/flags.ts")));
+check('there is no "research-slides" switch: numbers that open and the button to Slides are for everybody', !/\n  "research-slides": "/.test(code("src/lib/flags/flags.ts")));
 check("a report id is checked before anybody is read", route.indexOf('error: "bad_research"') > 0 && route.indexOf('error: "bad_research"') < route.indexOf("await supabase.auth.getUser()"));
 check("...and a typed description is still held to the field's limits", /if \(researchId === null\) \{\s*const verdict = checkDeckDescription\(description\);/.test(route));
-check("the report is read only with the switch on", /if \(!\(await isFeatureOn\("research-slides", user\)\)\) return NextResponse\.json\(\{ error: "not_enabled" \}, \{ status: 403 \}\);/.test(route));
+check("the report is read for everybody the plan allows: no switch in front of it", !/isFeatureOn\("research-slides"/.test(route) && /if \(researchId !== null\) \{\s*const \{ data: report, error: reportError \} = await supabase/.test(route));
 check("...by id AND owner", /\.from\("research_reports"\)\s*\.select\("id, topic, status, sections, sources"\)\s*\.eq\("id", researchId\)\s*\.eq\("user_id", user\.id\)/.test(route));
 check("...only when it is finished", /const made = report\.status === "ready" \? researchBrief\(/.test(route) && /if \(!made\) return NextResponse\.json\(\{ error: "research_not_ready" \}, \{ status: 409 \}\);/.test(route));
 const plan = route.indexOf('accountHasCapability(await resolveEffectivePlanSlug(user), "presentations"');
@@ -129,11 +129,11 @@ check("the sources slides come from the stored list, after the model", /let deck
 console.log("\n== 5. the screen ==");
 // ---------------------------------------------------------------------
 const page = code("src/app/dashboard/deep-research/page.tsx");
-check("the Research page reads the switch for both screens", (page.match(/slides=\{await isFeatureOn\("research-slides", user\)\}/g) ?? []).length === 2);
+check("the Research page gives the screen no switch for the numbers or the button", !/research-slides/.test(page) && !/slides=\{/.test(page));
 for (const [file, label] of [["src/components/research/research-shell.tsx", "shell"], ["src/components/research/research-workspace.tsx", "page"]]) {
   const src = code(file);
-  check(`${label}: the numbers open, with the switch`, /\{slides \? \(\s*<CitedBody body=\{section\.body\} sources=\{open\.sources \?\? \[\]\}/.test(src));
-  check(`${label}: the report goes to Slides with one press, with the switch`, /\{slides && (\(\s*)?<SendToSlides\s+report=\{open\}/.test(src));
+  check(`${label}: the numbers open`, /<CitedBody body=\{section\.body\} sources=\{open\.sources \?\? \[\]\}/.test(src));
+  check(`${label}: the report goes to Slides with one press`, /<SendToSlides\s+report=\{open\}/.test(src) && !/\{slides &&/.test(src));
 }
 const send = code("src/components/research/send-to-slides.tsx");
 check("the price is on the button before it is pressed, from the server's estimator on the server's brief",

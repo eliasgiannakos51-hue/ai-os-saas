@@ -79,7 +79,6 @@ type FileTurn = { id: string; role: "user" | "tool"; text: string; answer?: Answ
 export function AnalyzeShell({
   analyses,
   current,
-  provenance = false,
   initialFiles,
   initialCollections = [],
   initialOpenId = null,
@@ -87,7 +86,6 @@ export function AnalyzeShell({
 }: {
   analyses: AnalysisSummary[];
   current: AnalysisView | null;
-  provenance?: boolean;
   initialFiles: WorkspaceFile[];
   initialCollections?: WorkspaceCollection[];
   initialOpenId?: string | null;
@@ -357,7 +355,7 @@ export function AnalyzeShell({
         return;
       }
       note("tool", t("analyse.done"));
-      if (provenance && Number(body?.dropped) > 0) note("tool", t("how.dropped", { count: Number(body.dropped) }));
+      if (Number(body?.dropped) > 0) note("tool", t("how.dropped", { count: Number(body.dropped) }));
       setPane("work");
       router.refresh();
     } finally {
@@ -647,25 +645,25 @@ export function AnalyzeShell({
               {current.findings ? (
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">{t("findings.title")}</h3>
-                  {provenance && facts.length > 0 ? <p className="mt-1 text-[11px] text-muted">{t("how.press")}</p> : null}
+                  {facts.length > 0 ? <p className="mt-1 text-[11px] text-muted">{t("how.press")}</p> : null}
                   {current.findings.summary ? (
                     <p className="mt-1 text-sm text-body">
-                      {provenance && current.findings.summaryParts ? <FactText parts={current.findings.summaryParts} facts={facts} /> : current.findings.summary}
+                      {current.findings.summaryParts ? <FactText parts={current.findings.summaryParts} facts={facts} /> : current.findings.summary}
                     </p>
                   ) : null}
                   <ul className="mt-2 space-y-2">
                     {current.findings.findings.map((finding) => (
                       <li key={finding.headline} data-testid="analysis-finding">
                         <p className="text-sm text-foreground">
-                          {provenance && finding.headlineParts ? <FactText parts={finding.headlineParts} facts={facts} /> : finding.headline}
+                          {finding.headlineParts ? <FactText parts={finding.headlineParts} facts={facts} /> : finding.headline}
                         </p>
                         <p className="text-xs text-muted">
-                          {provenance && finding.detailParts ? <FactText parts={finding.detailParts} facts={facts} /> : finding.detail}
+                          {finding.detailParts ? <FactText parts={finding.detailParts} facts={facts} /> : finding.detail}
                         </p>
                       </li>
                     ))}
                   </ul>
-                  {provenance && facts.length > 0 ? (
+                  {facts.length > 0 ? (
                     <details data-testid="analysis-how" className="mt-3 text-xs">
                       <summary className="flex min-h-[44px] cursor-pointer items-center text-foreground">{t("how.title")}</summary>
                       <ul className="space-y-1">
@@ -685,7 +683,7 @@ export function AnalyzeShell({
               {current.charts.length > 0 && (
                 <div className="grid gap-4 xl:grid-cols-2">
                   {current.charts.map((chart, index) => (
-                    <AnalysisChart key={`${chart.spec.title}-${index}`} chart={chart} how={provenance} />
+                    <AnalysisChart key={`${chart.spec.title}-${index}`} chart={chart} />
                   ))}
                 </div>
               )}

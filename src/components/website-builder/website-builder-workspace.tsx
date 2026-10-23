@@ -251,7 +251,7 @@ export function WebsiteBuilderWorkspace({
   const describeNote = useGenerationNoteText();
   // IN THE READER'S LANGUAGE, AS THE SITE SHELL SAYS IT (2026-10-14;
   // components/website-builder/website-shell.tsx). This page — the Site
-  // while the switch `tool-shell` is off — showed the routes' English:
+  // before the shell took over — showed the routes' English:
   // the stored `error_message` of a failed site (the provider's own JSON
   // when it failed), the 24-hour limit's and the AI limits' `message`, a
   // refused change's `error`. Each is said from its code, its status and

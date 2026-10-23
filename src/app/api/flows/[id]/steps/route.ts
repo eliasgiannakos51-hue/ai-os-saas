@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { IN_PROJECT, PROJECTS_TABLE } from "@/lib/projects/project";
 import { STEP_STATUSES, STEP_TABLE, flowStatus, readPlan, readStepStates, type StepStatus } from "@/lib/flows/plan";
 
@@ -43,7 +42,6 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
-  if (!(await isFeatureOn("flows", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
 
   try {
     const { data: flow, error: loadError } = await supabase

@@ -1,7 +1,7 @@
 /*
  * «ΓΡΑΦΩ "ΟΤΑΝ ΑΝΕΒΑΖΩ ΑΡΧΕΙΟ, ΚΑΝΕ ΣΥΝΟΨΗ ΚΑΙ ΒΑΛ' ΤΗ ΣΤΗ ΒΙΒΛΙΟΘΗΚΗ",
  * ΒΛΕΠΩ ΤΑ ΚΟΥΤΙΑ, ΑΛΛΑΖΩ ΕΝΑ ΜΕ ΛΟΓΙΑ, ΚΑΙ ΤΡΕΧΕΙ ΜΟΝΟ ΤΟΥ» (MASTER 16,
- * package 30), behind the switch "automations".
+ * package 30), for everybody since 2026-10-23 (no switch).
  *
  * What this holds, against the code rather than its comments:
  *
@@ -203,12 +203,12 @@ const ROUTES = {
   events: "src/app/api/automations/events/route.ts",
 };
 for (const [name, file] of Object.entries(ROUTES)) {
-  check(`${name}: signs in, then the switch`, /if \(!user\) return refuse\("not_signed_in", 401\);\s*const gate = await flowGate\(user\);\s*if \(gate instanceof NextResponse\) return gate;/.test(code(file)));
+  check(`${name}: signs in, then the gate`, /if \(!user\) return refuse\("not_signed_in", 401\);\s*const gate = await flowGate\(user\);\s*if \(gate instanceof NextResponse\) return gate;/.test(code(file)));
 }
 for (const name of ["edit", "change", "undo", "active", "run"]) {
   check(`${name}: the automation is the owner's`, /\.from\("automation_flows"\)\s*\.select\(FLOW_COLUMNS\)\s*\.eq\("id", id\)\s*\.eq\("user_id", user\.id\)\s*\.maybeSingle\(\);/.test(code(ROUTES[name])) && /if \(!found\) return refuse\("not_found", 404\);/.test(code(ROUTES[name])));
 }
-check("the switch is the automations switch", /if \(!\(await isFeatureOn\("automations", user\)\)\) return refuse\("not_enabled", 403\);/.test(code("src/lib/automations/flow-access.ts")));
+check("the gate reads no switch: every signed-in person has the tool", !/isFeatureOn/.test(code("src/lib/automations/flow-access.ts")) && /const plan = await resolveEffectivePlan\(user\);/.test(code("src/lib/automations/flow-access.ts")));
 check("a waiting run is taken once: approve and cancel move it only from waiting",
   /\.update\(\{ status: "running", approval_expires_at: null \}\)\s*\.eq\("id", runId\)\s*\.eq\("user_id", user\.id\)\s*\.eq\("status", "waiting_approval"\)/.test(code(ROUTES.approve)) &&
     /\.eq\("id", runId\)\s*\.eq\("user_id", user\.id\)\s*\.eq\("status", "waiting_approval"\)/.test(code(ROUTES.cancel)));
@@ -229,12 +229,12 @@ check("it is scheduled every 15 minutes", JSON.parse(readFileSync("vercel.json",
 check("a due automation is moved forward in the same update that claims it, before it runs",
   /\.update\(\{ busy_since: new Date\(\)\.toISOString\(\), next_run_at: next \}\)[\s\S]{0,200}\.lte\("next_run_at", nowIso\)/.test(cronRoute) && cronRoute.indexOf("next_run_at: next }") < cronRoute.indexOf("startRun("));
 check("...in its own time zone", /nextRunFor\(verdict\.boxes, flow\.time_zone, now\)/.test(cronRoute));
-check("...and not run for a person whose switch was closed", /if \(!verdict\.ok \|\| !user \|\| !\(await isFeatureOn\("automations", user\)\)\) \{/.test(cronRoute));
+check("...and not run for a flow it cannot read or a person who is gone, with no switch in the way", /if \(!verdict\.ok \|\| !user\) \{/.test(cronRoute) && !/isFeatureOn/.test(cronRoute));
 check("approvals nobody gave are cancelled; runs a dead request left are closed", /\.eq\("status", "waiting_approval"\)\s*\.lt\("approval_expires_at", nowIso\)/.test(cronRoute) && /\.eq\("status", "running"\)\s*\.lt\("started_at", staleRunning\)/.test(cronRoute));
 const ingest = code("src/lib/files/ingest.ts");
 const fileEvent = code("src/lib/automations/file-event.ts");
 check("an upload that was read queues its automations, and an unreadable one does not", /const automations = status === "ready" \? await queueFileRuns\(user, String\(row\.id\)\) : 0;/.test(ingest));
-check("...only the person's own, switched on, started by a file", /\.eq\("user_id", user\.id\)\s*\.eq\("is_active", true\)/.test(fileEvent) && /flow\.boxes\[0\]\.when === "file_uploaded"/.test(fileEvent) && /if \(!\(await isFeatureOn\("automations", user\)\)\) return 0;/.test(fileEvent));
+check("...only the person's own, active, started by a file", /\.eq\("user_id", user\.id\)\s*\.eq\("is_active", true\)/.test(fileEvent) && /flow\.boxes\[0\]\.when === "file_uploaded"/.test(fileEvent) && !/isFeatureOn/.test(fileEvent));
 check("...queued, not run: an upload calls no model", !/runner|start-run|event-runs/.test(fileEvent) && /status: "queued"/.test(fileEvent));
 check("a queued run is taken once", /\.update\(\{ status: "running" \}\)\s*\.eq\("id", run\.id\)\s*\.eq\("user_id", run\.user_id\)\s*\.eq\("status", "queued"\)/.test(code("src/lib/automations/event-runs.ts")));
 check("the screen that uploaded asks for them to run, only when some were queued", /if \(typeof queued !== "number" \|\| queued <= 0\) return;/.test(code("src/lib/automations/kick.ts")) && /startQueuedAutomations\(data\.automations\)/.test(code("src/components/files/files-workspace.tsx")) && (code("src/lib/files/upload-file.ts").match(/startQueuedAutomations\(data\.automations\)/g) ?? []).length === 2);
@@ -258,8 +258,8 @@ check("every status and every start the code writes is one the table allows",
 console.log("\n== 8. the screen and the words ==");
 // ---------------------------------------------------------------------
 const page = code("src/app/dashboard/[module]/page.tsx");
-check("the boxes only behind the switch, INSTEAD of the old page", /if \(\(await isFeatureOn\("automations", user\)\) && isAutomationModule\) \{/.test(page) && page.indexOf("<AutomationShell") < page.lastIndexOf("return ("));
-check("the flag is declared", /\n  "automations": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
+check("the boxes for everybody, INSTEAD of the old page", /if \(isAutomationModule\) \{/.test(page) && !/isFeatureOn\("automations"/.test(page) && page.indexOf("<AutomationShell") < page.lastIndexOf("return ("));
+check("the switch is gone (2026-10-23)", !/\n  "automations": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
 const shell = code("src/components/automations/automation-shell.tsx");
 check("with a box chosen, the field changes that box alone", /if \(shown && chosenBox\) \{[\s\S]{0,200}changeWithWords\(flow, box, text\)/.test(shell));
 check("an answer to the one question goes back with the sentence", /const said = pending \? `\$\{pending\.said\}\\n\$\{pending\.question\}\\n\$\{text\}` : text;/.test(shell));

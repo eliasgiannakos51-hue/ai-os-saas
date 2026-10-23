@@ -4924,7 +4924,14 @@
       "explain": "このコードが何をするか説明して",
       "tests": "この関数のテストを書いて"
     },
-    "uploadFolder": "フォルダをアップロード"
+    "uploadFolder": "フォルダをアップロード",
+    "power": {
+      "label": "パワー",
+      "fast": "高速",
+      "normal": "標準",
+      "max": "最大",
+      "estimate": "{level} · 約{count}クレジット"
+    }
   },
   "presentations": {
     "title": "プレゼンテーション",

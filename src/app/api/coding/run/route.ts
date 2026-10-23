@@ -24,11 +24,10 @@ import { runCompletion } from "@/lib/ai/providers/complete";
 import { loadWorkspaceContext, renderWorkspaceContext } from "@/lib/ai/workspace-context";
 import { loadChatContextForCoding } from "@/lib/ai/cross-module-store";
 import { MAX_INPUT_CHARS, OPERATION_SPECS, buildCodePrompt, deriveTitle, isCodeLanguage, planTurn } from "@/lib/coding/operations";
+import { isPowerLevel, modelForPower } from "@/lib/coding/power";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // @function-limit 120
-
-const MODEL = "claude-sonnet-4-6";
 
 /**
  * ONE TURN OF THE CONVERSATION.
@@ -68,6 +67,14 @@ export async function POST(request: Request) {
     // it is not on that list.
     const priorCode = typeof body.priorCode === "string" && body.priorCode.trim() ? body.priorCode : null;
     const priorLanguage = isCodeLanguage(body.priorLanguage) ? body.priorLanguage : null;
+    // «ΙΣΧΥΣ» (the owner's message, 2026-10-23): the field's own choice,
+    // sent as a tier name rather than a model id — lib/coding/power.ts is
+    // the one place that name becomes a model, on the server, so no model
+    // id travels over the wire either. Anything else in the body is the
+    // unchanged default, same model every turn had before this control
+    // existed.
+    const power = isPowerLevel(body.power) ? body.power : "normal";
+    const MODEL = modelForPower(power);
 
     const turn = planTurn(text, { code: priorCode, language: priorLanguage });
     const spec = OPERATION_SPECS[turn.operation];

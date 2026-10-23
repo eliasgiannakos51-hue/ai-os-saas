@@ -4924,7 +4924,14 @@
       "explain": "Explique o que este código faz",
       "tests": "Escreva testes para esta função"
     },
-    "uploadFolder": "Enviar pasta"
+    "uploadFolder": "Enviar pasta",
+    "power": {
+      "label": "Potência",
+      "fast": "Rápida",
+      "normal": "Normal",
+      "max": "Máxima",
+      "estimate": "{level} · cerca de {count} créditos"
+    }
   },
   "presentations": {
     "title": "Apresentações",

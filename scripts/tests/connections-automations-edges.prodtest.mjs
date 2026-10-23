@@ -308,7 +308,19 @@ function offsetOn(zone, day) {
   const name = new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "longOffset" }).formatToParts(new Date(`${day}T12:00:00Z`)).find((p) => p.type === "timeZoneName")?.value ?? "GMT";
   return /GMT([+-]\d{2}:\d{2})/.exec(name)?.[1] ?? "+00:00";
 }
-const at = (zone, offset, time) => `${dayIn(zone, offset)}T${time}:00${offsetOn(zone, dayIn(zone, offset))}`;
+/** The zone's offset at one instant, as Google writes it: "+03:00". */
+function offsetAtInstant(zone, ms) {
+  const name = new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "longOffset" }).formatToParts(new Date(ms)).find((p) => p.type === "timeZoneName")?.value ?? "GMT";
+  return /GMT([+-]\d{2}:\d{2})/.exec(name)?.[1] ?? "+00:00";
+}
+// THE OFFSET AT THE MOMENT NAMED, NOT AT NOON: on the day a zone changes its
+// clock (Athens, 2026-10-25) the offset at noon is not the one at midnight,
+// and a helper that reads noon is a test that fails one day a year.
+const at = (zone, offset, time) => {
+  const day = dayIn(zone, offset);
+  const guess = offsetOn(zone, day);
+  return `${day}T${time}:00${offsetAtInstant(zone, Date.parse(`${day}T${time}:00${guess}`))}`;
+};
 /** Midnight where the person is, «offset» days from now, as an instant. */
 const midnight = (zone, offset) => new Date(Date.parse(at(zone, offset, "00:00"))).toISOString();
 const athensDay = (offset) => dayIn("Europe/Athens", offset);
@@ -994,7 +1006,9 @@ try {
     check("...the [◧] column says there is nothing yet", main.includes(L.en.dashboard.toolShell.history.empty));
     check("...no Greek on the English screen", foreignOn("en", main).length === 0, foreignOn("en", main).join(" | "));
     check("...and it fits the phone", (await sideways(page)) <= 1);
-    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    // On a phone the open column covers the shell's own toggle, so a finger
+    // closes it the way the product offers: the scrim beside it.
+    await page.locator('[data-testid="tool-shell-history-scrim"]').click({ position: { x: 370, y: 400 } });
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
     // THE EMPTY LANDING'S EXAMPLES SEND IMMEDIATELY (Batch 3, 2026-10-22) —
     // not "fill the field", the old "flow-examples" panel's way.
@@ -1017,10 +1031,11 @@ try {
     await press(page.locator('[data-testid="flow-toggle"]'));
     await page.waitForFunction(() => document.querySelector('[data-testid="flow-state"]')?.getAttribute("data-active") === "true", null, { timeout: 15000 }).catch(() => null);
     check("switched on: it runs on every file", flow?.is_active === true && (await page.locator('[data-testid="flow-state"]').innerText()).includes(A.status.onFile));
-    // A file uploaded on the Files page, as anybody would.
-    await page.goto(`${ON}/dashboard/files`, { waitUntil: "networkidle" });
+    // A file uploaded where files go since Files merged into Analyze
+    // (2026-10-22; /dashboard/files redirects there), as anybody would.
+    await page.goto(`${ON}/dashboard/data-analysis`, { waitUntil: "networkidle" });
     const kicked = page.waitForResponse((r) => r.url().endsWith("/api/automations/events"), { timeout: 30000 }).catch(() => null);
-    await page.locator('[data-testid="files-shell-input"], main input[type="file"][accept]').first().setInputFiles({ name: "lease.txt", mimeType: "text/plain", buffer: Buffer.from("Lease agreement. Valid until 31/12/2027. Rent 900 EUR a month.") });
+    await page.locator('[data-testid="analyze-upload-input"]').first().setInputFiles({ name: "lease.md", mimeType: "text/markdown", buffer: Buffer.from("Lease agreement. Valid until 31/12/2027. Rent 900 EUR a month.") });
     const kick = await kicked;
     const run = table("automation_runs").filter((r) => r.flow_id === flow?.id && r.started_by === "event").at(-1);
     const doc = table("user_documents").at(-1);

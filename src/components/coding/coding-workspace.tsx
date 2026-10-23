@@ -408,7 +408,10 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
             there (the owner's literal complaint, "η δεξιά πλευρά άδεια"),
             including the plain back-and-forth turns that never produce
             code (explain, find bugs with nothing shown back). */}
-        <div className={code ? "flex min-h-0 flex-1 flex-col overflow-y-auto bg-panel lg:flex-row lg:overflow-hidden" : "flex min-h-0 flex-1 flex-col overflow-hidden bg-panel"}>
+        <div
+          data-testid="coding-main"
+          className={code ? "flex min-h-0 flex-1 flex-col overflow-y-auto bg-panel lg:flex-row lg:overflow-hidden" : "flex min-h-0 flex-1 flex-col overflow-hidden bg-panel"}
+        >
           <div className={code ? "flex min-h-0 flex-1 flex-col lg:max-w-md" : "mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col"}>
             <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
               {showEmpty ? (
@@ -465,7 +468,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                   out, so it stays absent, not disabled, the same rule as
                   before. "Ανέβασμα φακέλου" needs no GitHub — local files
                   only — so it alone draws here. */}
-              <div className="mb-2 flex flex-wrap gap-2">
+              <div data-testid="coding-project-row" className="mb-2 flex flex-wrap gap-2">
                 <input
                   ref={folderInputRef}
                   type="file"

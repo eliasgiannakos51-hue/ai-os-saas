@@ -50,8 +50,10 @@ export const FLAGS = {
   "research-slides": "Research you can follow and present: every [n] in a report opens its source, and one press makes a presentation of the report in Slides, with its sources (MASTER 16, package 11)",
   "site-pages": "Site with pages: ask for one, three or five pages, see and change every page in the Site, take back the last change, and download the whole site (MASTER 16, package 10)",
   "chat-attachments": "Chat reads what you give it: PDFs and images attached to a message, asked about, and under the answer the remembered facts it used (MASTER 16, package 9)",
-  "coding-github": "Coding: connect a GitHub account, pick a repo and branch, read files, and open a PR with the AI's changes (MASTER 20 Γ). Needs migration 20261025100000_github_connections.sql and the GitHub App env vars (GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_APP_CLIENT_ID, GITHUB_APP_CLIENT_SECRET)",
 } as const;
+// REMOVED (the owner's critical message, 2026-10-23, "χωρίς διακόπτες"):
+// "coding-github" — GitHub in Coding is controlled entirely by whether the
+// four env vars are set (githubAppConfigured(), lib/github/auth.ts).
 // REMOVED, UNCONDITIONAL FOR EVERYONE SINCE 2026-10-22 (the owner's
 // critical message — each was verified end-to-end with no open
 // blocker, and a flag that could hide a screen from its own owner,

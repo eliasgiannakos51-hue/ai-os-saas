@@ -203,9 +203,14 @@
     των Συνδέσεων (BUILD-SPECS 2.2, 5.12) — το ίδιο App καλύπτει και τα
     δύο, μία ενσωμάτωση όχι δύο.
     **Κατάσταση 2026-10-25:** ο κώδικας είναι έτοιμος — OAuth flow,
-    κρυπτογράφηση, repo/branch picker, file reader, commit+PR, 21
-    security checks, migration, feature flag `coding-github` (staff).
-    Μόλις φτιάξεις το App και βάλεις τα 4 env vars στο Vercel
+    κρυπτογράφηση, repo/branch picker με αναζήτηση, δημιουργία branch,
+    file tree, commit+PR dialog, CI status, merge με επιβεβαίωση,
+    undo stack, download .zip, **46 security checks** σε 3 αρχεία,
+    migration `20261025100000_github_connections.sql`. **Ο feature flag
+    `coding-github` αφαιρέθηκε** (ιδιοκτήτης 2026-10-23, «χωρίς
+    διακόπτες»): η εμφάνιση ελέγχεται ΜΟΝΟ από `githubAppConfigured()`
+    (4 env vars). Admin βλέπει μήνυμα ρύθμισης· χρήστες τίποτα μέχρι τα
+    keys. Μόλις φτιάξεις το App και βάλεις τα 4 env vars στο Vercel
     (`GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, `GITHUB_APP_CLIENT_SECRET`,
     `GITHUB_APP_PRIVATE_KEY`), το κουμπί εμφανίζεται χωρίς νέο deploy.
 

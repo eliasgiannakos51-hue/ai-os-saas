@@ -6,6 +6,8 @@ import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
 import { CodingWorkspace, type CodeSession } from "@/components/coding/coding-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { githubAppConfigured } from "@/lib/github/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +65,12 @@ export default async function CodingPage(
 
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <CodingWorkspace sessions={sessions} initialTask={readExampleParam(searchParams.brief)} />
+      <CodingWorkspace
+        sessions={sessions}
+        initialTask={readExampleParam(searchParams.brief)}
+        isAdmin={isAdminEmail(user.email)}
+        githubConfigured={githubAppConfigured()}
+      />
     </div>
   );
 }

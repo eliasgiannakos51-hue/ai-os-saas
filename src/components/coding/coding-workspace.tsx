@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Copy, Download, Plus, PanelLeft, Upload } from "lucide-react";
+import { Check, Copy, Download, Plus, PanelLeft, Upload, FolderTree, GitPullRequest, Undo2, Loader2, CheckCircle, XCircle, GitMerge, AlertTriangle } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { HelpTip } from "@/components/ui/help-tip";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -14,7 +14,7 @@ import { CodeBlock } from "@/components/coding/code-block";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { diffLines, replaceLine } from "@/lib/coding/diff";
-import { downloadTextFile, suggestedFileName } from "@/lib/coding/download";
+import { downloadTextFile, downloadZip, suggestedFileName } from "@/lib/coding/download";
 import { guessLanguage, languageFromPath } from "@/lib/coding/highlight";
 import { MAX_INPUT_CHARS, OPERATION_SPECS, type CodeOperation } from "@/lib/coding/operations";
 import { FOLDER_UPLOAD_MAX_FILES, readUploadedFolder } from "@/lib/coding/folder-upload";
@@ -74,7 +74,7 @@ const DELETE_UNDO_WINDOW_MS = 6000;
  * state for the length of the visit; [◧] still opens any one past turn
  * from history, the same single exchange the old page could.
  */
-export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSession[]; initialTask?: string }) {
+export function CodingWorkspace({ sessions, initialTask, isAdmin = false, githubConfigured = false }: { sessions: CodeSession[]; initialTask?: string; isAdmin?: boolean; githubConfigured?: boolean }) {
   const t = useTranslations("coding");
   const tSteps = useTranslations("aiSteps");
   const tShell = useTranslations("dashboard.toolShell");
@@ -100,6 +100,141 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
   const [power, setPower] = useState<PowerLevel>("normal");
   const [inputLength, setInputLength] = useState(0);
   const [github, setGitHub] = useState<GitHubSelection>({ repo: null, branch: null });
+
+  // GITHUB FILE TREE + COMMIT/PR FLOW (Part Γ + Δ).
+  const [fileTree, setFileTree] = useState<Array<{ path: string; type: string }>>([]);
+  const [loadingTree, setLoadingTree] = useState(false);
+  const [commitOpen, setCommitOpen] = useState(false);
+  const [commitMsg, setCommitMsg] = useState("");
+  const [prTitle, setPrTitle] = useState("");
+  const [prBody, setPrBody] = useState("");
+  const [newBranchForCommit, setNewBranchForCommit] = useState("");
+  const [committing, setCommitting] = useState(false);
+  const [prResult, setPrResult] = useState<{ number: number; url: string } | null>(null);
+  const [ciStatus, setCiStatus] = useState<{ state: string; checks: Array<{ name: string; status: string; conclusion: string | null }> } | null>(null);
+  const [merging, setMerging] = useState(false);
+  const [mergeConfirmOpen, setMergeConfirmOpen] = useState(false);
+  const [undoStack, setUndoStack] = useState<Code[]>([]);
+
+  const tGh = useTranslations("coding.github");
+
+  useEffect(() => {
+    if (!github.repo || !github.branch) {
+      setFileTree([]);
+      return;
+    }
+    setLoadingTree(true);
+    fetch("/api/github/files", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo: github.repo, branch: github.branch, mode: "tree" }),
+    })
+      .then((r) => r.json())
+      .then((body: { ok?: boolean; tree?: Array<{ path: string; type: string }> }) => {
+        if (body.ok && body.tree) setFileTree(body.tree);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingTree(false));
+  }, [github.repo, github.branch]);
+
+  useEffect(() => {
+    if (!prResult || !github.repo) return;
+    let active = true;
+    const poll = () => {
+      fetch(`/api/github/pr-status?repo=${encodeURIComponent(github.repo!)}&pr=${prResult.number}`)
+        .then((r) => r.json())
+        .then((body: { ok?: boolean; state?: string; merged?: boolean; checks?: Array<{ name: string; status: string; conclusion: string | null }> }) => {
+          if (!active) return;
+          if (body.ok) {
+            setCiStatus({ state: body.state ?? "open", checks: body.checks ?? [] });
+          }
+        })
+        .catch(() => {});
+    };
+    poll();
+    const interval = setInterval(poll, 15_000);
+    return () => { active = false; clearInterval(interval); };
+  }, [prResult, github.repo]);
+
+  function pushUndo() {
+    if (code) setUndoStack((prev) => [...prev.slice(-9), code]);
+  }
+
+  function popUndo() {
+    setUndoStack((prev) => {
+      const next = [...prev];
+      const last = next.pop();
+      if (last) setCode(last);
+      return next;
+    });
+  }
+
+  async function openGitHubFile(path: string) {
+    if (!github.repo || !github.branch) return;
+    const res = await fetch("/api/github/files", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo: github.repo, branch: github.branch, path, mode: "read" }),
+    });
+    const body = (await res.json().catch(() => null)) as { ok?: boolean; content?: string; encoding?: string } | null;
+    if (body?.ok && typeof body.content === "string") {
+      pushUndo();
+      const language = languageFromPath(path, body.content);
+      setCode({ files: [{ path, content: body.content, language }], activeIndex: 0, isEdit: false, priorContent: null });
+    }
+  }
+
+  async function doCommitAndPr() {
+    if (!github.repo || !code || committing) return;
+    setCommitting(true);
+    try {
+      const files = code.files.filter((f) => f.path).map((f) => ({ path: f.path!, content: f.content }));
+      if (files.length === 0) return;
+      const baseBranch = github.branch ?? "main";
+      const branchName = newBranchForCommit.trim() || `ionexa-${Date.now()}`;
+      const res = await fetch("/api/github/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          repo: github.repo,
+          baseBranch,
+          newBranch: branchName,
+          files,
+          commitMessage: commitMsg || "Update via Ionexa Coding",
+          prTitle: prTitle || commitMsg || "Update via Ionexa Coding",
+          prBody: prBody || "",
+        }),
+      });
+      const body = (await res.json().catch(() => null)) as { ok?: boolean; pr?: { number: number; html_url: string } } | null;
+      if (body?.ok && body.pr) {
+        setPrResult({ number: body.pr.number, url: body.pr.html_url });
+        setCommitOpen(false);
+        say("tool", `${tGh("prCreated")} #${body.pr.number}`);
+      }
+    } finally {
+      setCommitting(false);
+    }
+  }
+
+  async function doMerge() {
+    if (!github.repo || !prResult || merging) return;
+    setMerging(true);
+    try {
+      const res = await fetch("/api/github/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repo: github.repo, pr: prResult.number }),
+      });
+      const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+      if (body?.ok) {
+        say("tool", tGh("merged"));
+        setCiStatus((prev) => prev ? { ...prev, state: "closed" } : prev);
+      }
+    } finally {
+      setMerging(false);
+      setMergeConfirmOpen(false);
+    }
+  }
 
   // OPEN BY DEFAULT, UNCONDITIONALLY (the owner's critical message,
   // 2026-10-22: "the sessions list, open on the left, like Claude Code,
@@ -156,6 +291,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
     // enforces server-side; the other tabs from a folder upload sit
     // untouched until their own tab is active and asked about.
     const activeFile = code ? code.files[code.activeIndex] : undefined;
+    pushUndo();
     try {
       const response = await fetch("/api/coding/run", {
         method: "POST",
@@ -460,13 +596,13 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
             </div>
             <div className="p-4 sm:p-6">
               {/* ΠΑΝΩ ΑΠΟ ΤΟ ΠΕΔΙΟ (the owner's follow-up message,
-                  2026-10-23). "Σύνδεση GitHub" is gated on the
-                  `coding-github` flag AND the four env vars — the button
-                  does not appear until the owner adds the keys to Vercel
-                  and flips the switch on /dashboard/system-health, with
-                  no code change (MASTER 20 Γ). */}
+                  2026-10-23). "Σύνδεση GitHub" is gated on the four
+                  env vars only (githubAppConfigured(), lib/github/auth.ts)
+                  — no feature flag (the owner's "χωρίς διακόπτες",
+                  2026-10-23). Admin sees setup message; users see nothing
+                  until the keys are in Vercel (MASTER 20 Γ). */}
               <div data-testid="coding-project-row" className="mb-2 flex flex-wrap items-center gap-2">
-                <GitHubConnect selection={github} onSelectionChange={setGitHub} />
+                <GitHubConnect selection={github} onSelectionChange={setGitHub} isAdmin={isAdmin} githubConfigured={githubConfigured} />
                 <input
                   ref={folderInputRef}
                   type="file"
@@ -484,6 +620,7 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
                   type="button"
                   onClick={() => folderInputRef.current?.click()}
                   disabled={uploadingFolder}
+                  title={tGh("fromComputer")}
                   data-testid="coding-upload-folder"
                   className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground disabled:opacity-40"
                 >
@@ -527,28 +664,132 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
 
           {code && (
             <div className="flex min-h-0 flex-1 flex-col lg:w-[60%]" data-testid="coding-work">
+              {/* ACTION BAR: undo, commit/PR, CI, merge */}
+              {github.repo && github.branch && (
+                <div className="flex flex-wrap items-center gap-2 border-b border-divider px-4 py-2 sm:px-6" data-testid="coding-actions">
+                  {undoStack.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={popUndo}
+                      data-testid="coding-undo"
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+                    >
+                      <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      {tGh("undo")}
+                    </button>
+                  )}
+                  {!prResult && code.files.some((f) => f.path) && (
+                    <button
+                      type="button"
+                      onClick={() => setCommitOpen(true)}
+                      data-testid="coding-commit-open"
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item bg-foreground px-2.5 text-xs text-background hover:opacity-80"
+                    >
+                      <GitPullRequest className="h-3.5 w-3.5" aria-hidden="true" />
+                      {tGh("commitChanges")}
+                    </button>
+                  )}
+                  {prResult && (
+                    <>
+                      <a
+                        href={prResult.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="coding-view-pr"
+                        className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-border px-2.5 text-xs text-foreground hover:bg-panel-hover"
+                      >
+                        <GitPullRequest className="h-3.5 w-3.5" aria-hidden="true" />
+                        {tGh("viewPr")} #{prResult.number}
+                      </a>
+                      {ciStatus && (
+                        <span className="inline-flex items-center gap-1 text-xs">
+                          {ciStatus.checks.every((c) => c.conclusion === "success") ? (
+                            <><CheckCircle className="h-3.5 w-3.5 text-success" aria-hidden="true" /><span className="text-success">{tGh("ciPassed")}</span></>
+                          ) : ciStatus.checks.some((c) => c.conclusion === "failure") ? (
+                            <><XCircle className="h-3.5 w-3.5 text-danger" aria-hidden="true" /><span className="text-danger">{tGh("ciFailed")}</span></>
+                          ) : (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin text-muted" aria-hidden="true" /><span className="text-muted">{tGh("ciPending")}</span></>
+                          )}
+                        </span>
+                      )}
+                      {ciStatus?.state === "open" && !mergeConfirmOpen && (
+                        <button
+                          type="button"
+                          onClick={() => setMergeConfirmOpen(true)}
+                          disabled={merging}
+                          data-testid="coding-merge"
+                          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-item border border-success/40 bg-success/5 px-2.5 text-xs text-success hover:bg-success/10 disabled:opacity-40"
+                        >
+                          <GitMerge className="h-3.5 w-3.5" aria-hidden="true" />
+                          {tGh("merge")}
+                        </button>
+                      )}
+                      {mergeConfirmOpen && (
+                        <div className="flex items-center gap-2" data-testid="coding-merge-confirm">
+                          <span className="flex items-center gap-1 text-xs text-warning">
+                            <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                            {tGh("mergeConfirm")}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => void doMerge()}
+                            disabled={merging}
+                            data-testid="coding-merge-yes"
+                            className="min-h-[36px] rounded-item bg-success px-3 text-xs text-background hover:opacity-80 disabled:opacity-40"
+                          >
+                            {merging ? tGh("merging") : tGh("merge")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMergeConfirmOpen(false)}
+                            className="min-h-[36px] rounded-item border border-border px-3 text-xs text-muted hover:bg-panel-hover"
+                          >
+                            {tGh("cancel")}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <span className="text-[10px] text-muted">{tGh("neverMain")}</span>
+                </div>
+              )}
+
               {code.files.length > 1 && (
                 <div
-                  role="tablist"
                   aria-label={t("files")}
                   data-testid="coding-file-tabs"
-                  className="flex gap-1 overflow-x-auto border-b border-divider px-4 py-1.5 sm:px-6"
+                  className="flex items-center gap-1 border-b border-divider px-4 py-1.5 sm:px-6"
                 >
-                  {code.files.map((f, i) => (
-                    <button
-                      key={f.path ?? i}
-                      type="button"
-                      role="tab"
-                      aria-selected={i === code.activeIndex}
-                      onClick={() => selectFile(i)}
-                      data-testid="coding-file-tab"
-                      className={`min-h-[44px] shrink-0 rounded-item px-2.5 text-xs ${
-                        i === code.activeIndex ? "bg-panel-hover text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
-                      }`}
-                    >
-                      {f.path ?? t("code")}
-                    </button>
-                  ))}
+                  <div role="tablist" className="flex flex-1 gap-1 overflow-x-auto">
+                    {code.files.map((f, i) => (
+                      <button
+                        key={f.path ?? i}
+                        type="button"
+                        role="tab"
+                        aria-selected={i === code.activeIndex}
+                        onClick={() => selectFile(i)}
+                        data-testid="coding-file-tab"
+                        className={`min-h-[44px] shrink-0 rounded-item px-2.5 text-xs ${
+                          i === code.activeIndex ? "bg-panel-hover text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
+                        }`}
+                      >
+                        {f.path ?? t("code")}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => downloadZip(
+                      code.files.filter((f): f is CodeFile & { path: string } => f.path !== null).map((f) => ({ path: f.path, content: f.content })),
+                      "code.zip",
+                    )}
+                    aria-label={tGh("downloadZip")}
+                    data-testid="coding-download-zip"
+                    className="inline-flex min-h-[36px] shrink-0 items-center gap-1 rounded-item px-2 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+                  >
+                    <Download className="h-3 w-3" aria-hidden="true" />
+                    {tGh("downloadZip")}
+                  </button>
                 </div>
               )}
               <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
@@ -570,8 +811,110 @@ export function CodingWorkspace({ sessions, initialTask }: { sessions: CodeSessi
               </div>
             </div>
           )}
+
+          {/* GITHUB FILE TREE — shown on the far right when a repo+branch
+              is selected and there is no code open yet, or alongside the
+              code panel on large screens. */}
+          {github.repo && github.branch && !code && (
+            <div className="flex min-h-0 flex-1 flex-col border-s border-divider" data-testid="coding-file-tree">
+              <div className="flex items-center gap-2 border-b border-divider px-4 py-2">
+                <FolderTree className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+                <span className="text-xs font-medium text-foreground">{tGh("fileTree")}</span>
+              </div>
+              {loadingTree ? (
+                <div className="flex items-center gap-2 px-4 py-6 text-xs text-muted">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                  {tGh("loadingTree")}
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1 overflow-y-auto py-1">
+                  {fileTree.filter((f) => f.type === "blob").map((f) => (
+                    <button
+                      key={f.path}
+                      type="button"
+                      onClick={() => void openGitHubFile(f.path)}
+                      data-testid="coding-tree-file"
+                      className="flex w-full min-h-[36px] items-center px-4 text-start text-xs text-body hover:bg-panel-hover"
+                    >
+                      <span className="truncate">{f.path}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+      {/* COMMIT / PR DIALOG */}
+      {commitOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60" data-testid="coding-commit-dialog">
+          <div className="w-full max-w-md rounded-card border border-border bg-background p-6 shadow-lg">
+            <h3 className="mb-4 text-sm font-semibold text-foreground">{tGh("commitChanges")}</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs text-muted">{tGh("commitMessage")}</label>
+                <input
+                  type="text"
+                  value={commitMsg}
+                  onChange={(e) => setCommitMsg(e.target.value)}
+                  placeholder="Update code via Ionexa Coding"
+                  data-testid="coding-commit-msg"
+                  className="h-9 w-full rounded-item border border-border bg-transparent px-2 text-xs text-foreground outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-muted">{tGh("branchNameLabel")}</label>
+                <input
+                  type="text"
+                  value={newBranchForCommit}
+                  onChange={(e) => setNewBranchForCommit(e.target.value)}
+                  placeholder={`ionexa-${Date.now()}`}
+                  data-testid="coding-commit-branch"
+                  className="h-9 w-full rounded-item border border-border bg-transparent px-2 text-xs text-foreground outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-muted">{tGh("prTitle")}</label>
+                <input
+                  type="text"
+                  value={prTitle}
+                  onChange={(e) => setPrTitle(e.target.value)}
+                  data-testid="coding-pr-title"
+                  className="h-9 w-full rounded-item border border-border bg-transparent px-2 text-xs text-foreground outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-muted">{tGh("prBody")}</label>
+                <textarea
+                  value={prBody}
+                  onChange={(e) => setPrBody(e.target.value)}
+                  rows={3}
+                  data-testid="coding-pr-body"
+                  className="w-full rounded-item border border-border bg-transparent px-2 py-1.5 text-xs text-foreground outline-none"
+                />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setCommitOpen(false)}
+                className="min-h-[36px] rounded-item border border-border px-3 text-xs text-muted hover:bg-panel-hover"
+              >
+                {tGh("cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => void doCommitAndPr()}
+                disabled={committing}
+                data-testid="coding-commit-submit"
+                className="min-h-[36px] rounded-item bg-foreground px-3 text-xs text-background hover:opacity-80 disabled:opacity-40"
+              >
+                {committing ? tGh("creating") : tGh("createPr")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

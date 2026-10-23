@@ -6503,3 +6503,70 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
   | WebM VP9 κινητού | 51,3 s |
   | H.264 720p | 13,2 s |
   | poster | 0,7 s |
+
+---
+
+### 2026-10-25 — GitHub integration: full UI (Parts A–H minus ΣΤ)
+
+**Branch:** `claude/keen-turing-bv8gw4`
+
+Ολοκλήρωση UI σύνδεσης GitHub για το Coding (MASTER Μέρος 20 Γ, εντολή
+ιδιοκτήτη 2026-10-23 «ΟΛΟΚΛΗΡΩΣΗ, ΔΕΝ ΣΤΑΜΑΤΑΣ ΜΕΧΡΙ ΝΑ ΔΟΥΛΕΥΟΥΝ ΟΛΑ»).
+
+**Τι έγινε:**
+
+1. **Feature flag `coding-github` αφαιρέθηκε** — ο ιδιοκτήτης ζήτησε «χωρίς
+   διακόπτες». Η εμφάνιση ελέγχεται ΜΟΝΟ από `githubAppConfigured()` (4 env
+   vars). Admin βλέπει μήνυμα ρύθμισης· χρήστες τίποτα μέχρι τα keys.
+
+2. **Γ. Connect & project selection** — OAuth flow (connect → authorize →
+   callback), κρυπτογράφηση token AES-256-GCM, repository picker με αναζήτηση,
+   branch picker με «Νέο branch», session memory.
+
+3. **Δ. Working on code** — file tree (click ανοίγει αρχείο στον editor),
+   commit+PR dialog (commit message, νέο branch, PR title+body), CI status
+   (poll κάθε 15″ με pass/fail/pending icons), merge με confirmation dialog
+   (squash), undo stack.
+
+4. **E. Code from computer** — Zip download ήδη υλοποιημένο (`downloadZip` σε
+   `src/lib/coding/download.ts`), κουμπί στη σειρά καρτελών πολλαπλών αρχείων.
+
+5. **Ζ. Pricing/credits** — `MARGIN_MULTIPLIER_MIN = 4` υπάρχει ήδη στο
+   `pricing-config.ts`, power levels (Γρήγορη/Κανονική/Μέγιστη) δείχνουν
+   εκτίμηση credits.
+
+6. **Η. Security** — 46 security checks σε 3 αρχεία:
+   - `github-security.test.mjs` (22): tokens encrypted, data not instructions,
+     env vars gating, RLS, OAuth CSRF, ephemeral tokens, no push to main,
+     merge confirmation
+   - `github-user-isolation.test.mjs` (14): RLS, API auth, store scoping,
+     per-user tokens
+   - `github-data-not-instructions.test.mjs` (10): DATA-NOT-INSTRUCTIONS
+     marker, no eval, no push to main, merge requires explicit action
+
+7. **ΣΤ. Environment** — αναβλήθηκε μέχρι ο ιδιοκτήτης αποφασίσει πάροχο
+   εκτέλεσης (NEEDS 50, σύσταση E2B).
+
+**Αρχεία (23):**
+
+- `src/components/coding/coding-workspace.tsx` — file tree, commit/PR dialog,
+  CI status, merge, undo
+- `src/components/coding/github-connect.tsx` — full rewrite, repo/branch picker
+- `src/app/api/github/connect/route.ts` — flag check removed
+- `src/app/api/github/status/route.ts` — flag check removed
+- `src/app/api/github/commit/route.ts` — newBranch guard
+- `src/app/api/github/create-branch/route.ts` — NEW
+- `src/app/api/github/merge/route.ts` — NEW, squash merge
+- `src/app/api/github/pr-status/route.ts` — NEW, CI status
+- `src/app/dashboard/coding/page.tsx` — passes isAdmin, githubConfigured
+- `src/lib/coding/download.ts` — modified
+- `src/lib/flags/flags.ts` — `coding-github` removed
+- `scripts/tests/github-security.test.mjs` — updated (22 checks)
+- `scripts/tests/github-user-isolation.test.mjs` — NEW (14 checks)
+- `scripts/tests/github-data-not-instructions.test.mjs` — NEW (10 checks)
+- `scripts/tests/coding-pricing.test.mjs` — NEW
+- `messages/{ar,de,el,en,es,fr,it,ja,pt,zh}.json` — i18n for GitHub UI
+
+**Μπλοκαρισμένο:** NEEDS 11 (GitHub App), NEEDS 50 (πάροχος εκτέλεσης).
+
+**Migration:** `20261025100000_github_connections.sql` (από προηγούμενο session).

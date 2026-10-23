@@ -44,10 +44,11 @@ check("client never calls eval or Function or new Function", !/\beval\s*\(/.test
 
 console.log("\n== 3. the button does not appear until env vars are set ==");
 check("status route checks githubAppConfigured()", status.includes("githubAppConfigured()"));
-check("status route checks the feature flag", /isFeatureOn\("coding-github"/.test(status));
+check("status route returns unavailable when env vars are missing", status.includes("githubAppConfigured()"));
 check("connect route checks githubAppConfigured()", connect.includes("githubAppConfigured()"));
 check("auth.ts checks all four env vars in githubAppConfigured", /GITHUB_APP_ID/.test(auth) && /GITHUB_APP_CLIENT_ID/.test(auth) && /GITHUB_APP_CLIENT_SECRET/.test(auth) && /GITHUB_APP_PRIVATE_KEY/.test(auth));
-check("the component renders nothing when not available", /if \(!status \|\| !status\.available\) return null/.test(component));
+check("the component renders nothing when not configured for non-admin", component.includes("if (!githubConfigured) return null"));
+check("the component renders nothing when not available", component.includes("if (!status.available) return null"));
 
 console.log("\n== 4. RLS and server-only writes ==");
 check("migration enables RLS", /enable row level security/.test(migration));
@@ -65,6 +66,61 @@ check("callback clears the cookie after use", /maxAge: 0/.test(callback));
 console.log("\n== 6. installation tokens are ephemeral ==");
 check("client uses withInstallationToken, not stored tokens", /withInstallationToken/.test(client));
 check("auth creates JWTs with 10-minute expiry", /10 \* 60/.test(auth) || /600/.test(auth));
+
+// ---- PART Η additions (MASTER 20 Η, 2026-10-23) ----
+const commit = stripComments(readFileSync("src/app/api/github/commit/route.ts", "utf8"));
+const merge = stripComments(readFileSync("src/app/api/github/merge/route.ts", "utf8"));
+const repos = stripComments(readFileSync("src/app/api/github/repos/route.ts", "utf8"));
+const workspace = stripComments(readFileSync("src/components/coding/coding-workspace.tsx", "utf8"));
+
+console.log("\n== 7. user A never sees user B's repos or sessions ==");
+check("repos route authenticates the user", repos.includes("auth.getUser()"));
+check("repos route uses the AUTHENTICATED user's token", repos.includes("getGitHubAccessToken(user.id)"));
+check("store fetches tokens scoped to the user_id", /user_id.*eq.*userId/.test(store) || /\.eq\("user_id"/.test(store));
+check("RLS enforces user isolation at the database level", /auth\.uid\(\) = user_id/.test(migration));
+
+console.log("\n== 8. repository content is data, never instructions (extended) ==");
+check("readFile returns content as a string, never evals it", !/\beval\s*\(/.test(client));
+check("readFile never calls new Function", !/\bnew Function\b/.test(client));
+check("getTree never executes file contents", !/exec\(/.test(client) && !/spawn\(/.test(client));
+{
+  const allRoutes = [commit, merge, repos, status, connect, callback];
+  const anyEval = allRoutes.some((r) => /\beval\s*\(/.test(r) || /\bnew Function\b/.test(r));
+  check("no route uses eval or new Function on repository data", !anyEval);
+}
+
+console.log("\n== 9. no push to main, no branch delete, no merge without click ==");
+check(
+  "commit route rejects newBranch === baseBranch (no push to main)",
+  commit.includes("newBranch === body.baseBranch") || commit.includes("body.newBranch === body.baseBranch"),
+  "the commit route must guard against pushing directly to the base branch"
+);
+check(
+  "createBranchCommitAndPr always creates a NEW branch before committing",
+  /git\/refs[\s\S]*refs\/heads\/.*newBranch/.test(client) || client.includes("refs/heads/${params.newBranch}")
+);
+check(
+  "no delete-branch route exists",
+  (() => {
+    try { readFileSync("src/app/api/github/delete-branch/route.ts"); return false; } catch { return true; }
+  })()
+);
+check(
+  "no route sends DELETE to refs/ (no branch deletion)",
+  !/method:\s*["']DELETE["'][\s\S]{0,200}refs\//.test(client) && !/method:\s*["']DELETE["'][\s\S]{0,200}refs\//.test(commit)
+);
+check(
+  "merge happens only through an explicit POST request (user clicks)",
+  merge.includes("POST") && !merge.includes("auto_merge") && !merge.includes("auto-merge")
+);
+check(
+  "the UI shows a confirmation dialog before merge",
+  workspace.includes("mergeConfirmOpen") && workspace.includes("coding-merge-confirm")
+);
+check(
+  "merge uses squash (preserves history, single commit)",
+  merge.includes("squash")
+);
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

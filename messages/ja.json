@@ -4931,6 +4931,15 @@
       "normal": "標準",
       "max": "最大",
       "estimate": "{level} · 約{count}クレジット"
+    },
+    "github": {
+      "connect": "GitHub を接続",
+      "disconnect": "GitHub を切断",
+      "repoLabel": "リポジトリ",
+      "branchLabel": "ブランチ",
+      "pickRepo": "リポジトリを選択…",
+      "pickBranch": "ブランチを選択…",
+      "default": "デフォルト"
     }
   },
   "presentations": {

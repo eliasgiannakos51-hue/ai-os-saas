@@ -665,6 +665,13 @@ const LOCALE_ALLOWED = new Set([
   // merged Analyze, 2026-10-22) — it is not a loan everywhere else, so
   // this is the one locale, not INTENTIONALLY_IDENTICAL for all ten.
   "fr:dataAnalysis.pastedText.filename",
+  // "Repository" and "Branch" are the standard Git terms in German,
+  // Italian and Portuguese software — no native equivalent is used.
+  "de:coding.github.repoLabel",
+  "de:coding.github.branchLabel",
+  "it:coding.github.repoLabel",
+  "it:coding.github.branchLabel",
+  "pt:coding.github.branchLabel",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

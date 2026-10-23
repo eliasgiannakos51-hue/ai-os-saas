@@ -4931,6 +4931,15 @@
       "normal": "常规",
       "max": "最强",
       "estimate": "{level} · 约 {count} 积分"
+    },
+    "github": {
+      "connect": "连接 GitHub",
+      "disconnect": "断开 GitHub",
+      "repoLabel": "仓库",
+      "branchLabel": "分支",
+      "pickRepo": "选择仓库…",
+      "pickBranch": "选择分支…",
+      "default": "默认"
     }
   },
   "presentations": {

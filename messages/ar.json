@@ -4931,6 +4931,15 @@
       "normal": "عادية",
       "max": "قصوى",
       "estimate": "{level} · حوالي {count} رصيد"
+    },
+    "github": {
+      "connect": "ربط GitHub",
+      "disconnect": "إلغاء ربط GitHub",
+      "repoLabel": "المستودع",
+      "branchLabel": "الفرع",
+      "pickRepo": "اختر مستودعًا…",
+      "pickBranch": "اختر فرعًا…",
+      "default": "افتراضي"
     }
   },
   "presentations": {

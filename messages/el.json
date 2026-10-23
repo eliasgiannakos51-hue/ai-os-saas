@@ -4931,6 +4931,15 @@
       "normal": "Κανονική",
       "max": "Μέγιστη",
       "estimate": "{level} · περίπου {count} credits"
+    },
+    "github": {
+      "connect": "Σύνδεση GitHub",
+      "disconnect": "Αποσύνδεση GitHub",
+      "repoLabel": "Αποθετήριο",
+      "branchLabel": "Κλάδος",
+      "pickRepo": "Διάλεξε αποθετήριο…",
+      "pickBranch": "Διάλεξε κλάδο…",
+      "default": "προεπιλογή"
     }
   },
   "presentations": {

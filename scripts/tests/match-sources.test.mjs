@@ -297,6 +297,20 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // does for Chat's own tool-opening words, above. scripts/tests/
     // coding.test.mjs section 1 runs it in both languages.
     "src/lib/coding/operations.ts",
+    // «ΤΑ ΔΙΚΑ ΜΟΥ» (2026-10-22, the owner's message), deciding which
+    // kinds of the person's own rows a question is about before reading
+    // any of them. For finance/sales/trading it borrows
+    // module-synonyms.ts's vocabulary outright — the same list section 3
+    // already accounts for — and scores every kind, borrowed or not,
+    // with module-relevance.ts's own scoreTerms/questionWords rather than
+    // a second scorer. What is new is only a flat EN/EL term list for the
+    // nine kinds module-relevance.ts has no vocabulary for (site, slides,
+    // posts, document, research, analysis, file, chat, coding) — not a
+    // new matching rule — and it fails open the same way
+    // workspace-context.ts does: a question that scores nothing gets the
+    // first MAX_KINDS_READ kinds rather than a narrowed, possibly wrong,
+    // guess.
+    "src/lib/my-stuff/classify.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

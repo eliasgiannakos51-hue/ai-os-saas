@@ -1,6 +1,6 @@
 {
-  "total": 4336,
-  "onPath": 616,
+  "total": 4379,
+  "onPath": 617,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 374
+      "count": 375
     },
     {
       "n": 3,
@@ -2258,6 +2258,12 @@
         },
         {
           "key": "sidebar.items.music",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.myStuff",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"

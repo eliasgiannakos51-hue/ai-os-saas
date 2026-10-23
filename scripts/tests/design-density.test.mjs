@@ -110,7 +110,13 @@ console.log("\n== 2. the lines ==");
 // ceiling to 577. Both dialogs now share `.modal-surface`/`.modal-header`
 // in globals.css, and the count went two below where the two features
 // together found it.
-ok(`border utilities (${r.counts.borders}), ceiling 573`, r.counts.borders <= 573);
+// 573 -> 572 on 2026-10-22. «Τα δικά μου»'s own search bar
+// (`my-stuff-browse.tsx`) wrote the exact same search-pill input as
+// `library-view.tsx`, byte for byte, which combined with my-stuff's
+// own addition would have taken the count to 574. Both inputs now
+// share `.search-pill-input` in globals.css, same shape as the modal
+// pair above, and the count went one below where the change found it.
+ok(`border utilities (${r.counts.borders}), ceiling 572`, r.counts.borders <= 572);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

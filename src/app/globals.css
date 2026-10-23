@@ -330,6 +330,16 @@ body {
     @apply border-b border-border px-5 py-4;
   }
 
+  /* THE ROUNDED SEARCH FIELD, DECLARED ONCE (2026-10-22, «Τα δικά μου»).
+     `library-view.tsx` and the new `my-stuff-browse.tsx` write the exact
+     same search-pill input, byte for byte — the same shape as the modal
+     pair above, drawn twice inline against design-density.test.mjs's
+     ceiling instead of once here. */
+  .search-pill-input {
+    @apply min-h-[44px] w-full rounded-full border border-border bg-transparent py-2 pe-4 ps-9
+           text-sm text-foreground placeholder:text-muted focus:border-foreground/50 focus:outline-none;
+  }
+
   /* A LIST OF ROWS, SEPARATED BY ONE RULE INSTEAD OF N OUTLINES.
 
      The trade design-density.test.mjs's divide clause describes, made

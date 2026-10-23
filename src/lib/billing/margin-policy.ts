@@ -279,6 +279,8 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   dataQuestion: "data_analysis",
   // V4 #20.
   codeAssist: "code_assist",
+  // «Τα δικά μου», 2026-10-22: one question over the account's own rows.
+  myStuffAsk: "my_stuff_ask",
   // V5 #21.
   presentationGenerate: "presentation_generate",
   // V5 #22.

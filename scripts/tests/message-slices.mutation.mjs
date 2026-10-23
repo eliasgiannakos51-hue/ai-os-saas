@@ -107,7 +107,10 @@ const MUTANTS = [
     // literal over a declared array.
     // 70 -> 69 in design D.4 (2026-10-04): the Home examples strip
     // (first-screen-examples.tsx) was removed with the cards.
-    from: "    unbounded: 69,",
+    // 69 -> 70 -> 71 on 2026-10-22: my-stuff-shell.tsx's and then
+    // my-stuff-browse.tsx's `kinds.<kind>` template literals («Τα δικά
+    // μου»).
+    from: "    unbounded: 71,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

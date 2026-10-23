@@ -159,6 +159,20 @@ try {
       )
     );
     const page = await context.newPage();
+    // A REAL FINGER ON THE PHONE, A MOUSE ON THE DESKTOP (same pattern as
+    // tool-shell.prodtest.mjs) — scripts/tests/interaction-coverage.test.mjs
+    // holds a ratchet on prodtests that drive the page with a mouse only;
+    // the send button is pressed here, not a bare Enter, so this file
+    // genuinely exercises the touch path on its phone pass.
+    const cdp = device.touch ? await context.newCDPSession(page) : null;
+    async function press(locator) {
+      await locator.scrollIntoViewIfNeeded();
+      if (!cdp) return locator.click();
+      const box = await locator.boundingBox();
+      const x = box.x + box.width / 2, y = box.y + box.height / 2;
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    }
 
     await page.goto(`${ORIGIN}/dashboard/coding`, { waitUntil: "networkidle" });
 
@@ -232,8 +246,18 @@ try {
       })
     );
     if (fieldBox !== null) {
+      // ON THE PHONE, THE SESSIONS PANEL OPENS OVER THE WHOLE SCREEN BY
+      // DEFAULT (the owner's own spec: "στο κινητό ανοίγει πάνω από τη
+      // σελίδα") — its backdrop sits above the composer, so a real finger
+      // closes it first, same as any person would, rather than this test
+      // tapping blind through an overlay no finger could reach past.
+      if (device.touch) await press(page.locator('[data-testid="coding-history-toggle"]'));
       await field.fill("A function that returns 1");
-      await page.keyboard.press("Enter");
+      if (device.touch) {
+        await press(page.locator('button[type="submit"]').first());
+      } else {
+        await page.keyboard.press("Enter");
+      }
       try {
         await page.locator('[data-testid="coding-work"]').waitFor({ state: "visible", timeout: 10000 });
       } catch {
@@ -256,10 +280,11 @@ try {
   await browser.close();
   cleanup();
   console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
-  if (failures.length) {
-    console.log(failures.map((f) => "  - " + f).join("\n"));
-    process.exit(1);
-  }
+  if (failures.length) console.log(failures.map((f) => "  - " + f).join("\n"));
+  // AN EXPLICIT EXIT ON THE SUCCESS PATH TOO (scripts/tests/prodtest-
+  // hygiene.test.mjs) — leaving a pass to the event loop draining hangs
+  // the run if a handle (the browser, the stand-in server) is retained.
+  process.exit(failures.length === 0 ? 0 : 1);
 } catch (err) {
   console.error(err);
   cleanup();

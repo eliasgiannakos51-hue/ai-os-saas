@@ -3177,6 +3177,7 @@
         "empty": "Ainda não há nada aqui.",
         "delete": "Excluir",
         "rename": "Renomear",
+        "undo": "Desfazer",
         "deleteConfirm": "Excluir “{title}”?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Código",
     "copy": "Copiar",
     "copied": "Copiado",
+    "download": "Baixar",
+    "files": "Arquivos",
     "operations": {
       "generate": {
         "label": "Escrever um excerto"

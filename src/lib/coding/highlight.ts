@@ -341,3 +341,23 @@ export function guessLanguage(code: string): string | null {
   }
   return null;
 }
+
+/**
+ * A FILE'S EXTENSION, FOR A TAB — folder upload (the owner's message
+ * right after #332) keeps each file as its own tab, and a tab's language
+ * is read off its own name the way an editor would, not sniffed from its
+ * text: `guessLanguage` above is the fallback for the one file an
+ * extension here does not recognise.
+ */
+const EXTENSION_LANGUAGES: Record<string, string> = {
+  ts: "typescript", tsx: "typescript", js: "javascript", jsx: "javascript", mjs: "javascript", cjs: "javascript",
+  py: "python", go: "go", rs: "rust", php: "php", sql: "sql", json: "json",
+  sh: "bash", bash: "bash", zsh: "bash",
+  html: "html", htm: "html", css: "css", md: "markdown", yml: "yaml", yaml: "yaml",
+};
+
+export function languageFromPath(path: string, content: string): string | null {
+  const dot = path.lastIndexOf(".");
+  const ext = dot > -1 ? path.slice(dot + 1).toLowerCase() : "";
+  return EXTENSION_LANGUAGES[ext] ?? guessLanguage(content);
+}

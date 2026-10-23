@@ -3177,6 +3177,7 @@
         "empty": "Rien ici pour l’instant.",
         "delete": "Supprimer",
         "rename": "Renommer",
+        "undo": "Annuler",
         "deleteConfirm": "Supprimer « {title} » ?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Code",
     "copy": "Copier",
     "copied": "Copié",
+    "download": "Télécharger",
+    "files": "Fichiers",
     "operations": {
       "generate": {
         "label": "Écrire un extrait"

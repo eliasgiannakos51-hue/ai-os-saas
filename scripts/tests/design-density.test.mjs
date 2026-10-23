@@ -116,7 +116,19 @@ console.log("\n== 2. the lines ==");
 // own addition would have taken the count to 574. Both inputs now
 // share `.search-pill-input` in globals.css, same shape as the modal
 // pair above, and the count went one below where the change found it.
-ok(`border utilities (${r.counts.borders}), ceiling 572`, r.counts.borders <= 572);
+// 572 -> 570 on 2026-10-22, Coding's own redesign (the owner's critical
+// message, repeated: file tabs, copy, download, click-to-edit diff
+// boxes). `code-block.tsx` and the new `DiffView` (coding-workspace.tsx)
+// each drew the same bordered card, bordered header strip and two
+// Copy/Download buttons — a fourth and fifth copy of the
+// `.modal-surface`/`.modal-header` shape, this time with its own button
+// repeated twice more on top. All of it now shares `.code-panel`,
+// `.code-panel-header` and `.code-action-button` in globals.css; the two
+// new elements with nothing to share (the file-tabs row, the inline
+// diff-line editor) are the only ones that actually raised the count,
+// and sharing the rest left it two BELOW where it stood before this
+// round even started.
+ok(`border utilities (${r.counts.borders}), ceiling 570`, r.counts.borders <= 570);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

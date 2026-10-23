@@ -538,7 +538,7 @@ console.log("\n== 8. ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, poi
   console.log("-- ShellHistoryColumn: opt-in, not automatic --");
   const shellHistory = stripComments(readFileSync(SHELL_HISTORY, "utf8"));
   ok("the column only draws the button when a caller passes linkTable",
-    /\{linkTable && \(/.test(shellHistory) && /sourceTable=\{linkTable\}/.test(shellHistory));
+    /\{linkTable && !pendingDelete\.has\(r\.id\) && \(/.test(shellHistory) && /sourceTable=\{linkTable\}/.test(shellHistory));
   for (const [file, label] of [
     [AUTOMATION_SHELL, "automation"],
     ["src/components/coding/coding-workspace.tsx", "coding"],

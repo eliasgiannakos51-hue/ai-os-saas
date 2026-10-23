@@ -3177,6 +3177,7 @@
         "empty": "まだ何もありません。",
         "delete": "削除",
         "rename": "名前を変更",
+        "undo": "元に戻す",
         "deleteConfirm": "「{title}」を削除しますか?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "コード",
     "copy": "コピー",
     "copied": "コピーしました",
+    "download": "ダウンロード",
+    "files": "ファイル",
     "operations": {
       "generate": {
         "label": "スニペットを書く"

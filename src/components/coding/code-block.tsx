@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download } from "lucide-react";
 import { highlight, type TokenKind } from "@/lib/coding/highlight";
+import { downloadTextFile, suggestedFileName } from "@/lib/coding/download";
 
 // TOKENS TO <span>, never markup to innerHTML.
 //
@@ -28,10 +29,14 @@ export function CodeBlock({
   code,
   language,
   label,
+  fileName,
 }: {
   code: string;
   language?: string | null;
   label?: string;
+  /** The path to suggest when downloading — null draws one from the
+   *  language instead (see lib/coding/download.ts). */
+  fileName?: string | null;
 }) {
   const t = useTranslations("coding");
   const [copied, setCopied] = useState(false);
@@ -54,20 +59,33 @@ export function CodeBlock({
   }
 
   return (
-    <div className="rounded-card border border-border bg-workspace">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+    <div className="code-panel">
+      <div className="code-panel-header">
         <span className="break-words text-[11px] uppercase tracking-wider text-muted">
           {label ?? language ?? t("code")}
         </span>
-        <button
-          type="button"
-          onClick={() => void copy()}
-          aria-label={t("copy")}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-[11px] text-foreground hover:bg-panel-hover"
-        >
-          {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-          {copied ? t("copied") : t("copy")}
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => downloadTextFile(code, suggestedFileName(fileName ?? null, language ?? null))}
+            aria-label={t("download")}
+            data-testid="coding-download"
+            className="code-action-button"
+          >
+            <Download className="h-3 w-3" aria-hidden="true" />
+            {t("download")}
+          </button>
+          <button
+            type="button"
+            onClick={() => void copy()}
+            aria-label={t("copy")}
+            data-testid="coding-copy"
+            className="code-action-button"
+          >
+            {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+            {copied ? t("copied") : t("copy")}
+          </button>
+        </div>
       </div>
       {/* SCROLLS INSIDE ITSELF. A long line in a paste must not make the
           whole page scroll sideways. */}

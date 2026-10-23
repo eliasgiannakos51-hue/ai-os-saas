@@ -199,6 +199,29 @@ console.log("\n== 2b. diffLines: the green/red boxes an edit turn shows ==");
 }
 
 // =====================================================================
+console.log("\n== 2c. replaceLine: click a box, type a change, only that changes ==");
+// =====================================================================
+
+{
+  eq(
+    "the clicked line changes, nothing else does",
+    diffLib.replaceLine("const a = 1;\nconst b = 2;\nconst c = 3;", 1, "const b = 99;"),
+    "const a = 1;\nconst b = 99;\nconst c = 3;"
+  );
+}
+{
+  eq("the first line", diffLib.replaceLine("const a = 1;\nconst b = 2;", 0, "let a = 1;"), "let a = 1;\nconst b = 2;");
+  eq("the last line", diffLib.replaceLine("const a = 1;\nconst b = 2;", 1, "let b = 2;"), "const a = 1;\nlet b = 2;");
+}
+{
+  ok("an index past the end is a no-op", diffLib.replaceLine("const a = 1;", 5, "anything") === "const a = 1;");
+  ok("a negative index is a no-op", diffLib.replaceLine("const a = 1;", -1, "anything") === "const a = 1;");
+}
+{
+  eq("empty content stays empty — nothing to splice into", diffLib.replaceLine("", 0, "const a = 1;"), "");
+}
+
+// =====================================================================
 console.log("\n== 3. the workspace context: bounded, and marked as data ==");
 // =====================================================================
 
@@ -358,6 +381,22 @@ for (const [lang, sample] of [
   eq("json is recognised", hl.guessLanguage('{"a": 1}'), "json");
   ok("a bare sentence is NOT guessed at", hl.guessLanguage("hello there, how are you") === null);
   ok("…nor is an empty paste", hl.guessLanguage("") === null);
+}
+
+// =====================================================================
+console.log("\n== 5b. languageFromPath: a tab's own name, for folder upload ==");
+// =====================================================================
+
+{
+  eq("a .ts file is typescript by its name, no content read", hl.languageFromPath("app.ts", ""), "typescript");
+  eq("a .py file is python by its name", hl.languageFromPath("script.py", ""), "python");
+  eq("a nested path still reads its own extension", hl.languageFromPath("lib/util/helpers.go", ""), "go");
+  eq(
+    "an unrecognised extension falls back to content sniffing",
+    hl.languageFromPath("Makefile.weird", "def f(x):\n    return x"),
+    "python"
+  );
+  eq("no extension at all also falls back", hl.languageFromPath("README", '{"a": 1}'), "json");
 }
 
 console.log("\n== 6. folder upload: binary skipped, budget respected ==");

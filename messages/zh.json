@@ -3177,6 +3177,7 @@
         "empty": "这里还没有内容。",
         "delete": "删除",
         "rename": "重命名",
+        "undo": "撤销",
         "deleteConfirm": "删除「{title}」吗?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "代码",
     "copy": "复制",
     "copied": "已复制",
+    "download": "下载",
+    "files": "文件",
     "operations": {
       "generate": {
         "label": "写一段代码"

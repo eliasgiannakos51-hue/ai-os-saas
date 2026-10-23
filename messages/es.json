@@ -3177,6 +3177,7 @@
         "empty": "Aún no hay nada aquí.",
         "delete": "Eliminar",
         "rename": "Renombrar",
+        "undo": "Deshacer",
         "deleteConfirm": "¿Eliminar «{title}»?"
       }
     },
@@ -4880,6 +4881,8 @@
     "code": "Código",
     "copy": "Copiar",
     "copied": "Copiado",
+    "download": "Descargar",
+    "files": "Archivos",
     "operations": {
       "generate": {
         "label": "Escribir un fragmento"

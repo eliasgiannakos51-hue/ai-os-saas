@@ -344,6 +344,10 @@ try {
     await field.fill("Camping Ήλιος");
     await press(page.locator('[data-testid="translate-tool-glossary-add"]'));
     await page.locator('[data-testid="translate-tool-glossary-list"]').filter({ hasText: "Camping Ήλιος" }).waitFor({ timeout: 10_000 });
+    // The UI shows the new term at once, optimistically; the PUT that
+    // actually saves it is fire-and-forget behind that paint, so give it
+    // a moment to land before checking the mock's own row.
+    for (let i = 0; i < 20 && !glossaryRows[MOCK_USER.id]?.terms?.includes("Camping Ήλιος"); i++) await new Promise((r) => setTimeout(r, 100));
     check("the term is saved at once — the mock's own row carries it, before any translation runs", glossaryRows[MOCK_USER.id]?.terms?.includes("Camping Ήλιος") === true);
     await press(page.locator('[data-testid="translate-tool-glossary"]'));
 
@@ -357,8 +361,12 @@ try {
     const { context: c2, page: p2 } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
     await p2.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
     await p2.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
-    const field2 = p2.locator('[data-testid="translate-tool-glossary"]');
-    check("...and it is still there on a fresh page load — saved, not kept only in memory", (await field2.innerText()).includes("1"));
+    // The glossary GET is a client-side effect, after hydration — wait
+    // for its answer to paint rather than reading the button the instant
+    // the shell itself appears.
+    const field2 = p2.locator('[data-testid="translate-tool-glossary"]').filter({ hasText: "1" });
+    const sawSaved = await field2.waitFor({ timeout: 10_000 }).then(() => true, () => false);
+    check("...and it is still there on a fresh page load — saved, not kept only in memory", sawSaved);
     await c2.close();
     await context.close();
   }

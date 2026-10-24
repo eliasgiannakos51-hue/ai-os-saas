@@ -82,6 +82,7 @@ export function FlowShell({
   prices,
   available,
   brandColour,
+  initialText,
 }: {
   initialFlows: FlowRow[];
   projects: FlowProject[];
@@ -89,6 +90,8 @@ export function FlowShell({
   available: FlowAvailability;
   /** The business's colour from memory, when there is one. */
   brandColour: string | null;
+  /** A quick-job tile's example text, dropped into the field unsent (lib/nav/quick-jobs.ts). */
+  initialText?: string;
 }) {
   const { t, kind, notYet } = useFlowWords();
   const tProjects = useTranslations("projects");
@@ -415,6 +418,7 @@ export function FlowShell({
       <ToolShell
         ref={composerRef}
         name={t("name")}
+        initialText={initialText}
         turns={shellTurns}
         working={busy ? (
           <span className="inline-flex items-center gap-2 text-xs text-muted">

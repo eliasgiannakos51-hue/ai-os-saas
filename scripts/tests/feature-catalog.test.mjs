@@ -506,7 +506,11 @@ for (const group of FEATURE_GROUPS) {
 // they do not buy.
 //
 // The number goes up by exactly one, in the commit that adds the row.
-check(`the table is ${sold.length} rows, and 46 is the ceiling`, sold.length <= 46);
+// 46 -> 47 on 2026-10-24: Games is open to everyone now (the final All
+// tools grid, "ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ") — the switch that made it
+// owner-only is gone, so it stops being `notSold` and becomes an
+// ordinary row a buyer sees, like every other "make" capability.
+check(`the table is ${sold.length} rows, and 47 is the ceiling`, sold.length <= 47);
 check("the table is not empty", sold.length >= 20);
 
 // AND THE ANSWER TO "WHY WOULD AN ULTIMATE PAY 10x". Stated as a floor

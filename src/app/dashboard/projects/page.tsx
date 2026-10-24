@@ -10,6 +10,7 @@ import { IN_PROJECT, PROJECTS_TABLE, type ProjectStatus } from "@/lib/projects/p
 import { ProjectsWorkspace, type ProjectRow } from "@/components/projects/projects-workspace";
 import { FlowShell } from "@/components/flows/flow-shell";
 import { loadFlowPage } from "@/lib/flows/page-data";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,8 @@ export function generateMetadata(): Promise<Metadata> {
  * lib/projects/project.ts that would make the number mean something
  * larger than what the person can see when they open it.
  */
-export default async function ProjectsPage() {
+export default async function ProjectsPage(props: { searchParams?: Promise<{ ask?: string }> }) {
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
   const t = await getTranslations("projects");
   const supabase = await createClient();
   const user = await getCurrentUser();
@@ -70,7 +72,7 @@ export default async function ProjectsPage() {
     const data = await loadFlowPage(user);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <FlowShell initialFlows={data.flows} projects={projects} prices={data.prices} available={data.available} brandColour={data.brandColour} />
+        <FlowShell initialFlows={data.flows} projects={projects} prices={data.prices} available={data.available} brandColour={data.brandColour} initialText={readExampleParam(searchParams?.ask)} />
       </div>
     );
   }

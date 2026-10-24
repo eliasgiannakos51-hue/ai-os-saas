@@ -1275,8 +1275,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // the browser and changed with words. The Site's plan — a game is a page
   // of code written from a description, the Site's own work — enforced in
   // every games route before anything is spent (lib/games/game-access.ts).
-  // NOT A ROW YET, for documentWriter's reason: the switch "games" admits
-  // the owner and the test account only.
+  // OPEN TO EVERYONE since 2026-10-24 (the final All tools grid, "ALL
+  // TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ"): the switch games is gone, so this is now an
+  // ordinary sold row like every other "make" capability.
   {
     id: "games",
     group: "make",
@@ -1284,12 +1285,108 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     pages: ["games"],
     routes: ["games", "games/[id]", "games/[id]/download"],
     charges: true,
-    notSold:
-      "owner-only for now: the switch games admits the owner and the test account " +
-      "(isFeatureOn in src/lib/games/game-access.ts); the tier is confirmed when it opens to everyone",
     enforcedIn: "src/lib/games/game-access.ts",
     enforcedSymbol: 'accountHasCapability(plan?.slug ?? "free", "websiteBuilder", isAdmin)',
     cell: (p) => boolCell(p.capabilities.websiteBuilder),
+  },
+  // THE SEVEN COMING SOON TILES OF THE FINAL GRID (2026-10-24) and
+  // Translate (diagnosed the same day: it is not a tool of its own yet,
+  // only the Translate button inside Documents and the Site builder).
+  // Each has a real page at its address — components/tools/coming-soon-
+  // shell.tsx, field disabled, no provider call, no charge — so each
+  // must still be claimed here; `notBuilt` with no `capability` is the
+  // shape for exactly this (declared tiers for FUTURE enforcement, never
+  // read by anything today — plan-enforcement.test.mjs only requires
+  // that of a `notBuilt` entry that also carries `capability`, which
+  // none of these do, since none is a PlanCapabilities field).
+  {
+    id: "apps",
+    group: "make",
+    minPlan: "starter",
+    pages: ["app-builder"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): not built — a real generator (screens, saved data, a working form/list) rather than the manually-typed tracker /dashboard/apps already is. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/app-builder", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "video",
+    group: "make",
+    minPlan: "starter",
+    pages: ["video-studio"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): needs a video provider key from the owner (Veo, docs/NEEDS-FROM-ELIAS.md) and the real build. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/video-studio", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "films",
+    group: "make",
+    minPlan: "starter",
+    pages: ["films"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): needs the Video tool and a voice provider key from the owner. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/films", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "editing",
+    group: "make",
+    minPlan: "starter",
+    pages: ["editing"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): not built yet; needs a decision on where ffmpeg runs (docs/v6-ffmpeg-and-limits-2026-10-04.md). Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/editing", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "avatars",
+    group: "make",
+    minPlan: "starter",
+    pages: ["avatars"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): needs an avatar provider key from the owner (HeyGen, docs/NEEDS-FROM-ELIAS.md). Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/avatars", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "audio",
+    group: "make",
+    minPlan: "starter",
+    pages: ["audio"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): voice-over alone could reuse /dashboard/voice's engine, but podcasts and music are not built, so the combined tool is not ready end to end. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/audio", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "iowork",
+    group: "run",
+    minPlan: "growth",
+    pages: ["iowork"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): needs the owner's approval of the security plan (docs/IOWORK-SECURITY-PLAN.md) and signed desktop apps. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/iowork", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
+    id: "translateTool",
+    group: "ask",
+    minPlan: "free",
+    pages: ["translate"],
+    routes: ["tools/notify"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): not built as its own tool — today it is only the Translate button inside Documents and the Site builder, both behind the `translate` switch. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/translate", ready: false',
+    cell: () => ({ type: "cross" }),
   },
   {
     id: "customDomain",

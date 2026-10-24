@@ -691,6 +691,36 @@ const LOCALE_ALLOWED = new Set([
   "pt:coding.github.branchLabel",
   // «Structure» is the French word for the file-tree section heading.
   "fr:coding.github.structure",
+  // The small ready-made jobs (quick-jobs.ts, 2026-10-24): loanwords that
+  // stay English in that one language's everyday tech/office vocabulary —
+  // "Quiz", "CV", "Logo", "Poster", "Notes", "Voice-over", "Apps", "Audio"
+  // are not borrowed everywhere, so each is scoped to the locale it is
+  // actually unchanged in, not INTENTIONALLY_IDENTICAL for all ten.
+  "el:dashboard.quickJobs.voiceOver.label",
+  "el:dashboard.quickJobs.quiz.label",
+  "el:dashboard.quickJobs.flashcards.label",
+  "es:dashboard.tools.names.apps",
+  "es:dashboard.tools.names.audio",
+  "es:dashboard.quickJobs.cv.label",
+  "fr:dashboard.tools.names.audio",
+  "fr:dashboard.quickJobs.logo.label",
+  "fr:dashboard.quickJobs.cv.label",
+  "fr:dashboard.quickJobs.notes.label",
+  "fr:dashboard.quickJobs.quiz.label",
+  "de:dashboard.tools.names.apps",
+  "de:dashboard.tools.names.audio",
+  "de:dashboard.quickJobs.logo.label",
+  "de:dashboard.quickJobs.poster.label",
+  "de:dashboard.quickJobs.voiceOver.label",
+  "de:dashboard.quickJobs.quiz.label",
+  "it:dashboard.tools.names.audio",
+  "it:dashboard.quickJobs.logo.label",
+  "it:dashboard.quickJobs.poster.label",
+  "it:dashboard.quickJobs.cv.label",
+  "it:dashboard.quickJobs.quiz.label",
+  "pt:dashboard.tools.names.apps",
+  "pt:dashboard.quickJobs.cv.label",
+  "pt:dashboard.quickJobs.quiz.label",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

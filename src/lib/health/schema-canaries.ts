@@ -437,7 +437,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     kind: "table",
     table: "user_games",
     migration: "20261024000000_user_games.sql",
-    breaks: "Games (switch \"games\") plan a game, charge for the plan, and cannot keep it: the person pays and sees «it could not be saved»; the page itself shows no games",
+    breaks: "Games (no switch since 2026-10-24) plan a game, charge for the plan, and cannot keep it: the person pays and sees «it could not be saved»; the page itself shows no games",
+  },
+  {
+    kind: "table",
+    table: "tool_notify_subscriptions",
+    migration: "20261028000000_tool_notify_subscriptions.sql",
+    breaks: "Every «Notify me» press on a not-ready All tools tile answers «it could not be saved», and nobody is ever told when that tool opens",
   },
   {
     kind: "table",

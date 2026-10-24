@@ -275,7 +275,17 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // and that answer had not yet turned into a "build it" when this PR
   // was written. Deleting the sentence would read as the feature simply
   // not having been gotten to.
-  const CENSUS_CEILING = 73;
+  // 73 -> 74 ON 2026-10-24: scripts/check-i18n.js:694. A decision, not a
+  // defect: a handful of the final grid's small ready-made jobs ("Quiz",
+  // "CV", "Logo", "Poster", "Notes", "Voice-over", "Apps", "Audio") stay
+  // the English word in some locales' everyday tech vocabulary and not
+  // others, so each is scoped LOCALE_ALLOWED to the one locale it is
+  // actually unchanged in, rather than claimed identical everywhere.
+  // 74 -> 75 ON 2026-10-24: scripts/tests/all-tools-final-grid.prodtest.mjs,
+  // its own PRODUCT_WORDS comment — explains which Greek-page loanwords
+  // are pre-existing ("sites", "trading") versus this round's own
+  // ("Podcast", "Voice-over", "Quiz", "Flashcards"), also a decision.
+  const CENSUS_CEILING = 75;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

@@ -6688,3 +6688,28 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 - `all-tools-final-grid.prodtest.mjs` 58: το τετράγωνο «Σύνδεση» φαίνεται σε σύνηθες μέλος.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261026000000_mcp_servers.sql**
+
+
+---
+
+### 2026-10-24 — «ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ» — 24 τετράγωνα, 6 ομάδες, Σύντομα αντί για κρυφό
+
+**Branch:** `claude/keen-turing-bv8gw4`. Εντολή ιδιοκτήτη: το grid των 17/12 μένει, προσθέτονται όσα λείπουν μέχρι τα 24, σε 5 ομάδες plus μία έκτη (Μάθε) μόνο με μικρά τετράγωνα, με έναν νέο κανόνα — ένα εργαλείο που δεν δουλεύει ΔΕΝ εξαφανίζεται πια· φαίνεται με μια διακριτική ένδειξη «Σύντομα».
+
+**Τι έγινε.**
+- `src/lib/nav/all-tools.ts` ξαναγράφτηκε: 24 εγγραφές, 6 ομάδες (`record, ask, make, runAlone, organise, learn` — το `learn` χωρίς δικό του μεγάλο τετράγωνο, μόνο έτοιμες δουλειές). Νέα: Meetings, Slides, Posts, Games (ο διακόπτης `games` αφαιρέθηκε — ήταν ήδη φτιαγμένο), Apps, Video, Films, Editing, Avatars, Audio, iowork (`ready: false`, με `waitingFor`), Translate (`ready: false` — παραμένει μόνο κουμπί μέσα στο Documents/Site, ΔΕΝ χτίστηκε ξεχωριστό εργαλείο αυτόν τον γύρο· ο διακόπτης `translate` **δεν** αφαιρέθηκε).
+- **Το §3: ένα μη-έτοιμο τετράγωνο φαίνεται πάντα.** `src/components/tools/coming-soon-shell.tsx` — ίδιος σχεδιασμός (Earth, τίτλος, παραδείγματα), πεδίο απενεργοποιημένο, γραμμή «Δεν δουλεύει ακόμα. Τίποτα δεν χρεώνεται.», κουμπί «Ειδοποίησέ με όταν ανοίξει». Επτά νέες σελίδες Coming Soon (`app-builder`, `video-studio`, `films`, `editing`, `avatars`, `audio`, `iowork`) και μία όγδοη (`translate`, διορθωμένο μετά τη διάγνωση ότι δεν χτίστηκε ξεχωριστό εργαλείο).
+- **Ειδοποίηση:** πίνακας `tool_notify_subscriptions` (migration παρακάτω), RLS μόνο δικές γραμμές, καμία ενημέρωση επιτρεπτή από τον client· route `src/app/api/tools/notify/route.ts` (POST/DELETE). Χωρίς cron: `scripts/notify-tool-ready.mjs <toolKey>` τρέχει με το χέρι την ημέρα που ένα εργαλείο ανοίγει.
+- **`src/lib/nav/quick-jobs.ts`:** 56 έτοιμες μικρές δουλειές σε όλες τις ομάδες (συμπεριλαμβανομένης της νέας «Μάθε» — 6 δουλειές, όλες ανοίγουν το Chat με το ερώτημα ήδη γραμμένο). Κάθε μία ανοίγει ένα ΥΠΑΡΧΟΝ εργαλείο με το σωστό `?ask=`/`?brief=`/`?said=`/`?agent=` ήδη γεμισμένο — καμία νέα engine λογική.
+- `src/components/tools/tools-grid.tsx` ξαναγράφτηκε: κάθε εγγραφή του registry σχεδιάζεται πάντα (`isLive` δείχνει αν είναι το πραγματικό εργαλείο ή Coming Soon), η αναζήτηση ενώνει μεγάλα τετράγωνα + μικρές δουλειές σε μία λίστα.
+- `initialText` (πρόβλεψη πεδίου, όχι αυτόματη αποστολή) προστέθηκε στο ToolShell των: Analyze, Documents, My Stuff, Images, Games, Projects — ώστε οι έτοιμες δουλειές να γεμίζουν το πεδίο.
+- Κείμενα (ονόματα/γραμμές/επικεφαλίδες/Coming Soon/quick-jobs) σε 10 γλώσσες· η γραμμή του Document άλλαξε σε «Έγγραφα και φύλλα» (το Slides είναι πια δικό του τετράγωνο)· του Coding παραμένει «Γράψε και διόρθωσε κώδικα» (όχι GitHub, μέχρι να ανοίξει σε όλους).
+- Διορθώθηκαν τρεις αλυσιδωτές γραμμές που είχαν μείνει πίσω από τον αφαιρεμένο διακόπτη `games`: `docs/ACCEPTANCE.md` (Α26), `src/app/dashboard/layout.tsx` (ο αριθμός σελίδων 53→61 μετά τις 8 νέες Coming Soon σελίδες), το όριο των border-utilities στο `design-density.test.mjs` (590→594) και το όριο των σχολίων-περιορισμού στο `comment-claims.test.mjs`/`baselines.test.mjs` (73→74) — καθένα με αιτιολόγηση, όχι απλή αύξηση.
+
+**Δοκιμές.** `scripts/tests/all-tools.test.mjs` ξαναγράφτηκε για τα 24/6 (139 έλεγχοι)· `all-tools.mutation.mjs` ξαναγράφτηκε, 24/24· νέο `scripts/tests/tool-notify.test.mjs` (22 έλεγχοι, στατικοί πάνω στην πηγή: RLS, no-update, bounded key, no provider call). `npm run gates` πράσινο (379 gates). `npx tsc --noEmit` καθαρό.
+
+**Δεν δοκιμάστηκε.** Καμία παραγωγή — δεν φτάνει από εδώ. Prodtest με screenshots desktop/phone για τη νέα διάταξη δεν γράφτηκε αυτόν τον γύρο (ανοιχτό παρακάτω).
+
+**Ανοιχτό.** Prodtest στιγμιότυπων για το νέο grid (desktop + phone)· mutation suite ξεχωριστή για `tool-notify.test.mjs`· Translate ως δικό του εργαλείο δεν χτίστηκε — βλέπε `docs/NEEDS-FROM-ELIAS.md`.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261028000000_tool_notify_subscriptions.sql**

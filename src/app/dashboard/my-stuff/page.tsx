@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { MyStuffShell, type MyStuffSession, type MyStuffSessionTurn } from "@/components/my-stuff/my-stuff-shell";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,8 @@ export function generateMetadata(): Promise<Metadata> {
  * own name and its own [◧] history, the same reason
  * app/dashboard/coding/page.tsx renders no header of its own.
  */
-export default async function MyStuffPage() {
+export default async function MyStuffPage(props: { searchParams?: Promise<{ ask?: string }> }) {
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
@@ -39,7 +41,7 @@ export default async function MyStuffPage() {
 
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <MyStuffShell initialSessions={sessions} />
+      <MyStuffShell initialSessions={sessions} initialText={readExampleParam(searchParams?.ask)} />
     </div>
   );
 }

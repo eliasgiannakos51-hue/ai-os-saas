@@ -130,18 +130,18 @@ const MUTANTS = [
     expect: "...and so is every step after it",
   },
   {
-    name: "the switch is never asked",
+    name: "the plan is never asked",
     file: ACCESS,
-    from: '  if (!(await isFeatureOn("games", user))) return { ok: false, code: "not_enabled" };\n',
+    from: '  if (!accountHasCapability(plan?.slug ?? "free", "websiteBuilder", isAdmin)) return { ok: false, code: "not_included" };\n',
     to: "",
-    expect: 'the switch "games" first',
+    expect: "the plan, and nothing before it",
   },
   {
-    name: "the download skips the switch and the plan",
+    name: "the download skips the plan",
     file: DL,
     from: "  const gate = await gameGate(user);\n  if (!gate.ok) return NextResponse.json({ ok: false, code: gate.code }, { status: 403 });\n",
     to: "",
-    expect: "the download: signed in, then the switch and the plan",
+    expect: "the download: signed in, then the plan",
   },
   {
     name: "a game is read by id alone",

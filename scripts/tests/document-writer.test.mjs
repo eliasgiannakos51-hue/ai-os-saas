@@ -196,7 +196,7 @@ console.log("\n== 7. the PDF of the same document, read back ==");
 console.log("\n== 8. the page and the words ==");
 {
   const page = read("src/app/dashboard/documents/page.tsx");
-  ok("the page draws the writer on the plan alone, no switch", !/isFeatureOn\("document-writer"/.test(page) && /if \(\(isAdminEmail\(user\.email\) \|\| planMeetsMinimum\(await resolveEffectivePlanSlug\(user\), DOCUMENT_WRITER_MIN_PLAN\)\)/.test(page) && /<DocumentsShell /.test(page));
+  ok("the page draws the writer on the plan alone, no switch", !/isFeatureOn\("document-writer"/.test(page) && /if \(\(isAdminEmail\(user\.email\) \|\| planMeetsMinimum\(await resolveEffectivePlanSlug\(user\), DOCUMENT_WRITER_MIN_PLAN\)\)/.test(page) && /<DocumentsShell[\s]/.test(page));
   ok("...and every document of the person's, written or typed, opens in it as blocks", /blocks: htmlToBlocks\(/.test(page));
   const shell = read("src/components/documents/documents-shell.tsx");
   ok("the field writes a document, then changes the open one; a pressed box goes with its index", /fetch\("\/api\/documents\/generate"/.test(shell) && /fetch\(`\/api\/documents\/\$\{open\.id\}\/edit`/.test(shell) && /box === null \? \{\} : \{ blockIndex: box \}/.test(shell));

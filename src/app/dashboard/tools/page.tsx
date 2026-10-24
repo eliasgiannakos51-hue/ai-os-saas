@@ -20,12 +20,14 @@ export function generateMetadata(): Promise<Metadata> {
 /**
  * ALL TOOLS — the third road to every tool, and the only one a person can
  * browse without knowing a name (docs/mockups/README.md, "Three roads to
- * every tool"). Five groups with a search on top —
- * components/tools/tools-grid.tsx, the seventeen tools of lib/nav/all-tools.ts,
- * those that work; since MASTER 14.1
- * (2026-10-07) without the Settings block. Each square's pin is the only
- * way to put a tool in the sidebar at once, so the page hands it this
- * person's pins.
+ * every tool"). Six groups with a search on top —
+ * components/tools/tools-grid.tsx, the 24 big tiles of lib/nav/all-tools.ts
+ * plus the small ready-made jobs of lib/nav/quick-jobs.ts; since MASTER
+ * 14.1 (2026-10-07) without the Settings block. EVERY big tile is drawn
+ * now (the owner's "ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ", 2026-10-24) — `live`
+ * only says which ones are the real tool rather than a Coming Soon
+ * screen. Each square's pin is the only way to put a tool in the sidebar
+ * at once, so the page hands it this person's pins.
  *
  * NO SWITCH HIDES THE SQUARES (the owner's critical message, 2026-10-05
  * decision reversed 2026-10-22: `all-tools-tiles` is gone — the switch
@@ -41,17 +43,17 @@ export default async function ToolsPage() {
 
   const t = await getTranslations("dashboard.tools");
   const isOwner = isAdminEmail(user.email);
-  // THE TOOLS THAT WORK, for everybody (lib/nav/all-tools.ts): no switch
-  // decides a tile any more. The one thing a tile waits for is a key the
-  // server does not have — Image without a Gemini key is not drawn.
-  const shown = availableTools({ imageKey: Boolean(imageApiKey()) }).map((tool) => tool.href);
+  // EVERY TILE OF THE FINAL GRID IS DRAWN NOW (the owner's "ALL TOOLS: ΟΛΑ
+  // ΤΑ ΤΕΤΡΑΓΩΝΑ", 2026-10-24) — `live` is only which ones are the real
+  // tool rather than the Coming Soon screen at the same address.
+  const live = availableTools({ imageKey: Boolean(imageApiKey()) }).map((tool) => tool.href);
 
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <PageHeader helpKey="help.tools" icon={LayoutGrid} title={t("title")} description={t("description")} />
         <div className="mt-4">
-          <ToolsGrid isOwner={isOwner} pinned={readRecentPrefs(user.user_metadata).pinned} shown={shown} />
+          <ToolsGrid isOwner={isOwner} pinned={readRecentPrefs(user.user_metadata).pinned} live={live} />
         </div>
         <p className="mt-6 text-xs text-muted">{t("orPress")}</p>
       </div>

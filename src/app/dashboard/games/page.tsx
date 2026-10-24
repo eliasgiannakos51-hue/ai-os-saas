@@ -13,6 +13,7 @@ import { RECORD_CAP } from "@/lib/record-cap";
 import { gameGate } from "@/lib/games/game-access";
 import { gameSystemPrompt } from "@/lib/games/game-system";
 import { GamesShell, type GameRow } from "@/components/games/games-shell";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export function generateMetadata(): Promise<Metadata> {
  * grid: no switch). Without the Site's plan, the wall that says which
  * plan has it — the routes refuse the same gate (lib/games/game-access.ts).
  */
-export default async function GamesPage(props: { searchParams?: Promise<{ record?: string }> }) {
+export default async function GamesPage(props: { searchParams?: Promise<{ record?: string; ask?: string }> }) {
   const searchParams = props.searchParams ? await props.searchParams : undefined;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -51,7 +52,12 @@ export default async function GamesPage(props: { searchParams?: Promise<{ record
     .limit(RECORD_CAP);
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <GamesShell initialGames={(data as GameRow[] | null) ?? []} initialOpenId={readRequestedId(searchParams?.record)} systemChars={gameSystemPrompt().length} />
+      <GamesShell
+        initialGames={(data as GameRow[] | null) ?? []}
+        initialOpenId={readRequestedId(searchParams?.record)}
+        systemChars={gameSystemPrompt().length}
+        initialText={readExampleParam(searchParams?.ask)}
+      />
     </div>
   );
 }

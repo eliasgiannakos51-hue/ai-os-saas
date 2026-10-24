@@ -12,6 +12,7 @@ import type { AnalysisFindings } from "@/lib/data-analysis/analyse";
 import { FILE_LIST_COLUMNS } from "@/lib/files/store";
 import type { WorkspaceCollection, WorkspaceFile } from "@/lib/files/answer";
 import { readRequestedId } from "@/lib/library/requested";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export function generateMetadata(): Promise<Metadata> {
 // could disagree with the export and with the answers.
 export default async function DataAnalysisPage(
   props: {
-    searchParams: Promise<{ id?: string; record?: string }>;
+    searchParams: Promise<{ id?: string; record?: string; ask?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -174,6 +175,7 @@ export default async function DataAnalysisPage(
         initialCollections={initialCollections}
         initialOpenId={readRequestedId(searchParams.record)}
         pages
+        initialText={readExampleParam(searchParams.ask)}
       />
     </div>
   );

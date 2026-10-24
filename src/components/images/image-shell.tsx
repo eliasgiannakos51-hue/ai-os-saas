@@ -54,6 +54,7 @@ export function ImageShell({
   initialOpenId = null,
   prices,
   configured,
+  initialText,
 }: {
   initialImages: ShownImage[];
   /** An image to open on arrival — `?record=` from the Library. */
@@ -61,6 +62,8 @@ export function ImageShell({
   prices: ImagePrices;
   /** Whether the provider's key is set; without it nothing can be made, and nothing is charged. */
   configured: boolean;
+  /** A quick-job tile's example text, dropped into the field unsent (lib/nav/quick-jobs.ts). */
+  initialText?: string;
 }) {
   const t = useTranslations("dashboard.images");
   const tSteps = useTranslations("aiSteps");
@@ -371,6 +374,7 @@ export function ImageShell({
         ref={composerRef}
         name={t("name")}
         help={<HelpTip helpKey="help.images" />}
+        initialText={initialText}
         turns={shellTurns}
         working={
           working ? (

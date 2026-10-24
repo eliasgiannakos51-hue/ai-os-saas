@@ -263,6 +263,7 @@ const SAID_ELSEWHERE = {
   "src/app/api/websites/generate/process/route.ts": "the worker: the refusal is stored on the site, and each Site screen says a failed site in its own words",
   "src/app/api/automations/create/route.ts": "gates only the clarifying questions; a refusal skips them",
   "src/app/api/translate/route.ts": "its own code vocabulary (`rate_limited`), said by the translate button's own sentence (section 1)",
+  "src/app/api/translate/text/route.ts": "its own code vocabulary (`rate_limited`), said by the standalone Translate tool's own sentence — same shape as its sibling, api/translate/route.ts, above",
   "src/app/api/documents/[id]/edit/route.ts": "its own code vocabulary, said by the Document tool's own sentence (section 1)",
   "src/app/api/documents/generate/route.ts": "its own code vocabulary, said by the Document tool's own sentence (section 1)",
   "src/app/api/meetings/[id]/analyse/route.ts": "its own code vocabulary, said by the Meetings sentence (section 1)",

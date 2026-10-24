@@ -41,6 +41,15 @@ export function TranslateShell() {
   const composerRef = useRef<ChatComposerHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Literal keys, so the message-slices gate can bound this component
+  // (scripts/tests/message-slices.test.mjs) — `t(\`style.${style}\`)` is
+  // an unbounded key the same way documents-shell.tsx's `kindNames` note
+  // explains.
+  const styleNames: Record<TranslateStyle, string> = {
+    formal: t("style.formal"),
+    friendly: t("style.friendly"),
+    source: t("style.source"),
+  };
   const defaultTarget = locale === "en" ? "el" : "en";
   const [targets, setTargets] = useState<string[]>([defaultTarget]);
   const [style, setStyle] = useState<TranslateStyle>("source");
@@ -227,7 +236,7 @@ export function TranslateShell() {
             data-testid="translate-tool-style"
             className={OPTION}
           >
-            {t(`style.${style}`)}
+            {styleNames[style]}
             <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
           {choosingStyle && (
@@ -245,7 +254,7 @@ export function TranslateShell() {
                   data-testid="translate-tool-style-option"
                   className={`block min-h-[44px] w-full rounded-item px-2 text-start text-sm ${s === style ? "bg-panel-hover text-foreground" : "text-muted hover:text-foreground"}`}
                 >
-                  {t(`style.${s}`)}
+                  {styleNames[s]}
                 </button>
               ))}
             </div>

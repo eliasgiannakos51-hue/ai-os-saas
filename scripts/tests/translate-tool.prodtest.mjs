@@ -217,7 +217,7 @@ try {
 
     const textarea = p2.locator('textarea').first();
     await textarea.fill(TEXT);
-    const sendButton = p2.locator('button[aria-label]').last();
+    const sendButton = p2.locator('button[type="submit"]');
     const asked = modelAsked.length;
     await press2(sendButton);
     await p2.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 60_000 });
@@ -254,7 +254,7 @@ try {
     const textarea = page.locator("textarea").first();
     await textarea.fill(PARA_1);
     const asked = modelAsked.length;
-    await press(page.locator("button[aria-label]").last());
+    await press(page.locator('button[type="submit"]'));
     await page.locator('[data-testid="tool-shell-thread"]').locator(`text=${EL.errors.sameLanguage}`).waitFor({ timeout: 15_000 });
     check("asks the model nothing, holds nothing, and says so plainly", modelAsked.length === asked && reserved.length === 0);
     await context.close();
@@ -275,7 +275,7 @@ try {
     const textarea = page.locator("textarea").first();
     await textarea.fill(PARA_1);
     const asked = modelAsked.length;
-    await press(page.locator("button[aria-label]").last());
+    await press(page.locator('button[type="submit"]'));
     await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
     check("the model is asked once, for the one language that differs", modelAsked.length - asked === 1);
     check("the same-language target says so, plainly, with no translated column", (await page.locator('[data-testid="translate-tool-target"]').filter({ hasText: "Ελληνικά" }).innerText()).includes(EL.sameLanguageNote));
@@ -292,7 +292,7 @@ try {
     await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
     const textarea = page.locator("textarea").first();
     await textarea.fill(TEXT);
-    await press(page.locator("button[aria-label]").last());
+    await press(page.locator('button[type="submit"]'));
     await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
     const enLabel = describeLocale("en");
     const before0 = await p1Text(page, 0);
@@ -303,7 +303,7 @@ try {
     const instructionField = page.locator("textarea").first();
     const asked = modelAsked.length;
     await instructionField.fill("πιο σύντομο");
-    await press(page.locator("button[aria-label]").last());
+    await press(page.locator('button[type="submit"]'));
     await page.locator('[data-testid="translate-tool-translated"]').nth(1).filter({ hasText: "EDITED" }).waitFor({ timeout: 30_000 });
     const after0 = await p1Text(page, 0);
     const after1 = await p1Text(page, 1);

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { CostEstimateHint } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
@@ -12,7 +12,7 @@ import { LANGUAGES } from "@/lib/languages";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { TRANSLATE_MODEL, TRANSLATE_STYLES, translateEditInputChars, type TranslateStyle } from "@/lib/translate/translate-prompt";
-import { MAX_TRANSLATE_TARGETS, splitParagraphs, translateTextLiveEstimateChars } from "@/lib/translate/text-source";
+import { MAX_GLOSSARY_TERMS, MAX_TRANSLATE_TARGETS, splitParagraphs, translateTextLiveEstimateChars } from "@/lib/translate/text-source";
 
 /**
  * TRANSLATE, AS ITS OWN TOOL (the owner's "ΛΕΙΤΟΥΡΓΙΚΟ, ΚΟΜΜΑΤΙ ΚΟΜΜΑΤΙ",
@@ -63,6 +63,51 @@ export function TranslateShell() {
   // which turn, which language and which paragraph the next words change.
   const [editing, setEditing] = useState<{ turnId: string; target: string; index: number } | null>(null);
 
+  // THE GLOSSARY (package 4): one row, read once and written whole
+  // (api/translate/glossary) — a term the account typed is this
+  // account's own word, so a long name never has to make room for it,
+  // the same reason the "Σύντομα" badge sits in its own corner.
+  const [glossary, setGlossary] = useState<string[]>([]);
+  const [suggestedBrand, setSuggestedBrand] = useState<string | null>(null);
+  const [choosingGlossary, setChoosingGlossary] = useState(false);
+  const [newTerm, setNewTerm] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/translate/glossary");
+        const body = await res.json().catch(() => null);
+        if (!cancelled && res.ok && body?.ok) {
+          setGlossary(Array.isArray(body.terms) ? body.terms : []);
+          setSuggestedBrand(typeof body.suggestedBrand === "string" ? body.suggestedBrand : null);
+        }
+      } catch {
+        /* the glossary stays empty; translation still works without it */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function saveGlossary(terms: string[]) {
+    setGlossary(terms);
+    try {
+      await fetch("/api/translate/glossary", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ terms }) });
+    } catch {
+      /* the field already shows the new list; a failed save is retried on the next edit */
+    }
+  }
+  function addTerm(term: string) {
+    const t = term.trim();
+    if (!t || glossary.includes(t) || glossary.length >= MAX_GLOSSARY_TERMS) return;
+    void saveGlossary([...glossary, t]);
+    setSuggestedBrand((b) => (b === t ? null : b));
+  }
+  function removeTerm(term: string) {
+    void saveGlossary(glossary.filter((g) => g !== term));
+  }
+
   const editingParagraph = editing ? turns.find((t) => t.id === editing.turnId)?.results?.find((r) => r.target === editing.target)?.paragraphs[editing.index] : undefined;
 
   const estimate = useMemo(() => {
@@ -110,7 +155,7 @@ export function TranslateShell() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ text, targets, style, mode: "run" }),
+        body: JSON.stringify({ text, targets, style, glossary, mode: "run" }),
       });
       const body = await res.json().catch(() => null);
       refreshCredits();
@@ -142,7 +187,7 @@ export function TranslateShell() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
-        body: JSON.stringify({ target, style, paragraph, instruction, mode: "run" }),
+        body: JSON.stringify({ target, style, paragraph, instruction, glossary, mode: "run" }),
       });
       const body = await res.json().catch(() => null);
       refreshCredits();
@@ -319,6 +364,71 @@ export function TranslateShell() {
                   {styleNames[s]}
                 </button>
               ))}
+            </div>
+          )}
+        </span>,
+        <span key="glossary" className="relative">
+          <button
+            type="button"
+            onClick={() => {
+              setChoosingGlossary((v) => !v);
+              setChoosingTargets(false);
+              setChoosingStyle(false);
+            }}
+            aria-expanded={choosingGlossary}
+            data-testid="translate-tool-glossary"
+            className={OPTION}
+          >
+            {t("glossaryLabel", { count: glossary.length })}
+            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+          {choosingGlossary && (
+            <div aria-label={t("glossaryLabel", { count: glossary.length })} className="surface absolute bottom-full start-0 z-10 mb-2 w-64 space-y-2">
+              <p className="text-xs text-muted">{t("glossaryHint")}</p>
+              {suggestedBrand && (
+                <button
+                  type="button"
+                  onClick={() => addTerm(suggestedBrand)}
+                  data-testid="translate-tool-glossary-suggested"
+                  className="flex min-h-[36px] w-full items-center gap-1.5 rounded-item px-2 text-start text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+                >
+                  <Plus className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  {t("glossarySuggested", { term: suggestedBrand })}
+                </button>
+              )}
+              {glossary.length > 0 && (
+                <ul className="space-y-1" data-testid="translate-tool-glossary-list">
+                  {glossary.map((term) => (
+                    <li key={term} className="flex min-h-[36px] items-center justify-between gap-2 rounded-item bg-panel px-2 text-xs text-foreground">
+                      <span className="min-w-0 truncate">{term}</span>
+                      <button type="button" onClick={() => removeTerm(term)} aria-label={t("glossaryRemove", { term })} data-testid="translate-tool-glossary-remove" className="shrink-0 text-muted hover:text-foreground">
+                        <X className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addTerm(newTerm);
+                  setNewTerm("");
+                }}
+                className="flex gap-1.5"
+              >
+                <input
+                  type="text"
+                  value={newTerm}
+                  onChange={(e) => setNewTerm(e.target.value)}
+                  placeholder={t("glossaryPlaceholder")}
+                  disabled={glossary.length >= MAX_GLOSSARY_TERMS}
+                  data-testid="translate-tool-glossary-input"
+                  className="input min-w-0 flex-1 text-xs"
+                />
+                <button type="submit" disabled={!newTerm.trim() || glossary.length >= MAX_GLOSSARY_TERMS} data-testid="translate-tool-glossary-add" className="btn-outline px-2 text-xs disabled:opacity-40">
+                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </form>
             </div>
           )}
         </span>,

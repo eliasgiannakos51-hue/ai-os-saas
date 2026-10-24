@@ -4170,7 +4170,12 @@
       },
       "editPlaceholder": "Sag, was an diesem Absatz geändert werden soll…",
       "editDone": "Absatz {n} ({language}) wurde geändert.",
-      "editingLabel": "Absatz {n} · {language}"
+      "editingLabel": "Absatz {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossar} one {Glossar (1)} other {Glossar (#)}}",
+      "glossaryHint": "Wörter, die in jeder Sprache gleich bleiben.",
+      "glossarySuggested": "„{term}“ hinzufügen",
+      "glossaryPlaceholder": "Neues Wort…",
+      "glossaryRemove": "„{term}“ entfernen"
     }
   },
   "module": {

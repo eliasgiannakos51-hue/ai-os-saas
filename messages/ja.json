@@ -4170,7 +4170,12 @@
       },
       "editPlaceholder": "この段落をどう変更するか伝えてください…",
       "editDone": "段落 {n}（{language}）を変更しました。",
-      "editingLabel": "段落 {n} · {language}"
+      "editingLabel": "段落 {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {用語集} other {用語集（#）}}",
+      "glossaryHint": "どの言語でも変わらない語句です。",
+      "glossarySuggested": "「{term}」を追加",
+      "glossaryPlaceholder": "新しい語句…",
+      "glossaryRemove": "「{term}」を削除"
     }
   },
   "module": {

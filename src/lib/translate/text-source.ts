@@ -54,6 +54,25 @@ export function translateTextLiveEstimateChars(textChars: number, targetCount: n
   return Math.max(0, targetCount) * (Math.max(0, textChars) + TRANSLATE_SYSTEM_OVERHEAD_CHARS);
 }
 
+/** Glossary terms (package 4), as sent in a request body — bounded the
+ *  same way api/translate/glossary/route.ts bounds what it stores, so a
+ *  translate call can never send more than what could ever be saved. */
+export const MAX_GLOSSARY_TERMS = 50;
+export const MAX_GLOSSARY_TERM_CHARS = 80;
+
+export function cleanGlossaryTerms(value: unknown): string[] | null {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > MAX_GLOSSARY_TERMS) return null;
+  const terms: string[] = [];
+  for (const v of value) {
+    if (typeof v !== "string") return null;
+    const t = v.trim();
+    if (!t || t.length > MAX_GLOSSARY_TERM_CHARS) return null;
+    if (!terms.includes(t)) terms.push(t);
+  }
+  return terms;
+}
+
 export type RebuiltText = { paragraphs: string[]; kept: number };
 
 /** A translation that is missing or blank leaves that paragraph exactly as it was, counted in `kept`. */

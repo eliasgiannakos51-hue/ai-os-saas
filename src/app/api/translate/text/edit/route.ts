@@ -14,6 +14,7 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { isSupportedTargetLocale } from "@/lib/documents/translation";
 import { isTranslateStyle, translateEditInputChars, type TranslateStyle } from "@/lib/translate/translate-prompt";
+import { cleanGlossaryTerms } from "@/lib/translate/text-source";
 import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { translateParagraphEdit } from "@/lib/translate/translate-call";
 
@@ -37,17 +38,21 @@ const MAX_INSTRUCTION_CHARS = 500;
 type Mode = "price" | "run";
 const isMode = (v: unknown): v is Mode => v === "price" || v === "run";
 
-type Body = { target: unknown; style: unknown; paragraph: unknown; instruction: unknown; mode: unknown };
+type Body = { target: unknown; style: unknown; paragraph: unknown; instruction: unknown; mode: unknown; glossary?: unknown };
 
 function parseBody(
   body: Body
-): { ok: true; target: string; style: TranslateStyle; paragraph: string; instruction: string; mode: Mode } | { ok: false; code: string } {
+):
+  | { ok: true; target: string; style: TranslateStyle; paragraph: string; instruction: string; mode: Mode; glossary: string[] }
+  | { ok: false; code: string } {
   if (!isMode(body.mode)) return { ok: false, code: "invalid_request" };
   if (!isSupportedTargetLocale(body.target)) return { ok: false, code: "invalid_request" };
   if (!isTranslateStyle(body.style)) return { ok: false, code: "invalid_request" };
   if (typeof body.paragraph !== "string" || !body.paragraph.trim() || body.paragraph.length > MAX_PARAGRAPH_CHARS) return { ok: false, code: "invalid_request" };
   if (typeof body.instruction !== "string" || !body.instruction.trim() || body.instruction.length > MAX_INSTRUCTION_CHARS) return { ok: false, code: "invalid_request" };
-  return { ok: true, target: body.target, style: body.style, paragraph: body.paragraph, instruction: body.instruction, mode: body.mode };
+  const glossary = cleanGlossaryTerms(body.glossary);
+  if (glossary === null) return { ok: false, code: "invalid_request" };
+  return { ok: true, target: body.target, style: body.style, paragraph: body.paragraph, instruction: body.instruction, mode: body.mode, glossary };
 }
 
 export async function POST(request: Request) {
@@ -66,13 +71,13 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
   if (!(await isFeatureOn("translate-tool", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
   if (!parsed.ok) return NextResponse.json({ ok: false, code: parsed.code }, { status: 400 });
-  const { target, style, paragraph, instruction } = parsed;
+  const { target, style, paragraph, instruction, glossary } = parsed;
 
   try {
     const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
     const packPriceEur = await getPurchasedPackCreditPriceEur(user.id);
-    const inputChars = translateEditInputChars(target, paragraph, instruction, style);
+    const inputChars = translateEditInputChars(target, paragraph, instruction, style, glossary);
     const estimate = estimateForAction(
       "textTranslateEdit",
       { model: "claude-sonnet-4-6", inputChars, planSlug: plan?.slug ?? null },
@@ -110,7 +115,7 @@ export async function POST(request: Request) {
 
     const costs = new CostAccumulator();
     void recordAiCallForDailySpend(estimate.estimatedCredits);
-    const outcome = await translateParagraphEdit({ target, style, paragraph, instruction, costs, userId: user.id, signal: request.signal });
+    const outcome = await translateParagraphEdit({ target, style, paragraph, instruction, glossary, costs, userId: user.id, signal: request.signal });
     if (!outcome.ok) {
       await releaseReservation(user.id, reservationId);
       const status = outcome.kind === "aborted" ? 499 : outcome.kind === "unusable" ? 502 : 503;

@@ -108,5 +108,26 @@ console.log("== 6. piece 3: one paragraph, changed by words, nothing else sent =
   ok("the router classifies the new feature (category and tier)", /text_translate_edit: "translation"/.test(read("src/lib/ai/routing/categorize.ts")) && /text_translate_edit: "complex"/.test(read("src/lib/ai/routing/classify.ts")));
 }
 
+console.log("== 7. piece 4: the glossary — one row, read and written whole, in every prompt ==");
+{
+  const migrationRaw = readFileSync("supabase/migrations/20261029000000_translate_glossary.sql", "utf8");
+  ok("the table is one row per account, RLS scoped to the owner", /primary key references auth\.users/.test(migrationRaw) && /auth\.uid\(\) = user_id/.test(migrationRaw));
+  ok("the migration says how to undo it", /-- How to undo:/.test(migrationRaw));
+  ok("a schema canary names this migration", read("src/lib/health/schema-canaries.ts").includes('migration: "20261029000000_translate_glossary.sql"'));
+  ok("the GDPR registry carries it", read("src/lib/gdpr/user-data-registry.ts").includes('table: "translate_glossary"'));
+
+  const route = read("src/app/api/translate/glossary/route.ts");
+  ok("the switch gates it, GET and PUT alike", (route.match(/isFeatureOn\("translate-tool"/g) ?? []).length === 2);
+  ok("GET suggests the remembered brand name, PUT alone saves anything", /readBrand\(/.test(route) && /suggestedBrand/.test(route) && route.indexOf("export async function PUT") > route.indexOf("export async function GET"));
+  ok("PUT requires terms — an omitted list is not an empty save", /body\.terms === undefined\) return NextResponse\.json\(\{ ok: false, code: "invalid_request"/.test(route));
+
+  const prompt = read("src/lib/translate/translate-prompt.ts");
+  ok("the glossary line is appended to both the text and the edit system prompt, and omitted when there is nothing to add", /glossaryLine\(glossary\)/.test(prompt) && (prompt.match(/glossaryLine\(/g) ?? []).length >= 3 && /if \(!terms \|\| terms\.length === 0\) return "";/.test(prompt));
+
+  const shell = read("src/components/translate/translate-shell.tsx");
+  ok("the shell fetches the saved glossary once and sends it with every translate/edit call", /fetch\("\/api\/translate\/glossary"\)/.test(shell) && /glossary,\s*mode: "run"/.test(shell) || (shell.match(/glossary,/g) ?? []).length >= 2);
+  ok("adding or removing a term saves it at once (PUT), not only on a later full-text send", /method: "PUT"/.test(shell));
+}
+
 console.log(failures.length ? `\nFAILURES: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);
 process.exit(failures.length === 0 ? 0 : 1);

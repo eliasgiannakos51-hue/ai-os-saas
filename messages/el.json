@@ -4170,7 +4170,12 @@
       },
       "editPlaceholder": "Πες τι να αλλάξει σε αυτή την παράγραφο...",
       "editDone": "Η παράγραφος {n} ({language}) άλλαξε.",
-      "editingLabel": "Παράγραφος {n} · {language}"
+      "editingLabel": "Παράγραφος {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Γλωσσάρι} one {Γλωσσάρι (1)} other {Γλωσσάρι (#)}}",
+      "glossaryHint": "Λέξεις που μένουν ίδιες σε κάθε γλώσσα.",
+      "glossarySuggested": "Πρόσθεσε «{term}»",
+      "glossaryPlaceholder": "Νέα λέξη...",
+      "glossaryRemove": "Αφαίρεση «{term}»"
     }
   },
   "module": {

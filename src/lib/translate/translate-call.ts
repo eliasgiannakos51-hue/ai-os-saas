@@ -146,12 +146,13 @@ export async function translateTextPieces(params: {
   pieces: readonly Piece[];
   target: string;
   style: TranslateStyle;
+  glossary?: readonly string[];
   costs: CostAccumulator;
   userId?: string;
   signal?: AbortSignal;
 }): Promise<TranslateOutcome> {
-  const { style, ...rest } = params;
-  return translateWithSystem({ ...rest, system: translateTextSystemPrompt(params.target, style) });
+  const { style, glossary, ...rest } = params;
+  return translateWithSystem({ ...rest, system: translateTextSystemPrompt(params.target, style, glossary) });
 }
 
 export type ParagraphEditOutcome = { ok: true; text: string } | { ok: false; kind: "aborted" | "provider" | "unusable"; detail: string };
@@ -162,11 +163,12 @@ export async function translateParagraphEdit(params: {
   style: TranslateStyle;
   paragraph: string;
   instruction: string;
+  glossary?: readonly string[];
   costs: CostAccumulator;
   userId?: string;
   signal?: AbortSignal;
 }): Promise<ParagraphEditOutcome> {
-  const system = translateEditSystemPrompt(params.target, params.style);
+  const system = translateEditSystemPrompt(params.target, params.style, params.glossary);
   const message = translateEditMessage(params.target, params.paragraph, params.instruction);
   let outcome: AiOutcome;
   try {

@@ -4170,7 +4170,12 @@
       },
       "editPlaceholder": "Say what to change about this paragraph…",
       "editDone": "Paragraph {n} ({language}) changed.",
-      "editingLabel": "Paragraph {n} · {language}"
+      "editingLabel": "Paragraph {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossary} one {Glossary (1)} other {Glossary (#)}}",
+      "glossaryHint": "Words that stay the same in every language.",
+      "glossarySuggested": "Add \"{term}\"",
+      "glossaryPlaceholder": "New word…",
+      "glossaryRemove": "Remove \"{term}\""
     }
   },
   "module": {

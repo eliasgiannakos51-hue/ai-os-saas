@@ -14,7 +14,7 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { isSupportedTargetLocale } from "@/lib/documents/translation";
 import { isTranslateStyle, translateTextInputChars, type TranslateStyle } from "@/lib/translate/translate-prompt";
-import { MAX_TRANSLATE_TARGETS, MAX_TRANSLATE_TEXT_CHARS, planText, rebuildText } from "@/lib/translate/text-source";
+import { MAX_TRANSLATE_TARGETS, MAX_TRANSLATE_TEXT_CHARS, cleanGlossaryTerms, planText, rebuildText } from "@/lib/translate/text-source";
 import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { translateTextPieces } from "@/lib/translate/translate-call";
 
@@ -43,16 +43,20 @@ const MIN_PARAGRAPH_CHARS = 1;
 type Mode = "price" | "run";
 const isMode = (v: unknown): v is Mode => v === "price" || v === "run";
 
-type Body = { text: unknown; targets: unknown; style: unknown; mode: unknown };
+type Body = { text: unknown; targets: unknown; style: unknown; mode: unknown; glossary?: unknown };
 
-function parseBody(body: Body): { ok: true; text: string; targets: string[]; style: TranslateStyle; mode: Mode } | { ok: false; code: string } {
+function parseBody(
+  body: Body
+): { ok: true; text: string; targets: string[]; style: TranslateStyle; mode: Mode; glossary: string[] } | { ok: false; code: string } {
   if (!isMode(body.mode)) return { ok: false, code: "invalid_request" };
   if (typeof body.text !== "string" || body.text.trim().length < MIN_PARAGRAPH_CHARS) return { ok: false, code: "nothing_to_translate" };
   if (!isTranslateStyle(body.style)) return { ok: false, code: "invalid_request" };
   if (!Array.isArray(body.targets) || body.targets.length === 0 || body.targets.length > MAX_TRANSLATE_TARGETS) return { ok: false, code: "invalid_request" };
   const targets = [...new Set(body.targets)];
   if (targets.length > MAX_TRANSLATE_TARGETS || !targets.every(isSupportedTargetLocale)) return { ok: false, code: "invalid_request" };
-  return { ok: true, text: body.text, targets: targets as string[], style: body.style, mode: body.mode };
+  const glossary = cleanGlossaryTerms(body.glossary);
+  if (glossary === null) return { ok: false, code: "invalid_request" };
+  return { ok: true, text: body.text, targets: targets as string[], style: body.style, mode: body.mode, glossary };
 }
 
 async function priceOneTarget(plan: Awaited<ReturnType<typeof resolveEffectivePlan>>, packPriceEur: number | null, pricingConfig: ReturnType<typeof resolvePricingConfig>, inputChars: number) {
@@ -80,7 +84,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
   if (!(await isFeatureOn("translate-tool", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
   if (!parsed.ok) return NextResponse.json({ ok: false, code: parsed.code }, { status: 400 });
-  const { text, targets, style, mode } = parsed;
+  const { text, targets, style, mode, glossary } = parsed;
 
   const plan = planText(text);
   if (plan.pieces.length === 0) return NextResponse.json({ ok: false, code: "nothing_to_translate" }, { status: 400 });
@@ -101,7 +105,7 @@ export async function POST(request: Request) {
       let reserveCredits = 0;
       const perTarget: { target: string; estimatedCredits: number; sameLanguage: boolean }[] = [];
       for (const target of liveTargets) {
-        const estimate = await priceOneTarget(resolvedPlan, packPriceEur, pricingConfig, translateTextInputChars(plan.pieces, target, style));
+        const estimate = await priceOneTarget(resolvedPlan, packPriceEur, pricingConfig, translateTextInputChars(plan.pieces, target, style, glossary));
         estimatedCredits += estimate.estimatedCredits;
         reserveCredits += estimate.reserveCredits;
         perTarget.push({ target, estimatedCredits: estimate.estimatedCredits, sameLanguage: false });
@@ -128,7 +132,7 @@ export async function POST(request: Request) {
     let estimatedCredits = 0;
     let reserveCreditsTotal = 0;
     for (const target of liveTargets) {
-      const estimate = await priceOneTarget(resolvedPlan, packPriceEur, pricingConfig, translateTextInputChars(plan.pieces, target, style));
+      const estimate = await priceOneTarget(resolvedPlan, packPriceEur, pricingConfig, translateTextInputChars(plan.pieces, target, style, glossary));
       estimatedCredits += estimate.estimatedCredits;
       reserveCreditsTotal += estimate.reserveCredits;
     }
@@ -149,7 +153,7 @@ export async function POST(request: Request) {
     const results: { target: string; paragraphs: string[]; kept: number; sameLanguage: boolean }[] = [];
     let failure: { code: string } | null = null;
     for (const target of liveTargets) {
-      const outcome = await translateTextPieces({ pieces: plan.pieces, target, style, costs, userId: user.id, signal: request.signal });
+      const outcome = await translateTextPieces({ pieces: plan.pieces, target, style, glossary, costs, userId: user.id, signal: request.signal });
       if (!outcome.ok) {
         failure = { code: outcome.kind === "aborted" ? "stopped" : "ai_unavailable" };
         break;

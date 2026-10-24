@@ -4170,7 +4170,12 @@
       },
       "editPlaceholder": "说出要对这个段落做什么修改…",
       "editDone": "第 {n} 段（{language}）已修改。",
-      "editingLabel": "第 {n} 段 · {language}"
+      "editingLabel": "第 {n} 段 · {language}",
+      "glossaryLabel": "{count, plural, =0 {词汇表} other {词汇表（#）}}",
+      "glossaryHint": "在每种语言中保持不变的词语。",
+      "glossarySuggested": "添加「{term}」",
+      "glossaryPlaceholder": "新词语…",
+      "glossaryRemove": "移除「{term}」"
     }
   },
   "module": {

@@ -324,7 +324,9 @@ try {
     check("offline is said", (await page.locator("main").innerText()).includes(el.errors.offline));
 
     // ---- delete: every picture it names, then the row
-    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    // The column's state is remembered (ionexa.imageHistoryColumn), so it may
+    // already be open from the earlier look at it: open it only if it is shut.
+    if ((await page.locator('[data-testid="tool-shell-history"]').getAttribute("data-open")) !== "true") await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
     await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10000 }).catch(() => null);
     await press(page.locator('[data-testid="shell-history-row"]').last());
     await page.locator('[data-testid="image-delete"]').waitFor({ timeout: 10000 }).catch(() => null);

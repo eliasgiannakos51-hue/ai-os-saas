@@ -4135,6 +4135,50 @@
         "label": "Language practice",
         "text": "I want to practise "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Paste text to translate",
+        "examples": {
+          "a": "Welcome to our business. We're happy to help.\n\nOur office is open Monday to Friday, 9am to 6pm.",
+          "b": "Dear customer,\n\nThank you for your order. You'll receive it within 3 business days.",
+          "c": "Our company was founded in 2015 and specialises in software solutions for small businesses."
+        }
+      },
+      "placeholder": "Paste or type the text…",
+      "targetsLabel": "Into: {languages}",
+      "styleLabel": "Style",
+      "style": {
+        "formal": "Formal",
+        "friendly": "Friendly",
+        "source": "As the original"
+      },
+      "detectedFrom": "Detected: {language}",
+      "sameLanguageNote": "The text is already in this language.",
+      "kept": "{count, plural, one {# paragraph was left as it was} other {# paragraphs were left as they were}}, because its translation did not come back.",
+      "done": "{count, plural, one {Translated into # language.} other {Translated into # languages.}}",
+      "translating": "Translating…",
+      "errors": {
+        "nothing": "There is no text to translate.",
+        "tooLong": "This is too long for one translation ({chars} characters; the limit is {limit}).",
+        "sameLanguage": "The languages you picked are already the text's language. Choose at least one different one.",
+        "insufficient": "Not enough credits for this translation. Nothing was charged.",
+        "rateLimited": "Too many attempts at once. Try again shortly.",
+        "unavailable": "Translation is not available right now.",
+        "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
+        "failed": "The translation could not be made. No credits were charged."
+      },
+      "editPlaceholder": "Say what to change about this paragraph…",
+      "editDone": "Paragraph {n} ({language}) changed.",
+      "editingLabel": "Paragraph {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossary} one {Glossary (1)} other {Glossary (#)}}",
+      "glossaryHint": "Words that stay the same in every language.",
+      "glossarySuggested": "Add \"{term}\"",
+      "glossaryPlaceholder": "New word…",
+      "glossaryRemove": "Remove \"{term}\"",
+      "glossaryAdd": "Add a term",
+      "glossaryAdding": "New glossary term",
+      "openDocument": "Open as a document"
     }
   },
   "module": {

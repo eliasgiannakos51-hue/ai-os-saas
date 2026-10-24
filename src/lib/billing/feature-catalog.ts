@@ -1381,11 +1381,16 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "ask",
     minPlan: "free",
     pages: ["translate"],
-    routes: ["tools/notify"],
-    charges: false,
-    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): not built as its own tool — today it is only the Translate button inside Documents and the Site builder, both behind the `translate` switch. Published when ready flips to true.",
-    enforcedIn: "src/lib/nav/all-tools.ts",
-    enforcedSymbol: 'href: "/dashboard/translate", ready: false',
+    // "translate/text" (the standalone tool's own route, 2026-10-24) is
+    // built and charges, piece by piece, behind "translate-tool"
+    // (src/lib/flags/flags.ts) — but the tile stays Coming Soon
+    // (all-tools.ts, ready: false) until every piece checks out, which is
+    // what `notSold` below still names.
+    routes: ["tools/notify", "translate/text", "translate/text/edit", "translate/glossary"],
+    charges: true,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): the standalone tool is being built piece by piece behind the switch `translate-tool` — see src/app/dashboard/translate/page.tsx. Published when every piece checks out and ready flips to true.",
+    enforcedIn: "src/app/api/translate/text/route.ts",
+    enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "cross" }),
   },
   {

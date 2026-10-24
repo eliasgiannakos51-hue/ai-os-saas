@@ -4135,6 +4135,50 @@
         "label": "Prática de idioma",
         "text": "Quero praticar "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Cole o texto a traduzir",
+        "examples": {
+          "a": "Bem-vindo ao nosso negócio. Ficaremos felizes em ajudar.\n\nO nosso escritório está aberto de segunda a sexta, das 9h às 18h.",
+          "b": "Caro cliente,\n\nObrigado pela sua encomenda. Vai recebê-la no prazo de 3 dias úteis.",
+          "c": "A nossa empresa foi fundada em 2015 e é especializada em soluções de software para pequenas empresas."
+        }
+      },
+      "placeholder": "Cole ou escreva o texto…",
+      "targetsLabel": "Para: {languages}",
+      "styleLabel": "Estilo",
+      "style": {
+        "formal": "Formal",
+        "friendly": "Simpático",
+        "source": "Como o original"
+      },
+      "detectedFrom": "Detetado: {language}",
+      "sameLanguageNote": "O texto já está nesta língua.",
+      "kept": "{count, plural, one {# parágrafo ficou como estava} other {# parágrafos ficaram como estavam}}, porque a tradução não chegou.",
+      "done": "{count, plural, one {Traduzido para # língua.} other {Traduzido para # línguas.}}",
+      "translating": "A traduzir…",
+      "errors": {
+        "nothing": "Não há texto para traduzir.",
+        "tooLong": "Isto é demasiado longo para uma tradução ({chars} caracteres; o limite é {limit}).",
+        "sameLanguage": "As línguas escolhidas já são a língua do texto. Escolha pelo menos uma diferente.",
+        "insufficient": "Créditos insuficientes para esta tradução. Não foi cobrado nada.",
+        "rateLimited": "Demasiadas tentativas de uma vez. Tente novamente em breve.",
+        "unavailable": "A tradução não está disponível neste momento.",
+        "unusable": "A resposta não era utilizável e nada foi escrito. Só o que foi gasto é cobrado.",
+        "failed": "Não foi possível fazer a tradução. Não foram cobrados créditos."
+      },
+      "editPlaceholder": "Diz o que mudar neste parágrafo…",
+      "editDone": "O parágrafo {n} ({language}) foi alterado.",
+      "editingLabel": "Parágrafo {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossário} one {Glossário (1)} other {Glossário (#)}}",
+      "glossaryHint": "Palavras que ficam iguais em todas as línguas.",
+      "glossarySuggested": "Adicionar «{term}»",
+      "glossaryPlaceholder": "Nova palavra…",
+      "glossaryRemove": "Remover «{term}»",
+      "glossaryAdd": "Adicionar termo",
+      "glossaryAdding": "Novo termo do glossário",
+      "openDocument": "Abrir como documento"
     }
   },
   "module": {

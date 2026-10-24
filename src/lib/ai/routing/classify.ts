@@ -97,6 +97,8 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   meeting_analyse: "complex",
   data_analysis: "complex",
   document_translate: "complex",
+  text_translate: "complex",
+  text_translate_edit: "complex",
   mission_review: "complex",
   automation_run: "complex",
   scheduled_agent_run: "complex",

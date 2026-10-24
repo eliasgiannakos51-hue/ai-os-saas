@@ -447,6 +447,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "translate_glossary",
+    migration: "20261029000000_translate_glossary.sql",
+    breaks: "Glossary terms the account saved stop showing or saving in the standalone Translate tool, and «it could not be saved» answers every attempt",
+  },
+  {
+    kind: "table",
     table: "rebuild_projects",
     migration: "20261027000000_rebuild_projects.sql",
     breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",

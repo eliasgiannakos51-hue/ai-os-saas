@@ -4135,6 +4135,50 @@
         "label": "語学練習",
         "text": "を練習したい: "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "翻訳したいテキストを貼り付けてください",
+        "examples": {
+          "a": "当店へのご来店ありがとうございます。お気軽にお問い合わせください。\n\n営業時間は月曜から金曜、午前9時から午後6時までです。",
+          "b": "お客様へ\n\nご注文ありがとうございます。3営業日以内にお届けします。",
+          "c": "当社は2015年に設立され、中小企業向けソフトウェアソリューションを専門としています。"
+        }
+      },
+      "placeholder": "テキストを貼り付けるか入力してください…",
+      "targetsLabel": "翻訳先：{languages}",
+      "styleLabel": "文体",
+      "style": {
+        "formal": "フォーマル",
+        "friendly": "フレンドリー",
+        "source": "原文のまま"
+      },
+      "detectedFrom": "検出された言語：{language}",
+      "sameLanguageNote": "このテキストはすでにこの言語です。",
+      "kept": "{count, plural, other {# 段落は翻訳が返ってこなかったため、そのまま残りました。}}",
+      "done": "{count, plural, other {# 言語への翻訳が完了しました。}}",
+      "translating": "翻訳中…",
+      "errors": {
+        "nothing": "翻訳するテキストがありません。",
+        "tooLong": "1回の翻訳には長すぎます（{chars} 文字。上限は {limit} 文字です）。",
+        "sameLanguage": "選択した言語はすでにテキストの言語です。別の言語を少なくとも1つ選んでください。",
+        "insufficient": "この翻訳に必要なクレジットが不足しています。課金されていません。",
+        "rateLimited": "同時に試行回数が多すぎます。しばらくしてからもう一度お試しください。",
+        "unavailable": "翻訳は現在利用できません。",
+        "unusable": "返答が利用できず、何も書き込まれませんでした。使用した分のみ課金されます。",
+        "failed": "翻訳を行えませんでした。クレジットは課金されていません。"
+      },
+      "editPlaceholder": "この段落をどう変更するか伝えてください…",
+      "editDone": "段落 {n}（{language}）を変更しました。",
+      "editingLabel": "段落 {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {用語集} other {用語集（#）}}",
+      "glossaryHint": "どの言語でも変わらない語句です。",
+      "glossarySuggested": "「{term}」を追加",
+      "glossaryPlaceholder": "新しい語句…",
+      "glossaryRemove": "「{term}」を削除",
+      "glossaryAdd": "語句を追加",
+      "glossaryAdding": "新しい用語集の語句",
+      "openDocument": "ドキュメントとして開く"
     }
   },
   "module": {

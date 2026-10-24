@@ -4135,6 +4135,50 @@
         "label": "语言练习",
         "text": "我想练习"
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "粘贴要翻译的文本",
+        "examples": {
+          "a": "欢迎来到我们的企业。我们很乐意为您服务。\n\n我们的办公室周一至周五上午9点至下午6点开放。",
+          "b": "亲爱的客户，\n\n感谢您的订单。您将在3个工作日内收到。",
+          "c": "我们公司成立于2015年，专注于为小型企业提供软件解决方案。"
+        }
+      },
+      "placeholder": "粘贴或输入文本…",
+      "targetsLabel": "翻译成：{languages}",
+      "styleLabel": "风格",
+      "style": {
+        "formal": "正式",
+        "friendly": "亲切",
+        "source": "与原文一致"
+      },
+      "detectedFrom": "检测到：{language}",
+      "sameLanguageNote": "文本已经是这种语言了。",
+      "kept": "{count, plural, other {# 个段落保持不变}}，因为它的翻译没有返回。",
+      "done": "{count, plural, other {已翻译成 # 种语言。}}",
+      "translating": "正在翻译…",
+      "errors": {
+        "nothing": "没有可翻译的文本。",
+        "tooLong": "这段文本太长，无法一次翻译（{chars} 个字符；上限为 {limit}）。",
+        "sameLanguage": "你选择的语言已经是文本的语言。请至少选择一种不同的语言。",
+        "insufficient": "此次翻译的积分不足。未产生任何费用。",
+        "rateLimited": "同时尝试次数过多。请稍后再试。",
+        "unavailable": "翻译目前不可用。",
+        "unusable": "返回的结果无法使用，未写入任何内容。仅收取已消耗的费用。",
+        "failed": "无法完成翻译。未收取任何积分。"
+      },
+      "editPlaceholder": "说出要对这个段落做什么修改…",
+      "editDone": "第 {n} 段（{language}）已修改。",
+      "editingLabel": "第 {n} 段 · {language}",
+      "glossaryLabel": "{count, plural, =0 {词汇表} other {词汇表（#）}}",
+      "glossaryHint": "在每种语言中保持不变的词语。",
+      "glossarySuggested": "添加「{term}」",
+      "glossaryPlaceholder": "新词语…",
+      "glossaryRemove": "移除「{term}」",
+      "glossaryAdd": "添加词语",
+      "glossaryAdding": "新的词汇表词语",
+      "openDocument": "作为文档打开"
     }
   },
   "module": {

@@ -5,12 +5,17 @@ import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { readTranslations, type Piece } from "@/lib/translate/segments";
 import {
   PARALLEL_CALLS,
+  TRANSLATE_EDIT_TOOL,
   TRANSLATE_MODEL,
   TRANSLATE_TOOL,
   batchMaxTokens,
   batchMessage,
   translateBatches,
+  translateEditMessage,
+  translateEditSystemPrompt,
   translateSystemPrompt,
+  translateTextSystemPrompt,
+  type TranslateStyle,
 } from "@/lib/translate/translate-prompt";
 
 /**
@@ -81,15 +86,16 @@ async function callBatch(system: string, message: string, expected: number, cost
   return { ok: true, list: toolUse ? readTranslations(toolUse.input, expected) : null };
 }
 
-export async function translatePieces(params: {
+async function translateWithSystem(params: {
   pieces: readonly Piece[];
   target: string;
+  system: string;
   costs: CostAccumulator;
   /** For the provider log only. Never sent to any provider. */
   userId?: string;
   signal?: AbortSignal;
 }): Promise<TranslateOutcome> {
-  const system = translateSystemPrompt(params.target);
+  const { system } = params;
   const batches = translateBatches(params.pieces);
   const value: (string | null)[] = params.pieces.map(() => null);
   let unanswered = 0;
@@ -122,4 +128,73 @@ export async function translatePieces(params: {
   await Promise.all(Array.from({ length: Math.min(PARALLEL_CALLS, batches.length) }, worker));
   if (failure !== null) return { ok: false, ...(failure as { kind: "aborted" | "provider"; detail: string }) };
   return { ok: true, value, unanswered };
+}
+
+export async function translatePieces(params: {
+  pieces: readonly Piece[];
+  target: string;
+  costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
+  signal?: AbortSignal;
+}): Promise<TranslateOutcome> {
+  return translateWithSystem({ ...params, system: translateSystemPrompt(params.target) });
+}
+
+/** The same calls, with a register (package 1 of the standalone tool) instead of the site/document prompt. */
+export async function translateTextPieces(params: {
+  pieces: readonly Piece[];
+  target: string;
+  style: TranslateStyle;
+  glossary?: readonly string[];
+  costs: CostAccumulator;
+  userId?: string;
+  signal?: AbortSignal;
+}): Promise<TranslateOutcome> {
+  const { style, glossary, ...rest } = params;
+  return translateWithSystem({ ...rest, system: translateTextSystemPrompt(params.target, style, glossary) });
+}
+
+export type ParagraphEditOutcome = { ok: true; text: string } | { ok: false; kind: "aborted" | "provider" | "unusable"; detail: string };
+
+/** ONE paragraph, changed by an instruction (package 3) — one call, no batching. */
+export async function translateParagraphEdit(params: {
+  target: string;
+  style: TranslateStyle;
+  paragraph: string;
+  instruction: string;
+  glossary?: readonly string[];
+  costs: CostAccumulator;
+  userId?: string;
+  signal?: AbortSignal;
+}): Promise<ParagraphEditOutcome> {
+  const system = translateEditSystemPrompt(params.target, params.style, params.glossary);
+  const message = translateEditMessage(params.target, params.paragraph, params.instruction);
+  let outcome: AiOutcome;
+  try {
+    outcome = await runCompletion(
+      {
+        purpose: "create",
+        model: TRANSLATE_MODEL,
+        maxTokens: batchMaxTokens(message.length),
+        system: [{ type: "text", text: system }],
+        messages: [{ role: "user", content: message }],
+        tools: [TRANSLATE_EDIT_TOOL],
+        toolChoice: { type: "tool", name: TRANSLATE_EDIT_TOOL.name },
+        requires: ["tool_calling"],
+      },
+      { userId: params.userId, signal: params.signal }
+    );
+  } catch (err) {
+    if (params.signal?.aborted) return { ok: false, kind: "aborted", detail: "stopped by the user" };
+    return { ok: false, kind: "provider", detail: err instanceof Error ? err.message : String(err) };
+  }
+  if (!outcome.ok) {
+    return outcome.kind === "aborted" ? { ok: false, kind: "aborted", detail: "stopped by the user" } : { ok: false, kind: "provider", detail: outcome.detail };
+  }
+  params.costs.record("edit", outcome.usage, outcome.reportedModel || outcome.model);
+  const toolUse = outcome.toolCalls.find((call) => call.name === TRANSLATE_EDIT_TOOL.name);
+  const text = toolUse && typeof (toolUse.input as { text?: unknown })?.text === "string" ? ((toolUse.input as { text: string }).text) : "";
+  if (!text.trim()) return { ok: false, kind: "unusable", detail: "no usable answer" };
+  return { ok: true, text: text.trim() };
 }

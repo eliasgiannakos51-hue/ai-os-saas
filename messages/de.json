@@ -4135,6 +4135,50 @@
         "label": "Sprachübung",
         "text": "Ich möchte üben: "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Text zum Übersetzen einfügen",
+        "examples": {
+          "a": "Willkommen bei uns. Wir helfen Ihnen gerne.\n\nUnser Büro ist Montag bis Freitag von 9 bis 18 Uhr geöffnet.",
+          "b": "Liebe Kundin, lieber Kunde,\n\nvielen Dank für Ihre Bestellung. Sie erhalten sie innerhalb von 3 Werktagen.",
+          "c": "Unser Unternehmen wurde 2015 gegründet und ist auf Softwarelösungen für kleine Unternehmen spezialisiert."
+        }
+      },
+      "placeholder": "Text einfügen oder eingeben…",
+      "targetsLabel": "In: {languages}",
+      "styleLabel": "Stil",
+      "style": {
+        "formal": "Formell",
+        "friendly": "Freundlich",
+        "source": "Wie das Original"
+      },
+      "detectedFrom": "Erkannt: {language}",
+      "sameLanguageNote": "Der Text ist bereits in dieser Sprache.",
+      "kept": "{count, plural, one {# Absatz blieb unverändert} other {# Absätze blieben unverändert}}, weil die Übersetzung nicht ankam.",
+      "done": "{count, plural, one {In # Sprache übersetzt.} other {In # Sprachen übersetzt.}}",
+      "translating": "Wird übersetzt…",
+      "errors": {
+        "nothing": "Es gibt keinen Text zum Übersetzen.",
+        "tooLong": "Das ist zu lang für eine Übersetzung ({chars} Zeichen; das Limit liegt bei {limit}).",
+        "sameLanguage": "Die gewählten Sprachen sind bereits die Sprache des Textes. Wählen Sie mindestens eine andere.",
+        "insufficient": "Nicht genug Credits für diese Übersetzung. Es wurde nichts berechnet.",
+        "rateLimited": "Zu viele Versuche auf einmal. Versuchen Sie es gleich noch einmal.",
+        "unavailable": "Übersetzung ist derzeit nicht verfügbar.",
+        "unusable": "Die Antwort war nicht verwendbar, es wurde nichts geschrieben. Nur der Verbrauch wird berechnet.",
+        "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
+      },
+      "editPlaceholder": "Sag, was an diesem Absatz geändert werden soll…",
+      "editDone": "Absatz {n} ({language}) wurde geändert.",
+      "editingLabel": "Absatz {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossar} one {Glossar (1)} other {Glossar (#)}}",
+      "glossaryHint": "Wörter, die in jeder Sprache gleich bleiben.",
+      "glossarySuggested": "„{term}“ hinzufügen",
+      "glossaryPlaceholder": "Neues Wort…",
+      "glossaryRemove": "„{term}“ entfernen",
+      "glossaryAdd": "Begriff hinzufügen",
+      "glossaryAdding": "Neuer Glossarbegriff",
+      "openDocument": "Als Dokument öffnen"
     }
   },
   "module": {

@@ -189,7 +189,7 @@ try {
       const shot = async (name, full = false) => SHOT_DIR && page.screenshot({ path: `${SHOT_DIR}/${device.label}-${locale}-${name}.png`, fullPage: full });
       const mainText = () => page.locator("main").first().evaluate((n) => n.innerText ?? "");
 
-      await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "load" });
       await page.locator('[data-testid="tool-tile"]').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
       const tiles = () => page.locator('[data-testid="tool-tile"]').evaluateAll((els) => els.map((a) => {
         const r = a.getBoundingClientRect();
@@ -297,9 +297,13 @@ try {
         check(`${tag}: what left the grid still opens at its address`, lost.length === 0, lost.join(", "));
       } else {
         // On a phone: press one live tile with a finger, and it opens.
-        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "domcontentloaded" });
+        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "load" });
         await page.locator('[data-testid="tool-tile"]').first().waitFor({ state: "visible", timeout: 15000 });
-        const tile = page.locator('[data-testid="tool-tile"][href="/dashboard/deep-research"]');
+        // .first(): a service-worker-cached shell can briefly coexist with
+        // the freshly-fetched page right after a goto (both fully
+        // rendered, identical content) — either one leads to the same
+        // href, so picking either is fine for a press.
+        const tile = page.locator('[data-testid="tool-tile"][href="/dashboard/deep-research"]').first();
         await tile.scrollIntoViewIfNeeded();
         await tile.waitFor({ state: "visible" });
         await press(tile);
@@ -307,9 +311,9 @@ try {
         check(`${tag}: a finger on a live tile opens its tool`, /\/dashboard\/deep-research/.test(page.url()), page.url());
 
         // And a Coming Soon tile opens the Coming Soon screen, not the real tool.
-        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "domcontentloaded" });
+        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "load" });
         await page.locator('[data-testid="tool-tile"]').first().waitFor({ state: "visible", timeout: 15000 });
-        const comingSoonTile = page.locator(`[data-testid="tool-tile"][href="${NOT_LIVE[0].href}"]`);
+        const comingSoonTile = page.locator(`[data-testid="tool-tile"][href="${NOT_LIVE[0].href}"]`).first();
         await comingSoonTile.scrollIntoViewIfNeeded();
         await comingSoonTile.waitFor({ state: "visible" });
         await press(comingSoonTile);

@@ -246,7 +246,7 @@ console.log("\n== 5. the screen, the words, the switch ==");
   // migration any more — the schema canary is what still does.
   ok("not in flags.ts any more, and its migration is still named by the schema canary", !/\n\s*games:\s*"/.test(readFileSync("src/lib/flags/flags.ts", "utf8")) && /table: "user_games",\s*migration: "20261024000000_user_games\.sql",/.test(readFileSync("src/lib/health/schema-canaries.ts", "utf8")));
   const catalog = readFileSync("src/lib/billing/feature-catalog.ts", "utf8");
-  ok("the catalog claims the page and every route, on the Site's plan, not yet sold", /id: "games",\s*group: "make",\s*minPlan: "starter",\s*pages: \["games"\],\s*routes: \["games", "games\/\[id\]", "games\/\[id\]\/download"\],\s*charges: true,\s*notSold:/.test(catalog) && /cell: \(p\) => boolCell\(p\.capabilities\.websiteBuilder\),/.test(catalog.slice(catalog.indexOf('id: "games"'))));
+  ok("the catalog claims the page and every route, on the Site's plan, sold now (open to everyone since 2026-10-24)", /id: "games",\s*group: "make",\s*minPlan: "starter",\s*pages: \["games"\],\s*routes: \["games", "games\/\[id\]", "games\/\[id\]\/download"\],\s*charges: true,\s*enforcedIn:/.test(catalog) && /cell: \(p\) => boolCell\(p\.capabilities\.websiteBuilder\),/.test(catalog.slice(catalog.indexOf('id: "games"'))));
 }
 
 console.log(failures.length ? `\nFAILURES: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);

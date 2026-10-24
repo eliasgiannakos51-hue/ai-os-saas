@@ -441,6 +441,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "rebuild_projects",
+    migration: "20261027000000_rebuild_projects.sql",
+    breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",
+  },
+  {
+    kind: "table",
     table: "my_stuff_sessions",
     migration: "20261024100000_my_stuff_sessions.sql",
     breaks: "«Τα δικά μου» (switch \"my-stuff\") charges for a question and cannot save the answer: the person pays and sees «it could not be saved», and no session appears in its own history",

@@ -116,8 +116,8 @@ check(`every ready tool has its page (${ready.length} ready)`, missingPage.lengt
 const placeholders = ready.filter((t) => existsSync(`src/app${t.href}/page.tsx`) && /BuildModulePage/.test(readFileSync(`src/app${t.href}/page.tsx`, "utf8")));
 check("no ready tool is a placeholder: none of their pages is the empty BuildModulePage list", placeholders.length === 0, placeholders.map((t) => t.href).join(", "));
 check(`every tool that is not ready says what it waits for, in a sentence (${notReady.length} waiting)`, notReady.every((t) => String(t.waitingFor ?? "").trim().length >= 20), notReady.filter((t) => !t.waitingFor).map((t) => t.name).join(", "));
-check("...and the ones that cannot work yet are exactly the unbuilt: Rebuild, Video, Films, Editing, Avatars, iowork, unless a later round built them",
-  notReady.every((t) => ["rebuild", "video", "films", "editing", "avatars", "iowork"].includes(t.name)), notReady.map((t) => t.name).join(", "));
+check("...and the ones that cannot work yet are exactly the unbuilt: Video, Films, Editing, Avatars, iowork, unless a later round built them",
+  notReady.every((t) => ["video", "films", "editing", "avatars", "iowork"].includes(t.name)), notReady.map((t) => t.name).join(", "));
 // The drawn list is a function of what is ready and present, nothing else.
 const withKey = availableTools({ imageKey: true }).map((t) => t.name);
 const withoutKey = availableTools({ imageKey: false }).map((t) => t.name);

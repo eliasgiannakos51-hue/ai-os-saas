@@ -3811,6 +3811,64 @@
       "deleteSelectedConfirm": "{count} Unterhaltungen löschen? Du hast für jede ein paar Sekunden, um es rückgängig zu machen.",
       "deleteSelectedFailed": "Es wurde nicht alles gelöscht. Was noch da ist, wurde nicht gelöscht.",
       "atCap": "Die neuesten {cap}. Suche, um eine ältere zu finden."
+    },
+    "rebuild": {
+      "placeholder": "Beschreibe die App, die du willst, oder füge die Adresse einer Seite einer App ein, die dir gefällt",
+      "placeholderBox": "Sag, was in diesem Kasten geändert werden soll",
+      "placeholderChange": "Sag, was an der App geändert werden soll",
+      "new": "Neue App",
+      "empty": {
+        "heading": "Von welcher App willst du deine eigene Version?",
+        "examples": {
+          "booking": "Eine Buchungs-App für ein kleines Studio: Kunden, Zeiten, Erinnerungen",
+          "habits": "Ein Gewohnheits-Tracker mit einer Serie für jede Gewohnheit",
+          "invoices": "Ein einfacher Rechnungsmacher, der Kunden und Summen behält"
+        }
+      },
+      "planned": "Hier ist der Plan für „{title}“. Ändere jeden Kasten mit Worten, dann baue die App.",
+      "referenceRead": "Ich habe die Beschriftungen von {host} gelesen: nur woraus die Seite besteht, nichts wird kopiert.",
+      "boxChanged": "Der Kasten „{box}“ ist geändert.",
+      "built": "Die App ist rechts fertig. Sie ist deine eigene, mit eigenem Namen und eigenen Worten.",
+      "changed": "Geändert. Jede Änderung ist eine Version, zu der du zurückgehen kannst.",
+      "undone": "Zurück zur Version davor.",
+      "restored": "Version {n} ist wieder die aktuelle.",
+      "boxHint": "Tippe einen Kasten an und sag, was darin geändert werden soll. Wenn der Plan stimmt, baue die App.",
+      "boxes": {
+        "screens": "Bildschirme",
+        "data": "Daten",
+        "actions": "Aktionen",
+        "look": "Aussehen"
+      },
+      "build": "App bauen",
+      "building": "Die App wird gebaut …",
+      "download": "App herunterladen",
+      "undo": "Letzte Änderung rückgängig machen",
+      "preview": "Die App, laufend",
+      "sealed": "Sie läuft abgeschottet von allem anderen, was du hier eingibst, bleibt also in dieser Vorschau. Lade sie herunter, um sie auf deinem eigenen Computer zu benutzen.",
+      "original": "Deine eigene Version, keine Kopie: Sie übernimmt die Idee und die Art der Bildschirme, nie Namen, Worte, Bilder oder Code des Originals.",
+      "versions": "{count} Versionen",
+      "version": "Version {n}",
+      "first": "Erster Bau",
+      "restoreNote": "Zurückgegangen",
+      "restore": "Zu dieser zurückgehen",
+      "errors": {
+        "insufficient": "Dafür reichen die Credits nicht. Der Preis steht vor jedem Schritt.",
+        "unavailable": "Der App-Macher ist gerade nicht verfügbar. Es wurde nichts berechnet.",
+        "unusable": "Die zurückgekommene App war nicht vollständig oder nicht sicher und wurde verworfen. Es wurde nichts berechnet. Versuche es noch einmal oder sag es anders.",
+        "rateLimited": "Im Moment zu viele Anfragen. Versuche es später noch einmal.",
+        "tooLong": "Das ist zu lang. Kürze es und versuche es noch einmal.",
+        "stopped": "Gestoppt. Es wurde nichts berechnet.",
+        "failed": "Das hat nicht geklappt. Versuche es noch einmal.",
+        "limit": "Dein Tarif behält {limit} Apps. Lösche eine in der Verlaufsspalte, um eine weitere zu machen.",
+        "reference": {
+          "notHttps": "Nur Adressen, die mit https:// beginnen, können gelesen werden. Es wurde nichts berechnet.",
+          "blocked": "Diese Adresse kann nicht gelesen werden: Sie ist keine öffentliche Webseite. Es wurde nichts berechnet.",
+          "unreachable": "Ich konnte diese Seite nicht erreichen. Prüfe die Adresse oder beschreibe die App mit Worten. Es wurde nichts berechnet.",
+          "notHtml": "Diese Adresse ist keine Webseite. Es wurde nichts berechnet.",
+          "tooLarge": "Diese Seite ist zu groß zum Lesen. Es wurde nichts berechnet.",
+          "invalid": "Das ist keine Webadresse, die ich lesen kann. Es wurde nichts berechnet."
+        }
+      }
     }
   },
   "module": {
@@ -4552,6 +4610,11 @@
       "is": "Vier Bilder aus einer Beschreibung.",
       "does": "Beschreibe, was du willst, und du bekommst vier Versionen. Tippe eine an und ändere sie mit Worten, dann lade sie in der größten Auflösung herunter, die der Anbieter liefert. Jedes Bild bleibt in deiner Bibliothek.",
       "doesNot": "Dein Original wird nicht verändert: jede Änderung ist eine neue Version. Es erzeugt keine Bilder von echten Personen bei Dingen, die sie nie getan haben. Ohne den Schlüssel des Anbieters entsteht nichts und es wird nichts berechnet."
+    },
+    "rebuild": {
+      "is": "Deine eigene Version einer App, die dir gefällt.",
+      "does": "Beschreibe eine App oder füge die Adresse einer öffentlichen Seite einer App ein, die dir gefällt. Du bekommst einen Plan in vier Kästen, änderst mit Worten, was du willst, und baust sie dann: eine funktionierende App, die du mit Worten ändern, zurücksetzen und als eine Datei herunterladen kannst.",
+      "doesNot": "Sie kopiert die andere App nicht: Name, Worte, Bilder und Code sind deine eigenen, und sie liest nur die Beschriftungen der einen Seite, auf die du zeigst, nie etwas hinter einer Anmeldung. Sie ist kein Hosting-Dienst: Was du in der Vorschau eingibst, wird nicht gespeichert, und die heruntergeladene Datei behält ihre Daten auf deinem eigenen Computer."
     }
   },
   "helpCentre": {

@@ -955,6 +955,29 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "check" }),
   },
+  // REBUILD (Phase 2 of the final All tools grid, 2026-10-27): describe an
+  // app, or point at a public page of one you like, and get your own
+  // working version — planned in boxes, written as one file, changed with
+  // words, every version kept, downloaded as a file. Planning, writing and
+  // changing reserve credits (lib/rebuild/charge.ts); choosing a version
+  // back and downloading cost nothing. Open to every plan — the Free plan
+  // can keep one app (lib/rebuild/limits.ts) — and NOT SOLD AS A ROW YET:
+  // the allowance per plan is a number the owner has not confirmed, and a
+  // row he has not confirmed is the lie this file exists to stop.
+  {
+    id: "rebuild",
+    group: "make",
+    minPlan: "free",
+    notSold:
+      "open to everyone since 2026-10-27 (no switch; a Free account may keep one app); the allowance " +
+      "per plan is the owner's to confirm, so it is published as a row when he does",
+    pages: ["rebuild"],
+    routes: ["rebuild", "rebuild/[id]", "rebuild/[id]/download"],
+    charges: true,
+    enforcedIn: "src/lib/rebuild/charge.ts",
+    enforcedSymbol: "reserveCredits",
+    cell: () => ({ type: "check" }),
+  },
   // CONNECT BY ADDRESS (Phase 2 of the final All tools grid, 2026-10-26): an
   // app that speaks MCP over HTTPS, connected by its address with an optional
   // token. Connecting, listing, refreshing and removing cost nothing; only

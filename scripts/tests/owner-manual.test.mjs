@@ -182,6 +182,7 @@ const FAILOVER_NAMES = {
   "src/lib/jobs/handlers/create.ts": "το «Φτιάξε κάτι»",
   "src/app/api/my-stuff/ask/route.ts": "το «Τα δικά σου»",
   "src/app/api/mcp/[id]/run/route.ts": "το «Σύνδεση» με εφαρμογές με διεύθυνση",
+  "src/lib/rebuild/rebuild-call.ts": "το «Ξαναχτίσε»",
 };
 const callers = [];
 (function walkSrc(dir) {

@@ -46,6 +46,11 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Rebuild's texts (2026-10-27): the same word in that language.
+  "fr:dashboard.rebuild.boxes.actions",
+  "fr:dashboard.rebuild.versions",
+  "fr:dashboard.rebuild.version",
+  "de:dashboard.rebuild.version",
   // "Name" is the German word too.
   "de:dashboard.integrations.mcp.nameLabel",
   // The final grid's names (2026-10-23): words that are the same in that

@@ -3811,6 +3811,64 @@
       "deleteSelectedConfirm": "Eliminare {count} conversazioni? Avrai qualche secondo per annullare ciascuna.",
       "deleteSelectedFailed": "Non è stato eliminato tutto. Ciò che resta non lo è stato.",
       "atCap": "Le {cap} più recenti. Cerca per trovarne una più vecchia."
+    },
+    "rebuild": {
+      "placeholder": "Descrivi l'app che vuoi, o incolla l'indirizzo di una pagina di una che ti piace",
+      "placeholderBox": "Dì cosa cambiare in questa casella",
+      "placeholderChange": "Dì cosa cambiare nell'app",
+      "new": "Nuova app",
+      "empty": {
+        "heading": "Di quale app vuoi la tua versione?",
+        "examples": {
+          "booking": "Un'app di prenotazioni per un piccolo studio: clienti, orari, promemoria",
+          "habits": "Un tracciatore di abitudini con una serie per ogni abitudine",
+          "invoices": "Un semplice creatore di fatture che tiene clienti e totali"
+        }
+      },
+      "planned": "Ecco il piano per «{title}». Cambia qualsiasi casella con le parole, poi costruisci l'app.",
+      "referenceRead": "Ho letto le etichette di {host}: solo di cosa è fatta la pagina, non si copia nulla.",
+      "boxChanged": "La casella «{box}» è cambiata.",
+      "built": "L'app è pronta a destra. È tua, con un nome e parole suoi.",
+      "changed": "Cambiato. Ogni modifica è una versione a cui puoi tornare.",
+      "undone": "Sono tornato alla versione precedente.",
+      "restored": "La versione {n} è di nuovo quella attuale.",
+      "boxHint": "Premi una casella e dì cosa cambiare. Quando il piano è giusto, costruisci l'app.",
+      "boxes": {
+        "screens": "Schermate",
+        "data": "Dati",
+        "actions": "Azioni",
+        "look": "Aspetto"
+      },
+      "build": "Costruisci l'app",
+      "building": "Costruzione dell'app…",
+      "download": "Scarica l'app",
+      "undo": "Annulla l'ultima modifica",
+      "preview": "L'app, in funzione",
+      "sealed": "Gira isolata da tutto il resto, quindi ciò che scrivi qui resta in questa anteprima. Scaricala per usarla sul tuo computer.",
+      "original": "La tua versione, non una copia: prende l'idea e il tipo di schermate, mai il nome, le parole, le immagini o il codice dell'originale.",
+      "versions": "{count} versioni",
+      "version": "Versione {n}",
+      "first": "Prima costruzione",
+      "restoreNote": "Tornato indietro",
+      "restore": "Torna a questa",
+      "errors": {
+        "insufficient": "Crediti insufficienti per questo. Il prezzo è mostrato prima di ogni passo.",
+        "unavailable": "Il creatore di app non è disponibile ora. Non è stato addebitato nulla.",
+        "unusable": "L'app tornata non era completa o non era sicura, quindi è stata scartata. Non è stato addebitato nulla. Riprova o dillo in un altro modo.",
+        "rateLimited": "Troppe richieste per ora. Riprova più tardi.",
+        "tooLong": "È troppo lungo. Accorcialo e riprova.",
+        "stopped": "Fermato. Non è stato addebitato nulla.",
+        "failed": "Non ha funzionato. Riprova.",
+        "limit": "Il tuo piano tiene {limit} app. Eliminane una nella colonna della cronologia per farne un'altra.",
+        "reference": {
+          "notHttps": "Si possono leggere solo indirizzi che iniziano con https://. Non è stato addebitato nulla.",
+          "blocked": "Quell'indirizzo non si può leggere: non è una pagina web pubblica. Non è stato addebitato nulla.",
+          "unreachable": "Non sono riuscito a raggiungere quella pagina. Controlla l'indirizzo o descrivi l'app con le parole. Non è stato addebitato nulla.",
+          "notHtml": "Quell'indirizzo non è una pagina web. Non è stato addebitato nulla.",
+          "tooLarge": "Quella pagina è troppo grande per essere letta. Non è stato addebitato nulla.",
+          "invalid": "Non è un indirizzo web che posso leggere. Non è stato addebitato nulla."
+        }
+      }
     }
   },
   "module": {
@@ -4552,6 +4610,11 @@
       "is": "Quattro immagini da una descrizione.",
       "does": "Descrivi ciò che vuoi e ottieni quattro versioni. Premine una e cambiala con le parole, poi scaricala alla dimensione massima che offre il fornitore. Ogni immagine resta nella tua Libreria.",
       "doesNot": "Non modifica il tuo originale: ogni modifica è una nuova versione. Non crea immagini di persone reali che fanno cose che non hanno fatto. Senza la chiave del fornitore non crea nulla e non addebita nulla."
+    },
+    "rebuild": {
+      "is": "La tua versione di un'app che ti piace.",
+      "does": "Descrivi un'app, o incolla l'indirizzo di una pagina pubblica di un'app che ti piace. Ricevi un piano in quattro caselle, cambi ciò che vuoi con le parole e poi la costruisci: un'app che funziona, che cambi con le parole, a cui puoi tornare indietro e che scarichi come un unico file.",
+      "doesNot": "Non copia l'altra app: nome, parole, immagini e codice sono tuoi, e legge solo le etichette della pagina che indichi, mai nulla dietro un accesso. Non è un servizio di hosting: ciò che scrivi nell'anteprima non viene salvato, e il file scaricato tiene i suoi dati sul tuo computer."
     }
   },
   "helpCentre": {

@@ -54,10 +54,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   { name: "analyze", group: "ask", href: "/dashboard/data-analysis", ready: true },
   { name: "research", group: "ask", href: "/dashboard/deep-research", ready: true },
   // 3. ΦΤΙΑΞΕ
-  {
-    name: "rebuild", group: "make", href: "/dashboard/rebuild", ready: false,
-    waitingFor: "Phase 2, second: not built yet",
-  },
+  { name: "rebuild", group: "make", href: "/dashboard/rebuild", ready: true },
   { name: "site", group: "make", href: "/dashboard/website-builder", ready: true },
   { name: "document", group: "make", href: "/dashboard/documents", ready: true },
   { name: "image", group: "make", href: "/dashboard/images", ready: true, needs: "imageKey" },

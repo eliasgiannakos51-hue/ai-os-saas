@@ -13,6 +13,8 @@
  *                                downloads it: it opens outside Ionexa
  *   games/<title>.html           each game, as its own page, sealed as
  *                                it is served (lib/games/game-html.ts)
+ *   apps/<title>.html            each app made with Rebuild, sealed as it
+ *                                is downloaded (lib/rebuild/rebuild-html.ts)
  *
  * The files are the ones the account deletion removes, found by the same
  * listing (lib/account/erase-storage.ts listUserFiles): what we would
@@ -26,6 +28,7 @@
  */
 import { listUserFiles, type BucketApi } from "@/lib/account/erase-storage";
 import { sealGame } from "@/lib/games/game-html";
+import { sealApp } from "@/lib/rebuild/rebuild-html";
 import { siteDownload } from "@/lib/websites/site-download";
 import { zipStore } from "@/lib/websites/zip-store";
 
@@ -126,6 +129,8 @@ export function buildExportArchive(input: {
   files: readonly ExportFile[];
   sites: readonly { name: string; html_content: string | null; pages?: unknown }[];
   games: readonly { title: string; html: string | null }[];
+  /** Apps made with Rebuild; absent for a caller that has none to hand over. */
+  apps?: readonly { title: string; html: string | null }[];
 }): Uint8Array {
   const enc = new TextEncoder();
   const taken = new Set<string>();
@@ -147,6 +152,10 @@ export function buildExportArchive(input: {
   for (const game of input.games) {
     if (!game.html) continue;
     add(safeEntryName("games", `${titleOf(game.title, "game")}.html`), enc.encode(sealGame(game.html)));
+  }
+  for (const app of input.apps ?? []) {
+    if (!app.html) continue;
+    add(safeEntryName("apps", `${titleOf(app.title, "app")}.html`), enc.encode(sealApp(app.html)));
   }
   return zipStore(entries);
 }

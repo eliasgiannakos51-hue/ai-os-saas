@@ -13,9 +13,10 @@ import { ALL_TOOLS, ALL_TOOLS_GROUP_ORDER, type AllToolsGroupKey, type AllToolsN
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
 import { MY_STUFF_ICON } from "@/lib/module-icons";
+import { Hammer } from "lucide-react";
 
 /** The icon of a tool that has no sidebar row of its own. */
-const ROWLESS_ICONS: Record<string, LucideIcon> = { "/dashboard/my-stuff": MY_STUFF_ICON };
+const ROWLESS_ICONS: Record<string, LucideIcon> = { "/dashboard/my-stuff": MY_STUFF_ICON, "/dashboard/rebuild": Hammer };
 
 /**
  * ALL TOOLS, THE FINAL GRID (the owner's message, 2026-10-23): square

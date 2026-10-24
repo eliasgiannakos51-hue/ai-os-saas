@@ -205,6 +205,10 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // MASTER 16, package 26: a game the person described — its plan, its
   // code and its last versions. All of it is theirs to take with them.
   { table: "user_games", label: "user_games", scope: "user_content" },
+  // Rebuild (2026-10-27): an app the person described — its plan, the
+  // labels of a page they pointed at, its code and its last versions.
+  // All of it is theirs to take with them.
+  { table: "rebuild_projects", label: "rebuild_projects", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

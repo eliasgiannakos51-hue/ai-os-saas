@@ -3811,6 +3811,64 @@
       "deleteSelectedConfirm": "Delete {count} conversations? You'll have a few seconds to undo each one.",
       "deleteSelectedFailed": "Not everything was deleted. What is still here was not.",
       "atCap": "The newest {cap}. Search to find an older one."
+    },
+    "rebuild": {
+      "placeholder": "Describe the app you want, or paste the address of a page of one you like",
+      "placeholderBox": "Say what to change in this box",
+      "placeholderChange": "Say what to change in the app",
+      "new": "New app",
+      "empty": {
+        "heading": "Which app do you want your own version of?",
+        "examples": {
+          "booking": "A booking app for a small studio: clients, times, reminders",
+          "habits": "A habit tracker with a streak for each habit",
+          "invoices": "A simple invoice maker that keeps clients and totals"
+        }
+      },
+      "planned": "Here is the plan for “{title}”. Change any box with words, then build the app.",
+      "referenceRead": "I read the labels of {host}: only what the page is made of, nothing is copied.",
+      "boxChanged": "Changed the “{box}” box.",
+      "built": "The app is ready on the right. It is your own, with its own name and words.",
+      "changed": "Changed. Every change is a version you can go back to.",
+      "undone": "Went back to the version before.",
+      "restored": "Version {n} is the current one again.",
+      "boxHint": "Press a box and say what to change in it. When the plan is right, build the app.",
+      "boxes": {
+        "screens": "Screens",
+        "data": "Data",
+        "actions": "Actions",
+        "look": "Look"
+      },
+      "build": "Build the app",
+      "building": "Building the app…",
+      "download": "Download the app",
+      "undo": "Undo the last change",
+      "preview": "The app, running",
+      "sealed": "It runs sealed off from everything else, so what you enter here stays in this preview. Download it to use it on your own computer.",
+      "original": "Your own version, not a copy: it takes the idea and the kinds of screens, never the name, words, pictures or code of the original.",
+      "versions": "{count} versions",
+      "version": "Version {n}",
+      "first": "First build",
+      "restoreNote": "Went back",
+      "restore": "Go back to this one",
+      "errors": {
+        "insufficient": "Not enough credits for this. The price is shown before every step.",
+        "unavailable": "The app maker is not available right now. Nothing was charged.",
+        "unusable": "The app that came back was not complete or not safe, so it was thrown away. Nothing was charged. Try again, or say it differently.",
+        "rateLimited": "Too many requests for now. Try again later.",
+        "tooLong": "That is too long. Shorten it and try again.",
+        "stopped": "Stopped. Nothing was charged.",
+        "failed": "That did not work. Try again.",
+        "limit": "Your plan keeps {limit} apps. Delete one in the history column to make another.",
+        "reference": {
+          "notHttps": "Only addresses that start with https:// can be read. Nothing was charged.",
+          "blocked": "That address cannot be read: it is not a public web page. Nothing was charged.",
+          "unreachable": "I could not reach that page. Check the address, or describe the app in words instead. Nothing was charged.",
+          "notHtml": "That address is not a web page. Nothing was charged.",
+          "tooLarge": "That page is too large to read. Nothing was charged.",
+          "invalid": "That is not a web address I can read. Nothing was charged."
+        }
+      }
     }
   },
   "module": {
@@ -4552,6 +4610,11 @@
       "is": "Four pictures from one description.",
       "does": "Describe what you want and get four versions. Press one and change it with words, then download it at the largest size the provider makes. Every picture is kept in your Library.",
       "doesNot": "It does not change your original: every change is a new version. It does not make pictures of real people doing things they did not do. Without the provider's key it makes nothing and charges nothing."
+    },
+    "rebuild": {
+      "is": "Your own version of an app you like.",
+      "does": "Describe an app, or paste the address of one public page of an app you like. You get a plan in four boxes, change what you want with words, then build it: a working app you can use, change with words, step back from, and download as one file.",
+      "doesNot": "It does not copy the other app: the name, words, pictures and code are your own, and it reads only the labels of the one page you point at, never anything behind a sign-in. It is not a hosted service: what you enter in the preview is not saved, and the downloaded file keeps its data on your own computer."
     }
   },
   "helpCentre": {

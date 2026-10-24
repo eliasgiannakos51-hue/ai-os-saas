@@ -3811,6 +3811,64 @@
       "deleteSelectedConfirm": "Eliminar {count} conversas? Vais ter uns segundos para anular cada uma.",
       "deleteSelectedFailed": "Não foi tudo eliminado. O que continua aqui não foi.",
       "atCap": "As {cap} mais recentes. Procura para encontrar uma mais antiga."
+    },
+    "rebuild": {
+      "placeholder": "Descreve a aplicação que queres, ou cola o endereço de uma página de uma de que gostes",
+      "placeholderBox": "Diz o que mudar nesta caixa",
+      "placeholderChange": "Diz o que mudar na aplicação",
+      "new": "Nova aplicação",
+      "empty": {
+        "heading": "De que aplicação queres a tua própria versão?",
+        "examples": {
+          "booking": "Uma aplicação de reservas para um pequeno estúdio: clientes, horas, lembretes",
+          "habits": "Um registo de hábitos com uma sequência para cada hábito",
+          "invoices": "Um criador de faturas simples que guarda clientes e totais"
+        }
+      },
+      "planned": "Aqui está o plano de «{title}». Muda qualquer caixa com palavras e depois constrói a aplicação.",
+      "referenceRead": "Li as etiquetas de {host}: só do que a página é feita, nada é copiado.",
+      "boxChanged": "A caixa «{box}» foi mudada.",
+      "built": "A aplicação está pronta à direita. É tua, com nome e palavras próprios.",
+      "changed": "Mudado. Cada alteração é uma versão a que podes voltar.",
+      "undone": "Voltei à versão anterior.",
+      "restored": "A versão {n} é outra vez a atual.",
+      "boxHint": "Carrega numa caixa e diz o que mudar nela. Quando o plano estiver certo, constrói a aplicação.",
+      "boxes": {
+        "screens": "Ecrãs",
+        "data": "Dados",
+        "actions": "Ações",
+        "look": "Aspeto"
+      },
+      "build": "Construir a aplicação",
+      "building": "A construir a aplicação…",
+      "download": "Descarregar a aplicação",
+      "undo": "Anular a última alteração",
+      "preview": "A aplicação, a funcionar",
+      "sealed": "Corre isolada de tudo o resto, por isso o que escreves aqui fica nesta pré-visualização. Descarrega-a para a usares no teu computador.",
+      "original": "A tua própria versão, não uma cópia: leva a ideia e o tipo de ecrãs, nunca o nome, as palavras, as imagens ou o código do original.",
+      "versions": "{count} versões",
+      "version": "Versão {n}",
+      "first": "Primeira construção",
+      "restoreNote": "Voltou atrás",
+      "restore": "Voltar a esta",
+      "errors": {
+        "insufficient": "Não tens créditos suficientes para isto. O preço aparece antes de cada passo.",
+        "unavailable": "O criador de aplicações não está disponível agora. Não foi cobrado nada.",
+        "unusable": "A aplicação que voltou não estava completa ou não era segura, por isso foi deitada fora. Não foi cobrado nada. Tenta outra vez ou diz de outra maneira.",
+        "rateLimited": "Demasiados pedidos por agora. Tenta outra vez mais tarde.",
+        "tooLong": "É demasiado longo. Encurta e tenta outra vez.",
+        "stopped": "Parado. Não foi cobrado nada.",
+        "failed": "Não funcionou. Tenta outra vez.",
+        "limit": "O teu plano guarda {limit} aplicações. Apaga uma na coluna do histórico para fazer outra.",
+        "reference": {
+          "notHttps": "Só se podem ler endereços que comecem por https://. Não foi cobrado nada.",
+          "blocked": "Esse endereço não pode ser lido: não é uma página web pública. Não foi cobrado nada.",
+          "unreachable": "Não consegui chegar a essa página. Confirma o endereço ou descreve a aplicação com palavras. Não foi cobrado nada.",
+          "notHtml": "Esse endereço não é uma página web. Não foi cobrado nada.",
+          "tooLarge": "Essa página é grande demais para ser lida. Não foi cobrado nada.",
+          "invalid": "Esse não é um endereço web que eu possa ler. Não foi cobrado nada."
+        }
+      }
     }
   },
   "module": {
@@ -4552,6 +4610,11 @@
       "is": "Quatro imagens a partir de uma descrição.",
       "does": "Descreve o que queres e recebes quatro versões. Carrega numa e altera-a com palavras, e descarrega-a no maior tamanho que o fornecedor dá. Cada imagem fica guardada na tua Biblioteca.",
       "doesNot": "Não altera o teu original: cada alteração é uma versão nova. Não cria imagens de pessoas reais a fazer o que não fizeram. Sem a chave do fornecedor não cria nada e não cobra nada."
+    },
+    "rebuild": {
+      "is": "A tua própria versão de uma aplicação de que gostas.",
+      "does": "Descreve uma aplicação, ou cola o endereço de uma página pública de uma de que gostes. Recebes um plano em quatro caixas, mudas o que quiseres com palavras e depois constróis: uma aplicação que funciona, que mudas com palavras, a que podes voltar atrás e que descarregas num só ficheiro.",
+      "doesNot": "Não copia a outra aplicação: o nome, as palavras, as imagens e o código são teus, e só lê as etiquetas da página que indicas, nunca nada atrás de um início de sessão. Não é um serviço de alojamento: o que escreves na pré-visualização não fica guardado, e o ficheiro descarregado guarda os seus dados no teu próprio computador."
     }
   },
   "helpCentre": {

@@ -3811,6 +3811,64 @@
       "deleteSelectedConfirm": "Supprimer {count} discussions ? Vous aurez quelques secondes pour annuler chacune.",
       "deleteSelectedFailed": "Tout n'a pas été supprimé. Ce qui reste ne l'a pas été.",
       "atCap": "Les {cap} plus récentes. Recherchez pour en trouver une plus ancienne."
+    },
+    "rebuild": {
+      "placeholder": "Décrivez l'application que vous voulez, ou collez l'adresse d'une page d'une application qui vous plaît",
+      "placeholderBox": "Dites ce qu'il faut changer dans cette case",
+      "placeholderChange": "Dites ce qu'il faut changer dans l'application",
+      "new": "Nouvelle application",
+      "empty": {
+        "heading": "De quelle application voulez-vous votre propre version ?",
+        "examples": {
+          "booking": "Une application de réservation pour un petit studio : clients, horaires, rappels",
+          "habits": "Un suivi d'habitudes avec une série pour chaque habitude",
+          "invoices": "Un outil de factures simple qui garde clients et totaux"
+        }
+      },
+      "planned": "Voici le plan de « {title} ». Changez n'importe quelle case avec des mots, puis construisez l'application.",
+      "referenceRead": "J'ai lu les libellés de {host} : seulement de quoi la page est faite, rien n'est copié.",
+      "boxChanged": "La case « {box} » est changée.",
+      "built": "L'application est prête à droite. Elle est la vôtre, avec son propre nom et ses propres mots.",
+      "changed": "Changé. Chaque changement est une version à laquelle vous pouvez revenir.",
+      "undone": "Retour à la version d'avant.",
+      "restored": "La version {n} est de nouveau la version actuelle.",
+      "boxHint": "Appuyez sur une case et dites ce qu'il faut y changer. Quand le plan est juste, construisez l'application.",
+      "boxes": {
+        "screens": "Écrans",
+        "data": "Données",
+        "actions": "Actions",
+        "look": "Apparence"
+      },
+      "build": "Construire l'application",
+      "building": "Construction de l'application…",
+      "download": "Télécharger l'application",
+      "undo": "Annuler le dernier changement",
+      "preview": "L'application, en marche",
+      "sealed": "Elle tourne isolée de tout le reste : ce que vous saisissez ici reste dans cet aperçu. Téléchargez-la pour l'utiliser sur votre propre ordinateur.",
+      "original": "Votre propre version, pas une copie : elle prend l'idée et le genre d'écrans, jamais le nom, les mots, les images ou le code de l'original.",
+      "versions": "{count} versions",
+      "version": "Version {n}",
+      "first": "Première construction",
+      "restoreNote": "Retour",
+      "restore": "Revenir à celle-ci",
+      "errors": {
+        "insufficient": "Pas assez de crédits pour cela. Le prix est affiché avant chaque étape.",
+        "unavailable": "Le créateur d'applications n'est pas disponible pour le moment. Rien n'a été facturé.",
+        "unusable": "L'application revenue n'était pas complète ou pas sûre, elle a donc été jetée. Rien n'a été facturé. Réessayez, ou dites-le autrement.",
+        "rateLimited": "Trop de demandes pour le moment. Réessayez plus tard.",
+        "tooLong": "C'est trop long. Raccourcissez et réessayez.",
+        "stopped": "Arrêté. Rien n'a été facturé.",
+        "failed": "Ça n'a pas marché. Réessayez.",
+        "limit": "Votre forfait garde {limit} applications. Supprimez-en une dans la colonne d'historique pour en faire une autre.",
+        "reference": {
+          "notHttps": "Seules les adresses qui commencent par https:// peuvent être lues. Rien n'a été facturé.",
+          "blocked": "Cette adresse ne peut pas être lue : ce n'est pas une page web publique. Rien n'a été facturé.",
+          "unreachable": "Je n'ai pas pu atteindre cette page. Vérifiez l'adresse ou décrivez l'application avec des mots. Rien n'a été facturé.",
+          "notHtml": "Cette adresse n'est pas une page web. Rien n'a été facturé.",
+          "tooLarge": "Cette page est trop grande pour être lue. Rien n'a été facturé.",
+          "invalid": "Ce n'est pas une adresse web que je peux lire. Rien n'a été facturé."
+        }
+      }
     }
   },
   "module": {
@@ -4552,6 +4610,11 @@
       "is": "Quatre images à partir d'une description.",
       "does": "Décrivez ce que vous voulez et obtenez quatre versions. Appuyez sur l'une pour la modifier avec des mots, puis téléchargez-la dans la plus grande taille que fournit le fournisseur. Chaque image reste dans votre Bibliothèque.",
       "doesNot": "Votre original n'est pas modifié : chaque changement est une nouvelle version. Il ne crée pas d'images de personnes réelles faisant ce qu'elles n'ont pas fait. Sans la clé du fournisseur, rien n'est créé et rien n'est facturé."
+    },
+    "rebuild": {
+      "is": "Votre propre version d'une application qui vous plaît.",
+      "does": "Décrivez une application, ou collez l'adresse d'une page publique d'une application qui vous plaît. Vous obtenez un plan en quatre cases, changez ce que vous voulez avec des mots, puis construisez-la : une application qui marche, que vous changez avec des mots, dont vous pouvez revenir en arrière, et que vous téléchargez en un seul fichier.",
+      "doesNot": "Elle ne copie pas l'autre application : le nom, les mots, les images et le code sont les vôtres, et elle ne lit que les libellés de la seule page que vous indiquez, jamais rien derrière une connexion. Ce n'est pas un service d'hébergement : ce que vous saisissez dans l'aperçu n'est pas enregistré, et le fichier téléchargé garde ses données sur votre propre ordinateur."
     }
   },
   "helpCentre": {

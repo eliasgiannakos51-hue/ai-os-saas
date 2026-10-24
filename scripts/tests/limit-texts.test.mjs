@@ -120,6 +120,7 @@ const LIMIT_SENTENCES = [
   "dashboard.flows.errors.rateLimited",
   "dashboard.flows.stepErrors.rate_limited",
   "dashboard.games.errors.rateLimited",
+  "dashboard.rebuild.errors.rateLimited",
   "dashboard.deepResearch.refused.rateLimited",
   "dashboard.files.askRateLimited",
   "dashboard.meetings.errors.rate_limited",
@@ -272,6 +273,7 @@ const SAID_ELSEWHERE = {
   "src/app/api/automations/runs/[runId]/approve/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",
   "src/lib/images/image-access.ts": "refuse(\"rate_limited\"), said by the Image tool's sentence (section 1)",
   "src/lib/games/charge.ts": "its own code vocabulary, said by the Games sentence (section 1)",
+  "src/lib/rebuild/charge.ts": "its own code vocabulary (`rate_limited`), said by Rebuild's own sentence (section 1)",
   "src/lib/agents/execute-agent.ts": "an agent's run, refused as a run result, not a screen's request",
   "src/lib/automations/runner.ts": "a step of a running automation, recorded as the step's note",
 };

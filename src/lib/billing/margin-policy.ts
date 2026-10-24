@@ -301,4 +301,10 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   gameWrite: "game_generate",
   gameBoxEdit: "game_edit",
   gameChange: "game_edit",
+  // Rebuild, 2026-10-27: planning and writing an app settle as one
+  // feature, changing it as another, the way Games does.
+  rebuildPlan: "rebuild_generate",
+  rebuildBuild: "rebuild_generate",
+  rebuildBoxEdit: "rebuild_edit",
+  rebuildChange: "rebuild_edit",
 };

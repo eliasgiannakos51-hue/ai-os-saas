@@ -252,6 +252,15 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that starring something copies or moves it",
   },
   {
+    // REBUILD (2026-10-27): the fear is "it copies the other app", and the
+    // honest edge is that nothing is hosted.
+    id: "rebuild",
+    file: "src/components/rebuild/rebuild-shell.tsx",
+    route: "src/app/dashboard/rebuild/page.tsx",
+    keyPrefix: "help.rebuild",
+    corrects: "that it copies the other app, or that what you enter in the preview is kept",
+  },
+  {
     // THE IMAGE TOOL (2026-10-23, when its switch was removed): /dashboard/images
     // is no longer the ideas list, so it no longer gets the trackingModule
     // tip. The shell carries its own "?".

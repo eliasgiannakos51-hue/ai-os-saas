@@ -397,6 +397,9 @@ const BASELINE = {
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.
   "dashboard/games/page.tsx": 1,
+  // ONE: the field's send. The page is Rebuild (2026-10-27), born in the
+  // shell, for everybody.
+  "dashboard/rebuild/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
   // ONE: the field's send. The page is «Τα δικά μου» (2026-10-22), born
   // in the shell, open to everybody since 2026-10-23.

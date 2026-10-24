@@ -665,6 +665,38 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 1,
   },
+  // REBUILD (api/rebuild and api/rebuild/[id]; lib/rebuild/charge.ts), the
+  // same four steps as Games with the same shape: each call site passes
+  // EVERY character it sends (the system prompt and the message), so
+  // systemPromptTokens is only the tool schema's few lines. The plan is
+  // four boxes of at most 700 characters and a title; one box is one box;
+  // a written app is held at the most the prompt allows (40,000
+  // characters); a change sends the whole app up and gets the whole app
+  // back, so its output tracks its input one to one.
+  rebuildPlan: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 3000,
+    outputCharsPerInputChar: 0,
+  },
+  rebuildBoxEdit: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 800,
+    outputCharsPerInputChar: 0,
+  },
+  rebuildBuild: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 40000,
+    outputCharsPerInputChar: 0,
+  },
+  rebuildChange: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
   // One set of social posts (api/posts/generate) — V5 #22. The same
   // shape as presentationGenerate: one forced-tool call, and the cost is
   // set by WHICH platforms were asked for rather than by the brief, so

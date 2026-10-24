@@ -181,6 +181,12 @@ const CLASSIFIED = {
     // (lib/games/game-plan.ts). A game cut at max_tokens is refused by
     // stop_reason as "unusable" — its last script would never close.
     "src/lib/games/game-call.ts",
+    // Rebuild (2026-10-27). The same shape as the game above: one forced
+    // tool call per step, the plan and a box at PLAN_MAX_TOKENS, the app
+    // and a change at APP_MAX_TOKENS (lib/rebuild/rebuild-plan.ts). An app
+    // cut at max_tokens is refused by stop_reason as "unusable" — its last
+    // script would never close — and that step charges nothing.
+    "src/lib/rebuild/rebuild-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

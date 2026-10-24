@@ -120,9 +120,9 @@ export const KEY_INVENTORY: KeyEntry[] = [
     id: "bfl",
     label: "Black Forest Labs (Flux)",
     envVars: ["BFL_API_KEY"],
-    roles: ["photorealistic images — the Image tool's Draft provider (docs/IMAGE-PROVIDERS.md)"],
-    readBy: ["src/lib/images/flux-image.ts"],
-    missing: "The adapter itself (a real generation call) is not built yet (κομμάτι 3) — only the key presence check this file does, which decides whether the Image tile can open without a Gemini key.",
+    roles: ["photorealistic images — picked as the Image tool's Draft provider (docs/IMAGE-PROVIDERS.md), adapter not built yet"],
+    readBy: [],
+    missing: "No adapter yet. Decided 2026-10-24 as the Image tool's Draft provider (docs/IMAGE-PROVIDERS.md) — becomes a real sub-processor, and this entry's readBy changes, the day a route actually sends it a prompt (κομμάτι 3).",
     check: { url: "https://api.bfl.ai/v1/credits", headers: (key) => ({ "x-key": key }) },
   },
   {

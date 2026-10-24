@@ -451,6 +451,21 @@ try {
         return null;
       }
       const toolTurns = () => page.locator('[data-testid="tool-shell-thread"] [data-role="tool"]').count();
+      // The merged Analyze shell reports a failed UPLOAD in a toast, not as a
+      // turn of the conversation (components/analyze/analyze-shell.tsx
+      // uploadDoc: addToast(..., "error")) — the old Files shell wrote it into
+      // the thread. Either is "said"; this reads whichever comes first.
+      async function saidAnywhere(before, timeout = 30000) {
+        const toasts = page.getByRole("status");
+        const deadline = Date.now() + timeout;
+        while (Date.now() < deadline) {
+          const turn = await lastToolTurn(before, 250);
+          if (turn !== null) return turn;
+          if ((await toasts.count()) > 0) return (await toasts.allInnerTexts()).join(" ").trim();
+          await page.waitForTimeout(100);
+        }
+        return null;
+      }
       async function shellText() {
         return (await page.locator('[data-testid="tool-shell"]').innerText().catch(() => "")) || "";
       }
@@ -461,6 +476,18 @@ try {
           await press(back);
           await page.waitForTimeout(250);
         }
+      }
+      // A stored document is chosen from the [◧] column in the merged Analyze
+      // shell (2026-10-22), which is where the old "tick one" list went; with an
+      // analysis stored the shell opens on that, so the choice has to be made.
+      async function chooseStoredFile() {
+        const column = page.locator('[data-testid="tool-shell-history"]');
+        if ((await column.getAttribute("data-open")) !== "true") await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+        const row = page.locator('[data-testid="shell-history-row"]', { hasText: "contract.pdf" }).first();
+        await row.waitFor({ state: "visible", timeout: 10000 });
+        await press(row);
+        await page.waitForTimeout(500);
+        await backToField();
       }
       function inLanguage(label, text) {
         const wrong = foreign(text, locale);
@@ -475,7 +502,9 @@ try {
       for (const tool of TOOLS) {
         await page.goto(`${TEST}${tool.path}`, { waitUntil: "networkidle" });
         const shell = page.locator('[data-testid="tool-shell"]');
-        const name = W.names[tool.key];
+        // Files is the Analyze shell since the two merged (2026-10-22); its
+        // old address redirects, and the shell carries Analyze's name.
+        const name = W.names[tool.key === "files" ? "analyze" : tool.key];
         check(`${run}: ${tool.key} is the shell, named «${name}»`,
           (await shell.count()) === 1 && (await shell.locator("h1").innerText()).trim() === name);
         const fields = await page.locator('main textarea, main input:not([type]), main input[type=text], main input[type=search], main input[type=email], main input[type=url], main input[type=number]').count();
@@ -514,14 +543,20 @@ try {
       }
       await page.goto(`${TEST}/dashboard/data-analysis`, { waitUntil: "networkidle" });
       await say(locale === "el" ? "Ποια περιοχή πούλησε περισσότερα;" : "Which region sold most?");
-      check(`${run}: analyze — a question with no file says to give it a file`, (await lastToolTurn(0, 5000)) === M.dashboard.toolShell.analyze.needFile);
+      // On a computer, an account with nothing opens in the files half of the merged
+// shell (its default since the merge), whose answer is "choose one first"; on a
+// phone it is Analyze's "give it a file". Either way nothing is asked or charged.
+      const noFileSaid = await lastToolTurn(0, 5000);
+      check(`${run}: analyze — a question with no file says to give it a file`, noFileSaid === M.dashboard.toolShell.analyze.needFile || noFileSaid === M.dashboard.files.selectFirst, String(noFileSaid));
       await page.goto(`${TEST}/dashboard/files`, { waitUntil: "networkidle" });
       if (!device.touch) {
         check(`${run}: files — with no file, the files beside the conversation say there are none`,
           (await page.locator('[data-testid="tool-shell-work"]').innerText().catch(() => "")).includes(M.dashboard.files.empty));
       }
       await say(locale === "el" ? "Τι λέει για την ακύρωση;" : "What does it say about cancelling?");
-      check(`${run}: files — a question with no file says to choose one first`, (await lastToolTurn(0, 5000)) === M.dashboard.files.selectFirst);
+      // A phone opens the merged shell on nothing, so it is Analyze's "give it a file".
+      const noFileFiles = await lastToolTurn(0, 5000);
+      check(`${run}: files — a question with no file says to choose one first`, noFileFiles === M.dashboard.files.selectFirst || noFileFiles === M.dashboard.toolShell.analyze.needFile, String(noFileFiles));
       await backToField();
 
       // ================================================================
@@ -549,11 +584,7 @@ try {
       ];
       for (const [tool, path, expected] of credits) {
         await page.goto(`${TEST}${path}`, { waitUntil: "networkidle" });
-        if (tool === "files") {
-          if (device.touch) await press(page.locator('[data-testid="files-shell-files"]'));
-          await press(page.locator('[data-testid="files-shell-list"] input[type=checkbox]').first());
-          await backToField();
-        }
+        if (tool === "files") await chooseStoredFile();
         const before = await toolTurns();
         await say(brief[tool]);
         const said = await lastToolTurn(before);
@@ -647,9 +678,7 @@ try {
         r.fulfill({ contentType: "application/json", body: JSON.stringify({ ok: true, job: { id: JOB, status: "failed", stepLabel: null, error: SDK_MESSAGE, creditsCharged: 0, result: null } }) })
       );
       await page.goto(`${OWNER}/dashboard/files`, { waitUntil: "networkidle" });
-      if (device.touch) await press(page.locator('[data-testid="files-shell-files"]'));
-      await press(page.locator('[data-testid="files-shell-list"] input[type=checkbox]').first());
-      await backToField();
+      await chooseStoredFile();
       {
         const before = await toolTurns();
         await say(brief.files);
@@ -740,7 +769,12 @@ try {
         };
         writes.length = 0;
         await page.goto(`${TEST}/dashboard/files`, { waitUntil: "networkidle" });
-        if (device.touch) await press(page.locator('[data-testid="files-shell-files"]'));
+        // A phone opens on nothing: choose a document first, which brings the
+        // files half of the shell (and its Files button) with it.
+        if (device.touch) {
+          await chooseStoredFile();
+          await press(page.locator('[data-testid="files-shell-files"]'));
+        }
         const chips = page.locator('[data-testid="files-collection"]');
         const flat = async () => (await chips.allInnerTexts()).map((x) => x.replace(/\s+/g, " ").trim());
         const shown = await chips.first().waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
@@ -990,8 +1024,8 @@ try {
       await page.route("**/api/files/upload", (r) => r.abort("internetdisconnected"));
       {
         const before = await toolTurns();
-        await page.locator('[data-testid="files-shell-input"]').setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("Cancellation requires thirty days written notice.\n") });
-        const said = await lastToolTurn(before, 15000);
+        await page.locator('[data-testid="analyze-upload-input"]').setInputFiles({ name: "notes.md", mimeType: "text/markdown", buffer: Buffer.from("Cancellation requires thirty days written notice.\n") });
+        const said = await saidAnywhere(before, 15000);
         check(`${run}: files — a file sent while the connection drops says the connection`, said !== null && said.includes(M.errors.codes.offline.what), said ?? "nothing was said");
         inLanguage("files, connection dropped", await shellText());
       }
@@ -1001,8 +1035,8 @@ try {
         // could not be reached is the whole answer — and its own message
         // is the browser's English «Failed to fetch».
         const before = await toolTurns();
-        await page.locator('[data-testid="files-shell-input"]').setInputFiles({ name: "minutes.txt", mimeType: "text/plain", buffer: Buffer.alloc(5 * 1024 * 1024, "a") });
-        const said = await lastToolTurn(before, 15000);
+        await page.locator('[data-testid="analyze-upload-input"]').setInputFiles({ name: "minutes.md", mimeType: "text/markdown", buffer: Buffer.alloc(5 * 1024 * 1024, "a") });
+        const said = await saidAnywhere(before, 15000);
         check(`${run}: files — a file over 4MB sent while the connection drops says the connection`, said !== null && said.includes(M.errors.codes.offline.what), said ?? "nothing was said");
         inLanguage("files over 4MB, connection dropped", await shellText());
       }
@@ -1034,8 +1068,8 @@ try {
       await page.goto(`${TEST}/dashboard/files`, { waitUntil: "networkidle" });
       {
         const before = await toolTurns();
-        await page.locator('[data-testid="files-shell-input"]').setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("Cancellation requires thirty days written notice.\n") });
-        const said = await lastToolTurn(before, 20000);
+        await page.locator('[data-testid="analyze-upload-input"]').setInputFiles({ name: "notes.md", mimeType: "text/markdown", buffer: Buffer.from("Cancellation requires thirty days written notice.\n") });
+        const said = await saidAnywhere(before, 20000);
         check(`${run}: files on Free, with its three files — a fourth is refused as the plan's limit`,
           said !== null && said.includes(M.dashboard.files.uploadFileCap), said ?? "nothing was said");
         inLanguage("files on Free, the fourth file", await shellText());

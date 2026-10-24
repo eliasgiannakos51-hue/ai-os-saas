@@ -399,7 +399,16 @@ async function open(origin, device, locale) {
   async function press(locator) {
     await locator.evaluate((e) => e.scrollIntoView({ block: "center" }));
     if (!cdp) return locator.click();
-    const box = await locator.boundingBox();
+    // A finger lands where the thing IS: wait out a slide (the history column
+    // takes 200ms to come in) before taking its place from the page.
+    let box = await locator.boundingBox();
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 60));
+      const next = await locator.boundingBox();
+      const still = next && box && Math.abs(next.x - box.x) < 0.5 && Math.abs(next.y - box.y) < 0.5;
+      box = next;
+      if (still) break;
+    }
     const x = box.x + box.width / 2, y = box.y + box.height / 2;
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
@@ -573,7 +582,10 @@ try {
       await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await sleep(300);
       check("the [◧] column says there is nothing yet", (await page.locator('[data-testid="shell-history-column"]').innerText().catch(() => "")).includes(T.dashboard.toolShell.history.empty));
-      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+      // On a phone the open column covers the shell's own toggle, so it is
+      // closed the way a finger closes it: the scrim at the right edge.
+      if (device.touch) await page.locator('[data-testid="tool-shell-history-scrim"]').click({ position: { x: 370, y: 400 } });
+      else await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await language(page, locale, "empty");
 
       // ---------------------------------------------------------------

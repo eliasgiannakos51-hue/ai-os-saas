@@ -250,7 +250,7 @@ async function showFile(page, press) {
 }
 async function uploadAndAnalyse(origin, page, press, M) {
   await page.goto(`${origin}/dashboard/data-analysis`, { waitUntil: "networkidle" });
-  await page.locator('[data-testid="analysis-upload-input"]').setInputFiles([{ name: "πωλήσεις.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX }]);
+  await page.locator('[data-testid="analyze-upload-input"]').setInputFiles([{ name: "πωλήσεις.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX }]);
   await page.waitForURL(/\?id=/, { timeout: 30_000 });
   await page.waitForLoadState("networkidle");
   const asked = modelAsked.length;
@@ -348,7 +348,7 @@ try {
   {
     const { context, page, press } = await open(ON, { viewport: { width: 390, height: 844 }, touch: true });
     await page.goto(`${ON}/dashboard/data-analysis`, { waitUntil: "networkidle" });
-    await page.locator('[data-testid="analysis-upload-input"]').setInputFiles([{ name: "ΣΦΑΛΜΑ.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX }]);
+    await page.locator('[data-testid="analyze-upload-input"]').setInputFiles([{ name: "ΣΦΑΛΜΑ.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX }]);
     await page.waitForURL(/\?id=/, { timeout: 30_000 });
     await page.waitForLoadState("networkidle");
     await press(page.locator('[data-testid="analysis-analyse"]'));

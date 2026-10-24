@@ -156,7 +156,16 @@ async function open(origin, device) {
   async function press(locator) {
     await locator.evaluate((e) => e.scrollIntoView({ block: "center" }));
     if (!cdp) return locator.click();
-    const box = await locator.boundingBox();
+    // A finger lands where the thing IS: wait out a slide (the history column
+    // takes 200ms to come in) before taking its place from the page.
+    let box = await locator.boundingBox();
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 60));
+      const next = await locator.boundingBox();
+      const still = next && box && Math.abs(next.x - box.x) < 0.5 && Math.abs(next.y - box.y) < 0.5;
+      box = next;
+      if (still) break;
+    }
     const x = box.x + box.width / 2, y = box.y + box.height / 2;
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });

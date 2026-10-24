@@ -196,7 +196,16 @@ try {
     async function press(locator) {
       await locator.scrollIntoViewIfNeeded();
       if (!cdp) return locator.click();
-      const box = await locator.boundingBox();
+      // A finger lands where the thing IS: wait out a slide (the history column
+      // takes 200ms to come in) before taking its place from the page.
+      let box = await locator.boundingBox();
+      for (let i = 0; i < 20; i++) {
+        await new Promise((r) => setTimeout(r, 60));
+        const next = await locator.boundingBox();
+        const still = next && box && Math.abs(next.x - box.x) < 0.5 && Math.abs(next.y - box.y) < 0.5;
+        box = next;
+        if (still) break;
+      }
       const x = box.x + box.width / 2, y = box.y + box.height / 2;
       await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
       await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
@@ -423,11 +432,25 @@ try {
     const filesField = page.locator("main textarea");
     await filesField.fill("Τι λέει για την ακύρωση;");
     await filesField.press("Enter");
+    // Let that question finish before a document is chosen: the shell
+    // refreshes the page's analysis when it ends and re-opens "analysis" on a
+    // computer, which would undo a choice made in the middle of it.
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(1500);
+    // 2026-10-23: Files is the Analyze shell. It opens on the latest analysis
+    // when there is one, so a question typed before a document is chosen is
+    // asked of THAT, never of the documents; a stored document is chosen from
+    // the [◧] column, which is where the old "tick one" list went. The
+    // property is the same: nothing is asked of the files until one is
+    // chosen, and then exactly that file is asked.
+    check("with no document chosen, nothing is asked of the documents",
+      askedFiles.length === 0);
+    if ((await page.locator('[data-testid="tool-shell-history"]').getAttribute("data-open")) !== "true") await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10000 });
+    check("...and the stored file is in the [◧] column, to choose", (await page.locator('[data-testid="shell-history-column"]').innerText()).includes("σύμβαση.pdf"));
+    await press(page.locator('[data-testid="shell-history-row"]', { hasText: "σύμβαση.pdf" }));
     await page.waitForTimeout(400);
-    check("with nothing ticked, nothing is asked, and the files open to tick one",
-      askedFiles.length === 0 && (await page.locator('[data-testid="files-shell-list"]').count()) === 1);
-    await press(page.locator('[data-testid="files-shell-list"] input[type=checkbox]').first());
-    if (device.touch) {
+    if (device.touch && (await page.getByRole("button", { name: W.back }).isVisible().catch(() => false))) {
       await press(page.getByRole("button", { name: W.back }));
       await page.waitForTimeout(300);
     }

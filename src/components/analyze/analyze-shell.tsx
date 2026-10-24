@@ -114,7 +114,7 @@ export function AnalyzeShell({
 
   // WHICH HALF IS ACTIVE. null while nothing has been opened or uploaded
   // yet — the empty landing shows then, same ToolShell rule as Coding.
-  const [mode, setMode] = useState<"analysis" | "files" | null>(current ? "analysis" : null);
+  const [mode, setMode] = useState<"analysis" | "files" | null>(current ? "analysis" : initialOpenId ? "files" : null);
   const [pane, setPane] = useState<"work" | null>(null);
 
   // -- the spreadsheet half (the old analysis-shell.tsx, now deleted) --
@@ -171,9 +171,13 @@ export function AnalyzeShell({
       setMode("files");
       setPane("work");
     }
-    // Mount + current only, as the two old effects were.
+    // Mount + WHICH analysis is open only, as the two old effects were. It was
+    // `[current]`, the object, and every server refresh (a finished answer's
+    // "seen" mark, a saved question) hands down a new object for the same
+    // analysis: on a computer that put a person who had just chosen a document
+    // back on the analysis, and their document answer disappeared from the screen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
+  }, [current?.id]);
 
   // WHAT THE PHONE'S SHARE SHEET DID (src/app/share/route.ts): it ends at
   // /dashboard/files with `?shared=N` and the counts of what failed, or

@@ -545,12 +545,16 @@ try {
     await context.close();
   }
   {
-    setFlags({ flows: "off" });
+    // 2026-10-23: the switch `flows` is gone, so there is no "off" to hold. What
+    // that block protected, that nobody is shut out of the tool, is held the
+    // other way round: an account with no switch set at all gets the shell,
+    // and the route answers it instead of refusing it.
+    setFlags({});
     const { context, page } = await open(ON, desktop);
     await page.goto(`${ON}/dashboard/projects`, { waitUntil: "networkidle" });
-    check("with the switch off the Projects page is the one it always was", (await page.locator('[data-testid="tool-shell"]').count()) === 0 && (await page.locator("main").count()) === 1);
+    check("with no switch set the Projects page is the flow shell, for everybody", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator("main").count()) === 1);
     const r = await page.request.post(`${ON}/api/flows`, { data: { said: CAMPING } });
-    check("...and the route refuses", r.status() === 403 && (await r.json()).code === "not_enabled");
+    check("...and the route answers instead of refusing", r.status() !== 403 && (await r.json().catch(() => ({}))).code !== "not_enabled", String(r.status()));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

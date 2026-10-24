@@ -105,6 +105,7 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   mcp_ask: "file",
 
   document_translate: "translation",
+  text_translate: "translation",
 
   meeting_analyse: "summary",
 

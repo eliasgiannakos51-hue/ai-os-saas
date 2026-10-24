@@ -20,8 +20,8 @@
 // tool — every one opens Chat with its question already asked
 // (`?ask=`, which Chat auto-sends: components/chat/chat-workspace.tsx).
 //
-// scripts/tests/quick-jobs.test.mjs holds every href against a real route
-// and every target's param against what that page actually reads.
+// scripts/tests/all-tools.test.mjs §1 holds every href against a real
+// route and every target's param against what that page actually reads.
 
 export type QuickJobGroup = "record" | "ask" | "make" | "runAlone" | "organise" | "learn";
 

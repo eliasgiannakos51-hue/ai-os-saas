@@ -4175,7 +4175,9 @@
       "glossaryHint": "在每种语言中保持不变的词语。",
       "glossarySuggested": "添加「{term}」",
       "glossaryPlaceholder": "新词语…",
-      "glossaryRemove": "移除「{term}」"
+      "glossaryRemove": "移除「{term}」",
+      "glossaryAdd": "添加词语",
+      "glossaryAdding": "新的词汇表词语"
     }
   },
   "module": {

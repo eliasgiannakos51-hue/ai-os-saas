@@ -340,9 +340,13 @@ try {
     await page.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
     await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
     await press(page.locator('[data-testid="translate-tool-glossary"]'));
-    const field = page.locator('[data-testid="translate-tool-glossary-input"]');
-    await field.fill("Camping Ήλιος");
     await press(page.locator('[data-testid="translate-tool-glossary-add"]'));
+    check("choosing to add a term is said, with no second field — the shell's own is what takes it", (await page.locator('[data-testid="box-chosen"]').innerText()).length > 0 && (await page.locator('[data-testid="tool-shell"] textarea').count()) === 1);
+    const newTermField = page.locator("textarea").first();
+    await newTermField.fill("Camping Ήλιος");
+    await press(page.locator('button[type="submit"]'));
+    await page.locator('[data-testid="translate-tool-glossary"]').waitFor({ timeout: 10_000 });
+    await press(page.locator('[data-testid="translate-tool-glossary"]'));
     await page.locator('[data-testid="translate-tool-glossary-list"]').filter({ hasText: "Camping Ήλιος" }).waitFor({ timeout: 10_000 });
     // The UI shows the new term at once, optimistically; the PUT that
     // actually saves it is fire-and-forget behind that paint, so give it

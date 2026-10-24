@@ -4175,7 +4175,9 @@
       "glossaryHint": "Parole che restano le stesse in ogni lingua.",
       "glossarySuggested": "Aggiungi «{term}»",
       "glossaryPlaceholder": "Nuova parola…",
-      "glossaryRemove": "Rimuovi «{term}»"
+      "glossaryRemove": "Rimuovi «{term}»",
+      "glossaryAdd": "Aggiungi termine",
+      "glossaryAdding": "Nuovo termine del glossario"
     }
   },
   "module": {

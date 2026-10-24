@@ -4175,7 +4175,9 @@
       "glossaryHint": "كلمات تبقى كما هي في كل لغة.",
       "glossarySuggested": "أضف «{term}»",
       "glossaryPlaceholder": "كلمة جديدة…",
-      "glossaryRemove": "إزالة «{term}»"
+      "glossaryRemove": "إزالة «{term}»",
+      "glossaryAdd": "إضافة مصطلح",
+      "glossaryAdding": "مصطلح جديد في المسرد"
     }
   },
   "module": {

@@ -70,7 +70,7 @@ export function TranslateShell() {
   const [glossary, setGlossary] = useState<string[]>([]);
   const [suggestedBrand, setSuggestedBrand] = useState<string | null>(null);
   const [choosingGlossary, setChoosingGlossary] = useState(false);
-  const [newTerm, setNewTerm] = useState("");
+  const [addingTerm, setAddingTerm] = useState(false);
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -287,9 +287,16 @@ export function TranslateShell() {
           </span>
         ) : null
       }
-      placeholder={editing ? t("editPlaceholder") : t("placeholder")}
+      placeholder={addingTerm ? t("glossaryPlaceholder") : editing ? t("editPlaceholder") : t("placeholder")}
       sending={running}
-      onSend={(text) => void (editing ? editParagraph(text) : translate(text))}
+      onSend={(text) => {
+        if (addingTerm) {
+          addTerm(text);
+          setAddingTerm(false);
+          return;
+        }
+        void (editing ? editParagraph(text) : translate(text));
+      }}
       onStop={() => abortRef.current?.abort()}
       onLengthChange={setLength}
       options={[
@@ -408,40 +415,26 @@ export function TranslateShell() {
                   ))}
                 </ul>
               )}
-              {/* A plain row, not a <form>: this popover already sits
-                  inside ChatComposer's own <form> (components/chat/chat-
-                  composer.tsx), and a nested form is invalid HTML — the
-                  browser drops the inner one, so a "submit" button here
-                  would press the OUTER composer's send instead. */}
-              <div className="flex gap-1.5">
-                <input
-                  type="text"
-                  value={newTerm}
-                  onChange={(e) => setNewTerm(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key !== "Enter") return;
-                    e.preventDefault();
-                    addTerm(newTerm);
-                    setNewTerm("");
-                  }}
-                  placeholder={t("glossaryPlaceholder")}
-                  disabled={glossary.length >= MAX_GLOSSARY_TERMS}
-                  data-testid="translate-tool-glossary-input"
-                  className="input min-w-0 flex-1 text-xs"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addTerm(newTerm);
-                    setNewTerm("");
-                  }}
-                  disabled={!newTerm.trim() || glossary.length >= MAX_GLOSSARY_TERMS}
-                  data-testid="translate-tool-glossary-add"
-                  className="btn-outline px-2 text-xs disabled:opacity-40"
-                >
-                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              </div>
+              {/* NOTHING TO TYPE INTO BUT THE SHELL'S FIELD
+                  (scripts/tests/tool-shell.test.mjs) — a new term is
+                  typed into the one composer, the same way a Documents
+                  edit instruction is: pressing this sets "addingTerm"
+                  mode, the field's placeholder and send change to match,
+                  and ChosenBox below shows which mode is on. */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAddingTerm(true);
+                  setChoosingGlossary(false);
+                  composerRef.current?.focus();
+                }}
+                disabled={glossary.length >= MAX_GLOSSARY_TERMS}
+                data-testid="translate-tool-glossary-add"
+                className="flex min-h-[44px] w-full items-center gap-1.5 rounded-item px-2 text-start text-xs text-muted hover:bg-panel-hover hover:text-foreground disabled:opacity-40"
+              >
+                <Plus className="h-3 w-3 shrink-0" aria-hidden="true" />
+                {t("glossaryAdd")}
+              </button>
             </div>
           )}
         </span>,
@@ -456,6 +449,7 @@ export function TranslateShell() {
       }}
       footer={
         <>
+          {addingTerm && <ChosenBox label={t("glossaryAdding")} onClear={() => setAddingTerm(false)} />}
           {editing && <ChosenBox label={t("editingLabel", { n: editing.index + 1, language: languageLabel(editing.target) })} onClear={() => setEditing(null)} />}
           {!running && length > 0 ? <CostEstimateHint credits={estimate.estimatedCredits} /> : null}
         </>

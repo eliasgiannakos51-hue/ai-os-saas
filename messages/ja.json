@@ -4175,7 +4175,9 @@
       "glossaryHint": "どの言語でも変わらない語句です。",
       "glossarySuggested": "「{term}」を追加",
       "glossaryPlaceholder": "新しい語句…",
-      "glossaryRemove": "「{term}」を削除"
+      "glossaryRemove": "「{term}」を削除",
+      "glossaryAdd": "語句を追加",
+      "glossaryAdding": "新しい用語集の語句"
     }
   },
   "module": {

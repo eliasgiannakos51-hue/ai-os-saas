@@ -4175,7 +4175,9 @@
       "glossaryHint": "Λέξεις που μένουν ίδιες σε κάθε γλώσσα.",
       "glossarySuggested": "Πρόσθεσε «{term}»",
       "glossaryPlaceholder": "Νέα λέξη...",
-      "glossaryRemove": "Αφαίρεση «{term}»"
+      "glossaryRemove": "Αφαίρεση «{term}»",
+      "glossaryAdd": "Νέος όρος",
+      "glossaryAdding": "Νέος όρος για το γλωσσάρι"
     }
   },
   "module": {

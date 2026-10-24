@@ -140,6 +140,10 @@ const NO_HEADER_EXEMPT = new Map([
     "src/app/dashboard/memory/page.tsx",
     "not a page: a permanentRedirect to /dashboard/search, kept so a bookmark to the record search's old address does not 404. A header on it would render for nobody",
   ],
+  ...["app-builder", "audio", "avatars", "editing", "films", "iowork", "translate", "video-studio"].map((slug) => [
+    `src/app/dashboard/${slug}/page.tsx`,
+    "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",
+  ]),
 ]);
 const noHeader = dashboardPages.filter((f) => !withHeader.includes(f));
 const routed = new Set(HELP_TIPS.map((t) => t.route).filter(Boolean));

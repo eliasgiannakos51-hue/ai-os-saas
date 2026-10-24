@@ -4167,7 +4167,10 @@
         "unavailable": "La traduzione non è disponibile in questo momento.",
         "unusable": "La risposta non era utilizzabile e non è stato scritto nulla. Viene addebitato solo quanto speso.",
         "failed": "Non è stato possibile completare la traduzione. Nessun credit è stato addebitato."
-      }
+      },
+      "editPlaceholder": "Dì cosa cambiare in questo paragrafo…",
+      "editDone": "Il paragrafo {n} ({language}) è cambiato.",
+      "editingLabel": "Paragrafo {n} · {language}"
     }
   },
   "module": {

@@ -5,11 +5,14 @@ import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { readTranslations, type Piece } from "@/lib/translate/segments";
 import {
   PARALLEL_CALLS,
+  TRANSLATE_EDIT_TOOL,
   TRANSLATE_MODEL,
   TRANSLATE_TOOL,
   batchMaxTokens,
   batchMessage,
   translateBatches,
+  translateEditMessage,
+  translateEditSystemPrompt,
   translateSystemPrompt,
   translateTextSystemPrompt,
   type TranslateStyle,
@@ -149,4 +152,47 @@ export async function translateTextPieces(params: {
 }): Promise<TranslateOutcome> {
   const { style, ...rest } = params;
   return translateWithSystem({ ...rest, system: translateTextSystemPrompt(params.target, style) });
+}
+
+export type ParagraphEditOutcome = { ok: true; text: string } | { ok: false; kind: "aborted" | "provider" | "unusable"; detail: string };
+
+/** ONE paragraph, changed by an instruction (package 3) — one call, no batching. */
+export async function translateParagraphEdit(params: {
+  target: string;
+  style: TranslateStyle;
+  paragraph: string;
+  instruction: string;
+  costs: CostAccumulator;
+  userId?: string;
+  signal?: AbortSignal;
+}): Promise<ParagraphEditOutcome> {
+  const system = translateEditSystemPrompt(params.target, params.style);
+  const message = translateEditMessage(params.target, params.paragraph, params.instruction);
+  let outcome: AiOutcome;
+  try {
+    outcome = await runCompletion(
+      {
+        purpose: "create",
+        model: TRANSLATE_MODEL,
+        maxTokens: batchMaxTokens(message.length),
+        system: [{ type: "text", text: system }],
+        messages: [{ role: "user", content: message }],
+        tools: [TRANSLATE_EDIT_TOOL],
+        toolChoice: { type: "tool", name: TRANSLATE_EDIT_TOOL.name },
+        requires: ["tool_calling"],
+      },
+      { userId: params.userId, signal: params.signal }
+    );
+  } catch (err) {
+    if (params.signal?.aborted) return { ok: false, kind: "aborted", detail: "stopped by the user" };
+    return { ok: false, kind: "provider", detail: err instanceof Error ? err.message : String(err) };
+  }
+  if (!outcome.ok) {
+    return outcome.kind === "aborted" ? { ok: false, kind: "aborted", detail: "stopped by the user" } : { ok: false, kind: "provider", detail: outcome.detail };
+  }
+  params.costs.record("edit", outcome.usage, outcome.reportedModel || outcome.model);
+  const toolUse = outcome.toolCalls.find((call) => call.name === TRANSLATE_EDIT_TOOL.name);
+  const text = toolUse && typeof (toolUse.input as { text?: unknown })?.text === "string" ? ((toolUse.input as { text: string }).text) : "";
+  if (!text.trim()) return { ok: false, kind: "unusable", detail: "no usable answer" };
+  return { ok: true, text: text.trim() };
 }

@@ -102,6 +102,44 @@ export function translateTextInputChars(pieces: readonly Piece[], target: string
   return translateBatches(pieces).reduce((sum, b) => sum + system + batchMessage(pieces, b, target).length, 0);
 }
 
+/**
+ * ONE TRANSLATED PARAGRAPH, CHANGED BY WORDS (package 3): "make this
+ * shorter", "more formal" — the instruction and the ONE paragraph it is
+ * about, nothing else the screen is showing. api/translate/text/edit/
+ * route.ts sends exactly this; scripts/tests/translate-tool.test.mjs
+ * executes it.
+ */
+export const MAX_TRANSLATE_EDIT_INSTRUCTION_CHARS = 500;
+
+export function translateEditSystemPrompt(target: string, style: TranslateStyle): string {
+  const language = describeLocale(target);
+  return [
+    `You are given one paragraph already translated into ${language}, and an instruction for how to change it.`,
+    "Answer with the tool: the paragraph, changed exactly as asked, still in " + language + ", still meaning the same thing unless the instruction asks otherwise.",
+    styleLine(style),
+    "Keep numbers, prices, currencies, dates, email and web addresses, phone numbers, and the names of businesses, places, brands and products as they are.",
+    "Answer with the paragraph alone — no preamble, no explanation.",
+  ].join(" ");
+}
+
+export const TRANSLATE_EDIT_TOOL: AiToolSpec = {
+  name: "edited_paragraph",
+  description: "The paragraph, changed as asked.",
+  inputSchema: {
+    type: "object" as const,
+    properties: { text: { type: "string" } },
+    required: ["text"],
+  },
+};
+
+export function translateEditMessage(target: string, paragraph: string, instruction: string): string {
+  return JSON.stringify({ language: describeLocale(target), paragraph, instruction });
+}
+
+export function translateEditInputChars(target: string, paragraph: string, instruction: string, style: TranslateStyle): number {
+  return translateEditSystemPrompt(target, style).length + translateEditMessage(target, paragraph, instruction).length;
+}
+
 /** Characters of words: what MAX_TRANSLATE_CHARS bounds. */
 export function textChars(pieces: readonly Piece[]): number {
   return pieces.reduce((sum, p) => sum + p.text.length, 0);

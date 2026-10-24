@@ -4167,7 +4167,10 @@
         "unavailable": "翻译目前不可用。",
         "unusable": "返回的结果无法使用，未写入任何内容。仅收取已消耗的费用。",
         "failed": "无法完成翻译。未收取任何积分。"
-      }
+      },
+      "editPlaceholder": "说出要对这个段落做什么修改…",
+      "editDone": "第 {n} 段（{language}）已修改。",
+      "editingLabel": "第 {n} 段 · {language}"
     }
   },
   "module": {

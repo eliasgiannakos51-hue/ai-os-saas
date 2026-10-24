@@ -633,6 +633,18 @@ export const ACTION_PROFILES = {
     baseOutputChars: 2200,
     outputCharsPerInputChar: 0,
   },
+  // ONE TRANSLATED PARAGRAPH, CHANGED BY WORDS (the standalone Translate
+  // tool, package 3, 2026-10-24): only that paragraph and the instruction
+  // are sent — not the whole translation, which stays in the browser
+  // rather than a stored row until package 8 — so this is sized the same
+  // as documentBlockEdit's single paragraph rather than the whole-document
+  // weight documentEdit carries.
+  textTranslateEdit: {
+    systemPromptTokens: 300,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
   // GAMES (MASTER 16, package 26; api/games and api/games/[id]). Each
   // call site passes EVERY character it sends — the system prompt and the
   // message (lib/games/game-plan.ts) — so systemPromptTokens is only the

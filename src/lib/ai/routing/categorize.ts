@@ -106,6 +106,7 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
 
   document_translate: "translation",
   text_translate: "translation",
+  text_translate_edit: "translation",
 
   meeting_analyse: "summary",
 

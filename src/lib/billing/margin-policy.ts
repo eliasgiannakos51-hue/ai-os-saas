@@ -250,6 +250,10 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   // call with its own cost shape, so it gets its own key rather than
   // being folded into a margin that was decided about speech.
   meetingAnalyse: "meeting_analyse",
+  // Its own key, not folded into document_translate: a single-paragraph
+  // edit costs a fraction of a whole translation, and a shared margin key
+  // would let that mismatch hide inside one number.
+  textTranslateEdit: "text_translate_edit",
   // The three depth tiers settle under the SAME feature as the untiered
   // profile, so CREDIT_MARGIN_AGENT_RUN still governs all of them — a
   // per-tier margin key would let one tier quietly drop below the floor

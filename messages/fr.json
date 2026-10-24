@@ -4167,7 +4167,10 @@
         "unavailable": "La traduction n'est pas disponible pour le moment.",
         "unusable": "La réponse n'était pas utilisable et rien n'a été écrit. Seul ce qui a été dépensé est facturé.",
         "failed": "La traduction n'a pas pu être faite. Aucun crédit n'a été facturé."
-      }
+      },
+      "editPlaceholder": "Dites ce qu'il faut changer dans ce paragraphe…",
+      "editDone": "Le paragraphe {n} ({language}) a changé.",
+      "editingLabel": "Paragraphe {n} · {language}"
     }
   },
   "module": {

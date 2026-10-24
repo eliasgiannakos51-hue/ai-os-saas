@@ -4167,7 +4167,10 @@
         "unavailable": "La traducción no está disponible en este momento.",
         "unusable": "La respuesta no fue utilizable y no se escribió nada. Solo se cobra lo gastado.",
         "failed": "No se pudo hacer la traducción. No se cobraron créditos."
-      }
+      },
+      "editPlaceholder": "Di qué cambiar en este párrafo…",
+      "editDone": "El párrafo {n} ({language}) ha cambiado.",
+      "editingLabel": "Párrafo {n} · {language}"
     }
   },
   "module": {

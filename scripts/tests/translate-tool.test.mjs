@@ -1,8 +1,9 @@
 // TRANSLATE AS ITS OWN TOOL (the owner's "ΛΕΙΤΟΥΡΓΙΚΟ, ΚΟΜΜΑΤΙ ΚΟΜΜΑΤΙ",
 // 2026-10-24), built piece by piece behind the switch "translate-tool".
-// This suite holds piece 1 (the screen) and piece 2 (text in, translation
-// out, paragraph by paragraph) — scripts/tests/translate.test.mjs keeps
-// holding the site/document translation this tool grew out of.
+// This suite holds piece 1 (the screen), piece 2 (text in, translation
+// out, paragraph by paragraph) and piece 3 (one paragraph changed by
+// words) — scripts/tests/translate.test.mjs keeps holding the
+// site/document translation this tool grew out of.
 //
 // Run: node scripts/tests/translate-tool.test.mjs
 import { readFileSync } from "node:fs";
@@ -81,11 +82,30 @@ console.log("== 5. the catalog, and the screen's own namespace, in all ten local
 {
   const catalog = read("src/lib/billing/feature-catalog.ts");
   const entry = catalog.slice(catalog.indexOf('id: "translateTool"'), catalog.indexOf('id: "translateTool"') + 900);
-  ok("the real route is claimed, and the entry says it charges", /"translate\/text"/.test(entry) && /charges: true/.test(entry));
+  ok("both real routes are claimed, and the entry says it charges", /"translate\/text"/.test(entry) && /"translate\/text\/edit"/.test(entry) && /charges: true/.test(entry));
   for (const locale of LOCALES) {
     const t = messages[locale]?.dashboard?.translateTool;
     ok(`${locale}: the standalone screen's own keys exist`, Boolean(t?.empty?.heading && t?.empty?.examples?.a && t?.empty?.examples?.b && t?.empty?.examples?.c && t?.placeholder && t?.targetsLabel && t?.styleLabel && t?.style?.formal && t?.style?.friendly && t?.style?.source && t?.detectedFrom && t?.sameLanguageNote && t?.kept && t?.done && t?.translating && t?.errors?.nothing && t?.errors?.tooLong && t?.errors?.sameLanguage && t?.errors?.insufficient && t?.errors?.rateLimited && t?.errors?.unavailable && t?.errors?.unusable && t?.errors?.failed));
+    ok(`${locale}: piece 3's own keys exist`, Boolean(t?.editPlaceholder && t?.editDone && t?.editingLabel));
   }
+}
+
+console.log("== 6. piece 3: one paragraph, changed by words, nothing else sent ==");
+{
+  const editRoute = read("src/app/api/translate/text/edit/route.ts");
+  ok("the switch gates this route too, before parsing what was sent", editRoute.indexOf('isFeatureOn("translate-tool"') < editRoute.indexOf("if (!parsed.ok)"));
+  ok("takes exactly one paragraph and one instruction — no target list, no whole text", /paragraph: unknown; instruction: unknown/.test(editRoute) && !/targets/.test(editRoute));
+  ok("one reservation, settled once, under its own feature (never folded into a whole translation's price)", (editRoute.match(/reserveCredits\(/g) ?? []).length === 1 && /feature: "text_translate_edit"/.test(editRoute));
+  ok("a failed edit releases the hold and writes nothing", /releaseReservation\(user\.id, reservationId\)/.test(editRoute));
+
+  const shell = read("src/components/translate/translate-shell.tsx");
+  ok("clicking a translated paragraph is what chooses it (ChosenBox, the same box Documents uses)", /ChosenBox/.test(shell) && /data-testid="translate-tool-translated"/.test(shell));
+  ok("editing posts to the edit route, not the whole-text one", /\/api\/translate\/text\/edit/.test(shell));
+  ok("only the chosen paragraph is rewritten in state — every other paragraph, in every other language, is untouched by the edit", /r\.paragraphs\.map\(\(p, i\) => \(i === index \? body\.text : p\)\)/.test(shell));
+
+  const profile = read("src/lib/billing/estimate.ts");
+  ok("its own action profile exists, sized for one paragraph rather than a whole document", /textTranslateEdit: \{/.test(profile));
+  ok("the router classifies the new feature (category and tier)", /text_translate_edit: "translation"/.test(read("src/lib/ai/routing/categorize.ts")) && /text_translate_edit: "complex"/.test(read("src/lib/ai/routing/classify.ts")));
 }
 
 console.log(failures.length ? `\nFAILURES: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);

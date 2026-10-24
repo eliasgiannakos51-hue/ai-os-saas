@@ -1386,7 +1386,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     // (src/lib/flags/flags.ts) — but the tile stays Coming Soon
     // (all-tools.ts, ready: false) until every piece checks out, which is
     // what `notSold` below still names.
-    routes: ["tools/notify", "translate/text"],
+    routes: ["tools/notify", "translate/text", "translate/text/edit"],
     charges: true,
     notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): the standalone tool is being built piece by piece behind the switch `translate-tool` — see src/app/dashboard/translate/page.tsx. Published when every piece checks out and ready flips to true.",
     enforcedIn: "src/app/api/translate/text/route.ts",

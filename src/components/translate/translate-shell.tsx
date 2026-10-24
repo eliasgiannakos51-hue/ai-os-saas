@@ -6,12 +6,12 @@ import { Check, ChevronDown } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { CostEstimateHint } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
-import { ToolShell, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ChosenBox, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { LANGUAGES } from "@/lib/languages";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
-import { TRANSLATE_MODEL, TRANSLATE_STYLES, type TranslateStyle } from "@/lib/translate/translate-prompt";
+import { TRANSLATE_MODEL, TRANSLATE_STYLES, translateEditInputChars, type TranslateStyle } from "@/lib/translate/translate-prompt";
 import { MAX_TRANSLATE_TARGETS, splitParagraphs, translateTextLiveEstimateChars } from "@/lib/translate/text-source";
 
 /**
@@ -58,8 +58,18 @@ export function TranslateShell() {
   const [length, setLength] = useState(0);
   const [running, setRunning] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
+  // ONE PARAGRAPH CHOSEN (package 3, ChosenBox — components/shell/tool-
+  // shell.tsx, the same box Documents uses for its own paragraph edit):
+  // which turn, which language and which paragraph the next words change.
+  const [editing, setEditing] = useState<{ turnId: string; target: string; index: number } | null>(null);
+
+  const editingParagraph = editing ? turns.find((t) => t.id === editing.turnId)?.results?.find((r) => r.target === editing.target)?.paragraphs[editing.index] : undefined;
 
   const estimate = useMemo(() => {
+    if (editing && editingParagraph !== undefined) {
+      const inputChars = translateEditInputChars(editing.target, editingParagraph, "x".repeat(length), style);
+      return estimateForAction("textTranslateEdit", { model: TRANSLATE_MODEL, inputChars, planSlug }, DEFAULTS, accountCreditPriceEur ?? undefined);
+    }
     const inputChars = translateTextLiveEstimateChars(length, targets.length);
     return estimateForAction(
       "documentTranslate",
@@ -67,7 +77,7 @@ export function TranslateShell() {
       DEFAULTS,
       accountCreditPriceEur ?? undefined
     );
-  }, [length, targets.length, planSlug, accountCreditPriceEur]);
+  }, [editing, editingParagraph, length, targets, style, planSlug, accountCreditPriceEur]);
 
   function say(role: "user" | "tool", text: string, extra?: Partial<Turn>) {
     setTurns((prev) => [...prev, { id: `${role}${prev.length}`, role, text, ...extra }]);
@@ -118,6 +128,44 @@ export function TranslateShell() {
     }
   }
 
+  async function editParagraph(instruction: string) {
+    if (!editing || running) return;
+    const { turnId, target, index } = editing;
+    say("user", instruction);
+    setRunning(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const paragraph = turns.find((t) => t.id === turnId)?.results?.find((r) => r.target === target)?.paragraphs[index];
+      if (!paragraph) return;
+      const res = await fetch("/api/translate/text/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ target, style, paragraph, instruction, mode: "run" }),
+      });
+      const body = await res.json().catch(() => null);
+      refreshCredits();
+      if (!res.ok || !body?.ok) {
+        say("tool", refusal(String(body?.code ?? "")));
+        return;
+      }
+      setTurns((prev) =>
+        prev.map((t) =>
+          t.id === turnId
+            ? { ...t, results: t.results?.map((r) => (r.target === target ? { ...r, paragraphs: r.paragraphs.map((p, i) => (i === index ? body.text : p)) } : r)) }
+            : t
+        )
+      );
+      say("tool", t("editDone", { n: index + 1, language: languageLabel(target) }));
+    } catch {
+      say("tool", controller.signal.aborted ? tSteps("stopped") : t("errors.failed"));
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
+      setRunning(false);
+    }
+  }
+
   function toggleTarget(code: string) {
     setTargets((prev) => {
       if (prev.includes(code)) return prev.filter((c) => c !== code);
@@ -151,12 +199,26 @@ export function TranslateShell() {
                   <p className="text-xs text-muted">{t("sameLanguageNote")}</p>
                 ) : (
                   <ol className="space-y-2">
-                    {r.paragraphs.map((p, i) => (
-                      <li key={i} className="grid gap-2 sm:grid-cols-2" data-testid="translate-tool-pair">
-                        <p className="whitespace-pre-wrap rounded-item bg-panel p-2 text-xs text-muted" data-testid="translate-tool-original">{original[i] ?? ""}</p>
-                        <p className="whitespace-pre-wrap rounded-item bg-panel-hover p-2 text-xs text-foreground" data-testid="translate-tool-translated">{p}</p>
-                      </li>
-                    ))}
+                    {r.paragraphs.map((p, i) => {
+                      const chosen = editing?.turnId === turn.id && editing.target === r.target && editing.index === i;
+                      return (
+                        <li key={i} className="grid gap-2 sm:grid-cols-2" data-testid="translate-tool-pair">
+                          <p className="whitespace-pre-wrap rounded-item bg-panel p-2 text-xs text-muted" data-testid="translate-tool-original">{original[i] ?? ""}</p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditing((v) => (chosen ? null : { turnId: turn.id, target: r.target, index: i }));
+                              composerRef.current?.focus();
+                            }}
+                            aria-pressed={chosen}
+                            data-testid="translate-tool-translated"
+                            className={`block min-h-[44px] w-full whitespace-pre-wrap rounded-item p-2 text-start text-xs text-foreground ${chosen ? "bg-panel-hover ring-1 ring-foreground" : "bg-panel-hover hover:ring-1 hover:ring-border"}`}
+                          >
+                            {p}
+                          </button>
+                        </li>
+                      );
+                    })}
                   </ol>
                 )}
                 {r.kept > 0 && <p className="text-[11px] text-warning">{t("kept", { count: r.kept })}</p>}
@@ -180,9 +242,9 @@ export function TranslateShell() {
           </span>
         ) : null
       }
-      placeholder={t("placeholder")}
+      placeholder={editing ? t("editPlaceholder") : t("placeholder")}
       sending={running}
-      onSend={(text) => void translate(text)}
+      onSend={(text) => void (editing ? editParagraph(text) : translate(text))}
       onStop={() => abortRef.current?.abort()}
       onLengthChange={setLength}
       options={[
@@ -269,7 +331,12 @@ export function TranslateShell() {
           { key: "c", label: t("empty.examples.c") },
         ],
       }}
-      footer={!running && length > 0 ? <CostEstimateHint credits={estimate.estimatedCredits} /> : null}
+      footer={
+        <>
+          {editing && <ChosenBox label={t("editingLabel", { n: editing.index + 1, language: languageLabel(editing.target) })} onClear={() => setEditing(null)} />}
+          {!running && length > 0 ? <CostEstimateHint credits={estimate.estimatedCredits} /> : null}
+        </>
+      }
     />
   );
 }

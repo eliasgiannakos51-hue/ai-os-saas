@@ -4167,7 +4167,10 @@
         "unavailable": "Übersetzung ist derzeit nicht verfügbar.",
         "unusable": "Die Antwort war nicht verwendbar, es wurde nichts geschrieben. Nur der Verbrauch wird berechnet.",
         "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
-      }
+      },
+      "editPlaceholder": "Sag, was an diesem Absatz geändert werden soll…",
+      "editDone": "Absatz {n} ({language}) wurde geändert.",
+      "editingLabel": "Absatz {n} · {language}"
     }
   },
   "module": {

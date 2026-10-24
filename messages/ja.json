@@ -4167,7 +4167,10 @@
         "unavailable": "翻訳は現在利用できません。",
         "unusable": "返答が利用できず、何も書き込まれませんでした。使用した分のみ課金されます。",
         "failed": "翻訳を行えませんでした。クレジットは課金されていません。"
-      }
+      },
+      "editPlaceholder": "この段落をどう変更するか伝えてください…",
+      "editDone": "段落 {n}（{language}）を変更しました。",
+      "editingLabel": "段落 {n} · {language}"
     }
   },
   "module": {

@@ -68,15 +68,21 @@ const model = http.createServer((req, res) => {
     const sent = JSON.parse(body || "{}");
     modelAsked.push(sent);
     const message = String(sent.messages?.[0]?.content ?? "");
-    const { language = "", pieces = [] } = JSON.parse(message || "{}");
+    const parsed = JSON.parse(message || "{}");
+    const { language = "" } = parsed;
     res.writeHead(200, { "Content-Type": "application/json", "request-id": "req_test" });
+    const toolName = sent.tool_choice?.name ?? "translations";
+    const content =
+      toolName === "edited_paragraph"
+        ? { type: "tool_use", id: "t", name: "edited_paragraph", input: { text: `EDITED(${parsed.instruction}): ${parsed.paragraph}` } }
+        : { type: "tool_use", id: "t", name: "translations", input: { translations: (parsed.pieces ?? []).map((p) => `[${language}] ${p}`) } };
     res.end(
       JSON.stringify({
         id: "msg",
         type: "message",
         role: "assistant",
         model: "claude-sonnet-4-6",
-        content: [{ type: "tool_use", id: "t", name: "translations", input: { translations: pieces.map((p) => `[${language}] ${p}`) } }],
+        content: [content],
         stop_reason: "tool_use",
         usage: { input_tokens: 400, output_tokens: 200 },
       })
@@ -152,6 +158,8 @@ async function open(origin, device, locale = "el") {
   }
   return { context, page, press };
 }
+
+const p1Text = (page, index) => page.locator('[data-testid="translate-tool-translated"]').nth(index).innerText();
 
 const PARA_1 = "Καλημέρα σε όλους.";
 const PARA_2 = "Αυτή είναι η δεύτερη παράγραφος.";
@@ -271,6 +279,38 @@ try {
     await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
     check("the model is asked once, for the one language that differs", modelAsked.length - asked === 1);
     check("the same-language target says so, plainly, with no translated column", (await page.locator('[data-testid="translate-tool-target"]').filter({ hasText: "Ελληνικά" }).innerText()).includes(EL.sameLanguageNote));
+    await context.close();
+  }
+
+  console.log("\n== desktop: piece 3 — one paragraph, changed by words, the rest untouched ==");
+  {
+    setFlags({});
+    reserved.length = 0;
+    settled.length = 0;
+    const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
+    await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
+    const textarea = page.locator("textarea").first();
+    await textarea.fill(TEXT);
+    await press(page.locator("button[aria-label]").last());
+    await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
+    const enLabel = describeLocale("en");
+    const before0 = await p1Text(page, 0);
+    const before1 = await p1Text(page, 1);
+
+    await press(page.locator('[data-testid="translate-tool-translated"]').nth(1));
+    check("the chosen paragraph's box is said, with its language", (await page.locator('[data-testid="box-chosen"]').innerText()).includes(enLabel));
+    const instructionField = page.locator("textarea").first();
+    const asked = modelAsked.length;
+    await instructionField.fill("πιο σύντομο");
+    await press(page.locator("button[aria-label]").last());
+    await page.locator('[data-testid="translate-tool-translated"]').nth(1).filter({ hasText: "EDITED" }).waitFor({ timeout: 30_000 });
+    const after0 = await p1Text(page, 0);
+    const after1 = await p1Text(page, 1);
+    check("only the chosen paragraph changed — the other, same language, is byte-identical", after0 === before0 && after0 === `[${enLabel}] ${PARA_1}`);
+    check("the chosen one carries the edit", after1 === `EDITED(πιο σύντομο): ${before1}`);
+    check("exactly one more call was made — the edit alone, no re-translation", modelAsked.length - asked === 1);
+    check("its own reservation, settled under its own feature", reserved.length === 2 && settled.some((s) => s.p_feature === "text_translate_edit"));
     await context.close();
   }
 

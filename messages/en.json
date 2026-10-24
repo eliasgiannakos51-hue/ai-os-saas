@@ -4167,7 +4167,10 @@
         "unavailable": "Translation is not available right now.",
         "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
         "failed": "The translation could not be made. No credits were charged."
-      }
+      },
+      "editPlaceholder": "Say what to change about this paragraph…",
+      "editDone": "Paragraph {n} ({language}) changed.",
+      "editingLabel": "Paragraph {n} · {language}"
     }
   },
   "module": {

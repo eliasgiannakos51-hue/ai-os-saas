@@ -70,6 +70,17 @@ const ALLOWED = [
       "section 3 of the same gate, which calls resolveSelectionConfig() with the " +
       "flag unset, with 'true' and with 'on'.",
   },
+  {
+    file: "tool-notify.test.mjs",
+    target: "scripts/notify-tool-ready.mjs",
+    body: "NotificationType",
+    why:
+      "labelled 'DOC, not behaviour' in its own check name. There is no " +
+      "code-level guarantee to execute here — the point is that the script " +
+      "stays honest in its own comment about bypassing the curated " +
+      "NotificationType list rather than silently growing it, so a reader " +
+      "who opens the file sees the decision written down.",
+  },
 ];
 
 const pairs = proseAnchoredPairs();

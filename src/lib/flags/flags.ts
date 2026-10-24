@@ -32,8 +32,6 @@ export { FLAG_AUDIENCES, type FlagAudience };
 
 export const FLAGS = {
   "export-all": "Export everything: Settings' «Εξαγωγή όλων» downloads one .zip with the account's data, every stored file, every site as files that open outside Ionexa and every game, instead of the data alone as JSON (MASTER 18 §2.4, ACCEPTANCE Α49)",
-  games: "Games: describe a game, see its plan in five boxes and change any with words, then play it in the browser sealed off from the account, change it with words, step back to any version, and download its code (MASTER 16, package 26). Needs migration 20261024000000_user_games.sql",
-  translate: "Translate: a site and a document into another language in the same form, as a new copy beside the original, with the price before (MASTER 16, package 28)",
   "finance-sales": "Finances: write «πλήρωσα 50 ευρώ ρεύμα» and it is recorded, read by code; Sales: move a contact from stage to stage with a reminder that arrives in the bell (MASTER 16, package 18). Needs migration 20261023000000_lead_stages.sql",
   "meeting-goal": "Meetings: the actions you tick become the steps of a goal, inside a project you choose or make there (MASTER 16, package 17)",
   "posts-images": "Posts with a picture: your own photo, or one from Unsplash, on every post at its platform's own size (LinkedIn 1200x627, X 1600x900, Instagram and Threads 1080x1350, Facebook 1200x630), each downloadable (MASTER 16, package 15)",

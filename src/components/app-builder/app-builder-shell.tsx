@@ -43,7 +43,7 @@ export type AppRow = { id: string; title: string; definition: unknown; status: s
  * (lib/apps/app-system.ts, server-only), handed down by the page so the
  * price on screen counts what the route's hold counts.
  */
-export function AppsShell({ initialApps, systemChars, initialText }: { initialApps: AppRow[]; systemChars: number; initialText?: string }) {
+export function AppBuilderShell({ initialApps, systemChars, initialText }: { initialApps: AppRow[]; systemChars: number; initialText?: string }) {
   const t = useTranslations("dashboard.appBuilder");
   const tNames = useTranslations("dashboard.tools.names");
   const tSteps = useTranslations("aiSteps");

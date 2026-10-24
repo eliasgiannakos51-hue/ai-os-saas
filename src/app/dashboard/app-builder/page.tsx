@@ -13,7 +13,7 @@ import { RECORD_CAP } from "@/lib/record-cap";
 import { ComingSoonShell } from "@/components/tools/coming-soon-shell";
 import { appGate } from "@/lib/apps/app-access";
 import { appSystemPrompt } from "@/lib/apps/app-system";
-import { AppsShell, type AppRow } from "@/components/apps/apps-shell";
+import { AppBuilderShell, type AppRow } from "@/components/app-builder/app-builder-shell";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
@@ -75,7 +75,7 @@ export default async function AppBuilderPage(props: { searchParams?: Promise<{ a
     .limit(RECORD_CAP);
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <AppsShell initialApps={(data as AppRow[] | null) ?? []} systemChars={appSystemPrompt().length} initialText={readExampleParam(searchParams?.ask)} />
+      <AppBuilderShell initialApps={(data as AppRow[] | null) ?? []} systemChars={appSystemPrompt().length} initialText={readExampleParam(searchParams?.ask)} />
     </div>
   );
 }

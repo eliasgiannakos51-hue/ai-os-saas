@@ -207,7 +207,7 @@ console.log("\n== 4. the money: a price, a hold, a release, a settle — and app
   check("both are mapped to a settlement feature", /appPlan: "app_generate"/.test(margin) && /appBoxEdit: "app_generate"/.test(margin));
   check("the router knows the feature's category", /app_generate:/.test(read("src/lib/ai/routing/categorize.ts")));
   check("...and its tier", /app_generate:/.test(read("src/lib/ai/routing/classify.ts")));
-  check("no model name can reach the screen", !/claude-/.test(read("src/components/apps/apps-shell.tsx")));
+  check("no model name can reach the screen", !/claude-/.test(read("src/components/app-builder/app-builder-shell.tsx")));
 }
 
 console.log("\n== 5. the table, and everything that must know about it ==");
@@ -226,7 +226,7 @@ console.log("\n== 5. the table, and everything that must know about it ==");
 
 console.log("\n== 6. the screen: four boxes, one field, and the plan approved before anything is built ==");
 {
-  const shell = read("src/components/apps/apps-shell.tsx");
+  const shell = read("src/components/app-builder/app-builder-shell.tsx");
   check("the four boxes are drawn from the one list, not written out again", /APP_BOX_KINDS\.map/.test(shell));
   check("pressing a box chooses it", /data-testid="app-box"/.test(shell) && /aria-pressed=\{box === kind\}/.test(shell));
   check("the chosen box is said under the field", /<ChosenBox/.test(shell));

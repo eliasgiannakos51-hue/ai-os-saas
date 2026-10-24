@@ -393,6 +393,11 @@ const BASELINE = {
   // ONE: the field's send. A plan below the tool's meets the wall,
   // returned early (since 2026-10-23 the old ideas list is gone).
   "dashboard/images/page.tsx": 1,
+  // ONE: the field's send. The real shell (ToolShell) renders only for
+  // the switch "translate-tool"; everyone else still gets the Coming
+  // Soon screen, baseline 0 — 2026-10-24, piece 1 of the standalone
+  // Translate tool.
+  "dashboard/translate/page.tsx": 1,
   // ONE: the field's send. The page is Games (package 26), born in the
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.

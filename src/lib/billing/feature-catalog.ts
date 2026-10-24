@@ -1390,7 +1390,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     charges: true,
     notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): the standalone tool is being built piece by piece behind the switch `translate-tool` — see src/app/dashboard/translate/page.tsx. Published when every piece checks out and ready flips to true.",
     enforcedIn: "src/app/api/translate/text/route.ts",
-    enforcedSymbol: "reserveCredits(",
+    enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "cross" }),
   },
   {

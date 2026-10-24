@@ -390,7 +390,7 @@ export function TranslateShell() {
                   type="button"
                   onClick={() => addTerm(suggestedBrand)}
                   data-testid="translate-tool-glossary-suggested"
-                  className="flex min-h-[36px] w-full items-center gap-1.5 rounded-item px-2 text-start text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+                  className="flex min-h-[44px] w-full items-center gap-1.5 rounded-item px-2 text-start text-xs text-muted hover:bg-panel-hover hover:text-foreground"
                 >
                   <Plus className="h-3 w-3 shrink-0" aria-hidden="true" />
                   {t("glossarySuggested", { term: suggestedBrand })}
@@ -399,7 +399,7 @@ export function TranslateShell() {
               {glossary.length > 0 && (
                 <ul className="space-y-1" data-testid="translate-tool-glossary-list">
                   {glossary.map((term) => (
-                    <li key={term} className="flex min-h-[36px] items-center justify-between gap-2 rounded-item bg-panel px-2 text-xs text-foreground">
+                    <li key={term} className="flex min-h-[44px] items-center justify-between gap-2 rounded-item bg-panel px-2 text-xs text-foreground">
                       <span className="min-w-0 truncate">{term}</span>
                       <button type="button" onClick={() => removeTerm(term)} aria-label={t("glossaryRemove", { term })} data-testid="translate-tool-glossary-remove" className="shrink-0 text-muted hover:text-foreground">
                         <X className="h-3.5 w-3.5" aria-hidden="true" />

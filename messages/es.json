@@ -4135,6 +4135,39 @@
         "label": "Práctica de idioma",
         "text": "Quiero practicar "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Pega el texto que quieres traducir",
+        "examples": {
+          "a": "¡Bienvenido a nuestro negocio! Estaremos encantados de ayudarte.\n\nNuestra oficina está abierta de lunes a viernes, de 9 a 18h.",
+          "b": "Estimado cliente,\n\nGracias por su pedido. Lo recibirá en un plazo de 3 días hábiles.",
+          "c": "Nuestra empresa se fundó en 2015 y se especializa en soluciones de software para pequeñas empresas."
+        }
+      },
+      "placeholder": "Pega o escribe el texto…",
+      "targetsLabel": "A: {languages}",
+      "styleLabel": "Estilo",
+      "style": {
+        "formal": "Formal",
+        "friendly": "Cercano",
+        "source": "Como el original"
+      },
+      "detectedFrom": "Detectado: {language}",
+      "sameLanguageNote": "El texto ya está en este idioma.",
+      "kept": "{count, plural, one {# párrafo se dejó como estaba} other {# párrafos se dejaron como estaban}}, porque su traducción no llegó.",
+      "done": "{count, plural, one {Traducido a # idioma.} other {Traducido a # idiomas.}}",
+      "translating": "Traduciendo…",
+      "errors": {
+        "nothing": "No hay texto que traducir.",
+        "tooLong": "Esto es demasiado largo para una traducción ({chars} caracteres; el límite es {limit}).",
+        "sameLanguage": "Los idiomas elegidos ya son el idioma del texto. Elige al menos uno distinto.",
+        "insufficient": "No hay suficientes créditos para esta traducción. No se ha cobrado nada.",
+        "rateLimited": "Demasiados intentos a la vez. Inténtalo de nuevo en un momento.",
+        "unavailable": "La traducción no está disponible en este momento.",
+        "unusable": "La respuesta no fue utilizable y no se escribió nada. Solo se cobra lo gastado.",
+        "failed": "No se pudo hacer la traducción. No se cobraron créditos."
+      }
     }
   },
   "module": {

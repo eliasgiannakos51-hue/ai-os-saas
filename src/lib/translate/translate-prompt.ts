@@ -27,6 +27,38 @@ export const BATCH_COUNT = 120;
 /** Calls in flight at once for one translation. */
 export const PARALLEL_CALLS = 3;
 
+/**
+ * THE STANDALONE TOOL'S REGISTER (the owner's "ΛΕΙΤΟΥΡΓΙΚΟ, ΚΟΜΜΑΤΙ
+ * ΚΟΜΜΑΤΙ", package 1). The site/document translation above never asked
+ * for one — a copy of a whole page keeps its own voice. Pasted text has
+ * no existing voice to keep unless the person says "as the original".
+ */
+export type TranslateStyle = "formal" | "friendly" | "source";
+export const TRANSLATE_STYLES: readonly TranslateStyle[] = ["formal", "friendly", "source"];
+export const isTranslateStyle = (v: unknown): v is TranslateStyle => TRANSLATE_STYLES.includes(v as TranslateStyle);
+
+function styleLine(style: TranslateStyle): string {
+  switch (style) {
+    case "formal": return "Use a formal, professional register throughout.";
+    case "friendly": return "Use a warm, friendly, conversational register throughout.";
+    case "source": return "Match the register and tone of the original paragraphs exactly.";
+  }
+}
+
+/** The same shape as translateSystemPrompt, for plain paragraphs (no marks) and with a register. */
+export function translateTextSystemPrompt(target: string, style: TranslateStyle): string {
+  const language = describeLocale(target);
+  return [
+    `You translate text into ${language}.`,
+    "You receive a JSON list of paragraphs in the order they appear; neighbouring paragraphs are context for each other.",
+    "Answer with the tool: the same number of strings, in the same order, each the translation of the paragraph at the same position.",
+    styleLine(style),
+    "Keep numbers, prices, currencies, dates, email and web addresses, phone numbers, and the names of businesses, places, brands and products as they are.",
+    `A paragraph already in ${language} comes back unchanged.`,
+    "Never merge, split, skip, explain or add paragraphs.",
+  ].join(" ");
+}
+
 export function translateSystemPrompt(target: string): string {
   const language = describeLocale(target);
   return [
@@ -61,6 +93,12 @@ export function translateBatches(pieces: readonly Piece[]): number[][] {
 /** Characters of everything sent, every call counted: what the estimate is sized on. */
 export function translateInputChars(pieces: readonly Piece[], target: string): number {
   const system = translateSystemPrompt(target).length;
+  return translateBatches(pieces).reduce((sum, b) => sum + system + batchMessage(pieces, b, target).length, 0);
+}
+
+/** The same count, for the standalone tool's register-aware prompt — one target. */
+export function translateTextInputChars(pieces: readonly Piece[], target: string, style: TranslateStyle): number {
+  const system = translateTextSystemPrompt(target, style).length;
   return translateBatches(pieces).reduce((sum, b) => sum + system + batchMessage(pieces, b, target).length, 0);
 }
 

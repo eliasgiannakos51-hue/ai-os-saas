@@ -4135,6 +4135,39 @@
         "label": "Pratica della lingua",
         "text": "Voglio esercitarmi in "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Incolla il testo da tradurre",
+        "examples": {
+          "a": "Benvenuto nella nostra attività! Saremo felici di aiutarti.\n\nIl nostro ufficio è aperto dal lunedì al venerdì, dalle 9 alle 18.",
+          "b": "Gentile cliente,\n\ngrazie per il tuo ordine. Lo riceverai entro 3 giorni lavorativi.",
+          "c": "La nostra azienda è stata fondata nel 2015 ed è specializzata in soluzioni software per piccole imprese."
+        }
+      },
+      "placeholder": "Incolla o scrivi il testo…",
+      "targetsLabel": "In: {languages}",
+      "styleLabel": "Stile",
+      "style": {
+        "formal": "Formale",
+        "friendly": "Amichevole",
+        "source": "Come l'originale"
+      },
+      "detectedFrom": "Rilevato: {language}",
+      "sameLanguageNote": "Il testo è già in questa lingua.",
+      "kept": "{count, plural, one {# paragrafo è rimasto com'era} other {# paragrafi sono rimasti com'erano}}, perché la traduzione non è arrivata.",
+      "done": "{count, plural, one {Tradotto in # lingua.} other {Tradotto in # lingue.}}",
+      "translating": "Traduzione in corso…",
+      "errors": {
+        "nothing": "Non c'è testo da tradurre.",
+        "tooLong": "È troppo lungo per una traduzione ({chars} caratteri; il limite è {limit}).",
+        "sameLanguage": "Le lingue scelte sono già quella del testo. Scegli almeno una lingua diversa.",
+        "insufficient": "Credits insufficienti per questa traduzione. Non è stato addebitato nulla.",
+        "rateLimited": "Troppi tentativi insieme. Riprova a breve.",
+        "unavailable": "La traduzione non è disponibile in questo momento.",
+        "unusable": "La risposta non era utilizzabile e non è stato scritto nulla. Viene addebitato solo quanto speso.",
+        "failed": "Non è stato possibile completare la traduzione. Nessun credit è stato addebitato."
+      }
     }
   },
   "module": {

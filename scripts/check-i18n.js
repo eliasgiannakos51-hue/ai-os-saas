@@ -46,6 +46,12 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // The standalone Translate tool's style picker (2026-10-24): "Formal"
+  // is the Spanish and Portuguese word too, and "Style" is the French
+  // word (no accent difference once a comment strips it) for this sense.
+  "es:dashboard.translateTool.style.formal",
+  "pt:dashboard.translateTool.style.formal",
+  "fr:dashboard.translateTool.styleLabel",
   // Rebuild's texts (2026-10-27): the same word in that language.
   "fr:dashboard.rebuild.boxes.actions",
   "fr:dashboard.rebuild.versions",

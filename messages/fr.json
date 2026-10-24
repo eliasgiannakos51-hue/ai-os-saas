@@ -4135,6 +4135,39 @@
         "label": "Pratique de la langue",
         "text": "Je veux m'entraîner en "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Collez le texte à traduire",
+        "examples": {
+          "a": "Bienvenue chez nous ! Nous serons ravis de vous aider.\n\nNos bureaux sont ouverts du lundi au vendredi, de 9h à 18h.",
+          "b": "Cher client,\n\nMerci pour votre commande. Vous la recevrez dans un délai de 3 jours ouvrés.",
+          "c": "Notre entreprise a été fondée en 2015 et se spécialise dans les solutions logicielles pour petites entreprises."
+        }
+      },
+      "placeholder": "Collez ou écrivez le texte…",
+      "targetsLabel": "Vers : {languages}",
+      "styleLabel": "Style",
+      "style": {
+        "formal": "Formel",
+        "friendly": "Amical",
+        "source": "Comme l'original"
+      },
+      "detectedFrom": "Détecté : {language}",
+      "sameLanguageNote": "Le texte est déjà dans cette langue.",
+      "kept": "{count, plural, one {# paragraphe est resté comme il était} other {# paragraphes sont restés comme ils étaient}}, car sa traduction n'est pas revenue.",
+      "done": "{count, plural, one {Traduit en # langue.} other {Traduit en # langues.}}",
+      "translating": "Traduction en cours…",
+      "errors": {
+        "nothing": "Il n'y a pas de texte à traduire.",
+        "tooLong": "C'est trop long pour une seule traduction ({chars} caractères ; la limite est {limit}).",
+        "sameLanguage": "Les langues choisies sont déjà celle du texte. Choisissez au moins une langue différente.",
+        "insufficient": "Pas assez de crédits pour cette traduction. Rien n'a été facturé.",
+        "rateLimited": "Trop de tentatives à la fois. Réessayez dans un instant.",
+        "unavailable": "La traduction n'est pas disponible pour le moment.",
+        "unusable": "La réponse n'était pas utilisable et rien n'a été écrit. Seul ce qui a été dépensé est facturé.",
+        "failed": "La traduction n'a pas pu être faite. Aucun crédit n'a été facturé."
+      }
     }
   },
   "module": {

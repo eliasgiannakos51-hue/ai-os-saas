@@ -11,6 +11,8 @@ import {
   batchMessage,
   translateBatches,
   translateSystemPrompt,
+  translateTextSystemPrompt,
+  type TranslateStyle,
 } from "@/lib/translate/translate-prompt";
 
 /**
@@ -81,15 +83,16 @@ async function callBatch(system: string, message: string, expected: number, cost
   return { ok: true, list: toolUse ? readTranslations(toolUse.input, expected) : null };
 }
 
-export async function translatePieces(params: {
+async function translateWithSystem(params: {
   pieces: readonly Piece[];
   target: string;
+  system: string;
   costs: CostAccumulator;
   /** For the provider log only. Never sent to any provider. */
   userId?: string;
   signal?: AbortSignal;
 }): Promise<TranslateOutcome> {
-  const system = translateSystemPrompt(params.target);
+  const { system } = params;
   const batches = translateBatches(params.pieces);
   const value: (string | null)[] = params.pieces.map(() => null);
   let unanswered = 0;
@@ -122,4 +125,28 @@ export async function translatePieces(params: {
   await Promise.all(Array.from({ length: Math.min(PARALLEL_CALLS, batches.length) }, worker));
   if (failure !== null) return { ok: false, ...(failure as { kind: "aborted" | "provider"; detail: string }) };
   return { ok: true, value, unanswered };
+}
+
+export async function translatePieces(params: {
+  pieces: readonly Piece[];
+  target: string;
+  costs: CostAccumulator;
+  /** For the provider log only. Never sent to any provider. */
+  userId?: string;
+  signal?: AbortSignal;
+}): Promise<TranslateOutcome> {
+  return translateWithSystem({ ...params, system: translateSystemPrompt(params.target) });
+}
+
+/** The same calls, with a register (package 1 of the standalone tool) instead of the site/document prompt. */
+export async function translateTextPieces(params: {
+  pieces: readonly Piece[];
+  target: string;
+  style: TranslateStyle;
+  costs: CostAccumulator;
+  userId?: string;
+  signal?: AbortSignal;
+}): Promise<TranslateOutcome> {
+  const { style, ...rest } = params;
+  return translateWithSystem({ ...rest, system: translateTextSystemPrompt(params.target, style) });
 }

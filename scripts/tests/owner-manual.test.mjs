@@ -165,6 +165,7 @@ const FAILOVER_NAMES = {
   "src/lib/agents/template-fill.ts": "τα έτοιμα πρότυπα βοηθών",
   "src/lib/clarification.ts": "οι διευκρινιστικές ερωτήσεις",
   "src/lib/games/game-call.ts": "τα Παιχνίδια",
+  "src/lib/apps/app-call.ts": "οι Εφαρμογές",
   "src/lib/documents/write-call.ts": "τα Έγγραφα",
   "src/lib/automations/builder.ts": "οι Αυτοματισμοί",
   "src/lib/chat/memory.ts": "η μνήμη του Chat",

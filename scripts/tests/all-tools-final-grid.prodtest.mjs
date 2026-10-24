@@ -205,7 +205,11 @@ try {
           name: (a.querySelector("span > span")?.textContent ?? "").trim(),
           line: (a.querySelector(":scope > span:last-child")?.textContent ?? "").trim(),
           live: a.getAttribute("data-ready") === "true",
-          hasBadge: Boolean(a.querySelector('[data-testid="tool-tile-badge"]')),
+          // The badge sits beside the <a>, not inside it (components/tools/
+          // tools-grid.tsx: decoupled from the name so a long name never has
+          // to make room for it) — so it is found on the shared <li>, not on
+          // the link element the other fields are read from.
+          hasBadge: Boolean(a.closest("li")?.querySelector('[data-testid="tool-tile-badge"]')),
         };
       }));
       const drawn = await tiles();
@@ -217,8 +221,14 @@ try {
         drawn.every((t) => t.live === LIVE_HREFS.has(t.href) && t.hasBadge === !LIVE_HREFS.has(t.href)),
         drawn.filter((t) => t.live !== LIVE_HREFS.has(t.href) || t.hasBadge === LIVE_HREFS.has(t.href)).map((t) => t.href).join(", "));
       const headings = await page.locator("main h2").allInnerTexts();
-      const wantHeadings = ALL_TOOLS_GROUP_ORDER.map((g) => L.dashboard.tools.groups[g]);
-      check(`${tag}: the six headings are the owner's, in ${locale}, in order`, JSON.stringify(headings) === JSON.stringify(wantHeadings), `${headings.join(" | ")} vs ${wantHeadings.join(" | ")}`);
+      // Learn carries no big tile (lib/nav/quick-jobs.ts: its six jobs are
+      // all small, and the small row left the page), so it gets no row and
+      // no heading here — the same `g.big.length > 0` filter tools-grid.tsx
+      // itself applies, not the registry's full six-group order.
+      const wantHeadings = ALL_TOOLS_GROUP_ORDER.filter((g) => ALL_TOOLS.some((tool) => tool.group === g)).map(
+        (g) => L.dashboard.tools.groups[g]
+      );
+      check(`${tag}: the five headings are the owner's, in ${locale}, in order`, JSON.stringify(headings) === JSON.stringify(wantHeadings), `${headings.join(" | ")} vs ${wantHeadings.join(" | ")}`);
       const wrongName = drawn.filter((t, i) => t.name !== L.dashboard.tools.names[ALL_TOOLS[i].name]);
       check(`${tag}: every tile carries its ${locale} name`, wrongName.length === 0, wrongName.map((t) => `${t.href}="${t.name}"`).join(", "));
       const wrongLine = drawn.filter((t, i) => t.line !== L.dashboard.tools.lines[ALL_TOOLS[i].name]);

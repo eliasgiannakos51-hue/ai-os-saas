@@ -41,7 +41,11 @@ const credits = [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
 const reserved = [];
 const settled = [];
-function rest({ url, body, json }) {
+// ONE ROW PER USER, A REAL UPSERT — not the generic store's POST-is-
+// always-insert shape, since api/translate/glossary/route.ts's PUT
+// genuinely replaces the one row rather than adding another.
+const glossaryRows = {};
+function rest({ req, url, body, json }) {
   const table = url.pathname.replace(/^\/rest\/v1\//, "");
   if (table === "rpc/consume_rate_limit") return json(200, true), true;
   if (table === "rpc/reserve_credits") {
@@ -52,6 +56,19 @@ function rest({ url, body, json }) {
   }
   if (table === "rpc/settle_reservation") return settled.push(JSON.parse(body || "{}")), json(200, null), true;
   if (table === "rpc/release_reservation") return json(200, null), true;
+  if (table === "translate_glossary") {
+    const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+    if (req.method === "GET") {
+      const row = glossaryRows[MOCK_USER.id] ?? null;
+      return single ? (row ? json(200, row) : json(406, { message: "no rows" })) : json(200, row ? [row] : []), true;
+    }
+    if (req.method === "POST") {
+      const row = JSON.parse(body || "{}");
+      glossaryRows[row.user_id] = row;
+      return json(201, [row]), true;
+    }
+    return false;
+  }
   return false;
 }
 const supa = await startMockSupabase({ port: 54411, tableRows: { feature_flags: flags, user_credits: credits }, handle: rest });
@@ -311,6 +328,38 @@ try {
     check("the chosen one carries the edit", after1 === `EDITED(πιο σύντομο): ${before1}`);
     check("exactly one more call was made — the edit alone, no re-translation", modelAsked.length - asked === 1);
     check("its own reservation, settled under its own feature", reserved.length === 2 && settled.some((s) => s.p_feature === "text_translate_edit"));
+    await context.close();
+  }
+
+  console.log("\n== desktop: piece 4 — the glossary, saved at once, and kept in every translation ==");
+  {
+    setFlags({});
+    reserved.length = 0;
+    delete glossaryRows[MOCK_USER.id];
+    const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
+    await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
+    await press(page.locator('[data-testid="translate-tool-glossary"]'));
+    const field = page.locator('[data-testid="translate-tool-glossary-input"]');
+    await field.fill("Camping Ήλιος");
+    await press(page.locator('[data-testid="translate-tool-glossary-add"]'));
+    await page.locator('[data-testid="translate-tool-glossary-list"]').filter({ hasText: "Camping Ήλιος" }).waitFor({ timeout: 10_000 });
+    check("the term is saved at once — the mock's own row carries it, before any translation runs", glossaryRows[MOCK_USER.id]?.terms?.includes("Camping Ήλιος") === true);
+    await press(page.locator('[data-testid="translate-tool-glossary"]'));
+
+    const textarea = page.locator("textarea").first();
+    await textarea.fill(`${PARA_1} Camping Ήλιος.`);
+    const asked = modelAsked.length;
+    await press(page.locator('button[type="submit"]'));
+    await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
+    check("the glossary term reached the model's system prompt, for the call this translation made", modelAsked.slice(asked).some((m) => String(m.system?.[0]?.text ?? "").includes("Camping Ήλιος")));
+
+    const { context: c2, page: p2 } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await p2.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
+    await p2.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
+    const field2 = p2.locator('[data-testid="translate-tool-glossary"]');
+    check("...and it is still there on a fresh page load — saved, not kept only in memory", (await field2.innerText()).includes("1"));
+    await c2.close();
     await context.close();
   }
 

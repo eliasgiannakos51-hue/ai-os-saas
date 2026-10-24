@@ -201,5 +201,18 @@ Removing one from the product is always allowed.
 | dashboard.flows.help | quotes an example prompt the reader would type |
 | dashboard.flows.example.site | an example prompt the reader would type |
 | dashboard.firstTask.tasks.plan.text | an example prompt the reader would type |
+| dashboard.comingSoon.examples.apps.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.video.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.video.b | an example prompt the reader would type |
+| dashboard.comingSoon.examples.films.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.avatars.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.translate.b | an example prompt the reader would type |
+| dashboard.quickJobs.incomeExpenses.text | text prefilled into the reader's own input |
+| dashboard.quickJobs.competitorAnalysis.text | text prefilled into the reader's own input |
+| dashboard.quickJobs.customerEmail.text | text prefilled into the reader's own input |
+| dashboard.quickJobs.businessCard.text | text prefilled into the reader's own input |
+| dashboard.quickJobs.siteAssistant.text | text prefilled into the reader's own input |
+| dashboard.quickJobs.inboxSummary.text | text prefilled into the reader's own input |
+| dashboard.quickJobs.myWeek.text | text prefilled into the reader's own input |
 <!-- USERVOICE:END -->
 

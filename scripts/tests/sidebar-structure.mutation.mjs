@@ -140,8 +140,8 @@ const MUTANTS = [
     // renderer's exits instead.
     name: "a collapse comes back under another name",
     file: TOOLS_PAGE,
-    from: "<ul className={GRID}>{group.items.map(tile)}</ul>",
-    to: "<ul className={GRID}>{group.heading === \"Make\" && group.items.map(tile)}</ul>",
+    from: "{group.items.map(tile)}",
+    to: "{group.heading === \"Make\" && group.items.map(tile)}",
     expect: "every row is drawn, unconditionally",
   },
   {

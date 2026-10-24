@@ -327,9 +327,8 @@ check(
   ["https://www.googleapis.com/auth/calendar.events.readonly"]
 );
 check(
-  "Calendar is behind a declared switch",
-  providers.PROVIDERS.find((p) => p.id === "google_calendar")?.behindSwitch === "connections" &&
-    /\n  "connections": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")),
+  "Calendar is behind no switch (the switch connections was removed 2026-10-26)",
+  providers.PROVIDERS.every((p) => !("behindSwitch" in p)) && !/\n  "connections": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")),
   true
 );
 check("Gmail asks for read-only", providers.getProvider("gmail").scopes, [
@@ -683,10 +682,9 @@ console.log("\n== the copy offers only what can be connected (2026-10-05) ==");
 {
   // "your mail, your calendar, your files" — and no calendar provider.
   // The population is the provider registry, so a calendar provider that
-  // ships lifts this on its own. SHIPS TO EVERYONE: one behind a switch
-  // (Google Calendar, package 31, "connections") is there for the owner
-  // and the test account only, and the empty state is everybody's.
-  const providerIds = providers.PROVIDERS.filter((p) => !p.behindSwitch).map((p) => p.id);
+  // ships lifts this on its own. SHIPS TO EVERYONE: since 2026-10-26 no
+  // provider is behind a switch, so Google Calendar is in the population.
+  const providerIds = providers.PROVIDERS.map((p) => p.id);
   checkTrue(`providers open to everyone were read (${providerIds.length})`, providerIds.length >= 3, providerIds.join(", "));
   if (!providerIds.some((id) => /calendar/.test(id))) {
     for (const [locale, word] of [["en", /calendar/i], ["el", /ημερολόγιο/i]]) {

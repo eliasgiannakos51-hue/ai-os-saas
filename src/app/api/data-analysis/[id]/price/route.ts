@@ -4,7 +4,6 @@ import { logApiError } from "@/lib/log-error";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { ANALYSIS_MODEL, ANALYSIS_SYSTEM, analysisBrief } from "@/lib/data-analysis/analyse";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import type { TableProfile } from "@/lib/data-analysis/profile";
@@ -41,8 +40,7 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
         profile: analysis.profile as TableProfile,
         headers: (analysis.headers ?? []) as string[],
         rows: (analysis.rows ?? []) as string[][],
-      },
-      await isFeatureOn("analysis-provenance", user)
+      }
     );
     const plan = await resolveEffectivePlan(user);
     // The analyse route's own estimate, argument for argument.

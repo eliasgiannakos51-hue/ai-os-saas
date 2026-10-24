@@ -1,201 +1,143 @@
-// ALL TOOLS, AS THE DESIGN GROUPS THEM. Six headings, big squares, no
-// «beta»: Make, Ask, Automate, Organise, Business, Learn (the owner's
-// critical message, 2026-10-22 — Automate and Learn are new; Automation
-// and Connections moved out of Organise into Automate, and Research and
-// Memory moved out of Ask into Learn). Since 2026-10-07, exactly the
-// tools MASTER Μέρος 14.1 names, with its one-word names, and nothing
-// from Settings.
+// ALL TOOLS, THE FINAL GRID (the owner's message "ALL TOOLS: ΤΟ ΤΕΛΙΚΟ
+// GRID", 2026-10-23): exactly seventeen tools, in five groups, in this
+// order, under these names and these lines. Everything the grid showed
+// before is gone from it; nothing behind it was deleted — every old tool
+// is listed in HIDDEN_FROM_ALL_TOOLS below and still opens at its address.
 //
-// WHAT IS SHOWN IS THE OWNER'S RULE (NEEDS 19, decided 2026-10-05): a tool
-// is shown when it does its main job end to end today, even if it does
-// not yet pass every BUILD-SPECS scenario. It is hidden when it is only a
-// screen, when it produces nothing, or when its NAME promises something it
-// does not do. A hidden tool comes back when it works; its page still opens
-// by its address, so nothing anybody has is taken away.
+// A TOOL THAT DOES NOT WORK DOES NOT APPEAR (the owner's rule, 2026-10-05
+// and again 2026-10-23). The registry holds all seventeen so the order and
+// the wording are decided once, but only an entry with `ready: true` is
+// drawn, and an entry with `needs` is drawn only when the server says that
+// thing is present (see availableTools). An entry that is not ready says
+// what it is waiting for in `waitingFor`; the day it works, one line
+// changes here and its square appears for everyone.
 //
-// The sidebar's own groups (lib/sidebar-nav.ts) are untouched: the palette
-// and the gates on that list still read it. This file only says where each
-// of those tools sits on the All tools page, and the gate
-// (scripts/tests/all-tools.test.mjs) holds that every visible tool is in
-// exactly one group here or hidden here with a reason — both ways.
+// Pure, and imports nothing from lib/flags/flags.ts (that reads the
+// database) because the browser loads this file.
+// scripts/tests/all-tools.test.mjs holds the registry both ways against
+// the sidebar's tools and against the pages that exist.
 
-export type AllToolsGroupKey = "make" | "ask" | "automate" | "organise" | "business" | "learn";
-
-// SLIDES, POSTS, MEETINGS, LIBRARY, MEMORY, FINANCES, SALES AND TRADING
-// LEFT THIS GRID ON 2026-10-22 (the owner's message right after #332):
-// their hrefs are gone from the groups below and added to
-// HIDDEN_FROM_ALL_TOOLS instead — same mechanism as Predictions, Voice
-// and the rest of that table. Nothing about the tools themselves moved:
-// every route, page, API route, database table and i18n string is
-// untouched, and what each of them does is still reachable by typing it
-// into Chat. Finance, Sales and Trading were this grid's whole "business"
-// group, so that heading no longer renders at all — nothing hidden here
-// is a bug, ALL_TOOLS_GROUPS.filter((g) => g.items.length > 0) already
-// drops an empty group the same way it always has.
-//
-// WHAT WOULD BE DELETED, if the owner says so later (not done — see the
-// 2026-10-22 entry in docs/PROGRESS.md for the full per-tool list: route,
-// component folder, switch if any, and tables).
-export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly string[] }[] = [
-  {
-    key: "make",
-    hrefs: ["/dashboard/website-builder"],
-  },
-  // DEEP RESEARCH MOVED HERE from "learn" on 2026-10-22 (the owner's
-  // follow-up after #334 — "Deep Research πηγαίνει στο Ask"). A rename
-  // alone was done in #334; the group reassignment is this line.
-  {
-    key: "ask",
-    hrefs: ["/dashboard/data-analysis", "/dashboard/deep-research"],
-  },
-  {
-    key: "automate",
-    hrefs: ["/dashboard/automation"],
-  },
-  // GOALS LEFT THIS GROUP ON 2026-10-22 (the owner's follow-up after
-  // #334 — "Goals μπαίνει μέσα στα Projects"). Its href moved to
-  // HIDDEN_FROM_ALL_TOOLS below with a reason; the Projects hub (Μέρος
-  // 20Δ §6, not built yet) is where it is meant to surface instead of a
-  // square of its own.
-  {
-    key: "organise",
-    hrefs: ["/dashboard/projects"],
-  },
-  // EMPTY ON PURPOSE since 2026-10-22: Finance, Sales and Trading were
-  // this group's only three hrefs, and all three left the grid above.
-  // The key stays, in order, so a reader (and the "six groups, in the
-  // design's order" check) still sees where Business sat; the grid
-  // itself drops an empty group the same way it always has.
-  {
-    key: "business",
-    hrefs: [],
-  },
-  // EMPTY ON PURPOSE since 2026-10-22 too: Deep Research was this
-  // group's only href, and it just moved to "ask" above.
-  {
-    key: "learn",
-    hrefs: [],
-  },
-];
-
-/**
- * THE ONE-WORD NAME ON EACH SQUARE (MASTER Μέρος 14.1, 2026-10-07: «Μεγάλα
- * τετράγωνα: εικονίδιο, όνομα μίας λέξης, μία γραμμή», and the names it
- * lists). The value is the key under dashboard.tools.names in
- * messages/*.json, and under dashboard.tools.lines for the one line under
- * it — short enough to keep the square a square on a 390px phone, where
- * the sidebar's longer hints made two of them taller than wide (measured
- * 2026-10-08, scripts/tests/all-tools-empty-chat-edges.prodtest.mjs). The
- * grid reads both through literal maps, so the message slicer can bound
- * them. "What it remembers" is Memory from here on, and the row that
- * was "Mine" is called the Library everywhere since 2026-10-14
- * (sidebar.items.mine, scripts/tests/library.test.mjs §7).
- */
-// SLIDES, POSTS, MEETINGS, LIBRARY, MEMORY, FINANCES, SALES, TRADING AND
-// NOW GOALS LOST THEIR ENTRY HERE TOO, 2026-10-22, for the same reason as
-// ALL_TOOLS_GROUPS above — only the ones ALL_TOOLS_GROUPS still draws a
-// square for get a one-word name read off this map. Their keyPrefix,
-// their names/lines record entry below, and every i18n string for them
-// are untouched on purpose (the owner's "don't delete code yet").
-export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = {
-  "/dashboard/website-builder": "site",
-  "/dashboard/deep-research": "research",
-  "/dashboard/data-analysis": "analyze",
-  "/dashboard/automation": "automations",
-  "/dashboard/projects": "projects",
-};
+export type AllToolsGroupKey = "record" | "ask" | "make" | "runAlone" | "organise";
 
 export type AllToolsNameKey =
-  | "site" | "slides" | "posts" | "research" | "analyze" | "files" | "automations" | "projects"
-  | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading"
-  | "image" | "connections" | "document" | "games" | "myStuff";
+  | "myStuff" | "connect" | "analyze" | "research" | "rebuild" | "site" | "document" | "image"
+  | "video" | "films" | "editing" | "avatars" | "coding" | "agents" | "automations" | "iowork" | "projects"
+  // Names kept for tools that left the grid: other screens still read them
+  // (components/analyze/analyze-shell.tsx reads names.files).
+  | "files" | "slides" | "posts" | "goals" | "meetings" | "library" | "memory" | "finances" | "sales" | "trading" | "games";
 
-/**
- * THE NEW TOOLS, EACH BEHIND ITS OWN SWITCH (MASTER Μέρος 14.1: «Κάθε νέο
- * εργαλείο μπαίνει εδώ μόλις γίνει λειτουργικό: Image, … Connections»).
- * A square here is drawn for exactly the people its switch in
- * lib/flags/flags.ts is on for — the owner and the test account first,
- * everyone once he opens it on /dashboard/system-health — and the page
- * behind it reads the same switch (app/dashboard/images/page.tsx,
- * app/dashboard/integrations/page.tsx, where it is the Connect button).
- * Turning the switch off takes the square away again. `flag` is a plain
- * string so that this file, which the browser loads, imports nothing from
- * lib/flags/flags.ts (it reads the database);
- * scripts/tests/all-tools.test.mjs holds that every one names a switch
- * that exists. Found missing on 2026-10-08: both tools were built
- * (packages 19 and 31) and neither had a square, so opening them to
- * everyone would have left Image reachable only by its address and ⌘K,
- * and Connections only from Settings, where 14.1 put Integrations
- * (app/dashboard/settings/page.tsx).
- */
-export const SWITCHED_SQUARES: readonly { href: string; group: AllToolsGroupKey; flag: string; name: AllToolsNameKey }[] = [
-  { href: "/dashboard/images", group: "make", flag: "image-studio", name: "image" },
-  { href: "/dashboard/integrations", group: "automate", flag: "connections", name: "connections" },
-  // Package 14: without its switch the page keeps notes and is hidden
-  // below (HIDDEN_FROM_ALL_TOOLS); with it, it writes documents.
-  { href: "/dashboard/documents", group: "make", flag: "document-writer", name: "document" },
-  // Package 26: no sidebar row at all (SWITCH_ONLY_ITEMS below).
-  { href: "/dashboard/games", group: "make", flag: "games", name: "games" },
-  // «Τα δικά μου» (2026-10-22, the owner's message after #332): a wholly
-  // new tool with nothing to fall back to, so it is Games' shape — no
-  // sidebar row at all (SWITCH_ONLY_ITEMS below) — rather than
-  // Documents'/Images', which pre-existed the switch.
-  { href: "/dashboard/my-stuff", group: "organise", flag: "my-stuff", name: "myStuff" },
+/** Something outside the code a tool cannot work without. */
+export type AllToolsNeed = "imageKey";
+
+export type AllToolsEntry = {
+  name: AllToolsNameKey;
+  group: AllToolsGroupKey;
+  /** Where the tool opens — the address it has, or will have. */
+  href: string;
+  /** Drawn at all. False means the tool is not finished end to end. */
+  ready: boolean;
+  /** Drawn only when the server finds this present. */
+  needs?: AllToolsNeed;
+  /** Why it is not drawn, when it is not ready (a sentence). */
+  waitingFor?: string;
+};
+
+export const ALL_TOOLS: readonly AllToolsEntry[] = [
+  // 1. ΚΑΤΑΓΡΑΨΕ
+  { name: "myStuff", group: "record", href: "/dashboard/my-stuff", ready: true },
+  // CONNECT, built whole 2026-10-26: an app is connected by its address (MCP
+  // over HTTPS) with an optional token, needing nothing from the owner; the
+  // Google and Slack cards on the same page appear only where their OAuth
+  // apps are set up. Chat does not use these apps yet.
+  { name: "connect", group: "record", href: "/dashboard/integrations", ready: true },
+  // 2. ΡΩΤΑ
+  { name: "analyze", group: "ask", href: "/dashboard/data-analysis", ready: true },
+  { name: "research", group: "ask", href: "/dashboard/deep-research", ready: true },
+  // 3. ΦΤΙΑΞΕ
+  { name: "rebuild", group: "make", href: "/dashboard/rebuild", ready: true },
+  { name: "site", group: "make", href: "/dashboard/website-builder", ready: true },
+  { name: "document", group: "make", href: "/dashboard/documents", ready: true },
+  { name: "image", group: "make", href: "/dashboard/images", ready: true, needs: "imageKey" },
+  {
+    name: "video", group: "make", href: "/dashboard/videos", ready: false,
+    waitingFor: "Phase 2, third: needs a video provider key from the owner; /dashboard/videos is still the placeholder list",
+  },
+  {
+    name: "films", group: "make", href: "/dashboard/films", ready: false,
+    waitingFor: "Phase 2, fifth: needs the Video tool and a provider key from the owner",
+  },
+  {
+    name: "editing", group: "make", href: "/dashboard/editing", ready: false,
+    waitingFor: "Phase 2, fourth: not built yet",
+  },
+  {
+    name: "avatars", group: "make", href: "/dashboard/avatars", ready: false,
+    waitingFor: "Phase 2, sixth: needs an avatar provider key from the owner",
+  },
+  { name: "coding", group: "make", href: "/dashboard/coding", ready: true },
+  // 4. ΤΡΕΞΕ ΜΟΝΟ ΤΟΥ
+  { name: "agents", group: "runAlone", href: "/dashboard/agents", ready: true },
+  { name: "automations", group: "runAlone", href: "/dashboard/automation", ready: true },
+  {
+    name: "iowork", group: "runAlone", href: "/dashboard/iowork", ready: false,
+    waitingFor: "Phase 2, last: needs the owner's approval of the security plan and a desktop app",
+  },
+  // 5. ΟΡΓΑΝΩΣΕ
+  { name: "projects", group: "organise", href: "/dashboard/projects", ready: true },
 ];
 
-/**
- * A TOOL THAT EXISTS ONLY BEHIND ITS SWITCH (Games, package 26), with no
- * row in the sidebar's config. That config is also the search (⌘K) and
- * the records hub, which read no switch: a row there would be a door to
- * a page that, for everybody the switch does not admit, does not exist.
- * So its square is described here, and All tools draws it through
- * SWITCHED_SQUARES only for those whose switch is on. Pure, like the rest
- * of this file; the grid gives it its icon
- * (components/tools/tools-grid.tsx SWITCH_ONLY_ICONS).
- */
-export const SWITCH_ONLY_ITEMS: Readonly<Record<string, { label: string; hintKey: string }>> = {
-  "/dashboard/games": { label: "Games", hintKey: "games" },
-  "/dashboard/my-stuff": { label: "My Stuff", hintKey: "myStuff" },
-};
+/** The five headings, in the order they are drawn. */
+export const ALL_TOOLS_GROUP_ORDER: readonly AllToolsGroupKey[] = ["record", "ask", "make", "runAlone", "organise"];
+
+/** What the server found present, for availableTools. */
+export type AllToolsPresence = { imageKey: boolean };
+
+/** The tools to draw: ready, and with whatever they need present. */
+export function availableTools(presence: AllToolsPresence): readonly AllToolsEntry[] {
+  return ALL_TOOLS.filter((t) => t.ready && (!t.needs || presence[t.needs]));
+}
+
+export const ALL_TOOLS_GROUPS: readonly { key: AllToolsGroupKey; hrefs: readonly string[] }[] = ALL_TOOLS_GROUP_ORDER.map((key) => ({
+  key,
+  hrefs: ALL_TOOLS.filter((t) => t.group === key).map((t) => t.href),
+}));
+
+/** The name key of each tool, by address. */
+export const ALL_TOOLS_NAMES: Readonly<Record<string, AllToolsNameKey>> = Object.fromEntries(ALL_TOOLS.map((t) => [t.href, t.name]));
 
 /**
  * Hidden from All tools, each with the reason. NOTHING HERE IS REMOVED:
  * every one still opens at its own address, from the search (⌘K) and,
- * where 14.1 says so, from Settings or the sidebar.
+ * where it has one, from the sidebar or Settings. The tools of the final
+ * grid are not in this table — they are in ALL_TOOLS above.
  */
 export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
   "/dashboard/presentations":
-    "Slides left the grid 2026-10-22 (the owner's message after #332); the page, its data and its address are unchanged, and the sidebar's own Slides row is untouched",
+    "Slides is not among the seventeen of the final grid (2026-10-23); the page, its data and its address are unchanged, and the sidebar's own Slides row is untouched",
   "/dashboard/posts":
-    "Posts left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+    "Posts is not among the seventeen of the final grid; unchanged otherwise, same as Slides above",
   "/dashboard/meetings":
-    "Meetings left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+    "Meetings is not among the seventeen of the final grid; unchanged otherwise, same as Slides above",
   "/dashboard/timeline":
-    "the Library left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+    "the Library is not among the seventeen of the final grid; unchanged otherwise, same as Slides above",
   "/dashboard/files":
-    "Files merged into Analyze 2026-10-22 (the owner's message after #332): one square, at /dashboard/data-analysis, reads both data files and documents now (components/analyze/analyze-shell.tsx). With the switch on, this address redirects there (carrying ?record=); with it off, the old page is unchanged",
+    "Files merged into Analyze 2026-10-22: one square, at /dashboard/data-analysis, reads both data files and documents (components/analyze/analyze-shell.tsx). This address redirects there (carrying ?record=)",
   "/dashboard/ai-memory":
-    "Memory left the grid 2026-10-22; unchanged otherwise, same as Slides above",
+    "Memory is not among the seventeen of the final grid; unchanged otherwise, same as Slides above",
   "/dashboard/finance":
-    "Finances left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
+    "Finances is not among the seventeen of the final grid; unchanged otherwise, same as Slides above — its data is read by My Stuff, never moved",
   "/dashboard/sales":
-    "Sales left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
+    "Sales is not among the seventeen of the final grid; unchanged otherwise, same as Slides above — its data is read by My Stuff, never moved",
   "/dashboard/trading":
-    "Trading left the grid 2026-10-22, on the way to being replaced by a single records tool (owner's message, not built yet); unchanged otherwise, same as Slides above",
+    "Trading is not among the seventeen of the final grid; unchanged otherwise, same as Slides above — its data is read by My Stuff, never moved",
   "/dashboard/mission":
-    "Goals left the grid 2026-10-22 (the owner's follow-up after #334: \"Goals μπαίνει μέσα στα Projects\"), on its way into the Projects hub instead of its own square (Μέρος 20Δ §6, not built yet); unchanged otherwise, same as Slides above",
+    "Goals is inside Projects in the final grid (2026-10-23: \"οι στόχοι μέσα του\"); the Goals page and address are unchanged, same as Slides above",
   "/dashboard/predictions":
     "the name promises forecasts; today it finds patterns in the account's own rows, with the sample each rests on, and forecasts nothing",
   "/dashboard/games":
-    "without the switch games the page does not exist (package 26); with it on, its square is drawn under Make (SWITCHED_SQUARES)",
-  "/dashboard/my-stuff":
-    "without the switch my-stuff the page does not exist (2026-10-22, the owner's message after #332); with it on, its square is drawn under Organise (SWITCHED_SQUARES)",
-  "/dashboard/documents":
-    "without the switch document-writer it keeps notes the person writes and does not write a document with AI, which its name promises (MASTER 14.1: hidden until it does); with the switch on it writes them, and its square is drawn under Make (SWITCHED_SQUARES)",
+    "Games is not among the seventeen of the final grid (2026-10-23); the page keeps its own switch (games) and opens at its address",
   "/dashboard/chat":
     "Ask me is a row of the sidebar itself (MASTER 14.1), so a square here would be a second door to the same room",
-  "/dashboard/coding":
-    "Coding is a row of the sidebar itself (MASTER 14.1), so a square here would be a second door to the same room",
   "/dashboard/voice":
     "Voice is the microphone in every field (MASTER 14.1), not a tool of its own; the page still opens from Settings and the search",
   "/dashboard/search":
@@ -207,9 +149,9 @@ export const HIDDEN_FROM_ALL_TOOLS: Readonly<Record<string, string>> = {
   "/dashboard/team":
     "Team belongs to Settings (MASTER 14.1), where the plan that includes it is managed; it still opens at its address",
   "/dashboard/business-health":
-    "not among the tools the owner listed as staying in All tools (MASTER 14.1); it opens at its address and from the search",
+    "not among the tools in the final grid; it opens at its address and from the search",
 };
 
 export function allToolsGroupOf(href: string): AllToolsGroupKey | null {
-  return ALL_TOOLS_GROUPS.find((g) => g.hrefs.includes(href))?.key ?? null;
+  return ALL_TOOLS.find((t) => t.href === href)?.group ?? null;
 }

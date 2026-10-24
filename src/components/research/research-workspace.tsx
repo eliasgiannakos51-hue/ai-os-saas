@@ -78,7 +78,6 @@ export function ResearchWorkspace({
   initialOpenId = null,
   monthlyCap,
   usedThisMonth,
-  slides = false,
 }: {
   /** The question Home routed here, already in the box, never auto-run. */
   initialTopic?: string;
@@ -87,8 +86,6 @@ export function ResearchWorkspace({
   initialOpenId?: string | null;
   monthlyCap: number | null;
   usedThisMonth: number;
-  /** The switch "research-slides" (package 11). */
-  slides?: boolean;
 }) {
   const t = useTranslations("dashboard.deepResearch");
   const tModule = useTranslations("module");
@@ -612,11 +609,7 @@ export function ResearchWorkspace({
               {section.heading && (
                 <h3 className="text-xs font-semibold text-foreground">{section.heading}</h3>
               )}
-              {slides ? (
-                <CitedBody body={section.body} sources={open.sources ?? []} className="text-sm leading-relaxed text-muted" />
-              ) : (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted">{section.body}</p>
-              )}
+              <CitedBody body={section.body} sources={open.sources ?? []} className="text-sm leading-relaxed text-muted" />
             </div>
           ))}
 
@@ -652,12 +645,10 @@ export function ResearchWorkspace({
                 the word "report", and the source numbering that the claims
                 cite would not survive the flattening. */}
             <DownloadPdfButton href={`/api/research/${open.id}/pdf`} fallbackName="research-report" />
-            {slides && (
-              <SendToSlides
-                report={open}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
-              />
-            )}
+            <SendToSlides
+              report={open}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+            />
           {open.document_id && (
             <Link
               href={`/dashboard/documents/${open.document_id}`}

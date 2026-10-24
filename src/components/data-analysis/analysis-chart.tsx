@@ -49,7 +49,7 @@ function formatValue(value: number): string {
 }
 
 /**
- * HOW EACH VALUE WAS MADE (package 16, behind "analysis-provenance"):
+ * HOW EACH VALUE WAS MADE (package 16):
  * the arithmetic in words, and every value with the rows it came from —
  * the same numbers the chart draws, from lib/data-analysis/charts.ts.
  */
@@ -78,7 +78,7 @@ function ChartHow({ chart }: { chart: BuiltChart }) {
   );
 }
 
-export function AnalysisChart({ chart, how = false }: { chart: BuiltChart; how?: boolean }) {
+export function AnalysisChart({ chart }: { chart: BuiltChart }) {
   const t = useTranslations("dataAnalysis.chart");
   const { spec, points } = chart;
 
@@ -165,7 +165,7 @@ export function AnalysisChart({ chart, how = false }: { chart: BuiltChart; how?:
           )}
         </ResponsiveContainer>
       </div>
-      {how && spec.kind !== "scatter" ? <ChartHow chart={chart} /> : null}
+      {spec.kind !== "scatter" ? <ChartHow chart={chart} /> : null}
     </div>
   );
 }

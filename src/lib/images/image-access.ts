@@ -8,7 +8,6 @@ import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed } from "@/lib/ai-circuit-breaker";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
 import { planMeetsMinimum, type Plan, type PlanSlug } from "@/lib/billing/plans";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { imagePrices, type ImagePrices } from "@/lib/images/image-pricing";
 import {
   IMAGE_BUCKET,
@@ -29,7 +28,7 @@ import {
  * EACH ROUTE STILL SAYS WHO IS ASKING AND WHOSE ROW IT IS, in its own
  * file: auth.getUser() and `.eq("user_id", user.id)` are written where the
  * gates read them (security-posture, route-contract). What is shared is
- * what comes after: the switch and the plan, the breaker, the bucket.
+ * what comes after: the plan, the breaker, the bucket.
  *
  * THE PLAN. Images are Starter and up — the tier the Images page has
  * carried since the build modules (src/lib/build-modules.ts, minPlanSlug)
@@ -44,9 +43,8 @@ export function refuse(code: string, status: number, extra: Record<string, unkno
 
 export type ImageGate = { plan: Plan | null; packPriceEur: number | null; prices: ImagePrices; isAdmin: boolean };
 
-/** The switch and the plan, for a signed-in person. A refusal, or the price list for this account. */
+/** The plan, for a signed-in person. A refusal, or the price list for this account. */
 export async function imageGate(user: User): Promise<ImageGate | NextResponse> {
-  if (!(await isFeatureOn("image-studio", user))) return refuse("not_enabled", 403);
   const isAdmin = isAdminEmail(user.email);
   const plan = await resolveEffectivePlan(user);
   if (!isAdmin && !planMeetsMinimum(plan?.slug ?? "free", IMAGE_MIN_PLAN)) return refuse("not_included", 403);

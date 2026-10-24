@@ -26,7 +26,6 @@ import { AchievementUnlockBridge } from "@/components/achievements/achievement-u
 import { NavTracker } from "@/components/dashboard/nav-tracker";
 import { PageTransition } from "@/components/page-transition";
 import { MAIN_SIDEBAR_GROUPS, sidebarGroups } from "@/lib/sidebar-nav";
-import { switchedOnFor } from "@/lib/nav/switched-on";
 import {
   NEVER_RECENT,
   RECENT_WINDOW_DAYS,
@@ -55,12 +54,7 @@ export default async function DashboardLayout({
   // `user` above), which is fine for a low-frequency, best-effort check.
   void acceptPendingTeamInvite(user.id, user.email ?? "");
 
-  // THE PAGES NAMED BY THEIR SWITCH (lib/nav/switched-names.ts), read
-  // beside the plan rather than after it: one more read, not one more wait.
-  const [plan, switchedOn] = await Promise.all([
-    resolveEffectivePlan(user),
-    switchedOnFor(user.email),
-  ]);
+  const plan = await resolveEffectivePlan(user);
   const isAdmin = isAdminEmail(user.email);
 
   // getOrInitCredits creates a service-role Supabase client under the hood
@@ -203,8 +197,8 @@ export default async function DashboardLayout({
                     had nothing to land on, and so did the page's own
                     outline.
                     Putting it in the layout is what makes it true for all
-                    52 pages instead of 8, and the four components below
-                    COUNT: 52 /page\.tsx$/ in src/app/dashboard/
+                    53 pages instead of 8, and the four components below
+                    COUNT: 53 /page\.tsx$/ in src/app/dashboard/
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}
@@ -228,7 +222,7 @@ export default async function DashboardLayout({
                 reading is the two views in the nav_events migration. */}
             <NavTracker />
             <AchievementUnlockBridge />
-            <CommandPalette isOwner={isAdmin} switchedOn={switchedOn} />
+            <CommandPalette isOwner={isAdmin} />
             </VoiceAvailabilityProvider>
           </CreditsProvider>
           {/* Service worker + add-to-home-screen prompt. Mounted here, not

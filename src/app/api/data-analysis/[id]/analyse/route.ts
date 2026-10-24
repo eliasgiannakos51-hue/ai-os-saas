@@ -18,8 +18,7 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { runCompletion } from "@/lib/ai/providers/complete";
-import { ANALYSIS_MODEL, ANALYSIS_SYSTEM, analysisBrief, parseAnalysis, parseAnalysisWithFacts } from "@/lib/data-analysis/analyse";
-import { isFeatureOn } from "@/lib/flags/flags";
+import { ANALYSIS_MODEL, ANALYSIS_SYSTEM, analysisBrief, parseAnalysisWithFacts } from "@/lib/data-analysis/analyse";
 import { SUPPORTED_LOCALES } from "@/i18n/constants";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 
@@ -68,12 +67,10 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const headers = (analysis.headers ?? []) as string[];
     const rows = (analysis.rows ?? []) as string[][];
 
-    // EVERY NUMBER A FACT (package 16), behind its switch: the facts go in
-    // the brief, and the reply's numbers are read against them.
-    const withFacts = await isFeatureOn("analysis-provenance", user);
+    // EVERY NUMBER A FACT (package 16): the facts go in the brief, and the
+    // reply's numbers are read against them.
     const { brief, facts } = analysisBrief(
-      { fileName: String(analysis.file_name ?? analysis.title ?? "dataset"), profile, headers, rows },
-      withFacts
+      { fileName: String(analysis.file_name ?? analysis.title ?? "dataset"), profile, headers, rows }
     );
 
     const breaker = await checkAiCallAllowed(user.id, "data_analyse", fingerprintRequest(params.id, brief));
@@ -138,7 +135,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     }
 
     costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
-    const parsed = withFacts ? parseAnalysisWithFacts(outcome.text, profile, facts, locale) : parseAnalysis(outcome.text, profile);
+    const parsed = parseAnalysisWithFacts(outcome.text, profile, facts, locale);
 
     // THE SAVE COMES BEFORE THE CHARGE, and a save that fails refuses.
     //

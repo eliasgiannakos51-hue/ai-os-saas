@@ -34,7 +34,7 @@ import {
 
 /**
  * ONE SENTENCE, SEVERAL TOOLS, ONE PROJECT (MASTER 6.1, 6.3; MASTER 16
- * package 36), behind the switch "flows", on the Projects page.
+ * package 36), for everybody since 2026-10-23, on the Projects page.
  *
  * «Φτιάξε site για το camping μου, με εικόνες, και posts για να το
  * ανακοινώσω» is answered with the PLAN: the steps, the price of each, the

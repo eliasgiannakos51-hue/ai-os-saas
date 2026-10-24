@@ -68,9 +68,12 @@ check("how it runs is a check, or «χειροκίνητο:» and why", shapeles
 const silent = tasks.filter((t) => t.state !== "δεν φτιάχτηκε" && t.checks.length === 0 && !/^χειροκίνητο: \S/.test(t.fields["Αυτόματα"] ?? ""));
 check("a built task names its check, or says why it is by hand", silent.length === 0, silent.map((t) => `Α${t.number}`).join(" "));
 const flags = readFileSync("src/lib/flags/flags.ts", "utf8");
+// The floor is 5 since 2026-10-26: ten switches were removed in the owner's
+// "everything for everybody, without switches" rounds, and the tasks that
+// named them now say they were removed.
 const switches = tasks.flatMap((t) => [...(t.fields["Σήμερα"] ?? "").matchAll(/διακόπτη `([a-z-]+)`/g)].map((m) => m[1]));
 const unknown = switches.filter((s) => !new RegExp(`\\n  (?:"${s}"|${s.includes("-") ? "(?!)" : s}): "`).test(flags));
-check(`every switch named (${switches.length}) is declared`, switches.length >= 10 && unknown.length === 0, unknown.join(" "));
+check(`every switch named (${switches.length}) is declared`, switches.length >= 5 && unknown.length === 0, unknown.join(" "));
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 check("npm run acceptance runs the runner", pkg.scripts?.acceptance === "node scripts/acceptance.mjs");
 

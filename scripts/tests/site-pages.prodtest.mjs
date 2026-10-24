@@ -6,7 +6,7 @@
  *      SKIP_BUILD=1 node scripts/tests/site-pages.prodtest.mjs
  *
  * One production build; the signed-in account is the test account, so the
- * switches "tool-shell" and "site-pages" are on. The Site's own routes are
+ * switch "site-pages" is on (the switch "tool-shell" was removed 2026-10-23). The Site's own routes are
  * answered by the browser (page.route), so no model is called and nothing
  * is charged, and every request the screen makes is counted. The published
  * address is the REAL public route (/s/<address> and /s/<address>/<page>)

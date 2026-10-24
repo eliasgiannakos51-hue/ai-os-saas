@@ -5,7 +5,6 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { encryptionAvailable } from "@/lib/integrations/crypto";
 import { githubAppConfigured } from "@/lib/github/auth";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
@@ -26,10 +25,6 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
-    }
-
-    if (!(await isFeatureOn("coding-github", user))) {
-      return NextResponse.json({ ok: false, error: "Not available." }, { status: 404 });
     }
 
     if (!githubAppConfigured() || !encryptionAvailable()) {

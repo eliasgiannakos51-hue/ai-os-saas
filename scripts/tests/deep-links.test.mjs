@@ -290,6 +290,12 @@ for (const l of favLinks) {
 // the same ?projectId= contract /dashboard/website-builder and
 // /dashboard/deep-research already read for a result started from
 // inside a project.
+// 71 -> 70 (2026-10-23): /dashboard/files stopped being a page with a body
+// (the switch "tool-shell" that held it back was removed) and forwards every
+// parameter it was given (dashboard/files/page.tsx builds the query), so the
+// one literal `/dashboard/data-analysis?record=` it used to emit is no longer
+// in its source to be counted. The link itself is unchanged and is checked
+// below through REDIRECT_ONLY.
 const DEEP_LINK_FLOOR = 70;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
@@ -374,10 +380,18 @@ function layoutChain(page) {
   return out;
 }
 
+// A PAGE THAT ONLY REDIRECTS reads nothing itself: the parameter is read by
+// the page it forwards to, and that is where it is looked for. Each entry is
+// held to its word — the source page must really redirect there.
+const REDIRECT_ONLY = { "/dashboard/files": { to: "/dashboard/data-analysis", page: "src/app/dashboard/files/page.tsx" } };
+for (const [from, { to, page: src }] of Object.entries(REDIRECT_ONLY)) {
+  check(`${from} only redirects to ${to}, carrying its query`, new RegExp(`redirect\\(query \\? \`${to.replace(/\//g, "\\/")}\\?\\$\\{query\\}\` : "${to.replace(/\//g, "\\/")}"\\)`).test(stripComments(readFileSync(src, "utf8"))));
+}
+
 const unread = [];
 let checked = 0;
 for (const { path, param, from } of emitted.values()) {
-  const page = pageFor(path);
+  const page = pageFor(REDIRECT_ONLY[path]?.to ?? path);
   if (!page) {
     unread.push(`${path}?${param}= — no page resolves for this URL (linked from ${from[0]})`);
     continue;

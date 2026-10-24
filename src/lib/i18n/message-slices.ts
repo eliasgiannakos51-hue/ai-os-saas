@@ -145,7 +145,12 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // file (tool-shell.test.mjs's reason, in its own header comment)
     // and reaches `kinds.<kind>` the same way, for its filter chips and
     // result rows.
-    unbounded: 71,
+    // SIXTY-NINE on 2026-10-23: two components with an unbounded key left
+    // the dashboard group when the legacy branches behind the removed
+    // switches (tool-shell, image-studio, document-writer) stopped being
+    // reachable from any page. The count fell because code stopped being
+    // drawn, not because a reader was bounded; it is re-measured, not guessed.
+    unbounded: 69,
   },
   {
     name: "onboarding",

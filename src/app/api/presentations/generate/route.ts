@@ -157,7 +157,6 @@ export async function POST(request: Request) {
   // THE REPORT, the person's own and finished, becomes the brief.
   let reportSources: { title: string; url: string }[] = [];
   if (researchId !== null) {
-    if (!(await isFeatureOn("research-slides", user))) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
     const { data: report, error: reportError } = await supabase
       .from("research_reports")
       .select("id, topic, status, sections, sources")

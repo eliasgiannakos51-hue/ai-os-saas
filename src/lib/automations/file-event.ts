@@ -2,7 +2,6 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { readFlow } from "@/lib/automations/boxes";
 
 /** The most automations one upload starts. */
@@ -23,7 +22,6 @@ export const MAX_RUNS_PER_FILE = 5;
  */
 export async function queueFileRuns(user: User, fileId: string): Promise<number> {
   try {
-    if (!(await isFeatureOn("automations", user))) return 0;
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("automation_flows")

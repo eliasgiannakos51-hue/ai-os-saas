@@ -129,6 +129,11 @@ const CLASSIFIED = {
     "src/app/api/my-stuff/ask/route.ts",
   ],
   structured: [
+    // Connect by address (2026-10-26): 600 tokens for one forced tool call
+    // whose answer is a tool name, its arguments and a sentence. A cut reply
+    // carries no COMPLETE tool_use block, so readPlan gets undefined and the
+    // route answers `unusable_plan`: nobody is shown a severed sentence.
+    "src/app/api/mcp/[id]/run/route.ts",
     "src/lib/agents/template-fill.ts",
     "src/lib/agents/agent-builder.ts",
     // Package 30: one forced tool call returning a row of at most eight
@@ -176,6 +181,12 @@ const CLASSIFIED = {
     // (lib/games/game-plan.ts). A game cut at max_tokens is refused by
     // stop_reason as "unusable" — its last script would never close.
     "src/lib/games/game-call.ts",
+    // Rebuild (2026-10-27). The same shape as the game above: one forced
+    // tool call per step, the plan and a box at PLAN_MAX_TOKENS, the app
+    // and a change at APP_MAX_TOKENS (lib/rebuild/rebuild-plan.ts). An app
+    // cut at max_tokens is refused by stop_reason as "unusable" — its last
+    // script would never close — and that step charges nothing.
+    "src/lib/rebuild/rebuild-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

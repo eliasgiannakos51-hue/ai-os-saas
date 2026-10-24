@@ -45,9 +45,10 @@ const MAX_DESCRIPTION_LENGTH = 20000;
 type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; questions?: string[] };
 
 /**
- * SITE IN THE SHELL (MASTER 14.3, package 3), behind the switch
- * "tool-shell". The same routes as components/website-builder/website-builder-workspace.tsx,
- * which stays the page for everybody the switch is off for.
+ * SITE IN THE SHELL (MASTER 14.3, package 3), for everybody (its switch
+ * was removed 2026-10-23). The same routes as
+ * components/website-builder/website-builder-workspace.tsx, the older
+ * page, which no address draws any more.
  *
  * Said in the field, a description builds the site: /api/websites/generate
  * may first ask a few questions, which are answered in the field (or
@@ -79,7 +80,7 @@ type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; 
  * route puts back every other part exactly as stored
  * (lib/website-boxes.ts, takeEditedBox).
  *
- * PAGES (package 10), behind the switch "site-pages": a fourth option asks
+ * PAGES (package 10): a fourth option asks
  * for one, three or five pages (lib/websites/page-request.ts); a site with
  * pages shows them as tabs over the preview, and the parts, the chosen
  * part and the next change are the open page's — the route already edits
@@ -100,7 +101,6 @@ export function WebsiteShell({
   initialWebsites,
   initialBrief,
   initialOpenId = null,
-  pages = false,
   translate = false,
   initialProjectId = null,
 }: {
@@ -108,8 +108,6 @@ export function WebsiteShell({
   initialBrief?: string;
   /** A site to open on arrival — `?project=` from the Library or a star. */
   initialOpenId?: string | null;
-  /** The switch "site-pages" (package 10), read by the page. */
-  pages?: boolean;
   /** The switch "translate" (package 28), read by the page. */
   translate?: boolean;
   /** From `?projectId=` — a DIFFERENT query param from `initialOpenId`'s
@@ -318,7 +316,7 @@ export function WebsiteShell({
     try {
       const referenceImagePaths = await sendPhotos();
       if (referenceImagePaths === null) return;
-      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, ...(pages ? { pageSlug: slug } : {}), referenceImagePaths });
+      const outcome = await requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, pageSlug: slug, referenceImagePaths });
       void refreshCredits();
       if (outcome.kind === "refused") {
         say({
@@ -398,14 +396,14 @@ export function WebsiteShell({
         return;
       }
       // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
-      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + (pages ? pageRequestBrief(pageCount) : "");
+      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount);
       await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);
     })();
   }
 
   function download(site: UserWebsite) {
-    // With pages, the whole site: a .zip whose pages link to each other.
-    const file = pages ? siteDownload(site) : { filename: `${site.name || "site"}.html`, type: "text/html;charset=utf-8", data: site.html_content };
+    // The whole site: a .zip whose pages link to each other.
+    const file = siteDownload(site);
     saveBlob(new Blob([file.data as BlobPart], { type: file.type }), file.filename);
   }
 
@@ -418,10 +416,10 @@ export function WebsiteShell({
   ).estimatedCredits;
 
   // THE OPEN PAGE (package 10): home unless a tab chose another of THIS site's.
-  const sitePages = pages && current ? normalisePages(current.pages).pages : [];
+  const sitePages = current ? normalisePages(current.pages).pages : [];
   const pageSlug = openPage && current && openPage.siteId === current.id && sitePages.some((p) => p.slug === openPage.slug) ? openPage.slug : "";
   const html = pageSlug ? sitePages.find((p) => p.slug === pageSlug)!.html : current?.html_content ?? "";
-  const notes = pages && current && current.status === "completed" ? parseGenerationNotes(current.generation_notes) : [];
+  const notes = current && current.status === "completed" ? parseGenerationNotes(current.generation_notes) : [];
   const complete = Boolean(current) && current!.status === "completed" && looksLikeCompleteHtmlDocument(html);
   const unfilled = complete ? findUnfilledPlaceholders(html) : [];
   // Only for a site whose every request is in this conversation: a number
@@ -502,19 +500,17 @@ export function WebsiteShell({
           actions: (
             <>
               <PublishControl websiteId={current.id} websiteName={current.name} disabled={current.status !== "completed"} />
-              {pages && (
-                <button
-                  type="button"
-                  onClick={() => void undo()}
-                  disabled={current.status !== "completed" || busy}
-                  aria-label={tShell("pages.undo")}
-                  title={tShell("pages.undo")}
-                  data-testid="site-undo"
-                  className={`${ACTION} disabled:opacity-40`}
-                >
-                  <Undo2 className="h-4 w-4" aria-hidden="true" />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => void undo()}
+                disabled={current.status !== "completed" || busy}
+                aria-label={tShell("pages.undo")}
+                title={tShell("pages.undo")}
+                data-testid="site-undo"
+                className={`${ACTION} disabled:opacity-40`}
+              >
+                <Undo2 className="h-4 w-4" aria-hidden="true" />
+              </button>
               <button type="button" onClick={() => download(current)} disabled={current.status !== "completed" || !looksLikeCompleteHtmlDocument(current.html_content)} aria-label={t("downloadButton")} title={t("downloadButton")} data-testid="site-download" className={ACTION}>
                 <Download className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -720,9 +716,7 @@ export function WebsiteShell({
           )}
         </span>,
         // HOW MANY PAGES (package 10): the third option, for a new site.
-        ...(pages
-          ? [
-              <span key="pages" className="relative">
+        <span key="pages" className="relative">
                 <button
                   type="button"
                   onClick={() => setChoosingPages((v) => !v)}
@@ -754,9 +748,7 @@ export function WebsiteShell({
                     ))}
                   </div>
                 )}
-              </span>,
-            ]
-          : []),
+        </span>,
       ]}
       empty={{
         heading: t("empty.heading"),

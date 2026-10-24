@@ -23,8 +23,6 @@
  *             asked anyway, makes no project. A step left from a flow made
  *             on a plan that had it is refused by its tool's REAL route
  *             (lib/flows/plan-includes.ts) before anything is held.
- *   SWITCH    package 11's `research-slides` closed: a deck made from a
- *             research is not offered, the research is.
  *   CREDITS   a balance of 0: the REAL routes of the pictures and the
  *             posts refuse, nothing is held, nothing goes in the project.
  *   LIMIT     the hour's AI requests used up (2026-10-14): the REAL posts
@@ -165,7 +163,7 @@ function handle({ req, res, url, body, json }) {
 }
 const supa = await startMockSupabase({ port: 54523, handle });
 const setFlags = (audiences) => flags.splice(0, flags.length, ...Object.entries(audiences).map(([key, audience]) => ({ key, audience })));
-const ON = { flows: "staff", "image-studio": "staff", "research-slides": "staff" };
+const ON = { flows: "staff" };
 
 // ---------------------------------------------------------------------
 // The model, answered locally. "down": 529 overloaded_error, as
@@ -594,20 +592,6 @@ try {
         askedOf("posts").length === 1 && left.steps?.posts?.status === "failed" && left.steps?.posts?.error === "not_included" && left.status === "failed", JSON.stringify(left.steps));
       check(`${run}: ...before anything is held or the model asked, and nothing goes in the project`, model.calls === callsBefore && rpcOf("reserve_credits").length === 0 && linksInto(leftProject.id).length === 0);
       check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
-
-      // ================================================================
-      console.log("-- switch: a deck from a research, with research-slides closed");
-      reset({ tier: "growth", credits: 3000 });
-      setFlags({ ...ON, "research-slides": "off" });
-      await open();
-      await say(F.example.research);
-      await page.locator('[data-testid="flow-plan"]').waitFor({ timeout: 10000 }).catch(() => null);
-      check(`${run}: the research is offered, the deck from it named as not available`,
-        (await planKinds()) === "research" && (await page.locator('[data-testid="flow-unavailable"]').innerText().catch(() => "")) === fill(F.unavailable, { names: names("slides") }), `${await planKinds()} | ${await page.locator('[data-testid="flow-unavailable"]').innerText().catch(() => "")}`);
-      const sw = await page.request.post(`${APP}/api/flows`, { data: { said: F.example.research } });
-      const swBody = await sw.json().catch(() => ({}));
-      check(`${run}: ...and the route stores the research alone`, sw.status() === 200 && JSON.stringify((swBody.flow?.plan?.steps ?? []).map((s) => s.kind)) === '["research"]' && (swBody.unavailable ?? []).join() === "slides", JSON.stringify(swBody).slice(0, 300));
-      setFlags(ON);
 
       // ================================================================
       console.log("-- credits: a balance of 0, the real routes");

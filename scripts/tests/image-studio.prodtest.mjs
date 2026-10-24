@@ -156,7 +156,16 @@ async function open(origin, device) {
   async function press(locator) {
     await locator.evaluate((e) => e.scrollIntoView({ block: "center" }));
     if (!cdp) return locator.click();
-    const box = await locator.boundingBox();
+    // A finger lands where the thing IS: wait out a slide (the history column
+    // takes 200ms to come in) before taking its place from the page.
+    let box = await locator.boundingBox();
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 60));
+      const next = await locator.boundingBox();
+      const still = next && box && Math.abs(next.x - box.x) < 0.5 && Math.abs(next.y - box.y) < 0.5;
+      box = next;
+      if (still) break;
+    }
     const x = box.x + box.width / 2, y = box.y + box.height / 2;
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
@@ -204,7 +213,7 @@ try {
     { label: "phone", viewport: { width: 390, height: 844 }, touch: true },
   ]) {
     console.log(`\n== ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);
-    setFlags({ "image-studio": "staff" });
+    setFlags({});
     removed.length = 0;
     const { context, page, press } = await open(ON, device);
     const asked = { generate: [], edit: [], full: [] };
@@ -324,7 +333,9 @@ try {
     check("offline is said", (await page.locator("main").innerText()).includes(el.errors.offline));
 
     // ---- delete: every picture it names, then the row
-    await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
+    // The column's state is remembered (ionexa.imageHistoryColumn), so it may
+    // already be open from the earlier look at it: open it only if it is shut.
+    if ((await page.locator('[data-testid="tool-shell-history"]').getAttribute("data-open")) !== "true") await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
     await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10000 }).catch(() => null);
     await press(page.locator('[data-testid="shell-history-row"]').last());
     await page.locator('[data-testid="image-delete"]').waitFor({ timeout: 10000 }).catch(() => null);
@@ -344,7 +355,7 @@ try {
   // ---- no key: said, nothing sent, nothing charged
   console.log("\n== no key, phone ==");
   {
-    setFlags({ "image-studio": "staff" });
+    setFlags({});
     const { context, page, press } = await open(NOKEY, { viewport: { width: 390, height: 844 }, touch: true });
     let sent = 0;
     await page.route("**/api/images/**", (r) => { sent++; return r.continue(); });
@@ -359,15 +370,15 @@ try {
     await context.close();
   }
 
-  // ---- the switch off: the page everybody else has
-  console.log("\n== the switch off, desktop ==");
+  // ---- no switch: with no row in the switches table the tool is still the tool
+  console.log("\n== no switch row, desktop ==");
   {
-    setFlags({ "image-studio": "off" });
+    setFlags({});
     const { context, page } = await open(ON, { viewport: { width: 1440, height: 900 }, touch: false });
     await page.goto(`${ON}/dashboard/images`, { waitUntil: "networkidle" });
-    check("with the switch off the page is the list it always was", (await page.locator('[data-testid="image-grid"], [data-testid="image-price"]').count()) === 0 && (await page.locator("main").count()) === 1);
-    const refusedRoute = await page.request.post(`${ON}/api/images/generate`, { data: { description: "Βάρκα στο λιμάνι", aspect: "1:1" } });
-    check("...and the routes refuse", refusedRoute.status() === 403 && (await refusedRoute.json()).code === "not_enabled");
+    check("with no switch the page is the Image tool, not the old list", (await page.locator('[data-testid="tool-shell-thread"]').count()) === 1);
+    const route = await page.request.post(`${ON}/api/images/generate`, { data: { description: "Βάρκα στο λιμάνι", aspect: "1:1" } });
+    check("...and the route does not refuse for a switch", (await route.json().catch(() => ({}))).code !== "not_enabled");
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

@@ -92,13 +92,16 @@ checkList(
 );
 // And the reverse, so the exemption list cannot quietly cover a real one:
 // every deliberate name must actually BE a build module with its own page
-// that renders BuildModulePage.
+// that renders BuildModulePage — except /dashboard/images, which since
+// 2026-10-23 is the Image tool for everybody (components/images/image-shell.tsx);
+// its build-module entry stays because the module's table and its rows do.
 const wrongExemption = [...DELIBERATE]
   .filter((slug) => staticDirs.includes(slug))
   .filter((slug) => {
     const page = `${DASHBOARD}/${slug}/page.tsx`;
     try {
-      return !/BuildModulePage/.test(readFileSync(page, "utf8"));
+      const src = readFileSync(page, "utf8");
+      return !(/BuildModulePage/.test(src) || (slug === "images" && /<ImageShell/.test(src)));
     } catch {
       return true;
     }
@@ -202,7 +205,7 @@ const layout = readFileSync("src/app/dashboard/layout.tsx", "utf8");
 check(
   "and the layout tells both surfaces who is looking",
   /<Sidebar[^>]*isOwner=\{isAdmin\}/.test(layout) &&
-    // Other props may follow (switchedOn, lib/nav/switched-names.ts); who is looking is this one.
+    // Other props may follow; who is looking is this one.
     /<CommandPalette isOwner=\{isAdmin\}[^>]*\/>/.test(layout),
 );
 

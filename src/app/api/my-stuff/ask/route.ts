@@ -20,7 +20,6 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { runCompletion } from "@/lib/ai/providers/complete";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { kindsToRead } from "@/lib/my-stuff/classify";
 import { loadMyStuffCandidates } from "@/lib/my-stuff/ask-store";
 import { buildMyStuffPrompt, citationsFor, renderMyStuffContext, MY_STUFF_MAX_QUESTION_CHARS, type MyStuffCitation } from "@/lib/my-stuff/ask-context";
@@ -58,7 +57,6 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
-  if (!(await isFeatureOn("my-stuff", user))) return NextResponse.json({ error: "not_enabled" }, { status: 404 });
 
   try {
     const body = (await request.json()) as Record<string, unknown>;

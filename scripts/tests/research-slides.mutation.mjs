@@ -115,11 +115,11 @@ const MUTANTS = [
     expect: "...only when it is finished",
   },
   {
-    name: "the switch is ignored",
+    name: "the switch comes back in front of the report",
     file: ROUTE,
-    from: '    if (!(await isFeatureOn("research-slides", user))) return NextResponse.json({ error: "not_enabled" }, { status: 403 });\n',
-    to: "",
-    expect: "the report is read only with the switch on",
+    from: '  if (researchId !== null) {\n',
+    to: '  if (researchId !== null) {\n    if (!(await isFeatureOn("research-slides", user))) return NextResponse.json({ error: "not_enabled" }, { status: 403 });\n',
+    expect: "the report is read for everybody the plan allows: no switch in front of it",
   },
   {
     name: "a typed description is let past the field's limit",

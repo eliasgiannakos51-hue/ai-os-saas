@@ -6,8 +6,9 @@
  *      SKIP_BUILD=1 node scripts/tests/library.prodtest.mjs
  *
  * One production build, two servers: one where the signed-in account is
- * the test account (TEST_ACCOUNT_EMAILS), so the switches "library" and
- * "tool-shell" are on for it, and one where they are off.
+ * the test account (TEST_ACCOUNT_EMAILS) and one where it is not. (The
+ * switches "library" and "tool-shell" were removed 2026-10-22 and 2026-10-23,
+ * so both servers draw the same screens.)
  *
  * The account has made a site, a deck and a set of posts (and one site
  * that failed). With the switch on, the page All tools calls «Βιβλιοθήκη»
@@ -175,10 +176,14 @@ try {
     const items = page.locator('[data-testid="library-item"]');
     const kinds = async () => (await items.evaluateAll((els) => els.map((e) => e.getAttribute("data-kind")))).join(",");
 
-    // ---- the switch off: the page as it was
+    // ---- RETIRED 2026-10-23 (the switch went on 2026-10-22, c4be9faa): this
+    // held "switch off: no Library, the entries as before". The switch
+    // `library` no longer exists, so the Library tab is drawn for everybody,
+    // and the same address on the "off" server must now show it too — which
+    // is the opposite property, held here instead of an "off" nobody can set.
     await page.goto(`${OFF}/dashboard/timeline`, { waitUntil: "networkidle" });
-    check("switch off: no Library, the entries as before",
-      (await page.locator('[data-testid="library-items"]').count()) === 0 && (await page.getByRole("tab", { name: L.tab }).count()) === 0);
+    check("no switch: the Library tab is there for everybody",
+      (await page.getByRole("tab", { name: L.tab }).count()) === 1);
 
     // ---- the switch on: what was made, in three tools, in one place
     await page.goto(`${ON}/dashboard/timeline`, { waitUntil: "networkidle" });

@@ -293,7 +293,16 @@ async function open(origin, device) {
   async function press(locator) {
     await locator.evaluate((e) => e.scrollIntoView({ block: "center" }));
     if (!cdp) return locator.click();
-    const box = await locator.boundingBox();
+    // A finger lands where the thing IS: wait out a slide (the history column
+    // takes 200ms to come in) before taking its place from the page.
+    let box = await locator.boundingBox();
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 60));
+      const next = await locator.boundingBox();
+      const still = next && box && Math.abs(next.x - box.x) < 0.5 && Math.abs(next.y - box.y) < 0.5;
+      box = next;
+      if (still) break;
+    }
     const x = box.x + box.width / 2, y = box.y + box.height / 2;
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
@@ -474,7 +483,7 @@ try {
     const kicked = page.waitForResponse((r) => r.url().endsWith("/api/automations/events"), { timeout: 30000 }).catch(() => null);
     const registered = page.waitForResponse((r) => /\/api\/files\/(register|upload)$/.test(r.url()), { timeout: 30000 }).catch(() => null);
     // The Files tool's own picker (the shell's, or the page's before it), not another one on the screen.
-    await page.locator('[data-testid="files-shell-input"], main input[type="file"][accept]').first().setInputFiles({ name: "σύμβαση.txt", mimeType: "text/plain", buffer: contract });
+    await page.locator('[data-testid="analyze-upload-input"]').first().setInputFiles({ name: "σύμβαση.md", mimeType: "text/markdown", buffer: contract });
     const reg = await registered;
     const regBody = reg ? await reg.json().catch(() => null) : null;
     check("the file is stored and read, and its answer says one automation was started", reg?.status() === 200 && regBody?.file?.processing_status === "ready" && regBody.automations === 1, `${JSON.stringify(regBody)}\n        seen: ${seen.filter((x) => !/_next|favicon/.test(x)).slice(-15).join(" | ")}\n        inputs: ${await page.locator('input[type="file"]').count()} ${await page.locator('input[type="file"]').first().getAttribute("data-testid")}\n        url: ${page.url()}\n        main: ${(await page.locator("main").innerText()).slice(0, 400).replace(/\n/g, " / ")}`);
@@ -522,18 +531,18 @@ try {
   }
 
   // =================================================================
-  console.log("\n== 5. the switch off ==");
+  console.log("\n== 5. no switch: the tool is for everybody ==");
   {
-    setFlags({ automations: "off" });
+    // 2026-10-23: the switch `automations` is gone, so the old "switch off"
+    // section has no off to hold. What it protected, that nobody is shut out of
+    // the tool or refused by its routes, is held the other way round: an
+    // account with no switch set at all gets the shell and an answer.
+    setFlags({});
     const { context, page } = await open(ON, desktop);
     await page.goto(`${ON}/dashboard/automation`, { waitUntil: "networkidle" });
-    check("with the switch off the page is the one it always was", (await page.locator('[data-testid="tool-shell"]').count()) === 0 && (await page.locator("main").count()) === 1);
+    check("with no switch set the page is the automation shell, for everybody", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator("main").count()) === 1);
     const r = await page.request.post(`${ON}/api/automations/flows`, { data: { said: "κάθε πρωί στις 9", timeZone: "Europe/Athens" } });
-    check("...and the routes refuse", r.status() === 403 && (await r.json()).code === "not_enabled");
-    const live = flowNamed("Σύνοψη αρχείων");
-    live.next_run_at = null;
-    const tick = await page.request.get(`${ON}/api/cron/automation-flows`, { headers: { Authorization: `Bearer ${CRON_SECRET}` } });
-    check("...and the cron runs nothing for a person the switch is closed for", (await tick.json()).ran === 0);
+    check("...and the routes answer instead of refusing", r.status() !== 403 && (await r.json().catch(() => ({}))).code !== "not_enabled", String(r.status()));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

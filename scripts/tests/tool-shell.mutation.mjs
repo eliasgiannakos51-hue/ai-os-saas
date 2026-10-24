@@ -35,9 +35,10 @@ const JOBS = "src/lib/jobs/start-and-watch.ts";
 // The collections prop moved to the merged page when Files redirected
 // into Analyze (2026-10-22) — FILES_PAGE now names where it actually is.
 const FILES_PAGE = "src/app/dashboard/data-analysis/page.tsx";
+const FILES_OLD = "src/app/dashboard/files/page.tsx";
 const SITE_PHOTOS = "src/lib/website-builder/site-photos.ts";
 const SITE_HISTORY = "src/components/website-builder/site-history.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, SITE_PHOTOS, SITE_HISTORY];
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, FILES_OLD, SITE_PHOTOS, SITE_HISTORY];
 
 const MUTANTS = [
   {
@@ -90,11 +91,11 @@ const MUTANTS = [
     expect: "the options are drawn under that field",
   },
   {
-    name: "the shell is drawn without its switch",
+    name: "a page reads the removed switch again and keeps the shell from some readers",
     file: PAGE,
-    from: '  if (await isFeatureOn("tool-shell", user)) {',
-    to: "  if (true) {",
-    expect: "only behind the switch",
+    from: '  return (\n    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">\n      <PostsShell',
+    to: '  if (!(await isFeatureOn("tool-shell", user))) return null;\n  return (\n    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">\n      <PostsShell',
+    expect: "no page or component reads it",
   },
   {
     name: "Posts stops showing the price before sending",
@@ -144,11 +145,11 @@ const MUTANTS = [
     expect: "the photographs are removed again",
   },
   {
-    name: "Slides: the shell is drawn without its switch",
+    name: "Slides: the page reads the removed switch again and keeps the shell from some readers",
     file: SLIDES_PAGE,
-    from: '  if (await isFeatureOn("tool-shell", user)) {',
-    to: "  if (true) {",
-    expect: "only behind the switch",
+    from: '  return (\n    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">\n      <PresentationsShell',
+    to: '  if (!(await isFeatureOn("tool-shell", user))) return null;\n  return (\n    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">\n      <PresentationsShell',
+    expect: "no page or component reads it",
   },
   {
     name: "Slides: the price of a change is not shown",
@@ -353,9 +354,16 @@ const MUTANTS = [
   {
     name: "Files: the page no longer hands the shell its collections",
     file: FILES_PAGE,
-    from: "          initialCollections={initialCollections}\n",
+    from: "        initialCollections={initialCollections}\n",
     to: "",
     expect: "the collections the merged page reads are handed to the shell",
+  },
+  {
+    name: "Files: the old address stops redirecting to the merged tool",
+    file: FILES_OLD,
+    from: '  redirect(query ? `/dashboard/data-analysis?${query}` : "/dashboard/data-analysis");',
+    to: '  void (query ? `/dashboard/data-analysis?${query}` : "/dashboard/data-analysis");',
+    expect: "the old address redirects to it unconditionally",
   },
   {
     name: "Files: a collection pressed no longer selects its files",
@@ -416,8 +424,8 @@ const MUTANTS = [
   {
     name: "Site: a change is sent without its photos",
     file: SITE,
-    from: "...(pages ? { pageSlug: slug } : {}), referenceImagePaths });",
-    to: "...(pages ? { pageSlug: slug } : {}) });",
+    from: "pageSlug: slug, referenceImagePaths });",
+    to: "pageSlug: slug });",
     expect: "what is said changes it",
   },
   {

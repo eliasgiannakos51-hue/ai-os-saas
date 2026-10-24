@@ -12,6 +12,7 @@ import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
+import { HelpTip } from "@/components/ui/help-tip";
 import type { ImagePrices } from "@/lib/images/image-pricing";
 import {
   IMAGE_ASPECTS,
@@ -369,6 +370,7 @@ export function ImageShell({
       <ToolShell
         ref={composerRef}
         name={t("name")}
+        help={<HelpTip helpKey="help.images" />}
         turns={shellTurns}
         working={
           working ? (

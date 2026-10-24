@@ -67,6 +67,9 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   // Package 26: a game is a page of code written from a plan, as a site is.
   game_generate: "code",
   game_edit: "code",
+  // Rebuild (2026-10-27): a whole app in one file, and a change to it.
+  rebuild_generate: "code",
+  rebuild_edit: "code",
 
   deep_research: "research",
   research_plan: "research",
@@ -97,6 +100,9 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   // the same shape as record_ask above, just read across every tool
   // instead of one record table.
   my_stuff_ask: "file",
+  // Connect by address (2026-10-26): choosing one tool of an app and its
+  // arguments from a request, over a bounded list.
+  mcp_ask: "file",
 
   document_translate: "translation",
 

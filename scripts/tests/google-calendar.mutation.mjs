@@ -6,7 +6,8 @@
  * The days turned round losing the last one; a read with no ceiling on
  * its period; the description asked for; a cancelled meeting offered as
  * one that happens; Chat without the days, or without the calendar; the
- * switch ignored by the page, the connect route, Chat or an automation;
+ * card drawn for a provider that is not configured, the connect route
+ * accepting one, Chat or an automation reading with no connection;
  * the database left refusing the new provider; a consent that promises
  * no reads «in the background» while an automation reads at its hour; a
  * consent step that opens out of view; and Greenwich's days where the
@@ -20,7 +21,6 @@ const GATE = "scripts/tests/google-calendar.test.mjs";
 const WINDOW = "src/lib/integrations/calendar-window.ts";
 const READ = "src/lib/integrations/read.ts";
 const TOOL = "src/lib/integrations/chat-tool.ts";
-const SWITCHES = "src/lib/integrations/switches.ts";
 const CHAT = "src/app/api/chat/route.ts";
 const CONNECT = "src/app/api/integrations/[provider]/connect/route.ts";
 const LIST = "src/components/integrations/integrations-list.tsx";
@@ -75,32 +75,25 @@ const MUTANTS = [
     expect: "the calendar is a source of its own",
   },
   {
-    name: "the switch is ignored: every provider is open to everyone",
-    file: SWITCHES,
-    from: '(p.behindSwitch === "connections" && calendar)',
-    to: "true",
-    expect: "one answer to which providers are open",
-  },
-  {
-    name: "Chat goes on reading a connected calendar after the switch closes",
+    name: "Chat stops reading the connected accounts",
     file: CHAT,
-    from: "      const integrations = (await listIntegrations(user.id)).filter((i) => open.has(i.provider));",
-    to: "      const integrations = await listIntegrations(user.id); void open;",
-    expect: "Chat stops reading an account already connected",
+    from: "      const integrations = await listIntegrations(user.id);\n",
+    to: "      const integrations: Awaited<ReturnType<typeof listIntegrations>> = [];\n",
+    expect: "Chat reads every connected account the person has",
   },
   {
-    name: "a closed switch still lets the calendar be connected",
+    name: "the connect route stops refusing a provider that is not configured",
     file: CONNECT,
-    from: '    if (!(await providersOpenTo(user)).has(provider.id)) {\n      return NextResponse.json({ ok: false, code: "unknown_provider" }, { status: 404 });\n    }\n',
+    from: '    if (!providerConfigured(provider.id)) {\n      return NextResponse.json(\n        { ok: false, error: "That integration is not configured on this deployment." },\n        { status: 503 }\n      );\n    }\n',
     to: "",
-    expect: "the connect route refuses the others",
+    expect: "the connect route refuses a provider that is not configured here",
   },
   {
-    name: "the page draws the calendar card with the switch closed",
+    name: "the page draws a card for a provider that is not configured",
     file: LIST,
     from: "PROVIDERS.filter((p) => shown.includes(p.id) && matchesSearch(p.name, q))",
     to: "PROVIDERS.filter((p) => matchesSearch(p.name, q))",
-    expect: "the page draws only those",
+    expect: "the page draws a provider's card only when its OAuth app is configured",
   },
   {
     name: "the database goes on refusing the calendar",
@@ -110,25 +103,18 @@ const MUTANTS = [
     expect: "the database accepts the fourth provider",
   },
   {
-    name: "an automation goes on reading the calendar after the switch closes",
-    file: RUNNER,
-    from: '    if (!(await providersOpenTo(ctx.user)).has("google_calendar")) return { ok: false, note: "not_connected" };\n',
-    to: "",
-    expect: "an automation already on stops reading the calendar",
-  },
-  {
-    name: "switching an automation on counts a calendar behind a closed switch as connected",
+    name: "switching an automation on counts a calendar nobody connected as connected",
     file: FLOW_ACCESS,
-    from: '? !open.has("google_calendar") || !integrations.some(',
-    to: "? !integrations.some(",
-    expect: "...and the automations count the calendar as connected only while the switch is open",
+    from: '? !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")',
+    to: "? false",
+    expect: "...and the automations count the calendar as connected when it is",
   },
   {
-    name: "the boxes on the screen count a calendar behind a closed switch as connected",
+    name: "the boxes on the screen count a calendar nobody connected as connected",
     file: PAGE_DATA,
-    from: 'google_calendar: open.has("google_calendar") && integrations.some(',
-    to: "google_calendar: integrations.some(",
-    expect: "...and the automations count the calendar as connected only while the switch is open",
+    from: "google_calendar: integrations.some(",
+    to: "google_calendar: true || integrations.some(",
+    expect: "...and the automations count the calendar as connected when it is",
   },
   {
     name: "the consent promises again that it never reads in the background",
@@ -196,8 +182,8 @@ const MUTANTS = [
   {
     name: "Connect goes back into the card's menu",
     file: LIST,
-    from: "                  {connectButton && !isConnected && (",
-    to: "                  {false && connectButton && !isConnected && (",
+    from: "                  {!isConnected && (",
+    to: "                  {false && !isConnected && (",
     expect: "ONE PRESS",
   },
 ];
@@ -205,6 +191,6 @@ const MUTANTS = [
 runMutations({
   name: "connections",
   gate: GATE,
-  targets: [WINDOW, READ, TOOL, SWITCHES, CHAT, CONNECT, LIST, MIGRATION, RUNNER, FLOW_ACCESS, PAGE_DATA, EN, WORKSPACE],
+  targets: [WINDOW, READ, TOOL, CHAT, CONNECT, LIST, MIGRATION, RUNNER, FLOW_ACCESS, PAGE_DATA, EN, WORKSPACE],
   mutants: MUTANTS,
 });

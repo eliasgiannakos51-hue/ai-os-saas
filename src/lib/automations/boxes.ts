@@ -1,6 +1,6 @@
 /**
- * AN AUTOMATION IS A ROW OF BOXES (MASTER 16, package 30, behind the
- * switch "automations"; the plan is docs/automations-plan-2026-10-04.md).
+ * AN AUTOMATION IS A ROW OF BOXES (MASTER 16, package 30, for everybody
+ * since 2026-10-23; the plan is docs/automations-plan-2026-10-04.md).
  *
  * «όταν ανεβάζω αρχείο, κάνε σύνοψη και βάλ' τη στη Βιβλιοθήκη» is four:
  * start (a file is uploaded) → read (that file) → AI (summarise it) →

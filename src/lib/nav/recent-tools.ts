@@ -93,6 +93,8 @@ export const COMPLETION_TOOLS: Readonly<Record<string, string>> = {
   website_edit: "/dashboard/website-builder",
   game_generate: "/dashboard/games",
   game_edit: "/dashboard/games",
+  rebuild_generate: "/dashboard/rebuild",
+  rebuild_edit: "/dashboard/rebuild",
   deep_research: "/dashboard/deep-research",
   research_plan: "/dashboard/deep-research",
   presentation_generate: "/dashboard/presentations",

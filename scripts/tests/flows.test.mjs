@@ -1,7 +1,7 @@
 /*
  * «ΦΤΙΑΞΕ SITE ΓΙΑ ΤΟ CAMPING ΜΟΥ, ΜΕ ΕΙΚΟΝΕΣ, ΚΑΙ POSTS», ΕΓΚΡΙΝΩ ΤΟ ΠΛΑΝΟ,
  * ΚΑΙ ΠΑΙΡΝΩ ΚΑΙ ΤΑ ΤΡΙΑ ΣΕ ΕΝΑ ΕΡΓΟ, ΜΕ ΙΔΙΑ ΧΡΩΜΑΤΑ (MASTER 6.1, 6.3;
- * MASTER 16 package 36), behind the switch "flows".
+ * MASTER 16 package 36), for everybody since 2026-10-23 (no switch).
  *
  * What this holds, against the code rather than its comments:
  *
@@ -136,7 +136,7 @@ console.log("\n== 4. the routes ==");
 const create = code("src/app/api/flows/route.ts");
 const steps = code("src/app/api/flows/[id]/steps/route.ts");
 for (const [name, src] of [["create", create], ["steps", steps]]) {
-  check(`${name}: signs in, then the switch`, /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);\s*if \(!\(await isFeatureOn\("flows", user\)\)\) return NextResponse\.json\(\{ ok: false, code: "not_enabled" \}, \{ status: 403 \}\);/.test(src));
+  check(`${name}: signs in, and reads no switch`, /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);/.test(src) && !/isFeatureOn\("flows"/.test(src));
 }
 check("the plan is made again on the server, from the sentence, without what this person cannot use", /const available = await flowAvailability\(user, await resolveEffectivePlan\(user\)\);\s*const plan = withoutUnavailable\(planFlow\(said\), \(step\) => canRun\(available, step\)\);/.test(create) && !/body\.plan|body\.steps/.test(create));
 check("a sentence that needs what does not exist makes no project", create.indexOf("if (plan.steps.length === 0)") < create.indexOf('.from("projects")\n      .insert('));
@@ -196,18 +196,19 @@ check(`for every plan (${plans.PLANS.length}), and for the owner, a step is in t
 check("Free is offered the analysis, and none of what it would be refused",
   JSON.stringify(includes.planIncludes("free", false)) === JSON.stringify({ research: false, site: false, posts: false, slides: false, analysis: true }), JSON.stringify(includes.planIncludes("free", false)));
 const avail = code("src/lib/flows/availability.ts");
-check("the screen and the route ask it of this person's own plan", /return \{ \.\.\.planIncludes\(plan\?\.slug \?\? "free", isAdmin\), images, slidesFromResearch: researchSlides \};/.test(avail) && /const isAdmin = isAdminEmail\(user\.email\);/.test(avail));
-check("the pictures: their switch, their plan, their provider's key", /isFeatureOn\("image-studio", user\)/.test(avail) && /const images = Boolean\(imageApiKey\(\)\) && imageSwitch && \(isAdmin \|\| planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\);/.test(avail));
+check("the screen and the route ask it of this person's own plan", /return \{ \.\.\.planIncludes\(plan\?\.slug \?\? "free", isAdmin\), images, slidesFromResearch: true \};/.test(avail) && /const isAdmin = isAdminEmail\(user\.email\);/.test(avail));
+check("the pictures: their plan, their provider's key, and no switch", !/image-studio/.test(avail.replace(/\/\*[\s\S]*?\*\//g, "")) && /const images = Boolean\(imageApiKey\(\)\) && \(isAdmin \|\| planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\);/.test(avail));
 const ALL = { research: true, site: true, images: true, posts: true, slides: true, analysis: true };
 const deck = plan.planFlow("Κάνε έρευνα για τα camping και φτιάξε παρουσίαση");
 const alone = plan.planFlow("Φτιάξε παρουσίαση για το camping μου");
-check("a deck made FROM a research only where its switch is open; a deck alone does not need it",
+check("a deck made FROM a research is planned only where the deck can be made; a deck alone does not need it",
   plan.withoutUnavailable(deck, (s) => plan.canRun({ ...ALL, slidesFromResearch: false }, s)).unavailable.join() === "slides" &&
   plan.withoutUnavailable(deck, (s) => plan.canRun({ ...ALL, slidesFromResearch: true }, s)).unavailable.length === 0 &&
   plan.withoutUnavailable(alone, (s) => plan.canRun({ ...ALL, slidesFromResearch: false }, s)).steps.map((s) => s.kind).join() === "slides");
-check("...the switch the deck's route asks before it reads the report",
-  /const \[imageSwitch, researchSlides\] = await Promise\.all\(\[isFeatureOn\("image-studio", user\), isFeatureOn\("research-slides", user\)\]\);/.test(avail) &&
-  /if \(researchId !== null\) \{\s*if \(!\(await isFeatureOn\("research-slides", user\)\)\) return NextResponse\.json\(/.test(code("src/app/api/presentations/generate/route.ts")));
+check("...and it is open to everybody: no switch in front of the report",
+  /slidesFromResearch: true \}/.test(avail) && !/research-slides/.test(avail) &&
+  /if \(researchId !== null\) \{\s*const \{ data: report, error: reportError \} = await supabase/.test(code("src/app/api/presentations/generate/route.ts")) &&
+  !/research-slides/.test(code("src/app/api/presentations/generate/route.ts")));
 const siteRoute = code("src/app/api/websites/generate/route.ts");
 check("a site a flow asks for: an account that cannot pay for a pre-check is refused before the paid classifier, not after it",
   /if \(skipClarification && !bypassCredits\) \{\s*const check = await hasEnoughCredits\(user\.id, CREDIT_COSTS\.clarificationCheck, precheckPlan\);\s*if \(!check\.ok\) \{\s*return NextResponse\.json\(/.test(siteRoute) &&
@@ -222,7 +223,7 @@ const extras = code("src/lib/projects/linkable-extras.ts");
 check("a project can hold what a flow makes", ["user_websites", "generated_images", "research_reports", "data_analyses", "generated_posts", "ai_presentations"].every((t) => extras.includes(`table: "${t}"`)));
 check("each thing in a project opens in its tool", /function openHref\(member: ProjectMemberView\)/.test(code("src/components/projects/project-detail.tsx")) && /data-testid="project-member-open"/.test(code("src/components/projects/project-detail.tsx")));
 const page = code("src/app/dashboard/projects/page.tsx");
-check("the flows only behind the switch, INSTEAD of the page", /if \(\(await isFeatureOn\("flows", user\)\) && projects\) \{/.test(page) && page.indexOf("<FlowShell") < page.lastIndexOf("return ("));
+check("the flows for everybody, INSTEAD of the page", /if \(projects\) \{/.test(page) && !/isFeatureOn/.test(page) && page.indexOf("<FlowShell") < page.lastIndexOf("return ("));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the database and the words ==");
@@ -231,7 +232,7 @@ const sql = readFileSync("supabase/migrations/20261022000000_project_flows.sql",
 check("project_flows: the owner reads, nobody writes from the browser, gone with its project",
   /alter table public\.project_flows enable row level security;/.test(sql) && /create policy project_flows_select_own on public\.project_flows for select using \(auth\.uid\(\) = user_id\);/.test(sql) && /revoke insert, update, delete on public\.project_flows from authenticated;/.test(sql) && /references public\.projects\(id\) on delete cascade/.test(sql));
 check("a colour stored is a colour", /check \(colour is null or colour ~ '\^#\[0-9a-f\]\{6\}\$'\)/.test(sql));
-check("the switch is declared", /\n  "flows": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
+check("the switch is gone (2026-10-23)", !/\n  "flows": "/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
 const used = new Set();
 for (const f of ["src/components/flows/flow-shell.tsx", "src/components/flows/flow-plan.tsx"]) {
   for (const m of code(f).matchAll(/\bt\("([a-zA-Z_.0-9]+)"/g)) used.add(m[1]);

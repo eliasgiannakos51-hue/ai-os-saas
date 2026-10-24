@@ -77,6 +77,10 @@ const env = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: supa.anonKey,
   SUPABASE_SERVICE_ROLE_KEY: supa.serviceKey,
   NEXT_PUBLIC_SITE_URL: ORIGIN,
+  // Image is drawn only with its key; none here, so the count below is the
+  // registry's without it, whatever this machine has set.
+  GEMINI_API_KEY: "",
+  GOOGLE_API_KEY: "",
 };
 
 // The words a Greek reader sees, read from the shipped messages, so a
@@ -91,7 +95,12 @@ const W = {
   railAll: el.sidebar.rail.allTools,
   railRecent: el.sidebar.rail.recentTools,
   // The square's one-word name since MASTER 14.1 (2026-10-07).
-  posts: el.dashboard.tools.names.posts,
+  // The tile this walk opens and pins is Projects: Posts left the grid
+  // (2026-10-23, lib/nav/all-tools.ts), and Projects is a tool of the final
+  // grid that has a row in the sidebar's main groups, which a pin needs.
+  posts: el.dashboard.tools.names.projects,
+  // The same tool under Recent tools is named by the sidebar's own label.
+  postsRail: el.sidebar.items.projects,
   greetings: Object.values(el.promise.greeting),
   mentor: el.dashboard.chat.mentorMode,
   oldHeadings: ["make", "ask", "run", "see", "organise"].map((k) => el.sidebar.groups[k]),
@@ -273,9 +282,9 @@ try {
     const cardInfo = await cards.evaluateAll((els) => els.map((a) => ({ text: a.innerText.trim(), lines: a.innerText.trim().split("\n").filter(Boolean).length })));
     // EXACTLY the squares lib/nav/all-tools.ts groups (MASTER 14.1): no
     // Settings block, nothing hidden coming back.
-    const { ALL_TOOLS_GROUPS } = await loadTs("src/lib/nav/all-tools.ts");
-    const squares = ALL_TOOLS_GROUPS.flatMap((g) => g.hrefs).length;
-    check(`All tools draws exactly its ${squares} squares (${n} cards)`, n === squares && squares >= 15);
+    const { availableTools } = await loadTs("src/lib/nav/all-tools.ts");
+    const squares = availableTools({ imageKey: false }).length;
+    check(`All tools draws exactly the tools that work (${squares}; ${n} cards)`, n === squares && squares >= 9);
     check("...and every card has a name AND a one-line hint", cardInfo.every((c) => c.lines >= 2), cardInfo.filter((c) => c.lines < 2).map((c) => c.text).join(" | "));
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     check("...and the page does not scroll sideways", overflow <= 1, `${overflow}px`);
@@ -289,9 +298,9 @@ try {
     };
     const postsCard = cards.filter({ hasText: W.posts }).first();
     const postsThere = (await postsCard.count()) > 0;
-    check("All tools has a Posts square to open and pin", postsThere);
+    check("All tools has a Projects square to open and pin", postsThere);
     if (postsThere) await press(postsCard);
-    await page.waitForURL(/\/dashboard\/posts/, { timeout: 15000 }).catch(() => {});
+    await page.waitForURL(/\/dashboard\/projects/, { timeout: 15000 }).catch(() => {});
     await page.waitForLoadState("networkidle");
     const railOpened = await railNow();
     check("a tool only OPENED from All tools is not under Recent tools", !railOpened.includes(W.railRecent), railOpened.slice(0, 300));
@@ -307,7 +316,7 @@ try {
     }
     check("...pinning it from All tools is saved", pinned);
     const railPinned = await railNow();
-    check("...and then it IS under Recent tools", railPinned.includes(W.railRecent) && railPinned.includes(W.posts), railPinned.slice(0, 300));
+    check("...and then it IS under Recent tools", railPinned.includes(W.railRecent) && railPinned.includes(W.postsRail), railPinned.slice(0, 300));
     await shot("5-recent");
 
     // ---- 6. chat with no message

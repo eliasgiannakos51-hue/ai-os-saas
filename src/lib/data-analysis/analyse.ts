@@ -257,8 +257,8 @@ export function extractJson(raw: string): Record<string, unknown> | null {
 }
 
 /**
- * THE SAME READING, WITH EVERY NUMBER A FACT (package 16, behind the
- * switch "analysis-provenance"). parseAnalysis decides what survives on
+ * THE SAME READING, WITH EVERY NUMBER A FACT (package 16).
+ * parseAnalysis decides what survives on
  * columns and charts; this then reads each finding's numbers. A finding
  * with a number that is no fact — typed, or a reference to a fact that
  * does not exist — is dropped and said, as a finding about a column the
@@ -328,19 +328,17 @@ export function parseAnalysisWithFacts(raw: string, profile: TableProfile, facts
 
 /**
  * WHAT ONE ANALYSIS SENDS AS ITS BRIEF, in one place, so the price route
- * quotes the same characters the analyse route holds for. With the switch
- * "analysis-provenance" the brief ends with the rule that numbers are
+ * quotes the same characters the analyse route holds for. The brief ends
+ * with the rule that numbers are
  * written as {F7} and the facts themselves. They go in the BRIEF, not the
  * system prompt, so the system prompt stays the constant ANALYSIS_SYSTEM
  * and both routes keep sizing their hold as ANALYSIS_SYSTEM.length +
  * brief.length — the shape charge-sees-input.test.mjs can read.
  */
 export function analysisBrief(
-  params: { fileName: string; profile: TableProfile; headers: readonly string[]; rows: readonly (readonly string[])[] },
-  withFacts: boolean
+  params: { fileName: string; profile: TableProfile; headers: readonly string[]; rows: readonly (readonly string[])[] }
 ): { brief: string; facts: Fact[] } {
   const brief = buildProfileBrief(params);
-  if (!withFacts) return { brief, facts: [] };
   const facts = buildFacts(params.profile);
   return { brief: `${brief}\n${FACTS_RULE}\n\n${renderFactsForModel(facts)}`, facts };
 }

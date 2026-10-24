@@ -2357,6 +2357,72 @@
           "sees": "Mensajes recientes en los canales públicos a los que invites la app de Ionexa. No ve canales privados ni mensajes directos.",
           "consent": "La IA podrá leer los canales públicos a los que la invites, y tus agentes podrán publicar sus resultados en el canal que elijas. Es la única integración que puede escribir algo."
         }
+      },
+      "mcp": {
+        "title": "Añade una app por su dirección",
+        "intro": "Conecta cualquier app que hable MCP dando su dirección. La IA podrá usar sus herramientas por ti. Todo lo que pueda cambiar algo espera tu pulsación: nada se ejecuta a tus espaldas.",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "Mi app de notas",
+        "urlLabel": "Dirección",
+        "urlPlaceholder": "https://example.com/mcp",
+        "tokenLabel": "Token de acceso (solo si la app lo pide)",
+        "tokenHint": "Se guarda cifrado y no se vuelve a mostrar.",
+        "add": "Conectar",
+        "adding": "Conectando…",
+        "connected": "{name} está conectada.",
+        "refreshed": "Herramientas actualizadas.",
+        "confirmRemove": "¿Quitar {name}? También se borra su token guardado.",
+        "refresh": "Actualizar las herramientas",
+        "remove": "Quitar",
+        "toolsLabel": "Herramientas de esta app",
+        "toolsCount": "Herramientas: {count}",
+        "tokenStored": "token guardado",
+        "statusError": "la última comprobación falló",
+        "readOnly": "solo lectura",
+        "needsPress": "necesita tu pulsación",
+        "askLabel": "Pregunta a esta app con palabras",
+        "askPlaceholder": "¿Qué debe hacer?",
+        "ask": "Preguntar",
+        "none": "Nada de esta app encaja con eso.",
+        "willCall": "Va a llamar a",
+        "approvalNote": "Esta herramienta puede cambiar algo. No pasa nada hasta que pulses «Ejecutar».",
+        "approve": "Ejecutar",
+        "decline": "No ejecutar",
+        "resultTitle": "Lo que devolvió la app",
+        "errorResult": "La app indicó un error",
+        "resultNote": "se muestra como texto, nunca se ejecuta",
+        "truncated": "acortado",
+        "credits": "{credits} credits",
+        "empty": "Aún no hay ninguna app conectada por dirección.",
+        "limitNote": "Puedes conectar hasta {cap} apps por dirección.",
+        "errors": {
+          "bad_name": "Ponle un nombre a la app (hasta 80 caracteres).",
+          "bad_token": "Ese token es demasiado largo.",
+          "invalid_url": "Esa no es una dirección válida.",
+          "not_https": "La dirección debe empezar por https://.",
+          "credentials_in_url": "No pongas usuario ni contraseña en la dirección; usa el campo del token.",
+          "blocked_host": "Esa dirección apunta a una red privada y no se puede usar.",
+          "too_long": "Esa dirección es demasiado larga.",
+          "blocked_address": "Esa dirección lleva a una red privada y no se puede usar.",
+          "unreachable": "No se pudo contactar con la app.",
+          "timeout": "La app tardó demasiado en responder.",
+          "too_large": "La app respondió con demasiados datos.",
+          "redirect_refused": "La app redirigió a otra dirección, y eso no se sigue.",
+          "unauthorized": "La app no aceptó el token.",
+          "http_error": "La app respondió con un error.",
+          "protocol": "La app no respondió como una app MCP.",
+          "no_tools": "La app no lista herramientas.",
+          "duplicate": "Ya conectaste esa dirección.",
+          "limit": "Llegaste a tu límite de {cap} apps.",
+          "rate_limited": "Demasiados intentos. Espera un poco e inténtalo de nuevo.",
+          "encryption_unavailable": "Aquí no se pueden guardar tokens de forma segura, así que no se guardó nada.",
+          "insufficient_credits": "No hay credits suficientes para esto.",
+          "ai_unavailable": "No se pudo contactar con la IA. No se cobró nada.",
+          "unusable_plan": "La respuesta de la IA no se pudo usar. Prueba a pedirlo de otra forma.",
+          "approval_required": "Esta herramienta necesita antes tu pulsación.",
+          "empty": "Escribe primero lo que quieres.",
+          "default": "Algo salió mal. Inténtalo de nuevo."
+        }
       }
     },
     "files": {
@@ -3048,12 +3114,11 @@
       "searchLabel": "Buscar herramientas",
       "noMatch": "Ninguna herramienta se llama «{query}». Descríbela en el campo de Inicio.",
       "groups": {
-        "make": "Crear",
-        "ask": "Preguntar",
-        "organise": "Organizar",
-        "business": "Negocio",
-        "automate": "Automatizar",
-        "learn": "Aprender"
+        "record": "Registra",
+        "ask": "Pregunta",
+        "make": "Crea",
+        "runAlone": "Funciona solo",
+        "organise": "Organiza"
       },
       "names": {
         "site": "Sitio",
@@ -3073,31 +3138,47 @@
         "sales": "Ventas",
         "trading": "Trading",
         "image": "Imagen",
-        "connections": "Conexiones",
         "document": "Documento",
-        "games": "Juegos"
+        "games": "Juegos",
+        "connect": "Conectar",
+        "rebuild": "Reconstruir",
+        "video": "Vídeo",
+        "films": "Películas",
+        "editing": "Edición",
+        "avatars": "Avatares",
+        "coding": "Código",
+        "agents": "Agentes",
+        "iowork": "iowork"
       },
       "lines": {
-        "site": "Un sitio web a partir de una descripción.",
+        "site": "Un sitio web a partir de una descripción",
         "slides": "Una presentación a partir de una descripción.",
         "posts": "Una publicación para cada plataforma.",
-        "research": "Un informe con fuentes sobre cualquier tema.",
-        "analyze": "Hallazgos a partir de archivos, documentos o texto.",
+        "research": "Un informe con fuentes sobre cualquier tema",
+        "analyze": "Archivos, enlaces y vídeos, explicados",
         "files": "Pregunta sobre tus documentos.",
-        "automations": "Tareas que se ejecutan solas.",
-        "projects": "Una carpeta con un objetivo.",
+        "automations": "Tareas que se ejecutan solas",
+        "projects": "Todo para un objetivo, junto",
         "goals": "Un objetivo, dividido en pasos.",
         "meetings": "Resumen y acciones a partir de una grabación.",
-        "myStuff": "Pregunta por todo lo que has hecho, con fuentes.",
+        "myStuff": "Todo lo que has creado, en un solo lugar",
         "library": "Todo lo que has creado, en un solo lugar.",
         "memory": "Lo que Ionexa recuerda de ti.",
         "finances": "Registra ingresos y gastos.",
         "sales": "Contactos, seguimiento y próximos pasos.",
         "trading": "El registro de tus operaciones.",
-        "image": "Cuatro imágenes a partir de una descripción.",
-        "connections": "Conecta tus servicios con un clic.",
-        "document": "Un documento a partir de una descripción.",
-        "games": "Un juego a partir de una descripción."
+        "image": "Imágenes a partir de una descripción",
+        "document": "Documentos, presentaciones y hojas",
+        "games": "Un juego a partir de una descripción.",
+        "connect": "Trae tus otras aplicaciones",
+        "rebuild": "Crea tu propia versión de cualquier app",
+        "video": "Un videoclip a partir de una descripción",
+        "films": "Una película entera a partir de un guion",
+        "editing": "Edita vídeos y fotos con palabras",
+        "avatars": "Un presentador que dice tu texto",
+        "coding": "Programa con tus proyectos de GitHub",
+        "agents": "Trabajan mientras tú no lo haces",
+        "iowork": "Trabaja en tu ordenador y crea tus archivos"
       }
     },
     "home": {
@@ -3730,6 +3811,64 @@
       "deleteSelectedConfirm": "¿Eliminar {count} conversaciones? Tendrás unos segundos para deshacer cada una.",
       "deleteSelectedFailed": "No se eliminó todo. Lo que sigue aquí, no se eliminó.",
       "atCap": "Las {cap} más recientes. Busca para encontrar una más antigua."
+    },
+    "rebuild": {
+      "placeholder": "Describe la app que quieres, o pega la dirección de una página de una que te guste",
+      "placeholderBox": "Di qué cambiar en esta casilla",
+      "placeholderChange": "Di qué cambiar en la app",
+      "new": "Nueva app",
+      "empty": {
+        "heading": "¿De qué app quieres tu propia versión?",
+        "examples": {
+          "booking": "Una app de reservas para un pequeño estudio: clientes, horas, recordatorios",
+          "habits": "Un seguimiento de hábitos con una racha para cada hábito",
+          "invoices": "Un creador de facturas sencillo que guarda clientes y totales"
+        }
+      },
+      "planned": "Este es el plan de «{title}». Cambia cualquier casilla con palabras y luego construye la app.",
+      "referenceRead": "He leído las etiquetas de {host}: solo de qué está hecha la página, no se copia nada.",
+      "boxChanged": "Cambiada la casilla «{box}».",
+      "built": "La app está lista a la derecha. Es tuya, con su propio nombre y sus propias palabras.",
+      "changed": "Cambiado. Cada cambio es una versión a la que puedes volver.",
+      "undone": "Volví a la versión anterior.",
+      "restored": "La versión {n} vuelve a ser la actual.",
+      "boxHint": "Pulsa una casilla y di qué cambiar en ella. Cuando el plan esté bien, construye la app.",
+      "boxes": {
+        "screens": "Pantallas",
+        "data": "Datos",
+        "actions": "Acciones",
+        "look": "Aspecto"
+      },
+      "build": "Construir la app",
+      "building": "Construyendo la app…",
+      "download": "Descargar la app",
+      "undo": "Deshacer el último cambio",
+      "preview": "La app, funcionando",
+      "sealed": "Funciona aislada de todo lo demás, así que lo que escribas aquí se queda en esta vista previa. Descárgala para usarla en tu propio ordenador.",
+      "original": "Tu propia versión, no una copia: toma la idea y el tipo de pantallas, nunca el nombre, las palabras, las imágenes ni el código del original.",
+      "versions": "{count} versiones",
+      "version": "Versión {n}",
+      "first": "Primera construcción",
+      "restoreNote": "Vuelta atrás",
+      "restore": "Volver a esta",
+      "errors": {
+        "insufficient": "No tienes créditos suficientes para esto. El precio se muestra antes de cada paso.",
+        "unavailable": "El creador de apps no está disponible ahora. No se cobró nada.",
+        "unusable": "La app que volvió no estaba completa o no era segura, así que se descartó. No se cobró nada. Inténtalo de nuevo o dilo de otra manera.",
+        "rateLimited": "Demasiadas peticiones por ahora. Inténtalo de nuevo más tarde.",
+        "tooLong": "Es demasiado largo. Acórtalo e inténtalo de nuevo.",
+        "stopped": "Detenido. No se cobró nada.",
+        "failed": "No funcionó. Inténtalo de nuevo.",
+        "limit": "Tu plan guarda {limit} apps. Borra una en la columna del historial para hacer otra.",
+        "reference": {
+          "notHttps": "Solo se pueden leer direcciones que empiecen por https://. No se cobró nada.",
+          "blocked": "Esa dirección no se puede leer: no es una página web pública. No se cobró nada.",
+          "unreachable": "No pude llegar a esa página. Revisa la dirección o describe la app con palabras. No se cobró nada.",
+          "notHtml": "Esa dirección no es una página web. No se cobró nada.",
+          "tooLarge": "Esa página es demasiado grande para leerla. No se cobró nada.",
+          "invalid": "Esa no es una dirección web que pueda leer. No se cobró nada."
+        }
+      }
     }
   },
   "module": {
@@ -4262,11 +4401,6 @@
       "does": "Publicar le da al sitio una dirección que cualquiera puede abrir, y cuenta aquí sus visitas.",
       "doesNot": "No le da un dominio propio. Hoy la dirección es una ruta dentro de este sitio, no sudominio.com; apuntar un dominio real es un paso aparte."
     },
-    "files": {
-      "is": "Sus documentos, legibles por la IA.",
-      "does": "Suba un PDF, Word, Excel, CSV o texto: se extrae el texto y puede preguntar sobre los que elija.",
-      "doesNot": "No lee escaneos. Un PDF que es una foto de una página no tiene texto que extraer y necesita OCR antes, y los documentos muy largos se leen hasta un límite."
-    },
     "deepResearch": {
       "is": "Investigación que le costaría varias horas.",
       "does": "Primero le enseña su plan, después hace el trabajo y vuelve con fuentes que puede comprobar.",
@@ -4471,6 +4605,16 @@
       "is": "Todas las conversaciones que has tenido, en un solo lugar.",
       "does": "Las muestra de la más reciente a la más antigua, busca en los títulos y en lo que se dijo dentro, y renombra, fija, archiva o elimina cualquiera.",
       "doesNot": "La búsqueda no lee todos los mensajes enviados: lee los 400 más recientes, y la página lo dice mientras escribes."
+    },
+    "images": {
+      "is": "Cuatro imágenes a partir de una descripción.",
+      "does": "Describe lo que quieres y obtén cuatro versiones. Pulsa una y cámbiala con palabras, y descárgala en el mayor tamaño que da el proveedor. Cada imagen se guarda en tu Biblioteca.",
+      "doesNot": "No cambia tu original: cada cambio es una versión nueva. No crea imágenes de personas reales haciendo cosas que no hicieron. Sin la clave del proveedor no crea nada y no cobra nada."
+    },
+    "rebuild": {
+      "is": "Tu propia versión de una app que te gusta.",
+      "does": "Describe una app, o pega la dirección de una página pública de una que te guste. Recibes un plan en cuatro casillas, cambias lo que quieras con palabras y luego la construyes: una app que funciona, que cambias con palabras, a la que puedes volver atrás y que descargas como un solo archivo.",
+      "doesNot": "No copia la otra app: el nombre, las palabras, las imágenes y el código son tuyos, y solo lee las etiquetas de la página que señalas, nunca nada detrás de un inicio de sesión. No es un servicio de alojamiento: lo que escribes en la vista previa no se guarda, y el archivo descargado guarda sus datos en tu propio ordenador."
     }
   },
   "helpCentre": {
@@ -4924,7 +5068,7 @@
       "explain": "Explica qué hace este código",
       "tests": "Escribe pruebas para esta función"
     },
-    "uploadFolder": "Subir carpeta",
+    "uploadFolder": "Código desde tu ordenador",
     "power": {
       "label": "Potencia",
       "fast": "Rápida",
@@ -4939,7 +5083,41 @@
       "branchLabel": "Rama",
       "pickRepo": "Elige un repositorio…",
       "pickBranch": "Elige una rama…",
-      "default": "predeterminada"
+      "default": "predeterminada",
+      "searchRepos": "Buscar repositorios…",
+      "newBranch": "Nueva rama",
+      "newBranchName": "Nombre de la rama",
+      "create": "Crear",
+      "adminSetup": "La integración con GitHub necesita configuración",
+      "adminSetupLink": "Guía de configuración",
+      "fileTree": "Archivos",
+      "structure": "Estructura",
+      "commitChanges": "Confirmar cambios",
+      "commitMessage": "Mensaje del commit",
+      "branchNameLabel": "Nombre de la nueva rama",
+      "prTitle": "Título del PR",
+      "prBody": "Descripción del PR",
+      "createPr": "Crear PR",
+      "creating": "Creando…",
+      "prCreated": "PR creado",
+      "viewPr": "Ver en GitHub",
+      "ciStatus": "Estado del CI",
+      "ciPending": "Verificaciones en curso…",
+      "ciPassed": "Todas las verificaciones pasaron",
+      "ciFailed": "Las verificaciones fallaron",
+      "merge": "Fusionar",
+      "mergeConfirm": "¿Estás seguro de que quieres fusionar este PR?",
+      "merged": "Fusionado",
+      "merging": "Fusionando…",
+      "undo": "Deshacer último cambio",
+      "neverMain": "Los cambios van a una rama nueva, nunca directamente a main.",
+      "noRepos": "No se encontraron repositorios. Instala la GitHub App en tus repos.",
+      "loadingTree": "Cargando archivos…",
+      "downloadZip": "Descargar como .zip",
+      "fromComputer": "Código desde tu ordenador",
+      "connected": "Conectado",
+      "cancel": "Cancelar",
+      "commitPlaceholder": "Actualizar código con Ionexa Coding"
     }
   },
   "presentations": {

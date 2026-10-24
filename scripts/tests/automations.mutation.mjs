@@ -139,11 +139,11 @@ const MUTANTS = [
     expect: "a due automation is moved forward in the same update that claims it",
   },
   {
-    name: "the cron runs automations for a person whose switch was closed",
+    name: "the cron runs a flow it cannot read",
     file: CRON,
-    from: '          if (!verdict.ok || !user || !(await isFeatureOn("automations", user))) {',
-    to: "          if (!verdict.ok || !user) {",
-    expect: "not run for a person whose switch was closed",
+    from: "          if (!verdict.ok || !user) {",
+    to: "          if (!user) {",
+    expect: "not run for a flow it cannot read or a person who is gone",
   },
   {
     name: "a file that could not be read starts automations",

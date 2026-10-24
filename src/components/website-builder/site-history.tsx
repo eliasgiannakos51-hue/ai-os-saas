@@ -25,8 +25,8 @@ type LiveVersion = { id: string; version_number: number; published_at: string; c
 const LIVE_VERSIONS_SHOWN = 20;
 
 /**
- * A SITE'S VERSIONS, IN THE SHELL (components/website-builder/website-shell.tsx,
- * behind the switch "tool-shell"). Two lists, each the old screen's own:
+ * A SITE'S VERSIONS, IN THE SHELL (components/website-builder/website-shell.tsx).
+ * Two lists, each the old screen's own:
  *
  *   EVERY VERSION the site has had — the first generation, every change,
  *   every undo — read from website_versions exactly as the old page's

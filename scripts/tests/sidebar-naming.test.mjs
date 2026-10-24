@@ -877,8 +877,12 @@ check(
   // through MODULE_TITLE_KEYS, the third page to do so.
   // TWENTY-SEVEN SINCE V5 #22: /dashboard/posts, by the literal form.
   // TWENTY-EIGHT SINCE REDESIGN PHASE 2: /dashboard/projects.
-  namedPages.length >= 28,
-  `${namedPages.length} — this floor rises as pages are added, and never falls`,
+  // TWENTY-SEVEN SINCE 2026-10-23, the one time this floor fell on purpose:
+  // /dashboard/data-analysis and /dashboard/files drew their own PageHeader
+  // only in the branch behind the switch tool-shell, which was removed;
+  // the first is the shell alone now and the second a redirect.
+  namedPages.length >= 27,
+  `${namedPages.length} — this floor rises as pages are added, and falls only when a page stops drawing its own heading`,
 );
 for (const locale of LOCALES) {
   const drifted = namedPages
@@ -947,7 +951,8 @@ check("it reads the locale per request, not once at module load", /getTranslatio
 check("and it is server-only, so a client import fails at build", /^import "server-only";/m.test(metadataHelper));
 // The module pages hand it the config's own key, so tab, heading and nav
 // are one string.
-const modulePages = ["apps", "campaigns", "images", "videos", "websites"];
+// `images` left this list 2026-10-23: its page is the Image tool now (switch removed).
+const modulePages = ["apps", "campaigns", "videos", "websites"];
 const notFromConfig = modulePages.filter(
   (slug) => !/pageTitle\(CONFIG\.titleKey\)/.test(readFileSync(`src/app/dashboard/${slug}/page.tsx`, "utf8"))
 );

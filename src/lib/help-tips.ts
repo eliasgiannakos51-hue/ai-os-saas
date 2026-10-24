@@ -165,15 +165,6 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that publishing gives you a domain of your own",
   },
   {
-    id: "files",
-    article: "upload-files",
-    file: "src/app/dashboard/files/page.tsx",
-    // extract.ts refuses a scanned PDF by name — "it is probably a scan,
-    // and it would need OCR" — and truncates at MAX_EXTRACTED_CHARS.
-    corrects: "that any PDF can be read, including a scan, in full",
-    keyPrefix: "help.files",
-  },
-  {
     // Package 26. People assume a game made here can see the account it
     // was made in, or call out to the internet; it can do neither.
     id: "games",
@@ -259,6 +250,25 @@ export const HELP_TIPS: HelpTip[] = [
     route: "src/app/dashboard/timeline/page.tsx",
     keyPrefix: "help.favorites",
     corrects: "that starring something copies or moves it",
+  },
+  {
+    // REBUILD (2026-10-27): the fear is "it copies the other app", and the
+    // honest edge is that nothing is hosted.
+    id: "rebuild",
+    file: "src/components/rebuild/rebuild-shell.tsx",
+    route: "src/app/dashboard/rebuild/page.tsx",
+    keyPrefix: "help.rebuild",
+    corrects: "that it copies the other app, or that what you enter in the preview is kept",
+  },
+  {
+    // THE IMAGE TOOL (2026-10-23, when its switch was removed): /dashboard/images
+    // is no longer the ideas list, so it no longer gets the trackingModule
+    // tip. The shell carries its own "?".
+    id: "images",
+    file: "src/components/images/image-shell.tsx",
+    route: "src/app/dashboard/images/page.tsx",
+    keyPrefix: "help.images",
+    corrects: "that a change overwrites the original, or that the largest size is a bigger copy of the preview",
   },
   {
     // ONE ENTRY, FIVE PAGES. Apps, Images, Videos, Website plans and
@@ -418,7 +428,10 @@ export const HELP_TIPS: HelpTip[] = [
   },
   {
     id: "dataAnalysis",
-    file: "src/app/dashboard/data-analysis/page.tsx",
+    // The tip is mounted by the shell, which both Analyze and (since the
+    // two merged, 2026-10-22) Files open into; the page draws no header.
+    file: "src/components/analyze/analyze-shell.tsx",
+    route: "src/app/dashboard/data-analysis/page.tsx",
     keyPrefix: "help.dataAnalysis",
     // The page's own promise is "every statistic is computed from the
     // whole file — never guessed", and the honest edge of that promise is

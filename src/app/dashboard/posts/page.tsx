@@ -12,7 +12,7 @@ import { pageTitle } from "@/lib/page-title";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { POSTS_ICON } from "@/lib/module-icons";
 import { normalisePlatforms, parseStoredPostSet } from "@/lib/posts/platforms";
-import { PostsWorkspace, type PostRow } from "@/components/posts/posts-workspace";
+import type { PostRow } from "@/components/posts/posts-workspace";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import { readRequestedId } from "@/lib/library/requested";
 import { isFeatureOn } from "@/lib/flags/flags";
@@ -31,7 +31,7 @@ export function generateMetadata(): Promise<Metadata> {
  * log a person types captions into, and the roadmap's "Social posting"
  * (still under "soon") is the publishing step this page deliberately
  * does not take. What it will not do is stated on the screen by
- * PostsWorkspace rather than left to the name.
+ * PostsShell rather than left to the name.
  */
 // THE BRIEF ARRIVES IN THE URL when Home's field routed a post request
 // here. Read through the shared clamp, and the parameter's name is
@@ -91,27 +91,19 @@ export default async function PostsPage(
     createdAt: String(row.created_at ?? ""),
   }));
 
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same
-  // history and the same brief, drawn as conversation and work. Below md
-  // the bottom bar takes 4rem more, as on Chat (app/dashboard/chat/page.tsx).
-  if (await isFeatureOn("tool-shell", user)) {
-    return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <PostsShell
-          history={history}
-          initialDescription={readExampleParam(searchParams.brief)}
-          initialOpenId={wanted}
-          pictures={await isFeatureOn("posts-images", user)}
-          unsplashConfigured={isUnsplashConfigured()}
-        />
-      </div>
-    );
-  }
-
+  // THE SHELL, FOR EVERYBODY (MASTER 14.3, package 3; its switch was removed
+  // 2026-10-23): the same history and the same brief, drawn as conversation
+  // and work. Below md the bottom bar takes 4rem more, as on Chat
+  // (app/dashboard/chat/page.tsx).
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader icon={POSTS_ICON} title={t("title")} description={t("description")} helpKey="help.posts" />
-      <PostsWorkspace history={history} initialDescription={readExampleParam(searchParams.brief)} />
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <PostsShell
+        history={history}
+        initialDescription={readExampleParam(searchParams.brief)}
+        initialOpenId={wanted}
+        pictures={await isFeatureOn("posts-images", user)}
+        unsplashConfigured={isUnsplashConfigured()}
+      />
     </div>
   );
 }

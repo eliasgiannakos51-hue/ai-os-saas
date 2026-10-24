@@ -2,14 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { undoDescription, undoTarget, type VersionRow } from "@/lib/websites/undo";
 
 export const dynamic = "force-dynamic";
 
 /**
- * TAKE BACK THE LAST CHANGE TO A SITE (MASTER 16, package 10), behind the
- * switch "site-pages". Free: nothing is generated, a stored state is put
+ * TAKE BACK THE LAST CHANGE TO A SITE (MASTER 16, package 10). Free: nothing is generated, a stored state is put
  * back. The history in website_versions decides which state
  * (lib/websites/undo.ts); the site's home page and its other pages come
  * back together, and one more version row records the undo. Nothing is
@@ -22,7 +20,7 @@ export const dynamic = "force-dynamic";
  *
  * Codes, not sentences: the Site says each in the reader's language.
  */
-type UndoCode = "not_authenticated" | "not_enabled" | "not_found" | "busy" | "nothing_to_undo" | "failed";
+type UndoCode = "not_authenticated" | "not_found" | "busy" | "nothing_to_undo" | "failed";
 
 /** The edit route's own lock lifetime: a claim older than this was abandoned. */
 const EDIT_LOCK_MS = 2 * 60 * 1000;
@@ -39,7 +37,6 @@ export async function POST(_request: Request, props: { params: Promise<{ id: str
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return fail("not_authenticated", 401);
-    if (!(await isFeatureOn("site-pages", user))) return fail("not_enabled", 403);
 
     const { data: site, error: siteError } = await supabase
       .from("user_websites")

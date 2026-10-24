@@ -3,6 +3,74 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-10-24α (Rebuild — «Φτιάξε τη δική σου εκδοχή οποιασδήποτε εφαρμογής»)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** Το Rebuild, ανοιχτό για όλους (χωρίς διακόπτη), μόνο με το
+μοντέλο κειμένου που υπάρχει. Ροή: περιγραφή (+ προαιρετικά μια δημόσια
+διεύθυνση ως αναφορά) → πλάνο σε τέσσερα κουτιά (οθόνες, δεδομένα, ενέργειες,
+εμφάνιση) με την τιμή πριν το χτίσιμο → ένα αρχείο HTML σε σφραγισμένο iframe
+(`sandbox="allow-scripts"`, CSP πρώτο στο έγγραφο) → αλλαγές με λόγια, Undo και
+λίστα εκδόσεων (έως 10) → λήψη. Η αναφορά διαβάζεται από τον server μέσω του
+guard του Connect (`parseMcpUrl` + `guardedLookup`), κρατούνται μόνο
+ετικέτες, περνά στο μοντέλο ως δεδομένο μέσα σε περίφραξη και η εφαρμογή
+γράφεται πρωτότυπη. Αποτυχία, ακύρωση ή μη ασφαλής απάντηση (π.χ. `fetch`)
+απελευθερώνει την κράτηση: τίποτα δεν χρεώνεται.
+
+**ΑΡΧΕΙΑ.** `src/lib/rebuild/*`, `src/app/api/rebuild/**`,
+`src/components/rebuild/rebuild-shell.tsx`, `src/app/dashboard/rebuild/page.tsx`,
+migration `20261027000000_rebuild_projects.sql` (undo/canary/GDPR/εξαγωγή zip),
+μηνύματα σε 10 γλώσσες, help tip, εγγραφές χρέωσης/ορίων.
+
+**ΔΟΚΙΜΕΣ.** `rebuild.test.mjs` 164, `rebuild.mutation.mjs` 31/31,
+`rebuild.prodtest.mjs` 88 (production build, υπολογιστής 1440×900 και κινητό
+390×844 με αφή, ελληνικά και αγγλικά· η σφράγιση μετρήθηκε με server
+διαρροής: 0 αιτήματα· Free 1 εφαρμογή· χωρίς credits· πάροχος κάτω· ξένη
+εφαρμογή 404), `all-tools-final-grid.prodtest.mjs` 58, `npm run gates`
+378 περάσανε (26.671 έλεγχοι). Εικόνες:
+`scratchpad/shots/rebuild-*.png`. **Δεν επιβεβαιώθηκε στο ionexa.ai**
+(NEEDS «ΠΡΩΤΑ» Α). Ο έλεγχος θύρας του `billing-coverage` έστειλε τον
+server αναφοράς στο `scripts/tests/lib/rebuild-reference-live.mjs`.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261027000000_rebuild_projects.sql**
+
+## 2026-10-23ε (Coding: Parts E/Ζ/Η — zip download, pricing, security)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** Τα τρία τελευταία μέρη κώδικα (E, Ζ, Η) του MASTER 20Γ:
+
+**Μέρος Ε — zip download:**
+- `downloadZip()` στο `src/lib/coding/download.ts`: bare ZIP format (local
+  headers + central directory + EOCD), store-only, CRC32 lookup table,
+  UTF-8 flag. Χωρίς εξωτερική βιβλιοθήκη.
+- Κουμπί δίπλα στις καρτέλες αρχείων στο `coding-workspace.tsx`, με
+  `data-testid="coding-download-zip"`, i18n `coding.github.downloadZip`
+  σε 10 γλώσσες.
+
+**Μέρος Ζ — τιμολόγηση:**
+- `scripts/tests/coding-pricing.test.mjs`: 15 checks σε 6 ενότητες.
+  Πίνακας περιθωρίου (μέτρηση 2026-10-23):
+  - Fast (claude-haiku-4-5): $0.008575, 2 credits, 5,1× margin
+  - Normal (claude-sonnet-4-6): $0.025725, 5 credits, 4,2× margin
+  - Max (claude-opus-4-6): $0.042875, 8 credits, 4,1× margin
+- Κάθε επίπεδο πάνω από 4×. Κάθε ακριβότερο. Ο estimator είναι ο ίδιος
+  με αυτόν του UI. Το route ελέγχει balance πριν τρέξει.
+
+**Μέρος Η — ασφάλεια:**
+- `github-security.test.mjs` 21→37 checks (+3 ενότητες):
+  §7 user isolation (4), §8 data-not-instructions extended (4),
+  §9 no push to main / no branch delete / no merge without click (7).
+- Guard στο `src/app/api/github/commit/route.ts`:
+  `if (body.newBranch === body.baseBranch)` → 400.
+- Merge uses squash. UI shows confirmation dialog before merge.
+
+**Σύνολο checks:** 76 σε 4 αρχεία (37+14+10+15). ALL PASS.
+
+**Feature flag `coding-github` ΑΦΑΙΡΕΘΗΚΕ** (ιδιοκτήτης, «χωρίς
+διακόπτες»): η εμφάνιση ελέγχεται μόνο από `githubAppConfigured()`.
+
+**Μένει:** deploy + browser test (NEEDS 2), GitHub App (NEEDS 11),
+πάροχος εκτέλεσης (NEEDS 50). Μέρος ΣΤ (environment) αναβλήθηκε μέχρι
+ο ιδιοκτήτης αποφασίσει πάροχο.
+
 ## 2026-10-25 (Coding: GitHub integration — OAuth, repos, branches, files, PRs)
 
 **ΤΙ ΧΤΙΣΤΗΚΕ.** Πλήρης σύνδεση GitHub μέσω GitHub App:
@@ -6503,3 +6571,120 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
   | WebM VP9 κινητού | 51,3 s |
   | H.264 720p | 13,2 s |
   | poster | 0,7 s |
+
+---
+
+### 2026-10-25 — GitHub integration: full UI (Parts A–H minus ΣΤ)
+
+**Branch:** `claude/keen-turing-bv8gw4`
+
+Ολοκλήρωση UI σύνδεσης GitHub για το Coding (MASTER Μέρος 20 Γ, εντολή
+ιδιοκτήτη 2026-10-23 «ΟΛΟΚΛΗΡΩΣΗ, ΔΕΝ ΣΤΑΜΑΤΑΣ ΜΕΧΡΙ ΝΑ ΔΟΥΛΕΥΟΥΝ ΟΛΑ»).
+
+**Τι έγινε:**
+
+1. **Feature flag `coding-github` αφαιρέθηκε** — ο ιδιοκτήτης ζήτησε «χωρίς
+   διακόπτες». Η εμφάνιση ελέγχεται ΜΟΝΟ από `githubAppConfigured()` (4 env
+   vars). Admin βλέπει μήνυμα ρύθμισης· χρήστες τίποτα μέχρι τα keys.
+
+2. **Γ. Connect & project selection** — OAuth flow (connect → authorize →
+   callback), κρυπτογράφηση token AES-256-GCM, repository picker με αναζήτηση,
+   branch picker με «Νέο branch», session memory.
+
+3. **Δ. Working on code** — file tree (click ανοίγει αρχείο στον editor),
+   commit+PR dialog (commit message, νέο branch, PR title+body), CI status
+   (poll κάθε 15″ με pass/fail/pending icons), merge με confirmation dialog
+   (squash), undo stack.
+
+4. **E. Code from computer** — Zip download ήδη υλοποιημένο (`downloadZip` σε
+   `src/lib/coding/download.ts`), κουμπί στη σειρά καρτελών πολλαπλών αρχείων.
+
+5. **Ζ. Pricing/credits** — `MARGIN_MULTIPLIER_MIN = 4` υπάρχει ήδη στο
+   `pricing-config.ts`, power levels (Γρήγορη/Κανονική/Μέγιστη) δείχνουν
+   εκτίμηση credits.
+
+6. **Η. Security** — 46 security checks σε 3 αρχεία:
+   - `github-security.test.mjs` (22): tokens encrypted, data not instructions,
+     env vars gating, RLS, OAuth CSRF, ephemeral tokens, no push to main,
+     merge confirmation
+   - `github-user-isolation.test.mjs` (14): RLS, API auth, store scoping,
+     per-user tokens
+   - `github-data-not-instructions.test.mjs` (10): DATA-NOT-INSTRUCTIONS
+     marker, no eval, no push to main, merge requires explicit action
+
+7. **ΣΤ. Environment** — αναβλήθηκε μέχρι ο ιδιοκτήτης αποφασίσει πάροχο
+   εκτέλεσης (NEEDS 50, σύσταση E2B).
+
+**Αρχεία (23):**
+
+- `src/components/coding/coding-workspace.tsx` — file tree, commit/PR dialog,
+  CI status, merge, undo
+- `src/components/coding/github-connect.tsx` — full rewrite, repo/branch picker
+- `src/app/api/github/connect/route.ts` — flag check removed
+- `src/app/api/github/status/route.ts` — flag check removed
+- `src/app/api/github/commit/route.ts` — newBranch guard
+- `src/app/api/github/create-branch/route.ts` — NEW
+- `src/app/api/github/merge/route.ts` — NEW, squash merge
+- `src/app/api/github/pr-status/route.ts` — NEW, CI status
+- `src/app/dashboard/coding/page.tsx` — passes isAdmin, githubConfigured
+- `src/lib/coding/download.ts` — modified
+- `src/lib/flags/flags.ts` — `coding-github` removed
+- `scripts/tests/github-security.test.mjs` — updated (22 checks)
+- `scripts/tests/github-user-isolation.test.mjs` — NEW (14 checks)
+- `scripts/tests/github-data-not-instructions.test.mjs` — NEW (10 checks)
+- `scripts/tests/coding-pricing.test.mjs` — NEW
+- `messages/{ar,de,el,en,es,fr,it,ja,pt,zh}.json` — i18n for GitHub UI
+
+**Μπλοκαρισμένο:** NEEDS 11 (GitHub App), NEEDS 50 (πάροχος εκτέλεσης).
+
+**Migration:** `20261025100000_github_connections.sql` (από προηγούμενο session).
+
+
+---
+
+### 2026-10-23 — All tools: το τελικό grid (Φάση 1)
+
+**Branch:** `claude/keen-turing-bv8gw4`. Εντολή ιδιοκτήτη: 17 εργαλεία, 5 ομάδες, μόνο όσα δουλεύουν, για όλους χωρίς διακόπτες.
+
+**Διάγνωση πριν αλλάξει κάτι.** Το `/dashboard/tools` αποδίδεται από `src/app/dashboard/tools/page.tsx` → `src/components/tools/tools-grid.tsx`, ομάδες από `src/lib/nav/all-tools.ts`. Διακόπτες που έκρυβαν τετράγωνα ή τα εργαλεία πίσω τους: `my-stuff`, `document-writer`, `image-studio`, `connections` (τετράγωνα), και `automations`, `flows`, `tool-shell`, `analysis-provenance`, `site-pages`, `research-slides` (το ίδιο το εργαλείο έδειχνε παλιά οθόνη ή δεν έτρεχε σε απλούς χρήστες). Το τρέχον commit της παραγωγής δεν είναι ορατό από εδώ (το `ionexa.ai` δεν φτάνει).
+
+**Τι έγινε.**
+- `ALL_TOOLS` (17 εγγραφές, με `ready`, `needs`, `waitingFor`) και `availableTools()`· ο πίνακας `HIDDEN_FROM_ALL_TOOLS` κρατά όλα τα παλιά εργαλεία με λόγο (καμία σελίδα δεν χάθηκε).
+- Ο πίνακας `tools-grid.tsx` ξαναγράφτηκε πάνω στο registry· οι ομάδες μοιράζονται σειρές ώστε να χωρά σε μία οθόνη σε υπολογιστή.
+- Κείμενα (17 ονόματα, 17 γραμμές, 5 επικεφαλίδες) σε 10 γλώσσες· τα Ελληνικά του ιδιοκτήτη ακριβώς για τις επικεφαλίδες.
+- Αφαιρέθηκαν 9 διακόπτες από τον κώδικα και από το `flags.ts`· `switched-names.ts` έγινε `tool-names.ts`, το Image είναι πάντα το εργαλείο (το παλιό «ιδέες για εικόνες» δεν ανοίγει πια από αυτή τη διεύθυνση· ο πίνακας και οι γραμμές του δεν πειράχτηκαν).
+- Το Files ανακατευθύνει πάντα στο Analyze· το tip του Files έγινε tip του Analyze, και το Image πήρε δικό του tip (10 γλώσσες).
+- Δύο νεκρά legacy components (`files-workspace.tsx`, `website-builder-workspace.tsx`) μένουν με καταγεγραμμένη εξαίρεση στο `entry-points.test.mjs` γιατί δεκάδες gates διαβάζουν τον κώδικά τους· σβήσιμο = ξεχωριστή δουλειά.
+- **My Stuff: μέτρηση πριν/μετά.** Το εργαλείο μόνο διαβάζει τους πίνακες των Finances, Sales, Trading· ο έλεγχος `my-stuff.test.mjs` §5 κρατά ότι το μόνο που γράφει είναι το δικό του `my_stuff_sessions`. Άρα τίποτα δεν μετακινήθηκε και τα πριν/μετά ταυτίζονται εξ ορισμού. Η αντικατάσταση Finances/Sales/Trading **δεν έγινε**.
+
+**Δοκιμές.** `npm run gates`: 373 gates, 26.167 έλεγχοι, 0 αποτυχίες· mutation suites των αγγιγμένων gates πράσινες (`all-tools` 28/28, `tool-shell` 65/65, κ.ά.)· `all-tools-final-grid.prodtest.mjs` 58/58 σε production build.
+
+**Δεν δοκιμάστηκε.** Η παραγωγή (ionexa.ai) — δεν φτάνει από εδώ. Τα prodtests που άγγιξαν οι forks (`image-studio`, `document-writer`, `flows`, `navigation-latency`) επεξεργάστηκαν αλλά δεν έτρεξαν (θέλουν build και Chromium)· τρέχουν το βράδυ στο CI.
+
+**Ανοιχτό.** My Stuff θέλει το migration `20261024100000_my_stuff_sessions.sql` (χωρίς αυτό απαντά αλλά δεν κρατά ιστορικό). Η Φάση 2 συνεχίζεται: Connect πρώτο.
+
+
+---
+
+### 2026-10-26 — Φάση 2, εργαλείο 1: Connect με MCP, χωρίς διακόπτη
+
+**Branch:** `claude/keen-turing-bv8gw4`
+
+**Τι υπάρχει τώρα** (ό,τι μετριέται, το ξαναβγάζεις με τις εντολές στο τέλος):
+
+- **Client MCP** πάνω από Streamable HTTP (`src/lib/mcp/client.ts`): initialize, notifications/initialized, tools/list με σελιδοποίηση, tools/call· απάντηση ως JSON ή ως event stream· Mcp-Session-Id και MCP-Protocol-Version· χρονικά όρια, όριο μεγέθους απάντησης, όριο εργαλείων· ανακατεύθυνση **δεν** ακολουθείται.
+- **Φύλακας διευθύνσεων** (`src/lib/mcp/ssrf.ts`): μόνο https, χωρίς όνομα/κωδικό μέσα στη διεύθυνση, κανένα private/loopback/link-local/CGNAT/metadata (IPv4 και IPv6, και το IPv4 που κρύβεται μέσα σε IPv6, NAT64, 6to4), και ο έλεγχος γίνεται **μέσα στο DNS lookup της σύνδεσης**, άρα ό,τι ελέγχεται είναι ό,τι συνδέεται (DNS rebinding). `MCP_ALLOW_INSECURE_LOCAL=1` ανοίγει μόνο loopback πάνω από http και υπάρχει για τα tests· **να μη μπει ποτέ στο Vercel**.
+- **Αποθήκευση:** πίνακας `mcp_servers` (migration `20261026000000_mcp_servers.sql`), RLS μόνο ανάγνωση των δικών σου γραμμών και **όχι** της στήλης με το κρυπτογραφημένο token· γράφει μόνο ο server· σβήνεται με τον λογαριασμό· μπαίνει στην εξαγωγή δεδομένων (token κομμένο) και στα schema canaries.
+- **Routes** `src/app/api/mcp/`: λίστα/προσθήκη (ελέγχει διεύθυνση, κάνει handshake, σώζει μόνο αν απάντησε), διαγραφή, ανανέωση εργαλείων, `run` (το μοντέλο διαλέγει ΕΝΑ εργαλείο, χρεώνεται το μοντέλο· read-only τρέχει αμέσως, τα άλλα γυρίζουν ως πλάνο) και `call` (τρέχει ό,τι πατήθηκε, με `approved: true`, δωρεάν).
+- **Οθόνη** στο `/dashboard/integrations`: «Πρόσθεσε μια εφαρμογή με τη διεύθυνσή της», λίστα εργαλείων με ένδειξη read-only / θέλει πάτημα, «Ρώτα» με λόγια, πλάνο με «Τρέξε το / Μην το τρέξεις», αποτέλεσμα ως κείμενο. Δέκα γλώσσες. Plan cap: Free 1, Starter 3, Growth 10, Professional 25, Ultimate/Enterprise 50 (`src/lib/mcp/limits.ts`).
+- **Διακόπτης `connections` αφαιρέθηκε:** οι κάρτες Google/Slack φαίνονται μόνο όταν υπάρχει το OAuth app τους (ποτέ νεκρό κουμπί)· το Calendar δεν είναι πια πίσω από διακόπτη· το αρχείο `switches.ts` του φακέλου integrations σβήστηκε.
+- **Δεν έγινε (σκόπιμα):** το Chat δεν χρησιμοποιεί ακόμα τις εφαρμογές αυτές· δεν υπάρχει OAuth-MCP (εφαρμογές που ζητούν σύνδεση από browser)· ένα εργαλείο που η ίδια η εφαρμογή δηλώνει read-only τρέχει χωρίς πάτημα — η δήλωση είναι δική της, γι' αυτό η οθόνη τη δείχνει πριν.
+
+**Πώς ελέγχθηκε** (2026-10-26, τοπικό production build πάνω από stand-in Supabase/μοντέλου/MCP server, **όχι** η ζωντανή παραγωγή):
+
+- `scripts/tests/mcp-ssrf.test.mjs` 114, `mcp-client.test.mjs` 56 (πραγματικός client, πραγματικό socket, server με περιγραφή και αποτέλεσμα που είναι εντολή), `mcp-security.test.mjs` 42, `mcp-data-not-instructions.test.mjs` 50.
+- Mutations: `mcp-ssrf.mutation.mjs` **34/34**, `mcp-security.mutation.mjs` **37/37** (ένα mutant ανά κανόνα: κάθε εύρος διευθύνσεων, ανακατεύθυνση, token χωρίς δέσιμο στον χρήστη, ερώτημα χωρίς user_id, έλεγχος approval, eval, αποτέλεσμα πίσω στο μοντέλο).
+- `scripts/tests/mcp-connect.prodtest.mjs` **71** ελέγχοι end to end: απορριπτέες διευθύνσεις και λάθος token δεν σώζουν τίποτα· το token αποθηκεύεται κρυπτογραφημένο και δεν βγαίνει σε καμία απάντηση ή σελίδα· read-only τρέχει αμέσως, το άλλο περιμένει το πάτημα (και η route το αρνείται χωρίς `approved: true`)· η εντολή μέσα στο αποτέλεσμα δεν εκτελείται· ο χρήστης Β δεν βλέπει/αγγίζει του Α· Free: μία εφαρμογή, όχι δεύτερη· υπολογιστής και κινητό, 44px.
+- `all-tools-final-grid.prodtest.mjs` 58: το τετράγωνο «Σύνδεση» φαίνεται σε σύνηθες μέλος.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261026000000_mcp_servers.sql**

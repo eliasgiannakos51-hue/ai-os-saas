@@ -71,11 +71,11 @@ const MUTANTS = [
     expect: "the history is read in the order it happened, whatever order it arrives in",
   },
   {
-    name: "undo runs with the switch off",
+    name: "undo comes back behind a switch",
     file: ROUTE,
-    from: '    if (!(await isFeatureOn("site-pages", user))) return fail("not_enabled", 403);\n',
-    to: "",
-    expect: "the route is behind the switch",
+    from: '    if (!user) return fail("not_authenticated", 401);\n',
+    to: '    if (!user) return fail("not_authenticated", 401);\n    if (!(await isFeatureOn("site-pages", user))) return fail("not_enabled", 403);\n',
+    expect: "the route reads no switch: undo is for every signed-in owner",
   },
   {
     name: "undo lands in the middle of an edit",
@@ -137,7 +137,7 @@ const MUTANTS = [
   {
     name: "a change said on another page's tab goes to the home page",
     file: SHELL,
-    from: "section: part, ...(pages ? { pageSlug: slug } : {}), referenceImagePaths });",
+    from: "section: part, pageSlug: slug, referenceImagePaths });",
     to: "section: part, referenceImagePaths });",
     expect: "the change goes to the open page",
   },

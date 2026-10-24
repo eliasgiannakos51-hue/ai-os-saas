@@ -133,6 +133,10 @@ const NO_HEADER_EXEMPT = new Map([
     "one open document, not a feature: its name is whatever the person typed, and the Documents list that got them here carries the tip",
   ],
   [
+    "src/app/dashboard/files/page.tsx",
+    "not a page: a redirect into Analyze (/dashboard/data-analysis), which both tools merged into on 2026-10-22; the tip that page carried now belongs to Analyze's shell, so a header here would render for nobody",
+  ],
+  [
     "src/app/dashboard/memory/page.tsx",
     "not a page: a permanentRedirect to /dashboard/search, kept so a bookmark to the record search's old address does not 404. A header on it would render for nobody",
   ],

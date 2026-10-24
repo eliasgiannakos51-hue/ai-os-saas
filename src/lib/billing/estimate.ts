@@ -520,6 +520,17 @@ export const ACTION_PROFILES = {
     baseOutputChars: 900,
     outputCharsPerInputChar: 0,
   },
+  // Connect by address (api/mcp/[id]/run): one request in words and one
+  // app's tool list in, ONE forced tool call out (a tool name and its
+  // arguments). The input is the rendered tool list plus the request, so it
+  // already reflects how large the app's list was; the answer is a few
+  // hundred characters whatever the input, the same shape as myStuffAsk.
+  mcpAsk: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 700,
+    outputCharsPerInputChar: 0,
+  },
   // One coding operation (api/coding/run): generate, explain, find bugs,
   // convert or write tests.
   //
@@ -649,6 +660,38 @@ export const ACTION_PROFILES = {
     outputCharsPerInputChar: 0,
   },
   gameChange: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
+  // REBUILD (api/rebuild and api/rebuild/[id]; lib/rebuild/charge.ts), the
+  // same four steps as Games with the same shape: each call site passes
+  // EVERY character it sends (the system prompt and the message), so
+  // systemPromptTokens is only the tool schema's few lines. The plan is
+  // four boxes of at most 700 characters and a title; one box is one box;
+  // a written app is held at the most the prompt allows (40,000
+  // characters); a change sends the whole app up and gets the whole app
+  // back, so its output tracks its input one to one.
+  rebuildPlan: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 3000,
+    outputCharsPerInputChar: 0,
+  },
+  rebuildBoxEdit: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 800,
+    outputCharsPerInputChar: 0,
+  },
+  rebuildBuild: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 40000,
+    outputCharsPerInputChar: 0,
+  },
+  rebuildChange: {
     systemPromptTokens: 100,
     auxiliaryCalls: [],
     baseOutputChars: 400,

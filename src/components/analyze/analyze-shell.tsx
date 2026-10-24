@@ -33,6 +33,7 @@ import { pagesRead, relabelAnswer } from "@/lib/files/page-refs";
 import { useFilesFailureWords } from "@/components/files/failure-words";
 import type { Citation } from "@/lib/files/answer";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
+import { HelpTip } from "@/components/ui/help-tip";
 
 /** The longest name /api/files/collections keeps (its MAX_NAME). */
 const MAX_COLLECTION_NAME = 80;
@@ -79,7 +80,6 @@ type FileTurn = { id: string; role: "user" | "tool"; text: string; answer?: Answ
 export function AnalyzeShell({
   analyses,
   current,
-  provenance = false,
   initialFiles,
   initialCollections = [],
   initialOpenId = null,
@@ -87,7 +87,6 @@ export function AnalyzeShell({
 }: {
   analyses: AnalysisSummary[];
   current: AnalysisView | null;
-  provenance?: boolean;
   initialFiles: WorkspaceFile[];
   initialCollections?: WorkspaceCollection[];
   initialOpenId?: string | null;
@@ -115,7 +114,7 @@ export function AnalyzeShell({
 
   // WHICH HALF IS ACTIVE. null while nothing has been opened or uploaded
   // yet — the empty landing shows then, same ToolShell rule as Coding.
-  const [mode, setMode] = useState<"analysis" | "files" | null>(current ? "analysis" : null);
+  const [mode, setMode] = useState<"analysis" | "files" | null>(current ? "analysis" : initialOpenId ? "files" : null);
   const [pane, setPane] = useState<"work" | null>(null);
 
   // -- the spreadsheet half (the old analysis-shell.tsx, now deleted) --
@@ -172,9 +171,43 @@ export function AnalyzeShell({
       setMode("files");
       setPane("work");
     }
-    // Mount + current only, as the two old effects were.
+    // Mount + WHICH analysis is open only, as the two old effects were. It was
+    // `[current]`, the object, and every server refresh (a finished answer's
+    // "seen" mark, a saved question) hands down a new object for the same
+    // analysis: on a computer that put a person who had just chosen a document
+    // back on the analysis, and their document answer disappeared from the screen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
+  }, [current?.id]);
+
+  // WHAT THE PHONE'S SHARE SHEET DID (src/app/share/route.ts): it ends at
+  // /dashboard/files with `?shared=N` and the counts of what failed, or
+  // `?share_error=rate_limit`; /dashboard/files forwards them here and this
+  // says them, once, as the old Files page did (its switch-off screen no
+  // longer exists, so without this the words would be lost).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("shared") && !params.has("share_error")) return;
+    const stored = Number(params.get("shared") ?? 0);
+    const failed = Number(params.get("share_failed") ?? 0);
+    const dropped = Number(params.get("share_dropped") ?? 0);
+    const reason = params.get("share_reason");
+    if (params.get("share_error") === "rate_limit") {
+      addToast(tFiles("sharedRateLimit"), "error");
+    } else {
+      if (stored > 0) addToast(tFiles("sharedStored", { count: stored }), "success");
+      if (failed > 0) {
+        addToast(
+          reason ? `${tFiles("sharedFailed", { count: failed })} ${tFiles("sharedReason", { reason })}` : tFiles("sharedFailed", { count: failed }),
+          "error"
+        );
+      }
+      if (dropped > 0) addToast(tFiles("sharedDropped", { max: 5 }), "error");
+    }
+    // So a reload does not announce a share that already happened.
+    window.history.replaceState(null, "", window.location.pathname);
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [historyOpen, setHistoryOpen] = useState(false);
   useEffect(() => {
@@ -357,7 +390,7 @@ export function AnalyzeShell({
         return;
       }
       note("tool", t("analyse.done"));
-      if (provenance && Number(body?.dropped) > 0) note("tool", t("how.dropped", { count: Number(body.dropped) }));
+      if (Number(body?.dropped) > 0) note("tool", t("how.dropped", { count: Number(body.dropped) }));
       setPane("work");
       router.refresh();
     } finally {
@@ -647,25 +680,25 @@ export function AnalyzeShell({
               {current.findings ? (
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">{t("findings.title")}</h3>
-                  {provenance && facts.length > 0 ? <p className="mt-1 text-[11px] text-muted">{t("how.press")}</p> : null}
+                  {facts.length > 0 ? <p className="mt-1 text-[11px] text-muted">{t("how.press")}</p> : null}
                   {current.findings.summary ? (
                     <p className="mt-1 text-sm text-body">
-                      {provenance && current.findings.summaryParts ? <FactText parts={current.findings.summaryParts} facts={facts} /> : current.findings.summary}
+                      {current.findings.summaryParts ? <FactText parts={current.findings.summaryParts} facts={facts} /> : current.findings.summary}
                     </p>
                   ) : null}
                   <ul className="mt-2 space-y-2">
                     {current.findings.findings.map((finding) => (
                       <li key={finding.headline} data-testid="analysis-finding">
                         <p className="text-sm text-foreground">
-                          {provenance && finding.headlineParts ? <FactText parts={finding.headlineParts} facts={facts} /> : finding.headline}
+                          {finding.headlineParts ? <FactText parts={finding.headlineParts} facts={facts} /> : finding.headline}
                         </p>
                         <p className="text-xs text-muted">
-                          {provenance && finding.detailParts ? <FactText parts={finding.detailParts} facts={facts} /> : finding.detail}
+                          {finding.detailParts ? <FactText parts={finding.detailParts} facts={facts} /> : finding.detail}
                         </p>
                       </li>
                     ))}
                   </ul>
-                  {provenance && facts.length > 0 ? (
+                  {facts.length > 0 ? (
                     <details data-testid="analysis-how" className="mt-3 text-xs">
                       <summary className="flex min-h-[44px] cursor-pointer items-center text-foreground">{t("how.title")}</summary>
                       <ul className="space-y-1">
@@ -685,7 +718,7 @@ export function AnalyzeShell({
               {current.charts.length > 0 && (
                 <div className="grid gap-4 xl:grid-cols-2">
                   {current.charts.map((chart, index) => (
-                    <AnalysisChart key={`${chart.spec.title}-${index}`} chart={chart} how={provenance} />
+                    <AnalysisChart key={`${chart.spec.title}-${index}`} chart={chart} />
                   ))}
                 </div>
               )}
@@ -836,6 +869,7 @@ export function AnalyzeShell({
   return (
     <ToolShell
       name={tNames("analyze")}
+      help={<HelpTip helpKey="help.dataAnalysis" />}
       ref={composerRef}
       turns={turns}
       working={

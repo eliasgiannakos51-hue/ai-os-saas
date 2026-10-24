@@ -1,6 +1,6 @@
 /**
  * TAKE BACK THE LAST CHANGE (MASTER 16, package 10; ΣΥΣΤΗΜΑ DESIGN §7
- * «αναίρεση»), behind the switch "site-pages".
+ * «αναίρεση»).
  *
  * website_versions already holds the WHOLE site after every generation and
  * every change (api/websites/edit, "THE WHOLE SITE, not the page that

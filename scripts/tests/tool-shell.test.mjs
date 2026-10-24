@@ -6,8 +6,9 @@
 // src/, not listed here: a tool moved into the shell is held the moment it
 // is, and one that leaves it stops being counted. Each is held to four
 // options, the shell's own field and nothing else to type into, no step
-// flow and no box of warnings, and a page that draws it only behind the
-// switch "tool-shell" and INSTEAD of its old body.
+// flow and no box of warnings, and a page that draws it for everybody,
+// with no old body behind it (the switch "tool-shell" was removed
+// 2026-10-23).
 //
 // Read with comments stripped: none of this runs without a browser, and
 // scripts/tests/tool-shell.prodtest.mjs is where it is watched.
@@ -118,32 +119,31 @@ for (const f of users) {
   check(`${f}: imports no page component, so the old page is not drawn behind it`, !/from "@\/components\/[^"]+-workspace"/.test(src));
 }
 
-console.log("\n== 3. the switch, and the page that draws it ==");
+console.log("\n== 3. the page that draws it: for everybody, no switch ==");
+// The switch "tool-shell" was removed 2026-10-23 (the owner: everything for
+// all users, without switches): every page that draws a shell draws it
+// whatever the reader's account, inside the full-height wrapper. A tool
+// born in the shell may still wall itself by plan or end in notFound(); what
+// no page may do is read "tool-shell" or draw the shell only on a condition
+// that sends the rest to an old body.
 const flags = read("src/lib/flags/flags.ts");
-check('the switch "tool-shell" is declared', /"tool-shell":\s*"/.test(flags));
+check('the switch "tool-shell" is gone from the declared switches', !/"tool-shell":\s*"/.test(flags));
 const pages = walk("src/app").filter((f) => /page\.tsx$/.test(f));
+check("...and no page or component reads it", ![...pages, ...walk("src/components")].some((f) => /isFeatureOn\("tool-shell"/.test(read(f))));
 for (const f of users) {
   const component = (read(f).match(/export function (\w+)\(/) ?? [])[1];
   const callers = pages.filter((p) => component && new RegExp(`<${component}\\b`).test(read(p)));
   check(`${component}: drawn by a page (${callers.length})`, callers.length >= 1);
   for (const p of callers) {
     const src = read(p);
-    // "tool-shell" for a tool that moved into the shell, or — for a tool
-    // that was BORN in it, with no old body of its own — that tool's own
-    // declared switch (the Image tool, "image-studio", package 19). Either
-    // way a switch, read before the shell is drawn. A key that is a plain
-    // word is declared unquoted (`games: "…"`), one with a hyphen quoted.
-    const switchAt = /if \((?:\(?await isFeatureOn\("([a-z-]+)", user\)\)?)(?: && [^{]+)?\) \{/.exec(src);
-    const switchKey = switchAt?.[1] ?? "";
-    const gate = switchAt && (switchKey === "tool-shell" || new RegExp(`\\n  (?:"${switchKey}"|${switchKey}): "`).test(flags)) ? switchAt.index : -1;
     const drawn = src.indexOf(`<${component}`);
-    // A TOOL BORN IN THE SHELL WITH NO OLD BODY (Games, package 26) has
-    // nothing to fall back to: for everybody the switch does not admit,
-    // the page ends in notFound() — the address does not exist for them.
-    const endsNotFound = /\n  notFound\(\);\n\}\s*$/.test(src);
-    const lastReturn = endsNotFound ? src.length : src.lastIndexOf("return (");
-    check(`${p}: only behind the switch, and INSTEAD of the old body`,
-      gate >= 0 && drawn > gate && drawn < lastReturn && /return \(\s*<div className="h-\[calc\(100dvh-8rem\)\] md:h-\[calc\(100vh-4rem\)\]">/.test(src.slice(gate, lastReturn)));
+    const wrapper = src.lastIndexOf('return (\n    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">', drawn);
+    const wrapperIndented = src.lastIndexOf('<div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">', drawn);
+    // THE ONE PAGE THAT KEEPS AN OLD BODY: Projects (FlowShell) falls back to
+    // its plain list in the single case the projects could not be read.
+    const keepsFallback = component === "FlowShell";
+    check(`${p}: draws it inside the full-height wrapper${keepsFallback ? "" : ", with no old body behind it"}`,
+      drawn >= 0 && (wrapper >= 0 || wrapperIndented >= 0) && (keepsFallback || !/-workspace"/.test(src.replace(/import type [^;]*;/g, ""))));
   }
 }
 
@@ -229,8 +229,8 @@ check("a file that stored but could not be read is not called a success", /outco
 const analyzePage = read("src/app/dashboard/data-analysis/page.tsx");
 const filesPage = read("src/app/dashboard/files/page.tsx");
 const filesWorkspace = read("src/components/files/files-workspace.tsx");
-check("Files: the collections the merged page reads are handed to the shell, as to the old Files page",
-  /<AnalyzeShell[\s\S]{0,400}initialCollections=\{initialCollections\}/.test(analyzePage) && /initialCollections=\{collectionRows\}/.test(filesPage.slice(filesPage.indexOf("<FilesWorkspace"))));
+check("Files: the collections the merged page reads are handed to the shell, and the old address redirects to it unconditionally",
+  /<AnalyzeShell[\s\S]{0,400}initialCollections=\{initialCollections\}/.test(analyzePage) && /redirect\(query \? `\/dashboard\/data-analysis\?\$\{query\}` : "\/dashboard\/data-analysis"\)/.test(filesPage));
 check("Files: each collection is pressed to select its files again",
   /collections\.map\(\(collection\) => \(\s*<button[\s\S]{0,120}onClick=\{\(\) => setSelected\(readyIds\(collection\)\)\}[\s\S]{0,200}data-testid="files-collection"/.test(analyze) &&
     /const readyIds = \(collection: WorkspaceCollection\) => collection\.fileIds\.filter\(\(id\) => askable\.some\(\(f\) => f\.id === id\)\);/.test(analyze));
@@ -260,7 +260,7 @@ check("...asking its questions first, answered in the field or skipped",
   /if \(data\.needsClarification\) return \{ kind: "questions"/.test(siteRequests) && /if \(outcome\.kind === "questions"\)/.test(site) && /appendClarificationAnswers\(pending\.description, pending\.questions/.test(site) && /data-testid="site-skip-questions"/.test(site));
 check("...with the design chosen under the field folded into the brief", /applyDesignBrief\(text\.slice\(0, MAX_DESCRIPTION_LENGTH\), \{ \.\.\.design, imageCount: paths\.length \}\)/.test(site) && /<DesignControls value=\{design\} onChange=\{setDesign\}/.test(site));
 check("while it builds, Stop is offered", /data-testid="website-stop"/.test(site) && /requestSiteStop\(current\.id\)/.test(site) && /\/api\/websites\/\$\{encodeURIComponent\(websiteId\)\}\/cancel/.test(siteRequests));
-check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, \.\.\.\(pages \? \{ pageSlug: slug \} : \{\}\), referenceImagePaths \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
+check("while a finished site is the current one, what is said changes it", /if \(current && current\.status === "completed"\) \{\s*void change\(text\);/.test(site) && /requestSiteChange\(\{ websiteId: current\.id, changeRequest: request, section: part, pageSlug: slug, referenceImagePaths \}\)/.test(site) && /fetchWithAuthRetry\("\/api\/websites\/edit"/.test(siteRequests));
 check("the price shows before sending, from the server's own estimator", /estimateForAction\(\s*"websiteGenerate"/.test(site) && /t\("estimatedCost", \{ count: estimatedCost \}\)/.test(site));
 check("the site beside the conversation is sandboxed, marked as made by AI, and says what it still lacks",
   /srcDoc=\{chosen === null \? html : outlineBoxes\(html, chosen\)\}\s*sandbox=""/.test(site) && /<AiGeneratedNotice variant="block" \/>/.test(site) && /findUnfilledPlaceholders\(html\)/.test(site) && /t\("unfilledTitle"/.test(site));

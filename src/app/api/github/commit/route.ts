@@ -30,6 +30,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
   }
 
+  if (body.newBranch === body.baseBranch) {
+    return NextResponse.json({ ok: false, error: "Cannot commit directly to the base branch." }, { status: 400 });
+  }
+
   const token = await getGitHubAccessToken(user.id);
   if (!token.ok || !token.installationId) {
     return NextResponse.json({ ok: false, reason: "not_connected" }, { status: 403 });

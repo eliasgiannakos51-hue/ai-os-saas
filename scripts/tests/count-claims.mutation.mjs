@@ -57,7 +57,7 @@ const MUTANTS = [
     // when /dashboard/my-stuff did.
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    52 pages instead of 8, and the four components below",
+    from: "                    53 pages instead of 8, and the four components below",
     to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

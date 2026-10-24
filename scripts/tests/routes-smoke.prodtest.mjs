@@ -655,8 +655,10 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
     (await page.locator('a[href^="/pricing#plan-"]').count()) === 0
   );
 
-  // The generation form opens by default when the account has no sites,
-  // which is the state this stand-in serves.
+  // The design controls sit behind the shell's «Design» option since the
+  // shell became the only Site page (2026-10-23); the old form showed them
+  // open. The same controls, one press away.
+  await page.locator('[data-testid="site-design"]').click();
   const visible = async (selector) => {
     const el = page.locator(selector).first();
     return (await el.count()) > 0 && (await el.isVisible());
@@ -712,9 +714,12 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
       );
     }
   }
+  // The shell's photo control is the field's «+», labelled with what the
+  // photos are for (dashboard.toolShell.site.photosAttach), where the old
+  // form had a paragraph (imageIntro) above its upload button.
   checkTrue(
     "the upload control explains what it is for",
-    await visibleText("dashboard.websiteBuilder.imageIntro")
+    (await page.locator(`[aria-label=${quoteForSelector(await uiTextStrict(page, "dashboard.toolShell.site.photosAttach"))}]`).count()) > 0
   );
 
   // The controls must actually DO something — one that renders and is
@@ -795,7 +800,10 @@ console.log("\n== 4. every AI box says what it accepts, and what it will not do 
   const SURFACES = [
     { name: "createStudio", url: "/dashboard/create", input: "#studio-input" },
     { name: "mission", url: "/dashboard/mission", input: "#mission-goal", open: "New Mission" },
-    { name: "research", url: "/dashboard/deep-research", input: "#research-topic" },
+    // Deep Research is the shell for everybody since 2026-10-23: three
+    // examples on its empty landing that SEND at once (not chips that fill a
+    // box), and a line under the field with what has been used this month.
+    { name: "research", url: "/dashboard/deep-research", input: "textarea", shell: true },
     // NO CHIPS ON PURPOSE since MASTER 14.2 (2026-10-07): the empty Chat
     // is the earth, the greeting and the field (src/lib/ai/example-prompts.ts,
     // NO_CHIPS_ON_SCREEN). Visited all the same, to see that none came back.
@@ -812,6 +820,23 @@ console.log("\n== 4. every AI box says what it accepts, and what it will not do 
           await opener.first().click();
           await page.waitForTimeout(400);
         }
+      }
+      if (surface.shell) {
+        const shellChips = page.locator('[data-testid="tool-shell-example"]');
+        const shellCount = await shellChips.count();
+        checkTrue(`${surface.name}: 3-4 examples are on the page (${shellCount})`, shellCount >= 3 && shellCount <= 4);
+        const composerText = (await page.locator('[data-testid="tool-shell"] form').first().innerText().catch(() => "")).trim();
+        checkTrue(`${surface.name}: the limits line is readable ("${composerText.replace(/\s+/g, " ").slice(-46)}")`, /\d/.test(composerText));
+        if (shellCount > 0) {
+          const wanted = (await shellChips.first().innerText()).trim();
+          await shellChips.first().click();
+          await page.waitForTimeout(400);
+          const thread = await page.locator('[data-testid="tool-shell-thread"]').innerText().catch(() => "");
+          checkTrue(`${surface.name}: clicking an example sends it into the conversation ("${wanted.slice(0, 36)}")`, thread.includes(wanted));
+        }
+        const shellOverflow = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+        checkTrue(`${surface.name}: no horizontal overflow at 375px (${shellOverflow.scrollWidth}/${shellOverflow.clientWidth})`, shellOverflow.scrollWidth <= shellOverflow.clientWidth + 1);
+        continue;
       }
       const chips = page.locator(`[data-testid="examples-${surface.name}"] [data-testid="ai-example"]`);
       const count = await chips.count();
@@ -1032,8 +1057,10 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   // business, until Finance/Sales/Trading's replacement lands) legitimately
   // renders no heading — same "absent is allowed" rule as above.
   const groupsSrc = readSrc("src/lib/nav/all-tools.ts", "utf8");
-  const allToolsGroupKeys = [...groupsSrc.matchAll(/key:\s*"([a-z]+)"/g)].map((m) => m[1]);
-  checkTrue(`ALL_TOOLS_GROUPS keys were parsed (${allToolsGroupKeys.length})`, allToolsGroupKeys.length >= 4, groupsSrc.slice(0, 200));
+  // The final grid's five groups, in the one array that names them
+  // (ALL_TOOLS_GROUP_ORDER), not a pattern that matched the old shape.
+  const allToolsGroupKeys = [...(groupsSrc.match(/ALL_TOOLS_GROUP_ORDER[^=]*=\s*\[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-zA-Z]+)"/g)].map((m) => m[1]);
+  checkTrue(`ALL_TOOLS_GROUPS keys were parsed (${allToolsGroupKeys.length})`, allToolsGroupKeys.length === 5, groupsSrc.slice(0, 200));
   let allToolsHeadingsShown = 0;
   for (const key of allToolsGroupKeys) {
     const word = elMessages.dashboard?.tools?.groups?.[key];

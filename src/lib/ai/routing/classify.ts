@@ -73,10 +73,15 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   // Package 26: writing a whole game is the Site's generation; a box or a change, its edit.
   game_generate: "expert",
   game_edit: "complex",
+  // Rebuild (2026-10-27): the same two shapes as the game next to it.
+  rebuild_generate: "expert",
+  rebuild_edit: "complex",
   research_plan: "complex",
   file_ask: "complex",
   record_ask: "complex",
   my_stuff_ask: "complex",
+  // Connect by address (2026-10-26): arguments must follow the tool's schema.
+  mcp_ask: "complex",
   weekly_reflection: "complex",
   // Added 2026-10-05 (QUEUE E.2): every settlement feature string now has
   // a tier, so the shadow router (lib/ai/routing/shadow.ts) records a

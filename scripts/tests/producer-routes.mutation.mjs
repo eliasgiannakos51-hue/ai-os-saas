@@ -118,8 +118,8 @@ const MUTANTS = [
     // RE-ANCHORED 2026-10-22: the <WebsiteShell> call went multi-line when
     // `initialProjectId` joined it (owner's message, point 6). The defect
     // is unchanged — the brief prop is dropped.
-    from: "        <WebsiteShell\n          initialWebsites={websiteRows}\n          initialBrief={readExampleParam(searchParams.brief)}\n          initialOpenId={wanted}",
-    to: "        <WebsiteShell\n          initialWebsites={websiteRows}\n          initialOpenId={wanted}",
+    from: "      <WebsiteShell\n        initialWebsites={websiteRows}\n        initialBrief={readExampleParam(searchParams.brief)}\n        initialOpenId={wanted}",
+    to: "      <WebsiteShell\n        initialWebsites={websiteRows}\n        initialOpenId={wanted}",
     expect: "website-builder/page.tsx really reads searchParams.brief in <WebsiteShell> too",
   },
   {

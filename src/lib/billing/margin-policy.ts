@@ -281,6 +281,9 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   codeAssist: "code_assist",
   // «Τα δικά μου», 2026-10-22: one question over the account's own rows.
   myStuffAsk: "my_stuff_ask",
+  // Connect by address, 2026-10-26: the model call that turns a request
+  // into one tool call of the person's own app. The app's call is free.
+  mcpAsk: "mcp_ask",
   // V5 #21.
   presentationGenerate: "presentation_generate",
   // V5 #22.
@@ -298,4 +301,10 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   gameWrite: "game_generate",
   gameBoxEdit: "game_edit",
   gameChange: "game_edit",
+  // Rebuild, 2026-10-27: planning and writing an app settle as one
+  // feature, changing it as another, the way Games does.
+  rebuildPlan: "rebuild_generate",
+  rebuildBuild: "rebuild_generate",
+  rebuildBoxEdit: "rebuild_edit",
+  rebuildChange: "rebuild_edit",
 };

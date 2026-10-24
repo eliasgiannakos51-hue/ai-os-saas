@@ -145,9 +145,10 @@ export async function GET() {
     // (api/delete-account/confirm/route.ts), and only under this person's
     // own folder: the id is the session's, never the request's.
     if (await isFeatureOn("export-all", user)) {
-      const [sites, games, files] = await Promise.all([
+      const [sites, games, apps, files] = await Promise.all([
         supabase.from("user_websites").select("name, html_content, pages").eq("user_id", user.id).limit(MAX_ROWS_PER_TABLE),
         supabase.from("user_games").select("title, html").eq("user_id", user.id).limit(MAX_ROWS_PER_TABLE),
+        supabase.from("rebuild_projects").select("title, html").eq("user_id", user.id).limit(MAX_ROWS_PER_TABLE),
         collectExportFiles(createAdminClient().storage, user.id),
       ]);
       const archived = {
@@ -164,6 +165,7 @@ export async function GET() {
             : {}),
           ...(sites.error ? { sites_unreadable: sites.error.message } : {}),
           ...(games.error ? { games_unreadable: games.error.message } : {}),
+          ...(apps.error ? { apps_unreadable: apps.error.message } : {}),
         },
       };
       const zip = buildExportArchive({
@@ -172,6 +174,7 @@ export async function GET() {
         files: files.included,
         sites: sites.data ?? [],
         games: games.data ?? [],
+        apps: apps.data ?? [],
       });
       const zipName = `ionexa_export_${new Date().toISOString().slice(0, 10)}.zip`;
       return new NextResponse(Buffer.from(zip), {

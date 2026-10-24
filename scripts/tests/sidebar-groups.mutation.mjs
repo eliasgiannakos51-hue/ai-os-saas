@@ -120,8 +120,8 @@ const MUTANTS = [
     // (the sidebar of ΣΥΣΤΗΜΑ DESIGN has none), so that is where it
     // would come back.
     file: TOOLS_PAGE,
-    from: "<ul className={GRID}>{group.items.map(tile)}</ul>",
-    to: "<ul className={GRID}>{expanded ? group.items.map(tile) : null}</ul>",
+    from: "{group.items.map(tile)}",
+    to: "{expanded ? group.items.map(tile) : null}",
     expect: "every row is drawn, unconditionally",
   },
   {

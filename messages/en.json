@@ -2357,6 +2357,72 @@
           "sees": "Recent messages in the public channels you invite the Ionexa app into. It can't see private channels or direct messages.",
           "consent": "The AI will be able to read the public channels you invite it into, and your agents will be able to post their results to a channel you choose. This is the only integration that can write anything."
         }
+      },
+      "mcp": {
+        "title": "Add an app by address",
+        "intro": "Connect any app that speaks MCP by giving its address. The AI can then use that app's tools for you. Anything that could change something waits for your press: nothing runs behind your back.",
+        "nameLabel": "Name",
+        "namePlaceholder": "My notes app",
+        "urlLabel": "Address",
+        "urlPlaceholder": "https://example.com/mcp",
+        "tokenLabel": "Access token (only if the app asks for one)",
+        "tokenHint": "Stored encrypted and never shown again.",
+        "add": "Connect",
+        "adding": "Connecting…",
+        "connected": "{name} is connected.",
+        "refreshed": "Tools updated.",
+        "confirmRemove": "Remove {name}? Its stored token is deleted too.",
+        "refresh": "Update the tools",
+        "remove": "Remove",
+        "toolsLabel": "Tools of this app",
+        "toolsCount": "Tools: {count}",
+        "tokenStored": "token stored",
+        "statusError": "last check failed",
+        "readOnly": "read-only",
+        "needsPress": "needs your press",
+        "askLabel": "Ask this app in words",
+        "askPlaceholder": "What should it do?",
+        "ask": "Ask",
+        "none": "Nothing in this app fits that.",
+        "willCall": "It will call",
+        "approvalNote": "This tool may change something. Nothing happens until you press Run.",
+        "approve": "Run it",
+        "decline": "Don't run",
+        "resultTitle": "What the app returned",
+        "errorResult": "The app reported an error",
+        "resultNote": "shown as text, never run",
+        "truncated": "shortened",
+        "credits": "{credits} credits",
+        "empty": "No app connected by address yet.",
+        "limitNote": "You can connect up to {cap} apps by address.",
+        "errors": {
+          "bad_name": "Give the app a name (up to 80 characters).",
+          "bad_token": "That token is too long.",
+          "invalid_url": "That is not a valid address.",
+          "not_https": "The address must start with https://.",
+          "credentials_in_url": "Do not put a user name or password in the address; use the token field.",
+          "blocked_host": "That address points inside a private network and cannot be used.",
+          "too_long": "That address is too long.",
+          "blocked_address": "That address resolves to a private network and cannot be used.",
+          "unreachable": "The app could not be reached.",
+          "timeout": "The app took too long to answer.",
+          "too_large": "The app answered with too much data.",
+          "redirect_refused": "The app redirected to another address, which is not followed.",
+          "unauthorized": "The app did not accept the token.",
+          "http_error": "The app answered with an error.",
+          "protocol": "The app did not answer like an MCP app.",
+          "no_tools": "The app lists no tools.",
+          "duplicate": "You already connected that address.",
+          "limit": "You reached your limit of {cap} apps.",
+          "rate_limited": "Too many tries. Wait a little and try again.",
+          "encryption_unavailable": "Tokens cannot be stored safely on this deployment, so nothing was saved.",
+          "insufficient_credits": "Not enough credits for this.",
+          "ai_unavailable": "The AI could not be reached. Nothing was charged.",
+          "unusable_plan": "The AI's answer could not be used. Try asking differently.",
+          "approval_required": "This tool needs your press first.",
+          "empty": "Write what you want first.",
+          "default": "Something went wrong. Try again."
+        }
       }
     },
     "files": {
@@ -3048,12 +3114,11 @@
       "searchLabel": "Search tools",
       "noMatch": "No tool is called “{query}”. Describe it in the field on Home instead.",
       "groups": {
-        "make": "Make",
+        "record": "Record",
         "ask": "Ask",
-        "organise": "Organise",
-        "business": "Business",
-        "automate": "Automate",
-        "learn": "Learn"
+        "make": "Make",
+        "runAlone": "Run on its own",
+        "organise": "Organise"
       },
       "names": {
         "site": "Site",
@@ -3073,31 +3138,47 @@
         "sales": "Sales",
         "trading": "Trading",
         "image": "Image",
-        "connections": "Connections",
         "document": "Document",
-        "games": "Games"
+        "games": "Games",
+        "connect": "Connect",
+        "rebuild": "Rebuild",
+        "video": "Video",
+        "films": "Films",
+        "editing": "Editing",
+        "avatars": "Avatars",
+        "coding": "Coding",
+        "agents": "Agents",
+        "iowork": "iowork"
       },
       "lines": {
-        "site": "A website from a description.",
+        "site": "A website from a description",
         "slides": "A presentation from a description.",
         "posts": "One post for each platform.",
-        "research": "A sourced report on any topic.",
-        "analyze": "Findings from files, documents or text.",
+        "research": "A sourced report on any topic",
+        "analyze": "Files, links and videos, explained",
         "files": "Ask about your documents.",
-        "automations": "Tasks that run on their own.",
-        "projects": "A folder with a goal.",
+        "automations": "Tasks that run on their own",
+        "projects": "Everything for one goal, together",
         "goals": "A goal, broken into steps.",
         "meetings": "Summary and actions from a recording.",
-        "myStuff": "Ask about everything you've made, with sources.",
+        "myStuff": "Everything you've made, in one place",
         "library": "Everything you made and did, in one place.",
         "memory": "What Ionexa remembers about you.",
         "finances": "Log income and expenses.",
         "sales": "Contacts, outreach and next steps.",
         "trading": "A log of your trades.",
-        "image": "Four pictures from one description.",
-        "connections": "Connect your services in one press.",
-        "document": "A document from a description.",
-        "games": "A game from a description."
+        "image": "Images from a description",
+        "document": "Documents, slides and sheets",
+        "games": "A game from a description.",
+        "connect": "Bring your other apps in",
+        "rebuild": "Build your own version of any app",
+        "video": "A video clip from a description",
+        "films": "A whole film from a script",
+        "editing": "Edit videos and photos with words",
+        "avatars": "A presenter who says your text",
+        "coding": "Code with your GitHub projects",
+        "agents": "They work while you don't",
+        "iowork": "Works on your computer, makes your files"
       }
     },
     "home": {
@@ -3730,6 +3811,64 @@
       "deleteSelectedConfirm": "Delete {count} conversations? You'll have a few seconds to undo each one.",
       "deleteSelectedFailed": "Not everything was deleted. What is still here was not.",
       "atCap": "The newest {cap}. Search to find an older one."
+    },
+    "rebuild": {
+      "placeholder": "Describe the app you want, or paste the address of a page of one you like",
+      "placeholderBox": "Say what to change in this box",
+      "placeholderChange": "Say what to change in the app",
+      "new": "New app",
+      "empty": {
+        "heading": "Which app do you want your own version of?",
+        "examples": {
+          "booking": "A booking app for a small studio: clients, times, reminders",
+          "habits": "A habit tracker with a streak for each habit",
+          "invoices": "A simple invoice maker that keeps clients and totals"
+        }
+      },
+      "planned": "Here is the plan for “{title}”. Change any box with words, then build the app.",
+      "referenceRead": "I read the labels of {host}: only what the page is made of, nothing is copied.",
+      "boxChanged": "Changed the “{box}” box.",
+      "built": "The app is ready on the right. It is your own, with its own name and words.",
+      "changed": "Changed. Every change is a version you can go back to.",
+      "undone": "Went back to the version before.",
+      "restored": "Version {n} is the current one again.",
+      "boxHint": "Press a box and say what to change in it. When the plan is right, build the app.",
+      "boxes": {
+        "screens": "Screens",
+        "data": "Data",
+        "actions": "Actions",
+        "look": "Look"
+      },
+      "build": "Build the app",
+      "building": "Building the app…",
+      "download": "Download the app",
+      "undo": "Undo the last change",
+      "preview": "The app, running",
+      "sealed": "It runs sealed off from everything else, so what you enter here stays in this preview. Download it to use it on your own computer.",
+      "original": "Your own version, not a copy: it takes the idea and the kinds of screens, never the name, words, pictures or code of the original.",
+      "versions": "{count} versions",
+      "version": "Version {n}",
+      "first": "First build",
+      "restoreNote": "Went back",
+      "restore": "Go back to this one",
+      "errors": {
+        "insufficient": "Not enough credits for this. The price is shown before every step.",
+        "unavailable": "The app maker is not available right now. Nothing was charged.",
+        "unusable": "The app that came back was not complete or not safe, so it was thrown away. Nothing was charged. Try again, or say it differently.",
+        "rateLimited": "Too many requests for now. Try again later.",
+        "tooLong": "That is too long. Shorten it and try again.",
+        "stopped": "Stopped. Nothing was charged.",
+        "failed": "That did not work. Try again.",
+        "limit": "Your plan keeps {limit} apps. Delete one in the history column to make another.",
+        "reference": {
+          "notHttps": "Only addresses that start with https:// can be read. Nothing was charged.",
+          "blocked": "That address cannot be read: it is not a public web page. Nothing was charged.",
+          "unreachable": "I could not reach that page. Check the address, or describe the app in words instead. Nothing was charged.",
+          "notHtml": "That address is not a web page. Nothing was charged.",
+          "tooLarge": "That page is too large to read. Nothing was charged.",
+          "invalid": "That is not a web address I can read. Nothing was charged."
+        }
+      }
     }
   },
   "module": {
@@ -4262,11 +4401,6 @@
       "does": "Publishing gives a site an address anyone can open, and counts its visitors here.",
       "doesNot": "It does not give you a domain of your own. The address is a path on this site today, not yourdomain.com — pointing a real domain at it is separate."
     },
-    "files": {
-      "is": "Your documents, readable by the AI.",
-      "does": "Upload a PDF, Word, Excel, CSV or text file; the text is pulled out and you can ask questions across the ones you pick.",
-      "doesNot": "It does not read scans. A PDF that is a photo of a page has no text to extract and needs OCR first, and very long documents are read up to a limit."
-    },
     "deepResearch": {
       "is": "Research that would cost you several hours.",
       "does": "It shows you its plan first, then goes and does the work and comes back with sources you can check.",
@@ -4471,6 +4605,16 @@
       "is": "Every conversation you have had, in one place.",
       "does": "Lists them newest first, searches both their titles and what was said inside them, and renames, pins, files or deletes any of them.",
       "doesNot": "The search does not read every message ever sent: it reads the newest 400, and the page says so while you type."
+    },
+    "images": {
+      "is": "Four pictures from one description.",
+      "does": "Describe what you want and get four versions. Press one and change it with words, then download it at the largest size the provider makes. Every picture is kept in your Library.",
+      "doesNot": "It does not change your original: every change is a new version. It does not make pictures of real people doing things they did not do. Without the provider's key it makes nothing and charges nothing."
+    },
+    "rebuild": {
+      "is": "Your own version of an app you like.",
+      "does": "Describe an app, or paste the address of one public page of an app you like. You get a plan in four boxes, change what you want with words, then build it: a working app you can use, change with words, step back from, and download as one file.",
+      "doesNot": "It does not copy the other app: the name, words, pictures and code are your own, and it reads only the labels of the one page you point at, never anything behind a sign-in. It is not a hosted service: what you enter in the preview is not saved, and the downloaded file keeps its data on your own computer."
     }
   },
   "helpCentre": {
@@ -4924,7 +5068,7 @@
       "explain": "Explain what this code does",
       "tests": "Write tests for this function"
     },
-    "uploadFolder": "Upload folder",
+    "uploadFolder": "Code from your computer",
     "power": {
       "label": "Power",
       "fast": "Fast",
@@ -4939,7 +5083,41 @@
       "branchLabel": "Branch",
       "pickRepo": "Pick a repository…",
       "pickBranch": "Pick a branch…",
-      "default": "default"
+      "default": "default",
+      "searchRepos": "Search repositories…",
+      "newBranch": "New branch",
+      "newBranchName": "Branch name",
+      "create": "Create",
+      "adminSetup": "GitHub integration needs setup",
+      "adminSetupLink": "Setup guide",
+      "fileTree": "Files",
+      "structure": "Structure",
+      "commitChanges": "Commit changes",
+      "commitMessage": "Commit message",
+      "branchNameLabel": "New branch name",
+      "prTitle": "PR title",
+      "prBody": "PR description",
+      "createPr": "Create PR",
+      "creating": "Creating…",
+      "prCreated": "PR created",
+      "viewPr": "View on GitHub",
+      "ciStatus": "CI status",
+      "ciPending": "Checks running…",
+      "ciPassed": "All checks passed",
+      "ciFailed": "Checks failed",
+      "merge": "Merge",
+      "mergeConfirm": "Are you sure you want to merge this PR?",
+      "merged": "Merged",
+      "merging": "Merging…",
+      "undo": "Undo last change",
+      "neverMain": "Changes go to a new branch, never directly to main.",
+      "noRepos": "No repositories found. Install the GitHub App on your repos.",
+      "loadingTree": "Loading files…",
+      "downloadZip": "Download as .zip",
+      "fromComputer": "Code from your computer",
+      "connected": "Connected",
+      "cancel": "Cancel",
+      "commitPlaceholder": "Update code via Ionexa Coding"
     }
   },
   "presentations": {

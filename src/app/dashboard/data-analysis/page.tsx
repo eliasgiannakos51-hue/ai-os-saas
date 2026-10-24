@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { BarChart3 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { AnalysisWorkspace, type AnalysisSummary, type AskRecord } from "@/components/data-analysis/analysis-workspace";
+import type { AnalysisWorkspace, AnalysisSummary, AskRecord } from "@/components/data-analysis/analysis-workspace";
 import { AnalyzeShell } from "@/components/analyze/analyze-shell";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { buildChart, type BuiltChart, type ChartSpec } from "@/lib/data-analysis/charts";
 import type { TableProfile } from "@/lib/data-analysis/profile";
 import type { AnalysisFindings } from "@/lib/data-analysis/analyse";
@@ -34,7 +30,6 @@ export default async function DataAnalysisPage(
   }
 ) {
   const searchParams = await props.searchParams;
-  const t = await getTranslations("dataAnalysis");
   const supabase = await createClient();
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -132,69 +127,54 @@ export default async function DataAnalysisPage(
     }
   }
 
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): Analyze and
-  // Files, merged into one tool (owner's message of 2026-10-22) — the
-  // same spreadsheets, charts and questions AND the same documents and
-  // collections, drawn as one conversation and one work pane
+  // THE SHELL, FOR EVERYBODY (MASTER 14.3, package 3; its switch was removed
+  // 2026-10-23): Analyze and Files, merged into one tool (owner's message of
+  // 2026-10-22) — the same spreadsheets, charts and questions AND the same
+  // documents and collections, drawn as one conversation and one work pane
   // (components/analyze/analyze-shell.tsx). /dashboard/files redirects
-  // here when this switch is on; this is now the one address for both.
-  if (await isFeatureOn("tool-shell", user)) {
-    const [{ data: fileRows }, { data: collectionRows }, { data: itemRows }] = await Promise.all([
-      supabase
-        .from("user_files")
-        .select(FILE_LIST_COLUMNS)
-        .eq("user_id", user.id)
-        .order("uploaded_at", { ascending: false })
-        .limit(1000),
-      supabase
-        .from("file_collections")
-        .select("id, name, description")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(100),
-      supabase
-        .from("file_collection_items")
-        .select("collection_id, file_id")
-        .eq("user_id", user.id)
-        .limit(5000),
-    ]);
-    const byCollection = new Map<string, string[]>();
-    for (const item of itemRows ?? []) {
-      const key = String(item.collection_id);
-      byCollection.set(key, [...(byCollection.get(key) ?? []), String(item.file_id)]);
-    }
-    const initialFiles = (fileRows ?? []) as unknown as WorkspaceFile[];
-    const initialCollections: WorkspaceCollection[] = (collectionRows ?? []).map((c) => ({
-      id: String(c.id),
-      name: String(c.name),
-      description: c.description === null ? null : String(c.description),
-      fileIds: byCollection.get(String(c.id)) ?? [],
-    }));
-
-    return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <AnalyzeShell
-          analyses={analyses}
-          current={current}
-          provenance={await isFeatureOn("analysis-provenance", user)}
-          initialFiles={initialFiles}
-          initialCollections={initialCollections}
-          initialOpenId={readRequestedId(searchParams.record)}
-          pages
-        />
-      </div>
-    );
+  // here; this is now the one address for both.
+  const [{ data: fileRows }, { data: collectionRows }, { data: itemRows }] = await Promise.all([
+    supabase
+      .from("user_files")
+      .select(FILE_LIST_COLUMNS)
+      .eq("user_id", user.id)
+      .order("uploaded_at", { ascending: false })
+      .limit(1000),
+    supabase
+      .from("file_collections")
+      .select("id, name, description")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("file_collection_items")
+      .select("collection_id, file_id")
+      .eq("user_id", user.id)
+      .limit(5000),
+  ]);
+  const byCollection = new Map<string, string[]>();
+  for (const item of itemRows ?? []) {
+    const key = String(item.collection_id);
+    byCollection.set(key, [...(byCollection.get(key) ?? []), String(item.file_id)]);
   }
+  const initialFiles = (fileRows ?? []) as unknown as WorkspaceFile[];
+  const initialCollections: WorkspaceCollection[] = (collectionRows ?? []).map((c) => ({
+    id: String(c.id),
+    name: String(c.name),
+    description: c.description === null ? null : String(c.description),
+    fileIds: byCollection.get(String(c.id)) ?? [],
+  }));
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader
-        icon={BarChart3}
-        title={t("title")}
-        description={t("description")}
-        helpKey="help.dataAnalysis"
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <AnalyzeShell
+        analyses={analyses}
+        current={current}
+        initialFiles={initialFiles}
+        initialCollections={initialCollections}
+        initialOpenId={readRequestedId(searchParams.record)}
+        pages
       />
-      <AnalysisWorkspace analyses={analyses} current={current} />
     </div>
   );
 }

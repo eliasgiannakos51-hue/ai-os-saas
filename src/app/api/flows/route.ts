@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { resolveEffectivePlan, resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxProjectsForPlan } from "@/lib/projects/project-limits";
 import { checkProjectName } from "@/lib/projects/project";
@@ -15,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * A FLOW, APPROVED (MASTER 6.1 and 6.3; MASTER 16 package 36), behind the
- * switch "flows".
+ * for everybody since 2026-10-23.
  *
  * The screen has already shown the plan and its total (lib/flows/plan.ts,
  * lib/flows/flow-pricing.ts); pressing «Έγκριση» lands here. The plan is
@@ -45,7 +44,6 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
-  if (!(await isFeatureOn("flows", user))) return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
   const limited = await checkRateLimit({ scope: "flow_create", identifier: user.id, maxAttempts: 30, windowMinutes: 60 });
   if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });
 

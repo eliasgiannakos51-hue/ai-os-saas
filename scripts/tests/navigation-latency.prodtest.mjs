@@ -230,11 +230,12 @@ const HOME = "/dashboard/overview";
 // measured here and is not counted as unreachable either: it was never
 // supposed to be on the screen.
 //
-// /dashboard/documents is the case that taught this. It is a SWITCHED_SQUARE
-// behind `document-writer` (lib/nav/all-tools.ts), no row here opens that
-// switch, so All tools correctly draws no square for it — and this file
-// called that "every route is reachable from where the design links it
-// (7/8)" and went red over a product doing exactly what its switch says.
+// /dashboard/documents is the case that taught this: it was behind the
+// switch `document-writer`, no row here opened it, so All tools correctly
+// drew no square for it, and this file called that "every route is
+// reachable from where the design links it (7/8)". The switch is gone
+// (2026-10-23): Documents is a tile of the final grid for everybody
+// (lib/nav/all-tools.ts), so it carries no `needs` below.
 const OPEN_SWITCHES = ["all-tools-tiles"];
 
 const ROUTES = [
@@ -242,15 +243,27 @@ const ROUTES = [
   { path: "/dashboard/chat", name: "Chat", from: HOME },
   { path: ALL_TOOLS, name: "All tools", from: HOME },
   { path: "/dashboard/settings", name: "Settings", from: HOME },
-  { path: "/dashboard/files", name: "Files", from: ALL_TOOLS },
-  { path: "/dashboard/mission", name: "Mission Control", from: ALL_TOOLS },
-  { path: "/dashboard/timeline", name: "Timeline", from: ALL_TOOLS },
+  // LEFT ALL TOOLS 2026-10-23 (the owner's final grid, lib/nav/all-tools.ts
+  // HIDDEN_FROM_ALL_TOOLS): Files redirects into Analyze, Goals is reached
+  // inside Projects, the Library by ⌘K and its address. Their TTFB, LCP and
+  // query chain are still held below (section 1 ranges over every route);
+  // only the click from a square is not, because there is no square.
+  { path: "/dashboard/files", name: "Files", from: ALL_TOOLS, linked: false },
+  { path: "/dashboard/mission", name: "Mission Control", from: ALL_TOOLS, linked: false },
+  { path: "/dashboard/timeline", name: "Timeline", from: ALL_TOOLS, linked: false },
   { path: "/dashboard/website-builder", name: "Website Builder", from: ALL_TOOLS },
-  { path: "/dashboard/documents", name: "Documents", from: ALL_TOOLS, needs: "document-writer" },
+  { path: "/dashboard/documents", name: "Documents", from: ALL_TOOLS },
+  // THE TILES THE FINAL GRID ADDED OR KEPT, clicked from where they are:
+  { path: "/dashboard/data-analysis", name: "Analyze", from: ALL_TOOLS },
+  { path: "/dashboard/deep-research", name: "Deep Research", from: ALL_TOOLS },
+  { path: "/dashboard/automation", name: "Automations", from: ALL_TOOLS },
+  { path: "/dashboard/projects", name: "Projects", from: ALL_TOOLS },
+  { path: "/dashboard/agents", name: "Agents", from: ALL_TOOLS },
+  { path: "/dashboard/my-stuff", name: "My Stuff", from: ALL_TOOLS },
 ];
 // Split once, so both the measuring loop and the reachability check below
 // range over the same set rather than each deciding for itself.
-const MEASURED = ROUTES.filter((r) => !r.needs || OPEN_SWITCHES.includes(r.needs));
+const MEASURED = ROUTES.filter((r) => r.linked !== false && (!r.needs || OPEN_SWITCHES.includes(r.needs)));
 const BEHIND_A_CLOSED_SWITCH = ROUTES.filter((r) => r.needs && !OPEN_SWITCHES.includes(r.needs));
 
 // ---------------------------------------------------------------------------

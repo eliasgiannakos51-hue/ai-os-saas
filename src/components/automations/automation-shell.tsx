@@ -21,8 +21,8 @@ import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
 import type { UserAutomation } from "@/types/user-automation";
 
 /**
- * AUTOMATIONS AS BOXES (MASTER 16, package 30), behind the switch
- * "automations": «γράφω "όταν ανεβάζω αρχείο, κάνε σύνοψη και βάλ' τη στη
+ * AUTOMATIONS AS BOXES (MASTER 16, package 30), for everybody since
+ * 2026-10-23: «γράφω "όταν ανεβάζω αρχείο, κάνε σύνοψη και βάλ' τη στη
  * Βιβλιοθήκη", βλέπω τα κουτιά, αλλάζω ένα με λόγια, και τρέχει μόνο του».
  *
  * The field makes an automation from a sentence; when the sentence leaves

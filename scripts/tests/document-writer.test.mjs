@@ -117,14 +117,14 @@ console.log("\n== 5. the routes ==");
 {
   const gen = read("src/app/api/documents/generate/route.ts");
   const at = (src, re) => src.search(re);
-  ok("generate: the switch and the plan before the breaker", at(gen, /await writerGate\(user\)/) > 0 && at(gen, /await writerGate\(user\)/) < at(gen, /checkAiCallAllowed\(/));
+  ok("generate: the plan before the breaker", at(gen, /await writerGate\(user\)/) > 0 && at(gen, /await writerGate\(user\)/) < at(gen, /checkAiCallAllowed\(/));
   ok("...held on documentGenerate, sized on the description AND the records", /"documentGenerate",\s*\{ model: DOCUMENT_MODEL, inputChars: docEstimateInputChars\(description\.length \+ businessContext\.length\)/.test(gen));
   ok("...the hold before the model", at(gen, /await reserveCredits\(/) > 0 && at(gen, /await reserveCredits\(/) < at(gen, /await writeDocument\(/));
   ok("...a stop or a provider failure releases it; an unusable answer settles", /outcome\.kind === "aborted" \|\| outcome\.kind === "provider"\)\) \{\s*await releaseReservation/.test(gen) && /code: "unusable"/.test(gen));
   ok("...the document is saved through the person's own client, as the editor's escaped HTML", /supabase\s*\.from\("user_documents"\)\s*\.insert\(\{ user_id: user\.id, title: doc\.title, content: \{ html: blocksToHtml\(doc\.blocks\)/.test(gen));
   const edit = read("src/app/api/documents/[id]/edit/route.ts");
   ok("edit: read by id AND owner", /\.from\("user_documents"\)\s*\.select\("id, title, content"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(edit));
-  ok("...the switch and the plan before anything is read or spent", at(edit, /await writerGate\(user\)/) < at(edit, /\.from\("user_documents"\)/));
+  ok("...the plan before anything is read or spent", at(edit, /await writerGate\(user\)/) < at(edit, /\.from\("user_documents"\)/));
   ok("...a box keeps every other block (keepOnlyBlock)", /next = keepOnlyBlock\(stored, box, out\.value\)/.test(edit));
   ok("...a line is not a box", /stored\[box\]\.kind === "rule"/.test(edit));
   ok("...priced as a block change or a whole change", /box === null \? "documentEdit" : "documentBlockEdit"/.test(edit));
@@ -133,7 +133,7 @@ console.log("\n== 5. the routes ==");
   ok("Word: read by id AND owner, bounded like every export, no model", /\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(docx) && /allowExport\(user\.id\)/.test(docx) && !/anthropic|write-call/i.test(docx));
   ok("...sent as an attachment, uncached", /"Content-Disposition": `attachment;/.test(docx) && /"Cache-Control": "private, no-store"/.test(docx) && /wordprocessingml\.document/.test(docx));
   const access = read("src/lib/documents/writer-access.ts");
-  ok("the switch is document-writer and the plan Starter and up, the owner aside", /isFeatureOn\("document-writer", user\)/.test(access) && /DOCUMENT_WRITER_MIN_PLAN: PlanSlug = "starter"/.test(access) && /!isAdmin && !planMeetsMinimum\(plan\?\.slug \?\? "free", DOCUMENT_WRITER_MIN_PLAN\)/.test(access));
+  ok("no switch, and the plan Starter and up, the owner aside", !/isFeatureOn|not_enabled/.test(access) && /DOCUMENT_WRITER_MIN_PLAN: PlanSlug = "starter"/.test(access) && /!isAdmin && !planMeetsMinimum\(plan\?\.slug \?\? "free", DOCUMENT_WRITER_MIN_PLAN\)/.test(access));
 }
 
 console.log("\n== 6. a real .docx, read back ==");
@@ -196,13 +196,13 @@ console.log("\n== 7. the PDF of the same document, read back ==");
 console.log("\n== 8. the page and the words ==");
 {
   const page = read("src/app/dashboard/documents/page.tsx");
-  ok("the page draws the writer only with the switch AND the plan", /\(await isFeatureOn\("document-writer", user\)\) &&\s*\(isAdminEmail\(user\.email\) \|\| planMeetsMinimum\(await resolveEffectivePlanSlug\(user\), DOCUMENT_WRITER_MIN_PLAN\)\)/.test(page) && /<DocumentsShell /.test(page));
+  ok("the page draws the writer on the plan alone, no switch", !/isFeatureOn\("document-writer"/.test(page) && /if \(\(isAdminEmail\(user\.email\) \|\| planMeetsMinimum\(await resolveEffectivePlanSlug\(user\), DOCUMENT_WRITER_MIN_PLAN\)\)/.test(page) && /<DocumentsShell /.test(page));
   ok("...and every document of the person's, written or typed, opens in it as blocks", /blocks: htmlToBlocks\(/.test(page));
   const shell = read("src/components/documents/documents-shell.tsx");
   ok("the field writes a document, then changes the open one; a pressed box goes with its index", /fetch\("\/api\/documents\/generate"/.test(shell) && /fetch\(`\/api\/documents\/\$\{open\.id\}\/edit`/.test(shell) && /box === null \? \{\} : \{ blockIndex: box \}/.test(shell));
   ok("Word, PDF and the editor are on top of the document", /fetch\(`\/api\/documents\/\$\{id\}\/docx`\)/.test(shell) && /<DocumentPdfButton documentId=\{open\.id\}/.test(shell) && /href=\{`\/dashboard\/documents\/\$\{open\.id\}`\}/.test(shell));
   ok("the price shows before sending, for a new document and for a change", /useCostEstimate\("documentGenerate"/.test(shell) && /useCostEstimate\(box === null \? "documentEdit" : "documentBlockEdit"/.test(shell));
-  ok("the switch is declared", /"document-writer":/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
+  ok("the switch is gone", !/"document-writer":/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
   const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
   const KEYS = ["kind", "placeholder", "changePlaceholder", "block", "boxHint", "writing", "changing", "done", "changed", "blockChanged", "recent", "noneYet", "new", "word", "openEditor", "kinds.free", "kinds.offer", "kinds.letter", "kinds.cv", "kinds.report", "kinds.invoice", "kinds.script", "errors.tooShort", "errors.tooLong", "errors.insufficient", "errors.rateLimited", "errors.unavailable", "errors.unusable", "errors.notIncluded", "errors.notSaved", "errors.failed", "errors.exportFailed"];
   for (const loc of LOCALES) {

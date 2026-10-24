@@ -1,6 +1,7 @@
 /*
  * «ΠΑΙΡΝΩ 4 ΠΑΡΑΛΛΑΓΕΣ, ΑΛΛΑΖΩ ΜΙΑ ΜΕ ΛΟΓΙΑ, ΚΑΙ ΤΗΝ ΚΑΤΕΒΑΖΩ ΣΤΗΝ ΥΨΗΛΟΤΕΡΗ
- * ΑΝΑΛΥΣΗ» (MASTER 16, package 19), behind the switch "image-studio".
+ * ΑΝΑΛΥΣΗ» (MASTER 16, package 19), open to everybody since 2026-10-23 (the switch
+ * "image-studio" is gone).
  *
  * What this holds, against the code rather than its comments:
  *
@@ -16,16 +17,15 @@
  *      bucket, the account erasure that empties it.
  *   6. THE SCREEN AND THE WORDS.
  *   7. THE TOOL'S NAME WHERE THE TOOL IS NAMED: the tab, the ⌘K menu and
- *      the records hub say «Εικόνα» for whom the switch is on, and the
- *      ideas list keeps «Ιδέες για εικόνες» for everybody else
- *      (lib/nav/switched-names.ts).
+ *      the records hub say «Εικόνα» for everybody
+ *      (lib/nav/tool-names.ts).
  *
  * The provider's request and the prices against the settlement formula:
  * image-studio.itest.mjs. The screen in a browser: image-studio.prodtest.mjs.
  *
  * Run: node scripts/tests/image-studio.test.mjs
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -137,12 +137,12 @@ const download = code("src/app/api/images/[id]/download/route.ts");
 const del = code("src/app/api/images/[id]/route.ts");
 const ROUTES = { generate, edit, full, download, delete: del };
 for (const [name, src] of Object.entries(ROUTES)) {
-  check(`${name}: signs in, then the switch and the plan`, /if \(!user\) return refuse\("not_signed_in", 401\);\s*const gate = await imageGate\(user\);\s*if \(gate instanceof NextResponse\) return gate;/.test(src));
+  check(`${name}: signs in, then the plan`, /if \(!user\) return refuse\("not_signed_in", 401\);\s*const gate = await imageGate\(user\);\s*if \(gate instanceof NextResponse\) return gate;/.test(src));
 }
 for (const [name, src] of Object.entries({ edit, full, download, delete: del })) {
   check(`${name}: the row is the owner's`, /\.from\("generated_images"\)\s*\.select\(IMAGE_ROW_COLUMNS\)\s*\.eq\("id", id\)\s*\.eq\("user_id", user\.id\)\s*\.maybeSingle\(\)/.test(src) && /if \(!data\) return refuse\("not_found", 404\);/.test(src));
 }
-check("the switch is image-studio, the plan Starter and up", /if \(!\(await isFeatureOn\("image-studio", user\)\)\) return refuse\("not_enabled", 403\);/.test(access) && /export const IMAGE_MIN_PLAN: PlanSlug = "starter";/.test(access) && /if \(!isAdmin && !planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\) return refuse\("not_included", 403\);/.test(access));
+check("no switch, the plan Starter and up", !/isFeatureOn|not_enabled/.test(access) && /export const IMAGE_MIN_PLAN: PlanSlug = "starter";/.test(access) && /if \(!isAdmin && !planMeetsMinimum\(plan\?\.slug \?\? "free", IMAGE_MIN_PLAN\)\) return refuse\("not_included", 403\);/.test(access));
 check("before anything is spent: the breaker, and the ceiling on accounts not charged", /const breaker = await checkAiCallAllowed\(user\.id, endpoint, fingerprint\);\s*if \(!breaker\.allowed\) return refuse\("rate_limited", 429\);/.test(access) && /checkBypassCeiling\(user\.id, gate\.isAdmin, isBeta\)/.test(access));
 check("one change at a time: the row is claimed, and a stale claim expires",
   /\.or\(`busy_since\.is\.null,busy_since\.lt\.\$\{cutoff\}`\)/.test(access) && /if \(!\(await claimImage\(user\.id, id\)\)\) return refuse\("busy", 409\);/.test(edit) && /finally \{\s*await releaseImage\(user\.id, row\.id\);/.test(remake));
@@ -168,10 +168,10 @@ check("the bucket the code names is the one the migration makes", /export const 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the screen and the words ==");
 // ---------------------------------------------------------------------
-check('"image-studio" is declared as a switch', /\n  "image-studio": "/.test(code("src/lib/flags/flags.ts")));
+check('"image-studio" is no longer a switch', !/\n  "image-studio": "/.test(code("src/lib/flags/flags.ts")));
 const page = code("src/app/dashboard/images/page.tsx");
-check("the page draws the tool only behind the switch and for a plan that has it, the old list otherwise",
-  /if \(\(await isFeatureOn\("image-studio", user\)\) && included\) \{/.test(page) && /<ImageShell/.test(page) && /return \(\s*<BuildModulePage config=\{CONFIG\} icon=\{MODULE_ICONS\.images\} \/>/.test(page));
+check("the page draws the tool for a plan that has it, with no switch, and a wall otherwise",
+  !/isFeatureOn/.test(page) && /if \(!included\) \{[\s\S]*<UpgradeRequired[\s\S]*<ImageShell/.test(page) && !/BuildModulePage/.test(page));
 check("...with the prices of this account, and whether pictures can be made at all", /prices=\{imagePrices\(plan, await getPurchasedPackCreditPriceEur\(user\.id\)\)\}/.test(page) && /configured=\{Boolean\(imageApiKey\(\)\)\}/.test(page));
 const shell = code("src/components/images/image-shell.tsx");
 check("the price is on the screen before it is spent: four, one change, the largest size",
@@ -203,38 +203,36 @@ for (const file of LOCALES) {
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 7. the tool's name, where the switch is on ==");
+console.log("\n== 7. the tool's name, for everybody ==");
 // ---------------------------------------------------------------------
 // Until 2026-10-08 every menu read only the ideas list's name, so the
 // person with the tool saw the tab and ⌘K call it «Ιδέες για εικόνες»,
 // with the hint «Δεν τις δημιουργεί». In a browser:
 // scripts/tests/image-studio-edges.prodtest.mjs, section 9.
-const switched = await loadTs("src/lib/nav/switched-names.ts");
-const entry = switched.SWITCHED_NAMES.find((s) => s.href === "/dashboard/images");
-check("the Image tool's page is named by the switch its page reads",
-  entry?.flag === "image-studio" && /^\s*"image-studio":/m.test(code("src/lib/flags/flags.ts")) && entry.labelKey === "imageTool" && entry.hintKey === "imageTool" && /isFeatureOn\("image-studio", user\)/.test(code("src/app/dashboard/images/page.tsx")));
-check("...by that name only for whom the switch is on", switched.switchedName("/dashboard/images", ["/dashboard/images"]) === entry && switched.switchedName("/dashboard/images", []) === null && switched.switchedName("/dashboard/videos", ["/dashboard/videos"]) === null);
+const names = await loadTs("src/lib/nav/tool-names.ts");
+const entry = names.TOOL_NAMES.find((s) => s.href === "/dashboard/images");
+check("the Image tool's page has the tool's name and line", entry?.labelKey === "imageTool" && entry.hintKey === "imageTool");
+check("...unconditionally: no switch decides it", names.toolName("/dashboard/images") === entry && names.toolName("/dashboard/videos") === null && !("flag" in entry));
+check("...and the machinery that read a switch for it is gone", !existsSync("src/lib/nav/switched-on.ts") && !existsSync("src/lib/nav/switched-names.ts"));
 for (const file of LOCALES) {
   const side = JSON.parse(readFileSync(`messages/${file}`, "utf8")).sidebar ?? {};
   check(`${file}: the tool's name and its line, not the ideas list's`,
     Boolean(side.items?.imageTool?.trim()) && Boolean(side.hints?.imageTool?.trim()) && side.items.imageTool !== side.items.images && side.hints.imageTool !== side.hints.images);
 }
-const on = code("src/lib/nav/switched-on.ts");
-check("whom it is on for is the switch's own rule, read once per request", /isFlagKey\(s\.flag\) && audienceAllows\(audiences\[s\.flag\], staff\)/.test(on) && /= cache\(/.test(on));
 const palette = code("src/components/dashboard/command-palette.tsx");
 check("the ⌘K menu shows and matches every page row by that name",
-  /switchedName\(item\.href, switchedOn\)/.test(palette) && /candidates: \[\s*translatedLabel\(item\.label\),\s*item\.label,\s*\.\.\.aliasesFor\([^\n]*\),\s*itemLabel\(item\),/.test(palette) && /label: itemLabel\(item\),/.test(palette) && /\{itemLabel\(item\)\}/.test(palette) &&
+  /toolName\(item\.href\)/.test(palette) && /candidates: \[\s*translatedLabel\(item\.label\),\s*item\.label,\s*\.\.\.aliasesFor\([^\n]*\),\s*itemLabel\(item\),/.test(palette) && /label: itemLabel\(item\),/.test(palette) && /\{itemLabel\(item\)\}/.test(palette) &&
     !/\{translatedLabel\(item\.label\)\}|label: translatedLabel\(item\.label\)/.test(palette));
-check("...and is told by the layout for whom it is on", /<CommandPalette[^>]*\sswitchedOn=\{switchedOn\}/.test(code("src/app/dashboard/layout.tsx")) && /switchedOnFor\(user\.email\)/.test(code("src/app/dashboard/layout.tsx")));
+check("...and the layout hands it nothing but who is looking", /<CommandPalette isOwner=\{isAdmin\} \/>/.test(code("src/app/dashboard/layout.tsx")) && !/switchedOn/.test(code("src/app/dashboard/layout.tsx")));
 const records = code("src/app/dashboard/records/page.tsx");
 check("the records hub names it the same way, with the tool's line",
-  /const switched = switchedName\(item\.href, switchedOn\);/.test(records) && /label: switched\s*\?\s*tSidebar\(`items\.\$\{switched\.labelKey\}`\)/.test(records) && /hint: switched \? tSidebar\(`hints\.\$\{switched\.hintKey\}`\)/.test(records));
+  /const named = toolName\(item\.href\);/.test(records) && /label: named\s*\?\s*tSidebar\(`items\.\$\{named\.labelKey\}`\)/.test(records) && /hint: named \? tSidebar\(`hints\.\$\{named\.hintKey\}`\)/.test(records));
 const imagesPage = code("src/app/dashboard/images/page.tsx");
 check("the tab says it",
-  /const TOOL = SWITCHED_NAMES\.find\(\(s\) => s\.href === "\/dashboard\/images"\)!;\s*const TOOL_TITLE_KEY = `sidebar\.items\.\$\{TOOL\.labelKey\}`;/.test(imagesPage) &&
-    /return switchedName\("\/dashboard\/images", await switchedOnFor\(user\?\.email\)\) \? pageTitle\(TOOL_TITLE_KEY\) : pageTitle\(CONFIG\.titleKey\);/.test(imagesPage));
+  /const TOOL = TOOL_NAMES\.find\(\(s\) => s\.href === "\/dashboard\/images"\)!;\s*const TOOL_TITLE_KEY = `sidebar\.items\.\$\{TOOL\.labelKey\}`;/.test(imagesPage) &&
+    /return pageTitle\(TOOL_TITLE_KEY\);/.test(imagesPage));
 check("...and a plan below the tool's meets a wall under the tool's name, not the ideas list's",
-  /if \(switchedName\("\/dashboard\/images", await switchedOnFor\(user\.email\)\)\) \{\s*const t = await getTranslations\(\);\s*const name = t\(TOOL_TITLE_KEY\);[\s\S]{0,300}<h1 [^>]*>\{name\}<\/h1>\s*<UpgradeRequired\s+featureName=\{name\}/.test(imagesPage));
+  /const t = await getTranslations\(\);\s*const name = t\(TOOL_TITLE_KEY\);[\s\S]{0,300}<h1 [^>]*>\{name\}<\/h1>\s*<UpgradeRequired\s+featureName=\{name\}/.test(imagesPage));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

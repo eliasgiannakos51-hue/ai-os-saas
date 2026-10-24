@@ -9,7 +9,6 @@ import { PROJECTS_ICON } from "@/lib/module-icons";
 import { IN_PROJECT, PROJECTS_TABLE, type ProjectStatus } from "@/lib/projects/project";
 import { ProjectsWorkspace, type ProjectRow } from "@/components/projects/projects-workspace";
 import { FlowShell } from "@/components/flows/flow-shell";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { loadFlowPage } from "@/lib/flows/page-data";
 
 export const dynamic = "force-dynamic";
@@ -63,11 +62,11 @@ export default async function ProjectsPage() {
   }));
 
   // ONE SENTENCE, SEVERAL TOOLS, ONE PROJECT (MASTER 16, package 36),
-  // behind the switch "flows": the page becomes the place a flow is
+  // for everybody since 2026-10-23: the page becomes the place a flow is
   // written, planned, approved and followed, INSTEAD of the list below —
-  // which it still shows, as «Τα έργα μου». Everybody the switch is off
-  // for keeps this page as it was.
-  if ((await isFeatureOn("flows", user)) && projects) {
+  // which it still shows, as «Τα έργα μου». The plain list below is kept
+  // for the one case the projects could not be read.
+  if (projects) {
     const data = await loadFlowPage(user);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">

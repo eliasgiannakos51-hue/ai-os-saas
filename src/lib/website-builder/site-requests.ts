@@ -236,8 +236,8 @@ export async function requestSiteChange(input: {
 /**
  * A change api/websites/edit did not make, read once: by requestSiteChange
  * above and by the Site page that sends its own reference images
- * (components/website-builder/website-builder-workspace.tsx, while the
- * switch `tool-shell` is off), so both say the same refusal the same way.
+ * (components/website-builder/website-builder-workspace.tsx, the older
+ * Site page), so both say the same refusal the same way.
  */
 export function siteChangeRefusal(res: { ok: boolean; status: number }, data: Record<string, unknown> | null): Extract<SiteChange, { kind: "refused" }> {
   const reason =

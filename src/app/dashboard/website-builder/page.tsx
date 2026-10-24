@@ -5,11 +5,9 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { WebsiteBuilderWorkspace } from "@/components/website-builder/website-builder-workspace";
 import { WebsiteShell } from "@/components/website-builder/website-shell";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
-import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
 import { RECORD_CAP } from "@/lib/record-cap";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
@@ -100,41 +98,19 @@ export default async function WebsiteBuilderPage(
     const { data: one } = await supabase.from("user_websites").select("*").eq("id", wanted).eq("user_id", user.id).maybeSingle();
     if (one) websiteRows.push(one as UserWebsite);
   }
-  const favoritedWebsiteIds = [
-    ...(await loadFavoriteIds(supabase, user.id, "user_websites", websiteRows.map((w) => w.id))),
-  ];
-
-  // THE SHELL, BEHIND ITS SWITCH (MASTER 14.3, package 3): the same sites,
-  // drawn as conversation and work. Reference photos and the version
-  // history stay on the page.
-  if (await isFeatureOn("tool-shell", user)) {
-    const projectId = await ownedProjectId(supabase, searchParams.projectId);
-    return (
-      <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <WebsiteShell
-          initialWebsites={websiteRows}
-          initialBrief={readExampleParam(searchParams.brief)}
-          initialOpenId={wanted}
-          pages={await isFeatureOn("site-pages", user)}
-          translate={await isFeatureOn("translate", user)}
-          initialProjectId={projectId}
-        />
-      </div>
-    );
-  }
-
+  // THE SHELL, FOR EVERYBODY (MASTER 14.3, package 3; its switch was removed
+  // 2026-10-23): the same sites, drawn as conversation and work. Reference
+  // photos and the version history stay on the page.
+  const projectId = await ownedProjectId(supabase, searchParams.projectId);
   return (
-    <div className="min-h-full">
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.websiteBuilder" helpArticle="create-website" icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} />
-        <WebsiteBuilderWorkspace
-          initialWebsites={websiteRows}
-          favoritedWebsiteIds={favoritedWebsiteIds}
-          // BUILDING ON ARRIVAL. Clamped rather than trusted: this comes
-          // out of a URL anyone can edit.
-          initialBrief={readExampleParam(searchParams.brief)}
-        />
-      </div>
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      <WebsiteShell
+        initialWebsites={websiteRows}
+        initialBrief={readExampleParam(searchParams.brief)}
+        initialOpenId={wanted}
+        translate={await isFeatureOn("translate", user)}
+        initialProjectId={projectId}
+      />
     </div>
   );
 }

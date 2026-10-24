@@ -46,6 +46,23 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Rebuild's texts (2026-10-27): the same word in that language.
+  "fr:dashboard.rebuild.boxes.actions",
+  "fr:dashboard.rebuild.versions",
+  "fr:dashboard.rebuild.version",
+  "de:dashboard.rebuild.version",
+  // "Name" is the German word too.
+  "de:dashboard.integrations.mcp.nameLabel",
+  // The final grid's names (2026-10-23): words that are the same in that
+  // language — "Films", "Avatars" and "Agents" are French words too, "Video"
+  // is the German and Italian word, and "Coding" is what German-speaking
+  // developers call it.
+  "fr:dashboard.tools.names.films",
+  "fr:dashboard.tools.names.avatars",
+  "fr:dashboard.tools.names.agents",
+  "de:dashboard.tools.names.video",
+  "de:dashboard.tools.names.coding",
+  "it:dashboard.tools.names.video",
   // The one-word tool names on All tools (MASTER 14.1, 2026-10-07).
   // "Trading" is the word the de, fr, es, it and pt trading apps use;
   // "Site" is the everyday French and Portuguese word for a website,
@@ -672,9 +689,19 @@ const LOCALE_ALLOWED = new Set([
   "it:coding.github.repoLabel",
   "it:coding.github.branchLabel",
   "pt:coding.github.branchLabel",
+  // «Structure» is the French word for the file-tree section heading.
+  "fr:coding.github.structure",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // Connect by address (2026-10-26): an example web address is the same
+  // in every language, and "{credits} credits" uses the word the product
+  // itself uses for its currency everywhere.
+  "dashboard.integrations.mcp.urlPlaceholder",
+  "dashboard.integrations.mcp.credits",
+  // "iowork" is a product name, written the same in every language
+  // (the final All tools grid, 2026-10-23).
+  "dashboard.tools.names.iowork",
   // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
   // German and Portuguese all use the same word for this exact sense —
   // not a strength or a volume, the middle setting of three — and it is

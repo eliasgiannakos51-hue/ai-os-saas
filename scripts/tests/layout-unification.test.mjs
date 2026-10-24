@@ -129,8 +129,12 @@ for (const [label, file] of [
 //
 // "agents" is deliberately not in the registry — see the AI Agents entry
 // among the direct consumers above.
-const TRACKER_SLUGS = [...read("src/lib/build-modules.ts").matchAll(/slug: "([^"]+)"/g)].map((m) => m[1]);
-checkTrue(`the tracker registry was read (${TRACKER_SLUGS.length} modules)`, TRACKER_SLUGS.length >= 5);
+// `images` is still in the registry (its config, rows and strings are kept)
+// but its PAGE became the Image tool when the switch image-studio was
+// removed (2026-10-23), the way coding and data-analysis left earlier.
+const SUPERSEDED_BY_A_TOOL = new Set(["images"]);
+const TRACKER_SLUGS = [...read("src/lib/build-modules.ts").matchAll(/slug: "([^"]+)"/g)].map((m) => m[1]).filter((m) => !SUPERSEDED_BY_A_TOOL.has(m));
+checkTrue(`the tracker registry was read (${TRACKER_SLUGS.length} modules)`, TRACKER_SLUGS.length >= 4);
 for (const m of TRACKER_SLUGS) {
   checkTrue(`/${m} uses the shared BuildModulePage`, /BuildModulePage/.test(read(`src/app/dashboard/${m}/page.tsx`)));
 }

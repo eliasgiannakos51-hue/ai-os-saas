@@ -137,8 +137,8 @@ const MUTANTS = [
   {
     name: "Site: the change is sent without the part",
     file: SITE,
-    from: "requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, ...(pages ? { pageSlug: slug } : {}), referenceImagePaths })",
-    to: "requestSiteChange({ websiteId: current.id, changeRequest: request, ...(pages ? { pageSlug: slug } : {}), referenceImagePaths })",
+    from: "requestSiteChange({ websiteId: current.id, changeRequest: request, section: part, pageSlug: slug, referenceImagePaths })",
+    to: "requestSiteChange({ websiteId: current.id, changeRequest: request, pageSlug: slug, referenceImagePaths })",
     expect: "the change goes with the part",
   },
   {

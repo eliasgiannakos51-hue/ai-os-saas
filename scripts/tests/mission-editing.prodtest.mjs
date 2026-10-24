@@ -220,7 +220,8 @@ const supa = http.createServer((req, res) => {
         // (src/lib/nav/recent-tools.ts); an account with none reads empty.
         "search_index",
         // EVERY DASHBOARD PAGE READS THE SWITCHES, twice in one
-        // Promise.all (src/app/dashboard/layout.tsx — switchedOnFor and
+        // Promise.all (src/app/dashboard/layout.tsx — a read of the names
+        // of switched pages, since removed with the image-studio switch, and
         // isFeatureOn("chats-page")). This allowlist was last widened on
         // 2026-10-05 and the layout began reading the table on 2026-10-08,
         // so from then every render 500'd on the switch read and the

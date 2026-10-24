@@ -126,7 +126,7 @@ const MUTANTS = [
     file: PAGE,
     from: "(isAdminEmail(user.email) || planMeetsMinimum(await resolveEffectivePlanSlug(user), DOCUMENT_WRITER_MIN_PLAN))",
     to: "true",
-    expect: "the page draws the writer only with the switch AND the plan",
+    expect: "the page draws the writer on the plan alone, no switch",
   },
 ];
 

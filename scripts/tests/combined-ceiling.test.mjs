@@ -419,6 +419,7 @@ const CLASSIFIED_PLAN_TABLES = {
   DEFAULT_RESEARCH_LIMITS: { kind: "capacity", why: "how many Deep Research runs may START; each is charged in credits" },
   DEFAULT_INTEGRATION_LIMITS: { kind: "capacity", why: "standing OAuth grants; syncs make no unbilled model call" },
   DEFAULT_PUBLISH_LIMITS: { kind: "capacity", why: "hosted pages — bandwidth, not Anthropic cost" },
+  MCP_SERVER_LIMITS: { kind: "capacity", why: "how many apps may be connected by address; connecting makes no model call, and the one call that does (a request turned into a tool call) is charged in credits" },
   // Voice (V4 #19/#2). A CAPACITY limit, not a free allowance: every
   // second counted against it has already been charged in credits at the
   // margin (transcription and speech both reserve, call, then settle).

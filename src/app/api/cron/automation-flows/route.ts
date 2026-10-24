@@ -4,7 +4,6 @@ import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { readFlow } from "@/lib/automations/boxes";
 import { nextRunFor } from "@/lib/automations/flow-access";
 import { accountFor, startRun } from "@/lib/automations/start-run";
@@ -131,8 +130,8 @@ export async function GET(request: Request) {
           continue;
         }
         try {
-          // The person's switch was closed, or the person is gone: moved forward, not run.
-          if (!verdict.ok || !user || !(await isFeatureOn("automations", user))) {
+          // The flow is unreadable, or the person is gone: moved forward, not run.
+          if (!verdict.ok || !user) {
             report.skipped++;
             continue;
           }

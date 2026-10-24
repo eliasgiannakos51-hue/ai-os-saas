@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { githubAppConfigured } from "@/lib/github/auth";
 import { getGitHubConnection } from "@/lib/github/store";
-import { isFeatureOn } from "@/lib/flags/flags";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -18,8 +17,7 @@ export async function GET() {
       return NextResponse.json({ ok: false }, { status: 401 });
     }
 
-    const featureOn = await isFeatureOn("coding-github", user);
-    if (!featureOn || !githubAppConfigured()) {
+    if (!githubAppConfigured()) {
       return NextResponse.json({ ok: true, available: false });
     }
 

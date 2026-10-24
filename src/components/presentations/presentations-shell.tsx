@@ -45,9 +45,10 @@ const DATA_ACCEPT = ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedo
 type Open = { id: string | null; deck: Deck };
 
 /**
- * SLIDES IN THE SHELL (MASTER 14.3, package 3), behind the switch
- * "tool-shell". The same routes as components/presentations/presentations-workspace.tsx,
- * which stays the page for everybody the switch is off for.
+ * SLIDES IN THE SHELL (MASTER 14.3, package 3), for everybody (its switch
+ * was removed 2026-10-23). The same routes as
+ * components/presentations/presentations-workspace.tsx, the older page,
+ * which no address draws any more but which still holds DeckRow and NoteRow.
  *
  * The first thing said in the field writes the deck; while a saved deck is
  * open, what is said next CHANGES it (/api/presentations/[id]/edit), the

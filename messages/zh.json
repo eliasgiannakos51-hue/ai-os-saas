@@ -2357,6 +2357,72 @@
           "sees": "你邀请 Ionexa 应用加入的公开频道中的近期消息。它看不到私密频道和私信。",
           "consent": "AI 将能读取你邀请它加入的公开频道，你的智能体也能把结果发到你选择的频道。这是唯一可以写入的集成。"
         }
+      },
+      "mcp": {
+        "title": "通过地址添加应用",
+        "intro": "输入地址，连接任何支持 MCP 的应用。AI 就能替你使用该应用的工具。可能改变内容的操作都会等你点按：不会有任何事在你背后运行。",
+        "nameLabel": "名称",
+        "namePlaceholder": "我的笔记应用",
+        "urlLabel": "地址",
+        "urlPlaceholder": "https://example.com/mcp",
+        "tokenLabel": "访问令牌（仅在应用要求时填写）",
+        "tokenHint": "加密保存，之后不再显示。",
+        "add": "连接",
+        "adding": "连接中…",
+        "connected": "{name} 已连接。",
+        "refreshed": "工具已更新。",
+        "confirmRemove": "移除 {name}？已保存的令牌也会一并删除。",
+        "refresh": "更新工具",
+        "remove": "移除",
+        "toolsLabel": "此应用的工具",
+        "toolsCount": "工具：{count}",
+        "tokenStored": "令牌已保存",
+        "statusError": "上次检查失败",
+        "readOnly": "只读",
+        "needsPress": "需要你点按",
+        "askLabel": "用文字向此应用提问",
+        "askPlaceholder": "它该做什么？",
+        "ask": "提问",
+        "none": "此应用里没有合适的工具。",
+        "willCall": "它将调用",
+        "approvalNote": "此工具可能会改变内容。在你点按“运行”之前不会发生任何事。",
+        "approve": "运行",
+        "decline": "不运行",
+        "resultTitle": "应用返回的内容",
+        "errorResult": "应用报告了错误",
+        "resultNote": "以文本显示，绝不运行",
+        "truncated": "已截短",
+        "credits": "{credits} 积分",
+        "empty": "还没有通过地址连接的应用。",
+        "limitNote": "你最多可通过地址连接 {cap} 个应用。",
+        "errors": {
+          "bad_name": "请给应用起个名字（最多 80 个字符）。",
+          "bad_token": "该令牌太长。",
+          "invalid_url": "这不是有效的地址。",
+          "not_https": "地址必须以 https:// 开头。",
+          "credentials_in_url": "不要在地址里放用户名或密码，请使用令牌栏。",
+          "blocked_host": "该地址指向私有网络，无法使用。",
+          "too_long": "该地址太长。",
+          "blocked_address": "该地址解析到私有网络，无法使用。",
+          "unreachable": "无法连接到该应用。",
+          "timeout": "应用响应时间过长。",
+          "too_large": "应用返回的数据过多。",
+          "redirect_refused": "应用重定向到了其他地址，这不会被跟随。",
+          "unauthorized": "应用未接受该令牌。",
+          "http_error": "应用返回了错误。",
+          "protocol": "该应用的响应不像 MCP 应用。",
+          "no_tools": "该应用没有列出任何工具。",
+          "duplicate": "你已经连接过这个地址。",
+          "limit": "你已达到 {cap} 个应用的上限。",
+          "rate_limited": "尝试次数过多，请稍等后再试。",
+          "encryption_unavailable": "此处无法安全保存令牌，所以没有保存任何内容。",
+          "insufficient_credits": "积分不足。",
+          "ai_unavailable": "无法连接到 AI，未收取任何费用。",
+          "unusable_plan": "AI 的回答无法使用，请换种方式提问。",
+          "approval_required": "此工具需要你先点按。",
+          "empty": "请先写下你想要的。",
+          "default": "出了点问题，请重试。"
+        }
       }
     },
     "files": {
@@ -3048,12 +3114,11 @@
       "searchLabel": "搜索工具",
       "noMatch": "没有名为“{query}”的工具。请在首页的输入框中描述它。",
       "groups": {
-        "make": "创建",
+        "record": "记录",
         "ask": "提问",
-        "organise": "整理",
-        "business": "业务",
-        "automate": "自动化",
-        "learn": "学习"
+        "make": "创作",
+        "runAlone": "自动运行",
+        "organise": "整理"
       },
       "names": {
         "site": "网站",
@@ -3073,31 +3138,47 @@
         "sales": "销售",
         "trading": "交易",
         "image": "图片",
-        "connections": "连接",
         "document": "文档",
-        "games": "游戏"
+        "games": "游戏",
+        "connect": "连接",
+        "rebuild": "重建",
+        "video": "视频",
+        "films": "电影",
+        "editing": "剪辑",
+        "avatars": "数字人",
+        "coding": "编程",
+        "agents": "智能体",
+        "iowork": "iowork"
       },
       "lines": {
-        "site": "根据描述生成网站。",
+        "site": "根据描述生成网站",
         "slides": "根据描述生成演示文稿。",
         "posts": "每个平台一条帖子。",
-        "research": "任何主题的带来源报告。",
-        "analyze": "从文件、文档或文本中得出结论。",
+        "research": "任何主题的带来源报告",
+        "analyze": "文件、链接和视频，一目了然",
         "files": "就你的文档提问。",
-        "automations": "自动运行的任务。",
-        "projects": "带目标的文件夹。",
+        "automations": "自动运行的任务",
+        "projects": "为同一目标准备的一切",
         "goals": "把目标拆成步骤。",
         "meetings": "从录音得到摘要和行动项。",
-        "myStuff": "问问你做过的一切，附带来源。",
+        "myStuff": "你做过的一切，集中一处",
         "library": "你做过的一切，集中一处。",
         "memory": "Ionexa 记得的关于你的事。",
         "finances": "记录收入和支出。",
         "sales": "联系人、跟进和下一步。",
         "trading": "你的交易记录。",
-        "image": "一段描述生成四张图片。",
-        "connections": "一键连接你的服务。",
-        "document": "根据描述生成文档。",
-        "games": "根据描述生成游戏。"
+        "image": "根据描述生成图片",
+        "document": "文档、幻灯片和表格",
+        "games": "根据描述生成游戏。",
+        "connect": "把你的其他应用接进来",
+        "rebuild": "打造你自己的任何应用版本",
+        "video": "根据描述生成视频片段",
+        "films": "根据剧本生成完整电影",
+        "editing": "用文字剪辑视频和照片",
+        "avatars": "替你念出文字的主持人",
+        "coding": "用你的 GitHub 项目写代码",
+        "agents": "你不工作时，它们在工作",
+        "iowork": "在你的电脑上工作，生成文件"
       }
     },
     "home": {
@@ -3730,6 +3811,64 @@
       "deleteSelectedConfirm": "确定删除 {count} 个对话？每一个你都有几秒钟可以撤销。",
       "deleteSelectedFailed": "没有全部删除。还在的就是没删掉的。",
       "atCap": "最新的 {cap} 个。搜索可以找到更早的。"
+    },
+    "rebuild": {
+      "placeholder": "描述你想要的应用,或粘贴你喜欢的应用的某个页面地址",
+      "placeholderBox": "说出这个框要改什么",
+      "placeholderChange": "说出应用要改什么",
+      "new": "新应用",
+      "empty": {
+        "heading": "你想要哪个应用的自己版本?",
+        "examples": {
+          "booking": "小工作室的预约应用:客户、时间、提醒",
+          "habits": "每个习惯都有连续天数的习惯记录器",
+          "invoices": "能记住客户和合计的简易发票工具"
+        }
+      },
+      "planned": "这是“{title}”的计划。可以用文字修改任何一个框,然后构建应用。",
+      "referenceRead": "我读取了 {host} 的标签:只是页面的构成,没有复制任何内容。",
+      "boxChanged": "已修改“{box}”框。",
+      "built": "应用已在右侧准备好。它是你自己的,有自己的名字和文字。",
+      "changed": "已修改。每次修改都是一个可以回到的版本。",
+      "undone": "已回到上一个版本。",
+      "restored": "版本 {n} 再次成为当前版本。",
+      "boxHint": "点一个框,说出要改什么。计划没问题时,就构建应用。",
+      "boxes": {
+        "screens": "界面",
+        "data": "数据",
+        "actions": "操作",
+        "look": "外观"
+      },
+      "build": "构建应用",
+      "building": "正在构建应用…",
+      "download": "下载应用",
+      "undo": "撤销上一次修改",
+      "preview": "运行中的应用",
+      "sealed": "它与其他一切隔离运行,所以你在这里输入的内容只留在这个预览里。下载后可在你自己的电脑上使用。",
+      "original": "你自己的版本,不是复制:只取想法和界面的类型,绝不使用原应用的名字、文字、图片或代码。",
+      "versions": "{count} 个版本",
+      "version": "版本 {n}",
+      "first": "首次构建",
+      "restoreNote": "已回退",
+      "restore": "回到这一版",
+      "errors": {
+        "insufficient": "额度不足。每一步之前都会显示价格。",
+        "unavailable": "应用生成器暂时不可用。没有扣费。",
+        "unusable": "返回的应用不完整或不安全,已丢弃。没有扣费。请重试,或换个说法。",
+        "rateLimited": "目前请求太多。请稍后再试。",
+        "tooLong": "太长了。请缩短后重试。",
+        "stopped": "已停止。没有扣费。",
+        "failed": "没有成功。请重试。",
+        "limit": "你的套餐可保留 {limit} 个应用。在历史列里删除一个即可再做新的。",
+        "reference": {
+          "notHttps": "只能读取以 https:// 开头的地址。没有扣费。",
+          "blocked": "该地址无法读取:它不是公开网页。没有扣费。",
+          "unreachable": "无法打开该页面。请检查地址,或用文字描述应用。没有扣费。",
+          "notHtml": "该地址不是网页。没有扣费。",
+          "tooLarge": "该页面太大,无法读取。没有扣费。",
+          "invalid": "这不是我能读取的网址。没有扣费。"
+        }
+      }
     }
   },
   "module": {
@@ -4262,11 +4401,6 @@
       "does": "发布会给站点一个任何人都能打开的地址，并在这里统计访问量。",
       "doesNot": "它不会给你自己的域名。目前的地址是本站下的一条路径，而不是 你的域名.com——把真实域名指过来是另一件事。"
     },
-    "files": {
-      "is": "你的文档，AI 能读。",
-      "does": "上传 PDF、Word、Excel、CSV 或纯文本；系统提取其中的文字，你可以就选中的文件提问。",
-      "doesNot": "它读不了扫描件。整页是照片的 PDF 没有文字可提取，需要先做 OCR；超长文档也只读到一定长度为止。"
-    },
     "deepResearch": {
       "is": "要花你好几个小时的那种调研。",
       "does": "先把调研计划给你看，然后真的去查，带着你能核对的出处回来。",
@@ -4471,6 +4605,16 @@
       "is": "你所有的对话，都在一个地方。",
       "does": "按最新排列，既搜索标题也搜索对话中说过的内容，并可以重命名、置顶、归档或删除其中任意一个。",
       "doesNot": "搜索不会读取曾经发出的每一条消息：它只读取最新的 400 条，并在你输入时说明这一点。"
+    },
+    "images": {
+      "is": "根据一段描述生成四张图片。",
+      "does": "描述你想要的内容，得到四个版本。点选其中一张，用文字修改，并以服务商提供的最大尺寸下载。每张图片都保存在你的资料库中。",
+      "doesNot": "它不会改动你的原图：每次修改都是新版本。它不会生成真实人物做了他们没做过的事的图片。没有服务商的密钥时，它什么也不生成，也不收费。"
+    },
+    "rebuild": {
+      "is": "你自己版本的、你喜欢的应用。",
+      "does": "描述一个应用,或粘贴你喜欢的应用的某个公开页面地址。你会得到四个框的计划,用文字改你想改的,然后构建:一个能用的应用,可以用文字修改、回退,并作为一个文件下载。",
+      "doesNot": "它不会复制另一个应用:名字、文字、图片和代码都是你自己的,它只读取你指定的那一页的标签,绝不读取登录后的任何内容。它不是托管服务:你在预览里输入的内容不会保存,下载的文件把数据保存在你自己的电脑上。"
     }
   },
   "helpCentre": {
@@ -4924,7 +5068,7 @@
       "explain": "解释这段代码做什么",
       "tests": "为这个函数编写测试"
     },
-    "uploadFolder": "上传文件夹",
+    "uploadFolder": "从电脑上传代码",
     "power": {
       "label": "算力",
       "fast": "快速",
@@ -4939,7 +5083,41 @@
       "branchLabel": "分支",
       "pickRepo": "选择仓库…",
       "pickBranch": "选择分支…",
-      "default": "默认"
+      "default": "默认",
+      "searchRepos": "搜索仓库…",
+      "newBranch": "新分支",
+      "newBranchName": "分支名称",
+      "create": "创建",
+      "adminSetup": "GitHub集成需要配置",
+      "adminSetupLink": "配置指南",
+      "fileTree": "文件",
+      "structure": "结构",
+      "commitChanges": "提交更改",
+      "commitMessage": "提交信息",
+      "branchNameLabel": "新分支名称",
+      "prTitle": "PR标题",
+      "prBody": "PR描述",
+      "createPr": "创建PR",
+      "creating": "创建中…",
+      "prCreated": "PR已创建",
+      "viewPr": "在GitHub上查看",
+      "ciStatus": "CI状态",
+      "ciPending": "检查运行中…",
+      "ciPassed": "所有检查已通过",
+      "ciFailed": "检查失败",
+      "merge": "合并",
+      "mergeConfirm": "确定要合并此PR吗？",
+      "merged": "已合并",
+      "merging": "合并中…",
+      "undo": "撤销上次更改",
+      "neverMain": "更改会发送到新分支，不会直接推送到main。",
+      "noRepos": "未找到仓库。请在你的仓库上安装GitHub App。",
+      "loadingTree": "正在加载文件…",
+      "downloadZip": "下载为.zip",
+      "fromComputer": "从电脑上传代码",
+      "connected": "已连接",
+      "cancel": "取消",
+      "commitPlaceholder": "通过Ionexa Coding更新代码"
     }
   },
   "presentations": {

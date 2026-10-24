@@ -42,8 +42,15 @@ export const ABSENT_ON_PURPOSE = {
       "true the moment it was written; later the same day the «Βήμα 3/4» entry merged it (and " +
       "files-shell.tsx) into src/components/analyze/analyze-shell.tsx and deleted both old files. " +
       "Editing the earlier entry to point at the merged file would make it describe a splice that had " +
-      "not happened yet.",
-    paths: ["src/lib/nav/tool-status.ts", "src/components/data-analysis/analysis-shell.tsx"],
+      "not happened yet. The 2026-10-08 entry on the Image tool's name names src/lib/nav/switched-names.ts " +
+      "and src/lib/nav/switched-on.ts; on 2026-10-23 the owner opened Image to everybody, the switch went, " +
+      "and the first became src/lib/nav/tool-names.ts while the second was deleted.",
+    paths: [
+      "src/lib/nav/tool-status.ts",
+      "src/components/data-analysis/analysis-shell.tsx",
+      "src/lib/nav/switched-names.ts",
+      "src/lib/nav/switched-on.ts",
+    ],
   },
   "docs/MASTER.md": {
     reason:

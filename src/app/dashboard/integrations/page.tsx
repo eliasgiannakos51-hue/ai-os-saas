@@ -17,8 +17,9 @@ import { encryptionAvailable } from "@/lib/integrations/crypto";
 import { providerConfigured } from "@/lib/integrations/oauth";
 import { PROVIDERS, type ProviderId } from "@/lib/integrations/providers";
 import { IntegrationsList } from "@/components/integrations/integrations-list";
-import { providersOpenTo } from "@/lib/integrations/switches";
-import { isFeatureOn } from "@/lib/flags/flags";
+import { McpApps } from "@/components/integrations/mcp-apps";
+import { listMcpServers } from "@/lib/mcp/store";
+import { maxMcpServersForPlan } from "@/lib/mcp/limits";
 
 export const dynamic = "force-dynamic";
 
@@ -40,53 +41,50 @@ export default async function IntegrationsPage() {
   const planSlug = await resolveEffectivePlanSlug(user);
   const planCap = maxIntegrationsForPlan(planSlug);
 
-  if (!isAdmin && planCap <= 0) {
-    return (
-      <div className="min-h-full">
-        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader helpKey="help.integrations" helpArticle="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
-          <UpgradeRequired {...upgradeWallProps("integrations", t("title"))!} />
-        </div>
-      </div>
-    );
-  }
-
   // Resolved on the server: `providerConfigured` reads process.env, and a
   // client component must never learn which secrets exist. What crosses is
   // a list of provider IDS, which is public information.
   const configured = PROVIDERS.map((p) => p.id).filter((id: ProviderId) => providerConfigured(id));
-  // Providers behind a closed switch are not drawn (lib/integrations/switches.ts).
-  const open = await providersOpenTo(user);
-  const shown = PROVIDERS.map((p) => p.id).filter((id) => open.has(id));
+  // A card is drawn only for a provider whose OAuth app is set up on this
+  // deployment: there is never a Connect button that cannot work. Those
+  // cards are for paid plans (the cap is 0 on Free), so a Free account sees
+  // the by-address section alone, which is open to every plan.
+  const cardsAllowed = isAdmin || planCap > 0;
+  const shown = cardsAllowed ? configured : [];
 
   const integrations = await listIntegrations(user.id);
   const cap = isAdmin ? Number.POSITIVE_INFINITY : planCap;
+  const mcpServers = await listMcpServers(user.id);
+  const mcpCap = isAdmin ? 100 : maxMcpServersForPlan(planSlug);
 
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.integrations" helpArticle="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
 
-        {/* Said once, at the top, in the user's own language: this is the
-            page where somebody decides whether an AI may read their mail,
-            and the terms of that should not be somewhere else. */}
-        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
-          {t("privacyNotice")}
-        </p>
+        <McpApps initialServers={mcpServers} cap={mcpCap} />
 
-        {/* useSearchParams (the ?status= the OAuth callback returns with)
-            makes the list a client component that must be inside Suspense
-            for the production build to prerender this route's shell. */}
-        <Suspense fallback={null}>
-          <IntegrationsList
-            integrations={integrations}
-            cap={cap}
-            configured={configured}
-            shown={shown}
-            connectButton={await isFeatureOn("connections", user)}
-            encryptionReady={encryptionAvailable()}
-          />
-        </Suspense>
+        {shown.length > 0 && (
+          <div className="mt-10">
+            {/* Said once, at the top, in the user's own language: this is the
+                place where somebody decides whether an AI may read their mail,
+                and the terms of that should not be somewhere else. */}
+            <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">{t("privacyNotice")}</p>
+
+            {/* useSearchParams (the ?status= the OAuth callback returns with)
+                makes the list a client component that must be inside Suspense
+                for the production build to prerender this route's shell. */}
+            <Suspense fallback={null}>
+              <IntegrationsList
+                integrations={integrations}
+                cap={cap}
+                configured={configured}
+                shown={shown}
+                encryptionReady={encryptionAvailable()}
+              />
+            </Suspense>
+          </div>
+        )}
       </div>
     </div>
   );

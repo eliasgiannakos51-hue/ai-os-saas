@@ -7,9 +7,9 @@
  *
  * One production build; the signed-in account is the test account. The
  * switches are rows in the stand-in database's feature_flags, changed
- * between runs, so both screens are walked: the Files shell ("tool-shell"
- * on) and the Files page ("tool-shell" off), each with "file-pages" on,
- * and once with it off.
+ * between runs: the Files shell (the Analyze shell, which /dashboard/files
+ * redirects into; the switch "tool-shell" was removed 2026-10-23) with
+ * "file-pages" on, and once with it off.
  *
  * TWO KINDS OF RUN.
  *
@@ -192,6 +192,7 @@ const base = {
 const messages = (locale) => JSON.parse(readFileSync(`messages/${locale}.json`, "utf8")).dashboard.files;
 const M = { el: messages("el"), en: messages("en") };
 const el = M.el;
+const TOOL_SHELL_EL = JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.toolShell;
 const W = el.pageRefs;
 // The copy button's own name (components/ui/copy-button.tsx, "common").
 const COPY = { el: JSON.parse(readFileSync("messages/el.json", "utf8")).common.copy, en: JSON.parse(readFileSync("messages/en.json", "utf8")).common.copy };
@@ -242,8 +243,9 @@ async function start(env) {
 
 const DESKTOP = { label: "desktop", viewport: { width: 1440, height: 900 }, touch: false };
 const PHONE = { label: "phone", viewport: { width: 390, height: 844 }, touch: true };
-const SHELL = { "tool-shell": "staff", "file-pages": "staff" };
-const PAGE = { "tool-shell": "off", "file-pages": "staff" };
+// The Files page (the walk with the switch "tool-shell" off) is gone: the switch
+// was removed 2026-10-23 and /dashboard/files redirects into the Analyze shell.
+const SHELL = { "file-pages": "staff" };
 const FREE_FILES = [1, 2, 3].map((n) => ({ ...FILE, id: `f${n}111111-1111-4111-8111-11111111111${n}`, filename: `Arxeio-${n}.pdf`, size_bytes: 1000 }));
 
 try {
@@ -310,11 +312,13 @@ try {
   const RUNS = [
     { screen: "shell", flags: SHELL, device: DESKTOP },
     { screen: "shell", flags: SHELL, device: PHONE },
-    { screen: "page", flags: PAGE, device: DESKTOP },
-    { screen: "page", flags: PAGE, device: PHONE },
     { screen: "shell, in English", flags: SHELL, device: DESKTOP, locale: "en" },
-    { screen: "page, in English", flags: PAGE, device: PHONE, locale: "en" },
-    { screen: "shell, switch off", flags: { "tool-shell": "staff", "file-pages": "off" }, device: PHONE },
+    // RETIRED 2026-10-23: the run "shell, switch off" held that with the switch
+    // `file-pages` off no reference was a button. The switch left flags.ts on
+    // 2026-10-22 and the Analyze shell always draws references as buttons
+    // (pages is passed unconditionally by app/dashboard/data-analysis/page.tsx),
+    // so there is no "off" left to hold; the property that remains, that a
+    // reference is a pressable page, is every other run here.
   ];
 
   for (const run of RUNS) {
@@ -447,7 +451,7 @@ try {
   }
   async function shellUpload(page, press, name, bytes) {
     const chooser = page.waitForEvent("filechooser", { timeout: 10000 });
-    await press(page.locator('[data-testid="files-shell-upload"]'));
+    await press(page.locator('[data-testid="analyze-upload"]'));
     await (await chooser).setFiles({ name, mimeType: "application/pdf", buffer: bytes });
   }
   const lastTool = async (page) => (await page.locator('[data-testid="tool-shell-thread"]').innerText()).trim();
@@ -482,7 +486,6 @@ try {
   const WHOLE = [
     { name: "upload a 51-page PDF and ask — the shell", flags: SHELL, device: DESKTOP },
     { name: "upload a 51-page PDF and ask — the shell", flags: SHELL, device: PHONE },
-    { name: "upload a 51-page PDF and ask — the page", flags: PAGE, device: DESKTOP },
   ];
   for (const run of WHOLE) {
     const { device } = run;
@@ -504,6 +507,10 @@ try {
 
     // ---- ask
     if (shell) {
+      // The merged Analyze shell opens the files pane over the conversation
+      // after an upload (uploadDoc: "selected the new file and opened the
+      // files pane"); on a phone that covers the field, so a person goes back.
+      await toConversation(page, press);
       await shellAsk(page, press, "Πόσο είναι το μίσθωμα;");
     } else {
       await press(page.locator("main label:has(input[type=checkbox]:not([disabled]))").first());
@@ -529,19 +536,24 @@ try {
   }
 
   // ---- a new account, nothing yet
-  for (const run of [{ flags: SHELL, device: PHONE }, { flags: PAGE, device: DESKTOP }]) {
+  for (const run of [{ flags: SHELL, device: PHONE }]) {
     const { device } = run;
     console.log(`\n== a new account, nothing yet — ${run.flags === SHELL ? "the shell" : "the page"}, ${device.label} ==`);
     const { context, page, press } = await open(run);
     await page.goto(`${ON}/dashboard/files`, { waitUntil: "networkidle" });
     if (run.flags === SHELL) {
-      await press(page.locator('[data-testid="files-shell-files"]'));
+      // The merged Analyze shell opens a phone on nothing; what a new account
+      // has stored is read in the [◧] column, whose empty message is the
+      // shared one, and a question with nothing chosen is told to give a file.
+      await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await settle(page);
-      check("empty: the files say there are none yet", (await page.locator("main").innerText()).includes(el.empty));
+      check("empty: the files say there are none yet", (await page.locator('[data-testid="shell-history-column"]').innerText()).includes(TOOL_SHELL_EL.history.empty));
+      await page.locator('[data-testid="tool-shell-history-scrim"]').click({ position: { x: 370, y: 400 } });
+      await settle(page);
       await toConversation(page, press);
       await shellAsk(page, press, "Τι λέει το συμβόλαιο;");
-      await until(page, async () => (await lastTool(page)).includes(el.selectFirst), 5000);
-      check("...a question with nothing chosen says to choose a file first, and nothing is asked", (await lastTool(page)).includes(el.selectFirst) && model.calls.length === 0 && store.ai_jobs.length === 0);
+      await until(page, async () => { const t = await lastTool(page); return t.includes(el.selectFirst) || t.includes(TOOL_SHELL_EL.analyze.needFile); }, 5000);
+      check("...a question with nothing chosen says to choose or give a file first, and nothing is asked", ((await lastTool(page)).includes(el.selectFirst) || (await lastTool(page)).includes(TOOL_SHELL_EL.analyze.needFile)) && model.calls.length === 0 && store.ai_jobs.length === 0);
     } else {
       check("empty: the page says there are no files yet, with a way to upload", (await page.locator('[data-testid="files-empty"]').count()) === 1 && (await page.locator("main").innerText()).includes(el.emptyTitle));
     }
@@ -553,9 +565,7 @@ try {
   // ---- out of credits; the provider overloaded
   for (const run of [
     { name: "out of credits — the shell", flags: SHELL, device: PHONE, credits: 0, files: [FILE], expect: "askNoCredits" },
-    { name: "out of credits — the page", flags: PAGE, device: DESKTOP, credits: 0, files: [FILE], expect: "askNoCredits" },
     { name: "the provider overloaded — the shell", flags: SHELL, device: DESKTOP, model: "overloaded", files: [FILE], expect: "askFailed" },
-    { name: "the provider overloaded — the page", flags: PAGE, device: PHONE, model: "overloaded", files: [FILE], expect: "askFailed" },
     { name: "the provider overloaded — the shell, in English", flags: SHELL, device: PHONE, model: "overloaded", files: [FILE], expect: "askFailed", locale: "en" },
   ]) {
     const { device } = run;
@@ -594,9 +604,7 @@ try {
   // ---- offline: the question never reaches the server; a delete the server refuses
   for (const run of [
     { name: "offline, the question — the shell", flags: SHELL, device: DESKTOP, files: [FILE], offline: true, expect: "askError" },
-    { name: "offline, the question — the page", flags: PAGE, device: PHONE, files: [FILE], offline: true, expect: "askError" },
     { name: "a delete the server refuses — the shell", flags: SHELL, device: DESKTOP, files: [FILE], storageRefusesDelete: true, expect: "deleteError" },
-    { name: "a delete the server refuses — the page", flags: PAGE, device: PHONE, files: [FILE], storageRefusesDelete: true, expect: "deleteError" },
   ]) {
     const { device } = run;
     console.log(`\n== ${run.name}, ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);
@@ -631,9 +639,7 @@ try {
   // ---- a Free account at its file limit; a scanned PDF
   for (const run of [
     { name: "a Free account at its 3 files — the shell", flags: SHELL, device: PHONE, tier: "free", files: FREE_FILES, upload: [UP, UP_PDF], expect: "uploadFileCap" },
-    { name: "a Free account at its 3 files — the page", flags: PAGE, device: DESKTOP, tier: "free", files: FREE_FILES, upload: [UP, UP_PDF], expect: "uploadFileCap" },
     { name: "a scanned PDF, no text in it — the shell", flags: SHELL, device: DESKTOP, upload: [SCAN, SCAN_PDF], expect: "scan" },
-    { name: "a scanned PDF, no text in it — the page", flags: PAGE, device: PHONE, upload: [SCAN, SCAN_PDF], expect: "scan" },
   ]) {
     const { device } = run;
     console.log(`\n== ${run.name}, ${device.label} ${device.viewport.width}x${device.viewport.height} ==`);

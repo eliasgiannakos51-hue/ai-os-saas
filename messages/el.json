@@ -4177,7 +4177,8 @@
       "glossaryPlaceholder": "Νέα λέξη...",
       "glossaryRemove": "Αφαίρεση «{term}»",
       "glossaryAdd": "Νέος όρος",
-      "glossaryAdding": "Νέος όρος για το γλωσσάρι"
+      "glossaryAdding": "Νέος όρος για το γλωσσάρι",
+      "openDocument": "Άνοιγμα ως έγγραφο"
     }
   },
   "module": {

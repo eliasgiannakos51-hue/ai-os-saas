@@ -4177,7 +4177,8 @@
       "glossaryPlaceholder": "كلمة جديدة…",
       "glossaryRemove": "إزالة «{term}»",
       "glossaryAdd": "إضافة مصطلح",
-      "glossaryAdding": "مصطلح جديد في المسرد"
+      "glossaryAdding": "مصطلح جديد في المسرد",
+      "openDocument": "فتح كمستند"
     }
   },
   "module": {

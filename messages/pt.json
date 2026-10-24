@@ -4177,7 +4177,8 @@
       "glossaryPlaceholder": "Nova palavra…",
       "glossaryRemove": "Remover «{term}»",
       "glossaryAdd": "Adicionar termo",
-      "glossaryAdding": "Novo termo do glossário"
+      "glossaryAdding": "Novo termo do glossário",
+      "openDocument": "Abrir como documento"
     }
   },
   "module": {

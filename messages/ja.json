@@ -4177,7 +4177,8 @@
       "glossaryPlaceholder": "新しい語句…",
       "glossaryRemove": "「{term}」を削除",
       "glossaryAdd": "語句を追加",
-      "glossaryAdding": "新しい用語集の語句"
+      "glossaryAdding": "新しい用語集の語句",
+      "openDocument": "ドキュメントとして開く"
     }
   },
   "module": {

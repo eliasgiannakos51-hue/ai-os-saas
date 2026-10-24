@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { CostEstimateHint } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
-import { ToolShell, ChosenBox, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ChosenBox, OPTION, ACTION, type ShellTurn } from "@/components/shell/tool-shell";
+import { AddToProjectButton } from "@/components/entity-links/add-to-project-button";
+import { LinkToButton } from "@/components/entity-links/link-to-button";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { LANGUAGES } from "@/lib/languages";
 import { estimateForAction } from "@/lib/billing/estimate";
@@ -25,7 +28,7 @@ import { MAX_GLOSSARY_TERMS, MAX_TRANSLATE_TARGETS, splitParagraphs, translateTe
  * a site or a glossary are later pieces of the same build, each its own
  * check before the next starts.
  */
-type ResultTarget = { target: string; paragraphs: string[]; kept: number; sameLanguage: boolean };
+type ResultTarget = { target: string; paragraphs: string[]; kept: number; sameLanguage: boolean; documentId?: string | null };
 type Turn = { id: string; role: "user" | "tool"; text: string; from?: string; results?: ResultTarget[] };
 
 function languageLabel(code: string): string {
@@ -239,7 +242,18 @@ export function TranslateShell() {
             )}
             {turn.results.map((r) => (
               <div key={r.target} className="space-y-2" data-testid="translate-tool-target">
-                <h3 className="text-xs font-semibold text-foreground">{languageLabel(r.target)}</h3>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xs font-semibold text-foreground">{languageLabel(r.target)}</h3>
+                  {!r.sameLanguage && r.documentId && (
+                    <div className="flex items-center gap-1" data-testid="translate-tool-saved">
+                      <Link href={`/dashboard/documents/${r.documentId}`} data-testid="translate-tool-open-document" className={ACTION} title={t("openDocument")} aria-label={t("openDocument")}>
+                        {t("openDocument")}
+                      </Link>
+                      <AddToProjectButton sourceTable="user_documents" sourceId={r.documentId} sourceHeadline={languageLabel(r.target)} />
+                      <LinkToButton sourceTable="user_documents" sourceId={r.documentId} sourceHeadline={languageLabel(r.target)} />
+                    </div>
+                  )}
+                </div>
                 {r.sameLanguage ? (
                   <p className="text-xs text-muted">{t("sameLanguageNote")}</p>
                 ) : (

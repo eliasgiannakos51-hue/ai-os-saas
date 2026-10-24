@@ -4177,7 +4177,8 @@
       "glossaryPlaceholder": "新词语…",
       "glossaryRemove": "移除「{term}」",
       "glossaryAdd": "添加词语",
-      "glossaryAdding": "新的词汇表词语"
+      "glossaryAdding": "新的词汇表词语",
+      "openDocument": "作为文档打开"
     }
   },
   "module": {

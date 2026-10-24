@@ -13,6 +13,8 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { isSupportedTargetLocale } from "@/lib/documents/translation";
+import { LANGUAGES } from "@/lib/languages";
+import { escapeHtml } from "@/lib/html-escape";
 import { isTranslateStyle, translateTextInputChars, type TranslateStyle } from "@/lib/translate/translate-prompt";
 import { MAX_TRANSLATE_TARGETS, MAX_TRANSLATE_TEXT_CHARS, cleanGlossaryTerms, planText, rebuildText } from "@/lib/translate/text-source";
 import { anyProviderConfigured } from "@/lib/ai/providers/registry";
@@ -185,7 +187,36 @@ export async function POST(request: Request) {
       metadata: { from: plan.from, targets: liveTargets, paragraphs: plan.pieces.length, style },
     });
 
-    return NextResponse.json({ ok: true, from: plan.from, results, creditsCharged: settlement.creditsCharged });
+    // Piece 8 (My Stuff): every live translation is saved as its own
+    // document, the same table every other document lives in
+    // (user_documents is already in LIBRARY_SOURCES — nothing new to
+    // register). A save failure here never fails the translation: the
+    // user already paid for and received the text, so the worst case is
+    // "not saved to My Stuff", logged, not a 500 on a successful answer.
+    const saved: (string | null)[] = [];
+    for (const r of results) {
+      if (r.sameLanguage) {
+        saved.push(null);
+        continue;
+      }
+      const firstParagraph = r.paragraphs.find((p) => p.trim().length > 0) ?? "";
+      const title = firstParagraph.slice(0, 60).trim() || LANGUAGES.find((l) => l.code === r.target)?.label || r.target;
+      try {
+        const html = r.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("");
+        const { data: row } = await supabase
+          .from("user_documents")
+          .insert({ user_id: user.id, title, content: { html, source: "translated", locale: r.target } })
+          .select("id")
+          .single();
+        saved.push(row?.id ?? null);
+      } catch (err) {
+        logApiError("/api/translate/text", err, { stage: "save" });
+        saved.push(null);
+      }
+    }
+    const resultsWithDocs = results.map((r, i) => ({ ...r, documentId: saved[i] }));
+
+    return NextResponse.json({ ok: true, from: plan.from, results: resultsWithDocs, creditsCharged: settlement.creditsCharged });
   } catch (err) {
     logApiError("/api/translate/text", err);
     return NextResponse.json({ ok: false, code: "failed" }, { status: 500 });

@@ -45,6 +45,9 @@ const settled = [];
 // always-insert shape, since api/translate/glossary/route.ts's PUT
 // genuinely replaces the one row rather than adding another.
 const glossaryRows = {};
+// Piece 8 (My Stuff): every live translation is saved as its own
+// user_documents row — the same table every other document lives in.
+const documents = [];
 function rest({ req, url, body, json }) {
   const table = url.pathname.replace(/^\/rest\/v1\//, "");
   if (table === "rpc/consume_rate_limit") return json(200, true), true;
@@ -66,6 +69,16 @@ function rest({ req, url, body, json }) {
       const row = JSON.parse(body || "{}");
       glossaryRows[row.user_id] = row;
       return json(201, [row]), true;
+    }
+    return false;
+  }
+  if (table === "user_documents") {
+    if (req.method === "POST") {
+      const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+      const row = JSON.parse(body || "{}");
+      row.id = `doc${documents.length + 1}`;
+      documents.push(row);
+      return json(201, single ? row : [row]), true;
     }
     return false;
   }
@@ -296,6 +309,30 @@ try {
     await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
     check("the model is asked once, for the one language that differs", modelAsked.length - asked === 1);
     check("the same-language target says so, plainly, with no translated column", (await page.locator('[data-testid="translate-tool-target"]').filter({ hasText: "Ελληνικά" }).innerText()).includes(EL.sameLanguageNote));
+    await context.close();
+  }
+
+  console.log("\n== desktop: piece 8 — every live translation is saved to My Stuff ==");
+  {
+    setFlags({});
+    documents.length = 0;
+    const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
+    await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
+    await press(page.locator('[data-testid="translate-tool-targets"]'));
+    await press(page.locator('[data-testid="translate-tool-target-option"]').filter({ hasText: "Deutsch" }).first());
+    await press(page.locator('[data-testid="translate-tool-targets"]'));
+    const textarea = page.locator("textarea").first();
+    await textarea.fill(TEXT);
+    await press(page.locator('button[type="submit"]'));
+    await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
+    check("one document is saved per live target (English and German — two, not one)", documents.length === 2);
+    check("each saved document belongs to the account that ran the translation", documents.every((d) => d.user_id === MOCK_USER.id));
+    check("each is tagged as a translation, in its own target locale", documents.some((d) => d.content?.locale === "en" && d.content?.source === "translated") && documents.some((d) => d.content?.locale === "de" && d.content?.source === "translated"));
+    const openLinks = page.locator('[data-testid="translate-tool-open-document"]');
+    check("each result card gets its own open-as-a-document link, to its own saved copy", (await openLinks.count()) === 2);
+    const hrefs = await openLinks.evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+    check("the two links point at the two different saved documents, not the same one twice", new Set(hrefs).size === 2 && hrefs.every((h) => documents.some((d) => h === `/dashboard/documents/${d.id}`)));
     await context.close();
   }
 

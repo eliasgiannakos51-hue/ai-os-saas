@@ -3808,6 +3808,63 @@
         "failed": "出了点问题。请重试。"
       }
     },
+    "appBuilder": {
+      "empty": {
+        "heading": "说说你的生意需要什么应用",
+        "examples": {
+          "a": "一个给我美发店用的预约应用",
+          "b": "一个记录订单和收货人的应用",
+          "c": "一个给客户填的表单，答案放在列表里"
+        }
+      },
+      "placeholder": "用你自己的话描述这个应用…",
+      "placeholderBox": "说说这个方框里要改什么…",
+      "placeholderAnother": "再描述一个应用…",
+      "recent": "最近的应用",
+      "noneYet": "还没有应用。",
+      "boxHint": "点一个方框，说说里面要改什么。",
+      "box": {
+        "data": "数据",
+        "screens": "界面",
+        "access": "谁看得到什么",
+        "notifications": "通知"
+      },
+      "type": {
+        "text": "文字",
+        "longText": "长文字",
+        "number": "数字",
+        "date": "日期",
+        "time": "时间",
+        "choice": "选项",
+        "email": "邮箱",
+        "phone": "电话",
+        "checkbox": "是或否"
+      },
+      "kindForm": "一个表单",
+      "kindList": "一个列表",
+      "seesOwn": "每位访客只看得到自己的",
+      "seesOwner": "只有你看得到",
+      "toCustomer": "给客户",
+      "toOwner": "给你",
+      "noNotifications": "不发送任何内容。",
+      "approve": "批准这个方案",
+      "approved": "方案已批准。",
+      "approvedNote": "已批准",
+      "planned": "这是方案，分四个方框。",
+      "boxChanged": "{box}方框改好了。",
+      "boxChangedAndDropped": "{box}方框改好了，同时去掉了：{what}。",
+      "errors": {
+        "empty": "写下这个应用要做什么。",
+        "tooLong": "这比一段描述能有的长度还长（{limit} 个字符）。",
+        "insufficient": "点数不够。没有扣费。",
+        "rateLimited": "一次尝试太多了。稍后再试。",
+        "notIncluded": "你的套餐里没有这个工具。",
+        "unavailable": "现在无法规划这个应用。",
+        "unusable": "这个回答用不了。只按已花费的部分收费。",
+        "notSaved": "方案做好了，但没能保存。",
+        "failed": "方案没做成。没有扣点数。"
+      }
+    },
     "chats": {
       "title": "对话",
       "searchPlaceholder": "搜索你的对话",
@@ -4910,6 +4967,11 @@
       "is": "根据一段描述，做一个属于你自己的小游戏。",
       "does": "先用五个框展示计划；用文字修改其中任意一个，然后写出游戏，你就在这里用键盘或触摸来玩。",
       "doesNot": "它看不到你的账户，也不会连接互联网：游戏在隔离环境中运行，你下载的文件也一样。"
+    },
+    "apps": {
+      "is": "在这里描述一个保存你数据的应用：预约、订单、库存、客户、表单答案。",
+      "does": "它把应用分成四个方框来规划，你用话改任意一个方框，然后批准。",
+      "doesNot": "它不收款，也绝不向客户索取银行卡或密码。"
     },
     "chats": {
       "is": "你所有的对话，都在一个地方。",

@@ -677,6 +677,31 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 1,
   },
+  // APPS (api/apps and api/apps/[id]; lib/apps/charge.ts), 2026-10-24.
+  // The caller counts the system prompt into inputChars itself — the
+  // page hands the screen its length so the hint and the hold count the
+  // same characters (lib/apps/app-plan.ts planInputChars) — so
+  // systemPromptTokens is only the tool schema's lines, as Games has it.
+  //
+  // The output is a DEFINITION, not prose: a plan of at most six
+  // collections with twelve fields each, eight screens and four
+  // notifications, written as JSON. Measured 2026-10-24 against the
+  // five templates of κομμάτι 9 rendered through lib/apps/app-plan.ts's
+  // own tool schema, the largest came to about 2,600 characters, so
+  // 3,000 covers the top of that with room. A box change returns one
+  // box's slice, which is the data box at its largest — about half.
+  appPlan: {
+    systemPromptTokens: 150,
+    auxiliaryCalls: [],
+    baseOutputChars: 3000,
+    outputCharsPerInputChar: 0,
+  },
+  appBoxEdit: {
+    systemPromptTokens: 150,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 0,
+  },
   // REBUILD (api/rebuild and api/rebuild/[id]; lib/rebuild/charge.ts), the
   // same four steps as Games with the same shape: each call site passes
   // EVERY character it sends (the system prompt and the message), so

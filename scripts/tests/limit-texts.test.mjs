@@ -276,6 +276,7 @@ const SAID_ELSEWHERE = {
   "src/lib/images/image-access.ts": "refuse(\"rate_limited\"), said by the Image tool's sentence (section 1)",
   "src/lib/games/charge.ts": "its own code vocabulary, said by the Games sentence (section 1)",
   "src/lib/rebuild/charge.ts": "its own code vocabulary (`rate_limited`), said by Rebuild's own sentence (section 1)",
+  "src/lib/apps/charge.ts": "its own code vocabulary (`rate_limited`), said by the App builder's own sentence (section 1)",
   "src/lib/agents/execute-agent.ts": "an agent's run, refused as a run result, not a screen's request",
   "src/lib/automations/runner.ts": "a step of a running automation, recorded as the step's note",
 };

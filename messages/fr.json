@@ -3808,6 +3808,63 @@
         "failed": "Un problème est survenu. Réessayez."
       }
     },
+    "appBuilder": {
+      "empty": {
+        "heading": "Décris l'app dont ton activité a besoin",
+        "examples": {
+          "a": "Une app de rendez-vous pour mon salon",
+          "b": "Une app qui garde mes commandes et à qui elles vont",
+          "c": "Un formulaire pour les clients, avec les réponses dans une liste"
+        }
+      },
+      "placeholder": "Décris l'app, avec tes propres mots…",
+      "placeholderBox": "Dis ce qui doit changer dans cette boîte…",
+      "placeholderAnother": "Décris une autre app…",
+      "recent": "Apps récentes",
+      "noneYet": "Pas encore d'app.",
+      "boxHint": "Appuie sur une boîte et dis ce qui doit y changer.",
+      "box": {
+        "data": "Données",
+        "screens": "Écrans",
+        "access": "Qui voit quoi",
+        "notifications": "Avis"
+      },
+      "type": {
+        "text": "Texte",
+        "longText": "Texte long",
+        "number": "Nombre",
+        "date": "Jour",
+        "time": "Heure",
+        "choice": "Choix",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "checkbox": "Oui ou non"
+      },
+      "kindForm": "un formulaire",
+      "kindList": "une liste",
+      "seesOwn": "chaque visiteur ne voit que les siens",
+      "seesOwner": "toi seul vois ceci",
+      "toCustomer": "au client",
+      "toOwner": "à toi",
+      "noNotifications": "Rien n'est envoyé.",
+      "approve": "Valider le plan",
+      "approved": "Le plan est validé.",
+      "approvedNote": "Validé",
+      "planned": "Voici le plan, en quatre boîtes.",
+      "boxChanged": "La boîte {box} a changé.",
+      "boxChangedAndDropped": "La boîte {box} a changé, et ceci est parti avec : {what}.",
+      "errors": {
+        "empty": "Écris ce que l'app doit faire.",
+        "tooLong": "C'est plus long qu'une description ne peut l'être ({limit} caractères).",
+        "insufficient": "Pas assez de crédits pour cela. Rien n'a été facturé.",
+        "rateLimited": "Trop de tentatives à la fois. Réessaie dans un instant.",
+        "notIncluded": "Cet outil n'est pas dans ton forfait.",
+        "unavailable": "L'app ne peut pas être planifiée pour le moment.",
+        "unusable": "La réponse n'était pas utilisable. Seul ce qui a été dépensé est facturé.",
+        "notSaved": "Le plan a été fait mais n'a pas pu être enregistré.",
+        "failed": "Le plan n'a pas pu être fait. Aucun crédit n'a été facturé."
+      }
+    },
     "chats": {
       "title": "Discussions",
       "searchPlaceholder": "Rechercher dans vos discussions",
@@ -4910,6 +4967,11 @@
       "is": "Un petit jeu à vous, à partir d'une description.",
       "does": "Il vous montre d'abord le plan en cinq cases ; changez-en une avec des mots, puis il écrit le jeu et vous y jouez ici, au clavier ou au toucher.",
       "doesNot": "Il ne voit pas votre compte et n'accède pas à internet : le jeu tourne isolé, tout comme le fichier que vous téléchargez."
+    },
+    "apps": {
+      "is": "Ici tu décris une app qui garde tes données : rendez-vous, commandes, stock, clients, réponses de formulaire.",
+      "does": "Elle planifie l'app en quatre boîtes, tu changes chaque boîte avec des mots, et tu valides.",
+      "doesNot": "Elle n'encaisse pas de paiement et ne demande jamais à un client une carte ou un mot de passe."
     },
     "chats": {
       "is": "Toutes les discussions que vous avez eues, au même endroit.",

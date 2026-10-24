@@ -3808,6 +3808,63 @@
         "failed": "Something went wrong. Try again."
       }
     },
+    "appBuilder": {
+      "empty": {
+        "heading": "Describe the app your business needs",
+        "examples": {
+          "a": "A booking app for my salon",
+          "b": "An app that keeps my orders and who they go to",
+          "c": "A form for customers, with the answers in a list"
+        }
+      },
+      "placeholder": "Describe the app, in your own words…",
+      "placeholderBox": "Say what to change in this box…",
+      "placeholderAnother": "Describe another app…",
+      "recent": "Recent apps",
+      "noneYet": "No app yet.",
+      "boxHint": "Press a box and say what to change in it.",
+      "box": {
+        "data": "Data",
+        "screens": "Screens",
+        "access": "Who sees what",
+        "notifications": "Notifications"
+      },
+      "type": {
+        "text": "Text",
+        "longText": "Long text",
+        "number": "Number",
+        "date": "Date",
+        "time": "Time",
+        "choice": "Choice",
+        "email": "Email",
+        "phone": "Phone",
+        "checkbox": "Yes or no"
+      },
+      "kindForm": "a form",
+      "kindList": "a list",
+      "seesOwn": "each visitor sees only their own",
+      "seesOwner": "only you see these",
+      "toCustomer": "to the customer",
+      "toOwner": "to you",
+      "noNotifications": "Nothing is sent.",
+      "approve": "Approve the plan",
+      "approved": "The plan is approved.",
+      "approvedNote": "Approved",
+      "planned": "Here is the plan, in four boxes.",
+      "boxChanged": "The {box} box changed.",
+      "boxChangedAndDropped": "The {box} box changed, and this went with it: {what}.",
+      "errors": {
+        "empty": "Write what the app should do.",
+        "tooLong": "That is longer than one description can be ({limit} characters).",
+        "insufficient": "Not enough credits for this. Nothing was charged.",
+        "rateLimited": "Too many attempts at once. Try again shortly.",
+        "notIncluded": "This tool is not in your plan.",
+        "unavailable": "The app cannot be planned right now.",
+        "unusable": "The answer was not usable. Only what was spent is charged.",
+        "notSaved": "The plan was made but could not be saved.",
+        "failed": "The plan could not be made. No credits were charged."
+      }
+    },
     "chats": {
       "title": "Chats",
       "searchPlaceholder": "Search your conversations",
@@ -4910,6 +4967,11 @@
       "is": "A small game of your own, from a description.",
       "does": "It shows you the plan in five boxes first; change any of them in words, then it writes the game and you play it here, with the keyboard or by touch.",
       "doesNot": "It does not see your account and does not reach the internet: the game plays sealed off, and so does the file you download."
+    },
+    "apps": {
+      "is": "A place to describe an app that keeps your data — bookings, orders, stock, customers, form answers.",
+      "does": "It plans the app in four boxes, you change any box with words, and you approve it.",
+      "doesNot": "It does not take payments, and it never asks a customer for a card or a password."
     },
     "chats": {
       "is": "Every conversation you have had, in one place.",

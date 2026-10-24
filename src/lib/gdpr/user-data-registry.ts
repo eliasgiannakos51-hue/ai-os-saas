@@ -214,6 +214,7 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // The standalone Translate tool's glossary: words this person said to keep
   // exactly as written in every translation.
   { table: "translate_glossary", label: "translate_glossary", scope: "user_content" },
+  { table: "user_apps", label: "user_apps", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

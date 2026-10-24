@@ -140,7 +140,11 @@ const NO_HEADER_EXEMPT = new Map([
     "src/app/dashboard/memory/page.tsx",
     "not a page: a permanentRedirect to /dashboard/search, kept so a bookmark to the record search's old address does not 404. A header on it would render for nobody",
   ],
-  ...["app-builder", "audio", "avatars", "editing", "films", "iowork", "translate", "video-studio"].map((slug) => [
+  // app-builder left this list on 2026-10-24: the App builder is being
+  // built behind the switch "apps-tool", the page renders a real
+  // PageHeader on its upgrade wall, and help.apps now says what the tool
+  // does and — the part that matters — that it never takes a payment.
+  ...["audio", "avatars", "editing", "films", "iowork", "translate", "video-studio"].map((slug) => [
     `src/app/dashboard/${slug}/page.tsx`,
     "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",
   ]),

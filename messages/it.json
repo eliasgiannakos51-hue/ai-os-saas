@@ -3808,6 +3808,63 @@
         "failed": "Qualcosa è andato storto. Riprova."
       }
     },
+    "appBuilder": {
+      "empty": {
+        "heading": "Descrivi l'app che serve alla tua attività",
+        "examples": {
+          "a": "Un'app di prenotazioni per il mio salone",
+          "b": "Un'app che tiene i miei ordini e a chi vanno",
+          "c": "Un modulo per i clienti, con le risposte in un elenco"
+        }
+      },
+      "placeholder": "Descrivi l'app, con parole tue…",
+      "placeholderBox": "Di' cosa cambiare in questo riquadro…",
+      "placeholderAnother": "Descrivi un'altra app…",
+      "recent": "App recenti",
+      "noneYet": "Ancora nessuna app.",
+      "boxHint": "Premi un riquadro e di' cosa cambiare lì dentro.",
+      "box": {
+        "data": "Dati",
+        "screens": "Schermate",
+        "access": "Chi vede cosa",
+        "notifications": "Avvisi"
+      },
+      "type": {
+        "text": "Testo",
+        "longText": "Testo lungo",
+        "number": "Numero",
+        "date": "Data",
+        "time": "Ora",
+        "choice": "Scelta",
+        "email": "E-mail",
+        "phone": "Telefono",
+        "checkbox": "Sì o no"
+      },
+      "kindForm": "un modulo",
+      "kindList": "un elenco",
+      "seesOwn": "ogni visitatore vede solo i propri",
+      "seesOwner": "li vedi solo tu",
+      "toCustomer": "al cliente",
+      "toOwner": "a te",
+      "noNotifications": "Non viene inviato nulla.",
+      "approve": "Approva il piano",
+      "approved": "Il piano è approvato.",
+      "approvedNote": "Approvato",
+      "planned": "Ecco il piano, in quattro riquadri.",
+      "boxChanged": "Il riquadro {box} è cambiato.",
+      "boxChangedAndDropped": "Il riquadro {box} è cambiato, e con lui se n'è andato: {what}.",
+      "errors": {
+        "empty": "Scrivi cosa deve fare l'app.",
+        "tooLong": "È più lungo di quanto possa essere una descrizione ({limit} caratteri).",
+        "insufficient": "Non bastano i crediti per questo. Non è stato addebitato nulla.",
+        "rateLimited": "Troppi tentativi insieme. Riprova tra poco.",
+        "notIncluded": "Questo strumento non è nel tuo piano.",
+        "unavailable": "L'app non può essere progettata in questo momento.",
+        "unusable": "La risposta non era utilizzabile. Si addebita solo quanto speso.",
+        "notSaved": "Il piano è stato fatto ma non è stato salvato.",
+        "failed": "Il piano non è stato fatto. Non sono stati addebitati crediti."
+      }
+    },
     "chats": {
       "title": "Chat",
       "searchPlaceholder": "Cerca nelle tue conversazioni",
@@ -4910,6 +4967,11 @@
       "is": "Un piccolo gioco tuo, da una descrizione.",
       "does": "Prima ti mostra il piano in cinque riquadri; cambiane uno a parole, poi scrive il gioco e ci giochi qui, con la tastiera o al tocco.",
       "doesNot": "Non vede il tuo account e non va su internet: il gioco gira isolato, e così il file che scarichi."
+    },
+    "apps": {
+      "is": "Qui descrivi un'app che tiene i tuoi dati: prenotazioni, ordini, magazzino, clienti, risposte ai moduli.",
+      "does": "Progetta l'app in quattro riquadri, cambi ogni riquadro a parole e lo approvi.",
+      "doesNot": "Non incassa pagamenti e non chiede mai a un cliente una carta o una password."
     },
     "chats": {
       "is": "Ogni conversazione che hai avuto, in un posto solo.",

@@ -173,6 +173,12 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that a game made here can see your account or reach the internet",
   },
   {
+    id: "apps",
+    file: "src/app/dashboard/app-builder/page.tsx",
+    keyPrefix: "help.apps",
+    corrects: "that an app made here can take payments, or that it is a page to look at rather than a place data is kept",
+  },
+  {
     id: "deepResearch",
     file: "src/app/dashboard/deep-research/page.tsx",
     keyPrefix: "help.deepResearch",

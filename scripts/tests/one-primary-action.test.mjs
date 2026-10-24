@@ -398,6 +398,11 @@ const BASELINE = {
   // Soon screen, baseline 0 — 2026-10-24, piece 1 of the standalone
   // Translate tool.
   "dashboard/translate/page.tsx": 1,
+  // ONE: the field's send, in the shell the App builder is born in.
+  // Everyone the switch "apps-tool" is not open to gets the Coming Soon
+  // screen, and an account without the Site's plan gets the wall —
+  // neither draws a filled control. 2026-10-24, κομμάτι 2 of Apps.
+  "dashboard/app-builder/page.tsx": 1,
   // ONE: the field's send. The page is Games (package 26), born in the
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.

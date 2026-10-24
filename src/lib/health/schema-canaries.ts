@@ -453,6 +453,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "user_apps",
+    migration: "20261030000000_user_apps.sql",
+    breaks: "The App builder plans an app, charges for it and then cannot store it: «it could not be saved» after the model has already been paid for, and no app the account made is ever listed again",
+  },
+  {
+    kind: "table",
     table: "rebuild_projects",
     migration: "20261027000000_rebuild_projects.sql",
     breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",

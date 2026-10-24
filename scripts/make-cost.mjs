@@ -30,6 +30,8 @@ const plansMod = await loadTs("src/lib/billing/plans.ts");
 const deck = await loadTs("src/lib/presentations/deck.ts");
 const posts = await loadTs("src/lib/posts/platforms.ts");
 const models = await loadTs("src/lib/ai-models.ts");
+const appPlan = await loadTs("src/lib/apps/app-plan.ts");
+const appSystem = await loadTs("src/lib/apps/app-system.ts");
 
 const config = cfgMod.DEFAULTS;
 
@@ -40,6 +42,7 @@ const TYPED = {
   website: "a one-page site for a coffee shop in Thessaloniki",
   deck: "eight slides about our new pricing",
   post: "a short post about our summer opening hours",
+  app: "a booking app for a hair salon",
 };
 
 // EACH ROW NAMES THE FILE THE PAIRING CAME FROM, and the pairing is
@@ -82,6 +85,17 @@ const ROWS = [
     action: "codeAssist",
     route: "src/app/api/coding/run/route.ts",
     inputChars: () => "a function that formats a phone number".length,
+  },
+  {
+    // THE NUMBER docs/APPS-ISOLATION.md §5 SENDS THE READER HERE FOR.
+    // The App builder's own planner counts the system prompt into
+    // inputChars itself (lib/apps/app-plan.ts planInputChars), so this
+    // row counts it too — the alternative is a figure a third smaller
+    // than the hold the route actually takes.
+    label: "Apps — plan an app",
+    action: "appPlan",
+    route: "src/app/api/apps/route.ts",
+    inputChars: () => appPlan.planInputChars(appSystem.appSystemPrompt().length, TYPED.app.length),
   },
 ];
 

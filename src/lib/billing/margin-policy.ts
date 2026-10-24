@@ -305,6 +305,12 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   gameWrite: "game_generate",
   gameBoxEdit: "game_edit",
   gameChange: "game_edit",
+  // APPS, 2026-10-24: planning an app and changing one of its four
+  // boxes are the same product decision — both are the planner, and the
+  // box change is the smaller half of it — so they settle as one
+  // feature rather than two that could be priced apart by accident.
+  appPlan: "app_generate",
+  appBoxEdit: "app_generate",
   // Rebuild, 2026-10-27: planning and writing an app settle as one
   // feature, changing it as another, the way Games does.
   rebuildPlan: "rebuild_generate",

@@ -66,6 +66,10 @@ export const FEATURE_CATEGORIES: Record<string, Category> = {
   code_assist: "code",
   // Package 26: a game is a page of code written from a plan, as a site is.
   game_generate: "code",
+  // An app's plan is a structure returned through a forced tool — the
+  // same shape of work as a game's plan, and read by the same kind of
+  // parser — so it is categorised with it rather than as prose.
+  app_generate: "code",
   game_edit: "code",
   // Rebuild (2026-10-27): a whole app in one file, and a change to it.
   rebuild_generate: "code",

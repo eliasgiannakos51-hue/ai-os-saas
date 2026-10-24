@@ -214,5 +214,7 @@ Removing one from the product is always allowed.
 | dashboard.quickJobs.siteAssistant.text | text prefilled into the reader's own input |
 | dashboard.quickJobs.inboxSummary.text | text prefilled into the reader's own input |
 | dashboard.quickJobs.myWeek.text | text prefilled into the reader's own input |
+| dashboard.appBuilder.empty.examples.a | an example prompt the reader would type |
+| dashboard.appBuilder.empty.examples.b | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

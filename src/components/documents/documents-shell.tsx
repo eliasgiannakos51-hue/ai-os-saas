@@ -40,7 +40,19 @@ type Open = { id: string; title: string; blocks: PdfBlock[] };
  * blocks, with Word, PDF and the editor on top. Three options under the
  * field: what kind of document, what was written before, a new one.
  */
-export function DocumentsShell({ initialOpenId = null, docs, translate = false }: { initialOpenId?: string | null; docs: WrittenDocRow[]; /** The switch "translate" (package 28). */ translate?: boolean }) {
+export function DocumentsShell({
+  initialOpenId = null,
+  docs,
+  translate = false,
+  initialText,
+}: {
+  initialOpenId?: string | null;
+  docs: WrittenDocRow[];
+  /** The switch "translate" (package 28). */
+  translate?: boolean;
+  /** A quick-job tile's example text, dropped into the field unsent (lib/nav/quick-jobs.ts). */
+  initialText?: string;
+}) {
   const t = useTranslations("dashboard.documents.writer");
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
@@ -285,6 +297,7 @@ export function DocumentsShell({ initialOpenId = null, docs, translate = false }
     <ToolShell
       ref={composerRef}
       name={tNames("document")}
+      initialText={initialText}
       turns={shellTurns}
       working={
         running ? (

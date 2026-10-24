@@ -396,7 +396,8 @@
       "voiceClipLength": "Registrazione più lunga (minuti)",
       "teamMembers": "Membri del team",
       "recordSearch": "Ricerca su tutti i dati",
-      "meetings": "Riunioni → azioni"
+      "meetings": "Riunioni → azioni",
+      "games": "Giochi"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
@@ -3118,7 +3119,8 @@
         "ask": "Chiedi",
         "make": "Crea",
         "runAlone": "Va da solo",
-        "organise": "Organizza"
+        "organise": "Organizza",
+        "learn": "Impara"
       },
       "names": {
         "site": "Sito",
@@ -3148,7 +3150,10 @@
         "avatars": "Avatar",
         "coding": "Codice",
         "agents": "Agenti",
-        "iowork": "iowork"
+        "iowork": "iowork",
+        "translate": "Traduci",
+        "apps": "App",
+        "audio": "Audio"
       },
       "lines": {
         "site": "Un sito da una descrizione",
@@ -3168,7 +3173,7 @@
         "sales": "Contatti, follow-up e prossimi passi.",
         "trading": "Il diario delle tue operazioni.",
         "image": "Immagini da una descrizione",
-        "document": "Documenti, presentazioni e fogli",
+        "document": "Documenti e fogli",
         "games": "Un gioco da una descrizione.",
         "connect": "Porta dentro le tue altre app",
         "rebuild": "Crea la tua versione di qualsiasi app",
@@ -3176,10 +3181,14 @@
         "films": "Un intero film da una sceneggiatura",
         "editing": "Modifica video e foto con le parole",
         "avatars": "Un presentatore che dice il tuo testo",
-        "coding": "Codice con i tuoi progetti GitHub",
+        "coding": "Scrivi e correggi codice",
         "agents": "Lavorano mentre tu non lavori",
-        "iowork": "Lavora sul tuo computer, crea i tuoi file"
-      }
+        "iowork": "Lavora sul tuo computer, crea i tuoi file",
+        "translate": "Testo, documenti e siti, in qualsiasi lingua",
+        "apps": "Un'app che salva dati, da una descrizione",
+        "audio": "Voce fuori campo, podcast e musica"
+      },
+      "comingSoonBadge": "Presto"
     },
     "home": {
       "actions": {
@@ -3868,6 +3877,263 @@
           "tooLarge": "Quella pagina è troppo grande per essere letta. Non è stato addebitato nulla.",
           "invalid": "Non è un indirizzo web che posso leggere. Non è stato addebitato nulla."
         }
+      }
+    },
+    "comingSoon": {
+      "badge": "Presto",
+      "fieldPlaceholder": "In arrivo",
+      "line": "Non funziona ancora. Non viene addebitato nulla.",
+      "notify": "Avvisami quando è pronto",
+      "notified": "Ti avviseremo",
+      "notifyFailed": "Impossibile salvare. Riprova.",
+      "examples": {
+        "apps": {
+          "a": "Un'app di prenotazione per il mio salone",
+          "b": "Un'app per gli ordini di consegna",
+          "c": "Un'app per registrare i turni del personale"
+        },
+        "video": {
+          "a": "Un video pubblicitario di 30 secondi per il mio prodotto",
+          "b": "Un breve video di presentazione della mia attività",
+          "c": "Un video di formazione per i nuovi dipendenti"
+        },
+        "films": {
+          "a": "Un breve documentario sulla mia attività",
+          "b": "Un film promozionale con tono narrativo"
+        },
+        "editing": {
+          "a": "Rimuovere lo sfondo da una foto",
+          "b": "Una breve clip social ritagliata da un video più lungo",
+          "c": "Sottotitoli per un video"
+        },
+        "avatars": {
+          "a": "Un avatar digitale che presenta il mio prodotto",
+          "b": "Un avatar formatore per video di lezioni"
+        },
+        "audio": {
+          "a": "Una voce fuori campo per un video",
+          "b": "Un podcast da un testo",
+          "c": "Un brano musicale per un video"
+        },
+        "translate": {
+          "a": "Traduci questo testo in inglese",
+          "b": "Traduci il mio sito in un'altra lingua"
+        }
+      }
+    },
+    "quickJobs": {
+      "meetingNotes": {
+        "label": "Note della riunione"
+      },
+      "incomeExpenses": {
+        "label": "Entrate e uscite",
+        "text": "Quali sono state le mie spese il mese scorso?"
+      },
+      "customersSales": {
+        "label": "Clienti e vendite",
+        "text": "Quali clienti hanno comprato il mese scorso?"
+      },
+      "tradingCalendar": {
+        "label": "Calendario di trading",
+        "text": "Mostrami le operazioni della scorsa settimana"
+      },
+      "translateQuick": {
+        "label": "Traduci"
+      },
+      "summariseText": {
+        "label": "Riassumi testo o PDF",
+        "text": "Riassumi questo file per me"
+      },
+      "chartFromNumbers": {
+        "label": "Grafico dai numeri",
+        "text": "Crea un grafico da questi dati"
+      },
+      "receiptsTable": {
+        "label": "Scontrini in una tabella",
+        "text": "Metti questi scontrini in una tabella"
+      },
+      "salesForecast": {
+        "label": "Previsione vendite",
+        "text": "Fai una previsione delle vendite da questi dati"
+      },
+      "factCheck": {
+        "label": "Verifica dei fatti",
+        "text": "Verifica se è vero: "
+      },
+      "compareOptions": {
+        "label": "Confronta opzioni",
+        "text": "Confronta queste opzioni: "
+      },
+      "competitorAnalysis": {
+        "label": "Analisi dei concorrenti",
+        "text": "Analizza i miei concorrenti"
+      },
+      "editText": {
+        "label": "Modifica testo",
+        "text": "Modifica questo testo: "
+      },
+      "replyToReview": {
+        "label": "Rispondi a una recensione",
+        "text": "Scrivi una risposta a questa recensione: "
+      },
+      "replyToCustomer": {
+        "label": "Rispondi a un cliente",
+        "text": "Scrivi una risposta a questo cliente: "
+      },
+      "logo": {
+        "label": "Logo",
+        "text": "Fammi un logo per "
+      },
+      "productPhoto": {
+        "label": "Foto del prodotto",
+        "text": "Fai una foto del prodotto per "
+      },
+      "poster": {
+        "label": "Poster",
+        "text": "Fai un poster per "
+      },
+      "upscaleImage": {
+        "label": "Ingrandisci un'immagine",
+        "text": "Ingrandisci questa immagine"
+      },
+      "removeBackground": {
+        "label": "Rimuovi sfondo"
+      },
+      "shortSocialClip": {
+        "label": "Breve clip per i social"
+      },
+      "subtitles": {
+        "label": "Sottotitoli"
+      },
+      "podcastToVideo": {
+        "label": "Podcast in video"
+      },
+      "thirtySecondAd": {
+        "label": "Spot di 30 secondi"
+      },
+      "musicForVideo": {
+        "label": "Musica per video"
+      },
+      "voiceOver": {
+        "label": "Voce fuori campo"
+      },
+      "podcastFromText": {
+        "label": "Podcast dal testo"
+      },
+      "presentation": {
+        "label": "Presentazione",
+        "text": "Fai una presentazione su "
+      },
+      "socialPost": {
+        "label": "Post social",
+        "text": "Fai un post su "
+      },
+      "campaign": {
+        "label": "Campagna",
+        "text": "Fai una campagna per "
+      },
+      "cv": {
+        "label": "CV",
+        "text": "Scrivimi un CV per "
+      },
+      "customerOffer": {
+        "label": "Offerta per il cliente",
+        "text": "Fai un'offerta per "
+      },
+      "letter": {
+        "label": "Lettera",
+        "text": "Scrivi una lettera su "
+      },
+      "customerEmail": {
+        "label": "Email ai clienti",
+        "text": "Scrivi un'email ai miei clienti su "
+      },
+      "spreadsheet": {
+        "label": "Foglio di calcolo",
+        "text": "Fai un foglio di calcolo per "
+      },
+      "formOrSurvey": {
+        "label": "Modulo o sondaggio",
+        "text": "Fai un modulo per "
+      },
+      "menuOrPriceList": {
+        "label": "Menu o listino prezzi",
+        "text": "Fai un menu per "
+      },
+      "businessCard": {
+        "label": "Sito biglietto da visita",
+        "text": "Fai una pagina semplice per la mia attività"
+      },
+      "siteAssistant": {
+        "label": "Assistente di supporto",
+        "text": "Aggiungi un assistente di supporto al mio sito"
+      },
+      "bookingApp": {
+        "label": "App di prenotazione"
+      },
+      "game": {
+        "label": "Gioco",
+        "text": "Fai un gioco semplice: "
+      },
+      "morningSummary": {
+        "label": "Riepilogo mattutino",
+        "text": "Ogni mattina alle 9 mandami cosa ho oggi"
+      },
+      "weeklyReport": {
+        "label": "Riepilogo settimanale",
+        "text": "Ogni lunedì mandami un rapporto settimanale"
+      },
+      "reminders": {
+        "label": "Promemoria",
+        "text": "Mandami un promemoria quando "
+      },
+      "tradingAlerts": {
+        "label": "Avvisi di trading",
+        "text": "Avvisami quando un'operazione "
+      },
+      "inboxSummary": {
+        "label": "Riepilogo posta in arrivo",
+        "text": "Crea un agente che riassume la mia posta in arrivo"
+      },
+      "myOwnAssistant": {
+        "label": "Il mio assistente",
+        "text": "Creami un assistente che "
+      },
+      "goalInSteps": {
+        "label": "Obiettivo in fasi",
+        "text": "Crea un obiettivo per "
+      },
+      "myWeek": {
+        "label": "La mia settimana",
+        "text": "Mostrami la mia settimana"
+      },
+      "notes": {
+        "label": "Note",
+        "text": "Prendi nota: "
+      },
+      "explainTopic": {
+        "label": "Spiega un argomento",
+        "text": "Spiegami in modo semplice: "
+      },
+      "practiceExercises": {
+        "label": "Esercizi",
+        "text": "Dammi esercizi su "
+      },
+      "quiz": {
+        "label": "Quiz",
+        "text": "Fammi un quiz su "
+      },
+      "flashcards": {
+        "label": "Flashcard",
+        "text": "Fammi delle flashcard per "
+      },
+      "studyPlan": {
+        "label": "Piano di studio",
+        "text": "Fammi un piano di studio per "
+      },
+      "languagePractice": {
+        "label": "Pratica della lingua",
+        "text": "Voglio esercitarmi in "
       }
     }
   },

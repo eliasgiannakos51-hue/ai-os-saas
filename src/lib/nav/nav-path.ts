@@ -63,6 +63,17 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   // they are two screens, which was the whole finding.
   "ai-memory",
   "apps",
+  // The final All tools grid's Coming Soon tiles (2026-10-24): new
+  // addresses, distinct from the older trackers at /dashboard/apps and
+  // /dashboard/videos (see src/lib/nav/all-tools.ts HIDDEN_FROM_ALL_TOOLS).
+  "app-builder",
+  "audio",
+  "avatars",
+  "editing",
+  "films",
+  "iowork",
+  "translate",
+  "video-studio",
   "business-health",
   "campaigns",
   "chat",

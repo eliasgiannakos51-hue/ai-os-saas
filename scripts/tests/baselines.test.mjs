@@ -122,7 +122,7 @@ export const BASELINES = [
     name: "COMMENT_LIMITATION_CENSUS",
     direction: "ceiling",
     slack: 0,
-    why: "Comment blocks carrying a limitation phrase. Held not because the phrase is wrong but because the list has to stay short enough for a person to read in one sitting — that reading is the only reliable way to find a defect written as a design note.",
+    why: "Comment blocks carrying a limitation phrase. Held not because the phrase is wrong but because the list has to stay short enough for a person to read in one sitting — that reading is the only reliable way to find a defect written as a design note. Read up to 75 on 2026-10-24: scripts/check-i18n.js:694 explains why a handful of quick-job loanwords stay English in one locale and not another; scripts/tests/all-tools-final-grid.prodtest.mjs's PRODUCT_WORDS comment explains which are pre-existing versus new — both decisions, not defects.",
   },
   {
     gate: "deep-links",

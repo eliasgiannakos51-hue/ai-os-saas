@@ -2,22 +2,12 @@
 /*
  * CAN all-tools.test.mjs SEE ALL TOOLS DRIFT FROM THE DESIGN?
  *
- * The search losing its synonyms, a tool falling out of every group or
- * sitting in two, a stale entry, a hidden tool with no reason, the square
- * losing its 28px icon or its shape, a name cut with an ellipsis, the pin
- * writing somewhere else or appearing on Chat, and a beta tag coming back.
- * Since MASTER 14.1 (2026-10-07): the Settings block coming back, the
- * long name replacing the one word, a square losing its name, and Settings
- * no longer linking to what left All tools. Since 2026-10-08: the square
- * drawing the sidebar's long hint again, a line missing or grown past one
- * line, and a new tool's square drawn without its switch, named after a
- * switch that does not exist, given a pin Recent tools refuses, or named
- * outside 14.1's list.
- *
- * Rewritten 2026-10-23 for the final grid: the registry's order and
- * groups, a tile declared ready that is not built or is a placeholder,
- * Image drawn without its key, a switch coming back onto the page or a
- * tile, and the owner's words drifting in English or Greek.
+ * Rewritten 2026-10-24 for the owner's "ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ" round:
+ * 24 tiles in 6 groups (Learn carrying only small jobs), a tile that is not
+ * ready still drawn with a «Σύντομα» mark instead of vanishing, its address
+ * rendering the Coming Soon shell instead of the real tool, the small
+ * ready-made jobs (quick-jobs.ts) each pointing at the param their target
+ * actually reads, and the registry's and the i18n's own words.
  *
  * Run: node scripts/tests/all-tools.mutation.mjs
  */
@@ -28,45 +18,52 @@ import { execFileSync } from "node:child_process";
 const GATE = "scripts/tests/all-tools.test.mjs";
 const GRID = "src/components/tools/tools-grid.tsx";
 const GROUPS = "src/lib/nav/all-tools.ts";
+const JOBS = "src/lib/nav/quick-jobs.ts";
 const ALIASES = "src/lib/palette-aliases.ts";
-const SETTINGS = "src/app/dashboard/settings/page.tsx";
 const PAGE = "src/app/dashboard/tools/page.tsx";
+const AUDIO_PAGE = "src/app/dashboard/audio/page.tsx";
+const GAMES_PAGE = "src/app/dashboard/games/page.tsx";
+const COMING_SOON = "src/components/tools/coming-soon-shell.tsx";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
 const DE = "messages/de.json";
-const TARGETS = [GATE, GRID, GROUPS, ALIASES, SETTINGS, PAGE, EN, EL, DE];
+const TARGETS = [GATE, GRID, GROUPS, JOBS, ALIASES, PAGE, AUDIO_PAGE, GAMES_PAGE, COMING_SOON, EN, EL, DE];
 
 const MUTANTS = [
   {
-    name: "the search stops knowing synonyms",
+    name: "the search stops merging big and small candidates",
     file: GRID,
-    from: '            candidates: [label(item), longLabel(item), item.label, ...aliasesFor(ITEM_LABEL_KEYS[item.label] ?? "", locale), hint(item), sidebarHint(item)],',
-    to: "            candidates: [label(item), longLabel(item), item.label, hint(item), sidebarHint(item)],",
-    expect: "the grid builds its candidates the way the palette does",
+    from: "return filterAndRankCandidates([...bigCandidates, ...smallCandidates].map((c) => ({ item: c, candidates: c.item.candidates })), query);",
+    to: "return filterAndRankCandidates(bigCandidates.map((c) => ({ item: c, candidates: c.item.candidates })), query);",
+    expect: "the grid merges big-tile and small-job candidates into one ranked list",
   },
   {
-    // Deep Research's "investigate" alias is load-bearing both in English
-    // (no literal label contains that word) and in Greek (aliasesFor's
-    // own-locale-plus-English fallback is what reaches it).
-    name: "the alias table forgets Deep Research's English synonyms",
+    name: "the alias table forgets Deep Research's English synonym",
     file: ALIASES,
     from: '    en: ["deep research", "investigate", "dig", "thorough"],',
     to: '    en: ["deep research", "dig", "thorough"],',
-    expect: "an alias with no Greek label anywhere near it",
+    expect: "investigate",
   },
   {
-    name: "a tool falls out of the registry, so it is on no road but ⌘K",
+    name: "a tile falls out of the registry entirely",
     file: GROUPS,
     from: '  { name: "automations", group: "runAlone", href: "/dashboard/automation", ready: true },\n',
     to: "",
-    expect: "the registry is exactly the owner's seventeen",
+    expect: "the registry is exactly the owner's 24",
   },
   {
-    name: "a tool moves to another group than the owner put it in",
+    name: "a tile moves to another group than the owner put it in",
     file: GROUPS,
     from: '{ name: "agents", group: "runAlone"',
     to: '{ name: "agents", group: "organise"',
-    expect: "the registry is exactly the owner's seventeen",
+    expect: "the registry is exactly the owner's 24",
+  },
+  {
+    name: "Learn gets a big tile of its own",
+    file: GROUPS,
+    from: '  { name: "projects", group: "organise", href: "/dashboard/projects", ready: true },\n];',
+    to: '  { name: "projects", group: "organise", href: "/dashboard/projects", ready: true },\n  { name: "coding", group: "learn", href: "/dashboard/coding", ready: true },\n];',
+    expect: "carrying no big tile",
   },
   {
     name: "a hidden tool stops saying why",
@@ -76,39 +73,39 @@ const MUTANTS = [
     expect: "every hidden tool says why",
   },
   {
-    name: "a tool that is not built is declared ready: Films has no page",
+    name: "a not-ready tile is declared ready though its page is still Coming Soon",
     file: GROUPS,
-    from: '    name: "films", group: "make", href: "/dashboard/films", ready: false,',
-    to: '    name: "films", group: "make", href: "/dashboard/films", ready: true,',
-    expect: "every ready tool has its page",
+    from: '    name: "audio", group: "make", href: "/dashboard/audio", ready: false,',
+    to: '    name: "audio", group: "make", href: "/dashboard/audio", ready: true,',
+    expect: "a ready tile's page is never the Coming Soon shell",
   },
   {
-    name: "a placeholder is declared ready: Video's page is still the empty list",
-    file: GROUPS,
-    from: '    name: "video", group: "make", href: "/dashboard/videos", ready: false,',
-    to: '    name: "video", group: "make", href: "/dashboard/videos", ready: true,',
-    expect: "no ready tool is a placeholder",
+    name: "a ready tool's page is swapped for the Coming Soon shell",
+    file: GAMES_PAGE,
+    from: "import { GamesShell, type GameRow } from \"@/components/games/games-shell\";",
+    to: "import { GamesShell, type GameRow } from \"@/components/games/games-shell\";\nimport { ComingSoonShell } from \"@/components/tools/coming-soon-shell\";",
+    expect: "a ready tile's page is never the Coming Soon shell",
   },
   {
     name: "Image is drawn without its Gemini key",
     file: GROUPS,
     from: "t.ready && (!t.needs || presence[t.needs])",
     to: "t.ready",
-    expect: "Image is drawn with its Gemini key and not without it",
+    expect: "Image is live with its Gemini key and not without it",
   },
   {
     name: "the page claims the Gemini key is always there",
     file: PAGE,
     from: "imageKey: Boolean(imageApiKey())",
     to: "imageKey: true",
-    expect: "hands the grid the tools that work",
+    expect: "hands the grid `live`",
   },
   {
     name: "the page asks a feature switch again",
     file: PAGE,
     from: 'import { availableTools } from "@/lib/nav/all-tools";',
     to: 'import { availableTools } from "@/lib/nav/all-tools";\nimport { isFeatureOn } from "@/lib/flags/flags";',
-    expect: "the page does not read a feature switch",
+    expect: "does not read a feature switch",
   },
   {
     name: "a tile names a switch again",
@@ -118,53 +115,32 @@ const MUTANTS = [
     expect: "no tile of the final grid names a switch",
   },
   {
-    name: "the icon shrinks further, to 12px",
-    file: GRID,
-    from: '<Icon className="h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />',
-    to: '<Icon className="h-3 w-3 shrink-0 text-foreground" aria-hidden="true" />',
-    expect: "icon and name share one row",
+    name: "the field in the Coming Soon shell stops being disabled",
+    file: "src/components/tools/coming-soon-shell.tsx",
+    from: 'aria-disabled="true"',
+    to: 'aria-disabled="false"',
+    expect: "the field is disabled",
   },
   {
-    name: "the icon and name stop sharing a row",
-    file: GRID,
-    from: '<span className="flex min-w-0 items-center gap-2">',
-    to: '<span className="flex min-w-0 flex-col gap-2">',
-    expect: "icon and name share one row",
+    name: "a quick job points at the wrong query parameter for its target",
+    file: JOBS,
+    from: '{ id: "logo", group: "make", tool: "image", href: "/dashboard/images", param: "ask" },',
+    to: '{ id: "logo", group: "make", tool: "image", href: "/dashboard/images", param: "brief" },',
+    expect: "every job's param matches what its target page actually reads",
   },
   {
-    name: "a long name is cut with an ellipsis",
-    file: GRID,
-    from: '<span className="min-w-0 break-words text-sm font-medium text-foreground">{name}</span>',
-    to: '<span className="min-w-0 truncate text-sm font-medium text-foreground">{name}</span>',
-    expect: "no name is cut with an ellipsis",
+    name: "two quick jobs share the same id",
+    file: JOBS,
+    from: '{ id: "poster", group: "make", tool: "image", href: "/dashboard/images", param: "ask" },',
+    to: '{ id: "logo", group: "make", tool: "image", href: "/dashboard/images", param: "ask" },',
+    expect: "every quick job's id is unique",
   },
   {
-    name: "the row shrinks back to four-per-row, two-per-phone",
-    file: GRID,
-    from: '"grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6"',
-    to: '"grid grid-cols-2 gap-3 lg:grid-cols-4"',
-    expect: "5-6 in a row on a computer",
-  },
-  {
-    name: "the pin writes somewhere the sidebar does not read",
-    file: GRID,
-    from: '      const res = await fetch("/api/nav/recent-tools", {',
-    to: '      const res = await fetch("/api/nav/pins", {',
-    expect: "writing through the sidebar's own route",
-  },
-  {
-    name: "Chat and Coding get a pin, though they are never in Recent tools",
-    file: GRID,
-    from: "mainRows.has(item.href) && !NEVER_RECENT.includes(item.href) && ",
-    to: "mainRows.has(item.href) && ",
-    expect: "have no pin",
-  },
-  {
-    name: "a tile with no visible sidebar row gets a pin Recent tools will refuse",
-    file: GRID,
-    from: "mainRows.has(item.href) && !NEVER_RECENT.includes(item.href) && ",
-    to: "!NEVER_RECENT.includes(item.href) && ",
-    expect: "have no pin",
+    name: "a quick job points at an address with no page",
+    file: JOBS,
+    from: '{ id: "notes", group: "organise", tool: "projects", href: "/dashboard/projects", param: "ask" },',
+    to: '{ id: "notes", group: "organise", tool: "projects", href: "/dashboard/nowhere-at-all", param: "ask" },',
+    expect: "every quick job's href is a real address",
   },
   {
     name: "a beta tag comes back",
@@ -174,32 +150,32 @@ const MUTANTS = [
     expect: "the grid draws no tag",
   },
   {
-    name: "the Settings block comes back onto All tools",
+    name: "the pin writes somewhere the sidebar does not read",
     file: GRID,
-    from: 'import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
-    to: 'import { ALL_SIDEBAR_GROUPS, MAIN_SIDEBAR_GROUPS, SETTINGS_GROUP, sidebarGroups, type SidebarItem } from "@/lib/sidebar-nav";',
-    expect: "no Settings block",
+    from: '      const res = await fetch("/api/nav/recent-tools", {',
+    to: '      const res = await fetch("/api/nav/pins", {',
+    expect: "writing through the sidebar's own route",
   },
   {
-    name: "the tile shows the sidebar's long name instead of the translated one",
+    name: "a small ready-made job gets a pin",
     file: GRID,
-    from: "  const label = (item: SidebarItem) => { const k = nameKey(item.href); return k ? names[k] : longLabel(item); };",
-    to: "  const label = (item: SidebarItem) => longLabel(item);",
-    expect: "the tile draws the translated name",
+    from: '      <li key={job.id}>',
+    to: '      <li key={job.id} data-testid="tool-pin">',
+    expect: "no pin on a small ready-made job",
   },
   {
-    name: "Settings stops linking to Integrations, so it is reached from nowhere",
-    file: SETTINGS,
-    from: '              { href: "/dashboard/integrations", label: tKey("sidebar.items.integrations") },\n',
-    to: "",
-    expect: "Settings links to each of them",
+    name: "document's line names slides again",
+    file: EN,
+    from: '"document": "Documents and sheets"',
+    to: '"document": "Documents, slides and sheets"',
+    expect: "names sheets, not slides",
   },
   {
-    name: "the tile draws the sidebar's two-sentence hint again",
-    file: GRID,
-    from: "  const hint = (item: SidebarItem) => { const k = nameKey(item.href); return k ? lines[k] : sidebarHint(item); };",
-    to: "  const hint = (item: SidebarItem) => sidebarHint(item);",
-    expect: "the tile draws its own line",
+    name: "coding's line names GitHub before it is open to everyone",
+    file: EN,
+    from: '"coding": "Write and fix code"',
+    to: '"coding": "Code with your GitHub projects"',
+    expect: "says «write and fix code», not GitHub",
   },
   {
     name: "a German line grows past the length limit",
@@ -209,13 +185,6 @@ const MUTANTS = [
     expect: "de: every tile has its one line",
   },
   {
-    name: "Image's line goes missing in Greek",
-    file: EL,
-    from: '        "image": "Εικόνες από μια περιγραφή",\n',
-    to: "",
-    expect: "el: every tile has its one line",
-  },
-  {
     name: "a Greek heading stops being the owner's word",
     file: EL,
     from: '"record": "Κατάγραψε"',
@@ -223,18 +192,11 @@ const MUTANTS = [
     expect: "the Greek headings are the owner's own words",
   },
   {
-    name: "an English line drifts from the owner's",
-    file: EN,
-    from: '"iowork": "Works on your computer, makes your files"',
-    to: '"iowork": "Works on your computer"',
-    expect: "the English lines are the owner's, word for word",
-  },
-  {
-    name: "an old heading is left behind in English",
-    file: EN,
-    from: '        "organise": "Organise"\n      },',
-    to: '        "organise": "Organise",\n        "learn": "Learn"\n      },',
-    expect: "en: the five headings are worded, and no old heading is left",
+    name: "the Learn heading goes missing in Greek",
+    file: EL,
+    from: '"learn": "Μάθε"',
+    to: '"learnX": "Μάθε"',
+    expect: "all six headings are worded",
   },
 ];
 

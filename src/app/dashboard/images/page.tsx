@@ -14,6 +14,7 @@ import { imagePrices } from "@/lib/images/image-pricing";
 import { IMAGE_MIN_PLAN, IMAGE_ROW_COLUMNS, showImages, type ImageRow } from "@/lib/images/image-access";
 import { readRequestedId } from "@/lib/library/requested";
 import { TOOL_NAMES } from "@/lib/nav/tool-names";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export function generateMetadata(): Promise<Metadata> {
 /** How many earlier images the page brings with it. */
 const RECENT_IMAGES = 24;
 
-export default async function ImagesPage(props: { searchParams: Promise<{ record?: string }> }) {
+export default async function ImagesPage(props: { searchParams: Promise<{ record?: string; ask?: string }> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
@@ -78,6 +79,7 @@ export default async function ImagesPage(props: { searchParams: Promise<{ record
         initialOpenId={readRequestedId(searchParams.record)}
         prices={imagePrices(plan, await getPurchasedPackCreditPriceEur(user.id))}
         configured={Boolean(imageApiKey())}
+        initialText={readExampleParam(searchParams.ask)}
       />
     </div>
   );

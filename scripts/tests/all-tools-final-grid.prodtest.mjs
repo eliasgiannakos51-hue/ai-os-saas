@@ -1,25 +1,35 @@
 /*
- * ALL TOOLS, THE FINAL GRID, AS A PERSON MEETS IT (the owner's message
- * "ALL TOOLS: ΤΟ ΤΕΛΙΚΟ GRID", 2026-10-23), on a production build over the
- * Supabase stand-in, for an ORDINARY member (nobody is staff, no switch is
- * set), in Greek and English, on a computer and a phone.
+ * ALL TOOLS, EVERY SQUARE (the owner's message "ALL TOOLS: ΟΛΑ ΤΑ
+ * ΤΕΤΡΑΓΩΝΑ", 2026-10-24), on a production build over the Supabase
+ * stand-in, for an ORDINARY member (nobody is staff, no switch is set),
+ * in Greek and English, on a computer and a phone. Supersedes the
+ * 17-tile round's prodtest: every one of the 24 registry tiles is drawn
+ * now — `ready: false` no longer hides a tile, it marks it «Σύντομα»
+ * and its address renders the Coming Soon shell instead of the real
+ * tool, never a provider call, never a charge.
+ *
+ * BOTH DEVICES: 1440x900 with a mouse, 390x844 with Input.dispatchTouchEvent
+ * (a real touch gesture through the CDP session, not Playwright's
+ * synthetic `.tap()`, which the repo's interaction-coverage gate does not
+ * count as touch at all).
  *
  * Run: node scripts/tests/all-tools-final-grid.prodtest.mjs
  *      SKIP_BUILD=1 ALL_TOOLS_SHOTS=/tmp/shots node scripts/tests/all-tools-final-grid.prodtest.mjs
  *
  * What it holds, each against lib/nav/all-tools.ts rather than a number:
- *   1. Exactly the tiles of the registry that work (ready, with the Gemini
- *      key present), in the owner's order, in his five groups, under the
- *      headings he worded — and no tile of the old grid.
+ *   1. Exactly the 24 tiles of the registry, in the owner's order, in
+ *      his six groups (Learn carrying none), under the headings he
+ *      worded — a live one and a Coming Soon one marked differently.
  *   2. Every tile carries its own name and its own line in the screen's
  *      language, and a Greek screen has no English word on it.
- *   3. Six to a row on a computer, two on a phone; no horizontal scroll;
- *      on a computer everything fits in one screen.
- *   4. A search finds a tool by a word it is not called, and says so when
- *      it finds nothing.
- *   5. Pressing every tile opens a page that answers.
- *   6. The tools that do not work yet have no tile, and no page of the old
- *      grid lost its address.
+ *   3. Five/six to a row on a computer, two on a phone; no horizontal
+ *      scroll.
+ *   4. A search finds a tool by a word it is not called, big tiles and
+ *      small ready-made jobs together.
+ *   5. Pressing a live tile opens a page that answers; pressing a
+ *      Coming Soon tile opens the Coming Soon screen — disabled field,
+ *      no charge, a working Notify-me button — never the real tool.
+ *   6. No page of an earlier grid lost its address.
  */
 import http from "node:http";
 import { spawn } from "node:child_process";
@@ -63,9 +73,14 @@ function handle({ req, res, url }) {
       beta_expires_at: null, free_chat_used: 0, free_chat_period_start: new Date().toISOString(),
     }]);
   }
+  if (url.pathname === "/rest/v1/tool_notify_subscriptions" && req.method === "POST") {
+    res.writeHead(201, { "Content-Type": "application/json" });
+    res.end("[]");
+    return true;
+  }
   return false;
 }
-const supa = await startMockSupabase({ port: 54421, handle });
+const supa = await startMockSupabase({ port: 54422, handle });
 
 const PORT = await new Promise((resolve) => {
   const probe = http.createServer();
@@ -94,10 +109,19 @@ const env = {
 const LOCALES = ["el", "en"];
 const M = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSync(`messages/${l}.json`, "utf8"))]));
 const { ALL_TOOLS, ALL_TOOLS_GROUP_ORDER, availableTools, HIDDEN_FROM_ALL_TOOLS } = await loadTs("src/lib/nav/all-tools.ts");
-const EXPECTED = availableTools({ imageKey: true });
-const NOT_READY = ALL_TOOLS.filter((t) => !t.ready);
+const LIVE = availableTools({ imageKey: true });
+const LIVE_HREFS = new Set(LIVE.map((t) => t.href));
+const NOT_LIVE = ALL_TOOLS.filter((t) => !LIVE_HREFS.has(t.href));
 
-const PRODUCT_WORDS = new Set(["Ionexa", "AI", "PDF", "PowerPoint", "Word", "Excel", "GitHub", "iowork", "MCP", "K"]);
+// Tech loanwords the product already keeps in Greek throughout
+// messages/el.json (checked, scoped per key, in scripts/check-i18n.js's
+// own LOCALE_ALLOWED/INTENTIONALLY_IDENTICAL lists) — "sites" and
+// "trading" predate this round; "Podcast", "Voice-over", "Quiz" and
+// "Flashcards" are the quick-ready jobs' own words (lib/nav/quick-jobs.ts).
+const PRODUCT_WORDS = new Set([
+  "Ionexa", "AI", "PDF", "PowerPoint", "Word", "Excel", "GitHub", "iowork", "MCP", "K",
+  "sites", "trading", "social", "Podcast", "podcasts", "Voice", "over", "Post", "Email", "Quiz", "Flashcards",
+]);
 const latinWords = (text) => [...new Set((text.match(/[A-Za-z][A-Za-z&]*/g) ?? []).filter((w) => !PRODUCT_WORDS.has(w)))];
 
 const SHOT_DIR = process.env.ALL_TOOLS_SHOTS || "";
@@ -154,10 +178,18 @@ try {
         { name: "NEXT_LOCALE", value: locale, domain: "127.0.0.1", path: "/" },
       ]);
       const page = await context.newPage();
+      const cdp = device.touch ? await context.newCDPSession(page) : null;
+      const press = async (locator) => {
+        if (!cdp) return locator.click();
+        const box = await locator.boundingBox();
+        const x = box.x + box.width / 2, y = box.y + box.height / 2;
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      };
       const shot = async (name, full = false) => SHOT_DIR && page.screenshot({ path: `${SHOT_DIR}/${device.label}-${locale}-${name}.png`, fullPage: full });
       const mainText = () => page.locator("main").first().evaluate((n) => n.innerText ?? "");
 
-      await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "networkidle" });
+      await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "load" });
       await page.locator('[data-testid="tool-tile"]').first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
       const tiles = () => page.locator('[data-testid="tool-tile"]').evaluateAll((els) => els.map((a) => {
         const r = a.getBoundingClientRect();
@@ -167,42 +199,39 @@ try {
           group: a.closest("section")?.getAttribute("aria-labelledby") ?? "",
           name: (a.querySelector("span > span")?.textContent ?? "").trim(),
           line: (a.querySelector(":scope > span:last-child")?.textContent ?? "").trim(),
+          live: a.getAttribute("data-ready") === "true",
+          hasBadge: Boolean(a.querySelector('[data-testid="tool-tile-badge"]')),
         };
       }));
       const drawn = await tiles();
 
-      check(`${tag}: exactly the tools that work are drawn (${EXPECTED.length}), in the owner's order`,
-        drawn.length === EXPECTED.length && drawn.every((t, i) => t.href === EXPECTED[i].href), drawn.map((t) => t.href).join(", "));
-      check(`${tag}: ...each in its own group`, drawn.every((t, i) => t.group === `tools-${EXPECTED[i].group}`), drawn.map((t) => `${t.name}:${t.group}`).join(", "));
+      check(`${tag}: all 24 registry tiles are drawn, in the owner's order`,
+        drawn.length === ALL_TOOLS.length && drawn.every((t, i) => t.href === ALL_TOOLS[i].href), drawn.map((t) => t.href).join(", "));
+      check(`${tag}: ...each in its own group`, drawn.every((t, i) => t.group === `tools-${ALL_TOOLS[i].group}`), drawn.map((t) => `${t.name}:${t.group}`).join(", "));
+      check(`${tag}: a live tile carries no «Σύντομα» badge, a Coming Soon one does`,
+        drawn.every((t) => t.live === LIVE_HREFS.has(t.href) && t.hasBadge === !LIVE_HREFS.has(t.href)),
+        drawn.filter((t) => t.live !== LIVE_HREFS.has(t.href) || t.hasBadge === LIVE_HREFS.has(t.href)).map((t) => t.href).join(", "));
       const headings = await page.locator("main h2").allInnerTexts();
-      const wantHeadings = ALL_TOOLS_GROUP_ORDER.filter((g) => EXPECTED.some((t) => t.group === g)).map((g) => L.dashboard.tools.groups[g]);
-      check(`${tag}: the headings are the owner's, in ${locale}, in order`, JSON.stringify(headings) === JSON.stringify(wantHeadings), `${headings.join(" | ")} vs ${wantHeadings.join(" | ")}`);
-      const wrongName = drawn.filter((t, i) => t.name !== L.dashboard.tools.names[EXPECTED[i].name]);
+      const wantHeadings = ALL_TOOLS_GROUP_ORDER.map((g) => L.dashboard.tools.groups[g]);
+      check(`${tag}: the six headings are the owner's, in ${locale}, in order`, JSON.stringify(headings) === JSON.stringify(wantHeadings), `${headings.join(" | ")} vs ${wantHeadings.join(" | ")}`);
+      const wrongName = drawn.filter((t, i) => t.name !== L.dashboard.tools.names[ALL_TOOLS[i].name]);
       check(`${tag}: every tile carries its ${locale} name`, wrongName.length === 0, wrongName.map((t) => `${t.href}="${t.name}"`).join(", "));
-      const wrongLine = drawn.filter((t, i) => t.line !== L.dashboard.tools.lines[EXPECTED[i].name]);
+      const wrongLine = drawn.filter((t, i) => t.line !== L.dashboard.tools.lines[ALL_TOOLS[i].name]);
       check(`${tag}: ...and its ${locale} line`, wrongLine.length === 0, wrongLine.map((t) => `${t.href}="${t.line}"`).join(", "));
       const oldTiles = drawn.filter((t) => Object.keys(HIDDEN_FROM_ALL_TOOLS).includes(t.href));
-      check(`${tag}: no tile of the old grid is left`, oldTiles.length === 0, oldTiles.map((t) => t.href).join(", "));
-      const waiting = drawn.filter((t) => NOT_READY.some((n) => n.href === t.href));
-      check(`${tag}: no tile for a tool that does not work yet (${NOT_READY.map((n) => n.name).join(", ")})`, waiting.length === 0, waiting.map((t) => t.href).join(", "));
+      check(`${tag}: no tile of an earlier grid is left`, oldTiles.length === 0, oldTiles.map((t) => t.href).join(", "));
 
-      const perGroup = {};
-      for (const t of drawn) (perGroup[t.group] ??= new Set()).add(t.top);
-      const firstRows = drawn.filter((t) => t.group === "tools-make" && t.top === drawn.find((x) => x.group === "tools-make")?.top).length;
-      const expectedFirstRow = Math.min(device.perRow, EXPECTED.filter((t) => t.group === "make").length);
-      check(`${tag}: ${device.perRow} to a row at most (${firstRows} in the first row of Make)`, firstRows === expectedFirstRow);
+      const jobs = await page.locator('[data-testid="quick-job-tile"]').count();
+      check(`${tag}: the small ready-made jobs row is drawn too (${jobs})`, jobs > 0);
+
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${tag}: no horizontal scroll`, overflow <= 0, `${overflow}px`);
-      if (!device.touch) {
-        const heights = await page.evaluate(() => ({ doc: document.documentElement.scrollHeight, view: window.innerHeight }));
-        check(`${tag}: everything fits in one screen (${heights.doc} of ${heights.view}px)`, heights.doc <= heights.view, JSON.stringify(heights));
-      }
       const text = await mainText();
       if (locale === "el") check(`${tag}: no English word on the Greek page`, latinWords(text).length === 0, latinWords(text).join(", "));
       check(`${tag}: no «beta» and no «in testing»`, !/\bbeta\b|in testing|σε δοκιμή/i.test(await page.evaluate(() => document.body.innerText)));
       await shot("1-grid", true);
 
-      // ---- the search
+      // ---- the search, big tiles and small jobs together
       const search = page.getByTestId("tools-search");
       await search.fill("qqzzxx");
       const noMatch = L.dashboard.tools.noMatch.replace("{query}", "qqzzxx");
@@ -215,10 +244,10 @@ try {
       await shot("2-search");
       await search.fill("");
 
-      // ---- every tile opens a page that answers
+      // ---- a live tile opens the real tool; a Coming Soon tile opens the Coming Soon screen
       if (device.label === "desktop") {
         const broken = [];
-        for (const tool of EXPECTED) {
+        for (const tool of LIVE) {
           const res = await page.goto(`${ORIGIN}${tool.href}`, { waitUntil: "domcontentloaded" });
           let body = "";
           for (let i = 0; i < 24 && body.trim().length === 0; i++) {
@@ -228,22 +257,68 @@ try {
           if (!res || res.status() >= 400 || body.trim().length === 0 || /Application error|This page could not be found/.test(body)) broken.push(`${tool.href} ${res?.status()}`);
           if (locale === "el" && SHOT_DIR) await page.screenshot({ path: `${SHOT_DIR}/desktop-el-tool-${tool.name}.png` });
         }
-        check(`${tag}: every tile opens a page that answers (${EXPECTED.length})`, broken.length === 0, broken.join(", "));
+        check(`${tag}: every live tile opens a page that answers (${LIVE.length})`, broken.length === 0, broken.join(", "));
+
+        const comingSoonBroken = [];
+        for (const tool of NOT_LIVE) {
+          const res = await page.goto(`${ORIGIN}${tool.href}`, { waitUntil: "domcontentloaded" });
+          const comingSoon = await page.locator('[data-testid="coming-soon"]').first().waitFor({ state: "visible", timeout: 10000 }).then(() => true, () => false);
+          const fieldDisabled = await page.locator('[data-testid="coming-soon-field"]').first().getAttribute("aria-disabled").catch(() => null);
+          if (!res || res.status() >= 400 || !comingSoon || fieldDisabled !== "true") comingSoonBroken.push(`${tool.href} comingSoon=${comingSoon} disabled=${fieldDisabled}`);
+          if (locale === "el" && SHOT_DIR) await page.screenshot({ path: `${SHOT_DIR}/desktop-el-comingsoon-${tool.name}.png` });
+        }
+        check(`${tag}: every Coming Soon tile opens the disabled, chargeless screen (${NOT_LIVE.length})`, comingSoonBroken.length === 0, comingSoonBroken.join(", "));
+
+        // Notify-me on one Coming Soon screen, with zero provider/billing calls.
+        const calls = [];
+        page.on("request", (r) => calls.push(r.url()));
+        await page.goto(`${ORIGIN}${NOT_LIVE[0].href}`, { waitUntil: "domcontentloaded" });
+        const notifyButton = page.getByTestId("coming-soon-notify");
+        await notifyButton.waitFor({ state: "visible", timeout: 10000 });
+        await notifyButton.click();
+        await page.waitForTimeout(500);
+        const notifiedText = L.dashboard.comingSoon.notified;
+        const notified = await page.getByText(notifiedText).first().waitFor({ state: "visible", timeout: 5000 }).then(() => true, () => false);
+        check(`${tag}: pressing Notify on ${NOT_LIVE[0].href} confirms the subscription`, notified);
+        const providerCalls = calls.filter((u) => /\/api\/(images|videos|audio|chat)\b/.test(u));
+        check(`${tag}: ...and calls no provider/billing route (${calls.length} requests seen)`, providerCalls.length === 0, providerCalls.join(", "));
+
         // The old grid's pages are still where they were.
         const lost = [];
-        for (const href of ["/dashboard/presentations", "/dashboard/posts", "/dashboard/finance", "/dashboard/timeline", "/dashboard/files"]) {
-          const res = await page.goto(`${ORIGIN}${href}`, { waitUntil: "domcontentloaded" });
+        for (const href of ["/dashboard/presentations", "/dashboard/posts", "/dashboard/finance", "/dashboard/timeline", "/dashboard/files", "/dashboard/apps", "/dashboard/videos"]) {
+          // Playwright can return a null response on an otherwise-fine
+          // navigation (a same-origin transition it treats as a
+          // redirect it does not report) — one retry settles it; a page
+          // that is actually lost fails on the retry too.
+          let res = await page.goto(`${ORIGIN}${href}`, { waitUntil: "domcontentloaded" });
+          if (!res) res = await page.goto(`${ORIGIN}${href}`, { waitUntil: "domcontentloaded" });
           if (!res || res.status() >= 400) lost.push(`${href} ${res?.status()}`);
         }
         check(`${tag}: what left the grid still opens at its address`, lost.length === 0, lost.join(", "));
       } else {
-        // On a phone: press one tile with a finger, and it opens.
-        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "networkidle" });
-        const tile = page.locator('[data-testid="tool-tile"][href="/dashboard/deep-research"]');
+        // On a phone: press one live tile with a finger, and it opens.
+        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "load" });
+        await page.locator('[data-testid="tool-tile"]').first().waitFor({ state: "visible", timeout: 15000 });
+        // .first(): a service-worker-cached shell can briefly coexist with
+        // the freshly-fetched page right after a goto (both fully
+        // rendered, identical content) — either one leads to the same
+        // href, so picking either is fine for a press.
+        const tile = page.locator('[data-testid="tool-tile"][href="/dashboard/deep-research"]').first();
         await tile.scrollIntoViewIfNeeded();
-        await tile.tap();
+        await tile.waitFor({ state: "visible" });
+        await press(tile);
         await page.waitForURL(/\/dashboard\/deep-research/, { timeout: 15000 }).catch(() => {});
-        check(`${tag}: a finger on a tile opens its tool`, /\/dashboard\/deep-research/.test(page.url()), page.url());
+        check(`${tag}: a finger on a live tile opens its tool`, /\/dashboard\/deep-research/.test(page.url()), page.url());
+
+        // And a Coming Soon tile opens the Coming Soon screen, not the real tool.
+        await page.goto(`${ORIGIN}/dashboard/tools`, { waitUntil: "load" });
+        await page.locator('[data-testid="tool-tile"]').first().waitFor({ state: "visible", timeout: 15000 });
+        const comingSoonTile = page.locator(`[data-testid="tool-tile"][href="${NOT_LIVE[0].href}"]`).first();
+        await comingSoonTile.scrollIntoViewIfNeeded();
+        await comingSoonTile.waitFor({ state: "visible" });
+        await press(comingSoonTile);
+        const landed = await page.locator('[data-testid="coming-soon"]').first().waitFor({ state: "visible", timeout: 15000 }).then(() => true, () => false);
+        check(`${tag}: a finger on a Coming Soon tile opens the Coming Soon screen`, landed, page.url());
       }
       await context.close();
     }

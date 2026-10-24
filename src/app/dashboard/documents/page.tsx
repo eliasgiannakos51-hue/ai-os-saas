@@ -19,6 +19,7 @@ import { htmlToBlocks } from "@/lib/pdf/blocks";
 import { DOCUMENT_WRITER_MIN_PLAN } from "@/lib/documents/writer-access";
 import { DocumentsShell, type WrittenDocRow } from "@/components/documents/documents-shell";
 import { readRequestedId } from "@/lib/library/requested";
+import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.documents");
@@ -31,7 +32,7 @@ export function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-export default async function DocumentsPage(props: { searchParams?: Promise<{ record?: string }> }) {
+export default async function DocumentsPage(props: { searchParams?: Promise<{ record?: string; ask?: string }> }) {
   const searchParams = await props.searchParams;
   const t = await getTranslations("dashboard.documents");
   const supabase = await createClient();
@@ -77,7 +78,12 @@ export default async function DocumentsPage(props: { searchParams?: Promise<{ re
     }));
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-        <DocumentsShell initialOpenId={readRequestedId(typeof searchParams?.record === "string" ? searchParams.record : null)} docs={written} translate={await isFeatureOn("translate", user)} />
+        <DocumentsShell
+          initialOpenId={readRequestedId(typeof searchParams?.record === "string" ? searchParams.record : null)}
+          docs={written}
+          translate={await isFeatureOn("translate", user)}
+          initialText={readExampleParam(searchParams?.ask)}
+        />
       </div>
     );
   }

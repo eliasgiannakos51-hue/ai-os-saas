@@ -63,7 +63,14 @@ export type MyStuffSession = { id: string; title: string; turns: MyStuffSessionT
  * exact same lib/my-stuff/load.ts the Library's own search already proves
  * out, for whoever wants to look rather than ask.
  */
-export function MyStuffShell({ initialSessions }: { initialSessions: MyStuffSession[] }) {
+export function MyStuffShell({
+  initialSessions,
+  initialText,
+}: {
+  initialSessions: MyStuffSession[];
+  /** A quick-job tile's example text, dropped into the field unsent (lib/nav/quick-jobs.ts). */
+  initialText?: string;
+}) {
   const t = useTranslations("dashboard.myStuff");
   const { refresh: refreshCredits } = useCredits();
   const composerRef = useRef<ChatComposerHandle>(null);
@@ -194,6 +201,7 @@ export function MyStuffShell({ initialSessions }: { initialSessions: MyStuffSess
       ref={composerRef}
       name={t("name")}
       help={<HelpTip helpKey="help.myStuff" />}
+      initialText={initialText}
       turns={shellTurns}
       working={
         sending ? (

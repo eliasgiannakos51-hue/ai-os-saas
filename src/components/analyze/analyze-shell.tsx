@@ -84,6 +84,7 @@ export function AnalyzeShell({
   initialCollections = [],
   initialOpenId = null,
   pages = false,
+  initialText,
 }: {
   analyses: AnalysisSummary[];
   current: AnalysisView | null;
@@ -91,6 +92,8 @@ export function AnalyzeShell({
   initialCollections?: WorkspaceCollection[];
   initialOpenId?: string | null;
   pages?: boolean;
+  /** A quick-job tile's example text, dropped into the field unsent (lib/nav/quick-jobs.ts). */
+  initialText?: string;
 }) {
   const t = useTranslations("dataAnalysis");
   const tFiles = useTranslations("dashboard.files");
@@ -871,6 +874,7 @@ export function AnalyzeShell({
       name={tNames("analyze")}
       help={<HelpTip helpKey="help.dataAnalysis" />}
       ref={composerRef}
+      initialText={initialText}
       turns={turns}
       working={
         analysisUploading || analysing || analysisAsking ? (

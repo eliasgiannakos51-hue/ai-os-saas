@@ -29,7 +29,18 @@ export type GameRow = { id: string; title: string; plan: unknown; html: string |
  * (lib/games/game-system.ts, server-only), handed down by the page so the
  * price on screen counts what the route's hold counts.
  */
-export function GamesShell({ initialGames, initialOpenId = null, systemChars }: { initialGames: GameRow[]; initialOpenId?: string | null; systemChars: number }) {
+export function GamesShell({
+  initialGames,
+  initialOpenId = null,
+  systemChars,
+  initialText,
+}: {
+  initialGames: GameRow[];
+  initialOpenId?: string | null;
+  systemChars: number;
+  /** A quick-job tile's example text, dropped into the field unsent (lib/nav/quick-jobs.ts). */
+  initialText?: string;
+}) {
   const t = useTranslations("dashboard.games");
   const tNames = useTranslations("dashboard.tools.names");
   const locale = useLocale();

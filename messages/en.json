@@ -396,7 +396,8 @@
       "voiceClipLength": "Longest recording (minutes)",
       "teamMembers": "Team members",
       "recordSearch": "Record search across modules",
-      "meetings": "Meetings → actions"
+      "meetings": "Meetings → actions",
+      "games": "Games"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -3118,7 +3119,8 @@
         "ask": "Ask",
         "make": "Make",
         "runAlone": "Run on its own",
-        "organise": "Organise"
+        "organise": "Organise",
+        "learn": "Learn"
       },
       "names": {
         "site": "Site",
@@ -3148,7 +3150,10 @@
         "avatars": "Avatars",
         "coding": "Coding",
         "agents": "Agents",
-        "iowork": "iowork"
+        "iowork": "iowork",
+        "translate": "Translate",
+        "apps": "Apps",
+        "audio": "Audio"
       },
       "lines": {
         "site": "A website from a description",
@@ -3168,7 +3173,7 @@
         "sales": "Contacts, outreach and next steps.",
         "trading": "A log of your trades.",
         "image": "Images from a description",
-        "document": "Documents, slides and sheets",
+        "document": "Documents and sheets",
         "games": "A game from a description.",
         "connect": "Bring your other apps in",
         "rebuild": "Build your own version of any app",
@@ -3176,10 +3181,14 @@
         "films": "A whole film from a script",
         "editing": "Edit videos and photos with words",
         "avatars": "A presenter who says your text",
-        "coding": "Code with your GitHub projects",
+        "coding": "Write and fix code",
         "agents": "They work while you don't",
-        "iowork": "Works on your computer, makes your files"
-      }
+        "iowork": "Works on your computer, makes your files",
+        "translate": "Text, documents and sites, in any language",
+        "apps": "An app that saves data, from a description",
+        "audio": "Voice-over, podcasts and music"
+      },
+      "comingSoonBadge": "Coming soon"
     },
     "home": {
       "actions": {
@@ -3868,6 +3877,263 @@
           "tooLarge": "That page is too large to read. Nothing was charged.",
           "invalid": "That is not a web address I can read. Nothing was charged."
         }
+      }
+    },
+    "comingSoon": {
+      "badge": "Coming soon",
+      "fieldPlaceholder": "Coming soon",
+      "line": "Not working yet. Nothing is charged.",
+      "notify": "Notify me when it opens",
+      "notified": "We'll notify you",
+      "notifyFailed": "Could not be saved. Try again.",
+      "examples": {
+        "apps": {
+          "a": "A booking app for my salon",
+          "b": "An app for delivery orders",
+          "c": "A staff shift-tracking app"
+        },
+        "video": {
+          "a": "A 30-second ad video for my product",
+          "b": "A short video introducing my business",
+          "c": "A training video for new staff"
+        },
+        "films": {
+          "a": "A short documentary about my business",
+          "b": "A promotional film with a narrative tone"
+        },
+        "editing": {
+          "a": "Remove the background from a photo",
+          "b": "A short social clip cut from a longer video",
+          "c": "Subtitles on a video"
+        },
+        "avatars": {
+          "a": "A digital avatar presenting my product",
+          "b": "A trainer avatar for lesson videos"
+        },
+        "audio": {
+          "a": "Voice-over for a video",
+          "b": "A podcast from a piece of text",
+          "c": "A music track for a video"
+        },
+        "translate": {
+          "a": "Translate this text into English",
+          "b": "Translate my site into another language"
+        }
+      }
+    },
+    "quickJobs": {
+      "meetingNotes": {
+        "label": "Meeting notes"
+      },
+      "incomeExpenses": {
+        "label": "Income & expenses",
+        "text": "What were my expenses last month?"
+      },
+      "customersSales": {
+        "label": "Customers & sales",
+        "text": "Which customers bought last month?"
+      },
+      "tradingCalendar": {
+        "label": "Trading calendar",
+        "text": "Show me last week's trades"
+      },
+      "translateQuick": {
+        "label": "Translate"
+      },
+      "summariseText": {
+        "label": "Summarise text or PDF",
+        "text": "Summarise this file for me"
+      },
+      "chartFromNumbers": {
+        "label": "Chart from numbers",
+        "text": "Make a chart from this data"
+      },
+      "receiptsTable": {
+        "label": "Receipts to a table",
+        "text": "Put these receipts into a table"
+      },
+      "salesForecast": {
+        "label": "Sales forecast",
+        "text": "Forecast sales from this data"
+      },
+      "factCheck": {
+        "label": "Fact check",
+        "text": "Check whether this is true: "
+      },
+      "compareOptions": {
+        "label": "Compare options",
+        "text": "Compare these options: "
+      },
+      "competitorAnalysis": {
+        "label": "Competitor analysis",
+        "text": "Analyse my competitors"
+      },
+      "editText": {
+        "label": "Edit text",
+        "text": "Edit this text: "
+      },
+      "replyToReview": {
+        "label": "Reply to a review",
+        "text": "Write a reply to this review: "
+      },
+      "replyToCustomer": {
+        "label": "Reply to a customer",
+        "text": "Write a reply to this customer: "
+      },
+      "logo": {
+        "label": "Logo",
+        "text": "Make me a logo for "
+      },
+      "productPhoto": {
+        "label": "Product photo",
+        "text": "Make a product photo for "
+      },
+      "poster": {
+        "label": "Poster",
+        "text": "Make a poster for "
+      },
+      "upscaleImage": {
+        "label": "Upscale an image",
+        "text": "Upscale this image"
+      },
+      "removeBackground": {
+        "label": "Remove background"
+      },
+      "shortSocialClip": {
+        "label": "Short clip for social"
+      },
+      "subtitles": {
+        "label": "Subtitles"
+      },
+      "podcastToVideo": {
+        "label": "Podcast to video"
+      },
+      "thirtySecondAd": {
+        "label": "30-second ad"
+      },
+      "musicForVideo": {
+        "label": "Music for video"
+      },
+      "voiceOver": {
+        "label": "Voice-over"
+      },
+      "podcastFromText": {
+        "label": "Podcast from text"
+      },
+      "presentation": {
+        "label": "Presentation",
+        "text": "Make a presentation about "
+      },
+      "socialPost": {
+        "label": "Social post",
+        "text": "Make a post about "
+      },
+      "campaign": {
+        "label": "Campaign",
+        "text": "Make a campaign for "
+      },
+      "cv": {
+        "label": "CV",
+        "text": "Write me a CV for "
+      },
+      "customerOffer": {
+        "label": "Customer offer",
+        "text": "Make an offer for "
+      },
+      "letter": {
+        "label": "Letter",
+        "text": "Write a letter about "
+      },
+      "customerEmail": {
+        "label": "Email to customers",
+        "text": "Write an email to my customers about "
+      },
+      "spreadsheet": {
+        "label": "Spreadsheet",
+        "text": "Make a spreadsheet for "
+      },
+      "formOrSurvey": {
+        "label": "Form or survey",
+        "text": "Make a form for "
+      },
+      "menuOrPriceList": {
+        "label": "Menu or price list",
+        "text": "Make a menu for "
+      },
+      "businessCard": {
+        "label": "Business card site",
+        "text": "Make a simple page for my business"
+      },
+      "siteAssistant": {
+        "label": "Support assistant",
+        "text": "Add a support assistant to my site"
+      },
+      "bookingApp": {
+        "label": "Booking app"
+      },
+      "game": {
+        "label": "Game",
+        "text": "Make a simple game: "
+      },
+      "morningSummary": {
+        "label": "Morning summary",
+        "text": "Every morning at 9 send me what I have today"
+      },
+      "weeklyReport": {
+        "label": "Weekly summary",
+        "text": "Every Monday send me a summary of the week"
+      },
+      "reminders": {
+        "label": "Reminders",
+        "text": "Send me a reminder when "
+      },
+      "tradingAlerts": {
+        "label": "Trading alerts",
+        "text": "Notify me when a trade "
+      },
+      "inboxSummary": {
+        "label": "Inbox summary",
+        "text": "Build an agent that summarises my inbox"
+      },
+      "myOwnAssistant": {
+        "label": "My own assistant",
+        "text": "Build me an assistant that "
+      },
+      "goalInSteps": {
+        "label": "Goal in steps",
+        "text": "Make a goal for "
+      },
+      "myWeek": {
+        "label": "My week",
+        "text": "Show me my week"
+      },
+      "notes": {
+        "label": "Notes",
+        "text": "Keep a note: "
+      },
+      "explainTopic": {
+        "label": "Explain a topic",
+        "text": "Explain in plain words: "
+      },
+      "practiceExercises": {
+        "label": "Exercises",
+        "text": "Give me exercises on "
+      },
+      "quiz": {
+        "label": "Quiz",
+        "text": "Make me a quiz on "
+      },
+      "flashcards": {
+        "label": "Flashcards",
+        "text": "Make me flashcards for "
+      },
+      "studyPlan": {
+        "label": "Study plan",
+        "text": "Make me a study plan for "
+      },
+      "languagePractice": {
+        "label": "Language practice",
+        "text": "I want to practise "
       }
     }
   },

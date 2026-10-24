@@ -209,6 +209,8 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // labels of a page they pointed at, its code and its last versions.
   // All of it is theirs to take with them.
   { table: "rebuild_projects", label: "rebuild_projects", scope: "user_content" },
+  // The Coming Soon screen's "Notify me": which not-ready tools this person asked about.
+  { table: "tool_notify_subscriptions", label: "tool_notify_subscriptions", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what

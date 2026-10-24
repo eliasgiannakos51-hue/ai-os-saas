@@ -199,12 +199,13 @@ console.log("\n== 3. the price, the hold, the charge ==");
 console.log("\n== 4. who may: the switch, the plan, the owner ==");
 {
   const access = read("src/lib/games/game-access.ts");
-  ok('the switch "games" first, then the Site\'s plan', /if \(!\(await isFeatureOn\("games", user\)\)\) return \{ ok: false, code: "not_enabled" \};/.test(access) && /if \(!accountHasCapability\(plan\?\.slug \?\? "free", "websiteBuilder", isAdmin\)\) return \{ ok: false, code: "not_included" \};/.test(access) && access.indexOf('isFeatureOn("games"') < access.indexOf("accountHasCapability("));
+  // No switch since 2026-10-24: gameGate checks only the Site's plan.
+  ok("the plan, and nothing before it", /if \(!accountHasCapability\(plan\?\.slug \?\? "free", "websiteBuilder", isAdmin\)\) return \{ ok: false, code: "not_included" \};/.test(access) && !/isFeatureOn\("games"/.test(access));
   const create = read("src/app/api/games/route.ts");
   const one = read("src/app/api/games/[id]/route.ts");
   const dl = read("src/app/api/games/[id]/download/route.ts");
   for (const [name, src, first] of [["the plan", create, "chargedGameStep("], ["a step", one, '.from("user_games")'], ["the download", dl, '.from("user_games")']]) {
-    ok(`${name}: signed in, then the switch and the plan, before anything is read or spent`, /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);\s*const gate = await gameGate\(user\);\s*if \(!gate\.ok\) return NextResponse\.json\(\{ ok: false, code: gate\.code \}, \{ status: 403 \}\);/.test(src) && src.indexOf("gameGate(user)") < src.indexOf(first));
+    ok(`${name}: signed in, then the plan, before anything is read or spent`, /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);\s*const gate = await gameGate\(user\);\s*if \(!gate\.ok\) return NextResponse\.json\(\{ ok: false, code: gate\.code \}, \{ status: 403 \}\);/.test(src) && src.indexOf("gameGate(user)") < src.indexOf(first));
   }
   ok("a game is read by id AND owner with the person's own client", /supabase\s*\.from\("user_games"\)\s*\.select\("id, title, plan, html, versions, locale"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(one) && /supabase\.from\("user_games"\)\.select\("title, html"\)\.eq\("id", params\.id\)\.eq\("user_id", user\.id\)/.test(dl));
   ok("...and written with the server's, scoped by id AND owner", /createAdminClient\(\)\s*\.from\("user_games"\)\s*\.update\(\{ \.\.\.patch, updated_at: new Date\(\)\.toISOString\(\) \}\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(one) && (one.match(/createAdminClient\(\)/g) ?? []).length === 1);
@@ -223,7 +224,9 @@ console.log("\n== 5. the screen, the words, the switch ==");
 {
   const page = read("src/app/dashboard/games/page.tsx");
   const shell = read("src/components/games/games-shell.tsx");
-  ok("without the switch the page does not exist; without the plan it is the wall", /if \(await isFeatureOn\("games", user\)\) \{\s*const gate = await gameGate\(user\);\s*if \(!gate\.ok\) \{/.test(page) && /\n  \}\n  notFound\(\);\n\}/.test(page) && /<UpgradeRequired \{\.\.\.upgradeWallProps\("websiteBuilder", t\("games"\)\)!\} \/>/.test(page) && page.indexOf("gameGate(user)") < page.indexOf('.from("user_games")'));
+  // No switch since 2026-10-24: for everyone, the plan gate decides the
+  // real tool or the wall — never notFound().
+  ok("for everyone; without the plan it is the wall, not a 404", /const gate = await gameGate\(user\);\s*if \(!gate\.ok\) \{/.test(page) && !/notFound\(\)/.test(page) && /<UpgradeRequired \{\.\.\.upgradeWallProps\("websiteBuilder", t\("games"\)\)!\} \/>/.test(page) && page.indexOf("gameGate(user)") < page.indexOf('.from("user_games")'));
   ok("the page reads only the person's own games", /\.from\("user_games"\)\s*\.select\("id, title, plan, html, versions, locale, updated_at"\)\s*\.eq\("user_id", user\.id\)/.test(page));
   ok("the game is played sealed, in a frame with scripts and nothing else", /const sealed = useMemo\(\(\) => \(open\?\.html \? sealGame\(open\.html\) : ""\), \[open\?\.html\]\);/.test(shell) && /srcDoc=\{sealed\}\s*sandbox=\{GAME_SANDBOX\}/.test(shell) && !/allow-same-origin/.test(shell));
   ok("the price of the next press is the characters that press sends, the server's prompt counted", /const nextAction = !open \? "gamePlan" : built \? "gameChange" : "gameBoxEdit";/.test(shell) && /systemChars \+ planMessage\(words, locale\)\.length/.test(shell) && /systemChars \+ changeMessage\(open\.html \?\? "", words, locale\)\.length/.test(shell) && /systemChars \+ boxMessage\(plan, box \?\? "rules", words, locale\)\.length/.test(shell) && /useCostEstimate\("gameWrite", \{ inputChars: plan \? systemChars \+ buildMessage\(plan, locale\)\.length : 0 \}\)/.test(shell) && /systemChars=\{gameSystemPrompt\(\)\.length\}/.test(page));
@@ -239,9 +242,11 @@ console.log("\n== 5. the screen, the words, the switch ==");
     const named = /\{title\}/.test(m.planned ?? "") && /\{box\}/.test(m.boxChanged ?? "") && /\{n\}/.test(m.restored ?? "") && /\{n\}/.test(m.version ?? "") && /\{count, plural,/.test(m.versions ?? "");
     ok(`${l}: every sentence, every box, every error, the named ones named`, missing.length === 0 && named && typeof messages[l].dashboard?.tools?.names?.games === "string", missing.join(" "));
   }
-  ok('the switch "games" is declared and names its migration', /\n  games: "[^"]*20261024000000_user_games\.sql",/.test(readFileSync("src/lib/flags/flags.ts", "utf8")));
+  // No switch since 2026-10-24, so nowhere in flags.ts names the
+  // migration any more — the schema canary is what still does.
+  ok("not in flags.ts any more, and its migration is still named by the schema canary", !/\n\s*games:\s*"/.test(readFileSync("src/lib/flags/flags.ts", "utf8")) && /table: "user_games",\s*migration: "20261024000000_user_games\.sql",/.test(readFileSync("src/lib/health/schema-canaries.ts", "utf8")));
   const catalog = readFileSync("src/lib/billing/feature-catalog.ts", "utf8");
-  ok("the catalog claims the page and every route, on the Site's plan, not yet sold", /id: "games",\s*group: "make",\s*minPlan: "starter",\s*pages: \["games"\],\s*routes: \["games", "games\/\[id\]", "games\/\[id\]\/download"\],\s*charges: true,\s*notSold:/.test(catalog) && /cell: \(p\) => boolCell\(p\.capabilities\.websiteBuilder\),/.test(catalog.slice(catalog.indexOf('id: "games"'))));
+  ok("the catalog claims the page and every route, on the Site's plan, sold now (open to everyone since 2026-10-24)", /id: "games",\s*group: "make",\s*minPlan: "starter",\s*pages: \["games"\],\s*routes: \["games", "games\/\[id\]", "games\/\[id\]\/download"\],\s*charges: true,\s*enforcedIn:/.test(catalog) && /cell: \(p\) => boolCell\(p\.capabilities\.websiteBuilder\),/.test(catalog.slice(catalog.indexOf('id: "games"'))));
 }
 
 console.log(failures.length ? `\nFAILURES: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);

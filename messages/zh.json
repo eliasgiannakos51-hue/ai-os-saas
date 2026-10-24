@@ -396,7 +396,8 @@
       "voiceClipLength": "单次录音时长上限（分钟）",
       "teamMembers": "团队成员",
       "recordSearch": "跨模块记录搜索",
-      "meetings": "会议 → 行动"
+      "meetings": "会议 → 行动",
+      "games": "游戏"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -3118,7 +3119,8 @@
         "ask": "提问",
         "make": "创作",
         "runAlone": "自动运行",
-        "organise": "整理"
+        "organise": "整理",
+        "learn": "学习"
       },
       "names": {
         "site": "网站",
@@ -3148,7 +3150,10 @@
         "avatars": "数字人",
         "coding": "编程",
         "agents": "智能体",
-        "iowork": "iowork"
+        "iowork": "iowork",
+        "translate": "翻译",
+        "apps": "应用",
+        "audio": "音频"
       },
       "lines": {
         "site": "根据描述生成网站",
@@ -3168,7 +3173,7 @@
         "sales": "联系人、跟进和下一步。",
         "trading": "你的交易记录。",
         "image": "根据描述生成图片",
-        "document": "文档、幻灯片和表格",
+        "document": "文档与表格",
         "games": "根据描述生成游戏。",
         "connect": "把你的其他应用接进来",
         "rebuild": "打造你自己的任何应用版本",
@@ -3176,10 +3181,14 @@
         "films": "根据剧本生成完整电影",
         "editing": "用文字剪辑视频和照片",
         "avatars": "替你念出文字的主持人",
-        "coding": "用你的 GitHub 项目写代码",
+        "coding": "编写并修复代码",
         "agents": "你不工作时，它们在工作",
-        "iowork": "在你的电脑上工作，生成文件"
-      }
+        "iowork": "在你的电脑上工作，生成文件",
+        "translate": "文本、文档和网站，支持任何语言",
+        "apps": "根据描述生成可保存数据的应用",
+        "audio": "配音、播客与音乐"
+      },
+      "comingSoonBadge": "即将推出"
     },
     "home": {
       "actions": {
@@ -3868,6 +3877,263 @@
           "tooLarge": "该页面太大,无法读取。没有扣费。",
           "invalid": "这不是我能读取的网址。没有扣费。"
         }
+      }
+    },
+    "comingSoon": {
+      "badge": "即将推出",
+      "fieldPlaceholder": "即将推出",
+      "line": "尚未开放，不会产生任何费用。",
+      "notify": "开放时通知我",
+      "notified": "我们会通知你",
+      "notifyFailed": "无法保存，请重试。",
+      "examples": {
+        "apps": {
+          "a": "我的沙龙预订应用",
+          "b": "外卖订单应用",
+          "c": "员工排班记录应用"
+        },
+        "video": {
+          "a": "我产品的30秒广告视频",
+          "b": "介绍我business的简短视频",
+          "c": "新员工培训视频"
+        },
+        "films": {
+          "a": "关于我business的小纪录片",
+          "b": "带叙事风格的宣传片"
+        },
+        "editing": {
+          "a": "去除照片的背景",
+          "b": "从较长视频中剪出的社交媒体短片",
+          "c": "为视频添加字幕"
+        },
+        "avatars": {
+          "a": "展示我产品的数字化身",
+          "b": "用于课程视频的讲师化身"
+        },
+        "audio": {
+          "a": "视频配音",
+          "b": "由一段文字生成的播客",
+          "c": "视频用的音乐曲目"
+        },
+        "translate": {
+          "a": "把这段文字翻译成英文",
+          "b": "把我的网站翻译成另一种语言"
+        }
+      }
+    },
+    "quickJobs": {
+      "meetingNotes": {
+        "label": "会议记录"
+      },
+      "incomeExpenses": {
+        "label": "收入与支出",
+        "text": "我上个月的支出是多少？"
+      },
+      "customersSales": {
+        "label": "客户与销售",
+        "text": "上个月哪些客户购买了？"
+      },
+      "tradingCalendar": {
+        "label": "交易日历",
+        "text": "给我看上周的交易"
+      },
+      "translateQuick": {
+        "label": "翻译"
+      },
+      "summariseText": {
+        "label": "摘要文本或PDF",
+        "text": "帮我总结这个文件"
+      },
+      "chartFromNumbers": {
+        "label": "从数字制作图表",
+        "text": "用这些数据做一个图表"
+      },
+      "receiptsTable": {
+        "label": "收据制成表格",
+        "text": "把这些收据整理成表格"
+      },
+      "salesForecast": {
+        "label": "销售预测",
+        "text": "根据这些数据预测销售额"
+      },
+      "factCheck": {
+        "label": "事实核查",
+        "text": "核实这是否属实："
+      },
+      "compareOptions": {
+        "label": "比较选项",
+        "text": "比较这些选项："
+      },
+      "competitorAnalysis": {
+        "label": "竞争对手分析",
+        "text": "分析我的竞争对手"
+      },
+      "editText": {
+        "label": "编辑文本",
+        "text": "编辑这段文字："
+      },
+      "replyToReview": {
+        "label": "回复评价",
+        "text": "给这条评价写回复："
+      },
+      "replyToCustomer": {
+        "label": "回复客户",
+        "text": "给这位客户写回复："
+      },
+      "logo": {
+        "label": "标志",
+        "text": "给我做一个标志，用于"
+      },
+      "productPhoto": {
+        "label": "产品照片",
+        "text": "为这个产品做一张照片："
+      },
+      "poster": {
+        "label": "海报",
+        "text": "做一张海报，用于"
+      },
+      "upscaleImage": {
+        "label": "放大图像",
+        "text": "放大这张图片"
+      },
+      "removeBackground": {
+        "label": "去除背景"
+      },
+      "shortSocialClip": {
+        "label": "社交媒体短视频"
+      },
+      "subtitles": {
+        "label": "字幕"
+      },
+      "podcastToVideo": {
+        "label": "播客转视频"
+      },
+      "thirtySecondAd": {
+        "label": "30秒广告"
+      },
+      "musicForVideo": {
+        "label": "视频配乐"
+      },
+      "voiceOver": {
+        "label": "配音"
+      },
+      "podcastFromText": {
+        "label": "文字转播客"
+      },
+      "presentation": {
+        "label": "演示文稿",
+        "text": "制作一个关于以下内容的演示文稿："
+      },
+      "socialPost": {
+        "label": "社交媒体帖子",
+        "text": "制作一个关于以下内容的帖子："
+      },
+      "campaign": {
+        "label": "营销活动",
+        "text": "为以下内容制作一个营销活动："
+      },
+      "cv": {
+        "label": "简历",
+        "text": "给我写一份简历，用于"
+      },
+      "customerOffer": {
+        "label": "客户报价",
+        "text": "为以下内容制作报价："
+      },
+      "letter": {
+        "label": "信函",
+        "text": "写一封关于以下内容的信："
+      },
+      "customerEmail": {
+        "label": "给客户的邮件",
+        "text": "给我的客户写一封关于以下内容的邮件："
+      },
+      "spreadsheet": {
+        "label": "电子表格",
+        "text": "为以下内容制作一个表格："
+      },
+      "formOrSurvey": {
+        "label": "表单或问卷",
+        "text": "为以下内容制作一个表单："
+      },
+      "menuOrPriceList": {
+        "label": "菜单或价目表",
+        "text": "为以下内容制作一个菜单："
+      },
+      "businessCard": {
+        "label": "名片式网站",
+        "text": "为我的企业做一个简单的网页"
+      },
+      "siteAssistant": {
+        "label": "客服助手",
+        "text": "给我的网站添加一个客服助手"
+      },
+      "bookingApp": {
+        "label": "预订应用"
+      },
+      "game": {
+        "label": "游戏",
+        "text": "制作一个简单的游戏："
+      },
+      "morningSummary": {
+        "label": "早晨摘要",
+        "text": "每天早上9点发给我今天的安排"
+      },
+      "weeklyReport": {
+        "label": "每周摘要",
+        "text": "每周一给我发一份周报"
+      },
+      "reminders": {
+        "label": "提醒",
+        "text": "在以下情况提醒我："
+      },
+      "tradingAlerts": {
+        "label": "交易提醒",
+        "text": "当交易出现以下情况时通知我："
+      },
+      "inboxSummary": {
+        "label": "收件箱摘要",
+        "text": "创建一个总结我收件箱的智能体"
+      },
+      "myOwnAssistant": {
+        "label": "我的专属助手",
+        "text": "给我创建一个这样的智能体："
+      },
+      "goalInSteps": {
+        "label": "分步目标",
+        "text": "为以下内容制定一个目标："
+      },
+      "myWeek": {
+        "label": "我的一周",
+        "text": "给我看看我这一周"
+      },
+      "notes": {
+        "label": "笔记",
+        "text": "记一条笔记："
+      },
+      "explainTopic": {
+        "label": "解释一个主题",
+        "text": "简单地给我解释一下："
+      },
+      "practiceExercises": {
+        "label": "练习题",
+        "text": "给我一些关于以下内容的练习题："
+      },
+      "quiz": {
+        "label": "测验",
+        "text": "给我出一个关于以下内容的测验："
+      },
+      "flashcards": {
+        "label": "记忆卡片",
+        "text": "给我制作关于以下内容的记忆卡片："
+      },
+      "studyPlan": {
+        "label": "学习计划",
+        "text": "给我制定一个关于以下内容的学习计划："
+      },
+      "languagePractice": {
+        "label": "语言练习",
+        "text": "我想练习"
       }
     }
   },

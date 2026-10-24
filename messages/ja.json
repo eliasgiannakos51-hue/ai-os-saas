@@ -396,7 +396,8 @@
       "voiceClipLength": "1回の録音の上限（分）",
       "teamMembers": "チームメンバー",
       "recordSearch": "記録の横断検索",
-      "meetings": "会議 → アクション"
+      "meetings": "会議 → アクション",
+      "games": "ゲーム"
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
@@ -3118,7 +3119,8 @@
         "ask": "質問",
         "make": "作る",
         "runAlone": "自動で動かす",
-        "organise": "整理"
+        "organise": "整理",
+        "learn": "学ぶ"
       },
       "names": {
         "site": "サイト",
@@ -3148,7 +3150,10 @@
         "avatars": "アバター",
         "coding": "コーディング",
         "agents": "エージェント",
-        "iowork": "iowork"
+        "iowork": "iowork",
+        "translate": "翻訳",
+        "apps": "アプリ",
+        "audio": "オーディオ"
       },
       "lines": {
         "site": "説明からウェブサイトを作成",
@@ -3168,7 +3173,7 @@
         "sales": "連絡先、アプローチ、次のステップ。",
         "trading": "トレードの記録。",
         "image": "説明から画像を作成",
-        "document": "文書、スライド、シート",
+        "document": "文書とシート",
         "games": "説明からゲームを作成。",
         "connect": "ほかのアプリを取り込む",
         "rebuild": "どんなアプリも自分版に作り直す",
@@ -3176,10 +3181,14 @@
         "films": "脚本から映画を丸ごと作成",
         "editing": "言葉で動画と写真を編集",
         "avatars": "あなたの文章を話すプレゼンター",
-        "coding": "GitHubプロジェクトでコーディング",
+        "coding": "コードを書いて修正",
         "agents": "あなたが休んでいる間も働く",
-        "iowork": "パソコン上で動き、ファイルを作る"
-      }
+        "iowork": "パソコン上で動き、ファイルを作る",
+        "translate": "テキスト、文書、サイトをあらゆる言語に",
+        "apps": "説明からデータを保存するアプリを作成",
+        "audio": "ナレーション、ポッドキャスト、音楽"
+      },
+      "comingSoonBadge": "近日公開"
     },
     "home": {
       "actions": {
@@ -3868,6 +3877,263 @@
           "tooLarge": "そのページは大きすぎて読めません。課金はされていません。",
           "invalid": "読めるウェブアドレスではありません。課金はされていません。"
         }
+      }
+    },
+    "comingSoon": {
+      "badge": "近日公開",
+      "fieldPlaceholder": "近日公開",
+      "line": "まだ利用できません。料金は発生しません。",
+      "notify": "公開時に通知する",
+      "notified": "通知します",
+      "notifyFailed": "保存できませんでした。もう一度お試しください。",
+      "examples": {
+        "apps": {
+          "a": "サロンの予約アプリ",
+          "b": "デリバリー注文用アプリ",
+          "c": "スタッフのシフト管理アプリ"
+        },
+        "video": {
+          "a": "自分の商品の30秒広告動画",
+          "b": "自分の事業を紹介する短い動画",
+          "c": "新入社員向けの研修動画"
+        },
+        "films": {
+          "a": "自分の事業についての短いドキュメンタリー",
+          "b": "物語調のプロモーション映像"
+        },
+        "editing": {
+          "a": "写真の背景を削除",
+          "b": "長い動画から切り出したSNS用の短いクリップ",
+          "c": "動画に字幕をつける"
+        },
+        "avatars": {
+          "a": "自分の商品を紹介するデジタルアバター",
+          "b": "レッスン動画用の講師アバター"
+        },
+        "audio": {
+          "a": "動画のナレーション",
+          "b": "テキストから作るポッドキャスト",
+          "c": "動画用の音楽トラック"
+        },
+        "translate": {
+          "a": "この文章を英語に翻訳して",
+          "b": "自分のサイトを別の言語に翻訳して"
+        }
+      }
+    },
+    "quickJobs": {
+      "meetingNotes": {
+        "label": "会議メモ"
+      },
+      "incomeExpenses": {
+        "label": "収入と支出",
+        "text": "先月の支出はいくらでしたか？"
+      },
+      "customersSales": {
+        "label": "顧客と売上",
+        "text": "先月購入した顧客は誰ですか？"
+      },
+      "tradingCalendar": {
+        "label": "取引カレンダー",
+        "text": "先週の取引を見せて"
+      },
+      "translateQuick": {
+        "label": "翻訳"
+      },
+      "summariseText": {
+        "label": "テキストやPDFの要約",
+        "text": "このファイルを要約して"
+      },
+      "chartFromNumbers": {
+        "label": "数値からグラフ作成",
+        "text": "このデータからグラフを作って"
+      },
+      "receiptsTable": {
+        "label": "領収書を表に",
+        "text": "この領収書を表にして"
+      },
+      "salesForecast": {
+        "label": "売上予測",
+        "text": "このデータから売上を予測して"
+      },
+      "factCheck": {
+        "label": "ファクトチェック",
+        "text": "これが本当か確認して: "
+      },
+      "compareOptions": {
+        "label": "選択肢を比較",
+        "text": "これらの選択肢を比較して: "
+      },
+      "competitorAnalysis": {
+        "label": "競合分析",
+        "text": "競合他社を分析して"
+      },
+      "editText": {
+        "label": "テキスト編集",
+        "text": "この文章を編集して: "
+      },
+      "replyToReview": {
+        "label": "レビューに返信",
+        "text": "このレビューへの返信を書いて: "
+      },
+      "replyToCustomer": {
+        "label": "顧客へ返信",
+        "text": "この顧客への返信を書いて: "
+      },
+      "logo": {
+        "label": "ロゴ",
+        "text": "ロゴを作って: "
+      },
+      "productPhoto": {
+        "label": "商品写真",
+        "text": "商品写真を作って: "
+      },
+      "poster": {
+        "label": "ポスター",
+        "text": "ポスターを作って: "
+      },
+      "upscaleImage": {
+        "label": "画像を拡大",
+        "text": "この画像を拡大して"
+      },
+      "removeBackground": {
+        "label": "背景を削除"
+      },
+      "shortSocialClip": {
+        "label": "SNS用の短い動画"
+      },
+      "subtitles": {
+        "label": "字幕"
+      },
+      "podcastToVideo": {
+        "label": "ポッドキャストを動画に"
+      },
+      "thirtySecondAd": {
+        "label": "30秒広告"
+      },
+      "musicForVideo": {
+        "label": "動画用の音楽"
+      },
+      "voiceOver": {
+        "label": "ナレーション"
+      },
+      "podcastFromText": {
+        "label": "テキストからポッドキャスト"
+      },
+      "presentation": {
+        "label": "プレゼン資料",
+        "text": "についてのプレゼンを作って: "
+      },
+      "socialPost": {
+        "label": "SNS投稿",
+        "text": "についての投稿を作って: "
+      },
+      "campaign": {
+        "label": "キャンペーン",
+        "text": "キャンペーンを作って: "
+      },
+      "cv": {
+        "label": "履歴書",
+        "text": "の履歴書を書いて: "
+      },
+      "customerOffer": {
+        "label": "顧客向け見積り",
+        "text": "向けの見積りを作って: "
+      },
+      "letter": {
+        "label": "手紙",
+        "text": "についての手紙を書いて: "
+      },
+      "customerEmail": {
+        "label": "顧客へのメール",
+        "text": "宛のメールを書いて: "
+      },
+      "spreadsheet": {
+        "label": "表計算シート",
+        "text": "の表を作って: "
+      },
+      "formOrSurvey": {
+        "label": "フォームやアンケート",
+        "text": "のフォームを作って: "
+      },
+      "menuOrPriceList": {
+        "label": "メニューや価格表",
+        "text": "のメニューを作って: "
+      },
+      "businessCard": {
+        "label": "簡易ビジネスサイト",
+        "text": "私のビジネス用のシンプルなページを作って"
+      },
+      "siteAssistant": {
+        "label": "サポートアシスタント",
+        "text": "サイトにサポートアシスタントを追加して"
+      },
+      "bookingApp": {
+        "label": "予約アプリ"
+      },
+      "game": {
+        "label": "ゲーム",
+        "text": "シンプルなゲームを作って: "
+      },
+      "morningSummary": {
+        "label": "朝のサマリー",
+        "text": "毎朝9時に今日の予定を送って"
+      },
+      "weeklyReport": {
+        "label": "週次サマリー",
+        "text": "毎週月曜日に週次レポートを送って"
+      },
+      "reminders": {
+        "label": "リマインダー",
+        "text": "次の時にリマインドして: "
+      },
+      "tradingAlerts": {
+        "label": "トレードアラート",
+        "text": "取引が次の時に通知して: "
+      },
+      "inboxSummary": {
+        "label": "受信箱の要約",
+        "text": "受信箱を要約するエージェントを作って"
+      },
+      "myOwnAssistant": {
+        "label": "自分専用のアシスタント",
+        "text": "次のようなアシスタントを作って: "
+      },
+      "goalInSteps": {
+        "label": "ステップ化された目標",
+        "text": "のための目標を作って: "
+      },
+      "myWeek": {
+        "label": "今週のまとめ",
+        "text": "今週の予定を見せて"
+      },
+      "notes": {
+        "label": "メモ",
+        "text": "メモして: "
+      },
+      "explainTopic": {
+        "label": "トピックの説明",
+        "text": "簡単に説明して: "
+      },
+      "practiceExercises": {
+        "label": "練習問題",
+        "text": "の練習問題をください: "
+      },
+      "quiz": {
+        "label": "クイズ",
+        "text": "のクイズを作って: "
+      },
+      "flashcards": {
+        "label": "単語カード",
+        "text": "の単語カードを作って: "
+      },
+      "studyPlan": {
+        "label": "学習プラン",
+        "text": "の学習プランを作って: "
+      },
+      "languagePractice": {
+        "label": "語学練習",
+        "text": "を練習したい: "
       }
     }
   },

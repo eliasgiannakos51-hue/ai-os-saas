@@ -4140,7 +4140,7 @@
       "empty": {
         "heading": "Collez le texte à traduire",
         "examples": {
-          "a": "Bienvenue chez nous ! Nous serons ravis de vous aider.\n\nNos bureaux sont ouverts du lundi au vendredi, de 9h à 18h.",
+          "a": "Bienvenue chez nous. Nous serons ravis de vous aider.\n\nNos bureaux sont ouverts du lundi au vendredi, de 9h à 18h.",
           "b": "Cher client,\n\nMerci pour votre commande. Vous la recevrez dans un délai de 3 jours ouvrés.",
           "c": "Notre entreprise a été fondée en 2015 et se spécialise dans les solutions logicielles pour petites entreprises."
         }

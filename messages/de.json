@@ -4140,7 +4140,7 @@
       "empty": {
         "heading": "Text zum Übersetzen einfügen",
         "examples": {
-          "a": "Willkommen bei uns! Wir helfen Ihnen gerne.\n\nUnser Büro ist Montag bis Freitag von 9 bis 18 Uhr geöffnet.",
+          "a": "Willkommen bei uns. Wir helfen Ihnen gerne.\n\nUnser Büro ist Montag bis Freitag von 9 bis 18 Uhr geöffnet.",
           "b": "Liebe Kundin, lieber Kunde,\n\nvielen Dank für Ihre Bestellung. Sie erhalten sie innerhalb von 3 Werktagen.",
           "c": "Unser Unternehmen wurde 2015 gegründet und ist auf Softwarelösungen für kleine Unternehmen spezialisiert."
         }

@@ -4140,7 +4140,7 @@
       "empty": {
         "heading": "Paste text to translate",
         "examples": {
-          "a": "Welcome to our business! We're happy to help.\n\nOur office is open Monday to Friday, 9am to 6pm.",
+          "a": "Welcome to our business. We're happy to help.\n\nOur office is open Monday to Friday, 9am to 6pm.",
           "b": "Dear customer,\n\nThank you for your order. You'll receive it within 3 business days.",
           "c": "Our company was founded in 2015 and specialises in software solutions for small businesses."
         }

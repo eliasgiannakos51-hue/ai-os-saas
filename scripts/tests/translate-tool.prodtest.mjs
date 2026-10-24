@@ -200,9 +200,10 @@ try {
     await p2.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
     await p2.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
 
-    // Choose two targets: English and German (both different from the detected Greek).
+    // Two targets: English (already the default, in a Greek-locale
+    // session — src/components/translate/translate-shell.tsx picks
+    // "en" when the UI locale is not English) plus German, added here.
     await press2(p2.locator('[data-testid="translate-tool-targets"]'));
-    await press2(p2.locator('[data-testid="translate-tool-target-option"][data-selected="false"]').filter({ hasText: "English" }).first());
     await press2(p2.locator('[data-testid="translate-tool-target-option"]').filter({ hasText: "Deutsch" }).first());
     await press2(p2.locator('[data-testid="translate-tool-targets"]'));
 
@@ -228,13 +229,38 @@ try {
     await c2.close();
   }
 
-  console.log("\n== desktop: a target already in the text's own language costs nothing ==");
+  console.log("\n== desktop: every target already in the text's own language refuses, before any price or hold ==");
   {
     setFlags({});
     reserved.length = 0;
     const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
     await page.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
     await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
+    await press(page.locator('[data-testid="translate-tool-targets"]'));
+    // "English" is the default target in a Greek-locale session — drop it
+    // first, so Greek (the text's own, detected language) is the ONLY
+    // target left, and this run has nothing live to translate at all.
+    await press(page.locator('[data-testid="translate-tool-target-option"]').filter({ hasText: "English" }).first());
+    await press(page.locator('[data-testid="translate-tool-target-option"]').filter({ hasText: "Ελληνικά" }).first());
+    await press(page.locator('[data-testid="translate-tool-targets"]'));
+    const textarea = page.locator("textarea").first();
+    await textarea.fill(PARA_1);
+    const asked = modelAsked.length;
+    await press(page.locator("button[aria-label]").last());
+    await page.locator('[data-testid="tool-shell-thread"]').locator(`text=${EL.errors.sameLanguage}`).waitFor({ timeout: 15_000 });
+    check("asks the model nothing, holds nothing, and says so plainly", modelAsked.length === asked && reserved.length === 0);
+    await context.close();
+  }
+
+  console.log("\n== desktop: a MIX of languages — one same, one different — translates only the different one ==");
+  {
+    setFlags({});
+    reserved.length = 0;
+    const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/translate`, { waitUntil: "load" });
+    await page.locator('[data-testid="tool-shell-empty"]').waitFor({ timeout: 15_000 });
+    // Default target is already "en" (a live target); add Greek too — the
+    // text's own detected language, a free no-op beside it.
     await press(page.locator('[data-testid="translate-tool-targets"]'));
     await press(page.locator('[data-testid="translate-tool-target-option"]').filter({ hasText: "Ελληνικά" }).first());
     await press(page.locator('[data-testid="translate-tool-targets"]'));
@@ -243,7 +269,8 @@ try {
     const asked = modelAsked.length;
     await press(page.locator("button[aria-label]").last());
     await page.locator('[data-testid="translate-tool-results"]').waitFor({ timeout: 30_000 });
-    check("a same-language target asks the model nothing, and says so plainly", modelAsked.length === asked && (await page.locator('[data-testid="translate-tool-target"]').innerText()).includes(EL.sameLanguageNote));
+    check("the model is asked once, for the one language that differs", modelAsked.length - asked === 1);
+    check("the same-language target says so, plainly, with no translated column", (await page.locator('[data-testid="translate-tool-target"]').filter({ hasText: "Ελληνικά" }).innerText()).includes(EL.sameLanguageNote));
     await context.close();
   }
 

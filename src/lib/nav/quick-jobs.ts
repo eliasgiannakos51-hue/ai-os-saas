@@ -20,8 +20,8 @@
 // tool — every one opens Chat with its question already asked
 // (`?ask=`, which Chat auto-sends: components/chat/chat-workspace.tsx).
 //
-// scripts/tests/quick-jobs.test.mjs holds every href against a real route
-// and every target's param against what that page actually reads.
+// scripts/tests/all-tools.test.mjs §1 holds every href against a real
+// route and every target's param against what that page actually reads.
 
 export type QuickJobGroup = "record" | "ask" | "make" | "runAlone" | "organise" | "learn";
 
@@ -34,6 +34,15 @@ export type QuickJob = {
   href: string;
   /** The query parameter the target reads for its example text; omit when the job has none to give (Meetings, Translate, Apps). */
   param?: "ask" | "brief" | "said" | "agent";
+  /** Words a reader types that are not the job's own displayed label, by
+   *  locale — the same reason lib/palette-aliases.ts exists, but these
+   *  are not tied to a sidebar item key (PALETTE_ALIASES' own gate checks
+   *  that correspondence, which a quick job has none of), so they live
+   *  here instead. `el: ["cv"]` on the cv job is why "cv" still finds
+   *  «Βιογραφικό» after the final grid's small tiles left the page
+   *  (the owner's "ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ", 2026-10-24) —
+   *  the search is now the only road to it. */
+  aliases?: Partial<Record<string, string[]>>;
 };
 
 export const QUICK_JOBS: readonly QuickJob[] = [
@@ -70,7 +79,7 @@ export const QUICK_JOBS: readonly QuickJob[] = [
   { id: "presentation", group: "make", tool: "slides", href: "/dashboard/presentations", param: "brief" },
   { id: "socialPost", group: "make", tool: "posts", href: "/dashboard/posts", param: "brief" },
   { id: "campaign", group: "make", tool: "posts", href: "/dashboard/posts", param: "brief" },
-  { id: "cv", group: "make", tool: "document", href: "/dashboard/documents", param: "ask" },
+  { id: "cv", group: "make", tool: "document", href: "/dashboard/documents", param: "ask", aliases: { el: ["cv"] } },
   { id: "customerOffer", group: "make", tool: "document", href: "/dashboard/documents", param: "ask" },
   { id: "letter", group: "make", tool: "document", href: "/dashboard/documents", param: "ask" },
   { id: "customerEmail", group: "make", tool: "document", href: "/dashboard/documents", param: "ask" },

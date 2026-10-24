@@ -55,7 +55,7 @@ console.log("\n== 4. the notify script: honest about having no cron ==");
 check("the script requires DATABASE_URL rather than silently no-op'ing", /DATABASE_URL/.test(script));
 check("it deletes the subscriptions it just notified (no repeat notification)", /delete/i.test(script) && /tool_notify_subscriptions/.test(script));
 check("it supports --dry-run so a run can be checked before it writes", /--dry-run/.test(script));
-check("it is documented as bypassing the curated NotificationType list, not silently extending it", /NotificationType/.test(script));
+check("DOC, not behaviour: the script's own comment says it bypasses the curated NotificationType list, not silently extending it", /NotificationType/.test(script));
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

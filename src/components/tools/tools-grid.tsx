@@ -34,21 +34,32 @@ const ROWLESS_ICONS: Record<string, LucideIcon> = {
 };
 
 /**
- * ALL TOOLS, EVERY SQUARE (the owner's message, 2026-10-24): big square
- * tiles, five to six in a row on a computer and two on a phone, in six
- * groups — Record, Ask, Make, Run on its own, Organise, Learn — with a
- * search on top and no «beta» anywhere. Under each group's big tiles, a
- * row of smaller ready-made jobs (lib/nav/quick-jobs.ts): name and icon
- * only, opening an existing tool with its field already filled.
+ * ALL TOOLS, ONLY THE REGULAR SQUARES, CLEANLY ALIGNED (the owner's
+ * message "ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ, ΚΑΘΑΡΑ ΣΤΟΙΧΙΣΜΕΝΑ",
+ * 2026-10-24): the page draws ONLY the 24 big tiles, five to a row on a
+ * computer and two on a phone, same width and same height, left-aligned,
+ * no gaps in the middle. Each group is its own full-width row — no more
+ * sharing a row with another group — so nothing sits beside anything
+ * else at a width that does not fit.
+ *
+ * THE SMALL READY-MADE JOBS (lib/nav/quick-jobs.ts) ARE NOT DRAWN ON THIS
+ * PAGE ANY MORE, and the Learn group — which carries nothing else — goes
+ * with them. NEITHER IS DELETED FROM THE REGISTRY: both are still found
+ * by this page's own search, by ⌘K (the same ranking, lib/command-
+ * palette-match.ts) and by Chat (asking for what a job promises, e.g.
+ * "make me a CV", opens the same tool the job would have opened).
  *
  * EVERY BIG TILE IS DRAWN, even one that is not built yet — a small
- * «Σύντομα» mark, and its address is components/tools/coming-soon-shell.tsx
- * instead of the real tool (`live` says which addresses are real; every
- * other registry entry is still a tile, just not a live one).
+ * «Σύντομα» mark in the tile's own top-right corner, decoupled from the
+ * name so a long name never has to make room for it, and its address is
+ * components/tools/coming-soon-shell.tsx instead of the real tool
+ * (`live` says which addresses are real; every other registry entry is
+ * still a tile, just not a live one).
  *
- * THE SAME SEARCH AS ⌘K: a tile or a job answers to its name on screen,
- * its English name, lib/palette-aliases.ts and its one-line description,
- * ranked by lib/command-palette-match.ts.
+ * A NAME NEVER WRAPS AND NEVER IS CUT: one line, in full
+ * (`whitespace-nowrap`, no truncate). The line under it is the one
+ * exception allowed to truncate — it is what keeps every tile the same
+ * height regardless of how long that language's description runs.
  *
  * THE PIN is the only way to put a tool in the sidebar at once (the
  * Recent tools rule, ΣΥΣΤΗΜΑ DESIGN §3); it writes through the same
@@ -169,14 +180,17 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
   const bigLabel = (href: string) => { const k = nameKey(href); const item = everyItem.get(href); return k ? names[k] : item ? longLabel(item) : href; };
   const bigHint = (href: string) => { const k = nameKey(href); const item = everyItem.get(href); return k ? lines[k] : item ? sidebarHint(item) : ""; };
 
+  // ONLY BIG TILES REACH THE PAGE NOW: a group with none — Learn, which
+  // carries only small ready-made jobs — never gets a row of its own
+  // here. The small jobs stay fully real (lib/nav/quick-jobs.ts), just
+  // reachable only through the search below, ⌘K and Chat.
   const groups = useMemo(
     () =>
       ALL_TOOLS_GROUP_ORDER.map((key) => ({
         key,
         heading: headings[key],
         big: ALL_TOOLS.filter((tool) => tool.group === key),
-        small: QUICK_JOBS.filter((job) => job.group === key),
-      })).filter((g) => g.big.length > 0 || g.small.length > 0),
+      })).filter((g) => g.big.length > 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
   );
@@ -204,7 +218,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
         const smallCandidates = QUICK_JOBS.map((job) => ({
           kind: "small" as const,
           job,
-          item: { href: job.id, label: jobLabel(job), candidates: [jobLabel(job), bigLabel(job.href)] },
+          item: { href: job.id, label: jobLabel(job), candidates: [jobLabel(job), bigLabel(job.href), ...(job.aliases?.[locale] ?? [])] },
         }));
         return filterAndRankCandidates([...bigCandidates, ...smallCandidates].map((c) => ({ item: c, candidates: c.item.candidates })), query);
       })()
@@ -239,24 +253,36 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     const canPin = mainRows.has(tool.href) && !NEVER_RECENT.includes(tool.href) && !tool.href.startsWith("/help") && tool.href !== "/dashboard/settings";
     const isPinned = pins.includes(tool.href);
     return (
-      <li key={tool.href} className="group relative">
+      <li key={tool.href} className="group relative h-full">
         <Link
           href={tool.href}
           data-testid="tool-tile"
           data-ready={isLive}
-          className="flex flex-col gap-1 rounded-card border border-border bg-panel p-3 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
+          // h-full + a fixed min-height: every tile the same height
+          // regardless of language or whether it carries a badge — the
+          // owner's "ΙΔΙΟ ΜΕΓΕΘΟΣ". The name never wraps and is never cut
+          // (whitespace-nowrap, no truncate); the line below it is the
+          // one allowed to truncate, which is what keeps the height fixed
+          // even when a language's description runs long.
+          className="flex h-full min-h-[88px] flex-col gap-1 rounded-card border border-border bg-panel p-3 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
         >
           <span className="flex min-w-0 items-center gap-2">
             <Icon className="h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />
-            <span className="min-w-0 break-words text-sm font-medium text-foreground">{name}</span>
-            {!isLive && (
-              <span data-testid="tool-tile-badge" className="ms-auto shrink-0 rounded-item border border-border bg-panel-hover px-1.5 py-0.5 text-[10px] text-muted">
-                {t("comingSoonBadge")}
-              </span>
-            )}
+            <span className="min-w-0 overflow-visible whitespace-nowrap text-sm font-medium text-foreground">{name}</span>
           </span>
-          {description && <span className="block break-words text-xs text-muted">{description}</span>}
+          {description && <span className="block truncate text-xs text-muted">{description}</span>}
         </Link>
+        {!isLive && (
+          // Its own corner, decoupled from the name row, so a long name
+          // never has to make room for it (the owner's "ποτέ δίπλα στο
+          // όνομα αν δεν χωρά").
+          <span
+            data-testid="tool-tile-badge"
+            className="pointer-events-none absolute end-2 top-2 shrink-0 rounded-item border border-border bg-panel-hover px-1.5 py-0.5 text-[10px] text-muted"
+          >
+            {t("comingSoonBadge")}
+          </span>
+        )}
         {canPin && (
           <button
             type="button"
@@ -302,17 +328,12 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     );
   };
 
-  const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6";
-  // How many of the grid's columns a group of N tiles spans on a wide screen.
-  // Literal class names, so Tailwind can see every one of them.
-  const SPAN: Record<number, string> = {
-    1: "lg:col-span-1 xl:col-span-1",
-    2: "lg:col-span-2 xl:col-span-2",
-    3: "lg:col-span-3 xl:col-span-3",
-    4: "lg:col-span-4 xl:col-span-4",
-    5: "lg:col-span-5 xl:col-span-5",
-    6: "lg:col-span-5 xl:col-span-6",
-  };
+  // ONE fixed grid for every row on this page — search results, and
+  // every group's own row — so a tile is the same width wherever it is
+  // drawn: five to a row on a computer, two on a phone (the owner's
+  // "5 ανά σειρά σε υπολογιστή, 2 σε κινητό"). `items-stretch` (the grid
+  // default) is what makes every tile in a row the same height.
+  const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5";
 
   return (
     <div>
@@ -338,35 +359,19 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
           <p className="mt-6 text-sm text-muted">{t("noMatch", { query: query.trim() })}</p>
         )
       ) : (
-        // THE GROUPS SHARE ROWS where they fit (the owner's "όλα σε μία
-        // οθόνη αν χωράνε"): on a wide screen each group spans as many of the
-        // grid's columns as it has tiles, so Record and Ask sit side by side
-        // and Make sits beside Run on its own; on a phone every group is a
-        // full-width block. The order is the owner's either way.
-        <div className="mt-5 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+        // EVERY GROUP IS ITS OWN FULL-WIDTH ROW now (the owner's "ΚΑΘΕ
+        // ΟΜΑΔΑ ΣΕ ΔΙΚΗ ΤΗΣ ΓΡΑΜΜΗ") — no more sharing a row with another
+        // group at a width that does not fit. A plain vertical stack of
+        // sections, each with the one fixed tile grid.
+        <div className="mt-5 flex flex-col gap-6">
           {groups.map((group) => (
-            <section
-              key={group.key}
-              aria-labelledby={`tools-${group.key}`}
-              className={`col-span-2 sm:col-span-3 ${SPAN[Math.min(group.big.length || group.small.length, 6)]}`}
-            >
+            <section key={group.key} aria-labelledby={`tools-${group.key}`}>
               <h2 id={`tools-${group.key}`} className="mb-2 text-xs text-muted">
                 {group.heading}
               </h2>
-              {group.big.length > 0 && (
-                <ul
-                  data-testid="tools-big-row"
-                  className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]"
-                  style={{ "--n": Math.min(group.big.length, 5) } as React.CSSProperties}
-                >
-                  {group.big.map(bigTile)}
-                </ul>
-              )}
-              {group.small.length > 0 && (
-                <ul data-testid="quick-jobs-row" className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${group.big.length > 0 ? "mt-2" : ""}`}>
-                  {group.small.map(smallTile)}
-                </ul>
-              )}
+              <ul data-testid="tools-big-row" className={GRID}>
+                {group.big.map(bigTile)}
+              </ul>
             </section>
           ))}
         </div>

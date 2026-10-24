@@ -1,12 +1,11 @@
 /*
- * ALL TOOLS, EVERY SQUARE (the owner's message "ALL TOOLS: ΟΛΑ ΤΑ
- * ΤΕΤΡΑΓΩΝΑ", 2026-10-24), on a production build over the Supabase
- * stand-in, for an ORDINARY member (nobody is staff, no switch is set),
- * in Greek and English, on a computer and a phone. Supersedes the
- * 17-tile round's prodtest: every one of the 24 registry tiles is drawn
- * now — `ready: false` no longer hides a tile, it marks it «Σύντομα»
- * and its address renders the Coming Soon shell instead of the real
- * tool, never a provider call, never a charge.
+ * ALL TOOLS, ONLY THE REGULAR SQUARES, CLEANLY ALIGNED (the owner's
+ * message "ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ, ΚΑΘΑΡΑ ΣΤΟΙΧΙΣΜΕΝΑ",
+ * 2026-10-24), on a production build over the Supabase stand-in, for an
+ * ORDINARY member (nobody is staff, no switch is set), in Greek and
+ * English, on a computer and a phone. Supersedes the previous round's
+ * prodtest, which still expected a row of small ready-made jobs under
+ * every group and let groups share a row.
  *
  * BOTH DEVICES: 1440x900 with a mouse, 390x844 with Input.dispatchTouchEvent
  * (a real touch gesture through the CDP session, not Playwright's
@@ -20,16 +19,22 @@
  *   1. Exactly the 24 tiles of the registry, in the owner's order, in
  *      his six groups (Learn carrying none), under the headings he
  *      worded — a live one and a Coming Soon one marked differently.
- *   2. Every tile carries its own name and its own line in the screen's
+ *   2. NO small ready-made job tile is drawn on the page at all — the
+ *      owner's "ΦΕΥΓΟΥΝ ΟΛΑ ΤΑ ΜΙΚΡΑ ΤΕΤΡΑΓΩΝΑ" — they are still real
+ *      (lib/nav/quick-jobs.ts) and still found through the search below.
+ *   3. Every tile carries its own name and its own line in the screen's
  *      language, and a Greek screen has no English word on it.
- *   3. Five/six to a row on a computer, two on a phone; no horizontal
- *      scroll.
- *   4. A search finds a tool by a word it is not called, big tiles and
- *      small ready-made jobs together.
- *   5. Pressing a live tile opens a page that answers; pressing a
+ *   4. Five to a row on a computer, two on a phone, same width AND same
+ *      height, left-aligned, no horizontal scroll; no two groups ever
+ *      share a row — each group's section sits strictly below the one
+ *      before it; no tile's name wraps to a second line.
+ *   5. A search finds a tool by a word it is not called, big tiles and
+ *      small ready-made jobs together — "cv" still finds the CV job by
+ *      its own name, even though its tile is gone from the page itself.
+ *   6. Pressing a live tile opens a page that answers; pressing a
  *      Coming Soon tile opens the Coming Soon screen — disabled field,
  *      no charge, a working Notify-me button — never the real tool.
- *   6. No page of an earlier grid lost its address.
+ *   7. No page of an earlier grid lost its address.
  */
 import http from "node:http";
 import { spawn } from "node:child_process";
@@ -200,7 +205,11 @@ try {
           name: (a.querySelector("span > span")?.textContent ?? "").trim(),
           line: (a.querySelector(":scope > span:last-child")?.textContent ?? "").trim(),
           live: a.getAttribute("data-ready") === "true",
-          hasBadge: Boolean(a.querySelector('[data-testid="tool-tile-badge"]')),
+          // The badge sits beside the <a>, not inside it (components/tools/
+          // tools-grid.tsx: decoupled from the name so a long name never has
+          // to make room for it) — so it is found on the shared <li>, not on
+          // the link element the other fields are read from.
+          hasBadge: Boolean(a.closest("li")?.querySelector('[data-testid="tool-tile-badge"]')),
         };
       }));
       const drawn = await tiles();
@@ -212,8 +221,14 @@ try {
         drawn.every((t) => t.live === LIVE_HREFS.has(t.href) && t.hasBadge === !LIVE_HREFS.has(t.href)),
         drawn.filter((t) => t.live !== LIVE_HREFS.has(t.href) || t.hasBadge === LIVE_HREFS.has(t.href)).map((t) => t.href).join(", "));
       const headings = await page.locator("main h2").allInnerTexts();
-      const wantHeadings = ALL_TOOLS_GROUP_ORDER.map((g) => L.dashboard.tools.groups[g]);
-      check(`${tag}: the six headings are the owner's, in ${locale}, in order`, JSON.stringify(headings) === JSON.stringify(wantHeadings), `${headings.join(" | ")} vs ${wantHeadings.join(" | ")}`);
+      // Learn carries no big tile (lib/nav/quick-jobs.ts: its six jobs are
+      // all small, and the small row left the page), so it gets no row and
+      // no heading here — the same `g.big.length > 0` filter tools-grid.tsx
+      // itself applies, not the registry's full six-group order.
+      const wantHeadings = ALL_TOOLS_GROUP_ORDER.filter((g) => ALL_TOOLS.some((tool) => tool.group === g)).map(
+        (g) => L.dashboard.tools.groups[g]
+      );
+      check(`${tag}: the five headings are the owner's, in ${locale}, in order`, JSON.stringify(headings) === JSON.stringify(wantHeadings), `${headings.join(" | ")} vs ${wantHeadings.join(" | ")}`);
       const wrongName = drawn.filter((t, i) => t.name !== L.dashboard.tools.names[ALL_TOOLS[i].name]);
       check(`${tag}: every tile carries its ${locale} name`, wrongName.length === 0, wrongName.map((t) => `${t.href}="${t.name}"`).join(", "));
       const wrongLine = drawn.filter((t, i) => t.line !== L.dashboard.tools.lines[ALL_TOOLS[i].name]);
@@ -222,7 +237,32 @@ try {
       check(`${tag}: no tile of an earlier grid is left`, oldTiles.length === 0, oldTiles.map((t) => t.href).join(", "));
 
       const jobs = await page.locator('[data-testid="quick-job-tile"]').count();
-      check(`${tag}: the small ready-made jobs row is drawn too (${jobs})`, jobs > 0);
+      check(`${tag}: no small ready-made job tile is drawn on the page (${jobs})`, jobs === 0);
+
+      // No two groups share a row: each <section>'s box sits strictly
+      // below the one before it (a shared row would overlap vertically).
+      const groupBoxes = await page.locator("main section").evaluateAll((els) =>
+        els.map((el) => { const r = el.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom) }; })
+      );
+      const sharedRow = groupBoxes.slice(1).filter((box, i) => box.top < groupBoxes[i].bottom - 1);
+      check(`${tag}: no two groups share a row (${groupBoxes.length} groups)`, sharedRow.length === 0, JSON.stringify(groupBoxes));
+
+      // Every tile is the same width and the same height, and a name
+      // never wraps to a second line.
+      const tileGeometry = await page.locator('[data-testid="tool-tile"]').evaluateAll((els) =>
+        els.map((a) => {
+          const r = a.getBoundingClientRect();
+          const nameEl = a.querySelector("span > span");
+          const nameHeight = nameEl ? nameEl.getBoundingClientRect().height : 0;
+          return { width: Math.round(r.width), height: Math.round(r.height), nameHeight: Math.round(nameHeight) };
+        })
+      );
+      const heights = new Set(tileGeometry.map((g) => g.height));
+      check(`${tag}: every tile is the same height (${[...heights].join(", ")})`, heights.size === 1, JSON.stringify(tileGeometry));
+      const widthsPerRowWidth = new Set(tileGeometry.map((g) => g.width));
+      check(`${tag}: every tile is the same width (${[...widthsPerRowWidth].join(", ")})`, widthsPerRowWidth.size === 1, JSON.stringify(tileGeometry));
+      const wrapped = tileGeometry.filter((g) => g.nameHeight > 24);
+      check(`${tag}: no tile's name wraps to a second line`, wrapped.length === 0, JSON.stringify(wrapped));
 
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       check(`${tag}: no horizontal scroll`, overflow <= 0, `${overflow}px`);
@@ -242,6 +282,14 @@ try {
       const found = await tiles();
       check(`${tag}: "${locale === "el" ? "έρευνα" : "research"}" finds Deep Research`, found.some((t) => t.href === "/dashboard/deep-research"), found.map((t) => t.href).join(", "));
       await shot("2-search");
+
+      // "cv" still finds the CV quick job by name, even though its tile
+      // left the page itself — the owner's §5 check.
+      await search.fill("cv");
+      await page.waitForTimeout(300);
+      const cvLabel = L.dashboard.quickJobs.cv.label;
+      const cvFound = await page.getByTestId("quick-job-tile").filter({ hasText: cvLabel }).first().isVisible().catch(() => false);
+      check(`${tag}: "cv" in Find a tool still finds "${cvLabel}"`, cvFound);
       await search.fill("");
 
       // ---- a live tile opens the real tool; a Coming Soon tile opens the Coming Soon screen

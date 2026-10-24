@@ -148,7 +148,7 @@ const MUTANTS = [
     // number and the page renders correctly either way.
     name: "the page's stated row count drifts from what it renders",
     file: PRICING_PAGE,
-    from: "ROWS: 46",
+    from: "ROWS: 47",
     to: "ROWS: 43",
     // THE COUNT IS NOT PINNED, 2026-10-01. This expected "returns 45"
     // and the catalog has 46 — so the mutant went red on exactly the
@@ -184,7 +184,7 @@ const MUTANTS = [
     // `pricingSrc` read and never judged if it happened again.
     name: "the page stops stating a row count at all",
     file: PRICING_PAGE,
-    from: "ROWS: 46",
+    from: "ROWS: 47",
     to: "Rows, several of them",
     expect: "the pricing page states its own row count in a form this gate can read",
   },

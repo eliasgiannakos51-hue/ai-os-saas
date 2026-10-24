@@ -119,10 +119,13 @@ const MUTANTS = [
     // RE-ANCHORED 2026-10-04: the groups are drawn on All tools now
     // (the sidebar of ΣΥΣΤΗΜΑ DESIGN has none), so that is where it
     // would come back.
+    // RE-ANCHORED 2026-10-24: the final grid's big-tile row reads
+    // `group.big.map(bigTile)` (lib/nav/all-tools.ts tiles), not
+    // `group.items.map(tile)`.
     file: TOOLS_PAGE,
-    from: "{group.items.map(tile)}",
-    to: "{expanded ? group.items.map(tile) : null}",
-    expect: "every row is drawn, unconditionally",
+    from: "{group.big.map(bigTile)}",
+    to: "{expanded ? group.big.map(bigTile) : null}",
+    expect: "every row with items is drawn, unconditionally",
   },
   {
     dimension: "C. four groups",

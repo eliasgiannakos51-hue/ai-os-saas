@@ -139,10 +139,12 @@ const MUTANTS = [
     // stays green, which is why the check it trips counts the group
     // renderer's exits instead.
     name: "a collapse comes back under another name",
+    // RE-ANCHORED 2026-10-24: the final grid's big-tile row reads
+    // `group.big.map(bigTile)`, not `group.items.map(tile)`.
     file: TOOLS_PAGE,
-    from: "{group.items.map(tile)}",
-    to: "{group.heading === \"Make\" && group.items.map(tile)}",
-    expect: "every row is drawn, unconditionally",
+    from: "{group.big.map(bigTile)}",
+    to: "{group.heading === \"Make\" && group.big.map(bigTile)}",
+    expect: "every row with items is drawn, unconditionally",
   },
   {
     // AGAINST sidebar-structure's OWN CLAUSE, not the tooltips gate's.

@@ -163,13 +163,25 @@ checkTrue(
 // the mutation that proves it takes four lines: `const expanded = true;
 // ... if (!expanded) return <p/>;` reintroduces the whole defect without
 // using any of those words. The group renderer draws every item through
-// `tile` with no condition of its own: a `return`, a `?` or an `&&` in it
-// is something deciding whether rows appear, and that is the collapse
-// whatever it is called.
+// `bigTile`/`smallTile` with no condition beyond "this row has items at
+// all": a `return`, a `?` or an `&&` NOT of that shape is something else
+// deciding whether rows appear — the collapse whatever it is called.
+//
+// RE-ANCHORED 2026-10-24 (the final grid, six groups, big tiles and small
+// ready-made jobs): `tile`/`group.items` became `bigTile`/`smallTile` over
+// `group.big`/`group.small`, and Learn (small jobs only, no big tile of
+// its own) made "this row has items" a real, legitimate condition rather
+// than a defect — so those three emptiness guards are stripped before
+// counting, and the two map calls are checked by name instead.
+const groupRendererOtherConditions = groupRenderer
+  .replace(/group\.big\.length > 0 \? "mt-2" : ""/g, "")
+  .replace(/group\.(?:big|small)\.length > 0 &&/g, "");
 checkTrue(
-  `no group can be collapsed — every row is drawn, unconditionally (${(groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length} conditions)`,
-  (groupRenderer.match(/\breturn\b|\?|&&/g) ?? []).length === 0 && /\{group\.items\.map\(tile\)\}\s*<\/ul>/.test(groupRenderer),
-  "a condition in the group renderer is a decision about whether rows appear — a collapse under another name",
+  `no group can be collapsed — every row with items is drawn, unconditionally (${(groupRendererOtherConditions.match(/\breturn\b|\?|&&/g) ?? []).length} other conditions)`,
+  (groupRendererOtherConditions.match(/\breturn\b|\?|&&/g) ?? []).length === 0 &&
+    /\{group\.big\.map\(bigTile\)\}/.test(groupRenderer) &&
+    /\{group\.small\.map\(smallTile\)\}/.test(groupRenderer),
+  "a condition in the group renderer beyond its own row's emptiness is a decision about whether rows appear — a collapse under another name",
 );
 checkTrue(
   "...and the names the old collapse used are gone, from the sidebar and the page",
@@ -178,9 +190,9 @@ checkTrue(
 );
 checkTrue(
   "...and a heading with no rows under it is not drawn at all",
-  /\)\)\.filter\(\(g\) => g\.items\.length > 0\);/.test(toolsGridSrc) &&
+  /\)\)\.filter\(\(g\) => g\.big\.length > 0 \|\| g\.small\.length > 0\)/.test(toolsGridSrc) &&
     /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
-  "the page's four groups drop any that end up empty; the sidebar's one heading, Recent tools, sits under the guard on its list",
+  "the page's six groups drop any that end up empty on both rows; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
 // WHAT THE SIDEBAR MAY REMEMBER: NOTHING, AND THAT IS NOW THE WHOLE
 // ANSWER. Until 2026-10-02 it was nothing; from then to 2026-10-04 it

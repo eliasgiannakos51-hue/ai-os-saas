@@ -167,20 +167,23 @@ checkTrue(
 // all": a `return`, a `?` or an `&&` NOT of that shape is something else
 // deciding whether rows appear — the collapse whatever it is called.
 //
-// RE-ANCHORED 2026-10-24 (the final grid, six groups, big tiles and small
-// ready-made jobs): `tile`/`group.items` became `bigTile`/`smallTile` over
-// `group.big`/`group.small`, and Learn (small jobs only, no big tile of
-// its own) made "this row has items" a real, legitimate condition rather
-// than a defect — so those three emptiness guards are stripped before
-// counting, and the two map calls are checked by name instead.
-const groupRendererOtherConditions = groupRenderer
-  .replace(/group\.big\.length > 0 \? "mt-2" : ""/g, "")
-  .replace(/group\.(?:big|small)\.length > 0 &&/g, "");
+// RE-ANCHORED 2026-10-24, TWICE. First for the final grid (six groups,
+// big tiles and small ready-made jobs): `tile`/`group.items` became
+// `bigTile`/`smallTile` over `group.big`/`group.small`. Then for "ΜΟΝΟ ΤΑ
+// ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ" the same day: the small row left the default page
+// entirely (lib/nav/quick-jobs.ts stays real, reachable only through
+// search/⌘K/Chat), so `group.small.map(smallTile)` is gone from this
+// renderer for good — checking for its presence would now be checking
+// for a regression, not a guarantee. `groups` itself is already filtered
+// to `g.big.length > 0` (the "heading with no rows" check below), so the
+// only emptiness guard left here is the `mt-2` ternary, stripped before
+// counting.
+const groupRendererOtherConditions = groupRenderer.replace(/group\.big\.length > 0 \? "mt-2" : ""/g, "");
 checkTrue(
   `no group can be collapsed — every row with items is drawn, unconditionally (${(groupRendererOtherConditions.match(/\breturn\b|\?|&&/g) ?? []).length} other conditions)`,
   (groupRendererOtherConditions.match(/\breturn\b|\?|&&/g) ?? []).length === 0 &&
     /\{group\.big\.map\(bigTile\)\}/.test(groupRenderer) &&
-    /\{group\.small\.map\(smallTile\)\}/.test(groupRenderer),
+    !/group\.small\.map\(smallTile\)/.test(groupRenderer),
   "a condition in the group renderer beyond its own row's emptiness is a decision about whether rows appear — a collapse under another name",
 );
 checkTrue(
@@ -190,9 +193,9 @@ checkTrue(
 );
 checkTrue(
   "...and a heading with no rows under it is not drawn at all",
-  /\)\)\.filter\(\(g\) => g\.big\.length > 0 \|\| g\.small\.length > 0\)/.test(toolsGridSrc) &&
+  /\)\)\.filter\(\(g\) => g\.big\.length > 0\)/.test(toolsGridSrc) &&
     /\{list\.length > 0 && \([\s\S]{0,200}t\("rail\.recentTools"\)/.test(stripComments(sidebarForOpen)),
-  "the page's six groups drop any that end up empty on both rows; the sidebar's one heading, Recent tools, sits under the guard on its list",
+  "the page's groups drop any with no big tile — Learn, which carries only small jobs, among them; the sidebar's one heading, Recent tools, sits under the guard on its list",
 );
 // WHAT THE SIDEBAR MAY REMEMBER: NOTHING, AND THAT IS NOW THE WHOLE
 // ANSWER. Until 2026-10-02 it was nothing; from then to 2026-10-04 it

@@ -173,6 +173,24 @@ for (const l of LOCALES) {
 }
 check("iowork's Coming Soon page passes no examples (it has none to show)", /examples=\{\[\]\}|<ComingSoonShell\s+toolKey="iowork"\s+name=\{[^}]+\}\s*\/>/.test(stripComments(readFileSync("src/app/dashboard/iowork/page.tsx", "utf8"))) || !/examples=/.test(stripComments(readFileSync("src/app/dashboard/iowork/page.tsx", "utf8"))));
 
+console.log("\n== 0h. only the 24 big tiles reach the page, each group its own full-width row (the owner's \"ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ\", 2026-10-24) ==");
+const defaultBranch = grid.slice(grid.indexOf('<div className="mt-5 flex flex-col gap-6">'));
+check("the default (non-search) render draws no quick-job tile",
+  defaultBranch.length > 50 && !/\bsmallTile\b/.test(defaultBranch), "smallTile referenced inside the default (non-search) render branch");
+check("...and no group shares a row with another: a vertical stack, each section full width",
+  /<div className="mt-5 flex flex-col gap-6">/.test(grid), "the groups wrapper must be a vertical stack (flex-col), not a grid that lets sections share a row");
+check("...one fixed grid (GRID) used for every group's row and for search results alike",
+  /const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"/.test(grid) &&
+    (grid.match(/className=\{GRID\}|\$\{GRID\}/g) ?? []).length >= 2,
+  "GRID must be reused, not re-derived per group, or tile widths could drift apart");
+check("a name never wraps and is never cut (whitespace-nowrap on the name, no truncate/line-clamp on it)",
+  /whitespace-nowrap text-sm font-medium text-foreground/.test(grid) && !/truncate text-sm font-medium|line-clamp[^>]*text-sm font-medium/.test(grid));
+check("...the line below it is the one span allowed to truncate, which is what keeps every tile the same height",
+  /truncate text-xs text-muted/.test(grid));
+check("every tile fills its grid cell (h-full) with the same minimum height, badge and pin absolutely positioned so neither touches the name's own width",
+  /className="group relative h-full"/.test(grid) && /min-h-\[88px\]/.test(grid) &&
+    /absolute end-2 top-2[^"]*"[\s\S]{0,40}data-testid="tool-tile-badge"|data-testid="tool-tile-badge"[\s\S]{0,200}absolute end-2 top-2/.test(grid));
+
 console.log("\n== 1. the small ready-made jobs (quick-jobs.ts): every one opens a real page, worded everywhere ==");
 const { QUICK_JOBS, quickJobHref } = await loadTs("src/lib/nav/quick-jobs.ts");
 const jobTargets = new Set(ALL_TOOLS.map((t) => t.href));
@@ -236,6 +254,22 @@ check('...and "investigate" finds it too, an alias', searchBig("en", "investigat
 check('"βαθι" finds it by its Greek name', searchBig("el", "βαθι").map((t) => t.href).includes("/dashboard/deep-research"));
 check('"site" finds Site', searchBig("en", "site").map((t) => t.href)[0] === "/dashboard/website-builder");
 check("a word that is nothing finds nothing", searchBig("en", "qqzzxx").length === 0);
+// "cv" still finds the quick job by name in Greek, through its own
+// aliases field (lib/nav/quick-jobs.ts) — not lib/palette-aliases.ts,
+// whose own gate ties every key to a sidebar item key a quick job has
+// none of. This is the one thing a reader can still ask this page for
+// the CV job by, now that its tile left the page itself.
+const searchSmall = (locale, query) => {
+  const jobs = messages[locale].dashboard.quickJobs;
+  return match.filterAndRankCandidates(
+    QUICK_JOBS.map((job) => ({
+      item: job,
+      candidates: [jobs[job.id]?.label ?? "", ...(job.aliases?.[locale] ?? [])],
+    })),
+    query
+  );
+};
+check('"cv" finds the cv job, in Greek, by its own alias', searchSmall("el", "cv").some((j) => j.id === "cv"));
 for (const l of LOCALES) {
   const t = messages[l].dashboard?.tools ?? {};
   check(`${l}: the search, its label and the empty result are worded`,

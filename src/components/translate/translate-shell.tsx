@@ -408,27 +408,40 @@ export function TranslateShell() {
                   ))}
                 </ul>
               )}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  addTerm(newTerm);
-                  setNewTerm("");
-                }}
-                className="flex gap-1.5"
-              >
+              {/* A plain row, not a <form>: this popover already sits
+                  inside ChatComposer's own <form> (components/chat/chat-
+                  composer.tsx), and a nested form is invalid HTML — the
+                  browser drops the inner one, so a "submit" button here
+                  would press the OUTER composer's send instead. */}
+              <div className="flex gap-1.5">
                 <input
                   type="text"
                   value={newTerm}
                   onChange={(e) => setNewTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter") return;
+                    e.preventDefault();
+                    addTerm(newTerm);
+                    setNewTerm("");
+                  }}
                   placeholder={t("glossaryPlaceholder")}
                   disabled={glossary.length >= MAX_GLOSSARY_TERMS}
                   data-testid="translate-tool-glossary-input"
                   className="input min-w-0 flex-1 text-xs"
                 />
-                <button type="submit" disabled={!newTerm.trim() || glossary.length >= MAX_GLOSSARY_TERMS} data-testid="translate-tool-glossary-add" className="btn-outline px-2 text-xs disabled:opacity-40">
+                <button
+                  type="button"
+                  onClick={() => {
+                    addTerm(newTerm);
+                    setNewTerm("");
+                  }}
+                  disabled={!newTerm.trim() || glossary.length >= MAX_GLOSSARY_TERMS}
+                  data-testid="translate-tool-glossary-add"
+                  className="btn-outline px-2 text-xs disabled:opacity-40"
+                >
                   <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
-              </form>
+              </div>
             </div>
           )}
         </span>,

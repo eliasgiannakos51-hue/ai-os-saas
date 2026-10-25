@@ -4236,6 +4236,36 @@
       "glossaryAdd": "Añadir término",
       "glossaryAdding": "Nuevo término del glosario",
       "openDocument": "Abrir como documento"
+    },
+    "iowork": {
+      "noAppYet": "La aplicación para tu ordenador aún no ha salido. Esta pantalla es el lado de la cuenta: cuando exista la aplicación, la conectarás desde aquí.",
+      "connectHeading": "Conecta un ordenador",
+      "connectHint": "Escribe los ocho caracteres que muestra tu ordenador.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Conectar",
+      "connecting": "Conectando…",
+      "codeAccepted": "{name} aceptó el código. Aparece abajo en cuanto el ordenador termine de conectarse.",
+      "listHeading": "Ordenadores conectados ({count} de {max})",
+      "empty": "Aún no hay ningún ordenador conectado.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Sin usar durante 30 días",
+      "disconnect": "Desconectar",
+      "disconnectLabel": "Desconectar {name}",
+      "confirmDisconnect": "¿Desconectar {name}? Dejará de funcionar de inmediato y habrá que conectarlo otra vez.",
+      "safetyLine": "Un ordenador conectado llega solo a las carpetas que elijas en él, nunca a contraseñas, claves ni carpetas del sistema, y cada cambio espera tu aprobación allí.",
+      "errors": {
+        "bad_code": "Eso no es un código. Son ocho caracteres, tal como los muestra tu ordenador.",
+        "not_found": "Ningún ordenador muestra ese código.",
+        "expired": "Ese código ha caducado. Tu ordenador mostrará uno nuevo.",
+        "tooMany": "Esta cuenta ya tiene {max} ordenadores. Desconecta uno primero.",
+        "rateLimited": "Demasiados intentos. Espera un poco y vuelve a probar.",
+        "not_enabled": "iowork aún no está abierto.",
+        "not_signed_in": "Inicia sesión de nuevo.",
+        "failed": "No funcionó. No cambió nada."
+      }
     }
   },
   "module": {
@@ -4987,6 +5017,11 @@
       "is": "Tu propia versión de una app que te gusta.",
       "does": "Describe una app, o pega la dirección de una página pública de una que te guste. Recibes un plan en cuatro casillas, cambias lo que quieras con palabras y luego la construyes: una app que funciona, que cambias con palabras, a la que puedes volver atrás y que descargas como un solo archivo.",
       "doesNot": "No copia la otra app: el nombre, las palabras, las imágenes y el código son tuyos, y solo lee las etiquetas de la página que señalas, nunca nada detrás de un inicio de sesión. No es un servicio de alojamiento: lo que escribes en la vista previa no se guarda, y el archivo descargado guarda sus datos en tu propio ordenador."
+    },
+    "iowork": {
+      "is": "La aplicación que trabaja dentro de tu propio ordenador",
+      "does": "Lee y escribe archivos en las carpetas que elijas, cuando se lo pides, y te muestra cada cambio antes de hacerlo",
+      "doesNot": "No llega a contraseñas, claves, tu navegador ni carpetas del sistema, nunca ejecuta programas en tu ordenador, y no borra nada sin tu aprobación"
     }
   },
   "helpCentre": {

@@ -4236,6 +4236,36 @@
       "glossaryAdd": "Begriff hinzufügen",
       "glossaryAdding": "Neuer Glossarbegriff",
       "openDocument": "Als Dokument öffnen"
+    },
+    "iowork": {
+      "noAppYet": "Die App für Ihren Computer ist noch nicht erschienen. Dieser Bildschirm ist die Kontoseite: sobald es die App gibt, verbinden Sie sie von hier aus.",
+      "connectHeading": "Einen Computer verbinden",
+      "connectHint": "Geben Sie die acht Zeichen ein, die Ihr Computer anzeigt.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Verbinden",
+      "connecting": "Wird verbunden…",
+      "codeAccepted": "{name} hat den Code angenommen. Er erscheint unten, sobald der Computer die Verbindung abgeschlossen hat.",
+      "listHeading": "Verbundene Computer ({count} von {max})",
+      "empty": "Noch kein Computer verbunden.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Seit 30 Tagen ungenutzt",
+      "disconnect": "Trennen",
+      "disconnectLabel": "{name} trennen",
+      "confirmDisconnect": "{name} trennen? Er hört sofort auf zu arbeiten und muss neu verbunden werden.",
+      "safetyLine": "Ein verbundener Computer erreicht nur die Ordner, die Sie dort auswählen, niemals Passwörter, Schlüssel oder Systemordner, und jede Änderung wartet dort auf Ihre Zustimmung.",
+      "errors": {
+        "bad_code": "Das ist kein Code. Er hat acht Zeichen, so wie Ihr Computer sie anzeigt.",
+        "not_found": "Kein Computer zeigt diesen Code.",
+        "expired": "Dieser Code ist abgelaufen. Ihr Computer zeigt einen neuen.",
+        "tooMany": "Dieses Konto hat bereits {max} Computer. Trennen Sie zuerst einen.",
+        "rateLimited": "Zu viele Versuche. Warten Sie kurz und versuchen Sie es erneut.",
+        "not_enabled": "iowork ist noch nicht geöffnet.",
+        "not_signed_in": "Melden Sie sich erneut an.",
+        "failed": "Das hat nicht geklappt. Nichts wurde geändert."
+      }
     }
   },
   "module": {
@@ -4987,6 +5017,11 @@
       "is": "Deine eigene Version einer App, die dir gefällt.",
       "does": "Beschreibe eine App oder füge die Adresse einer öffentlichen Seite einer App ein, die dir gefällt. Du bekommst einen Plan in vier Kästen, änderst mit Worten, was du willst, und baust sie dann: eine funktionierende App, die du mit Worten ändern, zurücksetzen und als eine Datei herunterladen kannst.",
       "doesNot": "Sie kopiert die andere App nicht: Name, Worte, Bilder und Code sind deine eigenen, und sie liest nur die Beschriftungen der einen Seite, auf die du zeigst, nie etwas hinter einer Anmeldung. Sie ist kein Hosting-Dienst: Was du in der Vorschau eingibst, wird nicht gespeichert, und die heruntergeladene Datei behält ihre Daten auf deinem eigenen Computer."
+    },
+    "iowork": {
+      "is": "Die App, die in Ihrem eigenen Computer arbeitet",
+      "does": "Liest und schreibt Dateien in den Ordnern, die Sie auswählen, wenn Sie darum bitten, und zeigt Ihnen jede Änderung vorher",
+      "doesNot": "Sie erreicht keine Passwörter, Schlüssel, Ihren Browser oder Systemordner, führt niemals Programme auf Ihrem Computer aus und löscht nichts ohne Ihre Zustimmung"
     }
   },
   "helpCentre": {

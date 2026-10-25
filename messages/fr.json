@@ -4236,6 +4236,36 @@
       "glossaryAdd": "Ajouter un terme",
       "glossaryAdding": "Nouveau terme du glossaire",
       "openDocument": "Ouvrir comme document"
+    },
+    "iowork": {
+      "noAppYet": "L'application pour votre ordinateur n'est pas encore sortie. Cet écran est le côté du compte : quand l'application existera, c'est ici que vous la connecterez.",
+      "connectHeading": "Connecter un ordinateur",
+      "connectHint": "Saisissez les huit caractères affichés par votre ordinateur.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Connecter",
+      "connecting": "Connexion…",
+      "codeAccepted": "{name} a accepté le code. Il apparaît ci-dessous dès que l'ordinateur a fini de se connecter.",
+      "listHeading": "Ordinateurs connectés ({count} sur {max})",
+      "empty": "Aucun ordinateur n'est encore connecté.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Inutilisé depuis 30 jours",
+      "disconnect": "Déconnecter",
+      "disconnectLabel": "Déconnecter {name}",
+      "confirmDisconnect": "Déconnecter {name} ? Il cessera aussitôt de fonctionner et devra être reconnecté.",
+      "safetyLine": "Un ordinateur connecté n'atteint que les dossiers que vous y choisissez, jamais les mots de passe, les clés ou les dossiers système, et chaque modification attend votre accord sur place.",
+      "errors": {
+        "bad_code": "Ce n'est pas un code. Il compte huit caractères, tels que votre ordinateur les affiche.",
+        "not_found": "Aucun ordinateur n'affiche ce code.",
+        "expired": "Ce code a expiré. Votre ordinateur en affichera un nouveau.",
+        "tooMany": "Ce compte a déjà {max} ordinateurs. Déconnectez-en un d'abord.",
+        "rateLimited": "Trop de tentatives. Patientez un peu et réessayez.",
+        "not_enabled": "iowork n'est pas encore ouvert.",
+        "not_signed_in": "Reconnectez-vous.",
+        "failed": "Cela n'a pas fonctionné. Rien n'a changé."
+      }
     }
   },
   "module": {
@@ -4987,6 +5017,11 @@
       "is": "Votre propre version d'une application qui vous plaît.",
       "does": "Décrivez une application, ou collez l'adresse d'une page publique d'une application qui vous plaît. Vous obtenez un plan en quatre cases, changez ce que vous voulez avec des mots, puis construisez-la : une application qui marche, que vous changez avec des mots, dont vous pouvez revenir en arrière, et que vous téléchargez en un seul fichier.",
       "doesNot": "Elle ne copie pas l'autre application : le nom, les mots, les images et le code sont les vôtres, et elle ne lit que les libellés de la seule page que vous indiquez, jamais rien derrière une connexion. Ce n'est pas un service d'hébergement : ce que vous saisissez dans l'aperçu n'est pas enregistré, et le fichier téléchargé garde ses données sur votre propre ordinateur."
+    },
+    "iowork": {
+      "is": "L'application qui travaille à l'intérieur de votre propre ordinateur",
+      "does": "Lit et écrit des fichiers dans les dossiers que vous choisissez, quand vous le demandez, et vous montre chaque modification avant qu'elle ait lieu",
+      "doesNot": "Elle n'atteint ni mots de passe, ni clés, ni votre navigateur, ni les dossiers système, elle n'exécute jamais de programmes sur votre ordinateur, et elle ne supprime rien sans votre accord"
     }
   },
   "helpCentre": {

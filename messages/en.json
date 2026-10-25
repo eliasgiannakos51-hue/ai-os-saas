@@ -4236,6 +4236,36 @@
       "glossaryAdd": "Add a term",
       "glossaryAdding": "New glossary term",
       "openDocument": "Open as a document"
+    },
+    "iowork": {
+      "noAppYet": "The app for your computer is not out yet. This screen is the account's side of it: when the app exists, this is where you connect it.",
+      "connectHeading": "Connect a computer",
+      "connectHint": "Type the eight characters your computer is showing.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Connect",
+      "connecting": "Connecting…",
+      "codeAccepted": "{name} accepted the code. It appears below once the computer finishes connecting.",
+      "listHeading": "Connected computers ({count} of {max})",
+      "empty": "No computer is connected yet.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Not used for 30 days",
+      "disconnect": "Disconnect",
+      "disconnectLabel": "Disconnect {name}",
+      "confirmDisconnect": "Disconnect {name}? It will stop working at once and will have to be connected again.",
+      "safetyLine": "A connected computer reaches only the folders you pick on it, never passwords, keys or system folders, and every change waits for your approval there.",
+      "errors": {
+        "bad_code": "That is not a code. It is eight characters, as shown on your computer.",
+        "not_found": "No computer is showing that code.",
+        "expired": "That code has expired. Your computer will show a new one.",
+        "tooMany": "This account already has {max} computers. Disconnect one first.",
+        "rateLimited": "Too many tries. Wait a while and try again.",
+        "not_enabled": "iowork is not open yet.",
+        "not_signed_in": "Sign in again.",
+        "failed": "That did not work. Nothing changed."
+      }
     }
   },
   "module": {
@@ -4987,6 +5017,11 @@
       "is": "Your own version of an app you like.",
       "does": "Describe an app, or paste the address of one public page of an app you like. You get a plan in four boxes, change what you want with words, then build it: a working app you can use, change with words, step back from, and download as one file.",
       "doesNot": "It does not copy the other app: the name, words, pictures and code are your own, and it reads only the labels of the one page you point at, never anything behind a sign-in. It is not a hosted service: what you enter in the preview is not saved, and the downloaded file keeps its data on your own computer."
+    },
+    "iowork": {
+      "is": "The app that works inside your own computer",
+      "does": "Reads and writes files in the folders you pick, when you ask it to, and shows you every change before it happens",
+      "doesNot": "It does not reach passwords, keys, your browser or system folders, it never runs programs on your computer, and it deletes nothing without your approval"
     }
   },
   "helpCentre": {

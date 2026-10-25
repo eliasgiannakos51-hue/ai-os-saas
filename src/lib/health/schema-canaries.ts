@@ -459,6 +459,18 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "iowork_devices",
+    migration: "20261031000000_iowork_devices.sql",
+    breaks: "iowork can connect no computer at all: the person types the code their machine is showing and gets «something went wrong», and /dashboard/iowork lists nothing it could disconnect",
+  },
+  {
+    kind: "table",
+    table: "iowork_pairings",
+    migration: "20261031000000_iowork_devices.sql",
+    breaks: "The desktop app can never show a code: pairing fails at its first step, before the person is asked to type anything, so no computer can be connected",
+  },
+  {
+    kind: "table",
     table: "rebuild_projects",
     migration: "20261027000000_rebuild_projects.sql",
     breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",

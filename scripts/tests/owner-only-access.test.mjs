@@ -202,7 +202,16 @@ console.log("\n== 4b. every service-role exemption states a recognised reason ==
 // The marker must not become a way to silence this check. Only three
 // reasons are accepted, and each one is a real architectural constraint.
 const justifiedRoutes = routes.filter((f) => /@service-role-justified/.test(readFileSync(f, "utf8")));
-check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 6);
+// 6 -> 8 on 2026-10-25, for iowork's two app-facing routes and no others.
+// The desktop app is not a browser: it has no cookie and no session, so
+// api/iowork/pair (the app asks for a code before any account is involved
+// — pre-auth, exactly like signup) and api/iowork/pair/token (authorised
+// by a 32-byte claim secret — token-auth, exactly like jobs/continue)
+// cannot be scoped to a user the way every other route is. Both reasons
+// are ones §4b already recognises; neither is a new kind of exemption.
+// api/iowork/devices and api/iowork/devices/[id] are NOT in this count:
+// they establish the session themselves and are scoped to its user.
+check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 8);
 for (const file of justifiedRoutes) {
   const src = readFileSync(file, "utf8");
   const reason = src.match(/@service-role-justified (\w[\w-]*)/)?.[1];

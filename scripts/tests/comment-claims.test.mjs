@@ -285,7 +285,14 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // its own PRODUCT_WORDS comment — explains which Greek-page loanwords
   // are pre-existing ("sites", "trading") versus this round's own
   // ("Podcast", "Voice-over", "Quiz", "Flashcards"), also a decision.
-  const CENSUS_CEILING = 75;
+  // 75 -> 76 ON 2026-10-25: src/app/api/iowork/pair/route.ts, "Low entropy
+  // by design, because a person has to retype it". The clearest kind of
+  // entry this census is for: eight characters is weak on purpose, and the
+  // sentence exists so the next reader does not "fix" it by lengthening
+  // the code — the strength is in the 32-byte claim secret beside it and
+  // in the limiter on the claim, both named in the same comment. Removing
+  // the line would leave the weakness looking like an oversight.
+  const CENSUS_CEILING = 76;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

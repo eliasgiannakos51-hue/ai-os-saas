@@ -4236,6 +4236,36 @@
       "glossaryAdd": "Adicionar termo",
       "glossaryAdding": "Novo termo do glossário",
       "openDocument": "Abrir como documento"
+    },
+    "iowork": {
+      "noAppYet": "A aplicação para o teu computador ainda não saiu. Este ecrã é o lado da conta: quando a aplicação existir, é aqui que a ligas.",
+      "connectHeading": "Liga um computador",
+      "connectHint": "Escreve os oito caracteres que o teu computador está a mostrar.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Ligar",
+      "connecting": "A ligar…",
+      "codeAccepted": "{name} aceitou o código. Aparece abaixo assim que o computador terminar de ligar-se.",
+      "listHeading": "Computadores ligados ({count} de {max})",
+      "empty": "Ainda não há nenhum computador ligado.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Sem uso há 30 dias",
+      "disconnect": "Desligar",
+      "disconnectLabel": "Desligar {name}",
+      "confirmDisconnect": "Desligar {name}? Para de funcionar de imediato e terá de ser ligado outra vez.",
+      "safetyLine": "Um computador ligado chega apenas às pastas que escolheres nele, nunca a palavras-passe, chaves ou pastas do sistema, e cada alteração espera a tua aprovação aí.",
+      "errors": {
+        "bad_code": "Isso não é um código. São oito caracteres, tal como o teu computador os mostra.",
+        "not_found": "Nenhum computador está a mostrar esse código.",
+        "expired": "Esse código expirou. O teu computador vai mostrar um novo.",
+        "tooMany": "Esta conta já tem {max} computadores. Desliga primeiro um.",
+        "rateLimited": "Demasiadas tentativas. Espera um pouco e tenta de novo.",
+        "not_enabled": "O iowork ainda não abriu.",
+        "not_signed_in": "Inicia sessão outra vez.",
+        "failed": "Não resultou. Nada mudou."
+      }
     }
   },
   "module": {
@@ -4987,6 +5017,11 @@
       "is": "A tua própria versão de uma aplicação de que gostas.",
       "does": "Descreve uma aplicação, ou cola o endereço de uma página pública de uma de que gostes. Recebes um plano em quatro caixas, mudas o que quiseres com palavras e depois constróis: uma aplicação que funciona, que mudas com palavras, a que podes voltar atrás e que descarregas num só ficheiro.",
       "doesNot": "Não copia a outra aplicação: o nome, as palavras, as imagens e o código são teus, e só lê as etiquetas da página que indicas, nunca nada atrás de um início de sessão. Não é um serviço de alojamento: o que escreves na pré-visualização não fica guardado, e o ficheiro descarregado guarda os seus dados no teu próprio computador."
+    },
+    "iowork": {
+      "is": "A aplicação que trabalha dentro do teu próprio computador",
+      "does": "Lê e escreve ficheiros nas pastas que escolheres, quando lhe pedires, e mostra-te cada alteração antes de acontecer",
+      "doesNot": "Não chega a palavras-passe, chaves, ao teu navegador ou a pastas do sistema, nunca executa programas no teu computador, e não apaga nada sem a tua aprovação"
     }
   },
   "helpCentre": {

@@ -77,7 +77,12 @@ console.log("== 1. the registry describes real pages ==");
 // on purpose and mount the tip at a control of their own instead.
 check(
   `pages carrying a tip (${HELP_TIPS.length})`,
-  HELP_TIPS.length >= 31,
+  // 31 -> 47 on 2026-10-25, with iowork's. The floor had been left at the
+  // 2026-09 figure while sixteen pages gained a tip, so it had stopped
+  // being a ratchet and become a number no change could ever trip. Set to
+  // what the tree actually holds, which is the only value that makes the
+  // next removal visible.
+  HELP_TIPS.length >= 47,
   `${HELP_TIPS.length} — this floor rises with each page that gains one, and never falls`,
 );
 // EVERY PAGE WITH A HEADER, or a written reason why not. The floor above
@@ -107,7 +112,10 @@ const covered = new Set(HELP_TIPS.flatMap((t) => [t.file, ...(t.alsoIn ?? [])]))
 // page carries a tip" over an empty list.
 check(
   `the scan found the dashboard pages (${dashboardPages.length} files, ${withHeader.length} with a header)`,
-  dashboardPages.length >= 38 && withHeader.length >= 28,
+  // 38/28 -> 61/40 on 2026-10-25, the same correction as the floor above
+  // and for the same reason: both had been left behind by a year of new
+  // pages, so neither could catch a page or a header disappearing.
+  dashboardPages.length >= 61 && withHeader.length >= 40,
   `${dashboardPages.length} pages / ${withHeader.length} headers — both floors rise, neither falls`,
 );
 checkList(
@@ -144,7 +152,13 @@ const NO_HEADER_EXEMPT = new Map([
   // built behind the switch "apps-tool", the page renders a real
   // PageHeader on its upgrade wall, and help.apps now says what the tool
   // does and — the part that matters — that it never takes a payment.
-  ...["audio", "avatars", "editing", "films", "iowork", "translate", "video-studio"].map((slug) => [
+  // iowork left this list on 2026-10-25: Φάση 1 κομμάτι 2 gave the page a
+  // real PageHeader over the account's side of pairing — connect a
+  // computer, see what is connected, disconnect one — behind the switch
+  // "iowork-tool". help.iowork carries the part that matters most on this
+  // page of all of them: that it reaches only folders the person picks,
+  // and never passwords or keys.
+  ...["audio", "avatars", "editing", "films", "translate", "video-studio"].map((slug) => [
     `src/app/dashboard/${slug}/page.tsx`,
     "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",
   ]),

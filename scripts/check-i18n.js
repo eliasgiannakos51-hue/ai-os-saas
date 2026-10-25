@@ -738,6 +738,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // "iowork" is a product name, written the same in every language
   // (the final All tools grid, 2026-10-23).
   "dashboard.tools.names.iowork",
+  // iowork Φάση 1 (2026-10-25): "Mac" and "Windows" are the operating
+  // systems' own names, written in Latin letters everywhere including
+  // zh/ja/ar, and the placeholder is an example of the code itself —
+  // eight characters from PAIRING_ALPHABET (src/lib/iowork/pairing.ts),
+  // which has no language. Every other string of this screen IS
+  // translated, including the two that carry those names in a sentence.
+  "dashboard.iowork.platform.mac",
+  "dashboard.iowork.platform.windows",
+  "dashboard.iowork.codePlaceholder",
   // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
   // German and Portuguese all use the same word for this exact sense —
   // not a strength or a volume, the middle setting of three — and it is

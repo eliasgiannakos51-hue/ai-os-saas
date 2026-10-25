@@ -215,6 +215,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // exactly as written in every translation.
   { table: "translate_glossary", label: "translate_glossary", scope: "user_content" },
   { table: "user_apps", label: "user_apps", scope: "user_content" },
+  // iowork (Φάση 1, 2026-10-25): which computers this account connected,
+  // what they are called and which operating system they run. It holds no
+  // path and no file name — IOWORK-SECURITY-PLAN §4 keeps all of that on
+  // the computer — so this is the whole of what an export can carry, and
+  // it is genuinely theirs: the names they gave their own machines.
+  { table: "iowork_devices", label: "iowork_devices", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what
@@ -544,6 +550,16 @@ export const NON_PERSONAL_TABLES = [
   // answered. gdpr-coverage.test.mjs holds that sweep in place; without
   // it this entry would be wrong again.
   "rate_limit_log",
+  // iowork pairings: a code, two hashes, an operating system and a label,
+  // alive for ten minutes (PAIRING_TTL_MINUTES, src/lib/iowork/pairing.ts).
+  //
+  // THE SAME REASON AS rate_limit_log ABOVE, and it has to be the real one:
+  // not "no personal data" — a claimed row does carry a user_id — but that
+  // nothing in this table survives to be handed over or erased.
+  // api/cron/scheduled-runs deletes every row past an hour, which is six
+  // times the longest a pairing can be useful. The computer that pairing
+  // produced IS exported and erased: iowork_devices, listed above.
+  "iowork_pairings",
   // Keyed by team + invited email; rows belong to the team owner's
   // account and are covered via the team tables' own cascade.
   "team_members",

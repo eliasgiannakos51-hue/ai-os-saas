@@ -179,6 +179,15 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that an app made here can take payments, or that it is a page to look at rather than a place data is kept",
   },
   {
+    // IOWORK (Φάση 1, 2026-10-25). The fear here is larger than on any
+    // other page — this is the one tool that reaches into the person's own
+    // computer — so the tip leads with the boundary, not the benefit.
+    id: "iowork",
+    file: "src/app/dashboard/iowork/page.tsx",
+    keyPrefix: "help.iowork",
+    corrects: "that connecting a computer gives Ionexa the run of it, or that it could reach passwords, keys or folders nobody picked",
+  },
+  {
     id: "deepResearch",
     file: "src/app/dashboard/deep-research/page.tsx",
     keyPrefix: "help.deepResearch",

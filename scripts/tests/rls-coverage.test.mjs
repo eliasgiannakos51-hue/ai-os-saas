@@ -171,6 +171,16 @@ const DENY_ALL_ON_PURPOSE = {
   business_inputs: "the owner's own figures for the margin report, reached only through an admin-gated route.",
   account_deletion_requests: "the emailed single-use deletion tokens. A user who could read this table could delete another account; the route claims a token atomically under the service role.",
   routing_decisions: "which model served which request, granted explicitly to service_role and to nobody else.",
+  // The one entry here that is NOT "written about a user rather than for
+  // them": a pairing row belongs to the person, and once claimed it even
+  // carries their user_id. Deny-all anyway, and that is the point — the
+  // eight-character code sits in this table for ten minutes
+  // (PAIRING_TTL_MINUTES, src/lib/iowork/pairing.ts), and a policy that
+  // let an account read its own pending rows would also be a shape a
+  // guesser could aim at. Nothing needs to read it from a browser: the
+  // desktop app collects by its claim secret and the person types the
+  // code, neither of which is a SELECT.
+  iowork_pairings: "the ten-minute handshake that connects one computer to one account (IOWORK-SECURITY-PLAN §3). Holds a code and two SHA-256 hashes, never a secret in the clear, and api/cron/scheduled-runs deletes every row past an hour. Read and written only by the service role, so a pending code cannot be harvested from any browser — including the owner's own.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

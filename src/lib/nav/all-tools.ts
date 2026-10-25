@@ -143,7 +143,10 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   { name: "automations", group: "runAlone", href: "/dashboard/automation", ready: true },
   {
     name: "iowork", group: "runAlone", href: "/dashboard/iowork", ready: false,
-    waitingFor: "needs the owner's approval of the security plan (docs/IOWORK-SECURITY-PLAN.md) and signed desktop apps",
+    // The security plan is approved (2026-10-25). What is still missing is
+    // the two unanswered questions of its §8 and the signing accounts they
+    // decide — docs/IOWORK-TECH.md carries both, with costs.
+    waitingFor: "security plan approved; needs the owner's answers on Mac-first vs both and the signing accounts (docs/IOWORK-TECH.md), then signed desktop apps",
   },
   // 5. ΟΡΓΑΝΩΣΕ
   { name: "projects", group: "organise", href: "/dashboard/projects", ready: true },

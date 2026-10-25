@@ -184,6 +184,19 @@ const ADMIN_ONLY_TABLES = new Set([
   // who could read it would learn our per-request margin. Reached only
   // through createAdminClient(), behind that gate.
   "routing_decisions",
+  // iowork (Φάση 1, 2026-10-25). THE ODD ONE ON THIS LIST, and worth the
+  // sentence: every table above is the owner's business data, kept from
+  // customers. This one is the customer's own — a ten-minute handshake
+  // row that, once claimed, even carries their user_id.
+  //
+  // Deny-all anyway, and that IS the argument. The row holds the eight
+  // characters their computer is showing (IOWORK-SECURITY-PLAN §3), and a
+  // policy letting an account select its own pending rows would be a
+  // readable surface aimed at exactly the value a guesser wants. Nothing
+  // needs to read it from a browser: the person types the code into a
+  // route, and the desktop app collects by its 32-byte claim secret.
+  // Neither is a SELECT. api/cron/scheduled-runs deletes rows past an hour.
+  "iowork_pairings",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -457,6 +470,25 @@ const NO_SESSION_BY_DESIGN = {
     "the recipient is FIXED to ADMIN_EMAILS — the sender's address is only ever reply-to " +
     "and never selects a destination, which is the difference between a contact form and " +
     "an open relay. Nothing is stored.",
+  "src/app/api/iowork/pair/route.ts":
+    "the iowork desktop app asking for a pairing code, BEFORE any account is " +
+    "involved — that is the whole step, and there is no session to check because " +
+    "the app was just installed and belongs to nobody. It accepts an operating " +
+    "system and a label, writes one ten-minute row, and returns a code plus a " +
+    "32-byte claim secret. Rate-limited to 10/hour per IP through " +
+    "consume_rate_limit. It reads nothing, charges nothing, and the row it " +
+    "creates is useless until a SIGNED-IN person types that code at " +
+    "/dashboard/iowork (api/iowork/devices, which does authenticate).",
+  "src/app/api/iowork/pair/token/route.ts":
+    "the iowork desktop app collecting its device token, authenticated by the " +
+    "32-byte claim secret it was given above — not by a cookie, because the app " +
+    "is not a browser. The secret is looked up as a SHA-256 digest, never " +
+    "compared in process, and the pairing is single-use: collected_at is " +
+    "stamped after the device row exists, so a second call answers 409. The " +
+    "answer names the account the pairing joined, so a person whose code was " +
+    "read over their shoulder sees a name that is not theirs. Rate-limited " +
+    "to 180/hour per IP, which is well above the ~60 polls an honest ten-minute " +
+    "pairing makes.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",

@@ -3366,6 +3366,10 @@
         "project": "Project",
         "allProjects": "Όλα τα Projects"
       },
+      "upload": {
+        "button": "Ανέβασμα",
+        "uploading": "Ανεβάζει…"
+      },
       "kinds": {
         "site": "Ιστότοποι",
         "slides": "Διαφάνειες",

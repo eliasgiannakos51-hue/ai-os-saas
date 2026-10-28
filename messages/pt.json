@@ -3366,6 +3366,10 @@
         "project": "Projeto",
         "allProjects": "Todos os projetos"
       },
+      "upload": {
+        "button": "Carregar",
+        "uploading": "A carregar…"
+      },
       "kinds": {
         "site": "Sites",
         "slides": "Diapositivos",

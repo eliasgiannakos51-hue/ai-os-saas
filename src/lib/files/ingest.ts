@@ -11,6 +11,7 @@ import {
   extensionOf,
   formatBytes,
   sanitiseFilename,
+  sniffAnyFileType,
   sniffFileType,
 } from "@/lib/files/file-types";
 import { maxFilesForPlan, maxStorageBytesForPlan } from "@/lib/files/limits";
@@ -97,8 +98,15 @@ export async function ingestFileBytes(opts: {
    *  object on any refusal, so a refused upload cannot squat in the
    *  bucket against the user's quota. */
   existingPath?: string;
+  /** My Stuff's own upload (Κομμάτι 5, 2026-10-28): "κάθε τύπου αρχείου"
+   *  — every type, stored and counted against the same plan quota as
+   *  every other file, never refused for being one this app cannot
+   *  read. Every OTHER caller (the Files tool, chat attachments) leaves
+   *  this unset and keeps refusing exactly the types it always refused;
+   *  nothing below this flag changes for them. */
+  acceptAnyType?: boolean;
 }): Promise<IngestResult> {
-  const { supabase, user, bytes, contentType, existingPath } = opts;
+  const { supabase, user, bytes, contentType, existingPath, acceptAnyType } = opts;
 
   // Best-effort: a refusal must not leave the direct-uploaded object
   // behind. Failure to remove is logged, never surfaced — the refusal
@@ -126,7 +134,7 @@ export async function ingestFileBytes(opts: {
   const filename = sanitiseFilename(opts.rawFilename || "untitled");
   // Decided from the first bytes. The browser's Content-Type and the
   // extension are both supplied by whoever is uploading.
-  const kind = sniffFileType(bytes, filename);
+  const kind = acceptAnyType ? sniffAnyFileType(bytes, filename) : sniffFileType(bytes, filename);
   if (!kind) {
     return refuse({
       ok: false,

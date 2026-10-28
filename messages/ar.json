@@ -3366,6 +3366,10 @@
         "project": "المشروع",
         "allProjects": "كل المشاريع"
       },
+      "upload": {
+        "button": "رفع",
+        "uploading": "جارٍ الرفع…"
+      },
       "kinds": {
         "site": "المواقع",
         "slides": "الشرائح",

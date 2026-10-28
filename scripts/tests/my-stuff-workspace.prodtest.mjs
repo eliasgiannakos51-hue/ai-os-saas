@@ -25,6 +25,12 @@
  * not its `CHARGED` one, which deliberately leaves ADMIN_EMAILS unset to
  * exercise the real reserve/settle round trip instead).
  *
+ * Κομμάτι 5 (upload, below) needs BOTH of those: the admin account to
+ * prove every file type is accepted, and a SECOND server with
+ * ADMIN_EMAILS unset — the same ON/CHARGED idea, same reason — to prove
+ * the real per-plan storage cap (lib/files/limits.ts) is actually
+ * enforced, not just infinite for whoever happens to be testing it.
+ *
  * Run: node scripts/tests/my-stuff-workspace.prodtest.mjs
  *      SKIP_BUILD=1 node scripts/tests/my-stuff-workspace.prodtest.mjs
  */
@@ -32,7 +38,8 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
-import { containsUi, uiTextStrict } from "./lib/ui-text.mjs";
+import { containsUi, uiFormat, uiTextStrict } from "./lib/ui-text.mjs";
+import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
 const failures = [];
@@ -143,6 +150,106 @@ function handleSessions({ req, res, url, body, json }) {
 }
 
 // ---------------------------------------------------------------------
+// Κομμάτι 5's own mock surface: an upload. STORAGE IS REAL HERE — the
+// bucket keeps real bytes and a call this does not implement FAILS
+// rather than the old blanket `200 {}}`, the same principle files-
+// workspace.prodtest.mjs's own storage mock states and the same shapes
+// ported from it and from file-pages.prodtest.mjs's `storage()`.
+//
+// Starts at ZERO files/bytes — a fresh account's honest starting point —
+// so the two checks below (desktop: every file type; the second server:
+// the real per-plan cap) do not have to account for a pre-seeded
+// baseline on top of what they themselves upload.
+// ---------------------------------------------------------------------
+const USER_FILES = [];
+const bucket = new Map(); // storage path -> Buffer
+
+/**
+ * supabase-js wraps a browser File in multipart/form-data; a server-side
+ * Buffer upload (lib/files/ingest.ts, when the bytes arrive via /api/
+ * files/upload instead of a direct browser->bucket write) arrives raw.
+ * Operates on `raw` — mock-supabase.mjs's own undecoded Buffer — never
+ * on the UTF-8-decoded `body` string files-pages.prodtest.mjs's own
+ * version of this reads, which would corrupt a real ZIP's bytes on the
+ * round trip (its own fixture survives only because a generated PDF of
+ * ASCII text happens not to).
+ */
+function extractMultipartFile(buf, contentType) {
+  const m = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType ?? "");
+  if (!m) return buf;
+  const boundary = Buffer.from(`--${m[1] ?? m[2]}`);
+  let largest = null;
+  let pos = buf.indexOf(boundary);
+  while (pos !== -1) {
+    const next = buf.indexOf(boundary, pos + boundary.length);
+    if (next === -1) break;
+    const part = buf.subarray(pos + boundary.length, next);
+    const headerEnd = part.indexOf("\r\n\r\n");
+    if (headerEnd !== -1) {
+      const headers = part.subarray(0, headerEnd).toString();
+      const partBody = part.subarray(headerEnd + 4, part.length - 2); // strip trailing \r\n
+      if (/filename=/i.test(headers)) return partBody;
+      if (largest === null || partBody.length > largest.length) largest = partBody;
+    }
+    pos = next;
+  }
+  return largest ?? buf;
+}
+
+function storage({ req, res, url, raw, json }) {
+  if (req.method === "DELETE" && url.pathname === "/storage/v1/object/user-files") {
+    // The ONLY delete shape storage-js sends (.remove() posts `prefixes`,
+    // never a per-object DELETE URL) — ingestFileBytes's own `refuse()`
+    // calls this on every refusal, to clean up the already-uploaded
+    // object so a refused upload cannot squat against the user's quota.
+    let prefixes = [];
+    try { prefixes = JSON.parse(raw.toString("utf8") || "{}").prefixes ?? []; } catch {}
+    for (const p of prefixes) bucket.delete(p);
+    return json(200, prefixes.map((name) => ({ name }))), true;
+  }
+  const m = /^\/storage\/v1\/object\/(?:authenticated\/)?user-files\/(.+)$/.exec(url.pathname);
+  if (!m) return false;
+  const objectPath = decodeURIComponent(m[1]);
+  if (req.method === "POST" || req.method === "PUT") {
+    const ctype = req.headers["content-type"] ?? "";
+    bucket.set(objectPath, ctype.startsWith("multipart/form-data") ? extractMultipartFile(raw, ctype) : raw);
+    return json(200, { Key: `user-files/${objectPath}`, Id: objectPath }), true;
+  }
+  if (req.method === "GET") {
+    const stored = bucket.get(objectPath);
+    if (!stored) return json(400, { statusCode: "404", error: "not_found", message: "Object not found" }), true;
+    res.writeHead(200, { "Content-Type": "application/octet-stream" });
+    res.end(stored);
+    return true;
+  }
+  return false;
+}
+
+/** The one write user_files needs that the shared mock's plain
+ *  GET-shaped default cannot do — lib/files/ingest.ts's own
+ *  `createAdminClient().from("user_files").insert({...}).select(...)
+ *  .single()`, answered as the single row PostgREST's own `Accept:
+ *  vnd.pgrst.object+json` expects, exactly as files-workspace.
+ *  prodtest.mjs's own POST handler for this table already does. GET/
+ *  HEAD (the list, and the count/sum reads lib/files/ingest.ts's own
+ *  plan-cap checks make) are left to the shared mock's default — it
+ *  already reads straight off this same array, by reference. */
+function filesTable({ req, url, body, json }) {
+  const table = url.pathname.replace(/^\/rest\/v1\//, "").split("?")[0];
+  if (table !== "user_files" || req.method !== "POST") return false;
+  let row;
+  try {
+    row = JSON.parse(body || "{}");
+  } catch {
+    return json(400, { message: "bad body" }), true;
+  }
+  row.id = `uf${USER_FILES.length + 1}`;
+  row.uploaded_at = new Date().toISOString();
+  USER_FILES.unshift(row);
+  return json(201, row), true;
+}
+
+// ---------------------------------------------------------------------
 // THE MODEL: a local stand-in answering as Anthropic does
 // (ANTHROPIC_BASE_URL, the SDK's own env var) — the real provider is
 // never called. It reads back the SAME context the route rendered
@@ -197,11 +304,21 @@ const supa = await startMockSupabase({
     projects: PROJECTS,
     entity_links: ENTITY_LINKS,
     research_reports: RESEARCH_REPORTS,
+    user_files: USER_FILES,
   },
-  handle: handleSessions,
+  handle: (ctx) => storage(ctx) || filesTable(ctx) || handleSessions(ctx),
 });
 
-let server, browser;
+// AN ARRAY, NOT ONE SLOT: Κομμάτι 5 (below) starts a SECOND `next start`
+// — a non-admin account to exercise the real per-plan storage cap, since
+// ADMIN_EMAILS (the `base` env, below) makes every cap infinite for the
+// account every other section in this file uses. A second `start()` call
+// that overwrote a single `server` variable would leak the first
+// process — exactly what prodtest-hygiene.test.mjs exists to catch — so
+// this mirrors scripts/tests/document-writer.prodtest.mjs's own `servers`
+// array, built for the same reason (its ON vs CHARGED servers).
+const servers = [];
+let browser;
 const pageErrors = [];
 function cleanup() {
   // DETACHED + GROUP KILL, not server.kill(): `npx next start` spawns a
@@ -209,7 +326,9 @@ function cleanup() {
   // leaves that grandchild running — the leak scripts/tests/
   // prodtest-hygiene.test.mjs exists to catch, reproduced in its own
   // section 4.
-  try { if (server?.pid) process.kill(-server.pid, "SIGKILL"); } catch {}
+  for (const server of servers) {
+    try { if (server?.pid) process.kill(-server.pid, "SIGKILL"); } catch {}
+  }
   try { browser?.close(); } catch {}
   try { supa.close(); } catch {}
   try { model.close(); } catch {}
@@ -225,7 +344,8 @@ async function start(env) {
     });
   });
   const origin = `http://127.0.0.1:${port}`;
-  server = spawn("npx", ["next", "start", "-p", String(port)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
+  const server = spawn("npx", ["next", "start", "-p", String(port)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
+  servers.push(server);
   for (let i = 0; i < 90; i++) {
     try {
       await new Promise((res, rej) => { const r = http.get(`${origin}/api/health`, () => res()); r.on("error", rej); });
@@ -602,7 +722,119 @@ try {
     check("a row with no real lineage shows no 'Made from'", (await page.locator('[data-testid="my-stuff-made-from"]').count()) === 0);
     check("...and no real links shows no 'Used in'", (await page.locator('[data-testid="my-stuff-used-in"] a').count()) === 0);
 
+    console.log("\n== desktop: upload — every file type, held to the same quota as any other file ==");
+    // ADMIN_EMAILS (base, below) bypasses BOTH plan caps for this account
+    // (lib/files/ingest.ts's own isAdminEmail check) — exactly the Κομμάτι
+    // 2 reason that env exists in this file at all. So what THIS account
+    // can prove is the "every file type" half and an HONEST zero-baseline
+    // readout; the "όριο αποθήκευσης ανά πλάνο" half — a REAL numeric cap,
+    // and a REAL refusal for crossing it — needs an account that is NOT
+    // bypassed, which is the second server, after this one closes.
+    const { formatBytes } = await loadTs("src/lib/format-bytes.ts");
+    check(
+      "before any upload, the real usage reads zero — not hidden, not guessed",
+      containsUi(await page.locator('[data-testid="my-stuff-upload-usage"]').innerText(), formatBytes(0))
+    );
+
+    // A REAL ZIP MAGIC NUMBER (`PK\x03\x04`) with a `.zip` extension —
+    // the one shape sniffFileType (lib/files/file-types.ts) ALREADY
+    // refuses on purpose (DOCX/XLSX are zips too; the magic number is
+    // only accepted for THOSE two extensions). A kind the Files tool's
+    // own six-kind sniff already accepted would prove nothing Κομμάτι 5
+    // added — this is "κάθε τύπου αρχείου" or it is nothing.
+    const ZIP_NAME = "Αρχειοθήκη.zip";
+    const ZIP_BYTES = Buffer.concat([Buffer.from([0x50, 0x4b, 0x03, 0x04]), Buffer.alloc(2044, 0x41)]); // 2048 bytes total
+    await page.setInputFiles('[data-testid="my-stuff-upload-input"]', {
+      name: ZIP_NAME,
+      mimeType: "application/zip",
+      buffer: ZIP_BYTES,
+    });
+    const zipRow = page.locator('[data-testid="my-stuff-list-item"][data-kind="file"]').filter({ hasText: ZIP_NAME });
+    await zipRow.first().waitFor({ timeout: 15_000 });
+    check(
+      "a type the Files tool refuses (a .zip) is accepted and listed, by this upload alone",
+      (await zipRow.count()) === 1
+    );
+    check("...and the total grew by exactly one (11, not 10 or 12)", (await page.locator('[data-testid="my-stuff-list-item"]').count()) === 11);
+
+    await press(zipRow);
+    await page.locator('[data-testid="my-stuff-details"]').waitFor({ timeout: 10_000 });
+    const zipOpenHref = await page.locator('[data-testid="my-stuff-open"]').getAttribute("href");
+    check("Open points at the real file record, the same href a readable file gets", /^\/dashboard\/files\?record=/.test(zipOpenHref ?? ""), zipOpenHref);
+    check("a brand-new upload has no 'Made from' — nothing points at it yet", (await page.locator('[data-testid="my-stuff-made-from"]').count()) === 0);
+    check("...and no 'Used in' — nothing links to it yet", (await page.locator('[data-testid="my-stuff-used-in"] a').count()) === 0);
+
+    const usageAfterZip = await page.locator('[data-testid="my-stuff-upload-usage"]').innerText();
+    check(
+      `the real usage grows by this file's own real size ("${usageAfterZip}")`,
+      containsUi(usageAfterZip, formatBytes(ZIP_BYTES.length))
+    );
+
     check("no page threw (desktop, " + pageErrors.length + ")", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+    await context.close();
+  }
+
+  console.log("\n== a SECOND, non-admin server: the real per-plan storage cap ==");
+  // The same reason document-writer.prodtest.mjs runs an ON server and a
+  // CHARGED one: ADMIN_EMAILS above makes this account's caps infinite,
+  // so the only way to see the REAL number lib/files/limits.ts computes
+  // for an actual plan — and a REAL refusal for crossing it — is an
+  // account this env does not bypass. Free has no subscription_tier in
+  // user_metadata, so resolvePlanSlug (lib/billing/plan-resolution.ts)
+  // resolves it to "free" with no seeding needed.
+  //
+  // FILE_STORAGE_MB_FREE overrides ONLY the free-plan ceiling (lib/
+  // files/limits.ts's own env escape hatch, STORAGE_LIMIT_ENV_VARS) to
+  // 1MB so this check uploads kilobytes, not fifty real megabytes, to
+  // prove the same mechanism — the real default (free: 50MB) is checked
+  // by name in scripts/tests/combined-ceiling.test.mjs, not re-asserted
+  // here.
+  {
+    const FREE_CAP_BYTES = 1 * 1024 * 1024;
+    const { formatBytes } = await loadTs("src/lib/format-bytes.ts");
+    const APP2 = await start({ ...base, ADMIN_EMAILS: "", FILE_STORAGE_MB_FREE: "1" });
+    const { context, page } = await open(APP2, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP2}/dashboard/my-stuff`, { waitUntil: "load" });
+    await page.locator('[data-testid="my-stuff-list-item"]').first().waitFor({ timeout: 15_000 });
+
+    // THE SAME ACCOUNT, THE SAME STORAGE — this server reads the SAME
+    // mock Supabase as the admin one above, so the one real file already
+    // uploaded there (2048 bytes) is this account's own real usage too.
+    const usageBefore = await page.locator('[data-testid="my-stuff-upload-usage"]').innerText();
+    check(
+      `the real 1MB free-plan cap is shown, not hidden by admin bypass ("${usageBefore}")`,
+      containsUi(usageBefore, await uiFormat(page, "dashboard.files.storage", { used: formatBytes(2048), cap: formatBytes(FREE_CAP_BYTES) }))
+    );
+
+    // 2048 (already used) + 1,100,000 is over the 1,048,576-byte cap —
+    // deliberately, by a real margin, not a boundary rounding could flip.
+    const OVER_BYTES = Buffer.alloc(1_100_000, 0x42);
+    await page.setInputFiles('[data-testid="my-stuff-upload-input"]', {
+      name: "Πολύ-μεγάλο.bin",
+      mimeType: "application/octet-stream",
+      buffer: OVER_BYTES,
+    });
+    // NOT a join of every toast — this account's own seed data (finance,
+    // trading, a site) fires unrelated "Achievement unlocked" toasts on
+    // its first real page load, which would otherwise drown the one
+    // this check is actually about.
+    const capToast = page.locator('[role="status"]', { hasText: await uiTextStrict(page, "dashboard.files.uploadStorageCap") });
+    await capToast.first().waitFor({ state: "visible", timeout: 15_000 }).catch(() => {});
+    const capToastText = await capToast.first().innerText().catch(() => "");
+    check(
+      `crossing the real cap is refused, by name, not silently accepted ("${capToastText}")`,
+      containsUi(capToastText, await uiTextStrict(page, "dashboard.files.uploadStorageCap"))
+    );
+    check(
+      "...and not the generic \"could not be uploaded\"",
+      !containsUi(capToastText, await uiTextStrict(page, "dashboard.files.uploadError"))
+    );
+    check(
+      "the refused upload left no phantom row — the count is unchanged (11, not 12)",
+      (await page.locator('[data-testid="my-stuff-list-item"]').count()) === 11
+    );
+
+    check("no page threw (second server, " + pageErrors.length + ")", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }
 

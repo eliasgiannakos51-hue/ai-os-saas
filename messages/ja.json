@@ -3366,6 +3366,10 @@
         "project": "プロジェクト",
         "allProjects": "すべてのプロジェクト"
       },
+      "upload": {
+        "button": "アップロード",
+        "uploading": "アップロード中…"
+      },
       "kinds": {
         "site": "サイト",
         "slides": "スライド",

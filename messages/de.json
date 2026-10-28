@@ -3366,6 +3366,10 @@
         "project": "Projekt",
         "allProjects": "Alle Projekte"
       },
+      "upload": {
+        "button": "Hochladen",
+        "uploading": "Wird hochgeladen…"
+      },
       "kinds": {
         "site": "Websites",
         "slides": "Folien",

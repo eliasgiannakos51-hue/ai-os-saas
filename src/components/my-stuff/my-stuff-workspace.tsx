@@ -12,6 +12,7 @@ import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { MyStuffList } from "@/components/my-stuff/my-stuff-list";
 import { MyStuffDetails } from "@/components/my-stuff/my-stuff-details";
 import { MyStuffFilters } from "@/components/my-stuff/my-stuff-filters";
+import { MyStuffUpload } from "@/components/my-stuff/my-stuff-upload";
 import type { MyStuffItem } from "@/lib/my-stuff/load";
 import type { MyStuffKind } from "@/lib/my-stuff/sources";
 import { BUCKET_KINDS, type MyStuffBucket } from "@/lib/my-stuff/buckets";
@@ -179,7 +180,14 @@ export function MyStuffWorkspace({
   // SAME round trip the search box already made, not a separate filter
   // layer — the owner's own check ("κάθε φίλτρο δείχνει μόνο τα σωστά")
   // is about what the SERVER returns, the same RLS-scoped read either way.
+  //
+  // Κομμάτι 5 adds a FOURTH reason to re-run it: a file just uploaded
+  // through My Stuff's own upload row lands in the exact same table the
+  // "file" kind already reads, so showing it is this same fetch, not a
+  // second list-reading mechanism — `refreshTick` exists only to ask for
+  // one more run of it without touching query/bucket/project at all.
   const firstRun = useRef(true);
+  const [refreshTick, setRefreshTick] = useState(0);
   useEffect(() => {
     if (firstRun.current) {
       firstRun.current = false;
@@ -211,7 +219,7 @@ export function MyStuffWorkspace({
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [query, bucket, projectId]);
+  }, [query, bucket, projectId, refreshTick]);
 
   // A SELECTION THAT NO LONGER MATCHES THE LIST (a new search ran) is
   // cleared rather than left pointing at a row the screen no longer
@@ -312,15 +320,18 @@ export function MyStuffWorkspace({
             selectedKey={selected?.key ?? null}
             onSelect={setSelected}
             filters={
-              <MyStuffFilters
-                bucket={bucket}
-                onBucketChange={setBucket}
-                projects={initialProjects}
-                projectId={projectId}
-                onProjectChange={setProjectId}
-                sortOrder={sortOrder}
-                onSortChange={setSortOrder}
-              />
+              <>
+                <MyStuffUpload onUploaded={() => setRefreshTick((t) => t + 1)} />
+                <MyStuffFilters
+                  bucket={bucket}
+                  onBucketChange={setBucket}
+                  projects={initialProjects}
+                  projectId={projectId}
+                  onProjectChange={setProjectId}
+                  sortOrder={sortOrder}
+                  onSortChange={setSortOrder}
+                />
+              </>
             }
           />
         </div>

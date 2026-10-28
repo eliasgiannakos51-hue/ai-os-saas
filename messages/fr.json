@@ -3366,6 +3366,10 @@
         "project": "Projet",
         "allProjects": "Tous les projets"
       },
+      "upload": {
+        "button": "Importer",
+        "uploading": "Importation…"
+      },
       "kinds": {
         "site": "Sites",
         "slides": "Diapositives",

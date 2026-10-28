@@ -3366,6 +3366,10 @@
         "project": "项目",
         "allProjects": "所有项目"
       },
+      "upload": {
+        "button": "上传",
+        "uploading": "正在上传…"
+      },
       "kinds": {
         "site": "网站",
         "slides": "幻灯片",

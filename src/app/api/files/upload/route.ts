@@ -78,12 +78,18 @@ export async function POST(request: Request) {
 
     const bytes = Buffer.from(await entry.arrayBuffer());
 
+    // My Stuff's own upload (Κομμάτι 5) sends this field; the Files tool
+    // never does, so its own uploads keep refusing exactly the types
+    // they always refused. See ingestFileBytes's own comment.
+    const anyType = form.get("anyType") === "true";
+
     const result = await ingestFileBytes({
       supabase,
       user,
       bytes,
       rawFilename: entry.name || "untitled",
       contentType: entry.type || null,
+      acceptAnyType: anyType,
     });
 
     if (!result.ok) {

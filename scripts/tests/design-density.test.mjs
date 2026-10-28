@@ -163,7 +163,12 @@ console.log("\n== 2. the lines ==");
 // own `border-t` above the honest "who sees this" line at the foot of the
 // pane — a second, unrelated horizontal rule inside the SAME component
 // Κομμάτι 1's border-t already counted above, not a duplicate of it.
-ok(`border utilities (${r.counts.borders}), ceiling 598`, r.counts.borders <= 598);
+// 598 -> 599 on 2026-10-28. My Stuff's Κομμάτι 5 (upload) gives its own
+// upload/drop row a dashed `border` to read as a drop target, the one
+// shape this file does not already have a shared class for (the solid
+// `border-border` used elsewhere draws a different thing — a field or a
+// card, not "drop here").
+ok(`border utilities (${r.counts.borders}), ceiling 599`, r.counts.borders <= 599);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

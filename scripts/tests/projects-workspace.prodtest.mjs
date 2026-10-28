@@ -230,7 +230,12 @@ try {
     await press(page.locator('[data-testid="projects-list-item"]').filter({ hasText: "Νέος ιστότοπος" }).locator('[data-testid="projects-list-delete"]'));
     await page.waitForFunction(() => document.querySelectorAll('[data-testid="projects-list-row"]').length === 2);
     check("deleting a project removes it from the list (back to 2)", (await page.locator('[data-testid="projects-list-row"]').count()) === 2);
-    check("...and ONLY the folder — the owner's own ΔΕΝ ΚΑΝΕΙ rule needs no UI proof here, projects.test.mjs §4 reads the delete trigger itself", true);
+    // The owner's own ΔΕΝ ΚΑΝΕΙ rule — deleting a project must not delete its
+    // member items — needs no UI proof here: this mock's DELETE handler
+    // never touches entity_links or any member table, so a passing check
+    // against it here could never go red. The real guarantee is proven
+    // against the migration's actual SQL in projects.test.mjs §4 ("the
+    // delete trigger touches only entity_links").
 
     await page.goto(`${APP}/dashboard/projects/${PROJECT_1}`, { waitUntil: "load" });
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });

@@ -46,13 +46,21 @@ const PROJECTS = [
   { id: PROJECT_1, user_id: MOCK_USER.id, name: "Καλοκαιρινή καμπάνια", goal: "Αύξηση πωλήσεων τον Αύγουστο", status: "active", primary_colour: null, secondary_colour: null, created_at: "2026-08-15T10:00:00Z" },
   { id: PROJECT_2, user_id: MOCK_USER.id, name: "Νέος ιστότοπος", goal: null, status: "active", primary_colour: null, secondary_colour: null, created_at: "2026-09-01T10:00:00Z" },
 ];
-// One real member of PROJECT_1 — proves the detail pane's join (members
-// resolved to headlines through the module registry) actually runs
-// end to end in the built app, not just in projects.test.mjs's own
-// pure-function checks.
+// Real members of PROJECT_1, one per Κομμάτι 3 count box (site/posts/
+// images/documents — video has none, honestly, nothing writes ai_videos
+// yet) — proves the detail pane's join (members resolved to headlines
+// through the module registry) actually runs end to end in the built
+// app, not just in projects.test.mjs's own pure-function checks, AND
+// that the five boxes read real counts, not a hardcoded shape.
 const IMAGES = [{ id: "im1", prompt: "Αφίσα για καλοκαιρινή προσφορά", status: "done", created_at: "2026-08-16T10:00:00Z" }];
+const WEBSITES = [{ id: "w1", name: "Το καλοκαιρινό site", status: "done", created_at: "2026-08-17T10:00:00Z" }];
+const POSTS = [{ id: "po1", description: "Σετ αναρτήσεων Αυγούστου", status: "done", created_at: "2026-08-18T10:00:00Z" }];
+const DOCUMENTS = [{ id: "do1", title: "Προσφορά καλοκαιρινής καμπάνιας", created_at: "2026-08-19T10:00:00Z" }];
 const ENTITY_LINKS = [
   { source_table: "generated_images", source_id: "im1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-16T10:05:00Z" },
+  { source_table: "user_websites", source_id: "w1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-17T10:05:00Z" },
+  { source_table: "generated_posts", source_id: "po1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-18T10:05:00Z" },
+  { source_table: "user_documents", source_id: "do1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-19T10:05:00Z" },
 ];
 
 function handleProjects({ req, res, url, body, json }) {
@@ -97,7 +105,7 @@ function handleProjects({ req, res, url, body, json }) {
 
 const supa = await startMockSupabase({
   port: 54416,
-  tableRows: { projects: PROJECTS, entity_links: ENTITY_LINKS, generated_images: IMAGES },
+  tableRows: { projects: PROJECTS, entity_links: ENTITY_LINKS, generated_images: IMAGES, user_websites: WEBSITES, generated_posts: POSTS, user_documents: DOCUMENTS },
   handle: (ctx) => handleProjects(ctx),
 });
 
@@ -130,6 +138,26 @@ async function start(env) {
     } catch { await new Promise((r) => setTimeout(r, 1000)); }
   }
   throw new Error("the production server did not start");
+}
+
+/**
+ * .first(), NOT A BARE LOCATOR, ON projects-detail-name/-goal AFTER A
+ * RELOAD OR A CROSS-PROJECT page.goto() — found live, repeatedly: this
+ * testid briefly resolves to TWO elements, one hidden, for a window
+ * whose length is unpredictable (clear in under a second on one run,
+ * still there after 20s of polling on another, same machine, same
+ * seed). A direct fetch() of the exact same URL, ten times in a row,
+ * NEVER showed the duplicate in the raw server HTML — so this is a
+ * client-side rendering artifact, not a data bug, and the two copies
+ * (confirmed by dumping both) always carry the IDENTICAL value. Given
+ * that invariant, .first() reads/writes the right thing either way,
+ * without depending on a window this file could not pin down a cause
+ * for. Flagged in docs/PROGRESS.md for whoever next works the common
+ * dashboard shell — it deserves a real root-cause, just not one this
+ * round's own scope (Κομμάτι 3, the count boxes) is about.
+ */
+function one(page, selector) {
+  return page.locator(selector).first();
 }
 
 async function open(origin, device) {
@@ -204,15 +232,24 @@ try {
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });
     // Κομμάτι 2 made this an <input> (hand-editable, see below) — .inputValue(),
     // not .innerText(), which reads nothing off a form control.
-    check("selecting a row shows ITS OWN name in the detail pane", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Καλοκαιρινή καμπάνια");
+    check("selecting a row shows ITS OWN name in the detail pane", (await one(page, '[data-testid="projects-detail-name"]').inputValue()) === "Καλοκαιρινή καμπάνια");
     check("...and the url names it, so a reload or a bookmark opens the same one", page.url() === `${APP}/dashboard/projects?id=${PROJECT_1}`);
     check("...and the selected row is the only one marked current", (await page.locator('[aria-current="true"]').count()) === 1);
     const detailText1 = await page.locator('[data-testid="projects-detail-pane"]').innerText();
     // Κομμάτι 2 moved the goal off static text into a <textarea> — innerText
     // on an ancestor does not surface a form control's value, so this is
     // .inputValue() on the field itself, same reason as the name above.
-    check("its own goal text is shown", (await page.locator('[data-testid="projects-detail-goal"]').inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
+    check("its own goal text is shown", (await one(page, '[data-testid="projects-detail-goal"]').inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
     check("its one real member (an image) is resolved to its own headline, not a blank row", detailText1.includes("Αφίσα για καλοκαιρινή προσφορά"));
+
+    // Κομμάτι 3: the five count boxes — one real member each of site/
+    // posts/images/documents (seeded above), none of video (honest 0,
+    // nothing writes ai_videos yet).
+    check("site: 1", (await page.locator('[data-testid="project-kind-count-site"]').innerText()).startsWith("1"));
+    check("posts: 1", (await page.locator('[data-testid="project-kind-count-posts"]').innerText()).startsWith("1"));
+    check("images: 1", (await page.locator('[data-testid="project-kind-count-images"]').innerText()).startsWith("1"));
+    check("video: 0, honestly — nothing generates one yet", (await page.locator('[data-testid="project-kind-count-video"]').innerText()).startsWith("0"));
+    check("documents: 1", (await page.locator('[data-testid="project-kind-count-documents"]').innerText()).startsWith("1"));
 
     const row2 = page.locator('[data-testid="projects-list-row"]').filter({ hasText: "Νέος ιστότοπος" });
     await press(row2);
@@ -220,9 +257,14 @@ try {
     const detailText2 = await page.locator('[data-testid="projects-detail-pane"]').innerText();
     check(
       "picking the OTHER project swaps the pane to ITS content",
-      (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Νέος ιστότοπος" && !detailText2.includes("Αφίσα για καλοκαιρινή προσφορά")
+      (await one(page, '[data-testid="projects-detail-name"]').inputValue()) === "Νέος ιστότοπος" && !detailText2.includes("Αφίσα για καλοκαιρινή προσφορά")
     );
     check("...and the first project's row is no longer current", (await row1.getAttribute("aria-current")) === null);
+    // SCOPED TO THIS PROJECT ONLY — project 2 has none of the four
+    // members project 1 does, so all five boxes read zero here, not a
+    // leaked total from the account's other project.
+    check("the OTHER project's own count boxes are all zero (nothing linked to it)",
+      (await Promise.all(["site", "posts", "images", "video", "documents"].map((k) => page.locator(`[data-testid="project-kind-count-${k}"]`).innerText()))).every((s) => s.startsWith("0")));
 
     await page.locator('[data-testid="projects-new-name"]').fill("Φθινοπωρινή προσφορά");
     await page.locator('[data-testid="projects-new-goal"]').fill("Ξεπούλημα αποθέματος");
@@ -232,7 +274,7 @@ try {
       { timeout: 10_000 }
     );
     check("the created project is now in the list (3 total)", (await page.locator('[data-testid="projects-list-row"]').count()) === 3);
-    check("...and it opens selected, as the thing that was just made", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Φθινοπωρινή προσφορά");
+    check("...and it opens selected, as the thing that was just made", (await one(page, '[data-testid="projects-detail-name"]').inputValue()) === "Φθινοπωρινή προσφορά");
 
     page.once("dialog", (d) => d.accept());
     await press(page.locator('[data-testid="projects-list-item"]').filter({ hasText: "Νέος ιστότοπος" }).locator('[data-testid="projects-list-delete"]'));
@@ -247,7 +289,7 @@ try {
 
     await page.goto(`${APP}/dashboard/projects/${PROJECT_1}`, { waitUntil: "load" });
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });
-    check("the old per-project address still opens the right one, through its own redirect", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Καλοκαιρινή καμπάνια");
+    check("the old per-project address still opens the right one, through its own redirect", (await one(page, '[data-testid="projects-detail-name"]').inputValue()) === "Καλοκαιρινή καμπάνια");
 
     await page.goto(`${APP}/dashboard/projects?ask=${encodeURIComponent("Οργάνωσε τη μετακόμιση")}`, { waitUntil: "load" });
     check("?ask= is still read — it seeds the new-project goal field rather than going unread", (await page.locator('[data-testid="projects-new-goal"]').inputValue()) === "Οργάνωσε τη μετακόμιση");
@@ -255,8 +297,8 @@ try {
     // == Κομμάτι 2: title + goal, hand-editable, persisting after refresh ==
     await press(row1);
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });
-    const nameField = page.locator('[data-testid="projects-detail-name"]');
-    const goalField = page.locator('[data-testid="projects-detail-goal"]');
+    const nameField = one(page, '[data-testid="projects-detail-name"]');
+    const goalField = one(page, '[data-testid="projects-detail-goal"]');
     check("the goal field holds the project's own goal, editable (a <textarea>, not static text)", (await goalField.inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
 
     await nameField.fill("Καμπάνια Νοεμβρίου");
@@ -278,11 +320,12 @@ try {
     // re-fetches from the (mock) database through the server component,
     // so this is the one check that actually proves the PATCH reached
     // the server rather than just updating local state that a reload
-    // would have exposed as never having been saved.
+    // would have exposed as never having been saved. See one()'s own
+    // comment above for why this reads through .first().
     await page.reload({ waitUntil: "load" });
-    await page.locator('[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
-    check("the renamed title survives a reload — it reached the server, not just the screen", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Καμπάνια Νοεμβρίου");
-    check("the edited goal survives a reload too", (await page.locator('[data-testid="projects-detail-goal"]').inputValue()) === "Αύξηση πωλήσεων τον Νοέμβριο");
+    await one(page, '[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
+    check("the renamed title survives a reload — it reached the server, not just the screen", (await nameField.inputValue()) === "Καμπάνια Νοεμβρίου");
+    check("the edited goal survives a reload too", (await goalField.inputValue()) === "Αύξηση πωλήσεων τον Νοέμβριο");
 
     // AN EMPTY NAME IS REFUSED, like the create form's own checkProjectName
     // — the field reverts rather than silently saving a blank project.
@@ -304,10 +347,10 @@ try {
       () => (document.querySelector('[data-testid="projects-detail-name"]'))?.value === "Φθινοπωρινή προσφορά",
       { timeout: 10_000 }
     );
-    check("picking a different project shows ITS OWN name, not the previous one's edited value", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Φθινοπωρινή προσφορά");
+    check("picking a different project shows ITS OWN name, not the previous one's edited value", (await one(page, '[data-testid="projects-detail-name"]').inputValue()) === "Φθινοπωρινή προσφορά");
     // Project 3 WAS given a goal at creation ("Ξεπούλημα αποθέματος",
     // above) — "never edited" means "never edited HERE", not empty.
-    check("...and ITS OWN goal (from when it was made), not the previous one's", (await page.locator('[data-testid="projects-detail-goal"]').inputValue()) === "Ξεπούλημα αποθέματος");
+    check("...and ITS OWN goal (from when it was made), not the previous one's", (await one(page, '[data-testid="projects-detail-goal"]').inputValue()) === "Ξεπούλημα αποθέματος");
 
     // RESTORE project 1's original name/goal — this section renamed it to
     // prove the save path works, and the phone section below still looks
@@ -315,10 +358,7 @@ try {
     // By URL, not by pressing a row filtered on the OLD name text — that
     // text is exactly what this step just changed, out from under itself.
     await page.goto(`${APP}/dashboard/projects?id=${PROJECT_1}`, { waitUntil: "load" });
-    await page.waitForFunction(
-      () => (document.querySelector('[data-testid="projects-detail-name"]'))?.value === "Καμπάνια Νοεμβρίου",
-      { timeout: 10_000 }
-    );
+    await one(page, '[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
     await nameField.fill("Καλοκαιρινή καμπάνια");
     await nameField.blur();
     await goalField.fill("Αύξηση πωλήσεων τον Αύγουστο");
@@ -343,7 +383,7 @@ try {
 
     const row = page.locator('[data-testid="projects-list-row"]').filter({ hasText: "Καλοκαιρινή καμπάνια" });
     await press(row);
-    await page.locator('[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
+    await one(page, '[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
     check("selecting a project now shows ONLY the detail pane, full-screen", !(await page.locator('[data-testid="projects-list-pane"]').isVisible()) && (await page.locator('[data-testid="projects-detail-pane"]').isVisible()));
     const back = page.locator('[data-testid="projects-detail-back"]');
     const backBox = await back.boundingBox();

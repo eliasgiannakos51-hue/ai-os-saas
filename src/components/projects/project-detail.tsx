@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { MAX_GOAL_CHARS, MAX_NAME_CHARS, PROJECT_STATUSES, isHexColour, type ProjectStatus } from "@/lib/projects/project";
+import { MAX_GOAL_CHARS, MAX_NAME_CHARS, PROJECT_KIND_TABLES, PROJECT_STATUSES, isHexColour, projectKindCounts, type ProjectStatus } from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
 
 export type ProjectMemberView = {
@@ -155,6 +155,21 @@ export function ProjectDetail({
     }
   }
 
+  // Κομμάτι 3's own kind→label pairing. images/video/documents reuse the
+  // EXACT words dashboard.myStuff.filters already uses for the same three
+  // buckets — "ίδιοι αριθμοί με το My Stuff" doubled as "ίδιες λέξεις",
+  // not a coincidence. site/posts have no My Stuff filter chip of their
+  // own (My Stuff groups sites with apps), so they fall back to each
+  // tool's own canonical name, already translated everywhere else.
+  const KIND_LABEL_KEYS: Record<string, string> = {
+    site: "dashboard.tools.names.site",
+    posts: "dashboard.tools.names.posts",
+    images: "dashboard.myStuff.filters.images",
+    video: "dashboard.myStuff.filters.video",
+    documents: "dashboard.myStuff.filters.documents",
+  };
+  const kindCounts = useMemo(() => projectKindCounts(members), [members]);
+
   const sections = useMemo(
     () => [
       { key: "tasks", rows: members.filter((m) => TASK_TABLES.has(m.table)) },
@@ -232,6 +247,20 @@ export function ProjectDetail({
         }}
         className="w-full min-w-0 rounded-item border border-transparent bg-transparent px-1 text-lg font-semibold text-foreground outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
       />
+
+      {/* Κομμάτι 3's own five count boxes — Site/Posts/Images/Video/
+          Documents, one per PROJECT_KIND_TABLES entry above. Grid, not a
+          row that could wrap: five equal boxes stay five equal boxes on
+          a phone (narrower, never fewer per row — ProjectsShell's detail
+          pane is full-width there already). */}
+      <div className="grid grid-cols-5 gap-2" data-testid="project-kind-counts">
+        {PROJECT_KIND_TABLES.map(({ kind }) => (
+          <div key={kind} className="surface-tight text-center" data-testid={`project-kind-count-${kind}`}>
+            <p className="text-lg font-semibold text-foreground">{kindCounts[kind]}</p>
+            <p className="text-[11px] text-muted">{tKey(KIND_LABEL_KEYS[kind])}</p>
+          </div>
+        ))}
+      </div>
 
       {/* GOAL + PROGRESS */}
       <div className="surface">

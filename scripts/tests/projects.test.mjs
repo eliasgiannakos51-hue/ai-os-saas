@@ -97,6 +97,7 @@ const {
   isUuid, projectEdgeFilter,
   ROWS_PER_MODULE_UNSCOPED, UNSCOPED_MODULE_COUNT, CONTEXT_ROW_BUDGET, rowsPerModuleInProject,
   isHexColour, checkColour,
+  PROJECT_KIND_TABLES, projectKindCounts,
 } = project;
 
 ok(`ten locales were read (${LOCALES.length})`, LOCALES.length === 10);
@@ -609,6 +610,47 @@ console.log("\n== 8. ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, poi
     !/createAdminClient/.test(updateRoute) && /\.eq\("user_id", user\.id\)/.test(updateRoute));
   ok("an invalid colour is refused with 400, not passed through to the database's own CHECK",
     (updateRoute.match(/if \(!verdict\.ok\) return NextResponse\.json\(\{ error: "invalid_colour" \}, \{ status: 400 \}\);/g) ?? []).length === 2);
+}
+
+console.log("\n== 9. Κομμάτι 3: the five count boxes read the SAME tables as My Stuff ==");
+{
+  const librarySrc = await loadTs("src/lib/library/sources.ts");
+  const myStuffSrc = await loadTs("src/lib/my-stuff/sources.ts");
+  const byKind = Object.fromEntries(PROJECT_KIND_TABLES.map((e) => [e.kind, e.table]));
+
+  ok("five kinds, no more and no fewer — the owner's own list", PROJECT_KIND_TABLES.length === 5);
+  ok("site reads the SAME table Library's own 'site' entry does",
+    byKind.site === librarySrc.LIBRARY_SOURCES.find((s) => s.kind === "site").table);
+  ok("posts reads the SAME table Library's own 'posts' entry does",
+    byKind.posts === librarySrc.LIBRARY_SOURCES.find((s) => s.kind === "posts").table);
+  ok("documents reads the SAME table Library's own 'document' entry does",
+    byKind.documents === librarySrc.LIBRARY_SOURCES.find((s) => s.kind === "document").table);
+  ok("images reads the SAME table My Stuff's own 'images' entry does",
+    byKind.images === myStuffSrc.MY_STUFF_SOURCES.find((s) => s.kind === "images").table);
+  // video HAS no My Stuff/Library entry to check against — Video (task
+  // #90-97) has no generator yet, so this just pins the one real table
+  // (the baseline schema's own ai_videos, already read by this
+  // component's RESULT_TABLES) rather than a name nobody chose on purpose.
+  ok("video pins the one real table that exists for it (no generator writes to it yet)", byKind.video === "ai_videos");
+
+  console.log("-- the count is over THIS project's own members, nothing wider --");
+  const members = [
+    { table: "user_websites", id: "s1" }, { table: "user_websites", id: "s2" },
+    { table: "generated_posts", id: "p1" },
+    { table: "generated_images", id: "i1" }, { table: "generated_images", id: "i2" }, { table: "generated_images", id: "i3" },
+    { table: "user_documents", id: "d1" },
+    { table: "ai_missions", id: "m1" }, // a kind NONE of the five boxes count
+  ];
+  const counts = projectKindCounts(members);
+  ok("site: 2", counts.site === 2);
+  ok("posts: 1", counts.posts === 1);
+  ok("images: 3", counts.images === 3);
+  ok("video: 0 (none linked)", counts.video === 0);
+  ok("documents: 1", counts.documents === 1);
+  ok("a member of a SIXTH kind (ai_missions, Tasks) inflates none of the five",
+    counts.site + counts.posts + counts.images + counts.video + counts.documents === 7);
+  ok("an empty project counts honest zeroes, not missing keys",
+    Object.values(projectKindCounts([])).every((n) => n === 0) && Object.keys(projectKindCounts([])).length === 5);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

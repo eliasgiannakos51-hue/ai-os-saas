@@ -200,6 +200,38 @@ export function projectContextModules(members: ReadonlyArray<ProjectMemberRef>):
   return projectModuleTables(members).filter((t) => scanned.has(t));
 }
 
+/**
+ * «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 3 — THE FIVE COUNT BOXES, and the
+ * table each one reads. "ίδιοι αριθμοί με το My Stuff" (the owner's own
+ * words) is a claim about WHICH TABLE, not just which number — so each
+ * entry here names the exact same table My Stuff's own registry reads
+ * for that kind, checked structurally in projects.test.mjs rather than
+ * trusted by eye: `site`/`posts`/`documents` against
+ * `lib/library/sources.ts`'s own `site`/`posts`/`document` entries,
+ * `images` against `lib/my-stuff/sources.ts`'s own `images` entry.
+ *
+ * `video` HAS NO SUCH ENTRY TO CHECK AGAINST — Video (task #90-97,
+ * `docs/NEEDS-FROM-ELIAS.md`) is a provider-comparison table today, no
+ * generator writes a row yet. `ai_videos` is real (the baseline schema,
+ * already read by this very file's own `RESULT_TABLES` above) and this
+ * box reads it honestly: zero now, because nothing makes a video yet,
+ * not a placeholder standing in for a number nobody can compute.
+ */
+export const PROJECT_KIND_TABLES: ReadonlyArray<{ kind: "site" | "posts" | "images" | "video" | "documents"; table: string }> = [
+  { kind: "site", table: "user_websites" },
+  { kind: "posts", table: "generated_posts" },
+  { kind: "images", table: "generated_images" },
+  { kind: "video", table: "ai_videos" },
+  { kind: "documents", table: "user_documents" },
+];
+
+/** One count per PROJECT_KIND_TABLES entry, over this project's own members. */
+export function projectKindCounts(members: ReadonlyArray<ProjectMemberRef>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const { kind, table } of PROJECT_KIND_TABLES) out[kind] = members.filter((m) => m.table === table).length;
+  return out;
+}
+
 // ---------------------------------------------------------------------
 // THE CONTEXT BUDGET, AND WHY A PROJECT IS WORTH ANYTHING AT ALL
 // ---------------------------------------------------------------------

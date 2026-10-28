@@ -35,6 +35,44 @@ export function isProjectStatus(value: unknown): value is ProjectStatus {
   return typeof value === "string" && (PROJECT_STATUSES as readonly string[]).includes(value);
 }
 
+/**
+ * ProjectHeader/ProjectMemberView live here, not in
+ * components/projects/project-detail.tsx where they used to — THIS file
+ * has no client component anywhere in its own import graph, and that
+ * file does: Projects Κομμάτι 7's own public page, src/app/shared/[token]/
+ * page.tsx, imports lib/projects/load-project-detail.ts for the server
+ * data loader alone, but that loader's type-only import of these two
+ * types from project-detail.tsx was enough for scripts/lib/route-graph.mjs's
+ * reachability walk (which does not distinguish `import type` from a
+ * real one — the same shape Projects Κομμάτι 6 already hit once for
+ * FlowRow, see lib/flows/plan.ts's own comment) to mark project-detail.tsx
+ * and project-flow-field.tsx — both unbounded client components — as
+ * reachable from the marketing group, the one group message-slices.ts
+ * requires to have NONE.
+ */
+export type ProjectMemberView = {
+  table: string;
+  id: string;
+  slug: string;
+  titleKey: string;
+  headline: string;
+  createdAt: string;
+};
+
+export type ProjectHeader = {
+  id: string;
+  name: string;
+  goal: string | null;
+  notes: string | null;
+  status: ProjectStatus;
+  primaryColour: string | null;
+  secondaryColour: string | null;
+  createdAt: string;
+  /** Κομμάτι 7 — the live read-only link, already built absolute (getSiteUrl()
+   *  in load-project-detail.ts), or null when nothing is currently shared. */
+  shareUrl: string | null;
+};
+
 export const MAX_NAME_CHARS = 120;
 export const MIN_NAME_CHARS = 2;
 export const MAX_GOAL_CHARS = 2_000;

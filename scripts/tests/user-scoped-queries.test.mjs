@@ -250,6 +250,8 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
       "Sweeps agent_runs in status 'queued' across all accounts on purpose — collecting Anthropic Batch results is a cross-account job by definition, and it settles each run against the account that owns it.",
     "derivedDataHealth@src/app/api/health/route.ts":
       "Counts search_index across every account on purpose: the question it exists to answer is whether the index has ANY rows at all, and a caller-scoped client would answer it about one person. Nothing identifying leaves the function — it returns three integers and a verdict, never a user_id, a title or an href — and it sits beside navFreshness, which reads nav_events the same way for the same reason.",
+    "loadProjectDetail@src/app/shared/[token]/page.tsx":
+      "There is no session here to scope a caller's client to — this is Projects Κομμάτι 7's public share page, reached by the token alone. byToken.id is not attacker-supplied: it is read ONE line above from projects.share_token, an unguessable value randomBytes(24) generates server-side in api/projects/[id]/share's own POST, and a token that does not resolve already returned before this call. So the id this hands loadProjectDetail is exactly the one capability the token proves, the same argument the cron entries above make for an id read first through the user's own client.",
   };
 
   const violations = [];

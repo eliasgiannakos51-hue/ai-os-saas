@@ -5825,6 +5825,19 @@
       "placeholder": "Faits, décisions, préférences — écrits ici, lus uniquement par les discussions, créations, plans et créations d'agents de ce projet.",
       "hint": "Alimente uniquement la création à l'intérieur de ce projet. Rien d'autre ne le lit."
     },
+    "share": {
+      "heading": "Partager",
+      "hint": "Toute personne disposant de ce lien peut consulter ce projet, en lecture seule, sans connexion. Vous pouvez le révoquer à tout moment.",
+      "create": "Créer un lien",
+      "revoke": "Révoquer",
+      "public": {
+        "readOnly": "Partagé avec vous — lecture seule",
+        "notFound": {
+          "heading": "Ce lien n'est pas disponible",
+          "body": "Il a peut-être été révoqué, ou il n'a jamais existé."
+        }
+      }
+    },
     "errors": {
       "tooShort": "Donnez-lui d'abord un nom.",
       "tooLong": "Ce nom dépasse {limit} caractères.",

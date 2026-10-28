@@ -189,7 +189,14 @@ console.log("\n== 2. the lines ==");
 // for the same reason as every field above, and +1 border-t separating the
 // field from the list of this project's own flows below it — the one new
 // divider line this screen did not already have one of.
-ok(`border utilities (${r.counts.borders}), ceiling 605`, r.counts.borders <= 605);
+// 605 -> 608 on 2026-10-28. Κομμάτι 7 (Share, read-only link + revoke)
+// added THREE boxes to project-detail.tsx's new Share card: the read-only
+// `<input>` holding the link itself (same "a field needs a border to read
+// as one" reason as every text field already counted above), and the
+// "Create link"/"Revoke" buttons, styled like the sibling "Automate it"
+// button already in this file (`border border-border`, not `bg-button` —
+// secondary actions, so this stays off one-primary-action's own count).
+ok(`border utilities (${r.counts.borders}), ceiling 608`, r.counts.borders <= 608);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —
@@ -198,7 +205,11 @@ ok(`border utilities (${r.counts.borders}), ceiling 605`, r.counts.borders <= 60
 // `divide-y` inside draws the same separation with one rule instead of
 // forty outlines, so the page costs exactly this: one divide, zero
 // borders. A round that raises BOTH numbers has not made this trade.
-ok(`divide rules (${r.counts.divides}), ceiling 7`, r.counts.divides <= 7);
+// 7 -> 8 on 2026-10-28. Κομμάτι 7's public page, src/app/shared/[token]/
+// page.tsx, lists a shared project's own Activity the same read-only way
+// — one `divide-y` over up to ten rows, not ten borders, same trade as
+// /dashboard/ai-memory's own above.
+ok(`divide rules (${r.counts.divides}), ceiling 8`, r.counts.divides <= 8);
 
 console.log("\n== 3. the glow and the gradient titles ==");
 // ZERO, and the definition is in design-census.mjs: a glow is a BLURRED

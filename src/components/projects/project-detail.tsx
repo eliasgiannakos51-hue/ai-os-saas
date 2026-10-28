@@ -4,34 +4,26 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { MessageCircle, Wand2, X } from "lucide-react";
+import { Link2, Link2Off, MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { MAX_GOAL_CHARS, MAX_NAME_CHARS, MAX_NOTES_CHARS, PROJECT_KIND_TABLES, PROJECT_STATUSES, isHexColour, projectKindCounts, type ProjectStatus } from "@/lib/projects/project";
+import { CopyButton } from "@/components/ui/copy-button";
+import {
+  MAX_GOAL_CHARS,
+  MAX_NAME_CHARS,
+  MAX_NOTES_CHARS,
+  PROJECT_KIND_TABLES,
+  PROJECT_STATUSES,
+  isHexColour,
+  projectKindCounts,
+  type ProjectHeader,
+  type ProjectMemberView,
+  type ProjectStatus,
+} from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
 import { ProjectFlowField } from "@/components/projects/project-flow-field";
 import type { FlowRow } from "@/lib/flows/plan";
 import type { FlowPrices } from "@/lib/flows/flow-pricing";
 import type { FlowAvailability } from "@/lib/flows/plan";
-
-export type ProjectMemberView = {
-  table: string;
-  id: string;
-  slug: string;
-  titleKey: string;
-  headline: string;
-  createdAt: string;
-};
-
-export type ProjectHeader = {
-  id: string;
-  name: string;
-  goal: string | null;
-  notes: string | null;
-  status: ProjectStatus;
-  primaryColour: string | null;
-  secondaryColour: string | null;
-  createdAt: string;
-};
 
 /**
  * THE SEVEN SECTIONS ARE SEVEN VIEWS OF ONE LIST.
@@ -134,6 +126,11 @@ export function ProjectDetail({
   // rejects, it truncates, same as clampGoal already does for goal).
   const [notes, setNotes] = useState(project.notes ?? "");
   const [savingText, setSavingText] = useState<"name" | "goal" | "notes" | null>(null);
+  // Κομμάτι 7 (Share, read-only link + revoke) — initialised from the
+  // project's own row, so a link made in an earlier session still shows
+  // after a reload rather than reading as "nothing shared" until pressed.
+  const [shareUrl, setShareUrl] = useState(project.shareUrl);
+  const [shareBusy, setShareBusy] = useState(false);
   const TEXT_FIELD_LIMIT: Record<"name" | "goal" | "notes", number> = {
     name: MAX_NAME_CHARS,
     goal: MAX_GOAL_CHARS,
@@ -238,6 +235,47 @@ export function ProjectDetail({
       addToast(t("errors.failed"), "error");
     } finally {
       setSavingColour(null);
+    }
+  }
+
+  // Κομμάτι 7 — ONE secret per project. Pressing Share again after a
+  // revoke calls the SAME route, which always makes a brand-new token
+  // (api/projects/[id]/share's own POST) — never the old one back.
+  async function createShareLink() {
+    if (shareBusy) return;
+    setShareBusy(true);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}/share`, { method: "POST" });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok || typeof body.url !== "string") {
+        addToast(t("errors.failed"), "error");
+        return;
+      }
+      setShareUrl(body.url);
+    } catch {
+      addToast(t("errors.failed"), "error");
+    } finally {
+      setShareBusy(false);
+    }
+  }
+
+  // "ανάκληση με ένα πάτημα" — the owner's own words: one press, no
+  // confirm dialog. Unlike deleting the project itself, revoking a link
+  // is not destructive to anything — a new one is a press away.
+  async function revokeShareLink() {
+    if (shareBusy) return;
+    setShareBusy(true);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}/share`, { method: "DELETE" });
+      if (!res.ok) {
+        addToast(t("errors.failed"), "error");
+        return;
+      }
+      setShareUrl(null);
+    } catch {
+      addToast(t("errors.failed"), "error");
+    } finally {
+      setShareBusy(false);
     }
   }
 
@@ -386,6 +424,49 @@ export function ProjectDetail({
           className="mt-1 w-full min-w-0 resize-y rounded-item border border-transparent bg-transparent px-1 py-0.5 text-sm text-muted outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
         />
         <p className="mt-1.5 text-[11px] text-muted">{t("notes.hint")}</p>
+      </div>
+
+      {/* Κομμάτι 7 (Share, read-only link + revoke). The public page this
+          resolves, src/app/shared/[token]/page.tsx, never shows notes —
+          that textarea above is private AI memory, not share content. */}
+      <div className="surface">
+        <h2 className="text-sm font-semibold text-foreground">{t("share.heading")}</h2>
+        <p className="mt-1 text-[11px] text-muted">{t("share.hint")}</p>
+        {shareUrl ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={shareUrl}
+              data-testid="projects-share-url"
+              aria-label={t("share.heading")}
+              onFocus={(e) => e.currentTarget.select()}
+              className="min-w-0 flex-1 rounded-item border border-border bg-transparent px-2 py-2 text-xs text-foreground"
+            />
+            <CopyButton text={shareUrl} data-testid="projects-share-copy" />
+            <button
+              type="button"
+              onClick={() => void revokeShareLink()}
+              disabled={shareBusy}
+              data-testid="projects-share-revoke"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-semibold text-foreground hover:border-foreground/40 disabled:opacity-50"
+            >
+              <Link2Off className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("share.revoke")}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void createShareLink()}
+            disabled={shareBusy}
+            data-testid="projects-share-create"
+            className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-semibold text-foreground hover:border-foreground/40 disabled:opacity-50"
+          >
+            <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+            {t("share.create")}
+          </button>
+        )}
       </div>
 
       {/* TASKS · FILES · AGENTS · RESULTS · ACTIVITY */}

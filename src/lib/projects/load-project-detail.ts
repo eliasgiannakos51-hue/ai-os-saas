@@ -12,6 +12,7 @@
  * simply is not here").
  */
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site-url";
 import { getLinkableModuleByTable } from "@/lib/knowledge-graph";
 import {
   IN_PROJECT,
@@ -19,9 +20,10 @@ import {
   projectMembers,
   projectContextModules,
   rowsPerModuleInProject,
+  type ProjectHeader,
+  type ProjectMemberView,
   type ProjectStatus,
 } from "@/lib/projects/project";
-import type { ProjectHeader, ProjectMemberView } from "@/components/projects/project-detail";
 
 export type ProjectDetailData = {
   header: ProjectHeader;
@@ -35,7 +37,7 @@ export async function loadProjectDetail(
 ): Promise<ProjectDetailData | null> {
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, goal, notes, status, primary_colour, secondary_colour, created_at")
+    .select("id, name, goal, notes, status, primary_colour, secondary_colour, created_at, share_token")
     .eq("id", projectId)
     .maybeSingle();
   if (!project) return null;
@@ -93,6 +95,7 @@ export async function loadProjectDetail(
       primaryColour: (project.primary_colour as string | null) ?? null,
       secondaryColour: (project.secondary_colour as string | null) ?? null,
       createdAt: String(project.created_at ?? ""),
+      shareUrl: project.share_token ? `${getSiteUrl()}/shared/${project.share_token as string}` : null,
     },
     members: views,
     rowsPerModule: rowsPerModuleInProject(projectContextModules(members).length),

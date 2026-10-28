@@ -7904,3 +7904,82 @@ production-build τεστ 42→51. Σημειωμένο, όχι διορθωμέ
 ξεχωριστή δουλειά.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία.**
+
+---
+
+**«2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» — Κομμάτι 7 (τελευταίο): Share, read-only
+link + ανάκληση με ένα πάτημα, 2026-10-28.**
+
+**Τίποτα δεν υπήρχε να ξαναχρησιμοποιηθεί.** Ψάξαμε πρώτα: το
+`/r/[code]` είναι το referral link (`lib/affiliate/*`), άσχετο· το
+`published_sites` (Site tool) είναι «δημοσίευση σε δική της διεύθυνση»
+(ένα chosen slug, όχι μυστικό token) — διαφορετικό σχήμα, όχι
+ανακλητός σύνδεσμος. Καμία γενική πίνακας «shares». Χτίστηκε νέο, μικρό
+μηχανισμό: δύο στήλες στο `projects` (`share_token`,
+`share_token_created_at`, migration `20261102000000_projects_share_token.sql`,
+δικό της `-- How to undo:`) — όχι νέος πίνακας, ίδιο σχήμα με
+`primary_colour`/`notes`. Νέο route `api/projects/[id]/share` (POST
+φτιάχνει, DELETE ανακαλεί, πάντα ΝΕΟ token — `randomBytes(24)`, ποτέ
+το παλιό ξανά), με το ΙΔΙΟ client (όχι admin) που ήδη χρησιμοποιεί το
+PATCH route δίπλα του — καμία κλειδωμένη στήλη, το UPDATE είναι ήδη
+row-scoped από το `projects_update_own`. Νέα public σελίδα
+`src/app/shared/[token]/page.tsx` — ΧΩΡΙΣ session, μέσω
+`createAdminClient()`, ξαναχρησιμοποιεί αυτολεξεί το `loadProjectDetail`
+(ίδιο function με το ιδιοκτήτη's δικό πάνελ) αλλά ΔΕΝ renders ΠΟΤΕ το
+`header.notes` — μηδέν client component, άρα καμία επιρροή στο
+message-slices. Ένα revoked ή ανύπαρκτο token δείχνει το ΙΔΙΟ «αυτός ο
+σύνδεσμος δεν είναι διαθέσιμος» — καμία διάκριση ορατή στον ξένο.
+`src/app/robots.ts` πήρε `/shared` στο disallow (defense-in-depth με
+το per-page `robots: {index:false}`) — ποτέ indexed.
+
+**Τέσσερα ευρήματα στην πορεία, όλα διορθωμένα, κανένα δικό του bug
+προϊόντος:**
+1. `one-primary-action`/`design-density`: δύο νέα boxes (link+Revoke),
+   βάση borders 605→608, divides 7→8 — γνήσιο, αιτιολογημένο.
+2. `published-site-seo.test.mjs`'s δικό της «robots δεν disallows /s/»
+   είχε ανεξέταστο regex (`"\/s` χωρίς anchor) που ταίριαζε και το
+   «/shared» — ψευδώς-θετικό στο ΤΕΣΤ, όχι στο robots.ts· διορθώθηκε με
+   anchor στο closing quote.
+3. `stub-vs-production.test.mjs`'s GRANT/REVOKE scanner διάβασε το
+   δικό μου SQL comment «Revoke sets this back to NULL;» ως
+   `REVOKE ... TO NULL;` — ξαναγράφτηκε η πρόταση, όχι το scanner
+   (ήδη πιάνει άλλα τρία παρόμοια, ηθελημένα αφημένα ατράνταχτα).
+4. `user-scoped-queries.test.mjs` σωστά σημάδεψε ότι η public σελίδα
+   δίνει admin client στο `loadProjectDetail` (που κανονικά βασίζεται
+   στο RLS του caller) — προστέθηκε στο ήδη υπάρχον `ADMIN_CALLERS_ARGUED`
+   με το επιχείρημα: το project id έρχεται ΗΔΗ από ένα share_token
+   lookup, όχι από attacker input απευθείας.
+
+**Δοκιμή, ζωντανά, σε production build.** `projects-workspace.prodtest.mjs`
+51→62 (ο σταθερός `start()` πήρε `NEXT_PUBLIC_SITE_URL` στο runtime env
+του — server-only read, το `getSiteUrl()` χρειαζόταν το ίδιο origin με
+το `APP` του τεστ): φτιάχνεται link, ανοίγεται σε ΚΑΙΝΟΥΡΓΙΟ context
+χωρίς cookies — δείχνει όνομα+στόχο+σωστά counts, ΠΟΤΕ τις σημειώσεις
+(που γράφτηκαν επίτηδες μη-άδειες πριν τον έλεγχο), μηδέν input/
+textarea/button μέσα στο δικό της `<main>` (το cookie-consent banner
+του root layout εξαιρέθηκε ρητά — καθολικό chrome, όχι δική της
+ευθύνη)· ανάκληση με ένα πάτημα αχρηστεύει το ΙΔΙΟ link αμέσως (ίδια
+εμφάνιση με «ποτέ δεν υπήρξε»)· Share ξανά φτιάχνει ΝΕΟ link, ποτέ το
+παλιό. Μία φλέβα ασταθούς ελέγχου βρέθηκε κι αυτή (ο ήδη γνωστός
+διπλός-render παράθυρο αυτού του dashboard shell, countάροντας «gone»
+πριν προλάβει) — διορθώθηκε με `waitForFunction` αντί άμεσου count().
+Έξι συνεχόμενα runs καθαρά μετά. `npm run gates` **ΟΛΑ 383 ΠΕΡΑΣΑΝ**
+(27.264 έλεγχοι). `npx tsc --noEmit` καθαρό. `npm run build:ci`
+πράσινο.
+
+✅ Κομμάτι 7 (τελευταίο): Share — δύο νέες στήλες, ένα route, μία
+public σελίδα που ξαναχρησιμοποιεί το ίδιο `loadProjectDetail` χωρίς
+να δείχνει ΠΟΤΕ τις σημειώσεις, revoke με ένα πάτημα, κάθε νέο link
+πάντα φρέσκο. Τέσσερα ευρήματα σε ήδη υπάρχοντα gates, όλα διορθωμένα
+(δύο ψευδώς-θετικά στα ίδια τα tests, ένα αιτιολογημένο admin-client
+entry, μία βάση ανέβηκε γνήσια).
+
+**ΟΛΑ ΕΦΤΑ ΚΟΜΜΑΤΙΑ ΤΟΥ «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» ✅.** Περιμένει pull
+request (μία migration σε όλο το directive: `20261101000000_projects_notes.sql`
+και `20261102000000_projects_share_token.sql` — και οι δύο ήδη
+αναφερμένες στα δικά τους Κομμάτια). Δεν κάνω merge. Γνωστό, ξεχωριστό
+κενό που ΔΕΝ είναι μέρος αυτού του directive: το `flows.prodtest.mjs`
+(λογαριασμό-ευρύ τεστ ενός UI που το Κομμάτι 1 αντικατέστησε) είναι
+κόκκινο — σημειωμένο στο Κομμάτι 6 παραπάνω.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261102000000_projects_share_token.sql.**

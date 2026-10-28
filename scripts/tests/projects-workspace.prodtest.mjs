@@ -149,6 +149,13 @@ function handleProjects({ req, res, url, body, json }) {
   if (table !== "projects") return false;
   const idParam = [...url.searchParams].find(([k]) => k === "id")?.[1];
   const id = idParam?.startsWith("eq.") ? idParam.slice(3) : null;
+  // Κομμάτι 7's own public lookup filters by share_token, not id — the
+  // id-only filter above silently ignored it and (worse) `single` then
+  // returned sorted[0], some OTHER project, rather than refusing. Same
+  // shape as handleFlowTables' own matchesFilter, kept separate here
+  // since handleProjects' POST/PATCH/DELETE already depend on id alone.
+  const shareTokenParam = [...url.searchParams].find(([k]) => k === "share_token")?.[1];
+  const shareToken = shareTokenParam?.startsWith("eq.") ? shareTokenParam.slice(3) : null;
   const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
   const answer = (list) => (single ? (list[0] ? json(200, list[0]) : json(406, { message: "no rows" })) : json(200, list));
   if (req.method === "GET") {
@@ -156,6 +163,7 @@ function handleProjects({ req, res, url, body, json }) {
     // the route relies on the DATABASE for that order, so this stand-in
     // has to sort too, not just hold the rows in insertion order.
     const sorted = [...PROJECTS].sort((a, b) => b.created_at.localeCompare(a.created_at));
+    if (shareToken !== null) return answer(sorted.filter((p) => p.share_token === shareToken)), true;
     return answer(id ? sorted.filter((p) => p.id === id) : sorted), true;
   }
   if (req.method === "POST") {
@@ -211,7 +219,12 @@ async function start(env) {
     });
   });
   const origin = `http://127.0.0.1:${port}`;
-  server = spawn("npx", ["next", "start", "-p", String(port)], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
+  // Κομμάτι 7's own share link is built server-side from getSiteUrl()
+  // (src/lib/site-url.ts), which falls back to localhost:3000 without
+  // this — a server-only read, so setting it here (not at `next build`
+  // time, which only matters for NEXT_PUBLIC_* values a CLIENT bundle
+  // reads directly) is enough.
+  server = spawn("npx", ["next", "start", "-p", String(port)], { env: { ...env, NEXT_PUBLIC_SITE_URL: origin }, stdio: ["ignore", "pipe", "pipe"], detached: true });
   for (let i = 0; i < 90; i++) {
     try {
       await new Promise((res, rej) => { const r = http.get(`${origin}/api/health`, () => res()); r.on("error", rej); });
@@ -558,6 +571,71 @@ try {
     await page.reload({ waitUntil: "load" });
     await one(page, '[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
     check("the flow itself survives a reload too — it is a row, not local screen state", (await one(page, '[data-testid="project-flow-field"]').locator('[data-testid="flow-step"][data-status="done"]').count()) === 1);
+
+    // == Κομμάτι 7: Share — a read-only link, revoked with one press ==.
+    // Written here with notes set to something non-empty, on purpose:
+    // the strongest proof that the public page never shows them is a
+    // run where there is something to leak and it does not.
+    await notesField.fill("Σημείωση που ΔΕΝ πρέπει να φανεί σε όποιον έχει το link.");
+    await notesField.blur();
+    await page.waitForFunction(() => (document.querySelector('[data-testid="projects-detail-notes"]'))?.value?.length > 0, { timeout: 10_000 });
+
+    check("nothing shared yet — the create button shows, not a link", (await page.locator('[data-testid="projects-share-create"]').count()) >= 1 && (await page.locator('[data-testid="projects-share-url"]').count()) === 0);
+    await press(page.locator('[data-testid="projects-share-create"]'));
+    await page.locator('[data-testid="projects-share-url"]').waitFor({ timeout: 10_000 });
+    const shareUrl1 = await page.locator('[data-testid="projects-share-url"]').inputValue();
+    check("the link is this app's own origin, at /shared/<token>", shareUrl1.startsWith(`${APP}/shared/`) && shareUrl1.length > `${APP}/shared/`.length + 10);
+    // waitForFunction, not an immediate count() === 0: one()'s own comment
+    // above describes an unpredictable window, after a state change, where
+    // this screen briefly renders twice — found live here too, flaking on
+    // "gone" exactly when the stale copy had not caught up yet.
+    const createGone = await page
+      .waitForFunction(() => document.querySelectorAll('[data-testid="projects-share-create"]').length === 0, { timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+    check("the create button is gone now that a link exists", createGone);
+
+    // A FRESH, COOKIE-LESS CONTEXT — nobody signed in, same as a stranger
+    // who was just handed the link.
+    const anonContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const anonPage = await anonContext.newPage();
+    await anonPage.goto(shareUrl1, { waitUntil: "load" });
+    check("the public page shows the project's own name, with no session at all", (await anonPage.locator("h1").innerText()) === "Καλοκαιρινή καμπάνια");
+    check("...and its own goal", (await anonPage.innerText("main")).includes("Αύξηση πωλήσεων τον Αύγουστο"));
+    check("...the SAME counts the owner's own pane shows (images: 2, after Κομμάτι 6's own picture)", (await anonPage.innerText("main")).includes("2"));
+    check(
+      "the notes — private AI memory, just set above — are NEVER on this page, however they are rendered",
+      !(await anonPage.innerText("main")).includes("ΔΕΝ πρέπει να φανεί")
+    );
+    // "main", NOT "body": the root layout's own CookieConsentBanner draws
+    // a real Accept/Decline button on every page, this one included — a
+    // fact about the global chrome, not about whether THIS page is
+    // read-only. Scoped to this page's own content, there is nothing to
+    // press at all.
+    check("no edit control anywhere — every field the owner's own pane has is read-only here", (await anonPage.locator("main input, main textarea, main button").count()) === 0);
+
+    await press(page.locator('[data-testid="projects-share-revoke"]'));
+    await page.waitForFunction(() => document.querySelector('[data-testid="projects-share-create"]') !== null, { timeout: 10_000 });
+    check("revoke — one press — brings the create button back", (await page.locator('[data-testid="projects-share-create"]').count()) >= 1);
+
+    await anonPage.goto(shareUrl1, { waitUntil: "load" });
+    const revokedMain = await anonPage.innerText("main");
+    check(
+      "the OLD link now reads exactly like one that never existed — revoked, not merely hidden",
+      !revokedMain.includes("Καλοκαιρινή καμπάνια") && !revokedMain.includes("Αύξηση πωλήσεων") && revokedMain.length < 400
+    );
+    await anonContext.close();
+
+    await press(page.locator('[data-testid="projects-share-create"]'));
+    await page.locator('[data-testid="projects-share-url"]').waitFor({ timeout: 10_000 });
+    const shareUrl2 = await page.locator('[data-testid="projects-share-url"]').inputValue();
+    check("pressing Share again makes a BRAND-NEW link, never the revoked one back", shareUrl2 !== shareUrl1);
+
+    await press(page.locator('[data-testid="projects-share-revoke"]'));
+    await page.waitForFunction(() => document.querySelector('[data-testid="projects-share-create"]') !== null, { timeout: 10_000 });
+    await notesField.fill("");
+    await notesField.blur();
+    await page.waitForFunction(() => (document.querySelector('[data-testid="projects-detail-notes"]'))?.value === "", { timeout: 10_000 });
   }
 
   console.log("\n== phone (390x844): list OR project, never both ==");

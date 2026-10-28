@@ -503,6 +503,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "«What Ionexa knows» (Projects Κομμάτι 4) cannot save: the PATCH route's write fails, the field reverts on every blur, and nothing a project's own chats/creates/plans/agent builds read ever carries what was written there",
   },
   {
+    kind: "column",
+    table: "projects",
+    column: "share_token",
+    migration: "20261102000000_projects_share_token.sql",
+    breaks: "Share (Projects Κομμάτι 7) cannot create or revoke a link: api/projects/[id]/share's POST/DELETE fail, and the project page's Share button never shows one",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

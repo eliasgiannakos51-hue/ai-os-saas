@@ -136,6 +136,8 @@ const PUBLIC_ON_PURPOSE = {
     "reached from an emailed single-use token. The token is the credential and it is claimed atomically by /api/delete-account/confirm; requiring a session as well would strand anybody who had already been signed out.",
   "src/app/offline/page.tsx":
     "served by the service worker when the network is gone. It is fetched ONCE, over the network, at service-worker install — so it cannot depend on a session, and it deliberately holds no account data at all.",
+  "src/app/shared/[token]/page.tsx":
+    "Projects Κομμάτι 7's own read-only share link: the whole point is that whoever holds the unguessable token may read it with NO session — that is what 'share' means. It is not a cross-account leak: the token itself (randomBytes(24), api/projects/[id]/share's own POST) is the credential, looked up with createAdminClient() the same deliberate way delete-account/confirm's single-use token is above, and the page never renders the project's notes (private AI memory) regardless of who asks.",
 };
 
 const unguarded = [];

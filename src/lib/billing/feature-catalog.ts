@@ -825,7 +825,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     // the same project cap; each step is charged by its own tool.
     // projects/[id] (2026-10-22): name, goal, status and the two colours —
     // no credit cost, no plan gate, the same free routes as the rest.
-    routes: ["projects", "projects/[id]", "projects/[id]/members", "flows", "flows/[id]/steps"],
+    // projects/[id]/share (Κομμάτι 7, 2026-10-28): the read-only link and
+    // its revoke — also free, no plan gate, same reason: this is the
+    // project the account already owns, not a new thing being sold.
+    routes: ["projects", "projects/[id]", "projects/[id]/members", "projects/[id]/share", "flows", "flows/[id]/steps"],
     charges: false,
     enforcedIn: "src/app/api/projects/route.ts",
     enforcedSymbol: "maxProjectsForPlan",

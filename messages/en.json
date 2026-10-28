@@ -5825,6 +5825,19 @@
       "placeholder": "Facts, decisions, preferences — written here, read only by this project's own chats, creates, plans and agent builds.",
       "hint": "Fed into this project's own generation. Nothing outside this project reads it."
     },
+    "share": {
+      "heading": "Share",
+      "hint": "Anyone with this link can view this project, read-only, with no sign-in. Revoke it any time.",
+      "create": "Create link",
+      "revoke": "Revoke",
+      "public": {
+        "readOnly": "Shared with you — read-only",
+        "notFound": {
+          "heading": "This link isn't available",
+          "body": "It may have been revoked, or it never existed."
+        }
+      }
+    },
     "errors": {
       "tooShort": "Give it a name first.",
       "tooLong": "That name is longer than {limit} characters.",

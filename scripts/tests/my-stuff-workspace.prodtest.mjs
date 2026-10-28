@@ -845,14 +845,117 @@ try {
     await page.locator('[data-testid="my-stuff-list-item"]').first().waitFor({ timeout: 15_000 });
     check("the list is visible", await page.locator('[data-testid="my-stuff-list"]').isVisible());
     check("no horizontal scroll", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+    const noHScroll = () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+
+    // THIS ACCOUNT'S OWN SEEDED ROWS (finance, trading, a site) fire
+    // four stacked "Achievement unlocked" toasts — nothing to do with
+    // My Stuff — a little AFTER first load, not immediately, and they
+    // land PHYSICALLY OVER the filter row on this 390px viewport (found
+    // live: elementFromPoint at the Documents chip's own centre resolved
+    // to a toast, not the chip, and the tap it absorbed left
+    // aria-current unset). Waited for right before EACH tap below,
+    // rather than once up top, for the same reason: "a little after
+    // load" means a one-time wait at the top can miss the window these
+    // actually cover. A real finger meets the same transient overlap;
+    // this is what a person who does not happen to tap in that exact
+    // instant already gets for free.
+    async function waitForNoToasts() {
+      for (let i = 0; i < 60 && (await page.locator('[role="status"]').count()) > 0; i++) await page.waitForTimeout(100);
+    }
+    await waitForNoToasts();
+
+    // Κομμάτι 7 (mobile, 2026-10-28) — the LIST view's own controls
+    // (Κομμάτι 2 search, Κομμάτι 3 filters, Κομμάτι 5 upload), not only
+    // the list/details toggle Κομμάτι 1 already proved. No reference
+    // image reached this session for this piece either (εικόνα M01,
+    // docs/NEEDS-FROM-ELIAS.md) — this is the same TOOL-RULES.md rule 3
+    // stand-in, read on the narrow viewport this time: "no horizontal
+    // scroll" is this file's own proxy for "κανένα όνομα δεν κόβεται",
+    // since a name that did not fit would be what pushed the page wide
+    // rather than wrapping (my-stuff-list.tsx's own `break-words`, never
+    // `truncate`).
+    // POLLS rather than waits for ONE row to exist: the phone's current
+    // (unfiltered) list already has a row to satisfy a bare `.waitFor()`
+    // before the new fetch this fill/tap triggers has even landed — the
+    // exact "stale count satisfies the new assertion" race this file's
+    // own desktop search section was already written to avoid.
+    async function waitForCount(test) {
+      const end = Date.now() + 8_000;
+      let n = -1;
+      while (Date.now() < end) {
+        n = await page.locator('[data-testid="my-stuff-list-item"]').count();
+        if (test(n)) return n;
+        await page.waitForTimeout(100);
+      }
+      return n;
+    }
+
+    await page.locator('[data-testid="my-stuff-search"]').fill("Camping");
+    const searchCount = await waitForCount((n) => n === 1);
+    check(
+      "search narrows the list on the phone, same field as desktop",
+      searchCount === 1 && (await page.locator('[data-testid="my-stuff-list-item"]').first().innerText()).includes("Camping"),
+      `count=${searchCount}`
+    );
+    check("...with no horizontal scroll while a result is showing", await noHScroll());
+    await page.locator('[data-testid="my-stuff-search"]').fill("");
+    await waitForCount((n) => n > 1);
+
+    const beforeFilter = await page.locator('[data-testid="my-stuff-list-item"]').count();
+    const docsChip = page.locator('[data-testid="my-stuff-filter"][data-bucket="documents"]');
+    await waitForNoToasts();
+    await press(docsChip);
+    const docsCount = await waitForCount((n) => n > 0 && n < beforeFilter);
+    check(
+      "a filter chip is tappable on the phone and narrows the list",
+      docsCount > 0 && docsCount < beforeFilter,
+      `before=${beforeFilter} after=${docsCount}`
+    );
+    check("...and the filter row itself causes no horizontal scroll", await noHScroll());
+    await waitForNoToasts();
+    await press(page.locator('[data-testid="my-stuff-filter"][data-bucket="all"]'));
+    await waitForCount((n) => n >= beforeFilter);
+
+    // Κομμάτι 5's own upload row — `justify-between`, not `flex-wrap`
+    // like the filters above, so this is the one row an overflow was
+    // actually plausible in: the button's own text plus a translated
+    // "X of Y" usage reading could be wider than 390px in a language
+    // longer than English. It is not: still no horizontal scroll, and
+    // the button itself is a real 44px touch target, the same bar the
+    // back arrow below is held to.
+    const uploadBox = await page.locator('[data-testid="my-stuff-upload-button"]').boundingBox();
+    check(`the upload button is at least 44px tall on the phone (${Math.round(uploadBox?.height ?? 0)}px)`, (uploadBox?.height ?? 0) >= 44);
+    check("...and the upload row causes no horizontal scroll either", await noHScroll());
 
     const row = page.locator('[data-testid="my-stuff-list-item"]').first();
+    await waitForNoToasts();
     await press(row);
     await page.locator('[data-testid="my-stuff-details"]').waitFor({ timeout: 10_000 });
     check("the details pane covers the screen, the list is gone", await page.locator('[data-testid="my-stuff-details"]').isVisible() && !(await page.locator('[data-testid="my-stuff-list"]').isVisible()));
+
+    // Κομμάτι 4's own action row (Open/Add to Project/Link to…), real
+    // touch targets on the phone too — not only desktop's mouse-sized
+    // ones. Located the same way §4's own desktop checks already do
+    // (by accessible name — AddToProjectButton/LinkToButton render no
+    // testid of their own) rather than a testid this row does not have.
+    // The row wraps (flex-wrap, my-stuff-details.tsx) rather than
+    // squeeze, so this checks the same two things as the rest of this
+    // section: the bar (44px) and the scroll (none).
+    for (const [testid, role] of [
+      ["my-stuff-open", null],
+      [null, "Add to project"],
+      [null, "Link to..."],
+    ]) {
+      const target = testid ? page.locator(`[data-testid="${testid}"]`) : page.getByRole("button", { name: role });
+      const b = await target.boundingBox();
+      check(`"${testid ?? role}" is a real touch target on the phone (${Math.round(b?.height ?? 0)}px)`, (b?.height ?? 0) >= 44);
+    }
+    check("the action row causes no horizontal scroll", await noHScroll());
+
     const backTarget = page.locator('[data-testid="my-stuff-details-back"]');
     const box = await backTarget.boundingBox();
     check(`the back arrow is at least 44px (${Math.round(box?.height ?? 0)}px)`, (box?.height ?? 0) >= 44 && (box?.width ?? 0) >= 44);
+    await waitForNoToasts();
     await press(backTarget);
     await page.locator('[data-testid="my-stuff-list"]').waitFor({ state: "visible", timeout: 10_000 });
     check("back returns to the list", await page.locator('[data-testid="my-stuff-list"]').isVisible());

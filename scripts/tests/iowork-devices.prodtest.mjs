@@ -21,6 +21,7 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 
@@ -39,7 +40,6 @@ function check(name, cond, detail) {
 const flags = [];
 const devices = [];
 const pairings = [];
-let nextId = 1;
 
 /** The filters these routes actually send: eq. and is.null, nothing else. */
 function matches(row, url) {
@@ -75,8 +75,14 @@ function rest({ req, res, url, body, json }) {
     return answer(wanted), true;
   }
   if (req.method === "POST") {
+    // A REAL uuid, not a placeholder: production's id column is
+    // gen_random_uuid(), and src/app/api/iowork/devices/[id]/route.ts
+    // DELETE now rejects an id that does not look like one before it ever
+    // reaches Postgres — a mock id of a different shape would make that
+    // guard refuse every disconnect in this file for a reason that could
+    // never happen against the real table.
     const row = {
-      id: `row${nextId++}`,
+      id: randomUUID(),
       user_id: null,
       claimed_at: null,
       collected_at: null,
@@ -233,27 +239,66 @@ try {
     check("a claim secret came with it, and it is not the code", typeof started.body?.claimSecret === "string" && started.body.claimSecret.length >= 40);
     check("the pairing is stored as a hash, never as the secret itself", pairings[0]?.claim_secret_hash !== started.body?.claimSecret && !JSON.stringify(pairings[0]).includes(started.body.claimSecret));
 
-    console.log(`\n== ${device.label}: the person types that code, with real presses ==`);
+    console.log(`\n== ${device.label}: the person types that code, and sees what it claims to be FIRST ==`);
     await page.locator("#iowork-code").fill(started.body.display);
     await press(page.locator('[data-testid="iowork-connect"]'));
+    await page.locator('[data-testid="iowork-preview"]').waitFor({ timeout: 15_000 });
+    // THE HALF THAT MATTERS: typing the code does NOT bind anything. This is
+    // the device-code-phishing fix — an independent review, 2026-10-28,
+    // found that the old one-step flow let anyone start a pairing, send the
+    // code to a real account holder, and collect a token bound to THEIR
+    // account the moment they typed it. Now typing only previews.
+    check("typing the code alone claimed nothing", pairings[0]?.user_id == null);
+    const previewBody = await page.locator('[data-testid="iowork-preview"]').innerText();
+    check("the preview names the computer that asked", previewBody.includes("Το MacBook"));
+
+    console.log(`\n== ${device.label}: cancelling kills the code immediately ==`);
+    await press(page.locator('[data-testid="iowork-preview-cancel"]'));
+    await page.waitForTimeout(1000);
+    check("the pairing row is gone, not merely left unclaimed", pairings.length === 0);
+    check("the plain code field is back", (await page.locator("#iowork-code").count()) === 1);
+
+    console.log(`\n== ${device.label}: a fresh code, previewed and this time confirmed ==`);
+    const restarted = await asApp(APP, "/api/iowork/pair", { platform: "mac", label: "Το MacBook" });
+    await page.locator("#iowork-code").fill(restarted.body.display);
+    await press(page.locator('[data-testid="iowork-connect"]'));
+    await page.locator('[data-testid="iowork-preview"]').waitFor({ timeout: 15_000 });
+    await press(page.locator('[data-testid="iowork-preview-confirm"]'));
     await page.waitForTimeout(1500);
-    check("the pairing is now claimed by this account", pairings[0]?.user_id === MOCK_USER.id);
-    // THE HALF THAT MATTERS: typing the code does NOT create the computer.
-    // The app has to come back for its token first, which is what stops a
-    // typed code alone from attaching anything.
-    check("typing the code alone connected no computer", devices.length === 0 && (await page.locator('[data-testid="iowork-device"]').count()) === 0);
+    check("confirming is what actually claims the pairing", pairings[0]?.user_id === MOCK_USER.id);
+    check("...and typing+confirming still connected no computer by itself", devices.length === 0 && (await page.locator('[data-testid="iowork-device"]').count()) === 0);
     // ...and the screen says exactly that much and no more. A toast reading
     // «συνδέθηκε» here would be ahead of the line above it.
     check("...and the message says the code was accepted, not that it is connected", (await page.locator("body").innerText()).includes(EL.codeAccepted.split("{name}")[1].slice(0, 30)));
+    const startedBody = restarted.body;
 
     console.log(`\n== ${device.label}: the app collects its token, once ==`);
-    const collected = await asApp(APP, "/api/iowork/pair/token", { claimSecret: started.body.claimSecret });
+    const collected = await asApp(APP, "/api/iowork/pair/token", { claimSecret: startedBody.claimSecret });
     check("the app got a token", collected.status === 200 && collected.body?.status === "paired" && typeof collected.body?.token === "string");
     check("the answer names the account, so a wrong one is visible", collected.body?.account === MOCK_USER.email);
     check("one computer now exists", devices.length === 1 && devices[0].label === "Το MacBook" && devices[0].platform === "mac");
     check("the token is stored as a hash, never in the clear", devices[0].token_hash !== collected.body.token && !JSON.stringify(devices[0]).includes(collected.body.token));
-    const again = await asApp(APP, "/api/iowork/pair/token", { claimSecret: started.body.claimSecret });
+    const again = await asApp(APP, "/api/iowork/pair/token", { claimSecret: startedBody.claimSecret });
     check("the same secret cannot collect a second token", again.status === 409 && devices.length === 1);
+
+    console.log(`\n== ${device.label}: two concurrent collects still mint only one device ==`);
+    const racePair = await asApp(APP, "/api/iowork/pair", { platform: "mac", label: "Race" });
+    await page.request.post(`${APP}/api/iowork/devices`, { data: { code: racePair.body.code, action: "preview" } });
+    await page.request.post(`${APP}/api/iowork/devices`, { data: { code: racePair.body.code, action: "confirm" } });
+    const before = devices.length;
+    const [raceA, raceB] = await Promise.all([
+      asApp(APP, "/api/iowork/pair/token", { claimSecret: racePair.body.claimSecret }),
+      asApp(APP, "/api/iowork/pair/token", { claimSecret: racePair.body.claimSecret }),
+    ]);
+    const raceOks = [raceA, raceB].filter((r) => r.status === 200 && r.body?.status === "paired");
+    check("exactly one of the two concurrent collects won", raceOks.length === 1, `statuses: ${raceA.status}, ${raceB.status}`);
+    check("exactly one device was minted, not two", devices.length === before + 1, `before ${before}, after ${devices.length}`);
+    // Clean-up, not assertion: this sub-test's only job was the race. The
+    // "Race" device it minted is removed directly (not through a second UI
+    // round trip) so the disconnect scenario below still finds exactly the
+    // one computer it expects.
+    const raceIdx = devices.findIndex((d) => d.label === "Race");
+    if (raceIdx >= 0) devices.splice(raceIdx, 1);
 
     console.log(`\n== ${device.label}: the computer appears on its own, and one press disconnects it ==`);
     // NO RELOAD HERE, ON PURPOSE. An earlier version of this file called
@@ -293,10 +338,14 @@ try {
 
     console.log("\n== desktop: a code already claimed answers exactly like one that never existed ==");
     const started = await asApp(APP, "/api/iowork/pair", { platform: "windows", label: "Το PC" });
-    const first = await page.request.post(`${APP}/api/iowork/devices`, { data: { code: started.body.code } });
-    const second = await page.request.post(`${APP}/api/iowork/devices`, { data: { code: started.body.code } });
+    const first = await page.request.post(`${APP}/api/iowork/devices`, { data: { code: started.body.code, action: "confirm" } });
+    const second = await page.request.post(`${APP}/api/iowork/devices`, { data: { code: started.body.code, action: "confirm" } });
     check("the first claim works", first.status() === 200);
     check("the second is a plain not_found, which tells a guesser nothing", second.status() === 404 && (await second.json()).code === "not_found");
+
+    console.log("\n== desktop: a malformed device id is refused, not a crash ==");
+    const badId = await page.request.delete(`${APP}/api/iowork/devices/not-a-uuid`);
+    check("a non-uuid id answers like any other id that is not this account's", badId.status() === 404 && (await badId.json()).code === "not_found");
     await context.close();
   }
 
@@ -311,7 +360,25 @@ try {
     check("...and the route refuses too, independently of the page", list.status() === 403 && (await list.json()).code === "not_enabled");
     const gone = await page.request.delete(`${APP}/api/iowork/devices/whatever`);
     check("...and so does disconnecting", gone.status() === 403);
+
+    // THE KILL SWITCH ON THE TWO ROUTES NOBODY SIGNS IN TO CALL (found by
+    // an independent review, 2026-10-28). The owner's own instruction for
+    // this round was "opens first ONLY for me" — a flag he can flip has to
+    // actually reach api/iowork/pair and api/iowork/pair/token, which have
+    // no session for isFeatureOn to check, or "staff only" was never true
+    // for either of them.
+    const pairOff = await asApp(APP, "/api/iowork/pair", { platform: "mac", label: "Should not work" });
+    check("api/iowork/pair itself refuses while the flag is off", pairOff.status === 403 && pairOff.body?.code === "not_enabled");
+    const tokenOff = await asApp(APP, "/api/iowork/pair/token", { claimSecret: "x".repeat(32) });
+    check("api/iowork/pair/token itself refuses while the flag is off", tokenOff.status === 403 && tokenOff.body?.code === "not_enabled");
     await context.close();
+  }
+
+  console.log("\n== desktop: with the switch open again, the two app routes work as before ==");
+  {
+    setFlags({});
+    const pairOn = await asApp(APP, "/api/iowork/pair", { platform: "mac", label: "Flag back on" });
+    check("api/iowork/pair works again once the flag is back", pairOn.status === 200 && typeof pairOn.body?.code === "string");
   }
 } catch (err) {
   check("the run completed", false, String(err?.stack ?? err) + (pageErrors.length ? `\n        page errors: ${pageErrors.slice(0, 3).join(" | ")}` : ""));

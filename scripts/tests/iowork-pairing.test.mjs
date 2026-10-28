@@ -151,6 +151,23 @@ console.log("\n== 5. nothing is kept that could be replayed, and nothing about f
   for (const word of ["path", "folder", "file_name", "filename", "directory"]) {
     check(`no column named for a ${word}`, !new RegExp(`^\\s+\\w*${word}\\w*\\s+(text|jsonb|uuid)`, "mi").test(sql));
   }
+
+  // A device id that is not shaped like a uuid must never reach a query
+  // (found by an independent review, 2026-10-28 — see §9 below for what
+  // it protects against).
+  check("a uuid shape is accepted", P.looksLikeUuid("550e8400-e29b-41d4-a716-446655440000"));
+  check("a uuid shape is accepted case-insensitively", P.looksLikeUuid("550E8400-E29B-41D4-A716-446655440000"));
+  for (const bad of ["not-a-uuid", "550e8400", "'; drop table iowork_devices; --", "", "550e8400-e29b-41d4-a716-44665544000"]) {
+    check(`${JSON.stringify(bad.slice(0, 24))} is not a uuid shape`, !P.looksLikeUuid(bad));
+  }
+
+  // Control characters an unauthenticated caller supplies (api/iowork/pair
+  // has no session) must not survive into a label the owner later reads —
+  // on screen, and in logApiError's metadata on a failure.
+  check("a NUL byte is stripped from a label", !P.parseDeviceLabel("a\u0000b", "Mac").includes("\u0000"));
+  check("an escape character is stripped", !P.parseDeviceLabel("a\u001Bb", "Mac").includes("\u001B"));
+  check("a tab becomes a space, not a deletion", P.parseDeviceLabel("a\tb", "Mac") === "a b");
+  check("a newline becomes a space, not a deletion", P.parseDeviceLabel("a\nb", "Mac") === "a b");
 }
 
 console.log("\n== 6. the migration says how to undo itself and locks both tables ==");
@@ -168,6 +185,12 @@ console.log("\n== 6. the migration says how to undo itself and locks both tables
   check("no policy is created on the pairings", !/create policy "[^"]*iowork_pairings"/.test(sql));
   check("the client is revoked from the pairings entirely", /revoke all on public\.iowork_pairings from anon, authenticated;/.test(sql));
   check("the cron sweeps old pairings", /from\("iowork_pairings"\)[\s\S]{0,80}\.delete\(\)[\s\S]{0,80}\.lt\("created_at"/.test(read("src/app/api/cron/scheduled-runs/route.ts")));
+  // The address a pairing was requested from, surfaced only to the signed-
+  // in person previewing it (found worth adding by an independent review,
+  // 2026-10-28 — the whole point of the preview step is to give the human
+  // something to recognise or not).
+  check("the pairing keeps the address that asked for it", /requester_ip text/.test(sql));
+  check("the claim-secret lookup is actually indexed, as the route comment claims", /create unique index[^;]*on public\.iowork_pairings \(claim_secret_hash\)/.test(sql));
 }
 
 console.log("\n== 7. every refusal the browser can meet has words, in all ten languages ==");
@@ -210,9 +233,36 @@ console.log("\n== 8. the two routes the desktop app calls, and why they may skip
   check("an expired pairing is removed rather than left holding its code", /isPairingExpired[\s\S]{0,200}\.delete\(\)/.test(token));
   check("a pairing nobody has claimed answers 'waiting', not a token", /status: "waiting"/.test(token));
   check("a pairing already collected cannot be collected twice", /collected_at[\s\S]{0,120}status: 409/.test(token));
-  check("the device row is written before the pairing is burned", token.indexOf('.from("iowork_devices")') < token.indexOf("collected_at: new Date()"));
   check("the answer names the account, so a wrong one is visible", /account: account\?\.user\?\.email/.test(token));
   check("the token is stored only as a hash", /token_hash: hashSecret\(token\)/.test(token));
+
+  // THE RACE FIX (found by an independent review, 2026-10-28). The old
+  // order — insert the device, THEN mark collected_at — let two
+  // concurrent polls both pass the earlier `if (pairing.collected_at)`
+  // check (read before either wrote) and both reach the insert, minting
+  // two tokens from one approval. The lock now has to be the FIRST
+  // database write mintDevice makes, and it has to be checked by its
+  // returned rows, not by the absence of an error — Postgres does not
+  // error on an UPDATE that matched nothing.
+  const mint = token.slice(token.indexOf("async function mintDevice"));
+  check("mintDevice's first write is the atomic collect lock", /\.from\("iowork_pairings"\)\s*\.update\(\{ collected_at:/.test(mint));
+  check("...guarded so only an unclaimed row matches", /\.is\("collected_at", null\)/.test(mint));
+  check("...and the result is read back, not inferred from a missing error", /\.select\("id"\)/.test(mint.slice(0, mint.indexOf("iowork_devices"))));
+  check("...a zero-row result is 'already_used', not success", /if \(!claimed \|\| claimed\.length === 0\)[\s\S]{0,120}"already_used"/.test(mint));
+  check(
+    "the lock is acquired BEFORE the device is ever inserted",
+    mint.indexOf('.update({ collected_at:') < mint.indexOf('.from("iowork_devices")\n    .insert(')
+  );
+
+  // THE KILL SWITCH (same review). Neither route has a session to put
+  // through isFeatureOn, so "staff only" meant nothing to either of them
+  // until they read the flag's raw audience themselves.
+  for (const [name, src] of [["start", pair], ["token", token]]) {
+    check(`the ${name} route reads the flag's raw audience`, /readFlagAudiences\(\)/.test(src));
+    check(`...and "off" refuses before anything else runs`, /audiences\["iowork-tool"\] === "off"/.test(src));
+  }
+  check("the start route captures who asked", /requester_ip: requesterIp/.test(pair));
+
   // THE APP IS NOT A BROWSER, and these two answer it rather than a
   // person: an English sentence here would be a string the desktop app
   // had to match on, and a sentence nobody could translate. Both answer
@@ -235,13 +285,56 @@ console.log("\n== 9. the two routes the browser calls ==");
   // A code somebody else already claimed must answer exactly as a code
   // that never existed, or the refusal becomes an oracle for guessing.
   check("a claimed code answers like a code that never existed", /!pairing \|\| pairing\.user_id\) return[\s\S]{0,80}"not_found"/.test(devices));
-  check("the claim cannot be won twice", /\.is\("user_id", null\)/.test(devices));
   check("the account's limit of computers is enforced at the claim", /MAX_DEVICES_PER_USER[\s\S]{0,120}"tooMany"/.test(devices));
+
+  // THREE ACTIONS, ONE CODE (found by an independent review, 2026-10-28:
+  // see docs/PROGRESS.md for the full attack). A single "type it and it's
+  // connected" was a device-code-phishing hole — nothing stopped anyone
+  // from starting a pairing, sending the eight characters to a real
+  // account holder, and collecting a token bound to THEIR account the
+  // moment they typed it. Now typing the code only PREVIEWS what it
+  // claims to be; only a second, separate "confirm" binds anything, and
+  // "cancel" can kill it before the ten minutes are up.
+  check("there is a named action, not a bare claim", /action === "preview"/.test(devices) && /action === "cancel"/.test(devices));
+  check("...and an unrecognised one is refused before any lookup", /CLAIM_ACTIONS\.includes\(action/.test(devices));
+  check(
+    "preview answers with what the code claims",
+    /if \(action === "preview"\)[\s\S]{0,400}status: "preview"[\s\S]{0,200}requesterIp: pairing\.requester_ip/.test(devices)
+  );
+  check("...and that block contains no .update( or .insert( of its own", (() => {
+    const start = devices.indexOf('if (action === "preview")');
+    const end = devices.indexOf("if (action ===", start + 1);
+    const block = devices.slice(start, end === -1 ? start + 600 : end);
+    return !/\.update\(|\.insert\(/.test(block);
+  })());
+  check("cancel deletes the row, and only while it is still unclaimed", /action === "cancel"[\s\S]{0,200}\.delete\(\)[\s\S]{0,120}\.is\("user_id", null\)/.test(devices));
+  // The bind lives in the code reached only after BOTH the preview and
+  // the cancel branches have already returned — CLAIM_ACTIONS allows only
+  // three values, so whatever falls through past both is confirm, named
+  // or not. Checked structurally: the bind comes after both branches.
+  const previewAt = devices.indexOf('if (action === "preview")');
+  const cancelAt = devices.indexOf('if (action === "cancel")');
+  const bindAt = devices.indexOf(".is(\"user_id\", null)");
+  check("the bind sits after both the preview and the cancel branches, never before", previewAt >= 0 && cancelAt >= 0 && bindAt > previewAt && bindAt > cancelAt);
+  check("the bind is still guarded so it cannot be won twice", /\.is\("user_id", null\)[\s\S]{0,40}\.select\("id"\)/.test(devices));
+  // THE RACE FIX (same review): the old code trusted "no error" as
+  // success, but Postgres does not error on an update that matched zero
+  // rows — the loser of a race was told ok:true. Now the affected rows
+  // are read back, and zero of them is a refusal.
+  check(
+    "a lost race is answered as not_found, not as a fabricated success",
+    /if \(!claimed \|\| claimed\.length === 0\)[\s\S]{0,160}"not_found"/.test(devices)
+  );
+
   // DISCONNECTING IS A DELETE. A flag would be a second condition some
   // later query could forget; a missing row cannot be forgotten.
   check("disconnecting deletes the row", /\.delete\(\)[\s\S]{0,120}\.eq\("user_id", user\.id\)/.test(one));
   check("...and no revoked_at flag was invented instead", !/revoked_at/.test(one) && !/revoked_at/.test(stripComments(read(MIGRATION))));
   check("another account's id deletes nothing and gets a 404", /data\.length === 0[\s\S]{0,120}status: 404/.test(one));
+  // A malformed id (found by the same review) used to reach Postgres as a
+  // bad uuid literal — a 500, and the caller's own string written into
+  // the owner's error log through logApiError's metadata.
+  check("a malformed id is refused before it ever reaches the database", /looksLikeUuid\(id\)[\s\S]{0,80}status: 404/.test(one));
 }
 
 console.log("\n== 10. the screen: behind the switch, and honest about what is missing ==");
@@ -264,7 +357,34 @@ console.log("\n== 10. the screen: behind the switch, and honest about what is mi
     check(`${locale}: that line is translated and not empty`, typeof m.noAppYet === "string" && m.noAppYet.length > 20);
     check(`${locale}: the safety line names what it never reaches`, typeof m.safetyLine === "string" && m.safetyLine.length > 40);
   }
+  // THE SAFETY LINE MUST NOT CLAIM A PRESENT TENSE THE CODE DOES NOT HOLD
+  // (found by an independent review, 2026-10-28): nothing in Phase 1
+  // enforces folder access, because there is no desktop app yet — so the
+  // sentence must read as a commitment, not a fact already true. Checked
+  // on English only; a wording rule, not a translation rule.
+  check(
+    "the safety line is a commitment ('once the app exists'), not a present-tense claim",
+    /^Once the app exists/.test(JSON.parse(read("messages/en.json")).dashboard.iowork.safetyLine)
+  );
+  // THE IDLE LABEL MUST NOT CLAIM ACTIVITY TRACKING THAT DOES NOT EXIST:
+  // nothing writes last_seen_at yet (no device agent exists to call home),
+  // so "idle" can honestly mean only "paired a while ago", not "unused".
+  const idleEn = JSON.parse(read("messages/en.json")).dashboard.iowork.idle;
+  check("the idle label says when it paired, not that it went unused", /paired/i.test(idleEn) && !/not used|unused/i.test(idleEn));
   check("disconnecting asks first", /window\.confirm\(t\("confirmDisconnect"/.test(shell));
+
+  // THE PREVIEW/CONFIRM/CANCEL SCREEN (found by an independent review,
+  // 2026-10-28): typing a code shows what it claims to be BEFORE binding
+  // it, with a second, separate press required to actually connect, and
+  // a way to kill the code on the spot if it is not recognised.
+  check("the code field posts a preview, not a bind", /action: "preview"/.test(shell));
+  check("the preview card exists and shows what the code claims", /data-testid="iowork-preview"/.test(shell) && /t\("previewHeading"\)/.test(shell));
+  check("...the address that asked, honestly falling back when it is unknown", /preview\.requesterIp \|\| t\("previewIpUnknown"\)/.test(shell));
+  check("only a second, separate press binds anything", /data-testid="iowork-preview-confirm"/.test(shell) && /onClick=\{confirmConnect\}/.test(shell));
+  check("...and that press sends action: \"confirm\"", /action: "confirm"/.test(shell));
+  check("a visible way to kill the code before it is confirmed", /data-testid="iowork-preview-cancel"/.test(shell) && /onClick=\{cancelConnect\}/.test(shell));
+  check("...and that press sends action: \"cancel\"", /action: "cancel"/.test(shell));
+  check("cancelling clears the preview locally even if the request fails", /finally \{\s*setPreview\(null\);\s*setDeciding\(null\);\s*\}/.test(shell));
   // THE LIST IS SEEDED FROM A PROP, so a server re-render cannot update
   // it: useState keeps its first value. The screen must therefore ask the
   // server again itself, and keep asking until the computer joins —

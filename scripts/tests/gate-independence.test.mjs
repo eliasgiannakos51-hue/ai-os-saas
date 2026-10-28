@@ -120,6 +120,12 @@ const NONE_IS_FINE = {
     "a SHAPE over the write paths it finds. Every update must re-assert what it read. " +
     "Settled twice — dropping the .or() guard, and moving the comparison back into " +
     "TypeScript, which is the incident it was written for: RED both times.",
+  "tool-rules.test.mjs":
+    "a single byte-for-byte compare of docs/TOOL-RULES.md against CANONICAL, a template " +
+    "string written in the gate itself — not a Set/Map/array of 2+ entries, which is why " +
+    "the scan does not see LITERAL, and one file read, which is why it does not see " +
+    "CROSS-KIND either. Settled 2026-10-28 by appending one byte to the doc on disk and " +
+    "re-running the gate unmutated: RED, naming the exact line.",
 };
 const rows = scanAll();
 const noneBuild = rows.filter((r) => r.suite === "build" && r.rung === "NONE").map((r) => r.file);

@@ -75,12 +75,28 @@ create table if not exists public.iowork_pairings (
   user_id uuid references auth.users(id) on delete cascade,
   claimed_at timestamptz,
   collected_at timestamptz,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- The address that asked for this code (src/lib/get-client-ip.ts), shown
+  -- back ONLY to the signed-in person claiming it — api/iowork/devices'
+  -- "preview" step, before it lets them confirm. Nullable: a request whose
+  -- address could not be read still gets a pairing, just a preview with no
+  -- address line. Gone within the hour with the rest of the row.
+  requester_ip text
 );
 
 -- The claim looks a pairing up by its code, and the sweep below finds the
 -- old ones by age.
 create index if not exists iowork_pairings_created_idx on public.iowork_pairings (created_at);
+
+-- UNIQUE, not just an index: api/iowork/pair/token's lookup is this exact
+-- column, called by an unauthenticated caller as often as every
+-- PAIR_POLL_SECONDS for up to ten minutes per pairing, and the route's own
+-- comment already claimed "an indexed equality" before this line made that
+-- true. Unique because claim_secret_hash is the hash of 32 fresh random
+-- bytes (src/lib/iowork/pairing.ts newSecret()) — a collision should never
+-- happen, and the constraint turns "somehow it did" into a loud insert
+-- failure instead of a silent, wrong row served to two different codes.
+create unique index if not exists iowork_pairings_secret_idx on public.iowork_pairings (claim_secret_hash);
 
 alter table public.iowork_pairings enable row level security;
 

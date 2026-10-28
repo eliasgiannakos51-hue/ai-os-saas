@@ -292,7 +292,15 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // the code — the strength is in the 32-byte claim secret beside it and
   // in the limiter on the claim, both named in the same comment. Removing
   // the line would leave the weakness looking like an oversight.
-  const CENSUS_CEILING = 76;
+  // 76 -> 77 ON 2026-10-28: src/app/api/iowork/devices/route.ts,
+  // actOnPairing's own docblock, "api/iowork/pair has no session by
+  // design (nothing exists to sign in as yet)" — explaining why the
+  // device-code-phishing fix below it (preview/confirm/cancel, found by
+  // the same day's independent review) has to exist at all: the route
+  // cannot require a session, so it cannot rely on one to stop a stranger
+  // claiming someone else's code. A decision with its reason in the same
+  // block, not a limitation left unexplained.
+  const CENSUS_CEILING = 77;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

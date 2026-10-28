@@ -126,8 +126,34 @@ export function parsePlatform(value: unknown): IoworkPlatform | null {
  *  is bounded so one row cannot push the rest off the screen. */
 export const MAX_DEVICE_LABEL_CHARS = 60;
 
+/**
+ * C0/C1 control characters, EXCLUDING tab/newline/carriage-return — those
+ * three are left to the whitespace-collapse below, which turns them into a
+ * single readable space rather than deleting them outright. Everything
+ * else in this range (NUL, ESC, the rest) has no business in a label an
+ * UNAUTHENTICATED caller supplies (api/iowork/pair has no session) and
+ * that later shows up verbatim in the owner's own device list and, on a
+ * failure, in logApiError's metadata.
+ */
+const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g;
+
 export function parseDeviceLabel(value: unknown, fallback: string): string {
   if (typeof value !== "string") return fallback;
-  const trimmed = value.replace(/\s+/g, " ").trim().slice(0, MAX_DEVICE_LABEL_CHARS);
+  const trimmed = value
+    .replace(CONTROL_CHARS, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_DEVICE_LABEL_CHARS);
   return trimmed.length > 0 ? trimmed : fallback;
+}
+
+/** A device id, as it appears in a DELETE URL — checked before it ever
+ *  reaches a query. Without this, a non-UUID string reaches Postgres as a
+ *  malformed uuid, which answers 500 rather than 404 and, through
+ *  logApiError's metadata, writes whatever the caller sent into the
+ *  owner's own error table. The shape only, not the version nibble: Postgres
+ *  itself does not care which UUID version a column holds. */
+const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function looksLikeUuid(value: string): boolean {
+  return UUID_SHAPE.test(value);
 }

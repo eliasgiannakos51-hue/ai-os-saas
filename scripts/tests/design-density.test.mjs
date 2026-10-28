@@ -141,7 +141,14 @@ console.log("\n== 2. the lines ==");
 // Coming Soon screen (coming-soon-shell.tsx) each carry their own
 // `border border-border`, with nothing already drawn the same way
 // elsewhere on the page to share a class with.
-ok(`border utilities (${r.counts.borders}), ceiling 594`, r.counts.borders <= 594);
+// 594 -> 595 on 2026-10-28. The iowork device-code-phishing fix
+// (api/iowork/devices/route.ts, iowork-devices.tsx) added a second button
+// beside the preview's existing `.btn-outline` one — "this is not me,
+// cancel it" — and gave it its OWN border deliberately, not .btn-outline's:
+// a muted, unfilled secondary next to the confirm button, on purpose, so
+// the eye still lands on confirm first. One new one-off, nothing already
+// drawn the same muted-secondary way elsewhere to share a class with yet.
+ok(`border utilities (${r.counts.borders}), ceiling 595`, r.counts.borders <= 595);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

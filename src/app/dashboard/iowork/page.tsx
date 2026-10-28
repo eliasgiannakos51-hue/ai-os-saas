@@ -6,9 +6,10 @@ import { Laptop } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { isFeatureOn } from "@/lib/flags/flags";
+import { logApiError } from "@/lib/log-error";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ComingSoonShell } from "@/components/tools/coming-soon-shell";
-import { isDeviceIdle, MAX_DEVICES_PER_USER } from "@/lib/iowork/pairing";
+import { isDeviceIdle, MAX_DEVICES_PER_USER, PAIRING_TTL_MINUTES } from "@/lib/iowork/pairing";
 import { IoworkDevices, type IoworkDevice } from "@/components/iowork/iowork-devices";
 
 export const dynamic = "force-dynamic";
@@ -51,11 +52,18 @@ export default async function IoworkPage() {
   }
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("iowork_devices")
     .select("id, label, platform, created_at, last_seen_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+  // A failed read still renders — the person should not see a broken page
+  // over this — but it renders as an EMPTY list, which looks identical to
+  // "no computer is connected yet". Logging here is the only thing that
+  // keeps the two apart for anyone who goes looking afterwards; the
+  // client-side refresh in iowork-devices.tsx already does this correctly
+  // on its own fetch, this was only ever missing on first paint.
+  if (error) logApiError("/dashboard/iowork", error, { stage: "initial_list" });
   const devices: IoworkDevice[] = ((data as Row[] | null) ?? []).map((d) => ({
     ...d,
     idle: isDeviceIdle(d.last_seen_at),
@@ -65,7 +73,7 @@ export default async function IoworkPage() {
     <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.iowork" icon={Laptop} title={t("dashboard.tools.names.iowork")} />
-        <IoworkDevices initialDevices={devices} max={MAX_DEVICES_PER_USER} />
+        <IoworkDevices initialDevices={devices} max={MAX_DEVICES_PER_USER} maxWaitMinutes={PAIRING_TTL_MINUTES} />
       </div>
     </div>
   );

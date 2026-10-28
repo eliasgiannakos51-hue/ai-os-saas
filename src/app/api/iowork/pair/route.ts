@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { getClientIp } from "@/lib/get-client-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { readFlagAudiences } from "@/lib/flags/flags";
 import {
   newPairingCode,
   newSecret,
@@ -47,12 +48,28 @@ export const PAIR_POLL_SECONDS = 10;
 // row holds a code, a hash, a platform and a label (§4).
 export async function POST(request: Request) {
   try {
+    // THE KILL SWITCH. This route has no session to put through
+    // isFeatureOn (the app has no account yet), but the owner's own
+    // instruction to this round was "security plan approved... opens
+    // first ONLY for me" — a flag the owner can see on
+    // /dashboard/system-health has to actually reach the two routes
+    // nobody signs in to call, not only the ones that check a user. This
+    // is the raw audience, not a per-user check: "off" refuses everyone,
+    // "staff" or "everyone" lets the step that has no user through, and
+    // WHO may finish pairing is still decided downstream, by
+    // isFeatureOn("iowork-tool", user) on the signed-in claim.
+    const audiences = await readFlagAudiences();
+    if (audiences["iowork-tool"] === "off") {
+      return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const platform = parsePlatform((body as { platform?: unknown }).platform);
     if (!platform) {
       return NextResponse.json({ ok: false, code: "bad_platform" }, { status: 400 });
     }
     const label = parseDeviceLabel((body as { label?: unknown }).label, platform === "mac" ? "Mac" : "Windows");
+    const requesterIp = getClientIp(request) || null;
 
     // Anyone on the internet can reach this route, so the ceiling is per
     // address: enough for a person reinstalling or retrying, far short of
@@ -81,6 +98,7 @@ export async function POST(request: Request) {
         claim_secret_hash: hashSecret(claimSecret),
         platform,
         label,
+        requester_ip: requesterIp,
       });
       if (!error) {
         return NextResponse.json({

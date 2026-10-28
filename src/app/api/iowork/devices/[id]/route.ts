@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isFeatureOn } from "@/lib/flags/flags";
+import { looksLikeUuid } from "@/lib/iowork/pairing";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,14 @@ export async function DELETE(_request: Request, props: { params: Promise<{ id: s
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
   if (!(await isFeatureOn("iowork-tool", user))) {
     return NextResponse.json({ ok: false, code: "not_enabled" }, { status: 403 });
+  }
+  // A malformed id answers exactly like a real id that is not this
+  // account's — not_found, before the database ever sees it. Without
+  // this, a non-UUID string reaches Postgres as a bad uuid literal, which
+  // answers 500 instead of 404 and, through logApiError's own metadata,
+  // writes whatever the caller sent into the owner's error table.
+  if (!looksLikeUuid(id)) {
+    return NextResponse.json({ ok: false, code: "not_found" }, { status: 404 });
   }
 
   try {

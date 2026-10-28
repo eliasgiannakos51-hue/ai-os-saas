@@ -901,6 +901,13 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "auth.login.email",
   "auth.signup.email",
   "auth.forgotPassword.email",
+  // Projects Κομμάτι 4, 2026-10-28: «What Ionexa knows» is the owner's own
+  // quoted name for this field, written in English guillemets in his own
+  // Greek directive, not a sentence someone forgot to translate — the
+  // same treatment "Project" itself already gets inside Greek prose
+  // elsewhere on this screen (automateIt.hint). The placeholder and hint
+  // around it ARE translated in all ten locales; only the heading is not.
+  "projects.notes.heading",
 ]);
 
 function flatten(obj, prefix = "") {

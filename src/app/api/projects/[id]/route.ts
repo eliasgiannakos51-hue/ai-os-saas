@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
-import { checkColour, checkProjectName, clampGoal, isProjectStatus } from "@/lib/projects/project";
+import { checkColour, checkProjectName, clampGoal, clampNotes, isProjectStatus } from "@/lib/projects/project";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +46,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     patch.name = verdict.name;
   }
   if (body.goal !== undefined) patch.goal = clampGoal(body.goal);
+  if (body.notes !== undefined) patch.notes = clampNotes(body.notes);
   if (body.status !== undefined) {
     if (!isProjectStatus(body.status)) return NextResponse.json({ error: "invalid_status" }, { status: 400 });
     patch.status = body.status;
@@ -69,7 +70,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       .update(patch)
       .eq("id", params.id)
       .eq("user_id", user.id)
-      .select("id, name, goal, status, primary_colour, secondary_colour, created_at")
+      .select("id, name, goal, notes, status, primary_colour, secondary_colour, created_at")
       .maybeSingle();
     if (error) {
       logApiError("/api/projects/[id]", error, { stage: "update" });

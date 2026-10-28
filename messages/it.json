@@ -5820,6 +5820,11 @@
       "button": "Automatizzalo",
       "hint": "Crea un'automazione centrata su questo progetto — legge ciò che contiene e l'obiettivo sopra."
     },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "Fatti, decisioni, preferenze — scritti qui, letti solo dalle conversazioni, creazioni, piani e creazioni di agenti di questo progetto.",
+      "hint": "Alimenta solo la creazione all'interno di questo progetto. Nulla al di fuori lo legge."
+    },
     "errors": {
       "tooShort": "Dagli prima un nome.",
       "tooLong": "Quel nome supera i {limit} caratteri.",

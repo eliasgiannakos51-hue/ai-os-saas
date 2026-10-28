@@ -52,6 +52,15 @@ export function clampGoal(raw: unknown): string {
   return String(raw ?? "").trim().slice(0, MAX_GOAL_CHARS);
 }
 
+// «What Ionexa knows» (Κομμάτι 4) — longer than a goal, same shape:
+// free text, trimmed, clamped, never rejected (an empty string clears
+// it, same as clampGoal already does for the goal field).
+export const MAX_NOTES_CHARS = 4_000;
+
+export function clampNotes(raw: unknown): string {
+  return String(raw ?? "").trim().slice(0, MAX_NOTES_CHARS);
+}
+
 /**
  * A PROJECT'S OWN COLOUR, EXACTLY #rrggbb OR NULL (20261025000000_projects_colours.sql).
  *

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { MAX_GOAL_CHARS, MAX_NAME_CHARS, PROJECT_KIND_TABLES, PROJECT_STATUSES, isHexColour, projectKindCounts, type ProjectStatus } from "@/lib/projects/project";
+import { MAX_GOAL_CHARS, MAX_NAME_CHARS, MAX_NOTES_CHARS, PROJECT_KIND_TABLES, PROJECT_STATUSES, isHexColour, projectKindCounts, type ProjectStatus } from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
 
 export type ProjectMemberView = {
@@ -22,6 +22,7 @@ export type ProjectHeader = {
   id: string;
   name: string;
   goal: string | null;
+  notes: string | null;
   status: ProjectStatus;
   primaryColour: string | null;
   secondaryColour: string | null;
@@ -114,10 +115,26 @@ export function ProjectDetail({
   // optimistic-update-then-revert shape exactly, not a new pattern.
   const [name, setName] = useState(project.name);
   const [goal, setGoal] = useState(project.goal ?? "");
-  const [savingText, setSavingText] = useState<"name" | "goal" | null>(null);
+  // Κομμάτι 4 («What Ionexa knows») — same shape as goal, one field
+  // longer: free text, hand-written, saved on blur. The limit per field
+  // (used only for the too_long toast; clampNotes on the server never
+  // rejects, it truncates, same as clampGoal already does for goal).
+  const [notes, setNotes] = useState(project.notes ?? "");
+  const [savingText, setSavingText] = useState<"name" | "goal" | "notes" | null>(null);
+  const TEXT_FIELD_LIMIT: Record<"name" | "goal" | "notes", number> = {
+    name: MAX_NAME_CHARS,
+    goal: MAX_GOAL_CHARS,
+    notes: MAX_NOTES_CHARS,
+  };
 
-  async function saveText(field: "name" | "goal", value: string) {
-    const original = field === "name" ? project.name : project.goal ?? "";
+  function originalOf(field: "name" | "goal" | "notes"): string {
+    if (field === "name") return project.name;
+    if (field === "goal") return project.goal ?? "";
+    return project.notes ?? "";
+  }
+
+  async function saveText(field: "name" | "goal" | "notes", value: string) {
+    const original = originalOf(field);
     if (value === original) return; // nothing changed — no round trip
     setSavingText(field);
     try {
@@ -133,23 +150,26 @@ export function ProjectDetail({
           code === "too_short"
             ? t("errors.tooShort")
             : code === "too_long"
-              ? t("errors.tooLong", { limit: field === "name" ? MAX_NAME_CHARS : MAX_GOAL_CHARS })
+              ? t("errors.tooLong", { limit: TEXT_FIELD_LIMIT[field] })
               : t("errors.failed"),
           "error"
         );
         if (field === "name") setName(original);
-        else setGoal(original);
+        else if (field === "goal") setGoal(original);
+        else setNotes(original);
         return;
       }
       // THE SIDEBAR LIST ALSO SHOWS THE NAME (ProjectsShell's own rows),
       // a separate component with its own server-fetched props — a
       // renamed project only looks renamed there after this. The goal
-      // appears nowhere else on screen, so it skips the round trip.
+      // and notes appear nowhere else on screen, so they skip the round
+      // trip.
       if (field === "name") router.refresh();
     } catch {
       addToast(t("errors.failed"), "error");
       if (field === "name") setName(original);
-      else setGoal(original);
+      else if (field === "goal") setGoal(original);
+      else setNotes(original);
     } finally {
       setSavingText(null);
     }
@@ -329,6 +349,30 @@ export function ProjectDetail({
         </div>
         <p className="mt-1.5 text-[11px] text-muted">{t("chatFixed")}</p>
         <p className="mt-1 text-[11px] text-muted">{t("automateIt.hint")}</p>
+      </div>
+
+      {/* Κομμάτι 4 («What Ionexa knows») — hand-written, project-scoped
+          memory. Same always-editable textarea shape as the Goal above
+          (saveText's own third field), rendered as its own card so it
+          reads as a distinct, named thing rather than a longer goal.
+          lib/user-context.ts's loadProjectScope reads this column and
+          buildUserContextPromptAddition* renders it into the prompt
+          ONLY for a conversation/create/mission-plan/agent-build scoped
+          to this project — nothing outside this project reads it. */}
+      <div className="surface">
+        <h2 className="text-sm font-semibold text-foreground">{t("notes.heading")}</h2>
+        <textarea
+          data-testid="projects-detail-notes"
+          aria-label={t("notes.heading")}
+          value={notes}
+          placeholder={t("notes.placeholder")}
+          rows={4}
+          disabled={savingText === "notes"}
+          onChange={(e) => setNotes(e.target.value.slice(0, MAX_NOTES_CHARS))}
+          onBlur={() => void saveText("notes", notes.trim())}
+          className="mt-1 w-full min-w-0 resize-y rounded-item border border-transparent bg-transparent px-1 py-0.5 text-sm text-muted outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
+        />
+        <p className="mt-1.5 text-[11px] text-muted">{t("notes.hint")}</p>
       </div>
 
       {/* TASKS · FILES · AGENTS · RESULTS · ACTIVITY */}

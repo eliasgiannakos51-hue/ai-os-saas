@@ -35,7 +35,7 @@ export async function loadProjectDetail(
 ): Promise<ProjectDetailData | null> {
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, goal, status, primary_colour, secondary_colour, created_at")
+    .select("id, name, goal, notes, status, primary_colour, secondary_colour, created_at")
     .eq("id", projectId)
     .maybeSingle();
   if (!project) return null;
@@ -88,6 +88,7 @@ export async function loadProjectDetail(
       id: String(project.id),
       name: String(project.name ?? ""),
       goal: (project.goal as string | null) ?? null,
+      notes: (project.notes as string | null) ?? null,
       status: String(project.status ?? "active") as ProjectStatus,
       primaryColour: (project.primary_colour as string | null) ?? null,
       secondaryColour: (project.secondary_colour as string | null) ?? null,

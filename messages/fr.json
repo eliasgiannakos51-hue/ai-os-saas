@@ -5820,6 +5820,11 @@
       "button": "Automatiser",
       "hint": "Crée une automatisation centrée sur ce projet — elle lit ce qu'il contient et l'objectif ci-dessus."
     },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "Faits, décisions, préférences — écrits ici, lus uniquement par les discussions, créations, plans et créations d'agents de ce projet.",
+      "hint": "Alimente uniquement la création à l'intérieur de ce projet. Rien d'autre ne le lit."
+    },
     "errors": {
       "tooShort": "Donnez-lui d'abord un nom.",
       "tooLong": "Ce nom dépasse {limit} caractères.",

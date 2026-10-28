@@ -496,6 +496,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "a project's colour picker (owner's message 2026-10-22, point 6) cannot save either colour: the PATCH route's write fails and the page shows the colour reverting every time",
   },
   {
+    kind: "column",
+    table: "projects",
+    column: "notes",
+    migration: "20261101000000_projects_notes.sql",
+    breaks: "«What Ionexa knows» (Projects Κομμάτι 4) cannot save: the PATCH route's write fails, the field reverts on every blur, and nothing a project's own chats/creates/plans/agent builds read ever carries what was written there",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

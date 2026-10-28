@@ -181,7 +181,10 @@ console.log("\n== 2. the lines ==");
 // <textarea> — two more boxes, +2, the same unavoidable shape as the
 // create form's own two fields just above: a field the person can click
 // into needs a border to read as one, even transparent until hover/focus.
-ok(`border utilities (${r.counts.borders}), ceiling 602`, r.counts.borders <= 602);
+// 602 -> 603 on 2026-10-28. Κομμάτι 4 ("«What Ionexa knows» σημειώσεις")
+// added ONE more such field, the notes <textarea> — the same unavoidable
+// border-until-hover/focus shape as the two above, +1.
+ok(`border utilities (${r.counts.borders}), ceiling 603`, r.counts.borders <= 603);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

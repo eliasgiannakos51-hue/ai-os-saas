@@ -91,8 +91,8 @@ const COLOURS_MIGRATION = "supabase/migrations/20261025000000_projects_colours.s
 const project = await loadTs(PROJECT_TS);
 const {
   IN_PROJECT, PROJECTS_TABLE, PROJECT_STATUSES, MAX_MEMBERS,
-  MAX_NAME_CHARS, MIN_NAME_CHARS, MAX_GOAL_CHARS,
-  checkProjectName, clampGoal, isProjectStatus, isProjectMemberTable,
+  MAX_NAME_CHARS, MIN_NAME_CHARS, MAX_GOAL_CHARS, MAX_NOTES_CHARS,
+  checkProjectName, clampGoal, clampNotes, isProjectStatus, isProjectMemberTable,
   projectMembers, projectModuleTables, projectContextModules, projectMemberTables,
   isUuid, projectEdgeFilter,
   ROWS_PER_MODULE_UNSCOPED, UNSCOPED_MODULE_COUNT, CONTEXT_ROW_BUDGET, rowsPerModuleInProject,
@@ -112,6 +112,8 @@ ok("an unnamed project is refused, a long one is refused, a normal one is kept",
   checkProjectName("  Launch   the  shop ").name === "Launch the shop");
 ok("bounds are sane", MIN_NAME_CHARS >= 2 && MAX_NAME_CHARS >= 60 && MAX_GOAL_CHARS >= 500);
 ok("a goal is clamped, never rejected", clampGoal("g".repeat(MAX_GOAL_CHARS + 100)).length === MAX_GOAL_CHARS && clampGoal(null) === "");
+ok("notes are clamped too, longer than a goal, never rejected",
+  clampNotes("n".repeat(MAX_NOTES_CHARS + 500)).length === MAX_NOTES_CHARS && clampNotes(null) === "" && MAX_NOTES_CHARS > MAX_GOAL_CHARS);
 ok(`the relationship type is one string (${IN_PROJECT}) and the table is one string (${PROJECTS_TABLE})`,
   IN_PROJECT === "in_project" && PROJECTS_TABLE === "projects");
 ok(`a project is capped at ${MAX_MEMBERS} members`, MAX_MEMBERS >= 50 && MAX_MEMBERS <= 1000);
@@ -486,6 +488,82 @@ console.log("\n== 6b. THE BUDGET IS SPENT, NOT DECLARED ==");
   ok("the scope read is scoped to the person explicitly, not left to RLS",
     /\.eq\("user_id", userId\)[\s\S]{0,200}\.eq\("relationship_type", IN_PROJECT\)/.test(ctx),
     "two job handlers call getUserFullContext with the service-role client");
+}
+
+console.log("\n== 6c. «What Ionexa knows» (Κομμάτι 4) ACTUALLY REACHES THE PROMPT ==");
+{
+  // NOT A REGEX OVER THE SOURCE — the REAL getUserFullContext and the
+  // REAL two prompt-serializer functions, executed, against a small
+  // generic stand-in for the Supabase query-builder chain. Every other
+  // check in this section reads the source text; this one runs it, which
+  // is the only way to prove the notes column actually arrives at
+  // context.projectNotes and from there into the rendered prompt text,
+  // rather than merely that the code reads as though it should.
+  //
+  // The stand-in does not attempt to be a real Supabase client: it is a
+  // thenable that answers every `.from(table)...` chain with an empty
+  // list (or null, for a `.maybeSingle()` chain) UNLESS the table is
+  // "entity_links" or "projects", the two this test cares about. That is
+  // enough to let getUserFullContext's other ~13 module scans, its
+  // missions read and its energy check-in read all resolve to "nothing"
+  // without throwing, so the one thing under test — the notes — is not
+  // drowned in fixture work it does not need.
+  const uc = await loadTs(USER_CONTEXT);
+  function fakeSupabase({ entityLinks = [], notes } = {}) {
+    function builder(table) {
+      let single = false;
+      let headCount = null;
+      const api = {
+        select(_cols, opts) { if (opts?.head) headCount = 0; return api; },
+        eq() { return api; },
+        in() { return api; },
+        or() { return api; },
+        gte() { return api; },
+        order() { return api; },
+        limit() { return api; },
+        maybeSingle() { single = true; return api; },
+        then(resolve) {
+          if (headCount !== null) return resolve({ count: headCount, error: null });
+          if (table === "entity_links") return resolve({ data: entityLinks, error: null });
+          if (table === "projects") return resolve({ data: single && notes !== undefined ? { notes } : null, error: null });
+          return resolve(single ? { data: null, error: null } : { data: [], error: null });
+        },
+      };
+      return api;
+    }
+    return { from: builder };
+  }
+
+  const PROJECT_ID = "33333333-3333-3333-3333-333333333333";
+  const USER_ID = "44444444-4444-4444-4444-444444444444";
+  const NOTES_TEXT = "Το κοινό-στόχος είναι γυναίκες 25-40 στην Αθήνα.";
+
+  // A — a project with a paragraph of notes and NOTHING ELSE added to it
+  // yet (zero entity_links rows): the exact "just created it, wrote
+  // notes, hasn't added anything" shape. Before this round's own fix to
+  // loadProjectScope, idsByTable.size === 0 alone returned null here and
+  // the notes would never have reached the prompt for this, the single
+  // most ordinary way to use the field.
+  const withNotes = await uc.getUserFullContext(fakeSupabase({ entityLinks: [], notes: NOTES_TEXT }), USER_ID, PROJECT_ID);
+  ok("a project with notes but no members still carries them", withNotes.projectNotes === NOTES_TEXT, String(withNotes.projectNotes));
+
+  const greek = uc.buildUserContextPromptAdditionGreek(withNotes);
+  const english = uc.buildUserContextPromptAdditionEnglish(withNotes);
+  ok("...rendered into the Greek prompt, verbatim", greek.includes("Σημειώσεις που έγραψε ο χρήστης για αυτό το Project:") && greek.includes(NOTES_TEXT), greek.slice(0, 300));
+  ok("...and into the English prompt, verbatim", english.includes("Notes the user wrote for this project:") && english.includes(NOTES_TEXT), english.slice(0, 300));
+
+  // B — nothing written: null column, no members either. Scope must come
+  // back null exactly as before this round (the old behaviour, kept).
+  const empty = await uc.getUserFullContext(fakeSupabase({ entityLinks: [], notes: null }), USER_ID, PROJECT_ID);
+  ok("a project with nothing written has no notes in the context", empty.projectNotes === null);
+  ok("...and the serializers print no notes section for it, in either language",
+    !uc.buildUserContextPromptAdditionGreek(empty).includes("Σημειώσεις που έγραψε") &&
+    !uc.buildUserContextPromptAdditionEnglish(empty).includes("Notes the user wrote"));
+
+  // C — no project at all (the ordinary, unscoped chat): never reads the
+  // projects table for notes, never prints the section.
+  const unscoped = await uc.getUserFullContext(fakeSupabase({ entityLinks: [], notes: NOTES_TEXT }), USER_ID, null);
+  ok("outside a project, notes never reach the context even if the fixture has some", unscoped.projectNotes === null);
 }
 
 console.log("\n== 7. THE PAGES ==");

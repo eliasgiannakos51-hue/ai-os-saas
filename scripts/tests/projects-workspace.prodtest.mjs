@@ -43,8 +43,8 @@ function check(name, cond, detail) {
 const PROJECT_1 = "11111111-1111-1111-1111-111111111111";
 const PROJECT_2 = "22222222-2222-2222-2222-222222222222";
 const PROJECTS = [
-  { id: PROJECT_1, user_id: MOCK_USER.id, name: "Καλοκαιρινή καμπάνια", goal: "Αύξηση πωλήσεων τον Αύγουστο", status: "active", primary_colour: null, secondary_colour: null, created_at: "2026-08-15T10:00:00Z" },
-  { id: PROJECT_2, user_id: MOCK_USER.id, name: "Νέος ιστότοπος", goal: null, status: "active", primary_colour: null, secondary_colour: null, created_at: "2026-09-01T10:00:00Z" },
+  { id: PROJECT_1, user_id: MOCK_USER.id, name: "Καλοκαιρινή καμπάνια", goal: "Αύξηση πωλήσεων τον Αύγουστο", notes: null, status: "active", primary_colour: null, secondary_colour: null, created_at: "2026-08-15T10:00:00Z" },
+  { id: PROJECT_2, user_id: MOCK_USER.id, name: "Νέος ιστότοπος", goal: null, notes: null, status: "active", primary_colour: null, secondary_colour: null, created_at: "2026-09-01T10:00:00Z" },
 ];
 // Real members of PROJECT_1, one per Κομμάτι 3 count box (site/posts/
 // images/documents — video has none, honestly, nothing writes ai_videos
@@ -368,6 +368,39 @@ try {
       { timeout: 10_000 }
     );
     check("renaming back to the original also round-trips cleanly (not a one-way save)", (await nameField.inputValue()) === "Καλοκαιρινή καμπάνια" && (await goalField.inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
+
+    // == Κομμάτι 4: «What Ionexa knows» — hand-written, project-scoped
+    // notes. Same always-editable <textarea>, saved on blur shape as the
+    // goal above; this UI-level check proves "hand-editable, persisting
+    // after refresh". Whether a saved paragraph actually REACHES a
+    // project-scoped chat's assembled prompt is proven separately, against
+    // the real lib/user-context.ts functions (no browser needed for that
+    // half) — scripts/tests/projects.test.mjs §6b.
+    const notesField = one(page, '[data-testid="projects-detail-notes"]');
+    check("the notes field starts empty — nothing written yet, same meaning as a null column", (await notesField.inputValue()) === "");
+
+    const NOTES_TEXT = "Το κοινό-στόχος είναι γυναίκες 25-40 στην Αθήνα.";
+    await notesField.fill(NOTES_TEXT);
+    await notesField.blur();
+    await page.waitForFunction(
+      (expected) => (document.querySelector('[data-testid="projects-detail-notes"]'))?.value === expected,
+      NOTES_TEXT,
+      { timeout: 10_000 }
+    );
+
+    await page.reload({ waitUntil: "load" });
+    await one(page, '[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
+    check("the notes survive a reload — they reached the server, not just the screen", (await notesField.inputValue()) === NOTES_TEXT);
+
+    // RESTORE — same discipline as the name/goal restore above, so this
+    // section leaves nothing behind for the phone section that follows.
+    await notesField.fill("");
+    await notesField.blur();
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="projects-detail-notes"]'))?.value === "",
+      { timeout: 10_000 }
+    );
+    check("clearing the notes round-trips too — an empty string saves, same as an emptied goal already does", (await notesField.inputValue()) === "");
   }
 
   console.log("\n== phone (390x844): list OR project, never both ==");

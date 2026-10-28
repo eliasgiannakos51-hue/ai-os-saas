@@ -5820,6 +5820,11 @@
       "button": "Automate it",
       "hint": "Builds an automation scoped to this project — it reads what is in it and the goal above."
     },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "Facts, decisions, preferences — written here, read only by this project's own chats, creates, plans and agent builds.",
+      "hint": "Fed into this project's own generation. Nothing outside this project reads it."
+    },
     "errors": {
       "tooShort": "Give it a name first.",
       "tooLong": "That name is longer than {limit} characters.",

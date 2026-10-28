@@ -3343,6 +3343,10 @@
         "hide": "Ocultar perguntas anteriores",
         "back": "Voltar às perguntas anteriores"
       },
+      "ask": {
+        "send": "Perguntar",
+        "dismiss": "Ocultar a resposta"
+      },
       "kinds": {
         "site": "Sites",
         "slides": "Diapositivos",

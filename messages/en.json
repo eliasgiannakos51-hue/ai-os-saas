@@ -3343,6 +3343,10 @@
         "hide": "Hide previous questions",
         "back": "Back to previous questions"
       },
+      "ask": {
+        "send": "Ask",
+        "dismiss": "Hide the answer"
+      },
       "kinds": {
         "site": "Sites",
         "slides": "Slides",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Search } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { formatDateTime } from "@/lib/format-number";
 import type { MyStuffItem } from "@/lib/my-stuff/load";
@@ -15,16 +15,20 @@ import { KIND_ICON } from "@/components/my-stuff/kind-icon";
  * because the new screen's whole point is list-left/details-right on the
  * SAME screen, not a side panel that sends you elsewhere.
  *
- * The search box here is the plain substring search that already existed
- * (lib/my-stuff/load.ts, unchanged) — Κομμάτι 2 is where it also learns
- * to answer a question, in the SAME field, per the owner's own "one field
- * for search and questions" (ΔΕΝ φτιάχνεις δεύτερο πεδίο).
+ * THE ONE FIELD, BOTH JOBS (Κομμάτι 2). Typing — every keystroke, as
+ * before — runs the plain substring search this list already had
+ * (lib/my-stuff/load.ts, unchanged). Submitting (Enter, or the ✨
+ * button) is the NEW half: it does not touch the list at all, it asks
+ * `onAsk` to answer the same text as a question. Two outcomes from the
+ * same keystrokes, not two fields and not two modes to switch between.
  */
 export function MyStuffList({
   items,
   loading,
   query,
   onQueryChange,
+  onAsk,
+  asking,
   selectedKey,
   onSelect,
 }: {
@@ -32,6 +36,11 @@ export function MyStuffList({
   loading: boolean;
   query: string;
   onQueryChange: (value: string) => void;
+  /** Submits the field's current text as a question. Omitted while a
+   *  question is already in flight, so a second Enter cannot start a
+   *  second one. */
+  onAsk: (question: string) => void;
+  asking: boolean;
   selectedKey: string | null;
   onSelect: (item: MyStuffItem) => void;
 }) {
@@ -42,18 +51,36 @@ export function MyStuffList({
   return (
     <div className="flex h-full min-h-0 flex-col" data-testid="my-stuff-list">
       <div className="shrink-0 px-3 pt-3">
-        <label className="relative block">
-          <span className="sr-only">{t("browse.searchLabel")}</span>
-          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={t("browse.searchPlaceholder")}
-            data-testid="my-stuff-search"
-            className="search-pill-input"
-          />
-        </label>
+        <form
+          className="flex gap-1.5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!asking && query.trim()) onAsk(query.trim());
+          }}
+        >
+          <label className="relative block min-w-0 flex-1">
+            <span className="sr-only">{t("browse.searchLabel")}</span>
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => onQueryChange(e.target.value)}
+              placeholder={t("browse.searchPlaceholder")}
+              data-testid="my-stuff-search"
+              className="search-pill-input"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={asking || !query.trim()}
+            aria-label={t("ask.send")}
+            title={t("ask.send")}
+            data-testid="my-stuff-ask-send"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted hover:bg-panel-hover hover:text-foreground disabled:opacity-40"
+          >
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </form>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">

@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, Clock, X } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
+import { useCredits } from "@/components/credits/credits-context";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { MyStuffList } from "@/components/my-stuff/my-stuff-list";
 import { MyStuffDetails } from "@/components/my-stuff/my-stuff-details";
 import type { MyStuffItem } from "@/lib/my-stuff/load";
 import type { MyStuffKind } from "@/lib/my-stuff/sources";
-import type { MyStuffSession } from "@/lib/my-stuff/types";
+import type { MyStuffCitation, MyStuffSession, MyStuffSessionTurn } from "@/lib/my-stuff/types";
 import { KIND_ICON } from "@/components/my-stuff/kind-icon";
 
 /**
@@ -21,13 +25,36 @@ import { KIND_ICON } from "@/components/my-stuff/kind-icon";
  * a conversation. See docs/NEEDS-FROM-ELIAS.md for the full account of
  * what this does and does not carry over unchanged from the old screen.
  *
- * THE Q&A FIELD IS NOT WIRED TO ANSWER YET — that is Κομμάτι 2's own
- * piece ("Ένα πεδίο για αναζήτηση ΚΑΙ ερωτήσεις"), the same field as the
- * search box below, not a second one. What IS kept here, so asking a
- * question is never further away than before this round started: every
- * past Q&A session (my_stuff_sessions, unchanged) is still readable, in
- * the history drawer the [◧] button opens.
+ * Κομμάτι 2 wires the field's second half: submitting it (not typing —
+ * typing still only filters the list, unchanged) asks /api/my-stuff/ask
+ * and shows the answer in a card above the list, with the same citation
+ * chips the old shell drew. The session it belongs to is appended to
+ * `sessions` as it happens, so the history drawer and a freshly asked
+ * question are never out of step with each other.
  */
+function CitationChips({ citations }: { citations: MyStuffCitation[] }) {
+  const t = useTranslations("dashboard.myStuff");
+  return (
+    <ul className="mt-1.5 flex flex-wrap gap-1.5" data-testid="my-stuff-citations">
+      {citations.map((c, ci) => {
+        const Icon = KIND_ICON[c.kind];
+        return (
+          <li key={`${c.kind}-${c.id}-${ci}`}>
+            <Link
+              href={c.href}
+              data-testid="my-stuff-citation"
+              data-kind={c.kind}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-panel px-3 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
+            >
+              <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />
+              <span className="max-w-[12rem] truncate">{c.title || t(`kinds.${c.kind}`)}</span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 export function MyStuffWorkspace({
   initialItems,
   initialFailed,
@@ -44,6 +71,7 @@ export function MyStuffWorkspace({
   initialQuery?: string;
 }) {
   const t = useTranslations("dashboard.myStuff");
+  const { refresh: refreshCredits } = useCredits();
 
   const [items, setItems] = useState<MyStuffItem[]>(initialItems);
   const [failed, setFailed] = useState<MyStuffKind[]>(initialFailed);
@@ -52,8 +80,81 @@ export function MyStuffWorkspace({
   const [selected, setSelected] = useState<MyStuffItem | null>(null);
 
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [sessions] = useState<MyStuffSession[]>(initialSessions);
+  const [sessions, setSessions] = useState<MyStuffSession[]>(initialSessions);
   const [openSessionId, setOpenSessionId] = useState<string | null>(null);
+
+  // THE ASKING HALF (Κομμάτι 2). `currentSessionId` is which session a
+  // fresh answer binds to — null starts a new one, the same rule
+  // api/my-stuff/ask itself already applies server-side. Asking again
+  // while `answer` is still showing CONTINUES that session, exactly the
+  // way the old chat shell's thread did.
+  const [asking, setAsking] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
+  const [answer, setAnswer] = useState<{ question: string; text: string; citations: MyStuffCitation[] } | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const askAbort = useRef<AbortController | null>(null);
+
+  function askRefusal(code: unknown): string {
+    switch (code) {
+      case "empty":
+        return t("errors.empty");
+      case "too_long":
+        return t("errors.tooLong");
+      case "insufficient_credits":
+      case "reserve_failed":
+        return t("errors.insufficient");
+      case "rate_limited":
+      case "bypass_ceiling":
+        return t("errors.rateLimited");
+      case "ai_unavailable":
+        return t("errors.unavailable");
+      case "stopped":
+        return t("errors.stopped");
+      default:
+        return t("errors.failed");
+    }
+  }
+
+  async function ask(question: string) {
+    if (asking) return;
+    setAsking(true);
+    setAskError(null);
+    const controller = new AbortController();
+    askAbort.current = controller;
+    try {
+      const res = await fetch("/api/my-stuff/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ question, sessionId: currentSessionId }),
+      });
+      const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+      void refreshCredits();
+      if (!res.ok || !data?.ok) {
+        setAskError(askRefusal(data?.error));
+        return;
+      }
+      const sessionId = String(data.sessionId ?? "") || null;
+      const citations = Array.isArray(data.citations) ? (data.citations as MyStuffCitation[]) : [];
+      const answerText = String(data.answer ?? "");
+      setAnswer({ question, text: answerText, citations });
+      setCurrentSessionId(sessionId);
+      if (sessionId) {
+        const userTurn: MyStuffSessionTurn = { role: "user", text: question };
+        const toolTurn: MyStuffSessionTurn = { role: "tool", text: answerText, citations };
+        setSessions((prev) => {
+          const existing = prev.find((s) => s.id === sessionId);
+          if (existing) return prev.map((s) => (s.id === sessionId ? { ...s, turns: [...s.turns, userTurn, toolTurn] } : s));
+          return [{ id: sessionId, title: question.slice(0, 120), turns: [userTurn, toolTurn] }, ...prev];
+        });
+      }
+    } catch (err) {
+      if (!controller.signal.aborted) setAskError(getErrorMessage(err, t("errors.offline")));
+    } finally {
+      if (askAbort.current === controller) askAbort.current = null;
+      setAsking(false);
+    }
+  }
 
   // THE SAME DEBOUNCED READ my-stuff-browse.tsx already had — unchanged
   // contract (/api/my-stuff/browse), just a new place to call it from.
@@ -115,6 +216,45 @@ export function MyStuffWorkspace({
         </p>
       )}
 
+      {/* THE ANSWER, ABOVE THE LIST — never inside it, and never replacing
+          it: the list keeps showing whatever the typed text filters to,
+          the same as before this card existed. */}
+      {(asking || answer || askError) && (
+        <div className="surface-tight mx-4 mb-2 space-y-2" data-testid="my-stuff-answer">
+          {asking ? (
+            <span className="inline-flex items-center gap-2 text-xs text-muted">
+              <ThinkingIndicator size="sm" />
+              {t("working")}
+            </span>
+          ) : askError ? (
+            <p role="alert" className="text-sm text-warning">
+              {askError}
+            </p>
+          ) : (
+            answer && (
+              <>
+                <p className="break-words text-xs text-muted">{answer.question}</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-foreground">{answer.text}</p>
+                {answer.citations.length > 0 && <CitationChips citations={answer.citations} />}
+              </>
+            )
+          )}
+          {!asking && (answer || askError) && (
+            <button
+              type="button"
+              onClick={() => {
+                setAnswer(null);
+                setAskError(null);
+              }}
+              data-testid="my-stuff-answer-dismiss"
+              className="text-xs text-muted underline hover:text-foreground"
+            >
+              {t("ask.dismiss")}
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="relative flex min-h-0 flex-1 overflow-hidden border-t border-divider">
         {/* LIST: full width on a phone, 360px on a computer. Hidden on a
             phone once something is selected — the details pane covers it
@@ -126,6 +266,8 @@ export function MyStuffWorkspace({
             loading={loading}
             query={query}
             onQueryChange={setQuery}
+            onAsk={ask}
+            asking={asking}
             selectedKey={selected?.key ?? null}
             onSelect={setSelected}
           />
@@ -187,24 +329,7 @@ export function MyStuffWorkspace({
                       {openSession.turns.map((turn, i) => (
                         <div key={i} className={turn.role === "user" ? "text-foreground" : "text-body"}>
                           <p className="whitespace-pre-wrap break-words text-sm">{turn.text}</p>
-                          {turn.citations && turn.citations.length > 0 && (
-                            <ul className="mt-1.5 flex flex-wrap gap-1.5">
-                              {turn.citations.map((c, ci) => {
-                                const Icon = KIND_ICON[c.kind];
-                                return (
-                                  <li key={`${c.kind}-${c.id}-${ci}`}>
-                                    <a
-                                      href={c.href}
-                                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-panel px-3 text-xs text-muted hover:bg-panel-hover hover:text-foreground"
-                                    >
-                                      <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />
-                                      <span className="max-w-[12rem] truncate">{c.title || t(`kinds.${c.kind}`)}</span>
-                                    </a>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          )}
+                          {turn.citations && turn.citations.length > 0 && <CitationChips citations={turn.citations} />}
                         </div>
                       ))}
                     </div>

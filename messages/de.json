@@ -3343,6 +3343,10 @@
         "hide": "Frühere Fragen ausblenden",
         "back": "Zurück zu den früheren Fragen"
       },
+      "ask": {
+        "send": "Fragen",
+        "dismiss": "Antwort ausblenden"
+      },
       "kinds": {
         "site": "Websites",
         "slides": "Folien",

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { PROJECT_STATUSES, isHexColour, type ProjectStatus } from "@/lib/projects/project";
+import { MAX_GOAL_CHARS, MAX_NAME_CHARS, PROJECT_STATUSES, isHexColour, type ProjectStatus } from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
 
 export type ProjectMemberView = {
@@ -109,6 +109,51 @@ export function ProjectDetail({
     primaryColour: project.primaryColour,
     secondaryColour: project.secondaryColour,
   });
+  // Κομμάτι 2 ("title + goal, hand-editable, persisting after refresh").
+  // name/goal are the project's own, so this mirrors saveColour's
+  // optimistic-update-then-revert shape exactly, not a new pattern.
+  const [name, setName] = useState(project.name);
+  const [goal, setGoal] = useState(project.goal ?? "");
+  const [savingText, setSavingText] = useState<"name" | "goal" | null>(null);
+
+  async function saveText(field: "name" | "goal", value: string) {
+    const original = field === "name" ? project.name : project.goal ?? "";
+    if (value === original) return; // nothing changed — no round trip
+    setSavingText(field);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: value }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) {
+        const code = String(body?.error ?? "");
+        addToast(
+          code === "too_short"
+            ? t("errors.tooShort")
+            : code === "too_long"
+              ? t("errors.tooLong", { limit: field === "name" ? MAX_NAME_CHARS : MAX_GOAL_CHARS })
+              : t("errors.failed"),
+          "error"
+        );
+        if (field === "name") setName(original);
+        else setGoal(original);
+        return;
+      }
+      // THE SIDEBAR LIST ALSO SHOWS THE NAME (ProjectsShell's own rows),
+      // a separate component with its own server-fetched props — a
+      // renamed project only looks renamed there after this. The goal
+      // appears nowhere else on screen, so it skips the round trip.
+      if (field === "name") router.refresh();
+    } catch {
+      addToast(t("errors.failed"), "error");
+      if (field === "name") setName(original);
+      else setGoal(original);
+    } finally {
+      setSavingText(null);
+    }
+  }
 
   const sections = useMemo(
     () => [
@@ -170,10 +215,38 @@ export function ProjectDetail({
 
   return (
     <div className="space-y-6">
+      {/* THE NAME, HAND-EDITABLE. An <input> styled as a heading, not a
+          separate view/edit toggle — the same always-live shape as the
+          colour pickers above and the create form in ProjectsShell,
+          saved on blur (or Enter, which blurs) so a reload never catches
+          an unsaved keystroke. */}
+      <input
+        data-testid="projects-detail-name"
+        aria-label={t("form.name")}
+        value={name}
+        disabled={savingText === "name"}
+        onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_CHARS))}
+        onBlur={() => void saveText("name", name.trim())}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        className="w-full min-w-0 rounded-item border border-transparent bg-transparent px-1 text-lg font-semibold text-foreground outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
+      />
+
       {/* GOAL + PROGRESS */}
       <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("sections.goal")}</h2>
-        <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{project.goal || t("noGoal")}</p>
+        <textarea
+          data-testid="projects-detail-goal"
+          aria-label={t("form.goal")}
+          value={goal}
+          placeholder={t("noGoal")}
+          rows={3}
+          disabled={savingText === "goal"}
+          onChange={(e) => setGoal(e.target.value.slice(0, MAX_GOAL_CHARS))}
+          onBlur={() => void saveText("goal", goal.trim())}
+          className="mt-1 w-full min-w-0 resize-y rounded-item border border-transparent bg-transparent px-1 py-0.5 text-sm text-muted outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
+        />
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
           <span>{t(`status.${project.status}`)}</span>
           <span>·</span>

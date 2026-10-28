@@ -202,29 +202,37 @@ try {
     const row1 = page.locator('[data-testid="projects-list-row"]').filter({ hasText: "Καλοκαιρινή καμπάνια" });
     await press(row1);
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });
-    check("selecting a row shows ITS OWN name in the detail pane", (await page.locator('[data-testid="projects-detail-name"]').innerText()) === "Καλοκαιρινή καμπάνια");
+    // Κομμάτι 2 made this an <input> (hand-editable, see below) — .inputValue(),
+    // not .innerText(), which reads nothing off a form control.
+    check("selecting a row shows ITS OWN name in the detail pane", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Καλοκαιρινή καμπάνια");
     check("...and the url names it, so a reload or a bookmark opens the same one", page.url() === `${APP}/dashboard/projects?id=${PROJECT_1}`);
     check("...and the selected row is the only one marked current", (await page.locator('[aria-current="true"]').count()) === 1);
     const detailText1 = await page.locator('[data-testid="projects-detail-pane"]').innerText();
-    check("its own goal text is shown", detailText1.includes("Αύξηση πωλήσεων τον Αύγουστο"));
+    // Κομμάτι 2 moved the goal off static text into a <textarea> — innerText
+    // on an ancestor does not surface a form control's value, so this is
+    // .inputValue() on the field itself, same reason as the name above.
+    check("its own goal text is shown", (await page.locator('[data-testid="projects-detail-goal"]').inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
     check("its one real member (an image) is resolved to its own headline, not a blank row", detailText1.includes("Αφίσα για καλοκαιρινή προσφορά"));
 
     const row2 = page.locator('[data-testid="projects-list-row"]').filter({ hasText: "Νέος ιστότοπος" });
     await press(row2);
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_2}`, { timeout: 10_000 });
     const detailText2 = await page.locator('[data-testid="projects-detail-pane"]').innerText();
-    check("picking the OTHER project swaps the pane to ITS content", detailText2.includes("Νέος ιστότοπος") && !detailText2.includes("Αφίσα για καλοκαιρινή προσφορά"));
+    check(
+      "picking the OTHER project swaps the pane to ITS content",
+      (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Νέος ιστότοπος" && !detailText2.includes("Αφίσα για καλοκαιρινή προσφορά")
+    );
     check("...and the first project's row is no longer current", (await row1.getAttribute("aria-current")) === null);
 
     await page.locator('[data-testid="projects-new-name"]').fill("Φθινοπωρινή προσφορά");
     await page.locator('[data-testid="projects-new-goal"]').fill("Ξεπούλημα αποθέματος");
     await press(page.locator('[data-testid="projects-new-create"]'));
     await page.waitForFunction(
-      () => document.querySelector('[data-testid="projects-detail-name"]')?.textContent === "Φθινοπωρινή προσφορά",
+      () => (document.querySelector('[data-testid="projects-detail-name"]'))?.value === "Φθινοπωρινή προσφορά",
       { timeout: 10_000 }
     );
     check("the created project is now in the list (3 total)", (await page.locator('[data-testid="projects-list-row"]').count()) === 3);
-    check("...and it opens selected, as the thing that was just made", (await page.locator('[data-testid="projects-detail-name"]').innerText()) === "Φθινοπωρινή προσφορά");
+    check("...and it opens selected, as the thing that was just made", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Φθινοπωρινή προσφορά");
 
     page.once("dialog", (d) => d.accept());
     await press(page.locator('[data-testid="projects-list-item"]').filter({ hasText: "Νέος ιστότοπος" }).locator('[data-testid="projects-list-delete"]'));
@@ -239,10 +247,87 @@ try {
 
     await page.goto(`${APP}/dashboard/projects/${PROJECT_1}`, { waitUntil: "load" });
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });
-    check("the old per-project address still opens the right one, through its own redirect", (await page.locator('[data-testid="projects-detail-name"]').innerText()) === "Καλοκαιρινή καμπάνια");
+    check("the old per-project address still opens the right one, through its own redirect", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Καλοκαιρινή καμπάνια");
 
     await page.goto(`${APP}/dashboard/projects?ask=${encodeURIComponent("Οργάνωσε τη μετακόμιση")}`, { waitUntil: "load" });
     check("?ask= is still read — it seeds the new-project goal field rather than going unread", (await page.locator('[data-testid="projects-new-goal"]').inputValue()) === "Οργάνωσε τη μετακόμιση");
+
+    // == Κομμάτι 2: title + goal, hand-editable, persisting after refresh ==
+    await press(row1);
+    await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_1}`, { timeout: 10_000 });
+    const nameField = page.locator('[data-testid="projects-detail-name"]');
+    const goalField = page.locator('[data-testid="projects-detail-goal"]');
+    check("the goal field holds the project's own goal, editable (a <textarea>, not static text)", (await goalField.inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
+
+    await nameField.fill("Καμπάνια Νοεμβρίου");
+    await nameField.blur();
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="projects-list-row"][aria-current="true"]')?.textContent?.includes("Καμπάνια Νοεμβρίου"),
+      { timeout: 10_000 }
+    );
+    check("renaming also updates the matching row in the sidebar list, not just the field itself", (await page.locator('[data-testid="projects-list-row"][aria-current="true"]').innerText()).includes("Καμπάνια Νοεμβρίου"));
+
+    await goalField.fill("Αύξηση πωλήσεων τον Νοέμβριο");
+    await goalField.blur();
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="projects-detail-goal"]'))?.value === "Αύξηση πωλήσεων τον Νοέμβριο",
+      { timeout: 10_000 }
+    );
+
+    // THE DIRECTIVE'S OWN WORDS: "persisting after refresh" — a reload
+    // re-fetches from the (mock) database through the server component,
+    // so this is the one check that actually proves the PATCH reached
+    // the server rather than just updating local state that a reload
+    // would have exposed as never having been saved.
+    await page.reload({ waitUntil: "load" });
+    await page.locator('[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
+    check("the renamed title survives a reload — it reached the server, not just the screen", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Καμπάνια Νοεμβρίου");
+    check("the edited goal survives a reload too", (await page.locator('[data-testid="projects-detail-goal"]').inputValue()) === "Αύξηση πωλήσεων τον Νοέμβριο");
+
+    // AN EMPTY NAME IS REFUSED, like the create form's own checkProjectName
+    // — the field reverts rather than silently saving a blank project.
+    await nameField.fill("");
+    await nameField.blur();
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="projects-detail-name"]'))?.value === "Καμπάνια Νοεμβρίου",
+      { timeout: 10_000 }
+    );
+    check("an emptied name reverts rather than saving blank", (await nameField.inputValue()) === "Καμπάνια Νοεμβρίου");
+
+    // SWITCHING PROJECTS DOES NOT LEAK THE PREVIOUS ONE'S EDITED FIELDS —
+    // the exact bug a missing `key` on <ProjectDetail> would cause (and,
+    // until this round, silently did for the colour pickers too).
+    const row3 = page.locator('[data-testid="projects-list-row"]').filter({ hasText: "Φθινοπωρινή προσφορά" });
+    await press(row3);
+    await page.waitForURL(`${APP}/dashboard/projects?id=*`, { timeout: 10_000 });
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="projects-detail-name"]'))?.value === "Φθινοπωρινή προσφορά",
+      { timeout: 10_000 }
+    );
+    check("picking a different project shows ITS OWN name, not the previous one's edited value", (await page.locator('[data-testid="projects-detail-name"]').inputValue()) === "Φθινοπωρινή προσφορά");
+    // Project 3 WAS given a goal at creation ("Ξεπούλημα αποθέματος",
+    // above) — "never edited" means "never edited HERE", not empty.
+    check("...and ITS OWN goal (from when it was made), not the previous one's", (await page.locator('[data-testid="projects-detail-goal"]').inputValue()) === "Ξεπούλημα αποθέματος");
+
+    // RESTORE project 1's original name/goal — this section renamed it to
+    // prove the save path works, and the phone section below still looks
+    // it up by its ORIGINAL name (its own concern is layout, not naming).
+    // By URL, not by pressing a row filtered on the OLD name text — that
+    // text is exactly what this step just changed, out from under itself.
+    await page.goto(`${APP}/dashboard/projects?id=${PROJECT_1}`, { waitUntil: "load" });
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="projects-detail-name"]'))?.value === "Καμπάνια Νοεμβρίου",
+      { timeout: 10_000 }
+    );
+    await nameField.fill("Καλοκαιρινή καμπάνια");
+    await nameField.blur();
+    await goalField.fill("Αύξηση πωλήσεων τον Αύγουστο");
+    await goalField.blur();
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="projects-list-row"][aria-current="true"]')?.textContent?.includes("Καλοκαιρινή καμπάνια"),
+      { timeout: 10_000 }
+    );
+    check("renaming back to the original also round-trips cleanly (not a one-way save)", (await nameField.inputValue()) === "Καλοκαιρινή καμπάνια" && (await goalField.inputValue()) === "Αύξηση πωλήσεων τον Αύγουστο");
   }
 
   console.log("\n== phone (390x844): list OR project, never both ==");

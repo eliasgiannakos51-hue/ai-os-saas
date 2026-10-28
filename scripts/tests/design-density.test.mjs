@@ -175,7 +175,13 @@ console.log("\n== 2. the lines ==");
 // goal field each need their own box) plus one new `border-b` under the
 // form, separating it from the project list below (+1, nothing already
 // drawn that line in this component to share a class with). Net +1.
-ok(`border utilities (${r.counts.borders}), ceiling 600`, r.counts.borders <= 600);
+// 600 -> 602 on 2026-10-28. Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 2 ("title + goal,
+// hand-editable") turned the static name heading and the static goal
+// paragraph in project-detail.tsx into a real <input> and a real
+// <textarea> — two more boxes, +2, the same unavoidable shape as the
+// create form's own two fields just above: a field the person can click
+// into needs a border to read as one, even transparent until hover/focus.
+ok(`border utilities (${r.counts.borders}), ceiling 602`, r.counts.borders <= 602);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

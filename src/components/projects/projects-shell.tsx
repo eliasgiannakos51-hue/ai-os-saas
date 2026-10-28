@@ -214,12 +214,15 @@ export function ProjectsShell({
           )}
           <div className="mx-auto w-full max-w-5xl px-4 py-6">
             {detail ? (
-              <>
-                <h1 className="mb-4 text-lg font-semibold text-foreground" data-testid="projects-detail-name">
-                  {detail.header.name}
-                </h1>
-                <ProjectDetail project={detail.header} members={detail.members} rowsPerModule={detail.rowsPerModule} />
-              </>
+              // key={detail.header.id}: Κομμάτι 2 gave ProjectDetail its
+              // own local state for the name/goal fields (and the
+              // colour pickers already had this, unnoticed) — without a
+              // key, React reuses the same component instance across a
+              // selection change and that state survives the switch,
+              // showing the PREVIOUS project's edited name/goal/colours
+              // over the newly selected one until something else
+              // happens to touch it. The key forces a real remount.
+              <ProjectDetail key={detail.header.id} project={detail.header} members={detail.members} rowsPerModule={detail.rowsPerModule} />
             ) : projects.length > 0 ? (
               <div className="surface" data-testid="projects-select-prompt">
                 <h2 className="text-sm font-semibold text-foreground">{t("selectPrompt")}</h2>

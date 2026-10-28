@@ -125,6 +125,7 @@
       "apps": "Idee per app",
       "images": "Idee per immagini",
       "imageTool": "Immagine",
+      "appBuilder": "App",
       "videos": "Idee per video",
       "coding": "Codice",
       "dataAnalysis": "Guarda cosa dicono i numeri",
@@ -3335,7 +3336,10 @@
       "details": {
         "empty": "Seleziona qualcosa a sinistra per vederlo qui.",
         "open": "Apri",
-        "back": "Torna all'elenco"
+        "back": "Torna all'elenco",
+        "madeFrom": "Creato da",
+        "viewers": "Chi lo vede",
+        "viewersAnswer": "Solo tu. Condividere un elemento con qualcun altro non esiste ancora."
       },
       "history": {
         "title": "Domande precedenti",

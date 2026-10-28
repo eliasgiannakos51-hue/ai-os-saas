@@ -144,6 +144,14 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.myStuff.kinds.document",
   "fr:dashboard.myStuff.kinds.analysis",
   "fr:dashboard.myStuff.kinds.chat",
+  // My Stuff's Add-to-Project eligibility for app-builder records (Κομμάτι
+  // 4, 2026-10-28): "Apps" is the everyday Spanish, German and Portuguese
+  // word too (las apps / die Apps / os apps) — none of their own software
+  // translates it to "aplicaciones"/"Anwendungen"/"aplicativos" in this
+  // short-label sense.
+  "es:sidebar.items.appBuilder",
+  "de:sidebar.items.appBuilder",
+  "pt:sidebar.items.appBuilder",
   "fr:dashboard.toolShell.box.nav",
   "it:dashboard.toolShell.box.nav",
   "pt:dashboard.toolShell.box.nav",

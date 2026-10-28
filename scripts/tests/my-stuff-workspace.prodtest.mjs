@@ -32,6 +32,7 @@ import http from "node:http";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
+import { containsUi, uiTextStrict } from "./lib/ui-text.mjs";
 
 let pass = 0;
 const failures = [];
@@ -56,8 +57,9 @@ const TRADES = [
 // ---------------------------------------------------------------------
 // Κομμάτι 3's own seed — one row per bucket the filter row names, dated
 // so "newest"/"oldest" have an unambiguous, non-collation answer (s1 is
-// the oldest of all nine, m1 the newest) rather than relying on how
-// Intl.Collator happens to interleave Greek and Latin titles.
+// the oldest of all ten — Κομμάτι 4 adds a tenth, r1, below — m1 the
+// newest) rather than relying on how Intl.Collator happens to
+// interleave Greek and Latin titles.
 // ---------------------------------------------------------------------
 const DOCUMENTS = [{ id: "d1", title: "Σύμβαση πελάτη", content: "...", created_at: "2026-09-01T10:00:00Z" }];
 const IMAGES = [{ id: "im1", prompt: "Αφίσα για καλοκαιρινή προσφορά", status: "done", created_at: "2026-09-18T10:00:00Z" }];
@@ -69,13 +71,33 @@ const APPS = [{ id: "ap1", title: "Καταγραφή παραγγελιών", d
 const PROJECT_ID = "11111111-1111-1111-1111-111111111111";
 const PROJECTS = [{ id: PROJECT_ID, name: "Καλοκαιρινή καμπάνια", created_at: "2026-08-15T10:00:00Z" }];
 // generated_images IS a project-member table (lib/projects/linkable-
-// extras.ts's own LINK_ONLY_MODULES) — document/meetings/apps are NOT
-// (confirmed by reading lib/modules.ts and linkable-extras.ts; neither
-// lists user_documents, user_apps or meetings), so the one edge below
-// links the IMAGE row, not a kind that projectMembers() would silently
-// drop.
+// extras.ts's own LINK_ONLY_MODULES) — so is user_documents/meetings/
+// user_apps as of Κομμάτι 4 (2026-10-28), which closed that gap. The
+// edge below is still just the one the Κομμάτι 3 project-filter test
+// needs; the second entity_links row, for Κομμάτι 4's own "Used in"
+// check, is below with that section's own seed.
 const ENTITY_LINKS = [
   { source_table: "generated_images", source_id: "im1", target_table: "projects", target_id: PROJECT_ID, relationship_type: "in_project", created_at: "2026-09-18T10:05:00Z" },
+  // Κομμάτι 4: a plain "related" edge (the default relationship_type,
+  // not in_project) between two already-seeded rows — "Used in" is
+  // genuinely bidirectional, so this one edge is enough to check it
+  // from BOTH ends (selecting d1 shows the image, selecting im1 shows
+  // the document).
+  { source_table: "generated_images", source_id: "im1", target_table: "user_documents", target_id: "d1", relationship_type: "related", created_at: "2026-09-19T10:00:00Z" },
+];
+// Κομμάτι 4's "Made from" — the one real, narrow case: a document saved
+// from a research report (research_reports.document_id). d1 (already
+// seeded above) is both the "Used in" test's target AND this one's, on
+// purpose: one real selected row showing two real, independent facts
+// about itself is a better check than two rows showing one fact each.
+//
+// A REAL REPORT IS STILL "ready" after a document is saved from it —
+// saving to Documents does not un-finish the report. So r1 is also a
+// second real row in the Documents bucket (research is one of its five
+// kinds, buckets.ts) and the TENTH real item the counts below now
+// expect (ten, not nine, from this point on in the file).
+const RESEARCH_REPORTS = [
+  { id: "r1", topic: "Ανάλυση ανταγωνισμού", document_id: "d1", status: "ready", created_at: "2026-08-28T10:00:00Z" },
 ];
 const SESSIONS = [
   {
@@ -174,6 +196,7 @@ const supa = await startMockSupabase({
     user_apps: APPS,
     projects: PROJECTS,
     entity_links: ENTITY_LINKS,
+    research_reports: RESEARCH_REPORTS,
   },
   handle: handleSessions,
 });
@@ -266,7 +289,7 @@ try {
     const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
     await page.goto(`${APP}/dashboard/my-stuff`, { waitUntil: "load" });
     await page.locator('[data-testid="my-stuff-list-item"]').first().waitFor({ timeout: 15_000 });
-    check("all nine real rows are listed", (await page.locator('[data-testid="my-stuff-list-item"]').count()) === 9);
+    check("all ten real rows are listed", (await page.locator('[data-testid="my-stuff-list-item"]').count()) === 10);
     check("nothing selected yet reads as empty, not broken", (await page.locator('[data-testid="my-stuff-details-empty"]').count()) === 1);
     check(
       "newest-first by default: the most recent row (a meeting) leads",
@@ -349,7 +372,7 @@ try {
     );
 
     await searchFor("");
-    await waitForSearch(9, null); // back to all nine before the questions below read the list
+    await waitForSearch(10, null); // back to all ten before the questions below read the list
 
     // -----------------------------------------------------------------
     // The SAME field's other job: submitting asks a real question
@@ -401,15 +424,22 @@ try {
     // -----------------------------------------------------------------
     console.log("\n== desktop: filters — All/Documents/Images/Data/More/Project/Sort ==");
     await searchFor("");
-    await waitForSearch(9, null);
+    await waitForSearch(10, null);
 
     async function pickBucket(bucket, wantCount, mustContain) {
       await press(page.locator(`[data-testid="my-stuff-filter"][data-bucket="${bucket}"]`));
       return waitForSearch(wantCount, mustContain);
     }
 
-    let f = await pickBucket("documents", 1, "Σύμβαση πελάτη");
-    check("Documents shows only the one document row", f.n === 1 && f.texts.includes("Σύμβαση πελάτη"), f.texts);
+    // Documents = document/research/slides/posts/file. r1 (Κομμάτι 4's
+    // own research report, status "ready") is a real second row here —
+    // slides/posts/file have none seeded, so the real count is two.
+    let f = await pickBucket("documents", 2, "Σύμβαση πελάτη");
+    check(
+      "Documents shows the document AND the research report, nothing else",
+      f.n === 2 && f.texts.includes("Σύμβαση πελάτη") && f.texts.includes("Ανάλυση ανταγωνισμού"),
+      f.texts
+    );
 
     f = await pickBucket("images", 1, "Αφίσα για καλοκαιρινή προσφορά");
     check("Images shows only the one image row", f.n === 1 && f.texts.includes("Αφίσα για καλοκαιρινή προσφορά"), f.texts);
@@ -451,22 +481,22 @@ try {
     f = await pickBucket("meetings", 1, "Σύσκεψη με τον προμηθευτή");
     check("Meetings shows only the one meeting", f.n === 1 && f.texts.includes("Σύσκεψη με τον προμηθευτή"), f.texts);
 
-    f = await pickBucket("all", 9, null);
-    check("All, pressed again, returns every row", f.n === 9, f.texts);
+    f = await pickBucket("all", 10, null);
+    check("All, pressed again, returns every row", f.n === 10, f.texts);
 
     console.log("\n== desktop: the Project filter reads real entity_links membership ==");
     const projectSelect = page.locator('[data-testid="my-stuff-filter-project"]');
     await projectSelect.selectOption(PROJECT_ID);
     f = await waitForSearch(1, "Αφίσα για καλοκαιρινή προσφορά");
     check(
-      "picking the project shows only its one real member (the image), not all nine",
+      "picking the project shows only its one real member (the image), not all ten",
       f.n === 1 && f.texts.includes("Αφίσα για καλοκαιρινή προσφορά"),
       f.texts
     );
     await projectSelect.selectOption("");
-    await waitForSearch(9, null);
+    await waitForSearch(10, null);
 
-    console.log("\n== desktop: Sort reorders by date, reversibly, without changing WHICH nine ==");
+    console.log("\n== desktop: Sort reorders by date, reversibly, without changing WHICH ten ==");
     // Purely client-side (useSortAndPaginate, no round trip) — polled
     // the same careful way as the search checks above, since a click and
     // React's re-render are still two different ticks.
@@ -493,11 +523,84 @@ try {
     await press(sortButtons.nth(3)); // za
     const zaTitles = await page.locator('[data-testid="my-stuff-list-item"]').allInnerTexts();
     check(
-      "A-Z and Z-A are exact reverses of each other (same nine, opposite order)",
-      azTitles.length === 9 && zaTitles.length === 9 && JSON.stringify(azTitles) === JSON.stringify([...zaTitles].reverse()),
+      "A-Z and Z-A are exact reverses of each other (same ten, opposite order)",
+      azTitles.length === 10 && zaTitles.length === 10 && JSON.stringify(azTitles) === JSON.stringify([...zaTitles].reverse()),
       azTitles.join(" | ") + "\n        -- vs --\n        " + zaTitles.join(" | ")
     );
     await press(sortButtons.nth(0)); // back to newest, the default, before anything else reads this list
+
+    // -----------------------------------------------------------------
+    // Κομμάτι 4's own check: "οι σύνδεσμοι ανοίγουν το σωστό" — every
+    // link the details pane now draws opens the real thing. d1 (the
+    // document) carries BOTH a real "Made from" (research_reports.
+    // document_id) and a real "Used in" edge (entity_links, "related",
+    // to im1) at once — one selected row, two independent real facts.
+    // -----------------------------------------------------------------
+    console.log("\n== desktop: details — Made from, Used in, who sees it, Add to Project, Link to ==");
+    async function waitForTestId(testid, timeout = 8000) {
+      await page.locator(`[data-testid="${testid}"]`).waitFor({ timeout });
+    }
+
+    await press(page.locator('[data-testid="my-stuff-list-item"][data-kind="document"]'));
+    await page.locator('[data-testid="my-stuff-details"]').waitFor({ timeout: 10_000 });
+
+    await waitForTestId("my-stuff-made-from");
+    const madeFromText = await page.locator('[data-testid="my-stuff-made-from"]').innerText();
+    check("Made from shows the real research report (document <- research_reports.document_id)", madeFromText.includes("Ανάλυση ανταγωνισμού"), madeFromText);
+    const madeFromHref = await page.locator('[data-testid="my-stuff-made-from"] a').getAttribute("href");
+    check("...with a real link to that report", madeFromHref === "/dashboard/deep-research?record=r1", madeFromHref);
+
+    // THE WRAPPER <div> IS ALWAYS IN THE DOM (LinkedEntities itself
+    // renders null when empty) — waiting on it alone would not wait for
+    // the async fetch at all, so this waits on the real signal: an
+    // actual link appearing inside it.
+    await page.locator('[data-testid="my-stuff-used-in"] a').first().waitFor({ timeout: 8_000 });
+    let usedInText = await page.locator('[data-testid="my-stuff-used-in"]').innerText();
+    check("Used in shows the real linked image (document's own side of a real entity_links row)", usedInText.includes("Αφίσα για καλοκαιρινή προσφορά"), usedInText);
+    let usedInHref = await page.locator('[data-testid="my-stuff-used-in"] a').getAttribute("href");
+    check("...with a real link to the images tool", usedInHref === "/dashboard/generated-images", usedInHref);
+
+    const viewersText = await page.locator('[data-testid="my-stuff-viewers"]').innerText();
+    check(
+      "Who sees this answers honestly — no sharing exists for any kind yet",
+      containsUi(viewersText, await uiTextStrict(page, "dashboard.myStuff.details.viewersAnswer")),
+      viewersText
+    );
+
+    await press(page.getByRole("button", { name: "Add to project" }));
+    await page.locator('[data-testid="add-to-project-list"]').waitFor({ timeout: 8_000 });
+    const dialogVisible = await page.locator('[role="dialog"]').isVisible();
+    const projectListVisible = await page.locator('[data-testid="add-to-project-list"]').isVisible();
+    check("Add to Project opens the real picker, with the real project in it", dialogVisible && projectListVisible, `dialog=${dialogVisible} list=${projectListVisible}`);
+    await page.keyboard.press("Escape");
+    await page.locator('[role="dialog"]').waitFor({ state: "hidden", timeout: 5_000 });
+
+    await press(page.getByRole("button", { name: "Link to..." }));
+    await page.locator('[role="dialog"]').waitFor({ timeout: 8_000 });
+    check("Link to... opens the real picker", await page.locator('[role="dialog"]').isVisible());
+    await page.keyboard.press("Escape");
+    await page.locator('[role="dialog"]').waitFor({ state: "hidden", timeout: 5_000 });
+
+    // THE OTHER SIDE OF THE SAME REAL EDGE — selecting im1 must show the
+    // document, not re-show its own side, which is exactly what a
+    // directed (not bidirectional) read would get wrong.
+    await press(page.locator('[data-testid="my-stuff-list-item"][data-kind="images"]'));
+    await page.locator('[data-testid="my-stuff-details"]').waitFor({ timeout: 10_000 });
+    await page.locator('[data-testid="my-stuff-used-in"] a').first().waitFor({ timeout: 8_000 });
+    usedInText = await page.locator('[data-testid="my-stuff-used-in"]').innerText();
+    check("...and from the OTHER side, the same real edge shows the document", usedInText.includes("Σύμβαση πελάτη"), usedInText);
+    usedInHref = await page.locator('[data-testid="my-stuff-used-in"] a').getAttribute("href");
+    check("...with a real link to Documents", usedInHref === "/dashboard/documents", usedInHref);
+    check("...and images has no 'Made from' — nothing generates an image from another record today", (await page.locator('[data-testid="my-stuff-made-from"]').count()) === 0);
+
+    // A ROW WITH NEITHER FACT must show neither section — the honest
+    // negative case, not an empty placeholder pretending to be data.
+    const financeRow2 = page.locator('[data-testid="my-stuff-list-item"][data-kind="finance"]').filter({ hasText: "Πώληση πακέτου" });
+    await press(financeRow2);
+    await page.locator('[data-testid="my-stuff-details"]').waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(400); // the one case with no async fetch result to wait FOR — give it a moment to not appear
+    check("a row with no real lineage shows no 'Made from'", (await page.locator('[data-testid="my-stuff-made-from"]').count()) === 0);
+    check("...and no real links shows no 'Used in'", (await page.locator('[data-testid="my-stuff-used-in"] a').count()) === 0);
 
     check("no page threw (desktop, " + pageErrors.length + ")", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();

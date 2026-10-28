@@ -125,6 +125,7 @@
       "apps": "App ideas",
       "images": "Image ideas",
       "imageTool": "Image",
+      "appBuilder": "Apps",
       "videos": "Video ideas",
       "coding": "Coding",
       "dataAnalysis": "See what the numbers say",
@@ -3335,7 +3336,10 @@
       "details": {
         "empty": "Select something on the left to see it here.",
         "open": "Open",
-        "back": "Back to the list"
+        "back": "Back to the list",
+        "madeFrom": "Made from",
+        "viewers": "Who sees this",
+        "viewersAnswer": "Only you. Sharing one record with someone else isn't built yet."
       },
       "history": {
         "title": "Previous questions",

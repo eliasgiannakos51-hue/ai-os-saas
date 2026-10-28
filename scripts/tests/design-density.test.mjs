@@ -159,7 +159,11 @@ console.log("\n== 2. the lines ==");
 // shape generic-list.tsx's own status `<select>` already has, reused by
 // hand rather than shared, since the two live in different components
 // with nothing to import from each other for one declaration this small.
-ok(`border utilities (${r.counts.borders}), ceiling 597`, r.counts.borders <= 597);
+// 597 -> 598 on 2026-10-28. My Stuff's Κομμάτι 4 (details pane) draws its
+// own `border-t` above the honest "who sees this" line at the foot of the
+// pane — a second, unrelated horizontal rule inside the SAME component
+// Κομμάτι 1's border-t already counted above, not a duplicate of it.
+ok(`border utilities (${r.counts.borders}), ceiling 598`, r.counts.borders <= 598);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

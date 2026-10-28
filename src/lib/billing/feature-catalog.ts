@@ -935,8 +935,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // «Τα δικά μου» (2026-10-22, the owner's message after #332): a
   // read-only aggregator over the account's own rows across every
   // tool — Library's 7 sources plus chat, coding, finance, sales and
-  // trading. Browsing and deleting its own sessions cost nothing; only
-  // asking a question in words reserves credits, the same shape as
+  // trading. Browsing, reading a selected row's own details (Κομμάτι 4,
+  // 2026-10-28) and deleting its own sessions cost nothing; only asking a
+  // question in words reserves credits, the same shape as
   // Coding's own "coding/run" above. No sidebar row; its square is the
   // first of the final All tools grid (lib/nav/all-tools.ts), open to
   // everyone since 2026-10-23, and not sold as a plan row yet, the same
@@ -949,7 +950,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "open to everyone since 2026-10-23 (no switch); the plan tier is the owner's to confirm, " +
       "so it is published as a row when he does",
     pages: ["my-stuff"],
-    routes: ["my-stuff/ask", "my-stuff/browse", "my-stuff/sessions/[id]"],
+    routes: ["my-stuff/ask", "my-stuff/browse", "my-stuff/sessions/[id]", "my-stuff/details"],
     charges: true,
     enforcedIn: "src/app/api/my-stuff/ask/route.ts",
     enforcedSymbol: "reserveCredits",

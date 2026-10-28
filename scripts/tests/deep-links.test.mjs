@@ -296,7 +296,10 @@ for (const l of favLinks) {
 // one literal `/dashboard/data-analysis?record=` it used to emit is no longer
 // in its source to be counted. The link itself is unchanged and is checked
 // below through REDIRECT_ONLY.
-const DEEP_LINK_FLOOR = 70;
+// 70 -> 71 (2026-10-28): My Stuff's details pane (Κομμάτι 4) asks
+// /api/my-stuff/details?kind=&id= for a selected row's "Made from"/"Used
+// in", read by that route's GET (src/app/api/my-stuff/details/route.ts).
+const DEEP_LINK_FLOOR = 71;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

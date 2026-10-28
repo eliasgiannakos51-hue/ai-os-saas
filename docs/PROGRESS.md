@@ -7136,3 +7136,97 @@ Audio/Sites and Apps/Meetings/Project/Sort) σε real production build,
 κανένα project (δεν φαίνεται καθόλου, όχι ένα άδειο dropdown).
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία.**
+
+### 2026-10-28 — My Stuff «ΝΕΑ ΟΘΟΝΗ»: Κομμάτι 4, το δεξί πάνελ
+
+**Τι είναι πραγματικά «Made from»/«Used in»/«ποιος το βλέπει»/«Send
+to…» σε αυτό το προϊόν σήμερα — ψάξιμο πρώτα, όχι υπόθεση.** Κανένας
+πίνακας δεν έχει γενική στήλη «φτιάχτηκε από» — βρέθηκε ΜΙΑ γνήσια,
+στενή εξαίρεση: `research_reports.document_id`, που γεμίζει όταν μια
+έρευνα αποθηκεύεται ως έγγραφο. Κανένα row δεν έχει «ποιος άλλος το
+βλέπει» — ελέγχθηκε: τα seats της ομάδας δεν μοιράζονται τίποτα, ένα
+project είναι single-owner RLS. Και «Send to…» δεν έχει χτιστεί για
+ΚΑΝΕΝΑ εργαλείο ακόμα (TOOL-RULES.md's δικός του κανόνας, όχι κάτι
+φτιαγμένο εδώ). Το πάνελ χτίστηκε γύρω από αυτά τα τρία γεγονότα, όχι
+γύρω από το όνομα της οδηγίας:
+
+- **Made from** — `src/app/api/my-stuff/details/route.ts` (νέο) διαβάζει
+  `research_reports` με `document_id = id AND user_id = χρήστη` ΜΟΝΟ
+  για `kind === "document"`· κάθε άλλο είδος απλά δεν δείχνει καθόλου
+  αυτή τη γραμμή (όχι ένα «δεν υπάρχει» μήνυμα — η απουσία της στήλης
+  λέει την αλήθεια).
+- **Used in** — ξανάχρηση του ήδη υπάρχοντος `loadLinkedEntities()`
+  (`src/lib/entity-links.ts`) και του component `<LinkedEntities>`,
+  αυτολεξεί, όχι μετονομασία: ο δεσμός είναι ήδη αμφίδρομος (οι ίδιες
+  «Linked to: X» chips που δείχνουν 20+ κλασικές σελίδες), άρα το My
+  Stuff δεν εφευρίσκει ένα μονόδρομο «used in» πάνω σε κάτι που είναι
+  ήδη διπλής κατεύθυνσης.
+- **Ποιος το βλέπει** — στατικό, έντιμο κείμενο· «Μόνο εσύ» σε όλα τα
+  15 είδη, όχι ένα stub για sharing που δεν υπάρχει.
+- **Open / Add to Project / Link to…** — το πραγματικό `AddToProjectButton`/
+  `LinkToButton` (`src/components/entity-links/`), ίδια components με
+  τη Βιβλιοθήκη και τα άλλα εργαλεία· το όνομα είναι «Link to…», όχι
+  «Send to…», επειδή αυτό είναι το πραγματικό πράγμα που ανοίγει.
+
+**Έκλεισε το κενό που άφησε ανοιχτό το Κομμάτι 3.** Εκείνο το σημείωμα
+είχε πει: `user_documents`/`meetings`/`user_apps` ΔΕΝ είναι project-member
+tables, άρα ένα έγγραφο/συνάντηση/εφαρμογή δεν μπορούσε να μπει σε
+Project από πουθενά. `src/lib/projects/linkable-extras.ts` πήρε τρεις
+νέες `LINK_ONLY_MODULES` καταχωρήσεις — `documents`, `meetings`,
+`app-builder` — πάνω στους ήδη υπάρχοντες πίνακες, με το κλειδί ονόματος
+`sidebar.items.appBuilder` ΝΕΟ επίτηδες (όχι το `sidebar.items.apps` =
+«App ideas» του παλιού `ai_apps` tracker — τα δύο είναι διαφορετικοί
+πίνακες, και μοιρασμένο όνομα θα έκανε το ένα από τα δύο μη-πατήσιμο σε
+μια λίστα μελών project, σε όποια γλώσσα συνέπιπταν). Ελέγχθηκε με το
+πραγματικό `load-ts.mjs` loader ότι `getFavoritableByTable("generated_images")`,
+`("meetings")`, `("user_apps")` συνεχίζουν να γυρίζουν `undefined`
+μετά την αλλαγή (το `LINK_ONLY_TABLES` filter στο `favoritable.ts` τα
+αποκλείει επίτηδες) — καμία επίδραση στο αστέρι/favorite μηχανισμό,
+μόνο στο Add-to-Project/Link-to.
+
+**Ένα πραγματικό side-effect, βρέθηκε από το ίδιο το check.** Το seed
+data για το «Made from» test χρειαζόταν ένα `research_reports` row με
+`status: "ready"` (ο μόνος ρεαλιστικός συνδυασμός — μια έρευνα που ήδη
+αποθηκεύτηκε ως έγγραφο δεν μπορεί ταυτόχρονα να «τρέχει» ακόμα). Αυτό
+το row περνάει και το δικό του `keep()` φίλτρο ως κατηγορία «research»,
+άρα έγινε ένα δέκατο, πραγματικό, ορατό στοιχείο στη λίστα — όχι bug,
+αλλά μια αλήθεια που το seed data αποκάλυψε. Διορθώθηκαν όλες οι
+μετρήσεις «εννιά» → «δέκα» στο prodtest (όχι το αντίστροφο: αλλοίωση
+του status σε μη-«ready» θα έφτιαχνε έναν ανύπαρκτο συνδυασμό δεδομένων
+μόνο για να κρύψει τη γραμμή).
+
+**Γνήσιες αλλαγές σε gates, με δική τους γραμμή:** `design-density`
+border ceiling 597→598 (το νέο `border-t` πάνω από τη γραμμή «ποιος το
+βλέπει», δεύτερη και άσχετη από του Κομματιού 1)· `deep-links`
+DEEP_LINK_FLOOR 70→71 (`/api/my-stuff/details?kind=&id=`, διαβάζεται
+από το δικό του GET)· `scripts/check-i18n.js` 3 νέες `LOCALE_ALLOWED`
+για `sidebar.items.appBuilder` σε es/de/pt («Apps» είναι η καθημερινή
+λέξη και στις τρεις γλώσσες)· `src/lib/billing/feature-catalog.ts`'s
+`myStuff` entry πήρε το `my-stuff/details` στη λίστα routes του (δωρεάν,
+σαν το browse)· `docs/projects.md` 30→33 (τα τρία νέα link-only module),
+με το δικό του mutation anchor στο `projects.mutation.mjs` ενημερωμένο
+στο ίδιο commit· i18n πακέτο πρώτης χρήσης ξαναγράφτηκε
+(`npm run i18n:first-run`). Ένα hardcoded English literal διορθώθηκε
+στο ίδιο το prodtest (`"Only you"` ➜ `uiTextStrict`/`containsUi` από
+`scripts/tests/lib/ui-text.mjs`, όπως κάθε άλλο prodtest σε αυτό το
+αρχείο θα έπρεπε να κάνει) — το βρήκε `english-anchored-gates.test.mjs`.
+
+**Δοκιμές.** `scripts/tests/my-stuff-workspace.prodtest.mjs` επεκτάθηκε
+από 39 σε 51 ελέγχους: Made from δείχνει το πραγματικό research report
+με πραγματικό link, Used in δείχνει τη πραγματική εικόνα ΚΑΙ από τις
+δύο πλευρές του `entity_links` row, «ποιος το βλέπει» λέει την αλήθεια,
+Add to Project και Link to… ανοίγουν τους πραγματικούς pickers με το
+πραγματικό project μέσα, και δύο αρνητικές περιπτώσεις: μια εικόνα
+χωρίς «Made from» (τίποτα δεν παράγει εικόνα από άλλη εγγραφή σήμερα)
+και ένα οικονομικό στοιχείο χωρίς κανένα από τα δύο. **51/51**, πλήρες
+build. `npm run build:ci` πέρασε. `npm run gates` **ΟΛΑ 383 ΠΕΡΑΣΑΝ**
+(27.223 έλεγχοι).
+
+✅ Κομμάτι 4: έλεγξα το δεξί πάνελ (Made from/Used in/ποιος το βλέπει/
+Open/Add to Project/Link to…) σε real production build, υπολογιστής —
+κάθε γραμμή δείχνει μόνο πραγματικά δεδομένα, καμία εφεύρεση, 51/51,
+όλα τα gates πράσινα. «Send to…» υλοποιήθηκε ως το πραγματικό
+«Link to…» (δεν υπάρχει πραγματική μεταφορά περιεχομένου μεταξύ
+εργαλείων σε αυτό το προϊόν ακόμα).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία.**

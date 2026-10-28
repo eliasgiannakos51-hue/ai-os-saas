@@ -125,6 +125,7 @@
       "apps": "アプリのアイデア",
       "images": "画像のアイデア",
       "imageTool": "画像",
+      "appBuilder": "アプリ",
       "videos": "動画のアイデア",
       "coding": "コーディング",
       "dataAnalysis": "数字が語ることを見る",
@@ -3335,7 +3336,10 @@
       "details": {
         "empty": "左側で何かを選ぶとここに表示されます。",
         "open": "開く",
-        "back": "一覧に戻る"
+        "back": "一覧に戻る",
+        "madeFrom": "作成元",
+        "viewers": "誰が見られるか",
+        "viewersAnswer": "あなただけです。他の人と共有する機能はまだありません。"
       },
       "history": {
         "title": "これまでの質問",

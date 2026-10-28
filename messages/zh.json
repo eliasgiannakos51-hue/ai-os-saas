@@ -125,6 +125,7 @@
       "apps": "应用点子",
       "images": "图片点子",
       "imageTool": "图片",
+      "appBuilder": "应用",
       "videos": "视频点子",
       "coding": "编程",
       "dataAnalysis": "看看数字怎么说",
@@ -3335,7 +3336,10 @@
       "details": {
         "empty": "在左侧选择一项以在此查看。",
         "open": "打开",
-        "back": "返回列表"
+        "back": "返回列表",
+        "madeFrom": "来源于",
+        "viewers": "谁能看到",
+        "viewersAnswer": "只有你。与他人共享一项内容的功能还没有。"
       },
       "history": {
         "title": "以前的问题",

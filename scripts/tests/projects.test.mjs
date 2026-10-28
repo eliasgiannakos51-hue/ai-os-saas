@@ -504,9 +504,11 @@ console.log("\n== 7. THE PAGES ==");
   }
   ok("the row is drawn under Organise", /"\/dashboard\/projects"/.test(readFileSync("src/lib/sidebar-nav.ts", "utf8")));
   const tips = await loadTs("src/lib/help-tips.ts");
-  ok("both screens carry a help tip, and they say different things",
-    tips.HELP_TIPS.some((t) => t.id === "projects") && tips.HELP_TIPS.some((t) => t.id === "projectDetail") &&
-    lookup(messages.en, "help.projects.doesNot") !== lookup(messages.en, "help.projectDetail.doesNot"));
+  // Since Κομμάτι 1 (2026-10-28) this is one screen, not two — "projects"
+  // and "projectDetail" merged into the one entry projects-shell.tsx now
+  // mounts, so there is one tip to carry, not two to tell apart.
+  ok("the merged screen carries its own help tip",
+    tips.HELP_TIPS.some((t) => t.id === "projects") && !tips.HELP_TIPS.some((t) => t.id === "projectDetail"));
   ok("en: the tip names the absence this feature is built on", /does not pull things in by itself/i.test(lookup(messages.en, "help.projects.doesNot")));
   ok("the member count shown is the edge count, with no expansion in the page",
     /counts\.set\(id, \(counts\.get\(id\) \?\? 0\) \+ 1\)/.test(listPage));

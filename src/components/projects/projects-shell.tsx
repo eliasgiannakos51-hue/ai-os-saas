@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 import { useToast } from "@/components/toast/toast-context";
 import { MAX_GOAL_CHARS, MAX_NAME_CHARS, type ProjectStatus } from "@/lib/projects/project";
 import { ProjectDetail, type ProjectHeader, type ProjectMemberView } from "@/components/projects/project-detail";
@@ -115,6 +116,10 @@ export function ProjectsShell({
 
   return (
     <div className="flex h-full flex-col overflow-hidden" data-testid="projects-shell">
+      <div className="flex items-center gap-2 px-4 py-2">
+        <h1 className="min-w-0 break-words text-sm font-semibold text-foreground">{t("title")}</h1>
+        <HelpTip helpKey="help.projects" />
+      </div>
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {/* LIST: full width on a phone, 360px on a computer. Hidden on a
             phone once a project is selected. */}

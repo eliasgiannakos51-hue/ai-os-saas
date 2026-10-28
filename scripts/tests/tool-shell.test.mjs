@@ -133,7 +133,14 @@ check("...and no page or component reads it", ![...pages, ...walk("src/component
 for (const f of users) {
   const component = (read(f).match(/export function (\w+)\(/) ?? [])[1];
   const callers = pages.filter((p) => component && new RegExp(`<${component}\\b`).test(read(p)));
-  check(`${component}: drawn by a page (${callers.length})`, callers.length >= 1);
+  // FLOWSHELL RETIRED AS A MOUNT, NOT AS A FILE, 2026-10-28: Projects
+  // ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 replaced it on /dashboard/projects (the owner's
+  // own answer to the direct question, docs/PROGRESS.md) with
+  // projects-shell.tsx. It still builds on <ToolShell>, which is why
+  // this derived scan still finds it, with no page drawing it — a
+  // likely home for Κομμάτι 6's own bottom field, not dead code to
+  // delete yet.
+  check(`${component}: drawn by a page (${callers.length})`, component === "FlowShell" || callers.length >= 1);
   for (const p of callers) {
     const src = read(p);
     const drawn = src.indexOf(`<${component}`);

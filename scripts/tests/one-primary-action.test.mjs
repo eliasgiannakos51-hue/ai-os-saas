@@ -447,8 +447,15 @@ const BASELINE = {
   "dashboard/predictions/page.tsx": 1,
   "dashboard/presentations/page.tsx": 1,
   "dashboard/product-workflow/page.tsx": 1,
-  "dashboard/projects/page.tsx": 1,
-  "dashboard/projects/[id]/page.tsx": 1,
+  // 1 -> 2 on 2026-10-28 (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1): FlowShell
+  // (budget 1, below) no longer mounts here. The page now shows
+  // projects-shell.tsx's own "Create project" button alongside
+  // project-detail.tsx's "Start chat" link — two real, different
+  // actions (make a folder; start working in the one that's open),
+  // not one loud screen with a second control nobody asked for.
+  "dashboard/projects/page.tsx": 2,
+  // Now a bare redirect (?id= into the page above) — no UI, no control.
+  "dashboard/projects/[id]/page.tsx": 0,
   "dashboard/published/page.tsx": 1,
   // ZERO, AND IT IS THE HONEST NUMBER RATHER THAN A WIN. /reflection
   // renders one component, reflection-generator.tsx, whose "write it"
@@ -540,13 +547,12 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Automations in the shell (package 30): the field's send makes an automation or changes the chosen box; try, run, switch on and approve are quiet panels",
   },
-  {
-    file: "src/components/flows/flow-shell.tsx",
-    tag: "<FlowShell",
-    budget: 1,
-    walk: true,
-    why: "Flows on the Projects page (package 36): the field's send makes the plan; approve, open and again are quiet panels",
-  },
+  // flow-shell.tsx's entry retired 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ
+  // Κομμάτι 1 replaced it as what /dashboard/projects mounts (owner's
+  // own answer to the direct question, docs/PROGRESS.md), so it has no
+  // caller left to walk — a declared replacement surface nothing
+  // renders is a dead exception, not a passing one. The file itself is
+  // untouched, a likely home for Κομμάτι 6's own bottom field.
   {
     file: "src/components/onboarding/first-task.tsx",
     tag: "<FirstTask",

@@ -223,7 +223,18 @@ const extras = code("src/lib/projects/linkable-extras.ts");
 check("a project can hold what a flow makes", ["user_websites", "generated_images", "research_reports", "data_analyses", "generated_posts", "ai_presentations"].every((t) => extras.includes(`table: "${t}"`)));
 check("each thing in a project opens in its tool", /function openHref\(member: ProjectMemberView\)/.test(code("src/components/projects/project-detail.tsx")) && /data-testid="project-member-open"/.test(code("src/components/projects/project-detail.tsx")));
 const page = code("src/app/dashboard/projects/page.tsx");
-check("the flows for everybody, INSTEAD of the page", /if \(projects\) \{/.test(page) && !/isFeatureOn/.test(page) && page.indexOf("<FlowShell") < page.lastIndexOf("return ("));
+// UNTIL 2026-10-28, THIS CHECKED THE OPPOSITE: that FlowShell mounted
+// for everybody, no switch in front of it ("the flows for everybody,
+// INSTEAD of the page"). «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 1 replaced
+// what this route mounts — asked directly, answered "Αντικαθιστά" —
+// with projects-shell.tsx (list left, project right). flow-shell.tsx
+// and the planFlow/canRun/availability logic this file's own earlier
+// sections test are unchanged and still in the tree, just unmounted
+// here; Κομμάτι 6 ("bottom field creates inside project") is a likely
+// next home for the one-sentence idea, scoped to a project already
+// open rather than asked for again at the top of this page.
+check("ProjectsShell for everybody, not FlowShell — this route no longer mounts it",
+  /<ProjectsShell\b/.test(page) && !/<FlowShell\b/.test(page) && !/isFeatureOn/.test(page));
 
 // ---------------------------------------------------------------------
 console.log("\n== 6. the database and the words ==");

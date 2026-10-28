@@ -189,6 +189,7 @@ const STANDS_ON_THE_LAYOUT = {
   "src/app/dashboard/videos/page.tsx": "the same shell.",
   "src/app/dashboard/websites/page.tsx": "the same shell.",
   "src/app/dashboard/memory/page.tsx": "a 308 to /dashboard/search and nothing else — a kept address for old bookmarks. It has no body to protect, and the page it forwards to resolves and refuses.",
+  "src/app/dashboard/projects/[id]/page.tsx": "a redirect to /dashboard/projects?id= and nothing else (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1, 2026-10-28) — a kept address for meetings-workspace.tsx's old link. It has no body to protect, and the page it forwards to resolves and refuses.",
 };
 const undeclaredReliance = relyOnLayout.filter((p) => !STANDS_ON_THE_LAYOUT[p]);
 check(

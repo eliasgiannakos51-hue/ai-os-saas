@@ -82,7 +82,14 @@ check(
   // being a ratchet and become a number no change could ever trip. Set to
   // what the tree actually holds, which is the only value that makes the
   // next removal visible.
-  HELP_TIPS.length >= 47,
+  // 47 -> 46 on 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 merged the two
+  // screens "projectDetail" and "projects" covered into one
+  // (projects-shell.tsx, list left/project right) — the same shape as
+  // the 71 -> 70 drop in deep-links.test.mjs when Files merged into
+  // Analyze, and for the same reason: one mount now, not two, so one
+  // registry entry, not two. This is the deliberate kind of fall, not
+  // an untracked one — the register still says why.
+  HELP_TIPS.length >= 46,
   `${HELP_TIPS.length} — this floor rises with each page that gains one, and never falls`,
 );
 // EVERY PAGE WITH A HEADER, or a written reason why not. The floor above
@@ -115,7 +122,14 @@ check(
   // 38/28 -> 61/40 on 2026-10-25, the same correction as the floor above
   // and for the same reason: both had been left behind by a year of new
   // pages, so neither could catch a page or a header disappearing.
-  dashboardPages.length >= 61 && withHeader.length >= 40,
+  // 61/40 -> 61/38 on 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 removed
+  // <PageHeader> from BOTH src/app/dashboard/projects/page.tsx (its own
+  // title moved into projects-shell.tsx, which draws it directly — the
+  // same shape My Stuff's Κομμάτι 1 already made for that page) and
+  // src/app/dashboard/projects/[id]/page.tsx (now a bare redirect, no
+  // JSX at all). The page count is unmoved — neither file was added or
+  // removed, only what they render.
+  dashboardPages.length >= 61 && withHeader.length >= 38,
   `${dashboardPages.length} pages / ${withHeader.length} headers — both floors rise, neither falls`,
 );
 checkList(
@@ -147,6 +161,10 @@ const NO_HEADER_EXEMPT = new Map([
   [
     "src/app/dashboard/memory/page.tsx",
     "not a page: a permanentRedirect to /dashboard/search, kept so a bookmark to the record search's old address does not 404. A header on it would render for nobody",
+  ],
+  [
+    "src/app/dashboard/projects/[id]/page.tsx",
+    "not a page: a redirect into /dashboard/projects?id=, which both the list and the per-project detail merged into on 2026-10-28 (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1); the tip that page carried now belongs to the merged \"projects\" entry, so a header here would render for nobody",
   ],
   // app-builder left this list on 2026-10-24: the App builder is being
   // built behind the switch "apps-tool", the page renders a real

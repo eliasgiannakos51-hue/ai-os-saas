@@ -9,6 +9,9 @@ import { HelpTip } from "@/components/ui/help-tip";
 import { useToast } from "@/components/toast/toast-context";
 import { MAX_GOAL_CHARS, MAX_NAME_CHARS, type ProjectStatus } from "@/lib/projects/project";
 import { ProjectDetail, type ProjectHeader, type ProjectMemberView } from "@/components/projects/project-detail";
+import type { FlowAvailability } from "@/lib/flows/plan";
+import type { FlowPrices } from "@/lib/flows/flow-pricing";
+import type { FlowRow } from "@/lib/flows/plan";
 
 export type ProjectRow = {
   id: string;
@@ -50,11 +53,20 @@ export function ProjectsShell({
   selectedId,
   detail,
   initialGoal,
+  flows,
+  flowPrices,
+  flowAvailable,
+  defaultFlowColour,
 }: {
   projects: ProjectRow[];
   selectedId: string | null;
   detail: ProjectDetailData | null;
   initialGoal?: string;
+  /** Κομμάτι 6 — this project's own flows, and what a new one would cost/allow. Empty/null when no project is open. */
+  flows: FlowRow[];
+  flowPrices: FlowPrices | null;
+  flowAvailable: FlowAvailability | null;
+  defaultFlowColour: string | null;
 }) {
   const t = useTranslations("projects");
   const router = useRouter();
@@ -222,7 +234,16 @@ export function ProjectsShell({
               // showing the PREVIOUS project's edited name/goal/colours
               // over the newly selected one until something else
               // happens to touch it. The key forces a real remount.
-              <ProjectDetail key={detail.header.id} project={detail.header} members={detail.members} rowsPerModule={detail.rowsPerModule} />
+              <ProjectDetail
+                key={detail.header.id}
+                project={detail.header}
+                members={detail.members}
+                rowsPerModule={detail.rowsPerModule}
+                flows={flows}
+                flowPrices={flowPrices}
+                flowAvailable={flowAvailable}
+                defaultFlowColour={defaultFlowColour}
+              />
             ) : projects.length > 0 ? (
               <div className="surface" data-testid="projects-select-prompt">
                 <h2 className="text-sm font-semibold text-foreground">{t("selectPrompt")}</h2>

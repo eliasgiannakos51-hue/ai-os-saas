@@ -8,6 +8,10 @@ import { MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { MAX_GOAL_CHARS, MAX_NAME_CHARS, MAX_NOTES_CHARS, PROJECT_KIND_TABLES, PROJECT_STATUSES, isHexColour, projectKindCounts, type ProjectStatus } from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
+import { ProjectFlowField } from "@/components/projects/project-flow-field";
+import type { FlowRow } from "@/lib/flows/plan";
+import type { FlowPrices } from "@/lib/flows/flow-pricing";
+import type { FlowAvailability } from "@/lib/flows/plan";
 
 export type ProjectMemberView = {
   table: string;
@@ -94,10 +98,19 @@ export function ProjectDetail({
   project,
   members,
   rowsPerModule,
+  flows,
+  flowPrices,
+  flowAvailable,
+  defaultFlowColour,
 }: {
   project: ProjectHeader;
   members: ProjectMemberView[];
   rowsPerModule: number;
+  /** Κομμάτι 6 — this project's own flows, and what a new one may cost/run. */
+  flows: FlowRow[];
+  flowPrices: FlowPrices | null;
+  flowAvailable: FlowAvailability | null;
+  defaultFlowColour: string | null;
 }) {
   const t = useTranslations("projects");
   const tKey = useTranslations();
@@ -447,6 +460,25 @@ export function ProjectDetail({
           </ul>
         )}
       </section>
+
+      {/* Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο project, με Brand
+          Kit") — THE BOTTOM FIELD, last on the screen on purpose: one
+          sentence plans a flow across several tools, all of it joining
+          THIS project. flowPrices/flowAvailable are null only when this
+          screen somehow rendered without a project open, which cannot
+          happen in practice (this component itself requires one) — kept
+          as a type, not asserted away, so a future caller that forgets
+          to load them fails to compile rather than crashing at runtime. */}
+      {flowPrices && flowAvailable && (
+        <ProjectFlowField
+          projectId={project.id}
+          projectName={project.name}
+          initialFlows={flows}
+          prices={flowPrices}
+          available={flowAvailable}
+          defaultColour={defaultFlowColour}
+        />
+      )}
 
       {/* The statuses exist as a contract even where this screen does not
           yet offer them as a control — named here so a reader can see the

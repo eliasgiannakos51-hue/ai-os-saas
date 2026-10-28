@@ -453,7 +453,11 @@ const BASELINE = {
   // project-detail.tsx's "Start chat" link — two real, different
   // actions (make a folder; start working in the one that's open),
   // not one loud screen with a second control nobody asked for.
-  "dashboard/projects/page.tsx": 2,
+  // 2 -> 3 on 2026-10-28, same day (Κομμάτι 6, "κάτω πεδίο που φτιάχνει
+  // μέσα στο project"): project-flow-field.tsx's own send button, a
+  // third real, different action (plan one sentence into the open
+  // project) — not a restyle of either control above it.
+  "dashboard/projects/page.tsx": 3,
   // Now a bare redirect (?id= into the page above) — no UI, no control.
   "dashboard/projects/[id]/page.tsx": 0,
   "dashboard/published/page.tsx": 1,

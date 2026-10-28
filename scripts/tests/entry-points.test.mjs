@@ -277,6 +277,16 @@ console.log("\n== and every component under src/components has an importer ==");
       "only it called, lib/workspace-templates.ts and ten locales of " +
       "dashboard.overview.quickStart*. Whether the feature ships or goes is the " +
       "owner's decision (v6-list #24), so it is not deleted as cleanup.",
+    "src/components/flows/flow-shell.tsx":
+      "Unmounted since 2026-10-23 (dashboard/projects/page.tsx now renders ProjectsShell, " +
+      "not FlowShell) and the LAST real import of anything from this file — FlowRow, a " +
+      "type — was moved out to lib/flows/plan.ts on 2026-10-28 (Projects Κομμάτι 6), which is " +
+      "what made this entry go from accidentally-reachable to genuinely orphaned. Not deleted: " +
+      "scripts/tests/flows.test.mjs reads this file's own source for real behavioural checks " +
+      "(§4, §4b and §6 — the approve/advance/retry flow, the plan-minus-unavailable-steps line, " +
+      "the dashboard.flows.* key census) and scripts/tests/flows.mutation.mjs mutates it directly; " +
+      "re-pointing both at project-flow-field.tsx, which now covers the single-project case, is a " +
+      "separate cleanup, not part of Κομμάτι 6.",
   };
 
   const unimported = [];

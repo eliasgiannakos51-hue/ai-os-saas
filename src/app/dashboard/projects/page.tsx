@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { IN_PROJECT, PROJECTS_TABLE, type ProjectStatus } from "@/lib/projects/project";
 import { loadProjectDetail } from "@/lib/projects/load-project-detail";
+import { loadFlowPage } from "@/lib/flows/page-data";
 import { ProjectsShell, type ProjectRow } from "@/components/projects/projects-shell";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
@@ -43,6 +44,16 @@ export function generateMetadata(): Promise<Metadata> {
  * piece), so for now the text seeds the new-project goal field instead of
  * going unread — the same stand-in app/dashboard/my-stuff/page.tsx uses
  * for its own ?ask=.
+ *
+ * Κομμάτι 6 LANDED (owner's message 2026-10-28, point 2): the bottom
+ * field flow-shell.tsx's comment pointed at is lib/flows/page-data.ts's
+ * loadFlowPage, called here with THIS project's own id so it loads only
+ * this project's own flows — the account-wide picker/examples drawer the
+ * old FlowShell carried around them stays unmounted, since a project
+ * already open needs neither. The colour the planned steps share
+ * defaults to the PROJECT'S OWN primary_colour (Κομμάτι 2) — its own
+ * "Brand Kit" — before the account's business-memory colour, which is
+ * what the old page fell back on when no project had an opinion yet.
  */
 export default async function ProjectsPage(props: { searchParams?: Promise<{ id?: string; ask?: string }> }) {
   const searchParams = props.searchParams ? await props.searchParams : undefined;
@@ -90,11 +101,26 @@ export default async function ProjectsPage(props: { searchParams?: Promise<{ id?
   const requestedId = searchParams?.id;
   const selectedId = requestedId && projects.some((p) => p.id === requestedId) ? requestedId : null;
   const detail = selectedId ? await loadProjectDetail(supabase, selectedId) : null;
+  const flowPage = detail ? await loadFlowPage(user, selectedId) : null;
+  // The project's own colour (Κομμάτι 2) first — its own Brand Kit —
+  // falling back to the account's business-memory colour only when this
+  // project has not chosen one, same as the old account-wide page did
+  // when NO project had an opinion.
+  const defaultFlowColour = detail?.header.primaryColour ?? flowPage?.brandColour ?? null;
   const initialGoal = readExampleParam(searchParams?.ask) ?? "";
 
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <ProjectsShell projects={projects} selectedId={detail ? selectedId : null} detail={detail} initialGoal={initialGoal} />
+      <ProjectsShell
+        projects={projects}
+        selectedId={detail ? selectedId : null}
+        detail={detail}
+        initialGoal={initialGoal}
+        flows={flowPage?.flows ?? []}
+        flowPrices={flowPage?.prices ?? null}
+        flowAvailable={flowPage?.available ?? null}
+        defaultFlowColour={defaultFlowColour}
+      />
     </div>
   );
 }

@@ -62,6 +62,87 @@ const ENTITY_LINKS = [
   { source_table: "generated_posts", source_id: "po1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-18T10:05:00Z" },
   { source_table: "user_documents", source_id: "do1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-19T10:05:00Z" },
 ];
+// Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο project"): empty until the
+// new section below approves one, through the real POST /api/flows and
+// POST /api/flows/[id]/steps — not stubbed, unlike the tool's own
+// generate route (page.route below), which is each tool's OWN concern.
+const PROJECT_FLOWS = [];
+
+/**
+ * project_flows/entity_links/generated_images, with REAL filtering (not
+ * handleProjects' own by-id-only reads above): api/flows/[id]/steps does
+ * an ownership check (`.eq("id", row).eq("user_id", ...)`) and an
+ * optimistic-concurrency update (`.eq("updated_at", current.updated_at)`)
+ * that only works, or only fails closed, when the stand-in actually
+ * applies the filters a real Postgrest would — the same shape as
+ * flows.prodtest.mjs's own `matches()`/`rest()`, trimmed to these three
+ * tables (the generic default in mock-supabase.mjs itself just returns
+ * every row in the table, filters unread, which Κομμάτι 1-5 above never
+ * needed to care about).
+ */
+function matchesFilter(row, url) {
+  for (const [key, raw] of url.searchParams) {
+    if (["select", "order", "limit", "offset", "on_conflict", "columns"].includes(key)) continue;
+    const [op, ...rest] = raw.split(".");
+    const value = rest.join(".");
+    const cell = row[key];
+    if (op === "eq" && String(cell) !== value) return false;
+    if (op === "neq" && String(cell) === value) return false;
+    if (op === "is" && value === "null" && cell !== null && cell !== undefined) return false;
+    if (op === "in") {
+      const set = value.replace(/^\(|\)$/g, "").split(",").map((s) => s.replace(/"/g, ""));
+      if (!set.includes(String(cell))) return false;
+    }
+  }
+  return true;
+}
+function handleFlowTables({ req, res, url, body, json }) {
+  const table = url.pathname.replace(/^\/rest\/v1\//, "").split("?")[0];
+  if (table === "rpc/consume_rate_limit") return json(200, true), true;
+  const tables = { project_flows: PROJECT_FLOWS, entity_links: ENTITY_LINKS, generated_images: IMAGES };
+  if (!(table in tables)) return false;
+  const rows = tables[table];
+  const hit = rows.filter((r) => matchesFilter(r, url));
+  const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+  // The flow's project name, as the embedded select projects(name) reads it.
+  const shape = (r) => (table === "project_flows" ? { ...r, projects: { name: PROJECTS.find((p) => p.id === r.project_id)?.name ?? null } } : r);
+  const answer = (list) => {
+    const out = list.map(shape);
+    if ((req.headers.prefer ?? "").includes("count=")) {
+      res.writeHead(200, { "Content-Type": "application/json", "Content-Range": out.length ? `0-${out.length - 1}/${out.length}` : "*/0" });
+      res.end(req.method === "HEAD" ? "" : JSON.stringify(out));
+      return;
+    }
+    if (single) return out[0] ? json(200, out[0]) : json(406, { message: "no rows" });
+    json(200, out);
+  };
+  if (req.method === "GET" || req.method === "HEAD") {
+    let list = [...hit];
+    const order = url.searchParams.get("order");
+    if (order) {
+      const [col, dir] = order.split(".");
+      list.sort((a, b) => (String(a[col]) < String(b[col]) ? -1 : String(a[col]) > String(b[col]) ? 1 : 0) * (dir === "desc" ? -1 : 1));
+    }
+    const limit = Number(url.searchParams.get("limit"));
+    if (limit) list = list.slice(0, limit);
+    answer(list);
+    return true;
+  }
+  if (req.method === "POST") {
+    const input = JSON.parse(body || "[]");
+    const made = (Array.isArray(input) ? input : [input]).map((r) => ({ id: crypto.randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...r }));
+    rows.push(...made);
+    answer(made);
+    return true;
+  }
+  if (req.method === "PATCH") {
+    const patch = JSON.parse(body || "{}");
+    for (const r of hit) Object.assign(r, patch, { updated_at: new Date().toISOString() });
+    answer(hit);
+    return true;
+  }
+  return false;
+}
 
 function handleProjects({ req, res, url, body, json }) {
   const table = url.pathname.replace(/^\/rest\/v1\//, "").split("?")[0];
@@ -105,8 +186,8 @@ function handleProjects({ req, res, url, body, json }) {
 
 const supa = await startMockSupabase({
   port: 54416,
-  tableRows: { projects: PROJECTS, entity_links: ENTITY_LINKS, generated_images: IMAGES, user_websites: WEBSITES, generated_posts: POSTS, user_documents: DOCUMENTS },
-  handle: (ctx) => handleProjects(ctx),
+  tableRows: { projects: PROJECTS, entity_links: ENTITY_LINKS, generated_images: IMAGES, user_websites: WEBSITES, generated_posts: POSTS, user_documents: DOCUMENTS, project_flows: PROJECT_FLOWS },
+  handle: (ctx) => handleProjects(ctx) || handleFlowTables(ctx),
 });
 
 let server;
@@ -185,6 +266,13 @@ const base = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: supa.anonKey,
   SUPABASE_SERVICE_ROLE_KEY: supa.serviceKey,
   ANTHROPIC_API_KEY: "placeholder-unused-by-this-screen",
+  // Κομμάτι 6's own field: isAdmin makes every flow step available
+  // regardless of plan (lib/flows/availability.ts), the same shortcut
+  // flows.prodtest.mjs already takes; the pictures step ALSO needs a
+  // non-empty provider key to read as configured, never actually called
+  // since /api/images/generate is page.route()'d in that section.
+  ADMIN_EMAILS: MOCK_USER.email,
+  GEMINI_API_KEY: "placeholder-never-called",
   // The real free-plan cap is 1 (project-limits.ts) and this account's
   // own plan resolves to free (no subscription row in this mock) — the
   // two seeded projects are already over it, by design, and Κομμάτι 1 is
@@ -411,6 +499,65 @@ try {
       { timeout: 10_000 }
     );
     check("clearing the notes round-trips too — an empty string saves, same as an emptied goal already does", (await notesField.inputValue()) === "");
+
+    // == Κομμάτι 6: the bottom field creates INSIDE this project — the
+    // sentence, through the REAL api/flows and api/flows/[id]/steps (the
+    // mock-supabase filtering above, not handleProjects' own by-id reads),
+    // and each tool's OWN generate route stubbed exactly as
+    // flows.prodtest.mjs already stubs it (that is each tool's own
+    // concern, held by its own prodtest). "φτιάξε μου εικόνες για το
+    // μαγαζί" is flows.test.mjs's own proven images-only sentence (§7) —
+    // one step, so the plan asks nothing this section is not testing.
+    const createdImages = [];
+    await page.route("**/api/images/generate", (route) => {
+      const body = route.request().postDataJSON();
+      const row = { id: crypto.randomUUID(), user_id: MOCK_USER.id, prompt: body.description, status: "done", created_at: new Date().toISOString() };
+      IMAGES.push(row);
+      createdImages.push(row.id);
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, image: { id: row.id } }) });
+    });
+
+    // ONE COPY ONLY, PAST HERE — same duplicate-render window one()'s own
+    // comment above describes, confirmed on project-flow-field too: every
+    // query below is scoped to field (the FIRST copy's own subtree), not
+    // a bare page.locator(testid), so a count or an attribute read never
+    // depends on which copy answers first.
+    const field = one(page, '[data-testid="project-flow-field"]');
+    check("the field is drawn under the already-open project, not a picker of its own", await field.isVisible());
+    check("images: 1, before anything is made here", (await one(page, '[data-testid="project-kind-count-images"]').innerText()).startsWith("1"));
+
+    const FLOW_SAID = "Φτιάξε μου εικόνες για το μαγαζί";
+    await field.locator('[data-testid="project-flow-said"]').first().fill(FLOW_SAID);
+    await press(field.locator('[data-testid="project-flow-plan"]'));
+    await field.locator('[data-testid="flow-plan"]').first().waitFor({ timeout: 10_000 });
+    check(
+      "the sentence plans exactly one step — pictures, nothing this section did not ask for",
+      (await field.locator('[data-testid="flow-plan-step"]').count()) === 1 && (await field.locator('[data-testid="flow-plan-step"]').first().getAttribute("data-kind")) === "images"
+    );
+
+    await press(field.locator('[data-testid="flow-approve"]'));
+    const confirmDialog = page.locator('[role="dialog"]').first();
+    if (await confirmDialog.waitFor({ timeout: 1500 }).then(() => true).catch(() => false)) await press(confirmDialog.locator("button").last());
+
+    await page.waitForFunction(
+      () => document.querySelector('[data-testid="flow-step"]')?.getAttribute("data-status") === "done",
+      { timeout: 20_000 }
+    );
+    check("the one step the plan asked for ran through the real route, and finished", (await field.locator('[data-testid="flow-step"][data-kind="images"][data-status="done"]').count()) === 1);
+    check("...a real request reached the picture tool's own generate route, with this sentence in it", createdImages.length === 1);
+    check(
+      "...and opens at the SAME address the Image tool's own records use",
+      (await field.locator('[data-testid="flow-step-open"]').first().getAttribute("href")) === `/dashboard/images?record=${createdImages[0]}`
+    );
+
+    await page.waitForFunction(() => document.querySelector('[data-testid="project-kind-count-images"]')?.textContent?.startsWith("2"), { timeout: 10_000 });
+    check("images: 1 -> 2 — the new picture joined THIS project, not a new one and not none", (await one(page, '[data-testid="project-kind-count-images"]').innerText()).startsWith("2"));
+
+    check("Recent leads with the just-made picture — newest first, same Activity section Κομμάτι 5 already wired", (await one(page, '[data-testid="project-recent-open"]').getAttribute("href")) === `/dashboard/images?record=${createdImages[0]}`);
+
+    await page.reload({ waitUntil: "load" });
+    await one(page, '[data-testid="projects-detail-name"]').waitFor({ timeout: 10_000 });
+    check("the flow itself survives a reload too — it is a row, not local screen state", (await one(page, '[data-testid="project-flow-field"]').locator('[data-testid="flow-step"][data-status="done"]').count()) === 1);
   }
 
   console.log("\n== phone (390x844): list OR project, never both ==");

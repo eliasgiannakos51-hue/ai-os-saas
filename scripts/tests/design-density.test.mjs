@@ -184,7 +184,12 @@ console.log("\n== 2. the lines ==");
 // 602 -> 603 on 2026-10-28. Κομμάτι 4 ("«What Ionexa knows» σημειώσεις")
 // added ONE more such field, the notes <textarea> — the same unavoidable
 // border-until-hover/focus shape as the two above, +1.
-ok(`border utilities (${r.counts.borders}), ceiling 603`, r.counts.borders <= 603);
+// 603 -> 605 on 2026-10-28. Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο
+// project") added project-flow-field.tsx: its own sentence field, +1 border
+// for the same reason as every field above, and +1 border-t separating the
+// field from the list of this project's own flows below it — the one new
+// divider line this screen did not already have one of.
+ok(`border utilities (${r.counts.borders}), ceiling 605`, r.counts.borders <= 605);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

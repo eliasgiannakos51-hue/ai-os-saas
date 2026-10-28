@@ -139,7 +139,11 @@ for (const [name, src] of [["create", create], ["steps", steps]]) {
   check(`${name}: signs in, and reads no switch`, /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);/.test(src) && !/isFeatureOn\("flows"/.test(src));
 }
 check("the plan is made again on the server, from the sentence, without what this person cannot use", /const available = await flowAvailability\(user, await resolveEffectivePlan\(user\)\);\s*const plan = withoutUnavailable\(planFlow\(said\), \(step\) => canRun\(available, step\)\);/.test(create) && !/body\.plan|body\.steps/.test(create));
-check("a sentence that needs what does not exist makes no project", create.indexOf("if (plan.steps.length === 0)") < create.indexOf('.from("projects")\n      .insert('));
+// Projects Κομμάτι 6 (owner's message 2026-10-28) nested the "make a new
+// project" branch one level deeper (an else beside the existing-project
+// branch below), which only moved its own indentation — 6 spaces before
+// `.insert(` became 8.
+check("a sentence that needs what does not exist makes no project", create.indexOf("if (plan.steps.length === 0)") < create.indexOf('.from("projects")\n        .insert('));
 check("the project under the plan's own cap", /const cap = maxProjectsForPlan\(await resolveEffectivePlanSlug\(user\)\);/.test(create) && /if \(\(count \?\? 0\) >= cap\) return NextResponse\.json\(\{ ok: false, code: "project_limit_reached", limit: cap \}, \{ status: 402 \}\);/.test(create));
 check("the flow row through the server, with the person's id", /\.from\("project_flows"\)\s*\.insert\(\{ user_id: user\.id, project_id: project\.id,/.test(create));
 check("a step's flow is the person's own", /\.from\("project_flows"\)\s*\.select\("id, project_id, plan, steps, status, updated_at"\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(steps));
@@ -149,6 +153,17 @@ check("...into the project once", steps.indexOf('.select("id", { count: "exact",
 check("a step is claimed once, waits for what it needs, and is not reopened", /if \(status === "running" && !row && now\?\.status === "running"\) return "already_running";/.test(steps) && /if \(status === "running" && !step\.after\.every\(\(a\) => states\[a\]\?\.status === "done"\)\) return "waiting";/.test(steps) && /if \(now\?\.status === "done"\) return "already_done";/.test(steps));
 check("two steps finishing together lose neither", /\.eq\("updated_at", current\.updated_at\)/.test(steps) && /const late = attempt > 0 \? refusal\(before\) : null;/.test(steps));
 check("the creating route is bounded", /checkRateLimit\(\{ scope: "flow_create", identifier: user\.id,/.test(create));
+
+// Projects Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο project") — a
+// SECOND way into this same route: a projectId that resolves joins that
+// project instead of making a new one, and one that does not resolve
+// refuses outright rather than silently falling back to "make a new
+// project", which the field drawn on an open project should never do.
+check("an existing project resolves through the SAME ownedProjectId every other creation route uses", /const existingProjectId = requestedProjectId \? await ownedProjectId\(supabase, requestedProjectId\) : null;/.test(create));
+check("...and a requested id that does not resolve refuses, before the rate limit and before a new project could be made",
+  create.indexOf('if (requestedProjectId && !existingProjectId) return NextResponse.json({ ok: false, code: "no_such_project" }, { status: 404 });') <
+  create.indexOf('checkRateLimit({ scope: "flow_create"'));
+check("...and when it DOES resolve, no new project is made and no cap is spent", /if \(existingProjectId\) \{[\s\S]{0,500}project = existing;\s*\} else \{/.test(create));
 const run = code("src/lib/flows/run-step.ts");
 check("each step is its own tool's request", ['startSiteGeneration(', '"/api/images/generate"', '"/api/posts/generate"', '"/api/research"', '"/api/presentations/generate"', '"/api/data-analysis/upload"'].every((s) => run.includes(s)) && !/\.from\(|createAdminClient|reserveCredits/.test(run));
 // A SITE REFUSED FOR CREDITS SAYS SO (docs/BUGS.md 36.4): the refusal's

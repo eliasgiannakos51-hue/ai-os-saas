@@ -163,7 +163,14 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // the bucket literal (TOP_BUCKETS/MORE_BUCKETS.map) — the exact same
     // computed-key shape the other three already have, for the bucket
     // labels instead of a kind's.
-    unbounded: 71,
+    // SEVENTY-TWO on 2026-10-28, «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 6
+    // ("κάτω πεδίο που φτιάχνει μέσα στο project"): the new
+    // project-flow-field.tsx calls `useTranslations()` with NO namespace
+    // (`tKey`, reused across this file the way project-detail.tsx's own
+    // already does) to reach `dashboard.createAnything.send` — one key
+    // from a namespace this component otherwise has no reason to declare,
+    // the same unbounded shape as every entry above it.
+    unbounded: 72,
   },
   {
     name: "onboarding",

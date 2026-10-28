@@ -300,7 +300,12 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // cannot require a session, so it cannot rely on one to stop a stranger
   // claiming someone else's code. A decision with its reason in the same
   // block, not a limitation left unexplained.
-  const CENSUS_CEILING = 77;
+  // 77 -> 78 ON 2026-10-28: src/app/dashboard/my-stuff/page.tsx, "no AI
+  // answer yet (that is Κομμάτι 2's own piece), so for now the text seeds
+  // the plain search box instead of going unread" — the owner's own
+  // piece-by-piece order (docs/TOOL-RULES.md), not a gap left quiet: the
+  // reason (instead of leaving ?ask= unread) is in the same sentence.
+  const CENSUS_CEILING = 78;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

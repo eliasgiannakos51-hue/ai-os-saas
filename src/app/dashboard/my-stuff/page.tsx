@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
-import { MyStuffShell, type MyStuffSession, type MyStuffSessionTurn } from "@/components/my-stuff/my-stuff-shell";
+import { MyStuffWorkspace } from "@/components/my-stuff/my-stuff-workspace";
+import { loadMyStuff } from "@/lib/my-stuff/load";
+import type { MyStuffSession, MyStuffSessionTurn } from "@/lib/my-stuff/types";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +15,24 @@ export function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * «ΤΑ ΔΙΚΑ ΜΟΥ» (the owner's message 2026-10-22), open to everybody since
- * 2026-10-23 (the switch "my-stuff" is gone). No PageHeader here — MyStuffShell draws its
- * own name and its own [◧] history, the same reason
+ * «1. MY STUFF: ΝΕΑ ΟΘΟΝΗ» (the owner's message, 2026-10-28) — list left,
+ * details right, full width. No PageHeader — MyStuffWorkspace draws its
+ * own name and its own history button, the same reason
  * app/dashboard/coding/page.tsx renders no header of its own.
+ *
+ * THE LIST IS LOADED HERE, SERVER-SIDE, the same way
+ * app/dashboard/timeline/page.tsx loads the Library's own grid — so the
+ * first paint already has rows in it rather than an empty screen that
+ * fills in a moment later. The workspace only re-fetches
+ * (/api/my-stuff/browse, unchanged) once a search is actually typed.
+ *
+ * ?ask= IS STILL READ — a quick-job tile (lib/nav/quick-jobs.ts) links
+ * here with the owner's own example text ("How much did I spend in
+ * September?") under that param, and all-tools.test.mjs holds every
+ * target page to actually reading its job's param. Κομμάτι 1 has no AI
+ * answer yet (that is Κομμάτι 2's own piece), so for now the text seeds
+ * the plain search box instead of going unread — a real, honest filter,
+ * not a placeholder with nothing behind it.
  */
 export default async function MyStuffPage(props: { searchParams?: Promise<{ ask?: string }> }) {
   const searchParams = props.searchParams ? await props.searchParams : undefined;
@@ -39,9 +55,12 @@ export default async function MyStuffPage(props: { searchParams?: Promise<{ ask?
     turns: Array.isArray(row.turns) ? (row.turns as MyStuffSessionTurn[]) : [],
   }));
 
+  const initialQuery = readExampleParam(searchParams?.ask) ?? "";
+  const { items, failed } = await loadMyStuff(supabase, user.id, { kind: null, query: initialQuery });
+
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <MyStuffShell initialSessions={sessions} initialText={readExampleParam(searchParams?.ask)} />
+      <MyStuffWorkspace initialItems={items} initialFailed={failed} initialSessions={sessions} initialQuery={initialQuery} />
     </div>
   );
 }

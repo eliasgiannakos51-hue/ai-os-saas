@@ -3329,7 +3329,19 @@
         "kindsLabel": "只显示",
         "all": "全部",
         "empty": "未找到任何内容",
-        "untitled": "无标题"
+        "untitled": "无标题",
+        "failed": "无法加载：{kinds}。其余内容已显示。"
+      },
+      "details": {
+        "empty": "在左侧选择一项以在此查看。",
+        "open": "打开",
+        "back": "返回列表"
+      },
+      "history": {
+        "title": "以前的问题",
+        "show": "显示以前的问题",
+        "hide": "隐藏以前的问题",
+        "back": "返回以前的问题"
       },
       "kinds": {
         "site": "网站",

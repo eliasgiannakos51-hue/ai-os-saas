@@ -150,7 +150,15 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // switches (tool-shell, image-studio, document-writer) stopped being
     // reachable from any page. The count fell because code stopped being
     // drawn, not because a reader was bounded; it is re-measured, not guessed.
-    unbounded: 69,
+    // SEVENTY on 2026-10-28 («1. MY STUFF: ΝΕΑ ΟΘΟΝΗ», Κομμάτι 1):
+    // my-stuff-shell.tsx and my-stuff-browse.tsx (the two SEVENTY/
+    // SEVENTY-ONE above) are both gone, replaced by three files that
+    // split their one job three ways and each still reaches `kinds.<kind>`
+    // the same unbounded way — my-stuff-list.tsx (the left column's rows),
+    // my-stuff-details.tsx (the right column) and my-stuff-workspace.tsx
+    // (the failed-kinds line and the history drawer's citation chips).
+    // Two files became three; the count moved by one, not two.
+    unbounded: 70,
   },
   {
     name: "onboarding",

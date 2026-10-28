@@ -411,9 +411,13 @@ const BASELINE = {
   // shell, for everybody.
   "dashboard/rebuild/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
-  // ONE: the field's send. The page is «Τα δικά μου» (2026-10-22), born
-  // in the shell, open to everybody since 2026-10-23.
-  "dashboard/my-stuff/page.tsx": 1,
+  // ZERO since 2026-10-28, «1. MY STUFF: ΝΕΑ ΟΘΟΝΗ», Κομμάτι 1: the old
+  // chat shell's filled send button is gone with the shell itself — the
+  // new list+details screen has no field yet (Κομμάτι 2), and its Open
+  // link and history button are both the outline/icon style, same as
+  // everywhere else the owner's quality criteria ask for fewer filled
+  // controls, not more.
+  "dashboard/my-stuff/page.tsx": 0,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.
   // Transcribe is an outline control on purpose; see the comment at that

@@ -573,12 +573,13 @@ export const HELP_TIPS: HelpTip[] = [
       "that these lists were removed or merged when the sidebar stopped listing them one by one",
   },
   {
-    // «ΤΑ ΔΙΚΑ ΜΟΥ» (2026-10-22). Mounted via ToolShell's own `help` slot
-    // (tool-shell.tsx), same reason as "chat" above: the title it sits
-    // beside is drawn by the shared shell, not by a page-level
-    // <PageHeader>.
+    // «ΤΑ ΔΙΚΑ ΜΟΥ» (2026-10-22), moved to the new screen's own top strip
+    // («1. MY STUFF: ΝΕΑ ΟΘΟΝΗ», 2026-10-28, my-stuff-workspace.tsx —
+    // my-stuff-shell.tsx is gone) — a direct mount, same reason as "chat"
+    // above: the title it sits beside is drawn by the workspace itself,
+    // not by a page-level <PageHeader>.
     id: "myStuff",
-    file: "src/components/my-stuff/my-stuff-shell.tsx",
+    file: "src/components/my-stuff/my-stuff-workspace.tsx",
     route: "src/app/dashboard/my-stuff/page.tsx",
     keyPrefix: "help.myStuff",
     corrects:

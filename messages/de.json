@@ -3329,7 +3329,19 @@
         "kindsLabel": "Nur zeigen",
         "all": "Alle",
         "empty": "Nichts gefunden",
-        "untitled": "Ohne Titel"
+        "untitled": "Ohne Titel",
+        "failed": "Nicht geladen: {kinds}. Der Rest wird angezeigt."
+      },
+      "details": {
+        "empty": "Wählen Sie links etwas aus, um es hier zu sehen.",
+        "open": "Öffnen",
+        "back": "Zurück zur Liste"
+      },
+      "history": {
+        "title": "Frühere Fragen",
+        "show": "Frühere Fragen anzeigen",
+        "hide": "Frühere Fragen ausblenden",
+        "back": "Zurück zu den früheren Fragen"
       },
       "kinds": {
         "site": "Websites",

@@ -3329,7 +3329,19 @@
         "kindsLabel": "Afficher seulement",
         "all": "Tout",
         "empty": "Rien trouvé",
-        "untitled": "Sans titre"
+        "untitled": "Sans titre",
+        "failed": "Impossible de charger : {kinds}. Le reste est affiché."
+      },
+      "details": {
+        "empty": "Choisissez quelque chose à gauche pour le voir ici.",
+        "open": "Ouvrir",
+        "back": "Retour à la liste"
+      },
+      "history": {
+        "title": "Questions précédentes",
+        "show": "Afficher les questions précédentes",
+        "hide": "Masquer les questions précédentes",
+        "back": "Retour aux questions précédentes"
       },
       "kinds": {
         "site": "Sites",

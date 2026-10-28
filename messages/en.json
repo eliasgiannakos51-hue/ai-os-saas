@@ -3329,7 +3329,19 @@
         "kindsLabel": "Show only",
         "all": "All",
         "empty": "Nothing found",
-        "untitled": "Untitled"
+        "untitled": "Untitled",
+        "failed": "Could not load: {kinds}. The rest is shown."
+      },
+      "details": {
+        "empty": "Select something on the left to see it here.",
+        "open": "Open",
+        "back": "Back to the list"
+      },
+      "history": {
+        "title": "Previous questions",
+        "show": "Show previous questions",
+        "hide": "Hide previous questions",
+        "back": "Back to previous questions"
       },
       "kinds": {
         "site": "Sites",

@@ -148,7 +148,13 @@ console.log("\n== 2. the lines ==");
 // a muted, unfilled secondary next to the confirm button, on purpose, so
 // the eye still lands on confirm first. One new one-off, nothing already
 // drawn the same muted-secondary way elsewhere to share a class with yet.
-ok(`border utilities (${r.counts.borders}), ceiling 595`, r.counts.borders <= 595);
+// 595 -> 596 on 2026-10-28. My Stuff's «ΝΕΑ ΟΘΟΝΗ» (Κομμάτι 1) drew the
+// line between the top strip and the list+details body as its own
+// `border-t`, with nothing already drawn that line elsewhere on the page
+// to share a class with (the matching `border-e` beside the list column
+// is a logical side the census regex does not match at all, so only this
+// one counted).
+ok(`border utilities (${r.counts.borders}), ceiling 596`, r.counts.borders <= 596);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

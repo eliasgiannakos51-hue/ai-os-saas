@@ -5791,6 +5791,12 @@
     "delete": "Löschen",
     "deleteConfirm": "Dieses Projekt löschen? Was darin liegt, bleibt, wo es ist.",
     "removeMember": "Aus dem Projekt nehmen",
+    "back": "Zurück zu den Projekten",
+    "selectPrompt": "Wähle links ein Projekt aus, um es hier zu sehen.",
+    "empty": {
+      "title": "Noch keine Projekte",
+      "description": "Erstelle links dein erstes Projekt, um es hier zu sehen."
+    },
     "addToProject": {
       "button": "Zum Projekt hinzufügen",
       "title": "Zu einem Projekt hinzufügen",

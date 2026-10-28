@@ -168,7 +168,14 @@ console.log("\n== 2. the lines ==");
 // shape this file does not already have a shared class for (the solid
 // `border-border` used elsewhere draws a different thing — a field or a
 // card, not "drop here").
-ok(`border utilities (${r.counts.borders}), ceiling 599`, r.counts.borders <= 599);
+// 599 -> 600 on 2026-10-28. Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 replaced
+// projects-workspace.tsx (gone — its own two `border border-border`
+// inputs went with it, -2) with projects-shell.tsx's own create-project
+// form: the same two inputs again (+2, unavoidable — a name field and a
+// goal field each need their own box) plus one new `border-b` under the
+// form, separating it from the project list below (+1, nothing already
+// drawn that line in this component to share a class with). Net +1.
+ok(`border utilities (${r.counts.borders}), ceiling 600`, r.counts.borders <= 600);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

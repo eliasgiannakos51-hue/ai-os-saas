@@ -5791,6 +5791,12 @@
     "delete": "Διαγραφή",
     "deleteConfirm": "Να διαγραφεί αυτό το project; Τα πράγματα μέσα του μένουν εκεί που είναι.",
     "removeMember": "Βγάλ' το από το project",
+    "back": "Πίσω στα projects",
+    "selectPrompt": "Διάλεξε ένα project από τη λίστα για να το δεις εδώ.",
+    "empty": {
+      "title": "Δεν υπάρχουν ακόμα projects",
+      "description": "Φτιάξε το πρώτο σου project αριστερά για να το δεις εδώ."
+    },
     "addToProject": {
       "button": "Προσθήκη σε Project",
       "title": "Προσθήκη σε ένα Project",

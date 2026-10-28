@@ -305,7 +305,22 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // the plain search box instead of going unread" — the owner's own
   // piece-by-piece order (docs/TOOL-RULES.md), not a gap left quiet: the
   // reason (instead of leaving ?ask= unread) is in the same sentence.
-  const CENSUS_CEILING = 78;
+  // 78 -> 79 ON 2026-10-28: src/app/dashboard/projects/page.tsx, the same
+  // shape one piece later — "There is no AI step here yet (Κομμάτι 6's
+  // own piece), so for now the text seeds the new-project goal field
+  // instead of going unread". Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 replaced the
+  // page flow-shell.tsx used to mount, which is what used to read ?ask=;
+  // the reason it is read differently now, not left unread, is in the
+  // same sentence.
+  // 79 -> 80 ON 2026-10-28: scripts/tests/projects-workspace.prodtest.mjs's
+  // own PROJECT_LIMIT_FREE env override, "already over it, by design, and
+  // Κομμάτι 1 is about the layout, not the cap" — the test seeds two
+  // projects for a free-plan account whose real cap is 1 (lifting the cap
+  // for the test only), and says why in the next clause; the scanner
+  // marks it NO REASON GIVEN because its reason regex does not match this
+  // phrasing, not because one is missing (this file's own precision note
+  // applies: ~1 in 5 by hand).
+  const CENSUS_CEILING = 80;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

@@ -5791,6 +5791,12 @@
     "delete": "Supprimer",
     "deleteConfirm": "Supprimer ce projet ? Ce qu'il contient reste où c'est.",
     "removeMember": "Retirer du projet",
+    "back": "Retour aux projets",
+    "selectPrompt": "Sélectionnez un projet dans la liste pour le voir ici.",
+    "empty": {
+      "title": "Pas encore de projets",
+      "description": "Créez votre premier projet à gauche pour le voir ici."
+    },
     "addToProject": {
       "button": "Ajouter au projet",
       "title": "Ajouter à un projet",

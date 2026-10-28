@@ -60,6 +60,10 @@ const ROUTE = "src/app/api/projects/route.ts";
 const MEMBERS_ROUTE = "src/app/api/projects/[id]/members/route.ts";
 const LIST_PAGE = "src/app/dashboard/projects/page.tsx";
 const DETAIL_PAGE = "src/app/dashboard/projects/[id]/page.tsx";
+// «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 1 (2026-10-28) moved the detail fetch
+// out of DETAIL_PAGE (now a redirect into LIST_PAGE's own ?id=) and into
+// this one function, shared by both routes.
+const PROJECT_DETAIL_LOADER = "src/lib/projects/load-project-detail.ts";
 const DETAIL_COMPONENT = "src/components/projects/project-detail.tsx";
 const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
 const CHAT_WORKSPACE = "src/components/chat/chat-workspace.tsx";
@@ -223,8 +227,18 @@ console.log("\n== 3. ONE ACCOUNT'S FOLDER IS NOT ANOTHER'S ==");
 
   const listPage = stripComments(readFileSync(LIST_PAGE, "utf8"));
   const detailPage = stripComments(readFileSync(DETAIL_PAGE, "utf8"));
-  ok("the pages read through the person's own client", !/createAdminClient/.test(listPage + detailPage));
-  ok("the project page answers 404 rather than showing somebody else's", /notFound\(\)/.test(detailPage));
+  const loader = stripComments(readFileSync(PROJECT_DETAIL_LOADER, "utf8"));
+  ok("the pages read through the person's own client", !/createAdminClient/.test(listPage + detailPage + loader));
+  // Since Κομμάτι 1 (2026-10-28) the old route-level notFound() moved into
+  // this: the loader's own "projects" read is RLS-scoped (.eq("id", …),
+  // no .eq("user_id", …) needed) and answers null, never a thrown error or
+  // somebody else's row, for an id that is not the caller's — and the
+  // screen never even reaches the loader with one, see the next check.
+  ok("the detail loader answers null, not somebody else's row, for an id that is not the caller's",
+    /\.from\("projects"\)[\s\S]{0,120}\.eq\("id", projectId\)[\s\S]{0,60}\.maybeSingle\(\)/.test(loader) &&
+    /if \(!project\) return null;/.test(loader));
+  ok("...and the screen only ever hands the loader an id its OWN rls-scoped list already proved is the caller's",
+    /projects\.some\(\(p\) => p\.id === requestedId\)/.test(listPage));
 }
 
 console.log("\n== 4. DELETING THE FOLDER DOES NOT DELETE THE CONTENTS ==");
@@ -426,7 +440,7 @@ console.log("\n== 6b. THE BUDGET IS SPENT, NOT DECLARED ==");
   ok("...divided by the modules the chat actually reads",
     /rowsPerModuleInProject\(idsByTable\.size\)/.test(ctx));
   ok("the screen divides by the same thing the prompt does",
-    /rowsPerModuleInProject\(projectContextModules\(members\)\.length\)/.test(readFileSync(DETAIL_PAGE, "utf8")) &&
+    /rowsPerModuleInProject\(projectContextModules\(members\)\.length\)/.test(readFileSync(PROJECT_DETAIL_LOADER, "utf8")) &&
     /projectContextModules/.test(ctx));
   ok("...and that is the classifier tables only, because those are the ones scanned",
     projectContextModules([{ table: "ideas", id: "a" }, { table: "user_files", id: "b" }, { table: "chat_conversations", id: "c" }]).length === 1 &&
@@ -467,7 +481,7 @@ console.log("\n== 6b. THE BUDGET IS SPENT, NOT DECLARED ==");
     ok("...and the builder throws rather than concatenating it", threw);
   }
   ok("both readers of a project's edges go through that builder",
-    /\.or\(projectEdgeFilter\(/.test(readFileSync(DETAIL_PAGE, "utf8")) && /\.or\(projectEdgeFilter\(projectId\)\)/.test(ctx));
+    /\.or\(projectEdgeFilter\(/.test(readFileSync(PROJECT_DETAIL_LOADER, "utf8")) && /\.or\(projectEdgeFilter\(projectId\)\)/.test(ctx));
   ok("the scope read is scoped to the person explicitly, not left to RLS",
     /\.eq\("user_id", userId\)[\s\S]{0,200}\.eq\("relationship_type", IN_PROJECT\)/.test(ctx),
     "two job handlers call getUserFullContext with the service-role client");

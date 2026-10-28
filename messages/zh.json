@@ -5791,6 +5791,12 @@
     "delete": "删除",
     "deleteConfirm": "删除这个项目？里面的内容会留在原处。",
     "removeMember": "移出项目",
+    "back": "返回项目列表",
+    "selectPrompt": "从左侧列表中选择一个项目即可在此查看。",
+    "empty": {
+      "title": "还没有项目",
+      "description": "在左侧创建你的第一个项目,即可在此查看。"
+    },
     "addToProject": {
       "button": "添加到项目",
       "title": "添加到项目",

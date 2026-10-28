@@ -251,6 +251,16 @@ try {
     check("video: 0, honestly — nothing generates one yet", (await page.locator('[data-testid="project-kind-count-video"]').innerText()).startsWith("0"));
     check("documents: 1", (await page.locator('[data-testid="project-kind-count-documents"]').innerText()).startsWith("1"));
 
+    // Κομμάτι 5 ("Recent, τελευταία δουλειά, πατήσιμη") — this IS the
+    // Activity section: members are already loaded newest-first, so its
+    // top row is the document (2026-08-19), the most recent of the four
+    // seeded above. "πατήσιμη" was the missing piece — it now opens
+    // through the same openHref() the Tasks/Files/Agents/Results
+    // sections already use, same as Library's own address for a document.
+    const recentRows = page.locator('[data-testid="project-recent-open"]');
+    check("the most recent item leads Activity, and opens — the document, newest of the four seeded", (await recentRows.first().innerText()).includes("Προσφορά καλοκαιρινής καμπάνιας"));
+    check("...to the SAME address the Library opens it at", (await recentRows.first().getAttribute("href")) === "/dashboard/documents/do1");
+
     const row2 = page.locator('[data-testid="projects-list-row"]').filter({ hasText: "Νέος ιστότοπος" });
     await press(row2);
     await page.waitForURL(`${APP}/dashboard/projects?id=${PROJECT_2}`, { timeout: 10_000 });

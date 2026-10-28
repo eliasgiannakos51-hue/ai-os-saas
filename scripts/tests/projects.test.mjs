@@ -577,6 +577,14 @@ console.log("\n== 7. THE PAGES ==");
   }
   ok("the sections are views over ONE member list, not seven queries",
     (detail.match(/members\.filter\(/g) ?? []).length >= 4 && !/await fetch\([^)]*sections/.test(detail));
+  // Κομμάτι 5 ("Recent, τελευταία δουλειά, πατήσιμη") — the activity
+  // section opens through the SAME openHref() the Tasks/Files/Agents/
+  // Results sections above already use, not a second link-building path.
+  {
+    const activityBlock = detail.slice(detail.indexOf('aria-label={t("sections.activity")}'), detail.indexOf('aria-label={t("sections.activity")}') + 900);
+    ok("the activity section (\"Recent\") opens through openHref, not a second address-building path",
+      activityBlock.includes("openHref(member)") && activityBlock.includes('data-testid="project-recent-open"'));
+  }
   ok("the list page names itself through the nav key", /pageTitle\("sidebar\.items\.projects"\)/.test(readFileSync(LIST_PAGE, "utf8")));
   for (const l of LOCALES) {
     ok(`${l}: the nav name is the page heading`, lookup(messages[l], "sidebar.items.projects") === lookup(messages[l], "projects.title"));

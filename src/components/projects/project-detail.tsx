@@ -410,17 +410,40 @@ export function ProjectDetail({
         </section>
       ))}
 
+      {/* Κομμάτι 5 ("Recent, τελευταία δουλειά, πατήσιμη") — this IS the
+          "Activity" section below, not a second list: `members` is
+          already sorted newest-first (load-project-detail.ts's own
+          sort), so the ten it slices off the top already ARE the
+          project's most recent work. What was missing was "πατήσιμη" —
+          each row now opens through the SAME `openHref()` the Tasks/
+          Files/Agents/Results sections above already use, falling back
+          to plain text for a table openHref has no address for, exactly
+          like those sections do. */}
       <section className="surface" aria-label={t("sections.activity")}>
         <h2 className="text-sm font-semibold text-foreground">{t("sections.activity")}</h2>
         {members.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("sections.empty")}</p>
         ) : (
           <ul className="mt-2 space-y-1">
-            {members.slice(0, 10).map((member) => (
-              <li key={`activity-${member.table}:${member.id}`} className="text-xs text-muted">
-                {new Date(member.createdAt).toLocaleDateString(locale)} · {tKey(member.titleKey)} · {member.headline || t("untitled")}
-              </li>
-            ))}
+            {members.slice(0, 10).map((member) => {
+              const href = openHref(member);
+              const line = (
+                <>
+                  {new Date(member.createdAt).toLocaleDateString(locale)} · {tKey(member.titleKey)} · {member.headline || t("untitled")}
+                </>
+              );
+              return (
+                <li key={`activity-${member.table}:${member.id}`} className="text-xs text-muted">
+                  {href ? (
+                    <Link href={href} data-testid="project-recent-open" className="underline-offset-2 hover:underline hover:text-foreground">
+                      {line}
+                    </Link>
+                  ) : (
+                    line
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

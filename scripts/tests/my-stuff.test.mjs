@@ -53,14 +53,21 @@ const messages = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSy
 const lookup = (obj, dotted) => dotted.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
 
 // =====================================================================
-console.log("\n== 1. sources: every kind the Library has, plus five more, nothing moved ==");
+console.log("\n== 1. sources: every kind the Library has, plus eight more, nothing moved ==");
 // =====================================================================
 
-eq("twelve kinds in all", sources.MY_STUFF_KINDS.length, 12);
+// 12 -> 15, 2026-10-28, Κομμάτι 3 (filters: All/Documents/Images/Data/
+// More/Project/Sort) added "images" (generated_images, real, shipped),
+// "meetings" (meetings, real, shipped) and "apps" (user_apps — real, but
+// the only screen that writes one is itself behind the `apps-tool` flag,
+// so an account without it never has a row here either; see
+// src/lib/my-stuff/sources.ts's own comment on why that needs no extra
+// gate in this file).
+eq("fifteen kinds in all", sources.MY_STUFF_KINDS.length, 15);
 for (const libraryKind of library.LIBRARY_KINDS) {
   ok(`"${libraryKind}" (a Library kind) is one of my-stuff's own`, sources.MY_STUFF_KINDS.includes(libraryKind));
 }
-for (const extra of ["chat", "coding", "finance", "sales", "trading"]) {
+for (const extra of ["chat", "coding", "finance", "sales", "trading", "images", "meetings", "apps"]) {
   ok(`"${extra}" is a my-stuff kind the Library does not have`, sources.MY_STUFF_KINDS.includes(extra) && !library.LIBRARY_KINDS.includes(extra));
 }
 // THE SEVEN SHARED KINDS READ THE SAME TABLE AS THE LIBRARY — one
@@ -78,7 +85,7 @@ for (const kind of sources.MY_STUFF_KINDS) {
 ok("finance reads finance_entries (the tracker's own table, untouched)", sources.sourceForKind("finance").table === "finance_entries");
 ok("sales reads leads", sources.sourceForKind("sales").table === "leads");
 ok("trading reads trades", sources.sourceForKind("trading").table === "trades");
-ok("isMyStuffKind rejects a kind that is not one of the twelve", sources.isMyStuffKind("nonsense") === false);
+ok("isMyStuffKind rejects a kind that is not one of the fifteen", sources.isMyStuffKind("nonsense") === false);
 ok("isMyStuffKind accepts a real one", sources.isMyStuffKind("finance") === true);
 
 // =====================================================================

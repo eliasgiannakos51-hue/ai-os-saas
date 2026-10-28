@@ -1,11 +1,14 @@
 import {
+  AppWindow,
   BarChart3,
   Code2,
   DollarSign,
   FileText,
   Globe,
+  Image as ImageIcon,
   MessageCircle,
   Megaphone,
+  Mic,
   Paperclip,
   Presentation,
   Telescope,
@@ -32,4 +35,7 @@ export const KIND_ICON: Record<MyStuffKind, LucideIcon> = {
   finance: DollarSign,
   sales: Users,
   trading: TrendingUp,
+  images: ImageIcon,
+  meetings: Mic,
+  apps: AppWindow,
 };

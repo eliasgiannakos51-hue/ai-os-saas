@@ -3347,6 +3347,21 @@
         "send": "Demander",
         "dismiss": "Masquer la réponse"
       },
+      "filters": {
+        "label": "Filtrer par type",
+        "all": "Tout",
+        "documents": "Documents",
+        "images": "Images",
+        "data": "Données",
+        "more": "Plus",
+        "moreLabel": "Plus de filtres",
+        "video": "Vidéo",
+        "audio": "Audio",
+        "sitesApps": "Sites et Applis",
+        "meetings": "Réunions",
+        "project": "Projet",
+        "allProjects": "Tous les projets"
+      },
       "kinds": {
         "site": "Sites",
         "slides": "Diapositives",
@@ -3359,7 +3374,10 @@
         "coding": "Code",
         "finance": "Finances",
         "sales": "Ventes",
-        "trading": "Trading"
+        "trading": "Trading",
+        "images": "Images",
+        "meetings": "Réunions",
+        "apps": "Applis"
       },
       "errors": {
         "empty": "Écrivez une question.",

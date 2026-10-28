@@ -727,6 +727,26 @@ const LOCALE_ALLOWED = new Set([
   "pt:dashboard.tools.names.apps",
   "pt:dashboard.quickJobs.cv.label",
   "pt:dashboard.quickJobs.quiz.label",
+  // My Stuff's filter row (Κομμάτι 3, 2026-10-28) names several of the
+  // same already-allowed loanwords again, under its own key path —
+  // "Video"/"Audio"/"Apps" stay the words above already allow them to be
+  // in de/it/es/pt, scoped here because the allowlist is per key, not
+  // per word. "Documents"/"Images" are the French plurals (library's own
+  // "Sites"/"Documents"/"Analyses" precedent above). "Project" is the
+  // Greek sidebar's own word for it (sidebar.items.projects el="Projects").
+  "el:dashboard.myStuff.filters.project",
+  "es:dashboard.myStuff.filters.audio",
+  "es:dashboard.myStuff.kinds.apps",
+  "fr:dashboard.myStuff.filters.documents",
+  "fr:dashboard.myStuff.filters.images",
+  "fr:dashboard.myStuff.filters.audio",
+  "fr:dashboard.myStuff.kinds.images",
+  "de:dashboard.myStuff.filters.video",
+  "de:dashboard.myStuff.filters.audio",
+  "de:dashboard.myStuff.kinds.apps",
+  "it:dashboard.myStuff.filters.video",
+  "it:dashboard.myStuff.filters.audio",
+  "pt:dashboard.myStuff.kinds.apps",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

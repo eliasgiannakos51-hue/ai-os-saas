@@ -154,7 +154,12 @@ console.log("\n== 2. the lines ==");
 // to share a class with (the matching `border-e` beside the list column
 // is a logical side the census regex does not match at all, so only this
 // one counted).
-ok(`border utilities (${r.counts.borders}), ceiling 596`, r.counts.borders <= 596);
+// 596 -> 597 on 2026-10-28. My Stuff's Κομμάτι 3 (filters) gave the
+// Project dropdown its own `border border-border` — the same one-off
+// shape generic-list.tsx's own status `<select>` already has, reused by
+// hand rather than shared, since the two live in different components
+// with nothing to import from each other for one declaration this small.
+ok(`border utilities (${r.counts.borders}), ceiling 597`, r.counts.borders <= 597);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

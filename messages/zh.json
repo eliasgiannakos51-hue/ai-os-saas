@@ -3347,6 +3347,21 @@
         "send": "提问",
         "dismiss": "隐藏回答"
       },
+      "filters": {
+        "label": "按类型筛选",
+        "all": "全部",
+        "documents": "文档",
+        "images": "图片",
+        "data": "数据",
+        "more": "更多",
+        "moreLabel": "更多筛选",
+        "video": "视频",
+        "audio": "音频",
+        "sitesApps": "网站和应用",
+        "meetings": "会议",
+        "project": "项目",
+        "allProjects": "所有项目"
+      },
       "kinds": {
         "site": "网站",
         "slides": "幻灯片",
@@ -3359,7 +3374,10 @@
         "coding": "代码",
         "finance": "财务",
         "sales": "销售",
-        "trading": "交易"
+        "trading": "交易",
+        "images": "图片",
+        "meetings": "会议",
+        "apps": "应用"
       },
       "errors": {
         "empty": "请写一个问题。",

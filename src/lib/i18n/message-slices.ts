@@ -158,7 +158,12 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // my-stuff-details.tsx (the right column) and my-stuff-workspace.tsx
     // (the failed-kinds line and the history drawer's citation chips).
     // Two files became three; the count moved by one, not two.
-    unbounded: 70,
+    // SEVENTY-ONE, same day, Κομμάτι 3 (filters): my-stuff-filters.tsx is
+    // a fourth new file, and its chip() helper reaches `t(b)` with `b`
+    // the bucket literal (TOP_BUCKETS/MORE_BUCKETS.map) — the exact same
+    // computed-key shape the other three already have, for the bucket
+    // labels instead of a kind's.
+    unbounded: 71,
   },
   {
     name: "onboarding",

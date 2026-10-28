@@ -115,7 +115,10 @@ const MUTANTS = [
     // (my-stuff-list.tsx, my-stuff-details.tsx, my-stuff-workspace.tsx),
     // each still reaching `kinds.<kind>` the same unbounded way — two
     // files became three, so the count moved by one, not two.
-    from: "    unbounded: 70,",
+    // 70 -> 71 on 2026-10-28, same day, Κομμάτι 3 (filters):
+    // my-stuff-filters.tsx reaches `t(b)` with `b` the bucket literal,
+    // the same computed-key shape, a fourth file.
+    from: "    unbounded: 71,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

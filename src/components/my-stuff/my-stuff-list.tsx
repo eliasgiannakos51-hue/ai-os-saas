@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Search, Sparkles } from "lucide-react";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
@@ -31,6 +32,7 @@ export function MyStuffList({
   asking,
   selectedKey,
   onSelect,
+  filters,
 }: {
   items: MyStuffItem[];
   loading: boolean;
@@ -43,6 +45,10 @@ export function MyStuffList({
   asking: boolean;
   selectedKey: string | null;
   onSelect: (item: MyStuffItem) => void;
+  /** The filter row (my-stuff-filters.tsx, Κομμάτι 3) — a slot rather than
+   *  built in here, so this file stays ignorant of buckets/projects/sort
+   *  the same way it is already ignorant of how `items` got filtered. */
+  filters?: ReactNode;
 }) {
   const t = useTranslations("dashboard.myStuff");
   const locale = useLocale();
@@ -82,6 +88,8 @@ export function MyStuffList({
           </button>
         </form>
       </div>
+
+      {filters}
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
         {!loading && items.length === 0 ? (

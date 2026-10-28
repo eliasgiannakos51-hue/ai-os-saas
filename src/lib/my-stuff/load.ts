@@ -26,19 +26,28 @@ export const MAX_ITEMS = 200;
 
 /**
  * Everything this account has across every kind in lib/my-stuff/sources.ts
- * — optionally one kind, optionally only what matches a search in its name
- * OR in what it says. `.eq("user_id", userId)` on every query, not RLS
- * alone, for the same reason lib/library/load.ts states it: a session that
- * degraded to anonymous must be REPORTED, never read as "nothing here".
+ * — optionally narrowed to a set of kinds (Κομμάτι 3's filter row: a
+ * bucket is several kinds at once, not one), optionally only what matches
+ * a search in its name OR in what it says. `.eq("user_id", userId)` on
+ * every query, not RLS alone, for the same reason lib/library/load.ts
+ * states it: a session that degraded to anonymous must be REPORTED, never
+ * read as "nothing here".
+ *
+ * `null` MEANS "no restriction", `[]` MEANS "restricted to nothing" —
+ * NOT THE SAME THING. The Video/Audio buckets (buckets.ts) are real,
+ * honestly-empty kind lists (no backing table exists yet) — a caller
+ * that collapsed `[]` to "every kind" here would turn "this bucket has
+ * nothing" into "show the whole account", the opposite of what Κομμάτι
+ * 3's own check asks for.
  */
 export async function loadMyStuff(
   supabase: SupabaseClient,
   userId: string,
-  { kind, query }: { kind: MyStuffKind | null; query: string }
+  { kinds, query }: { kinds: readonly MyStuffKind[] | null; query: string }
 ): Promise<{ items: MyStuffItem[]; failed: MyStuffKind[] }> {
   const failed: MyStuffKind[] = [];
   const searching = query.trim().length > 0;
-  const sources = kind ? MY_STUFF_SOURCES.filter((s) => s.kind === kind) : MY_STUFF_SOURCES;
+  const sources = kinds === null ? MY_STUFF_SOURCES : MY_STUFF_SOURCES.filter((s) => kinds.includes(s.kind));
 
   const perSource = await Promise.all(
     sources.map(async (source) => {

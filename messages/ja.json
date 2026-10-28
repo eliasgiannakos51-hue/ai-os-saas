@@ -3347,6 +3347,21 @@
         "send": "質問する",
         "dismiss": "回答を隠す"
       },
+      "filters": {
+        "label": "種類で絞り込み",
+        "all": "すべて",
+        "documents": "ドキュメント",
+        "images": "画像",
+        "data": "データ",
+        "more": "その他",
+        "moreLabel": "その他のフィルター",
+        "video": "動画",
+        "audio": "オーディオ",
+        "sitesApps": "サイトとアプリ",
+        "meetings": "会議",
+        "project": "プロジェクト",
+        "allProjects": "すべてのプロジェクト"
+      },
       "kinds": {
         "site": "サイト",
         "slides": "スライド",
@@ -3359,7 +3374,10 @@
         "coding": "コード",
         "finance": "財務",
         "sales": "セールス",
-        "trading": "トレーディング"
+        "trading": "トレーディング",
+        "images": "画像",
+        "meetings": "会議",
+        "apps": "アプリ"
       },
       "errors": {
         "empty": "質問を入力してください。",

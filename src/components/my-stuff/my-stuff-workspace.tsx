@@ -11,10 +11,13 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { MyStuffList } from "@/components/my-stuff/my-stuff-list";
 import { MyStuffDetails } from "@/components/my-stuff/my-stuff-details";
+import { MyStuffFilters } from "@/components/my-stuff/my-stuff-filters";
 import type { MyStuffItem } from "@/lib/my-stuff/load";
 import type { MyStuffKind } from "@/lib/my-stuff/sources";
+import { BUCKET_KINDS, type MyStuffBucket } from "@/lib/my-stuff/buckets";
 import type { MyStuffCitation, MyStuffSession, MyStuffSessionTurn } from "@/lib/my-stuff/types";
 import { KIND_ICON } from "@/components/my-stuff/kind-icon";
+import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 
 /**
  * «1. MY STUFF: ΝΕΑ ΟΘΟΝΗ» (the owner's message, 2026-10-28) — Κομμάτι 1:
@@ -60,6 +63,7 @@ export function MyStuffWorkspace({
   initialFailed,
   initialSessions,
   initialQuery,
+  initialProjects,
 }: {
   initialItems: MyStuffItem[];
   initialFailed: MyStuffKind[];
@@ -69,6 +73,10 @@ export function MyStuffWorkspace({
    *  box shows what it is filtering on, not a blank field over a filtered
    *  list. */
   initialQuery?: string;
+  /** The Project filter's own dropdown (Κομμάτι 3) — empty on an account
+   *  with no projects, which hides the control entirely rather than
+   *  showing a dropdown with nothing real in it. */
+  initialProjects: { id: string; name: string }[];
 }) {
   const t = useTranslations("dashboard.myStuff");
   const { refresh: refreshCredits } = useCredits();
@@ -78,6 +86,11 @@ export function MyStuffWorkspace({
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState(initialQuery ?? "");
   const [selected, setSelected] = useState<MyStuffItem | null>(null);
+
+  // Κομμάτι 3: the filter row's own state. `bucket === null` is "All" —
+  // the owner's own first chip, not a bucket with kinds of its own.
+  const [bucket, setBucket] = useState<MyStuffBucket | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [sessions, setSessions] = useState<MyStuffSession[]>(initialSessions);
@@ -161,6 +174,11 @@ export function MyStuffWorkspace({
   // THE FIRST RUN IS SKIPPED: the server already sent `initialItems` for
   // an empty query, so refetching it here would be a second round trip
   // for the exact same answer, on every single visit.
+  //
+  // Κομμάτι 3 widens what re-fetches: a bucket or a project pick is the
+  // SAME round trip the search box already made, not a separate filter
+  // layer — the owner's own check ("κάθε φίλτρο δείχνει μόνο τα σωστά")
+  // is about what the SERVER returns, the same RLS-scoped read either way.
   const firstRun = useRef(true);
   useEffect(() => {
     if (firstRun.current) {
@@ -171,6 +189,17 @@ export function MyStuffWorkspace({
     setLoading(true);
     const params = new URLSearchParams();
     if (query) params.set("q", query);
+    if (bucket) {
+      const bucketKinds = BUCKET_KINDS[bucket];
+      // A BUCKET WITH NO REAL KIND (Video/Audio) still has to SEND the
+      // `kind` key — an absent key means "no restriction" to the route
+      // (api/my-stuff/browse/route.ts), so a bucket of zero kinds must
+      // still be told apart from no bucket at all, or it would silently
+      // read back as "every kind" instead of "none".
+      if (bucketKinds.length === 0) params.append("kind", "");
+      else for (const kind of bucketKinds) params.append("kind", kind);
+    }
+    if (projectId) params.set("project", projectId);
     fetch(`/api/my-stuff/browse?${params.toString()}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data: { ok?: boolean; items?: MyStuffItem[]; failed?: MyStuffKind[] }) => {
@@ -182,7 +211,7 @@ export function MyStuffWorkspace({
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [query]);
+  }, [query, bucket, projectId]);
 
   // A SELECTION THAT NO LONGER MATCHES THE LIST (a new search ran) is
   // cleared rather than left pointing at a row the screen no longer
@@ -193,6 +222,18 @@ export function MyStuffWorkspace({
   }, [items, selected]);
 
   const openSession = sessions.find((s) => s.id === openSessionId) ?? null;
+
+  // THE SORT CHIP (Κομμάτι 3) — client-side, over whatever the server
+  // already sent back for the current query/bucket/project: up to 200
+  // rows (lib/my-stuff/load.ts's own MAX_ITEMS), well inside what a plain
+  // array sort costs nothing noticeable to re-order. useSortAndPaginate
+  // wants `created_at` (its own shared shape, lib/use-sort-and-paginate.ts)
+  // where MyStuffItem has `createdAt` — mapped below rather than widening
+  // that shared type for one caller. Only `.sorted` is used; My Stuff has
+  // no pagination of its own (the owner's own "1.000 items, no sticking"
+  // criterion is a scroll, not a page size).
+  const sortable = items.map((item) => ({ ...item, created_at: item.createdAt }));
+  const { sortOrder, setSortOrder, sorted } = useSortAndPaginate(sortable, query + (bucket ?? "") + (projectId ?? ""), (item) => item.title);
 
   return (
     <div className="flex h-full flex-col overflow-hidden" data-testid="my-stuff-workspace">
@@ -262,7 +303,7 @@ export function MyStuffWorkspace({
             squeezed beside it (there is no room for both on 390px). */}
         <div className={`h-full min-h-0 w-full shrink-0 border-e border-divider lg:w-[360px] ${selected ? "hidden lg:block" : ""}`}>
           <MyStuffList
-            items={items}
+            items={sorted}
             loading={loading}
             query={query}
             onQueryChange={setQuery}
@@ -270,6 +311,17 @@ export function MyStuffWorkspace({
             asking={asking}
             selectedKey={selected?.key ?? null}
             onSelect={setSelected}
+            filters={
+              <MyStuffFilters
+                bucket={bucket}
+                onBucketChange={setBucket}
+                projects={initialProjects}
+                projectId={projectId}
+                onProjectChange={setProjectId}
+                sortOrder={sortOrder}
+                onSortChange={setSortOrder}
+              />
+            }
           />
         </div>
 

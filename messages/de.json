@@ -3347,6 +3347,21 @@
         "send": "Fragen",
         "dismiss": "Antwort ausblenden"
       },
+      "filters": {
+        "label": "Nach Art filtern",
+        "all": "Alle",
+        "documents": "Dokumente",
+        "images": "Bilder",
+        "data": "Daten",
+        "more": "Mehr",
+        "moreLabel": "Weitere Filter",
+        "video": "Video",
+        "audio": "Audio",
+        "sitesApps": "Websites und Apps",
+        "meetings": "Besprechungen",
+        "project": "Projekt",
+        "allProjects": "Alle Projekte"
+      },
       "kinds": {
         "site": "Websites",
         "slides": "Folien",
@@ -3359,7 +3374,10 @@
         "coding": "Code",
         "finance": "Finanzen",
         "sales": "Verkäufe",
-        "trading": "Trading"
+        "trading": "Trading",
+        "images": "Bilder",
+        "meetings": "Besprechungen",
+        "apps": "Apps"
       },
       "errors": {
         "empty": "Schreib eine Frage.",

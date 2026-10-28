@@ -56,11 +56,28 @@ export default async function MyStuffPage(props: { searchParams?: Promise<{ ask?
   }));
 
   const initialQuery = readExampleParam(searchParams?.ask) ?? "";
-  const { items, failed } = await loadMyStuff(supabase, user.id, { kind: null, query: initialQuery });
+  const { items, failed } = await loadMyStuff(supabase, user.id, { kinds: null, query: initialQuery });
+
+  // THE PROJECT FILTER'S OWN DROPDOWN (Κομμάτι 3) — loaded here, the same
+  // way initialSessions already is, rather than a new client round trip
+  // on every visit. RLS scopes this to the caller, same as every other
+  // read on this page.
+  const { data: projectRows } = await supabase
+    .from("projects")
+    .select("id, name")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const initialProjects = (projectRows ?? []).map((row) => ({ id: String(row.id), name: String(row.name ?? "") }));
 
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <MyStuffWorkspace initialItems={items} initialFailed={failed} initialSessions={sessions} initialQuery={initialQuery} />
+      <MyStuffWorkspace
+        initialItems={items}
+        initialFailed={failed}
+        initialSessions={sessions}
+        initialQuery={initialQuery}
+        initialProjects={initialProjects}
+      />
     </div>
   );
 }

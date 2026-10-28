@@ -53,6 +53,30 @@ const SITES = [{ id: "s1", name: "Camping Παραλία", status: "ready", crea
 const TRADES = [
   { id: "t1", symbol: "BTC", direction: "long", result: "win", pnl: 120, notes: "Είπαμε να κρατήσω πάνω από τις 60000, και κράτησα.", created_at: "2026-09-20T10:00:00Z" },
 ];
+// ---------------------------------------------------------------------
+// Κομμάτι 3's own seed — one row per bucket the filter row names, dated
+// so "newest"/"oldest" have an unambiguous, non-collation answer (s1 is
+// the oldest of all nine, m1 the newest) rather than relying on how
+// Intl.Collator happens to interleave Greek and Latin titles.
+// ---------------------------------------------------------------------
+const DOCUMENTS = [{ id: "d1", title: "Σύμβαση πελάτη", content: "...", created_at: "2026-09-01T10:00:00Z" }];
+const IMAGES = [{ id: "im1", prompt: "Αφίσα για καλοκαιρινή προσφορά", status: "done", created_at: "2026-09-18T10:00:00Z" }];
+const ANALYSES = [{ id: "an1", title: "Πωλήσεις ανά μήνα", file_name: "sales.csv", created_at: "2026-09-22T10:00:00Z" }];
+const MEETINGS = [{ id: "m1", title: "Σύσκεψη με τον προμηθευτή", transcript: "...", created_at: "2026-09-25T10:00:00Z" }];
+const APPS = [{ id: "ap1", title: "Καταγραφή παραγγελιών", description: "...", created_at: "2026-09-10T10:00:00Z" }];
+// A real UUID — isUuid()/projectEdgeFilter() (lib/projects/project.ts)
+// both require the shape, not just any string.
+const PROJECT_ID = "11111111-1111-1111-1111-111111111111";
+const PROJECTS = [{ id: PROJECT_ID, name: "Καλοκαιρινή καμπάνια", created_at: "2026-08-15T10:00:00Z" }];
+// generated_images IS a project-member table (lib/projects/linkable-
+// extras.ts's own LINK_ONLY_MODULES) — document/meetings/apps are NOT
+// (confirmed by reading lib/modules.ts and linkable-extras.ts; neither
+// lists user_documents, user_apps or meetings), so the one edge below
+// links the IMAGE row, not a kind that projectMembers() would silently
+// drop.
+const ENTITY_LINKS = [
+  { source_table: "generated_images", source_id: "im1", target_table: "projects", target_id: PROJECT_ID, relationship_type: "in_project", created_at: "2026-09-18T10:05:00Z" },
+];
 const SESSIONS = [
   {
     id: "sess1",
@@ -139,7 +163,18 @@ await new Promise((r) => model.listen(0, "127.0.0.1", r));
 
 const supa = await startMockSupabase({
   port: 54415,
-  tableRows: { finance_entries: FINANCE, user_websites: SITES, trades: TRADES },
+  tableRows: {
+    finance_entries: FINANCE,
+    user_websites: SITES,
+    trades: TRADES,
+    user_documents: DOCUMENTS,
+    generated_images: IMAGES,
+    data_analyses: ANALYSES,
+    meetings: MEETINGS,
+    user_apps: APPS,
+    projects: PROJECTS,
+    entity_links: ENTITY_LINKS,
+  },
   handle: handleSessions,
 });
 
@@ -231,8 +266,12 @@ try {
     const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
     await page.goto(`${APP}/dashboard/my-stuff`, { waitUntil: "load" });
     await page.locator('[data-testid="my-stuff-list-item"]').first().waitFor({ timeout: 15_000 });
-    check("all four real rows are listed", (await page.locator('[data-testid="my-stuff-list-item"]').count()) === 4);
+    check("all nine real rows are listed", (await page.locator('[data-testid="my-stuff-list-item"]').count()) === 9);
     check("nothing selected yet reads as empty, not broken", (await page.locator('[data-testid="my-stuff-details-empty"]').count()) === 1);
+    check(
+      "newest-first by default: the most recent row (a meeting) leads",
+      (await page.locator('[data-testid="my-stuff-list-item"]').first().innerText()).includes("Σύσκεψη με τον προμηθευτή")
+    );
 
     const financeRow = page.locator('[data-testid="my-stuff-list-item"][data-kind="finance"]').filter({ hasText: "Πώληση πακέτου" });
     await press(financeRow);
@@ -310,7 +349,7 @@ try {
     );
 
     await searchFor("");
-    await waitForSearch(4, null); // back to all four before the questions below read the list
+    await waitForSearch(9, null); // back to all nine before the questions below read the list
 
     // -----------------------------------------------------------------
     // The SAME field's other job: submitting asks a real question
@@ -353,6 +392,113 @@ try {
     await press(page.locator('[data-testid="my-stuff-answer-dismiss"]'));
 
     check("all 3 model calls actually happened (not a cached/stale page)", modelAsked.length === 3, String(modelAsked.length));
+
+    // -----------------------------------------------------------------
+    // Κομμάτι 3's own check: "κάθε φίλτρο δείχνει μόνο τα σωστά" — each
+    // filter shows only the correct ones. The search field still holds
+    // Κομμάτι 2's last question; clear it first so a filter result is
+    // never read through a stale text search too.
+    // -----------------------------------------------------------------
+    console.log("\n== desktop: filters — All/Documents/Images/Data/More/Project/Sort ==");
+    await searchFor("");
+    await waitForSearch(9, null);
+
+    async function pickBucket(bucket, wantCount, mustContain) {
+      await press(page.locator(`[data-testid="my-stuff-filter"][data-bucket="${bucket}"]`));
+      return waitForSearch(wantCount, mustContain);
+    }
+
+    let f = await pickBucket("documents", 1, "Σύμβαση πελάτη");
+    check("Documents shows only the one document row", f.n === 1 && f.texts.includes("Σύμβαση πελάτη"), f.texts);
+
+    f = await pickBucket("images", 1, "Αφίσα για καλοκαιρινή προσφορά");
+    check("Images shows only the one image row", f.n === 1 && f.texts.includes("Αφίσα για καλοκαιρινή προσφορά"), f.texts);
+
+    // Data = analysis + finance + sales + trading. Sales has no seeded
+    // row — this account genuinely has none — so the real count is the
+    // other three: 1 analysis + 2 finance + 1 trading.
+    f = await pickBucket("data", 4, "Πωλήσεις ανά μήνα");
+    check(
+      "Data shows analysis+finance+trading, not documents or images",
+      f.n === 4 && f.texts.includes("Πωλήσεις ανά μήνα") && f.texts.includes("Διαφημίσεις") && f.texts.includes("BTC") && !f.texts.includes("Σύμβαση πελάτη"),
+      f.texts
+    );
+
+    await press(page.locator('[data-testid="my-stuff-filter-more"]'));
+    await page.locator('[data-testid="my-stuff-filters-more"]').waitFor({ timeout: 5_000 });
+
+    f = await pickBucket("video", 0, null);
+    check("Video is honestly empty — no backing table exists yet", f.n === 0 && (await page.locator('[data-testid="my-stuff-empty"]').isVisible()));
+
+    // A BRIDGE BACK TO A NON-EMPTY BUCKET, not asserted on its own —
+    // without it, "Video" and "Audio" are both count===0, and the second
+    // click's fetch could still be in flight while the FIRST one's
+    // already-empty list satisfies "count === 0" on the very first poll,
+    // the identical race waitForSearch's own comment already names for
+    // two one-result searches in a row.
+    await pickBucket("images", 1, "Αφίσα για καλοκαιρινή προσφορά");
+
+    f = await pickBucket("audio", 0, null);
+    check("Audio is honestly empty — no backing table exists yet", f.n === 0 && (await page.locator('[data-testid="my-stuff-empty"]').isVisible()));
+
+    f = await pickBucket("sitesApps", 2, "Camping Παραλία");
+    check(
+      "Sites and Apps shows the site AND the app, nothing else",
+      f.n === 2 && f.texts.includes("Camping Παραλία") && f.texts.includes("Καταγραφή παραγγελιών"),
+      f.texts
+    );
+
+    f = await pickBucket("meetings", 1, "Σύσκεψη με τον προμηθευτή");
+    check("Meetings shows only the one meeting", f.n === 1 && f.texts.includes("Σύσκεψη με τον προμηθευτή"), f.texts);
+
+    f = await pickBucket("all", 9, null);
+    check("All, pressed again, returns every row", f.n === 9, f.texts);
+
+    console.log("\n== desktop: the Project filter reads real entity_links membership ==");
+    const projectSelect = page.locator('[data-testid="my-stuff-filter-project"]');
+    await projectSelect.selectOption(PROJECT_ID);
+    f = await waitForSearch(1, "Αφίσα για καλοκαιρινή προσφορά");
+    check(
+      "picking the project shows only its one real member (the image), not all nine",
+      f.n === 1 && f.texts.includes("Αφίσα για καλοκαιρινή προσφορά"),
+      f.texts
+    );
+    await projectSelect.selectOption("");
+    await waitForSearch(9, null);
+
+    console.log("\n== desktop: Sort reorders by date, reversibly, without changing WHICH nine ==");
+    // Purely client-side (useSortAndPaginate, no round trip) — polled
+    // the same careful way as the search checks above, since a click and
+    // React's re-render are still two different ticks.
+    async function waitForFirstItem(mustContain, timeout = 5000) {
+      const end = Date.now() + timeout;
+      let text = "";
+      while (Date.now() < end) {
+        text = await page.locator('[data-testid="my-stuff-list-item"]').first().innerText();
+        if (text.includes(mustContain)) return text;
+        await page.waitForTimeout(100);
+      }
+      return text;
+    }
+    const sortButtons = page.locator('[data-testid="my-stuff-sort"] button');
+    await press(sortButtons.nth(1)); // oldest
+    check("'oldest' puts the actual oldest row (the site) first", (await waitForFirstItem("Camping Παραλία")).includes("Camping Παραλία"));
+    await press(sortButtons.nth(0)); // newest
+    check(
+      "'newest' puts the actual newest row (the meeting) first again",
+      (await waitForFirstItem("Σύσκεψη με τον προμηθευτή")).includes("Σύσκεψη με τον προμηθευτή")
+    );
+    await press(sortButtons.nth(2)); // az
+    const azTitles = await page.locator('[data-testid="my-stuff-list-item"]').allInnerTexts();
+    await press(sortButtons.nth(3)); // za
+    const zaTitles = await page.locator('[data-testid="my-stuff-list-item"]').allInnerTexts();
+    check(
+      "A-Z and Z-A are exact reverses of each other (same nine, opposite order)",
+      azTitles.length === 9 && zaTitles.length === 9 && JSON.stringify(azTitles) === JSON.stringify([...zaTitles].reverse()),
+      azTitles.join(" | ") + "\n        -- vs --\n        " + zaTitles.join(" | ")
+    );
+    await press(sortButtons.nth(0)); // back to newest, the default, before anything else reads this list
+
     check("no page threw (desktop, " + pageErrors.length + ")", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

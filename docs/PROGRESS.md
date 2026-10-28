@@ -7052,3 +7052,87 @@ href) στο πραγματικό αρχείο, σε real production build, υπ
 26/26, όλα τα gates πράσινα.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία.**
+
+### 2026-10-28 — My Stuff «ΝΕΑ ΟΘΟΝΗ»: Κομμάτι 3, φίλτρα
+
+**Τρεις νέα είδη, γνήσια, όχι εικονικά.** Οι 12 κατηγορίες του My
+Stuff δεν είχαν καμία που να παράγει εικόνα, συνάντηση ή εφαρμογή.
+`src/lib/my-stuff/sources.ts` πήρε τρεις νέες, πάνω σε πίνακες που
+ήδη υπάρχουν και ήδη γράφονται από τα πραγματικά εργαλεία:
+`images` (`generated_images`, το ίδιο Image tool), `meetings`
+(`meetings`, το ίδιο Meetings tool) και `apps` (`user_apps`, το Apps
+tool — πίσω ακόμα από το δικό του `apps-tool` switch). Το `apps` δεν
+χρειάστηκε δικό του έλεγχο flag εδώ: μόνο η σελίδα που θα έφτιαχνε
+μια γραμμή είναι πίσω από το switch, άρα λογαριασμός χωρίς το flag
+απλά δεν έχει καμία γραμμή να φανεί. 12→15 κατηγορίες·
+`scripts/tests/my-stuff.test.mjs`'s «twelve kinds in all» έγινε
+«fifteen», με τον λόγο στο σχόλιο.
+
+**Η σειρά φίλτρων.** Νέο αρχείο `src/lib/my-stuff/buckets.ts`
+χαρτογραφεί τα 15 είδη στα 7 ονόματα της οδηγίας: Documents
+(document/research/slides/posts/file), Images (images), Data
+(analysis/finance/sales/trading), και μέσα στο More: Video (κενό,
+σκόπιμα — δεν υπάρχει πίνακας ακόμα), Audio (το ίδιο), Sites and
+Apps (site/apps), Meetings (meetings). Το «chat» και το «coding» ΔΕΝ
+μπαίνουν σε κανένα φίλτρο επίτηδες — μια συνομιλία με τον βοηθό δεν
+είναι έγγραφο, εικόνα, δεδομένο, site/app ή συνάντηση· φαίνονται μόνο
+στο «Όλα». Νέο component `my-stuff-filters.tsx`: σειρά chips (ίδια
+κλάση `.chip-link` με τη Βιβλιοθήκη), το «More» ανοίγει δεύτερη
+σειρά (όχι αναδυόμενο μενού — δεν υπάρχει έτοιμο component για αυτό
+και δεν έφτασε εικόνα να δείξει τι ζητήθηκε), dropdown Project, και
+το ήδη υπάρχον `SortToggle`/`useSortAndPaginate` (νέα/παλαιά/Α-Ω/Ω-Α),
+όλα χωρίς καμία σελιδοποίηση — η λίστα παραμένει ένα scroll, όπως το
+Κομμάτι 1.
+
+**Project φίλτρο, πάνω στο ήδη υπάρχον σύστημα.** Καμία νέα δομή: το
+`/api/my-stuff/browse` διαβάζει τα ίδια `entity_links`
+(`projectEdgeFilter`/`projectMembers`, `lib/projects/project.ts`) που
+διαβάζει και η σελίδα `/dashboard/projects/[id]`, και συγκρίνει με
+το κλειδί `table:id` που το `MyStuffItem` είχε ήδη. Σημαντικό: το
+`generated_images` ΕΙΝΑΙ ήδη project-member table
+(`lib/projects/linkable-extras.ts`) — το `user_documents`/`user_apps`/
+`meetings` ΔΕΝ είναι, άρα ένα item αυτών των ειδών δεν μπορεί σήμερα
+να μπει σε Project από πουθενά (ανοιχτό για το Κομμάτι 4).
+
+**Ένα πραγματικό bug, βρέθηκε από το ίδιο το check.** Το «Video»/
+«Audio» (κενά επίτηδες) αρχικά επέστρεφαν ΟΛΑ τα εννιά αντί για
+κανένα: όταν ο κάδος έχει μηδέν είδη, το πεδίο `kind` στο αίτημα
+έλειπε εντελώς, και η απουσία του σημαίνει «χωρίς φίλτρο» στο
+`loadMyStuff`/route — ακριβώς το αντίθετο από «φίλτρο σε τίποτα».
+Διορθώθηκε σε τρία σημεία: το `null` (χωρίς φίλτρο) και το `[]`
+(φίλτρο σε τίποτα) είναι τώρα διαφορετικά πράγματα σε όλη τη
+διαδρομή — `load.ts` δεν τα συγχέει πια, το route διαβάζει
+`searchParams.has("kind")` αντί για το πλήθος των έγκυρων ειδών, και
+ο client στέλνει πάντα το κλειδί `kind` (έστω άδειο) όταν ένας κάδος
+είναι ενεργός.
+
+**Γνήσιες αλλαγές σε gates, με δική τους γραμμή:**
+`design-density` border ceiling 596→597 (το νέο `border border-border`
+του Project dropdown)· `message-slices.ts` `unbounded` 70→71
+(`my-stuff-filters.tsx` διαβάζει `t(b)` με `b` μεταβλητή — το ίδιο
+computed-key σχήμα που ήδη μέτρησε τα άλλα τρία my-stuff αρχεία, ίδια
+αλλαγή και στο `message-slices.mutation.mjs`)· i18n πακέτο πρώτης
+χρήσης ξαναγράφτηκε (4815→4831, 13 νέα κλειδιά × 10 γλώσσες)·
+`scripts/check-i18n.js` πήρε 13 νέες `LOCALE_ALLOWED` καταχωρήσεις
+για λέξεις που είναι ήδη η ίδια σε εκείνη τη γλώσσα (Video/Audio/Apps
+σε de/it/es/pt, Documents/Images σε fr, Project στα ελληνικά — ίδιο
+ακριβώς με το sidebar).
+
+**Δοκιμές.** `scripts/tests/my-stuff-workspace.prodtest.mjs` επεκτάθηκε
+από 26 σε 39 ελέγχους: εννιά πραγματικές γραμμές (τρεις νέες
+κατηγορίες + τα παλιά έξι), κάθε φίλτρο (Documents/Images/Data/Video/
+Audio/Sites and Apps/Meetings/All) δείχνει ΜΟΝΟ τα σωστά, το Project
+φίλτρο βρίσκει το ένα πραγματικό μέλος μέσω αληθινού `entity_links`,
+και το Sort αντιστρέφει σωστά (παλαιότερο/νεότερο με αληθινές
+ημερομηνίες, Α-Ω/Ω-Α επαληθεύτηκε ως ακριβής αντιστροφή το ένα του
+άλλου, χωρίς να υποθέτει πώς το Intl.Collator συγκρίνει ελληνικά με
+λατινικά). **39/39**, πλήρες build. `npm run gates` **ΟΛΑ 383
+ΠΕΡΑΣΑΝ** (27.215 έλεγχοι).
+
+✅ Κομμάτι 3: έλεγξα κάθε φίλτρο (All/Documents/Images/Data/Video/
+Audio/Sites and Apps/Meetings/Project/Sort) σε real production build,
+υπολογιστής — κάθε ένα δείχνει μόνο τα σωστά, 39/39, όλα τα gates
+πράσινα. Το dropdown Project είναι άδειο όταν ο λογαριασμός δεν έχει
+κανένα project (δεν φαίνεται καθόλου, όχι ένα άδειο dropdown).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία.**

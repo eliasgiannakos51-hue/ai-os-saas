@@ -107,11 +107,16 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  * sent was the HSTS Vercel adds itself. Every page could be framed by any
  * site, and nothing told a browser not to guess content types.
  *
- * EVERY PATH BUT /s/. Published sites set their own, stricter set —
- * sandboxed CSP, frame-ancestors 'none' — in
+ * EVERY PATH BUT /s/ AND /a/. Published sites (/s/) and published
+ * Rebuild apps (/a/, Κομμάτι 4's third piece) each set their own,
+ * stricter set — sandboxed CSP, frame-ancestors 'none' — in
  * src/lib/publishing/public-serving.ts, and two sources for one header is
- * how a weaker value wins. The app never frames itself: every iframe in
- * src/ renders `srcDoc`, which `frame-ancestors` does not govern.
+ * how a weaker value wins: this blanket rule's own CSP has no script-src,
+ * so applying it on top silently stripped the published-app CSP down to
+ * just frame-ancestors, found by rebuild.prodtest.mjs's own live fetch of
+ * /a/<subdomain> rather than by inspection. The app never frames itself:
+ * every iframe in src/ renders `srcDoc`, which `frame-ancestors` does not
+ * govern.
  *
  * The microphone stays allowed for the app's own origin: voice input
  * (src/components/voice/) asks for it.
@@ -129,7 +134,7 @@ const nextConfig = {
   // "x-powered-by: Next.js" tells a stranger which advisories to try.
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/((?!s/).*)", headers: APP_SECURITY_HEADERS }];
+    return [{ source: "/((?!s/|a/).*)", headers: APP_SECURITY_HEADERS }];
   },
   // Inlined at build time — see commitDate() above. The DATE is the
   // commit's; BUILD_AT is when the build ran, and the two differ by

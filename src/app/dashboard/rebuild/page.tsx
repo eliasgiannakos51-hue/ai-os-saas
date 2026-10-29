@@ -33,7 +33,7 @@ export default async function RebuildPage(props: { searchParams?: Promise<{ reco
   const supabase = await createClient();
   const { data } = await supabase
     .from("rebuild_projects")
-    .select("id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, updated_at")
+    .select("id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at")
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
     .limit(RECENT_APPS);

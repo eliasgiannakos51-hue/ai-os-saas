@@ -533,6 +533,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/opengraph-image.tsx": "the share card for the landing page, rendered from constants; it reads no table",
   "src/app/s/[subdomain]/robots.txt/route.ts":
     "the same, for robots.txt. It reads only `status, is_active` and returns a fixed two-line file built from the address in the request — it discloses nothing that requesting the site itself does not. Worth stating plainly: a crawler reads robots.txt from the HOST ROOT, so while sites are served at /s/<subdomain> the file that actually governs them is the app's own /robots.txt; this one exists for Search Console and for the day a wildcard domain makes it the root file.",
+  "src/app/a/[subdomain]/route.ts":
+    "the public web for a published Rebuild app (Κομμάτι 4's third piece) — the same posture as /s/[subdomain]/route.ts, at its own address. Reads through the admin client and selects only `id, html, is_active, updated_at`; rebuild_projects has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited (the same publicRequestAllowed window the sites route uses), and every response carries the published-site CSP. The stored html is re-checked with checkAppHtml at read time, not only at write time, because this is the moment it starts being served to a stranger with no session at all — a row that would not pass the check today is served as absent rather than as whatever it is.",
 };
 
 // THE SITEMAP'S JUSTIFICATION, MADE CHECKABLE.

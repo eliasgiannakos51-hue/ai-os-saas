@@ -152,6 +152,26 @@ export function publishedSiteUrl(subdomain: string, siteUrl: string, domain?: st
 }
 
 /**
+ * The public URL for a published Rebuild app — `/a/acme`, never `/s/acme`
+ * and never `/r/acme`, which the affiliate referral link already owns
+ * (src/app/r/[code]/route.ts, ionexa.ai/r/AB2C4XYZ).
+ *
+ * A DIFFERENT prefix from publishedSiteUrl's, not a shared one: Site owns
+ * `/s/` and its own subdomain uniqueness (published_sites_subdomain_key);
+ * giving Rebuild the same prefix would mean checking rebuild_projects
+ * against published_sites on every publish, merging two products' own
+ * lifecycles for no reason. Different prefix, independent namespace, no
+ * cross-table check needed (see 20261106000000_rebuild_publish.sql).
+ *
+ * No custom-domain parameter, unlike publishedSiteUrl's: Rebuild has no
+ * per-app domain column, and this is not the place to decide whether it
+ * ever gets one.
+ */
+export function publishedAppUrl(subdomain: string, appUrl: string): string {
+  return `${appUrl.replace(/\/+$/, "")}/a/${subdomain}`;
+}
+
+/**
  * The absolute PATH a published site is served under — "/s/acme", or "/"
  * when a wildcard domain puts the site on its own host.
  *

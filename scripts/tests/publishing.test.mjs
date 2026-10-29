@@ -127,6 +127,24 @@ check(
   "https://acme.ionexa.ai"
 );
 
+// Rebuild's own address (Κομμάτι 4's third piece): a DIFFERENT prefix
+// from publishedSiteUrl's, so the two namespaces never collide even for
+// the same string.
+check(
+  "Rebuild apps live under /a/, never /s/",
+  subdomain.publishedAppUrl("acme", "https://ionexa.ai"),
+  "https://ionexa.ai/a/acme"
+);
+check(
+  "a trailing slash on the app URL does not double up either",
+  subdomain.publishedAppUrl("acme", "https://ionexa.ai/"),
+  "https://ionexa.ai/a/acme"
+);
+checkTrue(
+  "the same subdomain string under each prefix is two different addresses, not one",
+  subdomain.publishedSiteUrl("acme", "https://ionexa.ai") !== subdomain.publishedAppUrl("acme", "https://ionexa.ai")
+);
+
 // ---------------------------------------------------------------------
 console.log("\n== 2. fair use per plan ==");
 // ---------------------------------------------------------------------

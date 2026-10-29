@@ -4023,6 +4023,20 @@
           "tooLarge": "Esa página es demasiado grande para leerla. No se cobró nada.",
           "invalid": "Esa no es una dirección web que pueda leer. No se cobró nada."
         }
+      },
+      "publish": {
+        "summary": "Publicar esta aplicación",
+        "liveSummary": "En línea, en su propia dirección",
+        "label": "Elige una dirección",
+        "edit": "Elige otra dirección",
+        "editPlaceholder": "Escribe la dirección que quieres",
+        "button": "Publicar",
+        "unpublish": "Dejar de publicar",
+        "taken": "Esa dirección ya está en uso.",
+        "invalid": "Elige una dirección válida: letras minúsculas, números y guiones, al menos 3 caracteres.",
+        "notBuilt": "Primero construye la aplicación.",
+        "done": "Publicada en {url}",
+        "offline": "Dejada de publicar. La dirección se conserva — publica de nuevo para volver a usarla."
       }
     },
     "comingSoon": {

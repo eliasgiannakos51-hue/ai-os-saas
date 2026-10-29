@@ -1,6 +1,6 @@
 -- ---------------------------------------------------------------------------
 -- REBUILD, Κομμάτι 4's last piece: an app published to its own address
--- (/r/<subdomain>), next to the self-test and the Brand Kit hint that
+-- (/a/<subdomain>), next to the self-test and the Brand Kit hint that
 -- landed earlier in the same round.
 --
 -- How to undo: alter table public.rebuild_projects
@@ -18,8 +18,12 @@
 -- table would need its own FK, its own RLS, and its own join on every
 -- read, to say one-to-one what a nullable column already says.
 --
--- WHY /r/ AND NOT /s/: Site's published_sites owns the /s/ namespace and
--- its subdomain uniqueness; sharing it would mean checking THIS table
+-- WHY /a/ AND NOT /s/ OR /r/: Site's published_sites owns the /s/
+-- namespace and its subdomain uniqueness, and the affiliate referral link
+-- already owns /r/ (src/app/r/[code]/route.ts, ionexa.ai/r/AB2C4XYZ — the
+-- actual reason /r/ was tried first and rejected: Next.js refuses to
+-- build with two ambiguous dynamic routes at the same path depth).
+-- Sharing /s/ would mean checking THIS table
 -- against THAT one on every publish, or merging two products' lifecycles
 -- (view counts, SEO, per-page rows) that Rebuild has none of. Different
 -- prefix, independent namespace, no cross-table check needed — the same
@@ -34,7 +38,7 @@
 -- is_active: nobody's old address becomes free just because they paused
 -- it.
 --
--- READ BY THE PUBLIC ROUTE (src/app/r/[subdomain]/route.ts) WITH THE
+-- READ BY THE PUBLIC ROUTE (src/app/a/[subdomain]/route.ts) WITH THE
 -- ADMIN CLIENT, like published_sites: a stranger must not be able to
 -- read this table at all, only receive one app's html for a live
 -- subdomain. WRITTEN BY api/rebuild/[id]/route.ts's "publish"/
@@ -58,8 +62,8 @@ create index if not exists rebuild_projects_subdomain_active_idx
   where subdomain is not null;
 
 comment on column public.rebuild_projects.subdomain is
-  'The /r/<subdomain> address this app was ever given. Kept across unpublish so a re-publish restores the same links.';
+  'The /a/<subdomain> address this app was ever given. Kept across unpublish so a re-publish restores the same links.';
 comment on column public.rebuild_projects.is_active is
-  'Whether /r/<subdomain> currently serves this app. False after Unpublish; the row and its subdomain are kept.';
+  'Whether /a/<subdomain> currently serves this app. False after Unpublish; the row and its subdomain are kept.';
 comment on column public.rebuild_projects.published_at is
   'When this app first went live at its current subdomain. Unset until the first publish.';

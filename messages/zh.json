@@ -4023,6 +4023,20 @@
           "tooLarge": "该页面太大,无法读取。没有扣费。",
           "invalid": "这不是我能读取的网址。没有扣费。"
         }
+      },
+      "publish": {
+        "summary": "发布这个应用",
+        "liveSummary": "已上线，拥有自己的地址",
+        "label": "选择一个地址",
+        "edit": "选择其他地址",
+        "editPlaceholder": "输入你想要的地址",
+        "button": "发布",
+        "unpublish": "取消发布",
+        "taken": "该地址已被使用。",
+        "invalid": "请选择有效地址——小写字母、数字和连字符，至少 3 个字符。",
+        "notBuilt": "请先构建应用。",
+        "done": "已发布到 {url}",
+        "offline": "已取消发布。地址仍保留——再次发布即可重新使用。"
       }
     },
     "comingSoon": {

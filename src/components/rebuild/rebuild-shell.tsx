@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowRight, Check, Database, Download, Hammer, History, LayoutGrid, MousePointerClick, Palette, Pencil, ShieldCheck, Undo2 } from "lucide-react";
+import { ArrowRight, Check, Database, Download, Globe, Hammer, History, LayoutGrid, MousePointerClick, Palette, Pencil, ShieldCheck, Undo2 } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { HelpTip } from "@/components/ui/help-tip";
+import { CopyButton } from "@/components/ui/copy-button";
+import { validateSubdomain, suggestSubdomain, publishedAppUrl } from "@/lib/publishing/subdomain";
 import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import type { ActionProfileKey } from "@/lib/billing/estimate";
@@ -63,12 +65,15 @@ export type RebuildRow = {
   locale: string;
   has_app_phase: boolean;
   app_definition: unknown;
+  subdomain: string | null;
+  is_active: boolean;
+  published_at: string | null;
   updated_at: string;
 };
 
 type RebuildFeatureBox = { id: string; label: string; selected: boolean };
 
-type Running = null | "features" | "plan" | "appLogic" | "box" | "build" | "change" | "restore";
+type Running = null | "features" | "plan" | "appLogic" | "box" | "build" | "change" | "restore" | "publish" | "unpublish";
 
 export function RebuildShell({
   initialProjects,
@@ -124,6 +129,23 @@ export function RebuildShell({
   const plan: RebuildPlan | null = open ? readPlan(open.plan) : null;
   const built = Boolean(open?.html);
   const versions = Array.isArray(open?.versions) ? (open!.versions as { at: string; note: string }[]) : [];
+
+  // Κομμάτι 4's third piece: the suggested address — the project's own
+  // subdomain once it has one (so a direct re-publish after unpublish
+  // reuses THAT, not a fresh suggestion), suggested from its title until
+  // then. Re-synced on either a different app opening or the server
+  // confirming a new subdomain. A ref would skip both.
+  // Typing a DIFFERENT one never uses a second field — same rule as a
+  // feature's wording below: the shell has one field, so choosing a
+  // custom address reuses it (editingSubdomain), and send() reads it.
+  const [subdomainDraft, setSubdomainDraft] = useState("");
+  const [editingSubdomain, setEditingSubdomain] = useState(false);
+  useEffect(() => {
+    setSubdomainDraft(open?.subdomain ?? (open ? suggestSubdomain(open.title) : ""));
+    setEditingSubdomain(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId, open?.subdomain]);
+  const appUrl = typeof window !== "undefined" ? window.location.origin : "";
 
   // Κομμάτι 3: the second phase's own status, read back from the row —
   // never a separate piece of state to drift from what was actually saved.
@@ -194,6 +216,9 @@ export function RebuildShell({
     if (code === "limit_reached") return t("errors.limit", { limit: Number(data?.limit ?? 1) });
     if (code === "too_long") return t("errors.tooLong");
     if (code === "stopped") return t("errors.stopped");
+    if (code === "taken") return t("publish.taken");
+    if (code === "invalid_subdomain") return t("publish.invalid");
+    if (code === "not_built") return t("publish.notBuilt");
     return t("errors.failed");
   }
 
@@ -294,6 +319,15 @@ export function RebuildShell({
       return;
     }
 
+    // Κομμάτι 4's third piece: a custom address takes the next words,
+    // the same reuse-the-one-field rule as a feature's wording above —
+    // client-side validated, no model call, nothing charged either way.
+    if (editingSubdomain) {
+      setEditingSubdomain(false);
+      await publishApp(text);
+      return;
+    }
+
     if (!built && box === null) {
       const project = await post("/api/rebuild", { description: text }, "plan");
       if (project) {
@@ -324,6 +358,23 @@ export function RebuildShell({
       setBox(null);
       say({ role: "tool", text: t("built"), projectId: project.id });
     }
+  }
+
+  async function publishApp(rawSubdomain: string) {
+    if (!open) return;
+    const check = validateSubdomain(rawSubdomain);
+    if (!check.ok) {
+      say({ role: "tool", text: t("publish.invalid") });
+      return;
+    }
+    const project = await post(`/api/rebuild/${open.id}`, { action: "publish", subdomain: check.subdomain }, "publish");
+    if (project?.subdomain) say({ role: "tool", text: t("publish.done", { url: publishedAppUrl(project.subdomain, appUrl) }), projectId: project.id });
+  }
+
+  async function unpublishApp() {
+    if (!open) return;
+    const project = await post(`/api/rebuild/${open.id}`, { action: "unpublish" }, "unpublish");
+    if (project) say({ role: "tool", text: t("publish.offline"), projectId: project.id });
   }
 
   async function restore(index: number, undo = false) {
@@ -381,6 +432,65 @@ export function RebuildShell({
                     <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />
                     <p className="text-xs text-foreground" data-testid="rebuild-self-test">{t("selfTest")}</p>
                   </div>
+                  <details data-testid="rebuild-publish">
+                    <summary className="flex min-h-[44px] cursor-pointer items-center gap-1.5 text-xs text-muted">
+                      <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+                      {open.is_active ? t("publish.liveSummary") : t("publish.summary")}
+                    </summary>
+                    <div className="space-y-2 px-3 py-2">
+                      {open.is_active && open.subdomain ? (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={publishedAppUrl(open.subdomain, appUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              data-testid="rebuild-published-url"
+                              className="min-w-0 flex-1 truncate text-xs text-foreground underline"
+                            >
+                              {publishedAppUrl(open.subdomain, appUrl)}
+                            </a>
+                            <CopyButton text={publishedAppUrl(open.subdomain, appUrl)} variant="icon" data-testid="rebuild-copy-url" />
+                          </div>
+                          <button type="button" onClick={() => void unpublishApp()} disabled={running !== null} data-testid="rebuild-unpublish" className={OPTION}>
+                            {t("publish.unpublish")}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs text-muted">{t("publish.label")}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="min-w-0 flex-1 truncate text-xs text-foreground" data-testid="rebuild-subdomain-suggested">
+                              {publishedAppUrl(subdomainDraft, appUrl)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingSubdomain(true);
+                                if (!workIsBeside()) setPane(null);
+                                composerRef.current?.focus();
+                              }}
+                              aria-label={t("publish.edit")}
+                              title={t("publish.edit")}
+                              data-testid="rebuild-subdomain-edit"
+                              className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-item hover:bg-panel-hover"
+                            >
+                              <Pencil className="h-3.5 w-3.5 text-foreground/70" aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void publishApp(subdomainDraft)}
+                              disabled={running !== null || !subdomainDraft.trim()}
+                              data-testid="rebuild-publish-button"
+                              className={OPTION}
+                            >
+                              {t("publish.button")}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </details>
                   {versions.length > 1 && (
                     <details data-testid="rebuild-versions">
                       <summary className="flex min-h-[44px] cursor-pointer items-center gap-1.5 text-xs text-muted">
@@ -537,7 +647,7 @@ export function RebuildShell({
       help={<HelpTip helpKey="help.rebuild" />}
       turns={shellTurns}
       working={running !== null && running !== "build" && running !== "appLogic" ? <ThinkingIndicator size="sm" /> : null}
-      placeholder={!open ? (editingFeature !== null ? t("features.editPlaceholder") : t("placeholder")) : built ? t("placeholderChange") : box ? t("placeholderBox") : t("placeholder")}
+      placeholder={!open ? (editingFeature !== null ? t("features.editPlaceholder") : t("placeholder")) : editingSubdomain ? t("publish.editPlaceholder") : built ? t("placeholderChange") : box ? t("placeholderBox") : t("placeholder")}
       sending={running !== null}
       onSend={(text) => void send(text)}
       onStop={() => abortRef.current?.abort()}
@@ -548,7 +658,10 @@ export function RebuildShell({
           {!open && editingFeature !== null ? (
             <ChosenBox label={features?.find((f) => f.id === editingFeature)?.label ?? ""} onClear={() => { setEditingFeature(null); setPane("features"); }} />
           ) : null}
-          {running === null && length > 0 && !(!open && editingFeature !== null) ? <CostEstimateHint credits={nextPrice.credits} /> : null}
+          {open && editingSubdomain ? (
+            <ChosenBox label={publishedAppUrl(subdomainDraft, appUrl)} onClear={() => setEditingSubdomain(false)} />
+          ) : null}
+          {running === null && length > 0 && !(!open && editingFeature !== null) && !(open && editingSubdomain) ? <CostEstimateHint credits={nextPrice.credits} /> : null}
         </>
       }
       empty={{

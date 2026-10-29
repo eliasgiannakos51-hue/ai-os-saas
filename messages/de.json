@@ -4023,6 +4023,20 @@
           "tooLarge": "Diese Seite ist zu groß zum Lesen. Es wurde nichts berechnet.",
           "invalid": "Das ist keine Webadresse, die ich lesen kann. Es wurde nichts berechnet."
         }
+      },
+      "publish": {
+        "summary": "Diese App veröffentlichen",
+        "liveSummary": "Live, unter ihrer eigenen Adresse",
+        "label": "Adresse wählen",
+        "edit": "Eine andere Adresse wählen",
+        "editPlaceholder": "Gib die gewünschte Adresse ein",
+        "button": "Veröffentlichen",
+        "unpublish": "Veröffentlichung aufheben",
+        "taken": "Diese Adresse ist bereits vergeben.",
+        "invalid": "Wähle eine gültige Adresse — Kleinbuchstaben, Zahlen und Bindestriche, mindestens 3 Zeichen.",
+        "notBuilt": "Baue die App zuerst.",
+        "done": "Veröffentlicht unter {url}",
+        "offline": "Veröffentlichung aufgehoben. Die Adresse bleibt erhalten — erneut veröffentlichen, um sie wieder zu nutzen."
       }
     },
     "comingSoon": {

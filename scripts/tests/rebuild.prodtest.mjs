@@ -86,7 +86,10 @@ const OTHER_ID = "00000000-0000-4000-8000-00000000beef";
 const store = { rebuild_projects: [] };
 const PLAN_OTHER = { title: "Ξένη", boxes: ["screens", "data", "actions", "look"].map((kind) => ({ kind, text: `${kind} άλλου` })) };
 function reset() {
-  store.rebuild_projects.splice(0, Infinity, { id: OTHER_ID, user_id: "00000000-0000-4000-8000-0000000000ff", title: "Ξένη", description: "", locale: "el", plan: PLAN_OTHER, reference: null, html: "<html><script>1</script></html>", versions: [], created_at: "2026-10-01T00:00:00Z", updated_at: "2026-10-01T00:00:00Z" });
+  // Κομμάτι 4's third piece: an address someone ELSE already holds, so
+  // the "taken" scenario below is a real clash on the table, not a
+  // fabricated response.
+  store.rebuild_projects.splice(0, Infinity, { id: OTHER_ID, user_id: "00000000-0000-4000-8000-0000000000ff", title: "Ξένη", description: "", locale: "el", plan: PLAN_OTHER, reference: null, html: "<html><script>1</script></html>", versions: [], subdomain: "taken-already", is_active: true, published_at: "2026-10-01T00:00:00Z", created_at: "2026-10-01T00:00:00Z", updated_at: "2026-10-01T00:00:00Z" });
 }
 let seq = 0;
 const uuid = () => `${String(++seq).padStart(8, "0")}-0000-4000-8000-0000000000aa`;
@@ -319,6 +322,25 @@ async function say(page, press, text) {
   }
   throw new Error(`«${text}» was not sent after three presses`);
 }
+/**
+ * The publish panel remounts CLOSED whenever the work pane itself
+ * remounts — on a phone, choosing a custom address (the pencil) drops
+ * to the chat view, and a FAILED attempt never returns from it (only a
+ * successful post() does). So: reach the pane again via the same card
+ * every other turn gets, then open the <details> fresh — never assume
+ * either is still exactly as a press above left it.
+ */
+async function openPublish(page, press) {
+  const details = page.locator('[data-testid="rebuild-publish"]');
+  // On a phone the work pane COVERS the conversation rather than being
+  // unmounted by it — so a press that fell back to the field (pane
+  // null) leaves this element in the DOM but hidden, not absent.
+  if ((await details.count()) === 0 || !(await details.isVisible())) {
+    await press(page.locator('[data-testid="tool-shell-card"]').last());
+    await details.waitFor({ state: "visible", timeout: 10_000 });
+  }
+  if (!(await details.evaluate((el) => el.open))) await press(details.locator("summary"));
+}
 const thread = (page) => page.locator('[data-testid="tool-shell-thread"]');
 const frame = (page) => page.frameLocator('[data-testid="rebuild-frame"]');
 const frameBody = (page, attr) => frame(page).locator("body").getAttribute(`data-${attr}`);
@@ -473,6 +495,58 @@ try {
     const dl = await page.request.get(`${APP}/api/rebuild/${mine()[0].id}/download`);
     const file = await dl.text();
     check("the download is one HTML file, sealed the way it is shown, never cached", dl.status() === 200 && /^attachment;/.test(dl.headers()["content-disposition"] ?? "") && file.startsWith('<!DOCTYPE html><meta http-equiv="Content-Security-Policy"') && file.includes('dataset.version = "2"') && dl.headers()["cache-control"] === "private, no-store");
+
+    console.log(`\n== ${device.label}: the app's own address — /a/<subdomain> (Κομμάτι 4's third piece) ==`);
+    {
+      const beforeHolds = reserved.length, beforeSettled = settled.length;
+      // No second field to type into: choosing a custom address reuses
+      // the shell's own field, the same rule a feature's wording already
+      // follows — press the pencil, then say() the words.
+      await openPublish(page, press);
+      await press(page.locator('[data-testid="rebuild-subdomain-edit"]'));
+      await page.locator('[data-testid="box-chosen"]').waitFor({ timeout: 10_000 });
+      await say(page, press, "taken-already");
+      await said(page, G.publish.taken);
+      check("an address someone else already holds is refused as taken, said in words, nothing charged", mine()[0].is_active !== true && reserved.length === beforeHolds && settled.length === beforeSettled);
+
+      await openPublish(page, press);
+      await press(page.locator('[data-testid="rebuild-subdomain-edit"]'));
+      await page.locator('[data-testid="box-chosen"]').waitFor({ timeout: 10_000 });
+      await say(page, press, "studio-ilioupoli");
+      // post()'s own success is what flips the pane back to "app" — on a
+      // phone that is a remount, so the <details> comes back CLOSED and
+      // needs opening again before its (now live) content is reachable.
+      await said(page, "/a/studio-ilioupoli");
+      await openPublish(page, press);
+      await page.locator('[data-testid="rebuild-published-url"]').waitFor({ timeout: 10_000 });
+      const liveUrl = await page.locator('[data-testid="rebuild-published-url"]').innerText();
+      check("publishing a free address succeeds, said in words, and charges nothing — the bytes already existed", mine()[0].subdomain === "studio-ilioupoli" && mine()[0].is_active === true && typeof mine()[0].published_at === "string" && reserved.length === beforeHolds && settled.length === beforeSettled && liveUrl.endsWith("/a/studio-ilioupoli"));
+
+      const live = await page.request.get(`${APP}/a/studio-ilioupoli`);
+      const liveBody = await live.text();
+      check("the published address actually serves the app's current bytes, with the published-site CSP — never the app's OWN blanket security headers, which have no script-src at all", live.status() === 200 && liveBody.includes('dataset.version = "2"') && /script-src 'self' 'unsafe-inline'/.test(live.headers()["content-security-policy"] ?? "") && live.headers()["x-frame-options"] === "DENY", `status=${live.status()} csp=${live.headers()["content-security-policy"]}`);
+      const missing = await page.request.get(`${APP}/a/no-such-app-here`);
+      check("an address nobody holds is the same 404 as the sites route gives, not a 500", missing.status() === 404);
+
+      const firstPublishedAt = mine()[0].published_at;
+      await openPublish(page, press);
+      await press(page.locator('[data-testid="rebuild-unpublish"]'));
+      await said(page, G.publish.offline);
+      check("unpublishing takes the address offline but KEEPS it on the row", mine()[0].is_active === false && mine()[0].subdomain === "studio-ilioupoli" && reserved.length === beforeHolds && settled.length === beforeSettled);
+      const afterUnpublish = await page.request.get(`${APP}/a/studio-ilioupoli`);
+      check("an unpublished app's address now 404s, exactly like one that was never taken", afterUnpublish.status() === 404);
+
+      // The one-click button publishes the SUGGESTED address directly —
+      // which by now follows the project's own subdomain, not a fresh
+      // title-based guess, so no typing is needed to reuse it.
+      await openPublish(page, press);
+      await press(page.locator('[data-testid="rebuild-publish-button"]'));
+      await page.locator('[data-testid="rebuild-published-url"]').waitFor({ timeout: 10_000 });
+      check("re-publishing with no new address restores the SAME one, and published_at is the FIRST time, not this press", mine()[0].subdomain === "studio-ilioupoli" && mine()[0].is_active === true && mine()[0].published_at === firstPublishedAt);
+      const again = await page.request.get(`${APP}/a/studio-ilioupoli`);
+      check("...and the address works again", again.status() === 200);
+    }
+
     if (!device.touch) {
       await press(page.locator('[data-testid="tool-shell-history-toggle"]'));
       await page.locator('[data-testid="shell-history-row"]').first().waitFor({ timeout: 10_000 });

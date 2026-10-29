@@ -4023,6 +4023,20 @@
           "tooLarge": "Essa página é grande demais para ser lida. Não foi cobrado nada.",
           "invalid": "Esse não é um endereço web que eu possa ler. Não foi cobrado nada."
         }
+      },
+      "publish": {
+        "summary": "Publicar esta aplicação",
+        "liveSummary": "Online, no seu próprio endereço",
+        "label": "Escolhe um endereço",
+        "edit": "Escolhe outro endereço",
+        "editPlaceholder": "Escreve o endereço que queres",
+        "button": "Publicar",
+        "unpublish": "Despublicar",
+        "taken": "Esse endereço já está em uso.",
+        "invalid": "Escolhe um endereço válido — letras minúsculas, números e hífenes, pelo menos 3 caracteres.",
+        "notBuilt": "Primeiro constrói a aplicação.",
+        "done": "Publicada em {url}",
+        "offline": "Despublicada. O endereço fica guardado — publica de novo para o voltar a usar."
       }
     },
     "comingSoon": {

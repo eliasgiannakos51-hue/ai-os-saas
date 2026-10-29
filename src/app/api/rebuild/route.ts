@@ -33,7 +33,7 @@ export const revalidate = 0;
 export const maxDuration = 120; // @function-limit 120
 
 /** What a client may be handed of a stored app: never another account's, never a column it need not see. */
-export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, updated_at";
+export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at";
 
 /**
  * AN APP, PLANNED FROM A DESCRIPTION (Rebuild, the final All tools grid),

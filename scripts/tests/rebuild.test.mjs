@@ -260,7 +260,7 @@ console.log("\n== 6. who may, and whose: the routes and the table ==");
   ok("the cap on how many apps is read BEFORE a page is fetched or anything is held", create.indexOf("gate.cap") !== -1 && create.indexOf("gate.cap") < create.indexOf("readReferencePage(url)") && create.indexOf("readReferencePage(url)") < create.indexOf("chargedRebuildStep("));
   ok("a page that cannot be read is refused with its reason and charges nothing", /code: "reference_failed", reason: read\.reason \}, \{ status: 422 \}/.test(create));
   ok("a description, a box and a change are bounded before anything is spent", /description\.length > MAX_DESCRIPTION_CHARS\) return NextResponse\.json\(\{ ok: false, code: "too_long"/.test(create) && /body\.instruction\.trim\(\)\.slice\(0, MAX_INSTRUCTION_CHARS\)/.test(one) && /if \(action === "box" && !isRebuildBoxKind\(body\.kind\)\) return NextResponse\.json\(\{ ok: false, code: "invalid_request" \}, \{ status: 400 \}\);/.test(one));
-  ok("restoring a version calls no model and charges nothing", /if \(action === "restore"\) \{[\s\S]*?return answer\([^;]*\}, 0\);\s*\}/.test(one) && one.indexOf('action === "restore"') < one.indexOf("anyProviderConfigured(process.env)"));
+  ok("restoring a version calls no model and charges nothing", /if \(action === "restore"\) \{[\s\S]{0,600}?return answer\([^;]*\}, 0\);\s*\}/.test(one) && one.indexOf('action === "restore"') < one.indexOf("anyProviderConfigured(process.env)"));
   ok("the Free plan keeps ONE app, the others more, the owner a thousand", L.maxRebuildsForPlan("free") === 1 && L.maxRebuildsForPlan("starter") > 1 && L.maxRebuildsForPlan("growth") >= L.maxRebuildsForPlan("starter") && L.maxRebuildsForPlan("enterprise") >= L.maxRebuildsForPlan("ultimate") && L.maxRebuildsForPlan("free", true) === 1_000 && L.maxRebuildsForPlan("nonsense") === 1);
 
   const sql = readFileSync("supabase/migrations/20261027000000_rebuild_projects.sql", "utf8");
@@ -375,7 +375,7 @@ console.log("\n== 9. «Approve plan» builds phase by phase, only when the capab
 
   const create = read("src/app/api/rebuild/route.ts");
   ok("the phase count is decided once, at plan time, from what Κομμάτι 2 kept — never recomputed later", /const hasAppPhase = features\.length > 0;/.test(create) && /has_app_phase: hasAppPhase/.test(create) && create.indexOf("const hasAppPhase") < create.indexOf(".insert("));
-  ok("the client is handed has_app_phase and app_definition, like every other column it may read", /REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, updated_at"/.test(create));
+  ok("the client is handed has_app_phase and app_definition, like every other column it may read", /REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at"/.test(create));
 
   const one = read("src/app/api/rebuild/[id]/route.ts");
   ok("a plan with no App-logic phase cannot be charged for one", /if \(action === "appLogic"\) \{\s*if \(!hasAppPhase\) return NextResponse\.json\(\{ ok: false, code: "invalid_request" \}, \{ status: 400 \}\);/.test(one) && one.indexOf('if (!hasAppPhase)') < one.indexOf("chargedRebuildStep({\n        user, gate, action: \"rebuildAppLogic\""));
@@ -418,6 +418,57 @@ console.log("\n== 9. «Approve plan» builds phase by phase, only when the capab
   ok("the plan call passes the remembered brand through to the SAME planMessage every other call uses", /planMessage\(params\.description, params\.locale, params\.reference, params\.features, params\.brand\)/.test(callBrand));
   const createBrand = read("src/app/api/rebuild/route.ts");
   ok("the route reads the SAME remembered-brand source Flows already reuses (lib/memory/brand.ts, lib/memory/store.ts), never a second one, and folds it into both the priced message and the real call", /import \{ loadMemories \} from "@\/lib\/memory\/store";/.test(createBrand) && /import \{ readBrand \} from "@\/lib\/memory\/brand";/.test(createBrand) && /const remembered = readBrand\(memories\);/.test(createBrand) && /planMessage\(description, locale, reference\?\.rendered, features, brand\)/.test(createBrand) && /planApp\(\{ description, locale, reference: reference\?\.rendered, features, brand, costs,/.test(createBrand));
+}
+
+console.log("\n== 10. the app's own address — /a/<subdomain>, never /s/ (Κομμάτι 4's third piece) ==");
+{
+  const one = read("src/app/api/rebuild/[id]/route.ts");
+  ok("publish and unpublish are real actions", /"appLogic" \|\| v === "box" \|\| v === "build" \|\| v === "change" \|\| v === "restore" \|\| v === "publish" \|\| v === "unpublish"/.test(one));
+  ok("publish refuses an app that has not been built yet, before anything else", /if \(action === "publish"\) \{\s*if \(!html\) return NextResponse\.json\(\{ ok: false, code: "not_built" \}/.test(one));
+  ok("publish re-checks the stored html, fail-closed, same reason the public route re-checks at read time", /if \(action === "publish"\)[\s\S]{0,300}const recheck = checkAppHtml\(html\);\s*if \(!recheck\.ok\) return NextResponse\.json\(\{ ok: false, code: "unusable"/.test(one));
+  ok("the address is validated the same way sites validate theirs, keeping the existing one when none is given", /import \{ validateSubdomain \} from "@\/lib\/publishing\/subdomain";/.test(one) && /const wanted = typeof body\.subdomain === "string" && body\.subdomain\.trim\(\) \? body\.subdomain : existingSubdomain;/.test(one));
+  ok("a clash is answered as 'taken' from BOTH the own-rows pre-check and the real unique-index catch, never a bare 500", /return NextResponse\.json\(\{ ok: false, code: "taken" \}, \{ status: 409 \}\);/g.test(one) && (one.match(/code: "taken"/g) ?? []).length === 2);
+  ok("publish writes through the SAME shared save() helper every other action uses — still exactly one service-role call in the whole file", /if \(action === "publish"\)[\s\S]{0,2000}const \{ data: row, error: saveError \} = await save\(\{/.test(one) && (one.match(/createAdminClient\(\)/g) ?? []).length === 1);
+  ok("re-publishing keeps the FIRST published_at — never overwritten by a later publish", /published_at: project\.published_at \?\? new Date\(\)\.toISOString\(\),/.test(one));
+  ok("unpublish refuses an app with no address yet, and otherwise only clears is_active — never the row, never the subdomain", /if \(action === "unpublish"\) \{\s*if \(!project\.subdomain\) return NextResponse\.json\(\{ ok: false, code: "not_published" \}, \{ status: 404 \}\);\s*return answer\(\{ is_active: false \}, 0\);/.test(one));
+  ok("the shared COLUMNS constant hands the client its own address and live state, like every other column it may read", /const COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at";/.test(one));
+
+  const createRoute = read("src/app/api/rebuild/route.ts");
+  ok("the list/create route's own column constant knows the same three columns", /export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at";/.test(createRoute));
+
+  const page = read("src/app/dashboard/rebuild/page.tsx");
+  ok("the page's own initial read asks for the same three columns, not a narrower set the client would have to refetch", /subdomain, is_active, published_at, updated_at/.test(page));
+
+  const subdomainLib = read("src/lib/publishing/subdomain.ts");
+  ok("Rebuild gets its OWN url builder, under /a/ — never reusing publishedSiteUrl's /s/, never the affiliate link's /r/", /export function publishedAppUrl\(subdomain: string, appUrl: string\): string \{\s*return `\$\{appUrl\.replace\(\/\\\/\+\$\/, ""\)\}\/a\/\$\{subdomain\}`;/.test(subdomainLib));
+
+  const publicRoute = read("src/app/a/[subdomain]/route.ts");
+  ok("the public route exists and reads NO session — admin client only, same boundary /s/[subdomain] already is", existsSync("src/app/a/[subdomain]/route.ts") && /createAdminClient/.test(publicRoute) && !/\.auth\.getUser\(\)/.test(publicRoute) && !/from "@\/lib\/supabase\/server"/.test(publicRoute));
+  ok("the SAME Data Cache trap is already closed here — no second fetchCache bug to rediscover", /export const dynamic = "force-dynamic";/.test(publicRoute) && /export const fetchCache = "force-no-store";/.test(publicRoute) && /export const revalidate = 0;/.test(publicRoute));
+  ok("it is rate limited the same in-memory way the sites route is, not a second limiter", /import \{ publishedSiteHeaders, notFoundHeaders, publicRequestAllowed \} from "@\/lib\/publishing\/public-serving";/.test(publicRoute) && /if \(!publicRequestAllowed\(request\)\)/.test(publicRoute));
+  ok("only a live row's html is served; an inactive or missing one is the same 404 as an invalid address", /if \(!app \|\| app\.is_active !== true \|\| typeof app\.html !== "string"\) return notFoundResponse\(\);/.test(publicRoute));
+  ok("the stored html is re-checked fail-closed at READ time too — a row that passed once and would not pass again is served as absent, not as whatever it is", /const safe = checkAppHtml\(app\.html\);\s*if \(!safe\.ok\) \{/.test(publicRoute) && /return new Response\(safe\.html, \{/.test(publicRoute));
+  ok("the response carries the SAME CSP/sandbox headers a published site does — one policy, not a second one to drift from it", /\.\.\.publishedSiteHeaders\(\)/.test(publicRoute) && /\.\.\.notFoundHeaders\(\)/.test(publicRoute));
+
+  const shell4 = read("src/components/rebuild/rebuild-shell.tsx");
+  ok("the screen offers Publish once the app is built, with a live link once it is", /data-testid="rebuild-publish"/.test(shell4) && /open\.is_active \? t\("publish\.liveSummary"\) : t\("publish\.summary"\)/.test(shell4));
+  ok("the draft address follows the project's own subdomain once it has one — so a direct re-publish after unpublish reuses it, not a fresh suggestion — or a suggestion from its title until then", /setSubdomainDraft\(open\?\.subdomain \?\? \(open \? suggestSubdomain\(open\.title\) : ""\)\);/.test(shell4) && /\}, \[openId, open\?\.subdomain\]\);/.test(shell4));
+  ok("pressing Publish posts the SAME /api/rebuild/[id] route every other action uses, never a separate endpoint", /async function publishApp\(rawSubdomain: string\)[\s\S]{0,400}post\(`\/api\/rebuild\/\$\{open\.id\}`, \{ action: "publish", subdomain: check\.subdomain \}, "publish"\)/.test(shell4));
+  ok("no second field to type into — choosing a custom address reuses the shell's own field, the same rule a feature's wording already follows", !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(shell4) && /if \(editingSubdomain\) \{/.test(shell4) && /await publishApp\(text\);/.test(shell4));
+  ok("unpublishing posts the same route with its own action, and says so in the thread", /async function unpublishApp\(\)[\s\S]{0,300}post\(`\/api\/rebuild\/\$\{open\.id\}`, \{ action: "unpublish" \}, "unpublish"\)/.test(shell4) && /t\("publish\.offline"\)/.test(shell4));
+  ok("the live address is copyable, through the SAME CopyButton every other copy action in the app uses", /import \{ CopyButton \} from "@\/components\/ui\/copy-button";/.test(shell4) && /<CopyButton text=\{publishedAppUrl\(open\.subdomain, appUrl\)\}/.test(shell4));
+  ok("a taken address, an invalid one, and an unbuilt app each get their own words, not the generic failure", /if \(code === "taken"\) return t\("publish\.taken"\);/.test(shell4) && /if \(code === "invalid_subdomain"\) return t\("publish\.invalid"\);/.test(shell4) && /if \(code === "not_built"\) return t\("publish\.notBuilt"\);/.test(shell4));
+
+  for (const locale of LOCALES) {
+    const publish = messages[locale]?.dashboard?.rebuild?.publish;
+    ok(`${locale}: every publish.* word the screen reads exists`, publish && ["summary", "liveSummary", "label", "edit", "editPlaceholder", "button", "unpublish", "taken", "invalid", "notBuilt", "done", "offline"].every((k) => typeof publish[k] === "string" && publish[k].length > 0));
+  }
+  ok("done carries {url} — the one placeholder the chat message needs", /\{url\}/.test(messages.en.dashboard.rebuild.publish.done) && /\{url\}/.test(messages.el.dashboard.rebuild.publish.done));
+
+  const sql = readFileSync("supabase/migrations/20261106000000_rebuild_publish.sql", "utf8");
+  ok("the migration adds the three columns and a unique index that survives an unpublish (address kept, never freed)", /add column if not exists subdomain text/.test(sql) && /add column if not exists is_active boolean not null default false/.test(sql) && /add column if not exists published_at timestamptz/.test(sql) && /create unique index if not exists rebuild_projects_subdomain_key/.test(sql) && /-- How to undo:/.test(sql));
+  const canaries = read("src/lib/health/schema-canaries.ts");
+  ok("the table and the schema canary both know the new subdomain column, and how to undo it", /column: "subdomain",\s*table: "rebuild_projects"|table: "rebuild_projects",\s*column: "subdomain"/.test(canaries.replace(/\n\s+/g, " ")) && /migration: "20261106000000_rebuild_publish\.sql"/.test(canaries));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

@@ -17,6 +17,7 @@
  *   3. THE FRAME (components/rebuild/rebuild-shell.tsx): an iframe with
  *      sandbox="allow-scripts" and nothing else.
  */
+// BOUNDARY-FORMAT: html
 export const MAX_APP_HTML_CHARS = 120_000;
 
 /** What an app may not contain, each with the reason a person would be told. */

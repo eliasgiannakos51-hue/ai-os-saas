@@ -35,6 +35,7 @@ const EN = "messages/en.json";
 const FEATURES = "src/lib/rebuild/rebuild-features.ts";
 const FEATURES_ROUTE = "src/app/api/rebuild/features/route.ts";
 const CANARIES = "src/lib/health/schema-canaries.ts";
+const PUBLIC_ROUTE = "src/app/a/[subdomain]/route.ts";
 
 const MUTANTS = [
   {
@@ -485,6 +486,97 @@ const MUTANTS = [
     to: "",
     expect: "the table and the schema canary both know the two new columns, and how to undo them",
   },
+  {
+    name: "publish stops refusing an app that was never built",
+    file: ONE,
+    from: 'if (!html) return NextResponse.json({ ok: false, code: "not_built" }, { status: 409 });',
+    to: "",
+    expect: "publish refuses an app that has not been built yet, before anything else",
+  },
+  {
+    name: "publish stops re-checking the stored html before serving it to a stranger",
+    file: ONE,
+    from: 'const recheck = checkAppHtml(html);\n      if (!recheck.ok) return NextResponse.json({ ok: false, code: "unusable", reason: recheck.reason }, { status: 422 });',
+    to: "",
+    expect: "publish re-checks the stored html, fail-closed, same reason the public route re-checks at read time",
+  },
+  {
+    name: "a clash on someone else's own address is no longer caught before the write",
+    file: ONE,
+    from: 'if (ownClash && ownClash.length > 0) return NextResponse.json({ ok: false, code: "taken" }, { status: 409 });',
+    to: "",
+    expect: "a clash is answered as 'taken' from BOTH the own-rows pre-check and the real unique-index catch, never a bare 500",
+  },
+  {
+    name: "a real unique-index clash is reported as a bare 500, not as 'taken'",
+    file: ONE,
+    from: 'if (saveError && /duplicate key|unique/i.test(saveError.message)) {\n          return NextResponse.json({ ok: false, code: "taken" }, { status: 409 });\n        }',
+    to: "",
+    expect: "a clash is answered as 'taken' from BOTH the own-rows pre-check and the real unique-index catch, never a bare 500",
+  },
+  {
+    name: "re-publishing overwrites published_at every time instead of keeping the first one",
+    file: ONE,
+    from: "published_at: project.published_at ?? new Date().toISOString(),",
+    to: "published_at: new Date().toISOString(),",
+    expect: "re-publishing keeps the FIRST published_at — never overwritten by a later publish",
+  },
+  {
+    name: "unpublish stops refusing an app with no address yet",
+    file: ONE,
+    from: 'if (!project.subdomain) return NextResponse.json({ ok: false, code: "not_published" }, { status: 404 });',
+    to: "",
+    expect: "unpublish refuses an app with no address yet, and otherwise only clears is_active — never the row, never the subdomain",
+  },
+  {
+    name: "unpublish clears the subdomain too, instead of only is_active",
+    file: ONE,
+    from: "return answer({ is_active: false }, 0);",
+    to: 'return answer({ is_active: false, subdomain: null }, 0);',
+    expect: "unpublish refuses an app with no address yet, and otherwise only clears is_active — never the row, never the subdomain",
+  },
+  {
+    name: "the public route stops refusing an inactive app",
+    file: PUBLIC_ROUTE,
+    from: 'if (!app || app.is_active !== true || typeof app.html !== "string") return notFoundResponse();',
+    to: 'if (!app || typeof app.html !== "string") return notFoundResponse();',
+    expect: "only a live row's html is served; an inactive or missing one is the same 404 as an invalid address",
+  },
+  {
+    name: "the public route stops re-checking the stored html at read time",
+    file: PUBLIC_ROUTE,
+    from: 'const safe = checkAppHtml(app.html);\n    if (!safe.ok) {',
+    to: "if (false) {",
+    expect: "the stored html is re-checked fail-closed at READ time too — a row that passed once and would not pass again is served as absent, not as whatever it is",
+  },
+  {
+    name: "the public route stops rate limiting requests",
+    file: PUBLIC_ROUTE,
+    from: "if (!publicRequestAllowed(request)) {",
+    to: "if (false) {",
+    expect: "it is rate limited the same in-memory way the sites route is, not a second limiter",
+  },
+  {
+    name: "the public route's Data Cache trap reopens",
+    file: PUBLIC_ROUTE,
+    from: 'export const fetchCache = "force-no-store";',
+    to: "",
+    expect: "the SAME Data Cache trap is already closed here — no second fetchCache bug to rediscover",
+  },
+  {
+    name: "a taken address shows the generic failure instead of its own word",
+    file: SHELL,
+    from: 'if (code === "taken") return t("publish.taken");',
+    to: "",
+    expect: "a taken address, an invalid one, and an unbuilt app each get their own words, not the generic failure",
+  },
+  {
+    name: "the draft address stops resetting when a different app opens",
+    file: SHELL,
+    from: 'setSubdomainDraft(open?.subdomain ?? (open ? suggestSubdomain(open.title) : ""));',
+    to: 'setSubdomainDraft("");',
+    expect: "the draft address follows the project's own subdomain once it has one — so a direct re-publish after unpublish reuses it, not a fresh suggestion — or a suggestion from its title until then",
+  },
 ];
 
-runMutations({ name: "rebuild", gate: GATE, targets: [PLAN, HTML, STRUCTURE, REFERENCE, CALL, CHARGE, LIMITS, CREATE, ONE, DL, PAGE, SHELL, SQL, EN, FEATURES, FEATURES_ROUTE, CANARIES], mutants: MUTANTS });
+runMutations({ name: "rebuild", gate: GATE, targets: [PLAN, HTML, STRUCTURE, REFERENCE, CALL, CHARGE, LIMITS, CREATE, ONE, DL, PAGE, SHELL, SQL, EN, FEATURES, FEATURES_ROUTE, CANARIES, PUBLIC_ROUTE], mutants: MUTANTS });

@@ -4023,6 +4023,20 @@
           "tooLarge": "That page is too large to read. Nothing was charged.",
           "invalid": "That is not a web address I can read. Nothing was charged."
         }
+      },
+      "publish": {
+        "summary": "Publish this app",
+        "liveSummary": "Live at its own address",
+        "label": "Choose an address",
+        "edit": "Choose a different address",
+        "editPlaceholder": "Type the address you want",
+        "button": "Publish",
+        "unpublish": "Unpublish",
+        "taken": "That address is already taken.",
+        "invalid": "Choose a valid address — lowercase letters, numbers and hyphens, at least 3 characters.",
+        "notBuilt": "Build the app first.",
+        "done": "Published at {url}",
+        "offline": "Unpublished. The address is kept — publish again to use it."
       }
     },
     "comingSoon": {

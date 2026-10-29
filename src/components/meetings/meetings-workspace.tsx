@@ -12,7 +12,7 @@ import {
   type MeetingLimits,
   type MeetingPrice,
 } from "@/lib/meetings/meeting-limits";
-import type { ProposedAction } from "@/lib/meetings/meeting-analysis";
+import type { DiarizedLine, ProposedAction } from "@/lib/meetings/meeting-analysis";
 import { useRecorder } from "@/components/voice/use-recorder";
 
 export type MeetingRow = {
@@ -168,6 +168,25 @@ export function MeetingsWorkspace({
     };
   }, []);
 
+  /**
+   * MEETINGS Κομμάτι 5: CLICK A LINE, THE AUDIO SEEKS THERE.
+   *
+   * `playerLines` lives and dies with `playerUrl` above, for the same
+   * reason: these are per-segment START times from the provider's own
+   * diarized reply, never written to a column, never reachable for a
+   * meeting opened from the list days later — that meeting already has
+   * no player (playerMeetingId will not match), so it has nothing to
+   * seek either, and the transcript renders as the plain block it always
+   * has rather than offering a click that could not do anything.
+   */
+  const [playerLines, setPlayerLines] = useState<DiarizedLine[] | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  function seekTo(startSeconds: number) {
+    const el = audioRef.current;
+    if (!el) return;
+    el.currentTime = startSeconds;
+  }
+
   const mb = (bytes: number) => Math.round((bytes / (1024 * 1024)) * 10) / 10;
   const mins = (s: number) => Math.max(1, Math.round(s / 60));
 
@@ -285,6 +304,7 @@ export function MeetingsWorkspace({
       return URL.createObjectURL(recorded);
     });
     setPlayerMeetingId(null);
+    setPlayerLines(null);
     setFile(recorded);
     setSeconds(recordedSeconds);
     // EXACT, NOT ESTIMATED: the recorder measured wall-clock time itself
@@ -339,6 +359,7 @@ export function MeetingsWorkspace({
         return null;
       });
       setPlayerMeetingId(null);
+      setPlayerLines(null);
       if (!chosen) return;
       if (!isMeetingAudioType(chosen.type)) {
         setProblem(t("notAudio"));
@@ -403,6 +424,10 @@ export function MeetingsWorkspace({
         setRows((prev) => [data.meeting as MeetingRow, ...prev]);
         setOpenId(data.meeting.id);
         setPlayerMeetingId(data.meeting.id);
+        // Κομμάτι 5: the per-line start times the provider's diarized
+        // reply carried, for exactly as long as playerUrl above lives —
+        // never sent anywhere else, never stored.
+        setPlayerLines(Array.isArray(data.lines) ? (data.lines as DiarizedLine[]) : null);
         void analyse(data.meeting.id);
       } else {
         // Transcribed and paid for, but the row did not write. The text
@@ -633,6 +658,7 @@ export function MeetingsWorkspace({
         return null;
       });
       setPlayerMeetingId(null);
+      setPlayerLines(null);
     }
   }
 
@@ -950,6 +976,7 @@ export function MeetingsWorkspace({
               // eslint-disable-next-line jsx-a11y/media-has-caption -- a
               // meeting recording has no track to caption against.
               <audio
+                ref={audioRef}
                 controls
                 data-testid="meeting-player"
                 className="w-full"
@@ -1258,12 +1285,39 @@ export function MeetingsWorkspace({
               <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
                 {t("transcriptTitle")}
               </h3>
-              <p
-                data-testid="meeting-transcript"
-                className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted"
-              >
-                {open.transcript}
-              </p>
+              {/* Κομμάτι 5: a line is only ever clickable for the clip
+                  just transcribed IN THIS TAB — playerLines lives and
+                  dies with playerUrl, so a meeting opened from the list
+                  (no player, see meeting-player-unavailable above) falls
+                  straight to the plain block below, same text either
+                  way, just not a click target that could not seek
+                  anything. */}
+              {playerLines && playerMeetingId === open.id && playerLines.length > 0 ? (
+                <div
+                  data-testid="meeting-transcript"
+                  className="mt-2 space-y-1 text-sm leading-relaxed text-muted"
+                >
+                  {playerLines.map((line, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      data-testid="meeting-transcript-line"
+                      data-start={line.start}
+                      onClick={() => seekTo(line.start)}
+                      className="block min-h-[44px] w-full rounded-item text-left transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                    >
+                      <span className="font-semibold text-foreground">{line.speaker}:</span> {line.text}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p
+                  data-testid="meeting-transcript"
+                  className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted"
+                >
+                  {open.transcript}
+                </p>
+              )}
             </div>
           </div>
         </section>

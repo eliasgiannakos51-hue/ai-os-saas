@@ -421,7 +421,82 @@ console.log("\n== 8. Remind me (Κομμάτι 4) ==");
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 9. what this file does NOT prove ==");
+console.log("\n== 9. click a transcript line, the audio seeks (Κομμάτι 5) ==");
+// ---------------------------------------------------------------------
+{
+  const an = await loadTs(ANALYSIS);
+  const turns = [
+    { speaker: "A", start: 0, end: 2, text: "Πρώτη πρόταση." },
+    { speaker: "A", start: 2, end: 4, text: "Δεύτερη πρόταση." },
+    { speaker: "B", start: 4, end: 7, text: "Απάντηση." },
+    { speaker: "A", start: 7, end: 9, text: "Ξανά ο πρώτος." },
+  ];
+  const lines = an.diarizedTranscriptLines(turns, "el");
+  check("three merged lines, not four — adjacent A+A still merges", lines.length === 3, JSON.stringify(lines));
+  check(
+    "each line starts at its FIRST original segment's own time, never recomputed",
+    lines[0].start === 0 && lines[1].start === 4 && lines[2].start === 7,
+    JSON.stringify(lines.map((l) => l.start))
+  );
+  check(
+    "a merged line keeps the EARLIER segment's start, not the later one it swallowed",
+    lines[0].start === 0,
+    `got ${lines[0].start}; the second segment (start 2) must not have overwritten it`
+  );
+
+  const plainText = lines.map((l) => `${l.speaker}: ${l.text}`).join("\n");
+  check(
+    "the lines and formatDiarizedTranscript() never disagree — one merge, read two ways",
+    plainText === an.formatDiarizedTranscript(turns, "el"),
+    `${plainText}\n---\n${an.formatDiarizedTranscript(turns, "el")}`
+  );
+  check(
+    "no segments is an empty array, not a crash",
+    Array.isArray(an.diarizedTranscriptLines([], "el")) && an.diarizedTranscriptLines([], "el").length === 0
+  );
+
+  // THE ROUTE: the per-line times are handed back in BOTH outcomes —
+  // saved, and the "transcribed but the row did not write" fallback —
+  // never stored on the row itself (meetings.transcript stays plain text,
+  // proven in §7 above).
+  const t = code(TRANSCRIBE);
+  check(
+    "the per-line times are computed from the provider's own reply, not re-derived from the merged text",
+    /diarizedTranscriptLines\(result\.segments/.test(t)
+  );
+  const linesInResponses = [...t.matchAll(/lines:\s*transcriptLines/g)].length;
+  check("the per-line times are returned on BOTH outcomes — saved, and the unsaved fallback", linesInResponses === 2, String(linesInResponses));
+
+  // THE SCREEN. A line is a click target ONLY while this meeting still
+  // has the SAME live player the player zone itself gates on — never a
+  // second, independent condition that could drift from it and offer a
+  // click with nothing behind it.
+  const workspace = code(WORKSPACE);
+  check(
+    "a transcript line is clickable only under the SAME condition the player element itself is",
+    /playerLines\s*&&\s*playerMeetingId === open\.id/.test(workspace)
+  );
+  check("clicking a line seeks to THAT line's own start, not a fixed or recomputed time", /onClick=\{\(\) => seekTo\(line\.start\)\}/.test(workspace));
+  check(
+    "seeking sets the real <audio> element's currentTime — one player, not a second hidden one",
+    /function seekTo\(startSeconds: number\) \{\s*const el = audioRef\.current;[\s\S]{0,40}el\.currentTime = startSeconds;/.test(workspace)
+  );
+  check("the <audio> the player renders carries that same ref", /ref=\{audioRef\}/.test(workspace));
+
+  // EVERY PLACE THE PLAYER IS CLEARED CLEARS THE LINES TOO, so a stale
+  // line list from a previous clip can never survive long enough to
+  // look clickable over a meeting it was never transcribed from.
+  const meetingIdNulls = [...workspace.matchAll(/setPlayerMeetingId\(null\)/g)].length;
+  const linesNulls = [...workspace.matchAll(/setPlayerLines\(null\)/g)].length;
+  check(
+    "every reset of playerMeetingId resets playerLines alongside it",
+    meetingIdNulls === linesNulls && meetingIdNulls > 0,
+    `playerMeetingId(null): ${meetingIdNulls}, playerLines(null): ${linesNulls}`
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 10. what this file does NOT prove ==");
 // ---------------------------------------------------------------------
 // STATED, NOT IMPLIED. Everything above reads code and runs pure
 // functions. None of it starts a browser, reaches Whisper or touches a

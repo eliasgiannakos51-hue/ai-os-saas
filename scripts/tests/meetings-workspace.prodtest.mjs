@@ -31,6 +31,33 @@ import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { startMockSupabase, MOCK_USER } from "../lib/mock-supabase.mjs";
 
+/**
+ * A REAL, DECODABLE WAV (silence) — Κομμάτι 5's own check needs the
+ * browser to actually know a duration, so clicking a transcript line
+ * moves `<audio>.currentTime` for a real reason, not because the
+ * property accepts an assignment on an element with nothing behind it.
+ * Same construction as voice-conversation.prodtest.mjs's own WAV.
+ */
+function buildWav(seconds) {
+  const rate = 8000;
+  const data = Buffer.alloc(Math.round(rate * seconds) * 2); // silence
+  const head = Buffer.alloc(44);
+  head.write("RIFF", 0);
+  head.writeUInt32LE(36 + data.length, 4);
+  head.write("WAVE", 8);
+  head.write("fmt ", 12);
+  head.writeUInt32LE(16, 16);
+  head.writeUInt16LE(1, 20);
+  head.writeUInt16LE(1, 22);
+  head.writeUInt32LE(rate, 24);
+  head.writeUInt32LE(rate * 2, 28);
+  head.writeUInt16LE(2, 32);
+  head.writeUInt16LE(16, 34);
+  head.write("data", 36);
+  head.writeUInt32LE(data.length, 40);
+  return Buffer.concat([head, data]);
+}
+
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
@@ -49,6 +76,7 @@ function check(name, cond, detail) {
 const MEETING_1 = "11111111-1111-1111-1111-111111111111";
 const NEW_MEETING = "22222222-2222-2222-2222-222222222222";
 const RECORDED_MEETING = "33333333-3333-3333-3333-333333333333";
+const PHONE_MEETING = "44444444-4444-4444-4444-444444444444";
 
 // A meeting already analysed, with one action already kept — seeded
 // directly into the mock's table, so NOTHING about it was ever near this
@@ -329,6 +357,13 @@ try {
       check("both speakers show, each on its own line, in Greek", /Ομιλητής A:/.test(shown) && /Ομιλητής B:/.test(shown), shown);
       check("...on two separate lines, not run together", shown.split("\n").length >= 2, shown);
     }
+    // Κομμάτι 5: a meeting opened from the LIST (no player, no File in
+    // this tab) has nothing to seek — its transcript is the plain block
+    // above, never a row of click targets that could not do anything.
+    check(
+      "no transcript line is a click target for a meeting with no live player",
+      (await page.locator('[data-testid="meeting-transcript-line"]').count()) === 0
+    );
     check("the delete control is still there", (await page.locator('[data-testid="meeting-detail"] button[aria-label]').count()) >= 1);
 
     // THE SHAPE: player above the two columns; summary LEFT of transcript.
@@ -344,6 +379,13 @@ try {
 
     // A FRESH RECORDING, TRANSCRIBED IN THIS TAB: the player should now
     // show up, playing the browser's own copy — never a server path.
+    // Κομμάτι 5's own lines, with real, distinct start times (seconds
+    // into the 20s WAV below) — exactly the shape api/meetings/
+    // transcribe's real response carries.
+    const NEW_MEETING_LINES = [
+      { speaker: "Ομιλητής A", text: "Πρώτη πρόταση της νέας συνάντησης.", start: 2 },
+      { speaker: "Ομιλητής B", text: "Δεύτερη πρόταση, πολύ πιο αργά.", start: 13 },
+    ];
     await page.route("**/api/meetings/transcribe", async (route) => {
       await route.fulfill({
         status: 200,
@@ -363,6 +405,7 @@ try {
             analysed_at: null,
             created_at: new Date().toISOString(),
           },
+          lines: NEW_MEETING_LINES,
         }),
       });
     });
@@ -380,10 +423,13 @@ try {
         }),
       });
     });
+    // A REAL, DECODABLE 20s WAV — Κομμάτι 5's seek check below needs an
+    // element the browser actually knows the duration of, not bytes
+    // that merely pass the MIME-type check.
     await page.setInputFiles('[data-testid="meeting-file"]', {
       name: "clip.wav",
       mimeType: "audio/wav",
-      buffer: Buffer.from("RIFF0000WAVEfmt fake-bytes-not-a-real-wav-but-the-type-is-what-is-checked"),
+      buffer: buildWav(20),
     });
     await page.locator('[data-testid="meeting-start"]').waitFor({ timeout: 10_000 });
     await page.locator('[data-testid="meeting-start"]').click();
@@ -395,6 +441,34 @@ try {
     check(
       "the new meeting (just transcribed) is the one now open",
       (await page.locator('[data-testid="meeting-detail"] h2').innerText()).includes("Νέα συνάντηση")
+    );
+
+    // Κομμάτι 5: CLICK A TRANSCRIPT LINE, THE AUDIO SEEKS THERE.
+    const lines = page.locator('[data-testid="meeting-transcript-line"]');
+    await lines.first().waitFor({ timeout: 10_000 });
+    check("the transcript renders as separate clickable lines, one per segment", (await lines.count()) === NEW_MEETING_LINES.length);
+    const before = await page.locator('[data-testid="meeting-player"]').evaluate((el) => el.currentTime);
+    check("before any line is clicked, playback has not moved", before === 0, String(before));
+    await lines.nth(1).click();
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="meeting-player"]')?.currentTime ?? 0) > 0
+    );
+    const afterClick = await page.locator('[data-testid="meeting-player"]').evaluate((el) => el.currentTime);
+    check(
+      "clicking the SECOND line seeks to THAT line's own start, not the first or a fixed point",
+      Math.abs(afterClick - NEW_MEETING_LINES[1].start) < 0.5,
+      `expected ~${NEW_MEETING_LINES[1].start}, got ${afterClick}`
+    );
+    await lines.first().click();
+    await page.waitForFunction(
+      (expected) => Math.abs((document.querySelector('[data-testid="meeting-player"]')?.currentTime ?? -1) - expected) < 0.5,
+      NEW_MEETING_LINES[0].start
+    );
+    const afterSecondClick = await page.locator('[data-testid="meeting-player"]').evaluate((el) => el.currentTime);
+    check(
+      "clicking the FIRST line afterwards seeks backward, to ITS own start",
+      Math.abs(afterSecondClick - NEW_MEETING_LINES[0].start) < 0.5,
+      `expected ~${NEW_MEETING_LINES[0].start}, got ${afterSecondClick}`
     );
   }
 
@@ -580,6 +654,69 @@ try {
     check(
       "a real finger tap, start to stop, produced a clip this screen can price",
       (await page.locator('[data-testid="meeting-cost-total"]').innerText()).length > 0
+    );
+
+    // Κομμάτι 5, ON THE TOUCH PATH: a NEW upload (deterministic WAV,
+    // same reasoning as the desktop block) rather than the live
+    // recording above — a real-time MediaRecorder clip is too short and
+    // too variable in length to assert an exact seek target against.
+    const PHONE_LINES = [
+      { speaker: "Ομιλητής A", text: "Πρώτη πρόταση.", start: 3 },
+      { speaker: "Ομιλητής B", text: "Δεύτερη πρόταση.", start: 11 },
+    ];
+    await page.route("**/api/meetings/transcribe", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          meeting: {
+            id: PHONE_MEETING,
+            title: "Συνάντηση από το κινητό",
+            language: "el",
+            transcript: "Κείμενο από το κινητό.",
+            summary: null,
+            proposed_actions: null,
+            duration_seconds: 20,
+            credits_charged: 2,
+            analysis_error: null,
+            analysed_at: null,
+            created_at: new Date().toISOString(),
+          },
+          lines: PHONE_LINES,
+        }),
+      });
+    });
+    await page.route(`**/api/meetings/${PHONE_MEETING}/analyse`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, meeting: { summary: null, proposed_actions: [], analysed_at: new Date().toISOString() } }),
+      });
+    });
+    await page.setInputFiles('[data-testid="meeting-file"]', {
+      name: "phone-clip.wav",
+      mimeType: "audio/wav",
+      buffer: buildWav(20),
+    });
+    const startButton = page.locator('[data-testid="meeting-start"]');
+    await startButton.waitFor({ timeout: 10_000 });
+    await press(startButton);
+    await page.locator('[data-testid="meeting-player"]').waitFor({ timeout: 10_000 });
+
+    const phoneLines = page.locator('[data-testid="meeting-transcript-line"]');
+    await phoneLines.first().waitFor({ timeout: 10_000 });
+    const lineBox = await phoneLines.first().boundingBox();
+    check("a transcript line is a real touch target (>=44px tall)", lineBox.height >= 44);
+    await press(phoneLines.nth(1));
+    await page.waitForFunction(
+      () => (document.querySelector('[data-testid="meeting-player"]')?.currentTime ?? 0) > 0
+    );
+    const phoneSeek = await page.locator('[data-testid="meeting-player"]').evaluate((el) => el.currentTime);
+    check(
+      "a real finger tap on a transcript line seeks the audio to THAT line's own start",
+      Math.abs(phoneSeek - PHONE_LINES[1].start) < 0.5,
+      `expected ~${PHONE_LINES[1].start}, got ${phoneSeek}`
     );
   }
 

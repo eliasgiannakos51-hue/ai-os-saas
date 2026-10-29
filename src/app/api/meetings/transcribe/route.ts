@@ -26,7 +26,7 @@ import {
   meetingLimits,
   secondsFromBytes,
 } from "@/lib/meetings/meeting-limits";
-import { formatDiarizedTranscript, normaliseLanguage, titleFromTranscript } from "@/lib/meetings/meeting-analysis";
+import { diarizedTranscriptLines, formatDiarizedTranscript, normaliseLanguage, titleFromTranscript } from "@/lib/meetings/meeting-analysis";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -310,6 +310,13 @@ export async function POST(request: Request) {
     const detectedLanguageCode = normaliseLanguage(result.language);
     const transcriptText =
       formatDiarizedTranscript(result.segments ?? [], detectedLanguageCode) || result.text;
+    // MEETINGS Κομμάτι 5: click a transcript line, the audio seeks there.
+    // NEVER STORED — this is computed fresh from the provider's own reply
+    // and handed back in THIS response only, same lifetime as the audio
+    // itself (api/meetings/transcribe's own header). A meeting reopened
+    // from the list later has neither the clip nor these times, which is
+    // the honest answer: there is nothing left in this tab to seek.
+    const transcriptLines = diarizedTranscriptLines(result.segments ?? [], detectedLanguageCode);
 
     // THE ROW IS WRITTEN AFTER THE SETTLEMENT, which is the order
     // docs/shapes.md #36 is about: the state the user sees is the LAST
@@ -347,6 +354,7 @@ export async function POST(request: Request) {
         saved: false,
         meeting: null,
         transcript: transcriptText,
+        lines: transcriptLines,
         // A CODE, NEVER THE PROVIDER'S WORD. Whisper answers "greek";
         // the column and the screen both want "el". See normaliseLanguage.
         language: detectedLanguageCode,
@@ -364,6 +372,7 @@ export async function POST(request: Request) {
       saved: true,
       meeting: row,
       transcript: transcriptText,
+      lines: transcriptLines,
       language: detectedLanguageCode,
       seconds: billedSeconds,
       usage: buildUsageReceipt({

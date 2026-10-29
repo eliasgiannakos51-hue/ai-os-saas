@@ -15,6 +15,9 @@
  *   a new reminder stops clearing the old one
  *   a reminder update loses its ownership check
  *   the reminder cron re-sends to a row it never claimed
+ *   a merged line's seek time drifts to the wrong segment
+ *   the per-line seek times stop coming from the real provider reply
+ *   a click target stops checking it is the open meeting's own player
  *   ...and the two floors, because a gate that ranges over nothing passes.
  *
  * Run: node scripts/tests/meetings.mutation.mjs
@@ -123,8 +126,8 @@ const MUTANTS = [
     // defect "A: Hello\nA: how are you" instead of one line.
     name: "speaker turns stop merging, every segment gets its own line",
     file: ANALYSIS,
-    from: "    if (segment.speaker !== currentRaw) {\n      flush();\n      currentRaw = segment.speaker;\n    }",
-    to: "    flush();\n    currentRaw = segment.speaker;",
+    from: "    if (segment.speaker !== currentRaw) {\n      flush();\n      currentRaw = segment.speaker;\n      currentStart = segment.start;\n    }",
+    to: "    flush();\n    currentRaw = segment.speaker;\n    currentStart = segment.start;",
     expect: "consecutive turns from the SAME speaker merge into one line",
   },
   {
@@ -183,6 +186,54 @@ const MUTANTS = [
     from: "      if (!claimed) continue;",
     to: "      void claimed;",
     expect: "a row already claimed by a concurrent run is skipped",
+  },
+  {
+    // Κομμάτι 5. A merged line's start creeps forward to the LAST
+    // original segment it swallowed instead of staying at the first —
+    // clicking it would seek past however much the speaker already said.
+    name: "a merged line's start drifts to the last segment, not the first",
+    file: ANALYSIS,
+    from: "    if (segment.speaker !== currentRaw) {\n      flush();\n      currentRaw = segment.speaker;\n      currentStart = segment.start;\n    }\n    currentWords.push(text);",
+    to: "    if (segment.speaker !== currentRaw) {\n      flush();\n      currentRaw = segment.speaker;\n    }\n    currentStart = segment.start;\n    currentWords.push(text);",
+    expect: "keeps the EARLIER segment's start",
+  },
+  {
+    // Κομμάτι 5. The per-line times stop being computed from the
+    // provider's own segments, so every click would seek to nothing.
+    name: "the route stops computing per-line seek times from the real segments",
+    file: TRANSCRIBE,
+    from: "const transcriptLines = diarizedTranscriptLines(result.segments ?? [], detectedLanguageCode);",
+    to: "const transcriptLines = [];",
+    expect: "computed from the provider's own reply",
+  },
+  {
+    // Κομμάτι 5. The unsaved-fallback response stops carrying the lines,
+    // so a meeting that failed to write still cannot be seeked in THIS
+    // same tab even though the clip is still sitting right there.
+    name: "the unsaved-fallback response drops the per-line seek times",
+    file: TRANSCRIBE,
+    from: "        lines: transcriptLines,",
+    to: "",
+    expect: "returned on BOTH outcomes",
+  },
+  {
+    // Κομμάτι 5. The click target stops checking it is THIS meeting's
+    // own player, so stale lines from a previous clip could render as
+    // clickable over a meeting that has nothing in this tab to seek.
+    name: "a transcript line's click target drops the open-meeting check",
+    file: WORKSPACE,
+    from: "{playerLines && playerMeetingId === open.id && playerLines.length > 0 ? (",
+    to: "{playerLines && playerLines.length > 0 ? (",
+    expect: "the SAME condition the player element itself is",
+  },
+  {
+    // Κομμάτι 5. Deleting the open meeting stops clearing its lines, so
+    // a stale line list could outlive the player it was seeking for.
+    name: "deleting the open meeting stops clearing its transcript lines",
+    file: WORKSPACE,
+    from: "      setPlayerMeetingId(null);\n      setPlayerLines(null);\n    }",
+    to: "      setPlayerMeetingId(null);\n    }",
+    expect: "resets playerLines alongside it",
   },
   {
     // THE ARRAY. This one is not hypothetical — the parser accepted a

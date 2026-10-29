@@ -424,6 +424,18 @@ try {
     "...and it is what was actually stored, not just what this response says",
     data1.meeting?.transcript === EXPECTED_DIARIZED_TRANSCRIPT
   );
+  // Κομμάτι 5: the per-line seek times, one per rendered line, each at
+  // the FIRST original segment's own start — never persisted (the row
+  // above only ever carries the plain transcript text).
+  check(
+    "the per-line seek times come back too, one per rendered line, each at its own segment's start",
+    Array.isArray(data1.lines) &&
+      data1.lines.length === 3 &&
+      data1.lines[0].start === DIARIZED_SEGMENTS[0].start &&
+      data1.lines[1].start === DIARIZED_SEGMENTS[1].start &&
+      data1.lines[2].start === DIARIZED_SEGMENTS[2].start,
+    JSON.stringify(data1.lines)
+  );
   check("...and it was saved", data1.saved === true && Boolean(data1.meeting?.id));
   check("Whisper was called exactly once", whisperCalls === 1, String(whisperCalls));
   check("the minutes were consumed", seen.consumeSeconds === 1, String(seen.consumeSeconds));

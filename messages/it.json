@@ -3002,6 +3002,7 @@
       "start": "Trascrivi",
       "transcribing": "Trascrizione in corso…",
       "analysing": "Lettura della trascrizione…",
+      "playerUnavailable": "Nessun audio da riprodurre: è stato eliminato subito dopo la trascrizione di questa riunione.",
       "transcriptTitle": "Trascrizione",
       "summaryTitle": "Riassunto",
       "analyse": "Riassumi e trova le azioni",

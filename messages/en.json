@@ -3002,6 +3002,7 @@
       "start": "Transcribe",
       "transcribing": "Transcribing…",
       "analysing": "Reading the transcript…",
+      "playerUnavailable": "No audio to play — it was deleted right after this meeting was transcribed.",
       "transcriptTitle": "Transcript",
       "summaryTitle": "Summary",
       "analyse": "Summarise and find actions",

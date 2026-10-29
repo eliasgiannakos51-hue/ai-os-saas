@@ -3002,6 +3002,7 @@
       "start": "开始转写",
       "transcribing": "正在转写…",
       "analysing": "正在阅读文字记录…",
+      "playerUnavailable": "没有可播放的音频——该会议转录完成后音频已立即删除。",
       "transcriptTitle": "文字记录",
       "summaryTitle": "摘要",
       "analyse": "生成摘要并找出行动",

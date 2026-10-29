@@ -3002,6 +3002,7 @@
       "start": "Transkribieren",
       "transcribing": "Wird transkribiert…",
       "analysing": "Transkript wird gelesen…",
+      "playerUnavailable": "Kein Ton zum Abspielen – er wurde direkt nach der Transkription dieses Meetings gelöscht.",
       "transcriptTitle": "Transkript",
       "summaryTitle": "Zusammenfassung",
       "analyse": "Zusammenfassen und Aufgaben finden",

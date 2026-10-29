@@ -3002,6 +3002,7 @@
       "start": "Transcrever",
       "transcribing": "A transcrever…",
       "analysing": "A ler a transcrição…",
+      "playerUnavailable": "Não há áudio para reproduzir — foi excluído logo após a transcrição desta reunião.",
       "transcriptTitle": "Transcrição",
       "summaryTitle": "Resumo",
       "analyse": "Resumir e encontrar ações",

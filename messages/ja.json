@@ -3002,6 +3002,7 @@
       "start": "文字起こしする",
       "transcribing": "文字起こし中…",
       "analysing": "文字起こしを読んでいます…",
+      "playerUnavailable": "再生できる音声はありません。この会議の文字起こしが終わった直後に削除されました。",
       "transcriptTitle": "文字起こし",
       "summaryTitle": "要約",
       "analyse": "要約してアクションを探す",

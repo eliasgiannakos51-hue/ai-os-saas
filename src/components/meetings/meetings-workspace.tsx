@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
 import { ShieldAlert, Target, Trash2, Upload } from "lucide-react";
@@ -106,15 +106,52 @@ export function MeetingsWorkspace({
   const [seconds, setSeconds] = useState(0);
   const [durationRead, setDurationRead] = useState(true);
   const [problem, setProblem] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"idle" | "transcribing" | "analysing">("idle");
+  const [busy, setBusy] = useState<"idle" | "transcribing" | "analysing">(
+    "idle",
+  );
   const [openId, setOpenId] = useState<string | null>(meetings[0]?.id ?? null);
   const [ticked, setTicked] = useState<Set<number>>(new Set());
   const [goalWords, setGoalWords] = useState("");
-  const [projectChoice, setProjectChoice] = useState<string>(goals?.projects[0]?.id ?? "new");
+  const [projectChoice, setProjectChoice] = useState<string>(
+    goals?.projects[0]?.id ?? "new",
+  );
   const [newProjectName, setNewProjectName] = useState("");
-  const [goalMade, setGoalMade] = useState<{ projectId: string; steps: number } | null>(null);
+  const [goalMade, setGoalMade] = useState<{
+    projectId: string;
+    steps: number;
+  } | null>(null);
   const [goalBusy, setGoalBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * THE PLAYER, WITHOUT A SECOND COPY OF THE AUDIO.
+   *
+   * `src/app/api/meetings/transcribe/route.ts` still keeps none of it —
+   * "no bucket, no column, no path" (see that file's own header) is
+   * unchanged by this screen. `playerUrl` is a client-only
+   * `URL.createObjectURL` of the File the browser already holds in this
+   * tab, the exact same File `readDuration` above already opens to read
+   * its length. It plays the clip just transcribed, in this tab, for as
+   * long as this tab stays open — which is also the honest answer to
+   * "keeps the audio only as long as the user wants": closing or
+   * reloading the tab is the user not wanting it kept, and it is gone,
+   * same as it always was.
+   *
+   * A meeting opened from the picker chips days later has no File behind
+   * it — the audio was never stored — so `playerMeetingId` will not match
+   * and the zone says so instead of showing a dead player.
+   */
+  const [playerUrl, setPlayerUrl] = useState<string | null>(null);
+  const [playerMeetingId, setPlayerMeetingId] = useState<string | null>(null);
+  const playerUrlRef = useRef<string | null>(null);
+  useEffect(() => {
+    playerUrlRef.current = playerUrl;
+  }, [playerUrl]);
+  useEffect(() => {
+    return () => {
+      if (playerUrlRef.current) URL.revokeObjectURL(playerUrlRef.current);
+    };
+  }, []);
 
   const mb = (bytes: number) => Math.round((bytes / (1024 * 1024)) * 10) / 10;
   const mins = (s: number) => Math.max(1, Math.round(s / 60));
@@ -157,6 +194,11 @@ export function MeetingsWorkspace({
       setFile(null);
       setSeconds(0);
       setDurationRead(true);
+      setPlayerUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setPlayerMeetingId(null);
       if (!chosen) return;
       if (!isMeetingAudioType(chosen.type)) {
         setProblem(t("notAudio"));
@@ -164,17 +206,24 @@ export function MeetingsWorkspace({
       }
       // Bytes are known immediately and are the exact ceiling; the
       // duration check runs again once the metadata arrives.
-      const byteVerdict = checkMeetingUpload({ bytes: chosen.size, seconds: 0 }, limits);
+      const byteVerdict = checkMeetingUpload(
+        { bytes: chosen.size, seconds: 0 },
+        limits,
+      );
       if (!byteVerdict.ok && byteVerdict.reason === "too_large") {
         setProblem(
-          t("tooLarge", { actual: mb(byteVerdict.actualBytes), allowed: mb(byteVerdict.allowedBytes) })
+          t("tooLarge", {
+            actual: mb(byteVerdict.actualBytes),
+            allowed: mb(byteVerdict.allowedBytes),
+          }),
         );
         return;
       }
       setFile(chosen);
+      setPlayerUrl(URL.createObjectURL(chosen));
       readDuration(chosen);
     },
-    [limits, readDuration, t]
+    [limits, readDuration, t],
   );
 
   const tooLong = useMemo(() => {
@@ -195,7 +244,10 @@ export function MeetingsWorkspace({
       const body = new FormData();
       body.append("audio", file);
       body.append("seconds", String(seconds));
-      const res = await fetch("/api/meetings/transcribe", { method: "POST", body });
+      const res = await fetch("/api/meetings/transcribe", {
+        method: "POST",
+        body,
+      });
       // A NON-JSON REPLY IS THE HOST'S 413, not ours: a body over the
       // platform's cap never reaches the route, and the answer is HTML.
       // Reading it as JSON would throw and the catch would say
@@ -210,6 +262,7 @@ export function MeetingsWorkspace({
       if (data.meeting) {
         setRows((prev) => [data.meeting as MeetingRow, ...prev]);
         setOpenId(data.meeting.id);
+        setPlayerMeetingId(data.meeting.id);
         void analyse(data.meeting.id);
       } else {
         // Transcribed and paid for, but the row did not write. The text
@@ -228,12 +281,16 @@ export function MeetingsWorkspace({
   async function analyse(meetingId: string) {
     setBusy("analysing");
     try {
-      const res = await fetch(`/api/meetings/${meetingId}/analyse`, { method: "POST" });
+      const res = await fetch(`/api/meetings/${meetingId}/analyse`, {
+        method: "POST",
+      });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
         const code = data?.code ?? "failed";
         setRows((prev) =>
-          prev.map((m) => (m.id === meetingId ? { ...m, analysis_error: code } : m))
+          prev.map((m) =>
+            m.id === meetingId ? { ...m, analysis_error: code } : m,
+          ),
         );
         return;
       }
@@ -248,13 +305,15 @@ export function MeetingsWorkspace({
                 analysis_error: null,
                 analysed_at: data.meeting.analysed_at,
               }
-            : m
-        )
+            : m,
+        ),
       );
       setTicked(new Set());
     } catch {
       setRows((prev) =>
-        prev.map((m) => (m.id === meetingId ? { ...m, analysis_error: "failed" } : m))
+        prev.map((m) =>
+          m.id === meetingId ? { ...m, analysis_error: "failed" } : m,
+        ),
       );
     } finally {
       setBusy("idle");
@@ -296,16 +355,20 @@ export function MeetingsWorkspace({
         const made = await fetch("/api/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: newProjectName.trim(), goal: goalWords.trim() }),
+          body: JSON.stringify({
+            name: newProjectName.trim(),
+            goal: goalWords.trim(),
+          }),
         });
         const madeBody = await made.json().catch(() => null);
         if (!made.ok || !madeBody?.project?.id) {
           setProblem(
             madeBody?.error === "project_limit_reached"
               ? t("goal.projectLimit")
-              : madeBody?.error === "too_short" || madeBody?.error === "too_long"
+              : madeBody?.error === "too_short" ||
+                  madeBody?.error === "too_long"
                 ? t("goal.projectName")
-                : t("errors.failed")
+                : t("errors.failed"),
           );
           return;
         }
@@ -318,10 +381,17 @@ export function MeetingsWorkspace({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
-        setProblem(data?.code === "project_full" ? t("goal.projectFull") : errorText(data?.code, res.status));
+        setProblem(
+          data?.code === "project_full"
+            ? t("goal.projectFull")
+            : errorText(data?.code, res.status),
+        );
         return;
       }
-      setGoalMade({ projectId: String(data.projectId), steps: Number(data.steps) });
+      setGoalMade({
+        projectId: String(data.projectId),
+        steps: Number(data.steps),
+      });
       setTicked(new Set());
       setGoalWords("");
     } finally {
@@ -338,6 +408,13 @@ export function MeetingsWorkspace({
     }
     setRows((prev) => prev.filter((m) => m.id !== meetingId));
     setKept((prev) => prev.filter((a) => a.meeting_id !== meetingId));
+    if (playerMeetingId === meetingId) {
+      setPlayerUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setPlayerMeetingId(null);
+    }
   }
 
   /**
@@ -371,7 +448,10 @@ export function MeetingsWorkspace({
     }
     if (status === 402) return tCredits("outOfCredits.detail");
     if (status === 413) {
-      return t("tooLarge", { actual: file ? mb(file.size) : "?", allowed: mb(limits.maxBytes) });
+      return t("tooLarge", {
+        actual: file ? mb(file.size) : "?",
+        allowed: mb(limits.maxBytes),
+      });
     }
     return t("errors.failed");
   }
@@ -382,7 +462,9 @@ export function MeetingsWorkspace({
     : [];
   const keptForOpen = kept.filter((a) => a.meeting_id === open?.id);
   const keptIndexes = new Set(
-    keptForOpen.map((a) => a.source_index).filter((n): n is number => typeof n === "number")
+    keptForOpen
+      .map((a) => a.source_index)
+      .filter((n): n is number => typeof n === "number"),
   );
 
   return (
@@ -434,7 +516,9 @@ export function MeetingsWorkspace({
 
         {file && (
           <div data-testid="meeting-cost" className="surface-tight">
-            <p className="text-sm font-semibold text-foreground">{t("costTitle")}</p>
+            <p className="text-sm font-semibold text-foreground">
+              {t("costTitle")}
+            </p>
             {/* BOTH COSTS, BEFORE THE UPLOAD. Transcription is priced per
                 minute and the summary per token, and showing only one of
                 them is how a person is surprised by the other. */}
@@ -442,12 +526,20 @@ export function MeetingsWorkspace({
               <li>{t("costTranscribe", { minutes: mins(seconds) })}</li>
               <li>{t("costSummary")}</li>
             </ul>
-            <p data-testid="meeting-cost-total" className="mt-2 text-sm text-foreground">
+            <p
+              data-testid="meeting-cost-total"
+              className="mt-2 text-sm text-foreground"
+            >
               {t("costTotal", { credits: meetingCostCredits(price, seconds) })}
             </p>
-            {!durationRead && <p className="mt-2 text-xs text-muted">{t("costUnknown")}</p>}
+            {!durationRead && (
+              <p className="mt-2 text-xs text-muted">{t("costUnknown")}</p>
+            )}
             {tooLong && (
-              <p data-testid="meeting-too-long" className="mt-2 text-xs text-warning">
+              <p
+                data-testid="meeting-too-long"
+                className="mt-2 text-xs text-warning"
+              >
                 {tooLong}
               </p>
             )}
@@ -472,13 +564,19 @@ export function MeetingsWorkspace({
         )}
 
         {problem && (
-          <p data-testid="meeting-problem" role="status" className="notice-warning px-3 py-2 text-xs leading-relaxed">
+          <p
+            data-testid="meeting-problem"
+            role="status"
+            className="notice-warning px-3 py-2 text-xs leading-relaxed"
+          >
             {problem}
           </p>
         )}
       </section>
 
-      {rows.length === 0 && <p className="surface text-center text-sm text-muted">{t("empty")}</p>}
+      {rows.length === 0 && (
+        <p className="surface text-center text-sm text-muted">{t("empty")}</p>
+      )}
 
       {rows.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -497,7 +595,9 @@ export function MeetingsWorkspace({
                   : "border-border bg-panel/60 text-muted hover:border-foreground/40"
               }`}
             >
-              <span className="block max-w-[16rem] break-words">{m.title || t("title")}</span>
+              <span className="block max-w-[16rem] break-words">
+                {m.title || t("title")}
+              </span>
             </button>
           ))}
         </div>
@@ -507,10 +607,14 @@ export function MeetingsWorkspace({
         <section className="surface space-y-4" data-testid="meeting-detail">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-foreground">{open.title || t("title")}</h2>
+              <h2 className="text-sm font-semibold text-foreground">
+                {open.title || t("title")}
+              </h2>
               {open.language && (
                 <p className="mt-0.5 text-xs text-muted">
-                  {t("detectedLanguage", { language: languageLabel(open.language) })}
+                  {t("detectedLanguage", {
+                    language: languageLabel(open.language),
+                  })}
                 </p>
               )}
             </div>
@@ -524,196 +628,269 @@ export function MeetingsWorkspace({
             </button>
           </div>
 
-          {open.summary ? (
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
-                {t("summaryTitle")}
-              </h3>
-              <p data-testid="meeting-summary" className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                {open.summary}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {open.analysis_error && (
-                <p data-testid="meeting-analysis-error" role="status" className="notice-warning px-3 py-2 text-xs leading-relaxed">
-                  {errorText(open.analysis_error, 502)}
-                </p>
-              )}
-              <button
-                type="button"
-                onClick={() => analyse(open.id)}
-                disabled={busy !== "idle"}
-                data-testid="meeting-analyse"
-                className="btn-outline"
-              >
-                {busy === "analysing"
-                  ? t("analysing")
-                  : open.analysis_error
-                    ? t("retryAnalysis")
-                    : t("analyse")}
-              </button>
-            </div>
-          )}
-
-          {open.analysed_at && (
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
-                {t("proposedTitle")}
-              </h3>
-              {/* SAID ON THE SCREEN, not left to the word "proposed". */}
-              <p data-testid="meeting-proposed-hint" className="mt-1 text-xs text-muted">
-                {t("proposedHint")}
-              </p>
-              {proposals.length === 0 ? (
-                <p className="mt-2 text-sm text-muted">{t("noActions")}</p>
-              ) : (
-                <>
-                  <ul className="row-list mt-2">
-                    {proposals.map((action, index) => {
-                      const already = keptIndexes.has(index);
-                      return (
-                        <li key={index}>
-                          <label
-                            className={`flex min-h-[44px] items-start gap-3 px-3 py-2.5 ${already ? "opacity-60" : ""}`}
-                          >
-                            <input
-                              type="checkbox"
-                              className="mt-1 h-4 w-4 shrink-0"
-                              data-testid={`meeting-proposal-${index}`}
-                              checked={already || ticked.has(index)}
-                              disabled={already}
-                              onChange={(e) =>
-                                setTicked((prev) => {
-                                  const next = new Set(prev);
-                                  if (e.target.checked) next.add(index);
-                                  else next.delete(index);
-                                  return next;
-                                })
-                              }
-                            />
-                            <span className="min-w-0">
-                              <span className="block text-sm text-foreground">{action.what}</span>
-                              <span className="mt-0.5 block text-xs text-muted">
-                                {action.who ?? t("unassigned")} · {action.when ?? t("noDate")}
-                                {already ? ` · ${t("alreadyKept")}` : ""}
-                              </span>
-                            </span>
-                          </label>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <button
-                    type="button"
-                    onClick={() => keep(open.id)}
-                    disabled={ticked.size === 0}
-                    data-testid="meeting-keep"
-                    className="mt-3 inline-flex min-h-[44px] items-center rounded-card bg-button px-4 text-sm font-semibold text-button-ink transition-colors duration-150 hover:bg-button disabled:opacity-50"
-                  >
-                    {ticked.size === 0 ? t("keepNone") : t("keepSelected", { count: ticked.size })}
-                  </button>
-                  {goals && ticked.size > 0 ? (
-                    <div data-testid="meeting-goal" className="mt-3 space-y-2 rounded-card bg-panel p-3">
-                      <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                        <Target className="h-4 w-4 text-muted" aria-hidden="true" />
-                        {t("goal.title", { count: ticked.size })}
-                      </p>
-                      <label className="block text-xs text-muted">
-                        {t("goal.goalLabel")}
-                        <input
-                          data-testid="meeting-goal-text"
-                          value={goalWords}
-                          onChange={(e) => setGoalWords(e.target.value)}
-                          placeholder={open.title}
-                          maxLength={500}
-                          className="input mt-1 w-full"
-                        />
-                      </label>
-                      <label className="block text-xs text-muted">
-                        {t("goal.projectLabel")}
-                        <select
-                          data-testid="meeting-goal-project"
-                          value={projectChoice}
-                          onChange={(e) => setProjectChoice(e.target.value)}
-                          className="input mt-1 w-full"
-                        >
-                          {goals.projects.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name}
-                            </option>
-                          ))}
-                          <option value="new">{t("goal.newProject")}</option>
-                        </select>
-                      </label>
-                      {projectChoice === "new" ? (
-                        <label className="block text-xs text-muted">
-                          {t("goal.newProjectName")}
-                          <input
-                            data-testid="meeting-goal-new-project"
-                            value={newProjectName}
-                            onChange={(e) => setNewProjectName(e.target.value)}
-                            maxLength={120}
-                            className="input mt-1 w-full"
-                          />
-                        </label>
-                      ) : null}
-                      <button
-                        type="button"
-                        onClick={() => makeGoal(open.id)}
-                        disabled={goalBusy || (projectChoice === "new" && newProjectName.trim().length < 2)}
-                        data-testid="meeting-goal-make"
-                        className="inline-flex min-h-[44px] items-center rounded-card bg-panel-hover px-4 text-sm font-semibold text-foreground disabled:opacity-50"
-                      >
-                        {t("goal.make", { count: ticked.size })}
-                      </button>
-                    </div>
-                  ) : null}
-                  {goalMade ? (
-                    <p data-testid="meeting-goal-done" role="status" className="mt-3 text-sm text-foreground">
-                      {t("goal.done", { count: goalMade.steps })}{" "}
-                      <a href={`/dashboard/projects/${goalMade.projectId}`} data-testid="meeting-goal-open-project" className="underline">
-                        {t("goal.openProject")}
-                      </a>
-                      {" · "}
-                      <a href="/dashboard/mission" className="underline">
-                        {t("goal.openGoals")}
-                      </a>
-                    </p>
-                  ) : null}
-                </>
-              )}
-            </div>
-          )}
-
-          <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
-              {t("keptTitle")}
-            </h3>
-            {keptForOpen.length === 0 ? (
-              <p className="mt-1.5 text-sm text-muted">{t("keptEmpty")}</p>
+          {/* THE PLAYER, ON TOP. Only the clip just transcribed in this
+              tab has anything to play — see the note on playerUrl above
+              for why a meeting opened from the list days later shows the
+              explanation instead. */}
+          <div data-testid="meeting-player-zone">
+            {playerUrl && playerMeetingId === open.id ? (
+              // eslint-disable-next-line jsx-a11y/media-has-caption -- a
+              // meeting recording has no track to caption against.
+              <audio
+                controls
+                data-testid="meeting-player"
+                className="w-full"
+                src={playerUrl}
+              />
             ) : (
-              <ul data-testid="meeting-kept" className="row-list mt-1.5">
-                {keptForOpen.map((a) => (
-                  <li key={a.id} className="px-3 py-2.5">
-                    <span className="block text-sm text-foreground">{a.what}</span>
-                    <span className="mt-0.5 block text-xs text-muted">
-                      {a.who ?? t("unassigned")} · {a.when_text ?? t("noDate")}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <p
+                data-testid="meeting-player-unavailable"
+                className="text-xs text-muted"
+              >
+                {t("playerUnavailable")}
+              </p>
             )}
           </div>
 
-          <details>
-            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-widest text-muted">
-              {t("transcriptTitle")}
-            </summary>
-            <p data-testid="meeting-transcript" className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">
-              {open.transcript}
-            </p>
-          </details>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-4" data-testid="meeting-summary-column">
+              {open.summary ? (
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
+                    {t("summaryTitle")}
+                  </h3>
+                  <p
+                    data-testid="meeting-summary"
+                    className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-foreground"
+                  >
+                    {open.summary}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {open.analysis_error && (
+                    <p
+                      data-testid="meeting-analysis-error"
+                      role="status"
+                      className="notice-warning px-3 py-2 text-xs leading-relaxed"
+                    >
+                      {errorText(open.analysis_error, 502)}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => analyse(open.id)}
+                    disabled={busy !== "idle"}
+                    data-testid="meeting-analyse"
+                    className="btn-outline"
+                  >
+                    {busy === "analysing"
+                      ? t("analysing")
+                      : open.analysis_error
+                        ? t("retryAnalysis")
+                        : t("analyse")}
+                  </button>
+                </div>
+              )}
+
+              {open.analysed_at && (
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
+                    {t("proposedTitle")}
+                  </h3>
+                  {/* SAID ON THE SCREEN, not left to the word "proposed". */}
+                  <p
+                    data-testid="meeting-proposed-hint"
+                    className="mt-1 text-xs text-muted"
+                  >
+                    {t("proposedHint")}
+                  </p>
+                  {proposals.length === 0 ? (
+                    <p className="mt-2 text-sm text-muted">{t("noActions")}</p>
+                  ) : (
+                    <>
+                      <ul className="row-list mt-2">
+                        {proposals.map((action, index) => {
+                          const already = keptIndexes.has(index);
+                          return (
+                            <li key={index}>
+                              <label
+                                className={`flex min-h-[44px] items-start gap-3 px-3 py-2.5 ${already ? "opacity-60" : ""}`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="mt-1 h-4 w-4 shrink-0"
+                                  data-testid={`meeting-proposal-${index}`}
+                                  checked={already || ticked.has(index)}
+                                  disabled={already}
+                                  onChange={(e) =>
+                                    setTicked((prev) => {
+                                      const next = new Set(prev);
+                                      if (e.target.checked) next.add(index);
+                                      else next.delete(index);
+                                      return next;
+                                    })
+                                  }
+                                />
+                                <span className="min-w-0">
+                                  <span className="block text-sm text-foreground">
+                                    {action.what}
+                                  </span>
+                                  <span className="mt-0.5 block text-xs text-muted">
+                                    {action.who ?? t("unassigned")} ·{" "}
+                                    {action.when ?? t("noDate")}
+                                    {already ? ` · ${t("alreadyKept")}` : ""}
+                                  </span>
+                                </span>
+                              </label>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      <button
+                        type="button"
+                        onClick={() => keep(open.id)}
+                        disabled={ticked.size === 0}
+                        data-testid="meeting-keep"
+                        className="mt-3 inline-flex min-h-[44px] items-center rounded-card bg-button px-4 text-sm font-semibold text-button-ink transition-colors duration-150 hover:bg-button disabled:opacity-50"
+                      >
+                        {ticked.size === 0
+                          ? t("keepNone")
+                          : t("keepSelected", { count: ticked.size })}
+                      </button>
+                      {goals && ticked.size > 0 ? (
+                        <div data-testid="meeting-goal" className="mt-3 space-y-2 rounded-card bg-panel p-3">
+                          <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                            <Target
+                              className="h-4 w-4 text-muted"
+                              aria-hidden="true"
+                            />
+                            {t("goal.title", { count: ticked.size })}
+                          </p>
+                          <label className="block text-xs text-muted">
+                            {t("goal.goalLabel")}
+                            <input
+                              data-testid="meeting-goal-text"
+                              value={goalWords}
+                              onChange={(e) => setGoalWords(e.target.value)}
+                              placeholder={open.title}
+                              maxLength={500}
+                              className="input mt-1 w-full"
+                            />
+                          </label>
+                          <label className="block text-xs text-muted">
+                            {t("goal.projectLabel")}
+                            <select
+                              data-testid="meeting-goal-project"
+                              value={projectChoice}
+                              onChange={(e) => setProjectChoice(e.target.value)}
+                              className="input mt-1 w-full"
+                            >
+                              {goals.projects.map((p) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.name}
+                                </option>
+                              ))}
+                              <option value="new">
+                                {t("goal.newProject")}
+                              </option>
+                            </select>
+                          </label>
+                          {projectChoice === "new" ? (
+                            <label className="block text-xs text-muted">
+                              {t("goal.newProjectName")}
+                              <input
+                                data-testid="meeting-goal-new-project"
+                                value={newProjectName}
+                                onChange={(e) =>
+                                  setNewProjectName(e.target.value)
+                                }
+                                maxLength={120}
+                                className="input mt-1 w-full"
+                              />
+                            </label>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => makeGoal(open.id)}
+                            disabled={
+                              goalBusy ||
+                              (projectChoice === "new" &&
+                                newProjectName.trim().length < 2)
+                            }
+                            data-testid="meeting-goal-make"
+                            className="inline-flex min-h-[44px] items-center rounded-card bg-panel-hover px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+                          >
+                            {t("goal.make", { count: ticked.size })}
+                          </button>
+                        </div>
+                      ) : null}
+                      {goalMade ? (
+                        <p
+                          data-testid="meeting-goal-done"
+                          role="status"
+                          className="mt-3 text-sm text-foreground"
+                        >
+                          {t("goal.done", { count: goalMade.steps })}{" "}
+                          <a
+                            href={`/dashboard/projects/${goalMade.projectId}`}
+                            data-testid="meeting-goal-open-project"
+                            className="underline"
+                          >
+                            {t("goal.openProject")}
+                          </a>
+                          {" · "}
+                          <a href="/dashboard/mission" className="underline">
+                            {t("goal.openGoals")}
+                          </a>
+                        </p>
+                      ) : null}
+                    </>
+                  )}
+                </div>
+              )}
+
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
+                  {t("keptTitle")}
+                </h3>
+                {keptForOpen.length === 0 ? (
+                  <p className="mt-1.5 text-sm text-muted">{t("keptEmpty")}</p>
+                ) : (
+                  <ul data-testid="meeting-kept" className="row-list mt-1.5">
+                    {keptForOpen.map((a) => (
+                      <li key={a.id} className="px-3 py-2.5">
+                        <span className="block text-sm text-foreground">
+                          {a.what}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-muted">
+                          {a.who ?? t("unassigned")} ·{" "}
+                          {a.when_text ?? t("noDate")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            {/* THE TRANSCRIPT, ON THE RIGHT. Always open — it had been a
+                collapsed <details> when it was the last thing on a single
+                column; given its own column, collapsing it by default
+                would be hiding the one thing this side of the screen is
+                for. */}
+            <div data-testid="meeting-transcript-column">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
+                {t("transcriptTitle")}
+              </h3>
+              <p
+                data-testid="meeting-transcript"
+                className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted"
+              >
+                {open.transcript}
+              </p>
+            </div>
+          </div>
         </section>
       )}
     </div>
@@ -729,7 +906,9 @@ export function MeetingsWorkspace({
  */
 function languageLabel(code: string): string {
   try {
-    return new Intl.DisplayNames(undefined, { type: "language" }).of(code) ?? code;
+    return (
+      new Intl.DisplayNames(undefined, { type: "language" }).of(code) ?? code
+    );
   } catch {
     return code;
   }

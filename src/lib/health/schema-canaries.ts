@@ -476,6 +476,20 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",
   },
   {
+    kind: "column",
+    table: "rebuild_projects",
+    column: "has_app_phase",
+    migration: "20261105000000_rebuild_app_phase.sql",
+    breaks: "Rebuild's «Approve plan» (Κομμάτι 3) cannot tell a two-phase app from a one-phase one: every app looks like it needs an App-logic phase, or none ever does",
+  },
+  {
+    kind: "column",
+    table: "rebuild_projects",
+    column: "app_definition",
+    migration: "20261105000000_rebuild_app_phase.sql",
+    breaks: "Rebuild charges for the App-logic phase and then cannot save its result: the person pays and sees «it could not be saved», and the Write phase that follows never gets the structured definition it needs",
+  },
+  {
     kind: "table",
     table: "my_stuff_sessions",
     migration: "20261024100000_my_stuff_sessions.sql",

@@ -153,6 +153,20 @@ const NEW_DATA = "Πελάτης, ώρα, τιμή, σημείωση.";
 // dropped and one re-worded by hand and the third stays, each checked for.
 const FEATURES = ["Online booking", "Client reminders", "Staff scheduling"];
 const NEW_FEATURE = "Υπενθυμίσεις SMS";
+// Κομμάτι 3: the App-logic phase's own structured definition (Apps' own
+// shape, lib/apps/app-plan.ts) — valid on purpose (one collection with a
+// field, one screen pointing at it), so parseDefinition keeps it whole.
+const APP_DEFINITION = {
+  title: "Κρατήσεις",
+  collections: [{ key: "bookings", label: "Κρατήσεις", visibility: "own", fields: [{ key: "time", label: "Ώρα", type: "text", required: true }] }],
+  screens: [{ key: "new_booking", label: "Νέα κράτηση", kind: "form", collection: "bookings", role: "customer" }],
+  notifications: [],
+};
+// Set just before pressing «Build the app» to make the write phase itself
+// (not a later change) come back unsafe — Κομμάτι 3's constraint #4: a
+// phase that fails after an earlier one succeeded keeps what that one
+// already saved, and charges nothing for the failure.
+let forceUnsafeBuild = false;
 const app = (version, background) => `<!DOCTYPE html>
 <html lang="el"><script>
   // Before the head: the place a seal written after <head> would not cover.
@@ -195,11 +209,18 @@ const model = http.createServer((req, res) => {
     }
     let input;
     if (tool === "list_features") input = { features: [...FEATURES] };
+    // Apps' OWN planner (lib/apps/app-call.ts), called as a library for the
+    // App-logic phase — its tool is ALSO named "plan_app", so the two are
+    // told apart by Apps' own distinctive wording, never by name alone.
+    else if (tool === "plan_app" && message.includes("SAVES DATA for this business")) input = APP_DEFINITION;
     else if (tool === "plan_app") {
       const plan = PLANS[message.includes(`in ${languageNameFor("en")}`) ? "English" : "Greek"];
       input = { title: plan.title, boxes: Object.entries(plan.boxes).map(([kind, text]) => ({ kind, text })) };
     } else if (tool === "rewrite_box") input = { text: NEW_DATA };
-    else if (tool === "write_app" && message.split(UNTRUSTED_OPEN).length - 1 === 2 && message.startsWith("Change this app")) {
+    else if (tool === "write_app" && forceUnsafeBuild) {
+      forceUnsafeBuild = false;
+      input = { html: app(9, "#000").replace('save(v); el.value = "";', 'save(v); fetch("/score"); el.value = "";') };
+    } else if (tool === "write_app" && message.split(UNTRUSTED_OPEN).length - 1 === 2 && message.startsWith("Change this app")) {
       // «στείλε το σκορ» asks for the network: the answer is not a safe app.
       input = { html: /στείλε το σκορ/.test(message) ? app(9, "#000").replace('save(v); el.value = "";', 'save(v); fetch("/score"); el.value = "";') : app(2, "rgb(200, 0, 0)") };
     } else input = { html: app(1, "rgb(255, 255, 255)") };
@@ -391,8 +412,15 @@ try {
     check("the box says the new words, and the other three are exactly as they were", (await boxes.nth(1).innerText()).includes(NEW_DATA) && JSON.stringify(mine()[0].plan.boxes.filter((b) => b.kind !== "data")) === before);
     check("the box change was settled as changing an app", settled.length === 3 && settled[2].p_feature === "rebuild_edit");
 
-    console.log(`\n== ${device.label}: build, use it sealed ==`);
-    check("the plan shows a phase, priced, before it is approved", (await page.locator('[data-testid="rebuild-phase"]').count()) === 1 && (await page.locator('[data-testid="rebuild-phase"]').innerText()).match(/\d/) !== null);
+    console.log(`\n== ${device.label}: two real phases — App logic, then Write the app (Κομμάτι 3) ==`);
+    check("two capabilities were kept, so the plan needs a real App-logic phase before the app is written — each phase priced, neither charged yet", (await page.locator('[data-testid="rebuild-phase"]').count()) === 2 && (await page.locator('[data-testid="rebuild-phase"]').first().innerText()).match(/\d/) !== null && (await page.locator('[data-testid="rebuild-build"]').count()) === 0);
+    const appLogicAskedAt = modelAsked.length;
+    await press(page.locator('[data-testid="rebuild-approve-plan"]'));
+    await page.locator('[data-testid="rebuild-build"]').waitFor({ timeout: 60_000 });
+    const appLogicMsg = String(modelAsked[appLogicAskedAt]?.messages?.[0]?.content ?? "");
+    check("«Approve plan» ran Apps' OWN planner, as a library, fed OUR plan — never a second project, never Apps' own ready flag or tile", modelAsked.length === appLogicAskedAt + 1 && modelAsked[appLogicAskedAt]?.tool_choice?.name === "plan_app" && appLogicMsg.includes("SAVES DATA for this business") && appLogicMsg.includes("TITLE: Κρατήσεις Στούντιο"));
+    check("the App-logic phase's definition is saved on the SAME row, and the app is not written yet", mine()[0].app_definition?.title === APP_DEFINITION.title && mine()[0].html === null);
+    check("the App-logic phase was charged once, the same bucket as every other rebuild step, before the Write phase ran", settled.length === 4 && settled[3].p_feature === "rebuild_generate");
     await press(page.locator('[data-testid="rebuild-build"]'));
     await waitFrame(page, 1);
     const iframe = page.locator('[data-testid="rebuild-frame"]');
@@ -417,7 +445,7 @@ try {
     await page.screenshot({ path: `${SHOTS}/rebuild-${device.label}-el-2-app.png` });
     const stored = mine()[0];
     check("the app is stored as written, as its first version", stored.html === app(1, "rgb(255, 255, 255)") && stored.versions.length === 1 && stored.versions[0].note === "build");
-    check("the app was settled as making an app", settled.length === 4 && settled[3].p_feature === "rebuild_generate");
+    check("the Write phase was settled as making an app, right after the App-logic phase it followed", settled.length === 5 && settled[4].p_feature === "rebuild_generate");
 
     console.log(`\n== ${device.label}: change with words, undo, download ==`);
     await say(page, press, "κόκκινο φόντο");
@@ -425,19 +453,19 @@ try {
     await frame(page).locator('body[data-ready="yes"]').waitFor({ timeout: 15_000 });
     check("the change runs in its place", (await frameBody(page, "version")) === "2" && (await frame(page).locator("body").evaluate((b) => getComputedStyle(b).backgroundColor)) === "rgb(200, 0, 0)");
     check("...the one before is kept, and the screen counts both", mine()[0].versions.length === 2 && (await page.locator('[data-testid="rebuild-versions"] summary').innerText()).trim() === plural(G.versions, 2));
-    check("the change was settled as changing an app", settled.length === 5 && settled[4].p_feature === "rebuild_edit");
+    check("the change was settled as changing an app", settled.length === 6 && settled[5].p_feature === "rebuild_edit");
     const holds = reserved.length;
     await press(page.locator('[data-testid="rebuild-undo"]'));
     await waitFrame(page, 1);
     check("Undo brings the first version back", (await iframe.getAttribute("srcdoc")).includes('dataset.version = "1"') && mine()[0].html === app(1, "rgb(255, 255, 255)"));
-    check("...as a version of its own, and nothing was held or charged for it", mine()[0].versions.length === 3 && mine()[0].versions[0].note === "restore" && reserved.length === holds && settled.length === 5);
+    check("...as a version of its own, and nothing was held or charged for it", mine()[0].versions.length === 3 && mine()[0].versions[0].note === "restore" && reserved.length === holds && settled.length === 6);
     check("the thread says so", (await thread(page).innerText()).includes(G.undone));
     const summary = page.locator('[data-testid="rebuild-versions"] summary');
     await press(summary);
     check("every version is listed, the current one first, and the earlier ones can be chosen", (await page.locator('[data-testid="rebuild-restore"]').count()) === 2);
     await press(page.locator('[data-testid="rebuild-restore"]').nth(0));
     await waitFrame(page, 2);
-    check("a chosen version comes back, free", (await iframe.getAttribute("srcdoc")).includes('dataset.version = "2"') && reserved.length === holds && settled.length === 5);
+    check("a chosen version comes back, free", (await iframe.getAttribute("srcdoc")).includes('dataset.version = "2"') && reserved.length === holds && settled.length === 6);
     const dl = await page.request.get(`${APP}/api/rebuild/${mine()[0].id}/download`);
     const file = await dl.text();
     check("the download is one HTML file, sealed the way it is shown, never cached", dl.status() === 200 && /^attachment;/.test(dl.headers()["content-disposition"] ?? "") && file.startsWith('<!DOCTYPE html><meta http-equiv="Content-Security-Policy"') && file.includes('dataset.version = "2"') && dl.headers()["cache-control"] === "private, no-store");
@@ -462,6 +490,10 @@ try {
     await say(page, press, "A booking app for my small studio");
     await page.locator('[data-testid="rebuild-features"]').waitFor({ timeout: 60_000 });
     check("the capabilities step speaks English too", (await page.locator('[data-testid="rebuild-features-continue"]').innerText()).trim() === EN.dashboard.rebuild.features.continue);
+    // None kept here, on purpose: this block is about the words on screen,
+    // not the phase count, so it stays on the one-phase path Κομμάτι 1 always had.
+    const enFeatureBoxes = page.locator('[data-testid="rebuild-feature"]');
+    for (let i = 0; i < (await enFeatureBoxes.count()); i++) await press(enFeatureBoxes.nth(i));
     await press(page.locator('[data-testid="rebuild-features-continue"]'));
     await page.locator('[data-testid="rebuild-plan"]').waitFor({ timeout: 60_000 });
     const labels = await page.locator('[data-testid="rebuild-box"] span:first-child').allInnerTexts();
@@ -496,6 +528,8 @@ try {
 
     await say(page, press, "Μια εφαρμογή κρατήσεων");
     await toPlan(page, press);
+    await press(page.locator('[data-testid="rebuild-approve-plan"]'));
+    await page.locator('[data-testid="rebuild-build"]').waitFor({ timeout: 60_000 });
     await press(page.locator('[data-testid="rebuild-build"]'));
     await waitFrame(page, 1);
     const charged = settled.length;
@@ -521,6 +555,32 @@ try {
     check("the person's own app is deleted when they ask", own.status() === 200 && mine().length === 0);
     const signedOut = await fetch(`${APP}/api/rebuild`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ description: "x" }) });
     check("a request with no account is refused", signedOut.status === 401);
+    await context.close();
+  }
+
+  console.log("\n== Κομμάτι 3's constraint: the Write phase can fail after App-logic succeeded, and nothing is lost ==");
+  {
+    reset();
+    reserved.length = 0;
+    settled.length = 0;
+    released.length = 0;
+    const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/rebuild`, { waitUntil: "networkidle" });
+    await say(page, press, "Μια εφαρμογή κρατήσεων");
+    await toPlan(page, press);
+    check("the plan needs two phases, since capabilities were kept", (await page.locator('[data-testid="rebuild-phase"]').count()) === 2);
+    await press(page.locator('[data-testid="rebuild-approve-plan"]'));
+    await page.locator('[data-testid="rebuild-build"]').waitFor({ timeout: 60_000 });
+    check("the App-logic phase succeeded and was saved, charged once (after the capabilities step and the plan, already settled)", mine()[0].app_definition?.title === APP_DEFINITION.title && mine()[0].html === null && settled.length === 3 && settled[2].p_feature === "rebuild_generate");
+    const afterPhase1 = { settled: settled.length, released: released.length, definition: JSON.stringify(mine()[0].app_definition) };
+    forceUnsafeBuild = true;
+    await press(page.locator('[data-testid="rebuild-build"]'));
+    await said(page, G.errors.unusable);
+    check("the Write phase failing keeps what the App-logic phase already saved — never retroactively undone — and charges nothing for the failure", mine()[0].html === null && JSON.stringify(mine()[0].app_definition) === afterPhase1.definition && settled.length === afterPhase1.settled && released.length === afterPhase1.released + 1);
+    await press(page.locator('[data-testid="rebuild-build"]'));
+    await waitFrame(page, 1);
+    check("retrying the SAME phase succeeds, still folding in the one App-logic definition, and is charged once — no double phase, no lost work", mine()[0].html === app(1, "rgb(255, 255, 255)") && JSON.stringify(mine()[0].app_definition) === afterPhase1.definition && settled.length === afterPhase1.settled + 1 && settled[afterPhase1.settled].p_feature === "rebuild_generate");
+    check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }
 

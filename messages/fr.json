@@ -3985,7 +3985,13 @@
       },
       "phases": {
         "heading": "Étapes",
-        "note": "Aujourd'hui, il n'y a qu'une seule phase : toute l'application, en une fois. D'autres phases arriveront."
+        "note": "Aujourd'hui, il n'y a qu'une seule phase : toute l'application, en une fois. D'autres phases arriveront.",
+        "noteTwo": "Cette application a besoin de deux phases : d'abord ses données et ses écrans, puis l'application elle-même, écrite à partir d'eux. Approuvez le plan pour démarrer la première phase ; le prix de la deuxième phase s'affiche une fois la première terminée.",
+        "appLogic": "Logique de l'application",
+        "writeApp": "Écrire l'application",
+        "approve": "Approuver le plan",
+        "approving": "Démarrage…",
+        "appLogicDone": "Les données et les écrans de l'application sont planifiés. Écrivez maintenant l'application."
       },
       "build": "Construire l'application",
       "building": "Construction de l'application…",

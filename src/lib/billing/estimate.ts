@@ -724,6 +724,17 @@ export const ACTION_PROFILES = {
     baseOutputChars: 3000,
     outputCharsPerInputChar: 0,
   },
+  // Κομμάτι 3, 2026-10-29: the «App logic» phase — Apps' own planner
+  // (lib/apps/app-call.ts), called as a library; its system prompt is
+  // Apps' own (longer than Rebuild's few-line tool schema), its own
+  // structured definition is the output, typically compact JSON-shaped
+  // text, smaller than the four-box plan it feeds.
+  rebuildAppLogic: {
+    systemPromptTokens: 250,
+    auxiliaryCalls: [],
+    baseOutputChars: 1800,
+    outputCharsPerInputChar: 0,
+  },
   rebuildBoxEdit: {
     systemPromptTokens: 100,
     auxiliaryCalls: [],

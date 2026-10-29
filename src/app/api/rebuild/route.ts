@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120; // @function-limit 120
 
 /** What a client may be handed of a stored app: never another account's, never a column it need not see. */
-export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, updated_at";
+export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, updated_at";
 
 /**
  * AN APP, PLANNED FROM A DESCRIPTION (Rebuild, the final All tools grid),
@@ -93,9 +93,14 @@ export async function POST(request: Request) {
     });
     if (!step.ok) return step.response;
 
+    // Κομμάτι 3: the phase count is decided HERE, once, from what was kept
+    // on the capabilities step — never recomputed later, so a box edited
+    // afterwards cannot quietly add or remove a phase the person never
+    // approved.
+    const hasAppPhase = features.length > 0;
     const { data: row, error } = await createAdminClient()
       .from("rebuild_projects")
-      .insert({ user_id: user.id, title: step.value.title, description, locale, plan: step.value, reference })
+      .insert({ user_id: user.id, title: step.value.title, description, locale, plan: step.value, reference, has_app_phase: hasAppPhase })
       .select(REBUILD_COLUMNS)
       .single();
     if (error || !row) {

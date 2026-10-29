@@ -11,9 +11,10 @@ import type { ActionProfileKey } from "@/lib/billing/estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
-import { buildMessage, changeMessage, boxMessage, planMessage, readPlan, type RebuildBoxKind, type RebuildPlan } from "@/lib/rebuild/rebuild-plan";
+import { buildMessage, changeMessage, boxMessage, planMessage, planText, readPlan, type RebuildBoxKind, type RebuildPlan } from "@/lib/rebuild/rebuild-plan";
 import { MAX_FEATURE_CHARS, featuresMessage } from "@/lib/rebuild/rebuild-features";
 import { APP_SANDBOX, sealApp } from "@/lib/rebuild/rebuild-html";
+import { readDefinition } from "@/lib/apps/app-plan";
 
 /**
  * REBUILD (the final All tools grid), in the shell every tool shares: the
@@ -41,6 +42,16 @@ import { APP_SANDBOX, sealApp } from "@/lib/rebuild/rebuild-html";
  * itself is reached only through that button. A failed features call shows
  * its error and charges nothing, same as any other step; nothing is
  * created until the person presses that button.
+ *
+ * KΟΜΜΆΤΙ 3 (2026-10-29): a plan whose capabilities need it (has_app_phase,
+ * decided once, at plan time, from what Κομμάτι 2 kept) gets a real second
+ * phase — «App logic» first (Apps' own planner, lib/apps/app-plan.ts,
+ * called as a library: lib/rebuild/rebuild-call.ts's planAppLogic), then
+ * «Write the app» as before. Every other plan stays the one phase it
+ * always was. «Approve plan» starts phase 1 ONLY; phase 2's own price is
+ * shown only once phase 1 is done, and needs its own press — no phase is
+ * charged before it runs, and a phase 2 failure never touches what phase 1
+ * already saved (lib/rebuild/charge.ts's own hold/release, unchanged here).
  */
 export type RebuildRow = {
   id: string;
@@ -50,14 +61,26 @@ export type RebuildRow = {
   html: string | null;
   versions: unknown;
   locale: string;
+  has_app_phase: boolean;
+  app_definition: unknown;
   updated_at: string;
 };
 
 type RebuildFeatureBox = { id: string; label: string; selected: boolean };
 
-type Running = null | "features" | "plan" | "box" | "build" | "change" | "restore";
+type Running = null | "features" | "plan" | "appLogic" | "box" | "build" | "change" | "restore";
 
-export function RebuildShell({ initialProjects, initialOpenId = null, systemChars }: { initialProjects: RebuildRow[]; initialOpenId?: string | null; systemChars: number }) {
+export function RebuildShell({
+  initialProjects,
+  initialOpenId = null,
+  systemChars,
+  appSystemChars,
+}: {
+  initialProjects: RebuildRow[];
+  initialOpenId?: string | null;
+  systemChars: number;
+  appSystemChars: number;
+}) {
   const t = useTranslations("dashboard.rebuild");
   const tNames = useTranslations("dashboard.tools.names");
   const locale = useLocale();
@@ -102,6 +125,11 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
   const built = Boolean(open?.html);
   const versions = Array.isArray(open?.versions) ? (open!.versions as { at: string; note: string }[]) : [];
 
+  // Κομμάτι 3: the second phase's own status, read back from the row —
+  // never a separate piece of state to drift from what was actually saved.
+  const appDefinition = open?.has_app_phase ? readDefinition(open.app_definition) : null;
+  const appLogicDone = Boolean(appDefinition);
+
   // THE PRICE OF WHAT THE NEXT PRESS DOES, from what it will send. While no
   // project is open, the first real call is the features step (Κομμάτι 2),
   // never the plan directly — editing one feature's wording is free (no
@@ -118,7 +146,8 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
           ? systemChars + boxMessage(plan, box ?? "screens", words, locale).length
           : 0;
   const nextPrice = useCostEstimate(nextAction, { inputChars: nextChars });
-  const buildPrice = useCostEstimate("rebuildBuild", { inputChars: plan ? systemChars + buildMessage(plan, locale, open?.reference?.rendered).length : 0 });
+  const buildPrice = useCostEstimate("rebuildBuild", { inputChars: plan ? systemChars + buildMessage(plan, locale, open?.reference?.rendered, appDefinition).length : 0 });
+  const appLogicPrice = useCostEstimate("rebuildAppLogic", { inputChars: plan ? appSystemChars + planText(plan).length : 0 });
   const selectedFeatureLabels = features ? features.filter((f) => f.selected).map((f) => f.label) : [];
   const featuresPlanPrice = useCostEstimate("rebuildPlan", { inputChars: features ? systemChars + planMessage(featuresDescription, locale, undefined, selectedFeatureLabels).length : 0 });
 
@@ -282,6 +311,12 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
     if (project) say({ role: "tool", text: t("changed"), projectId: project.id });
   }
 
+  async function runAppLogic() {
+    if (!open) return;
+    const project = await post(`/api/rebuild/${open.id}`, { action: "appLogic" }, "appLogic");
+    if (project) say({ role: "tool", text: t("phases.appLogicDone"), projectId: project.id });
+  }
+
   async function build() {
     if (!open) return;
     const project = await post(`/api/rebuild/${open.id}`, { action: "build" }, "build");
@@ -402,20 +437,37 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
                   <div>
                     <p className="text-xs text-muted">{t("phases.heading")}</p>
                     <ol className="mt-1.5 space-y-1.5" data-testid="rebuild-phases">
+                      {open.has_app_phase && (
+                        <li data-testid="rebuild-phase" className="rounded-item bg-panel px-3 py-2">
+                          <div className="flex items-center gap-3">
+                            <span className="w-5 shrink-0 text-xs text-muted">1</span>
+                            <span className="min-w-0 flex-1 text-sm text-foreground">{t("phases.appLogic")}</span>
+                            {appLogicDone && <Check className="h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />}
+                          </div>
+                          {!appLogicDone && running === null && <CostEstimateHint credits={appLogicPrice.credits} />}
+                        </li>
+                      )}
                       <li data-testid="rebuild-phase" className="rounded-item bg-panel px-3 py-2">
                         <div className="flex items-center gap-3">
-                          <span className="w-5 shrink-0 text-xs text-muted">1</span>
-                          <span className="min-w-0 flex-1 text-sm text-foreground">{t("build")}</span>
+                          <span className="w-5 shrink-0 text-xs text-muted">{open.has_app_phase ? "2" : "1"}</span>
+                          <span className="min-w-0 flex-1 text-sm text-foreground">{open.has_app_phase ? t("phases.writeApp") : t("build")}</span>
                         </div>
-                        {running === null && <CostEstimateHint credits={buildPrice.credits} />}
+                        {(!open.has_app_phase || appLogicDone) && running === null && <CostEstimateHint credits={buildPrice.credits} />}
                       </li>
                     </ol>
-                    <p className="mt-1.5 text-[11px] text-muted">{t("phases.note")}</p>
+                    <p className="mt-1.5 text-[11px] text-muted">{open.has_app_phase ? t("phases.noteTwo") : t("phases.note")}</p>
                     <div className="mt-2">
-                      <button type="button" onClick={() => void build()} disabled={running !== null} data-testid="rebuild-build" className="btn-outline font-semibold">
-                        {running === "build" ? <ThinkingIndicator size="sm" /> : <Hammer className="h-4 w-4" aria-hidden="true" />}
-                        {running === "build" ? t("building") : t("build")}
-                      </button>
+                      {open.has_app_phase && !appLogicDone ? (
+                        <button type="button" onClick={() => void runAppLogic()} disabled={running !== null} data-testid="rebuild-approve-plan" className="btn-outline font-semibold">
+                          {running === "appLogic" ? <ThinkingIndicator size="sm" /> : <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                          {running === "appLogic" ? t("phases.approving") : t("phases.approve")}
+                        </button>
+                      ) : (
+                        <button type="button" onClick={() => void build()} disabled={running !== null} data-testid="rebuild-build" className="btn-outline font-semibold">
+                          {running === "build" ? <ThinkingIndicator size="sm" /> : <Hammer className="h-4 w-4" aria-hidden="true" />}
+                          {running === "build" ? t("building") : t("build")}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </>
@@ -480,7 +532,7 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
       name={tNames("rebuild")}
       help={<HelpTip helpKey="help.rebuild" />}
       turns={shellTurns}
-      working={running !== null && running !== "build" ? <ThinkingIndicator size="sm" /> : null}
+      working={running !== null && running !== "build" && running !== "appLogic" ? <ThinkingIndicator size="sm" /> : null}
       placeholder={!open ? (editingFeature !== null ? t("features.editPlaceholder") : t("placeholder")) : built ? t("placeholderChange") : box ? t("placeholderBox") : t("placeholder")}
       sending={running !== null}
       onSend={(text) => void send(text)}

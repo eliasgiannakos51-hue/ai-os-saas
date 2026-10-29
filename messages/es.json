@@ -3985,7 +3985,13 @@
       },
       "phases": {
         "heading": "Fases",
-        "note": "Hoy hay una sola fase: toda la app, de una vez. Llegarán más fases."
+        "note": "Hoy hay una sola fase: toda la app, de una vez. Llegarán más fases.",
+        "noteTwo": "Esta app necesita dos fases: primero sus datos y pantallas, luego la app misma, escrita a partir de ellos. Aprueba el plan para empezar la primera fase; el precio de la segunda fase se muestra cuando termina la primera.",
+        "appLogic": "Lógica de la app",
+        "writeApp": "Escribir la app",
+        "approve": "Aprobar plan",
+        "approving": "Empezando…",
+        "appLogicDone": "Los datos y pantallas de la app ya están planeados. Ahora escribe la app."
       },
       "build": "Construir la app",
       "building": "Construyendo la app…",

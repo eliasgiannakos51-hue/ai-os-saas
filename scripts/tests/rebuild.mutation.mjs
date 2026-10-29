@@ -34,6 +34,7 @@ const SQL = "supabase/migrations/20261027000000_rebuild_projects.sql";
 const EN = "messages/en.json";
 const FEATURES = "src/lib/rebuild/rebuild-features.ts";
 const FEATURES_ROUTE = "src/app/api/rebuild/features/route.ts";
+const CANARIES = "src/lib/health/schema-canaries.ts";
 
 const MUTANTS = [
   {
@@ -109,14 +110,14 @@ const MUTANTS = [
   {
     name: "the person's description is sent unfenced",
     file: PLAN,
-    from: "    fence(description),\n    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nconst planText",
-    to: "    description,\n    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nconst planText",
+    from: "    fencePlan(description),\n    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\n/** The plan as the model reads it back",
+    to: "    description,\n    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\n/** The plan as the model reads it back",
     expect: "what the person wrote arrives between the untrusted markers",
   },
   {
     name: "what a page said is sent unfenced",
     file: PLAN,
-    from: 'reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", fence(reference)] : [];',
+    from: 'reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", fencePlan(reference)] : [];',
     to: 'reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", reference] : [];',
     expect: "and so does what a page said",
   },
@@ -323,6 +324,90 @@ const MUTANTS = [
     to: 'if (!open) {\n      const ok = await postFeatures(text);\n      if (!ok) await post("/api/rebuild", { description: text }, "plan");\n      return;\n    }',
     expect: "a failed capabilities call shows its error and stops there (chargedRebuildStep's own hold/release) — it never silently falls through to a plan with no review",
   },
+  {
+    name: "the build message stops folding in the App-logic phase's definition",
+    file: PLAN,
+    from: "    ...appDefinitionBlock(appDefinition),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nexport function changeMessage",
+    to: "    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nexport function changeMessage",
+    expect: "the build call folds in the App-logic phase's definition when it ran, fenced like everything else",
+  },
+  {
+    name: "the phase count is recomputed instead of fixed at plan time",
+    file: CREATE,
+    from: "const hasAppPhase = features.length > 0;",
+    to: "const hasAppPhase = false;",
+    expect: "the phase count is decided once, at plan time, from what Κομμάτι 2 kept — never recomputed later",
+  },
+  {
+    name: "the App-logic phase can be charged for on a plan that never asked for one",
+    file: ONE,
+    from: '      if (!hasAppPhase) return NextResponse.json({ ok: false, code: "invalid_request" }, { status: 400 });\n',
+    to: "",
+    expect: "a plan with no App-logic phase cannot be charged for one",
+  },
+  {
+    name: "the App-logic phase's save also touches the app that build owns",
+    file: ONE,
+    from: "return answer({ app_definition: step.value }, step.creditsCharged);",
+    to: 'return answer({ app_definition: step.value, html: "" }, step.creditsCharged);',
+    expect: "the App-logic phase saves ONLY its own definition — a later, failed build phase can never touch what it already saved",
+  },
+  {
+    name: "writing the app stops reading back the App-logic phase's definition",
+    file: ONE,
+    from: "run: (costs) => writeApp({ plan, locale, reference, appDefinition, costs, userId: user.id, signal: request.signal }),",
+    to: "run: (costs) => writeApp({ plan, locale, reference, costs, userId: user.id, signal: request.signal }),",
+    expect: "writing the app reads back whatever the App-logic phase saved, and folds it into the SAME build call the one-phase app always used",
+  },
+  {
+    name: "the App-logic phase stops calling Apps' own planner",
+    file: CALL,
+    from: "  return planAppDefinition(params);\n}",
+    to: '  return { ok: true, value: { title: "x", collections: [], screens: [], notifications: [] } };\n}',
+    expect: "the App-logic phase calls Apps' OWN planner as a library, never creating an Apps project",
+  },
+  {
+    name: "writing the app stops passing the App-logic phase's definition to the build message",
+    file: CALL,
+    from: "buildMessage(params.plan, params.locale, params.reference, params.appDefinition)",
+    to: "buildMessage(params.plan, params.locale, params.reference)",
+    expect: "writing the app passes the App-logic phase's definition through to the same build message",
+  },
+  {
+    name: "the screen always shows «Build the app», even for a plan with an unapproved App-logic phase",
+    file: SHELL,
+    from: "open.has_app_phase && !appLogicDone ? (",
+    to: "false ? (",
+    expect: "the screen shows a real second phase only when the plan has one, with its own price and its own «Approve plan» gate",
+  },
+  {
+    name: "«Approve plan» starts the build instead of the App-logic phase",
+    file: SHELL,
+    from: 'post(`/api/rebuild/${open.id}`, { action: "appLogic" }, "appLogic")',
+    to: 'post(`/api/rebuild/${open.id}`, { action: "build" }, "appLogic")',
+    expect: "approving starts the App-logic phase ONLY — the existing «Build the app» press is untouched for the one-phase app and for the second phase of a two-phase one",
+  },
+  {
+    name: "the second phase's price stops accounting for the App-logic phase's definition",
+    file: SHELL,
+    from: "buildMessage(plan, locale, open?.reference?.rendered, appDefinition)",
+    to: "buildMessage(plan, locale, open?.reference?.rendered)",
+    expect: "the second phase's own price is the real build price, including the App-logic phase's definition once it ran",
+  },
+  {
+    name: "the App-logic phase's status is tracked as separate state instead of read from the row",
+    file: SHELL,
+    from: "const appLogicDone = Boolean(appDefinition);",
+    to: "const appLogicDone = false;",
+    expect: "the App-logic phase's own status comes from the saved row, never a separate piece of state to drift from it",
+  },
+  {
+    name: "the schema canary forgets the App-logic phase's own column",
+    file: CANARIES,
+    from: '  {\n    kind: "column",\n    table: "rebuild_projects",\n    column: "app_definition",\n    migration: "20261105000000_rebuild_app_phase.sql",\n    breaks: "Rebuild charges for the App-logic phase and then cannot save its result: the person pays and sees «it could not be saved», and the Write phase that follows never gets the structured definition it needs",\n  },\n',
+    to: "",
+    expect: "the table and the schema canary both know the two new columns, and how to undo them",
+  },
 ];
 
-runMutations({ name: "rebuild", gate: GATE, targets: [PLAN, HTML, STRUCTURE, REFERENCE, CALL, CHARGE, LIMITS, CREATE, ONE, DL, PAGE, SHELL, SQL, EN, FEATURES, FEATURES_ROUTE], mutants: MUTANTS });
+runMutations({ name: "rebuild", gate: GATE, targets: [PLAN, HTML, STRUCTURE, REFERENCE, CALL, CHARGE, LIMITS, CREATE, ONE, DL, PAGE, SHELL, SQL, EN, FEATURES, FEATURES_ROUTE, CANARIES], mutants: MUTANTS });

@@ -3985,7 +3985,13 @@
       },
       "phases": {
         "heading": "Fasi",
-        "note": "Oggi c'è una sola fase: l'intera app, tutta insieme. Altre fasi arriveranno."
+        "note": "Oggi c'è una sola fase: l'intera app, tutta insieme. Altre fasi arriveranno.",
+        "noteTwo": "Questa app richiede due fasi: prima i suoi dati e le sue schermate, poi l'app stessa, scritta a partire da essi. Approva il piano per avviare la prima fase; il prezzo della seconda fase viene mostrato quando la prima è finita.",
+        "appLogic": "Logica dell'app",
+        "writeApp": "Scrivi l'app",
+        "approve": "Approva il piano",
+        "approving": "Avvio…",
+        "appLogicDone": "I dati e le schermate dell'app sono pianificati. Ora scrivi l'app."
       },
       "build": "Costruisci l'app",
       "building": "Costruzione dell'app…",

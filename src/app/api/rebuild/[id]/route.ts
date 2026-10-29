@@ -5,22 +5,29 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { rebuildGate } from "@/lib/rebuild/access";
 import { chargedRebuildStep } from "@/lib/rebuild/charge";
-import { changeApp, rewriteAppBox, writeApp } from "@/lib/rebuild/rebuild-call";
-import { MAX_INSTRUCTION_CHARS, boxMessage, buildMessage, changeMessage, isRebuildBoxKind, readPlan, withBox } from "@/lib/rebuild/rebuild-plan";
+import { changeApp, planAppLogic, rewriteAppBox, writeApp } from "@/lib/rebuild/rebuild-call";
+import { MAX_INSTRUCTION_CHARS, boxMessage, buildMessage, changeMessage, isRebuildBoxKind, planText, readPlan, withBox } from "@/lib/rebuild/rebuild-plan";
 import { rebuildSystemPrompt } from "@/lib/rebuild/rebuild-system";
 import { pushAppVersion } from "@/lib/rebuild/rebuild-html";
+import { readDefinition } from "@/lib/apps/app-plan";
+import { appSystemPrompt } from "@/lib/apps/app-system";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // @function-limit 300
 
-const COLUMNS = "id, title, plan, reference, html, versions, locale, updated_at";
+const COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, updated_at";
 
 /**
  * EVERYTHING DONE TO ONE APP AFTER ITS PLAN (Rebuild), one action per
  * request:
  *
+ *   "appLogic" Κομμάτι 3's first phase, only for a plan with has_app_phase:
+ *              Apps' own planner (lib/apps/app-call.ts), called as a
+ *              library, saves its structured definition on THIS row —
+ *              never a separate Apps project, never Apps' ready flag.
  *   "box"     one box of the plan changed with words; every other box as it was
- *   "build"   the app written from the plan, checked, and kept as version 1
+ *   "build"   the app written from the plan (folding in app_definition
+ *             when the phase above has run), checked, kept as version 1
  *   "change"  the written app changed with words, kept as the next version
  *   "restore" an earlier version made the current one again — no model, no charge
  *
@@ -30,8 +37,8 @@ const COLUMNS = "id, title, plan, reference, html, versions, locale, updated_at"
  * A version that the check refused is never stored, and its step charges
  * nothing (lib/rebuild/charge.ts).
  */
-type Action = "box" | "build" | "change" | "restore";
-const isAction = (v: unknown): v is Action => v === "box" || v === "build" || v === "change" || v === "restore";
+type Action = "appLogic" | "box" | "build" | "change" | "restore";
+const isAction = (v: unknown): v is Action => v === "appLogic" || v === "box" || v === "build" || v === "change" || v === "restore";
 
 export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -63,6 +70,8 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const locale = typeof project.locale === "string" ? project.locale : "en";
     const html = typeof project.html === "string" ? project.html : "";
     const reference = typeof (project.reference as { rendered?: unknown } | null)?.rendered === "string" ? (project.reference as { rendered: string }).rendered : null;
+    const hasAppPhase = project.has_app_phase === true;
+    const appDefinition = readDefinition(project.app_definition);
     const save = async (patch: Record<string, unknown>) =>
       createAdminClient()
         .from("rebuild_projects")
@@ -90,6 +99,20 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
 
     if (!anyProviderConfigured(process.env)) return NextResponse.json({ ok: false, code: "not_configured" }, { status: 503 });
 
+    if (action === "appLogic") {
+      if (!hasAppPhase) return NextResponse.json({ ok: false, code: "invalid_request" }, { status: 400 });
+      const description = planText(plan);
+      const step = await chargedRebuildStep({
+        user, gate, action: "rebuildAppLogic", feature: "rebuild_generate",
+        inputChars: appSystemPrompt().length + description.length,
+        fingerprint: `${params.id}:appLogic`, route: "/api/rebuild/[id]",
+        metadata: { step: "appLogic", projectId: params.id },
+        run: (costs) => planAppLogic({ description, locale, costs, userId: user.id, signal: request.signal }),
+      });
+      if (!step.ok) return step.response;
+      return answer({ app_definition: step.value }, step.creditsCharged);
+    }
+
     if (action === "box") {
       const kind = body.kind as Parameters<typeof withBox>[1];
       const message = boxMessage(plan, kind, instruction, locale);
@@ -105,13 +128,13 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     }
 
     if (action === "build") {
-      const message = buildMessage(plan, locale, reference);
+      const message = buildMessage(plan, locale, reference, appDefinition);
       const step = await chargedRebuildStep({
         user, gate, action: "rebuildBuild", feature: "rebuild_generate",
         inputChars: rebuildSystemPrompt().length + message.length,
         fingerprint: `${params.id}:build`, route: "/api/rebuild/[id]",
-        metadata: { step: "build", projectId: params.id },
-        run: (costs) => writeApp({ plan, locale, reference, costs, userId: user.id, signal: request.signal }),
+        metadata: { step: "build", projectId: params.id, withAppDefinition: Boolean(appDefinition) },
+        run: (costs) => writeApp({ plan, locale, reference, appDefinition, costs, userId: user.id, signal: request.signal }),
       });
       if (!step.ok) return step.response;
       return answer({ html: step.value, versions: pushAppVersion(project.versions, { html: step.value, at: new Date().toISOString(), note: "build" }) }, step.creditsCharged);

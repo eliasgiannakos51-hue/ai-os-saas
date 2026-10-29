@@ -320,6 +320,7 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   // Rebuild, 2026-10-27: planning and writing an app settle as one
   // feature, changing it as another, the way Games does.
   rebuildFeatures: "rebuild_generate",
+  rebuildAppLogic: "rebuild_generate",
   rebuildPlan: "rebuild_generate",
   rebuildBuild: "rebuild_generate",
   rebuildBoxEdit: "rebuild_edit",

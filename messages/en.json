@@ -3985,7 +3985,13 @@
       },
       "phases": {
         "heading": "Phases",
-        "note": "Today this is one phase: the whole app, built at once. More phases are coming."
+        "note": "Today this is one phase: the whole app, built at once. More phases are coming.",
+        "noteTwo": "This app needs two phases: first its data and screens, then the app itself, written from them. Approve the plan to start the first phase; the second phase's own price is shown once the first is done.",
+        "appLogic": "App logic",
+        "writeApp": "Write the app",
+        "approve": "Approve plan",
+        "approving": "Starting…",
+        "appLogicDone": "The app's data and screens are planned. Now write the app."
       },
       "build": "Build the app",
       "building": "Building the app…",

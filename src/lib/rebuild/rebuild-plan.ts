@@ -40,7 +40,7 @@ export function isRebuildBoxKind(v: unknown): v is RebuildBoxKind {
   return typeof v === "string" && (REBUILD_BOX_KINDS as readonly string[]).includes(v);
 }
 
-const clip = (s: string, n: number) => s.replace(/\s+/g, " ").trim().slice(0, n);
+const clipPlan = (s: string, n: number) => s.replace(/\s+/g, " ").trim().slice(0, n);
 
 /** The plan the model returned, or why it is not one: every box once, none empty. */
 export function parsePlan(input: unknown, fallbackTitle: string): { ok: true; plan: RebuildPlan } | { ok: false; reason: string } {
@@ -49,11 +49,11 @@ export function parsePlan(input: unknown, fallbackTitle: string): { ok: true; pl
   const boxes: RebuildBox[] = [];
   for (const kind of REBUILD_BOX_KINDS) {
     const found = raw.boxes.find((b) => (b as { kind?: unknown })?.kind === kind) as { text?: unknown } | undefined;
-    const text = typeof found?.text === "string" ? clip(found.text, MAX_BOX_CHARS) : "";
+    const text = typeof found?.text === "string" ? clipPlan(found.text, MAX_BOX_CHARS) : "";
     if (!text) return { ok: false, reason: `the ${kind} box is missing or empty` };
     boxes.push({ kind, text });
   }
-  const title = typeof raw.title === "string" && raw.title.trim() ? clip(raw.title, MAX_TITLE_CHARS) : clip(fallbackTitle, MAX_TITLE_CHARS) || "App";
+  const title = typeof raw.title === "string" && raw.title.trim() ? clipPlan(raw.title, MAX_TITLE_CHARS) : clipPlan(fallbackTitle, MAX_TITLE_CHARS) || "App";
   return { ok: true, plan: { title, boxes } };
 }
 
@@ -65,11 +65,11 @@ export function readPlan(value: unknown): RebuildPlan | null {
 
 /** One box replaced, every other box exactly as it was. */
 export function withBox(plan: RebuildPlan, kind: RebuildBoxKind, text: string): RebuildPlan {
-  const next = clip(text, MAX_BOX_CHARS);
+  const next = clipPlan(text, MAX_BOX_CHARS);
   return { ...plan, boxes: plan.boxes.map((b) => (b.kind === kind && next ? { kind, text: next } : b)) };
 }
 
-const fence = (s: string) => `${UNTRUSTED_OPEN}\n${s}\n${UNTRUSTED_CLOSE}`;
+const fencePlan = (s: string) => `${UNTRUSTED_OPEN}\n${s}\n${UNTRUSTED_CLOSE}`;
 
 export const PLAN_TOOL = {
   name: "plan_app",
@@ -105,7 +105,7 @@ export const APP_TOOL = {
 
 /** The reference, rendered by lib/rebuild/structure.ts, fenced as data. */
 const referenceBlock = (reference: string | null | undefined) =>
-  reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", fence(reference)] : [];
+  reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", fencePlan(reference)] : [];
 
 export function planMessage(description: string, locale: string, reference?: string | null, features?: readonly string[]): string {
   return [
@@ -113,13 +113,14 @@ export function planMessage(description: string, locale: string, reference?: str
     "Boxes: screens (each screen and what the person does on it), data (what the app remembers and in what fields), actions (what the buttons and gestures do), look (colours, mood, layout — original, not the look of another product).",
     `Each box at most ${MAX_BOX_CHARS} characters, concrete enough to build from.`,
     "",
-    fence(description),
+    fencePlan(description),
     ...featuresContextBlock(features ?? []),
     ...referenceBlock(reference),
   ].join("\n");
 }
 
-const planText = (plan: RebuildPlan) => [`TITLE: ${plan.title}`, ...plan.boxes.map((b) => `${b.kind.toUpperCase()}: ${b.text}`)].join("\n");
+/** The plan as the model reads it back — also what the «App logic» phase plans FROM (lib/rebuild/rebuild-call.ts's planAppLogic). */
+export const planText = (plan: RebuildPlan) => [`TITLE: ${plan.title}`, ...plan.boxes.map((b) => `${b.kind.toUpperCase()}: ${b.text}`)].join("\n");
 
 export function boxMessage(plan: RebuildPlan, kind: RebuildBoxKind, instruction: string, locale: string): string {
   return [
@@ -128,7 +129,7 @@ export function boxMessage(plan: RebuildPlan, kind: RebuildBoxKind, instruction:
     planText(plan),
     "",
     "What to change:",
-    fence(instruction),
+    fencePlan(instruction),
   ].join("\n");
 }
 
@@ -142,13 +143,56 @@ export const BUILD_RULES = [
   "Under 40,000 characters. The visible words in the language you are told.",
 ];
 
-export function buildMessage(plan: RebuildPlan, locale: string, reference?: string | null): string {
+/**
+ * Κομμάτι 3 (2026-10-29): Apps' own structured definition (lib/apps/
+ * app-plan.ts, called as a library — see lib/rebuild/rebuild-call.ts's
+ * planAppLogic), when the «App logic» phase has run. Rendered here rather
+ * than importing app-plan.ts's own definitionText, and typed here with a
+ * LOCAL restatement of its shape rather than importing AppDefinition —
+ * even `import type` makes load-ts.mjs's flat bundle collect app-plan.ts's
+ * top-level names for its collision check (it recurses into every local
+ * import before it can know which were type-only), and that file declares
+ * several this one already uses for something else (boxMessage,
+ * planMessage, PLAN_TOOL, BOX_TOOL, PLAN_MAX_TOKENS). Structural typing
+ * makes the restatement safe: the real AppDefinition satisfies this shape
+ * exactly, nothing narrowed or re-validated. Fenced the same as every
+ * other block here: field and screen LABELS are still words, even though
+ * parseDefinition already bounds their shape.
+ */
+export type RebuildAppDefinitionView = {
+  title: string;
+  collections: { key: string; label: string; visibility: string; fields: { key: string; label: string; type: string; required: boolean; options?: string[] }[] }[];
+  screens: { key: string; label: string; kind: string; collection: string; role: string }[];
+  notifications: { key: string; label: string; collection: string; to: string }[];
+};
+
+function renderAppDefinition(definition: RebuildAppDefinitionView): string {
+  const lines = [`TITLE: ${definition.title}`, "COLLECTIONS:"];
+  for (const c of definition.collections) {
+    lines.push(`- ${c.key} "${c.label}" (visibility: ${c.visibility})`);
+    for (const f of c.fields) lines.push(`    ${f.key} "${f.label}" ${f.type}${f.required ? " required" : ""}${f.options ? ` [${f.options.join(", ")}]` : ""}`);
+  }
+  lines.push("SCREENS:");
+  for (const s of definition.screens) lines.push(`- ${s.key} "${s.label}" ${s.kind} of ${s.collection}, for the ${s.role}`);
+  if (definition.notifications.length > 0) {
+    lines.push("NOTIFICATIONS:");
+    for (const n of definition.notifications) lines.push(`- ${n.key} "${n.label}" on a new ${n.collection}, to the ${n.to}`);
+  }
+  return lines.join("\n");
+}
+
+function appDefinitionBlock(definition: RebuildAppDefinitionView | null | undefined): string[] {
+  return definition ? ["", "THE APP'S DATA AND SCREENS, decided in the App logic phase — build exactly this (in your own words and design, never copying the wording as-is):", fencePlan(renderAppDefinition(definition))] : [];
+}
+
+export function buildMessage(plan: RebuildPlan, locale: string, reference?: string | null, appDefinition?: RebuildAppDefinitionView | null): string {
   return [
     `Write this app. Visible words in ${languageNameFor(locale)}.`,
     ...BUILD_RULES.map((r) => `- ${r}`),
     "",
     "THE PLAN:",
-    fence(planText(plan)),
+    fencePlan(planText(plan)),
+    ...appDefinitionBlock(appDefinition),
     ...referenceBlock(reference),
   ].join("\n");
 }
@@ -159,9 +203,9 @@ export function changeMessage(html: string, instruction: string, locale: string)
     ...BUILD_RULES.map((r) => `- ${r}`),
     "",
     "THE APP:",
-    fence(html),
+    fencePlan(html),
     "",
     "WHAT TO CHANGE:",
-    fence(instruction),
+    fencePlan(instruction),
   ].join("\n");
 }

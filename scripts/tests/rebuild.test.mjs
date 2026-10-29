@@ -239,7 +239,7 @@ console.log("\n== 6. who may, and whose: the routes and the table ==");
   }
   ok("an app is read by id AND owner with the person's own client", /supabase\.from\("rebuild_projects"\)\.select\(COLUMNS\)\.eq\("id", params\.id\)\.eq\("user_id", user\.id\)/.test(one) && /supabase\.from\("rebuild_projects"\)\.select\("title, html"\)\.eq\("id", params\.id\)\.eq\("user_id", user\.id\)/.test(dl));
   ok("...and written with the server's, scoped by id AND owner, once", /createAdminClient\(\)\s*\.from\("rebuild_projects"\)\s*\.update\(\{ \.\.\.patch, updated_at: new Date\(\)\.toISOString\(\) \}\)\s*\.eq\("id", params\.id\)\s*\.eq\("user_id", user\.id\)/.test(one) && (one.match(/createAdminClient\(\)/g) ?? []).length === 1);
-  ok("a new app belongs to whoever asked for it", /createAdminClient\(\)\s*\.from\("rebuild_projects"\)\s*\.insert\(\{ user_id: user\.id, title: step\.value\.title, description, locale, plan: step\.value, reference \}\)/.test(create));
+  ok("a new app belongs to whoever asked for it", /createAdminClient\(\)\s*\.from\("rebuild_projects"\)\s*\.insert\(\{ user_id: user\.id, title: step\.value\.title, description, locale, plan: step\.value, reference, has_app_phase: hasAppPhase \}\)/.test(create));
   ok("an app is deleted only by its owner, with the owner's own client", /export async function DELETE[\s\S]*supabase\.from\("rebuild_projects"\)\.delete\(\)\.eq\("id", params\.id\)\.eq\("user_id", user\.id\)/.test(one) && !/createAdminClient\(\)[\s\S]{0,80}\.delete\(\)/.test(one));
   ok("the download is the sealed app, bounded like every download, and never cached", /allowExport\(user\.id\)/.test(dl) && /new NextResponse\(sealApp\(app\.html\),/.test(dl) && /"Cache-Control": "private, no-store"/.test(dl) && /"X-Content-Type-Options": "nosniff"/.test(dl));
   ok("the cap on how many apps is read BEFORE a page is fetched or anything is held", create.indexOf("gate.cap") !== -1 && create.indexOf("gate.cap") < create.indexOf("readReferencePage(url)") && create.indexOf("readReferencePage(url)") < create.indexOf("chargedRebuildStep("));
@@ -337,6 +337,51 @@ console.log("\n== 8. «something like X» → capabilities as boxes, before the 
   ok("a failed capabilities call shows its error and stops there (chargedRebuildStep's own hold/release) — it never silently falls through to a plan with no review", (() => { const at = shell2.indexOf("if (!open) {\n      await postFeatures(text);"); const end = shell2.indexOf("\n    }", at); const body = shell2.slice(at, end); return at !== -1 && !/post\("\/api\/rebuild"/.test(body); })());
   ok("editing one feature's words is client-side only: no fetch between pressing ✎ and the label changing", (() => { const at = shell2.indexOf("editingFeature !== null) {\n      const id = editingFeature;"); const end = shell2.indexOf("return;", at); const body = shell2.slice(at, end); return at !== -1 && !/fetch\(|post\(/.test(body); })());
   ok("«use these features» posts the SAME /api/rebuild the plain description would, with what was kept", /async function continueToPlan\(\)/.test(shell2) && /post\("\/api\/rebuild", \{ description: featuresDescription, features: selectedFeatureLabels \}, "plan"\)/.test(shell2));
+}
+
+console.log("\n== 9. «Approve plan» builds phase by phase, only when the capabilities need it (Κομμάτι 3) ==");
+{
+  const APP_DEF = {
+    title: "Κρατήσεις",
+    collections: [{ key: "bookings", label: "Κρατήσεις", visibility: "own", fields: [{ key: "time", label: "Ώρα", type: "text", required: true }] }],
+    screens: [{ key: "new_booking", label: "Νέα κράτηση", kind: "form", collection: "bookings", role: "customer" }],
+    notifications: [],
+  };
+  const plan = P.parsePlan({ title: "Κρατήσεις", boxes: BOXES }, "x").plan;
+  ok("the plan as the model reads it back is exported, for the App-logic phase to plan FROM", typeof P.planText === "function" && /^TITLE: Κρατήσεις/.test(P.planText(plan)));
+  const withDef = P.buildMessage(plan, "en", null, APP_DEF);
+  const withoutDef = P.buildMessage(plan, "en", null, null);
+  ok("the build call folds in the App-logic phase's definition when it ran, fenced like everything else", /THE APP'S DATA AND SCREENS/.test(withDef) && /TITLE: Κρατήσεις/.test(withDef.slice(withDef.indexOf("THE APP'S DATA AND SCREENS"))) && withDef.split(A.UNTRUSTED_OPEN).length - 1 === 2);
+  ok("...and leaves the build call exactly as it was when the phase never ran", !/THE APP'S DATA AND SCREENS/.test(withoutDef) && withoutDef.split(A.UNTRUSTED_OPEN).length - 1 === 1);
+
+  const call = read("src/lib/rebuild/rebuild-call.ts");
+  ok("the App-logic phase calls Apps' OWN planner as a library, never creating an Apps project", /import \{ planApp as planAppDefinition \} from "@\/lib\/apps\/app-call";/.test(call) && /export async function planAppLogic\(/.test(call) && /return planAppDefinition\(params\);/.test(call) && !/createAdminClient|user_apps/.test(call));
+  ok("writing the app passes the App-logic phase's definition through to the same build message", /appDefinition\?: AppDefinition \| null;/.test(call) && /buildMessage\(params\.plan, params\.locale, params\.reference, params\.appDefinition\)/.test(call));
+
+  const create = read("src/app/api/rebuild/route.ts");
+  ok("the phase count is decided once, at plan time, from what Κομμάτι 2 kept — never recomputed later", /const hasAppPhase = features\.length > 0;/.test(create) && /has_app_phase: hasAppPhase/.test(create) && create.indexOf("const hasAppPhase") < create.indexOf(".insert("));
+  ok("the client is handed has_app_phase and app_definition, like every other column it may read", /REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, updated_at"/.test(create));
+
+  const one = read("src/app/api/rebuild/[id]/route.ts");
+  ok("a plan with no App-logic phase cannot be charged for one", /if \(action === "appLogic"\) \{\s*if \(!hasAppPhase\) return NextResponse\.json\(\{ ok: false, code: "invalid_request" \}, \{ status: 400 \}\);/.test(one) && one.indexOf('if (!hasAppPhase)') < one.indexOf("chargedRebuildStep({\n        user, gate, action: \"rebuildAppLogic\""));
+  ok("the App-logic phase is charged like every other rebuild step, under rebuild_generate", /action: "rebuildAppLogic", feature: "rebuild_generate"/.test(one) && /run: \(costs\) => planAppLogic\(\{ description, locale, costs, userId: user\.id, signal: request\.signal \}\)/.test(one));
+  ok("the App-logic phase saves ONLY its own definition — a later, failed build phase can never touch what it already saved", /return answer\(\{ app_definition: step\.value \}, step\.creditsCharged\);/.test(one));
+  ok("writing the app reads back whatever the App-logic phase saved, and folds it into the SAME build call the one-phase app always used", /const appDefinition = readDefinition\(project\.app_definition\);/.test(one) && /buildMessage\(plan, locale, reference, appDefinition\)/.test(one) && /writeApp\(\{ plan, locale, reference, appDefinition, costs, userId: user\.id, signal: request\.signal \}\)/.test(one));
+  ok("the table and the schema canary both know the two new columns, and how to undo them", /has_app_phase/.test(readFileSync("supabase/migrations/20261105000000_rebuild_app_phase.sql", "utf8")) && /column: "has_app_phase",\s*migration: "20261105000000_rebuild_app_phase\.sql"/.test(read("src/lib/health/schema-canaries.ts")) && /column: "app_definition",\s*migration: "20261105000000_rebuild_app_phase\.sql"/.test(read("src/lib/health/schema-canaries.ts")));
+
+  const est2 = await loadTs("src/lib/billing/estimate.ts");
+  const margin2 = await loadTs("src/lib/billing/margin-policy.ts");
+  ok("rebuildAppLogic: has a profile and settles under rebuild_generate, same bucket as every other rebuild step", Boolean(est2.ACTION_PROFILES.rebuildAppLogic) && margin2.ACTION_TO_FEATURE.rebuildAppLogic === "rebuild_generate");
+  ok("charge.ts's one shared step now knows the App-logic action too", /"rebuildPlan" \| "rebuildBoxEdit" \| "rebuildBuild" \| "rebuildChange" \| "rebuildFeatures" \| "rebuildAppLogic"/.test(read("src/lib/rebuild/charge.ts")));
+
+  const page = read("src/app/dashboard/rebuild/page.tsx");
+  ok("the page reads the two new columns and hands the screen Apps' own system-prompt size, for the same live price the route itself computes", /has_app_phase, app_definition/.test(page) && /appSystemChars=\{appSystemPrompt\(\)\.length\}/.test(page));
+
+  const shell3 = read("src/components/rebuild/rebuild-shell.tsx");
+  ok("the screen shows a real second phase only when the plan has one, with its own price and its own «Approve plan» gate", /open\.has_app_phase && !appLogicDone \?/.test(shell3) && /data-testid="rebuild-approve-plan"/.test(shell3) && /<CostEstimateHint credits=\{appLogicPrice\.credits\}/.test(shell3));
+  ok("approving starts the App-logic phase ONLY — the existing «Build the app» press is untouched for the one-phase app and for the second phase of a two-phase one", /async function runAppLogic\(\)/.test(shell3) && /post\(`\/api\/rebuild\/\$\{open\.id\}`, \{ action: "appLogic" \}, "appLogic"\)/.test(shell3) && (shell3.match(/data-testid="rebuild-build"/g) ?? []).length === 1);
+  ok("the second phase's own price is the real build price, including the App-logic phase's definition once it ran", /buildMessage\(plan, locale, open\?\.reference\?\.rendered, appDefinition\)/.test(shell3));
+  ok("the App-logic phase's own status comes from the saved row, never a separate piece of state to drift from it", /const appDefinition = open\?\.has_app_phase \? readDefinition\(open\.app_definition\) : null;/.test(shell3) && /const appLogicDone = Boolean\(appDefinition\);/.test(shell3));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

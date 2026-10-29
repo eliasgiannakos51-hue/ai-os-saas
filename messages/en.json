@@ -3973,6 +3973,10 @@
         "actions": "Actions",
         "look": "Look"
       },
+      "phases": {
+        "heading": "Phases",
+        "note": "Today this is one phase: the whole app, built at once. More phases are coming."
+      },
       "build": "Build the app",
       "building": "Building the app…",
       "download": "Download the app",

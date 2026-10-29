@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Download, Hammer, History, Undo2 } from "lucide-react";
+import { Database, Download, Hammer, History, LayoutGrid, MousePointerClick, Palette, ShieldCheck, Undo2 } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { HelpTip } from "@/components/ui/help-tip";
 import { useCredits } from "@/components/credits/credits-context";
@@ -104,6 +104,12 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
     data: t("boxes.data"),
     actions: t("boxes.actions"),
     look: t("boxes.look"),
+  };
+  const BOX_ICON: Record<RebuildBoxKind, typeof LayoutGrid> = {
+    screens: LayoutGrid,
+    data: Database,
+    actions: MousePointerClick,
+    look: Palette,
   };
 
   function referenceError(reason: string): string {
@@ -240,7 +246,10 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
                 <>
                   <iframe title={t("preview")} data-testid="rebuild-frame" srcDoc={sealed} sandbox={APP_SANDBOX} className="min-h-[60vh] w-full flex-1 rounded-card bg-panel" />
                   <p className="text-xs text-muted">{t("sealed")}</p>
-                  <p className="text-xs text-muted" data-testid="rebuild-original">{t("original")}</p>
+                  <div className="flex items-start gap-2.5 rounded-card bg-panel-hover px-3 py-2.5">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />
+                    <p className="text-xs text-foreground" data-testid="rebuild-original">{t("original")}</p>
+                  </div>
                   {versions.length > 1 && (
                     <details data-testid="rebuild-versions">
                       <summary className="flex min-h-[44px] cursor-pointer items-center gap-1.5 text-xs text-muted">
@@ -264,35 +273,58 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
                 </>
               ) : (
                 <>
-                  <p className="text-xs text-muted">{t("boxHint")}</p>
-                  <ol className="space-y-2" data-testid="rebuild-plan">
-                    {plan.boxes.map((b) => (
-                      <li key={b.kind}>
-                        <button
-                          type="button"
-                          data-testid="rebuild-box"
-                          aria-pressed={box === b.kind}
-                          onClick={() => {
-                            setBox((v) => (v === b.kind ? null : b.kind));
-                            // On a phone the plan covers the field: close it, so the words can be written.
-                            if (!workIsBeside()) setPane(null);
-                            composerRef.current?.focus();
-                          }}
-                          className={`block min-h-[44px] w-full rounded-item px-3 py-2 text-start text-sm ${box === b.kind ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`}
-                        >
-                          <span className="block text-xs font-semibold text-foreground">{BOX_LABEL[b.kind]}</span>
-                          <span className="block whitespace-pre-wrap text-foreground">{b.text}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ol>
-                  <p className="text-xs text-muted" data-testid="rebuild-original">{t("original")}</p>
+                  <div className="flex items-start gap-2.5 rounded-card bg-panel-hover px-3 py-2.5">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />
+                    <p className="text-xs text-foreground" data-testid="rebuild-original">{t("original")}</p>
+                  </div>
                   <div>
-                    <button type="button" onClick={() => void build()} disabled={running !== null} data-testid="rebuild-build" className="btn-outline font-semibold">
-                      {running === "build" ? <ThinkingIndicator size="sm" /> : <Hammer className="h-4 w-4" aria-hidden="true" />}
-                      {running === "build" ? t("building") : t("build")}
-                    </button>
-                    {running === null && <CostEstimateHint credits={buildPrice.credits} />}
+                    <p className="text-xs text-muted">{t("boxHint")}</p>
+                    <ol className="mt-1.5 space-y-2" data-testid="rebuild-plan">
+                      {plan.boxes.map((b) => {
+                        const Icon = BOX_ICON[b.kind];
+                        return (
+                          <li key={b.kind}>
+                            <button
+                              type="button"
+                              data-testid="rebuild-box"
+                              aria-pressed={box === b.kind}
+                              onClick={() => {
+                                setBox((v) => (v === b.kind ? null : b.kind));
+                                // On a phone the plan covers the field: close it, so the words can be written.
+                                if (!workIsBeside()) setPane(null);
+                                composerRef.current?.focus();
+                              }}
+                              className={`flex min-h-[44px] w-full items-start gap-2.5 rounded-item px-3 py-2 text-start text-sm ${box === b.kind ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`}
+                            >
+                              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />
+                              <div className="min-w-0 flex-1">
+                                <span className="block text-xs font-semibold text-foreground">{BOX_LABEL[b.kind]}</span>
+                                <span className="block whitespace-pre-wrap text-foreground">{b.text}</span>
+                              </div>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted">{t("phases.heading")}</p>
+                    <ol className="mt-1.5 space-y-1.5" data-testid="rebuild-phases">
+                      <li data-testid="rebuild-phase" className="rounded-item bg-panel px-3 py-2">
+                        <div className="flex items-center gap-3">
+                          <span className="w-5 shrink-0 text-xs text-muted">1</span>
+                          <span className="min-w-0 flex-1 text-sm text-foreground">{t("build")}</span>
+                        </div>
+                        {running === null && <CostEstimateHint credits={buildPrice.credits} />}
+                      </li>
+                    </ol>
+                    <p className="mt-1.5 text-[11px] text-muted">{t("phases.note")}</p>
+                    <div className="mt-2">
+                      <button type="button" onClick={() => void build()} disabled={running !== null} data-testid="rebuild-build" className="btn-outline font-semibold">
+                        {running === "build" ? <ThinkingIndicator size="sm" /> : <Hammer className="h-4 w-4" aria-hidden="true" />}
+                        {running === "build" ? t("building") : t("build")}
+                      </button>
+                    </div>
                   </div>
                 </>
               )}

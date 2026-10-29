@@ -3973,6 +3973,10 @@
         "actions": "Actions",
         "look": "Apparence"
       },
+      "phases": {
+        "heading": "Étapes",
+        "note": "Aujourd'hui, il n'y a qu'une seule phase : toute l'application, en une fois. D'autres phases arriveront."
+      },
       "build": "Construire l'application",
       "building": "Construction de l'application…",
       "download": "Télécharger l'application",

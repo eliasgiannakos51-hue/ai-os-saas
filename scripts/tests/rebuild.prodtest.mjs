@@ -363,7 +363,7 @@ try {
     check("the box change was settled as changing an app", settled.length === 2 && settled[1].p_feature === "rebuild_edit");
 
     console.log(`\n== ${device.label}: build, use it sealed ==`);
-    check("the price is on the build button", (await page.locator('[data-testid="rebuild-build"]').locator("xpath=..").innerText()).match(/\d/) !== null);
+    check("the plan shows a phase, priced, before it is approved", (await page.locator('[data-testid="rebuild-phase"]').count()) === 1 && (await page.locator('[data-testid="rebuild-phase"]').innerText()).match(/\d/) !== null);
     await press(page.locator('[data-testid="rebuild-build"]'));
     await waitFrame(page, 1);
     const iframe = page.locator('[data-testid="rebuild-frame"]');

@@ -3973,6 +3973,10 @@
         "actions": "Azioni",
         "look": "Aspetto"
       },
+      "phases": {
+        "heading": "Fasi",
+        "note": "Oggi c'è una sola fase: l'intera app, tutta insieme. Altre fasi arriveranno."
+      },
       "build": "Costruisci l'app",
       "building": "Costruzione dell'app…",
       "download": "Scarica l'app",

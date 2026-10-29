@@ -226,8 +226,8 @@ const MUTANTS = [
   {
     name: "the screen stops saying «your own version, not a copy» on the plan",
     file: SHELL,
-    from: '                  <p className="text-xs text-muted" data-testid="rebuild-original">{t("original")}</p>\n                  <div>',
-    to: "                  <div>",
+    from: '                  <div className="flex items-start gap-2.5 rounded-card bg-panel-hover px-3 py-2.5">\n                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />\n                    <p className="text-xs text-foreground" data-testid="rebuild-original">{t("original")}</p>\n                  </div>\n                  <div>\n                    <p className="text-xs text-muted">{t("boxHint")}</p>',
+    to: '                  <div>\n                    <p className="text-xs text-muted">{t("boxHint")}</p>',
     expect: "the screen says «your own version, not a copy» wherever the plan or the app is",
   },
   {

@@ -2988,8 +2988,13 @@
       "description": "録音をアップロードすると、文字起こし・要約・自分で選ぶアクションの一覧が得られます。",
       "audioNoticeTitle": "音声は保存されません",
       "audioNotice": "音声は文字起こしが終わった時点で削除されます。話す人たちがそれを知っているか確かめてください。",
+      "recordConfirmAllow": "続ける",
+      "recordConfirmCancel": "キャンセル",
       "pick": "録音を選ぶ",
       "dropHint": "M4A、MP3、WAV、WebM、OGG",
+      "record": "録音",
+      "stopRecording": "録音を停止",
+      "recording": "録音中…",
       "limitHint": "最大 {mb} MB、話し声で約 {minutes} 分",
       "tooLarge": "このファイルは {actual} MB です。上限は {allowed} MB です — 音声録音として書き出すか、2つに分けてください。",
       "tooLong": "この録音は {actual} 分です。上限は {allowed} 分です — 2つに分けてください。",
@@ -3035,7 +3040,11 @@
         "unsupported_type": "この音声形式には対応していません。",
         "rate_limited": "リクエストの上限に達しました。上限は時間がたつと自然に戻ります。しばらくしてからもう一度お試しください。",
         "empty": "この録音は空でした。",
-        "failed": "問題が発生しました。料金はかかっていません。"
+        "failed": "問題が発生しました。料金はかかっていません。",
+        "record_denied": "マイクが許可されませんでした。ブラウザの権限を確認してもう一度お試しください。",
+        "record_unsupported": "このブラウザは録音に対応していません。代わりにファイルをアップロードしてください。",
+        "record_empty": "何も聞き取れませんでした。マイクに近づいてもう一度お試しください。",
+        "record_failed": "録音に失敗しました。もう一度お試しください。"
       },
       "goal": {
         "title": "{count, plural, other {この # 件のアクションを目標のステップにする}}",

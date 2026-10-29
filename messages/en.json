@@ -2988,8 +2988,13 @@
       "description": "Upload a recording. Get the transcript, a summary, and a list of actions you choose from.",
       "audioNoticeTitle": "The audio is not kept",
       "audioNotice": "The audio is deleted the moment it is transcribed. Make sure the people speaking know.",
+      "recordConfirmAllow": "Continue",
+      "recordConfirmCancel": "Cancel",
       "pick": "Choose a recording",
       "dropHint": "M4A, MP3, WAV, WebM or OGG",
+      "record": "Record",
+      "stopRecording": "Stop recording",
+      "recording": "Recording…",
       "limitHint": "Up to {mb} MB, about {minutes} minutes of speech",
       "tooLarge": "That file is {actual} MB. The limit is {allowed} MB — export it as a voice recording, or split it in two.",
       "tooLong": "That recording is {actual} minutes. The limit is {allowed} minutes — split it in two.",
@@ -3035,7 +3040,11 @@
         "unsupported_type": "That audio format is not supported.",
         "rate_limited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "empty": "That recording was empty.",
-        "failed": "Something went wrong. Nothing was charged."
+        "failed": "Something went wrong. Nothing was charged.",
+        "record_denied": "The microphone was not allowed. Check your browser's permissions and try again.",
+        "record_unsupported": "This browser cannot record audio. Upload a file instead.",
+        "record_empty": "Nothing was heard. Try again closer to the microphone.",
+        "record_failed": "The recording failed. Try again."
       },
       "goal": {
         "title": "{count, plural, one {Make this action a step of a goal} other {Make these # actions the steps of a goal}}",

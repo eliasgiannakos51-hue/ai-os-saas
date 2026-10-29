@@ -196,7 +196,15 @@ console.log("\n== 2. the lines ==");
 // "Create link"/"Revoke" buttons, styled like the sibling "Automate it"
 // button already in this file (`border border-border`, not `bg-button` —
 // secondary actions, so this stays off one-primary-action's own count).
-ok(`border utilities (${r.counts.borders}), ceiling 608`, r.counts.borders <= 608);
+// 608 -> 609 on 2026-10-29. Meetings Κομμάτι 2 (browser recording, with
+// the owner's own consent gate before it) added ONE new bordered control
+// to meetings-workspace.tsx: the record-confirm overlay's "Cancel" button
+// (`border border-border`, the same shape as every secondary button this
+// file already has). Its "Continue" sibling is `bg-button` — counted by
+// one-primary-action's own overlay budget, not here — and the record
+// button itself reuses the already-declared `.btn-outline` class, which
+// carries its border in globals.css and adds nothing to this count.
+ok(`border utilities (${r.counts.borders}), ceiling 609`, r.counts.borders <= 609);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

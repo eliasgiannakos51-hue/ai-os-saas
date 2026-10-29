@@ -2988,8 +2988,13 @@
       "description": "Carica una registrazione. Ottieni la trascrizione, un riassunto e un elenco di azioni tra cui scegli tu.",
       "audioNoticeTitle": "L'audio non viene conservato",
       "audioNotice": "L'audio viene cancellato appena è trascritto. Assicurati che chi parla lo sappia.",
+      "recordConfirmAllow": "Continua",
+      "recordConfirmCancel": "Annulla",
       "pick": "Scegli una registrazione",
       "dropHint": "M4A, MP3, WAV, WebM o OGG",
+      "record": "Registra",
+      "stopRecording": "Interrompi registrazione",
+      "recording": "Registrazione…",
       "limitHint": "Fino a {mb} MB, circa {minutes} minuti di parlato",
       "tooLarge": "Quel file è di {actual} MB. Il limite è {allowed} MB — esportalo come registrazione vocale o dividilo in due.",
       "tooLong": "Quella registrazione dura {actual} minuti. Il limite è {allowed} minuti — dividila in due.",
@@ -3035,7 +3040,11 @@
         "unsupported_type": "Quel formato audio non è supportato.",
         "rate_limited": "Hai raggiunto un limite di richieste. Si libera da solo col tempo: riprova più tardi.",
         "empty": "Quella registrazione era vuota.",
-        "failed": "Qualcosa è andato storto. Non è stato addebitato nulla."
+        "failed": "Qualcosa è andato storto. Non è stato addebitato nulla.",
+        "record_denied": "Il microfono non è stato autorizzato. Controlla le autorizzazioni del browser e riprova.",
+        "record_unsupported": "Questo browser non può registrare audio. Carica invece un file.",
+        "record_empty": "Non è stato sentito nulla. Riprova più vicino al microfono.",
+        "record_failed": "La registrazione non è riuscita. Riprova."
       },
       "goal": {
         "title": "{count, plural, one {Trasforma questa azione in un passo di un obiettivo} other {Trasforma queste # azioni nei passi di un obiettivo}}",

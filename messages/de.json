@@ -2988,8 +2988,13 @@
       "description": "Lade eine Aufnahme hoch. Du bekommst das Transkript, eine Zusammenfassung und eine Liste von Aufgaben, aus der du auswählst.",
       "audioNoticeTitle": "Die Aufnahme wird nicht aufbewahrt",
       "audioNotice": "Die Aufnahme wird gelöscht, sobald sie transkribiert ist. Stelle sicher, dass die Sprechenden das wissen.",
+      "recordConfirmAllow": "Weiter",
+      "recordConfirmCancel": "Abbrechen",
       "pick": "Aufnahme auswählen",
       "dropHint": "M4A, MP3, WAV, WebM oder OGG",
+      "record": "Aufnehmen",
+      "stopRecording": "Aufnahme beenden",
+      "recording": "Aufnahme läuft…",
       "limitHint": "Bis zu {mb} MB, etwa {minutes} Minuten Sprache",
       "tooLarge": "Diese Datei ist {actual} MB groß. Das Limit sind {allowed} MB — exportiere sie als Sprachaufnahme oder teile sie in zwei.",
       "tooLong": "Diese Aufnahme dauert {actual} Minuten. Das Limit sind {allowed} Minuten — teile sie in zwei.",
@@ -3035,7 +3040,11 @@
         "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
         "rate_limited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "empty": "Diese Aufnahme war leer.",
-        "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet."
+        "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet.",
+        "record_denied": "Das Mikrofon wurde nicht zugelassen. Prüfe die Berechtigungen deines Browsers und versuche es erneut.",
+        "record_unsupported": "Dieser Browser kann keine Audioaufnahmen machen. Lade stattdessen eine Datei hoch.",
+        "record_empty": "Es wurde nichts gehört. Versuche es näher am Mikrofon erneut.",
+        "record_failed": "Die Aufnahme ist fehlgeschlagen. Versuche es erneut."
       },
       "goal": {
         "title": "{count, plural, one {Diese Aufgabe zu einem Schritt eines Ziels machen} other {Diese # Aufgaben zu Schritten eines Ziels machen}}",

@@ -2988,8 +2988,13 @@
       "description": "Téléversez un enregistrement. Vous obtenez la transcription, un résumé et une liste d'actions que vous choisissez.",
       "audioNoticeTitle": "L'audio n'est pas conservé",
       "audioNotice": "L'audio est supprimé dès qu'il est transcrit. Assurez-vous que les personnes qui parlent le savent.",
+      "recordConfirmAllow": "Continuer",
+      "recordConfirmCancel": "Annuler",
       "pick": "Choisir un enregistrement",
       "dropHint": "M4A, MP3, WAV, WebM ou OGG",
+      "record": "Enregistrer",
+      "stopRecording": "Arrêter l'enregistrement",
+      "recording": "Enregistrement…",
       "limitHint": "Jusqu'à {mb} Mo, environ {minutes} minutes de parole",
       "tooLarge": "Ce fichier fait {actual} Mo. La limite est de {allowed} Mo — exportez-le en enregistrement vocal ou coupez-le en deux.",
       "tooLong": "Cet enregistrement dure {actual} minutes. La limite est de {allowed} minutes — coupez-le en deux.",
@@ -3035,7 +3040,11 @@
         "unsupported_type": "Ce format audio n'est pas pris en charge.",
         "rate_limited": "Vous avez atteint une limite de demandes. Elle se libère d'elle-même avec le temps — réessayez plus tard.",
         "empty": "Cet enregistrement était vide.",
-        "failed": "Une erreur est survenue. Rien n'a été facturé."
+        "failed": "Une erreur est survenue. Rien n'a été facturé.",
+        "record_denied": "Le microphone n'a pas été autorisé. Vérifiez les autorisations de votre navigateur et réessayez.",
+        "record_unsupported": "Ce navigateur ne peut pas enregistrer l'audio. Importez un fichier à la place.",
+        "record_empty": "Rien n'a été entendu. Réessayez plus près du microphone.",
+        "record_failed": "L'enregistrement a échoué. Réessayez."
       },
       "goal": {
         "title": "{count, plural, one {Faire de cette action une étape d’un objectif} other {Faire de ces # actions les étapes d’un objectif}}",

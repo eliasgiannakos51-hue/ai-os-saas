@@ -48,6 +48,7 @@ function check(name, cond, detail) {
 // postgrest-shaped filter below.
 const MEETING_1 = "11111111-1111-1111-1111-111111111111";
 const NEW_MEETING = "22222222-2222-2222-2222-222222222222";
+const RECORDED_MEETING = "33333333-3333-3333-3333-333333333333";
 
 // A meeting already analysed, with one action already kept — seeded
 // directly into the mock's table, so NOTHING about it was ever near this
@@ -150,7 +151,15 @@ async function start(env) {
 }
 
 async function open(origin, device) {
-  const context = await browser.newContext({ viewport: device.viewport, hasTouch: device.touch, isMobile: device.touch });
+  const context = await browser.newContext({
+    viewport: device.viewport,
+    hasTouch: device.touch,
+    isMobile: device.touch,
+    // Belt and suspenders with the launch args above: some Chromium
+    // builds still consult the context's own permission grants even
+    // with the fake-UI flag set.
+    permissions: ["microphone"],
+  });
   await context.addCookies(
     [{ ...supa.authCookie, url: origin, httpOnly: false, secure: false, sameSite: "Lax" }].map(({ domain, path: p, ...c }) => c)
   );
@@ -204,7 +213,19 @@ try {
     }
   }
   const APP = await start(base);
-  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
+  browser = await chromium.launch({
+    executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium",
+    // Κομμάτι 2's own recording section needs a real MediaRecorder
+    // stream to exist — these two make getUserMedia resolve with a
+    // synthetic tone instead of hanging on a permission prompt or a
+    // real microphone, same flags scripts/tests/voice-command.prodtest.mjs
+    // already uses for the SAME browser API.
+    args: [
+      "--no-sandbox",
+      "--use-fake-ui-for-media-stream",
+      "--use-fake-device-for-media-stream",
+    ],
+  });
 
   console.log("\n== desktop: player top, summary+actions left, transcript right ==");
   {
@@ -313,6 +334,124 @@ try {
     );
   }
 
+  console.log("\n== desktop: browser recording, gated by the SAME consent notice ==");
+  {
+    const { page } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/meetings`, { waitUntil: "load" });
+    await page.locator('[data-testid="meeting-detail"]').waitFor({ timeout: 15_000 });
+    // canRecord flips true in a useEffect AFTER mount (never during SSR) —
+    // see meetings-workspace.tsx's own comment on why. The button is
+    // genuinely absent for an instant, not just hidden.
+    const recordButton = page.locator('[data-testid="meeting-record"]');
+    await recordButton.waitFor({ timeout: 10_000 });
+
+    // ΔΕΝ ΚΑΝΕΙ: "recording without the notice." Press record, then
+    // CANCEL the gate, and prove no recording ever started — no getUserMedia
+    // call this test did not itself grant would matter if the UI never
+    // reaches it, which is exactly what this checks from the outside.
+    await recordButton.click();
+    const confirm = page.locator('[data-testid="meeting-record-confirm"]');
+    await confirm.waitFor({ timeout: 5_000 });
+    check(
+      "the gate says the SAME sentence the notice above the picker already says",
+      (await confirm.innerText()).includes("delete")
+    );
+    await page.locator('[data-testid="meeting-record-confirm-cancel"]').click();
+    await confirm.waitFor({ state: "hidden", timeout: 5_000 });
+    check(
+      "cancelling the gate never started a recording",
+      !(await page.locator('[data-testid="meeting-recording-indicator"]').isVisible().catch(() => false))
+    );
+
+    // NOW ALLOW IT. The gate reappears (recordExplainedRef is per-mount,
+    // a cancel does not pre-answer the next press) and this time a real
+    // MediaRecorder stream opens against the fake device armed above.
+    await recordButton.click();
+    await confirm.waitFor({ timeout: 5_000 });
+    await page.locator('[data-testid="meeting-record-confirm-allow"]').click();
+    await page.locator('[data-testid="meeting-recording-indicator"]').waitFor({ timeout: 10_000 });
+    check(
+      "the record button itself now reads as pressed, mid-recording",
+      (await recordButton.getAttribute("aria-pressed")) === "true"
+    );
+    await page.waitForTimeout(1500); // the fake device needs a moment to actually emit frames
+    await recordButton.click(); // same button, now the Stop control
+    await page.locator('[data-testid="meeting-cost"]').waitFor({ timeout: 10_000 });
+    check(
+      "stopping produced a real clip the cost panel can price",
+      (await page.locator('[data-testid="meeting-cost-total"]').innerText()).length > 0
+    );
+
+    await page.route("**/api/meetings/transcribe", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          meeting: {
+            id: RECORDED_MEETING,
+            title: "Συνάντηση από ηχογράφηση",
+            language: "el",
+            transcript: "Κείμενο από ζωντανή ηχογράφηση.",
+            summary: null,
+            proposed_actions: null,
+            duration_seconds: 2,
+            credits_charged: 1,
+            analysis_error: null,
+            analysed_at: null,
+            created_at: new Date().toISOString(),
+          },
+        }),
+      });
+    });
+    await page.route(`**/api/meetings/${RECORDED_MEETING}/analyse`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          meeting: {
+            summary: "Σύνοψη από ζωντανή ηχογράφηση.",
+            proposed_actions: [],
+            analysed_at: new Date().toISOString(),
+          },
+        }),
+      });
+    });
+    await page.locator('[data-testid="meeting-start"]').click();
+    await page.locator('[data-testid="meeting-player"]').waitFor({ timeout: 10_000 });
+    const recSrc = await page.locator('[data-testid="meeting-player"]').getAttribute("src");
+    check(
+      "a RECORDED clip plays from the same kind of local blob an uploaded one does",
+      Boolean(recSrc?.startsWith("blob:"))
+    );
+    check(
+      "the recorded meeting is the one now open",
+      (await page.locator('[data-testid="meeting-detail"] h2').innerText()).includes("Συνάντηση από ηχογράφηση")
+    );
+  }
+
+  console.log("\n== desktop: a browser that cannot record never shows the button ==");
+  {
+    const { context, page } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    // Removed BEFORE any app script runs, so canRecord's own capability
+    // check — not a flag this test flips behind its back — is what
+    // decides the button stays off.
+    await page.addInitScript(() => {
+      // @ts-ignore — test-only removal of a browser capability
+      delete window.MediaRecorder;
+    });
+    await page.goto(`${APP}/dashboard/meetings`, { waitUntil: "load" });
+    await page.locator('[data-testid="meeting-detail"]').waitFor({ timeout: 15_000 });
+    await page.waitForTimeout(500); // the same tick canRecord's effect needs to flip true, if it were going to
+    check(
+      "no MediaRecorder means no record button — same rule as the mic in Chat",
+      (await page.locator('[data-testid="meeting-record"]').count()) === 0
+    );
+    check("...but the file picker is unaffected", (await page.locator('[data-testid="meeting-file"]').count()) === 1);
+    await context.close();
+  }
+
   console.log("\n== phone (390x844): the two columns stack, player stays on top ==");
   {
     const { page, press } = await open(APP, { viewport: { width: 390, height: 844 }, touch: true });
@@ -345,6 +484,27 @@ try {
     check(
       "summary+actions is above the transcript, not beside it, at 390px",
       transcriptBox.y >= summaryBox.y + summaryBox.height - 1
+    );
+
+    // THE RECORD BUTTON, TAPPED FOR REAL — the desktop block above
+    // already proved the gate and the clip end to end with a mouse;
+    // this is the touch path docs/TOOL-RULES.md's own rule 3 asks for,
+    // not a second copy of that proof.
+    const recordButton = page.locator('[data-testid="meeting-record"]');
+    await recordButton.waitFor({ timeout: 10_000 });
+    const recordBox = await recordButton.boundingBox();
+    check("the record button is a real touch target (>=44px tall)", recordBox.height >= 44);
+    await press(recordButton);
+    const confirm = page.locator('[data-testid="meeting-record-confirm"]');
+    await confirm.waitFor({ timeout: 5_000 });
+    await press(page.locator('[data-testid="meeting-record-confirm-allow"]'));
+    await page.locator('[data-testid="meeting-recording-indicator"]').waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(1500);
+    await press(recordButton);
+    await page.locator('[data-testid="meeting-cost"]').waitFor({ timeout: 10_000 });
+    check(
+      "a real finger tap, start to stop, produced a clip this screen can price",
+      (await page.locator('[data-testid="meeting-cost-total"]').innerText()).length > 0
     );
   }
 

@@ -2988,8 +2988,13 @@
       "description": "上传一段录音。你会得到文字记录、摘要，以及一份由你挑选的行动清单。",
       "audioNoticeTitle": "录音不会保存",
       "audioNotice": "录音在转写完成的那一刻就会删除。请确保说话的人知道这一点。",
+      "recordConfirmAllow": "继续",
+      "recordConfirmCancel": "取消",
       "pick": "选择录音",
       "dropHint": "M4A、MP3、WAV、WebM 或 OGG",
+      "record": "录音",
+      "stopRecording": "停止录音",
+      "recording": "正在录音…",
       "limitHint": "最多 {mb} MB，约 {minutes} 分钟的讲话",
       "tooLarge": "该文件为 {actual} MB。上限是 {allowed} MB — 请导出为语音录音，或分成两段。",
       "tooLong": "该录音为 {actual} 分钟。上限是 {allowed} 分钟 — 请分成两段。",
@@ -3035,7 +3040,11 @@
         "unsupported_type": "不支持该音频格式。",
         "rate_limited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "empty": "该录音是空的。",
-        "failed": "出了点问题。未收取任何费用。"
+        "failed": "出了点问题。未收取任何费用。",
+        "record_denied": "麦克风未被允许。请检查浏览器权限后重试。",
+        "record_unsupported": "此浏览器无法录音。请改为上传文件。",
+        "record_empty": "没有听到任何声音。请靠近麦克风后重试。",
+        "record_failed": "录音失败。请重试。"
       },
       "goal": {
         "title": "{count, plural, other {把这 # 项行动变成一个目标的步骤}}",

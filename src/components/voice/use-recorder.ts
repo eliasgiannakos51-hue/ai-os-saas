@@ -48,6 +48,13 @@ export function useRecorder(options?: {
    *  recorder that decides for them mid-sentence is worse than one that
    *  waits. */
   autoStopOnSilence?: boolean;
+  /** Overrides the hard ceiling below for a caller whose clip is not a
+   *  chat voice message — Meetings Κομμάτι 2 passes the server's own
+   *  `meetingLimits().maxSeconds` (already bounded by the 4MB body cap
+   *  at this same bitrate, see meeting-limits.ts's `secondsFromBytes`).
+   *  Omitted, every existing caller (the mic button, the conversation
+   *  loop) keeps MAX_CLIP_SECONDS exactly as before. */
+  maxSeconds?: number;
   onResult?: (result: RecordingResult) => void;
   onError?: (reason: "denied" | "unsupported" | "no_speech" | "failed") => void;
 }) {
@@ -168,8 +175,13 @@ export function useRecorder(options?: {
     // THE HARD CEILING. Not a cost control — the per-plan minutes are
     // that — but a safety one: a tab whose stop never registered would
     // otherwise stream a room to a transcription API until the browser
-    // was closed.
-    stopTimerRef.current = window.setTimeout(() => stop(), MAX_CLIP_SECONDS * 1000);
+    // was closed. A caller with a longer, legitimate clip (a meeting,
+    // not a chat message) raises it explicitly; every other caller gets
+    // the unchanged default below.
+    const ceilingMs = optionsRef.current?.maxSeconds
+      ? optionsRef.current.maxSeconds * 1000
+      : MAX_CLIP_SECONDS * 1000;
+    stopTimerRef.current = window.setTimeout(() => stop(), ceilingMs);
 
     if (optionsRef.current?.autoStopOnSilence) {
       const Ctor =

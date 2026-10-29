@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
-import { ShieldAlert, Target, Trash2, Upload } from "lucide-react";
+import { Mic, ShieldAlert, Square, Target, Trash2, Upload } from "lucide-react";
 import {
   checkMeetingUpload,
   isMeetingAudioType,
@@ -13,6 +13,7 @@ import {
   type MeetingPrice,
 } from "@/lib/meetings/meeting-limits";
 import type { ProposedAction } from "@/lib/meetings/meeting-analysis";
+import { useRecorder } from "@/components/voice/use-recorder";
 
 export type MeetingRow = {
   id: string;
@@ -187,6 +188,131 @@ export function MeetingsWorkspace({
     audio.onerror = () => done(secondsFromBytes(chosen.size), false);
     audio.src = url;
   }, []);
+
+  /**
+   * CAN THIS BROWSER RECORD. Starts false and only turns true after
+   * mount — the server render has no `navigator`, and a check made
+   * inline during render would answer "no" there and "yes" on the
+   * client's first paint, which is the hydration mismatch
+   * scripts/tests/voice.test.mjs's own availability comment warns
+   * against ("flickers from absent to live" is the SAFE direction;
+   * this never even shows the unsafe one). No account/plan gate here —
+   * recording and uploading both end at the exact same
+   * /api/meetings/transcribe, so the existing plan/minutes wall applies
+   * identically to both.
+   */
+  const [canRecord, setCanRecord] = useState(false);
+  useEffect(() => {
+    setCanRecord(
+      typeof MediaRecorder !== "undefined" &&
+        Boolean(navigator.mediaDevices?.getUserMedia),
+    );
+  }, []);
+
+  // THE SAME NOTICE, NOW A GATE. audioNoticeTitle/audioNotice already
+  // say "make sure the people speaking know" — recording asks the exact
+  // same thing a room full of OTHER people never typed into a file
+  // picker, so this reuses that sentence rather than inventing a second
+  // one, and ΔΕΝ ΚΑΝΕΙ ("recording without the notice") becomes a real
+  // gate: start() below is never called before this confirms, once.
+  const [recordConfirm, setRecordConfirm] = useState(false);
+  const recordExplainedRef = useRef(false);
+
+  /**
+   * THE RECORDING'S OWN CEILING, SHORTER THAN THE SERVER'S WHEN THE
+   * BYTES SAY SO. `limits.maxSeconds` alone is not enough: Whisper and
+   * the function budget bound TIME, but api/meetings/transcribe's own
+   * 4MB body cap bounds BYTES, and a live recording at the recorder's
+   * fixed bitrate (use-recorder.ts's `audioBitsPerSecond: 32_000`, the
+   * same ASSUMED_VOICE_KBPS secondsFromBytes already prices uploads at)
+   * fills those bytes in well under an hour. Stopping here, at whichever
+   * ceiling binds first, means a recording is never cut off AND never
+   * refused for being one second over what it was allowed to make.
+   */
+  const recordingCeilingSeconds = Math.min(
+    limits.maxSeconds,
+    secondsFromBytes(limits.maxBytes),
+  );
+
+  function acceptRecording({
+    blob,
+    seconds: recordedSeconds,
+  }: {
+    blob: Blob;
+    seconds: number;
+    mimeType: string;
+  }) {
+    setProblem(null);
+    const recorded = new File([blob], "meeting-recording", {
+      type: blob.type,
+    });
+    const verdict = checkMeetingUpload(
+      { bytes: recorded.size, seconds: recordedSeconds },
+      limits,
+    );
+    if (!verdict.ok) {
+      setProblem(
+        verdict.reason === "too_large"
+          ? t("tooLarge", {
+              actual: mb(verdict.actualBytes),
+              allowed: mb(verdict.allowedBytes),
+            })
+          : verdict.reason === "too_long"
+            ? t("tooLong", {
+                actual: mins(verdict.actualSeconds),
+                allowed: mins(verdict.allowedSeconds),
+              })
+            : t("notAudio"),
+      );
+      return;
+    }
+    setPlayerUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(recorded);
+    });
+    setPlayerMeetingId(null);
+    setFile(recorded);
+    setSeconds(recordedSeconds);
+    // EXACT, NOT ESTIMATED: the recorder measured wall-clock time itself
+    // (performance.now() in use-recorder.ts), which is the real number
+    // readDuration's <audio>-metadata guess exists to approximate for an
+    // uploaded file. No guess to flag as a guess.
+    setDurationRead(true);
+  }
+
+  function recordError(reason: "denied" | "unsupported" | "no_speech" | "failed") {
+    // Routed through errorText()/ERROR_TEXT below, the SAME lookup the
+    // server's own error codes use — these four are the browser's codes
+    // instead of the server's, but the rule that keeps every t(...) call
+    // site a literal (not a template) is the same one.
+    const code =
+      reason === "denied"
+        ? "record_denied"
+        : reason === "unsupported"
+          ? "record_unsupported"
+          : reason === "no_speech"
+            ? "record_empty"
+            : "record_failed";
+    setProblem(errorText(code, 0));
+  }
+
+  const recorder = useRecorder({
+    maxSeconds: recordingCeilingSeconds,
+    onResult: acceptRecording,
+    onError: recordError,
+  });
+
+  function pressRecord() {
+    if (recorder.recording) {
+      recorder.stop();
+      return;
+    }
+    if (!recordExplainedRef.current) {
+      setRecordConfirm(true);
+      return;
+    }
+    void recorder.start();
+  }
 
   const choose = useCallback(
     (chosen: File | null) => {
@@ -440,6 +566,14 @@ export function MeetingsWorkspace({
     rate_limited: () => t("errors.rate_limited"),
     empty: () => t("errors.empty"),
     failed: () => t("errors.failed"),
+    // The browser's own recorder codes (use-recorder.ts's onError
+    // reasons), not the server's — same map, same lookup, so a reader
+    // of errorText() below does not need to know which side a failure
+    // came from to find its sentence.
+    record_denied: () => t("errors.record_denied"),
+    record_unsupported: () => t("errors.record_unsupported"),
+    record_empty: () => t("errors.record_empty"),
+    record_failed: () => t("errors.record_failed"),
   };
 
   function errorText(code: unknown, status: number): string {
@@ -491,15 +625,49 @@ export function MeetingsWorkspace({
           data-testid="meeting-file"
           onChange={(e) => choose(e.target.files?.[0] ?? null)}
         />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={busy !== "idle"}
-          className="btn-outline"
-        >
-          <Upload className="h-4 w-4" aria-hidden="true" />
-          {t("pick")}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy !== "idle" || recorder.recording}
+            className="btn-outline"
+          >
+            <Upload className="h-4 w-4" aria-hidden="true" />
+            {t("pick")}
+          </button>
+          {/* NOT DRAWN WHEN IT CANNOT RECORD — same rule as the mic in
+              Chat (components/voice/voice-input.tsx): a control that
+              would only ever fail reads as broken, not as off. */}
+          {canRecord && (
+            <button
+              type="button"
+              onClick={pressRecord}
+              disabled={
+                (busy !== "idle" && !recorder.recording) ||
+                recorder.state === "requesting"
+              }
+              aria-pressed={recorder.recording}
+              data-testid="meeting-record"
+              className={`btn-outline ${recorder.recording ? "border-foreground/60 text-foreground" : ""}`}
+            >
+              {recorder.recording ? (
+                <Square className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Mic className="h-4 w-4" aria-hidden="true" />
+              )}
+              {recorder.recording ? t("stopRecording") : t("record")}
+            </button>
+          )}
+        </div>
+        {recorder.recording && (
+          <p
+            data-testid="meeting-recording-indicator"
+            role="status"
+            className="text-xs text-foreground"
+          >
+            {t("recording")}
+          </p>
+        )}
         <p className="text-xs text-muted">{t("dropHint")}</p>
         <p data-testid="meeting-minutes-left" className="text-xs text-muted">
           {t("minutesLeft", {
@@ -573,6 +741,58 @@ export function MeetingsWorkspace({
           </p>
         )}
       </section>
+
+      {/* THE GATE, BEFORE THE BROWSER'S OWN PROMPT. Same shape as the
+          mic confirm in components/voice/voice-input.tsx: a `fixed
+          inset-0` overlay is its own surface for
+          scripts/tests/one-primary-action.test.mjs (section 3), so its
+          filled "allow" button is not a second primary action on this
+          page — `meeting-keep` stays the one. */}
+      {recordConfirm && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+          <div
+            className="fixed inset-0 bg-background/60 backdrop-blur-sm"
+            onClick={() => setRecordConfirm(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("audioNoticeTitle")}
+            data-testid="meeting-record-confirm"
+            className="relative w-full max-w-sm surface"
+          >
+            <p className="text-sm font-semibold text-foreground">
+              {t("audioNoticeTitle")}
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-muted">
+              {t("audioNotice")}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                data-testid="meeting-record-confirm-allow"
+                onClick={() => {
+                  recordExplainedRef.current = true;
+                  setRecordConfirm(false);
+                  void recorder.start();
+                }}
+                className="min-h-[44px] rounded-item bg-button px-4 text-xs font-semibold text-button-ink transition-opacity hover:opacity-90"
+              >
+                {t("recordConfirmAllow")}
+              </button>
+              <button
+                type="button"
+                data-testid="meeting-record-confirm-cancel"
+                onClick={() => setRecordConfirm(false)}
+                className="min-h-[44px] rounded-item border border-border px-4 text-xs text-muted transition-colors hover:text-foreground"
+              >
+                {t("recordConfirmCancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {rows.length === 0 && (
         <p className="surface text-center text-sm text-muted">{t("empty")}</p>

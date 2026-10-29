@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
-import { Mic, ShieldAlert, Square, Target, Trash2, Upload } from "lucide-react";
+import { Bell, Mic, ShieldAlert, Square, Target, Trash2, Upload } from "lucide-react";
 import {
   checkMeetingUpload,
   isMeetingAudioType,
@@ -39,6 +39,11 @@ export type KeptAction = {
   done: boolean;
   source_index: number | null;
   created_at: string;
+  /** The person's own pick of when to be reminded (Κομμάτι 4, "Remind
+   *  me") — never parsed from when_text, unlike due_date's own promise. */
+  remind_at: string | null;
+  /** Set once api/cron/meeting-action-reminders has sent it. */
+  reminded_at: string | null;
 };
 
 /**
@@ -94,6 +99,10 @@ export function MeetingsWorkspace({
   // the one every other feature shows. A second copy under this
   // namespace would be a second copy to keep in step.
   const tCredits = useTranslations("credits");
+  const locale = useLocale();
+  // SAME FORMAT SALES ALREADY SHOWS A REMINDER IN (sales-stages.tsx) —
+  // one date style for "a reminder is set on this day", not two.
+  const remindDateFormat = useMemo(() => new Intl.DateTimeFormat(locale, { dateStyle: "medium" }), [locale]);
   // WHAT IT COST, SAID OUT LOUD. Both routes return a receipt built
   // from the SETTLED figure, and a client that calls refresh() instead
   // of reporting it leaves the user to work out the difference from a
@@ -122,6 +131,11 @@ export function MeetingsWorkspace({
     steps: number;
   } | null>(null);
   const [goalBusy, setGoalBusy] = useState(false);
+  // THE DATE PICKER'S OWN DRAFT, PER ACTION — present only while that
+  // action's "Remind me" is open; absent once saved, cancelled, or never
+  // opened. Keyed by meeting_actions.id, same as `kept` itself.
+  const [remindEdit, setRemindEdit] = useState<Record<string, string>>({});
+  const [remindBusy, setRemindBusy] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   /**
@@ -522,6 +536,85 @@ export function MeetingsWorkspace({
       setGoalWords("");
     } finally {
       setGoalBusy(false);
+    }
+  }
+
+  const DAY_MS = 86_400_000;
+  /** The date input's own format, in the person's time zone — the same
+   *  shape sales-stages.tsx's own dateInput() is, not exported from
+   *  there, so repeated here rather than reached across tools for a
+   *  four-line date helper. */
+  function dateInput(d: Date): string {
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000);
+    return local.toISOString().slice(0, 10);
+  }
+
+  function openRemind(action: KeptAction) {
+    setRemindEdit((prev) => ({
+      ...prev,
+      [action.id]: action.remind_at && !action.reminded_at ? dateInput(new Date(action.remind_at)) : dateInput(new Date(Date.now() + DAY_MS)),
+    }));
+  }
+
+  function closeRemind(actionId: string) {
+    setRemindEdit((prev) => {
+      const next = { ...prev };
+      delete next[actionId];
+      return next;
+    });
+  }
+
+  /**
+   * THE SAME REMINDER SALES ALREADY SETS (sales-stages.tsx's own move()):
+   * a day, fixed at nine in the morning in the person's own time zone,
+   * sent to a route that re-validates it with the SAME `readReminder`
+   * (lib/sales/stages.ts) the Sales route itself calls — one rule for
+   * "is this a reminder", not a second copy that could drift from it.
+   */
+  async function saveRemind(action: KeptAction) {
+    const day = remindEdit[action.id];
+    if (!day || remindBusy) return;
+    setRemindBusy(action.id);
+    setProblem(null);
+    try {
+      const remindAt = new Date(`${day}T09:00:00`).toISOString();
+      const res = await fetch(`/api/meetings/${action.meeting_id}/actions/${action.id}/remind`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remindAt }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setProblem(data?.code === "bad_reminder" ? t("remind.bad") : errorText(data?.code, res.status));
+        return;
+      }
+      setKept((prev) =>
+        prev.map((a) => (a.id === action.id ? { ...a, remind_at: data.action.remind_at, reminded_at: data.action.reminded_at } : a)),
+      );
+      closeRemind(action.id);
+    } finally {
+      setRemindBusy(null);
+    }
+  }
+
+  async function cancelRemind(action: KeptAction) {
+    if (remindBusy) return;
+    setRemindBusy(action.id);
+    setProblem(null);
+    try {
+      const res = await fetch(`/api/meetings/${action.meeting_id}/actions/${action.id}/remind`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remindAt: null }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setProblem(errorText(data?.code, res.status));
+        return;
+      }
+      setKept((prev) => prev.map((a) => (a.id === action.id ? { ...a, remind_at: null, reminded_at: null } : a)));
+    } finally {
+      setRemindBusy(null);
     }
   }
 
@@ -1087,6 +1180,68 @@ export function MeetingsWorkspace({
                           {a.who ?? t("unassigned")} ·{" "}
                           {a.when_text ?? t("noDate")}
                         </span>
+                        {a.remind_at && !a.reminded_at ? (
+                          <span className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted">
+                            <Bell className="h-3.5 w-3.5" aria-hidden="true" />
+                            <span data-testid="meeting-remind-pending">
+                              {t("remind.pending", {
+                                date: remindDateFormat.format(new Date(a.remind_at)),
+                              })}
+                            </span>
+                            <button
+                              type="button"
+                              data-testid="meeting-remind-cancel"
+                              onClick={() => cancelRemind(a)}
+                              disabled={remindBusy === a.id}
+                              className="inline-flex min-h-[44px] items-center font-semibold text-foreground underline disabled:opacity-50"
+                            >
+                              {t("remind.cancel")}
+                            </button>
+                          </span>
+                        ) : remindEdit[a.id] !== undefined ? (
+                          <span className="mt-1.5 flex flex-wrap items-center gap-2">
+                            <label className="text-xs text-muted">
+                              {t("remind.label")}
+                              <input
+                                type="date"
+                                data-testid="meeting-remind-date"
+                                value={remindEdit[a.id]}
+                                min={dateInput(new Date())}
+                                onChange={(e) =>
+                                  setRemindEdit((prev) => ({ ...prev, [a.id]: e.target.value }))
+                                }
+                                className="input ms-2 mt-0 inline-block h-11 w-auto py-0"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              data-testid="meeting-remind-save"
+                              onClick={() => saveRemind(a)}
+                              disabled={remindBusy === a.id}
+                              className="min-h-[44px] rounded-card bg-panel-hover px-2.5 text-xs font-semibold text-foreground disabled:opacity-50"
+                            >
+                              {t("remind.save")}
+                            </button>
+                            <button
+                              type="button"
+                              data-testid="meeting-remind-dismiss"
+                              onClick={() => closeRemind(a.id)}
+                              className="inline-flex min-h-[44px] items-center text-xs text-muted underline"
+                            >
+                              {t("recordConfirmCancel")}
+                            </button>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            data-testid="meeting-remind-open"
+                            onClick={() => openRemind(a)}
+                            className="mt-1.5 inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-foreground underline"
+                          >
+                            <Bell className="h-3.5 w-3.5" aria-hidden="true" />
+                            {t("remind.button")}
+                          </button>
+                        )}
                       </li>
                     ))}
                   </ul>

@@ -427,6 +427,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "meetings/[id]/actions",
       // A goal from the meeting's actions (package 17): no model, no charge.
       "meetings/[id]/goal",
+      // Κομμάτι 4, "Remind me": no model, no charge — a time the person
+      // picked, and the cron that sends it (same shape as cron/lead-reminders).
+      "meetings/[id]/actions/[actionId]/remind",
+      "cron/meeting-action-reminders",
     ],
     charges: true,
     enforcedIn: "src/lib/voice/voice-pricing.ts",

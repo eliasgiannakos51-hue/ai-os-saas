@@ -85,15 +85,27 @@ const MEETING_ACTIONS = [
     done: false,
     source_index: 0,
     created_at: "2026-10-20T10:06:00Z",
+    remind_at: null,
+    reminded_at: null,
   },
 ];
 
-function handleMeetings({ req, res, url, json }) {
+function handleMeetings({ req, res, url, body, json }) {
   const table = url.pathname.replace(/^\/rest\/v1\//, "").split("?")[0];
   if (table !== "meetings" && table !== "meeting_actions") return false;
-  if (req.method !== "DELETE") return false;
   const idParam = [...url.searchParams].find(([k]) => k === "id")?.[1];
   const id = idParam?.startsWith("eq.") ? idParam.slice(3) : null;
+  // «Remind me» (Κομμάτι 4): the one place this file needs a REAL update,
+  // not just a delete — the screen reads remind_at/reminded_at back from
+  // the response to decide what to render next.
+  if (table === "meeting_actions" && req.method === "PATCH") {
+    const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+    const row = id ? MEETING_ACTIONS.find((a) => a.id === id) : null;
+    if (!row) return (single ? json(200, null) : json(200, [])), true;
+    Object.assign(row, JSON.parse(body || "{}"));
+    return (single ? json(200, row) : json(200, [row])), true;
+  }
+  if (req.method !== "DELETE") return false;
   if (table === "meetings") {
     const idx = id ? MEETINGS.findIndex((m) => m.id === id) : -1;
     const removed = idx >= 0 ? MEETINGS.splice(idx, 1) : [];
@@ -263,6 +275,46 @@ try {
       "the kept list still shows it",
       (await page.locator('[data-testid="meeting-kept"]').innerText()).includes("αναφορά πωλήσεων")
     );
+
+    // «Remind me» (Κομμάτι 4): opening it never sends anything by
+    // itself — dismissing it without pressing Save must leave the kept
+    // action exactly as it was.
+    check("the kept action offers Remind me", await page.locator('[data-testid="meeting-remind-open"]').isVisible());
+    await page.locator('[data-testid="meeting-remind-open"]').click();
+    await page.locator('[data-testid="meeting-remind-date"]').waitFor({ timeout: 5_000 });
+    await page.locator('[data-testid="meeting-remind-dismiss"]').click();
+    check(
+      "dismissing the date picker without saving asks for nothing",
+      (await page.locator('[data-testid="meeting-remind-date"]').count()) === 0 &&
+        (await page.locator('[data-testid="meeting-remind-pending"]').count()) === 0
+    );
+    check("...and the Remind me button is back", await page.locator('[data-testid="meeting-remind-open"]').isVisible());
+
+    // NOW SET ONE FOR REAL, through the real PATCH route, against the
+    // same mock table meeting_actions.a1 lives in.
+    await page.locator('[data-testid="meeting-remind-open"]').click();
+    const remindDay = (() => {
+      const d = new Date(Date.now() + 3 * 86_400_000);
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+    })();
+    await page.locator('[data-testid="meeting-remind-date"]').fill(remindDay);
+    await page.locator('[data-testid="meeting-remind-save"]').click();
+    await page.locator('[data-testid="meeting-remind-pending"]').waitFor({ timeout: 5_000 });
+    check(
+      "saving replaces the Remind me button with the pending reminder",
+      (await page.locator('[data-testid="meeting-remind-open"]').count()) === 0
+    );
+    check("...and offers a way to cancel it", await page.locator('[data-testid="meeting-remind-cancel"]').isVisible());
+    check("...and it is really stored, not just shown", MEETING_ACTIONS[0].remind_at !== null, String(MEETING_ACTIONS[0].remind_at));
+
+    await page.locator('[data-testid="meeting-remind-cancel"]').click();
+    await page.locator('[data-testid="meeting-remind-open"]').waitFor({ timeout: 5_000 });
+    check(
+      "cancelling the reminder brings the Remind me button back",
+      await page.locator('[data-testid="meeting-remind-open"]').isVisible()
+    );
+    check("...and clears the stored reminder too", MEETING_ACTIONS[0].remind_at === null, String(MEETING_ACTIONS[0].remind_at));
+
     check(
       "the transcript is visible WITHOUT being clicked open — no longer a collapsed <details>",
       await page.locator('[data-testid="meeting-transcript"]').isVisible()
@@ -482,6 +534,17 @@ try {
       "tapping the chip (touch, not a mouse click) keeps the right meeting open",
       (await page.locator('[data-testid="meeting-detail"] h2').innerText()).includes("Σύσκεψη πωλήσεων")
     );
+
+    // REMIND ME, TAPPED FOR REAL — the desktop block already proved the
+    // save/cancel round trip with a mouse; this is the touch path.
+    const remindOpen = page.locator('[data-testid="meeting-remind-open"]');
+    const remindBox = await remindOpen.boundingBox();
+    check("the Remind me button is a real touch target (>=44px tall)", remindBox.height >= 44);
+    await press(remindOpen);
+    await page.locator('[data-testid="meeting-remind-date"]').waitFor({ timeout: 5_000 });
+    check("a real finger tap opens the date picker", await page.locator('[data-testid="meeting-remind-date"]').isVisible());
+    await press(page.locator('[data-testid="meeting-remind-dismiss"]'));
+    await remindOpen.waitFor({ timeout: 5_000 });
 
     const { width: pageWidth } = page.viewportSize();
     check(

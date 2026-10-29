@@ -8307,3 +8307,108 @@ mutation (17/17), prodtest με υποκατάστατο server στο ΠΡΑΓ�
 4 (Make a goal/Remind me), 5 (seek-by-click), 6 (Q&A).
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία.**
+
+### 2026-10-29 — Meetings «ΝΕΑ ΟΘΟΝΗ»: Κομμάτι 4, Make a goal / Remind me
+
+**«9. MEETINGS: ΝΕΑ ΟΘΟΝΗ» — Κομμάτι 4: περίληψη και ενέργειες με
+«Make a goal» και «Remind me», 2026-10-29.**
+
+**«Make a goal» ήταν ήδη εκεί.** Πακέτο 17 (διακόπτης `meeting-goal`)
+το έφτιαξε πριν από αυτό το directive — επιβεβαιώθηκε αναλλοίωτο, όχι
+ξαναχτισμένο: ο ιδιοκτήτης τσεκάρει ενέργειες, διαλέγει ή φτιάχνει
+project, το `api/meetings/[id]/goal` ξαναδιαβάζει τις ενέργειες με
+index (ποτέ με κείμενο) και φτιάχνει ένα `ai_missions` με τα βήματά
+του.
+
+**«Remind me» ελέγχθηκε πρώτα για έτοιμο μηχανισμό, όχι χτίστηκε από
+το μηδέν.** Ίδια πειθαρχία με το Κομμάτι 2's `useRecorder()`: βρέθηκε
+`lib/notifications/store.ts`/`sendPushToUser` («mission_reminders»,
+ήδη το κανάλι του `api/cron/lead-reminders`) ΚΑΙ, πιο σημαντικό, το
+ΑΚΡΙΒΕΣ ήδη-λυμένο σχήμα — Sales/πακέτο 18's `leads.remind_at`/
+`reminded_at` + `readReminder()` (`lib/sales/stages.ts`): «μια ώρα στο
+μέλλον, μέσα σε έναν χρόνο, ή τίποτα» — ίδιος κανόνας, όχι
+ξαναγραμμένος. `readReminder`/`MAX_REMINDER_DAYS` εισάγονται αυτολεξεί
+από το Sales μέσα στο νέο route της Meetings, με σχόλιο που εξηγεί τη
+σκόπιμη επαναχρησιμοποίηση (όχι σύζευξη δύο εργαλείων κατά λάθος).
+
+**Πότε χτυπά η υπενθύμιση: ο χρήστης διαλέγει, ποτέ το μοντέλο.** Δύο
+νέες στήλες `meeting_actions.remind_at`/`reminded_at` (migration
+`20261103000000_meeting_action_reminders.sql`, ίδιο partial index με
+το `leads` του Sales). Το `due_date` (η ημερομηνία που είπε η ΙΔΙΑ η
+σύσκεψη, ποτέ μαντεμένη — βλ. Κομμάτι 3's σημείωση εκεί) παραμένει
+εντελώς αναλλοίωτο: το `remind_at` είναι μια ξεχωριστή, ρητή επιλογή
+του χρήστη με το χέρι, δεν ανακατεύεται με το «τι είπε η σύσκεψη».
+Νέο route `api/meetings/[id]/actions/[actionId]/remind` (PATCH):
+σβήνει το `reminded_at` κάθε φορά που μπαίνει νέο `remind_at`, ώστε η
+ΝΕΑ ημερομηνία να είναι αυτή που χτυπά, όχι μια παλιά. Νέο cron
+`api/cron/meeting-action-reminders` (κάθε 15 λεπτά, `vercel.json`) —
+ΙΔΙΟ σχήμα με το `lead-reminders`: claim (`reminded_at = now` σε ένα
+update) ΠΡΙΝ το push, ώστε μια κατάρρευση στη μέση να αφήσει την
+υπενθύμιση ανεπίδοτη αντί να τη στείλει δύο φορές· ΙΔΙΟ κανάλι push.
+
+**Η οθόνη.** Κάθε κρατημένη ενέργεια παίρνει κουμπί «Remind me» · το
+άνοιγμά του δεν στέλνει τίποτα από μόνο του (αποδεδειγμένο: άνοιξε,
+πάτησε «Cancel», τίποτα δεν άλλαξε) · επιλογή ημέρας με
+`<input type="date">`, ώρα σταθερή στις 9 π.μ. τοπικά — ΙΔΙΑ σύμβαση
+με το Sales' δικό του reminder picker, όχι δεύτερη ωριαία λογική ·
+μετά το Save δείχνει «Reminds you on {date}» με δικό του «Cancel the
+reminder» ξεχωριστό από το κουμπί που κλείνει απλά τον editor χωρίς
+να αποθηκεύσει.
+
+**Βρέθηκε και διορθώθηκε στην πορεία, πριν φτάσει στο prodtest.** Τα
+νέα κουμπιά/input δεν ήταν ≥44px (το νέο `min-h-[32px]`/`h-8` των
+πρώτων πρόχειρων στυλ) — διορθώθηκε σε `min-h-[44px]`/`h-11` σε όλα,
+ίδιος κανόνας αφής με κάθε άλλο κομμάτι αυτής της δουλειάς.
+
+**Και τέσσερα ξεχωριστά gates, βρέθηκαν ένα-ένα από μια φρέσκια
+`npm run gates`, όχι όλα μαζί.** Το νέο cron ανέβασε τον αριθμό
+προγραμματισμένων routes από 12 σε 13 — `docs/api-keys.md`/
+`api-keys-doc.test.mjs` είχαν και τα δύο σκληρο-κωδικοποιημένο
+«twelve»/12, διορθώθηκαν μαζί (κείμενο ΚΑΙ αριθμός, όχι μόνο ο ένας).
+`feature-catalog.test.mjs`'s «every api route is claimed» έγινε
+κόκκινο: τα δύο νέα routes (`remind`, το νέο cron) δεν ήταν στη λίστα
+`routes` του Meetings στο `lib/billing/feature-catalog.ts` —
+προστέθηκαν, με το ίδιο σχόλιο «no model, no charge» που ήδη έχει το
+`goal` route δίπλα τους. `security-posture.test.mjs` έγινε κόκκινο:
+το νέο cron (χωρίς session, authenticated by CRON_SECRET) δεν ήταν
+στη justified-λίστα `NO_SESSION_BY_DESIGN` — προστέθηκε η ΙΔΙΑ
+αιτιολόγηση που ήδη έχει το `cron/lead-reminders`, όχι μια νέα. Και
+το `first-run-strings.test.mjs`: ο νέος αριθμός «whole product»
+strings (4861→4869, τα 8 νέα `remind.*` keys) χρειάστηκε
+`npm run i18n:first-run` να ξανατρέξει — το tier 1-3 μέτρημα (619
+strings στο πρώτο μονοπάτι) δεν άλλαξε καθόλου, που είναι η σωστή
+απάντηση: το «Remind me» είναι βαθιά μέσα στην κρατημένη λίστα
+ενεργειών, όχι στα πρώτα δύο λεπτά της εμπειρίας.
+
+**Ο έλεγχος.** `meetings.test.mjs` 68→81: νέα ενότητα 8 (η επαναχρήση
+του `readReminder`, το καθάρισμα του `reminded_at`, ο έλεγχος
+ιδιοκτησίας, το `due_date` αναφανάλλο, το claim-πριν-το-push του
+cron, το ΙΔΙΟ κανάλι push, ο φρουρός διπλής αποστολής). `meetings.
+mutation.mjs` 17→20/20: τρεις νέες μεταλλάξεις (ξεχασμένο καθάρισμα
+reminded_at, χαμένος έλεγχος ιδιοκτησίας, cron που στέλνει σε σειρά
+που δεν διεκδίκησε) — όλες πιάστηκαν. `meetings.prodtest.mjs` 49→57:
+πραγματικό PATCH σε πραγματικό production build (set/past-date-refusal/
+cancel/404-σε-ανύπαρκτη-ενέργεια), με νέο γενικό handler PATCH για
+`meeting_actions` στο υποκατάστατο. `meetings-workspace.prodtest.mjs`
+36→46: desktop — άνοιξε/έκλεισε χωρίς αποθήκευση/αποθήκευσε/ακύρωσε,
+με πραγματική επιβεβαίωση ότι η αποθήκευση/ακύρωση ΓΡΑΦΕΙ στο
+υποκατάστατο table (`MEETING_ACTIONS[0].remind_at`), όχι μόνο στην
+οθόνη· κινητό — πραγματικό άγγιγμα ανοίγει το ημερολόγιο, κουμπί
+≥44px επιβεβαιωμένο. `npm run build:ci` πράσινο, `npm run gates`
+πράσινο.
+
+**Κανένα πραγματικό κόστος.** Το «Remind me» είναι ειδοποίηση+
+χρονοπρογραμματισμός, όχι κλήση μοντέλου — τίποτα από το €2 budget
+του directive δεν ξοδεύτηκε εδώ.
+
+✅ Κομμάτι 4: «Make a goal» αναλλοίωτο (ήδη έτοιμο)· «Remind me»
+χτισμένο πάνω στο ΙΔΙΟ μηχανισμό που ήδη δουλεύει στις Πωλήσεις
+(reminder validation, στήλες, cron claim-πριν-push, κανάλι push) —
+μηδέν δεύτερη υλοποίηση. Real production build, desktop+mobile, με
+πραγματικά πατήματα/άγγιγμα ΚΑΙ επιβεβαίωση ότι η αλλαγή φτάνει στη
+βάση. `meetings.test.mjs` 81/81, `meetings.mutation.mjs` 20/20,
+`meetings.prodtest.mjs` 57/57, `meetings-workspace.prodtest.mjs`
+46/46. Πραγματικό κόστος: €0. Μένει Κομμάτι 5 (seek-by-click), 6
+(Q&A).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261103000000_meeting_action_reminders.sql**

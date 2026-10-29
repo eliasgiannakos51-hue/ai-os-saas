@@ -55,6 +55,8 @@ const MIGRATION = "supabase/migrations/20261006000000_meetings.sql";
 const TRANSCRIBE = "src/app/api/meetings/transcribe/route.ts";
 const ANALYSE = "src/app/api/meetings/[id]/analyse/route.ts";
 const ACTIONS = "src/app/api/meetings/[id]/actions/route.ts";
+const REMIND = "src/app/api/meetings/[id]/actions/[actionId]/remind/route.ts";
+const REMIND_CRON = "src/app/api/cron/meeting-action-reminders/route.ts";
 const WORKSPACE = "src/components/meetings/meetings-workspace.tsx";
 const PAGE = "src/app/dashboard/meetings/page.tsx";
 const LIMITS = "src/lib/meetings/meeting-limits.ts";
@@ -366,7 +368,60 @@ console.log("\n== 7. speakers, in Greek (Κομμάτι 3) ==");
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 8. what this file does NOT prove ==");
+console.log("\n== 8. Remind me (Κομμάτι 4) ==");
+// ---------------------------------------------------------------------
+{
+  const remind = code(REMIND);
+  check(
+    "the reminder is validated by Sales' own readReminder, not a second copy of the rule",
+    /import\s*\{\s*readReminder\s*\}\s*from\s*"@\/lib\/sales\/stages"/.test(remind)
+  );
+  check(
+    "setting a new remind_at clears reminded_at, so the new pick is the one that fires",
+    /remind_at:\s*reminder\.at,\s*reminded_at:\s*null/.test(remind)
+  );
+  check(
+    "the update is scoped to the caller's own id AND their action",
+    /\.eq\("id",\s*params\.actionId\)/.test(remind) && /\.eq\("user_id",\s*user\.id\)/.test(remind)
+  );
+  check(
+    "a bad reminder is refused with its own code, not silently dropped",
+    /code:\s*"bad_reminder"/.test(remind)
+  );
+  check(
+    "due_date is never written here — that is the MEETING's own parsed date, a different column entirely",
+    !/due_date/.test(remind)
+  );
+
+  const cron = code(REMIND_CRON);
+  check("the cron reads meeting_actions, not leads — this is a different table with the same shape", /from\("meeting_actions"\)/.test(cron));
+  check(
+    "a row is claimed (reminded_at set) BEFORE the push is sent, so a crash leaves it unsent rather than resent",
+    (() => {
+      const claim = cron.indexOf('.update({ reminded_at: now })');
+      const push = cron.indexOf("sendPushToUser(");
+      return claim >= 0 && push > claim;
+    })()
+  );
+  check("it reuses the SAME push channel Sales' own reminder uses, not a new one", /sendPushToUser\([\s\S]{0,80}"mission_reminders"/.test(cron));
+  check("the bell notification is written too, not push alone", /createNotification\(/.test(cron));
+  check("a row already claimed by a concurrent run is skipped, not pushed to twice", /if\s*\(!claimed\)\s*continue;/.test(cron));
+
+  check("the cron is scheduled in vercel.json", JSON.parse(read("vercel.json")).crons.some((c) => c.path === "/api/cron/meeting-action-reminders"));
+
+  const workspace = code(WORKSPACE);
+  check(
+    "the screen calls the nested per-action remind route, not the bare actions route",
+    /\/api\/meetings\/\$\{action\.meeting_id\}\/actions\/\$\{action\.id\}\/remind/.test(workspace)
+  );
+  check(
+    "cancelling a reminder sends null, which the route reads as 'no reminder', not a sentinel string",
+    /remindAt:\s*null/.test(workspace)
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 9. what this file does NOT prove ==");
 // ---------------------------------------------------------------------
 // STATED, NOT IMPLIED. Everything above reads code and runs pure
 // functions. None of it starts a browser, reaches Whisper or touches a

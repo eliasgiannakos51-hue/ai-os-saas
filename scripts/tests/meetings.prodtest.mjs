@@ -177,6 +177,17 @@ const supa = http.createServer((req, res) => {
           meetings.set(id, row);
           return json(200, single ? row : [row]);
         }
+        if (table === "meeting_actions") {
+          // Only `id` is honoured here — the ownership/meeting-scoping
+          // filters the real route also sends are exercised structurally
+          // by meetings.test.mjs, not by this single-user fixture.
+          const id = (url.searchParams.get("id") ?? "").replace(/^eq\./, "");
+          const idx = meetingActions.findIndex((a) => a.id === id);
+          if (idx < 0) return json(200, single ? null : []);
+          meetingActions[idx] = { ...meetingActions[idx], ...parsed };
+          const row = meetingActions[idx];
+          return json(200, single ? row : [row]);
+        }
         return json(200, single ? {} : []);
       }
 
@@ -376,6 +387,13 @@ const post = (path, init = {}) =>
     headers: { Cookie: COOKIE, ...(init.headers ?? {}) },
   });
 
+const patch = (path, init = {}) =>
+  fetch(`${origin}${path}`, {
+    method: "PATCH",
+    ...init,
+    headers: { Cookie: COOKIE, ...(init.headers ?? {}) },
+  });
+
 /** A believable small audio upload. The route checks the MIME type and
  *  the size, never the bytes — Whisper is the thing that reads those,
  *  and it is standing in. */
@@ -513,7 +531,42 @@ try {
   check("pressing Keep twice does not duplicate", meetingActions.length === before, `${before} -> ${meetingActions.length}`);
 
   // -------------------------------------------------------------------
-  console.log("\n== 4. a refusal is a code the screen can render ==");
+  console.log("\n== 4. Remind me (Κομμάτι 4) ==");
+  // -------------------------------------------------------------------
+  const keptForReminder = meetingActions[0]; // Γιώργος's kept action, from §3
+  const future = new Date(Date.now() + 2 * 86_400_000).toISOString();
+  const res4a = await patch(`/api/meetings/${meetingId}/actions/${keptForReminder.id}/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: future }),
+  });
+  const data4a = await res4a.json();
+  check(`setting a reminder succeeds (HTTP ${res4a.status})`, res4a.ok && data4a.ok === true, JSON.stringify(data4a).slice(0, 300));
+  check("the reminder is stored on the action", meetingActions[0].remind_at === future, String(meetingActions[0].remind_at));
+  check("...and reminded_at starts out unset", meetingActions[0].reminded_at === null, String(meetingActions[0].reminded_at));
+
+  const res4b = await patch(`/api/meetings/${meetingId}/actions/${keptForReminder.id}/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: "yesterday" }),
+  });
+  check(`a reminder in the past is refused (HTTP ${res4b.status})`, res4b.status === 400, String(res4b.status));
+  check("...with the code the screen knows", (await res4b.json())?.code === "bad_reminder");
+  check("...and the stored reminder is untouched by the refused attempt", meetingActions[0].remind_at === future);
+
+  const res4c = await patch(`/api/meetings/${meetingId}/actions/${keptForReminder.id}/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: null }),
+  });
+  const data4c = await res4c.json();
+  check("cancelling clears the reminder", data4c.action.remind_at === null && meetingActions[0].remind_at === null);
+
+  const res4d = await patch(`/api/meetings/${meetingId}/actions/does-not-exist/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: future }),
+  });
+  check(`an action that is not there is a 404 (HTTP ${res4d.status})`, res4d.status === 404, String(res4d.status));
+
+  // -------------------------------------------------------------------
+  console.log("\n== 5. a refusal is a code the screen can render ==");
   // -------------------------------------------------------------------
   const tooBig = new FormData();
   tooBig.append("audio", audioBlob(5 * 1024 * 1024), "long.m4a");
@@ -533,7 +586,7 @@ try {
   check("...with the code the screen knows", (await res6.json())?.code === "unsupported_type");
 
   // -------------------------------------------------------------------
-  console.log("\n== 5. an unusable model reply is reported, not absorbed ==");
+  console.log("\n== 6. an unusable model reply is reported, not absorbed ==");
   // -------------------------------------------------------------------
   const form2 = new FormData();
   form2.append("audio", audioBlob(), "second.m4a");
@@ -560,7 +613,7 @@ try {
   check("...and it settled rather than released", seen.release === 0, JSON.stringify(seen));
 
   // -------------------------------------------------------------------
-  console.log("\n== 6. the way out removes the words too ==");
+  console.log("\n== 7. the way out removes the words too ==");
   // -------------------------------------------------------------------
   const res9 = await fetch(`${origin}/api/meetings/${meetingId}`, {
     method: "DELETE",

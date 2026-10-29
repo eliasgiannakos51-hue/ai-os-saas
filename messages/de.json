@@ -3059,6 +3059,16 @@
         "projectLimit": "Alle Projekte deines Tarifs sind belegt. Wähle eines davon oder archiviere zuerst eines.",
         "projectName": "Gib dem neuen Projekt einen Namen mit mindestens zwei Buchstaben.",
         "projectFull": "Dieses Projekt ist voll. Wähle ein anderes."
+      },
+      "remind": {
+        "button": "Erinnere mich",
+        "label": "An diesem Tag",
+        "save": "Erinnerung speichern",
+        "cancel": "Erinnerung abbrechen",
+        "pending": "Erinnert dich am {date}",
+        "bad": "Wähle einen Tag nach heute, innerhalb eines Jahres.",
+        "notifyTitle": "Erinnerung: {what}",
+        "notifyBody": "Aus einem Meeting — {who}"
       }
     },
     "voicePage": {

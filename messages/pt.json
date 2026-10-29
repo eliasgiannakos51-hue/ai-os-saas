@@ -3059,6 +3059,16 @@
         "projectLimit": "Todos os projetos do seu plano estão em uso. Escolha um deles ou arquive um primeiro.",
         "projectName": "Dê ao projeto novo um nome com pelo menos duas letras.",
         "projectFull": "Esse projeto está cheio. Escolha outro."
+      },
+      "remind": {
+        "button": "Lembra-me",
+        "label": "Neste dia",
+        "save": "Guardar o lembrete",
+        "cancel": "Cancelar o lembrete",
+        "pending": "Lembra você em {date}",
+        "bad": "Escolha um dia depois de hoje, dentro de um ano.",
+        "notifyTitle": "Lembrete: {what}",
+        "notifyBody": "De uma reunião — {who}"
       }
     },
     "voicePage": {

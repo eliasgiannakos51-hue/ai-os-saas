@@ -3059,6 +3059,16 @@
         "projectLimit": "你的套餐中的项目都已用完。请选择其中一个，或先归档一个。",
         "projectName": "请给新项目起一个至少两个字的名称。",
         "projectFull": "该项目已满。请选择另一个。"
+      },
+      "remind": {
+        "button": "提醒我",
+        "label": "在这一天",
+        "save": "设置提醒",
+        "cancel": "取消提醒",
+        "pending": "将在 {date} 提醒你",
+        "bad": "请选择今天之后、一年以内的日期。",
+        "notifyTitle": "提醒：{what}",
+        "notifyBody": "来自一次会议 — {who}"
       }
     },
     "voicePage": {

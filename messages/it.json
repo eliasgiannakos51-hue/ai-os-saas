@@ -3059,6 +3059,16 @@
         "projectLimit": "Tutti i progetti del tuo piano sono in uso. Scegline uno o archiviane uno prima.",
         "projectName": "Dai al nuovo progetto un nome di almeno due lettere.",
         "projectFull": "Quel progetto è pieno. Scegline un altro."
+      },
+      "remind": {
+        "button": "Ricordamelo",
+        "label": "In questo giorno",
+        "save": "Imposta il promemoria",
+        "cancel": "Annulla il promemoria",
+        "pending": "Te lo ricorda il {date}",
+        "bad": "Scegli un giorno dopo oggi, entro un anno.",
+        "notifyTitle": "Promemoria: {what}",
+        "notifyBody": "Da una riunione — {who}"
       }
     },
     "voicePage": {

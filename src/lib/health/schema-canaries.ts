@@ -510,6 +510,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Share (Projects Κομμάτι 7) cannot create or revoke a link: api/projects/[id]/share's POST/DELETE fail, and the project page's Share button never shows one",
   },
   {
+    kind: "column",
+    table: "meeting_actions",
+    column: "remind_at",
+    migration: "20261103000000_meeting_action_reminders.sql",
+    breaks: "«Remind me» (Meetings Κομμάτι 4) cannot save a reminder: the PATCH route's write fails, and api/cron/meeting-action-reminders has no column to read, so nothing is ever sent",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

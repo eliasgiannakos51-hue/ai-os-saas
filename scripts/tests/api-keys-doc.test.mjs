@@ -106,10 +106,10 @@ check("...and the conditional one is the one named as conditional",
 
 const crons = JSON.parse(readFileSync("vercel.json", "utf8")).crons;
 check(`the cron count is the cron count (${crons.length})`,
-  doc.includes(`all twelve scheduled routes`) && crons.length === 12,
+  doc.includes(`all thirteen scheduled routes`) && crons.length === 13,
   `vercel.json has ${crons.length}`);
 check("...and the split between /api/cron and the digest is right",
-  crons.filter((c) => c.path.startsWith("/api/cron")).length === 11);
+  crons.filter((c) => c.path.startsWith("/api/cron")).length === 12);
 
 check(`the registry size is right (${ENV_REQUIREMENTS.length})`,
   doc.includes(`all ${ENV_REQUIREMENTS.length} variables`),

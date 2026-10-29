@@ -12,6 +12,9 @@
  *   the browser derives its own ceiling
  *   the transcription is hinted with the interface locale
  *   the parser fills in a missing `what`
+ *   a new reminder stops clearing the old one
+ *   a reminder update loses its ownership check
+ *   the reminder cron re-sends to a row it never claimed
  *   ...and the two floors, because a gate that ranges over nothing passes.
  *
  * Run: node scripts/tests/meetings.mutation.mjs
@@ -25,12 +28,14 @@ const MIGRATION = "supabase/migrations/20261006000000_meetings.sql";
 const TRANSCRIBE = "src/app/api/meetings/transcribe/route.ts";
 const ANALYSE = "src/app/api/meetings/[id]/analyse/route.ts";
 const ACTIONS = "src/app/api/meetings/[id]/actions/route.ts";
+const REMIND = "src/app/api/meetings/[id]/actions/[actionId]/remind/route.ts";
+const REMIND_CRON = "src/app/api/cron/meeting-action-reminders/route.ts";
 const WORKSPACE = "src/components/meetings/meetings-workspace.tsx";
 const LIMITS = "src/lib/meetings/meeting-limits.ts";
 const ANALYSIS = "src/lib/meetings/meeting-analysis.ts";
 const EL = "messages/el.json";
 
-const TARGETS = [GATE, MIGRATION, TRANSCRIBE, ANALYSE, ACTIONS, WORKSPACE, LIMITS, ANALYSIS, EL];
+const TARGETS = [GATE, MIGRATION, TRANSCRIBE, ANALYSE, ACTIONS, REMIND, REMIND_CRON, WORKSPACE, LIMITS, ANALYSIS, EL];
 
 const MUTANTS = [
   {
@@ -150,6 +155,34 @@ const MUTANTS = [
     from: "      diarize: true,\n    });",
     to: "    });",
     expect: "the transcribe route asks for diarization",
+  },
+  {
+    // Κομμάτι 4. A new remind_at is saved but the old reminded_at stays
+    // set, so a reminder moved to a new day never fires — the cron's
+    // `.is("reminded_at", null)` filter skips it forever.
+    name: "a new reminder no longer clears the old reminded_at",
+    file: REMIND,
+    from: '      .update({ remind_at: reminder.at, reminded_at: null })',
+    to: '      .update({ remind_at: reminder.at })',
+    expect: "setting a new remind_at clears reminded_at",
+  },
+  {
+    // Κομμάτι 4. Ownership drops off the update, so one account's PATCH
+    // could move a reminder on another account's kept action.
+    name: "the remind route stops checking who owns the action",
+    file: REMIND,
+    from: '      .eq("user_id", user.id)\n      .select("id, remind_at, reminded_at")',
+    to: '      .select("id, remind_at, reminded_at")',
+    expect: "the update is scoped to the caller's own id AND their action",
+  },
+  {
+    // Κομμάτι 4. The cron stops skipping a row it did not just claim, so
+    // every due action is pushed again on every 15-minute tick forever.
+    name: "the cron pushes to a row it never actually claimed",
+    file: REMIND_CRON,
+    from: "      if (!claimed) continue;",
+    to: "      void claimed;",
+    expect: "a row already claimed by a concurrent run is skipped",
   },
   {
     // THE ARRAY. This one is not hypothetical — the parser accepted a

@@ -3059,6 +3059,16 @@
         "projectLimit": "Tous les projets de votre offre sont utilisés. Choisissez-en un, ou archivez-en un d’abord.",
         "projectName": "Donnez au nouveau projet un nom d’au moins deux lettres.",
         "projectFull": "Ce projet est plein. Choisissez-en un autre."
+      },
+      "remind": {
+        "button": "Rappelle-le-moi",
+        "label": "Ce jour-là",
+        "save": "Enregistrer le rappel",
+        "cancel": "Annuler le rappel",
+        "pending": "Vous le rappelle le {date}",
+        "bad": "Choisissez un jour après aujourd’hui, dans l’année.",
+        "notifyTitle": "Rappel : {what}",
+        "notifyBody": "D’une réunion — {who}"
       }
     },
     "voicePage": {

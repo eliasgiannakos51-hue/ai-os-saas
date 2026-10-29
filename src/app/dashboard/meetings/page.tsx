@@ -91,7 +91,7 @@ export default async function MeetingsPage() {
       .limit(30),
     supabase
       .from("meeting_actions")
-      .select("id, meeting_id, who, what, when_text, due_date, done, source_index, created_at")
+      .select("id, meeting_id, who, what, when_text, due_date, done, source_index, created_at, remind_at, reminded_at")
       .order("created_at", { ascending: false })
       .limit(300),
   ]);

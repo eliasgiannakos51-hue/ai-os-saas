@@ -3059,6 +3059,16 @@
         "projectLimit": "Your plan's projects are all in use. Choose one of them, or archive one first.",
         "projectName": "Give the new project a name of at least two letters.",
         "projectFull": "That project is full. Choose another one."
+      },
+      "remind": {
+        "button": "Remind me",
+        "label": "On this day",
+        "save": "Set the reminder",
+        "cancel": "Cancel the reminder",
+        "pending": "Reminds you on {date}",
+        "bad": "Choose a day after today, within a year.",
+        "notifyTitle": "Reminder: {what}",
+        "notifyBody": "From a meeting — {who}"
       }
     },
     "voicePage": {

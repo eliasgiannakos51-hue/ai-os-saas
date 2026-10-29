@@ -3059,6 +3059,16 @@
         "projectLimit": "Todos los proyectos de tu plan están en uso. Elige uno de ellos o archiva uno primero.",
         "projectName": "Ponle al proyecto nuevo un nombre de al menos dos letras.",
         "projectFull": "Ese proyecto está lleno. Elige otro."
+      },
+      "remind": {
+        "button": "Recuérdamelo",
+        "label": "Este día",
+        "save": "Guardar el recordatorio",
+        "cancel": "Cancelar el recordatorio",
+        "pending": "Te lo recuerda el {date}",
+        "bad": "Elige un día después de hoy, dentro de un año.",
+        "notifyTitle": "Recordatorio: {what}",
+        "notifyBody": "De una reunión — {who}"
       }
     },
     "voicePage": {

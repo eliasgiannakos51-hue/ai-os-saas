@@ -4000,6 +4000,7 @@
       "preview": "L'application, en marche",
       "sealed": "Elle tourne isolée de tout le reste : ce que vous saisissez ici reste dans cet aperçu. Téléchargez-la pour l'utiliser sur votre propre ordinateur.",
       "original": "Votre propre version, pas une copie : elle prend l'idée et le genre d'écrans, jamais le nom, les mots, les images ou le code de l'original.",
+      "selfTest": "Chaque bouton a été vérifié : il est bien relié à du code, avant de vous montrer ceci.",
       "versions": "{count} versions",
       "version": "Version {n}",
       "first": "Première construction",

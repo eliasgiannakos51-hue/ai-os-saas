@@ -140,7 +140,11 @@ function rest({ req, res, url, body, json }) {
 
 const credits = [{ user_id: MOCK_USER.id, credits_remaining: 3000, credits_total: 3000 }];
 MOCK_USER.user_metadata = { subscription_tier: "growth" };
-const supa = await startMockSupabase({ port: 54423, tableRows: { feature_flags: [], user_credits: credits }, handle: rest });
+// Κομμάτι 4's Brand Kit source — empty by default; one block below seeds
+// it to prove the remembered colour really reaches the plan call, then
+// empties it again so every other scenario sees no remembered brand.
+const chatMemory = [];
+const supa = await startMockSupabase({ port: 54423, tableRows: { feature_flags: [], user_credits: credits, chat_memory: chatMemory }, handle: rest });
 
 // The model: a plan in the language it is asked for, one box rewritten, and
 // an app whose first script tries to get out.
@@ -580,6 +584,26 @@ try {
     await press(page.locator('[data-testid="rebuild-build"]'));
     await waitFrame(page, 1);
     check("retrying the SAME phase succeeds, still folding in the one App-logic definition, and is charged once — no double phase, no lost work", mine()[0].html === app(1, "rgb(255, 255, 255)") && JSON.stringify(mine()[0].app_definition) === afterPhase1.definition && settled.length === afterPhase1.settled + 1 && settled[afterPhase1.settled].p_feature === "rebuild_generate");
+    check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+    await context.close();
+  }
+
+  console.log("\n== Κομμάτι 4's Brand Kit: a remembered colour reaches the plan call, as a hint only ==");
+  {
+    reset();
+    chatMemory.length = 0;
+    chatMemory.push({ id: "bm1", user_id: MOCK_USER.id, memory_text: "Χρώματα επιχείρησης: #1d4ed8", times_seen: 3, last_seen_at: "2026-10-20T00:00:00Z", surface: "chat", kind: "fact" });
+    const { context, page, press } = await open(APP, { viewport: { width: 1440, height: 900 }, touch: false });
+    await page.goto(`${APP}/dashboard/rebuild`, { waitUntil: "networkidle" });
+    const askedBefore = modelAsked.length;
+    await say(page, press, "Μια εφαρμογή κρατήσεων");
+    await toPlan(page, press);
+    // modelAsked[askedBefore] is the capabilities call (list_features);
+    // the plan call — the one the remembered colour reaches — is the next one.
+    const planSent = String(modelAsked[askedBefore + 1]?.messages?.[0]?.content ?? "");
+    check("the plan call carries the remembered colour, fenced as a hint for the look box, never a name or a business to copy", planSent.includes("THE PERSON'S OWN BUSINESS") && planSent.includes("Colour: #1d4ed8") && /never take the app's own name from this/.test(planSent));
+    check("the plan itself still gets its own new name — the remembered colour never becomes the app's name", mine()[0]?.plan?.title && mine()[0].plan.title !== "#1d4ed8");
+    chatMemory.length = 0;
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
   }

@@ -15,6 +15,7 @@ import {
   parsePlan,
   planMessage,
   type RebuildBoxKind,
+  type RebuildBrandHint,
   type RebuildPlan,
 } from "@/lib/rebuild/rebuild-plan";
 import { checkAppHtml, type AppCheck } from "@/lib/rebuild/rebuild-html";
@@ -73,8 +74,8 @@ async function call(params: { message: string; tool: Tool; maxTokens: number; co
 const safe = (check: AppCheck): RebuildCallResult<string> =>
   check.ok ? { ok: true, value: check.html } : { ok: false, kind: "unusable", detail: `not a safe app: ${check.reason}${check.what ? ` (${check.what})` : ""}` };
 
-export async function planApp(params: { description: string; locale: string; reference?: string | null; features?: readonly string[]; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<RebuildPlan>> {
-  const out = await call({ ...params, message: planMessage(params.description, params.locale, params.reference, params.features), tool: PLAN_TOOL, maxTokens: PLAN_MAX_TOKENS });
+export async function planApp(params: { description: string; locale: string; reference?: string | null; features?: readonly string[]; brand?: RebuildBrandHint | null; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<RebuildPlan>> {
+  const out = await call({ ...params, message: planMessage(params.description, params.locale, params.reference, params.features, params.brand), tool: PLAN_TOOL, maxTokens: PLAN_MAX_TOKENS });
   if (!out.ok) return out;
   const parsed = parsePlan(out.value, params.description.slice(0, 60));
   return parsed.ok ? { ok: true, value: parsed.plan } : { ok: false, kind: "unusable", detail: parsed.reason };

@@ -107,7 +107,27 @@ export const APP_TOOL = {
 const referenceBlock = (reference: string | null | undefined) =>
   reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", fencePlan(reference)] : [];
 
-export function planMessage(description: string, locale: string, reference?: string | null, features?: readonly string[]): string {
+/**
+ * Κομμάτι 4 (2026-10-29): the Brand Kit's own narrow source today — a
+ * business name and a colour, remembered from earlier chats
+ * (lib/memory/brand.ts), the SAME two facts Flows already reuses
+ * (lib/flows/page-data.ts's brandColour). No logo and no font: neither
+ * exists anywhere in the product yet (docs/MASTER.md:709), and saying so
+ * here is the honest version of "design from the Brand Kit" rather than
+ * a claim this file cannot back. A LOCAL shape, not an import from
+ * lib/memory/brand.ts — that file pulls in lib/website-design-brief.ts,
+ * and this one stays free of anything not plain and client-safe, same
+ * reason AppDefinition is restated locally above.
+ */
+export type RebuildBrandHint = { name: string | null; colourHex: string | null };
+
+const brandBlock = (brand: RebuildBrandHint | null | undefined): string[] => {
+  if (!brand || (!brand.name && !brand.colourHex)) return [];
+  const lines = [brand.name ? `Business: ${brand.name}` : null, brand.colourHex ? `Colour: ${brand.colourHex}` : null].filter((l): l is string => l !== null);
+  return ["", "THE PERSON'S OWN BUSINESS, remembered from earlier chats — a hint for the look box only (use the colour if it fits; never take the app's own name from this, never the business's actual logo or wording):", fencePlan(lines.join("\n"))];
+};
+
+export function planMessage(description: string, locale: string, reference?: string | null, features?: readonly string[], brand?: RebuildBrandHint | null): string {
   return [
     `Plan this app. Write the title and every box in ${languageNameFor(locale)}. Give it a NEW name of its own — never the name of the app it resembles.`,
     "Boxes: screens (each screen and what the person does on it), data (what the app remembers and in what fields), actions (what the buttons and gestures do), look (colours, mood, layout — original, not the look of another product).",
@@ -116,6 +136,7 @@ export function planMessage(description: string, locale: string, reference?: str
     fencePlan(description),
     ...featuresContextBlock(features ?? []),
     ...referenceBlock(reference),
+    ...brandBlock(brand),
   ].join("\n");
 }
 

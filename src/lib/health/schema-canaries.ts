@@ -490,6 +490,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Rebuild charges for the App-logic phase and then cannot save its result: the person pays and sees «it could not be saved», and the Write phase that follows never gets the structured definition it needs",
   },
   {
+    kind: "column",
+    table: "rebuild_projects",
+    column: "subdomain",
+    migration: "20261106000000_rebuild_publish.sql",
+    breaks: "Rebuild's Publish (Κομμάτι 4) cannot save the address the app was given: the person sees it published and the link 404s, because /r/[subdomain] has nothing to look up",
+  },
+  {
     kind: "table",
     table: "my_stuff_sessions",
     migration: "20261024100000_my_stuff_sessions.sql",

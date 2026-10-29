@@ -4000,6 +4000,7 @@
       "preview": "L'app, in funzione",
       "sealed": "Gira isolata da tutto il resto, quindi ciò che scrivi qui resta in questa anteprima. Scaricala per usarla sul tuo computer.",
       "original": "La tua versione, non una copia: prende l'idea e il tipo di schermate, mai il nome, le parole, le immagini o il codice dell'originale.",
+      "selfTest": "Ogni pulsante è stato controllato: è collegato a del codice, prima di mostrarti questo.",
       "versions": "{count} versioni",
       "version": "Versione {n}",
       "first": "Prima costruzione",

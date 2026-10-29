@@ -4000,6 +4000,7 @@
       "preview": "La app, funcionando",
       "sealed": "Funciona aislada de todo lo demás, así que lo que escribas aquí se queda en esta vista previa. Descárgala para usarla en tu propio ordenador.",
       "original": "Tu propia versión, no una copia: toma la idea y el tipo de pantallas, nunca el nombre, las palabras, las imágenes ni el código del original.",
+      "selfTest": "Se comprobó que cada botón está conectado a código antes de mostrarte esto.",
       "versions": "{count} versiones",
       "version": "Versión {n}",
       "first": "Primera construcción",

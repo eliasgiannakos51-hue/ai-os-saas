@@ -4000,6 +4000,7 @@
       "preview": "The app, running",
       "sealed": "It runs sealed off from everything else, so what you enter here stays in this preview. Download it to use it on your own computer.",
       "original": "Your own version, not a copy: it takes the idea and the kinds of screens, never the name, words, pictures or code of the original.",
+      "selfTest": "Every button was checked that it is wired to code before this was shown to you.",
       "versions": "{count} versions",
       "version": "Version {n}",
       "first": "First build",

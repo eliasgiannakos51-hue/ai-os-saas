@@ -4000,6 +4000,7 @@
       "preview": "A aplicação, a funcionar",
       "sealed": "Corre isolada de tudo o resto, por isso o que escreves aqui fica nesta pré-visualização. Descarrega-a para a usares no teu computador.",
       "original": "A tua própria versão, não uma cópia: leva a ideia e o tipo de ecrãs, nunca o nome, as palavras, as imagens ou o código do original.",
+      "selfTest": "Verificou-se que cada botão está ligado a código, antes de isto te ser mostrado.",
       "versions": "{count} versões",
       "version": "Versão {n}",
       "first": "Primeira construção",

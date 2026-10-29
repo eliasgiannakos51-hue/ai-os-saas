@@ -98,7 +98,7 @@ console.log("\n== 2. the check and the seal: an app that reaches out is refused,
 {
   const shell = (body, head = "") => `<!DOCTYPE html><html><head><meta charset="utf-8">${head}<style>body{margin:0}</style></head><body>${body}<script>let n = 0;</script></body></html>`;
   const withScript = (code) => shell("<div id=a></div>", "").replace("let n = 0;", code);
-  const GOOD = shell("<main><button id=add>Add</button><ul id=list></ul></main>").replace("let n = 0;", "var mem = {}; function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } } var geolocation = 1; var item = { location: 'a' }; item.location = 'b'; var d = 4 / 2; // plain comment");
+  const GOOD = shell("<main><button id=add>Add</button><ul id=list></ul></main>").replace("let n = 0;", "var mem = {}; function save(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } } var geolocation = 1; var item = { location: 'a' }; item.location = 'b'; var d = 4 / 2; document.getElementById('add').addEventListener('click', function () {}); // plain comment");
   ok("a working app passes (storage through try/catch, a word that merely contains «location»)", H.checkAppHtml(GOOD).ok, JSON.stringify(H.checkAppHtml(GOOD)));
   ok("inline SVG's own namespace is allowed", H.checkAppHtml(shell('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>')).ok);
   ok("a fenced answer is unwrapped", H.checkAppHtml("```html\n" + GOOD + "\n```").ok);
@@ -142,6 +142,21 @@ console.log("\n== 2. the check and the seal: an app that reaches out is refused,
     const r = H.checkAppHtml(html);
     ok(`refused: ${name}`, !r.ok && r.reason === "forbidden" && r.what === what, JSON.stringify(r));
   }
+  console.log("  -- Κομμάτι 4: every button is checked that it is wired to code, never that it was pressed --");
+  const btn = (markup, script) => shell(markup).replace("let n = 0;", script);
+  ok("a button with no code attached anywhere is refused as a dead button", (() => { const r = H.checkAppHtml(btn("<button id=lonely>Go</button>", "var x = 1;")); return !r.ok && r.reason === "dead_button" && r.what.includes("lonely"); })());
+  ok("an inline onclick wires it", H.checkAppHtml(btn('<button onclick="go()">Go</button>', "function go() {}")).ok);
+  ok("getElementById + addEventListener wires it (the pattern GOOD itself uses)", H.checkAppHtml(btn('<button id="go">Go</button>', 'document.getElementById("go").addEventListener("click", function () {});')).ok);
+  ok("getElementById + a direct .onclick assignment wires it too", H.checkAppHtml(btn('<button id="go">Go</button>', 'document.getElementById("go").onclick = function () {};')).ok);
+  ok("a class used with querySelectorAll + addEventListener wires every button sharing it (the dynamic-list pattern)", H.checkAppHtml(btn('<button class="remove">X</button>', 'document.querySelectorAll(".remove").forEach(function (b) { b.addEventListener("click", function () {}); });')).ok);
+  ok("wiring one button by id does not excuse a SECOND, unwired one", (() => { const r = H.checkAppHtml(btn('<button id="go">Go</button><button id="also">Also</button>', 'document.getElementById("go").addEventListener("click", function () {});')); return !r.ok && r.reason === "dead_button" && r.what.includes("also"); })());
+  ok("an id or class present elsewhere in the text, with no addEventListener nearby, still does not count as wired", (() => { const r = H.checkAppHtml(btn('<button id="go">Go</button>', 'var go = document.getElementById("go"); go.setAttribute("data-x", "1");')); return !r.ok && r.reason === "dead_button"; })());
+  ok("a bulk `querySelectorAll('button')` + addEventListener wires every plain button at once", H.checkAppHtml(btn("<button>One</button><button>Two</button>", 'document.querySelectorAll("button").forEach(function (b) { b.addEventListener("click", function () {}); });')).ok);
+  ok("<input type=button> and <input type=submit> are checked the same way as <button>", (() => { const unwired = H.checkAppHtml(btn('<input type="button" id="go" value="Go">', "var x = 1;")); const wired = H.checkAppHtml(btn('<input type="button" id="go" value="Go">', 'document.getElementById("go").addEventListener("click", function () {});')); return !unwired.ok && unwired.reason === "dead_button" && wired.ok; })());
+  ok("an <input> that is neither a button nor a submit is not in the population at all", H.checkAppHtml(btn('<input type="text" id="who">', "var x = 1;")).ok);
+  ok("an app with no button at all has nothing to check", H.checkAppHtml(shell("<p>Nothing to press here.</p>")).ok);
+  ok("an unquoted id attribute is still read, not silently skipped", H.checkAppHtml(btn("<button id=go>Go</button>", 'document.getElementById("go").addEventListener("click", function () {});')).ok);
+
   ok("empty, too long and not-a-document are refused as such",
     H.checkAppHtml("").reason === "empty" && H.checkAppHtml(null).reason === "empty" &&
     H.checkAppHtml(GOOD.replace("</body>", `<!--${"x".repeat(H.MAX_APP_HTML_CHARS)}--></body>`)).reason === "too_long" &&
@@ -312,7 +327,7 @@ console.log("\n== 8. «something like X» → capabilities as boxes, before the 
   ok("a reference AND kept features together fence as THREE separate blocks — description, features, page — none swallowing another", planWithBoth.split(A.UNTRUSTED_OPEN).length - 1 === 3 && /FEATURES THE PERSON CHOSE TO INCLUDE/.test(planWithBoth) && /read for its structure only/.test(planWithBoth));
 
   const call = read("src/lib/rebuild/rebuild-call.ts");
-  ok("the features call is forced-tool, parsed the same way as a plan, and plan passes selected features through", /export async function deriveFeatures/.test(call) && /tool: FEATURES_TOOL/.test(call) && /parseFeatures\(out\.value\)/.test(call) && /planMessage\(params\.description, params\.locale, params\.reference, params\.features\)/.test(call));
+  ok("the features call is forced-tool, parsed the same way as a plan, and plan passes selected features through", /export async function deriveFeatures/.test(call) && /tool: FEATURES_TOOL/.test(call) && /parseFeatures\(out\.value\)/.test(call) && /planMessage\(params\.description, params\.locale, params\.reference, params\.features, params\.brand\)/.test(call));
 
   const route = read("src/app/api/rebuild/features/route.ts");
   ok("features: signed in before anything is read or spent", /if \(!user\) return NextResponse\.json\(\{ ok: false, code: "not_signed_in" \}, \{ status: 401 \}\);/.test(route) && route.indexOf("not_signed_in") < route.indexOf("chargedRebuildStep("));
@@ -323,7 +338,7 @@ console.log("\n== 8. «something like X» → capabilities as boxes, before the 
   ok("features: the app cap is read BEFORE anything is spent, same protection as the plan's own, so a Free account at its limit is never charged to see capabilities for an app it cannot keep", /\(count \?\? 0\) >= gate\.cap\) return NextResponse\.json\(\{ ok: false, code: "limit_reached"/.test(route) && route.indexOf("gate.cap") < route.indexOf("chargedRebuildStep("));
 
   const create = read("src/app/api/rebuild/route.ts");
-  ok("the plan route reads kept features from the body, clipped and bounded, never trusted further than any box", /Array\.isArray\(body\.features\)/.test(create) && /\.slice\(0, MAX_FEATURE_CHARS\)/.test(create) && /\.slice\(0, MAX_FEATURES\)/.test(create) && /features,\s*costs,/.test(create));
+  ok("the plan route reads kept features from the body, clipped and bounded, never trusted further than any box", /Array\.isArray\(body\.features\)/.test(create) && /\.slice\(0, MAX_FEATURE_CHARS\)/.test(create) && /\.slice\(0, MAX_FEATURES\)/.test(create) && /features,\s*brand,\s*costs,/.test(create));
 
   const est = await loadTs("src/lib/billing/estimate.ts");
   const margin = await loadTs("src/lib/billing/margin-policy.ts");
@@ -382,6 +397,27 @@ console.log("\n== 9. «Approve plan» builds phase by phase, only when the capab
   ok("approving starts the App-logic phase ONLY — the existing «Build the app» press is untouched for the one-phase app and for the second phase of a two-phase one", /async function runAppLogic\(\)/.test(shell3) && /post\(`\/api\/rebuild\/\$\{open\.id\}`, \{ action: "appLogic" \}, "appLogic"\)/.test(shell3) && (shell3.match(/data-testid="rebuild-build"/g) ?? []).length === 1);
   ok("the second phase's own price is the real build price, including the App-logic phase's definition once it ran", /buildMessage\(plan, locale, open\?\.reference\?\.rendered, appDefinition\)/.test(shell3));
   ok("the App-logic phase's own status comes from the saved row, never a separate piece of state to drift from it", /const appDefinition = open\?\.has_app_phase \? readDefinition\(open\.app_definition\) : null;/.test(shell3) && /const appLogicDone = Boolean\(appDefinition\);/.test(shell3));
+
+  ok("the screen says the self-test ran, next to the written app", /data-testid="rebuild-self-test"/.test(shell3) && /t\("selfTest"\)/.test(shell3));
+  ok("the English words say CHECKED, never PRESSED — the self-test is static, not an interaction", /wired to code/.test(messages.en.dashboard.rebuild.selfTest) && !/press/i.test(messages.en.dashboard.rebuild.selfTest));
+  ok("the Greek words say ΕΛΕΓΧΘΗΚΕ (checked), never ΠΑΤΗΘΗΚΕ (pressed) — same honesty in the language the owner reads", /ελέγχθηκε|ελέγχθηκαν/.test(messages.el.dashboard.rebuild.selfTest) && !/πατ[ήη]θ/.test(messages.el.dashboard.rebuild.selfTest));
+
+  console.log("\n  -- Κομμάτι 4: the Brand Kit's own narrow source (a remembered name/colour), folded in as a hint the look box can use, never the app's own name --");
+  const insideBrand = (text, needle) => { const o = text.indexOf(A.UNTRUSTED_OPEN); const at = text.indexOf(needle); const c = text.indexOf(A.UNTRUSTED_CLOSE, at); return o !== -1 && o < at && at < c; };
+  const noBrand = P.planMessage("x", "en");
+  const withName = P.planMessage("x", "en", null, [], { name: "Αύρα Νάξου", colourHex: null });
+  const withColour = P.planMessage("x", "en", null, [], { name: null, colourHex: "#1d4ed8" });
+  const withBoth = P.planMessage("x", "en", null, [], { name: "Αύρα Νάξου", colourHex: "#1d4ed8" });
+  ok("no remembered brand adds nothing to the plan call", !/THE PERSON'S OWN BUSINESS/.test(noBrand) && noBrand === P.planMessage("x", "en", null, [], null) && noBrand === P.planMessage("x", "en", null, [], undefined));
+  ok("a remembered name alone is folded in, fenced, labelled as a hint for the look box only — never the app's own name", /THE PERSON'S OWN BUSINESS/.test(withName) && /Business: Αύρα Νάξου/.test(withName) && /never take the app's own name from this/.test(withName) && insideBrand(withName, "Αύρα Νάξου"));
+  ok("a remembered colour alone is folded in the same way", /THE PERSON'S OWN BUSINESS/.test(withColour) && /Colour: #1d4ed8/.test(withColour) && !/Business:/.test(withColour));
+  ok("both together are one fenced block, not two", /THE PERSON'S OWN BUSINESS/.test(withBoth) && /Business: Αύρα Νάξου/.test(withBoth) && /Colour: #1d4ed8/.test(withBoth) && (withBoth.match(/THE PERSON'S OWN BUSINESS/g) ?? []).length === 1);
+  ok("a reference AND a remembered brand together still fence as separate blocks (description, page, brand — three, not two), none swallowing another", P.planMessage("x", "en", "Page of: shop.example", [], { name: "Αύρα", colourHex: null }).split(A.UNTRUSTED_OPEN).length - 1 === 3);
+
+  const callBrand = read("src/lib/rebuild/rebuild-call.ts");
+  ok("the plan call passes the remembered brand through to the SAME planMessage every other call uses", /planMessage\(params\.description, params\.locale, params\.reference, params\.features, params\.brand\)/.test(callBrand));
+  const createBrand = read("src/app/api/rebuild/route.ts");
+  ok("the route reads the SAME remembered-brand source Flows already reuses (lib/memory/brand.ts, lib/memory/store.ts), never a second one, and folds it into both the priced message and the real call", /import \{ loadMemories \} from "@\/lib\/memory\/store";/.test(createBrand) && /import \{ readBrand \} from "@\/lib\/memory\/brand";/.test(createBrand) && /const remembered = readBrand\(memories\);/.test(createBrand) && /planMessage\(description, locale, reference\?\.rendered, features, brand\)/.test(createBrand) && /planApp\(\{ description, locale, reference: reference\?\.rendered, features, brand, costs,/.test(createBrand));
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

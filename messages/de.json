@@ -4000,6 +4000,7 @@
       "preview": "Die App, laufend",
       "sealed": "Sie läuft abgeschottet von allem anderen, was du hier eingibst, bleibt also in dieser Vorschau. Lade sie herunter, um sie auf deinem eigenen Computer zu benutzen.",
       "original": "Deine eigene Version, keine Kopie: Sie übernimmt die Idee und die Art der Bildschirme, nie Namen, Worte, Bilder oder Code des Originals.",
+      "selfTest": "Jeder Button wurde geprüft, ob er mit Code verbunden ist, bevor dir das hier gezeigt wurde.",
       "versions": "{count} Versionen",
       "version": "Version {n}",
       "first": "Erster Bau",

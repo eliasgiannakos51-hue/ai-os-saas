@@ -377,6 +377,10 @@ export function RebuildShell({
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />
                     <p className="text-xs text-foreground" data-testid="rebuild-original">{t("original")}</p>
                   </div>
+                  <div className="flex items-start gap-2.5 rounded-card bg-panel-hover px-3 py-2.5">
+                    <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" />
+                    <p className="text-xs text-foreground" data-testid="rebuild-self-test">{t("selfTest")}</p>
+                  </div>
                   {versions.length > 1 && (
                     <details data-testid="rebuild-versions">
                       <summary className="flex min-h-[44px] cursor-pointer items-center gap-1.5 text-xs text-muted">

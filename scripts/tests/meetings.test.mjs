@@ -290,7 +290,83 @@ console.log("\n== 6. the parser turns a bad reply into nothing, never a guess ==
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 7. what this file does NOT prove ==");
+console.log("\n== 7. speakers, in Greek (Κομμάτι 3) ==");
+// ---------------------------------------------------------------------
+{
+  const an = await loadTs(ANALYSIS);
+  const greekTurns = [
+    { speaker: "A", start: 0, end: 2, text: "Καλημέρα σε όλους," },
+    { speaker: "A", start: 2, end: 4, text: "ας ξεκινήσουμε." },
+    { speaker: "B", start: 4, end: 6, text: "Συμφωνώ, πάμε." },
+  ];
+  const greekOut = an.formatDiarizedTranscript(greekTurns, "el");
+  check(
+    "consecutive turns from the SAME speaker merge into one line",
+    greekOut.split("\n").length === 2,
+    greekOut
+  );
+  check(
+    "a Greek meeting gets the Greek word for speaker, not an English one",
+    greekOut.includes("Ομιλητής A:") && greekOut.includes("Ομιλητής B:"),
+    greekOut
+  );
+  check(
+    "the merged line keeps both of the first speaker's sentences",
+    greekOut.includes("Καλημέρα σε όλους, ας ξεκινήσουμε.")
+  );
+
+  const otherOut = an.formatDiarizedTranscript(
+    [{ speaker: "X", start: 0, end: 1, text: "Hello." }],
+    "en"
+  );
+  check(
+    "a non-Greek meeting gets the bare letter, never a guessed English word",
+    otherOut === "A: Hello.",
+    otherOut
+  );
+  check("...same for a null language", an.formatDiarizedTranscript([{ speaker: "X", start: 0, end: 1, text: "Hi." }], null) === "A: Hi.");
+
+  const stable = an.formatDiarizedTranscript(
+    [
+      { speaker: "spk_2", start: 0, end: 1, text: "First." },
+      { speaker: "spk_9", start: 1, end: 2, text: "Second." },
+      { speaker: "spk_2", start: 2, end: 3, text: "Third." },
+    ],
+    null
+  );
+  check(
+    "letters are assigned by first-appearance order, never trusting the provider's own raw label",
+    stable === "A: First.\nB: Second.\nA: Third.",
+    stable
+  );
+
+  check(
+    "a segment with no text (silence inside a speaker turn) contributes nothing",
+    an.formatDiarizedTranscript([{ speaker: "A", start: 0, end: 1, text: "   " }], "el") === ""
+  );
+  check("no segments at all is an empty string, not a crash", an.formatDiarizedTranscript([], "el") === "");
+
+  // THE ROUTE ITSELF: diarize:true reaches the provider, and the TITLE
+  // is taken from the plain text, never the speaker-labelled one — a
+  // title starting "A: " would be the artifact leaking through.
+  const t = code(TRANSCRIBE);
+  check(
+    "the transcribe route asks for diarization",
+    /diarize\s*:\s*true/.test(t),
+    "Κομμάτι 3 without this is Κομμάτι 1's whisper-1 call again"
+  );
+  check(
+    "the stored/shown transcript comes from formatDiarizedTranscript, not the raw provider text",
+    /transcript:\s*transcriptText/.test(t)
+  );
+  check(
+    "the TITLE is still derived from the plain text, so it can never start with a speaker label",
+    /titleFromTranscript\(result\.text,/.test(t)
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 8. what this file does NOT prove ==");
 // ---------------------------------------------------------------------
 // STATED, NOT IMPLIED. Everything above reads code and runs pure
 // functions. None of it starts a browser, reaches Whisper or touches a

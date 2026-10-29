@@ -59,7 +59,9 @@ const MEETINGS = [
     user_id: MOCK_USER.id,
     title: "Σύσκεψη πωλήσεων",
     language: "el",
-    transcript: "Μαρία: Καλημέρα σε όλους, ας ξεκινήσουμε.\nΓιώργος: Συμφωνώ, πάμε.",
+    // Κομμάτι 3's own shape (formatDiarizedTranscript, meeting-analysis.ts):
+    // "Ομιλητής <letter>: " per merged turn, one per line.
+    transcript: "Ομιλητής A: Καλημέρα σε όλους, ας ξεκινήσουμε.\nΟμιλητής B: Συμφωνώ, πάμε.",
     summary: "Συζητήθηκε η πορεία των πωλήσεων του τριμήνου και οι επόμενες ενέργειες.",
     proposed_actions: [
       { who: "Μαρία", what: "Να στείλει την αναφορά πωλήσεων", when: "Παρασκευή" },
@@ -265,6 +267,16 @@ try {
       "the transcript is visible WITHOUT being clicked open — no longer a collapsed <details>",
       await page.locator('[data-testid="meeting-transcript"]').isVisible()
     );
+    // Κομμάτι 3's own shape, rendered: the plain-text column already
+    // displays whatever formatDiarizedTranscript() produced server
+    // side — no new UI code to show speakers, which is the point. If
+    // this ever breaks it is whitespace-pre-wrap or the seed, not a
+    // feature this piece had to build.
+    {
+      const shown = await page.locator('[data-testid="meeting-transcript"]').innerText();
+      check("both speakers show, each on its own line, in Greek", /Ομιλητής A:/.test(shown) && /Ομιλητής B:/.test(shown), shown);
+      check("...on two separate lines, not run together", shown.split("\n").length >= 2, shown);
+    }
     check("the delete control is still there", (await page.locator('[data-testid="meeting-detail"] button[aria-label]').count()) >= 1);
 
     // THE SHAPE: player above the two columns; summary LEFT of transcript.

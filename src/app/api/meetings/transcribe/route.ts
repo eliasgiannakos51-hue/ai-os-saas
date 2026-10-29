@@ -26,7 +26,7 @@ import {
   meetingLimits,
   secondsFromBytes,
 } from "@/lib/meetings/meeting-limits";
-import { normaliseLanguage, titleFromTranscript } from "@/lib/meetings/meeting-analysis";
+import { formatDiarizedTranscript, normaliseLanguage, titleFromTranscript } from "@/lib/meetings/meeting-analysis";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -258,6 +258,10 @@ export async function POST(request: Request) {
       audio,
       filename: `meeting.${audio.type.includes("mp4") || audio.type.includes("m4a") ? "mp4" : audio.type.includes("mpeg") ? "mp3" : "webm"}`,
       durationSeconds: seconds,
+      // MEETINGS Κομμάτι 3: speakers, in Greek. Switches the model and
+      // response format inside transcribeAudio() — see that function's
+      // own comment for why Chat's own mic never sets this.
+      diarize: true,
     });
 
     if (!result.ok) {
@@ -297,6 +301,16 @@ export async function POST(request: Request) {
       metadata: { kind: "meeting_transcribe", seconds: billedSeconds, reportedSeconds: seconds, detectedLanguage: result.language },
     });
 
+    // MEETINGS Κομμάτι 3: SPEAKERS, IN GREEK. `transcriptText` is what
+    // gets stored and shown — the plain `result.text` stays reserved
+    // for the TITLE below, so a leading "A: " never leaks into it.
+    // Falls back to the plain text when segments parse to nothing (a
+    // provider response shape change, never a reason to show less than
+    // what was actually said).
+    const detectedLanguageCode = normaliseLanguage(result.language);
+    const transcriptText =
+      formatDiarizedTranscript(result.segments ?? [], detectedLanguageCode) || result.text;
+
     // THE ROW IS WRITTEN AFTER THE SETTLEMENT, which is the order
     // docs/shapes.md #36 is about: the state the user sees is the LAST
     // write, so a settlement that throws cannot leave a meeting on the
@@ -309,12 +323,13 @@ export async function POST(request: Request) {
         // NEVER THE FILENAME. Recordings are called things like
         // "Σύσκεψη με Παπαδόπουλο 14-03.m4a" — a person's name and a
         // date, which the uploader did not decide to put in a list they
-        // might screen-share.
+        // might screen-share. Titled from the PLAIN text, never the
+        // speaker-labelled one, so it never starts with "A: ".
         title: titleFromTranscript(result.text, fallbackTitle),
         // A CODE, NEVER THE PROVIDER'S WORD. Whisper answers "greek";
         // the column and the screen both want "el". See normaliseLanguage.
-        language: normaliseLanguage(result.language),
-        transcript: result.text,
+        language: detectedLanguageCode,
+        transcript: transcriptText,
         duration_seconds: billedSeconds,
         credits_charged: settlement.creditsCharged,
       })
@@ -331,10 +346,10 @@ export async function POST(request: Request) {
         ok: true,
         saved: false,
         meeting: null,
-        transcript: result.text,
+        transcript: transcriptText,
         // A CODE, NEVER THE PROVIDER'S WORD. Whisper answers "greek";
         // the column and the screen both want "el". See normaliseLanguage.
-        language: normaliseLanguage(result.language),
+        language: detectedLanguageCode,
         seconds: billedSeconds,
         usage: buildUsageReceipt({
           creditsCharged: settlement.creditsCharged,
@@ -348,8 +363,8 @@ export async function POST(request: Request) {
       ok: true,
       saved: true,
       meeting: row,
-      transcript: result.text,
-      language: normaliseLanguage(result.language),
+      transcript: transcriptText,
+      language: detectedLanguageCode,
       seconds: billedSeconds,
       usage: buildUsageReceipt({
         creditsCharged: settlement.creditsCharged,

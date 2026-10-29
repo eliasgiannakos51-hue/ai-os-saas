@@ -99,8 +99,8 @@ const MUTANTS = [
     // locale, which is the one thing this feature must not do.
     name: "the transcription is hinted with the interface locale",
     file: TRANSCRIBE,
-    from: "      durationSeconds: seconds,\n    });",
-    to: "      durationSeconds: seconds,\n      languageHint: String(form.get(\"locale\") ?? \"\"),\n    });",
+    from: "      diarize: true,\n    });",
+    to: "      diarize: true,\n      languageHint: String(form.get(\"locale\") ?? \"\"),\n    });",
     expect: "the transcription is not hinted with the interface locale",
   },
   {
@@ -111,6 +111,45 @@ const MUTANTS = [
     from: "    if (what.length === 0) continue;\n    const action: ProposedAction = { what };",
     to: "    const action: ProposedAction = { what: what || clean(row.who, MAX_ACTION_CHARS) || \"(unnamed)\" };",
     expect: "an action with no `what` is dropped",
+  },
+  {
+    // Κομμάτι 3. Consecutive segments from the same speaker stop
+    // merging, so every short diarized chunk becomes its own line — the
+    // defect "A: Hello\nA: how are you" instead of one line.
+    name: "speaker turns stop merging, every segment gets its own line",
+    file: ANALYSIS,
+    from: "    if (segment.speaker !== currentRaw) {\n      flush();\n      currentRaw = segment.speaker;\n    }",
+    to: "    flush();\n    currentRaw = segment.speaker;",
+    expect: "consecutive turns from the SAME speaker merge into one line",
+  },
+  {
+    // Κομμάτι 3. The Greek word for speaker leaks into every language,
+    // which is the new-English-sentence-shaped defect in reverse: a
+    // Greek word asserted onto a transcript that was never in Greek.
+    name: "the Greek speaker word is used for every language, not only Greek",
+    file: ANALYSIS,
+    from: '  const prefix = language === "el" ? "Ομιλητής" : null;',
+    to: '  const prefix = "Ομιλητής";',
+    expect: "a non-Greek meeting gets the bare letter",
+  },
+  {
+    // Κομμάτι 3. The title starts reading the speaker-labelled text, so
+    // every meeting's title in the list begins "A: " or "Ομιλητής A: ".
+    name: "the title is derived from the speaker-labelled transcript",
+    file: TRANSCRIBE,
+    from: "title: titleFromTranscript(result.text, fallbackTitle),",
+    to: "title: titleFromTranscript(transcriptText, fallbackTitle),",
+    expect: "the TITLE is still derived from the plain text",
+  },
+  {
+    // Κομμάτι 3. transcribeAudio is called without diarize, so Meetings
+    // quietly goes back to whisper-1 with no speakers at all —
+    // Κομμάτι 1's screen with Κομμάτι 1's own transcript, nothing new.
+    name: "the meetings route stops asking for diarization",
+    file: TRANSCRIBE,
+    from: "      diarize: true,\n    });",
+    to: "    });",
+    expect: "the transcribe route asks for diarization",
   },
   {
     // THE ARRAY. This one is not hypothetical — the parser accepted a

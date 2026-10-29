@@ -64,6 +64,26 @@ const TRANSCRIPT =
   "Η Νεφέλη αναλαμβάνει να ετοιμάσει τα οικονομικά για τον Μάρτιο. " +
   "Συζητήσαμε επίσης το ενδεχόμενο να αλλάξουμε προμηθευτή, αλλά δεν αποφασίστηκε τίποτα.";
 
+// MEETINGS Κομμάτι 3: SPEAKERS, IN GREEK. The same three sentences as
+// TRANSCRIPT, split into diarized turns — "A" speaks the first and
+// third (NOT adjacent, so they must NOT merge into one line; only
+// adjacent turns from the same speaker do), "B" the second. Lets §1
+// below prove the real parsing path (gpt-4o-transcribe-diarize's own
+// response shape, segments with no top-level `text`) rather than only
+// the plain-text fallback every other check in this file already uses.
+const DIARIZED_SEGMENTS = [
+  { speaker: "A", start: 0, end: 8, text: "Λοιπόν, ξεκινάμε. Ο Γιώργος θα στείλει την προσφορά στον πελάτη μέχρι την Παρασκευή." },
+  { speaker: "B", start: 8, end: 14, text: "Η Νεφέλη αναλαμβάνει να ετοιμάσει τα οικονομικά για τον Μάρτιο." },
+  { speaker: "A", start: 14, end: 20, text: "Συζητήσαμε επίσης το ενδεχόμενο να αλλάξουμε προμηθευτή, αλλά δεν αποφασίστηκε τίποτα." },
+];
+// Derived from DIARIZED_SEGMENTS above, not retyped — one source of
+// truth for what formatDiarizedTranscript() must produce from it.
+const EXPECTED_DIARIZED_TRANSCRIPT = [
+  `Ομιλητής A: ${DIARIZED_SEGMENTS[0].text}`,
+  `Ομιλητής B: ${DIARIZED_SEGMENTS[1].text}`,
+  `Ομιλητής A: ${DIARIZED_SEGMENTS[2].text}`,
+].join("\n");
+
 const ANALYSIS = {
   summary:
     "Συζητήθηκε η προσφορά προς τον πελάτη και τα οικονομικά του Μαρτίου. " +
@@ -190,7 +210,7 @@ const supa = http.createServer((req, res) => {
   });
 });
 
-// --- the stand-in Whisper --------------------------------------------
+// --- the stand-in Whisper (and gpt-4o-transcribe-diarize) ------------
 let whisperCalls = 0;
 let lastWhisperForm = "";
 const openai = http.createServer((req, res) => {
@@ -200,8 +220,29 @@ const openai = http.createServer((req, res) => {
     whisperCalls++;
     lastWhisperForm = body;
     res.writeHead(200, { "Content-Type": "application/json" });
-    // verbose_json, which is what the route asks for — and `language`
-    // is the whole reason it does.
+    // THE REAL REQUEST SHAPE, READ FROM THE MULTIPART BODY ITSELF, not
+    // assumed: transcribeAudio's `diarize: true` path asks for a
+    // DIFFERENT model and response_format than Chat's own mic ever
+    // sends, and this is the one place a wrong parameter name on
+    // either side of that call would go unnoticed otherwise.
+    if (/name="model"\r\n\r\ngpt-4o-transcribe-diarize/.test(body)) {
+      check(
+        "the diarized request asks for diarized_json, not verbose_json",
+        /name="response_format"\r\n\r\ndiarized_json/.test(body),
+        body.slice(0, 2000)
+      );
+      check(
+        "...and declares a chunking_strategy, required past 30 seconds",
+        /name="chunking_strategy"\r\n\r\nauto/.test(body)
+      );
+      // NO TOP-LEVEL `text` — gpt-4o-transcribe-diarize's own docs make
+      // no promise that one comes back, and the route has to cope with
+      // that by joining the segments itself.
+      res.end(JSON.stringify({ segments: DIARIZED_SEGMENTS, language: "greek", duration: 120 }));
+      return;
+    }
+    // verbose_json, which is what Chat's own mic asks for — and
+    // `language` is the whole reason it does.
     res.end(JSON.stringify({ text: TRANSCRIPT, language: "greek", duration: 120 }));
   });
 });
@@ -351,7 +392,20 @@ try {
   const res1 = await post("/api/meetings/transcribe", { body: form });
   const data1 = await res1.json();
   check(`the upload is accepted (HTTP ${res1.status})`, res1.ok && data1.ok === true, JSON.stringify(data1).slice(0, 400));
-  check("the transcript comes back", data1.transcript === TRANSCRIPT, String(data1.transcript).slice(0, 120));
+  check(
+    "the transcript comes back WITH SPEAKERS, in Greek",
+    data1.transcript === EXPECTED_DIARIZED_TRANSCRIPT,
+    String(data1.transcript).slice(0, 300)
+  );
+  check(
+    "...three lines, not two — two turns from the SAME speaker across a different speaker's turn stay separate",
+    data1.transcript.split("\n").length === 3,
+    data1.transcript
+  );
+  check(
+    "...and it is what was actually stored, not just what this response says",
+    data1.meeting?.transcript === EXPECTED_DIARIZED_TRANSCRIPT
+  );
   check("...and it was saved", data1.saved === true && Boolean(data1.meeting?.id));
   check("Whisper was called exactly once", whisperCalls === 1, String(whisperCalls));
   check("the minutes were consumed", seen.consumeSeconds === 1, String(seen.consumeSeconds));

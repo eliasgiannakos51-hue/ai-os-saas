@@ -137,6 +137,9 @@ const ROUTED = {
   "src/lib/meetings/meeting-analyse-call.ts": {
     note: "Meetings. One call, recorded onto the caller's accumulator and settled by the route that made it.",
   },
+  "src/lib/meetings/meeting-ask-call.ts": {
+    note: "A follow-up question on ONE meeting (Κομμάτι 6, api/meetings/[id]/ask), reserved against meetingAsk and settled under the SAME meeting_analyse feature the meeting's own analysis settles under. Same reserve-then-settle as a data-analysis follow-up question, at its own estimate.",
+  },
   "src/lib/websites-greek-spelling-check.ts": {
     note: "The spelling pass over a generated site. Recorded onto the website generation's own accumulator, so it is part of that generation's settlement rather than a second charge.",
   },

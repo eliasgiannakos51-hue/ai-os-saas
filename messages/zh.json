@@ -3069,6 +3069,12 @@
         "bad": "请选择今天之后、一年以内的日期。",
         "notifyTitle": "提醒：{what}",
         "notifyBody": "来自一次会议 — {who}"
+      },
+      "ask": {
+        "title": "询问这次会议",
+        "placeholder": "就这次会议提出问题…",
+        "submit": "提问",
+        "asking": "正在提问…"
       }
     },
     "voicePage": {

@@ -3069,6 +3069,12 @@
         "bad": "今日より後、1年以内の日を選んでください。",
         "notifyTitle": "リマインダー: {what}",
         "notifyBody": "会議から — {who}"
+      },
+      "ask": {
+        "title": "この会議について質問する",
+        "placeholder": "この会議について質問する…",
+        "submit": "質問する",
+        "asking": "質問中…"
       }
     },
     "voicePage": {

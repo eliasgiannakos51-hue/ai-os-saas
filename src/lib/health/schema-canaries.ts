@@ -517,6 +517,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "«Remind me» (Meetings Κομμάτι 4) cannot save a reminder: the PATCH route's write fails, and api/cron/meeting-action-reminders has no column to read, so nothing is ever sent",
   },
   {
+    kind: "table",
+    table: "meeting_questions",
+    migration: "20261104000000_meeting_questions.sql",
+    breaks: "Q&A about a meeting (Meetings Κομμάτι 6) answers the question but fails to save it: api/meetings/[id]/ask's insert fails after the model has already been charged, and the question never shows again on reopening the meeting",
+  },
+  {
     kind: "function",
     fn: "chat_memory_fold",
     migration: "20261004100000_chat_memory_fold_matches_app.sql",

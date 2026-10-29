@@ -3069,6 +3069,12 @@
         "bad": "Choisissez un jour après aujourd’hui, dans l’année.",
         "notifyTitle": "Rappel : {what}",
         "notifyBody": "D’une réunion — {who}"
+      },
+      "ask": {
+        "title": "Poser une question sur cette réunion",
+        "placeholder": "Posez une question sur cette réunion…",
+        "submit": "Demander",
+        "asking": "Envoi de la question…"
       }
     },
     "voicePage": {

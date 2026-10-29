@@ -98,7 +98,13 @@ const ANALYSIS = {
 // --- the stand-in database, and it REMEMBERS -------------------------
 const meetings = new Map();
 const meetingActions = [];
+const meetingQuestions = [];
 const seen = { reserve: 0, settle: 0, release: 0, consumeSeconds: 0 };
+
+// Κομμάτι 6, the fixed answer the stand-in model gives to a question
+// about the meeting — real Greek text, standing in for whatever the real
+// provider would say about this transcript.
+const ASK_ANSWER = "Ο Γιώργος θα στείλει την προσφορά στον πελάτη μέχρι την Παρασκευή.";
 
 const supa = http.createServer((req, res) => {
   let body = "";
@@ -164,6 +170,16 @@ const supa = http.createServer((req, res) => {
           }));
           meetingActions.push(...rows);
           return json(201, single ? rows[0] : rows);
+        }
+        if (table === "meeting_questions") {
+          const row = {
+            id: `q-${meetingQuestions.length + 1}`,
+            created_at: "2026-09-23T10:06:00Z",
+            answer: null,
+            ...parsed,
+          };
+          meetingQuestions.push(row);
+          return json(201, single ? row : [row]);
         }
         return json(201, single ? {} : []);
       }
@@ -261,7 +277,11 @@ const openai = http.createServer((req, res) => {
 // --- the stand-in Anthropic ------------------------------------------
 let anthropicCalls = 0;
 let lastSystemPrompt = "";
-let anthropicReply = () => JSON.stringify(ANALYSIS);
+// DEFAULT: the analyse call's own JSON shape, UNLESS the system prompt is
+// the ask route's own (Κομμάτι 6) — set AFTER lastSystemPrompt below, so
+// this reads the request that is actually in flight, not the previous one.
+let anthropicReply = () =>
+  lastSystemPrompt.includes("You answer a question about ONE meeting") ? ASK_ANSWER : JSON.stringify(ANALYSIS);
 const anthropic = http.createServer((req, res) => {
   let body = "";
   req.on("data", (c) => (body += c));
@@ -576,6 +596,53 @@ try {
     body: JSON.stringify({ remindAt: future }),
   });
   check(`an action that is not there is a 404 (HTTP ${res4d.status})`, res4d.status === 404, String(res4d.status));
+
+  // -------------------------------------------------------------------
+  console.log("\n== 4a. ask about this meeting, from a field (Κομμάτι 6) ==");
+  // -------------------------------------------------------------------
+  const callsBeforeAsk = anthropicCalls;
+  const reserveBeforeAsk = seen.reserve;
+  const settleBeforeAsk = seen.settle;
+  const res11 = await post(`/api/meetings/${meetingId}/ask`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Ποιος θα στείλει την προσφορά;" }),
+  });
+  const data11 = await res11.json();
+  check(`a question about the meeting is answered (HTTP ${res11.status})`, res11.ok && data11.ok === true, JSON.stringify(data11).slice(0, 300));
+  check("the answer is the model's real reply, read as plain text — not JSON-parsed", data11.answer === ASK_ANSWER, String(data11.answer));
+  check("exactly one model call was made for it", anthropicCalls === callsBeforeAsk + 1, String(anthropicCalls));
+  check("credits were reserved and settled for it", seen.reserve === reserveBeforeAsk + 1 && seen.settle === settleBeforeAsk + 1, JSON.stringify(seen));
+  check("a usage receipt came back", typeof data11.usage === "object" && data11.usage !== null, JSON.stringify(data11.usage));
+  check(
+    "the question and its answer were written to meeting_questions, through the service role",
+    meetingQuestions.length === 1 && meetingQuestions[0].question === "Ποιος θα στείλει την προσφορά;" && meetingQuestions[0].answer === ASK_ANSWER,
+    JSON.stringify(meetingQuestions)
+  );
+  check("...scoped to the right meeting and the signed-in user", meetingQuestions[0].meeting_id === meetingId && meetingQuestions[0].user_id === USER_ID);
+
+  const res12 = await post(`/api/meetings/${meetingId}/ask`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "   " }),
+  });
+  check(`a blank question is refused (HTTP ${res12.status})`, res12.status === 400, String(res12.status));
+  check("...with the code the screen knows", (await res12.json())?.error === "empty");
+  check("...and nothing new was written for it", meetingQuestions.length === 1, String(meetingQuestions.length));
+
+  // A meeting with nothing worth answering from — placed directly in the
+  // store, the same shape a real row with a near-silent recording has.
+  meetings.set("short-1", { id: "short-1", user_id: USER_ID, transcript: "Ναι.", summary: null, proposed_actions: [], created_at: "2026-09-23T10:00:00Z" });
+  const res13 = await post("/api/meetings/short-1/ask", {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Τι αποφασίστηκε;" }),
+  });
+  check(`a transcript too short to answer from is refused (HTTP ${res13.status})`, res13.status === 422, String(res13.status));
+  check("...with the SAME code the analyse route uses for the same reason", (await res13.json())?.error === "too_short");
+
+  const res14 = await post("/api/meetings/does-not-exist/ask", {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Τι αποφασίστηκε;" }),
+  });
+  check(`a meeting that is not there is a 404 (HTTP ${res14.status})`, res14.status === 404, String(res14.status));
 
   // -------------------------------------------------------------------
   console.log("\n== 5. a refusal is a code the screen can render ==");

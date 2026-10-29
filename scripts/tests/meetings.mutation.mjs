@@ -18,6 +18,16 @@
  *   a merged line's seek time drifts to the wrong segment
  *   the per-line seek times stop coming from the real provider reply
  *   a click target stops checking it is the open meeting's own player
+ *   an empty question about a meeting is answered instead of refused
+ *   the "never invent" rule disappears from the ask prompt
+ *   a summary stops reaching the ask prompt as its own section
+ *   a transcript too short to analyse is asked about anyway
+ *   a long question stops being bounded before it reaches the model
+ *   a follow-up question settles under a different feature than its meeting's own analysis
+ *   the answer is written through the user's own session instead of the service role
+ *   a half-typed question follows the reader to a different meeting
+ *   past questions stop being filtered to the open meeting
+ *   the database stops refusing an insert from a signed-in user
  *   ...and the two floors, because a gate that ranges over nothing passes.
  *
  * Run: node scripts/tests/meetings.mutation.mjs
@@ -28,17 +38,35 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/meetings.test.mjs";
 const MIGRATION = "supabase/migrations/20261006000000_meetings.sql";
+const QUESTIONS_MIGRATION = "supabase/migrations/20261104000000_meeting_questions.sql";
 const TRANSCRIBE = "src/app/api/meetings/transcribe/route.ts";
 const ANALYSE = "src/app/api/meetings/[id]/analyse/route.ts";
 const ACTIONS = "src/app/api/meetings/[id]/actions/route.ts";
 const REMIND = "src/app/api/meetings/[id]/actions/[actionId]/remind/route.ts";
 const REMIND_CRON = "src/app/api/cron/meeting-action-reminders/route.ts";
+const ASK = "src/app/api/meetings/[id]/ask/route.ts";
+const ASK_LIB = "src/lib/meetings/meeting-ask.ts";
 const WORKSPACE = "src/components/meetings/meetings-workspace.tsx";
 const LIMITS = "src/lib/meetings/meeting-limits.ts";
 const ANALYSIS = "src/lib/meetings/meeting-analysis.ts";
 const EL = "messages/el.json";
 
-const TARGETS = [GATE, MIGRATION, TRANSCRIBE, ANALYSE, ACTIONS, REMIND, REMIND_CRON, WORKSPACE, LIMITS, ANALYSIS, EL];
+const TARGETS = [
+  GATE,
+  MIGRATION,
+  QUESTIONS_MIGRATION,
+  TRANSCRIBE,
+  ANALYSE,
+  ACTIONS,
+  REMIND,
+  REMIND_CRON,
+  ASK,
+  ASK_LIB,
+  WORKSPACE,
+  LIMITS,
+  ANALYSIS,
+  EL,
+];
 
 const MUTANTS = [
   {
@@ -234,6 +262,108 @@ const MUTANTS = [
     from: "      setPlayerMeetingId(null);\n      setPlayerLines(null);\n    }",
     to: "      setPlayerMeetingId(null);\n    }",
     expect: "resets playerLines alongside it",
+  },
+  {
+    // Κομμάτι 6. An empty (whitespace-only) question stops being refused,
+    // so a blank press of the field would be sent to the model and
+    // charged for.
+    name: "an empty question stops being refused before the call",
+    file: ASK_LIB,
+    from: '  if (!trimmed) return { ok: false, reason: "empty" };',
+    to: "",
+    expect: "an empty question is refused",
+  },
+  {
+    // Κομμάτι 6. The "never invent" rule disappears from the system
+    // prompt, so a model with nothing to go on could answer anyway
+    // rather than say the meeting does not address the question.
+    name: "the ask prompt stops forbidding an invented answer",
+    file: ASK_LIB,
+    from: "Never invent a name, a date or a decision that is not there. If the meeting does not address the question, say so plainly rather than guessing. ",
+    to: "",
+    expect: "the rule against inventing an answer is in the SYSTEM prompt",
+  },
+  {
+    // Κομμάτι 6. The summary stops reaching the prompt as its own
+    // section, so a question the SUMMARY would answer (but the raw
+    // transcript's wording would not) loses that context.
+    name: "the ask prompt stops adding the meeting's own summary",
+    file: ASK_LIB,
+    from: 'if (summary && summary.trim()) parts.push(`SUMMARY:\\n${summary.trim()}`);',
+    to: "",
+    expect: "added as its own section",
+  },
+  {
+    // Κομμάτι 6. The route stops refusing a transcript too short to
+    // analyse, so a model call could be made and charged for over a
+    // handful of words with nothing to answer from.
+    name: "the ask route stops refusing a transcript too short to answer from",
+    file: ASK,
+    from: "    if (!isAnalysable(transcript)) {",
+    to: "    if (false) {",
+    expect: "too short to ask about",
+  },
+  {
+    // Κομμάτι 6. The question stops being bounded before it is sized and
+    // sent, so a message far longer than this feature is for could be
+    // charged and sent as though it were a short question.
+    name: "the ask route stops bounding the question's length",
+    file: ASK,
+    from: ".trim().slice(0, MEETING_ASK_MAX_QUESTION_CHARS) : \"\";",
+    to: '.trim() : "";',
+    expect: "bounded by slicing",
+  },
+  {
+    // Κομμάτι 6. A follow-up question settles under its own feature key
+    // instead of the meeting's own — the margin and the owner's own
+    // per-feature numbers would then be read against the wrong bucket.
+    name: "the ask route settles under a different feature than its meeting's own analysis",
+    file: ASK,
+    from: 'feature: "meeting_analyse",\n      costs,\n      plan,\n      bypassCharge: bypass,\n      metadata: { meetingId, kind: "question" },',
+    to: 'feature: "meeting_ask",\n      costs,\n      plan,\n      bypassCharge: bypass,\n      metadata: { meetingId, kind: "question" },',
+    expect: "the SAME feature the meeting's own analysis settles under",
+  },
+  {
+    // Κομμάτι 6. The answer is written through the caller's OWN session
+    // client instead of the service role — the same mistake
+    // data_analysis_questions' own grant exists to make impossible in
+    // the database, now made possible again in the route that writes it.
+    name: "the ask route writes the answer through the user's own session instead of the service role",
+    file: ASK,
+    from: "    const admin = createAdminClient();",
+    to: "    const admin = supabase;",
+    expect: "written by the SERVICE-ROLE client",
+  },
+  {
+    // Κομμάτι 6. Switching meetings stops clearing the half-typed
+    // question, so a draft about one meeting could be pressed into a
+    // different one after a reader clicks another row.
+    name: "switching meetings stops clearing the half-typed question",
+    file: WORKSPACE,
+    from: 'setOpenId(m.id);\n                setTicked(new Set());\n                setAskDraft("");\n                setAskError(null);',
+    to: "setOpenId(m.id);\n                setTicked(new Set());",
+    expect: "clears the draft and any error",
+  },
+  {
+    // Κομμάτι 6. Past questions stop being filtered to the open meeting,
+    // so every meeting's history would render under whichever one is
+    // currently open.
+    name: "past questions stop being filtered to the open meeting",
+    file: WORKSPACE,
+    from: "const askedForOpen = asked.filter((q) => q.meeting_id === open?.id);",
+    to: "const askedForOpen = asked;",
+    expect: "filtered to the open meeting",
+  },
+  {
+    // THE DATABASE ITSELF. If this grant is ever restored, a signed-in
+    // user could insert their own row into meeting_questions — a free
+    // answer in the product's own voice, or a real one marked as
+    // costing nothing.
+    name: "the database stops refusing an insert from a signed-in user",
+    file: QUESTIONS_MIGRATION,
+    from: "revoke insert, update on public.meeting_questions from authenticated;",
+    to: "",
+    expect: "insert is revoked from authenticated",
   },
   {
     // THE ARRAY. This one is not hypothetical — the parser accepted a

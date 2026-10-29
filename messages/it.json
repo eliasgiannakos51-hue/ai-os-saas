@@ -3069,6 +3069,12 @@
         "bad": "Scegli un giorno dopo oggi, entro un anno.",
         "notifyTitle": "Promemoria: {what}",
         "notifyBody": "Da una riunione — {who}"
+      },
+      "ask": {
+        "title": "Chiedi su questa riunione",
+        "placeholder": "Chiedi qualcosa su questa riunione…",
+        "submit": "Chiedi",
+        "asking": "Richiesta in corso…"
       }
     },
     "voicePage": {

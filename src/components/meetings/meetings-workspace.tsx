@@ -13,6 +13,7 @@ import {
   type MeetingPrice,
 } from "@/lib/meetings/meeting-limits";
 import type { DiarizedLine, ProposedAction } from "@/lib/meetings/meeting-analysis";
+import { MEETING_ASK_MAX_QUESTION_CHARS } from "@/lib/meetings/meeting-ask";
 import { useRecorder } from "@/components/voice/use-recorder";
 
 export type MeetingRow = {
@@ -44,6 +45,17 @@ export type KeptAction = {
   remind_at: string | null;
   /** Set once api/cron/meeting-action-reminders has sent it. */
   reminded_at: string | null;
+};
+
+/** Κομμάτι 6: one question asked about one meeting, and its answer —
+ *  written once by api/meetings/[id]/ask and never edited, same shape as
+ *  data_analysis_questions. */
+export type MeetingQuestion = {
+  id: string;
+  meeting_id: string;
+  question: string;
+  answer: string | null;
+  created_at: string;
 };
 
 /**
@@ -83,6 +95,7 @@ export function MeetingsWorkspace({
   minutes,
   meetings,
   keptActions,
+  questions,
   goals = null,
 }: {
   limits: MeetingLimits;
@@ -90,6 +103,9 @@ export function MeetingsWorkspace({
   minutes: { usedSeconds: number; limitMinutes: number };
   meetings: MeetingRow[];
   keptActions: KeptAction[];
+  /** Κομμάτι 6: every past question asked about any of this account's
+   *  meetings, newest first — eager-loaded the same way keptActions is. */
+  questions: MeetingQuestion[];
   /** The switch "meeting-goal" (package 17): the person's active projects
    *  to put a goal made from this meeting in. Null when the switch is off. */
   goals?: { projects: { id: string; name: string }[] } | null;
@@ -112,6 +128,15 @@ export function MeetingsWorkspace({
 
   const [rows, setRows] = useState<MeetingRow[]>(meetings);
   const [kept, setKept] = useState<KeptAction[]>(keptActions);
+  // Κομμάτι 6: the running list of past Q&A, and the field's own draft —
+  // asked is NOT cleared on a meeting switch (it is the whole account's
+  // history, filtered per meeting at render time, same as kept above);
+  // the DRAFT is, so a half-typed question about one meeting never posts
+  // itself to a different one.
+  const [asked, setAsked] = useState<MeetingQuestion[]>(questions);
+  const [askDraft, setAskDraft] = useState("");
+  const [asking, setAsking] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [durationRead, setDurationRead] = useState(true);
@@ -485,6 +510,44 @@ export function MeetingsWorkspace({
     }
   }
 
+  // Κομμάτι 6: a question about THIS meeting, answered strictly from its
+  // own transcript/summary/actions by api/meetings/[id]/ask — never a
+  // second source, never another meeting's.
+  async function submitAsk(meetingId: string) {
+    const question = askDraft.trim();
+    if (!question || asking) return;
+    setAsking(true);
+    setAskError(null);
+    try {
+      const res = await fetch(`/api/meetings/${meetingId}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setAskError(errorText(data?.error, res.status));
+        return;
+      }
+      void reportUsage(data);
+      setAsked((prev) => [
+        {
+          id: String(data.id ?? `${meetingId}-${prev.length}`),
+          meeting_id: meetingId,
+          question: String(data.question ?? question),
+          answer: typeof data.answer === "string" ? data.answer : null,
+          created_at: String(data.createdAt ?? new Date().toISOString()),
+        },
+        ...prev,
+      ]);
+      setAskDraft("");
+    } catch {
+      setAskError(errorText("failed", 0));
+    } finally {
+      setAsking(false);
+    }
+  }
+
   async function keep(meetingId: string) {
     if (ticked.size === 0) return;
     const res = await fetch(`/api/meetings/${meetingId}/actions`, {
@@ -719,6 +782,7 @@ export function MeetingsWorkspace({
       .map((a) => a.source_index)
       .filter((n): n is number => typeof n === "number"),
   );
+  const askedForOpen = asked.filter((q) => q.meeting_id === open?.id);
 
   return (
     <div className="space-y-6">
@@ -926,6 +990,8 @@ export function MeetingsWorkspace({
               onClick={() => {
                 setOpenId(m.id);
                 setTicked(new Set());
+                setAskDraft("");
+                setAskError(null);
               }}
               aria-pressed={m.id === openId}
               className={`min-h-[44px] rounded-card border px-3 text-start text-xs transition-colors duration-150 ${
@@ -1319,6 +1385,74 @@ export function MeetingsWorkspace({
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Κομμάτι 6: a question about THIS meeting, from a field —
+              below both columns, the same "field at the bottom" shape
+              Projects' own memory field uses. Answered strictly from
+              open.transcript/summary/proposed_actions
+              (lib/meetings/meeting-ask.ts) — never another meeting's,
+              never the account's other data. */}
+          <div
+            data-testid="meeting-ask"
+            className="mt-4 border-t border-divider pt-4"
+          >
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
+              {t("ask.title")}
+            </h3>
+            {askedForOpen.length > 0 && (
+              <ul className="mt-2 space-y-2">
+                {askedForOpen.map((q) => (
+                  <li
+                    key={q.id}
+                    data-testid="meeting-question"
+                    className="rounded-item bg-panel-hover p-2 text-sm"
+                  >
+                    <p className="font-semibold text-foreground">{q.question}</p>
+                    <p
+                      data-testid="meeting-answer"
+                      className="mt-1 whitespace-pre-wrap text-muted"
+                    >
+                      {q.answer}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {askError && (
+              <p
+                data-testid="meeting-ask-error"
+                role="status"
+                className="notice-warning mt-2 px-3 py-2 text-xs leading-relaxed"
+              >
+                {askError}
+              </p>
+            )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void submitAsk(open.id);
+              }}
+              className="mt-2 flex gap-2"
+            >
+              <input
+                type="text"
+                value={askDraft}
+                onChange={(e) => setAskDraft(e.target.value)}
+                placeholder={t("ask.placeholder")}
+                maxLength={MEETING_ASK_MAX_QUESTION_CHARS}
+                data-testid="meeting-ask-input"
+                className="min-h-[44px] flex-1 rounded-item border border-border bg-panel px-3 text-sm"
+              />
+              <button
+                type="submit"
+                data-testid="meeting-ask-submit"
+                disabled={asking || !askDraft.trim()}
+                className="min-h-[44px] rounded-item bg-panel-hover px-4 text-sm font-semibold text-foreground disabled:opacity-50"
+              >
+                {asking ? t("ask.asking") : t("ask.submit")}
+              </button>
+            </form>
           </div>
         </section>
       )}

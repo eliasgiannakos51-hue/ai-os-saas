@@ -79,7 +79,7 @@ export default async function MeetingsPage() {
   // screen. The two table reads go through the user's own session client,
   // so RLS decides what comes back rather than a filter this page
   // remembered to write.
-  const [packPrice, allowance, meetingsRead, actionsRead] = await Promise.all([
+  const [packPrice, allowance, meetingsRead, actionsRead, questionsRead] = await Promise.all([
     getPurchasedPackCreditPriceEur(user.id),
     readVoiceUsage(createAdminClient(), user.id, limitMinutes),
     supabase
@@ -94,9 +94,19 @@ export default async function MeetingsPage() {
       .select("id, meeting_id, who, what, when_text, due_date, done, source_index, created_at, remind_at, reminded_at")
       .order("created_at", { ascending: false })
       .limit(300),
+    // Κομμάτι 6, Q&A about the meeting: eager-loaded the same way
+    // meeting_actions is, so reopening a meeting shows its past
+    // questions without a second route — api/meetings/[id]/ask only
+    // ever APPENDS a new one, client-side, same as actions/remind do.
+    supabase
+      .from("meeting_questions")
+      .select("id, meeting_id, question, answer, created_at")
+      .order("created_at", { ascending: false })
+      .limit(300),
   ]);
   const data = meetingsRead.data;
   const actions = actionsRead.data;
+  const questions = questionsRead.data;
   const creditPriceEur = effectiveCreditPriceEurForAccount(plan, packPrice, pricingConfig);
 
   // THE PRICE, COMPUTED WHERE THE PRICING CONFIG LIVES.
@@ -156,6 +166,7 @@ export default async function MeetingsPage() {
         minutes={{ usedSeconds: allowance.usedSeconds, limitMinutes }}
         meetings={(data ?? []) as MeetingRow[]}
         keptActions={actions ?? []}
+        questions={questions ?? []}
       />
     </div>
   );

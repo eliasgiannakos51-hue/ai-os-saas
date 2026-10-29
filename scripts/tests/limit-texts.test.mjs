@@ -268,6 +268,7 @@ const SAID_ELSEWHERE = {
   "src/app/api/documents/[id]/edit/route.ts": "its own code vocabulary, said by the Document tool's own sentence (section 1)",
   "src/app/api/documents/generate/route.ts": "its own code vocabulary, said by the Document tool's own sentence (section 1)",
   "src/app/api/meetings/[id]/analyse/route.ts": "its own code vocabulary, said by the Meetings sentence (section 1)",
+  "src/app/api/meetings/[id]/ask/route.ts": "its own code vocabulary, said by the SAME Meetings sentence as analyse, above",
   "src/app/api/automations/flows/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",
   "src/app/api/automations/flows/[id]/run/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",
   "src/app/api/automations/flows/[id]/change/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",

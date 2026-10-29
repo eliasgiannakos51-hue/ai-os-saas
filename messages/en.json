@@ -3069,6 +3069,12 @@
         "bad": "Choose a day after today, within a year.",
         "notifyTitle": "Reminder: {what}",
         "notifyBody": "From a meeting — {who}"
+      },
+      "ask": {
+        "title": "Ask about this meeting",
+        "placeholder": "Ask something about this meeting…",
+        "submit": "Ask",
+        "asking": "Asking…"
       }
     },
     "voicePage": {

@@ -238,6 +238,11 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // meeting row would make them indistinguishable from the proposals in
   // `meetings.proposed_actions`, which nobody agreed to.
   { table: "meeting_actions", label: "meeting_actions", scope: "user_content" },
+  // Κομμάτι 6: every question asked about a meeting, and the answer it
+  // got — the same reason data_analysis_questions is its own row below:
+  // a person's own words to the product, not data about the meeting
+  // itself.
+  { table: "meeting_questions", label: "meeting_questions", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
   { table: "ai_websites", label: "ai_website_entries", scope: "user_content" },
 

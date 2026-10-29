@@ -52,11 +52,15 @@ const check = (name, cond, detail) => {
 };
 
 const MIGRATION = "supabase/migrations/20261006000000_meetings.sql";
+const QUESTIONS_MIGRATION = "supabase/migrations/20261104000000_meeting_questions.sql";
 const TRANSCRIBE = "src/app/api/meetings/transcribe/route.ts";
 const ANALYSE = "src/app/api/meetings/[id]/analyse/route.ts";
 const ACTIONS = "src/app/api/meetings/[id]/actions/route.ts";
 const REMIND = "src/app/api/meetings/[id]/actions/[actionId]/remind/route.ts";
 const REMIND_CRON = "src/app/api/cron/meeting-action-reminders/route.ts";
+const ASK = "src/app/api/meetings/[id]/ask/route.ts";
+const ASK_LIB = "src/lib/meetings/meeting-ask.ts";
+const ASK_CALL = "src/lib/meetings/meeting-ask-call.ts";
 const WORKSPACE = "src/components/meetings/meetings-workspace.tsx";
 const PAGE = "src/app/dashboard/meetings/page.tsx";
 const LIMITS = "src/lib/meetings/meeting-limits.ts";
@@ -496,7 +500,96 @@ console.log("\n== 9. click a transcript line, the audio seeks (Κομμάτι 5)
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 10. what this file does NOT prove ==");
+console.log("\n== 10. ask about this meeting, from a field (Κομμάτι 6) ==");
+// ---------------------------------------------------------------------
+{
+  const ask = await loadTs(ASK_LIB);
+  check("an empty question is refused, not sent", ask.buildMeetingAskPrompt("  ", "Κάποιο κείμενο.", null, []).ok === false);
+  check(
+    "a question past the ceiling is refused with its own reason",
+    (() => {
+      const r = ask.buildMeetingAskPrompt("x".repeat(ask.MEETING_ASK_MAX_QUESTION_CHARS + 1), "Κάποιο κείμενο.", null, []);
+      return r.ok === false && r.reason === "too_long";
+    })()
+  );
+
+  const noExtras = ask.buildMeetingAskPrompt("Ποιος μίλησε πρώτος;", "Α: Καλημέρα.", null, []);
+  check("a valid question builds both halves of the call", noExtras.ok === true && typeof noExtras.system === "string" && typeof noExtras.user === "string");
+  check("the transcript reaches the user turn, framed as data, never the system prompt", noExtras.ok === true && /TRANSCRIPT:\nΑ: Καλημέρα\./.test(noExtras.user) && !/Α: Καλημέρα\./.test(noExtras.system));
+  check("with no summary and no actions, neither section is added", noExtras.ok === true && !/SUMMARY:/.test(noExtras.user) && !/ACTIONS AGREED:/.test(noExtras.user));
+  check(
+    "the rule against inventing an answer is in the SYSTEM prompt, not left to the model's own judgement",
+    noExtras.ok === true && /[Nn]ever invent/.test(noExtras.system) && /say so plainly/.test(noExtras.system)
+  );
+
+  const withExtras = ask.buildMeetingAskPrompt(
+    "Τι αποφασίστηκε;",
+    "Α: Καλημέρα.",
+    "Σύντομη περίληψη.",
+    [{ who: "Γιώργος", what: "Να στείλει το αρχείο", when: "μέχρι Παρασκευή" }]
+  );
+  check("a summary, when there is one, is added as its own section", withExtras.ok === true && /SUMMARY:\nΣύντομη περίληψη\./.test(withExtras.user));
+  check(
+    "an agreed action is rendered who/what/when, the same triple the screen itself shows",
+    withExtras.ok === true && /ACTIONS AGREED:\n- Γιώργος: Να στείλει το αρχείο \(μέχρι Παρασκευή\)/.test(withExtras.user)
+  );
+
+  // THE WIRE: one call, recorded onto the caller's accumulator before the
+  // reply is judged — the same rule meeting-analyse-call.ts states for
+  // itself, so a reply this file still returns still cost the owner money.
+  const call = code(ASK_CALL);
+  check("the wire calls the pure builder, never builds its own prompt", /buildMeetingAskPrompt\(/.test(call));
+  check(
+    "usage reaches the accumulator before the reply is judged",
+    (() => {
+      const record = call.indexOf("costs.record(");
+      const extract = call.indexOf("modelTextFrom(");
+      return record >= 0 && extract > record;
+    })()
+  );
+
+  // THE ROUTE: same reserve-then-settle shape as api/data-analysis/[id]/ask
+  // and api/my-stuff/ask, declared in billing-coverage.test.mjs's ROUTED
+  // table — and the SAME transcript-too-short guard api/meetings/[id]/
+  // analyse applies, so there is never a call made over nothing to answer
+  // from.
+  const route = code(ASK);
+  check("the question is bounded by slicing, never refused for length", /\.slice\(0,\s*MEETING_ASK_MAX_QUESTION_CHARS\)/.test(route));
+  check("a transcript too short to analyse is also too short to ask about — the SAME guard, not a second one", /isAnalysable\(transcript\)/.test(route));
+  check("the estimate is sized from the transcript, the summary AND the question", /inputChars:\s*transcript\.length \+ \(summary\?\.length \?\? 0\) \+ question\.length/.test(route));
+  check("it reserves and settles under meetingAsk / meeting_analyse — the SAME feature the meeting's own analysis settles under, not a new one", /estimateForAction\(\s*"meetingAsk"/.test(route) && /feature:\s*"meeting_analyse"/.test(route));
+  check("the read goes through the caller's OWN session client, so RLS decides whose meeting this is", /await createClient\(\)/.test(route) && /supabase\s*\n?\s*\.from\("meetings"\)/.test(route.replace(/\s+/g, " ")));
+  check(
+    "the answer is written by the SERVICE-ROLE client, never the user's own session — the same rule data_analysis_questions' own grant enforces in the database",
+    /createAdminClient\(\)/.test(route) && /admin\s*\n?\s*\.from\("meeting_questions"\)\s*\n?\s*\.insert/.test(route.replace(/\s+/g, " "))
+  );
+
+  // THE TABLE: service-role-only insert, same reason data_analysis_questions
+  // is — the answer and the credits charged are written by the route AFTER
+  // the call, and a user who could insert could write themselves a free
+  // answer in our voice, or a real one at zero charge.
+  const migration = read(QUESTIONS_MIGRATION);
+  check("the migration says how to undo it", /How to undo:/.test(migration));
+  check("insert is revoked from authenticated — the route's admin client is the only writer", /revoke insert, update on public\.meeting_questions from authenticated/.test(migration));
+  check("select and delete stay the owner's own, through RLS", /meeting_questions_select_own/.test(migration) && /meeting_questions_delete_own/.test(migration));
+
+  // THE SCREEN: the past Q&A for THIS meeting, filtered the same way
+  // keptActions already is, and a half-typed question about one meeting
+  // can never post itself to a different one after a switch.
+  const workspace = code(WORKSPACE);
+  check("past questions are filtered to the open meeting, same pattern as keptForOpen", /asked\.filter\(\(q\) => q\.meeting_id === open\?\.id\)/.test(workspace));
+  check("the field posts to this meeting's own ask route", /\/api\/meetings\/\$\{meetingId\}\/ask/.test(workspace));
+  check(
+    "switching meetings clears the draft and any error, so neither follows the reader to a different meeting",
+    (() => {
+      const m = workspace.match(/setOpenId\(m\.id\);[\s\S]{0,80}setAskDraft\(""\);[\s\S]{0,40}setAskError\(null\);/);
+      return Boolean(m);
+    })()
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 11. what this file does NOT prove ==");
 // ---------------------------------------------------------------------
 // STATED, NOT IMPLIED. Everything above reads code and runs pure
 // functions. None of it starts a browser, reaches Whisper or touches a

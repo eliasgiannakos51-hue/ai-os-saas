@@ -3069,6 +3069,12 @@
         "bad": "Elige un día después de hoy, dentro de un año.",
         "notifyTitle": "Recordatorio: {what}",
         "notifyBody": "De una reunión — {who}"
+      },
+      "ask": {
+        "title": "Pregunta sobre esta reunión",
+        "placeholder": "Pregunta algo sobre esta reunión…",
+        "submit": "Preguntar",
+        "asking": "Preguntando…"
       }
     },
     "voicePage": {

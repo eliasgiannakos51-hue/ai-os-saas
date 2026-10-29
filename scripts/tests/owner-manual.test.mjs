@@ -153,6 +153,7 @@ const FAILOVER_NAMES = {
   "src/app/api/coding/run/route.ts": "το Coding",
   "src/lib/agents/agent-runner.ts": "οι βοηθοί",
   "src/lib/meetings/meeting-analyse-call.ts": "η σύνοψη των συναντήσεων",
+  "src/lib/meetings/meeting-ask-call.ts": "η σύνοψη των συναντήσεων",
   "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",
   "src/lib/lead-classification.ts": "η διαλογή των μηνυμάτων της φόρμας",
   "src/lib/website-security-review.ts": "ο έλεγχος ασφαλείας του Site",

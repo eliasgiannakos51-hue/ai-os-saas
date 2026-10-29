@@ -204,7 +204,15 @@ console.log("\n== 2. the lines ==");
 // one-primary-action's own overlay budget, not here — and the record
 // button itself reuses the already-declared `.btn-outline` class, which
 // carries its border in globals.css and adds nothing to this count.
-ok(`border utilities (${r.counts.borders}), ceiling 609`, r.counts.borders <= 609);
+// 609 -> 611 on 2026-10-29. Meetings Κομμάτι 6 ("Ask about this meeting,
+// from a field") added the field's own bordered <input> (`border
+// border-border`, the one token IS_BORDER matches is the bare `border`;
+// same shape as every other text field this file already has) AND the
+// section's own `border-t` separator above it, the same divider shape
+// Remind me's own sections already use elsewhere in this file — two new
+// tokens, not one, and neither is a card: the question list itself is
+// `bg-panel-hover`, no border.
+ok(`border utilities (${r.counts.borders}), ceiling 611`, r.counts.borders <= 611);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

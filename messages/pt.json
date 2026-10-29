@@ -3069,6 +3069,12 @@
         "bad": "Escolha um dia depois de hoje, dentro de um ano.",
         "notifyTitle": "Lembrete: {what}",
         "notifyBody": "De uma reunião — {who}"
+      },
+      "ask": {
+        "title": "Pergunte sobre esta reunião",
+        "placeholder": "Pergunte algo sobre esta reunião…",
+        "submit": "Perguntar",
+        "asking": "Perguntando…"
       }
     },
     "voicePage": {

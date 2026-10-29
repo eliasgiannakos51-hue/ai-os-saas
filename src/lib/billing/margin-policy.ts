@@ -250,6 +250,12 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   // call with its own cost shape, so it gets its own key rather than
   // being folded into a margin that was decided about speech.
   meetingAnalyse: "meeting_analyse",
+  // A follow-up question about the SAME meeting (Κομμάτι 6) settles under
+  // the SAME feature key as reading it in the first place — the same
+  // reason dataQuestion shares data_analysis with dataAnalyse rather than
+  // getting its own key the way myStuffAsk does: this is a follow-up on
+  // one resource already billed under this key, not a standalone tool.
+  meetingAsk: "meeting_analyse",
   // Its own key, not folded into document_translate: a single-paragraph
   // edit costs a fraction of a whole translation, and a shared margin key
   // would let that mismatch hide inside one number.

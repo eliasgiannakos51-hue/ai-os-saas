@@ -364,6 +364,45 @@ try {
       "no transcript line is a click target for a meeting with no live player",
       (await page.locator('[data-testid="meeting-transcript-line"]').count()) === 0
     );
+
+    // Κομμάτι 6: Q&A works on a meeting opened from the LIST too — unlike
+    // Κομμάτι 5's seek, this never needed a player or a File in this tab,
+    // only the already-analysed transcript/summary/actions the mock seeded
+    // above. The call itself is page.route()'d, same restraint as
+    // transcribe/analyse: this file proves the screen, not the billing
+    // wire (meetings.prodtest.mjs already drives a real call through a
+    // real stand-in model for that).
+    check("no past question is shown before any is asked", (await page.locator('[data-testid="meeting-question"]').count()) === 0);
+    let askBody = null;
+    await page.route(`**/api/meetings/${MEETING_1}/ask`, async (route) => {
+      askBody = JSON.parse(route.request().postData() || "{}");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          id: "q1",
+          question: askBody.question,
+          answer: "Η Μαρία θα στείλει την αναφορά πωλήσεων μέχρι την Παρασκευή.",
+          createdAt: "2026-10-29T10:00:00Z",
+          usage: { creditsCharged: 3, bypass: false, wouldHaveCharged: null, freeRemaining: null },
+        }),
+      });
+    });
+    await page.locator('[data-testid="meeting-ask-input"]').fill("Ποιος θα στείλει την αναφορά;");
+    await page.locator('[data-testid="meeting-ask-submit"]').click();
+    await page.locator('[data-testid="meeting-question"]').waitFor({ timeout: 5_000 });
+    check("the question actually sent is the one typed, not a stale draft", askBody?.question === "Ποιος θα στείλει την αναφορά;", JSON.stringify(askBody));
+    check(
+      "the answer renders under the question that was asked",
+      (await page.locator('[data-testid="meeting-question"]').innerText()).includes("Ποιος θα στείλει την αναφορά;")
+    );
+    check(
+      "...with the model's own answer, not a placeholder",
+      (await page.locator('[data-testid="meeting-answer"]').innerText()).includes("Παρασκευή")
+    );
+    check("the field clears after a successful ask, ready for another question", (await page.locator('[data-testid="meeting-ask-input"]').inputValue()) === "");
+
     check("the delete control is still there", (await page.locator('[data-testid="meeting-detail"] button[aria-label]').count()) >= 1);
 
     // THE SHAPE: player above the two columns; summary LEFT of transcript.
@@ -717,6 +756,36 @@ try {
       "a real finger tap on a transcript line seeks the audio to THAT line's own start",
       Math.abs(phoneSeek - PHONE_LINES[1].start) < 0.5,
       `expected ~${PHONE_LINES[1].start}, got ${phoneSeek}`
+    );
+
+    // Κομμάτι 6, ON THE TOUCH PATH: fill the field (a real tap to focus
+    // it first, same as any other input on this screen), then a real
+    // finger tap on Ask — not a mouse click standing in for one.
+    const askInput = page.locator('[data-testid="meeting-ask-input"]');
+    const askSubmit = page.locator('[data-testid="meeting-ask-submit"]');
+    const askSubmitBox = await askSubmit.boundingBox();
+    check("the Ask button is a real touch target (>=44px tall)", askSubmitBox.height >= 44);
+    await page.route(`**/api/meetings/${PHONE_MEETING}/ask`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          id: "q-phone-1",
+          question: "Τι ειπώθηκε;",
+          answer: "Κείμενο από το κινητό, όπως ακριβώς ακούστηκε.",
+          createdAt: new Date().toISOString(),
+          usage: { creditsCharged: 2, bypass: false, wouldHaveCharged: null, freeRemaining: null },
+        }),
+      });
+    });
+    await press(askInput);
+    await askInput.fill("Τι ειπώθηκε;");
+    await press(askSubmit);
+    await page.locator('[data-testid="meeting-answer"]').waitFor({ timeout: 5_000 });
+    check(
+      "a real finger tap on Ask gets back the model's real answer",
+      (await page.locator('[data-testid="meeting-answer"]').innerText()).includes("ακριβώς ακούστηκε")
     );
   }
 

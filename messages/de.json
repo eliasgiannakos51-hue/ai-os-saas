@@ -3069,6 +3069,12 @@
         "bad": "Wähle einen Tag nach heute, innerhalb eines Jahres.",
         "notifyTitle": "Erinnerung: {what}",
         "notifyBody": "Aus einem Meeting — {who}"
+      },
+      "ask": {
+        "title": "Frage zu diesem Meeting",
+        "placeholder": "Stelle eine Frage zu diesem Meeting…",
+        "submit": "Fragen",
+        "asking": "Wird gefragt…"
       }
     },
     "voicePage": {

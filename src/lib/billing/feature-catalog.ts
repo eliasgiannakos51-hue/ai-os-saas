@@ -431,6 +431,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       // picked, and the cron that sends it (same shape as cron/lead-reminders).
       "meetings/[id]/actions/[actionId]/remind",
       "cron/meeting-action-reminders",
+      // Κομμάτι 6, a question about one meeting: settles under the same
+      // feature the meeting's own analysis does (lib/billing/margin-policy.ts).
+      "meetings/[id]/ask",
     ],
     charges: true,
     enforcedIn: "src/lib/voice/voice-pricing.ts",

@@ -765,6 +765,17 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 0.06,
   },
+  // One question about ONE already-transcribed meeting (api/meetings/[id]/
+  // ask, Κομμάτι 6). SAME SHAPE AS dataQuestion/myStuffAsk: the input is
+  // the transcript again, sized the same way meetingAnalyse's own estimate
+  // is, but the answer is a sentence or two whatever the transcript's
+  // length — output does not scale with input, for the same reason.
+  meetingAsk: {
+    systemPromptTokens: 350,
+    auxiliaryCalls: [],
+    baseOutputChars: 900,
+    outputCharsPerInputChar: 0,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

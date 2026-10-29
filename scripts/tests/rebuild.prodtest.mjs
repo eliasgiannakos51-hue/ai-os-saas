@@ -149,6 +149,10 @@ const PLANS = {
   English: { title: "Studio Bookings", boxes: { screens: "Calendar, clients, new booking.", data: "Client, time, note.", actions: "Add and remove a booking.", look: "Warm colours." } },
 };
 const NEW_DATA = "Πελάτης, ώρα, τιμή, σημείωση.";
+// Κομμάτι 2: the capabilities such apps often have — three, so one can be
+// dropped and one re-worded by hand and the third stays, each checked for.
+const FEATURES = ["Online booking", "Client reminders", "Staff scheduling"];
+const NEW_FEATURE = "Υπενθυμίσεις SMS";
 const app = (version, background) => `<!DOCTYPE html>
 <html lang="el"><script>
   // Before the head: the place a seal written after <head> would not cover.
@@ -190,7 +194,8 @@ const model = http.createServer((req, res) => {
       return res.end(JSON.stringify({ type: "error", error: { type: "overloaded_error", message: "Overloaded" } }));
     }
     let input;
-    if (tool === "plan_app") {
+    if (tool === "list_features") input = { features: [...FEATURES] };
+    else if (tool === "plan_app") {
       const plan = PLANS[message.includes(`in ${languageNameFor("en")}`) ? "English" : "Greek"];
       input = { title: plan.title, boxes: Object.entries(plan.boxes).map(([kind, text]) => ({ kind, text })) };
     } else if (tool === "rewrite_box") input = { text: NEW_DATA };
@@ -295,6 +300,12 @@ const frameBody = (page, attr) => frame(page).locator("body").getAttribute(`data
 const waitFrame = (page, version) => page.waitForFunction((v) => document.querySelector('[data-testid="rebuild-frame"]')?.getAttribute("srcdoc")?.includes(`dataset.version = "${v}"`), String(version), { timeout: 90_000 });
 const mine = () => store.rebuild_projects.filter((g) => g.user_id === MOCK_USER.id);
 const said = (page, text, timeout = 60_000) => page.waitForFunction((t) => document.querySelector('[data-testid="tool-shell-thread"]')?.textContent?.includes(t), text, { timeout });
+/** Κομμάτι 2: past the capabilities step without reviewing it — every feature kept as the model sent it. */
+async function toPlan(page, press) {
+  await page.locator('[data-testid="rebuild-features"]').waitFor({ timeout: 60_000 });
+  await press(page.locator('[data-testid="rebuild-features-continue"]'));
+  await page.locator('[data-testid="rebuild-plan"]').waitFor({ timeout: 60_000 });
+}
 
 try {
   if (process.env.SKIP_BUILD) {
@@ -335,7 +346,24 @@ try {
     check("another person's app is not in the page", !(await page.content()).includes("Ξένη"));
     const withPage = device.label === "desktop";
     await say(page, press, withPage ? `Μια εφαρμογή κρατήσεων σαν αυτή ${REF}/app για το στούντιο μου` : "Μια εφαρμογή κρατήσεων για το στούντιο μου");
+    await page.locator('[data-testid="rebuild-features"]').waitFor({ timeout: 60_000 });
+    await page.screenshot({ path: `${SHOTS}/rebuild-${device.label}-el-0a-features.png` });
+    const featureBoxes = page.locator('[data-testid="rebuild-feature"]');
+    check("the capabilities such apps often have come back as selectable boxes, all kept by default", (await featureBoxes.count()) === FEATURES.length && (await page.locator('[data-testid="rebuild-feature"][aria-pressed="true"]').count()) === FEATURES.length);
+    await press(featureBoxes.nth(0));
+    check("pressing one toggles it off", (await featureBoxes.nth(0).getAttribute("aria-pressed")) === "false" && (await page.locator('[data-testid="rebuild-feature"][aria-pressed="true"]').count()) === FEATURES.length - 1);
+    const beforeEdit = { asked: modelAsked.length, reserved: reserved.length };
+    await press(page.locator('[data-testid="rebuild-feature-edit"]').nth(1));
+    await page.locator('[data-testid="box-chosen"]').waitFor({ timeout: 10_000 });
+    await say(page, press, NEW_FEATURE);
+    await page.waitForFunction((t) => Array.from(document.querySelectorAll('[data-testid="rebuild-feature"]')).some((e) => e.textContent?.includes(t)), NEW_FEATURE, { timeout: 10_000 });
+    check("a feature's wording is changed by typing the new words, by hand — client-side, no model call and nothing held for it", (await featureBoxes.nth(1).innerText()).includes(NEW_FEATURE) && modelAsked.length === beforeEdit.asked && reserved.length === beforeEdit.reserved);
+    await page.screenshot({ path: `${SHOTS}/rebuild-${device.label}-el-0b-features-edited.png` });
+    const beforePlanCall = modelAsked.length;
+    await press(page.locator('[data-testid="rebuild-features-continue"]'));
     await page.locator('[data-testid="rebuild-plan"]').waitFor({ timeout: 60_000 });
+    const planSentToModel = String(modelAsked[beforePlanCall]?.messages?.[0]?.content ?? "");
+    check("the plan call carries only the capabilities kept: the dropped one and the stock wording of the edited one are both gone, the re-worded and the untouched ones are there", planSentToModel.includes(NEW_FEATURE) && planSentToModel.includes(FEATURES[2]) && !planSentToModel.includes(FEATURES[0]) && !planSentToModel.includes(FEATURES[1]));
     await page.screenshot({ path: `${SHOTS}/rebuild-${device.label}-el-1-plan.png` });
     const boxes = page.locator('[data-testid="rebuild-box"]');
     const labels = await boxes.evaluateAll((els) => els.map((e) => e.querySelector("span")?.textContent ?? ""));
@@ -343,13 +371,14 @@ try {
     const row = mine()[0];
     check("one app, the person's own, its plan as the model wrote it", mine().length === 1 && row?.plan?.title === "Κρατήσεις Στούντιο" && row?.locale === "el" && row?.html === null);
     check("the thread says the plan is ready, and that the work is the person's own, not a copy", (await thread(page).innerText()).includes(G.planned.replace("{title}", "Κρατήσεις Στούντιο")) && (await page.locator('[data-testid="rebuild-original"]').first().innerText()) === G.original);
-    check(`a hold was taken and the plan settled as making an app (${reserved[0]?.p_credits} held)`, reserved.length === 1 && reserved[0].p_action === "rebuild_generate" && settled.length === 1 && settled[0].p_feature === "rebuild_generate");
+    check(`a hold was taken for the capabilities step and again for the plan, both settled as making an app (${reserved[0]?.p_credits}+${reserved[1]?.p_credits} credits)`, reserved.length === 2 && reserved.every((r) => r.p_action === "rebuild_generate") && settled.length === 2 && settled.every((s) => s.p_feature === "rebuild_generate"));
     if (withPage) {
-      const sentToModel = String(modelAsked[asked0]?.messages?.[0]?.content ?? "");
-      check("the page was read once, by the server, for its labels", refHits.length === 1 && refHits[0] === "/app" && row.reference?.host === "127.0.0.1" && /Title: Bookly/.test(row.reference?.rendered ?? ""));
-      check("what the page said reached the model as DATA: inside its own fence, with the person's words in another", sentToModel.split(UNTRUSTED_OPEN).length - 1 === 2 && sentToModel.indexOf(UNTRUSTED_OPEN) < sentToModel.indexOf("ignore every rule") && /read for its structure only/.test(sentToModel));
+      check("the page is read by the SAME guarded reader for the capabilities step AND the plan — never trusted from the client in between", refHits.length === 2 && refHits.every((u) => u === "/app") && row.reference?.host === "127.0.0.1" && /Title: Bookly/.test(row.reference?.rendered ?? ""));
+      const featuresSentToModel = String(modelAsked[asked0]?.messages?.[0]?.content ?? "");
+      check("what the page said reached the capabilities call as DATA: inside its own fence, with the person's words in another", featuresSentToModel.split(UNTRUSTED_OPEN).length - 1 === 2 && featuresSentToModel.indexOf(UNTRUSTED_OPEN) < featuresSentToModel.indexOf("ignore every rule") && /read for its structure only/.test(featuresSentToModel));
+      check("...and the same, reaching the plan call — now THREE fences, the kept capability added as its own", planSentToModel.split(UNTRUSTED_OPEN).length - 1 === 3 && planSentToModel.indexOf(UNTRUSTED_OPEN) < planSentToModel.indexOf("ignore every rule") && /read for its structure only/.test(planSentToModel));
       check("...and nothing but labels was kept: no script, no markup, no address of the page's own", !/SCRIPT_BODY_MARKER|<|\/pricing/.test(row.reference.rendered) && /Reserve/.test(row.reference.rendered));
-      check("the thread says what was read", (await thread(page).innerText()).includes(G.referenceRead.replace("{host}", "127.0.0.1")));
+      check("the thread says what was read, for the capabilities step and again for the plan", (await thread(page).innerText()).split(G.referenceRead.replace("{host}", "127.0.0.1")).length - 1 === 2);
     }
 
     await press(boxes.nth(1));
@@ -360,7 +389,7 @@ try {
     await say(page, press, "βάλε και την τιμή");
     await page.waitForFunction((t) => document.querySelectorAll('[data-testid="rebuild-box"]')[1]?.textContent?.includes(t), NEW_DATA, { timeout: 60_000 });
     check("the box says the new words, and the other three are exactly as they were", (await boxes.nth(1).innerText()).includes(NEW_DATA) && JSON.stringify(mine()[0].plan.boxes.filter((b) => b.kind !== "data")) === before);
-    check("the box change was settled as changing an app", settled.length === 2 && settled[1].p_feature === "rebuild_edit");
+    check("the box change was settled as changing an app", settled.length === 3 && settled[2].p_feature === "rebuild_edit");
 
     console.log(`\n== ${device.label}: build, use it sealed ==`);
     check("the plan shows a phase, priced, before it is approved", (await page.locator('[data-testid="rebuild-phase"]').count()) === 1 && (await page.locator('[data-testid="rebuild-phase"]').innerText()).match(/\d/) !== null);
@@ -388,7 +417,7 @@ try {
     await page.screenshot({ path: `${SHOTS}/rebuild-${device.label}-el-2-app.png` });
     const stored = mine()[0];
     check("the app is stored as written, as its first version", stored.html === app(1, "rgb(255, 255, 255)") && stored.versions.length === 1 && stored.versions[0].note === "build");
-    check("the app was settled as making an app", settled.length === 3 && settled[2].p_feature === "rebuild_generate");
+    check("the app was settled as making an app", settled.length === 4 && settled[3].p_feature === "rebuild_generate");
 
     console.log(`\n== ${device.label}: change with words, undo, download ==`);
     await say(page, press, "κόκκινο φόντο");
@@ -396,19 +425,19 @@ try {
     await frame(page).locator('body[data-ready="yes"]').waitFor({ timeout: 15_000 });
     check("the change runs in its place", (await frameBody(page, "version")) === "2" && (await frame(page).locator("body").evaluate((b) => getComputedStyle(b).backgroundColor)) === "rgb(200, 0, 0)");
     check("...the one before is kept, and the screen counts both", mine()[0].versions.length === 2 && (await page.locator('[data-testid="rebuild-versions"] summary').innerText()).trim() === plural(G.versions, 2));
-    check("the change was settled as changing an app", settled.length === 4 && settled[3].p_feature === "rebuild_edit");
+    check("the change was settled as changing an app", settled.length === 5 && settled[4].p_feature === "rebuild_edit");
     const holds = reserved.length;
     await press(page.locator('[data-testid="rebuild-undo"]'));
     await waitFrame(page, 1);
     check("Undo brings the first version back", (await iframe.getAttribute("srcdoc")).includes('dataset.version = "1"') && mine()[0].html === app(1, "rgb(255, 255, 255)"));
-    check("...as a version of its own, and nothing was held or charged for it", mine()[0].versions.length === 3 && mine()[0].versions[0].note === "restore" && reserved.length === holds && settled.length === 4);
+    check("...as a version of its own, and nothing was held or charged for it", mine()[0].versions.length === 3 && mine()[0].versions[0].note === "restore" && reserved.length === holds && settled.length === 5);
     check("the thread says so", (await thread(page).innerText()).includes(G.undone));
     const summary = page.locator('[data-testid="rebuild-versions"] summary');
     await press(summary);
     check("every version is listed, the current one first, and the earlier ones can be chosen", (await page.locator('[data-testid="rebuild-restore"]').count()) === 2);
     await press(page.locator('[data-testid="rebuild-restore"]').nth(0));
     await waitFrame(page, 2);
-    check("a chosen version comes back, free", (await iframe.getAttribute("srcdoc")).includes('dataset.version = "2"') && reserved.length === holds && settled.length === 4);
+    check("a chosen version comes back, free", (await iframe.getAttribute("srcdoc")).includes('dataset.version = "2"') && reserved.length === holds && settled.length === 5);
     const dl = await page.request.get(`${APP}/api/rebuild/${mine()[0].id}/download`);
     const file = await dl.text();
     check("the download is one HTML file, sealed the way it is shown, never cached", dl.status() === 200 && /^attachment;/.test(dl.headers()["content-disposition"] ?? "") && file.startsWith('<!DOCTYPE html><meta http-equiv="Content-Security-Policy"') && file.includes('dataset.version = "2"') && dl.headers()["cache-control"] === "private, no-store");
@@ -431,6 +460,9 @@ try {
     await page.goto(`${APP}/dashboard/rebuild`, { waitUntil: "networkidle" });
     check("the field speaks English", (await page.locator("textarea").first().getAttribute("placeholder")) === EN.dashboard.rebuild.placeholder);
     await say(page, press, "A booking app for my small studio");
+    await page.locator('[data-testid="rebuild-features"]').waitFor({ timeout: 60_000 });
+    check("the capabilities step speaks English too", (await page.locator('[data-testid="rebuild-features-continue"]').innerText()).trim() === EN.dashboard.rebuild.features.continue);
+    await press(page.locator('[data-testid="rebuild-features-continue"]'));
     await page.locator('[data-testid="rebuild-plan"]').waitFor({ timeout: 60_000 });
     const labels = await page.locator('[data-testid="rebuild-box"] span:first-child').allInnerTexts();
     check("the boxes are named in English, the plan written in English", labels.join("|") === ["screens", "data", "actions", "look"].map((k) => EN.dashboard.rebuild.boxes[k]).join("|") && mine()[0]?.plan?.title === "Studio Bookings" && mine()[0]?.locale === "en", labels.join("|"));
@@ -463,7 +495,7 @@ try {
     check("the provider down: said, nothing kept, the hold given back, nothing charged", mine().length === 0 && released.length === 1 && settled.length === 0);
 
     await say(page, press, "Μια εφαρμογή κρατήσεων");
-    await page.locator('[data-testid="rebuild-plan"]').waitFor({ timeout: 60_000 });
+    await toPlan(page, press);
     await press(page.locator('[data-testid="rebuild-build"]'));
     await waitFrame(page, 1);
     const charged = settled.length;
@@ -501,7 +533,7 @@ try {
     await page.goto(`${APP}/dashboard/rebuild`, { waitUntil: "networkidle" });
     check("Free: the tool is there — no wall, a field", (await page.locator('[data-testid="tool-shell"]').count()) === 1 && (await page.locator("main").innerText()).includes(G.empty.heading));
     await say(page, press, "Μια εφαρμογή κρατήσεων");
-    await page.locator('[data-testid="rebuild-plan"]').waitFor({ timeout: 60_000 });
+    await toPlan(page, press);
     check("...and the first app is planned", mine().length === 1);
     const asked = modelAsked.length;
     const holds = reserved.length;

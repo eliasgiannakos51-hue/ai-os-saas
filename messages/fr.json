@@ -3973,6 +3973,16 @@
         "actions": "Actions",
         "look": "Apparence"
       },
+      "features": {
+        "heading": "Fonctionnalités",
+        "hint": "Voici les fonctionnalités que ce genre d'application a souvent. Désactivez celles que vous voulez, ou appuyez sur le crayon pour changer ses mots.",
+        "found": "Voici les fonctionnalités que ces applications ont souvent. Désactivez celles que vous voulez, ou changez les mots de l'une, puis continuez.",
+        "changed": "Les mots de cette fonctionnalité ont été changés.",
+        "continue": "Utiliser ces fonctionnalités",
+        "continuing": "Préparation du plan…",
+        "edit": "Changer les mots de cette fonctionnalité",
+        "editPlaceholder": "Dites les nouveaux mots pour cette fonctionnalité"
+      },
       "phases": {
         "heading": "Étapes",
         "note": "Aujourd'hui, il n'y a qu'une seule phase : toute l'application, en une fois. D'autres phases arriveront."

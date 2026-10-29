@@ -710,6 +710,14 @@ export const ACTION_PROFILES = {
   // a written app is held at the most the prompt allows (40,000
   // characters); a change sends the whole app up and gets the whole app
   // back, so its output tracks its input one to one.
+  // Κομμάτι 2, 2026-10-29: the capabilities step, before the plan — a
+  // handful of short labels, cheaper than the plan itself.
+  rebuildFeatures: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 500,
+    outputCharsPerInputChar: 0,
+  },
   rebuildPlan: {
     systemPromptTokens: 100,
     auxiliaryCalls: [],

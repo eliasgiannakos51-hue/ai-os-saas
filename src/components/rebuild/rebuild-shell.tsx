@@ -2,15 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Database, Download, Hammer, History, LayoutGrid, MousePointerClick, Palette, ShieldCheck, Undo2 } from "lucide-react";
+import { ArrowRight, Check, Database, Download, Hammer, History, LayoutGrid, MousePointerClick, Palette, Pencil, ShieldCheck, Undo2 } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { HelpTip } from "@/components/ui/help-tip";
 import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
+import type { ActionProfileKey } from "@/lib/billing/estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { buildMessage, changeMessage, boxMessage, planMessage, readPlan, type RebuildBoxKind, type RebuildPlan } from "@/lib/rebuild/rebuild-plan";
+import { MAX_FEATURE_CHARS, featuresMessage } from "@/lib/rebuild/rebuild-features";
 import { APP_SANDBOX, sealApp } from "@/lib/rebuild/rebuild-html";
 
 /**
@@ -29,6 +31,16 @@ import { APP_SANDBOX, sealApp } from "@/lib/rebuild/rebuild-html";
  * WHAT IT IS, IN WORDS ON THE SCREEN: «your own version, not a copy» — it
  * takes the idea and the kinds of screens, never the name, words, pictures
  * or code of the original (dashboard.rebuild.original, ten languages).
+ *
+ * KΟΜΜΆΤΙ 2 (2026-10-29): describing an app first derives the CAPABILITIES
+ * such apps typically have (api/rebuild/features — lib/rebuild/rebuild-
+ * features.ts), as selectable boxes shown before the four-box plan. Toggle
+ * any off, or press ✎ to change a label's words by hand (no model call for
+ * that — the words typed ARE the new label); «Use these features» folds
+ * what is kept into the SAME plan call as additional context — the plan
+ * itself is reached only through that button. A failed features call shows
+ * its error and charges nothing, same as any other step; nothing is
+ * created until the person presses that button.
  */
 export type RebuildRow = {
   id: string;
@@ -41,7 +53,9 @@ export type RebuildRow = {
   updated_at: string;
 };
 
-type Running = null | "plan" | "box" | "build" | "change" | "restore";
+type RebuildFeatureBox = { id: string; label: string; selected: boolean };
+
+type Running = null | "features" | "plan" | "box" | "build" | "change" | "restore";
 
 export function RebuildShell({ initialProjects, initialOpenId = null, systemChars }: { initialProjects: RebuildRow[]; initialOpenId?: string | null; systemChars: number }) {
   const t = useTranslations("dashboard.rebuild");
@@ -53,8 +67,11 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
 
   const [projects, setProjects] = useState<RebuildRow[]>(initialProjects);
   const [openId, setOpenId] = useState<string | null>(initialProjects.some((p) => p.id === initialOpenId) ? initialOpenId : null);
-  const [pane, setPane] = useState<"app" | null>(openId ? "app" : null);
+  const [pane, setPane] = useState<"app" | "features" | null>(openId ? "app" : null);
   const [box, setBox] = useState<RebuildBoxKind | null>(null);
+  const [features, setFeatures] = useState<RebuildFeatureBox[] | null>(null);
+  const [featuresDescription, setFeaturesDescription] = useState("");
+  const [editingFeature, setEditingFeature] = useState<string | null>(null);
   const [running, setRunning] = useState<Running>(null);
   const [turns, setTurns] = useState<{ id: string; role: "user" | "tool"; text: string; projectId?: string }[]>([]);
   const [length, setLength] = useState(0);
@@ -85,11 +102,15 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
   const built = Boolean(open?.html);
   const versions = Array.isArray(open?.versions) ? (open!.versions as { at: string; note: string }[]) : [];
 
-  // THE PRICE OF WHAT THE NEXT PRESS DOES, from what it will send.
+  // THE PRICE OF WHAT THE NEXT PRESS DOES, from what it will send. While no
+  // project is open, the first real call is the features step (Κομμάτι 2),
+  // never the plan directly — editing one feature's wording is free (no
+  // call), so no price is shown for that.
   const words = "x".repeat(length);
-  const nextAction = !open || (!built && box === null) ? "rebuildPlan" : built ? "rebuildChange" : "rebuildBoxEdit";
-  const nextChars =
-    !open || (!built && box === null)
+  const nextAction: ActionProfileKey = !open ? "rebuildFeatures" : !built && box === null ? "rebuildPlan" : built ? "rebuildChange" : "rebuildBoxEdit";
+  const nextChars = !open
+    ? systemChars + featuresMessage(words, locale).length
+    : !built && box === null
       ? systemChars + planMessage(words, locale).length
       : built
         ? systemChars + changeMessage(open.html ?? "", words, locale).length
@@ -98,6 +119,8 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
           : 0;
   const nextPrice = useCostEstimate(nextAction, { inputChars: nextChars });
   const buildPrice = useCostEstimate("rebuildBuild", { inputChars: plan ? systemChars + buildMessage(plan, locale, open?.reference?.rendered).length : 0 });
+  const selectedFeatureLabels = features ? features.filter((f) => f.selected).map((f) => f.label) : [];
+  const featuresPlanPrice = useCostEstimate("rebuildPlan", { inputChars: features ? systemChars + planMessage(featuresDescription, locale, undefined, selectedFeatureLabels).length : 0 });
 
   const BOX_LABEL: Record<RebuildBoxKind, string> = {
     screens: t("boxes.screens"),
@@ -171,13 +194,82 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
     }
   }
 
+  function plannedMessage(project: RebuildRow): string {
+    return project.reference?.host ? `${t("planned", { title: project.title })} ${t("referenceRead", { host: project.reference.host })}` : t("planned", { title: project.title });
+  }
+
+  async function postFeatures(description: string): Promise<boolean> {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setRunning("features");
+    try {
+      const res = await fetch("/api/rebuild/features", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ description, locale }), signal: controller.signal });
+      const data = await res.json().catch(() => null);
+      refreshCredits();
+      if (!res.ok || !data?.ok) {
+        say({ role: "tool", text: errorText(data) });
+        return false;
+      }
+      const list = Array.isArray(data.features) ? (data.features as string[]) : [];
+      const reference = data.reference as { host?: string } | null;
+      setFeatures(list.map((label, i) => ({ id: `f${i}`, label, selected: true })));
+      setFeaturesDescription(description);
+      setPane("features");
+      say({ role: "tool", text: reference?.host ? `${t("features.found")} ${t("referenceRead", { host: reference.host })}` : t("features.found") });
+      return true;
+    } catch {
+      say({ role: "tool", text: controller.signal.aborted ? t("errors.stopped") : t("errors.failed") });
+      return false;
+    } finally {
+      abortRef.current = null;
+      setRunning(null);
+    }
+  }
+
+  function toggleFeature(id: string) {
+    setFeatures((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, selected: !f.selected } : f)) : prev));
+  }
+
+  async function continueToPlan() {
+    if (features === null) return;
+    const project = await post("/api/rebuild", { description: featuresDescription, features: selectedFeatureLabels }, "plan");
+    if (project) {
+      setBox(null);
+      setFeatures(null);
+      setFeaturesDescription("");
+      say({ role: "tool", text: plannedMessage(project), projectId: project.id });
+    }
+  }
+
   async function send(text: string) {
     say({ role: "user", text });
-    if (!open || (!built && box === null)) {
+
+    // Κομμάτι 2: a feature pressed for editing takes the next words as its
+    // new label, verbatim — client-side only, no model call, nothing charged.
+    if (!open && editingFeature !== null) {
+      const id = editingFeature;
+      setFeatures((prev) => (prev ? prev.map((f) => (f.id === id ? { ...f, label: text.trim().slice(0, MAX_FEATURE_CHARS) } : f)) : prev));
+      setEditingFeature(null);
+      setPane("features");
+      say({ role: "tool", text: t("features.changed") });
+      return;
+    }
+
+    // Κομμάτι 2: before a project exists, every plain message (the first
+    // one, or "actually, something else") derives the capabilities step —
+    // the plan itself is reached only through «Use these features»
+    // (continueToPlan). A failed call shows its error and charges nothing,
+    // same as any other step; the next message tries again.
+    if (!open) {
+      await postFeatures(text);
+      return;
+    }
+
+    if (!built && box === null) {
       const project = await post("/api/rebuild", { description: text }, "plan");
       if (project) {
         setBox(null);
-        say({ role: "tool", text: project.reference?.host ? `${t("planned", { title: project.title })} ${t("referenceRead", { host: project.reference.host })}` : t("planned", { title: project.title }), projectId: project.id });
+        say({ role: "tool", text: plannedMessage(project), projectId: project.id });
       }
       return;
     }
@@ -331,7 +423,56 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
             </div>
           ),
         }
-      : null;
+      : pane === "features" && features
+        ? {
+            title: t("features.heading"),
+            body: (
+              <div className="flex h-full flex-col gap-3">
+                <p className="text-xs text-muted">{t("features.hint")}</p>
+                <ol className="space-y-2" data-testid="rebuild-features">
+                  {features.map((f) => (
+                    <li key={f.id}>
+                      <div className={`flex w-full items-stretch gap-1 rounded-item ${f.selected ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`}>
+                        <button
+                          type="button"
+                          data-testid="rebuild-feature"
+                          aria-pressed={f.selected}
+                          onClick={() => toggleFeature(f.id)}
+                          className="flex min-h-[44px] min-w-0 flex-1 items-center gap-2.5 rounded-item px-2 text-start text-sm"
+                        >
+                          {f.selected ? <Check className="h-4 w-4 shrink-0 text-foreground/70" aria-hidden="true" /> : <span className="h-4 w-4 shrink-0" aria-hidden="true" />}
+                          <span className="min-w-0 flex-1 whitespace-pre-wrap text-foreground">{f.label}</span>
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="rebuild-feature-edit"
+                          aria-label={t("features.edit")}
+                          title={t("features.edit")}
+                          onClick={() => {
+                            setEditingFeature(f.id);
+                            // On a phone the list covers the field: close it, so the words can be written.
+                            if (!workIsBeside()) setPane(null);
+                            composerRef.current?.focus();
+                          }}
+                          className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-item hover:bg-panel-hover"
+                        >
+                          <Pencil className="h-3.5 w-3.5 text-foreground/70" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <div>
+                  <button type="button" onClick={() => void continueToPlan()} disabled={running !== null} data-testid="rebuild-features-continue" className="btn-outline font-semibold">
+                    {running === "plan" ? <ThinkingIndicator size="sm" /> : <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                    {running === "plan" ? t("features.continuing") : t("features.continue")}
+                  </button>
+                  {running === null && <CostEstimateHint credits={featuresPlanPrice.credits} />}
+                </div>
+              </div>
+            ),
+          }
+        : null;
 
   return (
     <ToolShell
@@ -340,7 +481,7 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
       help={<HelpTip helpKey="help.rebuild" />}
       turns={shellTurns}
       working={running !== null && running !== "build" ? <ThinkingIndicator size="sm" /> : null}
-      placeholder={!open ? t("placeholder") : built ? t("placeholderChange") : box ? t("placeholderBox") : t("placeholder")}
+      placeholder={!open ? (editingFeature !== null ? t("features.editPlaceholder") : t("placeholder")) : built ? t("placeholderChange") : box ? t("placeholderBox") : t("placeholder")}
       sending={running !== null}
       onSend={(text) => void send(text)}
       onStop={() => abortRef.current?.abort()}
@@ -348,7 +489,10 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
       footer={
         <>
           {open && !built && box !== null ? <ChosenBox label={BOX_LABEL[box]} onClear={() => setBox(null)} /> : null}
-          {running === null && length > 0 ? <CostEstimateHint credits={nextPrice.credits} /> : null}
+          {!open && editingFeature !== null ? (
+            <ChosenBox label={features?.find((f) => f.id === editingFeature)?.label ?? ""} onClear={() => { setEditingFeature(null); setPane("features"); }} />
+          ) : null}
+          {running === null && length > 0 && !(!open && editingFeature !== null) ? <CostEstimateHint credits={nextPrice.credits} /> : null}
         </>
       }
       empty={{
@@ -366,6 +510,9 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
           setOpenId(null);
           setPane(null);
           setBox(null);
+          setFeatures(null);
+          setFeaturesDescription("");
+          setEditingFeature(null);
         },
         newLabel: t("new"),
         column: (
@@ -376,6 +523,9 @@ export function RebuildShell({ initialProjects, initialOpenId = null, systemChar
               setOpenId(id);
               setPane("app");
               setBox(null);
+              setFeatures(null);
+              setFeaturesDescription("");
+              setEditingFeature(null);
             }}
             onDelete={removeProject}
             onNavigate={() => {

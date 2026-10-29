@@ -3973,6 +3973,16 @@
         "actions": "Actions",
         "look": "Look"
       },
+      "features": {
+        "heading": "Capabilities",
+        "hint": "These are the capabilities apps like this one often have. Toggle any off, or press the pencil to change its words.",
+        "found": "Here are the capabilities such apps often have. Toggle any off, or change one's words, then continue.",
+        "changed": "Changed that capability's words.",
+        "continue": "Use these features",
+        "continuing": "Making the plan…",
+        "edit": "Change this capability's words",
+        "editPlaceholder": "Say the new words for this capability"
+      },
       "phases": {
         "heading": "Phases",
         "note": "Today this is one phase: the whole app, built at once. More phases are coming."

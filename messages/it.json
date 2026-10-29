@@ -3973,6 +3973,16 @@
         "actions": "Azioni",
         "look": "Aspetto"
       },
+      "features": {
+        "heading": "Funzionalità",
+        "hint": "Queste sono le funzionalità che le app come questa hanno spesso. Disattiva quelle che vuoi, o premi la matita per cambiarne le parole.",
+        "found": "Ecco le funzionalità che queste app hanno spesso. Disattiva quelle che vuoi, o cambia le parole di una, poi continua.",
+        "changed": "Le parole di quella funzionalità sono state cambiate.",
+        "continue": "Usa queste funzionalità",
+        "continuing": "Sto facendo il piano…",
+        "edit": "Cambia le parole di questa funzionalità",
+        "editPlaceholder": "Di' le nuove parole per questa funzionalità"
+      },
       "phases": {
         "heading": "Fasi",
         "note": "Oggi c'è una sola fase: l'intera app, tutta insieme. Altre fasi arriveranno."

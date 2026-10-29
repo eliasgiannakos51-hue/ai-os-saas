@@ -1,5 +1,6 @@
 import { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } from "@/lib/agents/agent-config";
 import { languageNameFor } from "@/lib/text/language-name";
+import { featuresContextBlock } from "@/lib/rebuild/rebuild-features";
 
 /**
  * REBUILD — «build your own version of any app» (the owner's final grid,
@@ -106,13 +107,14 @@ export const APP_TOOL = {
 const referenceBlock = (reference: string | null | undefined) =>
   reference ? ["", "A PAGE OF AN APP THE PERSON LIKES, read for its structure only (the idea to build something OF THEIR OWN from, never to copy):", fence(reference)] : [];
 
-export function planMessage(description: string, locale: string, reference?: string | null): string {
+export function planMessage(description: string, locale: string, reference?: string | null, features?: readonly string[]): string {
   return [
     `Plan this app. Write the title and every box in ${languageNameFor(locale)}. Give it a NEW name of its own — never the name of the app it resembles.`,
     "Boxes: screens (each screen and what the person does on it), data (what the app remembers and in what fields), actions (what the buttons and gestures do), look (colours, mood, layout — original, not the look of another product).",
     `Each box at most ${MAX_BOX_CHARS} characters, concrete enough to build from.`,
     "",
     fence(description),
+    ...featuresContextBlock(features ?? []),
     ...referenceBlock(reference),
   ].join("\n");
 }

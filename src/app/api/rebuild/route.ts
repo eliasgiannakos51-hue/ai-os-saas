@@ -9,6 +9,7 @@ import { rebuildGate } from "@/lib/rebuild/access";
 import { chargedRebuildStep } from "@/lib/rebuild/charge";
 import { planApp } from "@/lib/rebuild/rebuild-call";
 import { MAX_DESCRIPTION_CHARS, planMessage } from "@/lib/rebuild/rebuild-plan";
+import { MAX_FEATURES, MAX_FEATURE_CHARS } from "@/lib/rebuild/rebuild-features";
 import { rebuildSystemPrompt } from "@/lib/rebuild/rebuild-system";
 import { readReferencePage } from "@/lib/rebuild/reference";
 import { firstUrl } from "@/lib/rebuild/structure";
@@ -50,6 +51,12 @@ export async function POST(request: Request) {
   if (!description) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
   if (description.length > MAX_DESCRIPTION_CHARS) return NextResponse.json({ ok: false, code: "too_long", limit: MAX_DESCRIPTION_CHARS }, { status: 400 });
   const uiLocale = typeof body.locale === "string" && (SUPPORTED_LOCALES as readonly string[]).includes(body.locale) ? body.locale : "en";
+  // Κομμάτι 2: features the person kept from the capabilities step
+  // (api/rebuild/features), never trusted further than any other word
+  // they typed — clipped and bounded exactly as a box is.
+  const features = Array.isArray(body.features)
+    ? body.features.filter((f): f is string => typeof f === "string" && f.trim().length > 0).map((f) => f.trim().slice(0, MAX_FEATURE_CHARS)).slice(0, MAX_FEATURES)
+    : [];
 
   const supabase = await createClient();
   const {
@@ -72,7 +79,7 @@ export async function POST(request: Request) {
     }
 
     const locale = resolveLanguage(description, uiLocale);
-    const message = planMessage(description, locale, reference?.rendered);
+    const message = planMessage(description, locale, reference?.rendered, features);
     const step = await chargedRebuildStep({
       user,
       gate,
@@ -81,8 +88,8 @@ export async function POST(request: Request) {
       inputChars: rebuildSystemPrompt().length + message.length,
       fingerprint: description,
       route: "/api/rebuild",
-      metadata: { step: "plan", descriptionChars: description.length, withReference: Boolean(reference) },
-      run: (costs) => planApp({ description, locale, reference: reference?.rendered, costs, userId: user.id, signal: request.signal }),
+      metadata: { step: "plan", descriptionChars: description.length, withReference: Boolean(reference), featureCount: features.length },
+      run: (costs) => planApp({ description, locale, reference: reference?.rendered, features, costs, userId: user.id, signal: request.signal }),
     });
     if (!step.ok) return step.response;
 

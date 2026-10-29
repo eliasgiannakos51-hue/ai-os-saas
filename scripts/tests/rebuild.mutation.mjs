@@ -32,6 +32,8 @@ const PAGE = "src/app/dashboard/rebuild/page.tsx";
 const SHELL = "src/components/rebuild/rebuild-shell.tsx";
 const SQL = "supabase/migrations/20261027000000_rebuild_projects.sql";
 const EN = "messages/en.json";
+const FEATURES = "src/lib/rebuild/rebuild-features.ts";
+const FEATURES_ROUTE = "src/app/api/rebuild/features/route.ts";
 
 const MUTANTS = [
   {
@@ -107,8 +109,8 @@ const MUTANTS = [
   {
     name: "the person's description is sent unfenced",
     file: PLAN,
-    from: "    fence(description),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nconst planText",
-    to: "    description,\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nconst planText",
+    from: "    fence(description),\n    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nconst planText",
+    to: "    description,\n    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),\n  ].join(\"\\n\");\n}\n\nconst planText",
     expect: "what the person wrote arrives between the untrusted markers",
   },
   {
@@ -251,6 +253,76 @@ const MUTANTS = [
     to: '"firstly": "First build",\n      "restoreNote"',
     expect: "el: every word is there, and nothing extra",
   },
+  {
+    name: "junk and duplicate capabilities are no longer dropped",
+    file: FEATURES,
+    from: 'const key = text.toLowerCase();\n    if (!text || seen.has(key)) continue;',
+    to: "const key = text;",
+    expect: "duplicates (even re-spaced) and blanks and non-strings are dropped, case kept from the first one seen",
+  },
+  {
+    name: "the capabilities list is no longer bounded",
+    file: FEATURES,
+    from: "if (features.length >= MAX_FEATURES) break;",
+    to: "// no cap",
+    expect: `bounded at ${8}, however many the model returns`,
+  },
+  {
+    name: "the rule against naming the real product is dropped from the capabilities call",
+    file: FEATURES,
+    from: "Never the name of any real product.",
+    to: "",
+    expect: "the call asks for CAPABILITIES in the model's own words, never a real product's name",
+  },
+  {
+    name: "kept capabilities stop reaching the plan call",
+    file: PLAN,
+    from: "    ...featuresContextBlock(features ?? []),\n    ...referenceBlock(reference),",
+    to: "    ...referenceBlock(reference),",
+    expect: "the plan call folds kept features in as fenced context, and leaves the plan the same without any",
+  },
+  {
+    name: "the capabilities route no longer checks who is signed in",
+    file: FEATURES_ROUTE,
+    from: 'if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });',
+    to: "",
+    expect: "features: signed in before anything is read or spent",
+  },
+  {
+    name: "the capabilities call settles under a different feature than the plan it feeds",
+    file: FEATURES_ROUTE,
+    from: 'feature: "rebuild_generate",',
+    to: 'feature: "rebuild_edit",',
+    expect: "features: charged the same way every rebuild step is, under rebuild_generate",
+  },
+  {
+    name: "the capabilities route starts writing a row before any project exists",
+    file: FEATURES_ROUTE,
+    from: "return NextResponse.json({ ok: true, features: step.value, reference, creditsCharged: step.creditsCharged });",
+    to: 'await createAdminClient().from("rebuild_projects").insert({});\n    return NextResponse.json({ ok: true, features: step.value, reference, creditsCharged: step.creditsCharged });',
+    expect: "features: nothing of it is ever written to a table — no project exists yet",
+  },
+  {
+    name: "features kept from the capabilities step are no longer bounded when the plan is created",
+    file: CREATE,
+    from: ".slice(0, MAX_FEATURE_CHARS)).slice(0, MAX_FEATURES)",
+    to: ".slice(0, MAX_FEATURE_CHARS))",
+    expect: "the plan route reads kept features from the body, clipped and bounded, never trusted further than any box",
+  },
+  {
+    name: "a Free account at its cap is still charged to see capabilities for an app it can never keep",
+    file: FEATURES_ROUTE,
+    from: "if ((count ?? 0) >= gate.cap) return NextResponse.json({ ok: false, code: \"limit_reached\", limit: gate.cap }, { status: 403 });",
+    to: "",
+    expect: "features: the app cap is read BEFORE anything is spent, same protection as the plan's own, so a Free account at its limit is never charged to see capabilities for an app it cannot keep",
+  },
+  {
+    name: "a failed capabilities call silently falls through to the plan, with nothing reviewed",
+    file: SHELL,
+    from: "if (!open) {\n      await postFeatures(text);\n      return;\n    }",
+    to: 'if (!open) {\n      const ok = await postFeatures(text);\n      if (!ok) await post("/api/rebuild", { description: text }, "plan");\n      return;\n    }',
+    expect: "a failed capabilities call shows its error and stops there (chargedRebuildStep's own hold/release) — it never silently falls through to a plan with no review",
+  },
 ];
 
-runMutations({ name: "rebuild", gate: GATE, targets: [PLAN, HTML, STRUCTURE, REFERENCE, CALL, CHARGE, LIMITS, CREATE, ONE, DL, PAGE, SHELL, SQL, EN], mutants: MUTANTS });
+runMutations({ name: "rebuild", gate: GATE, targets: [PLAN, HTML, STRUCTURE, REFERENCE, CALL, CHARGE, LIMITS, CREATE, ONE, DL, PAGE, SHELL, SQL, EN, FEATURES, FEATURES_ROUTE], mutants: MUTANTS });

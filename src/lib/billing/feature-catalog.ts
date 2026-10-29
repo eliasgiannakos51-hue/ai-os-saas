@@ -983,7 +983,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "open to everyone since 2026-10-27 (no switch; a Free account may keep one app); the allowance " +
       "per plan is the owner's to confirm, so it is published as a row when he does",
     pages: ["rebuild"],
-    routes: ["rebuild", "rebuild/[id]", "rebuild/[id]/download"],
+    routes: ["rebuild", "rebuild/features", "rebuild/[id]", "rebuild/[id]/download"],
     charges: true,
     enforcedIn: "src/lib/rebuild/charge.ts",
     enforcedSymbol: "reserveCredits",

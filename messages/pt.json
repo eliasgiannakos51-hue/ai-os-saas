@@ -1736,6 +1736,23 @@
       "tabPreview": "Pré-visualização",
       "tabEdit": "Editar",
       "tabHistory": "Histórico",
+      "viewportGroup": "Largura da pré-visualização",
+      "viewportDesktop": "Vista de computador",
+      "viewportMobile": "Vista de telemóvel",
+      "motion": {
+        "button": "Movimento",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Nenhum",
+          "softFade": "Fade suave",
+          "slideUp": "Deslizar para cima",
+          "parallax": "Parallax",
+          "glass": "Vidro",
+          "holographic": "Holográfico",
+          "typewriter": "Máquina de escrever",
+          "hoverLift": "Elevação ao passar o cursor"
+        }
+      },
       "statusLabel": "Estado",
       "statusCompleted": "Pronto",
       "statusFlagged": "Sinalizado",

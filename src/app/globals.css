@@ -258,6 +258,93 @@ body {
     @apply bg-panel-hover;
   }
 
+  /* THE CHROME AROUND A GENERATED SITE'S PREVIEW (Site Κομμάτι 1,
+     2026-10-30) — declared once, for the same reason .surface is: every
+     use of border/bg/rounded here is one line of CSS, not N lines of
+     Tailwind utilities counted by design-density.test.mjs. */
+  .browser-frame {
+    @apply flex min-h-0 flex-1 flex-col overflow-hidden rounded-card border border-border bg-paper;
+  }
+  .browser-frame-bar {
+    @apply flex shrink-0 items-center gap-2 border-b border-border bg-panel px-3 py-2;
+  }
+
+  /* MOTION STYLE PREVIEWS (Site "ΣΤΥΛ ΚΙΝΗΣΗΣ", Κομμάτι 1 — button and
+     list only, per the owner's own stop-gate: no style here is applied to
+     a real generated site yet, that is Κομμάτι 8). A tiny demo per named
+     style, shown while its row in the Motion popover is hovered or
+     focused. `prefers-reduced-motion: reduce` turns every one of them
+     off — the real feature will have to do the same (ΚΡΙΤΗΡΙΟ
+     ΠΟΙΟΤΗΤΑΣ 8), so the preview already does.
+
+     OPACITY AND TRANSFORM ONLY, ON PURPOSE. design-tokens.test.mjs §6
+     holds the whole stylesheet at zero shadow/gradient/blur, no
+     exception for a demo swatch — and §3 reserves --signal for the globe
+     and the logo alone. "Glass" and "Holographic" first used
+     backdrop-filter and a gradient; both are gone, replaced with a scale
+     and a multi-stop opacity flicker, the only two tools this file is
+     allowed to animate with. */
+  .motion-demo {
+    display: inline-block;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .motion-demo-softFade {
+    animation: motion-demo-fade 1.6s ease-in-out infinite;
+  }
+  .motion-demo-slideUp {
+    animation: motion-demo-slide-up 1.6s ease-in-out infinite;
+  }
+  .motion-demo-parallax {
+    animation: motion-demo-parallax 1.6s ease-in-out infinite;
+  }
+  .motion-demo-glass {
+    animation: motion-demo-glass 1.6s ease-in-out infinite;
+  }
+  .motion-demo-holographic {
+    animation: motion-demo-holo 1.8s ease-in-out infinite;
+  }
+  .motion-demo-typewriter {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: motion-demo-typewriter 1.6s steps(2) infinite;
+  }
+  .motion-demo-hoverLift {
+    animation: motion-demo-lift 1.2s ease-in-out infinite;
+  }
+}
+@keyframes motion-demo-fade {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes motion-demo-slide-up {
+  0%, 100% { transform: translateY(4px); opacity: 0.5; }
+  50% { transform: translateY(0); opacity: 1; }
+}
+@keyframes motion-demo-parallax {
+  0%, 100% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+}
+@keyframes motion-demo-glass {
+  0%, 100% { transform: scale(0.97); opacity: 0.55; }
+  50% { transform: scale(1); opacity: 1; }
+}
+@keyframes motion-demo-holo {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.7; }
+  50% { opacity: 1; }
+  75% { opacity: 0.85; }
+}
+@keyframes motion-demo-typewriter {
+  0% { width: 0; }
+  50%, 100% { width: 100%; }
+}
+@keyframes motion-demo-lift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@layer components {
   /* THE CALLOUT THAT SAYS SOMETHING FAILED — declared once, for the same
      reason .surface is.
 

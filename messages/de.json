@@ -1736,6 +1736,23 @@
       "tabPreview": "Vorschau",
       "tabEdit": "Bearbeiten",
       "tabHistory": "Verlauf",
+      "viewportGroup": "Vorschaubreite",
+      "viewportDesktop": "Desktop-Ansicht",
+      "viewportMobile": "Mobile Ansicht",
+      "motion": {
+        "button": "Bewegung",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Keine",
+          "softFade": "Sanftes Einblenden",
+          "slideUp": "Nach oben gleiten",
+          "parallax": "Parallax",
+          "glass": "Glas",
+          "holographic": "Holografisch",
+          "typewriter": "Schreibmaschine",
+          "hoverLift": "Hover-Anhebung"
+        }
+      },
       "statusLabel": "Status",
       "statusCompleted": "Fertig",
       "statusFlagged": "Markiert",

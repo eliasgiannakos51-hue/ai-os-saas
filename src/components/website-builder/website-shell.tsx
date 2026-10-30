@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Download, Files, History, Palette, Square, Undo2, X } from "lucide-react";
+import { Download, Files, History, Monitor, Palette, Smartphone, Sparkles, Square, Undo2, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
@@ -11,6 +11,7 @@ import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
 import { SiteHistory } from "@/components/website-builder/site-history";
+import { BrowserFrame } from "@/components/website-builder/browser-frame";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
@@ -43,6 +44,17 @@ const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
 
 type Turn = { id: string; role: "user" | "tool"; text: string; siteId?: string; questions?: string[] };
+
+/**
+ * MOTION STYLES (package 5, "ΣΤΥΛ ΚΙΝΗΣΗΣ") — the eight the owner named,
+ * in his own order. THIS ROUND BUILDS ONLY THE BUTTON AND THE LIST, per
+ * his own stop-gate in the directive: no style here is applied to a real
+ * site, no whole-site/section scope choice, no wording-based change.
+ * That is the next round, after he writes «εγκρίνω» on a screenshot of
+ * exactly this (docs/QUEUE.md, SITE-MOTION).
+ */
+const MOTION_STYLES = ["none", "softFade", "slideUp", "parallax", "glass", "holographic", "typewriter", "hoverLift"] as const;
+type MotionStyle = (typeof MOTION_STYLES)[number];
 
 /**
  * SITE IN THE SHELL (MASTER 14.3, package 3), for everybody (its switch
@@ -175,6 +187,29 @@ export function WebsiteShell({
   // How many pages the next site is asked for; null lets the site decide.
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [choosingPages, setChoosingPages] = useState(false);
+  // THE BROWSER FRAME (package 5, Κομμάτι 1): which simulated width the
+  // preview shows at. Remembered only for this visit — a real address
+  // does not change by device, so there is nothing to persist.
+  const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
+  // MOTION (package 5, Κομμάτι 1 of its own — button and list only).
+  const [motionOpen, setMotionOpen] = useState(false);
+  const [motionPreview, setMotionPreview] = useState<MotionStyle | null>(null);
+  // EVERY t() CALL HERE USES A STATIC STRING KEY, on purpose — a template
+  // key (t(`motion.styles.${style}`)) is exactly the "unbounded component"
+  // shape scripts/tests/message-slices.test.mjs holds at a recorded count:
+  // one dynamic key and the whole route group loses the ability to trim
+  // its message bundle. Eight static calls into a lookup object cost
+  // nothing extra and stay inside that bound.
+  const motionLabels: Record<MotionStyle, string> = {
+    none: t("motion.styles.none"),
+    softFade: t("motion.styles.softFade"),
+    slideUp: t("motion.styles.slideUp"),
+    parallax: t("motion.styles.parallax"),
+    glass: t("motion.styles.glass"),
+    holographic: t("motion.styles.holographic"),
+    typewriter: t("motion.styles.typewriter"),
+    hoverLift: t("motion.styles.hoverLift"),
+  };
   // The open page, with the site it belongs to, as the chosen part is.
   const [openPage, setOpenPage] = useState<{ siteId: string; slug: string } | null>(null);
   const describeNote = useGenerationNoteText();
@@ -499,6 +534,72 @@ export function WebsiteShell({
           title: current.name,
           actions: (
             <>
+              <span className="flex items-center gap-1" role="group" aria-label={t("viewportGroup")}>
+                <button
+                  type="button"
+                  onClick={() => setViewport("desktop")}
+                  aria-pressed={viewport === "desktop"}
+                  aria-label={t("viewportDesktop")}
+                  title={t("viewportDesktop")}
+                  data-testid="site-viewport-desktop"
+                  className={`${ACTION} ${viewport === "desktop" ? "border-foreground text-foreground" : ""}`}
+                >
+                  <Monitor className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewport("mobile")}
+                  aria-pressed={viewport === "mobile"}
+                  aria-label={t("viewportMobile")}
+                  title={t("viewportMobile")}
+                  data-testid="site-viewport-mobile"
+                  className={`${ACTION} ${viewport === "mobile" ? "border-foreground text-foreground" : ""}`}
+                >
+                  <Smartphone className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </span>
+              {/* MOTION (package 5, Κομμάτι 1): the button and the list
+                  only — see MOTION_STYLES above for the owner's own
+                  stop-gate. The small preview below the list is a demo
+                  swatch (globals.css, .motion-demo-*), never the real site. */}
+              <span className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMotionOpen((v) => !v)}
+                  aria-expanded={motionOpen}
+                  aria-label={t("motion.button")}
+                  title={t("motion.button")}
+                  data-testid="site-motion"
+                  className={ACTION}
+                >
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                </button>
+                {motionOpen && (
+                  <div role="menu" aria-label={t("motion.button")} className="surface absolute end-0 top-full z-10 mt-2 w-64" onMouseLeave={() => setMotionPreview(null)}>
+                    <ul className="flex flex-col gap-1">
+                      {MOTION_STYLES.map((style) => (
+                        <li key={style}>
+                          <button
+                            type="button"
+                            role="menuitemradio"
+                            aria-checked={false}
+                            data-testid="site-motion-choice"
+                            data-motion-style={style}
+                            onMouseEnter={() => setMotionPreview(style)}
+                            onFocus={() => setMotionPreview(style)}
+                            className={`${OPTION} w-full justify-start`}
+                          >
+                            {motionLabels[style]}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div data-testid="site-motion-preview" className="mt-2 flex items-center justify-center rounded-item bg-panel-hover p-3">
+                      <span className={`motion-demo motion-demo-${motionPreview ?? "none"} rounded-item bg-paper px-4 py-2 text-xs text-foreground`}>{t("motion.previewSample")}</span>
+                    </div>
+                  </div>
+                )}
+              </span>
               <PublishControl websiteId={current.id} websiteName={current.name} disabled={current.status !== "completed"} />
               <button
                 type="button"
@@ -609,22 +710,27 @@ export function WebsiteShell({
                 </div>
               )}
               {shown ? (
-                <iframe
-                  key={`${shown.id}:${pageSlug}`}
-                  srcDoc={shownHtml}
-                  sandbox=""
-                  title={t("viewingOldVersion", { number: shown.version_number })}
-                  data-testid="site-version-preview"
-                  className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
-                />
+                <BrowserFrame address={current.name} viewport={viewport}>
+                  <iframe
+                    key={`${shown.id}:${pageSlug}`}
+                    srcDoc={shownHtml}
+                    sandbox=""
+                    title={t("viewingOldVersion", { number: shown.version_number })}
+                    data-testid="site-version-preview"
+                    className="h-full min-h-[60vh] w-full flex-1 bg-paper"
+                  />
+                </BrowserFrame>
               ) : complete ? (
-                <iframe
-                  key={`${current.id}:${pageSlug}:${html.length}`}
-                  srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
-                  sandbox=""
-                  title={current.name}
-                  className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
-                />
+                <BrowserFrame address={current.name} viewport={viewport}>
+                  <iframe
+                    key={`${current.id}:${pageSlug}:${html.length}`}
+                    srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
+                    sandbox=""
+                    title={current.name}
+                    data-testid="site-live-preview"
+                    className="h-full min-h-[60vh] w-full flex-1 bg-paper"
+                  />
+                </BrowserFrame>
               ) : (
                 <p className="text-xs text-muted">{running(current) ? t("generating") : current.status === "flagged" ? t("flaggedBody") : failedText(current)}</p>
               )}

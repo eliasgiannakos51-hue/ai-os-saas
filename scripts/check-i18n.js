@@ -775,6 +775,16 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "dashboard.iowork.platform.mac",
   "dashboard.iowork.platform.windows",
   "dashboard.iowork.codePlaceholder",
+  // SITE MOTION STYLES, Κομμάτι 1 (2026-10-30, button and list only).
+  // "Aa" is a generic two-letter type sample, not a word — the same
+  // glyphs in every language that writes with the Latin alphabet (el
+  // uses its own "Αα" instead, so it is not even in this set's locales).
+  "dashboard.websiteBuilder.motion.previewSample",
+  // "Parallax" is the design/CSS term itself, used untranslated in
+  // el/es/fr/de/it/pt the way "online" or "email" are — ja/zh/ar DO
+  // translate it (パララックス/视差/بارالاكس), so this is six locales
+  // choosing the loanword, not a missed translation.
+  "dashboard.websiteBuilder.motion.styles.parallax",
   // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
   // German and Portuguese all use the same word for this exact sense —
   // not a strength or a volume, the middle setting of three — and it is

@@ -1736,6 +1736,23 @@
       "tabPreview": "معاينة",
       "tabEdit": "تعديل",
       "tabHistory": "السجل",
+      "viewportGroup": "عرض المعاينة",
+      "viewportDesktop": "عرض سطح المكتب",
+      "viewportMobile": "عرض الهاتف",
+      "motion": {
+        "button": "الحركة",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "بلا",
+          "softFade": "تلاشٍ ناعم",
+          "slideUp": "انزلاق للأعلى",
+          "parallax": "بارالاكس",
+          "glass": "زجاج",
+          "holographic": "هولوغرافي",
+          "typewriter": "آلة كاتبة",
+          "hoverLift": "رفع عند التمرير"
+        }
+      },
       "statusLabel": "الحالة",
       "statusCompleted": "جاهز",
       "statusFlagged": "مُعلَّم",

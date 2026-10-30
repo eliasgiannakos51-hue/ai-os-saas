@@ -1736,6 +1736,23 @@
       "tabPreview": "预览",
       "tabEdit": "编辑",
       "tabHistory": "历史版本",
+      "viewportGroup": "预览宽度",
+      "viewportDesktop": "桌面视图",
+      "viewportMobile": "移动视图",
+      "motion": {
+        "button": "动效",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "无",
+          "softFade": "柔和淡入淡出",
+          "slideUp": "向上滑动",
+          "parallax": "视差",
+          "glass": "玻璃",
+          "holographic": "全息",
+          "typewriter": "打字机",
+          "hoverLift": "悬停上浮"
+        }
+      },
       "statusLabel": "状态",
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",

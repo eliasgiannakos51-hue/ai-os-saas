@@ -1736,6 +1736,23 @@
       "tabPreview": "プレビュー",
       "tabEdit": "編集",
       "tabHistory": "履歴",
+      "viewportGroup": "プレビュー幅",
+      "viewportDesktop": "デスクトップ表示",
+      "viewportMobile": "モバイル表示",
+      "motion": {
+        "button": "モーション",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "なし",
+          "softFade": "ソフトフェード",
+          "slideUp": "スライドアップ",
+          "parallax": "パララックス",
+          "glass": "ガラス",
+          "holographic": "ホログラフィック",
+          "typewriter": "タイプライター",
+          "hoverLift": "ホバーリフト"
+        }
+      },
       "statusLabel": "ステータス",
       "statusCompleted": "完成",
       "statusFlagged": "フラグ付き",

@@ -3901,6 +3901,19 @@
         "failed": "Algo salió mal. Inténtalo de nuevo."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "¿Qué debe hacer Editing con tu material?"
+      },
+      "notBuilt": "Aún no está disponible. No se cobró nada.",
+      "placeholder": "Describe el cambio, con tus propias palabras…",
+      "workspaceTitle": "Espacio de trabajo",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Gráficos"
+      },
+      "noMaterial": "Todavía no hay material."
+    },
     "appBuilder": {
       "empty": {
         "heading": "Describe la app que necesita tu negocio",

@@ -794,6 +794,12 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // translate it (パララックス/视差/بارالاكس), so this is six locales
   // choosing the loanword, not a missed translation.
   "dashboard.toolShell.motion.styles.parallax",
+  // EDITING, Κομμάτι 2 (owner, 2026-10-30): "Zoom" the camera move —
+  // same shape as Parallax above, the same six Latin-alphabet locales
+  // (el/es/fr/de/it/pt) keep the English word for this exact film term,
+  // while ja/zh/ar translate it (ズーム/缩放/تكبير), so this is a choice,
+  // not a miss.
+  "dashboard.editing.tools.zoom",
   // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
   // German and Portuguese all use the same word for this exact sense —
   // not a strength or a volume, the middle setting of three — and it is

@@ -3901,6 +3901,19 @@
         "failed": "Etwas ist schiefgelaufen. Versuche es erneut."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "Was soll Editing mit deinem Material machen?"
+      },
+      "notBuilt": "Noch nicht umgesetzt. Es wurde nichts berechnet.",
+      "placeholder": "Beschreibe die Änderung in deinen eigenen Worten…",
+      "workspaceTitle": "Arbeitsbereich",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Grafiken"
+      },
+      "noMaterial": "Noch kein Material vorhanden."
+    },
     "appBuilder": {
       "empty": {
         "heading": "Beschreibe die App, die dein Betrieb braucht",

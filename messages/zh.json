@@ -3901,6 +3901,19 @@
         "failed": "出了点问题。请重试。"
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "您希望 Editing 对素材做什么？"
+      },
+      "notBuilt": "尚未构建。未产生任何费用。",
+      "placeholder": "用您自己的话描述要修改的内容…",
+      "workspaceTitle": "工作区",
+      "tools": {
+        "zoom": "缩放",
+        "graphics": "图形"
+      },
+      "noMaterial": "暂无素材。"
+    },
     "appBuilder": {
       "empty": {
         "heading": "说说你的生意需要什么应用",

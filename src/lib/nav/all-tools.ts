@@ -124,7 +124,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   },
   {
     name: "editing", group: "make", href: "/dashboard/editing", ready: false,
-    waitingFor: "not built yet; needs a decision on where ffmpeg runs (docs/v6-ffmpeg-and-limits-2026-10-04.md)",
+    waitingFor: "the Remotion-engine screen is built behind the 'editing-tool' switch (Κομμάτι 2, docs/EDITING-REMOTION.md) but stays Σύντομα here until every piece of the owner's directive passes, same as every other half-built tool on this tile",
   },
   {
     name: "avatars", group: "make", href: "/dashboard/avatars", ready: false,

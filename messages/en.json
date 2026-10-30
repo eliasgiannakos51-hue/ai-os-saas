@@ -3901,6 +3901,19 @@
         "failed": "Something went wrong. Try again."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "What should Editing do with your material?"
+      },
+      "notBuilt": "Not built yet. Nothing was charged.",
+      "placeholder": "Describe the edit, in your own words…",
+      "workspaceTitle": "Workspace",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Graphics"
+      },
+      "noMaterial": "No material yet."
+    },
     "appBuilder": {
       "empty": {
         "heading": "Describe the app your business needs",

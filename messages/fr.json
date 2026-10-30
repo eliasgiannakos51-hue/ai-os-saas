@@ -3901,6 +3901,19 @@
         "failed": "Un problème est survenu. Réessayez."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "Que doit faire Editing avec votre contenu ?"
+      },
+      "notBuilt": "Pas encore disponible. Rien n'a été facturé.",
+      "placeholder": "Décrivez la modification, avec vos propres mots…",
+      "workspaceTitle": "Espace de travail",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Graphiques"
+      },
+      "noMaterial": "Aucun contenu pour le moment."
+    },
     "appBuilder": {
       "empty": {
         "heading": "Décris l'app dont ton activité a besoin",

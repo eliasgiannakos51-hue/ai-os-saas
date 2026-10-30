@@ -3901,6 +3901,19 @@
         "failed": "問題が発生しました。もう一度お試しください。"
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "Editingに素材で何をしてほしいですか?"
+      },
+      "notBuilt": "まだ実装されていません。料金は発生していません。",
+      "placeholder": "変更したい内容を自分の言葉で説明してください…",
+      "workspaceTitle": "作業スペース",
+      "tools": {
+        "zoom": "ズーム",
+        "graphics": "グラフィック"
+      },
+      "noMaterial": "まだ素材がありません。"
+    },
     "appBuilder": {
       "empty": {
         "heading": "あなたの仕事に必要なアプリを教えて",

@@ -3901,6 +3901,19 @@
         "failed": "Qualcosa è andato storto. Riprova."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "Cosa deve fare Editing con il tuo materiale?"
+      },
+      "notBuilt": "Non ancora disponibile. Non è stato addebitato nulla.",
+      "placeholder": "Descrivi la modifica, con le tue parole…",
+      "workspaceTitle": "Spazio di lavoro",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Grafica"
+      },
+      "noMaterial": "Ancora nessun materiale."
+    },
     "appBuilder": {
       "empty": {
         "heading": "Descrivi l'app che serve alla tua attività",

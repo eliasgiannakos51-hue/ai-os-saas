@@ -110,7 +110,19 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
           <div
             data-testid="tool-shell-history"
             data-open={history.open}
-            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:w-[280px] md:max-w-none ${
+            // ONE `md:w-*` PER STATE, NOT TWO FIGHTING. The base classes
+            // used to carry `md:w-[280px]` unconditionally alongside the
+            // closed branch's `md:w-0` — both targeting the same property
+            // at the same breakpoint, and Tailwind's generated stylesheet
+            // orders arbitrary-value utilities after the named scale, so
+            // `w-[280px]` always won: a "closed" column still measured
+            // 280px wide on desktop, silently eating that width from the
+            // conversation column next to it (found 2026-10-30, Image
+            // Κομμάτι 2 — the first screen with `history` wired AND `work`
+            // open at a desktop width, which is what made it visible: its
+            // own h1 wrapped to one letter per line in the 200px left
+            // over). Each branch now owns its own width end to end.
+            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:max-w-none ${
               history.open
                 ? "translate-x-0 md:w-[280px]"
                 : "-translate-x-full rtl:translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-e-0"

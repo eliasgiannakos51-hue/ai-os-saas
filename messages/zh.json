@@ -3467,6 +3467,14 @@
       "price": "{count, plural, other {# 积分}}",
       "delete": "删除图片",
       "deleteConfirm": "删除这张图片及其所有版本？此操作无法撤销。",
+      "tools": {
+        "productAd": "产品广告",
+        "animate": "动画",
+        "sameProduct": "同一产品",
+        "addReference": "添加参考图片",
+        "removeReference": "移除这张参考图片",
+        "searchWeb": "先在网上搜索"
+      },
       "notConfigured": "图片功能尚未开启。不会扣费。",
       "working": {
         "variants": "正在生成 4 张图片…",

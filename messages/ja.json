@@ -3467,6 +3467,14 @@
       "price": "{count, plural, other {# クレジット}}",
       "delete": "画像を削除",
       "deleteConfirm": "この画像とすべての版を削除しますか？元に戻せません。",
+      "tools": {
+        "productAd": "商品広告",
+        "animate": "アニメーション",
+        "sameProduct": "同じ商品",
+        "addReference": "参考画像を追加",
+        "removeReference": "この参考画像を削除",
+        "searchWeb": "先にウェブを検索"
+      },
       "notConfigured": "画像はまだ有効になっていません。料金はかかりません。",
       "working": {
         "variants": "4枚の画像を作成中…",

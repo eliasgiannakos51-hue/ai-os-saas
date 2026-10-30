@@ -3467,6 +3467,14 @@
       "price": "{count, plural, zero {# رصيد} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}",
       "delete": "حذف الصورة",
       "deleteConfirm": "حذف هذه الصورة وكل نسخها؟ لا يمكن التراجع عن ذلك.",
+      "tools": {
+        "productAd": "إعلان منتج",
+        "animate": "تحريك",
+        "sameProduct": "نفس المنتج",
+        "addReference": "إضافة صورة مرجعية",
+        "removeReference": "إزالة صورة المرجع هذه",
+        "searchWeb": "البحث في الويب أولاً"
+      },
       "notConfigured": "الصور غير مفعلة بعد. لا يُخصم شيء.",
       "working": {
         "variants": "يجري إنشاء 4 صور…",

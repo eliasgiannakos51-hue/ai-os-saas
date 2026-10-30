@@ -3467,6 +3467,14 @@
       "price": "{count, plural, one {# Credit} other {# Credits}}",
       "delete": "Bild löschen",
       "deleteConfirm": "Dieses Bild und alle seine Versionen löschen? Das lässt sich nicht rückgängig machen.",
+      "tools": {
+        "productAd": "Produktwerbung",
+        "animate": "Animieren",
+        "sameProduct": "Gleiches Produkt",
+        "addReference": "Ein Referenzbild hinzufügen",
+        "removeReference": "Dieses Referenzbild entfernen",
+        "searchWeb": "Erst im Web suchen"
+      },
       "notConfigured": "Bilder sind noch nicht eingeschaltet. Es wird nichts berechnet.",
       "working": {
         "variants": "4 Bilder werden erstellt…",

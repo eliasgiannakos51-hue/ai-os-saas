@@ -3467,6 +3467,14 @@
       "price": "{count, plural, one {# crédit} other {# crédits}}",
       "delete": "Supprimer l’image",
       "deleteConfirm": "Supprimer cette image et toutes ses versions ? C’est définitif.",
+      "tools": {
+        "productAd": "Pub produit",
+        "animate": "Animer",
+        "sameProduct": "Même produit",
+        "addReference": "Ajouter une image de référence",
+        "removeReference": "Retirer cette image de référence",
+        "searchWeb": "Chercher sur le web d'abord"
+      },
       "notConfigured": "Les images ne sont pas encore activées. Rien n’est facturé.",
       "working": {
         "variants": "Création de 4 images…",

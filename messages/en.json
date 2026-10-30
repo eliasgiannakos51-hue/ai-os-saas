@@ -3467,6 +3467,14 @@
       "price": "{count, plural, one {# credit} other {# credits}}",
       "delete": "Delete image",
       "deleteConfirm": "Delete this image and all its versions? This cannot be undone.",
+      "tools": {
+        "productAd": "Product ad",
+        "animate": "Animate",
+        "sameProduct": "Same product",
+        "addReference": "Add a reference image",
+        "removeReference": "Remove this reference image",
+        "searchWeb": "Search the web first"
+      },
       "notConfigured": "Images are not switched on yet. Nothing is charged.",
       "working": {
         "variants": "Making 4 images…",

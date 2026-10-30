@@ -3467,6 +3467,14 @@
       "price": "{count, plural, one {# crédito} other {# créditos}}",
       "delete": "Eliminar imagem",
       "deleteConfirm": "Eliminar esta imagem e todas as suas versões? Não dá para desfazer.",
+      "tools": {
+        "productAd": "Anúncio de produto",
+        "animate": "Animar",
+        "sameProduct": "Mesmo produto",
+        "addReference": "Adicionar uma imagem de referência",
+        "removeReference": "Remover esta imagem de referência",
+        "searchWeb": "Pesquisar primeiro na web"
+      },
       "notConfigured": "As imagens ainda não estão ativas. Nada é cobrado.",
       "working": {
         "variants": "A criar 4 imagens…",

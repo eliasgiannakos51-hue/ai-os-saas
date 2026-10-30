@@ -407,6 +407,10 @@ const BASELINE = {
   // switch "editing-tool" is not open to gets the Coming Soon screen,
   // which draws no filled control. 2026-10-30, κομμάτι 2 of Editing.
   "dashboard/editing/page.tsx": 1,
+  // ONE: the field's send, in the shell Films is born in. Everyone the
+  // switch "films-tool" is not open to gets the Coming Soon screen,
+  // which draws no filled control. 2026-10-30, κομμάτι 2 of Films.
+  "dashboard/films/page.tsx": 1,
   // ONE: the field's send. The page is Games (package 26), born in the
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.

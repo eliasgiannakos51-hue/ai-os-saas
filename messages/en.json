@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "No material yet."
     },
+    "films": {
+      "empty": {
+        "heading": "What's your film about?"
+      },
+      "notBuilt": "Not built yet. Nothing was charged.",
+      "placeholder": "Describe the film, in your own words…",
+      "workspaceTitle": "Film production",
+      "stages": {
+        "script": "Script",
+        "characters": "Characters & places",
+        "storyboard": "Storyboard",
+        "shooting": "Shooting",
+        "edit": "Edit"
+      },
+      "stageStatus": {
+        "waiting": "Waiting",
+        "working": "Working",
+        "done": "Done"
+      },
+      "credits": {
+        "label": "Credits",
+        "unknown": "worked out once a script exists"
+      },
+      "charactersPlaces": {
+        "heading": "Characters & places",
+        "addCharacter": "Add a character",
+        "addPlace": "Add a place",
+        "empty": "None added yet."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Shot {n}",
+        "sampleCaption": "Sample grid — your shots appear here once the script is written."
+      },
+      "panel": {
+        "cameraAngle": "Camera angle",
+        "angleOptions": {
+          "wide": "Wide",
+          "medium": "Medium",
+          "closeUp": "Close-up",
+          "fromAbove": "From above",
+          "low": "Low"
+        },
+        "light": "Light",
+        "lightOptions": {
+          "day": "Day",
+          "goldenHour": "Golden hour",
+          "night": "Night",
+          "warmInside": "Warm inside"
+        },
+        "cameraMove": "Camera move",
+        "moveOptions": {
+          "still": "Still",
+          "slowPush": "Slow push",
+          "pan": "Pan",
+          "handheld": "Handheld"
+        },
+        "continueFromPrevious": "Continue from previous shot",
+        "reshoot": "Reshoot"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "Describe the app your business needs",

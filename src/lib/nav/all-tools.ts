@@ -120,7 +120,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   },
   {
     name: "films", group: "make", href: "/dashboard/films", ready: false,
-    waitingFor: "needs the Video tool and a voice provider key from the owner",
+    waitingFor: "the screen is built behind the 'films-tool' switch (Κομμάτι 2, docs/FILMS-HONESTY.md) but stays Σύντομα here until every piece passes — pieces 5-9 still need Video/Audio/Editing's own generators, not just their provider keys",
   },
   {
     name: "editing", group: "make", href: "/dashboard/editing", ready: false,

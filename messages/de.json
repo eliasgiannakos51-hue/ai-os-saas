@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "Noch kein Material vorhanden."
     },
+    "films": {
+      "empty": {
+        "heading": "Worum geht es in deinem Film?"
+      },
+      "notBuilt": "Noch nicht umgesetzt. Es wurde nichts berechnet.",
+      "placeholder": "Beschreibe den Film in deinen eigenen Worten…",
+      "workspaceTitle": "Filmproduktion",
+      "stages": {
+        "script": "Drehbuch",
+        "characters": "Figuren & Orte",
+        "storyboard": "Storyboard",
+        "shooting": "Dreh",
+        "edit": "Schnitt"
+      },
+      "stageStatus": {
+        "waiting": "Wartet",
+        "working": "In Arbeit",
+        "done": "Fertig"
+      },
+      "credits": {
+        "label": "Credits",
+        "unknown": "wird berechnet, sobald ein Drehbuch existiert"
+      },
+      "charactersPlaces": {
+        "heading": "Figuren & Orte",
+        "addCharacter": "Figur hinzufügen",
+        "addPlace": "Ort hinzufügen",
+        "empty": "Noch keine hinzugefügt."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Einstellung {n}",
+        "sampleCaption": "Beispielraster — deine Einstellungen erscheinen hier, sobald das Drehbuch geschrieben ist."
+      },
+      "panel": {
+        "cameraAngle": "Kamerawinkel",
+        "angleOptions": {
+          "wide": "Weit",
+          "medium": "Mittel",
+          "closeUp": "Nahaufnahme",
+          "fromAbove": "Von oben",
+          "low": "Niedrig"
+        },
+        "light": "Licht",
+        "lightOptions": {
+          "day": "Tag",
+          "goldenHour": "Goldene Stunde",
+          "night": "Nacht",
+          "warmInside": "Warm innen"
+        },
+        "cameraMove": "Kamerabewegung",
+        "moveOptions": {
+          "still": "Statisch",
+          "slowPush": "Langsamer Zoom",
+          "pan": "Schwenk",
+          "handheld": "Handkamera"
+        },
+        "continueFromPrevious": "Weiter von der vorherigen Einstellung",
+        "reshoot": "Neu drehen"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "Beschreibe die App, die dein Betrieb braucht",

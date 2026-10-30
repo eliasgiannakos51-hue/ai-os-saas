@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "暂无素材。"
     },
+    "films": {
+      "empty": {
+        "heading": "你的电影是关于什么的？"
+      },
+      "notBuilt": "尚未构建。未产生任何费用。",
+      "placeholder": "用您自己的话描述这部电影…",
+      "workspaceTitle": "电影制作",
+      "stages": {
+        "script": "剧本",
+        "characters": "角色与场景",
+        "storyboard": "分镜",
+        "shooting": "拍摄",
+        "edit": "剪辑"
+      },
+      "stageStatus": {
+        "waiting": "等待中",
+        "working": "进行中",
+        "done": "已完成"
+      },
+      "credits": {
+        "label": "积分",
+        "unknown": "一旦有剧本即可计算"
+      },
+      "charactersPlaces": {
+        "heading": "角色与场景",
+        "addCharacter": "添加角色",
+        "addPlace": "添加场景",
+        "empty": "尚未添加。"
+      },
+      "storyboard": {
+        "heading": "分镜",
+        "shot": "镜头 {n}",
+        "sampleCaption": "示例网格——剧本写好后，您的镜头将显示在这里。"
+      },
+      "panel": {
+        "cameraAngle": "镜头角度",
+        "angleOptions": {
+          "wide": "广角",
+          "medium": "中景",
+          "closeUp": "特写",
+          "fromAbove": "俯拍",
+          "low": "低角度"
+        },
+        "light": "光线",
+        "lightOptions": {
+          "day": "白天",
+          "goldenHour": "黄金时刻",
+          "night": "夜晚",
+          "warmInside": "温暖室内"
+        },
+        "cameraMove": "镜头运动",
+        "moveOptions": {
+          "still": "静止",
+          "slowPush": "缓慢推近",
+          "pan": "横摇",
+          "handheld": "手持"
+        },
+        "continueFromPrevious": "从上一个镜头继续",
+        "reshoot": "重新拍摄"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "说说你的生意需要什么应用",

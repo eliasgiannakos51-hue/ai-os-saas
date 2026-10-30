@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "Aucun contenu pour le moment."
     },
+    "films": {
+      "empty": {
+        "heading": "De quoi parle votre film ?"
+      },
+      "notBuilt": "Pas encore disponible. Rien n'a été facturé.",
+      "placeholder": "Décrivez le film, avec vos propres mots…",
+      "workspaceTitle": "Production du film",
+      "stages": {
+        "script": "Scénario",
+        "characters": "Personnages & lieux",
+        "storyboard": "Storyboard",
+        "shooting": "Tournage",
+        "edit": "Montage"
+      },
+      "stageStatus": {
+        "waiting": "En attente",
+        "working": "En cours",
+        "done": "Terminé"
+      },
+      "credits": {
+        "label": "Crédits",
+        "unknown": "calculé une fois le scénario écrit"
+      },
+      "charactersPlaces": {
+        "heading": "Personnages & lieux",
+        "addCharacter": "Ajouter un personnage",
+        "addPlace": "Ajouter un lieu",
+        "empty": "Aucun ajouté pour le moment."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Plan {n}",
+        "sampleCaption": "Grille d'exemple — vos plans apparaîtront ici une fois le scénario écrit."
+      },
+      "panel": {
+        "cameraAngle": "Angle de caméra",
+        "angleOptions": {
+          "wide": "Large",
+          "medium": "Moyen",
+          "closeUp": "Gros plan",
+          "fromAbove": "Plongée",
+          "low": "Contre-plongée"
+        },
+        "light": "Lumière",
+        "lightOptions": {
+          "day": "Jour",
+          "goldenHour": "Heure dorée",
+          "night": "Nuit",
+          "warmInside": "Intérieur chaud"
+        },
+        "cameraMove": "Mouvement de caméra",
+        "moveOptions": {
+          "still": "Fixe",
+          "slowPush": "Travelling lent",
+          "pan": "Panoramique",
+          "handheld": "Caméra à l'épaule"
+        },
+        "continueFromPrevious": "Continuer depuis le plan précédent",
+        "reshoot": "Retourner"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "Décris l'app dont ton activité a besoin",

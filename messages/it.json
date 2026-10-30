@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "Ancora nessun materiale."
     },
+    "films": {
+      "empty": {
+        "heading": "Di cosa parla il tuo film?"
+      },
+      "notBuilt": "Non ancora disponibile. Non è stato addebitato nulla.",
+      "placeholder": "Descrivi il film, con le tue parole…",
+      "workspaceTitle": "Produzione del film",
+      "stages": {
+        "script": "Sceneggiatura",
+        "characters": "Personaggi e luoghi",
+        "storyboard": "Storyboard",
+        "shooting": "Riprese",
+        "edit": "Montaggio"
+      },
+      "stageStatus": {
+        "waiting": "In attesa",
+        "working": "In corso",
+        "done": "Fatto"
+      },
+      "credits": {
+        "label": "Crediti",
+        "unknown": "calcolato quando esiste una sceneggiatura"
+      },
+      "charactersPlaces": {
+        "heading": "Personaggi e luoghi",
+        "addCharacter": "Aggiungi personaggio",
+        "addPlace": "Aggiungi luogo",
+        "empty": "Nessuno ancora aggiunto."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Inquadratura {n}",
+        "sampleCaption": "Griglia di esempio — le tue inquadrature appariranno qui una volta scritta la sceneggiatura."
+      },
+      "panel": {
+        "cameraAngle": "Angolazione della camera",
+        "angleOptions": {
+          "wide": "Ampia",
+          "medium": "Media",
+          "closeUp": "Primo piano",
+          "fromAbove": "Dall'alto",
+          "low": "Bassa"
+        },
+        "light": "Luce",
+        "lightOptions": {
+          "day": "Giorno",
+          "goldenHour": "Ora dorata",
+          "night": "Notte",
+          "warmInside": "Interno caldo"
+        },
+        "cameraMove": "Movimento di camera",
+        "moveOptions": {
+          "still": "Fissa",
+          "slowPush": "Avvicinamento lento",
+          "pan": "Panoramica",
+          "handheld": "A mano libera"
+        },
+        "continueFromPrevious": "Continua dall'inquadratura precedente",
+        "reshoot": "Riprendi di nuovo"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "Descrivi l'app che serve alla tua attività",

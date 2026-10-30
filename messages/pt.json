@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "Ainda sem material."
     },
+    "films": {
+      "empty": {
+        "heading": "Sobre o que é o seu filme?"
+      },
+      "notBuilt": "Ainda não foi criado. Nada foi cobrado.",
+      "placeholder": "Descreva o filme, com suas próprias palavras…",
+      "workspaceTitle": "Produção do filme",
+      "stages": {
+        "script": "Roteiro",
+        "characters": "Personagens e lugares",
+        "storyboard": "Storyboard",
+        "shooting": "Filmagem",
+        "edit": "Edição"
+      },
+      "stageStatus": {
+        "waiting": "Em espera",
+        "working": "Em andamento",
+        "done": "Concluído"
+      },
+      "credits": {
+        "label": "Créditos",
+        "unknown": "calculado assim que houver um roteiro"
+      },
+      "charactersPlaces": {
+        "heading": "Personagens e lugares",
+        "addCharacter": "Adicionar personagem",
+        "addPlace": "Adicionar lugar",
+        "empty": "Nenhum adicionado ainda."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Plano {n}",
+        "sampleCaption": "Grade de exemplo — seus planos aparecerão aqui assim que o roteiro for escrito."
+      },
+      "panel": {
+        "cameraAngle": "Ângulo de câmera",
+        "angleOptions": {
+          "wide": "Amplo",
+          "medium": "Médio",
+          "closeUp": "Close",
+          "fromAbove": "De cima",
+          "low": "Baixo"
+        },
+        "light": "Luz",
+        "lightOptions": {
+          "day": "Dia",
+          "goldenHour": "Hora dourada",
+          "night": "Noite",
+          "warmInside": "Interior aconchegante"
+        },
+        "cameraMove": "Movimento de câmera",
+        "moveOptions": {
+          "still": "Estática",
+          "slowPush": "Aproximação lenta",
+          "pan": "Panorâmica",
+          "handheld": "Câmera na mão"
+        },
+        "continueFromPrevious": "Continuar do plano anterior",
+        "reshoot": "Regravar"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "Descreve a app de que o teu negócio precisa",

@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "まだ素材がありません。"
     },
+    "films": {
+      "empty": {
+        "heading": "映画のテーマは何ですか?"
+      },
+      "notBuilt": "まだ実装されていません。料金は発生していません。",
+      "placeholder": "映画の内容を自分の言葉で説明してください…",
+      "workspaceTitle": "映画制作",
+      "stages": {
+        "script": "脚本",
+        "characters": "キャラクター・場所",
+        "storyboard": "絵コンテ",
+        "shooting": "撮影",
+        "edit": "編集"
+      },
+      "stageStatus": {
+        "waiting": "待機中",
+        "working": "作業中",
+        "done": "完了"
+      },
+      "credits": {
+        "label": "クレジット",
+        "unknown": "脚本ができ次第計算されます"
+      },
+      "charactersPlaces": {
+        "heading": "キャラクター・場所",
+        "addCharacter": "キャラクターを追加",
+        "addPlace": "場所を追加",
+        "empty": "まだ追加されていません。"
+      },
+      "storyboard": {
+        "heading": "絵コンテ",
+        "shot": "ショット {n}",
+        "sampleCaption": "サンプルグリッド — 脚本が書かれるとショットがここに表示されます。"
+      },
+      "panel": {
+        "cameraAngle": "カメラアングル",
+        "angleOptions": {
+          "wide": "ワイド",
+          "medium": "ミディアム",
+          "closeUp": "クローズアップ",
+          "fromAbove": "俯瞰",
+          "low": "ローアングル"
+        },
+        "light": "ライティング",
+        "lightOptions": {
+          "day": "昼",
+          "goldenHour": "ゴールデンアワー",
+          "night": "夜",
+          "warmInside": "暖かい室内"
+        },
+        "cameraMove": "カメラの動き",
+        "moveOptions": {
+          "still": "固定",
+          "slowPush": "ゆっくりズームイン",
+          "pan": "パン",
+          "handheld": "手持ち"
+        },
+        "continueFromPrevious": "前のショットから続ける",
+        "reshoot": "撮り直し"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "あなたの仕事に必要なアプリを教えて",

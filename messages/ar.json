@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "لا توجد مواد بعد."
     },
+    "films": {
+      "empty": {
+        "heading": "عن ماذا يتحدث فيلمك؟"
+      },
+      "notBuilt": "لم يُبنَ بعد. لم يتم خصم أي رسوم.",
+      "placeholder": "صف الفيلم، بكلماتك الخاصة…",
+      "workspaceTitle": "إنتاج الفيلم",
+      "stages": {
+        "script": "السيناريو",
+        "characters": "الشخصيات والأماكن",
+        "storyboard": "لوحة القصة المصورة",
+        "shooting": "التصوير",
+        "edit": "المونتاج"
+      },
+      "stageStatus": {
+        "waiting": "في الانتظار",
+        "working": "قيد التنفيذ",
+        "done": "منتهٍ"
+      },
+      "credits": {
+        "label": "الرصيد",
+        "unknown": "يُحسب بمجرد وجود سيناريو"
+      },
+      "charactersPlaces": {
+        "heading": "الشخصيات والأماكن",
+        "addCharacter": "إضافة شخصية",
+        "addPlace": "إضافة مكان",
+        "empty": "لم تتم إضافة أي شيء بعد."
+      },
+      "storyboard": {
+        "heading": "لوحة القصة المصورة",
+        "shot": "اللقطة {n}",
+        "sampleCaption": "شبكة نموذجية — ستظهر لقطاتك هنا بمجرد كتابة السيناريو."
+      },
+      "panel": {
+        "cameraAngle": "زاوية الكاميرا",
+        "angleOptions": {
+          "wide": "واسعة",
+          "medium": "متوسطة",
+          "closeUp": "لقطة قريبة",
+          "fromAbove": "من الأعلى",
+          "low": "منخفضة"
+        },
+        "light": "الإضاءة",
+        "lightOptions": {
+          "day": "نهار",
+          "goldenHour": "الساعة الذهبية",
+          "night": "ليل",
+          "warmInside": "داخلي دافئ"
+        },
+        "cameraMove": "حركة الكاميرا",
+        "moveOptions": {
+          "still": "ثابتة",
+          "slowPush": "تقريب بطيء",
+          "pan": "بانورامية",
+          "handheld": "محمولة باليد"
+        },
+        "continueFromPrevious": "المتابعة من اللقطة السابقة",
+        "reshoot": "إعادة التصوير"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "صف التطبيق الذي يحتاجه عملك",

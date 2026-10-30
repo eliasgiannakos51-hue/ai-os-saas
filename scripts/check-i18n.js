@@ -800,6 +800,22 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // while ja/zh/ar translate it (ズーム/缩放/تكبير), so this is a choice,
   // not a miss.
   "dashboard.editing.tools.zoom",
+  // FILMS, Κομμάτι 2 (owner, 2026-10-30): "Storyboard" is the English
+  // industry term itself — de/es/fr/it/pt all use it unchanged, the
+  // same five that keep "Parallax"/"Zoom" above (el, unlike those two,
+  // has its own well-established word here and uses it: Εικονογραφημένο
+  // σενάριο). ja/zh/ar translate it too (絵コンテ/分镜/لوحة القصة
+  // المصورة). Two keys share this word on the same screen (the
+  // stage-bar label and the grid's own heading), so both need the
+  // allowance.
+  "dashboard.films.stages.storyboard",
+  "dashboard.films.storyboard.heading",
+  // FILMS, Κομμάτι 2: "Credits" is the product's own currency word,
+  // already used untranslated inside Greek and German sentences
+  // elsewhere in this file (dashboard.integrations.mcp.credits,
+  // "{credits} credits" — the exact precedent this allowance already
+  // documents above). This is the same word as a standalone label.
+  "dashboard.films.credits.label",
   // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
   // German and Portuguese all use the same word for this exact sense —
   // not a strength or a volume, the middle setting of three — and it is

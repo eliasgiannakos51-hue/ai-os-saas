@@ -3914,6 +3914,67 @@
       },
       "noMaterial": "Δεν υπάρχει υλικό ακόμα."
     },
+    "films": {
+      "empty": {
+        "heading": "Για τι είναι η ταινία σου;"
+      },
+      "notBuilt": "Δεν έχει χτιστεί ακόμα. Δεν χρεώθηκε τίποτα.",
+      "placeholder": "Περιγράψτε την ταινία, με τα λόγια σας…",
+      "workspaceTitle": "Παραγωγή ταινίας",
+      "stages": {
+        "script": "Σενάριο",
+        "characters": "Χαρακτήρες & τόποι",
+        "storyboard": "Εικονογραφημένο σενάριο",
+        "shooting": "Γύρισμα",
+        "edit": "Μοντάζ"
+      },
+      "stageStatus": {
+        "waiting": "Σε αναμονή",
+        "working": "Σε εξέλιξη",
+        "done": "Έτοιμο"
+      },
+      "credits": {
+        "label": "Credits",
+        "unknown": "υπολογίζεται μόλις υπάρχει σενάριο"
+      },
+      "charactersPlaces": {
+        "heading": "Χαρακτήρες & τόποι",
+        "addCharacter": "Προσθήκη χαρακτήρα",
+        "addPlace": "Προσθήκη τόπου",
+        "empty": "Δεν έχουν προστεθεί ακόμα."
+      },
+      "storyboard": {
+        "heading": "Εικονογραφημένο σενάριο",
+        "shot": "Πλάνο {n}",
+        "sampleCaption": "Παράδειγμα πλέγματος — τα πλάνα σου θα εμφανιστούν εδώ μόλις γραφτεί το σενάριο."
+      },
+      "panel": {
+        "cameraAngle": "Γωνία κάμερας",
+        "angleOptions": {
+          "wide": "Ευρεία",
+          "medium": "Μεσαία",
+          "closeUp": "Κοντινό",
+          "fromAbove": "Από πάνω",
+          "low": "Χαμηλή"
+        },
+        "light": "Φωτισμός",
+        "lightOptions": {
+          "day": "Ημέρα",
+          "goldenHour": "Χρυσή ώρα",
+          "night": "Νύχτα",
+          "warmInside": "Ζεστό εσωτερικό"
+        },
+        "cameraMove": "Κίνηση κάμερας",
+        "moveOptions": {
+          "still": "Ακίνητη",
+          "slowPush": "Αργή προσέγγιση",
+          "pan": "Πανοραμική",
+          "handheld": "Με το χέρι"
+        },
+        "continueFromPrevious": "Συνέχεια από το προηγούμενο πλάνο",
+        "reshoot": "Ξαναγύρισμα"
+      }
+    },
     "appBuilder": {
       "empty": {
         "heading": "Πες μου τι εφαρμογή χρειάζεται η δουλειά σου",

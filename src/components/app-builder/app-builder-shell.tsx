@@ -7,6 +7,8 @@ import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint } from "@/components/credits/cost-estimate";
 import { ToolShell, ChosenBox, OPTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
+import { MotionButton } from "@/components/shell/motion-button";
+import { PhoneFrame } from "@/components/app-builder/phone-frame";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
@@ -17,9 +19,13 @@ import {
   planInputChars,
   readDefinition,
   type AppBoxKind,
+  type AppCollection,
   type AppDefinition,
   type AppFieldType,
+  type AppScreen,
 } from "@/lib/apps/app-plan";
+
+type AppTab = "preview" | "data" | "plan";
 
 /**
  * THE APP BUILDER (the owner's "APPS: ΛΕΙΤΟΥΡΓΙΚΟ, ΚΟΜΜΑΤΙ ΚΟΜΜΑΤΙ",
@@ -56,6 +62,8 @@ export function AppBuilderShell({ initialApps, systemChars, initialText }: { ini
   const [openId, setOpenId] = useState<string | null>(null);
   const [pane, setPane] = useState<"app" | "recent" | null>(null);
   const [box, setBox] = useState<AppBoxKind | null>(null);
+  const [tab, setTab] = useState<AppTab>("preview");
+  const [selectedScreenKey, setSelectedScreenKey] = useState<string | null>(null);
   const [running, setRunning] = useState<null | "plan" | "box" | "approve">(null);
   const [turns, setTurns] = useState<{ id: string; role: "user" | "tool"; text: string; appId?: string }[]>([]);
   const [length, setLength] = useState(0);
@@ -81,10 +89,63 @@ export function AppBuilderShell({ initialApps, systemChars, initialText }: { ini
     phone: t("type.phone"),
     checkbox: t("type.checkbox"),
   };
+  const tabLabels: Record<AppTab, string> = {
+    preview: t("tabs.preview"),
+    data: t("tabs.data"),
+    plan: t("tabs.plan"),
+  };
 
   const open = apps.find((a) => a.id === openId) ?? null;
   const definition: AppDefinition | null = open ? readDefinition(open.definition) : null;
   const approved = open?.status === "approved";
+  const screens = definition?.screens ?? [];
+  const activeScreenKey = selectedScreenKey ?? screens[0]?.key ?? null;
+  const activeScreen = screens.find((s) => s.key === activeScreenKey) ?? null;
+  const activeCollection = activeScreen ? definition?.collections.find((c) => c.key === activeScreen.collection) ?? null : null;
+
+  function openApp(id: string) {
+    if (openId !== id) {
+      setTab("preview");
+      setSelectedScreenKey(null);
+    }
+    setOpenId(id);
+    setPane("app");
+  }
+
+  // THE MOCKUP: non-interactive field-look rows (never a real typable
+  // element — tool-shell's own hard "one field on the whole page" rule,
+  // scripts/tests/tool-shell.test.mjs) and, for a list, one row explicitly
+  // marked as a sample. No value here is invented; a field's own label is
+  // what every row shows, never a fabricated name or number.
+  function renderScreenMock(screen: AppScreen, collection: AppCollection) {
+    if (screen.kind === "form") {
+      return (
+        <div className="space-y-2" data-testid="app-mock-form">
+          {collection.fields.map((f) => (
+            <div key={f.key}>
+              <span className="mb-1 block text-xs text-muted">{f.label}</span>
+              <div className="input flex items-center text-muted" data-testid="app-mock-field">
+                {typeNames[f.type]}
+              </div>
+            </div>
+          ))}
+          <div className="btn-outline w-full justify-center font-semibold" data-testid="app-mock-submit">
+            {t("formSubmit")}
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-2" data-testid="app-mock-list">
+        <div className="row-list">
+          <div className="flex min-h-[44px] items-center px-3 py-2 text-xs text-muted" data-testid="app-mock-row">
+            {collection.fields.map((f) => f.label).join(" · ")}
+          </div>
+        </div>
+        <p className="text-xs text-muted">{t("sampleRow")}</p>
+      </div>
+    );
+  }
 
   // THE PRICE OF WHAT THE NEXT PRESS DOES, from what it will send — the
   // same two helpers the routes use to size their hold.
@@ -126,8 +187,7 @@ export function AppBuilderShell({ initialApps, systemChars, initialText }: { ini
       }
       const app = answer.app as AppRow;
       setApps((prev) => [app, ...prev.filter((a) => a.id !== app.id)]);
-      setOpenId(app.id);
-      setPane("app");
+      openApp(app.id);
       return { app, dropped: Array.isArray(answer.dropped) ? (answer.dropped as string[]) : [] };
     } catch {
       say({ role: "tool", text: controller.signal.aborted ? tSteps("stopped") : t("errors.failed") });
@@ -239,7 +299,7 @@ export function AppBuilderShell({ initialApps, systemChars, initialText }: { ini
                   <li key={a.id}>
                     <button
                       type="button"
-                      onClick={() => { setOpenId(a.id); setPane("app"); setBox(null); }}
+                      onClick={() => { openApp(a.id); setBox(null); }}
                       className="flex min-h-[44px] w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground"
                     >
                       <LayoutGrid className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
@@ -255,35 +315,136 @@ export function AppBuilderShell({ initialApps, systemChars, initialText }: { ini
             title: open.title,
             body: (
               <div className="flex h-full flex-col gap-3">
-                <p className="text-xs text-muted">{t("boxHint")}</p>
-                <ol className="space-y-2" data-testid="app-plan">
-                  {APP_BOX_KINDS.map((kind) => (
-                    <li key={kind}>
-                      <button
-                        type="button"
-                        data-testid="app-box"
-                        data-box={kind}
-                        aria-pressed={box === kind}
-                        onClick={() => chooseBox(kind)}
-                        className={`block min-h-[44px] w-full rounded-item px-3 py-2 text-start text-sm ${box === kind ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`}
-                      >
-                        <span className="block text-xs font-semibold text-foreground">{boxNames[kind]}</span>
-                        {boxBody[kind]}
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-                <div>
-                  {approved ? (
-                    <p className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-foreground" data-testid="app-approved">
-                      <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      {t("approvedNote")}
-                    </p>
-                  ) : (
-                    <button type="button" onClick={() => void approve()} disabled={running !== null} data-testid="app-approve" className="btn-outline font-semibold">
-                      {running === "approve" ? <ThinkingIndicator size="sm" /> : <Check className="h-4 w-4" aria-hidden="true" />}
-                      {t("approve")}
+                <div role="tablist" aria-label={open.title} className="tab-bar">
+                  {(["preview", "data", "plan"] as const).map((kind) => (
+                    <button
+                      key={kind}
+                      type="button"
+                      role="tab"
+                      aria-selected={tab === kind}
+                      data-testid="app-tab"
+                      data-tab={kind}
+                      onClick={() => setTab(kind)}
+                      className={`min-h-[44px] rounded-item px-3 text-sm font-medium transition-colors duration-150 ${
+                        tab === kind ? "bg-panel-hover text-foreground" : "text-muted hover:bg-panel-hover hover:text-foreground"
+                      }`}
+                    >
+                      {tabLabels[kind]}
                     </button>
+                  ))}
+                </div>
+
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  {tab === "preview" && (
+                    <div className="flex h-full flex-col gap-4 lg:flex-row">
+                      <div className="shrink-0 lg:w-48">
+                        <p className="mb-1.5 text-xs font-semibold text-foreground">{boxNames.screens}</p>
+                        {screens.length === 0 ? (
+                          <p className="text-xs text-muted">{t("noScreensYet")}</p>
+                        ) : (
+                          <ul className="row-list" data-testid="app-preview-screens">
+                            {screens.map((s) => (
+                              <li key={s.key}>
+                                <button
+                                  type="button"
+                                  data-testid="app-preview-screen"
+                                  data-screen={s.key}
+                                  aria-pressed={activeScreenKey === s.key}
+                                  onClick={() => setSelectedScreenKey(s.key)}
+                                  className={`flex min-h-[44px] w-full items-center px-3 py-2 text-start text-sm ${
+                                    activeScreenKey === s.key ? "bg-panel-hover text-foreground" : "text-muted hover:bg-panel-hover"
+                                  }`}
+                                >
+                                  {s.label}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div className="flex min-h-0 flex-1 flex-col items-center gap-2">
+                        <div className="flex w-full max-w-[320px] justify-end">
+                          <MotionButton />
+                        </div>
+                        <PhoneFrame>
+                          {activeScreen && activeCollection ? (
+                            <>
+                              <p className="mb-2 text-xs font-semibold text-foreground">{activeScreen.label}</p>
+                              {renderScreenMock(activeScreen, activeCollection)}
+                            </>
+                          ) : (
+                            <p className="text-xs text-muted">{t("noScreensYet")}</p>
+                          )}
+                        </PhoneFrame>
+                        <p className="max-w-[320px] text-center text-xs text-muted">{t("previewCaption")}</p>
+                      </div>
+
+                      <div className="shrink-0 lg:w-56">
+                        {activeCollection ? (
+                          <div className="space-y-3">
+                            <div>
+                              <p className="mb-1.5 text-xs font-semibold text-foreground">{boxNames.data}</p>
+                              <p className="text-xs text-muted">
+                                {activeCollection.fields.map((f) => `${f.label} (${typeNames[f.type]})`).join(" · ")}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="mb-1.5 text-xs font-semibold text-foreground">{boxNames.access}</p>
+                              <p className="text-xs text-muted">{activeCollection.visibility === "own" ? t("seesOwn") : t("seesOwner")}</p>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+
+                  {tab === "data" && (
+                    <ul className="space-y-3" data-testid="app-data-tab">
+                      {definition.collections.map((c) => (
+                        <li key={c.key} className="panel-frame p-3">
+                          <p className="text-sm font-semibold text-foreground">{c.label}</p>
+                          <p className="mt-0.5 text-xs text-muted">{c.fields.map((f) => `${f.label} (${typeNames[f.type]})`).join(" · ")}</p>
+                          <p className="mt-1 text-xs text-muted">{c.visibility === "own" ? t("seesOwn") : t("seesOwner")}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {tab === "plan" && (
+                    <div className="flex h-full flex-col gap-3">
+                      <p className="text-xs text-muted">{t("boxHint")}</p>
+                      <ol className="space-y-2" data-testid="app-plan">
+                        {APP_BOX_KINDS.map((kind) => (
+                          <li key={kind}>
+                            <button
+                              type="button"
+                              data-testid="app-box"
+                              data-box={kind}
+                              aria-pressed={box === kind}
+                              onClick={() => chooseBox(kind)}
+                              className={`block min-h-[44px] w-full rounded-item px-3 py-2 text-start text-sm ${box === kind ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`}
+                            >
+                              <span className="block text-xs font-semibold text-foreground">{boxNames[kind]}</span>
+                              {boxBody[kind]}
+                            </button>
+                          </li>
+                        ))}
+                      </ol>
+                      <div>
+                        {approved ? (
+                          <p className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-foreground" data-testid="app-approved">
+                            <Check className="h-4 w-4 shrink-0" aria-hidden="true" />
+                            {t("approvedNote")}
+                          </p>
+                        ) : (
+                          <button type="button" onClick={() => void approve()} disabled={running !== null} data-testid="app-approve" className="btn-outline font-semibold">
+                            {running === "approve" ? <ThinkingIndicator size="sm" /> : <Check className="h-4 w-4" aria-hidden="true" />}
+                            {t("approve")}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

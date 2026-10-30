@@ -3908,6 +3908,11 @@
       "recent": "最近のアプリ",
       "noneYet": "まだアプリはありません。",
       "boxHint": "枠を押して、そこで変えたいことを書いて。",
+      "tabs": {
+        "preview": "プレビュー",
+        "data": "データ",
+        "plan": "プラン"
+      },
       "box": {
         "data": "データ",
         "screens": "画面",
@@ -3932,6 +3937,10 @@
       "toCustomer": "お客さまへ",
       "toOwner": "あなたへ",
       "noNotifications": "何も送りません。",
+      "noScreensYet": "まだ画面はありません。",
+      "previewCaption": "プランのライブプレビューです — まだ動くアプリではありません。",
+      "formSubmit": "送信",
+      "sampleRow": "サンプルです — 公開されると実際の入力がここに表示されます。",
       "approve": "計画を承認する",
       "approved": "計画を承認しました。",
       "approvedNote": "承認済み",

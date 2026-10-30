@@ -705,6 +705,13 @@ const LOCALE_ALLOWED = new Set([
   "pt:coding.github.branchLabel",
   // «Structure» is the French word for the file-tree section heading.
   "fr:coding.github.structure",
+  // "Plan" is the everyday German, French and Spanish word for a
+  // blueprint too (Apps' new Preview/Data/Plan tabs, 2026-10-30) — ja/zh/ar
+  // do have their own translated word, so this is scoped to the three
+  // locales where it is a genuine loanword, not all ten.
+  "de:dashboard.appBuilder.tabs.plan",
+  "fr:dashboard.appBuilder.tabs.plan",
+  "es:dashboard.appBuilder.tabs.plan",
   // The small ready-made jobs (quick-jobs.ts, 2026-10-24): loanwords that
   // stay English in that one language's everyday tech/office vocabulary —
   // "Quiz", "CV", "Logo", "Poster", "Notes", "Voice-over", "Apps", "Audio"

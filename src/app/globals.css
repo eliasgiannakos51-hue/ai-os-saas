@@ -269,6 +269,32 @@ body {
     @apply flex shrink-0 items-center gap-2 border-b border-border bg-panel px-3 py-2;
   }
 
+  /* THE PHONE SILHOUETTE AROUND APPS' OWN LIVE PREVIEW (Apps "ΛΕΙΤΟΥΡΓΙΚΟ,
+     ΜΕ ΤΗ ΝΕΑ ΟΘΟΝΗ", Κομμάτι 3, 2026-10-30) — same reasoning as
+     .browser-frame just above: the border/rounded decision is made once
+     here, not once per screen the preview draws. Apps has no
+     desktop/mobile toggle the way Site does — every app it builds is
+     phone-shaped, so there is only the one frame. */
+  .phone-frame {
+    @apply mx-auto flex h-full max-h-[720px] w-full max-w-[320px] flex-col overflow-hidden rounded-card border border-border bg-paper;
+  }
+  .phone-frame-bar {
+    @apply flex shrink-0 items-center justify-center border-b border-border bg-panel px-3 py-2;
+  }
+  .phone-frame-notch {
+    @apply h-1.5 w-16 rounded-full bg-border;
+  }
+  .phone-frame-body {
+    @apply min-h-0 flex-1 overflow-y-auto p-3;
+  }
+
+  /* THE PREVIEW/DATA/PLAN TAB ROW, DECLARED ONCE (Apps Κομμάτι 2,
+     2026-10-30) — one border here, not one per tool that grows its own
+     tab row later (design-density.test.mjs's border-utility ceiling). */
+  .tab-bar {
+    @apply flex gap-1 border-b border-divider;
+  }
+
   /* MOTION STYLE PREVIEWS (Site "ΣΤΥΛ ΚΙΝΗΣΗΣ", Κομμάτι 1 — button and
      list only, per the owner's own stop-gate: no style here is applied to
      a real generated site yet, that is Κομμάτι 8). A tiny demo per named

@@ -3908,6 +3908,11 @@
       "recent": "Recent apps",
       "noneYet": "No app yet.",
       "boxHint": "Press a box and say what to change in it.",
+      "tabs": {
+        "preview": "Preview",
+        "data": "Data",
+        "plan": "Plan"
+      },
       "box": {
         "data": "Data",
         "screens": "Screens",
@@ -3932,6 +3937,10 @@
       "toCustomer": "to the customer",
       "toOwner": "to you",
       "noNotifications": "Nothing is sent.",
+      "noScreensYet": "No screen in the plan yet.",
+      "previewCaption": "Live preview of the plan — not a working app yet.",
+      "formSubmit": "Send",
+      "sampleRow": "Sample — real entries will show up here once this is live.",
       "approve": "Approve the plan",
       "approved": "The plan is approved.",
       "approvedNote": "Approved",

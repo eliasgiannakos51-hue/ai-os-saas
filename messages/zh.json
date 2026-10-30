@@ -3908,6 +3908,11 @@
       "recent": "最近的应用",
       "noneYet": "还没有应用。",
       "boxHint": "点一个方框，说说里面要改什么。",
+      "tabs": {
+        "preview": "预览",
+        "data": "数据",
+        "plan": "计划"
+      },
       "box": {
         "data": "数据",
         "screens": "界面",
@@ -3932,6 +3937,10 @@
       "toCustomer": "给客户",
       "toOwner": "给你",
       "noNotifications": "不发送任何内容。",
+      "noScreensYet": "计划中还没有屏幕。",
+      "previewCaption": "计划的实时预览——还不是一个能用的应用。",
+      "formSubmit": "发送",
+      "sampleRow": "示例——上线后真实的记录会显示在这里。",
       "approve": "批准这个方案",
       "approved": "方案已批准。",
       "approvedNote": "已批准",

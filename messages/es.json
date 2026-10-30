@@ -3908,6 +3908,11 @@
       "recent": "Apps recientes",
       "noneYet": "Todavía no hay ninguna app.",
       "boxHint": "Pulsa una caja y di qué cambiar en ella.",
+      "tabs": {
+        "preview": "Vista previa",
+        "data": "Datos",
+        "plan": "Plan"
+      },
       "box": {
         "data": "Datos",
         "screens": "Pantallas",
@@ -3932,6 +3937,10 @@
       "toCustomer": "al cliente",
       "toOwner": "a ti",
       "noNotifications": "No se envía nada.",
+      "noScreensYet": "Todavía no hay ninguna pantalla en el plan.",
+      "previewCaption": "Vista previa en vivo del plan — todavía no es una app que funcione.",
+      "formSubmit": "Enviar",
+      "sampleRow": "Ejemplo — las entradas reales aparecerán aquí en cuanto esto esté activo.",
       "approve": "Aprobar el plan",
       "approved": "El plan está aprobado.",
       "approvedNote": "Aprobado",

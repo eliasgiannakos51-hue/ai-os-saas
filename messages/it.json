@@ -3908,6 +3908,11 @@
       "recent": "App recenti",
       "noneYet": "Ancora nessuna app.",
       "boxHint": "Premi un riquadro e di' cosa cambiare lì dentro.",
+      "tabs": {
+        "preview": "Anteprima",
+        "data": "Dati",
+        "plan": "Piano"
+      },
       "box": {
         "data": "Dati",
         "screens": "Schermate",
@@ -3932,6 +3937,10 @@
       "toCustomer": "al cliente",
       "toOwner": "a te",
       "noNotifications": "Non viene inviato nulla.",
+      "noScreensYet": "Ancora nessuna schermata nel piano.",
+      "previewCaption": "Anteprima dal vivo del piano — non è ancora un'app funzionante.",
+      "formSubmit": "Invia",
+      "sampleRow": "Esempio — le voci reali appariranno qui una volta online.",
       "approve": "Approva il piano",
       "approved": "Il piano è approvato.",
       "approvedNote": "Approvato",

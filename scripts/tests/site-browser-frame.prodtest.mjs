@@ -166,12 +166,12 @@ try {
     await page.waitForTimeout(150);
 
     // ---- Motion: the button and the list only (owner's stop-gate)
-    const motionButton = page.locator('[data-testid="site-motion"]');
+    const motionButton = page.locator('[data-testid="motion-button"]');
     check("a Motion button sits on the same bar as the viewport toggle", (await motionButton.count()) === 1);
     await press(motionButton);
     await page.waitForTimeout(100);
     check("it opens, aria-expanded true", (await motionButton.getAttribute("aria-expanded")) === "true");
-    const choices = page.locator('[data-testid="site-motion-choice"]');
+    const choices = page.locator('[data-testid="motion-choice"]');
     check("eight styles are offered", (await choices.count()) === 8);
     const order = await choices.evaluateAll((els) => els.map((e) => e.getAttribute("data-motion-style")));
     check(
@@ -182,7 +182,7 @@ try {
     await shot("3-motion-list");
 
     // ---- hovering/focusing a choice drives the preview swatch, nothing else
-    const preview = page.locator('[data-testid="site-motion-preview"] .motion-demo');
+    const preview = page.locator('[data-testid="motion-preview"] .motion-demo');
     check("no style selected yet: the demo shows 'none'", (await preview.getAttribute("class"))?.includes("motion-demo-none"));
     const slideUp = choices.nth(2); // index 2 = slideUp, by DOM order already checked above
     if (device.touch) {

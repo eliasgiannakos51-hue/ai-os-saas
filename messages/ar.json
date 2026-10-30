@@ -1739,20 +1739,6 @@
       "viewportGroup": "عرض المعاينة",
       "viewportDesktop": "عرض سطح المكتب",
       "viewportMobile": "عرض الهاتف",
-      "motion": {
-        "button": "الحركة",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "بلا",
-          "softFade": "تلاشٍ ناعم",
-          "slideUp": "انزلاق للأعلى",
-          "parallax": "بارالاكس",
-          "glass": "زجاج",
-          "holographic": "هولوغرافي",
-          "typewriter": "آلة كاتبة",
-          "hoverLift": "رفع عند التمرير"
-        }
-      },
       "statusLabel": "الحالة",
       "statusCompleted": "جاهز",
       "statusFlagged": "مُعلَّم",
@@ -3296,6 +3282,20 @@
         "partChanged": "تغيّر «{name}» فقط. بقي باقي الموقع كما هو.",
         "lost": "لم يرجع المربّع من التغيير، لذلك لم يتغيّر شيء. حاول مرة أخرى.",
         "boxes": "المربّعات"
+      },
+      "motion": {
+        "button": "الحركة",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "بلا",
+          "softFade": "تلاشٍ ناعم",
+          "slideUp": "انزلاق للأعلى",
+          "parallax": "بارالاكس",
+          "glass": "زجاج",
+          "holographic": "هولوغرافي",
+          "typewriter": "آلة كاتبة",
+          "hoverLift": "رفع عند التمرير"
+        }
       },
       "pages": {
         "auto": "الصفحات: بقدر الحاجة",

@@ -1739,20 +1739,6 @@
       "viewportGroup": "Preview width",
       "viewportDesktop": "Desktop view",
       "viewportMobile": "Mobile view",
-      "motion": {
-        "button": "Motion",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "None",
-          "softFade": "Soft fade",
-          "slideUp": "Slide up",
-          "parallax": "Parallax",
-          "glass": "Glass",
-          "holographic": "Holographic",
-          "typewriter": "Typewriter",
-          "hoverLift": "Hover lift"
-        }
-      },
       "statusLabel": "Status",
       "statusCompleted": "Ready",
       "statusFlagged": "Flagged",
@@ -3296,6 +3282,20 @@
         "partChanged": "Only “{name}” changed. The rest of the site stayed the same.",
         "lost": "The box did not come back from the change, so nothing changed. Try again.",
         "boxes": "Boxes"
+      },
+      "motion": {
+        "button": "Motion",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "None",
+          "softFade": "Soft fade",
+          "slideUp": "Slide up",
+          "parallax": "Parallax",
+          "glass": "Glass",
+          "holographic": "Holographic",
+          "typewriter": "Typewriter",
+          "hoverLift": "Hover lift"
+        }
       },
       "pages": {
         "auto": "Pages: as many as needed",

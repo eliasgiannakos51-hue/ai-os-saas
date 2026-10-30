@@ -1739,20 +1739,6 @@
       "viewportGroup": "プレビュー幅",
       "viewportDesktop": "デスクトップ表示",
       "viewportMobile": "モバイル表示",
-      "motion": {
-        "button": "モーション",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "なし",
-          "softFade": "ソフトフェード",
-          "slideUp": "スライドアップ",
-          "parallax": "パララックス",
-          "glass": "ガラス",
-          "holographic": "ホログラフィック",
-          "typewriter": "タイプライター",
-          "hoverLift": "ホバーリフト"
-        }
-      },
       "statusLabel": "ステータス",
       "statusCompleted": "完成",
       "statusFlagged": "フラグ付き",
@@ -3296,6 +3282,20 @@
         "partChanged": "「{name}」だけが変わりました。サイトのほかの部分はそのままです。",
         "lost": "ボックスが変更から戻らなかったため、何も変わっていません。もう一度お試しください。",
         "boxes": "ボックス"
+      },
+      "motion": {
+        "button": "モーション",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "なし",
+          "softFade": "ソフトフェード",
+          "slideUp": "スライドアップ",
+          "parallax": "パララックス",
+          "glass": "ガラス",
+          "holographic": "ホログラフィック",
+          "typewriter": "タイプライター",
+          "hoverLift": "ホバーリフト"
+        }
       },
       "pages": {
         "auto": "ページ数：必要なだけ",

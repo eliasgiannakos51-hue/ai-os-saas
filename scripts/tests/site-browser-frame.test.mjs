@@ -32,9 +32,11 @@ function check(name, cond, detail) {
 
 const shell = readFileSync("src/components/website-builder/website-shell.tsx", "utf8");
 const frame = readFileSync("src/components/website-builder/browser-frame.tsx", "utf8");
+const motion = readFileSync("src/components/shell/motion-button.tsx", "utf8");
 const css = readFileSync("src/app/globals.css", "utf8");
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
 const wb = en.dashboard.websiteBuilder;
+const tShellMsgs = en.dashboard.toolShell;
 
 console.log("== 1. every existing feature is untouched (κρατάς κάθε λειτουργία) ==");
 check("generation still goes through startSiteGeneration", /startSiteGeneration/.test(shell));
@@ -70,27 +72,31 @@ console.log("\n== 4. BrowserFrame's chrome is declared once, not counted per use
 check("the component uses the shared .browser-frame class, no raw border utility", /className="browser-frame"/.test(frame) && !/className="[^"]*\bborder\b/.test(frame));
 check("that shared class is declared exactly once in globals.css", (css.match(/^\s*\.browser-frame\s*\{/gm) ?? []).length === 1);
 
-console.log("\n== 5. the Motion button and list — the owner's stop-gate ==");
-check("a Motion button exists, next to the viewport toggle in the same actions bar", /data-testid="site-viewport-mobile"[\s\S]{0,1200}data-testid="site-motion"/.test(shell));
-check("it opens a popover, not a new field", /aria-expanded=\{motionOpen\}/.test(shell));
+console.log("\n== 5. Motion is a SHARED component, not inline/copied code (Apps directive, 2026-10-30) ==");
+check("Site imports the shared MotionButton, does not re-declare it", /import \{ MotionButton \} from "@\/components\/shell\/motion-button"/.test(shell));
+check("...and renders it in the same actions bar as the viewport toggle", /data-testid="site-viewport-mobile"[\s\S]{0,1200}<MotionButton \/>/.test(shell));
+check("no Motion state/markup is left inline in website-shell.tsx (fully extracted)", !/motionOpen|motionPreview|MOTION_STYLES/.test(shell));
+
+console.log("\n== 6. the Motion button and list themselves — the owner's stop-gate, in the shared file ==");
+check("it opens a popover, not a new field", /aria-expanded=\{motionOpen\}/.test(motion));
 check(
   "all eight named styles are offered, in the owner's own order",
-  /MOTION_STYLES = \["none", "softFade", "slideUp", "parallax", "glass", "holographic", "typewriter", "hoverLift"\]/.test(shell)
+  /MOTION_STYLES = \["none", "softFade", "slideUp", "parallax", "glass", "holographic", "typewriter", "hoverLift"\]/.test(motion)
 );
-check("each choice is a button (menuitemradio), never a typable field", /role="menuitemradio"/.test(shell));
+check("each choice is a button (menuitemradio), never a typable field", /role="menuitemradio"/.test(motion));
 check(
-  "no second typable field was introduced anywhere in the file (tool-shell's own hard rule)",
-  !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(shell)
+  "no typable field anywhere in the shared component (tool-shell's own hard rule)",
+  !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(motion)
 );
-check("hovering or focusing a choice drives the small preview, nothing else", /onMouseEnter={\(\) => setMotionPreview\(style\)}/.test(shell) && /onFocus={\(\) => setMotionPreview\(style\)}/.test(shell));
+check("hovering or focusing a choice drives the small preview, nothing else", /onMouseEnter={\(\) => setMotionPreview\(style\)}/.test(motion) && /onFocus={\(\) => setMotionPreview\(style\)}/.test(motion));
 
-console.log("\n== 6. the negative space the stop-gate requires — NOT built yet ==");
-check("no whole-site-vs-section scope choice exists for motion", !/motionScope|motion.{0,20}(whole|section)/i.test(shell));
-check("no wording-based motion change ('βάλε πιο ήρεμη κίνηση') is wired", !/motion.{0,40}(wording|words|change\(|requestMotion)/i.test(shell));
+console.log("\n== 7. the negative space the stop-gate requires — NOT built yet ==");
+check("no whole-site-vs-section scope choice exists for motion", !/motionScope|motion.{0,20}(whole|section)/i.test(motion) && !/motionScope/i.test(shell));
+check("no wording-based motion change ('βάλε πιο ήρεμη κίνηση') is wired", !/motion.{0,40}(wording|words|change\(|requestMotion)/i.test(motion));
 check("no motion style is ever sent to a real site generation/change route", !/(requestSiteChange|startSiteGeneration)\([^)]*motion/i.test(shell));
-check("no motion value is persisted (no save/insert/update naming it)", !/\bmotion_style\b|\bmotionStyle\b.{0,30}(save|insert|update|persist)/i.test(shell));
+check("no motion value is persisted (no save/insert/update naming it)", !/\bmotion_style\b|\bmotionStyle\b.{0,30}(save|insert|update|persist)/i.test(motion));
 
-console.log("\n== 7. the preview swatches respect reduced motion, same as the real feature will have to (ΚΡΙΤΗΡΙΟ 8) ==");
+console.log("\n== 8. the preview swatches respect reduced motion, same as the real feature will have to (ΚΡΙΤΗΡΙΟ 8) ==");
 for (const style of ["softFade", "slideUp", "parallax", "glass", "holographic", "typewriter", "hoverLift"]) {
   check(
     `.motion-demo-${style} only animates under (prefers-reduced-motion: no-preference)`,
@@ -99,11 +105,12 @@ for (const style of ["softFade", "slideUp", "parallax", "glass", "holographic", 
 }
 check("'none' has no demo animation defined at all (nothing to disable)", !new RegExp("\\.motion-demo-none\\s*\\{[^}]*animation").test(css));
 
-console.log("\n== 8. every new string is translated, never hardcoded ==");
-check("viewport group/labels are translated keys", Boolean(wb.viewportGroup) && Boolean(wb.viewportDesktop) && Boolean(wb.viewportMobile));
-check("the Motion button label is a translated key", Boolean(wb.motion?.button));
-check("all eight style names are translated keys, same order as MOTION_STYLES", ["none", "softFade", "slideUp", "parallax", "glass", "holographic", "typewriter", "hoverLift"].every((k) => Boolean(wb.motion?.styles?.[k])));
-check("the hover-preview sample text is a translated key, not literal JSX text", /\{t\("motion\.previewSample"\)\}/.test(shell));
+console.log("\n== 9. every new string is translated, never hardcoded ==");
+check("viewport group/labels are translated keys (Site's own, not shared)", Boolean(wb.viewportGroup) && Boolean(wb.viewportDesktop) && Boolean(wb.viewportMobile));
+check("Motion's strings live under the SHARED toolShell namespace, not websiteBuilder (so Apps reads the same keys)", wb.motion === undefined);
+check("the Motion button label is a translated key", Boolean(tShellMsgs.motion?.button));
+check("all eight style names are translated keys, same order as MOTION_STYLES", ["none", "softFade", "slideUp", "parallax", "glass", "holographic", "typewriter", "hoverLift"].every((k) => Boolean(tShellMsgs.motion?.styles?.[k])));
+check("the hover-preview sample text is a translated key, not literal JSX text", /\{tShell\("motion\.previewSample"\)\}/.test(motion));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

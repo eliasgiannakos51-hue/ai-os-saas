@@ -1739,20 +1739,6 @@
       "viewportGroup": "Largura da pré-visualização",
       "viewportDesktop": "Vista de computador",
       "viewportMobile": "Vista de telemóvel",
-      "motion": {
-        "button": "Movimento",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "Nenhum",
-          "softFade": "Fade suave",
-          "slideUp": "Deslizar para cima",
-          "parallax": "Parallax",
-          "glass": "Vidro",
-          "holographic": "Holográfico",
-          "typewriter": "Máquina de escrever",
-          "hoverLift": "Elevação ao passar o cursor"
-        }
-      },
       "statusLabel": "Estado",
       "statusCompleted": "Pronto",
       "statusFlagged": "Sinalizado",
@@ -3296,6 +3282,20 @@
         "partChanged": "Só «{name}» mudou. O resto do site ficou igual.",
         "lost": "O bloco não voltou da alteração, por isso nada mudou. Tente de novo.",
         "boxes": "Blocos"
+      },
+      "motion": {
+        "button": "Movimento",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Nenhum",
+          "softFade": "Fade suave",
+          "slideUp": "Deslizar para cima",
+          "parallax": "Parallax",
+          "glass": "Vidro",
+          "holographic": "Holográfico",
+          "typewriter": "Máquina de escrever",
+          "hoverLift": "Elevação ao passar o cursor"
+        }
       },
       "pages": {
         "auto": "Páginas: as necessárias",

@@ -1739,20 +1739,6 @@
       "viewportGroup": "Largeur de l'aperçu",
       "viewportDesktop": "Vue bureau",
       "viewportMobile": "Vue mobile",
-      "motion": {
-        "button": "Mouvement",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "Aucun",
-          "softFade": "Fondu doux",
-          "slideUp": "Glissement vers le haut",
-          "parallax": "Parallax",
-          "glass": "Verre",
-          "holographic": "Holographique",
-          "typewriter": "Machine à écrire",
-          "hoverLift": "Soulèvement au survol"
-        }
-      },
       "statusLabel": "Statut",
       "statusCompleted": "Prêt",
       "statusFlagged": "Signalé",
@@ -3296,6 +3282,20 @@
         "partChanged": "Seul « {name} » a changé. Le reste du site est resté identique.",
         "lost": "Le bloc n’est pas revenu de la modification, donc rien n’a changé. Réessaie.",
         "boxes": "Blocs"
+      },
+      "motion": {
+        "button": "Mouvement",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Aucun",
+          "softFade": "Fondu doux",
+          "slideUp": "Glissement vers le haut",
+          "parallax": "Parallax",
+          "glass": "Verre",
+          "holographic": "Holographique",
+          "typewriter": "Machine à écrire",
+          "hoverLift": "Soulèvement au survol"
+        }
       },
       "pages": {
         "auto": "Pages : autant que nécessaire",

@@ -14,3 +14,7 @@
 
 /** One option under the field: a label that is pressed, or that opens a choice. */
 export const OPTION = "chip-link gap-1.5";
+
+/** A 44px icon action in the work area's top row. */
+export const ACTION =
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground";

@@ -1739,20 +1739,6 @@
       "viewportGroup": "预览宽度",
       "viewportDesktop": "桌面视图",
       "viewportMobile": "移动视图",
-      "motion": {
-        "button": "动效",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "无",
-          "softFade": "柔和淡入淡出",
-          "slideUp": "向上滑动",
-          "parallax": "视差",
-          "glass": "玻璃",
-          "holographic": "全息",
-          "typewriter": "打字机",
-          "hoverLift": "悬停上浮"
-        }
-      },
       "statusLabel": "状态",
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",
@@ -3296,6 +3282,20 @@
         "partChanged": "只改了“{name}”，网站其余部分保持不变。",
         "lost": "方框没有从修改中返回，所以什么都没改。请再试一次。",
         "boxes": "方框"
+      },
+      "motion": {
+        "button": "动效",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "无",
+          "softFade": "柔和淡入淡出",
+          "slideUp": "向上滑动",
+          "parallax": "视差",
+          "glass": "玻璃",
+          "holographic": "全息",
+          "typewriter": "打字机",
+          "hoverLift": "悬停上浮"
+        }
       },
       "pages": {
         "auto": "页面：按需要",

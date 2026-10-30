@@ -1739,20 +1739,6 @@
       "viewportGroup": "Vorschaubreite",
       "viewportDesktop": "Desktop-Ansicht",
       "viewportMobile": "Mobile Ansicht",
-      "motion": {
-        "button": "Bewegung",
-        "previewSample": "Aa",
-        "styles": {
-          "none": "Keine",
-          "softFade": "Sanftes Einblenden",
-          "slideUp": "Nach oben gleiten",
-          "parallax": "Parallax",
-          "glass": "Glas",
-          "holographic": "Holografisch",
-          "typewriter": "Schreibmaschine",
-          "hoverLift": "Hover-Anhebung"
-        }
-      },
       "statusLabel": "Status",
       "statusCompleted": "Fertig",
       "statusFlagged": "Markiert",
@@ -3296,6 +3282,20 @@
         "partChanged": "Nur „{name}“ wurde geändert. Der Rest der Website ist gleich geblieben.",
         "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
         "boxes": "Kästen"
+      },
+      "motion": {
+        "button": "Bewegung",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Keine",
+          "softFade": "Sanftes Einblenden",
+          "slideUp": "Nach oben gleiten",
+          "parallax": "Parallax",
+          "glass": "Glas",
+          "holographic": "Holografisch",
+          "typewriter": "Schreibmaschine",
+          "hoverLift": "Hover-Anhebung"
+        }
       },
       "pages": {
         "auto": "Seiten: so viele wie nötig",

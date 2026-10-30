@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { Earth } from "@/components/brand/earth";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ACTION, OPTION } from "@/components/shell/tool-shell-styles";
 
 /**
  * ONE SHELL FOR EVERY TOOL (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §5, «ΕΝΑ
@@ -274,12 +275,12 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
   );
 });
 
-/** A 44px icon action in the work area's top row. */
-export const ACTION =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground";
-
-/** One option under the field: a label that is pressed, or that opens a choice. */
-export { OPTION } from "./tool-shell-styles";
+/** A 44px icon action in the work area's top row; one option under the
+ *  field that is pressed, or that opens a choice — both pure style
+ *  tokens, kept in tool-shell-styles.ts for the same reason explained
+ *  there, imported above for this file's own use and re-exported here
+ *  so existing callers see no difference. */
+export { ACTION, OPTION };
 
 /**
  * ONE BOX CHOSEN (package 4): under the field, what the next change will

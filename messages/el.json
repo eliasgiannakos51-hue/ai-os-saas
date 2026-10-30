@@ -1739,20 +1739,6 @@
       "viewportGroup": "Πλάτος προεπισκόπησης",
       "viewportDesktop": "Προβολή υπολογιστή",
       "viewportMobile": "Προβολή κινητού",
-      "motion": {
-        "button": "Κίνηση",
-        "previewSample": "Αα",
-        "styles": {
-          "none": "Καμία",
-          "softFade": "Απαλό fade",
-          "slideUp": "Ολίσθηση πάνω",
-          "parallax": "Parallax",
-          "glass": "Γυαλί",
-          "holographic": "Ολογραφικό",
-          "typewriter": "Γραφομηχανή",
-          "hoverLift": "Ανύψωση στο πέρασμα"
-        }
-      },
       "statusLabel": "Κατάσταση",
       "statusCompleted": "Έτοιμο",
       "statusFlagged": "Επισημασμένο",
@@ -3296,6 +3282,20 @@
         "partChanged": "Άλλαξε μόνο το «{name}». Το υπόλοιπο site έμεινε ίδιο.",
         "lost": "Το κουτί δεν γύρισε από την αλλαγή, οπότε δεν άλλαξε τίποτα. Δοκίμασε ξανά.",
         "boxes": "Κουτιά"
+      },
+      "motion": {
+        "button": "Κίνηση",
+        "previewSample": "Αα",
+        "styles": {
+          "none": "Καμία",
+          "softFade": "Απαλό fade",
+          "slideUp": "Ολίσθηση πάνω",
+          "parallax": "Parallax",
+          "glass": "Γυαλί",
+          "holographic": "Ολογραφικό",
+          "typewriter": "Γραφομηχανή",
+          "hoverLift": "Ανύψωση στο πέρασμα"
+        }
       },
       "pages": {
         "auto": "Σελίδες: όσες χρειάζεται",

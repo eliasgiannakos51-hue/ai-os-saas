@@ -94,6 +94,14 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       // the content is not — which is the same distinction that gave it a
       // page instead of a tab.
       "aiMemory",
+      // The three worked examples every AI surface offers, and the one
+      // honest line under them. Already reachable from the dashboard
+      // through <ExamplePrompts> on six screens; added here when Agents
+      // moved into the tool shell (2026-10-31) and began drawing the same
+      // three strings as the shell landing's own examples, which is a
+      // direct useTranslations("aiExamples.agents") rather than a call
+      // inside the shared component.
+      "aiExamples",
       "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
       "finance", "language", "module",
@@ -150,7 +158,27 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // switches (tool-shell, image-studio, document-writer) stopped being
     // reachable from any page. The count fell because code stopped being
     // drawn, not because a reader was bounded; it is re-measured, not guessed.
-    unbounded: 69,
+    // SEVENTY on 2026-10-28 («1. MY STUFF: ΝΕΑ ΟΘΟΝΗ», Κομμάτι 1):
+    // my-stuff-shell.tsx and my-stuff-browse.tsx (the two SEVENTY/
+    // SEVENTY-ONE above) are both gone, replaced by three files that
+    // split their one job three ways and each still reaches `kinds.<kind>`
+    // the same unbounded way — my-stuff-list.tsx (the left column's rows),
+    // my-stuff-details.tsx (the right column) and my-stuff-workspace.tsx
+    // (the failed-kinds line and the history drawer's citation chips).
+    // Two files became three; the count moved by one, not two.
+    // SEVENTY-ONE, same day, Κομμάτι 3 (filters): my-stuff-filters.tsx is
+    // a fourth new file, and its chip() helper reaches `t(b)` with `b`
+    // the bucket literal (TOP_BUCKETS/MORE_BUCKETS.map) — the exact same
+    // computed-key shape the other three already have, for the bucket
+    // labels instead of a kind's.
+    // SEVENTY-TWO on 2026-10-28, «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 6
+    // ("κάτω πεδίο που φτιάχνει μέσα στο project"): the new
+    // project-flow-field.tsx calls `useTranslations()` with NO namespace
+    // (`tKey`, reused across this file the way project-detail.tsx's own
+    // already does) to reach `dashboard.createAnything.send` — one key
+    // from a namespace this component otherwise has no reason to declare,
+    // the same unbounded shape as every entry above it.
+    unbounded: 72,
   },
   {
     name: "onboarding",

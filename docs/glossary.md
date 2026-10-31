@@ -189,6 +189,7 @@ Removing one from the product is always allowed.
 | dashboard.websiteBuilder.design.photoSourceChoices.own | a choice the reader makes, in their words |
 | dashboard.onboarding.goals.startup | a choice the reader makes, in their words |
 | dashboard.onboarding.sourceManual | a choice the reader makes, in their words |
+| dashboard.integrations.telegram.consentApprove | a choice the reader makes, in their words |
 | settings.billing.cancel.reasons.not_using | a choice the reader makes, in their words |
 | sidebar.items.memory | "Search my records" — the approved nav name |
 | dashboard.memory.title | the page heading, which must match that nav row |
@@ -205,6 +206,8 @@ Removing one from the product is always allowed.
 | dashboard.comingSoon.examples.video.a | an example prompt the reader would type |
 | dashboard.comingSoon.examples.video.b | an example prompt the reader would type |
 | dashboard.comingSoon.examples.films.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.threeD.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.threeD.c | an example prompt the reader would type |
 | dashboard.comingSoon.examples.avatars.a | an example prompt the reader would type |
 | dashboard.comingSoon.examples.translate.b | an example prompt the reader would type |
 | dashboard.quickJobs.incomeExpenses.text | text prefilled into the reader's own input |
@@ -214,5 +217,7 @@ Removing one from the product is always allowed.
 | dashboard.quickJobs.siteAssistant.text | text prefilled into the reader's own input |
 | dashboard.quickJobs.inboxSummary.text | text prefilled into the reader's own input |
 | dashboard.quickJobs.myWeek.text | text prefilled into the reader's own input |
+| dashboard.appBuilder.empty.examples.a | an example prompt the reader would type |
+| dashboard.appBuilder.empty.examples.b | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

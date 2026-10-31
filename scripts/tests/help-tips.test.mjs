@@ -77,7 +77,19 @@ console.log("== 1. the registry describes real pages ==");
 // on purpose and mount the tip at a control of their own instead.
 check(
   `pages carrying a tip (${HELP_TIPS.length})`,
-  HELP_TIPS.length >= 31,
+  // 31 -> 47 on 2026-10-25, with iowork's. The floor had been left at the
+  // 2026-09 figure while sixteen pages gained a tip, so it had stopped
+  // being a ratchet and become a number no change could ever trip. Set to
+  // what the tree actually holds, which is the only value that makes the
+  // next removal visible.
+  // 47 -> 46 on 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 merged the two
+  // screens "projectDetail" and "projects" covered into one
+  // (projects-shell.tsx, list left/project right) — the same shape as
+  // the 71 -> 70 drop in deep-links.test.mjs when Files merged into
+  // Analyze, and for the same reason: one mount now, not two, so one
+  // registry entry, not two. This is the deliberate kind of fall, not
+  // an untracked one — the register still says why.
+  HELP_TIPS.length >= 46,
   `${HELP_TIPS.length} — this floor rises with each page that gains one, and never falls`,
 );
 // EVERY PAGE WITH A HEADER, or a written reason why not. The floor above
@@ -107,7 +119,17 @@ const covered = new Set(HELP_TIPS.flatMap((t) => [t.file, ...(t.alsoIn ?? [])]))
 // page carries a tip" over an empty list.
 check(
   `the scan found the dashboard pages (${dashboardPages.length} files, ${withHeader.length} with a header)`,
-  dashboardPages.length >= 38 && withHeader.length >= 28,
+  // 38/28 -> 61/40 on 2026-10-25, the same correction as the floor above
+  // and for the same reason: both had been left behind by a year of new
+  // pages, so neither could catch a page or a header disappearing.
+  // 61/40 -> 61/38 on 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 removed
+  // <PageHeader> from BOTH src/app/dashboard/projects/page.tsx (its own
+  // title moved into projects-shell.tsx, which draws it directly — the
+  // same shape My Stuff's Κομμάτι 1 already made for that page) and
+  // src/app/dashboard/projects/[id]/page.tsx (now a bare redirect, no
+  // JSX at all). The page count is unmoved — neither file was added or
+  // removed, only what they render.
+  dashboardPages.length >= 61 && withHeader.length >= 38,
   `${dashboardPages.length} pages / ${withHeader.length} headers — both floors rise, neither falls`,
 );
 checkList(
@@ -140,7 +162,26 @@ const NO_HEADER_EXEMPT = new Map([
     "src/app/dashboard/memory/page.tsx",
     "not a page: a permanentRedirect to /dashboard/search, kept so a bookmark to the record search's old address does not 404. A header on it would render for nobody",
   ],
-  ...["app-builder", "audio", "avatars", "editing", "films", "iowork", "translate", "video-studio"].map((slug) => [
+  [
+    "src/app/dashboard/projects/[id]/page.tsx",
+    "not a page: a redirect into /dashboard/projects?id=, which both the list and the per-project detail merged into on 2026-10-28 (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1); the tip that page carried now belongs to the merged \"projects\" entry, so a header here would render for nobody",
+  ],
+  // app-builder left this list on 2026-10-24: the App builder is being
+  // built behind the switch "apps-tool", the page renders a real
+  // PageHeader on its upgrade wall, and help.apps now says what the tool
+  // does and — the part that matters — that it never takes a payment.
+  // iowork left this list on 2026-10-25: Φάση 1 κομμάτι 2 gave the page a
+  // real PageHeader over the account's side of pairing — connect a
+  // computer, see what is connected, disconnect one — behind the switch
+  // "iowork-tool". help.iowork carries the part that matters most on this
+  // page of all of them: that it reaches only folders the person picks,
+  // and never passwords or keys.
+  // 3d joined this list on 2026-10-31 (the owner's "23. 3D: ΝΕΟ
+  // ΕΡΓΑΛΕΙΟ"), for the same reason as the rest of it: the screen is
+  // built behind the switch "3d-tool", so everyone the switch is not
+  // open to gets the Coming Soon shell, which has nothing for a tip to
+  // explain yet.
+  ...["audio", "avatars", "3d", "editing", "films", "translate", "video-studio"].map((slug) => [
     `src/app/dashboard/${slug}/page.tsx`,
     "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",
   ]),

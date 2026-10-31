@@ -64,6 +64,26 @@ const TRANSCRIPT =
   "Η Νεφέλη αναλαμβάνει να ετοιμάσει τα οικονομικά για τον Μάρτιο. " +
   "Συζητήσαμε επίσης το ενδεχόμενο να αλλάξουμε προμηθευτή, αλλά δεν αποφασίστηκε τίποτα.";
 
+// MEETINGS Κομμάτι 3: SPEAKERS, IN GREEK. The same three sentences as
+// TRANSCRIPT, split into diarized turns — "A" speaks the first and
+// third (NOT adjacent, so they must NOT merge into one line; only
+// adjacent turns from the same speaker do), "B" the second. Lets §1
+// below prove the real parsing path (gpt-4o-transcribe-diarize's own
+// response shape, segments with no top-level `text`) rather than only
+// the plain-text fallback every other check in this file already uses.
+const DIARIZED_SEGMENTS = [
+  { speaker: "A", start: 0, end: 8, text: "Λοιπόν, ξεκινάμε. Ο Γιώργος θα στείλει την προσφορά στον πελάτη μέχρι την Παρασκευή." },
+  { speaker: "B", start: 8, end: 14, text: "Η Νεφέλη αναλαμβάνει να ετοιμάσει τα οικονομικά για τον Μάρτιο." },
+  { speaker: "A", start: 14, end: 20, text: "Συζητήσαμε επίσης το ενδεχόμενο να αλλάξουμε προμηθευτή, αλλά δεν αποφασίστηκε τίποτα." },
+];
+// Derived from DIARIZED_SEGMENTS above, not retyped — one source of
+// truth for what formatDiarizedTranscript() must produce from it.
+const EXPECTED_DIARIZED_TRANSCRIPT = [
+  `Ομιλητής A: ${DIARIZED_SEGMENTS[0].text}`,
+  `Ομιλητής B: ${DIARIZED_SEGMENTS[1].text}`,
+  `Ομιλητής A: ${DIARIZED_SEGMENTS[2].text}`,
+].join("\n");
+
 const ANALYSIS = {
   summary:
     "Συζητήθηκε η προσφορά προς τον πελάτη και τα οικονομικά του Μαρτίου. " +
@@ -78,7 +98,13 @@ const ANALYSIS = {
 // --- the stand-in database, and it REMEMBERS -------------------------
 const meetings = new Map();
 const meetingActions = [];
+const meetingQuestions = [];
 const seen = { reserve: 0, settle: 0, release: 0, consumeSeconds: 0 };
+
+// Κομμάτι 6, the fixed answer the stand-in model gives to a question
+// about the meeting — real Greek text, standing in for whatever the real
+// provider would say about this transcript.
+const ASK_ANSWER = "Ο Γιώργος θα στείλει την προσφορά στον πελάτη μέχρι την Παρασκευή.";
 
 const supa = http.createServer((req, res) => {
   let body = "";
@@ -145,6 +171,16 @@ const supa = http.createServer((req, res) => {
           meetingActions.push(...rows);
           return json(201, single ? rows[0] : rows);
         }
+        if (table === "meeting_questions") {
+          const row = {
+            id: `q-${meetingQuestions.length + 1}`,
+            created_at: "2026-09-23T10:06:00Z",
+            answer: null,
+            ...parsed,
+          };
+          meetingQuestions.push(row);
+          return json(201, single ? row : [row]);
+        }
         return json(201, single ? {} : []);
       }
 
@@ -155,6 +191,17 @@ const supa = http.createServer((req, res) => {
           const id = (url.searchParams.get("id") ?? "").replace(/^eq\./, "");
           const row = { ...(meetings.get(id) ?? {}), ...parsed };
           meetings.set(id, row);
+          return json(200, single ? row : [row]);
+        }
+        if (table === "meeting_actions") {
+          // Only `id` is honoured here — the ownership/meeting-scoping
+          // filters the real route also sends are exercised structurally
+          // by meetings.test.mjs, not by this single-user fixture.
+          const id = (url.searchParams.get("id") ?? "").replace(/^eq\./, "");
+          const idx = meetingActions.findIndex((a) => a.id === id);
+          if (idx < 0) return json(200, single ? null : []);
+          meetingActions[idx] = { ...meetingActions[idx], ...parsed };
+          const row = meetingActions[idx];
           return json(200, single ? row : [row]);
         }
         return json(200, single ? {} : []);
@@ -190,7 +237,7 @@ const supa = http.createServer((req, res) => {
   });
 });
 
-// --- the stand-in Whisper --------------------------------------------
+// --- the stand-in Whisper (and gpt-4o-transcribe-diarize) ------------
 let whisperCalls = 0;
 let lastWhisperForm = "";
 const openai = http.createServer((req, res) => {
@@ -200,8 +247,29 @@ const openai = http.createServer((req, res) => {
     whisperCalls++;
     lastWhisperForm = body;
     res.writeHead(200, { "Content-Type": "application/json" });
-    // verbose_json, which is what the route asks for — and `language`
-    // is the whole reason it does.
+    // THE REAL REQUEST SHAPE, READ FROM THE MULTIPART BODY ITSELF, not
+    // assumed: transcribeAudio's `diarize: true` path asks for a
+    // DIFFERENT model and response_format than Chat's own mic ever
+    // sends, and this is the one place a wrong parameter name on
+    // either side of that call would go unnoticed otherwise.
+    if (/name="model"\r\n\r\ngpt-4o-transcribe-diarize/.test(body)) {
+      check(
+        "the diarized request asks for diarized_json, not verbose_json",
+        /name="response_format"\r\n\r\ndiarized_json/.test(body),
+        body.slice(0, 2000)
+      );
+      check(
+        "...and declares a chunking_strategy, required past 30 seconds",
+        /name="chunking_strategy"\r\n\r\nauto/.test(body)
+      );
+      // NO TOP-LEVEL `text` — gpt-4o-transcribe-diarize's own docs make
+      // no promise that one comes back, and the route has to cope with
+      // that by joining the segments itself.
+      res.end(JSON.stringify({ segments: DIARIZED_SEGMENTS, language: "greek", duration: 120 }));
+      return;
+    }
+    // verbose_json, which is what Chat's own mic asks for — and
+    // `language` is the whole reason it does.
     res.end(JSON.stringify({ text: TRANSCRIPT, language: "greek", duration: 120 }));
   });
 });
@@ -209,7 +277,11 @@ const openai = http.createServer((req, res) => {
 // --- the stand-in Anthropic ------------------------------------------
 let anthropicCalls = 0;
 let lastSystemPrompt = "";
-let anthropicReply = () => JSON.stringify(ANALYSIS);
+// DEFAULT: the analyse call's own JSON shape, UNLESS the system prompt is
+// the ask route's own (Κομμάτι 6) — set AFTER lastSystemPrompt below, so
+// this reads the request that is actually in flight, not the previous one.
+let anthropicReply = () =>
+  lastSystemPrompt.includes("You answer a question about ONE meeting") ? ASK_ANSWER : JSON.stringify(ANALYSIS);
 const anthropic = http.createServer((req, res) => {
   let body = "";
   req.on("data", (c) => (body += c));
@@ -335,6 +407,13 @@ const post = (path, init = {}) =>
     headers: { Cookie: COOKIE, ...(init.headers ?? {}) },
   });
 
+const patch = (path, init = {}) =>
+  fetch(`${origin}${path}`, {
+    method: "PATCH",
+    ...init,
+    headers: { Cookie: COOKIE, ...(init.headers ?? {}) },
+  });
+
 /** A believable small audio upload. The route checks the MIME type and
  *  the size, never the bytes — Whisper is the thing that reads those,
  *  and it is standing in. */
@@ -351,7 +430,32 @@ try {
   const res1 = await post("/api/meetings/transcribe", { body: form });
   const data1 = await res1.json();
   check(`the upload is accepted (HTTP ${res1.status})`, res1.ok && data1.ok === true, JSON.stringify(data1).slice(0, 400));
-  check("the transcript comes back", data1.transcript === TRANSCRIPT, String(data1.transcript).slice(0, 120));
+  check(
+    "the transcript comes back WITH SPEAKERS, in Greek",
+    data1.transcript === EXPECTED_DIARIZED_TRANSCRIPT,
+    String(data1.transcript).slice(0, 300)
+  );
+  check(
+    "...three lines, not two — two turns from the SAME speaker across a different speaker's turn stay separate",
+    data1.transcript.split("\n").length === 3,
+    data1.transcript
+  );
+  check(
+    "...and it is what was actually stored, not just what this response says",
+    data1.meeting?.transcript === EXPECTED_DIARIZED_TRANSCRIPT
+  );
+  // Κομμάτι 5: the per-line seek times, one per rendered line, each at
+  // the FIRST original segment's own start — never persisted (the row
+  // above only ever carries the plain transcript text).
+  check(
+    "the per-line seek times come back too, one per rendered line, each at its own segment's start",
+    Array.isArray(data1.lines) &&
+      data1.lines.length === 3 &&
+      data1.lines[0].start === DIARIZED_SEGMENTS[0].start &&
+      data1.lines[1].start === DIARIZED_SEGMENTS[1].start &&
+      data1.lines[2].start === DIARIZED_SEGMENTS[2].start,
+    JSON.stringify(data1.lines)
+  );
   check("...and it was saved", data1.saved === true && Boolean(data1.meeting?.id));
   check("Whisper was called exactly once", whisperCalls === 1, String(whisperCalls));
   check("the minutes were consumed", seen.consumeSeconds === 1, String(seen.consumeSeconds));
@@ -459,7 +563,89 @@ try {
   check("pressing Keep twice does not duplicate", meetingActions.length === before, `${before} -> ${meetingActions.length}`);
 
   // -------------------------------------------------------------------
-  console.log("\n== 4. a refusal is a code the screen can render ==");
+  console.log("\n== 4. Remind me (Κομμάτι 4) ==");
+  // -------------------------------------------------------------------
+  const keptForReminder = meetingActions[0]; // Γιώργος's kept action, from §3
+  const future = new Date(Date.now() + 2 * 86_400_000).toISOString();
+  const res4a = await patch(`/api/meetings/${meetingId}/actions/${keptForReminder.id}/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: future }),
+  });
+  const data4a = await res4a.json();
+  check(`setting a reminder succeeds (HTTP ${res4a.status})`, res4a.ok && data4a.ok === true, JSON.stringify(data4a).slice(0, 300));
+  check("the reminder is stored on the action", meetingActions[0].remind_at === future, String(meetingActions[0].remind_at));
+  check("...and reminded_at starts out unset", meetingActions[0].reminded_at === null, String(meetingActions[0].reminded_at));
+
+  const res4b = await patch(`/api/meetings/${meetingId}/actions/${keptForReminder.id}/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: "yesterday" }),
+  });
+  check(`a reminder in the past is refused (HTTP ${res4b.status})`, res4b.status === 400, String(res4b.status));
+  check("...with the code the screen knows", (await res4b.json())?.code === "bad_reminder");
+  check("...and the stored reminder is untouched by the refused attempt", meetingActions[0].remind_at === future);
+
+  const res4c = await patch(`/api/meetings/${meetingId}/actions/${keptForReminder.id}/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: null }),
+  });
+  const data4c = await res4c.json();
+  check("cancelling clears the reminder", data4c.action.remind_at === null && meetingActions[0].remind_at === null);
+
+  const res4d = await patch(`/api/meetings/${meetingId}/actions/does-not-exist/remind`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ remindAt: future }),
+  });
+  check(`an action that is not there is a 404 (HTTP ${res4d.status})`, res4d.status === 404, String(res4d.status));
+
+  // -------------------------------------------------------------------
+  console.log("\n== 4a. ask about this meeting, from a field (Κομμάτι 6) ==");
+  // -------------------------------------------------------------------
+  const callsBeforeAsk = anthropicCalls;
+  const reserveBeforeAsk = seen.reserve;
+  const settleBeforeAsk = seen.settle;
+  const res11 = await post(`/api/meetings/${meetingId}/ask`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Ποιος θα στείλει την προσφορά;" }),
+  });
+  const data11 = await res11.json();
+  check(`a question about the meeting is answered (HTTP ${res11.status})`, res11.ok && data11.ok === true, JSON.stringify(data11).slice(0, 300));
+  check("the answer is the model's real reply, read as plain text — not JSON-parsed", data11.answer === ASK_ANSWER, String(data11.answer));
+  check("exactly one model call was made for it", anthropicCalls === callsBeforeAsk + 1, String(anthropicCalls));
+  check("credits were reserved and settled for it", seen.reserve === reserveBeforeAsk + 1 && seen.settle === settleBeforeAsk + 1, JSON.stringify(seen));
+  check("a usage receipt came back", typeof data11.usage === "object" && data11.usage !== null, JSON.stringify(data11.usage));
+  check(
+    "the question and its answer were written to meeting_questions, through the service role",
+    meetingQuestions.length === 1 && meetingQuestions[0].question === "Ποιος θα στείλει την προσφορά;" && meetingQuestions[0].answer === ASK_ANSWER,
+    JSON.stringify(meetingQuestions)
+  );
+  check("...scoped to the right meeting and the signed-in user", meetingQuestions[0].meeting_id === meetingId && meetingQuestions[0].user_id === USER_ID);
+
+  const res12 = await post(`/api/meetings/${meetingId}/ask`, {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "   " }),
+  });
+  check(`a blank question is refused (HTTP ${res12.status})`, res12.status === 400, String(res12.status));
+  check("...with the code the screen knows", (await res12.json())?.error === "empty");
+  check("...and nothing new was written for it", meetingQuestions.length === 1, String(meetingQuestions.length));
+
+  // A meeting with nothing worth answering from — placed directly in the
+  // store, the same shape a real row with a near-silent recording has.
+  meetings.set("short-1", { id: "short-1", user_id: USER_ID, transcript: "Ναι.", summary: null, proposed_actions: [], created_at: "2026-09-23T10:00:00Z" });
+  const res13 = await post("/api/meetings/short-1/ask", {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Τι αποφασίστηκε;" }),
+  });
+  check(`a transcript too short to answer from is refused (HTTP ${res13.status})`, res13.status === 422, String(res13.status));
+  check("...with the SAME code the analyse route uses for the same reason", (await res13.json())?.error === "too_short");
+
+  const res14 = await post("/api/meetings/does-not-exist/ask", {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: "Τι αποφασίστηκε;" }),
+  });
+  check(`a meeting that is not there is a 404 (HTTP ${res14.status})`, res14.status === 404, String(res14.status));
+
+  // -------------------------------------------------------------------
+  console.log("\n== 5. a refusal is a code the screen can render ==");
   // -------------------------------------------------------------------
   const tooBig = new FormData();
   tooBig.append("audio", audioBlob(5 * 1024 * 1024), "long.m4a");
@@ -479,7 +665,7 @@ try {
   check("...with the code the screen knows", (await res6.json())?.code === "unsupported_type");
 
   // -------------------------------------------------------------------
-  console.log("\n== 5. an unusable model reply is reported, not absorbed ==");
+  console.log("\n== 6. an unusable model reply is reported, not absorbed ==");
   // -------------------------------------------------------------------
   const form2 = new FormData();
   form2.append("audio", audioBlob(), "second.m4a");
@@ -506,7 +692,7 @@ try {
   check("...and it settled rather than released", seen.release === 0, JSON.stringify(seen));
 
   // -------------------------------------------------------------------
-  console.log("\n== 6. the way out removes the words too ==");
+  console.log("\n== 7. the way out removes the words too ==");
   // -------------------------------------------------------------------
   const res9 = await fetch(`${origin}/api/meetings/${meetingId}`, {
     method: "DELETE",

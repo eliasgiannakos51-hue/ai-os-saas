@@ -29,6 +29,16 @@ export const IMAGE_URL_TTL_SECONDS = 60 * 60;
 export const IMAGE_ASPECTS = ["1:1", "4:5", "16:9", "9:16"] as const;
 export type ImageAspect = (typeof IMAGE_ASPECTS)[number];
 
+/**
+ * "Same product" (owner, 2026-10-30, Κομμάτι 2 of "16. IMAGE: ΛΕΙΤΟΥΡΓΙΚΟ,
+ * ΜΕ ΤΗ ΝΕΑ ΟΘΟΝΗ ΚΑΙ ΤΑ ΝΕΑ ΚΟΥΜΠΙΑ"): up to four reference images of
+ * the same product or imagined character, kept consistent across many
+ * pictures. The owner's own stop-gate covers only the screen this round
+ * (components/images/image-shell.tsx) — the pictures chosen here are not
+ * sent to a provider yet; that wiring is Κομμάτι 6.
+ */
+export const MAX_SAME_PRODUCT_IMAGES = 4;
+
 export function readAspect(value: unknown): ImageAspect {
   return (IMAGE_ASPECTS as readonly unknown[]).includes(value) ? (value as ImageAspect) : IMAGE_ASPECTS[0];
 }

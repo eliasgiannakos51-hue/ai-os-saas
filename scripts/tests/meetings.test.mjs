@@ -52,9 +52,15 @@ const check = (name, cond, detail) => {
 };
 
 const MIGRATION = "supabase/migrations/20261006000000_meetings.sql";
+const QUESTIONS_MIGRATION = "supabase/migrations/20261104000000_meeting_questions.sql";
 const TRANSCRIBE = "src/app/api/meetings/transcribe/route.ts";
 const ANALYSE = "src/app/api/meetings/[id]/analyse/route.ts";
 const ACTIONS = "src/app/api/meetings/[id]/actions/route.ts";
+const REMIND = "src/app/api/meetings/[id]/actions/[actionId]/remind/route.ts";
+const REMIND_CRON = "src/app/api/cron/meeting-action-reminders/route.ts";
+const ASK = "src/app/api/meetings/[id]/ask/route.ts";
+const ASK_LIB = "src/lib/meetings/meeting-ask.ts";
+const ASK_CALL = "src/lib/meetings/meeting-ask-call.ts";
 const WORKSPACE = "src/components/meetings/meetings-workspace.tsx";
 const PAGE = "src/app/dashboard/meetings/page.tsx";
 const LIMITS = "src/lib/meetings/meeting-limits.ts";
@@ -290,7 +296,300 @@ console.log("\n== 6. the parser turns a bad reply into nothing, never a guess ==
 }
 
 // ---------------------------------------------------------------------
-console.log("\n== 7. what this file does NOT prove ==");
+console.log("\n== 7. speakers, in Greek (Κομμάτι 3) ==");
+// ---------------------------------------------------------------------
+{
+  const an = await loadTs(ANALYSIS);
+  const greekTurns = [
+    { speaker: "A", start: 0, end: 2, text: "Καλημέρα σε όλους," },
+    { speaker: "A", start: 2, end: 4, text: "ας ξεκινήσουμε." },
+    { speaker: "B", start: 4, end: 6, text: "Συμφωνώ, πάμε." },
+  ];
+  const greekOut = an.formatDiarizedTranscript(greekTurns, "el");
+  check(
+    "consecutive turns from the SAME speaker merge into one line",
+    greekOut.split("\n").length === 2,
+    greekOut
+  );
+  check(
+    "a Greek meeting gets the Greek word for speaker, not an English one",
+    greekOut.includes("Ομιλητής A:") && greekOut.includes("Ομιλητής B:"),
+    greekOut
+  );
+  check(
+    "the merged line keeps both of the first speaker's sentences",
+    greekOut.includes("Καλημέρα σε όλους, ας ξεκινήσουμε.")
+  );
+
+  const otherOut = an.formatDiarizedTranscript(
+    [{ speaker: "X", start: 0, end: 1, text: "Hello." }],
+    "en"
+  );
+  check(
+    "a non-Greek meeting gets the bare letter, never a guessed English word",
+    otherOut === "A: Hello.",
+    otherOut
+  );
+  check("...same for a null language", an.formatDiarizedTranscript([{ speaker: "X", start: 0, end: 1, text: "Hi." }], null) === "A: Hi.");
+
+  const stable = an.formatDiarizedTranscript(
+    [
+      { speaker: "spk_2", start: 0, end: 1, text: "First." },
+      { speaker: "spk_9", start: 1, end: 2, text: "Second." },
+      { speaker: "spk_2", start: 2, end: 3, text: "Third." },
+    ],
+    null
+  );
+  check(
+    "letters are assigned by first-appearance order, never trusting the provider's own raw label",
+    stable === "A: First.\nB: Second.\nA: Third.",
+    stable
+  );
+
+  check(
+    "a segment with no text (silence inside a speaker turn) contributes nothing",
+    an.formatDiarizedTranscript([{ speaker: "A", start: 0, end: 1, text: "   " }], "el") === ""
+  );
+  check("no segments at all is an empty string, not a crash", an.formatDiarizedTranscript([], "el") === "");
+
+  // THE ROUTE ITSELF: diarize:true reaches the provider, and the TITLE
+  // is taken from the plain text, never the speaker-labelled one — a
+  // title starting "A: " would be the artifact leaking through.
+  const t = code(TRANSCRIBE);
+  check(
+    "the transcribe route asks for diarization",
+    /diarize\s*:\s*true/.test(t),
+    "Κομμάτι 3 without this is Κομμάτι 1's whisper-1 call again"
+  );
+  check(
+    "the stored/shown transcript comes from formatDiarizedTranscript, not the raw provider text",
+    /transcript:\s*transcriptText/.test(t)
+  );
+  check(
+    "the TITLE is still derived from the plain text, so it can never start with a speaker label",
+    /titleFromTranscript\(result\.text,/.test(t)
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 8. Remind me (Κομμάτι 4) ==");
+// ---------------------------------------------------------------------
+{
+  const remind = code(REMIND);
+  check(
+    "the reminder is validated by Sales' own readReminder, not a second copy of the rule",
+    /import\s*\{\s*readReminder\s*\}\s*from\s*"@\/lib\/sales\/stages"/.test(remind)
+  );
+  check(
+    "setting a new remind_at clears reminded_at, so the new pick is the one that fires",
+    /remind_at:\s*reminder\.at,\s*reminded_at:\s*null/.test(remind)
+  );
+  check(
+    "the update is scoped to the caller's own id AND their action",
+    /\.eq\("id",\s*params\.actionId\)/.test(remind) && /\.eq\("user_id",\s*user\.id\)/.test(remind)
+  );
+  check(
+    "a bad reminder is refused with its own code, not silently dropped",
+    /code:\s*"bad_reminder"/.test(remind)
+  );
+  check(
+    "due_date is never written here — that is the MEETING's own parsed date, a different column entirely",
+    !/due_date/.test(remind)
+  );
+
+  const cron = code(REMIND_CRON);
+  check("the cron reads meeting_actions, not leads — this is a different table with the same shape", /from\("meeting_actions"\)/.test(cron));
+  check(
+    "a row is claimed (reminded_at set) BEFORE the push is sent, so a crash leaves it unsent rather than resent",
+    (() => {
+      const claim = cron.indexOf('.update({ reminded_at: now })');
+      const push = cron.indexOf("sendPushToUser(");
+      return claim >= 0 && push > claim;
+    })()
+  );
+  check("it reuses the SAME push channel Sales' own reminder uses, not a new one", /sendPushToUser\([\s\S]{0,80}"mission_reminders"/.test(cron));
+  check("the bell notification is written too, not push alone", /createNotification\(/.test(cron));
+  check("a row already claimed by a concurrent run is skipped, not pushed to twice", /if\s*\(!claimed\)\s*continue;/.test(cron));
+
+  check("the cron is scheduled in vercel.json", JSON.parse(read("vercel.json")).crons.some((c) => c.path === "/api/cron/meeting-action-reminders"));
+
+  const workspace = code(WORKSPACE);
+  check(
+    "the screen calls the nested per-action remind route, not the bare actions route",
+    /\/api\/meetings\/\$\{action\.meeting_id\}\/actions\/\$\{action\.id\}\/remind/.test(workspace)
+  );
+  check(
+    "cancelling a reminder sends null, which the route reads as 'no reminder', not a sentinel string",
+    /remindAt:\s*null/.test(workspace)
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 9. click a transcript line, the audio seeks (Κομμάτι 5) ==");
+// ---------------------------------------------------------------------
+{
+  const an = await loadTs(ANALYSIS);
+  const turns = [
+    { speaker: "A", start: 0, end: 2, text: "Πρώτη πρόταση." },
+    { speaker: "A", start: 2, end: 4, text: "Δεύτερη πρόταση." },
+    { speaker: "B", start: 4, end: 7, text: "Απάντηση." },
+    { speaker: "A", start: 7, end: 9, text: "Ξανά ο πρώτος." },
+  ];
+  const lines = an.diarizedTranscriptLines(turns, "el");
+  check("three merged lines, not four — adjacent A+A still merges", lines.length === 3, JSON.stringify(lines));
+  check(
+    "each line starts at its FIRST original segment's own time, never recomputed",
+    lines[0].start === 0 && lines[1].start === 4 && lines[2].start === 7,
+    JSON.stringify(lines.map((l) => l.start))
+  );
+  check(
+    "a merged line keeps the EARLIER segment's start, not the later one it swallowed",
+    lines[0].start === 0,
+    `got ${lines[0].start}; the second segment (start 2) must not have overwritten it`
+  );
+
+  const plainText = lines.map((l) => `${l.speaker}: ${l.text}`).join("\n");
+  check(
+    "the lines and formatDiarizedTranscript() never disagree — one merge, read two ways",
+    plainText === an.formatDiarizedTranscript(turns, "el"),
+    `${plainText}\n---\n${an.formatDiarizedTranscript(turns, "el")}`
+  );
+  check(
+    "no segments is an empty array, not a crash",
+    Array.isArray(an.diarizedTranscriptLines([], "el")) && an.diarizedTranscriptLines([], "el").length === 0
+  );
+
+  // THE ROUTE: the per-line times are handed back in BOTH outcomes —
+  // saved, and the "transcribed but the row did not write" fallback —
+  // never stored on the row itself (meetings.transcript stays plain text,
+  // proven in §7 above).
+  const t = code(TRANSCRIBE);
+  check(
+    "the per-line times are computed from the provider's own reply, not re-derived from the merged text",
+    /diarizedTranscriptLines\(result\.segments/.test(t)
+  );
+  const linesInResponses = [...t.matchAll(/lines:\s*transcriptLines/g)].length;
+  check("the per-line times are returned on BOTH outcomes — saved, and the unsaved fallback", linesInResponses === 2, String(linesInResponses));
+
+  // THE SCREEN. A line is a click target ONLY while this meeting still
+  // has the SAME live player the player zone itself gates on — never a
+  // second, independent condition that could drift from it and offer a
+  // click with nothing behind it.
+  const workspace = code(WORKSPACE);
+  check(
+    "a transcript line is clickable only under the SAME condition the player element itself is",
+    /playerLines\s*&&\s*playerMeetingId === open\.id/.test(workspace)
+  );
+  check("clicking a line seeks to THAT line's own start, not a fixed or recomputed time", /onClick=\{\(\) => seekTo\(line\.start\)\}/.test(workspace));
+  check(
+    "seeking sets the real <audio> element's currentTime — one player, not a second hidden one",
+    /function seekTo\(startSeconds: number\) \{\s*const el = audioRef\.current;[\s\S]{0,40}el\.currentTime = startSeconds;/.test(workspace)
+  );
+  check("the <audio> the player renders carries that same ref", /ref=\{audioRef\}/.test(workspace));
+
+  // EVERY PLACE THE PLAYER IS CLEARED CLEARS THE LINES TOO, so a stale
+  // line list from a previous clip can never survive long enough to
+  // look clickable over a meeting it was never transcribed from.
+  const meetingIdNulls = [...workspace.matchAll(/setPlayerMeetingId\(null\)/g)].length;
+  const linesNulls = [...workspace.matchAll(/setPlayerLines\(null\)/g)].length;
+  check(
+    "every reset of playerMeetingId resets playerLines alongside it",
+    meetingIdNulls === linesNulls && meetingIdNulls > 0,
+    `playerMeetingId(null): ${meetingIdNulls}, playerLines(null): ${linesNulls}`
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 10. ask about this meeting, from a field (Κομμάτι 6) ==");
+// ---------------------------------------------------------------------
+{
+  const ask = await loadTs(ASK_LIB);
+  check("an empty question is refused, not sent", ask.buildMeetingAskPrompt("  ", "Κάποιο κείμενο.", null, []).ok === false);
+  check(
+    "a question past the ceiling is refused with its own reason",
+    (() => {
+      const r = ask.buildMeetingAskPrompt("x".repeat(ask.MEETING_ASK_MAX_QUESTION_CHARS + 1), "Κάποιο κείμενο.", null, []);
+      return r.ok === false && r.reason === "too_long";
+    })()
+  );
+
+  const noExtras = ask.buildMeetingAskPrompt("Ποιος μίλησε πρώτος;", "Α: Καλημέρα.", null, []);
+  check("a valid question builds both halves of the call", noExtras.ok === true && typeof noExtras.system === "string" && typeof noExtras.user === "string");
+  check("the transcript reaches the user turn, framed as data, never the system prompt", noExtras.ok === true && /TRANSCRIPT:\nΑ: Καλημέρα\./.test(noExtras.user) && !/Α: Καλημέρα\./.test(noExtras.system));
+  check("with no summary and no actions, neither section is added", noExtras.ok === true && !/SUMMARY:/.test(noExtras.user) && !/ACTIONS AGREED:/.test(noExtras.user));
+  check(
+    "the rule against inventing an answer is in the SYSTEM prompt, not left to the model's own judgement",
+    noExtras.ok === true && /[Nn]ever invent/.test(noExtras.system) && /say so plainly/.test(noExtras.system)
+  );
+
+  const withExtras = ask.buildMeetingAskPrompt(
+    "Τι αποφασίστηκε;",
+    "Α: Καλημέρα.",
+    "Σύντομη περίληψη.",
+    [{ who: "Γιώργος", what: "Να στείλει το αρχείο", when: "μέχρι Παρασκευή" }]
+  );
+  check("a summary, when there is one, is added as its own section", withExtras.ok === true && /SUMMARY:\nΣύντομη περίληψη\./.test(withExtras.user));
+  check(
+    "an agreed action is rendered who/what/when, the same triple the screen itself shows",
+    withExtras.ok === true && /ACTIONS AGREED:\n- Γιώργος: Να στείλει το αρχείο \(μέχρι Παρασκευή\)/.test(withExtras.user)
+  );
+
+  // THE WIRE: one call, recorded onto the caller's accumulator before the
+  // reply is judged — the same rule meeting-analyse-call.ts states for
+  // itself, so a reply this file still returns still cost the owner money.
+  const call = code(ASK_CALL);
+  check("the wire calls the pure builder, never builds its own prompt", /buildMeetingAskPrompt\(/.test(call));
+  check(
+    "usage reaches the accumulator before the reply is judged",
+    (() => {
+      const record = call.indexOf("costs.record(");
+      const extract = call.indexOf("modelTextFrom(");
+      return record >= 0 && extract > record;
+    })()
+  );
+
+  // THE ROUTE: same reserve-then-settle shape as api/data-analysis/[id]/ask
+  // and api/my-stuff/ask, declared in billing-coverage.test.mjs's ROUTED
+  // table — and the SAME transcript-too-short guard api/meetings/[id]/
+  // analyse applies, so there is never a call made over nothing to answer
+  // from.
+  const route = code(ASK);
+  check("the question is bounded by slicing, never refused for length", /\.slice\(0,\s*MEETING_ASK_MAX_QUESTION_CHARS\)/.test(route));
+  check("a transcript too short to analyse is also too short to ask about — the SAME guard, not a second one", /isAnalysable\(transcript\)/.test(route));
+  check("the estimate is sized from the transcript, the summary AND the question", /inputChars:\s*transcript\.length \+ \(summary\?\.length \?\? 0\) \+ question\.length/.test(route));
+  check("it reserves and settles under meetingAsk / meeting_analyse — the SAME feature the meeting's own analysis settles under, not a new one", /estimateForAction\(\s*"meetingAsk"/.test(route) && /feature:\s*"meeting_analyse"/.test(route));
+  check("the read goes through the caller's OWN session client, so RLS decides whose meeting this is", /await createClient\(\)/.test(route) && /supabase\s*\n?\s*\.from\("meetings"\)/.test(route.replace(/\s+/g, " ")));
+  check(
+    "the answer is written by the SERVICE-ROLE client, never the user's own session — the same rule data_analysis_questions' own grant enforces in the database",
+    /createAdminClient\(\)/.test(route) && /admin\s*\n?\s*\.from\("meeting_questions"\)\s*\n?\s*\.insert/.test(route.replace(/\s+/g, " "))
+  );
+
+  // THE TABLE: service-role-only insert, same reason data_analysis_questions
+  // is — the answer and the credits charged are written by the route AFTER
+  // the call, and a user who could insert could write themselves a free
+  // answer in our voice, or a real one at zero charge.
+  const migration = read(QUESTIONS_MIGRATION);
+  check("the migration says how to undo it", /How to undo:/.test(migration));
+  check("insert is revoked from authenticated — the route's admin client is the only writer", /revoke insert, update on public\.meeting_questions from authenticated/.test(migration));
+  check("select and delete stay the owner's own, through RLS", /meeting_questions_select_own/.test(migration) && /meeting_questions_delete_own/.test(migration));
+
+  // THE SCREEN: the past Q&A for THIS meeting, filtered the same way
+  // keptActions already is, and a half-typed question about one meeting
+  // can never post itself to a different one after a switch.
+  const workspace = code(WORKSPACE);
+  check("past questions are filtered to the open meeting, same pattern as keptForOpen", /asked\.filter\(\(q\) => q\.meeting_id === open\?\.id\)/.test(workspace));
+  check("the field posts to this meeting's own ask route", /\/api\/meetings\/\$\{meetingId\}\/ask/.test(workspace));
+  check(
+    "switching meetings clears the draft and any error, so neither follows the reader to a different meeting",
+    (() => {
+      const m = workspace.match(/setOpenId\(m\.id\);[\s\S]{0,80}setAskDraft\(""\);[\s\S]{0,40}setAskError\(null\);/);
+      return Boolean(m);
+    })()
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 11. what this file does NOT prove ==");
 // ---------------------------------------------------------------------
 // STATED, NOT IMPLIED. Everything above reads code and runs pure
 // functions. None of it starts a browser, reaches Whisper or touches a

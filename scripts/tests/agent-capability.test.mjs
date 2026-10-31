@@ -49,7 +49,7 @@ const routeSrc = readFileSync("src/app/api/agents/build/route.ts", "utf8");
 const handlerSrc = readFileSync("src/lib/jobs/handlers/agent-build.ts", "utf8");
 const runnerSrc = readFileSync("src/lib/agents/agent-runner.ts", "utf8");
 const executeSrc = readFileSync("src/lib/agents/execute-agent.ts", "utf8");
-const workspaceSrc = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const workspaceSrc = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 const builderSrc = readFileSync("src/lib/agents/agent-builder.ts", "utf8");
 
 // ---------------------------------------------------------------------------

@@ -50,7 +50,7 @@ const lib = readFileSync("src/lib/clarification.ts", "utf8");
 const ui = readFileSync("src/components/clarification/clarification-questions.tsx", "utf8");
 const buildRoute = readFileSync("src/app/api/agents/build/route.ts", "utf8");
 const buildHandler = readFileSync("src/lib/jobs/handlers/agent-build.ts", "utf8");
-const agentsUi = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const agentsUi = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 
 // The `agent` prompt, isolated so assertions about it cannot be satisfied
 // by text belonging to one of the other four kinds.
@@ -75,10 +75,25 @@ check(
 );
 // The claim that justification rested on, checked against the actual UI:
 // there is no schedule input in the create flow.
-check(
-  "the create panel really has no schedule field (only the request textarea)",
-  /id="agent-request"/.test(agentsUi) && !/ScheduleEditor[\s\S]{0,200}creating/.test(agentsUi)
-);
+// THE CLAIM IS UNCHANGED; THE SCREEN IT IS ABOUT IS NOT. Agents moved
+// into the tool shell on 2026-10-31, so the create flow is the shell's
+// one field (no textarea of its own at all — tool-shell.test.mjs checks
+// that literally) and the ScheduleEditor lives in the open agent's
+// settings panel. Both halves are asserted structurally rather than by
+// proximity: the create stage is the `stage` block, and it is required to
+// contain no schedule field anywhere in it.
+{
+  const stageStart = agentsUi.indexOf("const stage = requestOnTable");
+  const stageEnd = agentsUi.indexOf("const shellTurns", stageStart);
+  const createStage = stageStart >= 0 && stageEnd > stageStart ? agentsUi.slice(stageStart, stageEnd) : "";
+  check(
+    "the create flow is the shell's one field, and really has no schedule field",
+    createStage.length > 500 &&
+      !/<ScheduleEditor\b/.test(createStage) &&
+      /placeholder=\{[\s\S]{0,260}requestPlaceholder/.test(agentsUi) &&
+      !/<textarea\b/.test(agentsUi)
+  );
+}
 check(
   "the cron is inferred by the builder from the same sentence",
   /scheduleCron/.test(readFileSync("src/lib/agents/agent-builder.ts", "utf8"))

@@ -881,7 +881,13 @@ check(
   // /dashboard/data-analysis and /dashboard/files drew their own PageHeader
   // only in the branch behind the switch tool-shell, which was removed;
   // the first is the shell alone now and the second a redirect.
-  namedPages.length >= 27,
+  // TWENTY-SIX SINCE 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 removed
+  // /dashboard/projects's own `<PageHeader title={t("title")}>` (it was
+  // the fallback branch's heading, for the one case projects could not
+  // be read) — projects-shell.tsx now draws its own title directly, the
+  // same shape my-stuff-workspace.tsx already uses, which this scan's
+  // own pattern does not reach (it looks only at page.tsx files).
+  namedPages.length >= 26,
   `${namedPages.length} — this floor rises as pages are added, and falls only when a page stops drawing its own heading`,
 );
 for (const locale of LOCALES) {

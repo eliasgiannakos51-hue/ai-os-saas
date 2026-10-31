@@ -110,7 +110,18 @@ const MUTANTS = [
     // 69 -> 70 -> 71 on 2026-10-22: my-stuff-shell.tsx's and then
     // my-stuff-browse.tsx's `kinds.<kind>` template literals («Τα δικά
     // μου»).
-    from: "    unbounded: 69,",
+    // 69 -> 70 on 2026-10-28: the «ΝΕΑ ΟΘΟΝΗ» redesign (Κομμάτι 1)
+    // deleted both those files and replaced them with three
+    // (my-stuff-list.tsx, my-stuff-details.tsx, my-stuff-workspace.tsx),
+    // each still reaching `kinds.<kind>` the same unbounded way — two
+    // files became three, so the count moved by one, not two.
+    // 70 -> 71 on 2026-10-28, same day, Κομμάτι 3 (filters):
+    // my-stuff-filters.tsx reaches `t(b)` with `b` the bucket literal,
+    // the same computed-key shape, a fourth file.
+    // 71 -> 72 on 2026-10-28, «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 6:
+    // project-flow-field.tsx's own `useTranslations()` with no namespace,
+    // reaching `dashboard.createAnything.send`.
+    from: "    unbounded: 72,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

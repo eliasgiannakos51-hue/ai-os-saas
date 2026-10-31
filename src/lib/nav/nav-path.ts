@@ -69,6 +69,10 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "app-builder",
   "audio",
   "avatars",
+  // 3D (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", 2026-10-31): the 25th tile's
+  // own address, new in that round — a brand new tool, not a rename of
+  // an older tracker.
+  "3d",
   "editing",
   "films",
   "iowork",

@@ -46,7 +46,7 @@ const listSrc = readFileSync("src/app/api/jobs/route.ts", "utf8");
 const consumeSrc = readFileSync("src/app/api/jobs/[id]/consume/route.ts", "utf8");
 const clientSrc = readFileSync("src/lib/jobs/consume.ts", "utf8");
 const seenSrc = readFileSync("src/components/jobs/job-seen.tsx", "utf8");
-const agentsUi = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const agentsUi = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 const agentsUiCode = stripComments(agentsUi);
 // stripComments preserves column positions, so a removed comment leaves
 // its own width behind as blanks — 359 characters, here, between the
@@ -351,7 +351,14 @@ check("so do the clarifying questions", /<JobSeen jobId=\{resultJobId\} \/>[\s\S
 check("(δ) Discard marks it immediately",
   /data-testid="agents-discard"[\s\S]{0,240}void markJobConsumed\(resultJobId\);/.test(agentsUiCode));
 check("closing the create panel does too", /function resetCreate\(\) \{[\s\S]{0,120}markJobConsumed\(resultJobId\)/.test(agentsUi));
-check("a completed build with nothing to render is marked, or it returns forever", /addToast\(result\.error \?\? t\("buildError"\), "error"\);[\s\S]{0,80}markJobConsumed\(job\.id\)/.test(agentsUi));
+// `t("buildError")` ALONE since 2026-10-31: the `result.error ??` that
+// used to be in front of it was the route's English, and
+// scripts/tests/tool-shell.test.mjs forbids a tool in the shell from
+// saying one (measured 2026-10-08 in the built app — English on a Greek
+// screen). What this check is about is unchanged: the one exit that
+// renders nothing must still mark the row, or the job is offered back
+// every time the page opens for a day.
+check("a completed build with nothing to render is marked, or it returns forever", /addToast\(t\("buildError"\), "error"\);[\s\S]{0,80}markJobConsumed\(job\.id\)/.test(agentsUi));
 check("agent_run's outcome is marked when it is announced", /markJobConsumed\(runJob\.id\)/.test(agentsUi));
 // file_ask — the answer, lost the same way for the same reason.
 check("the files answer carries JobSeen", /<JobSeen jobId=\{answer\.jobId\} \/>/.test(filesUi));

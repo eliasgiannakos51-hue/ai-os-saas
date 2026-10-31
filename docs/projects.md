@@ -221,17 +221,25 @@ defaults to `'related'`.
 > (`src/lib/presentations/`); this document was written afterwards and
 > never caught up.
 >
-> It now lists **30** — the thirteen classifiers, those five, and twelve more
-> in `src/lib/projects/linkable-extras.ts` so a project can hold the work
-> the person actually came to do: six that redesign phase 2 added, four
-> that Flows (package 36, 2026-10-07) add because a flow files its site,
-> pictures, research and analysis in a project, and two more for the
+> It now lists **33** — the thirteen classifiers, those five, and fifteen
+> more in `src/lib/projects/linkable-extras.ts` so a project can hold the
+> work the person actually came to do: six that redesign phase 2 added,
+> four that Flows (package 36, 2026-10-07) add because a flow files its
+> site, pictures, research and analysis in a project, two more for the
 > owner's message of 2026-10-22, point 6 — «κάθε αποτέλεσμα σε κάθε
 > εργαλείο (site, αυτοματισμός, ανάλυση, έρευνα, κώδικας, συνομιλία)»
 > named six tools, and automation (`automation_flows`) and coding
-> (`code_sessions`) were the two of the six still missing:
+> (`code_sessions`) were the two of the six still missing — and three more
+> for My Stuff's details pane (Κομμάτι 4, 2026-10-28): documents, meetings
+> and app-builder were readable in My Stuff's own list but had no entry
+> here, so a document, a meeting or an app could be opened and starred but
+> never added to a project. "App-builder" rather than the old tracker's
+> own `sidebar.items.apps` ("App ideas") on purpose — the two are
+> different tables (`user_apps` vs. the old `ai_apps`) and sharing the
+> label would have made one of them unclickable in a project's member
+> list, in whichever language happened to collide.
 >
-> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts, sites, generated-images, research, analyses, automation-flows, coding
+> - link-only (`src/lib/projects/linkable-extras.ts`): files, conversations, missions, agents, presentations, posts, sites, generated-images, research, analyses, automation-flows, coding, documents, meetings, app-builder
 >
 > Every number and both lists above are read off the registries by
 > `scripts/tests/projects.test.mjs`, which goes red if any of the three

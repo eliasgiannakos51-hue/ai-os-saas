@@ -43,7 +43,16 @@ export type VoiceProvider = (typeof VOICE_PROVIDERS)[number];
  * SPEECH is per 1,000 characters of input text.
  */
 export const VOICE_RATES_USD = {
-  /** OpenAI Whisper (whisper-1): $0.006 per minute. */
+  /** OpenAI Whisper (whisper-1): $0.006 per minute. Meetings' own
+   *  diarized call (transcribeAudio's `diarize: true` path,
+   *  gpt-4o-transcribe-diarize) is billed at this SAME rate — the one
+   *  third-party source found for that model's per-minute price also
+   *  quoted $0.006, while OpenAI's own model page instead lists it in
+   *  per-token terms that could not be reconciled against it. Billed
+   *  here until Elias confirms the real figure from the account's own
+   *  usage dashboard (docs/NEEDS-FROM-ELIAS.md) — the 4x+ margin this
+   *  product already applies is a cushion against being wrong, not a
+   *  reason not to ask. */
   transcribePerMinute: 0.006,
   /** ElevenLabs on a paid tier: about $0.15 per 1,000 characters at the
    *  Creator rate. Deliberately the EXPENSIVE end of the published range
@@ -57,6 +66,12 @@ export const VOICE_RATES_USD = {
  *  a charge computed for something we did not buy. */
 export const VOICE_MODELS = {
   transcribe: "whisper-1",
+  /** Meetings Κομμάτι 3 (speakers, in Greek): the same /v1/audio/
+   *  transcriptions endpoint whisper-1 uses, a different model and
+   *  response_format (transcribeAudio's `diarize: true` path). Chat's
+   *  own mic keeps whisper-1 — a two-second voice message has nobody
+   *  to diarize. */
+  meetingTranscribe: "gpt-4o-transcribe-diarize",
   /** ElevenLabs' low-latency model — the conversation loop's budget is
    *  1.5 seconds end to end, and their flagship model does not fit in
    *  it. */

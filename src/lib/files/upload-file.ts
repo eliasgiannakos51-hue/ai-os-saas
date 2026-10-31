@@ -54,7 +54,17 @@ const ROUTE_BODY_LIMIT = 4 * 1024 * 1024;
  * no row is counted nowhere and deletable by nobody, so it is removed from
  * the browser, where it was put. scripts/tests/tool-shell.test.mjs holds it.
  */
-export async function uploadFile(file: File, words: UploadMessages): Promise<UploadOutcome> {
+export async function uploadFile(
+  file: File,
+  words: UploadMessages,
+  opts?: {
+    /** My Stuff's own upload (Κομμάτι 5, 2026-10-28): accept every file
+     *  type, not only the six this app can read. Omit (or leave false)
+     *  to keep refusing unsupported types — every existing caller does. */
+    anyType?: boolean;
+  }
+): Promise<UploadOutcome> {
+  const anyType = opts?.anyType === true;
   const refused = (data: IngestBody | null, status: number): string =>
     words.refused ? words.refused(uploadRefusal(data, status)) : data?.error ?? (status === 413 ? words.tooLargeForTransfer ?? words.error : words.error);
   let path: string | null = null;
@@ -89,7 +99,7 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
     const response = await fetch("/api/files/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path, filename: file.name }),
+      body: JSON.stringify({ path, filename: file.name, anyType }),
     });
     const data = (await response.json().catch(() => null)) as IngestBody | null;
     // A file that was read may have started automations: they run now, in their own request.
@@ -108,6 +118,7 @@ export async function uploadFile(file: File, words: UploadMessages): Promise<Upl
   if (file.size > ROUTE_BODY_LIMIT) return { ok: false, error: unanswered ? (words.offline ?? words.error) : words.error };
   const body = new FormData();
   body.append("file", file);
+  if (anyType) body.append("anyType", "true");
   const response = await fetch("/api/files/upload", { method: "POST", body });
   const data = (await response.json().catch(() => null)) as IngestBody | null;
   // A file that was read may have started automations: they run now, in their own request.

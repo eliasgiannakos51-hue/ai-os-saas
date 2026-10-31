@@ -263,9 +263,12 @@ const SAID_ELSEWHERE = {
   "src/app/api/websites/generate/process/route.ts": "the worker: the refusal is stored on the site, and each Site screen says a failed site in its own words",
   "src/app/api/automations/create/route.ts": "gates only the clarifying questions; a refusal skips them",
   "src/app/api/translate/route.ts": "its own code vocabulary (`rate_limited`), said by the translate button's own sentence (section 1)",
+  "src/app/api/translate/text/route.ts": "its own code vocabulary (`rate_limited`), said by the standalone Translate tool's own sentence — same shape as its sibling, api/translate/route.ts, above",
+  "src/app/api/translate/text/edit/route.ts": "its own code vocabulary (`rate_limited`), said by the standalone Translate tool's own sentence — same shape as its sibling, api/translate/text/route.ts, above",
   "src/app/api/documents/[id]/edit/route.ts": "its own code vocabulary, said by the Document tool's own sentence (section 1)",
   "src/app/api/documents/generate/route.ts": "its own code vocabulary, said by the Document tool's own sentence (section 1)",
   "src/app/api/meetings/[id]/analyse/route.ts": "its own code vocabulary, said by the Meetings sentence (section 1)",
+  "src/app/api/meetings/[id]/ask/route.ts": "its own code vocabulary, said by the SAME Meetings sentence as analyse, above",
   "src/app/api/automations/flows/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",
   "src/app/api/automations/flows/[id]/run/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",
   "src/app/api/automations/flows/[id]/change/route.ts": "refuse(\"rate_limited\"), said by the Automations sentence (section 1)",
@@ -274,6 +277,7 @@ const SAID_ELSEWHERE = {
   "src/lib/images/image-access.ts": "refuse(\"rate_limited\"), said by the Image tool's sentence (section 1)",
   "src/lib/games/charge.ts": "its own code vocabulary, said by the Games sentence (section 1)",
   "src/lib/rebuild/charge.ts": "its own code vocabulary (`rate_limited`), said by Rebuild's own sentence (section 1)",
+  "src/lib/apps/charge.ts": "its own code vocabulary (`rate_limited`), said by the App builder's own sentence (section 1)",
   "src/lib/agents/execute-agent.ts": "an agent's run, refused as a run result, not a screen's request",
   "src/lib/automations/runner.ts": "a step of a running automation, recorded as the step's note",
 };
@@ -411,7 +415,7 @@ for (const locale of ["el", "en"]) {
     "src/components/records/ask-ai-modal.tsx",
     "src/components/create/create-studio.tsx",
     "src/components/text-actions/text-actions-textarea.tsx",
-    "src/components/agents/agents-workspace.tsx",
+    "src/components/agents/agents-shell.tsx",
     "src/components/marketplace/template-browser.tsx",
   ]) {
     check(`${file}: a limit is said with its time before anything the route wrote`, /limitText\(data\) \?\?/.test(code(file)));

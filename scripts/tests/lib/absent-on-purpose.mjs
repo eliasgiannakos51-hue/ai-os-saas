@@ -44,12 +44,17 @@ export const ABSENT_ON_PURPOSE = {
       "Editing the earlier entry to point at the merged file would make it describe a splice that had " +
       "not happened yet. The 2026-10-08 entry on the Image tool's name names src/lib/nav/switched-names.ts " +
       "and src/lib/nav/switched-on.ts; on 2026-10-23 the owner opened Image to everybody, the switch went, " +
-      "and the first became src/lib/nav/tool-names.ts while the second was deleted.",
+      "and the first became src/lib/nav/tool-names.ts while the second was deleted. The 2026-10-22 " +
+      "«Τα δικά μου» build entry names src/components/my-stuff/my-stuff-browse.tsx, true the moment it " +
+      "was written; on 2026-10-28, «1. MY STUFF: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 1 folded its list into the new " +
+      "list+details screen (my-stuff-list.tsx, my-stuff-workspace.tsx) and deleted the old file, along " +
+      "with my-stuff-shell.tsx, which no entry in this log names by path.",
     paths: [
       "src/lib/nav/tool-status.ts",
       "src/components/data-analysis/analysis-shell.tsx",
       "src/lib/nav/switched-names.ts",
       "src/lib/nav/switched-on.ts",
+      "src/components/my-stuff/my-stuff-browse.tsx",
     ],
   },
   "docs/MASTER.md": {

@@ -151,4 +151,42 @@ export const LINK_ONLY_MODULES: LinkableModule[] = [
     headlineKey: "title",
     fields: [],
   },
+  // THREE MORE, FOR MY STUFF's OWN «Add to Project» / «Link to…»
+  // (Κομμάτι 4, 2026-10-28). isProjectMemberTable() and the «Link to…»
+  // picker both read LINKABLE_MODULES; without an entry here, a
+  // document, a meeting or a real app could be opened and read in My
+  // Stuff but never filed into a project or cross-linked — the one
+  // action its own Κομμάτι 4 asks every record to have.
+  {
+    // "document" is one of the Library's original seven kinds
+    // (library/sources.ts) — no old tracker under this table, no
+    // collision to avoid.
+    slug: "documents",
+    titleKey: "sidebar.items.documents",
+    table: "user_documents",
+    headlineKey: "title",
+    fields: [],
+  },
+  {
+    // Reuses the real, shipped Meetings tool's own sidebar key
+    // (sidebar-nav.ts) — no old tracker under this table either.
+    slug: "meetings",
+    titleKey: "sidebar.items.meetings",
+    table: "meetings",
+    headlineKey: "title",
+    fields: [],
+  },
+  {
+    // DISTINCT FROM "sidebar.items.apps" ON PURPOSE: that key is the OLD
+    // ai_apps idea-tracker's own label ("App ideas", build-modules.ts,
+    // slug "apps") — the exact "Ιδέες για εικόνες" collision
+    // "generated-images" above already avoided, for the same reason.
+    // `user_apps` is the REAL Apps tool (still behind the `apps-tool`
+    // flag), so this is a new key, "sidebar.items.appBuilder".
+    slug: "app-builder",
+    titleKey: "sidebar.items.appBuilder",
+    table: "user_apps",
+    headlineKey: "title",
+    fields: [],
+  },
 ];

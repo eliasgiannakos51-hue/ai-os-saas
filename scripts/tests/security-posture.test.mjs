@@ -184,6 +184,28 @@ const ADMIN_ONLY_TABLES = new Set([
   // who could read it would learn our per-request margin. Reached only
   // through createAdminClient(), behind that gate.
   "routing_decisions",
+  // iowork (Φάση 1, 2026-10-25). THE ODD ONE ON THIS LIST, and worth the
+  // sentence: every table above is the owner's business data, kept from
+  // customers. This one is the customer's own — a ten-minute handshake
+  // row that, once claimed, even carries their user_id.
+  //
+  // Deny-all anyway, and that IS the argument. The row holds the eight
+  // characters their computer is showing (IOWORK-SECURITY-PLAN §3), and a
+  // policy letting an account select its own pending rows would be a
+  // readable surface aimed at exactly the value a guesser wants. Nothing
+  // needs to read it from a browser: the person types the code into a
+  // route, and the desktop app collects by its 32-byte claim secret.
+  // Neither is a SELECT. api/cron/scheduled-runs deletes rows past an hour.
+  "iowork_pairings",
+  // Telegram pairings (the owner's directive 24, κομμάτι 1): RLS on, no
+  // policy, on purpose and for iowork_pairings' reason one line up. The
+  // eight-character code sits here for ten minutes
+  // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts), and a
+  // policy letting an account SELECT its own pending rows is also a shape
+  // a guesser can aim at. Nothing needs it from a browser:
+  // api/telegram/link and lib/telegram/link-state.ts both read it through
+  // createAdminClient, filtered on the caller's own id.
+  "telegram_pairings",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -457,11 +479,31 @@ const NO_SESSION_BY_DESIGN = {
     "the recipient is FIXED to ADMIN_EMAILS — the sender's address is only ever reply-to " +
     "and never selects a destination, which is the difference between a contact form and " +
     "an open relay. Nothing is stored.",
+  "src/app/api/iowork/pair/route.ts":
+    "the iowork desktop app asking for a pairing code, BEFORE any account is " +
+    "involved — that is the whole step, and there is no session to check because " +
+    "the app was just installed and belongs to nobody. It accepts an operating " +
+    "system and a label, writes one ten-minute row, and returns a code plus a " +
+    "32-byte claim secret. Rate-limited to 10/hour per IP through " +
+    "consume_rate_limit. It reads nothing, charges nothing, and the row it " +
+    "creates is useless until a SIGNED-IN person types that code at " +
+    "/dashboard/iowork (api/iowork/devices, which does authenticate).",
+  "src/app/api/iowork/pair/token/route.ts":
+    "the iowork desktop app collecting its device token, authenticated by the " +
+    "32-byte claim secret it was given above — not by a cookie, because the app " +
+    "is not a browser. The secret is looked up as a SHA-256 digest, never " +
+    "compared in process, and the pairing is single-use: collected_at is " +
+    "stamped after the device row exists, so a second call answers 409. The " +
+    "answer names the account the pairing joined, so a person whose code was " +
+    "read over their shoulder sees a name that is not theirs. Rate-limited " +
+    "to 180/hour per IP, which is well above the ~60 polls an honest ten-minute " +
+    "pairing makes.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/cron/lead-reminders/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; sends each due contact reminder once (package 18) — a note in the owner's bell and a push where they opted in — and marks it sent before delivering, so a run that dies leaves one unsent rather than two sent. It reads no request body and spends nothing",
+  "src/app/api/cron/meeting-action-reminders/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; same shape as cron/lead-reminders — sends each due meeting-action reminder once (Meetings Κομμάτι 4) and marks it sent before delivering, so a run that dies leaves one unsent rather than two sent. It reads no request body and spends nothing",
   "src/app/api/cron/automation-flows/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; runs every due automation (package 30) and the runs uploaded files queued, each charged per AI box to the automation's owner, so it spends real money on many accounts per call",
   "src/app/api/cron/affiliate-payouts/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); moves real money to affiliates' Stripe Connect accounts, so the claim of accrued commissions is atomic (claim_affiliate_commissions) and each transfer carries an idempotency key",
@@ -500,6 +542,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/opengraph-image.tsx": "the share card for the landing page, rendered from constants; it reads no table",
   "src/app/s/[subdomain]/robots.txt/route.ts":
     "the same, for robots.txt. It reads only `status, is_active` and returns a fixed two-line file built from the address in the request — it discloses nothing that requesting the site itself does not. Worth stating plainly: a crawler reads robots.txt from the HOST ROOT, so while sites are served at /s/<subdomain> the file that actually governs them is the app's own /robots.txt; this one exists for Search Console and for the day a wildcard domain makes it the root file.",
+  "src/app/a/[subdomain]/route.ts":
+    "the public web for a published Rebuild app (Κομμάτι 4's third piece) — the same posture as /s/[subdomain]/route.ts, at its own address. Reads through the admin client and selects only `id, html, is_active, updated_at`; rebuild_projects has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited (the same publicRequestAllowed window the sites route uses), and every response carries the published-site CSP. The stored html is re-checked with checkAppHtml at read time, not only at write time, because this is the moment it starts being served to a stranger with no session at all — a row that would not pass the check today is served as absent rather than as whatever it is.",
 };
 
 // THE SITEMAP'S JUSTIFICATION, MADE CHECKABLE.

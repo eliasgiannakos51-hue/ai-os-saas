@@ -125,6 +125,7 @@
       "apps": "Ideias de apps",
       "images": "Ideias de imagens",
       "imageTool": "Imagem",
+      "appBuilder": "Apps",
       "videos": "Ideias de vídeos",
       "coding": "Código",
       "dataAnalysis": "Vê o que dizem os números",
@@ -1735,6 +1736,9 @@
       "tabPreview": "Pré-visualização",
       "tabEdit": "Editar",
       "tabHistory": "Histórico",
+      "viewportGroup": "Largura da pré-visualização",
+      "viewportDesktop": "Vista de computador",
+      "viewportMobile": "Vista de telemóvel",
       "statusLabel": "Estado",
       "statusCompleted": "Pronto",
       "statusFlagged": "Sinalizado",
@@ -2004,7 +2008,6 @@
       "cancel": "Cancelar",
       "agentsUsed": "{used} de {cap} agentes",
       "agentsTotal": "{total} no total (incl. pausados)",
-      "requestLabel": "O que quer que este agente faça por si?",
       "requestPlaceholder": "ex. Todas as manhãs, envia-me as últimas notícias sobre a Nvidia",
       "deliveryNote": "Os resultados são enviados para {email}, o endereço da sua conta.",
       "designButton": "Desenhar o teu agente",
@@ -2033,8 +2036,6 @@
       "menuRunNow": "Executar agora",
       "menuPause": "Pausar",
       "menuResume": "Retomar",
-      "menuEdit": "Editar",
-      "menuDelete": "Eliminar",
       "pauseSuccess": "Agente em pausa.",
       "resumeSuccess": "Agente retomado.",
       "deleteSuccess": "Agente eliminado.",
@@ -2083,9 +2084,8 @@
       },
       "buildStalled": "A criação parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
       "empty": {
-        "title": "Trabalho que acontece sem si",
-        "why": "Descreva uma tarefa numa frase e passa a correr segundo um horário, entregando-lhe o resultado em vez de o lembrar de a fazer.",
-        "example": "Todas as segundas de manhã, um resumo das vendas da semana"
+        "title": "O que deve fazer o novo agente?",
+        "why": "Descreva uma tarefa numa frase e passa a correr segundo um horário, entregando-lhe o resultado em vez de o lembrar de a fazer."
       },
       "delivery": {
         "label": "Para onde vai o resultado",
@@ -2226,7 +2226,39 @@
         "withdrawFailed": "Não foi possível retirar. Continua partilhado."
       },
       "failingWarning": "{failures} das últimas {max} execuções falharam seguidas. Após {max}, este agente desliga-se sozinho.",
-      "disabledReason": "Última falha: {reason}"
+      "disabledReason": "Última falha: {reason}",
+      "shell": {
+        "approvalsNone": "Nenhuma, porque não são precisas: nada do que este agente faz sai do Ionexa sem ti.",
+        "approvalsTitle": "Regras de aprovação",
+        "atCapacity": "limite de ativos atingido",
+        "capNoHardStop": "Isto é o custo, não um limite: ainda não existe um limite de créditos que pare o agente. Para quando a conta ficar sem créditos, ou por si só após {max} falhas seguidas.",
+        "capPerMonth": "Por mês, aproximadamente",
+        "capPerMonthValue": "{credits} créditos · {runs} execuções",
+        "capPerRun": "Por execução",
+        "capsTitle": "Custo em créditos",
+        "descriptionChanged": "A descrição mudou.",
+        "fieldTarget": "O campo altera:",
+        "inboxApprovals": "À espera de aprovação",
+        "inboxApprovalsNone": "Nada: este agente não executa nenhuma ação irreversível — procura, escreve e envia-te o resultado.",
+        "inboxReceived": "O que recebeu",
+        "inboxReceivedNone": "Nada: o agente ainda não tem endereço de email próprio, por isso não consegue receber mensagens.",
+        "noRunYet": "Nenhum passo começou. Os estados preenchem-se ao vivo, passo a passo, assim que correr.",
+        "ownEmail": "Endereço próprio",
+        "ownEmailNone": "Não tem nenhum. O resultado sai do endereço do Ionexa, para o canal que escolheste abaixo.",
+        "placeholderDescription": "Escreve a nova descrição deste agente…",
+        "placeholderTask": "Escreve a nova tarefa deste agente…",
+        "renameHint": "Muda o nome a partir do ⋯ ao lado do nome, na lista.",
+        "scheduleTitle": "Agendamento",
+        "stateDone": "Concluído",
+        "stateWaiting": "À espera",
+        "stateWorking": "A trabalhar",
+        "tabInbox": "Caixa de entrada",
+        "tabPlan": "Percurso",
+        "tabsLabel": "O que estás a ver sobre este agente",
+        "taskChanged": "A tarefa mudou.",
+        "toolsNone": "Ainda não existe uma lista própria de ferramentas permitidas por agente: cada agente procura (se permitires), escreve e envia para o único canal que definiste.",
+        "toolsTitle": "Ferramentas e ligações"
+      }
     },
     "publishing": {
       "title": "Sites no ar",
@@ -2423,6 +2455,71 @@
           "approval_required": "Esta ferramenta precisa primeiro do teu clique.",
           "empty": "Escreve primeiro o que queres.",
           "default": "Algo correu mal. Tenta de novo."
+        }
+      },
+      "telegram": {
+        "title": "Ionexa no Telegram",
+        "intro": "Liga a tua própria conversa do Telegram e o Ionexa trabalha também a partir de lá: tu escreves, ele constrói. Só conversas privadas — nunca um grupo.",
+        "notReady": "O Telegram ainda não está ligado nesta instalação, por isso não há nada aqui para ligar. Não falta nada na tua conta.",
+        "offerBody": "Escreve ao Ionexa pelo Telegram e ele constrói — sites, documentos, imagens, publicações. Vamos mostrar-te um código de uso único que dura dez minutos.",
+        "connect": "Ligar",
+        "consentTitle": "Ligar o Telegram à tua conta",
+        "consentBody": "Uma conversa ligada pode pedir ao Ionexa que trabalhe e gastar os teus créditos. Lê as duas listas antes de ligar, e desliga quando quiseres.",
+        "consentApprove": "Concordo, mostra-me o código",
+        "consentCancel": "Não agora",
+        "connecting": "A ligar…",
+        "canTitle": "O Ionexa pode",
+        "cannotTitle": "O Ionexa não pode",
+        "can": {
+          "chat": "Responder-te no Telegram como faz no Chat, com a mesma memória e na tua língua.",
+          "make": "Fazer o que pedires — um site, um documento, uma imagem, uma publicação — depois de mostrar o preço e esperar o teu toque.",
+          "status": "Dizer-te como vai um trabalho, e pará-lo.",
+          "files": "Pegar numa foto ou num ficheiro que envies e guardá-lo nas Minhas coisas."
+        },
+        "cannot": {
+          "approve": "Gastar um único crédito antes de teres tocado em Aprovar no preço.",
+          "publish": "Publicar nada — um site, uma aplicação, uma publicação — sem uma aprovação à parte para essa coisa em concreto.",
+          "secrets": "Enviar-te uma senha, uma chave ou um código, nem aceitar um teu numa mensagem.",
+          "groups": "Trabalhar numa conversa de grupo. Só na única conversa privada que ligaste."
+        },
+        "activityTitle": "Atividade recente",
+        "activityEmpty": "Nada ainda. Quando começar a chegar trabalho do Telegram, aparecerá aqui o que chegou e quando.",
+        "activityNotYet": "Nada ainda — não ligaste nenhuma conversa.",
+        "activityLast": "Última mensagem executada: {time}",
+        "waitingHeading": "Abre o Telegram e envia este código",
+        "waitingHint": "Toca no botão e o Telegram envia o código por ti. Se não abrir nada, escreve à mão /start e o código numa conversa com o bot.",
+        "expiresIn": "Expira em {time}",
+        "expiredNow": "Este código expirou. Pede um novo.",
+        "openInTelegram": "Abrir no Telegram",
+        "cancel": "Cancelar",
+        "noWebhookYet": "O bot ainda não consegue responder a um código — essa é a peça seguinte. Até estar feita, não vai acontecer nada no Telegram quando enviares isto.",
+        "presentedHeading": "És tu?",
+        "presentedBody": "{who} enviou o teu código ao bot. Nada fica ligado até dizeres que é teu.",
+        "presentedWarning": "Se não foste tu, toca em “Não sou eu”. Senão, quem tiver o teu código pode pedir ao Ionexa que trabalhe e gastar os teus créditos.",
+        "presentedConfirm": "Sim, liga",
+        "presentedReject": "Não sou eu",
+        "unknownAsker": "uma conta do Telegram sem nome",
+        "connected": "O Telegram está ligado.",
+        "connectedTo": "Ligado a {who}",
+        "connectedSince": "Ligado {time}",
+        "disconnect": "Desligar",
+        "disconnecting": "A desligar…",
+        "disconnected": "O Telegram está desligado.",
+        "confirmDisconnect": "Desligar o Telegram? A conversa já não poderá pedir nada ao Ionexa. As tuas notificações não mudam.",
+        "notTheSameAsNotifications": "Isto não é o mesmo que as notificações do Telegram. Essas só deixam o Ionexa enviar-te mensagens; isto deixa a conversa pedir ao Ionexa que trabalhe. Desligar uma não desliga a outra.",
+        "errors": {
+          "not_signed_in": "Entra outra vez e tenta de novo.",
+          "not_enabled": "O Telegram ainda não está aberto na tua conta.",
+          "bad_action": "Algo correu mal com esse toque. Tenta de novo.",
+          "bot_unavailable": "O Telegram não respondeu agora, por isso não foi criado nenhum código. Tenta dentro de um momento.",
+          "encryption_unavailable": "Falta a chave necessária para guardar uma conversa em segurança, por isso nada foi guardado. Nada se perdeu.",
+          "already_linked": "Já há uma conversa ligada. Desliga-a primeiro.",
+          "chat_in_use": "Essa conversa do Telegram já está ligada a outra conta. Desliga-a primeiro aí.",
+          "nothing_to_confirm": "Não há nada à espera de confirmação. O código pode já ter sido usado ou cancelado.",
+          "expired": "Esse código expirou. Pede um novo.",
+          "rateLimited": "Demasiadas tentativas. Espera uma hora e tenta outra vez.",
+          "not_started": "O código não foi criado. Tenta de novo.",
+          "failed": "Não funcionou. Tenta de novo."
         }
       }
     },
@@ -2987,8 +3084,13 @@
       "description": "Carrega uma gravação. Recebes a transcrição, um resumo e uma lista de ações que escolhes tu.",
       "audioNoticeTitle": "O áudio não é guardado",
       "audioNotice": "O áudio é apagado assim que é transcrito. Garante que quem fala sabe disso.",
+      "recordConfirmAllow": "Continuar",
+      "recordConfirmCancel": "Cancelar",
       "pick": "Escolher uma gravação",
       "dropHint": "M4A, MP3, WAV, WebM ou OGG",
+      "record": "Gravar",
+      "stopRecording": "Parar gravação",
+      "recording": "Gravando…",
       "limitHint": "Até {mb} MB, cerca de {minutes} minutos de fala",
       "tooLarge": "Esse ficheiro tem {actual} MB. O limite é {allowed} MB — exporta-o como gravação de voz ou divide-o em dois.",
       "tooLong": "Essa gravação tem {actual} minutos. O limite é {allowed} minutos — divide-a em duas.",
@@ -3001,6 +3103,7 @@
       "start": "Transcrever",
       "transcribing": "A transcrever…",
       "analysing": "A ler a transcrição…",
+      "playerUnavailable": "Não há áudio para reproduzir — foi excluído logo após a transcrição desta reunião.",
       "transcriptTitle": "Transcrição",
       "summaryTitle": "Resumo",
       "analyse": "Resumir e encontrar ações",
@@ -3033,7 +3136,11 @@
         "unsupported_type": "Esse formato de áudio não é suportado.",
         "rate_limited": "Atingiste um limite de pedidos. Liberta-se sozinho com o tempo — tenta mais tarde.",
         "empty": "Essa gravação estava vazia.",
-        "failed": "Algo correu mal. Nada foi cobrado."
+        "failed": "Algo correu mal. Nada foi cobrado.",
+        "record_denied": "O microfone não foi permitido. Verifique as permissões do seu navegador e tente novamente.",
+        "record_unsupported": "Este navegador não pode gravar áudio. Envie um arquivo em vez disso.",
+        "record_empty": "Nada foi ouvido. Tente novamente mais perto do microfone.",
+        "record_failed": "A gravação falhou. Tente novamente."
       },
       "goal": {
         "title": "{count, plural, one {Transformar esta ação num passo de um objetivo} other {Transformar estas # ações nos passos de um objetivo}}",
@@ -3048,6 +3155,22 @@
         "projectLimit": "Todos os projetos do seu plano estão em uso. Escolha um deles ou arquive um primeiro.",
         "projectName": "Dê ao projeto novo um nome com pelo menos duas letras.",
         "projectFull": "Esse projeto está cheio. Escolha outro."
+      },
+      "remind": {
+        "button": "Lembra-me",
+        "label": "Neste dia",
+        "save": "Guardar o lembrete",
+        "cancel": "Cancelar o lembrete",
+        "pending": "Lembra você em {date}",
+        "bad": "Escolha um dia depois de hoje, dentro de um ano.",
+        "notifyTitle": "Lembrete: {what}",
+        "notifyBody": "De uma reunião — {who}"
+      },
+      "ask": {
+        "title": "Pergunte sobre esta reunião",
+        "placeholder": "Pergunte algo sobre esta reunião…",
+        "submit": "Perguntar",
+        "asking": "Perguntando…"
       }
     },
     "voicePage": {
@@ -3140,6 +3263,7 @@
         "sales": "Vendas",
         "trading": "Trading",
         "image": "Imagem",
+        "threeD": "3D",
         "document": "Documento",
         "games": "Jogos",
         "connect": "Ligar",
@@ -3173,6 +3297,7 @@
         "sales": "Contactos, acompanhamento e próximos passos.",
         "trading": "O registo das tuas operações.",
         "image": "Imagens a partir de uma descrição",
+        "threeD": "Um modelo 3D a partir de poucas fotos",
         "document": "Documentos e folhas",
         "games": "Um jogo a partir de uma descrição.",
         "connect": "Traz as tuas outras aplicações",
@@ -3253,6 +3378,20 @@
         "lost": "O bloco não voltou da alteração, por isso nada mudou. Tente de novo.",
         "boxes": "Blocos"
       },
+      "motion": {
+        "button": "Movimento",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Nenhum",
+          "softFade": "Fade suave",
+          "slideUp": "Deslizar para cima",
+          "parallax": "Parallax",
+          "glass": "Vidro",
+          "holographic": "Holográfico",
+          "typewriter": "Máquina de escrever",
+          "hoverLift": "Elevação ao passar o cursor"
+        }
+      },
       "pages": {
         "auto": "Páginas: as necessárias",
         "count": "{count, plural, one {# página} other {# páginas}}",
@@ -3329,7 +3468,45 @@
         "kindsLabel": "Mostrar só",
         "all": "Tudo",
         "empty": "Nada encontrado",
-        "untitled": "Sem título"
+        "untitled": "Sem título",
+        "failed": "Não foi possível carregar: {kinds}. O resto é mostrado."
+      },
+      "details": {
+        "empty": "Escolhe algo à esquerda para o ver aqui.",
+        "open": "Abrir",
+        "back": "Voltar à lista",
+        "madeFrom": "Feito a partir de",
+        "viewers": "Quem vê isto",
+        "viewersAnswer": "Só você. Partilhar um item com outra pessoa ainda não existe."
+      },
+      "history": {
+        "title": "Perguntas anteriores",
+        "show": "Mostrar perguntas anteriores",
+        "hide": "Ocultar perguntas anteriores",
+        "back": "Voltar às perguntas anteriores"
+      },
+      "ask": {
+        "send": "Perguntar",
+        "dismiss": "Ocultar a resposta"
+      },
+      "filters": {
+        "label": "Filtrar por tipo",
+        "all": "Tudo",
+        "documents": "Documentos",
+        "images": "Imagens",
+        "data": "Dados",
+        "more": "Mais",
+        "moreLabel": "Mais filtros",
+        "video": "Vídeo",
+        "audio": "Áudio",
+        "sitesApps": "Sites e Apps",
+        "meetings": "Reuniões",
+        "project": "Projeto",
+        "allProjects": "Todos os projetos"
+      },
+      "upload": {
+        "button": "Carregar",
+        "uploading": "A carregar…"
       },
       "kinds": {
         "site": "Sites",
@@ -3343,7 +3520,10 @@
         "coding": "Código",
         "finance": "Finanças",
         "sales": "Vendas",
-        "trading": "Trading"
+        "trading": "Trading",
+        "images": "Imagens",
+        "meetings": "Reuniões",
+        "apps": "Apps"
       },
       "errors": {
         "empty": "Escreve uma pergunta.",
@@ -3382,6 +3562,14 @@
       "price": "{count, plural, one {# crédito} other {# créditos}}",
       "delete": "Eliminar imagem",
       "deleteConfirm": "Eliminar esta imagem e todas as suas versões? Não dá para desfazer.",
+      "tools": {
+        "productAd": "Anúncio de produto",
+        "animate": "Animar",
+        "sameProduct": "Mesmo produto",
+        "addReference": "Adicionar uma imagem de referência",
+        "removeReference": "Remover esta imagem de referência",
+        "searchWeb": "Pesquisar primeiro na web"
+      },
       "notConfigured": "As imagens ainda não estão ativas. Nada é cobrado.",
       "working": {
         "variants": "A criar 4 imagens…",
@@ -3808,6 +3996,197 @@
         "failed": "Algo correu mal. Tente novamente."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "O que o Editing deve fazer com o seu material?"
+      },
+      "notBuilt": "Ainda não foi criado. Nada foi cobrado.",
+      "placeholder": "Descreva a alteração, com suas próprias palavras…",
+      "workspaceTitle": "Espaço de trabalho",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Gráficos"
+      },
+      "noMaterial": "Ainda sem material."
+    },
+    "threeD": {
+      "empty": {
+        "heading": "O que você quer transformar em 3D?"
+      },
+      "notBuilt": "Ainda não foi criado. Nada foi cobrado.",
+      "placeholder": "Descreva o que deve se tornar 3D, com suas próprias palavras…",
+      "attachPhotos": "Adicionar fotos (1 a 4)",
+      "workspaceTitle": "Modelo 3D",
+      "photos": {
+        "heading": "Minhas fotos",
+        "remove": "Remover esta foto"
+      },
+      "viewer": {
+        "zoomIn": "Aumentar zoom",
+        "zoomOut": "Diminuir zoom",
+        "reset": "Repor vista",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Tipo",
+        "typeOptions": {
+          "product": "Produto",
+          "furniture": "Móvel",
+          "object": "Objeto"
+        },
+        "quality": "Qualidade",
+        "qualityOptions": {
+          "draft": "Rascunho",
+          "final": "Final"
+        },
+        "realSize": "Tamanho real",
+        "realSizeUnknown": "ainda não definido",
+        "format": "Formato",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Fundo",
+        "backgroundOptions": {
+          "white": "Branco",
+          "transparent": "Transparente"
+        },
+        "price": "Preço"
+      },
+      "bar": {
+        "viewInAr": "Ver em AR",
+        "download": "Transferir",
+        "makeFinal": "Finalizar"
+      }
+    },
+    "films": {
+      "empty": {
+        "heading": "Sobre o que é o seu filme?"
+      },
+      "notBuilt": "Ainda não foi criado. Nada foi cobrado.",
+      "placeholder": "Descreva o filme, com suas próprias palavras…",
+      "workspaceTitle": "Produção do filme",
+      "stages": {
+        "script": "Roteiro",
+        "characters": "Personagens e lugares",
+        "storyboard": "Storyboard",
+        "shooting": "Filmagem",
+        "edit": "Edição"
+      },
+      "stageStatus": {
+        "waiting": "Em espera",
+        "working": "Em andamento",
+        "done": "Concluído"
+      },
+      "credits": {
+        "label": "Créditos",
+        "unknown": "calculado assim que houver um roteiro"
+      },
+      "charactersPlaces": {
+        "heading": "Personagens e lugares",
+        "addCharacter": "Adicionar personagem",
+        "addPlace": "Adicionar lugar",
+        "empty": "Nenhum adicionado ainda."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Plano {n}",
+        "sampleCaption": "Grade de exemplo — seus planos aparecerão aqui assim que o roteiro for escrito."
+      },
+      "panel": {
+        "cameraAngle": "Ângulo de câmera",
+        "angleOptions": {
+          "wide": "Amplo",
+          "medium": "Médio",
+          "closeUp": "Close",
+          "fromAbove": "De cima",
+          "low": "Baixo"
+        },
+        "light": "Luz",
+        "lightOptions": {
+          "day": "Dia",
+          "goldenHour": "Hora dourada",
+          "night": "Noite",
+          "warmInside": "Interior aconchegante"
+        },
+        "cameraMove": "Movimento de câmera",
+        "moveOptions": {
+          "still": "Estática",
+          "slowPush": "Aproximação lenta",
+          "pan": "Panorâmica",
+          "handheld": "Câmera na mão"
+        },
+        "continueFromPrevious": "Continuar do plano anterior",
+        "reshoot": "Regravar"
+      }
+    },
+    "appBuilder": {
+      "empty": {
+        "heading": "Descreve a app de que o teu negócio precisa",
+        "examples": {
+          "a": "Uma app de marcações para o meu salão",
+          "b": "Uma app que guarda as minhas encomendas e para quem vão",
+          "c": "Um formulário para clientes, com as respostas numa lista"
+        }
+      },
+      "placeholder": "Descreve a app, pelas tuas palavras…",
+      "placeholderBox": "Diz o que mudar nesta caixa…",
+      "placeholderAnother": "Descreve outra app…",
+      "recent": "Apps recentes",
+      "noneYet": "Ainda nenhuma app.",
+      "boxHint": "Carrega numa caixa e diz o que mudar nela.",
+      "tabs": {
+        "preview": "Pré-visualização",
+        "data": "Dados",
+        "plan": "Plano"
+      },
+      "box": {
+        "data": "Dados",
+        "screens": "Ecrãs",
+        "access": "Quem vê o quê",
+        "notifications": "Avisos"
+      },
+      "type": {
+        "text": "Texto",
+        "longText": "Texto longo",
+        "number": "Número",
+        "date": "Data",
+        "time": "Hora",
+        "choice": "Escolha",
+        "email": "E-mail",
+        "phone": "Telefone",
+        "checkbox": "Sim ou não"
+      },
+      "kindForm": "um formulário",
+      "kindList": "uma lista",
+      "seesOwn": "cada visitante vê só os seus",
+      "seesOwner": "só tu vês estes",
+      "toCustomer": "ao cliente",
+      "toOwner": "a ti",
+      "noNotifications": "Não é enviado nada.",
+      "noScreensYet": "Ainda não há nenhum ecrã no plano.",
+      "previewCaption": "Pré-visualização em direto do plano — ainda não é uma app a funcionar.",
+      "formSubmit": "Enviar",
+      "sampleRow": "Exemplo — as entradas reais vão aparecer aqui quando isto estiver em funcionamento.",
+      "approve": "Aprovar o plano",
+      "approved": "O plano está aprovado.",
+      "approvedNote": "Aprovado",
+      "planned": "Aqui está o plano, em quatro caixas.",
+      "boxChanged": "A caixa {box} mudou.",
+      "boxChangedAndDropped": "A caixa {box} mudou, e isto foi com ela: {what}.",
+      "errors": {
+        "empty": "Escreve o que a app deve fazer.",
+        "tooLong": "Isso é mais longo do que uma descrição pode ser ({limit} caracteres).",
+        "insufficient": "Não há créditos suficientes para isto. Não foi cobrado nada.",
+        "rateLimited": "Demasiadas tentativas ao mesmo tempo. Tenta outra vez daqui a pouco.",
+        "notIncluded": "Esta ferramenta não está no teu plano.",
+        "unavailable": "A app não pode ser planeada neste momento.",
+        "unusable": "A resposta não servia. Só é cobrado o que foi gasto.",
+        "notSaved": "O plano foi feito mas não foi guardado.",
+        "failed": "O plano não foi feito. Não foram cobrados créditos."
+      }
+    },
     "chats": {
       "title": "Conversas",
       "searchPlaceholder": "Procurar nas tuas conversas",
@@ -3848,6 +4227,26 @@
         "actions": "Ações",
         "look": "Aspeto"
       },
+      "features": {
+        "heading": "Funcionalidades",
+        "hint": "Estas são as funcionalidades que apps como esta costumam ter. Desativa as que quiseres, ou carrega no lápis para mudar as palavras.",
+        "found": "Aqui estão as funcionalidades que essas apps costumam ter. Desativa as que quiseres, ou muda as palavras de uma, depois continua.",
+        "changed": "As palavras dessa funcionalidade foram mudadas.",
+        "continue": "Usar estas funcionalidades",
+        "continuing": "A fazer o plano…",
+        "edit": "Mudar as palavras desta funcionalidade",
+        "editPlaceholder": "Diz as novas palavras para esta funcionalidade"
+      },
+      "phases": {
+        "heading": "Fases",
+        "note": "Hoje há uma única fase: a aplicação toda, de uma vez. Mais fases estão a caminho.",
+        "noteTwo": "Esta aplicação precisa de duas fases: primeiro os seus dados e ecrãs, depois a própria aplicação, escrita a partir deles. Aprove o plano para começar a primeira fase; o preço da segunda fase é mostrado quando a primeira terminar.",
+        "appLogic": "Lógica da aplicação",
+        "writeApp": "Escrever a aplicação",
+        "approve": "Aprovar plano",
+        "approving": "A começar…",
+        "appLogicDone": "Os dados e ecrãs da aplicação estão planeados. Agora escreva a aplicação."
+      },
       "build": "Construir a aplicação",
       "building": "A construir a aplicação…",
       "download": "Descarregar a aplicação",
@@ -3855,6 +4254,7 @@
       "preview": "A aplicação, a funcionar",
       "sealed": "Corre isolada de tudo o resto, por isso o que escreves aqui fica nesta pré-visualização. Descarrega-a para a usares no teu computador.",
       "original": "A tua própria versão, não uma cópia: leva a ideia e o tipo de ecrãs, nunca o nome, as palavras, as imagens ou o código do original.",
+      "selfTest": "Verificou-se que cada botão está ligado a código, antes de isto te ser mostrado.",
       "versions": "{count} versões",
       "version": "Versão {n}",
       "first": "Primeira construção",
@@ -3877,6 +4277,20 @@
           "tooLarge": "Essa página é grande demais para ser lida. Não foi cobrado nada.",
           "invalid": "Esse não é um endereço web que eu possa ler. Não foi cobrado nada."
         }
+      },
+      "publish": {
+        "summary": "Publicar esta aplicação",
+        "liveSummary": "Online, no seu próprio endereço",
+        "label": "Escolhe um endereço",
+        "edit": "Escolhe outro endereço",
+        "editPlaceholder": "Escreve o endereço que queres",
+        "button": "Publicar",
+        "unpublish": "Despublicar",
+        "taken": "Esse endereço já está em uso.",
+        "invalid": "Escolhe um endereço válido — letras minúsculas, números e hífenes, pelo menos 3 caracteres.",
+        "notBuilt": "Primeiro constrói a aplicação.",
+        "done": "Publicada em {url}",
+        "offline": "Despublicada. O endereço fica guardado — publica de novo para o voltar a usar."
       }
     },
     "comingSoon": {
@@ -3887,6 +4301,11 @@
       "notified": "Vamos avisar-te",
       "notifyFailed": "Não foi possível guardar. Tenta novamente.",
       "examples": {
+        "threeD": {
+          "a": "Um vaso da minha loja, pronto para o site",
+          "b": "Uma cadeira de madeira, para ver de todos os ângulos",
+          "c": "Uma caneca de cerâmica, com AR no meu telemóvel"
+        },
         "apps": {
           "a": "Uma app de reservas para o meu salão",
           "b": "Uma app para encomendas de entrega",
@@ -4134,6 +4553,88 @@
       "languagePractice": {
         "label": "Prática de idioma",
         "text": "Quero praticar "
+      }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Cole o texto a traduzir",
+        "examples": {
+          "a": "Bem-vindo ao nosso negócio. Ficaremos felizes em ajudar.\n\nO nosso escritório está aberto de segunda a sexta, das 9h às 18h.",
+          "b": "Caro cliente,\n\nObrigado pela sua encomenda. Vai recebê-la no prazo de 3 dias úteis.",
+          "c": "A nossa empresa foi fundada em 2015 e é especializada em soluções de software para pequenas empresas."
+        }
+      },
+      "placeholder": "Cole ou escreva o texto…",
+      "targetsLabel": "Para: {languages}",
+      "styleLabel": "Estilo",
+      "style": {
+        "formal": "Formal",
+        "friendly": "Simpático",
+        "source": "Como o original"
+      },
+      "detectedFrom": "Detetado: {language}",
+      "sameLanguageNote": "O texto já está nesta língua.",
+      "kept": "{count, plural, one {# parágrafo ficou como estava} other {# parágrafos ficaram como estavam}}, porque a tradução não chegou.",
+      "done": "{count, plural, one {Traduzido para # língua.} other {Traduzido para # línguas.}}",
+      "translating": "A traduzir…",
+      "errors": {
+        "nothing": "Não há texto para traduzir.",
+        "tooLong": "Isto é demasiado longo para uma tradução ({chars} caracteres; o limite é {limit}).",
+        "sameLanguage": "As línguas escolhidas já são a língua do texto. Escolha pelo menos uma diferente.",
+        "insufficient": "Créditos insuficientes para esta tradução. Não foi cobrado nada.",
+        "rateLimited": "Demasiadas tentativas de uma vez. Tente novamente em breve.",
+        "unavailable": "A tradução não está disponível neste momento.",
+        "unusable": "A resposta não era utilizável e nada foi escrito. Só o que foi gasto é cobrado.",
+        "failed": "Não foi possível fazer a tradução. Não foram cobrados créditos."
+      },
+      "editPlaceholder": "Diz o que mudar neste parágrafo…",
+      "editDone": "O parágrafo {n} ({language}) foi alterado.",
+      "editingLabel": "Parágrafo {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossário} one {Glossário (1)} other {Glossário (#)}}",
+      "glossaryHint": "Palavras que ficam iguais em todas as línguas.",
+      "glossarySuggested": "Adicionar «{term}»",
+      "glossaryPlaceholder": "Nova palavra…",
+      "glossaryRemove": "Remover «{term}»",
+      "glossaryAdd": "Adicionar termo",
+      "glossaryAdding": "Novo termo do glossário",
+      "openDocument": "Abrir como documento"
+    },
+    "iowork": {
+      "noAppYet": "A aplicação para o teu computador ainda não saiu. Este ecrã é o lado da conta: quando a aplicação existir, é aqui que a ligas.",
+      "connectHeading": "Liga um computador",
+      "connectHint": "Escreve os oito caracteres que o teu computador está a mostrar.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Ligar",
+      "connecting": "A ligar…",
+      "previewHeading": "Um computador quer ligar-se",
+      "previewBody": "Diz ser “{label}” ({platform}), pedido às {time} a partir de {ip}.",
+      "previewIpUnknown": "um endereço que não conseguimos ler",
+      "previewWarning": "Se não acabaste de abrir o iowork tu mesmo, no teu próprio computador, carrega em Cancelar.",
+      "previewConfirm": "Sim, ligar",
+      "previewCancel": "Cancelar",
+      "cancelled": "Cancelado. Esse código não vai voltar a funcionar.",
+      "codeAccepted": "{name} aceitou o código. Aparece abaixo assim que o computador terminar de ligar-se.",
+      "listHeading": "Computadores ligados ({count} de {max})",
+      "empty": "Ainda não há nenhum computador ligado.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Ligado há mais de 30 dias",
+      "disconnect": "Desligar",
+      "disconnectLabel": "Desligar {name}",
+      "confirmDisconnect": "Desligar {name}? Para de funcionar de imediato e terá de ser ligado outra vez.",
+      "safetyLine": "Assim que a aplicação existir: um computador ligado só vai chegar às pastas que escolheres nele, nunca a palavras-passe, chaves ou pastas do sistema, e cada alteração vai esperar a tua aprovação aí.",
+      "errors": {
+        "bad_code": "Isso não é um código. São oito caracteres, tal como o teu computador os mostra.",
+        "bad_action": "Esse pedido não fazia sentido. Tenta outra vez.",
+        "not_found": "Nenhum computador está a mostrar esse código.",
+        "expired": "Esse código expirou. O teu computador vai mostrar um novo.",
+        "tooMany": "Esta conta já tem {max} computadores. Desliga primeiro um.",
+        "rateLimited": "Demasiadas tentativas. Espera um pouco e tenta de novo.",
+        "not_enabled": "O iowork ainda não abriu.",
+        "not_signed_in": "Inicia sessão outra vez.",
+        "failed": "Não resultou. Nada mudou."
       }
     }
   },
@@ -4867,6 +5368,11 @@
       "does": "Primeiro mostra o plano em cinco caixas; mude qualquer uma com palavras, depois escreve o jogo e você joga aqui, com o teclado ou pelo toque.",
       "doesNot": "Não vê sua conta e não acessa a internet: o jogo roda isolado, assim como o arquivo que você baixa."
     },
+    "apps": {
+      "is": "Aqui descreves uma app que guarda os teus dados: marcações, encomendas, stock, clientes, respostas de formulários.",
+      "does": "Planeia a app em quatro caixas, mudas cada caixa por palavras e aprovas.",
+      "doesNot": "Não cobra pagamentos e nunca pede a um cliente um cartão ou uma palavra-passe."
+    },
     "chats": {
       "is": "Todas as conversas que tiveste, num só lugar.",
       "does": "Mostra-as das mais recentes para as mais antigas, procura nos títulos e no que foi dito, e renomeia, fixa, arquiva ou elimina qualquer uma.",
@@ -4881,6 +5387,11 @@
       "is": "A tua própria versão de uma aplicação de que gostas.",
       "does": "Descreve uma aplicação, ou cola o endereço de uma página pública de uma de que gostes. Recebes um plano em quatro caixas, mudas o que quiseres com palavras e depois constróis: uma aplicação que funciona, que mudas com palavras, a que podes voltar atrás e que descarregas num só ficheiro.",
       "doesNot": "Não copia a outra aplicação: o nome, as palavras, as imagens e o código são teus, e só lê as etiquetas da página que indicas, nunca nada atrás de um início de sessão. Não é um serviço de alojamento: o que escreves na pré-visualização não fica guardado, e o ficheiro descarregado guarda os seus dados no teu próprio computador."
+    },
+    "iowork": {
+      "is": "A aplicação que trabalha dentro do teu próprio computador",
+      "does": "Lê e escreve ficheiros nas pastas que escolheres, quando lhe pedires, e mostra-te cada alteração antes de acontecer",
+      "doesNot": "Não chega a palavras-passe, chaves, ao teu navegador ou a pastas do sistema, nunca executa programas no teu computador, e não apaga nada sem a tua aprovação"
     }
   },
   "helpCentre": {
@@ -5600,6 +6111,12 @@
     "delete": "Eliminar",
     "deleteConfirm": "Eliminar este projeto? As coisas lá dentro ficam onde estão.",
     "removeMember": "Tirar do projeto",
+    "back": "Voltar aos projetos",
+    "selectPrompt": "Selecione um projeto na lista para vê-lo aqui.",
+    "empty": {
+      "title": "Ainda não há projetos",
+      "description": "Crie seu primeiro projeto à esquerda para vê-lo aqui."
+    },
     "addToProject": {
       "button": "Adicionar ao projeto",
       "title": "Adicionar a um projeto",
@@ -5622,6 +6139,24 @@
     "automateIt": {
       "button": "Automatizar",
       "hint": "Cria uma automação centrada neste projeto — lê o que há nele e o objetivo acima."
+    },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "Factos, decisões, preferências — escritos aqui, lidos apenas pelos chats, criações, planos e criações de agentes deste projeto.",
+      "hint": "Alimenta apenas a criação dentro deste projeto. Nada fora dele o lê."
+    },
+    "share": {
+      "heading": "Compartilhar",
+      "hint": "Qualquer pessoa com este link pode ver este projeto, somente leitura, sem login. Você pode revogá-lo quando quiser.",
+      "create": "Criar link",
+      "revoke": "Revogar",
+      "public": {
+        "readOnly": "Compartilhado com você — somente leitura",
+        "notFound": {
+          "heading": "Este link não está disponível",
+          "body": "Ele pode ter sido revogado ou nunca ter existido."
+        }
+      }
     },
     "errors": {
       "tooShort": "Dá-lhe primeiro um nome.",

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { Earth } from "@/components/brand/earth";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ACTION, OPTION } from "@/components/shell/tool-shell-styles";
 
 /**
  * ONE SHELL FOR EVERY TOOL (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §5, «ΕΝΑ
@@ -83,10 +84,19 @@ type Props = {
   tray?: ReactNode;
   /** Send waits while a file is still being read. */
   holdSend?: boolean;
-  /** The empty landing: one question and up to three examples, drawn with
-   *  the small globe while there are no turns and no work open. Omit for
-   *  a blank thread (the old behaviour). */
-  empty?: { heading: string; examples?: ShellExample[] };
+  /** The empty landing: one question, optionally one sentence under it,
+   *  and up to three examples, drawn with the small globe while there are
+   *  no turns and no work open. Omit for a blank thread (the old
+   *  behaviour).
+   *
+   *  `why` EXISTS BECAUSE A LIST SURFACE MOVING IN WOULD OTHERWISE LOSE
+   *  IT (2026-10-31, Agents Κομμάτι 1). lib/list-empty-states.ts requires
+   *  every non-module list screen to render a `.title` AND a `.why` — the
+   *  heading says what to do, the sentence says what the tool is for, and
+   *  Agents' was the one sentence explaining what a scheduled agent is.
+   *  A landing with only a heading had nowhere to put it. Optional, so
+   *  every tool already on this landing draws exactly what it drew. */
+  empty?: { heading: string; why?: string; examples?: ShellExample[] };
   /** The [◧] history column: its open state, what toggles and opens it,
    *  and its own content (a `ShellHistoryColumn`, typically). Omit to
    *  keep the tool's own history UI (an option under the field). */
@@ -109,7 +119,19 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
           <div
             data-testid="tool-shell-history"
             data-open={history.open}
-            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:w-[280px] md:max-w-none ${
+            // ONE `md:w-*` PER STATE, NOT TWO FIGHTING. The base classes
+            // used to carry `md:w-[280px]` unconditionally alongside the
+            // closed branch's `md:w-0` — both targeting the same property
+            // at the same breakpoint, and Tailwind's generated stylesheet
+            // orders arbitrary-value utilities after the named scale, so
+            // `w-[280px]` always won: a "closed" column still measured
+            // 280px wide on desktop, silently eating that width from the
+            // conversation column next to it (found 2026-10-30, Image
+            // Κομμάτι 2 — the first screen with `history` wired AND `work`
+            // open at a desktop width, which is what made it visible: its
+            // own h1 wrapped to one letter per line in the 200px left
+            // over). Each branch now owns its own width end to end.
+            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:max-w-none ${
               history.open
                 ? "translate-x-0 md:w-[280px]"
                 : "-translate-x-full rtl:translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-e-0"
@@ -164,6 +186,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
             <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
               <Earth variant="small" px={96} />
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">{empty!.heading}</h2>
+              {empty!.why && <p className="max-w-sm text-sm leading-relaxed text-muted">{empty!.why}</p>}
               {empty!.examples && empty!.examples.length > 0 && (
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   {empty!.examples.map((ex) => (
@@ -274,12 +297,12 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
   );
 });
 
-/** A 44px icon action in the work area's top row. */
-export const ACTION =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground";
-
-/** One option under the field: a label that is pressed, or that opens a choice. */
-export const OPTION = "chip-link gap-1.5";
+/** A 44px icon action in the work area's top row; one option under the
+ *  field that is pressed, or that opens a choice — both pure style
+ *  tokens, kept in tool-shell-styles.ts for the same reason explained
+ *  there, imported above for this file's own use and re-exported here
+ *  so existing callers see no difference. */
+export { ACTION, OPTION };
 
 /**
  * ONE BOX CHOSEN (package 4): under the field, what the next change will

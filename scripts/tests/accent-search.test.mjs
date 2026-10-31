@@ -347,7 +347,13 @@ console.log("\n== 5. the shared helper is actually the one being used ==");
 // ---------------------------------------------------------------------
 const WIRED = [
   "src/components/modules/generic-list.tsx",
-  "src/components/agents/agents-workspace.tsx",
+  // ONE ENTRY, EVERY TOOL IN THE SHELL (2026-10-31, Agents Κομμάτι 1).
+  // Agents used to search its own card grid here; its list is now the
+  // shared [◧] column, which is where the search box lives for Site,
+  // Document, Research, Automations, Coding and everything else that has
+  // moved in. The helper has to be called THERE, so that is where it is
+  // asserted — the agents entry it replaces covered one screen.
+  "src/components/shell/shell-history-column.tsx",
   "src/components/mission/mission-list.tsx",
   "src/components/publishing/published-sites-list.tsx",
   "src/components/integrations/integrations-list.tsx",
@@ -381,20 +387,34 @@ console.log("\n== 6. alphabetical sort is offered and is locale-aware ==");
 {
   // Every list that shows a sort control must actually pass a label, or the
   // A–Z button would be missing where a user expects it.
-  const SORTED_LISTS = [
-    "src/components/modules/generic-list.tsx",
-    "src/components/agents/agents-workspace.tsx",
-    "src/components/mission/mission-list.tsx",
-    "src/components/publishing/published-sites-list.tsx",
-    "src/components/documents/documents-list.tsx",
-    "src/components/website-builder/website-builder-workspace.tsx",
-    "src/components/ideas/ideas-list.tsx",
-  ];
-  const missing = SORTED_LISTS.filter((rel) => {
-    const s = readFileSync(path.join(ROOT, rel), "utf8");
-    return !(s.includes("alphabetical") && /useSortAndPaginate\([\s\S]{0,220}?=>/.test(s));
-  });
-  check("every list with a SortToggle supplies a label accessor", missing, []);
+  // THE POPULATION IS DERIVED, NOT TYPED OUT (2026-10-31). This was a
+  // hand list of seven files, and it went wrong in the way CLAUDE.md
+  // describes: Agents stopped rendering a SortToggle when it moved into
+  // the tool shell, and the list went on requiring a label accessor from
+  // it — a check about a control that is not on the screen. Every file
+  // under src/ that renders <SortToggle is the rule's real subject, so
+  // the rule now ranges over exactly that set.
+  const SORTED_LISTS = SRC_FILES.filter((f) => /\.tsx$/.test(f) && /<SortToggle\b/.test(readFileSync(f, "utf8"))).map((f) => path.relative(ROOT, f));
+  check(`the SortToggle population was found (${SORTED_LISTS.length})`, SORTED_LISTS.length >= 6, true);
+  // THE TOGGLE AND THE SORT CAN LIVE IN DIFFERENT FILES, and that is not
+  // a defect — my-stuff-filters.tsx renders the control while
+  // my-stuff-workspace.tsx holds the state and calls the hook with
+  // `(item) => item.title`. The hand list this derivation replaced simply
+  // did not contain my-stuff-filters.tsx, so the split was never tested
+  // either way. So the accessor is looked for in the file OR in whichever
+  // file imports it: what matters is that the A–Z the user presses has
+  // something to order by, not which module the call sits in.
+  // THE ACCESSOR ONLY. `alphabetical` being forwarded to the toggle is
+  // the NEXT check's subject, and asserting both here is what made this
+  // one unable to see a split component: the parent holds the hook, the
+  // child holds the prop, and neither file carried both.
+  const supplies = (rel) => /useSortAndPaginate\([\s\S]{0,220}?=>/.test(readFileSync(path.join(ROOT, rel), "utf8"));
+  const importersOf = (rel) => {
+    const stem = path.basename(rel).replace(/\.tsx$/, "");
+    return SRC_FILES.filter((f) => new RegExp(`from "[^"]*/${stem}"`).test(readFileSync(f, "utf8"))).map((f) => path.relative(ROOT, f));
+  };
+  const missing = SORTED_LISTS.filter((rel) => !supplies(rel) && !importersOf(rel).some(supplies));
+  check("every list with a SortToggle supplies a label accessor, here or in its parent", missing, []);
 
   // …and no list renders a SortToggle without forwarding the flag, which
   // would silently drop A–Z from that one page.

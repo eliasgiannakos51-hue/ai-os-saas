@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Check, FileUp, Play, RotateCcw, X, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
-import { OPTION } from "@/components/shell/tool-shell";
+import { OPTION } from "@/components/shell/tool-shell-styles";
 import type { FlowKind, FlowStep, NotYet, StepState } from "@/lib/flows/plan";
 
 /**

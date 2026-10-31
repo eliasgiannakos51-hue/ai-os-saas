@@ -156,7 +156,7 @@ ok("framing refused", headers["X-Frame-Options"] === "DENY" && /frame-ancestors 
 ok("no content-type guessing", headers["X-Content-Type-Options"] === "nosniff");
 ok("a referrer policy and a permissions policy", Boolean(headers["Referrer-Policy"]) && /camera=\(\)/.test(headers["Permissions-Policy"] ?? ""));
 const resolved = await config.default.headers();
-ok("applied to every path but the published sites", resolved.length === 1 && resolved[0].source === "/((?!s/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
+ok("applied to every path but the published sites and published Rebuild apps", resolved.length === 1 && resolved[0].source === "/((?!s/|a/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
 ok("the framework is not announced", config.default.poweredByHeader === false);
 
 // =====================================================================

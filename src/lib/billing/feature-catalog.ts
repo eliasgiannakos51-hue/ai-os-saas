@@ -427,6 +427,13 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "meetings/[id]/actions",
       // A goal from the meeting's actions (package 17): no model, no charge.
       "meetings/[id]/goal",
+      // Κομμάτι 4, "Remind me": no model, no charge — a time the person
+      // picked, and the cron that sends it (same shape as cron/lead-reminders).
+      "meetings/[id]/actions/[actionId]/remind",
+      "cron/meeting-action-reminders",
+      // Κομμάτι 6, a question about one meeting: settles under the same
+      // feature the meeting's own analysis does (lib/billing/margin-policy.ts).
+      "meetings/[id]/ask",
     ],
     charges: true,
     enforcedIn: "src/lib/voice/voice-pricing.ts",
@@ -825,7 +832,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     // the same project cap; each step is charged by its own tool.
     // projects/[id] (2026-10-22): name, goal, status and the two colours —
     // no credit cost, no plan gate, the same free routes as the rest.
-    routes: ["projects", "projects/[id]", "projects/[id]/members", "flows", "flows/[id]/steps"],
+    // projects/[id]/share (Κομμάτι 7, 2026-10-28): the read-only link and
+    // its revoke — also free, no plan gate, same reason: this is the
+    // project the account already owns, not a new thing being sold.
+    routes: ["projects", "projects/[id]", "projects/[id]/members", "projects/[id]/share", "flows", "flows/[id]/steps"],
     charges: false,
     enforcedIn: "src/app/api/projects/route.ts",
     enforcedSymbol: "maxProjectsForPlan",
@@ -920,6 +930,11 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "integrations/[provider]",
       "integrations/[provider]/connect",
       "integrations/[provider]/callback",
+      // Telegram is a connection on this same screen but not an OAuth
+      // provider (src/components/integrations/telegram-connect.tsx says
+      // why it is not in PROVIDERS). It charges nothing: connecting a chat
+      // and disconnecting it are both free.
+      "telegram/link",
     ],
     charges: false,
     enforcedIn: "src/lib/integrations/limits.ts",
@@ -935,8 +950,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
   // «Τα δικά μου» (2026-10-22, the owner's message after #332): a
   // read-only aggregator over the account's own rows across every
   // tool — Library's 7 sources plus chat, coding, finance, sales and
-  // trading. Browsing and deleting its own sessions cost nothing; only
-  // asking a question in words reserves credits, the same shape as
+  // trading. Browsing, reading a selected row's own details (Κομμάτι 4,
+  // 2026-10-28) and deleting its own sessions cost nothing; only asking a
+  // question in words reserves credits, the same shape as
   // Coding's own "coding/run" above. No sidebar row; its square is the
   // first of the final All tools grid (lib/nav/all-tools.ts), open to
   // everyone since 2026-10-23, and not sold as a plan row yet, the same
@@ -949,7 +965,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "open to everyone since 2026-10-23 (no switch); the plan tier is the owner's to confirm, " +
       "so it is published as a row when he does",
     pages: ["my-stuff"],
-    routes: ["my-stuff/ask", "my-stuff/browse", "my-stuff/sessions/[id]"],
+    routes: ["my-stuff/ask", "my-stuff/browse", "my-stuff/sessions/[id]", "my-stuff/details"],
     charges: true,
     enforcedIn: "src/app/api/my-stuff/ask/route.ts",
     enforcedSymbol: "reserveCredits",
@@ -972,7 +988,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "open to everyone since 2026-10-27 (no switch; a Free account may keep one app); the allowance " +
       "per plan is the owner's to confirm, so it is published as a row when he does",
     pages: ["rebuild"],
-    routes: ["rebuild", "rebuild/[id]", "rebuild/[id]/download"],
+    routes: ["rebuild", "rebuild/features", "rebuild/[id]", "rebuild/[id]/download"],
     charges: true,
     enforcedIn: "src/lib/rebuild/charge.ts",
     enforcedSymbol: "reserveCredits",
@@ -1304,10 +1320,11 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "make",
     minPlan: "starter",
     pages: ["app-builder"],
-    charges: false,
-    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): not built — a real generator (screens, saved data, a working form/list) rather than the manually-typed tracker /dashboard/apps already is. Published when ready flips to true.",
-    enforcedIn: "src/lib/nav/all-tools.ts",
-    enforcedSymbol: 'href: "/dashboard/app-builder", ready: false',
+    routes: ["apps", "apps/[id]"],
+    charges: true,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): being built piece by piece behind the switch 'apps-tool' (2026-10-24). The planner charges those it is open to, so `charges` is true; the tile stays Coming Soon, and the row unsold, until every piece passes. Published when ready flips to true.",
+    enforcedIn: "src/lib/apps/charge.ts",
+    enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "cross" }),
   },
   {
@@ -1355,6 +1372,17 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "cross" }),
   },
   {
+    id: "threeD",
+    group: "make",
+    minPlan: "starter",
+    pages: ["3d"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): the screen is built behind the switch '3d-tool' (the owner's '23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ', 2026-10-31, Κομμάτι 2, docs/3D-PROVIDERS.md) but no photo-to-3D provider key from the owner yet. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/3d", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
     id: "audio",
     group: "make",
     minPlan: "starter",
@@ -1370,8 +1398,9 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "run",
     minPlan: "growth",
     pages: ["iowork"],
+    routes: ["iowork/devices", "iowork/devices/[id]", "iowork/pair", "iowork/pair/token"],
     charges: false,
-    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): needs the owner's approval of the security plan (docs/IOWORK-SECURITY-PLAN.md) and signed desktop apps. Published when ready flips to true.",
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false). The security plan is approved (docs/IOWORK-SECURITY-PLAN.md, 2026-10-25) and the account's half of pairing is built behind the switch \"iowork-tool\", but there is no desktop app yet and no signing accounts (docs/IOWORK-TECH.md). The four routes above charge nothing: connecting a computer is not a model call. Published when ready flips to true, which the owner has said waits for an independent security review.",
     enforcedIn: "src/lib/nav/all-tools.ts",
     enforcedSymbol: 'href: "/dashboard/iowork", ready: false',
     cell: () => ({ type: "cross" }),
@@ -1381,11 +1410,16 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "ask",
     minPlan: "free",
     pages: ["translate"],
-    routes: ["tools/notify"],
-    charges: false,
-    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): not built as its own tool — today it is only the Translate button inside Documents and the Site builder, both behind the `translate` switch. Published when ready flips to true.",
-    enforcedIn: "src/lib/nav/all-tools.ts",
-    enforcedSymbol: 'href: "/dashboard/translate", ready: false',
+    // "translate/text" (the standalone tool's own route, 2026-10-24) is
+    // built and charges, piece by piece, behind "translate-tool"
+    // (src/lib/flags/flags.ts) — but the tile stays Coming Soon
+    // (all-tools.ts, ready: false) until every piece checks out, which is
+    // what `notSold` below still names.
+    routes: ["tools/notify", "translate/text", "translate/text/edit", "translate/glossary"],
+    charges: true,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): the standalone tool is being built piece by piece behind the switch `translate-tool` — see src/app/dashboard/translate/page.tsx. Published when every piece checks out and ready flips to true.",
+    enforcedIn: "src/app/api/translate/text/route.ts",
+    enforcedSymbol: "reserveCredits",
     cell: () => ({ type: "cross" }),
   },
   {

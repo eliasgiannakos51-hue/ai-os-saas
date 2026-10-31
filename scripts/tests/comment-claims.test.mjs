@@ -285,7 +285,65 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // its own PRODUCT_WORDS comment — explains which Greek-page loanwords
   // are pre-existing ("sites", "trading") versus this round's own
   // ("Podcast", "Voice-over", "Quiz", "Flashcards"), also a decision.
-  const CENSUS_CEILING = 75;
+  // 75 -> 76 ON 2026-10-25: src/app/api/iowork/pair/route.ts, "Low entropy
+  // by design, because a person has to retype it". The clearest kind of
+  // entry this census is for: eight characters is weak on purpose, and the
+  // sentence exists so the next reader does not "fix" it by lengthening
+  // the code — the strength is in the 32-byte claim secret beside it and
+  // in the limiter on the claim, both named in the same comment. Removing
+  // the line would leave the weakness looking like an oversight.
+  // 76 -> 77 ON 2026-10-28: src/app/api/iowork/devices/route.ts,
+  // actOnPairing's own docblock, "api/iowork/pair has no session by
+  // design (nothing exists to sign in as yet)" — explaining why the
+  // device-code-phishing fix below it (preview/confirm/cancel, found by
+  // the same day's independent review) has to exist at all: the route
+  // cannot require a session, so it cannot rely on one to stop a stranger
+  // claiming someone else's code. A decision with its reason in the same
+  // block, not a limitation left unexplained.
+  // 77 -> 78 ON 2026-10-28: src/app/dashboard/my-stuff/page.tsx, "no AI
+  // answer yet (that is Κομμάτι 2's own piece), so for now the text seeds
+  // the plain search box instead of going unread" — the owner's own
+  // piece-by-piece order (docs/TOOL-RULES.md), not a gap left quiet: the
+  // reason (instead of leaving ?ask= unread) is in the same sentence.
+  // 78 -> 79 ON 2026-10-28: src/app/dashboard/projects/page.tsx, the same
+  // shape one piece later — "There is no AI step here yet (Κομμάτι 6's
+  // own piece), so for now the text seeds the new-project goal field
+  // instead of going unread". Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 replaced the
+  // page flow-shell.tsx used to mount, which is what used to read ?ask=;
+  // the reason it is read differently now, not left unread, is in the
+  // same sentence.
+  // 79 -> 80 ON 2026-10-28: scripts/tests/projects-workspace.prodtest.mjs's
+  // own PROJECT_LIMIT_FREE env override, "already over it, by design, and
+  // Κομμάτι 1 is about the layout, not the cap" — the test seeds two
+  // projects for a free-plan account whose real cap is 1 (lifting the cap
+  // for the test only), and says why in the next clause; the scanner
+  // marks it NO REASON GIVEN because its reason regex does not match this
+  // phrasing, not because one is missing (this file's own precision note
+  // applies: ~1 in 5 by hand).
+  // 80 -> 81 ON 2026-10-31: scripts/tests/all-tools-final-grid.prodtest.mjs,
+  // the new PRODUCT_WORDS entry for "3D" ("identical in el per
+  // check-i18n.js's own INTENTIONALLY_IDENTICAL — a universal term, not a
+  // missed translation"). The PHRASES scan matches "intentionally" as a
+  // plain substring, and the SYMBOL NAME `INTENTIONALLY_IDENTICAL` (not
+  // the English word, used as prose, anywhere in the comment) contains
+  // it — the same false-positive shape check-i18n.js's own two older
+  // comments already carry at lines 697 and 719 of that file, already
+  // inside this ceiling before this round. The actual decision (the "D"
+  // in the exemption list is a false positive from the tile's own name
+  // "3D", not English leaking onto the Greek page) is explained in full
+  // in the same comment block.
+  // 81 -> 82 ON 2026-10-31: scripts/check-i18n.js again, and the SAME
+  // false positive as the entry directly above rather than a new one. Its
+  // new LOCALE_ALLOWED comment (Telegram κομμάτι 1: «Ionexa in Telegram»
+  // is the German sentence too, while Italian took «su Telegram», which
+  // is why the entry is per-locale) names the symbol
+  // `INTENTIONALLY_IDENTICAL` to say which of the two mechanisms it is
+  // NOT — and PHRASES matches "intentionally" as a plain substring, so
+  // the symbol name scores as a limitation phrase. That is the third
+  // comment in that one file to be counted for containing the name of
+  // one of its own constants; the honest reading of this ceiling is that
+  // roughly three of its eighty-two are this, not a limitation at all.
+  const CENSUS_CEILING = 82;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

@@ -35,6 +35,44 @@ export function isProjectStatus(value: unknown): value is ProjectStatus {
   return typeof value === "string" && (PROJECT_STATUSES as readonly string[]).includes(value);
 }
 
+/**
+ * ProjectHeader/ProjectMemberView live here, not in
+ * components/projects/project-detail.tsx where they used to — THIS file
+ * has no client component anywhere in its own import graph, and that
+ * file does: Projects Κομμάτι 7's own public page, src/app/shared/[token]/
+ * page.tsx, imports lib/projects/load-project-detail.ts for the server
+ * data loader alone, but that loader's type-only import of these two
+ * types from project-detail.tsx was enough for scripts/lib/route-graph.mjs's
+ * reachability walk (which does not distinguish `import type` from a
+ * real one — the same shape Projects Κομμάτι 6 already hit once for
+ * FlowRow, see lib/flows/plan.ts's own comment) to mark project-detail.tsx
+ * and project-flow-field.tsx — both unbounded client components — as
+ * reachable from the marketing group, the one group message-slices.ts
+ * requires to have NONE.
+ */
+export type ProjectMemberView = {
+  table: string;
+  id: string;
+  slug: string;
+  titleKey: string;
+  headline: string;
+  createdAt: string;
+};
+
+export type ProjectHeader = {
+  id: string;
+  name: string;
+  goal: string | null;
+  notes: string | null;
+  status: ProjectStatus;
+  primaryColour: string | null;
+  secondaryColour: string | null;
+  createdAt: string;
+  /** Κομμάτι 7 — the live read-only link, already built absolute (getSiteUrl()
+   *  in load-project-detail.ts), or null when nothing is currently shared. */
+  shareUrl: string | null;
+};
+
 export const MAX_NAME_CHARS = 120;
 export const MIN_NAME_CHARS = 2;
 export const MAX_GOAL_CHARS = 2_000;
@@ -50,6 +88,15 @@ export function checkProjectName(raw: unknown): NameVerdict {
 
 export function clampGoal(raw: unknown): string {
   return String(raw ?? "").trim().slice(0, MAX_GOAL_CHARS);
+}
+
+// «What Ionexa knows» (Κομμάτι 4) — longer than a goal, same shape:
+// free text, trimmed, clamped, never rejected (an empty string clears
+// it, same as clampGoal already does for the goal field).
+export const MAX_NOTES_CHARS = 4_000;
+
+export function clampNotes(raw: unknown): string {
+  return String(raw ?? "").trim().slice(0, MAX_NOTES_CHARS);
 }
 
 /**
@@ -198,6 +245,38 @@ export function projectModuleTables(members: ReadonlyArray<ProjectMemberRef>): s
 export function projectContextModules(members: ReadonlyArray<ProjectMemberRef>): string[] {
   const scanned = new Set(CLASSIFIER_MODULES.map((m) => m.table));
   return projectModuleTables(members).filter((t) => scanned.has(t));
+}
+
+/**
+ * «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 3 — THE FIVE COUNT BOXES, and the
+ * table each one reads. "ίδιοι αριθμοί με το My Stuff" (the owner's own
+ * words) is a claim about WHICH TABLE, not just which number — so each
+ * entry here names the exact same table My Stuff's own registry reads
+ * for that kind, checked structurally in projects.test.mjs rather than
+ * trusted by eye: `site`/`posts`/`documents` against
+ * `lib/library/sources.ts`'s own `site`/`posts`/`document` entries,
+ * `images` against `lib/my-stuff/sources.ts`'s own `images` entry.
+ *
+ * `video` HAS NO SUCH ENTRY TO CHECK AGAINST — Video (task #90-97,
+ * `docs/NEEDS-FROM-ELIAS.md`) is a provider-comparison table today, no
+ * generator writes a row yet. `ai_videos` is real (the baseline schema,
+ * already read by this very file's own `RESULT_TABLES` above) and this
+ * box reads it honestly: zero now, because nothing makes a video yet,
+ * not a placeholder standing in for a number nobody can compute.
+ */
+export const PROJECT_KIND_TABLES: ReadonlyArray<{ kind: "site" | "posts" | "images" | "video" | "documents"; table: string }> = [
+  { kind: "site", table: "user_websites" },
+  { kind: "posts", table: "generated_posts" },
+  { kind: "images", table: "generated_images" },
+  { kind: "video", table: "ai_videos" },
+  { kind: "documents", table: "user_documents" },
+];
+
+/** One count per PROJECT_KIND_TABLES entry, over this project's own members. */
+export function projectKindCounts(members: ReadonlyArray<ProjectMemberRef>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const { kind, table } of PROJECT_KIND_TABLES) out[kind] = members.filter((m) => m.table === table).length;
+  return out;
 }
 
 // ---------------------------------------------------------------------

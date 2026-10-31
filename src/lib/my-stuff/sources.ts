@@ -20,6 +20,15 @@ import { getFavoritableByTable } from "@/lib/favoritable";
  * names by hand as what must still be found here once they leave their
  * own grid square.
  *
+ * KΟΜΜΑΤΙ 3 ADDS THREE MORE (2026-10-28, filters: All/Documents/Images/
+ * Data/More[...]/Project/Sort) — `images` (generated_images, the real
+ * Image tool's own table, already shipped), `meetings` (meetings, also
+ * shipped), and `apps` (user_apps, the Apps tool, still behind the
+ * `apps-tool` flag — see that source's own comment below for why it needs
+ * no flag check written HERE). None of the three had a My Stuff entry
+ * before this round; see docs/PROGRESS.md's Κομμάτι 3 entry for the
+ * per-kind bucket mapping this unlocks.
+ *
  * `MyStuffKind` is deliberately its OWN union rather than an extension of
  * `LibraryKind` — the Library's own gate (scripts/tests/library.test.mjs)
  * holds `LibraryKind` to exactly the seven kinds it lists, and widening
@@ -27,7 +36,7 @@ import { getFavoritableByTable } from "@/lib/favoritable";
  * claims to cover.
  */
 
-export type MyStuffKind = LibraryKind | "chat" | "coding" | "finance" | "sales" | "trading";
+export type MyStuffKind = LibraryKind | "chat" | "coding" | "finance" | "sales" | "trading" | "images" | "meetings" | "apps";
 
 export type MyStuffSource = {
   kind: MyStuffKind;
@@ -134,6 +143,51 @@ const trading: MyStuffSource = {
   hrefFor: favoriteHref("trades", "/dashboard/trading"),
 };
 
+// THE THREE KΟΜΜΑΤΙ 3 ADDS. generated_images and meetings are real,
+// shipped tables with rows today; user_apps is real too, but the ONLY
+// screen that can write one (app-builder/page.tsx) renders nothing for an
+// account without the `apps-tool` flag (lib/flags/flags.ts) — so an
+// account that never had the flag never has a row here either, and no
+// extra gate is needed in THIS file for that to be true.
+const images: MyStuffSource = {
+  kind: "images",
+  table: "generated_images",
+  columns: "id, prompt, created_at",
+  // No separate body column — the prompt IS the whole record, same as
+  // `sales`'s lead_name below.
+  contentColumns: "",
+  titleOf: (row) => myStuffText(row.prompt),
+  timeColumn: "created_at",
+  keep: (row) => row.status !== "failed",
+  hrefFor: favoriteHref("generated_images", "/dashboard/images"),
+};
+
+const meetings: MyStuffSource = {
+  kind: "meetings",
+  table: "meetings",
+  columns: "id, title, created_at",
+  contentColumns: "transcript",
+  titleOf: (row) => myStuffText(row.title),
+  timeColumn: "created_at",
+  keep: () => true,
+  // No favoritable.ts entry and no per-meeting dashboard route exists yet
+  // (src/components/meetings/meetings-workspace.tsx keeps the open one in
+  // client state, not a URL) — the same situation `coding` is already in
+  // above, same fallback shape.
+  hrefFor: favoriteHref("meetings", "/dashboard/meetings"),
+};
+
+const apps: MyStuffSource = {
+  kind: "apps",
+  table: "user_apps",
+  columns: "id, title, created_at",
+  contentColumns: "description",
+  titleOf: (row) => myStuffText(row.title),
+  timeColumn: "created_at",
+  keep: () => true,
+  hrefFor: favoriteHref("user_apps", "/dashboard/app-builder"),
+};
+
 export const MY_STUFF_SOURCES: readonly MyStuffSource[] = [
   ...FROM_LIBRARY,
   chat,
@@ -141,6 +195,9 @@ export const MY_STUFF_SOURCES: readonly MyStuffSource[] = [
   finance,
   sales,
   trading,
+  images,
+  meetings,
+  apps,
 ];
 
 export const MY_STUFF_KINDS: readonly MyStuffKind[] = MY_STUFF_SOURCES.map((s) => s.kind);

@@ -211,6 +211,24 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "rebuild_projects", label: "rebuild_projects", scope: "user_content" },
   // The Coming Soon screen's "Notify me": which not-ready tools this person asked about.
   { table: "tool_notify_subscriptions", label: "tool_notify_subscriptions", scope: "user_content" },
+  // The standalone Translate tool's glossary: words this person said to keep
+  // exactly as written in every translation.
+  { table: "translate_glossary", label: "translate_glossary", scope: "user_content" },
+  { table: "user_apps", label: "user_apps", scope: "user_content" },
+  // iowork (Φάση 1, 2026-10-25): which computers this account connected,
+  // what they are called and which operating system they run. It holds no
+  // path and no file name — IOWORK-SECURITY-PLAN §4 keeps all of that on
+  // the computer — so this is the whole of what an export can carry, and
+  // it is genuinely theirs: the names they gave their own machines.
+  { table: "iowork_devices", label: "iowork_devices", scope: "user_content" },
+  // Telegram (the owner's directive 24, κομμάτι 1, 2026-10-31): which
+  // Telegram chat this account connected, and the name it goes by. The chat
+  // id itself is in two unreadable shapes — a keyed HMAC and ciphertext
+  // (src/lib/telegram/identity.ts) — so what an export can honestly carry
+  // is the Telegram name and username, which are the person's own and are
+  // what they would need to recognise the row. An erasure takes the whole
+  // row, and with it the chat's ability to command the account.
+  { table: "telegram_links", label: "telegram_links", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what
@@ -228,6 +246,11 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // meeting row would make them indistinguishable from the proposals in
   // `meetings.proposed_actions`, which nobody agreed to.
   { table: "meeting_actions", label: "meeting_actions", scope: "user_content" },
+  // Κομμάτι 6: every question asked about a meeting, and the answer it
+  // got — the same reason data_analysis_questions is its own row below:
+  // a person's own words to the product, not data about the meeting
+  // itself.
+  { table: "meeting_questions", label: "meeting_questions", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
   { table: "ai_websites", label: "ai_website_entries", scope: "user_content" },
 
@@ -540,6 +563,29 @@ export const NON_PERSONAL_TABLES = [
   // answered. gdpr-coverage.test.mjs holds that sweep in place; without
   // it this entry would be wrong again.
   "rate_limit_log",
+  // iowork pairings: a code, two hashes, an operating system and a label,
+  // alive for ten minutes (PAIRING_TTL_MINUTES, src/lib/iowork/pairing.ts).
+  //
+  // THE SAME REASON AS rate_limit_log ABOVE, and it has to be the real one:
+  // not "no personal data" — a claimed row does carry a user_id — but that
+  // nothing in this table survives to be handed over or erased.
+  // api/cron/scheduled-runs deletes every row past an hour, which is six
+  // times the longest a pairing can be useful. The computer that pairing
+  // produced IS exported and erased: iowork_devices, listed above.
+  "iowork_pairings",
+  // Telegram pairings: an eight-character code and, for at most ten
+  // minutes, the name of whichever chat presented it
+  // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts).
+  //
+  // THE SAME ARGUMENT AS iowork_pairings ABOVE, and it is load-bearing
+  // rather than decorative: a row here DOES carry a user_id and, once a
+  // chat has presented the code, a Telegram display name — so "no personal
+  // data" would be false. What is true is that nothing survives:
+  // api/cron/scheduled-runs deletes every row past an hour, six times the
+  // longest a pairing can be useful, and that delete is the reason this
+  // entry is allowed to be here. The connection a pairing produces IS
+  // exported and erased: telegram_links, listed above.
+  "telegram_pairings",
   // Keyed by team + invited email; rows belong to the team owner's
   // account and are covered via the team tables' own cascade.
   "team_members",

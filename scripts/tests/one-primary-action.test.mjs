@@ -375,7 +375,15 @@ const BASELINE_NOTE = "one per surface; lower to 0 is fine, raising needs a reas
 const BASELINE = {
   "dashboard/[module]/page.tsx": 1,
   "dashboard/affiliate/page.tsx": 1,
-  "dashboard/agents/page.tsx": 1,
+  // TWO, and the second is what the whole screen is about (2026-10-31,
+  // Κομμάτι 1 of the owner's directive 25: «Μπάρα: κατάσταση, "Run now",
+  // ένα λευκό κουμπί»). One is the field's send, which every tool in the
+  // shell has. The other is Παύση/Συνέχιση in the work area's bar —
+  // whether this agent runs on its schedule at all — and it exists only
+  // while an agent is open, which is a moment the landing never shows.
+  // Run now beside it is a 44px icon action (ACTION), not a filled
+  // control, exactly so this stays at two.
+  "dashboard/agents/page.tsx": 2,
   "dashboard/apps/page.tsx": 1,
   "dashboard/business-health/page.tsx": 1,
   "dashboard/campaigns/page.tsx": 1,
@@ -393,6 +401,30 @@ const BASELINE = {
   // ONE: the field's send. A plan below the tool's meets the wall,
   // returned early (since 2026-10-23 the old ideas list is gone).
   "dashboard/images/page.tsx": 1,
+  // ONE: the field's send. The real shell (ToolShell) renders only for
+  // the switch "translate-tool"; everyone else still gets the Coming
+  // Soon screen, baseline 0 — 2026-10-24, piece 1 of the standalone
+  // Translate tool.
+  "dashboard/translate/page.tsx": 1,
+  // ONE: the field's send, in the shell the App builder is born in.
+  // Everyone the switch "apps-tool" is not open to gets the Coming Soon
+  // screen, and an account without the Site's plan gets the wall —
+  // neither draws a filled control. 2026-10-24, κομμάτι 2 of Apps.
+  "dashboard/app-builder/page.tsx": 1,
+  // ONE: the field's send, in the shell Editing is born in. Everyone the
+  // switch "editing-tool" is not open to gets the Coming Soon screen,
+  // which draws no filled control. 2026-10-30, κομμάτι 2 of Editing.
+  "dashboard/editing/page.tsx": 1,
+  // ONE: the field's send, in the shell Films is born in. Everyone the
+  // switch "films-tool" is not open to gets the Coming Soon screen,
+  // which draws no filled control. 2026-10-30, κομμάτι 2 of Films.
+  "dashboard/films/page.tsx": 1,
+  // ONE: the field's send, in the shell 3D is born in. Everyone the
+  // switch "3d-tool" is not open to gets the Coming Soon screen, which
+  // draws no filled control. "Make final" on the work screen is styled
+  // `btn-outline` (not the accent class), disabled — it never adds a
+  // second one. 2026-10-31, κομμάτι 2 of 3D.
+  "dashboard/3d/page.tsx": 1,
   // ONE: the field's send. The page is Games (package 26), born in the
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.
@@ -401,9 +433,13 @@ const BASELINE = {
   // shell, for everybody.
   "dashboard/rebuild/page.tsx": 1,
   "dashboard/integrations/page.tsx": 1,
-  // ONE: the field's send. The page is «Τα δικά μου» (2026-10-22), born
-  // in the shell, open to everybody since 2026-10-23.
-  "dashboard/my-stuff/page.tsx": 1,
+  // ZERO since 2026-10-28, «1. MY STUFF: ΝΕΑ ΟΘΟΝΗ», Κομμάτι 1: the old
+  // chat shell's filled send button is gone with the shell itself — the
+  // new list+details screen has no field yet (Κομμάτι 2), and its Open
+  // link and history button are both the outline/icon style, same as
+  // everywhere else the owner's quality criteria ask for fewer filled
+  // controls, not more.
+  "dashboard/my-stuff/page.tsx": 0,
   // V6 #1. ONE, and it is Keep — the action the feature is named for and
   // the only one on the page that writes a row somebody reads tomorrow.
   // Transcribe is an outline control on purpose; see the comment at that
@@ -433,8 +469,19 @@ const BASELINE = {
   "dashboard/predictions/page.tsx": 1,
   "dashboard/presentations/page.tsx": 1,
   "dashboard/product-workflow/page.tsx": 1,
-  "dashboard/projects/page.tsx": 1,
-  "dashboard/projects/[id]/page.tsx": 1,
+  // 1 -> 2 on 2026-10-28 (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1): FlowShell
+  // (budget 1, below) no longer mounts here. The page now shows
+  // projects-shell.tsx's own "Create project" button alongside
+  // project-detail.tsx's "Start chat" link — two real, different
+  // actions (make a folder; start working in the one that's open),
+  // not one loud screen with a second control nobody asked for.
+  // 2 -> 3 on 2026-10-28, same day (Κομμάτι 6, "κάτω πεδίο που φτιάχνει
+  // μέσα στο project"): project-flow-field.tsx's own send button, a
+  // third real, different action (plan one sentence into the open
+  // project) — not a restyle of either control above it.
+  "dashboard/projects/page.tsx": 3,
+  // Now a bare redirect (?id= into the page above) — no UI, no control.
+  "dashboard/projects/[id]/page.tsx": 0,
   "dashboard/published/page.tsx": 1,
   // ZERO, AND IT IS THE HONEST NUMBER RATHER THAN A WIN. /reflection
   // renders one component, reflection-generator.tsx, whose "write it"
@@ -526,13 +573,12 @@ const REPLACEMENT_SURFACES = [
     walk: true,
     why: "Automations in the shell (package 30): the field's send makes an automation or changes the chosen box; try, run, switch on and approve are quiet panels",
   },
-  {
-    file: "src/components/flows/flow-shell.tsx",
-    tag: "<FlowShell",
-    budget: 1,
-    walk: true,
-    why: "Flows on the Projects page (package 36): the field's send makes the plan; approve, open and again are quiet panels",
-  },
+  // flow-shell.tsx's entry retired 2026-10-28: Projects ΝΕΑ ΟΘΟΝΗ
+  // Κομμάτι 1 replaced it as what /dashboard/projects mounts (owner's
+  // own answer to the direct question, docs/PROGRESS.md), so it has no
+  // caller left to walk — a declared replacement surface nothing
+  // renders is a dead exception, not a passing one. The file itself is
+  // untouched, a likely home for Κομμάτι 6's own bottom field.
   {
     file: "src/components/onboarding/first-task.tsx",
     tag: "<FirstTask",

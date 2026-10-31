@@ -250,6 +250,16 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   // call with its own cost shape, so it gets its own key rather than
   // being folded into a margin that was decided about speech.
   meetingAnalyse: "meeting_analyse",
+  // A follow-up question about the SAME meeting (Κομμάτι 6) settles under
+  // the SAME feature key as reading it in the first place — the same
+  // reason dataQuestion shares data_analysis with dataAnalyse rather than
+  // getting its own key the way myStuffAsk does: this is a follow-up on
+  // one resource already billed under this key, not a standalone tool.
+  meetingAsk: "meeting_analyse",
+  // Its own key, not folded into document_translate: a single-paragraph
+  // edit costs a fraction of a whole translation, and a shared margin key
+  // would let that mismatch hide inside one number.
+  textTranslateEdit: "text_translate_edit",
   // The three depth tiers settle under the SAME feature as the untiered
   // profile, so CREDIT_MARGIN_AGENT_RUN still governs all of them — a
   // per-tier margin key would let one tier quietly drop below the floor
@@ -301,8 +311,16 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   gameWrite: "game_generate",
   gameBoxEdit: "game_edit",
   gameChange: "game_edit",
+  // APPS, 2026-10-24: planning an app and changing one of its four
+  // boxes are the same product decision — both are the planner, and the
+  // box change is the smaller half of it — so they settle as one
+  // feature rather than two that could be priced apart by accident.
+  appPlan: "app_generate",
+  appBoxEdit: "app_generate",
   // Rebuild, 2026-10-27: planning and writing an app settle as one
   // feature, changing it as another, the way Games does.
+  rebuildFeatures: "rebuild_generate",
+  rebuildAppLogic: "rebuild_generate",
   rebuildPlan: "rebuild_generate",
   rebuildBuild: "rebuild_generate",
   rebuildBoxEdit: "rebuild_edit",

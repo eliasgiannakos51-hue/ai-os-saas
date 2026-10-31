@@ -15,10 +15,14 @@ import {
   parsePlan,
   planMessage,
   type RebuildBoxKind,
+  type RebuildBrandHint,
   type RebuildPlan,
 } from "@/lib/rebuild/rebuild-plan";
 import { checkAppHtml, type AppCheck } from "@/lib/rebuild/rebuild-html";
 import { rebuildSystemPrompt } from "@/lib/rebuild/rebuild-system";
+import { FEATURES_MAX_TOKENS, FEATURES_TOOL, featuresMessage, parseFeatures } from "@/lib/rebuild/rebuild-features";
+import { planApp as planAppDefinition } from "@/lib/apps/app-call";
+import type { AppDefinition } from "@/lib/apps/app-plan";
 
 /**
  * REBUILD'S CALLS TO THE MODEL: plan it, change one box, write it, change
@@ -70,11 +74,19 @@ async function call(params: { message: string; tool: Tool; maxTokens: number; co
 const safe = (check: AppCheck): RebuildCallResult<string> =>
   check.ok ? { ok: true, value: check.html } : { ok: false, kind: "unusable", detail: `not a safe app: ${check.reason}${check.what ? ` (${check.what})` : ""}` };
 
-export async function planApp(params: { description: string; locale: string; reference?: string | null; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<RebuildPlan>> {
-  const out = await call({ ...params, message: planMessage(params.description, params.locale, params.reference), tool: PLAN_TOOL, maxTokens: PLAN_MAX_TOKENS });
+export async function planApp(params: { description: string; locale: string; reference?: string | null; features?: readonly string[]; brand?: RebuildBrandHint | null; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<RebuildPlan>> {
+  const out = await call({ ...params, message: planMessage(params.description, params.locale, params.reference, params.features, params.brand), tool: PLAN_TOOL, maxTokens: PLAN_MAX_TOKENS });
   if (!out.ok) return out;
   const parsed = parsePlan(out.value, params.description.slice(0, 60));
   return parsed.ok ? { ok: true, value: parsed.plan } : { ok: false, kind: "unusable", detail: parsed.reason };
+}
+
+/** The capabilities apps like this one typically have — Κομμάτι 2, shown before the plan, folded in as the person edits them. */
+export async function deriveFeatures(params: { description: string; locale: string; reference?: string | null; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<string[]>> {
+  const out = await call({ ...params, message: featuresMessage(params.description, params.locale, params.reference), tool: FEATURES_TOOL, maxTokens: FEATURES_MAX_TOKENS });
+  if (!out.ok) return out;
+  const parsed = parseFeatures(out.value);
+  return parsed.ok ? { ok: true, value: parsed.features } : { ok: false, kind: "unusable", detail: parsed.reason };
 }
 
 export async function rewriteAppBox(params: { plan: RebuildPlan; kind: RebuildBoxKind; instruction: string; locale: string; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<string>> {
@@ -84,8 +96,21 @@ export async function rewriteAppBox(params: { plan: RebuildPlan; kind: RebuildBo
   return typeof text === "string" && text.trim() ? { ok: true, value: text } : { ok: false, kind: "unusable", detail: "the box came back empty" };
 }
 
-export async function writeApp(params: { plan: RebuildPlan; locale: string; reference?: string | null; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<string>> {
-  const out = await call({ ...params, message: buildMessage(params.plan, params.locale, params.reference), tool: APP_TOOL, maxTokens: APP_MAX_TOKENS });
+/**
+ * Κομμάτι 3's «App logic» phase (2026-10-29): Apps' OWN planner
+ * (lib/apps/app-call.ts, which is itself lib/apps/app-plan.ts's caller),
+ * called as a library — its own model, its own system prompt, its own
+ * forced tool, its own parseDefinition. No Apps project is ever created:
+ * the definition this returns is saved on the REBUILD row
+ * (rebuild_projects.app_definition) and read back by writeApp below.
+ * Apps' own ready flag and tile are untouched by this call.
+ */
+export async function planAppLogic(params: { description: string; locale: string; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<AppDefinition>> {
+  return planAppDefinition(params);
+}
+
+export async function writeApp(params: { plan: RebuildPlan; locale: string; reference?: string | null; appDefinition?: AppDefinition | null; costs: CostAccumulator; userId?: string; signal?: AbortSignal }): Promise<RebuildCallResult<string>> {
+  const out = await call({ ...params, message: buildMessage(params.plan, params.locale, params.reference, params.appDefinition), tool: APP_TOOL, maxTokens: APP_MAX_TOKENS });
   if (!out.ok) return out;
   return safe(checkAppHtml((out.value as { html?: unknown })?.html));
 }

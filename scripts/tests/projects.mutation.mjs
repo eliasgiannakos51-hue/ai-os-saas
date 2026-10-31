@@ -29,7 +29,9 @@ const KG = "src/lib/knowledge-graph.ts";
 const CTX = "src/lib/user-context.ts";
 const CHAT_ROUTE = "src/app/api/chat/route.ts";
 const CONV_SCOPE = "src/lib/projects/conversation-scope.ts";
-const DETAIL_PAGE = "src/app/dashboard/projects/[id]/page.tsx";
+// Moved out of [id]/page.tsx (now a redirect) and into this loader by
+// Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 (2026-10-28) — same logic, new address.
+const DETAIL_PAGE = "src/lib/projects/load-project-detail.ts";
 const DOC = "docs/projects.md";
 
 // ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, point 6).
@@ -312,7 +314,7 @@ const MUTANTS = [
   {
     name: "the document goes back to a total nobody counted",
     file: DOC,
-    from: "> It now lists **30**",
+    from: "> It now lists **33**",
     to: "> It now lists **19**",
     expect: "docs/projects.md prints the real total",
   },

@@ -163,7 +163,7 @@ console.log("\n== the COUNTER shows what the CAP enforces ==");
 //      on a cap of 2 disabled the create button the server would have
 //      allowed, and "2 of 2" was printed next to a limit it did not mean.
 {
-  const ws = stripComments(readFileSync("src/components/agents/agents-workspace.tsx", "utf8"));
+  const ws = stripComments(readFileSync("src/components/agents/agents-shell.tsx", "utf8"));
   check(
     "the workspace counts ACTIVE agents",
     /agents\.filter\(\(a\) => a\.status === "active"\)\.length/.test(ws)

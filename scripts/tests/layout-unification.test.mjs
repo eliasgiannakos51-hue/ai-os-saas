@@ -96,11 +96,31 @@ for (const [label, file] of [
   // per-agent actions. That is exactly the moment a surface hand-rolls its
   // own grid and the pattern quietly forks, so it is asserted here as a
   // direct consumer instead of being dropped from the list.
-  ["AI Agents", "src/components/agents/agents-workspace.tsx"],
 ]) {
   const src = read(file);
   checkTrue(`${label}: imports the primitive`, /from "@\/components\/ui\/list-layout"/.test(src));
   checkTrue(`${label}: actually renders it`, /<ListLayout/.test(src));
+}
+
+// AGENTS LEFT THIS LIST BY MOVING INTO THE TOOL SHELL (2026-10-31,
+// Κομμάτι 1 of the owner's directive 25), and the rule it was here for
+// still applies to it — just against a different primitive. It no longer
+// draws a list at all: the list is ToolShell's [◧] column
+// (components/shell/shell-history-column.tsx), which is the shared
+// primitive now. So the same two assertions are made about those two,
+// PLUS the thing the entry above was really guarding against — a surface
+// hand-rolling its own grid next to a shared one.
+{
+  const src = read("src/components/agents/agents-shell.tsx");
+  checkTrue("AI Agents: imports the shell and its shared column", /from "@\/components\/shell\/tool-shell"/.test(src) && /from "@\/components\/shell\/shell-history-column"/.test(src));
+  checkTrue("AI Agents: actually renders both", /<ToolShell\b/.test(src) && /<ShellHistoryColumn\b/.test(src));
+  // THE THING THE OLD ENTRY WAS GUARDING AGAINST, stated as itself: not
+  // "no CSS grid anywhere" (the settings panel and the preview both lay
+  // facts out in two columns, which is not a list), but no SECOND list UI
+  // beside the shared column — no card grid, no pager, no sort toggle of
+  // its own. That is the fork this file exists to catch.
+  checkTrue("AI Agents: and keeps no second list UI beside the shared column",
+    !/<CardGrid\b|<EntityCard\b|<PaginationControls\b|<SortToggle\b|<ListLayout\b/.test(src));
 }
 
 // Indirect consumers: the module pages don't import ListLayout themselves,

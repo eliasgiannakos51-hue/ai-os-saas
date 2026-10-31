@@ -296,7 +296,15 @@ for (const l of favLinks) {
 // one literal `/dashboard/data-analysis?record=` it used to emit is no longer
 // in its source to be counted. The link itself is unchanged and is checked
 // below through REDIRECT_ONLY.
-const DEEP_LINK_FLOOR = 70;
+// 70 -> 71 (2026-10-28): My Stuff's details pane (Κομμάτι 4) asks
+// /api/my-stuff/details?kind=&id= for a selected row's "Made from"/"Used
+// in", read by that route's GET (src/app/api/my-stuff/details/route.ts).
+// 71 -> 72 (2026-10-28): Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 moved the detail
+// view onto /dashboard/projects itself, selected by ?id= (one screen,
+// list left/project right, replacing flow-shell.tsx there); the old
+// /dashboard/projects/<id> link is read back only by that route's own
+// redirect into this one now (src/app/dashboard/projects/[id]/page.tsx).
+const DEEP_LINK_FLOOR = 72;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

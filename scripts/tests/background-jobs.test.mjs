@@ -134,7 +134,7 @@ check(
 // the guarantee is checked in both halves rather than in the prose.
 check("the reaped row is charged zero", /credits_charged: 0,/.test(runJobSrc));
 check("and carries a translatable code, not English prose", /error: "stalled"/.test(runJobSrc));
-const agentsUi = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const agentsUi = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 check(
   "the client renders that code in the user\'s language",
   /job\.error === "stalled" \? t\("buildStalled"\)/.test(agentsUi)
@@ -233,7 +233,7 @@ check(
     listAdminUses === 1 &&
     /createAdminClient\(\)\s*\.from\("ai_jobs"\)\s*\.select\("reservation_id"\)\s*\.eq\("id", String\(activeRow\.id\)\)\s*\.eq\("user_id", user\.id\)/.test(listSrc)
 );
-const workspace = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const workspace = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 check("the agents page asks on mount", /fetch\("\/api\/jobs\?kind=agent_build"\)/.test(workspace));
 check("and adopts the running job", /setJobId\(String\(data\.job\.id\)\)/.test(workspace));
 check(

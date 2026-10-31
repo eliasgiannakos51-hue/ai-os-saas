@@ -238,7 +238,7 @@ check(
 console.log("\n== 4. THE MECHANISM: one design, two settlements ==");
 // Confirmed from the source, not assumed: the client resubmits after the
 // user answers, which is a second POST and therefore a second job.
-const workspace = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const workspace = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 check(
   "answering the questions calls build() again with skipClarification=true",
   /onAnswer=\{[\s\S]{0,200}build\([\s\S]{0,120},\s*true\)/.test(workspace)

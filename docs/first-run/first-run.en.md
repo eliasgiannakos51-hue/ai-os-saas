@@ -1,8 +1,8 @@
 # The first run — en
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **618 strings**. The whole product is 4688, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **619 strings**. The whole product is 5093, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 376 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 377 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -147,7 +147,7 @@ That looks like a question. Should I answer it, or record it?
 
 Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.
 
-## Tier 2 — The labels — skim these (376)
+## Tier 2 — The labels — skim these (377)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -1283,6 +1283,11 @@ What it remembers
 
 
 Analytics
+
+**`sidebar.items.appBuilder`**
+
+
+Apps
 
 **`sidebar.items.apps`**
 

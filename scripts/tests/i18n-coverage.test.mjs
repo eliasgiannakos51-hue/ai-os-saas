@@ -752,9 +752,10 @@ const clientFallbacks = sources.flatMap((f) => [
 //   THE SIXTH IS REACHED, AND IT IS TRANSLATED. A person at their
 //   project ceiling really does press "New project" — so the refusal
 //   carries `code: "project_limit_reached"` and `limit`, and
-//   components/projects/projects-workspace.tsx looks the code up under
-//   projects.errors.limitReached in all ten locales and prints the
-//   number. The English sentence in the body is the log line.
+//   components/projects/projects-shell.tsx (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι
+//   1, 2026-10-28, replaces projects-workspace.tsx) looks the code up
+//   under projects.errors.limitReached in all ten locales and prints
+//   the number. The English sentence in the body is the log line.
 //
 // The regex cannot tell a body that is displayed from one that is not,
 // so the number goes up and the reason is written down.

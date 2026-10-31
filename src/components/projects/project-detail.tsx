@@ -4,29 +4,26 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { MessageCircle, Wand2, X } from "lucide-react";
+import { Link2, Link2Off, MessageCircle, Wand2, X } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
-import { PROJECT_STATUSES, isHexColour, type ProjectStatus } from "@/lib/projects/project";
+import { CopyButton } from "@/components/ui/copy-button";
+import {
+  MAX_GOAL_CHARS,
+  MAX_NAME_CHARS,
+  MAX_NOTES_CHARS,
+  PROJECT_KIND_TABLES,
+  PROJECT_STATUSES,
+  isHexColour,
+  projectKindCounts,
+  type ProjectHeader,
+  type ProjectMemberView,
+  type ProjectStatus,
+} from "@/lib/projects/project";
 import { LIBRARY_SOURCES } from "@/lib/library/sources";
-
-export type ProjectMemberView = {
-  table: string;
-  id: string;
-  slug: string;
-  titleKey: string;
-  headline: string;
-  createdAt: string;
-};
-
-export type ProjectHeader = {
-  id: string;
-  name: string;
-  goal: string | null;
-  status: ProjectStatus;
-  primaryColour: string | null;
-  secondaryColour: string | null;
-  createdAt: string;
-};
+import { ProjectFlowField } from "@/components/projects/project-flow-field";
+import type { FlowRow } from "@/lib/flows/plan";
+import type { FlowPrices } from "@/lib/flows/flow-pricing";
+import type { FlowAvailability } from "@/lib/flows/plan";
 
 /**
  * THE SEVEN SECTIONS ARE SEVEN VIEWS OF ONE LIST.
@@ -93,10 +90,19 @@ export function ProjectDetail({
   project,
   members,
   rowsPerModule,
+  flows,
+  flowPrices,
+  flowAvailable,
+  defaultFlowColour,
 }: {
   project: ProjectHeader;
   members: ProjectMemberView[];
   rowsPerModule: number;
+  /** Κομμάτι 6 — this project's own flows, and what a new one may cost/run. */
+  flows: FlowRow[];
+  flowPrices: FlowPrices | null;
+  flowAvailable: FlowAvailability | null;
+  defaultFlowColour: string | null;
 }) {
   const t = useTranslations("projects");
   const tKey = useTranslations();
@@ -109,6 +115,90 @@ export function ProjectDetail({
     primaryColour: project.primaryColour,
     secondaryColour: project.secondaryColour,
   });
+  // Κομμάτι 2 ("title + goal, hand-editable, persisting after refresh").
+  // name/goal are the project's own, so this mirrors saveColour's
+  // optimistic-update-then-revert shape exactly, not a new pattern.
+  const [name, setName] = useState(project.name);
+  const [goal, setGoal] = useState(project.goal ?? "");
+  // Κομμάτι 4 («What Ionexa knows») — same shape as goal, one field
+  // longer: free text, hand-written, saved on blur. The limit per field
+  // (used only for the too_long toast; clampNotes on the server never
+  // rejects, it truncates, same as clampGoal already does for goal).
+  const [notes, setNotes] = useState(project.notes ?? "");
+  const [savingText, setSavingText] = useState<"name" | "goal" | "notes" | null>(null);
+  // Κομμάτι 7 (Share, read-only link + revoke) — initialised from the
+  // project's own row, so a link made in an earlier session still shows
+  // after a reload rather than reading as "nothing shared" until pressed.
+  const [shareUrl, setShareUrl] = useState(project.shareUrl);
+  const [shareBusy, setShareBusy] = useState(false);
+  const TEXT_FIELD_LIMIT: Record<"name" | "goal" | "notes", number> = {
+    name: MAX_NAME_CHARS,
+    goal: MAX_GOAL_CHARS,
+    notes: MAX_NOTES_CHARS,
+  };
+
+  function originalOf(field: "name" | "goal" | "notes"): string {
+    if (field === "name") return project.name;
+    if (field === "goal") return project.goal ?? "";
+    return project.notes ?? "";
+  }
+
+  async function saveText(field: "name" | "goal" | "notes", value: string) {
+    const original = originalOf(field);
+    if (value === original) return; // nothing changed — no round trip
+    setSavingText(field);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [field]: value }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) {
+        const code = String(body?.error ?? "");
+        addToast(
+          code === "too_short"
+            ? t("errors.tooShort")
+            : code === "too_long"
+              ? t("errors.tooLong", { limit: TEXT_FIELD_LIMIT[field] })
+              : t("errors.failed"),
+          "error"
+        );
+        if (field === "name") setName(original);
+        else if (field === "goal") setGoal(original);
+        else setNotes(original);
+        return;
+      }
+      // THE SIDEBAR LIST ALSO SHOWS THE NAME (ProjectsShell's own rows),
+      // a separate component with its own server-fetched props — a
+      // renamed project only looks renamed there after this. The goal
+      // and notes appear nowhere else on screen, so they skip the round
+      // trip.
+      if (field === "name") router.refresh();
+    } catch {
+      addToast(t("errors.failed"), "error");
+      if (field === "name") setName(original);
+      else if (field === "goal") setGoal(original);
+      else setNotes(original);
+    } finally {
+      setSavingText(null);
+    }
+  }
+
+  // Κομμάτι 3's own kind→label pairing. images/video/documents reuse the
+  // EXACT words dashboard.myStuff.filters already uses for the same three
+  // buckets — "ίδιοι αριθμοί με το My Stuff" doubled as "ίδιες λέξεις",
+  // not a coincidence. site/posts have no My Stuff filter chip of their
+  // own (My Stuff groups sites with apps), so they fall back to each
+  // tool's own canonical name, already translated everywhere else.
+  const KIND_LABEL_KEYS: Record<string, string> = {
+    site: "dashboard.tools.names.site",
+    posts: "dashboard.tools.names.posts",
+    images: "dashboard.myStuff.filters.images",
+    video: "dashboard.myStuff.filters.video",
+    documents: "dashboard.myStuff.filters.documents",
+  };
+  const kindCounts = useMemo(() => projectKindCounts(members), [members]);
 
   const sections = useMemo(
     () => [
@@ -148,6 +238,47 @@ export function ProjectDetail({
     }
   }
 
+  // Κομμάτι 7 — ONE secret per project. Pressing Share again after a
+  // revoke calls the SAME route, which always makes a brand-new token
+  // (api/projects/[id]/share's own POST) — never the old one back.
+  async function createShareLink() {
+    if (shareBusy) return;
+    setShareBusy(true);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}/share`, { method: "POST" });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok || typeof body.url !== "string") {
+        addToast(t("errors.failed"), "error");
+        return;
+      }
+      setShareUrl(body.url);
+    } catch {
+      addToast(t("errors.failed"), "error");
+    } finally {
+      setShareBusy(false);
+    }
+  }
+
+  // "ανάκληση με ένα πάτημα" — the owner's own words: one press, no
+  // confirm dialog. Unlike deleting the project itself, revoking a link
+  // is not destructive to anything — a new one is a press away.
+  async function revokeShareLink() {
+    if (shareBusy) return;
+    setShareBusy(true);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(project.id)}/share`, { method: "DELETE" });
+      if (!res.ok) {
+        addToast(t("errors.failed"), "error");
+        return;
+      }
+      setShareUrl(null);
+    } catch {
+      addToast(t("errors.failed"), "error");
+    } finally {
+      setShareBusy(false);
+    }
+  }
+
   async function removeMember(member: ProjectMemberView) {
     if (busy) return;
     setBusy(true);
@@ -170,10 +301,52 @@ export function ProjectDetail({
 
   return (
     <div className="space-y-6">
+      {/* THE NAME, HAND-EDITABLE. An <input> styled as a heading, not a
+          separate view/edit toggle — the same always-live shape as the
+          colour pickers above and the create form in ProjectsShell,
+          saved on blur (or Enter, which blurs) so a reload never catches
+          an unsaved keystroke. */}
+      <input
+        data-testid="projects-detail-name"
+        aria-label={t("form.name")}
+        value={name}
+        disabled={savingText === "name"}
+        onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_CHARS))}
+        onBlur={() => void saveText("name", name.trim())}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+        className="w-full min-w-0 rounded-item border border-transparent bg-transparent px-1 text-lg font-semibold text-foreground outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
+      />
+
+      {/* Κομμάτι 3's own five count boxes — Site/Posts/Images/Video/
+          Documents, one per PROJECT_KIND_TABLES entry above. Grid, not a
+          row that could wrap: five equal boxes stay five equal boxes on
+          a phone (narrower, never fewer per row — ProjectsShell's detail
+          pane is full-width there already). */}
+      <div className="grid grid-cols-5 gap-2" data-testid="project-kind-counts">
+        {PROJECT_KIND_TABLES.map(({ kind }) => (
+          <div key={kind} className="surface-tight text-center" data-testid={`project-kind-count-${kind}`}>
+            <p className="text-lg font-semibold text-foreground">{kindCounts[kind]}</p>
+            <p className="text-[11px] text-muted">{tKey(KIND_LABEL_KEYS[kind])}</p>
+          </div>
+        ))}
+      </div>
+
       {/* GOAL + PROGRESS */}
       <div className="surface">
         <h2 className="text-sm font-semibold text-foreground">{t("sections.goal")}</h2>
-        <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{project.goal || t("noGoal")}</p>
+        <textarea
+          data-testid="projects-detail-goal"
+          aria-label={t("form.goal")}
+          value={goal}
+          placeholder={t("noGoal")}
+          rows={3}
+          disabled={savingText === "goal"}
+          onChange={(e) => setGoal(e.target.value.slice(0, MAX_GOAL_CHARS))}
+          onBlur={() => void saveText("goal", goal.trim())}
+          className="mt-1 w-full min-w-0 resize-y rounded-item border border-transparent bg-transparent px-1 py-0.5 text-sm text-muted outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
+        />
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted">
           <span>{t(`status.${project.status}`)}</span>
           <span>·</span>
@@ -229,6 +402,73 @@ export function ProjectDetail({
         <p className="mt-1 text-[11px] text-muted">{t("automateIt.hint")}</p>
       </div>
 
+      {/* Κομμάτι 4 («What Ionexa knows») — hand-written, project-scoped
+          memory. Same always-editable textarea shape as the Goal above
+          (saveText's own third field), rendered as its own card so it
+          reads as a distinct, named thing rather than a longer goal.
+          lib/user-context.ts's loadProjectScope reads this column and
+          buildUserContextPromptAddition* renders it into the prompt
+          ONLY for a conversation/create/mission-plan/agent-build scoped
+          to this project — nothing outside this project reads it. */}
+      <div className="surface">
+        <h2 className="text-sm font-semibold text-foreground">{t("notes.heading")}</h2>
+        <textarea
+          data-testid="projects-detail-notes"
+          aria-label={t("notes.heading")}
+          value={notes}
+          placeholder={t("notes.placeholder")}
+          rows={4}
+          disabled={savingText === "notes"}
+          onChange={(e) => setNotes(e.target.value.slice(0, MAX_NOTES_CHARS))}
+          onBlur={() => void saveText("notes", notes.trim())}
+          className="mt-1 w-full min-w-0 resize-y rounded-item border border-transparent bg-transparent px-1 py-0.5 text-sm text-muted outline-none placeholder:text-muted hover:border-border focus:border-border disabled:opacity-50"
+        />
+        <p className="mt-1.5 text-[11px] text-muted">{t("notes.hint")}</p>
+      </div>
+
+      {/* Κομμάτι 7 (Share, read-only link + revoke). The public page this
+          resolves, src/app/shared/[token]/page.tsx, never shows notes —
+          that textarea above is private AI memory, not share content. */}
+      <div className="surface">
+        <h2 className="text-sm font-semibold text-foreground">{t("share.heading")}</h2>
+        <p className="mt-1 text-[11px] text-muted">{t("share.hint")}</p>
+        {shareUrl ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={shareUrl}
+              data-testid="projects-share-url"
+              aria-label={t("share.heading")}
+              onFocus={(e) => e.currentTarget.select()}
+              className="min-w-0 flex-1 rounded-item border border-border bg-transparent px-2 py-2 text-xs text-foreground"
+            />
+            <CopyButton text={shareUrl} data-testid="projects-share-copy" />
+            <button
+              type="button"
+              onClick={() => void revokeShareLink()}
+              disabled={shareBusy}
+              data-testid="projects-share-revoke"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-semibold text-foreground hover:border-foreground/40 disabled:opacity-50"
+            >
+              <Link2Off className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("share.revoke")}
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void createShareLink()}
+            disabled={shareBusy}
+            data-testid="projects-share-create"
+            className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-item border border-border px-4 text-sm font-semibold text-foreground hover:border-foreground/40 disabled:opacity-50"
+          >
+            <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
+            {t("share.create")}
+          </button>
+        )}
+      </div>
+
       {/* TASKS · FILES · AGENTS · RESULTS · ACTIVITY */}
       {sections.map((section) => (
         <section key={section.key} className="surface" aria-label={t(`sections.${section.key}`)}>
@@ -264,20 +504,62 @@ export function ProjectDetail({
         </section>
       ))}
 
+      {/* Κομμάτι 5 ("Recent, τελευταία δουλειά, πατήσιμη") — this IS the
+          "Activity" section below, not a second list: `members` is
+          already sorted newest-first (load-project-detail.ts's own
+          sort), so the ten it slices off the top already ARE the
+          project's most recent work. What was missing was "πατήσιμη" —
+          each row now opens through the SAME `openHref()` the Tasks/
+          Files/Agents/Results sections above already use, falling back
+          to plain text for a table openHref has no address for, exactly
+          like those sections do. */}
       <section className="surface" aria-label={t("sections.activity")}>
         <h2 className="text-sm font-semibold text-foreground">{t("sections.activity")}</h2>
         {members.length === 0 ? (
           <p className="mt-2 text-xs text-muted">{t("sections.empty")}</p>
         ) : (
           <ul className="mt-2 space-y-1">
-            {members.slice(0, 10).map((member) => (
-              <li key={`activity-${member.table}:${member.id}`} className="text-xs text-muted">
-                {new Date(member.createdAt).toLocaleDateString(locale)} · {tKey(member.titleKey)} · {member.headline || t("untitled")}
-              </li>
-            ))}
+            {members.slice(0, 10).map((member) => {
+              const href = openHref(member);
+              const line = (
+                <>
+                  {new Date(member.createdAt).toLocaleDateString(locale)} · {tKey(member.titleKey)} · {member.headline || t("untitled")}
+                </>
+              );
+              return (
+                <li key={`activity-${member.table}:${member.id}`} className="text-xs text-muted">
+                  {href ? (
+                    <Link href={href} data-testid="project-recent-open" className="underline-offset-2 hover:underline hover:text-foreground">
+                      {line}
+                    </Link>
+                  ) : (
+                    line
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
+
+      {/* Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο project, με Brand
+          Kit") — THE BOTTOM FIELD, last on the screen on purpose: one
+          sentence plans a flow across several tools, all of it joining
+          THIS project. flowPrices/flowAvailable are null only when this
+          screen somehow rendered without a project open, which cannot
+          happen in practice (this component itself requires one) — kept
+          as a type, not asserted away, so a future caller that forgets
+          to load them fails to compile rather than crashing at runtime. */}
+      {flowPrices && flowAvailable && (
+        <ProjectFlowField
+          projectId={project.id}
+          projectName={project.name}
+          initialFlows={flows}
+          prices={flowPrices}
+          available={flowAvailable}
+          defaultColour={defaultFlowColour}
+        />
+      )}
 
       {/* The statuses exist as a contract even where this screen does not
           yet offer them as a control — named here so a reader can see the

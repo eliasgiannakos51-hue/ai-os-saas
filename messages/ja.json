@@ -125,6 +125,7 @@
       "apps": "アプリのアイデア",
       "images": "画像のアイデア",
       "imageTool": "画像",
+      "appBuilder": "アプリ",
       "videos": "動画のアイデア",
       "coding": "コーディング",
       "dataAnalysis": "数字が語ることを見る",
@@ -1735,6 +1736,9 @@
       "tabPreview": "プレビュー",
       "tabEdit": "編集",
       "tabHistory": "履歴",
+      "viewportGroup": "プレビュー幅",
+      "viewportDesktop": "デスクトップ表示",
+      "viewportMobile": "モバイル表示",
       "statusLabel": "ステータス",
       "statusCompleted": "完成",
       "statusFlagged": "フラグ付き",
@@ -2004,7 +2008,6 @@
       "cancel": "キャンセル",
       "agentsUsed": "{cap} 体中 {used} 体",
       "agentsTotal": "合計 {total} 件（一時停止中を含む）",
-      "requestLabel": "このエージェントに何をしてほしいですか？",
       "requestPlaceholder": "例：毎朝、Nvidia の最新ニュースを送って",
       "deliveryNote": "結果はアカウントのアドレス {email} に送信されます。",
       "designButton": "エージェントを設計",
@@ -2033,8 +2036,6 @@
       "menuRunNow": "今すぐ実行",
       "menuPause": "一時停止",
       "menuResume": "再開",
-      "menuEdit": "編集",
-      "menuDelete": "削除",
       "pauseSuccess": "エージェントを一時停止しました。",
       "resumeSuccess": "エージェントを再開しました。",
       "deleteSuccess": "エージェントを削除しました。",
@@ -2083,9 +2084,8 @@
       },
       "buildStalled": "作成が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
       "empty": {
-        "title": "あなたがいなくても進む仕事",
-        "why": "やってほしいことを一文で書けば、以後は決めた頻度で自動的に走り、結果そのものを届けます。催促ではありません。",
-        "example": "毎週月曜の朝、先週の売上をまとめる"
+        "title": "新しいエージェントに何をさせますか？",
+        "why": "やってほしいことを一文で書けば、以後は決めた頻度で自動的に走り、結果そのものを届けます。催促ではありません。"
       },
       "delivery": {
         "label": "結果の届け先",
@@ -2226,7 +2226,39 @@
         "withdrawFailed": "取り下げられませんでした。まだ共有されています。"
       },
       "failingWarning": "直近 {failures} 回連続で実行に失敗しました。{max} 回でこのエージェントは自動的に停止します。",
-      "disabledReason": "最後の失敗: {reason}"
+      "disabledReason": "最後の失敗: {reason}",
+      "shell": {
+        "approvalsNone": "ありません。必要がないからです。このエージェントのすることは、あなたなしに Ionexa の外へ出ません。",
+        "approvalsTitle": "承認のきまり",
+        "atCapacity": "稼働中の上限に達しました",
+        "capNoHardStop": "これは費用で、上限ではありません。エージェントを止めるクレジット上限はまだありません。アカウントのクレジットが尽きたとき、または {max} 回続けて失敗したときに自分で止まります。",
+        "capPerMonth": "1 か月あたり、おおよそ",
+        "capPerMonthValue": "{credits} クレジット · {runs} 回",
+        "capPerRun": "1 回あたり",
+        "capsTitle": "クレジットの費用",
+        "descriptionChanged": "説明を変更しました。",
+        "fieldTarget": "入力欄が変えるもの:",
+        "inboxApprovals": "承認待ち",
+        "inboxApprovalsNone": "ありません。このエージェントは取り消せない操作を行いません。調べて、書いて、結果をあなたに送るだけです。",
+        "inboxReceived": "受け取ったもの",
+        "inboxReceivedNone": "ありません。エージェントはまだ自分のメールアドレスを持っていないため、メッセージを受け取れません。",
+        "noRunYet": "まだどの手順も始まっていません。動き出すと、状態が一手順ずつその場で埋まります。",
+        "ownEmail": "自分のアドレス",
+        "ownEmailNone": "持っていません。結果は Ionexa のアドレスから、下で選んだ送り先に届きます。",
+        "placeholderDescription": "このエージェントの新しい説明を書いてください…",
+        "placeholderTask": "このエージェントの新しい作業を書いてください…",
+        "renameHint": "名前の変更は、一覧の名前のとなりにある ⋯ から。",
+        "scheduleTitle": "スケジュール",
+        "stateDone": "完了",
+        "stateWaiting": "待機中",
+        "stateWorking": "実行中",
+        "tabInbox": "受信",
+        "tabPlan": "手順",
+        "tabsLabel": "このエージェントについて見ているもの",
+        "taskChanged": "作業を変更しました。",
+        "toolsNone": "エージェントごとに許可するツールの一覧はまだありません。どのエージェントも、許可すれば検索し、書き、あなたが決めた一つの送り先に送ります。",
+        "toolsTitle": "ツールと接続"
+      }
     },
     "publishing": {
       "title": "公開中のサイト",
@@ -2423,6 +2455,71 @@
           "approval_required": "このツールは先にあなたが押す必要があります。",
           "empty": "先にやりたいことを書いてください。",
           "default": "問題が発生しました。もう一度お試しください。"
+        }
+      },
+      "telegram": {
+        "title": "Telegram の Ionexa",
+        "intro": "自分の Telegram のチャットをつなぐと、Ionexa はそこからも働きます。あなたが書いて、Ionexa が作ります。個人チャットだけ — グループは使いません。",
+        "notReady": "この環境では Telegram がまだ有効になっていないので、ここにつなぐものはありません。あなたのアカウントに足りないものはありません。",
+        "offerBody": "Telegram から Ionexa に書けば作ります — サイト、書類、画像、投稿。10 分だけ使える一回きりのコードをお見せします。",
+        "connect": "つなぐ",
+        "consentTitle": "Telegram をアカウントにつなぐ",
+        "consentBody": "つながったチャットは Ionexa に仕事を頼み、あなたのクレジットを使えます。つなぐ前に両方のリストを読んでください。いつでも切断できます。",
+        "consentApprove": "同意してコードを見る",
+        "consentCancel": "今はしない",
+        "connecting": "接続中…",
+        "canTitle": "Ionexa ができること",
+        "cannotTitle": "Ionexa ができないこと",
+        "can": {
+          "chat": "Chat と同じように Telegram で答えます。同じ記憶で、あなたの言語で。",
+          "make": "頼まれたものを作ります — サイト、書類、画像、投稿 — 価格を見せて、あなたが押すのを待ってから。",
+          "status": "仕事の進み具合を伝え、止めることもできます。",
+          "files": "送った写真やファイルを受け取り、「マイアイテム」に入れます。"
+        },
+        "cannot": {
+          "approve": "価格に対してあなたが「承認」を押す前に、クレジットを 1 つでも使うこと。",
+          "publish": "何かを公開すること — サイト、アプリ、投稿 — その 1 件ごとの別の承認なしには。",
+          "secrets": "パスワードや鍵、コードを送ること。メッセージであなたから受け取ることも。",
+          "groups": "グループチャットで働くこと。つないだ 1 つの個人チャットだけです。"
+        },
+        "activityTitle": "最近の動き",
+        "activityEmpty": "まだ何もありません。Telegram から仕事が届きはじめたら、何がいつ来たかをここに書きます。",
+        "activityNotYet": "まだ何もありません — チャットをつないでいません。",
+        "activityLast": "最後に実行したメッセージ: {time}",
+        "waitingHeading": "Telegram を開いて、このコードを送ってください",
+        "waitingHint": "ボタンを押せば Telegram が代わりにコードを送ります。何も開かないときは、ボットとのチャットに /start とコードを手で書いてください。",
+        "expiresIn": "あと {time} で期限切れ",
+        "expiredNow": "このコードは期限切れです。新しいものをお求めください。",
+        "openInTelegram": "Telegram で開く",
+        "cancel": "キャンセル",
+        "noWebhookYet": "ボットはまだコードに返事できません — それが次の部分です。できるまでは、これを送っても Telegram では何も起きません。",
+        "presentedHeading": "これはあなたですか？",
+        "presentedBody": "{who} があなたのコードをボットに送りました。あなたが自分のものだと言うまで、何もつながりません。",
+        "presentedWarning": "あなたでなければ「これは私ではありません」を押してください。そうしないと、コードを持っている人が Ionexa に仕事を頼み、あなたのクレジットを使えます。",
+        "presentedConfirm": "はい、つなぐ",
+        "presentedReject": "これは私ではありません",
+        "unknownAsker": "名前のない Telegram アカウント",
+        "connected": "Telegram がつながりました。",
+        "connectedTo": "{who} とつながっています",
+        "connectedSince": "接続: {time}",
+        "disconnect": "切断",
+        "disconnecting": "切断中…",
+        "disconnected": "Telegram を切断しました。",
+        "confirmDisconnect": "Telegram を切断しますか？このチャットから Ionexa に何も頼めなくなります。通知は変わりません。",
+        "notTheSameAsNotifications": "これは Telegram の通知とは別のものです。通知は Ionexa があなたに送るだけ。こちらはチャットが Ionexa に仕事を頼めるようにします。片方を切っても、もう片方は切れません。",
+        "errors": {
+          "not_signed_in": "もう一度サインインしてから、やり直してください。",
+          "not_enabled": "あなたのアカウントではまだ Telegram が開いていません。",
+          "bad_action": "その操作で何か問題が起きました。もう一度お試しください。",
+          "bot_unavailable": "ちょうど今 Telegram が応答しなかったので、コードは作られませんでした。少し待ってお試しください。",
+          "encryption_unavailable": "チャットを安全に保存するための鍵がありません。何も保存されていません。失われたものもありません。",
+          "already_linked": "すでにチャットがつながっています。先にそれを切断してください。",
+          "chat_in_use": "その Telegram のチャットは別のアカウントにつながっています。先にそちらで切断してください。",
+          "nothing_to_confirm": "確認を待っているものはありません。コードはすでに使われたか、取り消されたのかもしれません。",
+          "expired": "そのコードは期限切れです。新しいものをお求めください。",
+          "rateLimited": "試行が多すぎます。1 時間待ってからお試しください。",
+          "not_started": "コードを作れませんでした。もう一度お試しください。",
+          "failed": "うまくいきませんでした。もう一度お試しください。"
         }
       }
     },
@@ -2987,8 +3084,13 @@
       "description": "録音をアップロードすると、文字起こし・要約・自分で選ぶアクションの一覧が得られます。",
       "audioNoticeTitle": "音声は保存されません",
       "audioNotice": "音声は文字起こしが終わった時点で削除されます。話す人たちがそれを知っているか確かめてください。",
+      "recordConfirmAllow": "続ける",
+      "recordConfirmCancel": "キャンセル",
       "pick": "録音を選ぶ",
       "dropHint": "M4A、MP3、WAV、WebM、OGG",
+      "record": "録音",
+      "stopRecording": "録音を停止",
+      "recording": "録音中…",
       "limitHint": "最大 {mb} MB、話し声で約 {minutes} 分",
       "tooLarge": "このファイルは {actual} MB です。上限は {allowed} MB です — 音声録音として書き出すか、2つに分けてください。",
       "tooLong": "この録音は {actual} 分です。上限は {allowed} 分です — 2つに分けてください。",
@@ -3001,6 +3103,7 @@
       "start": "文字起こしする",
       "transcribing": "文字起こし中…",
       "analysing": "文字起こしを読んでいます…",
+      "playerUnavailable": "再生できる音声はありません。この会議の文字起こしが終わった直後に削除されました。",
       "transcriptTitle": "文字起こし",
       "summaryTitle": "要約",
       "analyse": "要約してアクションを探す",
@@ -3033,7 +3136,11 @@
         "unsupported_type": "この音声形式には対応していません。",
         "rate_limited": "リクエストの上限に達しました。上限は時間がたつと自然に戻ります。しばらくしてからもう一度お試しください。",
         "empty": "この録音は空でした。",
-        "failed": "問題が発生しました。料金はかかっていません。"
+        "failed": "問題が発生しました。料金はかかっていません。",
+        "record_denied": "マイクが許可されませんでした。ブラウザの権限を確認してもう一度お試しください。",
+        "record_unsupported": "このブラウザは録音に対応していません。代わりにファイルをアップロードしてください。",
+        "record_empty": "何も聞き取れませんでした。マイクに近づいてもう一度お試しください。",
+        "record_failed": "録音に失敗しました。もう一度お試しください。"
       },
       "goal": {
         "title": "{count, plural, other {この # 件のアクションを目標のステップにする}}",
@@ -3048,6 +3155,22 @@
         "projectLimit": "プランのプロジェクトはすべて使用中です。そのいずれかを選ぶか、先に1つアーカイブしてください。",
         "projectName": "新しいプロジェクトに2文字以上の名前を付けてください。",
         "projectFull": "そのプロジェクトはいっぱいです。別のプロジェクトを選んでください。"
+      },
+      "remind": {
+        "button": "リマインドする",
+        "label": "この日に",
+        "save": "リマインダーを設定",
+        "cancel": "リマインダーを取り消す",
+        "pending": "{date} にお知らせします",
+        "bad": "今日より後、1年以内の日を選んでください。",
+        "notifyTitle": "リマインダー: {what}",
+        "notifyBody": "会議から — {who}"
+      },
+      "ask": {
+        "title": "この会議について質問する",
+        "placeholder": "この会議について質問する…",
+        "submit": "質問する",
+        "asking": "質問中…"
       }
     },
     "voicePage": {
@@ -3140,6 +3263,7 @@
         "sales": "営業",
         "trading": "トレード",
         "image": "画像",
+        "threeD": "3D",
         "document": "文書",
         "games": "ゲーム",
         "connect": "接続",
@@ -3173,6 +3297,7 @@
         "sales": "連絡先、アプローチ、次のステップ。",
         "trading": "トレードの記録。",
         "image": "説明から画像を作成",
+        "threeD": "数枚の写真から3Dモデルを作成",
         "document": "文書とシート",
         "games": "説明からゲームを作成。",
         "connect": "ほかのアプリを取り込む",
@@ -3253,6 +3378,20 @@
         "lost": "ボックスが変更から戻らなかったため、何も変わっていません。もう一度お試しください。",
         "boxes": "ボックス"
       },
+      "motion": {
+        "button": "モーション",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "なし",
+          "softFade": "ソフトフェード",
+          "slideUp": "スライドアップ",
+          "parallax": "パララックス",
+          "glass": "ガラス",
+          "holographic": "ホログラフィック",
+          "typewriter": "タイプライター",
+          "hoverLift": "ホバーリフト"
+        }
+      },
       "pages": {
         "auto": "ページ数：必要なだけ",
         "count": "{count, plural, other {# ページ}}",
@@ -3329,7 +3468,45 @@
         "kindsLabel": "表示するものだけ",
         "all": "すべて",
         "empty": "見つかりませんでした",
-        "untitled": "無題"
+        "untitled": "無題",
+        "failed": "読み込めませんでした: {kinds}。残りは表示しています。"
+      },
+      "details": {
+        "empty": "左側で何かを選ぶとここに表示されます。",
+        "open": "開く",
+        "back": "一覧に戻る",
+        "madeFrom": "作成元",
+        "viewers": "誰が見られるか",
+        "viewersAnswer": "あなただけです。他の人と共有する機能はまだありません。"
+      },
+      "history": {
+        "title": "これまでの質問",
+        "show": "これまでの質問を表示",
+        "hide": "これまでの質問を隠す",
+        "back": "これまでの質問に戻る"
+      },
+      "ask": {
+        "send": "質問する",
+        "dismiss": "回答を隠す"
+      },
+      "filters": {
+        "label": "種類で絞り込み",
+        "all": "すべて",
+        "documents": "ドキュメント",
+        "images": "画像",
+        "data": "データ",
+        "more": "その他",
+        "moreLabel": "その他のフィルター",
+        "video": "動画",
+        "audio": "オーディオ",
+        "sitesApps": "サイトとアプリ",
+        "meetings": "会議",
+        "project": "プロジェクト",
+        "allProjects": "すべてのプロジェクト"
+      },
+      "upload": {
+        "button": "アップロード",
+        "uploading": "アップロード中…"
       },
       "kinds": {
         "site": "サイト",
@@ -3343,7 +3520,10 @@
         "coding": "コード",
         "finance": "財務",
         "sales": "セールス",
-        "trading": "トレーディング"
+        "trading": "トレーディング",
+        "images": "画像",
+        "meetings": "会議",
+        "apps": "アプリ"
       },
       "errors": {
         "empty": "質問を入力してください。",
@@ -3382,6 +3562,14 @@
       "price": "{count, plural, other {# クレジット}}",
       "delete": "画像を削除",
       "deleteConfirm": "この画像とすべての版を削除しますか？元に戻せません。",
+      "tools": {
+        "productAd": "商品広告",
+        "animate": "アニメーション",
+        "sameProduct": "同じ商品",
+        "addReference": "参考画像を追加",
+        "removeReference": "この参考画像を削除",
+        "searchWeb": "先にウェブを検索"
+      },
       "notConfigured": "画像はまだ有効になっていません。料金はかかりません。",
       "working": {
         "variants": "4枚の画像を作成中…",
@@ -3808,6 +3996,197 @@
         "failed": "問題が発生しました。もう一度お試しください。"
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "Editingに素材で何をしてほしいですか?"
+      },
+      "notBuilt": "まだ実装されていません。料金は発生していません。",
+      "placeholder": "変更したい内容を自分の言葉で説明してください…",
+      "workspaceTitle": "作業スペース",
+      "tools": {
+        "zoom": "ズーム",
+        "graphics": "グラフィック"
+      },
+      "noMaterial": "まだ素材がありません。"
+    },
+    "threeD": {
+      "empty": {
+        "heading": "何を3Dにしますか?"
+      },
+      "notBuilt": "まだ実装されていません。料金は発生していません。",
+      "placeholder": "3Dにしたいものを自分の言葉で説明してください…",
+      "attachPhotos": "写真を追加（1〜4枚）",
+      "workspaceTitle": "3Dモデル",
+      "photos": {
+        "heading": "マイフォト",
+        "remove": "この写真を削除"
+      },
+      "viewer": {
+        "zoomIn": "ズームイン",
+        "zoomOut": "ズームアウト",
+        "reset": "表示をリセット",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "種類",
+        "typeOptions": {
+          "product": "製品",
+          "furniture": "家具",
+          "object": "物体"
+        },
+        "quality": "品質",
+        "qualityOptions": {
+          "draft": "ドラフト",
+          "final": "最終版"
+        },
+        "realSize": "実際のサイズ",
+        "realSizeUnknown": "まだ設定されていません",
+        "format": "形式",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "背景",
+        "backgroundOptions": {
+          "white": "白",
+          "transparent": "透明"
+        },
+        "price": "価格"
+      },
+      "bar": {
+        "viewInAr": "ARで見る",
+        "download": "ダウンロード",
+        "makeFinal": "最終版を作成"
+      }
+    },
+    "films": {
+      "empty": {
+        "heading": "映画のテーマは何ですか?"
+      },
+      "notBuilt": "まだ実装されていません。料金は発生していません。",
+      "placeholder": "映画の内容を自分の言葉で説明してください…",
+      "workspaceTitle": "映画制作",
+      "stages": {
+        "script": "脚本",
+        "characters": "キャラクター・場所",
+        "storyboard": "絵コンテ",
+        "shooting": "撮影",
+        "edit": "編集"
+      },
+      "stageStatus": {
+        "waiting": "待機中",
+        "working": "作業中",
+        "done": "完了"
+      },
+      "credits": {
+        "label": "クレジット",
+        "unknown": "脚本ができ次第計算されます"
+      },
+      "charactersPlaces": {
+        "heading": "キャラクター・場所",
+        "addCharacter": "キャラクターを追加",
+        "addPlace": "場所を追加",
+        "empty": "まだ追加されていません。"
+      },
+      "storyboard": {
+        "heading": "絵コンテ",
+        "shot": "ショット {n}",
+        "sampleCaption": "サンプルグリッド — 脚本が書かれるとショットがここに表示されます。"
+      },
+      "panel": {
+        "cameraAngle": "カメラアングル",
+        "angleOptions": {
+          "wide": "ワイド",
+          "medium": "ミディアム",
+          "closeUp": "クローズアップ",
+          "fromAbove": "俯瞰",
+          "low": "ローアングル"
+        },
+        "light": "ライティング",
+        "lightOptions": {
+          "day": "昼",
+          "goldenHour": "ゴールデンアワー",
+          "night": "夜",
+          "warmInside": "暖かい室内"
+        },
+        "cameraMove": "カメラの動き",
+        "moveOptions": {
+          "still": "固定",
+          "slowPush": "ゆっくりズームイン",
+          "pan": "パン",
+          "handheld": "手持ち"
+        },
+        "continueFromPrevious": "前のショットから続ける",
+        "reshoot": "撮り直し"
+      }
+    },
+    "appBuilder": {
+      "empty": {
+        "heading": "あなたの仕事に必要なアプリを教えて",
+        "examples": {
+          "a": "うちの美容室の予約アプリ",
+          "b": "注文と届け先を記録するアプリ",
+          "c": "お客さま向けのフォーム。回答は一覧で"
+        }
+      },
+      "placeholder": "アプリを自分の言葉で説明して…",
+      "placeholderBox": "この枠で変えたいことを書いて…",
+      "placeholderAnother": "別のアプリを説明して…",
+      "recent": "最近のアプリ",
+      "noneYet": "まだアプリはありません。",
+      "boxHint": "枠を押して、そこで変えたいことを書いて。",
+      "tabs": {
+        "preview": "プレビュー",
+        "data": "データ",
+        "plan": "プラン"
+      },
+      "box": {
+        "data": "データ",
+        "screens": "画面",
+        "access": "誰が何を見るか",
+        "notifications": "お知らせ"
+      },
+      "type": {
+        "text": "テキスト",
+        "longText": "長いテキスト",
+        "number": "数値",
+        "date": "日付",
+        "time": "時刻",
+        "choice": "選択",
+        "email": "メール",
+        "phone": "電話",
+        "checkbox": "はい・いいえ"
+      },
+      "kindForm": "フォーム",
+      "kindList": "一覧",
+      "seesOwn": "訪問者は自分の分だけ見えます",
+      "seesOwner": "あなただけが見えます",
+      "toCustomer": "お客さまへ",
+      "toOwner": "あなたへ",
+      "noNotifications": "何も送りません。",
+      "noScreensYet": "まだ画面はありません。",
+      "previewCaption": "プランのライブプレビューです — まだ動くアプリではありません。",
+      "formSubmit": "送信",
+      "sampleRow": "サンプルです — 公開されると実際の入力がここに表示されます。",
+      "approve": "計画を承認する",
+      "approved": "計画を承認しました。",
+      "approvedNote": "承認済み",
+      "planned": "これが計画です。四つの枠にまとめました。",
+      "boxChanged": "{box}の枠が変わりました。",
+      "boxChangedAndDropped": "{box}の枠が変わり、これも一緒になくなりました：{what}。",
+      "errors": {
+        "empty": "アプリが何をするのか書いてください。",
+        "tooLong": "説明としては長すぎます（{limit} 文字）。",
+        "insufficient": "クレジットが足りません。請求はありません。",
+        "rateLimited": "一度に試しすぎです。少ししてからもう一度。",
+        "notIncluded": "この道具はあなたのプランに入っていません。",
+        "unavailable": "いまはアプリを設計できません。",
+        "unusable": "答えが使えませんでした。使った分だけ請求されます。",
+        "notSaved": "計画はできましたが、保存できませんでした。",
+        "failed": "計画はできませんでした。クレジットの請求はありません。"
+      }
+    },
     "chats": {
       "title": "チャット",
       "searchPlaceholder": "会話を検索",
@@ -3848,6 +4227,26 @@
         "actions": "動作",
         "look": "見た目"
       },
+      "features": {
+        "heading": "機能",
+        "hint": "これはこのようなアプリによくある機能です。不要なものはオフにするか、鉛筆を押して言葉を変えてください。",
+        "found": "こうしたアプリによくある機能です。不要なものはオフにするか、どれか一つの言葉を変えてから続けてください。",
+        "changed": "その機能の言葉を変更しました。",
+        "continue": "この機能を使う",
+        "continuing": "プランを作っています…",
+        "edit": "この機能の言葉を変更",
+        "editPlaceholder": "この機能の新しい言葉を言ってください"
+      },
+      "phases": {
+        "heading": "フェーズ",
+        "note": "今は1つのフェーズだけです:アプリ全体を一度に作ります。今後フェーズが増えます。",
+        "noteTwo": "このアプリには2つのフェーズが必要です:まずデータと画面を計画し、それをもとにアプリ本体を書きます。プランを承認すると最初のフェーズが始まります。2番目のフェーズの価格は、最初のフェーズが終わってから表示されます。",
+        "appLogic": "アプリのロジック",
+        "writeApp": "アプリを書く",
+        "approve": "プランを承認",
+        "approving": "開始しています…",
+        "appLogicDone": "アプリのデータと画面が計画されました。次にアプリを書きます。"
+      },
       "build": "アプリを作る",
       "building": "アプリを作っています…",
       "download": "アプリをダウンロード",
@@ -3855,6 +4254,7 @@
       "preview": "動作中のアプリ",
       "sealed": "他のものから隔離されて動くので、ここで入力した内容はこのプレビューの中に残ります。自分のパソコンで使うにはダウンロードしてください。",
       "original": "コピーではなく、あなた自身のバージョン:アイデアと画面の種類だけを使い、元のアプリの名前・言葉・画像・コードは使いません。",
+      "selfTest": "表示する前に、すべてのボタンがコードにつながっているか確認済みです。",
       "versions": "{count}個のバージョン",
       "version": "バージョン{n}",
       "first": "最初の作成",
@@ -3877,6 +4277,20 @@
           "tooLarge": "そのページは大きすぎて読めません。課金はされていません。",
           "invalid": "読めるウェブアドレスではありません。課金はされていません。"
         }
+      },
+      "publish": {
+        "summary": "このアプリを公開する",
+        "liveSummary": "公開中(専用アドレス)",
+        "label": "アドレスを選ぶ",
+        "edit": "別のアドレスを選ぶ",
+        "editPlaceholder": "希望するアドレスを入力してください",
+        "button": "公開",
+        "unpublish": "公開を取り下げる",
+        "taken": "そのアドレスは既に使われています。",
+        "invalid": "有効なアドレスを選んでください — 小文字・数字・ハイフンのみ、3文字以上。",
+        "notBuilt": "先にアプリを作成してください。",
+        "done": "{url} に公開しました",
+        "offline": "公開を取り下げました。アドレスは保持されます — 再度公開すれば同じアドレスが使えます。"
       }
     },
     "comingSoon": {
@@ -3887,6 +4301,11 @@
       "notified": "通知します",
       "notifyFailed": "保存できませんでした。もう一度お試しください。",
       "examples": {
+        "threeD": {
+          "a": "お店の花瓶、サイトに掲載する準備ができています",
+          "b": "木製の椅子を、あらゆる角度から見る",
+          "c": "陶器のマグカップを、スマホでARで見る"
+        },
         "apps": {
           "a": "サロンの予約アプリ",
           "b": "デリバリー注文用アプリ",
@@ -4134,6 +4553,88 @@
       "languagePractice": {
         "label": "語学練習",
         "text": "を練習したい: "
+      }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "翻訳したいテキストを貼り付けてください",
+        "examples": {
+          "a": "当店へのご来店ありがとうございます。お気軽にお問い合わせください。\n\n営業時間は月曜から金曜、午前9時から午後6時までです。",
+          "b": "お客様へ\n\nご注文ありがとうございます。3営業日以内にお届けします。",
+          "c": "当社は2015年に設立され、中小企業向けソフトウェアソリューションを専門としています。"
+        }
+      },
+      "placeholder": "テキストを貼り付けるか入力してください…",
+      "targetsLabel": "翻訳先：{languages}",
+      "styleLabel": "文体",
+      "style": {
+        "formal": "フォーマル",
+        "friendly": "フレンドリー",
+        "source": "原文のまま"
+      },
+      "detectedFrom": "検出された言語：{language}",
+      "sameLanguageNote": "このテキストはすでにこの言語です。",
+      "kept": "{count, plural, other {# 段落は翻訳が返ってこなかったため、そのまま残りました。}}",
+      "done": "{count, plural, other {# 言語への翻訳が完了しました。}}",
+      "translating": "翻訳中…",
+      "errors": {
+        "nothing": "翻訳するテキストがありません。",
+        "tooLong": "1回の翻訳には長すぎます（{chars} 文字。上限は {limit} 文字です）。",
+        "sameLanguage": "選択した言語はすでにテキストの言語です。別の言語を少なくとも1つ選んでください。",
+        "insufficient": "この翻訳に必要なクレジットが不足しています。課金されていません。",
+        "rateLimited": "同時に試行回数が多すぎます。しばらくしてからもう一度お試しください。",
+        "unavailable": "翻訳は現在利用できません。",
+        "unusable": "返答が利用できず、何も書き込まれませんでした。使用した分のみ課金されます。",
+        "failed": "翻訳を行えませんでした。クレジットは課金されていません。"
+      },
+      "editPlaceholder": "この段落をどう変更するか伝えてください…",
+      "editDone": "段落 {n}（{language}）を変更しました。",
+      "editingLabel": "段落 {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {用語集} other {用語集（#）}}",
+      "glossaryHint": "どの言語でも変わらない語句です。",
+      "glossarySuggested": "「{term}」を追加",
+      "glossaryPlaceholder": "新しい語句…",
+      "glossaryRemove": "「{term}」を削除",
+      "glossaryAdd": "語句を追加",
+      "glossaryAdding": "新しい用語集の語句",
+      "openDocument": "ドキュメントとして開く"
+    },
+    "iowork": {
+      "noAppYet": "パソコン用のアプリはまだ公開されていません。この画面はアカウント側です。アプリが出たら、ここから接続します。",
+      "connectHeading": "パソコンを接続",
+      "connectHint": "パソコンに表示されている8文字を入力してください。",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "接続",
+      "connecting": "接続中…",
+      "previewHeading": "あるパソコンが接続を求めています",
+      "previewBody": "「{label}」({platform})と名乗っており、{time} に {ip} からの要求です。",
+      "previewIpUnknown": "読み取れなかったアドレス",
+      "previewWarning": "たった今、自分のパソコンで iowork を開いたのでなければ、キャンセルを押してください。",
+      "previewConfirm": "はい、接続する",
+      "previewCancel": "キャンセル",
+      "cancelled": "キャンセルしました。このコードは二度と使えません。",
+      "codeAccepted": "{name} がコードを受け取りました。パソコンの接続が終わると下に表示されます。",
+      "listHeading": "接続済みのパソコン（{count} / {max}）",
+      "empty": "まだパソコンは接続されていません。",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "ペアリングから30日以上経過",
+      "disconnect": "切断",
+      "disconnectLabel": "{name} を切断",
+      "confirmDisconnect": "{name} を切断しますか。すぐに動作を止め、もう一度接続が必要になります。",
+      "safetyLine": "アプリが出たら:接続したパソコンは、そのパソコンで選んだフォルダだけに届き、パスワードや鍵、システムフォルダには決して触れず、変更はすべてそのパソコンでの承認を待つようになります。",
+      "errors": {
+        "bad_code": "これはコードではありません。パソコンに表示されているとおりの8文字です。",
+        "bad_action": "そのリクエストは認識できませんでした。もう一度お試しください。",
+        "not_found": "そのコードを表示しているパソコンはありません。",
+        "expired": "そのコードは期限切れです。パソコンが新しいコードを表示します。",
+        "tooMany": "このアカウントにはすでに {max} 台のパソコンがあります。先に1台切断してください。",
+        "rateLimited": "試行が多すぎます。少し待ってからやり直してください。",
+        "not_enabled": "iowork はまだ公開されていません。",
+        "not_signed_in": "もう一度ログインしてください。",
+        "failed": "うまくいきませんでした。何も変わっていません。"
       }
     }
   },
@@ -4867,6 +5368,11 @@
       "does": "まず計画を5つの枠で見せます。どれでも言葉で変えられ、そのあとゲームを書き、ここでキーボードやタッチで遊べます。",
       "doesNot": "アカウントを見ることも、インターネットにつながることもありません。ゲームは隔離されて動き、ダウンロードしたファイルも同じです。"
     },
+    "apps": {
+      "is": "データを保つアプリをここで説明します。予約、注文、在庫、顧客、フォームの回答。",
+      "does": "アプリを四つの枠で設計し、どの枠も言葉で変えられ、最後に承認します。",
+      "doesNot": "支払いは受け取りません。お客さまにカードやパスワードを求めることもありません。"
+    },
     "chats": {
       "is": "これまでのすべての会話が、ひとつの場所に。",
       "does": "新しい順に並べ、タイトルと会話の中で話した内容の両方を検索し、名前の変更・ピン留め・プロジェクトへの移動・削除ができます。",
@@ -4881,6 +5387,11 @@
       "is": "気に入ったアプリの、あなた自身のバージョン。",
       "does": "アプリを説明するか、気に入ったアプリの公開ページのアドレスを貼り付けます。4つのボックスの計画が出て、言葉で好きなところを変え、そして作ります。動くアプリを言葉で変え、元に戻し、1つのファイルとしてダウンロードできます。",
       "doesNot": "元のアプリをコピーしません。名前・言葉・画像・コードはあなたのものです。読むのは指定した1ページのラベルだけで、ログインの向こうは決して読みません。ホスティングサービスではありません。プレビューで入力した内容は保存されず、ダウンロードしたファイルのデータはあなた自身のパソコンに残ります。"
+    },
+    "iowork": {
+      "is": "自分のパソコンの中で働くアプリ",
+      "does": "選んだフォルダのファイルを、頼まれたときに読み書きし、変更は必ず先に見せます",
+      "doesNot": "パスワードや鍵、ブラウザ、システムフォルダには届かず、パソコンでプログラムを実行することは決してなく、承認なしに何も削除しません"
     }
   },
   "helpCentre": {
@@ -5600,6 +6111,12 @@
     "delete": "削除",
     "deleteConfirm": "このプロジェクトを削除しますか？中身はそのまま残ります。",
     "removeMember": "プロジェクトから外す",
+    "back": "プロジェクト一覧に戻る",
+    "selectPrompt": "左のリストからプロジェクトを選ぶと、ここに表示されます。",
+    "empty": {
+      "title": "プロジェクトはまだありません",
+      "description": "左側で最初のプロジェクトを作成すると、ここに表示されます。"
+    },
     "addToProject": {
       "button": "プロジェクトに追加",
       "title": "プロジェクトに追加",
@@ -5622,6 +6139,24 @@
     "automateIt": {
       "button": "自動化する",
       "hint": "このプロジェクトに基づいたオートメーションを作成します — 中の内容と上の目標を読み取ります。"
+    },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "事実、決定、好みなど — ここに書いたことは、このプロジェクトのチャット、作成、プラン、エージェント作成だけが読み取ります。",
+      "hint": "このプロジェクト内の生成だけに反映されます。外部からは読み取られません。"
+    },
+    "share": {
+      "heading": "共有",
+      "hint": "このリンクを持つ人は誰でも、このプロジェクトを読み取り専用で、ログインなしで見ることができます。いつでも取り消せます。",
+      "create": "リンクを作成",
+      "revoke": "取り消す",
+      "public": {
+        "readOnly": "共有されました — 読み取り専用",
+        "notFound": {
+          "heading": "このリンクは利用できません",
+          "body": "取り消された可能性があるか、存在しなかった可能性があります。"
+        }
+      }
     },
     "errors": {
       "tooShort": "まず名前を付けてください。",

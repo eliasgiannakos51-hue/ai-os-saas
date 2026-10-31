@@ -71,15 +71,22 @@ for (const [label, value] of [["undefined", undefined], ["NaN", NaN], ["0", 0], 
 check("an override with an unknown agent id is ignored", effectiveRunDepth(deep, { agentId: "", depth: "simple" }) === "deep");
 
 console.log("\n== 5. the workspace calls this, and only this ==");
-const ws = stripComments(readFileSync("src/components/agents/agents-workspace.tsx", "utf8"));
+const ws = stripComments(readFileSync("src/components/agents/agents-shell.tsx", "utf8"));
 check("the workspace imports the helper", /from "@\/lib\/agents\/run-depth"/.test(ws));
 check("the per-run state is keyed by agent (RunDepthOverride), not a bare depth",
   /useState<RunDepthOverride>\(null\)/.test(ws),
   "a bare useState<AgentDepth>(\"standard\") is the state that ran a Deep agent at Standard");
 check("...and no bare runDepth state remains", !/useState<AgentDepth>\("standard"\)[^\n]*\n[^\n]*runDepth|const \[runDepth, setRunDepth\]/.test(ws));
-check("the card menu's Run now resolves the tier through the helper",
-  /runNow\(agent, effectiveRunDepth\(agent, runOverride\)\)/.test(ws),
-  "the card menu is the path the report came through");
+// THE BAR'S «Run now», not a card menu's, since Agents moved into the
+// tool shell (2026-10-31, Κομμάτι 1 of directive 25). Same bug, same
+// guard: the press has to resolve the tier through the helper, or a Deep
+// agent run from this button is charged at Standard. It reads `selected`
+// now rather than a card's `agent`, because the screen has one open agent
+// instead of a grid of them — that is what makes the stale-override bug
+// this file documents impossible to reach from here at all.
+check("the bar's Run now resolves the tier through the helper",
+  /runNow\(selected, effectiveRunDepth\(selected, runOverride\)\)/.test(ws),
+  "the card menu was the path the original report came through; the bar is that path now");
 check("the request body is built by the helper, not by hand",
   /body: JSON\.stringify\(runRequestBody\(agent, /.test(ws));
 check("the detail panel's picker shows the effective tier",

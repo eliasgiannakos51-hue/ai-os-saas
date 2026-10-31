@@ -173,6 +173,21 @@ export const HELP_TIPS: HelpTip[] = [
     corrects: "that a game made here can see your account or reach the internet",
   },
   {
+    id: "apps",
+    file: "src/app/dashboard/app-builder/page.tsx",
+    keyPrefix: "help.apps",
+    corrects: "that an app made here can take payments, or that it is a page to look at rather than a place data is kept",
+  },
+  {
+    // IOWORK (Φάση 1, 2026-10-25). The fear here is larger than on any
+    // other page — this is the one tool that reaches into the person's own
+    // computer — so the tip leads with the boundary, not the benefit.
+    id: "iowork",
+    file: "src/app/dashboard/iowork/page.tsx",
+    keyPrefix: "help.iowork",
+    corrects: "that connecting a computer gives Ionexa the run of it, or that it could reach passwords, keys or folders nobody picked",
+  },
+  {
     id: "deepResearch",
     file: "src/app/dashboard/deep-research/page.tsx",
     keyPrefix: "help.deepResearch",
@@ -299,20 +314,16 @@ export const HELP_TIPS: HelpTip[] = [
     // A page called Posts reads as a publisher. It writes them; the
     // publishing step is the roadmap's "Social posting", still under
     // "soon", and the tip says which side of that line this page is on.
-    // TWO SCREENS, TWO PREFIXES. Both draw a PageHeader and
-    // help-tips.test.mjs asks every header for a tip — and it also
-    // refuses two entries that share a prefix or a sentence, which is
-    // right: the list answers "what is a project" and this answers "what
-    // am I looking at inside one", and one text cannot be both.
-    id: "projectDetail",
-    file: "src/app/dashboard/projects/[id]/page.tsx",
-    keyPrefix: "help.projectDetail",
-    corrects:
-      "that a project pulls things in by itself — that a plan brings its steps, or a website its form submissions, or that deleting the project deletes what was in it",
-  },
-  {
+    // ONCE TWO SCREENS, NOW ONE. Until Κομμάτι 1 of «2. PROJECTS: ΝΕΑ
+    // ΟΘΟΝΗ» (2026-10-28) this was two entries, "projectDetail" and
+    // "projects" — the list page and the per-project page were two
+    // mounts, each with its own PageHeader. They are now one screen
+    // (projects-shell.tsx: list left, project right), so one entry,
+    // the same reason "myStuff" below points at its own workspace
+    // component instead of a page-level header.
     id: "projects",
-    file: "src/app/dashboard/projects/page.tsx",
+    file: "src/components/projects/projects-shell.tsx",
+    route: "src/app/dashboard/projects/page.tsx",
     keyPrefix: "help.projects",
     corrects:
       "that a project pulls things in by itself — that a plan brings its steps, or a website its form submissions, or that deleting the project deletes what was in it",
@@ -558,12 +569,13 @@ export const HELP_TIPS: HelpTip[] = [
       "that these lists were removed or merged when the sidebar stopped listing them one by one",
   },
   {
-    // «ΤΑ ΔΙΚΑ ΜΟΥ» (2026-10-22). Mounted via ToolShell's own `help` slot
-    // (tool-shell.tsx), same reason as "chat" above: the title it sits
-    // beside is drawn by the shared shell, not by a page-level
-    // <PageHeader>.
+    // «ΤΑ ΔΙΚΑ ΜΟΥ» (2026-10-22), moved to the new screen's own top strip
+    // («1. MY STUFF: ΝΕΑ ΟΘΟΝΗ», 2026-10-28, my-stuff-workspace.tsx —
+    // my-stuff-shell.tsx is gone) — a direct mount, same reason as "chat"
+    // above: the title it sits beside is drawn by the workspace itself,
+    // not by a page-level <PageHeader>.
     id: "myStuff",
-    file: "src/components/my-stuff/my-stuff-shell.tsx",
+    file: "src/components/my-stuff/my-stuff-workspace.tsx",
     route: "src/app/dashboard/my-stuff/page.tsx",
     keyPrefix: "help.myStuff",
     corrects:

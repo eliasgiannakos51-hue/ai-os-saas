@@ -99,6 +99,11 @@ const HANDLED = {
   // hold the old page back was removed 2026-10-23. Not middleware, a plain
   // decision in the page itself.
   "src/app/dashboard/files/page.tsx": "the page itself: redirects to the merged Analyze",
+  // Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 (2026-10-28) moved the detail view onto
+  // /dashboard/projects itself (?id=); this route is kept only so an old
+  // /dashboard/projects/<id> link (meetings-workspace.tsx) still opens the
+  // right project. Not middleware, a plain decision in the page itself.
+  "src/app/dashboard/projects/[id]/page.tsx": "the page itself: redirects into the unified /dashboard/projects?id=",
 };
 const UNREACHABLE = {
   // getModule("products") is the static module table; it cannot be absent

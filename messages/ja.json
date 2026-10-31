@@ -2008,7 +2008,6 @@
       "cancel": "キャンセル",
       "agentsUsed": "{cap} 体中 {used} 体",
       "agentsTotal": "合計 {total} 件（一時停止中を含む）",
-      "requestLabel": "このエージェントに何をしてほしいですか？",
       "requestPlaceholder": "例：毎朝、Nvidia の最新ニュースを送って",
       "deliveryNote": "結果はアカウントのアドレス {email} に送信されます。",
       "designButton": "エージェントを設計",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "今すぐ実行",
       "menuPause": "一時停止",
       "menuResume": "再開",
-      "menuEdit": "編集",
-      "menuDelete": "削除",
       "pauseSuccess": "エージェントを一時停止しました。",
       "resumeSuccess": "エージェントを再開しました。",
       "deleteSuccess": "エージェントを削除しました。",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "作成が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
       "empty": {
-        "title": "あなたがいなくても進む仕事",
-        "why": "やってほしいことを一文で書けば、以後は決めた頻度で自動的に走り、結果そのものを届けます。催促ではありません。",
-        "example": "毎週月曜の朝、先週の売上をまとめる"
+        "title": "新しいエージェントに何をさせますか？",
+        "why": "やってほしいことを一文で書けば、以後は決めた頻度で自動的に走り、結果そのものを届けます。催促ではありません。"
       },
       "delivery": {
         "label": "結果の届け先",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "取り下げられませんでした。まだ共有されています。"
       },
       "failingWarning": "直近 {failures} 回連続で実行に失敗しました。{max} 回でこのエージェントは自動的に停止します。",
-      "disabledReason": "最後の失敗: {reason}"
+      "disabledReason": "最後の失敗: {reason}",
+      "shell": {
+        "approvalsNone": "ありません。必要がないからです。このエージェントのすることは、あなたなしに Ionexa の外へ出ません。",
+        "approvalsTitle": "承認のきまり",
+        "atCapacity": "稼働中の上限に達しました",
+        "capNoHardStop": "これは費用で、上限ではありません。エージェントを止めるクレジット上限はまだありません。アカウントのクレジットが尽きたとき、または {max} 回続けて失敗したときに自分で止まります。",
+        "capPerMonth": "1 か月あたり、おおよそ",
+        "capPerMonthValue": "{credits} クレジット · {runs} 回",
+        "capPerRun": "1 回あたり",
+        "capsTitle": "クレジットの費用",
+        "descriptionChanged": "説明を変更しました。",
+        "fieldTarget": "入力欄が変えるもの:",
+        "inboxApprovals": "承認待ち",
+        "inboxApprovalsNone": "ありません。このエージェントは取り消せない操作を行いません。調べて、書いて、結果をあなたに送るだけです。",
+        "inboxReceived": "受け取ったもの",
+        "inboxReceivedNone": "ありません。エージェントはまだ自分のメールアドレスを持っていないため、メッセージを受け取れません。",
+        "noRunYet": "まだどの手順も始まっていません。動き出すと、状態が一手順ずつその場で埋まります。",
+        "ownEmail": "自分のアドレス",
+        "ownEmailNone": "持っていません。結果は Ionexa のアドレスから、下で選んだ送り先に届きます。",
+        "placeholderDescription": "このエージェントの新しい説明を書いてください…",
+        "placeholderTask": "このエージェントの新しい作業を書いてください…",
+        "renameHint": "名前の変更は、一覧の名前のとなりにある ⋯ から。",
+        "scheduleTitle": "スケジュール",
+        "stateDone": "完了",
+        "stateWaiting": "待機中",
+        "stateWorking": "実行中",
+        "tabInbox": "受信",
+        "tabPlan": "手順",
+        "tabsLabel": "このエージェントについて見ているもの",
+        "taskChanged": "作業を変更しました。",
+        "toolsNone": "エージェントごとに許可するツールの一覧はまだありません。どのエージェントも、許可すれば検索し、書き、あなたが決めた一つの送り先に送ります。",
+        "toolsTitle": "ツールと接続"
+      }
     },
     "publishing": {
       "title": "公開中のサイト",

@@ -50,6 +50,28 @@ export type ListEmptyState = {
   fills?: string;
   /** Non-interactive only: why there is no button. */
   whyNot?: string;
+  /**
+   * A SHELL LANDING RATHER THAN AN `<EmptyState>` — added 2026-10-31
+   * (Agents Κομμάτι 1).
+   *
+   * This surface's empty screen is not an `<EmptyState>` of its own: it is
+   * ToolShell's landing (components/shell/tool-shell.tsx) — the small
+   * globe, the heading, one sentence under it, and up to three pressable
+   * examples that send straight through the shell's one field. Such a
+   * component passes `empty={{ heading, why, examples }}` to the shell
+   * instead of rendering `<EmptyState onExample>`, so the two greps that
+   * look for those two literals cannot see it. scripts/tests/empty-states.test.mjs
+   * checks the equivalent pair instead, and the landing's own shape
+   * (globe, one heading, at most three examples, never a second field) is
+   * held by scripts/tests/tool-shell.test.mjs §1.
+   *
+   * `.title` and `.why` are still required and still checked. `.example`
+   * is NOT: the examples are the shared AI chips from
+   * lib/ai/example-prompts.ts, whose existence in all ten locales is held
+   * by scripts/tests/example-prompts.test.mjs §3 — one registry per
+   * string, rather than two lists of examples for one screen.
+   */
+  shell?: true;
 };
 
 export const LIST_EMPTY_STATES: ListEmptyState[] = [
@@ -73,10 +95,11 @@ export const LIST_EMPTY_STATES: ListEmptyState[] = [
   },
   {
     id: "agents",
-    file: "src/components/agents/agents-workspace.tsx",
+    file: "src/components/agents/agents-shell.tsx",
     keyPrefix: "dashboard.agents.empty",
     interactive: true,
-    fills: "the agent-request textarea, which is what the builder reads",
+    shell: true,
+    fills: "the tool shell's one field, through ToolShell's own empty landing — sending it puts the request on the table, which starts the free template search before anything is priced",
   },
   {
     id: "deepResearch",

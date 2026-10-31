@@ -415,7 +415,7 @@ for (const locale of ["el", "en"]) {
     "src/components/records/ask-ai-modal.tsx",
     "src/components/create/create-studio.tsx",
     "src/components/text-actions/text-actions-textarea.tsx",
-    "src/components/agents/agents-workspace.tsx",
+    "src/components/agents/agents-shell.tsx",
     "src/components/marketplace/template-browser.tsx",
   ]) {
     check(`${file}: a limit is said with its time before anything the route wrote`, /limitText\(data\) \?\?/.test(code(file)));

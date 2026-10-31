@@ -67,6 +67,14 @@ check("and the most examples on the empty landing is three", /export const MAX_S
 check("with no turns and no work open, the empty landing is the small globe, one heading and its examples — never a second field",
   /const showEmpty = Boolean\(empty\) && turns\.length === 0 && !work;/.test(shell) &&
     /<Earth variant="small" px=\{96\} \/>/.test(shell) && /\{empty!\.heading\}/.test(shell) && /onClick=\{\(\) => onSend\(ex\.label\)\}/.test(shell));
+// ONE SENTENCE UNDER THE HEADING, OPTIONAL — added 2026-10-31 so a list
+// surface moving into this shell keeps the `.why` that
+// lib/list-empty-states.ts requires of it (Agents' was the one sentence
+// saying what a scheduled agent is for). Optional, and drawn only when
+// given, so every landing already shipped is byte-identical.
+check("...and one optional sentence under it, for a surface whose empty screen owes the reader a why",
+  /empty\?: \{ heading: string; why\?: string; examples\?: ShellExample\[\] \};/.test(shell) &&
+    /\{empty!\.why && <p className="max-w-sm text-sm leading-relaxed text-muted">\{empty!\.why\}<\/p>\}/.test(shell));
 check("the [◧] history column slides over the whole shell, same shape as Chat's and Coding's own, with New beside it",
   /data-testid="tool-shell-history"/.test(shell) && /data-testid="tool-shell-history-toggle"/.test(shell) &&
     /data-testid="tool-shell-new"/.test(shell) && /onClick=\{history\.onToggle\}/.test(shell) && /onClick=\{history\.onNew\}/.test(shell));

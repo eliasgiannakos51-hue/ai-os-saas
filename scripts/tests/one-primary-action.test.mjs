@@ -375,7 +375,15 @@ const BASELINE_NOTE = "one per surface; lower to 0 is fine, raising needs a reas
 const BASELINE = {
   "dashboard/[module]/page.tsx": 1,
   "dashboard/affiliate/page.tsx": 1,
-  "dashboard/agents/page.tsx": 1,
+  // TWO, and the second is what the whole screen is about (2026-10-31,
+  // Κομμάτι 1 of the owner's directive 25: «Μπάρα: κατάσταση, "Run now",
+  // ένα λευκό κουμπί»). One is the field's send, which every tool in the
+  // shell has. The other is Παύση/Συνέχιση in the work area's bar —
+  // whether this agent runs on its schedule at all — and it exists only
+  // while an agent is open, which is a moment the landing never shows.
+  // Run now beside it is a 44px icon action (ACTION), not a filled
+  // control, exactly so this stays at two.
+  "dashboard/agents/page.tsx": 2,
   "dashboard/apps/page.tsx": 1,
   "dashboard/business-health/page.tsx": 1,
   "dashboard/campaigns/page.tsx": 1,

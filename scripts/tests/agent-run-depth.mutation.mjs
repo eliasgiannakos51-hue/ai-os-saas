@@ -16,7 +16,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/agent-run-depth.test.mjs";
 const LIB = "src/lib/agents/run-depth.ts";
-const WS = "src/components/agents/agents-workspace.tsx";
+const WS = "src/components/agents/agents-shell.tsx";
 const TARGETS = [GATE, LIB, WS];
 
 const MUTANTS = [
@@ -48,13 +48,14 @@ const MUTANTS = [
     expect: "the request body carries NO override for an ordinary run",
   },
   {
-    // 4. THE CARD MENU sends a bare value again instead of asking the
-    // helper — the path the report came through.
-    name: "the card menu runs at a hard-coded tier",
+    // 4. THE BAR'S «Run now» sends a bare value again instead of asking
+    // the helper — the same defect as the card menu's, on the button that
+    // replaced it when Agents moved into the tool shell (2026-10-31).
+    name: "the bar's Run now runs at a hard-coded tier",
     file: WS,
-    from: "onSelect: () => void runNow(agent, effectiveRunDepth(agent, runOverride)),",
-    to: 'onSelect: () => void runNow(agent, "standard"),',
-    expect: "the card menu's Run now resolves the tier through the helper",
+    from: "onClick={() => void runNow(selected, effectiveRunDepth(selected, runOverride))}",
+    to: 'onClick={() => void runNow(selected, "standard")}',
+    expect: "the bar's Run now resolves the tier through the helper",
   },
   {
     // 5. THE PICKER shows a value that is not what will run.

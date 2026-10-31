@@ -45,7 +45,7 @@ const createRoute = readFileSync("src/app/api/agents/route.ts", "utf8");
 const patchRoute = readFileSync("src/app/api/agents/[id]/route.ts", "utf8");
 const channelRoute = readFileSync("src/app/api/delivery-channels/route.ts", "utf8");
 const picker = readFileSync("src/components/agents/delivery-picker.tsx", "utf8");
-const workspace = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const workspace = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 
 const ACCOUNT = "owner@example.com";
 

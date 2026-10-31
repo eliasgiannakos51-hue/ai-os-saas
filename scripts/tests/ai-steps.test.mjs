@@ -147,7 +147,7 @@ console.log("\n== 5. the four silent surfaces now speak ==");
 // as "the four places that were silent use it".
 const CONSUMERS = [
   ["mission_plan", "src/components/mission/mission-form.tsx", "the plan button said Planning… for all three steps"],
-  ["agent_build", "src/components/agents/agents-workspace.tsx", "the design button said Designing… for all four"],
+  ["agent_build", "src/components/agents/agents-shell.tsx", "the design button said Designing… for all four"],
 ];
 for (const [kind, file, was] of CONSUMERS) {
   const src = readFileSync(file, "utf8");
@@ -156,8 +156,13 @@ for (const [kind, file, was] of CONSUMERS) {
 // agent_run is in the same file as agent_build, and had the weaker
 // symptom (no words at all), so it is checked separately rather than
 // being covered by its neighbour's assertion.
-const agents = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
-check("agent_run: the run job is rendered too, not only the build job", /job=\{runJob\}/.test(agents));
+const agents = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
+// `ownRunJob`, NOT `runJob`, since Agents Κομμάτι 1 (2026-10-31): the
+// watched row is narrowed to the agent whose screen is open, so a run
+// started on one agent cannot paint another agent's progress. Named
+// exactly, not loosened to /\w*runJob/, so deleting the render still
+// fails here.
+check("agent_run: the run job is rendered too, not only the build job", /job=\{ownRunJob\}/.test(agents));
 check(
   "mission_plan: the label is no longer captured and dropped",
   !/setStepLabel/.test(readFileSync("src/components/mission/mission-form.tsx", "utf8"))

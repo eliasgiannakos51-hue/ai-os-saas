@@ -84,10 +84,19 @@ type Props = {
   tray?: ReactNode;
   /** Send waits while a file is still being read. */
   holdSend?: boolean;
-  /** The empty landing: one question and up to three examples, drawn with
-   *  the small globe while there are no turns and no work open. Omit for
-   *  a blank thread (the old behaviour). */
-  empty?: { heading: string; examples?: ShellExample[] };
+  /** The empty landing: one question, optionally one sentence under it,
+   *  and up to three examples, drawn with the small globe while there are
+   *  no turns and no work open. Omit for a blank thread (the old
+   *  behaviour).
+   *
+   *  `why` EXISTS BECAUSE A LIST SURFACE MOVING IN WOULD OTHERWISE LOSE
+   *  IT (2026-10-31, Agents Κομμάτι 1). lib/list-empty-states.ts requires
+   *  every non-module list screen to render a `.title` AND a `.why` — the
+   *  heading says what to do, the sentence says what the tool is for, and
+   *  Agents' was the one sentence explaining what a scheduled agent is.
+   *  A landing with only a heading had nowhere to put it. Optional, so
+   *  every tool already on this landing draws exactly what it drew. */
+  empty?: { heading: string; why?: string; examples?: ShellExample[] };
   /** The [◧] history column: its open state, what toggles and opens it,
    *  and its own content (a `ShellHistoryColumn`, typically). Omit to
    *  keep the tool's own history UI (an option under the field). */
@@ -177,6 +186,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
             <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
               <Earth variant="small" px={96} />
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">{empty!.heading}</h2>
+              {empty!.why && <p className="max-w-sm text-sm leading-relaxed text-muted">{empty!.why}</p>}
               {empty!.examples && empty!.examples.length > 0 && (
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   {empty!.examples.map((ex) => (

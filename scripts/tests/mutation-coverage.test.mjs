@@ -326,7 +326,12 @@ console.log(
 // a floor on how many gates have a suite at all — it exists so most of
 // the suites vanishing would be noticed — so it is raised to the truth
 // rather than to a comfortable number below it.
-const RATCHET = 298;
+// 298 -> 304 on 2026-10-31, read off the run, not reasoned to. Six
+// suites' worth of gap had accumulated inside the tolerated five and
+// agents-shell.mutation.mjs is the one that pushed it to six. The
+// ratchet is a floor on how many gates have a suite at all, so it is
+// raised to the truth rather than to a comfortable number below it.
+const RATCHET = 304;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

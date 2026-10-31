@@ -2008,7 +2008,6 @@
       "cancel": "Abbrechen",
       "agentsUsed": "{used} von {cap} Agenten",
       "agentsTotal": "{total} insgesamt (inkl. pausierter)",
-      "requestLabel": "Was soll dieser Agent für Sie tun?",
       "requestPlaceholder": "z. B. Schick mir jeden Morgen die neuesten Nachrichten zu Nvidia",
       "deliveryNote": "Ergebnisse gehen an {email} — die Adresse Ihres Kontos.",
       "designButton": "Agent entwerfen",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "Jetzt ausführen",
       "menuPause": "Pausieren",
       "menuResume": "Fortsetzen",
-      "menuEdit": "Bearbeiten",
-      "menuDelete": "Löschen",
       "pauseSuccess": "Agent pausiert.",
       "resumeSuccess": "Agent fortgesetzt.",
       "deleteSuccess": "Agent gelöscht.",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
       "empty": {
-        "title": "Arbeit, die ohne dich passiert",
-        "why": "Beschreib eine Aufgabe in einem Satz — sie läuft danach nach Zeitplan und liefert das Ergebnis, statt dich daran zu erinnern.",
-        "example": "Jeden Montagmorgen die Verkäufe der Vorwoche zusammenfassen"
+        "title": "Was soll der neue Agent tun?",
+        "why": "Beschreib eine Aufgabe in einem Satz — sie läuft danach nach Zeitplan und liefert das Ergebnis, statt dich daran zu erinnern."
       },
       "delivery": {
         "label": "Wohin das Ergebnis geht",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "Konnte nicht zurückgezogen werden. Es ist weiterhin geteilt."
       },
       "failingWarning": "{failures} der letzten {max} Läufe sind nacheinander fehlgeschlagen. Nach {max} schaltet sich dieser Agent selbst ab.",
-      "disabledReason": "Letzter Fehler: {reason}"
+      "disabledReason": "Letzter Fehler: {reason}",
+      "shell": {
+        "approvalsNone": "Keine, weil keine nötig sind: nichts, was dieser Agent tut, verlässt Ionexa ohne dich.",
+        "approvalsTitle": "Freigaberegeln",
+        "atCapacity": "Grenze der aktiven erreicht",
+        "capNoHardStop": "Das sind die Kosten, keine Grenze: es gibt noch keine Credit-Grenze, die den Agenten anhält. Er hört auf, wenn die Credits des Kontos aufgebraucht sind, oder von selbst nach {max} Fehlschlägen hintereinander.",
+        "capPerMonth": "Pro Monat, etwa",
+        "capPerMonthValue": "{credits} Credits · {runs} Durchläufe",
+        "capPerRun": "Pro Durchlauf",
+        "capsTitle": "Kosten in Credits",
+        "descriptionChanged": "Die Beschreibung wurde geändert.",
+        "fieldTarget": "Das Feld ändert:",
+        "inboxApprovals": "Wartet auf Freigabe",
+        "inboxApprovalsNone": "Nichts: dieser Agent führt keine Aktion aus, die sich nicht zurücknehmen lässt — er sucht, schreibt und sendet dir das Ergebnis.",
+        "inboxReceived": "Was er empfangen hat",
+        "inboxReceivedNone": "Nichts: der Agent hat noch keine eigene E-Mail-Adresse und kann daher keine Nachrichten empfangen.",
+        "noRunYet": "Kein Schritt hat begonnen. Die Zustände füllen sich live, Schritt für Schritt, sobald er läuft.",
+        "ownEmail": "Eigene Adresse",
+        "ownEmailNone": "Er hat keine. Das Ergebnis geht von der Ionexa-Adresse aus an den Kanal, den du unten gewählt hast.",
+        "placeholderDescription": "Schreibe die neue Beschreibung dieses Agenten…",
+        "placeholderTask": "Schreibe die neue Aufgabe dieses Agenten…",
+        "renameHint": "Umbenennen über das ⋯ neben dem Namen in der Liste.",
+        "scheduleTitle": "Zeitplan",
+        "stateDone": "Fertig",
+        "stateWaiting": "Wartet",
+        "stateWorking": "Läuft",
+        "tabInbox": "Eingang",
+        "tabPlan": "Ablauf",
+        "tabsLabel": "Was du zu diesem Agenten siehst",
+        "taskChanged": "Die Aufgabe wurde geändert.",
+        "toolsNone": "Es gibt noch keine eigene Freigabeliste von Werkzeugen pro Agent: jeder Agent sucht (wenn du es erlaubst), schreibt und sendet an den einen Kanal, den du festgelegt hast.",
+        "toolsTitle": "Werkzeuge und Verbindungen"
+      }
     },
     "publishing": {
       "title": "Live-Seiten",

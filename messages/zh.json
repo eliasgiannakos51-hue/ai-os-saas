@@ -2008,7 +2008,6 @@
       "cancel": "取消",
       "agentsUsed": "{used} / {cap} 个智能体",
       "agentsTotal": "共 {total} 个（含已暂停）",
-      "requestLabel": "你希望这个智能体为你做什么？",
       "requestPlaceholder": "例如：每天早上把英伟达的最新消息发给我",
       "deliveryNote": "结果将发送到 {email}，即你账户的邮箱地址。",
       "designButton": "设计你的智能体",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "立即运行",
       "menuPause": "暂停",
       "menuResume": "恢复",
-      "menuEdit": "编辑",
-      "menuDelete": "删除",
       "pauseSuccess": "智能体已暂停。",
       "resumeSuccess": "智能体已恢复。",
       "deleteSuccess": "智能体已删除。",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
       "empty": {
-        "title": "不用你动手也会发生的工作",
-        "why": "用一句话描述一件事，之后它就按时自己跑，直接把结果交给你，而不是提醒你去做。",
-        "example": "每周一早上，汇总上周的销售情况"
+        "title": "新助手要做什么？",
+        "why": "用一句话描述一件事，之后它就按时自己跑，直接把结果交给你，而不是提醒你去做。"
       },
       "delivery": {
         "label": "结果发送到哪里",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "无法撤回，它仍处于共享状态。"
       },
       "failingWarning": "最近连续 {failures} 次运行失败。达到 {max} 次后，该智能体会自动关闭。",
-      "disabledReason": "最近一次失败：{reason}"
+      "disabledReason": "最近一次失败：{reason}",
+      "shell": {
+        "approvalsNone": "没有，因为不需要：这个助手所做的一切，没有你就不会离开 Ionexa。",
+        "approvalsTitle": "批准规则",
+        "atCapacity": "已达到启用上限",
+        "capNoHardStop": "这是花费，不是上限：目前还没有能让助手停下的积分上限。账户积分用完时它会停，或者连续失败 {max} 次后自己停下。",
+        "capPerMonth": "每月，大约",
+        "capPerMonthValue": "{credits} 积分 · {runs} 次",
+        "capPerRun": "每次运行",
+        "capsTitle": "积分花费",
+        "descriptionChanged": "说明已更改。",
+        "fieldTarget": "输入框改动的是：",
+        "inboxApprovals": "等待批准的",
+        "inboxApprovalsNone": "没有：这个助手不会做任何无法撤回的事——它查找、撰写，然后把结果发给你。",
+        "inboxReceived": "它收到的",
+        "inboxReceivedNone": "没有：这个助手还没有自己的邮箱地址，所以收不到任何消息。",
+        "noRunYet": "还没有任何一步开始。它一运行，状态就会逐步实时填上。",
+        "ownEmail": "它自己的地址",
+        "ownEmailNone": "它没有。结果从 Ionexa 的地址发出，送往你在下面选的渠道。",
+        "placeholderDescription": "写下这个助手新的说明…",
+        "placeholderTask": "写下这个助手新的任务…",
+        "renameHint": "在列表里名字旁边的 ⋯ 处重命名。",
+        "scheduleTitle": "时间安排",
+        "stateDone": "已完成",
+        "stateWaiting": "等待中",
+        "stateWorking": "进行中",
+        "tabInbox": "收件箱",
+        "tabPlan": "步骤",
+        "tabsLabel": "你正在查看这个助手的哪一部分",
+        "taskChanged": "任务已更改。",
+        "toolsNone": "目前还没有按助手单独设置的工具白名单：每个助手都会查找（如果你允许）、撰写，并发送到你设定的那一个渠道。",
+        "toolsTitle": "工具和连接"
+      }
     },
     "publishing": {
       "title": "已上线网站",

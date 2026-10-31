@@ -2008,7 +2008,6 @@
       "cancel": "Annulla",
       "agentsUsed": "{used} di {cap} agenti",
       "agentsTotal": "{total} in totale (inclusi in pausa)",
-      "requestLabel": "Cosa vuoi che faccia questo agente per te?",
       "requestPlaceholder": "es. Ogni mattina, mandami le ultime notizie su Nvidia",
       "deliveryNote": "I risultati vengono inviati a {email}, l'indirizzo del tuo account.",
       "designButton": "Progetta il tuo agente",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "Esegui ora",
       "menuPause": "Metti in pausa",
       "menuResume": "Riprendi",
-      "menuEdit": "Modifica",
-      "menuDelete": "Elimina",
       "pauseSuccess": "Agente in pausa.",
       "resumeSuccess": "Agente ripreso.",
       "deleteSuccess": "Agente eliminato.",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
       "empty": {
-        "title": "Lavoro che avviene senza di te",
-        "why": "Descrivi un compito in una frase: da lì in poi gira secondo una pianificazione e ti consegna il risultato, invece di ricordarti di farlo.",
-        "example": "Ogni lunedì mattina, un riepilogo delle vendite della settimana"
+        "title": "Che cosa deve fare il nuovo agente?",
+        "why": "Descrivi un compito in una frase: da lì in poi gira secondo una pianificazione e ti consegna il risultato, invece di ricordarti di farlo."
       },
       "delivery": {
         "label": "Dove arriva il risultato",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "Non è stato possibile ritirarlo. È ancora condiviso."
       },
       "failingWarning": "{failures} delle ultime {max} esecuzioni sono fallite di seguito. Dopo {max}, questo agente si spegne da solo.",
-      "disabledReason": "Ultimo errore: {reason}"
+      "disabledReason": "Ultimo errore: {reason}",
+      "shell": {
+        "approvalsNone": "Nessuna, perché non servono: niente di ciò che fa questo agente esce da Ionexa senza di te.",
+        "approvalsTitle": "Regole di approvazione",
+        "atCapacity": "limite degli attivi raggiunto",
+        "capNoHardStop": "Questo è il costo, non un limite: non esiste ancora un limite di crediti che fermi l'agente. Si ferma quando i crediti del profilo finiscono, o da solo dopo {max} fallimenti di fila.",
+        "capPerMonth": "Al mese, circa",
+        "capPerMonthValue": "{credits} crediti · {runs} esecuzioni",
+        "capPerRun": "Per esecuzione",
+        "capsTitle": "Costo in crediti",
+        "descriptionChanged": "Descrizione modificata.",
+        "fieldTarget": "Il campo cambia:",
+        "inboxApprovals": "In attesa di approvazione",
+        "inboxApprovalsNone": "Niente: questo agente non compie azioni irreversibili — cerca, scrive e ti manda il risultato.",
+        "inboxReceived": "Che cosa ha ricevuto",
+        "inboxReceivedNone": "Niente: l'agente non ha ancora un indirizzo email proprio, quindi non può ricevere messaggi.",
+        "noRunYet": "Nessun passo è iniziato. Gli stati si riempiono in diretta, un passo alla volta, appena parte.",
+        "ownEmail": "Indirizzo proprio",
+        "ownEmailNone": "Non ne ha uno. Il risultato parte dall'indirizzo di Ionexa, verso il canale che hai scelto qui sotto.",
+        "placeholderDescription": "Scrivi la nuova descrizione di questo agente…",
+        "placeholderTask": "Scrivi la nuova attività di questo agente…",
+        "renameHint": "Rinomina dal ⋯ accanto al nome, nella lista.",
+        "scheduleTitle": "Programmazione",
+        "stateDone": "Fatto",
+        "stateWaiting": "In attesa",
+        "stateWorking": "In corso",
+        "tabInbox": "In arrivo",
+        "tabPlan": "Percorso",
+        "tabsLabel": "Cosa stai guardando di questo agente",
+        "taskChanged": "Attività modificata.",
+        "toolsNone": "Non esiste ancora un elenco di strumenti permessi per singolo agente: ogni agente cerca (se lo consenti), scrive e manda al solo canale che hai impostato.",
+        "toolsTitle": "Strumenti e connessioni"
+      }
     },
     "publishing": {
       "title": "Siti online",

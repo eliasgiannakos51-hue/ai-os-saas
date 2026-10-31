@@ -71,7 +71,12 @@ for (const [file, capName] of CAPPED_PAGES) {
   const src = readFileSync(file, "utf8");
   if (!new RegExp(`\\.limit\\(${capName}\\)`).test(src)) missingLimit.push(`${file}: no .limit(${capName})`);
   // THE NOTICE, not just the cap. Either the page renders it directly, or
-  // it hands the cap to GenericList, which renders it.
+  // it hands the cap down — to GenericList, or (since 2026-10-31) to a
+  // tool shell: /dashboard/agents is one full-height child with the
+  // field at the bottom, so a notice stacked above it would push that
+  // field off a phone, and agents-shell.tsx draws <ListCappedNotice>
+  // under the field instead. Both shapes are a page that can say it is
+  // capped; a page that reads a cap and passes it nowhere is not.
   const rendersNotice = /<ListCappedNotice/.test(src) || new RegExp(`cap=\\{${capName}\\}`).test(src);
   if (!rendersNotice) missingNotice.push(`${file}: caps but never says so`);
 }

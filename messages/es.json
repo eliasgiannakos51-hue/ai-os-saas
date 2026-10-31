@@ -2008,7 +2008,6 @@
       "cancel": "Cancelar",
       "agentsUsed": "{used} de {cap} agentes",
       "agentsTotal": "{total} en total (incl. pausados)",
-      "requestLabel": "¿Qué quieres que haga este agente por ti?",
       "requestPlaceholder": "p. ej. Cada mañana, envíame las últimas noticias sobre Nvidia",
       "deliveryNote": "Los resultados se envían a {email}, la dirección de tu cuenta.",
       "designButton": "Diseñar tu agente",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "Ejecutar ahora",
       "menuPause": "Pausar",
       "menuResume": "Reanudar",
-      "menuEdit": "Editar",
-      "menuDelete": "Eliminar",
       "pauseSuccess": "Agente en pausa.",
       "resumeSuccess": "Agente reanudado.",
       "deleteSuccess": "Agente eliminado.",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "La creación se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
       "empty": {
-        "title": "Trabajo que ocurre sin usted",
-        "why": "Describa una tarea en una frase y se ejecutará con una periodicidad fija, entregándole el resultado en vez de recordarle que la haga.",
-        "example": "Cada lunes por la mañana, resumen de las ventas de la semana"
+        "title": "¿Qué debe hacer el nuevo agente?",
+        "why": "Describa una tarea en una frase y se ejecutará con una periodicidad fija, entregándole el resultado en vez de recordarle que la haga."
       },
       "delivery": {
         "label": "Dónde llega el resultado",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "No se pudo retirar. Sigue compartida."
       },
       "failingWarning": "{failures} de las últimas {max} ejecuciones fallaron seguidas. Tras {max}, este agente se apaga solo.",
-      "disabledReason": "Último fallo: {reason}"
+      "disabledReason": "Último fallo: {reason}",
+      "shell": {
+        "approvalsNone": "Ninguna, porque no hacen falta: nada de lo que hace este agente sale de Ionexa sin ti.",
+        "approvalsTitle": "Reglas de aprobación",
+        "atCapacity": "límite de activos alcanzado",
+        "capNoHardStop": "Esto es el coste, no un límite: todavía no hay un límite de créditos que detenga al agente. Se detiene cuando la cuenta se queda sin créditos, o por sí solo tras {max} fallos seguidos.",
+        "capPerMonth": "Por mes, aproximadamente",
+        "capPerMonthValue": "{credits} créditos · {runs} ejecuciones",
+        "capPerRun": "Por ejecución",
+        "capsTitle": "Coste en créditos",
+        "descriptionChanged": "La descripción cambió.",
+        "fieldTarget": "El campo cambia:",
+        "inboxApprovals": "Pendiente de aprobación",
+        "inboxApprovalsNone": "Nada: este agente no realiza ninguna acción que no se pueda deshacer — busca, escribe y te envía el resultado.",
+        "inboxReceived": "Lo que recibió",
+        "inboxReceivedNone": "Nada: el agente aún no tiene su propia dirección de correo, así que no puede recibir mensajes.",
+        "noRunYet": "Ningún paso ha empezado. Los estados se llenan en vivo, paso a paso, en cuanto se ejecuta.",
+        "ownEmail": "Su propia dirección",
+        "ownEmailNone": "No tiene ninguna. El resultado sale de la dirección de Ionexa, al canal que elegiste abajo.",
+        "placeholderDescription": "Escribe la nueva descripción de este agente…",
+        "placeholderTask": "Escribe la nueva tarea de este agente…",
+        "renameHint": "Cambia el nombre desde el ⋯ junto al nombre, en la lista.",
+        "scheduleTitle": "Programación",
+        "stateDone": "Hecho",
+        "stateWaiting": "En espera",
+        "stateWorking": "En curso",
+        "tabInbox": "Entrada",
+        "tabPlan": "Pasos",
+        "tabsLabel": "Lo que estás viendo de este agente",
+        "taskChanged": "La tarea cambió.",
+        "toolsNone": "Todavía no hay una lista propia de herramientas permitidas por agente: cada agente busca (si lo permites), escribe y envía al único canal que fijaste.",
+        "toolsTitle": "Herramientas y conexiones"
+      }
     },
     "publishing": {
       "title": "Sitios en vivo",

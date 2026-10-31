@@ -94,6 +94,14 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       // the content is not — which is the same distinction that gave it a
       // page instead of a tab.
       "aiMemory",
+      // The three worked examples every AI surface offers, and the one
+      // honest line under them. Already reachable from the dashboard
+      // through <ExamplePrompts> on six screens; added here when Agents
+      // moved into the tool shell (2026-10-31) and began drawing the same
+      // three strings as the shell landing's own examples, which is a
+      // direct useTranslations("aiExamples.agents") rather than a call
+      // inside the shared component.
+      "aiExamples",
       "aiSteps", "askAi", "coding", "common", "credits",
       "dashboard", "dataAnalysis", "entityLinks", "errors", "favorites",
       "finance", "language", "module",

@@ -2008,7 +2008,6 @@
       "cancel": "Annuler",
       "agentsUsed": "{used} agents sur {cap}",
       "agentsTotal": "{total} au total (pausés inclus)",
-      "requestLabel": "Que voulez-vous que cet agent fasse pour vous ?",
       "requestPlaceholder": "ex. Chaque matin, envoie-moi les dernières actualités sur Nvidia",
       "deliveryNote": "Les résultats sont envoyés à {email}, l'adresse de votre compte.",
       "designButton": "Concevoir votre agent",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "Exécuter maintenant",
       "menuPause": "Mettre en pause",
       "menuResume": "Reprendre",
-      "menuEdit": "Modifier",
-      "menuDelete": "Supprimer",
       "pauseSuccess": "Agent mis en pause.",
       "resumeSuccess": "Agent réactivé.",
       "deleteSuccess": "Agent supprimé.",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "La création s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
       "empty": {
-        "title": "Du travail qui se fait sans vous",
-        "why": "Décrivez une tâche en une phrase : elle s'exécute ensuite selon un calendrier et vous livre le résultat, au lieu de vous rappeler de la faire.",
-        "example": "Chaque lundi matin, un résumé des ventes de la semaine"
+        "title": "Que doit faire le nouvel agent ?",
+        "why": "Décrivez une tâche en une phrase : elle s'exécute ensuite selon un calendrier et vous livre le résultat, au lieu de vous rappeler de la faire."
       },
       "delivery": {
         "label": "Où arrive le résultat",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "Impossible de retirer. C'est toujours partagé."
       },
       "failingWarning": "{failures} des {max} dernières exécutions ont échoué d'affilée. Après {max}, cet agent s'éteint tout seul.",
-      "disabledReason": "Dernier échec : {reason}"
+      "disabledReason": "Dernier échec : {reason}",
+      "shell": {
+        "approvalsNone": "Aucune, parce qu'aucune n'est nécessaire : rien de ce que fait cet agent ne quitte Ionexa sans toi.",
+        "approvalsTitle": "Règles de validation",
+        "atCapacity": "limite des actifs atteinte",
+        "capNoHardStop": "Ce sont les coûts, pas une limite : il n'y a pas encore de limite de crédits qui arrête l'agent. Il s'arrête quand le compte n'a plus de crédits, ou de lui-même après {max} échecs de suite.",
+        "capPerMonth": "Par mois, environ",
+        "capPerMonthValue": "{credits} crédits · {runs} exécutions",
+        "capPerRun": "Par exécution",
+        "capsTitle": "Coût en crédits",
+        "descriptionChanged": "La description a changé.",
+        "fieldTarget": "Le champ modifie :",
+        "inboxApprovals": "En attente de validation",
+        "inboxApprovalsNone": "Rien : cet agent ne fait aucune action irréversible — il cherche, écrit, et t'envoie le résultat.",
+        "inboxReceived": "Ce qu'il a reçu",
+        "inboxReceivedNone": "Rien : l'agent n'a pas encore sa propre adresse e-mail, il ne peut donc pas recevoir de messages.",
+        "noRunYet": "Aucune étape n'a commencé. Les états se remplissent en direct, étape par étape, dès qu'il tourne.",
+        "ownEmail": "Sa propre adresse",
+        "ownEmailNone": "Il n'en a pas. Le résultat part de l'adresse Ionexa, vers le canal que tu as choisi ci-dessous.",
+        "placeholderDescription": "Écris la nouvelle description de cet agent…",
+        "placeholderTask": "Écris la nouvelle tâche de cet agent…",
+        "renameHint": "Renomme depuis le ⋯ à côté du nom, dans la liste.",
+        "scheduleTitle": "Planification",
+        "stateDone": "Terminé",
+        "stateWaiting": "En attente",
+        "stateWorking": "En cours",
+        "tabInbox": "Boîte de réception",
+        "tabPlan": "Déroulé",
+        "tabsLabel": "Ce que tu regardes pour cet agent",
+        "taskChanged": "La tâche a changé.",
+        "toolsNone": "Il n'existe pas encore de liste d'outils autorisés par agent : chaque agent cherche (si tu l'autorises), écrit, et envoie au seul canal que tu as défini.",
+        "toolsTitle": "Outils et connexions"
+      }
     },
     "publishing": {
       "title": "Sites en ligne",

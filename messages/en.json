@@ -2008,7 +2008,6 @@
       "cancel": "Cancel",
       "agentsUsed": "{used} of {cap} agents",
       "agentsTotal": "{total} total (incl. paused)",
-      "requestLabel": "What should this agent do for you?",
       "requestPlaceholder": "e.g. Every morning, send me the latest news about Nvidia",
       "deliveryNote": "Results are emailed to {email} — the address on your account.",
       "designButton": "Design your agent",
@@ -2037,8 +2036,6 @@
       "menuRunNow": "Run now",
       "menuPause": "Pause",
       "menuResume": "Resume",
-      "menuEdit": "Edit",
-      "menuDelete": "Delete",
       "pauseSuccess": "Agent paused.",
       "resumeSuccess": "Agent resumed.",
       "deleteSuccess": "Agent deleted.",
@@ -2087,9 +2084,8 @@
       },
       "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again.",
       "empty": {
-        "title": "Work that happens without you",
-        "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it.",
-        "example": "Every Monday morning, summarise last week's sales"
+        "title": "What should the new agent do?",
+        "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it."
       },
       "delivery": {
         "label": "Where the result goes",
@@ -2230,7 +2226,39 @@
         "withdrawFailed": "That could not be withdrawn. It is still shared."
       },
       "failingWarning": "{failures} of the last {max} runs failed in a row. After {max}, this agent switches itself off.",
-      "disabledReason": "Last failure: {reason}"
+      "disabledReason": "Last failure: {reason}",
+      "shell": {
+        "approvalsNone": "None, because none are needed: nothing this agent does leaves Ionexa without you.",
+        "approvalsTitle": "Approval rules",
+        "atCapacity": "active limit reached",
+        "capNoHardStop": "These are the cost, not a limit: there is no credit limit that stops the agent yet. It stops when the account runs out of credits, or by itself after {max} failures in a row.",
+        "capPerMonth": "Per month, roughly",
+        "capPerMonthValue": "{credits} credits · {runs} runs",
+        "capPerRun": "Per run",
+        "capsTitle": "Cost in credits",
+        "descriptionChanged": "The description changed.",
+        "fieldTarget": "The field changes:",
+        "inboxApprovals": "Waiting for approval",
+        "inboxApprovalsNone": "Nothing: this agent takes no action that cannot be undone — it searches, writes, and sends the result to you.",
+        "inboxReceived": "What it received",
+        "inboxReceivedNone": "Nothing: the agent has no email address of its own yet, so it cannot receive messages.",
+        "noRunYet": "No step has started. The states fill in live as it runs, one step at a time.",
+        "ownEmail": "Its own address",
+        "ownEmailNone": "It has none. The result leaves from the Ionexa address, to the channel you chose below.",
+        "placeholderDescription": "Write this agent's new description…",
+        "placeholderTask": "Write this agent's new task…",
+        "renameHint": "Rename from the ⋯ beside the name, in the list.",
+        "scheduleTitle": "Schedule",
+        "stateDone": "Done",
+        "stateWaiting": "Waiting",
+        "stateWorking": "Working",
+        "tabInbox": "Inbox",
+        "tabPlan": "Plan",
+        "tabsLabel": "What you are looking at for this agent",
+        "taskChanged": "The task changed.",
+        "toolsNone": "There is no separate per-agent allowlist of tools yet: every agent searches (if you allow it), writes, and sends to the one channel you set.",
+        "toolsTitle": "Tools and connections"
+      }
     },
     "publishing": {
       "title": "Live sites",

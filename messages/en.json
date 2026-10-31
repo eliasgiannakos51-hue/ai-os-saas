@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "Translate",
         "apps": "Apps",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Sheets"
       },
       "lines": {
         "site": "A website from a description",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "Sign in again.",
         "failed": "That did not work. Nothing changed."
       }
+    },
+    "sheets": {
+      "placeholder": "Describe the table you need, or the change you want",
+      "limits": "Formulas, charts and xlsx export are not wired yet · nothing is charged on this screen",
+      "soon": "I can't build the table yet — this screen is the first piece. Formulas come next, then a table from a description.",
+      "download": "Download",
+      "downloadSoon": "Download arrives with xlsx and csv export, with the formulas intact",
+      "work": {
+        "title": "Table"
+      },
+      "formula": {
+        "label": "Formula",
+        "empty": "Empty cell",
+        "selected": "{count, plural, one {# cell} other {# cells}}"
+      },
+      "sheet": {
+        "tab": "Sheet {n}",
+        "add": "New sheet"
+      },
+      "empty": {
+        "heading": "What should the table work out?",
+        "why": "Sheets builds a table with real formulas inside it, so every total works itself out again when you change a number — never a result typed in by hand.",
+        "examples": {
+          "budget": "A monthly budget for my shop",
+          "stock": "A stock list with reorder levels",
+          "pricelist": "A price list with VAT and margin"
+        }
+      },
+      "extend": "Extend the selection"
     }
   },
   "module": {

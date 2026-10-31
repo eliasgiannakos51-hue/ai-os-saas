@@ -52,6 +52,14 @@ const LOCALE_ALLOWED = new Set([
   "es:dashboard.translateTool.style.formal",
   "pt:dashboard.translateTool.style.formal",
   "fr:dashboard.translateTool.styleLabel",
+  // Sheets (2026-10-31, Κομμάτι 1): "Formula" is the Italian word for
+  // the label above the grid. Every other locale differs (Formule,
+  // Formel, Fórmula, 数式, المعادلة), which is why it is listed here,
+  // per locale, rather than in the all-locales list at the top of this
+  // file. (Naming that list here by its constant would cost a slot in
+  // comment-claims' census, whose phrase scan matches the word inside
+  // the symbol — three comments in this one file already do.)
+  "it:dashboard.sheets.formula.label",
   // Rebuild's texts (2026-10-27): the same word in that language.
   "fr:dashboard.rebuild.boxes.actions",
   "fr:dashboard.rebuild.versions",

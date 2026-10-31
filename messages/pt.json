@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "Traduzir",
         "apps": "Apps",
-        "audio": "Áudio"
+        "audio": "Áudio",
+        "sheets": "Folhas"
       },
       "lines": {
         "site": "Um site a partir de uma descrição",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "Inicia sessão outra vez.",
         "failed": "Não resultou. Nada mudou."
       }
+    },
+    "sheets": {
+      "placeholder": "Descreve a tabela de que precisas, ou a alteração",
+      "limits": "As fórmulas, os gráficos e a exportação para xlsx ainda não estão ligados · nesta janela não é cobrado nada",
+      "soon": "Ainda não consigo construir a tabela — esta janela é a primeira peça. A seguir vêm as fórmulas e depois a tabela a partir de uma descrição.",
+      "download": "Transferir",
+      "downloadSoon": "A transferência chega com a exportação para xlsx e csv, com as fórmulas intactas",
+      "work": {
+        "title": "Tabela"
+      },
+      "formula": {
+        "label": "Fórmula",
+        "empty": "Célula vazia",
+        "selected": "{count, plural, one {# célula} other {# células}}"
+      },
+      "sheet": {
+        "tab": "Folha {n}",
+        "add": "Nova folha"
+      },
+      "empty": {
+        "heading": "O que deve a tabela calcular?",
+        "why": "As Folhas constroem uma tabela com fórmulas verdadeiras lá dentro, para que cada total volte a sair sozinho quando mudas um número — nunca um resultado escrito à mão.",
+        "examples": {
+          "budget": "Um orçamento mensal para a minha loja",
+          "stock": "Um inventário com níveis de reposição",
+          "pricelist": "Uma lista de preços com IVA e margem"
+        }
+      },
+      "extend": "Ampliar a seleção"
     }
   },
   "module": {

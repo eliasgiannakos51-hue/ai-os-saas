@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "Übersetzen",
         "apps": "Apps",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Tabellen"
       },
       "lines": {
         "site": "Eine Website aus einer Beschreibung",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "Melden Sie sich erneut an.",
         "failed": "Das hat nicht geklappt. Nichts wurde geändert."
       }
+    },
+    "sheets": {
+      "placeholder": "Beschreibe die Tabelle, die du brauchst, oder die Änderung",
+      "limits": "Formeln, Diagramme und der xlsx-Export sind noch nicht angeschlossen · auf diesem Bildschirm wird nichts berechnet",
+      "soon": "Ich kann die Tabelle noch nicht bauen – dieser Bildschirm ist das erste Stück. Danach kommen die Formeln und dann die Tabelle aus einer Beschreibung.",
+      "download": "Herunterladen",
+      "downloadSoon": "Das Herunterladen kommt mit dem xlsx- und csv-Export, die Formeln bleiben erhalten",
+      "work": {
+        "title": "Tabelle"
+      },
+      "formula": {
+        "label": "Formel",
+        "empty": "Leere Zelle",
+        "selected": "{count, plural, one {# Zelle} other {# Zellen}}"
+      },
+      "sheet": {
+        "tab": "Blatt {n}",
+        "add": "Neues Blatt"
+      },
+      "empty": {
+        "heading": "Was soll die Tabelle ausrechnen?",
+        "why": "Tabellen baut eine Tabelle mit echten Formeln darin, damit sich jede Summe von selbst neu ausrechnet, wenn du eine Zahl änderst – nie ein von Hand getipptes Ergebnis.",
+        "examples": {
+          "budget": "Ein Monatsbudget für meinen Laden",
+          "stock": "Eine Lagerliste mit Meldebeständen",
+          "pricelist": "Eine Preisliste mit Mehrwertsteuer und Marge"
+        }
+      },
+      "extend": "Auswahl erweitern"
     }
   },
   "module": {

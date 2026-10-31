@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "Traduci",
         "apps": "App",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Fogli"
       },
       "lines": {
         "site": "Un sito da una descrizione",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "Accedi di nuovo.",
         "failed": "Non ha funzionato. Nulla è cambiato."
       }
+    },
+    "sheets": {
+      "placeholder": "Descrivi la tabella che ti serve, o la modifica",
+      "limits": "Le formule, i grafici e l'esportazione in xlsx non sono ancora collegati · in questa schermata non si paga nulla",
+      "soon": "Non posso ancora costruire la tabella: questa schermata è il primo pezzo. Poi arrivano le formule e quindi la tabella da una descrizione.",
+      "download": "Scarica",
+      "downloadSoon": "Il download arriva con l'esportazione in xlsx e csv, con le formule intatte",
+      "work": {
+        "title": "Tabella"
+      },
+      "formula": {
+        "label": "Formula",
+        "empty": "Cella vuota",
+        "selected": "{count, plural, one {# cella} other {# celle}}"
+      },
+      "sheet": {
+        "tab": "Foglio {n}",
+        "add": "Nuovo foglio"
+      },
+      "empty": {
+        "heading": "Che cosa deve calcolare la tabella?",
+        "why": "Fogli costruisce una tabella con formule vere dentro, così ogni totale si ricalcola da solo quando cambi un numero, mai un risultato scritto a mano.",
+        "examples": {
+          "budget": "Un budget mensile per il mio negozio",
+          "stock": "Un inventario con soglie di riordino",
+          "pricelist": "Un listino prezzi con IVA e margine"
+        }
+      },
+      "extend": "Estendi la selezione"
     }
   },
   "module": {

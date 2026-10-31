@@ -92,6 +92,26 @@ const EXEMPT = {
   // A detail page reached from the document it belongs to. Its parent
   // (/dashboard/documents) is in the nav; a document id cannot be.
   "/dashboard/documents/[id]": "a document's own page, opened from the documents list",
+
+  // SHEETS, AND THIS ENTRY IS MEANT TO BE DELETED (2026-10-31, Κομμάτι 1
+  // of the owner's directive 28). The screen is behind the switch
+  // "sheets-tool" and src/app/dashboard/sheets/page.tsx is `notFound()`
+  // for anyone it is not open to, so the only people who can reach it
+  // are the owner and the test account — the two who know the address.
+  //
+  // It has no way in BECAUSE THE WAY IN IS HIS DECISION, not because
+  // nobody thought about it: his own «ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ»
+  // message enumerates twenty-five squares and Sheets is not one, while
+  // the Document tile's line already says «Έγγραφα και φύλλα». The two
+  // roads — a twenty-sixth square, or a door inside Document — are put
+  // to him in docs/NEEDS-FROM-ELIAS.md. A hidden nav row would have
+  // closed this gate in one line and been the wrong answer: it puts
+  // «Φύλλα» in every customer's ⌘K, where pressing it gives a 404.
+  //
+  // CHECKED BOTH WAYS so it cannot go stale: scripts/tests/sheets.test.mjs
+  // requires this entry to exist exactly while lib/nav/all-tools.ts has
+  // no Sheets tile, and to be gone the moment it has one.
+  "/dashboard/sheets": "staff-only behind the 'sheets-tool' switch and notFound() for everyone else; its door (a 26th tile, or a link from Document) is the owner's own open question",
 };
 
 // ---------------------------------------------------------------------

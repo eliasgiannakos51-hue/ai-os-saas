@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "Traduire",
         "apps": "Applis",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Feuilles"
       },
       "lines": {
         "site": "Un site web à partir d'une description",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "Reconnectez-vous.",
         "failed": "Cela n'a pas fonctionné. Rien n'a changé."
       }
+    },
+    "sheets": {
+      "placeholder": "Décris le tableau dont tu as besoin, ou la modification",
+      "limits": "Les formules, les graphiques et l'export xlsx ne sont pas encore branchés · rien n'est facturé sur cet écran",
+      "soon": "Je ne peux pas encore construire le tableau : cet écran est la première pièce. Viennent ensuite les formules, puis le tableau à partir d'une description.",
+      "download": "Télécharger",
+      "downloadSoon": "Le téléchargement arrivera avec l'export xlsx et csv, les formules intactes",
+      "work": {
+        "title": "Tableau"
+      },
+      "formula": {
+        "label": "Formule",
+        "empty": "Cellule vide",
+        "selected": "{count, plural, one {# cellule} other {# cellules}}"
+      },
+      "sheet": {
+        "tab": "Feuille {n}",
+        "add": "Nouvelle feuille"
+      },
+      "empty": {
+        "heading": "Que doit calculer le tableau ?",
+        "why": "Feuilles construit un tableau avec de vraies formules à l'intérieur, pour que chaque total se recalcule tout seul quand tu changes un nombre, jamais un résultat saisi à la main.",
+        "examples": {
+          "budget": "Un budget mensuel pour ma boutique",
+          "stock": "Un inventaire avec seuils de réapprovisionnement",
+          "pricelist": "Une liste de prix avec TVA et marge"
+        }
+      },
+      "extend": "Étendre la sélection"
     }
   },
   "module": {

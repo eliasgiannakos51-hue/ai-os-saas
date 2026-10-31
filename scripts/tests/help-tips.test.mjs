@@ -181,6 +181,19 @@ const NO_HEADER_EXEMPT = new Map([
   // built behind the switch "3d-tool", so everyone the switch is not
   // open to gets the Coming Soon shell, which has nothing for a tip to
   // explain yet.
+  // SHEETS (2026-10-31, Κομμάτι 1) is exempt for a DIFFERENT reason from
+  // the Coming Soon list below, and the difference is worth the two
+  // lines: its screen is real and does something (a 10.000-row table,
+  // sheet tabs, a formula bar). What it does not need is a second
+  // explanation — the shell's own empty landing already carries one
+  // sentence saying what the tool is for, in ten languages
+  // (`dashboard.sheets.empty.why`), and a help tip would be that same
+  // sentence twice. A tip lands when the formulas do, which is the point
+  // at which there is something a landing sentence cannot say.
+  [
+    "src/app/dashboard/sheets/page.tsx",
+    "Behind the switch 'sheets-tool' and notFound() for everyone else; the shell's empty landing already carries the one sentence that says what the tool is for (dashboard.sheets.empty.why, ten languages). The tip lands with the formula engine (Κομμάτι 2+), when there is something that sentence cannot say",
+  ],
   ...["audio", "avatars", "3d", "editing", "films", "translate", "video-studio"].map((slug) => [
     `src/app/dashboard/${slug}/page.tsx`,
     "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",

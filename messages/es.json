@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "Traducir",
         "apps": "Apps",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Hojas"
       },
       "lines": {
         "site": "Un sitio web a partir de una descripción",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "Inicia sesión de nuevo.",
         "failed": "No funcionó. No cambió nada."
       }
+    },
+    "sheets": {
+      "placeholder": "Describe la tabla que necesitas, o el cambio que quieres",
+      "limits": "Las fórmulas, los gráficos y la exportación a xlsx aún no están conectados · en esta pantalla no se cobra nada",
+      "soon": "Todavía no puedo crear la tabla: esta pantalla es la primera pieza. Después vienen las fórmulas y luego la tabla a partir de una descripción.",
+      "download": "Descargar",
+      "downloadSoon": "La descarga llega con la exportación a xlsx y csv, con las fórmulas intactas",
+      "work": {
+        "title": "Tabla"
+      },
+      "formula": {
+        "label": "Fórmula",
+        "empty": "Celda vacía",
+        "selected": "{count, plural, one {# celda} other {# celdas}}"
+      },
+      "sheet": {
+        "tab": "Hoja {n}",
+        "add": "Nueva hoja"
+      },
+      "empty": {
+        "heading": "¿Qué debe calcular la tabla?",
+        "why": "Hojas crea una tabla con fórmulas de verdad dentro, para que cada total vuelva a salir solo cuando cambias un número, nunca un resultado escrito a mano.",
+        "examples": {
+          "budget": "Un presupuesto mensual para mi tienda",
+          "stock": "Un inventario con niveles de reposición",
+          "pricelist": "Una lista de precios con IVA y margen"
+        }
+      },
+      "extend": "Ampliar la selección"
     }
   },
   "module": {

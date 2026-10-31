@@ -3277,7 +3277,8 @@
         "iowork": "iowork",
         "translate": "翻译",
         "apps": "应用",
-        "audio": "音频"
+        "audio": "音频",
+        "sheets": "表格"
       },
       "lines": {
         "site": "根据描述生成网站",
@@ -4636,6 +4637,35 @@
         "not_signed_in": "请重新登录。",
         "failed": "没有成功。什么都没有改变。"
       }
+    },
+    "sheets": {
+      "placeholder": "描述你需要的表格，或想做的修改",
+      "limits": "公式、图表和 xlsx 导出尚未接通 · 此页面不收取任何费用",
+      "soon": "我还不能生成表格——这个页面只是第一步。接下来是公式，然后才是根据描述生成表格。",
+      "download": "下载",
+      "downloadSoon": "下载将随 xlsx 和 csv 导出一起推出，公式会完整保留",
+      "work": {
+        "title": "表格"
+      },
+      "formula": {
+        "label": "公式",
+        "empty": "空单元格",
+        "selected": "{count, plural, other {# 个单元格}}"
+      },
+      "sheet": {
+        "tab": "工作表 {n}",
+        "add": "新建工作表"
+      },
+      "empty": {
+        "heading": "这张表要算什么？",
+        "why": "表格会生成带有真实公式的表：改动一个数字，所有合计都会自己重新算出来，而不是手写上去的结果。",
+        "examples": {
+          "budget": "我店铺的月度预算",
+          "stock": "带补货下限的库存清单",
+          "pricelist": "含增值税和毛利的价目表"
+        }
+      },
+      "extend": "扩展选区"
     }
   },
   "module": {

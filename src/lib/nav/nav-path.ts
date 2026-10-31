@@ -118,6 +118,13 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "reflection",
   "routing",
   "settings",
+  // SHEETS (the owner's «28. SHEETS: ΠΙΝΑΚΕΣ ΜΕ ΠΡΑΓΜΑΤΙΚΟΥΣ ΤΥΠΟΥΣ»,
+  // 2026-10-31): a brand new tool's own address, behind the switch
+  // "sheets-tool" and notFound() for anyone it is not open to. It is
+  // tracked like every other screen even though only the owner and the
+  // test account can open it — a screen nobody can measure is a screen
+  // nobody can tell is being used when it does open.
+  "sheets",
   "system-health",
   "team",
   "timeline",

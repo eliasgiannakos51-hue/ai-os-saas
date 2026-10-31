@@ -1383,6 +1383,25 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "cross" }),
   },
   {
+    // SHEETS IS THE ONE ROW WHOSE PROOF IS NOT all-tools.ts, because it
+    // is the one tool with no tile there: the owner's own «ALL TOOLS:
+    // ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ» message enumerates twenty-five squares and this
+    // is not one of them (the question — a twenty-sixth square, or a
+    // door inside Document, whose line already says «Έγγραφα και φύλλα»
+    // — is his, and is in docs/NEEDS-FROM-ELIAS.md). So what keeps it
+    // out of a customer's hands is the switch on its own page, and that
+    // is what this row points at.
+    id: "sheets",
+    group: "make",
+    minPlan: "starter",
+    pages: ["sheets"],
+    charges: false,
+    notSold: "Not sold and not reachable: the screen is built behind the switch 'sheets-tool' (the owner's «28. SHEETS: ΠΙΝΑΚΕΣ ΜΕ ΠΡΑΓΜΑΤΙΚΟΥΣ ΤΥΠΟΥΣ», 2026-10-31, Κομμάτι 1) and the page is notFound() for anyone it is not open to, so only the owner and the test account can open it at all. It has no All tools tile, on purpose — where its door goes is his own open question (docs/NEEDS-FROM-ELIAS.md), and the formula engine's licence is Κομμάτι 2's (docs/SHEETS-ENGINE.md). Published when both are answered.",
+    enforcedIn: "src/app/dashboard/sheets/page.tsx",
+    enforcedSymbol: 'if (!(await isFeatureOn("sheets-tool", user))) notFound();',
+    cell: () => ({ type: "cross" }),
+  },
+  {
     id: "audio",
     group: "make",
     minPlan: "starter",

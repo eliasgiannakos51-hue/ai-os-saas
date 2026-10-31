@@ -495,6 +495,17 @@ const BASELINE = {
   // variable and makes this count unreadable — the failure mode
   // CLAUDE.md calls "runtime strings invisible to the compiler".
   "dashboard/reflection/page.tsx": 0,
+  // TWO, and the owner named the second one himself (2026-10-31,
+  // Κομμάτι 1 of his directive 28: «Πεδίο αλλαγών κάτω· Ένα λευκό
+  // κουμπί «Download»»). He writes the field and the button as two
+  // separate things, and they are: one is the shell's send arrow, the
+  // round 44px control INSIDE the field that every tool in the shell
+  // has; the other is «Λήψη» in the work area's bar, which is this
+  // screen's own and exists only while a table is open — a moment the
+  // landing never shows. It is drawn disabled with the marker dot until
+  // his Κομμάτι 8 wires xlsx and csv export
+  // (src/components/sheets/sheets-shell.tsx).
+  "dashboard/sheets/page.tsx": 2,
   "dashboard/settings/page.tsx": 1,
   "dashboard/team/page.tsx": 1,
   "dashboard/trading-journal/page.tsx": 1,

@@ -23,14 +23,26 @@ import { createHash, randomBytes } from "node:crypto";
  */
 
 /**
- * Crockford's base32: the digits, and the letters without I, L, O and U.
- * I/L/1 and O/0 are the pairs people mistype off a screen, and U is left
- * out so a random code cannot read as a word. 32 symbols means a byte maps
- * to one of them with no modulo bias (256 divides by 32), which is why
- * newPairingCode can stay this short.
+ * THE CODE ITSELF LIVES IN src/lib/pairing-code.ts, not here.
+ *
+ * It moved out on 2026-10-31, when Telegram (the owner's "24. IONEXA ΣΤΟ
+ * TELEGRAM") needed the same eight characters running the other way —
+ * ionexa.ai shows them, the person sends them to the bot. Two copies of a
+ * Crockford alphabet are two statements that can disagree, and the one
+ * that lost "no I, L, O, U" would keep passing its own tests.
+ *
+ * RE-EXPORTED RATHER THAN RE-IMPORTED BY EVERY CALLER so that every
+ * `from "@/lib/iowork/pairing"` in the four api/iowork routes and the page
+ * keeps naming one module, and so scripts/tests/iowork-pairing.test.mjs
+ * still exercises this file's whole surface in one load.
  */
-export const PAIRING_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
-export const PAIRING_CODE_LENGTH = 8;
+export {
+  PAIRING_ALPHABET,
+  PAIRING_CODE_LENGTH,
+  newPairingCode,
+  normalisePairingCode,
+  formatPairingCode,
+} from "@/lib/pairing-code";
 
 /** Ten minutes: long enough to walk to the other machine, short enough that
  *  a guessed code has almost no window. With the limiter on the claim route
@@ -44,39 +56,6 @@ export const DEVICE_IDLE_DAYS = 30;
  *  what a stolen account password can reach, and a person who really has
  *  six computers can disconnect one. */
 export const MAX_DEVICES_PER_USER = 5;
-
-/** Eight characters, uniform over PAIRING_ALPHABET. */
-export function newPairingCode(): string {
-  const bytes = randomBytes(PAIRING_CODE_LENGTH);
-  let code = "";
-  for (const byte of bytes) code += PAIRING_ALPHABET[byte % PAIRING_ALPHABET.length];
-  return code;
-}
-
-/**
- * What the person typed, turned into what was generated — or null.
- *
- * Spaces and dashes go (the app shows the code as ABCD-EF23, and people
- * retype the dash), case goes, and the three lookalikes the alphabet left
- * out are folded onto the symbol they were mistaken for. Anything still
- * outside the alphabet after that is a typo, not a code, and null says so
- * rather than sending a lookup that cannot match.
- */
-export function normalisePairingCode(input: string): string | null {
-  const folded = input
-    .toUpperCase()
-    .replace(/[\s-]/g, "")
-    .replace(/[IL]/g, "1")
-    .replace(/O/g, "0");
-  if (folded.length !== PAIRING_CODE_LENGTH) return null;
-  for (const ch of folded) if (!PAIRING_ALPHABET.includes(ch)) return null;
-  return folded;
-}
-
-/** ABCD-EF23 — read aloud and retyped more reliably than eight in a row. */
-export function formatPairingCode(code: string): string {
-  return code.length === PAIRING_CODE_LENGTH ? `${code.slice(0, 4)}-${code.slice(4)}` : code;
-}
 
 /** 32 random bytes, base64url. Used for both the claim secret and the
  *  device token: neither is ever shown to a person, so neither needs to be

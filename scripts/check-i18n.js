@@ -57,6 +57,12 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.rebuild.versions",
   "fr:dashboard.rebuild.version",
   "de:dashboard.rebuild.version",
+  // Telegram (2026-10-31): «Ionexa in Telegram» is the German
+  // sentence as well — "in" is the German preposition for this and
+  // the product name does not translate. Italian took «su Telegram»
+  // instead, which is why this is per-locale and not
+  // INTENTIONALLY_IDENTICAL: es, fr, pt and it all differ.
+  "de:dashboard.integrations.telegram.title",
   // "Name" is the German word too.
   "de:dashboard.integrations.mcp.nameLabel",
   // The final grid's names (2026-10-23): words that are the same in that

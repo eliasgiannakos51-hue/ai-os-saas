@@ -930,6 +930,11 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "integrations/[provider]",
       "integrations/[provider]/connect",
       "integrations/[provider]/callback",
+      // Telegram is a connection on this same screen but not an OAuth
+      // provider (src/components/integrations/telegram-connect.tsx says
+      // why it is not in PROVIDERS). It charges nothing: connecting a chat
+      // and disconnecting it are both free.
+      "telegram/link",
     ],
     charges: false,
     enforcedIn: "src/lib/integrations/limits.ts",

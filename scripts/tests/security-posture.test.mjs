@@ -197,6 +197,15 @@ const ADMIN_ONLY_TABLES = new Set([
   // route, and the desktop app collects by its 32-byte claim secret.
   // Neither is a SELECT. api/cron/scheduled-runs deletes rows past an hour.
   "iowork_pairings",
+  // Telegram pairings (the owner's directive 24, κομμάτι 1): RLS on, no
+  // policy, on purpose and for iowork_pairings' reason one line up. The
+  // eight-character code sits here for ten minutes
+  // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts), and a
+  // policy letting an account SELECT its own pending rows is also a shape
+  // a guesser can aim at. Nothing needs it from a browser:
+  // api/telegram/link and lib/telegram/link-state.ts both read it through
+  // createAdminClient, filtered on the caller's own id.
+  "telegram_pairings",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

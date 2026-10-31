@@ -332,7 +332,18 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // in the exemption list is a false positive from the tile's own name
   // "3D", not English leaking onto the Greek page) is explained in full
   // in the same comment block.
-  const CENSUS_CEILING = 81;
+  // 81 -> 82 ON 2026-10-31: scripts/check-i18n.js again, and the SAME
+  // false positive as the entry directly above rather than a new one. Its
+  // new LOCALE_ALLOWED comment (Telegram κομμάτι 1: «Ionexa in Telegram»
+  // is the German sentence too, while Italian took «su Telegram», which
+  // is why the entry is per-locale) names the symbol
+  // `INTENTIONALLY_IDENTICAL` to say which of the two mechanisms it is
+  // NOT — and PHRASES matches "intentionally" as a plain substring, so
+  // the symbol name scores as a limitation phrase. That is the third
+  // comment in that one file to be counted for containing the name of
+  // one of its own constants; the honest reading of this ceiling is that
+  // roughly three of its eighty-two are this, not a limitation at all.
+  const CENSUS_CEILING = 82;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

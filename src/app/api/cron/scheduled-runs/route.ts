@@ -807,6 +807,24 @@ export async function GET(request: Request) {
       logApiError("/api/cron/scheduled-runs", ioworkPairingError, { stage: "cleanup_iowork_pairings" });
     }
 
+    // Housekeeping — Telegram pairings, the same rule for the same reason
+    // (the owner's directive 24, κομμάτι 1). Ten minutes of life
+    // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts) and most
+    // are abandoned: the person presses Connect, never opens Telegram, and
+    // a dead row keeps holding its code in a unique index. This delete is
+    // what makes telegram_pairings honest as a NON_PERSONAL_TABLES entry
+    // in src/lib/gdpr/user-data-registry.ts — that entry's whole argument
+    // is "nothing here survives long enough to be anybody's data", and
+    // without this line the argument would be false.
+    const telegramPairingCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { error: telegramPairingError } = await admin
+      .from("telegram_pairings")
+      .delete()
+      .lt("created_at", telegramPairingCutoff);
+    if (telegramPairingError) {
+      logApiError("/api/cron/scheduled-runs", telegramPairingError, { stage: "cleanup_telegram_pairings" });
+    }
+
     // Housekeeping — the integrations audit trail.
     //
     // integration_sync_log records every read the AI makes of a user's

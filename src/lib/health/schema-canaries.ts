@@ -471,6 +471,18 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "telegram_links",
+    migration: "20261031000001_telegram_link.sql",
+    breaks: "The whole Connect page goes down to a «not ready yet» Telegram section: the account can connect no chat, and a chat that was connected before loses the right to command Ionexa with nothing on screen saying why",
+  },
+  {
+    kind: "table",
+    table: "telegram_pairings",
+    migration: "20261031000001_telegram_link.sql",
+    breaks: "Pressing «Σύνδεση» on the Telegram section fails at its first step: no code is ever shown, so no chat can be connected",
+  },
+  {
+    kind: "table",
     table: "rebuild_projects",
     migration: "20261027000000_rebuild_projects.sql",
     breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",

@@ -181,6 +181,14 @@ const DENY_ALL_ON_PURPOSE = {
   // desktop app collects by its claim secret and the person types the
   // code, neither of which is a SELECT.
   iowork_pairings: "the ten-minute handshake that connects one computer to one account (IOWORK-SECURITY-PLAN §3). Holds a code and two SHA-256 hashes, never a secret in the clear, and api/cron/scheduled-runs deletes every row past an hour. Read and written only by the service role, so a pending code cannot be harvested from any browser — including the owner's own.",
+  // The second entry here that belongs to the person rather than being
+  // written about them, and deny-all for the same reason: the code sits in
+  // this table for ten minutes (TELEGRAM_PAIRING_TTL_MINUTES,
+  // src/lib/telegram/pairing.ts), and a policy letting an account read its
+  // own pending rows is also a shape a guesser can aim at. Nothing needs
+  // to read it from a browser — api/telegram/link reads it through the
+  // service role, filtered on the caller's own id.
+  telegram_pairings: "the ten-minute handshake that connects one Telegram chat to one account (the owner's directive 24). Holds a code, a keyed HMAC of a chat id and ciphertext, never a secret in the clear, and api/cron/scheduled-runs deletes every row past an hour. Read and written only by the service role, so a pending code cannot be harvested from any browser - including the owner's own.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

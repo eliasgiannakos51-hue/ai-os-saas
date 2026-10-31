@@ -219,7 +219,29 @@ console.log("\n== 2. the lines ==");
 // className is written ONCE in the source and rendered six times at
 // runtime, so this count (a static scan of the source text, not of the
 // rendered DOM) moves by one token, not six.
-ok(`border utilities (${r.counts.borders}), ceiling 612`, r.counts.borders <= 612);
+// 612 -> 617 on 2026-10-31. Telegram κομμάτι 1 adds FIVE, each one a box
+// the design already draws this way elsewhere on the same page:
+// telegram-connect.tsx's consent panel (`border border-foreground/30`,
+// copied token for token from integrations-list.tsx's OAuth consent
+// panel, because it is the same step in the same flow) and its THREE
+// quiet refusals («Ακύρωση», «Δεν είμαι εγώ», «Όχι τώρα», `border
+// border-border`, the shape iowork-devices.tsx's own cancel already
+// uses), plus connection-details.tsx's one Disconnect button.
+//
+// THE FIFTH WAS NOT IN THE FIRST COUNT, and how it arrived is the part
+// worth keeping: the consent step originally had no refusal of its own —
+// it borrowed the shared block's Disconnect, which rendered in red, with
+// an unplug icon, over the words «Όχι τώρα», offering to disconnect a
+// connection that did not exist. That was found by looking at the
+// screenshot rather than at the code, and the fix gives the consent step
+// its own plain refusal, which is this border.
+//
+// NO FILLED ACCENT BUTTON came with any of them: the page's one white
+// button stays the OAuth consent «Έγκριση», so one-primary-action's
+// baseline for dashboard/integrations is untouched at 1. Five quiet
+// borders in exchange for no second loud control is the trade this
+// ceiling exists to make visible, and it is the right side of it.
+ok(`border utilities (${r.counts.borders}), ceiling 617`, r.counts.borders <= 617);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

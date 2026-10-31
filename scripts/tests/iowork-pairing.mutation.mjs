@@ -16,6 +16,12 @@ import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/iowork-pairing.test.mjs";
 const LIB = "src/lib/iowork/pairing.ts";
+// The four code mutants below moved here on 2026-10-31 with the code
+// itself: the alphabet and normalisePairingCode are shared with Telegram
+// now (src/lib/pairing-code.ts says why). They still run THIS gate,
+// which loads iowork/pairing.ts and so bundles this file in — so a
+// mutation here is still caught by the suite whose rules it breaks.
+const CODE = "src/lib/pairing-code.ts";
 const PAIR = "src/app/api/iowork/pair/route.ts";
 const DEVICES = "src/app/api/iowork/devices/route.ts";
 const ONE = "src/app/api/iowork/devices/[id]/route.ts";
@@ -28,28 +34,28 @@ const EL = "messages/el.json";
 const MUTANTS = [
   {
     name: "the alphabet keeps the letters people mistype",
-    file: LIB,
+    file: CODE,
     from: 'export const PAIRING_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";',
     to: 'export const PAIRING_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";',
     expect: "the alphabet leaves out I",
   },
   {
     name: "a code of the wrong length is accepted",
-    file: LIB,
+    file: CODE,
     from: "  if (folded.length !== PAIRING_CODE_LENGTH) return null;",
     to: "",
     expect: "seven characters is not a code",
   },
   {
     name: "I and L are no longer folded onto the 1 they were mistaken for",
-    file: LIB,
+    file: CODE,
     from: '    .replace(/[IL]/g, "1")',
     to: "",
     expect: "I folds onto 1",
   },
   {
     name: "O is no longer folded onto 0",
-    file: LIB,
+    file: CODE,
     from: '    .replace(/O/g, "0");',
     to: "    ;",
     expect: "O folds onto 0",
@@ -294,4 +300,4 @@ const MUTANTS = [
   },
 ];
 
-runMutations({ name: "iowork-pairing", gate: GATE, targets: [LIB, PAIR, DEVICES, ONE, TOKEN, PAGE, SHELL, SQL, EL, "messages/en.json"], mutants: MUTANTS });
+runMutations({ name: "iowork-pairing", gate: GATE, targets: [LIB, CODE, PAIR, DEVICES, ONE, TOKEN, PAGE, SHELL, SQL, EL, "messages/en.json"], mutants: MUTANTS });

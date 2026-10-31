@@ -20,6 +20,7 @@ function check(name, cond, detail) {
 // downloader (sharp).
 const { loadTsWithDeps } = await import("./load-ts.mjs");
 const content = await loadTsWithDeps("src/lib/chat/attachments.ts");
+const { UNTRUSTED_OPEN, UNTRUSTED_CLOSE } = await loadTsWithDeps("src/lib/agents/agent-config.ts");
 
 console.log("chat-attachments (run)");
 
@@ -69,7 +70,8 @@ console.log("\n== the content loader ==");
 // ---------------------------------------------------------------------
 let out = await content.loadAttachmentContent(fakeSupabase(), ME, [{ kind: "pdf", fileId: F1, name: "menu.pdf" }], "itest");
 const doc = out.blocks[0]?.text ?? "";
-check("a PDF goes as its text, named", out.blocks.length === 1 && doc.startsWith('<document name="menu.pdf">') && doc.endsWith("</document>"));
+check("a PDF goes as its text, named", out.blocks.length === 1 && doc.includes('<document name="menu.pdf">') && doc.includes("</document>"));
+check("...fenced as data, not instructions (ΑΣ2-3.2)", doc.startsWith(UNTRUSTED_OPEN) && doc.endsWith(UNTRUSTED_CLOSE) && doc.indexOf('<document name="menu.pdf">') > doc.indexOf(UNTRUSTED_OPEN) && doc.indexOf("</document>") < doc.lastIndexOf(UNTRUSTED_CLOSE));
 check("...with its pages marked, so «on which page?» has an answer", /--- Σελίδα 2 ---\nΜουσακάς 12 ευρώ/.test(doc) && !doc.includes("[[PAGE"));
 check("...and its size counted for the hold", out.textChars === doc.length && content.attachmentInputChars(out) === doc.length);
 

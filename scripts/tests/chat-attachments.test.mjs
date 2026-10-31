@@ -6,7 +6,8 @@
  *
  *   1. WHAT A REQUEST MAY CARRY: PDFs by id, images inside the sender's
  *      own folder only, within the caps — and a stored row is checked
- *      again when it is read back for the model.
+ *      again when it is read back for the model; a PDF's own text is
+ *      fenced as untrusted before it joins the prompt (ΑΣ2-3.2, §1c).
  *   2. WHICH MEMORIES AN ANSWER USED: the facts are numbered, the answer
  *      names them in one marker at its end, the marker never reaches the
  *      screen or the row, and a bracket that is not a marker loses nothing.
@@ -111,6 +112,22 @@ a = admit.admitFiles([f("x.png", "image/png", 10)], { pdfs: 0, images: 3, data: 
 check("...images too", a.refused[0]?.why === "tooManyImages");
 check("a PDF with no type, by its name", admit.attachKindOf({ name: "scan.PDF", type: "" }) === "pdf");
 check("the file picker offers exactly these", admit.CHAT_ACCEPT === "application/pdf,image/jpeg,image/png,.csv,.xlsx");
+
+// ---------------------------------------------------------------------
+console.log("\n== 1c. a PDF's text reaches the model fenced, not bare (ΑΣ2-3.2) ==");
+// A stranger wrote this text, not the user — same rule as Files' own
+// ask() and every other untrusted-text path in this repository, all
+// through the one helper (src/lib/agents/agent-config.ts, wrapUntrusted).
+// The behavioural proof (the real fence appears around the real block,
+// surviving a hostile echo of the fence markers) runs in
+// scripts/tests/chat-attachments.itest.mjs, against the real function;
+// this file only holds that the loader is wired to call it, by source,
+// because the loader itself needs Supabase and a real PDF to run.
+// ---------------------------------------------------------------------
+const attachments = code("src/lib/chat/attachments.ts");
+check("the loader imports the one untrusted-text fence", /import \{ wrapUntrusted \} from "@\/lib\/agents\/agent-config";/.test(attachments));
+check("...and wraps a document's text with it before pushing the block the model reads",
+  /const wrapped = wrapUntrusted\(block\);[\s\S]{0,120}blocks\.push\(\{ type: "text", text: wrapped \}\);/.test(attachments));
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. which memories an answer used ==");

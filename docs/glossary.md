@@ -219,5 +219,6 @@ Removing one from the product is always allowed.
 | dashboard.quickJobs.myWeek.text | text prefilled into the reader's own input |
 | dashboard.appBuilder.empty.examples.a | an example prompt the reader would type |
 | dashboard.appBuilder.empty.examples.b | an example prompt the reader would type |
+| dashboard.sheets.empty.examples.budget | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

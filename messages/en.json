@@ -609,7 +609,8 @@
       "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure.",
       "oauthFailed": "That sign-in didn't complete. Try again, or use your email and password below.",
       "sharedSignInFirst": "Sign in to save what you shared.",
-      "emailNotConfirmed": "Confirm your email first. We just sent a new link to your inbox."
+      "emailNotConfirmed": "Confirm your email first. We just sent a new link to your inbox.",
+      "rateLimited": "Too many attempts. Please try again later."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",

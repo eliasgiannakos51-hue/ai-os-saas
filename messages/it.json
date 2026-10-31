@@ -609,7 +609,8 @@
       "failed": "Non siamo riusciti ad accedere. Controlla email e password, oppure reimposta la password se non sei sicuro.",
       "oauthFailed": "L'accesso non è stato completato. Riprova oppure usa email e password qui sotto.",
       "sharedSignInFirst": "Accedi per salvare ciò che hai condiviso.",
-      "emailNotConfirmed": "Conferma prima la tua email. Ti abbiamo appena inviato un nuovo link."
+      "emailNotConfirmed": "Conferma prima la tua email. Ti abbiamo appena inviato un nuovo link.",
+      "rateLimited": "Troppi tentativi. Riprova più tardi."
     },
     "signup": {
       "chooseYourPlan": "Scegli il tuo piano",

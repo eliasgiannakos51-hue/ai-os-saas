@@ -609,7 +609,8 @@
       "failed": "Não conseguimos iniciar a tua sessão. Verifica o email e a palavra-passe, ou repõe-na se não tiveres a certeza.",
       "oauthFailed": "Esse início de sessão não foi concluído. Tente novamente ou use o seu e-mail e palavra-passe abaixo.",
       "sharedSignInFirst": "Inicie sessão para guardar o que partilhou.",
-      "emailNotConfirmed": "Confirme primeiro o seu email. Acabámos de enviar um novo link."
+      "emailNotConfirmed": "Confirme primeiro o seu email. Acabámos de enviar um novo link.",
+      "rateLimited": "Demasiadas tentativas. Tenta outra vez mais tarde."
     },
     "signup": {
       "chooseYourPlan": "Escolha seu plano",

@@ -12,6 +12,9 @@
  *   3  the login route counts every failure, and only failures
  *   4  an alert is rationed: one per cause per hour, and a failure to count
  *      or send never fails the sign-in
+ *   5  ΑΣ2-1.2: the account count the alert already reads also BLOCKS —
+ *      the wave the per-IP block cannot see, one account from many
+ *      addresses, none of which alone crosses the per-IP threshold
  *
  * Run: node scripts/tests/login-failure-alert.test.mjs
  */
@@ -77,6 +80,25 @@ check(
   "the three scopes are excluded from the activity probe, which counts signed-in traffic",
   [C.globalScope, C.accountScope, C.alertScope].every((s) => scopes.includes(`"${s}"`)),
 );
+
+console.log("\n== 5. the account count also blocks (ΑΣ2-1.2) ==");
+const ipBlock = route.slice(route.indexOf("if (failures.ok"), route.indexOf("const account = accountKey"));
+const acctBlockStart = route.indexOf("const account = accountKey(email);");
+const acctBlock = route.slice(acctBlockStart, route.indexOf("const supabase = await createClient();"));
+check("the account check runs before Supabase Auth is ever called", acctBlockStart !== -1 && acctBlockStart < route.indexOf("signInWithPassword"));
+check("...and after the per-IP check, never instead of it", route.indexOf("if (failures.ok") < acctBlockStart);
+check("it counts the SAME row set noteLoginFailure() writes — the alert's own scope, not a second counter",
+  /scope: LOGIN_FAILURE_ALERT\.accountScope/.test(acctBlock) && /identifier: account/.test(acctBlock));
+check("...over the alert's own window, to the SAME threshold that already emails the owner — one number, not two that can drift",
+  /windowMinutes: LOGIN_FAILURE_ALERT\.windowMinutes/.test(acctBlock) && /accountFailures\.count >= LOGIN_FAILURE_ALERT\.accountThreshold/.test(acctBlock));
+check("the account is hashed the same way the alert hashes it, not a second identifier shape", /const account = accountKey\(email\);/.test(acctBlock));
+const ipBody = ipBlock.match(/NextResponse\.json\(\s*\{([^}]*)\}/)?.[1]?.replace(/\s+/g, " ").trim();
+const acctBody = acctBlock.match(/NextResponse\.json\(\s*\{([^}]*)\}/)?.[1]?.replace(/\s+/g, " ").trim();
+check("the IP block and the account block answer with the exact same body — an attacker learns nothing about WHICH cap they hit",
+  Boolean(ipBody) && ipBody === acctBody, `ip: ${ipBody}\n        account: ${acctBody}`);
+check("...and the same status, 429 on both", (ipBlock.match(/status: 429/g) ?? []).length === 1 && (acctBlock.match(/status: 429/g) ?? []).length === 1);
+check("...never a code or message that names the account as the reason (no enumeration oracle)",
+  !/account.*(locked|exists|found)/i.test(acctBlock));
 
 console.log(`\n  ${pass} passed, ${failures.length} failed`);
 if (failures.length) {

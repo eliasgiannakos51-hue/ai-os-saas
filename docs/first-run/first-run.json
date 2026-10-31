@@ -1,6 +1,6 @@
 {
-  "total": 5136,
-  "onPath": 620,
+  "total": 5137,
+  "onPath": 621,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,7 +16,7 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 378
+      "count": 379
     },
     {
       "n": 3,
@@ -704,6 +704,12 @@
         },
         {
           "key": "auth.login.password",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.rateLimited",
           "depth": 0,
           "tier": 2,
           "file": "src/app/login/login-form.tsx"

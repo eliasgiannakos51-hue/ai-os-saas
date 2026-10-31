@@ -609,7 +609,8 @@
       "failed": "Nous n'avons pas pu vous connecter. Vérifiez l'e-mail et le mot de passe, ou réinitialisez-le en cas de doute.",
       "oauthFailed": "Cette connexion n'a pas abouti. Réessayez ou utilisez votre e-mail et votre mot de passe ci-dessous.",
       "sharedSignInFirst": "Connectez-vous pour enregistrer ce que vous avez partagé.",
-      "emailNotConfirmed": "Confirmez d’abord votre e-mail. Nous venons de vous envoyer un nouveau lien."
+      "emailNotConfirmed": "Confirmez d’abord votre e-mail. Nous venons de vous envoyer un nouveau lien.",
+      "rateLimited": "Trop de tentatives. Réessayez plus tard."
     },
     "signup": {
       "chooseYourPlan": "Choisissez votre forfait",

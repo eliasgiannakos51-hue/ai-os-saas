@@ -814,7 +814,12 @@ const clientFallbacks = sources.flatMap((f) => [
 // which decides from configuration, and a narration that cannot be
 // made falls back to the detectors' own true sentences instead of a
 // 503 on a page whose findings are already computed.
-const SERVER_PROSE_BASELINE = 687;
+// 687 -> 688 on 2026-10-31 (ΑΣ2-1.2): a second refusal SITE in
+// api/auth/login (the new account-level block, alongside the existing
+// per-IP one), zero new sentences — it answers with the SAME string the
+// route's existing per-IP block already uses, on purpose: an attacker
+// must not be able to tell which cap they hit. Measured, not added.
+const SERVER_PROSE_BASELINE = 688;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

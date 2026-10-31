@@ -609,7 +609,8 @@
       "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist.",
       "oauthFailed": "Diese Anmeldung wurde nicht abgeschlossen. Versuche es erneut oder nutze unten E-Mail und Passwort.",
       "sharedSignInFirst": "Melde dich an, um das Geteilte zu speichern.",
-      "emailNotConfirmed": "Bestätige zuerst deine E-Mail. Wir haben dir gerade einen neuen Link geschickt."
+      "emailNotConfirmed": "Bestätige zuerst deine E-Mail. Wir haben dir gerade einen neuen Link geschickt.",
+      "rateLimited": "Zu viele Versuche. Versuch es später erneut."
     },
     "signup": {
       "chooseYourPlan": "Wähle deinen Plan",

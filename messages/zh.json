@@ -609,7 +609,8 @@
       "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。",
       "oauthFailed": "该登录未完成。请重试，或在下方使用邮箱和密码登录。",
       "sharedSignInFirst": "登录后即可保存你分享的内容。",
-      "emailNotConfirmed": "请先确认你的邮箱。我们刚刚向你发送了新链接。"
+      "emailNotConfirmed": "请先确认你的邮箱。我们刚刚向你发送了新链接。",
+      "rateLimited": "尝试次数过多。请稍后再试。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",

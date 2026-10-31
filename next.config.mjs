@@ -123,7 +123,16 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  */
 export const APP_SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  // img-src (ΑΣ2-3.1, 2026-10-31): a markdown image the model's own
+  // words (or an echoed web-search result, or PDF text) can put in a
+  // chat answer had no CSP stop at all — any `https:` origin would load,
+  // which is an exfiltration channel (the request URL itself can carry
+  // data). 'self'/data:/blob: covers every real use: same-origin API
+  // images, inline base64, and chat's own attachment previews (client
+  // blob URLs, never a network fetch). No chat feature loads an image
+  // from an external host — see message-content.tsx's own `img` guard,
+  // the matching defense-in-depth layer.
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; img-src 'self' data: blob:" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },

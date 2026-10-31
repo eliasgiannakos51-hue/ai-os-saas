@@ -82,6 +82,11 @@ import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-bas
 import { loadCannedArticles } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
 import { attachWebSources } from "@/lib/chat/web-sources";
+import { deckChartsFrom } from "@/lib/presentations/deck-charts";
+import type { SlideChart } from "@/lib/presentations/deck";
+import { attachAnswerChart } from "@/lib/chat/answer-chart";
+import { emailTranslator } from "@/lib/email/email-locale";
+import type { TableProfile } from "@/lib/data-analysis/profile";
 import { addChatEvidence, chatTimelineForClient, chatTimelineWorthShowing, markChatStep, type ChatStep, type ChatTimelineEntry } from "@/lib/chat/chat-timeline";
 
 export const dynamic = "force-dynamic";
@@ -499,8 +504,18 @@ export async function POST(request: Request) {
     // package 9), behind the switch "chat-attachments". With it off,
     // attachments in a request are refused and nothing below changes.
     const attachmentsOn = await isFeatureOn("chat-attachments", user);
+    // A CHART UNDER THE ANSWER (the owner's «30. CHAT: ΓΡΑΦΗΜΑΤΑ...»,
+    // 2026-10-31, Κομμάτι 1), behind its own switch "chat-charts" so it
+    // can ship closed even once "chat-attachments" is open to everyone. A
+    // "data" attachment needs both switches on: it is an attachment kind
+    // (chat-attachments's own gate below) that only this feature reads.
+    const chatChartsOn = await isFeatureOn("chat-charts", user);
     const readAttachments = readChatAttachments(rawAttachments, user.id);
-    if (!readAttachments.ok || (!attachmentsOn && readAttachments.list.length > 0)) {
+    if (
+      !readAttachments.ok ||
+      (!attachmentsOn && readAttachments.list.length > 0) ||
+      (!chatChartsOn && readAttachments.list.some((a) => a.kind === "data"))
+    ) {
       return NextResponse.json(
         { ok: false, reason: "bad_attachments" },
         { status: 400 }
@@ -1564,6 +1579,48 @@ export async function POST(request: Request) {
         // and the definitions go INTO the stored text, so a reload shows
         // what the stream showed (lib/chat/web-sources.ts says why).
         const sourced = attachWebSources(assistantText, lastRoundBlocks);
+
+        // A CHART UNDER THE ANSWER (the owner's «30. CHAT: ΓΡΑΦΗΜΑΤΑ,
+        // ΔΙΑΓΡΑΜΜΑΤΑ ΚΑΙ ΚΑΡΤΕΣ ΜΕΣΑ ΣΤΗΝ ΑΠΑΝΤΗΣΗ», 2026-10-31, Κομμάτι
+        // 1): computed by code, from the attached data_analyses row,
+        // AFTER the model has already answered — the model never sees a
+        // row and never returns a number that gets drawn
+        // (lib/presentations/deck-charts.ts holds Slides to the same
+        // rule, lib/chat/answer-chart.ts says where it is kept). A file
+        // whose columns allow no chart, or any failure reading it, is
+        // simply no chart — never a blocked answer, since the chart adds
+        // to the answer rather than being it.
+        let chart: SlideChart | null = null;
+        const dataAttachment = chatChartsOn ? currentAttachments.find((a) => a.kind === "data") : undefined;
+        if (dataAttachment && dataAttachment.kind === "data") {
+          const { data: dataRow, error: dataRowError } = await supabase
+            .from("data_analyses")
+            .select("id, file_name, title, headers, rows, profile")
+            .eq("id", dataAttachment.dataId)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (dataRowError) {
+            logApiError("/api/chat", dataRowError, { stage: "load_chart_data" });
+          } else if (dataRow) {
+            try {
+              const charts = deckChartsFrom(
+                {
+                  dataId: dataAttachment.dataId,
+                  file: String(dataRow.file_name ?? dataRow.title ?? ""),
+                  headers: Array.isArray(dataRow.headers) ? (dataRow.headers as string[]) : [],
+                  rows: Array.isArray(dataRow.rows) ? (dataRow.rows as string[][]) : [],
+                  profile: (dataRow.profile ?? { rowCount: 0, columns: [], duplicateRows: 0, correlations: [] }) as TableProfile,
+                },
+                emailTranslator(locale)("presentations.chart.other")
+              );
+              chart = charts[0] ?? null;
+            } catch (err) {
+              logApiError("/api/chat", err, { stage: "compute_chart" });
+            }
+          }
+        }
+        const finalText = attachAnswerChart(sourced.text, chart);
+
         // The row's id goes back on `done`: the rating under the answer
         // (src/app/api/chat/messages/[id]/rating/route.ts) names it.
         // With the switch on, the row also keeps what the answer stood on
@@ -1575,7 +1632,7 @@ export async function POST(request: Request) {
           conversation_id: finalConversationId,
           user_id: user.id,
           role: "assistant",
-          content: sourced.text,
+          content: finalText,
         };
         const saveAssistant = (row: Record<string, unknown>) => supabase.from("chat_messages").insert(row).select("id").single();
         let { data: assistantRow, error: assistantMessageError } = await saveAssistant(
@@ -1607,8 +1664,9 @@ export async function POST(request: Request) {
             type: "done",
             messageId: assistantRow?.id ?? undefined,
             // The final text, only when it differs from what streamed — the
-            // client swaps it in so the numbers appear without a reload.
-            content: sourced.sources.length > 0 ? sourced.text : undefined,
+            // client swaps it in so the numbers and the chart appear
+            // without a reload.
+            content: finalText !== assistantText ? finalText : undefined,
             // The finished steps, with the last one closed — only for an
             // answer that searched; a plain one has nothing to show.
             timeline: chatTimelineWorthShowing(chatTimeline)

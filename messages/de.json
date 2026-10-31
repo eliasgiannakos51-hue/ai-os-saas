@@ -1451,7 +1451,7 @@
         "fileLimit": "„{name}“: Damit wäre das Limit Ihres Tarifs unter Dateien überschritten. Löschen Sie eine Datei unter Dateien oder wechseln Sie den Tarif.",
         "uploadLimit": "Zu viele Datei-Uploads in der letzten Stunde. Versuchen Sie es in Kürze erneut.",
         "offline": "Keine Verbindung. Prüfen Sie das Netzwerk und versuchen Sie es erneut.",
-        "type": "„{name}“: nur PDF, JPG oder PNG.",
+        "type": "„{name}“: nur PDF, JPG, PNG, CSV oder XLSX.",
         "pdfTooLarge": "„{name}“: Das PDF ist größer als 20 MB.",
         "imageTooLarge": "„{name}“: Das Bild ist größer als 5 MB.",
         "tooManyPdfs": "Bis zu {max} PDFs pro Nachricht.",
@@ -1463,7 +1463,11 @@
         "refused": "Die Anhänge wurden nicht angenommen. Hängen Sie sie erneut an.",
         "openInFiles": "In Dateien öffnen",
         "memoryUsed": "Aus dem Gedächtnis ({count})",
-        "manageMemory": "Was Ionexa sich merkt"
+        "manageMemory": "Was Ionexa sich merkt",
+        "dataTooLarge": "„{name}“: Die Datei ist größer als 8 MB.",
+        "tooManyData": "Bis zu {max} Datendatei pro Nachricht.",
+        "readyData": "Bereit — auch in Analyze",
+        "openInAnalyze": "In Analyze öffnen"
       },
       "deleteFailed": "Diese Unterhaltung wurde nicht gelöscht. Sie ist noch da.",
       "undo": "Rückgängig",
@@ -1472,7 +1476,10 @@
       "moved": "Nach {project} verschoben.",
       "moveFailed": "Das Verschieben hat nicht geklappt. Versuche es erneut.",
       "projectFull": "Dieses Projekt enthält bereits {limit} Dinge — mehr behält es nicht.",
-      "selectOne": "„{title}“ auswählen"
+      "selectOne": "„{title}“ auswählen",
+      "chart": {
+        "cardTitle": "Wie das berechnet wurde"
+      }
     },
     "create": {
       "title": "Alles Erstellen",

@@ -1451,7 +1451,7 @@
         "fileLimit": "«{name}»: supererebbe il limite del tuo piano in File. Elimina un file in File o passa a un piano superiore.",
         "uploadLimit": "Troppi caricamenti di file nell’ultima ora. Riprova tra poco.",
         "offline": "Nessuna connessione. Controlla la rete e riprova.",
-        "type": "«{name}»: solo PDF, JPG o PNG.",
+        "type": "«{name}»: solo PDF, JPG, PNG, CSV o XLSX.",
         "pdfTooLarge": "«{name}»: il PDF supera i 20 MB.",
         "imageTooLarge": "«{name}»: l’immagine supera i 5 MB.",
         "tooManyPdfs": "Fino a {max} PDF per messaggio.",
@@ -1463,7 +1463,11 @@
         "refused": "Gli allegati non sono stati accettati. Allegali di nuovo.",
         "openInFiles": "Apri in File",
         "memoryUsed": "Dalla memoria ({count})",
-        "manageMemory": "Cosa ricorda Ionexa"
+        "manageMemory": "Cosa ricorda Ionexa",
+        "dataTooLarge": "«{name}»: il file supera gli 8 MB.",
+        "tooManyData": "Fino a {max} file di dati per messaggio.",
+        "readyData": "Pronto — anche in Analyze",
+        "openInAnalyze": "Apri in Analyze"
       },
       "deleteFailed": "Quella conversazione non è stata eliminata. È ancora qui.",
       "undo": "Annulla",
@@ -1472,7 +1476,10 @@
       "moved": "Spostata in {project}.",
       "moveFailed": "Lo spostamento non è riuscito. Riprova.",
       "projectFull": "Quel progetto contiene già {limit} cose, il massimo che tiene.",
-      "selectOne": "Seleziona «{title}»"
+      "selectOne": "Seleziona «{title}»",
+      "chart": {
+        "cardTitle": "Come è stato calcolato"
+      }
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",

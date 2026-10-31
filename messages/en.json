@@ -1451,7 +1451,7 @@
         "fileLimit": "“{name}”: this would go over your plan’s limit in Files. Delete a file in Files or upgrade your plan.",
         "uploadLimit": "Too many file uploads in the last hour. Try again in a little while.",
         "offline": "No connection. Check the network and try again.",
-        "type": "“{name}”: only PDF, JPG or PNG.",
+        "type": "“{name}”: only PDF, JPG, PNG, CSV or XLSX.",
         "pdfTooLarge": "“{name}”: the PDF is over 20 MB.",
         "imageTooLarge": "“{name}”: the image is over 5 MB.",
         "tooManyPdfs": "Up to {max} PDFs per message.",
@@ -1463,7 +1463,11 @@
         "refused": "The attachments were not accepted. Attach them again.",
         "openInFiles": "Open in Files",
         "memoryUsed": "From memory ({count})",
-        "manageMemory": "What Ionexa remembers"
+        "manageMemory": "What Ionexa remembers",
+        "dataTooLarge": "“{name}”: the file is over 8 MB.",
+        "tooManyData": "Up to {max} data file per message.",
+        "readyData": "Ready — also in Analyze",
+        "openInAnalyze": "Open in Analyze"
       },
       "deleteFailed": "That conversation wasn't deleted. It is still here.",
       "undo": "Undo",
@@ -1472,7 +1476,10 @@
       "moved": "Moved to {project}.",
       "moveFailed": "That didn't move. Try again.",
       "projectFull": "That project already holds {limit} things, which is the most it keeps.",
-      "selectOne": "Select {title}"
+      "selectOne": "Select {title}",
+      "chart": {
+        "cardTitle": "How this was computed"
+      }
     },
     "create": {
       "title": "Create Anything",

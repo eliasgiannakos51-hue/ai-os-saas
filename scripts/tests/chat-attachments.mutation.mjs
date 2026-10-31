@@ -53,8 +53,8 @@ const MUTANTS = [
   {
     name: "attachments are taken with the switch off",
     file: ROUTE,
-    from: "    if (!readAttachments.ok || (!attachmentsOn && readAttachments.list.length > 0)) {",
-    to: "    if (!readAttachments.ok) {",
+    from: "      !readAttachments.ok ||\n      (!attachmentsOn && readAttachments.list.length > 0) ||",
+    to: "      !readAttachments.ok ||",
     expect: "with it off, attachments in a request are refused (400)",
   },
   {

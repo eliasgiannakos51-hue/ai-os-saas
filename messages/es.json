@@ -1451,7 +1451,7 @@
         "fileLimit": "«{name}»: superaría el límite de tu plan en Archivos. Borra un archivo en Archivos o mejora tu plan.",
         "uploadLimit": "Demasiadas subidas de archivos en la última hora. Vuelve a intentarlo dentro de un rato.",
         "offline": "Sin conexión. Revisa la red e inténtalo de nuevo.",
-        "type": "«{name}»: solo PDF, JPG o PNG.",
+        "type": "«{name}»: solo PDF, JPG, PNG, CSV o XLSX.",
         "pdfTooLarge": "«{name}»: el PDF supera los 20 MB.",
         "imageTooLarge": "«{name}»: la imagen supera los 5 MB.",
         "tooManyPdfs": "Hasta {max} PDF por mensaje.",
@@ -1463,7 +1463,11 @@
         "refused": "No se aceptaron los adjuntos. Adjúntalos de nuevo.",
         "openInFiles": "Abrir en Archivos",
         "memoryUsed": "De la memoria ({count})",
-        "manageMemory": "Lo que Ionexa recuerda"
+        "manageMemory": "Lo que Ionexa recuerda",
+        "dataTooLarge": "«{name}»: el archivo supera los 8 MB.",
+        "tooManyData": "Hasta {max} archivo de datos por mensaje.",
+        "readyData": "Listo — también en Analyze",
+        "openInAnalyze": "Abrir en Analyze"
       },
       "deleteFailed": "Esa conversación no se eliminó. Sigue aquí.",
       "undo": "Deshacer",
@@ -1472,7 +1476,10 @@
       "moved": "Movida a {project}.",
       "moveFailed": "No se movió. Inténtalo de nuevo.",
       "projectFull": "Ese proyecto ya tiene {limit} cosas, el máximo que guarda.",
-      "selectOne": "Seleccionar «{title}»"
+      "selectOne": "Seleccionar «{title}»",
+      "chart": {
+        "cardTitle": "Cómo se calculó esto"
+      }
     },
     "create": {
       "title": "Crear Cualquier Cosa",

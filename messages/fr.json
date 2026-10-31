@@ -1451,7 +1451,7 @@
         "fileLimit": "« {name} » : cela dépasserait la limite de votre offre dans Fichiers. Supprimez un fichier dans Fichiers ou changez d’offre.",
         "uploadLimit": "Trop de fichiers envoyés au cours de la dernière heure. Réessayez dans un moment.",
         "offline": "Pas de connexion. Vérifiez le réseau et réessayez.",
-        "type": "« {name} » : uniquement PDF, JPG ou PNG.",
+        "type": "« {name} » : uniquement PDF, JPG, PNG, CSV ou XLSX.",
         "pdfTooLarge": "« {name} » : le PDF dépasse 20 Mo.",
         "imageTooLarge": "« {name} » : l’image dépasse 5 Mo.",
         "tooManyPdfs": "Jusqu’à {max} PDF par message.",
@@ -1463,7 +1463,11 @@
         "refused": "Les pièces jointes n’ont pas été acceptées. Joignez-les à nouveau.",
         "openInFiles": "Ouvrir dans Fichiers",
         "memoryUsed": "De la mémoire ({count})",
-        "manageMemory": "Ce dont Ionexa se souvient"
+        "manageMemory": "Ce dont Ionexa se souvient",
+        "dataTooLarge": "« {name} » : le fichier dépasse 8 Mo.",
+        "tooManyData": "Jusqu’à {max} fichier de données par message.",
+        "readyData": "Prêt — aussi dans Analyze",
+        "openInAnalyze": "Ouvrir dans Analyze"
       },
       "deleteFailed": "Cette discussion n'a pas été supprimée. Elle est toujours là.",
       "undo": "Annuler",
@@ -1472,7 +1476,10 @@
       "moved": "Déplacée vers {project}.",
       "moveFailed": "Le déplacement a échoué. Réessayez.",
       "projectFull": "Ce projet contient déjà {limit} éléments, son maximum.",
-      "selectOne": "Sélectionner « {title} »"
+      "selectOne": "Sélectionner « {title} »",
+      "chart": {
+        "cardTitle": "Comment cela a été calculé"
+      }
     },
     "create": {
       "title": "Créer N'importe Quoi",

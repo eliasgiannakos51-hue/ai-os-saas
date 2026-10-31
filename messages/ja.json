@@ -1451,7 +1451,7 @@
         "fileLimit": "「{name}」: プランの「ファイル」の上限を超えます。ファイルから1件削除するか、プランをアップグレードしてください。",
         "uploadLimit": "この1時間のファイルのアップロードが多すぎます。しばらくしてからもう一度お試しください。",
         "offline": "接続がありません。ネットワークを確認して、もう一度お試しください。",
-        "type": "「{name}」: PDF、JPG、PNG のみ対応しています。",
+        "type": "「{name}」: PDF、JPG、PNG、CSV、XLSX のみ対忉しています。",
         "pdfTooLarge": "「{name}」: PDF が 20 MB を超えています。",
         "imageTooLarge": "「{name}」: 画像が 5 MB を超えています。",
         "tooManyPdfs": "1 通につき PDF は {max} 件までです。",
@@ -1463,7 +1463,11 @@
         "refused": "添付ファイルが受け付けられませんでした。もう一度添付してください。",
         "openInFiles": "ファイルで開く",
         "memoryUsed": "メモリーから ({count})",
-        "manageMemory": "Ionexa が覚えていること"
+        "manageMemory": "Ionexa が覚えていること",
+        "dataTooLarge": "「{name}」: ファイルが 8 MB を超えています。",
+        "tooManyData": "1 通につきデータファイルは {max} 件までです。",
+        "readyData": "準備完了 — Analyze にも追加されました",
+        "openInAnalyze": "Analyze で開く"
       },
       "deleteFailed": "その会話は削除されませんでした。まだここにあります。",
       "undo": "元に戻す",
@@ -1472,7 +1476,10 @@
       "moved": "{project} へ移動しました。",
       "moveFailed": "移動できませんでした。もう一度お試しください。",
       "projectFull": "そのプロジェクトはすでに {limit} 件を保持しており、これが上限です。",
-      "selectOne": "「{title}」を選択"
+      "selectOne": "「{title}」を選択",
+      "chart": {
+        "cardTitle": "どう計算されたか"
+      }
     },
     "create": {
       "title": "何でも作成",

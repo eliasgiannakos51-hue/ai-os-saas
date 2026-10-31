@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Brain, FileText, ImageIcon, X } from "lucide-react";
+import { Brain, FileText, ImageIcon, TableProperties, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
-import { admitFiles, attachPdf, chatImageUrl, uploadChatImages, type AttachKind, type AttachRefusal } from "@/lib/chat/attach-client";
-import { MAX_ATTACHMENT_IMAGES, MAX_CHAT_FILES, type ChatAttachment } from "@/lib/chat/attachment-types";
+import { admitFiles, attachData, attachPdf, chatImageUrl, uploadChatImages, type AttachKind, type AttachRefusal } from "@/lib/chat/attach-client";
+import { MAX_ATTACHMENT_IMAGES, MAX_CHAT_DATA, MAX_CHAT_FILES, type ChatAttachment } from "@/lib/chat/attachment-types";
 import type { MemoryUsed } from "@/lib/chat/memory-citations";
 
 /**
@@ -48,6 +48,9 @@ let trayCounter = 0;
 export function useChatAttachments(onRefused: (lines: string[]) => void) {
   const t = useTranslations("dashboard.chat.attach");
   const tFiles = useTranslations("dashboard.files");
+  // A spreadsheet's own failure words, reused rather than duplicated —
+  // the same three presentations-shell.tsx's addDataFile already shows.
+  const tc = useTranslations("presentations.chart");
   const [items, setItems] = useState<TrayItem[]>([]);
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -58,8 +61,10 @@ export function useChatAttachments(onRefused: (lines: string[]) => void) {
   function refusalLine(name: string, why: AttachRefusal): string {
     if (why === "tooManyPdfs") return t("tooManyPdfs", { max: MAX_CHAT_FILES });
     if (why === "tooManyImages") return t("tooManyImages", { max: MAX_ATTACHMENT_IMAGES });
+    if (why === "tooManyData") return t("tooManyData", { max: MAX_CHAT_DATA });
     if (why === "pdfTooLarge") return t("pdfTooLarge", { name });
     if (why === "imageTooLarge") return t("imageTooLarge", { name });
+    if (why === "dataTooLarge") return t("dataTooLarge", { name });
     return t("type", { name });
   }
 
@@ -68,35 +73,47 @@ export function useChatAttachments(onRefused: (lines: string[]) => void) {
     const { taken, refused } = admitFiles(files, {
       pdfs: live.filter((i) => i.kind === "pdf").length,
       images: live.filter((i) => i.kind === "image").length,
+      data: live.filter((i) => i.kind === "data").length,
     });
     if (refused.length > 0) onRefused([...new Set(refused.map((r) => refusalLine(r.name, r.why)))]);
     const added: TrayItem[] = taken.map(({ file, kind }) => ({
       key: `attach-${++trayCounter}`,
       kind,
       name: file.name,
-      state: kind === "pdf" ? "reading" : "ready",
+      state: kind === "pdf" || kind === "data" ? "reading" : "ready",
       ...(kind === "image" ? { file, preview: URL.createObjectURL(file) } : {}),
     }));
     if (added.length === 0) return;
     setItems((current) => [...current, ...added]);
     taken.forEach(({ file, kind }, i) => {
-      if (kind !== "pdf") return;
       const key = added[i].key;
-      attachPdf(file, {
-        error: tFiles("uploadError"),
-        storageMissing: tFiles("uploadStorageMissing"),
-        storagePolicy: tFiles("uploadStoragePolicy"),
-        tooLargeForTransfer: tFiles("tooLargeForTransfer"),
-        unreadable: t("unreadable", { name: file.name }),
-        fileLimit: t("fileLimit", { name: file.name }),
-        uploadLimit: t("uploadLimit"),
-      }).then(
-        (outcome) =>
-          outcome.ok
-            ? update(key, { state: "ready", attachment: outcome.attachment, pages: outcome.pages })
-            : update(key, { state: "failed", error: outcome.error }),
-        () => update(key, { state: "failed", error: t("offline") })
-      );
+      if (kind === "pdf") {
+        attachPdf(file, {
+          error: tFiles("uploadError"),
+          storageMissing: tFiles("uploadStorageMissing"),
+          storagePolicy: tFiles("uploadStoragePolicy"),
+          tooLargeForTransfer: tFiles("tooLargeForTransfer"),
+          unreadable: t("unreadable", { name: file.name }),
+          fileLimit: t("fileLimit", { name: file.name }),
+          uploadLimit: t("uploadLimit"),
+        }).then(
+          (outcome) =>
+            outcome.ok
+              ? update(key, { state: "ready", attachment: outcome.attachment, pages: outcome.pages })
+              : update(key, { state: "failed", error: outcome.error }),
+          () => update(key, { state: "failed", error: t("offline") })
+        );
+      } else if (kind === "data") {
+        attachData(file, {
+          tooLarge: t("dataTooLarge", { name: file.name }),
+          unreadable: tc("failed.unreadable"),
+          tooMany: tc("failed.tooMany"),
+          other: tc("failed.other"),
+        }).then(
+          (outcome) => (outcome.ok ? update(key, { state: "ready", attachment: outcome.attachment }) : update(key, { state: "failed", error: outcome.error })),
+          () => update(key, { state: "failed", error: t("offline") })
+        );
+      }
     });
   }
 
@@ -120,6 +137,7 @@ export function useChatAttachments(onRefused: (lines: string[]) => void) {
   > {
     const ready = itemsRef.current.filter((i) => i.state === "ready");
     const pdfs = ready.filter((i) => i.kind === "pdf" && i.attachment).map((i) => i.attachment!);
+    const data = ready.filter((i) => i.kind === "data" && i.attachment).map((i) => i.attachment!);
     const images = ready.filter((i) => i.kind === "image" && i.file);
     let uploaded: ChatAttachment[] = [];
     try {
@@ -135,7 +153,7 @@ export function useChatAttachments(onRefused: (lines: string[]) => void) {
     });
     return {
       ok: true,
-      attachments: [...pdfs, ...uploaded],
+      attachments: [...pdfs, ...data, ...uploaded],
       imagePaths: uploaded.flatMap((a) => (a.kind === "image" ? [a.path] : [])),
       previews,
     };
@@ -170,6 +188,8 @@ export function AttachmentTray({ items, onRemove, holdReason }: { items: TrayIte
             {item.kind === "image" && item.preview ? (
               // eslint-disable-next-line @next/next/no-img-element -- an on-page object URL, not an optimisable asset
               <img src={item.preview} alt="" className="h-8 w-8 shrink-0 rounded-item object-cover" />
+            ) : item.kind === "data" ? (
+              <TableProperties className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
             ) : (
               <FileText className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
             )}
@@ -185,6 +205,8 @@ export function AttachmentTray({ items, onRemove, holdReason }: { items: TrayIte
                   <span className="text-danger">{item.error}</span>
                 ) : item.kind === "pdf" ? (
                   item.pages ? t("pages", { count: item.pages }) : t("readyPdf")
+                ) : item.kind === "data" ? (
+                  t("readyData")
                 ) : (
                   t("readyImage")
                 )}
@@ -257,6 +279,17 @@ export function SentAttachments({ attachments, previews }: { attachments: ChatAt
               className="inline-flex min-h-[44px] max-w-[16rem] items-center gap-1.5 rounded-item bg-panel px-2 text-xs text-foreground hover:bg-panel-hover"
             >
               <FileText className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
+              <span className="truncate">{a.name}</span>
+            </Link>
+          </li>
+        ) : a.kind === "data" ? (
+          <li key={`data:${a.dataId}`}>
+            <Link
+              href={`/dashboard/data-analysis?id=${encodeURIComponent(a.dataId)}`}
+              title={t("openInAnalyze")}
+              className="inline-flex min-h-[44px] max-w-[16rem] items-center gap-1.5 rounded-item bg-panel px-2 text-xs text-foreground hover:bg-panel-hover"
+            >
+              <TableProperties className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden="true" />
               <span className="truncate">{a.name}</span>
             </Link>
           </li>

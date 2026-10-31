@@ -48,6 +48,7 @@ export const FLAGS = {
   "slides-charts": "Slides from your own file: a spreadsheet given to Slides with «+» becomes a deck with a real chart of its numbers, computed from the file and drawn as a chart PowerPoint can edit (MASTER 16, package 13)",
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
   "chat-attachments": "Chat reads what you give it: PDFs and images attached to a message, asked about, and under the answer the remembered facts it used (MASTER 16, package 9)",
+  "chat-charts": "Chat draws a chart under its answer when a data-type attachment is on the message: line, bars or pie, in the design's own colours, with a card underneath saying which file and which arithmetic produced it (the owner's «30. CHAT: ΓΡΑΦΗΜΑΤΑ, ΔΙΑΓΡΑΜΜΑΤΑ ΚΑΙ ΚΑΡΤΕΣ ΜΕΣΑ ΣΤΗΝ ΑΠΑΝΤΗΣΗ», 2026-10-31, Κομμάτι 1). The chart is picked and computed by code from the attached data_analyses row, after the model has already answered — the model never sees a row and never returns a number that gets drawn (the same rule lib/presentations/deck-charts.ts already holds Slides to).",
 } as const;
 // REMOVED (the owner's critical message, 2026-10-23, "χωρίς διακόπτες"):
 // "coding-github" — GitHub in Coding is controlled entirely by whether the

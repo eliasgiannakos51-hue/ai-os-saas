@@ -1451,7 +1451,7 @@
         "fileLimit": "«{name}»: ultrapassaria o limite do seu plano em Ficheiros. Apague um ficheiro em Ficheiros ou mude de plano.",
         "uploadLimit": "Demasiados carregamentos de ficheiros na última hora. Tente novamente daqui a pouco.",
         "offline": "Sem ligação. Verifique a rede e tente novamente.",
-        "type": "«{name}»: apenas PDF, JPG ou PNG.",
+        "type": "«{name}»: apenas PDF, JPG, PNG, CSV ou XLSX.",
         "pdfTooLarge": "«{name}»: o PDF excede 20 MB.",
         "imageTooLarge": "«{name}»: a imagem excede 5 MB.",
         "tooManyPdfs": "Até {max} PDF por mensagem.",
@@ -1463,7 +1463,11 @@
         "refused": "Os anexos não foram aceites. Anexe-os novamente.",
         "openInFiles": "Abrir em Ficheiros",
         "memoryUsed": "Da memória ({count})",
-        "manageMemory": "O que o Ionexa lembra"
+        "manageMemory": "O que o Ionexa lembra",
+        "dataTooLarge": "«{name}»: o ficheiro excede 8 MB.",
+        "tooManyData": "Até {max} ficheiro de dados por mensagem.",
+        "readyData": "Pronto — também no Analyze",
+        "openInAnalyze": "Abrir no Analyze"
       },
       "deleteFailed": "Essa conversa não foi eliminada. Continua aqui.",
       "undo": "Desfazer",
@@ -1472,7 +1476,10 @@
       "moved": "Movida para {project}.",
       "moveFailed": "Não foi movida. Tenta de novo.",
       "projectFull": "Esse projeto já tem {limit} coisas, o máximo que guarda.",
-      "selectOne": "Selecionar «{title}»"
+      "selectOne": "Selecionar «{title}»",
+      "chart": {
+        "cardTitle": "Como isto foi calculado"
+      }
     },
     "create": {
       "title": "Criar Qualquer Coisa",

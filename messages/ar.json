@@ -1451,7 +1451,7 @@
         "fileLimit": "«{name}»: سيتجاوز هذا حد خطتك في الملفات. احذف ملفًا من الملفات أو قم بترقية خطتك.",
         "uploadLimit": "عدد كبير جدًا من عمليات رفع الملفات خلال الساعة الأخيرة. حاول مرة أخرى بعد قليل.",
         "offline": "لا يوجد اتصال. تحقّق من الشبكة وحاول مرة أخرى.",
-        "type": "«{name}»: يُقبل PDF أو JPG أو PNG فقط.",
+        "type": "«{name}»: يُقبل PDF أو JPG أو PNG أو CSV أو XLSX فقط.",
         "pdfTooLarge": "«{name}»: حجم ملف PDF يتجاوز 20 ميغابايت.",
         "imageTooLarge": "«{name}»: حجم الصورة يتجاوز 5 ميغابايت.",
         "tooManyPdfs": "حتى {max} ملفات PDF في كل رسالة.",
@@ -1463,7 +1463,11 @@
         "refused": "لم تُقبل المرفقات. أرفقها مرة أخرى.",
         "openInFiles": "فتح في الملفات",
         "memoryUsed": "من الذاكرة ({count})",
-        "manageMemory": "ما يتذكره Ionexa"
+        "manageMemory": "ما يتذكره Ionexa",
+        "dataTooLarge": "«{name}»: حجم الملف يتجاوز 8 ميغابايت.",
+        "tooManyData": "حتى {max} ملف بيانات في كل رسالة.",
+        "readyData": "جاهز — وأيضًا في Analyze",
+        "openInAnalyze": "فتح في Analyze"
       },
       "deleteFailed": "لم تُحذف تلك المحادثة. ما زالت هنا.",
       "undo": "تراجع",
@@ -1472,7 +1476,10 @@
       "moved": "نُقلت إلى {project}.",
       "moveFailed": "لم يتم النقل. حاول مرة أخرى.",
       "projectFull": "هذا المشروع يضم بالفعل {limit} عنصرًا، وهو أقصى ما يحتفظ به.",
-      "selectOne": "اختر «{title}»"
+      "selectOne": "اختر «{title}»",
+      "chart": {
+        "cardTitle": "كيف تم حسابه"
+      }
     },
     "create": {
       "title": "إنشاء أي شيء",

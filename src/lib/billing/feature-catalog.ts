@@ -1367,6 +1367,17 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "cross" }),
   },
   {
+    id: "threeD",
+    group: "make",
+    minPlan: "starter",
+    pages: ["3d"],
+    charges: false,
+    notSold: "Coming Soon (src/lib/nav/all-tools.ts, ready: false): the screen is built behind the switch '3d-tool' (the owner's '23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ', 2026-10-31, Κομμάτι 2, docs/3D-PROVIDERS.md) but no photo-to-3D provider key from the owner yet. Published when ready flips to true.",
+    enforcedIn: "src/lib/nav/all-tools.ts",
+    enforcedSymbol: 'href: "/dashboard/3d", ready: false',
+    cell: () => ({ type: "cross" }),
+  },
+  {
     id: "audio",
     group: "make",
     minPlan: "starter",

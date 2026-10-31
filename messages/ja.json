@@ -3170,6 +3170,7 @@
         "sales": "営業",
         "trading": "トレード",
         "image": "画像",
+        "threeD": "3D",
         "document": "文書",
         "games": "ゲーム",
         "connect": "接続",
@@ -3203,6 +3204,7 @@
         "sales": "連絡先、アプローチ、次のステップ。",
         "trading": "トレードの記録。",
         "image": "説明から画像を作成",
+        "threeD": "数枚の写真から3Dモデルを作成",
         "document": "文書とシート",
         "games": "説明からゲームを作成。",
         "connect": "ほかのアプリを取り込む",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "まだ素材がありません。"
     },
+    "threeD": {
+      "empty": {
+        "heading": "何を3Dにしますか?"
+      },
+      "notBuilt": "まだ実装されていません。料金は発生していません。",
+      "placeholder": "3Dにしたいものを自分の言葉で説明してください…",
+      "attachPhotos": "写真を追加（1〜4枚）",
+      "workspaceTitle": "3Dモデル",
+      "photos": {
+        "heading": "マイフォト",
+        "remove": "この写真を削除"
+      },
+      "viewer": {
+        "zoomIn": "ズームイン",
+        "zoomOut": "ズームアウト",
+        "reset": "表示をリセット",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "種類",
+        "typeOptions": {
+          "product": "製品",
+          "furniture": "家具",
+          "object": "物体"
+        },
+        "quality": "品質",
+        "qualityOptions": {
+          "draft": "ドラフト",
+          "final": "最終版"
+        },
+        "realSize": "実際のサイズ",
+        "realSizeUnknown": "まだ設定されていません",
+        "format": "形式",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "背景",
+        "backgroundOptions": {
+          "white": "白",
+          "transparent": "透明"
+        },
+        "price": "価格"
+      },
+      "bar": {
+        "viewInAr": "ARで見る",
+        "download": "ダウンロード",
+        "makeFinal": "最終版を作成"
+      }
+    },
     "films": {
       "empty": {
         "heading": "映画のテーマは何ですか?"
@@ -4155,6 +4208,11 @@
       "notified": "通知します",
       "notifyFailed": "保存できませんでした。もう一度お試しください。",
       "examples": {
+        "threeD": {
+          "a": "お店の花瓶、サイトに掲載する準備ができています",
+          "b": "木製の椅子を、あらゆる角度から見る",
+          "c": "陶器のマグカップを、スマホでARで見る"
+        },
         "apps": {
           "a": "サロンの予約アプリ",
           "b": "デリバリー注文用アプリ",

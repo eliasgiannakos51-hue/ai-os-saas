@@ -176,7 +176,12 @@ const NO_HEADER_EXEMPT = new Map([
   // "iowork-tool". help.iowork carries the part that matters most on this
   // page of all of them: that it reaches only folders the person picks,
   // and never passwords or keys.
-  ...["audio", "avatars", "editing", "films", "translate", "video-studio"].map((slug) => [
+  // 3d joined this list on 2026-10-31 (the owner's "23. 3D: ΝΕΟ
+  // ΕΡΓΑΛΕΙΟ"), for the same reason as the rest of it: the screen is
+  // built behind the switch "3d-tool", so everyone the switch is not
+  // open to gets the Coming Soon shell, which has nothing for a tip to
+  // explain yet.
+  ...["audio", "avatars", "3d", "editing", "films", "translate", "video-studio"].map((slug) => [
     `src/app/dashboard/${slug}/page.tsx`,
     "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",
   ]),

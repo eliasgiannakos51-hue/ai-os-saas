@@ -205,6 +205,8 @@ Removing one from the product is always allowed.
 | dashboard.comingSoon.examples.video.a | an example prompt the reader would type |
 | dashboard.comingSoon.examples.video.b | an example prompt the reader would type |
 | dashboard.comingSoon.examples.films.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.threeD.a | an example prompt the reader would type |
+| dashboard.comingSoon.examples.threeD.c | an example prompt the reader would type |
 | dashboard.comingSoon.examples.avatars.a | an example prompt the reader would type |
 | dashboard.comingSoon.examples.translate.b | an example prompt the reader would type |
 | dashboard.quickJobs.incomeExpenses.text | text prefilled into the reader's own input |

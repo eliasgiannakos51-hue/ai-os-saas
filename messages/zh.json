@@ -3170,6 +3170,7 @@
         "sales": "销售",
         "trading": "交易",
         "image": "图片",
+        "threeD": "3D",
         "document": "文档",
         "games": "游戏",
         "connect": "连接",
@@ -3203,6 +3204,7 @@
         "sales": "联系人、跟进和下一步。",
         "trading": "你的交易记录。",
         "image": "根据描述生成图片",
+        "threeD": "由几张照片生成3D模型",
         "document": "文档与表格",
         "games": "根据描述生成游戏。",
         "connect": "把你的其他应用接进来",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "暂无素材。"
     },
+    "threeD": {
+      "empty": {
+        "heading": "您想将什么变成3D？"
+      },
+      "notBuilt": "尚未构建。未产生任何费用。",
+      "placeholder": "用您自己的话描述想要变成3D的物品…",
+      "attachPhotos": "添加照片（1至4张）",
+      "workspaceTitle": "3D模型",
+      "photos": {
+        "heading": "我的照片",
+        "remove": "移除此照片"
+      },
+      "viewer": {
+        "zoomIn": "放大",
+        "zoomOut": "缩小",
+        "reset": "重置视图",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "类型",
+        "typeOptions": {
+          "product": "产品",
+          "furniture": "家具",
+          "object": "物体"
+        },
+        "quality": "质量",
+        "qualityOptions": {
+          "draft": "草稿",
+          "final": "最终版"
+        },
+        "realSize": "实际尺寸",
+        "realSizeUnknown": "尚未设置",
+        "format": "格式",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "背景",
+        "backgroundOptions": {
+          "white": "白色",
+          "transparent": "透明"
+        },
+        "price": "价格"
+      },
+      "bar": {
+        "viewInAr": "在AR中查看",
+        "download": "下载",
+        "makeFinal": "生成最终版"
+      }
+    },
     "films": {
       "empty": {
         "heading": "你的电影是关于什么的？"
@@ -4155,6 +4208,11 @@
       "notified": "我们会通知你",
       "notifyFailed": "无法保存，请重试。",
       "examples": {
+        "threeD": {
+          "a": "我店里的花瓶，可用于网站",
+          "b": "一把木椅，可从各个角度查看",
+          "c": "一个陶瓷杯，可在手机上用AR查看"
+        },
         "apps": {
           "a": "我的沙龙预订应用",
           "b": "外卖订单应用",

@@ -3170,6 +3170,7 @@
         "sales": "Ventes",
         "trading": "Trading",
         "image": "Image",
+        "threeD": "3D",
         "document": "Document",
         "games": "Jeux",
         "connect": "Connecter",
@@ -3203,6 +3204,7 @@
         "sales": "Contacts, relances et prochaines étapes.",
         "trading": "Le journal de vos trades.",
         "image": "Des images à partir d'une description",
+        "threeD": "Un modèle 3D à partir de quelques photos",
         "document": "Documents et feuilles",
         "games": "Un jeu à partir d'une description.",
         "connect": "Faites entrer vos autres applis",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "Aucun contenu pour le moment."
     },
+    "threeD": {
+      "empty": {
+        "heading": "Que voulez-vous transformer en 3D ?"
+      },
+      "notBuilt": "Pas encore disponible. Rien n'a été facturé.",
+      "placeholder": "Décrivez ce qui doit devenir 3D, avec vos propres mots…",
+      "attachPhotos": "Ajouter des photos (1 à 4)",
+      "workspaceTitle": "Modèle 3D",
+      "photos": {
+        "heading": "Mes photos",
+        "remove": "Retirer cette photo"
+      },
+      "viewer": {
+        "zoomIn": "Zoomer",
+        "zoomOut": "Dézoomer",
+        "reset": "Réinitialiser la vue",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Type",
+        "typeOptions": {
+          "product": "Produit",
+          "furniture": "Meuble",
+          "object": "Objet"
+        },
+        "quality": "Qualité",
+        "qualityOptions": {
+          "draft": "Brouillon",
+          "final": "Final"
+        },
+        "realSize": "Taille réelle",
+        "realSizeUnknown": "pas encore défini",
+        "format": "Format",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Arrière-plan",
+        "backgroundOptions": {
+          "white": "Blanc",
+          "transparent": "Transparent"
+        },
+        "price": "Prix"
+      },
+      "bar": {
+        "viewInAr": "Voir en RA",
+        "download": "Télécharger",
+        "makeFinal": "Finaliser"
+      }
+    },
     "films": {
       "empty": {
         "heading": "De quoi parle votre film ?"
@@ -4155,6 +4208,11 @@
       "notified": "Nous te préviendrons",
       "notifyFailed": "Impossible d'enregistrer. Réessaie.",
       "examples": {
+        "threeD": {
+          "a": "Un vase de ma boutique, prêt pour le site",
+          "b": "Une chaise en bois, à voir sous tous les angles",
+          "c": "Une tasse en céramique, avec AR sur mon téléphone"
+        },
         "apps": {
           "a": "Une appli de réservation pour mon salon",
           "b": "Une appli pour les commandes de livraison",

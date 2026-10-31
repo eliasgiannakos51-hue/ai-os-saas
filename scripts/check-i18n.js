@@ -762,6 +762,22 @@ const LOCALE_ALLOWED = new Set([
   "it:dashboard.myStuff.filters.video",
   "it:dashboard.myStuff.filters.audio",
   "pt:dashboard.myStuff.kinds.apps",
+  // 3D's settings panel (2026-10-31): true cognates, the real word in
+  // that language too, not a missed translation. "Final" (the quality
+  // tier, matching Draft) is the Spanish, French, German and Portuguese
+  // word for it as well; "Type" and "Format" are the French word too
+  // (and German already has its own "Typ"/"Format" is the real German
+  // noun — capitalized, since German capitalizes every noun); and
+  // "Transparent" is the French and German adjective too.
+  "es:dashboard.threeD.panel.qualityOptions.final",
+  "fr:dashboard.threeD.panel.qualityOptions.final",
+  "de:dashboard.threeD.panel.qualityOptions.final",
+  "pt:dashboard.threeD.panel.qualityOptions.final",
+  "fr:dashboard.threeD.panel.type",
+  "fr:dashboard.threeD.panel.format",
+  "de:dashboard.threeD.panel.format",
+  "fr:dashboard.threeD.panel.backgroundOptions.transparent",
+  "de:dashboard.threeD.panel.backgroundOptions.transparent",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
@@ -810,6 +826,18 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // allowance.
   "dashboard.films.stages.storyboard",
   "dashboard.films.storyboard.heading",
+  // 3D, Κομμάτι 2 (owner, 2026-10-31, new tool): "3D" is the tile's own
+  // name — the owner's own words ("Τετράγωνο «3D»"), a universal
+  // technical abbreviation identical in every one of these ten
+  // languages' own tech vocabulary, not a missed translation.
+  "dashboard.tools.names.threeD",
+  "dashboard.threeD.viewer.placeholderLabel",
+  // 3D, Κομμάτι 2: GLB/USDZ/STL are file-format names, not words — the
+  // same category as "PDF"/"CSV"/"MP3" elsewhere in this product,
+  // identical in every language because the standard itself is.
+  "dashboard.threeD.panel.formatOptions.glb",
+  "dashboard.threeD.panel.formatOptions.usdz",
+  "dashboard.threeD.panel.formatOptions.stl",
   // FILMS, Κομμάτι 2: "Credits" is the product's own currency word,
   // already used untranslated inside Greek and German sentences
   // elsewhere in this file (dashboard.integrations.mcp.credits,

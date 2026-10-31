@@ -411,6 +411,12 @@ const BASELINE = {
   // switch "films-tool" is not open to gets the Coming Soon screen,
   // which draws no filled control. 2026-10-30, κομμάτι 2 of Films.
   "dashboard/films/page.tsx": 1,
+  // ONE: the field's send, in the shell 3D is born in. Everyone the
+  // switch "3d-tool" is not open to gets the Coming Soon screen, which
+  // draws no filled control. "Make final" on the work screen is styled
+  // `btn-outline` (not the accent class), disabled — it never adds a
+  // second one. 2026-10-31, κομμάτι 2 of 3D.
+  "dashboard/3d/page.tsx": 1,
   // ONE: the field's send. The page is Games (package 26), born in the
   // shell; without the switch it does not exist, and without the plan it
   // is the wall, returned early.

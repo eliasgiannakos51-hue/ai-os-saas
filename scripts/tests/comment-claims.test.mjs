@@ -320,7 +320,19 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // marks it NO REASON GIVEN because its reason regex does not match this
   // phrasing, not because one is missing (this file's own precision note
   // applies: ~1 in 5 by hand).
-  const CENSUS_CEILING = 80;
+  // 80 -> 81 ON 2026-10-31: scripts/tests/all-tools-final-grid.prodtest.mjs,
+  // the new PRODUCT_WORDS entry for "3D" ("identical in el per
+  // check-i18n.js's own INTENTIONALLY_IDENTICAL — a universal term, not a
+  // missed translation"). The PHRASES scan matches "intentionally" as a
+  // plain substring, and the SYMBOL NAME `INTENTIONALLY_IDENTICAL` (not
+  // the English word, used as prose, anywhere in the comment) contains
+  // it — the same false-positive shape check-i18n.js's own two older
+  // comments already carry at lines 697 and 719 of that file, already
+  // inside this ceiling before this round. The actual decision (the "D"
+  // in the exemption list is a false positive from the tile's own name
+  // "3D", not English leaking onto the Greek page) is explained in full
+  // in the same comment block.
+  const CENSUS_CEILING = 81;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

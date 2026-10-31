@@ -16,9 +16,10 @@
  *      SKIP_BUILD=1 ALL_TOOLS_SHOTS=/tmp/shots node scripts/tests/all-tools-final-grid.prodtest.mjs
  *
  * What it holds, each against lib/nav/all-tools.ts rather than a number:
- *   1. Exactly the 24 tiles of the registry, in the owner's order, in
- *      his six groups (Learn carrying none), under the headings he
- *      worded — a live one and a Coming Soon one marked differently.
+ *   1. Exactly the tiles of the registry (25 since 3D joined, 2026-10-31),
+ *      in the owner's order, in his six groups (Learn carrying none),
+ *      under the headings he worded — a live one and a Coming Soon one
+ *      marked differently.
  *   2. NO small ready-made job tile is drawn on the page at all — the
  *      owner's "ΦΕΥΓΟΥΝ ΟΛΑ ΤΑ ΜΙΚΡΑ ΤΕΤΡΑΓΩΝΑ" — they are still real
  *      (lib/nav/quick-jobs.ts) and still found through the search below.
@@ -126,6 +127,13 @@ const NOT_LIVE = ALL_TOOLS.filter((t) => !LIVE_HREFS.has(t.href));
 const PRODUCT_WORDS = new Set([
   "Ionexa", "AI", "PDF", "PowerPoint", "Word", "Excel", "GitHub", "iowork", "MCP", "K",
   "sites", "trading", "social", "Podcast", "podcasts", "Voice", "over", "Post", "Email", "Quiz", "Flashcards",
+  // "3D" (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", 2026-10-31, kept
+  // identical in el per check-i18n.js's own INTENTIONALLY_IDENTICAL —
+  // a universal term, not a missed translation) isn't itself a Latin
+  // match (the digit "3" breaks the run), but the regex above still
+  // isolates its trailing "D" as a standalone Latin word — a false
+  // positive from the tile's own name, not English leaking in.
+  "D",
 ]);
 const latinWords = (text) => [...new Set((text.match(/[A-Za-z][A-Za-z&]*/g) ?? []).filter((w) => !PRODUCT_WORDS.has(w)))];
 
@@ -214,7 +222,7 @@ try {
       }));
       const drawn = await tiles();
 
-      check(`${tag}: all 24 registry tiles are drawn, in the owner's order`,
+      check(`${tag}: all ${ALL_TOOLS.length} registry tiles are drawn, in the owner's order`,
         drawn.length === ALL_TOOLS.length && drawn.every((t, i) => t.href === ALL_TOOLS[i].href), drawn.map((t) => t.href).join(", "));
       check(`${tag}: ...each in its own group`, drawn.every((t, i) => t.group === `tools-${ALL_TOOLS[i].group}`), drawn.map((t) => `${t.name}:${t.group}`).join(", "));
       check(`${tag}: a live tile carries no «Σύντομα» badge, a Coming Soon one does`,

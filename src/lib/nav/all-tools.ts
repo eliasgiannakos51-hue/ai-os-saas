@@ -1,7 +1,9 @@
 // ALL TOOLS, THE FINAL GRID — EVERY SQUARE (the owner's message "ALL TOOLS:
 // ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ", 2026-10-24): 24 big tiles in 5 groups, in this order,
 // plus a 6th group (Learn) that carries only small ready-made jobs — no big
-// tile of its own. Replaces the 17-tile round of 2026-10-23
+// tile of its own. A 25th tile, 3D, joined the "make" group 2026-10-31
+// (owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", right after Image). Replaces the
+// 17-tile round of 2026-10-23
 // ("ALL TOOLS: ΤΟ ΤΕΛΙΚΟ GRID"): the 12 that worked then stay exactly as
 // they were (same hrefs, same names), and 12 more join — some because they
 // already worked end to end and only needed a switch removed (Meetings,
@@ -27,7 +29,7 @@ export type AllToolsGroupKey = "record" | "ask" | "make" | "runAlone" | "organis
 export type AllToolsNameKey =
   | "myStuff" | "connect" | "meetings" | "analyze" | "research" | "translate"
   | "rebuild" | "site" | "apps" | "games" | "document" | "slides" | "posts"
-  | "image" | "video" | "films" | "editing" | "avatars" | "audio" | "coding"
+  | "image" | "threeD" | "video" | "films" | "editing" | "avatars" | "audio" | "coding"
   | "agents" | "automations" | "iowork" | "projects"
   // Kept so other screens can still read a name/line that is no longer a
   // tile of its own (components/analyze/analyze-shell.tsx reads
@@ -111,6 +113,16 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // POSTS: already built, same reason as Slides.
   { name: "posts", group: "make", href: "/dashboard/posts", ready: true },
   { name: "image", group: "make", href: "/dashboard/images", ready: true, needs: "imageKey" },
+  // 3D: brand new tool (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", 2026-10-31) —
+  // the 25th tile, the owner's own piece 8 ("Τετράγωνο «3D» στο All
+  // tools, στην ομάδα «Φτιάξε», μετά το Image"), added as a Σύντομα tile
+  // now (same bootstrap every other half-built tool on this list gets)
+  // so it is registered and reachable at all; it flips to `ready: true`
+  // only once every piece of the directive passes.
+  {
+    name: "threeD", group: "make", href: "/dashboard/3d", ready: false,
+    waitingFor: "the screen is built behind the '3d-tool' switch (Κομμάτι 2, docs/3D-PROVIDERS.md) but stays Σύντομα here until every piece passes — no photo-to-3D provider key from the owner yet",
+  },
   // VIDEO: same reasoning as Apps — /dashboard/videos already exists as
   // the older manually-typed tracker (hidden sidebar row), so this tile's
   // address is new (/dashboard/video-studio) rather than overwriting it.

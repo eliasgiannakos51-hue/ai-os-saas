@@ -212,7 +212,14 @@ console.log("\n== 2. the lines ==");
 // Remind me's own sections already use elsewhere in this file — two new
 // tokens, not one, and neither is a card: the question list itself is
 // `bg-panel-hover`, no border.
-ok(`border utilities (${r.counts.borders}), ceiling 611`, r.counts.borders <= 611);
+// 611 -> 612 on 2026-10-31. 3D Κομμάτι 2's placeholder box
+// (three-d-shell.tsx, `BoxFace`) draws each of its six faces with
+// `border border-border` — the directive's own explicit allowance for
+// a "box with a label" before piece 3 exists. The `BoxFace` helper's
+// className is written ONCE in the source and rendered six times at
+// runtime, so this count (a static scan of the source text, not of the
+// rendered DOM) moves by one token, not six.
+ok(`border utilities (${r.counts.borders}), ceiling 612`, r.counts.borders <= 612);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

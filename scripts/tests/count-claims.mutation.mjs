@@ -57,10 +57,12 @@ const MUTANTS = [
     // when /dashboard/my-stuff did.
     // ...and 2026-10-24 (53 -> 61) when the final All tools grid's eight
     // Coming Soon pages (app-builder, audio, avatars, editing, films,
-    // iowork, translate, video-studio) landed.
+    // iowork, translate, video-studio) landed, and 2026-10-31 (61 -> 62)
+    // when /dashboard/3d did (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", the
+    // 25th All tools tile).
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    61 pages instead of 8, and the four components below",
+    from: "                    62 pages instead of 8, and the four components below",
     to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

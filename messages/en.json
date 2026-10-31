@@ -3170,6 +3170,7 @@
         "sales": "Sales",
         "trading": "Trading",
         "image": "Image",
+        "threeD": "3D",
         "document": "Document",
         "games": "Games",
         "connect": "Connect",
@@ -3203,6 +3204,7 @@
         "sales": "Contacts, outreach and next steps.",
         "trading": "A log of your trades.",
         "image": "Images from a description",
+        "threeD": "A 3D model from a few photos",
         "document": "Documents and sheets",
         "games": "A game from a description.",
         "connect": "Bring your other apps in",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "No material yet."
     },
+    "threeD": {
+      "empty": {
+        "heading": "What do you want to become 3D?"
+      },
+      "notBuilt": "Not built yet. Nothing was charged.",
+      "placeholder": "Describe what should become 3D, in your own words…",
+      "attachPhotos": "Add photos (1 to 4)",
+      "workspaceTitle": "3D model",
+      "photos": {
+        "heading": "My photos",
+        "remove": "Remove this photo"
+      },
+      "viewer": {
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "reset": "Reset view",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Type",
+        "typeOptions": {
+          "product": "Product",
+          "furniture": "Furniture",
+          "object": "Object"
+        },
+        "quality": "Quality",
+        "qualityOptions": {
+          "draft": "Draft",
+          "final": "Final"
+        },
+        "realSize": "Real size",
+        "realSizeUnknown": "not set yet",
+        "format": "Format",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Background",
+        "backgroundOptions": {
+          "white": "White",
+          "transparent": "Transparent"
+        },
+        "price": "Price"
+      },
+      "bar": {
+        "viewInAr": "View in AR",
+        "download": "Download",
+        "makeFinal": "Make final"
+      }
+    },
     "films": {
       "empty": {
         "heading": "What's your film about?"
@@ -4159,6 +4212,11 @@
           "a": "A booking app for my salon",
           "b": "An app for delivery orders",
           "c": "A staff shift-tracking app"
+        },
+        "threeD": {
+          "a": "A vase from my shop, ready for the site",
+          "b": "A wooden chair, to view from every angle",
+          "c": "A ceramic mug, with AR on my phone"
         },
         "video": {
           "a": "A 30-second ad video for my product",

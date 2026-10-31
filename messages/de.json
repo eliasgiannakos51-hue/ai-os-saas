@@ -3170,6 +3170,7 @@
         "sales": "Vertrieb",
         "trading": "Trading",
         "image": "Bild",
+        "threeD": "3D",
         "document": "Dokument",
         "games": "Spiele",
         "connect": "Verbinden",
@@ -3203,6 +3204,7 @@
         "sales": "Kontakte, Ansprache und nächste Schritte.",
         "trading": "Ein Journal deiner Trades.",
         "image": "Bilder aus einer Beschreibung",
+        "threeD": "Ein 3D-Modell aus wenigen Fotos",
         "document": "Dokumente und Tabellen",
         "games": "Ein Spiel aus einer Beschreibung.",
         "connect": "Hol deine anderen Apps herein",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "Noch kein Material vorhanden."
     },
+    "threeD": {
+      "empty": {
+        "heading": "Was soll 3D werden?"
+      },
+      "notBuilt": "Noch nicht umgesetzt. Es wurde nichts berechnet.",
+      "placeholder": "Beschreibe, was 3D werden soll, in deinen eigenen Worten…",
+      "attachPhotos": "Fotos hinzufügen (1 bis 4)",
+      "workspaceTitle": "3D-Modell",
+      "photos": {
+        "heading": "Meine Fotos",
+        "remove": "Dieses Foto entfernen"
+      },
+      "viewer": {
+        "zoomIn": "Vergrößern",
+        "zoomOut": "Verkleinern",
+        "reset": "Ansicht zurücksetzen",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Typ",
+        "typeOptions": {
+          "product": "Produkt",
+          "furniture": "Möbel",
+          "object": "Objekt"
+        },
+        "quality": "Qualität",
+        "qualityOptions": {
+          "draft": "Entwurf",
+          "final": "Final"
+        },
+        "realSize": "Reale Größe",
+        "realSizeUnknown": "noch nicht festgelegt",
+        "format": "Format",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Hintergrund",
+        "backgroundOptions": {
+          "white": "Weiß",
+          "transparent": "Transparent"
+        },
+        "price": "Preis"
+      },
+      "bar": {
+        "viewInAr": "In AR ansehen",
+        "download": "Herunterladen",
+        "makeFinal": "Final erstellen"
+      }
+    },
     "films": {
       "empty": {
         "heading": "Worum geht es in deinem Film?"
@@ -4155,6 +4208,11 @@
       "notified": "Wir benachrichtigen dich",
       "notifyFailed": "Konnte nicht gespeichert werden. Versuch es erneut.",
       "examples": {
+        "threeD": {
+          "a": "Eine Vase aus meinem Laden, bereit für die Website",
+          "b": "Ein Holzstuhl, aus jedem Blickwinkel betrachtbar",
+          "c": "Eine Keramiktasse, mit AR auf meinem Handy"
+        },
         "apps": {
           "a": "Eine Buchungs-App für meinen Salon",
           "b": "Eine App für Lieferbestellungen",

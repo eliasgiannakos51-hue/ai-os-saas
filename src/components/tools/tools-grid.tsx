@@ -14,7 +14,7 @@ import { QUICK_JOBS, quickJobHref, type QuickJob } from "@/lib/nav/quick-jobs";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
 import { MY_STUFF_ICON, CHAT_ICON } from "@/lib/module-icons";
-import { Hammer, Languages, LayoutTemplate, Clapperboard, Scissors, UserRound, Music, Laptop } from "lucide-react";
+import { Hammer, Languages, LayoutTemplate, Clapperboard, Scissors, UserRound, Music, Laptop, Box } from "lucide-react";
 
 /** The icon of a tool that has no sidebar row of its own — every new
  *  address this round (and the chat row, which quick jobs point to but
@@ -22,6 +22,7 @@ import { Hammer, Languages, LayoutTemplate, Clapperboard, Scissors, UserRound, M
 const ROWLESS_ICONS: Record<string, LucideIcon> = {
   "/dashboard/my-stuff": MY_STUFF_ICON,
   "/dashboard/rebuild": Hammer,
+  "/dashboard/3d": Box,
   "/dashboard/translate": Languages,
   "/dashboard/app-builder": LayoutTemplate,
   "/dashboard/video-studio": Clapperboard,
@@ -104,6 +105,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     slides: t("names.slides"),
     posts: t("names.posts"),
     image: t("names.image"),
+    threeD: t("names.threeD"),
     video: t("names.video"),
     films: t("names.films"),
     editing: t("names.editing"),
@@ -139,6 +141,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     slides: t("lines.slides"),
     posts: t("lines.posts"),
     image: t("lines.image"),
+    threeD: t("lines.threeD"),
     video: t("lines.video"),
     films: t("lines.films"),
     editing: t("lines.editing"),

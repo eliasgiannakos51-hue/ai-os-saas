@@ -3170,6 +3170,7 @@
         "sales": "المبيعات",
         "trading": "التداول",
         "image": "صورة",
+        "threeD": "3D",
         "document": "مستند",
         "games": "الألعاب",
         "connect": "اتصال",
@@ -3203,6 +3204,7 @@
         "sales": "جهات اتصال ومتابعة وخطوات تالية.",
         "trading": "سجل صفقاتك.",
         "image": "صور من وصف",
+        "threeD": "نموذج ثلاثي الأبعاد من بضع صور",
         "document": "مستندات وجداول",
         "games": "لعبة من وصف.",
         "connect": "أحضر تطبيقاتك الأخرى",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "لا توجد مواد بعد."
     },
+    "threeD": {
+      "empty": {
+        "heading": "ما الذي تريد تحويله إلى 3D؟"
+      },
+      "notBuilt": "لم يُبنَ بعد. لم يتم خصم أي رسوم.",
+      "placeholder": "صف ما تريد تحويله إلى 3D، بكلماتك الخاصة…",
+      "attachPhotos": "إضافة صور (1 إلى 4)",
+      "workspaceTitle": "نموذج 3D",
+      "photos": {
+        "heading": "صوري",
+        "remove": "إزالة هذه الصورة"
+      },
+      "viewer": {
+        "zoomIn": "تكبير",
+        "zoomOut": "تصغير",
+        "reset": "إعادة تعيين العرض",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "النوع",
+        "typeOptions": {
+          "product": "منتج",
+          "furniture": "أثاث",
+          "object": "جسم"
+        },
+        "quality": "الجودة",
+        "qualityOptions": {
+          "draft": "مسودة",
+          "final": "نهائي"
+        },
+        "realSize": "الحجم الحقيقي",
+        "realSizeUnknown": "لم يُحدَّد بعد",
+        "format": "الصيغة",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "الخلفية",
+        "backgroundOptions": {
+          "white": "أبيض",
+          "transparent": "شفاف"
+        },
+        "price": "السعر"
+      },
+      "bar": {
+        "viewInAr": "عرض بتقنية AR",
+        "download": "تنزيل",
+        "makeFinal": "إنشاء النسخة النهائية"
+      }
+    },
     "films": {
       "empty": {
         "heading": "عن ماذا يتحدث فيلمك؟"
@@ -4155,6 +4208,11 @@
       "notified": "سنُبلغك",
       "notifyFailed": "تعذّر الحفظ. حاول مرة أخرى.",
       "examples": {
+        "threeD": {
+          "a": "مزهرية من متجري، جاهزة للموقع",
+          "b": "كرسي خشبي، لرؤيته من كل زاوية",
+          "c": "كوب سيراميك، بتقنية AR على هاتفي"
+        },
         "apps": {
           "a": "تطبيق حجوزات لصالوني",
           "b": "تطبيق لطلبات التوصيل",

@@ -3170,6 +3170,7 @@
         "sales": "Vendas",
         "trading": "Trading",
         "image": "Imagem",
+        "threeD": "3D",
         "document": "Documento",
         "games": "Jogos",
         "connect": "Ligar",
@@ -3203,6 +3204,7 @@
         "sales": "Contactos, acompanhamento e próximos passos.",
         "trading": "O registo das tuas operações.",
         "image": "Imagens a partir de uma descrição",
+        "threeD": "Um modelo 3D a partir de poucas fotos",
         "document": "Documentos e folhas",
         "games": "Um jogo a partir de uma descrição.",
         "connect": "Traz as tuas outras aplicações",
@@ -3914,6 +3916,57 @@
       },
       "noMaterial": "Ainda sem material."
     },
+    "threeD": {
+      "empty": {
+        "heading": "O que você quer transformar em 3D?"
+      },
+      "notBuilt": "Ainda não foi criado. Nada foi cobrado.",
+      "placeholder": "Descreva o que deve se tornar 3D, com suas próprias palavras…",
+      "attachPhotos": "Adicionar fotos (1 a 4)",
+      "workspaceTitle": "Modelo 3D",
+      "photos": {
+        "heading": "Minhas fotos",
+        "remove": "Remover esta foto"
+      },
+      "viewer": {
+        "zoomIn": "Aumentar zoom",
+        "zoomOut": "Diminuir zoom",
+        "reset": "Repor vista",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Tipo",
+        "typeOptions": {
+          "product": "Produto",
+          "furniture": "Móvel",
+          "object": "Objeto"
+        },
+        "quality": "Qualidade",
+        "qualityOptions": {
+          "draft": "Rascunho",
+          "final": "Final"
+        },
+        "realSize": "Tamanho real",
+        "realSizeUnknown": "ainda não definido",
+        "format": "Formato",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Fundo",
+        "backgroundOptions": {
+          "white": "Branco",
+          "transparent": "Transparente"
+        },
+        "price": "Preço"
+      },
+      "bar": {
+        "viewInAr": "Ver em AR",
+        "download": "Transferir",
+        "makeFinal": "Finalizar"
+      }
+    },
     "films": {
       "empty": {
         "heading": "Sobre o que é o seu filme?"
@@ -4155,6 +4208,11 @@
       "notified": "Vamos avisar-te",
       "notifyFailed": "Não foi possível guardar. Tenta novamente.",
       "examples": {
+        "threeD": {
+          "a": "Um vaso da minha loja, pronto para o site",
+          "b": "Uma cadeira de madeira, para ver de todos os ângulos",
+          "c": "Uma caneca de cerâmica, com AR no meu telemóvel"
+        },
         "apps": {
           "a": "Uma app de reservas para o meu salão",
           "b": "Uma app para encomendas de entrega",

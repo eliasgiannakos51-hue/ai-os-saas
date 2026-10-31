@@ -59,10 +59,14 @@ const MUTANTS = [
     // Coming Soon pages (app-builder, audio, avatars, editing, films,
     // iowork, translate, video-studio) landed, and 2026-10-31 (61 -> 62)
     // when /dashboard/3d did (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", the
-    // 25th All tools tile).
+    // 25th All tools tile), and 2026-10-31 again (62 -> 63) when
+    // /dashboard/sheets did (his "28. SHEETS: ΠΙΝΑΚΕΣ ΜΕ ΠΡΑΓΜΑΤΙΚΟΥΣ
+    // ΤΥΠΟΥΣ", Κομμάτι 1) — a tool with no All tools tile at all, which
+    // is why that round found this anchor through the gate rather than
+    // through the grid.
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    62 pages instead of 8, and the four components below",
+    from: "                    63 pages instead of 8, and the four components below",
     to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

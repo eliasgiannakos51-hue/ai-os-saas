@@ -64,9 +64,12 @@ const MUTANTS = [
     // ΤΥΠΟΥΣ", Κομμάτι 1) — a tool with no All tools tile at all, which
     // is why that round found this anchor through the gate rather than
     // through the grid.
+    // ...and 2026-10-31 a third time (63 -> 64) when /dashboard/skills
+    // did (his «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», Κομμάτι 1) — the
+    // same shape as Sheets: no All tools tile, found through the gate.
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    63 pages instead of 8, and the four components below",
+    from: "                    64 pages instead of 8, and the four components below",
     to: "                    44 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

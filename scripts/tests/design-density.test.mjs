@@ -241,7 +241,15 @@ console.log("\n== 2. the lines ==");
 // baseline for dashboard/integrations is untouched at 1. Five quiet
 // borders in exchange for no second loud control is the trade this
 // ceiling exists to make visible, and it is the right side of it.
-ok(`border utilities (${r.counts.borders}), ceiling 617`, r.counts.borders <= 617);
+// 617 -> 618 on 2026-10-31. Skills Κομμάτι 1 adds ONE: the workspace's
+// own header separator (skills-workspace.tsx, `border-t border-divider`
+// above the list/details split). The list column's own border
+// (`border-e border-divider`) is a logical-property side the IS_BORDER
+// regex does not match at all — a real border the census cannot see,
+// same shape as the one named at line 155 — so it costs nothing here
+// despite being drawn. No frame carries a fill: the empty states on
+// both sides are plain centred text, no card.
+ok(`border utilities (${r.counts.borders}), ceiling 618`, r.counts.borders <= 618);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

@@ -228,7 +228,8 @@
       "personalJournal": "Journaling",
       "personalLifeOs": "Life OS",
       "activity": "Activity",
-      "games": "Games"
+      "games": "Games",
+      "skills": "Skills"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -293,7 +294,8 @@
       "aiMemory": "What the chat has kept about you, and how to remove it.",
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
       "activity": "Your next step, what changed, your progress and your numbers",
-      "games": "Describe a game, change its plan in words, and play it here, sealed off from your account."
+      "games": "Describe a game, change its plan in words, and play it here, sealed off from your account.",
+      "skills": "Procedures you taught Ionexa once, so it follows the same steps every time. For now this only shows them."
     },
     "closeMenu": "Close menu",
     "rail": {
@@ -1106,6 +1108,11 @@
       "saveFailed": "We couldn't save the name. Try again in a moment.",
       "save": "Save",
       "saving": "Saving…"
+    },
+    "skills": {
+      "title": "Skills",
+      "description": "Teach Ionexa a procedure once, and it follows the same steps every time that procedure is needed again.",
+      "open": "Open Skills"
     }
   },
   "dashboard": {
@@ -3278,7 +3285,8 @@
         "translate": "Translate",
         "apps": "Apps",
         "audio": "Audio",
-        "sheets": "Sheets"
+        "sheets": "Sheets",
+        "skills": "Skills"
       },
       "lines": {
         "site": "A website from a description",
@@ -4666,6 +4674,23 @@
         }
       },
       "extend": "Extend the selection"
+    },
+    "skills": {
+      "name": "Skills",
+      "empty": {
+        "title": "No skills yet",
+        "why": "A skill is a procedure you teach Ionexa once — its name, when it applies, its steps — and from then on it follows the same steps every time. Nothing can be taught here yet; this screen only shows what already exists."
+      },
+      "details": {
+        "empty": "Select a skill on the left to see it here.",
+        "back": "Back to the list",
+        "whenUsedLabel": "When it is used",
+        "whenUsedEmpty": "Not set",
+        "stepsLabel": "Steps",
+        "stepsEmpty": "No steps yet",
+        "filesLabel": "Files",
+        "filesEmpty": "No files attached"
+      }
     }
   },
   "module": {
@@ -5422,6 +5447,11 @@
       "is": "The app that works inside your own computer",
       "does": "Reads and writes files in the folders you pick, when you ask it to, and shows you every change before it happens",
       "doesNot": "It does not reach passwords, keys, your browser or system folders, it never runs programs on your computer, and it deletes nothing without your approval"
+    },
+    "skills": {
+      "is": "A procedure you teach Ionexa once, so it follows the same steps every time it is needed again.",
+      "does": "Shows a skill's name, when it is used, its steps and its files, exactly as they were taught.",
+      "doesNot": "It does not let you create, edit or run a skill yet, and it does not use any skill on its own — pressing a row only opens it to read."
     }
   },
   "helpCentre": {

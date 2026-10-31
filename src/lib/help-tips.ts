@@ -581,6 +581,20 @@ export const HELP_TIPS: HelpTip[] = [
     corrects:
       "that asking a question here changes anything it reads, or adds a record to Chat, Finance, Sales or Trading",
   },
+  {
+    // SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31),
+    // Κομμάτι 1: same reason as myStuff above — skills-workspace.tsx draws
+    // its own <h1>, not a page-level <PageHeader>, so the route and the
+    // file that mounts the "?" are two different paths.
+    id: "skills",
+    file: "src/components/skills/skills-workspace.tsx",
+    route: "src/app/dashboard/skills/page.tsx",
+    keyPrefix: "help.skills",
+    // Κομμάτι 1 is read-only: the migration grants select only, so the one
+    // wrong assumption worth correcting here is the obvious one — pressing
+    // a row does not let you type into it or change it yet.
+    corrects: "that pressing a skill in the list lets you edit it, add a step, or teach Ionexa a new one",
+  },
 ];
 
 export type HelpTipPart = "is" | "does" | "doesNot";

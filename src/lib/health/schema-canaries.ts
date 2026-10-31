@@ -509,6 +509,18 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Rebuild's Publish (Κομμάτι 4) cannot save the address the app was given: the person sees it published and the link 404s, because /a/[subdomain] has nothing to look up",
   },
   {
+    // Κομμάτι 1 has no write path (the migration grants select only), so
+    // a missing table would not surface as a visible error: loadSkills
+    // catches the failed select and returns [] (lib/skills/load.ts), the
+    // same empty state as a reader with zero rows. A row put there by
+    // hand for testing would silently never appear, with nothing on
+    // screen to say why.
+    kind: "table",
+    table: "user_skills",
+    migration: "20261107000000_user_skills.sql",
+    breaks: "Skills (switch \"skills-tool\") shows «no skills yet» even to a reader a skill was put in by hand — loadSkills swallows the failed select and returns an empty list, with no error on screen to say the table never arrived",
+  },
+  {
     kind: "table",
     table: "my_stuff_sessions",
     migration: "20261024100000_my_stuff_sessions.sql",

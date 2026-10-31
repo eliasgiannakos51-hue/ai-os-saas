@@ -228,7 +228,8 @@
       "personalJournal": "Tagebuch",
       "personalLifeOs": "Life OS",
       "activity": "Aktivität",
-      "games": "Spiele"
+      "games": "Spiele",
+      "skills": "Fähigkeiten"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -293,7 +294,8 @@
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
       "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen",
-      "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto."
+      "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto.",
+      "skills": "Abläufe, die du Ionexa einmal beigebracht hast, damit es jedes Mal denselben Schritten folgt. Vorerst zeigt dies sie nur an."
     },
     "closeMenu": "Menü schließen",
     "rail": {
@@ -1106,6 +1108,11 @@
       "saveFailed": "Der Name konnte nicht gespeichert werden. Versuch es gleich noch einmal.",
       "save": "Speichern",
       "saving": "Wird gespeichert…"
+    },
+    "skills": {
+      "title": "Fähigkeiten",
+      "description": "Bringe Ionexa einen Ablauf einmal bei, und er folgt denselben Schritten, jedes Mal wenn dieser Ablauf wieder gebraucht wird.",
+      "open": "Fähigkeiten öffnen"
     }
   },
   "dashboard": {
@@ -3278,7 +3285,8 @@
         "translate": "Übersetzen",
         "apps": "Apps",
         "audio": "Audio",
-        "sheets": "Tabellen"
+        "sheets": "Tabellen",
+        "skills": "Fähigkeiten"
       },
       "lines": {
         "site": "Eine Website aus einer Beschreibung",
@@ -4666,6 +4674,23 @@
         }
       },
       "extend": "Auswahl erweitern"
+    },
+    "skills": {
+      "name": "Fähigkeiten",
+      "empty": {
+        "title": "Noch keine Fähigkeiten",
+        "why": "Eine Fähigkeit ist ein Ablauf, den du Ionexa einmal beibringst — ihr Name, wann sie gilt, ihre Schritte — und von da an folgt Ionexa jedes Mal denselben Schritten. Hier kann noch nichts angelegt werden; dieser Bildschirm zeigt nur, was bereits vorhanden ist."
+      },
+      "details": {
+        "empty": "Wähle links eine Fähigkeit aus, um sie hier zu sehen.",
+        "back": "Zurück zur Liste",
+        "whenUsedLabel": "Wann sie verwendet wird",
+        "whenUsedEmpty": "Nicht festgelegt",
+        "stepsLabel": "Schritte",
+        "stepsEmpty": "Noch keine Schritte",
+        "filesLabel": "Dateien",
+        "filesEmpty": "Keine Dateien angehängt"
+      }
     }
   },
   "module": {
@@ -5422,6 +5447,11 @@
       "is": "Die App, die in Ihrem eigenen Computer arbeitet",
       "does": "Liest und schreibt Dateien in den Ordnern, die Sie auswählen, wenn Sie darum bitten, und zeigt Ihnen jede Änderung vorher",
       "doesNot": "Sie erreicht keine Passwörter, Schlüssel, Ihren Browser oder Systemordner, führt niemals Programme auf Ihrem Computer aus und löscht nichts ohne Ihre Zustimmung"
+    },
+    "skills": {
+      "is": "Ein Ablauf, den du Ionexa einmal beibringst, damit er jedes Mal, wenn er wieder gebraucht wird, denselben Schritten folgt.",
+      "does": "Zeigt den Namen einer Fähigkeit, wann sie verwendet wird, ihre Schritte und ihre Dateien, genau wie sie beigebracht wurden.",
+      "doesNot": "Du kannst hier noch keine Fähigkeit anlegen, ändern oder ausführen, und Ionexa nutzt noch keine Fähigkeit von sich aus — ein Klick auf eine Zeile öffnet sie nur zum Lesen."
     }
   },
   "helpCentre": {

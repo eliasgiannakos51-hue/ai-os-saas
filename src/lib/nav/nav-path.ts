@@ -125,6 +125,11 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   // test account can open it — a screen nobody can measure is a screen
   // nobody can tell is being used when it does open.
   "sheets",
+  // SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31):
+  // a hidden sidebar row (lib/sidebar-nav.ts), same shape as Affiliate —
+  // in the palette, not drawn in the list — behind the switch
+  // "skills-tool", notFound() for anyone it is not open to.
+  "skills",
   "system-health",
   "team",
   "timeline",

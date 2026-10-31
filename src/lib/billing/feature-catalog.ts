@@ -1402,6 +1402,25 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "cross" }),
   },
   {
+    // SKILLS IS THE SAME SHAPE AS SHEETS ABOVE — a switch, notFound() for
+    // anyone it is not open to — but reached from a card on
+    // /dashboard/settings rather than from All tools: the owner's own
+    // «29. SKILLS» message put it «στις Ρυθμίσεις», not on the grid, and
+    // src/lib/sidebar-nav.ts carries it as a hidden row for the same
+    // reason Affiliate does (a page with no tile, reachable by its row
+    // in the command palette and by the card that links to it).
+    id: "skills",
+    group: "make",
+    minPlan: "starter",
+    pages: ["skills"],
+    sidebar: ["/dashboard/skills"],
+    charges: false,
+    notSold: "Not sold and not reachable: the screen is built behind the switch 'skills-tool' (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31, Κομμάτι 1) and the page is notFound() for anyone it is not open to, so only the owner and the test account can open it at all. Κομμάτι 1 is read-only — the migration grants select only — so there is no way yet to teach Ionexa a first skill. Published piece by piece as Κομμάτια 2-7 land.",
+    enforcedIn: "src/app/dashboard/skills/page.tsx",
+    enforcedSymbol: 'if (!(await isFeatureOn("skills-tool", user))) notFound();',
+    cell: () => ({ type: "cross" }),
+  },
+  {
     id: "audio",
     group: "make",
     minPlan: "starter",

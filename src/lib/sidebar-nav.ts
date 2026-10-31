@@ -47,6 +47,7 @@ import {
   COMPUTER_ICON,
   MEETINGS_ICON,
   HELD_POSITION_ICON,
+  SKILLS_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -623,6 +624,15 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
 
     // --- in the palette and on the hub, not in the sidebar ---
     { href: "/dashboard/affiliate", label: "Affiliate", icon: AFFILIATE_ICON, hintKey: "affiliate", hidden: true },
+    // SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31,
+    // Κομμάτι 1) — hidden, not owner-only: the page itself is notFound()
+    // for anyone the switch "skills-tool" is not open to (owner + the
+    // test account today), the same shape Affiliate's row already has.
+    // Reached from the palette, and — because the directive's own words
+    // are "the Skills PAGE IN SETTINGS" — from a card on the Settings
+    // page body that only renders for a reader the switch is open to, so
+    // no one sees a link to a 404.
+    { href: "/dashboard/skills", label: "Skills", icon: SKILLS_ICON, hintKey: "skills", hidden: true },
     // THE THREE OPERATIONAL PAGES, owner-only and hidden. All three had a
     // page on disk and no entry in any config before round 5: costs was
     // reachable from the billing screens, routing and system-health from

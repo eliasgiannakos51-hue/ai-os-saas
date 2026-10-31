@@ -205,6 +205,10 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // MASTER 16, package 26: a game the person described — its plan, its
   // code and its last versions. All of it is theirs to take with them.
   { table: "user_games", label: "user_games", scope: "user_content" },
+  // Skills (2026-10-31): a procedure the person taught Ionexa by hand —
+  // its name, when it applies, its steps, its files. Theirs to take with
+  // them, same as every other thing they built.
+  { table: "user_skills", label: "user_skills", scope: "user_content" },
   // Rebuild (2026-10-27): an app the person described — its plan, the
   // labels of a page they pointed at, its code and its last versions.
   // All of it is theirs to take with them.

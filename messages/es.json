@@ -228,7 +228,8 @@
       "personalJournal": "Diario",
       "personalLifeOs": "Life OS",
       "activity": "Actividad",
-      "games": "Juegos"
+      "games": "Juegos",
+      "skills": "Habilidades"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -293,7 +294,8 @@
       "aiMemory": "Lo que el chat ha guardado sobre ti, y cómo borrarlo.",
       "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú.",
       "activity": "Tu próximo paso, qué ha cambiado, tu progreso y tus cifras",
-      "games": "Describe un juego, cambia su plan con palabras y juégalo aquí, aislado de tu cuenta."
+      "games": "Describe un juego, cambia su plan con palabras y juégalo aquí, aislado de tu cuenta.",
+      "skills": "Procedimientos que le enseñaste a Ionexa una vez, para que siga los mismos pasos cada vez. Por ahora esto solo los muestra."
     },
     "closeMenu": "Cerrar el menú",
     "rail": {
@@ -1106,6 +1108,11 @@
       "saveFailed": "No pudimos guardar el nombre. Inténtalo de nuevo en un momento.",
       "save": "Guardar",
       "saving": "Guardando…"
+    },
+    "skills": {
+      "title": "Habilidades",
+      "description": "Enseña a Ionexa un procedimiento una vez, y seguirá los mismos pasos cada vez que ese procedimiento vuelva a ser necesario.",
+      "open": "Abrir Habilidades"
     }
   },
   "dashboard": {
@@ -3278,7 +3285,8 @@
         "translate": "Traducir",
         "apps": "Apps",
         "audio": "Audio",
-        "sheets": "Hojas"
+        "sheets": "Hojas",
+        "skills": "Habilidades"
       },
       "lines": {
         "site": "Un sitio web a partir de una descripción",
@@ -4666,6 +4674,23 @@
         }
       },
       "extend": "Ampliar la selección"
+    },
+    "skills": {
+      "name": "Habilidades",
+      "empty": {
+        "title": "Aún no hay habilidades",
+        "why": "Una habilidad es un procedimiento que le enseñas a Ionexa una sola vez — su nombre, cuándo se aplica, sus pasos — y a partir de ahí sigue los mismos pasos cada vez. Todavía no se puede enseñar nada aquí; esta pantalla solo muestra lo que ya existe."
+      },
+      "details": {
+        "empty": "Selecciona una habilidad a la izquierda para verla aquí.",
+        "back": "Volver a la lista",
+        "whenUsedLabel": "Cuándo se usa",
+        "whenUsedEmpty": "Sin definir",
+        "stepsLabel": "Pasos",
+        "stepsEmpty": "Aún no hay pasos",
+        "filesLabel": "Archivos",
+        "filesEmpty": "Sin archivos adjuntos"
+      }
     }
   },
   "module": {
@@ -5422,6 +5447,11 @@
       "is": "La aplicación que trabaja dentro de tu propio ordenador",
       "does": "Lee y escribe archivos en las carpetas que elijas, cuando se lo pides, y te muestra cada cambio antes de hacerlo",
       "doesNot": "No llega a contraseñas, claves, tu navegador ni carpetas del sistema, nunca ejecuta programas en tu ordenador, y no borra nada sin tu aprobación"
+    },
+    "skills": {
+      "is": "Un procedimiento que le enseñas a Ionexa una sola vez, para que siga los mismos pasos cada vez que vuelva a necesitarlo.",
+      "does": "Muestra el nombre de una habilidad, cuándo se usa, sus pasos y sus archivos, exactamente como se enseñaron.",
+      "doesNot": "Todavía no te permite crear, editar ni ejecutar una habilidad, y tampoco usa ninguna habilidad por sí mismo: pulsar una fila solo la abre para leerla."
     }
   },
   "helpCentre": {

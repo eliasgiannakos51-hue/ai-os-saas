@@ -228,7 +228,8 @@
       "personalJournal": "Diario",
       "personalLifeOs": "Life OS",
       "activity": "Attività",
-      "games": "Giochi"
+      "games": "Giochi",
+      "skills": "Competenze"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -293,7 +294,8 @@
       "aiMemory": "Cosa la chat ha tenuto su di te, e come cancellarlo.",
       "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.",
       "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri",
-      "games": "Descrivi un gioco, cambia il suo piano a parole e giocaci qui, isolato dal tuo account."
+      "games": "Descrivi un gioco, cambia il suo piano a parole e giocaci qui, isolato dal tuo account.",
+      "skills": "Procedure che hai insegnato a Ionexa una volta, così segue gli stessi passaggi ogni volta. Per ora questo le mostra soltanto."
     },
     "closeMenu": "Chiudi il menu",
     "rail": {
@@ -1106,6 +1108,11 @@
       "saveFailed": "Non siamo riusciti a salvare il nome. Riprova tra un momento.",
       "save": "Salva",
       "saving": "Salvataggio…"
+    },
+    "skills": {
+      "title": "Competenze",
+      "description": "Insegna a Ionexa una procedura una sola volta, e seguirà gli stessi passaggi ogni volta che quella procedura sarà di nuovo necessaria.",
+      "open": "Apri Competenze"
     }
   },
   "dashboard": {
@@ -3278,7 +3285,8 @@
         "translate": "Traduci",
         "apps": "App",
         "audio": "Audio",
-        "sheets": "Fogli"
+        "sheets": "Fogli",
+        "skills": "Competenze"
       },
       "lines": {
         "site": "Un sito da una descrizione",
@@ -4666,6 +4674,23 @@
         }
       },
       "extend": "Estendi la selezione"
+    },
+    "skills": {
+      "name": "Competenze",
+      "empty": {
+        "title": "Ancora nessuna competenza",
+        "why": "Una competenza è una procedura che insegni a Ionexa una sola volta — il suo nome, quando si applica, i suoi passaggi — e da quel momento segue gli stessi passaggi ogni volta. Qui non si può ancora insegnare nulla; questa schermata mostra solo ciò che esiste già."
+      },
+      "details": {
+        "empty": "Seleziona una competenza a sinistra per vederla qui.",
+        "back": "Torna alla lista",
+        "whenUsedLabel": "Quando viene usata",
+        "whenUsedEmpty": "Non impostato",
+        "stepsLabel": "Passaggi",
+        "stepsEmpty": "Ancora nessun passaggio",
+        "filesLabel": "File",
+        "filesEmpty": "Nessun file allegato"
+      }
     }
   },
   "module": {
@@ -5422,6 +5447,11 @@
       "is": "L'applicazione che lavora dentro il tuo computer",
       "does": "Legge e scrive file nelle cartelle che scegli, quando glielo chiedi, e ti mostra ogni modifica prima che avvenga",
       "doesNot": "Non raggiunge password, chiavi, il tuo browser o le cartelle di sistema, non esegue mai programmi sul tuo computer e non cancella nulla senza la tua approvazione"
+    },
+    "skills": {
+      "is": "Una procedura che insegni a Ionexa una sola volta, così segue gli stessi passaggi ogni volta che serve di nuovo.",
+      "does": "Mostra il nome di una competenza, quando viene usata, i suoi passaggi e i suoi file, esattamente come sono stati insegnati.",
+      "doesNot": "Non permette ancora di creare, modificare o eseguire una competenza, e non ne usa ancora nessuna da solo: premere una riga la apre solo per leggerla."
     }
   },
   "helpCentre": {

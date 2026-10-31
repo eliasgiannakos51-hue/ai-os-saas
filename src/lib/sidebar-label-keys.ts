@@ -136,6 +136,10 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Meetings: "meetings",
   Team: "team",
   Affiliate: "affiliate",
+  // SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31):
+  // a hidden row, same as Affiliate above — without an entry here the
+  // palette falls back to the raw English "Skills" in every locale.
+  Skills: "skills",
   Settings: "settings",
   "Help Centre": "help",
   "AI Agents": "agents",

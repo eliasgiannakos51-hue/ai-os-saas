@@ -44,6 +44,7 @@ import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { LEGAL_AND_SUPPORT_LINKS } from "@/lib/footer-links";
 import { getPlan } from "@/lib/billing/plans";
+import { SKILLS_ICON } from "@/lib/module-icons";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.settings");
@@ -417,6 +418,27 @@ export default async function SettingsPage() {
           <p className="text-xs text-muted">{(await isFeatureOn("export-all", user)) ? t("exportData.descriptionAll") : t("exportData.description")}</p>
           <ExportDataButton />
         </div>
+
+        {/* SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ»,
+            2026-10-31): the one card this page draws for it, behind the
+            switch, same pattern the export card above already uses —
+            `isFeatureOn` decides whether the row even renders, rather
+            than rendering a dead link for everyone and gating the page
+            underneath it. The page itself still carries its own
+            `notFound()` (src/app/dashboard/skills/page.tsx) for anyone
+            who types the address directly. */}
+        {(await isFeatureOn("skills-tool", user)) && (
+          <div className="mb-6 space-y-3 surface">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <SKILLS_ICON className="h-4 w-4 text-muted" aria-hidden="true" />
+              {t("skills.title")}
+            </h2>
+            <p className="text-xs text-muted">{t("skills.description")}</p>
+            <Link href="/dashboard/skills" className="chip-link">
+              {t("skills.open")}
+            </Link>
+          </div>
+        )}
 
         {/* THE LEGAL AND SUPPORT LINKS, INSIDE THE APP.
             

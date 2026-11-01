@@ -3,6 +3,21 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01γ (οδηγία 41 — βοήθεια, Κομμάτι 1: ένα άρθρο ανά εργαλείο)
+
+Migration `20261109000000_help_articles_tools.sql`: 44 νέες γραμμές (22 EN +
+22 EL), κατηγορία `tools`, UPSERT pattern ίδιο με το υπάρχον seed. Κάθε
+άρθρο γραμμένο «από πώς δουλεύει πραγματικά» — τα Coming Soon εργαλεία
+λένε ρητά ότι έρχονται σύντομα. Κανένας αριθμός στα body (τιμές, credits,
+επιτρεπόμενα) — ο κανόνας NO NUMBERS του knowledge base τηρείται, ο
+generator αρνείται body με ψηφία.
+
+Υποστηρικτικές αλλαγές:
+- `src/app/help/page.tsx`: «tools» στο CATEGORY_ORDER
+- `messages/*.json` (10 γλώσσες): `helpCentre.categories.tools`
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: `20261109000000_help_articles_tools.sql`**
+
 ## 2026-11-01β (οδηγία 40 — κινητό, Κομμάτι 1: σύγκριση τεχνολογίας)
 
 Σύγκριση Capacitor (WebView wrapper) vs Expo (React Native).

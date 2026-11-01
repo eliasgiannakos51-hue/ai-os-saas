@@ -6,6 +6,7 @@ import { LifeBuoy, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { articlesByCategory } from "@/lib/support/knowledge-base";
 import { loadHelpArticles, type HelpArticle } from "@/lib/support/help-articles";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { getLocale } from "next-intl/server";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -55,6 +56,7 @@ const CATEGORY_ORDER = [
   "chat",
   "files",
   "integrations",
+  "tools",
   "account",
   "privacy",
 ] as const;
@@ -122,7 +124,10 @@ export default async function HelpPage() {
   // with no articles rather than throwing — a Help Centre that 500s is
   // worse than one that is briefly empty.
   const articles = await loadHelpArticles(locale);
-  const byCategory = articlesByCategory(articles);
+  const showToolArticles = await isFeatureOn("help-tool-articles", null);
+  const byCategory = articlesByCategory(
+    showToolArticles ? articles : articles.filter((a) => a.category !== "tools"),
+  );
   // Driven off the real categories rather than the hardcoded list, so an
   // article in a category nobody remembered to order still renders —
   // silently dropping an answer would be the worst failure this page has.

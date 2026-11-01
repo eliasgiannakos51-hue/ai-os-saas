@@ -5501,7 +5501,8 @@
       "files": "Files",
       "integrations": "Integrations",
       "account": "Account",
-      "privacy": "Privacy and data"
+      "privacy": "Privacy and data",
+      "tools": "Tools"
     }
   },
   "pageTitle": {

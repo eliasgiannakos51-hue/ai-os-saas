@@ -689,6 +689,18 @@
         "subscription_retry": "We couldn't cancel the subscription on this account, so nothing was deleted. Your link still works — please try again."
       }
     },
+    "cancelDeletion": {
+      "title": "Cancel account deletion",
+      "missingToken": "This link is missing its cancellation token. Please use the link from your email exactly as sent.",
+      "body": "Your account is scheduled for deletion. Click below to cancel and keep your account.",
+      "cancelling": "Cancelling…",
+      "cancelButton": "Keep my account",
+      "failed": "We couldn't cancel the deletion. Please try the link again, or contact support.",
+      "successTitle": "Deletion cancelled",
+      "successBody": "Your account is safe. The scheduled deletion has been cancelled.",
+      "backToDashboard": "Back to dashboard",
+      "home": "Go to home page"
+    },
     "generateStrongPassword": "Generate strong password",
     "verifyEmail": {
       "title": "Confirm your email",
@@ -815,7 +827,13 @@
       "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it.",
       "emailDoesNotMatch": "Email doesn't match.",
       "couldNotStartDeletion": "✗ could not start account deletion",
-      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted."
+      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted.",
+      "pendingTitle": "Deletion scheduled",
+      "pendingDescription": "Your account is scheduled for permanent deletion on {date}. You can cancel any time before then.",
+      "cancelDeletion": "Cancel deletion",
+      "cancelling": "Cancelling...",
+      "cancelledOk": "✓ deletion cancelled — your account is safe",
+      "cancelFailed": "Could not cancel — please try again or use the link in the email we sent you."
     },
     "emailNotifications": {
       "title": "Email notifications",
@@ -5501,6 +5519,8 @@
     "forgotPasswordDescription": "Reset your Ionexa AI account password.",
     "resetPasswordDescription": "Set a new password for your Ionexa AI account.",
     "confirmDeletionDescription": "Confirm permanent deletion of your Ionexa AI account.",
+    "cancelDeletion": "Cancel Account Deletion",
+    "cancelDeletionDescription": "Cancel the scheduled deletion of your Ionexa AI account.",
     "termsDescription": "Terms of Service for Ionexa AI.",
     "privacyDescription": "Privacy Policy for Ionexa AI.",
     "cookiesDescription": "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
@@ -6463,6 +6483,14 @@
       "cta": "Confirm deletion",
       "expiry": "This link expires in 1 hour. If you didn't request this, ignore this email and your account will stay exactly as it is.",
       "preheader": "Confirm permanent deletion of your Ionexa AI account."
+    },
+    "deletionScheduled": {
+      "label": "account deletion scheduled",
+      "title": "your account is scheduled for deletion",
+      "body": "Your Ionexa AI account will be permanently deleted on {date}. Until then you can cancel the deletion and keep your account exactly as it is.",
+      "cta": "Cancel deletion",
+      "footer": "If you did not request this, use the link above to cancel immediately.",
+      "preheader": "Your Ionexa AI account will be deleted on {date} — cancel any time before then."
     },
     "cancelled": {
       "label": "subscription",

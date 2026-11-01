@@ -289,6 +289,45 @@ export function deleteAccountConfirmationEmailHtml({
   });
 }
 
+export function deletionScheduledEmailHtml({
+  cancelUrl,
+  deleteAfter,
+  locale = "en",
+}: {
+  cancelUrl: string;
+  deleteAfter: string;
+  locale?: string;
+}): string {
+  const t = emailTranslator(locale);
+  const dateStr = new Date(deleteAfter).toLocaleDateString(locale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(t("email.deletionScheduled.label"))}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(t("email.deletionScheduled.title"))}</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      ${escapeHtml(t("email.deletionScheduled.body", { date: dateStr }))}
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${cancelUrl}" style="display:inline-block; background-color:${ORANGE}; color:#fff; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        ${escapeHtml(t("email.deletionScheduled.cta"))}
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
+      ${escapeHtml(t("email.deletionScheduled.footer"))}
+    </p>
+  `;
+
+  return layout({
+    preheader: escapeHtml(t("email.deletionScheduled.preheader", { date: dateStr })),
+    bodyHtml,
+    dir: isRtlLocale(locale) ? "rtl" : "ltr",
+    footer: escapeHtml(t("email.footer")),
+  });
+}
+
 export function subscriptionCancelledEmailHtml({
   email,
   endsOn,

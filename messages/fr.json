@@ -6680,7 +6680,8 @@
       "suspended": "Suspendu",
       "noUsers": "Aucun utilisateur trouvé.",
       "loading": "Chargement des utilisateurs...",
-      "creditBtn": "Crédits"
+      "creditBtn": "Crédits",
+      "adjust": "Ajuster"
     },
     "creditAdjust": {
       "title": "Ajuster les crédits",

@@ -6708,7 +6708,8 @@
       "suspended": "معلّق",
       "noUsers": "لم يُعثر على مستخدمين.",
       "loading": "جارٍ تحميل المستخدمين...",
-      "creditBtn": "الرصيد"
+      "creditBtn": "الرصيد",
+      "adjust": "تعديل"
     },
     "creditAdjust": {
       "title": "تعديل الرصيد",

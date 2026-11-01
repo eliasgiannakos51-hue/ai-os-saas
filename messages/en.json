@@ -6708,7 +6708,8 @@
       "suspended": "Suspended",
       "noUsers": "No users found.",
       "loading": "Loading users...",
-      "creditBtn": "Credits"
+      "creditBtn": "Credits",
+      "adjust": "Adjust"
     },
     "creditAdjust": {
       "title": "Adjust credits",

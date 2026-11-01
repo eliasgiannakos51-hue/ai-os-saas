@@ -6708,7 +6708,8 @@
       "suspended": "Σε αναστολή",
       "noUsers": "Δεν βρέθηκαν χρήστες.",
       "loading": "Φόρτωση χρηστών...",
-      "creditBtn": "Credits"
+      "creditBtn": "Credits",
+      "adjust": "Ρύθμιση"
     },
     "creditAdjust": {
       "title": "Ρύθμιση πιστωτικών",

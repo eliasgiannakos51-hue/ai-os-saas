@@ -6680,7 +6680,8 @@
       "suspended": "已暂停",
       "noUsers": "未找到用户。",
       "loading": "正在加载用户...",
-      "creditBtn": "积分"
+      "creditBtn": "积分",
+      "adjust": "调整"
     },
     "creditAdjust": {
       "title": "调整积分",

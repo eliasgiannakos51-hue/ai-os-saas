@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
-import { AdjustCreditsModal } from "@/components/admin/adjust-credits-modal";
+import { CreditAdjustModal } from "./credit-adjust-modal";
+import { RefundModal } from "./refund-modal";
 
 type UserRow = {
   id: string;
@@ -32,6 +33,7 @@ export function AdminUsersTab() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [adjustTarget, setAdjustTarget] = useState<UserRow | null>(null);
+  const [refundTarget, setRefundTarget] = useState<UserRow | null>(null);
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(query), 350);
@@ -139,12 +141,20 @@ export function AdminUsersTab() {
                       : "—"}
                   </td>
                   <td className="px-3 py-2 text-right">
-                    <button
-                      onClick={() => setAdjustTarget(u)}
-                      className="rounded border border-border px-2 py-0.5 text-xs text-foreground hover:bg-surface"
-                    >
-                      {t("adjust")}
-                    </button>
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={() => setAdjustTarget(u)}
+                        className="rounded border border-border px-2 py-0.5 text-xs text-foreground hover:bg-surface"
+                      >
+                        {t("adjust")}
+                      </button>
+                      <button
+                        onClick={() => setRefundTarget(u)}
+                        className="rounded border border-border px-2 py-0.5 text-xs text-foreground hover:bg-surface"
+                      >
+                        {t("refundBtn")}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -181,13 +191,24 @@ export function AdminUsersTab() {
       )}
 
       {adjustTarget && (
-        <AdjustCreditsModal
+        <CreditAdjustModal
           userId={adjustTarget.id}
           email={adjustTarget.email}
           creditsRemaining={adjustTarget.creditsRemaining}
           onClose={() => setAdjustTarget(null)}
-          onSuccess={() => {
+          onDone={() => {
             setAdjustTarget(null);
+            fetchUsers();
+          }}
+        />
+      )}
+      {refundTarget && (
+        <RefundModal
+          userId={refundTarget.id}
+          email={refundTarget.email}
+          onClose={() => setRefundTarget(null)}
+          onDone={() => {
+            setRefundTarget(null);
             fetchUsers();
           }}
         />

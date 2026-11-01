@@ -6680,7 +6680,8 @@
       "suspended": "停止中",
       "noUsers": "ユーザーが見つかりません。",
       "loading": "ユーザーを読み込み中...",
-      "creditBtn": "クレジット"
+      "creditBtn": "クレジット",
+      "adjust": "調整"
     },
     "creditAdjust": {
       "title": "クレジット調整",

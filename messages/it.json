@@ -6680,7 +6680,8 @@
       "suspended": "Sospeso",
       "noUsers": "Nessun utente trovato.",
       "loading": "Caricamento utenti...",
-      "creditBtn": "Crediti"
+      "creditBtn": "Crediti",
+      "adjust": "Regola"
     },
     "creditAdjust": {
       "title": "Modifica crediti",

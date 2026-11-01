@@ -11,11 +11,13 @@
   logs `adjust_credits` to audit log with amount + reason + creditsAfter.
 - `src/components/admin/credit-adjust-modal.tsx`: modal dialog — amount
   field (+/-), reason textarea, submit to API, success refreshes user list.
-- `src/components/admin/users-tab.tsx`: "Credits" button per row opens modal.
+- `src/components/admin/users-tab.tsx`: "Adjust" button per row opens
+  `CreditAdjustModal`, `onDone` refreshes list. "Credits" button also present.
 - `messages/*.json` (10 γλώσσες): `adminDashboard.creditAdjust.*` block +
-  `adminDashboard.users.creditBtn`.
+  `adminDashboard.users.creditBtn` + `adminDashboard.users.adjust`.
 
-Δοκιμές: `npx tsc --noEmit` ALL PASS.
+Δοκιμές: `npx tsc --noEmit` ALL PASS, `feature-flags.test.mjs` 20/20 PASS,
+`check-i18n.js` clean (pre-existing ar gaps unrelated).
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
 

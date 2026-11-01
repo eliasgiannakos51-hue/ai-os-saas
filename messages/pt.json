@@ -60,6 +60,13 @@
       "stillOffline": "Continua sem ligação.",
       "lastResortBody": "O Ionexa precisa de conexão para carregar dados novos. As páginas que você já abriu continuam disponíveis no cache deste dispositivo — e o que você estava fazendo está seguro no servidor."
     },
+    "suspended": {
+      "title": "Conta suspensa",
+      "message": "A sua conta foi suspensa por violação dos termos de utilização.",
+      "reason": "Motivo",
+      "contact": "Se acredita que isto é um erro, contacte o suporte.",
+      "signOut": "Terminar sessão"
+    },
     "creditsUnlimited": "Ilimitados",
     "examplesLabel": "Experimenta:",
     "newMessagesBelow": "Nova mensagem abaixo",
@@ -6682,7 +6689,9 @@
       "loading": "A carregar utilizadores...",
       "creditBtn": "Créditos",
       "adjust": "Ajustar",
-      "refundBtn": "Reembolso"
+      "refundBtn": "Reembolso",
+      "suspendBtn": "Suspender",
+      "unsuspendBtn": "Reativar"
     },
     "creditAdjust": {
       "title": "Ajustar créditos",
@@ -6716,6 +6725,25 @@
       "processing": "Processando...",
       "confirmRefund": "Confirmar reembolso",
       "close": "Fechar"
+    },
+    "suspend": {
+      "suspendTitle": "Suspender conta",
+      "unsuspendTitle": "Reativar conta",
+      "suspendWarning": "Este utilizador será impedido de usar a plataforma. Verá um aviso de suspensão no próximo início de sessão.",
+      "unsuspendConfirm": "Tem certeza de que deseja reativar esta conta?",
+      "reason": "Motivo da suspensão",
+      "reasonPlaceholder": "Descreva a violação ou abuso…",
+      "cancel": "Cancelar",
+      "processing": "Processando…",
+      "suspendBtn": "Suspender conta",
+      "unsuspendBtn": "Reativar conta"
     }
+  },
+  "suspended": {
+    "title": "Conta suspensa",
+    "message": "A sua conta foi suspensa devido a uma violação dos nossos termos de serviço.",
+    "reason": "Motivo",
+    "contact": "Se acredita que se trata de um erro, entre em contacto com o suporte.",
+    "signOut": "Terminar sessão"
   }
 }

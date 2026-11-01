@@ -60,6 +60,13 @@
       "stillOffline": "Still no connection.",
       "lastResortBody": "Ionexa needs a connection to load new data. Pages you already opened are still available from this device's cache — and anything you were working on is safe on the server."
     },
+    "suspended": {
+      "title": "Account suspended",
+      "message": "Your account has been suspended for violating our terms of use.",
+      "reason": "Reason",
+      "contact": "If you believe this is a mistake, contact support.",
+      "signOut": "Sign out"
+    },
     "creditsUnlimited": "Unlimited",
     "examplesLabel": "Try:",
     "newMessagesBelow": "New message below",
@@ -6710,7 +6717,9 @@
       "loading": "Loading users...",
       "creditBtn": "Credits",
       "adjust": "Adjust",
-      "refundBtn": "Refund"
+      "refundBtn": "Refund",
+      "suspendBtn": "Suspend",
+      "unsuspendBtn": "Reactivate"
     },
     "creditAdjust": {
       "title": "Adjust credits",
@@ -6744,6 +6753,25 @@
       "processing": "Processing...",
       "confirmRefund": "Confirm refund",
       "close": "Close"
+    },
+    "suspend": {
+      "suspendTitle": "Suspend account",
+      "unsuspendTitle": "Reactivate account",
+      "suspendWarning": "This user will be blocked from using the platform. They will see a suspension notice on their next login.",
+      "unsuspendConfirm": "Are you sure you want to reactivate this account?",
+      "reason": "Reason for suspension",
+      "reasonPlaceholder": "Describe the violation or abuse…",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "suspendBtn": "Suspend account",
+      "unsuspendBtn": "Reactivate account"
     }
+  },
+  "suspended": {
+    "title": "Account suspended",
+    "message": "Your account has been suspended due to a violation of our terms of service.",
+    "reason": "Reason",
+    "contact": "If you believe this is a mistake, please contact support.",
+    "signOut": "Sign out"
   }
 }

@@ -60,6 +60,13 @@
       "stillOffline": "Sigue sin conexión.",
       "lastResortBody": "Ionexa necesita conexión para cargar datos nuevos. Las páginas que ya abriste siguen disponibles desde la caché de este dispositivo — y lo que estabas haciendo está a salvo en el servidor."
     },
+    "suspended": {
+      "title": "Cuenta suspendida",
+      "message": "Su cuenta ha sido suspendida por violar los términos de uso.",
+      "reason": "Motivo",
+      "contact": "Si cree que se trata de un error, contacte con soporte.",
+      "signOut": "Cerrar sesión"
+    },
     "creditsUnlimited": "Ilimitados",
     "examplesLabel": "Prueba:",
     "newMessagesBelow": "Mensaje nuevo abajo",
@@ -6682,7 +6689,9 @@
       "loading": "Cargando usuarios...",
       "creditBtn": "Créditos",
       "adjust": "Ajustar",
-      "refundBtn": "Reembolso"
+      "refundBtn": "Reembolso",
+      "suspendBtn": "Suspender",
+      "unsuspendBtn": "Reactivar"
     },
     "creditAdjust": {
       "title": "Ajustar créditos",
@@ -6716,6 +6725,25 @@
       "processing": "Procesando...",
       "confirmRefund": "Confirmar reembolso",
       "close": "Cerrar"
+    },
+    "suspend": {
+      "suspendTitle": "Suspender cuenta",
+      "unsuspendTitle": "Reactivar cuenta",
+      "suspendWarning": "Este usuario será bloqueado del uso de la plataforma. Verá un aviso de suspensión en su próximo inicio de sesión.",
+      "unsuspendConfirm": "¿Estás seguro de que quieres reactivar esta cuenta?",
+      "reason": "Motivo de la suspensión",
+      "reasonPlaceholder": "Describe la infracción o el abuso…",
+      "cancel": "Cancelar",
+      "processing": "Procesando…",
+      "suspendBtn": "Suspender cuenta",
+      "unsuspendBtn": "Reactivar cuenta"
     }
+  },
+  "suspended": {
+    "title": "Cuenta suspendida",
+    "message": "Tu cuenta ha sido suspendida por una violación de nuestros términos de servicio.",
+    "reason": "Motivo",
+    "contact": "Si crees que se trata de un error, contacta con soporte.",
+    "signOut": "Cerrar sesión"
   }
 }

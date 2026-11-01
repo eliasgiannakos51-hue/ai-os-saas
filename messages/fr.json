@@ -60,6 +60,13 @@
       "stillOffline": "Toujours pas de connexion.",
       "lastResortBody": "Ionexa a besoin d'une connexion pour charger de nouvelles données. Les pages déjà ouvertes restent disponibles depuis le cache de cet appareil — et ce sur quoi vous travailliez est en sécurité sur le serveur."
     },
+    "suspended": {
+      "title": "Compte suspendu",
+      "message": "Votre compte a été suspendu pour violation des conditions d''utilisation.",
+      "reason": "Motif",
+      "contact": "Si vous pensez qu''il s''agit d''une erreur, contactez le support.",
+      "signOut": "Se déconnecter"
+    },
     "creditsUnlimited": "Illimités",
     "examplesLabel": "Essayez :",
     "newMessagesBelow": "Nouveau message en bas",
@@ -6682,7 +6689,9 @@
       "loading": "Chargement des utilisateurs...",
       "creditBtn": "Crédits",
       "adjust": "Ajuster",
-      "refundBtn": "Remboursement"
+      "refundBtn": "Remboursement",
+      "suspendBtn": "Suspendre",
+      "unsuspendBtn": "Réactiver"
     },
     "creditAdjust": {
       "title": "Ajuster les crédits",
@@ -6716,6 +6725,25 @@
       "processing": "Traitement...",
       "confirmRefund": "Confirmer le remboursement",
       "close": "Fermer"
+    },
+    "suspend": {
+      "suspendTitle": "Suspendre le compte",
+      "unsuspendTitle": "Réactiver le compte",
+      "suspendWarning": "Cet utilisateur sera bloqué sur la plateforme. Il verra un avis de suspension lors de sa prochaine connexion.",
+      "unsuspendConfirm": "Êtes-vous sûr de vouloir réactiver ce compte ?",
+      "reason": "Motif de la suspension",
+      "reasonPlaceholder": "Décrivez la violation ou l'abus…",
+      "cancel": "Annuler",
+      "processing": "Traitement…",
+      "suspendBtn": "Suspendre le compte",
+      "unsuspendBtn": "Réactiver le compte"
     }
+  },
+  "suspended": {
+    "title": "Compte suspendu",
+    "message": "Votre compte a été suspendu en raison d’une violation de nos conditions d’utilisation.",
+    "reason": "Motif",
+    "contact": "Si vous pensez qu’il s’agit d’une erreur, veuillez contacter le support.",
+    "signOut": "Se déconnecter"
   }
 }

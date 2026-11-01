@@ -353,7 +353,7 @@ BUILD-SPECS 5.8, ροές 1–3, με ό,τι χρειάζονται από το
 | AD42.1 | Χρήστες: αναζήτηση, πλάνο, credits, χρήση, κόστος, περιθώριο | Οδηγία 42 Κ1 | **έτοιμο** | `/dashboard/admin` + `/api/admin/users` + `admin-dashboard` flag, i18n 10 γλώσσες |
 | AD42.2 | Αλλαγή credits χρήστη, μόνο με λόγο, καταγράφεται | Οδηγία 42 Κ2 | **έτοιμο** | `/api/admin/users/credits` POST + `CreditAdjustModal`, audit logged, i18n 10 γλώσσες |
 | AD42.3 | Επιστροφή χρημάτων μέσω Stripe, μόνο Ηλίας, με επιβεβαίωση | Οδηγία 42 Κ3 | **έτοιμο** | `/api/admin/refund` GET+POST (owner-only via `isOwnerEmail`), `RefundModal` with charge list + confirmation + partial refund, audit logged, i18n 10 γλώσσες |
-| AD42.4 | Αναστολή λογαριασμού για κατάχρηση, με λόγο, ο χρήστης ενημερώνεται | Οδηγία 42 Κ4 | εκκρεμεί | API + email notification |
+| AD42.4 | Αναστολή λογαριασμού για κατάχρηση, με λόγο, ο χρήστης ενημερώνεται | Οδηγία 42 Κ4 | **έτοιμο** | `/api/admin/suspend` POST (admin-only via `isAdminEmail`), `SuspendModal` dual-form, `/suspended` page with reason, dashboard layout redirect, audit logged, i18n 10 γλώσσες |
 | AD42.5 | Κόστος ανά πάροχο ανά ημέρα, όρια, ειδοποίηση αν κοστίζει > πληρώνει | Οδηγία 42 Κ5 | εκκρεμεί | `ai_cost_log` + `daily_ai_spend_tracking` aggregation |
 | AD42.6 | Έσοδα μήνα, νέοι χρήστες, ακυρώσεις | Οδηγία 42 Κ6 | εκκρεμεί | `revenue_snapshots` + `subscription_events` aggregation |
 | AD42.7 | Feature flags | Οδηγία 42 Κ7 | εκκρεμεί | Ήδη υπάρχει στο `/dashboard/system-health` — embed ή link |

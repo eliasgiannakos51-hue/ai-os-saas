@@ -60,6 +60,13 @@
       "stillOffline": "まだ接続できません。",
       "lastResortBody": "新しいデータを読み込むには接続が必要です。すでに開いたページはこの端末のキャッシュから引き続き見られます。作業中の内容はサーバー上に安全に保存されています。"
     },
+    "suspended": {
+      "title": "アカウント停止",
+      "message": "利用規約違反のため、アカウントが停止されました。",
+      "reason": "理由",
+      "contact": "間違いだと思われる場合は、サポートにお問い合わせください。",
+      "signOut": "サインアウト"
+    },
     "creditsUnlimited": "無制限",
     "examplesLabel": "例：",
     "newMessagesBelow": "下に新しいメッセージ",
@@ -6682,7 +6689,9 @@
       "loading": "ユーザーを読み込み中...",
       "creditBtn": "クレジット",
       "adjust": "調整",
-      "refundBtn": "返金"
+      "refundBtn": "返金",
+      "suspendBtn": "停止",
+      "unsuspendBtn": "再開"
     },
     "creditAdjust": {
       "title": "クレジット調整",
@@ -6716,6 +6725,25 @@
       "processing": "処理中...",
       "confirmRefund": "返金を確認",
       "close": "閉じる"
+    },
+    "suspend": {
+      "suspendTitle": "アカウントを停止",
+      "unsuspendTitle": "アカウントを再開",
+      "suspendWarning": "このユーザーはプラットフォームの利用をブロックされます。次回ログイン時に停止通知が表示されます。",
+      "unsuspendConfirm": "このアカウントを再開してよろしいですか？",
+      "reason": "停止理由",
+      "reasonPlaceholder": "違反や不正行為を説明してください…",
+      "cancel": "キャンセル",
+      "processing": "処理中…",
+      "suspendBtn": "アカウントを停止",
+      "unsuspendBtn": "アカウントを再開"
     }
+  },
+  "suspended": {
+    "title": "アカウント停止",
+    "message": "利用規約違反のため、アカウントが停止されました。",
+    "reason": "理由",
+    "contact": "誤りだと思われる場合は、サポートまでお問い合わせください。",
+    "signOut": "ログアウト"
   }
 }

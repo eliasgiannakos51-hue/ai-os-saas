@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { CreditAdjustModal } from "./credit-adjust-modal";
 import { RefundModal } from "./refund-modal";
+import { SuspendModal } from "./suspend-modal";
 
 type UserRow = {
   id: string;
@@ -34,6 +35,7 @@ export function AdminUsersTab() {
   const [total, setTotal] = useState(0);
   const [adjustTarget, setAdjustTarget] = useState<UserRow | null>(null);
   const [refundTarget, setRefundTarget] = useState<UserRow | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<UserRow | null>(null);
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(query), 350);
@@ -154,6 +156,16 @@ export function AdminUsersTab() {
                       >
                         {t("refundBtn")}
                       </button>
+                      <button
+                        onClick={() => setSuspendTarget(u)}
+                        className={`rounded border px-2 py-0.5 text-xs ${
+                          u.suspended
+                            ? "border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
+                            : "border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+                        }`}
+                      >
+                        {u.suspended ? t("unsuspendBtn") : t("suspendBtn")}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -209,6 +221,18 @@ export function AdminUsersTab() {
           onClose={() => setRefundTarget(null)}
           onDone={() => {
             setRefundTarget(null);
+            fetchUsers();
+          }}
+        />
+      )}
+      {suspendTarget && (
+        <SuspendModal
+          userId={suspendTarget.id}
+          email={suspendTarget.email}
+          isSuspended={suspendTarget.suspended}
+          onClose={() => setSuspendTarget(null)}
+          onDone={() => {
+            setSuspendTarget(null);
             fetchUsers();
           }}
         />

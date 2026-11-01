@@ -60,6 +60,13 @@
       "stillOffline": "仍然没有连接。",
       "lastResortBody": "Ionexa 需要联网才能加载新数据。你已经打开过的页面仍可从本机缓存中查看，正在处理的内容也安全地保存在服务器上。"
     },
+    "suspended": {
+      "title": "账户已暂停",
+      "message": "您的账户因违反使用条款而被暂停。",
+      "reason": "原因",
+      "contact": "如果您认为这是一个错误，请联系客服。",
+      "signOut": "退出登录"
+    },
     "creditsUnlimited": "无限制",
     "examplesLabel": "试试：",
     "newMessagesBelow": "下方有新消息",
@@ -6682,7 +6689,9 @@
       "loading": "正在加载用户...",
       "creditBtn": "积分",
       "adjust": "调整",
-      "refundBtn": "退款"
+      "refundBtn": "退款",
+      "suspendBtn": "暂停",
+      "unsuspendBtn": "恢复"
     },
     "creditAdjust": {
       "title": "调整积分",
@@ -6716,6 +6725,25 @@
       "processing": "处理中...",
       "confirmRefund": "确认退款",
       "close": "关闭"
+    },
+    "suspend": {
+      "suspendTitle": "暂停账户",
+      "unsuspendTitle": "恢复账户",
+      "suspendWarning": "此用户将被禁止使用平台。他们下次登录时会看到暂停通知。",
+      "unsuspendConfirm": "确定要恢复此账户吗？",
+      "reason": "暂停原因",
+      "reasonPlaceholder": "描述违规或滥用行为…",
+      "cancel": "取消",
+      "processing": "处理中…",
+      "suspendBtn": "暂停账户",
+      "unsuspendBtn": "恢复账户"
     }
+  },
+  "suspended": {
+    "title": "账户已暂停",
+    "message": "由于违反服务条款，您的账户已被暂停。",
+    "reason": "原因",
+    "contact": "如果您认为这是一个错误，请联系客服支持。",
+    "signOut": "退出登录"
   }
 }

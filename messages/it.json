@@ -60,6 +60,13 @@
       "stillOffline": "Ancora nessuna connessione.",
       "lastResortBody": "Ionexa ha bisogno di una connessione per caricare nuovi dati. Le pagine che hai già aperto restano disponibili dalla cache di questo dispositivo — e ciò a cui stavi lavorando è al sicuro sul server."
     },
+    "suspended": {
+      "title": "Account sospeso",
+      "message": "Il tuo account è stato sospeso per violazione dei termini d'uso.",
+      "reason": "Motivo",
+      "contact": "Se ritieni che si tratti di un errore, contatta il supporto.",
+      "signOut": "Esci"
+    },
     "creditsUnlimited": "Illimitati",
     "examplesLabel": "Prova:",
     "newMessagesBelow": "Nuovo messaggio in basso",
@@ -6682,7 +6689,9 @@
       "loading": "Caricamento utenti...",
       "creditBtn": "Crediti",
       "adjust": "Regola",
-      "refundBtn": "Rimborso"
+      "refundBtn": "Rimborso",
+      "suspendBtn": "Sospendi",
+      "unsuspendBtn": "Riattiva"
     },
     "creditAdjust": {
       "title": "Modifica crediti",
@@ -6716,6 +6725,25 @@
       "processing": "Elaborazione...",
       "confirmRefund": "Conferma rimborso",
       "close": "Chiudi"
+    },
+    "suspend": {
+      "suspendTitle": "Sospendi account",
+      "unsuspendTitle": "Riattiva account",
+      "suspendWarning": "Questo utente verrà bloccato dall'uso della piattaforma. Vedrà un avviso di sospensione al prossimo accesso.",
+      "unsuspendConfirm": "Sei sicuro di voler riattivare questo account?",
+      "reason": "Motivo della sospensione",
+      "reasonPlaceholder": "Descrivi la violazione o l'abuso…",
+      "cancel": "Annulla",
+      "processing": "Elaborazione…",
+      "suspendBtn": "Sospendi account",
+      "unsuspendBtn": "Riattiva account"
     }
+  },
+  "suspended": {
+    "title": "Account sospeso",
+    "message": "Il tuo account è stato sospeso per violazione dei nostri termini di servizio.",
+    "reason": "Motivo",
+    "contact": "Se ritieni che si tratti di un errore, contatta l’assistenza.",
+    "signOut": "Esci"
   }
 }

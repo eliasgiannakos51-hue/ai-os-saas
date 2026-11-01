@@ -60,6 +60,13 @@
       "stillOffline": "Immer noch keine Verbindung.",
       "lastResortBody": "Ionexa braucht eine Verbindung, um neue Daten zu laden. Bereits geöffnete Seiten sind weiterhin aus dem Cache dieses Geräts verfügbar — und woran du gearbeitet hast, liegt sicher auf dem Server."
     },
+    "suspended": {
+      "title": "Konto gesperrt",
+      "message": "Ihr Konto wurde wegen Verstoßes gegen die Nutzungsbedingungen gesperrt.",
+      "reason": "Grund",
+      "contact": "Falls Sie glauben, dass es sich um einen Fehler handelt, kontaktieren Sie den Support.",
+      "signOut": "Abmelden"
+    },
     "creditsUnlimited": "Unbegrenzt",
     "examplesLabel": "Probier:",
     "newMessagesBelow": "Neue Nachricht unten",
@@ -6682,7 +6689,9 @@
       "loading": "Benutzer werden geladen...",
       "creditBtn": "Guthaben",
       "adjust": "Anpassen",
-      "refundBtn": "Erstattung"
+      "refundBtn": "Erstattung",
+      "suspendBtn": "Sperren",
+      "unsuspendBtn": "Reaktivieren"
     },
     "creditAdjust": {
       "title": "Guthaben anpassen",
@@ -6716,6 +6725,25 @@
       "processing": "Verarbeitung...",
       "confirmRefund": "Erstattung bestätigen",
       "close": "Schließen"
+    },
+    "suspend": {
+      "suspendTitle": "Konto sperren",
+      "unsuspendTitle": "Konto reaktivieren",
+      "suspendWarning": "Dieser Benutzer wird von der Nutzung der Plattform ausgesperrt. Er sieht einen Sperrhinweis bei der nächsten Anmeldung.",
+      "unsuspendConfirm": "Sind Sie sicher, dass Sie dieses Konto reaktivieren möchten?",
+      "reason": "Grund der Sperrung",
+      "reasonPlaceholder": "Beschreiben Sie den Verstoß oder Missbrauch…",
+      "cancel": "Abbrechen",
+      "processing": "Verarbeitung…",
+      "suspendBtn": "Konto sperren",
+      "unsuspendBtn": "Konto reaktivieren"
     }
+  },
+  "suspended": {
+    "title": "Konto gesperrt",
+    "message": "Ihr Konto wurde wegen eines Verstoßes gegen unsere Nutzungsbedingungen gesperrt.",
+    "reason": "Grund",
+    "contact": "Wenn Sie glauben, dass es sich um einen Fehler handelt, wenden Sie sich bitte an den Support.",
+    "signOut": "Abmelden"
   }
 }

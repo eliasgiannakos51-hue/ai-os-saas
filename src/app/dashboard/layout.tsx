@@ -49,6 +49,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  if (user.user_metadata?.suspended === true) {
+    redirect("/suspended");
+  }
+
   // Fire-and-forget: if this email has a pending team invite, join it now.
   // Any effect lands on the user's *next* request (this one already fetched
   // `user` above), which is fine for a low-frequency, best-effort check.

@@ -3,6 +3,32 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01η (οδηγία 42 — Κομμάτι 4: αναστολή λογαριασμού) ✅
+
+Αλλαγές:
+- `src/app/api/admin/suspend/route.ts`: POST endpoint — suspend/unsuspend.
+  Guard: `isAdminEmail` + `isFeatureOn("admin-dashboard")`. Δεν επιτρέπεται
+  σε admin (cannot_suspend_admin). Γράφει στο `user_metadata` (suspended,
+  suspended_reason, suspended_at, suspended_by). Audit logged ως
+  `"suspend_user"` / `"unsuspend_user"`.
+- `src/components/admin/suspend-modal.tsx`: modal — suspend με reason textarea
+  + red warning, ή unsuspend με green button. Δύο μορφές ανάλογα με τo
+  τρέχον status.
+- `src/components/admin/users-tab.tsx`: "Suspend"/"Reactivate" button ανά
+  γραμμή, χρωματικά (κόκκινο/πράσινο).
+- `src/app/dashboard/layout.tsx`: redirect στο `/suspended` αν
+  `user_metadata.suspended === true`.
+- `src/app/suspended/page.tsx` + `src/components/suspended-notice.tsx`: σελίδα
+  ειδοποίησης — εικονίδιο, λόγος, link to sign out. Ο χρήστης βλέπει τον
+  λόγο αναστολής.
+- `messages/*.json` (10 γλώσσες): `adminDashboard.suspend.*` block (10 keys),
+  `adminDashboard.users.suspendBtn` + `unsuspendBtn`, top-level `suspended.*`
+  block (5 keys).
+
+Δοκιμές: `npx tsc --noEmit` ALL PASS.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-01ζ (οδηγία 42 — Κομμάτι 3: επιστροφή χρημάτων Stripe) ✅
 
 Αλλαγές:

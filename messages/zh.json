@@ -6737,6 +6737,28 @@
       "processing": "处理中…",
       "suspendBtn": "暂停账户",
       "unsuspendBtn": "恢复账户"
+    },
+    "costs": {
+      "loading": "正在加载成本数据...",
+      "noData": "没有可用的成本数据。",
+      "period": "时段",
+      "days": "天",
+      "totalCost": "总成本",
+      "totalCalls": "总调用次数",
+      "callsLabel": "次调用",
+      "flaggedTitle": "成本超过付费的用户",
+      "flaggedEmail": "邮箱",
+      "flaggedCost": "成本",
+      "flaggedPays": "付费",
+      "flaggedMargin": "利润率",
+      "flaggedCalls": "调用次数",
+      "byProvider": "按供应商分列成本",
+      "provider": "供应商",
+      "cost": "成本",
+      "share": "占比",
+      "dailyBreakdown": "每日明细",
+      "date": "日期",
+      "dayTotal": "合计"
     }
   },
   "suspended": {

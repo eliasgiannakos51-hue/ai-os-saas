@@ -9,6 +9,7 @@ export type AdminAction =
   | "refund"
   | "suspend_user"
   | "unsuspend_user"
+  | "view_costs"
   | "toggle_flag"
   | "view_reported_content";
 

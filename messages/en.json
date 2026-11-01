@@ -6765,6 +6765,28 @@
       "processing": "Processing…",
       "suspendBtn": "Suspend account",
       "unsuspendBtn": "Reactivate account"
+    },
+    "costs": {
+      "loading": "Loading cost data...",
+      "noData": "No cost data available.",
+      "period": "Period",
+      "days": "days",
+      "totalCost": "Total cost",
+      "totalCalls": "Total calls",
+      "callsLabel": "calls",
+      "flaggedTitle": "Users costing more than they pay",
+      "flaggedEmail": "Email",
+      "flaggedCost": "Cost",
+      "flaggedPays": "Pays",
+      "flaggedMargin": "Margin",
+      "flaggedCalls": "Calls",
+      "byProvider": "Cost by provider",
+      "provider": "Provider",
+      "cost": "Cost",
+      "share": "Share",
+      "dailyBreakdown": "Daily breakdown",
+      "date": "Date",
+      "dayTotal": "Total"
     }
   },
   "suspended": {

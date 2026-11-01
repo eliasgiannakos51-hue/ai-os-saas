@@ -9,6 +9,8 @@ import { isFeatureOn } from "@/lib/flags/flags";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { getTranslations } from "next-intl/server";
 import { AdminUsersTab } from "@/components/admin/users-tab";
+import { AdminCostsTab } from "@/components/admin/costs-tab";
+import { AdminTabs } from "@/components/admin/admin-tabs";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("pageTitle.admin");
@@ -33,7 +35,12 @@ export default async function AdminDashboardPage() {
       <PageHeader icon={Shield} title={t("title")} description={t("description")} />
 
       <div className="mt-6">
-        <AdminUsersTab />
+        <AdminTabs
+          tabs={[
+            { key: "users", label: t("tabs.users"), content: <AdminUsersTab /> },
+            { key: "costs", label: t("tabs.costs"), content: <AdminCostsTab /> },
+          ]}
+        />
       </div>
     </div>
   );

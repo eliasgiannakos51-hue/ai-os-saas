@@ -6765,6 +6765,28 @@
       "processing": "جارٍ المعالجة…",
       "suspendBtn": "تعليق الحساب",
       "unsuspendBtn": "إعادة تفعيل الحساب"
+    },
+    "costs": {
+      "loading": "جارٍ تحميل بيانات التكلفة...",
+      "noData": "لا تتوفر بيانات تكلفة.",
+      "period": "الفترة",
+      "days": "أيام",
+      "totalCost": "التكلفة الإجمالية",
+      "totalCalls": "إجمالي الاستدعاءات",
+      "callsLabel": "استدعاءات",
+      "flaggedTitle": "مستخدمون يكلفون أكثر مما يدفعون",
+      "flaggedEmail": "البريد الإلكتروني",
+      "flaggedCost": "التكلفة",
+      "flaggedPays": "يدفع",
+      "flaggedMargin": "الهامش",
+      "flaggedCalls": "الاستدعاءات",
+      "byProvider": "التكلفة حسب المزود",
+      "provider": "المزود",
+      "cost": "التكلفة",
+      "share": "الحصة",
+      "dailyBreakdown": "التفصيل اليومي",
+      "date": "التاريخ",
+      "dayTotal": "الإجمالي"
     }
   },
   "suspended": {

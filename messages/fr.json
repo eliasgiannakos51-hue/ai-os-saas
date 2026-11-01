@@ -6737,6 +6737,28 @@
       "processing": "Traitement…",
       "suspendBtn": "Suspendre le compte",
       "unsuspendBtn": "Réactiver le compte"
+    },
+    "costs": {
+      "loading": "Chargement des données de coûts...",
+      "noData": "Aucune donnée de coûts disponible.",
+      "period": "Période",
+      "days": "jours",
+      "totalCost": "Coût total",
+      "totalCalls": "Total des appels",
+      "callsLabel": "appels",
+      "flaggedTitle": "Utilisateurs qui coûtent plus qu'ils ne paient",
+      "flaggedEmail": "E-mail",
+      "flaggedCost": "Coût",
+      "flaggedPays": "Paie",
+      "flaggedMargin": "Marge",
+      "flaggedCalls": "Appels",
+      "byProvider": "Coût par fournisseur",
+      "provider": "Fournisseur",
+      "cost": "Coût",
+      "share": "Part",
+      "dailyBreakdown": "Détail journalier",
+      "date": "Date",
+      "dayTotal": "Total"
     }
   },
   "suspended": {

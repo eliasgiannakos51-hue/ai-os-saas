@@ -6737,6 +6737,28 @@
       "processing": "処理中…",
       "suspendBtn": "アカウントを停止",
       "unsuspendBtn": "アカウントを再開"
+    },
+    "costs": {
+      "loading": "コストデータを読み込み中...",
+      "noData": "コストデータがありません。",
+      "period": "期間",
+      "days": "日間",
+      "totalCost": "合計コスト",
+      "totalCalls": "合計呼び出し数",
+      "callsLabel": "回",
+      "flaggedTitle": "支払額を超えるコストのユーザー",
+      "flaggedEmail": "メール",
+      "flaggedCost": "コスト",
+      "flaggedPays": "支払額",
+      "flaggedMargin": "マージン",
+      "flaggedCalls": "呼び出し数",
+      "byProvider": "プロバイダー別コスト",
+      "provider": "プロバイダー",
+      "cost": "コスト",
+      "share": "割合",
+      "dailyBreakdown": "日別内訳",
+      "date": "日付",
+      "dayTotal": "合計"
     }
   },
   "suspended": {

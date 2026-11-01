@@ -3,6 +3,48 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01θ (οδηγία 42 — Κομμάτι 5: κόστος ανά πάροχο ανά ημέρα) ✅
+
+Αλλαγές:
+- `src/app/api/admin/costs/route.ts`: GET endpoint — κόστος ανά πάροχο ανά
+  ημέρα (τελευταίες N ημέρες, default 30, max 90). Guard: `isAdminEmail` +
+  `isFeatureOn("admin-dashboard")`. Audit logged ως `"view_costs"`. Πάροχος
+  εξάγεται από `metadata.modelBreakdown` model keys (claude-* → anthropic,
+  openai/* → openai, google/* → google, groq/* → groq). Επιστρέφει:
+  `dailyProviderCosts`, `providerTotals`, `flaggedUsers` (χρήστες που
+  κοστίζουν > πληρώνουν, πάτωμα €0.50), `totalCostEur`, `totalCalls`.
+- `src/components/admin/costs-tab.tsx`: client component — period selector
+  (7/14/30/60/90 ημέρες), summary cards (total cost, total calls, top 2
+  providers), flagged users alert (κόκκινο, AlertTriangle), provider totals
+  πίνακας, daily breakdown πίνακας (scrollable).
+- `src/components/admin/admin-tabs.tsx`: γενικό tab switcher component.
+- `src/app/dashboard/admin/page.tsx`: tabbed layout — Users + Costs.
+- `src/lib/admin/audit-log.ts`: `"view_costs"` στο `AdminAction` union.
+- `messages/*.json` (10 γλώσσες): `adminDashboard.costs.*` block (20 keys).
+
+Δοκιμές: `npx tsc --noEmit` ALL PASS.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-01θ (οδηγία 42 — Κομμάτι 5: κόστος ανά πάροχο ανά ημέρα) ✅
+
+Αλλαγές:
+- `src/app/api/admin/costs/route.ts`: GET endpoint — κόστος ανά πάροχο ανά
+  ημέρα. Guard: `isAdminEmail` + `isFeatureOn("admin-dashboard")`. Διαβάζει
+  `ai_cost_log`, σπάει τo κόστος ανά πάροχο μέσω `metadata.modelBreakdown`
+  (proportional share), flagged users (κόστος > μηνιαία τιμή, minimum €0.50).
+  Audit logged ως `"view_costs"`.
+- `src/components/admin/costs-tab.tsx`: client component — period selector
+  (7/14/30/60/90 ημέρες), summary cards, flagged users warning table,
+  provider totals table, daily breakdown matrix.
+- `src/components/admin/admin-tabs.tsx`: generic tab component (Users, Costs).
+- `src/app/dashboard/admin/page.tsx`: AdminTabs αντί σκέτου AdminUsersTab.
+- `messages/*.json` (10 γλώσσες): `adminDashboard.costs.*` block (22 keys).
+
+Δοκιμές: `npx tsc --noEmit` ALL PASS.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-01η (οδηγία 42 — Κομμάτι 4: αναστολή λογαριασμού) ✅
 
 Αλλαγές:

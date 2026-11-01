@@ -6765,6 +6765,28 @@
       "processing": "Επεξεργασία…",
       "suspendBtn": "Αναστολή λογαριασμού",
       "unsuspendBtn": "Επανενεργοποίηση λογαριασμού"
+    },
+    "costs": {
+      "loading": "Φόρτωση δεδομένων κόστους...",
+      "noData": "Δεν υπάρχουν δεδομένα κόστους.",
+      "period": "Περίοδος",
+      "days": "ημέρες",
+      "totalCost": "Συνολικό κόστος",
+      "totalCalls": "Συνολικές κλήσεις",
+      "callsLabel": "κλήσεις",
+      "flaggedTitle": "Χρήστες που κοστίζουν περισσότερο από ό,τι πληρώνουν",
+      "flaggedEmail": "Email",
+      "flaggedCost": "Κόστος",
+      "flaggedPays": "Πληρώνει",
+      "flaggedMargin": "Περιθώριο",
+      "flaggedCalls": "Κλήσεις",
+      "byProvider": "Κόστος ανά πάροχο",
+      "provider": "Πάροχος",
+      "cost": "Κόστος",
+      "share": "Μερίδιο",
+      "dailyBreakdown": "Ημερήσια ανάλυση",
+      "date": "Ημερομηνία",
+      "dayTotal": "Σύνολο"
     }
   },
   "suspended": {

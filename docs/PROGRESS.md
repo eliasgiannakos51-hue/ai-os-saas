@@ -3,18 +3,23 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
-## 2026-11-01γ (οδηγία 41 — βοήθεια, Κομμάτι 1: ένα άρθρο ανά εργαλείο)
+## 2026-11-01γ (οδηγία 41 — βοήθεια, Κομμάτι 1: ένα άρθρο ανά εργαλείο) ✅
 
 Migration `20261109000000_help_articles_tools.sql`: 44 νέες γραμμές (22 EN +
 22 EL), κατηγορία `tools`, UPSERT pattern ίδιο με το υπάρχον seed. Κάθε
 άρθρο γραμμένο «από πώς δουλεύει πραγματικά» — τα Coming Soon εργαλεία
 λένε ρητά ότι έρχονται σύντομα. Κανένας αριθμός στα body (τιμές, credits,
-επιτρεπόμενα) — ο κανόνας NO NUMBERS του knowledge base τηρείται, ο
-generator αρνείται body με ψηφία.
+επιτρεπόμενα) — ο κανόνας NO NUMBERS του knowledge base τηρείται.
 
-Υποστηρικτικές αλλαγές:
-- `src/app/help/page.tsx`: «tools» στο CATEGORY_ORDER
+Αλλαγές:
+- `supabase/migrations/20261109000000_help_articles_tools.sql`: 44 UPSERT rows
+- `src/lib/flags/flags.ts`: νέος διακόπτης `help-tool-articles`
+- `src/app/help/page.tsx`: import `isFeatureOn`, φιλτράρει τα tools articles
+  πίσω από τον διακόπτη (ανώνυμος χρήστης → `null` → staff → off)
 - `messages/*.json` (10 γλώσσες): `helpCentre.categories.tools`
+
+Δοκιμές: `feature-flags.test.mjs` ALL PASS (20/20), `migration-undo.test.mjs`
+ALL PASS (33/33).
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: `20261109000000_help_articles_tools.sql`**
 

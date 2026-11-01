@@ -3,6 +3,22 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01β (οδηγία 40 — κινητό, Κομμάτι 1: σύγκριση τεχνολογίας)
+
+Σύγκριση Capacitor (WebView wrapper) vs Expo (React Native).
+
+**Πρόταση: Capacitor.** Λόγος: ~95% κοινός κώδικας (vs ~20% με Expo), 1-2
+εβδομάδες αντί μηνών, 0 € licenses, κανένα rewrite. Το Ionexa ήδη έχει
+ώριμο PWA — manifest, service worker, push, share target, camera/mic, install
+invitation, offline shell. Capacitor τυλίγει αυτό ακριβώς σε native shell.
+
+Κάθε κομμάτι που ακολουθεί (push, share, camera, biometric, IAP, store)
+αντιστοιχίζεται σε Capacitor plugin ή τρέχει ήδη μέσω WebView.
+
+Αρχείο: `docs/MOBILE-TECHNOLOGY.md`.
+
+Καμία εγκεκριμένη εικόνα δεν έφτασε — αναφέρθηκαν αλλά δεν επισυνάφθηκαν.
+
 ## 2026-10-31ι (οδηγία 36 — ΑΣ2-1.1: έρευνα μόνο, μπλοκαρισμένο σε 3 αποφάσεις)
 
 Τελευταίο από τα τέσσερα σοβαρά. Σε αντίθεση με τα άλλα τρία (ήδη

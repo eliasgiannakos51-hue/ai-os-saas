@@ -5512,7 +5512,8 @@
     "contactDescription": "Contactez l'équipe d'Ionexa AI.",
     "verifyEmail": "Confirmez votre e-mail",
     "verifyEmailDescription": "Confirmez l’adresse e-mail de votre compte Ionexa AI.",
-    "chats": "Discussions"
+    "chats": "Discussions",
+    "admin": "Administration"
   },
   "errors": {
     "retry": "Réessayer",
@@ -6654,5 +6655,31 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "Seules les {cap} requêtes les plus récentes ont été lues ; les chiffres portent sur celles-ci.",
     "empty": "Aucune requête facturée sur cette période."
+  },
+  "adminDashboard": {
+    "title": "Administration",
+    "description": "Gestion des utilisateurs, coûts, revenus et journal des actions. Réservé au propriétaire.",
+    "tabs": {
+      "users": "Utilisateurs",
+      "costs": "Coûts",
+      "revenue": "Revenus",
+      "flags": "Interrupteurs",
+      "reports": "Rapports",
+      "auditLog": "Journal"
+    },
+    "users": {
+      "search": "Rechercher par email ou nom...",
+      "email": "Email",
+      "name": "Nom",
+      "plan": "Forfait",
+      "credits": "Crédits",
+      "cost30d": "Coût (30j)",
+      "margin": "Marge",
+      "calls": "Appels",
+      "lastSignIn": "Dernière connexion",
+      "suspended": "Suspendu",
+      "noUsers": "Aucun utilisateur trouvé.",
+      "loading": "Chargement des utilisateurs..."
+    }
   }
 }

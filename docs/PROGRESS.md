@@ -3,6 +3,57 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01δ (οδηγία 42 — σελίδα διαχείρισης, Κομμάτι 9+1: audit log + users) ✅
+
+Θεμέλιο: Κομμάτι 9 (audit log) χτίστηκε πρώτο γιατί όλα τα υπόλοιπα
+κομμάτια χρειάζονται καταγραφή. Κομμάτι 1 (users tab) πάνω σε αυτό.
+
+Αλλαγές:
+- `supabase/migrations/20261110000000_admin_audit_log.sql`: πίνακας
+  `admin_audit_log` (id, admin_email, action, target_user_id, detail, created_at),
+  3 indexes, REVOKE authenticated+anon (service-role μόνο). Undo: `DROP TABLE`.
+- `src/lib/admin/audit-log.ts`: `logAdminAction()` + `readAuditLog()` +
+  τύποι `AdminAction`, `AuditLogEntry`.
+- `src/lib/flags/flags.ts`: νέος διακόπτης `admin-dashboard` (21ος).
+- `src/app/dashboard/admin/page.tsx`: server component, auth guards
+  (`getCurrentUser` → `isAdminEmail` → `isFeatureOn("admin-dashboard")`).
+- `src/app/api/admin/users/route.ts`: GET endpoint — `listUsers` + join
+  `user_credits` (plan tier, credits) + join `ai_cost_log` (30d cost) +
+  margin = monthlyPrice / costEur. Audit logged.
+- `src/components/admin/users-tab.tsx`: client component — search (debounce
+  350ms), πίνακας (email, name, plan badge, credits, cost 30d, margin red
+  <4x, calls, last sign-in, suspended badge), pagination 25/page.
+- `messages/*.json` (10 γλώσσες): `pageTitle.admin` + `adminDashboard.*` block.
+
+Δοκιμές: `npx tsc --noEmit` ALL PASS, `feature-flags.test.mjs` 21 flags.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: `20261110000000_admin_audit_log.sql`**
+
+## 2026-11-01δ (οδηγία 42 — σελίδα διαχείρισης, Κομμάτι 1: χρήστες + Κομμάτι 9: audit log) σε εξέλιξη
+
+Κομμάτι 9 (audit log) χτίστηκε πρώτο γιατί κάθε άλλο κομμάτι τον χρειάζεται.
+Κομμάτι 1 (users tab) ακολούθησε αμέσως.
+
+Αλλαγές:
+- `supabase/migrations/20261110000000_admin_audit_log.sql`: πίνακας `admin_audit_log` (admin_email, action, target_user_id, detail jsonb), 3 indexes, REVOKE authenticated/anon
+- `src/lib/admin/audit-log.ts`: `logAdminAction()` + `readAuditLog()` + τύποι
+- `src/lib/flags/flags.ts`: νέος flag `admin-dashboard` (audience: staff)
+- `src/app/api/admin/users/route.ts`: GET endpoint — auth guards + isFeatureOn + paginated listUsers + user_credits + ai_cost_log (30d) + margin
+- `src/app/dashboard/admin/page.tsx`: server component — auth, flag gate, PageHeader
+- `src/components/admin/users-tab.tsx`: client component — αναζήτηση, debounce, πίνακας (email, name, plan, credits, cost, margin, calls, lastSignIn, suspended), pagination
+- `messages/*.json` (10 γλώσσες): `adminDashboard` block + `pageTitle.admin`
+
+Plan tier source of truth: `user_credits.plan_tier`, NOT `auth.users.raw_user_meta_data`.
+Margin: `monthlyPrice / costEur30d` — κόκκινο αν < 4× (MARGIN_TARGET).
+
+**Εκκρεμεί:** 2FA υποχρεωτικό (ΑΣ2-1.1 blocked σε αποφάσεις). Μέχρι τότε το flag μένει στο "staff".
+
+`npm run gates`: (θα τρέξουν πλήρη πριν το push)
+`feature-flags.test.mjs`: 20/20 PASS (21 flags, κάθε ένας διαβάζεται)
+TypeScript: clean
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261110000000_admin_audit_log.sql**
+
 ## 2026-11-01γ (οδηγία 41 — βοήθεια, Κομμάτι 1: ένα άρθρο ανά εργαλείο) ✅
 
 Migration `20261109000000_help_articles_tools.sql`: 44 νέες γραμμές (22 EN +

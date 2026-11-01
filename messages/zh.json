@@ -5512,7 +5512,8 @@
     "contactDescription": "与 Ionexa AI 团队取得联系。",
     "verifyEmail": "确认邮箱",
     "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。",
-    "chats": "对话"
+    "chats": "对话",
+    "admin": "管理面板"
   },
   "errors": {
     "retry": "重试",
@@ -6654,5 +6655,31 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "只读取了最新的 {cap} 个请求；数字针对这些请求。",
     "empty": "此时间段内没有已结算的请求。"
+  },
+  "adminDashboard": {
+    "title": "管理",
+    "description": "用户管理、成本、收入和操作日志。仅限所有者。",
+    "tabs": {
+      "users": "用户",
+      "costs": "成本",
+      "revenue": "收入",
+      "flags": "开关",
+      "reports": "报告",
+      "auditLog": "操作日志"
+    },
+    "users": {
+      "search": "按邮箱或姓名搜索...",
+      "email": "邮箱",
+      "name": "姓名",
+      "plan": "方案",
+      "credits": "积分",
+      "cost30d": "成本（30天）",
+      "margin": "利润率",
+      "calls": "调用次数",
+      "lastSignIn": "最后登录",
+      "suspended": "已暂停",
+      "noUsers": "未找到用户。",
+      "loading": "正在加载用户..."
+    }
   }
 }

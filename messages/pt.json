@@ -5512,7 +5512,8 @@
     "contactDescription": "Fale com a equipa do Ionexa AI.",
     "verifyEmail": "Confirmar email",
     "verifyEmailDescription": "Confirme o endereço de email da sua conta Ionexa AI.",
-    "chats": "Conversas"
+    "chats": "Conversas",
+    "admin": "Administração"
   },
   "errors": {
     "retry": "Tentar de novo",
@@ -6654,5 +6655,31 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "Só foram lidos os {cap} pedidos mais recentes; os números referem-se a esses.",
     "empty": "Nenhum pedido cobrado neste período."
+  },
+  "adminDashboard": {
+    "title": "Administração",
+    "description": "Gestão de utilizadores, custos, receitas e registo de ações. Apenas para o proprietário.",
+    "tabs": {
+      "users": "Utilizadores",
+      "costs": "Custos",
+      "revenue": "Receitas",
+      "flags": "Interruptores",
+      "reports": "Relatórios",
+      "auditLog": "Registo"
+    },
+    "users": {
+      "search": "Pesquisar por email ou nome...",
+      "email": "Email",
+      "name": "Nome",
+      "plan": "Plano",
+      "credits": "Créditos",
+      "cost30d": "Custo (30d)",
+      "margin": "Margem",
+      "calls": "Chamadas",
+      "lastSignIn": "Último acesso",
+      "suspended": "Suspenso",
+      "noUsers": "Nenhum utilizador encontrado.",
+      "loading": "A carregar utilizadores..."
+    }
   }
 }

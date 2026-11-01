@@ -5512,7 +5512,8 @@
     "contactDescription": "Ionexa AI チームにご連絡ください。",
     "verifyEmail": "メールアドレスの確認",
     "verifyEmailDescription": "Ionexa AI アカウントのメールアドレスを確認します。",
-    "chats": "チャット"
+    "chats": "チャット",
+    "admin": "管理画面"
   },
   "errors": {
     "retry": "もう一度試す",
@@ -6654,5 +6655,31 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "最新の {cap} 件のみ読み込みました。数値はそれらが対象です。",
     "empty": "この期間に課金されたリクエストはありません。"
+  },
+  "adminDashboard": {
+    "title": "管理",
+    "description": "ユーザー管理、コスト、収益、操作ログ。オーナー専用。",
+    "tabs": {
+      "users": "ユーザー",
+      "costs": "コスト",
+      "revenue": "収益",
+      "flags": "スイッチ",
+      "reports": "レポート",
+      "auditLog": "操作ログ"
+    },
+    "users": {
+      "search": "メールまたは名前で検索...",
+      "email": "メール",
+      "name": "名前",
+      "plan": "プラン",
+      "credits": "クレジット",
+      "cost30d": "コスト（30日）",
+      "margin": "マージン",
+      "calls": "呼び出し",
+      "lastSignIn": "最終ログイン",
+      "suspended": "停止中",
+      "noUsers": "ユーザーが見つかりません。",
+      "loading": "ユーザーを読み込み中..."
+    }
   }
 }

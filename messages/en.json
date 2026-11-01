@@ -5506,6 +5506,7 @@
     }
   },
   "pageTitle": {
+    "admin": "Admin",
     "document": "Document",
     "systemHealth": "System Health",
     "onboarding": "Get started",
@@ -5532,7 +5533,8 @@
     "contactDescription": "Get in touch with the Ionexa AI team.",
     "verifyEmail": "Confirm Your Email",
     "verifyEmailDescription": "Confirm the email address of your Ionexa AI account.",
-    "chats": "Chats"
+    "chats": "Chats",
+    "admin": "Admin"
   },
   "errors": {
     "retry": "Try again",
@@ -6682,5 +6684,31 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "Only the newest {cap} requests were read; the figures cover those.",
     "empty": "No settled requests in this period."
+  },
+  "adminDashboard": {
+    "title": "Admin",
+    "description": "User management, costs, revenue and audit log. Owner only.",
+    "tabs": {
+      "users": "Users",
+      "costs": "Costs",
+      "revenue": "Revenue",
+      "flags": "Flags",
+      "reports": "Reports",
+      "auditLog": "Audit log"
+    },
+    "users": {
+      "search": "Search by email or name...",
+      "email": "Email",
+      "name": "Name",
+      "plan": "Plan",
+      "credits": "Credits",
+      "cost30d": "Cost (30d)",
+      "margin": "Margin",
+      "calls": "Calls",
+      "lastSignIn": "Last sign-in",
+      "suspended": "Suspended",
+      "noUsers": "No users found.",
+      "loading": "Loading users..."
+    }
   }
 }

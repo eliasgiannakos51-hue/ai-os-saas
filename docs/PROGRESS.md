@@ -3,6 +3,28 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01ζ (οδηγία 42 — Κομμάτι 3: επιστροφή χρημάτων Stripe) ✅
+
+Αλλαγές:
+- `src/lib/auth/admin-emails.ts`: νέα `isOwnerEmail()` — ελέγχει αν το email
+  είναι ο πρώτος στο `ADMIN_EMAILS` (ο ιδιοκτήτης). Χρησιμοποιείται μόνο
+  για refund, πιο αυστηρό από `isAdminEmail`.
+- `src/app/api/admin/refund/route.ts`: GET (λίστα charges μέσω
+  `stripe.charges.list`) + POST (refund μέσω `stripe.refunds.create`).
+  Guard: `isOwnerEmail` + `isFeatureOn("admin-dashboard")`. Υποστηρίζει
+  full + partial refund. Audit logged ως `"refund"`.
+- `src/components/admin/refund-modal.tsx`: modal — φορτώνει charges,
+  επιλογή charge, confirmation step με warning, partial refund checkbox,
+  reason textarea. Κόκκινο κουμπί "Confirm refund".
+- `src/components/admin/users-tab.tsx`: "Refund" button ανά γραμμή, ανοίγει
+  `RefundModal`.
+- `messages/*.json` (10 γλώσσες): `adminDashboard.refund.*` block (18 keys)
+  + `adminDashboard.users.refundBtn`.
+
+Δοκιμές: `npx tsc --noEmit` ALL PASS.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-01ε (οδηγία 42 — Κομμάτι 2: αλλαγή credits χρήστη) ✅
 
 Αλλαγές:

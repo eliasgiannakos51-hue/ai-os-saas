@@ -6709,7 +6709,8 @@
       "noUsers": "Δεν βρέθηκαν χρήστες.",
       "loading": "Φόρτωση χρηστών...",
       "creditBtn": "Credits",
-      "adjust": "Ρύθμιση"
+      "adjust": "Ρύθμιση",
+      "refundBtn": "Επιστροφή"
     },
     "creditAdjust": {
       "title": "Ρύθμιση πιστωτικών",
@@ -6723,6 +6724,26 @@
       "submitting": "Ρύθμιση...",
       "success": "Τα credits ενημερώθηκαν.",
       "button": "Credits"
+    },
+    "refund": {
+      "title": "Επιστροφή χρημάτων",
+      "loadingCharges": "Φόρτωση χρεώσεων...",
+      "noCharges": "Δεν βρέθηκαν χρεώσεις για αυτόν τον χρήστη.",
+      "refundedPartial": "{amount} επιστράφηκαν",
+      "alreadyRefunded": "Επιστράφηκε",
+      "selectBtn": "Επιλογή",
+      "confirmWarning": "Αυτή η ενέργεια θα επιστρέψει χρήματα μέσω Stripe. Δεν μπορεί να αναιρεθεί.",
+      "chargeAmount": "Ποσό χρέωσης",
+      "refundableAmount": "Επιστρέψιμο ποσό",
+      "partialRefund": "Μερική επιστροφή",
+      "refundAmount": "Ποσό επιστροφής (λεπτά)",
+      "amountPlaceholder": "Μέγιστο {max}",
+      "reason": "Αιτία",
+      "reasonPlaceholder": "Γιατί κάνετε αυτή την επιστροφή;",
+      "back": "Πίσω",
+      "processing": "Επεξεργασία...",
+      "confirmRefund": "Επιβεβαίωση επιστροφής",
+      "close": "Κλείσιμο"
     }
   }
 }

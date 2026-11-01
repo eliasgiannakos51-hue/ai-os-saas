@@ -6709,7 +6709,8 @@
       "noUsers": "لم يُعثر على مستخدمين.",
       "loading": "جارٍ تحميل المستخدمين...",
       "creditBtn": "الرصيد",
-      "adjust": "تعديل"
+      "adjust": "تعديل",
+      "refundBtn": "استرداد"
     },
     "creditAdjust": {
       "title": "تعديل الرصيد",
@@ -6723,6 +6724,26 @@
       "submitting": "جارٍ التعديل...",
       "success": "تم تحديث الرصيد.",
       "button": "الرصيد"
+    },
+    "refund": {
+      "title": "استرداد",
+      "loadingCharges": "جارٍ تحميل الرسوم...",
+      "noCharges": "لم يتم العثور على رسوم لهذا المستخدم.",
+      "refundedPartial": "تم استرداد {amount}",
+      "alreadyRefunded": "تم الاسترداد",
+      "selectBtn": "اختيار",
+      "confirmWarning": "سيتم استرداد الأموال عبر Stripe. لا يمكن التراجع عن هذا الإجراء.",
+      "chargeAmount": "مبلغ الرسوم",
+      "refundableAmount": "المبلغ القابل للاسترداد",
+      "partialRefund": "استرداد جزئي",
+      "refundAmount": "مبلغ الاسترداد (سنتات)",
+      "amountPlaceholder": "الحد الأقصى {max}",
+      "reason": "السبب",
+      "reasonPlaceholder": "لماذا تقوم بهذا الاسترداد؟",
+      "back": "رجوع",
+      "processing": "جارٍ المعالجة...",
+      "confirmRefund": "تأكيد الاسترداد",
+      "close": "إغلاق"
     }
   }
 }

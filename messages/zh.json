@@ -6681,7 +6681,8 @@
       "noUsers": "未找到用户。",
       "loading": "正在加载用户...",
       "creditBtn": "积分",
-      "adjust": "调整"
+      "adjust": "调整",
+      "refundBtn": "退款"
     },
     "creditAdjust": {
       "title": "调整积分",
@@ -6695,6 +6696,26 @@
       "submitting": "调整中...",
       "success": "积分已更新。",
       "button": "积分"
+    },
+    "refund": {
+      "title": "退款",
+      "loadingCharges": "加载收费记录...",
+      "noCharges": "未找到该用户的收费记录。",
+      "refundedPartial": "已退款 {amount}",
+      "alreadyRefunded": "已退款",
+      "selectBtn": "选择",
+      "confirmWarning": "此操作将通过 Stripe 退款给客户，无法撤销。",
+      "chargeAmount": "收费金额",
+      "refundableAmount": "可退金额",
+      "partialRefund": "部分退款",
+      "refundAmount": "退款金额（分）",
+      "amountPlaceholder": "最多 {max}",
+      "reason": "原因",
+      "reasonPlaceholder": "为什么要进行此退款？",
+      "back": "返回",
+      "processing": "处理中...",
+      "confirmRefund": "确认退款",
+      "close": "关闭"
     }
   }
 }

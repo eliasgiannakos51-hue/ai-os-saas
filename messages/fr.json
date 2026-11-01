@@ -6681,7 +6681,8 @@
       "noUsers": "Aucun utilisateur trouvé.",
       "loading": "Chargement des utilisateurs...",
       "creditBtn": "Crédits",
-      "adjust": "Ajuster"
+      "adjust": "Ajuster",
+      "refundBtn": "Remboursement"
     },
     "creditAdjust": {
       "title": "Ajuster les crédits",
@@ -6695,6 +6696,26 @@
       "submitting": "Ajustement...",
       "success": "Crédits mis à jour.",
       "button": "Crédits"
+    },
+    "refund": {
+      "title": "Remboursement",
+      "loadingCharges": "Chargement des paiements...",
+      "noCharges": "Aucun paiement trouvé pour cet utilisateur.",
+      "refundedPartial": "{amount} remboursé",
+      "alreadyRefunded": "Remboursé",
+      "selectBtn": "Sélectionner",
+      "confirmWarning": "Cette action remboursera le client via Stripe. Elle ne peut pas être annulée.",
+      "chargeAmount": "Montant du paiement",
+      "refundableAmount": "Montant remboursable",
+      "partialRefund": "Remboursement partiel",
+      "refundAmount": "Montant du remboursement (centimes)",
+      "amountPlaceholder": "Maximum {max}",
+      "reason": "Motif",
+      "reasonPlaceholder": "Pourquoi effectuez-vous ce remboursement ?",
+      "back": "Retour",
+      "processing": "Traitement...",
+      "confirmRefund": "Confirmer le remboursement",
+      "close": "Fermer"
     }
   }
 }

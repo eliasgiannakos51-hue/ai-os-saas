@@ -6709,7 +6709,8 @@
       "noUsers": "No users found.",
       "loading": "Loading users...",
       "creditBtn": "Credits",
-      "adjust": "Adjust"
+      "adjust": "Adjust",
+      "refundBtn": "Refund"
     },
     "creditAdjust": {
       "title": "Adjust credits",
@@ -6723,6 +6724,26 @@
       "submitting": "Adjusting...",
       "success": "Credits updated.",
       "button": "Credits"
+    },
+    "refund": {
+      "title": "Refund",
+      "loadingCharges": "Loading charges...",
+      "noCharges": "No charges found for this user.",
+      "refundedPartial": "{amount} refunded",
+      "alreadyRefunded": "Refunded",
+      "selectBtn": "Select",
+      "confirmWarning": "This action will refund the customer through Stripe. It cannot be undone.",
+      "chargeAmount": "Charge amount",
+      "refundableAmount": "Refundable amount",
+      "partialRefund": "Partial refund",
+      "refundAmount": "Refund amount (cents)",
+      "amountPlaceholder": "Max {max}",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why are you issuing this refund?",
+      "back": "Back",
+      "processing": "Processing...",
+      "confirmRefund": "Confirm refund",
+      "close": "Close"
     }
   }
 }

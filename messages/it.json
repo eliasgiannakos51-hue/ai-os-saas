@@ -6681,7 +6681,8 @@
       "noUsers": "Nessun utente trovato.",
       "loading": "Caricamento utenti...",
       "creditBtn": "Crediti",
-      "adjust": "Regola"
+      "adjust": "Regola",
+      "refundBtn": "Rimborso"
     },
     "creditAdjust": {
       "title": "Modifica crediti",
@@ -6695,6 +6696,26 @@
       "submitting": "Modifica in corso...",
       "success": "Crediti aggiornati.",
       "button": "Crediti"
+    },
+    "refund": {
+      "title": "Rimborso",
+      "loadingCharges": "Caricamento addebiti...",
+      "noCharges": "Nessun addebito trovato per questo utente.",
+      "refundedPartial": "{amount} rimborsato",
+      "alreadyRefunded": "Rimborsato",
+      "selectBtn": "Seleziona",
+      "confirmWarning": "Questa azione rimborserà il cliente tramite Stripe. Non può essere annullata.",
+      "chargeAmount": "Importo dell''addebito",
+      "refundableAmount": "Importo rimborsabile",
+      "partialRefund": "Rimborso parziale",
+      "refundAmount": "Importo del rimborso (centesimi)",
+      "amountPlaceholder": "Massimo {max}",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Perché stai emettendo questo rimborso?",
+      "back": "Indietro",
+      "processing": "Elaborazione...",
+      "confirmRefund": "Conferma rimborso",
+      "close": "Chiudi"
     }
   }
 }

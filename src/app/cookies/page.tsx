@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitleAndDescription("landing.footer.cookies", "pageTitle.cookiesDescription");
@@ -22,7 +23,7 @@ export function generateMetadata(): Promise<Metadata> {
 // that point, not optional.
 export default function CookiePolicyPage() {
   return (
-    <LegalLayout titleKey="landing.footer.cookies" updated="2026-08-08">
+    <LegalLayout titleKey="landing.footer.cookies" updated={LEGAL_VERSIONS.cookies}>
       <LegalSection title="1. The short version">
         <p>
           Ionexa AI sets no advertising cookies, no cross-site tracking

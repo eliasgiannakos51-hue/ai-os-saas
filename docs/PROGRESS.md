@@ -10478,3 +10478,133 @@ webhook handler (γραμμές 456-520) και η απουσία του `invoic
   `npm run build:ci`: πράσινο σε όλα τα environments.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-01 — ΔΗΜΟΣΙΟ SITE ΤΟΥ IONEXA (οδηγία 38), Κομμάτι 1 (Αρχική) — σταμάτησε στο stop-gate
+
+Το `docs/TOOL-RULES.md` διαβάστηκε πρώτα, όπως ζητά η οδηγία. Έρευνα πριν
+τον κώδικα (workflow 7 agents): «η γη» είναι το `Earth` component
+(`src/components/brand/earth.tsx`, ήδη μέσα στο `Logo` που η Αρχική
+έδειχνε), οι υπάρχουσες δημόσιες σελίδες (`/`, `/pricing`, `/terms`,
+`/privacy`, `/help`, `/contact`) είναι ήδη πραγματικές — όχι stub — και
+το `/help` είναι το σημερινό de facto FAQ χωρίς να υπάρχει ξεχωριστό
+`/faq`.
+
+**Το πεδίο.** «Τι θέλεις να φτιάξεις;» (`src/components/landing/
+build-field.tsx`) στέλνει σε `/signup?ask=<κείμενο>` — η καθαρή λογική σε
+`src/lib/landing/build-redirect.ts` (`buildSignupHref`), ίδιο σχήμα
+(`?ask=`, clamp στους 300 χαρακτήρες από `MAX_EXAMPLE_CHARS`) με το ήδη
+υπάρχον `exampleHref()` που κάθε quick-job πλακίδιο στο dashboard ήδη
+χρησιμοποιεί (`lib/overview/first-screen-examples.ts`). Το
+`signup-flow.tsx` διαβάζει το `ask` πίσω (ίδιο μοτίβο με το ήδη υπάρχον
+`?plan=`, από `window.location.search` ώστε να μην χρειάζεται Suspense
+boundary) και δείχνει «Θα φτιάξεις: «…»» πριν τη δημιουργία λογαριασμού.
+
+**Τα εργαλεία, με πραγματικά στιγμιότυπα — όχι σχήματα.** Τρία: Chat,
+Site (Website Builder), Meetings — όλα `ready: true` στο
+`lib/nav/all-tools.ts`, τα πιο οπτικά διαφορετικά. Το
+`scripts/generate-home-tool-shots.mjs` (ίδια τεχνική με το ήδη υπάρχον
+`scripts/generate-pwa-assets.mjs`: πραγματικό `next build` πάνω σε
+stand-in Supabase, φωτογραφία, όχι σχέδιο) γράφει τα τρία PNG στο
+`public/marketing/tools/`. Τα δεδομένα παραδείγματος είναι ΤΑ ΙΔΙΑ με
+αυτά που ήδη χρησιμοποιούν `chat-chart.prodtest.mjs`,
+`site-browser-frame.prodtest.mjs` και `meetings-workspace.prodtest.mjs`
+(«Αύρα Νάξος», «Σύσκεψη πωλήσεων») — τίποτα καινούργιο δεν επινοήθηκε.
+Ένα πρώτο πέρασμα έδειξε «Έγινε στα Greek» μέσα σε ελληνική οθόνη: το
+`meetings-workspace.tsx:1473` διαβάζει το όνομα γλώσσας μέσω
+`Intl.DisplayNames(undefined, ...)`, που ρητά «ακολουθεί τον browser»
+(σχόλιο του ίδιου αρχείου) — το Playwright context δεν είχε `locale`,
+άρα ακολούθησε το en-US default του. Διορθώθηκε με `locale: "el-GR"`
+στο context, όχι στο προϊόν (δεν ήταν δικό του bug).
+
+**Τίμιο, όχι fake.** Κάθε στιγμιότυπο φέρει ετικέτα «Example» ώστε να
+μην περάσει ως πραγματικός πελάτης. Νέο
+`scripts/tests/marketing-site-honesty.test.mjs` — καμία ψεύτικη κριτική,
+κανένα ψεύτικο νούμερο χρηστών, κανένα αστέρι βαθμολογίας, καμία
+υπόσχεση χωρίς στήριγμα, στο `src/app/page.tsx` (η πρώτη τέτοια
+εξαίρεση σε όλο το repository ΓΙΑ ΤΙΣ ΙΔΙΕΣ τις σελίδες του Ionexa —
+`website-invented-numbers.test.mjs`/`website-negatives.test.mjs` ήδη
+υπήρχαν αλλά μόνο για τα sites που φτιάχνει το εργαλείο Website Builder
+για τους πελάτες του, όχι για τη δημόσια παρουσία του ίδιου του
+Ionexa). Settled by mutation στο χέρι (ψεύτικος αριθμός εισήχθη, πέρασε
+RED· η ετικέτα «Example» αφαιρέθηκε, πέρασε RED· αποκαταστάθηκε, πέρασε
+PASS) — καταγεγραμμένο στο `scripts/tests/gate-independence.test.mjs`'s
+`NONE_IS_FINE`, γιατί διαβάζει ένα μόνο αρχείο πηγής και ο σαρωτής δεν
+το βλέπει ως DISK.
+
+### Τρεις baseline που χρειάστηκαν ενημέρωση, και γιατί η καθεμιά ήταν σωστή
+
+- `COMMENT_LIMITATION_CENSUS` 82 → 84: δύο νέα σχόλια «by design»
+  (`scripts/generate-home-tool-shots.mjs` εξηγεί γιατί το locale είναι
+  καρφωμένο· `landing-build-field.test.mjs` εξηγεί γιατί το chat δεν
+  έχει `ready:false` entry να αντικρούσει) — και τα δύο αποφάσεις, όχι
+  ελλείψεις, ίδιο σχήμα με τα προηγούμενα 81→82.
+- `DEEP_LINK_FLOOR` 72 → 73: ο σαρωτής βρήκε ένα νέο πραγματικό deep
+  link, `/signup?ask=`.
+- `design-density.test.mjs`'s border ceiling 618 → 619: το πεδίο
+  χρησιμοποιεί `border border-border` — ΤΟ ΙΔΙΟ class με κάθε άλλο πεδίο
+  κειμένου στην εφαρμογή (π.χ. `signup-flow.tsx`'s `FIELD_CLASS`). Οι
+  τρεις κάρτες εργαλείων ΔΕΝ κοστίζουν τίποτα εδώ: έγιναν μόνο
+  `bg-panel`, χωρίς περίγραμμα, αφαιρέθηκε το αρχικό `border
+  border-border` τους αφού η πρώτη εκδοχή έσπασε αυτήν ακριβώς την
+  οροφή κατά 2.
+
+### Τι ΔΕΝ έγινε ακόμα, ρητά (όχι σιωπηλά υπονοούμενο ως έτοιμο)
+
+1. **Το `?ask=` δεν φτάνει ακόμα στο πρώτο μήνυμα του dashboard.**
+   Σταματά στην επιβεβαίωση στο signup. Το να φτάσει ως εκεί χρειάζεται
+   τον προορισμό μετά το onboarding, που δεν έχει χτιστεί ακόμα
+   (QUEUE.md #212, «First experience: result in 5 minutes»).
+2. **Lighthouse ≥ 95 δεν μετρήθηκε.** Καμία υποδομή CI γι' αυτό δεν
+   υπάρχει σήμερα πουθενά στο repository· το `lighthouse` CLI δεν είναι
+   εγκατεστημένο, και η προσθήκη του θα ήταν μια νέα εξάρτηση χωρίς
+   έγκριση του ιδιοκτήτη. Μένει ανοιχτό για όταν υπάρχουν περισσότερες
+   δημόσιες σελίδες να μετρηθούν μαζί.
+3. **Η απόφαση «Συχνές ερωτήσεις»** — νέο ξεχωριστό `/faq` ή σύνδεσμος
+   στο ήδη υπάρχον, πλήρες `/help` — δεν πάρθηκε. Μένει για το Κομμάτι 3.
+
+### Μέτρα
+
+- `scripts/tests/landing-build-field.test.mjs`: **119 έλεγχοι**, όλοι
+  πράσινοι (η καθαρή λογική `buildSignupHref` τρέχεται, όχι περιγράφεται·
+  και τα δέκα γλωσσικά πακέτα ελέγχονται).
+- `scripts/tests/landing-build-field.mutation.mjs`: **5 από 5**.
+- `scripts/tests/marketing-site-honesty.test.mjs`: **6 από 6**.
+- `scripts/tests/home-page.prodtest.mjs`: **8 από 8**, πραγματικό
+  `next build`, υπολογιστής 1440×900 και κινητό 390×844 — τα δύο
+  στιγμιότυπα που ζητά το stop-gate, δοσμένα στον ιδιοκτήτη.
+- `npm run gates`: **ΟΛΑ 398 ΠΕΡΑΣΑΝ, 28.588 έλεγχοι** (μετρημένο
+  2026-11-01). `npm run build:ci`: πράσινο σε όλα τα environments.
+
+**Σταμάτησε εδώ, όπως ζητά η οδηγία**: «ΜΟΝΟ ΕΔΩ: στιγμιότυπα
+υπολογιστή και κινητού, και σταματάς μέχρι να γράψω «εγκρίνω».» Τα
+Κομμάτια 2 (Τιμές), 3 (Συχνές ερωτήσεις) και 4 (Όροι/Απόρρητο/
+Επικοινωνία) δεν ξεκίνησαν.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-01 — ΝΟΜΙΚΑ: GDPR, DSA, ΣΗΜΑΝΣΗ AI (οδηγία 39), Κομμάτι 1 (σφράγιση εκδόσεων)
+
+**Τι έγινε.** Νέο αρχείο `src/lib/legal/versions.ts` με `LEGAL_VERSIONS`
+(terms/privacy/cookies) — μία πηγή αλήθειας. Και οι δύο δρόμοι εγγραφής
+(`api/signup`, `auth/callback`) γράφουν `terms_version` και
+`privacy_version` στο `user_metadata`. Οι τρεις νομικές σελίδες
+(`/terms`, `/privacy`, `/cookies`) διαβάζουν `updated` από
+`LEGAL_VERSIONS` αντί για σκληρό κείμενο.
+
+**Αρχεία.**
+- `src/lib/legal/versions.ts` (ΝΕΟ)
+- `src/app/api/signup/route.ts` (τροποποίηση: +2 πεδία `user_metadata`)
+- `src/app/auth/callback/route.ts` (τροποποίηση: +2 πεδία `mergeUserMetadata`)
+- `src/app/terms/page.tsx` (τροποποίηση: `updated` ← `LEGAL_VERSIONS.terms`)
+- `src/app/privacy/page.tsx` (τροποποίηση: `updated` ← `LEGAL_VERSIONS.privacy`)
+- `src/app/cookies/page.tsx` (τροποποίηση: `updated` ← `LEGAL_VERSIONS.cookies`)
+
+**Τι ΔΕΝ χρειάζεται migration:** τα `terms_version`/`privacy_version`
+γράφονται στο `user_metadata` jsonb, όχι σε νέα στήλη. Δεν είναι
+προστατευμένα κλειδιά (`20261010000000_guard_entitlement_metadata.sql`).
+
+**Τι ακολουθεί.** Κομμάτι 2 (κουκί — πιθανώς ΘΕΛΩ μόνο), Κομμάτι 3
+(εξαγωγή δεδομένων + αναβολή διαγραφής 30 ημερών), Κομμάτι 4 (DSA),
+Κομμάτι 5 (σήμανση AI), Κομμάτι 6 (ανήλικοι → ΘΕΛΩ).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

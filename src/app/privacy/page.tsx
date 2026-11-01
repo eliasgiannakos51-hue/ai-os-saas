@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitleAndDescription("landing.footer.privacy", "pageTitle.privacyDescription");
@@ -9,7 +10,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-07">
+    <LegalLayout titleKey="landing.footer.privacy" updated={LEGAL_VERSIONS.privacy}>
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you

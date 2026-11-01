@@ -6,6 +6,7 @@ import { getPlan } from "@/lib/billing/plans";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 import { attributeReferral } from "@/lib/affiliate/store";
 import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
 
@@ -72,6 +73,8 @@ export async function GET(request: Request) {
         // completing the provider's consent screen, which the social
         // buttons disclose in their own helper text before the redirect.
         terms_accepted_at: new Date().toISOString(),
+        terms_version: LEGAL_VERSIONS.terms,
+        privacy_version: LEGAL_VERSIONS.privacy,
         subscription_tier: "free",
         seat_count: 0,
         signup_provider: user.app_metadata?.provider ?? "oauth",

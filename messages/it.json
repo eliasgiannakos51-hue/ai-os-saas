@@ -6679,7 +6679,21 @@
       "lastSignIn": "Ultimo accesso",
       "suspended": "Sospeso",
       "noUsers": "Nessun utente trovato.",
-      "loading": "Caricamento utenti..."
+      "loading": "Caricamento utenti...",
+      "creditBtn": "Crediti"
+    },
+    "creditAdjust": {
+      "title": "Modifica crediti",
+      "current": "Crediti attuali",
+      "amount": "Importo",
+      "amountPlaceholder": "+50 aggiungere, -10 detrarre",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Perché modifichi i crediti?",
+      "cancel": "Annulla",
+      "confirm": "Modifica",
+      "submitting": "Modifica in corso...",
+      "success": "Crediti aggiornati.",
+      "button": "Crediti"
     }
   }
 }

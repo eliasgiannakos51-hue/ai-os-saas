@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
+import { AdjustCreditsModal } from "@/components/admin/adjust-credits-modal";
 
 type UserRow = {
   id: string;
@@ -30,6 +31,7 @@ export function AdminUsersTab() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [adjustTarget, setAdjustTarget] = useState<UserRow | null>(null);
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(query), 350);
@@ -90,6 +92,7 @@ export function AdminUsersTab() {
                 <th className="px-3 py-2 text-right">{t("margin")}</th>
                 <th className="px-3 py-2 text-right">{t("calls")}</th>
                 <th className="px-3 py-2">{t("lastSignIn")}</th>
+                <th className="px-3 py-2" />
               </tr>
             </thead>
             <tbody>
@@ -135,6 +138,14 @@ export function AdminUsersTab() {
                       ? new Date(u.lastSignIn).toLocaleDateString()
                       : "—"}
                   </td>
+                  <td className="px-3 py-2 text-right">
+                    <button
+                      onClick={() => setAdjustTarget(u)}
+                      className="rounded border border-border px-2 py-0.5 text-xs text-foreground hover:bg-surface"
+                    >
+                      {t("adjust")}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -167,6 +178,19 @@ export function AdminUsersTab() {
             </button>
           </div>
         </div>
+      )}
+
+      {adjustTarget && (
+        <AdjustCreditsModal
+          userId={adjustTarget.id}
+          email={adjustTarget.email}
+          creditsRemaining={adjustTarget.creditsRemaining}
+          onClose={() => setAdjustTarget(null)}
+          onSuccess={() => {
+            setAdjustTarget(null);
+            fetchUsers();
+          }}
+        />
       )}
     </div>
   );

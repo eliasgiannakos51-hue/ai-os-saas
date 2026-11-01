@@ -5533,8 +5533,7 @@
     "contactDescription": "Get in touch with the Ionexa AI team.",
     "verifyEmail": "Confirm Your Email",
     "verifyEmailDescription": "Confirm the email address of your Ionexa AI account.",
-    "chats": "Chats",
-    "admin": "Admin"
+    "chats": "Chats"
   },
   "errors": {
     "retry": "Try again",
@@ -6708,7 +6707,21 @@
       "lastSignIn": "Last sign-in",
       "suspended": "Suspended",
       "noUsers": "No users found.",
-      "loading": "Loading users..."
+      "loading": "Loading users...",
+      "creditBtn": "Credits"
+    },
+    "creditAdjust": {
+      "title": "Adjust credits",
+      "current": "Current credits",
+      "amount": "Amount",
+      "amountPlaceholder": "+50 to add, -10 to deduct",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why are you adjusting credits?",
+      "cancel": "Cancel",
+      "confirm": "Adjust",
+      "submitting": "Adjusting...",
+      "success": "Credits updated.",
+      "button": "Credits"
     }
   }
 }

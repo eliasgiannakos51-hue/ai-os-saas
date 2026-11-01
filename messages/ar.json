@@ -6707,7 +6707,21 @@
       "lastSignIn": "آخر تسجيل دخول",
       "suspended": "معلّق",
       "noUsers": "لم يُعثر على مستخدمين.",
-      "loading": "جارٍ تحميل المستخدمين..."
+      "loading": "جارٍ تحميل المستخدمين...",
+      "creditBtn": "الرصيد"
+    },
+    "creditAdjust": {
+      "title": "تعديل الرصيد",
+      "current": "الرصيد الحالي",
+      "amount": "المبلغ",
+      "amountPlaceholder": "+50 إضافة، -10 خصم",
+      "reason": "السبب",
+      "reasonPlaceholder": "لماذا تعدّل الرصيد؟",
+      "cancel": "إلغاء",
+      "confirm": "تعديل",
+      "submitting": "جارٍ التعديل...",
+      "success": "تم تحديث الرصيد.",
+      "button": "الرصيد"
     }
   }
 }

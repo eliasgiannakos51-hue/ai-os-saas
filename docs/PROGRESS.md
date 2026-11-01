@@ -3,6 +3,22 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-01ε (οδηγία 42 — Κομμάτι 2: αλλαγή credits χρήστη) ✅
+
+Αλλαγές:
+- `src/app/api/admin/users/credits/route.ts`: POST endpoint — validates
+  userId, amount (non-zero), reason (≥3 chars), calls `grantCredits()`,
+  logs `adjust_credits` to audit log with amount + reason + creditsAfter.
+- `src/components/admin/credit-adjust-modal.tsx`: modal dialog — amount
+  field (+/-), reason textarea, submit to API, success refreshes user list.
+- `src/components/admin/users-tab.tsx`: "Credits" button per row opens modal.
+- `messages/*.json` (10 γλώσσες): `adminDashboard.creditAdjust.*` block +
+  `adminDashboard.users.creditBtn`.
+
+Δοκιμές: `npx tsc --noEmit` ALL PASS.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-01δ (οδηγία 42 — σελίδα διαχείρισης, Κομμάτι 9+1: audit log + users) ✅
 
 Θεμέλιο: Κομμάτι 9 (audit log) χτίστηκε πρώτο γιατί όλα τα υπόλοιπα

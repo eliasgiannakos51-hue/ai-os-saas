@@ -6679,7 +6679,21 @@
       "lastSignIn": "Letzte Anmeldung",
       "suspended": "Gesperrt",
       "noUsers": "Keine Benutzer gefunden.",
-      "loading": "Benutzer werden geladen..."
+      "loading": "Benutzer werden geladen...",
+      "creditBtn": "Guthaben"
+    },
+    "creditAdjust": {
+      "title": "Guthaben anpassen",
+      "current": "Aktuelles Guthaben",
+      "amount": "Betrag",
+      "amountPlaceholder": "+50 hinzufügen, -10 abziehen",
+      "reason": "Grund",
+      "reasonPlaceholder": "Warum passen Sie das Guthaben an?",
+      "cancel": "Abbrechen",
+      "confirm": "Anpassen",
+      "submitting": "Wird angepasst...",
+      "success": "Guthaben aktualisiert.",
+      "button": "Guthaben"
     }
   }
 }

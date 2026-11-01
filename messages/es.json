@@ -6679,7 +6679,21 @@
       "lastSignIn": "Último acceso",
       "suspended": "Suspendido",
       "noUsers": "No se encontraron usuarios.",
-      "loading": "Cargando usuarios..."
+      "loading": "Cargando usuarios...",
+      "creditBtn": "Créditos"
+    },
+    "creditAdjust": {
+      "title": "Ajustar créditos",
+      "current": "Créditos actuales",
+      "amount": "Cantidad",
+      "amountPlaceholder": "+50 añadir, -10 deducir",
+      "reason": "Motivo",
+      "reasonPlaceholder": "¿Por qué ajustas los créditos?",
+      "cancel": "Cancelar",
+      "confirm": "Ajustar",
+      "submitting": "Ajustando...",
+      "success": "Créditos actualizados.",
+      "button": "Créditos"
     }
   }
 }

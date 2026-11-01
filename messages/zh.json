@@ -6679,7 +6679,21 @@
       "lastSignIn": "最后登录",
       "suspended": "已暂停",
       "noUsers": "未找到用户。",
-      "loading": "正在加载用户..."
+      "loading": "正在加载用户...",
+      "creditBtn": "积分"
+    },
+    "creditAdjust": {
+      "title": "调整积分",
+      "current": "当前积分",
+      "amount": "数量",
+      "amountPlaceholder": "+50 添加，-10 扣除",
+      "reason": "原因",
+      "reasonPlaceholder": "为什么要调整积分？",
+      "cancel": "取消",
+      "confirm": "调整",
+      "submitting": "调整中...",
+      "success": "积分已更新。",
+      "button": "积分"
     }
   }
 }

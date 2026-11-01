@@ -6707,7 +6707,21 @@
       "lastSignIn": "Τελευταία σύνδεση",
       "suspended": "Σε αναστολή",
       "noUsers": "Δεν βρέθηκαν χρήστες.",
-      "loading": "Φόρτωση χρηστών..."
+      "loading": "Φόρτωση χρηστών...",
+      "creditBtn": "Credits"
+    },
+    "creditAdjust": {
+      "title": "Ρύθμιση πιστωτικών",
+      "current": "Τρέχοντα",
+      "amount": "Ποσό",
+      "amountPlaceholder": "+50 προσθήκη, -10 αφαίρεση",
+      "reason": "Αιτιολογία",
+      "reasonPlaceholder": "Γιατί ρυθμίζετε τα credits;",
+      "cancel": "Ακύρωση",
+      "confirm": "Ρύθμιση",
+      "submitting": "Ρύθμιση...",
+      "success": "Τα credits ενημερώθηκαν.",
+      "button": "Credits"
     }
   }
 }

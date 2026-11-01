@@ -6679,7 +6679,21 @@
       "lastSignIn": "最終ログイン",
       "suspended": "停止中",
       "noUsers": "ユーザーが見つかりません。",
-      "loading": "ユーザーを読み込み中..."
+      "loading": "ユーザーを読み込み中...",
+      "creditBtn": "クレジット"
+    },
+    "creditAdjust": {
+      "title": "クレジット調整",
+      "current": "現在のクレジット",
+      "amount": "数量",
+      "amountPlaceholder": "+50 追加、-10 差引",
+      "reason": "理由",
+      "reasonPlaceholder": "なぜクレジットを調整しますか？",
+      "cancel": "キャンセル",
+      "confirm": "調整",
+      "submitting": "調整中...",
+      "success": "クレジットが更新されました。",
+      "button": "クレジット"
     }
   }
 }

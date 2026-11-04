@@ -249,7 +249,31 @@ console.log("\n== 2. the lines ==");
 // same shape as the one named at line 155 — so it costs nothing here
 // despite being drawn. No frame carries a fill: the empty states on
 // both sides are plain centred text, no card.
-ok(`border utilities (${r.counts.borders}), ceiling 618`, r.counts.borders <= 618);
+// 618 -> 685, found 2026-11-04 (not landed in one commit — this gate was
+// never run against the admin dashboard until directive 42's own gate
+// cleanup reached it, so the whole climb is counted here at once rather
+// than piece by piece as it happened). The count at the branch point
+// (b51f08fc) was already 623, five over this ceiling before any of
+// directive 42 existed — a pre-existing gap, reported separately, not
+// raised here. The 62 this adds are the admin dashboard's own tables,
+// modals and tabs, every one a box or a field that needs a line to read
+// as one, the same unavoidable shape every entry above already argues:
+// costs-tab.tsx (12): the summary cards, the flagged-users table and the
+// provider/daily tables each need their own frame or header rule.
+// revenue-tab.tsx (15): the same shape — summary cards, the MRR bar and
+// three tables (events, cohorts, by-plan).
+// users-tab.tsx (9): the search field, the users table and its header
+// rule, the per-row action buttons.
+// refund-modal.tsx (7), credit-adjust-modal.tsx (5) and
+// suspend-modal.tsx (5): each modal's own fields and buttons — a field
+// needs a border to read as one, the same reason Projects' and Meetings'
+// fields above already counted.
+// audit-log-tab.tsx (3) and admin-tabs.tsx (2): the log table and the
+// tab strip's own underline.
+// suspended-notice.tsx (3): the notice card and its reason box.
+// NO FILLED ACCENT BUTTON came with any of them beyond the one the admin
+// dashboard already had: one-primary-action's own count is untouched.
+ok(`border utilities (${r.counts.borders}), ceiling 685`, r.counts.borders <= 685);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

@@ -246,6 +246,9 @@ const base = {
 };
 
 const el = JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.automations;
+// The shared shell's own words (the «Simple | Pro» switch lives there, not
+// in the Automations namespace — directive 55, Κομμάτι 1).
+const el2 = JSON.parse(readFileSync("messages/el.json", "utf8")).dashboard.toolShell;
 const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 // The brand names the boxes print, read from where the screen takes them.
 const CONNECTION = {
@@ -339,7 +342,14 @@ try {
   const ON = await start(base);
   browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || "/opt/pw-browsers/chromium" });
   const desktop = { viewport: { width: 1440, height: 900 }, touch: false };
-  setFlags({ automations: "staff" });
+  // SECTIONS 1-4 DRIVE PRO'S BOXES, so they say so rather than leaning on a
+  // default. `agents-automations-pro` (directive 55) fails towards "staff"
+  // and ADMIN_EMAILS above is this very account, so leaving it unset would
+  // open every one of them in Simple — where there is no `flow-box` to
+  // press, and four sections would fail for a reason that is not theirs.
+  // Section 6 is the one that turns it on. (The old `automations` row this
+  // line used to set went away with that switch on 2026-10-23.)
+  setFlags({ "agents-automations-pro": "off" });
 
   // =================================================================
   console.log("\n== 1. «Κάθε πρωί στις 9 στείλε μου στο Telegram τι έχω σήμερα» ==");
@@ -545,6 +555,120 @@ try {
     check("...and the routes answer instead of refusing", r.status() !== 403 && (await r.json().catch(() => ({}))).code !== "not_enabled", String(r.status()));
     check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
     await context.close();
+  }
+
+  // =================================================================
+  console.log("\n== 6. «Simple | Pro»: two levels, one automation (directive 55, Κομμάτι 1) ==");
+  // =================================================================
+  // Pressed for real, on a computer and with a finger, in the built app.
+  // A row of its own rather than one left over from a section above, so
+  // the count below is a fact about THIS automation and not about what
+  // some earlier press happened to leave behind.
+  {
+    const SIX = [
+      { id: "b1", kind: "start", when: "time", every: "day", at: "09:00" },
+      { id: "b2", kind: "read", source: "finances_week" },
+      { id: "b3", kind: "ai", instruction: "Κάνε σύνοψη των εξόδων της εβδομάδας." },
+      { id: "b4", kind: "condition", test: "has_content" },
+      { id: "b5", kind: "approval" },
+      { id: "b6", kind: "action", do: "save_to_library" },
+    ];
+    const FLOW = {
+      id: "55000000-0000-4000-8000-000000000055",
+      user_id: MOCK_USER.id,
+      name: "Δύο επίπεδα",
+      said: "κάθε μέρα στις 9 σύνοψη των εξόδων στη Βιβλιοθήκη",
+      boxes: SIX,
+      version: 1,
+      is_active: false,
+      time_zone: "Europe/Athens",
+      next_run_at: null,
+      last_run_at: null,
+      cost_limit: 50,
+      busy_since: null,
+      created_at: "2026-11-04T08:00:00Z",
+    };
+    store.automation_flows.push(FLOW);
+    const AT = `${ON}/dashboard/automation?flow=${FLOW.id}`;
+
+    setFlags({ "agents-automations-pro": "everyone" });
+    for (const device of [desktop, { viewport: { width: 390, height: 844 }, touch: true }]) {
+      const how = device.touch ? "with a finger" : "on a computer";
+      const { context, page, press } = await open(ON, device);
+      await page.goto(AT, { waitUntil: "networkidle" });
+      await page.locator('[data-testid="tool-shell-work"]').waitFor({ timeout: 10000 });
+
+      // THE SWITCH IS IN THE SHELL'S OWN WORK BAR, beside the title — not a
+      // bar Automations drew (docs/TOOL-RULES.md). Asserted by where it is
+      // in the DOM, not by its existence somewhere on the page.
+      const inBar = await page.evaluate(() => {
+        const sw = document.querySelector('[data-testid="shell-mode"]');
+        const work = document.querySelector('[data-testid="tool-shell-work"]');
+        return Boolean(sw && work && work.firstElementChild?.contains(sw));
+      });
+      check(`${how}: the «Simple | Pro» switch is in the work bar of the shared shell`, inBar);
+      check(`${how}: both levels are named, neither shortened`,
+        (await page.locator('[data-testid="shell-mode-simple"]').innerText()).trim() === el2.mode.simple &&
+        (await page.locator('[data-testid="shell-mode-pro"]').innerText()).trim() === el2.mode.pro);
+
+      // SIMPLE FIRST: every step, in words, nothing to press.
+      check(`${how}: Simple opens, and shows every step as a line`,
+        (await page.locator('[data-testid="shell-mode"]').getAttribute("data-mode")) === "simple" &&
+        (await page.locator('[data-testid="flow-step"]').count()) === SIX.length &&
+        (await page.locator('[data-testid="flow-box"]').count()) === 0);
+      // NOT `el.kinds.condition.toUpperCase()`: the kind label is uppercased
+      // by CSS, and Chromium drops the Greek accent doing it (ΣΥΝΘΗΚΗ) while
+      // JS keeps it (ΣΥΝΘΉΚΗ) — the two can never be equal, so a check
+      // written that way could never go red. These are both untransformed
+      // strings, so this fails if Simple ever starts speaking Pro's words.
+      const simpleWords = await page.locator('[data-testid="flow-steps"]').innerText();
+      check(`${how}: ...in plain words — one sentence for the condition, not Pro's two halves`,
+        simpleWords.includes(el.approval) && simpleWords.includes(el.simple.onlyIf) && !simpleWords.includes(el.conditionElse));
+
+      // PRO: the canvas that was always there, and a box still configurable.
+      await press(page.locator('[data-testid="shell-mode-pro"]'));
+      await page.locator('[data-testid="flow-box"]').first().waitFor({ timeout: 10000 });
+      check(`${how}: Pro draws the same steps as boxes, with the kinds and the else branch`,
+        (await page.locator('[data-testid="flow-box"]').count()) === SIX.length &&
+        (await page.locator('[data-testid="flow-step"]').count()) === 0 &&
+        (await page.locator('[data-testid="flow-branch"]').count()) === 1);
+      await press(page.locator('[data-testid="flow-box"]').nth(2));
+      await page.waitForTimeout(400);
+      check(`${how}: ...and pressing a box still opens its editor, named under the field`,
+        (await page.locator('[data-testid="box-chosen"]').count()) === 1 && (await page.locator('[data-testid="flow-box"][aria-pressed="true"]').count()) === 1);
+
+      // BACK TO SIMPLE: the same automation, no step lost either way.
+      await press(page.locator('[data-testid="shell-mode-simple"]'));
+      await page.locator('[data-testid="flow-step"]').first().waitFor({ timeout: 10000 });
+      check(`${how}: back in Simple every step is still there, and the editor is gone`,
+        (await page.locator('[data-testid="flow-step"]').count()) === SIX.length &&
+        (await page.locator('[data-testid="box-chosen"]').count()) === 0);
+      check(`${how}: nothing is stored for the level — the automation is byte-for-byte what it was`,
+        JSON.stringify(flowNamed("Δύο επίπεδα").boxes) === JSON.stringify(SIX) && flowNamed("Δύο επίπεδα").version === 1);
+      if (device.touch) {
+        check("on a phone neither level pushes the screen sideways", (await page.evaluate(() => document.documentElement.scrollWidth)) <= 390);
+      }
+      check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+      await context.close();
+    }
+
+    // WITHOUT THE SWITCH: the screen as it was. Nobody loses the boxes.
+    // "off", not {}: an absent row falls back to "staff" (lib/flags/flags.ts
+    // fails towards it on purpose), and ADMIN_EMAILS here is this account,
+    // so {} would leave the switch ON and this would be testing the opposite
+    // of what it says. It did, on the first run, and said so.
+    setFlags({ "agents-automations-pro": "off" });
+    {
+      const { context, page } = await open(ON, desktop);
+      await page.goto(AT, { waitUntil: "networkidle" });
+      await page.locator('[data-testid="tool-shell-work"]').waitFor({ timeout: 10000 });
+      check("with the switch off there is no switch, and the boxes are what you get",
+        (await page.locator('[data-testid="shell-mode"]').count()) === 0 &&
+        (await page.locator('[data-testid="flow-box"]').count()) === SIX.length &&
+        (await page.locator('[data-testid="flow-step"]').count()) === 0);
+      check(`no page threw (${pageErrors.length})`, pageErrors.length === 0, pageErrors.slice(0, 3).join(" | "));
+      await context.close();
+    }
   }
 } catch (err) {
   check("the run completed", false, String(err?.stack ?? err) + (pageErrors.length ? `\n        page errors: ${pageErrors.slice(0, 3).join(" | ")}` : ""));

@@ -3,6 +3,42 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-04θ (η βάση από το μηδέν: όλα τα dbtests πράσινα) ✅
+
+Τα FD4 και FD5 της 2026-11-04η. Μέχρι σήμερα το `npm run test:db`
+σταματούσε στο `20261109000000_help_articles_tools.sql` πριν τρέξει
+οποιοδήποτε dbtest, άρα ό,τι ακολουθούσε δεν το είχε δει κανείς.
+
+- **FD4**: το `20261109000000_help_articles_tools.sql` προσθέτει πρώτα την
+  κατηγορία `tools` στο `help_articles_category_check`, μετά γράφει.
+  Διορθώθηκε το ίδιο αρχείο αντί για νέο, γιατί δεν μπορεί να έχει
+  τρέξει πουθενά με επιτυχία: η ΠΡΩΤΗ του εντολή ήταν insert με
+  `tools`, άρα σε οποιαδήποτε βάση με αυτόν τον έλεγχο δεν γράφτηκε
+  ούτε μία γραμμή.
+- **FD5**, τρία πράγματα που φάνηκαν μόλις η βάση έφτασε ως το τέλος:
+  - ο αριθμός πινάκων ήταν γραμμένος με το χέρι σε δύο αρχεία (119),
+    ενώ τα migrations φτιάχνουν 133 (μέτρηση 2026-11-04). Τώρα και τα
+    δύο (`db-migrations.test.mjs`, `credit-flow.dbtest.mjs`) τον παίρνουν
+    από το `scripts/db-inventory.mjs --json`, με `cleanEnv()` για το
+    `env-independence`·
+  - τέσσερις deny-all πίνακες (`iowork_pairings`, `telegram_pairings`,
+    `admin_audit_log`, `pending_deletions`) δηλώθηκαν με λόγο στο
+    `db-migrations.test.mjs`, και οι τρεις που ανήκουν σε χρήστη στο
+    `user-isolation.dbtest.mjs`·
+  - το `db_exposure_report()` έδειχνε `grant_without_policy` 4: SELECT,
+    INSERT, UPDATE, DELETE στον `pending_deletions` για `authenticated`,
+    από τα default privileges του Supabase. Αφαιρούνται στο τέλος του
+    `20261112000000_pending_deletions_one_open.sql` (κανένα αίτημα δεν
+    σπάει: με RLS και χωρίς policy αποτύγχαναν ήδη).
+- Κάθε αλλαγή ήταν κόκκινη πριν: «119 tables, got 133», «the sealed set
+  is exactly the 7», «grant_without_policy: 4», και το «violates check
+  constraint» του FD4.
+
+**Αποτέλεσμα**: `npm run test:db` σε καθαρή Postgres 16, **25 αρχεία,
+ALL PASS** (μέτρηση 2026-11-04). Επιπλέον πράσινα: `db-migrations`,
+`env-independence`, `migration-undo`, `schema-canaries`, `rls-coverage`,
+`security-posture`, `gdpr-coverage`, `deferred-deletion`, `self-claims`.
+
 ## 2026-11-04η (αναβαλλόμενη διαγραφή: τα τρία ευρήματα, διορθωμένα) ✅
 
 Οδηγία 39 Κομμάτι 3. Τα τρία ευρήματα της 2026-11-04ζ (πιο κάτω) είχαν

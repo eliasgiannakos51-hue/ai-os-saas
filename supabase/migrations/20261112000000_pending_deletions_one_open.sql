@@ -56,7 +56,10 @@
 -- Settings still does). The fold of step 2 is NOT undone, on purpose:
 -- reopening the duplicates puts back two schedules for one account, the
 -- defect this file removes. They kept their delete_after; nothing in them
--- was deleted.
+-- was deleted. The revoke of the last section is NOT undone either: with
+-- row level security on and no policy, every one of those verbs already
+-- fails for a signed-in user, so granting them back restores only the red
+-- `grant_without_policy` line, never a working request.
 --
 
 -- 1. -------------------------------------------------------------------
@@ -154,3 +157,20 @@ revoke all on function public.pending_deletions_forget_tokens() from authenticat
 create or replace trigger pending_deletions_forget_tokens
   before update of user_id on public.pending_deletions
   for each row execute function public.pending_deletions_forget_tokens();
+
+-- ----------------------------------------------------------------------
+-- THE GRANTS THAT NO POLICY COVERS (found 2026-11-04 by `npm run test:db`
+-- on a fresh Postgres 16: db_exposure_report() said grant_without_policy 4,
+-- and the four were SELECT, INSERT, UPDATE and DELETE on this table for
+-- `authenticated`, handed out by Supabase's default privileges when
+-- 20261108000000_pending_deletions.sql created it).
+--
+-- The table is deny-all on purpose: only the service role reads or writes
+-- it (src/lib/account/pending-deletion.ts takes the admin client by type).
+-- 20260926000000_revoke_authenticated_grants_without_policy.sql explains
+-- why the grant goes even though RLS already refuses: the grant is the
+-- loaded half, RLS the safety catch, and a later `disable row level
+-- security` should find nothing loaded. Revoking cannot break a request:
+-- each verb already fails for these roles. Idempotent.
+revoke all on table public.pending_deletions from anon;
+revoke all on table public.pending_deletions from authenticated;

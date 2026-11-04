@@ -1,6 +1,24 @@
 -- Help articles: one per tool from the All Tools grid (directive 41, Κομμάτι 1).
 -- Generated, idempotent (UPSERT). No digits in any body — prices live on /pricing.
--- How to undo: DELETE FROM help_articles WHERE slug IN ('tool-my-stuff','tool-meetings','tool-analyze','tool-research','tool-translate','tool-rebuild','tool-apps','tool-games','tool-document','tool-slides','tool-posts','tool-image','tool-3d','tool-video','tool-films','tool-editing','tool-avatars','tool-audio','tool-coding','tool-automations','tool-iowork','tool-projects');
+-- How to undo: DELETE FROM help_articles WHERE slug IN ('tool-my-stuff','tool-meetings','tool-analyze','tool-research','tool-translate','tool-rebuild','tool-apps','tool-games','tool-document','tool-slides','tool-posts','tool-image','tool-3d','tool-video','tool-films','tool-editing','tool-avatars','tool-audio','tool-coding','tool-automations','tool-iowork','tool-projects'); then ALTER TABLE public.help_articles DROP CONSTRAINT help_articles_category_check, ADD CONSTRAINT help_articles_category_check CHECK (category IN ('getting-started','billing','credits','websites','agents','missions','account','chat','files','integrations','privacy'));
+
+-- THE TWELFTH CATEGORY, ADDED BEFORE THE FIRST ROW THAT USES IT
+-- (found 2026-11-04 by applying every migration to an empty Postgres 16).
+-- 20260816_help_articles.sql closes `category` to eleven names on purpose
+-- (/help groups by it), and this file's rows are all 'tools', so without
+-- this block the first INSERT fails help_articles_category_check and the
+-- whole paste is refused in the SQL editor. Adding a category is "a
+-- deliberate act", as that file says; this is the act. Drop-and-add is
+-- safe to paste twice: the new list is a superset of the old one, so every
+-- existing row still satisfies it.
+alter table public.help_articles drop constraint if exists help_articles_category_check;
+alter table public.help_articles
+  add constraint help_articles_category_check
+  check (category in (
+    'getting-started', 'billing', 'credits', 'websites', 'agents',
+    'missions', 'account', 'chat', 'files', 'integrations', 'privacy',
+    'tools'
+  ));
 
 -- ============================================================
 -- ENGLISH

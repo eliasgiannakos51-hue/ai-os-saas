@@ -23,6 +23,7 @@
 //      DATABASE_URL=postgres://… node scripts/tests/db-migrations.test.mjs
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { cleanEnv } from "./lib/clean-env.mjs";
 
 let pass = 0;
 const failures = [];
@@ -618,7 +619,22 @@ if (!DB) {
   // here and in credit-flow.dbtest.mjs in the same commit.
   // 118 -> 119 on 2026-10-22: my_stuff_sessions (20261024100000, «Τα δικά
   // μου»), moved here and in credit-flow.dbtest.mjs in the same commit.
-  check(`119 tables`, tables === 119, `got ${tables}`);
+  // 119 -> DERIVED on 2026-11-04, the same change and the same reason as
+  // credit-flow.dbtest.mjs's copy: the literal sat at 119 while the
+  // migrations built 133, unseen because the database run stopped earlier,
+  // at 20261109000000_help_articles_tools.sql. The "two files, one number"
+  // trap above ends here: both copies now read the number of public
+  // tables scripts/db-inventory.mjs derives from the migration text.
+  const derivedTables = JSON.parse(
+    execFileSync("node", ["scripts/db-inventory.mjs", "--json"], {
+      env: cleanEnv(),
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "pipe"],
+    })
+  ).tables.length;
+  check(`the migrations name some tables at all`, derivedTables > 100, `db-inventory derived ${derivedTables}`);
+  check(`${derivedTables} tables, as the migrations derive`, tables === derivedTables, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -634,7 +650,7 @@ if (!DB) {
   //
   // So the question is not "does every table have a policy" but "is every
   // policy-less table one we MEANT to be unreachable". Each entry below
-  // was checked: all four are written and read only through
+  // was checked: every one is written and read only through
   // createAdminClient(), and production_errors is additionally behind an
   // isAdminEmail() gate on the page that shows it.
   const DENY_ALL_BY_DESIGN = {
@@ -663,6 +679,13 @@ if (!DB) {
     // through the service role, scoped to the caller.
     ai_cost_log: "the real cost, margin and model breakdown behind every charge; the account's screens read the columns they need via service role",
     ai_provider_log: "which provider and model answered and why it failed over; the export reads purpose and outcome via service role",
+    // 2026-11-04: four more, each argued in its own migration and found
+    // here only now, because the database run used to stop earlier, at
+    // 20261109000000_help_articles_tools.sql.
+    iowork_pairings: "pending ten-minute pairing codes for a computer (20261031000000_iowork_devices.sql); a code readable from the browser could be harvested and claimed",
+    telegram_pairings: "pending ten-minute Telegram connection codes (20261031000001_telegram_link.sql); the same harvesting argument as iowork_pairings",
+    admin_audit_log: "every admin action, by whom and on whom (20261110000000_admin_audit_log.sql, 20261111000000_admin_audit_log_rls.sql); written and read only by the owner's admin page through the service role",
+    pending_deletions: "scheduled account deletions and their cancel-link hashes (20261108000000_pending_deletions.sql, 20261112000000_pending_deletions_one_open.sql); src/lib/account/pending-deletion.ts reaches it with the admin client only",
   };
   const noPolicy = sql(`select coalesce(string_agg(c.relname, ', '), '') from pg_class c
       join pg_namespace ns on ns.oid = c.relnamespace

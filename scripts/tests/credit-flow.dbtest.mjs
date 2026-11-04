@@ -49,6 +49,7 @@
 // contrary used to sit here and was never true. Read the log if it
 // matters which one happened.
 import { execFileSync } from "node:child_process";
+import { cleanEnv } from "./lib/clean-env.mjs";
 
 const DB = process.env.DATABASE_URL ?? process.env.PGDATABASE;
 if (!DB) {
@@ -195,7 +196,24 @@ console.log("== 0. the database really is the one the migrations build ==");
 // user_games (package 26); db-migrations.test.mjs moved in the same commit.
 // 118 -> 119 on 2026-10-22: 20261024100000_my_stuff_sessions.sql adds
 // my_stuff_sessions («Τα δικά μου»'s own question/answer history).
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 119);
+// 119 -> DERIVED on 2026-11-04. The literal above went stale at 119 while
+// the migrations built 133 (measured on a fresh Postgres 16 by
+// `npm run test:db`), and nobody saw it because the run stopped earlier,
+// at 20261109000000_help_articles_tools.sql. Fourteen tables, a date and
+// a filename per step, kept by hand: CLAUDE.md's "produced by the thing
+// that prints it" is the cure, so the expected count is now the number of
+// public tables scripts/db-inventory.mjs derives from the same migration
+// text the database was built from. The history above stays as a record.
+const DERIVED_TABLES = JSON.parse(
+  execFileSync("node", ["scripts/db-inventory.mjs", "--json"], {
+    env: cleanEnv(),
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "pipe"],
+  })
+).tables.length;
+check("the migrations name some tables at all", DERIVED_TABLES > 100, `db-inventory derived ${DERIVED_TABLES}`);
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), DERIVED_TABLES);
 eq(
   "the credit functions exist",
   Number(

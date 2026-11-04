@@ -6715,7 +6715,6 @@
       "suspended": "停止中",
       "noUsers": "ユーザーが見つかりません。",
       "loading": "ユーザーを読み込み中...",
-      "creditBtn": "クレジット",
       "adjust": "調整",
       "refundBtn": "返金",
       "suspendBtn": "停止",
@@ -6822,6 +6821,14 @@
       "upgraded": "アップグレード",
       "downgraded": "ダウングレード",
       "net": "純増減"
+    },
+    "auditLog": {
+      "loading": "操作ログを読み込み中...",
+      "noEntries": "まだ記録がありません。",
+      "time": "時刻",
+      "admin": "管理者",
+      "action": "操作",
+      "target": "対象"
     }
   },
   "suspended": {

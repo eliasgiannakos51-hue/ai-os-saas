@@ -6715,7 +6715,6 @@
       "suspended": "Gesperrt",
       "noUsers": "Keine Benutzer gefunden.",
       "loading": "Benutzer werden geladen...",
-      "creditBtn": "Guthaben",
       "adjust": "Anpassen",
       "refundBtn": "Erstattung",
       "suspendBtn": "Sperren",
@@ -6822,6 +6821,14 @@
       "upgraded": "Höhergestuft",
       "downgraded": "Herabgestuft",
       "net": "Netto"
+    },
+    "auditLog": {
+      "loading": "Audit-Protokoll wird geladen...",
+      "noEntries": "Noch keine Einträge.",
+      "time": "Zeit",
+      "admin": "Admin",
+      "action": "Aktion",
+      "target": "Ziel"
     }
   },
   "suspended": {

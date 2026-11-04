@@ -6715,7 +6715,6 @@
       "suspended": "已暂停",
       "noUsers": "未找到用户。",
       "loading": "正在加载用户...",
-      "creditBtn": "积分",
       "adjust": "调整",
       "refundBtn": "退款",
       "suspendBtn": "暂停",
@@ -6822,6 +6821,14 @@
       "upgraded": "升级",
       "downgraded": "降级",
       "net": "净增"
+    },
+    "auditLog": {
+      "loading": "正在加载审计日志...",
+      "noEntries": "暂无记录。",
+      "time": "时间",
+      "admin": "管理员",
+      "action": "操作",
+      "target": "目标"
     }
   },
   "suspended": {

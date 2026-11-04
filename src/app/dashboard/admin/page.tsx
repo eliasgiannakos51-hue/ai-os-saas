@@ -11,6 +11,7 @@ import { getTranslations } from "next-intl/server";
 import { AdminUsersTab } from "@/components/admin/users-tab";
 import { AdminCostsTab } from "@/components/admin/costs-tab";
 import { AdminRevenueTab } from "@/components/admin/revenue-tab";
+import { AdminAuditLogTab } from "@/components/admin/audit-log-tab";
 import { AdminTabs } from "@/components/admin/admin-tabs";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -41,6 +42,7 @@ export default async function AdminDashboardPage() {
             { key: "users", label: t("tabs.users"), content: <AdminUsersTab /> },
             { key: "costs", label: t("tabs.costs"), content: <AdminCostsTab /> },
             { key: "revenue", label: t("tabs.revenue"), content: <AdminRevenueTab /> },
+            { key: "auditLog", label: t("tabs.auditLog"), content: <AdminAuditLogTab /> },
           ]}
         />
       </div>

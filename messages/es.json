@@ -6715,7 +6715,6 @@
       "suspended": "Suspendido",
       "noUsers": "No se encontraron usuarios.",
       "loading": "Cargando usuarios...",
-      "creditBtn": "Créditos",
       "adjust": "Ajustar",
       "refundBtn": "Reembolso",
       "suspendBtn": "Suspender",
@@ -6822,6 +6821,14 @@
       "upgraded": "Mejoradas",
       "downgraded": "Reducidas",
       "net": "Neto"
+    },
+    "auditLog": {
+      "loading": "Cargando registro de auditoría...",
+      "noEntries": "Aún no hay entradas.",
+      "time": "Hora",
+      "admin": "Admin",
+      "action": "Acción",
+      "target": "Objetivo"
     }
   },
   "suspended": {

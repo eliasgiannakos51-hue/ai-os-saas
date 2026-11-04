@@ -6715,7 +6715,6 @@
       "suspended": "Suspendu",
       "noUsers": "Aucun utilisateur trouvé.",
       "loading": "Chargement des utilisateurs...",
-      "creditBtn": "Crédits",
       "adjust": "Ajuster",
       "refundBtn": "Remboursement",
       "suspendBtn": "Suspendre",
@@ -6822,6 +6821,14 @@
       "upgraded": "Surclassés",
       "downgraded": "Déclassés",
       "net": "Net"
+    },
+    "auditLog": {
+      "loading": "Chargement du journal d'audit...",
+      "noEntries": "Aucune entrée pour le moment.",
+      "time": "Heure",
+      "admin": "Admin",
+      "action": "Action",
+      "target": "Cible"
     }
   },
   "suspended": {

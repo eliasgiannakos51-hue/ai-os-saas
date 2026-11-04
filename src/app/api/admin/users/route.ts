@@ -6,6 +6,7 @@ import { logApiError } from "@/lib/log-error";
 import { logAdminAction } from "@/lib/admin/audit-log";
 import { getPlan } from "@/lib/billing/plans";
 import { isFeatureOn } from "@/lib/flags/flags";
+import { matchesSearch } from "@/lib/text/search-match";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,10 @@ export async function GET(request: Request) {
   if (!on) return NextResponse.json({ ok: false }, { status: 404 });
 
   const url = new URL(request.url);
-  const search = url.searchParams.get("q")?.trim().toLowerCase() ?? "";
+  // NOT lower-cased here: matchesSearch does its own folding, and
+  // pre-lowering is what defeats it — `.toLowerCase()` leaves the accent on,
+  // so "καφές" never matches "ΚΑΦΕΣ" (accent-search.test.mjs §4).
+  const search = url.searchParams.get("q")?.trim() ?? "";
   const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
   const perPage = 25;
 
@@ -39,13 +43,14 @@ export async function GET(request: Request) {
 
     const allUsers = usersPage?.users ?? [];
 
-    // Client-side search filter on email (Supabase admin API doesn't
-    // support server-side email search).
+    // Client-side search filter on email and name (the Supabase admin API
+    // has no server-side search). Through the shared helper, so an admin
+    // typing Greek with or without accents — or Greeklish — finds the row.
     const filtered = search
       ? allUsers.filter(
           (u) =>
-            u.email?.toLowerCase().includes(search) ||
-            (u.user_metadata?.full_name as string | undefined)?.toLowerCase().includes(search),
+            matchesSearch(u.email, search) ||
+            matchesSearch(u.user_metadata?.full_name as string | undefined, search),
         )
       : allUsers;
 

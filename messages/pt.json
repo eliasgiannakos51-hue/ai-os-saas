@@ -712,6 +712,18 @@
       "loading": "A carregar o seu espaço de trabalho…",
       "syncing": "A sincronizar os dados…",
       "ready": "Pronto."
+    },
+    "cancelDeletion": {
+      "title": "Cancelar eliminação da conta",
+      "missingToken": "Falta o token de cancelamento neste link. Use o link do seu email exatamente como foi enviado.",
+      "body": "A sua conta está agendada para eliminação. Carregue no botão abaixo para cancelar e manter a sua conta.",
+      "cancelling": "A cancelar…",
+      "cancelButton": "Manter a minha conta",
+      "failed": "Não conseguimos cancelar a eliminação. Tenta o link outra vez ou contacta o apoio.",
+      "successTitle": "Eliminação cancelada",
+      "successBody": "A sua conta está segura. A eliminação agendada foi cancelada.",
+      "backToDashboard": "Voltar ao painel",
+      "home": "Ir para a página inicial"
     }
   },
   "settings": {
@@ -822,7 +834,13 @@
       "checkEmail": "Verifique seu e-mail para confirmar a exclusão — enviamos um link para <highlight>{email}</highlight>. Ele expira em 1 hora; nada será excluído até que você clique nele.",
       "emailDoesNotMatch": "O e-mail não corresponde.",
       "couldNotStartDeletion": "✗ não foi possível iniciar a eliminação da conta",
-      "failed": "Não conseguimos enviar o email de confirmação. Tenta outra vez daqui a pouco — não foi eliminado nada."
+      "failed": "Não conseguimos enviar o email de confirmação. Tenta outra vez daqui a pouco — não foi eliminado nada.",
+      "pendingTitle": "Eliminação agendada",
+      "pendingDescription": "A sua conta está agendada para eliminação permanente a {date}. Pode cancelar a qualquer momento antes disso.",
+      "cancelDeletion": "Cancelar eliminação",
+      "cancelling": "A cancelar...",
+      "cancelledOk": "✓ eliminação cancelada — a sua conta está segura",
+      "cancelFailed": "Não conseguimos cancelar — tenta outra vez ou usa o link do email que te enviámos."
     },
     "emailNotifications": {
       "title": "Notificações por e-mail",
@@ -5520,7 +5538,9 @@
     "verifyEmail": "Confirmar email",
     "verifyEmailDescription": "Confirme o endereço de email da sua conta Ionexa AI.",
     "chats": "Conversas",
-    "admin": "Administração"
+    "admin": "Administração",
+    "cancelDeletion": "Cancelar eliminação da conta",
+    "cancelDeletionDescription": "Cancela a eliminação agendada da tua conta Ionexa AI."
   },
   "errors": {
     "retry": "Tentar de novo",
@@ -6614,6 +6634,14 @@
       "body": "Toque no botão para confirmar este endereço e abrir a sua conta Ionexa AI.",
       "button": "Confirmar email",
       "ignore": "Se não criou esta conta, ignore este email: sem o link nada acontece."
+    },
+    "deletionScheduled": {
+      "label": "eliminação de conta agendada",
+      "title": "a tua conta está agendada para eliminação",
+      "body": "A tua conta Ionexa AI será eliminada definitivamente a {date}. Até lá podes cancelar a eliminação e manter a tua conta exatamente como está.",
+      "cta": "Cancelar eliminação",
+      "footer": "Se não foste tu a pedir, usa o link acima para cancelar já.",
+      "preheader": "A tua conta Ionexa AI será eliminada a {date} — podes cancelar a qualquer momento até lá."
     }
   },
   "routerReport": {
@@ -6676,7 +6704,7 @@
     },
     "users": {
       "search": "Pesquisar por email ou nome...",
-      "email": "Email",
+      "email": "E-mail",
       "name": "Nome",
       "plan": "Plano",
       "credits": "Créditos",
@@ -6747,7 +6775,7 @@
       "totalCalls": "Total de chamadas",
       "callsLabel": "chamadas",
       "flaggedTitle": "Utilizadores que custam mais do que pagam",
-      "flaggedEmail": "Email",
+      "flaggedEmail": "E-mail",
       "flaggedCost": "Custo",
       "flaggedPays": "Paga",
       "flaggedMargin": "Margem",

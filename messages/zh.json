@@ -712,6 +712,18 @@
       "loading": "正在加载工作区…",
       "syncing": "正在同步数据…",
       "ready": "准备就绪。"
+    },
+    "cancelDeletion": {
+      "title": "取消账户删除",
+      "missingToken": "此链接缺少取消令牌。请完全按照邮件中发送的链接使用。",
+      "body": "你的账户已安排删除。点击下方即可取消，保留你的账户。",
+      "cancelling": "取消中…",
+      "cancelButton": "保留我的账户",
+      "failed": "我们无法取消这次删除。请重新点击链接，或联系客服。",
+      "successTitle": "删除已取消",
+      "successBody": "你的账户是安全的。原先安排的删除已经取消。",
+      "backToDashboard": "返回仪表板",
+      "home": "前往首页"
     }
   },
   "settings": {
@@ -822,7 +834,13 @@
       "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。",
       "emailDoesNotMatch": "电子邮件地址不匹配。",
       "couldNotStartDeletion": "✗ 无法开始删除账户",
-      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。"
+      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。",
+      "pendingTitle": "已安排删除",
+      "pendingDescription": "你的账户已安排在 {date} 永久删除。在那之前你可以随时取消。",
+      "cancelDeletion": "取消删除",
+      "cancelling": "取消中...",
+      "cancelledOk": "✓ 已取消删除——你的账户是安全的",
+      "cancelFailed": "无法取消——请重试，或使用我们发送给你的邮件中的链接。"
     },
     "emailNotifications": {
       "title": "邮件通知",
@@ -5520,7 +5538,9 @@
     "verifyEmail": "确认邮箱",
     "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。",
     "chats": "对话",
-    "admin": "管理面板"
+    "admin": "管理面板",
+    "cancelDeletion": "取消账户删除",
+    "cancelDeletionDescription": "取消已安排的 Ionexa AI 账户删除。"
   },
   "errors": {
     "retry": "重试",
@@ -6614,6 +6634,14 @@
       "body": "点击按钮确认此地址并打开你的 Ionexa AI 账户。",
       "button": "确认邮箱",
       "ignore": "如果你没有创建此账户，请忽略此邮件：不点击链接就不会有任何变化。"
+    },
+    "deletionScheduled": {
+      "label": "账户删除已安排",
+      "title": "你的账户已安排删除",
+      "body": "你的 Ionexa AI 账户将在 {date} 被永久删除。在那之前，你可以取消删除，账户会完全保持原样。",
+      "cta": "取消删除",
+      "footer": "如果不是你提出的，请立即使用上方的链接取消。",
+      "preheader": "你的 Ionexa AI 账户将在 {date} 被删除——在那之前你可以随时取消。"
     }
   },
   "routerReport": {

@@ -55,6 +55,66 @@ const LOCALE_ALLOWED = new Set([
   "de:adminDashboard.revenue.status",
   "fr:adminDashboard.revenue.date",
   "fr:adminDashboard.revenue.net",
+  // The rest of the admin dashboard (2026-11-04, οδηγία 42 Κομμάτια 1-5).
+  // These were red from the day those κομμάτια shipped; each was settled by
+  // reading the locale's OWN file, because the precedent genuinely differs
+  // per language — es and pt render this same email column with their own
+  // word, so theirs were TRANSLATED ("Correo", "E-mail") rather than listed
+  // here, and fr's users.email became "E-mail" to match its costs.flaggedEmail.
+  //
+  // el: the loanword is this file's term for a labelled address field —
+  // auth.login.email, auth.signup.email, auth.forgotPassword.email and
+  // settings.notifications.channels.email are all bare "Email", and the
+  // search box in this very table reads «Αναζήτηση με email ή όνομα...».
+  // The formal «Ηλεκτρονικό ταχυδρομείο» is used for the CHANNEL
+  // (sidebar.items.connectEmail), not for an address column.
+  "el:adminDashboard.users.email",
+  "el:adminDashboard.costs.flaggedEmail",
+  // el: "Credits" is the product's own word for the usage currency —
+  // pricing.rows.creditsPerMonth «Credits / μήνα»,
+  // settings.aiUsage.creditsUsed «Credits που Χρησιμοποιήθηκαν»,
+  // settings.billing.buyCredits «Αγορά Credits». en.json's source for these
+  // three keys is itself the bare noun, so the Greek is faithful, not
+  // truncated: the verb lives in adminDashboard.users.adjust («Ρύθμιση»).
+  "el:adminDashboard.users.credits",
+  "el:adminDashboard.users.creditBtn",
+  "el:adminDashboard.creditAdjust.button",
+  // de: "Name" is the German noun, capital and all — the same bare word as
+  // routerReport.colName (also a column heading) and projects.form.name,
+  // both already listed in this file. The block around it WAS translated
+  // (users.email "E-Mail", users.plan "Tarif", users.margin "Marge"), so
+  // this coincides rather than being skipped.
+  "de:adminDashboard.users.name",
+  // de: "Credits" is the unit; «Guthaben» is the BALANCE, and
+  // sidebar.tabs.balance «Guthaben: {amount} Credits» shows both roles in
+  // one string. This column counts credits, so it takes the unit term —
+  // which is why de:settings.marginReport.sumCredits is already listed below.
+  "de:adminDashboard.users.credits",
+  // es: "Plan" is the everyday Spanish word for the tier —
+  // settings.billing.currentPlan "Plan actual", auth.signup.chooseYourPlan
+  // "Elige tu plan". es:dashboard.appBuilder.tabs.plan is already listed.
+  "es:adminDashboard.users.plan",
+  // "Total" is the Spanish, French and Portuguese noun for a sum, used
+  // unchanged beside these very keys: costs.totalCalls is "Total de
+  // llamadas" / "Total des appels" / "Total de chamadas". That the row is
+  // localised and not skipped is settled by its neighbour costs.date, which
+  // IS translated ("Fecha" / "Date" / "Data"). Per locale, not for all ten:
+  // de Gesamt, it Totale, el Σύνολο, ja 合計, zh 合计, ar الإجمالي.
+  "es:adminDashboard.costs.dayTotal",
+  "fr:adminDashboard.costs.dayTotal",
+  "pt:adminDashboard.costs.dayTotal",
+  // fr: the same word, for the same sense, as fr:adminDashboard.revenue.date
+  // listed just above — the other eight locales differ.
+  "fr:adminDashboard.costs.date",
+  // it: Italian borrowed the noun whole, which is why
+  // it:dashboard.agents.delivery.channels.email and
+  // it:settings.notifications.channels.email are already listed below with
+  // that reason. The siblings here are translated where Italian has its own
+  // word (users.name "Nome", users.plan "Piano", users.credits "Crediti"),
+  // and users.search reads «Cerca per email o nome...», so a heading of
+  // «Posta elettronica» would disagree with the box directly above it.
+  "it:adminDashboard.users.email",
+  "it:adminDashboard.costs.flaggedEmail",
   // The standalone Translate tool's style picker (2026-10-24): "Formal"
   // is the Spanish and Portuguese word too, and "Style" is the French
   // word (no accent difference once a comment strips it) for this sense.

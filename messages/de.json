@@ -712,6 +712,18 @@
       "loading": "Arbeitsbereich wird geladen…",
       "syncing": "Daten werden synchronisiert…",
       "ready": "Bereit."
+    },
+    "cancelDeletion": {
+      "title": "Kontolöschung abbrechen",
+      "missingToken": "Diesem Link fehlt das Abbruch-Token. Nutze den Link aus deiner E-Mail genau so, wie er gesendet wurde.",
+      "body": "Für dein Konto ist die Löschung geplant. Klicke unten, um sie abzubrechen und dein Konto zu behalten.",
+      "cancelling": "Wird abgebrochen…",
+      "cancelButton": "Mein Konto behalten",
+      "failed": "Wir konnten die Löschung nicht abbrechen. Versuch den Link erneut oder wende dich an den Support.",
+      "successTitle": "Löschung abgebrochen",
+      "successBody": "Dein Konto ist sicher. Die geplante Löschung wurde abgebrochen.",
+      "backToDashboard": "Zurück zum Dashboard",
+      "home": "Zur Startseite"
     }
   },
   "settings": {
@@ -822,7 +834,13 @@
       "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst.",
       "emailDoesNotMatch": "Die E-Mail stimmt nicht überein.",
       "couldNotStartDeletion": "✗ Kontolöschung konnte nicht gestartet werden",
-      "failed": "Wir konnten die Bestätigungs-E-Mail nicht senden. Versuch es gleich noch einmal — es wurde nichts gelöscht."
+      "failed": "Wir konnten die Bestätigungs-E-Mail nicht senden. Versuch es gleich noch einmal — es wurde nichts gelöscht.",
+      "pendingTitle": "Löschung geplant",
+      "pendingDescription": "Dein Konto wird am {date} dauerhaft gelöscht. Du kannst die Löschung jederzeit vorher abbrechen.",
+      "cancelDeletion": "Löschung abbrechen",
+      "cancelling": "Wird abgebrochen...",
+      "cancelledOk": "✓ Löschung abgebrochen — dein Konto ist sicher",
+      "cancelFailed": "Die Löschung konnte nicht abgebrochen werden — versuch es erneut oder nutze den Link in der E-Mail, die wir dir gesendet haben."
     },
     "emailNotifications": {
       "title": "E-Mail-Benachrichtigungen",
@@ -5520,7 +5538,9 @@
     "verifyEmail": "E-Mail bestätigen",
     "verifyEmailDescription": "Bestätige die E-Mail-Adresse deines Ionexa-AI-Kontos.",
     "chats": "Chats",
-    "admin": "Verwaltung"
+    "admin": "Verwaltung",
+    "cancelDeletion": "Kontolöschung abbrechen",
+    "cancelDeletionDescription": "Brich die geplante Löschung deines Ionexa-AI-Kontos ab."
   },
   "errors": {
     "retry": "Erneut versuchen",
@@ -6614,6 +6634,14 @@
       "body": "Klicke auf die Schaltfläche, um diese Adresse zu bestätigen und dein Ionexa-AI-Konto zu öffnen.",
       "button": "E-Mail bestätigen",
       "ignore": "Wenn du dieses Konto nicht erstellt hast, ignoriere diese E-Mail: Ohne den Link passiert nichts."
+    },
+    "deletionScheduled": {
+      "label": "geplante Kontolöschung",
+      "title": "die Löschung deines Kontos ist geplant",
+      "body": "Dein Ionexa-AI-Konto wird am {date} dauerhaft gelöscht. Bis dahin kannst du die Löschung abbrechen und dein Konto genau so behalten, wie es ist.",
+      "cta": "Löschung abbrechen",
+      "footer": "Falls du das nicht angefordert hast, brich die Löschung sofort über den Link oben ab.",
+      "preheader": "Dein Ionexa-AI-Konto wird am {date} gelöscht — du kannst jederzeit vorher abbrechen."
     }
   },
   "routerReport": {

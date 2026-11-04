@@ -712,6 +712,18 @@
       "loading": "Cargando tu espacio de trabajo…",
       "syncing": "Sincronizando datos…",
       "ready": "Listo."
+    },
+    "cancelDeletion": {
+      "title": "Cancelar la eliminación de la cuenta",
+      "missingToken": "A este enlace le falta su token de cancelación. Usa el enlace de tu correo exactamente como se envió.",
+      "body": "Tu cuenta está programada para eliminarse. Pulsa el botón de abajo para cancelar la eliminación y conservar tu cuenta.",
+      "cancelling": "Cancelando…",
+      "cancelButton": "Conservar mi cuenta",
+      "failed": "No hemos podido cancelar la eliminación. Vuelve a usar el enlace o contacta con soporte.",
+      "successTitle": "Eliminación cancelada",
+      "successBody": "Tu cuenta está a salvo. La eliminación programada se ha cancelado.",
+      "backToDashboard": "Volver a tu panel",
+      "home": "Ir a la página de inicio"
     }
   },
   "settings": {
@@ -822,7 +834,13 @@
       "checkEmail": "Revisa tu correo para confirmar la eliminación — enviamos un enlace a <highlight>{email}</highlight>. Caduca en 1 hora; nada se elimina hasta que hagas clic en él.",
       "emailDoesNotMatch": "El correo no coincide.",
       "couldNotStartDeletion": "✗ no se pudo iniciar la eliminación de la cuenta",
-      "failed": "No hemos podido enviar el correo de confirmación. Inténtalo de nuevo en un momento: no se ha eliminado nada."
+      "failed": "No hemos podido enviar el correo de confirmación. Inténtalo de nuevo en un momento: no se ha eliminado nada.",
+      "pendingTitle": "Eliminación programada",
+      "pendingDescription": "Tu cuenta se eliminará permanentemente el {date}. Puedes cancelar la eliminación en cualquier momento antes de esa fecha.",
+      "cancelDeletion": "Cancelar eliminación",
+      "cancelling": "Cancelando...",
+      "cancelledOk": "✓ eliminación cancelada — tu cuenta está a salvo",
+      "cancelFailed": "No se pudo cancelar — inténtalo de nuevo o usa el enlace del correo que te enviamos."
     },
     "emailNotifications": {
       "title": "Notificaciones por correo",
@@ -5520,7 +5538,9 @@
     "verifyEmail": "Confirma tu correo",
     "verifyEmailDescription": "Confirma la dirección de correo de tu cuenta de Ionexa AI.",
     "chats": "Chats",
-    "admin": "Administración"
+    "admin": "Administración",
+    "cancelDeletion": "Cancelar eliminación de la cuenta",
+    "cancelDeletionDescription": "Cancela la eliminación programada de tu cuenta de Ionexa AI."
   },
   "errors": {
     "retry": "Inténtalo de nuevo",
@@ -6614,6 +6634,14 @@
       "body": "Pulsa el botón para confirmar esta dirección y abrir tu cuenta de Ionexa AI.",
       "button": "Confirmar correo",
       "ignore": "Si no creaste esta cuenta, ignora este correo: sin el enlace no ocurre nada."
+    },
+    "deletionScheduled": {
+      "label": "eliminación de cuenta programada",
+      "title": "tu cuenta está programada para eliminarse",
+      "body": "Tu cuenta de Ionexa AI se eliminará permanentemente el {date}. Hasta entonces puedes cancelar la eliminación y tu cuenta se quedará exactamente como está.",
+      "cta": "Cancelar eliminación",
+      "footer": "Si no lo solicitaste, usa el enlace de arriba para cancelar la eliminación de inmediato.",
+      "preheader": "Tu cuenta de Ionexa AI se eliminará el {date} — puedes cancelar la eliminación en cualquier momento antes de esa fecha."
     }
   },
   "routerReport": {
@@ -6676,7 +6704,7 @@
     },
     "users": {
       "search": "Buscar por email o nombre...",
-      "email": "Email",
+      "email": "Correo",
       "name": "Nombre",
       "plan": "Plan",
       "credits": "Créditos",

@@ -712,6 +712,18 @@
       "loading": "Chargement de votre espace de travail…",
       "syncing": "Synchronisation des données…",
       "ready": "Prêt."
+    },
+    "cancelDeletion": {
+      "title": "Annuler la suppression du compte",
+      "missingToken": "Ce lien ne contient pas son jeton d’annulation. Veuillez utiliser le lien de votre e-mail exactement tel qu’il a été envoyé.",
+      "body": "La suppression de votre compte est programmée. Cliquez ci-dessous pour l’annuler et conserver votre compte.",
+      "cancelling": "Annulation…",
+      "cancelButton": "Conserver mon compte",
+      "failed": "Nous n’avons pas pu annuler la suppression. Réessayez le lien ou contactez le support.",
+      "successTitle": "Suppression annulée",
+      "successBody": "Votre compte est en sécurité. La suppression programmée a été annulée.",
+      "backToDashboard": "Retour au tableau de bord",
+      "home": "Aller à la page d’accueil"
     }
   },
   "settings": {
@@ -822,7 +834,13 @@
       "checkEmail": "Vérifiez votre e-mail pour confirmer la suppression — un lien a été envoyé à <highlight>{email}</highlight>. Il expire dans 1 heure ; rien n'est supprimé tant que vous ne cliquez pas dessus.",
       "emailDoesNotMatch": "L'e-mail ne correspond pas.",
       "couldNotStartDeletion": "✗ impossible de lancer la suppression du compte",
-      "failed": "Nous n'avons pas pu envoyer l'e-mail de confirmation. Réessayez dans un instant — rien n'a été supprimé."
+      "failed": "Nous n'avons pas pu envoyer l'e-mail de confirmation. Réessayez dans un instant — rien n'a été supprimé.",
+      "pendingTitle": "Suppression programmée",
+      "pendingDescription": "La suppression définitive de votre compte est programmée pour le {date}. Vous pouvez l’annuler à tout moment d’ici là.",
+      "cancelDeletion": "Annuler la suppression",
+      "cancelling": "Annulation...",
+      "cancelledOk": "✓ suppression annulée — votre compte est en sécurité",
+      "cancelFailed": "Impossible d’annuler — réessayez ou utilisez le lien dans l’e-mail que nous vous avons envoyé."
     },
     "emailNotifications": {
       "title": "Notifications par e-mail",
@@ -5520,7 +5538,9 @@
     "verifyEmail": "Confirmez votre e-mail",
     "verifyEmailDescription": "Confirmez l’adresse e-mail de votre compte Ionexa AI.",
     "chats": "Discussions",
-    "admin": "Administration"
+    "admin": "Administration",
+    "cancelDeletion": "Annuler la suppression du compte",
+    "cancelDeletionDescription": "Annulez la suppression programmée de votre compte Ionexa AI."
   },
   "errors": {
     "retry": "Réessayer",
@@ -6614,6 +6634,14 @@
       "body": "Appuyez sur le bouton pour confirmer cette adresse et ouvrir votre compte Ionexa AI.",
       "button": "Confirmer l’e-mail",
       "ignore": "Si vous n’avez pas créé ce compte, ignorez cet e-mail : rien ne se passe sans le lien."
+    },
+    "deletionScheduled": {
+      "label": "suppression du compte programmée",
+      "title": "la suppression de votre compte est programmée",
+      "body": "Votre compte Ionexa AI sera définitivement supprimé le {date}. D’ici là, vous pouvez annuler la suppression et conserver votre compte exactement tel quel.",
+      "cta": "Annuler la suppression",
+      "footer": "Si vous n’êtes pas à l’origine de cette demande, utilisez le lien ci-dessus pour annuler immédiatement.",
+      "preheader": "Votre compte Ionexa AI sera supprimé le {date} — vous pouvez annuler à tout moment d’ici là."
     }
   },
   "routerReport": {
@@ -6676,7 +6704,7 @@
     },
     "users": {
       "search": "Rechercher par email ou nom...",
-      "email": "Email",
+      "email": "E-mail",
       "name": "Nom",
       "plan": "Forfait",
       "credits": "Crédits",

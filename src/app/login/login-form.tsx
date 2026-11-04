@@ -86,8 +86,18 @@ export function LoginForm() {
         // eslint-disable-next-line no-console
         console.error("Login error:", data?.error);
         // A right password on an address not yet proved: a new link has
-        // been sent (api/auth/login), and the reader is told so.
-        setError(data?.code === "email_not_confirmed" ? t("emailNotConfirmed") : getErrorMessage(data?.error, t("failed")));
+        // been sent (api/auth/login), and the reader is told so. A 429
+        // (too many failed attempts, by IP or by account — ΑΣ2-1.2) is
+        // said in the reader's own language too: without this branch,
+        // getErrorMessage would read the route's own English sentence
+        // straight off data.error and show it untranslated.
+        setError(
+          data?.code === "email_not_confirmed"
+            ? t("emailNotConfirmed")
+            : data?.code === "rate_limited"
+              ? t("rateLimited")
+              : getErrorMessage(data?.error, t("failed"))
+        );
         return;
       }
 

@@ -55,6 +55,13 @@ export type UserFullContext = {
   healthScore: HealthScoreResult;
   knowledgeGraphLinkCount: number;
   knowledgeGraphLinksThisWeek: number;
+  /** «What Ionexa knows» (Κομμάτι 4) — the project's own hand-written
+   *  notes, verbatim. Null unscoped, or scoped to a project with nothing
+   *  written yet. Rendered into the prompt by both
+   *  buildUserContextPromptAddition* functions below, below the module
+   *  summaries, so it reads as the owner's own word on the project
+   *  rather than one more scanned row. */
+  projectNotes: string | null;
 };
 
 type ModuleScan = {
@@ -208,6 +215,7 @@ export async function getUserFullContext(
     healthScore,
     knowledgeGraphLinkCount: totalLinksResult.count ?? 0,
     knowledgeGraphLinksThisWeek: recentLinksResult.count ?? 0,
+    projectNotes: scope?.notes ?? null,
   };
 }
 
@@ -216,6 +224,9 @@ type ProjectScope = {
   rowsPerModule: number;
   /** Member ids, per classifier table. Only the tables the scan walks. */
   idsByTable: Map<string, string[]>;
+  /** «What Ionexa knows» — the project's own `notes` column, verbatim.
+   *  Null means nothing written, same meaning as the column itself. */
+  notes: string | null;
 };
 
 /**
@@ -234,19 +245,29 @@ async function loadProjectScope(
 ): Promise<ProjectScope | null> {
   if (!isUuid(projectId)) return null;
   try {
-    const { data, error } = await supabase
-      .from("entity_links")
-      .select("source_table, source_id, target_table, target_id, relationship_type")
-      // EXPLICIT, not left to RLS — the same reason as scanModule below:
-      // two job handlers call this with the service-role client.
-      .eq("user_id", userId)
-      .eq("relationship_type", IN_PROJECT)
-      .or(projectEdgeFilter(projectId))
-      .limit(MAX_MEMBERS * 2);
+    const [edgesResult, projectResult] = await Promise.all([
+      supabase
+        .from("entity_links")
+        .select("source_table, source_id, target_table, target_id, relationship_type")
+        // EXPLICIT, not left to RLS — the same reason as scanModule below:
+        // two job handlers call this with the service-role client.
+        .eq("user_id", userId)
+        .eq("relationship_type", IN_PROJECT)
+        .or(projectEdgeFilter(projectId))
+        .limit(MAX_MEMBERS * 2),
+      // «What Ionexa knows» (Κομμάτι 4) — scoped by user_id EXPLICITLY,
+      // same reason: the service-role client has no RLS to fall back on.
+      supabase.from("projects").select("notes").eq("id", projectId).eq("user_id", userId).maybeSingle(),
+    ]);
+    const { data, error } = edgesResult;
     if (error || !data) {
       if (error) logApiError("user-context:loadProjectScope", error, { projectId });
       return null;
     }
+    if (projectResult.error) {
+      logApiError("user-context:loadProjectScope", projectResult.error, { projectId, stage: "notes" });
+    }
+    const notes = (projectResult.data?.notes as string | null) ?? null;
     const members = projectMembers(data, projectId);
     const readable = new Set(projectContextModules(members));
     const idsByTable = new Map<string, string[]>();
@@ -254,8 +275,13 @@ async function loadProjectScope(
       if (!readable.has(member.table)) continue;
       idsByTable.set(member.table, [...(idsByTable.get(member.table) ?? []), member.id]);
     }
-    if (idsByTable.size === 0) return null;
-    return { rowsPerModule: rowsPerModuleInProject(idsByTable.size), idsByTable };
+    // NOTES KEEP THE SCOPE ALIVE EVEN WITH NOTHING ELSE IN THE PROJECT —
+    // a brand-new project with a paragraph of hand-written notes and
+    // nothing added to it yet is still worth scoping to; the old
+    // idsByTable.size === 0 check alone would have dropped the notes
+    // along with the (correctly) empty module read.
+    if (idsByTable.size === 0 && !notes) return null;
+    return { rowsPerModule: rowsPerModuleInProject(idsByTable.size), idsByTable, notes };
   } catch (err) {
     logApiError("user-context:loadProjectScope", err, { projectId });
     return null;
@@ -383,6 +409,9 @@ export function buildUserContextPromptAdditionGreek(context: UserFullContext): s
   if (context.moduleSummaries.length > 0) {
     parts.push(`Πρόσφατες εγγραφές ανά ενότητα:\n${formatModuleLines(context.moduleSummaries)}`);
   }
+  if (context.projectNotes) {
+    parts.push(`Σημειώσεις που έγραψε ο χρήστης για αυτό το Project:\n${context.projectNotes}`);
+  }
   if (context.activeMissions.length > 0) {
     const missionLines = context.activeMissions
       .map((m) => `- "${m.goal}" (${m.stepsCompleted}/${m.stepsTotal} βήματα ολοκληρωμένα)`)
@@ -407,6 +436,9 @@ export function buildUserContextPromptAdditionEnglish(context: UserFullContext):
 
   if (context.moduleSummaries.length > 0) {
     parts.push(`Recent entries per module:\n${formatModuleLines(context.moduleSummaries)}`);
+  }
+  if (context.projectNotes) {
+    parts.push(`Notes the user wrote for this project:\n${context.projectNotes}`);
   }
   if (context.activeMissions.length > 0) {
     const missionLines = context.activeMissions

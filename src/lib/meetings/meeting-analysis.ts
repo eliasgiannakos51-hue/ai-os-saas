@@ -206,6 +206,135 @@ export function isAnalysable(transcript: string): boolean {
 }
 
 /**
+ * ONE SPEAKER TURN. Structurally the same shape voice-providers.ts's own
+ * `DiarizedSegment` is, but NOT imported from there: that file carries
+ * the actual provider call and this one is reached by
+ * meetings-workspace.tsx (a client component, "use client") through the
+ * already-existing `ProposedAction` type import — a real import of a
+ * provider-calling module through that same path is the shape
+ * entry-points.test.mjs's route graph cannot tell apart from one the
+ * client bundle actually reaches (it does not distinguish `import type`
+ * from a real one). Two matching shapes cost four lines; a transitive
+ * server-only import reaching the browser costs a build nobody can
+ * explain.
+ */
+export type SpeakerTurn = { speaker: string; start: number; end: number; text: string };
+
+/**
+ * MEETINGS Κομμάτι 3: THE TRANSCRIPT SPEAKERS CAN ACTUALLY READ.
+ *
+ * Consecutive segments from the SAME speaker are merged into one line —
+ * diarization answers in short utterance-sized chunks, and printing each
+ * one separately reads as the speaker interrupting themselves every few
+ * words. Speakers are assigned stable letters (A, B, C…) by the order
+ * they first speak, never trusting the provider's own label to already
+ * be one: nothing in gpt-4o-transcribe-diarize's docs promises a single
+ * letter, only "a speaker label".
+ *
+ * THE WORD BEFORE THE LETTER IS PART OF THE MEETING'S OWN CONTENT, not a
+ * UI string — the same reasoning systemPrompt() above already applies to
+ * the summary: a Greek meeting stays Greek regardless of the reader's
+ * interface locale. For every other detected language this prints the
+ * bare letter with no word at all, rather than inventing an English one
+ * scripts/tests/i18n-coverage.test.mjs's own src/lib ceiling exists to
+ * catch — Κομμάτι 3's own quality bar is Greek, and a wrong guess at
+ * "Speaker"/"Locuteur"/... for every other language is worse than no
+ * word.
+ */
+/**
+ * ONE MERGED LINE, WITH WHERE IT STARTS.
+ *
+ * `start` is the FIRST original segment's own start time, in seconds —
+ * never recomputed or guessed. A merged line spans several original
+ * provider segments; clicking it (Κομμάτι 5) seeks to where that speaker
+ * BEGAN talking, not to some point inside what they said, which is the
+ * one place in the line a click can mean without ambiguity.
+ */
+export type DiarizedLine = { speaker: string; text: string; start: number };
+
+/** The merge both `formatDiarizedTranscript` and `diarizedTranscriptLines`
+ *  share — one algorithm, read two ways, so the text a reader sees and
+ *  the line a click seeks on can never silently disagree about where one
+ *  turn ends and the next begins. */
+function mergeDiarizedTurns(segments: SpeakerTurn[], language: string | null): DiarizedLine[] {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const letterFor = new Map<string, string>();
+  const prefix = language === "el" ? "Ομιλητής" : null;
+  const lines: DiarizedLine[] = [];
+  let currentRaw: string | null = null;
+  let currentWords: string[] = [];
+  let currentStart = 0;
+
+  function flush() {
+    if (currentRaw === null || currentWords.length === 0) return;
+    const letter = letterFor.get(currentRaw) ?? "?";
+    const label = prefix ? `${prefix} ${letter}` : letter;
+    lines.push({ speaker: label, text: currentWords.join(" "), start: currentStart });
+    currentWords = [];
+  }
+
+  for (const segment of segments) {
+    const text = segment.text.trim();
+    if (!text) continue;
+    if (!letterFor.has(segment.speaker)) {
+      letterFor.set(segment.speaker, letters[letterFor.size % letters.length]);
+    }
+    if (segment.speaker !== currentRaw) {
+      flush();
+      currentRaw = segment.speaker;
+      currentStart = segment.start;
+    }
+    currentWords.push(text);
+  }
+  flush();
+  return lines;
+}
+
+/**
+ * MEETINGS Κομμάτι 3: THE TRANSCRIPT SPEAKERS CAN ACTUALLY READ.
+ *
+ * Consecutive segments from the SAME speaker are merged into one line —
+ * diarization answers in short utterance-sized chunks, and printing each
+ * one separately reads as the speaker interrupting themselves every few
+ * words. Speakers are assigned stable letters (A, B, C…) by the order
+ * they first speak, never trusting the provider's own label to already
+ * be one: nothing in gpt-4o-transcribe-diarize's docs promises a single
+ * letter, only "a speaker label".
+ *
+ * THE WORD BEFORE THE LETTER IS PART OF THE MEETING'S OWN CONTENT, not a
+ * UI string — the same reasoning systemPrompt() above already applies to
+ * the summary: a Greek meeting stays Greek regardless of the reader's
+ * interface locale. For every other detected language this prints the
+ * bare letter with no word at all, rather than inventing an English one
+ * scripts/tests/i18n-coverage.test.mjs's own src/lib ceiling exists to
+ * catch — Κομμάτι 3's own quality bar is Greek, and a wrong guess at
+ * "Speaker"/"Locuteur"/... for every other language is worse than no
+ * word.
+ */
+export function formatDiarizedTranscript(
+  segments: SpeakerTurn[],
+  language: string | null
+): string {
+  return mergeDiarizedTurns(segments, language)
+    .map((line) => `${line.speaker}: ${line.text}`)
+    .join("\n");
+}
+
+/**
+ * MEETINGS Κομμάτι 5: THE SAME LINES, STILL CARRYING WHERE EACH ONE
+ * STARTS — never persisted (the audio itself never is, see
+ * api/meetings/transcribe's own header), held in the browser only for
+ * as long as the clip just transcribed in this tab is, same lifetime as
+ * `playerUrl` in meetings-workspace.tsx.
+ */
+export function diarizedTranscriptLines(
+  segments: SpeakerTurn[],
+  language: string | null
+): DiarizedLine[] {
+  return mergeDiarizedTurns(segments, language);
+}
+
+/**
  * A title for the history list, taken from the transcript rather than
  * from the filename.
  *

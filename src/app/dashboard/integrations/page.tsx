@@ -18,6 +18,9 @@ import { providerConfigured } from "@/lib/integrations/oauth";
 import { PROVIDERS, type ProviderId } from "@/lib/integrations/providers";
 import { IntegrationsList } from "@/components/integrations/integrations-list";
 import { McpApps } from "@/components/integrations/mcp-apps";
+import { TelegramConnect, type TelegramState } from "@/components/integrations/telegram-connect";
+import { readTelegramState } from "@/lib/telegram/link-state";
+import { logApiError } from "@/lib/log-error";
 import { listMcpServers } from "@/lib/mcp/store";
 import { maxMcpServersForPlan } from "@/lib/mcp/limits";
 
@@ -57,12 +60,39 @@ export default async function IntegrationsPage() {
   const mcpServers = await listMcpServers(user.id);
   const mcpCap = isAdmin ? 100 : maxMcpServersForPlan(planSlug);
 
+  // TELEGRAM (the owner's directive 24, κομμάτι 1). Read on the server so
+  // a connected account does not see "not connected" for one frame.
+  //
+  // THE SWITCH IS READ INSIDE readTelegramState, NOT HERE, and that is a
+  // rule about this page rather than a preference: google-calendar.test.mjs
+  // forbids any isFeatureOn on dashboard/integrations/page.tsx, because a
+  // switch once hid every connection from everybody. null means "not open
+  // to this account", and the section is then not drawn at all.
+  //
+  // THE try/catch IS NOT DEFENSIVE NOISE. Every migration in this
+  // repository is pasted into the SQL editor by hand (CLAUDE.md), so
+  // public.telegram_links may not exist yet on a deployment that has this
+  // code. Without this, the whole Connect page — Gmail, Drive, Calendar,
+  // Slack, MCP — would 500 on a missing table, which is precisely how
+  // user_websites.generation_notes broke website generation on 2026-09-04.
+  // The section degrades to "not ready yet", which is true for a missing
+  // table exactly as it is for a missing bot token.
+  let telegramState: TelegramState | null = null;
+  try {
+    telegramState = await readTelegramState(user);
+  } catch (err) {
+    logApiError("/dashboard/integrations", err, { stage: "telegram-state" });
+    telegramState = { status: "none", botUsername: null, ready: false };
+  }
+
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader helpKey="help.integrations" helpArticle="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
 
         <McpApps initialServers={mcpServers} cap={mcpCap} />
+
+        {telegramState && <TelegramConnect initialState={telegramState} />}
 
         {shown.length > 0 && (
           <div className="mt-10">

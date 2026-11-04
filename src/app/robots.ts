@@ -24,7 +24,15 @@ export default function robots(): MetadataRoute.Robots {
       // worse than none, and it is what a person reads to learn which
       // pages are meant to be indexed.
       allow: ["/", ...FOOTER_LINKS.map((l) => l.href), "/s/"],
-      disallow: ["/dashboard", "/api", "/login", "/forgot-password", "/reset-password"],
+      // /shared/ (Projects Κομμάτι 7): each address is one project's own
+      // secret, revocable link — "/" already permits it like every other
+      // page, so without this a crawler that found one (pasted somewhere
+      // public, say) would index and cache a project's content even
+      // after the owner presses Revoke. The page's own noindex meta
+      // (src/app/shared/[token]/page.tsx) is the second, independent
+      // layer: this line stops the crawl, that one stops the index if
+      // something crawls it anyway.
+      disallow: ["/dashboard", "/api", "/login", "/forgot-password", "/reset-password", "/shared"],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,
   };

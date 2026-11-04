@@ -94,6 +94,12 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
       protection: /scope: "subscription_change"/,
       why: "proration_behavior 'always_invoice' charges the card there and then. Guarded by consume_rate_limit on (user, plan, interval) — atomic, no 24h cache — with a Stripe key as the backstop.",
     },
+    {
+      where: "src/app/api/admin/refund/route.ts",
+      call: "stripe.refunds.create",
+      protection: /idempotencyKey: `refund:\$\{paymentIntentId\}/,
+      why: "moves money OUT, refunding a charge. An admin double-click or a retried request must not refund the same payment intent twice. Stripe's own key, on the intent and the amount.",
+    },
   ];
   for (const { where, call, protection, why } of MONEY_CALLS) {
     const src = read(where);

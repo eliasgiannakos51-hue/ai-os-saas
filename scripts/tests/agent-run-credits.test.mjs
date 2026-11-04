@@ -141,7 +141,7 @@ check("the agent_run handler emits usage.wouldHaveCharged from the settlement",
 // ---------------------------------------------------------------------
 // 5. Both screens branch. This is the defect as reported.
 // ---------------------------------------------------------------------
-const workspace = read("src/components/agents/agents-workspace.tsx");
+const workspace = read("src/components/agents/agents-shell.tsx");
 check("the run toast branches on usage.bypass instead of printing a bare 0",
   /result\.usage\?\.bypass/.test(workspace) && /runSuccessUnlimitedCost/.test(workspace));
 check("the run history branches on would_have_charged_credits",

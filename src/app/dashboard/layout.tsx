@@ -49,6 +49,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  if (user.user_metadata?.suspended === true) {
+    redirect("/suspended");
+  }
+
   // Fire-and-forget: if this email has a pending team invite, join it now.
   // Any effect lands on the user's *next* request (this one already fetched
   // `user` above), which is fine for a low-frequency, best-effort check.
@@ -197,11 +201,28 @@ export default async function DashboardLayout({
                     had nothing to land on, and so did the page's own
                     outline.
                     Putting it in the layout is what makes it true for all
-                    61 pages instead of 8, and the four components below
-                    COUNT: 61 /page\.tsx$/ in src/app/dashboard/
+                    65 pages instead of 8, and the four components below
+                    COUNT: 65 /page\.tsx$/ in src/app/dashboard/
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}
+                {/* WHY THE HISTORY OF THAT NUMBER IS IN ITS OWN BLOCK, and
+                    not up there with the marker. The count moved on
+                    2026-11-04 when /dashboard/admin landed (οδηγία 42
+                    Κομμάτι 1, a day after the marker was last set). The
+                    first fix wrote the before-and-after INSIDE the block
+                    above — and that silently disarmed
+                    count-claims.mutation.mjs, whose mutant changes the
+                    sentence's number and expects "every marker's number is
+                    also written in the sentence it vouches for" to fire.
+                    It did not fire: the old number was still sitting in the
+                    explanation, so the block still contained a matching
+                    digit string and the gate stayed green. The mutation
+                    suite reported it as a HOLE.
+                    So the rule for this block: the vouched block holds the
+                    sentence and the marker and NOTHING ELSE that carries a
+                    count. Prose about the count goes here, where mutating
+                    the sentence above cannot be rescued by it. */}
                 {/* pb-16 below md: the phone's bottom bar
                     (components/dashboard/mobile-tab-bar.tsx) sits over the
                     last 64px, and content must not end underneath it. */}

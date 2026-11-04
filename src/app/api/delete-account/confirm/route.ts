@@ -6,6 +6,9 @@ import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { eraseUserStorage } from "@/lib/account/erase-storage";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { scheduleDeletion, DELETION_GRACE_DAYS } from "@/lib/account/pending-deletion";
+import { sendDeletionScheduledEmail } from "@/lib/email/send-deletion-scheduled-email";
 
 // @service-role-justified token-auth — the 256-bit single-use token from
 // the emailed link IS the proof of identity (see the file comment below);
@@ -79,6 +82,47 @@ export async function POST(request: Request) {
         { ok: false, code: "link_invalid", error: "This link is invalid or has expired." },
         { status: 400 }
       );
+    }
+
+    // --- DEFERRED DELETION (directive 39 Κομμάτι 3) ---
+    // When the flag is on, schedule the deletion 30 days out instead of
+    // executing it inline. The user gets an email with a cancel link.
+    // The old immediate path remains as the fallback when the flag is off.
+    const { data: authUserForFlag } = await admin.auth.admin.getUserById(claimed.user_id);
+    const deferredOn = await isFeatureOn("deferred-deletion", authUserForFlag?.user);
+    if (deferredOn) {
+      const result = await scheduleDeletion(admin, claimed.user_id);
+      if (!result) {
+        logApiError("/api/delete-account/confirm", new Error("scheduleDeletion returned null"), {
+          stage: "schedule_deferred",
+          userId: claimed.user_id,
+        });
+        return NextResponse.json(
+          { ok: false, code: "retry", error: "Something went wrong. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      const userEmail = authUserForFlag?.user?.email;
+      if (userEmail) {
+        try {
+          await sendDeletionScheduledEmail(
+            userEmail,
+            result.cancelToken,
+            result.row.delete_after,
+            authUserForFlag?.user?.id,
+          );
+        } catch (emailErr) {
+          logApiError("/api/delete-account/confirm", emailErr, { stage: "send_scheduled_email" });
+        }
+      }
+
+      return NextResponse.json({
+        ok: true,
+        deferred: true,
+        deleteAfter: result.row.delete_after,
+        graceDays: DELETION_GRACE_DAYS,
+      });
     }
 
     // The uploaded FILES first, and before the auth user, because

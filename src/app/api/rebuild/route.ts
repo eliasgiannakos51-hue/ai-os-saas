@@ -8,16 +8,32 @@ import { resolveLanguage } from "@/lib/text/resolve-language";
 import { rebuildGate } from "@/lib/rebuild/access";
 import { chargedRebuildStep } from "@/lib/rebuild/charge";
 import { planApp } from "@/lib/rebuild/rebuild-call";
-import { MAX_DESCRIPTION_CHARS, planMessage } from "@/lib/rebuild/rebuild-plan";
+import { MAX_DESCRIPTION_CHARS, planMessage, type RebuildBrandHint } from "@/lib/rebuild/rebuild-plan";
+import { MAX_FEATURES, MAX_FEATURE_CHARS } from "@/lib/rebuild/rebuild-features";
 import { rebuildSystemPrompt } from "@/lib/rebuild/rebuild-system";
 import { readReferencePage } from "@/lib/rebuild/reference";
 import { firstUrl } from "@/lib/rebuild/structure";
+import { loadMemories } from "@/lib/memory/store";
+import { readBrand } from "@/lib/memory/brand";
+import { memoryWindowFor } from "@/lib/memory/memory-window";
 
 export const dynamic = "force-dynamic";
+// Needed next to force-dynamic, not redundant with it — see
+// src/app/s/[subdomain]/route.ts's own comment on this exact trap.
+// force-dynamic governs this ROUTE's caching; it says nothing about the
+// fetches @supabase/ssr's client makes FROM it, and those are what Next
+// patches globally. Κομμάτι 4's remembered-brand read (chat_memory, below)
+// asks the SAME URL on every plan call for a given account — same
+// user_id, same limit — whether or not the person has said anything to
+// remember yet, so the first (empty) answer this build ever sees for that
+// URL would otherwise be replayed forever, on every later plan call in
+// the same deployment, even after a brand fact is saved.
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
 export const maxDuration = 120; // @function-limit 120
 
 /** What a client may be handed of a stored app: never another account's, never a column it need not see. */
-export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, updated_at";
+export const REBUILD_COLUMNS = "id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at";
 
 /**
  * AN APP, PLANNED FROM A DESCRIPTION (Rebuild, the final All tools grid),
@@ -50,6 +66,12 @@ export async function POST(request: Request) {
   if (!description) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
   if (description.length > MAX_DESCRIPTION_CHARS) return NextResponse.json({ ok: false, code: "too_long", limit: MAX_DESCRIPTION_CHARS }, { status: 400 });
   const uiLocale = typeof body.locale === "string" && (SUPPORTED_LOCALES as readonly string[]).includes(body.locale) ? body.locale : "en";
+  // Κομμάτι 2: features the person kept from the capabilities step
+  // (api/rebuild/features), never trusted further than any other word
+  // they typed — clipped and bounded exactly as a box is.
+  const features = Array.isArray(body.features)
+    ? body.features.filter((f): f is string => typeof f === "string" && f.trim().length > 0).map((f) => f.trim().slice(0, MAX_FEATURE_CHARS)).slice(0, MAX_FEATURES)
+    : [];
 
   const supabase = await createClient();
   const {
@@ -72,7 +94,15 @@ export async function POST(request: Request) {
     }
 
     const locale = resolveLanguage(description, uiLocale);
-    const message = planMessage(description, locale, reference?.rendered);
+    // Κομμάτι 4: the Brand Kit's own narrow source — a remembered business
+    // name/colour, the SAME two facts Flows already reuses
+    // (lib/flows/page-data.ts) — folded in as a hint for the look box
+    // only, never the app's own name. A cheap account read, not an AI
+    // call: it costs nothing to check even when memory knows nothing.
+    const memories = await loadMemories(supabase, user.id, memoryWindowFor(gate.plan?.capabilities.chatMemoryLimit ?? 0, gate.isAdmin));
+    const remembered = readBrand(memories);
+    const brand: RebuildBrandHint = { name: remembered.name, colourHex: remembered.colours.find((c) => c.hex)?.hex ?? null };
+    const message = planMessage(description, locale, reference?.rendered, features, brand);
     const step = await chargedRebuildStep({
       user,
       gate,
@@ -81,14 +111,19 @@ export async function POST(request: Request) {
       inputChars: rebuildSystemPrompt().length + message.length,
       fingerprint: description,
       route: "/api/rebuild",
-      metadata: { step: "plan", descriptionChars: description.length, withReference: Boolean(reference) },
-      run: (costs) => planApp({ description, locale, reference: reference?.rendered, costs, userId: user.id, signal: request.signal }),
+      metadata: { step: "plan", descriptionChars: description.length, withReference: Boolean(reference), featureCount: features.length },
+      run: (costs) => planApp({ description, locale, reference: reference?.rendered, features, brand, costs, userId: user.id, signal: request.signal }),
     });
     if (!step.ok) return step.response;
 
+    // Κομμάτι 3: the phase count is decided HERE, once, from what was kept
+    // on the capabilities step — never recomputed later, so a box edited
+    // afterwards cannot quietly add or remove a phase the person never
+    // approved.
+    const hasAppPhase = features.length > 0;
     const { data: row, error } = await createAdminClient()
       .from("rebuild_projects")
-      .insert({ user_id: user.id, title: step.value.title, description, locale, plan: step.value, reference })
+      .insert({ user_id: user.id, title: step.value.title, description, locale, plan: step.value, reference, has_app_phase: hasAppPhase })
       .select(REBUILD_COLUMNS)
       .single();
     if (error || !row) {

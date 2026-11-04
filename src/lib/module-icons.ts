@@ -25,6 +25,7 @@ import {
   LifeBuoy,
   Lightbulb,
   LineChart,
+  ListChecks,
   Megaphone,
   MessageCircle,
   MessageSquare,
@@ -276,3 +277,7 @@ export const GAMES_ICON: LucideIcon = Gamepad2;
 // A dashed circle, not a solid one: it reads as an outline of something
 // rather than a thing.
 export const HELD_POSITION_ICON: LucideIcon = CircleDashed;
+
+// A checklist, because what a skill IS is an ordered list of steps
+// followed the same way every time (directive 29, 2026-10-31).
+export const SKILLS_ICON: LucideIcon = ListChecks;

@@ -153,10 +153,12 @@ console.log("\n== 7. the app's own security headers ==");
 const config = await import(path.resolve("next.config.mjs"));
 const headers = Object.fromEntries((config.APP_SECURITY_HEADERS ?? []).map((h) => [h.key, h.value]));
 ok("framing refused", headers["X-Frame-Options"] === "DENY" && /frame-ancestors 'none'/.test(headers["Content-Security-Policy"] ?? ""));
+ok("...and an image a chat answer embeds can only come from the app itself, inline data, or a local blob (ΑΣ2-3.1)",
+  /img-src 'self' data: blob:/.test(headers["Content-Security-Policy"] ?? "") && !/img-src[^;]*https:/.test(headers["Content-Security-Policy"] ?? ""));
 ok("no content-type guessing", headers["X-Content-Type-Options"] === "nosniff");
 ok("a referrer policy and a permissions policy", Boolean(headers["Referrer-Policy"]) && /camera=\(\)/.test(headers["Permissions-Policy"] ?? ""));
 const resolved = await config.default.headers();
-ok("applied to every path but the published sites", resolved.length === 1 && resolved[0].source === "/((?!s/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
+ok("applied to every path but the published sites and published Rebuild apps", resolved.length === 1 && resolved[0].source === "/((?!s/|a/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
 ok("the framework is not announced", config.default.poweredByHeader === false);
 
 // =====================================================================

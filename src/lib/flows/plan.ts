@@ -246,6 +246,19 @@ export const STEP_STATUSES = ["running", "done", "failed"] as const;
 export type StepStatus = (typeof STEP_STATUSES)[number];
 export type StepState = { status: StepStatus; row?: string; error?: string };
 
+/**
+ * A raw `project_flows` row, its project's name joined in. Lives here
+ * (not in components/flows/flow-shell.tsx, where it used to) because
+ * THIS file has no other import — flow-shell.tsx pulls in
+ * components/chat/chat-composer.tsx (for `ChatComposerHandle`'s type
+ * only), and scripts/lib/route-graph.mjs's reachability walk, which
+ * feeds one-primary-action.test.mjs, does not distinguish `import type`
+ * from a real one: Projects Κομμάτι 6 importing `FlowRow` from
+ * flow-shell.tsx made chat-composer.tsx's own filled send button read as
+ * dashboard/projects/page.tsx's fourth, when nothing new renders there.
+ */
+export type FlowRow = { id: string; project_id: string; said: string; colour: string | null; plan: unknown; steps: unknown; status: string; project_name: string };
+
 /** The stored state of each step, read defensively. */
 export function readStepStates(raw: unknown, plan: FlowPlan): Record<string, StepState> {
   const value = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};

@@ -36,8 +36,24 @@ export type VoiceFailure =
   | { kind: "provider_error"; detail: string }
   | { kind: "empty"; detail: string };
 
+/** One speaker turn, as gpt-4o-transcribe-diarize's `diarized_json`
+ *  response carries it. `speaker` is whatever the provider's own
+ *  generic label is ("A", "B", speaker_0, ...) — never assumed to be a
+ *  single letter, since nothing in its docs promises a shape. */
+export type DiarizedSegment = { speaker: string; start: number; end: number; text: string };
+
 export type TranscribeResult =
-  | { ok: true; text: string; language: string | null; usdCost: number; seconds: number }
+  | {
+      ok: true;
+      text: string;
+      language: string | null;
+      usdCost: number;
+      seconds: number;
+      /** Only present when called with `diarize: true`. Absent (not
+       *  empty) for every other caller, so "no segments" and "nobody
+       *  asked for them" stay two different things. */
+      segments?: DiarizedSegment[];
+    }
   | { ok: false; failure: VoiceFailure };
 
 export type SpeakResult =
@@ -124,6 +140,12 @@ export async function transcribeAudio(params: {
   filename: string;
   durationSeconds: number;
   languageHint?: string;
+  /** Meetings Κομμάτι 3. Switches the model and response format to the
+   *  diarized pair below and parses `segments` into the result. Chat's
+   *  own mic (the only other caller) never sets this — a two-second
+   *  voice message has nobody to diarize, and whisper-1 stays its
+   *  model. */
+  diarize?: boolean;
 }): Promise<TranscribeResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -138,16 +160,26 @@ export async function transcribeAudio(params: {
 
   const form = new FormData();
   form.append("file", params.audio, params.filename);
-  form.append("model", VOICE_MODELS.transcribe);
+  form.append("model", params.diarize ? VOICE_MODELS.meetingTranscribe : VOICE_MODELS.transcribe);
   // THE HINT IS A HINT. Whisper detects the language itself; passing the
   // UI's locale improves it on short clips and must never CONSTRAIN it,
   // because somebody whose interface is English and who speaks Greek is
-  // the case automatic detection exists for.
+  // the case automatic detection exists for. (Meetings never sets this
+  // in the first place — see transcribe/route.ts's own comment.)
   if (params.languageHint) form.append("language", params.languageHint);
-  // verbose_json so the detected language comes back — the UI shows it,
-  // and a transcript in a language the user did not expect is the one
-  // failure they can see and correct before sending.
-  form.append("response_format", "verbose_json");
+  if (params.diarize) {
+    // diarized_json is the only response_format that carries speaker
+    // labels; chunking_strategy is REQUIRED past 30 seconds of audio,
+    // which every meeting this screen accepts already is. "auto" is
+    // the provider's own recommendation, not a guess made here.
+    form.append("response_format", "diarized_json");
+    form.append("chunking_strategy", "auto");
+  } else {
+    // verbose_json so the detected language comes back — the UI shows
+    // it, and a transcript in a language the user did not expect is
+    // the one failure they can see and correct before sending.
+    form.append("response_format", "verbose_json");
+  }
 
   try {
     const response = await withTimeout((signal) =>
@@ -168,8 +200,34 @@ export async function transcribeAudio(params: {
       };
     }
 
-    const data = (await response.json()) as { text?: unknown; language?: unknown; duration?: unknown };
-    const text = typeof data.text === "string" ? data.text.trim() : "";
+    const data = (await response.json()) as {
+      text?: unknown;
+      language?: unknown;
+      duration?: unknown;
+      segments?: unknown;
+    };
+    // SEGMENTS, PARSED DEFENSIVELY — this is the one response shape in
+    // this file nobody here has ever actually seen: diarized_json is a
+    // DIFFERENT shape than verbose_json's, and a field that is missing,
+    // renamed or typed differently by the provider must come back as
+    // "no segments", never throw past this function into the route.
+    const rawSegments = params.diarize && Array.isArray(data.segments) ? data.segments : [];
+    const segments: DiarizedSegment[] = rawSegments
+      .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === "object")
+      .map((s) => ({
+        speaker: typeof s.speaker === "string" && s.speaker.trim() ? s.speaker.trim() : "?",
+        start: typeof s.start === "number" ? s.start : 0,
+        end: typeof s.end === "number" ? s.end : 0,
+        text: typeof s.text === "string" ? s.text.trim() : "",
+      }))
+      .filter((s) => s.text.length > 0);
+    // `text` falls back to the segments joined when the top-level field
+    // is absent — diarized_json's own docs do not promise it the way
+    // verbose_json's always has.
+    const text =
+      typeof data.text === "string" && data.text.trim()
+        ? data.text.trim()
+        : segments.map((s) => s.text).join(" ");
     // AN EMPTY TRANSCRIPT IS ITS OWN OUTCOME, not an error. It means the
     // clip had no speech in it — a muted microphone, a wrong device, a
     // press that caught nothing — and the sentence a user needs for that
@@ -184,6 +242,7 @@ export async function transcribeAudio(params: {
       language: typeof data.language === "string" ? data.language : null,
       usdCost: transcribeCostUsd(seconds),
       seconds,
+      ...(params.diarize ? { segments } : {}),
     };
   } catch (err) {
     logApiError("voice:transcribe", err);

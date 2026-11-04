@@ -60,6 +60,13 @@
       "stillOffline": "Immer noch keine Verbindung.",
       "lastResortBody": "Ionexa braucht eine Verbindung, um neue Daten zu laden. Bereits geöffnete Seiten sind weiterhin aus dem Cache dieses Geräts verfügbar — und woran du gearbeitet hast, liegt sicher auf dem Server."
     },
+    "suspended": {
+      "title": "Konto gesperrt",
+      "message": "Ihr Konto wurde wegen Verstoßes gegen die Nutzungsbedingungen gesperrt.",
+      "reason": "Grund",
+      "contact": "Falls Sie glauben, dass es sich um einen Fehler handelt, kontaktieren Sie den Support.",
+      "signOut": "Abmelden"
+    },
     "creditsUnlimited": "Unbegrenzt",
     "examplesLabel": "Probier:",
     "newMessagesBelow": "Neue Nachricht unten",
@@ -125,6 +132,7 @@
       "apps": "App-Ideen",
       "images": "Bild-Ideen",
       "imageTool": "Bild",
+      "appBuilder": "Apps",
       "videos": "Video-Ideen",
       "coding": "Code",
       "dataAnalysis": "Sieh, was die Zahlen sagen",
@@ -227,7 +235,8 @@
       "personalJournal": "Tagebuch",
       "personalLifeOs": "Life OS",
       "activity": "Aktivität",
-      "games": "Spiele"
+      "games": "Spiele",
+      "skills": "Fähigkeiten"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -292,7 +301,8 @@
       "aiMemory": "Was der Chat über dich behalten hat und wie du es löschst.",
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
       "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen",
-      "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto."
+      "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto.",
+      "skills": "Abläufe, die du Ionexa einmal beigebracht hast, damit es jedes Mal denselben Schritten folgt. Vorerst zeigt dies sie nur an."
     },
     "closeMenu": "Menü schließen",
     "rail": {
@@ -606,7 +616,8 @@
       "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist.",
       "oauthFailed": "Diese Anmeldung wurde nicht abgeschlossen. Versuche es erneut oder nutze unten E-Mail und Passwort.",
       "sharedSignInFirst": "Melde dich an, um das Geteilte zu speichern.",
-      "emailNotConfirmed": "Bestätige zuerst deine E-Mail. Wir haben dir gerade einen neuen Link geschickt."
+      "emailNotConfirmed": "Bestätige zuerst deine E-Mail. Wir haben dir gerade einen neuen Link geschickt.",
+      "rateLimited": "Zu viele Versuche. Versuch es später erneut."
     },
     "signup": {
       "chooseYourPlan": "Wähle deinen Plan",
@@ -701,6 +712,18 @@
       "loading": "Arbeitsbereich wird geladen…",
       "syncing": "Daten werden synchronisiert…",
       "ready": "Bereit."
+    },
+    "cancelDeletion": {
+      "title": "Kontolöschung abbrechen",
+      "missingToken": "Diesem Link fehlt das Abbruch-Token. Nutze den Link aus deiner E-Mail genau so, wie er gesendet wurde.",
+      "body": "Für dein Konto ist die Löschung geplant. Klicke unten, um sie abzubrechen und dein Konto zu behalten.",
+      "cancelling": "Wird abgebrochen…",
+      "cancelButton": "Mein Konto behalten",
+      "failed": "Wir konnten die Löschung nicht abbrechen. Versuch den Link erneut oder wende dich an den Support.",
+      "successTitle": "Löschung abgebrochen",
+      "successBody": "Dein Konto ist sicher. Die geplante Löschung wurde abgebrochen.",
+      "backToDashboard": "Zurück zum Dashboard",
+      "home": "Zur Startseite"
     }
   },
   "settings": {
@@ -811,7 +834,13 @@
       "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst.",
       "emailDoesNotMatch": "Die E-Mail stimmt nicht überein.",
       "couldNotStartDeletion": "✗ Kontolöschung konnte nicht gestartet werden",
-      "failed": "Wir konnten die Bestätigungs-E-Mail nicht senden. Versuch es gleich noch einmal — es wurde nichts gelöscht."
+      "failed": "Wir konnten die Bestätigungs-E-Mail nicht senden. Versuch es gleich noch einmal — es wurde nichts gelöscht.",
+      "pendingTitle": "Löschung geplant",
+      "pendingDescription": "Dein Konto wird am {date} dauerhaft gelöscht. Du kannst die Löschung jederzeit vorher abbrechen.",
+      "cancelDeletion": "Löschung abbrechen",
+      "cancelling": "Wird abgebrochen...",
+      "cancelledOk": "✓ Löschung abgebrochen — dein Konto ist sicher",
+      "cancelFailed": "Die Löschung konnte nicht abgebrochen werden — versuch es erneut oder nutze den Link in der E-Mail, die wir dir gesendet haben."
     },
     "emailNotifications": {
       "title": "E-Mail-Benachrichtigungen",
@@ -1105,6 +1134,11 @@
       "saveFailed": "Der Name konnte nicht gespeichert werden. Versuch es gleich noch einmal.",
       "save": "Speichern",
       "saving": "Wird gespeichert…"
+    },
+    "skills": {
+      "title": "Fähigkeiten",
+      "description": "Bringe Ionexa einen Ablauf einmal bei, und er folgt denselben Schritten, jedes Mal wenn dieser Ablauf wieder gebraucht wird.",
+      "open": "Fähigkeiten öffnen"
     }
   },
   "dashboard": {
@@ -1443,7 +1477,7 @@
         "fileLimit": "„{name}“: Damit wäre das Limit Ihres Tarifs unter Dateien überschritten. Löschen Sie eine Datei unter Dateien oder wechseln Sie den Tarif.",
         "uploadLimit": "Zu viele Datei-Uploads in der letzten Stunde. Versuchen Sie es in Kürze erneut.",
         "offline": "Keine Verbindung. Prüfen Sie das Netzwerk und versuchen Sie es erneut.",
-        "type": "„{name}“: nur PDF, JPG oder PNG.",
+        "type": "„{name}“: nur PDF, JPG, PNG, CSV oder XLSX.",
         "pdfTooLarge": "„{name}“: Das PDF ist größer als 20 MB.",
         "imageTooLarge": "„{name}“: Das Bild ist größer als 5 MB.",
         "tooManyPdfs": "Bis zu {max} PDFs pro Nachricht.",
@@ -1455,7 +1489,11 @@
         "refused": "Die Anhänge wurden nicht angenommen. Hängen Sie sie erneut an.",
         "openInFiles": "In Dateien öffnen",
         "memoryUsed": "Aus dem Gedächtnis ({count})",
-        "manageMemory": "Was Ionexa sich merkt"
+        "manageMemory": "Was Ionexa sich merkt",
+        "dataTooLarge": "„{name}“: Die Datei ist größer als 8 MB.",
+        "tooManyData": "Bis zu {max} Datendatei pro Nachricht.",
+        "readyData": "Bereit — auch in Analyze",
+        "openInAnalyze": "In Analyze öffnen"
       },
       "deleteFailed": "Diese Unterhaltung wurde nicht gelöscht. Sie ist noch da.",
       "undo": "Rückgängig",
@@ -1464,7 +1502,10 @@
       "moved": "Nach {project} verschoben.",
       "moveFailed": "Das Verschieben hat nicht geklappt. Versuche es erneut.",
       "projectFull": "Dieses Projekt enthält bereits {limit} Dinge — mehr behält es nicht.",
-      "selectOne": "„{title}“ auswählen"
+      "selectOne": "„{title}“ auswählen",
+      "chart": {
+        "cardTitle": "Wie das berechnet wurde"
+      }
     },
     "create": {
       "title": "Alles Erstellen",
@@ -1735,6 +1776,9 @@
       "tabPreview": "Vorschau",
       "tabEdit": "Bearbeiten",
       "tabHistory": "Verlauf",
+      "viewportGroup": "Vorschaubreite",
+      "viewportDesktop": "Desktop-Ansicht",
+      "viewportMobile": "Mobile Ansicht",
       "statusLabel": "Status",
       "statusCompleted": "Fertig",
       "statusFlagged": "Markiert",
@@ -2004,7 +2048,6 @@
       "cancel": "Abbrechen",
       "agentsUsed": "{used} von {cap} Agenten",
       "agentsTotal": "{total} insgesamt (inkl. pausierter)",
-      "requestLabel": "Was soll dieser Agent für Sie tun?",
       "requestPlaceholder": "z. B. Schick mir jeden Morgen die neuesten Nachrichten zu Nvidia",
       "deliveryNote": "Ergebnisse gehen an {email} — die Adresse Ihres Kontos.",
       "designButton": "Agent entwerfen",
@@ -2033,8 +2076,6 @@
       "menuRunNow": "Jetzt ausführen",
       "menuPause": "Pausieren",
       "menuResume": "Fortsetzen",
-      "menuEdit": "Bearbeiten",
-      "menuDelete": "Löschen",
       "pauseSuccess": "Agent pausiert.",
       "resumeSuccess": "Agent fortgesetzt.",
       "deleteSuccess": "Agent gelöscht.",
@@ -2083,9 +2124,8 @@
       },
       "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
       "empty": {
-        "title": "Arbeit, die ohne dich passiert",
-        "why": "Beschreib eine Aufgabe in einem Satz — sie läuft danach nach Zeitplan und liefert das Ergebnis, statt dich daran zu erinnern.",
-        "example": "Jeden Montagmorgen die Verkäufe der Vorwoche zusammenfassen"
+        "title": "Was soll der neue Agent tun?",
+        "why": "Beschreib eine Aufgabe in einem Satz — sie läuft danach nach Zeitplan und liefert das Ergebnis, statt dich daran zu erinnern."
       },
       "delivery": {
         "label": "Wohin das Ergebnis geht",
@@ -2226,7 +2266,39 @@
         "withdrawFailed": "Konnte nicht zurückgezogen werden. Es ist weiterhin geteilt."
       },
       "failingWarning": "{failures} der letzten {max} Läufe sind nacheinander fehlgeschlagen. Nach {max} schaltet sich dieser Agent selbst ab.",
-      "disabledReason": "Letzter Fehler: {reason}"
+      "disabledReason": "Letzter Fehler: {reason}",
+      "shell": {
+        "approvalsNone": "Keine, weil keine nötig sind: nichts, was dieser Agent tut, verlässt Ionexa ohne dich.",
+        "approvalsTitle": "Freigaberegeln",
+        "atCapacity": "Grenze der aktiven erreicht",
+        "capNoHardStop": "Das sind die Kosten, keine Grenze: es gibt noch keine Credit-Grenze, die den Agenten anhält. Er hört auf, wenn die Credits des Kontos aufgebraucht sind, oder von selbst nach {max} Fehlschlägen hintereinander.",
+        "capPerMonth": "Pro Monat, etwa",
+        "capPerMonthValue": "{credits} Credits · {runs} Durchläufe",
+        "capPerRun": "Pro Durchlauf",
+        "capsTitle": "Kosten in Credits",
+        "descriptionChanged": "Die Beschreibung wurde geändert.",
+        "fieldTarget": "Das Feld ändert:",
+        "inboxApprovals": "Wartet auf Freigabe",
+        "inboxApprovalsNone": "Nichts: dieser Agent führt keine Aktion aus, die sich nicht zurücknehmen lässt — er sucht, schreibt und sendet dir das Ergebnis.",
+        "inboxReceived": "Was er empfangen hat",
+        "inboxReceivedNone": "Nichts: der Agent hat noch keine eigene E-Mail-Adresse und kann daher keine Nachrichten empfangen.",
+        "noRunYet": "Kein Schritt hat begonnen. Die Zustände füllen sich live, Schritt für Schritt, sobald er läuft.",
+        "ownEmail": "Eigene Adresse",
+        "ownEmailNone": "Er hat keine. Das Ergebnis geht von der Ionexa-Adresse aus an den Kanal, den du unten gewählt hast.",
+        "placeholderDescription": "Schreibe die neue Beschreibung dieses Agenten…",
+        "placeholderTask": "Schreibe die neue Aufgabe dieses Agenten…",
+        "renameHint": "Umbenennen über das ⋯ neben dem Namen in der Liste.",
+        "scheduleTitle": "Zeitplan",
+        "stateDone": "Fertig",
+        "stateWaiting": "Wartet",
+        "stateWorking": "Läuft",
+        "tabInbox": "Eingang",
+        "tabPlan": "Ablauf",
+        "tabsLabel": "Was du zu diesem Agenten siehst",
+        "taskChanged": "Die Aufgabe wurde geändert.",
+        "toolsNone": "Es gibt noch keine eigene Freigabeliste von Werkzeugen pro Agent: jeder Agent sucht (wenn du es erlaubst), schreibt und sendet an den einen Kanal, den du festgelegt hast.",
+        "toolsTitle": "Werkzeuge und Verbindungen"
+      }
     },
     "publishing": {
       "title": "Live-Seiten",
@@ -2423,6 +2495,71 @@
           "approval_required": "Dieses Werkzeug braucht zuerst deinen Klick.",
           "empty": "Schreib zuerst, was du willst.",
           "default": "Etwas ist schiefgelaufen. Versuche es erneut."
+        }
+      },
+      "telegram": {
+        "title": "Ionexa in Telegram",
+        "intro": "Verbinde deinen eigenen Telegram-Chat, und Ionexa arbeitet auch von dort: du schreibst, es baut. Nur private Chats — nie eine Gruppe.",
+        "notReady": "Telegram ist auf dieser Installation noch nicht eingeschaltet, hier gibt es also nichts zu verbinden. In deinem Konto fehlt nichts.",
+        "offerBody": "Schreib Ionexa aus Telegram, und es baut — Websites, Dokumente, Bilder, Beiträge. Wir zeigen dir einen Einmal-Code, der zehn Minuten gilt.",
+        "connect": "Verbinden",
+        "consentTitle": "Telegram mit deinem Konto verbinden",
+        "consentBody": "Ein verbundener Chat kann Ionexa um Arbeit bitten und deine Credits ausgeben. Lies beide Listen, bevor du verbindest — und trenne die Verbindung, wann du willst.",
+        "consentApprove": "Einverstanden, zeig mir den Code",
+        "consentCancel": "Jetzt nicht",
+        "connecting": "Verbinde…",
+        "canTitle": "Ionexa kann",
+        "cannotTitle": "Ionexa kann nicht",
+        "can": {
+          "chat": "Dir in Telegram so antworten wie im Chat, mit dem gleichen Gedächtnis und in deiner Sprache.",
+          "make": "Machen, worum du bittest — eine Website, ein Dokument, ein Bild, einen Beitrag — nachdem es den Preis gezeigt und auf deinen Druck gewartet hat.",
+          "status": "Dir sagen, wie eine Arbeit läuft, und sie stoppen.",
+          "files": "Ein Foto oder eine Datei, die du schickst, nehmen und in Meine Sachen legen."
+        },
+        "cannot": {
+          "approve": "Einen einzigen Credit ausgeben, bevor du beim Preis auf Freigeben gedrückt hast.",
+          "publish": "Irgendetwas veröffentlichen — eine Website, eine App, einen Beitrag — ohne eine eigene Freigabe für genau diese Sache.",
+          "secrets": "Dir ein Passwort, einen Schlüssel oder einen Code schicken oder einen von dir in einer Nachricht annehmen.",
+          "groups": "In einem Gruppenchat arbeiten. Nur in dem einen privaten Chat, den du verbunden hast."
+        },
+        "activityTitle": "Letzte Aktivität",
+        "activityEmpty": "Noch nichts. Sobald Arbeit aus Telegram kommt, steht hier, was kam und wann.",
+        "activityNotYet": "Noch nichts — du hast keinen Chat verbunden.",
+        "activityLast": "Letzte ausgeführte Nachricht: {time}",
+        "waitingHeading": "Öffne Telegram und schick diesen Code",
+        "waitingHint": "Drück den Knopf, und Telegram schickt den Code für dich. Öffnet sich nichts, schreib /start und den Code von Hand in einen Chat mit dem Bot.",
+        "expiresIn": "Läuft ab in {time}",
+        "expiredNow": "Dieser Code ist abgelaufen. Bitte um einen neuen.",
+        "openInTelegram": "In Telegram öffnen",
+        "cancel": "Abbrechen",
+        "noWebhookYet": "Der Bot kann auf einen Code noch nicht antworten — das ist das nächste Stück. Bis es gebaut ist, passiert in Telegram nichts, wenn du das schickst.",
+        "presentedHeading": "Bist das du?",
+        "presentedBody": "{who} hat deinen Code an den Bot geschickt. Nichts wird verbunden, bis du sagst, dass er dir gehört.",
+        "presentedWarning": "Wenn das nicht du warst, drück „Das bin ich nicht“. Sonst kann, wer deinen Code hat, Ionexa um Arbeit bitten und deine Credits ausgeben.",
+        "presentedConfirm": "Ja, verbinde ihn",
+        "presentedReject": "Das bin ich nicht",
+        "unknownAsker": "ein Telegram-Konto ohne Namen",
+        "connected": "Telegram ist verbunden.",
+        "connectedTo": "Verbunden mit {who}",
+        "connectedSince": "Verbunden {time}",
+        "disconnect": "Trennen",
+        "disconnecting": "Wird getrennt…",
+        "disconnected": "Telegram ist getrennt.",
+        "confirmDisconnect": "Telegram trennen? Der Chat kann Ionexa dann um nichts mehr bitten. Deine Benachrichtigungen ändern sich nicht.",
+        "notTheSameAsNotifications": "Das ist nicht dasselbe wie Telegram-Benachrichtigungen. Die lassen Ionexa nur an dich senden; das hier lässt den Chat Ionexa um Arbeit bitten. Das eine abzuschalten schaltet das andere nicht ab.",
+        "errors": {
+          "not_signed_in": "Melde dich neu an und versuch es noch einmal.",
+          "not_enabled": "Telegram ist für dein Konto noch nicht offen.",
+          "bad_action": "Mit diesem Druck ist etwas schiefgegangen. Versuch es noch einmal.",
+          "bot_unavailable": "Telegram hat gerade nicht geantwortet, es wurde also kein Code erstellt. Versuch es in einem Moment.",
+          "encryption_unavailable": "Der Schlüssel, der zum sicheren Speichern eines Chats nötig ist, fehlt, es wurde also nichts gespeichert. Nichts ist verloren.",
+          "already_linked": "Es ist schon ein Chat verbunden. Trenne ihn zuerst.",
+          "chat_in_use": "Dieser Telegram-Chat ist schon mit einem anderen Konto verbunden. Trenne ihn dort zuerst.",
+          "nothing_to_confirm": "Es wartet nichts auf eine Bestätigung. Der Code wurde vielleicht schon benutzt oder abgebrochen.",
+          "expired": "Dieser Code ist abgelaufen. Bitte um einen neuen.",
+          "rateLimited": "Zu viele Versuche. Warte eine Stunde und versuch es wieder.",
+          "not_started": "Der Code konnte nicht erstellt werden. Versuch es noch einmal.",
+          "failed": "Das hat nicht funktioniert. Versuch es noch einmal."
         }
       }
     },
@@ -2987,8 +3124,13 @@
       "description": "Lade eine Aufnahme hoch. Du bekommst das Transkript, eine Zusammenfassung und eine Liste von Aufgaben, aus der du auswählst.",
       "audioNoticeTitle": "Die Aufnahme wird nicht aufbewahrt",
       "audioNotice": "Die Aufnahme wird gelöscht, sobald sie transkribiert ist. Stelle sicher, dass die Sprechenden das wissen.",
+      "recordConfirmAllow": "Weiter",
+      "recordConfirmCancel": "Abbrechen",
       "pick": "Aufnahme auswählen",
       "dropHint": "M4A, MP3, WAV, WebM oder OGG",
+      "record": "Aufnehmen",
+      "stopRecording": "Aufnahme beenden",
+      "recording": "Aufnahme läuft…",
       "limitHint": "Bis zu {mb} MB, etwa {minutes} Minuten Sprache",
       "tooLarge": "Diese Datei ist {actual} MB groß. Das Limit sind {allowed} MB — exportiere sie als Sprachaufnahme oder teile sie in zwei.",
       "tooLong": "Diese Aufnahme dauert {actual} Minuten. Das Limit sind {allowed} Minuten — teile sie in zwei.",
@@ -3001,6 +3143,7 @@
       "start": "Transkribieren",
       "transcribing": "Wird transkribiert…",
       "analysing": "Transkript wird gelesen…",
+      "playerUnavailable": "Kein Ton zum Abspielen – er wurde direkt nach der Transkription dieses Meetings gelöscht.",
       "transcriptTitle": "Transkript",
       "summaryTitle": "Zusammenfassung",
       "analyse": "Zusammenfassen und Aufgaben finden",
@@ -3033,7 +3176,11 @@
         "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
         "rate_limited": "Du hast ein Anfragelimit erreicht. Es leert sich mit der Zeit von selbst – versuch es später noch einmal.",
         "empty": "Diese Aufnahme war leer.",
-        "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet."
+        "failed": "Etwas ist schiefgelaufen. Es wurde nichts berechnet.",
+        "record_denied": "Das Mikrofon wurde nicht zugelassen. Prüfe die Berechtigungen deines Browsers und versuche es erneut.",
+        "record_unsupported": "Dieser Browser kann keine Audioaufnahmen machen. Lade stattdessen eine Datei hoch.",
+        "record_empty": "Es wurde nichts gehört. Versuche es näher am Mikrofon erneut.",
+        "record_failed": "Die Aufnahme ist fehlgeschlagen. Versuche es erneut."
       },
       "goal": {
         "title": "{count, plural, one {Diese Aufgabe zu einem Schritt eines Ziels machen} other {Diese # Aufgaben zu Schritten eines Ziels machen}}",
@@ -3048,6 +3195,22 @@
         "projectLimit": "Alle Projekte deines Tarifs sind belegt. Wähle eines davon oder archiviere zuerst eines.",
         "projectName": "Gib dem neuen Projekt einen Namen mit mindestens zwei Buchstaben.",
         "projectFull": "Dieses Projekt ist voll. Wähle ein anderes."
+      },
+      "remind": {
+        "button": "Erinnere mich",
+        "label": "An diesem Tag",
+        "save": "Erinnerung speichern",
+        "cancel": "Erinnerung abbrechen",
+        "pending": "Erinnert dich am {date}",
+        "bad": "Wähle einen Tag nach heute, innerhalb eines Jahres.",
+        "notifyTitle": "Erinnerung: {what}",
+        "notifyBody": "Aus einem Meeting — {who}"
+      },
+      "ask": {
+        "title": "Frage zu diesem Meeting",
+        "placeholder": "Stelle eine Frage zu diesem Meeting…",
+        "submit": "Fragen",
+        "asking": "Wird gefragt…"
       }
     },
     "voicePage": {
@@ -3140,6 +3303,7 @@
         "sales": "Vertrieb",
         "trading": "Trading",
         "image": "Bild",
+        "threeD": "3D",
         "document": "Dokument",
         "games": "Spiele",
         "connect": "Verbinden",
@@ -3153,7 +3317,9 @@
         "iowork": "iowork",
         "translate": "Übersetzen",
         "apps": "Apps",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Tabellen",
+        "skills": "Fähigkeiten"
       },
       "lines": {
         "site": "Eine Website aus einer Beschreibung",
@@ -3173,6 +3339,7 @@
         "sales": "Kontakte, Ansprache und nächste Schritte.",
         "trading": "Ein Journal deiner Trades.",
         "image": "Bilder aus einer Beschreibung",
+        "threeD": "Ein 3D-Modell aus wenigen Fotos",
         "document": "Dokumente und Tabellen",
         "games": "Ein Spiel aus einer Beschreibung.",
         "connect": "Hol deine anderen Apps herein",
@@ -3253,6 +3420,20 @@
         "lost": "Der Kasten kam von der Änderung nicht zurück, daher wurde nichts geändert. Versuche es noch einmal.",
         "boxes": "Kästen"
       },
+      "motion": {
+        "button": "Bewegung",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "Keine",
+          "softFade": "Sanftes Einblenden",
+          "slideUp": "Nach oben gleiten",
+          "parallax": "Parallax",
+          "glass": "Glas",
+          "holographic": "Holografisch",
+          "typewriter": "Schreibmaschine",
+          "hoverLift": "Hover-Anhebung"
+        }
+      },
       "pages": {
         "auto": "Seiten: so viele wie nötig",
         "count": "{count, plural, one {# Seite} other {# Seiten}}",
@@ -3269,6 +3450,11 @@
         "rename": "Umbenennen",
         "undo": "Rückgängig",
         "deleteConfirm": "„{title}“ löschen?"
+      },
+      "mode": {
+        "label": "Ebene",
+        "simple": "Einfach",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3329,7 +3515,45 @@
         "kindsLabel": "Nur zeigen",
         "all": "Alle",
         "empty": "Nichts gefunden",
-        "untitled": "Ohne Titel"
+        "untitled": "Ohne Titel",
+        "failed": "Nicht geladen: {kinds}. Der Rest wird angezeigt."
+      },
+      "details": {
+        "empty": "Wählen Sie links etwas aus, um es hier zu sehen.",
+        "open": "Öffnen",
+        "back": "Zurück zur Liste",
+        "madeFrom": "Erstellt aus",
+        "viewers": "Wer das sieht",
+        "viewersAnswer": "Nur Sie. Das Teilen eines Eintrags mit jemand anderem gibt es noch nicht."
+      },
+      "history": {
+        "title": "Frühere Fragen",
+        "show": "Frühere Fragen anzeigen",
+        "hide": "Frühere Fragen ausblenden",
+        "back": "Zurück zu den früheren Fragen"
+      },
+      "ask": {
+        "send": "Fragen",
+        "dismiss": "Antwort ausblenden"
+      },
+      "filters": {
+        "label": "Nach Art filtern",
+        "all": "Alle",
+        "documents": "Dokumente",
+        "images": "Bilder",
+        "data": "Daten",
+        "more": "Mehr",
+        "moreLabel": "Weitere Filter",
+        "video": "Video",
+        "audio": "Audio",
+        "sitesApps": "Websites und Apps",
+        "meetings": "Besprechungen",
+        "project": "Projekt",
+        "allProjects": "Alle Projekte"
+      },
+      "upload": {
+        "button": "Hochladen",
+        "uploading": "Wird hochgeladen…"
       },
       "kinds": {
         "site": "Websites",
@@ -3343,7 +3567,10 @@
         "coding": "Code",
         "finance": "Finanzen",
         "sales": "Verkäufe",
-        "trading": "Trading"
+        "trading": "Trading",
+        "images": "Bilder",
+        "meetings": "Besprechungen",
+        "apps": "Apps"
       },
       "errors": {
         "empty": "Schreib eine Frage.",
@@ -3382,6 +3609,14 @@
       "price": "{count, plural, one {# Credit} other {# Credits}}",
       "delete": "Bild löschen",
       "deleteConfirm": "Dieses Bild und alle seine Versionen löschen? Das lässt sich nicht rückgängig machen.",
+      "tools": {
+        "productAd": "Produktwerbung",
+        "animate": "Animieren",
+        "sameProduct": "Gleiches Produkt",
+        "addReference": "Ein Referenzbild hinzufügen",
+        "removeReference": "Dieses Referenzbild entfernen",
+        "searchWeb": "Erst im Web suchen"
+      },
       "notConfigured": "Bilder sind noch nicht eingeschaltet. Es wird nichts berechnet.",
       "working": {
         "variants": "4 Bilder werden erstellt…",
@@ -3599,7 +3834,13 @@
       "empty": {
         "heading": "Was soll von selbst passieren?"
       },
-      "new": "Neue Automatisierung"
+      "new": "Neue Automatisierung",
+      "simple": {
+        "reads": "Liest: {what}",
+        "does": "Ionexa erledigt: {what}",
+        "onlyIf": "Macht nur weiter, wenn etwas gefunden wurde. Sonst hört es hier auf, und es wird nichts berechnet.",
+        "hint": "Das sind die Schritte, der Reihe nach. Tippe auf Pro, um einen davon zu ändern."
+      }
     },
     "flows": {
       "name": "Projekte",
@@ -3808,6 +4049,197 @@
         "failed": "Etwas ist schiefgelaufen. Versuche es erneut."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "Was soll Editing mit deinem Material machen?"
+      },
+      "notBuilt": "Noch nicht umgesetzt. Es wurde nichts berechnet.",
+      "placeholder": "Beschreibe die Änderung in deinen eigenen Worten…",
+      "workspaceTitle": "Arbeitsbereich",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Grafiken"
+      },
+      "noMaterial": "Noch kein Material vorhanden."
+    },
+    "threeD": {
+      "empty": {
+        "heading": "Was soll 3D werden?"
+      },
+      "notBuilt": "Noch nicht umgesetzt. Es wurde nichts berechnet.",
+      "placeholder": "Beschreibe, was 3D werden soll, in deinen eigenen Worten…",
+      "attachPhotos": "Fotos hinzufügen (1 bis 4)",
+      "workspaceTitle": "3D-Modell",
+      "photos": {
+        "heading": "Meine Fotos",
+        "remove": "Dieses Foto entfernen"
+      },
+      "viewer": {
+        "zoomIn": "Vergrößern",
+        "zoomOut": "Verkleinern",
+        "reset": "Ansicht zurücksetzen",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Typ",
+        "typeOptions": {
+          "product": "Produkt",
+          "furniture": "Möbel",
+          "object": "Objekt"
+        },
+        "quality": "Qualität",
+        "qualityOptions": {
+          "draft": "Entwurf",
+          "final": "Final"
+        },
+        "realSize": "Reale Größe",
+        "realSizeUnknown": "noch nicht festgelegt",
+        "format": "Format",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Hintergrund",
+        "backgroundOptions": {
+          "white": "Weiß",
+          "transparent": "Transparent"
+        },
+        "price": "Preis"
+      },
+      "bar": {
+        "viewInAr": "In AR ansehen",
+        "download": "Herunterladen",
+        "makeFinal": "Final erstellen"
+      }
+    },
+    "films": {
+      "empty": {
+        "heading": "Worum geht es in deinem Film?"
+      },
+      "notBuilt": "Noch nicht umgesetzt. Es wurde nichts berechnet.",
+      "placeholder": "Beschreibe den Film in deinen eigenen Worten…",
+      "workspaceTitle": "Filmproduktion",
+      "stages": {
+        "script": "Drehbuch",
+        "characters": "Figuren & Orte",
+        "storyboard": "Storyboard",
+        "shooting": "Dreh",
+        "edit": "Schnitt"
+      },
+      "stageStatus": {
+        "waiting": "Wartet",
+        "working": "In Arbeit",
+        "done": "Fertig"
+      },
+      "credits": {
+        "label": "Credits",
+        "unknown": "wird berechnet, sobald ein Drehbuch existiert"
+      },
+      "charactersPlaces": {
+        "heading": "Figuren & Orte",
+        "addCharacter": "Figur hinzufügen",
+        "addPlace": "Ort hinzufügen",
+        "empty": "Noch keine hinzugefügt."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Einstellung {n}",
+        "sampleCaption": "Beispielraster — deine Einstellungen erscheinen hier, sobald das Drehbuch geschrieben ist."
+      },
+      "panel": {
+        "cameraAngle": "Kamerawinkel",
+        "angleOptions": {
+          "wide": "Weit",
+          "medium": "Mittel",
+          "closeUp": "Nahaufnahme",
+          "fromAbove": "Von oben",
+          "low": "Niedrig"
+        },
+        "light": "Licht",
+        "lightOptions": {
+          "day": "Tag",
+          "goldenHour": "Goldene Stunde",
+          "night": "Nacht",
+          "warmInside": "Warm innen"
+        },
+        "cameraMove": "Kamerabewegung",
+        "moveOptions": {
+          "still": "Statisch",
+          "slowPush": "Langsamer Zoom",
+          "pan": "Schwenk",
+          "handheld": "Handkamera"
+        },
+        "continueFromPrevious": "Weiter von der vorherigen Einstellung",
+        "reshoot": "Neu drehen"
+      }
+    },
+    "appBuilder": {
+      "empty": {
+        "heading": "Beschreibe die App, die dein Betrieb braucht",
+        "examples": {
+          "a": "Eine Termin-App für meinen Salon",
+          "b": "Eine App für meine Bestellungen und wohin sie gehen",
+          "c": "Ein Formular für Kunden, mit den Antworten in einer Liste"
+        }
+      },
+      "placeholder": "Beschreibe die App in deinen eigenen Worten…",
+      "placeholderBox": "Sag, was sich in diesem Kasten ändern soll…",
+      "placeholderAnother": "Beschreibe eine weitere App…",
+      "recent": "Letzte Apps",
+      "noneYet": "Noch keine App.",
+      "boxHint": "Drücke auf einen Kasten und sag, was sich darin ändern soll.",
+      "tabs": {
+        "preview": "Vorschau",
+        "data": "Daten",
+        "plan": "Plan"
+      },
+      "box": {
+        "data": "Daten",
+        "screens": "Bildschirme",
+        "access": "Wer was sieht",
+        "notifications": "Benachrichtigungen"
+      },
+      "type": {
+        "text": "Kurzer Text",
+        "longText": "Langer Text",
+        "number": "Zahl",
+        "date": "Datum",
+        "time": "Uhrzeit",
+        "choice": "Auswahl",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "checkbox": "Ja oder nein"
+      },
+      "kindForm": "ein Formular",
+      "kindList": "eine Liste",
+      "seesOwn": "jeder Besucher sieht nur seine eigenen",
+      "seesOwner": "nur du siehst diese",
+      "toCustomer": "an den Kunden",
+      "toOwner": "an dich",
+      "noNotifications": "Es wird nichts gesendet.",
+      "noScreensYet": "Noch kein Bildschirm im Plan.",
+      "previewCaption": "Live-Vorschau des Plans — noch keine funktionierende App.",
+      "formSubmit": "Senden",
+      "sampleRow": "Beispiel — echte Einträge erscheinen hier, sobald das live ist.",
+      "approve": "Plan freigeben",
+      "approved": "Der Plan ist freigegeben.",
+      "approvedNote": "Freigegeben",
+      "planned": "Hier ist der Plan, in vier Kästen.",
+      "boxChanged": "Der Kasten {box} hat sich geändert.",
+      "boxChangedAndDropped": "Der Kasten {box} hat sich geändert, und das ist mitgegangen: {what}.",
+      "errors": {
+        "empty": "Schreib, was die App tun soll.",
+        "tooLong": "Das ist länger, als eine Beschreibung sein kann ({limit} Zeichen).",
+        "insufficient": "Nicht genug Credits dafür. Es wurde nichts berechnet.",
+        "rateLimited": "Zu viele Versuche auf einmal. Versuch es gleich noch einmal.",
+        "notIncluded": "Dieses Werkzeug gehört nicht zu deinem Tarif.",
+        "unavailable": "Die App kann gerade nicht geplant werden.",
+        "unusable": "Die Antwort war nicht brauchbar. Berechnet wird nur, was ausgegeben wurde.",
+        "notSaved": "Der Plan entstand, konnte aber nicht gespeichert werden.",
+        "failed": "Der Plan entstand nicht. Es wurden keine Credits berechnet."
+      }
+    },
     "chats": {
       "title": "Chats",
       "searchPlaceholder": "Deine Unterhaltungen durchsuchen",
@@ -3848,6 +4280,26 @@
         "actions": "Aktionen",
         "look": "Aussehen"
       },
+      "features": {
+        "heading": "Funktionen",
+        "hint": "Das sind Funktionen, die Apps wie diese oft haben. Schalte aus, was du nicht willst, oder tippe den Stift an, um die Worte zu ändern.",
+        "found": "Hier sind die Funktionen, die solche Apps oft haben. Schalte aus, was du nicht willst, oder ändere die Worte einer davon, dann geh weiter.",
+        "changed": "Die Worte dieser Funktion wurden geändert.",
+        "continue": "Diese Funktionen verwenden",
+        "continuing": "Der Plan wird erstellt…",
+        "edit": "Die Worte dieser Funktion ändern",
+        "editPlaceholder": "Sag die neuen Worte für diese Funktion"
+      },
+      "phases": {
+        "heading": "Phasen",
+        "note": "Heute gibt es eine Phase: die ganze App auf einmal. Weitere Phasen folgen.",
+        "noteTwo": "Diese App braucht zwei Phasen: zuerst ihre Daten und Bildschirme, dann die App selbst, daraus geschrieben. Plan genehmigen, um die erste Phase zu starten; der Preis der zweiten Phase wird gezeigt, sobald die erste fertig ist.",
+        "appLogic": "App-Logik",
+        "writeApp": "App schreiben",
+        "approve": "Plan genehmigen",
+        "approving": "Startet…",
+        "appLogicDone": "Die Daten und Bildschirme der App sind geplant. Jetzt die App schreiben."
+      },
       "build": "App bauen",
       "building": "Die App wird gebaut …",
       "download": "App herunterladen",
@@ -3855,6 +4307,7 @@
       "preview": "Die App, laufend",
       "sealed": "Sie läuft abgeschottet von allem anderen, was du hier eingibst, bleibt also in dieser Vorschau. Lade sie herunter, um sie auf deinem eigenen Computer zu benutzen.",
       "original": "Deine eigene Version, keine Kopie: Sie übernimmt die Idee und die Art der Bildschirme, nie Namen, Worte, Bilder oder Code des Originals.",
+      "selfTest": "Jeder Button wurde geprüft, ob er mit Code verbunden ist, bevor dir das hier gezeigt wurde.",
       "versions": "{count} Versionen",
       "version": "Version {n}",
       "first": "Erster Bau",
@@ -3877,6 +4330,20 @@
           "tooLarge": "Diese Seite ist zu groß zum Lesen. Es wurde nichts berechnet.",
           "invalid": "Das ist keine Webadresse, die ich lesen kann. Es wurde nichts berechnet."
         }
+      },
+      "publish": {
+        "summary": "Diese App veröffentlichen",
+        "liveSummary": "Live, unter ihrer eigenen Adresse",
+        "label": "Adresse wählen",
+        "edit": "Eine andere Adresse wählen",
+        "editPlaceholder": "Gib die gewünschte Adresse ein",
+        "button": "Veröffentlichen",
+        "unpublish": "Veröffentlichung aufheben",
+        "taken": "Diese Adresse ist bereits vergeben.",
+        "invalid": "Wähle eine gültige Adresse — Kleinbuchstaben, Zahlen und Bindestriche, mindestens 3 Zeichen.",
+        "notBuilt": "Baue die App zuerst.",
+        "done": "Veröffentlicht unter {url}",
+        "offline": "Veröffentlichung aufgehoben. Die Adresse bleibt erhalten — erneut veröffentlichen, um sie wieder zu nutzen."
       }
     },
     "comingSoon": {
@@ -3887,6 +4354,11 @@
       "notified": "Wir benachrichtigen dich",
       "notifyFailed": "Konnte nicht gespeichert werden. Versuch es erneut.",
       "examples": {
+        "threeD": {
+          "a": "Eine Vase aus meinem Laden, bereit für die Website",
+          "b": "Ein Holzstuhl, aus jedem Blickwinkel betrachtbar",
+          "c": "Eine Keramiktasse, mit AR auf meinem Handy"
+        },
         "apps": {
           "a": "Eine Buchungs-App für meinen Salon",
           "b": "Eine App für Lieferbestellungen",
@@ -4134,6 +4606,134 @@
       "languagePractice": {
         "label": "Sprachübung",
         "text": "Ich möchte üben: "
+      }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Text zum Übersetzen einfügen",
+        "examples": {
+          "a": "Willkommen bei uns. Wir helfen Ihnen gerne.\n\nUnser Büro ist Montag bis Freitag von 9 bis 18 Uhr geöffnet.",
+          "b": "Liebe Kundin, lieber Kunde,\n\nvielen Dank für Ihre Bestellung. Sie erhalten sie innerhalb von 3 Werktagen.",
+          "c": "Unser Unternehmen wurde 2015 gegründet und ist auf Softwarelösungen für kleine Unternehmen spezialisiert."
+        }
+      },
+      "placeholder": "Text einfügen oder eingeben…",
+      "targetsLabel": "In: {languages}",
+      "styleLabel": "Stil",
+      "style": {
+        "formal": "Formell",
+        "friendly": "Freundlich",
+        "source": "Wie das Original"
+      },
+      "detectedFrom": "Erkannt: {language}",
+      "sameLanguageNote": "Der Text ist bereits in dieser Sprache.",
+      "kept": "{count, plural, one {# Absatz blieb unverändert} other {# Absätze blieben unverändert}}, weil die Übersetzung nicht ankam.",
+      "done": "{count, plural, one {In # Sprache übersetzt.} other {In # Sprachen übersetzt.}}",
+      "translating": "Wird übersetzt…",
+      "errors": {
+        "nothing": "Es gibt keinen Text zum Übersetzen.",
+        "tooLong": "Das ist zu lang für eine Übersetzung ({chars} Zeichen; das Limit liegt bei {limit}).",
+        "sameLanguage": "Die gewählten Sprachen sind bereits die Sprache des Textes. Wählen Sie mindestens eine andere.",
+        "insufficient": "Nicht genug Credits für diese Übersetzung. Es wurde nichts berechnet.",
+        "rateLimited": "Zu viele Versuche auf einmal. Versuchen Sie es gleich noch einmal.",
+        "unavailable": "Übersetzung ist derzeit nicht verfügbar.",
+        "unusable": "Die Antwort war nicht verwendbar, es wurde nichts geschrieben. Nur der Verbrauch wird berechnet.",
+        "failed": "Die Übersetzung konnte nicht erstellt werden. Es wurden keine Credits berechnet."
+      },
+      "editPlaceholder": "Sag, was an diesem Absatz geändert werden soll…",
+      "editDone": "Absatz {n} ({language}) wurde geändert.",
+      "editingLabel": "Absatz {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossar} one {Glossar (1)} other {Glossar (#)}}",
+      "glossaryHint": "Wörter, die in jeder Sprache gleich bleiben.",
+      "glossarySuggested": "„{term}“ hinzufügen",
+      "glossaryPlaceholder": "Neues Wort…",
+      "glossaryRemove": "„{term}“ entfernen",
+      "glossaryAdd": "Begriff hinzufügen",
+      "glossaryAdding": "Neuer Glossarbegriff",
+      "openDocument": "Als Dokument öffnen"
+    },
+    "iowork": {
+      "noAppYet": "Die App für Ihren Computer ist noch nicht erschienen. Dieser Bildschirm ist die Kontoseite: sobald es die App gibt, verbinden Sie sie von hier aus.",
+      "connectHeading": "Einen Computer verbinden",
+      "connectHint": "Geben Sie die acht Zeichen ein, die Ihr Computer anzeigt.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Verbinden",
+      "connecting": "Wird verbunden…",
+      "previewHeading": "Ein Computer möchte sich verbinden",
+      "previewBody": "Er gibt an, „{label}“ ({platform}) zu sein, angefragt um {time} von {ip}.",
+      "previewIpUnknown": "eine Adresse, die wir nicht lesen konnten",
+      "previewWarning": "Wenn Sie iowork nicht gerade selbst, auf Ihrem eigenen Computer, geöffnet haben, drücken Sie Abbrechen.",
+      "previewConfirm": "Ja, verbinden",
+      "previewCancel": "Abbrechen",
+      "cancelled": "Abgebrochen. Dieser Code funktioniert nicht mehr.",
+      "codeAccepted": "{name} hat den Code angenommen. Er erscheint unten, sobald der Computer die Verbindung abgeschlossen hat.",
+      "listHeading": "Verbundene Computer ({count} von {max})",
+      "empty": "Noch kein Computer verbunden.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Vor mehr als 30 Tagen verbunden",
+      "disconnect": "Trennen",
+      "disconnectLabel": "{name} trennen",
+      "confirmDisconnect": "{name} trennen? Er hört sofort auf zu arbeiten und muss neu verbunden werden.",
+      "safetyLine": "Sobald es die App gibt: Ein verbundener Computer erreicht dann nur die Ordner, die Sie dort auswählen, niemals Passwörter, Schlüssel oder Systemordner, und jede Änderung wartet dort auf Ihre Zustimmung.",
+      "errors": {
+        "bad_code": "Das ist kein Code. Er hat acht Zeichen, so wie Ihr Computer sie anzeigt.",
+        "bad_action": "Diese Anfrage ergab keinen Sinn. Versuchen Sie es erneut.",
+        "not_found": "Kein Computer zeigt diesen Code.",
+        "expired": "Dieser Code ist abgelaufen. Ihr Computer zeigt einen neuen.",
+        "tooMany": "Dieses Konto hat bereits {max} Computer. Trennen Sie zuerst einen.",
+        "rateLimited": "Zu viele Versuche. Warten Sie kurz und versuchen Sie es erneut.",
+        "not_enabled": "iowork ist noch nicht geöffnet.",
+        "not_signed_in": "Melden Sie sich erneut an.",
+        "failed": "Das hat nicht geklappt. Nichts wurde geändert."
+      }
+    },
+    "sheets": {
+      "placeholder": "Beschreibe die Tabelle, die du brauchst, oder die Änderung",
+      "limits": "Formeln, Diagramme und der xlsx-Export sind noch nicht angeschlossen · auf diesem Bildschirm wird nichts berechnet",
+      "soon": "Ich kann die Tabelle noch nicht bauen – dieser Bildschirm ist das erste Stück. Danach kommen die Formeln und dann die Tabelle aus einer Beschreibung.",
+      "download": "Herunterladen",
+      "downloadSoon": "Das Herunterladen kommt mit dem xlsx- und csv-Export, die Formeln bleiben erhalten",
+      "work": {
+        "title": "Tabelle"
+      },
+      "formula": {
+        "label": "Formel",
+        "empty": "Leere Zelle",
+        "selected": "{count, plural, one {# Zelle} other {# Zellen}}"
+      },
+      "sheet": {
+        "tab": "Blatt {n}",
+        "add": "Neues Blatt"
+      },
+      "empty": {
+        "heading": "Was soll die Tabelle ausrechnen?",
+        "why": "Tabellen baut eine Tabelle mit echten Formeln darin, damit sich jede Summe von selbst neu ausrechnet, wenn du eine Zahl änderst – nie ein von Hand getipptes Ergebnis.",
+        "examples": {
+          "budget": "Ein Monatsbudget für meinen Laden",
+          "stock": "Eine Lagerliste mit Meldebeständen",
+          "pricelist": "Eine Preisliste mit Mehrwertsteuer und Marge"
+        }
+      },
+      "extend": "Auswahl erweitern"
+    },
+    "skills": {
+      "name": "Fähigkeiten",
+      "empty": {
+        "title": "Noch keine Fähigkeiten",
+        "why": "Eine Fähigkeit ist ein Ablauf, den du Ionexa einmal beibringst — ihr Name, wann sie gilt, ihre Schritte — und von da an folgt Ionexa jedes Mal denselben Schritten. Hier kann noch nichts angelegt werden; dieser Bildschirm zeigt nur, was bereits vorhanden ist."
+      },
+      "details": {
+        "empty": "Wähle links eine Fähigkeit aus, um sie hier zu sehen.",
+        "back": "Zurück zur Liste",
+        "whenUsedLabel": "Wann sie verwendet wird",
+        "whenUsedEmpty": "Nicht festgelegt",
+        "stepsLabel": "Schritte",
+        "stepsEmpty": "Noch keine Schritte",
+        "filesLabel": "Dateien",
+        "filesEmpty": "Keine Dateien angehängt"
       }
     }
   },
@@ -4867,6 +5467,11 @@
       "does": "Zuerst zeigt es den Plan in fünf Feldern; ändere jedes davon mit Worten, dann schreibt es das Spiel und du spielst es hier, mit Tastatur oder per Touch.",
       "doesNot": "Es sieht dein Konto nicht und geht nicht ins Internet: Das Spiel läuft abgeschottet, ebenso die Datei, die du herunterlädst."
     },
+    "apps": {
+      "is": "Hier beschreibst du eine App, die deine Daten hält — Termine, Bestellungen, Bestand, Kunden, Formularantworten.",
+      "does": "Sie plant die App in vier Kästen, du änderst jeden Kasten mit Worten und gibst ihn frei.",
+      "doesNot": "Sie nimmt keine Zahlungen an und fragt einen Kunden nie nach Karte oder Passwort."
+    },
     "chats": {
       "is": "Jede Unterhaltung, die du geführt hast, an einem Ort.",
       "does": "Zeigt sie neueste zuerst, durchsucht sowohl die Titel als auch das Gesagte, und benennt um, heftet an, legt ab oder löscht jede davon.",
@@ -4881,6 +5486,21 @@
       "is": "Deine eigene Version einer App, die dir gefällt.",
       "does": "Beschreibe eine App oder füge die Adresse einer öffentlichen Seite einer App ein, die dir gefällt. Du bekommst einen Plan in vier Kästen, änderst mit Worten, was du willst, und baust sie dann: eine funktionierende App, die du mit Worten ändern, zurücksetzen und als eine Datei herunterladen kannst.",
       "doesNot": "Sie kopiert die andere App nicht: Name, Worte, Bilder und Code sind deine eigenen, und sie liest nur die Beschriftungen der einen Seite, auf die du zeigst, nie etwas hinter einer Anmeldung. Sie ist kein Hosting-Dienst: Was du in der Vorschau eingibst, wird nicht gespeichert, und die heruntergeladene Datei behält ihre Daten auf deinem eigenen Computer."
+    },
+    "iowork": {
+      "is": "Die App, die in Ihrem eigenen Computer arbeitet",
+      "does": "Liest und schreibt Dateien in den Ordnern, die Sie auswählen, wenn Sie darum bitten, und zeigt Ihnen jede Änderung vorher",
+      "doesNot": "Sie erreicht keine Passwörter, Schlüssel, Ihren Browser oder Systemordner, führt niemals Programme auf Ihrem Computer aus und löscht nichts ohne Ihre Zustimmung"
+    },
+    "skills": {
+      "is": "Ein Ablauf, den du Ionexa einmal beibringst, damit er jedes Mal, wenn er wieder gebraucht wird, denselben Schritten folgt.",
+      "does": "Zeigt den Namen einer Fähigkeit, wann sie verwendet wird, ihre Schritte und ihre Dateien, genau wie sie beigebracht wurden.",
+      "doesNot": "Du kannst hier noch keine Fähigkeit anlegen, ändern oder ausführen, und Ionexa nutzt noch keine Fähigkeit von sich aus — ein Klick auf eine Zeile öffnet sie nur zum Lesen."
+    },
+    "admin": {
+      "is": "Das Admin-Dashboard des Inhabers.",
+      "does": "Zeigt Nutzerkonten, Abrechnung, Kosten und Umsatz der Plattform, mit einem Audit-Log für jeden Zugriff.",
+      "doesNot": "Es zeigt nicht den Inhalt der Nutzer — was sie im Chat, in Dokumenten oder Datensätzen schreiben, bleibt privat."
     }
   },
   "helpCentre": {
@@ -4903,6 +5523,7 @@
       "chat": "Chat",
       "files": "Dateien",
       "integrations": "Verbindungen",
+      "tools": "Werkzeuge",
       "account": "Konto",
       "privacy": "Datenschutz und Daten"
     }
@@ -4932,7 +5553,10 @@
     "contactDescription": "Nehmen Sie Kontakt mit dem Ionexa-AI-Team auf.",
     "verifyEmail": "E-Mail bestätigen",
     "verifyEmailDescription": "Bestätige die E-Mail-Adresse deines Ionexa-AI-Kontos.",
-    "chats": "Chats"
+    "chats": "Chats",
+    "admin": "Verwaltung",
+    "cancelDeletion": "Kontolöschung abbrechen",
+    "cancelDeletionDescription": "Brich die geplante Löschung deines Ionexa-AI-Kontos ab."
   },
   "errors": {
     "retry": "Erneut versuchen",
@@ -5600,6 +6224,12 @@
     "delete": "Löschen",
     "deleteConfirm": "Dieses Projekt löschen? Was darin liegt, bleibt, wo es ist.",
     "removeMember": "Aus dem Projekt nehmen",
+    "back": "Zurück zu den Projekten",
+    "selectPrompt": "Wähle links ein Projekt aus, um es hier zu sehen.",
+    "empty": {
+      "title": "Noch keine Projekte",
+      "description": "Erstelle links dein erstes Projekt, um es hier zu sehen."
+    },
     "addToProject": {
       "button": "Zum Projekt hinzufügen",
       "title": "Zu einem Projekt hinzufügen",
@@ -5622,6 +6252,24 @@
     "automateIt": {
       "button": "Automatisieren",
       "hint": "Erstellt eine Automatisierung für dieses Projekt — sie liest dessen Inhalt und das Ziel oben."
+    },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "Fakten, Entscheidungen, Vorlieben — hier geschrieben, nur von den eigenen Chats, Erstellungen, Plänen und Agent-Builds dieses Projekts gelesen.",
+      "hint": "Fließt nur in die Erstellung innerhalb dieses Projekts ein. Nichts außerhalb liest es."
+    },
+    "share": {
+      "heading": "Teilen",
+      "hint": "Jeder mit diesem Link kann dieses Projekt ansehen, nur lesend, ohne Anmeldung. Du kannst ihn jederzeit widerrufen.",
+      "create": "Link erstellen",
+      "revoke": "Widerrufen",
+      "public": {
+        "readOnly": "Mit dir geteilt — nur lesend",
+        "notFound": {
+          "heading": "Dieser Link ist nicht verfügbar",
+          "body": "Er wurde möglicherweise widerrufen oder hat nie existiert."
+        }
+      }
     },
     "errors": {
       "tooShort": "Gib ihm zuerst einen Namen.",
@@ -6002,6 +6650,14 @@
       "body": "Klicke auf die Schaltfläche, um diese Adresse zu bestätigen und dein Ionexa-AI-Konto zu öffnen.",
       "button": "E-Mail bestätigen",
       "ignore": "Wenn du dieses Konto nicht erstellt hast, ignoriere diese E-Mail: Ohne den Link passiert nichts."
+    },
+    "deletionScheduled": {
+      "label": "geplante Kontolöschung",
+      "title": "die Löschung deines Kontos ist geplant",
+      "body": "Dein Ionexa-AI-Konto wird am {date} dauerhaft gelöscht. Bis dahin kannst du die Löschung abbrechen und dein Konto genau so behalten, wie es ist.",
+      "cta": "Löschung abbrechen",
+      "footer": "Falls du das nicht angefordert hast, brich die Löschung sofort über den Link oben ab.",
+      "preheader": "Dein Ionexa-AI-Konto wird am {date} gelöscht — du kannst jederzeit vorher abbrechen."
     }
   },
   "routerReport": {
@@ -6050,5 +6706,152 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "Nur die neuesten {cap} Anfragen wurden gelesen; die Zahlen beziehen sich darauf.",
     "empty": "Keine abgerechneten Anfragen in diesem Zeitraum."
+  },
+  "adminDashboard": {
+    "title": "Verwaltung",
+    "description": "Benutzerverwaltung, Kosten, Einnahmen und Aktionsprotokoll. Nur für den Eigentümer.",
+    "tabs": {
+      "users": "Benutzer",
+      "costs": "Kosten",
+      "revenue": "Einnahmen",
+      "flags": "Schalter",
+      "reports": "Berichte",
+      "auditLog": "Protokoll"
+    },
+    "users": {
+      "search": "Nach E-Mail oder Name suchen...",
+      "email": "E-Mail",
+      "name": "Name",
+      "plan": "Tarif",
+      "credits": "Credits",
+      "cost30d": "Kosten (30T)",
+      "margin": "Marge",
+      "calls": "Aufrufe",
+      "lastSignIn": "Letzte Anmeldung",
+      "suspended": "Gesperrt",
+      "noUsers": "Keine Benutzer gefunden.",
+      "loading": "Benutzer werden geladen...",
+      "adjust": "Anpassen",
+      "refundBtn": "Erstattung",
+      "suspendBtn": "Sperren",
+      "unsuspendBtn": "Reaktivieren"
+    },
+    "creditAdjust": {
+      "title": "Guthaben anpassen",
+      "current": "Aktuelles Guthaben",
+      "amount": "Betrag",
+      "amountPlaceholder": "+50 hinzufügen, -10 abziehen",
+      "reason": "Grund",
+      "reasonPlaceholder": "Warum passen Sie das Guthaben an?",
+      "cancel": "Abbrechen",
+      "confirm": "Anpassen",
+      "submitting": "Wird angepasst...",
+      "success": "Guthaben aktualisiert.",
+      "button": "Guthaben",
+      "errorNetwork": "Netzwerkfehler — bitte erneut versuchen."
+    },
+    "refund": {
+      "title": "Erstattung",
+      "loadingCharges": "Zahlungen werden geladen...",
+      "noCharges": "Keine Zahlungen für diesen Benutzer gefunden.",
+      "refundedPartial": "{amount} erstattet",
+      "alreadyRefunded": "Erstattet",
+      "selectBtn": "Auswählen",
+      "confirmWarning": "Diese Aktion erstattet den Kunden über Stripe. Sie kann nicht rückgängig gemacht werden.",
+      "chargeAmount": "Zahlungsbetrag",
+      "refundableAmount": "Erstattungsfähiger Betrag",
+      "partialRefund": "Teilerstattung",
+      "refundAmount": "Erstattungsbetrag (Cent)",
+      "amountPlaceholder": "Maximal {max}",
+      "reason": "Grund",
+      "reasonPlaceholder": "Warum erstatten Sie diesen Betrag?",
+      "back": "Zurück",
+      "processing": "Verarbeitung...",
+      "confirmRefund": "Erstattung bestätigen",
+      "close": "Schließen",
+      "errorNetwork": "Netzwerkfehler — bitte erneut versuchen."
+    },
+    "suspend": {
+      "suspendTitle": "Konto sperren",
+      "unsuspendTitle": "Konto reaktivieren",
+      "suspendWarning": "Dieser Benutzer wird von der Nutzung der Plattform ausgesperrt. Er sieht einen Sperrhinweis bei der nächsten Anmeldung.",
+      "unsuspendConfirm": "Sind Sie sicher, dass Sie dieses Konto reaktivieren möchten?",
+      "reason": "Grund der Sperrung",
+      "reasonPlaceholder": "Beschreiben Sie den Verstoß oder Missbrauch…",
+      "cancel": "Abbrechen",
+      "processing": "Verarbeitung…",
+      "suspendBtn": "Konto sperren",
+      "unsuspendBtn": "Konto reaktivieren",
+      "errorNetwork": "Netzwerkfehler — bitte erneut versuchen."
+    },
+    "costs": {
+      "loading": "Kostendaten werden geladen...",
+      "noData": "Keine Kostendaten verfügbar.",
+      "period": "Zeitraum",
+      "days": "Tage",
+      "totalCost": "Gesamtkosten",
+      "totalCalls": "Gesamtaufrufe",
+      "callsLabel": "Aufrufe",
+      "flaggedTitle": "Benutzer, die mehr kosten als sie zahlen",
+      "flaggedEmail": "E-Mail",
+      "flaggedCost": "Kosten",
+      "flaggedPays": "Zahlt",
+      "flaggedMargin": "Marge",
+      "flaggedCalls": "Aufrufe",
+      "byProvider": "Kosten nach Anbieter",
+      "provider": "Anbieter",
+      "cost": "Kosten",
+      "share": "Anteil",
+      "dailyBreakdown": "Tägliche Aufschlüsselung",
+      "date": "Datum",
+      "dayTotal": "Gesamt"
+    },
+    "revenue": {
+      "loading": "Umsatzdaten werden geladen...",
+      "noData": "Keine Umsatzdaten vorhanden.",
+      "period": "Zeitraum",
+      "days": "Tage",
+      "currentMrr": "Aktueller MRR",
+      "payingSubscribers": "Zahlende Abonnenten",
+      "totalAccounts": "Konten insgesamt",
+      "newUsers": "Neue Nutzer",
+      "cancellations": "Kündigungen",
+      "keyMetrics": "Kennzahlen",
+      "otherMetrics": "Weitere Kennzahlen",
+      "metric": "Kennzahl",
+      "value": "Wert",
+      "status": "Status",
+      "needsInput": "Eingabe des Inhabers erforderlich",
+      "needsHistory": "Benötigt mehr Verlauf",
+      "needsHistoryDays": "Benötigt mehr Tagesaufnahmen",
+      "mrrTrend": "MRR-Verlauf",
+      "date": "Datum",
+      "aiCost": "KI-Kosten",
+      "subscribers": "Abonnenten",
+      "margin": "Marge",
+      "eventsByMonth": "Abo-Ereignisse pro Monat",
+      "month": "Monat",
+      "started": "Gestartet",
+      "reactivated": "Reaktiviert",
+      "cancelled": "Gekündigt",
+      "upgraded": "Höhergestuft",
+      "downgraded": "Herabgestuft",
+      "net": "Netto"
+    },
+    "auditLog": {
+      "loading": "Audit-Protokoll wird geladen...",
+      "noEntries": "Noch keine Einträge.",
+      "time": "Zeit",
+      "admin": "Admin",
+      "action": "Aktion",
+      "target": "Ziel"
+    }
+  },
+  "suspended": {
+    "title": "Konto gesperrt",
+    "message": "Ihr Konto wurde wegen eines Verstoßes gegen unsere Nutzungsbedingungen gesperrt.",
+    "reason": "Grund",
+    "contact": "Wenn Sie glauben, dass es sich um einen Fehler handelt, wenden Sie sich bitte an den Support.",
+    "signOut": "Abmelden"
   }
 }

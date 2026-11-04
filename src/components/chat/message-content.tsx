@@ -9,6 +9,23 @@ import remarkGfm from "remark-gfm";
 // inline `code` spans by the `language-*` class remark adds to fenced
 // blocks — full per-token highlighting would need an extra heavy
 // dependency, so it's left out.
+
+/**
+ * Whether a markdown image's `src` matches the app's own CSP `img-src`
+ * (next.config.mjs, APP_SECURITY_HEADERS, ΑΣ2-3.1): same-origin, inline
+ * data, or a chat attachment's own blob preview. No chat feature puts an
+ * external-host image into an answer — a model's own words, an echoed
+ * web-search result, or a PDF's text can, and that is exactly what this
+ * rejects, same defense-in-depth belt as `frame-ancestors`+X-Frame-Options.
+ */
+export function isAllowedChatImageSrc(src: unknown): boolean {
+  if (typeof src !== "string" || src.length === 0) return false;
+  // "//host/…" is protocol-relative — a real external origin, not
+  // same-origin, and startsWith("/") alone would have let it through.
+  if (src.startsWith("//")) return false;
+  return src.startsWith("data:") || src.startsWith("blob:") || src.startsWith("/");
+}
+
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 list-disc space-y-1 ps-5">{children}</ul>,
@@ -46,6 +63,7 @@ const markdownComponents: Components = {
       {children}
     </blockquote>
   ),
+  img: ({ src, alt }) => (isAllowedChatImageSrc(src) ? <img src={src as string} alt={alt ?? ""} className="max-w-full rounded-item" /> : null),
 };
 
 // Memoized: depends only on `content` (a plain string, compared by value),

@@ -113,7 +113,6 @@ const MIC_REQUIRED = [
   "src/components/chat/chat-composer.tsx",
   "src/components/create/create-chat.tsx",
   "src/components/research/research-workspace.tsx",
-  "src/components/agents/agents-workspace.tsx",
   "src/components/website-builder/website-builder-workspace.tsx",
   "src/components/files/files-workspace.tsx",
   "src/components/mission/mission-form.tsx",
@@ -137,7 +136,11 @@ check(
   missing.length === 0,
   missing.join(", ")
 );
-check("the list is not empty", MIC_REQUIRED.length >= 10);
+// NINE, not ten, since 2026-10-31: Agents left the list by losing its own
+// textarea to the shell's shared field, and the chain that replaces its
+// entry is asserted above rather than assumed. The floor is here so an
+// empty list cannot make the loop above pass for nothing.
+check("the list is not empty", MIC_REQUIRED.length >= 9);
 check(
   "every file on the list still exists",
   MIC_REQUIRED.every((f) => read(f) !== null),
@@ -180,11 +183,28 @@ console.log("\n== 2. and it can be read back where an answer is long ==");
 const LISTEN_SURFACES = [
   "src/components/chat/chat-workspace.tsx",
   "src/components/research/research-workspace.tsx",
-  "src/components/agents/agents-workspace.tsx",
+  "src/components/agents/agents-shell.tsx",
 ];
 // `<VoicePlayer`, for the same reason, and because /VoicePlayer/ also
 // matches VoicePlayerX — a rename that broke every call site would have
 // passed.
+// AGENTS LEFT MIC_REQUIRED ABOVE BY MOVING INTO THE TOOL SHELL
+// (2026-10-31, Κομμάτι 1 of the owner's directive 25). It has no sentence
+// input of its own any more — the only thing a key is typed into is the
+// shell's field, which is chat-composer.tsx, entry 1 of that same list.
+// NOT a dropped entry: the chain is asserted, link by link, so breaking
+// any link still turns this red. Listening stays its own, below.
+{
+  const agents = read("src/components/agents/agents-shell.tsx") ?? "";
+  const shell = read("src/components/shell/tool-shell.tsx") ?? "";
+  const composer = read("src/components/chat/chat-composer.tsx") ?? "";
+  check(
+    "Agents' mic is the shared field's: agents-shell -> ToolShell -> ChatComposer -> VoiceInput",
+    /<ToolShell\b/.test(agents) && !/<textarea\b/.test(agents) && /<ChatComposer\b/.test(shell) && /<VoiceInput\b/.test(composer),
+    "agents-shell.tsx"
+  );
+}
+
 const noListen = LISTEN_SURFACES.filter((f) => !/<VoicePlayer\b/.test(read(f) ?? ""));
 check(
   `Listen is on all three (${LISTEN_SURFACES.length - noListen.length}/3)`,

@@ -105,8 +105,24 @@ for (const file of files) {
   const widths = widthsIn(src);
   const drives = INPUT.some((re) => re.test(src));
   const moves = MOTION.some((re) => re.test(src));
-  const hasTouch = /hasTouch:\s*true/.test(src);
-  const realTouch = /dispatchTouchEvent/.test(src);
+  // `true` OR A VARIABLE, never the literal `false`. A suite that runs
+  // the same scenario twice from a device table writes
+  // `hasTouch: device.touch`, which is the parameterised form of the
+  // same thing and was invisible to `/hasTouch:\s*true/` (found
+  // 2026-10-31 alongside the tap() case below).
+  const hasTouch = /hasTouch:\s*(?:true|[A-Za-z_$][\w.$]*)/.test(src);
+  // A FINGER IS A FINGER WHICHEVER API DISPATCHES IT. This read
+  // `/dispatchTouchEvent/` alone, which is ONE implementation of pressing
+  // with a finger — the hand-rolled CDP pair — and not the property. A
+  // suite that presses with Playwright's own `locator.tap()` was counted
+  // "mouse only" while doing exactly what this census exists to ask
+  // about (found 2026-10-31, when agents-shell.prodtest.mjs moved from
+  // the CDP pair to tap(): tap() re-resolves the point itself, which is
+  // why it works inside a `fixed inset-0` pane where coordinates taken
+  // beforehand do not). `hasTouch` is required with it because
+  // Playwright throws on tap() without it — so this cannot be satisfied
+  // by the word alone.
+  const realTouch = /dispatchTouchEvent/.test(src) || (hasTouch && /\.tap\(/.test(src));
   report.push({ file, widths, drives, moves, hasTouch, realTouch });
 }
 

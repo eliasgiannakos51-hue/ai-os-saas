@@ -73,6 +73,10 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   // Package 26: writing a whole game is the Site's generation; a box or a change, its edit.
   game_generate: "expert",
   game_edit: "complex",
+  // Apps (2026-10-24): planning an app is design work with referential
+  // integrity to keep — every screen must name a collection that
+  // exists — so it asks for the same tier a game's plan does.
+  app_generate: "expert",
   // Rebuild (2026-10-27): the same two shapes as the game next to it.
   rebuild_generate: "expert",
   rebuild_edit: "complex",
@@ -97,6 +101,8 @@ export const FEATURE_TIERS: Record<string, Tier> = {
   meeting_analyse: "complex",
   data_analysis: "complex",
   document_translate: "complex",
+  text_translate: "complex",
+  text_translate_edit: "complex",
   mission_review: "complex",
   automation_run: "complex",
   scheduled_agent_run: "complex",

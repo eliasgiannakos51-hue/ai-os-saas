@@ -92,6 +92,35 @@ const EXEMPT = {
   // A detail page reached from the document it belongs to. Its parent
   // (/dashboard/documents) is in the nav; a document id cannot be.
   "/dashboard/documents/[id]": "a document's own page, opened from the documents list",
+
+  // SHEETS, AND THIS ENTRY IS MEANT TO BE DELETED (2026-10-31, Κομμάτι 1
+  // of the owner's directive 28). The screen is behind the switch
+  // "sheets-tool" and src/app/dashboard/sheets/page.tsx is `notFound()`
+  // for anyone it is not open to, so the only people who can reach it
+  // are the owner and the test account — the two who know the address.
+  //
+  // It has no way in BECAUSE THE WAY IN IS HIS DECISION, not because
+  // nobody thought about it: his own «ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ»
+  // message enumerates twenty-five squares and Sheets is not one, while
+  // the Document tile's line already says «Έγγραφα και φύλλα». The two
+  // roads — a twenty-sixth square, or a door inside Document — are put
+  // to him in docs/NEEDS-FROM-ELIAS.md. A hidden nav row would have
+  // closed this gate in one line and been the wrong answer: it puts
+  // «Φύλλα» in every customer's ⌘K, where pressing it gives a 404.
+  //
+  // CHECKED BOTH WAYS so it cannot go stale: scripts/tests/sheets.test.mjs
+  // requires this entry to exist exactly while lib/nav/all-tools.ts has
+  // no Sheets tile, and to be gone the moment it has one.
+  "/dashboard/sheets": "staff-only behind the 'sheets-tool' switch and notFound() for everyone else; its door (a 26th tile, or a link from Document) is the owner's own open question",
+
+  // Directive 42's admin dashboard. src/app/dashboard/admin/page.tsx is
+  // notFound() for anyone isAdminEmail() does not allow, same as Sheets
+  // above — a sidebar row, even a hidden one, would put «Admin» in the
+  // palette for the one person it is built for to type past, and a
+  // visible row would put it in front of every non-admin's ⌘K too. The
+  // owner and the test account reach it by typing the address, which is
+  // the point: admin surface is not meant to be discoverable.
+  "/dashboard/admin": "owner/admin-only, notFound() for everyone else — reached by typing the address, not by discovery",
 };
 
 // ---------------------------------------------------------------------
@@ -277,6 +306,16 @@ console.log("\n== and every component under src/components has an importer ==");
       "only it called, lib/workspace-templates.ts and ten locales of " +
       "dashboard.overview.quickStart*. Whether the feature ships or goes is the " +
       "owner's decision (v6-list #24), so it is not deleted as cleanup.",
+    "src/components/flows/flow-shell.tsx":
+      "Unmounted since 2026-10-23 (dashboard/projects/page.tsx now renders ProjectsShell, " +
+      "not FlowShell) and the LAST real import of anything from this file — FlowRow, a " +
+      "type — was moved out to lib/flows/plan.ts on 2026-10-28 (Projects Κομμάτι 6), which is " +
+      "what made this entry go from accidentally-reachable to genuinely orphaned. Not deleted: " +
+      "scripts/tests/flows.test.mjs reads this file's own source for real behavioural checks " +
+      "(§4, §4b and §6 — the approve/advance/retry flow, the plan-minus-unavailable-steps line, " +
+      "the dashboard.flows.* key census) and scripts/tests/flows.mutation.mjs mutates it directly; " +
+      "re-pointing both at project-flow-field.tsx, which now covers the single-project case, is a " +
+      "separate cleanup, not part of Κομμάτι 6.",
   };
 
   const unimported = [];

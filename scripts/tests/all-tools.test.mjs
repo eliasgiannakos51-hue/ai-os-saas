@@ -6,7 +6,10 @@
 // «Σύντομα» mark, the field disabled, a Notify-me button, never a
 // provider call, never a charge). Replaces the 17-tile round of
 // 2026-10-23, whose "a tool that does not work does not appear" rule
-// this round reverses.
+// this round reverses. A 25th tile, 3D, joined 2026-10-31 (owner's "23.
+// 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ") — ALL_TOOLS.length is read live below, never
+// hand-typed, so this file does not need its own update every time the
+// count changes again.
 //
 // Run: node scripts/tests/all-tools.test.mjs
 import { existsSync, readFileSync } from "node:fs";
@@ -55,7 +58,7 @@ const allDrawn = drawnFor(false).flatMap((g) => g.items);
 console.log("== 0. the population ==");
 check(`the sidebar's tools were read (${allDrawn.length} in ${drawn.length} groups and Settings)`, allDrawn.length >= 20 && drawn.length >= 4);
 
-console.log("\n== 0b. the registry: 24 tiles, 6 groups, in the owner's order ==");
+console.log("\n== 0b. the registry: 25 tiles, 6 groups, in the owner's order ==");
 const { ALL_TOOLS, ALL_TOOLS_GROUP_ORDER, ALL_TOOLS_GROUPS, ALL_TOOLS_NAMES, HIDDEN_FROM_ALL_TOOLS, availableTools } = await loadTs("src/lib/nav/all-tools.ts");
 const registryHrefs = ALL_TOOLS.map((t) => t.href);
 const hidden = Object.keys(HIDDEN_FROM_ALL_TOOLS);
@@ -64,19 +67,20 @@ const OWNER_LIST = [
   ["ask", "analyze"], ["ask", "research"], ["ask", "translate"],
   ["make", "rebuild"], ["make", "site"], ["make", "apps"], ["make", "games"],
   ["make", "document"], ["make", "slides"], ["make", "posts"], ["make", "image"],
+  ["make", "threeD"],
   ["make", "video"], ["make", "films"], ["make", "editing"], ["make", "avatars"],
   ["make", "audio"], ["make", "coding"],
   ["runAlone", "agents"], ["runAlone", "automations"], ["runAlone", "iowork"],
   ["organise", "projects"],
 ];
-check("the registry is exactly the owner's 24, in his order, each in his group",
-  ALL_TOOLS.length === 24 && OWNER_LIST.every(([g, k], i) => ALL_TOOLS[i].name === k && ALL_TOOLS[i].group === g),
+check("the registry is exactly the owner's 25 (24 plus 3D, 2026-10-31), in his order, each in his group",
+  ALL_TOOLS.length === 25 && OWNER_LIST.every(([g, k], i) => ALL_TOOLS[i].name === k && ALL_TOOLS[i].group === g),
   ALL_TOOLS.map((t) => `${t.group}/${t.name}`).join(", "));
 check("...six groups, in the owner's order, Learn last and carrying no big tile",
   ALL_TOOLS_GROUP_ORDER.join(",") === "record,ask,make,runAlone,organise,learn" &&
     ALL_TOOLS_GROUPS.map((g) => g.key).join(",") === "record,ask,make,runAlone,organise,learn" &&
     ALL_TOOLS_GROUPS.find((g) => g.key === "learn").hrefs.length === 0);
-check("...each address once", new Set(registryHrefs).size === 24);
+check("...each address once", new Set(registryHrefs).size === ALL_TOOLS.length);
 const enNames = messages.en.dashboard.tools.names;
 const enLines = messages.en.dashboard.tools.lines;
 check("document's line names sheets, not slides (Slides is its own tile now)", /sheet/i.test(enLines.document) && !/slide/i.test(enLines.document));
@@ -91,7 +95,7 @@ const hasPage = (href) => existsSync(`src/app${href}/page.tsx`) || moduleHrefs.h
 // route (app/dashboard/[module]/page.tsx), not app/dashboard/<name>/page.tsx.
 const pageFileFor = (href) => (existsSync(`src/app${href}/page.tsx`) ? `src/app${href}/page.tsx` : "src/app/dashboard/[module]/page.tsx");
 const missingPage = ALL_TOOLS.filter((t) => !hasPage(t.href));
-check(`every one of the 24 tiles — ready or not — has a page at its address (${ALL_TOOLS.length} total)`, missingPage.length === 0, missingPage.map((t) => t.href).join(", "));
+check(`every one of the ${ALL_TOOLS.length} tiles — ready or not — has a page at its address`, missingPage.length === 0, missingPage.map((t) => t.href).join(", "));
 check(`every tool that is not ready says what it waits for, in a sentence (${notReady.length} waiting)`, notReady.every((t) => String(t.waitingFor ?? "").trim().length >= 20), notReady.filter((t) => !t.waitingFor).map((t) => t.name).join(", "));
 check("...and a not-ready tile's page renders the Coming Soon shell, not the real tool",
   notReady.every((t) => /ComingSoonShell/.test(readFileSync(pageFileFor(t.href), "utf8"))), notReady.filter((t) => !/ComingSoonShell/.test(readFileSync(pageFileFor(t.href), "utf8"))).map((t) => t.name).join(", "));
@@ -165,7 +169,7 @@ for (const l of LOCALES) {
   check(`${l}: the Coming Soon screen's own words are all present`,
     ["badge", "fieldPlaceholder", "line", "notify", "notified", "notifyFailed"].every((k) => typeof cs[k] === "string" && cs[k].length > 0));
 }
-const examplesNeeded = ["apps", "video", "films", "editing", "avatars", "audio", "translate"];
+const examplesNeeded = ["apps", "threeD", "video", "films", "editing", "avatars", "audio", "translate"];
 for (const l of LOCALES) {
   const ex = messages[l].dashboard?.comingSoon?.examples ?? {};
   const bad = examplesNeeded.filter((k) => !ex[k] || Object.keys(ex[k]).length === 0);
@@ -173,7 +177,7 @@ for (const l of LOCALES) {
 }
 check("iowork's Coming Soon page passes no examples (it has none to show)", /examples=\{\[\]\}|<ComingSoonShell\s+toolKey="iowork"\s+name=\{[^}]+\}\s*\/>/.test(stripComments(readFileSync("src/app/dashboard/iowork/page.tsx", "utf8"))) || !/examples=/.test(stripComments(readFileSync("src/app/dashboard/iowork/page.tsx", "utf8"))));
 
-console.log("\n== 0h. only the 24 big tiles reach the page, each group its own full-width row (the owner's \"ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ\", 2026-10-24) ==");
+console.log("\n== 0h. only the big tiles reach the page, each group its own full-width row (the owner's \"ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ\", 2026-10-24) ==");
 const defaultBranch = grid.slice(grid.indexOf('<div className="mt-5 flex flex-col gap-6">'));
 check("the default (non-search) render draws no quick-job tile",
   defaultBranch.length > 50 && !/\bsmallTile\b/.test(defaultBranch), "smallTile referenced inside the default (non-search) render branch");

@@ -29,6 +29,7 @@ import {
   type FlowAvailability,
   type FlowKind,
   type FlowPlan,
+  type FlowRow,
   type StepState,
 } from "@/lib/flows/plan";
 
@@ -73,8 +74,6 @@ type Open = "flow" | "mine" | "examples" | null;
 
 /** A project in «Τα έργα μου»: its name and how many things are in it. */
 export type FlowProject = { id: string; name: string; memberCount: number };
-
-export type FlowRow = { id: string; project_id: string; said: string; colour: string | null; plan: unknown; steps: unknown; status: string; project_name: string };
 
 export function FlowShell({
   initialFlows,

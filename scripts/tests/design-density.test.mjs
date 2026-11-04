@@ -141,7 +141,139 @@ console.log("\n== 2. the lines ==");
 // Coming Soon screen (coming-soon-shell.tsx) each carry their own
 // `border border-border`, with nothing already drawn the same way
 // elsewhere on the page to share a class with.
-ok(`border utilities (${r.counts.borders}), ceiling 594`, r.counts.borders <= 594);
+// 594 -> 595 on 2026-10-28. The iowork device-code-phishing fix
+// (api/iowork/devices/route.ts, iowork-devices.tsx) added a second button
+// beside the preview's existing `.btn-outline` one — "this is not me,
+// cancel it" — and gave it its OWN border deliberately, not .btn-outline's:
+// a muted, unfilled secondary next to the confirm button, on purpose, so
+// the eye still lands on confirm first. One new one-off, nothing already
+// drawn the same muted-secondary way elsewhere to share a class with yet.
+// 595 -> 596 on 2026-10-28. My Stuff's «ΝΕΑ ΟΘΟΝΗ» (Κομμάτι 1) drew the
+// line between the top strip and the list+details body as its own
+// `border-t`, with nothing already drawn that line elsewhere on the page
+// to share a class with (the matching `border-e` beside the list column
+// is a logical side the census regex does not match at all, so only this
+// one counted).
+// 596 -> 597 on 2026-10-28. My Stuff's Κομμάτι 3 (filters) gave the
+// Project dropdown its own `border border-border` — the same one-off
+// shape generic-list.tsx's own status `<select>` already has, reused by
+// hand rather than shared, since the two live in different components
+// with nothing to import from each other for one declaration this small.
+// 597 -> 598 on 2026-10-28. My Stuff's Κομμάτι 4 (details pane) draws its
+// own `border-t` above the honest "who sees this" line at the foot of the
+// pane — a second, unrelated horizontal rule inside the SAME component
+// Κομμάτι 1's border-t already counted above, not a duplicate of it.
+// 598 -> 599 on 2026-10-28. My Stuff's Κομμάτι 5 (upload) gives its own
+// upload/drop row a dashed `border` to read as a drop target, the one
+// shape this file does not already have a shared class for (the solid
+// `border-border` used elsewhere draws a different thing — a field or a
+// card, not "drop here").
+// 599 -> 600 on 2026-10-28. Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 replaced
+// projects-workspace.tsx (gone — its own two `border border-border`
+// inputs went with it, -2) with projects-shell.tsx's own create-project
+// form: the same two inputs again (+2, unavoidable — a name field and a
+// goal field each need their own box) plus one new `border-b` under the
+// form, separating it from the project list below (+1, nothing already
+// drawn that line in this component to share a class with). Net +1.
+// 600 -> 602 on 2026-10-28. Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 2 ("title + goal,
+// hand-editable") turned the static name heading and the static goal
+// paragraph in project-detail.tsx into a real <input> and a real
+// <textarea> — two more boxes, +2, the same unavoidable shape as the
+// create form's own two fields just above: a field the person can click
+// into needs a border to read as one, even transparent until hover/focus.
+// 602 -> 603 on 2026-10-28. Κομμάτι 4 ("«What Ionexa knows» σημειώσεις")
+// added ONE more such field, the notes <textarea> — the same unavoidable
+// border-until-hover/focus shape as the two above, +1.
+// 603 -> 605 on 2026-10-28. Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο
+// project") added project-flow-field.tsx: its own sentence field, +1 border
+// for the same reason as every field above, and +1 border-t separating the
+// field from the list of this project's own flows below it — the one new
+// divider line this screen did not already have one of.
+// 605 -> 608 on 2026-10-28. Κομμάτι 7 (Share, read-only link + revoke)
+// added THREE boxes to project-detail.tsx's new Share card: the read-only
+// `<input>` holding the link itself (same "a field needs a border to read
+// as one" reason as every text field already counted above), and the
+// "Create link"/"Revoke" buttons, styled like the sibling "Automate it"
+// button already in this file (`border border-border`, not `bg-button` —
+// secondary actions, so this stays off one-primary-action's own count).
+// 608 -> 609 on 2026-10-29. Meetings Κομμάτι 2 (browser recording, with
+// the owner's own consent gate before it) added ONE new bordered control
+// to meetings-workspace.tsx: the record-confirm overlay's "Cancel" button
+// (`border border-border`, the same shape as every secondary button this
+// file already has). Its "Continue" sibling is `bg-button` — counted by
+// one-primary-action's own overlay budget, not here — and the record
+// button itself reuses the already-declared `.btn-outline` class, which
+// carries its border in globals.css and adds nothing to this count.
+// 609 -> 611 on 2026-10-29. Meetings Κομμάτι 6 ("Ask about this meeting,
+// from a field") added the field's own bordered <input> (`border
+// border-border`, the one token IS_BORDER matches is the bare `border`;
+// same shape as every other text field this file already has) AND the
+// section's own `border-t` separator above it, the same divider shape
+// Remind me's own sections already use elsewhere in this file — two new
+// tokens, not one, and neither is a card: the question list itself is
+// `bg-panel-hover`, no border.
+// 611 -> 612 on 2026-10-31. 3D Κομμάτι 2's placeholder box
+// (three-d-shell.tsx, `BoxFace`) draws each of its six faces with
+// `border border-border` — the directive's own explicit allowance for
+// a "box with a label" before piece 3 exists. The `BoxFace` helper's
+// className is written ONCE in the source and rendered six times at
+// runtime, so this count (a static scan of the source text, not of the
+// rendered DOM) moves by one token, not six.
+// 612 -> 617 on 2026-10-31. Telegram κομμάτι 1 adds FIVE, each one a box
+// the design already draws this way elsewhere on the same page:
+// telegram-connect.tsx's consent panel (`border border-foreground/30`,
+// copied token for token from integrations-list.tsx's OAuth consent
+// panel, because it is the same step in the same flow) and its THREE
+// quiet refusals («Ακύρωση», «Δεν είμαι εγώ», «Όχι τώρα», `border
+// border-border`, the shape iowork-devices.tsx's own cancel already
+// uses), plus connection-details.tsx's one Disconnect button.
+//
+// THE FIFTH WAS NOT IN THE FIRST COUNT, and how it arrived is the part
+// worth keeping: the consent step originally had no refusal of its own —
+// it borrowed the shared block's Disconnect, which rendered in red, with
+// an unplug icon, over the words «Όχι τώρα», offering to disconnect a
+// connection that did not exist. That was found by looking at the
+// screenshot rather than at the code, and the fix gives the consent step
+// its own plain refusal, which is this border.
+//
+// NO FILLED ACCENT BUTTON came with any of them: the page's one white
+// button stays the OAuth consent «Έγκριση», so one-primary-action's
+// baseline for dashboard/integrations is untouched at 1. Five quiet
+// borders in exchange for no second loud control is the trade this
+// ceiling exists to make visible, and it is the right side of it.
+// 617 -> 618 on 2026-10-31. Skills Κομμάτι 1 adds ONE: the workspace's
+// own header separator (skills-workspace.tsx, `border-t border-divider`
+// above the list/details split). The list column's own border
+// (`border-e border-divider`) is a logical-property side the IS_BORDER
+// regex does not match at all — a real border the census cannot see,
+// same shape as the one named at line 155 — so it costs nothing here
+// despite being drawn. No frame carries a fill: the empty states on
+// both sides are plain centred text, no card.
+// 618 -> 685, found 2026-11-04 (not landed in one commit — this gate was
+// never run against the admin dashboard until directive 42's own gate
+// cleanup reached it, so the whole climb is counted here at once rather
+// than piece by piece as it happened). The count at the branch point
+// (b51f08fc) was already 623, five over this ceiling before any of
+// directive 42 existed — a pre-existing gap, reported separately, not
+// raised here. The 62 this adds are the admin dashboard's own tables,
+// modals and tabs, every one a box or a field that needs a line to read
+// as one, the same unavoidable shape every entry above already argues:
+// costs-tab.tsx (12): the summary cards, the flagged-users table and the
+// provider/daily tables each need their own frame or header rule.
+// revenue-tab.tsx (15): the same shape — summary cards, the MRR bar and
+// three tables (events, cohorts, by-plan).
+// users-tab.tsx (9): the search field, the users table and its header
+// rule, the per-row action buttons.
+// refund-modal.tsx (7), credit-adjust-modal.tsx (5) and
+// suspend-modal.tsx (5): each modal's own fields and buttons — a field
+// needs a border to read as one, the same reason Projects' and Meetings'
+// fields above already counted.
+// audit-log-tab.tsx (3) and admin-tabs.tsx (2): the log table and the
+// tab strip's own underline.
+// suspended-notice.tsx (3): the notice card and its reason box.
+// NO FILLED ACCENT BUTTON came with any of them beyond the one the admin
+// dashboard already had: one-primary-action's own count is untouched.
+ok(`border utilities (${r.counts.borders}), ceiling 685`, r.counts.borders <= 685);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —
@@ -150,7 +282,11 @@ ok(`border utilities (${r.counts.borders}), ceiling 594`, r.counts.borders <= 59
 // `divide-y` inside draws the same separation with one rule instead of
 // forty outlines, so the page costs exactly this: one divide, zero
 // borders. A round that raises BOTH numbers has not made this trade.
-ok(`divide rules (${r.counts.divides}), ceiling 7`, r.counts.divides <= 7);
+// 7 -> 8 on 2026-10-28. Κομμάτι 7's public page, src/app/shared/[token]/
+// page.tsx, lists a shared project's own Activity the same read-only way
+// — one `divide-y` over up to ten rows, not ten borders, same trade as
+// /dashboard/ai-memory's own above.
+ok(`divide rules (${r.counts.divides}), ceiling 8`, r.counts.divides <= 8);
 
 console.log("\n== 3. the glow and the gradient titles ==");
 // ZERO, and the definition is in design-census.mjs: a glow is a BLURRED

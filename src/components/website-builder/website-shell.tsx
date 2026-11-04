@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Download, Files, History, Palette, Square, Undo2, X } from "lucide-react";
+import { Download, Files, History, Monitor, Palette, Smartphone, Square, Undo2, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
@@ -11,6 +11,8 @@ import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { PublishControl } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
 import { SiteHistory } from "@/components/website-builder/site-history";
+import { BrowserFrame } from "@/components/website-builder/browser-frame";
+import { MotionButton } from "@/components/shell/motion-button";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
@@ -175,6 +177,10 @@ export function WebsiteShell({
   // How many pages the next site is asked for; null lets the site decide.
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [choosingPages, setChoosingPages] = useState(false);
+  // THE BROWSER FRAME (package 5, Κομμάτι 1): which simulated width the
+  // preview shows at. Remembered only for this visit — a real address
+  // does not change by device, so there is nothing to persist.
+  const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
   // The open page, with the site it belongs to, as the chosen part is.
   const [openPage, setOpenPage] = useState<{ siteId: string; slug: string } | null>(null);
   const describeNote = useGenerationNoteText();
@@ -499,6 +505,36 @@ export function WebsiteShell({
           title: current.name,
           actions: (
             <>
+              <span className="flex items-center gap-1" role="group" aria-label={t("viewportGroup")}>
+                <button
+                  type="button"
+                  onClick={() => setViewport("desktop")}
+                  aria-pressed={viewport === "desktop"}
+                  aria-label={t("viewportDesktop")}
+                  title={t("viewportDesktop")}
+                  data-testid="site-viewport-desktop"
+                  className={`${ACTION} ${viewport === "desktop" ? "border-foreground text-foreground" : ""}`}
+                >
+                  <Monitor className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewport("mobile")}
+                  aria-pressed={viewport === "mobile"}
+                  aria-label={t("viewportMobile")}
+                  title={t("viewportMobile")}
+                  data-testid="site-viewport-mobile"
+                  className={`${ACTION} ${viewport === "mobile" ? "border-foreground text-foreground" : ""}`}
+                >
+                  <Smartphone className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </span>
+              {/* MOTION (package 5, Κομμάτι 1): shared with Apps
+                  (components/shell/motion-button.tsx) — one piece of
+                  code, not a copy, per the Apps directive 2026-10-30.
+                  Still the button and the list only, the owner's own
+                  stop-gate, unchanged by moving file. */}
+              <MotionButton />
               <PublishControl websiteId={current.id} websiteName={current.name} disabled={current.status !== "completed"} />
               <button
                 type="button"
@@ -609,22 +645,27 @@ export function WebsiteShell({
                 </div>
               )}
               {shown ? (
-                <iframe
-                  key={`${shown.id}:${pageSlug}`}
-                  srcDoc={shownHtml}
-                  sandbox=""
-                  title={t("viewingOldVersion", { number: shown.version_number })}
-                  data-testid="site-version-preview"
-                  className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
-                />
+                <BrowserFrame address={current.name} viewport={viewport}>
+                  <iframe
+                    key={`${shown.id}:${pageSlug}`}
+                    srcDoc={shownHtml}
+                    sandbox=""
+                    title={t("viewingOldVersion", { number: shown.version_number })}
+                    data-testid="site-version-preview"
+                    className="h-full min-h-[60vh] w-full flex-1 bg-paper"
+                  />
+                </BrowserFrame>
               ) : complete ? (
-                <iframe
-                  key={`${current.id}:${pageSlug}:${html.length}`}
-                  srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
-                  sandbox=""
-                  title={current.name}
-                  className="min-h-[60vh] w-full flex-1 rounded-card bg-paper"
-                />
+                <BrowserFrame address={current.name} viewport={viewport}>
+                  <iframe
+                    key={`${current.id}:${pageSlug}:${html.length}`}
+                    srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
+                    sandbox=""
+                    title={current.name}
+                    data-testid="site-live-preview"
+                    className="h-full min-h-[60vh] w-full flex-1 bg-paper"
+                  />
+                </BrowserFrame>
               ) : (
                 <p className="text-xs text-muted">{running(current) ? t("generating") : current.status === "flagged" ? t("flaggedBody") : failedText(current)}</p>
               )}

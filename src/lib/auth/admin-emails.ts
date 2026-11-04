@@ -33,3 +33,8 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
   return ADMIN_EMAILS.includes(email.toLowerCase());
 }
+
+export function isOwnerEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.length > 0 && email.toLowerCase() === ADMIN_EMAILS[0];
+}

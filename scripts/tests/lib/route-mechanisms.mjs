@@ -109,8 +109,14 @@ export function ownershipTable(invoker) {
     helper: (src) => /resolveDeliveryOwnership|referenceImagePathBelongsToUser|isProjectMemberTable/.test(src),
 
     // The route is owner-only, so the resource being somebody else's is
-    // the point of it.
-    owner_only: (src) => /isAdminEmail\s*\(/.test(src),
+    // the point of it. isOwnerEmail (lib/auth/admin-emails.ts) is the
+    // NARROWER sibling of isAdminEmail — the single literal owner address,
+    // ADMIN_EMAILS[0], rather than the whole staff allowlist. api/admin/
+    // refund gates on it instead (directive 42 Κ3: refunds only by the
+    // owner), and missing it from this pattern reported the route as
+    // unowned despite being gated tighter than every admin route that
+    // passes through isAdminEmail.
+    owner_only: (src) => /isAdminEmail\s*\(|isOwnerEmail\s*\(/.test(src),
   };
 }
 

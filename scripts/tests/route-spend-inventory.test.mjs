@@ -301,6 +301,16 @@ const DECLARED = {
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },
   "system-health/keys": { bound: "none", why: "owner-only (isAdminEmail); one free READ per provider (a model or account list, never a generation), so the provider URLs it names are never asked to produce anything" },
   "import/csv/apply": { bound: "limited", scope: "import_apply", why: "scope import_apply; the model call it makes was reserved by import/csv/analyse" },
+  // Classified `webhook_out` only because its import closure reaches
+  // lib/notify/channels/telegram — which it imports for ONE function,
+  // telegramBotUsername(), to build the «Άνοιξε στο Telegram» link. It
+  // sends no message and spends no credit: connecting a chat and
+  // disconnecting it are both free (the owner's directive 24, κομμάτι 1).
+  "telegram/link": {
+    bound: "limited",
+    scope: "telegram_link_act",
+    why: "connects or disconnects one Telegram chat. The bot URL in its closure is lib/notify/channels/telegram, imported only to read the bot's own username for the deep link - nothing is sent from here and no credit is charged. Bounded by checkRateLimit scope telegram_link_act, twenty an hour per account, answering 429.",
+  },
 };
 
 // ---------------------------------------------------------------------

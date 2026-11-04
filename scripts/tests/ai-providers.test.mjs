@@ -1514,7 +1514,7 @@ ok("the collector is registered as a cron",
   // BOTH BRANCHES. The colour and the label are two separate ternaries,
   // and breaking only the label leaves the first one still spelling
   // `run.status === "queued"` — which a single `includes` is satisfied by.
-  const workspace = stripTs(src("src/components/agents/agents-workspace.tsx"));
+  const workspace = stripTs(src("src/components/agents/agents-shell.tsx"));
   ok("a queued run is shown as queued, not as running — colour AND label",
     (workspace.match(/run\.status === "queued"/g) ?? []).length >= 2 &&
     /run\.status === "queued"[\s\S]{0,60}t\("runQueued"\)/.test(workspace),

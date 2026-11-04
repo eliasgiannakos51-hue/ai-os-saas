@@ -1,8 +1,8 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **618 strings**. The whole product is 4688, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5137, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 376 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Das sieht nach einer Frage aus. Soll ich sie beantworten oder ablegen?
 
 Beschreibe irgendetwas — eine Produktidee, einen Trade, das Feedback eines Nutzers, eine Kennzahl — und es landet automatisch im richtigen Modul.
 
-## Tier 2 — The labels — skim these (376)
+## Tier 2 — The labels — skim these (379)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -807,6 +807,12 @@ Noch kein Konto?
 > EN — Password
 
 Passwort
+
+**`auth.login.rateLimited`**
+
+> EN — Too many attempts. Please try again later.
+
+Zu viele Versuche. Versuch es später erneut.
 
 **`auth.login.resetSuccess`**
 
@@ -1532,6 +1538,12 @@ Was es sich merkt
 
 Analytik
 
+**`sidebar.items.appBuilder`**
+
+> EN — Apps
+
+Apps
+
 **`sidebar.items.apps`**
 
 > EN — App ideas
@@ -2095,6 +2107,12 @@ Geplante Aufgaben
 > EN — Settings
 
 Einstellungen
+
+**`sidebar.items.skills`**
+
+> EN — Skills
+
+Fähigkeiten
 
 **`sidebar.items.systemHealth`**
 

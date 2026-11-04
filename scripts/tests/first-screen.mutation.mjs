@@ -38,7 +38,7 @@ const GREETING = "src/components/overview/greeting-header.tsx";
 const OVERVIEW = "src/app/dashboard/overview/page.tsx";
 const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
 const CHAT_WS = "src/components/chat/chat-workspace.tsx";
-const AGENTS_WS = "src/components/agents/agents-workspace.tsx";
+const AGENTS_WS = "src/components/agents/agents-shell.tsx";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
 const TEMPLATES_ROUTE = "src/app/api/agents/templates/route.ts";
@@ -128,7 +128,7 @@ const MUTANTS = [
     file: AGENTS_WS,
     from: "  initialAgent?: string;",
     to: "  initialAgentXX?: string;",
-    expect: "repeat: agents-workspace.tsx accepts initialAgent",
+    expect: "repeat: agents-shell.tsx accepts initialAgent",
   },
   {
     dimension: "C. arriving runs it",

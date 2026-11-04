@@ -13,6 +13,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { COUNTRIES } from "@/lib/countries";
 import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 import { diagLog } from "@/lib/diag";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 
@@ -159,6 +160,8 @@ export async function POST(request: Request) {
       // written below, through merge_user_metadata, once the account exists.
       user_metadata: {
         terms_accepted_at: new Date().toISOString(),
+        terms_version: LEGAL_VERSIONS.terms,
+        privacy_version: LEGAL_VERSIONS.privacy,
         ...(country ? { country } : {}),
       },
     });

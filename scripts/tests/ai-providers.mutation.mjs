@@ -51,7 +51,7 @@ const BATCH_CRON = "src/app/api/cron/agent-batches/route.ts";
 const LOG_SQL = "supabase/migrations/20260828000000_ai_provider_log.sql";
 const BATCH_SQL = "supabase/migrations/20260829000000_agent_run_batches.sql";
 const VERCEL = "vercel.json";
-const WORKSPACE = "src/components/agents/agents-workspace.tsx";
+const WORKSPACE = "src/components/agents/agents-shell.tsx";
 const COMPLETE = "src/lib/ai/providers/complete.ts";
 const PROVIDER_LOG = "src/lib/ai/providers/provider-log.ts";
 const CITATIONS = "src/lib/ai/providers/citations.ts";
@@ -485,8 +485,8 @@ const MUTANTS = [
   {
     name: "a queued run is shown to the user as Running for up to 24 hours",
     file: WORKSPACE,
-    from: '                              : run.status === "queued"\n                                  ? t("runQueued")',
-    to: '                              : run.status === "queued_never"\n                                  ? t("runQueued")',
+    from: '                                    : run.status === "queued"\n                                      ? t("runQueued")',
+    to: '                                    : run.status === "queued_never"\n                                      ? t("runQueued")',
   },
   {
     name: "the agent runner leaks which provider failed into the sentence the user reads",

@@ -180,7 +180,7 @@ SAFETY CHECK (this automation will run repeatedly, unsupervised, on whatever sch
   // stated grounds that cadence is "a separate field the user picks
   // directly". That justification is true of Automations and false of
   // Agents: there is no schedule field in the agent create flow at all
-  // (components/agents/agents-workspace.tsx is one textarea and a
+  // (components/agents/agents-shell.tsx is one textarea and a
   // button), the cron is INFERRED by the builder from this same sentence,
   // and the ScheduleEditor only appears when editing an agent that
   // already exists. So the one detail most likely to be missing was the

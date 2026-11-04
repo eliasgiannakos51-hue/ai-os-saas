@@ -10,13 +10,26 @@ import { MAX_ATTACHMENT_IMAGES } from "@/lib/create-attachment-image";
  * (lib/files/upload-file.ts), so it is in Files and in the Library too —
  * and an image is a path in the create-attachments bucket, as Create and
  * Site attach them. Neither is copied anywhere else.
+ *
+ * A "data" attachment (the owner's «30. CHAT: ΓΡΑΦΗΜΑΤΑ...», 2026-10-31,
+ * Κομμάτι 1) is different in kind from the other two: it carries no bytes
+ * at all, only the id of a row in `data_analyses` — a file already
+ * profiled by Analyze. It is never handed to the model (lib/chat/
+ * attachments.ts's loadAttachmentContent has no branch for it, on
+ * purpose: the model never sees a row, lib/data-analysis/charts.ts's own
+ * rule, kept here by omission rather than by a check that could be
+ * missed). The route reads the row itself, after the model has answered,
+ * and draws a chart from it in code (lib/chat/answer-chart.ts).
  */
 export type ChatAttachment =
   | { kind: "pdf"; fileId: string; name: string }
-  | { kind: "image"; path: string; name: string };
+  | { kind: "image"; path: string; name: string }
+  | { kind: "data"; dataId: string; name: string };
 
 /** PDFs one message may carry, beside MAX_ATTACHMENT_IMAGES images. */
 export const MAX_CHAT_FILES = 3;
+/** One dataset per message — Κομμάτι 1 draws its one best chart from it. */
+export const MAX_CHAT_DATA = 1;
 export { MAX_ATTACHMENT_IMAGES };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -44,12 +57,15 @@ export function readChatAttachments(
     } else if (a.kind === "image" && typeof a.path === "string" && a.path.length <= 300) {
       if (!a.path.startsWith(`${userId}/`) || a.path.includes("..")) return { ok: false, reason: "notYours" };
       list.push({ kind: "image", path: a.path, name: n });
+    } else if (a.kind === "data" && typeof a.dataId === "string" && UUID.test(a.dataId)) {
+      list.push({ kind: "data", dataId: a.dataId, name: n });
     } else {
       return { ok: false, reason: "shape" };
     }
   }
   if (list.filter((a) => a.kind === "pdf").length > MAX_CHAT_FILES) return { ok: false, reason: "tooMany" };
   if (list.filter((a) => a.kind === "image").length > MAX_ATTACHMENT_IMAGES) return { ok: false, reason: "tooMany" };
+  if (list.filter((a) => a.kind === "data").length > MAX_CHAT_DATA) return { ok: false, reason: "tooMany" };
   return { ok: true, list };
 }
 
@@ -72,6 +88,8 @@ export function parseStoredAttachments(raw: unknown, ownerId?: string): ChatAtta
     else if (a.kind === "image" && typeof a.path === "string" && a.path.length <= 300) {
       if (ownerId !== undefined && (!a.path.startsWith(`${ownerId}/`) || a.path.includes(".."))) continue;
       out.push({ kind: "image", path: a.path, name: n });
+    } else if (a.kind === "data" && typeof a.dataId === "string" && UUID.test(a.dataId)) {
+      out.push({ kind: "data", dataId: a.dataId, name: n });
     }
   }
   return out;
@@ -84,7 +102,7 @@ export function parseStoredAttachments(raw: unknown, ownerId?: string): ChatAtta
  */
 export function conversationAttachments(earlier: readonly ChatAttachment[][], current: readonly ChatAttachment[]): ChatAttachment[] {
   const all = [...earlier.flat(), ...current];
-  const key = (a: ChatAttachment) => (a.kind === "pdf" ? `pdf:${a.fileId}` : `image:${a.path}`);
+  const key = (a: ChatAttachment) => (a.kind === "pdf" ? `pdf:${a.fileId}` : a.kind === "image" ? `image:${a.path}` : `data:${a.dataId}`);
   const seen = new Set<string>();
   const unique: ChatAttachment[] = [];
   for (let i = all.length - 1; i >= 0; i--) {
@@ -96,6 +114,7 @@ export function conversationAttachments(earlier: readonly ChatAttachment[][], cu
   const kept = new Set<ChatAttachment>([
     ...unique.filter((a) => a.kind === "pdf").slice(-MAX_CHAT_FILES),
     ...unique.filter((a) => a.kind === "image").slice(-MAX_ATTACHMENT_IMAGES),
+    ...unique.filter((a) => a.kind === "data").slice(-MAX_CHAT_DATA),
   ]);
   return unique.filter((a) => kept.has(a));
 }

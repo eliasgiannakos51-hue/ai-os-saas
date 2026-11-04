@@ -161,7 +161,7 @@ export const FIRST_SCREEN_EXAMPLES: readonly FirstScreenExample[] = [
     path: "/dashboard/agents",
     param: "agent",
     page: "src/app/dashboard/agents/page.tsx",
-    workspace: "src/components/agents/agents-workspace.tsx",
+    workspace: "src/components/agents/agents-shell.tsx",
     // Postgres full-text over the template library. No AI call, no
     // reservation, no settlement — and the expensive builder is not
     // called on arrival precisely so this stays true.

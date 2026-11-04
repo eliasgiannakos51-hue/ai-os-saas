@@ -127,6 +127,11 @@ const CLASSIFIED = {
     // answer gets truncationNotice appended before it is shown, saved
     // or cited — the same shape file-ask.ts uses above.
     "src/app/api/my-stuff/ask/route.ts",
+    // Meetings Κομμάτι 6 (2026-10-29): a question about one meeting,
+    // answered through modelTextFrom — the SAME shape as my-stuff/ask
+    // just above, truncationNotice appended before the answer is shown
+    // or saved to meeting_questions.
+    "src/lib/meetings/meeting-ask-call.ts",
   ],
   structured: [
     // Connect by address (2026-10-26): 600 tokens for one forced tool call
@@ -187,6 +192,13 @@ const CLASSIFIED = {
     // cut at max_tokens is refused by stop_reason as "unusable" — its last
     // script would never close — and that step charges nothing.
     "src/lib/rebuild/rebuild-call.ts",
+    // Apps (2026-10-24). One forced tool call per step: the plan and a
+    // box change both at PLAN_MAX_TOKENS (lib/apps/app-plan.ts) — the
+    // output is a DEFINITION, not code, so one ceiling fits both. A
+    // reply cut at max_tokens is refused by stop_reason as "unusable":
+    // a plan missing its last screens would otherwise parse as a
+    // smaller, valid app.
+    "src/lib/apps/app-call.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

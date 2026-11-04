@@ -217,8 +217,8 @@ const MUTANTS = [
   {
     name: "Site: the preview runs the generated page's scripts",
     file: SITE,
-    from: 'srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}\n                  sandbox=""',
-    to: 'srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}\n                  sandbox="allow-scripts"',
+    from: 'srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}\n                    sandbox=""',
+    to: 'srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}\n                    sandbox="allow-scripts"',
     expect: "is sandboxed",
   },
   {
@@ -469,8 +469,8 @@ const MUTANTS = [
   {
     name: "Site: an earlier version is previewed with its scripts running",
     file: SITE,
-    from: 'srcDoc={shownHtml}\n                  sandbox=""',
-    to: 'srcDoc={shownHtml}\n                  sandbox="allow-scripts"',
+    from: 'srcDoc={shownHtml}\n                    sandbox=""',
+    to: 'srcDoc={shownHtml}\n                    sandbox="allow-scripts"',
     expect: "read-only and sandboxed",
   },
   {

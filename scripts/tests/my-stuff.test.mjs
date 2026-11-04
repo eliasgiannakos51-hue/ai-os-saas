@@ -53,21 +53,51 @@ const messages = Object.fromEntries(LOCALES.map((l) => [l, JSON.parse(readFileSy
 const lookup = (obj, dotted) => dotted.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
 
 // =====================================================================
-console.log("\n== 1. sources: every kind the Library has, plus five more, nothing moved ==");
+console.log("\n== 1. sources: every kind the Library has, plus eight more, nothing moved ==");
 // =====================================================================
 
-eq("twelve kinds in all", sources.MY_STUFF_KINDS.length, 12);
+// 12 -> 15, 2026-10-28, Κομμάτι 3 (filters: All/Documents/Images/Data/
+// More/Project/Sort) added "images" (generated_images, real, shipped),
+// "meetings" (meetings, real, shipped) and "apps" (user_apps — real, but
+// the only screen that writes one is itself behind the `apps-tool` flag,
+// so an account without it never has a row here either; see
+// src/lib/my-stuff/sources.ts's own comment on why that needs no extra
+// gate in this file).
+eq("fifteen kinds in all", sources.MY_STUFF_KINDS.length, 15);
 for (const libraryKind of library.LIBRARY_KINDS) {
   ok(`"${libraryKind}" (a Library kind) is one of my-stuff's own`, sources.MY_STUFF_KINDS.includes(libraryKind));
 }
-for (const extra of ["chat", "coding", "finance", "sales", "trading"]) {
+for (const extra of ["chat", "coding", "finance", "sales", "trading", "images", "meetings", "apps"]) {
   ok(`"${extra}" is a my-stuff kind the Library does not have`, sources.MY_STUFF_KINDS.includes(extra) && !library.LIBRARY_KINDS.includes(extra));
 }
-// THE SEVEN SHARED KINDS READ THE SAME TABLE AS THE LIBRARY — one
-// definition, not two that could drift.
+// THE SEVEN SHARED KINDS ARE TEXTUALLY THE LIBRARY'S OWN DEFINITION, IN
+// EVERY FIELD THAT DECIDES WHAT SHOWS — not just `.table`, which a
+// hand-copied object with a DIFFERENT `keep()` would still pass. NOT
+// `mine === libSource` (reference equality): `loadTs` bundles each entry
+// point's transitive imports on its own (scripts/tests/load-ts.mjs's own
+// `bundleOf`), so `sources.ts`'s bundle and `library.ts`'s bundle each
+// get their OWN copy of library/sources.ts's module-level objects —
+// identical by construction (src/lib/my-stuff/sources.ts's own
+// `FROM_LIBRARY = LIBRARY_SOURCES`, spread into MY_STUFF_SOURCES, is ONE
+// array literal in ONE file, so the two bundles' copies are
+// byte-for-byte the same source text transpiled twice), but never the
+// same object in THIS test's two separately-loaded bundles. Comparing
+// every field — the functions by their transpiled text, since two
+// bundles of the same source produce the same text — is what proves
+// "one definition" in a way this harness can actually express; Κομμάτι
+// 6 (2026-10-28, same item count before/after) is this sentence proven.
 for (const libSource of library.LIBRARY_SOURCES) {
   const mine = sources.sourceForKind(libSource.kind);
-  ok(`"${libSource.kind}": same table as the Library's`, mine && mine.table === libSource.table, `library reads ${libSource.table}, my-stuff reads ${mine?.table}`);
+  const same =
+    Boolean(mine) &&
+    mine.table === libSource.table &&
+    mine.columns === libSource.columns &&
+    mine.contentColumns === libSource.contentColumns &&
+    mine.timeColumn === libSource.timeColumn &&
+    mine.keep.toString() === libSource.keep.toString() &&
+    mine.titleOf.toString() === libSource.titleOf.toString() &&
+    mine.hrefFor.toString() === libSource.hrefFor.toString();
+  ok(`"${libSource.kind}": every field is the Library's own definition, not a drifted copy`, same, `library reads ${libSource.table}, my-stuff reads ${mine?.table}`);
 }
 // EVERY SOURCE HAS A REAL ADDRESS.
 for (const kind of sources.MY_STUFF_KINDS) {
@@ -78,7 +108,7 @@ for (const kind of sources.MY_STUFF_KINDS) {
 ok("finance reads finance_entries (the tracker's own table, untouched)", sources.sourceForKind("finance").table === "finance_entries");
 ok("sales reads leads", sources.sourceForKind("sales").table === "leads");
 ok("trading reads trades", sources.sourceForKind("trading").table === "trades");
-ok("isMyStuffKind rejects a kind that is not one of the twelve", sources.isMyStuffKind("nonsense") === false);
+ok("isMyStuffKind rejects a kind that is not one of the fifteen", sources.isMyStuffKind("nonsense") === false);
 ok("isMyStuffKind accepts a real one", sources.isMyStuffKind("finance") === true);
 
 // =====================================================================
@@ -306,6 +336,95 @@ for (const l of LOCALES) {
   }
   const line = lookup(messages[l], "dashboard.tools.lines.myStuff");
   ok(`${l}: the square's one line fits (<= 60 chars)`, typeof line === "string" && line.length <= 60, `${line?.length} chars`);
+}
+
+// =====================================================================
+console.log("\n== 9. Κομμάτι 6 (2026-10-28): same item count before/after, proven live ==");
+// =====================================================================
+// NOT A DATA MIGRATION — nothing moves, nothing is deleted, there is no
+// "before" table and "after" table. "My Stuff: ΝΕΑ ΟΘΟΝΗ" is a NEW
+// screen over the SAME seven tables the Library (now `/dashboard/
+// timeline`'s default view, lib/library/load.ts) has always read; the
+// owner's own standing rule — count before and after, nobody loses
+// anything — applies here as "every item the Library shows, My Stuff
+// shows too", checked against a REAL load, not just the source-object
+// identity above (which proves WHY this must be true; this proves it
+// IS, today, against the same keep()-excluded rows library.test.mjs's
+// own fixture uses: a1/b1/c1/d1 are findable; a2 (failed site), b2
+// (failed slides) and the still-researching report are not, in BOTH
+// loaders, from the SAME seeded rows).
+{
+  const load = await loadTs("src/lib/my-stuff/load.ts");
+  const libLoad = await loadTs("src/lib/library/load.ts");
+  ok("the same per-kind bound as the Library (60)", load.PER_SOURCE_LIMIT === libLoad.PER_SOURCE_LIMIT);
+  ok("...and the same overall bound (200)", load.MAX_ITEMS === libLoad.MAX_ITEMS);
+
+  const ME = "11111111-1111-4111-8111-111111111111";
+  // Mirrors library.test.mjs's own fixture (§3) — same tables, same
+  // keep()-excluded rows (a2 failed, b2 failed, d1 still researching) —
+  // because this is the SAME question library.test.mjs already answers
+  // for loadLibrary alone: does `keep()` actually exclude what it says.
+  // Answering it for loadMyStuff too is the whole point of this section.
+  const ROWS = {
+    user_websites: [
+      { id: "a1", user_id: ME, name: "Camping Νάξος", status: "completed", created_at: "2026-10-07T10:00:00Z", html_content: "<p>καφές</p>" },
+      { id: "a2", user_id: ME, name: "Χαλασμένο", status: "failed", created_at: "2026-10-07T11:00:00Z", html_content: "" },
+    ],
+    ai_presentations: [
+      { id: "b1", user_id: ME, title: "Παρουσίαση για επενδυτές", description: null, error: null, created_at: "2026-10-07T09:00:00Z", slides: { title: "Επενδυτές", slides: [] } },
+      { id: "b2", user_id: ME, title: "Απέτυχε", description: null, error: "model", created_at: "2026-10-07T09:30:00Z", slides: null },
+    ],
+    generated_posts: [{ id: "c1", user_id: ME, description: "Ανακοίνωση εγκαινίων", status: "done", created_at: "2026-10-07T12:30:00Z", posts: { instagram: { text: "..." } } }],
+    user_documents: [{ id: "doc1", user_id: ME, title: "Σύμβαση", content: "...", created_at: "2026-10-07T08:00:00Z" }],
+    research_reports: [{ id: "d1", user_id: ME, topic: "Αγορά camping", status: "researching", created_at: "2026-10-07T07:00:00Z", sections: [] }],
+    data_analyses: [{ id: "e1", user_id: ME, title: "Πωλήσεις", file_name: "sales.csv", created_at: "2026-10-07T06:00:00Z" }],
+    user_files: [{ id: "f1", user_id: ME, filename: "Τιμολόγιο.pdf", processing_status: "ready", uploaded_at: "2026-10-07T05:00:00Z" }],
+  };
+  function fakeDb() {
+    return {
+      from(table) {
+        const call = { table, eq: [], order: null, limit: null };
+        const q = {
+          select() { return q; },
+          eq(col, val) { call.eq.push([col, val]); return q; },
+          order(col, opts) { call.order = [col, opts?.ascending]; return q; },
+          limit(n) { call.limit = n; return q; },
+          then(resolve) {
+            let rows = (ROWS[table] ?? []).filter((r) => call.eq.every(([c, v]) => r[c] === v));
+            const [col] = call.order ?? [];
+            if (col) rows = [...rows].sort((x, y) => String(y[col]).localeCompare(String(x[col])));
+            return resolve({ data: rows.slice(0, call.limit ?? rows.length), error: null });
+          },
+        };
+        return q;
+      },
+    };
+  }
+
+  const { items: libraryItems, failed: libraryFailed } = await libLoad.loadLibrary(fakeDb(), ME, { kind: null, query: "" });
+  const { items: myStuffItems, failed: myStuffFailed } = await load.loadMyStuff(fakeDb(), ME, { kinds: null, query: "" });
+  const sharedKinds = new Set(library.LIBRARY_KINDS);
+  const myStuffOnShared = myStuffItems.filter((i) => sharedKinds.has(i.kind));
+
+  ok("nothing failed to load, on either side", libraryFailed.length === 0 && myStuffFailed.length === 0);
+  eq(
+    "the Library's own ids, exactly — not a subset, not a superset",
+    [...libraryItems.map((i) => i.id)].sort(),
+    [...myStuffOnShared.map((i) => i.id)].sort()
+  );
+  ok(
+    "the excluded rows (a2 failed, b2 failed, d1 researching) are absent from BOTH",
+    !myStuffOnShared.some((i) => i.id === "a2" || i.id === "b2" || i.id === "d1"),
+    myStuffOnShared.map((i) => i.id).join(",")
+  );
+  ok(
+    "the kept rows (a1, b1, c1, doc1, e1, f1 — not d1, which is excluded above) are present in both, by id and by href",
+    ["a1", "b1", "c1", "doc1", "e1", "f1"].every((id) => {
+      const fromLib = libraryItems.find((i) => i.id === id);
+      const fromMine = myStuffOnShared.find((i) => i.id === id);
+      return fromLib && fromMine && fromLib.href === fromMine.href && fromLib.kind === fromMine.kind;
+    })
+  );
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

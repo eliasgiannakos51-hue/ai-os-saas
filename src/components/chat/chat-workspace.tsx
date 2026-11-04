@@ -19,6 +19,7 @@ import { PanelLeft, Plus } from "lucide-react";
 import type { SidebarProject } from "@/lib/nav/recent-tools";
 import { MessageContent } from "@/components/chat/message-content";
 import { SourceCards } from "@/components/chat/source-cards";
+import { AnswerChart } from "@/components/chat/answer-chart";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { alignSuggestions, appendClarificationAnswers } from "@/lib/clarification-client";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
@@ -1163,6 +1164,12 @@ export function ChatWorkspace({
                       {/* NUMBERED WEB SOURCES — only when the answer searched
                           the web; the numbers in the prose above link here. */}
                       <SourceCards content={msg.content} />
+                      {/* A CHART + CARD UNDER THE ANSWER — only when a data
+                          attachment on the message had a chart in it
+                          (lib/chat/answer-chart.ts), never in the live-
+                          streaming branch below, which has no stored
+                          content yet to read one from. */}
+                      <AnswerChart content={msg.content} />
                       {/* THE ROW UNDER THE ANSWER (ΣΥΣΤΗΜΑ DESIGN §5): the
                           26px earth, copy, the thumbs, again
                           (components/chat/answer-actions.tsx). Again only

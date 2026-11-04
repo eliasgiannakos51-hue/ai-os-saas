@@ -47,7 +47,7 @@ const component = readFileSync("src/components/ai/example-prompts.tsx", "utf8");
 // Where each surface's chips are rendered.
 const SURFACE_FILES = {
   createStudio: "src/components/create/create-studio.tsx",
-  agents: "src/components/agents/agents-workspace.tsx",
+  agents: "src/components/agents/agents-shell.tsx",
   mission: "src/components/mission/mission-form.tsx",
   websiteBuilder: "src/components/website-builder/website-builder-workspace.tsx",
   files: "src/components/files/files-workspace.tsx",
@@ -71,7 +71,26 @@ for (const surface of reg.AI_SURFACES) {
       !new RegExp(`surface="${surface}"`).test(src) && !/<ExamplePrompts\b/.test(src));
     continue;
   }
-  check(`${surface} renders the shared chips`, new RegExp(`surface="${surface}"`).test(src));
+  // A SURFACE IN THE TOOL SHELL DRAWS THE SAME THREE STRINGS, through
+  // ToolShell's own `empty.examples` rather than through <ExamplePrompts>
+  // (2026-10-31, Agents Κομμάτι 1): the shell's landing already owns the
+  // globe, the heading and at most three pressable examples, and a second
+  // chip row under the field would be the same list twice. The strings
+  // still come from THIS registry — `exampleKeys(surface)` — which is
+  // what §3 below resolves in all ten locales, and the honest limits line
+  // is still rendered. So either shape passes, and neither "no chips at
+  // all" nor "chips from somewhere else" does.
+  // THE NAMESPACE IS PART OF THE CLAIM. Found by mutation on 2026-10-31:
+  // pointing the translator at `dashboard.agents` instead of
+  // `aiExamples.agents` left both literals below matching while all three
+  // labels and the limits line rendered as missing keys. So the
+  // translator this surface reads them through is checked too.
+  const shellChips =
+    new RegExp(`useTranslations\\("aiExamples\\.${surface}"\\)`).test(src) &&
+    new RegExp(`examples:\\s*exampleKeys\\("${surface}"\\)`).test(src) &&
+    new RegExp(`tExamples\\("limits"\\)|t\\("limits"\\)`).test(src);
+  check(`${surface} renders the shared chips`,
+    new RegExp(`surface="${surface}"`).test(src) || shellChips);
 }
 check("...and every surface without chips is a declared surface, with a reason",
   Object.entries(reg.NO_CHIPS_ON_SCREEN).every(([s, why]) => reg.AI_SURFACES.includes(s) && String(why).length > 30));

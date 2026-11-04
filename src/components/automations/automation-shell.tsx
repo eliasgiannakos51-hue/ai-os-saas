@@ -7,11 +7,11 @@ import { FlaskConical, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-rea
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
-import { ToolShell, ACTION, ChosenBox, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ACTION, ChosenBox, type ShellMode, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
-import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, RunHistory, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
+import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, RunHistory, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { aiBoxCount, type Box } from "@/lib/automations/boxes";
@@ -55,6 +55,7 @@ export function AutomationShell({
   older,
   initialProjectId = null,
   initialSaid,
+  simplePro = false,
 }: {
   initialFlows: Record<string, unknown>[];
   /** The runs of the automation opened on arrival. */
@@ -75,6 +76,11 @@ export function AutomationShell({
   initialProjectId?: string | null;
   /** The sentence to start the field with, from the project's own goal. */
   initialSaid?: string;
+  /** Whether the «Simple | Pro» switch is open to this reader (the switch
+   *  "agents-automations-pro", read in app/dashboard/[module]/page.tsx).
+   *  False is the screen exactly as it was: the boxes, with no switch
+   *  above them and nothing a person has to press to reach them. */
+  simplePro?: boolean;
 }) {
   const t = useTranslations("dashboard.automations");
   const tSteps = useTranslations("aiSteps");
@@ -118,8 +124,42 @@ export function AutomationShell({
     });
   }
 
+  // «Simple | Pro», remembered per device — the same shape and the same
+  // storage as the [◧] column above, for the same reason: it is a way of
+  // looking at the thing, not part of the thing, so it belongs to this
+  // browser and never to the automation (nothing is stored server-side
+  // and no migration carries it; an automation made in either level
+  // opens in the other, which is directive 55's own rule).
+  //
+  // SIMPLE IS THE DEFAULT, because the owner's own ordering puts it first
+  // and describes it as the plain path («Simple: γράφεις τι θέλεις και
+  // τρέχει»). A reader who presses Pro once gets Pro from then on.
+  const [mode, setMode] = useState<ShellMode>("simple");
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem("ionexa.automationMode") === "pro") setMode("pro");
+    } catch {
+      // private window or storage off: Simple, which is the default
+    }
+  }, []);
+  function chooseMode(next: ShellMode) {
+    setMode(next);
+    // Pro's own editor is the only thing that reads `chosen`; leaving a
+    // box chosen while Simple is showing would reopen that editor the
+    // moment Pro came back, under a box nobody pressed this time.
+    if (next === "simple") setChosen(null);
+    try {
+      window.localStorage.setItem("ionexa.automationMode", next);
+    } catch {
+      // nothing to persist to; the switch still works for this visit
+    }
+  }
+  // Pro unless the reader has the switch: without it this screen is what
+  // it always was, so `mode` cannot hide the boxes from anybody.
+  const level: ShellMode = simplePro ? mode : "pro";
+
   const shown = flows.find((f) => f.id === openId) ?? null;
-  const chosenBox = shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
+  const chosenBox = level === "pro" && shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
   const runPrice = shown ? prices.step * aiBoxCount(shown.boxes) : 0;
   const names = CONNECTION_NAME;
 
@@ -377,6 +417,7 @@ export function AutomationShell({
     open === "flow" && shown
       ? {
           title: shown.name,
+          ...(simplePro ? { mode: { value: mode, onChange: chooseMode } } : {}),
           actions: (
             <>
               <button type="button" disabled={running !== null || shown.version <= 1} onClick={() => void undo(shown)} aria-label={t("undo")} title={t("undo")} data-testid="flow-undo" className={`${ACTION} disabled:opacity-40`}>
@@ -413,14 +454,17 @@ export function AutomationShell({
 
               {shown.boxes.length === 0 ? (
                 <p className="text-xs text-warning">{t("errors.broken")}</p>
+              ) : level === "simple" ? (
+                <FlowSteps boxes={shown.boxes} connected={connected} />
               ) : (
                 <BoxRow boxes={shown.boxes} chosen={chosen} onChoose={(id) => setChosen((c) => (c === id ? null : id))} connected={connected} />
               )}
-              {chosenBox ? (
-                <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
-              ) : (
-                shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
-              )}
+              {level === "pro" &&
+                (chosenBox ? (
+                  <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
+                ) : (
+                  shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
+                ))}
 
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">

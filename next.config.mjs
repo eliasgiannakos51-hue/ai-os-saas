@@ -107,18 +107,32 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  * sent was the HSTS Vercel adds itself. Every page could be framed by any
  * site, and nothing told a browser not to guess content types.
  *
- * EVERY PATH BUT /s/. Published sites set their own, stricter set —
- * sandboxed CSP, frame-ancestors 'none' — in
+ * EVERY PATH BUT /s/ AND /a/. Published sites (/s/) and published
+ * Rebuild apps (/a/, Κομμάτι 4's third piece) each set their own,
+ * stricter set — sandboxed CSP, frame-ancestors 'none' — in
  * src/lib/publishing/public-serving.ts, and two sources for one header is
- * how a weaker value wins. The app never frames itself: every iframe in
- * src/ renders `srcDoc`, which `frame-ancestors` does not govern.
+ * how a weaker value wins: this blanket rule's own CSP has no script-src,
+ * so applying it on top silently stripped the published-app CSP down to
+ * just frame-ancestors, found by rebuild.prodtest.mjs's own live fetch of
+ * /a/<subdomain> rather than by inspection. The app never frames itself:
+ * every iframe in src/ renders `srcDoc`, which `frame-ancestors` does not
+ * govern.
  *
  * The microphone stays allowed for the app's own origin: voice input
  * (src/components/voice/) asks for it.
  */
 export const APP_SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  // img-src (ΑΣ2-3.1, 2026-10-31): a markdown image the model's own
+  // words (or an echoed web-search result, or PDF text) can put in a
+  // chat answer had no CSP stop at all — any `https:` origin would load,
+  // which is an exfiltration channel (the request URL itself can carry
+  // data). 'self'/data:/blob: covers every real use: same-origin API
+  // images, inline base64, and chat's own attachment previews (client
+  // blob URLs, never a network fetch). No chat feature loads an image
+  // from an external host — see message-content.tsx's own `img` guard,
+  // the matching defense-in-depth layer.
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; img-src 'self' data: blob:" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },
@@ -129,7 +143,7 @@ const nextConfig = {
   // "x-powered-by: Next.js" tells a stranger which advisories to try.
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/((?!s/).*)", headers: APP_SECURITY_HEADERS }];
+    return [{ source: "/((?!s/|a/).*)", headers: APP_SECURITY_HEADERS }];
   },
   // Inlined at build time — see commitDate() above. The DATE is the
   // commit's; BUILD_AT is when the build ran, and the two differ by

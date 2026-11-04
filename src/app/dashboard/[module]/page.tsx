@@ -69,7 +69,14 @@ export default async function ModulePage(
   const isAutomationModule = moduleConfig.slug === "automation";
   if (isAutomationModule) {
     const searchParams = await props.searchParams;
-    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId);
+    const [data, simplePro] = await Promise.all([
+      loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId),
+      // «Simple | Pro» (directive 55 Κομμάτι 1). Off reads as the screen
+      // before it: the boxes, no switch. It fails towards 'staff'
+      // (lib/flags/flags.ts), so a customer never meets a half-built
+      // level and the configurator they already had never disappears.
+      isFeatureOn("agents-automations-pro", user),
+    ]);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
         <AutomationShell
@@ -83,6 +90,7 @@ export default async function ModulePage(
           older={data.older}
           initialProjectId={data.projectId}
           initialSaid={readExampleParam(searchParams.said)}
+          simplePro={simplePro}
         />
       </div>
     );

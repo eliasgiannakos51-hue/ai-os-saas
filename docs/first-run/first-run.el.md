@@ -1,8 +1,8 @@
 # The first run — el
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **618 strings**. The whole product is 4688, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5137, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 376 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV ή tab-separated, έως {max}. Το διαβάζουμε και σου δε
 
 Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.
 
-## Tier 2 — The labels — skim these (376)
+## Tier 2 — The labels — skim these (379)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -807,6 +807,12 @@ Email
 > EN — Password
 
 Κωδικός
+
+**`auth.login.rateLimited`**
+
+> EN — Too many attempts. Please try again later.
+
+Πάρα πολλές προσπάθειες. Δοκίμασε ξανά αργότερα.
 
 **`auth.login.resetSuccess`**
 
@@ -1532,6 +1538,12 @@ AI που δουλεύει για σένα
 
 Αναλυτικά
 
+**`sidebar.items.appBuilder`**
+
+> EN — Apps
+
+Εφαρμογές
+
 **`sidebar.items.apps`**
 
 > EN — App ideas
@@ -2095,6 +2107,12 @@ Projects
 > EN — Settings
 
 Ρυθμίσεις
+
+**`sidebar.items.skills`**
+
+> EN — Skills
+
+Δεξιοτητες
 
 **`sidebar.items.systemHealth`**
 

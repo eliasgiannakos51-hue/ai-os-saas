@@ -57,7 +57,10 @@ const MUTANTS = [
     // 263 -> 271 -> 273 on 2026-10-15: four new suites this round, four
     // the previous entry had under-counted, and two more that landed
     // after 271 was written.
-    from: "const FLOOR = 273;",
+    // 273 -> 284 on 2026-10-31: run-mutations.mjs's own comment says
+    // which — one new suite this round (chat-chart), ten an arrear from
+    // rounds earlier in the same session that never ran this gate.
+    from: "const FLOOR = 284;",
     to: "const FLOOR = 244;",
     expect: "no baseline has more room than it is allowed",
   },

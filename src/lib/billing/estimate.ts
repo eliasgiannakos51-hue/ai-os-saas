@@ -633,6 +633,18 @@ export const ACTION_PROFILES = {
     baseOutputChars: 2200,
     outputCharsPerInputChar: 0,
   },
+  // ONE TRANSLATED PARAGRAPH, CHANGED BY WORDS (the standalone Translate
+  // tool, package 3, 2026-10-24): only that paragraph and the instruction
+  // are sent — not the whole translation, which stays in the browser
+  // rather than a stored row until package 8 — so this is sized the same
+  // as documentBlockEdit's single paragraph rather than the whole-document
+  // weight documentEdit carries.
+  textTranslateEdit: {
+    systemPromptTokens: 300,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 1,
+  },
   // GAMES (MASTER 16, package 26; api/games and api/games/[id]). Each
   // call site passes EVERY character it sends — the system prompt and the
   // message (lib/games/game-plan.ts) — so systemPromptTokens is only the
@@ -665,6 +677,31 @@ export const ACTION_PROFILES = {
     baseOutputChars: 400,
     outputCharsPerInputChar: 1,
   },
+  // APPS (api/apps and api/apps/[id]; lib/apps/charge.ts), 2026-10-24.
+  // The caller counts the system prompt into inputChars itself — the
+  // page hands the screen its length so the hint and the hold count the
+  // same characters (lib/apps/app-plan.ts planInputChars) — so
+  // systemPromptTokens is only the tool schema's lines, as Games has it.
+  //
+  // The output is a DEFINITION, not prose: a plan of at most six
+  // collections with twelve fields each, eight screens and four
+  // notifications, written as JSON. Measured 2026-10-24 against the
+  // five templates of κομμάτι 9 rendered through lib/apps/app-plan.ts's
+  // own tool schema, the largest came to about 2,600 characters, so
+  // 3,000 covers the top of that with room. A box change returns one
+  // box's slice, which is the data box at its largest — about half.
+  appPlan: {
+    systemPromptTokens: 150,
+    auxiliaryCalls: [],
+    baseOutputChars: 3000,
+    outputCharsPerInputChar: 0,
+  },
+  appBoxEdit: {
+    systemPromptTokens: 150,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 0,
+  },
   // REBUILD (api/rebuild and api/rebuild/[id]; lib/rebuild/charge.ts), the
   // same four steps as Games with the same shape: each call site passes
   // EVERY character it sends (the system prompt and the message), so
@@ -673,10 +710,29 @@ export const ACTION_PROFILES = {
   // a written app is held at the most the prompt allows (40,000
   // characters); a change sends the whole app up and gets the whole app
   // back, so its output tracks its input one to one.
+  // Κομμάτι 2, 2026-10-29: the capabilities step, before the plan — a
+  // handful of short labels, cheaper than the plan itself.
+  rebuildFeatures: {
+    systemPromptTokens: 100,
+    auxiliaryCalls: [],
+    baseOutputChars: 500,
+    outputCharsPerInputChar: 0,
+  },
   rebuildPlan: {
     systemPromptTokens: 100,
     auxiliaryCalls: [],
     baseOutputChars: 3000,
+    outputCharsPerInputChar: 0,
+  },
+  // Κομμάτι 3, 2026-10-29: the «App logic» phase — Apps' own planner
+  // (lib/apps/app-call.ts), called as a library; its system prompt is
+  // Apps' own (longer than Rebuild's few-line tool schema), its own
+  // structured definition is the output, typically compact JSON-shaped
+  // text, smaller than the four-box plan it feeds.
+  rebuildAppLogic: {
+    systemPromptTokens: 250,
+    auxiliaryCalls: [],
+    baseOutputChars: 1800,
     outputCharsPerInputChar: 0,
   },
   rebuildBoxEdit: {
@@ -727,6 +783,17 @@ export const ACTION_PROFILES = {
     auxiliaryCalls: [],
     baseOutputChars: 400,
     outputCharsPerInputChar: 0.06,
+  },
+  // One question about ONE already-transcribed meeting (api/meetings/[id]/
+  // ask, Κομμάτι 6). SAME SHAPE AS dataQuestion/myStuffAsk: the input is
+  // the transcript again, sized the same way meetingAnalyse's own estimate
+  // is, but the answer is a sentence or two whatever the transcript's
+  // length — output does not scale with input, for the same reason.
+  meetingAsk: {
+    systemPromptTokens: 350,
+    auxiliaryCalls: [],
+    baseOutputChars: 900,
+    outputCharsPerInputChar: 0,
   },
 } as const;
 

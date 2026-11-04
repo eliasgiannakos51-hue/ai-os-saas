@@ -233,6 +233,9 @@ const PAIRS = [
   // which of two numbers moved their balance.
   ["meetings/transcribe", "src/app/api/meetings/transcribe/route.ts", "src/components/meetings/meetings-workspace.tsx"],
   ["meetings/analyse", "src/app/api/meetings/[id]/analyse/route.ts", "src/components/meetings/meetings-workspace.tsx"],
+  // Κομμάτι 6: a question about one meeting is its own charge, on the
+  // same workspace that already reports the other two.
+  ["meetings/ask", "src/app/api/meetings/[id]/ask/route.ts", "src/components/meetings/meetings-workspace.tsx"],
 ];
 const declaredRoutes = PAIRS.map(([, r]) => r);
 const undeclaredReceipts = RECEIPT_ROUTES.filter((r) => !declaredRoutes.includes(r));

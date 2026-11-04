@@ -247,6 +247,11 @@ const OUTSIDE_EVERY_POPULATION = {
     why:
       "the robots.txt of a published site — the one file on the internet defined by being fetchable without credentials. It reads the same published_sites row to decide whether the site is live and emits text, behind publicRequestAllowed; it writes nothing.",
   },
+  "src/app/a/[subdomain]/route.ts": {
+    has: ["bound:in_memory_window"],
+    why:
+      "the public web for a published Rebuild app (Κομμάτι 4's third piece), the same boundary /s/[subdomain]/route.ts already is for sites. No session is read — the admin client is used because rebuild_projects has no public RLS policy at all, so a stranger can only receive one app's html for a live subdomain, nothing else on the row and nothing by listing. It writes nothing, so there is no row to own and no insert to bound. It calls the same publicRequestAllowed in-memory window the sites route uses before it touches the database, and re-runs checkAppHtml at read time — the HTML already passed this once before the row could be written, but this is the moment it starts being served to a stranger with no session at all, and a row that would not pass the check today is served as absent rather than as whatever it is.",
+  },
 };
 
 const undeclared = askedNothing.filter((f) => !OUTSIDE_EVERY_POPULATION[f]);

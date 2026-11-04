@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitleAndDescription("landing.footer.terms", "pageTitle.termsDescription");
@@ -9,7 +10,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function TermsPage() {
   return (
-    <LegalLayout titleKey="landing.footer.terms" updated="2026-07-29">
+    <LegalLayout titleKey="landing.footer.terms" updated={LEGAL_VERSIONS.terms}>
       <LegalSection title="1. Acceptance of Terms">
         <p>
           By creating an account or otherwise using Ionexa AI (&quot;the

@@ -1060,7 +1060,14 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   // The final grid's five groups, in the one array that names them
   // (ALL_TOOLS_GROUP_ORDER), not a pattern that matched the old shape.
   const allToolsGroupKeys = [...(groupsSrc.match(/ALL_TOOLS_GROUP_ORDER[^=]*=\s*\[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-zA-Z]+)"/g)].map((m) => m[1]);
-  checkTrue(`ALL_TOOLS_GROUPS keys were parsed (${allToolsGroupKeys.length})`, allToolsGroupKeys.length === 5, groupsSrc.slice(0, 200));
+  // === 5 -> >= 5 on 2026-10-25, and this line is why the comment above it
+  // is worth reading: it already said "the floor is set below the six
+  // declared groups so adding one does not break it", while the code under
+  // it demanded exactly five. "learn" became the sixth group on 2026-10-24
+  // (4e38749a) and this assertion was written the same day (4d551cc3), so
+  // the browser smoke has been red on every push since — green gates said
+  // nothing, because a prodtest is not part of `npm run gates`.
+  checkTrue(`ALL_TOOLS_GROUPS keys were parsed (${allToolsGroupKeys.length})`, allToolsGroupKeys.length >= 5, groupsSrc.slice(0, 200));
   let allToolsHeadingsShown = 0;
   for (const key of allToolsGroupKeys) {
     const word = elMessages.dashboard?.tools?.groups?.[key];

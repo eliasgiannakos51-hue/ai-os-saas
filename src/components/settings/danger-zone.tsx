@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, useCallback, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Trash2, MailCheck } from "lucide-react";
+import { AlertTriangle, Trash2, MailCheck, ShieldCheck, Clock } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
+
+interface PendingStatus {
+  pending: boolean;
+  deleteAfter?: string;
+}
 
 export function DangerZone({ email }: { email: string }) {
   const t = useTranslations("settings.dangerZone");
@@ -17,12 +22,52 @@ export function DangerZone({ email }: { email: string }) {
   const [loading, setLoading] = useState(false);
   const [requested, setRequested] = useState(false);
 
+  const [pendingStatus, setPendingStatus] = useState<PendingStatus | null>(null);
+  const [cancellingDeletion, setCancellingDeletion] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
+
   const confirmed = confirmEmail.trim().toLowerCase() === email.toLowerCase();
+
+  const fetchPendingStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/delete-account/status");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok) {
+          setPendingStatus({ pending: data.pending, deleteAfter: data.deleteAfter });
+        }
+      }
+    } catch {
+      // silent — status check is best-effort
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPendingStatus();
+  }, [fetchPendingStatus]);
 
   function cancel() {
     setOpen(false);
     setConfirmEmail("");
     setError(null);
+  }
+
+  async function handleCancelDeletion() {
+    setCancellingDeletion(true);
+    try {
+      const res = await fetch("/api/delete-account/status", { method: "POST" });
+      if (!res.ok) {
+        addToast(t("cancelFailed"), "error");
+        return;
+      }
+      setCancelled(true);
+      setPendingStatus({ pending: false });
+      addToast(t("cancelledOk"), "success");
+    } catch {
+      addToast(t("cancelFailed"), "error");
+    } finally {
+      setCancellingDeletion(false);
+    }
   }
 
   async function handleDelete(e: FormEvent) {
@@ -47,13 +92,42 @@ export function DangerZone({ email }: { email: string }) {
 
       setRequested(true);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error("Delete account request threw:", err);
       setError(getErrorMessage(err, t("failed")));
       addToast(t("couldNotStartDeletion"), "error");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (pendingStatus?.pending && !cancelled) {
+    const dateStr = pendingStatus.deleteAfter
+      ? new Date(pendingStatus.deleteAfter).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "—";
+
+    return (
+      <div className="rounded-card border border-warning/40 bg-warning/[0.03] p-5">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-warning">
+          <Clock className="h-4 w-4" /> {t("pendingTitle")}
+        </h2>
+        <p className="mt-2 text-xs text-muted">
+          {t("pendingDescription", { date: dateStr })}
+        </p>
+        <button
+          type="button"
+          onClick={handleCancelDeletion}
+          disabled={cancellingDeletion}
+          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item border border-primary/40 px-4 py-2 text-sm text-primary transition-colors duration-150 hover:border-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <ShieldCheck className="h-4 w-4" />
+          {cancellingDeletion ? t("cancelling") : t("cancelDeletion")}
+        </button>
+      </div>
+    );
   }
 
   return (

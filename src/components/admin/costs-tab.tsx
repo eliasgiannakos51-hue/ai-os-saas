@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { AlertTriangle } from "lucide-react";
+import { formatNumber } from "@/lib/format-number";
 
 type DayProvider = { date: string; provider: string; costEur: number; calls: number };
 type ProviderTotal = { provider: string; costEur: number; calls: number };
@@ -26,6 +27,7 @@ type CostsData = {
 
 export function AdminCostsTab() {
   const t = useTranslations("adminDashboard.costs");
+  const locale = useLocale();
   const [data, setData] = useState<CostsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
@@ -97,7 +99,7 @@ export function AdminCostsTab() {
             {t("totalCalls")}
           </p>
           <p className="mt-0.5 text-lg font-semibold text-foreground">
-            {data.totalCalls.toLocaleString()}
+            {formatNumber(data.totalCalls, locale)}
           </p>
         </div>
         {data.providerTotals.slice(0, 2).map((pt) => (
@@ -109,7 +111,7 @@ export function AdminCostsTab() {
               &euro;{pt.costEur.toFixed(2)}
             </p>
             <p className="text-[10px] text-muted">
-              {pt.calls.toLocaleString()} {t("callsLabel")}
+              {formatNumber(pt.calls, locale)} {t("callsLabel")}
             </p>
           </div>
         ))}
@@ -179,7 +181,7 @@ export function AdminCostsTab() {
                       &euro;{pt.costEur.toFixed(2)}
                     </td>
                     <td className="px-3 py-2 text-right font-mono text-xs">
-                      {pt.calls.toLocaleString()}
+                      {formatNumber(pt.calls, locale)}
                     </td>
                     <td className="px-3 py-2 text-right font-mono text-xs">
                       {data.totalCostEur > 0

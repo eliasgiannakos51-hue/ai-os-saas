@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "@/lib/format-number";
 
 type Charge = {
   id: string;
@@ -24,6 +25,7 @@ type Props = {
 
 export function RefundModal({ userId, email, onClose, onDone }: Props) {
   const t = useTranslations("adminDashboard.refund");
+  const locale = useLocale();
   const [charges, setCharges] = useState<Charge[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Charge | null>(null);
@@ -135,7 +137,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                       </span>
                     )}
                     <span className="ml-2 text-xs text-muted">
-                      {new Date(c.created * 1000).toLocaleDateString()}
+                      {formatDate(new Date(c.created * 1000), locale)}
                     </span>
                   </div>
                   <div className="text-xs">

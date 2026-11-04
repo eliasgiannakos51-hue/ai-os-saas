@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Search } from "lucide-react";
 import { CreditAdjustModal } from "./credit-adjust-modal";
 import { RefundModal } from "./refund-modal";
 import { SuspendModal } from "./suspend-modal";
+import { formatDate } from "@/lib/format-number";
 
 type UserRow = {
   id: string;
@@ -26,6 +27,7 @@ type UserRow = {
 
 export function AdminUsersTab() {
   const t = useTranslations("adminDashboard.users");
+  const locale = useLocale();
 
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -138,9 +140,7 @@ export function AdminUsersTab() {
                     {u.calls30d > 0 ? u.calls30d : "—"}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted">
-                    {u.lastSignIn
-                      ? new Date(u.lastSignIn).toLocaleDateString()
-                      : "—"}
+                    {u.lastSignIn ? formatDate(u.lastSignIn, locale) : "—"}
                   </td>
                   <td className="px-3 py-2 text-right">
                     <div className="flex justify-end gap-1">

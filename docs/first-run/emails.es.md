@@ -1,12 +1,12 @@
 # The emails — es
 
-Every line of every email the product sends: **115 strings**. The interface has its own pack, `first-run.es.md`, beside this one.
+Every line of every email the product sends: **121 strings**. The interface has its own pack, `first-run.es.md`, beside this one.
 
-**Start with tier 1. It is 41 sentences and it is the whole ask.** Tier 2 is 26 more sentences from emails fewer people get. Tier 3 is 48 short lines to skim.
+**Start with tier 1. It is 45 sentences and it is the whole ask.** Tier 2 is 26 more sentences from emails fewer people get. Tier 3 is 50 short lines to skim.
 
 **What to look for.** An email is read when the product is not on screen, often on a phone, sometimes as the only thing a person reads from us that week. Does it sound like a person wrote it? Is it the right register — the same "you" as the app? Would you send it to a customer under your own name? `{name}`-style placeholders are filled in when it is sent.
 
-## Tier 1 — THE SENTENCES — read these (41)
+## Tier 1 — THE SENTENCES — read these (45)
 
 _From the emails a person is sure or likely to receive, 5 words or more._
 
@@ -272,6 +272,32 @@ Este enlace caduca en 1 hora. Si no lo solicitaste, ignora este correo y tu cuen
 
 Confirma la eliminación permanente de tu cuenta de Ionexa AI.
 
+### deletionScheduled — the deletion is scheduled, and the email carries the only link that cancels it — read closely by everyone who confirms a deletion while the switch "deferred-deletion" is on
+
+**`email.deletionScheduled.title`**
+
+> EN — your account is scheduled for deletion
+
+tu cuenta está programada para eliminarse
+
+**`email.deletionScheduled.body`**
+
+> EN — Your Ionexa AI account will be permanently deleted on {date}. Until then you can cancel the deletion and keep your account exactly as it is.
+
+Tu cuenta de Ionexa AI se eliminará permanentemente el {date}. Hasta entonces puedes cancelar la eliminación y tu cuenta se quedará exactamente como está.
+
+**`email.deletionScheduled.footer`**
+
+> EN — If you did not request this, use the link above to cancel immediately.
+
+Si no lo solicitaste, usa el enlace de arriba para cancelar la eliminación de inmediato.
+
+**`email.deletionScheduled.preheader`**
+
+> EN — Your Ionexa AI account will be deleted on {date} — cancel any time before then.
+
+Tu cuenta de Ionexa AI se eliminará el {date} — puedes cancelar la eliminación en cualquier momento antes de esa fecha.
+
 ## Tier 2 — The other emails' sentences — if you have time (26)
 
 _The digest, form submissions and shared lines. Fewer people get them._
@@ -440,7 +466,7 @@ Flujos que vale la pena automatizar, y el tiempo ahorrado.
 
 Recibes este mensaje porque tienes una cuenta en Ionexa AI.
 
-## Tier 3 — Subjects, labels and the footer — skim (48)
+## Tier 3 — Subjects, labels and the footer — skim (50)
 
 _Short lines. A wrong one is usually obvious; look for the one that means something else in your language._
 
@@ -621,6 +647,20 @@ confirma la eliminación de tu cuenta
 > EN — Confirm deletion
 
 Confirmar eliminación
+
+### deletionScheduled — the deletion is scheduled, and the email carries the only link that cancels it — read closely by everyone who confirms a deletion while the switch "deferred-deletion" is on
+
+**`email.deletionScheduled.label`**
+
+> EN — account deletion scheduled
+
+eliminación de cuenta programada
+
+**`email.deletionScheduled.cta`**
+
+> EN — Cancel deletion
+
+Cancelar eliminación
 
 ### digest — the weekly digest, for those who opt in
 

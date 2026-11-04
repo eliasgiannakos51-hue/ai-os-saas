@@ -165,6 +165,11 @@ const LOCAL_ENUMERATIONS = [
     phrase: "first shape",
     why: "the first version of that suite's own `expect` field, not a catalogue entry",
   },
+  {
+    file: "src/components/automations/flow-boxes.tsx",
+    phrase: "second shape",
+    why: "a second copy of an automation's boxes for Simple to keep in step with Pro — the comment says there is none; not a catalogue entry",
+  },
 ];
 
 console.log("shape-names");

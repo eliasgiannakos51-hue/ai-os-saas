@@ -438,7 +438,14 @@ console.log("\n== a page that refuses non-owners is not offered to them ==");
     refusing.push({ p, href });
   }
   // A FLOOR, on the collection the emptiness is asserted over.
-  check(`pages that refuse a non-owner (${refusing.length})`, refusing.length >= 4,
+  //
+  // 4 -> 5 on 2026-11-04: dashboard/admin (directive 42) is the fifth,
+  // beside business-health, costs, routing and system-health. At 4 the
+  // floor sat one below the population, so a page that stopped refusing
+  // left it green — owner-only-access.mutation.mjs's "an owner-only page
+  // stops refusing" went red only on system-health's own named checks.
+  // At the population, losing any one refusal is red here.
+  check(`pages that refuse a non-owner (${refusing.length})`, refusing.length >= 5,
     refusing.map((r) => r.href).join(", "));
 
   // THE CLASSIFIER, ASKED ABOUT A SAMPLE IT IS GIVEN.

@@ -69,8 +69,15 @@ const MUTANTS = [
     // same shape as Sheets: no All tools tile, found through the gate.
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    64 pages instead of 8, and the four components below",
-    to: "                    44 pages instead of 8, and the four components below",
+    // 64 -> 65 on 2026-11-04, for the third time this anchor has moved and
+    // for the same reason: /dashboard/admin landed (οδηγία 42 Κομμάτι 1) and
+    // the marker followed it. Worth saying that the DRIFT WAS CAUGHT BY THE
+    // SURVEY, not by this suite — editing the sentence breaks the anchor, and
+    // mutation-anchors is the gate that reports it, two gates further down a
+    // chain that stops at the first red. Fixing count-claims and pushing it
+    // without running the mutation suites is how a broken anchor ships.
+    from: "                    65 pages instead of 8, and the four components below",
+    to: "                    45 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },
   {

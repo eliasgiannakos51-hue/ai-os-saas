@@ -253,11 +253,11 @@ export function AdminRevenueTab() {
         <div>
           <h3 className="mb-2 text-xs font-semibold text-foreground">{t("otherMetrics")}</h3>
           <div className="overflow-x-auto rounded-item border border-border">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-start text-sm">
               <thead>
                 <tr className="border-b border-border bg-panel text-xs font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("metric")}</th>
-                  <th className="px-3 py-2 text-right">{t("value")}</th>
+                  <th className="px-3 py-2 text-end">{t("value")}</th>
                   <th className="px-3 py-2">{t("status")}</th>
                 </tr>
               </thead>
@@ -269,7 +269,7 @@ export function AdminRevenueTab() {
                       <td className="px-3 py-2 font-medium">
                         {METRIC_LABELS[m.key] ?? m.key}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono text-xs">
+                      <td className="px-3 py-2 text-end font-mono text-xs">
                         {formatMetricValue(m)}
                       </td>
                       <td className="px-3 py-2 text-xs text-muted">
@@ -289,13 +289,13 @@ export function AdminRevenueTab() {
         <div>
           <h3 className="mb-2 text-xs font-semibold text-foreground">{t("mrrTrend")}</h3>
           <div className="max-h-[300px] overflow-auto rounded-item border border-border">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead className="sticky top-0 z-10">
                 <tr className="border-b border-border bg-panel text-[10px] font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("date")}</th>
-                  <th className="px-3 py-2 text-right">MRR</th>
-                  <th className="px-3 py-2 text-right">{t("aiCost")}</th>
-                  <th className="px-3 py-2 text-right">{t("subscribers")}</th>
+                  <th className="px-3 py-2 text-end">MRR</th>
+                  <th className="px-3 py-2 text-end">{t("aiCost")}</th>
+                  <th className="px-3 py-2 text-end">{t("subscribers")}</th>
                   <th className="px-3 py-2 w-24">{t("margin")}</th>
                 </tr>
               </thead>
@@ -308,16 +308,16 @@ export function AdminRevenueTab() {
                   return (
                     <tr key={point.day} className="border-b border-border last:border-0">
                       <td className="px-3 py-1.5 font-mono text-muted">{point.day}</td>
-                      <td className="px-3 py-1.5 text-right font-mono">
+                      <td className="px-3 py-1.5 text-end font-mono">
                         &euro;{point.value.toFixed(2)}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono">
+                      <td className="px-3 py-1.5 text-end font-mono">
                         &euro;{cost.toFixed(2)}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono">{subs}</td>
+                      <td className="px-3 py-1.5 text-end font-mono">{subs}</td>
                       <td className="px-3 py-1.5">
                         <MiniBar value={margin} max={100} />
-                        <span className="ml-1 text-[10px] text-muted">{margin.toFixed(0)}%</span>
+                        <span className="ms-1 text-[10px] text-muted">{margin.toFixed(0)}%</span>
                       </td>
                     </tr>
                   );
@@ -333,22 +333,22 @@ export function AdminRevenueTab() {
         <div>
           <h3 className="mb-2 text-xs font-semibold text-foreground">{t("eventsByMonth")}</h3>
           <div className="overflow-x-auto rounded-item border border-border">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead>
                 <tr className="border-b border-border bg-panel text-[10px] font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("month")}</th>
-                  <th className="px-3 py-2 text-right text-success">
+                  <th className="px-3 py-2 text-end text-success">
                     {t("started")}
                   </th>
-                  <th className="px-3 py-2 text-right text-success">
+                  <th className="px-3 py-2 text-end text-success">
                     {t("reactivated")}
                   </th>
-                  <th className="px-3 py-2 text-right text-danger">
+                  <th className="px-3 py-2 text-end text-danger">
                     {t("cancelled")}
                   </th>
-                  <th className="px-3 py-2 text-right">{t("upgraded")}</th>
-                  <th className="px-3 py-2 text-right">{t("downgraded")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("net")}</th>
+                  <th className="px-3 py-2 text-end">{t("upgraded")}</th>
+                  <th className="px-3 py-2 text-end">{t("downgraded")}</th>
+                  <th className="px-3 py-2 text-end font-semibold">{t("net")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -357,23 +357,23 @@ export function AdminRevenueTab() {
                   return (
                     <tr key={ev.month} className="border-b border-border last:border-0">
                       <td className="px-3 py-1.5 font-mono text-muted">{ev.month}</td>
-                      <td className="px-3 py-1.5 text-right font-mono text-success">
+                      <td className="px-3 py-1.5 text-end font-mono text-success">
                         {ev.started > 0 ? `+${ev.started}` : "—"}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono text-success">
+                      <td className="px-3 py-1.5 text-end font-mono text-success">
                         {ev.reactivated > 0 ? `+${ev.reactivated}` : "—"}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono text-danger">
+                      <td className="px-3 py-1.5 text-end font-mono text-danger">
                         {ev.cancelled > 0 ? `-${ev.cancelled}` : "—"}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono">
+                      <td className="px-3 py-1.5 text-end font-mono">
                         {ev.upgraded > 0 ? ev.upgraded : "—"}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono">
+                      <td className="px-3 py-1.5 text-end font-mono">
                         {ev.downgraded > 0 ? ev.downgraded : "—"}
                       </td>
                       <td
-                        className={`px-3 py-1.5 text-right font-mono font-semibold ${
+                        className={`px-3 py-1.5 text-end font-mono font-semibold ${
                           net > 0
                             ? "text-success"
                             : net < 0

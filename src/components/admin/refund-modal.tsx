@@ -121,7 +121,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                     setSelected(c);
                     setConfirming(true);
                   }}
-                  className={`flex w-full items-center justify-between rounded-item border px-3 py-2 text-left text-sm ${
+                  className={`flex w-full items-center justify-between rounded-item border px-3 py-2 text-start text-sm ${
                     canRefund
                       ? "border-border hover:bg-panel-hover"
                       : "border-border/50 opacity-50"
@@ -132,11 +132,11 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                       {formatAmount(c.amount, c.currency)}
                     </span>
                     {c.amountRefunded > 0 && (
-                      <span className="ml-2 text-xs text-muted">
+                      <span className="ms-2 text-xs text-muted">
                         ({t("refundedPartial", { amount: formatAmount(c.amountRefunded, c.currency) })})
                       </span>
                     )}
-                    <span className="ml-2 text-xs text-muted">
+                    <span className="ms-2 text-xs text-muted">
                       {formatDate(new Date(c.created * 1000), locale)}
                     </span>
                   </div>

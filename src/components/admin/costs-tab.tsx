@@ -127,30 +127,30 @@ export function AdminCostsTab() {
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead>
                 <tr className="text-[10px] font-medium uppercase tracking-wide text-danger/70">
                   <th className="px-2 py-1">{t("flaggedEmail")}</th>
-                  <th className="px-2 py-1 text-right">{t("flaggedCost")}</th>
-                  <th className="px-2 py-1 text-right">{t("flaggedPays")}</th>
-                  <th className="px-2 py-1 text-right">{t("flaggedMargin")}</th>
-                  <th className="px-2 py-1 text-right">{t("flaggedCalls")}</th>
+                  <th className="px-2 py-1 text-end">{t("flaggedCost")}</th>
+                  <th className="px-2 py-1 text-end">{t("flaggedPays")}</th>
+                  <th className="px-2 py-1 text-end">{t("flaggedMargin")}</th>
+                  <th className="px-2 py-1 text-end">{t("flaggedCalls")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.flaggedUsers.map((u) => (
                   <tr key={u.userId} className="border-t border-danger/30">
                     <td className="px-2 py-1 font-mono">{u.email}</td>
-                    <td className="px-2 py-1 text-right font-mono text-danger">
+                    <td className="px-2 py-1 text-end font-mono text-danger">
                       &euro;{u.costEur.toFixed(2)}
                     </td>
-                    <td className="px-2 py-1 text-right font-mono">
+                    <td className="px-2 py-1 text-end font-mono">
                       {u.monthlyPrice > 0 ? `€${u.monthlyPrice.toFixed(2)}` : "—"}
                     </td>
-                    <td className="px-2 py-1 text-right font-mono text-danger">
+                    <td className="px-2 py-1 text-end font-mono text-danger">
                       {u.margin !== null ? `${u.margin.toFixed(1)}x` : "—"}
                     </td>
-                    <td className="px-2 py-1 text-right font-mono">{u.calls}</td>
+                    <td className="px-2 py-1 text-end font-mono">{u.calls}</td>
                   </tr>
                 ))}
               </tbody>
@@ -164,26 +164,26 @@ export function AdminCostsTab() {
         <div>
           <h3 className="mb-2 text-xs font-semibold text-foreground">{t("byProvider")}</h3>
           <div className="overflow-x-auto rounded-item border border-border">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-start text-sm">
               <thead>
                 <tr className="border-b border-border bg-panel text-xs font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("provider")}</th>
-                  <th className="px-3 py-2 text-right">{t("cost")}</th>
-                  <th className="px-3 py-2 text-right">{t("callsLabel")}</th>
-                  <th className="px-3 py-2 text-right">{t("share")}</th>
+                  <th className="px-3 py-2 text-end">{t("cost")}</th>
+                  <th className="px-3 py-2 text-end">{t("callsLabel")}</th>
+                  <th className="px-3 py-2 text-end">{t("share")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.providerTotals.map((pt) => (
                   <tr key={pt.provider} className="border-b border-border last:border-0">
                     <td className="px-3 py-2 font-medium capitalize">{pt.provider}</td>
-                    <td className="px-3 py-2 text-right font-mono text-xs">
+                    <td className="px-3 py-2 text-end font-mono text-xs">
                       &euro;{pt.costEur.toFixed(2)}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono text-xs">
+                    <td className="px-3 py-2 text-end font-mono text-xs">
                       {formatNumber(pt.calls, locale)}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono text-xs">
+                    <td className="px-3 py-2 text-end font-mono text-xs">
                       {data.totalCostEur > 0
                         ? `${((pt.costEur / data.totalCostEur) * 100).toFixed(1)}%`
                         : "—"}
@@ -201,16 +201,16 @@ export function AdminCostsTab() {
         <div>
           <h3 className="mb-2 text-xs font-semibold text-foreground">{t("dailyBreakdown")}</h3>
           <div className="max-h-[400px] overflow-auto rounded-item border border-border">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead className="sticky top-0 z-10">
                 <tr className="border-b border-border bg-panel text-[10px] font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("date")}</th>
                   {providers.map((p) => (
-                    <th key={p} className="px-3 py-2 text-right capitalize">
+                    <th key={p} className="px-3 py-2 text-end capitalize">
                       {p}
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-right">{t("dayTotal")}</th>
+                  <th className="px-3 py-2 text-end">{t("dayTotal")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -225,12 +225,12 @@ export function AdminCostsTab() {
                       {providers.map((p) => {
                         const cost = costByDateProvider.get(`${date}|${p}`) ?? 0;
                         return (
-                          <td key={p} className="px-3 py-1.5 text-right font-mono">
+                          <td key={p} className="px-3 py-1.5 text-end font-mono">
                             {cost > 0 ? `€${cost.toFixed(4)}` : "—"}
                           </td>
                         );
                       })}
-                      <td className="px-3 py-1.5 text-right font-mono font-medium">
+                      <td className="px-3 py-1.5 text-end font-mono font-medium">
                         {dayTotal > 0 ? `€${dayTotal.toFixed(4)}` : "—"}
                       </td>
                     </tr>

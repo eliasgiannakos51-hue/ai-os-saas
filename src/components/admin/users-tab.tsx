@@ -71,13 +71,13 @@ export function AdminUsersTab() {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden />
+        <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("search")}
-          className="w-full rounded-item border border-border bg-panel py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-foreground/20"
+          className="w-full rounded-item border border-border bg-panel py-2 ps-10 pe-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-foreground/20"
         />
       </div>
 
@@ -87,16 +87,16 @@ export function AdminUsersTab() {
         <p className="py-8 text-center text-sm text-muted">{t("noUsers")}</p>
       ) : (
         <div className="overflow-x-auto rounded-item border border-border">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-start text-sm">
             <thead>
               <tr className="border-b border-border bg-panel text-xs font-medium uppercase tracking-wide text-muted">
                 <th className="px-3 py-2">{t("email")}</th>
                 <th className="px-3 py-2">{t("name")}</th>
                 <th className="px-3 py-2">{t("plan")}</th>
-                <th className="px-3 py-2 text-right">{t("credits")}</th>
-                <th className="px-3 py-2 text-right">{t("cost30d")}</th>
-                <th className="px-3 py-2 text-right">{t("margin")}</th>
-                <th className="px-3 py-2 text-right">{t("calls")}</th>
+                <th className="px-3 py-2 text-end">{t("credits")}</th>
+                <th className="px-3 py-2 text-end">{t("cost30d")}</th>
+                <th className="px-3 py-2 text-end">{t("margin")}</th>
+                <th className="px-3 py-2 text-end">{t("calls")}</th>
                 <th className="px-3 py-2">{t("lastSignIn")}</th>
                 <th className="px-3 py-2" />
               </tr>
@@ -110,7 +110,7 @@ export function AdminUsersTab() {
                   <td className="px-3 py-2 font-mono text-xs">
                     {u.email}
                     {u.suspended && (
-                      <span className="ml-1 rounded-full bg-danger/10 px-1.5 py-0.5 text-[10px] font-semibold text-danger">
+                      <span className="ms-1 rounded-full bg-danger/10 px-1.5 py-0.5 text-[10px] font-semibold text-danger">
                         {t("suspended")}
                       </span>
                     )}
@@ -121,13 +121,13 @@ export function AdminUsersTab() {
                       {u.planName}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-xs">
+                  <td className="px-3 py-2 text-end font-mono text-xs">
                     {u.creditsRemaining}/{u.creditsTotal}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-xs">
+                  <td className="px-3 py-2 text-end font-mono text-xs">
                     {u.costEur30d > 0 ? `€${u.costEur30d.toFixed(2)}` : "—"}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-xs">
+                  <td className="px-3 py-2 text-end font-mono text-xs">
                     {u.margin !== null ? (
                       <span className={u.margin < 4 ? "text-danger" : ""}>
                         {u.margin.toFixed(1)}x
@@ -136,13 +136,13 @@ export function AdminUsersTab() {
                       "—"
                     )}
                   </td>
-                  <td className="px-3 py-2 text-right font-mono text-xs">
+                  <td className="px-3 py-2 text-end font-mono text-xs">
                     {u.calls30d > 0 ? u.calls30d : "—"}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted">
                     {u.lastSignIn ? formatDate(u.lastSignIn, locale) : "—"}
                   </td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-end">
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => setAdjustTarget(u)}

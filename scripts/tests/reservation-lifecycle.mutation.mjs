@@ -150,8 +150,10 @@ const MUTANTS = [
   {
     name: "a failed give-back still tells the user their link works",
     file: DELETE_CONFIRM,
-    from: "        if (giveBackError) {",
-    to: "        if (false && giveBackError) {",
+    // RE-ANCHORED 2026-11-04 on the subscription give-back's own hint: the
+    // deferred branch's give-back now comes first at the same indentation.
+    from: "        if (giveBackError) {\n          logApiError(\"/api/delete-account/confirm\", giveBackError, {\n            stage: \"release_deletion_token\",\n            hint: \"the emailed link is now spent",
+    to: "        if (false && giveBackError) {\n          logApiError(\"/api/delete-account/confirm\", giveBackError, {\n            stage: \"release_deletion_token\",\n            hint: \"the emailed link is now spent",
     expect: "does not say the link still works",
   },
   {

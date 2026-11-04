@@ -68,10 +68,14 @@ const MUTANTS = [
     expect: "before the auth user is deleted",
   },
   {
+    // RE-ANCHORED 2026-11-04: the deferred branch gained its own give-back
+    // at the same indentation, earlier in the file, and the bare
+    // `.update({ used_at: null })` would have mutated that one instead of
+    // the Stripe refusal's. Anchored on the Stripe give-back's own hint.
     name: "a refused deletion keeps the single-use token spent",
     file: DELETION,
-    from: "          .update({ used_at: null })",
-    to: "          .update({ used_at: new Date().toISOString() })",
+    from: "          .update({ used_at: null })\n          .eq(\"token_hash\", tokenHash);\n        if (giveBackError) {\n          logApiError(\"/api/delete-account/confirm\", giveBackError, {\n            stage: \"release_deletion_token\",\n            hint: \"the emailed link is now spent and the account was NOT deleted",
+    to: "          .update({ used_at: new Date().toISOString() })\n          .eq(\"token_hash\", tokenHash);\n        if (giveBackError) {\n          logApiError(\"/api/delete-account/confirm\", giveBackError, {\n            stage: \"release_deletion_token\",\n            hint: \"the emailed link is now spent and the account was NOT deleted",
     expect: "releases the link",
   },
   {

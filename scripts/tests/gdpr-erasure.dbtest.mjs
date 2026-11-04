@@ -106,11 +106,36 @@ const explicit = new Set(tablesNeedingExplicitErasure().map((t) => t.table));
 const personal = USER_DATA_TABLES.filter((t) => t.scope !== "not_personal");
 check(`there are personal-data tables to check (${personal.length})`, personal.length >= 40);
 
+// THE THIRD ANSWER: rows that outlive the account on purpose, detached by
+// ON DELETE SET NULL and emptied of anything personal
+// (keptWithoutOwner, pending_deletions since 20261112000000). Accepted only
+// when the LIVE foreign key really is SET NULL ('n') and the live columns
+// are exactly the two lists the registry declares — a column added later
+// is a new thing kept after the person is gone.
+const keptWithoutOwner = new Map(R.tablesKeptWithoutOwner().map((t) => [t.table, t.keptWithoutOwner]));
+check(`the registry names the tables kept without their owner (${keptWithoutOwner.size})`, keptWithoutOwner.size >= 1);
+const reallyKept = new Set();
+for (const [table, k] of keptWithoutOwner) {
+  const rules = rows(`select confdeltype from pg_constraint
+                       where conrelid = 'public.${table}'::regclass and contype = 'f'
+                         and confrelid = 'auth.users'::regclass`);
+  check(`${table}: its foreign key to auth.users is ON DELETE SET NULL, and the only one (${rules.join(",")})`,
+    rules.length === 1 && rules[0] === "n");
+  const live = rows(`select column_name from information_schema.columns
+                      where table_schema = 'public' and table_name = '${table}'`);
+  const declared = new Set([...k.survivingColumns, ...k.clearedColumns]);
+  const undeclared = live.filter((c) => !declared.has(c));
+  check(`${table}: every live column is kept or cleared (${live.length})`, live.length >= 3 && undeclared.length === 0,
+    `not on either list: ${undeclared.join(", ")}`);
+  if (rules.length === 1 && rules[0] === "n" && undeclared.length === 0) reallyKept.add(table);
+}
+
 // THE CHECK. A table holding personal data must be reached by the
-// cascade, or be declared as needing explicit erasure. Anything else is
-// data that outlives the person.
+// cascade, or be declared as needing explicit erasure, or be kept with
+// nothing personal left in it (above). Anything else is data that
+// outlives the person.
 const orphaned = personal
-  .filter((t) => !explicit.has(t.table) && !cascaded.has(t.table))
+  .filter((t) => !explicit.has(t.table) && !cascaded.has(t.table) && !reallyKept.has(t.table))
   .map((t) => `${t.table} (${t.scope}${t.status ? ", " + t.status : ""})`);
 check("no personal-data table is outside BOTH the cascade and the explicit list",
   orphaned.length === 0,

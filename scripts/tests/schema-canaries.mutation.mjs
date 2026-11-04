@@ -125,7 +125,7 @@ const MUTANTS = [
     // (20261108), a file with a table well inside the window.
     name: "a migration in the window loses its canary — the state all three new screens were in",
     file: CANARIES,
-    from: "  {\n    kind: \"table\",\n    table: \"pending_deletions\",\n    migration: \"20261108000000_pending_deletions.sql\",\n    breaks: \"With the switch \\\"deferred-deletion\\\" on, confirming an account deletion fails at its last step: the emailed link is already claimed, scheduleDeletion's insert fails, and the person sees «Something went wrong» with a link that will not work again; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run\",\n  },\n",
+    from: "  {\n    kind: \"table\",\n    table: \"pending_deletions\",\n    migration: \"20261108000000_pending_deletions.sql\",\n    breaks: \"With the switch \\\"deferred-deletion\\\" on, confirming an account deletion fails at its last step: scheduleDeletion's insert fails, the link is given back, and the person sees «Something went wrong» every time they try; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run\",\n  },\n",
     to: "",
     expect: "20261108000000_pending_deletions.sql",
   },

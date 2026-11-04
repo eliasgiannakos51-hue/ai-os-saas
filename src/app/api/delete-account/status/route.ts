@@ -50,10 +50,18 @@ export async function POST() {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Every open schedule of the account, and success when at least one
+    // stopped. With two (written before 20261112000000) this used to
+    // cancel both and then answer 404 (lib/account/pending-deletion.ts).
     const admin = createAdminClient();
     const cancelled = await cancelDeletionByUserId(admin, user.id);
 
-    if (!cancelled) {
+    if (cancelled === null) {
+      // A failed write is not "nothing to cancel". A code and no English
+      // (QUEUE FD3); Settings reads only res.ok (danger-zone.tsx).
+      return NextResponse.json({ ok: false, code: "cancel_failed" }, { status: 500 });
+    }
+    if (cancelled === 0) {
       return NextResponse.json(
         { ok: false, error: "No active pending deletion found." },
         { status: 404 },

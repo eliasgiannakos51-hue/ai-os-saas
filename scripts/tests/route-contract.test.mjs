@@ -220,7 +220,7 @@ const OUTSIDE_EVERY_POPULATION = {
   "src/app/api/delete-account/cancel/route.ts": {
     has: ["bound:rate_limit"],
     why:
-      "the Keep-my-account link from the deletion-scheduled email. It answers 'who is asking' with a bearer token the identity detector cannot see from this file, the same way auth/confirm's verifyOtp is invisible above: the route hands the body's token to cancelDeletion() in lib/account/pending-deletion.ts, which hashes it with hashCancelToken() and claims the one pending_deletions row whose cancel_token_hash matches, in a single conditional update that also requires cancelled_at and executed_at to be null. It inserts nothing, calls no model, and takes no row id from the request — the token IS the lookup — so there is nothing to own and nothing to bound beyond checkRateLimit with scope \"delete_account_cancel\", ten an hour per address, which answers 429.",
+      "the Keep-my-account link from the deletion-scheduled email. It answers 'who is asking' with a bearer token the identity detector cannot see from this file, the same way auth/confirm's verifyOtp is invisible above: the route hands the body's token to cancelDeletion() in lib/account/pending-deletion.ts, which hashes it with hashCancelToken(), resolves the digest to the account whose open schedule it belongs to (cancelled_at and executed_at null), and cancels every open pending_deletions row of that account in a single conditional update. It inserts nothing, calls no model, and takes no row id from the request — the token IS the lookup — so there is nothing to own and nothing to bound beyond checkRateLimit with scope \"delete_account_cancel\", ten an hour per address, which answers 429.",
   },
   "src/app/api/contact/route.ts": {
     has: ["bound:rate_limit"],

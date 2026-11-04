@@ -91,12 +91,38 @@ export async function POST(request: Request) {
     const { data: authUserForFlag } = await admin.auth.admin.getUserById(claimed.user_id);
     const deferredOn = await isFeatureOn("deferred-deletion", authUserForFlag?.user);
     if (deferredOn) {
-      const result = await scheduleDeletion(admin, claimed.user_id);
+      // scheduleDeletion joins an open schedule rather than writing a
+      // second one, so a second confirmation gets the FIRST date and a
+      // link that cancels it (lib/account/pending-deletion.ts).
+      let result: Awaited<ReturnType<typeof scheduleDeletion>> = null;
+      try {
+        result = await scheduleDeletion(admin, claimed.user_id);
+      } catch (scheduleErr) {
+        logApiError("/api/delete-account/confirm", scheduleErr, { stage: "schedule_deferred" });
+      }
       if (!result) {
         logApiError("/api/delete-account/confirm", new Error("scheduleDeletion returned null"), {
           stage: "schedule_deferred",
           userId: claimed.user_id,
         });
+        // NOTHING WAS SCHEDULED, SO THE LINK GOES BACK — the same give-back
+        // as the files and the subscription below. The claim above spent
+        // the single-use token; without this, "please try again" sent the
+        // person back to a link that could never work again, and the only
+        // way on was a new deletion email.
+        const { error: giveBackError } = await admin
+          .from("account_deletion_requests")
+          .update({ used_at: null })
+          .eq("token_hash", tokenHash);
+        if (giveBackError) {
+          logApiError("/api/delete-account/confirm", giveBackError, {
+            stage: "release_deletion_token",
+            hint: "nothing was scheduled and the emailed link is now spent — this request needs a new deletion link",
+          });
+          // A code and no English (QUEUE FD3): the page says it in the
+          // reader's language (confirm-delete-account-form.tsx).
+          return NextResponse.json({ ok: false, code: "contact_support" }, { status: 500 });
+        }
         return NextResponse.json(
           { ok: false, code: "retry", error: "Something went wrong. Please try again." },
           { status: 500 }

@@ -64,6 +64,27 @@ export type UserDataTable = {
   needsExplicitErasure?: boolean;
   erasureNote?: string;
   /**
+   * Set when the rows OUTLIVE the account on purpose: the foreign key to
+   * auth.users is ON DELETE SET NULL, so deleting the account detaches
+   * each row instead of removing it. Allowed only where what is left is
+   * not personal data, and the two lists are the whole table between
+   * them:
+   *
+   *   survivingColumns  keep their value — none of it about a person
+   *   clearedColumns    emptied by the database in the update that
+   *                     detaches the row (the user column itself, and
+   *                     anything a trigger forgets with it)
+   *
+   * gdpr-coverage.test.mjs holds the migrations to both lists (every
+   * column on one of them, a trigger clearing each cleared one) and
+   * gdpr-erasure.dbtest.mjs holds the live catalogue to the foreign key.
+   */
+  keptWithoutOwner?: {
+    survivingColumns: string[];
+    clearedColumns: string[];
+    note: string;
+  };
+  /**
    * Whether anything in the product still WRITES this table.
    *
    *   legacy       a feature that has been replaced. Nothing writes it
@@ -445,15 +466,22 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // Deferred deletion (directive 39 Κομμάτι 3): when this account was
   // scheduled for deletion, when it will run, and whether it was
   // cancelled. The person's own record, so it is exported — read by the
-  // server because the table is deny-all, and WITHOUT cancel_token_hash:
-  // a digest of the one credential that can stop a deletion is not
-  // information about them. Removed by the auth.users cascade when the
-  // deletion runs.
+  // server because the table is deny-all, and WITHOUT the link digests
+  // (cancel_token_hash, previous_cancel_token_hashes): a digest of the
+  // credential that can stop a deletion is not information about them.
+  // NOT removed when the deletion runs, since 20261112000000: the row is
+  // the record that it ran.
   {
     table: "pending_deletions",
     label: "scheduled_account_deletion",
     scope: "account",
     serverExportColumns: ["id", "delete_after", "cancelled_at", "executed_at", "created_at"],
+    keptWithoutOwner: {
+      survivingColumns: ["id", "delete_after", "cancelled_at", "executed_at", "created_at"],
+      clearedColumns: ["user_id", "cancel_token_hash", "previous_cancel_token_hashes"],
+      note:
+        "The record that a deletion request was made and carried out, kept for accountability (GDPR Art. 5(2)): when it was asked for, when it was due, whether it was cancelled, when it ran. The foreign key is ON DELETE SET NULL (20261112000000_pending_deletions_one_open.sql), and its trigger pending_deletions_forget_tokens empties both link digests in the same update, so what is left names nobody: the table never had an email column, and the account id is gone with the account.",
+    },
   },
 
   // --- Sensitive: exported, but with the secret columns stripped ---
@@ -635,6 +663,11 @@ export function exportableTables(): UserDataTable[] {
 /** Tables that deleteUser()'s cascade will NOT clear. */
 export function tablesNeedingExplicitErasure(): UserDataTable[] {
   return USER_DATA_TABLES.filter((t) => t.needsExplicitErasure);
+}
+
+/** Tables whose rows stay after the account, detached and emptied of anything personal. */
+export function tablesKeptWithoutOwner(): UserDataTable[] {
+  return USER_DATA_TABLES.filter((t) => t.keptWithoutOwner);
 }
 
 /** Strips the columns a table is not allowed to export verbatim. */

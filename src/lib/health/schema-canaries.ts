@@ -524,7 +524,17 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     kind: "table",
     table: "pending_deletions",
     migration: "20261108000000_pending_deletions.sql",
-    breaks: "With the switch \"deferred-deletion\" on, confirming an account deletion fails at its last step: the emailed link is already claimed, scheduleDeletion's insert fails, and the person sees «Something went wrong» with a link that will not work again; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run",
+    breaks: "With the switch \"deferred-deletion\" on, confirming an account deletion fails at its last step: scheduleDeletion's insert fails, the link is given back, and the person sees «Something went wrong» every time they try; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run",
+  },
+  {
+    // NOTHING FAILS WITHOUT IT, which is why it needs a probe: the
+    // application falls back (lib/account/pending-deletion.ts), so the
+    // only sign this file never ran is two guarantees quietly absent.
+    kind: "column",
+    table: "pending_deletions",
+    column: "previous_cancel_token_hashes",
+    migration: "20261112000000_pending_deletions_one_open.sql",
+    breaks: "Nothing on screen: a second confirmation of a deletion already scheduled writes a second row with the same date instead of joining the first (either email's link still cancels both), and a carried-out deletion leaves no record — the row still goes with the account, so nothing shows the deletion ever ran",
   },
   {
     // logAdminAction does not read its insert's error and readAuditLog

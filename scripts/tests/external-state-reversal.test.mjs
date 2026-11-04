@@ -65,7 +65,7 @@ const DECLARED = {
   "src/app/api/delete-account/confirm/route.ts":
     "refuses. It cancels the subscription before deleteUser — after it, the metadata holding the id is gone — and a failure returns 500 WITHOUT deleting, releasing the single-use token so the person can try again. 'We deleted your account' must not be said while the card is still being charged.",
   "src/app/api/cron/execute-deletions/route.ts":
-    "refuses, the same way delete-account/confirm does, one account at a time. The subscription is cancelled before deleteUser, while the metadata holding its id still exists, and a Stripe failure `continue`s past that account: no deleteUser and no markExecuted, so its pending_deletions row stays actionable and the next daily run (vercel.json, 02:00 UTC) tries again. An account is never deleted while its card is still being charged.",
+    "refuses, the same way delete-account/confirm does, one account at a time. The subscription is cancelled before deleteUser, while the metadata holding its id still exists, and a Stripe failure gives the row's claim back (releaseExecution) and `continue`s past that account: no deleteUser, the pending_deletions row is open again, and the next daily run (vercel.json, 02:00 UTC) tries again. An account is never deleted while its card is still being charged.",
   "src/app/api/billing/addons/route.ts":
     "refuses. If Stripe will not remove the subscription item, the row is NOT marked cancelled: the add-on stays active and the person is told. The exception is an item Stripe reports as already gone, where refusing would strand a row that has nothing behind it.",
   "src/app/api/billing/cancel/route.ts":

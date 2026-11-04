@@ -47,6 +47,8 @@ export async function POST(request: Request) {
       );
     }
 
+    // The link stops the ACCOUNT's deletion — every open row of the person
+    // it was sent to, not only its own (lib/account/pending-deletion.ts).
     const admin = createAdminClient();
     const result = await cancelDeletion(admin, token);
 

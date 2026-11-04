@@ -147,6 +147,15 @@ function collect(file, seen, out, allowExternals = false, declaredBy = new Map()
       stmt.moduleSpecifier &&
       ts.isStringLiteral(stmt.moduleSpecifier)
     ) {
+      // `import type { X } from "@/…"` HAS NO RUNTIME. TypeScript erases
+      // the whole statement, and so does Next, so following it bundles a
+      // module nothing executes — and fails the load when that module
+      // imports a vendor package. lib/account/pending-deletion.ts types
+      // its client as ReturnType<typeof createAdminClient>, a type-only
+      // import of lib/supabase/admin.ts (supabase-js), which is what
+      // scripts/tests/deferred-deletion.test.mjs found. A statement that
+      // also imports a value (`import { type A, b }`) is still followed.
+      if (stmt.importClause?.isTypeOnly || (ts.isExportDeclaration(stmt) && stmt.isTypeOnly)) continue;
       const resolved = resolveSpecifier(stmt.moduleSpecifier.text, abs);
       if (!resolved) continue;
       // A .json import is DATA, and the REAL data is inlined — never a

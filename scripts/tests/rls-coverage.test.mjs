@@ -202,7 +202,7 @@ const DENY_ALL_ON_PURPOSE = {
   // that can stop the deletion, and nothing needs to read it from a
   // browser — the person proves who they are with the emailed token or
   // their session, and the routes look the row up for them.
-  pending_deletions: "an account's scheduled deletion (directive 39 Κομμάτι 3): when it runs, and the SHA-256 of the emailed cancel token. Read and written only through lib/account/pending-deletion.ts with the service role — by the confirm, cancel and status routes and api/cron/execute-deletions — so the digest of the one link that can stop a deletion is reachable from no browser.",
+  pending_deletions: "an account's scheduled deletion (directive 39 Κομμάτι 3): when it runs, and the SHA-256 of each emailed cancel link of that schedule; after the deletion runs, a row with no account and no digest left, the record that it ran. Read and written only through lib/account/pending-deletion.ts with the service role — by the confirm, cancel and status routes and api/cron/execute-deletions — so the digest of the one link that can stop a deletion is reachable from no browser.",
   admin_audit_log: "the owner's record of what staff did to which account (directive 42 Κομμάτι 9). A customer who could read it would learn who was looked at and why; one who could write it could forge or bury an entry. Read and written only in lib/admin/audit-log.ts through createAdminClient(), behind the admin routes' isAdminEmail gates. RLS since 20261111000000_admin_audit_log_rls.sql.",
 };
 

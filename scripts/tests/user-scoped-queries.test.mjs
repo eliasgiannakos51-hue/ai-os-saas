@@ -107,13 +107,6 @@ const ALLOWED = new Map([
     "Keyed by the reportId this run already loaded and authorised.",
   ],
   [
-    "src/lib/account/pending-deletion.ts::cancelDeletion",
-    "Takes no userId: the `userId: string` the scan sees is in its RETURN type, the owner the token " +
-      "resolved to. It is keyed by the SHA-256 of the 256-bit token from the emailed cancel link — the " +
-      "credential, not a guess — and claims the row in one conditional update (cancelled_at and " +
-      "executed_at both null), so it can only ever stop the deletion that link was sent for.",
-  ],
-  [
     "src/app/api/admin/costs/route.ts::breakdown",
     "Not a function: `const breakdown = (meta.modelBreakdown ?? null)` is a parenthesised expression " +
       "the scan reads as an arrow, and the slice it measures is the rest of GET. That GET is the admin " +
@@ -269,12 +262,15 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
     // is deny-all, so these helpers take the service-role client by type
     // (lib/account/pending-deletion.ts) — a session client would see no
     // rows at all. What scopes each call is written here.
-    "cancelDeletion@src/app/api/delete-account/cancel/route.ts":
-      "There is no session on this path — the person may have signed out — so there is no caller's client to scope. The row is addressed by the SHA-256 of the 256-bit token from the emailed cancel link, which only the person the link was sent to holds, and the update also requires cancelled_at and executed_at to be null, so a token stops one deletion once and nothing else.",
+    // (cancelDeletion is not here: since 2026-11-04 its update is scoped
+    // with .eq("user_id", ownerId), the account the emailed link resolves
+    // to, so the rule above judges it like any other.)
     "getActionableDeletions@src/app/api/cron/execute-deletions/route.ts":
-      "Sweeps pending_deletions across every account on purpose — carrying out each deletion whose 30-day grace has ended is a cross-account job by definition, behind CRON_SECRET, at most 50 rows a run. Only rows with cancelled_at and executed_at null and delete_after in the past are returned, and the route reads no request body.",
-    "markExecuted@src/app/api/cron/execute-deletions/route.ts":
-      "Keyed by row.id from getActionableDeletions in the same run, after that account's deleteUser succeeded. The id is never from a request: the cron route reads no body and takes no parameter.",
+      "Sweeps pending_deletions across every account on purpose — carrying out each deletion whose 30-day grace has ended is a cross-account job by definition, behind CRON_SECRET, at most 50 rows a run. Only rows not cancelled, with an account still attached and delete_after in the past are returned, and the route reads no request body.",
+    "claimExecution@src/app/api/cron/execute-deletions/route.ts":
+      "Keyed by row.id from getActionableDeletions in the same run, before anything of that account is erased, and conditional on the row being uncancelled with an account still attached. The id is never from a request: the cron route reads no body and takes no parameter.",
+    "releaseExecution@src/app/api/cron/execute-deletions/route.ts":
+      "Keyed by row.id from getActionableDeletions in the same run, only after a step of that account's erase failed, and only while the row still has its account (user_id not null). The id is never from a request: the cron route reads no body and takes no parameter.",
     "loadProjectDetail@src/app/shared/[token]/page.tsx":
       "There is no session here to scope a caller's client to — this is Projects Κομμάτι 7's public share page, reached by the token alone. byToken.id is not attacker-supplied: it is read ONE line above from projects.share_token, an unguessable value randomBytes(24) generates server-side in api/projects/[id]/share's own POST, and a token that does not resolve already returned before this call. So the id this hands loadProjectDetail is exactly the one capability the token proves, the same argument the cron entries above make for an id read first through the user's own client.",
   };

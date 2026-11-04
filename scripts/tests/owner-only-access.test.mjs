@@ -241,8 +241,9 @@ const justifiedRoutes = routes.filter((f) => SERVICE_ROLE_DECLARED.test(readFile
 // stops it from the link in the email that follows — signed out, possibly
 // on another device, for the same reason confirm cannot ask for a
 // session. token-auth, exactly like confirm: a 256-bit token stored only
-// as its SHA-256, claimed by one conditional update that refuses a row
-// already cancelled or executed (lib/account/pending-deletion.ts). It is not
+// as its SHA-256, honoured only while the schedule it was sent for is
+// still open — never once cancelled or executed — and then one conditional
+// update over that account's open rows (lib/account/pending-deletion.ts). It is not
 // a new kind of exemption. api/delete-account/status, which cancels from
 // Settings, is NOT in this count: it reads the session and is scoped to
 // its user.

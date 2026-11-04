@@ -31,7 +31,7 @@ function check(name, cond, detail = "") {
 }
 
 const reg = await loadTs("src/lib/gdpr/user-data-registry.ts");
-const { USER_DATA_TABLES, NON_PERSONAL_TABLES, exportableTables, tablesNeedingExplicitErasure, redactRow } = reg;
+const { USER_DATA_TABLES, NON_PERSONAL_TABLES, exportableTables, tablesNeedingExplicitErasure, tablesKeptWithoutOwner, redactRow } = reg;
 
 // --- Parse every CREATE TABLE out of the real schema files -------------
 function allSql() {
@@ -98,6 +98,35 @@ for (const m of SQL.matchAll(
   // — the constraint is one object — so the later statement simply fills
   // in what the create table did not say.
   if (!cascadeByTable.get(table)) cascadeByTable.set(table, action.toLowerCase());
+}
+
+// A LATER MIGRATION CAN REPLACE THE RULE, and the paragraph above stops
+// being true the day one does. "They cannot disagree" holds for ONE
+// constraint; 20261112000000_pending_deletions_one_open.sql drops
+// pending_deletions_user_id_fkey (inline, `on delete cascade`) and adds it
+// back `on delete set null`. Read the way the loop above reads, that table
+// still said "cascade" — the registry would have been held to a rule the
+// database no longer has, and (\w+) would have read the new one as "set".
+//
+// So: in migration order, a statement that DROPS a table's user_id foreign
+// key and then adds one back replaces what that table is recorded as. A
+// second constraint added WITHOUT the drop is not a replacement — both
+// would act, and the one that cascades still removes the row — so that
+// case leaves the record alone, as it always did.
+const FK_ACTION = String.raw`on\s+delete\s+(set\s+null|set\s+default|no\s+action|cascade|restrict)`;
+const replacedFk = new Map();
+for (const f of existsSync("supabase/migrations") ? readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).sort() : []) {
+  const text = readFileSync(`supabase/migrations/${f}`, "utf8").replace(/--[^\n]*/g, "");
+  for (const drop of text.matchAll(/alter table (?:if exists )?(?:only )?(?:public\.)?"?([a-z_0-9]+)"?\s+drop constraint (?:if exists )?"?([a-z_0-9]+_user_id_fkey)"?/gi)) {
+    const [, table] = drop;
+    const after = text.slice(drop.index);
+    const add = after.match(new RegExp(
+      String.raw`alter table (?:only )?(?:public\.)?"?${table}"?\s+add constraint\s+"?[a-z_0-9]+"?\s+foreign key\s*\(\s*user_id\s*\)\s*references\s+auth\.users\s*\(\s*id\s*\)\s*${FK_ACTION}`, "i"));
+    if (!add || !tablesWithUserId.has(table)) continue;
+    const action = add[1].toLowerCase().replace(/\s+/g, " ");
+    cascadeByTable.set(table, action);
+    replacedFk.set(table, `${action} (${f})`);
+  }
 }
 
 console.log(`== 1. every table with a user_id is classified (${tablesWithUserId.size} found in schema) ==`);
@@ -322,8 +351,11 @@ check("redactRow strips the named column and keeps the rest", redacted.access_to
 
 console.log("\n== 4. erasure: every table is either cascaded or explicitly scrubbed ==");
 const explicit = new Set(tablesNeedingExplicitErasure().map((t) => t.table));
+const keptWithoutOwner = new Map(tablesKeptWithoutOwner().map((t) => [t.table, t]));
 const notCascaded = [...tablesWithUserId].filter((t) => cascadeByTable.get(t) !== "cascade" && !nonPersonal.has(t));
 for (const t of notCascaded) {
+  // The third answer, judged in 4b below rather than waved through here.
+  if (keptWithoutOwner.has(t)) continue;
   check(
     `${t} does not cascade — so it must be flagged needsExplicitErasure`,
     explicit.has(t),
@@ -442,6 +474,81 @@ if (existsSync(migration)) {
   check("it nulls the user_id pointer", /set user_id = null/i.test(mig));
   check("it removes the id from the affected_user_ids array", /array_remove\(affected_user_ids/i.test(mig));
   check("it is service-role only", /grant execute[\s\S]*to service_role/i.test(mig) && /revoke all[\s\S]*from authenticated/i.test(mig));
+}
+
+console.log("\n== 4b. a row kept after the account keeps nothing that names anybody ==");
+// THE THIRD ANSWER TO ERASURE, and the one that could be abused. Cascaded
+// and explicitly scrubbed both REMOVE the person; keptWithoutOwner leaves
+// rows behind on purpose (pending_deletions: the record that a deletion
+// ran, GDPR Art. 5(2)). That is defensible only while the foreign key
+// really detaches the row and every column left is not about a person —
+// so both are read out of the migrations here, not taken from the
+// registry's own description. gdpr-erasure.dbtest.mjs and
+// pending-deletions.dbtest.mjs ask a real Postgres the same questions.
+{
+  const MIGRATIONS = existsSync("supabase/migrations")
+    ? readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).sort()
+        .map((f) => readFileSync(`supabase/migrations/${f}`, "utf8").replace(/--[^\n]*/g, ""))
+    : [];
+  const KEYWORDS = new Set(["constraint", "primary", "unique", "foreign", "check", "exclude", "like"]);
+  /** The table's columns as the migrations leave them: created, added, dropped, in order. */
+  const columnsOf = (table) => {
+    const cols = new Set();
+    for (const text of MIGRATIONS) {
+      const create = text.match(new RegExp(String.raw`create table (?:if not exists )?(?:public\.)?${table}\s*\(((?:(?!create table)[\s\S])*?)\n\);`, "i"));
+      if (create) for (const m of create[1].matchAll(/^[ \t]+([a-z_][a-z0-9_]*)\s+/gm)) if (!KEYWORDS.has(m[1])) cols.add(m[1]);
+      for (const stmt of text.matchAll(new RegExp(String.raw`alter table (?:if exists )?(?:only )?(?:public\.)?"?${table}"?\s([^;]*);`, "gi"))) {
+        for (const a of stmt[1].matchAll(/add column (?:if not exists )?"?([a-z_][a-z0-9_]*)"?/gi)) cols.add(a[1]);
+        for (const d of stmt[1].matchAll(/drop column (?:if exists )?"?([a-z_][a-z0-9_]*)"?/gi)) cols.delete(d[1]);
+      }
+    }
+    return cols;
+  };
+  const kept = [...keptWithoutOwner.values()];
+  // FLOOR. An unread list makes every line below green on nothing.
+  check(`the tables kept without their owner were read (${kept.map((t) => t.table).join(", ") || "none"})`, kept.length >= 1);
+  for (const t of kept) {
+    const k = t.keptWithoutOwner;
+    check(`${t.table}: its foreign key really is ON DELETE SET NULL (${cascadeByTable.get(t.table) ?? "none found"}${replacedFk.has(t.table) ? ", replaced by " + replacedFk.get(t.table) : ""})`,
+      cascadeByTable.get(t.table) === "set null",
+      "a cascade removes the row the registry says is kept; anything else keeps the account's id in it");
+    check(`${t.table}: not also on the explicit-erasure list`, !t.needsExplicitErasure && !explicit.has(t.table));
+    check(`${t.table}: the note says why it is kept`, typeof k.note === "string" && k.note.length >= 80, String(k.note));
+    const cols = columnsOf(t.table);
+    const declared = new Set([...k.survivingColumns, ...k.clearedColumns]);
+    const undeclared = [...cols].filter((c) => !declared.has(c));
+    const phantom = [...declared].filter((c) => !cols.has(c));
+    check(`${t.table}: every column is either kept or cleared (${cols.size} in the migrations)`,
+      cols.size >= 3 && undeclared.length === 0,
+      `not on either list: ${undeclared.join(", ")} — a new column on this table is something the record keeps after the account is gone`);
+    check(`${t.table}: ...and neither list names a column the table does not have`, phantom.length === 0, phantom.join(", "));
+    check(`${t.table}: ...and no column is on both`, k.survivingColumns.every((c) => !k.clearedColumns.includes(c)));
+    check(`${t.table}: the user column is one of the cleared`, k.clearedColumns.includes("user_id"));
+    // What the foreign key clears is user_id alone. Every other cleared
+    // column needs a trigger that fires on that same update and empties it.
+    const others = k.clearedColumns.filter((c) => c !== "user_id");
+    let trigger = null;
+    let body = "";
+    for (const text of MIGRATIONS) {
+      const tr = text.match(new RegExp(String.raw`create (?:or replace )?trigger\s+([a-z_0-9]+)\s+before update of user_id on (?:public\.)?${t.table}\s+for each row execute (?:function|procedure) (?:public\.)?([a-z_0-9]+)\(\)`, "i"));
+      if (tr) trigger = tr;
+    }
+    if (trigger) {
+      for (const text of MIGRATIONS) {
+        const fn = text.match(new RegExp(String.raw`create (?:or replace )?function (?:public\.)?${trigger[2]}\(\)[\s\S]*?as \$\$([\s\S]*?)\$\$`, "i"));
+        if (fn) body = fn[1];
+      }
+    }
+    check(`${t.table}: a BEFORE UPDATE OF user_id trigger is on it (${trigger ? trigger[1] : "none"})`, others.length === 0 || trigger !== null);
+    check(`${t.table}: ...which acts only when the owner goes`,
+      others.length === 0 || /if\s+new\.user_id\s+is\s+null\s+and\s+old\.user_id\s+is\s+not\s+null\s+then/i.test(body),
+      body.trim().slice(0, 200));
+    for (const c of others) {
+      check(`${t.table}: ...and empties ${c}`, new RegExp(String.raw`new\.${c}\s*:=\s*(null|'\{\}')`, "i").test(body), body.trim().slice(0, 200));
+    }
+    check(`${t.table}: the export carries none of the cleared columns`,
+      !(t.serverExportColumns ?? []).some((c) => k.clearedColumns.includes(c)));
+  }
 }
 
 console.log("\n== 5. the export runs server-side, under the user's own session ==");

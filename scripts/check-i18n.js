@@ -48,10 +48,14 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 const LOCALE_ALLOWED = new Set([
   // The admin Revenue tab (2026-11-04, οδηγία 42 Κομμάτι 6): "Status" is
   // the German noun, and "Date" and "Net" are the French ones, for these
-  // senses — a column heading, a date, and a net change. Per locale, not
-  // INTENTIONALLY_IDENTICAL: the other eight all differ (Κατάσταση,
-  // Estado, Stato, 状態, الحالة for status; Ημερομηνία, Fecha, Data,
-  // 日付, التاريخ for date).
+  // senses — a column heading, a date, and a net change. Per locale, NOT in
+  // the all-locales list at the top of this file: the other eight all differ
+  // (Κατάσταση, Estado, Stato, 状態, الحالة for status; Ημερομηνία, Fecha,
+  // Data, 日付, التاريخ for date). Named that way round on purpose — this
+  // file's own note says writing that constant's name in a comment costs a
+  // slot in comment-claims' census, whose phrase scan matches the word
+  // inside the symbol. It did: the census went 82 -> 83 on the first draft
+  // of this very comment.
   "de:adminDashboard.revenue.status",
   "fr:adminDashboard.revenue.date",
   "fr:adminDashboard.revenue.net",

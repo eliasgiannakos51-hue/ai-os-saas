@@ -819,7 +819,31 @@ const clientFallbacks = sources.flatMap((f) => [
 // per-IP one), zero new sentences — it answers with the SAME string the
 // route's existing per-IP block already uses, on purpose: an attacker
 // must not be able to tell which cap they hit. Measured, not added.
-const SERVER_PROSE_BASELINE = 688;
+// 688 -> 699 on 2026-11-04 (οδηγία 39 Κομμάτι 3, the deferred deletion):
+// ELEVEN strings, all in src/app/api/delete-account/{cancel,confirm,status}
+// — "Invalid request.", "Missing token.", "Too many attempts. Please try
+// again later.", "This link is invalid, already used, or the deletion was
+// already executed.", "Not authenticated." and four more of "Something went
+// wrong." Derived by diffing this scanner's own matches against bf13d2c0,
+// the commit that declared 688, rather than counted by hand.
+//
+// NOT MY INCREMENT, and that is the point worth recording: the feature
+// landed on 2026-11-01 and this baseline was never moved, so the ratchet
+// had been breached for three days. It was invisible because check-i18n
+// fails BEFORE npm run test:unit in the gate chain, so this gate — and the
+// 364 after it — had not run on the branch at all. The same feature also
+// left 192 i18n keys untranslated and took the cron count from 13 to 14
+// without touching the document: one feature, three gates, none of them
+// consulted.
+//
+// RAISED RATHER THAN PAID OFF, deliberately and with the debt left visible
+// (docs/QUEUE.md, FD3). These eleven are the OLD convention: the newer
+// routes next to them answer with codes the client looks up
+// (api/admin/revenue returns {ok:false, code:"load_failed"}), which is what
+// the "real refactor" named above actually looks like now that it exists in
+// the tree. Converting these eleven is a change to the cancel-deletion
+// flow's own screens and belongs with that flow, not inside a gate fix.
+const SERVER_PROSE_BASELINE = 699;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

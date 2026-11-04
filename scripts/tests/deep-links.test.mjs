@@ -304,7 +304,14 @@ for (const l of favLinks) {
 // list left/project right, replacing flow-shell.tsx there); the old
 // /dashboard/projects/<id> link is read back only by that route's own
 // redirect into this one now (src/app/dashboard/projects/[id]/page.tsx).
-const DEEP_LINK_FLOOR = 72;
+// 72 -> 75 (2026-11-04): the admin dashboard's three query-carrying
+// endpoints, one per κομμάτι of οδηγία 42 — /api/admin/refund?userId= (Κ3,
+// the charge list for one account), /api/admin/costs?days= (Κ5) and
+// /api/admin/revenue?days= (Κ6, the period selector). Each is read by its
+// own route's GET. Derived by diffing this scanner's emitted set against
+// bf13d2c0, not counted by hand: the first two were already in the tree and
+// the floor had been left at 72, so it carried 2 of slack before today.
+const DEEP_LINK_FLOOR = 75;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

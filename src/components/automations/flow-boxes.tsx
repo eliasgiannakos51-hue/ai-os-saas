@@ -177,6 +177,78 @@ export function BoxRow({
 }
 
 /**
+ * THE SAME AUTOMATION, IN PLAIN WORDS: Simple's half of the «Simple | Pro»
+ * switch (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS: SIMPLE ΚΑΙ PRO»,
+ * 2026-11-04, Κομμάτι 1) — «βλέπεις τα βήματα σε λίστα, με απλά λόγια».
+ *
+ * THE SAME `boxes` ARRAY `BoxRow` ABOVE DRAWS, read through the same
+ * `useWords().describe`. That is the whole point of the switch: «ό,τι
+ * φτιάχνεις στο Simple ανοίγει και στο Pro, και αντίστροφα», so there is
+ * no second shape to keep in step and no second place a step could go
+ * missing. Pressing Pro draws the identical row of boxes it always did.
+ *
+ * WHAT SIMPLE LEAVES OUT IS THE MECHANISM, NOT THE AUTOMATION: no kind
+ * labels (ΕΝΑΡΞΗ/ΑΝΑΓΝΩΣΗ/ΣΥΝΘΗΚΗ are the words Pro teaches), no branch
+ * drawn beside a condition — the condition says both halves in one
+ * sentence instead — and nothing to press, because configuring a step is
+ * what Pro is for. Every step is still shown: a reader of Simple who
+ * counts the lines gets the same number Pro draws boxes.
+ *
+ * A BOX THAT NEEDS A CONNECTION STILL SAYS SO. It is not mechanism, it is
+ * the reason the automation cannot be switched on, and hiding it in
+ * Simple would leave a person with a dead «Ενεργοποίηση» and no sentence
+ * anywhere saying why (the `flow-needs` line `BoxRow` draws, same text,
+ * same press to the connection).
+ */
+export function FlowSteps({ boxes, connected }: { boxes: Box[]; connected: Connected }) {
+  const { t, needs, describe } = useWords();
+  function sentence(box: Box): string {
+    switch (box.kind) {
+      case "read":
+        return t("simple.reads", { what: describe(box) });
+      case "ai":
+        return t("simple.does", { what: describe(box) });
+      case "condition":
+        return t("simple.onlyIf");
+      default:
+        // start, approval and action already read as whole sentences in
+        // every locale («Κάθε μέρα στις 09:00», «Περιμένει να το
+        // εγκρίνεις», «Το στέλνει στο Telegram σου») — wrapping those in
+        // a lead-in would say the same thing twice.
+        return describe(box);
+    }
+  }
+  return (
+    <div className="space-y-2">
+      <ol data-testid="flow-steps" className="space-y-2">
+        {boxes.map((box, i) => {
+          const missing = connectionsNeeded([box]).filter((need) => !connected[need]);
+          return (
+            <li key={box.id} data-testid="flow-step" data-kind={box.kind} className="flex items-start gap-3">
+              <span aria-hidden="true" className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-panel text-[11px] text-muted">
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1 space-y-1">
+                <span className="block break-words text-sm leading-relaxed text-body">{sentence(box)}</span>
+                {missing.map((need) => (
+                  <span key={need} data-testid="flow-needs" className="flex flex-wrap items-center gap-2 text-xs text-warning">
+                    {t("needsConnection", { name: needs[need] })}
+                    <Link href={CONNECT_AT[need]} className="inline-flex min-h-[44px] items-center text-foreground underline underline-offset-2">
+                      {t("connect")}
+                    </Link>
+                  </span>
+                ))}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="text-xs text-muted">{t("simple.hint")}</p>
+    </div>
+  );
+}
+
+/**
  * THE SAME BOX, CHANGED BY HAND: the choices a box has, as lists. Saved
  * through PATCH /api/automations/flows/[id] as a new version — free, and
  * taken back by «Αναίρεση» like a change with words.

@@ -74,8 +74,17 @@ type Props = {
   options?: ReactNode[];
   /** Lines under the field: the price before sending, one plain limit. */
   footer?: ReactNode;
-  /** What the tool made, beside the conversation. */
-  work?: { title: string; actions?: ReactNode; body: ReactNode } | null;
+  /** What the tool made, beside the conversation.
+   *
+   *  `mode` DRAWS THE «Simple | Pro» SWITCH IN THIS BAR, and it lives
+   *  here rather than in each tool's own `actions` on purpose
+   *  (docs/TOOL-RULES.md, «κάθε εργαλείο πάνω στο κοινό κέλυφος, κανένα
+   *  δεν φτιάχνει δική του μπάρα»): one control, one pair of words, one
+   *  place, so Automations and Agents cannot drift into two switches
+   *  that look different. The tool owns only what each level SHOWS.
+   *  Omitted by every tool that has one level, which is all of them bar
+   *  the ones directive 55 names. */
+  work?: { title: string; actions?: ReactNode; body: ReactNode; mode?: { value: ShellMode; onChange: (next: ShellMode) => void } } | null;
   onCloseWork?: () => void;
   /** Files given to the field — the «+», a paste, a drop — and what they
    *  are, drawn above the text; the same as Chat's (package 9). Slides
@@ -102,6 +111,18 @@ type Props = {
    *  keep the tool's own history UI (an option under the field). */
   history?: { open: boolean; onToggle: () => void; onNew: () => void; newLabel: string; column: ReactNode };
 };
+
+/**
+ * THE TWO LEVELS OF ONE TOOL (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS:
+ * SIMPLE ΚΑΙ PRO», 2026-11-04, Κομμάτι 1).
+ *
+ * Simple is the steps in a list, in plain words; Pro is the whole
+ * mechanism, boxes and lines, with every box configurable. The SAME
+ * thing either way — «ό,τι φτιάχνεις στο Simple ανοίγει και στο Pro, και
+ * αντίστροφα» — so this is a view of one artefact, never two copies of
+ * it, and nothing a tool stores depends on which level is showing.
+ */
+export type ShellMode = "simple" | "pro";
 
 export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(
   { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend, empty, history },
@@ -285,6 +306,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </button>
             <p className="min-w-0 flex-1 break-words px-1 text-sm font-medium text-foreground">{work.title}</p>
+            {work.mode && <ShellModeSwitch value={work.mode.value} onChange={work.mode.onChange} />}
             {work.actions}
             <button type="button" onClick={onCloseWork} aria-label={t("close")} data-testid="tool-shell-close" className={`${ACTION} hidden lg:inline-flex`}>
               <X className="h-4 w-4" aria-hidden="true" />
@@ -324,4 +346,65 @@ export function ChosenBox({ label, onClear }: { label: string; onClear: () => vo
 /** Whether the work sits beside the conversation (a computer) or covers it (a phone). */
 export function workIsBeside(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+}
+
+/**
+ * THE «Simple | Pro» SWITCH, drawn in the work bar whenever a tool passes
+ * `work.mode` (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS: SIMPLE ΚΑΙ PRO»,
+ * Κομμάτι 1).
+ *
+ * The same segmented shape the product already uses for a pair of
+ * exclusive choices (components/sort-toggle.tsx): both words always
+ * visible, so nobody has to press to learn what the other level is
+ * called, and neither is ever shortened — on a 320px phone this row is
+ * the back arrow, a title that WRAPS rather than overflows, this switch
+ * and the tool's own icons.
+ *
+ * It is not the screen's one white button (ΣΥΣΤΗΜΑ DESIGN, «ένα λευκό
+ * κουμπί ανά οθόνη»): the chosen half is `bg-foreground`, the ink the
+ * background, which is the product's "selected" pair everywhere, and the
+ * field's send stays the only filled button.
+ */
+export function ShellModeSwitch({ value, onChange }: { value: ShellMode; onChange: (next: ShellMode) => void }) {
+  const t = useTranslations("dashboard.toolShell");
+  // BOTH KEYS WRITTEN OUT, not t(`mode.${mode}`). A template-literal key
+  // is a key lib/i18n/message-slices.ts cannot see, which is what makes a
+  // component "unbounded" there and a whole group untrimmable — the same
+  // rule flow-boxes.tsx keeps («every word is a literal key here, so the
+  // message slicer sees them all»). Two levels, two literals.
+  const modes: { mode: ShellMode; label: string }[] = [
+    { mode: "simple", label: t("mode.simple") },
+    { mode: "pro", label: t("mode.pro") },
+  ];
+  return (
+    <div
+      data-testid="shell-mode"
+      data-mode={value}
+      role="group"
+      aria-label={t("mode.label")}
+      // A `bg-panel` TRACK, NOT A HAIRLINE BORDER. The recessed-panel
+      // treatment this product already uses for a row inside the work
+      // area (components/automations/flow-boxes.tsx's ROW) separates the
+      // two halves from the bar on its own, and the border it replaces
+      // would have been the 686th border utility in the build against
+      // design-density.test.mjs's ceiling of 685 — a ceiling that exists
+      // to stop exactly this, one hairline at a time.
+      className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-panel p-0.5"
+    >
+      {modes.map(({ mode, label }) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => onChange(mode)}
+          aria-pressed={value === mode}
+          data-testid={`shell-mode-${mode}`}
+          className={`min-h-[44px] whitespace-nowrap rounded-full px-3 text-xs font-medium transition-colors duration-150 ${
+            value === mode ? "bg-foreground text-background" : "text-muted hover:text-foreground"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 }

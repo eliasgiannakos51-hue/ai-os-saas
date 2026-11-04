@@ -24,6 +24,9 @@ const CRON = "src/app/api/cron/automation-flows/route.ts";
 const INGEST = "src/lib/files/ingest.ts";
 const MIGRATION = "supabase/migrations/20261021000000_automation_flows.sql";
 const SHELL = "src/components/shell/tool-shell.tsx";
+const AUTO_SHELL = "src/components/automations/automation-shell.tsx";
+const FLOW_BOXES = "src/components/automations/flow-boxes.tsx";
+const PAGE = "src/app/dashboard/[module]/page.tsx";
 
 const MUTANTS = [
   {
@@ -173,11 +176,64 @@ const MUTANTS = [
     to: "pb-[calc(3rem+env(safe-area-inset-bottom))]",
     expect: "on a phone the work area keeps room for the tab bar under it",
   },
+  // «Simple | Pro» (directive 55, Κομμάτι 1). The defects worth catching
+  // here are the ones that take something away: a reader who loses the
+  // configurator, a level that drops a step, a switch Automations drew
+  // for itself, a word cut in half.
+  {
+    name: "a reader without the switch gets Simple, and loses the boxes they had",
+    file: AUTO_SHELL,
+    from: 'const level: ShellMode = simplePro ? mode : "pro";',
+    to: "const level: ShellMode = mode;",
+    expect: "no switch for a reader without it, and Pro is what they get",
+  },
+  {
+    name: "Simple quietly drops a step",
+    file: FLOW_BOXES,
+    from: "      {boxes.map((box, i) => {\n          const missing",
+    to: '      {boxes.filter((b) => b.kind !== "condition").map((box, i) => {\n          const missing',
+    expect: "Simple shows EVERY step: it maps the array whole, with no filter and no cap",
+  },
+  {
+    name: "the two levels stop reading the same boxes",
+    file: AUTO_SHELL,
+    from: "<FlowSteps boxes={shown.boxes} connected={connected} />",
+    to: "<FlowSteps boxes={shown.boxes.slice(1)} connected={connected} />",
+    expect: "Simple and Pro are drawn from the same boxes, not two stores",
+  },
+  {
+    name: "the shared bar stops drawing the switch, so a tool must make its own",
+    file: SHELL,
+    from: "{work.mode && <ShellModeSwitch value={work.mode.value} onChange={work.mode.onChange} />}\n",
+    to: "",
+    expect: "the switch is declared and drawn by the shared shell",
+  },
+  {
+    name: "a level's name may be cut in half",
+    file: SHELL,
+    from: 'className={`min-h-[44px] whitespace-nowrap rounded-full px-3',
+    to: 'className={`min-h-[44px] truncate rounded-full px-3',
+    expect: "both words are on screen at once, and neither is ever shortened",
+  },
+  {
+    name: "the page stops reading the switch, so an unfinished level ships to everyone",
+    file: PAGE,
+    from: 'isFeatureOn("agents-automations-pro", user),',
+    to: "Promise.resolve(true),",
+    expect: "the page reads the switch, which fails towards staff",
+  },
+  {
+    name: "leaving Pro keeps the chosen box, so its editor reopens under nothing",
+    file: AUTO_SHELL,
+    from: '    if (next === "simple") setChosen(null);\n',
+    to: "",
+    expect: "leaving Pro clears the chosen box, so its editor cannot reopen under nothing",
+  },
 ];
 
 runMutations({
   name: "automations",
   gate: GATE,
-  targets: [BOXES, ANSWERS, RUNNER, ACCESS, APPROVE, CRON, INGEST, MIGRATION, SHELL],
+  targets: [BOXES, ANSWERS, RUNNER, ACCESS, APPROVE, CRON, INGEST, MIGRATION, SHELL, AUTO_SHELL, FLOW_BOXES, PAGE],
   mutants: MUTANTS,
 });

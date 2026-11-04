@@ -3450,6 +3450,11 @@
         "rename": "Renombrar",
         "undo": "Deshacer",
         "deleteConfirm": "¿Eliminar «{title}»?"
+      },
+      "mode": {
+        "label": "Nivel",
+        "simple": "Sencillo",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "¿Qué debería pasar solo?"
       },
-      "new": "Automatización nueva"
+      "new": "Automatización nueva",
+      "simple": {
+        "reads": "Lee: {what}",
+        "does": "Ionexa hace: {what}",
+        "onlyIf": "Sigue solo si se encontró algo. Si no, se detiene aquí y no se cobra nada.",
+        "hint": "Estos son los pasos, en orden. Pulsa Pro para cambiar cualquiera."
+      }
     },
     "flows": {
       "name": "Proyectos",

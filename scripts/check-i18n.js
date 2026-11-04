@@ -907,6 +907,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // glyphs in every language that writes with the Latin alphabet (el
   // uses its own "Αα" instead, so it is not even in this set's locales).
   "dashboard.toolShell.motion.previewSample",
+  // «Simple | Pro» (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS: SIMPLE ΚΑΙ
+  // PRO», 2026-11-04, Κομμάτι 1). "Pro" is the LEVEL'S NAME, not the
+  // adjective: the owner writes the pair in Latin letters inside Greek
+  // prose, and it is the tier word software keeps untranslated in all
+  // ten of these languages. Its other half IS translated, in every one
+  // of them — Απλό, Sencillo, Simplifié, Einfach, Semplice, Simples,
+  // シンプル, 简易, بسيط — so this entry covers one word, not a pair, and
+  // the switch never reads as English on a Greek screen.
+  "dashboard.toolShell.mode.pro",
   // "Parallax" is the design/CSS term itself, used untranslated in
   // el/es/fr/de/it/pt the way "online" or "email" are — ja/zh/ar DO
   // translate it (パララックス/视差/بارالاكس), so this is six locales

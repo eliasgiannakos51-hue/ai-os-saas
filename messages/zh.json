@@ -3450,6 +3450,11 @@
         "rename": "重命名",
         "undo": "撤销",
         "deleteConfirm": "删除「{title}」吗?"
+      },
+      "mode": {
+        "label": "级别",
+        "simple": "简易",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "什么事情应该自动发生?"
       },
-      "new": "新建自动化"
+      "new": "新建自动化",
+      "simple": {
+        "reads": "读取：{what}",
+        "does": "Ionexa 执行：{what}",
+        "onlyIf": "只有找到内容时才继续。否则就在这里停下，不收取任何费用。",
+        "hint": "这是按顺序排列的步骤。按 Pro 即可修改其中任何一步。"
+      }
     },
     "flows": {
       "name": "项目",

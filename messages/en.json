@@ -3450,6 +3450,11 @@
         "rename": "Rename",
         "undo": "Undo",
         "deleteConfirm": "Delete “{title}”?"
+      },
+      "mode": {
+        "label": "Level",
+        "simple": "Simple",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "What should happen by itself?"
       },
-      "new": "New automation"
+      "new": "New automation",
+      "simple": {
+        "reads": "Reads: {what}",
+        "does": "Ionexa does: {what}",
+        "onlyIf": "Goes on only if something was found. Otherwise it stops here, and nothing is charged.",
+        "hint": "These are the steps, in order. Press Pro to change any of them."
+      }
     },
     "flows": {
       "name": "Projects",

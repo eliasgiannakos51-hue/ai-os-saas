@@ -3450,6 +3450,11 @@
         "rename": "Rinomina",
         "undo": "Annulla",
         "deleteConfirm": "Eliminare «{title}»?"
+      },
+      "mode": {
+        "label": "Livello",
+        "simple": "Semplice",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "Cosa dovrebbe succedere da solo?"
       },
-      "new": "Nuova automazione"
+      "new": "Nuova automazione",
+      "simple": {
+        "reads": "Legge: {what}",
+        "does": "Ionexa fa: {what}",
+        "onlyIf": "Continua solo se è stato trovato qualcosa. Altrimenti si ferma qui, senza alcun addebito.",
+        "hint": "Questi sono i passaggi, in ordine. Premi Pro per modificarne uno."
+      }
     },
     "flows": {
       "name": "Progetti",

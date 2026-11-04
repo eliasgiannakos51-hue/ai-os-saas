@@ -292,5 +292,81 @@ for (const file of LOCALES) {
   check(`${file}: every word, the prices with their number`, missing.length === 0 && /\{count/.test(m.priceBuild ?? "") && /\{count/.test(m.priceRun ?? "") && /\{name\}/.test(m.notify?.approval ?? ""), missing.join(", "));
 }
 
+// ---------------------------------------------------------------------
+console.log("\n== 9. «Simple | Pro»: two levels, one automation (directive 55, Κομμάτι 1) ==");
+// ---------------------------------------------------------------------
+// The owner's «55. AGENTS ΚΑΙ AUTOMATIONS: SIMPLE ΚΑΙ PRO», 2026-11-04:
+// Simple is the steps as a list in plain words, Pro the mechanism in
+// boxes and lines, and «ό,τι φτιάχνεις στο Simple ανοίγει και στο Pro,
+// και αντίστροφα».
+const flowBoxes = code("src/components/automations/flow-boxes.tsx");
+const flagsSrc = readFileSync("src/lib/flags/flags.ts", "utf8");
+
+// THE SWITCH IS THE SHELL'S, NOT AUTOMATIONS' OWN BAR (docs/TOOL-RULES.md:
+// «κάθε εργαλείο πάνω στο κοινό κέλυφος, κανένα δεν φτιάχνει δική του
+// μπάρα»). Automations hands the shell a value and a setter; the control
+// itself is drawn once, in the shell, so Agents cannot grow a second one
+// that looks different.
+check("the switch is declared and drawn by the shared shell",
+  /export function ShellModeSwitch\(\{ value, onChange \}/.test(shellWork) &&
+  /\{work\.mode && <ShellModeSwitch value=\{work\.mode\.value\} onChange=\{work\.mode\.onChange\} \/>\}/.test(shellWork));
+check("...inside the work bar's own row, beside the title and the tool's actions",
+  /\{work\.title\}<\/p>\s*\{work\.mode &&[\s\S]{0,120}\{work\.actions\}/.test(shellWork));
+check("Automations passes a mode to the shell and draws no switch of its own",
+  /mode: \{ value: mode, onChange: chooseMode \}/.test(shell) && !/ShellModeSwitch/.test(shell.replace(/type ShellMode/g, "")));
+check("both words are on screen at once, and neither is ever shortened",
+  /whitespace-nowrap/.test(shellWork.slice(shellWork.indexOf("export function ShellModeSwitch"))) &&
+  /\{ mode: "simple", label: t\("mode\.simple"\) \}/.test(shellWork) &&
+  /\{ mode: "pro", label: t\("mode\.pro"\) \}/.test(shellWork));
+
+// BOTH LEVELS READ THE SAME ARRAY. This is the interchangeability rule as
+// a property of the code rather than a promise: there is one `boxes`, so a
+// step cannot exist in one level and not the other, and nothing has to be
+// copied across when either changes.
+const simpleCall = /<FlowSteps boxes=\{(shown\.boxes)\}/.exec(shell);
+const proCall = /<BoxRow boxes=\{(shown\.boxes)\}/.exec(shell);
+check("Simple and Pro are drawn from the same boxes, not two stores",
+  Boolean(simpleCall) && Boolean(proCall) && simpleCall[1] === proCall[1]);
+check("Simple shows EVERY step: it maps the array whole, with no filter and no cap",
+  /boxes\.map\(\(box, i\) => \{/.test(flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"))) &&
+  !/boxes\.(filter|slice)\(/.test(flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"), flowBoxes.indexOf("export function BoxEditor"))));
+check("Pro keeps the boxes AND the per-box editor it always had",
+  /level === "pro" &&\s*\(chosenBox \?/.test(shell) && /<BoxEditor key=/.test(shell));
+
+// WITHOUT THE SWITCH THE SCREEN IS WHAT IT WAS. `level` is Pro whenever
+// the reader does not have the flag, so a half-built Simple can never
+// hide the configurator from somebody who already had it.
+check("no switch for a reader without it, and Pro is what they get",
+  /const level: ShellMode = simplePro \? mode : "pro";/.test(shell) &&
+  /\.\.\.\(simplePro \? \{ mode: \{/.test(shell) &&
+  /simplePro = false/.test(shell));
+check("the page reads the switch, which fails towards staff",
+  /isFeatureOn\("agents-automations-pro", user\)/.test(page) && /"agents-automations-pro":/.test(flagsSrc));
+
+// THE LEVEL IS A WAY OF LOOKING, NOT PART OF THE AUTOMATION. Nothing is
+// stored for it server-side: no column, no migration, so an automation
+// made in Simple opens in Pro by construction rather than by a copy.
+check("the level is remembered in the browser alone — no column, no migration",
+  /window\.localStorage\.setItem\("ionexa\.automationMode", next\)/.test(shell) &&
+  !/mode/.test(readFileSync("src/lib/automations/flow-access.ts", "utf8").match(/FLOW_COLUMNS[^;]*/s)?.[0] ?? "") &&
+  readdirSync("supabase/migrations").every((f) => !/automation.*mode|mode.*automation/i.test(f)));
+check("leaving Pro clears the chosen box, so its editor cannot reopen under nothing",
+  /if \(next === "simple"\) setChosen\(null\);/.test(shell) && /const chosenBox = level === "pro" &&/.test(shell));
+
+// A STEP THAT NEEDS A CONNECTION STILL SAYS SO IN SIMPLE. It is the reason
+// «Ενεργοποίηση» would do nothing, not mechanism to hide at this level.
+const stepsBody = flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"), flowBoxes.indexOf("export function BoxEditor"));
+check("Simple still names a missing connection, and leads to it",
+  /connectionsNeeded\(\[box\]\)\.filter\(\(need\) => !connected\[need\]\)/.test(stepsBody) && /<Link href=\{CONNECT_AT\[need\]\}/.test(stepsBody));
+
+// THE TWO WORDS, IN ALL TEN LANGUAGES. The scrape above covers
+// dashboard.automations; the switch's own words live under
+// dashboard.toolShell, so they are checked here or nowhere.
+for (const file of LOCALES) {
+  const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.toolShell?.mode ?? {};
+  check(`${file}: the switch says both levels and names itself`,
+    ["label", "simple", "pro"].every((k) => typeof m[k] === "string" && m[k].trim().length > 0));
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

@@ -3450,6 +3450,11 @@
         "rename": "Renomear",
         "undo": "Desfazer",
         "deleteConfirm": "Excluir “{title}”?"
+      },
+      "mode": {
+        "label": "Nível",
+        "simple": "Simples",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "O que deve acontecer por si só?"
       },
-      "new": "Nova automatização"
+      "new": "Nova automatização",
+      "simple": {
+        "reads": "Lê: {what}",
+        "does": "O Ionexa faz: {what}",
+        "onlyIf": "Continua apenas se algo foi encontrado. Caso contrário, para aqui e nada é cobrado.",
+        "hint": "Estes são os passos, por ordem. Toca em Pro para mudar qualquer um."
+      }
     },
     "flows": {
       "name": "Projetos",

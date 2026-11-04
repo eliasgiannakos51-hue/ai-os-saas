@@ -3450,6 +3450,11 @@
         "rename": "Umbenennen",
         "undo": "Rückgängig",
         "deleteConfirm": "„{title}“ löschen?"
+      },
+      "mode": {
+        "label": "Ebene",
+        "simple": "Einfach",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "Was soll von selbst passieren?"
       },
-      "new": "Neue Automatisierung"
+      "new": "Neue Automatisierung",
+      "simple": {
+        "reads": "Liest: {what}",
+        "does": "Ionexa erledigt: {what}",
+        "onlyIf": "Macht nur weiter, wenn etwas gefunden wurde. Sonst hört es hier auf, und es wird nichts berechnet.",
+        "hint": "Das sind die Schritte, der Reihe nach. Tippe auf Pro, um einen davon zu ändern."
+      }
     },
     "flows": {
       "name": "Projekte",

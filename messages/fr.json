@@ -3450,6 +3450,11 @@
         "rename": "Renommer",
         "undo": "Annuler",
         "deleteConfirm": "Supprimer « {title} » ?"
+      },
+      "mode": {
+        "label": "Niveau",
+        "simple": "Simplifié",
+        "pro": "Pro"
       }
     },
     "library": {
@@ -3829,7 +3834,13 @@
       "empty": {
         "heading": "Que doit-il se passer tout seul ?"
       },
-      "new": "Nouvelle automatisation"
+      "new": "Nouvelle automatisation",
+      "simple": {
+        "reads": "Lit : {what}",
+        "does": "Ionexa fait : {what}",
+        "onlyIf": "Continue seulement si quelque chose a été trouvé. Sinon, s’arrête ici, sans rien facturer.",
+        "hint": "Voici les étapes, dans l’ordre. Appuie sur Pro pour en modifier une."
+      }
     },
     "flows": {
       "name": "Projets",

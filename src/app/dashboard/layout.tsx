@@ -201,8 +201,15 @@ export default async function DashboardLayout({
                     had nothing to land on, and so did the page's own
                     outline.
                     Putting it in the layout is what makes it true for all
-                    64 pages instead of 8, and the four components below
-                    COUNT: 64 /page\.tsx$/ in src/app/dashboard/
+                    65 pages instead of 8, and the four components below
+                    COUNT: 65 /page\.tsx$/ in src/app/dashboard/
+                    (64 -> 65 on 2026-11-04: /dashboard/admin, added by
+                    οδηγία 42 Κομμάτι 1 on 2026-11-01, one day after this
+                    marker was last set. It inherits the landmark from here
+                    like the other 64 — the point of putting it in the
+                    layout — so nothing about the sentence changed except
+                    the number, which is exactly the drift the marker is
+                    for.)
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}

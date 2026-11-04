@@ -1535,8 +1535,14 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "/dashboard/routing",
       "/dashboard/system-health",
     ],
-    pages: ["business-health", "costs", "routing", "system-health"],
-    routes: ["system-health/files", "system-health/flags", "system-health/keys", "system-health/resolve", "system-health/test-alert", "cron/cost-alerts"],
+    // "admin" (directive 42) joined 2026-11-04: same isAdminEmail() gate,
+    // and no sidebar row at all (entry-points.test.mjs EXEMPTs it rather
+    // than giving it a hidden one — see that file's reasoning).
+    pages: ["business-health", "costs", "routing", "system-health", "admin"],
+    routes: [
+      "system-health/files", "system-health/flags", "system-health/keys", "system-health/resolve", "system-health/test-alert", "cron/cost-alerts",
+      "admin/users", "admin/users/credits", "admin/costs", "admin/revenue", "admin/suspend", "admin/refund", "admin/audit-log",
+    ],
     charges: false,
     enforcedIn: "src/lib/auth/admin-emails.ts",
     enforcedSymbol: "isAdminEmail",

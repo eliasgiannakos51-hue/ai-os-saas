@@ -88,6 +88,11 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // here.
     namespaces: [
       "achievements",
+      // Directive 42's admin dashboard: every tab (users/costs/revenue/
+      // auditLog) and its three modals (credit-adjust, refund, suspend)
+      // calls useTranslations("adminDashboard.<tab>") — one root, several
+      // dotted sub-namespaces, same shape as "settings" below.
+      "adminDashboard",
       // Universal Memory: /dashboard/ai-memory, the page that lists what
       // the chat has kept about you. Its own namespace rather than a
       // corner of `settings`, because the on/off switch is a setting and
@@ -211,7 +216,10 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // the only trimmable one, so a namespace used and not declared here is
     // not a missing translation, it is `landing.accountDeleted` rendered
     // literally.
-    namespaces: ["auth", "common", "contact", "cookies", "landing", "language", "pricing"],
+    // "suspended" is the full-screen notice a suspended account sees
+    // instead of the dashboard (directive 42 Κ4) — rendered outside the
+    // dashboard group's own layout, so it is marketing's to declare.
+    namespaces: ["auth", "common", "contact", "cookies", "landing", "language", "pricing", "suspended"],
     unbounded: 0,
   },
 ];

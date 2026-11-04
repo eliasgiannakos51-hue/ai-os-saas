@@ -3,6 +3,36 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-04α (οδηγία 42 — Κομμάτι 6: έσοδα μήνα, νέοι χρήστες, ακυρώσεις) ✅
+
+Αλλαγές:
+- `src/app/api/admin/revenue/route.ts`: GET endpoint — MRR trend (από
+  `loadTrend`), οι 15 δείκτες (από `loadMetricInputs` + `computeMetrics`),
+  συμβάντα συνδρομών ανά μήνα από `subscription_events`
+  (started/reactivated/cancelled/upgraded/downgraded). Guard: `isAdminEmail`
+  + `isFeatureOn("admin-dashboard")`. Audit logged ως `"view_revenue"`.
+  Οι δείκτες σειριοποιούνται ανά `state` (`serializeMetric`), ώστε ένας
+  δείκτης που ΔΕΝ υπολογίστηκε να φτάνει στην οθόνη ως `needs_input` /
+  `needs_history` / `no_data` με τον λόγο του, και ποτέ ως σιωπηλό μηδέν.
+- `src/components/admin/revenue-tab.tsx`: client component — επιλογή
+  περιόδου (30/60/90/180 ημέρες), 4 κάρτες σύνοψης (τρέχον MRR με μεταβολή,
+  συνδρομητές που πληρώνουν, νέοι χρήστες, ακυρώσεις), 6 κάρτες βασικών
+  δεικτών (MRR, ARR, ARPU, Gross Margin, Churn, NRR), πίνακας για τους
+  υπόλοιπους 9, ημερήσιος πίνακας MRR/κόστους/συνδρομητών με μπάρα
+  περιθωρίου, και πίνακας συμβάντων ανά μήνα με καθαρή μεταβολή.
+- `src/lib/admin/audit-log.ts`: `"view_revenue"` στο `AdminAction`.
+- `src/app/dashboard/admin/page.tsx`: 3η καρτέλα «Έσοδα» στο `AdminTabs`.
+- `messages/*.json` (10 γλώσσες): `adminDashboard.revenue`, 30 κλειδιά.
+  Επαληθεύτηκε ότι και οι 10 έχουν το ίδιο σύνολο κλειδιών, κανένα κενό,
+  και κανένα με τη μορφή `'{…}'` που θα τύπωνε τις αγκύλες αυτολεξεί.
+
+Καμία διαγραφή και κανένα migration: όλα τα δεδομένα από υπάρχοντες
+πίνακες (`revenue_snapshots`, `subscription_events`, `subscriber_months`,
+`ai_cost_log`, `business_inputs`) και τα `mrr_inputs()` /
+`subscription_cohort()`.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-01θ (οδηγία 42 — Κομμάτι 5: κόστος ανά πάροχο ανά ημέρα) ✅
 
 Αλλαγές:

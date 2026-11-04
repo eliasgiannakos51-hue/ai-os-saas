@@ -10,6 +10,7 @@ export type AdminAction =
   | "suspend_user"
   | "unsuspend_user"
   | "view_costs"
+  | "view_revenue"
   | "toggle_flag"
   | "view_reported_content";
 

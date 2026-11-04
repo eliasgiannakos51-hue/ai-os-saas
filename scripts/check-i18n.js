@@ -46,6 +46,15 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // The admin Revenue tab (2026-11-04, οδηγία 42 Κομμάτι 6): "Status" is
+  // the German noun, and "Date" and "Net" are the French ones, for these
+  // senses — a column heading, a date, and a net change. Per locale, not
+  // INTENTIONALLY_IDENTICAL: the other eight all differ (Κατάσταση,
+  // Estado, Stato, 状態, الحالة for status; Ημερομηνία, Fecha, Data,
+  // 日付, التاريخ for date).
+  "de:adminDashboard.revenue.status",
+  "fr:adminDashboard.revenue.date",
+  "fr:adminDashboard.revenue.net",
   // The standalone Translate tool's style picker (2026-10-24): "Formal"
   // is the Spanish and Portuguese word too, and "Style" is the French
   // word (no accent difference once a comment strips it) for this sense.

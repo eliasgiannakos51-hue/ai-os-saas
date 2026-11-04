@@ -104,12 +104,34 @@ check("the stated count matches the block", listed.length === 15, `${listed.leng
 check("...and the conditional one is the one named as conditional",
   listed.includes("MAX_FUNCTION_DURATION") && /depends on your Vercel plan/.test(doc));
 
+// DERIVED, NOT HARDCODED, and that is the whole point. This check used to
+// read `crons.length === 13` with "all thirteen" beside it, so the day the
+// deferred-deletion cron landed (20261108, /api/cron/execute-deletions) the
+// gate went red on a true sentence having become false — correct — but the
+// ONLY way to fix it was to hand-edit two literals in this file as well as
+// the document. A number that has to be maintained in two places is a number
+// that will disagree with itself. Now the population is vercel.json and the
+// document is held against it, so adding a cron is a one-line doc change.
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+  "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one",
+  "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six",
+  "twenty-seven", "twenty-eight", "twenty-nine", "thirty",
+];
+const word = (n) => NUMBER_WORDS[n] ?? String(n);
+
 const crons = JSON.parse(readFileSync("vercel.json", "utf8")).crons;
+const underCron = crons.filter((c) => c.path.startsWith("/api/cron"));
+const elsewhere = crons.filter((c) => !c.path.startsWith("/api/cron"));
+
 check(`the cron count is the cron count (${crons.length})`,
-  doc.includes(`all thirteen scheduled routes`) && crons.length === 13,
-  `vercel.json has ${crons.length}`);
+  doc.includes(`all ${word(crons.length)} scheduled routes`),
+  `vercel.json has ${crons.length}, so the document must say "all ${word(crons.length)} scheduled routes"`);
 check("...and the split between /api/cron and the digest is right",
-  crons.filter((c) => c.path.startsWith("/api/cron")).length === 12);
+  doc.includes(`${word(underCron.length)} under \`/api/cron\``) &&
+  underCron.length + elsewhere.length === crons.length,
+  `${underCron.length} under /api/cron plus ${elsewhere.length} elsewhere (${elsewhere.map((c) => c.path).join(", ")})`);
 
 check(`the registry size is right (${ENV_REQUIREMENTS.length})`,
   doc.includes(`all ${ENV_REQUIREMENTS.length} variables`),

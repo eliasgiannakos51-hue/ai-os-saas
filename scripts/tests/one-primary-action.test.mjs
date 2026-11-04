@@ -513,6 +513,12 @@ const BASELINE = {
   "dashboard/videos/page.tsx": 1,
   "dashboard/website-builder/page.tsx": 0,
   "dashboard/websites/page.tsx": 1,
+  // ONE, AND IT IS THE PAGE'S ONLY ACTION: «Keep my account», the button
+  // that stops a scheduled deletion (cancel-deletion-form.tsx). The same
+  // single filled control the reset-password and forgot-password pages
+  // carry; the only other controls are underlined text links (home, and
+  // the dashboard once the deletion is cancelled).
+  "delete-account/cancel/page.tsx": 1,
   "forgot-password/page.tsx": 1,
   "help/page.tsx": 1,
   "offline/page.tsx": 1,

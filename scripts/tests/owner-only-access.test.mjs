@@ -234,7 +234,19 @@ const justifiedRoutes = routes.filter((f) => SERVICE_ROLE_DECLARED.test(readFile
 // are ones §4b already recognises; neither is a new kind of exemption.
 // api/iowork/devices and api/iowork/devices/[id] are NOT in this count:
 // they establish the session themselves and are scoped to its user.
-check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 8);
+//
+// 8 -> 9 on 2026-11-04, for api/delete-account/cancel and no other. It is
+// the second half of a pair already counted here: delete-account/confirm
+// schedules the deletion from an emailed single-use token, and cancel
+// stops it from the link in the email that follows — signed out, possibly
+// on another device, for the same reason confirm cannot ask for a
+// session. token-auth, exactly like confirm: a 256-bit token stored only
+// as its SHA-256, claimed by one conditional update that refuses a row
+// already cancelled or executed (lib/account/pending-deletion.ts). It is not
+// a new kind of exemption. api/delete-account/status, which cancels from
+// Settings, is NOT in this count: it reads the session and is scoped to
+// its user.
+check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 9);
 for (const file of justifiedRoutes) {
   const src = readFileSync(file, "utf8");
   const reason = src.match(SERVICE_ROLE_DECLARED)?.[1];

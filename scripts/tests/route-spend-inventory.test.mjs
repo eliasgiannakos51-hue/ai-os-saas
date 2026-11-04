@@ -295,6 +295,7 @@ const DECLARED = {
 
   // --- account deletion (2026-10-08) ---
   "delete-account/confirm": { bound: "limited", scope: "delete_account_confirm", why: "lists and removes the person's own files through the Storage API (lib/account/erase-storage.ts), once per single-use token claimed before any storage call; scope delete_account_confirm, ten an hour per address" },
+  "cron/execute-deletions": { bound: "none", why: "cron, guarded by CRON_SECRET and scheduled once a day (vercel.json, 02:00 UTC); it removes, through the Storage API, the files of at most 50 accounts a run (getActionableDeletions), each one whose 30-day grace has ended, and there is no user to charge" },
 
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },

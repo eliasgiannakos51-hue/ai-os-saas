@@ -7,7 +7,7 @@ import { createStripeClient } from "@/lib/stripe/server";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+export const maxDuration = 300; // @function-limit 300
 
 export async function GET(request: Request) {
   const auth = checkCronAuth(request);

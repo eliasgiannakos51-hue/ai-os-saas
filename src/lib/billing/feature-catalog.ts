@@ -1218,6 +1218,12 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "account/export",
       "delete-account/request",
       "delete-account/confirm",
+      // Deferred deletion (switch "deferred-deletion"): Settings' status
+      // and cancel, the emailed cancel link, and the daily cron that
+      // carries out a deletion once its grace period has ended.
+      "delete-account/status",
+      "delete-account/cancel",
+      "cron/execute-deletions",
       "onboarding",
       "signup",
       "auth/login",

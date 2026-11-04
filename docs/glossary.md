@@ -190,6 +190,7 @@ Removing one from the product is always allowed.
 | dashboard.onboarding.goals.startup | a choice the reader makes, in their words |
 | dashboard.onboarding.sourceManual | a choice the reader makes, in their words |
 | dashboard.integrations.telegram.consentApprove | a choice the reader makes, in their words |
+| auth.cancelDeletion.cancelButton | a choice the reader makes, in their words: "Keep my account" stops their own scheduled deletion |
 | settings.billing.cancel.reasons.not_using | a choice the reader makes, in their words |
 | sidebar.items.memory | "Search my records" — the approved nav name |
 | dashboard.memory.title | the page heading, which must match that nav row |

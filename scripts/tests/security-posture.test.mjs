@@ -531,6 +531,14 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/monthly-credits/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); grants every annual subscriber their monthly credit allowance, so it moves real entitlement across many accounts per call",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
+  // The deferred-deletion pair (directive 39 Κομμάτι 3, switch
+  // "deferred-deletion"). Neither can have a session: one is Vercel's
+  // scheduler, the other a link opened from an inbox, possibly on another
+  // device and possibly by somebody already signed out.
+  "src/app/api/delete-account/cancel/route.ts":
+    "the Keep-my-account link from the deletion-scheduled email, which has to work signed out and on another device, like the confirm link beside it. The 256-bit token from generateCancelToken() is the credential: only its SHA-256 is stored (pending_deletions.cancel_token_hash), and cancelDeletion() claims the row in ONE conditional update — matching that hash AND cancelled_at is null AND executed_at is null — so a token works once, never after the account is gone, and a wrong one changes nothing. It can only cancel a deletion, which is the safe direction. Rate-limited to 10/hour per IP (scope delete_account_cancel), and the answer for a bad token is the same 400 whichever of the three conditions failed",
+  "src/app/api/cron/execute-deletions/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It DELETES ACCOUNTS — the most destructive job in the app — so it reads no request body and takes no parameter: everything it acts on is a pending_deletions row whose delete_after has passed with cancelled_at and executed_at both null, at most 50 a run (getActionableDeletions). For each it runs the confirm route's erase sequence in the same order — storage, the production-errors scrub, the Stripe subscription, then deleteUser — and a failure at any step skips that account before deleteUser and before markExecuted, so the row stays actionable and the next daily run retries it",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
   "src/app/api/health/route.ts":

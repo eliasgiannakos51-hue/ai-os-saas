@@ -134,6 +134,8 @@ const PUBLIC_ON_PURPOSE = {
   "src/app/reset-password/page.tsx": "reached from an emailed recovery link, before the session exists.",
   "src/app/delete-account/confirm/page.tsx":
     "reached from an emailed single-use token. The token is the credential and it is claimed atomically by /api/delete-account/confirm; requiring a session as well would strand anybody who had already been signed out.",
+  "src/app/delete-account/cancel/page.tsx":
+    "the other half of the confirm page above: reached from the cancel link in the deletion-scheduled email, possibly signed out and on another device. The page renders a heading, one sentence and one button from fixed strings, reads no table and shows nothing of the account; the token in the address is the credential, and /api/delete-account/cancel is what checks it (by SHA-256, single-use). Requiring a session would leave somebody who signed out unable to stop their own account's deletion from their inbox.",
   "src/app/offline/page.tsx":
     "served by the service worker when the network is gone. It is fetched ONCE, over the network, at service-worker install — so it cannot depend on a session, and it deliberately holds no account data at all.",
   "src/app/shared/[token]/page.tsx":

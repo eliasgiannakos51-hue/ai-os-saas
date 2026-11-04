@@ -998,7 +998,12 @@ const LEGAL_BASELINE = {
   // 17 -> 24 (2026-10-05): the sub-processor list grew from four companies
   // to every one the code sends data to (legal-pages.test.mjs §5b derives
   // that set from lib/env-check.ts), plus a paragraph on recordings.
-  "src/app/privacy/page.tsx": 24,
+  // 24 -> 25 (2026-11-04): section 5 says a deletion is scheduled
+  // {DELETION_GRACE_DAYS} days out (directive 39 Κομμάτι 3), and the
+  // constant interpolated mid-sentence splits one text node into two —
+  // measured by inlining the number, which gives 24 again. No sentence
+  // was added.
+  "src/app/privacy/page.tsx": 25,
   "src/app/terms/page.tsx": 10,
 };
 

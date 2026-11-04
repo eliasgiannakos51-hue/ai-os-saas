@@ -3,7 +3,6 @@ import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
 import { LEGAL_VERSIONS } from "@/lib/legal/versions";
-import { SUB_PROCESSORS } from "@/lib/legal/sub-processors";
 import { DELETION_GRACE_DAYS } from "@/lib/account/pending-deletion";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -56,17 +55,68 @@ export default function PrivacyPage() {
           the ones marked &quot;only if&quot; receive nothing unless you use
           that feature.
         </p>
+        {/* EVERY COMPANY BY NAME, IN THIS FILE. legal-pages.test.mjs reads
+            the credentials in lib/env-check.ts and requires each one's
+            company to appear here as `>Name<` — the page a lawyer or a
+            regulator reads, not a list somewhere else that it renders.
+            A registry file this page mapped over (2026-11-01) left the
+            text on screen unchanged and every one of those checks red. */}
         <ul className="list-disc space-y-1 ps-5">
-          {SUB_PROCESSORS.map((sp) => (
-            <li key={sp.name}>
-              <span className="text-foreground/90">{sp.name}</span>
-              {sp.onlyIf ? (
-                <> — only if {sp.onlyIf}: {sp.role}.</>
-              ) : (
-                <> — {sp.role}.</>
-              )}
-            </li>
-          ))}
+          <li>
+            <span className="text-foreground/90">Supabase</span> — database,
+            file storage and authentication.
+          </li>
+          <li>
+            <span className="text-foreground/90">Vercel</span> — application
+            hosting and content delivery.
+          </li>
+          <li>
+            <span className="text-foreground/90">Anthropic</span> — the AI
+            model behind every text feature: chat, sites, research,
+            presentations, posts, coding, analysis, files, meetings and
+            agents. It receives what you send to that feature and the context
+            the feature uses.
+          </li>
+          <li>
+            <span className="text-foreground/90">OpenAI</span> — only if you
+            use voice or upload a meeting recording: turns the audio into
+            text.
+          </li>
+          <li>
+            <span className="text-foreground/90">ElevenLabs</span> — only if
+            you ask for text to be read aloud: receives that text.
+          </li>
+          <li>
+            <span className="text-foreground/90">Stripe</span> — payments.
+            Your card details go to Stripe and never reach Ionexa. Stripe does
+            not set cookies on the pages we serve.
+          </li>
+          <li>
+            <span className="text-foreground/90">Resend</span> — email
+            delivery (for example the welcome email, and agent results you
+            chose to receive by email).
+          </li>
+          <li>
+            <span className="text-foreground/90">Unsplash</span> — photo
+            search for sites and presentations. It receives search words, not
+            your account details.
+          </li>
+          <li>
+            <span className="text-foreground/90">Google</span> and{" "}
+            <span className="text-foreground/90">Slack</span> — only if you
+            connect them: Ionexa reads from them what you ask it to, and
+            sends to Slack what you set an agent to send there. Google&apos;s
+            Gemini also, only if you use the Image tool: it receives the
+            description you write and, when you change a picture or ask for
+            it at full size, that picture, and makes the pictures. It does
+            not receive your account details.
+          </li>
+          <li>
+            <span className="text-foreground/90">Telegram</span> and{" "}
+            <span className="text-foreground/90">Discord</span> — only if you
+            choose them as a destination for notifications or agent results:
+            they receive that message.
+          </li>
         </ul>
       </LegalSection>
 

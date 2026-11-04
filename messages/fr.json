@@ -3455,6 +3455,17 @@
         "label": "Niveau",
         "simple": "Simplifié",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "Discussion",
+        "result": "Résultat",
+        "view": "Affichage",
+        "conversation": "La conversation",
+        "closeChat": "Fermer la conversation",
+        "settings": "Réglages",
+        "credits": "Crédits",
+        "selected": "Sélection : {name}",
+        "isOpen": "Ouvert maintenant"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "Une icône d'avatar simple pour une appli tech"
         }
       },
-      "new": "Nouvelle image"
+      "new": "Nouvelle image",
+      "panel": {
+        "status": "{count, plural, one {# visuel} other {# visuels}}",
+        "variants": "{n} visuels",
+        "change": "En changer un",
+        "full": "Pleine résolution",
+        "have": "Tu as",
+        "credits": "{count, plural, one {# crédit} other {# crédits}}"
+      }
     },
     "automations": {
       "name": "Automatisations",

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style>@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-400-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-400-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-500-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-500-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-600-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-600-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-700-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-700-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+</style>
+<meta charset="utf-8">
+<title>Ionexa · Coding</title>
+
+<style>.chat{flex:2 1 410px !important;padding:22px 24px 20px !important}.chat ~ .work{flex:3 1 570px !important}.frow{flex-wrap:nowrap !important;gap:0 !important}.opt{padding:0 6px !important}.cost{min-width:0;overflow:hidden;text-overflow:ellipsis}</style>
+</head>
+<body>
+
+
+
+<style>
+body{margin:0;background:#070A12}
+*{box-sizing:border-box}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+button{font-family:inherit;cursor:pointer}
+a{color:#DCE2EE;text-decoration:none}
+a:hover{color:#F5F7FB}
+.app{display:flex;flex-wrap:wrap;width:100%;min-height:900px;background:#070A12;color:#DCE2EE;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5}
+.side{flex:0 0 232px;display:flex;flex-direction:column;gap:2px;padding:16px 10px 14px;background:#080B14;border-right:1px solid #161D2E}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 10px 26px;color:#F5F7FB;font-weight:600;font-size:15px;letter-spacing:.3em}
+.nav{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px}
+.nav.on{background:#0F1524;color:#F5F7FB}
+.who{margin-top:8px;padding:12px 12px 0;border-top:1px solid #161D2E;font-size:13px;color:#F5F7FB}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;height:900px}
+.top{display:flex;align-items:center;gap:6px;height:58px;padding:0 16px;border-bottom:1px solid #161D2E;flex:none}
+.search{flex:0 1 440px;margin:0 auto;height:38px;display:flex;align-items:center;gap:10px;padding:0 8px 0 14px;border:1px solid #222A3D;border-radius:19px;background:none;color:#8D96A8;font-size:14px}
+.kbd{margin-left:auto;font-size:11px;border:1px solid #222A3D;border-radius:7px;padding:1px 6px}
+.av{width:36px;height:36px;margin-left:6px;border-radius:18px;background:#1E2638;color:#F5F7FB;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex:none}
+.bar{display:flex;align-items:center;gap:4px;min-height:52px;padding:0 16px;border-bottom:1px solid #161D2E;flex:none}
+.tn{color:#F5F7FB;font-weight:600;font-size:15px;margin:0 4px 0 6px}
+.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.g{fill:none;stroke:#F2A65A;stroke-width:1.6;flex:none}
+.ib{width:34px;height:34px;border:0;background:none;color:#8D96A8;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.btn{height:34px;padding:0 12px;border:1px solid #222A3D;background:none;color:#F5F7FB;border-radius:10px;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
+.sm{height:28px;padding:0 10px;font-size:12px}
+.ghost{border-color:transparent;color:#DCE2EE}
+.pri{background:#F5F7FB;border-color:#F5F7FB;color:#070A12;font-weight:600}
+.opt{height:30px;padding:0 8px;border:0;background:none;color:#DCE2EE;border-radius:8px;font-size:12.5px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.opt .i{width:13px;height:13px;color:#8D96A8}
+.mut{color:#8D96A8}
+.sub{color:#8D96A8;font-size:12.5px}
+.lbl{color:#8D96A8;font-size:12px;font-weight:500}
+.sp{flex:1}
+.split{flex:1;display:flex;flex-wrap:wrap;min-height:0}
+.chat{flex:2 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px;padding:22px 28px 20px}
+.msgs{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:14px}
+.u{align-self:flex-end;max-width:88%;background:#0D1220;border:1px solid #161D2E;border-radius:14px;padding:10px 14px;color:#F5F7FB}
+.a{display:flex;flex-direction:column;gap:8px}
+.st{display:flex;align-items:center;gap:8px;color:#8D96A8;font-size:13px}
+.st .i{width:14px;height:14px}
+.meta{display:flex;align-items:center;margin-left:-2px;color:#8D96A8}
+.mb{width:30px;height:30px;border:0;background:none;color:#8D96A8;border-radius:8px;display:inline-flex;align-items:center;justify-content:center}
+.mb .i{width:15px;height:15px}
+.field{display:flex;flex-direction:column;gap:6px;padding:12px 10px 8px 16px;border:1px solid #222A3D;border-radius:18px;background:#0D1220}
+.ta{width:100%;height:44px;padding:0;border:0;outline:none;resize:none;background:none;color:#F5F7FB;font:inherit;font-size:14px}
+.ta::placeholder{color:#8D96A8}
+.frow{display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin-left:-8px}
+.cost{margin-left:auto;margin-right:4px;color:#8D96A8;font-size:12.5px;white-space:nowrap}
+.send{width:34px;height:34px;border:0;border-radius:17px;background:#F5F7FB;color:#070A12;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.work{flex:3 1 600px;min-width:0;display:flex;flex-direction:column;background:#0A0E18;border-left:1px solid #161D2E}
+.wh{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:58px;padding:10px 20px;border-bottom:1px solid #161D2E;flex:none}
+.wt{color:#F5F7FB;font-weight:600;font-size:14px}
+.wb{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;padding:20px;overflow:hidden}
+.tag{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border:1px solid #1E2638;border-radius:6px;font-size:11.5px;color:#8D96A8;white-space:nowrap}
+.ok{color:#6FCF97}
+.seg{display:inline-flex;border:1px solid #222A3D;border-radius:10px;padding:2px}
+.seg button{height:28px;padding:0 12px;border:0;border-radius:8px;background:none;color:#8D96A8;font-size:12.5px}
+.seg .on{background:#1E2638;color:#F5F7FB}
+.file{border:1px solid #222A3D;border-radius:12px;background:#0D1220;overflow:hidden}
+.fh{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #161D2E;font-size:13px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.dl{display:grid;grid-template-columns:40px 18px minmax(0,1fr);padding:1px 12px 1px 0;white-space:pre;overflow:hidden}
+.dl .n{color:#5B6478;text-align:right;padding-right:10px}
+.del{background:#2A1215;color:#F2B8B5}
+.add{background:#10261A;color:#A8E6BF}
+.plus{color:#A8E6BF}
+.minus{color:#F2B8B5}
+@media (max-width:900px){.main{height:auto}.side{flex-basis:100%}}
+</style>
+
+<div class="app">
+<aside class="side">
+<div class="logo"><svg class="g" viewBox="0 0 40 40" width="24" height="24" aria-hidden="true"><circle cx="20" cy="20" r="11"></circle><ellipse cx="20" cy="20" rx="5" ry="11"></ellipse><path d="M9 20h22M10.6 14.5h18.8M10.6 25.5h18.8"></path><ellipse cx="20" cy="20" rx="18" ry="6.5" transform="rotate(-20 20 20)"></ellipse><circle cx="36.9" cy="13.8" r="1.7" fill="#F2A65A" stroke="none"></circle></svg>IONEXA</div>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Ionexa Chat</a>
+<a class="nav on" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"></path></svg>Coding</a>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg>All tools</a>
+<div style="flex:1"></div>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"></path></svg>Settings</a>
+<div class="who">Maria Papadaki<div class="sub">Pro</div></div>
+</aside>
+<div class="main">
+<header class="top">
+<button class="search" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span>Search anything…</span><span class="kbd">⌘K</span></button>
+<button class="btn ghost" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"></path></svg>EN</button>
+<button class="ib" type="button" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg></button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg>82</button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Make anything</button>
+<div class="av">M</div>
+</header>
+<div class="bar">
+<button class="ib" type="button" aria-label="Previous work"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M9.5 4.5v15"></path></svg></button>
+<button class="opt" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:15px;height:15px;color:#DCE2EE"><path d="M12 5v14M5 12h14"></path></svg>New</button>
+<span class="tn">Coding</span>
+<button class="ib" type="button" aria-label="Help"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"></path></svg></button>
+<div class="sp"></div>
+<span class="tag" style="color:#DCE2EE"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px"><circle cx="6" cy="6" r="2"></circle><circle cx="6" cy="18" r="2"></circle><circle cx="18" cy="8" r="2"></circle><path d="M6 8v8M18 10c0 4-6 3-10 6"></path></svg>fournos-eshop · ionexa/cart-fix</span>
+<div class="seg" role="group" aria-label="View"><button class="on" type="button">Simple</button><button type="button">Workshop</button></div>
+</div>
+<div class="split">
+<section class="chat">
+<div class="msgs">
+<div class="u">Στο καλάθι, όταν βάζω 2 τούρτες, το σύνολο βγαίνει λάθος.</div>
+<div class="a">
+<div class="st"><svg class="i ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Read 18 files</div>
+<div class="st"><svg class="i ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Found it in src/cart/total.ts</div>
+<div class="st"><svg class="i ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Changed 2 files, on a new branch</div>
+<div class="st"><svg class="i ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Ran tests · 24 passed</div>
+<p>Η τιμή πολλαπλασιαζόταν δύο φορές με την ποσότητα. Το διόρθωσα και πρόσθεσα test για 2 τούρτες. Δεν άλλαξα τίποτα άλλο.</p>
+<div class="meta"><svg class="g" viewBox="0 0 40 40" width="22" height="22" aria-hidden="true" style="margin-right:6px"><circle cx="20" cy="20" r="11"></circle><ellipse cx="20" cy="20" rx="5" ry="11"></ellipse><path d="M9 20h22M10.6 14.5h18.8M10.6 25.5h18.8"></path><ellipse cx="20" cy="20" rx="18" ry="6.5" transform="rotate(-20 20 20)"></ellipse><circle cx="36.9" cy="13.8" r="1.7" fill="#F2A65A" stroke="none"></circle></svg><button class="mb" type="button" aria-label="Copy"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"></path></svg></button><button class="mb" type="button" aria-label="Good answer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10v10H4V10zM7 10l4-6c1.6 0 2.6 1.2 2.2 2.8L12.5 10H18a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7"></path></svg></button><button class="mb" type="button" aria-label="Bad answer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(180 12 12)"><path d="M7 10v10H4V10zM7 10l4-6c1.6 0 2.6 1.2 2.2 2.8L12.5 10H18a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7"></path></g></svg></button><button class="mb" type="button" aria-label="Try again"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v4.5h-4.5"></path></svg></button></div>
+</div>
+</div>
+<div class="field">
+<textarea class="ta" aria-label="Message" placeholder="Describe what you need, paste code, or ask for a change…"></textarea>
+<div class="frow">
+<button class="ib" type="button" aria-label="Upload a folder"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+<button class="ib" type="button" aria-label="All tools"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg></button>
+<button class="opt" type="button" aria-label="Power: Normal">Normal<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<span class="cost">about 3 credits</span>
+<button class="send" type="button" aria-label="Send"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button>
+</div>
+</div>
+</section>
+<section class="work">
+<div class="wh">
+<div style="display:flex;flex-direction:column"><span class="wt">Changes · 2 files</span><span class="sub">Branch ionexa/cart-fix · nothing goes to main</span></div>
+<div class="sp"></div>
+<button class="btn" type="button">Discard</button>
+<button class="btn pri" type="button">Open pull request</button>
+</div>
+<div class="wb">
+<div class="file">
+<div class="fh"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color:#8D96A8"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span class="mono" style="color:#F5F7FB">src/cart/total.ts</span><span class="mono plus">+2</span><span class="mono minus">−2</span><div class="sp"></div><button class="btn sm" type="button">Reject</button><button class="btn sm" type="button">Accept</button></div>
+<div class="mono" style="padding:6px 0">
+<div class="dl"><span class="n">12</span><span></span><span>export function cartTotal(items: CartItem[]): number {</span></div>
+<div class="dl"><span class="n">13</span><span></span><span>  const total = items.reduce((sum, item) =&gt; {</span></div>
+<div class="dl del"><span class="n">14</span><span>−</span><span>    const line = item.price * item.qty * item.qty;</span></div>
+<div class="dl add"><span class="n">14</span><span>+</span><span>    const line = item.price * item.qty;</span></div>
+<div class="dl"><span class="n">15</span><span></span><span>    return sum + line;</span></div>
+<div class="dl"><span class="n">16</span><span></span><span>  }, 0);</span></div>
+<div class="dl del"><span class="n">17</span><span>−</span><span>  return total;</span></div>
+<div class="dl add"><span class="n">17</span><span>+</span><span>  return Math.round(total * 100) / 100;</span></div>
+<div class="dl"><span class="n">18</span><span></span><span>}</span></div>
+</div>
+</div>
+<div class="file">
+<div class="fh"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color:#8D96A8"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span class="mono" style="color:#F5F7FB">src/cart/total.test.ts</span><span class="mono plus">+14</span><span class="sub">New test: 2 cakes cost 2 × price</span><div class="sp"></div><button class="ib" type="button" aria-label="Show"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button></div>
+</div>
+<div class="file">
+<div class="fh"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color:#8D96A8"><path d="M4 6l5 5-5 5M11 18h9"></path></svg><span>Terminal</span><div class="sp"></div><span class="sub">ran by Ionexa</span></div>
+<div class="mono" style="padding:10px 14px;display:flex;flex-direction:column;gap:2px"><span class="mut">$ npm test</span><span class="plus">✓ 24 passed · 0 failed · 3.1s</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:8px" class="sub"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Restore point saved before the change<button class="btn ghost sm" type="button" style="color:#DCE2EE">Restore</button></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+
+
+</body>
+</html>

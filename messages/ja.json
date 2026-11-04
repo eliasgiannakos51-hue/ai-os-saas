@@ -3455,6 +3455,17 @@
         "label": "レベル",
         "simple": "シンプル",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "チャット",
+        "result": "結果",
+        "view": "表示する内容",
+        "conversation": "会話",
+        "closeChat": "会話を閉じる",
+        "settings": "設定",
+        "credits": "クレジット",
+        "selected": "選択中: {name}",
+        "isOpen": "表示中"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "テックアプリ用のシンプルなアバターアイコン"
         }
       },
-      "new": "新しい画像"
+      "new": "新しい画像",
+      "panel": {
+        "status": "{count, plural, other {# 枚の画像}}",
+        "variants": "画像 {n} 枚",
+        "change": "1 枚を変更",
+        "full": "フル解像度",
+        "have": "残り",
+        "credits": "{count, plural, other {# クレジット}}"
+      }
     },
     "automations": {
       "name": "オートメーション",

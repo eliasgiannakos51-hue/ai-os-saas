@@ -20,6 +20,8 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { EditorShellProvider } from "@/components/shell/editor-shell-context";
 import { SampleDataBanner } from "@/components/sample-data/sample-data-banner";
 import { findSampleImport } from "@/lib/sample-data/apply";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
@@ -96,7 +98,14 @@ export default async function DashboardLayout({
   // somewhere a person can land without passing Home. One indexed read
   // (user_imports has user_created_idx) against a table with at most a
   // handful of rows per account.
-  const sampleImport = await findSampleImport(supabase, user.id);
+  //
+  // THE EDITOR LAYOUT'S SWITCH ("editor-shell", src/lib/flags/flags.ts),
+  // read HERE, once, beside the sample read rather than after it — this
+  // layout's awaits are counted (navigation-cost.test.mjs holds them to
+  // three) and the two reads do not depend on each other. Every tool that
+  // draws components/shell/tool-shell.tsx follows it through
+  // components/shell/editor-shell-context.tsx, so no page reads it.
+  const [sampleImport, editorShell] = await Promise.all([findSampleImport(supabase, user.id), isFeatureOn("editor-shell", user)]);
 
   // RECENT TOOLS, ON THE ACCOUNT (lib/nav/recent-tools.ts): finished
   // work only — this person's settled actions (ai_cost_log) and the
@@ -168,6 +177,9 @@ export default async function DashboardLayout({
                 inside CreditsProvider because the voice controls show a
                 price and refresh the balance after spending it. */}
             <VoiceAvailabilityProvider>
+            {/* The editor layout's switch, read above, for every tool shell
+                below (components/shell/editor-shell-context.tsx). */}
+            <EditorShellProvider on={editorShell}>
             {/* WHAT A PAGE SAYS WHEN IT CANNOT REACH THE SERVER.
                 Mounted once, above the whole dashboard, because the
                 service worker will happily serve the last version of any
@@ -244,6 +256,7 @@ export default async function DashboardLayout({
             <NavTracker />
             <AchievementUnlockBridge />
             <CommandPalette isOwner={isAdmin} />
+            </EditorShellProvider>
             </VoiceAvailabilityProvider>
           </CreditsProvider>
           {/* Service worker + add-to-home-screen prompt. Mounted here, not

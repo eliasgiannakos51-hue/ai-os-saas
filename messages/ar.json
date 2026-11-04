@@ -3455,6 +3455,17 @@
         "label": "المستوى",
         "simple": "بسيط",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "المحادثة",
+        "result": "النتيجة",
+        "view": "ما يُعرض",
+        "conversation": "المحادثة كاملة",
+        "closeChat": "إغلاق المحادثة",
+        "settings": "الإعدادات",
+        "credits": "الرصيد",
+        "selected": "المحدد: {name}",
+        "isOpen": "مفتوح الآن"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "أيقونة صورة رمزية بسيطة لتطبيق تقني"
         }
       },
-      "new": "صورة جديدة"
+      "new": "صورة جديدة",
+      "panel": {
+        "status": "{count, plural, zero {لا صور} one {صورة واحدة} two {صورتان} few {# صور} many {# صورة} other {# صورة}}",
+        "variants": "{n} صور",
+        "change": "تغيير صورة واحدة",
+        "full": "الدقة الكاملة",
+        "have": "لديك",
+        "credits": "{count, plural, zero {# رصيد} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}}"
+      }
     },
     "automations": {
       "name": "الأتمتة",

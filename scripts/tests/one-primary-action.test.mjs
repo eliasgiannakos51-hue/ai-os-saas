@@ -332,16 +332,42 @@ const chromeKeys = new Set(chrome.map((h) => `${h.file}:${h.at}`));
 //     dashboard page: cookie-consent-banner.tsx returns null on any path
 //     under /dashboard.
 //
-// What remains on a dashboard screen is the top bar's "Make anything",
-// on all thirty-nine of them. Every per-page number below is measured
-// with the chrome SUBTRACTED, so "1" means one of the page's own — the
-// screen carries the global one as well, and that is the decision this
-// count records rather than hides.
+// What remained on a dashboard screen until 2026-11-04 was the top bar's
+// "Make anything", on every one of them. It is OUTLINED now
+// (components/dashboard/top-nav.tsx, `.btn-quiet`): every one of the
+// owner's 26 approved screens (docs/design/approved/README.md) draws it
+// with a frame and no fill, so the white button on a screen is the
+// screen's own. So the chrome is ONE filled control, the cookie banner's,
+// and none reaches a dashboard page. Every per-page number below is still
+// measured with the chrome SUBTRACTED, so a filled control put back in the
+// top bar shows up here first, as this count, not as forty pages at once.
 check(
-  `the layout chrome contributes ${chrome.length} filled controls, of which 1 reaches a dashboard page`,
-  chrome.length === 2,
+  `the layout chrome contributes ${chrome.length} filled control, none of which reaches a dashboard page`,
+  chrome.length === 1 && chrome.every((h) => h.file === "src/components/cookie-consent-banner.tsx"),
   chrome.map((h) => `${h.file}:${h.at}`).join(", ")
 );
+
+// THE EDITOR LAYOUT'S ONE WHITE BUTTON (the switch "editor-shell",
+// components/shell/editor-shell.tsx). Behind that switch every tool's work
+// gets a bar with EXACTLY ONE white primary in it, drawn by the shell from
+// what the tool hands it (`work.primary`), never by the tool — so the
+// shell is where it is counted, once, and it is SUBTRACTED from every page
+// the same way the top bar's is above: it is the same affordance in the
+// same place on every tool, and it took the top bar's fill when it came.
+// A screen in that layout carries the field's send and this; before, it
+// carried the field's send and the top bar's "Make anything". What is held:
+// the shell draws ONE filled tag (the component it writes once and places
+// by width — in the bar from 1024px, full-width above the field below it),
+// so a second white button in the shell turns this red rather than
+// passing as "chrome".
+const SHELL_PRIMARY_FILE = "src/components/shell/editor-shell.tsx";
+const shellPrimary = controlsIn(SHELL_PRIMARY_FILE);
+check(
+  `the editor shell draws ${shellPrimary.length} filled control of its own — the bar's one primary`,
+  shellPrimary.length === 1 && /function PrimaryButton\(/.test(stripComments(readFileSync(SHELL_PRIMARY_FILE, "utf8"))),
+  shellPrimary.map((h) => `${h.file}:${h.at}`).join(", ") || "none — the scan did not find the primary it subtracts"
+);
+for (const h of shellPrimary) chromeKeys.add(`${h.file}:${h.at}`);
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. one filled accent control per surface ==");

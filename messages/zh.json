@@ -3455,6 +3455,17 @@
         "label": "级别",
         "simple": "简易",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "对话",
+        "result": "结果",
+        "view": "显示内容",
+        "conversation": "完整对话",
+        "closeChat": "关闭对话",
+        "settings": "设置",
+        "credits": "积分",
+        "selected": "已选择：{name}",
+        "isOpen": "已打开"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "一个科技应用的简单头像图标"
         }
       },
-      "new": "新图片"
+      "new": "新图片",
+      "panel": {
+        "status": "{count, plural, other {# 张图片}}",
+        "variants": "{n} 张图片",
+        "change": "修改一张",
+        "full": "全分辨率",
+        "have": "你有",
+        "credits": "{count, plural, other {# 积分}}"
+      }
     },
     "automations": {
       "name": "自动化",

@@ -149,6 +149,13 @@ const MUTANTS = [
     expect: "the focus ring is the text colour",
   },
   {
+    name: "the editor field's ring, which stands in for the text's own, is drawn in the signal colour",
+    file: CSS,
+    from: ".editor-field:has(textarea:focus-visible) {\n    outline: 2px solid rgb(var(--foreground));",
+    to: ".editor-field:has(textarea:focus-visible) {\n    outline: 2px solid rgb(var(--signal));",
+    expect: "it is the same ring",
+  },
+  {
     name: "a token loses its channel form, so its alpha classes emit nothing",
     file: TW,
     from: '      muted: "rgb(var(--muted) / <alpha-value>)",',

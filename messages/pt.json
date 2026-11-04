@@ -3455,6 +3455,17 @@
         "label": "Nível",
         "simple": "Simples",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "Conversa",
+        "result": "Resultado",
+        "view": "O que mostrar",
+        "conversation": "A conversa",
+        "closeChat": "Fechar a conversa",
+        "settings": "Definições",
+        "credits": "Créditos",
+        "selected": "Selecionado: {name}",
+        "isOpen": "Aberto agora"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "Um ícone de avatar simples para uma app de tecnologia"
         }
       },
-      "new": "Nova imagem"
+      "new": "Nova imagem",
+      "panel": {
+        "status": "{count, plural, one {# imagem} other {# imagens}}",
+        "variants": "{n} imagens",
+        "change": "Mudar uma",
+        "full": "Resolução total",
+        "have": "Tens",
+        "credits": "{count, plural, one {# crédito} other {# créditos}}"
+      }
     },
     "automations": {
       "name": "Automações",

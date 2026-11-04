@@ -459,5 +459,95 @@ for (const l of LOCALES) {
       typeof all.automations?.new === "string" && all.automations.new);
 }
 
+console.log('\n== 11. the approved editor layout, behind the switch "editor-shell" ==');
+// THE OWNER'S 26 APPROVED SCREENS (docs/design/approved/README.md,
+// 2026-11-04) are editor-first: the work at full width under a 56px bar
+// with one white primary, an optional 288px panel, the field floating
+// bottom-centre at most 680px wide. components/shell/editor-shell.tsx
+// draws that for every tool at once, for whoever the switch is open to;
+// everything sections 1-10 hold above is the shell everyone else still
+// has, which is why this section never relaxes one of them. Read with
+// comments stripped; scripts/tests/editor-shell.prodtest.mjs measures the
+// same facts in a real browser at 1440x900 and 390x844.
+const editorSrc = readIfThere("src/components/shell/editor-shell.tsx");
+const editorCtx = readIfThere("src/components/shell/editor-shell-context.tsx");
+const dashLayout = read("src/app/dashboard/layout.tsx");
+const composerSrc = read("src/components/chat/chat-composer.tsx");
+const css = readFileSync("src/app/globals.css", "utf8");
+const cssRule = (name) => (new RegExp(`\\.${name}\\s*\\{[^}]*\\}`).exec(css) ?? [""])[0];
+check("the switch is declared, and read ONCE, in the dashboard's layout, beside the sample read",
+  /"editor-shell":\s*"/.test(flags) && /= await Promise\.all\(\[findSampleImport\(supabase, user\.id\), isFeatureOn\("editor-shell", user\)\]\);/.test(dashLayout) &&
+    /<EditorShellProvider on=\{editorShell\}>/.test(dashLayout));
+check("...and no page or component reads it on its own: the tools follow the shell",
+  ![...walk("src/app"), ...walk("src/components")].some((f) => f !== join("src", "app", "dashboard", "layout.tsx") && /isFeatureOn\("editor-shell"/.test(read(f))));
+{
+  const handOver = shell.search(/if \(editor\) \{\s*return <EditorShell ref=\{ref\} \{\.\.\.props\}/);
+  check("ToolShell hands over to the editor layout only when the switch says so, before it draws anything of its own",
+    /const editor = useEditorShell\(\);/.test(shell) && handOver > 0 && handOver < shell.indexOf("const showEmpty") && handOver < shell.indexOf('data-testid="tool-shell"'));
+}
+check("the editor layout's one field is Chat's own composer, drawn once, so it stays mounted when work opens",
+  (editorSrc.match(/<ChatComposer\b/g) ?? []).length === 1 && (editorSrc.match(/\{field\}/g) ?? []).length === 1 && !/<textarea|<input\b/.test(editorSrc));
+check("...one row over open work, the start screen's stacked shape otherwise — the same textarea and the same send",
+  /const oneRow = Boolean\(work\) && !optionsInField;/.test(editorSrc) && /shape=\{oneRow \? "inline" : "landing"\}/.test(editorSrc) && (composerSrc.match(/<textarea\b/g) ?? []).length === 1 &&
+    (composerSrc.match(/type="submit"/g) ?? []).length === 1 && /shape = "chat"/.test(composerSrc));
+check("the bar is 56px with a divider under it (.tbar)",
+  /data-testid="editor-bar" className="editor-bar"/.test(editorSrc) && /\bh-14\b/.test(cssRule("editor-bar")) && /border-b border-divider/.test(cssRule("editor-bar")));
+check("...«Tool / title», then the tool's controls and ONE status tag, a spacer, its buttons and the primary",
+  /\{name\}\s*<\/button>\s*<span aria-hidden="true"[^>]*>\s*\/\s*<\/span>\s*<h1 data-testid="editor-title"/.test(editorSrc) &&
+    /\{work\.controls\}\s*\{work\.status && \(\s*<span data-testid="editor-status" className="editor-tag">/.test(editorSrc) &&
+    /<div className="flex-1" \/>\s*<div data-testid="editor-actions"[^>]*>\s*\{work\.actions\}\s*\{primary && <PrimaryButton primary=\{primary\} where="bar" \/>\}/.test(editorSrc));
+check("EXACTLY ONE white button in the shell: the primary, written once and placed by width",
+  (editorSrc.match(/\bbg-button\b/g) ?? []).length === 1 && /function PrimaryButton\([\s\S]{0,900}?\bbg-button\b[^`"]*\btext-button-ink\b/.test(editorSrc) &&
+    (editorSrc.match(/<PrimaryButton primary=\{primary\} where="(?:bar|phone)" \/>/g) ?? []).length === 2);
+check("the work takes the full width on the work surface, with 140px under it for the field",
+  /data-testid="editor-stage" className="min-w-0 flex-1 bg-workspace\b/.test(editorSrc) && /lg:pb-\[140px\]/.test(editorSrc) && !/w-\[60%\]/.test(editorSrc));
+check("the panel is 288px, only when the tool passes one, and then the options are its",
+  /export const EDITOR_PANEL_WIDTH = 288;/.test(editorSrc) && /\blg:w-72\b/.test(cssRule("editor-panel")) && /const panel = work\?\.panel \?\? null;/.test(editorSrc) &&
+    /\{panel && \(\s*<aside data-testid="editor-panel"/.test(editorSrc) && /const optionsInField = options\.length > 0 && !\(work && panel\);/.test(editorSrc));
+check("over work the field floats bottom-centre, at most 680px, never over the panel",
+  /lg:absolute lg:inset-x-0 lg:bottom-0/.test(editorSrc) && /\$\{panel \? "lg:end-72" : ""\}/.test(editorSrc) &&
+    /data-testid="editor-field" className="pointer-events-auto w-full max-w-\[680px\]"/.test(editorSrc) && /export const EDITOR_FIELD_MAX = 680;/.test(editorSrc));
+check("above it, ONE line: the last thing the tool said, and «Chat», which opens the whole conversation",
+  /const lastSaid = \[\.\.\.turns\]\.reverse\(\)\.find\(\(turn\) => turn\.role === "tool" && turn\.text\)\?\.text \?\? null;/.test(editorSrc) &&
+    /data-testid="editor-note-text" className="min-w-0 flex-1 truncate">\s*\{lastSaid\}/.test(editorSrc) && /onClick=\{\(\) => setChatOpen\(true\)\}/.test(editorSrc));
+check("...a dialog with the thread and what is running, that Esc closes, giving focus back",
+  /role="dialog"\s*aria-modal="true"[\s\S]{0,900}data-testid="editor-chat-thread"[^>]*>\s*\{thread\}/.test(editorSrc) &&
+    /\{working && <li aria-live="polite">\{working\}<\/li>\}/.test(editorSrc) && /if \(e\.key === "Escape"\) closeChat\(\);/.test(editorSrc) && /chatLink\.current\?\.focus\(\)/.test(editorSrc));
+check("the selected piece is a chip in the field: a ChosenBox says it there and draws nothing of its own",
+  /const inField = useFieldSelection\(label, onClear\);\s*if \(inField\) return null;/.test(shell) && /const pick = selection \?\? chosen;/.test(editorSrc) &&
+    /leading=\{pick \? <SelectionChip/.test(editorSrc) && /data-testid="editor-selection-clear"/.test(editorSrc));
+check("the price is said in the field: a CostEstimateHint or a FieldCost says it there, a prop wins",
+  /const inField = useFieldCost\(credits > 0 \? t\("approx", \{ count: credits \}\) : null\);\s*if \(credits <= 0 \|\| inField\) return null;/.test(read("src/components/credits/cost-estimate.tsx")) &&
+    /const price = cost \?\? registeredCost;/.test(editorSrc) && /export function FieldCost\(/.test(editorCtx));
+check("...and only the FIELD hears them: a price inside the work stays in the work",
+  /<FieldSlotsProvider value=\{slots\}>\s*<ChatComposer\b/.test(editorSrc) && (editorSrc.match(/<FieldSlotsProvider\b/g) ?? []).length === 1);
+check("on a phone: back and the title on top, «Chat | Result» under it, the primary full-width above the field",
+  /data-testid="tool-shell-back" className=\{`\$\{ACTION\} lg:hidden`\}/.test(editorSrc) && /data-testid="editor-switch"/.test(editorSrc) &&
+    /\{work && primary && phoneView === "result" && \(\s*<div className="pointer-events-auto w-full max-w-\[680px\] lg:hidden">/.test(editorSrc) &&
+    /\$\{phoneView === "chat" \? "max-lg:hidden" : ""\}/.test(editorSrc));
+check("...the open work above the tab bar, as the old shell measured it",
+  /"fixed inset-0 z-\[60\] flex min-w-0 flex-col bg-background pb-\[calc\(4rem\+env\(safe-area-inset-bottom\)\)\] md:pb-0 lg:static lg:z-auto lg:flex-1"/.test(editorSrc));
+check("the start screen: the globe, one heading, the examples as full-width rows in a ~560px column, not pills",
+  /data-testid="tool-shell-empty" className="mx-auto flex min-h-full w-full max-w-\[560px\]/.test(editorSrc) &&
+    /data-testid="tool-shell-example"\s*className="min-h-\[48px\] w-full rounded-card bg-panel/.test(editorSrc) && !/data-testid="tool-shell-example"\s*className="[^"]*rounded-full/.test(editorSrc));
+check("the history column and New are still there, on both moments",
+  /data-testid="tool-shell-history"/.test(editorSrc) && /data-testid="tool-shell-history-toggle"/.test(editorSrc) && /onClick=\{history\.onNew\}/.test(editorSrc));
+check("the top bar's «Make anything» is outlined: the screen's white button is the work's",
+  /className="btn-quiet min-w-\[44px\]/.test(read("src/components/dashboard/top-nav.tsx")) && !/\bbg-button\b/.test(read("src/components/dashboard/top-nav.tsx")) &&
+    /border border-border/.test(cssRule("btn-quiet")) && !/bg-button/.test(cssRule("btn-quiet")));
+{
+  const image = read("src/components/images/image-shell.tsx");
+  check("Image opts into the panel, the primary and the field's price (14-Image.png)",
+    /panel: editor \? \(/.test(image) && /<PanelPrice\b/.test(image) && /primary: chosenVariant/.test(image) && /<FieldCost text=\{tEstimate\("approx"/.test(image) &&
+      /\{!editor && \(\s*<div className="shrink-0 space-y-4 lg:w-56" data-testid="image-settings-panel">/.test(image));
+}
+for (const l of LOCALES) {
+  const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard ?? {};
+  const e = m.toolShell?.editor ?? {};
+  check(`${l}: the editor layout's words`,
+    ["chat", "result", "view", "conversation", "closeChat", "settings", "credits", "isOpen"].every((k) => typeof e[k] === "string" && e[k]) && /\{name\}/.test(e.selected ?? "") &&
+      ["variants", "change", "full", "have"].every((k) => typeof m.images?.panel?.[k] === "string" && m.images.panel[k]) && /\{count, plural/.test(m.images?.panel?.credits ?? ""));
+}
+
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

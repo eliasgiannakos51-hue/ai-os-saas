@@ -564,6 +564,9 @@ const LOCALE_ALLOWED = new Set([
   "el:posts.result.charged",
   // The same loanword, on the four credit-pack buttons under Billing.
   "el:settings.billing.creditsAmount",
+  // The same loanword, in the price box at the foot of Image's settings
+  // panel in the approved editor layout (components/images/image-shell.tsx).
+  "el:dashboard.images.panel.credits",
   // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
   // in this list, verified one by one rather than waved through:
   // "credits" is the word the Greek UI already uses verbatim; "Name" is

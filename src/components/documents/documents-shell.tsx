@@ -10,6 +10,7 @@ import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { saveFileResponse } from "@/components/ui/download-pdf-button";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
+import { useEditorShell } from "@/components/shell/editor-shell-context";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import { DocumentPdfButton } from "@/components/documents/document-pdf-button";
 import { TranslateButton } from "@/components/translate/translate-button";
@@ -54,6 +55,9 @@ export function DocumentsShell({
   initialText?: string;
 }) {
   const t = useTranslations("dashboard.documents.writer");
+  // The approved editor layout (the switch "editor-shell"): the Word file
+  // is the bar's one white button there, instead of an icon among the rest.
+  const editor = useEditorShell();
   const tShell = useTranslations("dashboard.toolShell");
   const tNames = useTranslations("dashboard.tools.names");
   const tSteps = useTranslations("aiSteps");
@@ -241,11 +245,14 @@ export function DocumentsShell({
     pane === "doc" && open
       ? {
           title: open.title,
+          primary: { label: t("word"), icon: <FileDown className="h-4 w-4" aria-hidden="true" />, onClick: () => void exportDocx(open.id), disabled: exporting, busy: exporting },
           actions: (
             <>
+              {!editor && (
               <button type="button" onClick={() => exportDocx(open.id)} disabled={exporting} aria-label={t("word")} title={t("word")} data-testid="document-docx" className={ACTION}>
                 <FileDown className="h-4 w-4" aria-hidden="true" />
               </button>
+              )}
               <DocumentPdfButton documentId={open.id} />
               {translate && <TranslateButton kind="document" id={open.id} actionClassName={ACTION} openHref={(id) => `/dashboard/documents/${id}`} />}
               <Link href={`/dashboard/documents/${open.id}`} aria-label={t("openEditor")} title={t("openEditor")} data-testid="document-open-editor" className={ACTION}>

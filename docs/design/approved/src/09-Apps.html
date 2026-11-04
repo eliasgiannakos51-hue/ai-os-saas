@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Apps</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.row{width:100%;max-width:1000px;display:flex;gap:32px;align-items:flex-start;justify-content:center}
+.col{flex:0 0 240px;display:flex;flex-direction:column;gap:8px}
+.scrn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #222A3D;border-radius:12px;background:#0D1220;font-size:13.5px}
+.scrn.on{outline:2px solid #F5F7FB;outline-offset:-1px}
+.num{width:22px;height:22px;border-radius:7px;background:#1E2638;color:#DCE2EE;font-size:11.5px;display:flex;align-items:center;justify-content:center;flex:none}
+.phone{width:290px;height:590px;flex:none;border:1px solid #222A3D;border-radius:32px;padding:10px;background:#0D1220}
+.scr{height:100%;border-radius:24px;background:#FFF8F2;color:#2A2118;padding:20px 16px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.flav{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #E8DCCD;border-radius:10px;font-size:13.5px}
+.flav.on{border:2px solid #B5662E;padding:9px}
+.dotc{width:22px;height:22px;border-radius:11px;flex:none}
+.pc{flex:1;height:34px;border:1px solid #E8DCCD;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.pc.on{background:#2A2118;color:#FFF8F2;border-color:#2A2118}
+.kv{display:grid;grid-template-columns:96px minmax(0,1fr);gap:6px 10px;font-size:13px}
+</style></head><body>
+<div data-tbar data-tool="Apps" data-doc="Παραγγελίες τούρτας"><div class="seg" role="group" aria-label="View"><button class="on" type="button">Preview</button><button type="button">Data</button><button type="button">Plan</button></div><span class="tag"><i data-i="check" style="width:12px;height:12px;color:#6FCF97"></i>Tested 14 buttons, 3 forms</span><div class="sp"></div><button class="btn pri" type="button">Publish</button></div>
+<div class="stage"><div class="canvas"><div class="row">
+<div class="col">
+<div class="lbl">Screens</div>
+<div class="scrn on"><span class="num">1</span>Διάλεξε τούρτα</div>
+<div class="scrn"><span class="num">2</span>Στοιχεία και ημερομηνία</div>
+<div class="scrn"><span class="num">3</span>Επιβεβαίωση</div>
+<div class="scrn"><span class="num">4</span>Για σένα: παραγγελίες</div>
+<button class="btn ghost" type="button" style="align-self:flex-start;color:#8D96A8"><i data-i="plus"></i>Add a screen</button>
+</div>
+<div class="phone"><div class="scr">
+<span style="font-size:11px;color:#8A7A68;letter-spacing:.06em">ΦΟΥΡΝΟΣ ΤΗΣ ΓΕΙΤΟΝΙΑΣ</span>
+<span style="font-size:22px;font-weight:700;line-height:1.2">Παράγγειλε τούρτα</span>
+<span style="font-size:12px;color:#8A7A68">1 · Διάλεξε γεύση</span>
+<div class="flav on"><span class="dotc" style="background:#5A3A26"></span>Σοκολάτα</div>
+<div class="flav"><span class="dotc" style="background:#E58C9A"></span>Φράουλα</div>
+<div class="flav"><span class="dotc" style="background:#C9A06A"></span>Πραλίνα</div>
+<span style="font-size:12px;color:#8A7A68;margin-top:4px">Για πόσα άτομα</span>
+<div style="display:flex;gap:6px"><span class="pc">8</span><span class="pc on">12</span><span class="pc">20</span></div>
+<span style="font-size:12px;color:#8A7A68;margin-top:4px">Πότε</span>
+<div style="height:40px;border:1px solid #E8DCCD;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:13.5px">Σάββατο 2 Νοεμβρίου</div>
+<div style="flex:1"></div>
+<div style="height:46px;border-radius:10px;background:#B5662E;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14.5px">Συνέχεια</div>
+</div></div>
+<div class="col">
+<div class="lbl">Data</div>
+<div class="kv"><span class="mut">Παραγγελίες</span><span>24</span><span class="mut">Πελάτες</span><span>18</span><span class="mut">Τούρτες</span><span>6</span></div>
+<div class="lbl" style="margin-top:12px">Who sees what</div>
+<div class="kv"><span class="mut">Πελάτης</span><span>Μόνο τις δικές του παραγγελίες</span><span class="mut">Εσύ</span><span>Όλες, και τις κατεβάζεις σε Excel</span></div>
+</div>
+</div>
+<div data-ask data-sel="Screen 1" data-cost="≈ 3 credits"></div>
+</div></div>
+<script src="common.js"></script><script>mount()</script>
+</body></html>

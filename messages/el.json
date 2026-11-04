@@ -3455,6 +3455,17 @@
         "label": "Επίπεδο",
         "simple": "Απλό",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "Συνομιλία",
+        "result": "Αποτέλεσμα",
+        "view": "Τι να φαίνεται",
+        "conversation": "Η συνομιλία",
+        "closeChat": "Κλείσιμο συνομιλίας",
+        "settings": "Ρυθμίσεις",
+        "credits": "Υπόλοιπο",
+        "selected": "Επιλεγμένο: {name}",
+        "isOpen": "Ανοιχτό τώρα"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "Ένα απλό avatar για εφαρμογή τεχνολογίας"
         }
       },
-      "new": "Νέα εικόνα"
+      "new": "Νέα εικόνα",
+      "panel": {
+        "status": "{count, plural, one {# εικόνα} other {# εικόνες}}",
+        "variants": "{n} εικόνες",
+        "change": "Αλλαγή μίας",
+        "full": "Πλήρης ανάλυση",
+        "have": "Έχεις",
+        "credits": "{count, plural, one {# credit} other {# credits}}"
+      }
     },
     "automations": {
       "name": "Αυτοματισμοί",

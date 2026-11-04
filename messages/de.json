@@ -3455,6 +3455,17 @@
         "label": "Ebene",
         "simple": "Einfach",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "Unterhaltung",
+        "result": "Ergebnis",
+        "view": "Was angezeigt wird",
+        "conversation": "Die Unterhaltung",
+        "closeChat": "Unterhaltung schließen",
+        "settings": "Einstellungen",
+        "credits": "Guthaben",
+        "selected": "Ausgewählt: {name}",
+        "isOpen": "Jetzt geöffnet"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "Ein einfaches Avatar-Symbol für eine Tech-App"
         }
       },
-      "new": "Neues Bild"
+      "new": "Neues Bild",
+      "panel": {
+        "status": "{count, plural, one {# Bild} other {# Bilder}}",
+        "variants": "{n} Bilder",
+        "change": "Eines ändern",
+        "full": "Volle Auflösung",
+        "have": "Du hast",
+        "credits": "{count, plural, one {# Credit} other {# Credits}}"
+      }
     },
     "automations": {
       "name": "Automationen",

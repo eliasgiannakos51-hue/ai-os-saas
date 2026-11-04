@@ -215,9 +215,19 @@ for (const ink of ["foreground", "body", "muted", "success", "warning", "danger"
 }
 const btn = channel("button") && channel("button-ink") ? ratio(channel("button"), channel("button-ink")) : 0;
 check(`button ink on the button: ${btn.toFixed(2)}:1, at least 4.5`, btn >= 4.5);
+// ANCHORED ON THE RULE'S OWN BODY, not on the first matching line after
+// the selector anywhere below it: since 2026-11-04 the editor layout's
+// field draws the same ring for the text inside it (globals.css,
+// `.editor-field:has(textarea:focus-visible)`), and a lazy match from
+// `a:focus-visible` found THAT line when the base rule's colour was
+// changed — design-tokens.mutation.mjs reported the hole.
 check(
   "the focus ring is the text colour, solid, 2px",
-  /a:focus-visible[\s\S]*?outline:\s*2px solid rgb\(var\(--foreground\)\);/.test(CSS)
+  /a:focus-visible,[^{}]*\{\s*outline:\s*2px solid rgb\(var\(--foreground\)\);/.test(CSS)
+);
+check(
+  "...and where the editor layout's field carries it for the text inside, it is the same ring",
+  /\.editor-field:has\(textarea:focus-visible\)\s*\{\s*outline:\s*2px solid rgb\(var\(--foreground\)\);\s*outline-offset:\s*2px;\s*\}/.test(CSS)
 );
 check(
   "the three radii are the design's: 18 / 16 / 10",

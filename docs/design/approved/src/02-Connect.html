@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style>@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-400-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-400-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-500-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-500-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-600-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-600-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-700-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-700-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+</style>
+<meta charset="utf-8">
+<title>Ionexa · Connect</title>
+
+<style>.chat{flex:2 1 410px !important;padding:22px 24px 20px !important}.chat ~ .work{flex:3 1 570px !important}.frow{flex-wrap:nowrap !important;gap:0 !important}.opt{padding:0 6px !important}.cost{min-width:0;overflow:hidden;text-overflow:ellipsis}</style>
+</head>
+<body>
+
+
+
+<style>
+body{margin:0;background:#070A12}
+*{box-sizing:border-box}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+button{font-family:inherit;cursor:pointer}
+a{color:#DCE2EE;text-decoration:none}
+a:hover{color:#F5F7FB}
+.app{display:flex;flex-wrap:wrap;width:100%;min-height:900px;background:#070A12;color:#DCE2EE;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5}
+.side{flex:0 0 232px;display:flex;flex-direction:column;gap:2px;padding:16px 10px 14px;background:#080B14;border-right:1px solid #161D2E}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 10px 26px;color:#F5F7FB;font-weight:600;font-size:15px;letter-spacing:.3em}
+.nav{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px}
+.nav.on{background:#0F1524;color:#F5F7FB}
+.who{margin-top:8px;padding:12px 12px 0;border-top:1px solid #161D2E;font-size:13px;color:#F5F7FB}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;height:900px}
+.top{display:flex;align-items:center;gap:6px;height:58px;padding:0 16px;border-bottom:1px solid #161D2E;flex:none}
+.search{flex:0 1 440px;margin:0 auto;height:38px;display:flex;align-items:center;gap:10px;padding:0 8px 0 14px;border:1px solid #222A3D;border-radius:19px;background:none;color:#8D96A8;font-size:14px}
+.kbd{margin-left:auto;font-size:11px;border:1px solid #222A3D;border-radius:7px;padding:1px 6px}
+.av{width:36px;height:36px;margin-left:6px;border-radius:18px;background:#1E2638;color:#F5F7FB;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex:none}
+.bar{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 16px;border-bottom:1px solid #161D2E;flex:none}
+.tn{color:#F5F7FB;font-weight:600;font-size:15px;margin:0 4px 0 6px}
+.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.g{fill:none;stroke:#F2A65A;stroke-width:1.6;flex:none}
+.ib{width:34px;height:34px;border:0;background:none;color:#8D96A8;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.btn{height:34px;padding:0 12px;border:1px solid #222A3D;background:none;color:#F5F7FB;border-radius:10px;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
+.sm{height:30px;padding:0 10px;font-size:12.5px}
+.ghost{border-color:transparent;color:#DCE2EE}
+.pri{background:#F5F7FB;border-color:#F5F7FB;color:#070A12;font-weight:600}
+.mut{color:#8D96A8}
+.sub{color:#8D96A8;font-size:12.5px}
+.lbl{color:#8D96A8;font-size:12px;font-weight:500}
+.sp{flex:1}
+.split{flex:1;display:flex;flex-wrap:wrap;min-height:0}
+.work{flex:3 1 600px;min-width:0;display:flex;flex-direction:column;background:#0A0E18;border-left:1px solid #161D2E}
+.list{flex:3 1 560px;min-width:0;display:flex;flex-direction:column;gap:12px;padding:20px 28px}
+.sbox{display:flex;align-items:center;gap:10px;height:42px;padding:0 14px;border:1px solid #222A3D;border-radius:12px;background:#0D1220;color:#8D96A8}
+.sin{flex:1;height:30px;border:0;outline:none;background:none;color:#F5F7FB;font:inherit;font-size:14px}
+.sin::placeholder{color:#8D96A8}
+.crow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #161D2E;border-radius:12px}
+.crow.on{background:#0F1524;border-color:#3A4560}
+.mono{width:36px;height:36px;border-radius:10px;background:#121829;border:1px solid #1E2638;color:#F5F7FB;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.cn{color:#F5F7FB;font-weight:500}
+.dot{width:7px;height:7px;border-radius:4px;background:#6FCF97;display:inline-block}
+.grid3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tile{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border:1px solid #161D2E;border-radius:12px;min-width:0}
+.tile .cn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px}
+.li .i{margin-top:2px;width:15px;height:15px}
+.ok{color:#6FCF97}
+.hd{color:#F5F7FB;font-size:13px;font-weight:600}
+@media (max-width:900px){.main{height:auto}.side{flex-basis:100%}.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+<div class="app">
+<aside class="side">
+<div class="logo"><svg class="g" viewBox="0 0 40 40" width="24" height="24" aria-hidden="true"><circle cx="20" cy="20" r="11"></circle><ellipse cx="20" cy="20" rx="5" ry="11"></ellipse><path d="M9 20h22M10.6 14.5h18.8M10.6 25.5h18.8"></path><ellipse cx="20" cy="20" rx="18" ry="6.5" transform="rotate(-20 20 20)"></ellipse><circle cx="36.9" cy="13.8" r="1.7" fill="#F2A65A" stroke="none"></circle></svg>IONEXA</div>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Ionexa Chat</a>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"></path></svg>Coding</a>
+<a class="nav on" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg>All tools</a>
+<div style="flex:1"></div>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"></path></svg>Settings</a>
+<div class="who">Maria Papadaki<div class="sub">Pro</div></div>
+</aside>
+<div class="main">
+<header class="top">
+<button class="search" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span>Search anything…</span><span class="kbd">⌘K</span></button>
+<button class="btn ghost" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"></path></svg>EN</button>
+<button class="ib" type="button" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg></button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg>82</button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Make anything</button>
+<div class="av">M</div>
+</header>
+<div class="bar">
+<span class="tn">Connect</span>
+<span class="sub">Ionexa reads from your apps. It always asks before it changes or sends anything.</span>
+</div>
+<div class="split">
+<section class="list">
+<div class="sbox">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<input class="sin" type="text" aria-label="Find an app" placeholder="Find an app…">
+</div>
+<div class="lbl" style="margin-top:4px">Connected · 3</div>
+<div class="crow"><span class="mono">D</span><div style="flex:1;min-width:0"><div class="cn">Google Drive</div><div class="sub">Reads the files and folders you choose</div></div><span class="sub" style="display:inline-flex;align-items:center;gap:6px"><span class="dot"></span>Connected</span><button class="btn sm" type="button">Manage</button></div>
+<div class="crow on"><span class="mono">G</span><div style="flex:1;min-width:0"><div class="cn">Gmail</div><div class="sub">Reads and drafts. Sends only after you approve</div></div><span class="sub" style="display:inline-flex;align-items:center;gap:6px"><span class="dot"></span>Connected</span><button class="btn sm" type="button">Manage</button></div>
+<div class="crow"><span class="mono">C</span><div style="flex:1;min-width:0"><div class="cn">Google Calendar</div><div class="sub">Reads your events. Adds events after you approve</div></div><span class="sub" style="display:inline-flex;align-items:center;gap:6px"><span class="dot"></span>Connected</span><button class="btn sm" type="button">Manage</button></div>
+<div class="lbl" style="margin-top:10px">Available</div>
+<div class="grid3">
+<div class="tile"><span class="mono">M</span><span class="cn">Microsoft 365</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">C</span><span class="cn">Canva</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">F</span><span class="cn">Figma</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">N</span><span class="cn">Notion</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">GH</span><span class="cn">GitHub</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">A</span><span class="cn">Adobe</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">S</span><span class="cn">Slack</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">D</span><span class="cn">Dropbox</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">Sh</span><span class="cn">Shopify</span><button class="btn sm" type="button">Connect</button></div>
+<div class="tile"><span class="mono">I</span><span class="cn">Instagram</span><button class="btn sm" type="button">Connect</button></div>
+</div>
+<div class="sub" style="margin-top:2px">Only official connections from each company. Your passwords never pass through Ionexa.</div>
+</section>
+<aside class="work" style="flex:2 1 400px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;padding:24px">
+<div style="display:flex;align-items:center;gap:12px">
+<span class="mono" style="width:44px;height:44px;font-size:16px">G</span>
+<div style="flex:1"><h2 style="font-size:18px;color:#F5F7FB;font-weight:600">Gmail</h2><div class="sub" style="display:flex;align-items:center;gap:6px"><span class="dot"></span>Connected as Maria Papadaki</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div class="hd">Ionexa can</div>
+<div class="li"><svg class="i ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Read your emails</div>
+<div class="li"><svg class="i ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Write drafts for you to check</div>
+<div class="li"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color:#DCE2EE"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Send an email, only after you approve each one</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div class="hd">Ionexa can't</div>
+<div class="li mut"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>Delete emails</div>
+<div class="li mut"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>Change your settings or password</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div class="hd">Recent activity</div>
+<div style="display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 10px;font-size:13px">
+<span class="mut">Today 07:30</span><span>Read 12 emails for “Πρωινή σύνοψη”</span>
+<span class="mut">Yesterday 18:02</span><span>Sent a reply to Κ. Νικολάου, after your approval</span>
+<span class="mut">Oct 22</span><span>Drafted 3 replies, none sent</span>
+</div>
+</div>
+<div class="sp"></div>
+<div style="display:flex;gap:8px">
+<button class="btn" type="button">Permissions</button>
+<button class="btn" type="button">See all activity</button>
+<div class="sp"></div>
+<button class="btn ghost" type="button" style="color:#F28B82">Disconnect</button>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+
+
+</body>
+</html>

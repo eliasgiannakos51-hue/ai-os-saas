@@ -16,6 +16,7 @@ import { MotionButton } from "@/components/shell/motion-button";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
+import { FieldCost, useEditorShell } from "@/components/shell/editor-shell-context";
 import { isSiteRunning, requestSiteChange, requestSiteStop, requestSiteUndo, startSiteGeneration, watchSite } from "@/lib/website-builder/site-requests";
 import { admitPhotos, uploadSitePhotos } from "@/lib/website-builder/site-photos";
 import { ACCEPTED_REFERENCE_IMAGE_TYPES, MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
@@ -121,6 +122,10 @@ export function WebsiteShell({
 }) {
   const t = useTranslations("dashboard.websiteBuilder");
   const tShell = useTranslations("dashboard.toolShell");
+  const tEstimate = useTranslations("credits.estimate");
+  // The approved editor layout (the switch "editor-shell"): only where the
+  // computer | phone control sits, and the price said inside the field.
+  const editor = useEditorShell();
   const tNames = useTranslations("dashboard.tools.names");
   const tSteps = useTranslations("aiSteps");
   const tCommon = useTranslations("common");
@@ -499,12 +504,9 @@ export function WebsiteShell({
         : undefined,
   }));
 
-  const work =
-    pane === "site" && current
-      ? {
-          title: current.name,
-          actions: (
-            <>
+  // COMPUTER | PHONE: among the icons on top under the old shell, the
+  // control beside the title in the editor layout's bar (08-Site.png).
+  const viewportGroup = current ? (
               <span className="flex items-center gap-1" role="group" aria-label={t("viewportGroup")}>
                 <button
                   type="button"
@@ -529,6 +531,19 @@ export function WebsiteShell({
                   <Smartphone className="h-4 w-4" aria-hidden="true" />
                 </button>
               </span>
+  ) : null;
+
+  const work =
+    pane === "site" && current
+      ? {
+          title: current.name,
+          controls: editor ? viewportGroup : undefined,
+          // How many pages the site has, as the editor layout's one tag;
+          // while it builds, that it is building.
+          status: running(current) ? t("generating") : current.status === "completed" ? tShell("pages.count", { count: sitePages.length + 1 }) : null,
+          actions: (
+            <>
+              {!editor && viewportGroup}
               {/* MOTION (package 5, Κομμάτι 1): shared with Apps
                   (components/shell/motion-button.tsx) — one piece of
                   code, not a copy, per the Apps directive 2026-10-30.
@@ -833,7 +848,11 @@ export function WebsiteShell({
       footer={
         <>
           {chosen !== null && !pending && <ChosenBox label={chosenLabel} onClear={() => setBox(null)} />}
-          {!busy && length > 0 && !(current?.status === "completed") ? <p className="mt-1.5 text-[11px] text-muted">{t("estimatedCost", { count: estimatedCost })}</p> : null}
+          {!busy && length > 0 && !(current?.status === "completed") ? (
+            <FieldCost text={tEstimate("approx", { count: estimatedCost })}>
+              <p className="mt-1.5 text-[11px] text-muted">{t("estimatedCost", { count: estimatedCost })}</p>
+            </FieldCost>
+          ) : null}
         </>
       }
       work={work}

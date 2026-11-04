@@ -8,6 +8,9 @@
  * top of the old page, and Posts losing its price, its stop or its route.
  * And (2026-10-09) the three things only the old pages had: the Files
  * collections, a Site's reference photos and its versions with Roll back.
+ * And (2026-11-04) the approved editor layout behind the switch
+ * "editor-shell": the full-width work, one white button, the 288px panel,
+ * the floating field that stays mounted, the chip and the price in it.
  *
  * Run: node scripts/tests/tool-shell.mutation.mjs
  */
@@ -38,7 +41,12 @@ const FILES_PAGE = "src/app/dashboard/data-analysis/page.tsx";
 const FILES_OLD = "src/app/dashboard/files/page.tsx";
 const SITE_PHOTOS = "src/lib/website-builder/site-photos.ts";
 const SITE_HISTORY = "src/components/website-builder/site-history.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, FILES_OLD, SITE_PHOTOS, SITE_HISTORY];
+// The approved editor layout (2026-11-04, the switch "editor-shell").
+const EDITOR = "src/components/shell/editor-shell.tsx";
+const DASH_LAYOUT = "src/app/dashboard/layout.tsx";
+const IMAGES_PAGE = "src/app/dashboard/images/page.tsx";
+const TOPNAV = "src/components/dashboard/top-nav.tsx";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, FILES_OLD, SITE_PHOTOS, SITE_HISTORY, EDITOR, DASH_LAYOUT, IMAGES_PAGE, TOPNAV];
 
 const MUTANTS = [
   {
@@ -507,6 +515,98 @@ const MUTANTS = [
     from: '        addToast(tPub("rollbackError"), "error");\n        return;',
     to: '        addToast(data?.error ?? tPub("rollbackError"), "error");\n        return;',
     expect: "are said in the screen's words",
+  },
+  // ---- 2026-11-04: the approved editor layout (section 11)
+  {
+    name: "editor: the work is a 60% pane again instead of the full width",
+    file: EDITOR,
+    from: 'data-testid="editor-stage" className="min-w-0 flex-1 bg-workspace',
+    to: 'data-testid="editor-stage" className="min-w-0 lg:w-[60%] bg-workspace',
+    expect: "the work takes the full width",
+  },
+  {
+    name: "editor: a second white button in the shell",
+    file: EDITOR,
+    from: 'data-testid="editor-chat-close" className={ACTION}',
+    to: 'data-testid="editor-chat-close" className="bg-button text-button-ink"',
+    expect: "EXACTLY ONE white button",
+  },
+  {
+    name: "editor: with a panel open, the options are drawn in the field as well",
+    file: EDITOR,
+    from: "const optionsInField = options.length > 0 && !(work && panel);",
+    to: "const optionsInField = options.length > 0;",
+    expect: "the panel is 288px",
+  },
+  {
+    name: "editor: the floating field runs under the panel",
+    file: EDITOR,
+    from: ' ${panel ? "lg:end-72" : ""}',
+    to: "",
+    expect: "never over the panel",
+  },
+  {
+    name: "editor: the field is drawn twice, so opening work remounts it and puts the quick job's text back",
+    file: EDITOR,
+    from: '{work && phoneView === "chat" && (',
+    to: '{field}{work && phoneView === "chat" && (',
+    expect: "drawn once, so it stays mounted",
+  },
+  {
+    name: "editor: Esc no longer closes the conversation",
+    file: EDITOR,
+    from: '      if (e.key === "Escape") closeChat();\n',
+    to: "",
+    expect: "Esc closes",
+  },
+  {
+    name: "editor: on a phone the tab bar covers the field",
+    file: EDITOR,
+    from: '"fixed inset-0 z-[60] flex min-w-0 flex-col bg-background pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0 lg:static lg:z-auto lg:flex-1"',
+    to: '"fixed inset-0 z-[60] flex min-w-0 flex-col bg-background lg:static lg:z-auto lg:flex-1"',
+    expect: "above the tab bar, as the old shell measured it",
+  },
+  {
+    name: "editor: every price under the shell is pulled into the field, the work's own included",
+    file: EDITOR,
+    from: '      <div data-testid="tool-shell" data-shell="editor"',
+    to: '      <FieldSlotsProvider value={slots}><div data-testid="tool-shell" data-shell="editor"',
+    expect: "only the FIELD hears them",
+  },
+  {
+    name: "editor: a ChosenBox draws its own line under the field as well as the chip",
+    file: SHELL,
+    from: "  if (inField) return null;\n",
+    to: "",
+    expect: "the selected piece is a chip in the field",
+  },
+  {
+    name: "editor: the shell hands over whatever the switch says",
+    file: SHELL,
+    from: "  if (editor) {",
+    to: "  if (true) {",
+    expect: "only when the switch says so",
+  },
+  {
+    name: "editor: the layout reads the switch AFTER the sample, one more round trip on every page",
+    file: DASH_LAYOUT,
+    from: '  const [sampleImport, editorShell] = await Promise.all([findSampleImport(supabase, user.id), isFeatureOn("editor-shell", user)]);',
+    to: '  const sampleImport = await findSampleImport(supabase, user.id);\n  const editorShell = await isFeatureOn("editor-shell", user);',
+    expect: "read ONCE, in the dashboard's layout",
+  },
+  {
+    name: "editor: a page reads the switch on its own",
+    file: IMAGES_PAGE,
+    from: "      <ImageShell",
+    to: '      {(await isFeatureOn("editor-shell", user)) && null}\n      <ImageShell',
+    expect: "no page or component reads it on its own",
+  },
+  {
+    name: "editor: «Make anything» is filled white again",
+    file: TOPNAV,
+    from: 'className="btn-quiet min-w-[44px] shrink-0 justify-center lg:px-3.5"',
+    to: 'className="btn-quiet min-w-[44px] shrink-0 justify-center bg-button text-button-ink lg:px-3.5"',
+    expect: "«Make anything» is outlined",
   },
 ];
 

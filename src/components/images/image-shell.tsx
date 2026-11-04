@@ -9,6 +9,8 @@ import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
 import { ToolShell, ACTION, ChosenBox, OPTION, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
+import { PanelGroup, PanelPrice } from "@/components/shell/editor-shell";
+import { FieldCost, useEditorShell } from "@/components/shell/editor-shell-context";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
@@ -81,7 +83,15 @@ export function ImageShell({
   const tSteps = useTranslations("aiSteps");
   const tSoon = useTranslations("dashboard.comingSoon");
   const router = useRouter();
-  const { refresh: refreshCredits } = useCredits();
+  const { refresh: refreshCredits, credits, isAdmin } = useCredits();
+  const tCommon = useTranslations("common");
+  const tEstimate = useTranslations("credits.estimate");
+  // THE APPROVED EDITOR LAYOUT (the switch "editor-shell",
+  // components/shell/editor-shell.tsx, 14-Image.png): the settings move
+  // out of the work into the 288px panel, with the price box at its foot,
+  // and the full-resolution download becomes the bar's one white button.
+  // Off, this screen is what it was.
+  const editor = useEditorShell();
   const composerRef = useRef<ChatComposerHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -332,10 +342,128 @@ export function ImageShell({
 
   const chosenVariant = shown && chosen !== null ? shown.variants.find((v) => v.index === chosen) ?? null : null;
 
+  // SAME PRODUCT AND SEARCH THE WEB FIRST, drawn once: in the work's own
+  // right-hand column under the old shell, in the editor layout's panel
+  // under the new one.
+  const imageSettings = (
+    <>
+      <div>
+        <p className="mb-1.5 text-xs font-semibold text-foreground">
+          {t("tools.sameProduct")} <span className="font-normal text-muted">({sameProductImages.length}/{MAX_SAME_PRODUCT_IMAGES})</span>
+        </p>
+        <div className="grid grid-cols-4 gap-1.5" data-testid="image-same-product">
+          {Array.from({ length: MAX_SAME_PRODUCT_IMAGES }).map((_, i) => {
+            const ref = sameProductImages[i];
+            if (ref) {
+              return (
+                <div key={ref.id} className="relative aspect-square overflow-hidden rounded-item bg-panel" data-testid="image-same-product-slot">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL preview, never uploaded anywhere yet */}
+                  <img src={ref.url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeSameProductImage(ref.id)}
+                    aria-label={t("tools.removeReference")}
+                    className="absolute end-0.5 top-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-foreground"
+                  >
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                </div>
+              );
+            }
+            return (
+              <button
+                key={`empty-${i}`}
+                type="button"
+                onClick={() => sameProductInputRef.current?.click()}
+                aria-label={t("tools.addReference")}
+                data-testid="image-same-product-slot"
+                className="flex aspect-square items-center justify-center rounded-item bg-panel-hover text-muted hover:text-foreground"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+              </button>
+            );
+          })}
+        </div>
+        <input
+          ref={sameProductInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            addSameProductImages(e.target.files);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
+      <button
+        type="button"
+        role="switch"
+        aria-checked={searchWebFirst}
+        aria-label={t("tools.searchWeb")}
+        onClick={() => setSearchWebFirst((v) => !v)}
+        data-testid="image-search-web"
+        className="flex w-full items-center justify-between gap-2"
+      >
+        <span className="flex items-center gap-1.5 text-sm text-foreground">
+          <Globe className="h-4 w-4 text-muted" aria-hidden="true" />
+          {t("tools.searchWeb")}
+        </span>
+        <span className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors duration-200 ${searchWebFirst ? "bg-foreground" : "bg-panel-hover"}`}>
+          <span className={`inline-block h-4 w-4 transform rounded-full transition-transform duration-200 ${searchWebFirst ? "translate-x-[18px] bg-panel" : "translate-x-1 bg-paper"}`} />
+        </span>
+      </button>
+    </>
+  );
+
+
   const work =
     open === "image" && shown
       ? {
           title: shown.prompt,
+          // The editor layout's bar (ignored by the old shell): how many
+          // pictures this is, and the one white button — the chosen
+          // picture at full resolution, with its price on it, or its
+          // download once it is made.
+          status: t("panel.status", { count: shown.variants.length }),
+          primary: chosenVariant
+            ? chosenVariant.full
+              ? {
+                  label: t("fullDownload"),
+                  icon: <Maximize2 className="h-4 w-4" aria-hidden="true" />,
+                  onClick: () => window.location.assign(`/api/images/${shown.id}/download?variant=${chosenVariant.index}&size=full`),
+                }
+              : {
+                  label: `${t("fullMake")} · ${t("panel.credits", { count: prices.full })}`,
+                  disabled: running !== null || !configured,
+                  busy: running === "full",
+                  onClick: () => withConfirm(prices.full, () => void full(shown, chosenVariant.index)),
+                }
+            : null,
+          panel: editor ? (
+            <>
+              <PanelGroup label={t("aspect")}>
+                {IMAGE_ASPECTS.map((a) => (
+                  <button key={a} type="button" onClick={() => setAspect(a)} aria-pressed={aspect === a} data-testid="image-panel-aspect" className="editor-pill">
+                    {aspectLabel[a]}
+                  </button>
+                ))}
+              </PanelGroup>
+              {imageSettings}
+              <PanelPrice
+                rows={[
+                  { label: t("panel.variants", { n: IMAGE_VARIANTS }), value: t("panel.credits", { count: prices.variants }) },
+                  { label: t("panel.change"), value: t("panel.credits", { count: prices.edit }) },
+                  { label: t("panel.full"), value: t("panel.credits", { count: prices.full }) },
+                  {
+                    label: t("panel.have"),
+                    value: isAdmin ? tCommon("creditsUnlimited") : credits === null ? "…" : t("panel.credits", { count: credits }),
+                  },
+                ]}
+              />
+            </>
+          ) : undefined,
           actions: (
             <button
               type="button"
@@ -438,75 +566,11 @@ export function ImageShell({
                 )}
               </div>
 
-              <div className="shrink-0 space-y-4 lg:w-56" data-testid="image-settings-panel">
-                <div>
-                  <p className="mb-1.5 text-xs font-semibold text-foreground">
-                    {t("tools.sameProduct")} <span className="font-normal text-muted">({sameProductImages.length}/{MAX_SAME_PRODUCT_IMAGES})</span>
-                  </p>
-                  <div className="grid grid-cols-4 gap-1.5" data-testid="image-same-product">
-                    {Array.from({ length: MAX_SAME_PRODUCT_IMAGES }).map((_, i) => {
-                      const ref = sameProductImages[i];
-                      if (ref) {
-                        return (
-                          <div key={ref.id} className="relative aspect-square overflow-hidden rounded-item bg-panel" data-testid="image-same-product-slot">
-                            {/* eslint-disable-next-line @next/next/no-img-element -- a local object URL preview, never uploaded anywhere yet */}
-                            <img src={ref.url} alt="" className="h-full w-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => removeSameProductImage(ref.id)}
-                              aria-label={t("tools.removeReference")}
-                              className="absolute end-0.5 top-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-foreground"
-                            >
-                              <X className="h-3 w-3" aria-hidden="true" />
-                            </button>
-                          </div>
-                        );
-                      }
-                      return (
-                        <button
-                          key={`empty-${i}`}
-                          type="button"
-                          onClick={() => sameProductInputRef.current?.click()}
-                          aria-label={t("tools.addReference")}
-                          data-testid="image-same-product-slot"
-                          className="flex aspect-square items-center justify-center rounded-item bg-panel-hover text-muted hover:text-foreground"
-                        >
-                          <Plus className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <input
-                    ref={sameProductInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      addSameProductImages(e.target.files);
-                      e.target.value = "";
-                    }}
-                  />
+              {!editor && (
+                <div className="shrink-0 space-y-4 lg:w-56" data-testid="image-settings-panel">
+                  {imageSettings}
                 </div>
-
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={searchWebFirst}
-                  aria-label={t("tools.searchWeb")}
-                  onClick={() => setSearchWebFirst((v) => !v)}
-                  data-testid="image-search-web"
-                  className="flex w-full items-center justify-between gap-2"
-                >
-                  <span className="flex items-center gap-1.5 text-sm text-foreground">
-                    <Globe className="h-4 w-4 text-muted" aria-hidden="true" />
-                    {t("tools.searchWeb")}
-                  </span>
-                  <span className={`relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors duration-200 ${searchWebFirst ? "bg-foreground" : "bg-panel-hover"}`}>
-                    <span className={`inline-block h-4 w-4 transform rounded-full transition-transform duration-200 ${searchWebFirst ? "translate-x-[18px] bg-panel" : "translate-x-1 bg-paper"}`} />
-                  </span>
-                </button>
-              </div>
+              )}
             </div>
           ),
         }
@@ -567,10 +631,12 @@ export function ImageShell({
             {editing && chosen !== null && <ChosenBox label={t("chosen", { n: chosen + 1 })} onClear={() => setChosen(null)} />}
             {turns.length === 0 && !editing && <p className="mt-1.5 text-[11px] text-muted">{t("help")}</p>}
             {configured ? (
-              <p data-testid="image-price" className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
-                <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
-                {editing ? t("priceEdit", { count: prices.edit }) : t("priceVariants", { count: prices.variants, n: IMAGE_VARIANTS })}
-              </p>
+              <FieldCost text={tEstimate("approx", { count: editing ? prices.edit : prices.variants })}>
+                <p data-testid="image-price" className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
+                  <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
+                  {editing ? t("priceEdit", { count: prices.edit }) : t("priceVariants", { count: prices.variants, n: IMAGE_VARIANTS })}
+                </p>
+              </FieldCost>
             ) : (
               <p data-testid="image-not-configured" className="mt-1.5 text-[11px] text-warning">
                 {t("notConfigured")}

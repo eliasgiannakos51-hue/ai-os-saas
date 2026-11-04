@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Games</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.game{position:relative;width:100%;max-width:960px;height:470px;flex:none;border:1px solid #222A3D;border-radius:16px;overflow:hidden;background:#13213A}
+.ring{position:absolute;border-radius:50%;border:10px solid #E2A75E}
+.hud{position:absolute;top:14px;left:16px;right:16px;display:flex;gap:10px;color:#F5F7FB;font-size:13.5px;font-weight:600}
+.hud span{background:rgba(7,10,18,.55);padding:4px 12px;border-radius:8px}
+.rules{width:100%;max-width:960px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.rb{display:flex;flex-direction:column;gap:3px;padding:11px 13px;border:1px solid #222A3D;border-radius:12px;background:#0D1220;font-size:13px}
+.rb.on{outline:2px solid #F5F7FB;outline-offset:-1px}
+.rb b{color:#F5F7FB;font-weight:600}
+</style></head><body>
+<div data-tbar data-tool="Games" data-doc="Πιάσε το κουλούρι"><span class="tag">Plays in the browser</span><div class="sp"></div><button class="btn" type="button"><i data-i="restart"></i>Restart</button><button class="btn pri" type="button">Publish</button></div>
+<div class="stage"><div class="canvas">
+<div class="game" role="img" aria-label="Game: a basket catches falling sesame rings">
+<div class="hud"><span>Πόντοι 12</span><span>Πίστα 2</span><span style="margin-left:auto">Ζωές 2</span></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:76px;background:#1C2B47"></div>
+<div class="ring" style="left:16%;top:22%;width:52px;height:52px"></div>
+<div class="ring" style="left:42%;top:12%;width:44px;height:44px;border-width:9px"></div>
+<div class="ring" style="left:57%;top:44%;width:54px;height:54px"></div>
+<div class="ring" style="left:80%;top:27%;width:46px;height:46px;border-width:9px"></div>
+<div style="position:absolute;left:52%;bottom:64px;width:136px;height:58px;background:#B07A45;border-radius:6px 6px 28px 28px;border-top:6px solid #D69B5E"></div>
+<div style="position:absolute;left:55.5%;bottom:116px;width:100px;height:28px;border:5px solid #D69B5E;border-bottom:0;border-radius:50px 50px 0 0"></div>
+<div style="position:absolute;bottom:24px;left:16px;font-size:12.5px;color:#B9C3D6">← → ή σύρε με το δάχτυλο</div>
+</div>
+<div class="rules">
+<div class="rb on"><b>Κανόνες</b><span class="sub">Πιάσε κουλούρια, απόφυγε τα καμένα</span></div>
+<div class="rb"><b>Πίστες</b><span class="sub">3, κάθε μία πιο γρήγορη</span></div>
+<div class="rb"><b>Χαρακτήρες</b><span class="sub">Καλάθι, κουλούρια, καμένο</span></div>
+<div class="rb"><b>Χειρισμός</b><span class="sub">Βελάκια ή δάχτυλο</span></div>
+</div>
+<div data-ask data-sel="Rules" data-cost="≈ 3 credits"></div>
+</div></div>
+<script src="common.js"></script><script>mount()</script>
+</body></html>

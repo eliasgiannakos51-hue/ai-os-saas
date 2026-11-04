@@ -3455,6 +3455,17 @@
         "label": "Level",
         "simple": "Simple",
         "pro": "Pro"
+      },
+      "editor": {
+        "chat": "Chat",
+        "result": "Result",
+        "view": "What to show",
+        "conversation": "Conversation",
+        "closeChat": "Close the conversation",
+        "settings": "Settings",
+        "credits": "Credits",
+        "selected": "Selected: {name}",
+        "isOpen": "Open now"
       }
     },
     "library": {
@@ -3643,7 +3654,15 @@
           "avatar": "A simple avatar icon for a tech app"
         }
       },
-      "new": "New image"
+      "new": "New image",
+      "panel": {
+        "status": "{count, plural, one {# image} other {# images}}",
+        "variants": "{n} images",
+        "change": "Changing one",
+        "full": "Full resolution",
+        "have": "You have",
+        "credits": "{count, plural, one {# credit} other {# credits}}"
+      }
     },
     "automations": {
       "name": "Automations",

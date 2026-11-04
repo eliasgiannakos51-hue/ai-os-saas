@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Films</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.wrap{width:100%;max-width:1000px;display:flex;flex-direction:column;gap:18px}
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13px}
+.fs{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;border:1px solid #222A3D}
+.fs.now{border-color:#F5F7FB;color:#F5F7FB}
+.fs.next{color:#8D96A8;border-style:dashed}
+.arr{color:#3A4560}
+.meter{height:6px;border-radius:3px;background:#1E2638;overflow:hidden}
+.cast{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ch{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #222A3D;border-radius:12px;background:#0D1220;min-width:0}
+.fig{width:44px;height:56px;border-radius:8px;flex:none;font-size:0}
+.sb{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.fr{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;font-size:0}
+.fr .n{position:absolute;left:6px;top:4px;font-size:11px;font-weight:600;color:#F5F7FB}
+.fr.q{opacity:.38}
+.fr.sh{outline:1.5px dashed #F5F7FB;outline-offset:-1.5px}
+.fr .s{position:absolute;left:6px;bottom:4px;font-size:10.5px;color:#F5F7FB}
+</style></head><body>
+<div data-tbar data-tool="Films" data-doc="Το τελευταίο ταψί"><span class="tag">Short film · 5 min · 18 shots</span><div class="sp"></div><button class="btn" type="button">Script</button><button class="btn" type="button"><i data-i="pause"></i>Pause</button><button class="btn pri" type="button"><i data-i="play"></i>Watch so far</button></div>
+<div class="stage"><div class="canvas"><div class="wrap">
+<div class="flow">
+<span class="fs"><i data-i="check" style="width:14px;height:14px;color:#6FCF97"></i>Script</span><span class="arr">›</span>
+<span class="fs"><i data-i="check" style="width:14px;height:14px;color:#6FCF97"></i>Characters</span><span class="arr">›</span>
+<span class="fs"><i data-i="check" style="width:14px;height:14px;color:#6FCF97"></i>Storyboard</span><span class="arr">›</span>
+<span class="fs now">Shooting 7 / 18</span><span class="arr">›</span>
+<span class="fs next">Sound</span><span class="arr">›</span>
+<span class="fs next">Edit</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;font-size:13px"><span>Credits</span><div class="sp"></div><span class="mut">352 used of 900 you approved</span></div><div class="meter"><div style="width:39%;height:6px;background:#DCE2EE"></div></div></div>
+<div class="cast">
+<div class="ch"><div class="fig" data-img="" data-icon="user" style="background:#2B3346;color:rgba(245,247,251,.45)"></div><div style="min-width:0"><div style="color:#F5F7FB;font-size:13.5px">Άννα</div><div class="sub">Φούρναρισσα, 60</div></div></div>
+<div class="ch"><div class="fig" data-img="" data-icon="user" style="background:#2B3346;color:rgba(245,247,251,.45)"></div><div style="min-width:0"><div style="color:#F5F7FB;font-size:13.5px">Νίκος</div><div class="sub">Ο εγγονός της, 17</div></div></div>
+<div class="ch"><div class="fig" data-img="" style="background:#2A1E14;color:rgba(245,247,251,.45)"></div><div style="min-width:0"><div style="color:#F5F7FB;font-size:13.5px">Φούρνος</div><div class="sub">Νύχτα</div></div></div>
+<div class="ch"><div class="fig" data-img="" style="background:#2F3B57;color:rgba(245,247,251,.45)"></div><div style="min-width:0"><div style="color:#F5F7FB;font-size:13.5px">Γειτονιά</div><div class="sub">Αυγή</div></div></div>
+</div>
+<div class="lbl">Storyboard · 18 shots</div>
+<div class="sb">
+<div class="fr" data-img="" style="background:#2A1E14"><span class="n">1</span></div>
+<div class="fr" data-img="" style="background:#3A2A1C"><span class="n">2</span></div>
+<div class="fr" data-img="" style="background:#2F3B57"><span class="n">3</span></div>
+<div class="fr" data-img="" style="background:#1C2638"><span class="n">4</span></div>
+<div class="fr" data-img="" style="background:#3A2A1C"><span class="n">5</span></div>
+<div class="fr" data-img="" style="background:#2F3B57"><span class="n">6</span></div>
+<div class="fr" data-img="" style="background:#2A1E14"><span class="n">7</span></div>
+<div class="fr sh" data-img="" style="background:#1C2638"><span class="n">8</span><span class="s">Shooting</span></div>
+<div class="fr q" data-img="" style="background:#2A1E14"><span class="n">9</span></div>
+<div class="fr q" data-img="" style="background:#2F3B57"><span class="n">10</span></div>
+<div class="fr q" data-img="" style="background:#3A2A1C"><span class="n">11</span></div>
+<div class="fr q" data-img="" style="background:#1C2638"><span class="n">12</span></div>
+<div class="fr q" data-img="" style="background:#2A1E14"><span class="n">13</span></div>
+<div class="fr q" data-img="" style="background:#3A2A1C"><span class="n">14</span></div>
+<div class="fr q" data-img="" style="background:#2F3B57"><span class="n">15</span></div>
+<div class="fr q" data-img="" style="background:#1C2638"><span class="n">16</span></div>
+<div class="fr q" data-img="" style="background:#2A1E14"><span class="n">17</span></div>
+<div class="fr q" data-img="" style="background:#3A2A1C"><span class="n">18</span></div>
+</div>
+<span class="sub">Every actor is made up. Marked as AI-made in the file and in the end credits.</span>
+</div>
+<div data-ask data-note="Το γύρισμα τρέχει στο παρασκήνιο. Πλάνο που αποτυγχάνει δεν χρεώνεται." data-ph="Ask, or change a shot…" data-cost="≈ 1 credit"></div>
+</div></div>
+<script src="common.js"></script><script>window.CREDITS='548';mount()</script>
+</body></html>

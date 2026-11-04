@@ -7,6 +7,8 @@ import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-co
 import { Earth } from "@/components/brand/earth";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ACTION, OPTION } from "@/components/shell/tool-shell-styles";
+import { EditorShell } from "@/components/shell/editor-shell";
+import { useEditorShell, useFieldSelection } from "@/components/shell/editor-shell-context";
 
 /**
  * ONE SHELL FOR EVERY TOOL (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §5, «ΕΝΑ
@@ -84,8 +86,19 @@ type Props = {
    *  that look different. The tool owns only what each level SHOWS.
    *  Omitted by every tool that has one level, which is all of them bar
    *  the ones directive 55 names. */
-  work?: { title: string; actions?: ReactNode; body: ReactNode; mode?: { value: ShellMode; onChange: (next: ShellMode) => void } } | null;
+  work?: ShellWork | null;
   onCloseWork?: () => void;
+  /** THE SELECTED PIECE, said as a chip inside the editor layout's field
+   *  (the switch "editor-shell", components/shell/editor-shell.tsx). A
+   *  tool that already draws a `ChosenBox` under the field gets the chip
+   *  without passing this; it is for a selection said some other way.
+   *  The old shell ignores it. */
+  selection?: { label: string; onClear: () => void } | null;
+  /** The price before sending, as the editor layout's field says it
+   *  («≈ 2 credits», muted, before send). A `CostEstimateHint` or a
+   *  `FieldCost` under the field fills it on its own; the old shell
+   *  ignores it and draws `footer` as it always did. */
+  cost?: string | null;
   /** Files given to the field — the «+», a paste, a drop — and what they
    *  are, drawn above the text; the same as Chat's (package 9). Slides
    *  passes them for a spreadsheet to chart (package 13). */
@@ -124,11 +137,54 @@ type Props = {
  */
 export type ShellMode = "simple" | "pro";
 
-export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(
-  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend, empty, history },
-  ref
-) {
+/**
+ * THE SCREEN'S ONE WHITE BUTTON, in the editor layout's bar (and
+ * full-width above the field on a phone). The tool says what it is and
+ * what it does; components/shell/editor-shell.tsx draws it, so no tool can
+ * draw a second one. The old shell has no bar for it and ignores it.
+ */
+export type ShellPrimary = {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  busy?: boolean;
+  icon?: ReactNode;
+};
+
+/** What a tool made, and what the bar above it carries. */
+export type ShellWork = {
+  title: string;
+  /** The bar's own buttons — the editor layout draws them outlined, after
+   *  the spacer; the old shell, beside the title. */
+  actions?: ReactNode;
+  body: ReactNode;
+  mode?: { value: ShellMode; onChange: (next: ShellMode) => void };
+  /** The editor layout only: a tool's own control beside the title
+   *  (Site's computer | phone). */
+  controls?: ReactNode;
+  /** The editor layout only: ONE status tag beside the title
+   *  («Version 3 · not published», «4 drafts»). */
+  status?: string | null;
+  /** The editor layout only: the one white button. */
+  primary?: ShellPrimary | null;
+  /** The editor layout only: the 288px settings panel on the right. While
+   *  it is there the tool's `options` are not drawn in the field — the
+   *  panel carries them (14-Image.png). Omit for no panel. */
+  panel?: ReactNode;
+};
+
+export type ToolShellProps = Props;
+
+export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(props, ref) {
+  const { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend, empty, history } = props;
+  const editor = useEditorShell();
   const t = useTranslations("dashboard.toolShell");
+  // THE APPROVED EDITOR LAYOUT, for whoever the switch "editor-shell" is
+  // open to (read once in app/dashboard/layout.tsx). Everything below this
+  // line is the shell every other reader has, untouched.
+  if (editor) {
+    return <EditorShell ref={ref} {...props} modeSwitch={work?.mode ? <ShellModeSwitch value={work.mode.value} onChange={work.mode.onChange} /> : null} />;
+  }
   const showEmpty = Boolean(empty) && turns.length === 0 && !work;
   return (
     <div data-testid="tool-shell" className="relative flex h-full overflow-hidden">
@@ -333,6 +389,10 @@ export { ACTION, OPTION };
  */
 export function ChosenBox({ label, onClear }: { label: string; onClear: () => void }) {
   const t = useTranslations("dashboard.toolShell");
+  // In the editor layout the same fact is the chip inside the field
+  // (components/shell/editor-shell-context.tsx); nothing is drawn here.
+  const inField = useFieldSelection(label, onClear);
+  if (inField) return null;
   return (
     <p data-testid="box-chosen" className="mt-1 flex items-center gap-1 text-xs text-foreground">
       <span className="min-w-0 break-words">{t("box.only", { name: label })}</span>

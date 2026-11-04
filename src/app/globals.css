@@ -491,6 +491,68 @@ body {
   .field-box {
     @apply rounded-field border border-border bg-panel text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60;
   }
+
+  /* THE EDITOR LAYOUT'S FRAMES (the switch "editor-shell",
+     components/shell/editor-shell.tsx), declared once, each named after
+     the class of the approved mockup's own measurement sheet it was taken
+     from (docs/design/approved/src/common.css). Every one is a line the
+     shape needs to read as itself — the bar's divider, the tag's outline,
+     the field's frame — and written inline in the shell they would be
+     drawn on every tool, against design-density.test.mjs's ceiling, for
+     one decision. The mockup's #2A3348 field edge and #3A4560 slash are
+     not tokens: the field takes `border`, the slash `muted`. */
+  .editor-bar { /* .tbar */
+    @apply flex h-14 shrink-0 items-center gap-2 border-b border-divider pe-4 ps-2.5;
+  }
+  .editor-tag { /* .tag */
+    @apply inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-item border border-tag px-2 text-xs text-muted;
+  }
+  .editor-note { /* .note */
+    @apply w-full max-w-[680px] items-center gap-2.5 rounded-card border border-tag bg-panel py-0.5 pe-1 ps-2.5 text-[13px] text-body;
+  }
+  .editor-field { /* .ask */
+    @apply w-full rounded-field border border-border bg-panel transition-colors duration-150 focus-within:border-foreground/40;
+  }
+  /* THE FOCUS RING MOVES TO THE FIELD, it is not removed. Inside this
+     frame the textarea is one item of a row (the chip, the text, the
+     price, send), and the base rule's 2px ring drawn round the textarea
+     alone read as a second box inside the field. The same ring — 2px,
+     solid, the text colour, the 2px offset of the @layer base rule above
+     — goes round the whole field while the text in it has keyboard
+     focus, which is what the person is typing into. */
+  .editor-field:has(textarea:focus-visible) {
+    outline: 2px solid rgb(var(--foreground));
+    outline-offset: 2px;
+  }
+  .editor-field textarea:focus-visible {
+    outline-color: transparent;
+  }
+  /* The options inside the field read as words with a chevron, not as
+     framed chips (M00-Start.png); the frame comes back on hover. */
+  .editor-field .chip-link {
+    @apply border-transparent px-2.5;
+  }
+  .editor-panel { /* .insp: under the work on a phone, beside it from lg */
+    @apply flex shrink-0 flex-col gap-5 border-t border-divider bg-background px-[18px] pb-6 pt-[22px]
+           lg:w-72 lg:overflow-y-auto lg:border-s lg:border-t-0 lg:pb-[22px];
+  }
+  .editor-pill { /* .pill, .pill.on */
+    @apply inline-flex min-h-[44px] items-center rounded-item border border-border px-3 text-xs text-body
+           transition-colors duration-150 hover:border-foreground/40 disabled:cursor-not-allowed disabled:opacity-40
+           aria-pressed:border-muted aria-pressed:bg-tag aria-pressed:text-foreground lg:min-h-9;
+  }
+  .editor-price { /* .price */
+    @apply flex flex-col gap-1.5 rounded-card border border-tag px-3.5 py-3 text-sm;
+  }
+
+  /* AN OUTLINED BUTTON (`.btn` of the same sheet): a frame, no fill, the
+     foreground's ink. The top bar's «Make anything» is drawn this way in
+     every approved screen, so the screen's one white button is the
+     tool's own primary (components/dashboard/top-nav.tsx). */
+  .btn-quiet {
+    @apply inline-flex min-h-[44px] items-center gap-1.5 rounded-item border border-border px-3 text-sm font-medium text-foreground
+           transition-colors duration-150 hover:border-foreground/40 disabled:cursor-not-allowed disabled:opacity-40;
+  }
 }
 /* ---------------------------------------------------------------------
    THE 16px FLOOR ON ANYTHING YOU CAN TYPE INTO

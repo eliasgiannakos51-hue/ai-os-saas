@@ -42,13 +42,14 @@ const TOPNAV = "src/components/dashboard/top-nav.tsx";
 const HEALTH = "src/components/overview/health-score-card.tsx";
 const UPGRADE = "src/components/billing/upgrade-required.tsx";
 const BUILDMODULE = "src/components/modules/build-module-page.tsx";
+const EDITOR = "src/components/shell/editor-shell.tsx";
 
 // The mutants edit whichever file each names; TARGETS is what gets
 // snapshotted and restored, so a suite killed mid-run cannot leave one
 // behind. (It still can if the process is hard-killed — the runner's
 // finally does not survive SIGKILL — which is why the workflow added in
 // .github/workflows/verify.yml checks `git status` after the suites.)
-const TARGETS = [GATE, JSX, TEAM, ASKAI, TOPNAV, HEALTH, UPGRADE, BUILDMODULE];
+const TARGETS = [GATE, JSX, TEAM, ASKAI, TOPNAV, HEALTH, UPGRADE, BUILDMODULE, EDITOR];
 
 const MUTANTS = [
   {
@@ -74,9 +75,28 @@ const MUTANTS = [
     expect: "no overlay draws more than one filled accent control",
   },
   {
+    // THE EDITOR LAYOUT'S ONE WHITE BUTTON is subtracted from every page
+    // like the top bar's was, so a second one in the shell must turn the
+    // shell's own count red — or "chrome" would be a licence.
+    name: "the editor shell grows a second white button",
+    file: EDITOR,
+    from: 'data-testid="editor-chat-close" className={ACTION}',
+    to: 'data-testid="editor-chat-close" className="bg-button text-button-ink"',
+    expect: "the editor shell draws",
+  },
+  {
+    // ...and the top bar's "Make anything" filled again is chrome that
+    // reaches every dashboard page again.
+    name: "the top bar's «Make anything» is filled white again",
+    file: TOPNAV,
+    from: 'className="btn-quiet min-w-[44px] shrink-0 justify-center lg:px-3.5"',
+    to: 'className="btn-quiet min-w-[44px] shrink-0 justify-center bg-button text-button-ink lg:px-3.5"',
+    expect: "the layout chrome contributes",
+  },
+  {
     // The chrome every dashboard page pays for, pinned rather than
     // floored precisely so this is a decision.
-    name: "the layout chrome grows a third filled control",
+    name: "the layout chrome grows a second filled control",
     file: TOPNAV,
     from: "<header",
     to: '<a className="bg-orange-500">x</a>\n    <header',

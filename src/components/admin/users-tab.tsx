@@ -75,7 +75,7 @@ export function AdminUsersTab() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("search")}
-          className="w-full rounded-item border border-border bg-surface py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-foreground/20"
+          className="w-full rounded-item border border-border bg-panel py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-foreground/20"
         />
       </div>
 
@@ -87,7 +87,7 @@ export function AdminUsersTab() {
         <div className="overflow-x-auto rounded-item border border-border">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-border bg-surface text-xs font-medium uppercase tracking-wide text-muted">
+              <tr className="border-b border-border bg-panel text-xs font-medium uppercase tracking-wide text-muted">
                 <th className="px-3 py-2">{t("email")}</th>
                 <th className="px-3 py-2">{t("name")}</th>
                 <th className="px-3 py-2">{t("plan")}</th>
@@ -108,7 +108,7 @@ export function AdminUsersTab() {
                   <td className="px-3 py-2 font-mono text-xs">
                     {u.email}
                     {u.suspended && (
-                      <span className="ml-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                      <span className="ml-1 rounded-full bg-danger/10 px-1.5 py-0.5 text-[10px] font-semibold text-danger">
                         {t("suspended")}
                       </span>
                     )}
@@ -127,7 +127,7 @@ export function AdminUsersTab() {
                   </td>
                   <td className="px-3 py-2 text-right font-mono text-xs">
                     {u.margin !== null ? (
-                      <span className={u.margin < 4 ? "text-red-600 dark:text-red-400" : ""}>
+                      <span className={u.margin < 4 ? "text-danger" : ""}>
                         {u.margin.toFixed(1)}x
                       </span>
                     ) : (
@@ -146,22 +146,22 @@ export function AdminUsersTab() {
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => setAdjustTarget(u)}
-                        className="rounded border border-border px-2 py-0.5 text-xs text-foreground hover:bg-surface"
+                        className="rounded-item border border-border px-2 py-0.5 text-xs text-foreground hover:bg-panel-hover"
                       >
                         {t("adjust")}
                       </button>
                       <button
                         onClick={() => setRefundTarget(u)}
-                        className="rounded border border-border px-2 py-0.5 text-xs text-foreground hover:bg-surface"
+                        className="rounded-item border border-border px-2 py-0.5 text-xs text-foreground hover:bg-panel-hover"
                       >
                         {t("refundBtn")}
                       </button>
                       <button
                         onClick={() => setSuspendTarget(u)}
-                        className={`rounded border px-2 py-0.5 text-xs ${
+                        className={`rounded-item border px-2 py-0.5 text-xs ${
                           u.suspended
-                            ? "border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
-                            : "border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+                            ? "border-success/40 text-success hover:bg-success/10"
+                            : "border-danger/40 text-danger hover:bg-danger/10"
                         }`}
                       >
                         {u.suspended ? t("unsuspendBtn") : t("suspendBtn")}
@@ -184,7 +184,7 @@ export function AdminUsersTab() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="rounded border border-border px-2 py-1 disabled:opacity-40"
+              className="rounded-item border border-border px-2 py-1 disabled:opacity-40"
             >
               &larr;
             </button>
@@ -194,7 +194,7 @@ export function AdminUsersTab() {
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page * 25 >= total}
-              className="rounded border border-border px-2 py-1 disabled:opacity-40"
+              className="rounded-item border border-border px-2 py-1 disabled:opacity-40"
             >
               &rarr;
             </button>

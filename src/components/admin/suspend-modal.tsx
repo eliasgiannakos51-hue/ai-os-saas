@@ -16,10 +16,12 @@ export function SuspendModal({ userId, email, isSuspended, onClose, onDone }: Pr
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [networkError, setNetworkError] = useState(false);
 
   async function handleSubmit() {
     setSubmitting(true);
     setError(null);
+    setNetworkError(false);
     try {
       const res = await fetch("/api/admin/suspend", {
         method: "POST",
@@ -37,17 +39,18 @@ export function SuspendModal({ userId, email, isSuspended, onClose, onDone }: Pr
       }
       onDone();
     } catch {
-      setError("network");
+      setNetworkError(true);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" aria-hidden="true" />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-xl"
+        className="relative w-full max-w-md rounded-card border border-border bg-panel p-6"
       >
         <h3 className="text-base font-semibold text-foreground">
           {isSuspended ? t("unsuspendTitle") : t("suspendTitle")}
@@ -55,7 +58,7 @@ export function SuspendModal({ userId, email, isSuspended, onClose, onDone }: Pr
         <p className="mt-1 text-xs text-muted">{email}</p>
 
         {!isSuspended && (
-          <div className="mt-4 rounded-item border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-900 dark:border-red-700 dark:bg-red-900/20 dark:text-red-300">
+          <div className="mt-4 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
             {t("suspendWarning")}
           </div>
         )}
@@ -69,7 +72,7 @@ export function SuspendModal({ userId, email, isSuspended, onClose, onDone }: Pr
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
-              className="mt-1 w-full rounded-item border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+              className="mt-1 w-full rounded-item border border-border bg-panel px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
               placeholder={t("reasonPlaceholder")}
               required
               minLength={3}
@@ -77,13 +80,17 @@ export function SuspendModal({ userId, email, isSuspended, onClose, onDone }: Pr
           </label>
         )}
 
-        {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
+        {(error || networkError) && (
+          <p className="mt-2 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+            {networkError ? t("errorNetwork") : error}
+          </p>
+        )}
 
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-surface-hover"
+            className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-panel-hover"
           >
             {t("cancel")}
           </button>
@@ -91,10 +98,8 @@ export function SuspendModal({ userId, email, isSuspended, onClose, onDone }: Pr
             type="button"
             onClick={handleSubmit}
             disabled={submitting || (!isSuspended && reason.trim().length < 3)}
-            className={`rounded-item px-3 py-1.5 text-xs text-white disabled:opacity-40 ${
-              isSuspended
-                ? "bg-green-600 dark:bg-green-700"
-                : "bg-red-600 dark:bg-red-700"
+            className={`rounded-item px-3 py-1.5 text-xs font-semibold text-button-ink hover:opacity-90 disabled:opacity-40 ${
+              isSuspended ? "bg-success" : "bg-danger"
             }`}
           >
             {submitting

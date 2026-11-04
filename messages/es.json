@@ -6732,7 +6732,8 @@
       "confirm": "Ajustar",
       "submitting": "Ajustando...",
       "success": "Créditos actualizados.",
-      "button": "Créditos"
+      "button": "Créditos",
+      "errorNetwork": "Error de red: inténtalo de nuevo."
     },
     "refund": {
       "title": "Reembolso",
@@ -6752,7 +6753,8 @@
       "back": "Atrás",
       "processing": "Procesando...",
       "confirmRefund": "Confirmar reembolso",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "errorNetwork": "Error de red: inténtalo de nuevo."
     },
     "suspend": {
       "suspendTitle": "Suspender cuenta",
@@ -6764,7 +6766,8 @@
       "cancel": "Cancelar",
       "processing": "Procesando…",
       "suspendBtn": "Suspender cuenta",
-      "unsuspendBtn": "Reactivar cuenta"
+      "unsuspendBtn": "Reactivar cuenta",
+      "errorNetwork": "Error de red: inténtalo de nuevo."
     },
     "costs": {
       "loading": "Cargando datos de costes...",

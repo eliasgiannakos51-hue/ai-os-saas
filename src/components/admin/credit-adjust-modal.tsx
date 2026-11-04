@@ -17,6 +17,7 @@ export function CreditAdjustModal({ userId, email, creditsRemaining, onClose, on
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [networkError, setNetworkError] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,6 +27,7 @@ export function CreditAdjustModal({ userId, email, creditsRemaining, onClose, on
 
     setSubmitting(true);
     setError(null);
+    setNetworkError(false);
     try {
       const res = await fetch("/api/admin/users/credits", {
         method: "POST",
@@ -39,18 +41,19 @@ export function CreditAdjustModal({ userId, email, creditsRemaining, onClose, on
       }
       onDone();
     } catch {
-      setError("network");
+      setNetworkError(true);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" aria-hidden="true" />
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-xl"
+        className="relative w-full max-w-md rounded-card border border-border bg-panel p-6"
       >
         <h3 className="text-base font-semibold text-foreground">{t("title")}</h3>
         <p className="mt-1 text-xs text-muted">{email}</p>
@@ -65,7 +68,7 @@ export function CreditAdjustModal({ userId, email, creditsRemaining, onClose, on
             step="1"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 w-full rounded-item border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            className="mt-1 w-full rounded-item border border-border bg-panel px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
             placeholder={t("amountPlaceholder")}
             required
           />
@@ -77,20 +80,24 @@ export function CreditAdjustModal({ userId, email, creditsRemaining, onClose, on
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={2}
-            className="mt-1 w-full rounded-item border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            className="mt-1 w-full rounded-item border border-border bg-panel px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
             placeholder={t("reasonPlaceholder")}
             required
             minLength={3}
           />
         </label>
 
-        {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
+        {(error || networkError) && (
+          <p className="mt-2 rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+            {networkError ? t("errorNetwork") : error}
+          </p>
+        )}
 
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-surface-hover"
+            className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-panel-hover"
           >
             {t("cancel")}
           </button>

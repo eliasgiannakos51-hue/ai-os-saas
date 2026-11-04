@@ -33,6 +33,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [networkError, setNetworkError] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -58,6 +59,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
     if (!selected?.paymentIntentId) return;
     setSubmitting(true);
     setError(null);
+    setNetworkError(false);
     try {
       const body: Record<string, unknown> = {
         paymentIntentId: selected.paymentIntentId,
@@ -79,7 +81,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
       }
       onDone();
     } catch {
-      setError("network");
+      setNetworkError(true);
     } finally {
       setSubmitting(false);
     }
@@ -90,10 +92,11 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
     : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div onClick={onClose} className="fixed inset-0 bg-background/60 backdrop-blur-sm" aria-hidden="true" />
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-lg border border-border bg-surface p-6 shadow-xl"
+        className="relative w-full max-w-lg rounded-card border border-border bg-panel p-6"
       >
         <h3 className="text-base font-semibold text-foreground">{t("title")}</h3>
         <p className="mt-1 text-xs text-muted">{email}</p>
@@ -118,7 +121,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                   }}
                   className={`flex w-full items-center justify-between rounded-item border px-3 py-2 text-left text-sm ${
                     canRefund
-                      ? "border-border hover:bg-surface-hover"
+                      ? "border-border hover:bg-panel-hover"
                       : "border-border/50 opacity-50"
                   }`}
                 >
@@ -148,7 +151,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
           </div>
         ) : (
           <div className="mt-4 space-y-3">
-            <div className="rounded-item border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+            <div className="rounded-item border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
               {t("confirmWarning")}
             </div>
 
@@ -180,7 +183,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                   max={refundableAmount}
                   value={amountCents}
                   onChange={(e) => setAmountCents(e.target.value)}
-                  className="mt-1 w-full rounded-item border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  className="mt-1 w-full rounded-item border border-border bg-panel px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
                   placeholder={t("amountPlaceholder", { max: String(refundableAmount) })}
                 />
               </label>
@@ -192,14 +195,18 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={2}
-                className="mt-1 w-full rounded-item border border-border bg-surface px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                className="mt-1 w-full rounded-item border border-border bg-panel px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
                 placeholder={t("reasonPlaceholder")}
                 required
                 minLength={3}
               />
             </label>
 
-            {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+            {(error || networkError) && (
+              <p className="rounded-item border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
+                {networkError ? t("errorNetwork") : error}
+              </p>
+            )}
 
             <div className="flex justify-end gap-2">
               <button
@@ -211,8 +218,9 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                   setPartial(false);
                   setAmountCents("");
                   setError(null);
+                  setNetworkError(false);
                 }}
-                className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-surface-hover"
+                className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-panel-hover"
               >
                 {t("back")}
               </button>
@@ -220,7 +228,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
                 type="button"
                 onClick={handleRefund}
                 disabled={submitting || reason.trim().length < 3 || (partial && !amountCents)}
-                className="rounded-item bg-red-600 px-3 py-1.5 text-xs text-white disabled:opacity-40 dark:bg-red-700"
+                className="rounded-item bg-danger px-3 py-1.5 text-xs font-semibold text-button-ink hover:opacity-90 disabled:opacity-40"
               >
                 {submitting ? t("processing") : t("confirmRefund")}
               </button>
@@ -233,7 +241,7 @@ export function RefundModal({ userId, email, onClose, onDone }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-surface-hover"
+              className="rounded-item border border-border px-3 py-1.5 text-xs text-muted hover:bg-panel-hover"
             >
               {t("close")}
             </button>

@@ -6732,7 +6732,8 @@
       "confirm": "Adjust",
       "submitting": "Adjusting...",
       "success": "Credits updated.",
-      "button": "Credits"
+      "button": "Credits",
+      "errorNetwork": "Network error — please try again."
     },
     "refund": {
       "title": "Refund",
@@ -6752,7 +6753,8 @@
       "back": "Back",
       "processing": "Processing...",
       "confirmRefund": "Confirm refund",
-      "close": "Close"
+      "close": "Close",
+      "errorNetwork": "Network error — please try again."
     },
     "suspend": {
       "suspendTitle": "Suspend account",
@@ -6764,7 +6766,8 @@
       "cancel": "Cancel",
       "processing": "Processing…",
       "suspendBtn": "Suspend account",
-      "unsuspendBtn": "Reactivate account"
+      "unsuspendBtn": "Reactivate account",
+      "errorNetwork": "Network error — please try again."
     },
     "costs": {
       "loading": "Loading cost data...",

@@ -6732,7 +6732,8 @@
       "confirm": "Ajustar",
       "submitting": "Ajustando...",
       "success": "Créditos atualizados.",
-      "button": "Créditos"
+      "button": "Créditos",
+      "errorNetwork": "Erro de rede — tente novamente."
     },
     "refund": {
       "title": "Reembolso",
@@ -6752,7 +6753,8 @@
       "back": "Voltar",
       "processing": "Processando...",
       "confirmRefund": "Confirmar reembolso",
-      "close": "Fechar"
+      "close": "Fechar",
+      "errorNetwork": "Erro de rede — tente novamente."
     },
     "suspend": {
       "suspendTitle": "Suspender conta",
@@ -6764,7 +6766,8 @@
       "cancel": "Cancelar",
       "processing": "Processando…",
       "suspendBtn": "Suspender conta",
-      "unsuspendBtn": "Reativar conta"
+      "unsuspendBtn": "Reativar conta",
+      "errorNetwork": "Erro de rede — tente novamente."
     },
     "costs": {
       "loading": "Carregando dados de custos...",

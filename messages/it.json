@@ -6732,7 +6732,8 @@
       "confirm": "Modifica",
       "submitting": "Modifica in corso...",
       "success": "Crediti aggiornati.",
-      "button": "Crediti"
+      "button": "Crediti",
+      "errorNetwork": "Errore di rete — riprova."
     },
     "refund": {
       "title": "Rimborso",
@@ -6752,7 +6753,8 @@
       "back": "Indietro",
       "processing": "Elaborazione...",
       "confirmRefund": "Conferma rimborso",
-      "close": "Chiudi"
+      "close": "Chiudi",
+      "errorNetwork": "Errore di rete — riprova."
     },
     "suspend": {
       "suspendTitle": "Sospendi account",
@@ -6764,7 +6766,8 @@
       "cancel": "Annulla",
       "processing": "Elaborazione…",
       "suspendBtn": "Sospendi account",
-      "unsuspendBtn": "Riattiva account"
+      "unsuspendBtn": "Riattiva account",
+      "errorNetwork": "Errore di rete — riprova."
     },
     "costs": {
       "loading": "Caricamento dati di costo...",

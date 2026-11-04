@@ -72,7 +72,7 @@ export function AdminCostsTab() {
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
-          className="rounded-item border border-border bg-surface px-2 py-1 text-xs text-foreground"
+          className="rounded-item border border-border bg-panel px-2 py-1 text-xs text-foreground"
         >
           <option value={7}>7 {t("days")}</option>
           <option value={14}>14 {t("days")}</option>
@@ -84,7 +84,7 @@ export function AdminCostsTab() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-item border border-border bg-surface px-3 py-2">
+        <div className="rounded-item border border-border bg-panel px-3 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
             {t("totalCost")}
           </p>
@@ -92,7 +92,7 @@ export function AdminCostsTab() {
             &euro;{data.totalCostEur.toFixed(2)}
           </p>
         </div>
-        <div className="rounded-item border border-border bg-surface px-3 py-2">
+        <div className="rounded-item border border-border bg-panel px-3 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
             {t("totalCalls")}
           </p>
@@ -101,7 +101,7 @@ export function AdminCostsTab() {
           </p>
         </div>
         {data.providerTotals.slice(0, 2).map((pt) => (
-          <div key={pt.provider} className="rounded-item border border-border bg-surface px-3 py-2">
+          <div key={pt.provider} className="rounded-item border border-border bg-panel px-3 py-2">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
               {pt.provider}
             </p>
@@ -117,17 +117,17 @@ export function AdminCostsTab() {
 
       {/* Flagged users: cost > what they pay */}
       {data.flaggedUsers.length > 0 && (
-        <div className="rounded-item border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-900/10">
+        <div className="rounded-item border border-danger/40 bg-danger/10 p-3">
           <div className="mb-2 flex items-center gap-1.5">
-            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-            <h3 className="text-xs font-semibold text-red-700 dark:text-red-400">
+            <AlertTriangle className="h-4 w-4 text-danger" />
+            <h3 className="text-xs font-semibold text-danger">
               {t("flaggedTitle")}
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="text-[10px] font-medium uppercase tracking-wide text-red-600/70 dark:text-red-400/70">
+                <tr className="text-[10px] font-medium uppercase tracking-wide text-danger/70">
                   <th className="px-2 py-1">{t("flaggedEmail")}</th>
                   <th className="px-2 py-1 text-right">{t("flaggedCost")}</th>
                   <th className="px-2 py-1 text-right">{t("flaggedPays")}</th>
@@ -137,15 +137,15 @@ export function AdminCostsTab() {
               </thead>
               <tbody>
                 {data.flaggedUsers.map((u) => (
-                  <tr key={u.userId} className="border-t border-red-200 dark:border-red-900/30">
+                  <tr key={u.userId} className="border-t border-danger/30">
                     <td className="px-2 py-1 font-mono">{u.email}</td>
-                    <td className="px-2 py-1 text-right font-mono text-red-700 dark:text-red-400">
+                    <td className="px-2 py-1 text-right font-mono text-danger">
                       &euro;{u.costEur.toFixed(2)}
                     </td>
                     <td className="px-2 py-1 text-right font-mono">
                       {u.monthlyPrice > 0 ? `€${u.monthlyPrice.toFixed(2)}` : "—"}
                     </td>
-                    <td className="px-2 py-1 text-right font-mono text-red-700 dark:text-red-400">
+                    <td className="px-2 py-1 text-right font-mono text-danger">
                       {u.margin !== null ? `${u.margin.toFixed(1)}x` : "—"}
                     </td>
                     <td className="px-2 py-1 text-right font-mono">{u.calls}</td>
@@ -164,7 +164,7 @@ export function AdminCostsTab() {
           <div className="overflow-x-auto rounded-item border border-border">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border bg-surface text-xs font-medium uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-panel text-xs font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("provider")}</th>
                   <th className="px-3 py-2 text-right">{t("cost")}</th>
                   <th className="px-3 py-2 text-right">{t("callsLabel")}</th>
@@ -201,7 +201,7 @@ export function AdminCostsTab() {
           <div className="max-h-[400px] overflow-auto rounded-item border border-border">
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-10">
-                <tr className="border-b border-border bg-surface text-[10px] font-medium uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-panel text-[10px] font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("date")}</th>
                   {providers.map((p) => (
                     <th key={p} className="px-3 py-2 text-right capitalize">

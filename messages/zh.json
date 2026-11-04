@@ -6732,7 +6732,8 @@
       "confirm": "调整",
       "submitting": "调整中...",
       "success": "积分已更新。",
-      "button": "积分"
+      "button": "积分",
+      "errorNetwork": "网络错误——请重试。"
     },
     "refund": {
       "title": "退款",
@@ -6752,7 +6753,8 @@
       "back": "返回",
       "processing": "处理中...",
       "confirmRefund": "确认退款",
-      "close": "关闭"
+      "close": "关闭",
+      "errorNetwork": "网络错误——请重试。"
     },
     "suspend": {
       "suspendTitle": "暂停账户",
@@ -6764,7 +6766,8 @@
       "cancel": "取消",
       "processing": "处理中…",
       "suspendBtn": "暂停账户",
-      "unsuspendBtn": "恢复账户"
+      "unsuspendBtn": "恢复账户",
+      "errorNetwork": "网络错误——请重试。"
     },
     "costs": {
       "loading": "正在加载成本数据...",

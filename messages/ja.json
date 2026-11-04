@@ -6732,7 +6732,8 @@
       "confirm": "調整",
       "submitting": "調整中...",
       "success": "クレジットが更新されました。",
-      "button": "クレジット"
+      "button": "クレジット",
+      "errorNetwork": "ネットワークエラー — もう一度お試しください。"
     },
     "refund": {
       "title": "返金",
@@ -6752,7 +6753,8 @@
       "back": "戻る",
       "processing": "処理中...",
       "confirmRefund": "返金を確認",
-      "close": "閉じる"
+      "close": "閉じる",
+      "errorNetwork": "ネットワークエラー — もう一度お試しください。"
     },
     "suspend": {
       "suspendTitle": "アカウントを停止",
@@ -6764,7 +6766,8 @@
       "cancel": "キャンセル",
       "processing": "処理中…",
       "suspendBtn": "アカウントを停止",
-      "unsuspendBtn": "アカウントを再開"
+      "unsuspendBtn": "アカウントを再開",
+      "errorNetwork": "ネットワークエラー — もう一度お試しください。"
     },
     "costs": {
       "loading": "コストデータを読み込み中...",

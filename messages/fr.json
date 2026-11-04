@@ -6732,7 +6732,8 @@
       "confirm": "Ajuster",
       "submitting": "Ajustement...",
       "success": "Crédits mis à jour.",
-      "button": "Crédits"
+      "button": "Crédits",
+      "errorNetwork": "Erreur réseau — veuillez réessayer."
     },
     "refund": {
       "title": "Remboursement",
@@ -6752,7 +6753,8 @@
       "back": "Retour",
       "processing": "Traitement...",
       "confirmRefund": "Confirmer le remboursement",
-      "close": "Fermer"
+      "close": "Fermer",
+      "errorNetwork": "Erreur réseau — veuillez réessayer."
     },
     "suspend": {
       "suspendTitle": "Suspendre le compte",
@@ -6764,7 +6766,8 @@
       "cancel": "Annuler",
       "processing": "Traitement…",
       "suspendBtn": "Suspendre le compte",
-      "unsuspendBtn": "Réactiver le compte"
+      "unsuspendBtn": "Réactiver le compte",
+      "errorNetwork": "Erreur réseau — veuillez réessayer."
     },
     "costs": {
       "loading": "Chargement des données de coûts...",

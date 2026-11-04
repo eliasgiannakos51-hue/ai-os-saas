@@ -86,9 +86,9 @@ function metricStateLabel(m: MetricData, t: (k: string) => string): string | nul
 function MiniBar({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <div className="h-2 w-full rounded-sm bg-border">
+    <div className="h-2 w-full rounded-item bg-border">
       <div
-        className="h-2 rounded-sm bg-foreground/60"
+        className="h-2 rounded-item bg-foreground/60"
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -147,7 +147,7 @@ export function AdminRevenueTab() {
         <select
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
-          className="rounded-item border border-border bg-surface px-2 py-1 text-xs text-foreground"
+          className="rounded-item border border-border bg-panel px-2 py-1 text-xs text-foreground"
         >
           <option value={30}>30 {t("days")}</option>
           <option value={60}>60 {t("days")}</option>
@@ -158,7 +158,7 @@ export function AdminRevenueTab() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-item border border-border bg-surface px-3 py-2">
+        <div className="rounded-item border border-border bg-panel px-3 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
             {t("currentMrr")}
           </p>
@@ -167,7 +167,7 @@ export function AdminRevenueTab() {
           </p>
           {mrrChange !== null && (
             <p
-              className={`flex items-center gap-0.5 text-[10px] ${mrrChange >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+              className={`flex items-center gap-0.5 text-[10px] ${mrrChange >= 0 ? "text-success" : "text-danger"}`}
             >
               {mrrChange >= 0 ? (
                 <TrendingUp className="h-3 w-3" />
@@ -180,7 +180,7 @@ export function AdminRevenueTab() {
           )}
         </div>
 
-        <div className="rounded-item border border-border bg-surface px-3 py-2">
+        <div className="rounded-item border border-border bg-panel px-3 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
             {t("payingSubscribers")}
           </p>
@@ -192,21 +192,21 @@ export function AdminRevenueTab() {
           </p>
         </div>
 
-        <div className="rounded-item border border-border bg-surface px-3 py-2">
+        <div className="rounded-item border border-border bg-panel px-3 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
             {t("newUsers")}
           </p>
-          <p className="mt-0.5 flex items-center gap-1 text-lg font-semibold text-green-600 dark:text-green-400">
+          <p className="mt-0.5 flex items-center gap-1 text-lg font-semibold text-success">
             <UserPlus className="h-4 w-4" />
             {totalNewUsers}
           </p>
         </div>
 
-        <div className="rounded-item border border-border bg-surface px-3 py-2">
+        <div className="rounded-item border border-border bg-panel px-3 py-2">
           <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
             {t("cancellations")}
           </p>
-          <p className="mt-0.5 flex items-center gap-1 text-lg font-semibold text-red-600 dark:text-red-400">
+          <p className="mt-0.5 flex items-center gap-1 text-lg font-semibold text-danger">
             <UserMinus className="h-4 w-4" />
             {totalCancellations}
           </p>
@@ -222,7 +222,7 @@ export function AdminRevenueTab() {
             return (
               <div
                 key={m.key}
-                className="rounded-item border border-border bg-surface px-3 py-2"
+                className="rounded-item border border-border bg-panel px-3 py-2"
               >
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
                   {METRIC_LABELS[m.key] ?? m.key}
@@ -233,7 +233,7 @@ export function AdminRevenueTab() {
                       {formatMetricValue(m)}
                     </p>
                     {m.note && (
-                      <p className="text-[10px] text-amber-600 dark:text-amber-400">{m.note}</p>
+                      <p className="text-[10px] text-warning">{m.note}</p>
                     )}
                   </>
                 ) : (
@@ -255,7 +255,7 @@ export function AdminRevenueTab() {
           <div className="overflow-x-auto rounded-item border border-border">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-border bg-surface text-xs font-medium uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-panel text-xs font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("metric")}</th>
                   <th className="px-3 py-2 text-right">{t("value")}</th>
                   <th className="px-3 py-2">{t("status")}</th>
@@ -291,7 +291,7 @@ export function AdminRevenueTab() {
           <div className="max-h-[300px] overflow-auto rounded-item border border-border">
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-10">
-                <tr className="border-b border-border bg-surface text-[10px] font-medium uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-panel text-[10px] font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("date")}</th>
                   <th className="px-3 py-2 text-right">MRR</th>
                   <th className="px-3 py-2 text-right">{t("aiCost")}</th>
@@ -335,15 +335,15 @@ export function AdminRevenueTab() {
           <div className="overflow-x-auto rounded-item border border-border">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-border bg-surface text-[10px] font-medium uppercase tracking-wide text-muted">
+                <tr className="border-b border-border bg-panel text-[10px] font-medium uppercase tracking-wide text-muted">
                   <th className="px-3 py-2">{t("month")}</th>
-                  <th className="px-3 py-2 text-right text-green-600 dark:text-green-400">
+                  <th className="px-3 py-2 text-right text-success">
                     {t("started")}
                   </th>
-                  <th className="px-3 py-2 text-right text-green-600 dark:text-green-400">
+                  <th className="px-3 py-2 text-right text-success">
                     {t("reactivated")}
                   </th>
-                  <th className="px-3 py-2 text-right text-red-600 dark:text-red-400">
+                  <th className="px-3 py-2 text-right text-danger">
                     {t("cancelled")}
                   </th>
                   <th className="px-3 py-2 text-right">{t("upgraded")}</th>
@@ -357,13 +357,13 @@ export function AdminRevenueTab() {
                   return (
                     <tr key={ev.month} className="border-b border-border last:border-0">
                       <td className="px-3 py-1.5 font-mono text-muted">{ev.month}</td>
-                      <td className="px-3 py-1.5 text-right font-mono text-green-600 dark:text-green-400">
+                      <td className="px-3 py-1.5 text-right font-mono text-success">
                         {ev.started > 0 ? `+${ev.started}` : "—"}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono text-green-600 dark:text-green-400">
+                      <td className="px-3 py-1.5 text-right font-mono text-success">
                         {ev.reactivated > 0 ? `+${ev.reactivated}` : "—"}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-mono text-red-600 dark:text-red-400">
+                      <td className="px-3 py-1.5 text-right font-mono text-danger">
                         {ev.cancelled > 0 ? `-${ev.cancelled}` : "—"}
                       </td>
                       <td className="px-3 py-1.5 text-right font-mono">
@@ -375,9 +375,9 @@ export function AdminRevenueTab() {
                       <td
                         className={`px-3 py-1.5 text-right font-mono font-semibold ${
                           net > 0
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-success"
                             : net < 0
-                              ? "text-red-600 dark:text-red-400"
+                              ? "text-danger"
                               : ""
                         }`}
                       >

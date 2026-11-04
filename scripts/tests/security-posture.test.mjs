@@ -206,6 +206,22 @@ const ADMIN_ONLY_TABLES = new Set([
   // api/telegram/link and lib/telegram/link-state.ts both read it through
   // createAdminClient, filtered on the caller's own id.
   "telegram_pairings",
+  // Deferred account deletion (directive 39 Κομμάτι 3): RLS on, no
+  // policy. The row holds the SHA-256 of the emailed cancel token, and
+  // the person proves who they are with that token or with their session
+  // — never by reading this table. Every query is in
+  // lib/account/pending-deletion.ts, whose helpers take
+  // ReturnType<typeof createAdminClient>; the callers are the confirm,
+  // cancel and status routes and api/cron/execute-deletions.
+  "pending_deletions",
+  // The admin dashboard's audit trail (directive 42 Κομμάτι 9). The
+  // owner's record of what staff did to which account, so a customer
+  // reading it would learn who was looked at; one writing it could forge
+  // or bury an entry. Written and read only in lib/admin/audit-log.ts,
+  // through createAdminClient, behind the isAdminEmail gates of the
+  // admin routes. RLS since 20261111000000_admin_audit_log_rls.sql — its
+  // create migration had only a REVOKE.
+  "admin_audit_log",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

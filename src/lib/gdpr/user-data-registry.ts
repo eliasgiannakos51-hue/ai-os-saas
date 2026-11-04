@@ -442,6 +442,19 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // export nothing while looking covered.
   { table: "affiliates", label: "affiliate_account", scope: "account" },
   { table: "account_deletion_requests", label: "account_deletion_requests", scope: "account" },
+  // Deferred deletion (directive 39 Κομμάτι 3): when this account was
+  // scheduled for deletion, when it will run, and whether it was
+  // cancelled. The person's own record, so it is exported — read by the
+  // server because the table is deny-all, and WITHOUT cancel_token_hash:
+  // a digest of the one credential that can stop a deletion is not
+  // information about them. Removed by the auth.users cascade when the
+  // deletion runs.
+  {
+    table: "pending_deletions",
+    label: "scheduled_account_deletion",
+    scope: "account",
+    serverExportColumns: ["id", "delete_after", "cancelled_at", "executed_at", "created_at"],
+  },
 
   // --- Sensitive: exported, but with the secret columns stripped ---
   {

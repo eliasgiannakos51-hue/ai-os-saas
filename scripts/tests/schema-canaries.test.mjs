@@ -180,7 +180,12 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // Migrations that ADD no probeable object. A canary asks "does this
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
-const NOT_PROBEABLE = {};
+const NOT_PROBEABLE = {
+  "20261109000000_help_articles_tools.sql":
+    "only INSERTs rows — one help article per tool, ON CONFLICT (slug, locale) DO UPDATE — into help_articles, which an older migration creates; it adds no table, column or function, so there is no object a schema probe could find missing. A missing row is missing content, not missing schema.",
+  "20261111000000_admin_audit_log_rls.sql":
+    "only enables row level security on admin_audit_log, whose own migration (20261110000000) carries the canary. Whether RLS is on is not something a PostgREST read through the service role can see — that role bypasses it — so there is nothing here to probe.",
+};
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));
 for (const f of recent) {

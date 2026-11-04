@@ -1,6 +1,14 @@
 import "server-only";
 import { randomBytes, createHash } from "crypto";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { createAdminClient } from "@/lib/supabase/admin";
+
+// EVERY HELPER HERE TAKES THE SERVICE-ROLE CLIENT, and the type says so.
+// pending_deletions has RLS on and no policy (deny-all,
+// 20261108000000_pending_deletions.sql): a session client would read zero
+// rows with no error, which on the cron's path means deletions that never
+// run and on the cancel path a link that always answers "invalid".
+// security-posture.test.mjs holds this file to the admin client.
+type AdminClient = ReturnType<typeof createAdminClient>;
 
 export const DELETION_GRACE_DAYS = 30;
 
@@ -23,7 +31,7 @@ export interface PendingDeletion {
 }
 
 export async function scheduleDeletion(
-  admin: SupabaseClient,
+  admin: AdminClient,
   userId: string,
 ): Promise<{ row: PendingDeletion; cancelToken: string } | null> {
   const { token, tokenHash } = generateCancelToken();
@@ -46,7 +54,7 @@ export async function scheduleDeletion(
 }
 
 export async function cancelDeletion(
-  admin: SupabaseClient,
+  admin: AdminClient,
   cancelToken: string,
 ): Promise<{ userId: string } | null> {
   const tokenHash = hashCancelToken(cancelToken);
@@ -65,7 +73,7 @@ export async function cancelDeletion(
 }
 
 export async function cancelDeletionByUserId(
-  admin: SupabaseClient,
+  admin: AdminClient,
   userId: string,
 ): Promise<boolean> {
   const { data, error } = await admin
@@ -81,7 +89,7 @@ export async function cancelDeletionByUserId(
 }
 
 export async function getActivePendingDeletion(
-  admin: SupabaseClient,
+  admin: AdminClient,
   userId: string,
 ): Promise<PendingDeletion | null> {
   const { data } = await admin
@@ -98,7 +106,7 @@ export async function getActivePendingDeletion(
 }
 
 export async function getActionableDeletions(
-  admin: SupabaseClient,
+  admin: AdminClient,
 ): Promise<PendingDeletion[]> {
   const { data } = await admin
     .from("pending_deletions")
@@ -113,7 +121,7 @@ export async function getActionableDeletions(
 }
 
 export async function markExecuted(
-  admin: SupabaseClient,
+  admin: AdminClient,
   id: string,
 ): Promise<boolean> {
   const { error } = await admin

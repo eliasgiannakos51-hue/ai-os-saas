@@ -69,8 +69,16 @@ check(`the migrations were read (${FILES.length} files, ${SQL.length} chars)`, F
 // ---------------------------------------------------------------------
 // 1. THE POPULATION: every table these migrations create.
 // ---------------------------------------------------------------------
+// THE `public.` PREFIX IS OPTIONAL, because Postgres's is. Until
+// 2026-11-04 this read `public\.` as required, and
+// 20261110000000_admin_audit_log.sql — `CREATE TABLE IF NOT EXISTS
+// admin_audit_log`, unprefixed, in public all the same — shipped with no
+// RLS while this file said every table had it; security-posture.test.mjs,
+// whose scraper already took the prefix as optional, was the one that
+// noticed. The lookahead keeps another schema's table (storage.x, auth.x)
+// from being read as a public table named after its schema.
 const TABLES = new Set();
-for (const m of SQL.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z_0-9]+)/gi)) {
+for (const m of SQL.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_0-9]+)\b(?!\.)/gi)) {
   TABLES.add(m[1]);
 }
 check(`tables created in public (${TABLES.size})`, TABLES.size >= 90, "the create-table scraper found almost nothing, and every check below would pass on an empty set");
@@ -189,6 +197,13 @@ const DENY_ALL_ON_PURPOSE = {
   // to read it from a browser — api/telegram/link reads it through the
   // service role, filtered on the caller's own id.
   telegram_pairings: "the ten-minute handshake that connects one Telegram chat to one account (the owner's directive 24). Holds a code, a keyed HMAC of a chat id and ciphertext, never a secret in the clear, and api/cron/scheduled-runs deletes every row past an hour. Read and written only by the service role, so a pending code cannot be harvested from any browser - including the owner's own.",
+  // The third that belongs to the person, and the same reasoning as the
+  // two pairing tables: the row carries a digest of the one credential
+  // that can stop the deletion, and nothing needs to read it from a
+  // browser — the person proves who they are with the emailed token or
+  // their session, and the routes look the row up for them.
+  pending_deletions: "an account's scheduled deletion (directive 39 Κομμάτι 3): when it runs, and the SHA-256 of the emailed cancel token. Read and written only through lib/account/pending-deletion.ts with the service role — by the confirm, cancel and status routes and api/cron/execute-deletions — so the digest of the one link that can stop a deletion is reachable from no browser.",
+  admin_audit_log: "the owner's record of what staff did to which account (directive 42 Κομμάτι 9). A customer who could read it would learn who was looked at and why; one who could write it could forge or bury an entry. Read and written only in lib/admin/audit-log.ts through createAdminClient(), behind the admin routes' isAdminEmail gates. RLS since 20261111000000_admin_audit_log_rls.sql.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

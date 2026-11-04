@@ -522,6 +522,21 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "pending_deletions",
+    migration: "20261108000000_pending_deletions.sql",
+    breaks: "With the switch \"deferred-deletion\" on, confirming an account deletion fails at its last step: the emailed link is already claimed, scheduleDeletion's insert fails, and the person sees «Something went wrong» with a link that will not work again; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run",
+  },
+  {
+    // logAdminAction does not read its insert's error and readAuditLog
+    // answers [] on one (lib/admin/audit-log.ts), so a missing table is
+    // silent on both sides — which is why it needs a probe.
+    kind: "table",
+    table: "admin_audit_log",
+    migration: "20261110000000_admin_audit_log.sql",
+    breaks: "Every admin action goes unrecorded: the admin dashboard's audit trail stays empty while refunds, credit adjustments and suspensions go through with no record of who did them, and nothing on screen says the table never arrived",
+  },
+  {
+    kind: "table",
     table: "my_stuff_sessions",
     migration: "20261024100000_my_stuff_sessions.sql",
     breaks: "«Τα δικά μου» (switch \"my-stuff\") charges for a question and cannot save the answer: the person pays and sees «it could not be saved», and no session appears in its own history",

@@ -110,7 +110,16 @@ export async function POST(request: Request) {
       params.amount = amountCents;
     }
 
-    const refund = await stripe.refunds.create(params);
+    // An admin double-click or a retried request must not refund the same
+    // charge twice. Keyed on the payment intent and the amount (not a
+    // per-request nonce), so the exact same click replayed inside
+    // Stripe's 24-hour idempotency window reuses the first refund instead
+    // of creating a second — the same convention as the affiliate payout
+    // and the overage invoice below. A deliberate second, different-
+    // amount refund on the same intent still goes through.
+    const refund = await stripe.refunds.create(params, {
+      idempotencyKey: `refund:${paymentIntentId}:${params.amount ?? "full"}`,
+    });
 
     await logAdminAction(user.email!, "refund", {
       paymentIntentId,

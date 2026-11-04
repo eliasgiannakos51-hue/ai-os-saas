@@ -81,7 +81,6 @@ const LOCALE_ALLOWED = new Set([
   // three keys is itself the bare noun, so the Greek is faithful, not
   // truncated: the verb lives in adminDashboard.users.adjust («Ρύθμιση»).
   "el:adminDashboard.users.credits",
-  "el:adminDashboard.users.creditBtn",
   "el:adminDashboard.creditAdjust.button",
   // de: "Name" is the German noun, capital and all — the same bare word as
   // routerReport.colName (also a column heading) and projects.form.name,
@@ -865,6 +864,22 @@ const LOCALE_ALLOWED = new Set([
   "de:dashboard.threeD.panel.format",
   "fr:dashboard.threeD.panel.backgroundOptions.transparent",
   "de:dashboard.threeD.panel.backgroundOptions.transparent",
+  // The admin Audit log tab (2026-11-04, οδηγία 42 Κομμάτι 9, wired up
+  // when the tab turned out to be orphaned — scripts/tests/
+  // orphan-i18n-keys.test.mjs). "Admin" is the shortened job title,
+  // written the same way in Spanish, French, German, Italian and
+  // Portuguese business usage; el/ja/zh/ar all translate it properly
+  // ("Διαχειριστής", 管理者, 管理员, المسؤول), so this is those five
+  // locales choosing the loanword, not a missed translation.
+  "es:adminDashboard.auditLog.admin",
+  "fr:adminDashboard.auditLog.admin",
+  "de:adminDashboard.auditLog.admin",
+  "it:adminDashboard.auditLog.admin",
+  "pt:adminDashboard.auditLog.admin",
+  // fr: "Action" is the French noun for the same sense (a thing done),
+  // identical to English the way "Information" and "Date" already are
+  // in this language elsewhere in the product.
+  "fr:adminDashboard.auditLog.action",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([

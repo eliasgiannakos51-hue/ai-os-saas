@@ -311,7 +311,9 @@ for (const l of favLinks) {
 // own route's GET. Derived by diffing this scanner's emitted set against
 // bf13d2c0, not counted by hand: the first two were already in the tree and
 // the floor had been left at 72, so it carried 2 of slack before today.
-const DEEP_LINK_FLOOR = 75;
+// 75 -> 76, same day: /api/admin/audit-log?limit= (Κ9, the audit log tab
+// wired up after orphan-i18n-keys.test.mjs found its label unreachable).
+const DEEP_LINK_FLOOR = 76;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

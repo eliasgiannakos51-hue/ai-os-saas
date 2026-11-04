@@ -55,6 +55,7 @@ export const NAV_RETENTION_DAYS = 90;
  * redirect.
  */
 export const NAV_STATIC_SEGMENTS: readonly string[] = [
+  "admin",
   "affiliate",
   "agents",
   // Universal Memory. `ai-memory` is what the chat has kept about you;

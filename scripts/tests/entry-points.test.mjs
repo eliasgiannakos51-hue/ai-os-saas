@@ -112,6 +112,15 @@ const EXEMPT = {
   // requires this entry to exist exactly while lib/nav/all-tools.ts has
   // no Sheets tile, and to be gone the moment it has one.
   "/dashboard/sheets": "staff-only behind the 'sheets-tool' switch and notFound() for everyone else; its door (a 26th tile, or a link from Document) is the owner's own open question",
+
+  // Directive 42's admin dashboard. src/app/dashboard/admin/page.tsx is
+  // notFound() for anyone isAdminEmail() does not allow, same as Sheets
+  // above — a sidebar row, even a hidden one, would put «Admin» in the
+  // palette for the one person it is built for to type past, and a
+  // visible row would put it in front of every non-admin's ⌘K too. The
+  // owner and the test account reach it by typing the address, which is
+  // the point: admin surface is not meant to be discoverable.
+  "/dashboard/admin": "owner/admin-only, notFound() for everyone else — reached by typing the address, not by discovery",
 };
 
 // ---------------------------------------------------------------------

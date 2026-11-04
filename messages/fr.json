@@ -5485,6 +5485,11 @@
       "is": "Une procédure que tu enseignes à Ionexa une seule fois, pour qu'il suive les mêmes étapes chaque fois qu'elle est à nouveau nécessaire.",
       "does": "Affiche le nom d'une compétence, quand elle est utilisée, ses étapes et ses fichiers, exactement comme ils ont été enseignés.",
       "doesNot": "Cela ne te permet pas encore de créer, modifier ou exécuter une compétence, et Ionexa n'utilise encore aucune compétence de lui-même — cliquer sur une ligne ne fait que l'ouvrir pour la lire."
+    },
+    "admin": {
+      "is": "Le tableau de bord admin du propriétaire.",
+      "does": "Affiche les comptes utilisateurs, la facturation, le coût et les revenus de la plateforme, avec une entrée de journal d'audit à chaque ouverture.",
+      "doesNot": "Il n'affiche pas ce qu'un utilisateur a écrit — ses discussions, documents et dossiers restent privés."
     }
   },
   "helpCentre": {

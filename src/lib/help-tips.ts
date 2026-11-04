@@ -388,6 +388,17 @@ export const HELP_TIPS: HelpTip[] = [
       "that this is where you put a document for the AI to read, which is Files",
   },
   {
+    id: "admin",
+    file: "src/app/dashboard/admin/page.tsx",
+    keyPrefix: "help.admin",
+    // Directive 42's own rule: «Admin δεν βλέπει περιεχόμενο χρηστών, κάθε
+    // άνοιγμα καταγράφεται» — so the wrong assumption to correct is the
+    // one an owner reaching for this page would actually make: that it
+    // lets them read what's INSIDE a user's records, chats or files.
+    corrects:
+      "that this page shows what a user wrote — it shows account, billing and cost numbers, never the content of their chats, documents or records",
+  },
+  {
     id: "affiliate",
     file: "src/app/dashboard/affiliate/page.tsx",
     keyPrefix: "help.affiliate",

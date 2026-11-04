@@ -34,7 +34,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <PageHeader icon={Shield} title={t("title")} description={t("description")} />
+      <PageHeader icon={Shield} title={t("title")} description={t("description")} helpKey="help.admin" />
 
       <div className="mt-6">
         <AdminTabs

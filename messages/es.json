@@ -5485,6 +5485,11 @@
       "is": "Un procedimiento que le enseñas a Ionexa una sola vez, para que siga los mismos pasos cada vez que vuelva a necesitarlo.",
       "does": "Muestra el nombre de una habilidad, cuándo se usa, sus pasos y sus archivos, exactamente como se enseñaron.",
       "doesNot": "Todavía no te permite crear, editar ni ejecutar una habilidad, y tampoco usa ninguna habilidad por sí mismo: pulsar una fila solo la abre para leerla."
+    },
+    "admin": {
+      "is": "El panel de administración del propietario.",
+      "does": "Muestra cuentas de usuario, facturación, coste y ingresos de la plataforma, con un registro de auditoría en cada apertura.",
+      "doesNot": "No muestra lo que escribió un usuario: sus chats, documentos y registros siguen siendo privados."
     }
   },
   "helpCentre": {

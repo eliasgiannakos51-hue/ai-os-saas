@@ -5485,6 +5485,11 @@
       "is": "A procedure you teach Ionexa once, so it follows the same steps every time it is needed again.",
       "does": "Shows a skill's name, when it is used, its steps and its files, exactly as they were taught.",
       "doesNot": "It does not let you create, edit or run a skill yet, and it does not use any skill on its own — pressing a row only opens it to read."
+    },
+    "admin": {
+      "is": "The owner's admin dashboard.",
+      "does": "Shows user accounts, billing, platform cost and revenue, with an audit log entry on every open.",
+      "doesNot": "It does not show what a user wrote — their chats, documents and records stay private."
     }
   },
   "helpCentre": {

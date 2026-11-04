@@ -5485,6 +5485,11 @@
       "is": "Una procedura che insegni a Ionexa una sola volta, così segue gli stessi passaggi ogni volta che serve di nuovo.",
       "does": "Mostra il nome di una competenza, quando viene usata, i suoi passaggi e i suoi file, esattamente come sono stati insegnati.",
       "doesNot": "Non permette ancora di creare, modificare o eseguire una competenza, e non ne usa ancora nessuna da solo: premere una riga la apre solo per leggerla."
+    },
+    "admin": {
+      "is": "La dashboard di amministrazione del proprietario.",
+      "does": "Mostra gli account utente, la fatturazione, il costo e i ricavi della piattaforma, con una voce nel registro di controllo a ogni apertura.",
+      "doesNot": "Non mostra ciò che un utente ha scritto: le sue chat, i documenti e i record restano privati."
     }
   },
   "helpCentre": {

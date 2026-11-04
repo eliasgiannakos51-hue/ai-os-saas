@@ -5485,6 +5485,11 @@
       "is": "Ein Ablauf, den du Ionexa einmal beibringst, damit er jedes Mal, wenn er wieder gebraucht wird, denselben Schritten folgt.",
       "does": "Zeigt den Namen einer Fähigkeit, wann sie verwendet wird, ihre Schritte und ihre Dateien, genau wie sie beigebracht wurden.",
       "doesNot": "Du kannst hier noch keine Fähigkeit anlegen, ändern oder ausführen, und Ionexa nutzt noch keine Fähigkeit von sich aus — ein Klick auf eine Zeile öffnet sie nur zum Lesen."
+    },
+    "admin": {
+      "is": "Das Admin-Dashboard des Inhabers.",
+      "does": "Zeigt Nutzerkonten, Abrechnung, Kosten und Umsatz der Plattform, mit einem Audit-Log für jeden Zugriff.",
+      "doesNot": "Es zeigt nicht den Inhalt der Nutzer — was sie im Chat, in Dokumenten oder Datensätzen schreiben, bleibt privat."
     }
   },
   "helpCentre": {

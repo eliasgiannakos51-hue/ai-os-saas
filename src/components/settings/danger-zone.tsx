@@ -121,7 +121,7 @@ export function DangerZone({ email }: { email: string }) {
           type="button"
           onClick={handleCancelDeletion}
           disabled={cancellingDeletion}
-          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item border border-primary/40 px-4 py-2 text-sm text-primary transition-colors duration-150 hover:border-primary hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-item border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-foreground/50 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           <ShieldCheck className="h-4 w-4" />
           {cancellingDeletion ? t("cancelling") : t("cancelDeletion")}

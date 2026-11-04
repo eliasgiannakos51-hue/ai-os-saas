@@ -103,15 +103,26 @@ export async function POST(request: Request) {
         );
       }
 
+      // The email carries the ONLY cancel link, so the response says
+      // whether it went: a deletion that cannot be cancelled from the
+      // inbox must at least be visible as such on the confirmation page.
+      // email-outcome-reported.test.mjs holds the binding.
       const userEmail = authUserForFlag?.user?.email;
+      let emailSent = false;
       if (userEmail) {
         try {
-          await sendDeletionScheduledEmail(
+          const emailResult = await sendDeletionScheduledEmail(
             userEmail,
             result.cancelToken,
             result.row.delete_after,
             authUserForFlag?.user?.id,
           );
+          emailSent = emailResult.ok;
+          if (!emailResult.ok) {
+            logApiError("/api/delete-account/confirm", emailResult.error ?? new Error("email not sent"), {
+              stage: "send_scheduled_email",
+            });
+          }
         } catch (emailErr) {
           logApiError("/api/delete-account/confirm", emailErr, { stage: "send_scheduled_email" });
         }
@@ -122,6 +133,7 @@ export async function POST(request: Request) {
         deferred: true,
         deleteAfter: result.row.delete_after,
         graceDays: DELETION_GRACE_DAYS,
+        emailSent,
       });
     }
 

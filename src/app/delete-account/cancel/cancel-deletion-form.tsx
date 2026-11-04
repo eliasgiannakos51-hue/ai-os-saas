@@ -98,7 +98,7 @@ export function CancelDeletionForm() {
                 type="button"
                 onClick={cancelDeletion}
                 disabled={status === "loading"}
-                className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-card bg-primary px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-card bg-button px-4 py-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === "loading" ? t("cancelling") : t("cancelButton")}
               </button>

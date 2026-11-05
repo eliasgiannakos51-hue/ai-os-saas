@@ -101,6 +101,14 @@ const USERS = {
   "tok-offline": { throws: true },
 };
 
+/** Files that already exist in A, with their blob sha. GitHub's Contents
+ *  API refuses to overwrite one without its CURRENT sha (422), and refuses
+ *  a sha for a path that does not exist — the stand-in does the same. */
+const EXISTING = new Map([
+  ["README.md", "c".repeat(40)],
+  ["docs/guide.md", "d".repeat(40)],
+]);
+
 const tokens = new Map(); // installation token -> { installationId, repoIds, permissions }
 const log = []; // every request, in order
 let mintMode = "honest"; // "honest" | "ignores-scope"
@@ -217,10 +225,19 @@ async function fakeGitHub(input, init = {}) {
     if (method === "GET" && rest.startsWith("/git/ref/heads/")) return json(200, { object: { sha: "b".repeat(40) } });
     if (method === "POST" && rest === "/git/refs") return json(201, {});
     if (method === "GET" && rest.startsWith("/contents/")) {
-      return json(200, { path: rest.slice(10), type: "file", encoding: "base64", content: Buffer.from("hello").toString("base64"), size: 5 });
+      const file = decodeURIComponent(rest.slice(10));
+      if (!EXISTING.has(file)) return json(404, { message: "Not Found" });
+      return json(200, { path: file, type: "file", sha: EXISTING.get(file), encoding: "base64", content: Buffer.from("hello").toString("base64"), size: 5 });
     }
     if (method === "GET" && rest === "/contents") return json(200, [{ path: "README.md", type: "file", size: 5 }]);
-    if (method === "PUT" && rest.startsWith("/contents/")) return json(201, {});
+    if (method === "PUT" && rest.startsWith("/contents/")) {
+      const file = decodeURIComponent(rest.slice(10));
+      const body = JSON.parse(init.body ?? "{}");
+      entry.body = body;
+      if (EXISTING.has(file) && body.sha !== EXISTING.get(file)) return json(422, { message: "\"sha\" wasn't supplied." });
+      if (!EXISTING.has(file) && body.sha !== undefined) return json(422, { message: "sha does not match" });
+      return json(EXISTING.has(file) ? 200 : 201, {});
+    }
     if (method === "POST" && rest === "/pulls") return json(201, { number: 7, html_url: `https://github.com/${repo.full_name}/pull/7`, title: "t" });
     if (method === "PUT" && /^\/pulls\/\d+\/merge$/.test(rest)) return json(200, { merged: true });
     if (method === "GET" && /^\/pulls\/\d+$/.test(rest)) return json(200, { state: "open", merged: false, head: { sha: "a".repeat(40) } });
@@ -499,6 +516,51 @@ console.log("\n== 8. every call a grant makes lands on A ==");
   check(
     "the merge was a squash on pull 7 of A",
     since(mark).some((e) => e.method === "PUT" && e.path === "/repos/acme/app/pulls/7/merge")
+  );
+}
+
+// ===========================================================================
+console.log("\n== 8b. a commit that changes a file that exists, and the PR link it returns ==");
+// ===========================================================================
+// The Coding screen sends files with a path and content only: it opens a
+// file, edits it, commits — and cannot know which paths already exist.
+// Until 2026-11-05 the client sent an existing file's sha only when the
+// screen said `action: "update"`, which it never did, so every edit of an
+// opened file would have been refused by GitHub.
+{
+  const mark = log.length;
+  const committed = await createBranchCommitAndPr(grants.commit, {
+    baseBranch: "main",
+    newBranch: "ionexa-3",
+    files: [
+      { path: "README.md", content: "edited" },
+      { path: "web/new-page.html", content: "<p>new</p>" },
+    ],
+    commitMessage: "m",
+    prTitle: "t",
+    prBody: "",
+  });
+  const puts = since(mark).filter((e) => e.method === "PUT" && e.path.includes("/contents/"));
+  const putOf = (file) => puts.find((e) => e.path === `/repos/acme/app/contents/${file}`);
+  check(
+    "a commit that edits an existing file and adds a new one succeeds",
+    committed.ok,
+    JSON.stringify(committed)
+  );
+  check(
+    "...the existing file is sent with its CURRENT sha",
+    putOf("README.md")?.body?.sha === EXISTING.get("README.md"),
+    JSON.stringify(putOf("README.md")?.body ?? null)
+  );
+  check(
+    "...and the new file with none",
+    putOf("web/new-page.html") !== undefined && putOf("web/new-page.html").body?.sha === undefined,
+    JSON.stringify(putOf("web/new-page.html")?.body ?? null)
+  );
+  check(
+    "the PR comes back with the `url` the Coding screen links to",
+    committed.ok && committed.pr.url === "https://github.com/acme/app/pull/7" && committed.pr.number === 7,
+    JSON.stringify(committed.ok ? committed.pr : committed)
   );
 }
 

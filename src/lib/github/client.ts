@@ -227,18 +227,25 @@ export async function createBranchCommitAndPr(
       return { ok: false, reason: err.message?.includes("already exists") ? "branch_exists" : "branch_create_failed" };
     }
 
-    // 3. Commit files one at a time using the Contents API.
+    // 3. Commit files one at a time using the Contents API. GitHub refuses
+    //    to overwrite a file without its current sha, and the screen cannot
+    //    know which files already exist (an edit of an opened file, or a new
+    //    one), so every path is looked up on the new branch first: found ->
+    //    update with its sha, 404 -> create. Anything else stops the commit.
     for (const file of params.files) {
       let existingSha: string | undefined;
-      if (file.action === "update") {
-        const existing = await fetch(
-          repoUrl(grant, `/contents/${encodePath(file.path)}`, { ref: params.newBranch }),
-          { headers, cache: "no-store" }
-        );
-        if (existing.ok) {
-          const body = (await existing.json()) as { sha?: string };
-          existingSha = body.sha;
+      const existing = await fetch(
+        repoUrl(grant, `/contents/${encodePath(file.path)}`, { ref: params.newBranch }),
+        { headers, cache: "no-store" }
+      );
+      if (existing.ok) {
+        const body = (await existing.json()) as { sha?: unknown; type?: unknown };
+        if (body.type !== "file" || typeof body.sha !== "string") {
+          return { ok: false, reason: `commit_failed:${file.path}` };
         }
+        existingSha = body.sha;
+      } else if (existing.status !== 404) {
+        return { ok: false, reason: `commit_failed:${file.path}` };
       }
 
       const commitBody: Record<string, unknown> = {

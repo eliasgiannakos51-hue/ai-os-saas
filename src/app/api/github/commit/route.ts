@@ -13,9 +13,9 @@ const MAX_FILES = 100;
 function parseFiles(raw: unknown): GitHubDiffFile[] | null {
   if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_FILES) return null;
   const files: GitHubDiffFile[] = [];
-  for (const f of raw as Array<{ path?: unknown; content?: unknown; action?: unknown }>) {
+  for (const f of raw as Array<{ path?: unknown; content?: unknown }>) {
     if (!f || !isValidRepoPath(f.path) || typeof f.content !== "string") return null;
-    files.push({ path: f.path, content: f.content, action: f.action === "update" ? "update" : "create" });
+    files.push({ path: f.path, content: f.content });
   }
   return files;
 }

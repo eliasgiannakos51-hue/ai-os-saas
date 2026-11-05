@@ -161,6 +161,20 @@ const MUTANTS = [
     expect: "repo \"acme/..\" -> null",
   },
   {
+    name: "an existing file is committed without its sha (the edit GitHub refuses)",
+    file: CLIENT,
+    from: "        existingSha = body.sha;",
+    to: "        existingSha = undefined;",
+    expect: "the existing file is sent with its CURRENT sha",
+  },
+  {
+    name: "the PR comes back without the url the screen links to",
+    file: CLIENT,
+    from: "        url: prBody.html_url ?? \"\",",
+    to: "        url: \"\",",
+    expect: "the PR comes back with the `url` the Coding screen links to",
+  },
+  {
     name: "a branch name may contain ..",
     file: VALIDATE,
     from: "  if (raw.includes(\"..\") || raw.includes(\"@{\") || raw.includes(\"//\")) return false;",

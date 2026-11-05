@@ -25,6 +25,7 @@ const AUTH = "src/lib/github/auth.ts";
 const CLIENT = "src/lib/github/client.ts";
 const STORE = "src/lib/github/store.ts";
 const ACCESS = "src/lib/github/access.ts";
+const WORKSPACE = "src/components/coding/coding-workspace.tsx";
 
 const MUTANTS = [
   {
@@ -146,11 +147,18 @@ const MUTANTS = [
     to: "",
     expect: "status reports an installation from GitHub's answer for the person's token",
   },
+  {
+    name: "the screen links the PR through GitHub's field name, which the route does not send",
+    file: WORKSPACE,
+    from: "        setPrResult({ number: body.pr.number, url: body.pr.url });",
+    to: "        setPrResult({ number: body.pr.number, url: body.pr.html_url });",
+    expect: "every field the screen reads off body.pr is one GitHubPrResult declares",
+  },
 ];
 
 runMutations({
   name: "github-security",
   gate: GATE,
-  targets: [MERGE, PR_STATUS, COMMIT, CREATE_BRANCH, CALLBACK, STATUS, PERMISSION, AUTH, CLIENT, STORE, ACCESS],
+  targets: [MERGE, PR_STATUS, COMMIT, CREATE_BRANCH, CALLBACK, STATUS, PERMISSION, AUTH, CLIENT, STORE, ACCESS, WORKSPACE],
   mutants: MUTANTS,
 });

@@ -316,5 +316,34 @@ check(
     /failure === "token_dead"[\s\S]{0,120}markGitHubConnectionStatus\(user\.id, "expired"\)/.test(status)
 );
 
+console.log("\n== 11. the screen reads the pull request the route sends ==");
+// The commit route answers { ok, pr } with lib/github/types.ts's
+// GitHubPrResult. The Coding screen read `html_url` — GitHub's name, not
+// ours — so the "open PR" link pointed at undefined (found 2026-11-05).
+// Every field it reads off `body.pr` must be one the type declares; the
+// client half (createBranchCommitAndPr fills `url`) is run in
+// github-repo-access.test.mjs §8b.
+{
+  const typesSrc = stripComments(readFileSync("src/lib/github/types.ts", "utf8"));
+  const prFields = new Set(
+    [...(typesSrc.match(/export type GitHubPrResult = \{([\s\S]*?)\};/)?.[1] ?? "").matchAll(/(\w+)\s*:/g)].map((m) => m[1])
+  );
+  check(`GitHubPrResult parses (${[...prFields].join(", ")})`, prFields.size >= 3 && prFields.has("url"));
+  const reads = [...workspace.matchAll(/\bbody\??\.pr\??\.(\w+)/g)].map((m) => m[1]);
+  check(`the screen's reads of the commit answer were found (${reads.length})`, reads.length >= 2, reads.join(", "));
+  const unknown = reads.filter((f) => !prFields.has(f));
+  check(
+    "every field the screen reads off body.pr is one GitHubPrResult declares",
+    unknown.length === 0,
+    `reads ${unknown.join(", ")} — the route sends ${[...prFields].join(", ")}`
+  );
+  check("...and the link it stores is the PR's url", /setPrResult\(\{ number: body\.pr\.number, url: body\.pr\.url \}\)/.test(workspace));
+  check(
+    "the route sends the client's GitHubPrResult as `pr`",
+    /return NextResponse\.json\(\{ ok: true, pr: result\.pr \}\)/.test(commit) &&
+      /Promise<\{ ok: true; pr: GitHubPrResult \}/.test(client)
+  );
+}
+
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

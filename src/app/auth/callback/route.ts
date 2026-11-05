@@ -9,6 +9,7 @@ import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 import { attributeReferral } from "@/lib/affiliate/store";
 import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
+import { safeNextPath } from "@/lib/auth/confirm-email";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +33,10 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const oauthError = url.searchParams.get("error_description") ?? url.searchParams.get("error");
-  // Only ever a same-origin path — never an absolute URL, so a crafted
-  // ?next=https://evil.example can't turn this into an open redirect.
-  const rawNext = url.searchParams.get("next") ?? "/dashboard/overview";
-  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard/overview";
+  // Only ever a path on this site, through the one rule every `next` in
+  // the app follows (safeNextPath, lib/auth/confirm-email.ts). This route
+  // used to carry its own, weaker prefix test.
+  const next = safeNextPath(url.searchParams.get("next"));
 
   if (oauthError) {
     logApiError("/auth/callback", new Error(oauthError), { stage: "provider_returned_error" });

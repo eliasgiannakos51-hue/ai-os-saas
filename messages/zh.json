@@ -2656,6 +2656,12 @@
       "sharedStored": "已从共享添加 {count} 个文件。",
       "sharedFailed": "有 {count} 个文件无法添加。",
       "sharedReason": "原因：{reason}",
+      "sharedReasons": {
+        "size": "文件为空或过大",
+        "type": "不支持这种文件类型",
+        "limit": "已达到你的套餐的文件数量或存储空间上限",
+        "stored": "无法保存，请重试"
+      },
       "sharedRateLimit": "过去一小时上传次数过多，请稍后再共享。",
       "sharedDropped": "仅接收了前 {max} 个文件。",
       "openedFromDevice": "已从你的设备打开 {count} 个文件。",

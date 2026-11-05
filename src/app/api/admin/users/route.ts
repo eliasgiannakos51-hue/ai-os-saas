@@ -7,6 +7,7 @@ import { logAdminAction } from "@/lib/admin/audit-log";
 import { getPlan } from "@/lib/billing/plans";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { matchesSearch } from "@/lib/text/search-match";
+import { isSuspended } from "@/lib/auth/suspension";
 
 export const dynamic = "force-dynamic";
 
@@ -115,7 +116,7 @@ export async function GET(request: Request) {
         margin: costEur > 0 ? Math.round((monthlyPrice / costEur) * 100) / 100 : null,
         createdAt: u.created_at,
         lastSignIn: u.last_sign_in_at ?? null,
-        suspended: meta.suspended === true,
+        suspended: isSuspended(u),
       };
     });
 

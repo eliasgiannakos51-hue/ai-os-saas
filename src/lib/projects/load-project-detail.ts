@@ -6,7 +6,9 @@
  * «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 1, 2026-10-28) so the SAME fetch runs
  * whether a project is opened through that old link or through
  * /dashboard/projects?id=… — one function, not two copies that could
- * drift. RLS scopes every query to the caller; a project that is not
+ * drift. RLS scopes every query to the caller, and every read after the
+ * project's own is filtered to the project's owner as well (for the share
+ * page, which has no caller); a project that is not
  * theirs or does not exist comes back null either way, on purpose
  * (projects/[id]/page.tsx's own comment: "another account's project
  * simply is not here").
@@ -37,14 +39,25 @@ export async function loadProjectDetail(
 ): Promise<ProjectDetailData | null> {
   const { data: project } = await supabase
     .from("projects")
-    .select("id, name, goal, notes, status, primary_colour, secondary_colour, created_at, share_token")
+    .select("id, user_id, name, goal, notes, status, primary_colour, secondary_colour, created_at, share_token")
     .eq("id", projectId)
     .maybeSingle();
   if (!project) return null;
 
+  // EVERY READ BELOW IS THE PROJECT OWNER'S (2026-11-05 review, A3). Under
+  // the owner's own session RLS already says so; the public share page
+  // (app/shared/[token]/page.tsx) hands this function the service-role
+  // client, where nothing does — and a link row, or the row it points at,
+  // belonging to another account must not reach a stranger's screen. The
+  // database refuses such links from now on
+  // (20261115000002_entity_links_same_owner.sql); this filter is what
+  // keeps any older one out.
+  const ownerId = String(project.user_id);
+
   const { data: edgeRows } = await supabase
     .from("entity_links")
     .select("source_table, source_id, target_table, target_id, relationship_type, created_at")
+    .eq("user_id", ownerId)
     .eq("relationship_type", IN_PROJECT)
     .or(projectEdgeFilter(projectId))
     .limit(500);
@@ -65,6 +78,7 @@ export async function loadProjectDetail(
     const { data } = await supabase
       .from(table)
       .select(`id, ${config.headlineKey}, created_at`)
+      .eq("user_id", ownerId)
       .in("id", ids)
       .limit(ids.length);
     for (const row of data ?? []) {

@@ -336,10 +336,13 @@ console.log(
 // covers a new gate, and github-security / github-user-isolation had
 // never had a suite until SECURITY-AUDIT ΑΣ-1.15 rewrote what they hold.
 // The other five had accumulated inside the tolerated five before it.
-// 312 -> 313 on 2026-11-05, on the rebase of the billing review onto
-// the line above: billing-integrity.mutation.mjs is the one suite that
-// tree did not have. Read off the run on the rebased tree.
-const RATCHET = 313;
+// 312 -> 313 on 2026-11-05 (billing-integrity.mutation.mjs, the billing
+// review), then -> 317 on the same day (five more: account-suspension,
+// cross-site-writes, entity-links-owner, pwa, share-target, the accounts
+// security round) on top of that — both merged here, so the floor is
+// whichever this rebased tree actually measures. Read off the run; see
+// the check below for the live count if this value goes stale again.
+const RATCHET = 318;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

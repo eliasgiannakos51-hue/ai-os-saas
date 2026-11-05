@@ -63,9 +63,18 @@ const MUTANTS = [
   {
     name: "a press stays put when the record could not be kept",
     file: SCREEN,
-    from: "    } catch {\n      // The task matters more than the record of it: a lost record only\n      // means this screen is offered once more, from Home.\n    }\n    router.push(href);",
-    to: "      router.push(href);\n    } catch {\n      // The task matters more than the record of it: a lost record only\n      // means this screen is offered once more, from Home.\n    }",
+    from: "    } catch {\n      // The task matters more than the record of it: a lost record only\n      // means this screen is offered once more, from Home.\n    }\n    // The press is the app's own, so Chat sends the task on arrival\n    // instead of only filling its field (lib/nav/send-on-arrival.ts).\n    armSendOnArrival(href);\n    router.push(href);",
+    to: "      armSendOnArrival(href);\n      router.push(href);\n    } catch {\n      // The task matters more than the record of it: a lost record only\n      // means this screen is offered once more, from Home.\n    }",
     expect: "...and leaves even when the record could not be kept",
+  },
+  {
+    // 2026-11-05 review, A8: a link only fills Chat's field now, so this
+    // press has to say it is the app's own.
+    name: "the task lands in Chat's field and waits",
+    file: SCREEN,
+    from: "    armSendOnArrival(href);\n    router.push(href);",
+    to: "    router.push(href);",
+    expect: "...saying, as the app's own press, that Chat should send the task",
   },
   {
     name: "two presses send the task twice",

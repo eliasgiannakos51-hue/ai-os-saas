@@ -649,4 +649,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261121000000_business_contacts.sql",
     breaks: "no customer, supplier or partner named in Chat is ever remembered, and the failure is a log line",
   },
+  {
+    // SILENT ON PURPOSE: the crons log the failed read and skip nobody
+    // (lib/auth/suspended-accounts.ts), so this probe is the only place
+    // the gap shows.
+    kind: "function",
+    fn: "suspended_user_ids",
+    migration: "20261115000000_account_suspension.sql",
+    breaks: "A suspended account's agents, automations, flows and reminders keep running on schedule, and an account suspended before 2026-11-05 can clear its own suspension flag — sign-in and the API are still refused",
+  },
 ];

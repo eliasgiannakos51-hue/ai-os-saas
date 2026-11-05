@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "total": 5330,
+=======
+  "total": 5324,
+>>>>>>> 679e7b0 (Security: eight findings of the 2026-11-05 reviews, each held by a gate)
   "onPath": 621,
   "thresholds": {
     "sentenceWords": 12,

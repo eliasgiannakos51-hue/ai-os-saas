@@ -29,6 +29,7 @@ import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 import type { UserAutomation } from "@/types/user-automation";
+import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
 // AWAITED, NOT FIRED AND FORGOTTEN — all eleven of them, 2026-09-24.
 //
@@ -146,12 +147,16 @@ export async function GET(request: Request) {
 
     const admin = createAdminClient();
     const today = new Date().toISOString().slice(0, 10);
+    // A SUSPENDED ACCOUNT'S WORK DOES NOT RUN (2026-11-05 review, A1;
+    // lib/auth/suspended-accounts.ts). Excluded in the query, not after it.
+    const suspended = await suspendedUserIds(admin, "/api/cron/scheduled-runs");
 
     const { data: dueRuns, error: dueError } = await admin
       .from("scheduled_agent_runs")
       .select("*")
       .eq("status", "pending")
       .lte("scheduled_for", today)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("created_at", { ascending: true });
 
     if (dueError) {
@@ -482,6 +487,7 @@ export async function GET(request: Request) {
       .select("*")
       .eq("is_active", true)
       .lte("next_run_at", nowIso)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("created_at", { ascending: true });
 
     if (dueAutomationsError) {

@@ -11,6 +11,7 @@ import { filterAndRankCandidates } from "@/lib/command-palette-match";
 import { aliasesFor } from "@/lib/palette-aliases";
 import { ALL_TOOLS, ALL_TOOLS_GROUP_ORDER, type AllToolsGroupKey, type AllToolsNameKey } from "@/lib/nav/all-tools";
 import { QUICK_JOBS, quickJobHref, type QuickJob } from "@/lib/nav/quick-jobs";
+import { armSendOnArrival } from "@/lib/nav/send-on-arrival";
 import { NEVER_RECENT } from "@/lib/nav/recent-tools";
 import { useToast } from "@/components/toast/toast-context";
 import { MY_STUFF_ICON, CHAT_ICON } from "@/lib/module-icons";
@@ -321,6 +322,10 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
       <li key={job.id}>
         <Link
           href={href}
+          // The app's own press: a job for a tool that acts on arrival
+          // lands with its work started (lib/nav/send-on-arrival.ts). The
+          // same address typed or linked from elsewhere only fills the field.
+          onClick={() => armSendOnArrival(href)}
           data-testid="quick-job-tile"
           className="flex min-h-[44px] items-center gap-2 rounded-item border border-border bg-panel px-3 py-2 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
         >

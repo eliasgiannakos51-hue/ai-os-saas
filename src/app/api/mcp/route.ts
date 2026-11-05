@@ -10,6 +10,7 @@ import { parseMcpUrl } from "@/lib/mcp/ssrf";
 import { addMcpServer, countMcpServers, listMcpServers } from "@/lib/mcp/store";
 import { maxMcpServersForPlan } from "@/lib/mcp/limits";
 import { MCP_LIMITS } from "@/lib/mcp/types";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30; // @function-limit 30
@@ -43,6 +44,9 @@ export async function POST(request: Request) {
     const limited = await checkRateLimit({ scope: "mcp_add", identifier: user.id, maxAttempts: 20, windowMinutes: 60 });
     if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });
 
+    // JSON ONLY: this body carries a third-party token (2026-11-05 review,
+    // A5; lib/security/cross-site.ts).
+    if (requireJsonBody(request)) return NextResponse.json({ ok: false, code: "bad_request" }, { status: 415 });
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const rawUrl = typeof body.url === "string" ? body.url : "";

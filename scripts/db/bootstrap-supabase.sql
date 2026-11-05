@@ -74,6 +74,12 @@ create table if not exists auth.users (
 -- lines gains the columns too.
 alter table auth.users add column if not exists deleted_at timestamptz;
 alter table auth.users add column if not exists updated_at timestamptz default now();
+-- app_metadata AND THE BAN, the two columns a suspension writes
+-- (supabase/migrations/20261115000000_account_suspension.sql reads both).
+-- Real Supabase has had them all along; this stub lacked them, which is the
+-- loud direction again — the function that reads them would fail here.
+alter table auth.users add column if not exists raw_app_meta_data jsonb default '{}'::jsonb;
+alter table auth.users add column if not exists banned_until timestamptz;
 create or replace function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;

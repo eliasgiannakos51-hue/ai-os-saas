@@ -2656,6 +2656,12 @@
       "sharedStored": "{count, plural, one {# fichier ajouté} other {# fichiers ajoutés}} depuis le partage.",
       "sharedFailed": "{count, plural, one {# fichier n'a pas pu être ajouté} other {# fichiers n'ont pas pu être ajoutés}}.",
       "sharedReason": "Raison : {reason}",
+      "sharedReasons": {
+        "size": "le fichier est vide ou trop volumineux",
+        "type": "ce type de fichier n'est pas pris en charge",
+        "limit": "la limite de fichiers ou de stockage de ton forfait est atteinte",
+        "stored": "il n'a pas pu être enregistré — réessaie"
+      },
       "sharedRateLimit": "Trop d'envois dans la dernière heure. Réessayez le partage dans un instant.",
       "sharedDropped": "Seuls les {max} premiers fichiers ont été pris.",
       "openedFromDevice": "{count, plural, one {# fichier ouvert} other {# fichiers ouverts}} depuis votre appareil.",

@@ -2656,6 +2656,12 @@
       "sharedStored": "{count, plural, one {# file} other {# files}} added from the share.",
       "sharedFailed": "{count, plural, one {# file} other {# files}} could not be added.",
       "sharedReason": "Why: {reason}",
+      "sharedReasons": {
+        "size": "the file is empty or too large",
+        "type": "that kind of file is not supported",
+        "limit": "your plan's file or storage limit is reached",
+        "stored": "it could not be saved — try again"
+      },
       "sharedRateLimit": "Too many uploads in the last hour. Try sharing again shortly.",
       "sharedDropped": "Only the first {max} files were taken.",
       "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device.",

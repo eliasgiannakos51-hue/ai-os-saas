@@ -6,6 +6,7 @@ import { logApiError } from "@/lib/log-error";
 import { logAdminAction } from "@/lib/admin/audit-log";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
+import { LIFT_BAN_DURATION, SUSPEND_BAN_DURATION, SUSPENSION_KEYS } from "@/lib/auth/suspension";
 
 export const dynamic = "force-dynamic";
 
@@ -46,50 +47,56 @@ export async function POST(request: Request) {
   if (isAdminEmail(targetUser.user.email))
     return NextResponse.json({ ok: false, code: "cannot_suspend_admin" }, { status: 400 });
 
-  // READ, for the two questions above and for the audit row below. NOT for
-  // the write: this route used to spread this snapshot back through
-  // updateUserById, which replaces the whole object. Between the read and
-  // the write anything another writer put in is gone, and the keys in the
-  // gap are the ones the product gates on — subscription_tier,
-  // stripe_subscription_id, seat_count, team_granted_tier. Stripe delivers
-  // customer.subscription.updated and invoice.paid inside the same second
-  // as two concurrent invocations, so suspending an account mid-webhook
-  // could have wiped the plan it was paying for. mergeUserMetadata does the
-  // merge in one statement, under that statement's row lock
-  // (lib/auth/user-metadata.ts, migration 20260910000000).
+  // READ, for the two questions above and for the audit row below.
+  const existingApp = targetUser.user.app_metadata ?? {};
   const existingMeta = targetUser.user.user_metadata ?? {};
 
+  // A SUSPENSION THAT HOLDS (2026-11-05 review, A1; lib/auth/suspension.ts).
+  // It used to be one key in user_metadata, which the account can rewrite
+  // itself, and only the dashboard layout read it. Now, in one call to
+  // Supabase Auth's admin API: a ban, so sign-in and token refresh are
+  // refused, and app_metadata, which only the service role can write, so
+  // the middleware can refuse the access token that is still alive.
+  // app_metadata is MERGED by that API key by key (a null removes a key),
+  // so nothing else the object carries is touched.
   try {
     if (action === "suspend") {
-      const merged = await mergeUserMetadata(
-        userId,
-        {
+      const { error: banError } = await admin.auth.admin.updateUserById(userId, {
+        ban_duration: SUSPEND_BAN_DURATION,
+        app_metadata: {
           suspended: true,
           suspended_reason: reason,
           suspended_at: new Date().toISOString(),
           suspended_by: user.email,
         },
-        { context: "/api/admin/suspend" },
-      );
-      if (!merged) throw new Error("merge_user_metadata returned null");
+      });
+      if (banError) throw banError;
 
       await logAdminAction(user.email!, "suspend_user", { reason }, userId);
 
       return NextResponse.json({ ok: true, action: "suspended" });
     } else {
-      // `remove` runs BEFORE the patch merges, so the three reason keys go
-      // and `suspended: false` lands in the same statement.
-      const merged = await mergeUserMetadata(
-        userId,
-        { suspended: false },
-        {
-          remove: ["suspended_reason", "suspended_at", "suspended_by"],
-          context: "/api/admin/suspend",
-        },
-      );
-      if (!merged) throw new Error("merge_user_metadata returned null");
+      const { error: liftError } = await admin.auth.admin.updateUserById(userId, {
+        ban_duration: LIFT_BAN_DURATION,
+        app_metadata: Object.fromEntries(SUSPENSION_KEYS.map((k) => [k, null])),
+      });
+      if (liftError) throw liftError;
 
-      await logAdminAction(user.email!, "unsuspend_user", { previousReason: existingMeta.suspended_reason ?? "" }, userId);
+      // THE KEYS AN OLDER SUSPENSION WROTE INTO user_metadata, removed
+      // through merge_user_metadata (lib/auth/user-metadata.ts) — one
+      // statement under the row lock, so a Stripe webhook landing at the
+      // same moment keeps the plan it wrote.
+      if (SUSPENSION_KEYS.some((k) => k in existingMeta)) {
+        const merged = await mergeUserMetadata(userId, {}, { remove: [...SUSPENSION_KEYS], context: "/api/admin/suspend" });
+        if (!merged) throw new Error("merge_user_metadata returned null");
+      }
+
+      await logAdminAction(
+        user.email!,
+        "unsuspend_user",
+        { previousReason: existingApp.suspended_reason ?? existingMeta.suspended_reason ?? "" },
+        userId
+      );
 
       return NextResponse.json({ ok: true, action: "unsuspended" });
     }

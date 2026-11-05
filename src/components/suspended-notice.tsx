@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { createClient } from "@/lib/supabase/client";
+import { signOutAndForget } from "@/lib/auth/sign-out";
 
 export function SuspendedNotice({ reason }: { reason: string }) {
   const t = useTranslations("suspended");
@@ -21,12 +23,19 @@ export function SuspendedNotice({ reason }: { reason: string }) {
           </div>
         )}
         <p className="mt-4 text-xs text-muted">{t("contact")}</p>
-        <a
-          href="/login"
-          className="mt-4 inline-block rounded-item border border-border px-4 py-2 text-xs text-muted hover:bg-panel-hover"
+        {/* A REAL SIGN-OUT, not a link to /login: a session that is
+            still alive is sent straight back here by the middleware, and
+            the pages the offline cache kept go with it (lib/auth/sign-out.ts). */}
+        <button
+          type="button"
+          onClick={async () => {
+            await signOutAndForget(createClient()).catch(() => undefined);
+            window.location.href = "/login";
+          }}
+          className="mt-4 inline-block min-h-[44px] rounded-item border border-border px-4 py-2 text-xs text-muted hover:bg-panel-hover"
         >
           {t("signOut")}
-        </a>
+        </button>
       </div>
     </div>
   );

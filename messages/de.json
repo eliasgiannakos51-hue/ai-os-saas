@@ -2656,6 +2656,12 @@
       "sharedStored": "{count, plural, one {# Datei} other {# Dateien}} aus der Freigabe hinzugefügt.",
       "sharedFailed": "{count, plural, one {# Datei} other {# Dateien}} konnten nicht hinzugefügt werden.",
       "sharedReason": "Grund: {reason}",
+      "sharedReasons": {
+        "size": "die Datei ist leer oder zu groß",
+        "type": "dieser Dateityp wird nicht unterstützt",
+        "limit": "das Datei- oder Speicherlimit deines Tarifs ist erreicht",
+        "stored": "sie konnte nicht gespeichert werden – versuche es noch einmal"
+      },
       "sharedRateLimit": "Zu viele Uploads in der letzten Stunde. Versuchen Sie es gleich noch einmal.",
       "sharedDropped": "Es wurden nur die ersten {max} Dateien übernommen.",
       "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet.",

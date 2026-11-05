@@ -2656,6 +2656,12 @@
       "sharedStored": "共有から {count} 件のファイルを追加しました。",
       "sharedFailed": "{count} 件のファイルを追加できませんでした。",
       "sharedReason": "理由: {reason}",
+      "sharedReasons": {
+        "size": "ファイルが空か、大きすぎます",
+        "type": "この種類のファイルには対応していません",
+        "limit": "プランのファイル数または容量の上限に達しました",
+        "stored": "保存できませんでした。もう一度お試しください"
+      },
       "sharedRateLimit": "直近 1 時間のアップロードが多すぎます。少し待って共有し直してください。",
       "sharedDropped": "最初の {max} 件のみを取り込みました。",
       "openedFromDevice": "端末から {count} 件のファイルを開きました。",

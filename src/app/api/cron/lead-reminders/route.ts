@@ -6,6 +6,7 @@ import { createNotification } from "@/lib/notifications/store";
 import { sendPushToUser } from "@/lib/push/web-push";
 import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
 import { isLeadStage } from "@/lib/sales/stages";
+import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -35,11 +36,15 @@ export async function GET(request: Request) {
   try {
     const admin = createAdminClient();
     const now = new Date().toISOString();
+    // A SUSPENDED ACCOUNT'S WORK DOES NOT RUN (2026-11-05 review, A1;
+    // lib/auth/suspended-accounts.ts). Excluded in the query, not after it.
+    const suspended = await suspendedUserIds(admin, "/api/cron/lead-reminders");
     const { data: due, error } = await admin
       .from("leads")
       .select("id, user_id, lead_name, stage")
       .lte("remind_at", now)
       .is("reminded_at", null)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("remind_at", { ascending: true })
       .limit(BATCH);
     if (error) throw error;

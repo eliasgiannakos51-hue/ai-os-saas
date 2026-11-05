@@ -23,11 +23,35 @@ import { logApiError } from "@/lib/log-error";
 
 export const CONFIRM_ROUTE = "/auth/confirm";
 
-/** A relative path inside this site, or the fallback. Never another host. */
+/**
+ * A relative path inside this site, or the fallback. Never another host.
+ *
+ * RESOLVED, NOT PATTERN-MATCHED (2026-11-05 review, A4). The string is
+ * handed to the same URL parser the redirect will use, against an origin
+ * that cannot exist, and only that exact origin is accepted back. A prefix
+ * test cannot see what the parser does to a string first — it drops tabs
+ * and line breaks and reads a backslash as a slash — so control characters
+ * and backslashes are refused before parsing, and the normalised path is
+ * refused if it now starts with two slashes (a dot segment can collapse
+ * into that). Every caller that follows a `next` goes through this one
+ * function: auth/confirm, auth/callback and the signup route.
+ */
+const NEXT_PATH_BASE = "https://placeholder.invalid";
+// eslint-disable-next-line no-control-regex
+const NEXT_PATH_UNSAFE = /[\u0000-\u001f\u007f\\]/;
+
 export function safeNextPath(raw: unknown, fallback = "/dashboard/overview"): string {
-  if (typeof raw !== "string") return fallback;
-  if (!raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return fallback;
-  return raw;
+  if (typeof raw !== "string" || !raw.startsWith("/")) return fallback;
+  if (NEXT_PATH_UNSAFE.test(raw)) return fallback;
+  let resolved: URL;
+  try {
+    resolved = new URL(raw, NEXT_PATH_BASE);
+  } catch {
+    return fallback;
+  }
+  if (resolved.origin !== NEXT_PATH_BASE) return fallback;
+  const path = `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  return path.startsWith("//") ? fallback : path;
 }
 
 export async function confirmLinkFor(

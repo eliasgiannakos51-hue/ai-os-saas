@@ -5,8 +5,9 @@
 // repository is public (BUILD-SPECS 6, «ΠΩΣ ΔΟΥΛΕΥΕΙΣ ΕΔΩ»).
 //
 //   1. Every entitlement key the billing code reads from user_metadata is
-//      on the list supabase/migrations/20261010000000_guard_entitlement_metadata.sql
-//      keeps for the server. The population is the code's own reads.
+//      on the list the guard keeps for the server — its latest definition,
+//      first written in supabase/migrations/20261010000000_guard_entitlement_metadata.sql.
+//      The population is the code's own reads.
 //   2. Signup writes the starting plan through the server's merge, not
 //      through Supabase Auth (which the migration now fences).
 //   3. The beta invite code exists only when the environment sets one.
@@ -72,7 +73,16 @@ function walk(dir, out = []) {
 // =====================================================================
 console.log("\n== 1. every entitlement key the billing code reads is the server's ==");
 // =====================================================================
-const MIGRATION = readFileSync("supabase/migrations/20261010000000_guard_entitlement_metadata.sql", "utf8");
+// THE LATEST DEFINITION, not the first file. The guard was written in
+// 20261010000000_guard_entitlement_metadata.sql and replaced, with a
+// longer list, by 20261115000000_account_suspension.sql (A1); a database
+// built in order ends up with the last one, so that is the one read.
+const GUARD_FILES = readdirSync("supabase/migrations")
+  .filter((f) => f.endsWith(".sql"))
+  .sort()
+  .filter((f) => readFileSync(`supabase/migrations/${f}`, "utf8").includes("create or replace function public.guard_entitlement_metadata()"));
+ok(`the guard's definitions were found (${GUARD_FILES.join(", ")})`, GUARD_FILES.length >= 1 && GUARD_FILES[0] === "20261010000000_guard_entitlement_metadata.sql");
+const MIGRATION = readFileSync(`supabase/migrations/${GUARD_FILES[GUARD_FILES.length - 1]}`, "utf8");
 const listed = new Set([...(MIGRATION.match(/protected constant text\[\] := array\[([\s\S]*?)\];/)?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((m) => m[1]));
 // Where billing decisions are made: plans, credits, checkout, the portal,
 // the team, the crons, beta, deletion.

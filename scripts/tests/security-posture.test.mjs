@@ -394,6 +394,48 @@ checkTrue(
   !/activation_used_at\s*[:=]/.test(onboardingRoute)
 );
 
+// THE GRANT, NOT ONLY THE ROUTE (2026-11-05 review, A2). The baseline's
+// UPDATE policy sat on Supabase's table-wide UPDATE grant, so
+// activation_used_at was writable through the account's own session
+// whatever the route above did. The effective grant is REPLAYED over every
+// migration in order: Supabase starts it table-wide, a table-wide revoke
+// empties it, a column grant adds to it.
+let onboardingUpdate = { tableWide: true, cols: new Set() };
+for (const f of readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).sort()) {
+  const text = readFileSync(`supabase/migrations/${f}`, "utf8").replace(/--[^\n]*/g, "");
+  for (const m of text.matchAll(/\b(grant|revoke)\s+update(?:\s*\(([^)]*)\))?\s+on\s+(?:table\s+)?public\.user_onboarding\s+(?:to|from)\s+([^;]*);/gi)) {
+    if (!/\bauthenticated\b/.test(m[3])) continue;
+    const cols = (m[2] ?? "").split(",").map((c) => c.trim()).filter(Boolean);
+    if (m[1].toLowerCase() === "revoke") {
+      if (cols.length === 0) onboardingUpdate = { tableWide: false, cols: new Set() };
+      else for (const c of cols) onboardingUpdate.cols.delete(c);
+    } else if (cols.length === 0) onboardingUpdate.tableWide = true;
+    else for (const c of cols) onboardingUpdate.cols.add(c);
+  }
+}
+checkTrue("the account's UPDATE on user_onboarding is a column list, not the whole table", !onboardingUpdate.tableWide);
+checkTrue("...and activation_used_at is not on it", !onboardingUpdate.cols.has("activation_used_at"));
+// The population: every column the app writes through the account's OWN
+// client — each one must be on the list, or that write fails in production.
+const onboardingWritten = new Set();
+const onboardingWriters = [];
+(function walkOnboarding(dir) {
+  for (const e of readdirSync(dir)) {
+    const f = `${dir}/${e}`;
+    if (statSync(f).isDirectory()) walkOnboarding(f);
+    else if (/\.(ts|tsx)$/.test(e)) {
+      const code = readFileSync(f, "utf8");
+      if (!/supabase\s*\.from\("user_onboarding"\)\s*\.(update|upsert)\(/.test(code)) continue;
+      onboardingWriters.push(f);
+      for (const m of code.matchAll(/\.from\("user_onboarding"\)\s*\.update\(\{([^}]*)\}/g)) for (const k of m[1].matchAll(/\b([a-z_]+):/g)) onboardingWritten.add(k[1]);
+      for (const m of code.matchAll(/\bupdate\.([a-z_]+)\s*=/g)) onboardingWritten.add(m[1]);
+      for (const m of code.matchAll(/const update[^=]*=\s*\{([^}]*)\}/g)) for (const k of m[1].matchAll(/\b([a-z_]+):/g)) onboardingWritten.add(k[1]);
+    }
+  }
+})("src");
+checkTrue(`the account's own writes to user_onboarding were found (${onboardingWriters.length} files, ${onboardingWritten.size} columns)`, onboardingWriters.length >= 2 && onboardingWritten.size >= 4);
+for (const c of onboardingWritten) checkTrue(`...${c} is on the account's UPDATE list`, onboardingUpdate.cols.has(c));
+
 // The importer stamps user_id from the SESSION and drops any that came
 // in on the row. The rows originate from a model's output and a user's
 // file, and neither gets a say in whose account they land in.

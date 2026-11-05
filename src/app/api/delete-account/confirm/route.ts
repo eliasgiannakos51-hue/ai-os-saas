@@ -9,6 +9,7 @@ import { eraseUserStorage } from "@/lib/account/erase-storage";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { scheduleDeletion, DELETION_GRACE_DAYS } from "@/lib/account/pending-deletion";
 import { sendDeletionScheduledEmail } from "@/lib/email/send-deletion-scheduled-email";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 // @service-role-justified token-auth — the 256-bit single-use token from
 // the emailed link IS the proof of identity (see the file comment below);
@@ -28,6 +29,13 @@ const DELETE_CONFIRM_WINDOW_MINUTES = 60;
 // against scripted hammering of the endpoint, not a real brute-force gate.
 export async function POST(request: Request) {
   try {
+    // JSON ONLY (2026-11-05 review, A5; lib/security/cross-site.ts): a
+    // form on another site can post anything else without the browser
+    // asking first.
+    if (requireJsonBody(request)) {
+      return NextResponse.json({ ok: false, code: "invalid_request" }, { status: 415 });
+    }
+
     const ip = getClientIp(request);
     const { allowed } = await checkRateLimit({
       scope: "delete_account_confirm",

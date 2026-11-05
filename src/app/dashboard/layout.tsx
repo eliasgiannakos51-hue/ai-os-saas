@@ -19,6 +19,7 @@ import { getOrInitCredits, resolveEffectivePlan, packCreditPriceEurFromRow } fro
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { isSuspended } from "@/lib/auth/suspension";
 import { logApiError } from "@/lib/log-error";
 import { isFeatureOn } from "@/lib/flags/flags";
 import { EditorShellProvider } from "@/components/shell/editor-shell-context";
@@ -51,7 +52,9 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  if (user.user_metadata?.suspended === true) {
+  // The middleware answers this first (src/proxy.ts); kept as the page's
+  // own fallback, read through the same rule (lib/auth/suspension.ts).
+  if (isSuspended(user)) {
     redirect("/suspended");
   }
 

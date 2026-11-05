@@ -9,6 +9,7 @@ import { getClientIp } from "@/lib/get-client-ip";
 import { logApiError } from "@/lib/log-error";
 import { noteLoginFailure } from "@/lib/auth/login-failure-alert";
 import { LOGIN_FAILURE_ALERT, accountKey } from "@/lib/auth/login-failure-policy";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 // @service-role-justified pre-auth — there is no session yet; the
 // rate_limit_log access in lib/rate-limit.ts uses the admin client, reads
@@ -31,6 +32,13 @@ const WINDOW_MINUTES = 15;
 
 export async function POST(request: Request) {
   try {
+    // JSON ONLY (2026-11-05 review, A5; lib/security/cross-site.ts): a
+    // form on another site can post anything else without the browser
+    // asking first.
+    if (requireJsonBody(request)) {
+      return NextResponse.json({ ok: false, code: "unsupported_media_type" }, { status: 415 });
+    }
+
     let email: string;
     let password: string;
     try {

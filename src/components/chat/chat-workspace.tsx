@@ -45,6 +45,7 @@ import { parseStoredAttachments, type ChatAttachment } from "@/lib/chat/attachme
 import { readAnswerBasis, readMemoriesUsed, type MemoryUsed } from "@/lib/chat/memory-citations";
 import { useToast } from "@/components/toast/toast-context";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
+import { takeSendOnArrival } from "@/lib/nav/send-on-arrival";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
 import type { WorkMode } from "@/lib/chat/work-modes";
@@ -368,16 +369,23 @@ export function ChatWorkspace({
     });
   }
 
-  // ASKED ON ARRIVAL. Runs once per mount and only for a brand-new
-  // thread: `sentAskRef` is what stops React's development double-invoke
-  // — and any later re-render — from sending the same question twice and
-  // charging for it twice. Deliberately not guarded on `sending`, which
-  // is false at mount; the ref is the guard.
+  // ARRIVING WITH A QUESTION. Runs once per mount and only for a
+  // brand-new thread: `sentAskRef` is what stops React's development
+  // double-invoke — and any later re-render — from sending the same
+  // question twice and charging for it twice. Deliberately not guarded on
+  // `sending`, which is false at mount; the ref is the guard.
+  //
+  // THE ADDRESS ONLY FILLS THE FIELD (2026-11-05 review, A8). A link can
+  // be written by any page, and sending spends credits and can write
+  // memory, so the question is SENT only when this tab's own app asked
+  // for it just before navigating (lib/nav/send-on-arrival.ts — a quick
+  // job, the first task). Otherwise it waits in the field for a press.
   const sentAskRef = useRef(false);
   useEffect(() => {
     if (!initialAsk || sentAskRef.current) return;
     sentAskRef.current = true;
-    void handleSend(initialAsk);
+    if (takeSendOnArrival("ask", initialAsk)) void handleSend(initialAsk);
+    else composerRef.current?.setText(initialAsk);
     forgetExampleParam("ask");
     // handleSend is redeclared every render and reads its own state via
     // setState callbacks; depending on it would re-run this effect

@@ -58,16 +58,58 @@ check(`scanned the app (${tsFiles.length} TypeScript files)`, tsFiles.length >= 
 console.log("\n== 1. nothing replaces user_metadata any more ==");
 // ---------------------------------------------------------------------
 // The whole class, not the seven instances: any NEW route that reaches for
-// updateUserById gets the same bug, so the API itself is what is banned.
+// updateUserById gets the same bug, so the API itself is what is banned —
+// with ONE named exception, argued below, whose calls are held to never
+// carrying user_metadata at all.
+//
+// THE EXCEPTION (2026-11-05 review, A1). A suspension is a BAN, and
+// Supabase Auth's admin update is the only API that sets `ban_duration`;
+// the same call writes `app_metadata`, the one object the account cannot
+// write itself. Neither is user_metadata, and merge_user_metadata cannot
+// set either. So api/admin/suspend may call it, and every argument it
+// passes is read here: a `user_metadata` key in one would be the bug this
+// file exists for, and goes red by name.
+const UPDATE_USER_ALLOWED = new Set(["src/app/api/admin/suspend/route.ts"]);
+/** Each updateUserById( call's argument text, up to its matching parenthesis. */
+function updateUserCalls(code) {
+  const calls = [];
+  for (const m of code.matchAll(/updateUserById\s*\(/g)) {
+    let depth = 1;
+    let i = m.index + m[0].length;
+    for (; i < code.length && depth > 0; i++) {
+      if (code[i] === "(") depth++;
+      else if (code[i] === ")") depth--;
+    }
+    calls.push(code.slice(m.index + m[0].length, i - 1));
+  }
+  return calls;
+}
 const offenders = [];
+const allowedCalls = [];
 for (const file of tsFiles) {
-  const code = stripTs(readFileSync(file, "utf8"));
-  if (/updateUserById\s*\(/.test(code)) offenders.push(path.relative(ROOT, file));
+  const rel = path.relative(ROOT, file).replace(/\\/g, "/");
+  const calls = updateUserCalls(stripTs(readFileSync(file, "utf8")));
+  if (calls.length === 0) continue;
+  if (UPDATE_USER_ALLOWED.has(rel)) allowedCalls.push(...calls.map((c) => ({ rel, c })));
+  else offenders.push(rel);
 }
 check(
-  "no file calls admin.auth.admin.updateUserById",
+  "no file calls admin.auth.admin.updateUserById, except the suspension's ban",
   offenders.length === 0,
   `still calling it: ${offenders.join(", ")} — use mergeUserMetadata (lib/auth/user-metadata.ts)`
+);
+check(
+  `...and the exception still calls it (${allowedCalls.length}), so the line above is not stale`,
+  allowedCalls.length >= 1
+);
+check(
+  "...and none of its calls carries user_metadata",
+  allowedCalls.every(({ c }) => !/user_metadata/.test(c)),
+  allowedCalls.filter(({ c }) => /user_metadata/.test(c)).map(({ rel }) => rel).join(", ")
+);
+check(
+  "...each one a ban or its lifting",
+  allowedCalls.length > 0 && allowedCalls.every(({ c }) => /ban_duration:/.test(c))
 );
 
 // And the spread that made it lossy, in case someone reaches the same shape

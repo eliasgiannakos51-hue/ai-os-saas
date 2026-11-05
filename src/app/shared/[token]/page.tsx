@@ -32,12 +32,13 @@ const KIND_LABEL_KEYS: Record<string, string> = {
  *
  * NO SESSION, so this is the one place in the app that reads a project
  * by a SECRET rather than by RLS: createAdminClient() bypasses RLS
- * entirely, and loadProjectDetail()'s own `.eq("id", projectId)` (no
- * `user_id` filter — ownership is normally the caller's RLS context,
- * which does not exist here) is exactly why the LOOKUP here is by
- * share_token first, admin-client, selecting ONLY `id` — the project id
- * this reaches is never attacker-chosen, it is whatever share_token
- * resolved to, same shape as every token-gated public page needs.
+ * entirely, which is why the LOOKUP here is by share_token first,
+ * admin-client, selecting ONLY `id` — the project id this reaches is never
+ * attacker-chosen, it is whatever share_token resolved to, same shape as
+ * every token-gated public page needs. Everything loadProjectDetail()
+ * reads after the project itself — its links and the rows they point at —
+ * is filtered to the project's owner (2026-11-05 review, A3), since there
+ * is no RLS context here to do it.
  *
  * NOTES ARE NEVER SHOWN. loadProjectDetail()'s own return value DOES
  * carry `header.notes` (it is one function for both the owner's page and
@@ -70,9 +71,8 @@ export default async function SharedProjectPage({ params }: { params: Promise<{ 
   }
 
   // admin CLIENT, NOT createClient(): there is no session for RLS to
-  // scope to here, and loadProjectDetail()'s own query has no user_id
-  // filter — it trusts whatever client it is handed, the same as every
-  // other admin-client call in this app (api/projects/[id]/share's own
+  // scope to here, so loadProjectDetail() filters its links and members to
+  // the project's own user_id itself (api/projects/[id]/share's own
   // POST/DELETE use the person's own client instead, for the opposite
   // reason: there, a real session IS what proves ownership).
   const detail = await loadProjectDetail(admin as unknown as Parameters<typeof loadProjectDetail>[0], String(byToken.id));

@@ -4,6 +4,8 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/
 import { NextResponse, type NextRequest } from "next/server";
 import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@/lib/nav/early-redirects";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { isSuspended } from "@/lib/auth/suspension";
+import { crossSiteVerdict } from "@/lib/security/cross-site";
 
 export async function proxy(request: NextRequest) {
   // NO x-pathname HEADER. One was set here for a single deploy, so the
@@ -13,6 +15,28 @@ export async function proxy(request: NextRequest) {
   // and the sidebar rendered its own key names. Reverted with the layout;
   // see app/layout.tsx.
   const requestHeaders = request.headers;
+
+  // A WRITE TO THE API FROM ANOTHER SITE (2026-11-05 review, A5). Asked
+  // first, before the session lookup it would otherwise pay for: a
+  // browser's cross-site POST to /api/* is refused here, whichever route
+  // it names, except the few that other sites reach on purpose
+  // (lib/security/cross-site.ts, which lists them with their reasons).
+  if (
+    crossSiteVerdict({
+      method: request.method,
+      pathname: request.nextUrl.pathname,
+      secFetchSite: request.headers.get("sec-fetch-site"),
+      origin: request.headers.get("origin"),
+      ownHosts: [
+        request.headers.get("x-forwarded-host"),
+        request.headers.get("host"),
+        request.nextUrl.host,
+        process.env.NEXT_PUBLIC_SITE_URL,
+      ],
+    }) === "refuse"
+  ) {
+    return NextResponse.json({ ok: false, code: "cross_site_refused" }, { status: 403 });
+  }
 
   let response = NextResponse.next({
     request: { headers: requestHeaders },
@@ -135,6 +159,25 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return withRefreshedCookies(NextResponse.redirect(url));
+  }
+
+  // A SUSPENDED ACCOUNT (2026-11-05 review, A1; lib/auth/suspension.ts).
+  // The ban refuses the next sign-in and the next refresh; this refuses
+  // the access token that is still alive, which can be up to an hour. Read
+  // from app_metadata (only the service role writes it) and from the ban
+  // itself, on the user getUser() just returned — no extra round trip.
+  // Every API call is refused by code; pages go to /suspended.
+  if (user && isSuspended(user)) {
+    const path = request.nextUrl.pathname;
+    if (path.startsWith("/api/")) {
+      return withRefreshedCookies(NextResponse.json({ ok: false, code: "account_suspended" }, { status: 403 }));
+    }
+    if (isDashboardRoute || path.startsWith("/onboarding")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/suspended";
+      url.search = "";
+      return withRefreshedCookies(NextResponse.redirect(url));
+    }
   }
 
   // AN ADDRESS NOT YET PROVED (NEEDS 22, lib/auth/confirm-email.ts). An

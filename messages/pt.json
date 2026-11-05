@@ -2656,6 +2656,12 @@
       "sharedStored": "{count, plural, one {# ficheiro adicionado} other {# ficheiros adicionados}} a partir da partilha.",
       "sharedFailed": "{count, plural, one {# ficheiro não pôde ser adicionado} other {# ficheiros não puderam ser adicionados}}.",
       "sharedReason": "Motivo: {reason}",
+      "sharedReasons": {
+        "size": "o ficheiro está vazio ou é demasiado grande",
+        "type": "esse tipo de ficheiro não é suportado",
+        "limit": "chegaste ao limite de ficheiros ou de armazenamento do teu plano",
+        "stored": "não foi possível guardá-lo — tenta de novo"
+      },
       "sharedRateLimit": "Demasiados carregamentos na última hora. Tente partilhar daqui a pouco.",
       "sharedDropped": "Só foram aceites os primeiros {max} ficheiros.",
       "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo.",

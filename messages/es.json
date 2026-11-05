@@ -2656,6 +2656,12 @@
       "sharedStored": "{count, plural, one {# archivo añadido} other {# archivos añadidos}} desde la compartición.",
       "sharedFailed": "{count, plural, one {# archivo no se pudo añadir} other {# archivos no se pudieron añadir}}.",
       "sharedReason": "Motivo: {reason}",
+      "sharedReasons": {
+        "size": "el archivo está vacío o es demasiado grande",
+        "type": "ese tipo de archivo no es compatible",
+        "limit": "has alcanzado el límite de archivos o de almacenamiento de tu plan",
+        "stored": "no se pudo guardar; inténtalo de nuevo"
+      },
       "sharedRateLimit": "Demasiadas subidas en la última hora. Vuelve a compartir en un momento.",
       "sharedDropped": "Solo se tomaron los primeros {max} archivos.",
       "openedFromDevice": "{count, plural, one {# archivo abierto} other {# archivos abiertos}} desde tu dispositivo.",

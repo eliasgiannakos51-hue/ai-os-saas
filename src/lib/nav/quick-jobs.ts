@@ -18,7 +18,9 @@
 //
 // Six Learn jobs carry no tool of their own — MASTER 16 names no "Learn"
 // tool — every one opens Chat with its question already asked
-// (`?ask=`, which Chat auto-sends: components/chat/chat-workspace.tsx).
+// (`?ask=`, which Chat sends on arrival because the tile's own press arms
+// it first — lib/nav/send-on-arrival.ts; the address alone only fills the
+// field: components/chat/chat-workspace.tsx).
 //
 // scripts/tests/all-tools.test.mjs §1 holds every href against a real
 // route and every target's param against what that page actually reads.

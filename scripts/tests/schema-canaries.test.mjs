@@ -181,6 +181,10 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
+  "20261115000001_user_onboarding_column_grants.sql":
+    "only revokes and re-grants UPDATE on user_onboarding (a column list instead of the whole table); it adds no table, column or function, and a grant to the signed-in role is invisible to a probe made through the service role. scripts/tests/user-onboarding-grants.dbtest.mjs is its check.",
+  "20261115000002_entity_links_same_owner.sql":
+    "adds a trigger on entity_links and the trigger function it calls. A function that returns `trigger` is never exposed by the database API, so the OpenAPI root this probe reads cannot list it, present or not. scripts/tests/entity-links-owner.dbtest.mjs is its check.",
   "20261109000000_help_articles_tools.sql":
     "only INSERTs rows — one help article per tool, ON CONFLICT (slug, locale) DO UPDATE — into help_articles, which an older migration creates; it adds no table, column or function, so there is no object a schema probe could find missing. A missing row is missing content, not missing schema.",
   "20261111000000_admin_audit_log_rls.sql":

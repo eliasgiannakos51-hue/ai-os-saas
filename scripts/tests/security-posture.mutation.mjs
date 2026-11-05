@@ -30,6 +30,7 @@ const RESET_CRON = "src/app/api/cron/reset-credits/route.ts";
 const SCHEDULED_CRON = "src/app/api/cron/scheduled-runs/route.ts";
 const ADMIN_CLIENT = "src/lib/supabase/admin.ts";
 const SITEMAP = "src/app/sitemap.ts";
+const ONBOARDING_GRANTS = "supabase/migrations/20261115000001_user_onboarding_column_grants.sql";
 
 const MUTANTS = [
   {
@@ -139,6 +140,29 @@ const MUTANTS = [
     }`,
     to: "    expiredReservationsSwept = await releaseExpiredReservations();",
     expect: "cannot fail the cron",
+  },
+  // THE FREE RUN'S FLAG, BY GRANT (2026-11-05 review, A2). Three ways the
+  // column list can stop meaning anything.
+  {
+    name: "the account gets the whole table back",
+    file: ONBOARDING_GRANTS,
+    from: "revoke update on public.user_onboarding from authenticated;",
+    to: "grant update on public.user_onboarding to authenticated;",
+    expect: "the account's UPDATE on user_onboarding is a column list",
+  },
+  {
+    name: "the free run's flag is put on the account's list",
+    file: ONBOARDING_GRANTS,
+    from: "grant update (user_id, goal, completed_at, skipped_at, home_seen_at)",
+    to: "grant update (user_id, goal, completed_at, skipped_at, home_seen_at, activation_used_at)",
+    expect: "...and activation_used_at is not on it",
+  },
+  {
+    name: "a column the app writes is left off the list",
+    file: ONBOARDING_GRANTS,
+    from: "grant update (user_id, goal, completed_at, skipped_at, home_seen_at)",
+    to: "grant update (user_id, goal, completed_at, skipped_at)",
+    expect: "...home_seen_at is on the account's UPDATE list",
   },
 ];
 

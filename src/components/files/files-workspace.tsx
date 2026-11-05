@@ -55,6 +55,7 @@ import { pagesRead, relabelAnswer, uniquePages } from "@/lib/files/page-refs";
 import { useFilesFailureWords } from "@/components/files/failure-words";
 import { uploadRefusal } from "@/lib/files/refusal-words";
 import { startQueuedAutomations } from "@/lib/automations/kick";
+import { shareReasonMessage, sharedReasonText } from "@/lib/files/share-outcome";
 
 /**
  * The File Workspace.
@@ -371,7 +372,10 @@ export function FilesWorkspace({
     const stored = Number(params.get("shared") ?? 0);
     const failed = Number(params.get("share_failed") ?? 0);
     const dropped = Number(params.get("share_dropped") ?? 0);
-    const reason = params.get("share_reason");
+    // A CODE, NEVER TEXT (lib/files/share-outcome.ts): the address can be
+    // written by anybody, so only a known refusal stage is told, in this
+    // screen's own words, and anything else in it is ignored.
+    const reason = shareReasonMessage(params.get("share_reason"));
 
     if (params.get("share_error") === "rate_limit") {
       addToast(t("sharedRateLimit"), "error");
@@ -382,7 +386,7 @@ export function FilesWorkspace({
         // text is the one thing that tells the user what to change.
         addToast(
           reason
-            ? `${t("sharedFailed", { count: failed })} ${t("sharedReason", { reason })}`
+            ? `${t("sharedFailed", { count: failed })} ${t("sharedReason", { reason: sharedReasonText(t, reason) })}`
             : t("sharedFailed", { count: failed }),
           "error"
         );

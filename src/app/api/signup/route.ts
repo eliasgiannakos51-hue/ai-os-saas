@@ -16,6 +16,7 @@ import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
 import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 import { diagLog } from "@/lib/diag";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 // @service-role-justified pre-auth — account creation happens before a
 // session can exist. admin.auth.admin.createUser only creates the caller's
@@ -46,6 +47,13 @@ export async function POST(request: Request) {
   const marks: string[] = [];
   const mark = (stage: string) => marks.push(`${stage}=${Date.now() - t0}ms`);
   try {
+    // JSON ONLY (2026-11-05 review, A5; lib/security/cross-site.ts): a
+    // form on another site can post anything else without the browser
+    // asking first.
+    if (requireJsonBody(request)) {
+      return NextResponse.json({ ok: false, code: "unsupported_media_type" }, { status: 415 });
+    }
+
     const ip = getClientIp(request);
     const { allowed } = await checkRateLimit({
       scope: "signup",

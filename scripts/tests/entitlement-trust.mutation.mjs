@@ -44,7 +44,9 @@
 import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/entitlement-trust.test.mjs";
-const MIGRATION = "supabase/migrations/20261010000000_guard_entitlement_metadata.sql";
+// The guard's LATEST definition, which is the one the gate reads (A1,
+// 2026-11-05: 20261115000000 replaced the 20261010000000 function).
+const MIGRATION = "supabase/migrations/20261115000000_account_suspension.sql";
 const SIGNUP = "src/app/api/signup/route.ts";
 const BETA = "src/lib/beta.ts";
 const OVERAGE = "src/app/api/billing/overage/route.ts";

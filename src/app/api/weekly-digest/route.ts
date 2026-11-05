@@ -5,6 +5,7 @@ import { sendWeeklyDigestEmail } from "@/lib/email/send-weekly-digest-email";
 import { logApiError } from "@/lib/log-error";
 import { collectDigestFacts } from "@/lib/notify/digest-data";
 import { buildDigest } from "@/lib/notify/digest";
+import { isSuspended } from "@/lib/auth/suspension";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +53,9 @@ export async function GET(request: Request) {
     let failed = 0;
 
     for (const user of usersData.users) {
-      if (!user.email) continue;
+      // Nothing is sent to a suspended account (2026-11-05 review, A1);
+      // listUsers already carries what lib/auth/suspension.ts reads.
+      if (!user.email || isSuspended(user)) continue;
 
       try {
         const facts = await collectDigestFacts({ userId: user.id, now });

@@ -8,6 +8,7 @@ import { readFlow } from "@/lib/automations/boxes";
 import { nextRunFor } from "@/lib/automations/flow-access";
 import { accountFor, startRun } from "@/lib/automations/start-run";
 import { runQueued, type QueuedRun } from "@/lib/automations/event-runs";
+import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // @function-limit 300
@@ -75,13 +76,16 @@ export async function GET(request: Request) {
     if (interruptError) logApiError("/api/cron/automation-flows", interruptError, { stage: "interrupted" });
     report.interrupted = interrupted?.length ?? 0;
 
-    // 3. What is due.
+    // 3. What is due — never a suspended account's (2026-11-05 review, A1;
+    // lib/auth/suspended-accounts.ts), excluded in the query, not after it.
+    const suspended = await suspendedUserIds(admin, "/api/cron/automation-flows");
     const { data: due, error: dueError } = await admin
       .from("automation_flows")
       .select("id, user_id, name, boxes, cost_limit, time_zone")
       .eq("is_active", true)
       .not("next_run_at", "is", null)
       .lte("next_run_at", nowIso)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("next_run_at", { ascending: true })
       .limit(MAX_FLOWS_PER_TICK);
     if (dueError) {
@@ -160,6 +164,7 @@ export async function GET(request: Request) {
       .from("automation_runs")
       .select("id, flow_id, user_id, event_ref")
       .eq("status", "queued")
+      .not("user_id", "in", suspendedIn(suspended))
       .order("started_at", { ascending: true })
       .limit(MAX_EVENT_RUNS_PER_TICK);
     if (queuedError) logApiError("/api/cron/automation-flows", queuedError, { stage: "queued" });

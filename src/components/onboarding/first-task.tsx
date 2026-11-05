@@ -8,6 +8,7 @@ import { ArrowRight, FileSpreadsheet, ListChecks, Lightbulb, PenLine } from "luc
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { FIRST_TASKS, firstTaskHref, goalFor, type FirstTaskId } from "@/lib/onboarding/first-tasks";
+import { armSendOnArrival } from "@/lib/nav/send-on-arrival";
 import { MAX_EXAMPLE_CHARS } from "@/lib/overview/first-screen-examples";
 
 /**
@@ -55,6 +56,9 @@ export function FirstTask({ name }: { name: string | null }) {
       // The task matters more than the record of it: a lost record only
       // means this screen is offered once more, from Home.
     }
+    // The press is the app's own, so Chat sends the task on arrival
+    // instead of only filling its field (lib/nav/send-on-arrival.ts).
+    armSendOnArrival(href);
     router.push(href);
   }
 

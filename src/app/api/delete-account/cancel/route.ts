@@ -4,6 +4,7 @@ import { cancelDeletion } from "@/lib/account/pending-deletion";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 // @service-role-justified token-auth — the cancel token from the emailed
 // link IS the proof of identity, same pattern as the deletion confirm route.
@@ -15,6 +16,13 @@ const CANCEL_WINDOW_MINUTES = 60;
 
 export async function POST(request: Request) {
   try {
+    // JSON ONLY (2026-11-05 review, A5; lib/security/cross-site.ts): a
+    // form on another site can post anything else without the browser
+    // asking first.
+    if (requireJsonBody(request)) {
+      return NextResponse.json({ ok: false, code: "invalid_request" }, { status: 415 });
+    }
+
     const ip = getClientIp(request);
     const { allowed } = await checkRateLimit({
       scope: "delete_account_cancel",

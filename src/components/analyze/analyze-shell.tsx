@@ -34,6 +34,7 @@ import { useFilesFailureWords } from "@/components/files/failure-words";
 import type { Citation } from "@/lib/files/answer";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { HelpTip } from "@/components/ui/help-tip";
+import { shareReasonMessage, sharedReasonText } from "@/lib/files/share-outcome";
 
 /** The longest name /api/files/collections keeps (its MAX_NAME). */
 const MAX_COLLECTION_NAME = 80;
@@ -193,14 +194,17 @@ export function AnalyzeShell({
     const stored = Number(params.get("shared") ?? 0);
     const failed = Number(params.get("share_failed") ?? 0);
     const dropped = Number(params.get("share_dropped") ?? 0);
-    const reason = params.get("share_reason");
+    // A CODE, NEVER TEXT (lib/files/share-outcome.ts): the address can be
+    // written by anybody, so only a known refusal stage is told, in this
+    // screen's own words, and anything else in it is ignored.
+    const reason = shareReasonMessage(params.get("share_reason"));
     if (params.get("share_error") === "rate_limit") {
       addToast(tFiles("sharedRateLimit"), "error");
     } else {
       if (stored > 0) addToast(tFiles("sharedStored", { count: stored }), "success");
       if (failed > 0) {
         addToast(
-          reason ? `${tFiles("sharedFailed", { count: failed })} ${tFiles("sharedReason", { reason })}` : tFiles("sharedFailed", { count: failed }),
+          reason ? `${tFiles("sharedFailed", { count: failed })} ${tFiles("sharedReason", { reason: sharedReasonText(tFiles, reason) })}` : tFiles("sharedFailed", { count: failed }),
           "error"
         );
       }

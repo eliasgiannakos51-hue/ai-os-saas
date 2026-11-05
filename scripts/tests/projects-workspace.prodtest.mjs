@@ -52,15 +52,15 @@ const PROJECTS = [
 // through the module registry) actually runs end to end in the built
 // app, not just in projects.test.mjs's own pure-function checks, AND
 // that the five boxes read real counts, not a hardcoded shape.
-const IMAGES = [{ id: "im1", prompt: "Αφίσα για καλοκαιρινή προσφορά", status: "done", created_at: "2026-08-16T10:00:00Z" }];
-const WEBSITES = [{ id: "w1", name: "Το καλοκαιρινό site", status: "done", created_at: "2026-08-17T10:00:00Z" }];
-const POSTS = [{ id: "po1", description: "Σετ αναρτήσεων Αυγούστου", status: "done", created_at: "2026-08-18T10:00:00Z" }];
-const DOCUMENTS = [{ id: "do1", title: "Προσφορά καλοκαιρινής καμπάνιας", created_at: "2026-08-19T10:00:00Z" }];
+const IMAGES = [{ id: "im1", user_id: MOCK_USER.id, prompt: "Αφίσα για καλοκαιρινή προσφορά", status: "done", created_at: "2026-08-16T10:00:00Z" }];
+const WEBSITES = [{ id: "w1", user_id: MOCK_USER.id, name: "Το καλοκαιρινό site", status: "done", created_at: "2026-08-17T10:00:00Z" }];
+const POSTS = [{ id: "po1", user_id: MOCK_USER.id, description: "Σετ αναρτήσεων Αυγούστου", status: "done", created_at: "2026-08-18T10:00:00Z" }];
+const DOCUMENTS = [{ id: "do1", user_id: MOCK_USER.id, title: "Προσφορά καλοκαιρινής καμπάνιας", created_at: "2026-08-19T10:00:00Z" }];
 const ENTITY_LINKS = [
-  { source_table: "generated_images", source_id: "im1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-16T10:05:00Z" },
-  { source_table: "user_websites", source_id: "w1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-17T10:05:00Z" },
-  { source_table: "generated_posts", source_id: "po1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-18T10:05:00Z" },
-  { source_table: "user_documents", source_id: "do1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-19T10:05:00Z" },
+  { user_id: MOCK_USER.id, source_table: "generated_images", source_id: "im1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-16T10:05:00Z" },
+  { user_id: MOCK_USER.id, source_table: "user_websites", source_id: "w1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-17T10:05:00Z" },
+  { user_id: MOCK_USER.id, source_table: "generated_posts", source_id: "po1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-18T10:05:00Z" },
+  { user_id: MOCK_USER.id, source_table: "user_documents", source_id: "do1", target_table: "projects", target_id: PROJECT_1, relationship_type: "in_project", created_at: "2026-08-19T10:05:00Z" },
 ];
 // Κομμάτι 6 ("κάτω πεδίο που φτιάχνει μέσα στο project"): empty until the
 // new section below approves one, through the real POST /api/flows and

@@ -6,11 +6,18 @@ import { logApiError } from "@/lib/log-error";
 //
 // Two layers, serving different purposes:
 //   1. The OAuth user access token (stored encrypted in github_connections)
-//      identifies the PERSON — it lists their installations and their own
-//      repos. It is long-lived and refreshed by GitHub automatically.
-//   2. The installation access token (generated here on demand, NEVER stored)
-//      gives access to the REPOSITORIES the person granted. It expires in
-//      one hour and is cheap to mint — just a JWT signature and one POST.
+//      identifies the PERSON. lib/github/permission.ts asks GitHub, with it,
+//      which installations and repositories this person can reach and with
+//      what permissions — before every repository operation. It lasts until
+//      revoked only when the App opts out of token expiry; with expiry on
+//      (GitHub's default) it lasts eight hours, the next call after that is
+//      refused with 401, and the connection is marked "expired" so the
+//      Coding screen offers Connect again (docs/NEEDS-FROM-ELIAS.md, 11).
+//   2. The installation access token (minted here on demand, NEVER stored)
+//      does the work. It is minted only by createRepoScopedToken: for ONE
+//      repository id and only the permissions one operation needs, and only
+//      after permission.ts has checked the person (SECURITY-AUDIT ΑΣ-1.15).
+//      There is no installation-wide token anywhere in this codebase.
 //
 // The App's private key never leaves this file. It arrives base64-encoded
 // from GITHUB_APP_PRIVATE_KEY (Vercel encodes PEM files this way because
@@ -71,9 +78,30 @@ export type InstallationToken = {
   expiresAt: Date;
 };
 
-export async function createInstallationToken(
-  installationId: number
+/** The installation-token permissions an operation may ask for. */
+export type RepoTokenPermissions = Readonly<
+  Partial<Record<"metadata" | "contents" | "pull_requests" | "checks", "read" | "write">>
+>;
+
+const PERMISSION_RANK = { read: 1, write: 2 } as const;
+
+/**
+ * An installation token that can reach ONE repository, with only
+ * `permissions`. Both are always sent: without `repository_ids` GitHub
+ * scopes the token to every repository of the installation, and without
+ * `permissions` to everything the App was granted.
+ *
+ * What GitHub hands back is checked too, and anything wider than asked for
+ * is refused rather than used.
+ */
+export async function createRepoScopedToken(
+  installationId: number,
+  repositoryId: number,
+  permissions: RepoTokenPermissions
 ): Promise<InstallationToken | null> {
+  if (!Number.isSafeInteger(installationId) || installationId <= 0) return null;
+  if (!Number.isSafeInteger(repositoryId) || repositoryId <= 0) return null;
+  if (Object.keys(permissions).length === 0) return null;
   try {
     const jwt = createAppJwt();
     const response = await fetch(
@@ -84,59 +112,49 @@ export async function createInstallationToken(
           Authorization: `Bearer ${jwt}`,
           Accept: "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ repository_ids: [repositoryId], permissions }),
         cache: "no-store",
       }
     );
     if (!response.ok) {
       logApiError("github:installation-token", new Error(`${response.status}`), {
         installationId,
+        repositoryId,
       });
       return null;
     }
-    const body = (await response.json()) as { token?: string; expires_at?: string };
+    const body = (await response.json()) as {
+      token?: string;
+      expires_at?: string;
+      repository_selection?: string;
+      repositories?: Array<{ id?: number }>;
+      permissions?: Record<string, string>;
+    };
     if (!body.token) return null;
+    const wider =
+      (body.repository_selection !== undefined && body.repository_selection !== "selected") ||
+      (Array.isArray(body.repositories) && body.repositories.some((r) => r.id !== repositoryId)) ||
+      Object.entries(body.permissions ?? {}).some(([key, level]) => {
+        const asked = permissions[key as keyof RepoTokenPermissions];
+        const got = PERMISSION_RANK[level as keyof typeof PERMISSION_RANK] ?? 3;
+        return !asked || got > PERMISSION_RANK[asked];
+      });
+    if (wider) {
+      logApiError("github:installation-token", new Error("token wider than requested"), {
+        installationId,
+        repositoryId,
+      });
+      return null;
+    }
     return {
       token: body.token,
       expiresAt: new Date(body.expires_at ?? Date.now() + 3_500_000),
     };
   } catch (err) {
-    logApiError("github:installation-token", err, { installationId });
+    logApiError("github:installation-token", err, { installationId, repositoryId });
     return null;
-  }
-}
-
-// Lists installations accessible to a user via their OAuth access token.
-export async function listUserInstallations(
-  userAccessToken: string
-): Promise<Array<{ id: number; account: { login: string }; repositorySelection: string }>> {
-  try {
-    const response = await fetch(
-      "https://api.github.com/user/installations?per_page=100",
-      {
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-        cache: "no-store",
-      }
-    );
-    if (!response.ok) return [];
-    const body = (await response.json()) as {
-      installations?: Array<{
-        id: number;
-        account: { login: string };
-        repository_selection: string;
-      }>;
-    };
-    return (body.installations ?? []).map((i) => ({
-      id: i.id,
-      account: { login: i.account.login },
-      repositorySelection: i.repository_selection,
-    }));
-  } catch {
-    return [];
   }
 }
 

@@ -9,6 +9,16 @@ import {
 } from "@/lib/integrations/crypto";
 import type { GitHubConnectionSummary, GitHubConnectionStatus } from "@/lib/github/types";
 
+// THE installation_id COLUMN IS NO LONGER AN INPUT TO ANYTHING (2026-11-05,
+// SECURITY-AUDIT ΑΣ-1.15). It held the first installation the person could
+// reach at connect time, and every repository operation acted through it —
+// which is how a member of an organisation could act on repositories they
+// had no access to, and kept that reach after being removed. The
+// installation is now resolved per request from the person's own token
+// (lib/github/permission.ts). saveGitHubConnection writes the column as
+// null, so a reconnect also clears a value an earlier build stored, and
+// nothing reads it.
+
 type ConnectionRow = {
   id: string;
   user_id: string;
@@ -23,7 +33,6 @@ type ConnectionRow = {
 function summarise(row: ConnectionRow): GitHubConnectionSummary {
   return {
     login: row.github_login,
-    installationId: row.installation_id,
     status: row.status,
     connectedAt: row.connected_at,
   };
@@ -46,9 +55,11 @@ export async function getGitHubConnection(
   return summarise(data as ConnectionRow);
 }
 
+/** The person's own GitHub token — only for a connection that still works.
+ *  An expired, revoked or undecryptable one answers "reconnect". */
 export async function getGitHubAccessToken(
   userId: string
-): Promise<{ ok: true; token: string; installationId: number | null } | { ok: false; reason: string }> {
+): Promise<{ ok: true; token: string } | { ok: false; reason: string }> {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("github_connections")
@@ -62,14 +73,14 @@ export async function getGitHubAccessToken(
   if (!data) return { ok: false, reason: "not_connected" };
 
   const row = data as ConnectionRow;
-  if (row.status === "revoked") return { ok: false, reason: "revoked" };
+  if (row.status !== "connected") return { ok: false, reason: "reconnect" };
 
   try {
     const token = decryptSecret(
       row.access_token_encrypted,
       tokenContext(userId, "github", "access")
     );
-    return { ok: true, token, installationId: row.installation_id };
+    return { ok: true, token };
   } catch (err) {
     logApiError("github:decrypt", safeErrorDetail(err), { userId });
     await markStatus(row.id, "error");
@@ -82,7 +93,6 @@ export async function saveGitHubConnection(params: {
   githubUserId: number;
   githubLogin: string;
   accessToken: string;
-  installationId: number | null;
 }): Promise<{ ok: true; id: string } | { ok: false; reason: string }> {
   try {
     const admin = createAdminClient();
@@ -94,7 +104,7 @@ export async function saveGitHubConnection(params: {
         params.accessToken,
         tokenContext(params.userId, "github", "access")
       ),
-      installation_id: params.installationId,
+      installation_id: null,
       connected_at: new Date().toISOString(),
       status: "connected" as const,
     };
@@ -119,20 +129,23 @@ export async function saveGitHubConnection(params: {
   }
 }
 
-export async function updateInstallationId(
+/** Marks the person's connection as needing a reconnect: their token was
+ *  refused (expired) or their access to the installation is gone (revoked).
+ *  The status route then reports it as not connected. */
+export async function markGitHubConnectionStatus(
   userId: string,
-  installationId: number
-): Promise<boolean> {
-  const admin = createAdminClient();
-  const { error } = await admin
-    .from("github_connections")
-    .update({ installation_id: installationId })
-    .eq("user_id", userId);
-  if (error) {
-    logApiError("github:update-installation", error, { userId });
-    return false;
+  status: Exclude<GitHubConnectionStatus, "connected">
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("github_connections")
+      .update({ status })
+      .eq("user_id", userId);
+    if (error) logApiError("github:mark-status", error, { userId, status });
+  } catch (err) {
+    logApiError("github:mark-status", err, { userId, status });
   }
-  return true;
 }
 
 export async function disconnectGitHub(

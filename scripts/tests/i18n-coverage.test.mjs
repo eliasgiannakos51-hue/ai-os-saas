@@ -843,7 +843,12 @@ const clientFallbacks = sources.flatMap((f) => [
 // the "real refactor" named above actually looks like now that it exists in
 // the tree. Converting these eleven is a change to the cancel-deletion
 // flow's own screens and belongs with that flow, not inside a gate fix.
-const SERVER_PROSE_BASELINE = 699;
+// 699 -> 697 on 2026-11-05 (SECURITY-AUDIT ΑΣ-1.15), read off the run: the
+// GitHub routes stopped answering "Missing repo parameter (owner/name)."
+// (branches) and "Invalid repo format." (files, commit) — the repository
+// name is now refused with reason "invalid_repo" by lib/github/access.ts —
+// and files gained one, "Invalid path.". Three out, one in.
+const SERVER_PROSE_BASELINE = 697;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

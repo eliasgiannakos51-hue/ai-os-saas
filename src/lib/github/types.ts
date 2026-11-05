@@ -8,7 +8,6 @@ export type GitHubConnectionStatus = "connected" | "expired" | "revoked" | "erro
 
 export type GitHubConnectionSummary = {
   login: string;
-  installationId: number | null;
   status: GitHubConnectionStatus;
   connectedAt: string;
 };

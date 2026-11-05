@@ -331,7 +331,12 @@ console.log(
 // agents-shell.mutation.mjs is the one that pushed it to six. The
 // ratchet is a floor on how many gates have a suite at all, so it is
 // raised to the truth rather than to a comfortable number below it.
-const RATCHET = 304;
+// 304 -> 312 on 2026-11-05, read off the run (declared=304 measured=312).
+// Three of the eight are this round's: github-repo-access.mutation.mjs
+// covers a new gate, and github-security / github-user-isolation had
+// never had a suite until SECURITY-AUDIT ΑΣ-1.15 rewrote what they hold.
+// The other five had accumulated inside the tolerated five before it.
+const RATCHET = 312;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

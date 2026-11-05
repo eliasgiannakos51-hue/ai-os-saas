@@ -2,17 +2,16 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
-import { REFERENCE_IMAGE_BUCKET } from "@/lib/website-reference-image";
-import { findOrphanImages, type StoredFile } from "@/lib/websites/orphan-images";
-import { normalisePages } from "@/lib/publishing/website-pages";
+import { runStorageCleanup } from "@/lib/websites/storage-cleanup";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
-// A full sweep lists every user folder and reads four tables. 300s is
-// generous for the scale this runs at today and is the floor the app
-// gives every long-running route; the marker is what scripts/tests/
+// A full sweep lists every user folder and reads five tables to the end.
+// 300s is generous for the scale this runs at today and is the floor the
+// app gives every long-running route; the marker is what scripts/tests/
 // function-limits.test.mjs requires so the number is declared rather
-// than inherited from whatever the platform tier happens to allow.
+// than inherited from whatever the platform tier happens to allow. A run
+// cut off by it has deleted nothing: every read comes before any delete.
 export const maxDuration = 300; // @function-limit 300
 
 /**
@@ -30,9 +29,15 @@ export const maxDuration = 300; // @function-limit 300
  * decided in lib/websites/orphan-images.ts where it can be tested without
  * deleting anything.
  *
+ * THE READS AND THE DELETES live in lib/websites/storage-cleanup.ts:
+ * every in-use read is paged to the end and counted, any incomplete read
+ * deletes nothing, and a run that would delete more than a small share
+ * of the bucket stops and is reported here instead.
+ *
  * DRY RUN BY DEFAULT is deliberately NOT the case — a cleanup nobody runs
  * is the state this replaces. It deletes, and it reports what it kept and
- * why, so the first run can be read rather than trusted.
+ * why, so the first run can be read rather than trusted. `?dry=1` reports
+ * without deleting.
  *
  * Auth: CRON_SECRET, fail-closed, same as every other cron route.
  */
@@ -42,102 +47,21 @@ export async function GET(request: Request) {
 
   const dryRun = new URL(request.url).searchParams.get("dry") === "1";
   const admin = createAdminClient();
-  const nowMs = Date.now();
 
   try {
-    // EVERY document that could still embed an upload, from all four
-    // tables that carry a site's HTML. Missing one of them is how a
-    // cleanup deletes a photograph a published site is serving.
-    const documents: string[] = [];
-    const collect = (rows: { html_content?: unknown; pages?: unknown }[] | null) => {
-      for (const row of rows ?? []) {
-        if (typeof row.html_content === "string") documents.push(row.html_content);
-        for (const page of normalisePages(row.pages).pages) documents.push(page.html);
-      }
-    };
-
-    const tables = ["user_websites", "published_sites", "website_versions", "site_versions"] as const;
-    for (const table of tables) {
-      const { data, error } = await admin.from(table).select("html_content, pages").limit(50_000);
-      if (error) throw error;
-      collect(data as { html_content?: unknown; pages?: unknown }[]);
+    const report = await runStorageCleanup(admin, { nowMs: Date.now(), dryRun });
+    if (!report.ok) {
+      // Logged, so it reaches the owner's error list rather than only the
+      // cron's response body, which nobody reads.
+      logApiError("/api/cron/website-storage-cleanup", new Error("cleanup stopped: over the deletion ceiling"), {
+        stage: "ceiling",
+        wouldDelete: report.wouldDelete,
+        scanned: report.scanned,
+        ceiling: report.ceiling,
+      });
+      return NextResponse.json(report, { status: 409 });
     }
-
-    const { data: refRows, error: refError } = await admin
-      .from("website_reference_images")
-      .select("image_url")
-      .limit(50_000);
-    if (refError) throw refError;
-    const referencedPaths = new Set(
-      (refRows ?? [])
-        .map((r) => String(r.image_url ?? ""))
-        .filter(Boolean)
-        // The column stores a Storage PATH, not a URL, despite its name
-        // (see the WebsiteReferenceImage type). Both forms are accepted
-        // so a row written either way still protects its file.
-        .map((value) => {
-          const marker = `/${REFERENCE_IMAGE_BUCKET}/`;
-          const at = value.indexOf(marker);
-          return at === -1 ? value : value.slice(at + marker.length);
-        })
-    );
-
-    // Storage lists per folder, and the folder is the user id.
-    const { data: folders, error: foldersError } = await admin.storage
-      .from(REFERENCE_IMAGE_BUCKET)
-      .list("", { limit: 10_000 });
-    if (foldersError) throw foldersError;
-
-    let deleted = 0;
-    let scanned = 0;
-    const keptReasons: Record<string, number> = {};
-    const sample: string[] = [];
-
-    for (const folder of folders ?? []) {
-      // A folder entry has no metadata; a file does. Anything with
-      // metadata at the root is not a user folder and is skipped rather
-      // than treated as one.
-      if (folder.metadata) continue;
-      const userId = folder.name;
-      const files: StoredFile[] = [];
-      const PAGE = 100;
-      for (let offset = 0; offset <= 10_000; offset += PAGE) {
-        const { data, error } = await admin.storage
-          .from(REFERENCE_IMAGE_BUCKET)
-          .list(userId, { limit: PAGE, offset });
-        if (error) throw error;
-        const page = data ?? [];
-        for (const file of page) {
-          if (!file.metadata) continue;
-          files.push({
-            path: `${userId}/${file.name}`,
-            createdAtMs: file.created_at ? new Date(file.created_at).getTime() : 0,
-          });
-        }
-        if (page.length < PAGE) break;
-      }
-      scanned += files.length;
-
-      const { orphans, kept } = findOrphanImages({ files, referencedPaths, documents, nowMs });
-      for (const k of kept) keptReasons[k.reason] = (keptReasons[k.reason] ?? 0) + 1;
-      if (orphans.length === 0) continue;
-      if (sample.length < 10) sample.push(...orphans.slice(0, 10 - sample.length));
-      if (dryRun) {
-        deleted += orphans.length;
-        continue;
-      }
-      // In batches: remove() takes a list, and a single call with
-      // thousands of paths is one request that either works or does not.
-      for (let i = 0; i < orphans.length; i += 100) {
-        const { error } = await admin.storage
-          .from(REFERENCE_IMAGE_BUCKET)
-          .remove(orphans.slice(i, i + 100));
-        if (error) throw error;
-        deleted += Math.min(100, orphans.length - i);
-      }
-    }
-
-    return NextResponse.json({ ok: true, dryRun, scanned, deleted, keptReasons, sample });
+    return NextResponse.json(report);
   } catch (err) {
     logApiError("/api/cron/website-storage-cleanup", err);
     return NextResponse.json({ ok: false, error: "Cleanup failed." }, { status: 500 });

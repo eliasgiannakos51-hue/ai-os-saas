@@ -67,13 +67,13 @@ const DECLARED = {
   "src/app/api/cron/execute-deletions/route.ts":
     "refuses, the same way delete-account/confirm does, one account at a time. The subscription is cancelled before deleteUser, while the metadata holding its id still exists, and a Stripe failure gives the row's claim back (releaseExecution) and `continue`s past that account: no deleteUser, the pending_deletions row is open again, and the next daily run (vercel.json, 02:00 UTC) tries again. An account is never deleted while its card is still being charged.",
   "src/app/api/billing/addons/route.ts":
-    "refuses. If Stripe will not remove the subscription item, the row is NOT marked cancelled: the add-on stays active and the person is told. The exception is an item Stripe reports as already gone, where refusing would strand a row that has nothing behind it.",
+    "refuses. If Stripe will not set the add-on's own subscription to cancel at period end, no row is marked cancelled: the add-on stays active and the person is told. A subscription that is not the add-on's own is refused, never touched. The exception is a subscription Stripe reports as already gone, where refusing would strand a row that has nothing behind it.",
   "src/app/api/billing/cancel/route.ts":
-    "sets cancel_at_period_end and only then records it, so a Stripe failure throws before anything local changes. Nothing is half-done: the subscription is either flagged at Stripe or it is not.",
+    "releases a waiting downgrade schedule, sets cancel_at_period_end, and only then records it, so a Stripe failure throws before anything local changes. Nothing is half-done: the subscription is either flagged at Stripe or it is not.",
   "src/app/api/billing/resume/route.ts":
     "the same shape in reverse — the flag is cleared at Stripe first, and the local state follows.",
   "src/app/api/checkout/route.ts":
-    "creates a checkout SESSION, which grants nothing until Stripe's webhook says it was paid. An abandoned session expires on its own and there is no local state to disagree with.",
+    "creates a checkout SESSION, which grants nothing until Stripe's webhook says it was paid. An abandoned session expires on its own and there is no local state to disagree with. A plan change writes nothing locally either: an upgrade is a pending update Stripe applies only once paid, a downgrade a schedule that changes nothing until the period ends, and a failure on a live subscription is a 502 with no second session sold.",
   "src/app/api/credits/checkout/route.ts":
     "the same: a session, not an entitlement. The credits are granted by the webhook.",
   "src/app/api/webhooks/stripe/route.ts":
@@ -96,9 +96,19 @@ for (const [f, why] of Object.entries(DECLARED)) {
 // THE TWO THAT WERE WRONG, ASSERTED EXACTLY.
 // ---------------------------------------------------------------------
 const ADDONS = SOURCE.get("src/app/api/billing/addons/route.ts") ?? "";
-const delAt = ADDONS.indexOf("stripe.subscriptionItems.del");
-const markAt = ADDONS.indexOf('.from("account_addons")\n      .update({\n        status: "cancelled"');
-check("the add-on route deletes the subscription item", delAt >= 0);
+// THROUGH THE ADD-ON'S OWN SUBSCRIPTION since 2026-11-05 (ΑΣ-4.17): this
+// asserted `stripe.subscriptionItems.del`, which Stripe refuses on the only
+// item of a subscription — so it pinned a cancel that never worked.
+const delAt = ADDONS.indexOf("await stripe.subscriptions.update(subscription.id, { cancel_at_period_end: true })");
+const markAt = ADDONS.indexOf('.from("account_addons")\n        .update({\n          status: "cancelled"');
+check("the add-on route stops the add-on's own subscription at period end", delAt >= 0);
+check("…and the place it marks the row cancelled is found (or the order check below is vacuous)", markAt > 0);
+check(
+  "…only after checking the subscription is the add-on's own",
+  ADDONS.indexOf("subscription.metadata?.addon_slug !== slug") > 0 &&
+    ADDONS.indexOf("subscription.metadata?.addon_slug !== slug") < delAt,
+  "an item id that leads to the plan's subscription would cancel the plan"
+);
 // INSIDE THE CATCH AND BEFORE THE UPDATE, by position rather than by a
 // window: the block is long enough that any fixed lookahead is a guess.
 const catchAt = ADDONS.indexOf("catch (stripeError)");

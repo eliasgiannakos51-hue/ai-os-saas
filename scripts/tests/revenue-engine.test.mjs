@@ -85,8 +85,22 @@ const CONSENTED = {
   consentVersion: overage.OVERAGE_CONSENT_VERSION,
 };
 
+// EVERY CASE BELOW IS A LIVE SUBSCRIBER unless it says otherwise: since
+// 2026-11-05 (ΑΣ-4.16) decideOverage requires the subscription to be live
+// at the moment of use, and the cases here are about the consent.
+const decide = (params) => overage.decideOverage({ subscriptionActive: true, ...params });
 {
-  const off = overage.decideOverage({ settings: overage.OVERAGE_OFF, shortfall: 100, spentEur: 0 });
+  // AT THE MOMENT OF USE, NOT ONLY AT CONSENT. The subscription was
+  // checked once, when overage was switched on; after it ended, the
+  // consent stood and every action kept charging overage.
+  const lapsed = overage.decideOverage({ settings: CONSENTED, shortfall: 100, spentEur: 0, subscriptionActive: false });
+  ok("full consent with no live subscription is refused", lapsed.allowed === false, JSON.stringify(lapsed));
+  eq("…and says why", lapsed.reason, "no_subscription");
+  const unsaid = overage.decideOverage({ settings: CONSENTED, shortfall: 100, spentEur: 0 });
+  ok("…and a caller that does not say is refused too", unsaid.allowed === false, JSON.stringify(unsaid));
+}
+{
+  const off = decide({ settings: overage.OVERAGE_OFF, shortfall: 100, spentEur: 0 });
   ok("THE DEFAULT REFUSES", off.allowed === false, JSON.stringify(off));
   eq("…and says it is not enabled, so the UI can offer the dialog", off.reason, "not_enabled");
 }
@@ -102,13 +116,13 @@ const CONSENTED = {
     ["no consent version", { ...CONSENTED, consentVersion: null }],
   ];
   for (const [label, settings] of cases) {
-    const verdict = overage.decideOverage({ settings, shortfall: 10, spentEur: 0 });
+    const verdict = decide({ settings, shortfall: 10, spentEur: 0 });
     ok(`enabled with ${label} still refuses`, verdict.allowed === false, JSON.stringify(verdict));
   }
 }
 {
   // CONSENT UNDER SUPERSEDED TERMS IS NOT CONSENT TO THESE ONES.
-  const stale = overage.decideOverage({
+  const stale = decide({
     settings: { ...CONSENTED, consentVersion: overage.OVERAGE_CONSENT_VERSION - 1 },
     shortfall: 10,
     spentEur: 0,
@@ -117,7 +131,7 @@ const CONSENTED = {
   eq("…and says why, so the user is asked again rather than blocked", stale.reason, "consent_out_of_date");
 }
 {
-  const allowed = overage.decideOverage({ settings: CONSENTED, shortfall: 100, spentEur: 0 });
+  const allowed = decide({ settings: CONSENTED, shortfall: 100, spentEur: 0 });
   ok("full consent allows the charge", allowed.allowed === true, JSON.stringify(allowed));
   eq("…priced at what they agreed to", allowed.pricePerCreditEur, 0.03);
   eq("…for the shortfall only, not the whole action", allowed.credits, 100);
@@ -126,7 +140,7 @@ const CONSENTED = {
 {
   // THE PRICE IS THE ONE THEY AGREED TO, not today's list. A rise applied
   // to standing consent is a charge nobody agreed to.
-  const old = overage.decideOverage({
+  const old = decide({
     settings: { ...CONSENTED, pricePerCreditEur: 0.01 },
     shortfall: 100,
     spentEur: 0,
@@ -137,21 +151,21 @@ const CONSENTED = {
 
 console.log("\n-- the cap is a ceiling --");
 {
-  const atCap = overage.decideOverage({ settings: CONSENTED, shortfall: 10, spentEur: 10 });
+  const atCap = decide({ settings: CONSENTED, shortfall: 10, spentEur: 10 });
   ok("nothing is charged once the cap is reached", atCap.allowed === false);
   eq("…and it says so", atCap.reason, "cap_reached");
 
   // REFUSED WHOLE, NOT PART-CHARGED. Charging for four of five credits
   // leaves a half-done action the user paid for.
-  const crossing = overage.decideOverage({ settings: CONSENTED, shortfall: 200, spentEur: 9.5 });
+  const crossing = decide({ settings: CONSENTED, shortfall: 200, spentEur: 9.5 });
   ok("an action that would cross the cap is refused ENTIRELY", crossing.allowed === false, JSON.stringify(crossing));
   eq("…for that reason", crossing.reason, "would_exceed_cap");
 
-  const fits = overage.decideOverage({ settings: CONSENTED, shortfall: 10, spentEur: 9.5 });
+  const fits = decide({ settings: CONSENTED, shortfall: 10, spentEur: 9.5 });
   ok("…while one that fits inside the remainder is allowed", fits.allowed === true, JSON.stringify(fits));
 }
 {
-  const nothing = overage.decideOverage({ settings: CONSENTED, shortfall: 0, spentEur: 0 });
+  const nothing = decide({ settings: CONSENTED, shortfall: 0, spentEur: 0 });
   ok("a covered action charges no overage at all", nothing.allowed === false);
   eq("…and is not reported as a refusal the user has to act on", nothing.reason, "nothing_to_charge");
 }
@@ -768,8 +782,10 @@ console.log("\n== 8. THE ONE PLACE OVERAGE CAN HAPPEN, AND THE INVOICE ==");
     enabledTrue.join(" | ")
   );
   ok(
+    // …and to NO SUBSCRIPTION (2026-11-05): an unreadable account is not
+    // a live one, so the subscription half of the decision refuses too.
     "…and every catch falls back to the OFF constant",
-    (store.match(/return \{ \.\.\.OVERAGE_OFF, spentEur: 0, month \};/g) ?? []).length >= 1
+    (store.match(/return \{ \.\.\.OVERAGE_OFF, spentEur: 0, month, subscriptionActive: false \};/g) ?? []).length >= 1
   );
 
   ok("the ledger row is written before the credits are granted",
@@ -837,10 +853,33 @@ console.log("\n== 8. THE ONE PLACE OVERAGE CAN HAPPEN, AND THE INVOICE ==");
 
   // BILLED AT MOST ONCE, three ways: only unbilled rows are picked up,
   // the Stripe call carries an idempotency key, and the rows are marked.
-  ok("only rows that were never invoiced are picked up",
-    /\.is\("stripe_invoice_item_id", null\)/.test(inv) && /\.is\("invoiced_at", null\)/.test(inv));
-  ok("the Stripe call is idempotent per customer per month", /idempotencyKey: `overage:\$\{userId\}:\$\{month\}`/.test(inv));
+  // EACH QUERY, not the file: since 2026-11-05 there are two (the closed
+  // month, and everything outstanding when a subscription ends), and a
+  // file-wide match let either one lose its filter while the other held
+  // the clause green — measured by this file's own mutation suite.
+  const closedMonth = inv.slice(inv.indexOf("export async function billOverageForClosedMonth"), inv.indexOf("export async function billOutstandingOverage"));
+  const outstanding = inv.slice(inv.indexOf("export async function billOutstandingOverage"));
+  for (const [label, body] of [["the closed month", closedMonth], ["what is outstanding at the end", outstanding]]) {
+    ok(`only rows that were never invoiced are picked up (${label})`,
+      body.length > 0 && /\.is\("stripe_invoice_item_id", null\)/.test(body) && /\.is\("invoiced_at", null\)/.test(body));
+  }
+  ok("the Stripe calls are idempotent per customer per month",
+    /idempotencyKey: `overage_item:\$\{runKey\}`/.test(inv) && /runKey: `\$\{userId\}:\$\{month\}`/.test(inv));
   ok("…and the rows are marked once it exists", /stripe_invoice_item_id: item\.id/.test(inv));
+
+  // COLLECTED, NOT LEFT PENDING (2026-11-05, ΑΣ-4.16). A pending item waits
+  // for a next subscription invoice, and an ended subscription has none.
+  ok("the line is attached to its own invoice", /invoice: invoice\.id/.test(inv) && /pending_invoice_items_behavior: "exclude"/.test(inv));
+  ok("…which is finalized, so Stripe collects it now", /stripe\.invoices\.finalizeInvoice\(/.test(inv) && /auto_advance: true/.test(inv));
+  ok("…charged to the card the subscription pays with", /default_payment_method: params\.defaultPaymentMethod/.test(inv));
+  const store = strip(read("src/lib/billing/overage-store.ts"));
+  ok("the decision reads the subscription at the moment of use",
+    /admin\.auth\.admin\.getUserById\(userId\)/.test(store) && /subscriptionActive: state\.subscriptionActive/.test(store));
+  const hook = strip(read("src/app/api/webhooks/stripe/route.ts"));
+  const inactive = hook.slice(hook.indexOf("if (!isActive) {"), hook.indexOf("} else {", hook.indexOf("if (!isActive) {")));
+  ok("a subscription that stops being live switches overage off", /await disableOverage\(supabaseUserId\)/.test(inactive));
+  ok("…and one that ended has what is outstanding invoiced now",
+    /if \(subscription\.status === "canceled"\) \{[\s\S]{0,120}await billOutstandingOverage\(/.test(inactive));
 
   // NEVER THE MONTH STILL RUNNING. Charges are still arriving.
   ok("only a CLOSED month is billed", /previousMonth\(monthKey\(now\)\)/.test(inv));

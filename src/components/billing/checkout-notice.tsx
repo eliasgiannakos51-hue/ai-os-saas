@@ -26,12 +26,15 @@ import { CheckCircle2 } from "lucide-react";
 // claiming it from the least reliable source in the system.
 export function CheckoutNotice() {
   const t = useTranslations("settings.billing.checkout");
-  const [state, setState] = useState<"success" | "cancelled" | null>(null);
+  const [state, setState] = useState<"success" | "cancelled" | "scheduled" | null>(null);
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("checkout");
     if (value === "success") setState("success");
     else if (value === "cancelled") setState("cancelled");
+    // A DOWNGRADE (api/checkout): nothing was paid and nothing changed yet,
+    // so "Payment received" would be untrue. It says when it will change.
+    else if (value === "scheduled") setState("scheduled");
   }, []);
 
   if (!state) return null;
@@ -46,7 +49,7 @@ export function CheckoutNotice() {
       }
     >
       {state === "success" && <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />}
-      {state === "success" ? t("success") : t("cancelled")}
+      {state === "success" ? t("success") : state === "scheduled" ? t("scheduled") : t("cancelled")}
     </p>
   );
 }

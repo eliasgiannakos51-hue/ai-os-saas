@@ -127,7 +127,10 @@ console.log("\n== 5. an add-on never overwrites the plan ==");
 // =====================================================================
 const WEBHOOK = read("src/app/api/webhooks/stripe/route.ts");
 const sync = WEBHOOK.slice(WEBHOOK.indexOf("async function syncSubscriptionToUser"));
-const skip = sync.indexOf("if (subscription.metadata?.addon_slug) return;");
+// Since 2026-11-05 (ΑΣ-4.17) the add-on's own subscription is handed to
+// syncAddonSubscription on the way out, which writes account_addons only;
+// the property held here is the same — it leaves before the plan.
+const skip = sync.indexOf("if (subscription.metadata?.addon_slug) return syncAddonSubscription(subscription);");
 ok("the plan sync returns on an add-on subscription", skip > 0);
 ok("...before it resolves a plan from the price", skip > 0 && skip < sync.indexOf("mergeUserMetadata("));
 

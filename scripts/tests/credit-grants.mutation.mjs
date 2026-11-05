@@ -57,8 +57,8 @@ const MUTANTS = [
     // derived from the session makes every redelivery a fresh grant.
     name: "the credit-pack grant stops keying on the checkout session",
     file: WEBHOOK,
-    from: "stripe_checkout:${session.id}",
-    to: "stripe_checkout:${Date.now()}",
+    from: "idempotencyKey: `stripe_checkout:${session.id}`",
+    to: "idempotencyKey: `stripe_checkout:${Date.now()}`",
     expect: "a credit-pack purchase passes an idempotency key",
   },
   {

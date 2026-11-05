@@ -925,7 +925,8 @@
       "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own.",
       "checkout": {
         "success": "Payment received. Your plan updates here as soon as Stripe confirms it — usually within a few seconds.",
-        "cancelled": "Checkout was cancelled. Nothing was charged."
+        "cancelled": "Checkout was cancelled. Nothing was charged.",
+        "scheduled": "Your plan change is booked. You keep your current plan until the end of the period you have already paid for, and the new one starts then. Nothing is charged today."
       },
       "buyCreditsDescription": "Need more credits this month? Buy a one-time top-up — no subscription change.",
       "creditsAmount": "{count, plural, one {# credit} other {# credits}}"
@@ -1073,7 +1074,7 @@
         "rate": "€{price} per credit, fixed at today's price.",
         "cap": "Never more than €{cap} in one calendar month.",
         "credits": "That buys up to {credits, plural, one {# extra credit} other {# extra credits}}.",
-        "invoice": "Charged as its own line on your next invoice, separate from your plan."
+        "invoice": "Charged on its own invoice after each month, separate from your plan, to the card your plan uses."
       },
       "agree": "Turn on overage",
       "saved": "Saved. You can turn this off at any time.",
@@ -1083,7 +1084,7 @@
       "capReached": "You have reached your limit. Nothing further will be charged until you raise it.",
       "turnOff": "Turn off overage",
       "turnOffNote": "Turning it off stops future charges. Anything already used this month is still invoiced.",
-      "needsSubscription": "Pay-as-you-go is for paying plans: it is billed with your next invoice. Choose a plan first."
+      "needsSubscription": "Pay-as-you-go is for paying plans: it is billed to the card your plan uses, and it stops when the plan ends. Choose a plan first."
     },
     "addons": {
       "title": "Add-ons",

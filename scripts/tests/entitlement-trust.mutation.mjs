@@ -120,7 +120,7 @@ const MUTANTS = [
   {
     name: "the plan sync no longer skips an add-on",
     file: WEBHOOK,
-    from: "  if (subscription.metadata?.addon_slug) return;\n",
+    from: "  if (subscription.metadata?.addon_slug) return syncAddonSubscription(subscription);\n",
     to: "",
     expect: "the plan sync returns on an add-on subscription",
   },

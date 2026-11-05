@@ -74,7 +74,11 @@ checkTrue("it is a security definer function with a pinned search_path", /securi
 
 console.log("\n== 2. the application actually passes idempotency keys ==");
 const CALLERS = [
-  ["src/app/api/webhooks/stripe/route.ts", "stripe_checkout:${session.id}", "a credit-pack purchase"],
+  // THE GRANT'S OWN ARGUMENT, not the bare key: since 2026-11-05 the
+  // refund handler looks the same key up (reversePackForCharge), and a
+  // file-wide match let the grant lose its key while that line held this
+  // clause green — measured by credit-grants.mutation.mjs.
+  ["src/app/api/webhooks/stripe/route.ts", "idempotencyKey: `stripe_checkout:${session.id}`", "a credit-pack purchase"],
   ["src/app/api/signup/route.ts", "signup_grant:${createData.user.id}", "the password signup grant"],
   ["src/app/auth/callback/route.ts", "signup_grant:${user.id}", "the OAuth bootstrap grant"],
 ];

@@ -50,8 +50,8 @@ const MUTANTS = [
   {
     name: "a recurring add-on with no item id is skipped again",
     file: ADDONS,
-    from: "      if (!itemId) {\n        itemId = await recoverSubscriptionItemId(stripe, user, slug);",
-    to: "      if (!itemId) continue;\n      if (false) {\n        itemId = await recoverSubscriptionItemId(stripe, user, slug);",
+    from: "      if (!itemId) {\n        const found = await recoverAddonSubscription(stripe, { userId: user.id, customerId }, slug, claimed);",
+    to: "      if (!itemId) continue;\n      if (false) {\n        const found = await recoverAddonSubscription(stripe, { userId: user.id, customerId }, slug, claimed);",
     expect: "never skipped",
   },
   {
@@ -61,17 +61,17 @@ const MUTANTS = [
     // a failure refuses — which is the distinction worth keeping.
     name: "the recovery stops looking at the subscription's items",
     file: ADDONS,
-    from: "    return subscription.items.data.find((i) => i.price.id === priceId)?.id ?? null;",
-    to: "    void subscription;\n    return null;",
-    expect: "recovered from the account's subscription",
+    from: "      const item = subscription.items.data.find((i) => !priceId || i.price.id === priceId);",
+    to: "      const item = null as null | { id: string };",
+    expect: "recovered from the add-on's own subscription",
   },
   {
     // The dangerous direction: a failed recovery falls through to the
     // local cancellation instead of refusing.
     name: "a failed recovery cancels locally anyway",
     file: ADDONS,
-    from: "            { status: 502 }\n          );\n        }\n        // Write it back",
-    to: "            { status: 200 }\n          );\n        }\n        // Write it back",
+    from: "            { status: 502 }\n          );\n        }\n        itemId = found.itemId;",
+    to: "            { status: 200 }\n          );\n        }\n        itemId = found.itemId;",
     expect: "refuses rather than cancelling locally",
   },
   {

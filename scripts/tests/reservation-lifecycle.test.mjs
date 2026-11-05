@@ -466,7 +466,7 @@ check(
 const ADDONS_SRC = SRC.get("src/app/api/billing/addons/route.ts") ?? "";
 check(
   "cleared: billing/addons' item-id write-back is re-derivable, so losing it costs a lookup",
-  /recoverSubscriptionItemId\(/.test(ADDONS_SRC) &&
+  /recoverAddonSubscription\(/.test(ADDONS_SRC) &&
     /\.update\(\{ stripe_subscription_item_id: itemId \}\)/.test(ADDONS_SRC),
   "the write-back is a cache of something the recovery re-derives; delete the recovery and this becomes a real unchecked write"
 );

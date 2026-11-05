@@ -41,9 +41,27 @@ const MUTANTS = [
     // who just paid for Growth keeps Starter's balance.
     name: "the key drops the plan, so an upgrade is blocked by its own month",
     file: CREDITS,
-    from: "const resetKey = `plan_reset:${userId}:${planSlug}:${creditMonthKey()}`;",
-    to: "const resetKey = `plan_reset:${userId}:${creditMonthKey()}`;",
+    from: "const resetKey = `plan_reset:${userId}:${planSlug}:${periodKey ?? creditMonthKey()}`;",
+    to: "const resetKey = `plan_reset:${userId}:${periodKey ?? creditMonthKey()}`;",
     expect: "both plans reset",
+  },
+  {
+    // THE CALENDAR AGAIN (2026-11-05): the period the webhook passes is
+    // ignored, so one paid period across the 1st has two keys and a
+    // renewal inside a month already claimed is skipped.
+    name: "the key ignores the paid period and uses the calendar month",
+    file: CREDITS,
+    from: "const resetKey = `plan_reset:${userId}:${planSlug}:${periodKey ?? creditMonthKey()}`;",
+    to: "const resetKey = `plan_reset:${userId}:${planSlug}:${creditMonthKey()}`;",
+    expect: "the next paid period is a new reset",
+  },
+  {
+    // A MOVE DOWN REFILLS AGAIN: the clamp is a reset in disguise.
+    name: "the clamp calls the refilling reset instead",
+    file: CREDITS,
+    from: '  const { error } = await admin.rpc("clamp_credits_to_plan", {',
+    to: '  const { error } = await admin.rpc("reset_monthly_credits", {',
+    expect: "…and never the reset that refills",
   },
   {
     name: "the claim is taken AFTER the reset, so the first run is unguarded",

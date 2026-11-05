@@ -81,3 +81,16 @@ export function resolvePlan(
 ): Plan {
   return getPlan(resolvePlanSlug(user)) ?? getPlan("free")!;
 }
+
+/**
+ * Does this account have a subscription the webhook says is live?
+ *
+ * stripe_subscription_id is written by api/webhooks/stripe only while the
+ * subscription is active or trialing, and set to null when it is not — and
+ * it is server-owned (20261010000000_guard_entitlement_metadata.sql). A
+ * customer id is not this: it exists from the first checkout page opened.
+ */
+export function hasLiveSubscription(user: { user_metadata?: Record<string, unknown> | null } | null | undefined): boolean {
+  const id = user?.user_metadata?.stripe_subscription_id;
+  return typeof id === "string" && id.length > 0;
+}

@@ -105,8 +105,44 @@ const MUTANTS = [
     gate: GATE,
     name: "a load failure falls back to overage ON",
     file: STORE,
-    from: "    return { ...OVERAGE_OFF, spentEur: 0, month };\n  }\n}",
-    to: "    return { ...OVERAGE_OFF, enabled: true, spentEur: 0, month };\n  }\n}",
+    from: "    return { ...OVERAGE_OFF, spentEur: 0, month, subscriptionActive: false };\n  }\n}",
+    to: "    return { ...OVERAGE_OFF, enabled: true, spentEur: 0, month, subscriptionActive: false };\n  }\n}",
+  },
+  // ΑΣ-4.16 (2026-11-05): overage after the subscription has ended.
+  {
+    gate: GATE,
+    name: "the decision stops asking whether the subscription is live",
+    file: OVERAGE,
+    from: '  if (params.subscriptionActive !== true) return refuse("no_subscription");',
+    to: "  // subscription not checked",
+  },
+  {
+    gate: GATE,
+    name: "a load failure counts as a live subscription",
+    file: STORE,
+    from: "    return { ...OVERAGE_OFF, spentEur: 0, month, subscriptionActive: false };\n  }\n}",
+    to: "    return { ...OVERAGE_OFF, spentEur: 0, month };\n  }\n}",
+  },
+  {
+    gate: GATE,
+    name: "the overage line is left pending again, never collected",
+    file: INVOICE,
+    from: "  try {\n    await stripe.invoices.finalizeInvoice(",
+    to: "  try {\n    await Promise.resolve(",
+  },
+  {
+    gate: GATE,
+    name: "an ended subscription no longer switches overage off",
+    file: "src/app/api/webhooks/stripe/route.ts",
+    from: "    const overageOff = await disableOverage(supabaseUserId);",
+    to: "    const overageOff = { ok: true };",
+  },
+  {
+    gate: GATE,
+    name: "an ended subscription leaves its overage unbilled",
+    file: "src/app/api/webhooks/stripe/route.ts",
+    from: "      const final = await billOutstandingOverage({",
+    to: "      const final = await (async (_: unknown) => null as null | { billedEur: number })({",
   },
 
   // ------------------------------------------------------------------
@@ -185,10 +221,17 @@ const MUTANTS = [
   },
   {
     gate: GATE,
+    name: "the final bill at cancellation picks up rows already invoiced",
+    file: INVOICE,
+    from: "      .is(\"stripe_invoice_item_id\", null)\n      .is(\"invoiced_at\", null)",
+    to: "      .is(\"invoiced_at\", null)",
+  },
+  {
+    gate: GATE,
     name: "the Stripe call loses its idempotency key, so a retried cron bills twice",
     file: INVOICE,
-    from: "        { idempotencyKey: `overage:${userId}:${month}` }",
-    to: "        {}",
+    from: "    { idempotencyKey: `overage_item:${runKey}` }",
+    to: "    {}",
   },
   {
     gate: GATE,
@@ -208,8 +251,8 @@ const MUTANTS = [
     gate: GATE,
     name: "the invoice amount is sent in euros, so everyone is charged a hundredfold",
     file: INVOICE,
-    from: "          amount: Math.round(amountEur * 100),",
-    to: "          amount: Math.round(amountEur),",
+    from: "      amount: Math.round(amountEur * 100),",
+    to: "      amount: Math.round(amountEur),",
   },
   {
     gate: GATE,

@@ -626,4 +626,16 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261026000000_mcp_servers.sql",
     breaks: "Connect by address: adding an app fails at its final save, and the apps already connected are not listed",
   },
+  {
+    kind: "function",
+    fn: "clamp_credits_to_plan",
+    migration: "20261117000000_billing_reversals.sql",
+    breaks: "a move to a lower plan or the end of a subscription leaves the higher plan's balance in place instead of lowering it to the new allowance",
+  },
+  {
+    kind: "function",
+    fn: "reverse_purchased_credits",
+    migration: "20261117000000_billing_reversals.sql",
+    breaks: "a refunded or lost-dispute credit pack keeps its credits on the balance",
+  },
 ];

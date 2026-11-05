@@ -219,19 +219,23 @@ check(
   `also written by: ${unexpected.join(", ")}`
 );
 
+const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 console.log("\n== 6. the grant ends with the owner's paid period, and only the grant (NEEDS 24) ==");
 {
-  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-  const revoke = strip(readFileSync("src/lib/team/revoke-team-grants.ts", "utf8"));
-  const hook = strip(readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8"));
+  const stripLocal = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const revoke = stripLocal(readFileSync("src/lib/team/revoke-team-grants.ts", "utf8"));
+  const hook = stripLocal(readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8"));
   check(
     "an owner's subscription that stops being active takes the members' grants with it",
     /if \(!isActive\) \{\s*const revoked = await revokeTeamGrants\(supabaseUserId\);/.test(hook)
   );
+  // The add-on early return hands the add-on's own subscription to
+  // syncAddonSubscription since 2026-11-05 (ΑΣ-4.17) instead of returning
+  // bare; what matters here is unchanged — it returns before the team.
+  const addonReturn = "if (subscription.metadata?.addon_slug) return syncAddonSubscription(subscription);";
   check(
     "…after the add-on early return, so an add-on ending is not the plan ending",
-    hook.indexOf("if (subscription.metadata?.addon_slug) return;") > 0 &&
-      hook.indexOf("if (subscription.metadata?.addon_slug) return;") < hook.indexOf("await revokeTeamGrants(")
+    hook.indexOf(addonReturn) > 0 && hook.indexOf(addonReturn) < hook.indexOf("await revokeTeamGrants(")
   );
   check("only the owner's active members are read", /\.eq\("owner_id", ownerId\)\s*\.eq\("status", "active"\)/.test(revoke));
   check(
@@ -243,6 +247,57 @@ console.log("\n== 6. the grant ends with the owner's paid period, and only the g
     /remove: \["team_owner_id", "team_granted_tier"\]/.test(revoke) && !/subscription_tier/.test(revoke)
   );
   check("nothing of theirs is deleted", !/\.delete\(/.test(revoke));
+}
+
+console.log("\n== 7. the grant follows the owner's plan, not only its end (ΑΣ-1.16, 2026-11-05) ==");
+// WHAT WAS FOUND: a member's grant was copied from the owner once, at
+// acceptance, and taken back only when the owner's subscription stopped
+// being active. An owner who moved DOWN — to a plan without team, or with
+// fewer seats — left every member on the old, higher plan, and
+// plan-resolution reads the higher of the two.
+{
+  const policy = await loadTs("src/lib/team/team-grant-policy.ts");
+  const { teamSeatLimit, splitTeamGrants } = policy;
+  eq("no live subscription lends nothing", teamSeatLimit({ tier: "ultimate", seatCount: 0, active: false }), 0);
+  eq("a plan without team lends nothing", teamSeatLimit({ tier: "growth", seatCount: 3, active: true }), 0);
+  eq("Professional lends what was paid for", teamSeatLimit({ tier: "professional", seatCount: 2, active: true }), 2);
+  eq("…never past the plan's own ceiling", teamSeatLimit({ tier: "professional", seatCount: 9, active: true }), 5);
+  check("Ultimate includes its seats (unbounded)", teamSeatLimit({ tier: "ultimate", seatCount: 0, active: true }) === Number.POSITIVE_INFINITY);
+  const members = [
+    { id: "c", memberUserId: "u-c", joinedAt: "2026-10-03T00:00:00Z", invitedAt: "2026-10-01T00:00:00Z" },
+    { id: "a", memberUserId: "u-a", joinedAt: "2026-10-01T00:00:00Z", invitedAt: "2026-10-01T00:00:00Z" },
+    { id: "b", memberUserId: "u-b", joinedAt: "2026-10-02T00:00:00Z", invitedAt: "2026-10-01T00:00:00Z" },
+    { id: "x", memberUserId: null, joinedAt: null, invitedAt: "2026-10-04T00:00:00Z" },
+  ];
+  const two = splitTeamGrants(members, 2);
+  eq("over the seats, the earliest to join keep the grant", two.keep.map((m) => m.memberUserId).join(","), "u-a,u-b");
+  eq("…and the most recently added lose it first", two.revoke.map((m) => m.memberUserId).join(","), "u-c");
+  eq("a row with no account is not a member to grant", splitTeamGrants(members, 99).keep.length, 3);
+  eq("no seats takes every grant back", splitTeamGrants(members, 0).revoke.length, 3);
+
+  const sync = strip(readFileSync("src/lib/team/sync-team-grants.ts", "utf8"));
+  const hook = strip(readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8"));
+  check(
+    "a live owner's every sync re-stamps the team to the owner's tier",
+    /\} else \{\s*const team = await syncTeamGrants\(supabaseUserId, \{ tier: planSlug, seatCount, active: true \}\);/.test(hook)
+  );
+  check("the sync decides with the shared policy", /splitTeamGrants\(rows, teamSeatLimit\(owner\)\)/.test(sync));
+  check(
+    "…re-stamps a kept member to the owner's current tier",
+    /\{ team_granted_tier: owner\.tier, team_owner_id: ownerId \}/.test(sync)
+  );
+  check(
+    "…takes back only the grant, only this owner's",
+    /if \(grantOwner && grantOwner !== ownerId\) continue;/.test(sync) &&
+      /remove: \["team_owner_id", "team_granted_tier"\]/.test(sync)
+  );
+  check("…never a member's own plan, and deletes nothing", !/subscription_tier/.test(sync) && !/\.delete\(/.test(sync));
+  check("…and tells the people who lost it", /dispatchNotification\(\{\s*userId: memberId,/.test(sync) && /userId: ownerId,/.test(sync));
+  check("…with the counts before and after in the webhook's log", /before=\$\{team\.grantedBefore\} after=\$\{team\.grantedAfter\}/.test(hook));
+  check(
+    "accepting an invitation respects the seats the owner has now",
+    /teamSeatLimit\(\{[\s\S]{0,200}\}\);[\s\S]{0,400}\(count \?\? 0\) >= seatLimit\) return;/.test(strip(accept))
+  );
 }
 
 console.log(

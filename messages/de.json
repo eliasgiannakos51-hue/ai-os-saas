@@ -925,7 +925,8 @@
       "noSubscriptionToCancel": "Kein Abo zum Kündigen — Inhaberzugang und Beta-Zeitraum enden von selbst.",
       "checkout": {
         "success": "Zahlung erhalten. Dein Tarif wird hier aktualisiert, sobald Stripe ihn bestätigt — meist innerhalb weniger Sekunden.",
-        "cancelled": "Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet."
+        "cancelled": "Der Bezahlvorgang wurde abgebrochen. Es wurde nichts berechnet.",
+        "scheduled": "Der Tarifwechsel ist vorgemerkt. Du behältst deinen aktuellen Tarif bis zum Ende des bereits bezahlten Zeitraums, danach beginnt der neue. Heute wird nichts berechnet."
       },
       "buyCreditsDescription": "Diesen Monat mehr Credits nötig? Lade einmalig auf — ohne Änderung am Abo.",
       "creditsAmount": "{count, plural, one {# Credit} other {# Credits}}"
@@ -1073,7 +1074,7 @@
         "rate": "{price} € pro Credit, festgeschrieben zum heutigen Preis.",
         "cap": "Nie mehr als {cap} € in einem Kalendermonat.",
         "credits": "Das reicht für bis zu {credits, plural, one {# zusätzlichen Credit} other {# zusätzliche Credits}}.",
-        "invoice": "Wird als eigene Position auf Ihrer nächsten Rechnung berechnet, getrennt von Ihrem Tarif."
+        "invoice": "Wird nach jedem Monat auf einer eigenen Rechnung berechnet, getrennt von deinem Tarif, auf die Karte, mit der du deinen Tarif bezahlst."
       },
       "agree": "Zusatznutzung aktivieren",
       "saved": "Gespeichert. Sie können das jederzeit abschalten.",
@@ -1083,7 +1084,7 @@
       "capReached": "Sie haben Ihr Limit erreicht. Es wird nichts weiter berechnet, bis Sie es anheben.",
       "turnOff": "Zusatznutzung abschalten",
       "turnOffNote": "Das Abschalten stoppt künftige Kosten. Bereits genutzte Beträge dieses Monats werden weiterhin berechnet.",
-      "needsSubscription": "Nutzungsbasierte Abrechnung gibt es für bezahlte Pläne: Sie wird mit deiner nächsten Rechnung abgerechnet. Wähle zuerst einen Plan."
+      "needsSubscription": "Nutzungsbasierte Abrechnung gibt es für bezahlte Pläne: Sie wird über die Karte deines Plans abgerechnet und endet mit dem Plan. Wähle zuerst einen Plan."
     },
     "addons": {
       "title": "Zusatzpakete",

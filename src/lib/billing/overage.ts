@@ -70,6 +70,7 @@ export type OverageDecision =
        *  step — "turn it on" and "raise your cap" are different screens. */
       reason:
         | "not_enabled"
+        | "no_subscription"
         | "consent_out_of_date"
         | "cap_reached"
         | "would_exceed_cap"
@@ -93,6 +94,13 @@ export function decideOverage(params: {
   shortfall: number;
   /** Euros of overage already charged this calendar month. */
   spentEur: number;
+  /**
+   * Is there a live subscription to bill this to, RIGHT NOW? Required, and
+   * only `true` passes: overage is billed to the customer's Stripe account
+   * (lib/billing/overage-invoice.ts), and consent given while subscribed
+   * is not a standing order to keep charging once the subscription ends.
+   */
+  subscriptionActive: boolean;
   /** Injectable for tests; the current consent version otherwise. */
   currentConsentVersion?: number;
 }): OverageDecision {
@@ -109,6 +117,14 @@ export function decideOverage(params: {
   // THE FIRST GATE, AND THE ONLY ONE THAT MATTERS ON ITS OWN. Everything
   // below assumes consent; this is the branch that says there is none.
   if (!settings.enabled) return refuse("not_enabled");
+
+  // AT THE MOMENT OF USE, NOT ONLY AT CONSENT (2026-11-05, ΑΣ-4.16). The
+  // subscription was checked once, when overage was switched on
+  // (api/billing/overage). It ended, the consent row stayed, and every
+  // action after that kept charging overage to an account with nothing to
+  // bill. The webhook also deletes the consent when a subscription ends;
+  // this is the gate that holds even if that write never landed.
+  if (params.subscriptionActive !== true) return refuse("no_subscription");
 
   // Consent under superseded terms is not consent to these ones.
   if (settings.consentVersion === null || settings.consentVersion < version) {

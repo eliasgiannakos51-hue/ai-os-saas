@@ -925,7 +925,8 @@
       "noSubscriptionToCancel": "Nessun abbonamento da annullare: l'accesso proprietario e il periodo beta finiscono da soli.",
       "checkout": {
         "success": "Pagamento ricevuto. Il tuo piano si aggiorna qui appena Stripe lo conferma, di solito in pochi secondi.",
-        "cancelled": "Il pagamento è stato annullato. Non è stato addebitato nulla."
+        "cancelled": "Il pagamento è stato annullato. Non è stato addebitato nulla.",
+        "scheduled": "Il cambio di piano è programmato. Mantieni il piano attuale fino alla fine del periodo già pagato, poi inizia quello nuovo. Oggi non viene addebitato nulla."
       },
       "buyCreditsDescription": "Ti servono più crediti questo mese? Acquista una ricarica una tantum — senza cambiare abbonamento.",
       "creditsAmount": "{count, plural, one {# credito} other {# crediti}}"
@@ -1073,7 +1074,7 @@
         "rate": "{price} € per credito, bloccato al prezzo di oggi.",
         "cap": "Mai più di {cap} € in un mese solare.",
         "credits": "Bastano per {credits, plural, one {# credito aggiuntivo} other {# crediti aggiuntivi}}.",
-        "invoice": "Addebitato come voce separata sulla prossima fattura, distinta dal piano."
+        "invoice": "Addebitato su una fattura a parte dopo ogni mese, distinta dal piano, sulla carta con cui paghi il piano."
       },
       "agree": "Attiva l'utilizzo extra",
       "saved": "Salvato. Puoi disattivarlo quando vuoi.",
@@ -1083,7 +1084,7 @@
       "capReached": "Hai raggiunto il tuo limite. Non verrà addebitato altro finché non lo aumenti.",
       "turnOff": "Disattiva l'utilizzo extra",
       "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato.",
-      "needsSubscription": "Il pagamento a consumo è per i piani a pagamento: viene addebitato con la prossima fattura. Scegli prima un piano."
+      "needsSubscription": "Il pagamento a consumo è per i piani a pagamento: viene addebitato sulla carta del piano e si ferma quando il piano termina. Scegli prima un piano."
     },
     "addons": {
       "title": "Componenti aggiuntivi",

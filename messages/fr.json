@@ -925,7 +925,8 @@
       "noSubscriptionToCancel": "Aucun abonnement à résilier — l'accès propriétaire et la période bêta prennent fin d'eux-mêmes.",
       "checkout": {
         "success": "Paiement reçu. Votre offre se met à jour ici dès que Stripe la confirme, en général en quelques secondes.",
-        "cancelled": "Le paiement a été annulé. Rien n'a été débité."
+        "cancelled": "Le paiement a été annulé. Rien n'a été débité.",
+        "scheduled": "Le changement d'offre est enregistré. Vous gardez votre offre actuelle jusqu'à la fin de la période déjà payée, puis la nouvelle commence. Rien n'est débité aujourd'hui."
       },
       "buyCreditsDescription": "Besoin de plus de crédits ce mois-ci ? Achetez une recharge unique — sans changer d'abonnement.",
       "creditsAmount": "{count, plural, one {# crédit} other {# crédits}}"
@@ -1073,7 +1074,7 @@
         "rate": "{price} € par crédit, figé au tarif du jour.",
         "cap": "Jamais plus de {cap} € sur un mois civil.",
         "credits": "Cela représente jusqu'à {credits, plural, one {# crédit supplémentaire} other {# crédits supplémentaires}}.",
-        "invoice": "Facturé sur une ligne distincte de votre prochaine facture, séparément de votre forfait."
+        "invoice": "Facturé sur une facture distincte après chaque mois, séparément de votre forfait, sur la carte qui paie votre forfait."
       },
       "agree": "Activer le dépassement",
       "saved": "Enregistré. Vous pouvez le désactiver à tout moment.",
@@ -1083,7 +1084,7 @@
       "capReached": "Vous avez atteint votre plafond. Rien ne sera facturé de plus tant que vous ne l'aurez pas relevé.",
       "turnOff": "Désactiver le dépassement",
       "turnOffNote": "La désactivation arrête les prochains frais. Ce qui a déjà été utilisé ce mois-ci reste facturé.",
-      "needsSubscription": "Le paiement à l’usage est réservé aux forfaits payants : il est facturé avec votre prochaine facture. Choisissez d’abord un forfait."
+      "needsSubscription": "Le paiement à l’usage est réservé aux forfaits payants : il est facturé sur la carte de votre forfait et s’arrête quand le forfait prend fin. Choisissez d’abord un forfait."
     },
     "addons": {
       "title": "Options",

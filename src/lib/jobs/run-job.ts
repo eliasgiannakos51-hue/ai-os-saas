@@ -206,7 +206,7 @@ async function billingIdentity(userId: string) {
   const admin = createAdminClient();
   const { data } = await admin.auth.admin.getUserById(userId);
   // The REAL user object, not a stub. resolveEffectivePlan and
-  // hasActiveBetaBypass both read user_metadata (stripe_customer_id, beta
+  // hasActiveBetaBypass both read user_metadata (stripe_subscription_id, beta
   // flags), so a `{id, email}` cast would silently classify every beta
   // tester and every pack purchaser as a plain plan user — and settle
   // their jobs at the wrong credit price.

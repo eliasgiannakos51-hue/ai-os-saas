@@ -27,6 +27,27 @@ export function currentPeriodEndSeconds(subscription: Stripe.Subscription): numb
   return typeof legacy === "number" && Number.isFinite(legacy) ? legacy : null;
 }
 
+/**
+ * When the paid period the subscription is in BEGAN, read from the same
+ * two places as the end above. This is what a monthly credit reset is
+ * keyed on (lib/billing/subscription-sync.ts, creditPeriodKey): one reset
+ * per plan per PAID period, so a calendar month boundary inside one
+ * period cannot open a second one.
+ *
+ * The EARLIEST item start: every item of one subscription shares a cycle,
+ * and when they differ the plan line started the period.
+ */
+export function currentPeriodStartSeconds(subscription: Stripe.Subscription): number | null {
+  const itemStarts = (subscription.items?.data ?? [])
+    .map((item) => (item as unknown as { current_period_start?: number }).current_period_start)
+    .filter((v): v is number => typeof v === "number" && Number.isFinite(v));
+
+  if (itemStarts.length > 0) return Math.min(...itemStarts);
+
+  const legacy = (subscription as unknown as { current_period_start?: number }).current_period_start;
+  return typeof legacy === "number" && Number.isFinite(legacy) ? legacy : null;
+}
+
 /** The same value as an ISO string, or null when Stripe gave us neither. */
 export function currentPeriodEndIso(subscription: Stripe.Subscription): string | null {
   const seconds = currentPeriodEndSeconds(subscription);

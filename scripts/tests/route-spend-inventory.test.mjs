@@ -263,6 +263,10 @@ const DECLARED = {
     bound: "none",
     why: "the telegram path is three hops away, through cost-alerts: a notification the account holder asked for, sent on a state change rather than per request.",
   },
+  "webhooks/stripe": {
+    bound: "none",
+    why: "a Stripe event verified by signature, not a request anyone else can send. The telegram/discord path is lib/notify/dispatch, reached through lib/team/sync-team-grants.ts (2026-11-05) only when a team member loses the owner's plan: one message per member who lost it and one to the owner, on that state change, never per event.",
+  },
 
   // --- READS AND CRUD, whose spend kind is a closure artefact ---
   // These six surfaced the day the reserve detector was tightened from a

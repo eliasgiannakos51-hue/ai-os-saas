@@ -82,11 +82,27 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
       protection: /idempotencyKey: `affiliate_payout_\$\{payoutId\}`/,
       why: "moves money OUT to an affiliate. Stripe's own key, on our payout row.",
     },
+    // OVERAGE IS ITS OWN FINALIZED INVOICE since 2026-11-05 (ΑΣ-4.16):
+    // a pending item rode on a next subscription invoice that, for an
+    // ended subscription, never came. Three calls, each keyed on the run
+    // (the customer and the month, or the subscription that ended).
     {
       where: "src/lib/billing/overage-invoice.ts",
       call: "stripe.invoiceItems.create",
-      protection: /idempotencyKey: `overage:\$\{userId\}:\$\{month\}`/,
+      protection: /idempotencyKey: `overage_item:\$\{runKey\}`/,
       why: "bills a month of overage. A retried cron run cannot add a second line.",
+    },
+    {
+      where: "src/lib/billing/overage-invoice.ts",
+      call: "stripe.invoices.create",
+      protection: /idempotencyKey: `overage_invoice:\$\{runKey\}`/,
+      why: "opens the invoice that line sits on. A retried run gets the same invoice back, not a second one.",
+    },
+    {
+      where: "src/lib/billing/overage-invoice.ts",
+      call: "stripe.invoices.finalizeInvoice",
+      protection: /idempotencyKey: `overage_finalize:\$\{invoice\.id\}`/,
+      why: "starts collection. Keyed on the invoice, and finalizing an invoice twice is refused by Stripe anyway.",
     },
     {
       where: "src/app/api/checkout/route.ts",
@@ -122,7 +138,15 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
     "stripe.customers.create", "stripe.customers.update",
     "stripe.checkout.sessions.create", "stripe.billingPortal.sessions.create",
     "stripe.accounts.create", "stripe.accountLinks.create",
-    "stripe.subscriptionItems.del",
+    // A DOWNGRADE MOVES NO MONEY TODAY (2026-11-05, ΑΣ-4.15). The schedule
+    // is created as a copy of the subscription and updated with
+    // proration_behavior "none"; the lower price is charged at the next
+    // renewal like any other. api/checkout keys both on the change.
+    "stripe.subscriptionSchedules.create", "stripe.subscriptionSchedules.update",
+    // stripe.subscriptionItems.del left this list on 2026-11-05: the add-on
+    // cancel deleted the only item of the add-on's subscription, which
+    // Stripe refuses, and now sets that subscription to cancel at period end
+    // (stripe.subscriptions.update, already listed above).
     // STOPS a charge rather than making one, and is idempotent at
     // Stripe's end: cancelling an already-cancelled subscription is not a
     // second cancellation. Added 2026-09-17 with

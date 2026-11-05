@@ -462,6 +462,19 @@ export function higherPlanSlug(a: string | null | undefined, b: string | null | 
   return rankA >= rankB ? (a as PlanSlug) : (b as PlanSlug);
 }
 
+/**
+ * Which way a move between two tiers goes: below zero is down, above zero
+ * is up, zero is the same tier. An unknown slug ranks below "free", as in
+ * higherPlanSlug, so a corrupt value can only ever compare as the lowest.
+ *
+ * Read by the credit decision in lib/billing/subscription-sync.ts and the
+ * plan-change direction in lib/billing/plan-change.ts — the two places
+ * where "is this a downgrade?" decides money.
+ */
+export function comparePlanSlugs(a: string | null | undefined, b: string | null | undefined): number {
+  return planRank(a) - planRank(b);
+}
+
 export function getPlan(slug: string): Plan | undefined {
   return PLANS.find((p) => p.slug === slug);
 }

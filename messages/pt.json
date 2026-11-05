@@ -925,7 +925,8 @@
       "noSubscriptionToCancel": "Não há subscrição para cancelar — o acesso de proprietário e o período beta terminam sozinhos.",
       "checkout": {
         "success": "Pagamento recebido. O seu plano é atualizado aqui assim que a Stripe confirmar — normalmente em poucos segundos.",
-        "cancelled": "O pagamento foi cancelado. Nada foi cobrado."
+        "cancelled": "O pagamento foi cancelado. Nada foi cobrado.",
+        "scheduled": "A mudança de plano ficou agendada. Mantém o plano atual até ao fim do período que já pagou e o novo começa nessa altura. Hoje não é cobrado nada."
       },
       "buyCreditsDescription": "Precisa de mais créditos este mês? Compre uma recarga avulsa — sem mudar a assinatura.",
       "creditsAmount": "{count, plural, one {# crédito} other {# créditos}}"
@@ -1073,7 +1074,7 @@
         "rate": "{price} € por crédito, fixado ao preço de hoje.",
         "cap": "Nunca mais de {cap} € num mês de calendário.",
         "credits": "Isso dá até {credits, plural, one {# crédito adicional} other {# créditos adicionais}}.",
-        "invoice": "Cobrado numa linha própria da próxima fatura, separada do seu plano."
+        "invoice": "Cobrado numa fatura própria depois de cada mês, separada do seu plano, no cartão com que paga o plano."
       },
       "agree": "Ativar uso adicional",
       "saved": "Guardado. Pode desligar quando quiser.",
@@ -1083,7 +1084,7 @@
       "capReached": "Atingiu o seu limite. Nada mais será cobrado até o aumentar.",
       "turnOff": "Desligar uso adicional",
       "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado.",
-      "needsSubscription": "O pagamento por uso é para planos pagos: é cobrado na sua próxima fatura. Escolha primeiro um plano."
+      "needsSubscription": "O pagamento por uso é para planos pagos: é cobrado no cartão do seu plano e termina quando o plano termina. Escolha primeiro um plano."
     },
     "addons": {
       "title": "Extras",

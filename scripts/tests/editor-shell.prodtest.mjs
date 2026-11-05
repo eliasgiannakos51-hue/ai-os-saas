@@ -400,6 +400,11 @@ try {
       } else {
         check(`${device.label}: site — «Chat | Result» on the phone`, (await page.locator('[data-testid="editor-switch"] button').count()) === 2);
         check(`${device.label}: site — the field sits above the tab bar`, l.tabBar !== null && l.field.bottom <= l.tabBar + 1);
+        // Site has options and no panel, so its field is the stacked shape,
+        // whose placeholder runs to two lines at 390px and was cut in half
+        // at one line's height (2026-11-05).
+        const text = await page.locator('[data-testid="editor-field"] textarea').boundingBox();
+        check(`${device.label}: site — the stacked field's text has room for two lines (${Math.round(text?.height ?? 0)}px)`, (text?.height ?? 0) >= 63);
       }
     }
     await shot("site-1-work");

@@ -209,7 +209,11 @@ export const ChatComposer = forwardRef<
           // so the text has the full width and never runs under a button.
           className={
             editor
-              ? `max-h-40 min-h-[44px] min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-3 text-sm text-foreground outline-none placeholder:text-muted ${shape === "landing" ? "basis-full" : "min-w-[8rem]"}`
+              ? // The stacked shape's text is two lines tall: on a 390px
+                // phone a tool's placeholder runs to two lines (Site's
+                // does), and at one line it was cut in half (measured
+                // 2026-11-05, scripts/tests/editor-shell.prodtest.mjs).
+                `max-h-40 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-3 text-sm text-foreground outline-none placeholder:text-muted ${shape === "landing" ? "min-h-16 basis-full" : "min-h-[44px] min-w-[8rem]"}`
               : `focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "ring-1 ring-foreground/60" : ""}`
           }
           autoFocus

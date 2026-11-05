@@ -186,6 +186,27 @@ async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunSt
   return outcome.delivered ? { box: box.id, status: "ok", note: "sent", via: method } : { box: box.id, status: "failed", note: method === "telegram" && /no longer connected/.test(outcome.reason ?? "") ? "not_connected" : "delivery", via: method };
 }
 
+/**
+ * WHAT THE RUN HAS DONE SO FAR, written before each box it starts, so the
+ * Pro canvas can light the line into the box it is in
+ * (lib/automations/run-progress.ts reads it back; the owner, 2026-11-05).
+ *
+ * Only onto a row that is still `running`: a run another request has
+ * already closed, or cancelled, is never written back to life. It never
+ * stops the run — progress is for the screen, and a run that cannot say
+ * where it is still goes on and still closes its row with every step
+ * (finishRun).
+ */
+async function reportProgress(ctx: RunContext, steps: RunStep[]): Promise<void> {
+  const { error } = await createAdminClient()
+    .from("automation_runs")
+    .update({ steps })
+    .eq("id", ctx.runId)
+    .eq("user_id", ctx.user.id)
+    .eq("status", "running");
+  if (error) logApiError("automations:run", error, { stage: "progress" });
+}
+
 export async function runFlow(ctx: RunContext): Promise<RunResult> {
   const flow = readFlow(ctx.flow.boxes);
   if (!flow.ok) return { status: "failed", steps: [], credits: 0, error: `flow:${flow.reason}` };
@@ -205,6 +226,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
 
   for (let i = ctx.resume?.at ?? 0; i < boxes.length; i++) {
     const box = boxes[i];
+    if (steps.length > 0) await reportProgress(ctx, steps);
     if (box.kind === "start") {
       steps.push({ box: box.id, status: "ok", note: "started" });
       continue;

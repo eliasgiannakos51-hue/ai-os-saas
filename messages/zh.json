@@ -3855,7 +3855,9 @@
         "expired": "已过期限;已取消,不收费。",
         "broken": "这些方框已无法读取。请删除这个自动化并重新创建。",
         "failed": "出了点问题。未发生的部分不会收费。",
-        "offline": "没有网络连接。请检查网络后重试。"
+        "offline": "没有网络连接。请检查网络后重试。",
+        "badMinutes": "分钟数必须在 {min} 到 {max} 之间,或留空。",
+        "notReady": "暂时还不可用。请稍后再试。"
       },
       "empty": {
         "heading": "什么事情应该自动发生?"
@@ -3866,6 +3868,53 @@
         "does": "Ionexa 执行：{what}",
         "onlyIf": "只有找到内容时才继续。否则就在这里停下，不收取任何费用。",
         "hint": "这是按顺序排列的步骤。按 Pro 即可修改其中任何一步。"
+      },
+      "parts": {
+        "when": "当",
+        "if": "如果",
+        "do": "执行"
+      },
+      "failedHere": "上次运行在这里停止:{reason}",
+      "templates": {
+        "title": "现成的自动化",
+        "intro": "一键即可开始。之后可以像其他自动化一样修改,准备好后随时开启。",
+        "start": "从这个开始",
+        "free": "创建免费",
+        "soon": "即将推出",
+        "made": "已就绪:“{name}”。可以随意修改,想用时再开启。",
+        "groups": {
+          "finance": "财务助手",
+          "instagram": "Instagram → Telegram"
+        },
+        "finance_daily": {
+          "name": "每天早上的财务摘要",
+          "description": "每天 08:30:把本周的财务做成简短摘要,发到你的 Telegram。",
+          "instruction": "简要总结本周的收入和支出:进账多少、支出多少、净额,以及最大的三笔支出。只使用数据中已有的金额。"
+        },
+        "finance_weekly": {
+          "name": "每周一的月度分析",
+          "description": "每周一 08:30:分析本月的财务,发到你的 Telegram。",
+          "instruction": "分析最近一个月的收入和支出:总额、净额、大部分钱花在哪里,以及值得注意的地方。只使用数据中已有的金额,最后给出一条实用的观察。"
+        },
+        "finance_expense_telegram": {
+          "name": "通过 Telegram 记一笔支出",
+          "description": "给机器人发“电费付了50欧元”,就会记到你的财务里。",
+          "why": "这需要 Ionexa 能读取你发给 Telegram 机器人的消息,目前还做不到。"
+        },
+        "instagram_to_telegram": {
+          "name": "Instagram 新帖子 → Telegram 消息",
+          "description": "你一在 Instagram 发帖,Telegram 就会收到一条消息。",
+          "why": "目前还没有与 Instagram 的连接。"
+        }
+      },
+      "timeSaved": {
+        "label": "手动做这件事需要多少分钟?",
+        "unit": "分钟",
+        "help": "可选。节省的时间根据这个数字计算;留空则不显示任何内容。",
+        "hours": "为你节省了约 {hours} 小时",
+        "minutes": "为你节省了约 {minutes} 分钟",
+        "notYet": "第一次运行完成后,这里会显示为你节省了多少时间。",
+        "how": "计算方式:已完成的运行次数({runs})× 你填写的分钟数({minutes})。试运行不计入。"
       }
     },
     "flows": {

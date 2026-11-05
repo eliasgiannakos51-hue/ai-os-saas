@@ -615,6 +615,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   // 2026-10-08 (src/lib/account/erase-storage.ts), because Supabase
   // refuses that function's delete, so its absence breaks nothing.
   {
+    kind: "column",
+    table: "automation_flows",
+    column: "minutes_saved",
+    migration: "20261114000000_automation_minutes_saved.sql",
+    breaks: "«Σου γλίτωσε» (Automations, the switch automation-time-saved) is not drawn for anyone: the page's own read of the column fails and hides the minutes field and the time saved, so the owner sees nothing to set and nothing measured — every other part of Automations works as before",
+  },
+  {
     kind: "table",
     table: "github_connections",
     migration: "20261025100000_github_connections.sql",

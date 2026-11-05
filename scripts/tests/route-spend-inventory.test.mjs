@@ -291,6 +291,7 @@ const DECLARED = {
   "automations/flows/[id]/active": { bound: "artefact", why: "switches an automation on or off; same closure — it asks whether Telegram and the calendar are connected, it sends nothing" },
   "automations/flows/[id]/undo": { bound: "artefact", why: "puts back the previous version of the boxes; same closure as the edit" },
   "automations/flows/[id]/runs": { bound: "artefact", why: "reads the person's own run history; the closure reaches the delivery store through the shared access module, and nothing is sent" },
+  "automations/templates": { bound: "limited", scope: "automation_template", why: "makes the person's own automation from a ready-made row of boxes, no model and no charge; twenty presses an hour and MAX_FLOWS bound it, and the telegram URL is reached only through the shared access module, which asks WHETHER Telegram is connected and sends nothing" },
   "automations/runs/[runId]/cancel": { bound: "artefact", why: "cancels the person's own waiting run in one conditional update; nothing is sent or charged" },
   "cron/automation-flows": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel, bounded per tick and per person, and every AI box is held and settled in the runner on the automation's owner" },
 

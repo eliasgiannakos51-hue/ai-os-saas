@@ -1001,6 +1001,80 @@ input:-webkit-autofill:focus {
   animation: thinking-dot 1.2s ease-in-out infinite;
 }
 
+/* THE LINES OF THE PRO CANVAS (components/automations/flow-boxes.tsx
+   FlowLine; the owner, 2026-11-05): a run that is going lights the line
+   into the box it is in, with two small dots travelling down it, and the
+   lines it has already come along stay lit, quieter. Idle is the border
+   colour and nothing moves. The state is the run's own
+   (lib/automations/run-progress.ts), set on `data-state`.
+
+   THE TEXT COLOUR, NOT THE SIGNAL. --signal is the globe's and the logo's
+   alone (design-tokens.test.mjs §3); a line that is working is the
+   foreground at a lower strength, and its dots the foreground itself, so
+   they read against the lit line without a second colour.
+
+   REDUCED MOTION: no dots at all — not dots frozen wherever the collapsed
+   animation leaves them — and the active line at full strength instead,
+   so "this is where it is" is still said, by brightness alone. Both ways
+   of asking for it, the same two the rule further down this file answers
+   (the account's own setting, data-motion, and the OS's). */
+.flow-line {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 1.5rem;
+  margin-inline-start: 1.25rem;
+  background-color: rgb(var(--border));
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.flow-line[data-state="done"] {
+  background-color: rgb(var(--foreground) / 0.35);
+}
+.flow-line[data-state="active"] {
+  background-color: rgb(var(--foreground) / 0.45);
+}
+@keyframes flow-dot {
+  0% {
+    transform: translate(-50%, -0.25rem);
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 1.375rem);
+    opacity: 0;
+  }
+}
+.flow-dot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background-color: rgb(var(--foreground));
+  animation: flow-dot 1.1s linear infinite;
+}
+.flow-dot + .flow-dot {
+  animation-delay: 0.55s;
+}
+html[data-motion="reduce"] .flow-dot {
+  display: none;
+}
+html[data-motion="reduce"] .flow-line[data-state="active"] {
+  background-color: rgb(var(--foreground));
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .flow-dot {
+    display: none;
+  }
+  html:not([data-motion="full"]) .flow-line[data-state="active"] {
+    background-color: rgb(var(--foreground));
+  }
+}
+
 /* One-shot pop when a star is switched ON. Overshoots to 1.35 then
    settles, so the action registers as a small physical event rather than
    a colour swap. Only fires on favourite, never on un-favourite — a

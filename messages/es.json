@@ -3855,7 +3855,9 @@
         "expired": "Pasó el plazo; se canceló sin coste.",
         "broken": "Estas casillas ya no se pueden leer. Elimina la automatización y créala de nuevo.",
         "failed": "Algo salió mal. No se cobró nada por lo que no ocurrió.",
-        "offline": "Sin conexión. Revisa la red e inténtalo de nuevo."
+        "offline": "Sin conexión. Revisa la red e inténtalo de nuevo.",
+        "badMinutes": "Los minutos deben estar entre {min} y {max}, o vacíos.",
+        "notReady": "Esto aún no está disponible. Inténtalo más tarde."
       },
       "empty": {
         "heading": "¿Qué debería pasar solo?"
@@ -3866,6 +3868,53 @@
         "does": "Ionexa hace: {what}",
         "onlyIf": "Sigue solo si se encontró algo. Si no, se detiene aquí y no se cobra nada.",
         "hint": "Estos son los pasos, en orden. Pulsa Pro para cambiar cualquiera."
+      },
+      "parts": {
+        "when": "Cuando",
+        "if": "Si",
+        "do": "Haz"
+      },
+      "failedHere": "La última ejecución se detuvo aquí: {reason}",
+      "templates": {
+        "title": "Automatizaciones listas",
+        "intro": "Empieza desde una con un solo toque. Luego la cambias como cualquier otra y la activas cuando quieras.",
+        "start": "Empezar con esta",
+        "free": "Crearla es gratis",
+        "soon": "Próximamente",
+        "made": "Lista: «{name}». Cambia lo que quieras y actívala cuando quieras.",
+        "groups": {
+          "finance": "Asistente financiero",
+          "instagram": "Instagram → Telegram"
+        },
+        "finance_daily": {
+          "name": "Resumen financiero cada mañana",
+          "description": "Cada día a las 08:30: las finanzas de la semana, en un breve resumen, a tu Telegram.",
+          "instruction": "Haz un breve resumen de los ingresos y gastos de la semana: lo que entró, lo que salió, el neto y los tres gastos más grandes. Usa solo importes que estén en los datos."
+        },
+        "finance_weekly": {
+          "name": "Análisis del mes cada lunes",
+          "description": "Cada lunes a las 08:30: las finanzas del mes, analizadas, a tu Telegram.",
+          "instruction": "Analiza los ingresos y gastos del último mes: los totales, el neto, a dónde va la mayor parte del dinero y lo que destaque. Usa solo importes que estén en los datos y termina con una observación práctica."
+        },
+        "finance_expense_telegram": {
+          "name": "Anotar un gasto desde Telegram",
+          "description": "Escribes al bot «pagué 50 € de luz» y queda anotado en tus Finanzas.",
+          "why": "Necesita que Ionexa lea los mensajes que envías a su bot de Telegram, y eso todavía no es posible."
+        },
+        "instagram_to_telegram": {
+          "name": "Nueva publicación en Instagram → mensaje en Telegram",
+          "description": "En cuanto publicas en Instagram, te llega un mensaje a Telegram.",
+          "why": "Todavía no hay conexión con Instagram."
+        }
+      },
+      "timeSaved": {
+        "label": "¿Cuántos minutos te llevaba esto a mano?",
+        "unit": "minutos",
+        "help": "Opcional. Con esto se calcula el tiempo ahorrado; si lo dejas vacío, no se muestra nada.",
+        "hours": "Te ha ahorrado ~{hours, plural, one {# hora} other {# horas}}",
+        "minutes": "Te ha ahorrado ~{minutes, plural, one {# minuto} other {# minutos}}",
+        "notYet": "Cuando termine la primera ejecución, verás aquí cuánto tiempo te ha ahorrado.",
+        "how": "Cómo se calcula: ejecuciones terminadas ({runs}) × los minutos que indicaste ({minutes}). Las pruebas no cuentan."
       }
     },
     "flows": {

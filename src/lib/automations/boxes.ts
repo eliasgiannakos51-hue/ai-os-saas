@@ -148,6 +148,32 @@ export function connectionsNeeded(boxes: Box[]): ("google_calendar" | "telegram"
   return [...needs];
 }
 
+/**
+ * «ΌΤΑΝ → ΑΝ → ΚΆΝΕ» (When → If → Do): the part of the sentence each box
+ * is, for Simple to say beside every step (the owner, 2026-11-05, after
+ * the automation videos; behind "agents-automations-pro"). The start is
+ * the WHEN; a condition and an approval are the IF — each one is a
+ * "go on only if": something was found, the person said yes; reading,
+ * the AI step and the action are the DO.
+ *
+ * A record over every kind, so a seventh kind cannot be added without
+ * being given a part (the compiler refuses the missing key), and pure,
+ * so scripts/tests/automations.test.mjs §10 holds it. Presentation only:
+ * nothing stored changes and no box carries its part.
+ */
+export type SentencePart = "when" | "if" | "do";
+export const SENTENCE_PART: Record<BoxKind, SentencePart> = {
+  start: "when",
+  condition: "if",
+  approval: "if",
+  read: "do",
+  ai: "do",
+  action: "do",
+};
+export function partOf(box: Box): SentencePart {
+  return SENTENCE_PART[box.kind];
+}
+
 /** How many boxes call a model: what a run is priced on. */
 export function aiBoxCount(boxes: Box[]): number {
   return boxes.filter((b) => b.kind === "ai").length;

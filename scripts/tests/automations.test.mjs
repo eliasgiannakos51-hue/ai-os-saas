@@ -201,6 +201,7 @@ const ROUTES = {
   approve: "src/app/api/automations/runs/[runId]/approve/route.ts",
   cancel: "src/app/api/automations/runs/[runId]/cancel/route.ts",
   events: "src/app/api/automations/events/route.ts",
+  templates: "src/app/api/automations/templates/route.ts",
 };
 for (const [name, file] of Object.entries(ROUTES)) {
   check(`${name}: signs in, then the gate`, /if \(!user\) return refuse\("not_signed_in", 401\);\s*const gate = await flowGate\(user\);\s*if \(gate instanceof NextResponse\) return gate;/.test(code(file)));
@@ -278,7 +279,7 @@ check("a box that needs a connection says which, and leads to it", /data-testid=
 // THE WORDS: every key the screen uses, in every language, read from the
 // code rather than listed here — a list kept here is a second copy.
 const used = new Set();
-for (const f of ["src/components/automations/automation-shell.tsx", "src/components/automations/flow-boxes.tsx"]) {
+for (const f of ["src/components/automations/automation-shell.tsx", "src/components/automations/flow-boxes.tsx", "src/components/automations/template-gallery.tsx"]) {
   for (const m of code(f).matchAll(/\bt\("([a-zA-Z_.0-9]+)"/g)) used.add(m[1]);
 }
 used.add("notify.approval");
@@ -366,6 +367,204 @@ for (const file of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.toolShell?.mode ?? {};
   check(`${file}: the switch says both levels and names itself`,
     ["label", "simple", "pro"].every((k) => typeof m[k] === "string" && m[k].trim().length > 0));
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 10. «Όταν → Αν → Κάνε»: Simple says the sentence (2026-11-05) ==");
+// ---------------------------------------------------------------------
+// The owner, after the automation videos: in Simple each step says which
+// part of the sentence it is — the start is WHEN, a condition and an
+// approval are IF, reading, the AI step and the action are DO — so the
+// list reads top to bottom as one sentence. Presentation over the same
+// boxes: nothing stored changes.
+const KINDS = ["start", "read", "ai", "condition", "approval", "action"];
+check("every kind of box has a part of the sentence, and no other key is there",
+  JSON.stringify(Object.keys(boxes.SENTENCE_PART).sort()) === JSON.stringify([...KINDS].sort()));
+check("the start is «Όταν»; the condition and the approval are «Αν»; read, AI and action are «Κάνε»",
+  boxes.SENTENCE_PART.start === "when" &&
+    boxes.SENTENCE_PART.condition === "if" && boxes.SENTENCE_PART.approval === "if" &&
+    boxes.SENTENCE_PART.read === "do" && boxes.SENTENCE_PART.ai === "do" && boxes.SENTENCE_PART.action === "do");
+check("…and partOf reads it off the box, for every box of a real row",
+  boxes.readFlow(MONDAY).boxes.map(boxes.partOf).join() === "when,do,do,if,do");
+check("it is a way of saying the row, not part of it: a box read back carries no part",
+  !("part" in boxes.readBox({ id: "b1", kind: "approval", part: "do" }, "b1")) &&
+    !/part/.test(code("src/lib/automations/flow-access.ts").match(/FLOW_COLUMNS = "[^"]*"/)?.[0] ?? "x"));
+const stepsBlock = flowBoxes.slice(flowBoxes.indexOf("export function FlowSteps"), flowBoxes.indexOf("export function BoxEditor"));
+check("Simple draws each step's part, from the box's own kind, before its sentence",
+  /data-part=\{partOf\(box\)\}/.test(stepsBlock) &&
+    /data-testid="flow-step-part"[\s\S]{0,400}\{part\[partOf\(box\)\]\}/.test(stepsBlock) &&
+    stepsBlock.indexOf("{part[partOf(box)]}") < stepsBlock.indexOf("{sentence(box)}"));
+check("…the three words are literal keys, so the message slicer sees them",
+  /const part: Record<SentencePart, string> = \{ when: t\("parts\.when"\), if: t\("parts\.if"\), do: t\("parts\.do"\) \};/.test(flowBoxes));
+for (const file of LOCALES) {
+  const parts = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.parts ?? {};
+  const words = ["when", "if", "do"].map((k) => (typeof parts[k] === "string" ? parts[k].trim() : ""));
+  check(`${file}: «Όταν», «Αν», «Κάνε» are three different words`, words.every(Boolean) && new Set(words).size === 3, JSON.stringify(parts));
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 11. the Pro canvas is alive while a run is going (2026-11-05) ==");
+// ---------------------------------------------------------------------
+const progressLib = await loadTs("src/lib/automations/run-progress.ts");
+const FOUR = boxes.readFlow(MORNING).boxes;
+const run = (status, stepList) => ({ status, steps: stepList });
+const ok = (box) => ({ box, status: "ok", note: "started" });
+const idle = progressLib.runProgress(FOUR, null);
+check("no run: every box and every line is idle, nothing is live, nothing failed",
+  idle.live === false && Object.values(idle.boxes).every((s) => s === "idle") && idle.lines.length === 3 && idle.lines.every((l) => l === "idle") && idle.failed === null);
+const going = progressLib.runProgress(FOUR, run("running", [ok("b1"), ok("b2")]));
+check("a run that has done two boxes is IN the third: two done, the third active, the line into it moving",
+  going.live === true && going.boxes.b1 === "done" && going.boxes.b2 === "done" && going.boxes.b3 === "active" && going.boxes.b4 === "idle" &&
+    going.lines.join() === "done,active,idle", JSON.stringify(going));
+const justStarted = progressLib.runProgress(FOUR, run("running", []));
+check("…a run with no steps yet is at its start box, and no line moves yet",
+  justStarted.boxes.b1 === "active" && justStarted.lines.every((l) => l === "idle"));
+check("…a queued run is live too", progressLib.runProgress(FOUR, run("queued", [])).live === true);
+for (const status of ["done", "stopped", "waiting_approval", "cancelled"]) {
+  const p = progressLib.runProgress(FOUR, run(status, [ok("b1"), ok("b2"), ok("b3"), ok("b4")]));
+  check(`a run that is ${status} lights nothing: idle is calm`, p.live === false && p.lines.every((l) => l === "idle") && Object.values(p.boxes).every((s) => s === "idle"));
+}
+const failedRun = progressLib.runProgress(FOUR, run("failed", [ok("b1"), { box: "b2", status: "failed", note: "not_connected" }]));
+check("a run that failed marks the box it failed at, with the step's own note, and nothing moves",
+  failedRun.live === false && failedRun.boxes.b2 === "failed" && failedRun.failed?.box === "b2" && failedRun.failed?.note === "not_connected" && failedRun.lines.every((l) => l === "idle"));
+check("…a run that crashed before any step failed blames no box",
+  progressLib.runProgress(FOUR, run("failed", [ok("b1")])).failed === null &&
+    progressLib.runProgress(FOUR, run("failed", [{ box: "zz", status: "failed", note: "failed" }])).failed === null);
+const R = (id, startedAt, status = "done") => ({ id, startedAt, status, steps: [] });
+const history = [R("old", "2026-11-05T08:00:00Z", "failed"), R("older", "2026-11-04T08:00:00Z")];
+check("with no run of its own in flight, the canvas follows the newest run, whoever started it",
+  progressLib.followedRun(history, null)?.id === "old");
+check("while its own press is in flight it follows the run that was NOT there before — by id, not by clock",
+  progressLib.followedRun([...history, R("mine", "2026-11-05T07:59:00Z", "running")], { known: ["old", "older"] })?.id === "mine" &&
+    progressLib.followedRun(history, { known: ["old", "older"] }) === null);
+check("…and an approval follows the run it approved", progressLib.followedRun(history, { known: [], runId: "older" })?.id === "older");
+
+const runnerSrc = code("src/lib/automations/runner.ts");
+const progressFn = runnerSrc.slice(runnerSrc.indexOf("async function reportProgress"), runnerSrc.indexOf("export async function runFlow"));
+check("the runner writes what it has done before each box it starts — the real state the canvas reads",
+  /for \(let i = ctx\.resume\?\.at \?\? 0; i < boxes\.length; i\+\+\) \{\s*const box = boxes\[i\];\s*if \(steps\.length > 0\) await reportProgress\(ctx, steps\);\s*if \(box\.kind === "start"\)/.test(runnerSrc));
+check("…only onto the person's own row while it is still running, never bringing a closed run back",
+  /\.update\(\{ steps \}\)\s*\.eq\("id", ctx\.runId\)\s*\.eq\("user_id", ctx\.user\.id\)\s*\.eq\("status", "running"\);/.test(progressFn));
+check("…and a failed progress write is logged, never stops the run", /if \(error\) logApiError\("automations:run", error, \{ stage: "progress" \}\);/.test(progressFn) && !/throw|return \{/.test(progressFn));
+check("the runs route says where a run is: the same RUN_COLUMNS, steps included", /steps/.test(code("src/lib/automations/flow-access.ts").match(/RUN_COLUMNS = "[^"]*"/)?.[0] ?? ""));
+check("the canvas is alive only behind the switch, and only in Pro",
+  /const alive = simplePro && level === "pro";/.test(shell) && /const progress = shown && alive \? runProgress\(shown\.boxes, followed\) : null;/.test(shell));
+check("…it asks how the run is going only while one is going (or its own press is in flight), once a second",
+  /const pollId = shown && open === "flow" && alive && \(\(watch && watch\.flowId === shown\.id\) \|\| isLive\(followed\)\) \? shown\.id : null;/.test(shell) &&
+    /if \(!pollId\) return;/.test(shell) && /window\.setInterval\(tick, PROGRESS_POLL_MS\)/.test(shell) && /window\.clearInterval\(timer\)/.test(shell) && progressLib.PROGRESS_POLL_MS === 1000);
+check("…and the boxes get it", /<BoxRow boxes=\{shown\.boxes\}[^\n]{0,200}? progress=\{progress\} \/>/.test(shell));
+const rowBlock = flowBoxes.slice(flowBoxes.indexOf("export function BoxRow"), flowBoxes.indexOf("export function FlowSteps"));
+check("without progress the row is drawn exactly as before: the short still line",
+  /\{i > 0 && \(progress \? <FlowLine state=\{progress\.lines\[i - 1\] \?\? "idle"\} \/> : <span aria-hidden="true" className="ms-5 block h-3 w-px bg-border" \/>\)\}/.test(rowBlock));
+check("the failed box is marked in the danger colour, with the reason in words",
+  /state === "failed" \? "ring-1 ring-danger"/.test(rowBlock) && /data-testid="flow-failed" className="[^"]*text-danger"/.test(rowBlock) && /t\("failedHere", \{ reason: noteWords\(/.test(rowBlock));
+const css = readFileSync("src/app/globals.css", "utf8");
+const flowCss = css.slice(css.indexOf(".flow-line {"), css.indexOf("@media (prefers-reduced-motion: reduce) {\n  html:not([data-motion=\"full\"]) .flow-dot"));
+check("the lines are the palette's own: border when idle, the text colour when lit — never the signal",
+  /\.flow-line \{[\s\S]*?background-color: rgb\(var\(--border\)\);/.test(css) && /\.flow-line\[data-state="active"\] \{\s*background-color: rgb\(var\(--foreground\) \/ 0\.45\);/.test(css) &&
+    /\.flow-dot \{[\s\S]*?background-color: rgb\(var\(--foreground\)\);/.test(css) && !/--signal|globe-ink/.test(flowCss + css.slice(css.indexOf(".flow-dot {"), css.indexOf(".flow-dot {") + 600)));
+check("reduced motion, asked for either way: no dots at all, and the active line at full strength instead",
+  /html\[data-motion="reduce"\] \.flow-dot \{\s*display: none;\s*\}/.test(css) &&
+    /@media \(prefers-reduced-motion: reduce\) \{\s*html:not\(\[data-motion="full"\]\) \.flow-dot \{\s*display: none;\s*\}\s*html:not\(\[data-motion="full"\]\) \.flow-line\[data-state="active"\] \{\s*background-color: rgb\(var\(--foreground\)\);/.test(css) &&
+    /html\[data-motion="reduce"\] \.flow-line\[data-state="active"\] \{\s*background-color: rgb\(var\(--foreground\)\);/.test(css));
+
+// ---------------------------------------------------------------------
+console.log("\n== 12. ready-made automations, one press, then the person's own (2026-11-05) ==");
+// ---------------------------------------------------------------------
+const templates = await loadTs("src/lib/automations/templates.ts");
+check("two ready: the finance assistant's daily summary and weekly analysis", templates.TEMPLATE_IDS.join() === "finance_daily,finance_weekly");
+for (const file of LOCALES) {
+  const words = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.templates ?? {};
+  for (const id of templates.TEMPLATE_IDS) {
+    const w = words[id] ?? {};
+    const flow = boxes.readFlow(templates.templateBoxes(id, w.instruction ?? ""));
+    check(`${file} ${id}: a whole row with the reader's own words, as the route writes it`,
+      flow.ok && templates.templateFlow(id, w.instruction) !== null && flow.boxes.find((b) => b.kind === "ai")?.instruction === String(w.instruction).trim() &&
+        [w.name, w.description].every((x) => typeof x === "string" && x.trim().length > 0) && w.name.length <= 60,
+      JSON.stringify(flow));
+  }
+  for (const id of templates.SOON_TEMPLATE_IDS) {
+    const w = words[id] ?? {};
+    check(`${file} ${id}: «Σύντομα» says what it would do and why it cannot yet`, ["name", "description", "why"].every((k) => typeof w[k] === "string" && w[k].trim().length > 0));
+  }
+  check(`${file}: the gallery's own words`, ["title", "intro", "start", "free", "soon", "made"].every((k) => typeof words[k] === "string" && words[k].trim()) && /\{name\}/.test(words.made ?? "") && ["finance", "instagram"].every((g) => typeof words.groups?.[g] === "string"));
+}
+const daily = templates.templateBoxes("finance_daily", "Κάνε σύνοψη");
+const weekly = templates.templateBoxes("finance_weekly", "Κάνε ανάλυση");
+check("(a) every day at 08:30: this week's finances → AI → Telegram",
+  daily.map((b) => b.kind).join() === "start,read,ai,action" && daily[0].every === "day" && daily[0].at === "08:30" && daily[1].source === "finances_week" && daily[3].do === "send_telegram");
+check("(b) every week: this month's finances → AI → Telegram",
+  weekly.map((b) => b.kind).join() === "start,read,ai,action" && weekly[0].every === "week" && weekly[0].weekday === 1 && weekly[1].source === "finances_month" && weekly[3].do === "send_telegram");
+check("…both need Telegram connected before they can be switched on, as any automation that sends there",
+  JSON.stringify(boxes.connectionsNeeded(daily)) === JSON.stringify(["telegram"]) && JSON.stringify(boxes.connectionsNeeded(weekly)) === JSON.stringify(["telegram"]));
+check("what the product cannot do yet is not a template: no id, no boxes, nothing to press",
+  templates.SOON_TEMPLATE_IDS.every((id) => !templates.isTemplateId(id)) && !templates.isTemplateId("") && !templates.isTemplateId("__proto__") && !templates.isTemplateId(null) &&
+    templates.GALLERY.flatMap((g) => g.soon).sort().join() === [...templates.SOON_TEMPLATE_IDS].sort().join() &&
+    templates.GALLERY.flatMap((g) => g.ready).sort().join() === [...templates.TEMPLATE_IDS].sort().join());
+check("WhatsApp is not drawn at all: it needs Meta's WhatsApp Business API, the owner's to obtain",
+  !/whatsapp/i.test(readFileSync("src/lib/automations/templates.ts", "utf8").replace(/\/\*[\s\S]*?\*\//g, "")) && /WhatsApp Business/.test(readFileSync("docs/NEEDS-FROM-ELIAS.md", "utf8")));
+const gallery = code("src/components/automations/template-gallery.tsx");
+const soonBlock = gallery.slice(gallery.indexOf("{g.soon.map("), gallery.indexOf("</ul>"));
+check("a «Σύντομα» card has nothing to press", soonBlock.length > 100 && !/<button|onClick|<Link/.test(soonBlock) && /t\("templates\.soon"\)/.test(soonBlock) && /\{words\.why\}/.test(soonBlock));
+check("a ready card shows the automation itself and what each run costs, before the press",
+  /<FlowSteps boxes=\{boxes\} connected=\{connected\} preview \/>/.test(gallery) && /const runPrice = stepPrice \* aiBoxCount\(boxes\);/.test(gallery) && /onClick=\{\(\) => onStart\(id\)\}/.test(gallery));
+const tplRoute = code("src/app/api/automations/templates/route.ts");
+check("templates: signs in, then the gate, then its own switch",
+  /if \(!user\) return refuse\("not_signed_in", 401\);\s*const gate = await flowGate\(user\);\s*if \(gate instanceof NextResponse\) return gate;\s*if \(!\(await isFeatureOn\("automation-templates", user\)\)\) return refuse\("not_enabled", 403\);/.test(tplRoute));
+check("…the browser names a template, never boxes: the rows are this product's own list",
+  /if \(!isTemplateId\(body\.template\)\) return refuse\("bad_template", 400\);/.test(tplRoute) && !/body\.boxes/.test(tplRoute) && /const boxes = templateFlow\(template, instruction\);/.test(tplRoute));
+check("…no model is called and nothing is held: it writes boxes out", !/runCompletion|buildFlow|reserveCredits|lib\/automations\/builder/.test(tplRoute));
+check("…bounded as a free insert is: a limit per hour per account, and the person's MAX_FLOWS",
+  /const limited = await checkRateLimit\(\{ scope: "automation_template", identifier: user\.id, maxAttempts: 20, windowMinutes: 60 \}\);\s*if \(!limited\.allowed\) return refuse\("rate_limited", 429\);/.test(tplRoute) && /if \(\(count \?\? 0\) >= MAX_FLOWS\) return refuse\("too_many", 409, \{ limit: MAX_FLOWS \}\);/.test(tplRoute));
+check("…made off, version 1, the person's own row — an ordinary automation from then on",
+  /\.insert\(\{ id, user_id: user\.id, name: name\.slice\(0, 60\), said, boxes, version: 1, is_active: false, time_zone: timeZone \}\)/.test(tplRoute) && /from\("automation_flow_versions"\)\.insert\(\{ flow_id: id, user_id: user\.id, version: 1, boxes, said \}\)/.test(tplRoute));
+check("the gallery opens only for readers the switch is open to", /isFeatureOn\("automation-templates", user\)/.test(page) && /templates=\{templatesOn\}/.test(page) && /open === "templates" && templates/.test(shell) && /templates\s*\? \[/.test(shell));
+
+// ---------------------------------------------------------------------
+console.log("\n== 13. «Σου γλίτωσε ~X ώρες»: time saved, measured (2026-11-05) ==");
+// ---------------------------------------------------------------------
+const saved = await loadTs("src/lib/automations/time-saved.ts");
+check("no minutes, no number — however many runs", saved.timeSaved(0, null).kind === "none" && saved.timeSaved(40, null).kind === "none" && saved.timeSaved(40, undefined).kind === "none" && saved.timeSaved(40, 0).kind === "none");
+check("minutes but no finished run yet: said as «not yet», never as a number", JSON.stringify(saved.timeSaved(0, 15)) === JSON.stringify({ kind: "not_yet", minutesPerRun: 15 }) && saved.timeSaved(-3, 15).kind === "not_yet" && saved.timeSaved(2.5, 15).kind === "not_yet");
+check("runs × minutes, under an hour in minutes", JSON.stringify(saved.timeSaved(3, 15)) === JSON.stringify({ kind: "minutes", total: 45, runs: 3, minutesPerRun: 15 }));
+check("…from an hour, in hours to the half hour",
+  saved.timeSaved(4, 15).hours === 1 && saved.timeSaved(5, 15).hours === 1.5 && saved.timeSaved(7, 15).hours === 2 && saved.timeSaved(23, 20).hours === 7.5 && saved.timeSaved(23, 20).total === 460);
+check("…and from ten hours, in whole hours", saved.timeSaved(40, 15).hours === 10 && saved.timeSaved(100, 480).hours === 800 && saved.timeSaved(61, 15).hours === 15);
+check("a minute is a whole number from 1 to 480, typed or stored; anything else is not one",
+  saved.readMinutes(15) === 15 && saved.readMinutes(" 15 ") === 15 && saved.readMinutes(480) === 480 && saved.readMinutes(1) === 1 &&
+    [0, 481, 1.5, -3, "1e2", "abc", "", null, undefined, NaN, "15 λεπτά"].every((v) => saved.readMinutes(v) === null));
+check("a trial saves nobody anything: only the schedule, a file and «Εκτέλεση τώρα» count", saved.COUNTED_STARTS.join() === "time,event,manual");
+const pageData = code("src/lib/automations/page-data.ts");
+check("…and the count is the database's: finished runs of those starts, the person's own, every one",
+  /\.select\("id", \{ count: "exact", head: true \}\)\s*\.eq\("flow_id", flowId\)\s*\.eq\("user_id", userId\)\s*\.eq\("status", "done"\)\s*\.in\("started_by", \[\.\.\.COUNTED_STARTS\]\);/.test(pageData));
+check("…the runs route answers it beside the history", /doneRuns: await countDoneRuns\(supabase, user\.id, id\)/.test(code(ROUTES.runs)));
+check("THE APP WORKS BEFORE THE MIGRATION: the minutes are read in a query of their own, never in FLOW_COLUMNS",
+  !/minutes_saved/.test(code("src/lib/automations/flow-access.ts")) &&
+    /\.from\("automation_flows"\)\.select\("id, minutes_saved"\)\.eq\("user_id", userId\)\.limit\(MAX_FLOWS\);/.test(pageData) &&
+    /if \(error\) \{\s*if \(!isColumnMissing\(error\)\) logApiError\([^)]*\);\s*return null;\s*\}/.test(pageData));
+check("…a missing column is Postgres's 42703 on a read and PostgREST's PGRST204 on a write", /return error\?\.code === "42703" \|\| error\?\.code === "PGRST204";/.test(pageData));
+check("…and a closed switch does not even read them", /timeSavedOn \? loadMinutesSaved\(supabase, user\.id\) : Promise\.resolve\(null\)/.test(pageData) && /isFeatureOn\("automation-time-saved", user\)/.test(page));
+check("…the screen draws the field and the figure only when the minutes could be read",
+  /\{minutesSaved && \(\s*<TimeSavedForm/.test(shell) && /minutes=\{minutesSaved\[shown\.id\] \?\? null\}/.test(shell));
+const timeForm = flowBoxes.slice(flowBoxes.indexOf("export function TimeSavedForm"));
+check("…with no minutes it draws no figure, and with one it prints both factors beside it",
+  /\{saved\.kind !== "none" && \(/.test(timeForm) && /t\("timeSaved\.how", \{ runs: saved\.runs, minutes: saved\.minutesPerRun \}\)/.test(timeForm) && /const saved = timeSaved\(doneRuns, minutes\);/.test(timeForm));
+const editRoute = code(ROUTES.edit);
+check("the minutes are the person's own write: behind the switch, bounded, the row the session owns",
+  /if \(body\.minutes_saved !== undefined\) \{\s*if \(!\(await isFeatureOn\("automation-time-saved", user\)\)\) return refuse\("not_enabled", 403\);/.test(editRoute) &&
+    /if \(body\.minutes_saved !== null && minutesSaved === null\) return refuse\("bad_minutes", 400, \{ min: MIN_MINUTES, max: MAX_MINUTES \}\);/.test(editRoute) &&
+    /\.update\(\{ minutes_saved: minutesSaved \}\)\.eq\("id", id\)\.eq\("user_id", user\.id\);/.test(editRoute));
+check("…a database without the column answers «not ready», and the limit or name sent beside it are not refused with it",
+  /if \(isColumnMissing\(error\)\) return refuse\("not_ready", 409\);/.test(editRoute) && !/plain\.minutes_saved/.test(editRoute) && editRoute.indexOf("minutes_saved: minutesSaved") < editRoute.indexOf("const plain"));
+const minutesSql = readFileSync("supabase/migrations/20261114000000_automation_minutes_saved.sql", "utf8");
+check("the column is nullable, and bounded where the code bounds it",
+  /alter table public\.automation_flows add column if not exists minutes_saved integer;/.test(minutesSql) &&
+    new RegExp(`check \\(minutes_saved is null or minutes_saved between ${saved.MIN_MINUTES} and ${saved.MAX_MINUTES}\\)`).test(minutesSql) && !/default/i.test(minutesSql.replace(/--[^\n]*/g, "")));
+check("…and says how to undo it", /-- How to undo: alter table public\.automation_flows drop constraint if exists/.test(minutesSql));
+for (const file of LOCALES) {
+  const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.timeSaved ?? {};
+  check(`${file}: the figure carries its number, and the how carries both factors`,
+    /\{hours/.test(m.hours ?? "") && /\{minutes/.test(m.minutes ?? "") && /\{runs\}/.test(m.how ?? "") && /\{minutes\}/.test(m.how ?? "") && ["label", "unit", "help", "notYet"].every((k) => typeof m[k] === "string" && m[k].trim()));
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

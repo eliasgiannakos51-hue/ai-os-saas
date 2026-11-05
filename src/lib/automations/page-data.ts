@@ -1,5 +1,5 @@
 import "server-only";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
@@ -9,6 +9,7 @@ import { FLOW_COLUMNS, MAX_FLOWS, RUN_COLUMNS, UUID } from "@/lib/automations/fl
 import { flowPrices, type FlowPrices } from "@/lib/automations/flow-pricing";
 import type { UserAutomation } from "@/types/user-automation";
 import { ownedProjectId } from "@/lib/projects/link-result";
+import { COUNTED_STARTS, readMinutes } from "@/lib/automations/time-saved";
 
 /** How many runs of the opened automation come with the page. */
 const RUNS_SHOWN = 20;
@@ -23,7 +24,64 @@ export type AutomationPageData = {
   older: UserAutomation[];
   /** From `?projectId=`, read back as the caller's own — see below. */
   projectId: string | null;
+  /** The minutes each automation saves, as its owner typed them — or null
+   *  for the whole map when the switch is closed to this reader or the
+   *  column is not in the database yet (see loadMinutesSaved). */
+  minutesSaved: Record<string, number | null> | null;
+  /** The opened automation's finished runs that were not trials. */
+  doneRuns: number;
 };
+
+/**
+ * A COLUMN THE DATABASE DOES NOT HAVE YET: Postgres's undefined_column on
+ * a read (42703), PostgREST's schema-cache miss on a write (PGRST204).
+ * The migrations here are pasted by hand (CLAUDE.md), so both mean
+ * "20261114000000 has not run", never "something failed".
+ */
+export function isColumnMissing(error: { code?: string } | null | undefined): boolean {
+  return error?.code === "42703" || error?.code === "PGRST204";
+}
+
+/**
+ * THE MINUTES EACH AUTOMATION SAVES (automation_flows.minutes_saved,
+ * 20261114000000), in a query OF ITS OWN and never in FLOW_COLUMNS: until
+ * the migration is pasted the column is not there, and a select that
+ * names it fails whole — which in FLOW_COLUMNS would empty the screen of
+ * every automation. Here a missing column answers null, and null hides
+ * the field and the figure (components/automations/flow-boxes.tsx
+ * TimeSavedForm), so the screen is exactly what it was.
+ */
+export async function loadMinutesSaved(supabase: SupabaseClient, userId: string): Promise<Record<string, number | null> | null> {
+  const { data, error } = await supabase.from("automation_flows").select("id, minutes_saved").eq("user_id", userId).limit(MAX_FLOWS);
+  if (error) {
+    if (!isColumnMissing(error)) logApiError("dashboard/automation", error, { stage: "minutes_saved" });
+    return null;
+  }
+  return Object.fromEntries(((data ?? []) as { id: string; minutes_saved: unknown }[]).map((row) => [row.id, readMinutes(row.minutes_saved)]));
+}
+
+/**
+ * HOW MANY TIMES ONE AUTOMATION DID ITS JOB: finished (`done`) runs that
+ * the schedule, a file or «Εκτέλεση τώρα» started — never a «Δοκιμή»
+ * (lib/automations/time-saved.ts COUNTED_STARTS). Counted by the
+ * database, under the person's own select policy, so it is every run and
+ * not the twenty the history shows. Zero when it cannot be counted: the
+ * figure it feeds is then "not yet", never a guess.
+ */
+export async function countDoneRuns(supabase: SupabaseClient, userId: string, flowId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("automation_runs")
+    .select("id", { count: "exact", head: true })
+    .eq("flow_id", flowId)
+    .eq("user_id", userId)
+    .eq("status", "done")
+    .in("started_by", [...COUNTED_STARTS]);
+  if (error) {
+    logApiError("dashboard/automation", error, { stage: "done_runs" });
+    return 0;
+  }
+  return count ?? 0;
+}
 
 /**
  * WHAT THE AUTOMATIONS SCREEN OPENS WITH (MASTER 16, package 30): the
@@ -45,12 +103,14 @@ export async function loadAutomationPage(
   user: User,
   runParam: string | undefined,
   flowParam?: string,
-  projectIdParam?: string
+  projectIdParam?: string,
+  /** Whether "automation-time-saved" is open to this reader: closed, the minutes are not even read. */
+  timeSavedOn = false
 ): Promise<AutomationPageData> {
   const supabase = await createClient();
   const runId = runParam && UUID.test(runParam) ? runParam : null;
   const flowIdFromUrl = flowParam && UUID.test(flowParam) ? flowParam : null;
-  const [flowsResult, olderResult, plan, packPrice, integrations, channels, projectId] = await Promise.all([
+  const [flowsResult, olderResult, plan, packPrice, integrations, channels, projectId, minutesSaved] = await Promise.all([
     supabase.from("automation_flows").select(FLOW_COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(MAX_FLOWS),
     supabase.from("user_automations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
     resolveEffectivePlan(user),
@@ -58,6 +118,7 @@ export async function loadAutomationPage(
     listIntegrations(user.id),
     listDeliveryChannels(user.id),
     ownedProjectId(supabase, projectIdParam),
+    timeSavedOn ? loadMinutesSaved(supabase, user.id) : Promise.resolve(null),
   ]);
   if (flowsResult.error) logApiError("dashboard/automation", flowsResult.error, { stage: "flows" });
   const flows = (flowsResult.data ?? []) as Record<string, unknown>[];
@@ -70,15 +131,20 @@ export async function loadAutomationPage(
     openId = flowIdFromUrl;
   }
   let runs: Record<string, unknown>[] = [];
+  let doneRuns = 0;
   if (openId) {
-    const { data } = await supabase
-      .from("automation_runs")
-      .select(RUN_COLUMNS)
-      .eq("flow_id", openId)
-      .eq("user_id", user.id)
-      .order("started_at", { ascending: false })
-      .limit(RUNS_SHOWN);
+    const [{ data }, done] = await Promise.all([
+      supabase
+        .from("automation_runs")
+        .select(RUN_COLUMNS)
+        .eq("flow_id", openId)
+        .eq("user_id", user.id)
+        .order("started_at", { ascending: false })
+        .limit(RUNS_SHOWN),
+      minutesSaved ? countDoneRuns(supabase, user.id, openId) : Promise.resolve(0),
+    ]);
     runs = (data ?? []) as Record<string, unknown>[];
+    doneRuns = done;
   }
   return {
     flows,
@@ -93,5 +159,7 @@ export async function loadAutomationPage(
     },
     older: (olderResult.data ?? []) as UserAutomation[],
     projectId,
+    minutesSaved,
+    doneRuns,
   };
 }

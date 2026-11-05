@@ -184,6 +184,16 @@ const asked = JSON.parse(to("api.anthropic.com")[0]?.body ?? "{}");
 check("the finances are read as the owner's, the last 7 days", to(new URL(DB).hostname, "/rest/v1/finance_entries").some((c) => c.url.search.includes(`user_id=eq.${USER.id}`) && c.url.search.includes("created_at=gte.")));
 check("...and handed to the model fenced as data, with the totals", asked.messages?.[0].content.includes(UNTRUSTED_OPEN) && asked.messages[0].content.includes("income 450.00 · expense 120.50 · net 329.50"));
 check("the run stops at the approval, waiting", result.status === "waiting_approval" && result.steps.map((s) => s.note).join() === "started,read_items,ai_done,approval_waiting", JSON.stringify(result.steps));
+// THE CANVAS'S REAL STATE (2026-11-05): before each box after the start,
+// the run writes the steps it has so far onto its own row — only while
+// that row is still running — so the Pro canvas reads where it is rather
+// than guessing (lib/automations/run-progress.ts).
+const progressWrites = dbWrites("automation_runs").filter((c) => c.method === "PATCH" && c.url.search.includes("status=eq.running"));
+check("the run says where it is before each box: one write per box after the start, steps growing",
+  progressWrites.length === 3 &&
+    progressWrites.map((c) => JSON.parse(c.body).steps.map((st) => st.note).join()).join(" | ") === "started | started,read_items | started,read_items,ai_done" &&
+    progressWrites.every((c) => c.url.search.includes(`user_id=eq.${USER.id}`) && Object.keys(JSON.parse(c.body)).join() === "steps"),
+  progressWrites.map((c) => `${c.url.search} ${c.body}`).join("\n        "));
 const waitWrite = dbWrites("automation_runs").at(-1);
 const waitBody = JSON.parse(waitWrite?.body ?? "{}");
 check("...keeping what it made and the box to go on from, for 48 hours", waitBody.status === "waiting_approval" && waitBody.state?.at === 4 && waitBody.state.text.startsWith("Αναφορά εβδομάδας") && Math.abs(new Date(waitBody.approval_expires_at).getTime() - Date.now() - 48 * 3_600_000) < 60_000);

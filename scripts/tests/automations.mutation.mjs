@@ -27,6 +27,15 @@ const SHELL = "src/components/shell/tool-shell.tsx";
 const AUTO_SHELL = "src/components/automations/automation-shell.tsx";
 const FLOW_BOXES = "src/components/automations/flow-boxes.tsx";
 const PAGE = "src/app/dashboard/[module]/page.tsx";
+const PROGRESS = "src/lib/automations/run-progress.ts";
+const TEMPLATES = "src/lib/automations/templates.ts";
+const TEMPLATE_ROUTE = "src/app/api/automations/templates/route.ts";
+const GALLERY = "src/components/automations/template-gallery.tsx";
+const TIME_SAVED = "src/lib/automations/time-saved.ts";
+const PAGE_DATA = "src/lib/automations/page-data.ts";
+const EDIT = "src/app/api/automations/flows/[id]/route.ts";
+const MINUTES_SQL = "supabase/migrations/20261114000000_automation_minutes_saved.sql";
+const CSS = "src/app/globals.css";
 
 const MUTANTS = [
   {
@@ -229,11 +238,185 @@ const MUTANTS = [
     to: "",
     expect: "leaving Pro clears the chosen box, so its editor cannot reopen under nothing",
   },
+  // 2026-11-05, after the owner's automation videos. «Όταν → Αν → Κάνε»:
+  // a step said as the wrong part, or not said at all.
+  {
+    name: "an approval is said as «Κάνε», not «Αν»",
+    file: BOXES,
+    from: '  approval: "if",\n',
+    to: '  approval: "do",\n',
+    expect: "the start is «Όταν»; the condition and the approval are «Αν»",
+  },
+  {
+    name: "Simple stops saying which part each step is",
+    file: FLOW_BOXES,
+    from: "                {part[partOf(box)]}\n",
+    to: "                {i + 1}\n",
+    expect: "Simple draws each step's part, from the box's own kind, before its sentence",
+  },
+  // The live canvas: a position invented, a run brought back, a moving
+  // line nobody can switch off, a failure blamed on nothing.
+  {
+    name: "the canvas lights a line that the run has not reached",
+    file: PROGRESS,
+    from: '    if (from === "done" && to === "active") return "active";',
+    to: '    if (to === "active" || to === "idle") return "active";',
+    expect: "a run that has done two boxes is IN the third",
+  },
+  {
+    name: "a finished run keeps its lines lit",
+    file: PROGRESS,
+    from: "  if (!isLive(run)) return idle;\n",
+    to: "",
+    expect: "lights nothing: idle is calm",
+  },
+  {
+    name: "a failed run marks nothing",
+    file: PROGRESS,
+    from: '    const step = [...run.steps].reverse().find((s) => s.status === "failed" && boxes.some((b) => b.id === s.box));',
+    to: "    const step = undefined as RunStep | undefined;",
+    expect: "a run that failed marks the box it failed at",
+  },
+  {
+    name: "the canvas follows last week's run, by clock, while its own press is in flight",
+    file: PROGRESS,
+    from: "    return newest.find((r) => !known.has(r.id)) ?? null;",
+    to: "    return newest[0] ?? null;",
+    expect: "while its own press is in flight it follows the run that was NOT there before",
+  },
+  {
+    name: "the runner never says where it is, so the canvas can only guess",
+    file: RUNNER,
+    from: "    if (steps.length > 0) await reportProgress(ctx, steps);\n",
+    to: "",
+    expect: "the runner writes what it has done before each box it starts",
+  },
+  {
+    name: "a progress write brings a closed run back to life",
+    file: RUNNER,
+    from: '    .eq("user_id", ctx.user.id)\n    .eq("status", "running");',
+    to: '    .eq("user_id", ctx.user.id);',
+    expect: "only onto the person's own row while it is still running",
+  },
+  {
+    name: "the canvas polls for everybody, switch or no switch",
+    file: AUTO_SHELL,
+    from: '  const alive = simplePro && level === "pro";',
+    to: "  const alive = true;",
+    expect: "the canvas is alive only behind the switch, and only in Pro",
+  },
+  {
+    name: "the dots keep moving for somebody who asked for less motion",
+    file: CSS,
+    from: 'html[data-motion="reduce"] .flow-dot {\n  display: none;\n}',
+    to: 'html[data-motion="reduce"] .flow-dot {\n  opacity: 1;\n}',
+    expect: "reduced motion, asked for either way",
+  },
+  {
+    name: "a working line is drawn in the globe's signal colour",
+    file: CSS,
+    from: '.flow-line[data-state="active"] {\n  background-color: rgb(var(--foreground) / 0.45);',
+    to: '.flow-line[data-state="active"] {\n  background-color: rgb(var(--signal) / 0.45);',
+    expect: "the lines are the palette's own",
+  },
+  // Templates: a wrong row, a half-made one, an unbounded or unswitched route.
+  {
+    name: "the daily summary runs at 09:30, not the owner's 08:30",
+    file: TEMPLATES,
+    from: '      { id: "b1", kind: "start", when: "time", every: "day", at: "08:30" },',
+    to: '      { id: "b1", kind: "start", when: "time", every: "day", at: "09:30" },',
+    expect: "(a) every day at 08:30",
+  },
+  {
+    name: "a «Σύντομα» template becomes something to press",
+    file: TEMPLATES,
+    from: 'export const TEMPLATE_IDS = ["finance_daily", "finance_weekly"] as const;',
+    to: 'export const TEMPLATE_IDS = ["finance_daily", "finance_weekly", "instagram_to_telegram"] as const;',
+    expect: "two ready: the finance assistant's daily summary and weekly analysis",
+  },
+  {
+    name: "a «Σύντομα» card grows a button",
+    file: GALLERY,
+    from: '                  <p data-testid="flow-template-why" className="break-words text-xs text-muted">',
+    to: '                  <button type="button" onClick={() => undefined}>x</button>\n                  <p data-testid="flow-template-why" className="break-words text-xs text-muted">',
+    expect: "a «Σύντομα» card has nothing to press",
+  },
+  {
+    name: "the templates route stops reading its switch",
+    file: TEMPLATE_ROUTE,
+    from: '  if (!(await isFeatureOn("automation-templates", user))) return refuse("not_enabled", 403);\n',
+    to: "",
+    expect: "templates: signs in, then the gate, then its own switch",
+  },
+  {
+    name: "the templates route makes rows without a limit",
+    file: TEMPLATE_ROUTE,
+    from: '  if (!limited.allowed) return refuse("rate_limited", 429);\n',
+    to: "",
+    expect: "bounded as a free insert is",
+  },
+  {
+    name: "a template is made already switched on",
+    file: TEMPLATE_ROUTE,
+    from: "boxes, version: 1, is_active: false, time_zone: timeZone })",
+    to: "boxes, version: 1, is_active: true, time_zone: timeZone })",
+    expect: "made off, version 1",
+  },
+  // Time saved: a number invented, a trial counted, a screen emptied by a migration not yet run.
+  {
+    name: "an automation with no minutes is given ten",
+    file: TIME_SAVED,
+    from: "  const minutes = readMinutes(minutesPerRun);",
+    to: "  const minutes = readMinutes(minutesPerRun) ?? 10;",
+    expect: "no minutes, no number",
+  },
+  {
+    name: "a trial is counted as time saved",
+    file: TIME_SAVED,
+    from: 'export const COUNTED_STARTS = ["time", "event", "manual"] as const;',
+    to: 'export const COUNTED_STARTS = ["time", "event", "manual", "dry"] as const;',
+    expect: "a trial saves nobody anything",
+  },
+  {
+    name: "seventy-five minutes is said as one hour",
+    file: TIME_SAVED,
+    from: "  const hours = total < 600 ? Math.round(total / 30) / 2 : Math.round(total / 60);",
+    to: "  const hours = Math.round(total / 60);",
+    expect: "from an hour, in hours to the half hour",
+  },
+  {
+    name: "the screen reads the new column with every automation, so a database without it shows none",
+    file: ACCESS,
+    from: 'export const FLOW_COLUMNS = "id, name, said, boxes, version, is_active, time_zone, next_run_at, last_run_at, cost_limit, busy_since, created_at";',
+    to: 'export const FLOW_COLUMNS = "id, name, said, boxes, version, is_active, time_zone, next_run_at, last_run_at, cost_limit, busy_since, created_at, minutes_saved";',
+    expect: "THE APP WORKS BEFORE THE MIGRATION",
+  },
+  {
+    name: "a missing column is logged as a failure instead of read as «not yet»",
+    file: PAGE_DATA,
+    from: '  return error?.code === "42703" || error?.code === "PGRST204";',
+    to: '  return error?.code === "PGRST204";',
+    expect: "a missing column is Postgres's 42703 on a read",
+  },
+  {
+    name: "a database without the column refuses the limit sent beside the minutes",
+    file: EDIT,
+    from: '      if (isColumnMissing(error)) return refuse("not_ready", 409);\n',
+    to: "",
+    expect: "a database without the column answers «not ready»",
+  },
+  {
+    name: "the database lets a run replace more than a working day",
+    file: MINUTES_SQL,
+    from: "check (minutes_saved is null or minutes_saved between 1 and 480)",
+    to: "check (minutes_saved is null or minutes_saved between 1 and 1440)",
+    expect: "the column is nullable, and bounded where the code bounds it",
+  },
 ];
 
 runMutations({
   name: "automations",
   gate: GATE,
-  targets: [BOXES, ANSWERS, RUNNER, ACCESS, APPROVE, CRON, INGEST, MIGRATION, SHELL, AUTO_SHELL, FLOW_BOXES, PAGE],
+  targets: [BOXES, ANSWERS, RUNNER, ACCESS, APPROVE, CRON, INGEST, MIGRATION, SHELL, AUTO_SHELL, FLOW_BOXES, PAGE, PROGRESS, TEMPLATES, TEMPLATE_ROUTE, GALLERY, TIME_SAVED, PAGE_DATA, EDIT, MINUTES_SQL, CSS],
   mutants: MUTANTS,
 });

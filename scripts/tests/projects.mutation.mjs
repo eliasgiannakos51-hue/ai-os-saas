@@ -342,7 +342,11 @@ const MUTANTS = [
     file: EXTRAS,
     from: '    titleKey: "sidebar.items.imageTool",',
     to: '    titleKey: "sidebar.items.images",',
-    expect: "el: no two of the 30 linkable modules share a name",
+    // The count in that check's name is derived (LINKABLE_MODULES.length),
+    // so it is not written here: "30" went stale when the list reached 33
+    // and left this mutant MISSED while the gate was in fact going red on it
+    // (found 2026-11-05, running this suite for automation-shell.tsx).
+    expect: "linkable modules share a name",
   },
   // ---- the copy ---------------------------------------------------------
   {

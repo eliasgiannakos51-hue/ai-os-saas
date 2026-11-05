@@ -46,6 +46,10 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // «minutes» is the French word too (Automations' «Σου γλίτωσε», the unit
+  // beside the minutes field, 2026-11-05) — every other locale has its own
+  // (λεπτά, Minuten, minutos, minuti, 分, 分钟, دقيقة), so it is this one.
+  "fr:dashboard.automations.timeSaved.unit",
   // The admin Revenue tab (2026-11-04, οδηγία 42 Κομμάτι 6): "Status" is
   // the German noun, and "Date" and "Net" are the French ones, for these
   // senses — a column heading, a date, and a net change. Per locale, NOT in
@@ -886,6 +890,12 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // A ready-made automation's group in Automations (2026-11-05): two brand
+  // names and an arrow, the same in every language that writes left to
+  // right. Arabic says it in words («من Instagram إلى Telegram») rather
+  // than with an arrow that points the wrong way in a right-to-left line,
+  // which is why ar is not one of the nine this answers for.
+  "dashboard.automations.templates.groups.instagram",
   // Connect by address (2026-10-26): an example web address is the same
   // in every language, and "{credits} credits" uses the word the product
   // itself uses for its currency everywhere.

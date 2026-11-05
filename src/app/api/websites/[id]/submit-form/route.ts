@@ -14,6 +14,7 @@ import {
   parseFormType,
   submissionHeadline,
 } from "@/lib/websites/form-types";
+import { isCredentialFieldName } from "@/lib/publishing/credential-fields";
 
 // @service-role-justified public — this is the contact form on a PUBLISHED
 // site, submitted by strangers who have no account. Scoped to the one
@@ -24,6 +25,10 @@ export const dynamic = "force-dynamic";
 const MAX_FIELDS = 20;
 const MAX_FIELD_LENGTH = 2000;
 const MAX_KEY_LENGTH = 60;
+// The whole request, read before anything is parsed. Twenty fields of
+// 2,000 characters with their names and the consent text fit well inside
+// it; a body past it is refused unread rather than parsed and trimmed.
+const MAX_BODY_BYTES = 64 * 1024;
 // Per-website hourly cap — this endpoint is deliberately public/
 // unauthenticated (a real site visitor submitting a contact form has no
 // Ionexa AI account), so there's no per-user credit gate to fall back on
@@ -98,8 +103,19 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     let formType: string;
     let consent = false;
     let consentText: string | null = null;
+    // THE SIZE FIRST. This endpoint answers any origin, so nothing about
+    // the caller is known; a declared length past the cap is refused
+    // before a byte is read, and an undeclared one after it is read.
+    const declared = Number(request.headers.get("content-length") ?? "0");
+    if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) {
+      return NextResponse.json({ ok: false, code: "too_large" }, { status: 413, headers });
+    }
     try {
-      const body = await request.json();
+      const raw = await request.text();
+      if (Buffer.byteLength(raw, "utf8") > MAX_BODY_BYTES) {
+        return NextResponse.json({ ok: false, code: "too_large" }, { status: 413, headers });
+      }
+      const body = JSON.parse(raw);
       rawFields = typeof body?.fields === "object" && body.fields !== null ? body.fields : {};
       // VALIDATED, NOT TRUSTED. Everything in this request comes from a
       // page a stranger's browser is running, and the form type reaches
@@ -142,6 +158,11 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     let fieldCount = 0;
     for (const [key, value] of Object.entries(rawFields)) {
       if (key === "_hp" || key === "_consent") continue;
+      // A PASSWORD IS NEVER KEPT FOR A SITE'S OWNER. No form this product
+      // generates asks for one, and a published page that does is refused
+      // before it goes live (lib/publishing/credential-fields.ts); this
+      // is for a copy of a page hosted somewhere no scan runs.
+      if (isCredentialFieldName(key)) continue;
       if (fieldCount >= MAX_FIELDS) break;
       if (typeof value !== "string") continue;
       const trimmed = value.trim().slice(0, MAX_FIELD_LENGTH);

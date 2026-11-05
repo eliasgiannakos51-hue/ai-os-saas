@@ -15,12 +15,16 @@
 // scan only catches structural/technical issues (script tags, handlers,
 // form targets), not the semantic content of the generated page itself.
 
+import { findCredentialField } from "@/lib/publishing/credential-fields";
+
 export type SecurityScanIssue =
   | { type: "external_script"; src: string }
   | { type: "inline_event_handler"; attribute: string }
   | { type: "external_form_target"; action: string }
   | { type: "external_iframe"; src: string }
-  | { type: "dynamic_code_execution"; snippet: string };
+  | { type: "dynamic_code_execution"; snippet: string }
+  // A page that asks for a password (lib/publishing/credential-fields.ts).
+  | { type: "credential_field"; snippet: string };
 
 // The app's own form endpoint, as a PATH. Matched against a parsed URL's
 // pathname, never against the whole URL string — see isExternalFormTarget.
@@ -202,6 +206,11 @@ export function scanWebsiteHtmlForSecurityIssues(
     issues.push({ type: "dynamic_code_execution", snippet: match[0] });
   }
 
+  // Read whole, not per double-quoted attribute like the checks above
+  // (ΑΣ2-9.1): single quotes, bare values and script all count.
+  const credential = findCredentialField(html);
+  if (credential !== null) issues.push({ type: "credential_field", snippet: credential });
+
   return issues;
 }
 
@@ -221,6 +230,8 @@ export function describeSecurityScanIssue(issue: SecurityScanIssue): string {
       return `Iframe embedding an external domain (${issue.src || "no src"})`;
     case "dynamic_code_execution":
       return `Dynamic code execution (${issue.snippet})`;
+    case "credential_field":
+      return `A field that asks for a password (${issue.snippet})`;
   }
 }
 

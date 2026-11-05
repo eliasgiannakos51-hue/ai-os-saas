@@ -18,6 +18,8 @@
  *      sandbox="allow-scripts" and nothing else.
  */
 // BOUNDARY-FORMAT: html
+import { findCredentialField } from "@/lib/publishing/credential-fields";
+
 export const MAX_APP_HTML_CHARS = 120_000;
 
 /** What an app may not contain, each with the reason a person would be told. */
@@ -111,6 +113,9 @@ export function checkAppHtml(raw: unknown): AppCheck {
   if (html.length > MAX_APP_HTML_CHARS) return { ok: false, reason: "too_long" };
   if (!/<html[\s>]/i.test(html) || !/<\/html>\s*$/i.test(html) || !/<script[\s>]/i.test(html)) return { ok: false, reason: "not_a_document" };
   for (const rule of APP_FORBIDDEN) if (rule.pattern.test(html)) return { ok: false, reason: "forbidden", what: rule.what };
+  // A published app is served on the app's own domain: one that asks for
+  // a password looks like the app asking (lib/publishing/credential-fields.ts).
+  if (findCredentialField(html) !== null) return { ok: false, reason: "forbidden", what: "passwords" };
   const dead = findDeadButton(html);
   if (dead) return { ok: false, reason: "dead_button", what: dead };
   return { ok: true, html };

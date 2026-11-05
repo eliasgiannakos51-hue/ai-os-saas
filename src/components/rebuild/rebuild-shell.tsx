@@ -80,11 +80,15 @@ export function RebuildShell({
   initialOpenId = null,
   systemChars,
   appSystemChars,
+  publishedAppBase = null,
 }: {
   initialProjects: RebuildRow[];
   initialOpenId?: string | null;
   systemChars: number;
   appSystemChars: number;
+  /** The content domain's address when published apps live there
+   *  (lib/publishing/content-origin.ts); null serves them here. */
+  publishedAppBase?: string | null;
 }) {
   const t = useTranslations("dashboard.rebuild");
   const tNames = useTranslations("dashboard.tools.names");
@@ -145,7 +149,7 @@ export function RebuildShell({
     setEditingSubdomain(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openId, open?.subdomain]);
-  const appUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const appUrl = publishedAppBase ?? (typeof window !== "undefined" ? window.location.origin : "");
 
   // Κομμάτι 3: the second phase's own status, read back from the row —
   // never a separate piece of state to drift from what was actually saved.

@@ -2319,6 +2319,7 @@
       "paidOnly": "Veröffentlichen ist in den kostenpflichtigen Plänen enthalten.",
       "tooManyToday": "Du hast heute viele Änderungen veröffentlicht. Versuche es morgen noch einmal.",
       "securityBlocked": "Die Sicherheitsprüfung hat etwas gefunden, das nicht online gehen sollte. Die Website wurde nicht veröffentlicht.",
+      "securityBlockedPassword": "Eine Seite, die nach einem Passwort fragt, kann nicht veröffentlicht werden: Sie sähe aus wie die Anmeldeseite dieser App. Entferne das Passwortfeld und versuche es erneut.",
       "unpublish": "Offline nehmen",
       "unpublishSuccess": "Ihre Seite ist nicht mehr öffentlich.",
       "unpublishError": "Die Seite konnte nicht offline genommen werden. Bitte erneut versuchen.",

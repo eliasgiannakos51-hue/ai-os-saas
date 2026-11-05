@@ -2319,6 +2319,7 @@
       "paidOnly": "发布功能仅在付费套餐中提供。",
       "tooManyToday": "你今天发布的修改太多了。请明天再试。",
       "securityBlocked": "安全检查发现了不应上线的内容，因此网站未发布。",
+      "securityBlockedPassword": "要求输入密码的页面无法发布：它看起来会像本应用的登录页面。请删除密码字段后重试。",
       "unpublish": "下线",
       "unpublishSuccess": "你的网站已不再公开。",
       "unpublishError": "无法将网站下线，请重试。",

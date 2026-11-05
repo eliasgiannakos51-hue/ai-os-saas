@@ -2319,6 +2319,7 @@
       "paidOnly": "La publication est disponible avec les offres payantes.",
       "tooManyToday": "Vous avez publié beaucoup de modifications aujourd’hui. Réessayez demain.",
       "securityBlocked": "Le contrôle de sécurité a trouvé quelque chose qui ne doit pas être mis en ligne : le site n’a pas été publié.",
+      "securityBlockedPassword": "Une page qui demande un mot de passe ne peut pas être publiée : elle ressemblerait à la page de connexion de cette application. Retire le champ du mot de passe et réessaie.",
       "unpublish": "Retirer",
       "unpublishSuccess": "Votre site n'est plus public.",
       "unpublishError": "Impossible de retirer ce site. Réessayez.",

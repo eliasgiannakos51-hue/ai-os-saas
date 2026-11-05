@@ -2319,6 +2319,7 @@
       "paidOnly": "La pubblicazione è disponibile nei piani a pagamento.",
       "tooManyToday": "Oggi hai pubblicato molte modifiche. Riprova domani.",
       "securityBlocked": "Il controllo di sicurezza ha trovato qualcosa che non deve andare online, quindi il sito non è stato pubblicato.",
+      "securityBlockedPassword": "Una pagina che chiede una password non può essere pubblicata: sembrerebbe la pagina di accesso di questa app. Togli il campo della password e riprova.",
       "unpublish": "Rimuovi",
       "unpublishSuccess": "Il tuo sito non è più pubblico.",
       "unpublishError": "Non è stato possibile rimuovere il sito. Riprova.",

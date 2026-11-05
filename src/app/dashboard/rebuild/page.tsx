@@ -7,6 +7,7 @@ import { readRequestedId } from "@/lib/library/requested";
 import { rebuildSystemPrompt } from "@/lib/rebuild/rebuild-system";
 import { appSystemPrompt } from "@/lib/apps/app-system";
 import { RebuildShell, type RebuildRow } from "@/components/rebuild/rebuild-shell";
+import { contentDomain, publishedAppBase } from "@/lib/publishing/content-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,7 @@ export default async function RebuildPage(props: { searchParams?: Promise<{ reco
         initialOpenId={readRequestedId(searchParams?.record)}
         systemChars={rebuildSystemPrompt().length}
         appSystemChars={appSystemPrompt().length}
+        publishedAppBase={publishedAppBase(contentDomain(process.env.PUBLISHED_SITE_DOMAIN))}
       />
     </div>
   );

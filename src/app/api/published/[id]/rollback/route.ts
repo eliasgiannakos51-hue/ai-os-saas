@@ -133,6 +133,9 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
         {
           ok: false,
           securityBlocked: true,
+          // Named, so the screen can say WHY in the reader's language
+          // (components/publishing/publish-control.tsx).
+          ...(issues.some((i) => i.type === "credential_field") ? { reason: "password_field" } : {}),
           issues: described,
           error: "That version can't go live — the security check found something that shouldn't.",
         },

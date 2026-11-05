@@ -6,8 +6,30 @@ import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { isSuspended } from "@/lib/auth/suspension";
 import { crossSiteVerdict } from "@/lib/security/cross-site";
+import { contentDomain, requestHost, routeContentHost } from "@/lib/publishing/content-origin";
 
 export async function proxy(request: NextRequest) {
+  // PUBLISHED SITES AND APPS ON A DOMAIN OF THEIR OWN, when one is set
+  // (PUBLISHED_SITE_DOMAIN; lib/publishing/content-origin.ts). Decided
+  // first, before any session is read: nothing on that domain is the app,
+  // so there is no session there to read, and a site's page is rewritten
+  // to the /s/ route that serves it. Unset, this returns null for every
+  // request and nothing below changes.
+  const content = routeContentHost(
+    requestHost(request.headers),
+    request.nextUrl.pathname,
+    contentDomain(process.env.PUBLISHED_SITE_DOMAIN)
+  );
+  if (content) {
+    if (content.kind === "rewrite") {
+      const url = request.nextUrl.clone();
+      url.pathname = content.pathname;
+      return NextResponse.rewrite(url);
+    }
+    if (content.kind === "pass") return NextResponse.next();
+    return new NextResponse("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }
+
   // NO x-pathname HEADER. One was set here for a single deploy, so the
   // root layout could trim the message catalogue per path. It could not:
   // a shared layout is not re-rendered across client-side navigations, so

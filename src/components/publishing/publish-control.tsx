@@ -181,7 +181,7 @@ export function PublishControl({
   function refusalText(status: number, data: { reason?: unknown; limitReached?: unknown; upgradeRequired?: unknown; securityBlocked?: unknown } | null): string {
     if (data?.limitReached === true) return t("limitReached");
     if (data?.upgradeRequired === true) return t("paidOnly");
-    if (data?.securityBlocked === true) return t("securityBlocked");
+    if (data?.securityBlocked === true) return data.reason === "password_field" ? t("securityBlockedPassword") : t("securityBlocked");
     if (status === 429) return t("tooManyToday");
     if (typeof data?.reason === "string" && REASON_KEY[data.reason]) return t(REASON_KEY[data.reason]);
     return t("publishError");

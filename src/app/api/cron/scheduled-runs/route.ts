@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { sendPushToUser } from "@/lib/push/web-push";
+import { createPushBatch } from "@/lib/push/delivery";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -128,7 +129,12 @@ async function closeRun(
 // configured the route refuses to run on any deployment: this one spends
 // real money per invocation, so an unauthenticated caller could run up an
 // Anthropic bill on every user's behalf. See lib/cron-auth.ts.
+/** How long a run waits at the end for pushes still in flight; each send
+ *  is bounded on its own (lib/push/delivery.ts). */
+const PUSH_SETTLE_MS = 30_000;
+
 export async function GET(request: Request) {
+  const pushes = createPushBatch();
   try {
     const auth = checkCronAuth(request);
     if (!auth.ok) {
@@ -455,23 +461,31 @@ export async function GET(request: Request) {
         // the run row says done, and the person simply never hears.
         // Nobody is waiting on a cron's response, so this is a log and
         // not a third state on a screen.
-        const pushResult = await sendPushToUser(user.id, "mission_reminders", {
-          title: "Mission step done",
-          body: run.step_text.slice(0, 120),
-          url: "/dashboard/mission",
-          tag: `mission-${run.mission_id}`,
+        // QUEUED ON THE RUN'S BATCH, not awaited here: one person's slow
+        // push service must not hold the next person's run. The batch is
+        // settled in the `finally` below, on every way out of GET.
+        const pushUserId = user.id;
+        const pushStep = run.step_text.slice(0, 120);
+        const pushTag = `mission-${run.mission_id}`;
+        pushes.add(async () => {
+          const pushResult = await sendPushToUser(pushUserId, "mission_reminders", {
+            title: "Mission step done",
+            body: pushStep,
+            url: "/dashboard/mission",
+            tag: pushTag,
+          });
+          if (pushResult.skipped || pushResult.failed > 0) {
+            logApiError(
+              "/api/cron/scheduled-runs",
+              new Error(
+                pushResult.skipped
+                  ? `mission reminder not delivered: ${pushResult.skipped}`
+                  : `mission reminder failed for ${pushResult.failed} subscription(s)`
+              ),
+              { stage: "push", userId: pushUserId }
+            );
+          }
         });
-        if (pushResult.skipped || pushResult.failed > 0) {
-          logApiError(
-            "/api/cron/scheduled-runs",
-            new Error(
-              pushResult.skipped
-                ? `mission reminder not delivered: ${pushResult.skipped}`
-                : `mission reminder failed for ${pushResult.failed} subscription(s)`
-            ),
-            { stage: "push", userId: user.id }
-          );
-        }
       }
     }
 
@@ -896,5 +910,10 @@ export async function GET(request: Request) {
   } catch (err) {
     logApiError("/api/cron/scheduled-runs", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
+  } finally {
+    const pushed = await pushes.settle(PUSH_SETTLE_MS);
+    if (pushed.abandoned > 0) {
+      logApiError("/api/cron/scheduled-runs", new Error(`${pushed.abandoned} push(es) still in flight at the deadline`), { stage: "push" });
+    }
   }
 }

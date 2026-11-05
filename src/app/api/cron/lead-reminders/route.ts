@@ -4,6 +4,7 @@ import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
 import { createNotification } from "@/lib/notifications/store";
 import { sendPushToUser } from "@/lib/push/web-push";
+import { createPushBatch } from "@/lib/push/delivery";
 import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
 import { isLeadStage } from "@/lib/sales/stages";
 import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
@@ -14,6 +15,11 @@ export const maxDuration = 60; // @function-limit 60
 
 /** One run's ceiling; a quarter-hour schedule drains a backlog in turns. */
 const BATCH = 200;
+
+/** How long the run waits, after the last bell row, for pushes still in
+ *  flight. Each send is already bounded (lib/push/delivery.ts); this
+ *  keeps the whole run inside maxDuration whatever a push service does. */
+const PUSH_SETTLE_MS = 20_000;
 
 /**
  * THE REMINDERS OF CONTACTS THAT ARE DUE (MASTER 16, package 18): every
@@ -49,6 +55,9 @@ export async function GET(request: Request) {
       .limit(BATCH);
     if (error) throw error;
 
+    // QUEUED, NOT AWAITED ONE BY ONE. A push service that is slow for one
+    // person used to hold every person after them in this loop.
+    const pushes = createPushBatch();
     let sent = 0;
     for (const lead of due ?? []) {
       const { data: claimed } = await admin
@@ -65,8 +74,12 @@ export async function GET(request: Request) {
       const title = t("dashboard.sales.reminder.title", { name: String(lead.lead_name ?? "").slice(0, 120) });
       const body = isLeadStage(lead.stage) ? t("dashboard.sales.reminder.body", { stage: t(`dashboard.sales.stages.${lead.stage}`) }) : "";
       await createNotification({ userId: String(lead.user_id), source: "sales", title, body, url });
-      await sendPushToUser(String(lead.user_id), "mission_reminders", { title, body, url, tag: `lead-${lead.id}` });
+      pushes.add(() => sendPushToUser(String(lead.user_id), "mission_reminders", { title, body, url, tag: `lead-${lead.id}` }));
       sent++;
+    }
+    const pushed = await pushes.settle(PUSH_SETTLE_MS);
+    if (pushed.abandoned > 0) {
+      logApiError("/api/cron/lead-reminders", new Error(`${pushed.abandoned} push(es) still in flight at the deadline`), { stage: "push" });
     }
     return NextResponse.json({ ok: true, due: due?.length ?? 0, sent });
   } catch (err) {

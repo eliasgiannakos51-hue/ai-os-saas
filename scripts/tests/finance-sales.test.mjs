@@ -93,7 +93,7 @@ console.log("\n== 3. the routes, and the reminder job ==");
   ok("the job is the cron's own: CRON_SECRET first", cron.indexOf("checkCronAuth(request)") > 0 && cron.indexOf("checkCronAuth(request)") < cron.indexOf("createAdminClient()"));
   ok("it reads only reminders that are due and unsent", /\.lte\("remind_at", now\)\s*\.is\("reminded_at", null\)/.test(cron));
   ok("each is MARKED before it is delivered, and only by the run that marked it", /\.update\(\{ reminded_at: now \}\)\s*\.eq\("id", lead\.id\)\s*\.is\("reminded_at", null\)/.test(cron) && /if \(!claimed\) continue;/.test(cron) && cron.indexOf("if (!claimed) continue;") < cron.indexOf("createNotification("));
-  ok("...then said in the bell, in the person's language, and pushed where they opted in", /const t = emailTranslator\(await emailLocaleFor\(String\(lead\.user_id\)\)\);/.test(cron) && /await createNotification\(\{ userId: String\(lead\.user_id\), source: "sales", title, body, url \}\);/.test(cron) && /await sendPushToUser\(String\(lead\.user_id\), "mission_reminders"/.test(cron));
+  ok("...then said in the bell, in the person's language, and pushed where they opted in", /const t = emailTranslator\(await emailLocaleFor\(String\(lead\.user_id\)\)\);/.test(cron) && /await createNotification\(\{ userId: String\(lead\.user_id\), source: "sales", title, body, url \}\);/.test(cron) && /pushes\.add\(\(\) => sendPushToUser\(String\(lead\.user_id\), "mission_reminders"/.test(cron));
   const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
   ok("it is scheduled, every quarter of an hour", vercel.crons.some((c) => c.path === "/api/cron/lead-reminders" && c.schedule === "*/15 * * * *"));
 }

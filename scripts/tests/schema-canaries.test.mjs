@@ -189,6 +189,8 @@ const NOT_PROBEABLE = {
     "only INSERTs rows — one help article per tool, ON CONFLICT (slug, locale) DO UPDATE — into help_articles, which an older migration creates; it adds no table, column or function, so there is no object a schema probe could find missing. A missing row is missing content, not missing schema.",
   "20261111000000_admin_audit_log_rls.sql":
     "only enables row level security on admin_audit_log, whose own migration (20261110000000) carries the canary. Whether RLS is on is not something a PostgREST read through the service role can see — that role bypasses it — so there is nothing here to probe.",
+  "20261116000000_push_subscriptions_server_written.sql":
+    "only drops two policies and revokes INSERT and UPDATE on push_subscriptions from the signed-in role; it adds no table, column or function. The service role the probe reads through bypasses both policies and privileges, so it cannot see the difference. Held instead by scripts/tests/server-written-tables.dbtest.mjs as the signed-in role on a real Postgres, and by the file's own SELF-CHECK, which raises when pasted if the revoke did not take.",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

@@ -3,6 +3,12 @@ import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { getSiteUrl } from "@/lib/site-url";
+import {
+  deliverToSubscriptions,
+  MAX_PUSH_SUBSCRIPTIONS_PER_USER,
+  PUSH_SEND_TIMEOUT_MS,
+  type PushRow,
+} from "@/lib/push/delivery";
 
 // Web Push delivery.
 //
@@ -16,6 +22,14 @@ import { getSiteUrl } from "@/lib/site-url";
 // is a no-op that logs once. Push is an enhancement — a deployment
 // without keys must behave exactly like one without the feature, never
 // throw into an agent run or a cron sweep.
+//
+// WHERE A SEND MAY GO AND HOW LONG IT MAY TAKE is decided in
+// lib/push/delivery.ts: only the known push services' hosts (checked
+// again here, not only when the subscription was stored), at most
+// MAX_PUSH_SUBSCRIPTIONS_PER_USER per person, each send bounded by
+// PUSH_SEND_TIMEOUT_MS. A sweep that pushes to many people queues them on
+// a batch (createPushBatch in that file) instead of awaiting one after
+// another.
 
 export const PUSH_TYPES = [
   "agent_results",
@@ -79,6 +93,8 @@ export type PushSendResult = {
   sent: number;
   failed: number;
   revoked: number;
+  /** Stored endpoints that are not a known push service: not sent to. */
+  refused: number;
   skipped: "unconfigured" | "opted_out" | "no_subscriptions" | null;
 };
 
@@ -94,7 +110,7 @@ export async function sendPushToUser(
   type: PushType,
   payload: PushPayload
 ): Promise<PushSendResult> {
-  const result: PushSendResult = { sent: 0, failed: 0, revoked: 0, skipped: null };
+  const result: PushSendResult = { sent: 0, failed: 0, revoked: 0, refused: 0, skipped: null };
   if (!isPushConfigured()) {
     result.skipped = "unconfigured";
     return result;
@@ -108,7 +124,9 @@ export async function sendPushToUser(
       .select("id, endpoint, p256dh, auth")
       .eq("user_id", userId)
       .is("revoked_at", null)
-      .eq(column, true);
+      .eq(column, true)
+      .order("updated_at", { ascending: false })
+      .limit(MAX_PUSH_SUBSCRIPTIONS_PER_USER);
 
     if (error) {
       logApiError("push:sendPushToUser", error, { userId, type });
@@ -127,36 +145,24 @@ export async function sendPushToUser(
       tag: payload.tag ?? type,
     });
 
-    await Promise.all(
-      data.map(async (row) => {
-        try {
-          await webpush.sendNotification(
-            {
-              endpoint: row.endpoint as string,
-              keys: { p256dh: row.p256dh as string, auth: row.auth as string },
-            },
-            body,
-            { TTL: 60 * 60 * 24 }
-          );
-          result.sent += 1;
-        } catch (err) {
-          // 404/410 mean the browser threw the subscription away — the
-          // endpoint is dead forever, so mark it revoked instead of
-          // retrying it on every future send.
-          const status = (err as { statusCode?: number })?.statusCode;
-          if (status === 404 || status === 410) {
-            result.revoked += 1;
-            await admin
-              .from("push_subscriptions")
-              .update({ revoked_at: new Date().toISOString() })
-              .eq("id", row.id as string);
-            return;
-          }
-          result.failed += 1;
-          logApiError("push:sendNotification", err, { userId, type, status: status ?? null });
-        }
-      })
-    );
+    const tally = await deliverToSubscriptions(data as PushRow[], {
+      send: (row) =>
+        webpush.sendNotification(
+          { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
+          body,
+          { TTL: 60 * 60 * 24, timeout: PUSH_SEND_TIMEOUT_MS }
+        ),
+      revoke: (id) =>
+        admin
+          .from("push_subscriptions")
+          .update({ revoked_at: new Date().toISOString() })
+          .eq("id", id),
+      onError: (err, status) => logApiError("push:sendNotification", err, { userId, type, status }),
+    });
+    result.sent = tally.sent;
+    result.failed = tally.failed;
+    result.revoked = tally.revoked;
+    result.refused = tally.refused;
   } catch (err) {
     logApiError("push:sendPushToUser", err, { userId, type, stage: "unhandled" });
     result.failed += 1;

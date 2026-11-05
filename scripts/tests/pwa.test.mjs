@@ -136,10 +136,16 @@ for (const [file, type] of WIRING) {
 }
 const push = readFileSync("src/lib/push/web-push.ts", "utf8");
 check("sends are per-type opt-in filtered", /\.eq\(column, true\)/.test(push));
-check("dead subscriptions (404/410) are revoked, not retried forever", /status === 404 \|\| status === 410/.test(push));
+// The per-row decisions moved to lib/push/delivery.ts on 2026-11-05, where
+// scripts/tests/push-delivery.test.mjs runs them against a sender that
+// answers 410; the line itself is still checked here, where it now lives.
+const delivery = readFileSync("src/lib/push/delivery.ts", "utf8");
+check("dead subscriptions (404/410) are revoked, not retried forever", /status === 404 \|\| status === 410/.test(delivery) && /deliverToSubscriptions\(/.test(push));
 check("an unconfigured deployment is a no-op, not a crash", /skipped = "unconfigured"/.test(push));
 const route = readFileSync("src/app/api/push/subscribe/route.ts", "utf8");
-check("only https endpoints are stored", /startsWith\("https:\/\/"\)/.test(route));
+// Stronger than it was: not any https URL, a known push service's
+// (lib/push/delivery.ts, executed by push-delivery.test.mjs).
+check("only known push services' endpoints are stored", /isAllowedPushEndpoint\(endpoint\)/.test(route));
 check("the row is stamped with the CALLER's user id", /user_id: user\.id/.test(route));
 
 console.log("\n== 10. every asset the manifest names is ON DISK, at the size it claims ==");

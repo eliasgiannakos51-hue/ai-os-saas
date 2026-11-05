@@ -4,6 +4,7 @@ import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
 import { createNotification } from "@/lib/notifications/store";
 import { sendPushToUser } from "@/lib/push/web-push";
+import { createPushBatch } from "@/lib/push/delivery";
 import { emailLocaleFor, emailTranslator } from "@/lib/email/email-locale";
 import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
@@ -13,6 +14,11 @@ export const maxDuration = 60; // @function-limit 60
 
 /** One run's ceiling; a quarter-hour schedule drains a backlog in turns. */
 const BATCH = 200;
+
+/** How long the run waits, after the last bell row, for pushes still in
+ *  flight. Each send is already bounded (lib/push/delivery.ts); this
+ *  keeps the whole run inside maxDuration whatever a push service does. */
+const PUSH_SETTLE_MS = 20_000;
 
 /**
  * THE REMINDERS OF KEPT MEETING ACTIONS THAT ARE DUE (Meetings «ΝΕΑ
@@ -52,6 +58,9 @@ export async function GET(request: Request) {
       .limit(BATCH);
     if (error) throw error;
 
+    // QUEUED, NOT AWAITED ONE BY ONE. A push service that is slow for one
+    // person used to hold every person after them in this loop.
+    const pushes = createPushBatch();
     let sent = 0;
     for (const action of due ?? []) {
       const { data: claimed } = await admin
@@ -70,8 +79,12 @@ export async function GET(request: Request) {
       const who = typeof action.who === "string" ? action.who.trim() : "";
       const body = who ? t("dashboard.meetings.remind.notifyBody", { who }) : "";
       await createNotification({ userId: String(action.user_id), source: "meetings", title, body, url });
-      await sendPushToUser(String(action.user_id), "mission_reminders", { title, body, url, tag: `meeting-action-${action.id}` });
+      pushes.add(() => sendPushToUser(String(action.user_id), "mission_reminders", { title, body, url, tag: `meeting-action-${action.id}` }));
       sent++;
+    }
+    const pushed = await pushes.settle(PUSH_SETTLE_MS);
+    if (pushed.abandoned > 0) {
+      logApiError("/api/cron/meeting-action-reminders", new Error(`${pushed.abandoned} push(es) still in flight at the deadline`), { stage: "push" });
     }
     return NextResponse.json({ ok: true, due: due?.length ?? 0, sent });
   } catch (err) {

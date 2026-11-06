@@ -1,5 +1,5 @@
 import { Bot } from "lucide-react";
-import { BLOCKERS, DEPARTMENTS, ROSTER, RUNNING_AGENT_IDS, rosterCounts, type AgentStatus, type DepartmentKey } from "@/lib/company-agents/roster";
+import { BLOCKERS, DEPARTMENTS, ROSTER, RUNNING_AGENT_IDS, rosterCounts, type RosterStatus, type DepartmentKey } from "@/lib/company-agents/roster";
 
 /**
  * THE COMPANY'S OWN AGENTS, for the owner: what each one's last run found,
@@ -22,7 +22,7 @@ export type CompanyAgentRunRow = {
   unverified: string[];
 };
 
-const STATUS_LABEL: Record<AgentStatus, string> = {
+const STATUS_LABEL: Record<RosterStatus, string> = {
   running: "Running",
   built: "Built, not scheduled",
   blocked: "Blocked",

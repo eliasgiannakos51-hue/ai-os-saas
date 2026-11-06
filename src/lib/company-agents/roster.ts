@@ -30,7 +30,7 @@
  * say "running" about an agent the runner does not run.
  */
 
-export type AgentStatus = "running" | "built" | "blocked" | "planned";
+export type RosterStatus = "running" | "built" | "blocked" | "planned";
 export type Autonomy = 1 | 2 | 3;
 
 /** What an agent can be waiting on. Each is a fact about the repository
@@ -51,7 +51,7 @@ export type RosterAgent = {
   name: string;
   mission: string;
   autonomy: Autonomy;
-  status: AgentStatus;
+  status: RosterStatus;
   blockedBy?: BlockerKey;
 };
 
@@ -77,7 +77,7 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
  *  roster's `running` entries must equal this list, both ways. */
 export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor"] as const;
 
-type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: AgentStatus, blockedBy?: BlockerKey];
+type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: RosterStatus, blockedBy?: BlockerKey];
 
 function dept(department: DepartmentKey, rows: Row[]): RosterAgent[] {
   return rows.map(([id, name, mission, autonomy, status, blockedBy]) => ({
@@ -244,8 +244,8 @@ export const ROSTER: RosterAgent[] = [
 ];
 
 /** How many agents are in each status — what the page's summary prints. */
-export function rosterCounts(roster: RosterAgent[] = ROSTER): Record<AgentStatus, number> {
-  const out: Record<AgentStatus, number> = { running: 0, built: 0, blocked: 0, planned: 0 };
+export function rosterCounts(roster: RosterAgent[] = ROSTER): Record<RosterStatus, number> {
+  const out: Record<RosterStatus, number> = { running: 0, built: 0, blocked: 0, planned: 0 };
   for (const a of roster) out[a.status] += 1;
   return out;
 }

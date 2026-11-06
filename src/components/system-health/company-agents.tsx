@@ -54,7 +54,7 @@ function LastRuns({ runs }: { runs: CompanyAgentRunRow[] | null }) {
       {RUNNING_AGENT_IDS.map((id) => {
         const last = runs.find((r) => r.agentId === id);
         return (
-          <li key={id} className="rounded-item border border-border bg-background/20 p-3">
+          <li key={id} className="rounded-item bg-background/30 p-3">
             <p className="text-[11px] uppercase tracking-wide text-muted">{nameOf(id)}</p>
             {last === undefined ? (
               <p className="mt-1 text-xs text-muted">
@@ -99,7 +99,7 @@ export function CompanyAgents({ runs }: { runs: CompanyAgentRunRow[] | null }) {
         {departments.map((d) => (
           <div key={d} className="mt-4">
             <p className="text-[11px] uppercase tracking-wide text-muted">{DEPARTMENTS[d]}</p>
-            <ul className="mt-1 divide-y divide-border">
+            <ul className="mt-1 space-y-1">
               {ROSTER.filter((a) => a.department === d).map((a) => (
                 <li key={a.id} className="py-2 text-xs">
                   <span className="font-medium">{a.name}</span>

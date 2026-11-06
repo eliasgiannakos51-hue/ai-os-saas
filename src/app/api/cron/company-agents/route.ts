@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkCronAuth } from "@/lib/cron-auth";
+import { logApiError } from "@/lib/log-error";
 import { runCompanyAgents } from "@/lib/company-agents/run";
 
 export const dynamic = "force-dynamic";
@@ -23,11 +24,18 @@ export async function GET(request: Request) {
   const auth = checkCronAuth(request);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
 
-  const report = await runCompanyAgents();
-  return NextResponse.json({
-    ok: true,
-    saved: report.saved,
-    saveError: report.saveError,
-    results: report.results.map(({ agentId, result }) => ({ agentId, status: result.status, summary: result.summary })),
-  });
+  try {
+    const report = await runCompanyAgents();
+    return NextResponse.json({
+      ok: true,
+      saved: report.saved,
+      saveError: report.saveError,
+      results: report.results.map(({ agentId, result }) => ({ agentId, status: result.status, summary: result.summary })),
+    });
+  } catch (err) {
+    // runCompanyAgents does not throw by design; this is the net under it,
+    // so an unexpected failure reaches production_errors instead of vanishing.
+    logApiError("/api/cron/company-agents", err, { stage: "run" });
+    return NextResponse.json({ ok: false, error: "run failed" }, { status: 500 });
+  }
 }

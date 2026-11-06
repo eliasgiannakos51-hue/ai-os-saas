@@ -997,6 +997,7 @@ const OWNER_ONLY_BASELINE = {
   "src/app/dashboard/system-health/page.tsx": 5,
   "src/components/costs/cost-dashboard.tsx": 12,
   "src/components/system-health/capability-status.tsx": 3,
+  "src/components/system-health/company-agents.tsx": 10,
   "src/components/system-health/db-exposure.tsx": 3,
   "src/components/system-health/env-warnings.tsx": 1,
   "src/components/system-health/error-list.tsx": 2,

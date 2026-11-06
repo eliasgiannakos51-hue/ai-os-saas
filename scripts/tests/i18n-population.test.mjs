@@ -115,6 +115,7 @@ const ENGLISH_ON_PURPOSE = {
   "src/components/system-health/pwa-adoption.tsx": "the same screen: install and push-permission counts for the owner.",
   "src/components/system-health/db-exposure.tsx": "the same owner-only screen: which tables each database role can reach, listed by their SQL names, which are not words in any language.",
   "src/components/system-health/capability-status.tsx": "the same screen: which provider keys are configured.",
+  "src/components/system-health/company-agents.tsx": "the same owner-only screen: the roster of the company's own agents, with status words, blocker reasons and agent names that are internal working vocabulary for the owner, not product text for customers.",
   "src/components/system-health/key-checks.tsx": "the same owner-only screen: provider names, environment variable names and HTTP status codes, which are identifiers rather than prose.",
   "src/components/system-health/storage-diagnostics.tsx": "the same owner-only screen: bucket names and storage policy names, which are identifiers rather than prose.",
   "src/components/costs/cost-dashboard.tsx": "the owner's spend dashboard, reached from /dashboard/costs, which is owner-gated in the page above it.",

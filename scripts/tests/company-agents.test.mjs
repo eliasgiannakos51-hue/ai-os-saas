@@ -70,6 +70,7 @@ ok("the runner's only write is the insert into company_agent_runs", (runnerSrc.m
 console.log("\n== 2. the reasons are still true ==");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
+ok(`package.json was read (${deps.length} dependencies), so "no analytics package" is a finding and not an empty read`, deps.length >= 20 && deps.includes("next"));
 const analyticsDeps = deps.filter((d) => /posthog|plausible|mixpanel|umami|amplitude/i.test(d));
 const blockedByAnalytics = ROSTER.filter((a) => a.blockedBy === "analytics").length;
 ok(`"analytics" blocks ${blockedByAnalytics} agent(s) only while no analytics package is installed`,

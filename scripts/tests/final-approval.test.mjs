@@ -22,9 +22,9 @@ function check(name, cond, detail) {
 
 const GOOD_BODY = `## Τι αλλάζει\nx\n\n## Πώς γυρίζει πίσω\n1. Στη σελίδα του PR πάτα Revert και μετά merge.\n\n## Migrations\nΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261101000000_x.sql\n`;
 const GOOD_SQL = "-- How to undo: drop table public.x; nothing else reads it.\ncreate table public.x();";
-const files = { "supabase/migrations/20261101000000_x.sql": GOOD_SQL };
+const files = { "supabase/migrations/20261028000000_tool_notify_subscriptions.sql": GOOD_SQL };
 const GOOD = {
-  changed: ["src/lib/a.ts", "scripts/tests/a.test.mjs", "docs/PROGRESS.md", "supabase/migrations/20261101000000_x.sql"],
+  changed: ["src/lib/flags/flags.ts", "scripts/tests/a.test.mjs", "docs/PROGRESS.md", "supabase/migrations/20261028000000_tool_notify_subscriptions.sql"],
   readFile: (f) => files[f] ?? null,
   body: GOOD_BODY,
   gatesExit: 0,
@@ -66,7 +66,7 @@ check("the rendered report says how many were not verified", /NOT verified/.test
 console.log("\n== only what applies is asked ==");
 const docsOnly = evaluate({ changed: ["docs/FEATURES.md"], readFile: () => null, body: GOOD_BODY, gatesExit: 0 });
 check("a docs-only change owes no test and no plan update", !ids(docsOnly, "fail").length && !docsOnly.some((r) => r.id === "test-with-code" || r.id === "plan-updated"));
-const noMig = evaluate({ ...GOOD, changed: ["src/a.ts", "scripts/tests/a.test.mjs", "docs/QUEUE.md"], body: "## Πώς γυρίζει πίσω\nRevert the PR on GitHub, then merge it.\n" });
+const noMig = evaluate({ ...GOOD, changed: ["src/lib/flags/flags.ts", "scripts/tests/a.test.mjs", "docs/QUEUE.md"], body: "## Πώς γυρίζει πίσω\nRevert the PR on GitHub, then merge it.\n" });
 check("no migration means no ΝΑ ΤΡΕΞΕΙΣ line is demanded", !noMig.some((r) => r.id === "pr-body:migrations-line"));
 
 console.log("\n== the readers ==");

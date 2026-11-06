@@ -22,6 +22,8 @@ import { KeyChecks, type KeyInventoryRow } from "@/components/system-health/key-
 import { KEY_INVENTORY, keyVarFor } from "@/lib/ai/providers/key-inventory";
 import { getLocale } from "next-intl/server";
 import { FeatureFlags } from "@/components/system-health/feature-flags";
+import { CompanyAgents, type CompanyAgentRunRow } from "@/components/system-health/company-agents";
+import { RUNNING_AGENT_IDS } from "@/lib/company-agents/roster";
 import { FLAGS, readFlagAudiences, type FlagKey } from "@/lib/flags/flags";
 
 export function generateMetadata(): Promise<Metadata> {
@@ -169,6 +171,38 @@ export default async function SystemHealthPage() {
     console.error("system-health: could not read pwa_adoption_summary", err);
   }
 
+  // THE COMPANY'S OWN AGENTS: the newest row of each running agent. Null
+  // means the table could not be read (the migration has not been run), and
+  // the section says that rather than showing an empty list.
+  let companyRuns: CompanyAgentRunRow[] | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("company_agent_runs")
+      .select("agent_id, ran_at, status, summary, unverified")
+      .in("agent_id", [...RUNNING_AGENT_IDS])
+      .order("ran_at", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    const seen = new Set<string>();
+    companyRuns = [];
+    for (const r of (data ?? []) as Record<string, unknown>[]) {
+      const agentId = String(r.agent_id);
+      if (seen.has(agentId)) continue;
+      seen.add(agentId);
+      companyRuns.push({
+        agentId,
+        ranAt: String(r.ran_at),
+        status: r.status as CompanyAgentRunRow["status"],
+        summary: String(r.summary ?? ""),
+        unverified: Array.isArray(r.unverified) ? (r.unverified as unknown[]).map(String) : [],
+      });
+    }
+  } catch (err) {
+    // Not logApiError, for the reason given at the other reads above.
+    console.error("system-health: could not read company_agent_runs", err);
+  }
+
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -217,6 +251,8 @@ export default async function SystemHealthPage() {
             <ErrorList rows={rows} />
           </>
         )}
+
+        <CompanyAgents runs={companyRuns} />
 
         <KeyChecks rows={keyRows} />
 

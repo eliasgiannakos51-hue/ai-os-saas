@@ -163,6 +163,7 @@ const DENY_ALL_ON_PURPOSE = {
   feature_flags: "the owner's switches for new tools (MASTER Μέρος 13 Β): read and written only by the server with the service role (src/lib/flags/flags.ts, src/app/api/system-health/flags/route.ts). A client that could write one could open an unfinished tool to everyone.",
   rate_limit_log: "the limiter's own ledger. A client that could read it would learn other accounts' request rates; one that could write it could clear its own limit.",
   production_errors: "server-side error records, scrubbed and admin-read only through the service role.",
+  company_agent_runs: "one row per run of the company's own agents, written by the daily cron and read only by the owner-only System Health section, both through the service role. No customer has any business reading it.",
   daily_ai_spend_tracking: "platform-wide spend, aggregated across every account — one row here is not any one user's data.",
   cost_alert_log: "which cost alerts have already been sent, so the cron does not send them twice.",
   revenue_snapshots: "whole-business figures for the owner's dashboard; not per-user data at all.",

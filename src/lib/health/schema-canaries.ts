@@ -441,6 +441,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "company_agent_runs",
+    migration: "20261106000000_company_agent_runs.sql",
+    breaks: "The owner-only Company agents section of System Health shows «Could not read company_agent_runs», and the daily agent run cannot record what it found; nothing a customer sees is affected",
+  },
+  {
+    kind: "table",
     table: "tool_notify_subscriptions",
     migration: "20261028000000_tool_notify_subscriptions.sql",
     breaks: "Every «Notify me» press on a not-ready All tools tile answers «it could not be saved», and nobody is ever told when that tool opens",

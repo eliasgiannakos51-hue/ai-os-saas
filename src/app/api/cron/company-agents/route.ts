@@ -33,7 +33,7 @@ export async function GET(request: Request) {
       results: report.results.map(({ agentId, result }) => ({ agentId, status: result.status, summary: result.summary })),
     });
   } catch (err) {
-    // runCompanyAgents does not throw by design; this is the net under it,
+    // runCompanyAgents is written not to throw; this is the net under it,
     // so an unexpected failure reaches production_errors instead of vanishing.
     logApiError("/api/cron/company-agents", err, { stage: "run" });
     return NextResponse.json({ ok: false, error: "run failed" }, { status: 500 });

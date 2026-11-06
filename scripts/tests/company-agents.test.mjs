@@ -126,7 +126,7 @@ ok("...and reads the table the runner writes", /from\("company_agent_runs"\)/.te
 console.log("\n== 5. the migration ==");
 const sql = readFileSync("supabase/migrations/20261106000000_company_agent_runs.sql", "utf8");
 const sqlCode = sql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
-ok("it says how to undo itself", /^-- How to undo: .{20,}/m.test(sql));
+ok("DOC, not behaviour: the migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(sql));
 ok("it creates the table with if not exists", /create table if not exists public\.company_agent_runs/.test(sqlCode));
 ok("row level security is on", /alter table public\.company_agent_runs enable row level security/.test(sqlCode));
 ok("it grants nothing to customers: revoked from anon and authenticated", /revoke all on public\.company_agent_runs from anon/.test(sqlCode) && /revoke all on public\.company_agent_runs from authenticated/.test(sqlCode));

@@ -4,6 +4,7 @@ import { cacheImpactOfRoute, cachedPrefixTokens } from "@/lib/ai/providers/cache
 import { ATTEMPT_TIMEOUT_MS, classifyError } from "@/lib/ai/providers/failover";
 import { resolveChain, warnIfPricesUnverified, PROVIDER_KEY_ENV_VARS } from "@/lib/ai/providers/registry";
 import { recordProviderAttempts } from "@/lib/ai/providers/provider-log";
+import { resolveAccountEuOnly } from "@/lib/ai/providers/eu-only";
 import type { Adapter, AiAttempt, AiOutcome, AiProvider, AiRequest } from "@/lib/ai/providers/types";
 
 /**
@@ -56,6 +57,7 @@ const ADAPTERS: Record<AiProvider, () => Promise<Adapter>> = {
   openai: async () => (await import("@/lib/ai/providers/adapters/openai")).callOpenAi,
   google: async () => (await import("@/lib/ai/providers/adapters/google")).callGoogle,
   groq: async () => (await import("@/lib/ai/providers/adapters/groq")).callGroq,
+  mistral: async () => (await import("@/lib/ai/providers/adapters/mistral")).callMistral,
 };
 
 export type CompleteOptions = {
@@ -71,6 +73,14 @@ export type CompleteOptions = {
    *  tried — a stop is not a provider failure to route around. The
    *  outcome is `kind: "aborted"` so the route can release the hold. */
   signal?: AbortSignal;
+  /**
+   * «ΜΟΝΟ ΕΥΡΩΠΗ», explicit. Tests set this directly, which is also why
+   * it exists rather than every caller resolving the account's own
+   * setting by hand: when it is omitted and `userId` is given, runCompletion
+   * resolves it itself from eu-only.ts, so passing `{ userId }` is the
+   * one thing a call site must do to be covered — nothing else.
+   */
+  euOnly?: boolean;
 };
 
 export async function runCompletion(
@@ -83,21 +93,34 @@ export async function runCompletion(
 
   warnIfPricesUnverified(env);
 
-  const chain = resolveChain({ env, purpose: request.purpose, requires });
+  // EXPLICIT BEATS RESOLVED, because a test sets this directly and must
+  // never have it overwritten by a database read it did not ask for.
+  // Omitted AND a userId given is the one case this actually looks it
+  // up — every other call shape (no userId, a background/cron job with
+  // no account) gets `false`, honestly: there is no account to have made
+  // the promise.
+  const euOnly = options.euOnly ?? (options.userId ? await resolveAccountEuOnly(options.userId) : false);
+
+  const chain = resolveChain({ env, purpose: request.purpose, requires, euOnly });
   const attempts: AiAttempt[] = [];
 
   if (chain.order.length === 0) {
-    // TWO DIFFERENT FAILURES WEARING THE SAME FACE, and they need
-    // different fixes: "nothing is configured" is an env problem, "the
-    // configured providers cannot do this" is a routing problem. The
-    // skipped list already carries the reason for each.
+    // THREE DIFFERENT FAILURES WEARING THE SAME FACE, and they need
+    // different fixes. "nothing is configured" is an env problem, "the
+    // configured providers cannot do this" is a routing problem, and
+    // "configured, capable, and not in the EU while this account asked
+    // for the EU" is a promise this layer is keeping by refusing rather
+    // than by quietly answering from the wrong place. euOnlyBlocked is
+    // checked FIRST: resolveChain only sets it true when a provider was
+    // otherwise usable and was ruled out purely for region, so it cannot
+    // misfire on a chain that was always going to be empty.
     const capabilityBlocked =
       requires.length > 0 && chain.skipped.some((s) => s.reason.startsWith("does not offer"));
     return {
       ok: false,
-      kind: capabilityBlocked ? "unsupported" : "no_provider",
+      kind: chain.euOnlyBlocked ? "eu_only_blocked" : capabilityBlocked ? "unsupported" : "no_provider",
       detail:
-        `purpose=${request.purpose} source=${chain.source} ` +
+        `purpose=${request.purpose} source=${chain.source} euOnly=${euOnly} ` +
         `skipped=[${chain.skipped.map((s) => `${s.provider}: ${s.reason}`).join("; ")}] ` +
         `warnings=[${chain.warnings.map((w) => `${w.envVar}=${w.value} (${w.reason})`).join("; ")}]`,
       attempts,

@@ -267,7 +267,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
           ownerPlan
         );
         if (affordable.ok) {
-          classification = await classifyLeadMessage(fields, costs);
+          classification = await classifyLeadMessage(fields, costs, website.user_id);
         }
       } catch (err) {
         logApiError("/api/websites/[id]/submit-form", err, { stage: "lead_classification" });

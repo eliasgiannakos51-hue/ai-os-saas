@@ -833,7 +833,8 @@ export async function POST(request: Request) {
       const contentReview = await reviewWebsiteContentSafety(
         apiKey,
         stripped.length === 1 ? stripped[0] : stripped.join("\n"),
-        costs
+        costs,
+        writerUserId
       );
 
       const allIssueDescriptions = [

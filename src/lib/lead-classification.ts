@@ -72,7 +72,15 @@ export async function classifyLeadMessage(
   // the door it came through open. billing-coverage.test.mjs §1b ranges
   // over every runCompletion caller and requires the usage to reach an
   // accumulator; an optional one cannot satisfy that honestly.
-  costs: CostAccumulator
+  costs: CostAccumulator,
+  // The site OWNER's id — same party `costs` settles against, not the
+  // anonymous visitor submitting the form. Required for the same reason
+  // `costs` is: without it, runCompletion has no account to resolve
+  // «Μόνο Ευρώπη» against (lib/ai/providers/eu-only.ts) and this call
+  // would silently route around that account's own setting.
+  // eu-only.test.mjs ranges over every runCompletion caller and requires
+  // this.
+  userId: string
 ): Promise<LeadClassification | null> {
   const text = formatFields(fields);
   if (!text.trim()) return null;
@@ -96,7 +104,7 @@ export async function classifyLeadMessage(
     messages: [{ role: "user", content: text }],
     tools: [CLASSIFY_TOOL],
     toolChoice: { type: "tool", name: "classify_lead" },
-  });
+  }, { userId });
   // A call that never completed has no usage to record and nothing to
   // settle — the caller's `costs.callCount > 0` is what decides whether
   // a settlement happens at all.

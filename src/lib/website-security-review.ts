@@ -81,7 +81,13 @@ export function parseContentSafetyReviewInput(input: {
 export async function reviewWebsiteContentSafety(
   apiKey: string,
   html: string,
-  costs?: CostAccumulator
+  costs?: CostAccumulator,
+  // The site owner's id, the account this review's tokens are billed to
+  // (costs above). Required so runCompletion can resolve this account's
+  // «Μόνο Ευρώπη» setting (lib/ai/providers/eu-only.ts) — without it the
+  // call could silently route around a promise this account made.
+  // eu-only.test.mjs ranges over every runCompletion caller for this.
+  userId: string
 ): Promise<ContentSafetyReviewResult> {
   try {
     const trimmed = html.length > MAX_HTML_CHARS_FOR_REVIEW ? html.slice(0, MAX_HTML_CHARS_FOR_REVIEW) : html;
@@ -107,7 +113,7 @@ export async function reviewWebsiteContentSafety(
       tools: [REVIEW_TOOL],
       toolChoice: { type: "tool", name: "review_content_safety" },
       requires: ["tool_calling"],
-    });
+    }, { userId });
 
     // FAIL OPEN, AS THIS LAYER ALWAYS HAS — and now that includes a
     // provider failure and a Stop, which used to arrive as a thrown

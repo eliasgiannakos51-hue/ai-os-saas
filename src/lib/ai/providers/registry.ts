@@ -5,7 +5,7 @@ import {
   type AiProvider,
   type AiPurpose,
 } from "@/lib/ai/providers/types";
-import { UNVERIFIED_PRICE_PROVIDERS, providerSupports } from "@/lib/ai/providers/catalog";
+import { PROVIDER_REGION, UNVERIFIED_PRICE_PROVIDERS, providerSupports } from "@/lib/ai/providers/catalog";
 
 /**
  * WHICH PROVIDERS EXIST HERE, IN WHAT ORDER, FOR WHAT.
@@ -49,7 +49,14 @@ export const PROVIDER_KEY_ENV_VARS: Record<AiProvider, string> = {
   openai: "OPENAI_API_KEY",
   google: "GOOGLE_API_KEY",
   groq: "GROQ_API_KEY",
+  mistral: "MISTRAL_API_KEY",
 };
+
+/** The sentence `resolveChain` writes into `skipped` for a provider ruled
+ *  out ONLY because of «Μόνο Ευρώπη» — every other reason is a different
+ *  string, and complete.ts tells the two apart by this exact text so
+ *  `kind: "eu_only_blocked"` is never confused with `no_provider`. */
+export const EU_ONLY_SKIP_REASON = "not an EU provider — this account's «Μόνο Ευρώπη» setting is on";
 
 /** The global chain, and the per-purpose override that beats it. */
 export const PROVIDER_ORDER_ENV_VAR = "AI_PROVIDER_ORDER";
@@ -173,6 +180,17 @@ export type ResolvedChain = {
   /** Which env var decided this, so an operator can find it. */
   source: string;
   failoverEnabled: boolean;
+  /**
+   * TRUE ONLY WHEN «Μόνο Ευρώπη» ITSELF IS WHAT EMPTIED THE CHAIN — not
+   * whenever the account has it on. An EU-only account whose chain still
+   * has Mistral in it after filtering is not blocked; one configured with
+   * only non-EU providers, or with none configured at all, is a DIFFERENT
+   * failure (no_provider) that happened to also be EU-only, and this stays
+   * false for it. complete.ts reads this to choose between `no_provider`,
+   * `unsupported` and `eu_only_blocked` — three sentences for three
+   * different fixes.
+   */
+  euOnlyBlocked: boolean;
 };
 
 /**
@@ -188,9 +206,15 @@ export function resolveChain(params: {
   env: ProviderEnv;
   purpose: AiPurpose;
   requires?: readonly AiCapability[];
+  /** This account's «Μόνο Ευρώπη» setting (eu-only.ts resolves it from
+   *  user_credits). When true, a provider PROVIDER_REGION does not mark
+   *  "eu" is skipped here, before any call — never tried and silently
+   *  allowed to answer because it happened to be configured. */
+  euOnly?: boolean;
 }): ResolvedChain {
   const { env, purpose } = params;
   const requires = params.requires ?? [];
+  const euOnly = params.euOnly ?? false;
 
   const purposeVar = purposeOrderEnvVar(purpose);
   const perPurpose = parseProviderOrder(env[purposeVar], purposeVar);
@@ -212,6 +236,13 @@ export function resolveChain(params: {
   const statuses = new Map(providerStatuses(env).map((s) => [s.provider, s]));
   const order: AiProvider[] = [];
   const skipped: { provider: AiProvider; reason: string }[] = [];
+  // Set only for a provider that was otherwise USABLE — key present,
+  // every required capability offered — and ruled out purely for not
+  // being in the EU. A provider skipped for a different reason first
+  // (no key, missing capability) never reaches this check, because the
+  // continues above already moved past it: euOnlyBlocked below must stay
+  // false for a chain that was always going to be empty anyway.
+  let viableButNotEu = false;
   for (const provider of configured) {
     const status = statuses.get(provider);
     if (!status?.enabled) {
@@ -221,6 +252,11 @@ export function resolveChain(params: {
     const missing = requires.filter((c) => !providerSupports(provider, c));
     if (missing.length > 0) {
       skipped.push({ provider, reason: `does not offer ${missing.join(", ")}` });
+      continue;
+    }
+    if (euOnly && PROVIDER_REGION[provider] !== "eu") {
+      skipped.push({ provider, reason: EU_ONLY_SKIP_REASON });
+      viableButNotEu = true;
       continue;
     }
     order.push(provider);
@@ -239,6 +275,7 @@ export function resolveChain(params: {
     warnings: [...perPurpose.warnings, ...global.warnings],
     source,
     failoverEnabled,
+    euOnlyBlocked: order.length === 0 && viableButNotEu,
   };
 }
 

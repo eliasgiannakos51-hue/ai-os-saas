@@ -19,7 +19,7 @@
  * without one.
  */
 
-export const AI_PROVIDERS = ["anthropic", "openai", "google", "groq"] as const;
+export const AI_PROVIDERS = ["anthropic", "openai", "google", "groq", "mistral"] as const;
 export type AiProvider = (typeof AI_PROVIDERS)[number];
 
 export function isAiProvider(value: unknown): value is AiProvider {
@@ -409,7 +409,20 @@ export type AiFailureKind =
    *  differently. Never failed over: see failover.ts. */
   | "bad_request"
   /** Ruled out before any call: no provider offers a required capability. */
-  | "unsupported";
+  | "unsupported"
+  /**
+   * «ΜΟΝΟ ΕΥΡΩΠΗ» (EU-only, eu-only.ts) IS ON FOR THIS ACCOUNT, and every
+   * provider left in the chain after key and capability filtering is
+   * NOT in the EU (catalog.ts's PROVIDER_REGION). This is never
+   * `no_provider` or `unsupported`, on purpose: those two read as "we
+   * have nothing configured" or "nothing here can do this", and an
+   * operator — or a translated error on screen — needs the true third
+   * reason, which is a promise the account itself asked for, kept by
+   * refusing rather than by silently answering from the provider the
+   * account asked NOT to use. See registry.ts's resolveChain and
+   * complete.ts's runCompletion.
+   */
+  | "eu_only_blocked";
 
 export type AiFailure = {
   ok: false;

@@ -431,7 +431,7 @@ export async function POST(request: Request) {
       // shipped with a warning.
       updatedHtml = stripDisallowedExternalScripts(updatedHtml);
       const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined });
-      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs);
+      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs, user.id);
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),
         ...contentReview.concerns,

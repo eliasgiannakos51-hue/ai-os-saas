@@ -75,7 +75,7 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
 
 /** The agents the runner (lib/company-agents/run.ts) executes today. The
  *  roster's `running` entries must equal this list, both ways. */
-export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
+export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
 
 type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: RosterStatus, blockedBy?: BlockerKey];
 
@@ -166,14 +166,14 @@ export const ROSTER: RosterAgent[] = [
   ]),
   ...dept("finance", [
     ["revenue-tracker", "Revenue tracker", "Computes monthly recurring revenue from subscriptions with the billing code, and says when a tier has no price. Not Stripe cash.", 1, "running"],
-    ["expense-tracker", "Expense tracker", "Reads what the company spends.", 1, "planned"],
-    ["cost-per-agent", "Cost per agent", "Reports what each agent's model calls cost.", 1, "planned"],
+    ["expense-tracker", "AI expense tracker", "Reports AI cost for the last 7 days against the 7 before. Only AI usage, not hosting or tools.", 1, "running"],
+    ["cost-per-agent", "Cost by feature", "Reports 30-day AI cost by product feature and flags features with cost but no credits charged. Company agents make no AI calls yet.", 1, "running"],
     ["invoice-prep", "Invoice preparation", "Prepares invoice data for the accountant.", 2, "blocked", "human-only"],
     ["reconciliation", "Payment reconciliation", "Matches payments with records.", 1, "planned"],
-    ["budget-monitor", "Budget monitor", "Compares spend with the budget.", 1, "planned"],
+    ["budget-monitor", "Budget monitor", "Compares today's AI calls with the platform daily cap. There is no euro budget in the product, so it cannot compare euro spend.", 1, "running"],
     ["forecast", "Forecast", "Projects revenue and cost.", 1, "blocked", "analytics"],
     ["tax-documents", "Tax documents", "Organises documents for the accountant; files nothing.", 1, "blocked", "human-only"],
-    ["fraud-alert", "Fraud alert", "Flags unusual payments.", 1, "planned"],
+    ["fraud-alert", "Spend concentration alert", "Flags one account being most of a day's AI spend. It does not see payments or cards.", 1, "running"],
   ]),
   ...dept("research", [
     ["competitor-tracker", "Competitor tracker", "Watches competitors' features and prices.", 1, "planned"],
@@ -200,7 +200,7 @@ export const ROSTER: RosterAgent[] = [
     ["api-uptime-monitor", "API uptime monitor", "Calls /api/health and records whether the app answers and says it is ok.", 1, "running"],
     ["error-log-analyst", "Error log analyst", "Reads the open production errors and reports how many and where.", 1, "running"],
     ["database-health", "Database health", "Reads the database's own exposure report and fails when any of its checks fails.", 1, "running"],
-    ["queue-monitor", "Queue monitor", "Watches background work that is stuck.", 1, "planned"],
+    ["queue-monitor", "Queue monitor", "Counts background jobs (ai_jobs) that are queued or running and have not moved for 30 minutes, and recent failures.", 1, "running"],
     ["backup-verifier", "Backup verifier", "Checks that a backup exists and is recent.", 1, "planned"],
     ["deployment-monitor", "Deployment monitor", "Watches deployments for failures.", 1, "planned"],
     ["cost-optimizer", "Cost optimizer", "Compares the last 24 hours of AI spend with the daily average of the week before and warns on a spike. AI cost only, not infrastructure bills.", 1, "running"],

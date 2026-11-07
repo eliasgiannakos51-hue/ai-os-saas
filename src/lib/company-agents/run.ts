@@ -2,7 +2,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { scrubSecrets } from "@/lib/scrub-secrets";
 import {
+  analyzeBudget,
+  analyzeConcentration,
   analyzeCost,
+  analyzeExpenses,
+  analyzeFeatureCosts,
+  analyzeQueue,
   analyzeDatabase,
   analyzeErrors,
   analyzeHeaders,
@@ -13,6 +18,10 @@ import {
   ERROR_READ_LIMIT,
   type AgentResult,
   type CostHour,
+  type DayCost,
+  type FeatureCost,
+  type OpenJob,
+  type UserCost,
   type ErrorRow,
   type ExposureRow,
   type HeadersProbe,
@@ -134,6 +143,59 @@ async function probeHeaders(): Promise<HeadersProbe> {
   }
 }
 
+async function readOpenJobs(): Promise<{ open: OpenJob[]; failed24h: number | null } | null> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("ai_jobs")
+      .select("status, updated_at")
+      .in("status", ["queued", "running"])
+      .order("updated_at", { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    const open = ((data ?? []) as Record<string, unknown>[]).map((r) => ({ status: String(r.status), updatedAt: String(r.updated_at) }));
+    let failed24h: number | null = null;
+    const since = new Date(Date.now() - 24 * 3600_000).toISOString();
+    const failed = await admin.from("ai_jobs").select("id", { count: "exact", head: true }).eq("status", "failed").gte("updated_at", since);
+    if (!failed.error) failed24h = failed.count ?? 0;
+    return { open, failed24h };
+  } catch (err) {
+    logApiError("/api/cron/company-agents", err, { stage: "read ai_jobs" });
+    return null;
+  }
+}
+
+async function readCallsToday(): Promise<number | null> {
+  try {
+    const admin = createAdminClient();
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await admin.from("daily_ai_spend_tracking").select("total_calls").eq("date", today).maybeSingle();
+    if (error) throw error;
+    return Number((data as { total_calls?: unknown } | null)?.total_calls ?? 0);
+  } catch (err) {
+    logApiError("/api/cron/company-agents", err, { stage: "read daily_ai_spend_tracking" });
+    return null;
+  }
+}
+
+async function readUserCosts(): Promise<UserCost[] | null> {
+  const rows = await callRpc("cost_user_totals", { p_days: 1 });
+  if (rows === null) return null;
+  return rows.map((r) => ({ userId: String(r.user_id), costEur: Number(r.cost_eur ?? 0), calls: Number(r.calls ?? 0) }));
+}
+
+async function readFeatureCosts(): Promise<FeatureCost[] | null> {
+  const rows = await callRpc("cost_by_feature", { p_days: 30 });
+  if (rows === null) return null;
+  return rows.map((r) => ({ feature: String(r.feature), costEur: Number(r.cost_eur ?? 0), calls: Number(r.calls ?? 0), creditsCharged: Number(r.credits_charged ?? 0) }));
+}
+
+async function readDayCosts(): Promise<DayCost[] | null> {
+  const rows = await callRpc("cost_daily_totals", { p_days: 14 });
+  if (rows === null) return null;
+  return rows.map((r) => ({ day: String(r.day), costEur: Number(r.cost_eur ?? 0), calls: Number(r.calls ?? 0) }));
+}
+
 /** The rows written by earlier runs, for task-auditor. Read BEFORE this run saves its own. */
 async function readPastRuns(): Promise<PastRun[] | null> {
   try {
@@ -179,6 +241,15 @@ export async function runCompanyAgents(): Promise<RunReport> {
     await runOne("cost-optimizer", async () => analyzeCost(await readCost(), Date.now())),
     await runOne("revenue-tracker", async () => analyzeRevenue(await readRevenue())),
     await runOne("headers-checker", async () => analyzeHeaders(await probeHeaders())),
+    await runOne("queue-monitor", async () => {
+      const jobs = await readOpenJobs();
+      return analyzeQueue(jobs?.open ?? null, jobs?.failed24h ?? null, Date.now());
+    }),
+    // Same default as lib/ai-circuit-breaker.ts (5000) and the same env var.
+    await runOne("budget-monitor", async () => analyzeBudget(await readCallsToday(), Number(process.env.MAX_DAILY_AI_CALLS) || 5000)),
+    await runOne("fraud-alert", async () => analyzeConcentration(await readUserCosts())),
+    await runOne("cost-per-agent", async () => analyzeFeatureCosts(await readFeatureCosts())),
+    await runOne("expense-tracker", async () => analyzeExpenses(await readDayCosts(), Date.now())),
     await runOne("task-auditor", async () => analyzeStaleness(await readPastRuns(), RUNNING_AGENT_IDS, Date.now())),
   ];
   // LAST, because it reports on everything above.

@@ -157,6 +157,37 @@ ok("reporter: an unverified agent keeps the whole report from being ok", agents.
 ok("reporter: counts add up", (() => { const r = agents.summarizeRun([R("a", "ok"), R("b", "warn"), R("c", "fail"), R("d", "unverified")]); return r.evidence.ok + r.evidence.warn + r.evidence.fail + r.evidence.unverified === 4; })());
 ok("the reporter runs last in the runner", runnerIds[runnerIds.length - 1] === "daily-reporter");
 
+console.log("\n== 3d. third batch: every shape of input ==");
+const job = (minAgo) => ({ status: "running", updatedAt: new Date(NOW - minAgo * 60_000).toISOString() });
+ok("queue: a failed read is unverified", agents.analyzeQueue(null, 0, NOW).status === "unverified");
+ok("queue: no open jobs is ok", agents.analyzeQueue([], 0, NOW).status === "ok");
+ok("queue: a job moving 5 minutes ago is ok", agents.analyzeQueue([job(5)], 0, NOW).status === "ok");
+ok("queue: a job silent 45 minutes is a warning", (() => { const r = agents.analyzeQueue([job(5), job(45)], 2, NOW); return r.status === "warn" && r.evidence.stuck === 1 && /2 job\(s\) failed/.test(r.summary); })());
+ok("queue: an unreadable failure count never reads as zero", agents.analyzeQueue([], null, NOW).unverified.some((u) => /failed jobs/.test(u)));
+ok("budget: a failed read is unverified", agents.analyzeBudget(null, 5000).status === "unverified");
+ok("budget: 10% is ok", agents.analyzeBudget(500, 5000).status === "ok");
+ok("budget: 80% is a warning", agents.analyzeBudget(4000, 5000).status === "warn");
+ok("budget: 79% is still ok", agents.analyzeBudget(3950, 5000).status === "ok");
+ok("budget: reaching the cap is a failure", agents.analyzeBudget(5000, 5000).status === "fail");
+ok("budget: a zero cap is unverified, never a divide-by-zero verdict", agents.analyzeBudget(10, 0).status === "unverified");
+const u = (id, eur) => ({ userId: id, costEur: eur, calls: 1 });
+ok("concentration: a failed read is unverified", agents.analyzeConcentration(null).status === "unverified");
+ok("concentration: no spend is ok", agents.analyzeConcentration([]).status === "ok");
+ok("concentration: one account at 90% and 9 euro warns, naming 8 chars of it", (() => { const r = agents.analyzeConcentration([u("abcdef123456", 9), u("zzzzzzzz", 1)]); return r.status === "warn" && /abcdef12/.test(r.summary) && !/abcdef123456/.test(r.summary); })());
+ok("concentration: 90% but under 2 euro is ok (noise floor)", agents.analyzeConcentration([u("a", 0.9), u("b", 0.1)]).status === "ok");
+ok("concentration: a single account alone is not 'concentration'", agents.analyzeConcentration([u("a", 50)]).status === "ok");
+ok("concentration: an even spread is ok", agents.analyzeConcentration([u("a", 3), u("b", 3), u("c", 3)]).status === "ok");
+const f = (feature, eur, calls, credits) => ({ feature, costEur: eur, calls, creditsCharged: credits });
+ok("features: a failed read is unverified", agents.analyzeFeatureCosts(null).status === "unverified");
+ok("features: no cost is ok", agents.analyzeFeatureCosts([]).status === "ok");
+ok("features: names the top three by cost", (() => { const r = agents.analyzeFeatureCosts([f("a", 1, 30, 9), f("b", 5, 30, 9), f("c", 3, 30, 9), f("d", 2, 30, 9)]); return r.evidence.top3[0].startsWith("b ") && r.evidence.top3.length === 3; })());
+ok("features: cost with no credits charged (20+ calls) warns", (() => { const r = agents.analyzeFeatureCosts([f("free-thing", 4, 25, 0), f("paid", 1, 30, 9)]); return r.status === "warn" && /free-thing/.test(r.summary); })());
+ok("features: uncharged but under 20 calls does not warn", agents.analyzeFeatureCosts([f("x", 4, 5, 0)]).status === "ok");
+const dc = (daysAgo, eur) => ({ day: new Date(NOW - daysAgo * 86400_000).toISOString().slice(0, 10), costEur: eur, calls: 1 });
+ok("expenses: a failed read is unverified", agents.analyzeExpenses(null, NOW).status === "unverified");
+ok("expenses: sums the last 7 days and the 7 before separately", (() => { const r = agents.analyzeExpenses([dc(1, 2), dc(3, 3), dc(8, 10), dc(20, 99)], NOW); return r.evidence.last7Eur === 5 && r.evidence.prev7Eur === 10; })());
+ok("expenses: says it does not judge the trend", agents.analyzeExpenses([], NOW).unverified.some((x) => /does not judge/.test(x)));
+
 console.log("\n== 4. the wiring is real ==");
 const cron = code("src/app/api/cron/company-agents/route.ts");
 ok("the cron route calls checkCronAuth()", /\bcheckCronAuth\s*\(/.test(cron));

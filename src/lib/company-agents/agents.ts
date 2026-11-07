@@ -263,3 +263,136 @@ export function summarizeRun(results: { agentId: string; result: AgentResult }[]
   const head = `${results.length} agents: ${counts.ok} ok, ${counts.warn} warn, ${counts.fail} fail, ${counts.unverified} unverified.`;
   return { status, summary: needs.length === 0 ? head : `${head} Needs a look: ${needs.join("; ")}.`, evidence: counts, unverified };
 }
+
+// ---------------------------------------------------------------------------
+// THIRD BATCH (2026-11-07): five more database readers. Same rules.
+// ---------------------------------------------------------------------------
+
+/** An ai_jobs row that has not finished. */
+export type OpenJob = { status: string; updatedAt: string };
+
+/** A background job untouched for this long is stuck, not slow. Chosen 2026-11-07. */
+export const STUCK_JOB_MINUTES = 30;
+
+/** queue-monitor: background jobs (ai_jobs) that are queued or running and have not moved. */
+export function analyzeQueue(open: OpenJob[] | null, failedLast24h: number | null, nowMs: number): AgentResult {
+  const unverified = [
+    "why a job is stuck: the agent sees timestamps, not the worker",
+    "jobs older than the 500 newest open rows it reads",
+  ];
+  if (open === null) {
+    return { status: "unverified", summary: "Could not read ai_jobs, so the queue was not checked.", evidence: {}, unverified: ["every open job: the read failed", ...unverified] };
+  }
+  const stuck = open.filter((j) => {
+    const t = Date.parse(j.updatedAt);
+    return !Number.isNaN(t) && nowMs - t > STUCK_JOB_MINUTES * 60_000;
+  });
+  const evidence = { open: open.length, stuck: stuck.length, failedLast24h };
+  const failedNote = failedLast24h === null ? "" : ` ${failedLast24h} job(s) failed in the last 24h.`;
+  if (stuck.length > 0) {
+    return { status: "warn", summary: `${stuck.length} of ${open.length} open job(s) have not moved for over ${STUCK_JOB_MINUTES} minutes.${failedNote}`, evidence, unverified };
+  }
+  return { status: "ok", summary: `${open.length} open job(s), none stuck.${failedNote}`, evidence, unverified: failedLast24h === null ? ["failed jobs: that count could not be read", ...unverified] : unverified };
+}
+
+/** budget-monitor: today's AI calls against the platform's own daily cap. */
+export function analyzeBudget(callsToday: number | null, cap: number): AgentResult {
+  const unverified = [
+    "euro spend against a euro budget: the cap in force is a CALL count, there is no euro budget to compare with",
+  ];
+  if (callsToday === null) {
+    return { status: "unverified", summary: "Could not read daily_ai_spend_tracking, so the cap was not checked.", evidence: { cap }, unverified: ["today's call count: the read failed", ...unverified] };
+  }
+  const evidence = { callsToday, cap, share: cap > 0 ? Math.round((callsToday / cap) * 1000) / 1000 : null };
+  if (cap <= 0) {
+    return { status: "unverified", summary: "The daily cap is not a positive number, so the share could not be computed.", evidence, unverified };
+  }
+  if (callsToday >= cap) return { status: "fail", summary: `${callsToday} AI calls today: the platform daily cap of ${cap} is reached and the circuit breaker is refusing requests.`, evidence, unverified };
+  if (callsToday >= cap * 0.8) return { status: "warn", summary: `${callsToday} AI calls today, ${Math.round((callsToday / cap) * 100)}% of the daily cap of ${cap}.`, evidence, unverified };
+  return { status: "ok", summary: `${callsToday} AI calls today, ${Math.round((callsToday / cap) * 100)}% of the daily cap of ${cap}.`, evidence, unverified };
+}
+
+/** One user's spend over the window. */
+export type UserCost = { userId: string; costEur: number; calls: number };
+
+/** fraud-alert: one account being most of a day's AI spend. */
+export const CONCENTRATION_SHARE = 0.5;
+export const CONCENTRATION_MIN_EUR = 2;
+
+export function analyzeConcentration(users: UserCost[] | null): AgentResult {
+  const unverified = [
+    "whether the spend is abuse: a heavy legitimate user looks the same as a bad one",
+    "payment fraud: nothing here sees cards or Stripe",
+  ];
+  if (users === null) {
+    return { status: "unverified", summary: "Could not read cost_user_totals(), so nothing was checked.", evidence: {}, unverified: ["per-account spend: the read failed", ...unverified] };
+  }
+  const total = users.reduce((s, u) => s + u.costEur, 0);
+  if (users.length === 0 || total <= 0) {
+    return { status: "ok", summary: "No AI spend in the last 24 hours.", evidence: { totalEur: 0, accounts: 0 }, unverified };
+  }
+  const top = [...users].sort((a, b) => b.costEur - a.costEur)[0];
+  const share = top.costEur / total;
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  const evidence = { totalEur: round2(total), accounts: users.length, topAccount: top.userId.slice(0, 8), topEur: round2(top.costEur), topShare: Math.round(share * 100) / 100 };
+  if (share >= CONCENTRATION_SHARE && top.costEur >= CONCENTRATION_MIN_EUR && users.length > 1) {
+    return { status: "warn", summary: `Account ${top.userId.slice(0, 8)} is ${Math.round(share * 100)}% of the last 24h AI spend (€${round2(top.costEur)} of €${round2(total)}).`, evidence, unverified };
+  }
+  return { status: "ok", summary: `${users.length} account(s) spent €${round2(total)} in 24h; the largest is ${Math.round(share * 100)}%.`, evidence, unverified };
+}
+
+/** One feature's 30-day cost, from cost_by_feature(). */
+export type FeatureCost = { feature: string; costEur: number; calls: number; creditsCharged: number };
+
+/** cost-per-agent: 30-day AI cost by product feature (the unit the cost log records). */
+export const UNCHARGED_MIN_CALLS = 20;
+
+export function analyzeFeatureCosts(rows: FeatureCost[] | null): AgentResult {
+  const unverified = [
+    "cost per COMPANY agent: the cost log is keyed by product feature, and these agents make no AI calls yet",
+    "whether a feature is priced right: that is the margin report's job",
+  ];
+  if (rows === null) {
+    return { status: "unverified", summary: "Could not read cost_by_feature(), so nothing was checked.", evidence: {}, unverified: ["feature costs: the read failed", ...unverified] };
+  }
+  const total = rows.reduce((s, r) => s + r.costEur, 0);
+  if (rows.length === 0 || total <= 0) {
+    return { status: "ok", summary: "No AI cost recorded in the last 30 days.", evidence: { totalEur: 0, features: 0 }, unverified };
+  }
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  const sorted = [...rows].sort((a, b) => b.costEur - a.costEur);
+  const top3 = sorted.slice(0, 3).map((r) => `${r.feature} €${round2(r.costEur)}`);
+  const uncharged = rows.filter((r) => r.costEur > 0 && r.creditsCharged === 0 && r.calls >= UNCHARGED_MIN_CALLS).map((r) => r.feature);
+  const evidence = { totalEur: round2(total), features: rows.length, top3, unchargedFeatures: uncharged };
+  if (uncharged.length > 0) {
+    return { status: "warn", summary: `30-day AI cost €${round2(total)}. Cost with no credits charged (${UNCHARGED_MIN_CALLS}+ calls): ${uncharged.join(", ")}. Top: ${top3.join(", ")}.`, evidence, unverified };
+  }
+  return { status: "ok", summary: `30-day AI cost €${round2(total)} across ${rows.length} feature(s). Top: ${top3.join(", ")}.`, evidence, unverified };
+}
+
+/** One day of AI cost, from cost_daily_totals(). */
+export type DayCost = { day: string; costEur: number; calls: number };
+
+/** expense-tracker: the last 7 days of AI cost against the 7 before them. A report with a trend, not a verdict. */
+export function analyzeExpenses(days: DayCost[] | null, nowMs: number): AgentResult {
+  const unverified = [
+    "any expense that is not AI usage: hosting, database, domains and tools are not in the cost log",
+    "whether the trend is good or bad: the agent reports it, it does not judge it",
+  ];
+  if (days === null) {
+    return { status: "unverified", summary: "Could not read cost_daily_totals(), so nothing was checked.", evidence: {}, unverified: ["AI expenses: the read failed", ...unverified] };
+  }
+  const DAY = 24 * 3600_000;
+  let last7 = 0;
+  let prev7 = 0;
+  for (const d of days) {
+    const t = Date.parse(d.day);
+    if (Number.isNaN(t)) continue;
+    const age = nowMs - t;
+    if (age >= -DAY && age < 7 * DAY) last7 += d.costEur;
+    else if (age >= 7 * DAY && age < 14 * DAY) prev7 += d.costEur;
+  }
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  const evidence = { last7Eur: round2(last7), prev7Eur: round2(prev7) };
+  return { status: "ok", summary: `AI cost last 7 days €${round2(last7)}, the 7 days before €${round2(prev7)}.`, evidence, unverified };
+}

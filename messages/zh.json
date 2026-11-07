@@ -3328,7 +3328,8 @@
         "apps": "应用",
         "audio": "音频",
         "sheets": "表格",
-        "skills": "技能"
+        "skills": "技能",
+        "discord": "Discord"
       },
       "lines": {
         "site": "根据描述生成网站",
@@ -4817,6 +4818,153 @@
         "stepsEmpty": "还没有步骤",
         "filesLabel": "文件",
         "filesEmpty": "没有附加文件"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "这里尚未设置 Discord",
+        "why": "部署中缺少这些值：{names}。没有它们，这里什么都无法运行。",
+        "unreadable": "此部署上的 Discord 尚未就绪：数据库中还没有它的表。"
+      },
+      "connect": {
+        "heading": "连接一个 Discord 服务器",
+        "why": "先在 Discord 中创建一个空服务器：点服务器列表底部的 +，再选「Create My Own」。然后把 Ionexa 连接到它。",
+        "button": "连接 Ionexa",
+        "permissions": "Ionexa 只请求：{list}。从不请求管理员权限。"
+      },
+      "perm": {
+        "manage_roles": "管理身份组",
+        "manage_channels": "管理频道",
+        "view_channel": "查看频道",
+        "send_messages": "发送消息",
+        "embed_links": "嵌入链接",
+        "read_message_history": "阅读消息历史",
+        "manage_guild": "管理服务器",
+        "manage_webhooks": "管理 Webhook",
+        "administrator": "管理员",
+        "ban_members": "封禁成员"
+      },
+      "flash": {
+        "connected": "服务器已连接。描述它，Ionexa 来规划。",
+        "cancelled": "连接已取消，没有任何改变。",
+        "invalid_state": "该链接不是你的或已过期。请重试。",
+        "expired": "链接已过期。请重试。",
+        "exchange_failed": "Discord 没有确认连接。请重试。",
+        "no_server": "Discord 没有指明服务器。请在 Discord 的页面上选择服务器。",
+        "bot_not_in_server": "Ionexa 不在那个服务器中。请重新连接。",
+        "taken": "此服务器已连接到另一个 Ionexa 账户。",
+        "save_failed": "无法保存连接。请重试。",
+        "rate_limited": "尝试次数过多。请稍等后重试。",
+        "error": "出了点问题。请重试。",
+        "not_configured": "此部署未设置 Discord。",
+        "unavailable": "此账户尚未开放 Discord。",
+        "invalid_response": "Discord 的响应不完整。请重试。"
+      },
+      "placeholder": "描述你想要的服务器…",
+      "changePlaceholder": "修改方案…",
+      "boxPlaceholder": "「{name}」要改什么？",
+      "empty": {
+        "heading": "你想要什么样的服务器？",
+        "why": "用于 {server}。用文字描述：在 Discord 发生任何变化之前，你会先看到以方块呈现的方案。",
+        "examples": {
+          "bakery": "为我的面包店社区建一个服务器，带一个订单频道",
+          "club": "为一个小游戏俱乐部建一个服务器，带语音房间",
+          "class": "为我的班级建一个服务器，带公告和作业"
+        }
+      },
+      "server": "服务器",
+      "disconnect": "断开连接",
+      "disconnectConfirm": "Ionexa 将离开此服务器。它创建的内容会留在 Discord 中，之后无法再从这里撤销。",
+      "priceLabel": "价格",
+      "price": "每个方案或每次用文字修改约 {credits} 积分。在 Discord 中创建、勾选、删除方块和撤销均免费。",
+      "cost": "约 {credits} 积分",
+      "slashLabel": "在服务器中",
+      "slash": "/ionexa ask 用此账户的积分在服务器中回答，仅限能管理服务器的成员使用。",
+      "planning": "正在规划服务器…",
+      "changing": "正在修改方案…",
+      "making": "正在 Discord 中创建… 已完成 {n} 个",
+      "planned": "方案已就绪：{roles} 个身份组，{channels} 个频道。Discord 中还没有任何改变。",
+      "changed": "方案已修改。",
+      "changedOne": "只改了「{name}」，其余保持不变。",
+      "applied": "完成。整个方案都已在 Discord 中。",
+      "undone": "已撤销。只删除了 Ionexa 创建的内容。",
+      "stoppedAt": "在「{name}」处停止。标记为已完成的内容在 Discord 中；撤销会删除它们。",
+      "undo": "撤销",
+      "undoConfirm": "只删除 Ionexa 在此服务器中创建的内容？原有的任何内容都不会被触碰。",
+      "primary": "在 Discord 中创建",
+      "deleteBox": "删除此方块",
+      "boxCount": "{n} 个方块",
+      "status": {
+        "planned": "方案 · 尚未创建",
+        "applying": "正在创建…",
+        "applied": "已在 Discord 中创建",
+        "failed": "中途停止",
+        "undoing": "正在撤销…",
+        "undone": "已撤销"
+      },
+      "state": {
+        "made": "已完成",
+        "failed": "失败",
+        "deleted": "已撤销"
+      },
+      "note": {
+        "community_needed": "已创建为文字频道：这需要社区服务器。"
+      },
+      "section": {
+        "roles": "身份组",
+        "channels": "分类和频道",
+        "messages": "消息",
+        "automod": "自动审核"
+      },
+      "kind": {
+        "text": "文字频道",
+        "voice": "语音频道",
+        "forum": "论坛",
+        "announcement": "公告",
+        "category": "分类"
+      },
+      "message": {
+        "welcome": "欢迎消息",
+        "rules": "规则"
+      },
+      "automod": {
+        "keywords": "屏蔽 {n} 个词",
+        "spam": "屏蔽垃圾信息",
+        "preset": "屏蔽：{list}",
+        "mentions": "每条消息最多 {n} 次提及"
+      },
+      "preset": {
+        "profanity": "脏话",
+        "sexual_content": "色情内容",
+        "slurs": "侮辱性用语"
+      },
+      "private": "仅限：{roles}",
+      "readOnly": "所有人只读",
+      "hoist": "在成员列表中单独显示",
+      "tickTitle": "仅在你勾选时：",
+      "elevated": {
+        "manage_guild": "管理服务器：修改服务器名称、设置和自动审核。",
+        "manage_channels": "管理频道：创建、修改和删除任何频道。",
+        "manage_roles": "管理身份组：创建和修改低于自身的身份组，并授予成员。"
+      },
+      "refusedNote": "Ionexa 从不授予管理员或封禁成员权限：由服务器所有者在 Discord 中授予。",
+      "errors": {
+        "insufficient_credits": "积分不足：大约需要 {needed}。",
+        "ai_unavailable": "Ionexa 现在无法规划。没有扣费。",
+        "unusable": "回答不是可执行的方案。请换种说法。",
+        "failed": "出了点问题。请重试。",
+        "conflict": "方案已在另一个标签页中修改。请刷新页面。",
+        "rate_limited": "尝试次数过多。请稍等。",
+        "busy": "已在运行。",
+        "already_applied": "请先撤销已创建的内容。",
+        "bot_not_in_server": "Ionexa 已不在此服务器中。请重新连接。",
+        "not_connected": "此服务器未连接。",
+        "empty": "请再多写一点。",
+        "too_long": "内容太长了。",
+        "stopped": "已停止。没有扣费。",
+        "bypass_ceiling": "此账户已达到每月上限。",
+        "refused_permission": "Ionexa 从不授予管理员或封禁成员权限。",
+        "not_configured": "此部署未设置 Discord。"
       }
     }
   },
@@ -6947,5 +7095,18 @@
     "reason": "原因",
     "contact": "如果您认为这是一个错误，请联系客服支持。",
     "signOut": "退出登录"
+  },
+  "discordBot": {
+    "notLinked": "此服务器未连接到 Ionexa 账户。",
+    "notAllowed": "只有能管理此服务器的成员才能使用 /ionexa：它会使用已连接账户的积分。",
+    "accountMissing": "找不到此服务器的 Ionexa 账户。",
+    "notOpen": "此账户尚未开放 Discord 中的 Ionexa。",
+    "tooMany": "现在问题太多了。请稍后再试。",
+    "ceiling": "已连接的账户已达到每月上限。",
+    "noCredits": "已连接的 Ionexa 账户积分不足（大约需要 {needed}）。",
+    "failed": "Ionexa 现在无法回答。没有扣费。",
+    "cut": "（回答在长度上限处被截断。）",
+    "unknownCommand": "未知命令。",
+    "empty": "请在 /ionexa ask 后面写一个问题。"
   }
 }

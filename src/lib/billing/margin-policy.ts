@@ -238,6 +238,8 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   // Package 30: both settle under the same feature as every automation.
   automationStep: "automation_run",
   automationBuild: "automation_run",
+  // The Discord directive (2026-11-05): a server plan, and one box changed.
+  discordPlan: "discord_plan",
   agentBuild: "agent_build",
   agentRun: "agent_run",
   // Voice. Both settle under one feature so CREDIT_MARGIN_VOICE governs

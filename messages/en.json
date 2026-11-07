@@ -3328,7 +3328,8 @@
         "apps": "Apps",
         "audio": "Audio",
         "sheets": "Sheets",
-        "skills": "Skills"
+        "skills": "Skills",
+        "discord": "Discord"
       },
       "lines": {
         "site": "A website from a description",
@@ -4817,6 +4818,153 @@
         "stepsEmpty": "No steps yet",
         "filesLabel": "Files",
         "filesEmpty": "No files attached"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "Discord is not set up here yet",
+        "why": "These values are missing on the deployment: {names}. Nothing here can work without them.",
+        "unreadable": "Discord is not ready on this deployment yet: its tables are not in the database."
+      },
+      "connect": {
+        "heading": "Connect a Discord server",
+        "why": "First make an empty server in Discord: the + at the bottom of your server list, then Create My Own. Then connect Ionexa to it.",
+        "button": "Connect Ionexa",
+        "permissions": "Ionexa asks only for: {list}. Never Administrator."
+      },
+      "perm": {
+        "manage_roles": "Manage Roles",
+        "manage_channels": "Manage Channels",
+        "view_channel": "View Channels",
+        "send_messages": "Send Messages",
+        "embed_links": "Embed Links",
+        "read_message_history": "Read Message History",
+        "manage_guild": "Manage Server",
+        "manage_webhooks": "Manage Webhooks",
+        "administrator": "Administrator",
+        "ban_members": "Ban Members"
+      },
+      "flash": {
+        "connected": "The server is connected. Describe it and Ionexa plans it.",
+        "cancelled": "Connecting was cancelled. Nothing changed.",
+        "invalid_state": "That link was not yours or has expired. Try again.",
+        "expired": "The link expired. Try again.",
+        "exchange_failed": "Discord did not confirm the connection. Try again.",
+        "no_server": "Discord did not say which server. Pick a server on Discord's screen.",
+        "bot_not_in_server": "Ionexa is not in that server. Try connecting again.",
+        "taken": "This server is already connected to another Ionexa account.",
+        "save_failed": "The connection could not be saved. Try again.",
+        "rate_limited": "Too many tries. Wait a little and try again.",
+        "error": "Something went wrong. Try again.",
+        "not_configured": "Discord is not set up on this deployment.",
+        "unavailable": "Discord is not open for this account.",
+        "invalid_response": "Discord's answer was incomplete. Try again."
+      },
+      "placeholder": "Describe the server you want…",
+      "changePlaceholder": "Change the plan…",
+      "boxPlaceholder": "What should change in “{name}”?",
+      "empty": {
+        "heading": "What server do you want?",
+        "why": "For {server}. Describe it in words: you see the plan as boxes before anything changes in Discord.",
+        "examples": {
+          "bakery": "A server for my bakery's community, with a channel for orders",
+          "club": "A server for a small gaming club, with voice rooms",
+          "class": "A server for my class, with announcements and homework"
+        }
+      },
+      "server": "Server",
+      "disconnect": "Disconnect",
+      "disconnectConfirm": "Ionexa will leave this server. What it made stays in Discord and can no longer be undone from here.",
+      "priceLabel": "Price",
+      "price": "≈ {credits} credits for a plan or a change with words. Making it in Discord, ticks, deleting a box and Undo cost nothing.",
+      "cost": "≈ {credits} credits",
+      "slashLabel": "In the server",
+      "slash": "/ionexa ask answers in the server with this account's credits, for members who can manage the server.",
+      "planning": "Planning the server…",
+      "changing": "Changing the plan…",
+      "making": "Making it in Discord… {n} made",
+      "planned": "The plan is ready: {roles} roles, {channels} channels. Nothing has changed in Discord yet.",
+      "changed": "The plan changed.",
+      "changedOne": "Only “{name}” changed. The rest stayed the same.",
+      "applied": "Done. Everything in the plan is in Discord.",
+      "undone": "Undone. Only what Ionexa made was deleted.",
+      "stoppedAt": "It stopped at “{name}”. What is marked made is in Discord; Undo deletes it.",
+      "undo": "Undo",
+      "undoConfirm": "Delete only what Ionexa made in this server? Nothing that was there before is touched.",
+      "primary": "Make it in Discord",
+      "deleteBox": "Delete this box",
+      "boxCount": "{n} boxes",
+      "status": {
+        "planned": "Plan · not made yet",
+        "applying": "Making it…",
+        "applied": "Made in Discord",
+        "failed": "Stopped half-way",
+        "undoing": "Undoing…",
+        "undone": "Undone"
+      },
+      "state": {
+        "made": "Made",
+        "failed": "Failed",
+        "deleted": "Undone"
+      },
+      "note": {
+        "community_needed": "Made as a text channel: this needs a Community server."
+      },
+      "section": {
+        "roles": "Roles",
+        "channels": "Categories and channels",
+        "messages": "Messages",
+        "automod": "AutoMod"
+      },
+      "kind": {
+        "text": "Text channel",
+        "voice": "Voice channel",
+        "forum": "Forum",
+        "announcement": "Announcements",
+        "category": "Category"
+      },
+      "message": {
+        "welcome": "Welcome message",
+        "rules": "Rules"
+      },
+      "automod": {
+        "keywords": "Blocks {n} words",
+        "spam": "Blocks spam",
+        "preset": "Blocks: {list}",
+        "mentions": "At most {n} mentions in a message"
+      },
+      "preset": {
+        "profanity": "swearing",
+        "sexual_content": "sexual content",
+        "slurs": "slurs"
+      },
+      "private": "Only for: {roles}",
+      "readOnly": "Read-only for everyone",
+      "hoist": "Shown separately in the member list",
+      "tickTitle": "Only if you tick it:",
+      "elevated": {
+        "manage_guild": "Manage Server: change the server's name, settings and AutoMod.",
+        "manage_channels": "Manage Channels: create, change and delete any channel.",
+        "manage_roles": "Manage Roles: create and change roles below their own, and give them to members."
+      },
+      "refusedNote": "Administrator and Ban Members are never given by Ionexa: the server's owner gives them in Discord.",
+      "errors": {
+        "insufficient_credits": "Not enough credits: this needs about {needed}.",
+        "ai_unavailable": "Ionexa could not plan right now. Nothing was charged.",
+        "unusable": "The answer was not a plan that can be made. Try saying it differently.",
+        "failed": "Something went wrong. Try again.",
+        "conflict": "The plan changed in another tab. Reload the page.",
+        "rate_limited": "Too many tries. Wait a little.",
+        "busy": "It is already running.",
+        "already_applied": "Undo what was made first.",
+        "bot_not_in_server": "Ionexa is no longer in this server. Connect it again.",
+        "not_connected": "This server is not connected.",
+        "empty": "Write a little more.",
+        "too_long": "That is too long.",
+        "stopped": "Stopped. Nothing was charged.",
+        "bypass_ceiling": "This account has reached its monthly limit.",
+        "refused_permission": "Administrator and Ban Members are never given by Ionexa.",
+        "not_configured": "Discord is not set up on this deployment."
       }
     }
   },
@@ -6947,5 +7095,18 @@
     "reason": "Reason",
     "contact": "If you believe this is a mistake, please contact support.",
     "signOut": "Sign out"
+  },
+  "discordBot": {
+    "notLinked": "This server is not connected to an Ionexa account.",
+    "notAllowed": "Only members who can manage this server can use /ionexa: it uses the connected account's credits.",
+    "accountMissing": "This server's Ionexa account could not be found.",
+    "notOpen": "Ionexa in Discord is not open for this account yet.",
+    "tooMany": "Too many questions right now. Try again in a little while.",
+    "ceiling": "The connected account has reached its monthly limit.",
+    "noCredits": "The connected Ionexa account does not have enough credits (this needs about {needed}).",
+    "failed": "Ionexa could not answer right now. Nothing was charged.",
+    "cut": "(The answer was cut at its length limit.)",
+    "unknownCommand": "Unknown command.",
+    "empty": "Write a question after /ionexa ask."
   }
 }

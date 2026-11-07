@@ -3328,7 +3328,8 @@
         "apps": "アプリ",
         "audio": "オーディオ",
         "sheets": "シート",
-        "skills": "スキル"
+        "skills": "スキル",
+        "discord": "Discord"
       },
       "lines": {
         "site": "説明からウェブサイトを作成",
@@ -4817,6 +4818,153 @@
         "stepsEmpty": "まだ手順はありません",
         "filesLabel": "ファイル",
         "filesEmpty": "添付ファイルはありません"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "ここではまだDiscordが設定されていません",
+        "why": "デプロイに次の値がありません: {names}。これがないとここでは何も動きません。",
+        "unreadable": "このデプロイではDiscordの準備がまだです。テーブルがデータベースにありません。"
+      },
+      "connect": {
+        "heading": "Discordサーバーをつなぐ",
+        "why": "まずDiscordで空のサーバーを作ります。サーバー一覧の下の＋から「Create My Own」を選びます。そのあとIonexaをつなぎます。",
+        "button": "Ionexaをつなぐ",
+        "permissions": "Ionexaが求めるのは次だけです: {list}。管理者権限は決して求めません。"
+      },
+      "perm": {
+        "manage_roles": "ロールの管理",
+        "manage_channels": "チャンネルの管理",
+        "view_channel": "チャンネルを見る",
+        "send_messages": "メッセージの送信",
+        "embed_links": "埋め込みリンク",
+        "read_message_history": "メッセージ履歴を読む",
+        "manage_guild": "サーバー管理",
+        "manage_webhooks": "ウェブフックの管理",
+        "administrator": "管理者",
+        "ban_members": "メンバーをBAN"
+      },
+      "flash": {
+        "connected": "サーバーがつながりました。説明すればIonexaが設計します。",
+        "cancelled": "接続は取り消されました。何も変わっていません。",
+        "invalid_state": "そのリンクはあなたのものではないか、期限切れです。もう一度お試しください。",
+        "expired": "リンクの期限が切れました。もう一度お試しください。",
+        "exchange_failed": "Discordが接続を確認しませんでした。もう一度お試しください。",
+        "no_server": "Discordがサーバーを示しませんでした。Discordの画面でサーバーを選んでください。",
+        "bot_not_in_server": "Ionexaはそのサーバーにいません。もう一度つないでください。",
+        "taken": "このサーバーはすでに別のIonexaアカウントにつながっています。",
+        "save_failed": "接続を保存できませんでした。もう一度お試しください。",
+        "rate_limited": "試行が多すぎます。少し待ってからお試しください。",
+        "error": "問題が発生しました。もう一度お試しください。",
+        "not_configured": "このデプロイではDiscordが設定されていません。",
+        "unavailable": "このアカウントではDiscordが開放されていません。",
+        "invalid_response": "Discordの応答が不完全でした。もう一度お試しください。"
+      },
+      "placeholder": "ほしいサーバーを説明してください…",
+      "changePlaceholder": "プランを変更…",
+      "boxPlaceholder": "「{name}」の何を変えますか？",
+      "empty": {
+        "heading": "どんなサーバーにしますか？",
+        "why": "{server}のために。言葉で説明してください。Discordで何かが変わる前に、プランをボックスで確認できます。",
+        "examples": {
+          "bakery": "パン屋のコミュニティ用サーバー、注文用チャンネル付き",
+          "club": "小さなゲームクラブ用サーバー、ボイスルーム付き",
+          "class": "クラス用サーバー、お知らせと宿題付き"
+        }
+      },
+      "server": "サーバー",
+      "disconnect": "接続を解除",
+      "disconnectConfirm": "Ionexaはこのサーバーから退出します。作ったものはDiscordに残り、ここからは元に戻せなくなります。",
+      "priceLabel": "料金",
+      "price": "プランまたは言葉での変更1回につき約{credits}クレジット。Discordでの作成、チェック、ボックスの削除、元に戻すは無料です。",
+      "cost": "約{credits}クレジット",
+      "slashLabel": "サーバー内で",
+      "slash": "/ionexa ask はこのアカウントのクレジットでサーバー内に回答します。使えるのはサーバーを管理できるメンバーです。",
+      "planning": "サーバーを設計中…",
+      "changing": "プランを変更中…",
+      "making": "Discordで作成中… {n}件完了",
+      "planned": "プランができました: ロール{roles}件、チャンネル{channels}件。Discordではまだ何も変わっていません。",
+      "changed": "プランを変更しました。",
+      "changedOne": "「{name}」だけが変わりました。ほかはそのままです。",
+      "applied": "完了しました。プランのすべてがDiscordにあります。",
+      "undone": "元に戻しました。Ionexaが作ったものだけを削除しました。",
+      "stoppedAt": "「{name}」で止まりました。完了と表示されたものはDiscordにあり、元に戻すで削除できます。",
+      "undo": "元に戻す",
+      "undoConfirm": "このサーバーでIonexaが作ったものだけを削除しますか？もともとあったものには触れません。",
+      "primary": "Discordで作る",
+      "deleteBox": "このボックスを削除",
+      "boxCount": "{n}個のボックス",
+      "status": {
+        "planned": "プラン・未作成",
+        "applying": "作成中…",
+        "applied": "Discordで作成済み",
+        "failed": "途中で停止",
+        "undoing": "元に戻しています…",
+        "undone": "元に戻しました"
+      },
+      "state": {
+        "made": "完了",
+        "failed": "失敗",
+        "deleted": "取り消し済み"
+      },
+      "note": {
+        "community_needed": "テキストチャンネルとして作成しました。これにはコミュニティサーバーが必要です。"
+      },
+      "section": {
+        "roles": "ロール",
+        "channels": "カテゴリーとチャンネル",
+        "messages": "メッセージ",
+        "automod": "自動モデレーション"
+      },
+      "kind": {
+        "text": "テキストチャンネル",
+        "voice": "ボイスチャンネル",
+        "forum": "フォーラム",
+        "announcement": "お知らせ",
+        "category": "カテゴリー"
+      },
+      "message": {
+        "welcome": "ようこそメッセージ",
+        "rules": "ルール"
+      },
+      "automod": {
+        "keywords": "{n}個の語をブロック",
+        "spam": "スパムをブロック",
+        "preset": "ブロック: {list}",
+        "mentions": "1メッセージのメンションは最大{n}件"
+      },
+      "preset": {
+        "profanity": "暴言",
+        "sexual_content": "性的な内容",
+        "slurs": "差別的な言葉"
+      },
+      "private": "対象: {roles}のみ",
+      "readOnly": "全員閲覧のみ",
+      "hoist": "メンバー一覧で別に表示",
+      "tickTitle": "チェックした場合のみ:",
+      "elevated": {
+        "manage_guild": "サーバー管理: サーバーの名前、設定、自動モデレーションを変更できます。",
+        "manage_channels": "チャンネルの管理: どのチャンネルでも作成・変更・削除できます。",
+        "manage_roles": "ロールの管理: 自分より下のロールを作成・変更し、メンバーに付与できます。"
+      },
+      "refusedNote": "管理者とメンバーのBANはIonexaが与えることはありません。サーバーのオーナーがDiscordで与えます。",
+      "errors": {
+        "insufficient_credits": "クレジットが足りません。約{needed}必要です。",
+        "ai_unavailable": "Ionexaは今設計できませんでした。請求はありません。",
+        "unusable": "回答が実行できるプランではありませんでした。別の言い方でお試しください。",
+        "failed": "問題が発生しました。もう一度お試しください。",
+        "conflict": "別のタブでプランが変わりました。ページを再読み込みしてください。",
+        "rate_limited": "試行が多すぎます。少し待ってください。",
+        "busy": "すでに実行中です。",
+        "already_applied": "まず作成したものを元に戻してください。",
+        "bot_not_in_server": "Ionexaはこのサーバーにもういません。もう一度つないでください。",
+        "not_connected": "このサーバーはつながっていません。",
+        "empty": "もう少し書いてください。",
+        "too_long": "長すぎます。",
+        "stopped": "停止しました。請求はありません。",
+        "bypass_ceiling": "このアカウントは月の上限に達しました。",
+        "refused_permission": "管理者とメンバーのBANはIonexaが与えることはありません。",
+        "not_configured": "このデプロイではDiscordが設定されていません。"
       }
     }
   },
@@ -6947,5 +7095,18 @@
     "reason": "理由",
     "contact": "誤りだと思われる場合は、サポートまでお問い合わせください。",
     "signOut": "ログアウト"
+  },
+  "discordBot": {
+    "notLinked": "このサーバーはIonexaアカウントにつながっていません。",
+    "notAllowed": "/ionexa はこのサーバーを管理できるメンバーだけが使えます。つながっているアカウントのクレジットを使うためです。",
+    "accountMissing": "このサーバーのIonexaアカウントが見つかりません。",
+    "notOpen": "このアカウントではDiscordのIonexaはまだ開放されていません。",
+    "tooMany": "今は質問が多すぎます。少ししてからお試しください。",
+    "ceiling": "つながっているアカウントは月の上限に達しました。",
+    "noCredits": "つながっているIonexaアカウントのクレジットが足りません（約{needed}必要です）。",
+    "failed": "Ionexaは今回答できませんでした。請求はありません。",
+    "cut": "（回答は長さの上限で切れました。）",
+    "unknownCommand": "不明なコマンドです。",
+    "empty": "/ionexa ask のあとに質問を書いてください。"
   }
 }

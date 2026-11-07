@@ -3328,7 +3328,8 @@
         "apps": "App",
         "audio": "Audio",
         "sheets": "Fogli",
-        "skills": "Competenze"
+        "skills": "Competenze",
+        "discord": "Discord"
       },
       "lines": {
         "site": "Un sito da una descrizione",
@@ -4817,6 +4818,153 @@
         "stepsEmpty": "Ancora nessun passaggio",
         "filesLabel": "File",
         "filesEmpty": "Nessun file allegato"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "Discord non è ancora configurato qui",
+        "why": "Mancano questi valori nella distribuzione: {names}. Senza di essi qui non funziona nulla.",
+        "unreadable": "Discord non è ancora pronto in questa distribuzione: le sue tabelle non sono nel database."
+      },
+      "connect": {
+        "heading": "Collega un server Discord",
+        "why": "Prima crea un server vuoto su Discord: il + in fondo all'elenco dei server, poi «Create My Own». Poi collega Ionexa a quel server.",
+        "button": "Collega Ionexa",
+        "permissions": "Ionexa chiede solo: {list}. Mai Amministratore."
+      },
+      "perm": {
+        "manage_roles": "Gestire i ruoli",
+        "manage_channels": "Gestire i canali",
+        "view_channel": "Vedere i canali",
+        "send_messages": "Inviare messaggi",
+        "embed_links": "Incorporare link",
+        "read_message_history": "Leggere la cronologia",
+        "manage_guild": "Gestire il server",
+        "manage_webhooks": "Gestire i webhook",
+        "administrator": "Amministratore",
+        "ban_members": "Bannare membri"
+      },
+      "flash": {
+        "connected": "Il server è collegato. Descrivilo e Ionexa lo progetta.",
+        "cancelled": "Il collegamento è stato annullato. Non è cambiato nulla.",
+        "invalid_state": "Quel link non era tuo o è scaduto. Riprova.",
+        "expired": "Il link è scaduto. Riprova.",
+        "exchange_failed": "Discord non ha confermato il collegamento. Riprova.",
+        "no_server": "Discord non ha indicato un server. Scegli un server nella schermata di Discord.",
+        "bot_not_in_server": "Ionexa non è in quel server. Riprova a collegarlo.",
+        "taken": "Questo server è già collegato a un altro account Ionexa.",
+        "save_failed": "Non è stato possibile salvare il collegamento. Riprova.",
+        "rate_limited": "Troppi tentativi. Aspetta un po' e riprova.",
+        "error": "Qualcosa è andato storto. Riprova.",
+        "not_configured": "Discord non è configurato in questa distribuzione.",
+        "unavailable": "Discord non è aperto per questo account.",
+        "invalid_response": "La risposta di Discord era incompleta. Riprova."
+      },
+      "placeholder": "Descrivi il server che vuoi…",
+      "changePlaceholder": "Cambia il piano…",
+      "boxPlaceholder": "Cosa deve cambiare in «{name}»?",
+      "empty": {
+        "heading": "Che server vuoi?",
+        "why": "Per {server}. Descrivilo a parole: vedi il piano a blocchi prima che cambi qualcosa su Discord.",
+        "examples": {
+          "bakery": "Un server per la community del mio panificio, con un canale per gli ordini",
+          "club": "Un server per un piccolo club di videogiochi, con stanze vocali",
+          "class": "Un server per la mia classe, con avvisi e compiti"
+        }
+      },
+      "server": "Server",
+      "disconnect": "Scollega",
+      "disconnectConfirm": "Ionexa lascerà questo server. Ciò che ha creato resta su Discord e non si può più annullare da qui.",
+      "priceLabel": "Prezzo",
+      "price": "≈ {credits} crediti per un piano o una modifica a parole. Crearlo su Discord, le spunte, eliminare un blocco e Annulla non costano nulla.",
+      "cost": "≈ {credits} crediti",
+      "slashLabel": "Nel server",
+      "slash": "/ionexa ask risponde nel server con i crediti di questo account, ai membri che possono gestire il server.",
+      "planning": "Progetto il server…",
+      "changing": "Cambio il piano…",
+      "making": "Lo creo su Discord… {n} fatti",
+      "planned": "Il piano è pronto: {roles} ruoli, {channels} canali. Su Discord non è ancora cambiato nulla.",
+      "changed": "Il piano è cambiato.",
+      "changedOne": "È cambiato solo «{name}». Il resto è rimasto uguale.",
+      "applied": "Fatto. Tutto il piano è su Discord.",
+      "undone": "Annullato. È stato eliminato solo ciò che aveva creato Ionexa.",
+      "stoppedAt": "Si è fermato a «{name}». Ciò che è segnato come fatto è su Discord; Annulla lo elimina.",
+      "undo": "Annulla",
+      "undoConfirm": "Eliminare solo ciò che Ionexa ha creato in questo server? Nulla di ciò che c'era prima viene toccato.",
+      "primary": "Crealo su Discord",
+      "deleteBox": "Elimina questo blocco",
+      "boxCount": "{n} blocchi",
+      "status": {
+        "planned": "Piano · non ancora creato",
+        "applying": "Lo creo…",
+        "applied": "Creato su Discord",
+        "failed": "Fermato a metà",
+        "undoing": "Annullo…",
+        "undone": "Annullato"
+      },
+      "state": {
+        "made": "Fatto",
+        "failed": "Non riuscito",
+        "deleted": "Annullato"
+      },
+      "note": {
+        "community_needed": "Creato come canale testuale: serve un server Community."
+      },
+      "section": {
+        "roles": "Ruoli",
+        "channels": "Categorie e canali",
+        "messages": "Messaggi",
+        "automod": "AutoMod"
+      },
+      "kind": {
+        "text": "Canale testuale",
+        "voice": "Canale vocale",
+        "forum": "Forum",
+        "announcement": "Annunci",
+        "category": "Categoria"
+      },
+      "message": {
+        "welcome": "Messaggio di benvenuto",
+        "rules": "Regole"
+      },
+      "automod": {
+        "keywords": "Blocca {n} parole",
+        "spam": "Blocca lo spam",
+        "preset": "Blocca: {list}",
+        "mentions": "Al massimo {n} menzioni per messaggio"
+      },
+      "preset": {
+        "profanity": "parolacce",
+        "sexual_content": "contenuti sessuali",
+        "slurs": "insulti"
+      },
+      "private": "Solo per: {roles}",
+      "readOnly": "Sola lettura per tutti",
+      "hoist": "Mostrato a parte nell'elenco membri",
+      "tickTitle": "Solo se lo spunti:",
+      "elevated": {
+        "manage_guild": "Gestire il server: cambia nome, impostazioni e AutoMod del server.",
+        "manage_channels": "Gestire i canali: crea, modifica ed elimina qualsiasi canale.",
+        "manage_roles": "Gestire i ruoli: crea e modifica ruoli sotto il proprio e li assegna ai membri."
+      },
+      "refusedNote": "Ionexa non dà mai Amministratore né Bannare membri: li dà il proprietario del server su Discord.",
+      "errors": {
+        "insufficient_credits": "Crediti insufficienti: ne servono circa {needed}.",
+        "ai_unavailable": "Ionexa non è riuscito a progettare ora. Non è stato addebitato nulla.",
+        "unusable": "La risposta non era un piano realizzabile. Prova a dirlo in un altro modo.",
+        "failed": "Qualcosa è andato storto. Riprova.",
+        "conflict": "Il piano è cambiato in un'altra scheda. Ricarica la pagina.",
+        "rate_limited": "Troppi tentativi. Aspetta un po'.",
+        "busy": "È già in corso.",
+        "already_applied": "Prima annulla ciò che è stato creato.",
+        "bot_not_in_server": "Ionexa non è più in questo server. Ricollegalo.",
+        "not_connected": "Questo server non è collegato.",
+        "empty": "Scrivi qualcosa in più.",
+        "too_long": "È troppo lungo.",
+        "stopped": "Fermato. Non è stato addebitato nulla.",
+        "bypass_ceiling": "Questo account ha raggiunto il limite mensile.",
+        "refused_permission": "Ionexa non dà mai Amministratore né Bannare membri.",
+        "not_configured": "Discord non è configurato in questa distribuzione."
       }
     }
   },
@@ -6947,5 +7095,18 @@
     "reason": "Motivo",
     "contact": "Se ritieni che si tratti di un errore, contatta l’assistenza.",
     "signOut": "Esci"
+  },
+  "discordBot": {
+    "notLinked": "Questo server non è collegato a un account Ionexa.",
+    "notAllowed": "Solo i membri che possono gestire questo server possono usare /ionexa: usa i crediti dell'account collegato.",
+    "accountMissing": "Account Ionexa di questo server non trovato.",
+    "notOpen": "Ionexa su Discord non è ancora aperto per questo account.",
+    "tooMany": "Troppe domande in questo momento. Riprova tra poco.",
+    "ceiling": "L'account collegato ha raggiunto il limite mensile.",
+    "noCredits": "L'account Ionexa collegato non ha crediti sufficienti (ne servono circa {needed}).",
+    "failed": "Ionexa non è riuscito a rispondere ora. Non è stato addebitato nulla.",
+    "cut": "(La risposta è stata tagliata al suo limite di lunghezza.)",
+    "unknownCommand": "Comando sconosciuto.",
+    "empty": "Scrivi una domanda dopo /ionexa ask."
   }
 }

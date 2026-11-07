@@ -88,6 +88,9 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "create",
   "data-analysis",
   "deep-research",
+  // DISCORD (the owner's Discord directive, 2026-11-05): behind the switch
+  // "discord-bot", notFound() for anyone it is not open to, like "sheets".
+  "discord",
   "documents",
   "favorites",
   "games",

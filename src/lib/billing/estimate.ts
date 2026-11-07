@@ -317,6 +317,16 @@ export const ACTION_PROFILES = {
     baseOutputChars: 6000,
     outputCharsPerInputChar: 0,
   },
+  // A Discord server plan from words, or one box of it changed with words:
+  // one forced-tool call (lib/discord/planner.ts, at most PLAN_MAX_TOKENS,
+  // 6,000 tokens — ~24,000 characters, the ceiling, since a plan of fifty
+  // channels and twenty roles is what the cap allows).
+  discordPlan: {
+    systemPromptTokens: 1200,
+    auxiliaryCalls: [],
+    baseOutputChars: 24000,
+    outputCharsPerInputChar: 0,
+  },
   agentRun: {
     systemPromptTokens: 800,
     auxiliaryCalls: [{ inputTokens: 900, outputTokens: 900 }],

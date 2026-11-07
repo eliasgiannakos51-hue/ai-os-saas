@@ -3328,7 +3328,8 @@
         "apps": "Apps",
         "audio": "Audio",
         "sheets": "Tabellen",
-        "skills": "Fähigkeiten"
+        "skills": "Fähigkeiten",
+        "discord": "Discord"
       },
       "lines": {
         "site": "Eine Website aus einer Beschreibung",
@@ -4817,6 +4818,153 @@
         "stepsEmpty": "Noch keine Schritte",
         "filesLabel": "Dateien",
         "filesEmpty": "Keine Dateien angehängt"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "Discord ist hier noch nicht eingerichtet",
+        "why": "Diese Werte fehlen in der Bereitstellung: {names}. Ohne sie funktioniert hier nichts.",
+        "unreadable": "Discord ist in dieser Bereitstellung noch nicht bereit: seine Tabellen fehlen in der Datenbank."
+      },
+      "connect": {
+        "heading": "Einen Discord-Server verbinden",
+        "why": "Erstelle zuerst einen leeren Server in Discord: das + unten in deiner Serverliste, dann „Create My Own“. Verbinde dann Ionexa damit.",
+        "button": "Ionexa verbinden",
+        "permissions": "Ionexa fragt nur nach: {list}. Niemals Administrator."
+      },
+      "perm": {
+        "manage_roles": "Rollen verwalten",
+        "manage_channels": "Kanäle verwalten",
+        "view_channel": "Kanäle ansehen",
+        "send_messages": "Nachrichten senden",
+        "embed_links": "Links einbetten",
+        "read_message_history": "Nachrichtenverlauf lesen",
+        "manage_guild": "Server verwalten",
+        "manage_webhooks": "Webhooks verwalten",
+        "administrator": "Administrator",
+        "ban_members": "Mitglieder bannen"
+      },
+      "flash": {
+        "connected": "Der Server ist verbunden. Beschreibe ihn, und Ionexa plant ihn.",
+        "cancelled": "Das Verbinden wurde abgebrochen. Nichts wurde geändert.",
+        "invalid_state": "Dieser Link war nicht deiner oder ist abgelaufen. Versuche es erneut.",
+        "expired": "Der Link ist abgelaufen. Versuche es erneut.",
+        "exchange_failed": "Discord hat die Verbindung nicht bestätigt. Versuche es erneut.",
+        "no_server": "Discord hat keinen Server genannt. Wähle auf der Discord-Seite einen Server.",
+        "bot_not_in_server": "Ionexa ist nicht auf diesem Server. Verbinde erneut.",
+        "taken": "Dieser Server ist bereits mit einem anderen Ionexa-Konto verbunden.",
+        "save_failed": "Die Verbindung konnte nicht gespeichert werden. Versuche es erneut.",
+        "rate_limited": "Zu viele Versuche. Warte kurz und versuche es erneut.",
+        "error": "Etwas ist schiefgelaufen. Versuche es erneut.",
+        "not_configured": "Discord ist in dieser Bereitstellung nicht eingerichtet.",
+        "unavailable": "Discord ist für dieses Konto nicht freigeschaltet.",
+        "invalid_response": "Die Antwort von Discord war unvollständig. Versuche es erneut."
+      },
+      "placeholder": "Beschreibe den Server, den du willst…",
+      "changePlaceholder": "Ändere den Plan…",
+      "boxPlaceholder": "Was soll sich an „{name}“ ändern?",
+      "empty": {
+        "heading": "Welchen Server willst du?",
+        "why": "Für {server}. Beschreibe ihn in Worten: Du siehst den Plan als Kästen, bevor sich in Discord etwas ändert.",
+        "examples": {
+          "bakery": "Ein Server für die Community meiner Bäckerei, mit einem Kanal für Bestellungen",
+          "club": "Ein Server für einen kleinen Gaming-Club, mit Sprachräumen",
+          "class": "Ein Server für meine Klasse, mit Ankündigungen und Hausaufgaben"
+        }
+      },
+      "server": "Server",
+      "disconnect": "Trennen",
+      "disconnectConfirm": "Ionexa verlässt diesen Server. Was es erstellt hat, bleibt in Discord und kann von hier nicht mehr rückgängig gemacht werden.",
+      "priceLabel": "Preis",
+      "price": "≈ {credits} Credits für einen Plan oder eine Änderung mit Worten. Das Erstellen in Discord, Häkchen, das Löschen eines Kastens und Rückgängig kosten nichts.",
+      "cost": "≈ {credits} Credits",
+      "slashLabel": "Im Server",
+      "slash": "/ionexa ask antwortet im Server mit den Credits dieses Kontos, für Mitglieder, die den Server verwalten dürfen.",
+      "planning": "Der Server wird geplant…",
+      "changing": "Der Plan wird geändert…",
+      "making": "Wird in Discord erstellt… {n} fertig",
+      "planned": "Der Plan ist fertig: {roles} Rollen, {channels} Kanäle. In Discord hat sich noch nichts geändert.",
+      "changed": "Der Plan wurde geändert.",
+      "changedOne": "Nur „{name}“ wurde geändert. Der Rest blieb gleich.",
+      "applied": "Fertig. Der ganze Plan ist in Discord.",
+      "undone": "Rückgängig gemacht. Nur was Ionexa erstellt hat, wurde gelöscht.",
+      "stoppedAt": "Es hat bei „{name}“ angehalten. Was als erstellt markiert ist, ist in Discord; Rückgängig löscht es.",
+      "undo": "Rückgängig",
+      "undoConfirm": "Nur löschen, was Ionexa auf diesem Server erstellt hat? Nichts, was vorher da war, wird angerührt.",
+      "primary": "In Discord erstellen",
+      "deleteBox": "Diesen Kasten löschen",
+      "boxCount": "{n} Kästen",
+      "status": {
+        "planned": "Plan · noch nicht erstellt",
+        "applying": "Wird erstellt…",
+        "applied": "In Discord erstellt",
+        "failed": "Auf halbem Weg angehalten",
+        "undoing": "Wird rückgängig gemacht…",
+        "undone": "Rückgängig gemacht"
+      },
+      "state": {
+        "made": "Erstellt",
+        "failed": "Fehlgeschlagen",
+        "deleted": "Rückgängig"
+      },
+      "note": {
+        "community_needed": "Als Textkanal erstellt: Dafür braucht es einen Community-Server."
+      },
+      "section": {
+        "roles": "Rollen",
+        "channels": "Kategorien und Kanäle",
+        "messages": "Nachrichten",
+        "automod": "AutoMod"
+      },
+      "kind": {
+        "text": "Textkanal",
+        "voice": "Sprachkanal",
+        "forum": "Forum",
+        "announcement": "Ankündigungen",
+        "category": "Kategorie"
+      },
+      "message": {
+        "welcome": "Willkommensnachricht",
+        "rules": "Regeln"
+      },
+      "automod": {
+        "keywords": "Blockiert {n} Wörter",
+        "spam": "Blockiert Spam",
+        "preset": "Blockiert: {list}",
+        "mentions": "Höchstens {n} Erwähnungen pro Nachricht"
+      },
+      "preset": {
+        "profanity": "Schimpfwörter",
+        "sexual_content": "sexuelle Inhalte",
+        "slurs": "Beleidigungen"
+      },
+      "private": "Nur für: {roles}",
+      "readOnly": "Für alle nur lesbar",
+      "hoist": "In der Mitgliederliste getrennt angezeigt",
+      "tickTitle": "Nur wenn du es ankreuzt:",
+      "elevated": {
+        "manage_guild": "Server verwalten: Name, Einstellungen und AutoMod des Servers ändern.",
+        "manage_channels": "Kanäle verwalten: jeden Kanal erstellen, ändern und löschen.",
+        "manage_roles": "Rollen verwalten: Rollen unter der eigenen erstellen, ändern und an Mitglieder vergeben."
+      },
+      "refusedNote": "Administrator und Mitglieder bannen vergibt Ionexa nie: Das macht der Server-Besitzer in Discord.",
+      "errors": {
+        "insufficient_credits": "Nicht genug Credits: Das braucht etwa {needed}.",
+        "ai_unavailable": "Ionexa konnte gerade nicht planen. Es wurde nichts berechnet.",
+        "unusable": "Die Antwort war kein umsetzbarer Plan. Versuche es anders zu sagen.",
+        "failed": "Etwas ist schiefgelaufen. Versuche es erneut.",
+        "conflict": "Der Plan wurde in einem anderen Tab geändert. Lade die Seite neu.",
+        "rate_limited": "Zu viele Versuche. Warte kurz.",
+        "busy": "Es läuft bereits.",
+        "already_applied": "Mache zuerst rückgängig, was erstellt wurde.",
+        "bot_not_in_server": "Ionexa ist nicht mehr auf diesem Server. Verbinde es erneut.",
+        "not_connected": "Dieser Server ist nicht verbunden.",
+        "empty": "Schreib etwas mehr.",
+        "too_long": "Das ist zu lang.",
+        "stopped": "Angehalten. Es wurde nichts berechnet.",
+        "bypass_ceiling": "Dieses Konto hat sein Monatslimit erreicht.",
+        "refused_permission": "Administrator und Mitglieder bannen vergibt Ionexa nie.",
+        "not_configured": "Discord ist in dieser Bereitstellung nicht eingerichtet."
       }
     }
   },
@@ -6947,5 +7095,18 @@
     "reason": "Grund",
     "contact": "Wenn Sie glauben, dass es sich um einen Fehler handelt, wenden Sie sich bitte an den Support.",
     "signOut": "Abmelden"
+  },
+  "discordBot": {
+    "notLinked": "Dieser Server ist mit keinem Ionexa-Konto verbunden.",
+    "notAllowed": "Nur Mitglieder, die diesen Server verwalten dürfen, können /ionexa nutzen: Es verbraucht die Credits des verbundenen Kontos.",
+    "accountMissing": "Das Ionexa-Konto dieses Servers wurde nicht gefunden.",
+    "notOpen": "Ionexa in Discord ist für dieses Konto noch nicht freigeschaltet.",
+    "tooMany": "Gerade zu viele Fragen. Versuche es gleich noch einmal.",
+    "ceiling": "Das verbundene Konto hat sein Monatslimit erreicht.",
+    "noCredits": "Das verbundene Ionexa-Konto hat nicht genug Credits (nötig sind etwa {needed}).",
+    "failed": "Ionexa konnte gerade nicht antworten. Es wurde nichts berechnet.",
+    "cut": "(Die Antwort wurde an ihrer Längengrenze abgeschnitten.)",
+    "unknownCommand": "Unbekannter Befehl.",
+    "empty": "Schreib eine Frage nach /ionexa ask."
   }
 }

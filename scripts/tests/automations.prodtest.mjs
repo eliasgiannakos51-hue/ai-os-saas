@@ -815,6 +815,11 @@ try {
         check(`${how}: …a ready card shows the steps it will make, and the price of a run before the press`,
           (await page.locator('[data-testid="flow-template"][data-template="finance_daily"] [data-testid="flow-step"]').count()) === 4 &&
             /\d/.test(await page.locator('[data-testid="flow-template-price"]').first().innerText()));
+        // The AI step's whole instruction drowned the card's shape (seen in
+        // this test's own pictures, 2026-11-05): two lines on a card, the
+        // rest in the automation once made.
+        check(`${how}: …a card's AI step is held to two lines, the whole of it one hover away`,
+          (await page.locator('[data-testid="flow-template"][data-template="finance_daily"] [data-kind="ai"] span[title]').evaluate((e) => `${getComputedStyle(e).webkitLineClamp}|${e.getAttribute("title").length > 40}`)) === "2|true");
         check(`${how}: …no WhatsApp anywhere`, !/whatsapp/i.test(await page.locator('[data-testid="flow-templates"]').innerText()));
         await shot(page, "gallery");
         if (layout === "shell" && !device.touch) {

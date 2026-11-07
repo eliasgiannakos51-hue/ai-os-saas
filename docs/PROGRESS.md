@@ -139,9 +139,36 @@ Migration `20261114000000_automation_minutes_saved.sql` (μία στήλη, με
 Canary στο `/api/health`.
 
 **Τι δοκιμάστηκε** (2026-11-05, σε αυτό το worktree):
-__NUMBERS__
+- `node scripts/tests/automations.test.mjs`: **261 passed** (§10-§13 new; 128 before).
+- `node scripts/tests/automations.mutation.mjs`: **52 of 52** (25 new).
+- `node scripts/tests/automations.itest.mjs`: **28 passed** — the progress write
+  executed: one write per box after the start, steps growing, filtered to a
+  `running` row.
+- `SHOT_DIR=… node scripts/tests/automations.prodtest.mjs` σε πραγματικό build:
+  **146 passed, 0 failed** — §7 και στα δύο κελύφη (το παλιό και το
+  `editor-shell`), υπολογιστής 1440×900 και κινητό 390×844 με δάχτυλο: τα
+  κομμάτια της πρότασης, η εκτέλεση πραγματικά στο κουτί AI (το μοντέλο
+  κρατά την απάντηση 6″ και η οθόνη διαβάζει τα βήματα της γραμμής), το
+  κουτί της αποτυχίας, η συλλογή, ένα πάτημα → αυτοματοποίηση → αλλαγή κουτιού,
+  τα λεπτά, `reducedMotion: "reduce"`, οι διακόπτες κλειστοί, και βάση
+  χωρίς τη στήλη. Στιγμιότυπα σε 17 εικόνες, εκτός repository (`SHOT_DIR`).
+- `npm run build:ci`: πράσινο («The build passes in all 2 environments»).
+- `npm run gates`: __GATES__
+- Mutation suites που αγγίζουν αρχεία αυτού του γύρου: route-spend-inventory
+  9/9, schema-canaries 11/11, feature-flags 6/6, icu-quoted-placeholders 4/4,
+  ci-coverage 22/22, google-calendar 22/22, design-tokens 21/21,
+  chat-measure 21/21, globe-mark 21/21, navigation-cost 9/9, plan-claims
+  11/11, rtl 17/17, voice 58/58, chat-chart 14/14, projects **50/50** (ήταν
+  49/50: ένα `expect` με γραμμένο «30 linkable modules» ενώ η λίστα είναι
+  33 — διορθώθηκε να μη γράφει τον αριθμό). **Δεν ολοκληρώθηκαν** (κόπηκαν
+  στο χρονικό όριο της εκτέλεσης, όχι κόκκινα): self-claims, sidebar-chats,
+  ai-memory, rebuild, rpc-canaries, skills — μεταλλάσσουν γραμμές αυτών των
+  αρχείων που ο γύρος δεν άλλαξε.
 
-**Τι βρέθηκε στον δρόμο:** (1) το `route-spend-inventory` είδε τη νέα
+**Τι βρέθηκε στον δρόμο:** (0) στα στιγμιότυπα, η πλήρης οδηγία του βήματος
+AI έπνιγε την κάρτα της έτοιμης αυτοματοποίησης· δύο γραμμές τώρα, και το
+πρώτο `line-clamp-2` δεν έπιανε γιατί το `block` βγαίνει αργότερα στο CSS
+και του έπαιρνε το `display` — κρατιέται πια από έλεγχο στο prodtest. (1) το `route-spend-inventory` είδε τη νέα
 διαδρομή να «φτάνει» στο Telegram μέσω του κοινού `flow-access.ts`
 (ρωτά αν είναι συνδεδεμένο, δεν στέλνει)· δηλώθηκε με το όριό της, όπως οι
 αδελφές της. (2) Το `i18n-coverage` έπιασε δύο κλειδιά (`*.said`) που η

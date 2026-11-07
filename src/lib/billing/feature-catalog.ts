@@ -618,6 +618,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       // Automations as boxes (package 30): the same feature, charged the
       // same way, drawn in the shell.
       "automations/flows",
+      // Ready-made automations (package 31, 2026-11-05): one press writes
+      // the rows, no model call and nothing held — the route's own
+      // comment says so (src/app/api/automations/templates/route.ts).
+      "automations/templates",
       "automations/flows/[id]",
       "automations/flows/[id]/change",
       "automations/flows/[id]/undo",

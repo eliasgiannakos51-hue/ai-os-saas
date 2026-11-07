@@ -322,7 +322,7 @@ export function FlowSteps({ boxes, connected, preview = false }: { boxes: Box[];
                     the shape of the automation the card is showing: two
                     lines there, the rest one hover away and the whole of
                     it in the automation once made. */}
-                <span title={preview ? sentence(box) : undefined} className={`block break-words text-sm leading-relaxed text-body ${preview && box.kind === "ai" ? "line-clamp-2" : ""}`}>
+                <span title={preview ? sentence(box) : undefined} className={`${preview && box.kind === "ai" ? "line-clamp-2" : "block"} break-words text-sm leading-relaxed text-body`}>
                   {sentence(box)}
                 </span>
                 {missing.map((need) => (

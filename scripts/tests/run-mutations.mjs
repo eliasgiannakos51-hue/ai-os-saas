@@ -173,7 +173,7 @@ if (suites.length === 0) {
 // security round onto this line: five new suites (account-suspension,
 // cross-site-writes, entity-links-owner, pwa, share-target). Read off
 // the run.
-const FLOOR = 296;
+const FLOOR = 297;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

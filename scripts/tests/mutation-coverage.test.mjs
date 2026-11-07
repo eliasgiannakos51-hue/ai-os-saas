@@ -331,18 +331,12 @@ console.log(
 // agents-shell.mutation.mjs is the one that pushed it to six. The
 // ratchet is a floor on how many gates have a suite at all, so it is
 // raised to the truth rather than to a comfortable number below it.
-// 304 -> 312 on 2026-11-05, read off the run (declared=304 measured=312).
-// Three of the eight are this round's: github-repo-access.mutation.mjs
-// covers a new gate, and github-security / github-user-isolation had
-// never had a suite until SECURITY-AUDIT ΑΣ-1.15 rewrote what they hold.
-// The other five had accumulated inside the tolerated five before it.
-// 312 -> 313 on 2026-11-05 (billing-integrity.mutation.mjs, the billing
-// review), then -> 317 on the same day (five more: account-suspension,
-// cross-site-writes, entity-links-owner, pwa, share-target, the accounts
-// security round) on top of that — both merged here, so the floor is
-// whichever this rebased tree actually measures. Read off the run; see
-// the check below for the live count if this value goes stale again.
-const RATCHET = 319;
+// 304 -> 312 -> 313 -> 317 -> 319 on 2026-11-05/07, read off each run in
+// turn as rounds rebased onto each other (github-repo-access,
+// billing-integrity, five accounts-security suites). This round adds
+// prompt-caching.mutation.mjs (the Create Studio intake's cache) on
+// top of that — the floor is whatever this rebased tree measures now.
+const RATCHET = 320;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

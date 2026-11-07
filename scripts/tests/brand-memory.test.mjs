@@ -119,9 +119,9 @@ console.log("\n== 5. the wiring, unconditional since 2026-10-22 ==");
 // ---------------------------------------------------------------------
 check('"brand-memory" is no longer declared as a switch (removed, the owner\'s critical message)', !/\n  "brand-memory": "/.test(code("src/lib/flags/flags.ts")));
 const extractor = code("src/lib/chat/memory.ts");
-check("the extractor asks for the brand lines only with the switch on", /text: brand \? `\$\{EXTRACTION_SYSTEM_PROMPT\}\$\{BRAND_EXTRACTION_RULE\}` : EXTRACTION_SYSTEM_PROMPT/.test(extractor));
+check("the extractor asks for the brand lines only with the switch on", /text: `\$\{EXTRACTION_SYSTEM_PROMPT\}\$\{brand \? BRAND_EXTRACTION_RULE : ""\}/.test(extractor));
 check("...naming both prefixes", /BRAND_EXTRACTION_RULE =[\s\S]{0,200}\$\{BRAND_NAME_PREFIX\}[\s\S]{0,400}\$\{BRAND_COLOURS_PREFIX\}/.test(extractor));
-check("...and records each row on its own", /for \(const row of brand \? splitBrandLines\(extracted\) : \[extracted\]\) \{[\s\S]{0,200}p_memory_text: row,/.test(extractor));
+check("...and records each row on its own", /for \(const row of \(brand \? splitBrandLines\(afterContacts\) : \[afterContacts\]\)\.filter[\s\S]{0,200}p_memory_text: row,/.test(extractor));
 check("the chat passes it unconditionally", /extractAndStoreMemory\(\{[\s\S]{0,300}brand: true,/.test(code("src/app/api/chat/route.ts")));
 const site = code("src/app/api/websites/generate/process/route.ts");
 check("the site reads the business under the website memory rule alone, the switch gone",

@@ -6511,6 +6511,17 @@
       "posts": "المنشورات",
       "coding": "البرمجة",
       "agent": "الوكلاء"
+    },
+    "contacts": {
+      "heading": "شبكة عملك",
+      "description": "أسماء تعلّمها Ionexa من محادثاتك — عملاء، موردون، شركاء — ليستخدمها كل أداة.",
+      "empty": "لم يتم تعلّم أي جهة اتصال بعد. اذكر واحدة في المحادثة وستظهر هنا.",
+      "roleCustomer": "عميل",
+      "roleSupplier": "مورد",
+      "rolePartner": "شريك",
+      "roleOther": "جهة اتصال",
+      "mentions": "ذُكر {count} مرة",
+      "knownSince": "معروف منذ {date}"
     }
   },
   "email": {

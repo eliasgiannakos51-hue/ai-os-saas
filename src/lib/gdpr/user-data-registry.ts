@@ -143,6 +143,10 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "chat_conversations", label: "chat_conversations", scope: "user_content" },
   { table: "chat_messages", label: "chat_messages", scope: "user_content" },
   { table: "chat_memory", label: "chat_memory", scope: "user_content" },
+  // business_contacts (the 2026-11-07 market round, docs/QUEUE.md «ΤΟ
+  // MOAT»): the customers, suppliers and partners named in a
+  // conversation — behind the switch "business-contact-memory".
+  { table: "business_contacts", label: "business_contacts", scope: "user_content" },
   { table: "ai_missions", label: "missions", scope: "user_content" },
   { table: "user_websites", label: "websites", scope: "user_content" },
   { table: "website_versions", label: "website_versions", scope: "user_content" },

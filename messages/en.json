@@ -6511,6 +6511,17 @@
       "posts": "Posts",
       "coding": "Code",
       "agent": "Agents"
+    },
+    "contacts": {
+      "heading": "Your business network",
+      "description": "Names Ionexa has picked up from your chats — customers, suppliers, partners — remembered automatically so every tool can use them.",
+      "empty": "No contacts remembered yet. Mention one in Chat and it starts here.",
+      "roleCustomer": "Customer",
+      "roleSupplier": "Supplier",
+      "rolePartner": "Partner",
+      "roleOther": "Contact",
+      "mentions": "mentioned {count} times",
+      "knownSince": "known since {date}"
     }
   },
   "email": {

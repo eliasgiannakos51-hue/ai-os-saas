@@ -6511,6 +6511,17 @@
       "posts": "帖子",
       "coding": "代码",
       "agent": "智能体"
+    },
+    "contacts": {
+      "heading": "你的业务网络",
+      "description": "Ionexa 从你的对话中学到的名字——客户、供应商、合作伙伴——让每个工具都能使用。",
+      "empty": "还没有记住任何联系人。在聊天中提到一个，它就会出现在这里。",
+      "roleCustomer": "客户",
+      "roleSupplier": "供应商",
+      "rolePartner": "合作伙伴",
+      "roleOther": "联系人",
+      "mentions": "被提及 {count} 次",
+      "knownSince": "自 {date} 起已知"
     }
   },
   "email": {

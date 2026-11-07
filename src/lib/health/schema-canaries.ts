@@ -638,4 +638,15 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261117000000_billing_reversals.sql",
     breaks: "a refunded or lost-dispute credit pack keeps its credits on the balance",
   },
+  {
+    // Without the FUNCTION, nothing is ever added to the business's own
+    // network — extraction is best-effort, never allowed to fail the chat
+    // itself (lib/chat/memory.ts), the same shape memory_record above is
+    // held to, so the failure is one log line and the panel on
+    // /dashboard/ai-memory silently stops growing.
+    kind: "function",
+    fn: "business_contact_record",
+    migration: "20261121000000_business_contacts.sql",
+    breaks: "no customer, supplier or partner named in Chat is ever remembered, and the failure is a log line",
+  },
 ];

@@ -6511,6 +6511,17 @@
       "posts": "Publications",
       "coding": "Écriture de code",
       "agent": "Agents IA"
+    },
+    "contacts": {
+      "heading": "Le réseau de votre entreprise",
+      "description": "Des noms qu'Ionexa a appris de vos conversations — clients, fournisseurs, partenaires — pour que chaque outil puisse les utiliser.",
+      "empty": "Aucun contact appris pour le moment. Mentionnez-en un dans le chat et il apparaîtra ici.",
+      "roleCustomer": "Client",
+      "roleSupplier": "Fournisseur",
+      "rolePartner": "Partenaire",
+      "roleOther": "Interlocuteur",
+      "mentions": "mentionné {count} fois",
+      "knownSince": "connu depuis {date}"
     }
   },
   "email": {

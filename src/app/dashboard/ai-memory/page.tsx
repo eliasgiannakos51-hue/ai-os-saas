@@ -23,6 +23,11 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { getLocale } from "next-intl/server";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { isContactRole, type ContactRole } from "@/lib/memory/contacts";
+import { BusinessContactsList, type BusinessContactRow } from "@/components/memory/business-contacts-list";
+import { formatDate } from "@/lib/format-number";
 import { memoryWindowFor } from "@/lib/memory/memory-window";
 import { accountHasCapability } from "@/lib/billing/capability-gate";
 import { upgradeWallProps } from "@/lib/billing/feature-catalog";
@@ -92,6 +97,33 @@ export default async function AiMemoryPage() {
   // second count() that could be taken a moment apart.
   const prunableIds: string[] = ((prunableResult.data ?? []) as { id: string }[]).map((p) => String(p.id));
 
+  // THE BUSINESS'S OWN NETWORK (the 2026-11-07 market round,
+  // docs/QUEUE.md «ΤΟ MOAT»), behind "business-contact-memory" — read
+  // here the same way the chat_memory rows above are, scoped by RLS and
+  // filtered explicitly for the same reason.
+  const businessContactsOn = await isFeatureOn("business-contact-memory", user);
+  const locale = await getLocale();
+  type RawContactRow = { id: string; name: string; role: ContactRole; detail: string | null; mentionCount: number; firstSeenAt: string };
+  let rawBusinessContacts: RawContactRow[] = [];
+  if (businessContactsOn) {
+    const { data: contactRows, error: contactsError } = await supabase
+      .from("business_contacts")
+      .select("id, name, role, detail, mention_count, first_seen_at, last_seen_at")
+      .eq("user_id", user.id)
+      .order("last_seen_at", { ascending: false })
+      .limit(100);
+    if (!contactsError) {
+      rawBusinessContacts = (contactRows ?? []).map((r) => ({
+        id: String(r.id),
+        name: String(r.name ?? ""),
+        role: (isContactRole(r.role) ? r.role : "other") as ContactRole,
+        detail: r.detail ? String(r.detail) : null,
+        mentionCount: Number(r.mention_count ?? 1),
+        firstSeenAt: String(r.first_seen_at ?? ""),
+      }));
+    }
+  }
+
   const planSlug = await resolveEffectivePlanSlug(user);
 
   // THE PLAN GATE, ON THE FIELD ITSELF.
@@ -142,6 +174,36 @@ export default async function AiMemoryPage() {
           windowSize={planLimit}
         />
       )}
+      {businessContactsOn ? (
+        <div className="mt-10">
+          <h2 className="text-lg font-medium text-foreground">{t("contacts.heading")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("contacts.description")}</p>
+          {rawBusinessContacts.length === 0 ? (
+            <p className="mt-4 text-sm text-muted">{t("contacts.empty")}</p>
+          ) : (
+            <div className="mt-4">
+              <BusinessContactsList
+                rows={rawBusinessContacts.map(
+                  (r): BusinessContactRow => ({
+                    id: r.id,
+                    name: r.name,
+                    role: r.role,
+                    detail: r.detail,
+                    mentionsText: t("contacts.mentions", { count: r.mentionCount }),
+                    knownSinceText: t("contacts.knownSince", { date: formatDate(r.firstSeenAt, locale) }),
+                  })
+                )}
+                roleLabels={{
+                  customer: t("contacts.roleCustomer"),
+                  supplier: t("contacts.roleSupplier"),
+                  partner: t("contacts.rolePartner"),
+                  other: t("contacts.roleOther"),
+                }}
+              />
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

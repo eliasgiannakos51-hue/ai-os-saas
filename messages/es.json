@@ -6511,6 +6511,17 @@
       "posts": "Publicaciones",
       "coding": "Código",
       "agent": "Agentes"
+    },
+    "contacts": {
+      "heading": "La red de tu negocio",
+      "description": "Nombres que Ionexa ha aprendido de tus conversaciones — clientes, proveedores, socios — para que cada herramienta los use.",
+      "empty": "Todavía no se ha aprendido ningún contacto. Menciona uno en el chat y aparecerá aquí.",
+      "roleCustomer": "Cliente",
+      "roleSupplier": "Proveedor",
+      "rolePartner": "Socio",
+      "roleOther": "Contacto",
+      "mentions": "mencionado {count} veces",
+      "knownSince": "conocido desde {date}"
     }
   },
   "email": {

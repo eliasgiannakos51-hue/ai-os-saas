@@ -311,6 +311,17 @@ console.log("\n== 5. no matcher was added without an entry above ==");
     // first MAX_KINDS_READ kinds rather than a narrowed, possibly wrong,
     // guess.
     "src/lib/my-stuff/classify.ts",
+    // THE BUSINESS'S OWN NETWORK (the 2026-11-07 market round,
+    // docs/QUEUE.md «ΤΟ MOAT»), the same shape as brand.ts above: a role
+    // a person said ("προμηθευτής"), folded and looked up against a
+    // closed ~15-word table (roleFromWord — unrecognised is "other", so
+    // a miss costs nothing); and the dedup fold for a contact's NAME
+    // (contactNameFold, so "Γιώργος" said twice is one row with a
+    // growing mention_count, not two), the same device
+    // lib/chat/memory-fold.ts already uses for a whole remembered fact.
+    // Neither decides what is shown to whom. scripts/tests/
+    // business-contacts.test.mjs runs both, word by word.
+    "src/lib/memory/contacts.ts",
   ]);
   const unaccounted = users.filter((f) => !ACCOUNTED.has(f));
 

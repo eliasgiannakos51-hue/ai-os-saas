@@ -848,7 +848,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // (branches) and "Invalid repo format." (files, commit) — the repository
 // name is now refused with reason "invalid_repo" by lib/github/access.ts —
 // and files gained one, "Invalid path.". Three out, one in.
-const SERVER_PROSE_BASELINE = 697;
+// 697 -> 701 on 2026-11-07 (the market round, docs/QUEUE.md «ΤΟ MOAT»):
+// the new read route for business_contacts, src/app/api/memory/contacts/
+// route.ts, answers "Not authenticated.", "Not available yet.", "Could
+// not load that. Please try again." and "Something went wrong." — the
+// same documented convention as every increment above, English server
+// replies with the calling component supplying translated wording.
+const SERVER_PROSE_BASELINE = 701;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

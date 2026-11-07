@@ -510,6 +510,11 @@ export async function POST(request: Request) {
     // "data" attachment needs both switches on: it is an attachment kind
     // (chat-attachments's own gate below) that only this feature reads.
     const chatChartsOn = await isFeatureOn("chat-charts", user);
+    // THE BUSINESS'S NETWORK (the 2026-11-07 market round, docs/QUEUE.md
+    // "ΤΟ MOAT"), behind its own switch "business-contact-memory" so it
+    // can ship closed independently of chat memory's own always-on
+    // extraction below.
+    const businessContactsOn = await isFeatureOn("business-contact-memory", user);
     const readAttachments = readChatAttachments(rawAttachments, user.id);
     if (
       !readAttachments.ok ||
@@ -1532,6 +1537,7 @@ export async function POST(request: Request) {
             assistantMessage: assistantText,
             costs,
             brand: true,
+            contacts: businessContactsOn,
           });
         }
 

@@ -745,7 +745,12 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     // claimed here rather than given a row of its own because a buyer
     // comparing plans is choosing whether the product remembers, not
     // whether it has a settings endpoint.
-    routes: ["memory/surfaces"],
+    // Same reasoning again for memory/contacts (the 2026-11-07 market
+    // round, docs/QUEUE.md «ΤΟ MOAT»): it reads business_contacts,
+    // charges nothing and reaches no provider, behind its own switch
+    // "business-contact-memory" — a buyer is choosing whether the
+    // product remembers, not comparing read endpoints.
+    routes: ["memory/surfaces", "memory/contacts"],
     charges: false,
     capability: "aiMemory",
     enforcedIn: "src/app/dashboard/ai-memory/page.tsx",

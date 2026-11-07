@@ -6,6 +6,7 @@ import { logApiError } from "@/lib/log-error";
 import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { memoryFold } from "./memory-fold";
 import { BRAND_COLOURS_PREFIX, BRAND_NAME_PREFIX, splitBrandLines } from "@/lib/memory/brand";
+import { CONTACT_PREFIX, contactNameFold, splitContactLines } from "@/lib/memory/contacts";
 import type { RememberedFact } from "./memory-prompt";
 
 const MEMORY_MODEL = "claude-sonnet-4-6";
@@ -54,6 +55,15 @@ const EXTRACTION_SYSTEM_PROMPT =
 const BRAND_EXTRACTION_RULE =
   ` ΕΠΙΠΛΕΟΝ: αν ο χρήστης λέει το όνομα της επιχείρησής του, γράψε σε ΔΙΚΗ ΤΟΥ γραμμή ακριβώς «${BRAND_NAME_PREFIX} <το όνομα, όπως το έγραψε>». Αν λέει τα χρώματα της επιχείρησής του (του brand, του logo), γράψε σε ΔΙΚΗ ΤΟΥ γραμμή ακριβώς «${BRAND_COLOURS_PREFIX} <χρώμα>, <χρώμα>», με τα χρώματα όπως τα είπε ή σε #hex. Αυτές οι γραμμές μετρούν πέρα από τις 1-2 προτάσεις.`;
 
+// THE BUSINESS'S NETWORK, AS ROWS (behind the switch
+// "business-contact-memory"): every customer, supplier or partner named
+// in a conversation becomes its own line here, which
+// lib/memory/contacts.ts turns into a row of business_contacts rather
+// than a chat_memory fact — see that file and the migration
+// 20261121000000_business_contacts.sql for why a table and not a line.
+const CONTACT_EXTRACTION_RULE =
+  ` ΕΠΙΠΛΕΟΝ: αν ο χρήστης αναφέρει το όνομα ενός πελάτη, προμηθευτή ή συνεργάτη της επιχείρησής του, γράψε σε ΔΙΚΗ ΤΟΥ γραμμή ακριβώς «${CONTACT_PREFIX} <όνομα> | <πελάτης, προμηθευτής ή συνεργάτης> | <τηλέφωνο, email ή σύντομη σημείωση, αν είπε κάτι — αλλιώς άφησέ το κενό>». Μία γραμμή ανά άτομο. Αυτές οι γραμμές μετρούν πέρα από τις 1-2 προτάσεις.`;
+
 // Fires a second, small/fast Claude call after a chat exchange to pull out
 // anything worth remembering across future, unrelated conversations — a
 // name, role, preference, recurring context. Best-effort: awaited inline
@@ -68,6 +78,7 @@ export async function extractAndStoreMemory({
   assistantMessage,
   costs,
   brand = false,
+  contacts = false,
 }: {
   supabase: SupabaseClient;
   userId: string;
@@ -81,6 +92,8 @@ export async function extractAndStoreMemory({
   costs?: CostAccumulator;
   /** The switch "brand-memory": ask for the business name and colours as their own lines. */
   brand?: boolean;
+  /** The switch "business-contact-memory": ask for named customers/suppliers/partners as their own lines, recorded into business_contacts rather than chat_memory. */
+  contacts?: boolean;
 }): Promise<void> {
   try {
     // No separate circuit-breaker check here — this only ever runs once
@@ -99,7 +112,7 @@ export async function extractAndStoreMemory({
         purpose: "summarisation",
         model: MEMORY_MODEL,
         maxTokens: MEMORY_MAX_TOKENS,
-        system: [{ type: "text", text: brand ? `${EXTRACTION_SYSTEM_PROMPT}${BRAND_EXTRACTION_RULE}` : EXTRACTION_SYSTEM_PROMPT }],
+        system: [{ type: "text", text: `${EXTRACTION_SYSTEM_PROMPT}${brand ? BRAND_EXTRACTION_RULE : ""}${contacts ? CONTACT_EXTRACTION_RULE : ""}` }],
         messages: [
           {
             role: "user",
@@ -133,9 +146,33 @@ export async function extractAndStoreMemory({
     // because chat_memory has no UPDATE policy on purpose: the table is
     // append/delete-only for a browser session, and a counter is not a
     // reason to give that up. See the migration's own note.
+    // CONTACTS FIRST, AND INTO THEIR OWN TABLE. A named customer or
+    // supplier is not prose for the model to replay — it is a row with
+    // its own growing mention_count (business_contacts, the migration
+    // beside this file's comment) — so it never also becomes a
+    // chat_memory line. What is left after pulling contact lines out is
+    // what brand/plain recording below runs on, same as before.
+    const { contacts: parsedContacts, rest: afterContacts } = contacts
+      ? splitContactLines(extracted)
+      : { contacts: [], rest: extracted };
+    for (const c of parsedContacts) {
+      const { error } = await supabase.rpc("business_contact_record", {
+        p_name: c.name,
+        p_name_fold: contactNameFold(c.name),
+        p_role: c.role,
+        p_detail: c.detail,
+        p_conversation_id: conversationId,
+      });
+      if (error) {
+        logApiError("chat:extractAndStoreMemory", error, { stage: "recordContact", userId });
+      }
+    }
+
     // One row per brand line, the rest as one row (lib/memory/brand.ts):
-    // without the switch the answer is recorded whole, as before.
-    for (const row of brand ? splitBrandLines(extracted) : [extracted]) {
+    // without the switch the answer is recorded whole, as before. A row
+    // left empty because the whole answer was contact lines is dropped
+    // rather than recorded as a blank fact.
+    for (const row of (brand ? splitBrandLines(afterContacts) : [afterContacts]).filter((r) => r.trim().length > 0)) {
       const { error } = await supabase.rpc("chat_memory_record", {
         p_memory_text: row,
         p_memory_fold: memoryFold(row),

@@ -286,7 +286,15 @@ ok(`border utilities (${r.counts.borders}), ceiling 685`, r.counts.borders <= 68
 // page.tsx, lists a shared project's own Activity the same read-only way
 // — one `divide-y` over up to ten rows, not ten borders, same trade as
 // /dashboard/ai-memory's own above.
-ok(`divide rules (${r.counts.divides}), ceiling 8`, r.counts.divides <= 8);
+// 8 -> 9 on 2026-11-07 (the market round, docs/QUEUE.md «ΤΟ MOAT»).
+// components/memory/business-contacts-list.tsx, the growing list of
+// customers/suppliers/partners on /dashboard/ai-memory, is the same shape
+// again: one `divide-y` over up to a hundred rows, zero borders — the
+// role pill beside each name uses `bg-tag` alone, with no border, the
+// same pill shape editor-shell.tsx's own selection chip already uses.
+// Border count is UNCHANGED at 685, which is the only form of this trade
+// this ceiling exists to allow.
+ok(`divide rules (${r.counts.divides}), ceiling 9`, r.counts.divides <= 9);
 
 console.log("\n== 3. the glow and the gradient titles ==");
 // ZERO, and the definition is in design-census.mjs: a glow is a BLURRED

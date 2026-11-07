@@ -6511,6 +6511,17 @@
       "posts": "投稿",
       "coding": "コード",
       "agent": "エージェント"
+    },
+    "contacts": {
+      "heading": "あなたのビジネスのネットワーク",
+      "description": "Ionexaが会話から学んだ名前 — 顧客、仕入先、パートナー — すべてのツールで使えるように記憶します。",
+      "empty": "まだ連絡先は記憶されていません。チャットで言及すると、ここに表示されます。",
+      "roleCustomer": "顧客",
+      "roleSupplier": "仕入先",
+      "rolePartner": "パートナー",
+      "roleOther": "連絡先",
+      "mentions": "{count}回言及",
+      "knownSince": "{date}から記憶"
     }
   },
   "email": {

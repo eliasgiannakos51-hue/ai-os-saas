@@ -37,7 +37,8 @@ const code = (f) => readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").rep
 
 const roster = await loadTs("src/lib/company-agents/roster.ts");
 const agents = await loadTs("src/lib/company-agents/agents.ts");
-const { ROSTER, BLOCKERS, DEPARTMENTS, RUNNING_AGENT_IDS } = roster;
+const { ROSTER, BLOCKERS, DEPARTMENTS, RUNNING_AGENT_IDS, CI_AGENT_IDS } = roster;
+const repoAgents = await import("../company-agents/repo-agents.mjs");
 
 console.log("== 1. the roster is consistent ==");
 ok(`the roster was read (${ROSTER.length} agents)`, ROSTER.length >= 100);
@@ -62,7 +63,12 @@ const runnerIds = [...runnerSrc.matchAll(/runOne\(\s*"([a-z0-9-]+)"/g)].map((m) 
 const rosterRunning = ROSTER.filter((a) => a.status === "running").map((a) => a.id).sort();
 ok("the runner executes at least one agent", runnerIds.length >= 1);
 ok("RUNNING_AGENT_IDS equals the ids the runner passes to runOne()", JSON.stringify([...RUNNING_AGENT_IDS].sort()) === JSON.stringify([...runnerIds].sort()), `${[...RUNNING_AGENT_IDS]} vs ${runnerIds}`);
-ok("the roster's `running` entries equal RUNNING_AGENT_IDS", JSON.stringify(rosterRunning) === JSON.stringify([...RUNNING_AGENT_IDS].sort()), `${rosterRunning}`);
+ok("the roster's `running` entries equal RUNNING_AGENT_IDS plus CI_AGENT_IDS", JSON.stringify(rosterRunning) === JSON.stringify([...RUNNING_AGENT_IDS, ...CI_AGENT_IDS].sort()), `${rosterRunning}`);
+ok("CI_AGENT_IDS equals the ids repo-agents.mjs runs, both ways", JSON.stringify([...CI_AGENT_IDS].sort()) === JSON.stringify([...repoAgents.REPO_AGENT_IDS].sort()) && Object.keys(repoAgents.runAll({ files: [], vercel: null, routes: [], migrations: [], pkgs: [], audit: null })).sort().join() === [...CI_AGENT_IDS].sort().join());
+ok("no agent is in both the runner and CI", RUNNING_AGENT_IDS.every((id) => !CI_AGENT_IDS.includes(id)));
+const workflow = readFileSync(".github/workflows/verify.yml", "utf8").replace(/^\s*#.*$/gm, "");
+ok("the CI workflow runs repo-agents.mjs", /run:\s*node scripts\/company-agents\/repo-agents\.mjs/.test(workflow));
+ok("...and the step cannot turn the job red", /name: company agents \(repository\)[\s\S]{0,120}continue-on-error: true/.test(workflow));
 ok("every running agent is autonomy 1 (reads and reports)", ROSTER.filter((a) => a.status === "running").every((a) => a.autonomy === 1));
 ok("each id the runner writes is on the roster", runnerIds.every((id) => ids.includes(id)));
 ok("the runner's only write is the insert into company_agent_runs", (runnerSrc.match(/\.(insert|update|delete|upsert)\(/g) ?? []).length === 1 && /from\("company_agent_runs"\)\s*\.insert\(/.test(runnerSrc));

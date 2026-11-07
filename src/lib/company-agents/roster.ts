@@ -77,6 +77,12 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
  *  roster's `running` entries must equal this list, both ways. */
 export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
 
+/** The agents that run in CI, on every push, from scripts/company-agents/repo-agents.mjs.
+ *  They need the repository's files, which the Vercel runner does not have, so their result
+ *  is on the CI job's summary page and NOT in the System Health section above. The roster's
+ *  `running` entries equal RUNNING_AGENT_IDS plus this list, both ways. */
+export const CI_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner"] as const;
+
 type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: RosterStatus, blockedBy?: BlockerKey];
 
 function dept(department: DepartmentKey, rows: Row[]): RosterAgent[] {
@@ -111,7 +117,7 @@ export const ROSTER: RosterAgent[] = [
     ["code-review", "Code review", "Reads a diff against CLAUDE.md's rules before a merge.", 2, "planned"],
     ["bug-detection", "Bug detection", "Finds problems from errors and tests.", 1, "planned"],
     ["bug-fix", "Bug fix", "Proposes a fix as a pull request, never committing to main.", 2, "planned"],
-    ["migration-ledger", "Migration ledger", "Reports which migration files are not applied (npm run db:pending).", 1, "planned"],
+    ["migration-ledger", "Migration ledger", "Checks the migration files: every one since 20261016000000 has an undo note and every name starts with a date. Runs in CI on every push. It cannot say which are applied (npm run db:pending does, with DATABASE_URL).", 1, "running"],
     ["product-research", "Product research", "Looks into what the market needs.", 1, "planned"],
     ["product-spec", "Product specification", "Turns an idea into written requirements.", 2, "planned"],
     ["architecture", "Architecture", "Sketches the technical design of a change.", 2, "planned"],
@@ -186,17 +192,17 @@ export const ROSTER: RosterAgent[] = [
     ["research-report", "Research report", "Turns research into a short report.", 1, "planned"],
   ]),
   ...dept("security", [
-    ["vulnerability-scanner", "Vulnerability scanner", "Scans code and dependencies; GitHub's Dependabot and CodeQL are the first tools for it.", 1, "planned"],
+    ["vulnerability-scanner", "Vulnerability scanner", "Runs npm audit on the lockfile in CI on every push and reports critical and high advisories. Dependencies only, not the code this project wrote.", 1, "running"],
     ["idor-checker", "IDOR checker", "Looks for routes that read another user's data.", 1, "planned"],
     ["auth-auditor", "Authentication auditor", "Reviews how sign-in works.", 1, "planned"],
     ["authorization-auditor", "Authorization auditor", "Reviews who may do what.", 1, "planned"],
     ["headers-checker", "Security headers", "Fetches the public home page and checks HSTS, nosniff, Referrer-Policy and framing protection are sent.", 1, "running"],
-    ["secrets-scanner", "Secrets scanner", "Finds API keys and secrets that were committed or exposed.", 1, "planned"],
+    ["secrets-scanner", "Secrets scanner", "Scans every tracked file in CI for eight credential shapes (Anthropic, AWS, Stripe, GitHub, Slack, JWT, Resend keys, private-key blocks). Current files only, not git history.", 1, "running"],
     ["privacy-checker", "Privacy checker", "Reviews how personal data is handled.", 1, "planned"],
     ["incident-response", "Incident response", "Proposes steps when something happens; takes none.", 1, "planned"],
   ]),
   ...dept("devops", [
-    ["cron-monitor", "Cron monitor", "Checks that the scheduled jobs in vercel.json actually ran.", 1, "planned"],
+    ["cron-monitor", "Cron monitor", "Checks in CI that every cron in vercel.json has a route and a valid schedule and that every /api/cron route is scheduled. It does not see whether Vercel actually fired them.", 1, "running"],
     ["api-uptime-monitor", "API uptime monitor", "Calls /api/health and records whether the app answers and says it is ok.", 1, "running"],
     ["error-log-analyst", "Error log analyst", "Reads the open production errors and reports how many and where.", 1, "running"],
     ["database-health", "Database health", "Reads the database's own exposure report and fails when any of its checks fails.", 1, "running"],
@@ -208,7 +214,7 @@ export const ROSTER: RosterAgent[] = [
   ...dept("legal", [
     ["gdpr-assistant", "GDPR assistant", "Checks data-protection procedures; does not give legal advice.", 1, "blocked", "human-only"],
     ["terms-monitor", "Terms monitor", "Notices changes in providers' terms.", 1, "planned"],
-    ["license-monitor", "License monitor", "Tracks software licences in the dependencies.", 1, "planned"],
+    ["license-monitor", "License monitor", "Reads the licence of every direct dependency in CI and fails on GPL, AGPL or SSPL, warns on LGPL or an unreadable licence.", 1, "running"],
     ["contract-organizer", "Contract organizer", "Files contracts; signs none.", 1, "blocked", "human-only"],
     ["approval-policy", "Approval policy", "Says whether an action needs the owner's approval.", 1, "planned"],
   ]),

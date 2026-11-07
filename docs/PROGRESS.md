@@ -38,6 +38,30 @@ stale, χωρίς όριο θορύβου στο κόστος, κενή αναφ
 μετρήθηκαν. `company-agents.test.mjs` 112 έλεγχοι, 5 μεταλλάξεις κοκκίνισαν.
 **Δεν επιβεβαιώθηκε σε production.** 13 τρέχουν· οι 108 δεν.
 
+## 2026-11-07γ (Τέταρτη δέσμη: +5 agents που διαβάζουν το repo — 18 από 121 τρέχουν)
+
+`scripts/company-agents/repo-agents.mjs`: `secrets-scanner` (8 σχήματα κλειδιών σε όλα
+τα tracked αρχεία, δεν τυπώνει ποτέ το κλειδί, 3 γνωστά test fixtures με λόγο και έλεγχο
+ότι δεν μένουν παλιά), `cron-monitor` (κάθε cron του `vercel.json` έχει route και 5 πεδία·
+κάθε route στο `/api/cron` είναι προγραμματισμένο· ΔΕΝ βλέπει αν η Vercel το εκτέλεσε),
+`migration-ledger` (undo note από το 20261016000000, ονόματα με ημερομηνία· ΔΕΝ ξέρει ποια
+έχουν τρέξει, αυτό το λέει μόνο το `npm run db:pending`), `license-monitor` (άμεσες
+εξαρτήσεις: GPL/AGPL/SSPL αποτυχία, LGPL προειδοποίηση), `vulnerability-scanner`
+(`npm audit`). Τρέχουν στο CI σε κάθε push (`.github/workflows/verify.yml`, βήμα
+«company agents (repository)», `continue-on-error`, αναφέρουν στη σελίδα σύνοψης του job)
+και όχι στη Vercel, γιατί εκεί δεν υπάρχουν τα αρχεία. **Το αποτέλεσμά τους ΔΕΝ φαίνεται
+στο System Health**· μόνο στο CI. `CI_AGENT_IDS` στο roster.ts ισούται με το script.
+
+**ΕΥΡΗΜΑ (μέτρηση 2026-11-07, `npm audit` σε αυτό το checkout):** 1 critical, 5 high, 7
+moderate. Η critical είναι το `next` 16.3.8 (εύρος 16.0.0–16.4.0): δύο advisories RCE
+(GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr) και ένα DoS σε Server Actions. Υπάρχει
+διόρθωση. ΔΕΝ ελέγχθηκε αν η εφαρμογή χρησιμοποιεί τα επηρεαζόμενα χαρακτηριστικά (SVG
+στο image optimization, `use cache`). Δεν άλλαξα την έκδοση: αλλαγή του Next είναι δική σου
+απόφαση.
+
+`repo-agents.test.mjs` 46 έλεγχοι, 8 μεταλλάξεις (μία επιβίωσε, ήταν περιττός κώδικας,
+αφαιρέθηκε και ξαναδοκιμάστηκε). **18 τρέχουν· οι 103 δεν.**
+
 ## 2026-11-06β (Οι agents της εταιρείας μέσα στο Ionexa — βάση + 2 που τρέχουν)
 
 **ΤΙ ΧΤΙΣΤΗΚΕ.** Ενότητα «Company agents» μέσα στο `/dashboard/system-health`

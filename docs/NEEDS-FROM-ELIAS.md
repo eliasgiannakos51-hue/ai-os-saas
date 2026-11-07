@@ -5,7 +5,6 @@
 Ξαναγράφτηκε 2026-10-04 με τις απαντήσεις σου της ίδιας ημέρας, και
 ξανά με το «ΜΕΡΟΣ Α» της ίδιας ημέρας.
 
-<<<<<<< HEAD
 ## Χρεώσεις (2026-11-05) — ένα migration και τρεις ρυθμίσεις στο Stripe
 
 Μια ανεξάρτητη αναθεώρηση βρήκε έξι κενά στη χρέωση (ΑΣ-1.16, ΑΣ-4.15
@@ -164,10 +163,7 @@
   ξεκινούν «Εσύ και ο λογαριασμός δοκιμής»): `agents-automations-pro`
   (Όταν/Αν/Κάνε και ο ζωντανός καμβάς)· `automation-templates` (οι έτοιμες)·
   `automation-time-saved` — **μόνο αφού τρέξει το σημείο 1**.
-## Ασφάλεια (2026-11-05) — ένα migration
-=======
 ## Ασφάλεια (2026-11-05) — ένα migration, και ένα domain που μπλοκάρει την κυκλοφορία
->>>>>>> 1ccda2b (Published pages: no password fields, narrower CSP, form endpoint hardened, separate origin ready)
 
 - **1. Τρέξε το migration.** `supabase/migrations/20261116000000_push_subscriptions_server_written.sql`
   στον SQL editor. Ο browser δεν μπορεί πια να γράψει απευθείας τις

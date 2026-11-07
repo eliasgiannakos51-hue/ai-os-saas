@@ -151,8 +151,8 @@ export const APP_SECURITY_HEADERS = [
  * headers are already chosen — so the matcher above sees a path that
  * does not start with "s/" or "a/" and this blanket, narrow img-src
  * ('self' data: blob:) would apply on top of the published page's own,
- * wider CSP (lib/publishing/public-serving.ts, which allows Unsplash
- * and the owner's uploads). Two sources for one header is how the
+ * wider CSP (lib/publishing/public-serving.ts, which allows the stock
+ * photo host and the owner's uploads). Two sources for one header is how the
  * weaker one wins — the exact failure this file's own comment above
  * names for /a/ — and here it would be silent: the site stays up, its
  * photos just stop loading, on every one of them, the day the domain

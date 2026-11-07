@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { CheckoutNotice } from "@/components/billing/checkout-notice";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
+import { EuOnlySettings } from "@/components/settings/eu-only-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
 import { LanguageSettings } from "@/components/settings/language-settings";
 import { SampleDataSettings } from "@/components/settings/sample-data-settings";
@@ -132,7 +133,7 @@ export default async function SettingsPage() {
     // walks rows that actually moved the balance.
     supabase
       .from("user_credits")
-      .select("credits_remaining, purchased_credits")
+      .select("credits_remaining, purchased_credits, eu_only_ai")
       .eq("user_id", user.id)
       .maybeSingle(),
     supabase
@@ -342,6 +343,10 @@ export default async function SettingsPage() {
             // rather than showing an ON switch above a count of nothing.
             planLimit={getPlan(tier)?.capabilities.chatMemoryLimit ?? 0}
           />
+        </div>
+
+        <div className="mt-6">
+          <EuOnlySettings initialEnabled={creditsRow?.eu_only_ai === true} />
         </div>
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />

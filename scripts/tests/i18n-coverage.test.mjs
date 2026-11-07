@@ -1014,7 +1014,11 @@ const LEGAL_BASELINE = {
   // constant interpolated mid-sentence splits one text node into two —
   // measured by inlining the number, which gives 24 again. No sentence
   // was added.
-  "src/app/privacy/page.tsx": 25,
+  // 25 -> 26 (2026-11-07, agent/mistral): the sub-processor list gained
+  // Mistral AI — the «Μόνο Ευρώπη» provider — a real, named company the
+  // same way every other row in that list is, per legal-pages.test.mjs
+  // §5b's own derivation from lib/env-check.ts.
+  "src/app/privacy/page.tsx": 26,
   "src/app/terms/page.tsx": 10,
 };
 

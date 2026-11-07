@@ -185,8 +185,6 @@ const NOT_PROBEABLE = {
     "only revokes and re-grants UPDATE on user_onboarding (a column list instead of the whole table); it adds no table, column or function, and a grant to the signed-in role is invisible to a probe made through the service role. scripts/tests/user-onboarding-grants.dbtest.mjs is its check.",
   "20261115000002_entity_links_same_owner.sql":
     "adds a trigger on entity_links and the trigger function it calls. A function that returns `trigger` is never exposed by the database API, so the OpenAPI root this probe reads cannot list it, present or not. scripts/tests/entity-links-owner.dbtest.mjs is its check.",
-  "20261109000000_help_articles_tools.sql":
-    "only INSERTs rows — one help article per tool, ON CONFLICT (slug, locale) DO UPDATE — into help_articles, which an older migration creates; it adds no table, column or function, so there is no object a schema probe could find missing. A missing row is missing content, not missing schema.",
   "20261111000000_admin_audit_log_rls.sql":
     "only enables row level security on admin_audit_log, whose own migration (20261110000000) carries the canary. Whether RLS is on is not something a PostgREST read through the service role can see — that role bypasses it — so there is nothing here to probe.",
   "20261116000000_push_subscriptions_server_written.sql":

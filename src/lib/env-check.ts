@@ -255,6 +255,20 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "the provider is skipped; if Anthropic is unreachable the call fails rather than failing over",
     secret: true,
   },
+  // THE ONLY EU-RESIDENT PROVIDER (agent/mistral, 2026-11-07). Without
+  // this key, «Μόνο Ευρώπη» (user_credits.eu_only_ai, dashboard/settings)
+  // is a setting an account can turn on that then refuses every AI call
+  // it makes — there is no other EU provider in the catalog to route to
+  // (lib/ai/providers/eu-only.ts). Listed here for the same reason
+  // GOOGLE_API_KEY and GROQ_API_KEY are above it: a provider the registry
+  // reads but this list does not know about is invisible to the owner.
+  {
+    name: "MISTRAL_API_KEY",
+    level: "optional",
+    what: "Mistral AI, the only EU-resident provider in the chain (lib/ai/providers/registry.ts) — what «Μόνο Ευρώπη» accounts route to",
+    fallback: "the provider is skipped. For an account with «Μόνο Ευρώπη» on, every AI call is refused (eu_only_blocked) rather than routed outside the EU; other accounts are unaffected",
+    secret: true,
+  },
   // THE KEYS NOTHING READS YET (src/lib/ai/providers/key-inventory.ts).
   // Listed so the screen says so instead of a set key looking like a
   // working feature: the only reader is the key check itself.

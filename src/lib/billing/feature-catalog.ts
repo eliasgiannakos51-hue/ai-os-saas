@@ -1239,6 +1239,10 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "auth/device-check",
       "auth/resend-confirmation",
       "health",
+      // «Μόνο Ευρώπη» (agent/mistral, 2026-11-07): a privacy-shaped
+      // account setting — which region may serve this account's AI
+      // calls — same free, no-charge shape as every other row here.
+      "settings/eu-only",
     ],
     charges: false,
     enforcedIn: "src/app/api/account/export/route.ts",

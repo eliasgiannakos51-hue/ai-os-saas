@@ -143,9 +143,11 @@ console.log("\n== 4. 'not in the code' still is not in the code ==");
 // tells a reader not to bother setting its key — and the feature is dark
 // for exactly as long as nobody re-reads this file.
 const NOT_WIRED = [
-  "XAI", "GROK", "PERPLEXITY", "MANUS", "DEEPSEEK", "TOGETHER", "MISTRAL", "COHERE",
+  "XAI", "GROK", "PERPLEXITY", "MANUS", "DEEPSEEK", "TOGETHER", "COHERE",
   // RUNWAY, IDEOGRAM and DEEPGRAM left this list on 2026-10-03, when the
-  // document moved them to Table A ("Keys the code CHECKS").
+  // document moved them to Table A ("Keys the code CHECKS"). MISTRAL left
+  // on 2026-11-07, when agent/mistral wired it as the fifth AI provider
+  // and the only EU destination in the chain (eu-only.ts).
   "LUMA", "KLING", "PIKA", "HEYGEN", "SYNTHESIA",
   "MIDJOURNEY", "RECRAFT", "ASSEMBLYAI",
   "PLAID", "TINK", "GOCARDLESS", "ALCHEMY", "MORALIS",
@@ -160,9 +162,9 @@ check(
 // And the registry really is the closed set of four the document quotes.
 const registry = readFileSync("src/lib/ai/providers/registry.ts", "utf8");
 const providers = [...(registry.match(/PROVIDER_KEY_ENV_VARS[\s\S]*?\};/)?.[0] ?? "").matchAll(/^\s+(\w+): "/gm)].map((m) => m[1]);
-check(`the model registry holds four providers (${providers.join(", ")})`, providers.length === 4);
-check("...the four the document names",
-  JSON.stringify(providers.slice().sort()) === JSON.stringify(["anthropic", "google", "groq", "openai"]));
+check(`the model registry holds five providers (${providers.join(", ")})`, providers.length === 5);
+check("...the five the document names",
+  JSON.stringify(providers.slice().sort()) === JSON.stringify(["anthropic", "google", "groq", "mistral", "openai"]));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. every gate it points at exists, and does what it says ==");
@@ -187,8 +189,8 @@ console.log("\n== 6. the honesty clause is still there ==");
 check("it says the prices are not measured", /have not measured any provider's price/i.test(doc));
 check("...and quotes the constant that agrees", /UNVERIFIED_PRICE_PROVIDERS/.test(doc));
 const catalog = readFileSync("src/lib/ai/providers/catalog.ts", "utf8");
-check("...which still exists and still names three providers",
-  /UNVERIFIED_PRICE_PROVIDERS[^=]*=\s*\["openai", "google", "groq"\]/.test(catalog));
+check("...which still exists and still names four providers",
+  /UNVERIFIED_PRICE_PROVIDERS[^=]*=\s*\["openai", "google", "groq", "mistral"\]/.test(catalog));
 
 console.log("");
 if (failures.length > 0) {

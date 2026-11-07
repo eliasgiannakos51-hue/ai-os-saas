@@ -59,7 +59,7 @@ check(
   "a known reader is found (VAPID_PRIVATE_KEY in src/lib/push/web-push.ts)",
   readsVar(code.get("src/lib/push/web-push.ts") ?? "", "VAPID_PRIVATE_KEY"),
 );
-check(`the inventory has its ten entries (${KEY_INVENTORY.length})`, KEY_INVENTORY.length === 10);
+check(`the inventory has its eleven entries (${KEY_INVENTORY.length})`, KEY_INVENTORY.length === 11);
 
 console.log("\n== 2. readBy matches src/, both ways ==");
 for (const entry of KEY_INVENTORY) {

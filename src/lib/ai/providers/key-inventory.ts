@@ -27,6 +27,7 @@ export type KeyId =
   | "openai"
   | "groq"
   | "google"
+  | "mistral"
   | "deepgram"
   | "elevenlabs"
   | "bfl"
@@ -97,6 +98,15 @@ export const KEY_INVENTORY: KeyEntry[] = [
       url: "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
       headers: (key) => ({ "x-goog-api-key": key }),
     },
+  },
+  {
+    id: "mistral",
+    label: "Mistral AI",
+    envVars: ["MISTRAL_API_KEY"],
+    roles: ["«Μόνο Ευρώπη»: the only EU destination in the chain (eu-only.ts)", "failover for text"],
+    readBy: ["src/lib/ai/providers/registry.ts"],
+    missing: "Not set as of 2026-11-07. Until it is, every account that turns on «Μόνο Ευρώπη» gets eu_only_blocked on every call — there is no other EU provider in the catalog for it to route to.",
+    check: { url: "https://api.mistral.ai/v1/models", headers: (key) => ({ authorization: `Bearer ${key}` }) },
   },
   {
     id: "deepgram",

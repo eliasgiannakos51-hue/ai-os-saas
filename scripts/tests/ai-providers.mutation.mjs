@@ -153,8 +153,8 @@ const MUTANTS = [
   {
     name: "Anthropic is quietly added to the verified list without anybody checking a bill",
     file: CATALOG,
-    from: 'export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq"];',
-    to: 'export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq", "anthropic"];',
+    from: 'export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq", "mistral"];',
+    to: 'export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq", "mistral", "anthropic"];',
   },
 
   // ------------------------------------------------------------------

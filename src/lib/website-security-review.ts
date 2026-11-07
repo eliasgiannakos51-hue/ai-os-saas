@@ -81,7 +81,13 @@ export function parseContentSafetyReviewInput(input: {
 export async function reviewWebsiteContentSafety(
   apiKey: string,
   html: string,
-  costs?: CostAccumulator,
+  // REQUIRED, NOT OPTIONAL (agent/mistral, 2026-11-07, matching
+  // lib/lead-classification.ts's own reasoning): a required parameter
+  // cannot follow an optional one once userId below is required too, and
+  // both of this function's two real callers already pass one — an
+  // optional `?` here bought nothing and would again be the open door a
+  // caller could walk tokens through uncounted.
+  costs: CostAccumulator,
   // The site owner's id, the account this review's tokens are billed to
   // (costs above). Required so runCompletion can resolve this account's
   // «Μόνο Ευρώπη» setting (lib/ai/providers/eu-only.ts) — without it the
@@ -125,7 +131,7 @@ export async function reviewWebsiteContentSafety(
     // Recorded before the parse: this review is a real billed call whose
     // cost the user's action incurred whether or not the response came
     // back in a shape we could use.
-    costs?.record("security_review", outcome.usage, outcome.reportedModel || outcome.model);
+    costs.record("security_review", outcome.usage, outcome.reportedModel || outcome.model);
 
     const toolUse = outcome.toolCalls[0];
     if (!toolUse) return { isSafe: true, concerns: [] };

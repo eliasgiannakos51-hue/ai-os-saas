@@ -397,7 +397,13 @@ checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{
   checkTrue("the classifier records its own usage",
     /costs\.record\("classification", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(classifier));
   checkTrue("...and cannot be called without something to record into",
-    /costs: CostAccumulator\n\): Promise<LeadClassification \| null>/.test(classifier) && !/costs\?: CostAccumulator/.test(classifier));
+    /costs: CostAccumulator,/.test(classifier) && !/costs\?: CostAccumulator/.test(classifier));
+  // AND CANNOT BE CALLED WITHOUT AN ACCOUNT TO ROUTE AGAINST, since
+  // agent/mistral (2026-11-07): the same reasoning as costs above, for
+  // the id runCompletion resolves «Μόνο Ευρώπη» from (eu-only.ts). One
+  // caller, always has it, so the parameter is required, not optional.
+  checkTrue("...and cannot be called without an account to route against",
+    /userId: string\n\): Promise<LeadClassification \| null>/.test(classifier) && !/userId\?: string/.test(classifier));
 }
 // The abuse ceiling that was already there, asserted so it cannot be
 // removed without noticing: an unpaid flood is capped per website/hour.

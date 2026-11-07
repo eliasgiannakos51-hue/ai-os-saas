@@ -657,6 +657,16 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "no customer, supplier or partner named in Chat is ever remembered, and the failure is a log line",
   },
   {
+    // «Μόνο Ευρώπη» (agent/mistral, 2026-11-07): a column add on an
+    // EXISTING table, not a new table — the shape the pending list this
+    // repository keeps said this canary should take.
+    kind: "column",
+    table: "user_credits",
+    column: "eu_only_ai",
+    migration: "20261122000000_eu_only_ai.sql",
+    breaks: "the account's own «Μόνο Ευρώπη» toggle (dashboard/settings) 500s on GET and PATCH, which looks identical to the setting simply not existing",
+  },
+  {
     // SILENT ON PURPOSE: the crons log the failed read and skip nobody
     // (lib/auth/suspended-accounts.ts), so this probe is the only place
     // the gap shows.

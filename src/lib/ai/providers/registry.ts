@@ -233,6 +233,25 @@ export function resolveChain(params: {
     source = "default";
   }
 
+  // «ΜΟΝΟ ΕΥΡΩΠΗ» MUST NOT DEPEND ON AN OPERATOR ALSO EDITING
+  // AI_PROVIDER_ORDER. DEFAULT_PROVIDER_ORDER is anthropic alone, and an
+  // operator's own AI_PROVIDER_ORDER is free to name no EU provider
+  // either — neither one is about this account's setting. Without this,
+  // an account that turns «Μόνο Ευρώπη» on would get `eu_only_blocked`
+  // on every call even with MISTRAL_API_KEY set and valid, because
+  // mistral was never a candidate to filter in the first place: the loop
+  // below only ever considers `configured`. So when euOnly is true, every
+  // EU provider is appended to the end of `configured` if it is not
+  // already there — considered, not promoted: an operator's explicit
+  // order (or the default) still decides who goes first.
+  if (euOnly) {
+    for (const provider of AI_PROVIDERS) {
+      if (PROVIDER_REGION[provider] === "eu" && !configured.includes(provider)) {
+        configured = [...configured, provider];
+      }
+    }
+  }
+
   const statuses = new Map(providerStatuses(env).map((s) => [s.provider, s]));
   const order: AiProvider[] = [];
   const skipped: { provider: AiProvider; reason: string }[] = [];

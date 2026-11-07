@@ -300,6 +300,9 @@ CLASSIFIED.routedUnmarked = [
 CLASSIFIED.passthrough = [
   "src/lib/ai/providers/adapters/anthropic.ts",
   "src/lib/ai/providers/adapters/groq.ts",
+  // Same shape as groq.ts (agent/mistral, 2026-11-07): an OpenAI-compatible
+  // request body that hands on max_tokens from the caller's AiRequest.
+  "src/lib/ai/providers/adapters/mistral.ts",
   "src/lib/ai/batch/batch-client.ts",
   // Both became visible on 2026-10-15 with the population above. The
   // batch builder hands on `spec.outputTokens`, and types.ts only

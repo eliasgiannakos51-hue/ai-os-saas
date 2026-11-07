@@ -79,9 +79,20 @@ const MUTANTS = [
     // shape in which this exact call once spent money with no cost log.
     name: "the classifier's accumulator becomes optional again",
     file: CLASSIFIER,
-    from: "  costs: CostAccumulator\n): Promise<LeadClassification | null> {",
-    to: "  costs?: CostAccumulator\n): Promise<LeadClassification | null> {",
+    from: "  costs: CostAccumulator,",
+    to: "  costs?: CostAccumulator,",
     expect: "cannot be called without something to record into",
+  },
+  {
+    // 6. THE ACCOUNT TO ROUTE «ΜΟΝΟ ΕΥΡΩΠΗ» AGAINST GOES BACK TO BEING
+    // OPTIONAL (agent/mistral, 2026-11-07) — the shape in which a caller
+    // could again omit it, and this call would then be served from
+    // outside the EU for an account that explicitly turned that off.
+    name: "the classifier's account id becomes optional again",
+    file: CLASSIFIER,
+    from: "  userId: string",
+    to: "  userId?: string",
+    expect: "cannot be called without an account to route against",
   },
 ];
 

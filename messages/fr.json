@@ -761,6 +761,16 @@
       "nothingYet": "Rien d’enregistré pour l’instant. La mémoire est active — elle retient les éléments durables comme votre nom, votre métier ou une préférence, dès qu’une conversation en mentionne un.",
       "seeAll": "Voir ce dont il se souvient"
     },
+    "euOnly": {
+      "title": "Europe uniquement",
+      "toggleLabel": "Servir les appels IA de ce compte uniquement depuis l'UE",
+      "toggleDescription": "Lorsque c'est activé, chaque appel IA de ce compte est refusé plutôt que traité par un fournisseur hors UE.",
+      "turnedOn": "✓ « Europe uniquement » activé",
+      "turnedOff": "✓ « Europe uniquement » désactivé",
+      "couldNotUpdate": "✗ impossible de mettre à jour ce réglage",
+      "effectOn": "Les appels IA de ce compte ne sont servis que par Mistral AI (UE). Un appel que ce fournisseur ne peut pas traiter est refusé plutôt que traité ailleurs.",
+      "effectOff": "Les appels IA de ce compte peuvent être servis par tout fournisseur configuré, quel que soit son siège."
+    },
     "loginActivity": {
       "title": "Activité de connexion",
       "description": "Appareils et navigateurs connectés à votre compte. Nous vous envoyons un e-mail à chaque nouvelle connexion.",

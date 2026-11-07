@@ -761,6 +761,16 @@
       "nothingYet": "Noch nichts gespeichert. Das Gedächtnis ist aktiv — es merkt sich Dauerhaftes wie Ihren Namen, Ihre Arbeit oder eine Vorliebe, sobald eine Unterhaltung so etwas enthält.",
       "seeAll": "Ansehen, was es sich merkt"
     },
+    "euOnly": {
+      "title": "Nur Europa",
+      "toggleLabel": "KI-Aufrufe dieses Kontos nur aus der EU bedienen",
+      "toggleDescription": "Wenn aktiviert, wird jeder KI-Aufruf dieses Kontos abgelehnt statt von einem Anbieter außerhalb der EU beantwortet zu werden.",
+      "turnedOn": "✓ „Nur Europa“ aktiviert",
+      "turnedOff": "✓ „Nur Europa“ deaktiviert",
+      "couldNotUpdate": "✗ diese Einstellung konnte nicht aktualisiert werden",
+      "effectOn": "KI-Aufrufe für dieses Konto werden nur von Mistral AI (EU) bedient. Ein Aufruf, den dieser Anbieter nicht bedienen kann, wird abgelehnt statt anderswo beantwortet.",
+      "effectOff": "KI-Aufrufe für dieses Konto können von jedem konfigurierten Anbieter bedient werden, unabhängig vom Sitz."
+    },
     "loginActivity": {
       "title": "Anmeldeaktivität",
       "description": "Geräte und Browser, die sich bei deinem Konto angemeldet haben. Wir informieren dich per E-Mail, sobald ein neues auftaucht.",

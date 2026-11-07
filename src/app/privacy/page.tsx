@@ -78,6 +78,12 @@ export default function PrivacyPage() {
             the feature uses.
           </li>
           <li>
+            <span className="text-foreground/90">Mistral AI</span> — only if
+            you turn on «Μόνο Ευρώπη» in Settings: the AI model that answers
+            your text features instead of Anthropic, so that no AI call for
+            your account leaves the EU.
+          </li>
+          <li>
             <span className="text-foreground/90">OpenAI</span> — only if you
             use voice or upload a meeting recording: turns the audio into
             text.

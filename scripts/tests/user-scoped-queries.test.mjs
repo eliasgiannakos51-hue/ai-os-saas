@@ -44,6 +44,13 @@ function check(name, cond, detail) {
 // EVERY ENTRY IS A CLAIM SOMEBODY CAN CHECK. "It is fine" is not a reason.
 const ALLOWED = new Map([
   [
+    "src/lib/company-agents/generate.ts::generateDraft",
+    "Queries company_agent_drafts, which is the company's own table and has " +
+      "no user column. userId is the OWNER's id, passed only to the provider " +
+      "log; its one caller, /api/company-agents/drafts, refuses anyone who " +
+      "is not isAdminEmail() first.",
+  ],
+  [
     "src/lib/account/erase-storage.ts::listUserFiles",
     "Queries no table. The userId is the storage FOLDER the listing is " +
       "confined to (`<userId>/` in each bucket), refused unless it is a " +

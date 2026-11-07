@@ -160,6 +160,7 @@ const ADMIN_ONLY_TABLES = new Set([
   "account_deletion_requests",
   "production_errors",
   "company_agent_runs",
+  "company_agent_drafts",
   // What every customer's spend triggered, with the numbers. RLS on with
   // NO policy is deny-all, which is stricter than any policy could be and
   // is exactly right here: a customer who could read this would learn the

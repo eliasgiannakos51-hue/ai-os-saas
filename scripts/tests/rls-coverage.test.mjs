@@ -160,6 +160,7 @@ const RLS_NOT_NEEDED = {
 // else. Each one is a table the product writes ABOUT a user rather than
 // FOR them.
 const DENY_ALL_ON_PURPOSE = {
+  company_agent_drafts: "drafts written for the owner by the company's writing agents, created and decided only through the owner-only routes under /api/company-agents, both with the service role. No customer has any business reading a draft or a brief.",
   feature_flags: "the owner's switches for new tools (MASTER Μέρος 13 Β): read and written only by the server with the service role (src/lib/flags/flags.ts, src/app/api/system-health/flags/route.ts). A client that could write one could open an unfinished tool to everyone.",
   rate_limit_log: "the limiter's own ledger. A client that could read it would learn other accounts' request rates; one that could write it could clear its own limit.",
   production_errors: "server-side error records, scrubbed and admin-read only through the service role.",

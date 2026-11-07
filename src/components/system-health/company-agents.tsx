@@ -24,7 +24,7 @@ export type CompanyAgentRunRow = {
 
 const STATUS_LABEL: Record<RosterStatus, string> = {
   running: "Running",
-  built: "Built, not scheduled",
+  built: "Built, runs when asked (not scheduled)",
   blocked: "Blocked",
   planned: "Planned",
 };
@@ -88,7 +88,7 @@ export function CompanyAgents({ runs }: { runs: CompanyAgentRunRow[] | null }) {
         Company agents — {ROSTER.length} on the roster
       </h2>
       <p className="mt-2 text-xs text-muted">
-        {counts.running} running · {counts.built} built, not scheduled · {counts.blocked} blocked · {counts.planned} planned.
+        {counts.running} running · {counts.built} built, run when asked · {counts.blocked} blocked · {counts.planned} planned.
         Only “running” means code is executing. Every agent here reads and reports; none changes anything.
       </p>
 

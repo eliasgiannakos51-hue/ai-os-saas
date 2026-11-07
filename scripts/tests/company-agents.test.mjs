@@ -38,8 +38,10 @@ const code = (f) => readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").rep
 const roster = await loadTs("src/lib/company-agents/roster.ts");
 const agents = await loadTs("src/lib/company-agents/agents.ts");
 const { ROSTER, BLOCKERS, DEPARTMENTS, RUNNING_AGENT_IDS, CI_AGENT_IDS } = roster;
+const drafting = await loadTs("src/lib/company-agents/drafting.ts");
 const repoAgents = await import("../company-agents/repo-agents.mjs");
 
+const page0 = code("src/app/dashboard/system-health/page.tsx");
 console.log("== 1. the roster is consistent ==");
 ok(`the roster was read (${ROSTER.length} agents)`, ROSTER.length >= 100);
 const ids = ROSTER.map((a) => a.id);
@@ -87,6 +89,48 @@ ok(`"crm" is stated correctly: public.leads exists`, /create table if not exists
 ok(`"tickets" blocks only while no support-ticket table exists`, !/create table if not exists public\.(support_tickets|tickets)\b/i.test(migrations), "a tickets table exists now: revisit the roster entries blockedBy \"tickets\"");
 const providers = readFileSync("src/lib/integrations/providers.ts", "utf8");
 ok(`"gmail-send" blocks only while Gmail is read-only`, /gmail\.readonly/.test(providers) && !/gmail\.(send|modify|compose)/.test(providers), "Gmail has a write scope now: revisit the roster entries blockedBy \"gmail-send\"");
+
+const opsSrc = [readFileSync("docs/api-keys.md", "utf8"), ...readdirSync("src/lib", { recursive: true }).filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => readFileSync(`src/lib/${f}`, "utf8"))].join("\n");
+ok(`"ops-tokens" holds only while neither a Vercel nor a Supabase management token is used`, !/VERCEL_API_TOKEN|VERCEL_TOKEN|SUPABASE_ACCESS_TOKEN/.test(opsSrc), "a token is referenced now: revisit backup-verifier, deployment-monitor and BLOCKERS['ops-tokens']");
+
+console.log("\n== 2b. the writing agents (drafting.ts) ==");
+const D = drafting.DRAFT_AGENTS;
+ok(`the table was read (${D.length} writing agents)`, D.length >= 40);
+ok("every writing agent id is unique", new Set(D.map((x) => x.id)).size === D.length);
+ok("every writing agent is on the roster", D.every((x) => ids.includes(x.id)));
+ok("the roster's `built` entries are exactly the writing agents plus final-approval, both ways", JSON.stringify(ROSTER.filter((a) => a.status === "built").map((a) => a.id).sort()) === JSON.stringify([...D.map((x) => x.id), "final-approval"].sort()), ROSTER.filter((a) => a.status === "built").map((a) => a.id).filter((i) => !D.some((x) => x.id === i) && i !== "final-approval").join(", "));
+ok("no writing agent is rated above autonomy 2", D.every((x) => ROSTER.find((a) => a.id === x.id).autonomy <= 2));
+ok("every writing agent has a real job and a brief hint", D.every((x) => x.job.length >= 40 && x.brief.length >= 15));
+ok("the review roles are told they saw only what was pasted", ["code-review", "bug-detection", "accessibility", "performance", "auth-auditor", "authorization-auditor", "idor-checker", "privacy-checker"].every((id) => /ONLY the material pasted/.test(D.find((x) => x.id === id).job)));
+ok("every agent whose job is to report on the outside world searches the web", ["market-research", "competitor-tracker", "technology-research", "trend-detector", "opportunity-finder", "fact-checker", "research-report", "reputation-monitor", "terms-monitor", "recruitment-research", "product-research"].every((id) => D.find((x) => x.id === id).web === true));
+ok("no agent that only reshapes the brief searches the web", ["meeting-summary", "task-manager", "content-writer", "documentation", "job-description"].every((id) => D.find((x) => x.id === id).web === false));
+const sys = (id) => drafting.systemPromptFor(D.find((x) => x.id === id));
+ok("every prompt forbids inventing numbers and asks for a 'Not checked' section", D.every((x) => /Never invent a number/.test(drafting.systemPromptFor(x)) && /Not checked/.test(drafting.systemPromptFor(x))));
+ok("web rules are in a web agent's prompt and only there", /web search tool/.test(sys("research-report")) && !/web search tool/.test(sys("content-writer")));
+ok("a code-writing agent must say its code was not run", ["frontend-dev", "backend-dev", "database-dev", "bug-fix"].every((id) => /has not been run/.test(D.find((x) => x.id === id).job)));
+ok("brief: too short is refused", drafting.checkBrief("hi").ok === false && drafting.checkBrief(undefined).ok === false);
+ok("brief: too long is refused", drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS + 1)).ok === false);
+ok("brief: exactly the limits are accepted and trimmed", drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").ok === true && drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS)).ok === true && drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").brief.length === drafting.MIN_BRIEF_CHARS);
+ok("daily limit: the Nth draft is allowed, the N+1th is not", drafting.dailyLimitReached(drafting.DAILY_DRAFT_LIMIT - 1) === false && drafting.dailyLimitReached(drafting.DAILY_DRAFT_LIMIT) === true);
+const gen = code("src/lib/company-agents/generate.ts");
+const postRoute = code("src/app/api/company-agents/drafts/route.ts");
+const decideRoute = code("src/app/api/company-agents/drafts/[id]/route.ts");
+ok("the create route checks the owner BEFORE it generates", postRoute.indexOf("isAdminEmail(user.email)") !== -1 && postRoute.indexOf("isAdminEmail(user.email)") < postRoute.indexOf("generateDraft("));
+ok("...and answers a non-owner with 404, as if the route did not exist", /return new NextResponse\(null, \{ status: 404 \}\)/.test(postRoute));
+ok("the decide route checks the owner, and only a pending draft can be decided", decideRoute.indexOf("isAdminEmail(user.email)") !== -1 && /\.eq\("status", "pending"\)/.test(decideRoute));
+ok("the decide route changes only status and decided_at", /\.update\(\{ status: decision, decided_at: [^}]*\}\)/.test(decideRoute));
+const insertBlock = (gen.match(/\.insert\(\{[\s\S]*?\}\)/) ?? [""])[0];
+ok("the generator saves nothing but a pending draft (the insert writes no status, so the table default `pending` applies)", insertBlock.length > 40 && /agent_id/.test(insertBlock) && !/status/.test(insertBlock), insertBlock);
+ok("the generator refuses a web draft whose provider reported no sources", /agent\.web && outcome\.citations === undefined/.test(gen));
+ok("the generator checks the day's limit before it calls the model", gen.indexOf("dailyLimitReached(") !== -1 && gen.indexOf("dailyLimitReached(") < gen.indexOf("runCompletion("));
+ok("the generator saves the cut-off flag with the draft", /modelTextFrom\(/.test(gen) && /truncated: text\.truncated/.test(insertBlock));
+ok("the generator has no way to send anything (no mail, no fetch)", !/\bfetch\(|resend|sendMail|nodemailer/i.test(gen));
+const draftSql = readFileSync("supabase/migrations/20261107000000_company_agent_drafts.sql", "utf8");
+const draftSqlCode = draftSql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+ok("DOC, not behaviour: the drafts migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(draftSql));
+ok("drafts table: RLS on, no policy, revoked from anon and authenticated", /enable row level security/.test(draftSqlCode) && !/create policy/i.test(draftSqlCode) && /revoke all on public\.company_agent_drafts from anon/.test(draftSqlCode) && /revoke all on public\.company_agent_drafts from authenticated/.test(draftSqlCode));
+ok("drafts table: a draft starts pending and status is limited to three values", /default 'pending'/.test(draftSqlCode) && /status in \('pending', 'approved', 'rejected'\)/.test(draftSqlCode));
+ok("the page renders the draft desk behind the owner check", /<DraftDesk\b/.test(page0) && page0.indexOf("isAdminEmail(user.email)") < page0.indexOf("company_agent_drafts"));
 
 console.log("\n== 3a. the error analyst: every shape of input ==");
 const row = (route, n, resolved = false) => ({ route, occurrenceCount: n, resolved });

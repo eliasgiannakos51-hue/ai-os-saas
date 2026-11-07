@@ -272,6 +272,7 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
   // unguarded route in as soon as an old one is guarded. Each of these is
   // here for a reason that was read; anything else is a failure.
   const ALLOWED = new Map([
+    ["company-agents/drafts", "owner-only (isAdminEmail, 404 for everybody else); checkRateLimit six an hour, then DAILY_DRAFT_LIMIT a day counted from the table, each capped at MAX_DRAFT_TOKENS. The per-customer breaker is for credit-paying accounts and is deliberately not used"],
     ["cron/agent-batches", "cron: CRON_SECRET, fires on a schedule, not on demand"],
     ["cron/automation-flows", "cron: CRON_SECRET, fires on a schedule, not on demand; every AI box it runs passes checkAiCallAllowed in lib/automations/runner.ts"],
     ["jobs", "GET. imports reapJob for the stale-job sweep; makes no provider call itself"],

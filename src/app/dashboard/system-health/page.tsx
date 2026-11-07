@@ -23,6 +23,9 @@ import { KEY_INVENTORY, keyVarFor } from "@/lib/ai/providers/key-inventory";
 import { getLocale } from "next-intl/server";
 import { FeatureFlags } from "@/components/system-health/feature-flags";
 import { CompanyAgents, type CompanyAgentRunRow } from "@/components/system-health/company-agents";
+import { DraftDesk, type DeskAgent, type DeskDraft } from "@/components/system-health/draft-desk";
+import { DRAFT_AGENTS, DAILY_DRAFT_LIMIT } from "@/lib/company-agents/drafting";
+import { ROSTER, DEPARTMENTS } from "@/lib/company-agents/roster";
 import { RUNNING_AGENT_IDS } from "@/lib/company-agents/roster";
 import { FLAGS, readFlagAudiences, type FlagKey } from "@/lib/flags/flags";
 
@@ -203,6 +206,36 @@ export default async function SystemHealthPage() {
     console.error("system-health: could not read company_agent_runs", err);
   }
 
+  // THE DRAFT DESK: the writing agents (from the table, not the database)
+  // and the newest drafts. Null drafts means the table could not be read.
+  const deskAgents: DeskAgent[] = DRAFT_AGENTS.map((d) => {
+    const r = ROSTER.find((x) => x.id === d.id);
+    return { id: d.id, name: r?.name ?? d.id, brief: d.brief, web: d.web, department: r ? DEPARTMENTS[r.department] : "" };
+  });
+  let deskDrafts: DeskDraft[] | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("company_agent_drafts")
+      .select("id, agent_id, created_at, brief, draft, status, truncated, sources")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    deskDrafts = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+      id: String(r.id),
+      agentId: String(r.agent_id),
+      createdAt: String(r.created_at),
+      brief: String(r.brief ?? ""),
+      draft: String(r.draft ?? ""),
+      status: r.status as DeskDraft["status"],
+      truncated: r.truncated === true,
+      sources: Array.isArray(r.sources) ? (r.sources as { url?: unknown; title?: unknown }[]).map((x) => ({ url: String(x.url ?? ""), title: String(x.title ?? "") })) : null,
+    }));
+  } catch (err) {
+    // Not logApiError, for the reason given at the other reads above.
+    console.error("system-health: could not read company_agent_drafts", err);
+  }
+
   return (
     <div className="min-h-full">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -253,6 +286,7 @@ export default async function SystemHealthPage() {
         )}
 
         <CompanyAgents runs={companyRuns} />
+        <DraftDesk agents={deskAgents} drafts={deskDrafts} limit={DAILY_DRAFT_LIMIT} />
 
         <KeyChecks rows={keyRows} />
 

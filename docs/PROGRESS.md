@@ -58,7 +58,7 @@
 (`account-suspension`, `user-onboarding-grants`, `entity-links-owner`)
 πράσινα σε βάση χτισμένη από όλα τα migrations και κόκκινα σε βάση χτισμένη
 χωρίς τα τρία νέα (10, 6 και 9 κόκκινοι έλεγχοι). Το `RATCHET` του
-`mutation-coverage` ανέβηκε 304 → 314, διαβασμένο από το run. Το
+`mutation-coverage` ανέβηκε 312 → 317 (μετά το rebase πάνω στο GitHub της 2026-11-05), διαβασμένο από το run. Το
 `entitlement-trust` διαβάζει πια τον τελευταίο ορισμό του guard (33/33).
 `npm run gates`, 2026-11-05: **ALL 400 GATES PASSED — 28944 checks, 0
 failed**. `npm run test:db`: όλα τα dbtests και το `db-migrations` πράσινα

@@ -17,6 +17,11 @@
 //   5. the separate domain: when PUBLISHED_SITE_DOMAIN is set, sites and
 //      apps are served there, nothing of the app is, and the old
 //      addresses redirect
+//   6. ...and on that domain, the app's OWN narrow img-src CSP (next.
+//      config.mjs) does not land on top of a published page's wider one
+//      (SEC-C3b) — matched by host as well as by path, since proxy.ts's
+//      rewrite to /s/<name> happens after next.config.mjs has already
+//      chosen the headers for the original "/"
 //
 // Run: node scripts/tests/published-isolation.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -255,6 +260,41 @@ console.log("\n== 5. a domain of their own, when one is set ==");
   ok("Rebuild shows an app's address on the content domain when there is one",
     /publishedAppBase=\{publishedAppBase\(contentDomain\(process\.env\.PUBLISHED_SITE_DOMAIN\)\)\}/.test(rebuildPage) &&
       /const appUrl = publishedAppBase \?\? \(typeof window !== "undefined" \? window\.location\.origin : ""\);/.test(shell));
+}
+
+console.log("\n== 6. on that domain, the app's own narrow CSP does not override the published one ==");
+{
+  const config = await import(path.resolve("next.config.mjs"));
+  ok("no domain set: no host condition at all", config.contentDomainHostPattern(undefined) === null && config.contentDomainHostPattern("  ") === null);
+  for (const bad of ["ionexa.site:8443", "ionexa.site/path", "localhost", "user@ionexa.site", "*.ionexa.site"]) {
+    ok(`not a domain, no pattern: ${bad}`, config.contentDomainHostPattern(bad) === null);
+  }
+  const pattern = config.contentDomainHostPattern("https://IONEXA.site/");
+  ok("a configured domain produces a pattern", typeof pattern === "string" && pattern.length > 0, pattern);
+  const full = (h) => new RegExp(`^${pattern}$`).test(h);
+  ok("matches the apex", full("ionexa.site"));
+  ok("...and a site's subdomain", full("acme.ionexa.site"));
+  ok("...case-insensitively against what Next lower-cases the host to", full("acme.ionexa.site".toLowerCase()));
+  ok("does not match a look-alike host", !full("evilionexa.site") && !full("ionexa.site.evil.com"));
+  ok("does not match the app's own domain", !full("ionexa.ai"));
+
+  // headers() reads process.env.PUBLISHED_SITE_DOMAIN on every call, not
+  // once at import, so both branches are exercised from one import.
+  const saved = process.env.PUBLISHED_SITE_DOMAIN;
+  delete process.env.PUBLISHED_SITE_DOMAIN;
+  const withoutDomain = await config.default.headers();
+  ok("no domain configured: the rule has no `missing` clause, same as before this fix",
+    withoutDomain.length === 1 && !("missing" in withoutDomain[0]) && withoutDomain[0].source === "/((?!s/|a/).*)");
+
+  process.env.PUBLISHED_SITE_DOMAIN = "ionexa.site";
+  const withDomain = await config.default.headers();
+  if (saved === undefined) delete process.env.PUBLISHED_SITE_DOMAIN; else process.env.PUBLISHED_SITE_DOMAIN = saved;
+  ok("a domain configured: the app's blanket headers carry a host exclusion",
+    withDomain.length === 1 && Array.isArray(withDomain[0].missing) && withDomain[0].missing.length === 1 && withDomain[0].missing[0].type === "host");
+  ok("...built from the SAME function tested above, not a second copy of the regex",
+    withDomain[0].missing[0].value === config.contentDomainHostPattern("ionexa.site"));
+  ok("...and the headers are still the app's own array",
+    withDomain[0].headers === config.APP_SECURITY_HEADERS);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

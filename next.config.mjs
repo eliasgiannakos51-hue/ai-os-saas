@@ -138,12 +138,63 @@ export const APP_SECURITY_HEADERS = [
   { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },
 ];
 
+/**
+ * THE PATH EXCLUSION ABOVE IS NOT ENOUGH ONCE SITES HAVE THEIR OWN
+ * DOMAIN (SEC-C3b, ΑΣ-10.3; docs/NEEDS-FROM-ELIAS.md «Ασφάλεια
+ * 2026-11-05»).
+ *
+ * `headers()` is matched against the ORIGINAL request path, before
+ * src/proxy.ts rewrites it. On the app's own domain that is exactly
+ * right: a visitor asks for /s/<name> and the path exclusion above
+ * already skips it. On PUBLISHED_SITE_DOMAIN a site's own path is "/"
+ * or "/services" — proxy.ts rewrites that to /s/<name>/... AFTER these
+ * headers are already chosen — so the matcher above sees a path that
+ * does not start with "s/" or "a/" and this blanket, narrow img-src
+ * ('self' data: blob:) would apply on top of the published page's own,
+ * wider CSP (lib/publishing/public-serving.ts, which allows Unsplash
+ * and the owner's uploads). Two sources for one header is how the
+ * weaker one wins — the exact failure this file's own comment above
+ * names for /a/ — and here it would be silent: the site stays up, its
+ * photos just stop loading, on every one of them, the day the domain
+ * goes live.
+ *
+ * So the content domain is excluded by HOST as well as by path. A
+ * `missing` host condition is a regex, anchored full-match
+ * (node_modules/next/dist/shared/lib/router/utils/prepare-destination.js,
+ * matchHas: `new RegExp('^' + value + '$')`), so this matches the apex
+ * AND every subdomain under it, and nothing else. Unset
+ * (contentDomainHostPattern() returns null), the `missing` clause is
+ * left out entirely and behaviour is byte-identical to before.
+ *
+ * Mirrors contentDomain() in src/lib/publishing/content-origin.ts,
+ * covered there by scripts/tests/published-isolation.test.mjs — not
+ * imported here because that is a .ts module and this file runs as
+ * plain Node ESM with no transpile step. scripts/tests/published-
+ * isolation.test.mjs §6 runs this exact function against the same
+ * fixtures the .ts one uses, so the two cannot silently drift apart.
+ */
+export function contentDomainHostPattern(raw) {
+  if (typeof raw !== "string") return null;
+  const normalised = raw.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  if (!normalised) return null;
+  if (!/^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(normalised)) return null;
+  const escaped = normalised.replace(/[.]/g, "\\.");
+  return `([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)*${escaped}`;
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // "x-powered-by: Next.js" tells a stranger which advisories to try.
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/((?!s/|a/).*)", headers: APP_SECURITY_HEADERS }];
+    const hostPattern = contentDomainHostPattern(process.env.PUBLISHED_SITE_DOMAIN);
+    return [
+      {
+        source: "/((?!s/|a/).*)",
+        ...(hostPattern ? { missing: [{ type: "host", value: hostPattern }] } : {}),
+        headers: APP_SECURITY_HEADERS,
+      },
+    ];
   },
   // Inlined at build time — see commitDate() above. The DATE is the
   // commit's; BUILD_AT is when the build ran, and the two differ by

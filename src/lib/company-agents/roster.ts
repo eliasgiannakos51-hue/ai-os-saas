@@ -75,7 +75,7 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
 
 /** The agents the runner (lib/company-agents/run.ts) executes today. The
  *  roster's `running` entries must equal this list, both ways. */
-export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor"] as const;
+export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
 
 type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: RosterStatus, blockedBy?: BlockerKey];
 
@@ -97,12 +97,12 @@ export const ROSTER: RosterAgent[] = [
     ["agent-builder", "Agent builder", "Creates a new internal agent from an approved template.", 2, "planned"],
     ["goal-tracker", "Goal tracker", "Tracks goals and progress against them.", 1, "blocked", "analytics"],
     ["kpi-monitor", "KPI monitor", "Watches the numbers the owner cares about.", 1, "blocked", "analytics"],
-    ["daily-reporter", "Daily reporter", "One daily message: what ran, what failed, what needs a decision.", 1, "planned"],
+    ["daily-reporter", "Daily reporter", "One line over the day's run: how many agents are ok, warn, fail or unverified, and which need a look. Recorded as a row; not sent anywhere yet.", 1, "running"],
     ["weekly-reporter", "Weekly reporter", "The weekly roll-up across every department.", 1, "planned"],
     ["decision-analyst", "Decision analyst", "Lays out the options, costs and risks for a decision.", 1, "planned"],
     ["priority-agent", "Priority agent", "Orders the work by stated rules.", 1, "planned"],
     ["resource-manager", "Resource manager", "Watches time, compute and cost per agent.", 1, "planned"],
-    ["task-auditor", "Task auditor", "Checks that assigned work was actually done.", 1, "planned"],
+    ["task-auditor", "Task auditor", "Checks that every scheduled agent produced a row in the last 36 hours. It audits agent runs, not human or pull-request work.", 1, "running"],
     ["final-approval", "Final approval", "Reports whether a change is really finished, from the diff and the PR text. Never says the gates passed unless it was given a real result.", 1, "built"],
   ]),
   ...dept("development", [
@@ -165,7 +165,7 @@ export const ROSTER: RosterAgent[] = [
     ["knowledge-base", "Knowledge base", "Keeps the help articles current.", 2, "planned"],
   ]),
   ...dept("finance", [
-    ["revenue-tracker", "Revenue tracker", "Reads revenue and cash in. The db:invoice and db:spend scripts already exist.", 1, "planned"],
+    ["revenue-tracker", "Revenue tracker", "Computes monthly recurring revenue from subscriptions with the billing code, and says when a tier has no price. Not Stripe cash.", 1, "running"],
     ["expense-tracker", "Expense tracker", "Reads what the company spends.", 1, "planned"],
     ["cost-per-agent", "Cost per agent", "Reports what each agent's model calls cost.", 1, "planned"],
     ["invoice-prep", "Invoice preparation", "Prepares invoice data for the accountant.", 2, "blocked", "human-only"],
@@ -190,7 +190,7 @@ export const ROSTER: RosterAgent[] = [
     ["idor-checker", "IDOR checker", "Looks for routes that read another user's data.", 1, "planned"],
     ["auth-auditor", "Authentication auditor", "Reviews how sign-in works.", 1, "planned"],
     ["authorization-auditor", "Authorization auditor", "Reviews who may do what.", 1, "planned"],
-    ["headers-checker", "Security headers", "Checks the CSP and other headers.", 1, "planned"],
+    ["headers-checker", "Security headers", "Fetches the public home page and checks HSTS, nosniff, Referrer-Policy and framing protection are sent.", 1, "running"],
     ["secrets-scanner", "Secrets scanner", "Finds API keys and secrets that were committed or exposed.", 1, "planned"],
     ["privacy-checker", "Privacy checker", "Reviews how personal data is handled.", 1, "planned"],
     ["incident-response", "Incident response", "Proposes steps when something happens; takes none.", 1, "planned"],
@@ -199,11 +199,11 @@ export const ROSTER: RosterAgent[] = [
     ["cron-monitor", "Cron monitor", "Checks that the scheduled jobs in vercel.json actually ran.", 1, "planned"],
     ["api-uptime-monitor", "API uptime monitor", "Calls /api/health and records whether the app answers and says it is ok.", 1, "running"],
     ["error-log-analyst", "Error log analyst", "Reads the open production errors and reports how many and where.", 1, "running"],
-    ["database-health", "Database health", "Watches the database's own health report.", 1, "planned"],
+    ["database-health", "Database health", "Reads the database's own exposure report and fails when any of its checks fails.", 1, "running"],
     ["queue-monitor", "Queue monitor", "Watches background work that is stuck.", 1, "planned"],
     ["backup-verifier", "Backup verifier", "Checks that a backup exists and is recent.", 1, "planned"],
     ["deployment-monitor", "Deployment monitor", "Watches deployments for failures.", 1, "planned"],
-    ["cost-optimizer", "Cost optimizer", "Finds infrastructure spend that buys nothing.", 1, "planned"],
+    ["cost-optimizer", "Cost optimizer", "Compares the last 24 hours of AI spend with the daily average of the week before and warns on a spike. AI cost only, not infrastructure bills.", 1, "running"],
   ]),
   ...dept("legal", [
     ["gdpr-assistant", "GDPR assistant", "Checks data-protection procedures; does not give legal advice.", 1, "blocked", "human-only"],

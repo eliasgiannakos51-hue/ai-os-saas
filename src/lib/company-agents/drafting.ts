@@ -121,6 +121,37 @@ export const DRAFT_AGENTS: readonly DraftAgent[] = [
   a("meeting-summary", "Summarise the meeting notes or transcript pasted in: decisions, actions with owners, open questions.", "The notes or transcript."),
   a("vendor-manager", "Compare the vendors or quotes described on the criteria given and draft the questions to ask each.", "The vendors, quotes and what matters to you."),
   a("internal-audit", "Draft an audit checklist for the process described: what to check, the evidence that would show it, and what a finding looks like.", "The process or control to audit."),
+  // second pass (2026-11-07): roles first marked blocked because the SYSTEM they
+  // would act on does not exist. A draft needs only a brief, so each works on
+  // pasted input and acts on nothing.
+  a("manager", "Split the goal into concrete tasks, say which writing agent or person each belongs to, in what order, and how you would check each result. You only plan: nothing is assigned or started.", "The goal, the deadline and the people or agents available."),
+  a("goal-tracker", "Compare the goals with the figures pasted in: for each goal, where it stands, whether it is on track and what the gap is. Use only the figures given.", "The goals, with targets and dates, and the current figures."),
+  a("lead-finder", "Find businesses that match the profile described, with a source for each, and say why each might need Ionexa. Do not invent contact details.", "The kind of business, the place and what Ionexa would solve for them.", true),
+  a("lead-researcher", "Collect public facts about the named business or person: what they do, size, recent news, and anything relevant to selling to them, with sources.", "The lead's name and what you want to know.", true),
+  a("lead-qualifier", "Judge whether the lead is worth approaching: fit, need, budget signals, timing, risks. Give a verdict and the reasons, and say what is unknown.", "Everything you know about the lead."),
+  a("crm-manager", "Turn the notes pasted in into clean customer or lead records: name, status, last contact, next step. Mark anything missing as missing; do not fill gaps.", "Notes, emails or a messy list about customers or leads."),
+  a("email-drafter", "Write a personalised outreach email from the details given. A person sends it: do not write as if it was sent, and do not invent facts about the recipient.", "The recipient, what you know about them, the goal and the tone."),
+  a("follow-up", "From the notes pasted in, list each lead or customer with the next step, who owns it and when it is due, and draft the follow-up message where one is needed. Do not invent dates.", "The notes on conversations so far."),
+  a("proposal-writer", "Draft a proposal for the described customer: problem, solution, scope, price as given, timeline and terms marked as proposals for a person to review.", "The customer, their need, the scope and the price you want to offer."),
+  a("pricing-agent", "Suggest a price or price change for the case described, with options, the reasoning and the risks. Stay inside the limits in the brief; if none are given, say so and propose ranges, not numbers to apply.", "The product, current price, costs, limits the owner set, and what you want to decide."),
+  a("campaign-manager", "Plan a campaign: goal, audience, channels, messages, schedule and a budget split using only the budget given. Say how success would be measured.", "The goal, the audience and the budget."),
+  a("discount-agent", "Suggest a discount for the case described, inside the limits in the brief, with the reason, the cost to the business and the conditions. Never write as if it was applied.", "The customer or situation, normal price and the maximum discount the owner allows."),
+  a("video-script", "Write a video script: hook, scenes with spoken text and on-screen notes, call to action, and the length.", "The topic, audience, length and where it will be shown."),
+  a("support-intake", "Sort the support requests pasted in: for each, the category, urgency, what is being asked and what information is missing.", "The requests, as received."),
+  a("faq", "Draft answers to the common questions listed, in a clear and honest tone. Where the answer depends on facts you were not given, say what is needed.", "The questions and the facts the answers must rest on."),
+  a("technical-support", "Investigate the technical problem described: likely causes ranked, what to check first, and a reply to the customer. Say what you cannot tell without logs or access.", "The problem, the steps, any error text, and what the customer uses."),
+  a("billing-support", "Explain the charge described in plain words and draft the reply. Do not promise or approve a refund: say a person decides.", "The charge, the plan terms and the customer's question."),
+  a("email-replier", "Draft a reply to the customer email pasted in. A person sends it: do not claim anything was done that the brief does not say was done.", "The email and the facts the reply must be based on."),
+  a("escalation", "Decide whether the case should be handed to a person, and if so write the hand-off: what happened, what was tried, what is needed and how urgent.", "The case so far."),
+  a("response-quality", "Check the drafted answer pasted in against the customer's question: accuracy against the facts given, tone, completeness, anything risky to promise. Suggest the corrected version.", "The customer's message, the facts, and the draft reply."),
+  a("complaint-analyst", "Find the problems that recur across the complaints pasted in: group them, count them from what is given, and say which to fix first and why.", "The complaints or feedback, as received."),
+  a("invoice-prep", "Prepare the invoice data from the details given in a clean table for the accountant: lines, amounts, VAT as stated, totals. Flag anything inconsistent. Do not compute tax rules you were not given.", "The customer, the services, amounts and the VAT treatment the accountant specified."),
+  a("reconciliation", "Match the payments with the records pasted in: what matches, what does not and what is missing on each side. Do not guess matches that are not certain.", "The payments list and the records list."),
+  a("forecast", "Project revenue and cost for the period from the figures given, as three scenarios with the assumptions stated. Mark every assumption.", "The past figures and what you expect to change."),
+  a("tax-documents", "Organise the documents listed for the accountant: a checklist of what is there, what is missing and how each is named. File and decide nothing.", "The list of documents and the period."),
+  a("gdpr-assistant", "Review the data-protection procedure or practice described against common GDPR duties and list gaps and questions for a lawyer. This is not legal advice.", "The procedure, the data involved and where it is stored."),
+  a("contract-organizer", "Summarise the contract text pasted in: parties, term, renewal, termination, payment, liability, obligations, with the clause each comes from. Flag anything unusual. Sign and decide nothing.", "The contract text."),
+  a("calendar", "Plan the schedule from the commitments and priorities pasted in: a proposed week with time blocks, conflicts and what to drop. Nothing is put in a calendar.", "The commitments, fixed times and priorities."),
 ];
 
 export const DRAFT_AGENT_IDS: readonly string[] = DRAFT_AGENTS.map((x) => x.id);

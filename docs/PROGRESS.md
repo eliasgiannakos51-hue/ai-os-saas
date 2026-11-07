@@ -38,6 +38,22 @@ stale, χωρίς όριο θορύβου στο κόστος, κενή αναφ
 μετρήθηκαν. `company-agents.test.mjs` 112 έλεγχοι, 5 μεταλλάξεις κοκκίνισαν.
 **Δεν επιβεβαιώθηκε σε production.** 13 τρέχουν· οι 108 δεν.
 
+## 2026-11-07ε (Διόρθωση: 28 agents ήταν λάθος μπλοκαρισμένοι — τώρα draft agents)
+
+Τους είχα βάλει «blocked» (crm, tickets, gmail-send, human-only, video-tool) επειδή
+έλειπε το ΣΥΣΤΗΜΑ πάνω στο οποίο θα ενεργούσαν. Ένα πρόχειρο όμως χρειάζεται μόνο brief.
+Τώρα είναι draft agents στο γραφείο draft: manager, goal-tracker, lead-finder (web),
+lead-researcher (web), lead-qualifier, crm-manager, email-drafter, follow-up,
+proposal-writer, pricing-agent, campaign-manager, discount-agent, video-script,
+support-intake, faq, technical-support, billing-support, email-replier, escalation,
+response-quality, complaint-analyst, invoice-prep, reconciliation, forecast,
+tax-documents, gdpr-assistant, contract-organizer, calendar. **Δουλεύουν μόνο στο
+κείμενο που επικολλάς.** Δεν στέλνουν email, δεν εφαρμόζουν έκπτωση, δεν υπογράφουν, δεν
+αγγίζουν `public.leads`, ημερολόγιο ή Stripe, δεν παρακολουθούν τίποτα ανάμεσα σε δύο
+χρήσεις. Κάθε mission το λέει και το `company-agents.test.mjs` το κρατά. Αφαιρέθηκαν από
+το BLOCKERS οι 5 λόγοι που δεν χρησιμοποιεί πια κανείς. Μετράται από
+`rosterCounts()` (δεν γράφω αριθμούς εδώ ώστε να μη μπαγιατέψουν).
+
 ## 2026-11-07δ (Πέμπτη δέσμη: γραφείο draft, +56 agents που γράφουν — 74 από 121 «τρέχουν» ή «χτισμένοι»)
 
 **ΤΙ ΧΤΙΣΤΗΚΕ.** «Draft desk» στο `/dashboard/system-health` (μόνο ο ιδιοκτήτης). Διαλέγεις

@@ -34,15 +34,16 @@ export type RosterStatus = "running" | "built" | "blocked" | "planned";
 export type Autonomy = 1 | 2 | 3;
 
 /** What an agent can be waiting on. Each is a fact about the repository
- *  as measured on 2026-11-06 (see docs/PROGRESS.md), not an opinion. */
+ *  as measured on 2026-11-06 (see docs/PROGRESS.md), not an opinion.
+ *
+ *  FIVE REASONS WERE REMOVED ON 2026-11-07 (crm, tickets, gmail-send,
+ *  human-only, video-tool) and that was a correction, not progress: they
+ *  blocked agents that ACT on a system that does not exist, but a draft
+ *  agent needs only a brief. Those agents now exist as draft agents and say
+ *  in their missions what they cannot do (send, track, apply, file). */
 export const BLOCKERS = {
   analytics: "No analytics package is installed (package.json has no PostHog, Plausible, Mixpanel, Umami or Amplitude). Owner-run SQL queries exist in docs/analytics-queries.sql; whether they cover what these agents need was not measured.",
-  crm: "public.leads exists, but it is the Sales tool of each customer's own account. The company has no pipeline of its own in it yet: someone has to decide that the owner's account is the company's pipeline, or build a separate one.",
-  tickets: "There is no support-ticket system: requests have nowhere to be tracked.",
-  "gmail-send": "Gmail is connected read-only (gmail.readonly). Sending or modifying mail needs a restricted scope and Google's security assessment.",
-  "human-only": "Legal, tax, contract and money decisions stay with a person; an agent only prepares material.",
   "ops-tokens": "No Vercel API token and no Supabase management token is configured (neither name appears in src/ or docs/api-keys.md), so nothing running here can ask either platform about its deployments or backups.",
-  "video-tool": "The video tool is not a finished product yet, so there is nothing to automate around.",
 } as const;
 export type BlockerKey = keyof typeof BLOCKERS;
 
@@ -100,9 +101,9 @@ function dept(department: DepartmentKey, rows: Row[]): RosterAgent[] {
 
 export const ROSTER: RosterAgent[] = [
   ...dept("executive", [
-    ["manager", "Manager", "Splits a goal into tasks, assigns them to the right agent and checks the result.", 2, "planned"],
+    ["manager", "Manager", "Drafts the split of a goal into tasks, owners and checks. The owner assigns; nothing is started by it.", 2, "built"],
     ["agent-builder", "Agent builder", "Creates a new internal agent from an approved template.", 2, "built"],
-    ["goal-tracker", "Goal tracker", "Tracks goals and progress against them.", 1, "blocked", "analytics"],
+    ["goal-tracker", "Goal tracker", "Compares goals with the figures pasted in and says which are on track. It has no goals of its own stored anywhere.", 1, "built"],
     ["kpi-monitor", "KPI monitor", "Watches the numbers the owner cares about.", 1, "blocked", "analytics"],
     ["daily-reporter", "Daily reporter", "One line over the day's run: how many agents are ok, warn, fail or unverified, and which need a look. Recorded as a row; not sent anywhere yet.", 1, "running"],
     ["weekly-reporter", "Weekly reporter", "The weekly roll-up across every department.", 1, "built"],
@@ -132,14 +133,14 @@ export const ROSTER: RosterAgent[] = [
     ["rollback", "Rollback", "Prepares the steps to take a release back.", 2, "built"],
   ]),
   ...dept("sales", [
-    ["lead-finder", "Lead finder", "Finds businesses that might need Ionexa.", 1, "blocked", "crm"],
-    ["lead-researcher", "Lead researcher", "Collects public facts about a lead.", 1, "blocked", "crm"],
-    ["lead-qualifier", "Lead qualifier", "Judges whether a lead is worth approaching.", 1, "blocked", "crm"],
-    ["crm-manager", "CRM manager", "Keeps customer records current.", 2, "blocked", "crm"],
-    ["email-drafter", "Email drafter", "Writes a personalised outreach draft; a person sends it.", 2, "blocked", "gmail-send"],
-    ["follow-up", "Follow-up", "Tracks the next step with each lead.", 2, "blocked", "crm"],
-    ["proposal-writer", "Proposal writer", "Drafts a proposal for a person to review.", 2, "blocked", "human-only"],
-    ["pricing-agent", "Pricing agent", "Suggests prices inside approved limits.", 2, "blocked", "analytics"],
+    ["lead-finder", "Lead finder", "Finds businesses matching a profile on the open web, with sources. It does not store leads anywhere.", 1, "built"],
+    ["lead-researcher", "Lead researcher", "Collects public facts about one lead from the open web, with sources.", 1, "built"],
+    ["lead-qualifier", "Lead qualifier", "Judges one lead from the notes pasted in. It has no pipeline of its own to read.", 1, "built"],
+    ["crm-manager", "CRM manager", "Turns pasted notes into clean customer records. It does not write to public.leads or any CRM.", 2, "built"],
+    ["email-drafter", "Email drafter", "Writes an outreach draft. It cannot send mail: Gmail is connected read-only, and nothing here sends.", 2, "built"],
+    ["follow-up", "Follow-up", "Lists next steps from pasted notes and drafts follow-ups. It does not track anything between uses.", 2, "built"],
+    ["proposal-writer", "Proposal writer", "Drafts a proposal for the owner to review and sign off. Prices come only from the brief.", 2, "built"],
+    ["pricing-agent", "Pricing agent", "Suggests prices inside limits the owner states. It sees no sales data and applies nothing.", 2, "built"],
     ["sales-analytics", "Sales analytics", "Reads what the sales funnel did.", 1, "blocked", "analytics"],
     ["affiliate-manager", "Affiliate manager", "Watches partners and commissions. The monthly payout cron already exists; the agent on top of it does not.", 1, "built"],
     ["onboarding", "Onboarding", "Walks a new customer through the first steps.", 2, "built"],
@@ -151,35 +152,35 @@ export const ROSTER: RosterAgent[] = [
     ["content-writer", "Content writer", "Drafts articles and posts for approval.", 2, "built"],
     ["seo", "SEO", "Finds keywords and improves search presence.", 2, "built"],
     ["social-scheduler", "Social scheduler", "Queues approved posts.", 2, "built"],
-    ["video-script", "Video script", "Writes video scripts.", 2, "blocked", "video-tool"],
+    ["video-script", "Video script", "Writes a video script. It makes no video: the video tool is not a finished product.", 2, "built"],
     ["graphic-design", "Graphic design", "Makes graphics with the image tool.", 2, "built"],
-    ["campaign-manager", "Campaign manager", "Plans campaigns and their budgets.", 2, "blocked", "analytics"],
+    ["campaign-manager", "Campaign manager", "Plans a campaign and its budget split from the brief. It runs and measures nothing.", 2, "built"],
     ["ab-testing", "A/B testing", "Compares two versions and reads the result.", 1, "blocked", "analytics"],
     ["conversion-optimizer", "Conversion optimizer", "Looks for what turns visitors into customers.", 1, "blocked", "analytics"],
     ["reputation-monitor", "Reputation monitor", "Watches what is said about Ionexa in public.", 1, "built"],
-    ["discount-agent", "Discount agent", "Suggests discounts inside owner-set limits; never applies one alone.", 2, "blocked", "analytics"],
+    ["discount-agent", "Discount agent", "Suggests a discount inside owner-set limits. It never applies one.", 2, "built"],
     ["brand-manager", "Brand manager", "Checks content against the brand.", 1, "built"],
   ]),
   ...dept("support", [
-    ["support-intake", "Support intake", "Receives and sorts requests.", 1, "blocked", "tickets"],
-    ["faq", "FAQ", "Drafts answers to common questions.", 2, "blocked", "tickets"],
-    ["technical-support", "Technical support", "Investigates a technical problem.", 2, "blocked", "tickets"],
-    ["billing-support", "Billing support", "Explains charges; refunds stay with a person.", 2, "blocked", "human-only"],
-    ["email-replier", "Email replier", "Drafts replies to customer email; a person sends them.", 2, "blocked", "gmail-send"],
-    ["escalation", "Escalation", "Hands hard cases to a person.", 1, "blocked", "tickets"],
-    ["response-quality", "Response quality", "Checks a drafted answer before it goes out.", 1, "blocked", "tickets"],
-    ["complaint-analyst", "Complaint analyst", "Finds the problems that keep recurring.", 1, "blocked", "tickets"],
+    ["support-intake", "Support intake", "Sorts pasted support requests. There is no ticket system, so nothing is tracked after.", 1, "built"],
+    ["faq", "FAQ", "Drafts FAQ answers from the facts in the brief.", 2, "built"],
+    ["technical-support", "Technical support", "Analyses a pasted problem and drafts a reply. It has no access to logs, accounts or code.", 2, "built"],
+    ["billing-support", "Billing support", "Explains a charge and drafts a reply. Refunds stay with a person.", 2, "built"],
+    ["email-replier", "Email replier", "Drafts a reply to a pasted email. It cannot send mail.", 2, "built"],
+    ["escalation", "Escalation", "Writes the hand-off note for a hard case. There is no ticket queue to route it through.", 1, "built"],
+    ["response-quality", "Response quality", "Checks a pasted draft reply before it goes out.", 1, "built"],
+    ["complaint-analyst", "Complaint analyst", "Groups pasted complaints into recurring problems. It counts only what is pasted.", 1, "built"],
     ["knowledge-base", "Knowledge base", "Keeps the help articles current.", 2, "built"],
   ]),
   ...dept("finance", [
     ["revenue-tracker", "Revenue tracker", "Computes monthly recurring revenue from subscriptions with the billing code, and says when a tier has no price. Not Stripe cash.", 1, "running"],
     ["expense-tracker", "AI expense tracker", "Reports AI cost for the last 7 days against the 7 before. Only AI usage, not hosting or tools.", 1, "running"],
     ["cost-per-agent", "Cost by feature", "Reports 30-day AI cost by product feature and flags features with cost but no credits charged. Company agents make no AI calls yet.", 1, "running"],
-    ["invoice-prep", "Invoice preparation", "Prepares invoice data for the accountant.", 2, "blocked", "human-only"],
-    ["reconciliation", "Payment reconciliation", "Matches payments with records.", 1, "planned"],
+    ["invoice-prep", "Invoice preparation", "Prepares invoice data for the accountant from pasted details. It issues nothing.", 2, "built"],
+    ["reconciliation", "Payment reconciliation", "Matches two pasted lists. It does not read Stripe or the database.", 1, "built"],
     ["budget-monitor", "Budget monitor", "Compares today's AI calls with the platform daily cap. There is no euro budget in the product, so it cannot compare euro spend.", 1, "running"],
-    ["forecast", "Forecast", "Projects revenue and cost.", 1, "blocked", "analytics"],
-    ["tax-documents", "Tax documents", "Organises documents for the accountant; files nothing.", 1, "blocked", "human-only"],
+    ["forecast", "Forecast", "Projects scenarios from pasted figures. It has no sales history of its own.", 1, "built"],
+    ["tax-documents", "Tax documents", "Organises a pasted list of documents for the accountant. It files nothing.", 1, "built"],
     ["fraud-alert", "Spend concentration alert", "Flags one account being most of a day's AI spend. It does not see payments or cards.", 1, "running"],
   ]),
   ...dept("research", [
@@ -213,10 +214,10 @@ export const ROSTER: RosterAgent[] = [
     ["cost-optimizer", "Cost optimizer", "Compares the last 24 hours of AI spend with the daily average of the week before and warns on a spike. AI cost only, not infrastructure bills.", 1, "running"],
   ]),
   ...dept("legal", [
-    ["gdpr-assistant", "GDPR assistant", "Checks data-protection procedures; does not give legal advice.", 1, "blocked", "human-only"],
+    ["gdpr-assistant", "GDPR assistant", "Reviews a described procedure for gaps. Not legal advice; a lawyer decides.", 1, "built"],
     ["terms-monitor", "Terms monitor", "Notices changes in providers' terms.", 1, "built"],
     ["license-monitor", "License monitor", "Reads the licence of every direct dependency in CI and fails on GPL, AGPL or SSPL, warns on LGPL or an unreadable licence.", 1, "running"],
-    ["contract-organizer", "Contract organizer", "Files contracts; signs none.", 1, "blocked", "human-only"],
+    ["contract-organizer", "Contract organizer", "Summarises a pasted contract. It signs nothing and stores nothing.", 1, "built"],
     ["approval-policy", "Approval policy", "Says whether an action needs the owner's approval.", 1, "built"],
   ]),
   ...dept("hr", [
@@ -243,7 +244,7 @@ export const ROSTER: RosterAgent[] = [
   ...dept("admin", [
     ["task-manager", "Task manager", "Tracks internal tasks and deadlines.", 1, "built"],
     ["document-organizer", "Document organizer", "Files and names documents so they can be found again.", 1, "built"],
-    ["calendar", "Calendar", "Organises the owner's calendar.", 2, "planned"],
+    ["calendar", "Calendar", "Proposes a schedule from pasted commitments. It does not touch any calendar.", 2, "built"],
     ["meeting-summary", "Meeting summary", "Summarises meetings.", 1, "built"],
     ["vendor-manager", "Vendor manager", "Tracks providers and subscriptions.", 1, "built"],
     ["internal-audit", "Internal audit", "Checks that internal procedures are followed.", 1, "built"],

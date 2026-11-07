@@ -85,10 +85,10 @@ ok(`"analytics" blocks ${blockedByAnalytics} agent(s) only while no analytics pa
   analyticsDeps.length === 0,
   `${analyticsDeps.join(", ")} is installed now: revisit the ${blockedByAnalytics} roster entries blockedBy "analytics" and BLOCKERS.analytics`);
 const migrations = readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).map((f) => readFileSync(`supabase/migrations/${f}`, "utf8")).join("\n");
-ok(`"crm" is stated correctly: public.leads exists`, /create table if not exists public\.leads\b/i.test(migrations));
-ok(`"tickets" blocks only while no support-ticket table exists`, !/create table if not exists public\.(support_tickets|tickets)\b/i.test(migrations), "a tickets table exists now: revisit the roster entries blockedBy \"tickets\"");
+ok(`crm-manager says it does not write to public.leads, which still exists as the customer Sales tool`, /create table if not exists public\.leads\b/i.test(migrations));
+ok(`the support agents say "no ticket system" only while no support-ticket table exists`, !/create table if not exists public\.(support_tickets|tickets)\b/i.test(migrations), "a tickets table exists now: revisit support-intake, escalation and the missions that say there is none");
 const providers = readFileSync("src/lib/integrations/providers.ts", "utf8");
-ok(`"gmail-send" blocks only while Gmail is read-only`, /gmail\.readonly/.test(providers) && !/gmail\.(send|modify|compose)/.test(providers), "Gmail has a write scope now: revisit the roster entries blockedBy \"gmail-send\"");
+ok(`email-drafter and email-replier say they cannot send only while Gmail is read-only`, /gmail\.readonly/.test(providers) && !/gmail\.(send|modify|compose)/.test(providers), "Gmail has a write scope now: revisit those two missions");
 
 const opsSrc = [readFileSync("docs/api-keys.md", "utf8"), ...readdirSync("src/lib", { recursive: true }).filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => readFileSync(`src/lib/${f}`, "utf8"))].join("\n");
 ok(`"ops-tokens" holds only while neither a Vercel nor a Supabase management token is used`, !/VERCEL_API_TOKEN|VERCEL_TOKEN|SUPABASE_ACCESS_TOKEN/.test(opsSrc), "a token is referenced now: revisit backup-verifier, deployment-monitor and BLOCKERS['ops-tokens']");
@@ -108,6 +108,10 @@ const sys = (id) => drafting.systemPromptFor(D.find((x) => x.id === id));
 ok("every prompt forbids inventing numbers and asks for a 'Not checked' section", D.every((x) => /Never invent a number/.test(drafting.systemPromptFor(x)) && /Not checked/.test(drafting.systemPromptFor(x))));
 ok("web rules are in a web agent's prompt and only there", /web search tool/.test(sys("research-report")) && !/web search tool/.test(sys("content-writer")));
 ok("a code-writing agent must say its code was not run", ["frontend-dev", "backend-dev", "database-dev", "bug-fix"].every((id) => /has not been run/.test(D.find((x) => x.id === id).job)));
+const guard = (id, re) => re.test(D.find((x) => x.id === id).job);
+ok("the agents that sit next to an action are told never to take it", guard("email-drafter", /A person sends it/) && guard("email-replier", /A person sends it/) && guard("discount-agent", /Never write as if it was applied/) && guard("billing-support", /Do not promise or approve a refund/) && guard("contract-organizer", /Sign and decide nothing/) && guard("tax-documents", /File and decide nothing/) && guard("invoice-prep", /Do not compute tax rules/) && guard("pricing-agent", /applies nothing|Stay inside the limits/) && guard("manager", /nothing is assigned or started/) && guard("calendar", /Nothing is put in a calendar/));
+ok("every mission of an agent that cannot act says so (send, apply, file, track, sign or touch)", ["email-drafter", "email-replier", "discount-agent", "billing-support", "contract-organizer", "tax-documents", "invoice-prep", "calendar", "manager", "crm-manager", "follow-up", "support-intake", "escalation"].every((id) => /cannot|never|nothing|does not|not |no ticket|owner assigns|stay with/i.test(ROSTER.find((x) => x.id === id).mission)));
+ok("no agent is blocked by a reason that is no longer defined", ROSTER.every((x) => x.blockedBy === undefined || x.blockedBy in BLOCKERS));
 ok("brief: too short is refused", drafting.checkBrief("hi").ok === false && drafting.checkBrief(undefined).ok === false);
 ok("brief: too long is refused", drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS + 1)).ok === false);
 ok("brief: exactly the limits are accepted and trimmed", drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").ok === true && drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS)).ok === true && drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").brief.length === drafting.MIN_BRIEF_CHARS);

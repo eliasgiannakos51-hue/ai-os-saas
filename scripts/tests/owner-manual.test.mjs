@@ -157,6 +157,7 @@ const FAILOVER_NAMES = {
   "src/lib/lead-classification.ts": "η διαλογή των μηνυμάτων της φόρμας",
   "src/lib/website-security-review.ts": "ο έλεγχος ασφαλείας του Site",
   "src/lib/insights/narrate.ts": "η διατύπωση των ευρημάτων",
+  "src/lib/company-agents/generate.ts": "το γραφείο draft των agents της εταιρείας",
   "src/lib/posts/generate.ts": "τα Posts",
   "src/lib/presentations/generate.ts": "οι Παρουσιάσεις",
   "src/lib/translate/translate-call.ts": "η Μετάφραση",

@@ -113,6 +113,9 @@ const DECLARED = {
  * naming a file that no longer calls runCompletion fails too.
  */
 const ROUTED = {
+  "src/lib/company-agents/generate.ts": {
+    note: "The owner-only draft desk (2026-11-07). NOT credit-gated: the caller is the owner, behind isAdminEmail(), and a draft is capped at DAILY_DRAFT_LIMIT a day and MAX_DRAFT_TOKENS each. The usage is recorded onto a CostAccumulator and its list price is saved on the draft row (cost_usd); it counts toward the platform's daily AI call counter. It is not written to ai_cost_log, so the cost agents do not see it.",
+  },
   "src/lib/website-security-review.ts": {
     note: "recorded onto the generation's accumulator — it is folded into an already-reserved generation or edit, not a separate credit-gated call. Moved onto runCompletion 2026-10-15. It fails OPEN by design, and that now includes a provider failure and a Stop, which used to arrive as a thrown error: written out in the file rather than inherited from the catch, because \"the security review returns safe\" has to be a deliberate sentence.",
   },

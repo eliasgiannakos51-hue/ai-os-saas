@@ -81,6 +81,32 @@ const ALLOWED = [
       "NotificationType list rather than silently growing it, so a reader " +
       "who opens the file sees the decision written down.",
   },
+  {
+    file: "company-agents.test.mjs",
+    target: "supabase/migrations/20261107010000_company_kpis.sql",
+    body: "^-- How to undo: .{20,}",
+    why:
+      "labelled 'DOC, not behaviour' in its own check name; an undo note is a comment by nature. " +
+      "migration-undo.test.mjs holds every migration from 20261016000000 on to carry one.",
+  },
+  {
+    file: "company-agents.test.mjs",
+    target: "supabase/migrations/20261107000000_company_agent_drafts.sql",
+    body: "^-- How to undo: .{20,}",
+    why:
+      "labelled 'DOC, not behaviour' in its own check name; an undo note is a comment by nature. " +
+      "migration-undo.test.mjs holds every migration from 20261016000000 on to carry one.",
+  },
+  {
+    file: "company-agents.test.mjs",
+    target: "supabase/migrations/20261106000000_company_agent_runs.sql",
+    body: "^-- How to undo: .{20,}",
+    why:
+      "labelled 'DOC, not behaviour' in its own check name. An undo note is a " +
+      "comment by nature, so there is no code to anchor on. The guarantee that " +
+      "every migration from 20261016000000 on carries one is held for all of " +
+      "them by migration-undo.test.mjs, which this check repeats for one file.",
+  },
 ];
 
 const pairs = proseAnchoredPairs();

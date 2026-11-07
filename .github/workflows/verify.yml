@@ -148,6 +148,16 @@ jobs:
         timeout-minutes: 20
         run: npm run gates
 
+      # THE COMPANY'S REPOSITORY AGENTS (scripts/company-agents/repo-agents.mjs):
+      # secrets, crons, migrations, licences, npm audit. They REPORT, to this
+      # job's summary page; they do not decide whether a push may land, so the
+      # step cannot turn the job red (the script exits 0 and continue-on-error
+      # covers a crash). The database agents run from /api/cron/company-agents.
+      - name: company agents (repository)
+        timeout-minutes: 5
+        continue-on-error: true
+        run: node scripts/company-agents/repo-agents.mjs
+
       # NO env vars are supplied on purpose: the build must not need
       # secrets to compile. This is now `apply-function-limits` — which
       # REWRITES route files and is therefore part of building — and

@@ -299,6 +299,7 @@ const DECLARED = {
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },
+  "company-agents/drafts": { bound: "limited", scope: "company_agent_draft", why: "owner-only (isAdminEmail); six drafts an hour per owner, then generateDraft refuses past DAILY_DRAFT_LIMIT a day counted from the table, each capped at MAX_DRAFT_TOKENS. Not credit-gated: the caller is the owner, and the draft's list price is saved on its row" },
   "system-health/keys": { bound: "none", why: "owner-only (isAdminEmail); one free READ per provider (a model or account list, never a generation), so the provider URLs it names are never asked to produce anything" },
   "import/csv/apply": { bound: "limited", scope: "import_apply", why: "scope import_apply; the model call it makes was reserved by import/csv/analyse" },
 };

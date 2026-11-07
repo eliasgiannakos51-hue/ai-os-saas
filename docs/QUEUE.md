@@ -19,6 +19,15 @@
 - Τα μπλοκαρισμένα: `docs/NEEDS-FROM-ELIAS.md`. Ημερολόγιο:
   `docs/PROGRESS.md`. Ενημερώνεται στο ίδιο commit με τη δουλειά (CLAUDE.md).
 
+- **Final Approval (agent επιπέδου 1)** — φτιαγμένο, αδοκίμαστο σε πραγματικό
+  PR: `scripts/final-approval.mjs`. Επόμενο: job στο `verify.yml` που το τρέχει
+  σε κάθε PR και γράφει σχόλιο (χωρίς να μπλοκάρει).
+- **Agents της εταιρείας στο Ionexa (βάση)** — φτιαγμένο, αδοκίμαστο σε browser:
+  ενότητα «Company agents» στο `/dashboard/system-health`, πίνακας
+  `company_agent_runs`, 2 agents που τρέχουν (`error-log-analyst`,
+  `api-uptime-monitor`). Επόμενο: ξεκλείδωμα PostHog (19 agents περιμένουν),
+  μετά `gates-agent`, `migration-ledger`, `cron-monitor`.
+
 ## Μετά το τρέχον πακέτο — MASTER Μέρος 18 και 5.1.1 (2026-10-08)
 
 Ο ιδιοκτήτης έστειλε στις 2026-10-08 το Μέρος 18 («Καλύτερο από την

@@ -159,6 +159,8 @@ const ADMIN_ONLY_TABLES = new Set([
   "daily_ai_spend_tracking",
   "account_deletion_requests",
   "production_errors",
+  "company_agent_runs",
+  "company_agent_drafts",
   // What every customer's spend triggered, with the numbers. RLS on with
   // NO policy is deny-all, which is stricter than any policy could be and
   // is exactly right here: a customer who could read this would learn the
@@ -459,6 +461,7 @@ const NO_SESSION_BY_DESIGN = {
     "an open relay. Nothing is stored.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/company-agents/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. Runs the company's own read-only agents once a day: it reads production_errors and calls /api/health, and its only write is one row per agent into company_agent_runs. It reads no request body, spends nothing and contacts no customer",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/cron/lead-reminders/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; sends each due contact reminder once (package 18) — a note in the owner's bell and a push where they opted in — and marks it sent before delivering, so a run that dies leaves one unsent rather than two sent. It reads no request body and spends nothing",

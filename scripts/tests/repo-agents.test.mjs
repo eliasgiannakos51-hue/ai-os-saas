@@ -84,6 +84,41 @@ ok("moderate only is still ok", A.analyzeAudit(au({ moderate: 9 })).status === "
 ok("high is a warning", A.analyzeAudit(au({ high: 1 })).status === "warn");
 ok("critical is a failure and the summary carries the counts", (() => { const r = A.analyzeAudit(au({ critical: 1, high: 5 })); return r.status === "fail" && /1 critical, 5 high/.test(r.summary); })());
 
+console.log("\n== 1f. gates-agent and testing-wrapper ==");
+const goodWf = `on:
+  push:
+    branches: ["**"]
+jobs:
+  verify:
+    steps:
+      - name: gates
+        run: npm run gates
+      - name: mutation suites
+        run: npm run test:mutation
+      - name: database suites
+        run: |
+          npm run test:db
+      - name: integration suites
+        run: npm run test:integration
+`;
+const pkgS = { gates: "node x && npm run test:unit", "test:unit": "node scripts/tests/run-gates.mjs", "test:mutation": "x", "test:integration": "x", "test:db": "x" };
+const runner = "const files = glob('*.test.mjs')";
+ok("gates: an unreadable workflow is unverified", A.analyzeGateWiring(null, pkgS, runner, 200).status === "unverified" && A.analyzeGateWiring("", pkgS, runner, 200).status === "unverified");
+ok("gates: a sound workflow is ok", A.analyzeGateWiring(goodWf, pkgS, runner, 200).status === "ok");
+ok("gates: no step running the gates fails", A.analyzeGateWiring(goodWf.replace("npm run gates", "echo hi"), pkgS, runner, 200).status === "fail");
+ok("gates: continue-on-error on the gates step fails", A.analyzeGateWiring(goodWf.replace("run: npm run gates", "continue-on-error: true\n        run: npm run gates"), pkgS, runner, 200).status === "fail");
+ok("gates: continue-on-error on ANOTHER step does not fail the gates agent", A.analyzeGateWiring(goodWf.replace("run: npm run test:mutation", "continue-on-error: true\n        run: npm run test:mutation"), pkgS, runner, 200).status === "ok");
+ok("gates: a commented-out gates step does not count", A.analyzeGateWiring(goodWf.replace("        run: npm run gates", "        # run: npm run gates"), pkgS, runner, 200).status === "fail");
+ok("gates: a workflow not triggered on push fails", A.analyzeGateWiring(goodWf.replace("push:", "workflow_dispatch:"), pkgS, runner, 200).status === "fail");
+ok("gates: a gates script that no longer runs test:unit fails", A.analyzeGateWiring(goodWf, { ...pkgS, gates: "node x" }, runner, 200).status === "fail");
+ok("gates: a unit runner that never mentions the gate files warns", A.analyzeGateWiring(goodWf, pkgS, "nothing", 200).status === "warn");
+ok("gates: a shrunken suite warns", A.analyzeGateWiring(goodWf, pkgS, runner, 40).status === "warn");
+ok("suites: an unreadable workflow is unverified", A.analyzeSuiteWiring(null, pkgS).status === "unverified");
+ok("suites: all three present is ok", A.analyzeSuiteWiring(goodWf, pkgS).status === "ok");
+ok("suites: a dropped suite fails and names it", (() => { const r = A.analyzeSuiteWiring(goodWf.replace("npm run test:integration", "echo"), pkgS); return r.status === "fail" && /integration suites/.test(r.summary); })());
+ok("suites: continue-on-error on a suite fails and names it", (() => { const r = A.analyzeSuiteWiring(goodWf.replace("run: npm run test:mutation", "continue-on-error: true\n        run: npm run test:mutation"), pkgS); return r.status === "fail" && /mutation suites/.test(r.summary); })());
+ok("suites: a missing package.json script fails", A.analyzeSuiteWiring(goodWf, { ...pkgS, "test:db": undefined }).status === "fail");
+
 console.log("\n== 2. the real repository is read, not an empty list ==");
 const g = A.gather();
 ok(`files read (${g.files.length})`, g.files.length > 1000);
@@ -95,6 +130,7 @@ const real = A.runAll(g);
 ok("all five agents answered", Object.keys(real).sort().join() === [...A.REPO_AGENT_IDS].sort().join());
 ok("the real secrets scan is not a failure (a real credential would be one)", real["secrets-scanner"].status === "ok", real["secrets-scanner"].summary);
 ok("every real result says what it did not cover", Object.values(real).every((r) => r.unverified.length >= 1));
+ok("the real CI workflow passes the gate-wiring and suite-wiring checks", real["gates-agent"].status === "ok" && real["testing-wrapper"].status === "ok", `${real["gates-agent"].summary} | ${real["testing-wrapper"].summary}`);
 ok("the vulnerability scanner either ran or says it did not (never a silent ok)", real["vulnerability-scanner"].status !== "ok" || g.audit?.metadata?.vulnerabilities !== undefined);
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

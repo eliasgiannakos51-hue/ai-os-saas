@@ -242,6 +242,38 @@ ok("expenses: a failed read is unverified", agents.analyzeExpenses(null, NOW).st
 ok("expenses: sums the last 7 days and the 7 before separately", (() => { const r = agents.analyzeExpenses([dc(1, 2), dc(3, 3), dc(8, 10), dc(20, 99)], NOW); return r.evidence.last7Eur === 5 && r.evidence.prev7Eur === 10; })());
 ok("expenses: says it does not judge the trend", agents.analyzeExpenses([], NOW).unverified.some((x) => /does not judge/.test(x)));
 
+console.log("\n== 3e. sixth batch: the seven KPI agents ==");
+const K = (o) => ({ users_total: 100, users_new_7d: 12, users_new_prev_7d: 12, paid_users: 10, active_7d: 40, active_prev_7d: 40, active_30d: 60, active_prev_30d: 60, lapsed_30d: 10, paid_lapsed_30d: 0, free_near_limit_active_7d: 3, ...o });
+const kpiFns = ["analyzeSignups", "analyzeUsage", "analyzeLapse", "analyzeRetention", "analyzeUpsell", "analyzeAnomalies", "analyzePaidShare"];
+ok("every KPI agent: a failed read is unverified, never ok", kpiFns.every((f) => agents[f](null).status === "unverified"));
+ok("every KPI agent: a missing metric is unverified, never treated as zero", kpiFns.every((f) => agents[f]({}).status === "unverified"));
+ok("every KPI agent: a healthy snapshot is ok", kpiFns.every((f) => agents[f](K({})).status === "ok"), kpiFns.filter((f) => agents[f](K({})).status !== "ok").join(", "));
+ok("every KPI agent says what it does not cover", kpiFns.every((f) => agents[f](K({})).unverified.length >= 2));
+ok("signups: new accounts halved from a base of 12 warns", agents.analyzeSignups(K({ users_new_7d: 5, users_new_prev_7d: 12 })).status === "warn");
+ok("signups: a halving from a base of 4 is noise, not a warning", agents.analyzeSignups(K({ users_new_7d: 1, users_new_prev_7d: 4 })).status === "ok");
+ok("usage: a 40% fall from 40 warns and names the percentage", (() => { const r = agents.analyzeUsage(K({ active_7d: 24, active_prev_7d: 40 })); return r.status === "warn" && /40%/.test(r.summary); })());
+ok("usage: a 20% fall does not warn", agents.analyzeUsage(K({ active_7d: 32, active_prev_7d: 40 })).status === "ok");
+ok("usage: a fall from a base of 5 is noise", agents.analyzeUsage(K({ active_7d: 1, active_prev_7d: 5 })).status === "ok");
+ok("lapse: half the base gone warns", agents.analyzeLapse(K({ lapsed_30d: 30, active_prev_30d: 60 })).status === "warn");
+ok("lapse: under half is ok", agents.analyzeLapse(K({ lapsed_30d: 29, active_prev_30d: 60 })).status === "ok");
+ok("lapse: a base under 10 is unverified, not a rate", agents.analyzeLapse(K({ lapsed_30d: 5, active_prev_30d: 6 })).status === "unverified");
+ok("lapse: says it is not a prediction about a person", agents.analyzeLapse(K({})).unverified.some((u) => /not a prediction about a person/.test(u)));
+ok("retention: any paying account gone quiet warns", agents.analyzeRetention(K({ paid_lapsed_30d: 1 })).status === "warn" && agents.analyzeRetention(K({ paid_lapsed_30d: 0 })).status === "ok");
+ok("upsell: reports the count and never judges", (() => { const r = agents.analyzeUpsell(K({ free_near_limit_active_7d: 7 })); return r.status === "ok" && r.evidence.candidates === 7 && /7 free/.test(r.summary); })());
+ok("anomalies: a 3x weekly jump warns; 2x does not", agents.analyzeAnomalies(K({ users_new_7d: 36, users_new_prev_7d: 12 })).status === "warn" && agents.analyzeAnomalies(K({ users_new_7d: 24, users_new_prev_7d: 12 })).status === "ok");
+ok("anomalies: a jump from zero counts, a jump to under 10 does not", agents.analyzeAnomalies(K({ active_7d: 12, active_prev_7d: 0 })).status === "warn" && agents.analyzeAnomalies(K({ active_7d: 6, active_prev_7d: 1 })).status === "ok");
+ok("paid share: computes the percentage to one decimal", /10%/.test(agents.analyzePaidShare(K({ users_total: 100, paid_users: 10 })).summary) && /3\.3%/.test(agents.analyzePaidShare(K({ users_total: 300, paid_users: 10 })).summary));
+ok("paid share: no accounts is unverified, not a divide by zero", agents.analyzePaidShare(K({ users_total: 0, paid_users: 0 })).status === "unverified");
+ok("paid share: says there is no funnel", agents.analyzePaidShare(K({})).unverified.some((u) => /funnel/.test(u)));
+const kpiSql = readFileSync("supabase/migrations/20261107010000_company_kpis.sql", "utf8");
+const kpiSqlCode = kpiSql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+ok("DOC, not behaviour: the kpis migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(kpiSql));
+ok("company_kpis is security definer with a pinned search_path", /security definer/.test(kpiSqlCode) && /set search_path = public, pg_catalog/.test(kpiSqlCode));
+ok("company_kpis is executable by service_role only", /revoke all on function public\.company_kpis\(\) from public/.test(kpiSqlCode) && /revoke all on function public\.company_kpis\(\) from anon/.test(kpiSqlCode) && /revoke all on function public\.company_kpis\(\) from authenticated/.test(kpiSqlCode) && /grant execute on function public\.company_kpis\(\) to service_role/.test(kpiSqlCode));
+ok("company_kpis returns counts only: the signature is (metric, value) and every metric row is a count", /returns table \(metric text, value bigint\)/.test(kpiSqlCode) && (kpiSqlCode.match(/select '[a-z0-9_]+'(::text)?,\s*count\(/g) ?? []).length === (kpiSqlCode.match(/select '[a-z0-9_]+'/g) ?? []).length && (kpiSqlCode.match(/select '[a-z0-9_]+'/g) ?? []).length >= 12);
+ok("every metric the analyzers read is one the function returns", (() => { const used = new Set([...code("src/lib/company-agents/agents.ts").matchAll(/"((?:users|paid|active|lapsed|free)_[a-z0-9_]+)"/g)].map((m) => m[1])); const returned = [...kpiSqlCode.matchAll(/select '([a-z0-9_]+)'/g)].map((m) => m[1]).concat([...kpiSqlCode.matchAll(/union all select '([a-z0-9_]+)'/g)].map((m) => m[1])); return [...used].every((k) => returned.includes(k)); })(), "an analyzer reads a metric that company_kpis() does not return");
+ok("the runner reads company_kpis once for all seven", (runnerSrc.match(/\.rpc\("company_kpis"/g) ?? []).length === 1);
+
 console.log("\n== 4. the wiring is real ==");
 const cron = code("src/app/api/cron/company-agents/route.ts");
 ok("the cron route calls checkCronAuth()", /\bcheckCronAuth\s*\(/.test(cron));

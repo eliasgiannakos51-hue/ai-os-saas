@@ -83,6 +83,14 @@ const ALLOWED = [
   },
   {
     file: "company-agents.test.mjs",
+    target: "supabase/migrations/20261107010000_company_kpis.sql",
+    body: "^-- How to undo: .{20,}",
+    why:
+      "labelled 'DOC, not behaviour' in its own check name; an undo note is a comment by nature. " +
+      "migration-undo.test.mjs holds every migration from 20261016000000 on to carry one.",
+  },
+  {
+    file: "company-agents.test.mjs",
     target: "supabase/migrations/20261107000000_company_agent_drafts.sql",
     body: "^-- How to undo: .{20,}",
     why:

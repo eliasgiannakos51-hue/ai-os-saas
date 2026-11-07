@@ -440,6 +440,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "Games (no switch since 2026-10-24) plan a game, charge for the plan, and cannot keep it: the person pays and sees «it could not be saved»; the page itself shows no games",
   },
   {
+    kind: "function",
+    fn: "company_kpis",
+    migration: "20261107010000_company_kpis.sql",
+    breaks: "seven company agents (signups, usage, lapse, retention, upsell, anomalies, paid share) report «Could not read company_kpis()»; nothing a customer sees is affected",
+  },
+  {
     kind: "table",
     table: "company_agent_drafts",
     migration: "20261107000000_company_agent_drafts.sql",

@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { scrubSecrets } from "@/lib/scrub-secrets";
 import {
+  analyzeAnomalies,
   analyzeBudget,
   analyzeConcentration,
   analyzeCost,
@@ -12,6 +13,12 @@ import {
   analyzeErrors,
   analyzeHeaders,
   analyzeHealth,
+  analyzeLapse,
+  analyzePaidShare,
+  analyzeRetention,
+  analyzeSignups,
+  analyzeUpsell,
+  analyzeUsage,
   analyzeRevenue,
   analyzeStaleness,
   summarizeRun,
@@ -25,6 +32,7 @@ import {
   type ErrorRow,
   type ExposureRow,
   type HeadersProbe,
+  type Kpis,
   type HealthProbe,
   type PastRun,
   type RevenueFigure,
@@ -196,6 +204,20 @@ async function readDayCosts(): Promise<DayCost[] | null> {
   return rows.map((r) => ({ day: String(r.day), costEur: Number(r.cost_eur ?? 0), calls: Number(r.calls ?? 0) }));
 }
 
+async function readKpis(): Promise<Kpis> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("company_kpis");
+    if (error) throw error;
+    const out: Record<string, number> = {};
+    for (const r of (data ?? []) as Record<string, unknown>[]) out[String(r.metric)] = Number(r.value);
+    return out;
+  } catch (err) {
+    logApiError("/api/cron/company-agents", err, { stage: "rpc company_kpis" });
+    return null;
+  }
+}
+
 /** The rows written by earlier runs, for task-auditor. Read BEFORE this run saves its own. */
 async function readPastRuns(): Promise<PastRun[] | null> {
   try {
@@ -234,6 +256,8 @@ async function runOne(agentId: string, work: () => Promise<AgentResult>): Promis
 }
 
 export async function runCompanyAgents(): Promise<RunReport> {
+  // One read feeds all seven KPI agents: they judge the same snapshot.
+  const kpis = await readKpis();
   const results = [
     await runOne("error-log-analyst", async () => analyzeErrors(await readErrors())),
     await runOne("api-uptime-monitor", async () => analyzeHealth(await probeHealth())),
@@ -250,6 +274,13 @@ export async function runCompanyAgents(): Promise<RunReport> {
     await runOne("fraud-alert", async () => analyzeConcentration(await readUserCosts())),
     await runOne("cost-per-agent", async () => analyzeFeatureCosts(await readFeatureCosts())),
     await runOne("expense-tracker", async () => analyzeExpenses(await readDayCosts(), Date.now())),
+    await runOne("kpi-monitor", async () => analyzeSignups(kpis)),
+    await runOne("usage-monitor", async () => analyzeUsage(kpis)),
+    await runOne("churn-predictor", async () => analyzeLapse(kpis)),
+    await runOne("retention", async () => analyzeRetention(kpis)),
+    await runOne("upsell", async () => analyzeUpsell(kpis)),
+    await runOne("anomaly-detector", async () => analyzeAnomalies(kpis)),
+    await runOne("sales-analytics", async () => analyzePaidShare(kpis)),
     await runOne("task-auditor", async () => analyzeStaleness(await readPastRuns(), RUNNING_AGENT_IDS, Date.now())),
   ];
   // LAST, because it reports on everything above.

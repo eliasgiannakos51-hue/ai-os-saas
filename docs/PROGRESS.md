@@ -38,6 +38,28 @@ stale, χωρίς όριο θορύβου στο κόστος, κενή αναφ
 μετρήθηκαν. `company-agents.test.mjs` 112 έλεγχοι, 5 μεταλλάξεις κοκκίνισαν.
 **Δεν επιβεβαιώθηκε σε production.** 13 τρέχουν· οι 108 δεν.
 
+## 2026-11-07ζ (Έκτη δέσμη: 7 agents KPI από δεδομένα που ήδη υπάρχουν + 2 agents καλωδίωσης CI)
+
+**Τι διορθώθηκε στη σκέψη.** Οι 9+ agents «analytics» δεν χρειάζονται όλοι εργαλείο
+analytics: όσοι διαβάζουν λογαριασμούς και χρήση AI μπορούν να τα πάρουν από τη βάση.
+Νέο migration `20261107010000_company_kpis.sql`: η συνάρτηση `company_kpis()` γυρίζει 12
+ΜΕΤΡΗΣΕΙΣ (ποτέ λίστα λογαριασμών), μόνο για service_role. «Ενεργός» = τουλάχιστον μία
+καταγεγραμμένη κλήση AI στο `ai_cost_log`, ΟΧΙ επίσκεψη (το προϊόν δεν καταγράφει επισκέψεις).
+Τρέχουν πλέον στο καθημερινό cron: `kpi-monitor` (νέοι λογαριασμοί), `usage-monitor`
+(ενεργοί, πτώση ≥30%), `churn-predictor` (ποσοστό που δεν ξαναήρθε· ρυθμός, όχι πρόβλεψη
+για πρόσωπο), `retention` (πληρωτές χωρίς χρήση 30 ημέρες), `upsell` (δωρεάν ενεργοί με ≤10%
+credits), `anomaly-detector` (άλμα ≥3x), `sales-analytics` (ποσοστό που πληρώνει· χωρίς
+funnel). Ελάχιστη βάση 10 λογαριασμών για κάθε ποσοστιαία σύγκριση, ώστε λίγοι λογαριασμοί να
+μην δίνουν δραματικά ποσοστά. Όρια ΕΠΕΛΕΧΘΗΚΑΝ.
+`gates-agent` και `testing-wrapper` (CI): ελέγχουν ότι το workflow τρέχει ακόμα τα gates και
+τις suites mutation/integration/database και ότι κανένα δεν μπορεί να αποτύχει σιωπηλά
+(`continue-on-error`). Δεν τρέχουν τα gates οι ίδιοι. Βρήκαν αμέσως ένα δικό μου λάθος
+(έψαχνα λάθος εντολή για τις database suites), που διορθώθηκε.
+**Μένουν 9 blocked:** ab-testing, conversion-optimizer, analytics-collector, data-quality,
+dashboard-agent, experiment-analyst, attribution (θέλουν καταγραφή επισκέψεων/γεγονότων, που
+δεν υπάρχει· χρειάζεται απόφαση για ιδιωτικότητα) και backup-verifier, deployment-monitor
+(θέλουν token Vercel/Supabase). Αριθμοί: `rosterCounts()`.
+
 ## 2026-11-07ε (Διόρθωση: 28 agents ήταν λάθος μπλοκαρισμένοι — τώρα draft agents)
 
 Τους είχα βάλει «blocked» (crm, tickets, gmail-send, human-only, video-tool) επειδή

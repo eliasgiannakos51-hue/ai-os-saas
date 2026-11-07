@@ -396,3 +396,129 @@ export function analyzeExpenses(days: DayCost[] | null, nowMs: number): AgentRes
   const evidence = { last7Eur: round2(last7), prev7Eur: round2(prev7) };
   return { status: "ok", summary: `AI cost last 7 days €${round2(last7)}, the 7 days before €${round2(prev7)}.`, evidence, unverified };
 }
+
+// ---------------------------------------------------------------------------
+// SIXTH BATCH (2026-11-07): seven agents over public.company_kpis(), the
+// counts the database can give without an analytics package. "Active" means
+// "made at least one logged AI call", NOT "visited": the product records no
+// visits. Every threshold is CHOSEN 2026-11-07 and every minimum-base rule
+// exists so that a handful of accounts cannot produce a dramatic percentage.
+// ---------------------------------------------------------------------------
+
+/** metric -> value from company_kpis(), or null when the call failed. */
+export type Kpis = Record<string, number> | null;
+
+/** Below this many accounts a percentage change is noise, not a signal. */
+export const KPI_MIN_BASE = 10;
+
+const KPI_UNVERIFIED = [
+  "visits, page views, sign-in frequency or conversion: the product records none of them, only AI calls",
+  "why a number moved: the agent compares two windows, it does not know the cause",
+];
+
+/** Reads named metrics; `missing` lists any that the database did not return (never treated as zero). */
+function kpiNeeds(kpis: Kpis, keys: string[]): { values: Record<string, number>; missing: string[] } {
+  const values: Record<string, number> = {};
+  const missing: string[] = [];
+  for (const k of keys) {
+    const v = kpis?.[k];
+    if (typeof v === "number" && Number.isFinite(v)) values[k] = v;
+    else missing.push(k);
+  }
+  return { values, missing };
+}
+
+function kpiUnreadable(kpis: Kpis, missing: string[]): AgentResult {
+  return {
+    status: "unverified",
+    summary: kpis === null ? "Could not read company_kpis(), so nothing was checked." : `company_kpis() did not return: ${missing.join(", ")}.`,
+    evidence: {},
+    unverified: [kpis === null ? "every metric: the read failed" : `the missing metrics: ${missing.join(", ")}`, ...KPI_UNVERIFIED],
+  };
+}
+
+const pct = (n: number) => Math.round(n * 100);
+
+/** kpi-monitor: how many accounts exist and how many are new, this week against last. */
+export function analyzeSignups(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["users_total", "users_new_7d", "users_new_prev_7d"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  const evidence = { total: v.users_total, new7d: v.users_new_7d, newPrev7d: v.users_new_prev_7d };
+  const line = `${v.users_total} accounts; ${v.users_new_7d} new in the last 7 days, ${v.users_new_prev_7d} in the 7 before.`;
+  if (v.users_new_prev_7d >= KPI_MIN_BASE && v.users_new_7d < v.users_new_prev_7d * 0.5) {
+    return { status: "warn", summary: `${line} New accounts fell by more than half.`, evidence, unverified: KPI_UNVERIFIED };
+  }
+  return { status: "ok", summary: line, evidence, unverified: KPI_UNVERIFIED };
+}
+
+/** usage-monitor: accounts that used an AI feature this week against last. */
+export function analyzeUsage(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["active_7d", "active_prev_7d"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  const evidence = { active7d: v.active_7d, activePrev7d: v.active_prev_7d };
+  const line = `${v.active_7d} accounts used an AI feature in the last 7 days, ${v.active_prev_7d} in the 7 before.`;
+  if (v.active_prev_7d >= KPI_MIN_BASE && v.active_7d < v.active_prev_7d * 0.7) {
+    return { status: "warn", summary: `${line} That is a fall of ${pct(1 - v.active_7d / v.active_prev_7d)}%.`, evidence, unverified: KPI_UNVERIFIED };
+  }
+  return { status: "ok", summary: line, evidence, unverified: KPI_UNVERIFIED };
+}
+
+/** churn-predictor: the share of last period's users who did not come back. A rate, not a prediction about anyone. */
+export function analyzeLapse(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["lapsed_30d", "active_prev_30d"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  const unverified = ["which accounts will leave: this is a rate over the whole base, not a prediction about a person", ...KPI_UNVERIFIED];
+  const evidence = { lapsed30d: v.lapsed_30d, activePrev30d: v.active_prev_30d };
+  if (v.active_prev_30d < KPI_MIN_BASE) {
+    return { status: "unverified", summary: `Only ${v.active_prev_30d} accounts were active 30-60 days ago, too few for a rate to mean anything.`, evidence, unverified };
+  }
+  const share = v.lapsed_30d / v.active_prev_30d;
+  const line = `${v.lapsed_30d} of the ${v.active_prev_30d} accounts active 30-60 days ago have made no AI call in the last 30 days (${pct(share)}%).`;
+  return { status: share >= 0.5 ? "warn" : "ok", summary: line, evidence, unverified };
+}
+
+/** retention: paying accounts with no AI use in 30 days. */
+export function analyzeRetention(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["paid_users", "paid_lapsed_30d"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  const evidence = { paidUsers: v.paid_users, paidLapsed30d: v.paid_lapsed_30d };
+  if (v.paid_lapsed_30d > 0) {
+    return { status: "warn", summary: `${v.paid_lapsed_30d} of ${v.paid_users} paying accounts have made no AI call in 30 days.`, evidence, unverified: ["which accounts: the agent returns a count, the list is a database query away", ...KPI_UNVERIFIED] };
+  }
+  return { status: "ok", summary: `All ${v.paid_users} paying accounts used an AI feature in the last 30 days.`, evidence, unverified: KPI_UNVERIFIED };
+}
+
+/** upsell: free accounts that are using the product and are nearly out of credits. */
+export function analyzeUpsell(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["free_near_limit_active_7d"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  return {
+    status: "ok",
+    summary: `${v.free_near_limit_active_7d} free account(s) used an AI feature this week and have 10% or less of their credits left.`,
+    evidence: { candidates: v.free_near_limit_active_7d },
+    unverified: ["whether any of them would pay: nothing here measures willingness", ...KPI_UNVERIFIED],
+  };
+}
+
+/** anomaly-detector: a sudden jump in new accounts or active accounts. */
+export function analyzeAnomalies(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["users_new_7d", "users_new_prev_7d", "active_7d", "active_prev_7d"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  const spikes: string[] = [];
+  if (v.users_new_7d >= KPI_MIN_BASE && v.users_new_7d >= Math.max(v.users_new_prev_7d, 1) * 3) spikes.push(`new accounts ${v.users_new_prev_7d} -> ${v.users_new_7d}`);
+  if (v.active_7d >= KPI_MIN_BASE && v.active_7d >= Math.max(v.active_prev_7d, 1) * 3) spikes.push(`active accounts ${v.active_prev_7d} -> ${v.active_7d}`);
+  const evidence = { spikes };
+  const unverified = ["whether a spike is good (a launch) or bad (bots): the agent only sees the size", "drops: the usage monitor and the signup monitor own those", ...KPI_UNVERIFIED];
+  if (spikes.length > 0) return { status: "warn", summary: `Weekly jump of 3x or more: ${spikes.join("; ")}.`, evidence, unverified };
+  return { status: "ok", summary: "No weekly jump of 3x or more in new or active accounts.", evidence, unverified };
+}
+
+/** sales-analytics: what share of accounts pay. Not a funnel: there is no funnel data. */
+export function analyzePaidShare(kpis: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(kpis, ["users_total", "paid_users"]);
+  if (missing.length > 0) return kpiUnreadable(kpis, missing);
+  const unverified = ["the funnel: visits, sign-up steps and conversion are not recorded, so no step before 'has an account' can be read", ...KPI_UNVERIFIED];
+  const evidence = { total: v.users_total, paid: v.paid_users };
+  if (v.users_total === 0) return { status: "unverified", summary: "There are no accounts, so no share can be computed.", evidence, unverified };
+  return { status: "ok", summary: `${v.paid_users} of ${v.users_total} accounts pay (${Math.round((v.paid_users / v.users_total) * 1000) / 10}%).`, evidence, unverified };
+}

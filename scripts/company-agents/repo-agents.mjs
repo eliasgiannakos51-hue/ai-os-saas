@@ -1,12 +1,15 @@
 // THE COMPANY'S AGENTS THAT READ THE REPOSITORY, NOT THE DATABASE.
 //
-// Five agents, all autonomy 1 (they read and report, they change nothing):
+// Seven agents, all autonomy 1 (they read and report, they change nothing):
 //
 //   secrets-scanner         a credential-shaped string in a tracked file
 //   cron-monitor            vercel.json and src/app/api/**/route.ts agree
 //   migration-ledger        migration files: undo notes, names that order
 //   license-monitor         licences of the packages package.json asks for
 //   vulnerability-scanner   what `npm audit` says about the lockfile
+//   gates-agent             the CI workflow still RUNS the gates, and can fail on them
+//   testing-wrapper         the CI workflow still runs the mutation, database and
+//                           integration suites, and none of them can fail silently
 //
 // WHY THEY LIVE HERE AND NOT IN src/lib/company-agents/run.ts. That runner
 // is a Vercel function: it has a database and a network, but no checkout of
@@ -30,7 +33,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync, appendFileSync } from "node:fs";
 
 /** The ids this file runs. company-agents.test.mjs holds that they equal CI_AGENT_IDS in roster.ts. */
-export const REPO_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner"];
+export const REPO_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner", "gates-agent", "testing-wrapper"];
 
 const result = (status, summary, evidence, unverified) => ({ status, summary, evidence, unverified });
 
@@ -213,6 +216,87 @@ export function analyzeAudit(audit) {
 }
 
 // ---------------------------------------------------------------------------
+// gates-agent and testing-wrapper
+//
+// WHAT THEY ARE NOT: they do not run the gates or the suites. CI already does
+// that, on every push, and a second run inside a step that cannot fail the job
+// would be a gate nobody listens to. What can go wrong QUIETLY is the wiring:
+// someone adds `continue-on-error: true` to the gates step, renames the
+// script, or drops a suite from the workflow, and every push goes green with
+// the check gone. That is what these two read.
+// ---------------------------------------------------------------------------
+
+/** The workflow's steps, comments removed. A step starts at a `- name:`, `- uses:` or `- run:` line. */
+export function workflowSteps(workflowText) {
+  const text = String(workflowText ?? "").replace(/^\s*#.*$/gm, "");
+  return text.split(/\n(?=\s*- (?:name|uses|run):)/).filter((b) => /\n?\s*- (?:name|uses|run):/.test(b));
+}
+
+const failsOpen = (step) => /continue-on-error:\s*true/.test(step);
+
+/** workflow: text of .github/workflows/verify.yml. unitRunner: text of scripts/tests/run-gates.mjs. testFiles: number of scripts/tests/*.test.mjs. */
+export function analyzeGateWiring(workflow, pkgScripts, unitRunner, testFiles) {
+  const unverified = [
+    "whether the gates PASS: the CI job reports that; this reads only that they are run and can fail the job",
+    "branch protection: whether GitHub refuses to merge a red push is a repository setting this agent cannot see",
+  ];
+  if (typeof workflow !== "string" || workflow.trim() === "" || !pkgScripts || typeof pkgScripts !== "object") {
+    return result("unverified", "The workflow or package.json could not be read, so the gate wiring was not checked.", {}, ["the wiring: unreadable", ...unverified]);
+  }
+  const steps = workflowSteps(workflow);
+  const gateSteps = steps.filter((st) => /run:\s*npm run gates\b/.test(st));
+  const problems = [];
+  if (gateSteps.length === 0) problems.push("no workflow step runs `npm run gates`");
+  if (gateSteps.some(failsOpen)) problems.push("the `npm run gates` step has continue-on-error: true, so a red gate cannot fail the job");
+  if (!/\bon:[\s\S]{0,80}\bpush:/.test(workflow.replace(/^\s*#.*$/gm, ""))) problems.push("the workflow is not triggered on push");
+  if (typeof pkgScripts.gates !== "string" || !/test:unit/.test(pkgScripts.gates)) problems.push("the `gates` script in package.json does not run test:unit");
+  if (typeof pkgScripts["test:unit"] !== "string") problems.push("package.json has no `test:unit` script");
+  const evidence = { gateSteps: gateSteps.length, testFiles, problems };
+  if (problems.length > 0) return result("fail", `Gate wiring is broken: ${problems.join("; ")}.`, evidence, unverified);
+  if (typeof unitRunner !== "string" || !/\.test\.mjs/.test(unitRunner)) {
+    return result("warn", "The unit runner (scripts/tests/run-gates.mjs) does not mention *.test.mjs, so it is unclear it runs the gate files.", evidence, unverified);
+  }
+  if (!(testFiles >= 100)) {
+    return result("warn", `Only ${testFiles} gate files were found; the suite has been larger. Check that gate files were not moved or deleted.`, evidence, unverified);
+  }
+  return result("ok", `The CI workflow runs \`npm run gates\` on push and cannot pass it silently; ${testFiles} gate files are present.`, evidence, unverified);
+}
+
+/** The suites CI is expected to run, each as: [label, pattern its step must run, script it needs in package.json or null]. */
+export const EXPECTED_SUITES = [
+  ["mutation suites", /npm run test:mutation\b/, "test:mutation"],
+  ["integration suites", /npm run test:integration\b/, "test:integration"],
+  ["database suites", /npm run test:db\b/, "test:db"],
+];
+
+export function analyzeSuiteWiring(workflow, pkgScripts) {
+  const unverified = [
+    "whether the suites PASS: the CI job reports that",
+    "the nightly production browser tests and any suite that only runs on a schedule",
+  ];
+  if (typeof workflow !== "string" || workflow.trim() === "" || !pkgScripts || typeof pkgScripts !== "object") {
+    return result("unverified", "The workflow or package.json could not be read, so the suite wiring was not checked.", {}, ["the wiring: unreadable", ...unverified]);
+  }
+  const steps = workflowSteps(workflow);
+  const missing = [];
+  const open = [];
+  for (const [label, re, script] of EXPECTED_SUITES) {
+    const found = steps.filter((st) => re.test(st));
+    if (found.length === 0) missing.push(label);
+    else if (found.some(failsOpen)) open.push(label);
+    if (script && typeof pkgScripts[script] !== "string") missing.push(`${label} (no ${script} script in package.json)`);
+  }
+  const evidence = { expected: EXPECTED_SUITES.length, missing, failOpen: open };
+  if (missing.length > 0 || open.length > 0) {
+    const parts = [];
+    if (missing.length > 0) parts.push(`not run by the workflow: ${missing.join(", ")}`);
+    if (open.length > 0) parts.push(`cannot fail the job (continue-on-error): ${open.join(", ")}`);
+    return result("fail", `Suite wiring is broken: ${parts.join("; ")}.`, evidence, unverified);
+  }
+  return result("ok", `The workflow runs all ${EXPECTED_SUITES.length} expected suites (${EXPECTED_SUITES.map((e) => e[0]).join(", ")}) and none can fail open.`, evidence, unverified);
+}
+
+// ---------------------------------------------------------------------------
 // gathering
 // ---------------------------------------------------------------------------
 
@@ -272,7 +356,11 @@ export function gather() {
     audit = tryJson(() => String(err?.stdout ?? ""));
   }
 
-  return { files, vercel, routes, migrations, pkgs, audit };
+  const workflow = existsSync(".github/workflows/verify.yml") ? readFileSync(".github/workflows/verify.yml", "utf8") : null;
+  const unitRunner = existsSync("scripts/tests/run-gates.mjs") ? readFileSync("scripts/tests/run-gates.mjs", "utf8") : null;
+  const testFiles = (tracked ?? []).filter((p) => /^scripts\/tests\/[^/]+\.test\.mjs$/.test(p)).length;
+
+  return { files, vercel, routes, migrations, pkgs, audit, workflow, pkgScripts: pkg?.scripts ?? null, unitRunner, testFiles };
 }
 
 export function runAll(g = gather()) {
@@ -283,6 +371,8 @@ export function runAll(g = gather()) {
     "migration-ledger": analyzeMigrations(g.migrations),
     "license-monitor": analyzeLicenses(g.pkgs),
     "vulnerability-scanner": analyzeAudit(g.audit),
+    "gates-agent": analyzeGateWiring(g.workflow, g.pkgScripts, g.unitRunner, g.testFiles),
+    "testing-wrapper": analyzeSuiteWiring(g.workflow, g.pkgScripts),
   };
 }
 

@@ -77,13 +77,13 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
 
 /** The agents the runner (lib/company-agents/run.ts) executes today. The
  *  roster's `running` entries must equal this list, both ways. */
-export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
+export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "kpi-monitor", "usage-monitor", "churn-predictor", "retention", "upsell", "anomaly-detector", "sales-analytics", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
 
 /** The agents that run in CI, on every push, from scripts/company-agents/repo-agents.mjs.
  *  They need the repository's files, which the Vercel runner does not have, so their result
  *  is on the CI job's summary page and NOT in the System Health section above. The roster's
  *  `running` entries equal RUNNING_AGENT_IDS plus this list, both ways. */
-export const CI_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner"] as const;
+export const CI_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner", "gates-agent", "testing-wrapper"] as const;
 
 type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: RosterStatus, blockedBy?: BlockerKey];
 
@@ -104,7 +104,7 @@ export const ROSTER: RosterAgent[] = [
     ["manager", "Manager", "Drafts the split of a goal into tasks, owners and checks. The owner assigns; nothing is started by it.", 2, "built"],
     ["agent-builder", "Agent builder", "Creates a new internal agent from an approved template.", 2, "built"],
     ["goal-tracker", "Goal tracker", "Compares goals with the figures pasted in and says which are on track. It has no goals of its own stored anywhere.", 1, "built"],
-    ["kpi-monitor", "KPI monitor", "Watches the numbers the owner cares about.", 1, "blocked", "analytics"],
+    ["kpi-monitor", "KPI monitor", "Counts accounts and new accounts this week against last, from company_kpis(). Warns when new accounts fall by more than half (10+ the week before). Not web traffic.", 1, "running"],
     ["daily-reporter", "Daily reporter", "One line over the day's run: how many agents are ok, warn, fail or unverified, and which need a look. Recorded as a row; not sent anywhere yet.", 1, "running"],
     ["weekly-reporter", "Weekly reporter", "The weekly roll-up across every department.", 1, "built"],
     ["decision-analyst", "Decision analyst", "Lays out the options, costs and risks for a decision.", 1, "built"],
@@ -114,8 +114,8 @@ export const ROSTER: RosterAgent[] = [
     ["final-approval", "Final approval", "Reports whether a change is really finished, from the diff and the PR text. Never says the gates passed unless it was given a real result.", 1, "built"],
   ]),
   ...dept("development", [
-    ["gates-agent", "Gates agent", "Runs npm run gates and reports red or green, never ignoring a failure.", 1, "planned"],
-    ["testing-wrapper", "Testing wrapper", "Runs the existing test scripts and reports pass or fail.", 1, "planned"],
+    ["gates-agent", "Gates agent", "Checks in CI that the workflow still runs `npm run gates` on push and cannot pass it silently (no continue-on-error). It does not run the gates or say whether they pass: the CI job does.", 1, "running"],
+    ["testing-wrapper", "Testing wrapper", "Checks in CI that the workflow still runs the mutation, integration and database suites and that none can fail open. It runs none of them itself.", 1, "running"],
     ["code-review", "Code review", "Reads a diff against CLAUDE.md's rules before a merge.", 2, "built"],
     ["bug-detection", "Bug detection", "Finds problems from errors and tests.", 1, "built"],
     ["bug-fix", "Bug fix", "Proposes a fix as a pull request, never committing to main.", 2, "built"],
@@ -141,10 +141,10 @@ export const ROSTER: RosterAgent[] = [
     ["follow-up", "Follow-up", "Lists next steps from pasted notes and drafts follow-ups. It does not track anything between uses.", 2, "built"],
     ["proposal-writer", "Proposal writer", "Drafts a proposal for the owner to review and sign off. Prices come only from the brief.", 2, "built"],
     ["pricing-agent", "Pricing agent", "Suggests prices inside limits the owner states. It sees no sales data and applies nothing.", 2, "built"],
-    ["sales-analytics", "Sales analytics", "Reads what the sales funnel did.", 1, "blocked", "analytics"],
+    ["sales-analytics", "Sales analytics", "Reports the share of accounts that pay. There is no funnel data: visits and conversion are not recorded.", 1, "running"],
     ["affiliate-manager", "Affiliate manager", "Watches partners and commissions. The monthly payout cron already exists; the agent on top of it does not.", 1, "built"],
     ["onboarding", "Onboarding", "Walks a new customer through the first steps.", 2, "built"],
-    ["retention", "Retention", "Spots customers at risk of leaving.", 1, "blocked", "analytics"],
+    ["retention", "Retention", "Counts paying accounts with no AI call in 30 days and warns on any. It returns a count, not the list of accounts.", 1, "running"],
   ]),
   ...dept("marketing", [
     ["market-research", "Market research", "Studies the audience and the market.", 1, "built"],
@@ -227,9 +227,9 @@ export const ROSTER: RosterAgent[] = [
     ["team-knowledge", "Team knowledge", "Keeps the internal documentation findable.", 1, "built"],
   ]),
   ...dept("success", [
-    ["usage-monitor", "Usage monitor", "Reads how customers use the product.", 1, "blocked", "analytics"],
-    ["churn-predictor", "Churn predictor", "Estimates who may leave.", 1, "blocked", "analytics"],
-    ["upsell", "Upsell opportunity", "Finds customers for whom a plan upgrade fits.", 1, "blocked", "analytics"],
+    ["usage-monitor", "Usage monitor", "Counts accounts that used an AI feature this week against last. \"Active\" means at least one logged AI call; the product records no visits. Warns on a fall of 30% or more (10+ the week before).", 1, "running"],
+    ["churn-predictor", "Churn predictor", "Reports the share of accounts active 30-60 days ago that made no AI call in the last 30 days. A rate over the whole base, not a prediction about any person.", 1, "running"],
+    ["upsell", "Upsell opportunity", "Counts free accounts that used an AI feature this week and have 10% or less of their credits left. It measures no willingness to pay.", 1, "running"],
     ["renewal-reminder", "Renewal reminder", "Tracks subscription renewals and who is about to renew.", 1, "built"],
     ["customer-education", "Customer education", "Drafts guides and tutorials.", 2, "built"],
   ]),
@@ -238,7 +238,7 @@ export const ROSTER: RosterAgent[] = [
     ["data-quality", "Data quality", "Checks that the data is right.", 1, "blocked", "analytics"],
     ["dashboard-agent", "Dashboard", "Keeps the owner's dashboards current.", 1, "blocked", "analytics"],
     ["experiment-analyst", "Experiment analyst", "Reads the result of an experiment.", 1, "blocked", "analytics"],
-    ["anomaly-detector", "Anomaly detector", "Notices an unusual change.", 1, "blocked", "analytics"],
+    ["anomaly-detector", "Anomaly detector", "Warns when new accounts or active accounts jump 3x or more week on week. It sees the size, not the cause.", 1, "running"],
     ["attribution", "Attribution", "Finds where customers come from.", 1, "blocked", "analytics"],
   ]),
   ...dept("admin", [

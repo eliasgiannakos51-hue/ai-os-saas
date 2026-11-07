@@ -8,9 +8,10 @@
 ## ΠΡΩΤΑ — Agents της εταιρείας (2026-11-06, ενημερώθηκε 2026-11-07)
 
 Για να γράφονται τα αποτελέσματα των agents στο System Health: κάνε paste στο
-Supabase SQL editor **και τα δύο** (έχουν μέσα το πώς αναιρούνται):
+Supabase SQL editor **και τα τρία** (έχουν μέσα το πώς αναιρούνται):
 `supabase/migrations/20261106000000_company_agent_runs.sql` (αποτελέσματα) και
-`supabase/migrations/20261107000000_company_agent_drafts.sql` (γραφείο draft).
+`supabase/migrations/20261107000000_company_agent_drafts.sql` (γραφείο draft) και
+`supabase/migrations/20261107010000_company_kpis.sql` (μετρήσεις για 7 agents).
 Μέχρι να το κάνεις, οι ενότητες γράφουν «Could not read company_agent_runs» /
 «company_agent_drafts» — δεν είναι σφάλμα, είναι η ένδειξη. Μετά:
 `npm run db:pending` για να δεις ότι είναι «applied».

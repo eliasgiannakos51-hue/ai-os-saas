@@ -80,7 +80,7 @@ export function useFieldCost(text: string | null): boolean {
  * itself is drawn, unchanged. For a tool whose price is not a
  * `CostEstimateHint` (Image's, Site's).
  */
-export function FieldCost({ text, children }: { text: string; children: ReactNode }) {
+export function FieldCost({ text, children = null }: { text: string; children?: ReactNode }) {
   const registered = useFieldCost(text);
   return registered ? null : <>{children}</>;
 }

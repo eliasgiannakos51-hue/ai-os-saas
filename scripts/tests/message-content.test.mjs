@@ -67,6 +67,7 @@ if (isAllowedChatImageSrc) {
   check("a chat attachment's local blob preview is allowed", isAllowedChatImageSrc("blob:http://localhost/abc-123"));
   check("https to an arbitrary host is refused — the exfiltration channel itself", !isAllowedChatImageSrc("https://evil.example/t.gif?d=leaked"));
   check("a protocol-relative URL is refused", !isAllowedChatImageSrc("//evil.example/t.gif"));
+  check("...and so is the same address written with a backslash (hardening, 2026-11-05)", !isAllowedChatImageSrc("/\\evil.example/t.gif"));
   check("javascript: is refused", !isAllowedChatImageSrc("javascript:alert(1)"));
   check("nothing (no src at all) is refused, not treated as allowed", !isAllowedChatImageSrc(undefined) && !isAllowedChatImageSrc(""));
 }

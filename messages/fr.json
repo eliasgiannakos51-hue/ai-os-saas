@@ -1382,7 +1382,8 @@
             "cv": "Un CV pour un poste en marketing",
             "letter": "Une lettre demandant un délai supplémentaire"
           }
-        }
+        },
+        "words": "{count, plural, one {# mot} other {# mots}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "Toutes les versions",
         "versionsHint": "Appuyez sur une version pour la voir. Ce que vous écrivez ensuite modifie toujours la plus récente.",
         "liveVersions": "Versions publiées",
-        "undid": "Annulé : {change}"
+        "undid": "Annulé : {change}",
+        "version": "Version {n} · {live, select, yes {publiée} other {non publiée}}",
+        "publishState": "{live, select, yes {Publié} other {Non publié}}"
       },
       "box": {
         "only": "Seulement : {name}",
@@ -3473,7 +3476,11 @@
         "settings": "Réglages",
         "credits": "Crédits",
         "selected": "Sélection : {name}",
-        "isOpen": "Ouvert maintenant"
+        "isOpen": "Ouvert maintenant",
+        "more": "Plus",
+        "selectedTag": "{name} · sélectionné",
+        "changeThis": "Modifier ceci…",
+        "changeWork": "Dites ce qu’il faut changer…"
       }
     },
     "library": {

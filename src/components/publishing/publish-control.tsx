@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Globe, Loader2, Check, ExternalLink, EyeOff, X, AlertCircle } from "lucide-react";
@@ -23,6 +23,28 @@ export type PublishedSiteState = {
 };
 
 /**
+ * What the control knows and can do, told to a caller that draws the
+ * buttons itself — the editor layout's bar (the switch "editor-shell",
+ * components/website-builder/website-shell.tsx), where Publish is the
+ * screen's one white button and the rest sit in «More». The state stays
+ * here, as it always did; the caller is told it, never computes it.
+ */
+export type PublishApi = {
+  loading: boolean;
+  isLive: boolean;
+  /** Published at least once — live now, or taken offline since. */
+  everPublished: boolean;
+  url: string | null;
+  busy: boolean;
+  /** Opens the address dialog (the first publish, or publishing again after taking it offline). */
+  openPublish: () => void;
+  /** Pushes the current draft to the address the site already has. */
+  publishChanges: () => void;
+  /** Takes the site offline, after the same confirmation. */
+  unpublish: () => void;
+};
+
+/**
  * The Publish control in the Website Builder.
  *
  * Self-contained on purpose: it fetches its own state from
@@ -38,10 +60,15 @@ export function PublishControl({
   disabled = false,
   disabledReason,
   onLiveChange,
+  headless = false,
+  onApi,
 }: {
   websiteId: string;
   websiteName: string;
   disabled?: boolean;
+  /** Draw no buttons — only the address dialog when it is opened — and tell `onApi` everything. */
+  headless?: boolean;
+  onApi?: (api: PublishApi) => void;
   /**
    * Told whenever this control learns, or changes, whether the site is
    * live. It owns that fact — it fetches it itself — and the website
@@ -188,13 +215,19 @@ export function PublishControl({
   }
 
   async function publish() {
-    if (!check.ok) return;
+    // «Publish changes» is pressed with the dialog closed, on a site that
+    // already has its address — and after a reload nothing was ever typed,
+    // so the field is empty and this returned without a word (found
+    // 2026-11-05 while giving the editor layout its Publish). The address
+    // is then the site's own; the dialog's field is read only while it is open.
+    const target = !open && site ? validateSubdomain(site.subdomain) : check;
+    if (!target.ok) return;
     setBusy(true);
     try {
       const response = await fetch(`/api/websites/${websiteId}/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subdomain: check.subdomain }),
+        body: JSON.stringify({ subdomain: target.subdomain }),
       });
       const data = await response.json().catch(() => null);
       if (!data?.ok) {
@@ -204,7 +237,7 @@ export function PublishControl({
         // it applies to re-disables the button, so the same address cannot
         // simply be submitted again.
         if (data?.reason === "taken") {
-          setTakenMessage({ subdomain: check.subdomain });
+          setTakenMessage({ subdomain: target.subdomain });
           return;
         }
         addToast(refusalText(response.status, data), "error");
@@ -247,7 +280,27 @@ export function PublishControl({
   }
 
 
-  if (loading) {
+  // THE API, told whenever what it says changes. The three actions are
+  // read through a ref, so the caller's copy always calls this render's
+  // functions without being told again on every keystroke in the dialog.
+  const actions = useRef({ publish, unpublish });
+  actions.current = { publish, unpublish };
+  const siteUrl = site?.url ?? null;
+  useEffect(() => {
+    onApi?.({
+      loading,
+      isLive,
+      everPublished: site !== null,
+      url: siteUrl,
+      busy,
+      openPublish: () => setOpen(true),
+      publishChanges: () => void actions.current.publish(),
+      unpublish: () => void actions.current.unpublish(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, isLive, site !== null, siteUrl, busy]);
+
+  if (loading && !headless) {
     return (
       <span className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 text-xs text-muted">
         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -256,7 +309,8 @@ export function PublishControl({
   }
 
   return (
-    <div className="relative">
+    <div className={headless ? "contents" : "relative"}>
+      {!headless && (
       <div className="flex flex-wrap items-center gap-1.5">
         {/* ONE BUTTON, TWO STATES.
 
@@ -357,6 +411,7 @@ export function PublishControl({
           </>
         )}
       </div>
+      )}
 
       {/* A MODAL, NOT A DROPDOWN.
 ​

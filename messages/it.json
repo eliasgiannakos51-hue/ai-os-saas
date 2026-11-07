@@ -1382,7 +1382,8 @@
             "cv": "Un CV per un ruolo di marketing",
             "letter": "Una lettera che chiede una proroga"
           }
-        }
+        },
+        "words": "{count, plural, one {# parola} other {# parole}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "Tutte le versioni",
         "versionsHint": "Tocca una versione per vederla. Quello che scrivi dopo modifica sempre la più recente.",
         "liveVersions": "Versioni pubblicate",
-        "undid": "Annullato: {change}"
+        "undid": "Annullato: {change}",
+        "version": "Versione {n} · {live, select, yes {pubblicata} other {non pubblicata}}",
+        "publishState": "{live, select, yes {Pubblicato} other {Non pubblicato}}"
       },
       "box": {
         "only": "Cambia solo: {name}",
@@ -3473,7 +3476,11 @@
         "settings": "Impostazioni",
         "credits": "Crediti",
         "selected": "Selezionato: {name}",
-        "isOpen": "Aperto ora"
+        "isOpen": "Aperto ora",
+        "more": "Altro",
+        "selectedTag": "{name} · selezionato",
+        "changeThis": "Cambia questo…",
+        "changeWork": "Di’ cosa cambiare…"
       }
     },
     "library": {

@@ -3,16 +3,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Download, Files, History, Monitor, Palette, Smartphone, Square, Undo2, X } from "lucide-react";
+import { Download, ExternalLink, EyeOff, Files, Globe, History, Languages, Monitor, Palette, Smartphone, Sparkles, Square, Undo2, X } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
-import { PublishControl } from "@/components/publishing/publish-control";
+import { PublishControl, type PublishApi } from "@/components/publishing/publish-control";
 import { DesignControls } from "@/components/website-builder/design-controls";
-import { SiteHistory } from "@/components/website-builder/site-history";
+import { SiteHistory, useLatestSiteVersion } from "@/components/website-builder/site-history";
 import { BrowserFrame } from "@/components/website-builder/browser-frame";
-import { MotionButton } from "@/components/shell/motion-button";
+import { MotionButton, MotionList } from "@/components/shell/motion-button";
+import { MoreMenu, type MoreItem } from "@/components/shell/more-menu";
+import { SitePickFrame } from "@/components/website-builder/site-pick-frame";
+import { CopyButton } from "@/components/ui/copy-button";
 import { useRememberedLine } from "@/components/website-builder/use-remembered-line";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
@@ -27,7 +30,7 @@ import { normalisePages } from "@/lib/publishing/website-pages";
 import { PAGE_COUNT_CHOICES, pageRequestBrief } from "@/lib/websites/page-request";
 import { siteDownload } from "@/lib/websites/site-download";
 import { saveBlob } from "@/components/ui/download-pdf-button";
-import { TranslateButton } from "@/components/translate/translate-button";
+import { TranslateButton, TranslateDialog } from "@/components/translate/translate-button";
 import { websiteNameFrom } from "@/lib/website-name";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { applyDesignBrief, DEFAULT_DESIGN_CHOICES, type WebsiteDesignChoices } from "@/lib/website-design-brief";
@@ -130,6 +133,8 @@ export function WebsiteShell({
   const tSteps = useTranslations("aiSteps");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
+  const tPub = useTranslations("dashboard.publishing");
+  const tTranslate = useTranslations("dashboard.translate");
   const describe = useErrorText();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
@@ -188,6 +193,12 @@ export function WebsiteShell({
   const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
   // The open page, with the site it belongs to, as the chosen part is.
   const [openPage, setOpenPage] = useState<{ siteId: string; slug: string } | null>(null);
+  // THE EDITOR LAYOUT'S BAR (the switch "editor-shell", 08-Site.png): what
+  // Publish knows, told by the one PublishControl drawn for it with no
+  // buttons of its own (below), and the copy in another language, opened
+  // from «More». Neither exists under the old shell.
+  const [publishState, setPublishState] = useState<{ siteId: string; api: PublishApi } | null>(null);
+  const [translating, setTranslating] = useState(false);
   const describeNote = useGenerationNoteText();
   const composerRef = useRef<ChatComposerHandle>(null);
   const mountedRef = useRef(true);
@@ -426,6 +437,17 @@ export function WebsiteShell({
     accountCreditPriceEur ?? undefined
   ).estimatedCredits;
 
+  // THE PRICE OF A CHANGE, in the editor layout's field (08-Site.png's
+  // «≈ 2 credits»): the estimator api/websites/edit holds against, on the
+  // same input — the open page's HTML, the words, the photos.
+  const changeCost = (pageHtml: string) =>
+    estimateForAction(
+      "websiteEdit",
+      { model: WEBSITE_BUILDER_MODEL, inputChars: pageHtml.length + length, imageCount: photos.length, planSlug },
+      DEFAULTS,
+      accountCreditPriceEur ?? undefined
+    ).estimatedCredits;
+
   // THE OPEN PAGE (package 10): home unless a tab chose another of THIS site's.
   const sitePages = current ? normalisePages(current.pages).pages : [];
   const pageSlug = openPage && current && openPage.siteId === current.id && sitePages.some((p) => p.slug === openPage.slug) ? openPage.slug : "";
@@ -507,7 +529,7 @@ export function WebsiteShell({
   // COMPUTER | PHONE: among the icons on top under the old shell, the
   // control beside the title in the editor layout's bar (08-Site.png).
   const viewportGroup = current ? (
-              <span className="flex items-center gap-1" role="group" aria-label={t("viewportGroup")}>
+              <span className={editor ? "editor-seg" : "flex items-center gap-1"} role="group" aria-label={t("viewportGroup")}>
                 <button
                   type="button"
                   onClick={() => setViewport("desktop")}
@@ -515,7 +537,7 @@ export function WebsiteShell({
                   aria-label={t("viewportDesktop")}
                   title={t("viewportDesktop")}
                   data-testid="site-viewport-desktop"
-                  className={`${ACTION} ${viewport === "desktop" ? "border-foreground text-foreground" : ""}`}
+                  className={editor ? "editor-seg-option" : `${ACTION} ${viewport === "desktop" ? "border-foreground text-foreground" : ""}`}
                 >
                   <Monitor className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -526,12 +548,55 @@ export function WebsiteShell({
                   aria-label={t("viewportMobile")}
                   title={t("viewportMobile")}
                   data-testid="site-viewport-mobile"
-                  className={`${ACTION} ${viewport === "mobile" ? "border-foreground text-foreground" : ""}`}
+                  className={editor ? "editor-seg-option" : `${ACTION} ${viewport === "mobile" ? "border-foreground text-foreground" : ""}`}
                 >
                   <Smartphone className="h-4 w-4" aria-hidden="true" />
                 </button>
               </span>
   ) : null;
+
+  // THE EDITOR LAYOUT'S BAR (08-Site.png): the version and whether it is
+  // live as the one tag, Publish as the one white button, the live
+  // address as the one outlined one, and everything else in «More» — undo,
+  // the download, the versions, the copy in another language, Motion, the
+  // live site and taking it offline. Nothing the old bar has is dropped.
+  // What Publish said about THIS site — never the one open a moment ago.
+  const publishing = publishState && current && publishState.siteId === current.id && current.status === "completed" ? publishState.api : null;
+  const latestVersion = useLatestSiteVersion(editor && current?.status === "completed" ? current.id : null, `${historyRound}:${current?.status ?? ""}:${current?.html_content?.length ?? 0}`);
+  const liveUrl = publishing?.isLive && publishing.url ? publishing.url : null;
+  const siteTag =
+    editor && current && current.status === "completed" && !running(current) && publishing && !publishing.loading
+      ? latestVersion !== null
+        ? tShell("site.version", { n: latestVersion, live: publishing.isLive ? "yes" : "no" })
+        : tShell("site.publishState", { live: publishing.isLive ? "yes" : "no" })
+      : null;
+  const sitePrimary =
+    editor && current && current.status === "completed" && publishing
+      ? {
+          label: publishing.isLive ? tPub("publishChanges") : publishing.everPublished ? tPub("republish") : tPub("publish"),
+          icon: <Globe className="h-4 w-4" aria-hidden="true" />,
+          onClick: publishing.isLive ? publishing.publishChanges : publishing.openPublish,
+          disabled: publishing.loading || publishing.busy,
+          busy: publishing.busy,
+        }
+      : undefined;
+  const moreItems: MoreItem[] = current
+    ? [
+        { id: "undo", label: tShell("pages.undo"), icon: <Undo2 className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => void undo(), disabled: current.status !== "completed" || busy, testId: "site-undo" },
+        { id: "download", label: t("downloadButton"), icon: <Download className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => download(current), disabled: current.status !== "completed" || !looksLikeCompleteHtmlDocument(current.html_content), testId: "site-download" },
+        { id: "versions", label: t("tabHistory"), icon: <History className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => setHistory(showingHistory ? null : current.id), testId: "site-history-open" },
+        ...(translate && current.status === "completed"
+          ? [{ id: "translate", label: tTranslate("button"), icon: <Languages className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => setTranslating(true), testId: "translate-open" }]
+          : []),
+        { id: "motion", label: tShell("motion.button"), icon: <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />, panel: <MotionList />, testId: "motion-button" },
+        ...(liveUrl
+          ? [
+              { id: "live", label: tPub("viewLive"), icon: <ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" />, href: liveUrl, testId: "site-view-live" },
+              { id: "unpublish", label: tPub("unpublish"), icon: <EyeOff className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => publishing?.unpublish(), disabled: publishing?.busy, testId: "site-unpublish" },
+            ]
+          : []),
+      ]
+    : [];
 
   const work =
     pane === "site" && current
@@ -540,8 +605,14 @@ export function WebsiteShell({
           controls: editor ? viewportGroup : undefined,
           // How many pages the site has, as the editor layout's one tag;
           // while it builds, that it is building.
-          status: running(current) ? t("generating") : current.status === "completed" ? tShell("pages.count", { count: sitePages.length + 1 }) : null,
-          actions: (
+          status: siteTag ?? (running(current) ? t("generating") : current.status === "completed" ? tShell("pages.count", { count: sitePages.length + 1 }) : null),
+          primary: sitePrimary,
+          actions: editor ? (
+            <>
+              {liveUrl && <CopyButton label={tPub("copyLink")} text={liveUrl} className="btn-quiet" data-testid="site-copy-link" />}
+              <MoreMenu label={tShell("editor.more")} backLabel={tShell("back")} items={moreItems} />
+            </>
+          ) : (
             <>
               {!editor && viewportGroup}
               {/* MOTION (package 5, Κομμάτι 1): shared with Apps
@@ -599,9 +670,11 @@ export function WebsiteShell({
               />
             </div>
           ) : (
-            <div data-testid="site-preview" className="flex h-full flex-col gap-3">
-              <AiGeneratedNotice variant="block" />
-              {historyToggle}
+            <div data-testid="site-preview" className={editor ? "mx-auto flex w-full max-w-[1000px] flex-1 flex-col gap-3" : "flex h-full flex-col gap-3"}>
+              {/* In the editor layout the AI label is the line under the
+                  page, and the versions are in «More». */}
+              {!editor && <AiGeneratedNotice variant="block" />}
+              {!editor && historyToggle}
               {shown && (
                 <p data-testid="site-viewing" className="flex flex-wrap items-center gap-x-2 text-xs text-foreground">
                   {t("viewingOldVersion", { number: shown.version_number })}
@@ -635,7 +708,7 @@ export function WebsiteShell({
               )}
               {!shown && unfilled.length > 0 && <p className="text-xs text-warning">{t("unfilledTitle", { count: unfilled.length })} {t("unfilledBody")}</p>}
               {!shown && invented.length > 0 && <p className="text-xs text-warning">{t("inventedTitle", { count: invented.length })} {t("inventedBody")}</p>}
-              {!shown && complete && boxes.length > 1 && (
+              {!editor && !shown && complete && boxes.length > 1 && (
                 <div role="group" aria-label={tShell("box.boxes")} data-testid="site-boxes">
                   <p className="mb-1.5 text-xs text-muted">{tShell("box.hint")}</p>
                   <div className="flex flex-wrap gap-1.5">
@@ -660,7 +733,7 @@ export function WebsiteShell({
                 </div>
               )}
               {shown ? (
-                <BrowserFrame address={current.name} viewport={viewport}>
+                <BrowserFrame address={current.name} viewport={viewport} chrome={editor ? "address" : "dots"} liveAddress={editor ? liveUrl : null}>
                   <iframe
                     key={`${shown.id}:${pageSlug}`}
                     srcDoc={shownHtml}
@@ -671,7 +744,24 @@ export function WebsiteShell({
                   />
                 </BrowserFrame>
               ) : complete ? (
-                <BrowserFrame address={current.name} viewport={viewport}>
+                <BrowserFrame address={current.name} viewport={viewport} chrome={editor ? "address" : "dots"} liveAddress={editor ? liveUrl : null}>
+                  {editor ? (
+                    <SitePickFrame
+                      key={`${current.id}:${pageSlug}`}
+                      html={html}
+                      chosen={chosen}
+                      chosenLabel={chosen === null ? "" : tShell("editor.selectedTag", { name: chosenLabel })}
+                      // A part pressed in the page: chosen, or let go when it
+                      // already was. The work stays open on a phone too —
+                      // the field is under it there, not behind it.
+                      onPick={(i) => {
+                        if (i >= boxes.length) return;
+                        setBox(chosen === i ? null : { siteId: current.id, slug: pageSlug, index: i });
+                      }}
+                      title={current.name}
+                      hint={tShell("box.hint")}
+                    />
+                  ) : (
                   <iframe
                     key={`${current.id}:${pageSlug}:${html.length}`}
                     srcDoc={chosen === null ? html : outlineBoxes(html, chosen)}
@@ -680,10 +770,12 @@ export function WebsiteShell({
                     data-testid="site-live-preview"
                     className="h-full min-h-[60vh] w-full flex-1 bg-paper"
                   />
+                  )}
                 </BrowserFrame>
               ) : (
                 <p className="text-xs text-muted">{running(current) ? t("generating") : current.status === "flagged" ? t("flaggedBody") : failedText(current)}</p>
               )}
+              {editor && <AiGeneratedNotice variant="line" />}
             </div>
           ),
         }
@@ -692,6 +784,29 @@ export function WebsiteShell({
   const buildingNow = running(current);
 
   return (
+    <>
+    {/* ONCE each, outside the bar: the bar's actions are drawn twice by
+        width (components/shell/editor-shell.tsx), and two PublishControls
+        would be two answers to "is it live". */}
+    {editor && current && current.status === "completed" && (
+      <PublishControl key={current.id} headless websiteId={current.id} websiteName={current.name} onApi={(api) => setPublishState({ siteId: current.id, api })} />
+    )}
+    {editor && translating && current && (
+      <TranslateDialog
+        kind="site"
+        id={current.id}
+        onDone={(made) => {
+          const record = made.record as UserWebsite | undefined;
+          if (record) setWebsites((prev) => (prev.some((w) => w.id === record.id) ? prev : [record, ...prev]));
+        }}
+        onOpen={(made) => {
+          setTranslating(false);
+          setCurrentId(made.id);
+          setPane("site");
+        }}
+        onClose={() => setTranslating(false)}
+      />
+    )}
     <ToolShell
       ref={composerRef}
       name={tNames("site")}
@@ -720,11 +835,18 @@ export function WebsiteShell({
           </div>
         ) : null
       }
+      // The editor layout's one-row field says it short (CONTEXT §7, «Change
+      // this…»): the chip beside it already names the part, and a long
+      // example would wrap the row in two.
       placeholder={
         current?.status === "completed" && !pending
-          ? chosen === null
-            ? t("editPlaceholder")
-            : tShell("box.placeholder", { name: chosenLabel })
+          ? editor
+            ? chosen === null
+              ? tShell("editor.changeWork")
+              : tShell("editor.changeThis")
+            : chosen === null
+              ? t("editPlaceholder")
+              : tShell("box.placeholder", { name: chosenLabel })
           : t("descriptionPlaceholder")
       }
       sending={busy}
@@ -759,7 +881,11 @@ export function WebsiteShell({
           </div>
         ) : undefined
       }
-      options={[
+      // A NEW SITE'S OPTIONS (design, pages) say nothing about a change to
+      // the open one, which is what the field does once a site is made —
+      // so in the editor layout they leave the field then, and it is the
+      // approved one-row field (08-Site.png). They come back with «New».
+      options={editor && current?.status === "completed" && !pending ? [] : [
         <span key="design" className="relative">
           <button type="button" onClick={() => setChoosingDesign((v) => !v)} aria-expanded={choosingDesign} data-testid="site-design" className={OPTION}>
             <Palette className="h-3.5 w-3.5" aria-hidden="true" />
@@ -853,10 +979,12 @@ export function WebsiteShell({
               <p className="mt-1.5 text-[11px] text-muted">{t("estimatedCost", { count: estimatedCost })}</p>
             </FieldCost>
           ) : null}
+          {editor && !busy && !pending && current?.status === "completed" ? <FieldCost text={tEstimate("approx", { count: changeCost(html) })} /> : null}
         </>
       }
       work={work}
       onCloseWork={() => setPane(null)}
     />
+    </>
   );
 }

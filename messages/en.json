@@ -1382,7 +1382,8 @@
             "cv": "A CV for a marketing role",
             "letter": "A letter asking for an extension"
           }
-        }
+        },
+        "words": "{count, plural, one {# word} other {# words}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "Every version",
         "versionsHint": "Press one to see it. What you write next still changes the latest.",
         "liveVersions": "Published versions",
-        "undid": "Undid: {change}"
+        "undid": "Undid: {change}",
+        "version": "Version {n} · {live, select, yes {published} other {not published}}",
+        "publishState": "{live, select, yes {Published} other {Not published}}"
       },
       "box": {
         "only": "Changing only: {name}",
@@ -3473,7 +3476,11 @@
         "settings": "Settings",
         "credits": "Credits",
         "selected": "Selected: {name}",
-        "isOpen": "Open now"
+        "isOpen": "Open now",
+        "more": "More",
+        "selectedTag": "{name} · selected",
+        "changeThis": "Change this…",
+        "changeWork": "Say what to change…"
       }
     },
     "library": {

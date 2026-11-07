@@ -76,7 +76,8 @@ export function TranslateButton({
   );
 }
 
-function TranslateDialog({
+/** The dialog alone, for a screen that opens it from a menu of its own (Site's «More», components/shell/more-menu.tsx). */
+export function TranslateDialog({
   kind,
   id,
   openHref,

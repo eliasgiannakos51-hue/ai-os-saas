@@ -1382,7 +1382,8 @@
             "cv": "マーケティング職の履歴書",
             "letter": "延長を依頼する手紙"
           }
-        }
+        },
+        "words": "{count, plural, other {# 語}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "すべてのバージョン",
         "versionsHint": "タップすると表示されます。次に書く内容は常に最新版を変更します。",
         "liveVersions": "公開したバージョン",
-        "undid": "取り消し: {change}"
+        "undid": "取り消し: {change}",
+        "version": "バージョン {n} · {live, select, yes {公開中} other {未公開}}",
+        "publishState": "{live, select, yes {公開中} other {未公開}}"
       },
       "box": {
         "only": "変更するのはここだけ: {name}",
@@ -3473,7 +3476,11 @@
         "settings": "設定",
         "credits": "クレジット",
         "selected": "選択中: {name}",
-        "isOpen": "表示中"
+        "isOpen": "表示中",
+        "more": "その他",
+        "selectedTag": "{name} · 選択中",
+        "changeThis": "ここを変更…",
+        "changeWork": "変えたいことを入力…"
       }
     },
     "library": {

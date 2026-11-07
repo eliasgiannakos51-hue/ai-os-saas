@@ -1382,7 +1382,8 @@
             "cv": "سيرة ذاتية لوظيفة تسويق",
             "letter": "خطاب يطلب تمديد الموعد"
           }
-        }
+        },
+        "words": "{count, plural, zero {لا كلمات} one {كلمة واحدة} two {كلمتان} few {# كلمات} many {# كلمة} other {# كلمة}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "كل الإصدارات",
         "versionsHint": "اضغط على إصدار لعرضه. ما تكتبه بعد ذلك يغيّر دائمًا أحدث إصدار.",
         "liveVersions": "الإصدارات المنشورة",
-        "undid": "تم التراجع: {change}"
+        "undid": "تم التراجع: {change}",
+        "version": "الإصدار {n} · {live, select, yes {منشور} other {غير منشور}}",
+        "publishState": "{live, select, yes {منشور} other {غير منشور}}"
       },
       "box": {
         "only": "يتغيّر فقط: {name}",
@@ -3473,7 +3476,11 @@
         "settings": "الإعدادات",
         "credits": "الرصيد",
         "selected": "المحدد: {name}",
-        "isOpen": "مفتوح الآن"
+        "isOpen": "مفتوح الآن",
+        "more": "المزيد",
+        "selectedTag": "{name} · محدد",
+        "changeThis": "غيّر هذا…",
+        "changeWork": "قل ما الذي تريد تغييره…"
       }
     },
     "library": {

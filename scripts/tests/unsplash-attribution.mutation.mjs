@@ -34,6 +34,7 @@ const BUILDER = "src/lib/website-builder.ts";
 const BUDGET = "src/lib/unsplash-budget.ts";
 const REGISTRATION = "scripts/tests/unsplash-download-registration.test.mjs";
 const VISIBLE = "scripts/tests/unsplash-credit-visible.prodtest.mjs";
+const CONFIG = "next.config.mjs";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -291,6 +292,24 @@ const MUTANTS = [
     to: '  "display:block;margin:4px 0 0;font-size:11px;line-height:1.4;" +',
   },
 
+  // ------------------------------------------------------------------
+  // Guideline 1 — hotlink. The two ways next.config.mjs could start
+  // re-hosting while still naming Unsplash only as an img-src host (FD6).
+  // ------------------------------------------------------------------
+  {
+    name: "Unsplash is handed to the image optimiser",
+    suites: [COMPLIANCE],
+    file: CONFIG,
+    from: "  poweredByHeader: false,\n",
+    to: '  poweredByHeader: false,\n  images: { unoptimized: false },\n',
+  },
+  {
+    name: "a second line names Unsplash outside the img-src list",
+    suites: [COMPLIANCE],
+    file: CONFIG,
+    from: "  poweredByHeader: false,\n",
+    to: '  poweredByHeader: false,\n  env2: { cdn: "https://images.unsplash.com" },\n',
+  },
 ];
 
 let caught = 0;

@@ -223,6 +223,21 @@ export function DocumentsShell({
     }
   }
 
+  // THE EDITOR LAYOUT'S TAG (the switch "editor-shell", 11-Document.png):
+  // what the screen knows for certain about the open document — how many
+  // words it has, counted as the reader's language divides words
+  // (Intl.Segmenter), so a Chinese or Japanese document is not one "word"
+  // per paragraph.
+  const wordCount = useMemo(() => {
+    if (!editor || !open) return null;
+    const text = open.blocks.map((block) => (block.kind === "rule" ? "" : blockText(block))).join(" ");
+    const segmenter = typeof Intl !== "undefined" && "Segmenter" in Intl ? new Intl.Segmenter(locale, { granularity: "word" }) : null;
+    if (!segmenter) return text.split(/\s+/).filter(Boolean).length;
+    let n = 0;
+    for (const piece of segmenter.segment(text)) if (piece.isWordLike) n++;
+    return n;
+  }, [editor, open, locale]);
+
   const shellTurns: ShellTurn[] = turns.map((turn) =>
     turn.doc
       ? {
@@ -245,6 +260,7 @@ export function DocumentsShell({
     pane === "doc" && open
       ? {
           title: open.title,
+          status: wordCount === null ? undefined : t("words", { count: wordCount }),
           primary: { label: t("word"), icon: <FileDown className="h-4 w-4" aria-hidden="true" />, onClick: () => void exportDocx(open.id), disabled: exporting, busy: exporting },
           actions: (
             <>
@@ -261,41 +277,68 @@ export function DocumentsShell({
             </>
           ),
           body: (
-            <>
-              <p className="mb-3 text-xs text-muted">{t("boxHint")}</p>
+            // THE PAGE, CENTRED ON THE STAGE in the editor layout
+            // (11-Document.png, `.paper`: at most 740px, white, the ink on
+            // it); the blocks as they always were under the old shell.
+            <div data-testid="doc-page" className={editor ? "doc-paper" : undefined}>
+              <p className={`mb-3 text-xs ${editor ? "text-button-ink/70" : "text-muted"}`}>{t("boxHint")}</p>
               <ol className="space-y-2">
                 {open.blocks.map((block, index) => (
-                  <li key={index}>
+                  <li key={index} className={editor ? "relative" : undefined}>
+                    {/* THE SELECTED PARAGRAPH'S LABEL (11-Document.png,
+                        the editor layout only): the same "<name> ·
+                        selected" text the Site picker draws over its box
+                        (tShell("editor.selectedTag")), placed above this
+                        paragraph instead, since there is no sandboxed
+                        iframe here to post it into — the block IS the
+                        page's own DOM. */}
+                    {editor && box === index && block.kind !== "rule" && (
+                      <span
+                        data-testid="doc-box-selected-label"
+                        className="absolute -top-2.5 left-3 rounded-full bg-button-ink px-2 py-0.5 text-[11px] font-semibold leading-none text-paper"
+                      >
+                        {tShell("editor.selectedTag", { name: t("block", { n: index + 1 }) })}
+                      </span>
+                    )}
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(event) => {
                         if (block.kind === "rule") return;
                         setBox((v) => (v === index ? null : index));
-                        if (!workIsBeside()) setPane(null);
-                        composerRef.current?.focus();
+                        // In the editor layout the field is under the page
+                        // on a phone too, so the page stays; and the field
+                        // is focused only from the keyboard (detail 0), so
+                        // a press does not draw its ring or open a phone's
+                        // keyboard over the page.
+                        if (!editor && !workIsBeside()) setPane(null);
+                        if (!editor || event.detail === 0) composerRef.current?.focus();
                       }}
                       aria-pressed={box === index}
                       data-testid="doc-box"
                       data-kind={block.kind}
-                      className={`block min-h-[44px] w-full rounded-item px-3 py-2 text-start ${box === index ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`}
+                      className={
+                        editor
+                          ? `block min-h-[44px] w-full rounded-item px-3 py-2 text-start ${box === index ? "bg-button-ink/5 ring-2 ring-button-ink" : "hover:bg-button-ink/5"}`
+                          : `block min-h-[44px] w-full rounded-item px-3 py-2 text-start ${box === index ? "bg-panel-hover ring-1 ring-foreground" : "hover:bg-panel-hover"}`
+                      }
                     >
                       {block.kind === "heading" ? (
-                        <span className={`block font-semibold text-foreground ${block.level === 1 ? "text-lg" : "text-base"}`}>{blockText(block).replace(/\*/g, "")}</span>
+                        <span className={`block font-semibold ${editor ? "text-button-ink" : "text-foreground"} ${block.level === 1 ? "text-lg" : "text-base"}`}>{blockText(block).replace(/\*/g, "")}</span>
                       ) : block.kind === "listItem" ? (
-                        <span className="flex gap-2 text-sm text-body">
-                          <span className="text-muted">{block.marker}</span>
+                        <span className={`flex gap-2 text-sm ${editor ? "text-button-ink" : "text-body"}`}>
+                          <span className={editor ? "text-button-ink/70" : "text-muted"}>{block.marker}</span>
                           <span>{block.runs.map((r) => r.text).join("")}</span>
                         </span>
                       ) : block.kind === "rule" ? (
-                        <span className="block h-px bg-border" />
+                        <span className={`block h-px ${editor ? "bg-button-ink/15" : "bg-border"}`} />
                       ) : (
-                        <span className="block text-sm leading-relaxed text-body">{block.runs.map((r) => r.text).join("")}</span>
+                        <span className={`block text-sm leading-relaxed ${editor ? "text-button-ink" : "text-body"}`}>{block.runs.map((r) => r.text).join("")}</span>
                       )}
                     </button>
                   </li>
                 ))}
               </ol>
-            </>
+            </div>
           ),
         }
       : null;
@@ -314,12 +357,15 @@ export function DocumentsShell({
           </span>
         ) : null
       }
-      placeholder={editing && box !== null ? tShell("box.placeholder", { name: t("block", { n: box + 1 }) }) : editing ? t("changePlaceholder") : t("placeholder")}
+      placeholder={editing && box !== null ? (editor ? tShell("editor.changeThis") : tShell("box.placeholder", { name: t("block", { n: box + 1 }) })) : editing ? t("changePlaceholder") : t("placeholder")}
       sending={running}
       onSend={(text) => void (editing ? change(text) : write(text))}
       onStop={() => abortRef.current?.abort()}
       onLengthChange={setLength}
-      options={[
+      // Once a document is open its kind is fixed (the option is disabled
+      // then), so in the editor layout it leaves the field, which is then
+      // the approved one row (11-Document.png). It comes back with «New».
+      options={editor && editing ? [] : [
         <span key="kind" className="relative">
           <button type="button" onClick={() => setChoosing((v) => !v)} aria-expanded={choosing} disabled={editing} data-testid="document-kind" className={`${OPTION} disabled:opacity-40`}>
             {kindNames[kind]}

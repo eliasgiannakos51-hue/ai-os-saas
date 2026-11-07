@@ -89,7 +89,7 @@ gates που έλεγαν βεβαιότητα χωρίς να την έχουν
 
 | # | Σημείο | Κατάσταση | Βαρύτητα | Σχέση με το πρώτο |
 |---|---|---|---|---|
-| ΑΣ2-3.1 | Εικόνες μέσα στο chat renderάρονται χωρίς CSP `img-src` ή λίστα επιτρεπόμενων πηγών | διορθώθηκε (2026-10-31, `img-src 'self' data: blob:` στο `next.config.mjs` + `isAllowedChatImageSrc` στο `src/components/chat/message-content.tsx`, κρατημένο από `message-content.test.mjs`/`.mutation.mjs` και `entitlement-trust.test.mjs` §7) | σοβαρό | νέο |
+| ΑΣ2-3.1 | Εικόνες μέσα στο chat renderάρονται χωρίς CSP `img-src` ή λίστα επιτρεπόμενων πηγών | διορθώθηκε (2026-10-31, `img-src 'self' data: blob:` στο `next.config.mjs` + `isAllowedChatImageSrc` στο `src/components/chat/message-content.tsx`, κρατημένο από `message-content.test.mjs`/`.mutation.mjs` και `entitlement-trust.test.mjs` §7). **2026-11-05 (FD6):** η λίστα πήρε ακριβώς δύο origins με γραμμένο λόγο — του Supabase του project (από το `NEXT_PUBLIC_SUPABASE_URL`, στο build) και του Unsplash CDN — ποτέ σκέτο `https:` ή `*`· το chat μένει στα τρία πρώτα. Μαζί, hardening: `object-src 'none'`, `base-uri 'none'` | σοβαρό | νέο |
 | ΑΣ2-3.2 | Το κείμενο συνημμένων στο chat μπαίνει στο prompt χωρίς το ίδιο τύλιγμα «δεδομένα, όχι εντολές» που έχουν ήδη τα Αρχεία | διορθώθηκε (2026-10-31, `wrapUntrusted` στο `src/lib/chat/attachments.ts`, κρατημένο από `chat-attachments.test.mjs`/`.itest.mjs`/`.mutation.mjs`) | σοβαρό | νέο |
 | ΑΣ2-3.3 | Η μνήμη μπαίνει στο system prompt χωρίς τύλιγμα | ανοιχτό | μικρό (φτάνει μέτριο μόνο σε συνδυασμό με τα δύο πάνω) | επιβεβαιώνει μισό του ΑΣ-6.1 («Συσκέψεις και μνήμη: όχι ακόμα») |
 | ΑΣ2-3.4 | Ο φραγμός τύλιξης του Rebuild μπορεί να ξαναφτιαχτεί από περιεχόμενο τρίτης σελίδας μέσω αποκωδικοποίησης HTML entity | ανοιχτό | μικρό | νέο |

@@ -29,6 +29,37 @@ export type MotionStyle = (typeof MOTION_STYLES)[number];
 export function MotionButton() {
   const tShell = useTranslations("dashboard.toolShell");
   const [motionOpen, setMotionOpen] = useState(false);
+
+  return (
+    <span className="relative">
+      <button
+        type="button"
+        onClick={() => setMotionOpen((v) => !v)}
+        aria-expanded={motionOpen}
+        aria-label={tShell("motion.button")}
+        title={tShell("motion.button")}
+        data-testid="motion-button"
+        className={ACTION}
+      >
+        <Sparkles className="h-4 w-4" aria-hidden="true" />
+      </button>
+      {motionOpen && (
+        <div role="menu" aria-label={tShell("motion.button")} className="surface absolute end-0 top-full z-10 mt-2 w-64">
+          <MotionList />
+        </div>
+      )}
+    </span>
+  );
+}
+
+/**
+ * THE LIST AND ITS PREVIEW, on their own: under MotionButton's popover in
+ * the old bar, and inside the editor layout's «More» menu
+ * (components/shell/more-menu.tsx) in the new one — the same eight
+ * choices, the same stop-gate, one piece of code.
+ */
+export function MotionList() {
+  const tShell = useTranslations("dashboard.toolShell");
   const [motionPreview, setMotionPreview] = useState<MotionStyle | null>(null);
 
   // EVERY t() CALL HERE USES A STATIC STRING KEY, on purpose — a
@@ -46,43 +77,28 @@ export function MotionButton() {
   };
 
   return (
-    <span className="relative">
-      <button
-        type="button"
-        onClick={() => setMotionOpen((v) => !v)}
-        aria-expanded={motionOpen}
-        aria-label={tShell("motion.button")}
-        title={tShell("motion.button")}
-        data-testid="motion-button"
-        className={ACTION}
-      >
-        <Sparkles className="h-4 w-4" aria-hidden="true" />
-      </button>
-      {motionOpen && (
-        <div role="menu" aria-label={tShell("motion.button")} className="surface absolute end-0 top-full z-10 mt-2 w-64" onMouseLeave={() => setMotionPreview(null)}>
-          <ul className="flex flex-col gap-1">
-            {MOTION_STYLES.map((style) => (
-              <li key={style}>
-                <button
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={false}
-                  data-testid="motion-choice"
-                  data-motion-style={style}
-                  onMouseEnter={() => setMotionPreview(style)}
-                  onFocus={() => setMotionPreview(style)}
-                  className={`${OPTION} w-full justify-start`}
-                >
-                  {motionLabels[style]}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <div data-testid="motion-preview" className="mt-2 flex items-center justify-center rounded-item bg-panel-hover p-3">
-            <span className={`motion-demo motion-demo-${motionPreview ?? "none"} rounded-item bg-paper px-4 py-2 text-xs text-foreground`}>{tShell("motion.previewSample")}</span>
-          </div>
-        </div>
-      )}
-    </span>
+    <div onMouseLeave={() => setMotionPreview(null)}>
+      <ul className="flex flex-col gap-1">
+        {MOTION_STYLES.map((style) => (
+          <li key={style}>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={false}
+              data-testid="motion-choice"
+              data-motion-style={style}
+              onMouseEnter={() => setMotionPreview(style)}
+              onFocus={() => setMotionPreview(style)}
+              className={`${OPTION} w-full justify-start`}
+            >
+              {motionLabels[style]}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div data-testid="motion-preview" className="mt-2 flex items-center justify-center rounded-item bg-panel-hover p-3">
+        <span className={`motion-demo motion-demo-${motionPreview ?? "none"} rounded-item bg-paper px-4 py-2 text-xs text-foreground`}>{tShell("motion.previewSample")}</span>
+      </div>
+    </div>
   );
 }

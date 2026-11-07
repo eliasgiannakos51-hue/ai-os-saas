@@ -54,7 +54,8 @@ check("reference photos are still attachable", /data-testid="site-photos"/.test(
 check("unfilled/invented-number warnings are still shown", /unfilledTitle/.test(shell) && /inventedTitle/.test(shell));
 
 console.log("\n== 2. the browser frame wraps BOTH previews (live and an old version) ==");
-check("the live preview is wrapped in BrowserFrame", /<BrowserFrame[\s\S]{0,400}data-testid="site-live-preview"[\s\S]{0,200}<\/BrowserFrame>/.test(shell));
+check("the live preview is wrapped in BrowserFrame — the old one, and the editor layout's pressable one (ED2)",
+  /<BrowserFrame[^>]*>\s*\{editor \? \(\s*<SitePickFrame[\s\S]{0,1200}data-testid="site-live-preview"[\s\S]{0,200}<\/BrowserFrame>/.test(shell));
 check("the old-version preview is wrapped in BrowserFrame too", /<BrowserFrame[\s\S]{0,400}data-testid="site-version-preview"[\s\S]{0,200}<\/BrowserFrame>/.test(shell));
 check("both share the one viewport toggle, not two", (shell.match(/viewport=\{viewport\}/g) ?? []).length === 2);
 check(
@@ -73,8 +74,9 @@ check("the component uses the shared .browser-frame class, no raw border utility
 check("that shared class is declared exactly once in globals.css", (css.match(/^\s*\.browser-frame\s*\{/gm) ?? []).length === 1);
 
 console.log("\n== 5. Motion is a SHARED component, not inline/copied code (Apps directive, 2026-10-30) ==");
-check("Site imports the shared MotionButton, does not re-declare it", /import \{ MotionButton \} from "@\/components\/shell\/motion-button"/.test(shell));
-check("...and renders it in the same actions bar as the viewport toggle", /data-testid="site-viewport-mobile"[\s\S]{0,1200}<MotionButton \/>/.test(shell));
+check("Site imports the shared MotionButton and its list, does not re-declare them", /import \{ MotionButton, MotionList \} from "@\/components\/shell\/motion-button"/.test(shell));
+check("...and renders the button in the same actions bar as the viewport toggle", /\{!editor && viewportGroup\}[\s\S]{0,600}<MotionButton \/>/.test(shell));
+check("...and in the editor layout (ED2), the same list in «More», one press away", /id: "motion", label: tShell\("motion\.button"\),[^}]*panel: <MotionList \/>/.test(shell));
 check("no Motion state/markup is left inline in website-shell.tsx (fully extracted)", !/motionOpen|motionPreview|MOTION_STYLES/.test(shell));
 
 console.log("\n== 6. the Motion button and list themselves — the owner's stop-gate, in the shared file ==");

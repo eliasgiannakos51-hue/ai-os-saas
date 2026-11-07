@@ -1382,7 +1382,8 @@
             "cv": "一份市场营销职位的简历",
             "letter": "一封申请延期的信"
           }
-        }
+        },
+        "words": "{count, plural, other {# 个词}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "所有版本",
         "versionsHint": "点按一个版本即可查看。你接下来写的内容仍会修改最新版本。",
         "liveVersions": "已发布的版本",
-        "undid": "已撤销：{change}"
+        "undid": "已撤销：{change}",
+        "version": "版本 {n} · {live, select, yes {已发布} other {未发布}}",
+        "publishState": "{live, select, yes {已发布} other {未发布}}"
       },
       "box": {
         "only": "只改：{name}",
@@ -3473,7 +3476,11 @@
         "settings": "设置",
         "credits": "积分",
         "selected": "已选择：{name}",
-        "isOpen": "已打开"
+        "isOpen": "已打开",
+        "more": "更多",
+        "selectedTag": "{name} · 已选中",
+        "changeThis": "修改这里…",
+        "changeWork": "说说要改什么…"
       }
     },
     "library": {

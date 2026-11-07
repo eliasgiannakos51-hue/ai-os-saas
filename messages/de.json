@@ -1382,7 +1382,8 @@
             "cv": "Einen Lebenslauf für eine Marketingstelle",
             "letter": "Einen Brief mit der Bitte um Fristverlängerung"
           }
-        }
+        },
+        "words": "{count, plural, one {# Wort} other {# Wörter}}"
       }
     },
     "chat": {
@@ -3411,7 +3412,9 @@
         "versions": "Alle Versionen",
         "versionsHint": "Tippe auf eine, um sie anzusehen. Was du danach schreibst, ändert weiterhin die neueste.",
         "liveVersions": "Veröffentlichte Versionen",
-        "undid": "Rückgängig gemacht: {change}"
+        "undid": "Rückgängig gemacht: {change}",
+        "version": "Version {n} · {live, select, yes {veröffentlicht} other {nicht veröffentlicht}}",
+        "publishState": "{live, select, yes {Veröffentlicht} other {Nicht veröffentlicht}}"
       },
       "box": {
         "only": "Nur ändern: {name}",
@@ -3473,7 +3476,11 @@
         "settings": "Einstellungen",
         "credits": "Guthaben",
         "selected": "Ausgewählt: {name}",
-        "isOpen": "Jetzt geöffnet"
+        "isOpen": "Jetzt geöffnet",
+        "more": "Mehr",
+        "selectedTag": "{name} · ausgewählt",
+        "changeThis": "Das hier ändern…",
+        "changeWork": "Sag, was sich ändern soll…"
       }
     },
     "library": {

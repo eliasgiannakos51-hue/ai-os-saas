@@ -11,6 +11,11 @@
  * And (2026-11-04) the approved editor layout behind the switch
  * "editor-shell": the full-width work, one white button, the 288px panel,
  * the floating field that stays mounted, the chip and the price in it.
+ * And (2026-11-05, ED2) Site and Document to their approved screens: Publish
+ * as Site's one white button, «More» holding everything else, no banner or
+ * pills above the page, the AI line under it, the address bar, a part
+ * pressed without closing the work, the one-row field, Document's tag and
+ * its centred page.
  *
  * Run: node scripts/tests/tool-shell.mutation.mjs
  */
@@ -46,7 +51,13 @@ const EDITOR = "src/components/shell/editor-shell.tsx";
 const DASH_LAYOUT = "src/app/dashboard/layout.tsx";
 const IMAGES_PAGE = "src/app/dashboard/images/page.tsx";
 const TOPNAV = "src/components/dashboard/top-nav.tsx";
-const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, FILES_OLD, SITE_PHOTOS, SITE_HISTORY, EDITOR, DASH_LAYOUT, IMAGES_PAGE, TOPNAV];
+const PUBLISH = "src/components/publishing/publish-control.tsx";
+const MORE = "src/components/shell/more-menu.tsx";
+const FRAME_CHROME = "src/components/website-builder/browser-frame.tsx";
+const COMPOSER_SRC = "src/components/chat/chat-composer.tsx";
+const DOCS = "src/components/documents/documents-shell.tsx";
+const CSS = "src/app/globals.css";
+const TARGETS = [GATE, SHELL, POSTS, PAGE, SLIDES, SLIDES_PAGE, RESEARCH, ANALYZE, FILES, UPLOAD, SITE, SITE_REQUESTS, SITE_GENERATE, JOBS, FILES_PAGE, FILES_OLD, SITE_PHOTOS, SITE_HISTORY, EDITOR, DASH_LAYOUT, IMAGES_PAGE, TOPNAV, PUBLISH, MORE, FRAME_CHROME, COMPOSER_SRC, DOCS, CSS];
 
 const MUTANTS = [
   {
@@ -470,8 +481,8 @@ const MUTANTS = [
   {
     name: "Site: «History» is not over the preview, so the list cannot be opened",
     file: SITE,
-    from: '              <AiGeneratedNotice variant="block" />\n              {historyToggle}\n',
-    to: '              <AiGeneratedNotice variant="block" />\n',
+    from: '              {!editor && <AiGeneratedNotice variant="block" />}\n              {!editor && historyToggle}\n',
+    to: '              {!editor && <AiGeneratedNotice variant="block" />}\n',
     expect: "its versions are one press away",
   },
   {
@@ -607,6 +618,168 @@ const MUTANTS = [
     from: 'className="btn-quiet min-w-[44px] shrink-0 justify-center lg:px-3.5"',
     to: 'className="btn-quiet min-w-[44px] shrink-0 justify-center bg-button text-button-ink lg:px-3.5"',
     expect: "«Make anything» is outlined",
+  },
+  // ---- ED2 (2026-11-05): Site and Document to their approved screens ----
+  {
+    name: "Site's Publish is no longer the bar's white button",
+    file: SITE,
+    from: "          primary: sitePrimary,\n",
+    to: "",
+    expect: "Site: Publish is the bar's ONE white button",
+  },
+  {
+    name: "a second publish control is drawn inside the bar, which is drawn twice by width",
+    file: SITE,
+    from: '              <MoreMenu label={tShell("editor.more")}',
+    to: '              <PublishControl websiteId={current.id} websiteName={current.name} />\n              <MoreMenu label={tShell("editor.more")}',
+    expect: "...told by ONE publish control",
+  },
+  {
+    name: "what Publish said about the site open a moment ago is shown for this one",
+    file: SITE,
+    from: "publishState && current && publishState.siteId === current.id && current.status",
+    to: "publishState && current && current.status",
+    expect: "...and what it says is about THIS site",
+  },
+  {
+    name: "«Publish changes» reads the empty dialog field again",
+    file: PUBLISH,
+    from: "const target = !open && site ? validateSubdomain(site.subdomain) : check;",
+    to: "const target = check;",
+    expect: "«Publish changes» after a reload",
+  },
+  {
+    name: "Site: in the editor layout «More» no longer opens the versions",
+    file: SITE,
+    from: '{ id: "versions", label: t("tabHistory"), icon: <History className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => setHistory(showingHistory ? null : current.id),',
+    to: '{ id: "versions", label: t("tabHistory"), icon: <History className="h-4 w-4 shrink-0" aria-hidden="true" />, onSelect: () => setViewing(null),',
+    expect: "its versions are one press away",
+  },
+  {
+    name: "undo is dropped from «More»",
+    file: SITE,
+    from: '{ id: "undo", label: tShell("pages.undo"),',
+    to: '{ id: "undone", label: tShell("pages.undo"),',
+    expect: "Site: nothing the old bar had is dropped",
+  },
+  {
+    name: "Esc no longer closes «More»",
+    file: MORE,
+    from: 'else if (event.key === "Escape") {',
+    to: 'else if (event.key === "Esc") {',
+    expect: "«More» is a menu button",
+  },
+  {
+    name: "the AI banner is back above the page in the editor layout",
+    file: SITE,
+    from: '{!editor && <AiGeneratedNotice variant="block" />}',
+    to: '<AiGeneratedNotice variant="block" />',
+    expect: "Site: above the page, no banner",
+  },
+  {
+    name: "the numbered pills are back above the page in the editor layout",
+    file: SITE,
+    from: "{!editor && !shown && complete && boxes.length > 1 && (",
+    to: "{!shown && complete && boxes.length > 1 && (",
+    expect: "Site: above the page, no banner",
+  },
+  {
+    name: "the AI label disappears from the editor layout",
+    file: SITE,
+    from: '              {editor && <AiGeneratedNotice variant="line" />}\n',
+    to: "",
+    expect: "...and the AI label is not lost",
+  },
+  {
+    name: "the frame's bar is the dots again",
+    file: FRAME_CHROME,
+    from: '{chrome === "address" ? (',
+    to: '{chrome === "adress" ? (',
+    expect: "Site: the frame's bar is a shield and the address",
+  },
+  {
+    name: "pressing a part closes the work on a phone again",
+    file: SITE,
+    from: "if (i >= boxes.length) return;\n",
+    to: "if (i >= boxes.length) return;\n                        if (!workIsBeside()) setPane(null);\n",
+    expect: "Site: a part pressed in the page is chosen there",
+  },
+  {
+    name: "the price of a change leaves Site's field",
+    file: SITE,
+    from: '          {editor && !busy && !pending && current?.status === "completed" ? <FieldCost text={tEstimate("approx", { count: changeCost(html) })} /> : null}\n',
+    to: "",
+    expect: "Site: the price of a change is said in the field",
+  },
+  {
+    name: "the new-site options squeeze into the field over a made site",
+    file: SITE,
+    from: 'options={editor && current?.status === "completed" && !pending ? [] : [',
+    to: "options={[",
+    expect: "Site: once a site is made, the new-site options leave the field",
+  },
+  {
+    name: "the field is focused on arrival over open work again",
+    file: COMPOSER_SRC,
+    from: 'autoFocus={shape !== "inline"}',
+    to: "autoFocus",
+    expect: "the field is not focused on arrival",
+  },
+  {
+    name: "an empty field is no longer as tall as its placeholder",
+    file: COMPOSER_SRC,
+    from: "      if (!el.value) resize(el);\n    };\n    fit();",
+    to: "    };\n    fit();",
+    expect: "an empty field is as tall as its placeholder",
+  },
+  {
+    name: "Document loses its tag",
+    file: DOCS,
+    from: '          status: wordCount === null ? undefined : t("words", { count: wordCount }),\n',
+    to: "",
+    expect: "Document: the tag is the document's word count",
+  },
+  {
+    name: "Document's page is no longer centred",
+    file: CSS,
+    from: "@apply mx-auto w-full max-w-[740px] flex-1",
+    to: "@apply w-full max-w-[740px] flex-1",
+    expect: "Document: the page is centred on the stage",
+  },
+  {
+    name: "Document's fixed kind squeezes into the field over an open document",
+    file: DOCS,
+    from: "options={editor && editing ? [] : [",
+    to: "options={[",
+    expect: "Document: once a document is open its fixed kind leaves the field",
+  },
+  {
+    name: "on a phone «+» sits alone above the chosen piece again",
+    file: COMPOSER_SRC,
+    from: '"max-lg:-order-2 max-lg:basis-full"',
+    to: '"max-lg:basis-full"',
+    expect: "on a phone the chosen piece is the field's first row",
+  },
+  {
+    name: "pressing a paragraph closes the work on a phone again",
+    file: DOCS,
+    from: "if (!editor && !workIsBeside()) setPane(null);",
+    to: "if (!workIsBeside()) setPane(null);",
+    expect: "Document: pressing a paragraph keeps the work open",
+  },
+  {
+    name: "the chosen paragraph's «selected» label disappears",
+    file: DOCS,
+    from: '{editor && box === index && block.kind !== "rule" && (',
+    to: '{false && editor && box === index && block.kind !== "rule" && (',
+    expect: "Document: the chosen paragraph gets the same «<name> · selected» label",
+  },
+  {
+    name: "the chosen paragraph's ring turns the old blue",
+    file: DOCS,
+    from: "bg-button-ink/5 ring-2 ring-button-ink",
+    to: "bg-button-ink/5 border-2 border-dashed border-blue-600",
+    expect: "Document: the chosen paragraph gets the same «<name> · selected» label",
   },
 ];
 

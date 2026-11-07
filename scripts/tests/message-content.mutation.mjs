@@ -3,14 +3,15 @@
  * CAN message-content.test.mjs SEE A CHAT ANSWER LOAD AN IMAGE FROM
  * ANYWHERE IT WANTS (ΑΣ2-3.1)?
  *
- * Three ways the guard quietly stops guarding: the protocol-relative
+ * The ways the guard quietly stops guarding: the protocol-relative
  * bypass this same file's own test caught once already before it
  * shipped (`//evil.example/...` starts with "/", so a predicate that
  * only checked that prefix let it through — fixed, kept here so it
  * cannot come back unnoticed); the guard removed from the `img`
  * component entirely; and the allowlist widened to bare `https:`,
  * which is the published-sites' own CSP precedent and exactly the hole
- * this fix exists to close for chat.
+ * this fix exists to close for chat. A fourth (hardening, 2026-11-05):
+ * the same protocol-relative address spelled with a backslash.
  *
  * EVERY MUTATION IS AN EDIT OF REAL CODE, never an `if (false)`:
  * scripts/check-mutation-markers.mjs fails the build on that literal.
@@ -29,6 +30,13 @@ const MUTANTS = [
     from: '  if (src.startsWith("//")) return false;\n',
     to: "",
     expect: "a protocol-relative URL is refused",
+  },
+  {
+    name: "the backslash spelling of a protocol-relative URL is allowed again",
+    file: SOURCE,
+    from: '  if (src.startsWith("/\\\\")) return false;\n',
+    to: "",
+    expect: "...and so is the same address written with a backslash",
   },
   {
     name: "the img component stops calling the guard at all",

@@ -15,7 +15,10 @@
 //   5. A recurring add-on never overwrites the plan.
 //   6. Ownership checks where the admin client reads by an id or a path
 //      that came from a user's own row or request.
-//   7. The app sends its own security headers.
+//   7. The app sends its own security headers; an image comes only from
+//      the app, inline data, a local blob, the project's own Supabase or a
+//      listed host, and plugins and <base> are refused (FD6 and hardening,
+//      2026-11-05).
 //   8. The internal hand-off secret is compared in constant time.
 //   9. A research report is written by the server only: the migration
 //      takes INSERT and UPDATE from the account, and every write in src/
@@ -163,11 +166,46 @@ ok(
 // =====================================================================
 console.log("\n== 7. the app's own security headers ==");
 // =====================================================================
+// THE SUPABASE ADDRESS IS SET HERE, NOT INHERITED. next.config.mjs derives
+// one img-src origin from NEXT_PUBLIC_SUPABASE_URL when it is imported, so
+// a gate that imported it under the machine's environment would answer
+// differently on a laptop with no Supabase and on Vercel with one — the
+// exact shape of aec56a2 (scripts/tests/env-independence.test.mjs).
+const FIXTURE_SUPABASE = "https://abcdefghijklmnopqrst.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_URL = `${FIXTURE_SUPABASE}/rest/v1/?apikey=never-in-a-policy`;
 const config = await import(path.resolve("next.config.mjs"));
 const headers = Object.fromEntries((config.APP_SECURITY_HEADERS ?? []).map((h) => [h.key, h.value]));
 ok("framing refused", headers["X-Frame-Options"] === "DENY" && /frame-ancestors 'none'/.test(headers["Content-Security-Policy"] ?? ""));
-ok("...and an image a chat answer embeds can only come from the app itself, inline data, or a local blob (ΑΣ2-3.1)",
-  /img-src 'self' data: blob:/.test(headers["Content-Security-Policy"] ?? "") && !/img-src[^;]*https:/.test(headers["Content-Security-Policy"] ?? ""));
+// THE LIST, held HERE as well as in next.config.mjs: an origin added there
+// and not here is red, which is the point — every image host is a decision
+// with its reason written beside it (FD6, 2026-11-05), never a line that
+// slips in. Unsplash: slides' and generated sites' stock photos, hotlinked
+// as the Unsplash terms require.
+const LISTED_IMAGE_HOSTS = ["https://images.unsplash.com"];
+const imgSrc = /(?:^|;)\s*img-src\s+([^;]*)/.exec(headers["Content-Security-Policy"] ?? "")?.[1].trim().split(/\s+/) ?? [];
+const allowedSources = new Set(["'self'", "data:", "blob:", FIXTURE_SUPABASE, ...LISTED_IMAGE_HOSTS]);
+ok(`img-src was found and read (${imgSrc.join(" ")})`, imgSrc.length >= 3);
+ok("...an image can only come from the app itself, inline data, a local blob, the project's own Supabase or a listed host (ΑΣ2-3.1, FD6)",
+  imgSrc.length > 0 && imgSrc.every((s) => allowedSources.has(s)), `not on the list: ${imgSrc.filter((s) => !allowedSources.has(s)).join(" ")}`);
+ok("...never a bare scheme that admits every host (https:, http:, wss: …)", !imgSrc.some((s) => /^[a-z][a-z0-9+.-]*:$/i.test(s) && s !== "data:" && s !== "blob:"), imgSrc.join(" "));
+ok("...never a wildcard host", !imgSrc.some((s) => s.includes("*")), imgSrc.join(" "));
+ok("...and the project's own Supabase origin IS there, as its origin only — no path, no query",
+  imgSrc.includes(FIXTURE_SUPABASE) && !imgSrc.some((s) => /supabase\.co\/|apikey/.test(s)), imgSrc.join(" "));
+ok("...and every listed host is there, so the list cannot go stale", LISTED_IMAGE_HOSTS.every((h) => imgSrc.includes(h)));
+// The derivation itself, run on the shapes a deployment could hand it.
+const derive = typeof config.supabaseImageOrigin === "function" ? config.supabaseImageOrigin : () => "missing";
+ok("the derivation takes an https origin and nothing after it", derive("https://xyzproject.supabase.co/storage/v1?x=1") === "https://xyzproject.supabase.co");
+ok("...refuses plain http on a host that is not this machine's own loopback", derive("http://xyzproject.supabase.co") === null);
+ok("...takes http on loopback, where only the local Supabase and the test stand-in answer", derive("http://127.0.0.1:54611") === "http://127.0.0.1:54611" && derive("http://localhost:54321") === "http://localhost:54321");
+ok("...refuses a wildcard host the URL parser would accept", derive("https://*.supabase.co") === null);
+ok("...refuses credentials, a non-URL, an empty or a missing value", [derive("https://user:pw@xyzproject.supabase.co"), derive("not a url"), derive(""), derive(undefined)].every((v) => v === null));
+ok("...and with no Supabase address the policy allows none", typeof config.imageSources === "function" && config.imageSources({}).join(" ") === ["'self'", "data:", "blob:", ...LISTED_IMAGE_HOSTS].join(" "));
+// Hardening, 2026-11-05: nothing in the app draws an <object>, an <embed>
+// or a <base>, so both directives are closed. Read as directives, not as
+// substrings, so a value of 'self' or a missing quote is red too.
+const directive = (name) => new RegExp(`(?:^|;)\\s*${name}\\s+([^;]*)`).exec(headers["Content-Security-Policy"] ?? "")?.[1].trim() ?? null;
+ok("plugins refused: object-src 'none'", directive("object-src") === "'none'", String(directive("object-src")));
+ok("a <base> tag refused: base-uri 'none'", directive("base-uri") === "'none'", String(directive("base-uri")));
 ok("no content-type guessing", headers["X-Content-Type-Options"] === "nosniff");
 ok("a referrer policy and a permissions policy", Boolean(headers["Referrer-Policy"]) && /camera=\(\)/.test(headers["Permissions-Policy"] ?? ""));
 const resolved = await config.default.headers();

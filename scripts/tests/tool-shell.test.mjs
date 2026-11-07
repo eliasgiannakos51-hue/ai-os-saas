@@ -320,7 +320,10 @@ check("Site: a photo refused or not sent is said in the screen's words, never st
 check("Site: its versions are one press away, above the preview and over the list",
   /onClick=\{\(\) => setHistory\(showingHistory \? null : current\.id\)\}[\s\S]{0,200}data-testid="site-history-open"/.test(site) &&
     /body: showingHistory \? \(\s*<div className="flex flex-col gap-3">\s*\{historyToggle\}\s*<SiteHistory\s/.test(site) &&
-    /<div data-testid="site-preview" className="flex h-full flex-col gap-3">\s*<AiGeneratedNotice variant="block" \/>\s*\{historyToggle\}/.test(site));
+    /<div data-testid="site-preview" className=\{editor \? "[^"]*" : "flex h-full flex-col gap-3"\}>[\s\S]{0,200}?\{!editor && <AiGeneratedNotice variant="block" \/>\}\s*\{!editor && historyToggle\}/.test(site) &&
+    // ...and in the editor layout (the switch "editor-shell", ED2) the same
+    // press is «More»'s «History», over the list it opens.
+    /id: "versions", label: t\("tabHistory"\),[^}]*onSelect: \(\) => setHistory\(showingHistory \? null : current\.id\)/.test(site));
 check("Site: ...every version, read as the old History tab reads it",
   /\.from\("website_versions"\)\s*\.select\("\*"\)\s*\.eq\("website_id", websiteId\)\s*\.order\("version_number", \{ ascending: false \}\)/.test(siteHistory) &&
     /\.from\("website_versions"\)\s*\.select\("\*"\)\s*\.eq\("website_id", websiteId\)\s*\.order\("version_number", \{ ascending: false \}\)/.test(oldSite) && /onClick=\{\(\) => onView\(version\)\}/.test(siteHistory));
@@ -547,6 +550,86 @@ for (const l of LOCALES) {
   check(`${l}: the editor layout's words`,
     ["chat", "result", "view", "conversation", "closeChat", "settings", "credits", "isOpen"].every((k) => typeof e[k] === "string" && e[k]) && /\{name\}/.test(e.selected ?? "") &&
       ["variants", "change", "full", "have"].every((k) => typeof m.images?.panel?.[k] === "string" && m.images.panel[k]) && /\{count, plural/.test(m.images?.panel?.credits ?? ""));
+}
+
+console.log('\n== 12. Site and Document to their approved screens, under the same switch (ED2, 2026-11-05) ==');
+// docs/design/approved/08-Site.png and 11-Document.png. Everything here is
+// the editor layout's branch only: sections 1-10 still hold the old one,
+// line for line, and those checks were not relaxed to make room. The part
+// of the page pressed IN the page, and why only one script runs there, is
+// scripts/tests/site-pick-frame.test.mjs; the browser is
+// scripts/tests/editor-shell.prodtest.mjs.
+{
+  const publish = read("src/components/publishing/publish-control.tsx");
+  const more = readIfThere("src/components/shell/more-menu.tsx");
+  const frameSrc = read("src/components/website-builder/browser-frame.tsx");
+  const notice = read("src/components/ai/ai-generated-notice.tsx");
+  const docs = read("src/components/documents/documents-shell.tsx");
+  check("Site: Publish is the bar's ONE white button, from the publish control's own state",
+    /primary: sitePrimary,/.test(site) && /onClick: publishing\.isLive \? publishing\.publishChanges : publishing\.openPublish,/.test(site) &&
+      /label: publishing\.isLive \? tPub\("publishChanges"\) : publishing\.everPublished \? tPub\("republish"\) : tPub\("publish"\),/.test(site));
+  check("...told by ONE publish control with no buttons of its own, outside the bar that is drawn twice by width",
+    (site.match(/<PublishControl key=\{current\.id\} headless\b/g) ?? []).length === 1 &&
+      (() => { const at = site.indexOf("actions: editor ? ("); const block = at < 0 ? "" : site.slice(at, site.indexOf(") : (", at)); return block.includes("<MoreMenu") && !block.includes("<PublishControl"); })() &&
+      /\{!headless && \(\s*<div className="flex flex-wrap items-center gap-1\.5">/.test(publish) && /onApi\?\.\(\{/.test(publish));
+  check("...and what it says is about THIS site, never the one open a moment ago",
+    /const publishing = publishState && current && publishState\.siteId === current\.id && current\.status === "completed" \? publishState\.api : null;/.test(site));
+  check("«Publish changes» after a reload publishes to the site's own address instead of returning on an empty field",
+    /const target = !open && site \? validateSubdomain\(site\.subdomain\) : check;\s*if \(!target\.ok\) return;/.test(publish) && /JSON\.stringify\(\{ subdomain: target\.subdomain \}\)/.test(publish));
+  {
+    const ids = [...site.matchAll(/\{ id: "([a-z]+)", label:/g)].map((m) => m[1]);
+    check(`Site: nothing the old bar had is dropped — «More» holds undo, the download, the versions, the translation, Motion, the live site and taking it offline (${ids.join(", ")})`,
+      ["undo", "download", "versions", "translate", "motion", "live", "unpublish"].every((id) => ids.includes(id)) &&
+        /actions: editor \? \(\s*<>\s*\{liveUrl && <CopyButton[^>]*\/>\}\s*<MoreMenu label=\{tShell\("editor\.more"\)\}/.test(site));
+  }
+  check("«More» is a menu button: its items are menuitems, arrows move, Esc gives focus back, a press outside closes it",
+    /aria-haspopup="menu"/.test(more) && /role="menu"/.test(more) && (more.match(/role="menuitem"/g) ?? []).length >= 2 &&
+      /event\.key === "ArrowDown"/.test(more) && /event\.key === "Escape"/.test(more) && /close\(true\)/.test(more) && /document\.addEventListener\("pointerdown", onDown\)/.test(more) &&
+      /flex min-h-\[44px\]/.test(more));
+  check("Site: above the page, no banner, no History button and no numbered pills in the editor layout",
+    /\{!editor && <AiGeneratedNotice variant="block" \/>\}/.test(site) && /\{!editor && historyToggle\}/.test(site) && /\{!editor && !shown && complete && boxes\.length > 1 && \(/.test(site));
+  check("...and the AI label is not lost: one muted line under the page, the long sentence, never hidden from a screen reader",
+    /\{editor && <AiGeneratedNotice variant="line" \/>\}\s*<\/div>/.test(site) && /if \(variant === "line"\) \{[\s\S]{0,400}\{t\("long"\)\}/.test(notice) && !/aria-hidden="true"[^>]*>\s*\{t\("long"\)\}/.test(notice));
+  check("Site: the frame's bar is a shield and the address in the editor layout, no dots — the live address once it is live, the name before",
+    (site.match(/chrome=\{editor \? "address" : "dots"\} liveAddress=\{editor \? liveUrl : null\}/g) ?? []).length === 2 &&
+      /\{chrome === "address" \? \(\s*<div className="browser-frame-address">\s*<Shield\b[\s\S]{0,300}\{liveAddress \? shownAddress\(liveAddress\) : address\}/.test(frameSrc) &&
+      !/browser-frame-address[\s\S]{0,400}bg-danger/.test(frameSrc));
+  check("Site: the tag is the version and whether it is live, when both are known",
+    /tShell\("site\.version", \{ n: latestVersion, live: publishing\.isLive \? "yes" : "no" \}\)/.test(site) && /status: siteTag \?\? \(/.test(site));
+  check("Site: a part pressed in the page is chosen there, and the work stays open on a phone",
+    /onPick=\{\(i\) => \{\s*if \(i >= boxes\.length\) return;\s*setBox\(chosen === i \? null : \{ siteId: current\.id, slug: pageSlug, index: i \}\);\s*\}\}/.test(site));
+  check("Site: the price of a change is said in the field, from the estimator the edit route holds against, on the same input",
+    /estimateForAction\(\s*"websiteEdit",\s*\{ model: WEBSITE_BUILDER_MODEL, inputChars: pageHtml\.length \+ length, imageCount: photos\.length, planSlug \}/.test(site) &&
+      /\{editor && !busy && !pending && current\?\.status === "completed" \? <FieldCost text=\{tEstimate\("approx", \{ count: changeCost\(html\) \}\)\} \/> : null\}/.test(site) &&
+      /inputChars: sourceHtml\.length \+ changeRequest\.length,\s*imageCount: referenceImagePaths\.length,/.test(read("src/app/api/websites/edit/route.ts")));
+  check("the one-row field says it short once a piece is chosen («Change this…», CONTEXT §7), in Site and Document",
+    /\? editor\s*\? chosen === null\s*\? tShell\("editor\.changeWork"\)\s*: tShell\("editor\.changeThis"\)/.test(site) && /editor \? tShell\("editor\.changeThis"\)/.test(docs));
+  check("Site: once a site is made, the new-site options leave the field, so it is the approved one row",
+    /options=\{editor && current\?\.status === "completed" && !pending \? \[\] : \[/.test(site));
+  check("the field is not focused on arrival over open work, and an empty field is as tall as its placeholder",
+    /autoFocus=\{shape !== "inline"\}/.test(composerSrc) && /useLayoutEffect\(\(\) => \{\s*if \(!editor\) return;[\s\S]{0,200}if \(!el\.value\) resize\(el\);/.test(composerSrc) &&
+      /requestAnimationFrame\(fit\)/.test(composerSrc));
+  check("Document: the tag is the document's word count, counted as its language divides words",
+    /status: wordCount === null \? undefined : t\("words", \{ count: wordCount \}\),/.test(docs) && /new Intl\.Segmenter\(locale, \{ granularity: "word" \}\)/.test(docs) && /piece\.isWordLike/.test(docs));
+  check("Document: the page is centred on the stage, white, at most 740px (.paper)",
+    /<div data-testid="doc-page" className=\{editor \? "doc-paper" : undefined\}>/.test(docs) && /\bmx-auto\b/.test(cssRule("doc-paper")) && /max-w-\[740px\]/.test(cssRule("doc-paper")) && /\bbg-paper\b/.test(cssRule("doc-paper")));
+  check("Document: once a document is open its fixed kind leaves the field, so it is the approved one row",
+    /options=\{editor && editing \? \[\] : \[/.test(docs));
+  check("on a phone the chosen piece is the field's first row, above «+», the text and send (M14-Image.png)",
+    /"max-lg:-order-2 max-lg:basis-full"/.test(composerSrc) && /shape === "inline" \? "order-first max-lg:-order-1" : ""/.test(composerSrc));
+  check("Document: pressing a paragraph keeps the work open on a phone, and focuses the field only from the keyboard",
+    /if \(!editor && !workIsBeside\(\)\) setPane\(null\);/.test(docs) && /if \(!editor \|\| event\.detail === 0\) composerRef\.current\?\.focus\(\);/.test(docs));
+  check("Document: the chosen paragraph gets the same «<name> · selected» label as Site's, and a solid ink ring, never the old blue dashed one",
+    /data-testid="doc-box-selected-label"/.test(docs) && /tShell\("editor\.selectedTag", \{ name: t\("block", \{ n: index \+ 1 \}\) \}\)/.test(docs) &&
+      /ring-2 ring-button-ink/.test(docs) && !/border-blue|border-dashed|outline-blue/.test(docs));
+  for (const l of LOCALES) {
+    const m = JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard ?? {};
+    const e = m.toolShell ?? {};
+    check(`${l}: ED2's words`,
+      typeof e.editor?.more === "string" && e.editor.more && /\{name\}/.test(e.editor?.selectedTag ?? "") &&
+        /\{n\}/.test(e.site?.version ?? "") && /\{live, select, yes \{/.test(e.site?.version ?? "") && /\{live, select, yes \{/.test(e.site?.publishState ?? "") &&
+        /^\{count, plural, /.test(m.documents?.writer?.words ?? "") && ["changeThis", "changeWork"].every((k) => typeof e.editor?.[k] === "string" && e.editor[k] && !/[{}]/.test(e.editor[k])));
+  }
 }
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);

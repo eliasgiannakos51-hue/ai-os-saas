@@ -3,6 +3,7 @@
 import {
   forwardRef,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -132,6 +133,32 @@ export const ChatComposer = forwardRef<
     el.style.height = `${el.scrollHeight}px`;
   }
 
+  // AN EMPTY EDITOR FIELD IS AS TALL AS WHAT IT SAYS. Chromium counts a
+  // wrapped placeholder in scrollHeight (measured 2026-11-05: three lines
+  // of Site's at 200px read 84px), so sizing the empty box to it means a
+  // placeholder that runs to two lines on a phone is never cut in half —
+  // in the one-row shape as well as the stacked one, whose min-h-16 was
+  // the first answer to the same thing (5031899). Re-measured when the
+  // words change and when the width does, in the next frame, so the
+  // observer never sees the size it caused.
+  useLayoutEffect(() => {
+    if (!editor) return;
+    const el = textareaRef.current;
+    if (!el) return;
+    const fit = () => {
+      if (!el.value) resize(el);
+    };
+    fit();
+    let width = el.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth === width) return;
+      width = el.clientWidth;
+      requestAnimationFrame(fit);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [editor, placeholder]);
+
   useImperativeHandle(ref, () => ({
     setText: (text: string) => {
       setInput(text);
@@ -167,7 +194,14 @@ export const ChatComposer = forwardRef<
     if (!text || holdSend) return;
     setInput("");
     onLengthChange?.(0);
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    if (textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.height = "auto";
+      // Emptied by the send: back to the placeholder's own height (above).
+      if (editor) requestAnimationFrame(() => {
+        if (!el.value) resize(el);
+      });
+    }
     onSend(text);
   }
 
@@ -216,6 +250,10 @@ export const ChatComposer = forwardRef<
                 `max-h-40 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-3 text-sm text-foreground outline-none placeholder:text-muted ${shape === "landing" ? "min-h-16 basis-full" : "min-h-[44px] min-w-[8rem]"}`
               : `focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "ring-1 ring-foreground/60" : ""}`
           }
+          // Not over open work (the one-row shape): there the page is what
+          // the person came back to, and a field focused on arrival drew
+          // its 2px ring round the field before anything was pressed
+          // (ED2, 2026-11-05). The start screen and Chat still open on it.
           autoFocus
         />
         {/* THE MICROPHONE SITS BESIDE THE BOX, NEVER INSTEAD OF IT, and
@@ -229,7 +267,7 @@ export const ChatComposer = forwardRef<
             The «+» after it gives the message a PDF or an image (package
             9), when the screen passes `attach`. */}
         <div
-          className={`absolute bottom-2 start-2 flex items-center gap-1 ${editor ? "!static" : ""} ${shape === "inline" ? "order-first" : ""} ${shape === "landing" ? "min-w-0 flex-1 flex-wrap" : ""}`}
+          className={`absolute bottom-2 start-2 flex items-center gap-1 ${editor ? "!static" : ""} ${shape === "inline" ? "order-first max-lg:-order-1" : ""} ${shape === "landing" ? "min-w-0 flex-1 flex-wrap" : ""}`}
         >
           {!editor && (
           <Link
@@ -292,7 +330,9 @@ export const ChatComposer = forwardRef<
             source order); in the stacked shape, where the controls are not
             first, it is a row of its own above the text. */}
         {editor && leading ? (
-          <div className={`order-first flex min-w-0 items-center ${shape === "landing" ? "basis-full px-1 pt-0.5" : "max-lg:basis-full"}`}>{leading}</div>
+          // On a phone the chip is a row of its own, and the FIRST row —
+          // above «+», the text and send (M14-Image.png).
+          <div className={`order-first flex min-w-0 items-center ${shape === "landing" ? "basis-full px-1 pt-0.5" : "max-lg:-order-2 max-lg:basis-full"}`}>{leading}</div>
         ) : null}
         {trailingBeside && (
           <div className={`absolute bottom-2 end-14 flex items-center ${editor ? "!static shrink-0" : ""}`}>{trailingBeside}</div>

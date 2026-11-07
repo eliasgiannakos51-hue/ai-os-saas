@@ -665,4 +665,14 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261115000000_account_suspension.sql",
     breaks: "A suspended account's agents, automations, flows and reminders keep running on schedule, and an account suspended before 2026-11-05 can clear its own suspension flag — sign-in and the API are still refused",
   },
+  {
+    // ONE OBJECT FOR THE WHOLE FILE: discord_builds and discord_build_items
+    // are the other two 20261119000000 creates, and a missing
+    // discord_guilds answers the same "was this ever pasted in" question
+    // for all three — api/discord/connect's callback writes this one first.
+    kind: "table",
+    table: "discord_guilds",
+    migration: "20261119000000_discord_bot.sql",
+    breaks: "connecting a Discord server fails at the final save after the OAuth round trip, and /dashboard/discord shows no server ever connected",
+  },
 ];

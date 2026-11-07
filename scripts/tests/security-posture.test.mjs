@@ -222,6 +222,18 @@ const ADMIN_ONLY_TABLES = new Set([
   // admin routes. RLS since 20261111000000_admin_audit_log_rls.sql — its
   // create migration had only a REVOKE.
   "admin_audit_log",
+  // Discord (the owner's Discord directive, 2026-11-05): RLS on, no
+  // policy, all grants revoked from anon and authenticated, deny-all for
+  // the row-points-at-someone-else's-resource reason rather than the
+  // pairing tables' secret-in-flight one — a client insert into
+  // discord_guilds could claim a server it never ran OAuth for, and one
+  // into discord_build_items could make Undo delete something that
+  // existed before an apply. Read and written only through
+  // createAdminClient() in lib/discord/store.ts, filtered on the
+  // session's own user_id, which section 2 asserts file by file.
+  "discord_guilds",
+  "discord_builds",
+  "discord_build_items",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -557,6 +569,15 @@ const NO_SESSION_BY_DESIGN = {
     "to 180/hour per IP, which is well above the ~60 polls an honest ten-minute " +
     "pairing makes.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
+  "src/app/api/discord/interactions/route.ts":
+    "Discord's Interactions Endpoint (the owner's Discord directive, 2026-11-05): " +
+    "authenticated by verifyInteraction's Ed25519 signature over the timestamp plus " +
+    "the raw body against DISCORD_PUBLIC_KEY, not a cookie — Discord calls this, not " +
+    "a browser, so there is no session to check. The request names a guild_id, never " +
+    "a user: guildOwner(guildId) resolves it to the Ionexa account that ran OAuth for " +
+    "that server (lib/discord/store.ts), and only a member with Manage Server or " +
+    "Administrator in that guild gets an answer. Rate-limited to 30/hour per guild " +
+    "through checkRateLimit scope discord_ask.",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",

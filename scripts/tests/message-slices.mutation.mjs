@@ -121,7 +121,9 @@ const MUTANTS = [
     // 71 -> 72 on 2026-10-28, «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 6:
     // project-flow-field.tsx's own `useTranslations()` with no namespace,
     // reaching `dashboard.createAnything.send`.
-    from: "    unbounded: 72,",
+    // 72 -> 73 on 2026-11-07, agent/discord: discord-shell.tsx's own
+    // `t(\`flash.${flash}\`)`, a template-literal key.
+    from: "    unbounded: 73,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

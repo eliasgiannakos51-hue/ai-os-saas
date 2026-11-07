@@ -137,6 +137,12 @@ const ROUTED = {
   "src/lib/meetings/meeting-analyse-call.ts": {
     note: "Meetings. One call, recorded onto the caller's accumulator and settled by the route that made it.",
   },
+  "src/lib/discord/ask.ts": {
+    note: "The /ionexa ask slash command (agent/discord, 2026-11-07). Reserves against the same chatMessage estimate chat uses, before the call, against the Discord-connected account rather than the asker (checkAiCallAllowed gates it first); settles as discord_ask on success, releases the hold on any failure or an unsettled outcome.",
+  },
+  "src/lib/discord/planner.ts": {
+    note: "The server plan/replan/apply-step call (agent/discord, 2026-11-07). Takes its caller's accumulator as a required parameter rather than opening its own; api/discord/plan/route.ts is the one reserve/settle pair around it, so retries and the three planner actions (plan, replan, box-change) are all one hold.",
+  },
   "src/lib/meetings/meeting-ask-call.ts": {
     note: "A follow-up question on ONE meeting (Κομμάτι 6, api/meetings/[id]/ask), reserved against meetingAsk and settled under the SAME meeting_analyse feature the meeting's own analysis settles under. Same reserve-then-settle as a data-analysis follow-up question, at its own estimate.",
   },

@@ -257,6 +257,11 @@ const OUTSIDE_EVERY_POPULATION = {
     why:
       "the public web for a published Rebuild app (Κομμάτι 4's third piece), the same boundary /s/[subdomain]/route.ts already is for sites. No session is read — the admin client is used because rebuild_projects has no public RLS policy at all, so a stranger can only receive one app's html for a live subdomain, nothing else on the row and nothing by listing. It writes nothing, so there is no row to own and no insert to bound. It calls the same publicRequestAllowed in-memory window the sites route uses before it touches the database, and re-runs checkAppHtml at read time — the HTML already passed this once before the row could be written, but this is the moment it starts being served to a stranger with no session at all, and a row that would not pass the check today is served as absent rather than as whatever it is.",
   },
+  "src/app/api/discord/interactions/route.ts": {
+    has: ["bound:rate_limit"],
+    why:
+      "Discord's own Interactions Endpoint (agent/discord, 2026-11-07). No session is read because Discord, not a browser, calls this — identity is verifyInteraction's Ed25519 check over timestamp plus the raw body against DISCORD_PUBLIC_KEY, which the identity detector cannot see. The request carries a guild_id, not a user id: guildOwner(guildId) resolves it to the Ionexa account that connected that server, so what gets charged is never named in the request body. It inserts no row of its own — answerAsk and the credit hold it takes live in lib/discord/ask.ts, called from after() — so there is nothing here to own and no insert to bound beyond checkRateLimit scope discord_ask, thirty an hour per guild.",
+  },
 };
 
 const undeclared = askedNothing.filter((f) => !OUTSIDE_EVERY_POPULATION[f]);

@@ -76,7 +76,8 @@ const MUTANTS = [
     // mutation-anchors is the gate that reports it, two gates further down a
     // chain that stops at the first red. Fixing count-claims and pushing it
     // without running the mutation suites is how a broken anchor ships.
-    from: "                    65 pages instead of 8, and the four components below",
+    // 65 -> 66 on 2026-11-07, agent/discord: /dashboard/discord landed.
+    from: "                    66 pages instead of 8, and the four components below",
     to: "                    45 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },

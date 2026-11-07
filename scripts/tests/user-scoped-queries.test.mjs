@@ -115,6 +115,14 @@ const ALLOWED = new Map([
       "dashboard/costs/page.tsx::CostsPage above. The `userId: string` is a field of its own result rows.",
   ],
   [
+    "src/lib/discord/signatures.ts::verifyState",
+    "Queries no table — the QUERIES detector is matching Buffer.from(json) " +
+      "and Buffer.from(a), not a Supabase .from(). verifyState compares the " +
+      "state's embedded user id against opts.userId in constant time " +
+      "(sameText(p.u, opts.userId)), which IS the ownership check — the " +
+      "same explicit-compare shape route-mechanisms.mjs names for routes.",
+  ],
+  [
     "src/lib/images/image-access.ts::showImages",
     "Its query is to storage, for paths read off rows the caller already selected with .eq(\"user_id\", user.id); " +
       "userId is the owner folder every one of those paths must start with (readVariants), so a path that is not the owner's is never signed.",

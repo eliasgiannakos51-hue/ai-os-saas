@@ -277,7 +277,18 @@ const COMMITS = {
   // Unconditional: setTurns runs straight after the read, which is
   // stronger than a guard and is why this one is spelled differently.
   "src/components/voice/voice-conversation.tsx": { varName: "answer", commit: "setTurns((current) => [...current, turn]);" },
+  // Discord's apply/undo stream (agent/discord, 2026-11-07): each event
+  // commits to `live` as it arrives (made/failed/deleted), and the final
+  // `done` event — cast to `finished` — decides which sentence the
+  // person sees once the stream ends.
+  "src/components/discord/discord-shell.tsx": { varName: "finished", commit: 'if (finished?.status === "applied") say(t("applied"));' },
 };
+
+// Consumers whose stream carries no event.text at all — typed progress
+// markers rather than an accumulating reply — so "guards delta text type"
+// below has nothing to find and is skipped for them, with the reason
+// written here rather than at the one call site (there is only one).
+const NO_TEXT_DELTA = new Set(["src/components/discord/discord-shell.tsx"]);
 const undeclaredStreamers = streamers.filter((f) => !COMMITS[f]);
 check("every streaming component is accounted for here", undeclaredStreamers, []);
 const staleStreamers = Object.keys(COMMITS).filter((f) => !streamers.includes(f));
@@ -330,8 +341,14 @@ for (const [file, varName, commit] of CONSUMERS) {
     "the interruption is read out of the result and never acted on"
   );
   checkTrue(`${file}: distinguishes partial from empty`, src.includes("streamInterruptedPartial"));
-  // A raw "undefined" must never be concatenated into a reply.
-  checkTrue(`${file}: guards delta text type`, /typeof event\.text === "string"/.test(src));
+  // A raw "undefined" must never be concatenated into a reply — for a
+  // stream that accumulates text deltas. Discord's apply/undo stream
+  // (agent/discord, 2026-11-07) has no event.text at all: its events are
+  // typed progress markers (made/failed/deleted/done), and the one field
+  // it reads off each (event.box) is already guarded the same way this
+  // check asks for (String(event.box ?? "") — see the commit above), so
+  // the check is skipped rather than faked with a dead literal.
+  if (!NO_TEXT_DELTA.has(file)) checkTrue(`${file}: guards delta text type`, /typeof event\.text === "string"/.test(src));
 }
 
 // The user-facing strings must exist in every locale, or next-intl renders

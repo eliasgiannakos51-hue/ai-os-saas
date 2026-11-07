@@ -204,6 +204,16 @@ const DENY_ALL_ON_PURPOSE = {
   // their session, and the routes look the row up for them.
   pending_deletions: "an account's scheduled deletion (directive 39 Κομμάτι 3): when it runs, and the SHA-256 of each emailed cancel link of that schedule; after the deletion runs, a row with no account and no digest left, the record that it ran. Read and written only through lib/account/pending-deletion.ts with the service role — by the confirm, cancel and status routes and api/cron/execute-deletions — so the digest of the one link that can stop a deletion is reachable from no browser.",
   admin_audit_log: "the owner's record of what staff did to which account (directive 42 Κομμάτι 9). A customer who could read it would learn who was looked at and why; one who could write it could forge or bury an entry. Read and written only in lib/admin/audit-log.ts through createAdminClient(), behind the admin routes' isAdminEmail gates. RLS since 20261111000000_admin_audit_log_rls.sql.",
+  // The fourth and fifth and sixth that belong to the person rather than
+  // being written about them, deny-all for a different reason than the
+  // pairing tables: not a ten-minute secret, but a row a client insert
+  // could point at someone else's resource. discord_guilds, 20261119000000
+  // _discord_bot.sql: a browser that could insert its own row could claim
+  // a Discord server as connected to an account that never ran the
+  // invite-and-OAuth flow in api/discord/connect and api/discord/callback.
+  discord_guilds: "which Discord server an account connected (the owner's Discord directive, 2026-11-05). A client insert could point an account at a server it does not administer; only api/discord/connect and api/discord/callback write it, under the service role, after the OAuth round trip with Discord proves the caller actually has Manage Server there.",
+  discord_builds: "a server plan /ionexa (dashboard/discord) made or is applying. Same reasoning as discord_guilds: api/discord/plan and api/discord/apply write it through the service role after checking the session owns the guild_id's discord_guilds row; a client write could forge a plan for a server it never asked to change.",
+  discord_build_items: "every id api/discord/apply created inside Discord for one build, read back so «Αναίρεση» deletes those and nothing else. A client write here could make Undo delete a channel or role that existed before the apply ever ran; api/discord/apply is the only writer, through the service role.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

@@ -273,7 +273,12 @@ console.log("\n== 2. the lines ==");
 // suspended-notice.tsx (3): the notice card and its reason box.
 // NO FILLED ACCENT BUTTON came with any of them beyond the one the admin
 // dashboard already had: one-primary-action's own count is untouched.
-ok(`border utilities (${r.counts.borders}), ceiling 685`, r.counts.borders <= 685);
+// 685 -> 689, agent/discord (2026-11-07): all four land in
+// discord-shell.tsx (the connect panel, the server/permission list and
+// the plan's boxes each need their own frame or header rule, the same
+// unavoidable shape every entry above already argues) — nothing else in
+// the tree moved.
+ok(`border utilities (${r.counts.borders}), ceiling 689`, r.counts.borders <= 689);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

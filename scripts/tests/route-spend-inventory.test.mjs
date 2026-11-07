@@ -317,6 +317,31 @@ const DECLARED = {
     scope: "telegram_link_act",
     why: "connects or disconnects one Telegram chat. The bot URL in its closure is lib/notify/channels/telegram, imported only to read the bot's own username for the deep link - nothing is sent from here and no credit is charged. Bounded by checkRateLimit scope telegram_link_act, twenty an hour per account, answering 429.",
   },
+
+  // --- discord bot (agent/discord, 2026-11-07) ---
+  // Four routes that call discord.com/api, each free and each bounded by
+  // its own checkRateLimit scope — no model, no credit, same shape as the
+  // telegram_link_act route above.
+  discord: {
+    bound: "limited",
+    scope: "discord_disconnect",
+    why: "«Αποσύνδεση» of one server: the bot calls DELETE /guilds/{id}/members/@me (lib/discord/bot.ts, botLeave) and the account forgets it, through lib/discord/store.ts's ownsGuild/unlinkGuild filtered on the caller's own id. No model, no credit. Bounded by checkRateLimit scope discord_disconnect, twenty an hour per account, answering 429.",
+  },
+  "discord/connect": {
+    bound: "limited",
+    scope: "discord_connect",
+    why: "redirects to Discord's own OAuth authorize screen with a signed, ten-minute state (lib/discord/signatures.ts); it calls discord.com/api nowhere itself — DISCORD_API lives in lib/discord/rest.ts, imported here only for botPermissionInteger()'s constant. No model, no credit. Bounded by checkRateLimit scope discord_connect, ten an hour per account, answering 429.",
+  },
+  "discord/callback": {
+    bound: "limited",
+    scope: "discord_connect",
+    why: "the OAuth return leg: exchanges the single-use code at discord.com/api/oauth2/token, asks the bot for the server (GET /guilds/{id}), and registers the slash command — all free Discord API calls, no model and no credit. Shares checkRateLimit scope discord_connect with api/discord/connect, both legs of the same ten-an-hour budget, answering 429.",
+  },
+  "discord/apply": {
+    bound: "limited",
+    scope: "discord_apply",
+    why: "«Φτιάξ' το στο Discord» and «Αναίρεση»: the only route that changes anything in Discord, through lib/discord/apply.ts's applyBlueprint/undoItems calling discord.com/api box by box. No model is called and nothing is charged — every id it creates is recorded in public.discord_build_items before the next request, so a dropped stream loses no state. Bounded by checkRateLimit scope discord_apply, twenty an hour per account, answering 429.",
+  },
 };
 
 // ---------------------------------------------------------------------
@@ -339,6 +364,20 @@ if (undeclared.length) {
 // ---------------------------------------------------------------------
 // 2. A declared bound is verified against the tree, not believed.
 // ---------------------------------------------------------------------
+// A LIMITED ROUTE THAT REFUSES BY REDIRECT, NOT BY STATUS CODE.
+// api/discord/callback (agent/discord, 2026-11-07) is Discord's own
+// OAuth-return leg: the browser lands here mid-navigation, having already
+// left Ionexa's origin and come back, so a JSON 429 would render as a
+// blank page rather than anything the person could act on. It refuses
+// the same as every other limited route — `if (!limited.allowed) return
+// back("rate_limited")` stops the exchange before it starts — just
+// through a 303 to /dashboard/discord?discord=rate_limited, read by
+// dashboard.discord.flash.rate_limited (already named in limit-texts.
+// test.mjs's SAID_ELSEWHERE for this exact route). The literal-429 check
+// below is otherwise right across the tree; this is the one route whose
+// refusal a status code cannot carry.
+const REFUSES_BY_REDIRECT = new Set(["src/app/api/discord/callback/route.ts"]);
+
 const brokenClaims = [];
 for (const [name, entry] of Object.entries(DECLARED)) {
   const found = classified.find((c) => shortName(c.route) === name);
@@ -363,7 +402,7 @@ for (const [name, entry] of Object.entries(DECLARED)) {
     }
     // A limiter whose answer is never acted on is a counter. The route has
     // to be able to refuse.
-    if (!/\b429\b/.test(SOURCE.get(found.route) || "")) {
+    if (!/\b429\b/.test(SOURCE.get(found.route) || "") && !REFUSES_BY_REDIRECT.has(found.route)) {
       brokenClaims.push(`${name}: declared "limited", but the route never answers 429`);
     }
   }

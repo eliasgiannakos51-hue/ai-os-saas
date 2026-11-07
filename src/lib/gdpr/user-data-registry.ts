@@ -147,6 +147,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // MOAT»): the customers, suppliers and partners named in a
   // conversation — behind the switch "business-contact-memory".
   { table: "business_contacts", label: "business_contacts", scope: "user_content" },
+  // The Discord connector (agent/discord, 2026-11-07): the servers
+  // connected, the plans made for them and the items each plan built —
+  // behind the switch "discord-bot".
+  { table: "discord_guilds", label: "discord_guilds", scope: "user_content" },
+  { table: "discord_builds", label: "discord_builds", scope: "user_content" },
+  { table: "discord_build_items", label: "discord_build_items", scope: "user_content" },
   { table: "ai_missions", label: "missions", scope: "user_content" },
   { table: "user_websites", label: "websites", scope: "user_content" },
   { table: "website_versions", label: "website_versions", scope: "user_content" },

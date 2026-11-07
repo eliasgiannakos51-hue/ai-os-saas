@@ -4841,7 +4841,7 @@
         "read_message_history": "Ιστορικό μηνυμάτων",
         "manage_guild": "Διαχείριση server",
         "manage_webhooks": "Διαχείριση webhooks",
-        "administrator": "Administrator",
+        "administrator": "Διαχειριστής",
         "ban_members": "Αποκλεισμός μελών"
       },
       "flash": {
@@ -4872,12 +4872,12 @@
           "class": "Server για την τάξη μου, με ανακοινώσεις και εργασίες"
         }
       },
-      "server": "Server",
+      "server": "Διακομιστής",
       "disconnect": "Αποσύνδεση",
       "disconnectConfirm": "Το Ionexa θα φύγει από αυτόν τον server. Ό,τι έφτιαξε μένει στο Discord και δεν αναιρείται πια από εδώ.",
       "priceLabel": "Τιμή",
-      "price": "≈ {credits} credits για ένα πλάνο ή μια αλλαγή με λόγια. Το «Φτιάξ' το», τα τικ, το σβήσιμο κουτιού και η Αναίρεση δεν χρεώνουν.",
-      "cost": "≈ {credits} credits",
+      "price": "≈ {credits, plural, one {# credit} other {# credits}} για ένα πλάνο ή μια αλλαγή με λόγια. Το «Φτιάξ' το», τα τικ, το σβήσιμο κουτιού και η Αναίρεση δεν χρεώνουν.",
+      "cost": "≈ {credits, plural, one {# credit} other {# credits}}",
       "slashLabel": "Μέσα στον server",
       "slash": "Το /ionexa ask απαντά μέσα στον server με τα credits αυτού του λογαριασμού, σε όσους μπορούν να διαχειρίζονται τον server.",
       "planning": "Σχεδιάζω τον server…",
@@ -4889,6 +4889,8 @@
       "applied": "Έγινε. Όλο το πλάνο είναι στο Discord.",
       "undone": "Αναιρέθηκε. Σβήστηκε μόνο ό,τι έφτιαξε το Ionexa.",
       "stoppedAt": "Σταμάτησε στο «{name}». Ό,τι γράφει «Έγινε» είναι στο Discord· η Αναίρεση το σβήνει.",
+      "streamInterrupted": "Η σύνδεση διακόπηκε. Δεν έγινε τίποτα στο Discord.",
+      "streamInterruptedPartial": "Η σύνδεση διακόπηκε στη μέση. Ό,τι γράφει «Έγινε» παραπάνω είναι στο Discord· το υπόλοιπο όχι.",
       "undo": "Αναίρεση",
       "undoConfirm": "Να σβηστεί μόνο ό,τι έφτιαξε το Ionexa σε αυτόν τον server; Τίποτα από όσα υπήρχαν πριν δεν αγγίζεται.",
       "primary": "Φτιάξ' το στο Discord",
@@ -4914,7 +4916,7 @@
         "roles": "Ρόλοι",
         "channels": "Κατηγορίες και κανάλια",
         "messages": "Μηνύματα",
-        "automod": "AutoMod"
+        "automod": "Αυτόματη διαχείριση"
       },
       "kind": {
         "text": "Κανάλι κειμένου",

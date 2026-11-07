@@ -280,6 +280,8 @@ const SAID_ELSEWHERE = {
   "src/lib/apps/charge.ts": "its own code vocabulary (`rate_limited`), said by the App builder's own sentence (section 1)",
   "src/lib/agents/execute-agent.ts": "an agent's run, refused as a run result, not a screen's request",
   "src/lib/automations/runner.ts": "a step of a running automation, recorded as the step's note",
+  "src/app/api/discord/plan/route.ts": "refuse(\"rate_limited\"), said by dashboard.discord.flash.rate_limited — its own fixed sentence, the same shape as the Automations entries above",
+  "src/lib/discord/ask.ts": "say(\"tooMany\"), said by discordBot.tooMany — a Discord interaction reply, not this screen's request; the fixed sentence is all a slash command's response can carry",
 };
 const callers = walk("src").filter((p) => p !== path.join("src", "lib", "ai-circuit-breaker.ts") && /checkAiCallAllowed\(/.test(readFileSync(p, "utf8")));
 check(`the population: every file under src/ that calls checkAiCallAllowed (${callers.length})`, callers.length >= 30, String(callers.length));

@@ -183,7 +183,11 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // already does) to reach `dashboard.createAnything.send` — one key
     // from a namespace this component otherwise has no reason to declare,
     // the same unbounded shape as every entry above it.
-    unbounded: 72,
+    // 72 -> 73 on 2026-11-07, agent/discord: discord-shell.tsx reaches
+    // `t(\`flash.${flash}\`)` — a template-literal key, the exact shape
+    // already named for affiliate-dashboard.tsx and agents-shell.tsx
+    // above, for the connect/callback flow's own flash status.
+    unbounded: 73,
   },
   {
     name: "onboarding",

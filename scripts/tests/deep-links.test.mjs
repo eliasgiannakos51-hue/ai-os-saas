@@ -313,7 +313,11 @@ for (const l of favLinks) {
 // the floor had been left at 72, so it carried 2 of slack before today.
 // 75 -> 76, same day: /api/admin/audit-log?limit= (Κ9, the audit log tab
 // wired up after orphan-i18n-keys.test.mjs found its label unreachable).
-const DEEP_LINK_FLOOR = 76;
+// 76 -> 77 (2026-11-07, agent/discord): /dashboard/discord?discord= — the
+// Discord connect/callback flow reads its own query-carried status
+// (connected, cancelled, expired, etc., src/app/dashboard/discord/
+// page.tsx) back on return from Discord's OAuth redirect.
+const DEEP_LINK_FLOOR = 77;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

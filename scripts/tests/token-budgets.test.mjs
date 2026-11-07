@@ -132,6 +132,12 @@ const CLASSIFIED = {
     // just above, truncationNotice appended before the answer is shown
     // or saved to meeting_questions.
     "src/lib/meetings/meeting-ask-call.ts",
+    // «/ionexa ask» (agent/discord, 2026-11-07): the member's own question,
+    // answered as free text through runCompletion and shown in Discord.
+    // Checks AI_TRUNCATED_STOP_REASON itself rather than calling
+    // modelTextFrom, and appends the same «cut» notice other deliverables
+    // get through that door before the answer is posted.
+    "src/lib/discord/ask.ts",
   ],
   structured: [
     // Connect by address (2026-10-26): 600 tokens for one forced tool call
@@ -199,6 +205,14 @@ const CLASSIFIED = {
     // a plan missing its last screens would otherwise parse as a
     // smaller, valid app.
     "src/lib/apps/app-call.ts",
+    // Discord server plans (agent/discord, 2026-11-07). The same shape as
+    // app-call/game-call above: one forced tool call (set_server)
+    // returning the whole plan or one changed box, and a reply cut at
+    // PLAN_MAX_TOKENS is refused by stopReason as "unusable" — a plan
+    // missing its last boxes would otherwise parse as a smaller, valid
+    // one, which is exactly the severed-but-structured shape this file
+    // exists to stop.
+    "src/lib/discord/planner.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",

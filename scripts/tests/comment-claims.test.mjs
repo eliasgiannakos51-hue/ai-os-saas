@@ -343,7 +343,11 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // comment in that one file to be counted for containing the name of
   // one of its own constants; the honest reading of this ceiling is that
   // roughly three of its eighty-two are this, not a limitation at all.
-  const CENSUS_CEILING = 82;
+  // 82 -> 83 ON 2026-11-07: the same mechanism again, in the same file —
+  // the Discord connector's new LOCALE_ALLOWED entries (agent/discord)
+  // name `INTENTIONALLY_IDENTICAL` once more to say which mechanism they
+  // are NOT, and that substring is what PHRASES matches.
+  const CENSUS_CEILING = 83;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

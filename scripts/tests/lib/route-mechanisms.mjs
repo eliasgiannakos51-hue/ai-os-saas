@@ -22,7 +22,13 @@ export const CRON = /checkCronAuth\s*\(/;
 export const STRIPE_SIG = /constructEvent\s*\(/;
 export const ADMIN_CLIENT = /createAdminClient\s*\(/;
 export const CALLER_CLIENT = /createClient\s*\(\s*\)/;
-export const FROM_REQUEST = /params\.[a-zA-Z_]+|body\??\.[a-zA-Z_]*[Ii]d\b|searchParams\.get\(/;
+// `(?!toString\b)` excludes api/discord/connect and /share: both build a
+// LOCAL `const params = new URLSearchParams(...)` to compose an outbound
+// URL and then call `params.toString()` on it — a variable that merely
+// shares the name with Next's route-params object, not a request-supplied
+// id. A real route param is read as `params.id` / `params.slug`, never
+// through `.toString()`, so the exclusion cannot hide a genuine one.
+export const FROM_REQUEST = /params\.(?!toString\b)[a-zA-Z_]+|body\??\.[a-zA-Z_]*[Ii]d\b|searchParams\.get\(/;
 
 /**
  * The SQL functions the migrations declare SECURITY INVOKER.

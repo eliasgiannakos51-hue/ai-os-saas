@@ -532,6 +532,14 @@ const BASELINE = {
   // his Κομμάτι 8 wires xlsx and csv export
   // (src/components/sheets/sheets-shell.tsx).
   "dashboard/sheets/page.tsx": 2,
+  // TWO, the same shape as Sheets just above (agent/discord, 2026-11-07):
+  // the shell's own round send arrow, and Discord's own «Σύνδεσε το
+  // Ionexa» <a> — the one action the connect screen shows, before any
+  // server is linked. They never compete for attention on the same
+  // screen view: there is nothing to send until a server is connected
+  // and a plan exists, so the composer is the quiet one on the landing
+  // that draws this button.
+  "dashboard/discord/page.tsx": 2,
   "dashboard/settings/page.tsx": 1,
   "dashboard/team/page.tsx": 1,
   "dashboard/trading-journal/page.tsx": 1,

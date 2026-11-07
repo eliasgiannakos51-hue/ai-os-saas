@@ -1436,6 +1436,26 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "cross" }),
   },
   {
+    // DISCORD IS THE SAME SHAPE AS imageStudio AND documentWriter BELOW —
+    // it DOES charge (discordPlan and discordAsk settle through the same
+    // reserve/estimate/settle path as every other feature, see
+    // billing-coverage.test.mjs §1b and ask.ts/planner.ts's ROUTED
+    // entries), but it is not SOLD: the page is notFound() for anyone the
+    // switch 'discord-bot' is not open to (agent/discord, the owner's
+    // Discord directive, 2026-11-05/07), so only the owner and the test
+    // account can reach any of its six routes to be charged at all.
+    id: "discord",
+    group: "make",
+    minPlan: "starter",
+    pages: ["discord"],
+    routes: ["discord", "discord/connect", "discord/callback", "discord/plan", "discord/apply", "discord/interactions"],
+    charges: true,
+    notSold: "Not sold and not reachable: the screen is built behind the switch 'discord-bot' and the page is notFound() for anyone it is not open to, so only the owner and the test account can connect a server at all. discord/interactions is Discord's own webhook, verified by its Ed25519 signature rather than a session, and still checks the same switch before answering any slash command. Published when the owner opens 'discord-bot' on /dashboard/system-health.",
+    enforcedIn: "src/app/dashboard/discord/page.tsx",
+    enforcedSymbol: 'if (!(await isFeatureOn("discord-bot", user))) notFound();',
+    cell: () => ({ type: "cross" }),
+  },
+  {
     id: "audio",
     group: "make",
     minPlan: "starter",

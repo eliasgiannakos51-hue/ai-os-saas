@@ -221,5 +221,7 @@ Removing one from the product is always allowed.
 | dashboard.appBuilder.empty.examples.a | an example prompt the reader would type |
 | dashboard.appBuilder.empty.examples.b | an example prompt the reader would type |
 | dashboard.sheets.empty.examples.budget | an example prompt the reader would type |
+| dashboard.discord.empty.examples.bakery | an example prompt the reader would type |
+| dashboard.discord.empty.examples.class | an example prompt the reader would type |
 <!-- USERVOICE:END -->
 

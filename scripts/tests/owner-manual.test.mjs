@@ -185,6 +185,8 @@ const FAILOVER_NAMES = {
   "src/app/api/my-stuff/ask/route.ts": "το «Τα δικά σου»",
   "src/app/api/mcp/[id]/run/route.ts": "το «Σύνδεση» με εφαρμογές με διεύθυνση",
   "src/lib/rebuild/rebuild-call.ts": "το «Ξαναχτίσε»",
+  "src/lib/discord/ask.ts": "το /ionexa ask στο Discord",
+  "src/lib/discord/planner.ts": "το σχέδιο για τον server στο Discord",
 };
 const callers = [];
 (function walkSrc(dir) {

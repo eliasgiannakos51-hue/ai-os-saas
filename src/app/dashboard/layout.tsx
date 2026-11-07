@@ -216,8 +216,8 @@ export default async function DashboardLayout({
                     had nothing to land on, and so did the page's own
                     outline.
                     Putting it in the layout is what makes it true for all
-                    65 pages instead of 8, and the four components below
-                    COUNT: 65 /page\.tsx$/ in src/app/dashboard/
+                    66 pages instead of 8, and the four components below
+                    COUNT: 66 /page\.tsx$/ in src/app/dashboard/
                     became plain <div>s in the same change: a <main>
                     inside a <main> is invalid, and two landmarks are
                     worse than one in the wrong place. */}

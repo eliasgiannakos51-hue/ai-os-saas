@@ -145,6 +145,10 @@ const CHARGES_A_ROW_OWNER = {
     accounts: ["ctx.user.id"],
     why: "one run of one automation (package 30). `ctx.user` is the automation's OWNER: the signed-in caller on «Δοκιμή», «Εκτέλεση τώρα», «Έγκριση» and api/automations/events (each loads the row with .eq(\"user_id\", user.id)), and the row's user_id on the cron behind CRON_SECRET, whose caller is Vercel. Nobody else's automation reaches it.",
   },
+  "src/app/api/discord/interactions/route.ts": {
+    accounts: ["owner"],
+    why: "/ionexa ask, Discord's own HTTP interactions webhook, verified by its Ed25519 signature rather than a session (agent/discord, 2026-11-07). There is no Ionexa caller here at all — the caller is Discord, relaying a server member's slash command. `owner` is discord_guilds.user_id for that guild (guildOwner(), lib/discord/store.ts): the account that connected the bot and whose credits dashboard.discord.slash already tells every member this command spends. notLinked/notAllowed are checked before answerAsk is ever reached.",
+  },
 };
 
 const CALLER = /^user\.id$|^userId$|^claimed\.user_id$|^params\.userId$/;

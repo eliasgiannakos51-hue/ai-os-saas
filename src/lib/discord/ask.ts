@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runCompletion } from "@/lib/ai/providers/complete";
-import { AI_TRUNCATED_STOP_REASON } from "@/lib/ai/providers/types";
+import { modelTextFrom } from "@/lib/verification/truncation";
 import { CHAT_MODEL } from "@/lib/ai-models";
 import { sanitiseAgentText } from "@/lib/agents/agent-config";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -117,8 +117,9 @@ export async function answerAsk(params: { userId: string; guildId: string; quest
     costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
     await settleReservation({ userId, reservationId, feature: ASK_FEATURE, costs, plan, bypassCharge: bypass, metadata: { kind: "discord_ask", guild: guildId } });
     settled = true;
-    const answer = outcome.text.trim() || "…";
-    return { text: outcome.stopReason === AI_TRUNCATED_STOP_REASON ? `${answer}\n\n${botText(locale, "cut")}` : answer };
+    const extracted = modelTextFrom({ text: outcome.text, stopReason: outcome.stopReason });
+    const answer = extracted.text.trim() || "…";
+    return { text: extracted.truncated ? `${answer}\n\n${botText(locale, "cut")}` : answer };
   } catch (err) {
     logApiError("/api/discord/interactions", err, { stage: "ask" });
     if (!settled) await releaseReservation(userId, reservationId).catch(() => undefined);

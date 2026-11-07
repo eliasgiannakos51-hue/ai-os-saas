@@ -383,15 +383,15 @@ console.log("\n== 5. apply.ts: one request per box, recorded before the next is 
   const undoRest = { request: async (method, path) => { deletedPaths.push(`${method} ${path}`); return { ok: true, status: 204, code: null, body: null }; } };
   const marked = [];
   const items = [
-    { seq: 1, kind: "role", boxKey: "mod", discordId: "111", channelId: null, note: null },
-    { seq: 2, kind: "category", boxKey: "cat", discordId: "222", channelId: null, note: null },
-    { seq: 3, kind: "channel", boxKey: "general", discordId: "333", channelId: null, note: null },
+    { seq: 1, kind: "role", boxKey: "mod", discordId: "111000000000000000", channelId: null, note: null },
+    { seq: 2, kind: "category", boxKey: "cat", discordId: "222000000000000000", channelId: null, note: null },
+    { seq: 3, kind: "channel", boxKey: "general", discordId: "333000000000000000", channelId: null, note: null },
   ];
   const undone = await A.undoItems(items, { rest: undoRest, guildId: "100000000000000000", markDeleted: async (seq) => { marked.push(seq); return true; } });
   check("undo reports every item deleted", undone.ok === true && undone.deleted === 3);
   check("undo deletes NEWEST first (seq 3, then 2, then 1)", marked.join(",") === "3,2,1");
-  check("the channel's own DELETE path is used for a category too (Discord: categories are channels)", deletedPaths[0].startsWith("DELETE /channels/333"));
-  check("the role's DELETE path is under /guilds/:id/roles", deletedPaths[2].includes("/guilds/100000000000000000/roles/111"));
+  check("the channel's own DELETE path is used for a category too (Discord: categories are channels)", deletedPaths[0].startsWith("DELETE /channels/333000000000000000"));
+  check("the role's DELETE path is under /guilds/:id/roles", deletedPaths[2].includes("/guilds/100000000000000000/roles/111000000000000000"));
 
   console.log("\n  -- a 404 on delete counts as already gone, by hand, and undo keeps going --");
   const alreadyGoneRest = { request: async () => ({ ok: false, status: 404, code: 10011, reason: "not_found" }) };
@@ -435,10 +435,17 @@ console.log("\n== 8. wired into the things a feature cannot skip ==");
 {
   check("the switch is declared, staff-first, with its migration named", /"discord-bot":/.test(read("src/lib/flags/flags.ts")) && /Needs migration 20261119000000_discord_bot\.sql/.test(read("src/lib/flags/flags.ts")));
   check("the page is notFound() for anyone the switch is not open to", /if \(!\(await isFeatureOn\("discord-bot", user\)\)\) notFound\(\);/.test(read("src/app/dashboard/discord/page.tsx")));
-  for (const route of ["connect", "callback", "plan", "apply"]) {
+  for (const route of ["connect", "plan", "apply"]) {
     check(`api/discord/${route} refuses with 404 the same way when the switch is off`,
       /isFeatureOn\("discord-bot", user\)/.test(read(`src/app/api/discord/${route}/route.ts`)) && /"not_found"/.test(read(`src/app/api/discord/${route}/route.ts`)));
   }
+  // callback is reached by the BROWSER, mid-redirect from Discord's own
+  // OAuth screen — not by fetch, so a raw JSON 404 would leave the person
+  // on a blank error page instead of back in the app with an explanation.
+  // It still refuses, by the same switch, but as the "unavailable" flash
+  // the dashboard screen already renders a sentence for.
+  check("api/discord/callback also checks the switch, redirecting with its own flash instead of 404 (it is reached by the browser mid-redirect, not by fetch)",
+    /isFeatureOn\("discord-bot", user\)/.test(read("src/app/api/discord/callback/route.ts")) && /back\("unavailable"\)/.test(read("src/app/api/discord/callback/route.ts")));
   check("the bot never asks for Administrator in the invite route either (defence in depth)",
     /botPermissionInteger\(\)/.test(read("src/app/api/discord/connect/route.ts")));
   check("discord_plan is billed through the same estimate function as everything else", /discordPlan:/.test(read("src/lib/billing/estimate.ts")));

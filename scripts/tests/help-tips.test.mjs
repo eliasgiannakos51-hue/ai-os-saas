@@ -194,6 +194,10 @@ const NO_HEADER_EXEMPT = new Map([
     "src/app/dashboard/sheets/page.tsx",
     "Behind the switch 'sheets-tool' and notFound() for everyone else; the shell's empty landing already carries the one sentence that says what the tool is for (dashboard.sheets.empty.why, ten languages). The tip lands with the formula engine (Κομμάτι 2+), when there is something that sentence cannot say",
   ],
+  [
+    "src/app/dashboard/discord/page.tsx",
+    "Behind the switch 'discord-bot' and notFound() for everyone else (agent/discord, 2026-11-05/07); the same shape as Sheets just above. The connect screen already carries the one sentence that says what the tool is for (dashboard.discord.connect.why, ten languages), and the empty-server screen carries the same for a connected server (dashboard.discord.empty.why). A tip lands if a real gap in that prose turns up once staff are using it.",
+  ],
   ...["audio", "avatars", "3d", "editing", "films", "translate", "video-studio"].map((slug) => [
     `src/app/dashboard/${slug}/page.tsx`,
     "Coming Soon (components/tools/coming-soon-shell.tsx, src/lib/nav/all-tools.ts ready: false): its own header, a disabled field and a single «Δεν δουλεύει ακόμα» line — there is nothing here yet for a help tip to explain. The real header and tip land the day the tool is built, in the same commit that flips ready",

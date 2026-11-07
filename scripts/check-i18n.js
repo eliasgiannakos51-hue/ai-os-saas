@@ -887,6 +887,39 @@ const LOCALE_ALLOWED = new Set([
   // identical to English the way "Information" and "Date" already are
   // in this language elsewhere in the product.
   "fr:adminDashboard.auditLog.action",
+  // The Discord connector (2026-11-07, ΤΟ MOAT / agent/discord). "credits"
+  // itself is the product's own currency word and stays in English in
+  // EVERY locale, el included — see common.creditsTooltip, pricing.rows.
+  // creditsPerMonth and dozens more in messages/el.json; "≈ {credits}
+  // credits" has nothing else in it to translate.
+  "el:dashboard.discord.cost",
+  // "Server" (the Discord server, not a web server) is Discord's own word
+  // in German and Italian — their official clients render it unchanged;
+  // el translates it properly ("Διακομιστής", done above).
+  "de:dashboard.discord.server",
+  "it:dashboard.discord.server",
+  // "AutoMod" is Discord's own feature name, a product term rather than
+  // an English sentence, and Discord's own es/fr/de/it/pt clients render
+  // it unchanged; el gives it its own phrase ("Αυτόματη διαχείριση",
+  // done above) because the Greek client does not borrow the term.
+  "es:dashboard.discord.section.automod",
+  "fr:dashboard.discord.section.automod",
+  "de:dashboard.discord.section.automod",
+  "it:dashboard.discord.section.automod",
+  "pt:dashboard.discord.section.automod",
+  // "Roles" is the Spanish word too, for Discord's own sense (a role
+  // assignable to a member) — same cognate as adminDashboard.auditLog.
+  // admin above.
+  "es:dashboard.discord.section.roles",
+  // "Messages" and "Forum" are the French words too, for Discord's own
+  // channel-type senses; "Forum" is also the German and Italian word.
+  "fr:dashboard.discord.section.messages",
+  "fr:dashboard.discord.kind.forum",
+  "de:dashboard.discord.kind.forum",
+  "it:dashboard.discord.kind.forum",
+  // "Administrator" is the German word too, and the Discord permission's
+  // own name; el translates it properly ("Διαχειριστής", done above).
+  "de:dashboard.discord.perm.administrator",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
@@ -1027,6 +1060,9 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // translated everywhere, which is why those two are not on this list.
   "settings.notifications.channels.telegram",
   "settings.notifications.channels.discord",
+  // The Discord tool's own name in the tools list — same brand name,
+  // same reason as the two entries above.
+  "dashboard.tools.names.discord",
   // A Discord webhook URL shown as a placeholder. A FORMAT, not prose —
   // and unlike most placeholders this one is copied literally, so a
   // "translated" version would be a wrong example.

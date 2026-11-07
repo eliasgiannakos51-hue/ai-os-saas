@@ -8,7 +8,6 @@ import { ToolShell, ChosenBox, type ShellTurn } from "@/components/shell/tool-sh
 import { PanelGroup } from "@/components/shell/editor-shell";
 import { Earth } from "@/components/brand/earth";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
-import { formatNumber } from "@/lib/format-number";
 import { messageBoxKey, planBoxes, type Blueprint, type BoxKind, type ChannelPlan, type Overwrite } from "@/lib/discord/blueprint";
 import { ROLE_ELEVATED, type ElevatedPermission, type PermissionName } from "@/lib/discord/permissions";
 import type { DiscordScreen } from "@/lib/discord/screen";
@@ -141,15 +140,25 @@ export function DiscordShell({ initial, flash, botPermissions }: { initial: Disc
         return say(errorText(String(body.code ?? "failed")));
       }
       let done: Record<string, unknown> | null = null;
-      await readNdjsonStream(res.body, (event) => {
+      let madeAny = false;
+      const { interrupted } = await readNdjsonStream(res.body, (event) => {
         const box = String(event.box ?? "");
-        if (event.type === "made") setLive((p) => ({ ...p, [box]: "made" }));
-        else if (event.type === "failed") setLive((p) => ({ ...p, [box]: "failed" }));
+        if (event.type === "made") {
+          madeAny = true;
+          setLive((p) => ({ ...p, [box]: "made" }));
+        } else if (event.type === "failed") setLive((p) => ({ ...p, [box]: "failed" }));
         else if (event.type === "deleted") setLive((p) => ({ ...p, [box]: "deleted" }));
         else if (event.type === "done") done = event;
       });
       const finished = done as Record<string, unknown> | null;
-      if (finished?.status === "applied") say(t("applied"));
+      // A DROPPED CONNECTION IS NOT A REFUSAL. Without this branch a lost
+      // connection fell straight to errors.failed below — the same "Try
+      // again" a server actually refusing something gets — even when
+      // several boxes HAD already been made in Discord (madeAny), which
+      // would then be remade or double-charged on a retry the person had
+      // no reason to think was necessary.
+      if (interrupted) say(madeAny ? t("streamInterruptedPartial") : t("streamInterrupted"));
+      else if (finished?.status === "applied") say(t("applied"));
       else if (action === "undo" && finished?.status === "planned") say(t("undone"));
       else say(finished?.failedBox ? t("stoppedAt", { name: boxName(String(finished.failedBox)) }) : t("errors.failed"));
     } finally {
@@ -188,7 +197,7 @@ export function DiscordShell({ initial, flash, botPermissions }: { initial: Disc
               </button>
             </PanelGroup>
             <PanelGroup label={t("priceLabel")}>
-              <p className="text-xs leading-relaxed text-body">{t("price", { credits: formatNumber(initial.price) })}</p>
+              <p className="text-xs leading-relaxed text-body">{t("price", { credits: initial.price })}</p>
             </PanelGroup>
             <PanelGroup label={t("slashLabel")}>
               <p className="text-xs leading-relaxed text-body">{t("slash")}</p>
@@ -243,11 +252,11 @@ export function DiscordShell({ initial, flash, botPermissions }: { initial: Disc
         ],
       }}
       selection={selected ? { label: boxName(selected), onClear: () => setSelected(null) } : null}
-      cost={t("cost", { credits: formatNumber(initial.price) })}
+      cost={t("cost", { credits: initial.price })}
       footer={
         <>
           {selected && <ChosenBox label={boxName(selected)} onClear={() => setSelected(null)} />}
-          <p className="text-[11px] text-muted">{t("cost", { credits: formatNumber(initial.price) })}</p>
+          <p className="text-[11px] text-muted">{t("cost", { credits: initial.price })}</p>
         </>
       }
       work={work}

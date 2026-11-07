@@ -1,10 +1,6 @@
 # The first run — ja
 
-<<<<<<< HEAD
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5330, which is why this file exists.
-=======
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5324, which is why this file exists.
->>>>>>> 679e7b0 (Security: eight findings of the 2026-11-05 reviews, each held by a gate)
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5334, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 

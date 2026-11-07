@@ -342,7 +342,7 @@ console.log(
 // security round) on top of that — both merged here, so the floor is
 // whichever this rebased tree actually measures. Read off the run; see
 // the check below for the live count if this value goes stale again.
-const RATCHET = 318;
+const RATCHET = 319;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

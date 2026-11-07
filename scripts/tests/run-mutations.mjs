@@ -169,7 +169,11 @@ if (suites.length === 0) {
 // of 10 while nobody ran this gate to notice the register had not moved
 // since 273. Counted with `ls scripts/tests/*.mutation.mjs | wc -l`,
 // after the round's files were all written.
-const FLOOR = 284;
+// 284 -> 296 on 2026-11-07, on the rebase of the 2026-11-05 accounts
+// security round onto this line: five new suites (account-suspension,
+// cross-site-writes, entity-links-owner, pwa, share-target). Read off
+// the run.
+const FLOOR = 296;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

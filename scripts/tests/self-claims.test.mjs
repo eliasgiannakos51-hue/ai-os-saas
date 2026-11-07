@@ -345,9 +345,19 @@ check(
 // Deliberately not spelling the constant's own name here — this file is
 // itself under scripts/, so a bare mention would add yet another
 // occurrence to the very count this comment explains.
+// 42 -> 55 on 2026-11-07, read off this rebase: six independent feature
+// branches (moat, accounts-security, parity, automations, infra, site-csp)
+// each landed its own one or two prose mentions of a real constant in the
+// same shape the scanner already treats as noise — a literal error code,
+// a constructed env or shape name used as a stand-in, or a billing
+// constant named for illustration in margin-policy.ts. Each one checked
+// by hand against this round's diff; none renames a symbol that moved.
+// Deliberately not spelling any of them out here — this file is itself
+// under scripts/, so naming them would only grow the count this comment
+// explains, the same reason the ΑΣ2-3.1 note above does not either.
 check(
   "...and it has not silently grown into a category nobody reads",
-  report.wrong.symbols <= 42,
+  report.wrong.symbols <= 55,
   `${report.wrong.symbols} unresolved — if this is climbing, either the corpus is missing a ` +
     `source of real names or comments are naming things that are gone`
 );

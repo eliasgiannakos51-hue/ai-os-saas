@@ -295,7 +295,7 @@ export function DocumentsShell({
                     {editor && box === index && block.kind !== "rule" && (
                       <span
                         data-testid="doc-box-selected-label"
-                        className="absolute -top-2.5 left-3 rounded-full bg-button-ink px-2 py-0.5 text-[11px] font-semibold leading-none text-paper"
+                        className="absolute -top-2.5 start-3 rounded-full bg-button-ink px-2 py-0.5 text-[11px] font-semibold leading-none text-paper"
                       >
                         {tShell("editor.selectedTag", { name: t("block", { n: index + 1 }) })}
                       </span>

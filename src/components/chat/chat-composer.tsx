@@ -254,7 +254,7 @@ export const ChatComposer = forwardRef<
           // the person came back to, and a field focused on arrival drew
           // its 2px ring round the field before anything was pressed
           // (ED2, 2026-11-05). The start screen and Chat still open on it.
-          autoFocus
+          autoFocus={shape !== "inline"}
         />
         {/* THE MICROPHONE SITS BESIDE THE BOX, NEVER INSTEAD OF IT, and
             what it produces lands in the textarea for the user to read

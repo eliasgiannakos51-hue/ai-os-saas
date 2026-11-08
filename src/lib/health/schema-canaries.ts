@@ -685,4 +685,16 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261119000000_discord_bot.sql",
     breaks: "connecting a Discord server fails at the final save after the OAuth round trip, and /dashboard/discord shows no server ever connected",
   },
+  {
+    // Automations Κομμάτι 2a (2026-11-08): modeFor/modesByFlowIds
+    // (lib/automations/flow-access.ts) already answer DEFAULT_FLOW_MODE
+    // on a column-missing error, same as minutes_saved before it — so a
+    // database this was never pasted into looks identical to one where
+    // every automation is simply "auto", and nothing else would say so.
+    kind: "column",
+    table: "automation_flows",
+    column: "mode",
+    migration: "20261123000000_automation_mode.sql",
+    breaks: "every automation silently stays \"auto\" — Shadow and Supervised can be set from the PATCH route but never take effect, with no error anywhere",
+  },
 ];

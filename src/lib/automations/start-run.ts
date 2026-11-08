@@ -8,6 +8,7 @@ import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import type { Plan } from "@/lib/billing/plans";
 import { finishRun, runFlow, type FlowRow, type RunContext, type RunResult } from "@/lib/automations/runner";
+import { effectiveDry, DEFAULT_FLOW_MODE } from "@/lib/automations/boxes";
 
 /**
  * STARTING A RUN, FROM WHEREVER IT IS STARTED (MASTER 16, package 30):
@@ -85,7 +86,7 @@ export async function startRun(params: {
     bypass: params.account.bypass,
     isAdmin: params.account.isAdmin,
     isBeta: params.account.isBeta,
-    dry: params.startedBy === "dry",
+    dry: effectiveDry(params.flow.mode ?? DEFAULT_FLOW_MODE, params.startedBy),
     eventRef: params.eventRef ?? null,
     resume: null,
   });

@@ -1,6 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -9,7 +9,7 @@ import type { Plan } from "@/lib/billing/plans";
 import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 import { listIntegrations } from "@/lib/integrations/store";
 import { listDeliveryChannels } from "@/lib/agents/delivery-store";
-import { connectionsNeeded, cronFor, type Box, type StartBox } from "@/lib/automations/boxes";
+import { connectionsNeeded, cronFor, isFlowMode, DEFAULT_FLOW_MODE, type Box, type FlowMode, type StartBox } from "@/lib/automations/boxes";
 
 /**
  * WHAT THE AUTOMATION ROUTES SHARE (MASTER 16, package 30), and nothing
@@ -186,4 +186,52 @@ export async function scheduleAfterChange(
   const missing = await missingConnections(user, boxes);
   if (missing.length > 0) return { patch: { is_active: false, next_run_at: null }, paused: missing };
   return { patch: { next_run_at: nextRunFor(boxes, flow.time_zone) }, paused: [] };
+}
+
+/**
+ * A COLUMN THE DATABASE DOES NOT HAVE YET: Postgres's undefined_column on
+ * a read (42703), PostgREST's schema-cache miss on a write (PGRST204).
+ * The migrations here are pasted by hand (CLAUDE.md), so both mean "the
+ * migration naming this column has not run", never "something failed".
+ * Lives here, not in page-data.ts, so modeFor/modesByFlowIds below can
+ * use it without an import cycle (page-data.ts already imports
+ * FLOW_COLUMNS etc. from this file); page-data.ts re-exports it so its
+ * one existing caller is unchanged.
+ */
+export function isColumnMissing(error: { code?: string } | null | undefined): boolean {
+  return error?.code === "42703" || error?.code === "PGRST204";
+}
+
+/**
+ * THE MODE ONE AUTOMATION RUNS WITH (automation_flows.mode,
+ * 20261123000000_automation_mode.sql) — in a query OF ITS OWN and never
+ * in FLOW_COLUMNS, same reason as minutes_saved: until the migration is
+ * pasted the column is not there, and naming it in FLOW_COLUMNS would
+ * fail every read of every automation whole. A missing column, or any
+ * other read problem, answers DEFAULT_FLOW_MODE ("auto") — the one
+ * answer that is already today's behaviour, so a database that has not
+ * caught up yet never silently turns an automation shadow or supervised,
+ * and never silently drops either back to running for real either.
+ */
+export async function modeFor(admin: SupabaseClient, flowId: string, userId: string): Promise<FlowMode> {
+  const { data, error } = await admin.from("automation_flows").select("mode").eq("id", flowId).eq("user_id", userId).maybeSingle();
+  if (error) {
+    if (!isColumnMissing(error)) logApiError("automations:mode", error, { stage: "mode_for", flowId });
+    return DEFAULT_FLOW_MODE;
+  }
+  const mode = (data as { mode?: unknown } | null)?.mode;
+  return isFlowMode(mode) ? mode : DEFAULT_FLOW_MODE;
+}
+
+/** The same, for many flows at once — the cron's one tick, not one query per due automation. */
+export async function modesByFlowIds(admin: SupabaseClient, flowIds: string[]): Promise<Map<string, FlowMode>> {
+  if (flowIds.length === 0) return new Map();
+  const { data, error } = await admin.from("automation_flows").select("id, mode").in("id", flowIds);
+  if (error) {
+    if (!isColumnMissing(error)) logApiError("automations:mode", error, { stage: "modes_by_ids" });
+    return new Map();
+  }
+  return new Map(
+    ((data ?? []) as { id: string; mode?: unknown }[]).map((row) => [row.id, isFlowMode(row.mode) ? row.mode : DEFAULT_FLOW_MODE])
+  );
 }

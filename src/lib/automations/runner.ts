@@ -18,7 +18,7 @@ import { getPurchasedPackCreditPriceEur, hasEnoughCredits } from "@/lib/billing/
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
-import { readFlow, type ActionBox, type Box, type ReadBox } from "@/lib/automations/boxes";
+import { readFlow, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
 import { periodFor, readAiAnswer, textToDocumentHtml, type AiOutcome, type Resume } from "@/lib/automations/answers";
 
@@ -60,6 +60,10 @@ export type FlowRow = {
   boxes: unknown;
   cost_limit: number;
   time_zone: string;
+  /** Optional: every call site that still omits it gets DEFAULT_FLOW_MODE
+   *  ("auto", today's behaviour), the same fails-safe shape the column
+   *  itself has (20261123000000_automation_mode.sql). */
+  mode?: FlowMode;
 };
 
 export type RunContext = {
@@ -210,7 +214,18 @@ async function reportProgress(ctx: RunContext, steps: RunStep[]): Promise<void> 
 export async function runFlow(ctx: RunContext): Promise<RunResult> {
   const flow = readFlow(ctx.flow.boxes);
   if (!flow.ok) return { status: "failed", steps: [], credits: 0, error: `flow:${flow.reason}` };
-  const boxes: Box[] = flow.boxes;
+  // "supervised": one extra, synthetic approval before any action box
+  // that does not already have one — never stored, computed the SAME
+  // way on a fresh run and on a resume of it (withSupervisedApprovals's
+  // own doc comment says why that has to hold).
+  const mode = ctx.flow.mode ?? DEFAULT_FLOW_MODE;
+  const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(flow.boxes) : flow.boxes;
+  // A resume whose stored index no longer fits this rebuild — the mode
+  // changed under a waiting run, or the boxes did — fails the run
+  // instead of reading the wrong box at boxes[i].
+  if (ctx.resume && ctx.resume.at > boxes.length) {
+    return { status: "failed", steps: [...ctx.resume.steps], credits: ctx.resume.credits, error: "flow:resume_mismatch" };
+  }
   const steps: RunStep[] = ctx.resume ? [...ctx.resume.steps] : [];
   let text = ctx.resume?.text ?? "";
   let credits = ctx.resume?.credits ?? 0;

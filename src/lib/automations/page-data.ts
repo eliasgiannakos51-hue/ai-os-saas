@@ -5,7 +5,7 @@ import { logApiError } from "@/lib/log-error";
 import { getPurchasedPackCreditPriceEur, resolveEffectivePlan } from "@/lib/billing/credits";
 import { listIntegrations } from "@/lib/integrations/store";
 import { listDeliveryChannels } from "@/lib/agents/delivery-store";
-import { FLOW_COLUMNS, MAX_FLOWS, RUN_COLUMNS, UUID } from "@/lib/automations/flow-access";
+import { FLOW_COLUMNS, MAX_FLOWS, RUN_COLUMNS, UUID, isColumnMissing } from "@/lib/automations/flow-access";
 import { flowPrices, type FlowPrices } from "@/lib/automations/flow-pricing";
 import type { UserAutomation } from "@/types/user-automation";
 import { ownedProjectId } from "@/lib/projects/link-result";
@@ -33,14 +33,15 @@ export type AutomationPageData = {
 };
 
 /**
- * A COLUMN THE DATABASE DOES NOT HAVE YET: Postgres's undefined_column on
- * a read (42703), PostgREST's schema-cache miss on a write (PGRST204).
- * The migrations here are pasted by hand (CLAUDE.md), so both mean
- * "20261114000000 has not run", never "something failed".
+ * A COLUMN THE DATABASE DOES NOT HAVE YET: moved to flow-access.ts
+ * (2026-11-08, Automations Κομμάτι 2a) so modeFor/modesByFlowIds there
+ * can use the SAME check without an import cycle — flow-access.ts
+ * already has no dependency on this file, and this file already depends
+ * on flow-access.ts (FLOW_COLUMNS, below), so the reverse direction
+ * would have been circular. Re-exported here so the one existing import
+ * site (api/automations/flows/[id]/route.ts) is unchanged.
  */
-export function isColumnMissing(error: { code?: string } | null | undefined): boolean {
-  return error?.code === "42703" || error?.code === "PGRST204";
-}
+export { isColumnMissing };
 
 /**
  * THE MINUTES EACH AUTOMATION SAVES (automation_flows.minutes_saved,

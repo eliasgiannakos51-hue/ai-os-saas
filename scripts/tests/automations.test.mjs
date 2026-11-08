@@ -347,10 +347,19 @@ check("the page reads the switch, which fails towards staff",
 // THE LEVEL IS A WAY OF LOOKING, NOT PART OF THE AUTOMATION. Nothing is
 // stored for it server-side: no column, no migration, so an automation
 // made in Simple opens in Pro by construction rather than by a copy.
+//
+// NOT THE SAME "mode" AS automation_flows.mode (20261123000000,
+// scripts/tests/automation-modes.test.mjs): that column is real, on
+// purpose — it is shadow/supervised/auto, how much the owner trusts ONE
+// automation to run for real, which is a server-side property of the
+// automation, unlike Simple/Pro, which is only how the screen draws it.
+// The invariant here is still exact — FLOW_COLUMNS must never name
+// "mode" either — so the migration check names that one file instead of
+// pattern-matching every migration's filename for the word "mode".
 check("the level is remembered in the browser alone — no column, no migration",
   /window\.localStorage\.setItem\("ionexa\.automationMode", next\)/.test(shell) &&
   !/mode/.test(readFileSync("src/lib/automations/flow-access.ts", "utf8").match(/FLOW_COLUMNS[^;]*/s)?.[0] ?? "") &&
-  readdirSync("supabase/migrations").every((f) => !/automation.*mode|mode.*automation/i.test(f)));
+  readdirSync("supabase/migrations").every((f) => f === "20261123000000_automation_mode.sql" || !/automation.*mode|mode.*automation/i.test(f)));
 check("leaving Pro clears the chosen box, so its editor cannot reopen under nothing",
   /if \(next === "simple"\) setChosen\(null\);/.test(shell) && /const chosenBox = level === "pro" &&/.test(shell));
 
@@ -542,7 +551,12 @@ check("THE APP WORKS BEFORE THE MIGRATION: the minutes are read in a query of th
   !/minutes_saved/.test(code("src/lib/automations/flow-access.ts")) &&
     /\.from\("automation_flows"\)\.select\("id, minutes_saved"\)\.eq\("user_id", userId\)\.limit\(MAX_FLOWS\);/.test(pageData) &&
     /if \(error\) \{\s*if \(!isColumnMissing\(error\)\) logApiError\([^)]*\);\s*return null;\s*\}/.test(pageData));
-check("…a missing column is Postgres's 42703 on a read and PostgREST's PGRST204 on a write", /return error\?\.code === "42703" \|\| error\?\.code === "PGRST204";/.test(pageData));
+// isColumnMissing moved to flow-access.ts (2026-11-08, Automations
+// Κομμάτι 2a, scripts/tests/automation-modes.test.mjs) so modeFor/
+// modesByFlowIds there could use it without an import cycle
+// (page-data.ts already depends on flow-access.ts); page-data.ts now
+// only re-exports the same function.
+check("…a missing column is Postgres's 42703 on a read and PostgREST's PGRST204 on a write", /return error\?\.code === "42703" \|\| error\?\.code === "PGRST204";/.test(code("src/lib/automations/flow-access.ts")));
 check("…and a closed switch does not even read them", /timeSavedOn \? loadMinutesSaved\(supabase, user\.id\) : Promise\.resolve\(null\)/.test(pageData) && /isFeatureOn\("automation-time-saved", user\)/.test(page));
 check("…the screen draws the field and the figure only when the minutes could be read",
   /\{minutesSaved && \(\s*<TimeSavedForm/.test(shell) && /minutes=\{minutesSaved\[shown\.id\] \?\? null\}/.test(shell));
@@ -555,7 +569,13 @@ check("the minutes are the person's own write: behind the switch, bounded, the r
     /if \(body\.minutes_saved !== null && minutesSaved === null\) return refuse\("bad_minutes", 400, \{ min: MIN_MINUTES, max: MAX_MINUTES \}\);/.test(editRoute) &&
     /\.update\(\{ minutes_saved: minutesSaved \}\)\.eq\("id", id\)\.eq\("user_id", user\.id\);/.test(editRoute));
 check("…a database without the column answers «not ready», and the limit or name sent beside it are not refused with it",
-  /if \(isColumnMissing\(error\)\) return refuse\("not_ready", 409\);/.test(editRoute) && !/plain\.minutes_saved/.test(editRoute) && editRoute.indexOf("minutes_saved: minutesSaved") < editRoute.indexOf("const plain"));
+  // Anchored on the minutes_saved stage, not a bare occurrence of the
+  // not_ready line: the mode write (Automations Κομμάτι 2a, 2026-11-08)
+  // has an identical line of its own just above this one in the same
+  // file, so a check that only asked "is this text in editRoute
+  // anywhere?" stayed green even with THIS occurrence removed.
+  /if \(isColumnMissing\(error\)\) return refuse\("not_ready", 409\);\s*\n\s*logApiError\("\/api\/automations\/flows\/\[id\]", error, \{ stage: "minutes_saved" \}\);/.test(editRoute) &&
+    !/plain\.minutes_saved/.test(editRoute) && editRoute.indexOf("minutes_saved: minutesSaved") < editRoute.indexOf("const plain"));
 const minutesSql = readFileSync("supabase/migrations/20261114000000_automation_minutes_saved.sql", "utf8");
 check("the column is nullable, and bounded where the code bounds it",
   /alter table public\.automation_flows add column if not exists minutes_saved integer;/.test(minutesSql) &&

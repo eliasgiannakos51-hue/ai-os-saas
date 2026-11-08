@@ -392,17 +392,24 @@ const MUTANTS = [
     expect: "THE APP WORKS BEFORE THE MIGRATION",
   },
   {
+    // Moved to flow-access.ts (2026-11-08, Automations Κομμάτι 2a) so
+    // automation-modes.test.mjs's modeFor/modesByFlowIds could use it
+    // without an import cycle; page-data.ts now only re-exports it.
     name: "a missing column is logged as a failure instead of read as «not yet»",
-    file: PAGE_DATA,
+    file: ACCESS,
     from: '  return error?.code === "42703" || error?.code === "PGRST204";',
     to: '  return error?.code === "PGRST204";',
     expect: "a missing column is Postgres's 42703 on a read",
   },
   {
+    // The anchor names the "minutes_saved" stage so it cannot match the
+    // IDENTICAL not_ready line the "mode" write added just above it in
+    // this same file (2026-11-08) — a plain one-line `from` would have
+    // silently started mutating the wrong block.
     name: "a database without the column refuses the limit sent beside the minutes",
     file: EDIT,
-    from: '      if (isColumnMissing(error)) return refuse("not_ready", 409);\n',
-    to: "",
+    from: '      if (isColumnMissing(error)) return refuse("not_ready", 409);\n      logApiError("/api/automations/flows/[id]", error, { stage: "minutes_saved" });',
+    to: '      logApiError("/api/automations/flows/[id]", error, { stage: "minutes_saved" });',
     expect: "a database without the column answers «not ready»",
   },
   {

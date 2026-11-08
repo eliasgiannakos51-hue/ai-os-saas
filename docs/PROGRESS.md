@@ -12038,3 +12038,93 @@ CSP ήταν γνησίως prose-anchored (διαβάζει μόνο σχόλι
 κομμάτι αυτό δεν προσθέτει κανένα ορατό στον χρήστη κείμενο).
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-08β — AGENTS ΚΑΙ AUTOMATIONS (οδηγία 55), Κομμάτι 2a — Shadow/Supervised/Auto, μόνο ο μηχανισμός
+
+Ο ιδιοκτήτης είπε «θέλω να χτίσεις εσύ και να κάνεις πλάνο αλλά και να
+το χτίσεις να λειτουργεί και να το κάνεις να είναι αυτόματο» — αυτό
+διαβάστηκε ως το «εγκρίνω» που έλειπε από το AP1 (2026-11-04) για να
+συνεχίσουν τα Κομμάτια 2-10. Το πρωτότυπο εύρος (καμβάς, 11 πεδία,
+ομάδες, Shadow/Supervised/Auto, Approval Center, παρακολούθηση,
+επεξεργασία με λόγια, βιβλιοθήκη) χωρίστηκε ξανά σε μικρότερα κομμάτια
+με tests στο καθένα, όπως και στο Cinematic Sites — αυτό εδώ είναι
+**μόνο ο backend μηχανισμός**, χωρίς κανέναν επιλογέα στην οθόνη.
+
+Και τα τρία τρόπο λειτουργίας στηρίζονται σε κάτι που ΗΔΗ υπήρχε, όχι
+σε νέα εφεύρεση: το κουτί `approval` ήδη σταματά/συνεχίζει μια
+εκτέλεση, και το `dry` ήδη κάνει πλήρη «πρόβα» (οι ενέργειες γράφουν
+«would send/save» αντί να το κάνουν) — έλειπε μόνο το να είναι αυτά
+ΜΟΝΙΜΗ ρύθμιση ανά αυτοματοποίηση, όχι μόνο ανά αίτημα (το κουμπί
+«Δοκιμή»/«Εκτέλεση τώρα»):
+
+- `src/lib/automations/boxes.ts`: `FlowMode = "auto" | "shadow" | "supervised"`,
+  `effectiveDry(mode, startedBy)` — ΜΙΑ συνάρτηση για όλη την απόφαση
+  dry (το `{dry:true}` του κουμπιού κερδίζει πάντα· αλλιώς `shadow`
+  επιβάλλει dry ΕΚΤΟΣ αν `startedBy === "manual"` — ο άνθρωπος πάτησε
+  το κουμπί ο ίδιος, ΤΩΡΑ, ρητά· αυτό δεν είναι ο κίνδυνος που το Shadow
+  προστατεύει). `withSupervisedApprovals(boxes)` — καθαρή, μόνο σε
+  χρόνο εκτέλεσης (ΠΟΤΕ αποθηκεύεται), βάζει ένα `approval` πριν από
+  κάθε `action` που δεν έχει ήδη ένα ακριβώς πριν του· αφού είναι
+  καθοριστική από `(boxes, mode)` μόνο, μια επανάληψη (resume) ξαναφτιάχνει
+  τον ίδιο πίνακα και ο αποθηκευμένος δείκτης `at` πέφτει στο ίδιο κουτί.
+- `src/lib/automations/runner.ts`: διαβάζει το mode, εφαρμόζει το
+  `withSupervisedApprovals` μόνο όταν `mode === "supervised"`, και νέος
+  έλεγχος ορίων (`resume.at > boxes.length` → αποτυχία, όχι out-of-bounds)
+  για την άκρη όπου κάποιος αλλάζει mode όσο μια εκτέλεση περιμένει.
+- `src/lib/automations/start-run.ts`, `event-runs.ts`: το `dry` τους
+  υπολογίζεται πλέον ΜΟΝΟ από `effectiveDry`, ποτέ ξανά τοπικά.
+- `src/lib/automations/flow-access.ts`: `modeFor`/`modesByFlowIds` —
+  ΙΔΙΑ πειθαρχία με το `minutes_saved`: ποτέ στο κοινό `FLOW_COLUMNS`,
+  πάντα σε ξεχωριστό ερώτημα, αποτυχία προς `DEFAULT_FLOW_MODE` ("auto")
+  σε οποιοδήποτε σφάλμα — ΚΑΙ σε λείπουσα στήλη (η εφαρμογή δουλεύει
+  πριν περάσει το migration). Το `isColumnMissing` μετακινήθηκε εδώ από
+  το `page-data.ts` (που το ξανα-εξάγει, για να αποφευχθεί κυκλική
+  εισαγωγή — το `page-data.ts` ήδη εισάγει `FLOW_COLUMNS` από εδώ).
+- Τέσσερα routes συνδέθηκαν: ο cron (`api/cron/automation-flows`, μία
+  μαζική ανάγνωση mode ανά tick με `modesByFlowIds`), η χειροκίνητη
+  εκτέλεση (`api/automations/flows/[id]/run`), η έγκριση
+  (`api/automations/runs/[runId]/approve` — ΤΟ ΙΔΙΟ mode με αυτό που η
+  εκτέλεση ξεκίνησε, ώστε το `withSupervisedApprovals` να ξαναφτιάξει
+  τον ίδιο πίνακα), και το PATCH (`api/automations/flows/[id]/route.ts`
+  — νέο `body.mode`, πίσω από το ΙΔΙΟ διακόπτη `agents-automations-pro`
+  που το Κομμάτι 1 ήδη έκλεισε, επικυρωμένο με `isFlowMode`).
+- `supabase/migrations/20261123000000_automation_mode.sql`: στήλη
+  `mode text not null default 'auto'` στο `automation_flows`, με
+  check constraint στις τρεις τιμές. Fails-towards-auto: μια βάση χωρίς
+  το migration συμπεριφέρεται ήδη όπως σήμερα.
+- `src/lib/health/schema-canaries.ts`: νέο canary (`automation_flows.mode`)
+  — χωρίς αυτό, μια βάση που δεν πήρε ποτέ το migration θα έδειχνε
+  ταυτόσημη με μια όπου όλοι είναι απλά "auto", και τίποτα άλλο δεν θα
+  το έλεγε.
+
+`scripts/tests/automation-modes.test.mjs` (51 έλεγχοι) +
+`.mutation.mjs` (15/15 πιάστηκαν, μετά από δύο δικές μου διορθώσεις: μια
+λάθος σειρά σε test fixture, και `--?` αντί για `-*` σε regex). Στην
+πορεία βρέθηκαν και διορθώθηκαν ΔΥΟ παλιά σημεία που αγκυρώνονταν σε
+«η φράση υπάρχει οπουδήποτε στο αρχείο» αντί σε ΣΥΓΚΕΚΡΙΜΕΝΗ εμφάνιση —
+το Κομμάτι 2a πρόσθεσε μια ΔΕΥΤΕΡΗ, ταυτόσημη γραμμή `if (isColumnMissing...)
+return refuse("not_ready", 409)` στο ίδιο route (μία για `mode`, μία ήδη
+υπήρχε για `minutes_saved`), και οι δύο ελέγχοι (`automations.test.mjs`
+γραμμή 572 για το `minutes_saved`, και ο νέος `automation-modes.test.mjs`
+για το `mode`) πιάνονταν ο ένας από την παρουσία του άλλου — και οι δύο
+τώρα αγκυρώνονται στο δικό τους `stage: "..."`. Βρέθηκε από mutation
+testing (`automations.mutation.mjs` έδειξε MISSED, `automation-modes.mutation.mjs`
+το ίδιο), όχι από ανάγνωση. Επίσης διορθώθηκε ένα STALE mutant
+(`automations.mutation.mjs`, `isColumnMissing` στο λάθος αρχείο μετά τη
+μετακίνηση) και ένα νέο argued entry στο `user-scoped-queries.test.mjs`
+(`modesByFlowIds` καλείται με το admin client από τον cron — ίδιο σχήμα
+με το `collectAgentBatches` που ήδη δικαιολογείται εκεί: σάρωση across
+accounts εκ κατασκευής, τα flowIds έρχονται από ανάγνωση που ο ίδιος
+cron ήδη κάνει across accounts επίτηδες).
+
+`npm run gates` → ALL 412 GATES PASSED (30348 checks). `npm run build:ci`
+πράσινο.
+
+Τι ΔΕΝ χτίστηκε ακόμα, ρητά: **κανένας επιλογέας στην οθόνη** — το mode
+αλλάζει σήμερα μόνο με άμεση κλήση PATCH ή χειροκίνητη επεξεργασία
+βάσης· καμία ειδική οθόνη «Approval Center» που μαζεύει όλες τις
+εκτελέσεις σε αναμονή σε ένα σημείο· ο καμβάς/11 πεδία/ομάδες/pre-activation
+tests του Agent Pro (Κομμάτια 3-10 της αρχικής οδηγίας 55). Αυτά
+παραμένουν για επόμενα κομμάτια.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261123000000_automation_mode.sql**

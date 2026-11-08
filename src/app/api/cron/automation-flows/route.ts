@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
 import { readFlow } from "@/lib/automations/boxes";
-import { nextRunFor } from "@/lib/automations/flow-access";
+import { modesByFlowIds, nextRunFor } from "@/lib/automations/flow-access";
 import { accountFor, startRun } from "@/lib/automations/start-run";
 import { runQueued, type QueuedRun } from "@/lib/automations/event-runs";
 import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
@@ -99,6 +99,9 @@ export async function GET(request: Request) {
       list.push(flow);
       perUser.set(flow.user_id, list);
     }
+    // ONE extra query for every due flow's mode, not one per flow: the
+    // same reason MAX_FLOWS_PER_TICK bounds this whole route.
+    const modes = await modesByFlowIds(admin, [...perUser.values()].flat().map((f) => f.id));
 
     const users = new Map<string, User | null>();
     async function userFor(id: string): Promise<User | null> {
@@ -145,7 +148,7 @@ export async function GET(request: Request) {
             continue;
           }
           const started = await startRun({
-            flow: { ...flow, boxes: verdict.boxes },
+            flow: { ...flow, boxes: verdict.boxes, mode: modes.get(flow.id) },
             user,
             account,
             startedBy: "time",

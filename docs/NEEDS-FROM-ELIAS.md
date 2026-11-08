@@ -8,11 +8,12 @@
 ## ΠΡΩΤΑ — Agents της εταιρείας (2026-11-06, ενημερώθηκε 2026-11-07)
 
 Για να γράφονται τα αποτελέσματα των agents στο System Health: κάνε paste στο
-Supabase SQL editor **και τα τέσσερα** (έχουν μέσα το πώς αναιρούνται):
+Supabase SQL editor **και τα πέντε** (έχουν μέσα το πώς αναιρούνται):
 `supabase/migrations/20261106000000_company_agent_runs.sql` (αποτελέσματα),
 `supabase/migrations/20261107000000_company_agent_drafts.sql` (γραφείο draft),
-`supabase/migrations/20261107010000_company_kpis.sql` (μετρήσεις για 7 agents) και
-`supabase/migrations/20261108000000_company_integrity.sql` (data-quality και attribution).
+`supabase/migrations/20261107010000_company_kpis.sql` (μετρήσεις για 7 agents) 
+`supabase/migrations/20261108000000_company_integrity.sql` (data-quality και attribution) και
+`supabase/migrations/20261108010000_page_view_counts.sql` (μετρητής προβολών).
 Μέχρι να το κάνεις, οι ενότητες γράφουν «Could not read company_agent_runs» /
 «company_agent_drafts» — δεν είναι σφάλμα, είναι η ένδειξη. Μετά:
 `npm run db:pending` για να δεις ότι είναι «applied».
@@ -20,14 +21,19 @@ Supabase SQL editor **και τα τέσσερα** (έχουν μέσα το π�
 **Έτοιμο για merge (2026-11-08):** η αναβάθμιση του Next.js για τα δύο critical advisories έγινε
 στο PR #372 (16.3.8 → 16.4.5). Μένει να το κάνεις merge.
 
-**Απόφαση που χρειάζεται από σένα (2026-11-07, ανοιχτή, ενημερώθηκε 2026-11-08):** 2 agents,
-ο `analytics-collector` και ο `dashboard-agent`, περιμένουν δεδομένα επισκέψεων που το προϊόν
-δεν καταγράφει. Ένας first-party collector χωρίς cookies θα τα ξεκλείδωνε, αλλά αλλάζει όσα
-λέει η σελίδα /cookies και χρειάζεται νομικό έλεγχο. Δεν θα τον φτιάξω χωρίς το δικό σου ρητό
-«ναι». Οι άλλοι τρεις που περίμεναν analytics (`ab-testing`, `conversion-optimizer`,
-`experiment-analyst`) δουλεύουν πια πάνω σε αριθμούς που τους επικολλάς· ο collector θα τους
-έδινε αυτόματα δεδομένα, όχι δυνατότητα. Το `backup-verifier` δουλεύει επίσης πάνω σε λίστα που
-επικολλάς· δεν χρειάζεται πια Supabase token.
+**Μετρητής επισκέψεων (2026-11-08): φτιαγμένος, ΣΒΗΣΤΟΣ για το κοινό.** Ο `analytics-collector` και ο
+`dashboard-agent` τρέχουν πια πάνω σε έναν δικό μας μετρητή (πόσες φορές είδε κάποιος κάθε σελίδα,
+χωρίς cookie, χωρίς IP, χωρίς αναγνωριστικό). Είναι πίσω από τον διακόπτη `first-party-analytics`, που
+ξεκινά στο «εσύ και ο test λογαριασμός»: μετριέσαι μόνο εσύ. Για να μετρά όλους τους επισκέπτες:
+1. Κάνε paste στο Supabase τη migration `supabase/migrations/20261108010000_page_view_counts.sql`.
+2. Δώσε στον δικηγόρο σου το `docs/ANALYTICS-WORDING.md` (προτεινόμενες προτάσεις για /cookies και /privacy,
+   δεν έχω αλλάξει καμία σελίδα). Δεν ξέρω αν στις χώρες σου θέλει συγκατάθεση· δεν το έλεγξα.
+3. Όταν οι σελίδες λένε ό,τι πρέπει, άνοιξε τον διακόπτη στο `/dashboard/system-health`. Αν κάτι πάει στραβά,
+   ξαναβάλ' τον «Μόνο εγώ»: σταματά αμέσως, χωρίς deploy.
+Μέτρα **προβολές**, όχι επισκέπτες (χωρίς αναγνωριστικό δεν ξεχωρίζει έναν από πολλούς), και μετρά και bots
+που τρέχουν scripts. Τα `ab-testing`, `conversion-optimizer`, `experiment-analyst` δουλεύουν πάνω σε αριθμούς
+που τους επικολλάς· ο μετρητής δεν τους αλλάζει αυτό. Το `backup-verifier` δουλεύει επίσης πάνω σε λίστα
+που επικολλάς· δεν χρειάζεται πια Supabase token.
 
 ## ΠΡΩΤΑ — «ALL TOOLS: ΤΟ ΤΕΛΙΚΟ GRID» (2026-10-23)
 

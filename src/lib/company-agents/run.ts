@@ -15,8 +15,10 @@ import {
   analyzeHealth,
   analyzeLapse,
   analyzeAttribution,
+  analyzeCollector,
   analyzeDataQuality,
   analyzePaidShare,
+  analyzeTraffic,
   analyzeRetention,
   analyzeSignups,
   analyzeUpsell,
@@ -236,6 +238,18 @@ async function readIntegrity(): Promise<Kpis> {
   }
 }
 
+async function readTraffic(): Promise<Kpis> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("company_traffic");
+    if (error) throw error;
+    return metricsFrom(data);
+  } catch (err) {
+    logApiError("/api/cron/company-agents", err, { stage: "rpc company_traffic" });
+    return null;
+  }
+}
+
 async function readAttribution(): Promise<Kpis> {
   try {
     const admin = createAdminClient();
@@ -288,6 +302,8 @@ async function runOne(agentId: string, work: () => Promise<AgentResult>): Promis
 export async function runCompanyAgents(): Promise<RunReport> {
   // One read feeds all seven KPI agents: they judge the same snapshot.
   const kpis = await readKpis();
+  // one read, two agents: they judge the same snapshot
+  const trafficRead = await readTraffic();
   const results = [
     await runOne("error-log-analyst", async () => analyzeErrors(await readErrors())),
     await runOne("api-uptime-monitor", async () => analyzeHealth(await probeHealth())),
@@ -313,6 +329,8 @@ export async function runCompanyAgents(): Promise<RunReport> {
     await runOne("sales-analytics", async () => analyzePaidShare(kpis)),
     await runOne("data-quality", async () => analyzeDataQuality(await readIntegrity())),
     await runOne("attribution", async () => analyzeAttribution(await readAttribution())),
+    await runOne("analytics-collector", async () => analyzeCollector(trafficRead)),
+    await runOne("dashboard-agent", async () => analyzeTraffic(trafficRead)),
     await runOne("task-auditor", async () => analyzeStaleness(await readPastRuns(), RUNNING_AGENT_IDS, Date.now())),
   ];
   // LAST, because it reports on everything above.

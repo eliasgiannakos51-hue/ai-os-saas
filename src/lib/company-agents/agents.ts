@@ -583,3 +583,56 @@ export function analyzeAttribution(metrics: Kpis): AgentResult {
     : `${v.referrals_new_7d} of ${v.users_new_7d} new accounts this week came through an affiliate link; the other ${Math.max(v.users_new_7d - v.referrals_new_7d, 0)} are not attributed.`;
   return { status: "ok", summary: `${week} ${v.referrals_converted} of ${v.referrals_total} referrals to date have paid, across ${v.affiliates_active} active affiliate(s).`, evidence, unverified };
 }
+
+// ---------------------------------------------------------------------------
+// analytics-collector and dashboard-agent read company_traffic(), the counts
+// behind the first-party page counter (supabase/migrations/
+// 20261108010000_page_view_counts.sql). VIEWS, never visitors: the counter
+// stores no identifier, so one person reloading ten times is ten views.
+// ---------------------------------------------------------------------------
+
+/** No view for this many days is worth a warning. Chosen, not measured. */
+export const COLLECTOR_STALE_DAYS = 2;
+/** Below this many views in the earlier week a percentage is noise. Chosen, not measured. */
+export const TRAFFIC_MIN_BASE = 50;
+
+const TRAFFIC_UNVERIFIED = [
+  "visitors: the counter stores no identifier, so it counts views and cannot tell one person from many",
+  "bots and crawlers that run scripts are counted like anyone else, and browsers that send Do Not Track or Global Privacy Control, or block the call, are not counted: the figure is a floor and a mixture",
+];
+
+/** analytics-collector: is the page counter recording at all? */
+export function analyzeCollector(traffic: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(traffic, ["views_7d", "days_with_data_14d", "days_since_last_view"]);
+  if (missing.length > 0) {
+    const r = kpiUnreadable(traffic, missing, "company_traffic()");
+    return { ...r, unverified: [...r.unverified.filter((u) => !u.startsWith("visits")), ...TRAFFIC_UNVERIFIED] };
+  }
+  const evidence = { views7d: v.views_7d, daysWithData14d: v.days_with_data_14d, daysSinceLastView: v.days_since_last_view };
+  if (v.days_since_last_view < 0) {
+    return { status: "unverified", summary: "No view has ever been recorded. The first-party-analytics switch may be off, or nobody has visited since it was opened.", evidence, unverified: ["whether the counter works: with no data there is nothing to judge", ...TRAFFIC_UNVERIFIED] };
+  }
+  if (v.days_since_last_view >= COLLECTOR_STALE_DAYS) {
+    return { status: "warn", summary: `The last recorded view was ${v.days_since_last_view} days ago. The counter may be broken or switched off, or the product may simply have had no visits.`, evidence, unverified: ["which of those it is: the agent sees only the gap", ...TRAFFIC_UNVERIFIED] };
+  }
+  return { status: "ok", summary: `${v.views_7d} views recorded in the last 7 days, on ${v.days_with_data_14d} of the last 14 days; the last one ${v.days_since_last_view === 0 ? "today" : "yesterday"}.`, evidence, unverified: TRAFFIC_UNVERIFIED };
+}
+
+/** dashboard-agent: the week's views against the week before. */
+export function analyzeTraffic(traffic: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(traffic, ["views_7d", "views_prev_7d", "pages_7d", "sources_7d", "direct_views_7d", "days_with_data_14d"]);
+  if (missing.length > 0) {
+    const r = kpiUnreadable(traffic, missing, "company_traffic()");
+    return { ...r, unverified: [...r.unverified.filter((u) => !u.startsWith("visits")), ...TRAFFIC_UNVERIFIED] };
+  }
+  const evidence = { views7d: v.views_7d, viewsPrev7d: v.views_prev_7d, pages7d: v.pages_7d, sources7d: v.sources_7d, directViews7d: v.direct_views_7d, daysWithData14d: v.days_with_data_14d };
+  const unverified = [...(v.days_with_data_14d < 14 ? ["the earlier week: the counter has data on fewer than 14 of the last 14 days, so it may have started partway through it"] : []), ...TRAFFIC_UNVERIFIED];
+  if (v.days_with_data_14d === 0) {
+    return { status: "unverified", summary: "No view is recorded in the last 14 days, so there is no week to report.", evidence, unverified };
+  }
+  const line = `${v.views_7d} views in the last 7 days (the 7 before: ${v.views_prev_7d}), across ${v.pages_7d} pages and ${v.sources_7d} sources; ${v.views_7d === 0 ? 0 : pct(v.direct_views_7d / v.views_7d)}% came with no referrer.`;
+  if (v.views_prev_7d >= TRAFFIC_MIN_BASE && v.views_7d < v.views_prev_7d * 0.7) {
+    return { status: "warn", summary: `${line} Views fell by 30% or more.`, evidence, unverified };
+  }
+  return { status: "ok", summary: line, evidence, unverified };
+}

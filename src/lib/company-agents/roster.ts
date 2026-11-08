@@ -41,10 +41,11 @@ export type Autonomy = 1 | 2 | 3;
  *  blocked agents that ACT on a system that does not exist, but a draft
  *  agent needs only a brief. Those agents now exist as draft agents and say
  *  in their missions what they cannot do (send, track, apply, file). */
-export const BLOCKERS = {
-  analytics: "No analytics package is installed (package.json has no PostHog, Plausible, Mixpanel, Umami or Amplitude). Owner-run SQL queries exist in docs/analytics-queries.sql; whether they cover what these agents need was not measured.",
-} as const;
-export type BlockerKey = keyof typeof BLOCKERS;
+/** EMPTY SINCE 2026-11-08: every agent either runs or is built. The mechanism
+ *  stays so that the next agent that really cannot work has to say why, and
+ *  the tests hold that a reason exists only while somebody is blocked by it. */
+export const BLOCKERS: Record<string, string> = {};
+export type BlockerKey = string;
 
 export type RosterAgent = {
   id: string;
@@ -76,7 +77,7 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
 
 /** The agents the runner (lib/company-agents/run.ts) executes today. The
  *  roster's `running` entries must equal this list, both ways. */
-export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "kpi-monitor", "usage-monitor", "churn-predictor", "retention", "upsell", "anomaly-detector", "sales-analytics", "data-quality", "attribution", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
+export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "kpi-monitor", "usage-monitor", "churn-predictor", "retention", "upsell", "anomaly-detector", "sales-analytics", "data-quality", "attribution", "analytics-collector", "dashboard-agent", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
 
 /** The agents that run in CI, on every push, from scripts/company-agents/repo-agents.mjs.
  *  They need the repository's files, which the Vercel runner does not have, so their result
@@ -233,9 +234,9 @@ export const ROSTER: RosterAgent[] = [
     ["customer-education", "Customer education", "Drafts guides and tutorials.", 2, "built"],
   ]),
   ...dept("data", [
-    ["analytics-collector", "Analytics collector", "Collects the product's usage events.", 1, "blocked", "analytics"],
+    ["analytics-collector", "Analytics collector", "Checks that the first-party page counter is recording: how many views in 7 days and how long since the last one. The counter itself is behind the first-party-analytics switch.", 1, "running"],
     ["data-quality", "Data quality", "Counts rows that break seven stated rules in the credit, usage and affiliate tables. It checks rules, not truth.", 1, "running"],
-    ["dashboard-agent", "Dashboard", "Keeps the owner's dashboards current.", 1, "blocked", "analytics"],
+    ["dashboard-agent", "Dashboard", "Reports the week's page views against the week before, how many pages and the direct share. Counts views, not visitors, and bots are not filtered.", 1, "running"],
     ["experiment-analyst", "Experiment analyst", "Reads an experiment result from figures you paste and says what they support. It does not run or measure experiments.", 2, "built"],
     ["anomaly-detector", "Anomaly detector", "Warns when new accounts or active accounts jump 3x or more week on week. It sees the size, not the cause.", 1, "running"],
     ["attribution", "Attribution", "Counts new accounts that came through an affiliate link. No other source is recorded, so the rest are not attributed.", 1, "running"],

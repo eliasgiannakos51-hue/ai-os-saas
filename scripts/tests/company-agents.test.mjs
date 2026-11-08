@@ -79,11 +79,7 @@ console.log("\n== 2. the reasons are still true ==");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
 ok(`package.json was read (${deps.length} dependencies), so "no analytics package" is a finding and not an empty read`, deps.length >= 20 && deps.includes("next"));
-const analyticsDeps = deps.filter((d) => /posthog|plausible|mixpanel|umami|amplitude/i.test(d));
-const blockedByAnalytics = ROSTER.filter((a) => a.blockedBy === "analytics").length;
-ok(`"analytics" blocks ${blockedByAnalytics} agent(s) only while no analytics package is installed`,
-  analyticsDeps.length === 0,
-  `${analyticsDeps.join(", ")} is installed now: revisit the ${blockedByAnalytics} roster entries blockedBy "analytics" and BLOCKERS.analytics`);
+ok("BLOCKERS is empty exactly while no roster entry is blocked", ROSTER.filter((x) => x.status === "blocked").length === 0 && Object.keys(BLOCKERS).length === 0);
 const migrations = readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).map((f) => readFileSync(`supabase/migrations/${f}`, "utf8")).join("\n");
 ok(`crm-manager says it does not write to public.leads, which still exists as the customer Sales tool`, /create table if not exists public\.leads\b/i.test(migrations));
 ok(`the support agents say "no ticket system" only while no support-ticket table exists`, !/create table if not exists public\.(support_tickets|tickets)\b/i.test(migrations), "a tickets table exists now: revisit support-intake, escalation and the missions that say there is none");
@@ -113,7 +109,6 @@ ok("every mission of an agent that cannot act says so (send, apply, file, track,
 ok("no agent is blocked by a reason that is no longer defined", ROSTER.every((x) => x.blockedBy === undefined || x.blockedBy in BLOCKERS));
 ok("the four agents converted on 2026-11-08 say in their job what they cannot do", [["ab-testing", /do not run, split or measure/], ["conversion-optimizer", /hypothesis, not a finding/], ["experiment-analyst", /do not run or measure/], ["backup-verifier", /never say a backup works/]].every(([id, re]) => re.test(D.find((x) => x.id === id).job)));
 ok("the two statistics agents are told to show the arithmetic and to refuse a winner on thin data", /arithmetic/.test(D.find((x) => x.id === "ab-testing").job) && /too small/.test(D.find((x) => x.id === "ab-testing").job) && /arithmetic/.test(D.find((x) => x.id === "experiment-analyst").job));
-ok("only the two agents that need visits are still blocked, and both by analytics", JSON.stringify(ROSTER.filter((a) => a.status === "blocked").map((a) => a.id).sort()) === JSON.stringify(["analytics-collector", "dashboard-agent"]) && ROSTER.filter((a) => a.status === "blocked").every((a) => a.blockedBy === "analytics"));
 ok("brief: too short is refused", drafting.checkBrief("hi").ok === false && drafting.checkBrief(undefined).ok === false);
 ok("brief: too long is refused", drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS + 1)).ok === false);
 ok("brief: exactly the limits are accepted and trimmed", drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").ok === true && drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS)).ok === true && drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").brief.length === drafting.MIN_BRIEF_CHARS);
@@ -311,6 +306,25 @@ ok("attribution reads exactly the eight metrics company_attribution returns, bot
 ok("every table and column the two functions name exists in a migration", ["user_credits", "affiliate_referrals", "affiliate_commissions", "affiliates", "ai_cost_log"].every((t) => new RegExp(`create table if not exists public\\.${t}\\b`, "i").test(migrations)) && ["void_reason", "converted_at", "real_cost_eur", "real_cost_usd", "credits_charged"].every((c) => new RegExp(`\\b${c}\\b`).test(migrations)));
 ok("the runner reads each function once, with a literal name the rpc canary can see", ["company_integrity", "company_attribution"].every((f) => (runnerSrc.match(new RegExp(`\\.rpc\\("${f}"`, "g")) ?? []).length === 1));
 ok("the runner runs both agents, each on its own function", /runOne\("data-quality", async \(\) => analyzeDataQuality\(await readIntegrity\(\)\)\)/.test(runnerSrc) && /runOne\("attribution", async \(\) => analyzeAttribution\(await readAttribution\(\)\)\)/.test(runnerSrc));
+
+console.log("\n== 3g. eighth batch: analytics-collector and dashboard-agent ==");
+const T = (o) => ({ views_7d: 400, views_prev_7d: 380, pages_7d: 12, sources_7d: 5, direct_views_7d: 100, days_with_data_14d: 14, days_since_last_view: 0, ...o });
+ok("collector: a failed read is unverified, never ok", agents.analyzeCollector(null).status === "unverified" && agents.analyzeTraffic(null).status === "unverified");
+ok("both: a missing metric is unverified, never treated as zero", agents.analyzeCollector({}).status === "unverified" && agents.analyzeTraffic({}).status === "unverified" && agents.analyzeTraffic((({ pages_7d, ...r }) => r)(T({}))).status === "unverified");
+ok("collector: nothing ever recorded (-1) is unverified and names the switch", (() => { const r = agents.analyzeCollector(T({ views_7d: 0, days_with_data_14d: 0, days_since_last_view: -1 })); return r.status === "unverified" && /first-party-analytics/.test(r.summary); })());
+ok("collector: a recent view is ok, today and yesterday worded apart", /today/.test(agents.analyzeCollector(T({})).summary) && /yesterday/.test(agents.analyzeCollector(T({ days_since_last_view: 1 })).summary) && agents.analyzeCollector(T({ days_since_last_view: 1 })).status === "ok");
+ok("collector: the stale limit is exact", agents.analyzeCollector(T({ days_since_last_view: agents.COLLECTOR_STALE_DAYS - 1 })).status === "ok" && agents.analyzeCollector(T({ days_since_last_view: agents.COLLECTOR_STALE_DAYS })).status === "warn");
+ok("both say they count views, not visitors, and that bots are counted", [agents.analyzeCollector(T({})), agents.analyzeTraffic(T({}))].every((r) => r.unverified.some((u) => /counts views and cannot tell one person from many/.test(u)) && r.unverified.some((u) => /bots and crawlers/.test(u))));
+ok("dashboard: no data in 14 days is unverified, not a report of zero", agents.analyzeTraffic(T({ views_7d: 0, views_prev_7d: 0, pages_7d: 0, direct_views_7d: 0, days_with_data_14d: 0, days_since_last_view: -1 })).status === "unverified");
+ok("dashboard: a steady week is ok and prints both weeks and the direct share", (() => { const r = agents.analyzeTraffic(T({})); return r.status === "ok" && /400 views/.test(r.summary) && /380/.test(r.summary) && /25%/.test(r.summary); })());
+ok("dashboard: a fall of 30% warns, 29% does not", agents.analyzeTraffic(T({ views_prev_7d: 100, views_7d: 69 })).status === "warn" && agents.analyzeTraffic(T({ views_prev_7d: 100, views_7d: 70 })).status === "ok");
+ok("dashboard: a fall is judged only on a base of TRAFFIC_MIN_BASE views, exactly that many counts", agents.analyzeTraffic(T({ views_prev_7d: agents.TRAFFIC_MIN_BASE - 1, views_7d: 0 })).status === "ok" && agents.analyzeTraffic(T({ views_prev_7d: agents.TRAFFIC_MIN_BASE, views_7d: 0 })).status === "warn");
+ok("dashboard: zero views this week never divides by zero", (() => { const r = agents.analyzeTraffic(T({ views_7d: 0, direct_views_7d: 0, views_prev_7d: 10 })); return r.status === "ok" && /0%/.test(r.summary) && !/NaN/.test(r.summary); })());
+ok("dashboard: a counter younger than two weeks says the earlier week may be partial", agents.analyzeTraffic(T({ days_with_data_14d: 5 })).unverified.some((u) => /earlier week/.test(u)) && !agents.analyzeTraffic(T({})).unverified.some((u) => /earlier week/.test(u)));
+const trafficRows = [...readFileSync("supabase/migrations/20261108010000_page_view_counts.sql", "utf8").split("create or replace function public.company_traffic")[1].matchAll(/select '([a-z_0-9]+)'(?:::text)?,|union all select '([a-z_0-9]+)',/g)].map((m) => m[1] ?? m[2]).sort();
+const trafficUsed = [...new Set([...(() => { const t = code("src/lib/company-agents/agents.ts"); return t.slice(t.indexOf("export function analyzeCollector")); })().matchAll(/"((?:views|days|pages|sources|direct)_[a-z0-9_]+)"/g)].map((m) => m[1]))].sort();
+ok("the two agents read exactly the metrics company_traffic returns, both ways", JSON.stringify(trafficRows) === JSON.stringify(trafficUsed) && trafficRows.length === 7, `${trafficRows} vs ${trafficUsed}`);
+ok("the runner reads company_traffic once, with a literal name, and gives both agents the same snapshot", (runnerSrc.match(/\.rpc\("company_traffic"/g) ?? []).length === 1 && /analyzeCollector\(trafficRead\)/.test(runnerSrc) && /analyzeTraffic\(trafficRead\)/.test(runnerSrc));
 
 console.log("\n== 4. the wiring is real ==");
 const cron = code("src/app/api/cron/company-agents/route.ts");

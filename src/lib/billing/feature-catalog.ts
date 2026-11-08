@@ -1187,7 +1187,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     group: "support",
     minPlan: "free",
     charges: false,
-    routes: ["contact", "client-error", "security-check-log", "pwa/telemetry"],
+    routes: ["contact", "client-error", "security-check-log", "pwa/telemetry", "analytics/view"],
     enforcedIn: "src/app/api/contact/route.ts",
     enforcedSymbol: "export async function POST",
     cell: () => ({ type: "check" }),

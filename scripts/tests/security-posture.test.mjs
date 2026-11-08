@@ -385,8 +385,17 @@ checkTrue(
   publishedPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
 );
 
+// TABLES THAT ONLY A FUNCTION TOUCHES (2026-11-08). Stricter than
+// ADMIN_ONLY_TABLES: no code in src/ queries the table at all, so there is no
+// client to get wrong. The only way in is a SECURITY DEFINER function that is
+// executable by service_role alone, and the only callers of those functions
+// must hold the admin client. Section 2 checks both halves.
+const RPC_ONLY_TABLES = {
+  page_view_counts: ["record_page_view", "company_traffic"],
+};
+
 const silentlyDenied = [...rlsEnabled].filter(
-  (t) => !policyTables.has(t) && !loopRls.has(t) && !ADMIN_ONLY_TABLES.has(t)
+  (t) => !policyTables.has(t) && !loopRls.has(t) && !ADMIN_ONLY_TABLES.has(t) && !(t in RPC_ONLY_TABLES)
 ).sort();
 check("no table is RLS-enabled with no policy and no justification", silentlyDenied, []);
 
@@ -416,6 +425,19 @@ for (const table of ADMIN_ONLY_TABLES) {
   for (const f of users) {
     const src = readFileSync(f, "utf8");
     checkTrue(`${table} in ${f} uses the admin client`, src.includes("createAdminClient"));
+  }
+}
+// The floor for "nobody queries it": the scan of src/ must have seen the source.
+checkTrue(`src/ was scanned (${srcFiles.length} files), so "never queried directly" is a finding and not an empty read`, srcFiles.length > 200);
+for (const [table, fns] of Object.entries(RPC_ONLY_TABLES)) {
+  const direct = srcFiles.filter((f) => readFileSync(f, "utf8").includes(`from("${table}")`));
+  checkTrue(`${table} is never queried directly from src/ (${direct.join(", ") || "nobody does"})`, direct.length === 0);
+  for (const fn of fns) {
+    const callers = srcFiles.filter((f) => readFileSync(f, "utf8").includes(`.rpc("${fn}"`));
+    checkTrue(`${fn}() is called from src/ (${callers.length})`, callers.length > 0);
+    for (const f of callers) {
+      checkTrue(`${fn}() in ${f} is called with the admin client`, readFileSync(f, "utf8").includes("createAdminClient"));
+    }
   }
 }
 
@@ -459,6 +481,8 @@ const NO_SESSION_BY_DESIGN = {
     "the recipient is FIXED to ADMIN_EMAILS — the sender's address is only ever reply-to " +
     "and never selects a destination, which is the difference between a contact form and " +
     "an open relay. Nothing is stored.",
+  "src/app/api/analytics/view/route.ts":
+    "the first-party page counter exists to count visitors who are not signed in. It reads the session only to ask the first-party-analytics switch whether this person is staff and never stores or returns it. It stores no IP, user agent or account id, refuses a cross-origin caller, bounds the body to 1000 characters, writes only a normalised page and source through record_page_view (service role), is limited by ONE shared bucket (a per-IP bucket would put visitors' IPs in the rate-limit table), and answers 204 to everyone.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/company-agents/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. Runs the company's own read-only agents once a day: it reads production_errors and calls /api/health, and its only write is one row per agent into company_agent_runs. It reads no request body, spends nothing and contacts no customer",
@@ -544,6 +568,10 @@ const REJECTS_BY_REDIRECT = {
     "the notification click: somebody followed a link from their email, and JSON in the address bar is a dead end",
 };
 
+// Routes that call auth.getUser() and still must NOT reject a missing user.
+// Each also has a NO_SESSION_BY_DESIGN entry saying why.
+const ANONYMOUS_ON_PURPOSE = new Set(["src/app/api/analytics/view/route.ts"]);
+
 for (const file of routes) {
   const src = readFileSync(file, "utf8");
   const key = file.replace(/\\/g, "/");
@@ -584,6 +612,16 @@ for (const file of routes) {
   // reason passed. The span after the guard is what is searched now, which
   // is strictly narrower: every route that passed on merit still passes,
   // and one that passed by coincidence no longer does.
+  // A route that reads the session ONLY to ask a switch who is staff, and
+  // answers the same to everyone, has nothing to reject. Narrow on purpose:
+  // it may not touch a property of the user, and the entry goes stale (and
+  // fails) the day the route does reject, so it cannot outlive its reason.
+  if (authenticates && ANONYMOUS_ON_PURPOSE.has(key)) {
+    const bare = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|\s)\/\/.*$/gm, "$1");
+    checkTrue(`  ${key} uses the session only to ask the switch (no user.id, user.email, ...)`, /isFeatureOn\("[a-z-]+", user\)/.test(bare) && !/\buser\b/.test(bare.replace(/data:\s*\{\s*user\s*\}/, "").replace(/isFeatureOn\("[a-z-]+", user\)/, "")));
+    checkTrue(`  ${key} still has no rejection of a missing user (else drop it from ANONYMOUS_ON_PURPOSE)`, !/if \(!user\b/.test(bare));
+    continue;
+  }
   if (authenticates) {
     const guard = src.match(/if \(!user\b[^)]*\)\s*\{?([\s\S]{0,400})/);
     const rejection = guard ? guard[1] : "";

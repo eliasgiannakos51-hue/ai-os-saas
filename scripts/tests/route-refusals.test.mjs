@@ -65,13 +65,16 @@ const ROUTES = routeFiles();
 /**
  * ROUTES ALLOWED TO SKIP A REFUSAL, with the reason.
  *
- * EMPTY, and that is the finding rather than an oversight: all 113
- * routes that read a user refuse a missing one, all 23 that take a hold
- * refuse a failed one, all 19 that read a row by id refuse a missing one.
- * The table exists so the first exception has to be argued for in
- * writing, and so it can be checked both ways when it is.
+ * One entry since 2026-11-08, and it was argued for in writing: until then
+ * the table was empty (all 113 routes that read a user then refused a
+ * missing one, measured when this note was written). The table exists so
+ * an exception has to be argued for, and so it can be checked both ways:
+ * section 4 fails if an entry describes a route that now refuses.
  */
-export const EXEMPT = {};
+export const EXEMPT = {
+  "src/app/api/analytics/view/route.ts":
+    "The page counter exists to count visitors who are NOT signed in. It reads the user only to ask the first-party-analytics switch whether this person is staff, never stores or returns the user, and answers 204 to everyone. Refusing a missing user would make it count nobody.",
+};
 
 /**
  * Where the statement containing `at` begins — the nearest declaration or

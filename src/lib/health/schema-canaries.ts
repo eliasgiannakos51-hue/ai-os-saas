@@ -459,6 +459,24 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "page_view_counts",
+    migration: "20261108010000_page_view_counts.sql",
+    breaks: "the first-party page counter cannot record a view and the analytics-collector and dashboard-agent company agents report «Could not read company_traffic()»; nothing a customer sees is affected",
+  },
+  {
+    kind: "function",
+    fn: "record_page_view",
+    migration: "20261108010000_page_view_counts.sql",
+    breaks: "the first-party page counter drops every view silently once the switch is opened; nothing a customer sees is affected",
+  },
+  {
+    kind: "function",
+    fn: "company_traffic",
+    migration: "20261108010000_page_view_counts.sql",
+    breaks: "the analytics-collector and dashboard-agent company agents report «Could not read company_traffic()»; nothing a customer sees is affected",
+  },
+  {
+    kind: "table",
     table: "company_agent_drafts",
     migration: "20261107000000_company_agent_drafts.sql",
     breaks: "The owner-only Draft desk in System Health shows «Could not read company_agent_drafts» and «Write draft» fails; nothing a customer sees is affected",

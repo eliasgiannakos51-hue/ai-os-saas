@@ -25,9 +25,9 @@
 - **Agents της εταιρείας στο Ionexa** — φτιαγμένο, αδοκίμαστο σε browser, PR #370:
   ενότητα «Company agents» στο `/dashboard/system-health`. Πόσοι τρέχουν, πόσοι
   είναι on demand και πόσοι μπλοκαρισμένοι βγαίνει από `rosterCounts()` στο
-  `src/lib/company-agents/roster.ts` (δεν γράφεται εδώ· μετρήθηκε 2026-11-08: 30 / 85 / 6).
-  Μπλοκαρισμένοι μένουν 6: οι 5 περιμένουν την απόφαση για analytics
-  (`NEEDS-FROM-ELIAS.md`) και ο `backup-verifier` ένα Supabase management token.
+  `src/lib/company-agents/roster.ts` (δεν γράφεται εδώ· μετρήθηκε 2026-11-08: 30 / 89 / 2).
+  Μπλοκαρισμένοι μένουν 2 (`analytics-collector`, `dashboard-agent`): περιμένουν την
+  απόφαση για analytics (`NEEDS-FROM-ELIAS.md`).
 
 ## Μετά το τρέχον πακέτο — MASTER Μέρος 18 και 5.1.1 (2026-10-08)
 

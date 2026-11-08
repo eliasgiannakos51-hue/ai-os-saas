@@ -20,15 +20,14 @@ Supabase SQL editor **και τα τέσσερα** (έχουν μέσα το π�
 **Έτοιμο για merge (2026-11-08):** η αναβάθμιση του Next.js για τα δύο critical advisories έγινε
 στο PR #372 (16.3.8 → 16.4.5). Μένει να το κάνεις merge.
 
-**Απόφαση που χρειάζεται από σένα (2026-11-07, ανοιχτή):** 5 agents (`analytics-collector`,
-`ab-testing`, `conversion-optimizer`, `experiment-analyst`, `dashboard-agent`) περιμένουν
-δεδομένα επισκέψεων που το προϊόν δεν καταγράφει. Ένας first-party collector χωρίς cookies
-θα τα ξεκλείδωνε, αλλά αλλάζει όσα λέει η σελίδα /cookies και χρειάζεται νομικό έλεγχο.
-Δεν θα τον φτιάξω χωρίς το δικό σου ρητό «ναι».
-
-**Προαιρετικό, για έναν agent:** το `backup-verifier` χρειάζεται Supabase management API
-token (Supabase → Account → Access Tokens), σαν μεταβλητή περιβάλλοντος στο Vercel και στο
-GitHub. Δεν είναι κρίσιμο· πες μου αν το θες.
+**Απόφαση που χρειάζεται από σένα (2026-11-07, ανοιχτή, ενημερώθηκε 2026-11-08):** 2 agents,
+ο `analytics-collector` και ο `dashboard-agent`, περιμένουν δεδομένα επισκέψεων που το προϊόν
+δεν καταγράφει. Ένας first-party collector χωρίς cookies θα τα ξεκλείδωνε, αλλά αλλάζει όσα
+λέει η σελίδα /cookies και χρειάζεται νομικό έλεγχο. Δεν θα τον φτιάξω χωρίς το δικό σου ρητό
+«ναι». Οι άλλοι τρεις που περίμεναν analytics (`ab-testing`, `conversion-optimizer`,
+`experiment-analyst`) δουλεύουν πια πάνω σε αριθμούς που τους επικολλάς· ο collector θα τους
+έδινε αυτόματα δεδομένα, όχι δυνατότητα. Το `backup-verifier` δουλεύει επίσης πάνω σε λίστα που
+επικολλάς· δεν χρειάζεται πια Supabase token.
 
 ## ΠΡΩΤΑ — «ALL TOOLS: ΤΟ ΤΕΛΙΚΟ GRID» (2026-10-23)
 

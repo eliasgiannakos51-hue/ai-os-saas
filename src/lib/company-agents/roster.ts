@@ -43,7 +43,6 @@ export type Autonomy = 1 | 2 | 3;
  *  in their missions what they cannot do (send, track, apply, file). */
 export const BLOCKERS = {
   analytics: "No analytics package is installed (package.json has no PostHog, Plausible, Mixpanel, Umami or Amplitude). Owner-run SQL queries exist in docs/analytics-queries.sql; whether they cover what these agents need was not measured.",
-  "supabase-token": "No Supabase management API token is configured (no such variable is read in src/ or listed in docs/api-keys.md), so nothing running here can ask Supabase about its backups. Deployments are a different case: the deployment monitor reads them from GitHub.",
 } as const;
 export type BlockerKey = keyof typeof BLOCKERS;
 
@@ -155,8 +154,8 @@ export const ROSTER: RosterAgent[] = [
     ["video-script", "Video script", "Writes a video script. It makes no video: the video tool is not a finished product.", 2, "built"],
     ["graphic-design", "Graphic design", "Makes graphics with the image tool.", 2, "built"],
     ["campaign-manager", "Campaign manager", "Plans a campaign and its budget split from the brief. It runs and measures nothing.", 2, "built"],
-    ["ab-testing", "A/B testing", "Compares two versions and reads the result.", 1, "blocked", "analytics"],
-    ["conversion-optimizer", "Conversion optimizer", "Looks for what turns visitors into customers.", 1, "blocked", "analytics"],
+    ["ab-testing", "A/B testing", "Reads an A/B result from numbers you paste and shows the arithmetic. It does not run, split or measure any test.", 2, "built"],
+    ["conversion-optimizer", "Conversion optimizer", "Finds the biggest drop in a funnel you paste and proposes changes to test. It cannot see visitors, so every proposal is a hypothesis.", 2, "built"],
     ["reputation-monitor", "Reputation monitor", "Watches what is said about Ionexa in public.", 1, "built"],
     ["discount-agent", "Discount agent", "Suggests a discount inside owner-set limits. It never applies one.", 2, "built"],
     ["brand-manager", "Brand manager", "Checks content against the brand.", 1, "built"],
@@ -209,7 +208,7 @@ export const ROSTER: RosterAgent[] = [
     ["error-log-analyst", "Error log analyst", "Reads the open production errors and reports how many and where.", 1, "running"],
     ["database-health", "Database health", "Reads the database's own exposure report and fails when any of its checks fails.", 1, "running"],
     ["queue-monitor", "Queue monitor", "Counts background jobs (ai_jobs) that are queued or running and have not moved for 30 minutes, and recent failures.", 1, "running"],
-    ["backup-verifier", "Backup verifier", "Checks that a backup exists and is recent.", 1, "blocked", "supabase-token"],
+    ["backup-verifier", "Backup verifier", "Judges a backup list you paste: how recent, any gaps. It cannot reach Supabase or restore, so it never says a backup works.", 2, "built"],
     ["deployment-monitor", "Deployment monitor", "Reads the last ten production deployments Vercel reported to GitHub and fails when the newest one failed. It does not test the live site.", 1, "running"],
     ["cost-optimizer", "Cost optimizer", "Compares the last 24 hours of AI spend with the daily average of the week before and warns on a spike. AI cost only, not infrastructure bills.", 1, "running"],
   ]),
@@ -237,7 +236,7 @@ export const ROSTER: RosterAgent[] = [
     ["analytics-collector", "Analytics collector", "Collects the product's usage events.", 1, "blocked", "analytics"],
     ["data-quality", "Data quality", "Counts rows that break seven stated rules in the credit, usage and affiliate tables. It checks rules, not truth.", 1, "running"],
     ["dashboard-agent", "Dashboard", "Keeps the owner's dashboards current.", 1, "blocked", "analytics"],
-    ["experiment-analyst", "Experiment analyst", "Reads the result of an experiment.", 1, "blocked", "analytics"],
+    ["experiment-analyst", "Experiment analyst", "Reads an experiment result from figures you paste and says what they support. It does not run or measure experiments.", 2, "built"],
     ["anomaly-detector", "Anomaly detector", "Warns when new accounts or active accounts jump 3x or more week on week. It sees the size, not the cause.", 1, "running"],
     ["attribution", "Attribution", "Counts new accounts that came through an affiliate link. No other source is recorded, so the rest are not attributed.", 1, "running"],
   ]),

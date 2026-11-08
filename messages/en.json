@@ -1894,7 +1894,8 @@
           "colours": "From memory: the colours {colours}.",
           "both": "From memory: the name «{name}» and the colours {colours}. To change them, tell Chat."
         },
-        "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it."
+        "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it.",
+        "placeholdered": "{count, plural, one {A detail was} other {# details were}} not in your brief — a phone number, price, time or address — and replaced with a placeholder for you to fill in."
       },
       "regeneratePaid": "Regenerate · about {count} credits",
       "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started.",

@@ -73,6 +73,14 @@ export function useGenerationNoteText(): (note: GenerationNote) => string {
         // Both numbers: "three of the five asked for" is something to act
         // on — ask again, or add the missing page in words.
         return t("notes.pagesShort", { asked: note.asked, made: note.made });
+      case "placeholdered":
+        // A fabricated phone/price/time/address/stat was swapped for a
+        // bracketed placeholder — said as a fact, not asked as a decision
+        // (BUILD-SPECS.md §1.5), because there is nothing to decide: see
+        // the comment on this note's definition in
+        // lib/website-generation-notes.ts for why this one note kind is
+        // repaired rather than merely reported, unlike `spelling` above.
+        return t("notes.placeholdered", { count: note.count });
     }
   };
 }

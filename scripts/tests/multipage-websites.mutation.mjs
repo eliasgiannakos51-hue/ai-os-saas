@@ -93,10 +93,17 @@ const MUTANTS = [
     to: "const attributions = [enforceUnsplashAttribution(cleaned[0])];",
   },
   {
-    name: "invented numbers are looked for on the home page only",
+    // UPDATED 2026-11-08 (agent/mistral): this used to be a single
+    // flatMap call; the detector moved inside the "fix and re-check"
+    // repair (website-invented-numbers-repair.ts), which has to write the
+    // repaired html BACK into documents[i], so the call became a for loop
+    // bounded by documents.length. The defect this mutant stands for is
+    // unchanged — only the home page gets checked/repaired — expressed
+    // now as the loop bound shrinking to 1.
+    name: "invented numbers are looked for (and repaired) on the home page only",
     file: GEN,
-    from: "const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));",
-    to: "const inventedNumbers = findInventedNumbers(documents[0], description);",
+    from: "for (let i = 0; i < documents.length; i += 1) {\n        const repaired = repairInventedNumbers(documents[i], description);",
+    to: "for (let i = 0; i < 1; i += 1) {\n        const repaired = repairInventedNumbers(documents[i], description);",
   },
   {
     name: "the split moves after the checks, so they all see one blob",

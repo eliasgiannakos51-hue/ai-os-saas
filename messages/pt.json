@@ -1894,7 +1894,8 @@
           "colours": "Da memória: as cores {colours}.",
           "both": "Da memória: o nome “{name}” e as cores {colours}. Para mudá-los, diga ao Chat."
         },
-        "pagesShort": "Pediu {asked} páginas e foram criadas {made}. Diga qual falta e eu acrescento-a."
+        "pagesShort": "Pediu {asked} páginas e foram criadas {made}. Diga qual falta e eu acrescento-a.",
+        "placeholdered": "{count, plural, one {Um dado que não estava na sua descrição (telefone, preço, horário ou endereço) foi substituído} other {# dados que não estavam na sua descrição (telefone, preço, horário ou endereço) foram substituídos}} por um marcador para preencher."
       },
       "regeneratePaid": "Regenerar · cerca de {count} créditos",
       "regenerateNoCredits": "Créditos insuficientes para outra regeneração: são precisos cerca de {needed} e tem {available}. Nada foi iniciado.",

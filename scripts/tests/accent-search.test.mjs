@@ -263,6 +263,14 @@ check("no component compares user text with toLowerCase().includes()", offenders
   //                              of void, raw-text and non-box elements
   //                              — spec-defined ASCII, the same case as
   //                              seo/head.ts.
+  //   lib/website-invented-numbers-repair.ts (added 2026-11-08)
+  //                              a BCP-47 LANGUAGE SUBTAG read off
+  //                              <html lang="..."> ("el", "en", "de"),
+  //                              compared against SUPPORTED_LOCALES —
+  //                              two-letter ASCII by the spec itself, not
+  //                              text anybody typed. Folding accents on a
+  //                              language code is the same no-op as
+  //                              folding them on an HTML tag name above.
   //
   //   NOT ADDED: lib/website-link-safety.ts, which this sweep flagged
   //   because a new function bound `slug` to a lowered value while an
@@ -292,6 +300,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
     "src/lib/seo/facts.ts",
     "src/lib/seo/head.ts",
     "src/lib/website-boxes.ts",
+    "src/lib/website-invented-numbers-repair.ts",
   ];
   const realOffenders = indirectOffenders.filter(
     (o) => !ASCII_BY_CONSTRUCTION.some((f) => o === f || o.startsWith(f + ":"))

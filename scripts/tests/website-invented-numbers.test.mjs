@@ -274,10 +274,19 @@ for (const [kind, onPage, briefWithIt] of matrix) {
 
 // ---------------------------------------------------------------------------
 console.log("\n== 12. it is wired into the generator, not just written ==");
+// REPAIRED, not merely detected, since 2026-11-08 (agent/mistral) —
+// findInventedNumbers itself is now called from inside
+// website-invented-numbers-repair.ts, and both routes call THAT, so the
+// generate route no longer imports this file directly. The repair test
+// file (website-invented-numbers-repair.test.mjs) is what pins the
+// detector→repair wiring; this section pins that the generate route
+// reaches the repair, which reaches this detector.
 const { readFileSync } = await import("node:fs");
 const route = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
-check("the generate route imports it", /from "@\/lib\/website-invented-numbers"/.test(route));
-check("…and calls it on the generated html", /findInventedNumbers\(/.test(route));
+check("the generate route imports the repair, which sits on this detector", /from "@\/lib\/website-invented-numbers-repair"/.test(route));
+check("…and calls it on the generated html", /repairInventedNumbers\(/.test(route));
+const repairLib = readFileSync("src/lib/website-invented-numbers-repair.ts", "utf8");
+check("…and the repair itself calls THIS file's detector", /from "@\/lib\/website-invented-numbers"/.test(repairLib) && /findInventedNumbers\(/.test(repairLib));
 
 console.log(
   `\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`

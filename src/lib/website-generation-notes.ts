@@ -63,7 +63,16 @@ export type GenerationNote =
   | { kind: "fromMemory"; name: string | null; colours: string[] }
   // Fewer pages came back than the person asked for (package 10,
   // lib/websites/page-request.ts) — said, with both numbers.
-  | { kind: "pagesShort"; asked: number; made: number };
+  | { kind: "pagesShort"; asked: number; made: number }
+  /** A phone/price/opening-time/address/statistic the model invented —
+   *  not in the brief at all — was found and swapped for a bracketed
+   *  placeholder in the site's own language (BUILD-SPECS.md §1.5's
+   *  "fix and re-check" contract, lib/website-invented-numbers-repair.ts).
+   *  REPAIRED, not merely reported, unlike `spelling` above: a fabricated
+   *  phone number is never a legitimate choice the way a surname might
+   *  be, so there is nothing here for the owner to decide — only
+   *  something to know happened, and where to look. */
+  | { kind: "placeholdered"; count: number };
 
 const FEATURES: readonly NegativeFeature[] = [
   "booking", "contactForm", "newsletter", "map", "prices", "gallery", "testimonials", "blog", "social", "chatWidget",
@@ -119,6 +128,8 @@ export function parseGenerationNotes(raw: unknown): GenerationNote[] {
       // render a wall of text beside the preview.
       const words = n.words.filter((w): w is string => typeof w === "string" && w.trim().length > 0).slice(0, 20);
       if (words.length > 0) out.push({ kind: "spelling", words });
+    } else if (n.kind === "placeholdered" && isNonNegativeInt(n.count) && n.count > 0) {
+      out.push({ kind: "placeholdered", count: n.count });
     }
   }
   return out;

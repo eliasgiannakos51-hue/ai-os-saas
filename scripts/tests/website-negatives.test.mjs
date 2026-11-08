@@ -254,7 +254,12 @@ console.log("\n== 5. the worker: enforced after generation, on every document, b
   check("every document — home AND each kept page — goes through the enforcer", /\[split\.home, \.\.\.keptPages\.map\(\(pg\) => pg\.html\)\]\.map\(\(doc\) => \{\s*const enforced = enforceNegativeInstructions\(doc, negatives\);/.test(proc));
   check("...and the removals are counted into one note per feature", /notes\.push\(\{ kind: "removedFeature", feature, count \}\)/.test(proc));
   const enforceAt = proc.indexOf("enforceNegativeInstructions(doc, negatives)");
-  const inventedAt = proc.indexOf("findInventedNumbers(doc, description)");
+  // repairInventedNumbers(documents[i], description), not
+  // findInventedNumbers(doc, description) — the detector moved inside
+  // the "fix and re-check" repair (agent/mistral, 2026-11-08,
+  // website-invented-numbers-repair.ts), which both detects AND rewrites
+  // documents[i] in place, so the ordering anchor moved with it.
+  const inventedAt = proc.indexOf("repairInventedNumbers(documents[i], description)");
   const linksAt = proc.indexOf("makeGeneratedLinksSafe(doc, { pageSlugs: generatedSlugs })");
   const pruneAt = proc.indexOf("pruneDeadNavLinks(cleaned[i])");
   const mapsAt = proc.indexOf("normaliseMapEmbeds(pruned.html)");

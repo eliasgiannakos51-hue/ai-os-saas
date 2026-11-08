@@ -1894,7 +1894,8 @@
           "colours": "来自记忆：颜色 {colours}。",
           "both": "来自记忆：名称“{name}”和颜色 {colours}。要更改，请在聊天中告诉我。"
         },
-        "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。"
+        "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。",
+        "placeholdered": "有 {count} 项不在你描述中的信息（电话、价格、营业时间或地址）已替换为待填写的占位符。"
       },
       "regeneratePaid": "重新生成 · 约 {count} 积分",
       "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。",

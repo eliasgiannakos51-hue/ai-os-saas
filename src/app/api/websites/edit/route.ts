@@ -37,7 +37,7 @@ import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
-import { findInventedNumbers } from "@/lib/website-invented-numbers";
+import { repairInventedNumbers } from "@/lib/website-invented-numbers-repair";
 import { normalisePages } from "@/lib/publishing/website-pages";
 import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
@@ -508,6 +508,44 @@ export async function POST(request: Request) {
       );
     }
 
+    // THE SAME CHECK AS GENERATION, on the same rule: never a number the
+    // owner did not give. The brief for an EDIT is everything they have
+    // ever said about this site — the original description plus every
+    // change they have asked for, including this one — because "add our
+    // phone 2310 555 123" is the owner giving a number, and a page that
+    // then shows it is obeying rather than inventing.
+    //
+    // MOVED HERE, BEFORE applyEditedDocument/persistence (agent/mistral,
+    // 2026-11-08): this used to run AFTER the update below had already
+    // written updatedHtml to the database, so the only thing a finding
+    // could do was log — never fix what was already saved. Repairing
+    // first means the version the owner actually gets is the repaired
+    // one, the same "fix and re-check" BUILD-SPECS.md §1.5 requires for
+    // generation (api/websites/generate/process, same repair function).
+    const { data: priorChanges } = await supabase
+      .from("website_versions")
+      .select("change_description")
+      .eq("website_id", websiteId)
+      .eq("user_id", user.id);
+    const editBrief = [
+      website.description ?? "",
+      changeRequest,
+      ...(priorChanges ?? []).map((v) => (v.change_description as string | null) ?? ""),
+    ].join("\n");
+    const inventedRepair = repairInventedNumbers(updatedHtml, editBrief);
+    updatedHtml = inventedRepair.html;
+    if (inventedRepair.remaining.length > 0) {
+      logApiError(
+        "/api/websites/edit",
+        new Error(`${inventedRepair.remaining.length} number(s) on the page are not in the brief and could not be placeholdered`),
+        {
+          websiteId,
+          kinds: inventedRepair.remaining.map((n) => n.kind).join(","),
+          samples: inventedRepair.remaining.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
+        }
+      );
+    }
+
     const { count: existingVersionCount } = await supabase
       .from("website_versions")
       .select("id", { count: "exact", head: true })
@@ -584,36 +622,6 @@ export async function POST(request: Request) {
         reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
       },
     });
-
-    // THE SAME CHECK AS GENERATION, on the same rule: never a number the
-    // owner did not give. The brief for an EDIT is everything they have
-    // ever said about this site — the original description plus every
-    // change they have asked for, including this one — because "add our
-    // phone 2310 555 123" is the owner giving a number, and a page that
-    // then shows it is obeying rather than inventing. Reported, never
-    // rewritten: the workspace shows the list beside the preview.
-    const { data: priorChanges } = await supabase
-      .from("website_versions")
-      .select("change_description")
-      .eq("website_id", websiteId)
-      .eq("user_id", user.id);
-    const editBrief = [
-      website.description ?? "",
-      changeRequest,
-      ...(priorChanges ?? []).map((v) => (v.change_description as string | null) ?? ""),
-    ].join("\n");
-    const inventedAfterEdit = findInventedNumbers(updatedHtml, editBrief);
-    if (inventedAfterEdit.length > 0) {
-      logApiError(
-        "/api/websites/edit",
-        new Error(`${inventedAfterEdit.length} number(s) on the page are not in the brief`),
-        {
-          websiteId,
-          kinds: inventedAfterEdit.map((n) => n.kind).join(","),
-          samples: inventedAfterEdit.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
-        }
-      );
-    }
 
     // THE WHOLE SITE, not the page that changed. A version is what
     // rollback restores, and restoring one edited sub-page over a site

@@ -25,7 +25,7 @@ import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { findGreekMisspellings } from "@/lib/websites-greek-spelling-check";
-import { findInventedNumbers } from "@/lib/website-invented-numbers";
+import { repairInventedNumbers } from "@/lib/website-invented-numbers-repair";
 import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
 import { registerUnsplashUses } from "@/lib/website-image-resolver";
@@ -702,15 +702,37 @@ export async function POST(request: Request) {
         logApiError("/api/websites/generate/process", err, { websiteId, stage: "sameSkeleton" });
       }
 
-      const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));
-      if (inventedNumbers.length > 0) {
+      // BUILD-SPECS.md §1.5's "fix and re-check, at most two cycles" for a
+      // phone/price/time/address/stat the model invented: each document
+      // gets its own run, since a four-page site having its first page
+      // repaired while pages 2-4 keep a fabricated phone number is the
+      // same half-measure the nav-link pass above calls out by name.
+      // REPLACED IN PLACE — documents is read again below (`cleaned`),
+      // so a page that still had a real-generation copy of the invented
+      // number would otherwise survive the repair done here.
+      let placeholderedCount = 0;
+      const stillInvented: ReturnType<typeof repairInventedNumbers>["remaining"] = [];
+      for (let i = 0; i < documents.length; i += 1) {
+        const repaired = repairInventedNumbers(documents[i], description);
+        documents[i] = repaired.html;
+        placeholderedCount += repaired.repairedCount;
+        stillInvented.push(...repaired.remaining);
+      }
+      if (placeholderedCount > 0) notes.push({ kind: "placeholdered", count: placeholderedCount });
+      // The §1.5 "clear indication of what did not pass" for whatever the
+      // two cycles above could not placeholder — kept as a log, same as
+      // before this repair existed, because the remaining cases are the
+      // ones the detector's own "WHAT IT CANNOT SEE" paragraph names (an
+      // address with no street word, say), not ones a human-visible note
+      // could act on inside the editor's number list.
+      if (stillInvented.length > 0) {
         logApiError(
           "/api/websites/generate/process",
-          new Error(`${inventedNumbers.length} number(s) on the page are not in the brief`),
+          new Error(`${stillInvented.length} number(s) on the page are not in the brief and could not be placeholdered`),
           {
             websiteId,
-            kinds: inventedNumbers.map((n) => n.kind).join(","),
-            samples: inventedNumbers.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
+            kinds: stillInvented.map((n) => n.kind).join(","),
+            samples: stillInvented.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
           }
         );
       }

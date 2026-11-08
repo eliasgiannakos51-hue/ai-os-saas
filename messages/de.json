@@ -1894,7 +1894,8 @@
           "colours": "Aus dem Gedächtnis: die Farben {colours}.",
           "both": "Aus dem Gedächtnis: der Name „{name}“ und die Farben {colours}. Um sie zu ändern, sag es im Chat."
         },
-        "pagesShort": "Du hast {asked} Seiten angefordert, {made} wurden erstellt. Sag, welche fehlt, und ich füge sie hinzu."
+        "pagesShort": "Du hast {asked} Seiten angefordert, {made} wurden erstellt. Sag, welche fehlt, und ich füge sie hinzu.",
+        "placeholdered": "{count, plural, one {Eine Angabe, die nicht in deiner Beschreibung stand (Telefon, Preis, Uhrzeit oder Adresse), wurde} other {# Angaben, die nicht in deiner Beschreibung standen (Telefon, Preis, Uhrzeit oder Adresse), wurden}} durch einen Platzhalter zum Ausfüllen ersetzt."
       },
       "regeneratePaid": "Neu erstellen · etwa {count} Credits",
       "regenerateNoCredits": "Nicht genug Credits für eine weitere Neugenerierung: Sie braucht etwa {needed}, Sie haben {available}. Es wurde nichts gestartet.",

@@ -116,8 +116,15 @@ console.log("\n== 4. the three that already existed are still wired ==");
   // `website-invented-numbers-disabled` too, so renaming the import to a
   // module that does not exist left this green — the same substring trap
   // that let a renamed Unsplash rule through earlier in this codebase.
+  //
+  // UPDATED 2026-11-08 (agent/mistral): both routes now import the
+  // REPAIR module (website-invented-numbers-repair.ts), which is what
+  // calls the detector internally — see
+  // website-invented-numbers.test.mjs §12 for that inner wiring. The
+  // closing-quote anchor is kept exact so a route that imports neither
+  // module still fails this.
   const CHECKS = [
-    ["invented numbers", /["']@\/lib\/website-invented-numbers["']/],
+    ["invented numbers", /["']@\/lib\/website-invented-numbers-repair["']/],
     ["link safety", /["']@\/lib\/website-link-safety["']/],
     ["security scan", /["']@\/lib\/(website-html-security-scan|website-security-review)["']/],
   ];

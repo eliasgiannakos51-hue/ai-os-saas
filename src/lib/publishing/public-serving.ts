@@ -29,6 +29,13 @@ import { getSiteUrl } from "@/lib/site-url";
 //     external script host is in script-src, so an injected
 //     <script src="//evil"> is blocked by the browser even if it somehow
 //     survived the static scan.
+//   'self' is also in script-src, for exactly ONE reference the
+//     generation prompt is allowed to write: <script src="/ionexa-players.js">
+//     (cinematic sites, docs/v6-cinematic-sites-2026-10-03.md). It is
+//     same-origin by construction — the published site IS this app's
+//     origin — and nothing else widens 'self' into an attacker's host.
+//     The scanner's own allowlist (ALLOWED_OWN_SCRIPT_SRCS,
+//     website-html-security-scan.ts) is what keeps it to that one path.
 //   img-src and media-src name the hosts a generated page's pictures
 //     really come from, and nothing else (since 2026-11-05; before, any
 //     https: host): inline SVG and data: URIs, Unsplash's CDN (the

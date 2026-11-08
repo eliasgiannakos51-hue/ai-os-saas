@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
@@ -429,8 +430,13 @@ export async function POST(request: Request) {
       // fall back to, so a flagged edit is simply rejected outright
       // (html_content stays unchanged, nothing charged) rather than
       // shipped with a warning.
-      updatedHtml = stripDisallowedExternalScripts(updatedHtml);
-      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined });
+      // "cinematic-sites" (Phase 1a, agent/mistral 2026-11-08) — same
+      // reasoning as api/websites/generate/process/route.ts: one flag
+      // read, used by both the strip and the scan so they cannot drift
+      // apart on which script path an edited page may keep.
+      const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);
+      updatedHtml = stripDisallowedExternalScripts(updatedHtml, cinematicSitesEnabled);
+      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled });
       const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs, user.id);
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),

@@ -71,6 +71,47 @@ export const ALLOWED_IFRAME_EMBEDS: readonly { host: string; pathPrefix?: string
 ];
 
 /**
+ * THE ONE SCRIPT A CINEMATIC SITE MAY REFERENCE BY `src`, instead of
+ * carrying its own JavaScript inline (docs/v6-cinematic-sites-2026-10-03.md
+ * §5/§10, "the players join the scanner's allowlist"). A generated page
+ * otherwise never carries a `<script src>` at all — the system prompt
+ * never asks for one, which is why `stripDisallowedExternalScripts`
+ * below has always been safe to strip every one it finds. This is the
+ * single, reviewed exception: `/ionexa-players.js` (public/ionexa-players.js,
+ * served from this app's own origin, so the CSP's existing `script-src
+ * 'self'` already permits it with no further change there).
+ *
+ * EXACT, RELATIVE, SAME-ORIGIN PATHS ONLY — see isAllowedOwnScriptSrc.
+ * An absolute URL is never allowed through this list even when it names
+ * this app's own host: the generation prompt only ever needs a relative
+ * reference, and accepting an absolute one re-opens exactly the
+ * substring/parsing bypasses host-and-word-boundaries.test.mjs exists to
+ * keep closed for the iframe and form-action allowlists above.
+ */
+export const ALLOWED_OWN_SCRIPT_SRCS: readonly string[] = ["/ionexa-players.js"];
+
+/**
+ * Is this `<script src="...">` value our own shipped player script,
+ * referenced the only way the generation prompt is ever told to
+ * reference it — a bare relative path, exactly matching one of
+ * ALLOWED_OWN_SCRIPT_SRCS?
+ *
+ * Deliberately NOT a substring or "startsWith" test, and deliberately
+ * rejecting anything parseHttpUrl accepts (an absolute http(s) URL) or
+ * that starts with `//` (protocol-relative, which is external — it
+ * resolves against whatever scheme the page loaded over, naming a host
+ * this function never sees). `/ionexa-players.js/../../evil` and
+ * `/ionexa-players.js?x=1` are both rejected by the exact-match rule,
+ * not parsed and partially matched.
+ */
+export function isAllowedOwnScriptSrc(src: string): boolean {
+  const raw = src.trim();
+  if (raw.startsWith("//")) return false;
+  if (parseHttpUrl(raw)) return false;
+  return (ALLOWED_OWN_SCRIPT_SRCS as readonly string[]).includes(raw);
+}
+
+/**
  * An absolute http(s) URL, or null for anything else.
  *
  * `javascript:`, `data:` and a bare relative path all come back null and
@@ -167,13 +208,19 @@ const DYNAMIC_CODE_RE = /\b(?:eval\s*\(|new\s+Function\s*\()/g;
 
 export function scanWebsiteHtmlForSecurityIssues(
   html: string,
-  options: { appHost?: string } = {}
+  // cinematicSitesEnabled defaults to false — FAILS CLOSED, same as
+  // every switch in src/lib/flags/flags.ts "fails towards staff": a
+  // caller that forgets to pass it gets the stricter behaviour (every
+  // <script src>, including our own player path, flagged), never the
+  // looser one.
+  options: { appHost?: string; cinematicSitesEnabled?: boolean } = {}
 ): SecurityScanIssue[] {
   const issues: SecurityScanIssue[] = [];
   let match: RegExpExecArray | null;
 
   SCRIPT_SRC_RE.lastIndex = 0;
   while ((match = SCRIPT_SRC_RE.exec(html))) {
+    if (options.cinematicSitesEnabled && isAllowedOwnScriptSrc(match[1])) continue;
     issues.push({ type: "external_script", src: match[1] });
   }
 
@@ -240,7 +287,12 @@ export function describeSecurityScanIssue(issue: SecurityScanIssue): string {
 // so removing it can only ever remove something that shouldn't have been
 // there — unlike inline handlers or form actions, which are riskier to
 // auto-rewrite without potentially breaking legitimate generated markup,
-// this one is safe to remove outright rather than just flag).
-export function stripDisallowedExternalScripts(html: string): string {
-  return html.replace(SCRIPT_SRC_RE, "");
+// this one is safe to remove outright rather than just flag) — EXCEPT the
+// one allowed exception, ALLOWED_OWN_SCRIPT_SRCS: a cinematic page's
+// <script src="/ionexa-players.js"> is something the generation prompt
+// DOES ask for, and stripping it would publish a page whose players
+// never move. Replace runs over every match so a page is never half
+// stripped by an early return.
+export function stripDisallowedExternalScripts(html: string, cinematicSitesEnabled = false): string {
+  return html.replace(SCRIPT_SRC_RE, (tag, src: string) => (cinematicSitesEnabled && isAllowedOwnScriptSrc(src) ? tag : ""));
 }

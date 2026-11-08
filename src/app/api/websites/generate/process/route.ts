@@ -5,6 +5,7 @@ import { brandBriefFor, readBrand } from "@/lib/memory/brand";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { pickVariation, variationDirective } from "@/lib/website-variation";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
@@ -817,7 +818,13 @@ export async function POST(request: Request) {
       // detect (lib/website-security-review.ts). Both layers run every
       // single generation, unconditionally — this is not an opt-in
       // toggle.
-      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc));
+      // "cinematic-sites" (Phase 1a, agent/mistral 2026-11-08): read once,
+      // used by both the strip and the scan just below — the exact
+      // disagreement this file's own history has already paid for once
+      // (ALLOWED_IFRAME_EMBEDS's comment on why it is now ONE list for
+      // both the scan and the CSP, not two that can drift apart).
+      const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);
+      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));
 
       // FINDABLE ON THE WEB. The prompt asks for a real title, a real
       // description and a real alt on every photo; this is what makes it
@@ -847,7 +854,7 @@ export async function POST(request: Request) {
       const pagesAsked = readPageRequest(description);
       const pagesMade = 1 + extraPages.length;
       if (pagesAsked !== null && pagesMade < pagesAsked) notes.push({ kind: "pagesShort", asked: pagesAsked, made: pagesMade });
-      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));
+      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled }));
       // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
       // content for what a deterministic scan cannot see, and content is
       // content wherever it sits — four separate reviews would cost four

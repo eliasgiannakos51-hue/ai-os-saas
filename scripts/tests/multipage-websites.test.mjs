@@ -157,7 +157,13 @@ console.log("\n== 4. EVERY page goes through EVERY check ==");
     // /about form this pass rewrites, and every one of them became "#".
     ["link safety", /documents\.map\(\s*\(doc\) => makeGeneratedLinksSafe\(doc, \{ pageSlugs: generatedSlugs \}\)\.html\s*\)/],
     ["unsplash attribution", /cleaned\.map\(\(doc\) => enforceUnsplashAttribution\(doc\)\)/],
-    ["script stripping", /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/],
+    // NOT THE WHOLE CALL SPELLED OUT, SAME REASON AS THE SCAN BELOW. This
+    // used to be /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/,
+    // which went red the moment the strip gained a second argument
+    // (cinematicSitesEnabled, agent/mistral, cinematic sites Phase 1a) —
+    // again the punctuation, not the property. The property is that the
+    // strip runs over `cleaned`, one call per document.
+    ["script stripping", /cleaned\.map\(\s*\(doc\)\s*=>\s*stripDisallowedExternalScripts\(\s*doc\b/],
     // NOT THE WHOLE CALL SPELLED OUT. This used to be
     // /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/,
     // which went red the moment the scan gained a second argument — the

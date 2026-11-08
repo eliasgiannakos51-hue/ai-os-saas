@@ -263,7 +263,11 @@ console.log("\n== 5. the worker: enforced after generation, on every document, b
   const linksAt = proc.indexOf("makeGeneratedLinksSafe(doc, { pageSlugs: generatedSlugs })");
   const pruneAt = proc.indexOf("pruneDeadNavLinks(cleaned[i])");
   const mapsAt = proc.indexOf("normaliseMapEmbeds(pruned.html)");
-  const scriptsAt = proc.indexOf("stripDisallowedExternalScripts(doc)");
+  // stripDisallowedExternalScripts(doc, cinematicSitesEnabled), not
+  // stripDisallowedExternalScripts(doc) — the strip gained a second
+  // argument (cinematic sites Phase 1a, agent/mistral, 2026-11-08), so
+  // the ordering anchor moved with it.
+  const scriptsAt = proc.indexOf("stripDisallowedExternalScripts(doc, cinematicSitesEnabled)");
   check("order: enforce → invented numbers → link-safety → prune dead nav → maps → security", [enforceAt, inventedAt, linksAt, pruneAt, mapsAt, scriptsAt].every((x, i, a) => x !== -1 && (i === 0 || a[i - 1] < x)), JSON.stringify([enforceAt, inventedAt, linksAt, pruneAt, mapsAt, scriptsAt]));
   check("link-safety is told the KEPT slugs, so a dropped page's link becomes '#' and is then pruned", /const generatedSlugs = keptPages\.map\(\(pg\) => pg\.slug\);/.test(proc));
   check("the prune+maps loop rewrites every document in place", /for \(let i = 0; i < cleaned\.length; i \+= 1\) \{\s*const pruned = pruneDeadNavLinks\(cleaned\[i\]\);\s*const maps = normaliseMapEmbeds\(pruned\.html\);\s*mapsNormalised \+= maps\.normalised;\s*cleaned\[i\] = maps\.html;\s*\}/.test(proc));

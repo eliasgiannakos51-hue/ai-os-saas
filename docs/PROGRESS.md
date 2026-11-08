@@ -11973,3 +11973,68 @@ log, ποτέ δεν διόρθωναν. Δείτε `docs/QUEUE.md` «ΔΙΟΡΘ
 Καμία αλλαγή σχήματος βάσης δεδομένων.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-08 — Cinematic sites, Φάση 1a: ο player και η πόρτα που τον επιτρέπει
+
+Ο ιδιοκτήτης ζήτησε να χτιστούν «όλα όσα έχουμε πει» — μεταξύ αυτών τα
+sites cinematic σαν τα βίντεο που έστειλε (Prisma/Apple Watch/VELA),
+ήδη ερευνημένα σε `docs/v6-cinematic-sites-2026-10-03.md` (366 γραμμές:
+βιβλιοθήκη 7 στύλ, 36 κλάδοι, Completion Contract, εκτίμηση 4 φάσεων
+3-4/2-3/3-4/2 εβδομάδων). Τρεις πραγματικοί μπλοκαριστές παραμένουν
+αναπάντητοι από τον ιδιοκτήτη (`docs/NEEDS-FROM-ELIAS.md`): το
+`GEMINI_API_KEY` δεν υπάρχει σε αυτό το environment, το πλάνο Vercel
+για ffmpeg, και η απόφαση 18+ στους όρους (με τον γονέα του — ρητά δική
+του απόφαση, ΟΧΙ δική μου). Κανένας από τους τρεις δεν μπλοκάρει αυτό
+το κομμάτι: χτίζεται με storyboard placeholder, χωρίς πραγματικό μέσο
+AI και χωρίς ffmpeg.
+
+Αυτό το κομμάτι (Φάση 1a) χτίζει ΜΟΝΟ τα θεμέλια, όχι ακόμα το ίδιο το
+στύλ μέσα στη γεννήτρια — «σε κομμάτια, πίσω από διακόπτη, με tests σε
+κάθε κομμάτι», όπως ειπώθηκε στον ιδιοκτήτη:
+
+- `public/ionexa-players.js` — ο ΕΝΑΣ script που επιτρέπεται σε μια
+  δημοσιευμένη σελίδα, προωθημένος αυτολεξεί από το δείγμα έρευνας
+  (`docs/samples/cinematic/ionexa-players.js`). Το μοντέλο δεν γράφει
+  ποτέ δικό του JavaScript· διαβάζει μόνο `data-ix`/`data-ix-depth`. Σέβεται
+  `prefers-reduced-motion`, Save-Data και 2G/3G (μένει στάσιμο), ξεκινάει
+  πάντα από το poster που είναι ήδη στο HTML.
+- `src/lib/website-html-security-scan.ts` — νέο `ALLOWED_OWN_SCRIPT_SRCS`
+  και `isAllowedOwnScriptSrc` (ΑΚΡΙΒΗΣ διαδρομή, όχι substring/startsWith —
+  ίδια αυστηρότητα με `host-and-word-boundaries.test.mjs`), ώστε ο
+  σκανερ/stripper να μην πετάξει πλέον τον ΔΙΚΟ ΜΑΣ script, αλλά να
+  συνεχίσει να κόβει κάθε ξένο. Και τα δύο (`stripDisallowedExternalScripts`,
+  `scanWebsiteHtmlForSecurityIssues`) παίρνουν τώρα `cinematicSitesEnabled`
+  — ΑΠΟΤΥΧΙΑ ΠΡΟΣ ΤΟ ΚΛΕΙΣΤΟ (default `false`), ίδιος κανόνας με κάθε
+  διακόπτη στο `flags.ts`.
+- Νέος διακόπτης `cinematic-sites` στο `src/lib/flags/flags.ts`, διαβάζεται
+  ΜΙΑ φορά ανά αίτημα και στα δύο routes (`generate/process`, `edit`) και
+  περνιέται στο ΙΔΙΟ όρισμα και στο strip και στο scan — επίτηδες ΜΙΑ
+  ανάγνωση, όχι δύο, ώστε τα δύο να μην μπορούν ποτέ να διαφωνήσουν (το
+  ίδιο σχήμα σφάλματος με το `ALLOWED_IFRAME_EMBEDS`/CSP ενοποίηση, ήδη
+  τεκμηριωμένο στο ίδιο αρχείο).
+- `src/lib/publishing/public-serving.ts` — μόνο το σχόλιο του CSP
+  ενημερώθηκε (καμία αλλαγή στο ίδιο το directive: το `script-src 'self'`
+  καλύπτει ΗΔΗ το `/ionexa-players.js` ως πόρο του ίδιου origin).
+
+`scripts/tests/cinematic-players.test.mjs` (43 έλεγχοι) + `.mutation.mjs`
+(8/8 πιάστηκαν). Στην πορεία διορθώθηκαν τρεις ΗΔΗ υπάρχοντες αγκυρώσεις
+που έσπασαν επειδή το `stripDisallowedExternalScripts`/
+`scanWebsiteHtmlForSecurityIssues` απέκτησαν δεύτερο όρισμα
+(`multipage-websites.test.mjs`, `multipage-websites.mutation.mjs`,
+`website-negatives.test.mjs`) — ίδιο μάθημα με το `db-migrations.test.mjs`:
+μια αγκύρωση σε ΑΚΡΙΒΗ κλήση σπάει τη στιγμή που η υπογραφή αλλάζει, όχι
+η ιδιότητα που θέλει να ελέγξει. Μία ακόμα: το νέο check στο σχόλιο του
+CSP ήταν γνησίως prose-anchored (διαβάζει μόνο σχόλιο, καμία αλλαγή
+κώδικα χρειάζεται) — μπήκε στο `ALLOWED` του `prose-anchored-checks.test.mjs`
+με ετικέτα «DOC, not behaviour» στο ίδιο του το όνομα, όχι κρυμμένο.
+
+Τι ΔΕΝ έγινε ακόμα, ρητά: κανένα στύλ (Α-Ζ) δεν είναι συνδεδεμένο στη
+γεννήτρια — καμία σελίδα δεν γράφει ακόμα `data-ix`. Αυτό είναι το
+επόμενο κομμάτι, μαζί με storyboard placeholder, schema.org SEO, και
+τους ελέγχους pixel του Completion Contract.
+
+`npm run gates` → ALL 411 GATES PASSED (30281 checks). `npm run build:ci`
+πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων, καμία αλλαγή i18n (το
+κομμάτι αυτό δεν προσθέτει κανένα ορατό στον χρήστη κείμενο).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

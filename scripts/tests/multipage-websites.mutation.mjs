@@ -67,8 +67,8 @@ const MUTANTS = [
     // guarding the sub-pages the moment the call site grew an option.
     name: "the security scan sees the home page only",
     file: GEN,
-    from: "const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));",
-    to: "const securityIssues = scanWebsiteHtmlForSecurityIssues(stripped[0], { appHost: getSiteHostname() ?? undefined });",
+    from: "const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled }));",
+    to: "const securityIssues = scanWebsiteHtmlForSecurityIssues(stripped[0], { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled });",
   },
   {
     // AND THE HOST ITSELF. Dropping appHost is a one-word edit that makes
@@ -77,14 +77,14 @@ const MUTANTS = [
     // scan was rewritten to stop.
     name: "the scan stops being told which host is ours, so any host's submit path passes",
     file: GEN,
-    from: "scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined })",
-    to: "scanWebsiteHtmlForSecurityIssues(doc)",
+    from: "scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled })",
+    to: "scanWebsiteHtmlForSecurityIssues(doc, { cinematicSitesEnabled })",
   },
   {
     name: "scripts are stripped from the home page only",
     file: GEN,
-    from: "const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc));",
-    to: "const stripped = [stripDisallowedExternalScripts(cleaned[0]), ...cleaned.slice(1)];",
+    from: "const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));",
+    to: "const stripped = [stripDisallowedExternalScripts(cleaned[0], cinematicSitesEnabled), ...cleaned.slice(1)];",
   },
   {
     name: "attribution is enforced on the home page only",

@@ -7,12 +7,14 @@ import { Bell, BookOpen, Check, Clock, FileUp, Filter, Mail, PauseCircle, Send, 
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
+  FLOW_MODES,
   MAX_INSTRUCTION_CHARS,
   READ_SOURCES,
   connectionsNeeded,
   partOf,
   type ActionKind,
   type Box,
+  type FlowMode,
   type ReadSource,
   type SentencePart,
   type StartBox,
@@ -711,5 +713,51 @@ export function TimeSavedForm({ minutes, doneRuns, saving, onSave }: { minutes: 
       </div>
       <p className="text-[11px] text-muted">{t("timeSaved.help")}</p>
     </form>
+  );
+}
+
+/**
+ * HOW ONE AUTOMATION RUNS (automation_flows.mode, Automations Κομμάτι 2a,
+ * lib/automations/boxes.ts FlowMode): Auto runs for real; Shadow rehearses
+ * every unattended start (cron, a queued file) and runs for real only when
+ * pressed by hand (effectiveDry's own manual exemption); Supervised gates
+ * every action behind an approval, even one already in the boxes.
+ *
+ * Drawn only when the page could read the column at all (same precedent
+ * as TimeSavedForm above — lib/automations/page-data.ts loadModes), so a
+ * database the migration has not reached yet never offers a selector that
+ * cannot save.
+ */
+export function ModeForm({ mode, saving, onSave }: { mode: FlowMode; saving: boolean; onSave: (mode: FlowMode) => void }) {
+  const { t } = useWords();
+  const NAME: Record<FlowMode, string> = { auto: t("mode.auto"), shadow: t("mode.shadow"), supervised: t("mode.supervised") };
+  const HELP: Record<FlowMode, string> = { auto: t("mode.autoHelp"), shadow: t("mode.shadowHelp"), supervised: t("mode.supervisedHelp") };
+  return (
+    <div className="space-y-1" data-testid="flow-mode">
+      <span className="block text-xs text-muted">{t("mode.label")}</span>
+      {/* Same `bg-panel` TRACK + selected-pill shape as components/shell/
+       *  tool-shell.tsx's ShellModeSwitch, for the same reason its own
+       *  comment gives: a track separates the choices from the row
+       *  without one more border against design-density.test.mjs's
+       *  ceiling. */}
+      <div className="inline-flex flex-wrap items-center gap-0.5 rounded-full bg-panel p-0.5" role="group" aria-label={t("mode.label")}>
+        {FLOW_MODES.map((m) => (
+          <button
+            key={m}
+            type="button"
+            aria-pressed={m === mode}
+            disabled={saving}
+            data-testid={`flow-mode-${m}`}
+            onClick={() => m !== mode && onSave(m)}
+            className={`min-h-[44px] whitespace-nowrap rounded-full px-3 text-xs font-medium transition-colors duration-150 disabled:opacity-60 ${
+              m === mode ? "bg-foreground text-background" : "text-muted hover:text-foreground"
+            }`}
+          >
+            {NAME[m]}
+          </button>
+        ))}
+      </div>
+      <p className="text-[11px] text-muted" data-testid="flow-mode-help">{HELP[mode]}</p>
+    </div>
   );
 }

@@ -3935,6 +3935,16 @@
         "minutes": "Hat dir ~{minutes, plural, one {# Minute} other {# Minuten}} gespart",
         "notYet": "Sobald der erste Lauf fertig ist, siehst du hier, wie viel Zeit er dir gespart hat.",
         "how": "So gerechnet: abgeschlossene Läufe ({runs}) × deine Minuten ({minutes}). Probeläufe zählen nicht."
+      },
+      "mode": {
+        "label": "Wie es läuft",
+        "auto": "Automatisch",
+        "autoHelp": "Läuft wirklich, nach Zeitplan oder von Hand.",
+        "shadow": "Schatten",
+        "shadowHelp": "Probt, wenn es von selbst startet — nichts Echtes wird gesendet, bis Sie es von Hand ausführen.",
+        "supervised": "Überwacht",
+        "supervisedHelp": "Jede Aktion wartet auf Ihre Zustimmung, bevor etwas gesendet wird.",
+        "save": "Speichern"
       }
     },
     "flows": {

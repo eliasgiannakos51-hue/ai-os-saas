@@ -3935,6 +3935,16 @@
         "minutes": "Te ha ahorrado ~{minutes, plural, one {# minuto} other {# minutos}}",
         "notYet": "Cuando termine la primera ejecución, verás aquí cuánto tiempo te ha ahorrado.",
         "how": "Cómo se calcula: ejecuciones terminadas ({runs}) × los minutos que indicaste ({minutes}). Las pruebas no cuentan."
+      },
+      "mode": {
+        "label": "Cómo se ejecuta",
+        "auto": "Automático",
+        "autoHelp": "Se ejecuta de verdad, según el horario o a mano.",
+        "shadow": "Sombra",
+        "shadowHelp": "Ensaya cuando se inicia solo — no se envía nada real hasta que lo ejecutes a mano.",
+        "supervised": "Supervisado",
+        "supervisedHelp": "Cada acción espera tu aprobación antes de enviar nada.",
+        "save": "Guardar"
       }
     },
     "flows": {

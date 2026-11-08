@@ -3,10 +3,11 @@
  * (Automations Κομμάτι 2a, οδηγία 55, 2026-11-08 — the owner, after
  * Κομμάτι 1's "εγκρίνω": «χτίσε το να δουλεύει και να είναι αυτόματο»).
  *
- * Only the first, backend half of Agent Pro: no canvas, no UI selector
- * yet — the owner can only set `mode` by hand in the database until the
- * next slice. What this holds, against the code rather than its
- * comments:
+ * Κομμάτι 2b (2026-11-08, same day) adds the one thing Κομμάτι 2a left
+ * out: a selector on the screen, Section 11 below. Still no canvas, no
+ * 11 fields, no teams, no Approval Center — those remain Κομμάτια 3-10.
+ *
+ * What this holds, against the code rather than its comments:
  *
  *   1. THE PURE RULES: effectiveDry and withSupervisedApprovals, run for
  *      real (boxes.ts, loadable — unlike runner.ts, which only ever
@@ -26,7 +27,7 @@
  *
  * Run: node scripts/tests/automation-modes.test.mjs
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 import { stripComments } from "../check-mutation-markers.mjs";
 
@@ -42,6 +43,7 @@ function check(name, cond, detail) {
   }
 }
 const code = (p) => stripComments(readFileSync(p, "utf8"));
+const LOCALES = readdirSync("messages").filter((f) => f.endsWith(".json"));
 
 const boxes = await loadTs("src/lib/automations/boxes.ts");
 
@@ -173,6 +175,44 @@ const migration = readFileSync("supabase/migrations/20261123000000_automation_mo
 check("adds the column idempotently", /add column if not exists mode text not null default 'auto'/.test(migration));
 check("constrains it to exactly the three values", /check \(mode in \('auto', 'shadow', 'supervised'\)\)/.test(migration));
 check("says how to undo", /How to undo:/.test(migration) && /drop column if\s*\n?\s*-*\s*exists mode/.test(migration.replace(/\n--\s*/g, "\n")));
+
+// ---------------------------------------------------------------------
+console.log("\n== 11. the selector (Κομμάτι 2b): read, wired, drawn, saved ==");
+const pageData = code("src/lib/automations/page-data.ts");
+check("loadModes reads mode in a query of its own, never in FLOW_COLUMNS, same precedent as loadMinutesSaved",
+  !/FLOW_COLUMNS = "[^"]*\bmode\b/.test(code("src/lib/automations/flow-access.ts")) &&
+    /\.from\("automation_flows"\)\.select\("id, mode"\)\.eq\("user_id", userId\)\.limit\(MAX_FLOWS\);/.test(pageData));
+check("…answers null for the whole map on any error, including a column not there yet",
+  /export async function loadModes[\s\S]{0,400}?if \(error\) \{\s*if \(!isColumnMissing\(error\)\) logApiError\([^)]*\);\s*return null;\s*\}/.test(pageData));
+check("…and a row with no mode yet (or a bad value) falls to DEFAULT_FLOW_MODE, never undefined",
+  /isFlowMode\(row\.mode\) \? row\.mode : DEFAULT_FLOW_MODE/.test(pageData));
+check("loadAutomationPage takes modeOn, defaulting closed, and only then reads it",
+  /modeOn = false\s*\n\)/.test(pageData) && /modeOn \? loadModes\(supabase, user\.id\) : Promise\.resolve\(null\)/.test(pageData) && /modes,/.test(pageData));
+
+const dashPage = code("src/app/dashboard/[module]/page.tsx");
+check("the dashboard page reads the mode with the SAME switch it reads the selector's own write behind — one flag, not two that could disagree",
+  /loadAutomationPage\(user, searchParams\.run, searchParams\.flow, searchParams\.projectId, timeSavedOn, simplePro\)/.test(dashPage) &&
+    /initialModes=\{data\.modes\}/.test(dashPage));
+
+const shellSrc = code("src/components/automations/automation-shell.tsx");
+check("the shell keeps the modes map in state, seeded from the server read", /const \[modes, setModes\] = useState<Record<string, FlowMode> \| null>\(initialModes\);/.test(shellSrc));
+check("saveMode PATCHes { mode }, and reads the mode the route echoes back — not a guess that the write landed",
+  /async function saveMode\(flow: ShownFlow, mode: FlowMode\) \{\s*const data = await call\(`\/api\/automations\/flows\/\$\{flow\.id\}`, "PATCH", \{ mode \}, "save"\);/.test(shellSrc) &&
+    /setModes\(\(prev\) => \(prev \? \{ \.\.\.prev, \[flow\.id\]: \(data\.mode as FlowMode \| undefined\) \?\? mode \} : prev\)\);/.test(shellSrc));
+check("the selector is drawn only when the modes map could be read at all — a reader who cannot write mode is never shown one that cannot save it",
+  /\{modes && \(\s*<ModeForm/.test(shellSrc) && /mode=\{modes\[shown\.id\] \?\? "auto"\}/.test(shellSrc) && /onSave=\{\(mode\) => void saveMode\(shown, mode\)\}/.test(shellSrc));
+
+const flowBoxesSrc = code("src/components/automations/flow-boxes.tsx");
+const modeForm = flowBoxesSrc.slice(flowBoxesSrc.indexOf("export function ModeForm"));
+check("ModeForm draws exactly the three FLOW_MODES, in the order boxes.ts declares them", /FLOW_MODES\.map\(\(m\) => \(/.test(modeForm));
+check("…each press calls onSave with the OTHER mode, never re-saving the one already chosen", /onClick=\{\(\) => m !== mode && onSave\(m\)\}/.test(modeForm));
+check("…and every press is disabled while a request from this screen is already in flight", /disabled=\{saving\}/.test(modeForm));
+
+for (const file of LOCALES) {
+  const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.mode ?? {};
+  check(`${file}: carries all eight mode.* keys, none empty`,
+    ["label", "auto", "autoHelp", "shadow", "shadowHelp", "supervised", "supervisedHelp", "save"].every((k) => typeof m[k] === "string" && m[k].length > 0));
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) process.exit(1);

@@ -81,7 +81,7 @@ export default async function ModulePage(
       isFeatureOn("automation-templates", user),
       isFeatureOn("automation-time-saved", user),
     ]);
-    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn);
+    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
         <AutomationShell
@@ -99,6 +99,7 @@ export default async function ModulePage(
           templates={templatesOn}
           initialMinutesSaved={data.minutesSaved}
           initialDoneRuns={data.doneRuns}
+          initialModes={data.modes}
         />
       </div>
     );

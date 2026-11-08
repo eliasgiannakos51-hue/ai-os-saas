@@ -3935,6 +3935,16 @@
         "minutes": "Ça t’a fait gagner ~{minutes, plural, one {# minute} other {# minutes}}",
         "notYet": "Dès que la première exécution sera terminée, tu verras ici le temps gagné.",
         "how": "Calcul : exécutions terminées ({runs}) × les minutes que tu as indiquées ({minutes}). Les essais ne comptent pas."
+      },
+      "mode": {
+        "label": "Comment elle s'exécute",
+        "auto": "Automatique",
+        "autoHelp": "S'exécute réellement, selon l'horaire ou à la main.",
+        "shadow": "Ombre",
+        "shadowHelp": "Répète quand elle démarre seule — rien de réel n'est envoyé jusqu'à ce que vous l'exécutiez à la main.",
+        "supervised": "Supervisé",
+        "supervisedHelp": "Chaque action attend votre approbation avant d'envoyer quoi que ce soit.",
+        "save": "Enregistrer"
       }
     },
     "flows": {

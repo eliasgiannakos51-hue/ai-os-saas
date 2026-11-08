@@ -3935,6 +3935,16 @@
         "minutes": "Saved you ~{minutes, plural, one {# minute} other {# minutes}}",
         "notYet": "Once the first run finishes, you’ll see here how much time it saved you.",
         "how": "How: finished runs ({runs}) × the minutes you gave ({minutes}). Trials don’t count."
+      },
+      "mode": {
+        "label": "How it runs",
+        "auto": "Auto",
+        "autoHelp": "Runs for real, on schedule or by hand.",
+        "shadow": "Shadow",
+        "shadowHelp": "Rehearses when it starts on its own — nothing real is sent until you run it by hand.",
+        "supervised": "Supervised",
+        "supervisedHelp": "Every action waits for your approval before it sends anything.",
+        "save": "Save"
       }
     },
     "flows": {

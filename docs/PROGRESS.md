@@ -12128,3 +12128,56 @@ tests του Agent Pro (Κομμάτια 3-10 της αρχικής οδηγία
 παραμένουν για επόμενα κομμάτια.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261123000000_automation_mode.sql**
+
+## 2026-11-08γ — AGENTS ΚΑΙ AUTOMATIONS (οδηγία 55), Κομμάτι 2b — ο επιλογέας στην οθόνη
+
+Αμέσως μετά το Κομμάτι 2a (μηχανισμός χωρίς UI): τώρα υπάρχει ένα κουμπί
+στην οθόνη για να διαλέξεις Auto / Shadow / Supervised σε κάθε
+αυτοματοποίηση — δεν χρειάζεται πλέον χειροκίνητη κλήση API ή
+επεξεργασία βάσης.
+
+- `src/lib/automations/page-data.ts`: νέο `loadModes(supabase, userId)`
+  — ΙΔΙΑ πειθαρχία με το `loadMinutesSaved` ακριβώς από πάνω του: σε
+  ερώτημα ΔΙΚΟ ΤΟΥ (ποτέ στο `FLOW_COLUMNS`), null για ΟΛΟΚΛΗΡΟ τον
+  χάρτη σε οποιοδήποτε σφάλμα — συμπεριλαμβανομένης της λείπουσας
+  στήλης — ώστε μια βάση που δεν πήρε ακόμα το migration να μη δείξει
+  επιλογέα που δεν μπορεί να αποθηκεύσει τίποτα. `loadAutomationPage`
+  πήρε νέο έκτο όρισμα `modeOn` (προεπιλογή `false`, ίδιο σχήμα με το
+  `timeSavedOn`).
+- `src/app/dashboard/[module]/page.tsx`: περνάει το ΙΔΙΟ `simplePro`
+  που ήδη διάβαζε για το Κομμάτι 1 στο `loadAutomationPage` ως το
+  `modeOn` του — ΕΝΑΣ διακόπτης, όχι δύο που θα μπορούσαν να διαφωνήσουν
+  (ο λόγος που ένα από τα mutation tests παρακάτω υπάρχει).
+- `src/components/automations/flow-boxes.tsx`: νέο `ModeForm` — τρία
+  κουμπιά (`FLOW_MODES`), ΙΔΙΟ οπτικό σχήμα με το `ShellModeSwitch` του
+  κοινού κελύφους (`bg-panel` πίστα, επιλεγμένο `bg-foreground
+  text-background`, ΧΩΡΙΣ νέο hairline border πάνω στο ήδη γεμάτο
+  ταβάνι του `design-density.test.mjs`), με το help-κείμενο του
+  επιλεγμένου mode από κάτω.
+- `src/components/automations/automation-shell.tsx`: νέο state `modes`,
+  νέο `saveMode()` (PATCH `{ mode }`, διαβάζει πίσω το mode που το route
+  επιβεβαιώνει — όχι υπόθεση ότι το γράψιμο πέτυχε), το `ModeForm`
+  σχεδιάζεται ΜΟΝΟ όταν ο χάρτης `modes` διαβάστηκε (`{modes && (...)}`
+  — ίδιο σχήμα με το `{minutesSaved && (...)}` του `TimeSavedForm`).
+- 10 γλώσσες: νέο `dashboard.automations.mode.*` (8 κλειδιά: label,
+  auto/autoHelp, shadow/shadowHelp, supervised/supervisedHelp, save) σε
+  όλα τα `messages/*.json`, γραμμένο με script που ξαναδιαβάζει κάθε
+  JSON και το ξανασειριοποιεί ΜΕ JSON.stringify(obj, null, 2) — ελέγχθηκε
+  πρώτα ότι αυτό παράγει byte-for-byte το ίδιο αρχείο σε όλα τα 10, ώστε
+  η μόνη αλλαγή στο diff να είναι το νέο κλειδί.
+
+`scripts/tests/automation-modes.test.mjs` §11 (21 νέοι έλεγχοι, 72
+συνολικά) + `.mutation.mjs` (21/21 πιάστηκαν, 7 νέα mutants). `npm run
+i18n:first-run` ξανατρέχτηκε (το πακέτο first-run έδειξε «ο προϊόν
+κινήθηκε, το πακέτο όχι» μετά τα νέα i18n κλειδιά — αναμενόμενο, η
+εντολή είναι ακριβώς γι' αυτό).
+
+`npm run gates` → ALL 412 GATES PASSED (30369 checks). `npm run
+build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων (ο επιλογέας
+διαβάζει/γράφει τη στήλη που το Κομμάτι 2a ήδη έφτιαξε).
+
+Τι ΔΕΝ χτίστηκε ακόμα: το «Approval Center» (μία οθόνη με όλες τις
+εκτελέσεις σε αναμονή), και τα Κομμάτια 3-10 του Agent Pro (καμβάς, 11
+πεδία, ομάδες, pre-activation tests).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

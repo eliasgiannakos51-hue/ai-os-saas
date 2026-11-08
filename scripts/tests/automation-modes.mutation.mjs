@@ -18,6 +18,10 @@ const FLOW_ACCESS = "src/lib/automations/flow-access.ts";
 const CRON = "src/app/api/cron/automation-flows/route.ts";
 const EDIT_ROUTE = "src/app/api/automations/flows/[id]/route.ts";
 const MIGRATION = "supabase/migrations/20261123000000_automation_mode.sql";
+const PAGE_DATA = "src/lib/automations/page-data.ts";
+const DASH_PAGE = "src/app/dashboard/[module]/page.tsx";
+const SHELL = "src/components/automations/automation-shell.tsx";
+const FLOW_BOXES_FILE = "src/components/automations/flow-boxes.tsx";
 
 const MUTANTS = [
   {
@@ -129,6 +133,53 @@ const MUTANTS = [
     to: "add constraint automation_flows_mode_check check (true);",
     expect: "constrains it to exactly the three values",
   },
+  {
+    name: "loadModes stops validating the row's own mode — a stray value in the column reaches the screen unchecked instead of falling to auto",
+    file: PAGE_DATA,
+    from: "isFlowMode(row.mode) ? row.mode : DEFAULT_FLOW_MODE",
+    to: "row.mode",
+    expect: "falls to DEFAULT_FLOW_MODE, never undefined",
+  },
+  {
+    name: "a closed switch reads mode anyway — loadAutomationPage calls loadModes unconditionally",
+    file: PAGE_DATA,
+    from: "modeOn ? loadModes(supabase, user.id) : Promise.resolve(null),",
+    to: "loadModes(supabase, user.id),",
+    expect: "only then reads it",
+  },
+  {
+    name: "the dashboard page stops reading mode behind the same switch Κομμάτι 1 shipped — it reads timeSavedOn's flag for mode too, or none at all",
+    file: DASH_PAGE,
+    from: "loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro)",
+    to: "loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn)",
+    expect: "one flag, not two that could disagree",
+  },
+  {
+    name: "the selector is drawn for everyone, even a reader whose database has not caught up — the gate on `modes` is dropped",
+    file: SHELL,
+    from: "{modes && (\n                <ModeForm",
+    to: "{true && (\n                <ModeForm",
+    expect: "a reader who cannot write mode is never shown one that cannot save it",
+  },
+  {
+    name: "the selector keeps taking presses while a save from this screen is already in flight",
+    file: FLOW_BOXES_FILE,
+    from: "disabled={saving}\n            data-testid={`flow-mode-${m}`}",
+    to: 'data-testid={`flow-mode-${m}`}',
+    expect: "every press is disabled while a request from this screen is already in flight",
+  },
+  {
+    name: "a press on the mode ALREADY chosen re-saves it — the guard against a no-op write is gone",
+    file: FLOW_BOXES_FILE,
+    from: "onClick={() => m !== mode && onSave(m)}",
+    to: "onClick={() => onSave(m)}",
+    expect: "never re-saving the one already chosen",
+  },
 ];
 
-runMutations({ name: "automation-modes", gate: GATE, targets: [BOXES, RUNNER, START_RUN, EVENT_RUNS, FLOW_ACCESS, CRON, EDIT_ROUTE, MIGRATION], mutants: MUTANTS });
+runMutations({
+  name: "automation-modes",
+  gate: GATE,
+  targets: [BOXES, RUNNER, START_RUN, EVENT_RUNS, FLOW_ACCESS, CRON, EDIT_ROUTE, MIGRATION, PAGE_DATA, DASH_PAGE, SHELL, FLOW_BOXES_FILE],
+  mutants: MUTANTS,
+});

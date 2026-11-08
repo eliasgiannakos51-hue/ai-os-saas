@@ -11,11 +11,11 @@ import { ToolShell, ACTION, OPTION, ChosenBox, type ShellMode, type ShellTurn } 
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
-import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, RunHistory, TimeSavedForm, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
+import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, ModeForm, RunHistory, TimeSavedForm, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
 import { TemplateGallery } from "@/components/automations/template-gallery";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
-import { aiBoxCount, type Box } from "@/lib/automations/boxes";
+import { aiBoxCount, type Box, type FlowMode } from "@/lib/automations/boxes";
 import type { FlowPrices } from "@/lib/automations/flow-pricing";
 import { readShownFlow, readShownRun, type ShownFlow, type ShownRun } from "@/lib/automations/flow-view";
 import { PROGRESS_POLL_MS, followedRun, isLive, runProgress, type Watch } from "@/lib/automations/run-progress";
@@ -63,6 +63,7 @@ export function AutomationShell({
   templates = false,
   initialMinutesSaved = null,
   initialDoneRuns = 0,
+  initialModes = null,
 }: {
   initialFlows: Record<string, unknown>[];
   /** The runs of the automation opened on arrival. */
@@ -99,6 +100,11 @@ export function AutomationShell({
   initialMinutesSaved?: Record<string, number | null> | null;
   /** The opened automation's finished runs that were not trials. */
   initialDoneRuns?: number;
+  /** Each automation's Auto/Shadow/Supervised mode — or null when
+   *  "agents-automations-pro" is closed to this reader or the database
+   *  has no such column yet (lib/automations/page-data.ts loadModes):
+   *  then no selector is drawn. */
+  initialModes?: Record<string, FlowMode> | null;
 }) {
   const t = useTranslations("dashboard.automations");
   const tSteps = useTranslations("aiSteps");
@@ -120,6 +126,7 @@ export function AutomationShell({
   const [pending, setPending] = useState<{ said: string; question: string } | null>(null);
   const [confirming, setConfirming] = useState<{ credits: number; go: () => void } | null>(null);
   const [minutesSaved, setMinutesSaved] = useState<Record<string, number | null> | null>(initialMinutesSaved);
+  const [modes, setModes] = useState<Record<string, FlowMode> | null>(initialModes);
   const [doneRuns, setDoneRuns] = useState<Record<string, number>>(() => (initialOpenId ? { [initialOpenId]: initialDoneRuns } : {}));
   // THE RUN THIS SCREEN STARTED, while its request is in flight: which run
   // the canvas follows (lib/automations/run-progress.ts followedRun).
@@ -462,6 +469,13 @@ export function AutomationShell({
     setMinutesSaved((prev) => (prev ? { ...prev, [flow.id]: readMinutes(data.minutesSaved) } : prev));
   }
 
+  async function saveMode(flow: ShownFlow, mode: FlowMode) {
+    const data = await call(`/api/automations/flows/${flow.id}`, "PATCH", { mode }, "save");
+    if (!data) return;
+    placeFlow(data.flow);
+    setModes((prev) => (prev ? { ...prev, [flow.id]: (data.mode as FlowMode | undefined) ?? mode } : prev));
+  }
+
   // BARE DELETE, no confirm of its own — the work panel's trash button
   // confirms before calling this, and the [◧] column (ShellHistoryColumn)
   // confirms its own way; neither should ask twice.
@@ -599,6 +613,15 @@ export function AutomationShell({
               </div>
 
               <CostLimitForm key={`${shown.id}-${shown.costLimit}`} limit={shown.costLimit} saving={running !== null} onSave={(limit) => void saveLimit(shown, limit)} />
+
+              {modes && (
+                <ModeForm
+                  key={`${shown.id}-${modes[shown.id] ?? "auto"}`}
+                  mode={modes[shown.id] ?? "auto"}
+                  saving={running !== null}
+                  onSave={(mode) => void saveMode(shown, mode)}
+                />
+              )}
 
               {minutesSaved && (
                 <TimeSavedForm

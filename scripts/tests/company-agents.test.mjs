@@ -1,0 +1,352 @@
+// THE COMPANY'S OWN AGENTS: THE ROSTER TELLS THE TRUTH, AND THE TWO THAT RUN
+// JUDGE CORRECTLY.
+//
+// Three things are held here, and each can go red:
+//
+//   1. THE ROSTER (src/lib/company-agents/roster.ts) is consistent: every
+//      id unique, every `blocked` entry names a reason that exists, and
+//      the entries marked `running` are EXACTLY the agents the runner
+//      executes — both directions, so the roster cannot call an agent
+//      running that nothing runs, nor leave one out that does run.
+//   2. THE REASONS ARE STILL TRUE. Each blocker is a claim about the
+//      repository ("no analytics package", "Gmail is read-only"). They are
+//      checked against package.json, the migrations and the Gmail scopes,
+//      so the day one stops being true this goes red and says which
+//      entries to revisit, instead of the roster quietly going stale.
+//   3. THE JUDGEMENT (agents.ts): every shape of input gets the right
+//      word. Most important: a read that FAILED is "unverified", never
+//      "ok", and an app that answers 503 or says ok:false is "fail".
+//
+// Source checks strip comments first. The question CLAUDE.md asks before
+// writing a check is "if I deleted every comment in the target, would
+// this still pass?", and this is the answer: it reads code only.
+//
+// Run: node scripts/tests/company-agents.test.mjs
+import { readFileSync, readdirSync } from "node:fs";
+import { loadTs } from "./load-ts.mjs";
+
+let pass = 0;
+const failures = [];
+const ok = (name, cond, detail) => {
+  if (cond) { pass++; console.log(`  PASS  ${name}`); }
+  else { failures.push(name); console.log(`  FAIL  ${name}${detail !== undefined ? "\n        " + detail : ""}`); }
+};
+
+/** Source with block comments and whole-line or trailing `//` comments removed. */
+const code = (f) => readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|\s)\/\/.*$/gm, "$1");
+
+const roster = await loadTs("src/lib/company-agents/roster.ts");
+const agents = await loadTs("src/lib/company-agents/agents.ts");
+const { ROSTER, BLOCKERS, DEPARTMENTS, RUNNING_AGENT_IDS, CI_AGENT_IDS } = roster;
+const drafting = await loadTs("src/lib/company-agents/drafting.ts");
+const repoAgents = await import("../company-agents/repo-agents.mjs");
+
+const page0 = code("src/app/dashboard/system-health/page.tsx");
+console.log("== 1. the roster is consistent ==");
+ok(`the roster was read (${ROSTER.length} agents)`, ROSTER.length >= 100);
+const ids = ROSTER.map((a) => a.id);
+ok("every id is unique", new Set(ids).size === ids.length, ids.filter((x, i) => ids.indexOf(x) !== i).join(", "));
+ok("every department is a known one", ROSTER.every((a) => a.department in DEPARTMENTS));
+ok("every status is one of the four", ROSTER.every((a) => ["running", "built", "blocked", "planned"].includes(a.status)));
+ok("every autonomy is 1, 2 or 3", ROSTER.every((a) => [1, 2, 3].includes(a.autonomy)));
+ok("every entry says what it does", ROSTER.every((a) => typeof a.mission === "string" && a.mission.length >= 20 && a.name.length > 0));
+ok("a blocked entry names a reason that exists",
+  ROSTER.filter((a) => a.status === "blocked").every((a) => a.blockedBy in BLOCKERS),
+  ROSTER.filter((a) => a.status === "blocked" && !(a.blockedBy in BLOCKERS)).map((a) => a.id).join(", "));
+ok("only a blocked entry names a reason", ROSTER.every((a) => (a.status === "blocked") === (a.blockedBy !== undefined)));
+ok("every reason in BLOCKERS is used by somebody (no dead reasons)", Object.keys(BLOCKERS).every((k) => ROSTER.some((a) => a.blockedBy === k)));
+ok("nothing is rated above autonomy 2 yet", ROSTER.every((a) => a.autonomy <= 2), "autonomy 3 is for reversible actions with no customer contact; none has earned it");
+ok("anything touching customers' mail, money or contracts is rated 2 at most and never 3",
+  ROSTER.filter((a) => /email|invoice|contract|billing|refund|discount|proposal|pricing/i.test(a.id)).every((a) => a.autonomy <= 2));
+
+console.log("\n== 1b. `running` is exactly what the runner runs ==");
+const runnerSrc = code("src/lib/company-agents/run.ts");
+const runnerIds = [...runnerSrc.matchAll(/runOne\(\s*"([a-z0-9-]+)"/g)].map((m) => m[1]);
+const rosterRunning = ROSTER.filter((a) => a.status === "running").map((a) => a.id).sort();
+ok("the runner executes at least one agent", runnerIds.length >= 1);
+ok("RUNNING_AGENT_IDS equals the ids the runner passes to runOne()", JSON.stringify([...RUNNING_AGENT_IDS].sort()) === JSON.stringify([...runnerIds].sort()), `${[...RUNNING_AGENT_IDS]} vs ${runnerIds}`);
+ok("the roster's `running` entries equal RUNNING_AGENT_IDS plus CI_AGENT_IDS", JSON.stringify(rosterRunning) === JSON.stringify([...RUNNING_AGENT_IDS, ...CI_AGENT_IDS].sort()), `${rosterRunning}`);
+ok("CI_AGENT_IDS equals the ids repo-agents.mjs runs, both ways", JSON.stringify([...CI_AGENT_IDS].sort()) === JSON.stringify([...repoAgents.REPO_AGENT_IDS].sort()) && Object.keys(repoAgents.runAll({ files: [], vercel: null, routes: [], migrations: [], pkgs: [], audit: null })).sort().join() === [...CI_AGENT_IDS].sort().join());
+ok("no agent is in both the runner and CI", RUNNING_AGENT_IDS.every((id) => !CI_AGENT_IDS.includes(id)));
+const workflow = readFileSync(".github/workflows/verify.yml", "utf8").replace(/^\s*#.*$/gm, "");
+ok("the CI workflow runs repo-agents.mjs", /run:\s*node scripts\/company-agents\/repo-agents\.mjs/.test(workflow));
+ok("...and the step cannot turn the job red", /name: company agents \(repository\)[\s\S]{0,120}continue-on-error: true/.test(workflow));
+ok("every running agent is autonomy 1 (reads and reports)", ROSTER.filter((a) => a.status === "running").every((a) => a.autonomy === 1));
+ok("each id the runner writes is on the roster", runnerIds.every((id) => ids.includes(id)));
+ok("the runner's only write is the insert into company_agent_runs", (runnerSrc.match(/\.(insert|update|delete|upsert)\(/g) ?? []).length === 1 && /from\("company_agent_runs"\)\s*\.insert\(/.test(runnerSrc));
+
+console.log("\n== 2. the reasons are still true ==");
+const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
+ok(`package.json was read (${deps.length} dependencies), so "no analytics package" is a finding and not an empty read`, deps.length >= 20 && deps.includes("next"));
+ok("BLOCKERS is empty exactly while no roster entry is blocked", ROSTER.filter((x) => x.status === "blocked").length === 0 && Object.keys(BLOCKERS).length === 0);
+const migrations = readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).map((f) => readFileSync(`supabase/migrations/${f}`, "utf8")).join("\n");
+ok(`crm-manager says it does not write to public.leads, which still exists as the customer Sales tool`, /create table if not exists public\.leads\b/i.test(migrations));
+ok(`the support agents say "no ticket system" only while no support-ticket table exists`, !/create table if not exists public\.(support_tickets|tickets)\b/i.test(migrations), "a tickets table exists now: revisit support-intake, escalation and the missions that say there is none");
+const providers = readFileSync("src/lib/integrations/providers.ts", "utf8");
+ok(`email-drafter and email-replier say they cannot send only while Gmail is read-only`, /gmail\.readonly/.test(providers) && !/gmail\.(send|modify|compose)/.test(providers), "Gmail has a write scope now: revisit those two missions");
+
+const opsSrc = [readFileSync("docs/api-keys.md", "utf8"), ...readdirSync("src/lib", { recursive: true }).filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => readFileSync(`src/lib/${f}`, "utf8"))].join("\n");
+
+console.log("\n== 2b. the writing agents (drafting.ts) ==");
+const D = drafting.DRAFT_AGENTS;
+ok(`the table was read (${D.length} writing agents)`, D.length >= 40);
+ok("every writing agent id is unique", new Set(D.map((x) => x.id)).size === D.length);
+ok("every writing agent is on the roster", D.every((x) => ids.includes(x.id)));
+ok("the roster's `built` entries are exactly the writing agents plus final-approval, both ways", JSON.stringify(ROSTER.filter((a) => a.status === "built").map((a) => a.id).sort()) === JSON.stringify([...D.map((x) => x.id), "final-approval"].sort()), ROSTER.filter((a) => a.status === "built").map((a) => a.id).filter((i) => !D.some((x) => x.id === i) && i !== "final-approval").join(", "));
+ok("no writing agent is rated above autonomy 2", D.every((x) => ROSTER.find((a) => a.id === x.id).autonomy <= 2));
+ok("every writing agent has a real job and a brief hint", D.every((x) => x.job.length >= 40 && x.brief.length >= 15));
+ok("the review roles are told they saw only what was pasted", ["code-review", "bug-detection", "accessibility", "performance", "auth-auditor", "authorization-auditor", "idor-checker", "privacy-checker"].every((id) => /ONLY the material pasted/.test(D.find((x) => x.id === id).job)));
+ok("every agent whose job is to report on the outside world searches the web", ["market-research", "competitor-tracker", "technology-research", "trend-detector", "opportunity-finder", "fact-checker", "research-report", "reputation-monitor", "terms-monitor", "recruitment-research", "product-research"].every((id) => D.find((x) => x.id === id).web === true));
+ok("no agent that only reshapes the brief searches the web", ["meeting-summary", "task-manager", "content-writer", "documentation", "job-description"].every((id) => D.find((x) => x.id === id).web === false));
+const sys = (id) => drafting.systemPromptFor(D.find((x) => x.id === id));
+ok("every prompt forbids inventing numbers and asks for a 'Not checked' section", D.every((x) => /Never invent a number/.test(drafting.systemPromptFor(x)) && /Not checked/.test(drafting.systemPromptFor(x))));
+ok("web rules are in a web agent's prompt and only there", /web search tool/.test(sys("research-report")) && !/web search tool/.test(sys("content-writer")));
+ok("a code-writing agent must say its code was not run", ["frontend-dev", "backend-dev", "database-dev", "bug-fix"].every((id) => /has not been run/.test(D.find((x) => x.id === id).job)));
+const guard = (id, re) => re.test(D.find((x) => x.id === id).job);
+ok("the agents that sit next to an action are told never to take it", guard("email-drafter", /A person sends it/) && guard("email-replier", /A person sends it/) && guard("discount-agent", /Never write as if it was applied/) && guard("billing-support", /Do not promise or approve a refund/) && guard("contract-organizer", /Sign and decide nothing/) && guard("tax-documents", /File and decide nothing/) && guard("invoice-prep", /Do not compute tax rules/) && guard("pricing-agent", /applies nothing|Stay inside the limits/) && guard("manager", /nothing is assigned or started/) && guard("calendar", /Nothing is put in a calendar/));
+ok("every mission of an agent that cannot act says so (send, apply, file, track, sign or touch)", ["email-drafter", "email-replier", "discount-agent", "billing-support", "contract-organizer", "tax-documents", "invoice-prep", "calendar", "manager", "crm-manager", "follow-up", "support-intake", "escalation"].every((id) => /cannot|never|nothing|does not|not |no ticket|owner assigns|stay with/i.test(ROSTER.find((x) => x.id === id).mission)));
+ok("no agent is blocked by a reason that is no longer defined", ROSTER.every((x) => x.blockedBy === undefined || x.blockedBy in BLOCKERS));
+ok("the four agents converted on 2026-11-08 say in their job what they cannot do", [["ab-testing", /do not run, split or measure/], ["conversion-optimizer", /hypothesis, not a finding/], ["experiment-analyst", /do not run or measure/], ["backup-verifier", /never say a backup works/]].every(([id, re]) => re.test(D.find((x) => x.id === id).job)));
+ok("the two statistics agents are told to show the arithmetic and to refuse a winner on thin data", /arithmetic/.test(D.find((x) => x.id === "ab-testing").job) && /too small/.test(D.find((x) => x.id === "ab-testing").job) && /arithmetic/.test(D.find((x) => x.id === "experiment-analyst").job));
+ok("brief: too short is refused", drafting.checkBrief("hi").ok === false && drafting.checkBrief(undefined).ok === false);
+ok("brief: too long is refused", drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS + 1)).ok === false);
+ok("brief: exactly the limits are accepted and trimmed", drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").ok === true && drafting.checkBrief("x".repeat(drafting.MAX_BRIEF_CHARS)).ok === true && drafting.checkBrief("  " + "x".repeat(drafting.MIN_BRIEF_CHARS) + "  ").brief.length === drafting.MIN_BRIEF_CHARS);
+ok("daily limit: the Nth draft is allowed, the N+1th is not", drafting.dailyLimitReached(drafting.DAILY_DRAFT_LIMIT - 1) === false && drafting.dailyLimitReached(drafting.DAILY_DRAFT_LIMIT) === true);
+const gen = code("src/lib/company-agents/generate.ts");
+const postRoute = code("src/app/api/company-agents/drafts/route.ts");
+const decideRoute = code("src/app/api/company-agents/drafts/[id]/route.ts");
+ok("the create route checks the owner BEFORE it generates", postRoute.indexOf("isAdminEmail(user.email)") !== -1 && postRoute.indexOf("isAdminEmail(user.email)") < postRoute.indexOf("generateDraft("));
+ok("...and answers a non-owner with 404, as if the route did not exist", /return new NextResponse\(null, \{ status: 404 \}\)/.test(postRoute));
+ok("the decide route checks the owner, and only a pending draft can be decided", decideRoute.indexOf("isAdminEmail(user.email)") !== -1 && /\.eq\("status", "pending"\)/.test(decideRoute));
+ok("the decide route changes only status and decided_at", /\.update\(\{ status: decision, decided_at: [^}]*\}\)/.test(decideRoute));
+const insertBlock = (gen.match(/\.insert\(\{[\s\S]*?\}\)/) ?? [""])[0];
+ok("the generator saves nothing but a pending draft (the insert writes no status, so the table default `pending` applies)", insertBlock.length > 40 && /agent_id/.test(insertBlock) && !/status/.test(insertBlock), insertBlock);
+ok("the generator refuses a web draft whose provider reported no sources", /agent\.web && outcome\.citations === undefined/.test(gen));
+ok("the generator checks the day's limit before it calls the model", gen.indexOf("dailyLimitReached(") !== -1 && gen.indexOf("dailyLimitReached(") < gen.indexOf("runCompletion("));
+ok("the generator saves the cut-off flag with the draft", /modelTextFrom\(/.test(gen) && /truncated: text\.truncated/.test(insertBlock));
+ok("the generator has no way to send anything (no mail, no fetch)", !/\bfetch\(|resend|sendMail|nodemailer/i.test(gen));
+const draftSql = readFileSync("supabase/migrations/20261107000000_company_agent_drafts.sql", "utf8");
+const draftSqlCode = draftSql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+ok("DOC, not behaviour: the drafts migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(draftSql));
+ok("drafts table: RLS on, no policy, revoked from anon and authenticated", /enable row level security/.test(draftSqlCode) && !/create policy/i.test(draftSqlCode) && /revoke all on public\.company_agent_drafts from anon/.test(draftSqlCode) && /revoke all on public\.company_agent_drafts from authenticated/.test(draftSqlCode));
+ok("drafts table: a draft starts pending and status is limited to three values", /default 'pending'/.test(draftSqlCode) && /status in \('pending', 'approved', 'rejected'\)/.test(draftSqlCode));
+ok("the page renders the draft desk behind the owner check", /<DraftDesk\b/.test(page0) && page0.indexOf("isAdminEmail(user.email)") < page0.indexOf("company_agent_drafts"));
+
+console.log("\n== 3a. the error analyst: every shape of input ==");
+const row = (route, n, resolved = false) => ({ route, occurrenceCount: n, resolved });
+const unread = agents.analyzeErrors(null);
+ok("a failed read is unverified, never ok", unread.status === "unverified" && unread.status !== "ok");
+ok("...and says nothing was checked", /nothing was checked/.test(unread.summary));
+const none = agents.analyzeErrors([]);
+ok("an empty table is ok", none.status === "ok" && none.evidence.open === 0);
+const resolvedOnly = agents.analyzeErrors([row("/api/a", 9, true), row("/api/b", 4, true)]);
+ok("only resolved rows is ok: resolved errors are not open", resolvedOnly.status === "ok");
+const some = agents.analyzeErrors([row("/api/a", 3), row("/api/b", 11), row("/api/c", 2, true)]);
+ok("open errors are a warning", some.status === "warn");
+ok("...counted: 2 open, 14 occurrences", some.evidence.open === 2 && some.evidence.occurrences === 14, JSON.stringify(some.evidence));
+ok("...naming the most frequent route", some.evidence.worstRoute === "/api/b" && /\/api\/b/.test(some.summary));
+const capped = agents.analyzeErrors(Array.from({ length: 5 }, () => row("/x", 1, true)), 5);
+ok("a read that hit its cap says older rows were not seen", capped.unverified.some((u) => /older rows/.test(u)));
+ok("an uncapped read does not claim that", !none.unverified.some((u) => /older rows/.test(u)));
+ok("every result says what it did not cover", [unread, none, some, capped].every((r) => Array.isArray(r.unverified) && r.unverified.length >= 1));
+
+console.log("\n== 3b. the uptime monitor: every shape of input ==");
+const probe = (over) => ({ reached: true, httpStatus: 200, ok: true, ms: 120, ...over });
+ok("no address configured is unverified, not ok", agents.analyzeHealth(null).status === "unverified");
+ok("an app that did not answer is a failure", agents.analyzeHealth(probe({ reached: false, httpStatus: null, ok: null })).status === "fail");
+ok("HTTP 503 is a failure", agents.analyzeHealth(probe({ httpStatus: 503, ok: false })).status === "fail");
+ok("a non-200 is a failure even when the body claims ok:true (the status is its own check)", agents.analyzeHealth(probe({ httpStatus: 500, ok: true })).status === "fail");
+ok("...and the summary names the HTTP status it saw", /HTTP 500/.test(agents.analyzeHealth(probe({ httpStatus: 500, ok: true })).summary));
+ok("HTTP 200 with ok:false is a failure", agents.analyzeHealth(probe({ ok: false })).status === "fail");
+ok("HTTP 200 with no readable ok is a failure, not a pass", agents.analyzeHealth(probe({ ok: null })).status === "fail");
+ok("HTTP 200 with ok:true is ok", agents.analyzeHealth(probe({})).status === "ok");
+ok("an ok result still says it was one call and not a visit", agents.analyzeHealth(probe({})).unverified.some((u) => /not a visit|one call/.test(u)));
+
+console.log("\n== 3c. second batch: every shape of input ==");
+const NOW = Date.parse("2026-11-07T12:00:00Z");
+const hr = (hoursAgo, eur) => ({ hour: new Date(NOW - hoursAgo * 3600_000).toISOString(), calls: 1, costEur: eur });
+const ex = (k, okv) => ({ checkKey: k, found: okv ? 0 : 2, expected: 0, ok: okv });
+ok("database: a failed read is unverified", agents.analyzeDatabase(null).status === "unverified");
+ok("database: an empty report is unverified, not ok", agents.analyzeDatabase([]).status === "unverified");
+ok("database: all checks passing is ok", agents.analyzeDatabase([ex("a", true), ex("b", true)]).status === "ok");
+const dbBad = agents.analyzeDatabase([ex("a", true), ex("tables_without_rls", false)]);
+ok("database: a failing check is a failure that names it", dbBad.status === "fail" && /tables_without_rls/.test(dbBad.summary) && dbBad.evidence.failing === 1);
+ok("cost: a failed read is unverified", agents.analyzeCost(null, NOW).status === "unverified");
+ok("cost: no spend at all is ok", agents.analyzeCost([], NOW).status === "ok");
+ok("cost: spend with no earlier week is unverified, not ok", agents.analyzeCost([hr(2, 5)], NOW).status === "unverified");
+const week = Array.from({ length: 7 }, (_, d) => hr(24 * (d + 2), 2));
+ok("cost: a steady day is ok", agents.analyzeCost([...week, hr(3, 2)], NOW).status === "ok");
+const spike = agents.analyzeCost([...week, hr(3, 9)], NOW);
+ok("cost: 4.5x the weekly average and 7 euro above it is a warning", spike.status === "warn" && /4\.5x/.test(spike.summary), spike.summary);
+ok("cost: 3x but under 1 euro above is NOT a warning (noise floor)", agents.analyzeCost([...Array.from({ length: 7 }, (_, d) => hr(24 * (d + 2), 0.1)), hr(3, 0.3)], NOW).status === "ok");
+ok("cost: spend older than 8 days is ignored", agents.analyzeCost([hr(24 * 9, 500)], NOW).status === "ok");
+ok("revenue: a failed read is unverified", agents.analyzeRevenue(null).status === "unverified");
+ok("revenue: complete figure is ok and carries the number", (() => { const r = agents.analyzeRevenue({ eur: 120, complete: true, unpricedSubscribers: 0, unpricedTiers: [] }); return r.status === "ok" && r.evidence.mrrEur === 120 && /120/.test(r.summary); })());
+ok("revenue: an unpriced tier is a warning that says the figure is a floor", (() => { const r = agents.analyzeRevenue({ eur: 120, complete: false, unpricedSubscribers: 2, unpricedTiers: ["enterprise"] }); return r.status === "warn" && /at least/.test(r.summary) && /enterprise/.test(r.summary); })());
+const goodH = { "Strict-Transport-Security": "max-age=1", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "origin", "Content-Security-Policy": "default-src 'self'" };
+const hp = (headers, over) => ({ reached: true, httpStatus: 200, headers, ...over });
+ok("headers: no address is unverified", agents.analyzeHeaders(null).status === "unverified");
+ok("headers: an unreachable page is unverified (uptime reports the outage)", agents.analyzeHeaders(hp({}, { reached: false, httpStatus: null })).status === "unverified");
+ok("headers: all present (any letter case) is ok", agents.analyzeHeaders(hp(goodH)).status === "ok");
+ok("headers: X-Frame-Options can stand in for CSP", agents.analyzeHeaders(hp({ ...goodH, "Content-Security-Policy": undefined, "X-Frame-Options": "DENY" })).status === "ok");
+ok("headers: missing HSTS warns and names it", (() => { const h = { ...goodH }; delete h["Strict-Transport-Security"]; const r = agents.analyzeHeaders(hp(h)); return r.status === "warn" && /Strict-Transport-Security/.test(r.summary); })());
+ok("headers: nosniff must be the value, not just the header", agents.analyzeHeaders(hp({ ...goodH, "X-Content-Type-Options": "other" })).status === "warn");
+ok("headers: neither CSP nor X-Frame-Options warns", agents.analyzeHeaders(hp({ ...goodH, "Content-Security-Policy": undefined })).status === "warn");
+const ago = (h) => new Date(NOW - h * 3600_000).toISOString();
+ok("auditor: a failed read is unverified", agents.analyzeStaleness(null, ["a"], NOW).status === "unverified");
+ok("auditor: every agent recent is ok", agents.analyzeStaleness([{ agentId: "a", ranAt: ago(20) }, { agentId: "b", ranAt: ago(30) }], ["a", "b"], NOW).status === "ok");
+ok("auditor: an agent silent for 40h is a warning that names it", (() => { const r = agents.analyzeStaleness([{ agentId: "a", ranAt: ago(20) }, { agentId: "b", ranAt: ago(40) }], ["a", "b"], NOW); return r.status === "warn" && /\bb\b/.test(r.summary) && r.evidence.stale[0] === "b"; })());
+ok("auditor: an agent with no earlier row is unverified, not stale and not ok", (() => { const r = agents.analyzeStaleness([{ agentId: "a", ranAt: ago(2) }], ["a", "new"], NOW); return r.status === "unverified" && r.evidence.neverRun[0] === "new"; })());
+ok("auditor: the newest row decides, not the oldest", agents.analyzeStaleness([{ agentId: "a", ranAt: ago(100) }, { agentId: "a", ranAt: ago(1) }], ["a"], NOW).status === "ok");
+const R = (id, status) => ({ agentId: id, result: { status, summary: "", evidence: {}, unverified: [] } });
+ok("reporter: nothing to report is unverified", agents.summarizeRun([]).status === "unverified");
+ok("reporter: all ok is ok", agents.summarizeRun([R("a", "ok"), R("b", "ok")]).status === "ok");
+ok("reporter: one warn makes it warn and names the agent", (() => { const r = agents.summarizeRun([R("a", "ok"), R("b", "warn")]); return r.status === "warn" && /b: warn/.test(r.summary); })());
+ok("reporter: a failure outranks a warning", agents.summarizeRun([R("a", "warn"), R("b", "fail")]).status === "fail");
+ok("reporter: an unverified agent keeps the whole report from being ok", agents.summarizeRun([R("a", "ok"), R("b", "unverified")]).status === "unverified");
+ok("reporter: counts add up", (() => { const r = agents.summarizeRun([R("a", "ok"), R("b", "warn"), R("c", "fail"), R("d", "unverified")]); return r.evidence.ok + r.evidence.warn + r.evidence.fail + r.evidence.unverified === 4; })());
+ok("the reporter runs last in the runner", runnerIds[runnerIds.length - 1] === "daily-reporter");
+
+console.log("\n== 3d. third batch: every shape of input ==");
+const job = (minAgo) => ({ status: "running", updatedAt: new Date(NOW - minAgo * 60_000).toISOString() });
+ok("queue: a failed read is unverified", agents.analyzeQueue(null, 0, NOW).status === "unverified");
+ok("queue: no open jobs is ok", agents.analyzeQueue([], 0, NOW).status === "ok");
+ok("queue: a job moving 5 minutes ago is ok", agents.analyzeQueue([job(5)], 0, NOW).status === "ok");
+ok("queue: a job silent 45 minutes is a warning", (() => { const r = agents.analyzeQueue([job(5), job(45)], 2, NOW); return r.status === "warn" && r.evidence.stuck === 1 && /2 job\(s\) failed/.test(r.summary); })());
+ok("queue: an unreadable failure count never reads as zero", agents.analyzeQueue([], null, NOW).unverified.some((u) => /failed jobs/.test(u)));
+ok("budget: a failed read is unverified", agents.analyzeBudget(null, 5000).status === "unverified");
+ok("budget: 10% is ok", agents.analyzeBudget(500, 5000).status === "ok");
+ok("budget: 80% is a warning", agents.analyzeBudget(4000, 5000).status === "warn");
+ok("budget: 79% is still ok", agents.analyzeBudget(3950, 5000).status === "ok");
+ok("budget: reaching the cap is a failure", agents.analyzeBudget(5000, 5000).status === "fail");
+ok("budget: a zero cap is unverified, never a divide-by-zero verdict", agents.analyzeBudget(10, 0).status === "unverified");
+const u = (id, eur) => ({ userId: id, costEur: eur, calls: 1 });
+ok("concentration: a failed read is unverified", agents.analyzeConcentration(null).status === "unverified");
+ok("concentration: no spend is ok", agents.analyzeConcentration([]).status === "ok");
+ok("concentration: one account at 90% and 9 euro warns, naming 8 chars of it", (() => { const r = agents.analyzeConcentration([u("abcdef123456", 9), u("zzzzzzzz", 1)]); return r.status === "warn" && /abcdef12/.test(r.summary) && !/abcdef123456/.test(r.summary); })());
+ok("concentration: 90% but under 2 euro is ok (noise floor)", agents.analyzeConcentration([u("a", 0.9), u("b", 0.1)]).status === "ok");
+ok("concentration: a single account alone is not 'concentration'", agents.analyzeConcentration([u("a", 50)]).status === "ok");
+ok("concentration: an even spread is ok", agents.analyzeConcentration([u("a", 3), u("b", 3), u("c", 3)]).status === "ok");
+const f = (feature, eur, calls, credits) => ({ feature, costEur: eur, calls, creditsCharged: credits });
+ok("features: a failed read is unverified", agents.analyzeFeatureCosts(null).status === "unverified");
+ok("features: no cost is ok", agents.analyzeFeatureCosts([]).status === "ok");
+ok("features: names the top three by cost", (() => { const r = agents.analyzeFeatureCosts([f("a", 1, 30, 9), f("b", 5, 30, 9), f("c", 3, 30, 9), f("d", 2, 30, 9)]); return r.evidence.top3[0].startsWith("b ") && r.evidence.top3.length === 3; })());
+ok("features: cost with no credits charged (20+ calls) warns", (() => { const r = agents.analyzeFeatureCosts([f("free-thing", 4, 25, 0), f("paid", 1, 30, 9)]); return r.status === "warn" && /free-thing/.test(r.summary); })());
+ok("features: uncharged but under 20 calls does not warn", agents.analyzeFeatureCosts([f("x", 4, 5, 0)]).status === "ok");
+const dc = (daysAgo, eur) => ({ day: new Date(NOW - daysAgo * 86400_000).toISOString().slice(0, 10), costEur: eur, calls: 1 });
+ok("expenses: a failed read is unverified", agents.analyzeExpenses(null, NOW).status === "unverified");
+ok("expenses: sums the last 7 days and the 7 before separately", (() => { const r = agents.analyzeExpenses([dc(1, 2), dc(3, 3), dc(8, 10), dc(20, 99)], NOW); return r.evidence.last7Eur === 5 && r.evidence.prev7Eur === 10; })());
+ok("expenses: says it does not judge the trend", agents.analyzeExpenses([], NOW).unverified.some((x) => /does not judge/.test(x)));
+
+console.log("\n== 3e. sixth batch: the seven KPI agents ==");
+const K = (o) => ({ users_total: 100, users_new_7d: 12, users_new_prev_7d: 12, paid_users: 10, active_7d: 40, active_prev_7d: 40, active_30d: 60, active_prev_30d: 60, lapsed_30d: 10, paid_lapsed_30d: 0, free_near_limit_active_7d: 3, ...o });
+const kpiFns = ["analyzeSignups", "analyzeUsage", "analyzeLapse", "analyzeRetention", "analyzeUpsell", "analyzeAnomalies", "analyzePaidShare"];
+ok("every KPI agent: a failed read is unverified, never ok", kpiFns.every((f) => agents[f](null).status === "unverified"));
+ok("every KPI agent: a missing metric is unverified, never treated as zero", kpiFns.every((f) => agents[f]({}).status === "unverified"));
+ok("every KPI agent: a healthy snapshot is ok", kpiFns.every((f) => agents[f](K({})).status === "ok"), kpiFns.filter((f) => agents[f](K({})).status !== "ok").join(", "));
+ok("every KPI agent says what it does not cover", kpiFns.every((f) => agents[f](K({})).unverified.length >= 2));
+ok("signups: new accounts halved from a base of 12 warns", agents.analyzeSignups(K({ users_new_7d: 5, users_new_prev_7d: 12 })).status === "warn");
+ok("signups: a halving from a base of 4 is noise, not a warning", agents.analyzeSignups(K({ users_new_7d: 1, users_new_prev_7d: 4 })).status === "ok");
+ok("usage: a 40% fall from 40 warns and names the percentage", (() => { const r = agents.analyzeUsage(K({ active_7d: 24, active_prev_7d: 40 })); return r.status === "warn" && /40%/.test(r.summary); })());
+ok("usage: a 20% fall does not warn", agents.analyzeUsage(K({ active_7d: 32, active_prev_7d: 40 })).status === "ok");
+ok("usage: a fall from a base of 5 is noise", agents.analyzeUsage(K({ active_7d: 1, active_prev_7d: 5 })).status === "ok");
+ok("lapse: half the base gone warns", agents.analyzeLapse(K({ lapsed_30d: 30, active_prev_30d: 60 })).status === "warn");
+ok("lapse: under half is ok", agents.analyzeLapse(K({ lapsed_30d: 29, active_prev_30d: 60 })).status === "ok");
+ok("lapse: a base under 10 is unverified, not a rate", agents.analyzeLapse(K({ lapsed_30d: 5, active_prev_30d: 6 })).status === "unverified");
+ok("lapse: says it is not a prediction about a person", agents.analyzeLapse(K({})).unverified.some((u) => /not a prediction about a person/.test(u)));
+ok("retention: any paying account gone quiet warns", agents.analyzeRetention(K({ paid_lapsed_30d: 1 })).status === "warn" && agents.analyzeRetention(K({ paid_lapsed_30d: 0 })).status === "ok");
+ok("upsell: reports the count and never judges", (() => { const r = agents.analyzeUpsell(K({ free_near_limit_active_7d: 7 })); return r.status === "ok" && r.evidence.candidates === 7 && /7 free/.test(r.summary); })());
+ok("anomalies: a 3x weekly jump warns; 2x does not", agents.analyzeAnomalies(K({ users_new_7d: 36, users_new_prev_7d: 12 })).status === "warn" && agents.analyzeAnomalies(K({ users_new_7d: 24, users_new_prev_7d: 12 })).status === "ok");
+ok("anomalies: a jump from zero counts, a jump to under 10 does not", agents.analyzeAnomalies(K({ active_7d: 12, active_prev_7d: 0 })).status === "warn" && agents.analyzeAnomalies(K({ active_7d: 6, active_prev_7d: 1 })).status === "ok");
+ok("paid share: computes the percentage to one decimal", /10%/.test(agents.analyzePaidShare(K({ users_total: 100, paid_users: 10 })).summary) && /3\.3%/.test(agents.analyzePaidShare(K({ users_total: 300, paid_users: 10 })).summary));
+ok("paid share: no accounts is unverified, not a divide by zero", agents.analyzePaidShare(K({ users_total: 0, paid_users: 0 })).status === "unverified");
+ok("paid share: says there is no funnel", agents.analyzePaidShare(K({})).unverified.some((u) => /funnel/.test(u)));
+const kpiSql = readFileSync("supabase/migrations/20261107010000_company_kpis.sql", "utf8");
+const kpiSqlCode = kpiSql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+ok("DOC, not behaviour: the kpis migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(kpiSql));
+ok("company_kpis is security definer with a pinned search_path", /security definer/.test(kpiSqlCode) && /set search_path = public, pg_catalog/.test(kpiSqlCode));
+ok("company_kpis is executable by service_role only", /revoke all on function public\.company_kpis\(\) from public/.test(kpiSqlCode) && /revoke all on function public\.company_kpis\(\) from anon/.test(kpiSqlCode) && /revoke all on function public\.company_kpis\(\) from authenticated/.test(kpiSqlCode) && /grant execute on function public\.company_kpis\(\) to service_role/.test(kpiSqlCode));
+ok("company_kpis returns counts only: the signature is (metric, value) and every metric row is a count", /returns table \(metric text, value bigint\)/.test(kpiSqlCode) && (kpiSqlCode.match(/select '[a-z0-9_]+'(::text)?,\s*count\(/g) ?? []).length === (kpiSqlCode.match(/select '[a-z0-9_]+'/g) ?? []).length && (kpiSqlCode.match(/select '[a-z0-9_]+'/g) ?? []).length >= 12);
+ok("every metric the analyzers read is one the function returns", (() => { const kpiPart = (() => { const t = code("src/lib/company-agents/agents.ts"); return t.slice(0, t.indexOf("export const INTEGRITY_RULES")); })(); const used = new Set([...kpiPart.matchAll(/"((?:users|paid|active|lapsed|free)_[a-z0-9_]+)"/g)].map((m) => m[1])); const returned = [...kpiSqlCode.matchAll(/select '([a-z0-9_]+)'/g)].map((m) => m[1]).concat([...kpiSqlCode.matchAll(/union all select '([a-z0-9_]+)'/g)].map((m) => m[1])); return [...used].every((k) => returned.includes(k)); })(), "an analyzer reads a metric that company_kpis() does not return");
+ok("the runner reads company_kpis once for all seven", (runnerSrc.match(/\.rpc\("company_kpis"/g) ?? []).length === 1);
+
+console.log("\n== 3f. seventh batch: data-quality and attribution ==");
+const I = (o) => ({ credit_rows_negative: 0, cost_rows_negative: 0, live_commissions_on_void: 0, self_referrals: 0, users_without_credit_row: 0, referrals_converted_no_date: 0, referrals_void_no_reason: 0, ...o });
+const A = (o) => ({ users_new_7d: 20, users_new_prev_7d: 15, referrals_new_7d: 5, referrals_new_prev_7d: 3, referrals_total: 40, referrals_converted: 12, referrals_void: 4, affiliates_active: 6, ...o });
+ok("data-quality: a failed read is unverified, never ok", agents.analyzeDataQuality(null).status === "unverified");
+ok("data-quality: a missing rule is unverified, never treated as zero", agents.analyzeDataQuality({}).status === "unverified" && agents.analyzeDataQuality((({ self_referrals, ...rest }) => rest)(I({}))).status === "unverified");
+ok("data-quality: no broken row is ok and says how many rules were checked", (() => { const r = agents.analyzeDataQuality(I({})); return r.status === "ok" && r.evidence.rulesChecked === 7 && /7 rules/.test(r.summary); })());
+ok("data-quality: every money rule fails on one row", agents.INTEGRITY_RULES.filter((x) => x.severity === "fail").length === 4 && agents.INTEGRITY_RULES.filter((x) => x.severity === "fail").every((x) => agents.analyzeDataQuality(I({ [x.metric]: 1 })).status === "fail"));
+ok("data-quality: every other rule warns on one row", agents.INTEGRITY_RULES.filter((x) => x.severity === "warn").length === 3 && agents.INTEGRITY_RULES.filter((x) => x.severity === "warn").every((x) => agents.analyzeDataQuality(I({ [x.metric]: 1 })).status === "warn"));
+ok("data-quality: a warn and a fail together is a fail, and both are named", (() => { const r = agents.analyzeDataQuality(I({ users_without_credit_row: 2, credit_rows_negative: 1 })); return r.status === "fail" && /2 accounts with no credit row/.test(r.summary) && /1 accounts with a negative credit balance/.test(r.summary) && r.evidence.broken.users_without_credit_row === 2; })());
+ok("data-quality: says it checks rules, not truth", agents.analyzeDataQuality(I({})).unverified.some((u) => /rules, not truth/.test(u)));
+ok("attribution: a failed read is unverified, never ok", agents.analyzeAttribution(null).status === "unverified");
+ok("attribution: a missing metric is unverified, never treated as zero", agents.analyzeAttribution({}).status === "unverified" && agents.analyzeAttribution((({ referrals_void, ...rest }) => rest)(A({}))).status === "unverified");
+ok("attribution: counts the affiliate share and calls the rest not attributed, never organic", (() => { const r = agents.analyzeAttribution(A({})); return r.status === "ok" && /5 of 20 new accounts/.test(r.summary) && /the other 15 are not attributed/.test(r.summary) && !/organic/.test(r.summary); })());
+ok("attribution: says no other source is recorded", agents.analyzeAttribution(A({})).unverified.some((u) => /not 'organic'/.test(u)));
+ok("attribution: no new accounts is stated, not a divide by zero", (() => { const r = agents.analyzeAttribution(A({ users_new_7d: 0, referrals_new_7d: 0 })); return r.status === "ok" && /No new accounts this week/.test(r.summary); })());
+ok("attribution: more referrals than new accounts never prints a negative number", !/-\d/.test(agents.analyzeAttribution(A({ users_new_7d: 2, referrals_new_7d: 5 })).summary));
+ok("attribution: a high voided share warns, but only on a base of KPI_MIN_BASE referrals", agents.analyzeAttribution(A({ referrals_total: 20, referrals_void: 6 })).status === "warn" && agents.analyzeAttribution(A({ referrals_total: agents.KPI_MIN_BASE - 1, referrals_void: agents.KPI_MIN_BASE - 1 })).status === "ok");
+ok("attribution: exactly KPI_MIN_BASE referrals is already enough base to warn", agents.analyzeAttribution(A({ referrals_total: agents.KPI_MIN_BASE, referrals_void: agents.KPI_MIN_BASE })).status === "warn");
+ok("attribution: the voided-share boundary is inclusive and exact", agents.analyzeAttribution(A({ referrals_total: 100, referrals_void: 30 })).status === "warn" && agents.analyzeAttribution(A({ referrals_total: 100, referrals_void: 29 })).status === "ok");
+const intSql = readFileSync("supabase/migrations/20261108000000_company_integrity.sql", "utf8");
+const intCode = intSql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+const intFn = intCode.slice(intCode.indexOf("create or replace function public.company_integrity"), intCode.indexOf("create or replace function public.company_attribution"));
+const attFn = intCode.slice(intCode.indexOf("create or replace function public.company_attribution"), intCode.indexOf("do $integritygrants$"));
+ok("DOC, not behaviour: the integrity migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(intSql));
+ok("both functions are security definer with a pinned search_path", (intCode.match(/security definer/g) ?? []).length === 2 && (intCode.match(/set search_path = public, pg_catalog/g) ?? []).length === 2);
+ok("both functions are executable by service_role only", ["company_integrity", "company_attribution"].every((f) => new RegExp(`revoke all on function public\\.${f}\\(\\) from public`).test(intCode) && new RegExp(`revoke all on function public\\.${f}\\(\\) from anon`).test(intCode) && new RegExp(`revoke all on function public\\.${f}\\(\\) from authenticated`).test(intCode) && new RegExp(`grant execute on function public\\.${f}\\(\\) to service_role`).test(intCode) && !new RegExp(`grant execute on function public\\.${f}\\(\\) to (anon|authenticated|public)`).test(intCode)));
+ok("both return (metric, value) counts and nothing that names an account", (intCode.match(/returns table \(metric text, value bigint\)/g) ?? []).length === 2 && !/\bemail\b|raw_user_meta_data/.test(intFn + attFn) && (intFn.match(/count\(\*\)/g) ?? []).length === 7 && (attFn.match(/count\(\*\)/g) ?? []).length === 8);
+const integrityRows = [...intFn.matchAll(/select '([a-z_0-9]+)'(?:::text)?,/g)].map((m) => m[1]).sort();
+ok("data-quality reads exactly the seven metrics company_integrity returns, both ways", JSON.stringify(integrityRows) === JSON.stringify(agents.INTEGRITY_RULES.map((r) => r.metric).sort()), `${integrityRows} vs ${agents.INTEGRITY_RULES.map((r) => r.metric)}`);
+const attributionRows = [...attFn.matchAll(/select '([a-z_0-9]+)'(?:::text)?,/g)].map((m) => m[1]).sort();
+const attributionUsed = [...new Set([...(() => { const t = code("src/lib/company-agents/agents.ts"); const from = t.indexOf("export function analyzeAttribution"); return t.slice(from, t.indexOf("const { values: v, missing }", from)); })().matchAll(/"((?:users_new|referrals|affiliates)_[a-z0-9_]+)"/g)].map((m) => m[1]))].sort();
+ok("attribution reads exactly the eight metrics company_attribution returns, both ways", JSON.stringify(attributionRows) === JSON.stringify(attributionUsed) && attributionRows.length === 8, `${attributionRows} vs ${attributionUsed}`);
+ok("every table and column the two functions name exists in a migration", ["user_credits", "affiliate_referrals", "affiliate_commissions", "affiliates", "ai_cost_log"].every((t) => new RegExp(`create table if not exists public\\.${t}\\b`, "i").test(migrations)) && ["void_reason", "converted_at", "real_cost_eur", "real_cost_usd", "credits_charged"].every((c) => new RegExp(`\\b${c}\\b`).test(migrations)));
+ok("the runner reads each function once, with a literal name the rpc canary can see", ["company_integrity", "company_attribution"].every((f) => (runnerSrc.match(new RegExp(`\\.rpc\\("${f}"`, "g")) ?? []).length === 1));
+ok("the runner runs both agents, each on its own function", /runOne\("data-quality", async \(\) => analyzeDataQuality\(await readIntegrity\(\)\)\)/.test(runnerSrc) && /runOne\("attribution", async \(\) => analyzeAttribution\(await readAttribution\(\)\)\)/.test(runnerSrc));
+
+console.log("\n== 3g. eighth batch: analytics-collector and dashboard-agent ==");
+const T = (o) => ({ views_7d: 400, views_prev_7d: 380, pages_7d: 12, sources_7d: 5, direct_views_7d: 100, days_with_data_14d: 14, days_since_last_view: 0, ...o });
+ok("collector: a failed read is unverified, never ok", agents.analyzeCollector(null).status === "unverified" && agents.analyzeTraffic(null).status === "unverified");
+ok("both: a missing metric is unverified, never treated as zero", agents.analyzeCollector({}).status === "unverified" && agents.analyzeTraffic({}).status === "unverified" && agents.analyzeTraffic((({ pages_7d, ...r }) => r)(T({}))).status === "unverified");
+ok("collector: nothing ever recorded (-1) is unverified and names the switch", (() => { const r = agents.analyzeCollector(T({ views_7d: 0, days_with_data_14d: 0, days_since_last_view: -1 })); return r.status === "unverified" && /first-party-analytics/.test(r.summary); })());
+ok("collector: a recent view is ok, today and yesterday worded apart", /today/.test(agents.analyzeCollector(T({})).summary) && /yesterday/.test(agents.analyzeCollector(T({ days_since_last_view: 1 })).summary) && agents.analyzeCollector(T({ days_since_last_view: 1 })).status === "ok");
+ok("collector: the stale limit is exact", agents.analyzeCollector(T({ days_since_last_view: agents.COLLECTOR_STALE_DAYS - 1 })).status === "ok" && agents.analyzeCollector(T({ days_since_last_view: agents.COLLECTOR_STALE_DAYS })).status === "warn");
+ok("both say they count views, not visitors, and that bots are counted", [agents.analyzeCollector(T({})), agents.analyzeTraffic(T({}))].every((r) => r.unverified.some((u) => /counts views and cannot tell one person from many/.test(u)) && r.unverified.some((u) => /bots and crawlers/.test(u))));
+ok("dashboard: no data in 14 days is unverified, not a report of zero", agents.analyzeTraffic(T({ views_7d: 0, views_prev_7d: 0, pages_7d: 0, direct_views_7d: 0, days_with_data_14d: 0, days_since_last_view: -1 })).status === "unverified");
+ok("dashboard: a steady week is ok and prints both weeks and the direct share", (() => { const r = agents.analyzeTraffic(T({})); return r.status === "ok" && /400 views/.test(r.summary) && /380/.test(r.summary) && /25%/.test(r.summary); })());
+ok("dashboard: a fall of 30% warns, 29% does not", agents.analyzeTraffic(T({ views_prev_7d: 100, views_7d: 69 })).status === "warn" && agents.analyzeTraffic(T({ views_prev_7d: 100, views_7d: 70 })).status === "ok");
+ok("dashboard: a fall is judged only on a base of TRAFFIC_MIN_BASE views, exactly that many counts", agents.analyzeTraffic(T({ views_prev_7d: agents.TRAFFIC_MIN_BASE - 1, views_7d: 0 })).status === "ok" && agents.analyzeTraffic(T({ views_prev_7d: agents.TRAFFIC_MIN_BASE, views_7d: 0 })).status === "warn");
+ok("dashboard: zero views this week never divides by zero", (() => { const r = agents.analyzeTraffic(T({ views_7d: 0, direct_views_7d: 0, views_prev_7d: 10 })); return r.status === "ok" && /0%/.test(r.summary) && !/NaN/.test(r.summary); })());
+ok("dashboard: a counter younger than two weeks says the earlier week may be partial", agents.analyzeTraffic(T({ days_with_data_14d: 5 })).unverified.some((u) => /earlier week/.test(u)) && !agents.analyzeTraffic(T({})).unverified.some((u) => /earlier week/.test(u)));
+const trafficRows = [...readFileSync("supabase/migrations/20261108010000_page_view_counts.sql", "utf8").split("create or replace function public.company_traffic")[1].matchAll(/select '([a-z_0-9]+)'(?:::text)?,|union all select '([a-z_0-9]+)',/g)].map((m) => m[1] ?? m[2]).sort();
+const trafficUsed = [...new Set([...(() => { const t = code("src/lib/company-agents/agents.ts"); return t.slice(t.indexOf("export function analyzeCollector")); })().matchAll(/"((?:views|days|pages|sources|direct)_[a-z0-9_]+)"/g)].map((m) => m[1]))].sort();
+ok("the two agents read exactly the metrics company_traffic returns, both ways", JSON.stringify(trafficRows) === JSON.stringify(trafficUsed) && trafficRows.length === 7, `${trafficRows} vs ${trafficUsed}`);
+ok("the runner reads company_traffic once, with a literal name, and gives both agents the same snapshot", (runnerSrc.match(/\.rpc\("company_traffic"/g) ?? []).length === 1 && /analyzeCollector\(trafficRead\)/.test(runnerSrc) && /analyzeTraffic\(trafficRead\)/.test(runnerSrc));
+
+console.log("\n== 4. the wiring is real ==");
+const cron = code("src/app/api/cron/company-agents/route.ts");
+ok("the cron route calls checkCronAuth()", /\bcheckCronAuth\s*\(/.test(cron));
+ok("...and refuses before it runs anything", cron.indexOf("checkCronAuth(") < cron.indexOf("runCompanyAgents("));
+const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
+ok("the cron is scheduled in vercel.json", vercel.crons.some((c) => c.path === "/api/cron/company-agents" && typeof c.schedule === "string"));
+const page = code("src/app/dashboard/system-health/page.tsx");
+ok("system-health renders the section", /<CompanyAgents\b/.test(page));
+ok("...behind the owner check that already 404s everyone else", page.indexOf("isAdminEmail(user.email)") !== -1 && page.indexOf("isAdminEmail(user.email)") < page.indexOf("company_agent_runs"));
+ok("...and reads the table the runner writes", /from\("company_agent_runs"\)/.test(page));
+
+console.log("\n== 5. the migration ==");
+const sql = readFileSync("supabase/migrations/20261106000000_company_agent_runs.sql", "utf8");
+const sqlCode = sql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
+ok("DOC, not behaviour: the migration header says how to undo itself", /^-- How to undo: .{20,}/m.test(sql));
+ok("it creates the table with if not exists", /create table if not exists public\.company_agent_runs/.test(sqlCode));
+ok("row level security is on", /alter table public\.company_agent_runs enable row level security/.test(sqlCode));
+ok("it grants nothing to customers: revoked from anon and authenticated", /revoke all on public\.company_agent_runs from anon/.test(sqlCode) && /revoke all on public\.company_agent_runs from authenticated/.test(sqlCode));
+ok("it creates no policy (service role only)", !/create policy/i.test(sqlCode));
+ok("status can be unverified", /status in \('ok', 'warn', 'fail', 'unverified'\)/.test(sqlCode));
+ok("it does not reuse the customer agents' table name agent_runs", !/public\.agent_runs\b/.test(sqlCode));
+
+console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
+process.exit(failures.length === 0 ? 0 : 1);

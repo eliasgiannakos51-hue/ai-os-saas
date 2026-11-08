@@ -19,6 +19,16 @@
 - Τα μπλοκαρισμένα: `docs/NEEDS-FROM-ELIAS.md`. Ημερολόγιο:
   `docs/PROGRESS.md`. Ενημερώνεται στο ίδιο commit με τη δουλειά (CLAUDE.md).
 
+- **Final Approval (agent επιπέδου 1)** — φτιαγμένο, αδοκίμαστο σε πραγματικό
+  PR: `scripts/final-approval.mjs`. Επόμενο: job στο `verify.yml` που το τρέχει
+  σε κάθε PR και γράφει σχόλιο (χωρίς να μπλοκάρει).
+- **Agents της εταιρείας στο Ionexa** — φτιαγμένο, αδοκίμαστο σε browser, PR #370:
+  ενότητα «Company agents» στο `/dashboard/system-health`. Πόσοι τρέχουν, πόσοι
+  είναι on demand και πόσοι μπλοκαρισμένοι βγαίνει από `rosterCounts()` στο
+  `src/lib/company-agents/roster.ts` (δεν γράφεται εδώ· μετρήθηκε 2026-11-08: 32 / 89 / 0).
+  Κανένας δεν είναι μπλοκαρισμένος. Ο μετρητής επισκέψεων (`first-party-analytics`) είναι σβηστός
+  για το κοινό μέχρι να αλλάξουν οι /cookies και /privacy (`docs/ANALYTICS-WORDING.md`).
+
 ## Μετά το τρέχον πακέτο — MASTER Μέρος 18 και 5.1.1 (2026-10-08)
 
 Ο ιδιοκτήτης έστειλε στις 2026-10-08 το Μέρος 18 («Καλύτερο από την

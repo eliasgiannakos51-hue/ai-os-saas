@@ -21,6 +21,10 @@
       "schedule": "5 * * * *"
     },
     {
+      "path": "/api/cron/company-agents",
+      "schedule": "23 6 * * *"
+    },
+    {
       "path": "/api/cron/monthly-credits",
       "schedule": "0 3 * * *"
     },

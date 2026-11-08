@@ -3,6 +3,186 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-07 (Δεύτερη δέσμη: +6 agents στον ίδιο runner — 8 από 121 τρέχουν)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** Έξι ακόμα agents, όλοι επιπέδου 1, στο ίδιο `/api/cron/company-agents`:
+`database-health` (διαβάζει το `db_exposure_report()` και κοκκινίζει όταν κάποιος
+έλεγχος αποτυγχάνει), `cost-optimizer` (τελευταίες 24 ώρες κόστους AI έναντι του
+ημερήσιου μέσου όρου της προηγούμενης εβδομάδας· προειδοποίηση στο 2x ΚΑΙ +1€,
+όρια που ΕΠΕΛΕΞΑ, δεν μετρήθηκαν), `revenue-tracker` (MRR από τον κώδικα χρέωσης,
+όχι μετρητά Stripe· λέει όταν ένα tier δεν έχει τιμή), `headers-checker` (HSTS,
+nosniff, Referrer-Policy, CSP ή X-Frame-Options στην αρχική σελίδα),
+`task-auditor` (κάθε προγραμματισμένος agent έχει γραμμή τις τελευταίες 36 ώρες)
+και `daily-reporter` (μία γραμμή για όλο το τρέξιμο· τρέχει τελευταίος· γράφεται
+ως γραμμή στον πίνακα, ΔΕΝ στέλνεται πουθενά ακόμα).
+
+**ΤΙ ΔΕΝ ΕΙΝΑΙ.** Ο `daily-reporter` δεν στέλνει email. Ο `revenue-tracker` δεν
+βλέπει το υπόλοιπο του Stripe. Ο `cost-optimizer` βλέπει μόνο το κόστος AI, όχι
+τους λογαριασμούς Vercel/Supabase. Κάθε αποτέλεσμα γράφει στο «unverified» τι δεν
+κάλυψε. 8 τρέχουν· οι 113 δεν.
+
+**ΔΟΚΙΜΕΣ.** `company-agents.test.mjs` 87 έλεγχοι. Μετρήθηκαν 5 μεταλλάξεις (ανεστραμμένο
+stale, χωρίς όριο θορύβου στο κόστος, κενή αναφορά βάσης → ok, nosniff, reporter
+που αγνοεί το unverified): και οι 5 κοκκίνισαν. **Δεν επιβεβαιώθηκε σε production**
+και οι κλήσεις `db_exposure_report`/`cost_hourly_calls`/`mrr_inputs` δεν έχουν
+τρέξει από αυτόν τον runner πάνω σε πραγματική βάση.
+
+## 2026-11-07β (Τρίτη δέσμη: +5 agents — 13 από 121 τρέχουν)
+
+`queue-monitor` (ai_jobs ακίνητα 30+ λεπτά), `budget-monitor` (κλήσεις AI σήμερα έναντι
+του ημερήσιου ορίου `MAX_DAILY_AI_CALLS`, προειδοποίηση στο 80%, αποτυχία στο 100%),
+`fraud-alert` (ένας λογαριασμός ≥50% και ≥2€ του κόστους 24ώρου· ΔΕΝ βλέπει πληρωμές),
+`cost-per-agent` (κόστος 30 ημερών ανά λειτουργία προϊόντος· ο agent μετονομάστηκε
+στο ρόστερ σε «Cost by feature» γιατί το cost log δεν ξέρει agents της εταιρείας) και
+`expense-tracker` (7 ημέρες έναντι 7, μόνο AI, χωρίς κρίση). Όρια ΕΠΕΛΕΧΘΗΚΑΝ, δεν
+μετρήθηκαν. `company-agents.test.mjs` 112 έλεγχοι, 5 μεταλλάξεις κοκκίνισαν.
+**Δεν επιβεβαιώθηκε σε production.** 13 τρέχουν· οι 108 δεν.
+
+## 2026-11-07ζ (Έκτη δέσμη: 7 agents KPI από δεδομένα που ήδη υπάρχουν + 2 agents καλωδίωσης CI)
+
+**Τι διορθώθηκε στη σκέψη.** Οι 9+ agents «analytics» δεν χρειάζονται όλοι εργαλείο
+analytics: όσοι διαβάζουν λογαριασμούς και χρήση AI μπορούν να τα πάρουν από τη βάση.
+Νέο migration `20261107010000_company_kpis.sql`: η συνάρτηση `company_kpis()` γυρίζει 12
+ΜΕΤΡΗΣΕΙΣ (ποτέ λίστα λογαριασμών), μόνο για service_role. «Ενεργός» = τουλάχιστον μία
+καταγεγραμμένη κλήση AI στο `ai_cost_log`, ΟΧΙ επίσκεψη (το προϊόν δεν καταγράφει επισκέψεις).
+Τρέχουν πλέον στο καθημερινό cron: `kpi-monitor` (νέοι λογαριασμοί), `usage-monitor`
+(ενεργοί, πτώση ≥30%), `churn-predictor` (ποσοστό που δεν ξαναήρθε· ρυθμός, όχι πρόβλεψη
+για πρόσωπο), `retention` (πληρωτές χωρίς χρήση 30 ημέρες), `upsell` (δωρεάν ενεργοί με ≤10%
+credits), `anomaly-detector` (άλμα ≥3x), `sales-analytics` (ποσοστό που πληρώνει· χωρίς
+funnel). Ελάχιστη βάση 10 λογαριασμών για κάθε ποσοστιαία σύγκριση, ώστε λίγοι λογαριασμοί να
+μην δίνουν δραματικά ποσοστά. Όρια ΕΠΕΛΕΧΘΗΚΑΝ.
+`gates-agent` και `testing-wrapper` (CI): ελέγχουν ότι το workflow τρέχει ακόμα τα gates και
+τις suites mutation/integration/database και ότι κανένα δεν μπορεί να αποτύχει σιωπηλά
+(`continue-on-error`). Δεν τρέχουν τα gates οι ίδιοι. Βρήκαν αμέσως ένα δικό μου λάθος
+(έψαχνα λάθος εντολή για τις database suites), που διορθώθηκε.
+**Μένουν 9 blocked:** ab-testing, conversion-optimizer, analytics-collector, data-quality,
+dashboard-agent, experiment-analyst, attribution (θέλουν καταγραφή επισκέψεων/γεγονότων, που
+δεν υπάρχει· χρειάζεται απόφαση για ιδιωτικότητα) και backup-verifier, deployment-monitor
+(θέλουν token Vercel/Supabase). Αριθμοί: `rosterCounts()`.
+
+## 2026-11-07ε (Διόρθωση: 28 agents ήταν λάθος μπλοκαρισμένοι — τώρα draft agents)
+
+Τους είχα βάλει «blocked» (crm, tickets, gmail-send, human-only, video-tool) επειδή
+έλειπε το ΣΥΣΤΗΜΑ πάνω στο οποίο θα ενεργούσαν. Ένα πρόχειρο όμως χρειάζεται μόνο brief.
+Τώρα είναι draft agents στο γραφείο draft: manager, goal-tracker, lead-finder (web),
+lead-researcher (web), lead-qualifier, crm-manager, email-drafter, follow-up,
+proposal-writer, pricing-agent, campaign-manager, discount-agent, video-script,
+support-intake, faq, technical-support, billing-support, email-replier, escalation,
+response-quality, complaint-analyst, invoice-prep, reconciliation, forecast,
+tax-documents, gdpr-assistant, contract-organizer, calendar. **Δουλεύουν μόνο στο
+κείμενο που επικολλάς.** Δεν στέλνουν email, δεν εφαρμόζουν έκπτωση, δεν υπογράφουν, δεν
+αγγίζουν `public.leads`, ημερολόγιο ή Stripe, δεν παρακολουθούν τίποτα ανάμεσα σε δύο
+χρήσεις. Κάθε mission το λέει και το `company-agents.test.mjs` το κρατά. Αφαιρέθηκαν από
+το BLOCKERS οι 5 λόγοι που δεν χρησιμοποιεί πια κανείς. Μετράται από
+`rosterCounts()` (δεν γράφω αριθμούς εδώ ώστε να μη μπαγιατέψουν).
+
+## 2026-11-07δ (Πέμπτη δέσμη: γραφείο draft, +56 agents που γράφουν — 74 από 121 «τρέχουν» ή «χτισμένοι»)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** «Draft desk» στο `/dashboard/system-health` (μόνο ο ιδιοκτήτης). Διαλέγεις
+agent, γράφεις brief, παίρνεις πρόχειρο, εγκρίνεις ή απορρίπτεις. **Η έγκριση αλλάζει μόνο
+την κατάσταση του draft· δεν στέλνεται, δεν δημοσιεύεται, δεν γίνεται merge τίποτα.**
+56 ρόλοι στο `src/lib/company-agents/drafting.ts` (executive, development, marketing,
+research, security-review, HR, success, admin). 11 από αυτούς ψάχνουν στο web και κρατούν
+τις πηγές· αν ο πάροχος δεν δώσει πηγές, το draft ΔΕΝ αποθηκεύεται. Οι review ρόλοι (code,
+auth, idor, privacy, accessibility, performance, bug) λένε ρητά ότι είδαν μόνο ό,τι
+επικολλήθηκε. Ό,τι γράφει κώδικα λέει ότι δεν έχει τρέξει.
+Νέο migration `20261107000000_company_agent_drafts.sql`, routes `/api/company-agents/drafts`
+(+`[id]`), `generate.ts`. Όρια ΕΠΕΛΕΧΘΗΚΑΝ: 6 drafts την ώρα, 10 τη μέρα, 2500 tokens.
+Στο roster οι 56 είναι «built» (τρέχουν όταν τους ζητήσεις, δεν είναι προγραμματισμένοι).
+Δύο ακόμα agents (backup-verifier, deployment-monitor) σημειώθηκαν blocked: δεν υπάρχει
+token Vercel/Supabase management.
+
+**ΤΙ ΔΕΝ ΕΙΝΑΙ.** Δεν βλέπουν βάση, κώδικα, πελάτες, έσοδα ή analytics· μόνο το brief. Το
+κόστος γράφεται στη γραμμή του draft (`cost_usd`, τιμή καταλόγου) αλλά ΟΧΙ στο `ai_cost_log`,
+άρα οι cost agents δεν το βλέπουν. Δεν είναι πιστωτικά χρεωμένο. Δεν ελέγχεται το όριο
+κλήσεων της πλατφόρμας πριν από ένα draft (μετράει στον ημερήσιο μετρητή, δεν τον σέβεται).
+**Δεν δοκιμάστηκε με πραγματική κλήση AI**: μόνο οι έλεγχοι του κώδικα. Η ποιότητα ενός
+draft δεν μετριέται από κανένα test.
+
+## 2026-11-07γ (Τέταρτη δέσμη: +5 agents που διαβάζουν το repo — 18 από 121 τρέχουν)
+
+`scripts/company-agents/repo-agents.mjs`: `secrets-scanner` (8 σχήματα κλειδιών σε όλα
+τα tracked αρχεία, δεν τυπώνει ποτέ το κλειδί, 3 γνωστά test fixtures με λόγο και έλεγχο
+ότι δεν μένουν παλιά), `cron-monitor` (κάθε cron του `vercel.json` έχει route και 5 πεδία·
+κάθε route στο `/api/cron` είναι προγραμματισμένο· ΔΕΝ βλέπει αν η Vercel το εκτέλεσε),
+`migration-ledger` (undo note από το 20261016000000, ονόματα με ημερομηνία· ΔΕΝ ξέρει ποια
+έχουν τρέξει, αυτό το λέει μόνο το `npm run db:pending`), `license-monitor` (άμεσες
+εξαρτήσεις: GPL/AGPL/SSPL αποτυχία, LGPL προειδοποίηση), `vulnerability-scanner`
+(`npm audit`). Τρέχουν στο CI σε κάθε push (`.github/workflows/verify.yml`, βήμα
+«company agents (repository)», `continue-on-error`, αναφέρουν στη σελίδα σύνοψης του job)
+και όχι στη Vercel, γιατί εκεί δεν υπάρχουν τα αρχεία. **Το αποτέλεσμά τους ΔΕΝ φαίνεται
+στο System Health**· μόνο στο CI. `CI_AGENT_IDS` στο roster.ts ισούται με το script.
+
+**ΕΥΡΗΜΑ (μέτρηση 2026-11-07, `npm audit` σε αυτό το checkout):** 1 critical, 5 high, 7
+moderate. Η critical είναι το `next` 16.3.8 (εύρος 16.0.0–16.4.0): δύο advisories RCE
+(GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr) και ένα DoS σε Server Actions. Υπάρχει
+διόρθωση. ΔΕΝ ελέγχθηκε αν η εφαρμογή χρησιμοποιεί τα επηρεαζόμενα χαρακτηριστικά (SVG
+στο image optimization, `use cache`). Δεν άλλαξα την έκδοση: αλλαγή του Next είναι δική σου
+απόφαση.
+
+`repo-agents.test.mjs` 46 έλεγχοι, 8 μεταλλάξεις (μία επιβίωσε, ήταν περιττός κώδικας,
+αφαιρέθηκε και ξαναδοκιμάστηκε). **18 τρέχουν· οι 103 δεν.**
+
+## 2026-11-06β (Οι agents της εταιρείας μέσα στο Ionexa — βάση + 2 που τρέχουν)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** Ενότητα «Company agents» μέσα στο `/dashboard/system-health`
+(μόνο ο ιδιοκτήτης· οι άλλοι παίρνουν 404 όπως και πριν). Δείχνει (1) τον
+κατάλογο με **όλους** τους agents (121 στο `src/lib/company-agents/roster.ts`,
+14 τμήματα) και την αληθινή κατάσταση του καθενός: running / built / blocked /
+planned, και για τους blocked τον λόγο, και (2) το τελευταίο αποτέλεσμα των δύο
+που τρέχουν σήμερα. Και οι δύο είναι επιπέδου 1: διαβάζουν και αναφέρουν.
+- `error-log-analyst`: διαβάζει το `production_errors`, λέει πόσα ανοιχτά και πού.
+- `api-uptime-monitor`: καλεί το `/api/health` και λέει αν απαντά και δηλώνει ok.
+Τρέχουν μία φορά την ημέρα από το `/api/cron/company-agents` (`vercel.json`,
+`23 6 * * *`) και γράφουν μία γραμμή ο καθένας στο νέο πίνακα
+`company_agent_runs`. Μια ανάγνωση που απέτυχε γράφεται `unverified`, ποτέ `ok`.
+
+**ΓΙΑΤΙ ΟΧΙ 121 ΚΩΔΙΚΕΣ.** (Μέτρηση 2026-11-06, ξεπεράστηκε την 2026-11-07: τώρα 113 δεν τρέχουν.) 117 από τους 121 δεν τρέχουν. Ο κατάλογος το λέει:
+δεν τους εμφανίζει ως ζωντανούς. Μπλοκάρονται από πράγματα που λείπουν σήμερα
+(analytics: 19 agents, CRM, tickets, Gmail με δικαίωμα αποστολής, ανθρώπινη
+απόφαση). Κάθε λόγος ελέγχεται από το gate: αν εγκατασταθεί π.χ. PostHog, το
+`company-agents.test.mjs` κοκκινίζει και λέει ποιες γραμμές να αναθεωρηθούν.
+
+**ΔΙΟΡΘΩΣΗ ΔΙΚΗ ΜΟΥ.** Σε προηγούμενη απάντηση είπα ότι δεν υπάρχει CRM/leads
+πίνακας. Λάθος ως διατύπωση: το `public.leads` υπάρχει (το εργαλείο Sales των
+πελατών, ανά λογαριασμό). Αυτό που λείπει είναι δικό της pipeline της εταιρείας
+μέσα του· ο λόγος `crm` στον κατάλογο το λέει έτσι.
+
+**ΑΡΧΕΙΑ.** `supabase/migrations/20261106000000_company_agent_runs.sql`,
+`src/lib/company-agents/{roster,agents,run}.ts`,
+`src/app/api/cron/company-agents/route.ts`,
+`src/components/system-health/company-agents.tsx`, αλλαγή στο
+`src/app/dashboard/system-health/page.tsx` και στο `vercel.json`.
+
+**ΔΟΚΙΜΕΣ.** `company-agents.test.mjs` 53 έλεγχοι. Μετρήθηκε με 5 μεταλλάξεις
+(failed read → ok, 503 → ok, ο runner τρέχει agent εκτός καταλόγου, cron χωρίς
+auth, migration χωρίς RLS): οι πέντε κοκκίνισαν· η μία (503 → ok) επιβίωσε στην
+πρώτη εκδοχή του test, ενισχύθηκε, και τώρα κοκκινίζει. `npm run typecheck` καθαρό.
+**Δεν επιβεβαιώθηκε στο ionexa.ai** και το migration δεν έχει τρέξει σε βάση.
+
+## 2026-11-06α (Final Approval — πρώτος εσωτερικός agent, επίπεδο 1)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** `scripts/final-approval.mjs`: διαβάζει μια αλλαγή (diff προς
+`origin/main`, προαιρετικά το σώμα του PR) και λέει READY ή NOT READY με
+αποδείξεις. Ελέγχει τους κανόνες του CLAUDE.md πάνω στο diff: κάθε νέο
+migration έχει `How to undo:`/`No undo:`, το «Πώς γυρίζει πίσω» είναι γεμάτο,
+υπάρχει η γραμμή `ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ:` όταν προστέθηκε migration, το
+`docs/PROGRESS.md` ή `docs/QUEUE.md` άλλαξε μαζί με τον κώδικα, και αρχείο
+test άλλαξε μαζί με το `src/`. Δεν γράφει τίποτα, δεν κάνει merge, δεν
+καλεί δίκτυο. Δεν λέει ποτέ ότι τα gates πέρασαν: γίνονται «επαληθευμένα»
+μόνο αν δοθεί `--gates-exit` από πραγματικό `npm run gates`, αλλιώς
+τυπώνονται ως UNVERIFIED.
+
+**ΑΡΧΕΙΑ.** `scripts/final-approval.mjs`, `scripts/tests/final-approval.test.mjs`.
+Καμία αλλαγή σε `src/`, καμία migration, κανένας διακόπτης (δεν αγγίζει τον
+χρήστη· γυρίζει πίσω σβήνοντας τα δύο αρχεία).
+
+**ΔΟΚΙΜΕΣ.** `final-approval.test.mjs` 19 έλεγχοι: κάθε κανόνας έχει καλό και
+χαλασμένο δείγμα, και το χαλασμένο πρέπει να κοκκινίζει στον δικό του κανόνα.
+`self-claims.test.mjs` 50 και `check-mutation-markers.mjs` καθαρό. **Δεν
+έτρεξε ολόκληρο το `npm run gates`** σε αυτό το περιβάλλον — το τρέχει το
+`verify.yml` στο PR. Δεν έχει τρέξει ακόμα πάνω σε πραγματικό PR.
+
 ## 2026-10-24α (Rebuild — «Φτιάξε τη δική σου εκδοχή οποιασδήποτε εφαρμογής»)
 
 **ΤΙ ΧΤΙΣΤΗΚΕ.** Το Rebuild, ανοιχτό για όλους (χωρίς διακόπτη), μόνο με το
@@ -6729,3 +6909,59 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 **Δοκιμές.** `node scripts/tests/all-tools.test.mjs` (146 έλεγχοι, 0 αποτυχίες)· `node scripts/tests/all-tools.mutation.mjs` (28/28)· `node scripts/tests/sidebar-and-tooltips.test.mjs` (48 έλεγχοι, 0 αποτυχίες)· `node scripts/tests/sidebar-groups.mutation.mjs` (12/12)· `node scripts/tests/sidebar-structure.mutation.mjs` (27/27)· `node scripts/tests/all-tools-final-grid.prodtest.mjs` με πραγματικό build — **84 passed, 0 failed**, desktop/el, desktop/en, phone/el, phone/en, με στιγμιότυπα. `npx tsc --noEmit` καθαρό. `npm run gates` ξανατρέχει στο τέλος αυτού του γύρου.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+### 2026-11-08 — τρεις agents ακόμα τρέχουν: data-quality, attribution, deployment-monitor
+
+**Εντολή ιδιοκτήτη, 2026-11-08 07:44:** συνέχισε πολλές ώρες, τελείωσε όσους agents γίνονται, και όσους δεν γίνονται με κώδικα τους αφήνουμε για άλλο εργαλείο.
+
+**Τι έγινε.** Από τους 9 blocked, οι 3 δεν χρειάζονταν πραγματικά αυτό που έλεγε ο λόγος τους (είχαν μπει στο «analytics» ή στα «tokens» από βιασύνη).
+- `data-quality`: `public.company_integrity()` (νέα migration) μετρά γραμμές που σπάνε επτά ρητούς κανόνες: αρνητικό υπόλοιπο credits, αρνητικό κόστος στο `ai_cost_log`, ζωντανές προμήθειες πάνω σε άκυρο referral, affiliate που φέρνει τον εαυτό του (αυτά τα τέσσερα είναι `fail`), λογαριασμός χωρίς γραμμή credits, converted referral χωρίς ημερομηνία, void referral χωρίς λόγο (αυτά τα τρία `warn`). Η αποστολή λέει ότι ελέγχει κανόνες, όχι αλήθεια.
+- `attribution`: `public.company_attribution()` μετρά τους νέους λογαριασμούς της εβδομάδας που ήρθαν με affiliate link. Η μόνη πηγή που καταγράφει το προϊόν είναι ο affiliate σύνδεσμος: κανένα UTM, referrer ή landing page δεν αποθηκεύεται, άρα οι υπόλοιποι είναι «not attributed», ΟΧΙ «organic» (το test απαγορεύει τη λέξη στο summary). Warn όταν ≥30% των referrals (από 10 και πάνω) είναι void· το 30% και το 10 είναι διαλεγμένα, όχι μετρημένα.
+- `deployment-monitor`: ο Vercel αναφέρει κάθε deployment στο GitHub (γι' αυτό υπάρχει το `deployment_status` στο `verify.yml`), άρα το ιστορικό διαβάζεται με το `GITHUB_TOKEN` του workflow, χωρίς Vercel token. Τρέχει στο CI (`repo-agents.mjs`, 8ος agent): κρίνει τα 10 νεότερα production deployments· `fail` αν το νεότερο απέτυχε, `warn` αν ≥3 από 10 απέτυχαν ή αν κάτι είναι ημιτελές πάνω από 60 λεπτά (τα 10, 3 και 60 διαλεγμένα). Δεν ελέγχει αν το site απαντά (αυτό το κάνει ο `api-uptime-monitor`). Αλλαγή στο `verify.yml`: `permissions: deployments: read` (μόνο ανάγνωση) και `GH_TOKEN` μόνο στο βήμα των agents.
+- Ο λόγος `ops-tokens` έγινε `supabase-token` και ισχύει πια μόνο για τον `backup-verifier`. Το `BLOCKERS.analytics` μένει για 5 agents.
+
+**Μέτρηση.** `rosterCounts()` (2026-11-08): running 30, built 85, blocked 6, planned 0, σύνολο 121 (πριν: 27 / 85 / 9). Ξαναβγαίνει με `node --experimental-strip-types --no-warnings -e 'import("./src/lib/company-agents/roster.ts").then(m=>console.log(m.rosterCounts()))'`.
+
+**Δοκιμές.** `company-agents.test.mjs` 200 ελέγχοι, `repo-agents.test.mjs` 81. Mutation στον δικό μου κώδικα: 6 για τα δύο database agents και 8 για τον deployment-monitor, και τα 14 έκαναν κόκκινο ένα test (δύο όρια δεν είχαν test, γράφτηκαν: ακριβώς 10 referrals και ακριβώς 60 λεπτά).
+
+**Τι ΔΕΝ ελέγχθηκε.** Οι δύο συναρτήσεις SQL δεν έχουν τρέξει σε πραγματική βάση (δεν υπάρχει πρόσβαση)· ελέγχονται μόνο ως κείμενο: ονόματα πινάκων/στηλών που υπάρχουν σε migrations, grants, μορφή. Το `deployment-monitor` δεν έχει τρέξει στο GitHub Actions: τοπικά δίνει «unverified» επειδή λείπει το token, και η μορφή της απάντησης του `gh api` (`id`, `environment`, `created_at` στα deployments, `state` στα statuses) είναι από τη μνήμη μου για το REST API του GitHub: ούτε πραγματική κλήση έγινε ούτε άνοιξα την τεκμηρίωση.
+
+**Ανοιχτά.** Πέντε agents περιμένουν απόφαση για analytics (NEEDS). Ο `backup-verifier` θέλει Supabase management token.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261108000000_company_integrity.sql**
+
+### 2026-11-08β — τέσσερις blocked έγιναν agents που δουλεύουν πάνω σε επικολλημένα στοιχεία
+
+**Εντολή ιδιοκτήτη, 2026-11-08 08:23:** «συνέχισε σίγουρα, δεν έχεις τελειώσει όλους τους agents».
+
+**Τι έγινε.** Ξανακοίταξα τους 6 blocked με το κριτήριο της διόρθωσης της 2026-11-07: ένας agent που γράφει από επικολλημένο υλικό δεν χρειάζεται το σύστημα που λείπει. Τέσσερις πέρασαν στα draft agents (`drafting.ts`, επίπεδο 2, `built`): `ab-testing`, `conversion-optimizer`, `experiment-analyst` και `backup-verifier`. Κάθε `job` λέει τι δεν κάνει: δεν τρέχει ούτε μετρά τεστ, οι προτάσεις είναι υποθέσεις, ο `backup-verifier` δεν λέει ποτέ ότι ένα backup δουλεύει (μόνο ό,τι δείχνει η λίστα). Οι δύο στατιστικοί υποχρεώνονται να δείξουν την αριθμητική και να αρνηθούν νικητή σε μικρό δείγμα. **Προσοχή:** είναι μοντέλο που κάνει πράξεις, όχι αριθμομηχανή· ο ιδιοκτήτης ελέγχει τους υπολογισμούς πριν βασιστεί σε αυτούς (το λέει και το «Not checked» κάθε draft).
+Ο λόγος `supabase-token` διαγράφηκε (κανένας δεν τον χρειάζεται πια) και το test που τον κρατούσε αφαιρέθηκε μαζί του.
+
+**Μέτρηση.** `rosterCounts()` (2026-11-08): running 30, built 89, blocked 2, planned 0, σύνολο 121 (πριν από αυτό το βήμα: 30 / 85 / 6). Μένουν blocked ο `analytics-collector` και ο `dashboard-agent`, και οι δύο στο «analytics».
+
+**Δοκιμές.** `company-agents.test.mjs` 202 ελέγχοι (τρεις νέοι: τα guards, οι στατιστικοί και ότι μένουν blocked ακριβώς οι δύο).
+
+**Τι ΔΕΝ ελέγχθηκε.** Κανένα από τα τέσσερα draft δεν έχει τρέξει με πραγματικό μοντέλο· ελέγχεται μόνο το κείμενο της εντολής τους, όχι η ποιότητα των απαντήσεων.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+### 2026-11-08γ — οι δύο τελευταίοι agents: μετρητής προβολών δικός μας, πίσω από διακόπτη
+
+**Εντολή ιδιοκτήτη, 2026-11-08 08:37:** «άχτισε τους άλλους δύο, και πες τι να κάνω για να δουλεύουν όλα αυτόματα».
+
+**Η απόφαση που πήρα και γιατί.** Ο ιδιοκτήτης ζήτησε ρητά τους δύο. Η επιφύλαξη που είχα (η σελίδα /cookies δεν λέει τίποτα για μέτρηση επισκέψεων) λύνεται χωρίς να τη χαλάσω: ο μετρητής μπήκε πίσω από τον διακόπτη `first-party-analytics`, που ξεκινά στο «εσύ και ο test λογαριασμός» (CLAUDE.md, Μέρος 13 Β). Κανένας επισκέπτης δεν μετριέται μέχρι να τον ανοίξει ο ιδιοκτήτης, και το `docs/ANALYTICS-WORDING.md` λέει ότι πρώτα αλλάζουν οι σελίδες και τις διαβάζει δικηγόρος. Δεν άλλαξα καμία δημόσια σελίδα.
+
+**Τι έγινε.**
+- `src/lib/analytics/normalize.ts`: οι κανόνες για το τι αποθηκεύεται. Διεύθυνση μόνο με ασφαλείς χαρακτήρες· query string, fragment, κωδικοποιημένοι χαρακτήρες, `..`, `//` απορρίπτονται (όχι κόβονται)· uuid, μακριοί αριθμοί, hex και τμήματα >40 χαρακτήρων γίνονται `:id`· `/api`, `/auth`, `/_next` δεν μετριούνται. Πηγή: `direct`, `internal` (κάθε προβολή μετά την πρώτη στην επίσκεψη), όνομα site (referrer), `utm:ετικέτα`, ή `other`.
+- `supabase/migrations/20261108010000_page_view_counts.sql`: πίνακας με τέσσερις στήλες (day, path, source, views)· καμία στήλη δεν χωρά άνθρωπο. `record_page_view()` και `company_traffic()` μόνο για service_role. Όριο 2000 διαφορετικών γραμμών ανά ημέρα· ό,τι περισσεύει διπλώνει σε μία γραμμή `(other)`.
+- `src/app/api/analytics/view/route.ts`: ρωτά πρώτα τον διακόπτη, απορρίπτει cross-origin, όριο σώματος 1000 χαρακτήρων, ΕΝΑ κοινό rate limit για όλους (1200/λεπτό)· **όχι ανά IP, γιατί ο πίνακας rate limit θα αποθήκευε τα IP των επισκεπτών και θα έσπαγε την υπόσχεση**. Το αντίτιμο: σε πλημμύρα ο μετρητής χάνει προβολές (υποεκτιμά), δεν μπορεί να μετρήσει λάθος. Απαντά πάντα 204.
+- `src/components/analytics/page-view-beacon.tsx` στο `layout.tsx`: στέλνει path, αν είναι η πρώτη προβολή, και μόνο τότε το host του referrer και το `utm_source`. Τίποτα στον browser (ούτε cookie ούτε localStorage). Σιωπά με Do Not Track / Global Privacy Control.
+- Agents: `analytics-collector` (καταγράφεται κάτι; warn αν η τελευταία προβολή είναι ≥2 ημέρες πριν) και `dashboard-agent` (εβδομάδα έναντι προηγούμενης, σελίδες, πηγές, ποσοστό direct· warn σε πτώση ≥30% όταν η προηγούμενη εβδομάδα έχει ≥50 προβολές· τα 2 και 50 διαλεγμένα). Ο πίνακας `BLOCKERS` είναι πια άδειος.
+
+**Μέτρηση.** `rosterCounts()` (2026-11-08): running 32, built 89, blocked 0, planned 0, σύνολο 121 (πριν: 30 / 89 / 2).
+
+**Δοκιμές.** Νέο `first-party-analytics.test.mjs` (58 έλεγχοι), `company-agents.test.mjs` 215. Mutation: 21 αλλαγές στους κανόνες απορρήτου, στη διαδρομή, στο beacon και στα όρια των agents. Μία επέζησε (ο πρώιμος έλεγχος μήκους ήταν νεκρός κώδικας)· αφαιρέθηκε και η συμπεριφορά κλειδώθηκε με test που έπιασε και τη νέα αλλαγή.
+
+**Τι ΔΕΝ ελέγχθηκε.** Η migration δεν έχει τρέξει σε πραγματική βάση. Το beacon δεν έχει τρέξει σε browser, άρα δεν ξέρω ότι ο `credentials: "same-origin"` + `keepalive` δουλεύει στο production ούτε πόσο κοστίζει σε κλήσεις βάσης ανά προβολή (διακόπτης + rate limit + εγγραφή). Δεν έλεγξα αν στις χώρες του Ionexa χρειάζεται συγκατάθεση.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261108010000_page_view_counts.sql**

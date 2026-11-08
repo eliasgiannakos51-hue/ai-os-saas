@@ -91,7 +91,14 @@ ok(`tables written from inside the database (${rows.length})`,
 //
 // So the question is not "is it counted" but WHERE, and by a suite that
 // runs. The list below says which of these suites the build executes.
-const NOT_COUNTED_IS_FINE = {};
+const NOT_COUNTED_IS_FINE = {
+  // Empty is the CORRECT state while the first-party-analytics switch is at
+  // «you and the test account», and the company agent analytics-collector
+  // reads days_with_data_14d / days_since_last_view from company_traffic()
+  // every day and says «unverified: no view has ever been recorded» rather
+  // than «ok» (src/lib/company-agents/agents.ts, analyzeCollector).
+  page_view_counts: "empty while the switch is off; analytics-collector reports it as unverified, never ok",
+};
 const uncounted = rows.filter((r) => r.countedIn.length === 0);
 for (const r of uncounted) {
   ok(`${r.table}: nobody counts its rows, and that is explained`,
@@ -116,8 +123,11 @@ for (const table of Object.keys(NOT_COUNTED_IS_FINE)) {
     `\n  ${onlyOutsideBuild.length} of ${rows.length} are counted ONLY by suites the build does not run:`
   );
   for (const r of onlyOutsideBuild) console.log(`     ${r.table.padEnd(26)} ${r.countedIn.join(", ")}`);
+  // THREE parts, not two: counted only outside the build, counted inside it,
+  // and not counted at all (each of those explained in NOT_COUNTED_IS_FINE).
+  // Until 2026-11-08 the third was always empty, so the sum of two was true.
   ok("that number is still being measured rather than assumed",
-    onlyOutsideBuild.length + rows.filter((r) => r.countedIn.some(runsInBuild)).length === rows.length);
+    onlyOutsideBuild.length + rows.filter((r) => r.countedIn.some(runsInBuild)).length + uncounted.length === rows.length);
 }
 {
   // THE ONE THE INCIDENT WAS ABOUT. It is counted — by a dbtest, which

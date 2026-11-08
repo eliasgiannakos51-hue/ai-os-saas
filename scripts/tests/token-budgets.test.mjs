@@ -127,6 +127,10 @@ const CLASSIFIED = {
     // answer gets truncationNotice appended before it is shown, saved
     // or cited — the same shape file-ask.ts uses above.
     "src/app/api/my-stuff/ask/route.ts",
+    // The owner-only draft desk (2026-11-07): through modelTextFrom, and a
+    // draft cut at MAX_DRAFT_TOKENS is saved with truncated = true and the
+    // desk says so on it, so a severed draft is never read as finished.
+    "src/lib/company-agents/generate.ts",
   ],
   structured: [
     // Connect by address (2026-10-26): 600 tokens for one forced tool call

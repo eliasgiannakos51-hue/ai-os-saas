@@ -38,6 +38,7 @@ export const FLAGS = {
   "posts-images": "Posts with a picture: your own photo, or one from Unsplash, on every post at its platform's own size (LinkedIn 1200x627, X 1600x900, Instagram and Threads 1080x1350, Facebook 1200x630), each downloadable (MASTER 16, package 15)",
   "slides-charts": "Slides from your own file: a spreadsheet given to Slides with «+» becomes a deck with a real chart of its numbers, computed from the file and drawn as a chart PowerPoint can edit (MASTER 16, package 13)",
   "chat-work-area": "Chat: the work area beside the conversation, and the card that reopens it (ΣΥΣΤΗΜΑ DESIGN §5, Δ.2)",
+  "first-party-analytics": "Page views: the product counts how many times each of its pages is viewed per day and where the view came from, with no cookie and no visitor identifier. While it is at «you and the test account» only your own views are counted; opening it to everyone starts counting all visitors, so change /cookies and /privacy first (docs/ANALYTICS-WORDING.md)",
   "chat-attachments": "Chat reads what you give it: PDFs and images attached to a message, asked about, and under the answer the remembered facts it used (MASTER 16, package 9)",
 } as const;
 // REMOVED (the owner's critical message, 2026-10-23, "χωρίς διακόπτες"):

@@ -14,6 +14,8 @@ import {
   analyzeHeaders,
   analyzeHealth,
   analyzeLapse,
+  analyzeAttribution,
+  analyzeDataQuality,
   analyzePaidShare,
   analyzeRetention,
   analyzeSignups,
@@ -204,16 +206,44 @@ async function readDayCosts(): Promise<DayCost[] | null> {
   return rows.map((r) => ({ day: String(r.day), costEur: Number(r.cost_eur ?? 0), calls: Number(r.calls ?? 0) }));
 }
 
+function metricsFrom(data: unknown): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const r of (data ?? []) as Record<string, unknown>[]) out[String(r.metric)] = Number(r.value);
+  return out;
+}
+
 async function readKpis(): Promise<Kpis> {
   try {
     const admin = createAdminClient();
     const { data, error } = await admin.rpc("company_kpis");
     if (error) throw error;
-    const out: Record<string, number> = {};
-    for (const r of (data ?? []) as Record<string, unknown>[]) out[String(r.metric)] = Number(r.value);
-    return out;
+    return metricsFrom(data);
   } catch (err) {
     logApiError("/api/cron/company-agents", err, { stage: "rpc company_kpis" });
+    return null;
+  }
+}
+
+async function readIntegrity(): Promise<Kpis> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("company_integrity");
+    if (error) throw error;
+    return metricsFrom(data);
+  } catch (err) {
+    logApiError("/api/cron/company-agents", err, { stage: "rpc company_integrity" });
+    return null;
+  }
+}
+
+async function readAttribution(): Promise<Kpis> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("company_attribution");
+    if (error) throw error;
+    return metricsFrom(data);
+  } catch (err) {
+    logApiError("/api/cron/company-agents", err, { stage: "rpc company_attribution" });
     return null;
   }
 }
@@ -281,6 +311,8 @@ export async function runCompanyAgents(): Promise<RunReport> {
     await runOne("upsell", async () => analyzeUpsell(kpis)),
     await runOne("anomaly-detector", async () => analyzeAnomalies(kpis)),
     await runOne("sales-analytics", async () => analyzePaidShare(kpis)),
+    await runOne("data-quality", async () => analyzeDataQuality(await readIntegrity())),
+    await runOne("attribution", async () => analyzeAttribution(await readAttribution())),
     await runOne("task-auditor", async () => analyzeStaleness(await readPastRuns(), RUNNING_AGENT_IDS, Date.now())),
   ];
   // LAST, because it reports on everything above.

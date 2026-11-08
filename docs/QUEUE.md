@@ -22,11 +22,12 @@
 - **Final Approval (agent επιπέδου 1)** — φτιαγμένο, αδοκίμαστο σε πραγματικό
   PR: `scripts/final-approval.mjs`. Επόμενο: job στο `verify.yml` που το τρέχει
   σε κάθε PR και γράφει σχόλιο (χωρίς να μπλοκάρει).
-- **Agents της εταιρείας στο Ionexa (βάση)** — φτιαγμένο, αδοκίμαστο σε browser:
-  ενότητα «Company agents» στο `/dashboard/system-health`, πίνακας
-  `company_agent_runs`, 2 agents που τρέχουν (`error-log-analyst`,
-  `api-uptime-monitor`). Επόμενο: ξεκλείδωμα PostHog (19 agents περιμένουν),
-  μετά `gates-agent`, `migration-ledger`, `cron-monitor`.
+- **Agents της εταιρείας στο Ionexa** — φτιαγμένο, αδοκίμαστο σε browser, PR #370:
+  ενότητα «Company agents» στο `/dashboard/system-health`. Πόσοι τρέχουν, πόσοι
+  είναι on demand και πόσοι μπλοκαρισμένοι βγαίνει από `rosterCounts()` στο
+  `src/lib/company-agents/roster.ts` (δεν γράφεται εδώ· μετρήθηκε 2026-11-08: 30 / 85 / 6).
+  Μπλοκαρισμένοι μένουν 6: οι 5 περιμένουν την απόφαση για analytics
+  (`NEEDS-FROM-ELIAS.md`) και ο `backup-verifier` ένα Supabase management token.
 
 ## Μετά το τρέχον πακέτο — MASTER Μέρος 18 και 5.1.1 (2026-10-08)
 

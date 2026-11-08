@@ -19,6 +19,7 @@
 //
 // Run: node scripts/tests/repo-agents.test.mjs
 import * as A from "../company-agents/repo-agents.mjs";
+import { readFileSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -119,6 +120,31 @@ ok("suites: a dropped suite fails and names it", (() => { const r = A.analyzeSui
 ok("suites: continue-on-error on a suite fails and names it", (() => { const r = A.analyzeSuiteWiring(goodWf.replace("run: npm run test:mutation", "continue-on-error: true\n        run: npm run test:mutation"), pkgS); return r.status === "fail" && /mutation suites/.test(r.summary); })());
 ok("suites: a missing package.json script fails", A.analyzeSuiteWiring(goodWf, { ...pkgS, "test:db": undefined }).status === "fail");
 
+console.log("\n== 1g. deployment-monitor ==");
+const NOW = Date.parse("2026-11-08T12:00:00Z");
+const dep = (minAgo, state, environment = "Production") => ({ environment, createdAt: new Date(NOW - minAgo * 60000).toISOString(), state });
+ok("no answer from GitHub is unverified, never ok", A.analyzeDeployments(null, NOW).status === "unverified" && A.analyzeDeployments(undefined, NOW).status === "unverified");
+ok("an empty list is unverified (Vercel may not report to GitHub), never ok", A.analyzeDeployments([], NOW).status === "unverified");
+ok("preview deployments alone are not production", A.analyzeDeployments([dep(10, "success", "Preview")], NOW).status === "unverified");
+ok("the environment name is matched case-insensitively", A.analyzeDeployments([dep(10, "success", "production")], NOW).status === "ok");
+ok("a healthy history is ok and counts what it judged", (() => { const r = A.analyzeDeployments([dep(10, "success"), dep(100, "inactive"), dep(200, "inactive")], NOW); return r.status === "ok" && r.evidence.judged === 3 && r.evidence.failed === 0; })());
+ok("a failed newest deployment is a failure", A.analyzeDeployments([dep(10, "failure"), dep(100, "success")], NOW).status === "fail");
+ok("an errored newest deployment is a failure too", A.analyzeDeployments([dep(10, "error"), dep(100, "success")], NOW).status === "fail");
+ok("the newest is picked by date, not by list order", A.analyzeDeployments([dep(500, "success"), dep(10, "failure")], NOW).status === "fail");
+ok("an old failure under a newer success is not a failure", A.analyzeDeployments([dep(10, "success"), dep(100, "failure")], NOW).status === "ok");
+ok("the newest with no status yet is unverified", A.analyzeDeployments([dep(10, null), dep(100, "success")], NOW).status === "unverified");
+ok("three failures in the window warn even when the newest succeeded", A.analyzeDeployments([dep(10, "success"), dep(20, "failure"), dep(30, "error"), dep(40, "failure")], NOW).status === "warn");
+ok("two failures in the window do not warn", A.analyzeDeployments([dep(10, "success"), dep(20, "failure"), dep(30, "failure")], NOW).status === "ok");
+ok("only the newest ten are judged: a failure outside the window is ignored", (() => { const list = [...Array.from({ length: 10 }, (_, i) => dep(i + 1, "success")), dep(500, "failure"), dep(600, "failure"), dep(700, "failure")]; const r = A.analyzeDeployments(list, NOW); return r.status === "ok" && r.evidence.judged === 10 && r.evidence.failed === 0; })());
+ok("an unfinished deployment is fine inside the hour and stuck after it", A.analyzeDeployments([dep(A.DEPLOY_STUCK_MINUTES - 1, "in_progress")], NOW).status === "ok" && A.analyzeDeployments([dep(A.DEPLOY_STUCK_MINUTES + 1, "in_progress")], NOW).status === "warn" && A.analyzeDeployments([dep(A.DEPLOY_STUCK_MINUTES + 1, "queued")], NOW).status === "warn");
+ok("exactly the stuck limit is not yet stuck", A.analyzeDeployments([dep(A.DEPLOY_STUCK_MINUTES, "pending")], NOW).status === "ok");
+ok("it says it does not test the live site", A.analyzeDeployments([dep(10, "success")], NOW).unverified.some((u) => /live site/.test(u)));
+const wf = readFileSync(".github/workflows/verify.yml", "utf8");
+const top = wf.slice(0, wf.indexOf("\njobs:"));
+ok("the workflow grants deployments: read at the top, and read only", /^permissions:[\s\S]*?^  deployments: read$/m.test(top) && !/deployments: write/.test(wf));
+ok("the agents step receives the token, and only that step", (() => { const step = wf.slice(wf.indexOf("- name: company agents (repository)")); const end = step.indexOf("\n      - name:", 10); const body = step.slice(0, end === -1 ? undefined : end); return /GH_TOKEN: \$\{\{ github\.token \}\}/.test(body) && (wf.match(/GH_TOKEN: \$\{\{ github\.token \}\}/g) ?? []).length === 1; })());
+ok("the reader needs BOTH GH_TOKEN and GITHUB_REPOSITORY, so a laptop run is unverified, not a crash", (() => { const saved = { t: process.env.GH_TOKEN, r: process.env.GITHUB_REPOSITORY }; delete process.env.GH_TOKEN; process.env.GITHUB_REPOSITORY = "a/b"; const st = A.runAll({ files: [], vercel: null, routes: [], migrations: [], pkgs: [], audit: null })["deployment-monitor"].status; if (saved.t !== undefined) process.env.GH_TOKEN = saved.t; if (saved.r === undefined) delete process.env.GITHUB_REPOSITORY; else process.env.GITHUB_REPOSITORY = saved.r; return st === "unverified"; })());
+
 console.log("\n== 2. the real repository is read, not an empty list ==");
 const g = A.gather();
 ok(`files read (${g.files.length})`, g.files.length > 1000);
@@ -127,7 +153,7 @@ ok(`migrations read (${g.migrations.length})`, g.migrations.length > 50);
 ok(`direct dependencies read with a licence (${g.pkgs.filter((p) => p.license).length})`, g.pkgs.filter((p) => p.license).length > 20);
 ok("vercel.json crons read", Array.isArray(g.vercel?.crons) && g.vercel.crons.length >= 10);
 const real = A.runAll(g);
-ok("all five agents answered", Object.keys(real).sort().join() === [...A.REPO_AGENT_IDS].sort().join());
+ok(`all ${A.REPO_AGENT_IDS.length} agents answered`, Object.keys(real).sort().join() === [...A.REPO_AGENT_IDS].sort().join());
 ok("the real secrets scan is not a failure (a real credential would be one)", real["secrets-scanner"].status === "ok", real["secrets-scanner"].summary);
 ok("every real result says what it did not cover", Object.values(real).every((r) => r.unverified.length >= 1));
 ok("the real CI workflow passes the gate-wiring and suite-wiring checks", real["gates-agent"].status === "ok" && real["testing-wrapper"].status === "ok", `${real["gates-agent"].summary} | ${real["testing-wrapper"].summary}`);

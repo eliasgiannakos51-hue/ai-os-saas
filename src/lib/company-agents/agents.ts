@@ -428,10 +428,10 @@ function kpiNeeds(kpis: Kpis, keys: string[]): { values: Record<string, number>;
   return { values, missing };
 }
 
-function kpiUnreadable(kpis: Kpis, missing: string[]): AgentResult {
+function kpiUnreadable(kpis: Kpis, missing: string[], source = "company_kpis()"): AgentResult {
   return {
     status: "unverified",
-    summary: kpis === null ? "Could not read company_kpis(), so nothing was checked." : `company_kpis() did not return: ${missing.join(", ")}.`,
+    summary: kpis === null ? `Could not read ${source}, so nothing was checked.` : `${source} did not return: ${missing.join(", ")}.`,
     evidence: {},
     unverified: [kpis === null ? "every metric: the read failed" : `the missing metrics: ${missing.join(", ")}`, ...KPI_UNVERIFIED],
   };
@@ -521,4 +521,65 @@ export function analyzePaidShare(kpis: Kpis): AgentResult {
   const evidence = { total: v.users_total, paid: v.paid_users };
   if (v.users_total === 0) return { status: "unverified", summary: "There are no accounts, so no share can be computed.", evidence, unverified };
   return { status: "ok", summary: `${v.paid_users} of ${v.users_total} accounts pay (${Math.round((v.paid_users / v.users_total) * 1000) / 10}%).`, evidence, unverified };
+}
+
+// ---------------------------------------------------------------------------
+// data-quality and attribution read two other database functions, added by
+// supabase/migrations/20261108000000_company_integrity.sql. Same rules as the
+// KPI agents above: a metric the database did not return is "unverified",
+// never zero, and a zero is only ever "no row breaks this rule".
+// ---------------------------------------------------------------------------
+
+/** The rules company_integrity() counts, with how hard each one breaks. Money first. */
+export const INTEGRITY_RULES: { metric: string; severity: "fail" | "warn"; label: string }[] = [
+  { metric: "credit_rows_negative", severity: "fail", label: "accounts with a negative credit balance" },
+  { metric: "cost_rows_negative", severity: "fail", label: "AI usage rows with a negative cost or charge" },
+  { metric: "live_commissions_on_void", severity: "fail", label: "affiliate commissions still live on a voided referral" },
+  { metric: "self_referrals", severity: "fail", label: "affiliates recorded as referring themselves" },
+  { metric: "users_without_credit_row", severity: "warn", label: "accounts with no credit row" },
+  { metric: "referrals_converted_no_date", severity: "warn", label: "converted referrals with no conversion date" },
+  { metric: "referrals_void_no_reason", severity: "warn", label: "voided referrals with no reason" },
+];
+
+/** data-quality: seven stated rules over the credit, usage and affiliate tables. */
+export function analyzeDataQuality(metrics: Kpis): AgentResult {
+  const { values: v, missing } = kpiNeeds(metrics, INTEGRITY_RULES.map((r) => r.metric));
+  const unverified = [
+    "every table and column outside these seven rules: the agent does not know what else could be wrong",
+    "whether a correct-looking value is the right value: it checks rules, not truth",
+  ];
+  if (missing.length > 0) {
+    const r = kpiUnreadable(metrics, missing, "company_integrity()");
+    return { ...r, unverified: [...r.unverified.filter((u) => !u.startsWith("visits")), ...unverified] };
+  }
+  const broken = INTEGRITY_RULES.filter((r) => v[r.metric] > 0);
+  const evidence = { rulesChecked: INTEGRITY_RULES.length, broken: Object.fromEntries(broken.map((r) => [r.metric, v[r.metric]])) };
+  if (broken.length === 0) return { status: "ok", summary: `No row breaks any of the ${INTEGRITY_RULES.length} rules checked.`, evidence, unverified };
+  const worst = broken.some((r) => r.severity === "fail") ? "fail" : "warn";
+  return { status: worst, summary: `${broken.length} of ${INTEGRITY_RULES.length} rules are broken: ${broken.map((r) => `${v[r.metric]} ${r.label}`).join("; ")}.`, evidence, unverified };
+}
+
+/** Above this share of all referrals being voided, something is worth a look (chosen, not measured). */
+export const VOID_SHARE_WARN = 0.3;
+
+/** attribution: affiliate links are the only recorded source of sign-ups. */
+export function analyzeAttribution(metrics: Kpis): AgentResult {
+  const keys = ["users_new_7d", "users_new_prev_7d", "referrals_new_7d", "referrals_new_prev_7d", "referrals_total", "referrals_converted", "referrals_void", "affiliates_active"];
+  const { values: v, missing } = kpiNeeds(metrics, keys);
+  const unverified = [
+    "any source other than an affiliate link: no UTM tag, referrer or landing page is stored, so the rest are 'not attributed', not 'organic'",
+    "which affiliate or campaign performs best: the agent counts, it does not rank people",
+  ];
+  if (missing.length > 0) {
+    const r = kpiUnreadable(metrics, missing, "company_attribution()");
+    return { ...r, unverified: [...r.unverified.filter((u) => !u.startsWith("visits")), ...unverified] };
+  }
+  const evidence = { newAccounts7d: v.users_new_7d, viaAffiliate7d: v.referrals_new_7d, referralsTotal: v.referrals_total, converted: v.referrals_converted, voided: v.referrals_void, affiliatesActive: v.affiliates_active };
+  if (v.referrals_total >= KPI_MIN_BASE && v.referrals_void / v.referrals_total >= VOID_SHARE_WARN) {
+    return { status: "warn", summary: `${v.referrals_void} of ${v.referrals_total} affiliate referrals are voided (${pct(v.referrals_void / v.referrals_total)}%): check why.`, evidence, unverified };
+  }
+  const week = v.users_new_7d === 0
+    ? "No new accounts this week."
+    : `${v.referrals_new_7d} of ${v.users_new_7d} new accounts this week came through an affiliate link; the other ${Math.max(v.users_new_7d - v.referrals_new_7d, 0)} are not attributed.`;
+  return { status: "ok", summary: `${week} ${v.referrals_converted} of ${v.referrals_total} referrals to date have paid, across ${v.affiliates_active} active affiliate(s).`, evidence, unverified };
 }

@@ -8,18 +8,27 @@
 ## ΠΡΩΤΑ — Agents της εταιρείας (2026-11-06, ενημερώθηκε 2026-11-07)
 
 Για να γράφονται τα αποτελέσματα των agents στο System Health: κάνε paste στο
-Supabase SQL editor **και τα τρία** (έχουν μέσα το πώς αναιρούνται):
-`supabase/migrations/20261106000000_company_agent_runs.sql` (αποτελέσματα) και
-`supabase/migrations/20261107000000_company_agent_drafts.sql` (γραφείο draft) και
-`supabase/migrations/20261107010000_company_kpis.sql` (μετρήσεις για 7 agents).
+Supabase SQL editor **και τα τέσσερα** (έχουν μέσα το πώς αναιρούνται):
+`supabase/migrations/20261106000000_company_agent_runs.sql` (αποτελέσματα),
+`supabase/migrations/20261107000000_company_agent_drafts.sql` (γραφείο draft),
+`supabase/migrations/20261107010000_company_kpis.sql` (μετρήσεις για 7 agents) και
+`supabase/migrations/20261108000000_company_integrity.sql` (data-quality και attribution).
 Μέχρι να το κάνεις, οι ενότητες γράφουν «Could not read company_agent_runs» /
 «company_agent_drafts» — δεν είναι σφάλμα, είναι η ένδειξη. Μετά:
 `npm run db:pending` για να δεις ότι είναι «applied».
 
-**Απόφαση που χρειάζεται από σένα (2026-11-07):** το `npm audit` βρίσκει 1 critical
-στο `next` 16.3.8 (δύο RCE advisories, GHSA-2464-fhr4-w9xw και GHSA-673q-mjm6-r5xr),
-με διορθωμένη έκδοση διαθέσιμη. Δεν έλεγξα αν η εφαρμογή χρησιμοποιεί τα επηρεαζόμενα
-χαρακτηριστικά ούτε άλλαξα την έκδοση. Πες μου αν θέλεις ξεχωριστό PR αναβάθμισης.
+**Έτοιμο για merge (2026-11-08):** η αναβάθμιση του Next.js για τα δύο critical advisories έγινε
+στο PR #372 (16.3.8 → 16.4.5). Μένει να το κάνεις merge.
+
+**Απόφαση που χρειάζεται από σένα (2026-11-07, ανοιχτή):** 5 agents (`analytics-collector`,
+`ab-testing`, `conversion-optimizer`, `experiment-analyst`, `dashboard-agent`) περιμένουν
+δεδομένα επισκέψεων που το προϊόν δεν καταγράφει. Ένας first-party collector χωρίς cookies
+θα τα ξεκλείδωνε, αλλά αλλάζει όσα λέει η σελίδα /cookies και χρειάζεται νομικό έλεγχο.
+Δεν θα τον φτιάξω χωρίς το δικό σου ρητό «ναι».
+
+**Προαιρετικό, για έναν agent:** το `backup-verifier` χρειάζεται Supabase management API
+token (Supabase → Account → Access Tokens), σαν μεταβλητή περιβάλλοντος στο Vercel και στο
+GitHub. Δεν είναι κρίσιμο· πες μου αν το θες.
 
 ## ΠΡΩΤΑ — «ALL TOOLS: ΤΟ ΤΕΛΙΚΟ GRID» (2026-10-23)
 

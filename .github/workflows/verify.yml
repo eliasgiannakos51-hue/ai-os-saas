@@ -55,6 +55,10 @@ on:
 permissions:
   contents: read
   issues: write
+  # READ ONLY, added 2026-11-08 for the deployment-monitor company agent: it
+  # lists the deployments Vercel reported to GitHub. Nothing here can create
+  # or change one.
+  deployments: read
 
 concurrency:
   # A second push to the same branch cancels the first: the answer that
@@ -156,6 +160,8 @@ jobs:
       - name: company agents (repository)
         timeout-minutes: 5
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: node scripts/company-agents/repo-agents.mjs
 
       # NO env vars are supplied on purpose: the build must not need

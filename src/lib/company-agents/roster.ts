@@ -43,7 +43,7 @@ export type Autonomy = 1 | 2 | 3;
  *  in their missions what they cannot do (send, track, apply, file). */
 export const BLOCKERS = {
   analytics: "No analytics package is installed (package.json has no PostHog, Plausible, Mixpanel, Umami or Amplitude). Owner-run SQL queries exist in docs/analytics-queries.sql; whether they cover what these agents need was not measured.",
-  "ops-tokens": "No Vercel API token and no Supabase management token is configured (neither name appears in src/ or docs/api-keys.md), so nothing running here can ask either platform about its deployments or backups.",
+  "supabase-token": "No Supabase management API token is configured (no such variable is read in src/ or listed in docs/api-keys.md), so nothing running here can ask Supabase about its backups. Deployments are a different case: the deployment monitor reads them from GitHub.",
 } as const;
 export type BlockerKey = keyof typeof BLOCKERS;
 
@@ -77,13 +77,13 @@ export type DepartmentKey = keyof typeof DEPARTMENTS;
 
 /** The agents the runner (lib/company-agents/run.ts) executes today. The
  *  roster's `running` entries must equal this list, both ways. */
-export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "kpi-monitor", "usage-monitor", "churn-predictor", "retention", "upsell", "anomaly-detector", "sales-analytics", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
+export const RUNNING_AGENT_IDS = ["error-log-analyst", "api-uptime-monitor", "database-health", "queue-monitor", "budget-monitor", "fraud-alert", "cost-per-agent", "expense-tracker", "kpi-monitor", "usage-monitor", "churn-predictor", "retention", "upsell", "anomaly-detector", "sales-analytics", "data-quality", "attribution", "cost-optimizer", "revenue-tracker", "headers-checker", "task-auditor", "daily-reporter"] as const;
 
 /** The agents that run in CI, on every push, from scripts/company-agents/repo-agents.mjs.
  *  They need the repository's files, which the Vercel runner does not have, so their result
  *  is on the CI job's summary page and NOT in the System Health section above. The roster's
  *  `running` entries equal RUNNING_AGENT_IDS plus this list, both ways. */
-export const CI_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner", "gates-agent", "testing-wrapper"] as const;
+export const CI_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner", "gates-agent", "testing-wrapper", "deployment-monitor"] as const;
 
 type Row = [id: string, name: string, mission: string, autonomy: Autonomy, status: RosterStatus, blockedBy?: BlockerKey];
 
@@ -209,8 +209,8 @@ export const ROSTER: RosterAgent[] = [
     ["error-log-analyst", "Error log analyst", "Reads the open production errors and reports how many and where.", 1, "running"],
     ["database-health", "Database health", "Reads the database's own exposure report and fails when any of its checks fails.", 1, "running"],
     ["queue-monitor", "Queue monitor", "Counts background jobs (ai_jobs) that are queued or running and have not moved for 30 minutes, and recent failures.", 1, "running"],
-    ["backup-verifier", "Backup verifier", "Checks that a backup exists and is recent.", 1, "blocked", "ops-tokens"],
-    ["deployment-monitor", "Deployment monitor", "Watches deployments for failures.", 1, "blocked", "ops-tokens"],
+    ["backup-verifier", "Backup verifier", "Checks that a backup exists and is recent.", 1, "blocked", "supabase-token"],
+    ["deployment-monitor", "Deployment monitor", "Reads the last ten production deployments Vercel reported to GitHub and fails when the newest one failed. It does not test the live site.", 1, "running"],
     ["cost-optimizer", "Cost optimizer", "Compares the last 24 hours of AI spend with the daily average of the week before and warns on a spike. AI cost only, not infrastructure bills.", 1, "running"],
   ]),
   ...dept("legal", [
@@ -235,11 +235,11 @@ export const ROSTER: RosterAgent[] = [
   ]),
   ...dept("data", [
     ["analytics-collector", "Analytics collector", "Collects the product's usage events.", 1, "blocked", "analytics"],
-    ["data-quality", "Data quality", "Checks that the data is right.", 1, "blocked", "analytics"],
+    ["data-quality", "Data quality", "Counts rows that break seven stated rules in the credit, usage and affiliate tables. It checks rules, not truth.", 1, "running"],
     ["dashboard-agent", "Dashboard", "Keeps the owner's dashboards current.", 1, "blocked", "analytics"],
     ["experiment-analyst", "Experiment analyst", "Reads the result of an experiment.", 1, "blocked", "analytics"],
     ["anomaly-detector", "Anomaly detector", "Warns when new accounts or active accounts jump 3x or more week on week. It sees the size, not the cause.", 1, "running"],
-    ["attribution", "Attribution", "Finds where customers come from.", 1, "blocked", "analytics"],
+    ["attribution", "Attribution", "Counts new accounts that came through an affiliate link. No other source is recorded, so the rest are not attributed.", 1, "running"],
   ]),
   ...dept("admin", [
     ["task-manager", "Task manager", "Tracks internal tasks and deadlines.", 1, "built"],

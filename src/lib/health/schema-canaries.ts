@@ -446,6 +446,18 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "seven company agents (signups, usage, lapse, retention, upsell, anomalies, paid share) report «Could not read company_kpis()»; nothing a customer sees is affected",
   },
   {
+    kind: "function",
+    fn: "company_integrity",
+    migration: "20261108000000_company_integrity.sql",
+    breaks: "the data-quality company agent reports «Could not read company_integrity()»; nothing a customer sees is affected",
+  },
+  {
+    kind: "function",
+    fn: "company_attribution",
+    migration: "20261108000000_company_integrity.sql",
+    breaks: "the attribution company agent reports «Could not read company_attribution()»; nothing a customer sees is affected",
+  },
+  {
     kind: "table",
     table: "company_agent_drafts",
     migration: "20261107000000_company_agent_drafts.sql",

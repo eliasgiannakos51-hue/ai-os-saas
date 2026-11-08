@@ -6909,3 +6909,23 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 **Δοκιμές.** `node scripts/tests/all-tools.test.mjs` (146 έλεγχοι, 0 αποτυχίες)· `node scripts/tests/all-tools.mutation.mjs` (28/28)· `node scripts/tests/sidebar-and-tooltips.test.mjs` (48 έλεγχοι, 0 αποτυχίες)· `node scripts/tests/sidebar-groups.mutation.mjs` (12/12)· `node scripts/tests/sidebar-structure.mutation.mjs` (27/27)· `node scripts/tests/all-tools-final-grid.prodtest.mjs` με πραγματικό build — **84 passed, 0 failed**, desktop/el, desktop/en, phone/el, phone/en, με στιγμιότυπα. `npx tsc --noEmit` καθαρό. `npm run gates` ξανατρέχει στο τέλος αυτού του γύρου.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+### 2026-11-08 — τρεις agents ακόμα τρέχουν: data-quality, attribution, deployment-monitor
+
+**Εντολή ιδιοκτήτη, 2026-11-08 07:44:** συνέχισε πολλές ώρες, τελείωσε όσους agents γίνονται, και όσους δεν γίνονται με κώδικα τους αφήνουμε για άλλο εργαλείο.
+
+**Τι έγινε.** Από τους 9 blocked, οι 3 δεν χρειάζονταν πραγματικά αυτό που έλεγε ο λόγος τους (είχαν μπει στο «analytics» ή στα «tokens» από βιασύνη).
+- `data-quality`: `public.company_integrity()` (νέα migration) μετρά γραμμές που σπάνε επτά ρητούς κανόνες: αρνητικό υπόλοιπο credits, αρνητικό κόστος στο `ai_cost_log`, ζωντανές προμήθειες πάνω σε άκυρο referral, affiliate που φέρνει τον εαυτό του (αυτά τα τέσσερα είναι `fail`), λογαριασμός χωρίς γραμμή credits, converted referral χωρίς ημερομηνία, void referral χωρίς λόγο (αυτά τα τρία `warn`). Η αποστολή λέει ότι ελέγχει κανόνες, όχι αλήθεια.
+- `attribution`: `public.company_attribution()` μετρά τους νέους λογαριασμούς της εβδομάδας που ήρθαν με affiliate link. Η μόνη πηγή που καταγράφει το προϊόν είναι ο affiliate σύνδεσμος: κανένα UTM, referrer ή landing page δεν αποθηκεύεται, άρα οι υπόλοιποι είναι «not attributed», ΟΧΙ «organic» (το test απαγορεύει τη λέξη στο summary). Warn όταν ≥30% των referrals (από 10 και πάνω) είναι void· το 30% και το 10 είναι διαλεγμένα, όχι μετρημένα.
+- `deployment-monitor`: ο Vercel αναφέρει κάθε deployment στο GitHub (γι' αυτό υπάρχει το `deployment_status` στο `verify.yml`), άρα το ιστορικό διαβάζεται με το `GITHUB_TOKEN` του workflow, χωρίς Vercel token. Τρέχει στο CI (`repo-agents.mjs`, 8ος agent): κρίνει τα 10 νεότερα production deployments· `fail` αν το νεότερο απέτυχε, `warn` αν ≥3 από 10 απέτυχαν ή αν κάτι είναι ημιτελές πάνω από 60 λεπτά (τα 10, 3 και 60 διαλεγμένα). Δεν ελέγχει αν το site απαντά (αυτό το κάνει ο `api-uptime-monitor`). Αλλαγή στο `verify.yml`: `permissions: deployments: read` (μόνο ανάγνωση) και `GH_TOKEN` μόνο στο βήμα των agents.
+- Ο λόγος `ops-tokens` έγινε `supabase-token` και ισχύει πια μόνο για τον `backup-verifier`. Το `BLOCKERS.analytics` μένει για 5 agents.
+
+**Μέτρηση.** `rosterCounts()` (2026-11-08): running 30, built 85, blocked 6, planned 0, σύνολο 121 (πριν: 27 / 85 / 9). Ξαναβγαίνει με `node --experimental-strip-types --no-warnings -e 'import("./src/lib/company-agents/roster.ts").then(m=>console.log(m.rosterCounts()))'`.
+
+**Δοκιμές.** `company-agents.test.mjs` 200 ελέγχοι, `repo-agents.test.mjs` 81. Mutation στον δικό μου κώδικα: 6 για τα δύο database agents και 8 για τον deployment-monitor, και τα 14 έκαναν κόκκινο ένα test (δύο όρια δεν είχαν test, γράφτηκαν: ακριβώς 10 referrals και ακριβώς 60 λεπτά).
+
+**Τι ΔΕΝ ελέγχθηκε.** Οι δύο συναρτήσεις SQL δεν έχουν τρέξει σε πραγματική βάση (δεν υπάρχει πρόσβαση)· ελέγχονται μόνο ως κείμενο: ονόματα πινάκων/στηλών που υπάρχουν σε migrations, grants, μορφή. Το `deployment-monitor` δεν έχει τρέξει στο GitHub Actions: τοπικά δίνει «unverified» επειδή λείπει το token, και η μορφή της απάντησης του `gh api` (`id`, `environment`, `created_at` στα deployments, `state` στα statuses) είναι από τη μνήμη μου για το REST API του GitHub: ούτε πραγματική κλήση έγινε ούτε άνοιξα την τεκμηρίωση.
+
+**Ανοιχτά.** Πέντε agents περιμένουν απόφαση για analytics (NEEDS). Ο `backup-verifier` θέλει Supabase management token.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261108000000_company_integrity.sql**

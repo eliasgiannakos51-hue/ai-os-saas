@@ -33,7 +33,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync, appendFileSync } from "node:fs";
 
 /** The ids this file runs. company-agents.test.mjs holds that they equal CI_AGENT_IDS in roster.ts. */
-export const REPO_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner", "gates-agent", "testing-wrapper"];
+export const REPO_AGENT_IDS = ["secrets-scanner", "cron-monitor", "migration-ledger", "license-monitor", "vulnerability-scanner", "gates-agent", "testing-wrapper", "deployment-monitor"];
 
 const result = (status, summary, evidence, unverified) => ({ status, summary, evidence, unverified });
 
@@ -296,6 +296,64 @@ export function analyzeSuiteWiring(workflow, pkgScripts) {
   return result("ok", `The workflow runs all ${EXPECTED_SUITES.length} expected suites (${EXPECTED_SUITES.map((e) => e[0]).join(", ")}) and none can fail open.`, evidence, unverified);
 }
 
+
+// ---------------------------------------------------------------------------
+// deployment-monitor: Vercel reports every deployment to GitHub (that is what
+// the `deployment_status` trigger in verify.yml listens to), so the history is
+// readable here with the workflow's own token and no Vercel credential. It
+// judges what GitHub was TOLD, not whether the site answers: that is the
+// uptime monitor's job, from the other side.
+// ---------------------------------------------------------------------------
+
+/** How many of the newest production deployments are judged. Chosen, not measured. */
+export const DEPLOY_WINDOW = 10;
+/** This many failures inside the window is a pattern, not an accident. Chosen, not measured. */
+export const DEPLOY_FAILS_WARN = 3;
+/** A deployment still unfinished after this long is stuck. Chosen, not measured. */
+export const DEPLOY_STUCK_MINUTES = 60;
+
+const DEPLOY_BAD = new Set(["failure", "error"]);
+const DEPLOY_UNFINISHED = new Set(["pending", "queued", "in_progress"]);
+
+/**
+ * @param {{ environment: string, createdAt: string, state: string | null }[] | null} deployments
+ *   newest first, each with the state of its LATEST status; null when GitHub could not be asked
+ * @param {number} nowMs
+ */
+export function analyzeDeployments(deployments, nowMs) {
+  const unverified = [
+    "whether the live site answers: the uptime monitor asks it directly, this agent only reads what Vercel reported to GitHub",
+    "deployments Vercel did not report to GitHub, and deployments older than the window",
+  ];
+  if (!Array.isArray(deployments)) {
+    return result("unverified", "Could not read the deployment history from GitHub (no token, no network, or no access to deployments).", {}, ["every deployment: the read failed", ...unverified]);
+  }
+  const prod = deployments
+    .filter((d) => typeof d.environment === "string" && d.environment.toLowerCase() === "production")
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, DEPLOY_WINDOW);
+  if (prod.length === 0) {
+    return result("unverified", "GitHub lists no production deployment, so nothing was judged. Vercel may not report to GitHub for this repository.", { production: 0 }, unverified);
+  }
+  const newest = prod[0];
+  const failed = prod.filter((d) => DEPLOY_BAD.has(d.state ?? "")).length;
+  const evidence = { judged: prod.length, failed, newestState: newest.state, newestAt: newest.createdAt };
+  if (newest.state === null) {
+    return result("unverified", `The newest production deployment (${newest.createdAt}) has no status yet.`, evidence, unverified);
+  }
+  if (DEPLOY_BAD.has(newest.state)) {
+    return result("fail", `The newest production deployment (${newest.createdAt}) ended in "${newest.state}". ${failed} of the last ${prod.length} failed.`, evidence, unverified);
+  }
+  const ageMin = (nowMs - Date.parse(newest.createdAt)) / 60000;
+  if (DEPLOY_UNFINISHED.has(newest.state) && ageMin > DEPLOY_STUCK_MINUTES) {
+    return result("warn", `The newest production deployment has been "${newest.state}" for ${Math.round(ageMin)} minutes.`, evidence, unverified);
+  }
+  if (failed >= DEPLOY_FAILS_WARN) {
+    return result("warn", `${failed} of the last ${prod.length} production deployments failed, though the newest did not.`, evidence, unverified);
+  }
+  return result("ok", `Newest production deployment: "${newest.state}". ${failed} of the last ${prod.length} failed.`, evidence, unverified);
+}
+
 // ---------------------------------------------------------------------------
 // gathering
 // ---------------------------------------------------------------------------
@@ -317,6 +375,27 @@ function listRouteFiles(dir = "src/app/api") {
 
 function tryJson(fn) {
   try { return JSON.parse(fn()); } catch { return null; }
+}
+
+/**
+ * The newest deployments GitHub holds for this repository, each with the state
+ * of its latest status. null when it cannot be asked: no GH_TOKEN, no
+ * GITHUB_REPOSITORY (both exist on Actions, neither on a laptop), no `gh`, or
+ * a refusal. The workflow grants `deployments: read` for this and nothing else.
+ */
+function readDeployments() {
+  const repo = process.env.GITHUB_REPOSITORY;
+  if (!repo || !process.env.GH_TOKEN) return null;
+  const gh = (path) => tryJson(() => execFileSync("gh", ["api", path], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] }));
+  const list = gh(`repos/${repo}/deployments?per_page=30`);
+  if (!Array.isArray(list)) return null;
+  const out = [];
+  for (const d of list.filter((x) => String(x.environment).toLowerCase() === "production").slice(0, DEPLOY_WINDOW)) {
+    const statuses = gh(`repos/${repo}/deployments/${d.id}/statuses?per_page=1`);
+    if (!Array.isArray(statuses)) return null;
+    out.push({ environment: d.environment, createdAt: d.created_at, state: statuses[0]?.state ?? null });
+  }
+  return out;
 }
 
 export function gather() {
@@ -360,7 +439,7 @@ export function gather() {
   const unitRunner = existsSync("scripts/tests/run-gates.mjs") ? readFileSync("scripts/tests/run-gates.mjs", "utf8") : null;
   const testFiles = (tracked ?? []).filter((p) => /^scripts\/tests\/[^/]+\.test\.mjs$/.test(p)).length;
 
-  return { files, vercel, routes, migrations, pkgs, audit, workflow, pkgScripts: pkg?.scripts ?? null, unitRunner, testFiles };
+  return { files, vercel, routes, migrations, pkgs, audit, workflow, pkgScripts: pkg?.scripts ?? null, unitRunner, testFiles, deployments: readDeployments() };
 }
 
 export function runAll(g = gather()) {
@@ -373,6 +452,7 @@ export function runAll(g = gather()) {
     "vulnerability-scanner": analyzeAudit(g.audit),
     "gates-agent": analyzeGateWiring(g.workflow, g.pkgScripts, g.unitRunner, g.testFiles),
     "testing-wrapper": analyzeSuiteWiring(g.workflow, g.pkgScripts),
+    "deployment-monitor": analyzeDeployments(g.deployments ?? null, Date.now()),
   };
 }
 

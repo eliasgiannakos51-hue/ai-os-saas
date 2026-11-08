@@ -14,6 +14,10 @@ import { COUNTED_STARTS, readMinutes } from "@/lib/automations/time-saved";
 
 /** How many runs of the opened automation come with the page. */
 const RUNS_SHOWN = 20;
+/** How many cross-automation approvals the Approval Center opens with — a
+ *  bound, same reason MAX_FLOWS is one: a person with many automations
+ *  still gets one page, not an unbounded scroll. */
+const PENDING_APPROVALS_SHOWN = 20;
 
 export type AutomationPageData = {
   flows: Record<string, unknown>[];
@@ -37,7 +41,35 @@ export type AutomationPageData = {
    *  Same precedent as minutesSaved above: a selector that could not
    *  save is never drawn. */
   modes: Record<string, FlowMode> | null;
+  /** Every one of this account's runs waiting for an approval, across
+   *  EVERY automation (not just the one opened) — the Approval Center
+   *  (οδηγία 55, 2026-11-08). Soonest deadline first, so the one about to
+   *  expire is the one seen first. No switch gates this: the approval box
+   *  itself has existed since package 30, this is only a new place to
+   *  see every one at once instead of opening each automation in turn. */
+  pendingApprovals: Record<string, unknown>[];
 };
+
+/**
+ * EVERY RUN WAITING FOR APPROVAL, ACROSS EVERY AUTOMATION — the Approval
+ * Center. The person's own runs, under their own select policy; no flow
+ * join needed, since the screen already holds every flow's name and
+ * boxes from `flows` above and matches by `flow_id` itself.
+ */
+export async function loadPendingApprovals(supabase: SupabaseClient, userId: string): Promise<Record<string, unknown>[]> {
+  const { data, error } = await supabase
+    .from("automation_runs")
+    .select(RUN_COLUMNS)
+    .eq("user_id", userId)
+    .eq("status", "waiting_approval")
+    .order("approval_expires_at", { ascending: true, nullsFirst: false })
+    .limit(PENDING_APPROVALS_SHOWN);
+  if (error) {
+    logApiError("dashboard/automation", error, { stage: "pending_approvals" });
+    return [];
+  }
+  return (data ?? []) as Record<string, unknown>[];
+}
 
 /**
  * THE MODE EACH AUTOMATION RUNS WITH (automation_flows.mode,
@@ -144,7 +176,7 @@ export async function loadAutomationPage(
   const supabase = await createClient();
   const runId = runParam && UUID.test(runParam) ? runParam : null;
   const flowIdFromUrl = flowParam && UUID.test(flowParam) ? flowParam : null;
-  const [flowsResult, olderResult, plan, packPrice, integrations, channels, projectId, minutesSaved, modes] = await Promise.all([
+  const [flowsResult, olderResult, plan, packPrice, integrations, channels, projectId, minutesSaved, modes, pendingApprovals] = await Promise.all([
     supabase.from("automation_flows").select(FLOW_COLUMNS).eq("user_id", user.id).order("created_at", { ascending: false }).limit(MAX_FLOWS),
     supabase.from("user_automations").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
     resolveEffectivePlan(user),
@@ -154,6 +186,7 @@ export async function loadAutomationPage(
     ownedProjectId(supabase, projectIdParam),
     timeSavedOn ? loadMinutesSaved(supabase, user.id) : Promise.resolve(null),
     modeOn ? loadModes(supabase, user.id) : Promise.resolve(null),
+    loadPendingApprovals(supabase, user.id),
   ]);
   if (flowsResult.error) logApiError("dashboard/automation", flowsResult.error, { stage: "flows" });
   const flows = (flowsResult.data ?? []) as Record<string, unknown>[];
@@ -195,6 +228,7 @@ export async function loadAutomationPage(
     older: (olderResult.data ?? []) as UserAutomation[],
     projectId,
     modes,
+    pendingApprovals,
     minutesSaved,
     doneRuns,
   };

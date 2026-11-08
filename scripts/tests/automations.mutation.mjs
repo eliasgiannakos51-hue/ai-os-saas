@@ -419,6 +419,41 @@ const MUTANTS = [
     to: "check (minutes_saved is null or minutes_saved between 1 and 1440)",
     expect: "the column is nullable, and bounded where the code bounds it",
   },
+  {
+    name: "the Approval Center stops ordering by deadline — a run about to expire is no longer the one seen first",
+    file: PAGE_DATA,
+    from: '.order("approval_expires_at", { ascending: true, nullsFirst: false })',
+    to: "",
+    expect: "soonest deadline first, bounded",
+  },
+  {
+    name: "a failed read of pending approvals throws instead of answering an empty list — the whole automations page would 500 for it",
+    file: PAGE_DATA,
+    from: "logApiError(\"dashboard/automation\", error, { stage: \"pending_approvals\" });\n    return [];",
+    to: 'throw error;',
+    expect: "a read that fails answers an empty list, never a thrown error",
+  },
+  {
+    name: "approving or cancelling a run no longer removes it from the Approval Center — it stays, already decided, until the next full page load",
+    file: AUTO_SHELL,
+    from: "setPendingApprovals((prev) => prev.filter((r) => r.id !== next.id));",
+    to: "",
+    expect: "drops it out of the Approval Center too",
+  },
+  {
+    name: "the approvals button is drawn even with nothing waiting — an always-empty panel one press away",
+    file: AUTO_SHELL,
+    from: "pendingApprovals.length > 0 ? (\n      <button\n        key=\"approvals\"",
+    to: "true ? (\n      <button\n        key=\"approvals\"",
+    expect: "drawn only while something is actually waiting",
+  },
+  {
+    name: "PendingApprovals stops skipping a run whose flow is gone — a flow id with no name reaches the list",
+    file: FLOW_BOXES,
+    from: "const visible = runs.filter((r) => flowName[r.flowId]);",
+    to: "const visible = runs;",
+    expect: "skips a run whose flow is not in the name map",
+  },
 ];
 
 runMutations({

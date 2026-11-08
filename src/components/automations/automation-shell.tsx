@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { FlaskConical, LayoutTemplate, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
+import { Bell, FlaskConical, LayoutTemplate, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
@@ -11,7 +11,7 @@ import { ToolShell, ACTION, OPTION, ChosenBox, type ShellMode, type ShellTurn } 
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
-import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, ModeForm, RunHistory, TimeSavedForm, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
+import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, ModeForm, PendingApprovals, RunHistory, TimeSavedForm, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
 import { TemplateGallery } from "@/components/automations/template-gallery";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
@@ -46,7 +46,7 @@ import type { UserAutomation } from "@/types/user-automation";
  */
 type Turn = { id: string; role: "user" | "tool"; text: string; flow?: string };
 type Running = "build" | "change" | "try" | "run" | "save" | "approve" | "template" | null;
-type Open = "flow" | "templates" | null;
+type Open = "flow" | "templates" | "approvals" | null;
 
 export function AutomationShell({
   initialFlows,
@@ -64,6 +64,7 @@ export function AutomationShell({
   initialMinutesSaved = null,
   initialDoneRuns = 0,
   initialModes = null,
+  initialPendingApprovals = [],
 }: {
   initialFlows: Record<string, unknown>[];
   /** The runs of the automation opened on arrival. */
@@ -105,6 +106,10 @@ export function AutomationShell({
    *  has no such column yet (lib/automations/page-data.ts loadModes):
    *  then no selector is drawn. */
   initialModes?: Record<string, FlowMode> | null;
+  /** Every run waiting for approval, across every automation — the
+   *  Approval Center (lib/automations/page-data.ts loadPendingApprovals).
+   *  No switch gates this. */
+  initialPendingApprovals?: Record<string, unknown>[];
 }) {
   const t = useTranslations("dashboard.automations");
   const tSteps = useTranslations("aiSteps");
@@ -127,6 +132,7 @@ export function AutomationShell({
   const [confirming, setConfirming] = useState<{ credits: number; go: () => void } | null>(null);
   const [minutesSaved, setMinutesSaved] = useState<Record<string, number | null> | null>(initialMinutesSaved);
   const [modes, setModes] = useState<Record<string, FlowMode> | null>(initialModes);
+  const [pendingApprovals, setPendingApprovals] = useState<ShownRun[]>(() => initialPendingApprovals.map(readShownRun));
   const [doneRuns, setDoneRuns] = useState<Record<string, number>>(() => (initialOpenId ? { [initialOpenId]: initialDoneRuns } : {}));
   // THE RUN THIS SCREEN STARTED, while its request is in flight: which run
   // the canvas follows (lib/automations/run-progress.ts followedRun).
@@ -436,6 +442,9 @@ export function AutomationShell({
       if (!data || !data.run) return;
       const next = readShownRun(data.run as Record<string, unknown>);
       setRuns((prev) => prev.map((r) => (r.id === next.id ? next : r)));
+      // Decided one way or the other, it is no longer waiting — out of
+      // the Approval Center regardless of which screen made the call.
+      setPendingApprovals((prev) => prev.filter((r) => r.id !== next.id));
       if (approve && minutesSaved) void refreshRuns(run.flowId);
     } finally {
       setBusyRun(null);
@@ -657,7 +666,60 @@ export function AutomationShell({
             title: t("templates.title"),
             body: <TemplateGallery stepPrice={prices.step} starting={starting} disabled={running !== null || !configured} connected={connected} onStart={(id) => void startTemplate(id)} />,
           }
-        : null;
+        : open === "approvals"
+          ? {
+              title: t("pendingApprovals.title"),
+              body: (
+                <PendingApprovals
+                  runs={pendingApprovals}
+                  flowName={Object.fromEntries(flows.map((f) => [f.id, f.name]))}
+                  locale={locale}
+                  busy={busyRun}
+                  onApprove={(run) => void decide(run, true)}
+                  onCancel={(run) => void decide(run, false)}
+                  onOpenFlow={(flowId) => void openFlow(flowId)}
+                />
+              ),
+            }
+          : null;
+
+  // THE OPTION BUTTONS beside the field — templates and the Approval
+  // Center, each drawn only while there is something to open (templates
+  // behind its own switch; approvals only while something is waiting).
+  const optionButtons = [
+    templates ? (
+      <button
+        key="templates"
+        type="button"
+        onClick={() => {
+          setChosen(null);
+          setOpen("templates");
+        }}
+        aria-pressed={open === "templates"}
+        data-testid="flow-templates-open"
+        className={`${OPTION} ${open === "templates" ? "bg-panel-hover" : ""}`}
+      >
+        <LayoutTemplate className="h-3.5 w-3.5" aria-hidden="true" />
+        {t("templates.title")}
+      </button>
+    ) : null,
+    pendingApprovals.length > 0 ? (
+      <button
+        key="approvals"
+        type="button"
+        onClick={() => {
+          setChosen(null);
+          setOpen("approvals");
+        }}
+        aria-pressed={open === "approvals"}
+        data-testid="flow-approvals-open"
+        className={`${OPTION} ${open === "approvals" ? "bg-panel-hover" : ""}`}
+      >
+        <Bell className="h-3.5 w-3.5" aria-hidden="true" />
+        {t("pendingApprovals.button", { count: pendingApprovals.length })}
+      </button>
+    ) : null,
+  ].filter((b): b is React.JSX.Element => b !== null);
 
   const working =
     running === "build"
@@ -689,26 +751,7 @@ export function AutomationShell({
         onSend={send}
         onStop={() => abortRef.current?.abort()}
         initialText={initialSaid}
-        options={
-          templates
-            ? [
-                <button
-                  key="templates"
-                  type="button"
-                  onClick={() => {
-                    setChosen(null);
-                    setOpen("templates");
-                  }}
-                  aria-pressed={open === "templates"}
-                  data-testid="flow-templates-open"
-                  className={`${OPTION} ${open === "templates" ? "bg-panel-hover" : ""}`}
-                >
-                  <LayoutTemplate className="h-3.5 w-3.5" aria-hidden="true" />
-                  {t("templates.title")}
-                </button>,
-              ]
-            : undefined
-        }
+        options={optionButtons.length > 0 ? optionButtons : undefined}
         footer={
           <>
             {shown && chosenBox && <ChosenBox label={boxLabel(chosenBox)} onClear={() => setChosen(null)} />}

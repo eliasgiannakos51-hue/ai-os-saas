@@ -761,3 +761,91 @@ export function ModeForm({ mode, saving, onSave }: { mode: FlowMode; saving: boo
     </div>
   );
 }
+
+/**
+ * THE APPROVAL CENTER (οδηγία 55, 2026-11-08): every run waiting for
+ * approval, across EVERY automation, in one list — instead of opening
+ * each automation in turn to find the one that is waiting. Approving or
+ * cancelling here is the SAME two routes RunHistory's own buttons call
+ * (api/automations/runs/[runId]/approve|cancel); this is a second place
+ * to reach them, not a second mechanism.
+ *
+ * Deliberately lighter than RunHistory: no step-by-step detail (that
+ * needs the owning automation's `boxes`, which differ per automation),
+ * only what was made (or will be sent) and the decision. «Open» goes to
+ * the automation itself for the full history.
+ */
+export function PendingApprovals({
+  runs,
+  flowName,
+  locale,
+  busy,
+  onApprove,
+  onCancel,
+  onOpenFlow,
+}: {
+  runs: ShownRun[];
+  /** flow id → name, from the screen's already-loaded flows list. A run
+   *  whose flow is not in this map (deleted since) is skipped: nothing
+   *  for the person to open, and the route itself refuses it already. */
+  flowName: Record<string, string>;
+  locale: string;
+  busy: string | null;
+  onApprove: (run: ShownRun) => void;
+  onCancel: (run: ShownRun) => void;
+  onOpenFlow: (flowId: string) => void;
+}) {
+  const { t } = useWords();
+  const when = (iso: string) => {
+    try {
+      return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+    } catch {
+      return iso.slice(0, 16).replace("T", " ");
+    }
+  };
+  const visible = runs.filter((r) => flowName[r.flowId]);
+  if (visible.length === 0) return <p className="text-xs text-muted">{t("pendingApprovals.empty")}</p>;
+  return (
+    <ul data-testid="pending-approvals" className="space-y-2">
+      {visible.map((run) => (
+        <li key={run.id} data-testid="pending-approval" className="space-y-1.5 rounded-item bg-panel/60 px-3 py-2.5">
+          <button
+            type="button"
+            onClick={() => onOpenFlow(run.flowId)}
+            data-testid="pending-approval-open"
+            className="block text-start text-xs font-medium text-foreground hover:underline"
+          >
+            {flowName[run.flowId]}
+          </button>
+          {run.output && (
+            <p data-testid="pending-approval-output" className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words rounded-item bg-panel px-3 py-2 text-xs text-foreground">
+              {run.output}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => onApprove(run)}
+              data-testid="pending-approval-approve"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-item bg-panel px-3 text-xs font-medium text-foreground hover:bg-panel-hover disabled:opacity-60"
+            >
+              {busy === run.id ? <ThinkingIndicator size="sm" /> : <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+              {t("approve")}
+            </button>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => onCancel(run)}
+              data-testid="pending-approval-cancel"
+              className="inline-flex min-h-[44px] items-center rounded-item px-3 text-xs text-muted hover:bg-panel-hover hover:text-foreground disabled:opacity-60"
+            >
+              {t("cancel")}
+            </button>
+          </div>
+          {run.approvalExpiresAt && <p className="text-[11px] text-muted">{t("approveHint", { when: when(run.approvalExpiresAt) })}</p>}
+        </li>
+      ))}
+    </ul>
+  );
+}

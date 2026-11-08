@@ -3945,6 +3945,11 @@
         "supervised": "Überwacht",
         "supervisedHelp": "Jede Aktion wartet auf Ihre Zustimmung, bevor etwas gesendet wird.",
         "save": "Speichern"
+      },
+      "pendingApprovals": {
+        "button": "Genehmigungen ({count})",
+        "title": "Ausstehende Genehmigungen",
+        "empty": "Derzeit wartet nichts auf Genehmigung."
       }
     },
     "flows": {

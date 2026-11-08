@@ -3945,6 +3945,11 @@
         "supervised": "承認制",
         "supervisedHelp": "すべての操作は送信前にあなたの承認を待ちます。",
         "save": "保存"
+      },
+      "pendingApprovals": {
+        "button": "承認待ち ({count})",
+        "title": "承認待ちの一覧",
+        "empty": "現在、承認待ちのものはありません。"
       }
     },
     "flows": {

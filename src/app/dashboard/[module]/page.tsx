@@ -100,6 +100,7 @@ export default async function ModulePage(
           initialMinutesSaved={data.minutesSaved}
           initialDoneRuns={data.doneRuns}
           initialModes={data.modes}
+          initialPendingApprovals={data.pendingApprovals}
         />
       </div>
     );

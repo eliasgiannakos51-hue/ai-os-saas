@@ -3945,6 +3945,11 @@
         "supervised": "需审批",
         "supervisedHelp": "每个操作在发送前都会等待你的批准。",
         "save": "保存"
+      },
+      "pendingApprovals": {
+        "button": "待审批 ({count})",
+        "title": "等待审批",
+        "empty": "目前没有任何内容等待审批。"
       }
     },
     "flows": {

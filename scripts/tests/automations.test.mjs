@@ -527,7 +527,10 @@ check("…bounded as a free insert is: a limit per hour per account, and the per
   /const limited = await checkRateLimit\(\{ scope: "automation_template", identifier: user\.id, maxAttempts: 20, windowMinutes: 60 \}\);\s*if \(!limited\.allowed\) return refuse\("rate_limited", 429\);/.test(tplRoute) && /if \(\(count \?\? 0\) >= MAX_FLOWS\) return refuse\("too_many", 409, \{ limit: MAX_FLOWS \}\);/.test(tplRoute));
 check("…made off, version 1, the person's own row — an ordinary automation from then on",
   /\.insert\(\{ id, user_id: user\.id, name: name\.slice\(0, 60\), said, boxes, version: 1, is_active: false, time_zone: timeZone \}\)/.test(tplRoute) && /from\("automation_flow_versions"\)\.insert\(\{ flow_id: id, user_id: user\.id, version: 1, boxes, said \}\)/.test(tplRoute));
-check("the gallery opens only for readers the switch is open to", /isFeatureOn\("automation-templates", user\)/.test(page) && /templates=\{templatesOn\}/.test(page) && /open === "templates" && templates/.test(shell) && /templates\s*\? \[/.test(shell));
+// templates ? ( — not "? [": since the Approval Center (§14) joined it in
+// optionButtons, both option buttons are array ENTRIES now, not the
+// whole array's own ternary.
+check("the gallery opens only for readers the switch is open to", /isFeatureOn\("automation-templates", user\)/.test(page) && /templates=\{templatesOn\}/.test(page) && /open === "templates" && templates/.test(shell) && /templates\s*\? \(/.test(shell));
 
 // ---------------------------------------------------------------------
 console.log("\n== 13. «Σου γλίτωσε ~X ώρες»: time saved, measured (2026-11-05) ==");
@@ -585,6 +588,35 @@ for (const file of LOCALES) {
   const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.timeSaved ?? {};
   check(`${file}: the figure carries its number, and the how carries both factors`,
     /\{hours/.test(m.hours ?? "") && /\{minutes/.test(m.minutes ?? "") && /\{runs\}/.test(m.how ?? "") && /\{minutes\}/.test(m.how ?? "") && ["label", "unit", "help", "notYet"].every((k) => typeof m[k] === "string" && m[k].trim()));
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 14. the Approval Center (οδηγία 55): every waiting run, across every automation ==");
+check("loadPendingApprovals reads the person's own waiting runs, soonest deadline first, bounded",
+  /\.from\("automation_runs"\)\s*\.select\(RUN_COLUMNS\)\s*\.eq\("user_id", userId\)\s*\.eq\("status", "waiting_approval"\)\s*\.order\("approval_expires_at", \{ ascending: true, nullsFirst: false \}\)\s*\.limit\(PENDING_APPROVALS_SHOWN\);/.test(pageData));
+check("…no switch gates it — unconditionally in the page's Promise.all, unlike minutesSaved/modes beside it", /loadPendingApprovals\(supabase, user\.id\),/.test(pageData));
+check("…and a read that fails answers an empty list, never a thrown error reaching the page", /export async function loadPendingApprovals[\s\S]{0,450}?if \(error\) \{\s*logApiError\([^)]*\);\s*return \[\];\s*\}/.test(pageData));
+
+check("the dashboard page hands the Approval Center's own read down, unconditionally", /initialPendingApprovals=\{data\.pendingApprovals\}/.test(page));
+
+check("the shell seeds its state from the server read", /const \[pendingApprovals, setPendingApprovals\] = useState<ShownRun\[\]>\(\(\) => initialPendingApprovals\.map\(readShownRun\)\);/.test(shell));
+check("deciding a run — approve OR cancel, from either screen — drops it out of the Approval Center too",
+  /setRuns\(\(prev\) => prev\.map\(\(r\) => \(r\.id === next\.id \? next : r\)\)\);\s*setPendingApprovals\(\(prev\) => prev\.filter\(\(r\) => r\.id !== next\.id\)\);/.test(shell));
+check("the approvals button is drawn only while something is actually waiting", /pendingApprovals\.length > 0 \? \(\s*<button/.test(shell) && /data-testid="flow-approvals-open"/.test(shell));
+check("…and names how many, inside the button's own label", /t\("pendingApprovals\.button", \{ count: pendingApprovals\.length \}\)/.test(shell));
+check("opening the center shows the Approval Center panel, wired to the SAME decide() RunHistory's own buttons call",
+  /open === "approvals"\s*\n\s*\? \{\s*title: t\("pendingApprovals\.title"\),/.test(shell) &&
+    /onApprove=\{\(run\) => void decide\(run, true\)\}\s*\n\s*onCancel=\{\(run\) => void decide\(run, false\)\}\s*\n\s*onOpenFlow=\{\(flowId\) => void openFlow\(flowId\)\}/.test(shell));
+
+const pendingApprovalsForm = flowBoxes.slice(flowBoxes.indexOf("export function PendingApprovals"));
+check("PendingApprovals skips a run whose flow is not in the name map — nothing for the person to open", /const visible = runs\.filter\(\(r\) => flowName\[r\.flowId\]\);/.test(pendingApprovalsForm));
+check("…approve and cancel are the same two actions, disabled together while one is in flight", /disabled=\{busy !== null\}/.test(pendingApprovalsForm) && (pendingApprovalsForm.match(/disabled=\{busy !== null\}/g) ?? []).length === 2);
+check("…opening a flow from here is a real press, not a link that reloads the page", /onClick=\{\(\) => onOpenFlow\(run\.flowId\)\}/.test(pendingApprovalsForm));
+
+for (const file of LOCALES) {
+  const m = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.pendingApprovals ?? {};
+  check(`${file}: carries all three pendingApprovals.* keys, and the button's own count placeholder`,
+    /\{count\}/.test(m.button ?? "") && ["button", "title", "empty"].every((k) => typeof m[k] === "string" && m[k].trim()));
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);

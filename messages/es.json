@@ -3945,6 +3945,11 @@
         "supervised": "Supervisado",
         "supervisedHelp": "Cada acción espera tu aprobación antes de enviar nada.",
         "save": "Guardar"
+      },
+      "pendingApprovals": {
+        "button": "Aprobaciones ({count})",
+        "title": "Aprobaciones pendientes",
+        "empty": "Ahora mismo no hay nada esperando aprobación."
       }
     },
     "flows": {

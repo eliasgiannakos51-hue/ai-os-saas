@@ -3945,6 +3945,11 @@
         "supervised": "Supervised",
         "supervisedHelp": "Every action waits for your approval before it sends anything.",
         "save": "Save"
+      },
+      "pendingApprovals": {
+        "button": "Approvals ({count})",
+        "title": "Approvals waiting",
+        "empty": "Nothing is waiting for approval right now."
       }
     },
     "flows": {

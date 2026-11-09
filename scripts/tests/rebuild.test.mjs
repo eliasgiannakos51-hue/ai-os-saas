@@ -89,6 +89,14 @@ console.log("== 1. the plan: four boxes, each once, one changed alone, and the w
   const change = P.changeMessage("<html></html>", HOSTILE, "en");
   ok("a change fences the app and the words asked", inside(change, "<html></html>") && inside(change, HOSTILE));
   ok("the build rules say ORIGINAL, no network, and the storage helper", /ORIGINAL: its own name/.test(build) && /Never the name, logo, wording, pictures or code of any real product/.test(build) && /No network of any kind/.test(build) && /try \{ localStorage \}/.test(build));
+  // SEC-C3c (docs/QUEUE.md, 2026-11-09): findCredentialField()
+  // (lib/publishing/credential-fields.ts) already refuses a password
+  // field at checkAppHtml() time — AFTER a full write, charged like any
+  // other refused one. This is the same fact said BEFORE the write, so
+  // the model is told once, for less, instead of finding out from a
+  // refusal. The change call gets it too (shares BUILD_RULES).
+  ok("the build and change messages both tell the model not to draw a password field",
+    /No password field/.test(build) && /this app is served on this product's own address/.test(build) && /No password field/.test(change));
   ok("the plan call asks for a NEW name, never the other app's", /Give it a NEW name of its own/.test(planMsg));
   const sys = read("src/lib/rebuild/rebuild-system.ts");
   ok("the system prompt says data, and never a copy", /EVERY PAGE THEY POINT AT/.test(sys) && /NEVER A COPY/.test(sys) && /Never reproduce the name, logo, slogans, text, pictures, layout details or code/.test(sys) && sys.includes("${UNTRUSTED_OPEN}"));

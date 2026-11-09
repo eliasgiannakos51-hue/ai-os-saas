@@ -161,6 +161,15 @@ export const BUILD_RULES = [
   "It fills the space it is given, works with the keyboard AND with large touch targets on a phone, and says plainly when a list is empty.",
   "ORIGINAL: its own name, its own words, its own colours and shapes. Never the name, logo, wording, pictures or code of any real product, even when asked; take only the idea and the kind of screens.",
   "Put the numbers and texts that tune the app (labels, colours, limits) together at the top of the script as named constants, so a change asked in words changes them in one place.",
+  // SEC-C3c (docs/QUEUE.md, 2026-11-09): the app is served on the app's
+  // own domain (lib/publishing/credential-fields.ts), so a password field
+  // in it looks like the app asking — findCredentialField() already
+  // refuses one at checkAppHtml() time (lib/rebuild/rebuild-html.ts), but
+  // that refusal lands AFTER a full write has run and been charged. This
+  // rule is the same fact said to the model before it writes, so a plan
+  // that would need one is turned aside earlier and for less: a sign-in
+  // or "my account" screen is drawn, never a working one.
+  "No password field, and no sign-in or account screen that would need one (a real password input, an autocomplete of current-password or new-password, or a password drawn in CSS as dots) — this app is served on this product's own address, so a password field in it would look like the product itself asking for one. Draw a sign-in SCREEN if the plan calls for one, but with no working password field on it.",
   "Under 40,000 characters. The visible words in the language you are told.",
 ];
 

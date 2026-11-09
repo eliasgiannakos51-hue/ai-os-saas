@@ -172,6 +172,18 @@ const MUTANTS = [
     expect: "the build rules say ORIGINAL, no network, and the storage helper",
   },
   {
+    // SEC-C3c (docs/QUEUE.md, 2026-11-09): without this line, a plan with
+    // a sign-in screen is written in full, charged, and only THEN refused
+    // by findCredentialField() at checkAppHtml() time — this rule is the
+    // cheaper, earlier half of the same guarantee, never a replacement
+    // for it.
+    name: "the build rules stop warning the model off a password field",
+    file: PLAN,
+    from: '  "No password field, and no sign-in or account screen that would need one (a real password input, an autocomplete of current-password or new-password, or a password drawn in CSS as dots) — this app is served on this product\'s own address, so a password field in it would look like the product itself asking for one. Draw a sign-in SCREEN if the plan calls for one, but with no working password field on it.",\n',
+    to: "",
+    expect: "the build and change messages both tell the model not to draw a password field",
+  },
+  {
     name: "a failed build keeps the hold",
     file: CHARGE,
     from: "  if (!outcome.ok) {\n    await releaseReservation(user.id, reservationId);\n",

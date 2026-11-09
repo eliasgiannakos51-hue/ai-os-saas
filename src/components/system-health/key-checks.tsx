@@ -26,6 +26,10 @@ export type KeyInventoryRow = {
   readBy: string[];
   missing: string | null;
   set: boolean;
+  /** Where to GET the key — never where to paste it; the value itself
+   *  still only ever goes into Vercel, by hand (owner's own request,
+   *  2026-11-09: a missing key should say where it comes from). */
+  setupUrl: string | null;
 };
 
 const STATUS_TEXT: Record<KeyStatus, { text: string; tone: string }> = {
@@ -48,6 +52,8 @@ const SET_UNCHECKED = "set — not checked yet";
 const NOT_SET = "not set";
 const UNREAD = "No code reads this key yet.";
 const UNREAD_BUT_SET = "No code reads this key yet — it is set, and does nothing.";
+const GET_KEY = "Get a key →";
+const PASTE_HINT = "Paste it into Vercel → Settings → Environment Variables as ";
 
 /**
  * The owner's question of §1.0 (docs/v6-master.md): which keys work, and
@@ -128,6 +134,15 @@ export function KeyChecks({ rows }: { rows: KeyInventoryRow[] }) {
                 </p>
               )}
               {row.missing && <p className="text-muted">Missing: {row.missing}</p>}
+              {!row.set && row.setupUrl && (
+                <p className="text-muted" data-testid={`key-${row.id}-setup`}>
+                  <a href={row.setupUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                    {GET_KEY}
+                  </a>{" "}
+                  {PASTE_HINT}
+                  <code>{row.envVars[0]}</code>.
+                </p>
+              )}
             </li>
           );
         })}

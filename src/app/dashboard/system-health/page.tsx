@@ -71,6 +71,7 @@ export default async function SystemHealthPage() {
     readBy: entry.readBy,
     missing: entry.missing,
     set: keyVarFor(entry, process.env) !== null,
+    setupUrl: entry.setupUrl,
   }));
 
   // THE PAIRS. A per-variable list cannot show a problem that belongs to

@@ -12306,3 +12306,29 @@ media, `GEMINI_API_KEY`), το Completion Contract (§8), πολλαπλές σ�
 με δικό τους hero.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-09γ — System health: κάθε κλειδί λέει πού θα το βρεις
+
+Αίτημα του ιδιοκτήτη (2026-11-09): «εύκολο να συνδέεται» — το
+`/dashboard/system-health` έδειχνε ήδη ποιο κλειδί λείπει, αλλά όχι ΠΟΥ
+να το πάρεις. Νέο `setupUrl: string | null` σε κάθε `KeyEntry`
+(`src/lib/ai/providers/key-inventory.ts`) — το session/console του
+παρόχου, ΠΟΤΕ μια σελίδα που δέχεται την τιμή: το κλειδί συνεχίζει να
+μπαίνει ΜΟΝΟ στο Vercel, με το χέρι, όπως πάντα. `null` μόνο για το
+`vapid` (δεν είναι κλειδί παρόχου — παράγεται τοπικά με
+`npx web-push generate-vapid-keys`, δεν υπάρχει σελίδα εγγραφής να
+δείξω). Στο `key-checks.tsx`: όταν ένα κλειδί ΔΕΝ είναι ρυθμισμένο,
+εμφανίζεται «Get a key →» (σύνδεσμος, νέα καρτέλα, `rel="noopener
+noreferrer"`) + «Paste it into Vercel → Settings → Environment
+Variables as `<ENV_VAR>`».
+
+`scripts/tests/key-inventory.test.mjs` §7 (26 νέοι έλεγχοι, 119
+συνολικά: κάθε `setupUrl` είναι https και δεν κουβαλάει κλειδί/token
+μέσα του, το vapid δεν έχει, ο σύνδεσμος φαίνεται ΜΟΝΟ όταν το κλειδί
+λείπει) + `.mutation.mjs` (18/18 πιάστηκαν, 6 νέα mutants).
+
+`npm run gates` → ALL 413 GATES PASSED (30452 checks). `npm run
+build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων — μόνο ένα
+πεδίο σε πίνακα TypeScript και ένας σύνδεσμος στην οθόνη.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

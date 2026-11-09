@@ -54,6 +54,18 @@ export type KeyEntry = {
   missing: string | null;
   /** The cheap validity call, or null when the provider offers none. */
   check: KeyCheckSpec | null;
+  /**
+   * WHERE TO GET THE KEY — the owner's own request (2026-11-09): the
+   * system-health panel should say where a missing key comes from, not
+   * just that it is missing, so getting one does not mean coming back
+   * here to ask. Null for the one entry that is not a provider key at
+   * all (vapid — generated locally, nothing to sign up for). NEVER a
+   * place that accepts the value itself: every key is still pasted into
+   * Vercel by hand (docs/NEEDS-FROM-ELIAS.md), per this repo's own rule
+   * that a secret lives in Vercel/GitHub Secrets and nowhere this code
+   * can read it from the browser.
+   */
+  setupUrl: string | null;
 };
 
 export const KEY_INVENTORY: KeyEntry[] = [
@@ -68,6 +80,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
       url: "https://api.anthropic.com/v1/models?limit=1",
       headers: (key) => ({ "x-api-key": key, "anthropic-version": "2023-06-01" }),
     },
+    setupUrl: "https://console.anthropic.com/settings/keys",
   },
   {
     id: "openai",
@@ -77,6 +90,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     readBy: ["src/lib/ai/providers/registry.ts", "src/lib/voice/voice-providers.ts"],
     missing: "The blind-judge role does not exist yet (Evaluation Lab, V6.2).",
     check: { url: "https://api.openai.com/v1/models", headers: (key) => ({ authorization: `Bearer ${key}` }) },
+    setupUrl: "https://platform.openai.com/api-keys",
   },
   {
     id: "groq",
@@ -86,6 +100,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     readBy: ["src/lib/ai/providers/registry.ts"],
     missing: "Only failover today; nothing routes to it for speed yet.",
     check: { url: "https://api.groq.com/openai/v1/models", headers: (key) => ({ authorization: `Bearer ${key}` }) },
+    setupUrl: "https://console.groq.com/keys",
   },
   {
     id: "google",
@@ -98,6 +113,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
       url: "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
       headers: (key) => ({ "x-goog-api-key": key }),
     },
+    setupUrl: "https://aistudio.google.com/apikey",
   },
   {
     id: "mistral",
@@ -107,6 +123,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     readBy: ["src/lib/ai/providers/registry.ts"],
     missing: "Not set as of 2026-11-07. Until it is, every account that turns on «Μόνο Ευρώπη» gets eu_only_blocked on every call — there is no other EU provider in the catalog for it to route to.",
     check: { url: "https://api.mistral.ai/v1/models", headers: (key) => ({ authorization: `Bearer ${key}` }) },
+    setupUrl: "https://console.mistral.ai/api-keys/",
   },
   {
     id: "deepgram",
@@ -116,6 +133,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     readBy: [],
     missing: "No adapter. Greek support is unverified — Deepgram's language list is blocked from the build environment, so it is tested with a real Greek recording before it replaces Whisper.",
     check: { url: "https://api.deepgram.com/v1/projects", headers: (key) => ({ authorization: `Token ${key}` }) },
+    setupUrl: "https://console.deepgram.com/",
   },
   {
     id: "elevenlabs",
@@ -125,6 +143,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     readBy: ["src/lib/voice/voice-providers.ts"],
     missing: null,
     check: { url: "https://api.elevenlabs.io/v1/models", headers: (key) => ({ "xi-api-key": key }) },
+    setupUrl: "https://elevenlabs.io/app/settings/api-keys",
   },
   {
     id: "bfl",
@@ -134,6 +153,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     readBy: [],
     missing: "No adapter yet. Decided 2026-10-24 as the Image tool's Draft provider (docs/IMAGE-PROVIDERS.md) — becomes a real sub-processor, and this entry's readBy changes, the day a route actually sends it a prompt (κομμάτι 3).",
     check: { url: "https://api.bfl.ai/v1/credits", headers: (key) => ({ "x-key": key }) },
+    setupUrl: "https://api.bfl.ai/auth/profile",
   },
   {
     id: "ideogram",
@@ -144,6 +164,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
     missing: "No adapter.",
     // Ideogram has no read-only call: every endpoint generates, and costs.
     check: null,
+    setupUrl: "https://ideogram.ai/manage-api",
   },
   {
     id: "runway",
@@ -156,6 +177,7 @@ export const KEY_INVENTORY: KeyEntry[] = [
       url: "https://api.dev.runwayml.com/v1/organization",
       headers: (key) => ({ authorization: `Bearer ${key}`, "x-runway-version": "2024-11-06" }),
     },
+    setupUrl: "https://dev.runwayml.com/",
   },
   {
     id: "vapid",
@@ -166,6 +188,11 @@ export const KEY_INVENTORY: KeyEntry[] = [
     missing: null,
     // Not an API key: a signing key. There is no provider to ask.
     check: null,
+    // Not a sign-up page either — generated locally with `npx web-push
+    // generate-vapid-keys`, which is why `missing` above is null (there is
+    // nothing to wait on) and this stays null rather than pointing at a
+    // page that does not exist.
+    setupUrl: null,
   },
 ];
 

@@ -180,6 +180,25 @@ const page = stripComments(readFileSync(PAGE, "utf8"));
 check("the page renders the panel", /<KeyChecks rows={keyRows} \/>/.test(page));
 check("the page passes whether a key is set, as a boolean", /set:\s*keyVarFor\(entry,\s*process\.env\)\s*!==\s*null/.test(page));
 
+// §7 — "where do I get this key", the owner's own request (2026-11-09):
+// a missing key should say where it comes from, without ever accepting
+// the value itself anywhere but Vercel.
+console.log("\n== 7. setupUrl: where to get a missing key, never where to paste it ==");
+check("the page passes setupUrl through to the panel", /setupUrl:\s*entry\.setupUrl/.test(page));
+for (const entry of KEY_INVENTORY) {
+  if (entry.setupUrl === null) continue;
+  check(`${entry.id}: setupUrl is https`, /^https:\/\//.test(entry.setupUrl), entry.setupUrl);
+  check(`${entry.id}: setupUrl carries no key or secret in it`, !/key=|secret=|token=/i.test(entry.setupUrl), entry.setupUrl);
+}
+check(
+  "vapid has no setupUrl — it is generated locally, not a provider sign-up page",
+  KEY_INVENTORY.find((e) => e.id === "vapid")?.setupUrl === null,
+);
+check("the panel renders a 'Get a key' link only when the key is NOT set", /!row\.set && row\.setupUrl/.test(panel));
+check("the panel's paste-hint names Vercel and Environment Variables, never the value", /Vercel.*Environment Variables/.test(panel) && !/value/i.test(panel.match(/PASTE_HINT[^;]*;/)?.[0] ?? ""));
+check("the panel links to the setup URL itself, not a hardcoded string", /href={row\.setupUrl}/.test(panel));
+check("the setup link opens in a new tab with noopener (it leaves the app)", /target="_blank" rel="noopener noreferrer"/.test(panel));
+
 console.log(
   failures.length === 0
     ? `\nALL PASS: ${pass} passed, 0 failed`

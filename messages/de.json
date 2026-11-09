@@ -3530,6 +3530,11 @@
           "report": "Bericht",
           "customers": "Kunden"
         }
+      },
+      "favoritesOnly": "Nur Favoriten",
+      "noFavorites": {
+        "title": "Noch nichts markiert",
+        "why": "Markiere etwas in Site, Slides oder Dokumente mit einem Stern, damit es hier erscheint."
       }
     },
     "myStuff": {

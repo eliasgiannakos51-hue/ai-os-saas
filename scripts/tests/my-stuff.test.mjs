@@ -383,14 +383,23 @@ console.log("\n== 9. Κομμάτι 6 (2026-10-28): same item count before/after
   function fakeDb() {
     return {
       from(table) {
-        const call = { table, eq: [], order: null, limit: null };
+        const call = { table, eq: [], in: null, order: null, limit: null };
         const q = {
           select() { return q; },
           eq(col, val) { call.eq.push([col, val]); return q; },
+          // loadLibrary now also asks user_favorites who has starred what
+          // (lib/favorites.ts's loadFavoriteIds) — not a row anywhere in
+          // ROWS above, so this always answers "nobody starred anything",
+          // same as a real account with no favorites yet.
+          in(col, vals) { call.in = [col, vals]; return q; },
           order(col, opts) { call.order = [col, opts?.ascending]; return q; },
           limit(n) { call.limit = n; return q; },
           then(resolve) {
             let rows = (ROWS[table] ?? []).filter((r) => call.eq.every(([c, v]) => r[c] === v));
+            if (call.in) {
+              const [col, vals] = call.in;
+              rows = rows.filter((r) => vals.includes(r[col]));
+            }
             const [col] = call.order ?? [];
             if (col) rows = [...rows].sort((x, y) => String(y[col]).localeCompare(String(x[col])));
             return resolve({ data: rows.slice(0, call.limit ?? rows.length), error: null });

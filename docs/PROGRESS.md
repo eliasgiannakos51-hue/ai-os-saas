@@ -12332,3 +12332,52 @@ build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δ
 πεδίο σε πίνακα TypeScript και ένας σύνδεσμος στην οθόνη.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-09δ — Βιβλιοθήκη: φίλτρο «Μόνο αγαπημένα»
+
+Πρώτο από τα τρία έτοιμα-για-build στοιχεία της λίστας (Βιβλιοθήκη /
+Εργαλεία στο Chat / Περιθώριο κόστους ανά εργαλείο) — ο ιδιοκτήτης είπε
+«κάντα όλα» (2026-11-09) στην προηγούμενη ερώτηση διευκρίνισης, άρα αυτό
+συνεχίζει τη σειρά, όχι η πρόταση Agent Pro, που παραμένει σε αναμονή
+έγκρισης.
+
+Μόνο 3 από τα 7 είδη της Βιβλιοθήκης είναι σήμερα «αγαπημένα» οπουδήποτε
+στην εφαρμογή — site/`user_websites`, slides/`ai_presentations`,
+document/`user_documents` (`src/lib/favoritable.ts`'s `FAVORITABLE`,
+`LINK_ONLY_MODULES` εξαιρεί τα άλλα 4: posts/research/analysis/file).
+Επαληθεύτηκε με ανάγνωση κώδικα πριν γραφτεί τίποτα — όχι υπόθεση.
+
+`src/lib/library/load.ts`: νέο `favoriteOnly?: boolean` στο `loadLibrary`,
+νέο `favorited: boolean` σε κάθε `LibraryItem`, νέο εξαγόμενο
+`FAVORITABLE_LIBRARY_KINDS`. Το αστέρι διαβάζεται από το ΙΔΙΟ
+`user_favorites` που διαβάζει ήδη κάθε άλλο κουμπί-αστέρι
+(`loadFavoriteKeys`, `lib/favorites.ts`) — μία ερώτηση ανά πίνακα που
+είναι όντως favoritable, ποτέ μία ανά αντικείμενο, και ποτέ για
+posts/research/analysis/file (δεν υπάρχει κλειδί ερώτησης γι' αυτά).
+`src/app/dashboard/timeline/page.tsx`: διαβάζει `?fav=1`.
+`src/components/library/library-view.tsx`: τσιπ «★ Μόνο αγαπημένα» δίπλα
+στα τσιπ είδους (ίδιο μοτίβο `<Link>`/`aria-current`), αστεράκι στο ίδιο
+το αντικείμενο όταν είναι αγαπημένο, δικό του κενό μήνυμα
+(«noFavorites») αντί για το γενικό όταν το φίλτρο δεν βρίσκει τίποτα. Τα
+`kind`/`q`/`fav` διατηρούνται μαζί σε κάθε σύνδεσμο.
+
+Λέξεις σε όλες τις 10 γλώσσες (`favoritesOnly`, `noFavorites.title`,
+`noFavorites.why`) — μόνο προσθήκη, καμία αναδιάταξη του υπόλοιπου
+αρχείου. `npm run i18n:first-run` ξανατρέχτηκε (το πακέτο πρώτης χρήσης
+μετακινήθηκε με τις νέες λέξεις).
+
+`scripts/tests/library.test.mjs` §3b (12 νέοι έλεγχοι: αστέρι σε site/
+slides φαίνεται, ένα «αδέσποτο» `user_favorites` σε μη-favoritable είδος
+(posts) ΔΕΝ φαίνεται ποτέ ως αγαπημένο, favoriteOnly συνδυάζεται με
+kind, καμία ερώτηση στο user_favorites για είδος εκτός registry) + §8
+(9 νέοι έλεγχοι στο UI) + `.mutation.mjs` (10 νέα mutants, 34/34
+πιάστηκαν). Βρέθηκε και διορθώθηκε στην πορεία: το `my-stuff.test.mjs`
+είχε δικό του ψεύτικο Supabase που καλεί `loadLibrary` απευθείας και δεν
+είχε `.in()` — έσκαγε με `TypeError`, όχι FAIL· προστέθηκε `.in()` στο
+mock του (ίδιο μοτίβο με το library.test.mjs).
+
+`npm run gates` → ALL 413 GATES PASSED (30473 checks). `npm run
+build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων — διαβάζει τον
+ίδιο πίνακα `user_favorites` που διαβάζει ήδη η σελίδα Favorites.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

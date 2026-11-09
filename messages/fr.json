@@ -3530,6 +3530,11 @@
           "report": "rapport",
           "customers": "clients"
         }
+      },
+      "favoritesOnly": "Favoris uniquement",
+      "noFavorites": {
+        "title": "Rien n'est encore marqué",
+        "why": "Mettez une étoile sur un élément dans Site, Diapositives ou Documents pour l'épingler ici."
       }
     },
     "myStuff": {

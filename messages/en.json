@@ -3530,6 +3530,11 @@
           "report": "report",
           "customers": "customers"
         }
+      },
+      "favoritesOnly": "Favorites only",
+      "noFavorites": {
+        "title": "Nothing starred yet",
+        "why": "Star something in Site, Slides or Documents to pin it here."
       }
     },
     "myStuff": {

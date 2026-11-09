@@ -3530,6 +3530,11 @@
           "report": "rapporto",
           "customers": "clienti"
         }
+      },
+      "favoritesOnly": "Solo preferiti",
+      "noFavorites": {
+        "title": "Niente ancora contrassegnato",
+        "why": "Metti una stella su qualcosa in Sito, Diapositive o Documenti per fissarlo qui."
       }
     },
     "myStuff": {

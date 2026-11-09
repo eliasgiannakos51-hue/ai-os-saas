@@ -3530,6 +3530,11 @@
           "report": "informe",
           "customers": "clientes"
         }
+      },
+      "favoritesOnly": "Solo favoritos",
+      "noFavorites": {
+        "title": "Nada marcado todavía",
+        "why": "Marca algo en Sitio, Diapositivas o Documentos con una estrella para fijarlo aquí."
       }
     },
     "myStuff": {

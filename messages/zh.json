@@ -3530,6 +3530,11 @@
           "report": "报告",
           "customers": "客户"
         }
+      },
+      "favoritesOnly": "仅收藏",
+      "noFavorites": {
+        "title": "还没有收藏任何内容",
+        "why": "在「网站」「幻灯片」或「文档」中给某项加星标，它就会显示在这里。"
       }
     },
     "myStuff": {

@@ -179,23 +179,40 @@ const ROWS = {
   data_analyses: [],
   user_files: [],
 };
+// Starred rows, the shape of the real user_favorites table (lib/favorites.ts).
+// a1 (site) and b1 (slides) are starred by ME — both kinds are in the
+// FAVORITABLE registry. c1 is a "stray" row on a kind that is NOT
+// favoritable (posts) — it must never surface as starred or change what
+// favoriteOnly returns, exactly as lib/favoritable.ts's LINK_ONLY_MODULES
+// intends.
+const FAVORITES = [
+  { id: "f1", user_id: ME, table_name: "user_websites", record_id: "a1", created_at: "2026-10-08T00:00:00Z" },
+  { id: "f2", user_id: ME, table_name: "ai_presentations", record_id: "b1", created_at: "2026-10-08T00:00:01Z" },
+  { id: "f3", user_id: ME, table_name: "generated_posts", record_id: "c1", created_at: "2026-10-08T00:00:02Z" },
+];
 function fakeSupabase({ failTable = null } = {}) {
   const calls = [];
   return {
     calls,
     from(table) {
-      const call = { table, eq: [], order: null, limit: null, select: null };
+      const call = { table, eq: [], in: null, order: null, limit: null, select: null };
       calls.push(call);
       const q = {
         select(cols) { call.select = cols; return q; },
         eq(col, val) { call.eq.push([col, val]); return q; },
+        in(col, vals) { call.in = [col, vals]; return q; },
         order(col, opts) { call.order = [col, opts?.ascending]; return q; },
         limit(n) { call.limit = n; return q; },
         then(resolve) {
           if (table === failTable) return resolve({ data: null, error: { message: "relation does not exist" } });
-          let rows = (ROWS[table] ?? []).filter((r) => call.eq.every(([c, v]) => r[c] === v));
+          const base = table === "user_favorites" ? FAVORITES : ROWS[table] ?? [];
+          let rows = base.filter((r) => call.eq.every(([c, v]) => r[c] === v));
+          if (call.in) {
+            const [col, vals] = call.in;
+            rows = rows.filter((r) => vals.includes(r[col]));
+          }
           const [col] = call.order ?? [];
-          rows = [...rows].sort((x, y) => String(y[col]).localeCompare(String(x[col])));
+          if (col) rows = [...rows].sort((x, y) => String(y[col]).localeCompare(String(x[col])));
           return resolve({ data: rows.slice(0, call.limit ?? rows.length), error: null });
         },
       };
@@ -207,14 +224,18 @@ function fakeSupabase({ failTable = null } = {}) {
 {
   const db = fakeSupabase();
   const { items, failed } = await load.loadLibrary(db, ME, { kind: null, query: "" });
-  check("every source is read once", db.calls.length === SOURCES.length, db.calls.map((c) => c.table).join(","));
-  check("every query carries the owner, not RLS alone", db.calls.every((c) => c.eq.some(([col, v]) => col === "user_id" && v === ME)));
-  check("every query is newest first by its own time column", db.calls.every((c) => {
+  // Starring is a second question, asked of user_favorites after the
+  // sources come back (§3b below) — excluded here so these checks stay
+  // about the sources themselves.
+  const sourceCalls = db.calls.filter((c) => c.table !== "user_favorites");
+  check("every source is read once", sourceCalls.length === SOURCES.length, sourceCalls.map((c) => c.table).join(","));
+  check("every query carries the owner, not RLS alone", sourceCalls.every((c) => c.eq.some(([col, v]) => col === "user_id" && v === ME)));
+  check("every query is newest first by its own time column", sourceCalls.every((c) => {
     const s = SOURCES.find((x) => x.table === c.table);
     return c.order && c.order[0] === s.timeColumn && c.order[1] === false;
   }));
-  check("every query is bounded", db.calls.every((c) => c.limit === load.PER_SOURCE_LIMIT));
-  check("without a search, no page text, deck or file text is read", db.calls.every((c) => {
+  check("every query is bounded", sourceCalls.every((c) => c.limit === load.PER_SOURCE_LIMIT));
+  check("without a search, no page text, deck or file text is read", sourceCalls.every((c) => {
     const s = SOURCES.find((x) => x.table === c.table);
     return !s.contentColumns.split(",").some((col) => c.select.split(",").map((x) => x.trim()).includes(col.trim()));
   }));
@@ -236,7 +257,8 @@ function fakeSupabase({ failTable = null } = {}) {
 {
   const db = fakeSupabase();
   const { items } = await load.loadLibrary(db, ME, { kind: "slides", query: "" });
-  check("one kind reads one table", db.calls.length === 1 && db.calls[0].table === "ai_presentations");
+  const sourceCalls = db.calls.filter((c) => c.table !== "user_favorites");
+  check("one kind reads one table", sourceCalls.length === 1 && sourceCalls[0].table === "ai_presentations");
   check("...and shows only that kind", items.length === 1 && items[0].kind === "slides");
 }
 async function search(query) {
@@ -285,6 +307,79 @@ check("a search for nothing they made finds nothing", (await search("ποδήλ�
 }
 check("textOfHtml drops scripts and styles", sources.textOfHtml("<style>.x{}</style><script>var y</script><p>ναι</p>") === "ναι");
 check("a long search is cut at the page (200 characters)", /searchParams\.q\.slice\(0, 200\)/.test(code("src/app/dashboard/timeline/page.tsx")));
+
+// ---------------------------------------------------------------------
+console.log("\n== 3b. favorites: starred state, and the favorites-only filter ==");
+// ---------------------------------------------------------------------
+// Only 3 of the 7 kinds are in the FAVORITABLE registry today (site,
+// slides, document) — lib/favoritable.ts's LINK_ONLY_MODULES is why the
+// other 4 are not a gap this file invents a fix for.
+check(
+  "the favoritable kinds are exactly site, slides, document, today",
+  [...load.FAVORITABLE_LIBRARY_KINDS].sort().join(",") === "document,site,slides",
+  [...load.FAVORITABLE_LIBRARY_KINDS].join(","),
+);
+{
+  const db = fakeSupabase();
+  const { items } = await load.loadLibrary(db, ME, { kind: null, query: "" });
+  const by = (id) => items.find((i) => i.id === id);
+  check("a starred site is marked favorited", by("a1")?.favorited === true);
+  check("a starred deck is marked favorited", by("b1")?.favorited === true);
+  check(
+    "a stray user_favorites row on a non-favoritable kind (posts) never surfaces as starred",
+    by("c1")?.favorited === false,
+  );
+  check("an unstarred site is not marked favorited", by("a3") === undefined); // not ME's — sanity: a3 excluded regardless
+  check(
+    "user_favorites is queried once per favoritable table actually present, not once per item",
+    db.calls.filter((c) => c.table === "user_favorites").length === 2,
+    db.calls.filter((c) => c.table === "user_favorites").map((c) => c.in).join(" | "),
+  );
+}
+{
+  const db = fakeSupabase();
+  const { items } = await load.loadLibrary(db, ME, { kind: null, query: "", favoriteOnly: true });
+  check(
+    "favoriteOnly keeps only starred items, newest first",
+    items.map((i) => i.id).join(",") === "a1,b1",
+    items.map((i) => i.id).join(","),
+  );
+  check("every returned item is marked favorited", items.every((i) => i.favorited === true));
+}
+{
+  const db = fakeSupabase();
+  const { items } = await load.loadLibrary(db, ME, { kind: "slides", query: "", favoriteOnly: true });
+  check("favoriteOnly composes with a kind filter", items.length === 1 && items[0].id === "b1", items.map((i) => i.id).join(","));
+}
+{
+  const db = fakeSupabase();
+  const { items } = await load.loadLibrary(db, ME, { kind: "posts", query: "", favoriteOnly: true });
+  check(
+    "favoriteOnly on a kind that can't be starred returns nothing, not the stray row",
+    items.length === 0,
+    items.map((i) => i.id).join(","),
+  );
+}
+check(
+  "no query asks user_favorites about a kind that isn't in the FAVORITABLE registry",
+  (await (async () => {
+    const db = fakeSupabase();
+    await load.loadLibrary(db, ME, { kind: "posts", query: "" });
+    return db.calls.filter((c) => c.table === "user_favorites").length;
+  })()) === 0,
+);
+{
+  // g1 is favoritable (document) but NOT starred — the control case that
+  // tells "favoritable, unstarred" apart from "not favoritable at all"
+  // (both read false, for different reasons). Pushed and popped, like the
+  // file fixture further down, so it never shifts the "newest first
+  // across tools" ordering asserted on the shared ROWS above.
+  ROWS.user_documents.push({ id: "g1", user_id: ME, title: "Σημειώσεις", created_at: "2026-10-07T13:00:00Z" });
+  const db = fakeSupabase();
+  const { items } = await load.loadLibrary(db, ME, { kind: "document", query: "" });
+  check("a favoritable, unstarred item reads favorited: false", items.length === 1 && items[0].favorited === false, JSON.stringify(items));
+  ROWS.user_documents.length = 0;
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. the switch ==");
@@ -343,8 +438,8 @@ check("a tool that did not load is never followed by «nothing made» or «nothi
 // ---------------------------------------------------------------------
 console.log("\n== 6. the words, in every language ==");
 // ---------------------------------------------------------------------
-const KEYS = ["description", "tab", "searchLabel", "searchPlaceholder", "searchButton", "searchScope", "kindsLabel", "all", "failed", "untitled", "empty.title", "empty.why", "noMatch.title", "noMatch.why", ...sources.LIBRARY_KINDS.map((k) => `kinds.${k}`)];
-check(`the words to look for (${KEYS.length})`, KEYS.length >= 21);
+const KEYS = ["description", "tab", "searchLabel", "searchPlaceholder", "searchButton", "searchScope", "kindsLabel", "all", "failed", "untitled", "empty.title", "empty.why", "noMatch.title", "noMatch.why", "favoritesOnly", "noFavorites.title", "noFavorites.why", ...sources.LIBRARY_KINDS.map((k) => `kinds.${k}`)];
+check(`the words to look for (${KEYS.length})`, KEYS.length >= 24);
 for (const locale of readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5))) {
   const lib = JSON.parse(read(`messages/${locale}.json`)).dashboard?.library ?? {};
   const get = (k) => k.split(".").reduce((o, p) => (o ? o[p] : undefined), lib);
@@ -420,6 +515,24 @@ check("Greek says «Βιβλιοθήκη» and English says «Library»", NAME.e
       typeof allTools.HIDDEN_FROM_ALL_TOOLS["/dashboard/timeline"] === "string" &&
       allTools.HIDDEN_FROM_ALL_TOOLS["/dashboard/timeline"].length > 0);
 }
+
+// ---------------------------------------------------------------------
+console.log("\n== 8. the favorites-only chip, wired from the address to the query ==");
+// ---------------------------------------------------------------------
+const timelineAfter = code("src/app/dashboard/timeline/page.tsx");
+check("the page reads ?fav=1", /searchParams\.fav === "1"/.test(timelineAfter));
+check("the page hands favoriteOnly to loadLibrary", /loadLibrary\(supabase, user\.id, \{ kind, query, favoriteOnly \}\)/.test(timelineAfter));
+check("the page hands favoriteOnly to the view", /<LibraryView items=\{items\} kind=\{kind\} query=\{query\} favoriteOnly=\{favoriteOnly\} failed=\{failed\} \/>/.test(timelineAfter));
+const view = code("src/components/library/library-view.tsx");
+check("the view carries ?fav=1 as a hidden field on search, same as ?kind", /\{favoriteOnly && <input type="hidden" name="fav" value="1" \/>\}/.test(view));
+check(
+  "the kind chips keep fav set when switching kind",
+  /if \(query\) params\.set\("q", query\);\n\s*if \(favoriteOnly\) params\.set\("fav", "1"\);/.test(view),
+);
+check("there is a star toggle chip with its own testid", /data-testid="library-favorite-toggle"/.test(view));
+check("the toggle flips fav on and off, keeping kind and query", /if \(!favoriteOnly\) params\.set\("fav", "1"\);/.test(view));
+check("a starred item shows a filled star badge", /data-testid="library-item-favorited"/.test(view) && /item\.favorited &&/.test(view));
+check("an empty favorites-only result gets its own message, not the generic empty state", /favoriteOnly \? \(\s*<EmptyState icon=\{Star\} title=\{t\("noFavorites\.title"\)\}/.test(view));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILED"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length > 0) process.exit(1);

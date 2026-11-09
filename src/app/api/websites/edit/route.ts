@@ -7,6 +7,7 @@ import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
 import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
+import { applyCinematicHeroParallax } from "@/lib/cinematic/hero-storyboard";
 import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
@@ -435,6 +436,19 @@ export async function POST(request: Request) {
       // read, used by both the strip and the scan so they cannot drift
       // apart on which script path an edited page may keep.
       const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);
+      // Style ΣΤ — ONLY when the edited page is the site's home page
+      // (targetIndex === HOME_INDEX, resolved above from pageSlugRaw):
+      // an edit to "Contact" or "About" must not pick up that page's own
+      // first <img> (often a small logo, not a hero) and parallax it.
+      // Idempotent (lib/cinematic/hero-storyboard.ts's `data-ix-hero`
+      // marker), so re-editing the home page repeatedly never doubles
+      // the attribute or the caption. Same ordering reason as the
+      // generate route: before stripDisallowedExternalScripts, which
+      // only strips <script src> and would otherwise run on HTML that
+      // doesn't have this step's attribute yet.
+      if (cinematicSitesEnabled && targetIndex === HOME_INDEX) {
+        updatedHtml = applyCinematicHeroParallax(updatedHtml).html;
+      }
       updatedHtml = stripDisallowedExternalScripts(updatedHtml, cinematicSitesEnabled);
       const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled });
       const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs, user.id);

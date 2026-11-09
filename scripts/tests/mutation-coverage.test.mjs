@@ -331,13 +331,15 @@ console.log(
 // agents-shell.mutation.mjs is the one that pushed it to six. The
 // ratchet is a floor on how many gates have a suite at all, so it is
 // raised to the truth rather than to a comfortable number below it.
-// 304 -> 312 -> 313 -> 317 -> 319 -> 320 -> 321 on 2026-11-05/07, read off
-// each run as rounds rebased onto each other (github-repo-access,
+// 304 -> 312 -> 313 -> 317 -> 319 -> 320 -> 321 -> 322 on 2026-11-05/07/08,
+// read off each run as rounds rebased onto each other (github-repo-access,
 // billing-integrity, five accounts-security suites, prompt-caching,
-// storage-cleanup.mutation.mjs). This round adds site-pick-frame.mutation.mjs
-// (the Site preview's in-page block picker, ED2) on top of that — the
-// floor is whatever this rebased tree measures now.
-const RATCHET = 322;
+// storage-cleanup.mutation.mjs, site-pick-frame.mutation.mjs). This round
+// (2026-11-09) adds cinematic-hero.mutation.mjs (style ΣΤ's hero parallax,
+// the first cinematic-sites style actually wired into generation — see
+// docs/PROGRESS.md 2026-11-09) on top of that — the floor is whatever this
+// rebased tree measures now.
+const RATCHET = 328;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

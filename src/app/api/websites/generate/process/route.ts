@@ -31,6 +31,7 @@ import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/web
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
 import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
+import { applyCinematicHeroParallax } from "@/lib/cinematic/hero-storyboard";
 import {
   describeSecurityScanIssue,
   scanWebsiteHtmlForSecurityIssues,
@@ -824,6 +825,19 @@ export async function POST(request: Request) {
       // (ALLOWED_IFRAME_EMBEDS's comment on why it is now ONE list for
       // both the scan and the CSP, not two that can drift apart).
       const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);
+      // Style ΣΤ (docs/v6-cinematic-sites-2026-10-03.md §1): the home
+      // page's first image gets a gentle parallax and an honest "not
+      // live yet" caption — see lib/cinematic/hero-storyboard.ts for why
+      // this is deterministic rather than a prompt line, and why only
+      // `cleaned[0]` (the home document; `documents`/`cleaned` are built
+      // as `[split.home, ...keptPages]` above) rather than every page.
+      // MUST run before stripDisallowedExternalScripts below: that call
+      // only strips <script src>, never touches a bare data attribute,
+      // but reading cleaned[0] before it is written would silently drop
+      // this step's own output on the next line.
+      if (cinematicSitesEnabled && cleaned.length > 0) {
+        cleaned[0] = applyCinematicHeroParallax(cleaned[0]).html;
+      }
       const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));
 
       // FINDABLE ON THE WEB. The prompt asks for a real title, a real

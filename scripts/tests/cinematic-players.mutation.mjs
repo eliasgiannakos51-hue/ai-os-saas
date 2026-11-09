@@ -64,8 +64,13 @@ const MUTANTS = [
   {
     name: "the generate route reads the switch TWICE — strip and scan could silently disagree",
     file: PROCESS,
-    from: 'const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);\n      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));',
-    to: 'const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);\n      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));\n      const cinematicSitesEnabledAgain = await isFeatureOn("cinematic-sites", user); void cinematicSitesEnabledAgain;',
+    // Anchored on the flag's own declaration line plus the strip call
+    // alone (not the hero-parallax lines 2026-11-09 now inserted between
+    // them, which would make this anchor go stale the next time THAT
+    // block's own wording changes — see cinematic-hero.mutation.mjs for
+    // the mutant that owns the hero step's own position in this file).
+    from: 'const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);',
+    to: 'const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);\n      const cinematicSitesEnabledAgain = await isFeatureOn("cinematic-sites", user); void cinematicSitesEnabledAgain;',
     expect: "the switch is read exactly once per request",
   },
   {

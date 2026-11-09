@@ -341,6 +341,10 @@ export function ImageShell({
   });
 
   const chosenVariant = shown && chosen !== null ? shown.variants.find((v) => v.index === chosen) ?? null : null;
+  // THE HERO IMAGE: the chosen variant, or the first one while nothing is
+  // chosen yet — the thumbnail strip never shows with nothing large above
+  // it (docs/design/approved/14-Image.png).
+  const mainVariant = chosenVariant ?? shown?.variants[0] ?? null;
 
   // SAME PRODUCT AND SEARCH THE WEB FIRST, drawn once: in the work's own
   // right-hand column under the old shell, in the editor layout's panel
@@ -507,7 +511,24 @@ export function ImageShell({
 
               <div className="min-w-0 flex-1 space-y-3">
                 {shown.variants.length < IMAGE_VARIANTS && <p className="text-xs text-muted">{t("made", { made: shown.variants.length, asked: IMAGE_VARIANTS })}</p>}
-                <ul data-testid="image-grid" className="grid grid-cols-2 gap-2">
+                {/* ONE LARGE PREVIEW ABOVE A THUMBNAIL STRIP (docs/design/
+                    approved/14-Image.png; docs/QUEUE.md ED2, 2026-11-09),
+                    replacing the plain 2x2 grid. The strip IS `image-grid`
+                    still — same 4 `<img>`s inside the same `image-variant`
+                    buttons, so every prodtest that waits on
+                    `[data-testid="image-grid"] img` or presses
+                    `image-variant` (image-studio.prodtest.mjs,
+                    image-studio-edges.prodtest.mjs,
+                    editor-shell.prodtest.mjs) reads exactly what it did
+                    before; only the layout around it changed. The hero is
+                    additional, not a replacement for anything a test reads. */}
+                {mainVariant && (
+                  <div data-testid="image-hero" className={`relative mx-auto w-full max-w-md overflow-hidden rounded-item bg-panel ring-2 ring-foreground ${ASPECT_CLASS[shown.aspect]}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- a short signed address to a private bucket; next/image would proxy and cache it */}
+                    <img src={mainVariant.url} alt={t("picture", { n: mainVariant.index + 1 })} className="h-full w-full object-cover" />
+                  </div>
+                )}
+                <ul data-testid="image-grid" className="mx-auto grid max-w-md grid-cols-4 gap-2">
                   {shown.variants.map((variant) => (
                     <li key={`${variant.index}-${variant.url}`}>
                       <button
@@ -516,11 +537,10 @@ export function ImageShell({
                         aria-pressed={chosen === variant.index}
                         aria-label={t("picture", { n: variant.index + 1 })}
                         data-testid="image-variant"
-                        className={`relative block w-full overflow-hidden rounded-item bg-panel ${ASPECT_CLASS[shown.aspect]} ${chosen === variant.index ? "ring-2 ring-foreground" : ""}`}
+                        className={`relative block aspect-square w-full overflow-hidden rounded-item bg-panel ${chosen === variant.index ? "ring-2 ring-foreground" : "opacity-80 hover:opacity-100"}`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element -- a short signed address to a private bucket; next/image would proxy and cache it */}
                         <img src={variant.url} alt={t("picture", { n: variant.index + 1 })} className="h-full w-full object-cover" />
-                        <span className="absolute start-1.5 top-1.5 rounded-item bg-background/80 px-1.5 text-[11px] text-foreground">{variant.index + 1}</span>
                       </button>
                     </li>
                   ))}

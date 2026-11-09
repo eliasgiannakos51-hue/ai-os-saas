@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useLimitText } from "@/lib/errors/use-error-text";
 import { Ban, AlertTriangle, Check, CircleDot, Clock, Inbox, Play, Pause, Search } from "lucide-react";
 import { ACTION, ChosenBox, OPTION, ToolShell, type ShellTurn } from "@/components/shell/tool-shell";
+import { useEditorShell } from "@/components/shell/editor-shell-context";
 import { ShellHistoryColumn, type ShellHistoryRow } from "@/components/shell/shell-history-column";
 import { VoicePlayer } from "@/components/voice/voice-player";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
@@ -283,6 +284,14 @@ export function AgentsShell({
   const { addToast } = useToast();
   const { refresh: refreshCredits } = useCredits();
   const scheduleLabel = useScheduleLabel();
+  // Whether the editor layout is drawing this screen (docs/QUEUE.md ED2,
+  // 2026-11-09): the old shell ignores `work.primary` entirely
+  // (components/shell/tool-shell.tsx's own comment on the type), so the
+  // pause/resume toggle below is either the bar's own filled button
+  // (old shell, inside `actions`, as it always drew it) or the one
+  // `work.primary` — never both, which is what website-shell.tsx's
+  // `sitePrimary` already does for Site.
+  const editor = useEditorShell();
 
   const [turns, setTurns] = useState<Turn[]>([]);
   /**
@@ -1314,6 +1323,25 @@ export function AgentsShell({
 
   const lastFailure = selectedRuns.find((r) => r.status === "failed" && r.error);
 
+  // THE SCREEN'S ONE WHITE BUTTON, and the thing the whole screen is about:
+  // whether this agent runs on its schedule or not. Defined once so the
+  // old shell (no bar slot of its own: it draws it inline below, inside
+  // `actions`) and the editor layout (components/shell/editor-shell.tsx,
+  // which draws its OWN white button from `work.primary` and would
+  // otherwise draw this one too — white sitting among the outlined
+  // `actions`, docs/QUEUE.md ED2, 2026-11-09) never both draw it, the same
+  // split website-shell.tsx's `sitePrimary` already uses for Site.
+  const toggleLabel = selected?.status === "active" ? t("menuPause") : t("menuResume");
+  const toggleOnClick = () =>
+    selected &&
+    void patchAgent(
+      selected,
+      { status: selected.status === "active" ? "paused" : "active" },
+      selected.status === "active" ? t("pauseSuccess") : t("resumeSuccess")
+    );
+  const toggleIcon = selected?.status === "active" ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />;
+  const toggleDisabled = Boolean(selected) && busyId === selected?.id;
+
   const work = selected && workOpen
     ? {
         title: selected.name,
@@ -1361,33 +1389,29 @@ export function AgentsShell({
               <Play className="h-4 w-4" aria-hidden="true" />
               <span className="hidden text-xs sm:inline">{t("menuRunNow")}</span>
             </button>
-            {/* THE SCREEN'S ONE WHITE BUTTON, and the thing the whole
-                screen is about: whether this agent runs on its schedule or
-                not. scripts/tests/one-primary-action.test.mjs carries the
-                raised baseline and the reason. */}
-            <button
-              type="button"
-              onClick={() =>
-                void patchAgent(
-                  selected,
-                  { status: selected.status === "active" ? "paused" : "active" },
-                  selected.status === "active" ? t("pauseSuccess") : t("resumeSuccess")
-                )
-              }
-              disabled={busyId === selected.id}
-              data-testid="agents-toggle"
-              aria-label={selected.status === "active" ? t("menuPause") : t("menuResume")}
-              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-card bg-button px-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3"
-            >
-              {selected.status === "active" ? (
-                <Pause className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <Play className="h-4 w-4" aria-hidden="true" />
-              )}
-              <span className="hidden sm:inline">{selected.status === "active" ? t("menuPause") : t("menuResume")}</span>
-            </button>
+            {!editor && (
+              <button
+                type="button"
+                onClick={toggleOnClick}
+                disabled={toggleDisabled}
+                data-testid="agents-toggle"
+                aria-label={toggleLabel}
+                className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-card bg-button px-2.5 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3"
+              >
+                {toggleIcon}
+                <span className="hidden sm:inline">{toggleLabel}</span>
+              </button>
+            )}
           </>
         ),
+        primary: editor
+          ? {
+              label: toggleLabel,
+              onClick: toggleOnClick,
+              disabled: toggleDisabled,
+              icon: toggleIcon,
+            }
+          : undefined,
         body: (
           /*
             TWO SCROLLING COLUMNS ON A COMPUTER, ONE SCROLLING PAGE ON A

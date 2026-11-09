@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Download, Plus } from "lucide-react";
 import { ToolShell, type ShellTurn } from "@/components/shell/tool-shell";
+import { useEditorShell } from "@/components/shell/editor-shell-context";
 import {
   COL_WIDTH,
   ROW_HEADER_WIDTH,
@@ -59,6 +60,13 @@ import {
 export function SheetsShell() {
   const t = useTranslations("dashboard.sheets");
   const tNames = useTranslations("dashboard.tools.names");
+  // docs/QUEUE.md ED2 (2026-11-09): the old shell has no bar slot of its
+  // own, so the inert Download button below stays inside `actions` there
+  // (unchanged); the editor layout draws its OWN white button from
+  // `work.primary` (components/shell/editor-shell.tsx) and would
+  // otherwise draw this one a second time, white among the outlined
+  // `actions` — the same split website-shell.tsx's `sitePrimary` uses.
+  const editor = useEditorShell();
 
   const [turns, setTurns] = useState<ShellTurn[]>([]);
   const [open, setOpen] = useState(false);
@@ -191,14 +199,18 @@ export function SheetsShell() {
   const work = open
     ? {
         title: t("work.title"),
-        actions: (
+        actions: !editor && (
           // THE ONE WHITE BUTTON HE ASKED FOR («Ένα λευκό κουμπί
           // «Download»»), drawn and inert. The dot in its corner is this
           // product's own mark for "a real control with no pipeline
           // behind it yet"; xlsx and csv with the formulas intact is his
           // Κομμάτι 8. This is why the page's entry in
           // scripts/tests/one-primary-action.test.mjs is 2 and not 1 —
-          // the reason is written there, beside the number.
+          // the reason is written there, beside the number. The editor
+          // layout draws the same button from `primary` below instead,
+          // without the corner dot (its PrimaryButton draws one shape
+          // only, components/shell/editor-shell.tsx) — the «soon» tooltip
+          // still says why it does nothing.
           <button
             type="button"
             disabled
@@ -212,6 +224,14 @@ export function SheetsShell() {
             <span className="absolute end-1 top-1 h-1.5 w-1.5 rounded-full bg-button-ink/50" aria-hidden="true" />
           </button>
         ),
+        primary: editor
+          ? {
+              label: t("download"),
+              onClick: () => {},
+              disabled: true,
+              icon: <Download className="h-4 w-4" aria-hidden="true" />,
+            }
+          : undefined,
         body: (
           <div className="flex h-full min-h-0 flex-col gap-2">
             {/* ΜΠΑΡΑ ΤΥΠΩΝ ΑΠΟ ΠΑΝΩ. It reads the selection: the

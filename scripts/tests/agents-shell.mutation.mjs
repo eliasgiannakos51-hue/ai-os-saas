@@ -120,8 +120,8 @@ const MUTANTS = [
   {
     name: "the white button no longer switches the schedule on and off",
     file: SHELL,
-    from: '                  { status: selected.status === "active" ? "paused" : "active" },',
-    to: '                  { status: "active" },',
+    from: '      { status: selected.status === "active" ? "paused" : "active" },',
+    to: '      { status: "active" },',
     expect: "...and it really switches the schedule on and off",
   },
   {
@@ -192,8 +192,8 @@ const MUTANTS = [
   {
     name: "the white button loses the name a screen reader reads when its label is hidden",
     file: SHELL,
-    from: '              aria-label={selected.status === "active" ? t("menuPause") : t("menuResume")}\n              className="inline-flex min-h-[44px] shrink-0',
-    to: '              className="inline-flex min-h-[44px] shrink-0',
+    from: '                aria-label={toggleLabel}\n                className="inline-flex min-h-[44px] shrink-0',
+    to: '                className="inline-flex min-h-[44px] shrink-0',
     expect: "the bar's two labels stand down below `sm`, and the press keeps its name",
   },
   {

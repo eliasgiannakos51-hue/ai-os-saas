@@ -12436,3 +12436,48 @@ top-nav/editor-shell γράφουν `credits === null ? "…" : …`).
 build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-09ζ — ED2: Agents και Sheets, ένα κουμπί ορισμένο μία φορά
+
+Συνέχεια της ίδιας λίστας («κάντα όλα» / «συνέχισε»), το `docs/QUEUE.md`
+σημείο ED2 που είχε μείνει: Agents και Sheets ζωγράφιζαν ΔΙΚΟ τους λευκό
+κουμπί (Παύση/Συνέχιση, Λήψη) μέσα στα `work.actions`. Σωστό στο παλιό
+κέλυφος — που δεν διαβάζει καθόλου `work.primary`
+(`components/shell/tool-shell.tsx`'s δικό του σχόλιο στον τύπο) — αλλά
+κάτω από τον διακόπτη «editor-shell» η νέα μπάρα
+(`components/shell/editor-shell.tsx`) ζωγραφίζει ΔΙΚΟ ΤΗΣ λευκό κουμπί
+από το `work.primary`, οπότε ο λογαριασμός με το switch ανοιχτό θα έβλεπε
+ΔΥΟ λευκά κουμπιά: ένα ανάμεσα στα περιγράμματα των `actions`, ένα στη
+θέση του `work.primary`.
+
+Η διόρθωση: το κουμπί (ετικέτα, onClick, disabled, εικονίδιο) ορίζεται
+ΜΙΑ φορά σε κάθε αρχείο, και πάει είτε στα `actions` (`!editor`, παλιό
+κέλυφος, αμετάβλητο) είτε ως `work.primary` (`editor`, νέο κέλυφος) —
+ποτέ και τα δύο. Ακριβώς το σχήμα που το `website-shell.tsx` χρησιμοποιεί
+ήδη για το Site's `sitePrimary` (`editor && current && … ? {...} :
+undefined`), αντί να επινοηθεί κάτι νέο.
+
+- `src/components/agents/agents-shell.tsx`: το toggle Παύση/Συνέχιση.
+- `src/components/sheets/sheets-shell.tsx`: το αδρανές Download (χάνει
+  μόνο την τελίτσα-σημάδι στη γωνία όταν είναι στο `primary` — το δικό
+  του `PrimaryButton` σχήμα, `editor-shell.tsx`, ζωγραφίζει ένα σχήμα
+  κουμπιού, όχι δύο — το tooltip «σύντομα» παραμένει ίδιο).
+
+`agents-shell.test.mjs`: 2 ελέγχους που έλεγχαν την παλιά, κατευθείαν
+ternary μέσα στο JSX τους διόρθωσα στις νέες μεταβλητές
+`toggleLabel`/`toggleOnClick`, και πρόσθεσα έναν τρίτο που κρατά τον
+διαχωρισμό `editor`/`!editor` ο ίδιος. `agents-shell.mutation.mjs`: 2
+αγκυρώματα ξεπερασμένα από την ίδια αλλαγή (η παλιά inline ternary δεν
+υπήρχε πια στο αρχείο) — ξαναγράφτηκαν πάνω στις νέες μεταβλητές, 50/50
+πιάστηκαν. `sheets.test.mjs`/`.mutation.mjs`: καμία αλλαγή χρειάστηκε
+(124/124, 35/35, ήδη περνούσαν).
+
+Επαληθεύτηκε ότι τα prodtests (`agents-shell.prodtest.mjs`,
+`sheets.prodtest.mjs`) δεν ανοίγουν το `editor-shell` switch τους —
+άρα βλέπουν ακριβώς το ίδιο `actions`-κουμπί με πριν, καμία αλλαγή
+συμπεριφοράς εκεί.
+
+`npm run gates` → ALL 414 GATES PASSED (30534 checks). `npm run
+build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

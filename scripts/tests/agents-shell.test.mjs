@@ -210,12 +210,22 @@ check("Run now resolves the tier through the shared helper",
 // it is the pause/resume — the thing the screen is about. Run now beside
 // it is a 44px icon action (ACTION), on purpose, so the count stays at
 // one here and two on the page (the field's send is the other).
+//
+// Defined once as `toggleLabel`/`toggleOnClick` (docs/QUEUE.md ED2,
+// 2026-11-09) rather than inline, so the old shell's `actions` button
+// (drawn only `!editor`) and the editor layout's `work.primary` share
+// one definition instead of drifting into two.
 check("exactly one bg-button in the file, and it is Παύση/Συνέχιση",
   (src.match(/\bbg-button\b/g) ?? []).length === 1 &&
     /data-testid="agents-toggle"/.test(src) &&
-    /\{selected\.status === "active" \? t\("menuPause"\) : t\("menuResume"\)\}/.test(src));
+    /const toggleLabel = selected\?\.status === "active" \? t\("menuPause"\) : t\("menuResume"\);/.test(src) &&
+    /<span className="hidden sm:inline">\{toggleLabel\}<\/span>/.test(src));
 check("...and it really switches the schedule on and off",
-  /patchAgent\(\s*selected,\s*\{ status: selected\.status === "active" \? "paused" : "active" \}/.test(src));
+  /const toggleOnClick = \(\) =>\s*selected &&\s*void patchAgent\(\s*selected,\s*\{ status: selected\.status === "active" \? "paused" : "active" \}/.test(src));
+check("the editor layout gets the SAME toggle as `work.primary`, not a second one",
+  /primary: editor\s*\?\s*\{\s*label: toggleLabel,\s*onClick: toggleOnClick,\s*disabled: toggleDisabled,\s*icon: toggleIcon,\s*\}\s*: undefined,/.test(src) &&
+    /actions: \(\s*<>/.test(src) &&
+    /\{!editor && \(/.test(src));
 check("Run now is an icon action, not a second filled control",
   /data-testid="agents-run-now"[\s\S]{0,200}className=\{`\$\{ACTION\}/.test(src));
 
@@ -251,8 +261,8 @@ check("...and the option under the field wraps inside itself, not only as a whol
 check("the bar's two labels stand down below `sm`, and the press keeps its name",
   /<span className="hidden text-xs sm:inline">\{t\("menuRunNow"\)\}<\/span>/.test(src) &&
     /aria-label=\{t\("menuRunNow"\)\}/.test(src) &&
-    /<span className="hidden sm:inline">\{selected\.status === "active" \? t\("menuPause"\) : t\("menuResume"\)\}<\/span>/.test(src) &&
-    /aria-label=\{selected\.status === "active" \? t\("menuPause"\) : t\("menuResume"\)\}/.test(src));
+    /<span className="hidden sm:inline">\{toggleLabel\}<\/span>/.test(src) &&
+    /aria-label=\{toggleLabel\}/.test(src));
 
 console.log("\n== 6. the panel, in the order the directive asks for it ==");
 const PANEL_ORDER = [

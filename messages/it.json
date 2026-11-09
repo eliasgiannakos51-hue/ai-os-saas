@@ -5168,7 +5168,8 @@
       "confirmTitle": "Questa è un'azione impegnativa",
       "confirmBody": "Questo costerà circa {count, plural, one {# credito} other {# crediti}}. Puoi continuare o ridurre la richiesta.",
       "cancel": "Annulla",
-      "continue": "Continua"
+      "continue": "Continua",
+      "approxWithRemaining": "~{count, plural, one {# credito} other {# crediti}} · {remaining, plural, one {# rimasto} other {# rimasti}}"
     },
     "freeChat": {
       "remaining": "{count, plural, one {Ti resta # messaggio gratuito} other {Ti restano # messaggi gratuiti}} questo mese",

@@ -187,7 +187,13 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // `t(\`flash.${flash}\`)` — a template-literal key, the exact shape
     // already named for affiliate-dashboard.tsx and agents-shell.tsx
     // above, for the connect/callback flow's own flash status.
-    unbounded: 73,
+    // 73 -> 74 on 2026-11-09, "πόσα σου απομένουν" (docs/QUEUE.md item
+    // 1.7): cost-estimate.tsx's CostEstimateHint now picks between
+    // "approx" and "approxWithRemaining" at runtime (creditsHintKey,
+    // credits-hint.ts) and reaches `t(key, {...})` with that variable —
+    // the same computed-key shape as delivery-picker.tsx's `t()` with a
+    // variable key, above.
+    unbounded: 74,
   },
   {
     name: "onboarding",

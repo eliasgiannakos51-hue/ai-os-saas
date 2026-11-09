@@ -5168,7 +5168,8 @@
       "confirmTitle": "Esta es una acción grande",
       "confirmBody": "Esto costará aproximadamente {count, plural, one {# crédito} other {# créditos}}. Puedes continuar o editar tu solicitud para reducirla.",
       "cancel": "Cancelar",
-      "continue": "Continuar"
+      "continue": "Continuar",
+      "approxWithRemaining": "~{count, plural, one {# crédito} other {# créditos}} · {remaining, plural, one {queda #} other {quedan #}}"
     },
     "freeChat": {
       "remaining": "{count, plural, one {Te queda # mensaje gratis} other {Te quedan # mensajes gratis}} este mes",

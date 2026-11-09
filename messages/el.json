@@ -5168,7 +5168,8 @@
       "confirmTitle": "Αυτή είναι μεγάλη ενέργεια",
       "confirmBody": "Αυτό θα κοστίσει περίπου {count, plural, one {# credit} other {# credits}}. Μπορείς να συνεχίσεις ή να επεξεργαστείς το αίτημά σου ώστε να είναι μικρότερο.",
       "cancel": "Ακύρωση",
-      "continue": "Συνέχεια"
+      "continue": "Συνέχεια",
+      "approxWithRemaining": "~{count, plural, one {# credit} other {# credits}} · {remaining, plural, one {απομένει #} other {απομένουν #}}"
     },
     "freeChat": {
       "remaining": "{count, plural, one {# δωρεάν μήνυμα απομένει} other {# δωρεάν μηνύματα απομένουν}} αυτόν τον μήνα",

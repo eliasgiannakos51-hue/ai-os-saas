@@ -5168,7 +5168,8 @@
       "confirmTitle": "Das ist eine große Aktion",
       "confirmBody": "Das kostet etwa {count, plural, one {# Credit} other {# Credits}}. Du kannst fortfahren oder deine Anfrage verkleinern.",
       "cancel": "Abbrechen",
-      "continue": "Fortfahren"
+      "continue": "Fortfahren",
+      "approxWithRemaining": "~{count, plural, one {# Credit} other {# Credits}} · {remaining} übrig"
     },
     "freeChat": {
       "remaining": "Noch {count, plural, one {# kostenlose Nachricht} other {# kostenlose Nachrichten}} diesen Monat",

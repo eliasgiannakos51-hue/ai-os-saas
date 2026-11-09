@@ -123,7 +123,9 @@ const MUTANTS = [
     // reaching `dashboard.createAnything.send`.
     // 72 -> 73 on 2026-11-07, agent/discord: discord-shell.tsx's own
     // `t(\`flash.${flash}\`)`, a template-literal key.
-    from: "    unbounded: 73,",
+    // 73 -> 74 on 2026-11-09, "πόσα σου απομένουν": cost-estimate.tsx's
+    // `t(key, {...})` with `key` the result of creditsHintKey().
+    from: "    unbounded: 74,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

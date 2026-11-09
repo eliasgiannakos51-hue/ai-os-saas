@@ -5168,7 +5168,8 @@
       "confirmTitle": "هذا إجراء كبير",
       "confirmBody": "سيكلّف هذا نحو {count, plural, zero {لا شيء} one {رصيد واحد} two {رصيدين} few {# أرصدة} many {# رصيدًا} other {# رصيد}}. يمكنك المتابعة أو تقليص طلبك.",
       "cancel": "إلغاء",
-      "continue": "متابعة"
+      "continue": "متابعة",
+      "approxWithRemaining": "~{count, plural, zero {لا أرصدة} one {رصيد واحد} two {رصيدان} few {# أرصدة} many {# رصيدًا} other {# رصيد}} · متبقٍ {remaining}"
     },
     "freeChat": {
       "remaining": "{count, plural, zero {لم تتبقَّ رسائل مجانية} one {تبقّت لديك رسالة مجانية واحدة} two {تبقّت لديك رسالتان مجانيتان} few {تبقّت لديك # رسائل مجانية} many {تبقّت لديك # رسالة مجانية} other {تبقّت لديك # رسالة مجانية}} هذا الشهر",

@@ -520,7 +520,7 @@ check("the selected piece is a chip in the field: a ChosenBox says it there and 
   /const inField = useFieldSelection\(label, onClear\);\s*if \(inField\) return null;/.test(shell) && /const pick = selection \?\? chosen;/.test(editorSrc) &&
     /leading=\{pick \? <SelectionChip/.test(editorSrc) && /data-testid="editor-selection-clear"/.test(editorSrc));
 check("the price is said in the field: a CostEstimateHint or a FieldCost says it there, a prop wins",
-  /const inField = useFieldCost\(credits > 0 \? t\("approx", \{ count: credits \}\) : null\);\s*if \(credits <= 0 \|\| inField\) return null;/.test(read("src/components/credits/cost-estimate.tsx")) &&
+  /const inField = useFieldCost\(credits > 0 \? text\(credits\) : null\);\s*if \(credits <= 0 \|\| inField\) return null;/.test(read("src/components/credits/cost-estimate.tsx")) &&
     /const price = cost \?\? registeredCost;/.test(editorSrc) && /export function FieldCost\(/.test(editorCtx));
 check("...and only the FIELD hears them: a price inside the work stays in the work",
   /<FieldSlotsProvider value=\{slots\}>\s*<ChatComposer\b/.test(editorSrc) && (editorSrc.match(/<FieldSlotsProvider\b/g) ?? []).length === 1);

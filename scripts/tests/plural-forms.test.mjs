@@ -238,6 +238,19 @@ const BARE_ON_PURPOSE = new Map([
     },
   ],
   [
+    // 2026-11-09, "πόσα σου απομένουν": same remaining-balance clause as
+    // usedWithRemaining above, reused for the pre-submit price hint
+    // (cost-estimate.tsx) — 'übrig' and 'متبقٍ' are the same two
+    // non-inflecting words, for the same two locales. English is NOT
+    // listed here: unlike usedWithRemaining's bare "{remaining} left",
+    // this key's English clause is itself plural-wrapped.
+    "credits.estimate.approxWithRemaining|remaining",
+    {
+      locales: ["ar", "de"],
+      why: "'übrig' and 'متبقٍ' do not agree with the number",
+    },
+  ],
+  [
     "dashboard.reflection.missionStepsLabel|pending",
     {
       locales: ["de", "en"],

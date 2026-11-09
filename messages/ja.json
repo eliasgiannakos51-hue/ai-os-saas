@@ -5168,7 +5168,8 @@
       "confirmTitle": "これは大きな操作です",
       "confirmBody": "この操作には約 {count} クレジットかかります。続行するか、リクエストを小さくしてください。",
       "cancel": "キャンセル",
-      "continue": "続行"
+      "continue": "続行",
+      "approxWithRemaining": "~{count} クレジット · 残り {remaining}"
     },
     "freeChat": {
       "remaining": "今月の無料メッセージは残り {count} 件です",

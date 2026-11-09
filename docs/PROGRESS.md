@@ -12523,3 +12523,39 @@ prodtests που περιμένουν `[data-testid="image-grid"] img` να εί
 build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+## 2026-11-09θ — ED2: Rebuild, Approve plan / Build / Download γίνονται work.primary
+
+Συνέχεια της ίδιας λίστας. Έναντι `docs/design/approved/07-Rebuild.png`
+(ένα λευκό κουμπί «Approve plan» στη μπάρα), το Rebuild είχε ήδη και τα
+τρία κουμπιά των σταδίων του — `rebuild-approve-plan`, `rebuild-build`,
+η λήψη (`rebuild-download`) — απλώς περιγεγραμμένα μέσα στο σώμα της
+δουλειάς, ποτέ στο `work.primary`.
+
+`src/components/rebuild/rebuild-shell.tsx`: το κάθε κουμπί μένει ίδιο
+(ίδια `onClick`, ίδιο `disabled`, ίδιο κείμενο/`busy`), απλώς κάτω από
+`editor` πάει στο `work.primary` αντί να ζωγραφίζεται και στα δύο μέρη —
+το αντίγραφό του μέσα στο σώμα κρύβεται με `!editor`, το ίδιο σχήμα που
+το Agents/Sheets και το Site's `sitePrimary` ήδη χρησιμοποιούν. Ποιο
+κουμπί είναι primary αλλάζει με το στάδιο: «Approve plan» όσο μένει η
+φάση του app-logic, αλλιώς «Build», αλλιώς (`built === true`) η λήψη —
+ο ίδιος διαχωρισμός σταδίων που το σώμα ήδη είχε, απλώς διαβασμένος μία
+φορά παραπάνω για το `primary`.
+
+Το παλιό κέλυφος αμετάβλητο· το `rebuild.prodtest.mjs` δεν ανοίγει το
+`editor-shell` switch, άρα καμία αλλαγή συμπεριφοράς εκεί.
+`rebuild.test.mjs` 272/272 χωρίς αλλαγή (οι μετρήσεις `data-testid`
+παραμένουν ίδιες — το κουμπί μπήκε σε `!editor`, δεν διπλασιάστηκε το
+testid). `rebuild.mutation.mjs` 77/77 χωρίς αλλαγή.
+`one-primary-action.test.mjs` 58/58.
+
+**Μένουν, σκόπιμα**: Posts, Research, Analyze, Translate, Apps, Games,
+Automations, 3D, Films, Editing — κανένα `primary` ακόμα· καθένα θέλει
+το δικό του κύριο κουμπί από τη δική του εικόνα (π.χ. Films «Watch so
+far», αλλά αυτό είναι ένα πολύ μεγαλύτερο εργαλείο, με δικό του στάδιο
+παραγωγής Script/Characters/Storyboard/Shooting/Sound/Edit).
+
+`npm run gates` → ALL 414 GATES PASSED (30534 checks). `npm run
+build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

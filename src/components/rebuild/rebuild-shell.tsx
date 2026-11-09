@@ -11,6 +11,7 @@ import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint, useCostEstimate } from "@/components/credits/cost-estimate";
 import type { ActionProfileKey } from "@/lib/billing/estimate";
 import { ToolShell, ChosenBox, OPTION, ACTION, workIsBeside, type ShellTurn } from "@/components/shell/tool-shell";
+import { useEditorShell } from "@/components/shell/editor-shell-context";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { buildMessage, changeMessage, boxMessage, planMessage, planText, readPlan, type RebuildBoxKind, type RebuildPlan } from "@/lib/rebuild/rebuild-plan";
@@ -94,6 +95,16 @@ export function RebuildShell({
   const tNames = useTranslations("dashboard.tools.names");
   const locale = useLocale();
   const { refresh: refreshCredits } = useCredits();
+  // docs/QUEUE.md ED2 (2026-11-09, docs/design/approved/07-Rebuild.png):
+  // the plan stage's ONE white button is «Approve plan» (or «Build» once
+  // the app-logic phase is done / there is none), and the built stage's
+  // is the download — all three already existed as outlined controls
+  // (rebuild-approve-plan, rebuild-build, the download link), just never
+  // promoted to `work.primary`. Old shell is unchanged (`!editor`
+  // keeps them exactly where they were); the editor layout gets them as
+  // its one filled button instead of a second, outlined copy of the
+  // same action.
+  const editor = useEditorShell();
   const composerRef = useRef<ChatComposerHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -417,11 +428,36 @@ export function RebuildShell({
                   <Undo2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               )}
-              <a href={`/api/rebuild/${open.id}/download`} aria-label={t("download")} title={t("download")} data-testid="rebuild-download" className={ACTION}>
-                <Download className="h-4 w-4" aria-hidden="true" />
-              </a>
+              {!editor && (
+                <a href={`/api/rebuild/${open.id}/download`} aria-label={t("download")} title={t("download")} data-testid="rebuild-download" className={ACTION}>
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                </a>
+              )}
             </>
           ) : undefined,
+          primary: editor
+            ? built
+              ? {
+                  label: t("download"),
+                  icon: <Download className="h-4 w-4" aria-hidden="true" />,
+                  onClick: () => window.location.assign(`/api/rebuild/${open.id}/download`),
+                }
+              : open.has_app_phase && !appLogicDone
+                ? {
+                    label: running === "appLogic" ? t("phases.approving") : t("phases.approve"),
+                    icon: <ArrowRight className="h-4 w-4" aria-hidden="true" />,
+                    onClick: () => void runAppLogic(),
+                    disabled: running !== null,
+                    busy: running === "appLogic",
+                  }
+                : {
+                    label: running === "build" ? t("building") : t("build"),
+                    icon: <Hammer className="h-4 w-4" aria-hidden="true" />,
+                    onClick: () => void build(),
+                    disabled: running !== null,
+                    busy: running === "build",
+                  }
+            : undefined,
           body: (
             <div className="flex h-full flex-col gap-3">
               {built ? (
@@ -574,19 +610,26 @@ export function RebuildShell({
                       </li>
                     </ol>
                     <p className="mt-1.5 text-[11px] text-muted">{open.has_app_phase ? t("phases.noteTwo") : t("phases.note")}</p>
-                    <div className="mt-2">
-                      {open.has_app_phase && !appLogicDone ? (
-                        <button type="button" onClick={() => void runAppLogic()} disabled={running !== null} data-testid="rebuild-approve-plan" className="btn-outline font-semibold">
-                          {running === "appLogic" ? <ThinkingIndicator size="sm" /> : <ArrowRight className="h-4 w-4" aria-hidden="true" />}
-                          {running === "appLogic" ? t("phases.approving") : t("phases.approve")}
-                        </button>
-                      ) : (
-                        <button type="button" onClick={() => void build()} disabled={running !== null} data-testid="rebuild-build" className="btn-outline font-semibold">
-                          {running === "build" ? <ThinkingIndicator size="sm" /> : <Hammer className="h-4 w-4" aria-hidden="true" />}
-                          {running === "build" ? t("building") : t("build")}
-                        </button>
-                      )}
-                    </div>
+                    {/* `!editor`: the editor layout draws this SAME action
+                        as `work.primary` above, its one white button —
+                        not a second, outlined copy of it
+                        (docs/design/approved/07-Rebuild.png shows only
+                        «Approve plan» in the bar, nothing repeated below). */}
+                    {!editor && (
+                      <div className="mt-2">
+                        {open.has_app_phase && !appLogicDone ? (
+                          <button type="button" onClick={() => void runAppLogic()} disabled={running !== null} data-testid="rebuild-approve-plan" className="btn-outline font-semibold">
+                            {running === "appLogic" ? <ThinkingIndicator size="sm" /> : <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                            {running === "appLogic" ? t("phases.approving") : t("phases.approve")}
+                          </button>
+                        ) : (
+                          <button type="button" onClick={() => void build()} disabled={running !== null} data-testid="rebuild-build" className="btn-outline font-semibold">
+                            {running === "build" ? <ThinkingIndicator size="sm" /> : <Hammer className="h-4 w-4" aria-hidden="true" />}
+                            {running === "build" ? t("building") : t("build")}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </>
               )}

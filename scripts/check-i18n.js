@@ -502,15 +502,11 @@ const LOCALE_ALLOWED = new Set([
   "pt:helpCentre.categories.chat",
   "de:helpCentre.categories.credits",
   "it:helpCentre.categories.credits",
-  "pt:helpCentre.categories.credits",
   "de:helpCentre.categories.websites",
-  "it:helpCentre.categories.websites",
   "fr:helpCentre.categories.missions",
-  "it:helpCentre.categories.missions",
   "el:helpCentre.categories.agents",
   "el:helpCentre.categories.credits",
   "el:helpCentre.categories.websites",
-  "el:helpCentre.categories.missions",
   "el:helpCentre.categories.chat",
   "it:helpCentre.categories.account",
   "el:settings.marginReport.colBypass",
@@ -619,33 +615,17 @@ const LOCALE_ALLOWED = new Set([
   "de:dashboard.publishing.statusUnpublished",
   "it:dashboard.publishing.statusUnpublished",
   "es:sidebar.items.trading",
-  "es:sidebar.items.sales",
   "fr:sidebar.items.trading",
-  "fr:sidebar.items.sales",
   "de:sidebar.items.trading",
-  "de:sidebar.items.sales",
   "it:sidebar.items.trading",
-  "it:sidebar.items.sales",
   "pt:sidebar.items.trading",
-  "pt:sidebar.items.sales",
-  "zh:sidebar.items.trading",
-  "zh:sidebar.items.sales",
-  "ja:sidebar.items.trading",
-  "ja:sidebar.items.sales",
-  "ar:sidebar.items.trading",
-  "ar:sidebar.items.sales",
   "ar:dashboard.team.emailPlaceholder",
   "de:dashboard.chat.title",
   "de:dashboard.overview.quickActions.trading.label",
   "de:dashboard.team.title",
   "de:dashboard.websiteBuilder.nameLabel",
-  "de:sidebar.groups.business",
-  "de:sidebar.items.apps",
-  "de:sidebar.items.chat",
   "de:sidebar.items.feedback",
   "de:sidebar.items.team",
-  "de:sidebar.items.videos",
-  "de:sidebar.items.websites",
   // "Details" is the German word, spelled identically — a loanword the
   // rest of the German UI already uses, not a skipped translation.
   "de:module.tabDetails",
@@ -674,10 +654,7 @@ const LOCALE_ALLOWED = new Set([
   "es:dashboard.overview.quickActions.ideas.label",
   "es:dashboard.overview.quickActions.trading.label",
   "es:entityLinks.no",
-  "es:sidebar.items.apps",
-  "es:sidebar.items.chat",
   "es:sidebar.items.ideas",
-  "es:sidebar.items.videos",
   "fr:common.notifications",
   "fr:dashboard.documents.backToDocuments",
   "fr:dashboard.documents.deleteLabel",
@@ -697,7 +674,6 @@ const LOCALE_ALLOWED = new Set([
   // "Publications", "Fichiers", "Objectifs et plans").
   "fr:pricing.rows.documents",
   "fr:sidebar.items.finance",
-  "fr:sidebar.items.images",
   "it:auth.login.password",
   "it:auth.signup.password",
   "it:dashboard.chat.title",
@@ -706,9 +682,7 @@ const LOCALE_ALLOWED = new Set([
   "it:dashboard.team.title",
   "it:entityLinks.no",
   "it:roadmap.items.ceoAdvisor.title",
-  "it:sidebar.groups.business",
   "it:sidebar.items.analytics",
-  "it:sidebar.items.chat",
   "it:sidebar.items.feedback",
   "it:sidebar.items.home",
   "it:sidebar.items.team",
@@ -721,30 +695,31 @@ const LOCALE_ALLOWED = new Set([
   // whether a synonym exists: "Marketing", "Budget", "Status", "Quiz",
   // "Hashtags", "Idea", "Sentiment", "Description", "Notes" and "Type"
   // really are spelled this way in these languages, and "email", "web",
-  // "live", "final" and "social" are the loanwords their UIs already use
+  // "live" and "social" are the loanwords their UIs already use
   // — the same reasoning as the Website Builder design controls above.
   // Substituting a rarer synonym to make the string differ would make
   // those UIs worse, not more translated.
+  // (The four de/es/fr/pt moduleData.options.final entries this comment
+  // used to cover are gone, 2026-11-09, FD2: the "final" option no
+  // longer exists in en.json's moduleData.options at all, so there was
+  // nothing left for them to exempt.)
   "de:moduleData.fields.budget",
   "de:moduleData.fields.hashtags",
   "de:moduleData.fields.marketing",
   "de:moduleData.fields.quiz",
   "de:moduleData.fields.status",
-  "de:moduleData.options.final",
   "de:moduleData.options.live",
   "el:moduleData.options.email",
   "el:moduleData.options.web",
   "es:moduleData.fields.hashtags",
   "es:moduleData.fields.idea",
   "es:moduleData.fields.marketing",
-  "es:moduleData.options.final",
   "es:moduleData.options.web",
   "fr:moduleData.fields.budget",
   "fr:moduleData.fields.description",
   "fr:moduleData.fields.marketing",
   "fr:moduleData.fields.notes",
   "fr:moduleData.fields.type",
-  "fr:moduleData.options.final",
   "fr:moduleData.options.web",
   "it:moduleData.fields.budget",
   "it:moduleData.fields.idea",
@@ -755,7 +730,6 @@ const LOCALE_ALLOWED = new Set([
   "it:moduleData.options.social",
   "it:moduleData.options.web",
   "pt:moduleData.fields.marketing",
-  "pt:moduleData.options.final",
   "pt:moduleData.options.web",
   // V4 #18. Three real linguistic facts rather than three skipped
   // translations: "email" is the ordinary Greek and Italian word for
@@ -769,11 +743,14 @@ const LOCALE_ALLOWED = new Set([
   // French and German. The nine other locales translate all four and are
   // not listed, which is what keeps this an allowance per locale rather
   // than a rule about short words.
-  // V4 #26. "Finances" is the ordinary French word, and "Rule of 40" is
-  // what German-speaking founders and investors call it — the German
-  // financial press uses the English term. The other locales translate
-  // both.
-  "fr:finance.title",
+  // V4 #26. "Rule of 40" is what German-speaking founders and investors
+  // call it — the German financial press uses the English term. The
+  // other locales translate it.
+  // (fr:finance.title, once allowed here because "Finances" was the
+  // ordinary French word for this heading, is gone, 2026-11-09, FD2:
+  // en.json's finance.title is now "How the business is doing" and
+  // French's own translation, "Comment va l'activité", no longer
+  // coincides — the exemption had been paid off.)
   "de:finance.metrics.ruleOf40",
   "fr:dataAnalysis.columns.type",
   "fr:dataAnalysis.types.date",
@@ -1153,9 +1130,11 @@ const messagesDir = path.join(__dirname, "..", "messages");
 const en = flatten(JSON.parse(fs.readFileSync(path.join(messagesDir, "en.json"), "utf8")));
 
 const failures = [];
+const targetsByLocale = new Map();
 
 for (const loc of LOCALES) {
   const target = flatten(JSON.parse(fs.readFileSync(path.join(messagesDir, `${loc}.json`), "utf8")));
+  targetsByLocale.set(loc, target);
 
   for (const key of Object.keys(en)) {
     if (!(key in target)) {
@@ -1175,6 +1154,42 @@ for (const loc of LOCALES) {
     ) {
       failures.push(`${loc}: UNTRANSLATED ${key} = ${JSON.stringify(value)}`);
     }
+  }
+}
+
+// FD2, 2026-11-09: an entry in LOCALE_ALLOWED was never checked the other
+// way. The set exists so that a word which genuinely coincides with English
+// in one locale (a loanword, a cognate) does not fail the loop above — but
+// nothing ever asked whether it STILL coincides. A locale that gets a real
+// translation later, or an en.json edit that changes the English word out
+// from under the exemption, leaves a LOCALE_ALLOWED entry pointing at a pair
+// that no longer matches — and it stays green forever, because the loop
+// above only ever treats membership in this set as permission to skip, not
+// as a claim to re-check. Same shape as the ABSENT_ON_PURPOSE table
+// (scripts/tests/lib/absent-on-purpose.mjs): every entry is checked BOTH
+// ways, and a stale one is a build failure, not a silent pass.
+for (const entry of LOCALE_ALLOWED) {
+  const sep = entry.indexOf(":");
+  const loc = entry.slice(0, sep);
+  const key = entry.slice(sep + 1);
+  if (!(key in en)) {
+    failures.push(`${entry}: STALE LOCALE_ALLOWED — this key no longer exists in en.json, remove the entry`);
+    continue;
+  }
+  const target = targetsByLocale.get(loc);
+  if (!target) {
+    failures.push(`${entry}: STALE LOCALE_ALLOWED — "${loc}" is not one of LOCALES, remove the entry`);
+    continue;
+  }
+  if (!(key in target)) {
+    failures.push(`${entry}: STALE LOCALE_ALLOWED — this key no longer exists in ${loc}.json, remove the entry`);
+    continue;
+  }
+  if (target[key] !== en[key]) {
+    failures.push(
+      `${entry}: STALE LOCALE_ALLOWED — ${loc}.json (${JSON.stringify(target[key])}) no longer matches en.json ` +
+        `(${JSON.stringify(en[key])}) for this key; the exemption was paid off (or en changed), remove the entry`
+    );
   }
 }
 

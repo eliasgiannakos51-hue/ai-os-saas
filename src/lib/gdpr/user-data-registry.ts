@@ -183,6 +183,9 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     scope: "account",
     serverExportColumns: ["id", "amount_cents", "currency", "status", "arrival_date", "created_at"],
   },
+  // Agent approvals (AG1 Κ3, 2026-11-11): pending, approved and denied
+  // actions the agent paused for.
+  { table: "agent_approvals", label: "agent_approvals", scope: "user_content" },
   { table: "discord_guilds", label: "discord_guilds", scope: "user_content" },
   { table: "discord_builds", label: "discord_builds", scope: "user_content" },
   { table: "discord_build_items", label: "discord_build_items", scope: "user_content" },

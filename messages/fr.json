@@ -2314,6 +2314,20 @@
         "taskChanged": "La tâche a changé.",
         "toolsNone": "Il n'existe pas encore de liste d'outils autorisés par agent : chaque agent cherche (si tu l'autorises), écrit, et envoie au seul canal que tu as défini.",
         "toolsTitle": "Outils et connexions"
+      },
+      "approvals": {
+        "title": "Approbations en attente",
+        "approve": "Approuver",
+        "deny": "Refuser",
+        "empty": "Aucune approbation en attente",
+        "send": "Envoyer",
+        "publish": "Publier",
+        "spend": "Dépenser",
+        "expired": "Expiré",
+        "creditCap": "Plafond de crédits",
+        "creditCapHint": "Crédits maximum que cet agent peut dépenser sur toutes les exécutions",
+        "noCap": "Sans limite",
+        "capReached": "Plafond de crédits atteint"
       }
     },
     "publishing": {

@@ -2314,6 +2314,20 @@
         "taskChanged": "作業を変更しました。",
         "toolsNone": "エージェントごとに許可するツールの一覧はまだありません。どのエージェントも、許可すれば検索し、書き、あなたが決めた一つの送り先に送ります。",
         "toolsTitle": "ツールと接続"
+      },
+      "approvals": {
+        "title": "承認待ち",
+        "approve": "承認",
+        "deny": "拒否",
+        "empty": "承認待ちはありません",
+        "send": "送信",
+        "publish": "公開",
+        "spend": "支出",
+        "expired": "期限切れ",
+        "creditCap": "クレジット上限",
+        "creditCapHint": "このエージェントが全実行で使える最大クレジット",
+        "noCap": "制限なし",
+        "capReached": "クレジット上限に達しました"
       }
     },
     "publishing": {

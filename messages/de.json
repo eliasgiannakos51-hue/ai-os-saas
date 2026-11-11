@@ -2314,6 +2314,20 @@
         "taskChanged": "Die Aufgabe wurde geändert.",
         "toolsNone": "Es gibt noch keine eigene Freigabeliste von Werkzeugen pro Agent: jeder Agent sucht (wenn du es erlaubst), schreibt und sendet an den einen Kanal, den du festgelegt hast.",
         "toolsTitle": "Werkzeuge und Verbindungen"
+      },
+      "approvals": {
+        "title": "Ausstehende Genehmigungen",
+        "approve": "Genehmigen",
+        "deny": "Ablehnen",
+        "empty": "Keine ausstehenden Genehmigungen",
+        "send": "Senden",
+        "publish": "Veröffentlichen",
+        "spend": "Ausgeben",
+        "expired": "Abgelaufen",
+        "creditCap": "Credit-Limit",
+        "creditCapHint": "Maximale Credits, die dieser Agent über alle Ausführungen ausgeben darf",
+        "noCap": "Kein Limit",
+        "capReached": "Credit-Limit erreicht"
       }
     },
     "publishing": {

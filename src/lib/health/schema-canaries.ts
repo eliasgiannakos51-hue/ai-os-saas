@@ -714,4 +714,11 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261125000000_ionexa_payments.sql",
     breaks: "the Payments page cannot connect a business or show any data for anyone the switch \"ionexa-payments\" is open to — the connect route catches the missing table and answers \"not ready\"",
   },
+  // Agent approvals (AG1 Κ3, 2026-11-11).
+  {
+    kind: "table",
+    table: "agent_approvals",
+    migration: "20261126000000_agent_approvals.sql",
+    breaks: "agents cannot request approval for irreversible actions — every action that needs approval would fail silently, with the agent either proceeding without asking or stopping with no way to resume",
+  },
 ];

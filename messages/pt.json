@@ -2314,6 +2314,20 @@
         "taskChanged": "A tarefa mudou.",
         "toolsNone": "Ainda não existe uma lista própria de ferramentas permitidas por agente: cada agente procura (se permitires), escreve e envia para o único canal que definiste.",
         "toolsTitle": "Ferramentas e ligações"
+      },
+      "approvals": {
+        "title": "Aprovações pendentes",
+        "approve": "Aprovar",
+        "deny": "Rejeitar",
+        "empty": "Sem aprovações pendentes",
+        "send": "Enviar",
+        "publish": "Publicar",
+        "spend": "Gastar",
+        "expired": "Expirado",
+        "creditCap": "Limite de créditos",
+        "creditCapHint": "Créditos máximos que este agente pode gastar em todas as execuções",
+        "noCap": "Sem limite",
+        "capReached": "Limite de créditos atingido"
       }
     },
     "publishing": {

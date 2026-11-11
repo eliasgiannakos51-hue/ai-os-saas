@@ -3,6 +3,37 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-11β (AG1 Κ3+Κ4: έγκριση πράκτορα, όριο credits, αναφορά εκτέλεσης + Ionexa Payments) ✅
+
+Ουρά AG1 Κ3-4, Ionexa Payments.
+
+- **Ionexa Payments** (commit `4977c86`, 2026-11-11). Πλήρης πλατφόρμα
+  πληρωμών πίσω από τον διακόπτη `ionexa-payments`: Stripe Connect Express
+  onboarding, δημιουργία προϊόντων, destination charges (2,5% platform fee),
+  δημόσια σελίδα `/pay/[productId]`, webhook handler, dashboard 4 καρτελών
+  (Overview/Products/Transactions/Payouts), cashout σε τράπεζα. Migration
+  `20261125000000_ionexa_payments.sql` (4 πίνακες, deny-all RLS). 73
+  στατικοί έλεγχοι, 14/14 mutations. Design system τηρημένο (rounded-card/
+  rounded-item, logical properties, locale-aware formatting).
+- **AG1 Κ3 — έγκριση πριν ό,τι δεν αναιρείται.** `agent-approval.ts`:
+  τρία είδη (send/publish/spend), 24h TTL, per-agent settings στο
+  `user_agents.approval_settings`. `agent-credit-cap.ts`: per-agent ceiling
+  στο `user_agents.credit_cap`, `capCheck()` πριν κάθε εκτέλεση. API route
+  `/api/agents/approvals` (GET list pending, POST approve/deny). Migration
+  `20261126000000_agent_approvals.sql` (πίνακας `agent_approvals` deny-all
+  RLS + δύο στήλες στο `user_agents`). i18n 10 γλώσσες.
+- **AG1 Κ4 — αναφορά εκτέλεσης.** `agent-report.ts`: `buildRunReport()`
+  (βήματα, κόστος, διάρκεια, επιτυχία/αποτυχία), `reportPushSummary()`.
+- Καταχωρήσεις: GDPR registry, schema canaries, feature catalog, security
+  posture (ADMIN_ONLY_TABLES, DENY_ALL_ON_PURPOSE), orphan-i18n-keys
+  (KNOWN_ORPHANS για creditCap UI key).
+
+**Τι μετρήθηκε, 2026-11-11.** `npm run gates`: **ΟΛΑ 417 ΠΕΡΑΣΑΝ —
+30.834 έλεγχοι, 0 αποτυχίες**. `npm run build:ci` πράσινο.
+**Αδοκίμαστο σε browser.**
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261125000000_ionexa_payments.sql, 20261126000000_agent_approvals.sql**
+
 ## 2026-11-05γ (ασφάλεια: οκτώ ευρήματα των ανεξάρτητων αναθεωρήσεων της 2026-11-05) ✅
 
 Ουρά SA4· `docs/SECURITY-AUDIT.md` ΑΣ-5.7, ΑΣ-7.3 και η νέα ενότητα Α10.

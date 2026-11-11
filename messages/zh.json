@@ -2314,6 +2314,20 @@
         "taskChanged": "任务已更改。",
         "toolsNone": "目前还没有按助手单独设置的工具白名单：每个助手都会查找（如果你允许）、撰写，并发送到你设定的那一个渠道。",
         "toolsTitle": "工具和连接"
+      },
+      "approvals": {
+        "title": "待审批",
+        "approve": "批准",
+        "deny": "拒绝",
+        "empty": "无待审批项",
+        "send": "发送",
+        "publish": "发布",
+        "spend": "支出",
+        "expired": "已过期",
+        "creditCap": "积分上限",
+        "creditCapHint": "此代理在所有运行中可使用的最大积分",
+        "noCap": "无限制",
+        "capReached": "已达积分上限"
       }
     },
     "publishing": {

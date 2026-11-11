@@ -2314,6 +2314,20 @@
         "taskChanged": "The task changed.",
         "toolsNone": "There is no separate per-agent allowlist of tools yet: every agent searches (if you allow it), writes, and sends to the one channel you set.",
         "toolsTitle": "Tools and connections"
+      },
+      "approvals": {
+        "title": "Pending approvals",
+        "approve": "Approve",
+        "deny": "Deny",
+        "empty": "No pending approvals",
+        "send": "Send",
+        "publish": "Publish",
+        "spend": "Spend",
+        "expired": "Expired",
+        "creditCap": "Credit cap",
+        "creditCapHint": "Maximum credits this agent may spend across all runs",
+        "noCap": "No limit",
+        "capReached": "Credit cap reached"
       }
     },
     "publishing": {

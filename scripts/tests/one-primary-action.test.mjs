@@ -564,6 +564,9 @@ const BASELINE = {
   // where no filled accent button exists — all actions are outlined).
   // The two buttons are in different branches of the if/return chain.
   "dashboard/payments/page.tsx": 2,
+  // ONE: the "Pay" button on the public payment page — the one action
+  // a customer landing on this page is here to do.
+  "pay/[productId]/page.tsx": 1,
 };
 
 // A PAYWALL IS NOT THE PAGE IT REPLACES, and unlike an overlay that is

@@ -1050,6 +1050,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "payments/payout",
       "payments/checkout",
       "payments/dashboard-link",
+      "pay/[productId]",
     ],
     charges: false,
     enforcedIn: "src/lib/payments/connect.ts",

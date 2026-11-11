@@ -146,9 +146,12 @@ check(
   mutants.length >= 1500,
   String(mutants.length)
 );
-// A RATCHET ON THE WEAKER READING, not a tolerance for it. Nineteen
-// suites do not evaluate; if a twentieth stops, the gate says so before
-// its `edits` go unread.
+// A RATCHET ON THE WEAKER READING, not a tolerance for it.
+// 19 -> 20 on 2026-11-11: ionexa-payments.mutation.mjs (its edits list
+// is read correctly, but the suite joins the fallback count because the
+// anchor evaluator reads it the weaker way).
+// 20 -> 19: ionexa-payments.mutation.mjs now uses runMutations (the
+// runner reads its edits list directly), so it left the fallback count.
 const FALLBACK_CEILING = 19;
 reportBaseline("FALLBACK_CEILING", FALLBACK_CEILING, fellBack.length);
 check(

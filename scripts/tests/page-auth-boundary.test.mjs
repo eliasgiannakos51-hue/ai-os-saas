@@ -140,6 +140,12 @@ const PUBLIC_ON_PURPOSE = {
     "served by the service worker when the network is gone. It is fetched ONCE, over the network, at service-worker install — so it cannot depend on a session, and it deliberately holds no account data at all.",
   "src/app/shared/[token]/page.tsx":
     "Projects Κομμάτι 7's own read-only share link: the whole point is that whoever holds the unguessable token may read it with NO session — that is what 'share' means. It is not a cross-account leak: the token itself (randomBytes(24), api/projects/[id]/share's own POST) is the credential, looked up with createAdminClient() the same deliberate way delete-account/confirm's single-use token is above, and the page never renders the project's notes (private AI memory) regardless of who asks.",
+  // Ionexa Payments (2026-11-11): the two public pages a customer
+  // (not an Ionexa user) sees when paying for a product.
+  "src/app/pay/[productId]/page.tsx":
+    "the public payment page: a customer who clicks a payment link lands here, sees the product name and price, and is sent to Stripe Checkout. No session because the payer has no Ionexa account and never will — Stripe handles the card. The page reads only the product's name, price and description (from a deny-all table through createAdminClient), and the charges_enabled flag that Stripe set; it shows nothing else, and writes nothing.",
+  "src/app/pay/success/page.tsx":
+    "a static confirmation shown after Stripe Checkout completes. It reads no table and names no account — it is three fixed sentences and a checkmark, the same in every locale. Stripe sends the receipt email.",
 };
 
 const unguarded = [];

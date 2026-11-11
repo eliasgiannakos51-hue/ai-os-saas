@@ -121,6 +121,10 @@ const ENGLISH_ON_PURPOSE = {
   "src/components/logo.tsx": "the wordmark. A brand name is not translated into nine languages; it is the same string everywhere.",
   "src/lib/pdf/deck.tsx":
     "the Unsplash photographer credit. Their API terms fix the wording — 'Photo by <name> on Unsplash', both halves linked — and scripts/unsplash-attribution-proof.mjs exists to prove it renders. Translating it would break the term that lets the product use the photographs at all.",
+  "src/app/pay/[productId]/page.tsx":
+    "the public payment page for a customer who is NOT an Ionexa user — they have no locale setting and no account. 'Secured by Stripe' and 'Powered by Ionexa Payments' are brand phrases, the same in every language. The product's own name and price are the seller's, not ours.",
+  "src/app/pay/success/page.tsx":
+    "the payment success confirmation. Same reasoning: the customer has no account and the confirmation is one screen they see once. Stripe sends the receipt email in the customer's own language.",
 };
 
 const undeclared = untranslated.filter((r) => !ENGLISH_ON_PURPOSE[r.file]);

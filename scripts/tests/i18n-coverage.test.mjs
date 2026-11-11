@@ -1107,7 +1107,17 @@ const OWNER_ONLY_BASELINE = {
 const ATTRIBUTION_BASELINE = {
   "src/lib/pdf/deck.tsx": 2,
 };
-const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE };
+// PUBLIC PAY PAGES (Ionexa Payments, 2026-11-11). The customer paying is
+// NOT an Ionexa user — they have no locale setting and no account. Stripe's
+// own checkout page is in the customer's browser language; these pages use
+// English as the common language for the product name and "Pay", "Secured
+// by Stripe", "Payment successful". Translating them requires detecting the
+// browser's Accept-Language, which is a feature, not a missing translation.
+const PUBLIC_PAY_BASELINE = {
+  "src/app/pay/[productId]/page.tsx": 2,
+  "src/app/pay/success/page.tsx": 3,
+};
+const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE, ...PUBLIC_PAY_BASELINE };
 
 const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
 

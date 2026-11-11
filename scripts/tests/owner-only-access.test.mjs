@@ -247,7 +247,12 @@ const justifiedRoutes = routes.filter((f) => SERVICE_ROLE_DECLARED.test(readFile
 // a new kind of exemption. api/delete-account/status, which cancels from
 // Settings, is NOT in this count: it reads the session and is scoped to
 // its user.
-check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 9);
+// 9 -> 10 on 2026-11-11, for api/pay/[productId] — the Ionexa Payments
+// public checkout redirect. The customer has no account; the admin client
+// reads a product from a deny-all table to build a Stripe redirect. It
+// writes nothing and the amount is fixed by the Stripe Price. public,
+// exactly like the published-site routes above.
+check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 10);
 for (const file of justifiedRoutes) {
   const src = readFileSync(file, "utf8");
   const reason = src.match(SERVICE_ROLE_DECLARED)?.[1];

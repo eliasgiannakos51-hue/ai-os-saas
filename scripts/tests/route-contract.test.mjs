@@ -257,6 +257,11 @@ const OUTSIDE_EVERY_POPULATION = {
     why:
       "the public web for a published Rebuild app (Κομμάτι 4's third piece), the same boundary /s/[subdomain]/route.ts already is for sites. No session is read — the admin client is used because rebuild_projects has no public RLS policy at all, so a stranger can only receive one app's html for a live subdomain, nothing else on the row and nothing by listing. It writes nothing, so there is no row to own and no insert to bound. It calls the same publicRequestAllowed in-memory window the sites route uses before it touches the database, and re-runs checkAppHtml at read time — the HTML already passed this once before the row could be written, but this is the moment it starts being served to a stranger with no session at all, and a row that would not pass the check today is served as absent rather than as whatever it is.",
   },
+  "src/app/api/pay/[productId]/route.ts": {
+    has: ["bound:rate_limit"],
+    why:
+      "the Ionexa Payments public checkout redirect — a customer (not an Ionexa user) clicks 'Pay' on /pay/[productId] and is sent to Stripe Checkout. No session is read because the payer has no Ionexa account and never will — Stripe collects the card. The admin client reads the product from a deny-all table (payments_products, payments_accounts) and creates a Stripe Checkout session with a fixed Price — the amount is set by the Stripe Price, not by any request parameter, so a caller cannot alter what is charged. It writes nothing and inserts no row. Bounded by checkRateLimit scope public_pay, 30 an hour per IP.",
+  },
   "src/app/api/discord/interactions/route.ts": {
     has: ["bound:rate_limit"],
     why:

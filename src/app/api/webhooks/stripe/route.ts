@@ -732,6 +732,32 @@ export async function POST(request: Request) {
       case "checkout.session.async_payment_succeeded":
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        // IONEXA PAYMENTS: a customer paying one of our user's products.
+        // Identified by the metadata the checkout put on the session.
+        // Handled BEFORE the subscription/credit-pack branches because
+        // those check `mode === "payment"` too and would fall through.
+        if (session.metadata?.platform === "ionexa_payments") {
+          const { recordPayment } = await import("@/lib/payments/checkout");
+          await recordPayment({
+            userId: session.metadata.ionexa_user_id,
+            accountId: session.metadata.ionexa_account_id,
+            productId: session.metadata.ionexa_product_id || null,
+            stripePaymentIntentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id ?? null,
+            stripeCheckoutSessionId: session.id,
+            amountCents: session.amount_total ?? 0,
+            currency: session.currency ?? "eur",
+            feeCents: Math.round((session.amount_total ?? 0) * 0.025),
+            customerEmail: session.customer_details?.email ?? null,
+            customerName: session.customer_details?.name ?? null,
+            description: session.metadata.ionexa_product_id
+              ? `Product ${session.metadata.ionexa_product_id}`
+              : "Ionexa Payment",
+          });
+          break;
+        }
         if (session.mode === "subscription" && session.subscription) {
           const subscriptionId =
             typeof session.subscription === "string"

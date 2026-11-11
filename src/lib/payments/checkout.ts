@@ -42,26 +42,36 @@ export async function createPaymentCheckout(params: {
     const base = getSiteUrl();
     const platformFee = Math.round(params.product.price_cents * PLATFORM_FEE_PERCENT / 100);
 
-    // Build a one-time payment session with destination charges.
-    // Subscription mode is similar but uses application_fee_percent on
-    // subscription_data — left as a future enhancement once the recurring
-    // UI is tested end to end.
+    // Recurring products use SUBSCRIPTION mode with application_fee_percent
+    // on subscription_data. One-time products use PAYMENT mode with a
+    // fixed application_fee_amount on payment_intent_data.
+    const isRecurring = params.product.is_recurring;
+
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          price: params.product.stripe_price_id!,
-          quantity: 1,
-        },
-      ],
-      // DESTINATION CHARGE: the payment goes to us, and we automatically
-      // transfer the net to the connected account minus our platform fee.
-      payment_intent_data: {
-        application_fee_amount: platformFee,
-        transfer_data: {
-          destination: params.account.stripe_account_id,
-        },
-      },
+      mode: isRecurring ? "subscription" : "payment",
+      line_items: [{ price: params.product.stripe_price_id!, quantity: 1 }],
+      // DESTINATION CHARGE: one-time → application_fee_amount on the
+      // payment intent; recurring → application_fee_percent on the
+      // subscription (Stripe applies it to every invoice automatically).
+      ...(isRecurring
+        ? {
+            subscription_data: {
+              application_fee_percent: PLATFORM_FEE_PERCENT,
+              transfer_data: { destination: params.account.stripe_account_id },
+              metadata: {
+                ionexa_user_id: params.account.user_id,
+                ionexa_product_id: params.product.id,
+                ionexa_account_id: params.account.id,
+                platform: "ionexa_payments",
+              },
+            },
+          }
+        : {
+            payment_intent_data: {
+              application_fee_amount: platformFee,
+              transfer_data: { destination: params.account.stripe_account_id },
+            },
+          }),
       success_url: params.successUrl || `${base}/pay/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: params.cancelUrl || `${base}/pay/cancel`,
       customer_email: params.customerEmail || undefined,

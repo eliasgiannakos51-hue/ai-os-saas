@@ -13,6 +13,7 @@ import {
   ArrowUpRight,
   Wallet,
   LinkIcon,
+  RefreshCw,
 } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -70,7 +71,7 @@ type BalanceData = {
   payouts: Payout[];
 };
 
-type Tab = "overview" | "products" | "transactions" | "payouts";
+type Tab = "overview" | "products" | "subscriptions" | "transactions" | "payouts";
 
 function formatCurrency(cents: number, currency = "eur", locale?: string): string {
   return new Intl.NumberFormat(locale, {
@@ -114,6 +115,22 @@ export function PaymentsDashboard() {
   const [payoutAmount, setPayoutAmount] = useState("");
   const [requestingPayout, setRequestingPayout] = useState(false);
 
+  // — Subscriptions state —
+  type Subscription = {
+    id: string;
+    product_id: string;
+    stripe_subscription_id: string;
+    customer_email: string | null;
+    customer_name: string | null;
+    status: string;
+    current_period_end: string;
+    cancel_at_period_end: boolean;
+    created_at: string;
+  };
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [subsMetrics, setSubsMetrics] = useState<{ activeCount: number; churnedThisMonth: number }>({ activeCount: 0, churnedThisMonth: 0 });
+  const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
+
   // — Copied link state —
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -143,6 +160,17 @@ export function PaymentsDashboard() {
     } catch { /* silent */ }
   }, []);
 
+  const loadSubscriptions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/payments/subscriptions");
+      if (res.ok) {
+        const data = await res.json();
+        setSubscriptions(data.subscriptions ?? []);
+        setSubsMetrics(data.metrics ?? { activeCount: 0, churnedThisMonth: 0 });
+      }
+    } catch { /* silent */ }
+  }, []);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -155,8 +183,9 @@ export function PaymentsDashboard() {
     if (account?.connected) {
       loadProducts();
       loadBalance();
+      loadSubscriptions();
     }
-  }, [account?.connected, loadProducts, loadBalance]);
+  }, [account?.connected, loadProducts, loadBalance, loadSubscriptions]);
 
   // — Handlers —
   async function handleConnect() {
@@ -334,6 +363,7 @@ export function PaymentsDashboard() {
   const TABS: { key: Tab; label: string }[] = [
     { key: "overview", label: t("dashboard.overview") },
     { key: "products", label: t("dashboard.productsTab") },
+    { key: "subscriptions", label: t("dashboard.subscriptionsTab") },
     { key: "transactions", label: t("dashboard.transactionsTab") },
     { key: "payouts", label: t("dashboard.payoutsTab") },
   ];
@@ -739,6 +769,88 @@ export function PaymentsDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Subscriptions tab */}
+        {tab === "subscriptions" && (
+          <div className="space-y-4">
+            {/* Metrics */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-card border border-divider bg-panel p-5">
+                <div className="mb-1 text-xs text-muted">{t("subscriptions.active")}</div>
+                <div className="text-2xl font-semibold text-foreground">{subsMetrics.activeCount}</div>
+              </div>
+              <div className="rounded-card border border-divider bg-panel p-5">
+                <div className="mb-1 text-xs text-muted">{t("subscriptions.churnedThisMonth")}</div>
+                <div className="text-2xl font-semibold text-foreground">{subsMetrics.churnedThisMonth}</div>
+              </div>
+              <div className="rounded-card border border-divider bg-panel p-5">
+                <div className="mb-1 text-xs text-muted">{t("subscriptions.total")}</div>
+                <div className="text-2xl font-semibold text-foreground">{subscriptions.length}</div>
+              </div>
+            </div>
+
+            {/* Subscription list */}
+            {subscriptions.length === 0 && (
+              <div className="rounded-card border border-divider bg-panel p-8 text-center">
+                <RefreshCw className="mx-auto mb-3 h-8 w-8 text-muted" />
+                <p className="text-sm text-muted">{t("subscriptions.noSubscriptions")}</p>
+                <p className="mt-1 text-xs text-muted">{t("subscriptions.hint")}</p>
+              </div>
+            )}
+            {subscriptions.map((sub) => {
+              const product = products.find((p) => p.id === sub.product_id);
+              return (
+                <div key={sub.id} className="flex items-center justify-between rounded-item border border-divider bg-panel px-4 py-3">
+                  <div>
+                    <div className="text-sm font-medium text-foreground">
+                      {product?.name ?? t("subscriptions.unknownProduct")}
+                    </div>
+                    <div className="text-xs text-muted">
+                      {sub.customer_email ?? sub.customer_name ?? "—"}
+                      {" · "}
+                      {t("subscriptions.renewsOn", { date: fmtDate(sub.current_period_end) })}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-end">
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${
+                      sub.status === "active" ? "bg-success/10 text-success" :
+                      sub.status === "trialing" ? "bg-workspace text-foreground" :
+                      sub.status === "past_due" ? "bg-warning/10 text-warning" :
+                      sub.status === "canceled" ? "bg-danger/10 text-danger" :
+                      "bg-workspace text-muted"
+                    }`}>
+                      {sub.cancel_at_period_end
+                        ? t("subscriptions.cancelling")
+                        : t(`subscriptions.status.${sub.status}` as never)}
+                    </span>
+                    {sub.status === "active" && !sub.cancel_at_period_end && (
+                      <button
+                        disabled={cancellingSubId === sub.stripe_subscription_id}
+                        onClick={async () => {
+                          setCancellingSubId(sub.stripe_subscription_id);
+                          try {
+                            const res = await fetch(
+                              `/api/payments/subscriptions?id=${sub.stripe_subscription_id}`,
+                              { method: "DELETE" }
+                            );
+                            if (res.ok) {
+                              addToast(t("subscriptions.cancelledOk"), "success");
+                              loadSubscriptions();
+                            }
+                          } catch { /* silent */ }
+                          setCancellingSubId(null);
+                        }}
+                        className="rounded-item px-2 py-1 text-xs text-danger hover:bg-danger/10"
+                      >
+                        {cancellingSubId === sub.stripe_subscription_id ? "…" : t("subscriptions.cancel")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 

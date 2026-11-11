@@ -7236,7 +7236,8 @@
       "overview": "概览",
       "productsTab": "产品",
       "transactionsTab": "交易",
-      "payoutsTab": "提现"
+      "payoutsTab": "提现",
+      "subscriptionsTab": "订阅"
     },
     "errors": {
       "notConfigured": "收款功能暂不可用。",
@@ -7248,6 +7249,26 @@
       "nameRequired": "产品名称为必填项。"
     },
     "platformFee": "平台费用：每笔交易{fee}%",
-    "cancel": "取消"
+    "cancel": "取消",
+    "subscriptions": {
+      "active": "活跃订阅",
+      "churnedThisMonth": "本月流失",
+      "total": "订阅总数",
+      "noSubscriptions": "暂无订阅",
+      "hint": "当您的客户订阅定期产品时，他们的订阅将显示在这里。",
+      "unknownProduct": "未知产品",
+      "renewsOn": "{date}续期",
+      "cancelling": "取消中",
+      "cancel": "取消",
+      "cancelledOk": "订阅将在当期结束时取消",
+      "status": {
+        "active": "活跃",
+        "trialing": "试用",
+        "past_due": "逾期",
+        "canceled": "已取消",
+        "paused": "已暂停",
+        "unpaid": "未付款"
+      }
+    }
   }
 }

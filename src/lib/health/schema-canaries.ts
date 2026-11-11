@@ -721,4 +721,10 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261126000000_agent_approvals.sql",
     breaks: "agents cannot request approval for irreversible actions — every action that needs approval would fail silently, with the agent either proceeding without asking or stopping with no way to resume",
   },
+  {
+    kind: "table",
+    table: "payments_subscriptions",
+    migration: "20261127000000_payments_subscriptions.sql",
+    breaks: "the payments dashboard subscriptions tab shows nothing, recurring product checkout fails to record the subscription, and webhook handlers for subscription lifecycle events silently lose data",
+  },
 ];

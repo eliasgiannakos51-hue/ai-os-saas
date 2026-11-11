@@ -7264,7 +7264,8 @@
       "overview": "نظرة عامة",
       "productsTab": "المنتجات",
       "transactionsTab": "المعاملات",
-      "payoutsTab": "السحب"
+      "payoutsTab": "السحب",
+      "subscriptionsTab": "الاشتراكات"
     },
     "errors": {
       "notConfigured": "المدفوعات غير متاحة بعد.",
@@ -7276,6 +7277,26 @@
       "nameRequired": "اسم المنتج مطلوب."
     },
     "platformFee": "رسوم المنصة: {fee}% لكل معاملة",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "subscriptions": {
+      "active": "الاشتراكات النشطة",
+      "churnedThisMonth": "إلغاءات هذا الشهر",
+      "total": "إجمالي الاشتراكات",
+      "noSubscriptions": "لا توجد اشتراكات بعد",
+      "hint": "عندما يشترك عملاؤك في منتج متكرر، ستظهر اشتراكاتهم هنا.",
+      "unknownProduct": "منتج غير معروف",
+      "renewsOn": "يتجدد في {date}",
+      "cancelling": "قيد الإلغاء",
+      "cancel": "إلغاء",
+      "cancelledOk": "سيتم إلغاء الاشتراك في نهاية الفترة",
+      "status": {
+        "active": "نشط",
+        "trialing": "تجريبي",
+        "past_due": "متأخر",
+        "canceled": "ملغى",
+        "paused": "متوقف",
+        "unpaid": "غير مدفوع"
+      }
+    }
   }
 }

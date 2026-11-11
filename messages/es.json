@@ -7236,7 +7236,8 @@
       "overview": "Resumen",
       "productsTab": "Productos",
       "transactionsTab": "Transacciones",
-      "payoutsTab": "Retiros"
+      "payoutsTab": "Retiros",
+      "subscriptionsTab": "Suscripciones"
     },
     "errors": {
       "notConfigured": "Los pagos no están disponibles aún.",
@@ -7248,6 +7249,26 @@
       "nameRequired": "Se requiere nombre del producto."
     },
     "platformFee": "Comisión de plataforma: {fee}% por transacción",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "subscriptions": {
+      "active": "Suscripciones activas",
+      "churnedThisMonth": "Cancelaciones este mes",
+      "total": "Total de suscripciones",
+      "noSubscriptions": "Aún no hay suscripciones",
+      "hint": "Cuando tus clientes se suscriban a un producto recurrente, sus suscripciones aparecerán aquí.",
+      "unknownProduct": "Producto desconocido",
+      "renewsOn": "Se renueva el {date}",
+      "cancelling": "Cancelando",
+      "cancel": "Cancelar",
+      "cancelledOk": "La suscripción se cancelará al final del período",
+      "status": {
+        "active": "Activa",
+        "trialing": "Prueba",
+        "past_due": "Vencida",
+        "canceled": "Cancelada",
+        "paused": "Pausada",
+        "unpaid": "Impaga"
+      }
+    }
   }
 }

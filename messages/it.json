@@ -7236,7 +7236,8 @@
       "overview": "Panoramica",
       "productsTab": "Prodotti",
       "transactionsTab": "Transazioni",
-      "payoutsTab": "Prelievi"
+      "payoutsTab": "Prelievi",
+      "subscriptionsTab": "Abbonamenti"
     },
     "errors": {
       "notConfigured": "I pagamenti non sono ancora disponibili.",
@@ -7248,6 +7249,26 @@
       "nameRequired": "Il nome del prodotto è obbligatorio."
     },
     "platformFee": "Commissione piattaforma: {fee}% per transazione",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "subscriptions": {
+      "active": "Abbonamenti attivi",
+      "churnedThisMonth": "Cancellazioni questo mese",
+      "total": "Totale abbonamenti",
+      "noSubscriptions": "Nessun abbonamento ancora",
+      "hint": "Quando i tuoi clienti si abbonano a un prodotto ricorrente, i loro abbonamenti appariranno qui.",
+      "unknownProduct": "Prodotto sconosciuto",
+      "renewsOn": "Rinnovo il {date}",
+      "cancelling": "In cancellazione",
+      "cancel": "Cancella",
+      "cancelledOk": "L’abbonamento verrà cancellato a fine periodo",
+      "status": {
+        "active": "Attivo",
+        "trialing": "Prova",
+        "past_due": "Scaduto",
+        "canceled": "Cancellato",
+        "paused": "In pausa",
+        "unpaid": "Non pagato"
+      }
+    }
   }
 }

@@ -7236,7 +7236,8 @@
       "overview": "Visão geral",
       "productsTab": "Produtos",
       "transactionsTab": "Transações",
-      "payoutsTab": "Levantamentos"
+      "payoutsTab": "Levantamentos",
+      "subscriptionsTab": "Assinaturas"
     },
     "errors": {
       "notConfigured": "Os pagamentos ainda não estão disponíveis.",
@@ -7248,6 +7249,26 @@
       "nameRequired": "O nome do produto é obrigatório."
     },
     "platformFee": "Taxa de plataforma: {fee}% por transação",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "subscriptions": {
+      "active": "Assinaturas ativas",
+      "churnedThisMonth": "Cancelamentos este mês",
+      "total": "Total de assinaturas",
+      "noSubscriptions": "Nenhuma assinatura ainda",
+      "hint": "Quando seus clientes assinarem um produto recorrente, suas assinaturas aparecerão aqui.",
+      "unknownProduct": "Produto desconhecido",
+      "renewsOn": "Renova em {date}",
+      "cancelling": "Cancelando",
+      "cancel": "Cancelar",
+      "cancelledOk": "A assinatura será cancelada no final do período",
+      "status": {
+        "active": "Ativa",
+        "trialing": "Teste",
+        "past_due": "Vencida",
+        "canceled": "Cancelada",
+        "paused": "Pausada",
+        "unpaid": "Não paga"
+      }
+    }
   }
 }

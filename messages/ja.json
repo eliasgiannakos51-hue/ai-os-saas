@@ -7236,7 +7236,8 @@
       "overview": "概要",
       "productsTab": "商品",
       "transactionsTab": "取引",
-      "payoutsTab": "出金"
+      "payoutsTab": "出金",
+      "subscriptionsTab": "サブスクリプション"
     },
     "errors": {
       "notConfigured": "決済はまだ利用できません。",
@@ -7248,6 +7249,26 @@
       "nameRequired": "商品名は必須です。"
     },
     "platformFee": "プラットフォーム手数料：取引あたり{fee}%",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "subscriptions": {
+      "active": "アクティブなサブスクリプション",
+      "churnedThisMonth": "今月の解約",
+      "total": "合計サブスクリプション",
+      "noSubscriptions": "サブスクリプションはまだありません",
+      "hint": "顧客が定期商品を購読すると、サブスクリプションがここに表示されます。",
+      "unknownProduct": "不明な商品",
+      "renewsOn": "{date}に更新",
+      "cancelling": "キャンセル中",
+      "cancel": "キャンセル",
+      "cancelledOk": "サブスクリプションは期間終了時にキャンセルされます",
+      "status": {
+        "active": "アクティブ",
+        "trialing": "トライアル",
+        "past_due": "期限超過",
+        "canceled": "キャンセル済み",
+        "paused": "一時停止",
+        "unpaid": "未払い"
+      }
+    }
   }
 }

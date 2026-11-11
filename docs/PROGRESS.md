@@ -3,6 +3,41 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-11γ (Ionexa Payments: recurring subscriptions, subscriptions tab, webhook lifecycle) ✅
+
+Ουρά Ionexa Payments — recurring subscriptions.
+
+- **Subscriptions lib** (`src/lib/payments/subscriptions.ts`): createSubscriptionCheckout
+  (Stripe Billing mode with application_fee_percent), recordSubscription,
+  updateSubscriptionStatus, cancelSubscription (at period end or immediately),
+  createCustomerPortal (self-service for end customers), listSubscriptions,
+  subscriptionMetrics (active count, churned this month).
+- **Checkout updated** (`src/lib/payments/checkout.ts`): auto-detects recurring
+  products and switches to `mode: "subscription"` with `subscription_data.
+  application_fee_percent: 2.5` + `transfer_data`.
+- **Webhook handlers** (`src/app/api/webhooks/stripe/route.ts`): handles
+  `checkout.session.completed` for subscription mode (records new sub),
+  `customer.subscription.updated` (upserts status/period), and
+  `customer.subscription.deleted` (marks canceled). All gated on
+  `metadata.platform === "ionexa_payments"`.
+- **API route** (`src/app/api/payments/subscriptions/route.ts`): GET (list +
+  metrics) + DELETE (cancel with ownership check via explicit_compare).
+- **Dashboard tab** (`payments-dashboard.tsx`): new "Subscriptions" tab with
+  3 metric cards (active/churned/total), subscription list with status badges,
+  cancel button (sets cancel_at_period_end).
+- **Migration** `20261127000000_payments_subscriptions.sql`: payments_subscriptions
+  table with deny-all RLS, indexes on user_id+status and stripe_subscription_id.
+- Registrations: GDPR (payments_subscriptions), schema canaries, security posture,
+  RLS coverage (DENY_ALL_ON_PURPOSE), feature catalog, baselines, design density,
+  deep links, comment claims.
+- i18n: 18 new keys in all 10 locales (subscriptions tab, status labels, metrics).
+
+**Τι μετρήθηκε, 2026-11-11.** `npm run gates`: **ΟΛΑ 417 ΠΕΡΑΣΑΝ —
+30.847 έλεγχοι, 0 αποτυχίες**. `npm run build:ci` πράσινο.
+**Αδοκίμαστο σε browser.**
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261125000000_ionexa_payments.sql, 20261126000000_agent_approvals.sql, 20261127000000_payments_subscriptions.sql**
+
 ## 2026-11-11β (AG1 Κ3+Κ4: έγκριση πράκτορα, όριο credits, αναφορά εκτέλεσης + Ionexa Payments) ✅
 
 Ουρά AG1 Κ3-4, Ionexa Payments.

@@ -737,6 +737,29 @@ export async function POST(request: Request) {
         // Handled BEFORE the subscription/credit-pack branches because
         // those check `mode === "payment"` too and would fall through.
         if (session.metadata?.platform === "ionexa_payments") {
+          // Subscription mode: record the new subscription.
+          if (session.mode === "subscription" && session.subscription) {
+            const { recordSubscription } = await import("@/lib/payments/subscriptions");
+            const subId = typeof session.subscription === "string"
+              ? session.subscription : session.subscription.id;
+            const custId = typeof session.customer === "string"
+              ? session.customer : session.customer?.id ?? "";
+            await recordSubscription({
+              userId: session.metadata.ionexa_user_id,
+              accountId: session.metadata.ionexa_account_id,
+              productId: session.metadata.ionexa_product_id,
+              stripeSubscriptionId: subId,
+              stripeCustomerId: custId,
+              status: "active",
+              currentPeriodStart: new Date().toISOString(),
+              currentPeriodEnd: new Date().toISOString(), // updated by sub.updated
+              cancelAtPeriodEnd: false,
+              trialEnd: null,
+              customerEmail: session.customer_details?.email ?? null,
+              customerName: session.customer_details?.name ?? null,
+            });
+          }
+          // One-time mode (or subscription first payment): record payment.
           const { recordPayment } = await import("@/lib/payments/checkout");
           await recordPayment({
             userId: session.metadata.ionexa_user_id,
@@ -808,6 +831,30 @@ export async function POST(request: Request) {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
+        // IONEXA PAYMENTS: a subscription on a user's connected account.
+        if (subscription.metadata?.platform === "ionexa_payments") {
+          const { recordSubscription, updateSubscriptionStatus } = await import("@/lib/payments/subscriptions");
+          const status = subscription.status as "active" | "past_due" | "canceled" | "trialing" | "paused" | "unpaid";
+          if (event.type === "customer.subscription.deleted") {
+            await updateSubscriptionStatus(subscription.id, "canceled");
+          } else {
+            await recordSubscription({
+              userId: subscription.metadata.ionexa_user_id,
+              accountId: subscription.metadata.ionexa_account_id,
+              productId: subscription.metadata.ionexa_product_id,
+              stripeSubscriptionId: subscription.id,
+              stripeCustomerId: typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id,
+              status,
+              currentPeriodStart: new Date((subscription.items.data[0]?.current_period_start ?? 0) * 1000).toISOString(),
+              currentPeriodEnd: new Date((subscription.items.data[0]?.current_period_end ?? 0) * 1000).toISOString(),
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+              customerEmail: null, // not on the subscription object
+              customerName: null,
+            });
+          }
+          break;
+        }
         await syncSubscriptionToUser(stripe, subscription.id, event.type, subscription, undefined, event.id);
         break;
       }

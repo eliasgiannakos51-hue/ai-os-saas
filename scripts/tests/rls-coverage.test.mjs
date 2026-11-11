@@ -219,6 +219,7 @@ const DENY_ALL_ON_PURPOSE = {
   payments_products: "products the user sells through Ionexa Payments. Same migration, same REVOKE ALL. A client insert could create a product on someone else's connected account; a client update could change another user's prices.",
   payments_transactions: "records of payments from the user's customers. Same migration, same REVOKE ALL. A client insert could forge a payment record; a client update could change a transaction's status.",
   payments_payouts: "payout history (cashouts to bank). Same migration, same REVOKE ALL. A client insert could forge a payout record.",
+  payments_subscriptions: "recurring subscriptions the user's customers have. Written by webhooks (no user session), read by the dashboard through API routes that verify ownership. A client insert could forge a subscription record; a client update could change status.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

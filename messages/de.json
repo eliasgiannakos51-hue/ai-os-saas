@@ -7236,7 +7236,8 @@
       "overview": "Übersicht",
       "productsTab": "Produkte",
       "transactionsTab": "Transaktionen",
-      "payoutsTab": "Auszahlungen"
+      "payoutsTab": "Auszahlungen",
+      "subscriptionsTab": "Abonnements"
     },
     "errors": {
       "notConfigured": "Zahlungen sind noch nicht verfügbar.",
@@ -7248,6 +7249,26 @@
       "nameRequired": "Produktname ist erforderlich."
     },
     "platformFee": "Plattformgebühr: {fee}% pro Transaktion",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "subscriptions": {
+      "active": "Aktive Abonnements",
+      "churnedThisMonth": "Kündigungen diesen Monat",
+      "total": "Abonnements gesamt",
+      "noSubscriptions": "Noch keine Abonnements",
+      "hint": "Wenn Ihre Kunden ein wiederkehrendes Produkt abonnieren, erscheinen ihre Abonnements hier.",
+      "unknownProduct": "Unbekanntes Produkt",
+      "renewsOn": "Verlängerung am {date}",
+      "cancelling": "Wird gekündigt",
+      "cancel": "Kündigen",
+      "cancelledOk": "Abonnement wird zum Periodenende gekündigt",
+      "status": {
+        "active": "Aktiv",
+        "trialing": "Testphase",
+        "past_due": "Überfällig",
+        "canceled": "Gekündigt",
+        "paused": "Pausiert",
+        "unpaid": "Unbezahlt"
+      }
+    }
   }
 }

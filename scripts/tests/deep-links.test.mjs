@@ -317,7 +317,8 @@ for (const l of favLinks) {
 // Discord connect/callback flow reads its own query-carried status
 // (connected, cancelled, expired, etc., src/app/dashboard/discord/
 // page.tsx) back on return from Discord's OAuth redirect.
-const DEEP_LINK_FLOOR = 77;
+// 77 -> 78 ON 2026-11-11: payments subscriptions API route adds a deep link.
+const DEEP_LINK_FLOOR = 78;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

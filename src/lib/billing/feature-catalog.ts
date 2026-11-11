@@ -1049,6 +1049,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "payments/products",
       "payments/balance",
       "payments/payout",
+      "payments/subscriptions",
       "payments/checkout",
       "payments/dashboard-link",
       "pay/[productId]",

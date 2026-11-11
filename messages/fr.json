@@ -7236,7 +7236,8 @@
       "overview": "Aperçu",
       "productsTab": "Produits",
       "transactionsTab": "Transactions",
-      "payoutsTab": "Virements"
+      "payoutsTab": "Virements",
+      "subscriptionsTab": "Abonnements"
     },
     "errors": {
       "notConfigured": "Les paiements ne sont pas encore disponibles.",
@@ -7248,6 +7249,26 @@
       "nameRequired": "Le nom du produit est requis."
     },
     "platformFee": "Frais de plateforme : {fee}% par transaction",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "subscriptions": {
+      "active": "Abonnements actifs",
+      "churnedThisMonth": "Résiliations ce mois",
+      "total": "Total des abonnements",
+      "noSubscriptions": "Pas encore d’abonnements",
+      "hint": "Lorsque vos clients s’abonnent à un produit récurrent, leurs abonnements apparaîtront ici.",
+      "unknownProduct": "Produit inconnu",
+      "renewsOn": "Renouvellement le {date}",
+      "cancelling": "En cours d’annulation",
+      "cancel": "Annuler",
+      "cancelledOk": "L’abonnement sera annulé en fin de période",
+      "status": {
+        "active": "Actif",
+        "trialing": "Essai",
+        "past_due": "En retard",
+        "canceled": "Annulé",
+        "paused": "En pause",
+        "unpaid": "Impayé"
+      }
+    }
   }
 }

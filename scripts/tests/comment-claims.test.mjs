@@ -350,9 +350,9 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // 83 -> 84 ON 2026-11-11: Ionexa Payments' LOCALE_ALLOWED entries
   // ("Transactions" and "Description" are the French words too) name the
   // same mechanism.
-  // 84 -> 85 ON 2026-11-11: the public pay route's NO_SESSION_BY_DESIGN
-  // entry names the limitation ("the payer has no Ionexa account").
-  const CENSUS_CEILING = 85;
+  // 85 -> 86 ON 2026-11-11: payments subscriptions route's @service-role-justified
+  // comment names the limitation (webhook-written, no user session).
+  const CENSUS_CEILING = 86;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

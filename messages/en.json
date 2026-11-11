@@ -7236,7 +7236,8 @@
       "overview": "Overview",
       "productsTab": "Products",
       "transactionsTab": "Transactions",
-      "payoutsTab": "Payouts"
+      "payoutsTab": "Payouts",
+      "subscriptionsTab": "Subscriptions"
     },
     "errors": {
       "notConfigured": "Payments are not available yet.",
@@ -7248,6 +7249,26 @@
       "nameRequired": "Product name is required."
     },
     "platformFee": "Platform fee: {fee}% per transaction",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "subscriptions": {
+      "active": "Active subscriptions",
+      "churnedThisMonth": "Churned this month",
+      "total": "Total subscriptions",
+      "noSubscriptions": "No subscriptions yet",
+      "hint": "When your customers subscribe to a recurring product, their subscriptions will appear here.",
+      "unknownProduct": "Unknown product",
+      "renewsOn": "Renews on {date}",
+      "cancelling": "Cancelling",
+      "cancel": "Cancel",
+      "cancelledOk": "Subscription set to cancel at period end",
+      "status": {
+        "active": "Active",
+        "trialing": "Trial",
+        "past_due": "Past due",
+        "canceled": "Canceled",
+        "paused": "Paused",
+        "unpaid": "Unpaid"
+      }
+    }
   }
 }

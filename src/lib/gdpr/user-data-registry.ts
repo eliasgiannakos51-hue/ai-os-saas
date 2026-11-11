@@ -183,6 +183,14 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     scope: "account",
     serverExportColumns: ["id", "amount_cents", "currency", "status", "arrival_date", "created_at"],
   },
+  // Payments subscriptions (2026-11-11): recurring subscriptions the
+  // user's own customers have.
+  {
+    table: "payments_subscriptions",
+    label: "payments_subscriptions",
+    scope: "account",
+    serverExportColumns: ["id", "product_id", "stripe_subscription_id", "customer_email", "status", "current_period_end", "created_at"],
+  },
   // Agent approvals (AG1 Κ3, 2026-11-11): pending, approved and denied
   // actions the agent paused for.
   { table: "agent_approvals", label: "agent_approvals", scope: "user_content" },

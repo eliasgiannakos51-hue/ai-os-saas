@@ -2284,7 +2284,6 @@
       "failingWarning": "{failures} delle ultime {max} esecuzioni sono fallite di seguito. Dopo {max}, questo agente si spegne da solo.",
       "disabledReason": "Ultimo errore: {reason}",
       "shell": {
-        "approvalsNone": "Nessuna, perché non servono: niente di ciò che fa questo agente esce da Ionexa senza di te.",
         "approvalsTitle": "Regole di approvazione",
         "atCapacity": "limite degli attivi raggiunto",
         "capNoHardStop": "Questo è il costo, non un limite: non esiste ancora un limite di crediti che fermi l'agente. Si ferma quando i crediti del profilo finiscono, o da solo dopo {max} fallimenti di fila.",
@@ -2313,7 +2312,10 @@
         "tabsLabel": "Cosa stai guardando di questo agente",
         "taskChanged": "Attività modificata.",
         "toolsNone": "Non esiste ancora un elenco di strumenti permessi per singolo agente: ogni agente cerca (se lo consenti), scrive e manda al solo canale che hai impostato.",
-        "toolsTitle": "Strumenti e connessioni"
+        "toolsTitle": "Strumenti e connessioni",
+        "approvalsHint": "Se attivo, l’agente si ferma e chiede prima di agire. Disattiva per lasciarlo agire da solo.",
+        "creditCapNone": "Nessun limite",
+        "creditCapHint": "L’agente si ferma quando ha speso questi crediti. Lascia vuoto per nessun limite."
       },
       "approvals": {
         "title": "Approvazioni in sospeso",

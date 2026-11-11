@@ -121,8 +121,10 @@ for (const f of users) {
   }
   const examples = (exBlock.match(/\bkey:\s*"[^"]+"/g) ?? []).length;
   check(`${f}: ${examples} examples on the empty landing, at most three`, examples <= 3, exBlock.slice(0, 120));
-  // A checkbox, a radio or a file picker takes no text; anything else does.
-  check(`${f}: nothing to type into but the shell's field`, !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(src));
+  // A checkbox, a radio, a file picker or a number spinner takes no
+  // free-form text; anything else does. AG1 Κ3 adds type="number" for
+  // the credit cap setting — a constrained control, not a text field.
+  check(`${f}: nothing to type into but the shell's field`, !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file|number)")/.test(src));
   check(`${f}: no steps on top, no box of limits`, !/<StepFlow\b|_LIMITS\.map\(/.test(src));
   check(`${f}: imports no page component, so the old page is not drawn behind it`, !/from "@\/components\/[^"]+-workspace"/.test(src));
 }

@@ -82,9 +82,11 @@ check("...and the page keeps no old body behind it",
   !/-workspace"/.test(page.replace(/import type [^;]*;/g, "")) && !/<ListLayout|<EntityCard/.test(page));
 // THE LITERAL RULE tool-shell.test.mjs holds every tool in the shell to,
 // restated here because this screen is the one that had three fields:
-// a search box, the create textarea and the edit form.
+// a search box, the create textarea and the edit form. AG1 Κ3 adds a
+// number input for the credit cap — a settings control, not a competing
+// text field, so type="number" is allowed alongside checkbox/radio/file.
 check("there is nothing to type into but the shell's own field",
-  !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file)")/.test(src));
+  !/<textarea\b|<input\b(?![^>]*type="(?:checkbox|radio|file|number)")/.test(src));
 check("the field's placeholder says which of the two things it writes",
   /placeholder=\{\s*selected\s*\?\s*fieldTarget === "task"\s*\?\s*t\("shell\.placeholderTask"\)\s*:\s*t\("shell\.placeholderDescription"\)\s*:\s*t\("requestPlaceholder"\)\s*\}/.test(src));
 check("the landing is the registry's own two keys plus the shared examples",
@@ -272,6 +274,7 @@ const PANEL_ORDER = [
   ["credits per run and per month", /data-testid="agents-panel-caps"/],
   ["schedule", /data-testid="agents-panel-schedule"/],
   ["approval rules", /data-testid="agents-panel-approvals"/],
+  ["credit cap", /data-testid="agents-panel-credit-cap"/],
 ];
 {
   let cursor = -1;
@@ -281,7 +284,7 @@ const PANEL_ORDER = [
     if (at < 0 || at < cursor) inOrder = false;
     cursor = at;
   }
-  check(`all six rows are there, in the asked order (${PANEL_ORDER.map(([n]) => n).join(" → ")})`, inOrder);
+  check(`all seven rows are there, in the asked order (${PANEL_ORDER.map(([n]) => n).join(" → ")})`, inOrder);
 }
 // THE TWO ROWS THAT HAVE DATA are checked against what produces them.
 check("the per-run figure is the server's own price for the chosen tier, not a number in this file",
@@ -297,7 +300,10 @@ const GAPS = [
   ["its own address", "shell.ownEmailNone", /data-testid="agents-panel-email"[\s\S]{0,400}t\("shell\.ownEmailNone"\)/],
   ["a per-agent tool allowlist", "shell.toolsNone", /data-testid="agents-panel-tools"[\s\S]{0,1400}t\("shell\.toolsNone"\)/],
   ["a credit limit that stops it", "shell.capNoHardStop", /data-testid="agents-panel-caps"[\s\S]{0,1600}t\("shell\.capNoHardStop", \{ max: AGENT_MAX_CONSECUTIVE_FAILURES \}\)/],
-  ["approval rules", "shell.approvalsNone", /data-testid="agents-panel-approvals"[\s\S]{0,300}t\("shell\.approvalsNone"\)/],
+  // AG1 Κ3 (2026-11-11): approval rules are no longer a gap — real
+  // controls (three checkboxes + credit cap input) now live in the panel.
+  // The "approvalsNone" key stays in the messages for the Inbox tab's
+  // empty state; the panel section is tested below.
 ];
 for (const [what, key, re] of GAPS) {
   check(`the gap in ${what} is said, where it is missing`, re.test(src), key);
@@ -312,8 +318,20 @@ check("the four settings controls are the SAME components, in the panel",
     /<DeliveryPicker\s+value=\{editDraft\.deliveryMethod\}/.test(src) &&
     /<DepthPicker value=\{editDraft\.depth\}/.test(src) &&
     /<input type="checkbox" checked=\{editDraft\.needsWebSearch\}/.test(src));
-check("...and Save sends all five fields together, as the route resolves them together",
-  /scheduleCron: partsToCron\(editDraft\.parts\),[\s\S]{0,260}deliveryMethod: editDraft\.deliveryMethod,\s*deliveryTarget: editDraft\.deliveryTarget,/.test(src));
+check("...and Save sends all seven fields together, as the route resolves them together",
+  /scheduleCron: partsToCron\(editDraft\.parts\),[\s\S]{0,400}deliveryMethod: editDraft\.deliveryMethod,\s*deliveryTarget: editDraft\.deliveryTarget,[\s\S]{0,200}creditCap: editDraft\.creditCap,\s*approvalSettings: editDraft\.approvalSettings,/.test(src));
+
+// AG1 Κ3: the approval controls and credit cap are real, not gaps.
+check("the approval panel has three checkboxes for send/publish/spend",
+  /\["send", "publish", "spend"\]/.test(src) &&
+    /editDraft\.approvalSettings\[kind\]/.test(src));
+check("the credit cap input is a number field in the panel",
+  /data-testid="agents-credit-cap-input"/.test(src) &&
+    /type="number"/.test(src) &&
+    /editDraft\.creditCap/.test(src));
+check("the draft is seeded from the agent's own credit_cap and approval_settings",
+  /creditCap: selected\.credit_cap/.test(src) &&
+    /approvalSettings:.*selected\.approval_settings/.test(src));
 
 console.log("\n== 7. the Inbox tab: built, empty, and honest about which half is empty why ==");
 check("there are two tabs and the Inbox is one of them",

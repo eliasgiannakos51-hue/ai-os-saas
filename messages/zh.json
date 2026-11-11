@@ -2284,7 +2284,6 @@
       "failingWarning": "最近连续 {failures} 次运行失败。达到 {max} 次后，该智能体会自动关闭。",
       "disabledReason": "最近一次失败：{reason}",
       "shell": {
-        "approvalsNone": "没有，因为不需要：这个助手所做的一切，没有你就不会离开 Ionexa。",
         "approvalsTitle": "批准规则",
         "atCapacity": "已达到启用上限",
         "capNoHardStop": "这是花费，不是上限：目前还没有能让助手停下的积分上限。账户积分用完时它会停，或者连续失败 {max} 次后自己停下。",
@@ -2313,7 +2312,10 @@
         "tabsLabel": "你正在查看这个助手的哪一部分",
         "taskChanged": "任务已更改。",
         "toolsNone": "目前还没有按助手单独设置的工具白名单：每个助手都会查找（如果你允许）、撰写，并发送到你设定的那一个渠道。",
-        "toolsTitle": "工具和连接"
+        "toolsTitle": "工具和连接",
+        "approvalsHint": "勾选后，代理在行动前会暂停并请求确认。取消勾选可让其自行行动。",
+        "creditCapNone": "无限制",
+        "creditCapHint": "代理消耗此数量的积分后将停止。留空表示无限制。"
       },
       "approvals": {
         "title": "待审批",

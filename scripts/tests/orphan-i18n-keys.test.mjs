@@ -269,10 +269,8 @@ console.log(`${literalKeys.size} literal t()-call keys, ${dynamicNamespaces.size
 // after the same reading; adding to it to silence this test without
 // reading the code is exactly the mistake the header describes.
 const KNOWN_ORPHANS = [
-  // AG1 Κ3 (2026-11-11): the credit cap setting label. The lib and the
-  // API route exist; the UI component that reads this key is the next
-  // piece. Removing the key before the UI ships loses the translation.
-  "dashboard.agents.approvals.creditCap",
+  // AG1 Κ3 (2026-11-11): creditCap is now read by agents-shell.tsx via
+  // t("approvals.creditCap"). KNOWN_ORPHANS is empty again.
 ];
 
 check(`the message-key walk found keys (${allKeys.length})`, allKeys.length >= 2000,

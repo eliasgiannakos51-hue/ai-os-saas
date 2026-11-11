@@ -125,6 +125,10 @@ export type UserAgent = {
   last_run_at: string | null;
   next_run_at: string | null;
   consecutive_failures: number;
+  /** Per-agent credit ceiling. NULL = no cap. AG1 Κ3. */
+  credit_cap: number | null;
+  /** Which action kinds need approval: {send: bool, publish: bool, spend: bool}. AG1 Κ3. */
+  approval_settings: Record<string, boolean> | null;
 };
 
 export type AgentRun = {

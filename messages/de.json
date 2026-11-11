@@ -2284,7 +2284,6 @@
       "failingWarning": "{failures} der letzten {max} Läufe sind nacheinander fehlgeschlagen. Nach {max} schaltet sich dieser Agent selbst ab.",
       "disabledReason": "Letzter Fehler: {reason}",
       "shell": {
-        "approvalsNone": "Keine, weil keine nötig sind: nichts, was dieser Agent tut, verlässt Ionexa ohne dich.",
         "approvalsTitle": "Freigaberegeln",
         "atCapacity": "Grenze der aktiven erreicht",
         "capNoHardStop": "Das sind die Kosten, keine Grenze: es gibt noch keine Credit-Grenze, die den Agenten anhält. Er hört auf, wenn die Credits des Kontos aufgebraucht sind, oder von selbst nach {max} Fehlschlägen hintereinander.",
@@ -2313,7 +2312,10 @@
         "tabsLabel": "Was du zu diesem Agenten siehst",
         "taskChanged": "Die Aufgabe wurde geändert.",
         "toolsNone": "Es gibt noch keine eigene Freigabeliste von Werkzeugen pro Agent: jeder Agent sucht (wenn du es erlaubst), schreibt und sendet an den einen Kanal, den du festgelegt hast.",
-        "toolsTitle": "Werkzeuge und Verbindungen"
+        "toolsTitle": "Werkzeuge und Verbindungen",
+        "approvalsHint": "Wenn aktiviert, pausiert der Agent und fragt, bevor er handelt. Deaktiviere, um ihn selbstständig handeln zu lassen.",
+        "creditCapNone": "Kein Limit",
+        "creditCapHint": "Der Agent stoppt, wenn er so viele Credits ausgegeben hat. Leer lassen für kein Limit."
       },
       "approvals": {
         "title": "Ausstehende Genehmigungen",

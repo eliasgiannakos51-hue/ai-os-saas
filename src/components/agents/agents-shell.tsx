@@ -375,6 +375,8 @@ export function AgentsShell({
     depth: AgentDepth;
     deliveryMethod: DeliveryChannel;
     deliveryTarget: string;
+    creditCap: number | null;
+    approvalSettings: Record<string, boolean>;
   } | null>(null);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
   // THE DEPTH ON THE PREVIEW SCREEN, separate from the draft the builder
@@ -494,6 +496,8 @@ export function AgentsShell({
       depth: parseAgentDepth(selected.config?.depth),
       deliveryMethod: isDeliveryChannel(selected.delivery_method) ? selected.delivery_method : "email",
       deliveryTarget: selected.delivery_target ?? "",
+      creditCap: selected.credit_cap ?? null,
+      approvalSettings: (selected.approval_settings as Record<string, boolean>) ?? { send: true, publish: true, spend: true },
     });
     setTab("plan");
     setLastRunOutput(null);
@@ -920,6 +924,9 @@ export function AgentsShell({
         // without the other would ask the route to guess.
         deliveryMethod: editDraft.deliveryMethod,
         deliveryTarget: editDraft.deliveryTarget,
+        // AG1 Κ3: credit cap and approval settings.
+        creditCap: editDraft.creditCap,
+        approvalSettings: editDraft.approvalSettings,
       },
       t("updateSuccess")
     );
@@ -1710,8 +1717,46 @@ export function AgentsShell({
                 </div>
 
                 <div data-testid="agents-panel-approvals">
-                  <p className="text-xs font-medium text-foreground">{t("shell.approvalsTitle")}</p>
-                  <p className="text-[11px] leading-relaxed text-muted">{t("shell.approvalsNone")}</p>
+                  <p className="mb-1.5 text-xs font-medium text-foreground">{t("shell.approvalsTitle")}</p>
+                  {(["send", "publish", "spend"] as const).map((kind) => (
+                    <label key={kind} className="flex items-center gap-2 text-xs text-muted">
+                      <input
+                        type="checkbox"
+                        checked={editDraft.approvalSettings[kind] !== false}
+                        onChange={(e) =>
+                          setEditDraft({
+                            ...editDraft,
+                            approvalSettings: { ...editDraft.approvalSettings, [kind]: e.target.checked },
+                          })
+                        }
+                      />
+                      {t(`approvals.${kind}`)}
+                    </label>
+                  ))}
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-muted">{t("shell.approvalsHint")}</p>
+                </div>
+
+                <div data-testid="agents-panel-credit-cap">
+                  <p className="mb-1.5 text-xs font-medium text-foreground">{t("approvals.creditCap")}</p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      max={10_000_000}
+                      placeholder={t("shell.creditCapNone")}
+                      value={editDraft.creditCap ?? ""}
+                      onChange={(e) => {
+                        const raw = e.target.value.trim();
+                        setEditDraft({
+                          ...editDraft,
+                          creditCap: raw === "" ? null : Math.max(0, Math.floor(Number(raw))),
+                        });
+                      }}
+                      className="h-8 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground placeholder:text-muted"
+                      data-testid="agents-credit-cap-input"
+                    />
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.creditCapHint")}</p>
                 </div>
 
                 <button

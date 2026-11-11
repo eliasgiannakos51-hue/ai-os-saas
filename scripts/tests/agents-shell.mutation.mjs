@@ -243,18 +243,20 @@ const MUTANTS = [
     expect: "the gap in a credit limit that stops it is said, where it is missing",
   },
   {
-    name: "the approval row becomes an empty heading",
+    // AG1 Κ3: the approval checkboxes must reference editDraft.approvalSettings.
+    name: "the approval controls lose their binding to the draft",
     file: SHELL,
-    from: '                  <p className="text-[11px] leading-relaxed text-muted">{t("shell.approvalsNone")}</p>',
-    to: "                  {null}",
-    expect: "the gap in approval rules is said, where it is missing",
+    from: 'editDraft.approvalSettings[kind]',
+    to: 'true',
+    expect: "the approval panel has three checkboxes for send/publish/spend",
   },
   {
-    name: "one language loses the sentence that explains a gap it still has",
-    file: ZH,
-    from: '"approvalsNone": "没有，因为不需要：这个助手所做的一切，没有你就不会离开 Ionexa。"',
-    to: '"approvalsNone": "无"',
-    expect: "...in all ten languages, as a real sentence (shell.approvalsNone)",
+    // AG1 Κ3: the credit cap input must exist with the right testid.
+    name: "the credit cap input loses its data-testid",
+    file: SHELL,
+    from: 'data-testid="agents-credit-cap-input"',
+    to: 'data-testid="agents-credit-cap-gone"',
+    expect: "the credit cap input is a number field in the panel",
   },
   {
     name: "a placeholder is quoted into literal text, so the number never prints",

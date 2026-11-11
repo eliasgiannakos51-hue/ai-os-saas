@@ -2284,7 +2284,6 @@
       "failingWarning": "{failures} des {max} dernières exécutions ont échoué d'affilée. Après {max}, cet agent s'éteint tout seul.",
       "disabledReason": "Dernier échec : {reason}",
       "shell": {
-        "approvalsNone": "Aucune, parce qu'aucune n'est nécessaire : rien de ce que fait cet agent ne quitte Ionexa sans toi.",
         "approvalsTitle": "Règles de validation",
         "atCapacity": "limite des actifs atteinte",
         "capNoHardStop": "Ce sont les coûts, pas une limite : il n'y a pas encore de limite de crédits qui arrête l'agent. Il s'arrête quand le compte n'a plus de crédits, ou de lui-même après {max} échecs de suite.",
@@ -2313,7 +2312,10 @@
         "tabsLabel": "Ce que tu regardes pour cet agent",
         "taskChanged": "La tâche a changé.",
         "toolsNone": "Il n'existe pas encore de liste d'outils autorisés par agent : chaque agent cherche (si tu l'autorises), écrit, et envoie au seul canal que tu as défini.",
-        "toolsTitle": "Outils et connexions"
+        "toolsTitle": "Outils et connexions",
+        "approvalsHint": "Quand coché, l’agent s’arrête et demande avant d’agir. Décochez pour le laisser agir seul.",
+        "creditCapNone": "Pas de limite",
+        "creditCapHint": "L’agent s’arrête après avoir dépensé ce nombre de crédits. Laissez vide pour pas de limite."
       },
       "approvals": {
         "title": "Approbations en attente",

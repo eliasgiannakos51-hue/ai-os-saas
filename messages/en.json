@@ -2284,7 +2284,6 @@
       "failingWarning": "{failures} of the last {max} runs failed in a row. After {max}, this agent switches itself off.",
       "disabledReason": "Last failure: {reason}",
       "shell": {
-        "approvalsNone": "None, because none are needed: nothing this agent does leaves Ionexa without you.",
         "approvalsTitle": "Approval rules",
         "atCapacity": "active limit reached",
         "capNoHardStop": "These are the cost, not a limit: there is no credit limit that stops the agent yet. It stops when the account runs out of credits, or by itself after {max} failures in a row.",
@@ -2313,7 +2312,10 @@
         "tabsLabel": "What you are looking at for this agent",
         "taskChanged": "The task changed.",
         "toolsNone": "There is no separate per-agent allowlist of tools yet: every agent searches (if you allow it), writes, and sends to the one channel you set.",
-        "toolsTitle": "Tools and connections"
+        "toolsTitle": "Tools and connections",
+        "approvalsHint": "When checked, the agent pauses and asks before acting. Uncheck to let it act on its own.",
+        "creditCapNone": "No limit",
+        "creditCapHint": "The agent stops when it has spent this many credits. Leave empty for no limit."
       },
       "approvals": {
         "title": "Pending approvals",

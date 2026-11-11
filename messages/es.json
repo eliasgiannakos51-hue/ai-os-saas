@@ -2284,7 +2284,6 @@
       "failingWarning": "{failures} de las últimas {max} ejecuciones fallaron seguidas. Tras {max}, este agente se apaga solo.",
       "disabledReason": "Último fallo: {reason}",
       "shell": {
-        "approvalsNone": "Ninguna, porque no hacen falta: nada de lo que hace este agente sale de Ionexa sin ti.",
         "approvalsTitle": "Reglas de aprobación",
         "atCapacity": "límite de activos alcanzado",
         "capNoHardStop": "Esto es el coste, no un límite: todavía no hay un límite de créditos que detenga al agente. Se detiene cuando la cuenta se queda sin créditos, o por sí solo tras {max} fallos seguidos.",
@@ -2313,7 +2312,10 @@
         "tabsLabel": "Lo que estás viendo de este agente",
         "taskChanged": "La tarea cambió.",
         "toolsNone": "Todavía no hay una lista propia de herramientas permitidas por agente: cada agente busca (si lo permites), escribe y envía al único canal que fijaste.",
-        "toolsTitle": "Herramientas y conexiones"
+        "toolsTitle": "Herramientas y conexiones",
+        "approvalsHint": "Cuando está marcado, el agente se detiene y pregunta antes de actuar. Desmarca para que actúe solo.",
+        "creditCapNone": "Sin límite",
+        "creditCapHint": "El agente se detiene al gastar esta cantidad de créditos. Déjalo vacío para sin límite."
       },
       "approvals": {
         "title": "Aprobaciones pendientes",

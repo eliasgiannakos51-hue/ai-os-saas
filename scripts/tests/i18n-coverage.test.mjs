@@ -856,9 +856,9 @@ const clientFallbacks = sources.flatMap((f) => [
 // not load that. Please try again." and "Something went wrong." — the
 // same documented convention as every increment above, English server
 // replies with the calling component supplying translated wording.
-// 727 since 2026-11-11: FS1 live voice routes — start/tick/end/sweep each
-// return English error strings (same convention as every increment above).
-const SERVER_PROSE_BASELINE = 727;
+// 728 since 2026-11-11: AG1 Κ3 approvals route returns English error prose
+// ("Credit cap must be 0–10 000 000 or null.").
+const SERVER_PROSE_BASELINE = 728;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

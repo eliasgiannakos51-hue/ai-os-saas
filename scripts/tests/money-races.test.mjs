@@ -166,6 +166,12 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
     // the same amount/currency/metadata pair does not create a second payout.
     // Rate-limited to 5/hour per user in api/payments/payout.
     "stripe.payouts.create",
+    // Coupons and promotion codes: discount configuration, no money moves.
+    "stripe.coupons.create",
+    "stripe.promotionCodes.create",
+    "stripe.coupons.del",
+    // Payment links: a link to a checkout page. No charge until clicked.
+    "stripe.paymentLinks.create",
   ]);
   const found = new Set();
   for (const f of files) {

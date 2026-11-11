@@ -183,6 +183,13 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     scope: "account",
     serverExportColumns: ["id", "amount_cents", "currency", "status", "arrival_date", "created_at"],
   },
+  // Payments coupons (2026-11-11): discount codes the seller created.
+  {
+    table: "payments_coupons",
+    label: "payments_coupons",
+    scope: "account",
+    serverExportColumns: ["id", "code", "percent_off", "amount_off_cents", "duration", "is_active", "created_at"],
+  },
   // Payments subscriptions (2026-11-11): recurring subscriptions the
   // user's own customers have.
   {

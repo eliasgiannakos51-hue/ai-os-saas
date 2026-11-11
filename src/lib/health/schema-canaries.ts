@@ -723,6 +723,12 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "payments_coupons",
+    migration: "20261128000000_payments_coupons.sql",
+    breaks: "the coupons tab shows nothing, creating a coupon fails, and applying discounts at checkout is impossible",
+  },
+  {
+    kind: "table",
     table: "payments_subscriptions",
     migration: "20261127000000_payments_subscriptions.sql",
     breaks: "the payments dashboard subscriptions tab shows nothing, recurring product checkout fails to record the subscription, and webhook handlers for subscription lifecycle events silently lose data",

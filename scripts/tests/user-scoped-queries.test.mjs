@@ -299,6 +299,11 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
     // deny-all table. The admin client is required because it has no policies.
     "refreshPaymentsAccount@src/app/api/payments/connect/route.ts":
       "Reads the authenticated user's own payments_accounts row by user_id (getPaymentsAccount scopes by user.id), and writes back its Stripe status from a fresh accounts.retrieve. The admin client is required because payments_accounts is deny-all — a session client would see nothing.",
+    // Ionexa Payments coupons: deactivateCoupon deletes the Stripe coupon
+    // and marks the row inactive. The admin client is required because
+    // payments_coupons is deny-all.
+    "deactivateCoupon@src/app/api/payments/coupons/route.ts":
+      "The route verifies ownership before this call: it loads all coupons by user.id (listCoupons), finds the one matching the request id, checks coupon.user_id !== user.id, and returns 404 on mismatch. The admin client is required because payments_coupons is deny-all — a session client would see nothing.",
   };
 
   const violations = [];

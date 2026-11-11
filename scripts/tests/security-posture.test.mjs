@@ -253,6 +253,7 @@ const ADMIN_ONLY_TABLES = new Set([
   "payments_transactions",
   "payments_payouts",
   "payments_subscriptions",
+  "payments_coupons",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

@@ -289,8 +289,8 @@ console.log("\n== 2. the lines ==");
 // 714 -> 718: converting four filled accent buttons to outlined (one-
 // primary-action rule) added four border-divider utilities, each on the
 // button that was bg-button and is now a bordered outline.
-// 721 -> 726: subscriptions tab — 3 metric cards + subscription list items + empty state.
-ok(`border utilities (${r.counts.borders}), ceiling 726`, r.counts.borders <= 726);
+// 726 -> 731: analytics dashboard — 4 secondary metric cards + top products.
+ok(`border utilities (${r.counts.borders}), ceiling 731`, r.counts.borders <= 731);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

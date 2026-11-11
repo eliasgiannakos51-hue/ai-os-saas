@@ -7269,6 +7269,17 @@
         "paused": "Pausada",
         "unpaid": "Não paga"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Receita este mês",
+      "vsLastMonth": "vs mês anterior",
+      "mrr": "Receita recorrente mensal",
+      "totalRevenue": "Receita total",
+      "transactions": "Transações",
+      "avgOrderValue": "Valor médio do pedido",
+      "platformFees": "Taxas da plataforma (este mês)",
+      "topProducts": "Principais produtos por receita",
+      "sales": "vendas"
     }
   }
 }

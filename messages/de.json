@@ -7269,6 +7269,17 @@
         "paused": "Pausiert",
         "unpaid": "Unbezahlt"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Umsatz diesen Monat",
+      "vsLastMonth": "vs letzter Monat",
+      "mrr": "Monatlich wiederkehrender Umsatz",
+      "totalRevenue": "Gesamtumsatz",
+      "transactions": "Transaktionen",
+      "avgOrderValue": "Durchschn. Bestellwert",
+      "platformFees": "Plattformgebühren (diesen Monat)",
+      "topProducts": "Top-Produkte nach Umsatz",
+      "sales": "Verkäufe"
     }
   }
 }

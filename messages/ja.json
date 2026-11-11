@@ -7269,6 +7269,17 @@
         "paused": "一時停止",
         "unpaid": "未払い"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "今月の売上",
+      "vsLastMonth": "先月比",
+      "mrr": "月間経常収益",
+      "totalRevenue": "総売上",
+      "transactions": "取引",
+      "avgOrderValue": "平均注文額",
+      "platformFees": "プラットフォーム手数料（今月）",
+      "topProducts": "売上上位の商品",
+      "sales": "件"
     }
   }
 }

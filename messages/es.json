@@ -7269,6 +7269,17 @@
         "paused": "Pausada",
         "unpaid": "Impaga"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Ingresos este mes",
+      "vsLastMonth": "vs mes anterior",
+      "mrr": "Ingresos recurrentes mensuales",
+      "totalRevenue": "Ingresos totales",
+      "transactions": "Transacciones",
+      "avgOrderValue": "Valor medio del pedido",
+      "platformFees": "Comisiones (este mes)",
+      "topProducts": "Productos principales por ingresos",
+      "sales": "ventas"
     }
   }
 }

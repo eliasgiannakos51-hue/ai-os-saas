@@ -7269,6 +7269,17 @@
         "paused": "Paused",
         "unpaid": "Unpaid"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Revenue this month",
+      "vsLastMonth": "vs last month",
+      "mrr": "Monthly recurring revenue",
+      "totalRevenue": "Total revenue",
+      "transactions": "Transactions",
+      "avgOrderValue": "Avg. order value",
+      "platformFees": "Platform fees (this month)",
+      "topProducts": "Top products by revenue",
+      "sales": "sales"
     }
   }
 }

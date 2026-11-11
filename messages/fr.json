@@ -7269,6 +7269,17 @@
         "paused": "En pause",
         "unpaid": "Impayé"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Revenus ce mois",
+      "vsLastMonth": "vs mois dernier",
+      "mrr": "Revenus récurrents mensuels",
+      "totalRevenue": "Revenus totaux",
+      "transactions": "Nombre de transactions",
+      "avgOrderValue": "Valeur moyenne de commande",
+      "platformFees": "Frais de plateforme (ce mois)",
+      "topProducts": "Meilleurs produits par revenus",
+      "sales": "ventes"
     }
   }
 }

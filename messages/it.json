@@ -7269,6 +7269,17 @@
         "paused": "In pausa",
         "unpaid": "Non pagato"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Ricavi questo mese",
+      "vsLastMonth": "vs mese scorso",
+      "mrr": "Ricavi ricorrenti mensili",
+      "totalRevenue": "Ricavi totali",
+      "transactions": "Transazioni",
+      "avgOrderValue": "Valore medio ordine",
+      "platformFees": "Commissioni (questo mese)",
+      "topProducts": "Prodotti principali per ricavi",
+      "sales": "vendite"
     }
   }
 }

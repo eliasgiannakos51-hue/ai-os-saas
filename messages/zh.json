@@ -7269,6 +7269,17 @@
         "paused": "已暂停",
         "unpaid": "未付款"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "本月收入",
+      "vsLastMonth": "与上月相比",
+      "mrr": "月度经常性收入",
+      "totalRevenue": "总收入",
+      "transactions": "交易",
+      "avgOrderValue": "平均订单金额",
+      "platformFees": "平台费用（本月）",
+      "topProducts": "收入最高的产品",
+      "sales": "笔"
     }
   }
 }

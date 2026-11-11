@@ -98,6 +98,22 @@ export function PaymentsDashboard() {
   const [account, setAccount] = useState<AccountStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [balanceData, setBalanceData] = useState<BalanceData | null>(null);
+  type Analytics = {
+    totalRevenueCents: number;
+    thisMonthRevenueCents: number;
+    lastMonthRevenueCents: number;
+    totalTransactions: number;
+    thisMonthTransactions: number;
+    averageOrderValueCents: number;
+    totalFeesCents: number;
+    thisMonthFeesCents: number;
+    activeSubscriptions: number;
+    mrrCents: number;
+    churnedThisMonth: number;
+    revenueByDay: { date: string; revenueCents: number; count: number }[];
+    topProducts: { productId: string; productName: string; revenueCents: number; count: number }[];
+  };
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
 
@@ -160,6 +176,13 @@ export function PaymentsDashboard() {
     } catch { /* silent */ }
   }, []);
 
+  const loadAnalytics = useCallback(async () => {
+    try {
+      const res = await fetch("/api/payments/analytics");
+      if (res.ok) setAnalytics(await res.json());
+    } catch { /* silent */ }
+  }, []);
+
   const loadSubscriptions = useCallback(async () => {
     try {
       const res = await fetch("/api/payments/subscriptions");
@@ -184,8 +207,9 @@ export function PaymentsDashboard() {
       loadProducts();
       loadBalance();
       loadSubscriptions();
+      loadAnalytics();
     }
-  }, [account?.connected, loadProducts, loadBalance, loadSubscriptions]);
+  }, [account?.connected, loadProducts, loadBalance, loadSubscriptions, loadAnalytics]);
 
   // — Handlers —
   async function handleConnect() {
@@ -413,7 +437,7 @@ export function PaymentsDashboard() {
         {/* Tab content */}
         {tab === "overview" && (
           <div className="space-y-6">
-            {/* Balance cards */}
+            {/* Balance + revenue cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-card border border-divider bg-panel p-5">
                 <div className="mb-1 text-xs text-muted">{t("balance.available")}</div>
@@ -424,20 +448,72 @@ export function PaymentsDashboard() {
                 </div>
               </div>
               <div className="rounded-card border border-divider bg-panel p-5">
-                <div className="mb-1 text-xs text-muted">{t("balance.pending")}</div>
+                <div className="mb-1 text-xs text-muted">{t("analytics.thisMonthRevenue")}</div>
                 <div className="text-2xl font-semibold text-foreground">
-                  {balanceData?.balance
-                    ? fmt(balanceData.balance.totalPendingCents, acct.defaultCurrency)
-                    : "—"}
+                  {analytics ? fmt(analytics.thisMonthRevenueCents, acct.defaultCurrency) : "—"}
                 </div>
+                {analytics && analytics.lastMonthRevenueCents > 0 && (
+                  <div className="mt-1 text-xs text-muted">
+                    {analytics.thisMonthRevenueCents >= analytics.lastMonthRevenueCents ? "↑" : "↓"}{" "}
+                    {t("analytics.vsLastMonth")}
+                  </div>
+                )}
               </div>
               <div className="rounded-card border border-divider bg-panel p-5">
-                <div className="mb-1 text-xs text-muted">{t("products.title")}</div>
+                <div className="mb-1 text-xs text-muted">{t("analytics.mrr")}</div>
                 <div className="text-2xl font-semibold text-foreground">
-                  {products.filter((p) => p.is_active).length}
+                  {analytics ? fmt(analytics.mrrCents, acct.defaultCurrency) : "—"}
+                </div>
+                {analytics && analytics.activeSubscriptions > 0 && (
+                  <div className="mt-1 text-xs text-muted">
+                    {analytics.activeSubscriptions} {t("subscriptions.active").toLowerCase()}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Secondary metrics */}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="rounded-card border border-divider bg-panel p-4">
+                <div className="mb-1 text-xs text-muted">{t("analytics.totalRevenue")}</div>
+                <div className="text-lg font-semibold text-foreground">
+                  {analytics ? fmt(analytics.totalRevenueCents, acct.defaultCurrency) : "—"}
+                </div>
+              </div>
+              <div className="rounded-card border border-divider bg-panel p-4">
+                <div className="mb-1 text-xs text-muted">{t("analytics.transactions")}</div>
+                <div className="text-lg font-semibold text-foreground">
+                  {analytics?.totalTransactions ?? 0}
+                </div>
+              </div>
+              <div className="rounded-card border border-divider bg-panel p-4">
+                <div className="mb-1 text-xs text-muted">{t("analytics.avgOrderValue")}</div>
+                <div className="text-lg font-semibold text-foreground">
+                  {analytics ? fmt(analytics.averageOrderValueCents, acct.defaultCurrency) : "—"}
+                </div>
+              </div>
+              <div className="rounded-card border border-divider bg-panel p-4">
+                <div className="mb-1 text-xs text-muted">{t("analytics.platformFees")}</div>
+                <div className="text-lg font-semibold text-foreground">
+                  {analytics ? fmt(analytics.thisMonthFeesCents, acct.defaultCurrency) : "—"}
                 </div>
               </div>
             </div>
+            {/* Top products */}
+            {analytics && analytics.topProducts.length > 0 && (
+              <div className="rounded-card border border-divider bg-panel p-5">
+                <div className="mb-3 text-xs font-medium text-foreground">{t("analytics.topProducts")}</div>
+                <div className="space-y-2">
+                  {analytics.topProducts.slice(0, 5).map((p) => (
+                    <div key={p.productId} className="flex items-center justify-between text-sm">
+                      <span className="text-foreground">{p.productName}</span>
+                      <span className="text-muted">
+                        {fmt(p.revenueCents, acct.defaultCurrency)} · {p.count} {t("analytics.sales")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quick actions */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

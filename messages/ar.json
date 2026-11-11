@@ -7297,6 +7297,17 @@
         "paused": "متوقف",
         "unpaid": "غير مدفوع"
       }
+    },
+    "analytics": {
+      "thisMonthRevenue": "إيرادات هذا الشهر",
+      "vsLastMonth": "مقارنة بالشهر الماضي",
+      "mrr": "الإيرادات الشهرية المتكررة",
+      "totalRevenue": "إجمالي الإيرادات",
+      "transactions": "المعاملات",
+      "avgOrderValue": "متوسط قيمة الطلب",
+      "platformFees": "رسوم المنصة (هذا الشهر)",
+      "topProducts": "أفضل المنتجات حسب الإيرادات",
+      "sales": "مبيعات"
     }
   }
 }

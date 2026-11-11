@@ -172,6 +172,16 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
     "stripe.coupons.del",
     // Payment links: a link to a checkout page. No charge until clicked.
     "stripe.paymentLinks.create",
+    // Invoicing: creating an invoice is configuration, not a charge.
+    // The charge happens when the customer pays the invoice.
+    "stripe.invoices.create",
+    "stripe.invoiceItems.create",
+    "stripe.invoices.finalizeInvoice",
+    // stripe.invoices.sendInvoice: not in the scanner regex (only create/
+    // update/del/cancel/finalizeInvoice), so not declared here. It sends
+    // an already-finalized invoice by email — no charge happens.
+    // Customer creation on connected accounts: no money moves.
+    "stripe.customers.create",
   ]);
   const found = new Set();
   for (const f of files) {

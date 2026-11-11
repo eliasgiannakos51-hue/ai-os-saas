@@ -2315,7 +2315,11 @@
         "toolsTitle": "Ferramentas e ligações",
         "approvalsHint": "Quando marcado, o agente pausa e pergunta antes de agir. Desmarque para deixá-lo agir sozinho.",
         "creditCapNone": "Sem limite",
-        "creditCapHint": "O agente para quando gasta esta quantidade de créditos. Deixe vazio para sem limite."
+        "creditCapHint": "O agente para quando gasta esta quantidade de créditos. Deixe vazio para sem limite.",
+        "spendingTiersTitle": "Níveis de gasto",
+        "autoBelow": "Auto abaixo de (créditos)",
+        "approveAbove": "Aprovar acima de (créditos)",
+        "spendingTiersHint": "Entre esses valores, o agente gasta e notifica você. Abaixo: automático. Acima: aguarda aprovação."
       },
       "approvals": {
         "title": "Aprovações pendentes",

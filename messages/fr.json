@@ -2315,7 +2315,11 @@
         "toolsTitle": "Outils et connexions",
         "approvalsHint": "Quand coché, l’agent s’arrête et demande avant d’agir. Décochez pour le laisser agir seul.",
         "creditCapNone": "Pas de limite",
-        "creditCapHint": "L’agent s’arrête après avoir dépensé ce nombre de crédits. Laissez vide pour pas de limite."
+        "creditCapHint": "L’agent s’arrête après avoir dépensé ce nombre de crédits. Laissez vide pour pas de limite.",
+        "spendingTiersTitle": "Niveaux de dépenses",
+        "autoBelow": "Auto en dessous de (crédits)",
+        "approveAbove": "Approbation au-dessus de (crédits)",
+        "spendingTiersHint": "Entre ces valeurs, l’agent dépense et vous notifie. En dessous : auto. Au-dessus : attend l’approbation."
       },
       "approvals": {
         "title": "Approbations en attente",

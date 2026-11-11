@@ -2315,7 +2315,11 @@
         "toolsTitle": "工具和连接",
         "approvalsHint": "勾选后，代理在行动前会暂停并请求确认。取消勾选可让其自行行动。",
         "creditCapNone": "无限制",
-        "creditCapHint": "代理消耗此数量的积分后将停止。留空表示无限制。"
+        "creditCapHint": "代理消耗此数量的积分后将停止。留空表示无限制。",
+        "spendingTiersTitle": "支出等级",
+        "autoBelow": "自动（低于，积分）",
+        "approveAbove": "审批（高于，积分）",
+        "spendingTiersHint": "在这些值之间，代理会消费并通知您。低于：自动。高于：等待审批。"
       },
       "approvals": {
         "title": "待审批",

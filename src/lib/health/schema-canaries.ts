@@ -722,6 +722,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     breaks: "agents cannot request approval for irreversible actions — every action that needs approval would fail silently, with the agent either proceeding without asking or stopping with no way to resume",
   },
   {
+    kind: "column",
+    table: "payments_accounts",
+    column: "invoice_settings",
+    migration: "20261129000000_payments_invoices.sql",
+    breaks: "the invoice settings form returns null, and every invoice attempt falls back to hard-coded defaults rather than the seller's saved preferences",
+  },
+  {
     kind: "table",
     table: "payments_coupons",
     migration: "20261128000000_payments_coupons.sql",

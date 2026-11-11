@@ -2315,7 +2315,11 @@
         "toolsTitle": "Werkzeuge und Verbindungen",
         "approvalsHint": "Wenn aktiviert, pausiert der Agent und fragt, bevor er handelt. Deaktiviere, um ihn selbstständig handeln zu lassen.",
         "creditCapNone": "Kein Limit",
-        "creditCapHint": "Der Agent stoppt, wenn er so viele Credits ausgegeben hat. Leer lassen für kein Limit."
+        "creditCapHint": "Der Agent stoppt, wenn er so viele Credits ausgegeben hat. Leer lassen für kein Limit.",
+        "spendingTiersTitle": "Ausgabenstufen",
+        "autoBelow": "Auto unter (Credits)",
+        "approveAbove": "Genehmigung über (Credits)",
+        "spendingTiersHint": "Zwischen diesen Werten gibt der Agent aus und benachrichtigt Sie. Darunter: automatisch. Darüber: wartet auf Genehmigung."
       },
       "approvals": {
         "title": "Ausstehende Genehmigungen",

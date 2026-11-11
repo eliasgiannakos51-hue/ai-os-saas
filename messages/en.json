@@ -2315,7 +2315,11 @@
         "toolsTitle": "Tools and connections",
         "approvalsHint": "When checked, the agent pauses and asks before acting. Uncheck to let it act on its own.",
         "creditCapNone": "No limit",
-        "creditCapHint": "The agent stops when it has spent this many credits. Leave empty for no limit."
+        "creditCapHint": "The agent stops when it has spent this many credits. Leave empty for no limit.",
+        "spendingTiersTitle": "Spending tiers",
+        "autoBelow": "Auto below (credits)",
+        "approveAbove": "Approve above (credits)",
+        "spendingTiersHint": "Between these values, the agent spends and notifies you. Below: auto. Above: waits for approval."
       },
       "approvals": {
         "title": "Pending approvals",

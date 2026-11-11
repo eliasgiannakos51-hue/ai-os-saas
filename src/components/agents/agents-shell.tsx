@@ -376,7 +376,7 @@ export function AgentsShell({
     deliveryMethod: DeliveryChannel;
     deliveryTarget: string;
     creditCap: number | null;
-    approvalSettings: Record<string, boolean>;
+    approvalSettings: Record<string, boolean | number>;
   } | null>(null);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
   // THE DEPTH ON THE PREVIEW SCREEN, separate from the draft the builder
@@ -1758,6 +1758,62 @@ export function AgentsShell({
                   </div>
                   <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.creditCapHint")}</p>
                 </div>
+
+                {/* Spending tiers: auto / notify / approve thresholds */}
+                {editDraft.approvalSettings.spend !== false && (
+                  <div data-testid="agents-panel-spending-tiers">
+                    <p className="mb-1.5 text-xs font-medium text-foreground">{t("shell.spendingTiersTitle")}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted">
+                      <label className="flex-1">
+                        <span>{t("shell.autoBelow")}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={10000}
+                          value={
+                            typeof editDraft.approvalSettings.spendAutoThreshold === "number"
+                              ? editDraft.approvalSettings.spendAutoThreshold
+                              : 10
+                          }
+                          onChange={(e) =>
+                            setEditDraft({
+                              ...editDraft,
+                              approvalSettings: {
+                                ...editDraft.approvalSettings,
+                                spendAutoThreshold: Math.max(0, Math.floor(Number(e.target.value))),
+                              },
+                            })
+                          }
+                          className="mt-1 h-7 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                        />
+                      </label>
+                      <label className="flex-1">
+                        <span>{t("shell.approveAbove")}</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100000}
+                          value={
+                            typeof editDraft.approvalSettings.spendNotifyThreshold === "number"
+                              ? editDraft.approvalSettings.spendNotifyThreshold
+                              : 50
+                          }
+                          onChange={(e) =>
+                            setEditDraft({
+                              ...editDraft,
+                              approvalSettings: {
+                                ...editDraft.approvalSettings,
+                                spendNotifyThreshold: Math.max(0, Math.floor(Number(e.target.value))),
+                              },
+                            })
+                          }
+                          className="mt-1 h-7 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                        />
+                      </label>
+                    </div>
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.spendingTiersHint")}</p>
+                  </div>
+                )}
 
                 <button
                   type="button"

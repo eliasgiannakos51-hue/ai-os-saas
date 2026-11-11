@@ -2315,7 +2315,11 @@
         "toolsTitle": "ツールと接続",
         "approvalsHint": "チェックすると、エージェントは行動前に一時停止して確認を求めます。チェックを外すと自動で行動します。",
         "creditCapNone": "制限なし",
-        "creditCapHint": "エージェントはこのクレジット数を使い切ると停止します。空欄で制限なし。"
+        "creditCapHint": "エージェントはこのクレジット数を使い切ると停止します。空欄で制限なし。",
+        "spendingTiersTitle": "支出レベル",
+        "autoBelow": "自動（以下、クレジット）",
+        "approveAbove": "承認（以上、クレジット）",
+        "spendingTiersHint": "これらの値の間では、エージェントは支出して通知します。以下：自動。以上：承認を待ちます。"
       },
       "approvals": {
         "title": "承認待ち",

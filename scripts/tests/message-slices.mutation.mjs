@@ -72,15 +72,15 @@ const MUTANTS = [
     // dashboard in it at all, so this mutation had nothing to fail.
     name: "a namespace is dropped from the dashboard's list",
     file: LIB,
-    from: '      "security", "settings", "sidebar", "voice",',
-    to: '      "security", "settings", "voice",',
+    from: '      "payments",\n    ],',
+    to: '    ],',
     expect: "dashboard: every namespace used is declared",
   },
   {
     name: "a namespace nobody uses is added to the dashboard's list",
     file: LIB,
-    from: '      "security", "settings", "sidebar", "voice",\n    ],',
-    to: '      "security", "settings", "sidebar", "voice", "roadmap",\n    ],',
+    from: '      "payments",\n    ],',
+    to: '      "payments",\n      "roadmap",\n    ],',
     expect: "dashboard: every declared namespace is used",
   },
   {
@@ -127,7 +127,8 @@ const MUTANTS = [
     // `t(key, {...})` with `key` the result of creditsHintKey().
     // 74 -> 75 on 2026-11-11: achievement-unlock-bridge.tsx's
     // useTranslations() with no namespace.
-    from: "    unbounded: 75,",
+    // 75 -> 76 on 2026-11-11: payments-dashboard.tsx template-literal key.
+    from: "    unbounded: 76,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

@@ -558,6 +558,12 @@ const BASELINE = {
   "offline/page.tsx": 1,
   "onboarding/page.tsx": 1,
   "reset-password/page.tsx": 1,
+  // TWO, and never on one screen: the page draws EITHER the Connect
+  // button (when no account is linked), OR the Resume button (when
+  // onboarding is incomplete), OR the full dashboard (when connected,
+  // where no filled accent button exists — all actions are outlined).
+  // The two buttons are in different branches of the if/return chain.
+  "dashboard/payments/page.tsx": 2,
 };
 
 // A PAYWALL IS NOT THE PAGE IT REPLACES, and unlike an overlay that is

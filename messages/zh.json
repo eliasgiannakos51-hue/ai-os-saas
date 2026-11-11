@@ -236,7 +236,8 @@
       "personalLifeOs": "生活系统",
       "activity": "动态",
       "games": "游戏",
-      "skills": "技能"
+      "skills": "技能",
+      "payments": "收款"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -302,7 +303,8 @@
       "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。",
       "activity": "下一步、变化、进度和你的数据",
       "games": "描述一个游戏，用文字修改它的计划，然后在这里玩——与你的账户隔离。",
-      "skills": "你教给 Ionexa 一次的流程，让它每次都遵循相同的步骤。目前这里只显示它们。"
+      "skills": "你教给 Ionexa 一次的流程，让它每次都遵循相同的步骤。目前这里只显示它们。",
+      "payments": "接受客户付款。连接、创建产品、收款。"
     },
     "closeMenu": "关闭菜单",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "团队成员",
       "recordSearch": "跨模块记录搜索",
       "meetings": "会议 → 行动",
-      "games": "游戏"
+      "games": "游戏",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -7156,5 +7159,79 @@
     "cut": "（回答在长度上限处被截断。）",
     "unknownCommand": "未知命令。",
     "empty": "请在 /ionexa ask 后面写一个问题。"
+  },
+  "payments": {
+    "title": "收款",
+    "subtitle": "接受客户付款",
+    "connect": {
+      "title": "连接您的企业",
+      "description": "通过Stripe连接您的企业以开始接受付款。Stripe负责验证和银行信息。",
+      "button": "连接Stripe",
+      "resumeButton": "继续设置",
+      "connected": "已连接",
+      "pendingVerification": "验证待处理",
+      "notConnected": "尚未连接"
+    },
+    "balance": {
+      "title": "余额",
+      "available": "可用",
+      "pending": "待处理",
+      "totalEarnings": "总收入",
+      "nothingYet": "暂无收入"
+    },
+    "products": {
+      "title": "产品",
+      "create": "新产品",
+      "name": "产品名称",
+      "description": "描述",
+      "price": "价格",
+      "currency": "货币",
+      "recurring": "定期付款",
+      "monthly": "每月",
+      "yearly": "每年",
+      "oneTime": "一次性",
+      "active": "活跃",
+      "inactive": "停用",
+      "copyLink": "复制付款链接",
+      "linkCopied": "链接已复制",
+      "deactivate": "停用",
+      "noProducts": "暂无产品。创建您的第一个产品以开始接受付款。"
+    },
+    "transactions": {
+      "title": "交易",
+      "noTransactions": "暂无交易",
+      "succeeded": "成功",
+      "pending": "待处理",
+      "failed": "失败",
+      "refunded": "已退款"
+    },
+    "payouts": {
+      "title": "提现",
+      "cashout": "提现到银行",
+      "amount": "金额",
+      "requestPayout": "请求提现",
+      "noPayouts": "暂无提现",
+      "inTransit": "转账中",
+      "paid": "已支付",
+      "failed": "失败"
+    },
+    "dashboard": {
+      "openStripeDashboard": "打开Stripe控制台",
+      "overview": "概览",
+      "productsTab": "产品",
+      "transactionsTab": "交易",
+      "payoutsTab": "提现"
+    },
+    "errors": {
+      "notConfigured": "收款功能暂不可用。",
+      "notConnected": "请先连接您的企业。",
+      "chargesNotEnabled": "您的账户尚未完成付款验证。",
+      "payoutsNotEnabled": "您的账户尚未完成提现验证。",
+      "insufficientBalance": "此次提现余额不足。",
+      "invalidPrice": "价格必须在1€到999,999€之间。",
+      "nameRequired": "产品名称为必填项。"
+    },
+    "platformFee": "平台费用：每笔交易{fee}%",
+    "cancel": "取消"
   }
 }

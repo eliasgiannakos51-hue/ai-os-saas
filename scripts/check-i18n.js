@@ -897,6 +897,11 @@ const LOCALE_ALLOWED = new Set([
   // "Administrator" is the German word too, and the Discord permission's
   // own name; el translates it properly ("Διαχειριστής", done above).
   "de:dashboard.discord.perm.administrator",
+  // "Transactions" is the French word too (Ionexa Payments tab label).
+  "fr:payments.dashboard.transactionsTab",
+  "fr:payments.transactions.title",
+  // "Description" is the French word too.
+  "fr:payments.products.description",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
@@ -1114,6 +1119,8 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // elsewhere on this screen (automateIt.hint). The placeholder and hint
   // around it ARE translated in all ten locales; only the heading is not.
   "projects.notes.heading",
+  // "Ionexa Payments" is a brand name — identical in every language.
+  "pricing.rows.ionexaPayments",
 ]);
 
 function flatten(obj, prefix = "") {

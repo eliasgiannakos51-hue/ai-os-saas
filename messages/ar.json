@@ -236,7 +236,8 @@
       "personalLifeOs": "نظام الحياة",
       "activity": "النشاط",
       "games": "ألعاب",
-      "skills": "المهارات"
+      "skills": "المهارات",
+      "payments": "المدفوعات"
     },
     "hints": {
       "chat": "اسأل أي شيء — غير مرتبط بأي وحدة.",
@@ -302,7 +303,8 @@
       "meetings": "حوّل تسجيلًا إلى نص وملخّص وإجراءات تختار منها.",
       "activity": "خطوتك التالية وما تغيّر وتقدّمك وأرقامك",
       "games": "صِف لعبة، وغيّر خطتها بالكلمات، والعبها هنا معزولة عن حسابك.",
-      "skills": "إجراءات علّمتها لـ Ionexa مرة واجدة، حتى يتبع نفس الخطوات كل مرة. حاليًا تعرض هنا فقط."
+      "skills": "إجراءات علّمتها لـ Ionexa مرة واجدة، حتى يتبع نفس الخطوات كل مرة. حاليًا تعرض هنا فقط.",
+      "payments": "اقبل المدفوعات من عملائك. اربط، أنشئ منتجات، احصل على أموالك."
     },
     "closeMenu": "إغلاق القائمة",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "أعضاء الفريق",
       "recordSearch": "البحث في كل السجلات",
       "meetings": "الاجتماعات ← الإجراءات",
-      "games": "الألعاب"
+      "games": "الألعاب",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "الأعمال",
     "businessSubtitle": "للفرق التي تبني معًا",
@@ -7184,5 +7187,79 @@
     "cut": "(قُطع الرد عند حد طوله.)",
     "unknownCommand": "أمر غير معروف.",
     "empty": "اكتب سؤالًا بعد /ionexa ask."
+  },
+  "payments": {
+    "title": "المدفوعات",
+    "subtitle": "اقبل المدفوعات من عملائك",
+    "connect": {
+      "title": "اربط نشاطك التجاري",
+      "description": "اربط نشاطك التجاري عبر Stripe لبدء قبول المدفوعات. يتولى Stripe التحقق والبيانات المصرفية.",
+      "button": "الربط مع Stripe",
+      "resumeButton": "متابعة الإعداد",
+      "connected": "متصل",
+      "pendingVerification": "التحقق قيد الانتظار",
+      "notConnected": "غير متصل بعد"
+    },
+    "balance": {
+      "title": "الرصيد",
+      "available": "متاح",
+      "pending": "قيد الانتظار",
+      "totalEarnings": "إجمالي الأرباح",
+      "nothingYet": "لا أرباح بعد"
+    },
+    "products": {
+      "title": "المنتجات",
+      "create": "منتج جديد",
+      "name": "اسم المنتج",
+      "description": "الوصف",
+      "price": "السعر",
+      "currency": "العملة",
+      "recurring": "دفع متكرر",
+      "monthly": "شهري",
+      "yearly": "سنوي",
+      "oneTime": "مرة واحدة",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "copyLink": "نسخ رابط الدفع",
+      "linkCopied": "تم نسخ الرابط",
+      "deactivate": "تعطيل",
+      "noProducts": "لا منتجات بعد. أنشئ منتجك الأول لبدء قبول المدفوعات."
+    },
+    "transactions": {
+      "title": "المعاملات",
+      "noTransactions": "لا معاملات بعد",
+      "succeeded": "ناجحة",
+      "pending": "قيد الانتظار",
+      "failed": "فاشلة",
+      "refunded": "مستردة"
+    },
+    "payouts": {
+      "title": "السحب",
+      "cashout": "سحب إلى البنك",
+      "amount": "المبلغ",
+      "requestPayout": "طلب سحب",
+      "noPayouts": "لا عمليات سحب بعد",
+      "inTransit": "قيد التحويل",
+      "paid": "مدفوع",
+      "failed": "فاشل"
+    },
+    "dashboard": {
+      "openStripeDashboard": "فتح لوحة Stripe",
+      "overview": "نظرة عامة",
+      "productsTab": "المنتجات",
+      "transactionsTab": "المعاملات",
+      "payoutsTab": "السحب"
+    },
+    "errors": {
+      "notConfigured": "المدفوعات غير متاحة بعد.",
+      "notConnected": "اربط نشاطك التجاري أولاً.",
+      "chargesNotEnabled": "حسابك غير مُتحقق بعد للمدفوعات.",
+      "payoutsNotEnabled": "حسابك غير مُتحقق بعد للسحب.",
+      "insufficientBalance": "رصيد غير كافٍ لهذا السحب.",
+      "invalidPrice": "يجب أن يكون السعر بين 1€ و999,999€.",
+      "nameRequired": "اسم المنتج مطلوب."
+    },
+    "platformFee": "رسوم المنصة: {fee}% لكل معاملة",
+    "cancel": "إلغاء"
   }
 }

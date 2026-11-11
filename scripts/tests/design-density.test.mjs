@@ -280,7 +280,16 @@ console.log("\n== 2. the lines ==");
 // the tree moved.
 // 689 -> 692, FS1 live voice (2026-11-11): voice-live.tsx's full-screen
 // overlay has a top rule, a mute-button ring and a close-button ring.
-ok(`border utilities (${r.counts.borders}), ceiling 692`, r.counts.borders <= 692);
+// 692 -> 714, Ionexa Payments (2026-11-11): payments-dashboard.tsx is a
+// full four-tab dashboard — balance cards, product list with forms,
+// transaction list, payout forms, action buttons, all framed with the
+// same border-divider bg-panel pattern the rest of the app uses. 22 new
+// border utilities, each on its own card/row/form, the same unavoidable
+// shape the dashboard pages above it already use.
+// 714 -> 718: converting four filled accent buttons to outlined (one-
+// primary-action rule) added four border-divider utilities, each on the
+// button that was bg-button and is now a bordered outline.
+ok(`border utilities (${r.counts.borders}), ceiling 718`, r.counts.borders <= 718);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

@@ -236,7 +236,8 @@
       "personalLifeOs": "Life OS",
       "activity": "Actividad",
       "games": "Juegos",
-      "skills": "Habilidades"
+      "skills": "Habilidades",
+      "payments": "Pagos"
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
@@ -302,7 +303,8 @@
       "meetings": "Convierte una grabación en transcripción, resumen y acciones que eliges tú.",
       "activity": "Tu próximo paso, qué ha cambiado, tu progreso y tus cifras",
       "games": "Describe un juego, cambia su plan con palabras y juégalo aquí, aislado de tu cuenta.",
-      "skills": "Procedimientos que le enseñaste a Ionexa una vez, para que siga los mismos pasos cada vez. Por ahora esto solo los muestra."
+      "skills": "Procedimientos que le enseñaste a Ionexa una vez, para que siga los mismos pasos cada vez. Por ahora esto solo los muestra.",
+      "payments": "Acepta pagos de tus clientes. Conecta, crea productos, cobra."
     },
     "closeMenu": "Cerrar el menú",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "Miembros del equipo",
       "recordSearch": "Búsqueda en todos los registros",
       "meetings": "Reuniones → acciones",
-      "games": "Juegos"
+      "games": "Juegos",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
@@ -7156,5 +7159,79 @@
     "cut": "(La respuesta se cortó en su límite de longitud.)",
     "unknownCommand": "Comando desconocido.",
     "empty": "Escribe una pregunta después de /ionexa ask."
+  },
+  "payments": {
+    "title": "Pagos",
+    "subtitle": "Acepta pagos de tus clientes",
+    "connect": {
+      "title": "Conecta tu negocio",
+      "description": "Conecta tu negocio a través de Stripe para empezar a aceptar pagos. Stripe se encarga de la verificación y los datos bancarios.",
+      "button": "Conectar con Stripe",
+      "resumeButton": "Continuar configuración",
+      "connected": "Conectado",
+      "pendingVerification": "Verificación pendiente",
+      "notConnected": "Aún no conectado"
+    },
+    "balance": {
+      "title": "Saldo",
+      "available": "Disponible",
+      "pending": "Pendiente",
+      "totalEarnings": "Ganancias totales",
+      "nothingYet": "Sin ganancias aún"
+    },
+    "products": {
+      "title": "Productos",
+      "create": "Nuevo producto",
+      "name": "Nombre del producto",
+      "description": "Descripción",
+      "price": "Precio",
+      "currency": "Moneda",
+      "recurring": "Pago recurrente",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "oneTime": "Único",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "copyLink": "Copiar enlace de pago",
+      "linkCopied": "Enlace copiado",
+      "deactivate": "Desactivar",
+      "noProducts": "Sin productos aún. Crea tu primer producto para empezar a aceptar pagos."
+    },
+    "transactions": {
+      "title": "Transacciones",
+      "noTransactions": "Sin transacciones aún",
+      "succeeded": "Exitosa",
+      "pending": "Pendiente",
+      "failed": "Fallida",
+      "refunded": "Reembolsada"
+    },
+    "payouts": {
+      "title": "Retiros",
+      "cashout": "Retirar a banco",
+      "amount": "Monto",
+      "requestPayout": "Solicitar retiro",
+      "noPayouts": "Sin retiros aún",
+      "inTransit": "En tránsito",
+      "paid": "Pagado",
+      "failed": "Fallido"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Abrir Stripe Dashboard",
+      "overview": "Resumen",
+      "productsTab": "Productos",
+      "transactionsTab": "Transacciones",
+      "payoutsTab": "Retiros"
+    },
+    "errors": {
+      "notConfigured": "Los pagos no están disponibles aún.",
+      "notConnected": "Conecta primero tu negocio.",
+      "chargesNotEnabled": "Tu cuenta aún no está verificada para pagos.",
+      "payoutsNotEnabled": "Tu cuenta aún no está verificada para retiros.",
+      "insufficientBalance": "Saldo insuficiente para este retiro.",
+      "invalidPrice": "El precio debe estar entre 1 € y 999.999 €.",
+      "nameRequired": "Se requiere nombre del producto."
+    },
+    "platformFee": "Comisión de plataforma: {fee}% por transacción",
+    "cancel": "Cancelar"
   }
 }

@@ -236,7 +236,8 @@
       "personalLifeOs": "Life OS",
       "activity": "Activité",
       "games": "Jeux",
-      "skills": "Compétences"
+      "skills": "Compétences",
+      "payments": "Paiements"
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",
@@ -302,7 +303,8 @@
       "meetings": "Transformez un enregistrement en transcription, résumé et actions que vous choisissez.",
       "activity": "Votre prochaine étape, ce qui a changé, vos progrès et vos chiffres",
       "games": "Décrivez un jeu, changez son plan avec des mots et jouez-y ici, isolé de votre compte.",
-      "skills": "Des procédures que tu as enseignées à Ionexa une fois, pour qu'il suive les mêmes étapes chaque fois. Pour l'instant, ceci les affiche seulement."
+      "skills": "Des procédures que tu as enseignées à Ionexa une fois, pour qu'il suive les mêmes étapes chaque fois. Pour l'instant, ceci les affiche seulement.",
+      "payments": "Acceptez les paiements de vos clients. Connectez, créez des produits, encaissez."
     },
     "closeMenu": "Fermer le menu",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "Membres de l’équipe",
       "recordSearch": "Recherche dans toutes les données",
       "meetings": "Réunions → actions",
-      "games": "Jeux"
+      "games": "Jeux",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Pour les équipes qui construisent ensemble",
@@ -7156,5 +7159,79 @@
     "cut": "(La réponse a été coupée à sa limite de longueur.)",
     "unknownCommand": "Commande inconnue.",
     "empty": "Écris une question après /ionexa ask."
+  },
+  "payments": {
+    "title": "Paiements",
+    "subtitle": "Acceptez les paiements de vos clients",
+    "connect": {
+      "title": "Connectez votre entreprise",
+      "description": "Connectez votre entreprise via Stripe pour commencer à accepter les paiements. Stripe gère la vérification et les coordonnées bancaires.",
+      "button": "Connecter avec Stripe",
+      "resumeButton": "Continuer la configuration",
+      "connected": "Connecté",
+      "pendingVerification": "Vérification en attente",
+      "notConnected": "Pas encore connecté"
+    },
+    "balance": {
+      "title": "Solde",
+      "available": "Disponible",
+      "pending": "En attente",
+      "totalEarnings": "Gains totaux",
+      "nothingYet": "Aucun gain pour le moment"
+    },
+    "products": {
+      "title": "Produits",
+      "create": "Nouveau produit",
+      "name": "Nom du produit",
+      "description": "Description",
+      "price": "Prix",
+      "currency": "Devise",
+      "recurring": "Paiement récurrent",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "oneTime": "Unique",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "copyLink": "Copier le lien de paiement",
+      "linkCopied": "Lien copié",
+      "deactivate": "Désactiver",
+      "noProducts": "Aucun produit pour le moment. Créez votre premier produit pour commencer à accepter les paiements."
+    },
+    "transactions": {
+      "title": "Transactions",
+      "noTransactions": "Aucune transaction pour le moment",
+      "succeeded": "Réussie",
+      "pending": "En attente",
+      "failed": "Échouée",
+      "refunded": "Remboursée"
+    },
+    "payouts": {
+      "title": "Virements",
+      "cashout": "Virer vers la banque",
+      "amount": "Montant",
+      "requestPayout": "Demander un virement",
+      "noPayouts": "Aucun virement pour le moment",
+      "inTransit": "En transit",
+      "paid": "Payé",
+      "failed": "Échoué"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Ouvrir le Stripe Dashboard",
+      "overview": "Aperçu",
+      "productsTab": "Produits",
+      "transactionsTab": "Transactions",
+      "payoutsTab": "Virements"
+    },
+    "errors": {
+      "notConfigured": "Les paiements ne sont pas encore disponibles.",
+      "notConnected": "Connectez d'abord votre entreprise.",
+      "chargesNotEnabled": "Votre compte n'est pas encore vérifié pour les paiements.",
+      "payoutsNotEnabled": "Votre compte n'est pas encore vérifié pour les virements.",
+      "insufficientBalance": "Solde insuffisant pour ce virement.",
+      "invalidPrice": "Le prix doit être entre 1 € et 999 999 €.",
+      "nameRequired": "Le nom du produit est requis."
+    },
+    "platformFee": "Frais de plateforme : {fee}% par transaction",
+    "cancel": "Annuler"
   }
 }

@@ -236,7 +236,8 @@
       "personalLifeOs": "Life OS",
       "activity": "Atividade",
       "games": "Jogos",
-      "skills": "Habilidades"
+      "skills": "Habilidades",
+      "payments": "Pagamentos"
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",
@@ -302,7 +303,8 @@
       "meetings": "Transforma uma gravação em transcrição, resumo e ações que escolhes tu.",
       "activity": "O seu próximo passo, o que mudou, o seu progresso e os seus números",
       "games": "Descreva um jogo, mude o plano com palavras e jogue aqui, isolado da sua conta.",
-      "skills": "Procedimentos que você ensinou ao Ionexa uma vez, para que ele siga os mesmos passos todas as vezes. Por enquanto, isto apenas os mostra."
+      "skills": "Procedimentos que você ensinou ao Ionexa uma vez, para que ele siga os mesmos passos todas as vezes. Por enquanto, isto apenas os mostra.",
+      "payments": "Aceite pagamentos dos seus clientes. Conecte, crie produtos, receba."
     },
     "closeMenu": "Fechar o menu",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "Membros da equipa",
       "recordSearch": "Pesquisa em todos os registos",
       "meetings": "Reuniões → ações",
-      "games": "Jogos"
+      "games": "Jogos",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipes que constroem juntas",
@@ -7156,5 +7159,79 @@
     "cut": "(A resposta foi cortada no limite de tamanho.)",
     "unknownCommand": "Comando desconhecido.",
     "empty": "Escreva uma pergunta depois de /ionexa ask."
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "subtitle": "Aceite pagamentos dos seus clientes",
+    "connect": {
+      "title": "Conecte o seu negócio",
+      "description": "Conecte o seu negócio através do Stripe para começar a aceitar pagamentos. O Stripe trata da verificação e dos dados bancários.",
+      "button": "Conectar com Stripe",
+      "resumeButton": "Continuar configuração",
+      "connected": "Conectado",
+      "pendingVerification": "Verificação pendente",
+      "notConnected": "Ainda não conectado"
+    },
+    "balance": {
+      "title": "Saldo",
+      "available": "Disponível",
+      "pending": "Pendente",
+      "totalEarnings": "Ganhos totais",
+      "nothingYet": "Sem ganhos ainda"
+    },
+    "products": {
+      "title": "Produtos",
+      "create": "Novo produto",
+      "name": "Nome do produto",
+      "description": "Descrição",
+      "price": "Preço",
+      "currency": "Moeda",
+      "recurring": "Pagamento recorrente",
+      "monthly": "Mensal",
+      "yearly": "Anual",
+      "oneTime": "Único",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "copyLink": "Copiar link de pagamento",
+      "linkCopied": "Link copiado",
+      "deactivate": "Desativar",
+      "noProducts": "Sem produtos ainda. Crie o seu primeiro produto para começar a aceitar pagamentos."
+    },
+    "transactions": {
+      "title": "Transações",
+      "noTransactions": "Sem transações ainda",
+      "succeeded": "Bem-sucedida",
+      "pending": "Pendente",
+      "failed": "Falhada",
+      "refunded": "Reembolsada"
+    },
+    "payouts": {
+      "title": "Levantamentos",
+      "cashout": "Levantar para banco",
+      "amount": "Montante",
+      "requestPayout": "Solicitar levantamento",
+      "noPayouts": "Sem levantamentos ainda",
+      "inTransit": "Em trânsito",
+      "paid": "Pago",
+      "failed": "Falhado"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Abrir Stripe Dashboard",
+      "overview": "Visão geral",
+      "productsTab": "Produtos",
+      "transactionsTab": "Transações",
+      "payoutsTab": "Levantamentos"
+    },
+    "errors": {
+      "notConfigured": "Os pagamentos ainda não estão disponíveis.",
+      "notConnected": "Conecte primeiro o seu negócio.",
+      "chargesNotEnabled": "A sua conta ainda não está verificada para pagamentos.",
+      "payoutsNotEnabled": "A sua conta ainda não está verificada para levantamentos.",
+      "insufficientBalance": "Saldo insuficiente para este levantamento.",
+      "invalidPrice": "O preço deve estar entre 1 € e 999.999 €.",
+      "nameRequired": "O nome do produto é obrigatório."
+    },
+    "platformFee": "Taxa de plataforma: {fee}% por transação",
+    "cancel": "Cancelar"
   }
 }

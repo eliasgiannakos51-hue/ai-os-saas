@@ -1,8 +1,8 @@
 # The first run — fr
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **623 strings**. The whole product is 5538, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **625 strings**. The whole product is 5599, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 381 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?
 
 Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.
 
-## Tier 2 — The labels — skim these (379)
+## Tier 2 — The labels — skim these (381)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -547,6 +547,12 @@ Lectures d’un compte connecté
 > EN — Connected integrations
 
 Intégrations connectées
+
+**`pricing.rows.ionexaPayments`**
+
+> EN — Ionexa Payments
+
+Ionexa Payments
 
 **`pricing.rows.listRowsShown`**
 
@@ -1981,6 +1987,12 @@ Nouvelle entrée
 > EN — Operations
 
 Opérations
+
+**`sidebar.items.payments`**
+
+> EN — Payments
+
+Paiements
 
 **`sidebar.items.personalFinance`**
 

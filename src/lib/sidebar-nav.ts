@@ -624,6 +624,11 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
 
     // --- in the palette and on the hub, not in the sidebar ---
     { href: "/dashboard/affiliate", label: "Affiliate", icon: AFFILIATE_ICON, hintKey: "affiliate", hidden: true },
+    // Ionexa Payments (2026-11-11): accept payments from your own customers.
+    // Hidden, same shape as Affiliate — reachable from the palette and
+    // Settings. The page is notFound() for anyone the switch
+    // "ionexa-payments" is not open to.
+    { href: "/dashboard/payments", label: "Payments", icon: AFFILIATE_ICON, hintKey: "payments", hidden: true },
     // SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31,
     // Κομμάτι 1) — hidden, not owner-only: the page itself is notFound()
     // for anyone the switch "skills-tool" is not open to (owner + the

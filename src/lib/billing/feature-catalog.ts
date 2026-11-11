@@ -1036,6 +1036,27 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     cell: () => ({ type: "check" }),
   },
 
+  // === PAYMENTS (Ionexa Payments, 2026-11-11) =======================
+  {
+    id: "ionexaPayments",
+    group: "organise",
+    minPlan: "starter",
+    sidebar: ["/dashboard/payments"],
+    pages: ["payments"],
+    routes: [
+      "payments/connect",
+      "payments/products",
+      "payments/balance",
+      "payments/payout",
+      "payments/checkout",
+      "payments/dashboard-link",
+    ],
+    charges: false,
+    enforcedIn: "src/lib/payments/connect.ts",
+    enforcedSymbol: "paymentsConfigured",
+    cell: (p) => (p.slug === "free" ? { type: "cross" } : { type: "check" }),
+  },
+
   // === LIMITS ========================================================
   {
     id: "creditsPerMonth",

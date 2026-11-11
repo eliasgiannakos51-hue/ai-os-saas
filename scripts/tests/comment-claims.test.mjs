@@ -347,7 +347,10 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // the Discord connector's new LOCALE_ALLOWED entries (agent/discord)
   // name `INTENTIONALLY_IDENTICAL` once more to say which mechanism they
   // are NOT, and that substring is what PHRASES matches.
-  const CENSUS_CEILING = 83;
+  // 83 -> 84 ON 2026-11-11: Ionexa Payments' LOCALE_ALLOWED entries
+  // ("Transactions" and "Description" are the French words too) name the
+  // same mechanism.
+  const CENSUS_CEILING = 84;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

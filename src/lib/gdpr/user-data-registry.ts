@@ -161,6 +161,28 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // The Discord connector (agent/discord, 2026-11-07): the servers
   // connected, the plans made for them and the items each plan built —
   // behind the switch "discord-bot".
+  // Ionexa Payments (2026-11-11): the user's connected payment account,
+  // their products, their customers' transactions and their payout history.
+  // Behind the switch "ionexa-payments".
+  {
+    table: "payments_accounts",
+    label: "payments_accounts",
+    scope: "account",
+    serverExportColumns: ["id", "business_name", "payouts_enabled", "charges_enabled", "country", "default_currency", "created_at"],
+  },
+  { table: "payments_products", label: "payments_products", scope: "user_content" },
+  {
+    table: "payments_transactions",
+    label: "payments_transactions",
+    scope: "account",
+    serverExportColumns: ["id", "product_id", "amount_cents", "currency", "fee_cents", "net_cents", "status", "customer_email", "customer_name", "description", "created_at"],
+  },
+  {
+    table: "payments_payouts",
+    label: "payments_payouts",
+    scope: "account",
+    serverExportColumns: ["id", "amount_cents", "currency", "status", "arrival_date", "created_at"],
+  },
   { table: "discord_guilds", label: "discord_guilds", scope: "user_content" },
   { table: "discord_builds", label: "discord_builds", scope: "user_content" },
   { table: "discord_build_items", label: "discord_build_items", scope: "user_content" },

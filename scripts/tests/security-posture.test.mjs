@@ -242,6 +242,16 @@ const ADMIN_ONLY_TABLES = new Set([
   // row without paying; a client update could extend one past its paid
   // time.
   "voice_live_sessions",
+  // Ionexa Payments (20261125000000_ionexa_payments.sql): all four tables
+  // deny-all. REVOKE ALL from anon, authenticated is in the migration;
+  // every read and write goes through createAdminClient() in
+  // lib/payments/*.ts and api/payments/. A client insert into
+  // payments_products could create a checkout that charges a stranger;
+  // a client update to payments_accounts could fake payouts_enabled.
+  "payments_accounts",
+  "payments_products",
+  "payments_transactions",
+  "payments_payouts",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

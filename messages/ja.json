@@ -236,7 +236,8 @@
       "personalLifeOs": "ライフOS",
       "activity": "アクティビティ",
       "games": "ゲーム",
-      "skills": "スキル"
+      "skills": "スキル",
+      "payments": "決済"
     },
     "hints": {
       "chat": "何でも聞けます — どのモジュールにも紐づきません。",
@@ -302,7 +303,8 @@
       "meetings": "録音を文字起こし・要約・自分で選ぶアクションに変えます。",
       "activity": "次の一歩、変化したこと、進捗、そして数字",
       "games": "ゲームを説明し、計画を言葉で変えて、アカウントから隔離されたまま、ここで遊べます。",
-      "skills": "Ionexaに一度教えた手順で、毎回同じ手順に従います。今のところここでは表示するだけです。"
+      "skills": "Ionexaに一度教えた手順で、毎回同じ手順に従います。今のところここでは表示するだけです。",
+      "payments": "お客様からの支払いを受け付けます。接続、商品作成、入金。"
     },
     "closeMenu": "メニューを閉じる",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "チームメンバー",
       "recordSearch": "記録の横断検索",
       "meetings": "会議 → アクション",
-      "games": "ゲーム"
+      "games": "ゲーム",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
@@ -7156,5 +7159,79 @@
     "cut": "（回答は長さの上限で切れました。）",
     "unknownCommand": "不明なコマンドです。",
     "empty": "/ionexa ask のあとに質問を書いてください。"
+  },
+  "payments": {
+    "title": "決済",
+    "subtitle": "お客様からの支払いを受け付ける",
+    "connect": {
+      "title": "ビジネスを接続",
+      "description": "Stripeを通じてビジネスを接続し、支払いの受け付けを開始します。Stripeが本人確認と銀行情報を処理します。",
+      "button": "Stripeで接続",
+      "resumeButton": "設定を続ける",
+      "connected": "接続済み",
+      "pendingVerification": "確認待ち",
+      "notConnected": "まだ接続されていません"
+    },
+    "balance": {
+      "title": "残高",
+      "available": "利用可能",
+      "pending": "保留中",
+      "totalEarnings": "総収益",
+      "nothingYet": "まだ収益はありません"
+    },
+    "products": {
+      "title": "商品",
+      "create": "新しい商品",
+      "name": "商品名",
+      "description": "説明",
+      "price": "価格",
+      "currency": "通貨",
+      "recurring": "定期支払い",
+      "monthly": "月額",
+      "yearly": "年額",
+      "oneTime": "一回払い",
+      "active": "有効",
+      "inactive": "無効",
+      "copyLink": "支払いリンクをコピー",
+      "linkCopied": "リンクがコピーされました",
+      "deactivate": "無効にする",
+      "noProducts": "まだ商品がありません。最初の商品を作成して支払いの受け付けを開始しましょう。"
+    },
+    "transactions": {
+      "title": "取引",
+      "noTransactions": "まだ取引はありません",
+      "succeeded": "成功",
+      "pending": "保留中",
+      "failed": "失敗",
+      "refunded": "返金済み"
+    },
+    "payouts": {
+      "title": "出金",
+      "cashout": "銀行口座へ出金",
+      "amount": "金額",
+      "requestPayout": "出金をリクエスト",
+      "noPayouts": "まだ出金はありません",
+      "inTransit": "送金中",
+      "paid": "支払い済み",
+      "failed": "失敗"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Stripeダッシュボードを開く",
+      "overview": "概要",
+      "productsTab": "商品",
+      "transactionsTab": "取引",
+      "payoutsTab": "出金"
+    },
+    "errors": {
+      "notConfigured": "決済はまだ利用できません。",
+      "notConnected": "まずビジネスを接続してください。",
+      "chargesNotEnabled": "アカウントはまだ決済の確認が完了していません。",
+      "payoutsNotEnabled": "アカウントはまだ出金の確認が完了していません。",
+      "insufficientBalance": "この出金に対する残高が不足しています。",
+      "invalidPrice": "価格は1€から999,999€の間である必要があります。",
+      "nameRequired": "商品名は必須です。"
+    },
+    "platformFee": "プラットフォーム手数料：取引あたり{fee}%",
+    "cancel": "キャンセル"
   }
 }

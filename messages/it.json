@@ -236,7 +236,8 @@
       "personalLifeOs": "Life OS",
       "activity": "Attività",
       "games": "Giochi",
-      "skills": "Competenze"
+      "skills": "Competenze",
+      "payments": "Pagamenti"
     },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
@@ -302,7 +303,8 @@
       "meetings": "Trasforma una registrazione in trascrizione, riassunto e azioni tra cui scegli tu.",
       "activity": "Il prossimo passo, cosa è cambiato, i progressi e i tuoi numeri",
       "games": "Descrivi un gioco, cambia il suo piano a parole e giocaci qui, isolato dal tuo account.",
-      "skills": "Procedure che hai insegnato a Ionexa una volta, così segue gli stessi passaggi ogni volta. Per ora questo le mostra soltanto."
+      "skills": "Procedure che hai insegnato a Ionexa una volta, così segue gli stessi passaggi ogni volta. Per ora questo le mostra soltanto.",
+      "payments": "Accetta pagamenti dai tuoi clienti. Collega, crea prodotti, incassa."
     },
     "closeMenu": "Chiudi il menu",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "Membri del team",
       "recordSearch": "Ricerca su tutti i dati",
       "meetings": "Riunioni → azioni",
-      "games": "Giochi"
+      "games": "Giochi",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
@@ -7156,5 +7159,79 @@
     "cut": "(La risposta è stata tagliata al suo limite di lunghezza.)",
     "unknownCommand": "Comando sconosciuto.",
     "empty": "Scrivi una domanda dopo /ionexa ask."
+  },
+  "payments": {
+    "title": "Pagamenti",
+    "subtitle": "Accetta pagamenti dai tuoi clienti",
+    "connect": {
+      "title": "Collega la tua attività",
+      "description": "Collega la tua attività tramite Stripe per iniziare ad accettare pagamenti. Stripe gestisce la verifica e i dati bancari.",
+      "button": "Collega con Stripe",
+      "resumeButton": "Continua la configurazione",
+      "connected": "Collegato",
+      "pendingVerification": "Verifica in attesa",
+      "notConnected": "Non ancora collegato"
+    },
+    "balance": {
+      "title": "Saldo",
+      "available": "Disponibile",
+      "pending": "In sospeso",
+      "totalEarnings": "Guadagni totali",
+      "nothingYet": "Nessun guadagno ancora"
+    },
+    "products": {
+      "title": "Prodotti",
+      "create": "Nuovo prodotto",
+      "name": "Nome prodotto",
+      "description": "Descrizione",
+      "price": "Prezzo",
+      "currency": "Valuta",
+      "recurring": "Pagamento ricorrente",
+      "monthly": "Mensile",
+      "yearly": "Annuale",
+      "oneTime": "Una tantum",
+      "active": "Attivo",
+      "inactive": "Inattivo",
+      "copyLink": "Copia link di pagamento",
+      "linkCopied": "Link copiato",
+      "deactivate": "Disattiva",
+      "noProducts": "Nessun prodotto ancora. Crea il tuo primo prodotto per iniziare ad accettare pagamenti."
+    },
+    "transactions": {
+      "title": "Transazioni",
+      "noTransactions": "Nessuna transazione ancora",
+      "succeeded": "Riuscita",
+      "pending": "In sospeso",
+      "failed": "Fallita",
+      "refunded": "Rimborsata"
+    },
+    "payouts": {
+      "title": "Prelievi",
+      "cashout": "Preleva su conto",
+      "amount": "Importo",
+      "requestPayout": "Richiedi prelievo",
+      "noPayouts": "Nessun prelievo ancora",
+      "inTransit": "In transito",
+      "paid": "Pagato",
+      "failed": "Fallito"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Apri Stripe Dashboard",
+      "overview": "Panoramica",
+      "productsTab": "Prodotti",
+      "transactionsTab": "Transazioni",
+      "payoutsTab": "Prelievi"
+    },
+    "errors": {
+      "notConfigured": "I pagamenti non sono ancora disponibili.",
+      "notConnected": "Collega prima la tua attività.",
+      "chargesNotEnabled": "Il tuo account non è ancora verificato per i pagamenti.",
+      "payoutsNotEnabled": "Il tuo account non è ancora verificato per i prelievi.",
+      "insufficientBalance": "Saldo insufficiente per questo prelievo.",
+      "invalidPrice": "Il prezzo deve essere tra 1 € e 999.999 €.",
+      "nameRequired": "Il nome del prodotto è obbligatorio."
+    },
+    "platformFee": "Commissione piattaforma: {fee}% per transazione",
+    "cancel": "Annulla"
   }
 }

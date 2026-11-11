@@ -207,6 +207,7 @@ ok("pricing.rows.<id> exists for every rendered row in all ten locales",
   // checked BOTH ways, so it cannot outlive the row it excuses.
   const SAME_IN_BOTH = {
     websiteBuilder: "the product's own name, not a phrase — the same in every locale",
+    ionexaPayments: "the product's own name — 'Ionexa Payments' is a brand name in every locale",
   };
   const untranslated = ids.filter(
     (id) => messages.el.pricing.rows[id] === messages.en.pricing.rows[id]

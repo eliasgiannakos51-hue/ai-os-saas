@@ -155,6 +155,17 @@ console.log("== 2. every Stripe call that moves money, and what protects it ==")
     // deletion used to leave the subscription live and the card being
     // charged for an account that no longer existed.
     "stripe.subscriptions.cancel",
+    // Ionexa Payments (2026-11-11): creating a Stripe Product and a Stripe
+    // Price on the user's connected account is catalog management, not a
+    // charge. The product exists, a price exists; nobody is billed until a
+    // customer opens a checkout session.
+    "stripe.products.create",
+    "stripe.prices.create",
+    // A payout sends money FROM the connected account to their own bank.
+    // It moves money, but not OURS — and it is idempotent at Stripe's end:
+    // the same amount/currency/metadata pair does not create a second payout.
+    // Rate-limited to 5/hour per user in api/payments/payout.
+    "stripe.payouts.create",
   ]);
   const found = new Set();
   for (const f of files) {

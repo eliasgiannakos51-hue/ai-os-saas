@@ -207,7 +207,8 @@ console.log("\n== 4. rule 4: icons that point turn around, and only those ==");
   // axis a mirrored page changes. Deliberately NOT "contains an arrow":
   // trending-up is an arrow and its meaning is vertical.
   const POINTS = /^(arrow|chevrons?|corner|move|undo|redo|reply|forward|skip|log-in|log-out|send|panel-(left|right)|indent)/;
-  const VERTICAL_ONLY = /^(arrow|chevrons?|move)-(up|down)$/;
+  // arrow-down, arrow-up, arrow-down-to-line, arrow-up-from-line, etc.
+  const VERTICAL_ONLY = /^(arrow|chevrons?|move)-(up|down)(-|$)/;
 
   const pointing = [...used]
     .map((n) => ({ name: n, classes: classNamesOf(n) }))

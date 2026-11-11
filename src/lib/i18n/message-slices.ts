@@ -121,6 +121,9 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
       // reachable from every dashboard route rather than from one page.
       "sampleData",
       "security", "settings", "sidebar", "voice",
+      // Ionexa Payments (2026-11-11): the payments-dashboard.tsx component
+      // uses useTranslations("payments") for the entire Payments page.
+      "payments",
     ],
     // SIXTY-FOUR — sixty-one before the first screen merged in,
     // overview/first-screen-examples.tsx was the sixty-second, and
@@ -195,7 +198,9 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // variable key, above.
     // 74 -> 75 on 2026-11-11: achievement-unlock-bridge.tsx's
     // useTranslations() with no namespace — same shape as above.
-    unbounded: 75,
+    // 75 -> 76 on 2026-11-11: payments-dashboard.tsx's `t()` with a
+    // template-literal key for error messages (`errors.${data.error}`).
+    unbounded: 76,
   },
   {
     name: "onboarding",

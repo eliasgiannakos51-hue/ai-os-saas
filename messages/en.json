@@ -236,7 +236,8 @@
       "personalLifeOs": "Life OS",
       "activity": "Activity",
       "games": "Games",
-      "skills": "Skills"
+      "skills": "Skills",
+      "payments": "Payments"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -302,7 +303,8 @@
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
       "activity": "Your next step, what changed, your progress and your numbers",
       "games": "Describe a game, change its plan in words, and play it here, sealed off from your account.",
-      "skills": "Procedures you taught Ionexa once, so it follows the same steps every time. For now this only shows them."
+      "skills": "Procedures you taught Ionexa once, so it follows the same steps every time. For now this only shows them.",
+      "payments": "Accept payments from your customers. Connect, create products, get paid."
     },
     "closeMenu": "Close menu",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "Team members",
       "recordSearch": "Record search across modules",
       "meetings": "Meetings → actions",
-      "games": "Games"
+      "games": "Games",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -7156,5 +7159,79 @@
     "cut": "(The answer was cut at its length limit.)",
     "unknownCommand": "Unknown command.",
     "empty": "Write a question after /ionexa ask."
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Accept payments from your customers",
+    "connect": {
+      "title": "Connect your business",
+      "description": "Connect your business through Stripe to start accepting payments. Stripe handles the verification and bank details.",
+      "button": "Connect with Stripe",
+      "resumeButton": "Continue setup",
+      "connected": "Connected",
+      "pendingVerification": "Verification pending",
+      "notConnected": "Not connected yet"
+    },
+    "balance": {
+      "title": "Balance",
+      "available": "Available",
+      "pending": "Pending",
+      "totalEarnings": "Total earnings",
+      "nothingYet": "No earnings yet"
+    },
+    "products": {
+      "title": "Products",
+      "create": "New product",
+      "name": "Product name",
+      "description": "Description",
+      "price": "Price",
+      "currency": "Currency",
+      "recurring": "Recurring payment",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "oneTime": "One-time",
+      "active": "Active",
+      "inactive": "Inactive",
+      "copyLink": "Copy payment link",
+      "linkCopied": "Link copied",
+      "deactivate": "Deactivate",
+      "noProducts": "No products yet. Create your first product to start accepting payments."
+    },
+    "transactions": {
+      "title": "Transactions",
+      "noTransactions": "No transactions yet",
+      "succeeded": "Succeeded",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "payouts": {
+      "title": "Payouts",
+      "cashout": "Withdraw to bank",
+      "amount": "Amount",
+      "requestPayout": "Request payout",
+      "noPayouts": "No payouts yet",
+      "inTransit": "In transit",
+      "paid": "Paid",
+      "failed": "Failed"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Open Stripe Dashboard",
+      "overview": "Overview",
+      "productsTab": "Products",
+      "transactionsTab": "Transactions",
+      "payoutsTab": "Payouts"
+    },
+    "errors": {
+      "notConfigured": "Payments are not available yet.",
+      "notConnected": "Connect your business first.",
+      "chargesNotEnabled": "Your account is not yet verified for payments.",
+      "payoutsNotEnabled": "Your account is not yet verified for payouts.",
+      "insufficientBalance": "Insufficient balance for this payout.",
+      "invalidPrice": "Price must be between €1 and €999,999.",
+      "nameRequired": "Product name is required."
+    },
+    "platformFee": "Platform fee: {fee}% per transaction",
+    "cancel": "Cancel"
   }
 }

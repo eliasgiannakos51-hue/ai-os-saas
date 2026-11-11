@@ -295,6 +295,10 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
       "Closes any open call the SAME user has, loaded by .eq('user_id', user.id).is('ended_at', null). The user_id is the authenticated session's own, so the query cannot find another account's row. The admin client is required because voice_live_sessions is deny-all.",
     "closeLiveSession@src/app/api/voice/live/tick/route.ts":
       "Closes a call that has exceeded its cap or whose billing failed, on a row loaded by .eq('id', body.id).eq('user_id', user.id) — the user_id is the authenticated session's own, so the id cannot name another account's row. The admin client is required because voice_live_sessions is deny-all.",
+    // Ionexa Payments: refreshPaymentsAccount reads payments_accounts, a
+    // deny-all table. The admin client is required because it has no policies.
+    "refreshPaymentsAccount@src/app/api/payments/connect/route.ts":
+      "Reads the authenticated user's own payments_accounts row by user_id (getPaymentsAccount scopes by user.id), and writes back its Stripe status from a fresh accounts.retrieve. The admin client is required because payments_accounts is deny-all — a session client would see nothing.",
   };
 
   const violations = [];

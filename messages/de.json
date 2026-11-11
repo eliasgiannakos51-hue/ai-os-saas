@@ -236,7 +236,8 @@
       "personalLifeOs": "Life OS",
       "activity": "Aktivität",
       "games": "Spiele",
-      "skills": "Fähigkeiten"
+      "skills": "Fähigkeiten",
+      "payments": "Zahlungen"
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
@@ -302,7 +303,8 @@
       "meetings": "Macht aus einer Aufnahme ein Transkript, eine Zusammenfassung und Aufgaben, aus denen du wählst.",
       "activity": "Dein nächster Schritt, was sich geändert hat, dein Fortschritt und deine Zahlen",
       "games": "Beschreibe ein Spiel, ändere seinen Plan mit Worten und spiel es hier, abgeschottet von deinem Konto.",
-      "skills": "Abläufe, die du Ionexa einmal beigebracht hast, damit es jedes Mal denselben Schritten folgt. Vorerst zeigt dies sie nur an."
+      "skills": "Abläufe, die du Ionexa einmal beigebracht hast, damit es jedes Mal denselben Schritten folgt. Vorerst zeigt dies sie nur an.",
+      "payments": "Zahlungen von Kunden annehmen. Verbinden, Produkte erstellen, bezahlt werden."
     },
     "closeMenu": "Menü schließen",
     "rail": {
@@ -407,7 +409,8 @@
       "teamMembers": "Teammitglieder",
       "recordSearch": "Suche über alle Einträge",
       "meetings": "Besprechungen → Aufgaben",
-      "games": "Spiele"
+      "games": "Spiele",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
@@ -7156,5 +7159,79 @@
     "cut": "(Die Antwort wurde an ihrer Längengrenze abgeschnitten.)",
     "unknownCommand": "Unbekannter Befehl.",
     "empty": "Schreib eine Frage nach /ionexa ask."
+  },
+  "payments": {
+    "title": "Zahlungen",
+    "subtitle": "Zahlungen von deinen Kunden annehmen",
+    "connect": {
+      "title": "Verbinde dein Unternehmen",
+      "description": "Verbinde dein Unternehmen über Stripe, um Zahlungen anzunehmen. Stripe übernimmt die Verifizierung und Bankdaten.",
+      "button": "Mit Stripe verbinden",
+      "resumeButton": "Einrichtung fortsetzen",
+      "connected": "Verbunden",
+      "pendingVerification": "Verifizierung ausstehend",
+      "notConnected": "Noch nicht verbunden"
+    },
+    "balance": {
+      "title": "Kontostand",
+      "available": "Verfügbar",
+      "pending": "Ausstehend",
+      "totalEarnings": "Gesamteinnahmen",
+      "nothingYet": "Noch keine Einnahmen"
+    },
+    "products": {
+      "title": "Produkte",
+      "create": "Neues Produkt",
+      "name": "Produktname",
+      "description": "Beschreibung",
+      "price": "Preis",
+      "currency": "Währung",
+      "recurring": "Wiederkehrende Zahlung",
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "oneTime": "Einmalig",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "copyLink": "Zahlungslink kopieren",
+      "linkCopied": "Link kopiert",
+      "deactivate": "Deaktivieren",
+      "noProducts": "Noch keine Produkte. Erstelle dein erstes Produkt, um Zahlungen anzunehmen."
+    },
+    "transactions": {
+      "title": "Transaktionen",
+      "noTransactions": "Noch keine Transaktionen",
+      "succeeded": "Erfolgreich",
+      "pending": "Ausstehend",
+      "failed": "Fehlgeschlagen",
+      "refunded": "Erstattet"
+    },
+    "payouts": {
+      "title": "Auszahlungen",
+      "cashout": "Auf Bankkonto auszahlen",
+      "amount": "Betrag",
+      "requestPayout": "Auszahlung anfordern",
+      "noPayouts": "Noch keine Auszahlungen",
+      "inTransit": "Unterwegs",
+      "paid": "Bezahlt",
+      "failed": "Fehlgeschlagen"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Stripe Dashboard öffnen",
+      "overview": "Übersicht",
+      "productsTab": "Produkte",
+      "transactionsTab": "Transaktionen",
+      "payoutsTab": "Auszahlungen"
+    },
+    "errors": {
+      "notConfigured": "Zahlungen sind noch nicht verfügbar.",
+      "notConnected": "Verbinde zuerst dein Unternehmen.",
+      "chargesNotEnabled": "Dein Konto ist noch nicht für Zahlungen verifiziert.",
+      "payoutsNotEnabled": "Dein Konto ist noch nicht für Auszahlungen verifiziert.",
+      "insufficientBalance": "Unzureichendes Guthaben für diese Auszahlung.",
+      "invalidPrice": "Der Preis muss zwischen 1 € und 999.999 € liegen.",
+      "nameRequired": "Produktname ist erforderlich."
+    },
+    "platformFee": "Plattformgebühr: {fee}% pro Transaktion",
+    "cancel": "Abbrechen"
   }
 }

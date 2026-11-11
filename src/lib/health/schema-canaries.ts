@@ -707,4 +707,11 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261124000000_voice_live_sessions.sql",
     breaks: "a live voice conversation cannot start for anyone the switch \"voice-live\" is open to — the call is refused before it connects",
   },
+  // Ionexa Payments (2026-11-11): one canary for the four tables.
+  {
+    kind: "table",
+    table: "payments_accounts",
+    migration: "20261125000000_ionexa_payments.sql",
+    breaks: "the Payments page cannot connect a business or show any data for anyone the switch \"ionexa-payments\" is open to — the connect route catches the missing table and answers \"not ready\"",
+  },
 ];

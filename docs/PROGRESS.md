@@ -12704,3 +12704,29 @@ Tests: `voice-live.test.mjs` 111/111, `voice-live.mutation.mjs` 32/32.
 (30709 checks, 555.3s). `npm run build:ci` πράσινο. Πραγματικό κόστος: €0.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261124000000_voice_live_sessions.sql**
+
+### 2026-11-11μ — Ionexa Payments + πλήρης έρευνα αγοράς
+
+**Ionexa Payments** — πλήρης πλατφόρμα πληρωμών πίσω από τον διακόπτη
+`ionexa-payments`:
+- Stripe Connect Express onboarding (σύνδεση επιχείρησης)
+- Δημιουργία προϊόντων με τιμές (Stripe Product + Price στο connected account)
+- Payment links για πελάτες (destination charges, 2.5% πλατφόρμα)
+- Υπόλοιπο, συναλλαγές, ιστορικό (balance από Stripe, transactions στη βάση)
+- Cashout/payout σε τραπεζικό λογαριασμό
+- Stripe Express Dashboard access
+- Πλήρης UI με 4 καρτέλες (Overview, Products, Transactions, Payouts)
+
+Νέα αρχεία: migration `20261125000000_ionexa_payments.sql` (4 πίνακες,
+deny-all RLS), 4 lib (`connect.ts`, `products.ts`, `checkout.ts`,
+`balance.ts`), 6 API routes, 1 component (`payments-dashboard.tsx`),
+1 σελίδα, i18n σε 10 γλώσσες (58 νέα κλειδιά × 10).
+
+**Πλήρης έρευνα αγοράς** — `docs/market-research-full-2026-11-11.md`:
+15 κατηγορίες AI εργαλείων, τιμές, δυνάμεις/αδυναμίες, 5 κενά αγοράς,
+4 τάσεις 2026-2027, 15 ιδέες ταξινομημένες κατά impact × feasibility.
+
+Αριθμοί μετρημένοι 2026-11-11: `npm run gates` → ALL 416 GATES PASSED
+(30739 checks, 569.8s). `npm run build:ci` πράσινο.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261125000000_ionexa_payments.sql**

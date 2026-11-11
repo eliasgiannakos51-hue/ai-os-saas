@@ -283,6 +283,18 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
       "Reads every due automation's mode in the same tick that already swept automation_flows across every account on purpose (step 3, the cron's own header) — the SAME cross-account shape collectAgentBatches above is argued under, for the same reason: there is no one caller to scope a client to. It answers only id and mode, keyed by flow ids the cron already holds from that earlier, equally cross-account read; nothing identifying a stranger's account reaches this function or leaves it.",
     "loadProjectDetail@src/app/shared/[token]/page.tsx":
       "There is no session here to scope a caller's client to — this is Projects Κομμάτι 7's public share page, reached by the token alone. byToken.id is not attacker-supplied: it is read ONE line above from projects.share_token, an unguessable value randomBytes(24) generates server-side in api/projects/[id]/share's own POST, and a token that does not resolve already returned before this call. So the id this hands loadProjectDetail is exactly the one capability the token proves, the same argument the cron entries above make for an id read first through the user's own client.",
+    // FS1 live voice: closeLiveSession updates voice_live_sessions, a
+    // deny-all table. The admin client is required because the table has
+    // no policies; every call addresses only the session row it already
+    // loaded by (id, user_id) or, in the sweep, by ended_at IS NULL.
+    "closeLiveSession@src/app/api/cron/voice-live-sweep/route.ts":
+      "The sweep reads stale sessions across every account on purpose (ended_at IS NULL AND paid_until < cutoff) — the same cross-account cron shape as collectAgentBatches. The admin client is required because voice_live_sessions is deny-all; nothing identifying a stranger's account leaves the function beyond what was already in the row the cron read.",
+    "closeLiveSession@src/app/api/voice/live/end/route.ts":
+      "Keyed by the session's id from a row the route loaded one line up through .eq('id', body.id).eq('user_id', user.id) — the user_id is the authenticated session's own, so the id cannot name another account's row. The admin client is required because voice_live_sessions is deny-all.",
+    "closeLiveSession@src/app/api/voice/live/start/route.ts":
+      "Closes any open call the SAME user has, loaded by .eq('user_id', user.id).is('ended_at', null). The user_id is the authenticated session's own, so the query cannot find another account's row. The admin client is required because voice_live_sessions is deny-all.",
+    "closeLiveSession@src/app/api/voice/live/tick/route.ts":
+      "Closes a call that has exceeded its cap or whose billing failed, on a row loaded by .eq('id', body.id).eq('user_id', user.id) — the user_id is the authenticated session's own, so the id cannot name another account's row. The admin client is required because voice_live_sessions is deny-all.",
   };
 
   const violations = [];

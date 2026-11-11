@@ -35,7 +35,7 @@ const MUTANTS = [
   {
     name: "a real reader is left off readBy",
     file: INVENTORY,
-    from: 'readBy: ["src/lib/ai/providers/registry.ts", "src/lib/voice/voice-providers.ts"],',
+    from: 'readBy: ["src/lib/ai/providers/registry.ts", "src/lib/voice/voice-providers.ts", "src/lib/voice/live-provider.ts"],',
     to: 'readBy: ["src/lib/ai/providers/registry.ts"],',
     expect: "openai: no reader is left off readBy",
   },

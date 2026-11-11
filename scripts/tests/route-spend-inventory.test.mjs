@@ -488,6 +488,7 @@ const CONTINUES_SOMEBODY_ELSES_HOLD = {
     why: "it queues rather than generates: the model call and the hold both live in /api/websites/generate/process, against the SAME estimate this route computes. What stops a loop here is hasEnoughCredits — an account that cannot afford the generation is refused before the row is written, so the queue cannot outrun the balance.",
   },
   "voice/usage": { bound: "reads_only", why: "reads a usage counter; the provider URL is a constant in voice-providers, imported to say whether voice is configured at all." },
+  "voice/live/end": { bound: "reads_only", why: "closes a live voice session and saves the transcript. The model call is autoTitleFromMessage (conversation titling) and hangupLiveCall (a POST to the provider's hangup endpoint, not a generation). All spending was done by start and tick before this route runs; it reserves nothing and generates nothing." },
   "system-health/keys": { bound: "reads_only", why: "owner-only; one GET per provider to a model or account LIST, never a generation, and only when the owner presses the button. There is no loop to stop." },
 };
 // ...or through a shared step it calls whose own body reserves

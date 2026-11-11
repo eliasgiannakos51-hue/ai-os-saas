@@ -1,6 +1,6 @@
 # The first run — es
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5526, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **623 strings**. The whole product is 5538, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2458,7 +2458,7 @@ Ver historial de créditos
 
 Inténtalo de nuevo
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (219)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3290,6 +3290,12 @@ No se permitió el micrófono. Siempre puedes escribir.
 
 No se oyó nada en esa grabación.
 
+**`voice.errors.ended`**
+
+> EN — The conversation has ended.
+
+La conversación ha terminado.
+
 **`voice.errors.failed`**
 
 > EN — Voice is unavailable right now. You can still type.
@@ -3325,6 +3331,12 @@ La voz no está configurada en esta instalación.
 > EN — Voice is not included on your plan.
 
 La voz no está incluida en tu plan.
+
+**`voice.errors.not_ready`**
+
+> EN — Live conversation is not set up here yet. You were not charged.
+
+La conversación en vivo aún no está configurada aquí. No se te ha cobrado.
 
 **`voice.errors.out_of_minutes`**
 

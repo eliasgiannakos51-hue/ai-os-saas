@@ -1,6 +1,6 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **621 strings**. The whole product is 5526, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **623 strings**. The whole product is 5538, which is why this file exists.
 
 **Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 379 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
@@ -2458,7 +2458,7 @@ credits の履歴を見る
 
 もう一度試す
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (219)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3290,6 +3290,12 @@ CSV をエクスポート
 
 その録音からは何も聞き取れませんでした。
 
+**`voice.errors.ended`**
+
+> EN — The conversation has ended.
+
+会話は終了しました。
+
 **`voice.errors.failed`**
 
 > EN — Voice is unavailable right now. You can still type.
@@ -3325,6 +3331,12 @@ CSV をエクスポート
 > EN — Voice is not included on your plan.
 
 お使いのプランに音声は含まれていません。
+
+**`voice.errors.not_ready`**
+
+> EN — Live conversation is not set up here yet. You were not charged.
+
+ライブ会話はまだここでは設定されていません。料金は発生していません。
 
 **`voice.errors.out_of_minutes`**
 

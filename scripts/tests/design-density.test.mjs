@@ -278,7 +278,9 @@ console.log("\n== 2. the lines ==");
 // the plan's boxes each need their own frame or header rule, the same
 // unavoidable shape every entry above already argues) — nothing else in
 // the tree moved.
-ok(`border utilities (${r.counts.borders}), ceiling 689`, r.counts.borders <= 689);
+// 689 -> 692, FS1 live voice (2026-11-11): voice-live.tsx's full-screen
+// overlay has a top rule, a mute-button ring and a close-button ring.
+ok(`border utilities (${r.counts.borders}), ceiling 692`, r.counts.borders <= 692);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

@@ -171,6 +171,11 @@ const REGISTER = {
     reason:
       "planResearch records usage before deciding the plan is unusable, so 'no_plan' is a real charge; the throw path is the helper's case.",
   },
+  "src/lib/voice/live-session.ts": {
+    mechanism: "settles_unconditionally",
+    reason:
+      "billLiveMinutes reserves and then immediately records the external cost and settles, on every path that passed the reserve. The reserve is guarded by bypassCredits, and the settle follows it unconditionally — there is no branch between the two that could return or throw without settling.",
+  },
   // api/research/[id]/run WAS registered here as handed_on, on 2026-09-18.
   // It released nothing of its own because the chunked runner owns the
   // hold — which was true until the write that hands the id over turned

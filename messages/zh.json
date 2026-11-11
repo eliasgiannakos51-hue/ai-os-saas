@@ -6014,7 +6014,9 @@
       "unsupported_type": "不支持这种音频格式。",
       "usage_unavailable": "目前无法查询语音分钟数。",
       "streamInterrupted": "连接在回复完成前中断了。",
-      "streamInterruptedPartial": "连接中断了 — 上面的回复可能不完整。"
+      "streamInterruptedPartial": "连接中断了 — 上面的回复可能不完整。",
+      "not_ready": "这里尚未设置实时对话。未向你收费。",
+      "ended": "对话已结束。"
     },
     "permission": {
       "title": "在打开麦克风之前",
@@ -6063,6 +6065,18 @@
       "directionNotConfigured": "本部署未配置",
       "speakNotConfigured": "本部署未配置朗读功能，因此“收听”按钮不会出现。语音输入可正常使用。",
       "transcribeNotConfigured": "本部署未配置语音输入，因此麦克风按钮不会出现。朗读功能可正常使用。"
+    },
+    "live": {
+      "price": "每分钟 {credits} 积分 · 每次对话最长 {minutes} 分钟",
+      "start": "开始说话",
+      "connecting": "正在连接…",
+      "ended": "对话已结束",
+      "endedCap": "本次对话已达到最长时长。说过的内容都已作为文字保存在聊天中，你可以开始新的对话。",
+      "mute": "将麦克风静音",
+      "unmute": "重新打开麦克风",
+      "subtitlesOn": "显示字幕",
+      "subtitlesOff": "隐藏字幕",
+      "close": "结束对话"
     }
   },
   "dataAnalysis": {

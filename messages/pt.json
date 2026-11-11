@@ -6014,7 +6014,9 @@
       "unsupported_type": "Esse formato de áudio não é suportado.",
       "usage_unavailable": "Não foi possível verificar os minutos de voz neste momento.",
       "streamInterrupted": "A ligação caiu antes de a resposta terminar.",
-      "streamInterruptedPartial": "A ligação caiu — a resposta acima pode estar incompleta."
+      "streamInterruptedPartial": "A ligação caiu — a resposta acima pode estar incompleta.",
+      "not_ready": "A conversa ao vivo ainda não está configurada aqui. Não te foi cobrado nada.",
+      "ended": "A conversa terminou."
     },
     "permission": {
       "title": "Antes de o microfone abrir",
@@ -6063,6 +6065,18 @@
       "directionNotConfigured": "Não está configurado nesta instalação",
       "speakNotConfigured": "A leitura das respostas não está configurada nesta instalação, por isso os botões Ouvir não aparecem. Falar com ele funciona normalmente.",
       "transcribeNotConfigured": "Falar com ele não está configurado nesta instalação, por isso os botões de microfone não aparecem. A leitura das respostas funciona normalmente."
+    },
+    "live": {
+      "price": "{credits, plural, one {# crédito} other {# créditos}} por minuto · até {minutes, plural, one {# minuto} other {# minutos}} por conversa",
+      "start": "Começa a falar",
+      "connecting": "A ligar…",
+      "ended": "A conversa terminou",
+      "endedCap": "Esta conversa atingiu a duração máxima. Tudo o que foi dito está no Chat como texto; podes começar outra.",
+      "mute": "Silenciar o teu microfone",
+      "unmute": "Voltar a ligar o teu microfone",
+      "subtitlesOn": "Mostrar legendas",
+      "subtitlesOff": "Ocultar legendas",
+      "close": "Terminar a conversa"
     }
   },
   "dataAnalysis": {

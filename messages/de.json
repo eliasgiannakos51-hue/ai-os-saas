@@ -6014,7 +6014,9 @@
       "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
       "usage_unavailable": "Die Sprachminuten konnten gerade nicht geprüft werden.",
       "streamInterrupted": "Die Verbindung wurde vor dem Ende der Antwort unterbrochen.",
-      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die Antwort oben ist möglicherweise unvollständig."
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die Antwort oben ist möglicherweise unvollständig.",
+      "not_ready": "Das Live-Gespräch ist hier noch nicht eingerichtet. Dir wurde nichts berechnet.",
+      "ended": "Das Gespräch ist beendet."
     },
     "permission": {
       "title": "Bevor das Mikrofon geöffnet wird",
@@ -6063,6 +6065,18 @@
       "directionNotConfigured": "Auf dieser Installation nicht eingerichtet",
       "speakNotConfigured": "Das Vorlesen von Antworten ist auf dieser Installation nicht eingerichtet, daher erscheinen die Vorlesen-Schaltflächen nicht. Das Sprechen funktioniert normal.",
       "transcribeNotConfigured": "Das Sprechen ist auf dieser Installation nicht eingerichtet, daher erscheinen die Mikrofon-Schaltflächen nicht. Das Vorlesen von Antworten funktioniert normal."
+    },
+    "live": {
+      "price": "{credits, plural, one {# Credit} other {# Credits}} pro Minute · bis zu {minutes, plural, one {# Minute} other {# Minuten}} pro Gespräch",
+      "start": "Losreden",
+      "connecting": "Verbindung wird aufgebaut…",
+      "ended": "Das Gespräch ist beendet",
+      "endedCap": "Dieses Gespräch hat seine längste Dauer erreicht. Alles Gesagte steht als Text im Chat; du kannst ein neues beginnen.",
+      "mute": "Dein Mikrofon stummschalten",
+      "unmute": "Dein Mikrofon wieder einschalten",
+      "subtitlesOn": "Untertitel einblenden",
+      "subtitlesOff": "Untertitel ausblenden",
+      "close": "Gespräch beenden"
     }
   },
   "dataAnalysis": {

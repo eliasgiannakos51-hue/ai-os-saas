@@ -6014,7 +6014,9 @@
       "unsupported_type": "その音声形式には対応していません。",
       "usage_unavailable": "音声の残り時間を今は確認できませんでした。",
       "streamInterrupted": "返信が終わる前に接続が切れました。",
-      "streamInterruptedPartial": "接続が切れました — 上の返信は途中までかもしれません。"
+      "streamInterruptedPartial": "接続が切れました — 上の返信は途中までかもしれません。",
+      "not_ready": "ライブ会話はまだここでは設定されていません。料金は発生していません。",
+      "ended": "会話は終了しました。"
     },
     "permission": {
       "title": "マイクを開く前に",
@@ -6063,6 +6065,18 @@
       "directionNotConfigured": "この環境では未設定です",
       "speakNotConfigured": "この環境では読み上げが設定されていないため、「聴く」ボタンは表示されません。音声入力は通常どおり使えます。",
       "transcribeNotConfigured": "この環境では音声入力が設定されていないため、マイクのボタンは表示されません。読み上げは通常どおり使えます。"
+    },
+    "live": {
+      "price": "1分あたり {credits} クレジット · 1回の会話は最長 {minutes} 分",
+      "start": "話し始める",
+      "connecting": "接続中…",
+      "ended": "会話は終了しました",
+      "endedCap": "この会話は最長時間に達しました。話した内容はすべてテキストとしてチャットに残っています。新しい会話を始められます。",
+      "mute": "マイクをミュートする",
+      "unmute": "マイクをもう一度オンにする",
+      "subtitlesOn": "字幕を表示",
+      "subtitlesOff": "字幕を隠す",
+      "close": "会話を終了する"
     }
   },
   "dataAnalysis": {

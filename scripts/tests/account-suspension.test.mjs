@@ -118,6 +118,8 @@ const NO_ACCOUNT_WORK = {
   "/api/cron/reset-credits": "the same bookkeeping as monthly-credits, on the first of the month.",
   "/api/cron/nav-retention": "deletes old navigation rows; it runs nothing for anybody.",
   "/api/cron/website-storage-cleanup": "removes stored images no row points at any more; it runs nothing for anybody.",
+  "/api/cron/voice-live-sweep":
+    "ENDS live voice calls left open past their paid time; it starts nothing. A suspended account's open call is exactly one that must still be hung up, so it is not skipped — and it cannot start another, because the middleware refuses its API calls.",
 };
 for (const p of crons) {
   const file = PICKED_IN[p] ?? fileOf(p);

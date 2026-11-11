@@ -227,7 +227,9 @@ check(
 // 34 since 2026-10-14: the Site page (components/website-builder/
 // website-builder-workspace.tsx) and Chat's Site pane say a refusal, a
 // failed site and a lost connection from their codes, not in English.
-const INDIRECT_ENGLISH_BASELINE = 34;
+// 36 since 2026-11-11: FS1 live voice — voice-live.tsx's connecting/ended
+// states and chat-workspace.tsx's liveAvailable ternary.
+const INDIRECT_ENGLISH_BASELINE = 36;
 reportBaseline("INDIRECT_ENGLISH_BASELINE", INDIRECT_ENGLISH_BASELINE, indirect.length);
 checkTrue(
   `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,
@@ -854,7 +856,9 @@ const clientFallbacks = sources.flatMap((f) => [
 // not load that. Please try again." and "Something went wrong." — the
 // same documented convention as every increment above, English server
 // replies with the calling component supplying translated wording.
-const SERVER_PROSE_BASELINE = 701;
+// 727 since 2026-11-11: FS1 live voice routes — start/tick/end/sweep each
+// return English error strings (same convention as every increment above).
+const SERVER_PROSE_BASELINE = 727;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

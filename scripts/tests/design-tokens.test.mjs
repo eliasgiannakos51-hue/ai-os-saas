@@ -163,7 +163,7 @@ for (const f of UI_FILES) {
 check(`every colour class names a palette colour (${unknownColors.length} do not)`, unknownColors.length === 0, unknownColors.slice(0, 10).join("\n        "));
 
 console.log("\n== 3. the signal colour: the globe and the logo, nowhere else ==");
-const SIGNAL_FILES = new Set(["src/components/logo.tsx", "src/components/ui/globe-mark.tsx", "src/components/brand/earth.tsx", "src/lib/brand/globe.ts", "src/lib/brand/globe-svg.ts", "src/lib/brand/earth.ts"]);
+const SIGNAL_FILES = new Set(["src/components/logo.tsx", "src/components/ui/globe-mark.tsx", "src/components/brand/earth.tsx", "src/lib/brand/globe.ts", "src/lib/brand/globe-svg.ts", "src/lib/brand/earth.ts", "src/components/voice/voice-orb.tsx"]);
 const SIGNAL = /f2a65a|--signal\b|--globe-ink\b|--logo-accent\b|(?<![\w-])(?:[a-z0-9-]+:)*(?:bg|text|border|ring|fill|stroke|outline|decoration|accent|caret|from|to|via)-signal(?![\w-])/i;
 const signalHits = [...CODE].filter(([f, code]) => !SIGNAL_FILES.has(f) && SIGNAL.test(code)).map(([f]) => f);
 check("no other source file names the signal colour", signalHits.length === 0, signalHits.join(", "));

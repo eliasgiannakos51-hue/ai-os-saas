@@ -28,6 +28,7 @@ import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import { VoicePlayer } from "@/components/voice/voice-player";
 import { VoiceConversation } from "@/components/voice/voice-conversation";
+import { VoiceLive } from "@/components/voice/voice-live";
 import { useVoiceAvailability } from "@/components/voice/voice-availability";
 import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
@@ -323,8 +324,17 @@ export function ChatWorkspace({
    * and minutes left. False draws no Talk button at all — see the button
    * below for why it is not drawn inert any more.
    */
-  const talkAvailable =
+  const loopAvailable =
     voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;
+  /**
+   * THE LIVE CONVERSATION (FS1), where the switch "voice-live" is open to
+   * this account: «Μίλα» opens the globe and one realtime call
+   * (components/voice/voice-live.tsx) instead of the loop. It needs only
+   * the transcription key, so it can be there on a deployment whose
+   * read-aloud key is missing.
+   */
+  const liveAvailable = voiceAvailability.loaded && voiceAvailability.live.available && voiceAvailability.hasMinutes;
+  const talkAvailable = loopAvailable || liveAvailable;
 
   // THE CONVERSATION COLUMN, AND WHETHER IT IS OPEN (owner, 2026-10-17:
   // «Θυμάται αν την άφησα ανοιχτή ή κλειστή»).
@@ -1455,7 +1465,23 @@ export function ChatWorkspace({
           a second one nobody asked for, and every completed turn is
           pushed into the messages above — close it and the exchange is
           still there to read. */}
-      {talking && (
+      {talking && liveAvailable && (
+        <VoiceLive
+          conversationId={activeId}
+          onClose={() => setTalking(false)}
+          onKept={({ turns, conversationId: keptIn }) => {
+            if (keptIn && keptIn !== activeId) setActiveId(keptIn);
+            if (turns.length > 0) {
+              setMessages((m) => [
+                ...m,
+                ...turns.map((turn) => ({ id: nextLocalId(turn.role), role: turn.role, content: turn.text }) as ChatMessage),
+              ]);
+            }
+            refreshCredits();
+          }}
+        />
+      )}
+      {talking && !liveAvailable && (
         <VoiceConversation
           conversationId={activeId}
           onConversationId={(id) => setActiveId(id)}

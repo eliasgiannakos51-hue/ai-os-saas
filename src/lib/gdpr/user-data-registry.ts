@@ -147,6 +147,17 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // MOAT»): the customers, suppliers and partners named in a
   // conversation — behind the switch "business-contact-memory".
   { table: "business_contacts", label: "business_contacts", scope: "user_content" },
+  // voice_live_sessions (FS1, 2026-11-11): one row per live voice call —
+  // ids, times and minutes billed, never audio or words; the words are
+  // chat_messages. Behind the switch "voice-live".
+  {
+    table: "voice_live_sessions",
+    label: "voice_live_sessions",
+    scope: "account",
+    // Server-only table (no policy, no grant): exported by the server,
+    // without the provider's own id for the call.
+    serverExportColumns: ["id", "conversation_id", "started_at", "paid_until", "minutes_billed", "ended_at", "end_reason"],
+  },
   // The Discord connector (agent/discord, 2026-11-07): the servers
   // connected, the plans made for them and the items each plan built —
   // behind the switch "discord-bot".

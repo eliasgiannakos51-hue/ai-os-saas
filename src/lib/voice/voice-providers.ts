@@ -79,7 +79,7 @@ export type SpeakResult =
  * "https://host/v1/" and "https://host/v1" behave the same, which is the
  * shape of every base-URL bug this kind of variable produces.
  */
-function openAiBase(): string {
+export function openAiBase(): string {
   const raw = process.env.OPENAI_BASE_URL;
   if (typeof raw !== "string" || raw.trim() === "") return "https://api.openai.com/v1";
   return raw.trim().replace(/\/+$/, "");

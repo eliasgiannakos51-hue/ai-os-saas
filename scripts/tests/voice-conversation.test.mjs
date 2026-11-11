@@ -78,7 +78,7 @@ console.log("\n== 2. the loop, in its order ==");
   ok("closing stops the microphone and the voice", /function close\(\) \{\s*abandonedRef\.current = true;\s*recorder\.stop\(\);\s*stopSpeaking\(\);/.test(conv));
   ok("the globe is what it shows, and the state is on the page", /<VoiceOrb state=\{state\}/.test(conv) && /data-state=\{state\}/.test(conv) && /import \{ GlobeMark \} from "@\/components\/ui\/globe-mark";/.test(readFileSync("src/components/voice/voice-orb.tsx", "utf8")));
   const chat = read("src/components/chat/chat-workspace.tsx");
-  ok("«Μίλα» is drawn only when both providers are set up and minutes are left", /const talkAvailable =\s*voiceAvailability\.loaded && voiceAvailability\.transcribeAvailable && voiceAvailability\.speakAvailable && voiceAvailability\.hasMinutes;/.test(chat) && /talkAvailable && \(\s*<button/.test(chat));
+  ok("«Μίλα» is drawn when loop OR live is available", /const loopAvailable =\s*\n?\s*voiceAvailability\.loaded && voiceAvailability\.transcribeAvailable && voiceAvailability\.speakAvailable && voiceAvailability\.hasMinutes;/.test(chat) && /const talkAvailable = loopAvailable \|\| liveAvailable;/.test(chat) && /talkAvailable && \(\s*<button/.test(chat));
 }
 
 console.log(failures.length ? `\nFAILURES: ${pass} passed, ${failures.length} failed` : `\nALL PASS: ${pass} passed, 0 failed`);

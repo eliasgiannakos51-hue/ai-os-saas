@@ -6014,7 +6014,9 @@
       "unsupported_type": "Quel formato audio non è supportato.",
       "usage_unavailable": "Non è stato possibile controllare i minuti di voce in questo momento.",
       "streamInterrupted": "La connessione si è interrotta prima della fine della risposta.",
-      "streamInterruptedPartial": "La connessione si è interrotta: la risposta qui sopra potrebbe essere incompleta."
+      "streamInterruptedPartial": "La connessione si è interrotta: la risposta qui sopra potrebbe essere incompleta.",
+      "not_ready": "La conversazione dal vivo non è ancora configurata qui. Non ti è stato addebitato nulla.",
+      "ended": "La conversazione è terminata."
     },
     "permission": {
       "title": "Prima che si apra il microfono",
@@ -6063,6 +6065,18 @@
       "directionNotConfigured": "Non configurato su questa installazione",
       "speakNotConfigured": "La lettura delle risposte non è configurata su questa installazione, quindi i pulsanti Ascolta non compaiono. Parlargli funziona normalmente.",
       "transcribeNotConfigured": "Parlargli non è configurato su questa installazione, quindi i pulsanti del microfono non compaiono. La lettura delle risposte funziona normalmente."
+    },
+    "live": {
+      "price": "{credits, plural, one {# credito} other {# crediti}} al minuto · fino a {minutes, plural, one {# minuto} other {# minuti}} per conversazione",
+      "start": "Inizia a parlare",
+      "connecting": "Connessione…",
+      "ended": "La conversazione è terminata",
+      "endedCap": "Questa conversazione ha raggiunto la durata massima. Tutto ciò che è stato detto è nella Chat come testo; puoi iniziarne un’altra.",
+      "mute": "Disattiva il tuo microfono",
+      "unmute": "Riattiva il tuo microfono",
+      "subtitlesOn": "Mostra i sottotitoli",
+      "subtitlesOff": "Nascondi i sottotitoli",
+      "close": "Termina la conversazione"
     }
   },
   "dataAnalysis": {

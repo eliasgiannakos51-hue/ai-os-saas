@@ -6014,7 +6014,9 @@
       "unsupported_type": "That audio format is not supported.",
       "usage_unavailable": "Voice minutes could not be checked right now.",
       "streamInterrupted": "The connection dropped before the reply finished.",
-      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+      "not_ready": "Live conversation is not set up here yet. You were not charged.",
+      "ended": "The conversation has ended."
     },
     "permission": {
       "title": "Before the microphone opens",
@@ -6063,6 +6065,18 @@
       "directionNotConfigured": "Not set up on this deployment",
       "speakNotConfigured": "Having answers read to you is not set up on this deployment, so the Listen buttons do not appear. Speaking to it works normally.",
       "transcribeNotConfigured": "Speaking to it is not set up on this deployment, so the microphone buttons do not appear. Having answers read to you works normally."
+    },
+    "live": {
+      "price": "{credits, plural, one {# credit} other {# credits}} a minute · up to {minutes, plural, one {# minute} other {# minutes}} a conversation",
+      "start": "Start talking",
+      "connecting": "Connecting…",
+      "ended": "The conversation has ended",
+      "endedCap": "This conversation reached its longest length. Everything said is in Chat as text; you can start another.",
+      "mute": "Mute your microphone",
+      "unmute": "Turn your microphone back on",
+      "subtitlesOn": "Show subtitles",
+      "subtitlesOff": "Hide subtitles",
+      "close": "End the conversation"
     }
   },
   "dataAnalysis": {

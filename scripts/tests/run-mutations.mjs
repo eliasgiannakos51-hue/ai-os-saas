@@ -173,7 +173,9 @@ if (suites.length === 0) {
 // security round onto this line: five new suites (account-suspension,
 // cross-site-writes, entity-links-owner, pwa, share-target). Read off
 // the run.
-const FLOOR = 297;
+// 308 since 2026-11-11: FS1 live voice (+1), FD2 locale-allowed-staleness
+// (+1), and nine more from the prior rounds. Read off the run.
+const FLOOR = 308;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -193,7 +193,9 @@ export const ROUTE_GROUPS: readonly RouteGroup[] = [
     // credits-hint.ts) and reaches `t(key, {...})` with that variable —
     // the same computed-key shape as delivery-picker.tsx's `t()` with a
     // variable key, above.
-    unbounded: 74,
+    // 74 -> 75 on 2026-11-11: achievement-unlock-bridge.tsx's
+    // useTranslations() with no namespace — same shape as above.
+    unbounded: 75,
   },
   {
     name: "onboarding",

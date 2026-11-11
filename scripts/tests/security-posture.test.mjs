@@ -234,6 +234,14 @@ const ADMIN_ONLY_TABLES = new Set([
   "discord_guilds",
   "discord_builds",
   "discord_build_items",
+  // FS1 live voice (20261124000000_voice_live_sessions.sql): billing and
+  // lifecycle record. REVOKE ALL from anon, authenticated is in the
+  // migration; the table has no grants and no policies. Every read and
+  // write goes through createAdminClient() in api/voice/live/start, tick,
+  // end and cron/voice-live-sweep. A client insert could open a session
+  // row without paying; a client update could extend one past its paid
+  // time.
+  "voice_live_sessions",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -620,6 +628,8 @@ const NO_SESSION_BY_DESIGN = {
     "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It collects Anthropic Batch API results for scheduled agent runs and SETTLES the charge for each one, so an unauthenticated call would take money from other people's accounts and deliver their agents' output. It reads no request body: everything it acts on is rows it finds in agent_runs with status 'queued'.",
   "src/app/api/cron/cost-alerts/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED — with no secret configured the route refuses to run on any deployment. It reads aggregates across every account's spend and can send email, so it is in the same class as the other cron routes and not a lighter one.",
+  "src/app/api/cron/voice-live-sweep/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It ENDS live voice calls left open past their paid time — hangs up each stale call, bills the overrun minutes (capped at LIVE_MAX_SESSION_MINUTES), and closes the session row as 'swept'. It reads no request body and takes no parameter: everything it acts on is a voice_live_sessions row with ended_at IS NULL whose paid_until has passed by LIVE_GRACE_SECONDS.",
   "src/app/s/[subdomain]/sitemap.xml/route.ts":
     "the public site's own sitemap, for its owner to submit to Search Console. Same posture as the routes above — admin client, rate limit, subdomain validated before any lookup — and it selects only `pages, status, is_active, updated_at`: the page SLUGS and a timestamp, never html_content, so nothing about a site's contents is reachable here that /s/<subdomain>/<page> does not already serve publicly. A site that is not live is a 404 rather than an empty sitemap, so this cannot be used to learn that a withdrawn address once existed.",
   "src/app/sitemap.ts":

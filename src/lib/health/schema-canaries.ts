@@ -697,4 +697,14 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     migration: "20261123000000_automation_mode.sql",
     breaks: "every automation silently stays \"auto\" — Shadow and Supervised can be set from the PATCH route but never take effect, with no error anywhere",
   },
+  {
+    // FS1 (2026-11-11): api/voice/live/start writes this row after the
+    // first minute is paid and before the answer is handed to the
+    // browser; without the table it refunds nothing it has not taken and
+    // answers «not ready», which from the screen is one sentence.
+    kind: "table",
+    table: "voice_live_sessions",
+    migration: "20261124000000_voice_live_sessions.sql",
+    breaks: "a live voice conversation cannot start for anyone the switch \"voice-live\" is open to — the call is refused before it connects",
+  },
 ];

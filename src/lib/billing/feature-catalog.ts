@@ -449,7 +449,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     minPlan: "starter",
     sidebar: ["/dashboard/voice"],
     pages: ["voice"],
-    routes: ["voice/transcribe", "voice/speak", "voice/usage"],
+    routes: ["voice/transcribe", "voice/speak", "voice/usage", "voice/live/start", "voice/live/tick", "voice/live/end", "cron/voice-live-sweep"],
     charges: true,
     enforcedIn: "src/lib/voice/voice-pricing.ts",
     enforcedSymbol: "voiceMinutesForPlan",

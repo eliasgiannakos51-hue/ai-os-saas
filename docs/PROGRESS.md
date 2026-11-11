@@ -12668,3 +12668,39 @@ check-i18n.js`: 5526 κλειδιά × 9 γλώσσες, 0 αμετάφραστ�
 build:ci` πράσινο. Καμία αλλαγή σχήματος βάσης δεδομένων.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+### 2026-11-11λ — FS1 Φωνητική συνομιλία (Κομμάτια 1+6), έρευνα αγοράς
+
+Πάροχος: OpenAI Realtime `gpt-realtime-2.1-mini` (WebRTC, browser→πάροχος
+απευθείας, ο server δίνει μόνο το SDP offer και χρεώνει). Κόστος βάσης
+$0.06/min (συντηρητικό), ~7-8 credits/min στο Starter margin.
+
+Νέα αρχεία (7 lib, 4 routes, 1 component, 1 migration):
+- `src/lib/voice/live-pricing.ts` — σταθερές, καθαρές συναρτήσεις τιμής
+- `src/lib/voice/live-provider.ts` — openLiveCall/hangupLiveCall
+- `src/lib/voice/live-instructions.ts` — system prompt (ομιλία, όχι γραφή)
+- `src/lib/voice/live-session.ts` — billLiveMinutes/closeLiveSession
+- `src/lib/voice/live-events.ts` — pure event reducer, subtitles, tick
+- `src/components/voice/voice-live.tsx` — πλήρης οθόνη, γη 240px
+- `src/app/api/voice/live/start/route.ts` — auth/switch/plan/open/bill/insert
+- `src/app/api/voice/live/tick/route.ts` — idempotent claim+bill
+- `src/app/api/voice/live/end/route.ts` — hangup/close/transcript
+- `src/app/api/cron/voice-live-sweep/route.ts` — κάθε 5 λεπτά
+- `supabase/migrations/20261124000000_voice_live_sessions.sql` — deny-all
+- `src/lib/seo/image-loading.ts` — enforceImageLoading (δεν συνδέθηκε)
+
+Αλλαγές: flags.ts (+voice-live), voice-orb.tsx (+variant globe, rgb()),
+voice-availability.tsx (+live), chat-workspace.tsx (+VoiceLive), voice-
+providers.ts (export openAiBase), key-inventory.ts (+Realtime), schema-
+canaries.ts (+voice_live_sessions), user-data-registry.ts (+id), vercel.json
+(+sweep cron), feature-catalog.ts (+4 routes), messages/*.json (+12 keys ×10).
+
+Tests: `voice-live.test.mjs` 111/111, `voice-live.mutation.mjs` 32/32.
+
+Έρευνα αγοράς: `docs/market-round-2026-11-11.md` — 7 πηγές, 3 ενότητες
+(μικρές επιχειρήσεις+AI, agents, AI-built sites), 10 ιδέες με πηγή/μέγεθος.
+
+Αριθμοί μετρημένοι 2026-11-11: `npm run gates` → ALL 416 GATES PASSED
+(30709 checks, 555.3s). `npm run build:ci` πράσινο. Πραγματικό κόστος: €0.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261124000000_voice_live_sessions.sql**

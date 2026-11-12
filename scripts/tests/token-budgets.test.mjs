@@ -238,6 +238,12 @@ const CLASSIFIED = {
     "src/app/api/chat/route.ts",
     "src/app/api/records/ask/route.ts",
     "src/app/api/text-actions/route.ts",
+    // Agent tool executor (2026-11-12): the AI text tools (ai_chat,
+    // ai_document, ai_post, ai_translate) and ai_research each call
+    // runCompletion with a maxTokens. The output goes back into the
+    // agent's context, not to a person — a cut reply is one paragraph
+    // shorter in the agent's working memory, and the agent can re-ask.
+    "src/lib/agents/agent-tool-executor.ts",
   ],
 };
 

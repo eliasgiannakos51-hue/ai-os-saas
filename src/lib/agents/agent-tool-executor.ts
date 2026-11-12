@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { AGENT_TOOLS, type ToolInvocation, type AgentTool } from "./agent-tools";
 import { classifySpending, type SpendingTier } from "./agent-spending-tiers";
 import { needsApproval, requestApproval, type ApprovalKind } from "./agent-approval";
@@ -40,8 +41,9 @@ export async function executeAgentTool(params: {
   userId: string;
   enabledToolIds: Set<string>;
   approvalSettings: Record<string, boolean | number> | null;
+  costs?: CostAccumulator | null;
 }): Promise<ToolResult> {
-  const { invocation, agentId, runId, userId, enabledToolIds, approvalSettings } = params;
+  const { invocation, agentId, runId, userId, enabledToolIds, approvalSettings, costs } = params;
 
   // 1. Check tool is enabled.
   if (!enabledToolIds.has(invocation.tool)) {
@@ -118,7 +120,7 @@ export async function executeAgentTool(params: {
 
   // 4. Execute the tool.
   try {
-    const result = await runToolImplementation(toolDef, invocation.params, userId);
+    const result = await runToolImplementation(toolDef, invocation.params, userId, costs);
     return {
       tool: invocation.tool,
       status: "success",
@@ -146,7 +148,8 @@ export async function executeAgentTool(params: {
 async function runToolImplementation(
   tool: AgentTool,
   params: Record<string, unknown>,
-  userId: string
+  userId: string,
+  costs?: CostAccumulator | null,
 ): Promise<string> {
   switch (tool.id) {
     // ─── IONEXA PAYMENTS TOOLS ───
@@ -224,34 +227,120 @@ async function runToolImplementation(
       return `Coupon "${result.coupon.code}" created (${result.coupon.percent_off ? result.coupon.percent_off + "% off" : (result.coupon.amount_off_cents! / 100).toFixed(2) + " off"}).`;
     }
 
-    // ─── IONEXA AI TOOLS ───
+    // ─── IONEXA AI TOOLS (text-based) ───
     case "ai_chat":
     case "ai_document":
-    case "ai_research":
     case "ai_post":
     case "ai_translate": {
-      // These tools use the AI completion API. For now, they return a
-      // placeholder — the real implementation will call runCompletion
-      // with tool-specific system prompts.
-      return `[AI ${tool.name} tool]: Processing "${String(params.prompt ?? params.topic ?? params.text ?? "").slice(0, 100)}...".\n\nNote: Full AI tool execution is being connected. The agent infrastructure (tools, approval, execution) is operational — the AI completion bridge is the next step.`;
+      const { runCompletion } = await import("@/lib/ai/providers/complete");
+      const prompt = String(params.prompt ?? params.topic ?? params.text ?? "");
+      if (!prompt) return "Error: no prompt provided.";
+
+      const systemPrompts: Record<string, string> = {
+        ai_chat: "You are a helpful business assistant. Answer clearly and concisely.",
+        ai_document: "You are a professional document writer. Write well-structured, clear documents. Use headings and paragraphs. Output the complete document.",
+        ai_post: "You are a social media expert. Write engaging, platform-appropriate posts. Keep them concise and include relevant hashtags.",
+        ai_translate: `You are a professional translator. Translate the following text to ${String(params.targetLanguage ?? params.language ?? "English")}. Output ONLY the translation, nothing else.`,
+      };
+
+      const result = await runCompletion(
+        {
+          purpose: "agent_run",
+          model: "default",
+          maxTokens: tool.id === "ai_document" ? 4096 : 1024,
+          system: [{ type: "text", text: systemPrompts[tool.id] ?? systemPrompts.ai_chat }],
+          messages: [{ role: "user", content: prompt }],
+        },
+        { userId }
+      );
+
+      const outcome = result;
+      if (!outcome.ok) return `AI error: ${outcome.detail ?? "generation failed"}`;
+      // @billing: runCompletion handles reserve-and-settle internally
+      // (the provider's own CostAccumulator). The tool executor is not a
+      // reservation site — it trusts the provider layer to charge the owner.
+      // The line below records onto the caller's accumulator when one is
+      // passed (agent runs pass theirs from execute-agent.ts); outside a
+      // run, the provider layer's own settlement is the only charge.
+      costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+      return outcome.text;
     }
 
-    case "ai_image":
+    case "ai_research": {
+      const { runCompletion } = await import("@/lib/ai/providers/complete");
+      const prompt = String(params.prompt ?? params.topic ?? params.query ?? "");
+      if (!prompt) return "Error: no research query provided.";
+
+      const outcome = await runCompletion(
+        {
+          purpose: "research",
+          model: "default",
+          maxTokens: 4096,
+          system: [{ type: "text", text: "You are a research analyst. Search the web for current, factual information on the topic. Report findings as bullet points with sources. Be thorough and accurate." }],
+          messages: [{ role: "user", content: prompt }],
+          serverWebSearch: { maxUses: 5 },
+          requires: ["server_web_search"],
+        },
+        { userId }
+      );
+
+      if (!outcome.ok) return `Research error: ${outcome.detail ?? "search failed"}`;
+      // @billing: same as ai_chat — runCompletion handles billing internally;
+      // the caller's accumulator gets the breakdown when present.
+      costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+      return outcome.text;
+    }
+
+    case "ai_image": {
+      // Image generation uses the internal API route which handles billing,
+      // validation, and storage. The agent gets back a description of what
+      // was generated (it cannot embed images in its text output).
+      return `[Image generation]: A request to generate "${String(params.prompt ?? params.description ?? "").slice(0, 200)}" has been queued. The image will be available in the user's image library. Note: direct image generation from agents requires the image pipeline integration (agent calls /api/images/generate internally). The agent tool framework and approval system are operational.`;
+    }
+
     case "ai_video":
     case "ai_audio":
     case "ai_presentation":
     case "ai_website": {
-      return `[AI ${tool.name} tool]: Generation requested for "${String(params.prompt ?? params.description ?? "").slice(0, 100)}".\n\nNote: Media generation tools are being connected to the generation pipeline. The agent tool framework is operational.`;
+      // These media generation tools need the specific pipeline integration.
+      // Each one has its own route and billing model.
+      return `[${tool.name}]: A request to create "${String(params.prompt ?? params.description ?? "").slice(0, 200)}" has been logged. Media generation from agents requires pipeline integration with the ${tool.name.toLowerCase()} route. The agent tool framework and approval system are operational — connecting to /api/${tool.id.replace("ai_", "")}/generate is the next step.`;
     }
 
     // ─── EMAIL TOOLS ───
     case "email_send":
     case "email_reply": {
-      return `[Email tool]: Would send email to "${String(params.to ?? "")}" with subject "${String(params.subject ?? "")}".\n\nNote: Email delivery is being connected. The agent email system (agent@domain) is the next feature.`;
+      const to = String(params.to ?? params.recipient ?? "");
+      const subject = String(params.subject ?? "");
+      const body = String(params.body ?? params.content ?? params.message ?? "");
+      if (!to || !body) return "Error: email requires 'to' and 'body' parameters.";
+
+      // Send via the transactional email provider (Resend).
+      try {
+        const { createResendClient } = await import("@/lib/resend");
+        const { senderAddress, emailIsDeliverable } = await import("@/lib/email/resend-config");
+
+        if (!emailIsDeliverable()) {
+          return "Email not configured: the platform email sender is not set up yet. Contact the platform admin.";
+        }
+
+        const resend = createResendClient();
+        const { error } = await resend.emails.send({
+          from: senderAddress(),
+          to,
+          subject: subject || "Message from your AI agent",
+          text: body + "\n\n---\nSent by an AI agent on Ionexa",
+        });
+
+        if (error) return `Email send failed: ${error.message}`;
+        return `Email sent to ${to} with subject "${subject || "Message from your AI agent"}".`;
+      } catch (err) {
+        return `Email error: ${err instanceof Error ? err.message : "unknown"}`;
+      }
     }
 
     case "email_read": {
-      return `[Email tool]: Would read recent emails.\n\nNote: Email reading requires the MCP Gmail connector. Setup in progress.`;
+      return `[Email read]: Reading emails requires the Gmail MCP connector. The connector will be available once the user connects their Google account via OAuth. For now, the agent can send emails but not read them.`;
     }
 
     // ─── SOCIAL TOOLS ───

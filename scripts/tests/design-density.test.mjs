@@ -290,7 +290,8 @@ console.log("\n== 2. the lines ==");
 // primary-action rule) added four border-divider utilities, each on the
 // button that was bg-button and is now a bordered outline.
 // 731 -> 733: spending tiers inputs (2 border fields).
-ok(`border utilities (${r.counts.borders}), ceiling 733`, r.counts.borders <= 733);
+// 733 -> 743: coupons + invoices tabs (form inputs and list borders).
+ok(`border utilities (${r.counts.borders}), ceiling 743`, r.counts.borders <= 743);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

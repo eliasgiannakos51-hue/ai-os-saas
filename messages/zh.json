@@ -7241,7 +7241,9 @@
       "productsTab": "产品",
       "transactionsTab": "交易",
       "payoutsTab": "提现",
-      "subscriptionsTab": "订阅"
+      "subscriptionsTab": "订阅",
+      "couponsTab": "优惠券",
+      "invoicesTab": "发票"
     },
     "errors": {
       "notConfigured": "收款功能暂不可用。",
@@ -7284,6 +7286,31 @@
       "platformFees": "平台费用（本月）",
       "topProducts": "收入最高的产品",
       "sales": "笔"
+    },
+    "coupons": {
+      "createTitle": "创建优惠券",
+      "code": "代码",
+      "percentOff": "% 折扣",
+      "once": "一次性",
+      "repeating": "重复",
+      "forever": "永久",
+      "create": "创建",
+      "created": "优惠券已创建",
+      "none": "暂无优惠券",
+      "used": "已使用",
+      "active": "有效",
+      "inactive": "无效"
+    },
+    "invoices": {
+      "createTitle": "发送发票",
+      "customerEmail": "客户邮箱",
+      "description": "描述",
+      "descriptionPlaceholder": "咨询服务",
+      "amount": "金额",
+      "sendInvoice": "发送",
+      "sent": "发票已发送",
+      "none": "暂无发票",
+      "view": "查看"
     }
   }
 }

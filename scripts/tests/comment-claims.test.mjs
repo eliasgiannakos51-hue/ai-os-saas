@@ -350,9 +350,9 @@ console.log("\n== 3. the ratchet, and what it is honestly on ==");
   // 83 -> 84 ON 2026-11-11: Ionexa Payments' LOCALE_ALLOWED entries
   // ("Transactions" and "Description" are the French words too) name the
   // same mechanism.
-  // 86 -> 88 ON 2026-11-12: agent-tool-executor.ts (2 createAdminClient calls
-  // for payments tools) each naming the limitation in the tool function.
-  const CENSUS_CEILING = 88;
+  // 86 -> 87 ON 2026-11-12: agent-tool-executor.ts (1 new createAdminClient
+  // call for payments tools naming the limitation in the tool function).
+  const CENSUS_CEILING = 87;
   const census = withReason.length + withoutReason.length;
   reportBaseline("COMMENT_LIMITATION_CENSUS", CENSUS_CEILING, census);
   ok(`at most ${CENSUS_CEILING} comment blocks carry a limitation phrase`,

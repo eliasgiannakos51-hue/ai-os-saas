@@ -7241,7 +7241,9 @@
       "productsTab": "Produits",
       "transactionsTab": "Transactions",
       "payoutsTab": "Virements",
-      "subscriptionsTab": "Abonnements"
+      "subscriptionsTab": "Abonnements",
+      "couponsTab": "Bons de réduction",
+      "invoicesTab": "Factures"
     },
     "errors": {
       "notConfigured": "Les paiements ne sont pas encore disponibles.",
@@ -7284,6 +7286,31 @@
       "platformFees": "Frais de plateforme (ce mois)",
       "topProducts": "Meilleurs produits par revenus",
       "sales": "ventes"
+    },
+    "coupons": {
+      "createTitle": "Créer un coupon",
+      "code": "Code promo",
+      "percentOff": "% de réduction",
+      "once": "Une fois",
+      "repeating": "Récurrent",
+      "forever": "Permanent",
+      "create": "Créer",
+      "created": "Coupon créé",
+      "none": "Pas encore de coupons",
+      "used": "utilisés",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "invoices": {
+      "createTitle": "Envoyer une facture",
+      "customerEmail": "E-mail du client",
+      "description": "Détails",
+      "descriptionPlaceholder": "Services de conseil",
+      "amount": "Montant",
+      "sendInvoice": "Envoyer",
+      "sent": "Facture envoyée",
+      "none": "Pas encore de factures",
+      "view": "Voir"
     }
   }
 }

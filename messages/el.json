@@ -7241,7 +7241,9 @@
       "productsTab": "Προϊόντα",
       "transactionsTab": "Συναλλαγές",
       "payoutsTab": "Εκταμιεύσεις",
-      "subscriptionsTab": "Συνδρομές"
+      "subscriptionsTab": "Συνδρομές",
+      "couponsTab": "Κουπόνια",
+      "invoicesTab": "Τιμολόγια"
     },
     "errors": {
       "notConfigured": "Οι πληρωμές δεν είναι διαθέσιμες ακόμα.",
@@ -7284,6 +7286,31 @@
       "platformFees": "Τέλη πλατφόρμας (αυτόν τον μήνα)",
       "topProducts": "Κορυφαία προϊόντα κατά έσοδα",
       "sales": "πωλήσεις"
+    },
+    "coupons": {
+      "createTitle": "Δημιουργία κουπονιού",
+      "code": "Κωδικός",
+      "percentOff": "% έκπτωση",
+      "once": "Μία φορά",
+      "repeating": "Επαναλαμβανόμενο",
+      "forever": "Για πάντα",
+      "create": "Δημιουργία",
+      "created": "Το κουπόνι δημιουργήθηκε",
+      "none": "Δεν υπάρχουν κουπόνια",
+      "used": "χρήσεις",
+      "active": "Ενεργό",
+      "inactive": "Ανενεργό"
+    },
+    "invoices": {
+      "createTitle": "Αποστολή τιμολογίου",
+      "customerEmail": "Email πελάτη",
+      "description": "Περιγραφή",
+      "descriptionPlaceholder": "Υπηρεσίες συμβουλευτικής",
+      "amount": "Ποσό",
+      "sendInvoice": "Αποστολή",
+      "sent": "Το τιμολόγιο στάλθηκε",
+      "none": "Δεν υπάρχουν τιμολόγια",
+      "view": "Προβολή"
     }
   }
 }

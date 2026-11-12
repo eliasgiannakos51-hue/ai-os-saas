@@ -187,6 +187,7 @@ const FAILOVER_NAMES = {
   "src/lib/rebuild/rebuild-call.ts": "το «Ξαναχτίσε»",
   "src/lib/discord/ask.ts": "το /ionexa ask στο Discord",
   "src/lib/discord/planner.ts": "το σχέδιο για τον server στο Discord",
+  "src/lib/agents/agent-tool-executor.ts": "οι βοηθοί",
 };
 const callers = [];
 (function walkSrc(dir) {

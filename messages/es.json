@@ -7241,7 +7241,9 @@
       "productsTab": "Productos",
       "transactionsTab": "Transacciones",
       "payoutsTab": "Retiros",
-      "subscriptionsTab": "Suscripciones"
+      "subscriptionsTab": "Suscripciones",
+      "couponsTab": "Cupones",
+      "invoicesTab": "Facturas"
     },
     "errors": {
       "notConfigured": "Los pagos no están disponibles aún.",
@@ -7284,6 +7286,31 @@
       "platformFees": "Comisiones (este mes)",
       "topProducts": "Productos principales por ingresos",
       "sales": "ventas"
+    },
+    "coupons": {
+      "createTitle": "Crear cupón",
+      "code": "Código",
+      "percentOff": "% descuento",
+      "once": "Una vez",
+      "repeating": "Recurrente",
+      "forever": "Siempre",
+      "create": "Crear",
+      "created": "Cupón creado",
+      "none": "Aún no hay cupones",
+      "used": "usados",
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "invoices": {
+      "createTitle": "Enviar factura",
+      "customerEmail": "Email del cliente",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Servicios de consultoría",
+      "amount": "Monto",
+      "sendInvoice": "Enviar",
+      "sent": "Factura enviada",
+      "none": "Aún no hay facturas",
+      "view": "Ver"
     }
   }
 }

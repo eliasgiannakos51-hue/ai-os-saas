@@ -7241,7 +7241,9 @@
       "productsTab": "Produtos",
       "transactionsTab": "Transações",
       "payoutsTab": "Levantamentos",
-      "subscriptionsTab": "Assinaturas"
+      "subscriptionsTab": "Assinaturas",
+      "couponsTab": "Cupons",
+      "invoicesTab": "Faturas"
     },
     "errors": {
       "notConfigured": "Os pagamentos ainda não estão disponíveis.",
@@ -7284,6 +7286,31 @@
       "platformFees": "Taxas da plataforma (este mês)",
       "topProducts": "Principais produtos por receita",
       "sales": "vendas"
+    },
+    "coupons": {
+      "createTitle": "Criar cupom",
+      "code": "Código",
+      "percentOff": "% de desconto",
+      "once": "Uma vez",
+      "repeating": "Recorrente",
+      "forever": "Permanente",
+      "create": "Criar",
+      "created": "Cupom criado",
+      "none": "Nenhum cupom ainda",
+      "used": "usados",
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "invoices": {
+      "createTitle": "Enviar fatura",
+      "customerEmail": "Email do cliente",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Serviços de consultoria",
+      "amount": "Valor",
+      "sendInvoice": "Enviar",
+      "sent": "Fatura enviada",
+      "none": "Nenhuma fatura ainda",
+      "view": "Ver"
     }
   }
 }

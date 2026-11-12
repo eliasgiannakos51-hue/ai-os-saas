@@ -7241,7 +7241,9 @@
       "productsTab": "Products",
       "transactionsTab": "Transactions",
       "payoutsTab": "Payouts",
-      "subscriptionsTab": "Subscriptions"
+      "subscriptionsTab": "Subscriptions",
+      "couponsTab": "Coupons",
+      "invoicesTab": "Invoices"
     },
     "errors": {
       "notConfigured": "Payments are not available yet.",
@@ -7284,6 +7286,31 @@
       "platformFees": "Platform fees (this month)",
       "topProducts": "Top products by revenue",
       "sales": "sales"
+    },
+    "coupons": {
+      "createTitle": "Create coupon",
+      "code": "Code",
+      "percentOff": "% off",
+      "once": "Once",
+      "repeating": "Repeating",
+      "forever": "Forever",
+      "create": "Create",
+      "created": "Coupon created",
+      "none": "No coupons yet",
+      "used": "used",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "invoices": {
+      "createTitle": "Send invoice",
+      "customerEmail": "Customer email",
+      "description": "Description",
+      "descriptionPlaceholder": "Consulting services",
+      "amount": "Amount",
+      "sendInvoice": "Send",
+      "sent": "Invoice sent",
+      "none": "No invoices yet",
+      "view": "View"
     }
   }
 }

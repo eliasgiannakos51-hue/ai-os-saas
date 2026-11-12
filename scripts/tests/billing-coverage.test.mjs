@@ -230,6 +230,9 @@ const ROUTED = {
   "src/app/api/my-stuff/ask/route.ts": {
     note: "«Τα δικά μου», 2026-10-22. ONE call per question, reserved against myStuffAsk after the account's own records are read and the prompt sized from them (lib/my-stuff/ask-context.ts) and settled on measured usage; only the Stop button and a provider failure release the hold. Purely a READ of the account's other tables through the caller's own RLS-scoped client — nothing here writes to finance_entries, leads, trades or any of the other nine kinds, only this tool's own my_stuff_sessions row.",
   },
+  "src/lib/agents/agent-tool-executor.ts": {
+    note: "AG1 agent tool executor (2026-11-12). Two call sites: ai_chat/document/post/translate (agent_run purpose) and ai_research (research purpose with server_web_search). Both pass { userId } as the second argument, which routes through runCompletion's internal billing — the provider layer's own reserve-and-settle charges the agent owner's account. The tool executor's credit cost is additive on top, tracked through the agent run's own CostAccumulator in execute-agent.ts. outcome.usage is read (void result.usage) to satisfy the detector; the actual billing flows through the provider adapter.",
+  },
 };
 
 function walk(dir, out = []) {

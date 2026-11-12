@@ -7241,7 +7241,9 @@
       "productsTab": "Produkte",
       "transactionsTab": "Transaktionen",
       "payoutsTab": "Auszahlungen",
-      "subscriptionsTab": "Abonnements"
+      "subscriptionsTab": "Abonnements",
+      "couponsTab": "Gutscheine",
+      "invoicesTab": "Rechnungen"
     },
     "errors": {
       "notConfigured": "Zahlungen sind noch nicht verfügbar.",
@@ -7284,6 +7286,31 @@
       "platformFees": "Plattformgebühren (diesen Monat)",
       "topProducts": "Top-Produkte nach Umsatz",
       "sales": "Verkäufe"
+    },
+    "coupons": {
+      "createTitle": "Gutschein erstellen",
+      "code": "Gutscheincode",
+      "percentOff": "% Rabatt",
+      "once": "Einmalig",
+      "repeating": "Wiederkehrend",
+      "forever": "Dauerhaft",
+      "create": "Erstellen",
+      "created": "Gutschein erstellt",
+      "none": "Noch keine Gutscheine",
+      "used": "verwendet",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "invoices": {
+      "createTitle": "Rechnung senden",
+      "customerEmail": "Kunden-E-Mail",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Beratungsleistungen",
+      "amount": "Betrag",
+      "sendInvoice": "Senden",
+      "sent": "Rechnung gesendet",
+      "none": "Noch keine Rechnungen",
+      "view": "Ansehen"
     }
   }
 }

@@ -7269,7 +7269,9 @@
       "productsTab": "المنتجات",
       "transactionsTab": "المعاملات",
       "payoutsTab": "السحب",
-      "subscriptionsTab": "الاشتراكات"
+      "subscriptionsTab": "الاشتراكات",
+      "couponsTab": "كوبونات",
+      "invoicesTab": "فواتير"
     },
     "errors": {
       "notConfigured": "المدفوعات غير متاحة بعد.",
@@ -7312,6 +7314,31 @@
       "platformFees": "رسوم المنصة (هذا الشهر)",
       "topProducts": "أفضل المنتجات حسب الإيرادات",
       "sales": "مبيعات"
+    },
+    "coupons": {
+      "createTitle": "إنشاء كوبون",
+      "code": "الرمز",
+      "percentOff": "% خصم",
+      "once": "مرة واحدة",
+      "repeating": "متكرر",
+      "forever": "دائم",
+      "create": "إنشاء",
+      "created": "تم إنشاء الكوبون",
+      "none": "لا توجد كوبونات بعد",
+      "used": "مستخدم",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "invoices": {
+      "createTitle": "إرسال فاتورة",
+      "customerEmail": "بريد العميل",
+      "description": "الوصف",
+      "descriptionPlaceholder": "خدمات استشارية",
+      "amount": "المبلغ",
+      "sendInvoice": "إرسال",
+      "sent": "تم إرسال الفاتورة",
+      "none": "لا توجد فواتير بعد",
+      "view": "عرض"
     }
   }
 }

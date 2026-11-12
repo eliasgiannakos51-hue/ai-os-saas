@@ -71,7 +71,7 @@ type BalanceData = {
   payouts: Payout[];
 };
 
-type Tab = "overview" | "products" | "subscriptions" | "transactions" | "payouts";
+type Tab = "overview" | "products" | "subscriptions" | "coupons" | "invoices" | "transactions" | "payouts";
 
 function formatCurrency(cents: number, currency = "eur", locale?: string): string {
   return new Intl.NumberFormat(locale, {
@@ -147,6 +147,18 @@ export function PaymentsDashboard() {
   const [subsMetrics, setSubsMetrics] = useState<{ activeCount: number; churnedThisMonth: number }>({ activeCount: 0, churnedThisMonth: 0 });
   const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
 
+  // — Coupons state —
+  type Coupon = { id: string; code: string; percent_off: number | null; amount_off_cents: number | null; currency: string; duration: string; is_active: boolean; times_redeemed: number; max_redemptions: number | null; created_at: string };
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponForm, setCouponForm] = useState({ code: "", percentOff: "", duration: "once" as "once" | "repeating" | "forever" });
+  const [creatingCoupon, setCreatingCoupon] = useState(false);
+
+  // — Invoices state —
+  type Invoice = { id: string; number: string | null; customer_email: string | null; amount_due: number; currency: string; status: string; due_date: number | null; hosted_invoice_url: string | null; created: number };
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoiceForm, setInvoiceForm] = useState({ customerEmail: "", description: "", amountCents: "" });
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+
   // — Copied link state —
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -173,6 +185,20 @@ export function PaymentsDashboard() {
     try {
       const res = await fetch("/api/payments/balance");
       if (res.ok) setBalanceData(await res.json());
+    } catch { /* silent */ }
+  }, []);
+
+  const loadCoupons = useCallback(async () => {
+    try {
+      const res = await fetch("/api/payments/coupons");
+      if (res.ok) { const data = await res.json(); setCoupons(data.coupons ?? []); }
+    } catch { /* silent */ }
+  }, []);
+
+  const loadInvoices = useCallback(async () => {
+    try {
+      const res = await fetch("/api/payments/invoices");
+      if (res.ok) { const data = await res.json(); setInvoices(data.invoices ?? []); }
     } catch { /* silent */ }
   }, []);
 
@@ -207,9 +233,11 @@ export function PaymentsDashboard() {
       loadProducts();
       loadBalance();
       loadSubscriptions();
+      loadCoupons();
+      loadInvoices();
       loadAnalytics();
     }
-  }, [account?.connected, loadProducts, loadBalance, loadSubscriptions, loadAnalytics]);
+  }, [account?.connected, loadProducts, loadBalance, loadSubscriptions, loadCoupons, loadInvoices, loadAnalytics]);
 
   // — Handlers —
   async function handleConnect() {
@@ -388,6 +416,8 @@ export function PaymentsDashboard() {
     { key: "overview", label: t("dashboard.overview") },
     { key: "products", label: t("dashboard.productsTab") },
     { key: "subscriptions", label: t("dashboard.subscriptionsTab") },
+    { key: "coupons", label: t("dashboard.couponsTab") },
+    { key: "invoices", label: t("dashboard.invoicesTab") },
     { key: "transactions", label: t("dashboard.transactionsTab") },
     { key: "payouts", label: t("dashboard.payoutsTab") },
   ];
@@ -927,6 +957,194 @@ export function PaymentsDashboard() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Coupons tab */}
+        {tab === "coupons" && (
+          <div className="space-y-4">
+            {/* Create coupon form */}
+            <div className="rounded-card border border-divider bg-panel p-5">
+              <p className="mb-3 text-xs font-medium text-foreground">{t("coupons.createTitle")}</p>
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="flex-1">
+                  <span className="text-xs text-muted">{t("coupons.code")}</span>
+                  <input
+                    type="text"
+                    placeholder="SUMMER25"
+                    value={couponForm.code}
+                    onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })}
+                    className="mt-1 h-8 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                  />
+                </label>
+                <label className="w-24">
+                  <span className="text-xs text-muted">{t("coupons.percentOff")}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    placeholder="25"
+                    value={couponForm.percentOff}
+                    onChange={(e) => setCouponForm({ ...couponForm, percentOff: e.target.value })}
+                    className="mt-1 h-8 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                  />
+                </label>
+                <select
+                  value={couponForm.duration}
+                  onChange={(e) => setCouponForm({ ...couponForm, duration: e.target.value as "once" | "repeating" | "forever" })}
+                  className="h-8 rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                >
+                  <option value="once">{t("coupons.once")}</option>
+                  <option value="repeating">{t("coupons.repeating")}</option>
+                  <option value="forever">{t("coupons.forever")}</option>
+                </select>
+                <button
+                  disabled={creatingCoupon || !couponForm.code || !couponForm.percentOff}
+                  onClick={async () => {
+                    setCreatingCoupon(true);
+                    try {
+                      const res = await fetch("/api/payments/coupons", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ code: couponForm.code, percentOff: Number(couponForm.percentOff), duration: couponForm.duration }),
+                      });
+                      if (res.ok) {
+                        addToast(t("coupons.created"), "success");
+                        setCouponForm({ code: "", percentOff: "", duration: "once" });
+                        loadCoupons();
+                      }
+                    } catch { /* silent */ }
+                    setCreatingCoupon(false);
+                  }}
+                  className="h-8 rounded-item bg-foreground px-4 text-xs font-medium text-background"
+                >
+                  {creatingCoupon ? "…" : t("coupons.create")}
+                </button>
+              </div>
+            </div>
+            {/* Coupon list */}
+            {coupons.length === 0 && (
+              <p className="text-center text-xs text-muted">{t("coupons.none")}</p>
+            )}
+            {coupons.map((c) => (
+              <div key={c.id} className="flex items-center justify-between rounded-item border border-divider bg-panel px-4 py-3">
+                <div>
+                  <span className="font-mono text-sm font-semibold text-foreground">{c.code}</span>
+                  <span className="ms-2 text-xs text-muted">
+                    {c.percent_off ? `${c.percent_off}% off` : c.amount_off_cents ? `${(c.amount_off_cents / 100).toFixed(2)} off` : ""}
+                    {" · "}{c.duration}
+                    {c.max_redemptions ? ` · max ${c.max_redemptions}` : ""}
+                    {" · "}{c.times_redeemed} {t("coupons.used")}
+                  </span>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${c.is_active ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}>
+                  {c.is_active ? t("coupons.active") : t("coupons.inactive")}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Invoices tab */}
+        {tab === "invoices" && (
+          <div className="space-y-4">
+            {/* Create invoice form */}
+            <div className="rounded-card border border-divider bg-panel p-5">
+              <p className="mb-3 text-xs font-medium text-foreground">{t("invoices.createTitle")}</p>
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="flex-1">
+                  <span className="text-xs text-muted">{t("invoices.customerEmail")}</span>
+                  <input
+                    type="email"
+                    placeholder="customer@example.com"
+                    value={invoiceForm.customerEmail}
+                    onChange={(e) => setInvoiceForm({ ...invoiceForm, customerEmail: e.target.value })}
+                    className="mt-1 h-8 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                  />
+                </label>
+                <label className="flex-1">
+                  <span className="text-xs text-muted">{t("invoices.description")}</span>
+                  <input
+                    type="text"
+                    placeholder={t("invoices.descriptionPlaceholder")}
+                    value={invoiceForm.description}
+                    onChange={(e) => setInvoiceForm({ ...invoiceForm, description: e.target.value })}
+                    className="mt-1 h-8 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                  />
+                </label>
+                <label className="w-28">
+                  <span className="text-xs text-muted">{t("invoices.amount")}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step={0.01}
+                    placeholder="100.00"
+                    value={invoiceForm.amountCents}
+                    onChange={(e) => setInvoiceForm({ ...invoiceForm, amountCents: e.target.value })}
+                    className="mt-1 h-8 w-full rounded-item border border-border bg-input px-2 text-xs text-foreground"
+                  />
+                </label>
+                <button
+                  disabled={creatingInvoice || !invoiceForm.customerEmail || !invoiceForm.amountCents}
+                  onClick={async () => {
+                    setCreatingInvoice(true);
+                    try {
+                      const res = await fetch("/api/payments/invoices", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          customerEmail: invoiceForm.customerEmail,
+                          items: [{ description: invoiceForm.description || "Service", amountCents: Math.round(Number(invoiceForm.amountCents) * 100) }],
+                        }),
+                      });
+                      if (res.ok) {
+                        addToast(t("invoices.sent"), "success");
+                        setInvoiceForm({ customerEmail: "", description: "", amountCents: "" });
+                        loadInvoices();
+                      }
+                    } catch { /* silent */ }
+                    setCreatingInvoice(false);
+                  }}
+                  className="h-8 rounded-item bg-foreground px-4 text-xs font-medium text-background"
+                >
+                  {creatingInvoice ? "…" : t("invoices.sendInvoice")}
+                </button>
+              </div>
+            </div>
+            {/* Invoice list */}
+            {invoices.length === 0 && (
+              <p className="text-center text-xs text-muted">{t("invoices.none")}</p>
+            )}
+            {invoices.map((inv) => (
+              <div key={inv.id} className="flex items-center justify-between rounded-item border border-divider bg-panel px-4 py-3">
+                <div>
+                  <span className="text-sm font-medium text-foreground">{inv.number ?? inv.id.slice(0, 8)}</span>
+                  <span className="ms-2 text-xs text-muted">
+                    {inv.customer_email ?? "—"} · {(inv.amount_due / 100).toFixed(2)} {inv.currency.toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${
+                    inv.status === "paid" ? "bg-success/10 text-success" :
+                    inv.status === "open" ? "bg-workspace text-foreground" :
+                    inv.status === "void" ? "bg-danger/10 text-danger" :
+                    "bg-workspace text-muted"
+                  }`}>
+                    {inv.status}
+                  </span>
+                  {inv.hosted_invoice_url && (
+                    <a
+                      href={inv.hosted_invoice_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-foreground hover:underline"
+                    >
+                      {t("invoices.view")}
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

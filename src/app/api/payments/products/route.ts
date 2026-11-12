@@ -13,6 +13,8 @@ import {
   MAX_PRICE_CENTS,
 } from "@/lib/payments/products";
 
+
+export const dynamic = "force-dynamic";
 /**
  * GET  /api/payments/products — list the user's products.
  * POST /api/payments/products — create a new product.

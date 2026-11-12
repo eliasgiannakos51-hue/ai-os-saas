@@ -6,6 +6,8 @@ import { logApiError } from "@/lib/log-error";
 import { getPaymentsAccount } from "@/lib/payments/connect";
 import { getBalance, listTransactions, listPayouts } from "@/lib/payments/balance";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/payments/balance — the user's payment balance, recent
  * transactions and payouts, all in one call (the page loads once).

@@ -10,6 +10,8 @@ import {
   subscriptionMetrics,
 } from "@/lib/payments/subscriptions";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET    /api/payments/subscriptions         — list all subscriptions.
  * DELETE /api/payments/subscriptions?id=X    — cancel a subscription.

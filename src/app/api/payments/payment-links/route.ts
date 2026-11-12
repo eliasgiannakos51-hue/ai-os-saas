@@ -8,6 +8,8 @@ import { getProduct } from "@/lib/payments/products";
 import { createPaymentLink, generateBuyButtonSnippet } from "@/lib/payments/payment-links";
 import { getSiteUrl } from "@/lib/site-url";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/payments/payment-links — create a Stripe Payment Link + buy button for a product.
  */

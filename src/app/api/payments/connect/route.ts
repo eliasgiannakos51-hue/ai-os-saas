@@ -10,6 +10,8 @@ import {
   refreshPaymentsAccount,
 } from "@/lib/payments/connect";
 
+
+export const dynamic = "force-dynamic";
 /**
  * POST /api/payments/connect — start or resume Stripe Connect onboarding.
  * GET  /api/payments/connect — read the account status (+ refresh from Stripe).

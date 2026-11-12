@@ -8,6 +8,8 @@ import { getPaymentsAccount } from "@/lib/payments/connect";
 import { getProduct } from "@/lib/payments/products";
 import { createPaymentCheckout } from "@/lib/payments/checkout";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/payments/checkout — create a checkout session for a product.
  *

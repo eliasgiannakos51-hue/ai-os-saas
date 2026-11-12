@@ -6,6 +6,8 @@ import { logApiError } from "@/lib/log-error";
 import { getPaymentsAccount } from "@/lib/payments/connect";
 import { createInvoice, listInvoices } from "@/lib/payments/invoices";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET  /api/payments/invoices — list recent invoices.
  * POST /api/payments/invoices — create and send an invoice.

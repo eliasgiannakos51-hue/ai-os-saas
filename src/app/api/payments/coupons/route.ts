@@ -6,6 +6,8 @@ import { logApiError } from "@/lib/log-error";
 import { getPaymentsAccount } from "@/lib/payments/connect";
 import { listCoupons, createCoupon, deactivateCoupon } from "@/lib/payments/coupons";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET    /api/payments/coupons       — list the user's coupons.
  * POST   /api/payments/coupons       — create a new coupon.

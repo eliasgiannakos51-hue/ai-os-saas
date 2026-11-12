@@ -5,6 +5,8 @@ import { isFeatureOn } from "@/lib/flags/flags";
 import { logApiError } from "@/lib/log-error";
 import { getPaymentsAnalytics } from "@/lib/payments/analytics";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/payments/analytics — full business metrics for the dashboard.
  */

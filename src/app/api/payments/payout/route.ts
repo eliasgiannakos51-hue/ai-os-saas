@@ -7,6 +7,8 @@ import { logApiError } from "@/lib/log-error";
 import { getPaymentsAccount } from "@/lib/payments/connect";
 import { requestPayout } from "@/lib/payments/balance";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/payments/payout — request a payout (cashout) to the user's bank.
  *

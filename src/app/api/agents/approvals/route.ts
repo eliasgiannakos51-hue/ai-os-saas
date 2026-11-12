@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { listPendingApprovals, decideApproval } from "@/lib/agents/agent-approval";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET  /api/agents/approvals — list pending approvals for the user.
  * POST /api/agents/approvals — approve or deny a pending approval.

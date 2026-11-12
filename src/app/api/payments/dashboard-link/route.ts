@@ -5,6 +5,8 @@ import { isFeatureOn } from "@/lib/flags/flags";
 import { logApiError } from "@/lib/log-error";
 import { getPaymentsAccount, createDashboardLink } from "@/lib/payments/connect";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/payments/dashboard-link — get a one-time Stripe Express
  * dashboard link so the user can see their full Stripe dashboard.

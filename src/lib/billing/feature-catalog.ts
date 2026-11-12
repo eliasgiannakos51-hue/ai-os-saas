@@ -595,6 +595,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
       "agents/templates/adopt",
       "agents/templates/share",
       "agents/approvals",
+      "agents/tools",
       "cron/agent-runs",
       "cron/agent-batches",
       "cron/scheduled-runs",

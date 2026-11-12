@@ -17,6 +17,10 @@
 // `npm audit` reported against 14.2.35 (and it carries the postcss fix).
 // react and react-dom go with it, because Next 16 needs React 19.
 //
+// The floor moved from 16.3.0 to 16.4.1 on 2026-11-07: `npm audit` against
+// 16.3.8 reported three advisories (two critical, one high) on
+// `>=16.0.0 <=16.4.0`, so 16.4.1 is the first version outside that range.
+//
 // image-size and source-map-js joined on 2026-10-08 (ΑΣ-8.1, measured
 // that day with `npm audit --omit=dev`: three high, through pptxgenjs and
 // through next's postcss). source-map-js took its fix inside the range
@@ -47,7 +51,7 @@ function ok(name, cond, detail) {
 const FLOORS = {
   sharp: "0.35.4",
   nanoid: "3.3.18",
-  next: "16.3.0",
+  next: "16.4.1",
   react: "19.0.0",
   "react-dom": "19.0.0",
   "image-size": "2.0.3",

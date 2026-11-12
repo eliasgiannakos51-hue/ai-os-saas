@@ -6729,3 +6729,17 @@ https://github.com/eliasgiannakos51-hue/ai-os-saas/pull/244 (branch
 **Δοκιμές.** `node scripts/tests/all-tools.test.mjs` (146 έλεγχοι, 0 αποτυχίες)· `node scripts/tests/all-tools.mutation.mjs` (28/28)· `node scripts/tests/sidebar-and-tooltips.test.mjs` (48 έλεγχοι, 0 αποτυχίες)· `node scripts/tests/sidebar-groups.mutation.mjs` (12/12)· `node scripts/tests/sidebar-structure.mutation.mjs` (27/27)· `node scripts/tests/all-tools-final-grid.prodtest.mjs` με πραγματικό build — **84 passed, 0 failed**, desktop/el, desktop/en, phone/el, phone/en, με στιγμιότυπα. `npx tsc --noEmit` καθαρό. `npm run gates` ξανατρέχει στο τέλος αυτού του γύρου.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
+### 2026-11-07η — Αναβάθμιση Next.js 16.3.8 → 16.4.5 (κρίσιμα security advisories)
+
+**Γιατί.** `npm audit` πάνω στο lockfile του main (μετρήθηκε 2026-11-07) έδειχνε για το Next τρία advisories στο εύρος `>=16.0.0 <=16.4.0`: GHSA-2464-fhr4-w9xw (critical, RCE στο Image Optimization API με SVG), GHSA-673q-mjm6-r5xr (critical, RCE σε `use cache` με typed arrays), GHSA-p3m5-59mp-jv5r (high, DoS σε Server Actions).
+
+**Τι έγινε.**
+- `package.json`: `next` `^16.3.8` → `^16.4.5`. `package-lock.json`: το Next και τα `@next/*` πήγαν 16.3.8 → 16.4.5.
+- `scripts/tests/dependency-floors.test.mjs`: το κατώφλι του `next` ανέβηκε από 16.3.0 σε 16.4.1 (η πρώτη έκδοση έξω από το εύρος των advisories, όπως τα αναφέρει το `npm audit`). `dependency-floors.mutation.mjs`: τα anchors δείχνουν πλέον τις νέες εκδόσεις.
+
+**Μέτρηση πριν και μετά** (`npm audit`, 2026-11-07): critical 1 → 0, high 5 → 5, moderate 7 → 7. Τα 5 high που μένουν είναι `eslint-config-next` (άμεση εξάρτηση, dev) και τα transitive `@next/eslint-plugin-next`, `brace-expansion`, `glob`, `js-yaml` — δεν έχουν αγγιχτεί σε αυτό το PR.
+
+**Έλεγχοι.** `npx tsc --noEmit` καθαρό· `npm run build:ci` πέρασε· `dependency-floors.mutation.mjs` 9 από 9 caught. `npm run gates`: 379 από 379 πέρασαν (2026-11-07, τοπικά, μία φορά· η πρώτη εκτέλεση έπεσε στο `mutation-suite-shape` γιατί τα anchors του `dependency-floors.mutation.mjs` έδειχναν την παλιά έκδοση — διορθώθηκε σε αυτό το commit).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

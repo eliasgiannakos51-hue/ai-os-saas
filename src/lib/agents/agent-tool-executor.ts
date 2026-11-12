@@ -292,19 +292,114 @@ async function runToolImplementation(
     }
 
     case "ai_image": {
-      // Image generation uses the internal API route which handles billing,
-      // validation, and storage. The agent gets back a description of what
-      // was generated (it cannot embed images in its text output).
-      return `[Image generation]: A request to generate "${String(params.prompt ?? params.description ?? "").slice(0, 200)}" has been queued. The image will be available in the user's image library. Note: direct image generation from agents requires the image pipeline integration (agent calls /api/images/generate internally). The agent tool framework and approval system are operational.`;
+      // Calls the real Gemini image generation pipeline. The agent gets
+      // back confirmation + the image ID; the image is stored in the
+      // user's library exactly as if they had used the Image tool.
+      const prompt = String(params.prompt ?? params.description ?? "");
+      if (!prompt) return "Error: no image prompt provided.";
+      try {
+        const { callImage, imageApiKey, IMAGE_CALL_TIMEOUT_MS } = await import("@/lib/images/gemini-image");
+        const { IMAGE_PREVIEW_MODEL } = await import("@/lib/images/image-pricing");
+        const { imagePath, readAspect, variantPrompt } = await import("@/lib/images/image-studio");
+        const { storePicture } = await import("@/lib/images/image-access");
+        const apiKey = imageApiKey();
+        if (!apiKey) return "Error: image generation is not configured (no API key).";
+        const aspect = readAspect(params.aspect);
+        const outcome = await callImage({ apiKey, model: IMAGE_PREVIEW_MODEL, prompt: variantPrompt(prompt, 0), aspect });
+        if (!outcome.ok) return `Image generation ${outcome.kind === "refused" ? "was declined by the provider's safety rules" : "failed"}: ${outcome.detail ?? outcome.kind}`;
+        const id = crypto.randomUUID();
+        const path = imagePath(userId, id, "v0", outcome.mime);
+        const stored = await storePicture(path, outcome.data, outcome.mime);
+        if (!stored) return "Image was generated but could not be saved to storage.";
+        // Write the row so it appears in the user's image library
+        // (same shape the /api/images/generate route uses).
+        const admin = createAdminClient();
+        await admin.from("generated_images").insert({
+          id, user_id: userId, prompt: prompt.slice(0, 500),
+          aspect, variants: [{ index: 0, path, mime: outcome.mime, fullPath: null, previous: [] }],
+          status: "done", credits_charged: 0,
+        });
+        return `Image generated successfully (ID: ${id}). It is now in the user's image library with description: "${prompt.slice(0, 100)}".`;
+      } catch (err) {
+        return `Image generation error: ${err instanceof Error ? err.message : "unknown"}`;
+      }
+    }
+
+    case "ai_presentation": {
+      // Calls the real presentation generation pipeline.
+      const description = String(params.prompt ?? params.description ?? params.topic ?? "");
+      if (!description) return "Error: no presentation topic provided.";
+      try {
+        const { generateDeck } = await import("@/lib/presentations/generate");
+        const slideCount = Number(params.slideCount ?? params.slides ?? 8);
+        const costsAcc = costs ?? new CostAccumulator();
+        const result = await generateDeck({
+          description,
+          slideCount: Math.min(Math.max(slideCount, 3), 20),
+          locale: String(params.locale ?? "en"),
+          imageSource: "none",
+          costs: costsAcc,
+          userId,
+        });
+        if (!result.ok) return `Presentation generation failed: ${result.detail ?? result.kind}`;
+        // Store the deck for the user (same table the route uses).
+        const admin = createAdminClient();
+        const { data: row } = await admin.from("ai_presentations").insert({
+          user_id: userId,
+          title: result.deck.title,
+          description: description.slice(0, 500),
+          slide_count: result.deck.slides.length,
+          status: "draft",
+          slides: result.deck,
+          locale: String(params.locale ?? "en"),
+          source: "agent",
+        }).select("id").single();
+        return `Presentation "${result.deck.title}" created${row ? ` (ID: ${row.id})` : ""} with ${result.deck.slides.length} slides. Saved to the user's presentations.`;
+      } catch (err) {
+        return `Presentation error: ${err instanceof Error ? err.message : "unknown"}`;
+      }
+    }
+
+    case "ai_website": {
+      // Calls the real website generation pipeline.
+      const description = String(params.prompt ?? params.description ?? "");
+      if (!description) return "Error: no website description provided.";
+      try {
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) return "Error: website generation is not configured (no ANTHROPIC_API_KEY).";
+        const { generateWebsiteHtml, classifyWebsiteDescription } = await import("@/lib/website-builder");
+        const { websiteNameFrom } = await import("@/lib/website-name");
+        const costsAcc = costs ?? new CostAccumulator();
+        const classification = await classifyWebsiteDescription(apiKey, description, costsAcc);
+        if (!classification.isWebsiteRequest) return `The description was not recognized as a website request: ${("message" in classification ? classification.message : "unclear description")}`;
+        const name = websiteNameFrom(description);
+        const admin = createAdminClient();
+        const { data: row } = await admin.from("user_websites").insert({
+          user_id: userId, name, description: description.slice(0, 1000),
+          status: "generating",
+        }).select("id").single();
+        if (!row) return "Error: could not create website record.";
+        const html = await generateWebsiteHtml(apiKey, description, /* referenceImages */ undefined, /* onDelta */ undefined, /* formEndpointUrl */ undefined, costsAcc);
+        if (!html) {
+          await admin.from("user_websites").update({ status: "failed" }).eq("id", row.id);
+          return "Website generation failed: no HTML produced.";
+        }
+        await admin.from("user_websites").update({
+          html, status: "ready",
+        }).eq("id", row.id);
+        return `Website "${name}" created (ID: ${row.id}). Status: ready. The user can view and edit it in their website builder.`;
+      } catch (err) {
+        return `Website error: ${err instanceof Error ? err.message : "unknown"}`;
+      }
     }
 
     case "ai_video":
-    case "ai_audio":
-    case "ai_presentation":
-    case "ai_website": {
-      // These media generation tools need the specific pipeline integration.
-      // Each one has its own route and billing model.
-      return `[${tool.name}]: A request to create "${String(params.prompt ?? params.description ?? "").slice(0, 200)}" has been logged. Media generation from agents requires pipeline integration with the ${tool.name.toLowerCase()} route. The agent tool framework and approval system are operational — connecting to /api/${tool.id.replace("ai_", "")}/generate is the next step.`;
+    case "ai_audio": {
+      // Video and audio generation do not have internal pipelines yet.
+      // These are genuinely not built — no route, no provider integration.
+      // Being honest about it rather than faking a result.
+      const mediaType = tool.id === "ai_video" ? "video" : "audio";
+      return `${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)} generation is not available yet — the ${mediaType} pipeline has not been integrated with a provider. The agent can use ai_chat to write scripts, ai_image for visuals, and ai_presentation for slide decks instead.`;
     }
 
     // ─── EMAIL TOOLS ───
@@ -340,23 +435,46 @@ async function runToolImplementation(
     }
 
     case "email_read": {
-      return `[Email read]: Reading emails requires the Gmail MCP connector. The connector will be available once the user connects their Google account via OAuth. For now, the agent can send emails but not read them.`;
+      return "Reading emails requires connecting a Gmail or Outlook account via OAuth. This is not yet available. The agent can send emails (email_send) and receive replies at the platform address.";
     }
 
     // ─── SOCIAL TOOLS ───
+    // Social tools require OAuth connections to external platforms
+    // (Twitter/X, Instagram, LinkedIn, Facebook). The agent can draft
+    // content with ai_post and the user publishes it manually, or
+    // connects their social accounts when the OAuth integration ships.
     case "social_post":
     case "social_schedule": {
-      return `[Social tool]: Would post/schedule to social media: "${String(params.content ?? "").slice(0, 100)}".\n\nNote: Social media connectors are being built.`;
+      // Draft the content using AI so it's ready to post.
+      const content = String(params.content ?? params.text ?? "");
+      const platform = String(params.platform ?? "general");
+      if (!content) return "Error: no content provided for social post.";
+
+      const { runCompletion } = await import("@/lib/ai/providers/complete");
+      const outcome = await runCompletion(
+        {
+          purpose: "agent_run",
+          model: "default",
+          maxTokens: 512,
+          system: [{ type: "text", text: `You are a social media expert. Polish the following draft for ${platform}. Add relevant hashtags. Output ONLY the final post text, nothing else.` }],
+          messages: [{ role: "user", content }],
+        },
+        { userId }
+      );
+      if (!outcome.ok) return `Error drafting post: ${outcome.detail ?? "failed"}`;
+      costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+      return `Draft post ready for ${platform}:\n\n${outcome.text}\n\n⚠️ Auto-posting requires connecting your ${platform} account. The draft is ready — the user can copy and post it manually, or connect the account for auto-publishing.`;
     }
 
     case "social_analytics": {
-      return `[Social Analytics]: Social media analytics connector in progress.`;
+      return "Social media analytics requires connecting social accounts (Twitter/X, Instagram, LinkedIn) via OAuth. This integration is not yet available. The agent can use analytics_report for business/payments analytics or analytics_competitors for market research.";
     }
 
     // ─── CALENDAR TOOLS ───
+    // Calendar tools require Google Calendar or Outlook OAuth connection.
     case "calendar_check":
     case "calendar_create": {
-      return `[Calendar tool]: Calendar integration via MCP connector in progress.`;
+      return "Calendar integration requires connecting a Google or Outlook calendar via OAuth. This is not yet available. The agent can send scheduling emails via email_send instead.";
     }
 
     // ─── ANALYTICS TOOLS ───
@@ -372,7 +490,28 @@ async function runToolImplementation(
     }
 
     case "analytics_competitors": {
-      return `[Competitor Analysis]: Would research competitors for "${String(params.industry ?? params.query ?? "")}".\n\nNote: Competitor analysis uses the AI research tool with web search. Being connected.`;
+      // Uses the same AI + web search pipeline as ai_research, focused
+      // on competitive analysis.
+      const { runCompletion } = await import("@/lib/ai/providers/complete");
+      const query = String(params.industry ?? params.query ?? params.competitors ?? "");
+      if (!query) return "Error: no industry or competitor query provided.";
+
+      const outcome = await runCompletion(
+        {
+          purpose: "research",
+          model: "default",
+          maxTokens: 4096,
+          system: [{ type: "text", text: "You are a competitive intelligence analyst. Research the competitive landscape for the given industry or company. Report: key competitors, their strengths and weaknesses, market positioning, pricing, and opportunities. Be thorough, factual, and cite sources." }],
+          messages: [{ role: "user", content: `Competitive analysis: ${query}` }],
+          serverWebSearch: { maxUses: 5 },
+          requires: ["server_web_search"],
+        },
+        { userId }
+      );
+
+      if (!outcome.ok) return `Competitor analysis error: ${outcome.detail ?? "search failed"}`;
+      costs?.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
+      return outcome.text;
     }
 
     default:

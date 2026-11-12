@@ -231,7 +231,8 @@ check(
 // states and chat-workspace.tsx's liveAvailable ternary.
 // 36 -> 38 ON 2026-11-12: coupons and invoices tabs — "Once", "View" are
 // English words used as labels that happen to match some locale values.
-const INDIRECT_ENGLISH_BASELINE = 38;
+// 38 -> 39: "Tools" in agent settings.
+const INDIRECT_ENGLISH_BASELINE = 39;
 reportBaseline("INDIRECT_ENGLISH_BASELINE", INDIRECT_ENGLISH_BASELINE, indirect.length);
 checkTrue(
   `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,

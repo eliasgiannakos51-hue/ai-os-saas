@@ -377,7 +377,9 @@ export function AgentsShell({
     deliveryTarget: string;
     creditCap: number | null;
     approvalSettings: Record<string, boolean | number>;
+    enabledToolIds: string[];
   } | null>(null);
+  const [availableTools, setAvailableTools] = useState<{ id: string; name: string; category: string; description: string }[]>([]);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
   // THE DEPTH ON THE PREVIEW SCREEN, separate from the draft the builder
   // returned so the user can change it before creating without the change
@@ -498,9 +500,17 @@ export function AgentsShell({
       deliveryTarget: selected.delivery_target ?? "",
       creditCap: selected.credit_cap ?? null,
       approvalSettings: (selected.approval_settings as Record<string, boolean>) ?? { send: true, publish: true, spend: true },
+      enabledToolIds: (selected.config?.enabledToolIds as string[]) ?? [],
     });
     setTab("plan");
     setLastRunOutput(null);
+    // Load available tools list.
+    fetch("/api/agents/tools")
+      .then((r) => r.json())
+      .then((data: { tools?: { id: string; name: string; category: string; description: string }[] }) => {
+        if (data.tools) setAvailableTools(data.tools);
+      })
+      .catch(() => {/* non-critical */});
   }, [selected]);
 
   // ---- create flow ---------------------------------------------------
@@ -927,6 +937,7 @@ export function AgentsShell({
         // AG1 Κ3: credit cap and approval settings.
         creditCap: editDraft.creditCap,
         approvalSettings: editDraft.approvalSettings,
+        enabledToolIds: editDraft.enabledToolIds,
       },
       t("updateSuccess")
     );
@@ -1814,6 +1825,43 @@ export function AgentsShell({
                     <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.spendingTiersHint")}</p>
                   </div>
                 )}
+
+                {/* ─── TOOLS PICKER ─── */}
+                <div data-testid="agents-panel-tools">
+                  <p className="mb-1.5 text-xs font-medium text-foreground">{t("shell.toolsTitle")}</p>
+                  {availableTools.length === 0 ? (
+                    <p className="text-[11px] text-muted">{t("shell.toolsLoading")}</p>
+                  ) : (
+                    <div className="max-h-48 space-y-0.5 overflow-y-auto">
+                      {Object.entries(
+                        availableTools.reduce<Record<string, typeof availableTools>>((acc, tool) => {
+                          (acc[tool.category] ??= []).push(tool);
+                          return acc;
+                        }, {})
+                      ).map(([cat, tools]) => (
+                        <div key={cat}>
+                          <p className="sticky top-0 bg-panel px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted">{cat.replace(/_/g, " ")}</p>
+                          {tools.map((tool) => (
+                            <label key={tool.id} className="flex items-center gap-2 px-1 py-0.5 text-xs text-muted hover:text-foreground" title={tool.description}>
+                              <input
+                                type="checkbox"
+                                checked={editDraft.enabledToolIds.includes(tool.id)}
+                                onChange={(e) => {
+                                  const ids = e.target.checked
+                                    ? [...editDraft.enabledToolIds, tool.id]
+                                    : editDraft.enabledToolIds.filter((id) => id !== tool.id);
+                                  setEditDraft({ ...editDraft, enabledToolIds: ids });
+                                }}
+                              />
+                              {tool.name}
+                            </label>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.toolsHint")}</p>
+                </div>
 
                 <button
                   type="button"

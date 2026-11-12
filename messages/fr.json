@@ -2312,14 +2312,16 @@
         "tabsLabel": "Ce que tu regardes pour cet agent",
         "taskChanged": "La tâche a changé.",
         "toolsNone": "Il n'existe pas encore de liste d'outils autorisés par agent : chaque agent cherche (si tu l'autorises), écrit, et envoie au seul canal que tu as défini.",
-        "toolsTitle": "Outils et connexions",
+        "toolsTitle": "Outils",
         "approvalsHint": "Quand coché, l’agent s’arrête et demande avant d’agir. Décochez pour le laisser agir seul.",
         "creditCapNone": "Pas de limite",
         "creditCapHint": "L’agent s’arrête après avoir dépensé ce nombre de crédits. Laissez vide pour pas de limite.",
         "spendingTiersTitle": "Niveaux de dépenses",
         "autoBelow": "Auto en dessous de (crédits)",
         "approveAbove": "Approbation au-dessus de (crédits)",
-        "spendingTiersHint": "Entre ces valeurs, l’agent dépense et vous notifie. En dessous : auto. Au-dessus : attend l’approbation."
+        "spendingTiersHint": "Entre ces valeurs, l’agent dépense et vous notifie. En dessous : auto. Au-dessus : attend l’approbation.",
+        "toolsLoading": "Chargement des outils…",
+        "toolsHint": "Sélectionnez les outils que cet agent peut utiliser."
       },
       "approvals": {
         "title": "Approbations en attente",

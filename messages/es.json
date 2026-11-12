@@ -2312,14 +2312,16 @@
         "tabsLabel": "Lo que estás viendo de este agente",
         "taskChanged": "La tarea cambió.",
         "toolsNone": "Todavía no hay una lista propia de herramientas permitidas por agente: cada agente busca (si lo permites), escribe y envía al único canal que fijaste.",
-        "toolsTitle": "Herramientas y conexiones",
+        "toolsTitle": "Herramientas",
         "approvalsHint": "Cuando está marcado, el agente se detiene y pregunta antes de actuar. Desmarca para que actúe solo.",
         "creditCapNone": "Sin límite",
         "creditCapHint": "El agente se detiene al gastar esta cantidad de créditos. Déjalo vacío para sin límite.",
         "spendingTiersTitle": "Niveles de gasto",
         "autoBelow": "Auto debajo de (créditos)",
         "approveAbove": "Aprobar encima de (créditos)",
-        "spendingTiersHint": "Entre estos valores, el agente gasta y te notifica. Debajo: automático. Encima: espera aprobación."
+        "spendingTiersHint": "Entre estos valores, el agente gasta y te notifica. Debajo: automático. Encima: espera aprobación.",
+        "toolsLoading": "Cargando herramientas…",
+        "toolsHint": "Seleccione las herramientas que puede usar este agente."
       },
       "approvals": {
         "title": "Aprobaciones pendientes",

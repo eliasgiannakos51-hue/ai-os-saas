@@ -42,6 +42,7 @@ type PatchBody = {
   deliveryTarget?: unknown;
   creditCap?: unknown;
   approvalSettings?: unknown;
+  enabledToolIds?: unknown;
 };
 
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
@@ -225,11 +226,12 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       updates.delivery_target = decision.target;
     }
 
-    if (body.needsWebSearch !== undefined || body.outputFormat !== undefined) {
+    if (body.needsWebSearch !== undefined || body.outputFormat !== undefined || body.enabledToolIds !== undefined) {
       updates.config = {
         ...agent.config,
         ...(body.needsWebSearch !== undefined ? { needsWebSearch: body.needsWebSearch === true } : {}),
         ...(isAgentOutputFormat(body.outputFormat) ? { outputFormat: body.outputFormat } : {}),
+        ...(Array.isArray(body.enabledToolIds) ? { enabledToolIds: body.enabledToolIds.filter((id: unknown): id is string => typeof id === "string").slice(0, 50) } : {}),
       };
     }
 

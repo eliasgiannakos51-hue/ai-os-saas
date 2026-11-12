@@ -94,6 +94,9 @@ export type AgentConfigJson = {
   /** What the builder understood, echoed back on the preview screen. Not
    *  used at run time. */
   builderSummary?: string;
+  /** IDs of the tools this agent is allowed to use (from AGENT_TOOLS).
+   *  Absent means no tools; the UI saves the selection. */
+  enabledToolIds?: string[];
 };
 
 export type AgentDraft = {

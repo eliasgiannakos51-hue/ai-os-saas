@@ -2312,14 +2312,16 @@
         "tabsLabel": "你正在查看这个助手的哪一部分",
         "taskChanged": "任务已更改。",
         "toolsNone": "目前还没有按助手单独设置的工具白名单：每个助手都会查找（如果你允许）、撰写，并发送到你设定的那一个渠道。",
-        "toolsTitle": "工具和连接",
+        "toolsTitle": "工具",
         "approvalsHint": "勾选后，代理在行动前会暂停并请求确认。取消勾选可让其自行行动。",
         "creditCapNone": "无限制",
         "creditCapHint": "代理消耗此数量的积分后将停止。留空表示无限制。",
         "spendingTiersTitle": "支出等级",
         "autoBelow": "自动（低于，积分）",
         "approveAbove": "审批（高于，积分）",
-        "spendingTiersHint": "在这些值之间，代理会消费并通知您。低于：自动。高于：等待审批。"
+        "spendingTiersHint": "在这些值之间，代理会消费并通知您。低于：自动。高于：等待审批。",
+        "toolsLoading": "加载工具中…",
+        "toolsHint": "选择此代理可以使用的工具。"
       },
       "approvals": {
         "title": "待审批",

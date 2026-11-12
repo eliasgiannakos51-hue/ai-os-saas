@@ -2312,14 +2312,16 @@
         "tabsLabel": "O que estás a ver sobre este agente",
         "taskChanged": "A tarefa mudou.",
         "toolsNone": "Ainda não existe uma lista própria de ferramentas permitidas por agente: cada agente procura (se permitires), escreve e envia para o único canal que definiste.",
-        "toolsTitle": "Ferramentas e ligações",
+        "toolsTitle": "Ferramentas",
         "approvalsHint": "Quando marcado, o agente pausa e pergunta antes de agir. Desmarque para deixá-lo agir sozinho.",
         "creditCapNone": "Sem limite",
         "creditCapHint": "O agente para quando gasta esta quantidade de créditos. Deixe vazio para sem limite.",
         "spendingTiersTitle": "Níveis de gasto",
         "autoBelow": "Auto abaixo de (créditos)",
         "approveAbove": "Aprovar acima de (créditos)",
-        "spendingTiersHint": "Entre esses valores, o agente gasta e notifica você. Abaixo: automático. Acima: aguarda aprovação."
+        "spendingTiersHint": "Entre esses valores, o agente gasta e notifica você. Abaixo: automático. Acima: aguarda aprovação.",
+        "toolsLoading": "Carregando ferramentas…",
+        "toolsHint": "Selecione as ferramentas que este agente pode usar."
       },
       "approvals": {
         "title": "Aprovações pendentes",

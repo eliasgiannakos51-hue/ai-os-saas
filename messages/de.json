@@ -2312,14 +2312,16 @@
         "tabsLabel": "Was du zu diesem Agenten siehst",
         "taskChanged": "Die Aufgabe wurde geändert.",
         "toolsNone": "Es gibt noch keine eigene Freigabeliste von Werkzeugen pro Agent: jeder Agent sucht (wenn du es erlaubst), schreibt und sendet an den einen Kanal, den du festgelegt hast.",
-        "toolsTitle": "Werkzeuge und Verbindungen",
+        "toolsTitle": "Werkzeuge",
         "approvalsHint": "Wenn aktiviert, pausiert der Agent und fragt, bevor er handelt. Deaktiviere, um ihn selbstständig handeln zu lassen.",
         "creditCapNone": "Kein Limit",
         "creditCapHint": "Der Agent stoppt, wenn er so viele Credits ausgegeben hat. Leer lassen für kein Limit.",
         "spendingTiersTitle": "Ausgabenstufen",
         "autoBelow": "Auto unter (Credits)",
         "approveAbove": "Genehmigung über (Credits)",
-        "spendingTiersHint": "Zwischen diesen Werten gibt der Agent aus und benachrichtigt Sie. Darunter: automatisch. Darüber: wartet auf Genehmigung."
+        "spendingTiersHint": "Zwischen diesen Werten gibt der Agent aus und benachrichtigt Sie. Darunter: automatisch. Darüber: wartet auf Genehmigung.",
+        "toolsLoading": "Werkzeuge werden geladen…",
+        "toolsHint": "Wählen Sie die Werkzeuge, die dieser Agent verwenden kann."
       },
       "approvals": {
         "title": "Ausstehende Genehmigungen",

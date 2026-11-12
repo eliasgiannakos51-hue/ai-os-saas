@@ -2312,14 +2312,16 @@
         "tabsLabel": "What you are looking at for this agent",
         "taskChanged": "The task changed.",
         "toolsNone": "There is no separate per-agent allowlist of tools yet: every agent searches (if you allow it), writes, and sends to the one channel you set.",
-        "toolsTitle": "Tools and connections",
+        "toolsTitle": "Tools",
         "approvalsHint": "When checked, the agent pauses and asks before acting. Uncheck to let it act on its own.",
         "creditCapNone": "No limit",
         "creditCapHint": "The agent stops when it has spent this many credits. Leave empty for no limit.",
         "spendingTiersTitle": "Spending tiers",
         "autoBelow": "Auto below (credits)",
         "approveAbove": "Approve above (credits)",
-        "spendingTiersHint": "Between these values, the agent spends and notifies you. Below: auto. Above: waits for approval."
+        "spendingTiersHint": "Between these values, the agent spends and notifies you. Below: auto. Above: waits for approval.",
+        "toolsLoading": "Loading tools…",
+        "toolsHint": "Select which tools this agent can use."
       },
       "approvals": {
         "title": "Pending approvals",

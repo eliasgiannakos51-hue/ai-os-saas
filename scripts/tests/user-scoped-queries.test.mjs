@@ -304,10 +304,10 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
     // payments_coupons is deny-all.
     "deactivateCoupon@src/app/api/payments/coupons/route.ts":
       "The route verifies ownership before this call: it loads all coupons by user.id (listCoupons), finds the one matching the request id, checks coupon.user_id !== user.id, and returns 404 on mismatch. The admin client is required because payments_coupons is deny-all — a session client would see nothing.",
-    // Agent tools: saveAgentTools takes (admin, agentId, userId, toolIds)
-    // and filters internally with .eq('user_id', userId).
-    "saveAgentTools@src/app/api/agents/tools/route.ts":
-      "The admin client is required because user_agents config is updated through a read-then-write that needs to see the row regardless of RLS. saveAgentTools internally scopes with .eq('id', agentId).eq('user_id', userId), so the agentId from the request body cannot name another user's agent.",
+    // saveAgentTools@src/app/api/agents/tools/route.ts: removed 2026-11-12.
+    // The route now has an explicit ownership check (.eq("user_id", user.id))
+    // before calling saveAgentTools, so the scanner sees the explicit_compare
+    // pattern and the entry is no longer needed here.
   };
 
   const violations = [];

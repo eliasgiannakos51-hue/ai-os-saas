@@ -193,7 +193,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
       ALL_TOOLS_GROUP_ORDER.map((key) => ({
         key,
         heading: headings[key],
-        big: ALL_TOOLS.filter((tool) => tool.group === key),
+        big: ALL_TOOLS.filter((tool) => tool.group === key && !tool.hidden),
       })).filter((g) => g.big.length > 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
@@ -204,7 +204,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
 
   const results = query.trim()
     ? (() => {
-        const bigCandidates = ALL_TOOLS.map((tool) => ({
+        const bigCandidates = ALL_TOOLS.filter((t) => !t.hidden).map((tool) => ({
           kind: "big" as const,
           tool,
           item: {

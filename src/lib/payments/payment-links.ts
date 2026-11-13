@@ -58,8 +58,9 @@ export async function createPaymentLink(params: {
           ionexa_product_id: params.product.id,
           platform: "ionexa_payments",
         },
-      },
-      { stripeAccount: params.account.stripe_account_id }
+      }
+      // No { stripeAccount } — destination charges are created on the
+      // platform account, with transfer_data pointing to the connected one.
     );
 
     return { ok: true, url: link.url, linkId: link.id };

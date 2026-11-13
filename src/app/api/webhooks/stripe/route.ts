@@ -845,8 +845,10 @@ export async function POST(request: Request) {
               stripeSubscriptionId: subscription.id,
               stripeCustomerId: typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id,
               status,
-              currentPeriodStart: new Date((subscription.items.data[0]?.current_period_start ?? 0) * 1000).toISOString(),
-              currentPeriodEnd: new Date((subscription.items.data[0]?.current_period_end ?? 0) * 1000).toISOString(),
+              // The Stripe API returns current_period_start/end on the subscription
+              // object, but newer SDK types moved them to items. Cast to access.
+              currentPeriodStart: new Date(((subscription as unknown as { current_period_start?: number }).current_period_start ?? 0) * 1000).toISOString(),
+              currentPeriodEnd: new Date(((subscription as unknown as { current_period_end?: number }).current_period_end ?? 0) * 1000).toISOString(),
               cancelAtPeriodEnd: subscription.cancel_at_period_end,
               trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
               customerEmail: null, // not on the subscription object

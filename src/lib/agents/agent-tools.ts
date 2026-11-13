@@ -103,7 +103,9 @@ export function getEnabledTools(
   config: Record<string, unknown> | null
 ): string[] {
   if (!config) return [];
-  const tools = config.enabledTools;
+  // Reads both field names: enabledToolIds (from UI/PATCH) and
+  // enabledTools (from POST /api/agents/tools) for backward compatibility.
+  const tools = config.enabledToolIds ?? config.enabledTools;
   if (!Array.isArray(tools)) return [];
   return tools.filter((t): t is string => typeof t === "string");
 }
@@ -192,7 +194,9 @@ export async function saveAgentTools(
     if (readErr || !agent) return { ok: false };
 
     const config = (agent.config as Record<string, unknown>) ?? {};
-    config.enabledTools = filtered;
+    config.enabledToolIds = filtered;
+    // Clean up old field name if present.
+    delete config.enabledTools;
 
     const { error } = await admin
       .from("user_agents")

@@ -91,6 +91,8 @@ export async function createInvoice(params: {
           customer: customerId,
           invoice: invoice.id,
           description: item.description,
+          // Stripe's invoiceItems `amount` is the TOTAL for the line.
+          // quantity is description-only here (Stripe shows it on the PDF).
           amount: item.amountCents * (item.quantity ?? 1),
           currency: params.account.default_currency ?? "eur",
         },

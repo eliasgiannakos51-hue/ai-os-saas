@@ -380,6 +380,7 @@ export function AgentsShell({
     enabledToolIds: string[];
   } | null>(null);
   const [availableTools, setAvailableTools] = useState<{ id: string; name: string; category: string; description: string }[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<{ id: string; name: string; icon: string; department: string; defaultTools: string[]; estimatedCreditsPerRun: number }[]>([]);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
   // THE DEPTH ON THE PREVIEW SCREEN, separate from the draft the builder
   // returned so the user can change it before creating without the change
@@ -504,11 +505,15 @@ export function AgentsShell({
     });
     setTab("plan");
     setLastRunOutput(null);
-    // Load available tools list.
+    // Load available tools and job roles.
     fetch("/api/agents/tools")
       .then((r) => r.json())
-      .then((data: { tools?: { id: string; name: string; category: string; description: string }[] }) => {
+      .then((data: {
+        tools?: { id: string; name: string; category: string; description: string }[];
+        roles?: { id: string; name: string; icon: string; department: string; defaultTools: string[]; estimatedCreditsPerRun: number }[];
+      }) => {
         if (data.tools) setAvailableTools(data.tools);
+        if (data.roles) setAvailableRoles(data.roles);
       })
       .catch(() => {/* non-critical */});
   }, [selected]);
@@ -1823,6 +1828,39 @@ export function AgentsShell({
                       </label>
                     </div>
                     <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.spendingTiersHint")}</p>
+                  </div>
+                )}
+
+                {/* ─── JOB ROLE PICKER ─── */}
+                {availableRoles.length > 0 && (
+                  <div data-testid="agents-panel-roles">
+                    <p className="mb-1.5 text-xs font-medium text-foreground">{t("shell.roleTitle")}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableRoles.map((role) => {
+                        const isActive = editDraft.enabledToolIds.length > 0 &&
+                          role.defaultTools.every((tid) => editDraft.enabledToolIds.includes(tid));
+                        return (
+                          <button
+                            key={role.id}
+                            type="button"
+                            className={`rounded-item border px-2.5 py-1 text-xs transition-colors ${
+                              isActive
+                                ? "border-foreground bg-foreground text-panel font-medium"
+                                : "border-border text-muted hover:border-foreground hover:text-foreground"
+                            }`}
+                            onClick={() => {
+                              setEditDraft({
+                                ...editDraft,
+                                enabledToolIds: isActive ? [] : [...role.defaultTools],
+                              });
+                            }}
+                          >
+                            {role.icon} {role.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("shell.roleHint")}</p>
                   </div>
                 )}
 

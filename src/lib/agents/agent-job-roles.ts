@@ -238,6 +238,28 @@ Use data, not opinions. Every recommendation should cite a specific metric and i
 Data first. Every claim backed by a number. Present findings as: what happened, why it matters, what to do about it.`,
     estimatedCreditsPerRun: 25,
   },
+  // ─── HR ───
+  {
+    id: "hr_recruiter",
+    name: "HR & Recruitment Agent",
+    nameKey: "roles.hrRecruiter",
+    descriptionKey: "roles.hrRecruiterDesc",
+    icon: "Users",
+    department: "hr",
+    defaultTools: ["ai_chat", "ai_document", "ai_post", "ai_research", "email_send", "calendar_create"],
+    defaultApprovalSettings: { send: true, publish: true, spend: false },
+    defaultSchedule: "0 8 * * 1-5", // Weekdays at 8am
+    systemPromptAddition: `You are an HR & Recruitment agent. Your daily tasks:
+1. Screen incoming job applications and rank candidates
+2. Draft interview questions tailored to each role
+3. Send follow-up emails to candidates
+4. Schedule interviews via calendar
+5. Write job descriptions for open positions
+6. Research salary benchmarks and hiring trends
+
+Be professional, unbiased, and follow equal opportunity principles in all communications.`,
+    estimatedCreditsPerRun: 15,
+  },
 ];
 
 /**

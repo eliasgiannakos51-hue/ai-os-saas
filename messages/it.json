@@ -2321,7 +2321,9 @@
         "approveAbove": "Approvazione sopra (crediti)",
         "spendingTiersHint": "Tra questi valori, l’agente spende e ti avvisa. Sotto: automatico. Sopra: attende l’approvazione.",
         "toolsLoading": "Caricamento strumenti…",
-        "toolsHint": "Seleziona quali strumenti può usare questo agente."
+        "toolsHint": "Seleziona quali strumenti può usare questo agente.",
+        "roleTitle": "Ruolo",
+        "roleHint": "Scegli un ruolo per gli strumenti consigliati."
       },
       "approvals": {
         "title": "Approvazioni in sospeso",

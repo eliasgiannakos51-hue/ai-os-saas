@@ -2321,7 +2321,9 @@
         "approveAbove": "审批（高于，积分）",
         "spendingTiersHint": "在这些值之间，代理会消费并通知您。低于：自动。高于：等待审批。",
         "toolsLoading": "加载工具中…",
-        "toolsHint": "选择此代理可以使用的工具。"
+        "toolsHint": "选择此代理可以使用的工具。",
+        "roleTitle": "职位",
+        "roleHint": "选择职位以自动推荐工具。"
       },
       "approvals": {
         "title": "待审批",

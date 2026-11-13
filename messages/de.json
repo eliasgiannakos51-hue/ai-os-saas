@@ -2321,7 +2321,9 @@
         "approveAbove": "Genehmigung über (Credits)",
         "spendingTiersHint": "Zwischen diesen Werten gibt der Agent aus und benachrichtigt Sie. Darunter: automatisch. Darüber: wartet auf Genehmigung.",
         "toolsLoading": "Werkzeuge werden geladen…",
-        "toolsHint": "Wählen Sie die Werkzeuge, die dieser Agent verwenden kann."
+        "toolsHint": "Wählen Sie die Werkzeuge, die dieser Agent verwenden kann.",
+        "roleTitle": "Berufsrolle",
+        "roleHint": "Rolle wählen für empfohlene Werkzeuge."
       },
       "approvals": {
         "title": "Ausstehende Genehmigungen",

@@ -2321,7 +2321,9 @@
         "approveAbove": "Aprovar acima de (créditos)",
         "spendingTiersHint": "Entre esses valores, o agente gasta e notifica você. Abaixo: automático. Acima: aguarda aprovação.",
         "toolsLoading": "Carregando ferramentas…",
-        "toolsHint": "Selecione as ferramentas que este agente pode usar."
+        "toolsHint": "Selecione as ferramentas que este agente pode usar.",
+        "roleTitle": "Cargo",
+        "roleHint": "Escolha um cargo para ferramentas recomendadas."
       },
       "approvals": {
         "title": "Aprovações pendentes",

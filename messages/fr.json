@@ -2321,7 +2321,9 @@
         "approveAbove": "Approbation au-dessus de (crédits)",
         "spendingTiersHint": "Entre ces valeurs, l’agent dépense et vous notifie. En dessous : auto. Au-dessus : attend l’approbation.",
         "toolsLoading": "Chargement des outils…",
-        "toolsHint": "Sélectionnez les outils que cet agent peut utiliser."
+        "toolsHint": "Sélectionnez les outils que cet agent peut utiliser.",
+        "roleTitle": "Rôle",
+        "roleHint": "Choisissez un rôle pour les outils recommandés."
       },
       "approvals": {
         "title": "Approbations en attente",

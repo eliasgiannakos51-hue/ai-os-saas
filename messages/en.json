@@ -2321,7 +2321,9 @@
         "approveAbove": "Approve above (credits)",
         "spendingTiersHint": "Between these values, the agent spends and notifies you. Below: auto. Above: waits for approval.",
         "toolsLoading": "Loading tools…",
-        "toolsHint": "Select which tools this agent can use."
+        "toolsHint": "Select which tools this agent can use.",
+        "roleTitle": "Job role",
+        "roleHint": "Pick a role to pre-fill recommended tools."
       },
       "approvals": {
         "title": "Pending approvals",

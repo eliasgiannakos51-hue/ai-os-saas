@@ -227,6 +227,50 @@ async function runToolImplementation(
       return `Coupon "${result.coupon.code}" created (${result.coupon.percent_off ? result.coupon.percent_off + "% off" : (result.coupon.amount_off_cents! / 100).toFixed(2) + " off"}).`;
     }
 
+    case "payments_create_product": {
+      const { getPaymentsAccount } = await import("@/lib/payments/connect");
+      const { createProduct } = await import("@/lib/payments/products");
+      const admin = createAdminClient();
+      const account = await getPaymentsAccount(admin, userId);
+      if (!account) return "Error: no payments account connected.";
+      const result = await createProduct(admin, account, {
+        name: String(params.name ?? ""),
+        description: params.description ? String(params.description) : undefined,
+        priceCents: Number(params.priceCents ?? params.price_cents ?? 0),
+        currency: String(params.currency ?? account.default_currency ?? "eur"),
+        isRecurring: params.isRecurring === true,
+        recurringInterval: params.recurringInterval ? String(params.recurringInterval) as "month" | "year" : undefined,
+      });
+      if (!result.ok) return `Error creating product: ${result.reason}`;
+      return `Product "${result.product.name}" created (ID: ${result.product.id}). Price: ${(result.product.price_cents / 100).toFixed(2)} ${result.product.currency.toUpperCase()}.`;
+    }
+
+    case "payments_process_refund": {
+      const admin = createAdminClient();
+      const txId = String(params.transactionId ?? params.transaction_id ?? "");
+      if (!txId) return "Error: no transaction ID provided.";
+      const { data: tx } = await admin
+        .from("payments_transactions")
+        .select("stripe_payment_intent_id, user_id, amount_cents, currency")
+        .eq("id", txId)
+        .eq("user_id", userId)
+        .single();
+      if (!tx) return "Error: transaction not found or not owned by this user.";
+      if (!tx.stripe_payment_intent_id) return "Error: transaction has no Stripe payment intent.";
+      try {
+        const { createStripeClient } = await import("@/lib/stripe/server");
+        const stripe = createStripeClient();
+        const refund = await stripe.refunds.create({
+          payment_intent: tx.stripe_payment_intent_id,
+          amount: params.amountCents ? Number(params.amountCents) : undefined, // undefined = full refund
+        });
+        await admin.from("payments_transactions").update({ status: "refunded" }).eq("id", txId);
+        return `Refund processed: ${(refund.amount / 100).toFixed(2)} ${refund.currency.toUpperCase()}. Refund ID: ${refund.id}.`;
+      } catch (err) {
+        return `Refund error: ${err instanceof Error ? err.message : "unknown"}`;
+      }
+    }
+
     // ─── IONEXA AI TOOLS (text-based) ───
     case "ai_chat":
     case "ai_document":

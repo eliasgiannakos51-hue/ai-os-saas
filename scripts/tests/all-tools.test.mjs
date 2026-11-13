@@ -109,8 +109,10 @@ check("nothing `availableTools` returns is ever a not-ready tile", availableTool
 check("the tools page hands the grid `live` (which addresses are the real tool), not a hidden/shown filter",
   /availableTools\(\{ imageKey: Boolean\(imageApiKey\(\)\) \}\)\.map\(\(tool\) => tool\.href\)/.test(stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"))) &&
     /live=\{live\}/.test(stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"))));
-check("the grid draws every registry tile, live or not, through `isLive = liveSet.has(tool.href)`",
-  /ALL_TOOLS\.filter\(\(tool\) => tool\.group === key\)/.test(grid) && /const isLive = liveSet\.has\(tool\.href\);/.test(grid) && /\{!isLive &&/.test(grid));
+// CONTEXT.md §5: "ό,τι δεν είναι λειτουργικό δεν εμφανίζεται" — hidden
+// tools are filtered out of the grid, not drawn with Coming Soon.
+check("the grid draws every non-hidden registry tile, live or not, through `isLive = liveSet.has(tool.href)`",
+  /ALL_TOOLS\.filter\(\(tool\) => tool\.group === key && !tool\.hidden\)/.test(grid) && /const isLive = liveSet\.has\(tool\.href\);/.test(grid) && /\{!isLive &&/.test(grid));
 
 console.log("\n== 0d. every other tool is hidden, with a reason, and nothing is lost ==");
 const rowless = ["/dashboard/my-stuff", "/dashboard/games"];

@@ -2544,6 +2544,29 @@ server αυτού του dev environment — καμία πραγματική κ�
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261105000000_rebuild_app_phase.sql**
 
+## 2026-11-06α (Final Approval — πρώτος εσωτερικός agent, επίπεδο 1)
+
+**ΤΙ ΧΤΙΣΤΗΚΕ.** `scripts/final-approval.mjs`: διαβάζει μια αλλαγή (diff προς
+`origin/main`, προαιρετικά το σώμα του PR) και λέει READY ή NOT READY με
+αποδείξεις. Ελέγχει τους κανόνες του CLAUDE.md πάνω στο diff: κάθε νέο
+migration έχει `How to undo:`/`No undo:`, το «Πώς γυρίζει πίσω» είναι γεμάτο,
+υπάρχει η γραμμή `ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ:` όταν προστέθηκε migration, το
+`docs/PROGRESS.md` ή `docs/QUEUE.md` άλλαξε μαζί με τον κώδικα, και αρχείο
+test άλλαξε μαζί με το `src/`. Δεν γράφει τίποτα, δεν κάνει merge, δεν
+καλεί δίκτυο. Δεν λέει ποτέ ότι τα gates πέρασαν: γίνονται «επαληθευμένα»
+μόνο αν δοθεί `--gates-exit` από πραγματικό `npm run gates`, αλλιώς
+τυπώνονται ως UNVERIFIED.
+
+**ΑΡΧΕΙΑ.** `scripts/final-approval.mjs`, `scripts/tests/final-approval.test.mjs`.
+Καμία αλλαγή σε `src/`, καμία migration, κανένας διακόπτης (δεν αγγίζει τον
+χρήστη· γυρίζει πίσω σβήνοντας τα δύο αρχεία).
+
+**ΔΟΚΙΜΕΣ.** `final-approval.test.mjs` 19 έλεγχοι: κάθε κανόνας έχει καλό και
+χαλασμένο δείγμα, και το χαλασμένο πρέπει να κοκκινίζει στον δικό του κανόνα.
+`self-claims.test.mjs` 50 και `check-mutation-markers.mjs` καθαρό. **Δεν
+έτρεξε ολόκληρο το `npm run gates`** σε αυτό το περιβάλλον — το τρέχει το
+`verify.yml` στο PR. Δεν έχει τρέξει ακόμα πάνω σε πραγματικό PR.
+
 ## 2026-10-24α (Rebuild — «Φτιάξε τη δική σου εκδοχή οποιασδήποτε εφαρμογής»)
 
 **ΤΙ ΧΤΙΣΤΗΚΕ.** Το Rebuild, ανοιχτό για όλους (χωρίς διακόπτη), μόνο με το
@@ -12796,3 +12819,17 @@ deny-all RLS), 4 lib (`connect.ts`, `products.ts`, `checkout.ts`,
 (30739 checks, 569.8s). `npm run build:ci` πράσινο.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: 20261125000000_ionexa_payments.sql**
+
+### 2026-11-07η — Αναβάθμιση Next.js 16.3.8 → 16.4.5 (κρίσιμα security advisories)
+
+**Γιατί.** `npm audit` πάνω στο lockfile του main (μετρήθηκε 2026-11-07) έδειχνε για το Next τρία advisories στο εύρος `>=16.0.0 <=16.4.0`: GHSA-2464-fhr4-w9xw (critical, RCE στο Image Optimization API με SVG), GHSA-673q-mjm6-r5xr (critical, RCE σε `use cache` με typed arrays), GHSA-p3m5-59mp-jv5r (high, DoS σε Server Actions).
+
+**Τι έγινε.**
+- `package.json`: `next` `^16.3.8` → `^16.4.5`. `package-lock.json`: το Next και τα `@next/*` πήγαν 16.3.8 → 16.4.5.
+- `scripts/tests/dependency-floors.test.mjs`: το κατώφλι του `next` ανέβηκε από 16.3.0 σε 16.4.1 (η πρώτη έκδοση έξω από το εύρος των advisories, όπως τα αναφέρει το `npm audit`). `dependency-floors.mutation.mjs`: τα anchors δείχνουν πλέον τις νέες εκδόσεις.
+
+**Μέτρηση πριν και μετά** (`npm audit`, 2026-11-07): critical 1 → 0, high 5 → 5, moderate 7 → 7. Τα 5 high που μένουν είναι `eslint-config-next` (άμεση εξάρτηση, dev) και τα transitive `@next/eslint-plugin-next`, `brace-expansion`, `glob`, `js-yaml` — δεν έχουν αγγιχτεί σε αυτό το PR.
+
+**Έλεγχοι.** `npx tsc --noEmit` καθαρό· `npm run build:ci` πέρασε· `dependency-floors.mutation.mjs` 9 από 9 caught. `npm run gates`: 379 από 379 πέρασαν (2026-11-07, τοπικά, μία φορά· η πρώτη εκτέλεση έπεσε στο `mutation-suite-shape` γιατί τα anchors του `dependency-floors.mutation.mjs` έδειχναν την παλιά έκδοση — διορθώθηκε σε αυτό το commit).
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

@@ -181,11 +181,24 @@ check("the outcome comes from the code, not from a prop", /CREDIT_OUTCOME_FOR\[c
 check("it announces itself", /role="alert"/.test(notice));
 
 console.log("\n== 7. a converted caller prefers the code to the prose ==");
-const agents = readFileSync("src/components/agents/agents-workspace.tsx", "utf8");
+const agents = readFileSync("src/components/agents/agents-shell.tsx", "utf8");
 check("agents reads the code off the body", /problemCodeFrom\(data\)/.test(agents));
 // An AI limit before the prose since 2026-10-14 (lib/errors/use-error-text.ts,
 // useLimitText): its name and the time it opens, in the reader's language.
-check("and falls back to the route's prose when there is none", /else addToast\(limitText\(data\) \?\? data\.error/.test(agents));
+// THE LAST RUNG WAS THE ROUTE'S PROSE AND IS NOW THE TRANSLATION
+// (2026-10-31). These two gates disagreed the day Agents moved into the
+// tool shell: this line required `limitText(data) ?? data.error ?? t(…)`
+// while scripts/tests/tool-shell.test.mjs forbids any tool in the shell
+// from saying a route's `error` to the reader. The shell's rule wins
+// because it has the measurement behind it — checked in the built app on
+// 2026-10-08 (out of credits, the model down, a Free account's limit:
+// every one of them answered in English prose written for logs, on a
+// Greek screen). Nothing diagnostic is lost: `problemCodeFrom(data)`
+// above reads the route's own `code`, so a coded failure still gets its
+// own translated notice, and this rung only ever fired for a failure
+// that carried neither a code nor a limit.
+check("and falls back to the reader's own language when there is none", /else addToast\(limitText\(data\) \?\? t\(/.test(agents));
+check("...and never to the route's English", !/data\.error \?\? t\(|getErrorMessage\(/.test(agents));
 check("a failed fetch becomes network or timeout", /problemCodeForFetchFailure\(err\)/.test(agents));
 check("and the notice is rendered where the action was", /<ProblemNotice/.test(agents));
 

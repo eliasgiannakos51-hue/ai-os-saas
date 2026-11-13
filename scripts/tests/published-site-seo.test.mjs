@@ -365,7 +365,12 @@ console.log("\n== 7. sitemap and robots ==");
   // THE ROBOTS FILE A CRAWLER ACTUALLY READS.
   const appRobots = readFileSync("src/app/robots.ts", "utf8");
   ok("the app's own robots.txt names /s/ explicitly", /allow:\s*\[[^\]]*"\/s\/"/.test(appRobots), appRobots.match(/allow:[^\n]*/)?.[0]);
-  ok("...and does not disallow it", !/disallow:\s*\[[^\]]*"\/s/.test(appRobots));
+  // "\/s\/?" ANCHORED ON THE CLOSING QUOTE — not just a prefix match.
+  // Projects Κομμάτι 7 added "/shared" to the same disallow array
+  // (src/app/robots.ts, a project's own revocable share link, nothing to
+  // do with published sites) and an unanchored "\/s" matched it too,
+  // reading an unrelated entry as disallowing /s/ itself.
+  ok("...and does not disallow it", !/disallow:\s*\[[^\]]*"\/s\/?"/.test(appRobots));
   const appSitemap = readFileSync("src/app/sitemap.ts", "utf8");
   ok("the app's sitemap lists published sites", /from\("published_sites"\)/.test(appSitemap));
   ok("...only the live ones", /\.eq\("status", "live"\)/.test(appSitemap) && /\.eq\("is_active", true\)/.test(appSitemap));

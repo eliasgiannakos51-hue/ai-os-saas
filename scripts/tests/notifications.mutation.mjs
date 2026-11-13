@@ -64,8 +64,8 @@ const MUTANTS = [
   {
     name: "a type nothing raises is listed as sent",
     file: TYPES,
-    from: 'SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low"];',
-    to: 'SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low", "website_published"];',
+    from: 'SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low", "error_needs_attention"];',
+    to: 'SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low", "error_needs_attention", "website_published"];',
   },
   {
     // §7c: the field nobody could complete, offered again.

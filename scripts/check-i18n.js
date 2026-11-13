@@ -46,11 +46,107 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // «minutes» is the French word too (Automations' «Σου γλίτωσε», the unit
+  // beside the minutes field, 2026-11-05) — every other locale has its own
+  // (λεπτά, Minuten, minutos, minuti, 分, 分钟, دقيقة), so it is this one.
+  "fr:dashboard.automations.timeSaved.unit",
+  // The admin Revenue tab (2026-11-04, οδηγία 42 Κομμάτι 6): "Status" is
+  // the German noun, and "Date" and "Net" are the French ones, for these
+  // senses — a column heading, a date, and a net change. Per locale, NOT in
+  // the all-locales list at the top of this file: the other eight all differ
+  // (Κατάσταση, Estado, Stato, 状態, الحالة for status; Ημερομηνία, Fecha,
+  // Data, 日付, التاريخ for date). Named that way round on purpose — this
+  // file's own note says writing that constant's name in a comment costs a
+  // slot in comment-claims' census, whose phrase scan matches the word
+  // inside the symbol. It did: the census went 82 -> 83 on the first draft
+  // of this very comment.
+  "de:adminDashboard.revenue.status",
+  "fr:adminDashboard.revenue.date",
+  "fr:adminDashboard.revenue.net",
+  // The rest of the admin dashboard (2026-11-04, οδηγία 42 Κομμάτια 1-5).
+  // These were red from the day those κομμάτια shipped; each was settled by
+  // reading the locale's OWN file, because the precedent genuinely differs
+  // per language — es and pt render this same email column with their own
+  // word, so theirs were TRANSLATED ("Correo", "E-mail") rather than listed
+  // here, and fr's users.email became "E-mail" to match its costs.flaggedEmail.
+  //
+  // el: the loanword is this file's term for a labelled address field —
+  // auth.login.email, auth.signup.email, auth.forgotPassword.email and
+  // settings.notifications.channels.email are all bare "Email", and the
+  // search box in this very table reads «Αναζήτηση με email ή όνομα...».
+  // The formal «Ηλεκτρονικό ταχυδρομείο» is used for the CHANNEL
+  // (sidebar.items.connectEmail), not for an address column.
+  "el:adminDashboard.users.email",
+  "el:adminDashboard.costs.flaggedEmail",
+  // el: "Credits" is the product's own word for the usage currency —
+  // pricing.rows.creditsPerMonth «Credits / μήνα»,
+  // settings.aiUsage.creditsUsed «Credits που Χρησιμοποιήθηκαν»,
+  // settings.billing.buyCredits «Αγορά Credits». en.json's source for these
+  // three keys is itself the bare noun, so the Greek is faithful, not
+  // truncated: the verb lives in adminDashboard.users.adjust («Ρύθμιση»).
+  "el:adminDashboard.users.credits",
+  "el:adminDashboard.creditAdjust.button",
+  // de: "Name" is the German noun, capital and all — the same bare word as
+  // routerReport.colName (also a column heading) and projects.form.name,
+  // both already listed in this file. The block around it WAS translated
+  // (users.email "E-Mail", users.plan "Tarif", users.margin "Marge"), so
+  // this coincides rather than being skipped.
+  "de:adminDashboard.users.name",
+  // de: "Credits" is the unit; «Guthaben» is the BALANCE, and
+  // sidebar.tabs.balance «Guthaben: {amount} Credits» shows both roles in
+  // one string. This column counts credits, so it takes the unit term —
+  // which is why de:settings.marginReport.sumCredits is already listed below.
+  "de:adminDashboard.users.credits",
+  // es: "Plan" is the everyday Spanish word for the tier —
+  // settings.billing.currentPlan "Plan actual", auth.signup.chooseYourPlan
+  // "Elige tu plan". es:dashboard.appBuilder.tabs.plan is already listed.
+  "es:adminDashboard.users.plan",
+  // "Total" is the Spanish, French and Portuguese noun for a sum, used
+  // unchanged beside these very keys: costs.totalCalls is "Total de
+  // llamadas" / "Total des appels" / "Total de chamadas". That the row is
+  // localised and not skipped is settled by its neighbour costs.date, which
+  // IS translated ("Fecha" / "Date" / "Data"). Per locale, not for all ten:
+  // de Gesamt, it Totale, el Σύνολο, ja 合計, zh 合计, ar الإجمالي.
+  "es:adminDashboard.costs.dayTotal",
+  "fr:adminDashboard.costs.dayTotal",
+  "pt:adminDashboard.costs.dayTotal",
+  // fr: the same word, for the same sense, as fr:adminDashboard.revenue.date
+  // listed just above — the other eight locales differ.
+  "fr:adminDashboard.costs.date",
+  // it: Italian borrowed the noun whole, which is why
+  // it:dashboard.agents.delivery.channels.email and
+  // it:settings.notifications.channels.email are already listed below with
+  // that reason. The siblings here are translated where Italian has its own
+  // word (users.name "Nome", users.plan "Piano", users.credits "Crediti"),
+  // and users.search reads «Cerca per email o nome...», so a heading of
+  // «Posta elettronica» would disagree with the box directly above it.
+  "it:adminDashboard.users.email",
+  "it:adminDashboard.costs.flaggedEmail",
+  // The standalone Translate tool's style picker (2026-10-24): "Formal"
+  // is the Spanish and Portuguese word too, and "Style" is the French
+  // word (no accent difference once a comment strips it) for this sense.
+  "es:dashboard.translateTool.style.formal",
+  "pt:dashboard.translateTool.style.formal",
+  "fr:dashboard.translateTool.styleLabel",
+  // Sheets (2026-10-31, Κομμάτι 1): "Formula" is the Italian word for
+  // the label above the grid. Every other locale differs (Formule,
+  // Formel, Fórmula, 数式, المعادلة), which is why it is listed here,
+  // per locale, rather than in the all-locales list at the top of this
+  // file. (Naming that list here by its constant would cost a slot in
+  // comment-claims' census, whose phrase scan matches the word inside
+  // the symbol — three comments in this one file already do.)
+  "it:dashboard.sheets.formula.label",
   // Rebuild's texts (2026-10-27): the same word in that language.
   "fr:dashboard.rebuild.boxes.actions",
   "fr:dashboard.rebuild.versions",
   "fr:dashboard.rebuild.version",
   "de:dashboard.rebuild.version",
+  // Telegram (2026-10-31): «Ionexa in Telegram» is the German
+  // sentence as well — "in" is the German preposition for this and
+  // the product name does not translate. Italian took «su Telegram»
+  // instead, which is why this is per-locale and not
+  // INTENTIONALLY_IDENTICAL: es, fr, pt and it all differ.
+  "de:dashboard.integrations.telegram.title",
   // "Name" is the German word too.
   "de:dashboard.integrations.mcp.nameLabel",
   // The final grid's names (2026-10-23): words that are the same in that
@@ -138,6 +234,14 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.myStuff.kinds.document",
   "fr:dashboard.myStuff.kinds.analysis",
   "fr:dashboard.myStuff.kinds.chat",
+  // My Stuff's Add-to-Project eligibility for app-builder records (Κομμάτι
+  // 4, 2026-10-28): "Apps" is the everyday Spanish, German and Portuguese
+  // word too (las apps / die Apps / os apps) — none of their own software
+  // translates it to "aplicaciones"/"Anwendungen"/"aplicativos" in this
+  // short-label sense.
+  "es:sidebar.items.appBuilder",
+  "de:sidebar.items.appBuilder",
+  "pt:sidebar.items.appBuilder",
   "fr:dashboard.toolShell.box.nav",
   "it:dashboard.toolShell.box.nav",
   "pt:dashboard.toolShell.box.nav",
@@ -398,15 +502,11 @@ const LOCALE_ALLOWED = new Set([
   "pt:helpCentre.categories.chat",
   "de:helpCentre.categories.credits",
   "it:helpCentre.categories.credits",
-  "pt:helpCentre.categories.credits",
   "de:helpCentre.categories.websites",
-  "it:helpCentre.categories.websites",
   "fr:helpCentre.categories.missions",
-  "it:helpCentre.categories.missions",
   "el:helpCentre.categories.agents",
   "el:helpCentre.categories.credits",
   "el:helpCentre.categories.websites",
-  "el:helpCentre.categories.missions",
   "el:helpCentre.categories.chat",
   "it:helpCentre.categories.account",
   "el:settings.marginReport.colBypass",
@@ -464,6 +564,9 @@ const LOCALE_ALLOWED = new Set([
   "el:posts.result.charged",
   // The same loanword, on the four credit-pack buttons under Billing.
   "el:settings.billing.creditsAmount",
+  // The same loanword, in the price box at the foot of Image's settings
+  // panel in the approved editor layout (components/images/image-shell.tsx).
+  "el:dashboard.images.panel.credits",
   // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
   // in this list, verified one by one rather than waved through:
   // "credits" is the word the Greek UI already uses verbatim; "Name" is
@@ -512,33 +615,17 @@ const LOCALE_ALLOWED = new Set([
   "de:dashboard.publishing.statusUnpublished",
   "it:dashboard.publishing.statusUnpublished",
   "es:sidebar.items.trading",
-  "es:sidebar.items.sales",
   "fr:sidebar.items.trading",
-  "fr:sidebar.items.sales",
   "de:sidebar.items.trading",
-  "de:sidebar.items.sales",
   "it:sidebar.items.trading",
-  "it:sidebar.items.sales",
   "pt:sidebar.items.trading",
-  "pt:sidebar.items.sales",
-  "zh:sidebar.items.trading",
-  "zh:sidebar.items.sales",
-  "ja:sidebar.items.trading",
-  "ja:sidebar.items.sales",
-  "ar:sidebar.items.trading",
-  "ar:sidebar.items.sales",
   "ar:dashboard.team.emailPlaceholder",
   "de:dashboard.chat.title",
   "de:dashboard.overview.quickActions.trading.label",
   "de:dashboard.team.title",
   "de:dashboard.websiteBuilder.nameLabel",
-  "de:sidebar.groups.business",
-  "de:sidebar.items.apps",
-  "de:sidebar.items.chat",
   "de:sidebar.items.feedback",
   "de:sidebar.items.team",
-  "de:sidebar.items.videos",
-  "de:sidebar.items.websites",
   // "Details" is the German word, spelled identically — a loanword the
   // rest of the German UI already uses, not a skipped translation.
   "de:module.tabDetails",
@@ -567,10 +654,7 @@ const LOCALE_ALLOWED = new Set([
   "es:dashboard.overview.quickActions.ideas.label",
   "es:dashboard.overview.quickActions.trading.label",
   "es:entityLinks.no",
-  "es:sidebar.items.apps",
-  "es:sidebar.items.chat",
   "es:sidebar.items.ideas",
-  "es:sidebar.items.videos",
   "fr:common.notifications",
   "fr:dashboard.documents.backToDocuments",
   "fr:dashboard.documents.deleteLabel",
@@ -590,7 +674,6 @@ const LOCALE_ALLOWED = new Set([
   // "Publications", "Fichiers", "Objectifs et plans").
   "fr:pricing.rows.documents",
   "fr:sidebar.items.finance",
-  "fr:sidebar.items.images",
   "it:auth.login.password",
   "it:auth.signup.password",
   "it:dashboard.chat.title",
@@ -599,9 +682,7 @@ const LOCALE_ALLOWED = new Set([
   "it:dashboard.team.title",
   "it:entityLinks.no",
   "it:roadmap.items.ceoAdvisor.title",
-  "it:sidebar.groups.business",
   "it:sidebar.items.analytics",
-  "it:sidebar.items.chat",
   "it:sidebar.items.feedback",
   "it:sidebar.items.home",
   "it:sidebar.items.team",
@@ -614,30 +695,31 @@ const LOCALE_ALLOWED = new Set([
   // whether a synonym exists: "Marketing", "Budget", "Status", "Quiz",
   // "Hashtags", "Idea", "Sentiment", "Description", "Notes" and "Type"
   // really are spelled this way in these languages, and "email", "web",
-  // "live", "final" and "social" are the loanwords their UIs already use
+  // "live" and "social" are the loanwords their UIs already use
   // — the same reasoning as the Website Builder design controls above.
   // Substituting a rarer synonym to make the string differ would make
   // those UIs worse, not more translated.
+  // (The four de/es/fr/pt moduleData.options.final entries this comment
+  // used to cover are gone, 2026-11-09, FD2: the "final" option no
+  // longer exists in en.json's moduleData.options at all, so there was
+  // nothing left for them to exempt.)
   "de:moduleData.fields.budget",
   "de:moduleData.fields.hashtags",
   "de:moduleData.fields.marketing",
   "de:moduleData.fields.quiz",
   "de:moduleData.fields.status",
-  "de:moduleData.options.final",
   "de:moduleData.options.live",
   "el:moduleData.options.email",
   "el:moduleData.options.web",
   "es:moduleData.fields.hashtags",
   "es:moduleData.fields.idea",
   "es:moduleData.fields.marketing",
-  "es:moduleData.options.final",
   "es:moduleData.options.web",
   "fr:moduleData.fields.budget",
   "fr:moduleData.fields.description",
   "fr:moduleData.fields.marketing",
   "fr:moduleData.fields.notes",
   "fr:moduleData.fields.type",
-  "fr:moduleData.options.final",
   "fr:moduleData.options.web",
   "it:moduleData.fields.budget",
   "it:moduleData.fields.idea",
@@ -648,7 +730,6 @@ const LOCALE_ALLOWED = new Set([
   "it:moduleData.options.social",
   "it:moduleData.options.web",
   "pt:moduleData.fields.marketing",
-  "pt:moduleData.options.final",
   "pt:moduleData.options.web",
   // V4 #18. Three real linguistic facts rather than three skipped
   // translations: "email" is the ordinary Greek and Italian word for
@@ -662,11 +743,14 @@ const LOCALE_ALLOWED = new Set([
   // French and German. The nine other locales translate all four and are
   // not listed, which is what keeps this an allowance per locale rather
   // than a rule about short words.
-  // V4 #26. "Finances" is the ordinary French word, and "Rule of 40" is
-  // what German-speaking founders and investors call it — the German
-  // financial press uses the English term. The other locales translate
-  // both.
-  "fr:finance.title",
+  // V4 #26. "Rule of 40" is what German-speaking founders and investors
+  // call it — the German financial press uses the English term. The
+  // other locales translate it.
+  // (fr:finance.title, once allowed here because "Finances" was the
+  // ordinary French word for this heading, is gone, 2026-11-09, FD2:
+  // en.json's finance.title is now "How the business is doing" and
+  // French's own translation, "Comment va l'activité", no longer
+  // coincides — the exemption had been paid off.)
   "de:finance.metrics.ruleOf40",
   "fr:dataAnalysis.columns.type",
   "fr:dataAnalysis.types.date",
@@ -691,6 +775,13 @@ const LOCALE_ALLOWED = new Set([
   "pt:coding.github.branchLabel",
   // «Structure» is the French word for the file-tree section heading.
   "fr:coding.github.structure",
+  // "Plan" is the everyday German, French and Spanish word for a
+  // blueprint too (Apps' new Preview/Data/Plan tabs, 2026-10-30) — ja/zh/ar
+  // do have their own translated word, so this is scoped to the three
+  // locales where it is a genuine loanword, not all ten.
+  "de:dashboard.appBuilder.tabs.plan",
+  "fr:dashboard.appBuilder.tabs.plan",
+  "es:dashboard.appBuilder.tabs.plan",
   // The small ready-made jobs (quick-jobs.ts, 2026-10-24): loanwords that
   // stay English in that one language's everyday tech/office vocabulary —
   // "Quiz", "CV", "Logo", "Poster", "Notes", "Voice-over", "Apps", "Audio"
@@ -721,9 +812,105 @@ const LOCALE_ALLOWED = new Set([
   "pt:dashboard.tools.names.apps",
   "pt:dashboard.quickJobs.cv.label",
   "pt:dashboard.quickJobs.quiz.label",
+  // My Stuff's filter row (Κομμάτι 3, 2026-10-28) names several of the
+  // same already-allowed loanwords again, under its own key path —
+  // "Video"/"Audio"/"Apps" stay the words above already allow them to be
+  // in de/it/es/pt, scoped here because the allowlist is per key, not
+  // per word. "Documents"/"Images" are the French plurals (library's own
+  // "Sites"/"Documents"/"Analyses" precedent above). "Project" is the
+  // Greek sidebar's own word for it (sidebar.items.projects el="Projects").
+  "el:dashboard.myStuff.filters.project",
+  "es:dashboard.myStuff.filters.audio",
+  "es:dashboard.myStuff.kinds.apps",
+  "fr:dashboard.myStuff.filters.documents",
+  "fr:dashboard.myStuff.filters.images",
+  "fr:dashboard.myStuff.filters.audio",
+  "fr:dashboard.myStuff.kinds.images",
+  "de:dashboard.myStuff.filters.video",
+  "de:dashboard.myStuff.filters.audio",
+  "de:dashboard.myStuff.kinds.apps",
+  "it:dashboard.myStuff.filters.video",
+  "it:dashboard.myStuff.filters.audio",
+  "pt:dashboard.myStuff.kinds.apps",
+  // 3D's settings panel (2026-10-31): true cognates, the real word in
+  // that language too, not a missed translation. "Final" (the quality
+  // tier, matching Draft) is the Spanish, French, German and Portuguese
+  // word for it as well; "Type" and "Format" are the French word too
+  // (and German already has its own "Typ"/"Format" is the real German
+  // noun — capitalized, since German capitalizes every noun); and
+  // "Transparent" is the French and German adjective too.
+  "es:dashboard.threeD.panel.qualityOptions.final",
+  "fr:dashboard.threeD.panel.qualityOptions.final",
+  "de:dashboard.threeD.panel.qualityOptions.final",
+  "pt:dashboard.threeD.panel.qualityOptions.final",
+  "fr:dashboard.threeD.panel.type",
+  "fr:dashboard.threeD.panel.format",
+  "de:dashboard.threeD.panel.format",
+  "fr:dashboard.threeD.panel.backgroundOptions.transparent",
+  "de:dashboard.threeD.panel.backgroundOptions.transparent",
+  // The admin Audit log tab (2026-11-04, οδηγία 42 Κομμάτι 9, wired up
+  // when the tab turned out to be orphaned — scripts/tests/
+  // orphan-i18n-keys.test.mjs). "Admin" is the shortened job title,
+  // written the same way in Spanish, French, German, Italian and
+  // Portuguese business usage; el/ja/zh/ar all translate it properly
+  // ("Διαχειριστής", 管理者, 管理员, المسؤول), so this is those five
+  // locales choosing the loanword, not a missed translation.
+  "es:adminDashboard.auditLog.admin",
+  "fr:adminDashboard.auditLog.admin",
+  "de:adminDashboard.auditLog.admin",
+  "it:adminDashboard.auditLog.admin",
+  "pt:adminDashboard.auditLog.admin",
+  // fr: "Action" is the French noun for the same sense (a thing done),
+  // identical to English the way "Information" and "Date" already are
+  // in this language elsewhere in the product.
+  "fr:adminDashboard.auditLog.action",
+  // The Discord connector (2026-11-07, ΤΟ MOAT / agent/discord). "credits"
+  // itself is the product's own currency word and stays in English in
+  // EVERY locale, el included — see common.creditsTooltip, pricing.rows.
+  // creditsPerMonth and dozens more in messages/el.json; "≈ {credits}
+  // credits" has nothing else in it to translate.
+  "el:dashboard.discord.cost",
+  // "Server" (the Discord server, not a web server) is Discord's own word
+  // in German and Italian — their official clients render it unchanged;
+  // el translates it properly ("Διακομιστής", done above).
+  "de:dashboard.discord.server",
+  "it:dashboard.discord.server",
+  // "AutoMod" is Discord's own feature name, a product term rather than
+  // an English sentence, and Discord's own es/fr/de/it/pt clients render
+  // it unchanged; el gives it its own phrase ("Αυτόματη διαχείριση",
+  // done above) because the Greek client does not borrow the term.
+  "es:dashboard.discord.section.automod",
+  "fr:dashboard.discord.section.automod",
+  "de:dashboard.discord.section.automod",
+  "it:dashboard.discord.section.automod",
+  "pt:dashboard.discord.section.automod",
+  // "Roles" is the Spanish word too, for Discord's own sense (a role
+  // assignable to a member) — same cognate as adminDashboard.auditLog.
+  // admin above.
+  "es:dashboard.discord.section.roles",
+  // "Messages" and "Forum" are the French words too, for Discord's own
+  // channel-type senses; "Forum" is also the German and Italian word.
+  "fr:dashboard.discord.section.messages",
+  "fr:dashboard.discord.kind.forum",
+  "de:dashboard.discord.kind.forum",
+  "it:dashboard.discord.kind.forum",
+  // "Administrator" is the German word too, and the Discord permission's
+  // own name; el translates it properly ("Διαχειριστής", done above).
+  "de:dashboard.discord.perm.administrator",
+  // "Transactions" is the French word too (Ionexa Payments tab label).
+  "fr:payments.dashboard.transactionsTab",
+  "fr:payments.transactions.title",
+  // "Description" is the French word too.
+  "fr:payments.products.description",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // A ready-made automation's group in Automations (2026-11-05): two brand
+  // names and an arrow, the same in every language that writes left to
+  // right. Arabic says it in words («من Instagram إلى Telegram») rather
+  // than with an arrow that points the wrong way in a right-to-left line,
+  // which is why ar is not one of the nine this answers for.
+  "dashboard.automations.templates.groups.instagram",
   // Connect by address (2026-10-26): an example web address is the same
   // in every language, and "{credits} credits" uses the word the product
   // itself uses for its currency everywhere.
@@ -732,6 +919,70 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // "iowork" is a product name, written the same in every language
   // (the final All tools grid, 2026-10-23).
   "dashboard.tools.names.iowork",
+  // iowork Φάση 1 (2026-10-25): "Mac" and "Windows" are the operating
+  // systems' own names, written in Latin letters everywhere including
+  // zh/ja/ar, and the placeholder is an example of the code itself —
+  // eight characters from PAIRING_ALPHABET (src/lib/iowork/pairing.ts),
+  // which has no language. Every other string of this screen IS
+  // translated, including the two that carry those names in a sentence.
+  "dashboard.iowork.platform.mac",
+  "dashboard.iowork.platform.windows",
+  "dashboard.iowork.codePlaceholder",
+  // MOTION STYLES, Κομμάτι 1 (Site 2026-10-30, shared with Apps
+  // 2026-10-30 — components/shell/motion-button.tsx, button and list
+  // only). Shared keys live under toolShell, same as box.* already does.
+  // "Aa" is a generic two-letter type sample, not a word — the same
+  // glyphs in every language that writes with the Latin alphabet (el
+  // uses its own "Αα" instead, so it is not even in this set's locales).
+  "dashboard.toolShell.motion.previewSample",
+  // «Simple | Pro» (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS: SIMPLE ΚΑΙ
+  // PRO», 2026-11-04, Κομμάτι 1). "Pro" is the LEVEL'S NAME, not the
+  // adjective: the owner writes the pair in Latin letters inside Greek
+  // prose, and it is the tier word software keeps untranslated in all
+  // ten of these languages. Its other half IS translated, in every one
+  // of them — Απλό, Sencillo, Simplifié, Einfach, Semplice, Simples,
+  // シンプル, 简易, بسيط — so this entry covers one word, not a pair, and
+  // the switch never reads as English on a Greek screen.
+  "dashboard.toolShell.mode.pro",
+  // "Parallax" is the design/CSS term itself, used untranslated in
+  // el/es/fr/de/it/pt the way "online" or "email" are — ja/zh/ar DO
+  // translate it (パララックス/视差/بارالاكس), so this is six locales
+  // choosing the loanword, not a missed translation.
+  "dashboard.toolShell.motion.styles.parallax",
+  // EDITING, Κομμάτι 2 (owner, 2026-10-30): "Zoom" the camera move —
+  // same shape as Parallax above, the same six Latin-alphabet locales
+  // (el/es/fr/de/it/pt) keep the English word for this exact film term,
+  // while ja/zh/ar translate it (ズーム/缩放/تكبير), so this is a choice,
+  // not a miss.
+  "dashboard.editing.tools.zoom",
+  // FILMS, Κομμάτι 2 (owner, 2026-10-30): "Storyboard" is the English
+  // industry term itself — de/es/fr/it/pt all use it unchanged, the
+  // same five that keep "Parallax"/"Zoom" above (el, unlike those two,
+  // has its own well-established word here and uses it: Εικονογραφημένο
+  // σενάριο). ja/zh/ar translate it too (絵コンテ/分镜/لوحة القصة
+  // المصورة). Two keys share this word on the same screen (the
+  // stage-bar label and the grid's own heading), so both need the
+  // allowance.
+  "dashboard.films.stages.storyboard",
+  "dashboard.films.storyboard.heading",
+  // 3D, Κομμάτι 2 (owner, 2026-10-31, new tool): "3D" is the tile's own
+  // name — the owner's own words ("Τετράγωνο «3D»"), a universal
+  // technical abbreviation identical in every one of these ten
+  // languages' own tech vocabulary, not a missed translation.
+  "dashboard.tools.names.threeD",
+  "dashboard.threeD.viewer.placeholderLabel",
+  // 3D, Κομμάτι 2: GLB/USDZ/STL are file-format names, not words — the
+  // same category as "PDF"/"CSV"/"MP3" elsewhere in this product,
+  // identical in every language because the standard itself is.
+  "dashboard.threeD.panel.formatOptions.glb",
+  "dashboard.threeD.panel.formatOptions.usdz",
+  "dashboard.threeD.panel.formatOptions.stl",
+  // FILMS, Κομμάτι 2: "Credits" is the product's own currency word,
+  // already used untranslated inside Greek and German sentences
+  // elsewhere in this file (dashboard.integrations.mcp.credits,
+  // "{credits} credits" — the exact precedent this allowance already
+  // documents above). This is the same word as a standalone label.
+  "dashboard.films.credits.label",
   // «ΙΣΧΥΣ» (2026-10-23): Coding's power selector, "Normal". Spanish,
   // German and Portuguese all use the same word for this exact sense —
   // not a strength or a volume, the middle setting of three — and it is
@@ -791,6 +1042,9 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // translated everywhere, which is why those two are not on this list.
   "settings.notifications.channels.telegram",
   "settings.notifications.channels.discord",
+  // The Discord tool's own name in the tools list — same brand name,
+  // same reason as the two entries above.
+  "dashboard.tools.names.discord",
   // A Discord webhook URL shown as a placeholder. A FORMAT, not prose —
   // and unlike most placeholders this one is copied literally, so a
   // "translated" version would be a wrong example.
@@ -858,6 +1112,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "auth.login.email",
   "auth.signup.email",
   "auth.forgotPassword.email",
+  // Projects Κομμάτι 4, 2026-10-28: «What Ionexa knows» is the owner's own
+  // quoted name for this field, written in English guillemets in his own
+  // Greek directive, not a sentence someone forgot to translate — the
+  // same treatment "Project" itself already gets inside Greek prose
+  // elsewhere on this screen (automateIt.hint). The placeholder and hint
+  // around it ARE translated in all ten locales; only the heading is not.
+  "projects.notes.heading",
+  // "Ionexa Payments" is a brand name — identical in every language.
+  "pricing.rows.ionexaPayments",
 ]);
 
 function flatten(obj, prefix = "") {
@@ -874,9 +1137,11 @@ const messagesDir = path.join(__dirname, "..", "messages");
 const en = flatten(JSON.parse(fs.readFileSync(path.join(messagesDir, "en.json"), "utf8")));
 
 const failures = [];
+const targetsByLocale = new Map();
 
 for (const loc of LOCALES) {
   const target = flatten(JSON.parse(fs.readFileSync(path.join(messagesDir, `${loc}.json`), "utf8")));
+  targetsByLocale.set(loc, target);
 
   for (const key of Object.keys(en)) {
     if (!(key in target)) {
@@ -896,6 +1161,42 @@ for (const loc of LOCALES) {
     ) {
       failures.push(`${loc}: UNTRANSLATED ${key} = ${JSON.stringify(value)}`);
     }
+  }
+}
+
+// FD2, 2026-11-09: an entry in LOCALE_ALLOWED was never checked the other
+// way. The set exists so that a word which genuinely coincides with English
+// in one locale (a loanword, a cognate) does not fail the loop above — but
+// nothing ever asked whether it STILL coincides. A locale that gets a real
+// translation later, or an en.json edit that changes the English word out
+// from under the exemption, leaves a LOCALE_ALLOWED entry pointing at a pair
+// that no longer matches — and it stays green forever, because the loop
+// above only ever treats membership in this set as permission to skip, not
+// as a claim to re-check. Same shape as the ABSENT_ON_PURPOSE table
+// (scripts/tests/lib/absent-on-purpose.mjs): every entry is checked BOTH
+// ways, and a stale one is a build failure, not a silent pass.
+for (const entry of LOCALE_ALLOWED) {
+  const sep = entry.indexOf(":");
+  const loc = entry.slice(0, sep);
+  const key = entry.slice(sep + 1);
+  if (!(key in en)) {
+    failures.push(`${entry}: STALE LOCALE_ALLOWED — this key no longer exists in en.json, remove the entry`);
+    continue;
+  }
+  const target = targetsByLocale.get(loc);
+  if (!target) {
+    failures.push(`${entry}: STALE LOCALE_ALLOWED — "${loc}" is not one of LOCALES, remove the entry`);
+    continue;
+  }
+  if (!(key in target)) {
+    failures.push(`${entry}: STALE LOCALE_ALLOWED — this key no longer exists in ${loc}.json, remove the entry`);
+    continue;
+  }
+  if (target[key] !== en[key]) {
+    failures.push(
+      `${entry}: STALE LOCALE_ALLOWED — ${loc}.json (${JSON.stringify(target[key])}) no longer matches en.json ` +
+        `(${JSON.stringify(en[key])}) for this key; the exemption was paid off (or en changed), remove the entry`
+    );
   }
 }
 

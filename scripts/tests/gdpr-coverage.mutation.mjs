@@ -67,10 +67,15 @@ const MUTANTS = [
     // The single-use claim is what makes refusing safe. Without the
     // release, a Stripe outage leaves somebody permanently unable to
     // delete their account — a worse trap than the one being fixed.
+    // RE-ANCHORED 2026-11-04: the deferred branch gained its own give-back
+    // (a schedule that did not land), at the same indentation and EARLIER
+    // in the file, so the bare `.update({ used_at: null })` replaced that
+    // one and this mutant was MISSED. Anchored now on the subscription
+    // give-back's own hint, which no other block has.
     name: "a refused deletion keeps the token spent",
     file: DELETE_ROUTE,
-    from: "          .update({ used_at: null })",
-    to: "          .update({ used_at: new Date().toISOString() })",
+    from: "          .update({ used_at: null })\n          .eq(\"token_hash\", tokenHash);\n        if (giveBackError) {\n          logApiError(\"/api/delete-account/confirm\", giveBackError, {\n            stage: \"release_deletion_token\",\n            hint: \"the emailed link is now spent and the account was NOT deleted",
+    to: "          .update({ used_at: new Date().toISOString() })\n          .eq(\"token_hash\", tokenHash);\n        if (giveBackError) {\n          logApiError(\"/api/delete-account/confirm\", giveBackError, {\n            stage: \"release_deletion_token\",\n            hint: \"the emailed link is now spent and the account was NOT deleted",
     expect: "releases the claim",
   },
   {

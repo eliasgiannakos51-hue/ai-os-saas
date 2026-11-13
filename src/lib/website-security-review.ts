@@ -81,7 +81,19 @@ export function parseContentSafetyReviewInput(input: {
 export async function reviewWebsiteContentSafety(
   apiKey: string,
   html: string,
-  costs?: CostAccumulator
+  // REQUIRED, NOT OPTIONAL (agent/mistral, 2026-11-07, matching
+  // lib/lead-classification.ts's own reasoning): a required parameter
+  // cannot follow an optional one once userId below is required too, and
+  // both of this function's two real callers already pass one — an
+  // optional `?` here bought nothing and would again be the open door a
+  // caller could walk tokens through uncounted.
+  costs: CostAccumulator,
+  // The site owner's id, the account this review's tokens are billed to
+  // (costs above). Required so runCompletion can resolve this account's
+  // «Μόνο Ευρώπη» setting (lib/ai/providers/eu-only.ts) — without it the
+  // call could silently route around a promise this account made.
+  // eu-only.test.mjs ranges over every runCompletion caller for this.
+  userId: string
 ): Promise<ContentSafetyReviewResult> {
   try {
     const trimmed = html.length > MAX_HTML_CHARS_FOR_REVIEW ? html.slice(0, MAX_HTML_CHARS_FOR_REVIEW) : html;
@@ -107,7 +119,7 @@ export async function reviewWebsiteContentSafety(
       tools: [REVIEW_TOOL],
       toolChoice: { type: "tool", name: "review_content_safety" },
       requires: ["tool_calling"],
-    });
+    }, { userId });
 
     // FAIL OPEN, AS THIS LAYER ALWAYS HAS — and now that includes a
     // provider failure and a Stop, which used to arrive as a thrown
@@ -119,7 +131,7 @@ export async function reviewWebsiteContentSafety(
     // Recorded before the parse: this review is a real billed call whose
     // cost the user's action incurred whether or not the response came
     // back in a shape we could use.
-    costs?.record("security_review", outcome.usage, outcome.reportedModel || outcome.model);
+    costs.record("security_review", outcome.usage, outcome.reportedModel || outcome.model);
 
     const toolUse = outcome.toolCalls[0];
     if (!toolUse) return { isSafe: true, concerns: [] };

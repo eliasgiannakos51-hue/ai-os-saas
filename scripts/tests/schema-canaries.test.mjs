@@ -181,10 +181,11 @@ console.log("\n== 3. every migration in the window has a canary, or says why it 
 // object exist"; a file that only revokes, grants, or replaces the body of
 // a function that already existed cannot be seen that way, by anybody.
 const NOT_PROBEABLE = {
-  "20261023100000_projects_site_versions_server_written.sql":
-    "drops the insert policy on projects and the insert and delete policies on site_versions, and revokes INSERT on the first and INSERT, UPDATE and DELETE on the second from the signed-in role. It creates no object, and what it changes is a privilege, which /api/health cannot see; the migration raises at the end if the account can still write what it should not or lost what it keeps, and server-written-tables.dbtest.mjs checks it against a real Postgres",
-  "20261020000000_google_calendar_connection.sql":
-    "widens a CHECK constraint on user_integrations to a fourth provider name. It creates no object, and a constraint is not in the database API's OpenAPI document, so /api/health cannot see it; the migration raises at the end if the constraint does not name google_calendar, and until it runs the Calendar callback's save is refused and says so",
+  // 20261115000001 and 20261115000002 were here until they fell out of
+  // the newest-12 window on 2026-11-11 (5 new migrations: ionexa_payments,
+  // agent_approvals, payments_subscriptions, payments_coupons, payments_invoices).
+  "20261116000000_push_subscriptions_server_written.sql":
+    "only drops two policies and revokes INSERT and UPDATE on push_subscriptions from the signed-in role; it adds no table, column or function. The service role the probe reads through bypasses both policies and privileges, so it cannot see the difference. Held instead by scripts/tests/server-written-tables.dbtest.mjs as the signed-in role on a real Postgres, and by the file's own SELF-CHECK, which raises when pasted if the revoke did not take.",
 };
 
 const canariedMigrations = new Set(SCHEMA_CANARIES.map((c) => c.migration));

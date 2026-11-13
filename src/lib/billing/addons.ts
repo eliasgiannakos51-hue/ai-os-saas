@@ -134,6 +134,36 @@ export function addonIsActive(addon: HeldAddon, now: Date): boolean {
   return Number.isFinite(expires.getTime()) && expires.getTime() > now.getTime();
 }
 
+/**
+ * WHAT A RECURRING ADD-ON'S ROW SHOULD SAY, FROM ITS OWN SUBSCRIPTION
+ * (2026-11-05, ΑΣ-4.17).
+ *
+ * The Stripe webhook runs this on every event about an add-on's
+ * subscription (syncAddonSubscription). Until then nothing moved the row
+ * after the purchase, and addonIsActive above reads an active row as
+ * active for ever — so an add-on whose subscription had ended kept
+ * granting.
+ *
+ *   live, renewing          -> active, no expiry
+ *   live, cancel at end     -> cancelled, granted until the period end
+ *   ended, unpaid, anything -> cancelled, ends now
+ *
+ * A subscription that is paid again after lapsing comes back active.
+ */
+export function addonStateFromSubscription(
+  subscription: { status: string; cancelAtPeriodEnd: boolean; periodEndIso: string | null },
+  now: Date
+): { status: "active" | "cancelled"; expiresAt: string | null } {
+  const live = subscription.status === "active" || subscription.status === "trialing";
+  if (live && !subscription.cancelAtPeriodEnd) return { status: "active", expiresAt: null };
+  if (live) {
+    const end = subscription.periodEndIso ? new Date(subscription.periodEndIso) : null;
+    const valid = end !== null && Number.isFinite(end.getTime());
+    return { status: "cancelled", expiresAt: valid ? end!.toISOString() : now.toISOString() };
+  }
+  return { status: "cancelled", expiresAt: now.toISOString() };
+}
+
 export type Entitlements = {
   /** The plan's cap PLUS every active agents add-on. */
   maxAiAgents: number;

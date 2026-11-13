@@ -76,8 +76,8 @@ const MUTANTS = [
     // the gate.
     name: "user-photos names four tables again instead of deriving them",
     file: USER_PHOTOS,
-    from: '  const unread = htmlTables.filter((t) => !route.includes(`"${t}"`));\n  ok("...and every table that carries HTML is read",\n    unread.length === 0,\n    `not read by the cleanup: ${unread.join(", ")}`);',
-    to: '  ok("...and every table that carries HTML is read",\n    ["user_websites", "published_sites", "website_versions", "site_versions"].every((t) => route.includes(`"${t}"`)));',
+    from: '  const unread = htmlTables.filter((t) => !sweep.includes(`"${t}"`));\n  ok("...and every table that carries HTML is read",\n    unread.length === 0,\n    `not read by the cleanup: ${unread.join(", ")}`);',
+    to: '  ok("...and every table that carries HTML is read",\n    ["user_websites", "published_sites", "website_versions", "site_versions"].every((t) => sweep.includes(`"${t}"`)));',
     expect: "user-photos.test.mjs",
   },
 ];

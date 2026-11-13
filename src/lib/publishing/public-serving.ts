@@ -1,6 +1,8 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { ALLOWED_IFRAME_EMBEDS } from "@/lib/website-html-security-scan";
+import { REFERENCE_IMAGE_BUCKET } from "@/lib/website-reference-image";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Everything the public site route needs that is not a database call.
 //
@@ -27,10 +29,23 @@ import { ALLOWED_IFRAME_EMBEDS } from "@/lib/website-html-security-scan";
 //     external script host is in script-src, so an injected
 //     <script src="//evil"> is blocked by the browser even if it somehow
 //     survived the static scan.
-//   img-src allows data: and https: because generated pages use inline
-//     SVGs and real photos from Unsplash. (There is no picsum fallback any
+//   'self' is also in script-src, for exactly ONE reference the
+//     generation prompt is allowed to write: <script src="/ionexa-players.js">
+//     (cinematic sites, docs/v6-cinematic-sites-2026-10-03.md). It is
+//     same-origin by construction — the published site IS this app's
+//     origin — and nothing else widens 'self' into an attacker's host.
+//     The scanner's own allowlist (ALLOWED_OWN_SCRIPT_SRCS,
+//     website-html-security-scan.ts) is what keeps it to that one path.
+//   img-src and media-src name the hosts a generated page's pictures
+//     really come from, and nothing else (since 2026-11-05; before, any
+//     https: host): inline SVG and data: URIs, Unsplash's CDN (the
+//     resolver's `urls.regular`, lib/unsplash.ts), and the owner's own
+//     uploads under this project's Storage bucket for them
+//     (lib/website-reference-image.ts). There is no picsum fallback any
 //     more — an unresolved photo placeholder has its <img> removed rather
-//     than filled with a random image; see lib/website-image-resolver.ts.)
+//     than filled with a random image; see lib/website-image-resolver.ts.
+//     A picture from anywhere else does not load; the point is that a
+//     request to anywhere else does not leave either.
 //   frame-src is BUILT FROM the static scan's own allowlist below, so the
 //     two cannot disagree. They used to be two hand-written lists with
 //     this same comment claiming they could not — and they did: the scan
@@ -38,9 +53,22 @@ import { ALLOWED_IFRAME_EMBEDS } from "@/lib/website-html-security-scan";
 //     https://www.youtube.com blocks. A page passed the scan, got
 //     published, and then failed to render its own video with no error
 //     anywhere. The comment is true now because there is one list.
-//   form-action is restricted to self, so a page cannot POST a visitor's
-//     details to a third party — the one thing a phishing page most wants
-//     to do, and the reason this is not just 'default-src'.
+//   form-action and connect-src name the app's own form endpoint path
+//     (/api/websites/), where a site's contact form posts; connect-src
+//     names nothing else, so a page's script cannot call the rest of the
+//     app's API. form-action keeps 'self' as well.
+//   WHAT THIS DOES NOT DO, said plainly because an earlier version of
+//     this comment claimed otherwise: none of it stops a page from sending
+//     what a visitor typed somewhere else. A page can navigate itself or
+//     open a window to any address with the text in the URL, and a browser
+//     resolves names it is asked to prefetch — a CSP governs what a page
+//     LOADS, not where it GOES. And the form endpoint it may reach stores
+//     a submission for whoever owns the site. So a page that asks for a
+//     password is refused before it is published
+//     (lib/publishing/credential-fields.ts, read by the site scan and by
+//     Rebuild's checkAppHtml), the form endpoint drops password-like
+//     fields, and the lasting answer is serving all of this from a domain
+//     that is not ours (lib/publishing/content-origin.ts).
 //   base-uri 'none' stops a <base> tag from re-pointing every relative
 //     URL on the page.
 //   object-src 'none' — no Flash/applet/plugin surface at all.
@@ -68,28 +96,62 @@ import { ALLOWED_IFRAME_EMBEDS } from "@/lib/website-html-security-scan";
 //     allow-same-origin here: next to allow-scripts it hands the page our
 //     origin back, and scripts/tests/publishing-sandbox.test.mjs is red on it.
 const SANDBOX_TOKENS = ["allow-scripts", "allow-forms", "allow-popups", "allow-popups-to-escape-sandbox"];
-const CSP_DIRECTIVES = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' data: https://fonts.gstatic.com",
-  "img-src 'self' data: blob: https:",
-  "media-src 'self' https:",
-  "connect-src 'self'",
-  "form-action 'self'",
-  `frame-src ${ALLOWED_IFRAME_EMBEDS.map((embed) => `https://${embed.host}`).join(" ")}`,
-  "frame-ancestors 'none'",
-  "base-uri 'none'",
-  "object-src 'none'",
-  "upgrade-insecure-requests",
-  `sandbox ${SANDBOX_TOKENS.join(" ")}`,
-].join("; ");
+
+/** Where a generated page's photographs come from besides its own
+ *  uploads: Unsplash's CDN. `plus.` is Unsplash+'s, which the search API
+ *  can return. */
+export const PUBLISHED_IMAGE_HOSTS = ["https://images.unsplash.com", "https://plus.unsplash.com"] as const;
+
+/** An origin, or null for anything that does not parse as http(s). */
+function originOf(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The published pages' policy. `appUrl` is the app's own address (forms
+ * post to its /api/websites/), `supabaseUrl` the project whose Storage
+ * serves the owner's uploads. Either missing leaves its source out rather
+ * than widening anything.
+ */
+export function buildPublishedCsp(options: { appUrl?: string | null; supabaseUrl?: string | null }): string {
+  const app = originOf(options.appUrl);
+  const storage = originOf(options.supabaseUrl);
+  const uploads = storage ? [`${storage}/storage/v1/object/public/${REFERENCE_IMAGE_BUCKET}/`] : [];
+  const formPath = app ? [`${app}/api/websites/`] : [];
+  return [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    ["img-src 'self' data: blob:", ...PUBLISHED_IMAGE_HOSTS, ...uploads].join(" "),
+    ["media-src 'self' data: blob:", ...uploads].join(" "),
+    formPath.length > 0 ? `connect-src ${formPath.join(" ")}` : "connect-src 'none'",
+    ["form-action 'self'", ...formPath].join(" "),
+    `frame-src ${ALLOWED_IFRAME_EMBEDS.map((embed) => `https://${embed.host}`).join(" ")}`,
+    "frame-ancestors 'none'",
+    "base-uri 'none'",
+    "object-src 'none'",
+    "upgrade-insecure-requests",
+    `sandbox ${SANDBOX_TOKENS.join(" ")}`,
+  ].join("; ");
+}
 
 export function publishedSiteHeaders(options: { cacheSeconds?: number } = {}): HeadersInit {
   const cache = options.cacheSeconds ?? 60;
   return {
     "Content-Type": "text/html; charset=utf-8",
-    "Content-Security-Policy": CSP_DIRECTIVES,
+    "Content-Security-Policy": buildPublishedCsp({
+      // The same address the generator wrote into each form's endpoint
+      // (api/websites/generate/process and api/websites/edit).
+      appUrl: getSiteUrl(),
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    }),
     // Belt and braces with frame-ancestors: older browsers honour only
     // this one, and clickjacking a published site is a real attack on its
     // owner's visitors.

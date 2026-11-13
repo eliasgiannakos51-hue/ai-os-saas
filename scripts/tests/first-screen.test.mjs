@@ -322,6 +322,82 @@ checkList(
 );
 
 // ---------------------------------------------------------------------
+console.log("\n== 4c. A LINK FILLS THE FIELD; ONLY THE APP PRESSES SEND (2026-11-05 review, A8) ==");
+// An address can be written by any page on the web, and sending spends
+// credits and can write memory. So the parameter only PRE-FILLS, and the
+// app's own buttons say "send it" through this tab's sessionStorage, which
+// another site cannot write. The behaviour is run, not read: a fake window
+// with a real-shaped Storage.
+{
+  const store = new Map();
+  const fakeStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+    removeItem: (k) => store.delete(k),
+  };
+  const priorWindow = globalThis.window;
+  globalThis.window = { location: { origin: "https://app.test", href: "https://app.test/dashboard/tools" }, sessionStorage: fakeStorage };
+  const arrival = await loadTs("src/lib/nav/send-on-arrival.ts");
+  const { armSendOnArrival, takeSendOnArrival, SENDS_ON_ARRIVAL, SEND_ON_ARRIVAL_FRESH_MS } = arrival;
+  check("nothing armed: an address alone never sends", takeSendOnArrival("ask", "hello") === false);
+  armSendOnArrival("/dashboard/chat?ask=hello");
+  check("the app's own press sends that text once", takeSendOnArrival("ask", "hello") === true);
+  check("...and only once", takeSendOnArrival("ask", "hello") === false);
+  armSendOnArrival("/dashboard/chat?ask=hello");
+  check("another text in the address is not sent", takeSendOnArrival("ask", "something else") === false);
+  check("...and the intent is spent by the attempt", takeSendOnArrival("ask", "hello") === false);
+  armSendOnArrival("/dashboard/chat?ask=hello");
+  check("an intent for another parameter is not this one", takeSendOnArrival("brief", "hello") === false);
+  armSendOnArrival("/dashboard/chat?ask=hello");
+  check("a stale intent sends nothing", takeSendOnArrival("ask", "hello", Date.now() + SEND_ON_ARRIVAL_FRESH_MS + 1) === false);
+  armSendOnArrival("https://evil.example/dashboard/chat?ask=hello");
+  check("a link to another origin arms nothing", takeSendOnArrival("ask", "hello") === false);
+  armSendOnArrival("/dashboard/images?ask=hello");
+  check("a route that does not act on arrival arms nothing", store.size === 0);
+  armSendOnArrival(`/dashboard/chat?ask=${"x".repeat(MAX_EXAMPLE_CHARS + 50)}`);
+  check("the text is compared as the page clamps it", takeSendOnArrival("ask", "x".repeat(MAX_EXAMPLE_CHARS)) === true);
+  if (priorWindow === undefined) delete globalThis.window;
+  else globalThis.window = priorWindow;
+
+  // EVERY CONSUMER: each route that may act on arrival, through the
+  // workspace the examples name for it, sends only behind the intent.
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const consumers = { ask: "src/components/chat/chat-workspace.tsx", brief: "src/components/website-builder/website-builder-workspace.tsx" };
+  check(
+    "the routes that act on arrival are the chat and the site, each with a consumer below",
+    JSON.stringify(Object.values(SENDS_ON_ARRIVAL).sort()) === JSON.stringify(Object.keys(consumers).sort()),
+    JSON.stringify(SENDS_ON_ARRIVAL)
+  );
+  const chat = strip(read(consumers.ask));
+  check(
+    "Chat sends an arriving question only when the app asked, and otherwise fills the field",
+    /if \(takeSendOnArrival\("ask", initialAsk\)\) void handleSend\(initialAsk\);\s*else composerRef\.current\?\.setText\(initialAsk\);/.test(chat)
+  );
+  check("...and nowhere else sends it", (chat.match(/handleSend\(initialAsk\)/g) ?? []).length === 1);
+  const site = strip(read(consumers.brief));
+  check(
+    "the older Site workspace submits an arriving brief only when the app asked",
+    /if \(takeSendOnArrival\("brief", initialBrief\)\) void submitGeneration\(/.test(site) && (site.match(/submitGeneration\(brief\.slice/g) ?? []).length === 1
+  );
+
+  // EVERY PRODUCER: the population is the tree — every file that builds
+  // one of these addresses through the shared builders arms the intent
+  // before it follows it.
+  const producers = [];
+  (function walk(dir) {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const f = `${dir}/${e.name}`;
+      if (e.isDirectory()) walk(f);
+      else if (/\.tsx$/.test(e.name) && /\b(quickJobHref|firstTaskHref|exampleHref)\(/.test(strip(read(f)))) producers.push(f);
+    }
+  })("src/components");
+  check(`the screens that build such an address were found (${producers.length})`, producers.length >= 2, producers.join(", "));
+  for (const f of producers) {
+    check(`${f} arms the intent on the app's own press`, /armSendOnArrival\(href\)/.test(strip(read(f))));
+  }
+}
+
+// ---------------------------------------------------------------------
 console.log("\n== 5. Home is the design's block: the field, then the quick actions ==");
 
 const overview = read(OVERVIEW);

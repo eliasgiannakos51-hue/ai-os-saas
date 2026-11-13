@@ -9,12 +9,13 @@ import { checkProjectName } from "@/lib/projects/project";
 import { MAX_FLOW_SAID, canRun, planFlow, projectNameFor, withoutUnavailable } from "@/lib/flows/plan";
 import { flowAvailability } from "@/lib/flows/availability";
 import { readColour } from "@/lib/flows/brief";
+import { ownedProjectId } from "@/lib/projects/link-result";
 
 export const dynamic = "force-dynamic";
 
 /**
- * A FLOW, APPROVED (MASTER 6.1 and 6.3; MASTER 16 package 36), behind the
- * for everybody since 2026-10-23.
+ * A FLOW, APPROVED (MASTER 6.1 and 6.3; MASTER 16 package 36), for
+ * everybody since 2026-10-23.
  *
  * The screen has already shown the plan and its total (lib/flows/plan.ts,
  * lib/flows/flow-pricing.ts); pressing «Έγκριση» lands here. The plan is
@@ -22,8 +23,17 @@ export const dynamic = "force-dynamic";
  * what runs is what this sentence means, not what a request says it means.
  * A sentence that needs a tool that does not exist yet starts nothing.
  *
- * It makes the PROJECT the results go into — under the plan's own project
- * cap, as api/projects does — and the flow row that follows the steps.
+ * TWO WAYS IN (Projects Κομμάτι 6, owner's message 2026-10-28, point 2:
+ * «κάτω πεδίο που φτιάχνει μέσα στο project»): with no `projectId`, this
+ * makes the PROJECT the results go into — under the plan's own project
+ * cap, as api/projects does — exactly as before. With one, the field sits
+ * INSIDE a project already open, and the sentence's results join THAT
+ * project instead of a new one: no project is made, no cap is spent, and
+ * an id that is not the caller's own refuses outright rather than
+ * silently falling back to "make a new one" — the field only ever sends
+ * the project it is drawn on, so a mismatch here is not the ordinary
+ * "nothing asked for yet" case the no-project path exists for.
+ *
  * Nothing here calls a model or charges: each step is its own tool's
  * request, charged by that tool.
  */
@@ -38,12 +48,18 @@ export async function POST(request: Request) {
   if (said.length < 3) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
   if (said.length > MAX_FLOW_SAID) return NextResponse.json({ ok: false, code: "too_long", limit: MAX_FLOW_SAID }, { status: 400 });
   const colour = readColour(body.colour);
+  // Present at all means the field was drawn ON a project — refused, not
+  // defaulted to "make a new one", if it does not resolve to the
+  // caller's own (see the comment above this route).
+  const requestedProjectId = typeof body.projectId === "string" ? body.projectId : null;
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ ok: false, code: "not_signed_in" }, { status: 401 });
+  const existingProjectId = requestedProjectId ? await ownedProjectId(supabase, requestedProjectId) : null;
+  if (requestedProjectId && !existingProjectId) return NextResponse.json({ ok: false, code: "no_such_project" }, { status: 404 });
   const limited = await checkRateLimit({ scope: "flow_create", identifier: user.id, maxAttempts: 30, windowMinutes: 60 });
   if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });
 
@@ -55,28 +71,39 @@ export async function POST(request: Request) {
   }
 
   try {
-    const cap = maxProjectsForPlan(await resolveEffectivePlanSlug(user));
-    if (Number.isFinite(cap)) {
-      const { count, error: countError } = await supabase.from("projects").select("id", { count: "exact", head: true }).eq("user_id", user.id);
-      if (countError) {
-        logApiError("/api/flows", countError, { stage: "count_projects" });
-        return NextResponse.json({ ok: false, code: "limit_check_failed" }, { status: 503 });
+    let project: { id: string; name: string };
+    if (existingProjectId) {
+      const { data: existing, error: existingError } = await supabase.from("projects").select("id, name").eq("id", existingProjectId).maybeSingle();
+      if (existingError || !existing) {
+        logApiError("/api/flows", existingError ?? new Error("project disappeared"), { stage: "existing_project" });
+        return NextResponse.json({ ok: false, code: "no_such_project" }, { status: 404 });
       }
-      if ((count ?? 0) >= cap) return NextResponse.json({ ok: false, code: "project_limit_reached", limit: cap }, { status: 402 });
-    }
-    const name = checkProjectName(projectNameFor(said));
-    if (!name.ok) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
-    // The project as api/projects makes it: by the server, after the cap
-    // above, user_id from the session (the account holds no INSERT on
-    // projects: 20261023100000_projects_site_versions_server_written.sql).
-    const { data: project, error: projectError } = await createAdminClient()
-      .from("projects")
-      .insert({ user_id: user.id, name: name.name, goal: said.slice(0, 500), status: "active" })
-      .select("id, name")
-      .single();
-    if (projectError || !project) {
-      logApiError("/api/flows", projectError ?? new Error("no project"), { stage: "project" });
-      return NextResponse.json({ ok: false, code: "save_failed" }, { status: 500 });
+      project = existing;
+    } else {
+      const cap = maxProjectsForPlan(await resolveEffectivePlanSlug(user));
+      if (Number.isFinite(cap)) {
+        const { count, error: countError } = await supabase.from("projects").select("id", { count: "exact", head: true }).eq("user_id", user.id);
+        if (countError) {
+          logApiError("/api/flows", countError, { stage: "count_projects" });
+          return NextResponse.json({ ok: false, code: "limit_check_failed" }, { status: 503 });
+        }
+        if ((count ?? 0) >= cap) return NextResponse.json({ ok: false, code: "project_limit_reached", limit: cap }, { status: 402 });
+      }
+      const name = checkProjectName(projectNameFor(said));
+      if (!name.ok) return NextResponse.json({ ok: false, code: "empty" }, { status: 400 });
+      // The project as api/projects makes it: by the server, after the cap
+      // above, user_id from the session (the account holds no INSERT on
+      // projects: 20261023100000_projects_site_versions_server_written.sql).
+      const { data: made, error: projectError } = await createAdminClient()
+        .from("projects")
+        .insert({ user_id: user.id, name: name.name, goal: said.slice(0, 500), status: "active" })
+        .select("id, name")
+        .single();
+      if (projectError || !made) {
+        logApiError("/api/flows", projectError ?? new Error("no project"), { stage: "project" });
+        return NextResponse.json({ ok: false, code: "save_failed" }, { status: 500 });
+      }
+      project = made;
     }
     const { data: flow, error: flowError } = await createAdminClient()
       .from("project_flows")

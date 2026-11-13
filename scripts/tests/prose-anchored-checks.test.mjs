@@ -81,6 +81,20 @@ const ALLOWED = [
       "NotificationType list rather than silently growing it, so a reader " +
       "who opens the file sees the decision written down.",
   },
+  {
+    file: "cinematic-players.test.mjs",
+    target: "src/lib/publishing/public-serving.ts",
+    body: "ionexa-players\\.js",
+    why:
+      "labelled 'DOC, not behaviour' in its own check name. There is no CSP " +
+      "code to execute here — 'self' already permits /ionexa-players.js as a " +
+      "same-origin static asset, with no change needed to the directive " +
+      "itself (checked separately, on the real 'script-src' string, two " +
+      "lines above this one). The guarantee is that the comment says why the " +
+      "exception needs no code change, instead of leaving the next reader to " +
+      "assume a generated page can never carry a <script src> and wonder why " +
+      "one suddenly works.",
+  },
 ];
 
 const pairs = proseAnchoredPairs();

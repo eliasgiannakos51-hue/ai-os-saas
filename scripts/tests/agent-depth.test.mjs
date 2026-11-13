@@ -384,7 +384,7 @@ console.log("\n7. The picker shows the price, every time");
     !/selected &&[\s\S]{0,80}fact\.credits/.test(pickerSrc));
   ok("the tier list comes from AGENT_DEPTHS", /AGENT_DEPTHS\.map/.test(pickerSrc));
   ok("the picker is used in three places",
-    ["src/components/agents/agents-workspace.tsx"].every((f) =>
+    ["src/components/agents/agents-shell.tsx"].every((f) =>
       (readFileSync(f, "utf8").match(/<DepthPicker/g) ?? []).length === 3),
     "create preview, edit panel and the per-run override");
   const facts = readFileSync("src/app/dashboard/agents/page.tsx", "utf8");

@@ -17,21 +17,29 @@ import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 // The plan an account is on is resolved in lib/billing/plan-resolution.ts
 // — pure, and therefore unit-testable, which this module is not. Re-exported
 // so every existing `from "@/lib/billing/credits"` import keeps working.
-import { resolvePlanSlug, resolvePlan } from "@/lib/billing/plan-resolution";
+import { resolvePlanSlug, resolvePlan, hasLiveSubscription } from "@/lib/billing/plan-resolution";
 export { resolvePlanSlug, resolvePlan };
 
 // The tier actually in effect right now — same as resolvePlanSlug, except
 // a beta-granted tier collapses to "free" once beta_expires_at (see
 // lib/beta.ts, user_credits.beta_expires_at) has passed. A beta tester who
-// has since become a real paying subscriber (has a Stripe customer id) is
-// left untouched — Stripe's webhook owns their tier from that point on,
-// regardless of whether their old beta window is still open.
+// has since become a real paying subscriber is left untouched — Stripe's
+// webhook owns their tier from that point on, regardless of whether their
+// old beta window is still open.
+//
+// A PAYING SUBSCRIBER MEANS A LIVE SUBSCRIPTION, not a customer id
+// (2026-11-05, ΑΣ-4.19). stripe_customer_id is written the moment a
+// checkout page is OPENED (api/checkout, api/credits/checkout,
+// api/billing/addons), so an expired beta that had merely looked at a
+// checkout kept the beta tier. stripe_subscription_id is written only by
+// the webhook, only while the subscription is active, and cleared when it
+// ends (api/webhooks/stripe, syncSubscriptionToUser).
 export async function resolveEffectivePlanSlug(
   user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): Promise<PlanSlug> {
   const baseSlug = resolvePlanSlug(user);
   if (!user || baseSlug === "free") return baseSlug;
-  if (user.user_metadata?.stripe_customer_id) return baseSlug;
+  if (hasLiveSubscription(user)) return baseSlug;
   if (!isBetaTester(user)) return baseSlug;
 
   const active = await hasActiveBetaBypass(user);
@@ -446,7 +454,13 @@ export async function resetCreditsToTotal(userId: string, total: number): Promis
 // and renewal (see api/webhooks/stripe/route.ts's syncSubscriptionToUser).
 // Enterprise's "custom" allotment is configured by hand, not by a plan
 // lookup, so it's left untouched here — only plan_tier is synced for it.
-export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, reason: string): Promise<void> {
+export async function syncCreditsForPlan(
+  userId: string,
+  planSlug: PlanSlug,
+  reason: string,
+  /** The paid period this reset belongs to (creditPeriodKey). */
+  periodKey?: string
+): Promise<void> {
   const plan = getPlan(planSlug) ?? getPlan("free")!;
   const admin = createAdminClient();
 
@@ -507,7 +521,15 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
   // insert is what grants the right to reset. If the reset then fails the
   // claim is handed back, because a claim without a reset would turn one
   // failed webhook into a customer who never gets that month's credits.
-  const resetKey = `plan_reset:${userId}:${planSlug}:${creditMonthKey()}`;
+  //
+  // AND THE PERIOD, NOT THE MONTH (2026-11-05, ΑΣ-4.15). Keyed on the
+  // calendar month, a paid period that straddles a month boundary had two
+  // keys, so up, down and up again across the 1st opened the higher plan's
+  // allowance twice — and a renewal in a month whose key a plan change had
+  // already taken was skipped. The webhook passes the paid period
+  // (creditPeriodKey in lib/billing/subscription-sync.ts); the month is
+  // only the fallback for a caller that has no period.
+  const resetKey = `plan_reset:${userId}:${planSlug}:${periodKey ?? creditMonthKey()}`;
   const { error: claimError } = await admin.from("credit_transactions").insert({
     user_id: userId,
     amount: total,
@@ -531,6 +553,75 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
     await admin.from("credit_transactions").delete().eq("idempotency_key", resetKey);
     throw resetError;
   }
+}
+
+/**
+ * A MOVE DOWN LOWERS THE BALANCE AND NEVER RAISES IT (2026-11-05,
+ * ΑΣ-4.15).
+ *
+ * The reset above SETS the balance to the plan's allowance plus what was
+ * bought. On a downgrade that is a refill: an account that had spent the
+ * higher plan's allowance came back at the lower plan's full one. This is
+ * what the webhook runs instead when lib/billing/subscription-sync.ts
+ * decides "clamp" — a lower plan, a past-due period, the end of a
+ * subscription. The balance becomes the smaller of what is there and the
+ * lower plan's allowance plus purchased credits, inside one statement
+ * (clamp_credits_to_plan, 20261117000000_billing_reversals.sql), so a
+ * spend landing at the same moment is not lost.
+ *
+ * NEVER THROWS INTO THE WEBHOOK, AND NEVER GIVES. If the function is not
+ * there yet (the migration has not been pasted), the balance is left as
+ * it is and the failure is logged — the one outcome that cannot hand out
+ * credits.
+ */
+export async function clampCreditsToPlan(userId: string, planSlug: PlanSlug, reason: string): Promise<void> {
+  const plan = getPlan(planSlug) ?? getPlan("free")!;
+  // A plan change ends any grandfathered entitlement — the same guard the
+  // reset runs, and the direction where it matters most.
+  await clearLegacyEntitlements(userId);
+  const monthly = plan.monthlyCredits === "custom" ? null : plan.monthlyCredits;
+  if (monthly === null) return;
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("clamp_credits_to_plan", {
+    p_user_id: userId,
+    p_monthly: monthly,
+    p_plan_tier: planSlug,
+    p_description: reason,
+  });
+  if (error) logApiError("billing:clampCreditsToPlan", error, { userId, planSlug });
+}
+
+/**
+ * Takes a refunded or disputed pack's credits back (2026-11-05, ΑΣ-4.18).
+ *
+ * From the balance and from the purchased sub-ledger together — otherwise
+ * the next monthly reset, which re-adds purchased credits, would hand them
+ * straight back — and never below zero: credits already spent are not
+ * owed back as a negative balance. Claimed once per key, so a redelivered
+ * refund event takes nothing twice. Returns what was actually taken, for
+ * the webhook's log; null when the reversal could not be recorded.
+ */
+export async function reversePurchasedCredits(
+  userId: string,
+  amount: number,
+  idempotencyKey: string,
+  description: string
+): Promise<{ applied: boolean; debited: number } | null> {
+  const requested = Math.floor(amount);
+  if (!Number.isFinite(requested) || requested <= 0) return { applied: false, debited: 0 };
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("reverse_purchased_credits", {
+    p_user_id: userId,
+    p_amount: requested,
+    p_idempotency_key: idempotencyKey,
+    p_description: description,
+  });
+  if (error) {
+    logApiError("billing:reversePurchasedCredits", error, { userId, requested });
+    return null;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  return { applied: Boolean(row?.applied), debited: Number(row?.debited ?? 0) };
 }
 
 /**

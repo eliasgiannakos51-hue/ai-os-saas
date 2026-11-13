@@ -29,12 +29,16 @@ import { useTranslations } from "next-intl";
  *             wrote or a real published page.
  *   badge   — a pill for a card or a toolbar, where a full sentence would
  *             not fit.
+ *   line    — one small muted line under a generated artefact, with no
+ *             frame: the editor layout's (the switch "editor-shell"), where
+ *             the approved screens say it under the work (16-Films.png)
+ *             instead of in a bordered strip above it.
  *
  * Never `aria-hidden`. A screen-reader user has exactly the same right to
  * know a model wrote this, and hiding it would defeat the purpose while
  * looking compliant.
  */
-export type AiNoticeVariant = "inline" | "block" | "badge";
+export type AiNoticeVariant = "inline" | "block" | "badge" | "line";
 
 export function AiGeneratedNotice({
   variant = "inline",
@@ -54,6 +58,15 @@ export function AiGeneratedNotice({
         <Sparkles className="h-2.5 w-2.5" aria-hidden="true" />
         {t("short")}
       </span>
+    );
+  }
+
+  if (variant === "line") {
+    return (
+      <p data-testid="ai-notice-line" className={`flex items-center justify-center gap-1.5 text-center text-xs leading-relaxed text-muted ${className}`}>
+        <Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
+        <span>{t("long")}</span>
+      </p>
     );
   }
 

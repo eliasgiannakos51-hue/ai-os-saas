@@ -171,6 +171,11 @@ const REGISTER = {
     reason:
       "planResearch records usage before deciding the plan is unusable, so 'no_plan' is a real charge; the throw path is the helper's case.",
   },
+  "src/lib/voice/live-session.ts": {
+    mechanism: "settles_unconditionally",
+    reason:
+      "billLiveMinutes reserves and then immediately records the external cost and settles, on every path that passed the reserve. The reserve is guarded by bypassCredits, and the settle follows it unconditionally — there is no branch between the two that could return or throw without settling.",
+  },
   // api/research/[id]/run WAS registered here as handed_on, on 2026-09-18.
   // It released nothing of its own because the chunked runner owns the
   // hold — which was true until the write that hands the id over turned
@@ -410,7 +415,7 @@ const deleteConfirm = SRC.get(DELETE_CONFIRM) ?? "";
 check(
   `${DELETE_CONFIRM.replace("src/app/api/", "")}: the token give-back is checked`,
   // EVERY write that gives the token back, each with its error read.
-  (deleteConfirm.match(/\.update\(\{ used_at: null \}\)/g) ?? []).length >= 2 &&
+  (deleteConfirm.match(/\.update\(\{ used_at: null \}\)/g) ?? []).length >= 3 &&
     (deleteConfirm.match(/\.update\(\{ used_at: null \}\)/g) ?? []).length ===
       (deleteConfirm.match(/const \{ error: giveBackError \} = await admin\s*\.from\("account_deletion_requests"\)\s*\.update\(\{ used_at: null \}\)/g) ?? []).length,
   "'Your link still works' is a promise about this exact write"
@@ -423,6 +428,10 @@ check(
 // EVERY GIVE-BACK, not the first one: since 2026-10-08 the route has two
 // (the files and the subscription), and a check that read the first could
 // not see the second. Each branch is bounded by its own matching brace.
+// THREE since 2026-11-04: a deferred schedule that did not land gives the
+// link back too. The floors below are the real count, because a floor
+// one under it let a branch lose its give-back with every check green
+// (reservation-lifecycle.mutation.mjs found it).
 const giveBackBranches = [];
 for (let at = deleteConfirm.indexOf("if (giveBackError) {"); at !== -1; at = deleteConfirm.indexOf("if (giveBackError) {", at + 1)) {
   let i = deleteConfirm.indexOf("{", at) + 1;
@@ -434,7 +443,7 @@ for (let at = deleteConfirm.indexOf("if (giveBackError) {"); at !== -1; at = del
 }
 check(
   `…and a give-back that failed does not say the link still works (${giveBackBranches.length} give-backs)`,
-  giveBackBranches.length >= 2 &&
+  giveBackBranches.length >= 3 &&
     giveBackBranches.every((b) => !/link still works/.test(b) && /return NextResponse\.json\([\s\S]{0,300}status: 500/.test(b)),
   "the claim above it consumed the single-use token, so the reassuring sentence with no give-back behind it sends somebody back to a link that can never work again — on the erasure path"
 );
@@ -462,7 +471,7 @@ check(
 const ADDONS_SRC = SRC.get("src/app/api/billing/addons/route.ts") ?? "";
 check(
   "cleared: billing/addons' item-id write-back is re-derivable, so losing it costs a lookup",
-  /recoverSubscriptionItemId\(/.test(ADDONS_SRC) &&
+  /recoverAddonSubscription\(/.test(ADDONS_SRC) &&
     /\.update\(\{ stripe_subscription_item_id: itemId \}\)/.test(ADDONS_SRC),
   "the write-back is a cache of something the recovery re-derives; delete the recovery and this becomes a real unchecked write"
 );

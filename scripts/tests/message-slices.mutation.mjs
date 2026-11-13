@@ -72,15 +72,15 @@ const MUTANTS = [
     // dashboard in it at all, so this mutation had nothing to fail.
     name: "a namespace is dropped from the dashboard's list",
     file: LIB,
-    from: '      "security", "settings", "sidebar", "voice",',
-    to: '      "security", "settings", "voice",',
+    from: '      "payments",\n    ],',
+    to: '    ],',
     expect: "dashboard: every namespace used is declared",
   },
   {
     name: "a namespace nobody uses is added to the dashboard's list",
     file: LIB,
-    from: '      "security", "settings", "sidebar", "voice",\n    ],',
-    to: '      "security", "settings", "sidebar", "voice", "roadmap",\n    ],',
+    from: '      "payments",\n    ],',
+    to: '      "payments",\n      "roadmap",\n    ],',
     expect: "dashboard: every declared namespace is used",
   },
   {
@@ -110,7 +110,25 @@ const MUTANTS = [
     // 69 -> 70 -> 71 on 2026-10-22: my-stuff-shell.tsx's and then
     // my-stuff-browse.tsx's `kinds.<kind>` template literals («Τα δικά
     // μου»).
-    from: "    unbounded: 69,",
+    // 69 -> 70 on 2026-10-28: the «ΝΕΑ ΟΘΟΝΗ» redesign (Κομμάτι 1)
+    // deleted both those files and replaced them with three
+    // (my-stuff-list.tsx, my-stuff-details.tsx, my-stuff-workspace.tsx),
+    // each still reaching `kinds.<kind>` the same unbounded way — two
+    // files became three, so the count moved by one, not two.
+    // 70 -> 71 on 2026-10-28, same day, Κομμάτι 3 (filters):
+    // my-stuff-filters.tsx reaches `t(b)` with `b` the bucket literal,
+    // the same computed-key shape, a fourth file.
+    // 71 -> 72 on 2026-10-28, «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 6:
+    // project-flow-field.tsx's own `useTranslations()` with no namespace,
+    // reaching `dashboard.createAnything.send`.
+    // 72 -> 73 on 2026-11-07, agent/discord: discord-shell.tsx's own
+    // `t(\`flash.${flash}\`)`, a template-literal key.
+    // 73 -> 74 on 2026-11-09, "πόσα σου απομένουν": cost-estimate.tsx's
+    // `t(key, {...})` with `key` the result of creditsHintKey().
+    // 74 -> 75 on 2026-11-11: achievement-unlock-bridge.tsx's
+    // useTranslations() with no namespace.
+    // 75 -> 76 on 2026-11-11: payments-dashboard.tsx template-literal key.
+    from: "    unbounded: 76,",
     // NOT `unbounded: 0,`. That was the old `to`, and it is ALSO the
     // marketing group's real value three entries down — so once `from`
     // went stale, check-mutation-tree saw the `to` present, the `from`

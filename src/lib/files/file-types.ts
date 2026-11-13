@@ -9,9 +9,20 @@
 // whoever is uploading. `sniffFileType` decides from the first bytes, and
 // the server trusts nothing else.
 
-export type FileKind = "pdf" | "docx" | "xlsx" | "txt" | "csv" | "md";
+export type FileKind = "pdf" | "docx" | "xlsx" | "txt" | "csv" | "md" | "other";
 
 export const FILE_KINDS: FileKind[] = ["pdf", "docx", "xlsx", "txt", "csv", "md"];
+
+/** `"other"` is deliberately absent from `FILE_KINDS`: that list is "the
+ *  kinds this app can read", and widening it would claim My Stuff's own
+ *  store-anything upload (Κομμάτι 5, 2026-10-28) can be asked a question
+ *  the way a PDF can. It is a real `FileKind` — stored, counted against
+ *  the same plan quota, listed everywhere a file is listed — just never
+ *  SUGGESTED by `kindFromExtension` (its `ACCEPTED_EXTENSIONS` entry
+ *  below is empty) and never returned by `sniffFileType`, which still
+ *  means "not one of the six readable kinds" by returning null. Only
+ *  `sniffAnyFileType` resolves to it, for the one caller that asked to
+ *  accept every type. */
 
 /** The PRIVATE bucket. Named once so no route can typo its way into a
  *  different, possibly public, one. Lives in this client-safe file (and is
@@ -74,6 +85,9 @@ export const ACCEPTED_EXTENSIONS: Record<FileKind, string[]> = {
   txt: [".txt"],
   csv: [".csv"],
   md: [".md", ".markdown"],
+  // No extension suggests "other" — it is where everything else lands,
+  // never where the extension sniff starts looking.
+  other: [],
 };
 
 /** The `accept` attribute for the file input — extensions only, because
@@ -156,6 +170,20 @@ export function sniffFileType(bytes: Uint8Array, filename: string): FileKind | n
     return looksLikeText(bytes) ? suggested : null;
   }
   return null;
+}
+
+/**
+ * Same decision as `sniffFileType`, for the one caller that must never
+ * refuse a file for being an unrecognised TYPE (My Stuff's own upload,
+ * Κομμάτι 5 — "κάθε τύπου αρχείου": every type). The six readable kinds
+ * are still detected exactly as before; anything else is `"other"`
+ * rather than null, so the caller has no "unsupported type" outcome left
+ * to handle. This never changes what `sniffFileType` itself returns, so
+ * every OTHER caller (the Files tool's own upload, chat attachments)
+ * keeps refusing precisely the types it always refused.
+ */
+export function sniffAnyFileType(bytes: Uint8Array, filename: string): FileKind {
+  return sniffFileType(bytes, filename) ?? "other";
 }
 
 /**

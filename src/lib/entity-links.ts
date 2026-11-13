@@ -86,9 +86,12 @@ export async function loadLinkedEntities(
       // strings that can't resolve a runtime column name, so a plain
       // wildcard sidesteps that entirely (same reasoning as
       // api/search/route.ts, which hits this exact issue).
+      // The caller's own rows only, explicitly as well as by RLS
+      // (2026-11-05 review, A3): a link's other end is a polymorphic id.
       const { data, error } = await supabase
         .from(otherTable)
         .select("*")
+        .eq("user_id", userId)
         .in("id", [...otherIds]);
       if (error || !data) return;
       for (const row of data as Record<string, unknown>[]) {

@@ -32,7 +32,7 @@ export type RebuildStep<T> = { ok: true; value: T; creditsCharged: number } | { 
 export async function chargedRebuildStep<T>(params: {
   user: User;
   gate: RebuildGate;
-  action: Extract<ActionProfileKey, "rebuildPlan" | "rebuildBoxEdit" | "rebuildBuild" | "rebuildChange">;
+  action: Extract<ActionProfileKey, "rebuildPlan" | "rebuildBoxEdit" | "rebuildBuild" | "rebuildChange" | "rebuildFeatures" | "rebuildAppLogic">;
   feature: "rebuild_generate" | "rebuild_edit";
   /** Every character the call sends: the system prompt and the message. */
   inputChars: number;

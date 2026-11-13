@@ -99,6 +99,18 @@ const HANDLED = {
   // hold the old page back was removed 2026-10-23. Not middleware, a plain
   // decision in the page itself.
   "src/app/dashboard/files/page.tsx": "the page itself: redirects to the merged Analyze",
+  // Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 (2026-10-28) moved the detail view onto
+  // /dashboard/projects itself (?id=); this route is kept only so an old
+  // /dashboard/projects/<id> link (meetings-workspace.tsx) still opens the
+  // right project. Not middleware, a plain decision in the page itself.
+  "src/app/dashboard/projects/[id]/page.tsx": "the page itself: redirects into the unified /dashboard/projects?id=",
+  // Directive 42 Κ4: a suspended account's user_metadata.suspended is
+  // read in the dashboard layout itself (every dashboard page shares it),
+  // not in middleware — middleware has no admin client and the suspend
+  // flag lives in auth.users.user_metadata, not a cookie it could read
+  // cheaply. Checked against src/app/suspended/page.tsx existing as the
+  // landing spot.
+  "src/app/dashboard/layout.tsx": "the layout itself: suspended accounts (user_metadata.suspended) redirect to /suspended",
 };
 const UNREACHABLE = {
   // getModule("products") is the static module table; it cannot be absent

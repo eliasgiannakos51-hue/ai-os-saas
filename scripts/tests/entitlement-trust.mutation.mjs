@@ -38,13 +38,26 @@
  *  31. a project is created through the user's client again
  *  32. a site version is written through the user's client again
  *  33. the history trim loses its owner scope
+ *  34. img-src admits every https host again (FD6, 2026-11-05)
+ *  35. ...or a wildcard host
+ *  36. ...or a host that is on no list
+ *  37. the project's Supabase origin is dropped from img-src
+ *  38. the derivation takes plain http on any host
+ *  39. ...or a wildcard host
+ *  40. ...or keeps the path and the query
+ *  41. ...or a URL with credentials
+ *  42. the gate imports the config under the machine's environment
+ *  43. object-src goes missing (hardening, 2026-11-05)
+ *  44. base-uri goes missing
  *
  * Run: node scripts/tests/entitlement-trust.mutation.mjs
  */
 import { runMutations } from "./lib/mutation-runner.mjs";
 
 const GATE = "scripts/tests/entitlement-trust.test.mjs";
-const MIGRATION = "supabase/migrations/20261010000000_guard_entitlement_metadata.sql";
+// The guard's LATEST definition, which is the one the gate reads (A1,
+// 2026-11-05: 20261115000000 replaced the 20261010000000 function).
+const MIGRATION = "supabase/migrations/20261115000000_account_suspension.sql";
 const SIGNUP = "src/app/api/signup/route.ts";
 const BETA = "src/lib/beta.ts";
 const OVERAGE = "src/app/api/billing/overage/route.ts";
@@ -120,7 +133,7 @@ const MUTANTS = [
   {
     name: "the plan sync no longer skips an add-on",
     file: WEBHOOK,
-    from: "  if (subscription.metadata?.addon_slug) return;\n",
+    from: "  if (subscription.metadata?.addon_slug) return syncAddonSubscription(subscription);\n",
     to: "",
     expect: "the plan sync returns on an add-on subscription",
   },
@@ -144,6 +157,83 @@ const MUTANTS = [
     from: '  { key: "X-Content-Type-Options", value: "nosniff" },\n',
     to: "",
     expect: "no content-type guessing",
+  },
+  {
+    name: "img-src admits every https host again",
+    file: CONFIG,
+    from: '  "https://images.unsplash.com",\n];',
+    to: '  "https://images.unsplash.com",\n  "https:",\n];',
+    expect: "...never a bare scheme that admits every host",
+  },
+  {
+    name: "img-src takes a wildcard host",
+    file: CONFIG,
+    from: '  "https://images.unsplash.com",\n];',
+    to: '  "https://images.unsplash.com",\n  "https://*.supabase.co",\n];',
+    expect: "...never a wildcard host",
+  },
+  {
+    name: "img-src takes a host that is on no list",
+    file: CONFIG,
+    from: '  "https://images.unsplash.com",\n];',
+    to: '  "https://images.unsplash.com",\n  "https://images.example-cdn.com",\n];',
+    expect: "or a listed host",
+  },
+  {
+    name: "the project's Supabase origin is dropped from img-src",
+    file: CONFIG,
+    from: '"blob:", ...(supabase ? [supabase] : []), ...IMAGE_HOSTS]',
+    to: '"blob:", ...IMAGE_HOSTS]',
+    expect: "...and the project's own Supabase origin IS there",
+  },
+  {
+    name: "the derivation takes plain http on any host",
+    file: CONFIG,
+    from: 'if (url.protocol !== "https:" || !DNS_NAME.test(url.hostname)) return null;',
+    to: 'if (!/^https?:$/.test(url.protocol) || !DNS_NAME.test(url.hostname)) return null;',
+    expect: "...refuses plain http on a host that is not this machine's own loopback",
+  },
+  {
+    name: "the derivation takes a wildcard host",
+    file: CONFIG,
+    from: 'if (url.protocol !== "https:" || !DNS_NAME.test(url.hostname)) return null;',
+    to: 'if (url.protocol !== "https:") return null;',
+    expect: "...refuses a wildcard host the URL parser would accept",
+  },
+  {
+    name: "the derivation keeps the path and the query",
+    file: CONFIG,
+    from: 'if (url.protocol !== "https:" || !DNS_NAME.test(url.hostname)) return null;\n  return url.origin;',
+    to: 'if (url.protocol !== "https:" || !DNS_NAME.test(url.hostname)) return null;\n  return url.origin + url.pathname + url.search;',
+    expect: "as its origin only",
+  },
+  {
+    name: "the derivation takes a URL with credentials",
+    file: CONFIG,
+    from: "  if (url.username || url.password) return null;\n",
+    to: "",
+    expect: "...refuses credentials",
+  },
+  {
+    name: "the gate imports the config under the machine's environment",
+    file: GATE,
+    from: "process.env.NEXT_PUBLIC_SUPABASE_URL = `${FIXTURE_SUPABASE}/rest/v1/?apikey=never-in-a-policy`;",
+    to: "",
+    expect: "...and the project's own Supabase origin IS there",
+  },
+  {
+    name: "object-src goes missing",
+    file: CONFIG,
+    from: "; object-src 'none'",
+    to: "",
+    expect: "plugins refused: object-src 'none'",
+  },
+  {
+    name: "base-uri goes missing",
+    file: CONFIG,
+    from: "; base-uri 'none'",
+    to: "",
+    expect: "a <base> tag refused: base-uri 'none'",
   },
   {
     name: "the framework announces itself again",

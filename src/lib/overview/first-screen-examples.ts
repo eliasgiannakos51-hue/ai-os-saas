@@ -16,6 +16,11 @@
  * replaces. The click navigates into the capability carrying the text,
  * and the work has already started by the time the page is on screen.
  *
+ * …WHEN THE CLICK IS THE APP'S OWN (2026-11-05 review, A8). The address
+ * alone only fills the field now — anybody can write one — and the
+ * button that should start the work says so first, through
+ * armSendOnArrival (lib/nav/send-on-arrival.ts).
+ *
  * WHY NOT "upload a file and tell me what it shows", which is the
  * obvious third example and the one that was asked for: a file picker
  * CANNOT be opened on arrival. `input.click()` on <input type="file">
@@ -161,7 +166,7 @@ export const FIRST_SCREEN_EXAMPLES: readonly FirstScreenExample[] = [
     path: "/dashboard/agents",
     param: "agent",
     page: "src/app/dashboard/agents/page.tsx",
-    workspace: "src/components/agents/agents-workspace.tsx",
+    workspace: "src/components/agents/agents-shell.tsx",
     // Postgres full-text over the template library. No AI call, no
     // reservation, no settlement — and the expensive builder is not
     // called on arrival precisely so this stays true.

@@ -38,28 +38,28 @@ const MUTANTS = [
     // what the code did before this function existed.
     name: "every event resets the balance again",
     file: SYNC,
-    from: '  if (input.previousTier === null) return "reset";\n  return input.previousTier === input.nextTier ? "skip" : "reset";',
+    from: '  if (input.previousTier === null) return "reset";\n  const direction = comparePlanSlugs(input.nextTier, input.previousTier);\n  if (direction < 0) return "clamp";\n  if (direction > 0) return "reset";\n  return "skip";',
     to: '  return "reset";',
     expect: "cancel_at_period_end on starter does not touch the balance",
   },
   {
-    // 2. THE INVERSE, and it is the quieter of the two: a paid invoice
-    // stops opening a new month, so a customer pays and receives nothing.
+    // 2. THE INVERSE, and it is the quieter of the two: a paid renewal
+    // stops opening a new period, so a customer pays and receives nothing.
     // Nothing errors; the balance simply never rises.
-    name: "an event that must reset stops resetting",
+    name: "a renewal stops opening a new period",
     file: SYNC,
-    from: '  "invoice.paid",\n',
-    to: "",
-    expect: "a paid invoice opens a new month",
+    from: 'const NEW_PERIOD_INVOICE_REASONS = new Set(["subscription_cycle", "subscription_create"]);',
+    to: 'const NEW_PERIOD_INVOICE_REASONS = new Set(["subscription_create"]);',
+    expect: "a paid renewal opens a new period",
   },
   {
-    // 3. THE TIER COMPARISON IS INVERTED. A real plan change is treated
-    // as no change, so an upgrade leaves the customer on the old, smaller
-    // allowance they just paid to leave.
-    name: "a plan change is read as no change",
+    // 3. THE TIER COMPARISON IS INVERTED. A real upgrade is treated as no
+    // change, so the customer keeps the old, smaller allowance they just
+    // paid to leave.
+    name: "an upgrade is read as no change",
     file: SYNC,
-    from: '  return input.previousTier === input.nextTier ? "skip" : "reset";',
-    to: '  return input.previousTier === input.nextTier ? "reset" : "skip";',
+    from: '  if (direction > 0) return "reset";\n  return "skip";',
+    to: '  if (direction > 0) return "skip";\n  return "skip";',
     expect: "an upgrade through the same event still resets",
   },
   {
@@ -77,7 +77,7 @@ const MUTANTS = [
     // costing the owner rather than the customer.
     name: "a deleted subscription no longer drops to Free's allotment",
     file: SYNC,
-    from: '  "customer.subscription.deleted",\n',
+    from: '  if (input.eventType === "customer.subscription.deleted") return "clamp";\n',
     to: "",
     expect: "a deleted subscription drops to Free's allotment",
   },
@@ -92,9 +92,45 @@ const MUTANTS = [
     // that nothing consults. Both halves are asserted separately now.
     name: "the webhook stops consulting the decision and syncs unconditionally",
     file: WEBHOOK,
-    from: "  const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug });",
+    from: "  const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug, billingReason });",
     to: '  const decision = "reset";',
     expect: "...and calls it",
+  },
+  {
+    // 7. THE DOWNGRADE REFILL (2026-11-05). A move down resets again,
+    // which SETS a spent higher-plan balance to the lower plan's full one.
+    name: "a downgrade resets the balance again",
+    file: SYNC,
+    from: '  if (direction < 0) return "clamp";',
+    to: '  if (direction < 0) return "reset";',
+    expect: "a downgrade lowers the balance and never refills it",
+  },
+  {
+    // 8. A PRORATION INVOICE COUNTS AS A NEW PERIOD again: every paid
+    // invoice opens a balance, whatever it was for.
+    name: "every paid invoice opens a period, whatever its reason",
+    file: SYNC,
+    from: '  return input.eventType === "invoice.paid" && NEW_PERIOD_INVOICE_REASONS.has(String(input.billingReason ?? ""));',
+    to: '  return input.eventType === "invoice.paid";',
+    expect: "a proration invoice is not a new period",
+  },
+  {
+    // 9. THE KEY GOES BACK TO THE CALENDAR: the webhook stops passing the
+    // period, so one period straddling the 1st has two keys again.
+    name: "the webhook keys the reset on the month again",
+    file: WEBHOOK,
+    from: "          `Subscription ${isActive ? \"active\" : \"ended\"}: ${planSlug} plan`,\n          periodKey\n        );",
+    to: "          `Subscription ${isActive ? \"active\" : \"ended\"}: ${planSlug} plan`\n        );",
+    expect: "the reset is claimed under the paid period",
+  },
+  {
+    // 10. A CLAMP DECISION THAT DOES NOTHING. The decision is right and
+    // the webhook drops it on the floor, leaving the higher balance.
+    name: "the webhook ignores the clamp decision",
+    file: WEBHOOK,
+    from: "      await clampCreditsToPlan(\n        supabaseUserId,",
+    to: "      await Promise.resolve(\n        supabaseUserId,",
+    expect: "a move down runs the clamp, not the reset",
   },
 ];
 
@@ -171,4 +207,4 @@ if (missed.length > 0 || !after.green) {
   }
   process.exit(1);
 }
-console.log("Resetting a paid balance on an event that is not a plan change turns this red.");
+console.log("Resetting a paid balance on an event that is not a plan change, or refilling it on a move down, turns this red.");

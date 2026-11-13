@@ -114,6 +114,7 @@ export const COMPLETION_TOOLS: Readonly<Record<string, string>> = {
   scheduled_agent_run: "/dashboard/agents",
   agent_run_batch: "/dashboard/agents",
   automation_run: "/dashboard/automation",
+  discord_plan: "/dashboard/discord",
   voice: "/dashboard/voice",
 };
 

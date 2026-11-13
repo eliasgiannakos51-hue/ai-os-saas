@@ -296,7 +296,29 @@ for (const l of favLinks) {
 // one literal `/dashboard/data-analysis?record=` it used to emit is no longer
 // in its source to be counted. The link itself is unchanged and is checked
 // below through REDIRECT_ONLY.
-const DEEP_LINK_FLOOR = 70;
+// 70 -> 71 (2026-10-28): My Stuff's details pane (Κομμάτι 4) asks
+// /api/my-stuff/details?kind=&id= for a selected row's "Made from"/"Used
+// in", read by that route's GET (src/app/api/my-stuff/details/route.ts).
+// 71 -> 72 (2026-10-28): Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1 moved the detail
+// view onto /dashboard/projects itself, selected by ?id= (one screen,
+// list left/project right, replacing flow-shell.tsx there); the old
+// /dashboard/projects/<id> link is read back only by that route's own
+// redirect into this one now (src/app/dashboard/projects/[id]/page.tsx).
+// 72 -> 75 (2026-11-04): the admin dashboard's three query-carrying
+// endpoints, one per κομμάτι of οδηγία 42 — /api/admin/refund?userId= (Κ3,
+// the charge list for one account), /api/admin/costs?days= (Κ5) and
+// /api/admin/revenue?days= (Κ6, the period selector). Each is read by its
+// own route's GET. Derived by diffing this scanner's emitted set against
+// bf13d2c0, not counted by hand: the first two were already in the tree and
+// the floor had been left at 72, so it carried 2 of slack before today.
+// 75 -> 76, same day: /api/admin/audit-log?limit= (Κ9, the audit log tab
+// wired up after orphan-i18n-keys.test.mjs found its label unreachable).
+// 76 -> 77 (2026-11-07, agent/discord): /dashboard/discord?discord= — the
+// Discord connect/callback flow reads its own query-carried status
+// (connected, cancelled, expired, etc., src/app/dashboard/discord/
+// page.tsx) back on return from Discord's OAuth redirect.
+// 77 -> 78 ON 2026-11-11: payments subscriptions API route adds a deep link.
+const DEEP_LINK_FLOOR = 78;
 reportBaseline("DEEP_LINK_FLOOR", DEEP_LINK_FLOOR, emitted.size);
 check(
   `the app was scanned for deep links (${emitted.size} distinct, over ${files.length} files)`,

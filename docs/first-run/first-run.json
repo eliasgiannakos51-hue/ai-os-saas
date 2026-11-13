@@ -1,6 +1,6 @@
 {
-  "total": 4688,
-  "onPath": 618,
+  "total": 5668,
+  "onPath": 625,
   "thresholds": {
     "sentenceWords": 12,
     "readDepth": 1
@@ -16,13 +16,13 @@
       "n": 2,
       "title": "The labels — skim these",
       "note": "On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language.",
-      "count": 376
+      "count": 381
     },
     {
       "n": 3,
       "title": "Further in — only if you have time",
       "note": "Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour.",
-      "count": 217
+      "count": 219
     }
   ],
   "screens": [
@@ -427,6 +427,12 @@
           "file": "src/app/signup/signup-flow.tsx"
         },
         {
+          "key": "pricing.rows.ionexaPayments",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/signup/signup-flow.tsx"
+        },
+        {
           "key": "pricing.rows.listRowsShown",
           "depth": 0,
           "tier": 2,
@@ -704,6 +710,12 @@
         },
         {
           "key": "auth.login.password",
+          "depth": 0,
+          "tier": 2,
+          "file": "src/app/login/login-form.tsx"
+        },
+        {
+          "key": "auth.login.rateLimited",
           "depth": 0,
           "tier": 2,
           "file": "src/app/login/login-form.tsx"
@@ -1849,6 +1861,12 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.appBuilder",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.apps",
           "depth": 1,
           "tier": 2,
@@ -2287,6 +2305,12 @@
           "file": "src/components/dashboard/sidebar.tsx"
         },
         {
+          "key": "sidebar.items.payments",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
           "key": "sidebar.items.personalFinance",
           "depth": 1,
           "tier": 2,
@@ -2408,6 +2432,12 @@
         },
         {
           "key": "sidebar.items.settings",
+          "depth": 1,
+          "tier": 2,
+          "file": "src/components/dashboard/sidebar.tsx"
+        },
+        {
+          "key": "sidebar.items.skills",
           "depth": 1,
           "tier": 2,
           "file": "src/components/dashboard/sidebar.tsx"
@@ -3283,6 +3313,12 @@
           "file": "src/components/voice/voice-input.tsx"
         },
         {
+          "key": "voice.errors.ended",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
           "key": "voice.errors.failed",
           "depth": 2,
           "tier": 3,
@@ -3314,6 +3350,12 @@
         },
         {
           "key": "voice.errors.not_included",
+          "depth": 2,
+          "tier": 3,
+          "file": "src/components/voice/voice-input.tsx"
+        },
+        {
+          "key": "voice.errors.not_ready",
           "depth": 2,
           "tier": 3,
           "file": "src/components/voice/voice-input.tsx"

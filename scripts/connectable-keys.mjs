@@ -65,6 +65,12 @@ const PROVIDERS = {
     url: "https://console.groq.com/keys",
     freeTier: "yes — a free tier with rate limits",
   },
+  MISTRAL_API_KEY: {
+    provider: "Mistral AI — the only EU-resident provider in the chain, what «Μόνο Ευρώπη» accounts route to",
+    category: "Models",
+    url: "https://console.mistral.ai/api-keys",
+    freeTier: "no — pay as you go",
+  },
   // The five below are read only by the key check on /dashboard/system-health
   // (src/lib/ai/providers/key-inventory.ts); no feature uses them yet.
   GEMINI_API_KEY: {

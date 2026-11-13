@@ -2,6 +2,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { matchesSearch } from "@/lib/text/search-match";
+import { isFavoritableTable } from "@/lib/favoritable";
+import { loadFavoriteKeys } from "@/lib/favorites";
 import {
   LIBRARY_SOURCES,
   searchableText,
@@ -18,7 +20,22 @@ export type LibraryItem = {
   snippet: string | null;
   createdAt: string;
   href: string;
+  /**
+   * Whether this item is starred — read from user_favorites, the same
+   * table the Favorites page and every star button already use
+   * (lib/favorites.ts). Only 3 of the 7 kinds (site, slides, document)
+   * are in the FAVORITABLE registry today (lib/favoritable.ts); the
+   * other 4 (posts, research, analysis, file) are deliberately
+   * LINK_ONLY_MODULES — this is always `false` for them, not a gap this
+   * file invents a fix for.
+   */
+  favorited: boolean;
 };
+
+/** The kinds a star can actually be put on, right now. */
+export const FAVORITABLE_LIBRARY_KINDS: readonly LibraryKind[] = LIBRARY_SOURCES.filter((s) =>
+  isFavoritableTable(s.table)
+).map((s) => s.kind);
 
 // THE NEWEST 60 OF EACH TOOL, AT MOST 200 IN ALL — the Timeline's bounds
 // (lib/timeline.ts), for the same reason: the page stays fast however much
@@ -40,11 +57,12 @@ export const MAX_ITEMS = 200;
 export async function loadLibrary(
   supabase: SupabaseClient,
   userId: string,
-  { kind, query }: { kind: LibraryKind | null; query: string }
+  { kind, query, favoriteOnly = false }: { kind: LibraryKind | null; query: string; favoriteOnly?: boolean }
 ): Promise<{ items: LibraryItem[]; failed: LibraryKind[] }> {
   const failed: LibraryKind[] = [];
   const searching = query.trim().length > 0;
   const sources = kind ? LIBRARY_SOURCES.filter((s) => s.kind === kind) : LIBRARY_SOURCES;
+  const tableOfKind = new Map(LIBRARY_SOURCES.map((s) => [s.kind, s.table]));
 
   const perSource = await Promise.all(
     sources.map(async (source) => {
@@ -58,9 +76,9 @@ export async function loadLibrary(
       if (error || !data) {
         if (error) logApiError("library:load", error, { table: source.table });
         failed.push(source.kind);
-        return [] as LibraryItem[];
+        return [] as Omit<LibraryItem, "favorited">[];
       }
-      const items: LibraryItem[] = [];
+      const items: Omit<LibraryItem, "favorited">[] = [];
       for (const row of data as unknown as Record<string, unknown>[]) {
         if (!source.keep(row)) continue;
         const title = source.titleOf(row);
@@ -85,9 +103,28 @@ export async function loadLibrary(
     })
   );
 
-  const items = perSource
+  const sorted = perSource
     .flat()
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, MAX_ITEMS);
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  // Starred state: one query per distinct table among the kinds that are
+  // actually favoritable (lib/favoritable.ts) — the other kinds never
+  // reach loadFavoriteKeys at all, so they stay `favorited: false` without
+  // asking user_favorites a question it has no rows to answer.
+  const candidates = sorted.filter((it) => isFavoritableTable(tableOfKind.get(it.kind) ?? ""));
+  const favoriteKeys =
+    candidates.length > 0
+      ? new Set(
+          await loadFavoriteKeys(
+            supabase,
+            userId,
+            candidates.map((it) => ({ table: tableOfKind.get(it.kind) as string, id: it.id }))
+          )
+        )
+      : new Set<string>();
+
+  const withFavorites: LibraryItem[] = sorted.map((it) => ({ ...it, favorited: favoriteKeys.has(it.key) }));
+  const filtered = favoriteOnly ? withFavorites.filter((it) => it.favorited) : withFavorites;
+  const items = filtered.slice(0, MAX_ITEMS);
   return { items, failed };
 }

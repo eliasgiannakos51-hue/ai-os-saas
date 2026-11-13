@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
+import { DELETION_GRACE_DAYS } from "@/lib/account/pending-deletion";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitleAndDescription("landing.footer.privacy", "pageTitle.privacyDescription");
@@ -9,7 +11,7 @@ export function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout titleKey="landing.footer.privacy" updated="2026-10-07">
+    <LegalLayout titleKey="landing.footer.privacy" updated={LEGAL_VERSIONS.privacy}>
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you
@@ -53,6 +55,12 @@ export default function PrivacyPage() {
           the ones marked &quot;only if&quot; receive nothing unless you use
           that feature.
         </p>
+        {/* EVERY COMPANY BY NAME, IN THIS FILE. legal-pages.test.mjs reads
+            the credentials in lib/env-check.ts and requires each one's
+            company to appear here as `>Name<` — the page a lawyer or a
+            regulator reads, not a list somewhere else that it renders.
+            A registry file this page mapped over (2026-11-01) left the
+            text on screen unchanged and every one of those checks red. */}
         <ul className="list-disc space-y-1 ps-5">
           <li>
             <span className="text-foreground/90">Supabase</span> — database,
@@ -70,6 +78,12 @@ export default function PrivacyPage() {
             the feature uses.
           </li>
           <li>
+            <span className="text-foreground/90">Mistral AI</span> — only if
+            you turn on «Μόνο Ευρώπη» in Settings: the AI model that answers
+            your text features instead of Anthropic, so that no AI call for
+            your account leaves the EU.
+          </li>
+          <li>
             <span className="text-foreground/90">OpenAI</span> — only if you
             use voice or upload a meeting recording: turns the audio into
             text.
@@ -80,7 +94,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <span className="text-foreground/90">Stripe</span> — payments.
-            Your card details go to Stripe and never reach Ionexa.
+            Your card details go to Stripe and never reach Ionexa. Stripe does
+            not set cookies on the pages we serve.
           </li>
           <li>
             <span className="text-foreground/90">Resend</span> — email
@@ -119,7 +134,10 @@ export default function PrivacyPage() {
           also permanently delete your account and every record tied to it
           from <span className="text-foreground/90">Settings → Danger Zone</span>:
           we send a confirmation link to your email, and once you open it and
-          confirm, the deletion happens and cannot be undone.
+          confirm, the deletion is scheduled for {DELETION_GRACE_DAYS} days
+          later. During that period you can cancel the deletion from the same
+          Settings page or from the link in your email. After the grace period
+          the deletion executes automatically and cannot be undone.
         </p>
       </LegalSection>
     </LegalLayout>

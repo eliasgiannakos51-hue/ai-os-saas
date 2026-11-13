@@ -4,8 +4,32 @@ import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/
 import { NextResponse, type NextRequest } from "next/server";
 import { PERMANENT_MOVES, onboardingRedirectTarget, teamRedirectTarget } from "@/lib/nav/early-redirects";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { isSuspended } from "@/lib/auth/suspension";
+import { crossSiteVerdict } from "@/lib/security/cross-site";
+import { contentDomain, requestHost, routeContentHost } from "@/lib/publishing/content-origin";
 
 export async function proxy(request: NextRequest) {
+  // PUBLISHED SITES AND APPS ON A DOMAIN OF THEIR OWN, when one is set
+  // (PUBLISHED_SITE_DOMAIN; lib/publishing/content-origin.ts). Decided
+  // first, before any session is read: nothing on that domain is the app,
+  // so there is no session there to read, and a site's page is rewritten
+  // to the /s/ route that serves it. Unset, this returns null for every
+  // request and nothing below changes.
+  const content = routeContentHost(
+    requestHost(request.headers),
+    request.nextUrl.pathname,
+    contentDomain(process.env.PUBLISHED_SITE_DOMAIN)
+  );
+  if (content) {
+    if (content.kind === "rewrite") {
+      const url = request.nextUrl.clone();
+      url.pathname = content.pathname;
+      return NextResponse.rewrite(url);
+    }
+    if (content.kind === "pass") return NextResponse.next();
+    return new NextResponse("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }
+
   // NO x-pathname HEADER. One was set here for a single deploy, so the
   // root layout could trim the message catalogue per path. It could not:
   // a shared layout is not re-rendered across client-side navigations, so
@@ -13,6 +37,28 @@ export async function proxy(request: NextRequest) {
   // and the sidebar rendered its own key names. Reverted with the layout;
   // see app/layout.tsx.
   const requestHeaders = request.headers;
+
+  // A WRITE TO THE API FROM ANOTHER SITE (2026-11-05 review, A5). Asked
+  // first, before the session lookup it would otherwise pay for: a
+  // browser's cross-site POST to /api/* is refused here, whichever route
+  // it names, except the few that other sites reach on purpose
+  // (lib/security/cross-site.ts, which lists them with their reasons).
+  if (
+    crossSiteVerdict({
+      method: request.method,
+      pathname: request.nextUrl.pathname,
+      secFetchSite: request.headers.get("sec-fetch-site"),
+      origin: request.headers.get("origin"),
+      ownHosts: [
+        request.headers.get("x-forwarded-host"),
+        request.headers.get("host"),
+        request.nextUrl.host,
+        process.env.NEXT_PUBLIC_SITE_URL,
+      ],
+    }) === "refuse"
+  ) {
+    return NextResponse.json({ ok: false, code: "cross_site_refused" }, { status: 403 });
+  }
 
   let response = NextResponse.next({
     request: { headers: requestHeaders },
@@ -135,6 +181,25 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return withRefreshedCookies(NextResponse.redirect(url));
+  }
+
+  // A SUSPENDED ACCOUNT (2026-11-05 review, A1; lib/auth/suspension.ts).
+  // The ban refuses the next sign-in and the next refresh; this refuses
+  // the access token that is still alive, which can be up to an hour. Read
+  // from app_metadata (only the service role writes it) and from the ban
+  // itself, on the user getUser() just returned — no extra round trip.
+  // Every API call is refused by code; pages go to /suspended.
+  if (user && isSuspended(user)) {
+    const path = request.nextUrl.pathname;
+    if (path.startsWith("/api/")) {
+      return withRefreshedCookies(NextResponse.json({ ok: false, code: "account_suspended" }, { status: 403 }));
+    }
+    if (isDashboardRoute || path.startsWith("/onboarding")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/suspended";
+      url.search = "";
+      return withRefreshedCookies(NextResponse.redirect(url));
+    }
   }
 
   // AN ADDRESS NOT YET PROVED (NEEDS 22, lib/auth/confirm-email.ts). An

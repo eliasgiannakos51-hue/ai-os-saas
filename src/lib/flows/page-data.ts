@@ -11,7 +11,7 @@ import { MAX_FLOW_SAID, type FlowKind } from "@/lib/flows/plan";
 import { flowPrices, type FlowPrices } from "@/lib/flows/flow-pricing";
 import { flowAvailability } from "@/lib/flows/availability";
 import { MAX_COLOUR_CHARS } from "@/lib/flows/brief";
-import type { FlowRow } from "@/components/flows/flow-shell";
+import type { FlowRow } from "@/lib/flows/plan";
 
 /** The flows the page opens with: the newest, finished or not. */
 const FLOWS_SHOWN = 20;
@@ -22,12 +22,21 @@ const FLOWS_SHOWN = 20;
  * account — at the longest sentence a flow takes, so the price shown is
  * never under the price held — which steps they can run, and the
  * business's colour from memory, when Memory knows one.
+ *
+ * SCOPED TO ONE PROJECT (Κομμάτι 6, owner's message 2026-10-28): the
+ * bottom field on a single project's own page only ever needs THAT
+ * project's own flows, newest first — not the account's twenty newest
+ * across every project, most of which belong to a project not open here.
+ * `prices`/`available` stay account-wide either way: what a step costs
+ * and whether this person can run it do not depend on which project it
+ * joins.
  */
-export async function loadFlowPage(user: User): Promise<{ flows: FlowRow[]; prices: FlowPrices; available: Record<FlowKind, boolean> & { slidesFromResearch: boolean }; brandColour: string | null }> {
+export async function loadFlowPage(user: User, projectId?: string | null): Promise<{ flows: FlowRow[]; prices: FlowPrices; available: Record<FlowKind, boolean> & { slidesFromResearch: boolean }; brandColour: string | null }> {
   const supabase = await createClient();
   const plan = await resolveEffectivePlan(user);
+  const flowsQuery = supabase.from("project_flows").select("id, project_id, said, colour, plan, steps, status, projects(name)").eq("user_id", user.id);
   const [{ data, error }, packPrice, available] = await Promise.all([
-    supabase.from("project_flows").select("id, project_id, said, colour, plan, steps, status, projects(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(FLOWS_SHOWN),
+    (projectId ? flowsQuery.eq("project_id", projectId) : flowsQuery).order("created_at", { ascending: false }).limit(FLOWS_SHOWN),
     getPurchasedPackCreditPriceEur(user.id),
     flowAvailability(user, plan),
   ]);

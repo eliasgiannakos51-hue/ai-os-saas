@@ -55,6 +55,7 @@ export const NAV_RETENTION_DAYS = 90;
  * redirect.
  */
 export const NAV_STATIC_SEGMENTS: readonly string[] = [
+  "admin",
   "affiliate",
   "agents",
   // Universal Memory. `ai-memory` is what the chat has kept about you;
@@ -69,6 +70,10 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "app-builder",
   "audio",
   "avatars",
+  // 3D (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", 2026-10-31): the 25th tile's
+  // own address, new in that round — a brand new tool, not a rename of
+  // an older tracker.
+  "3d",
   "editing",
   "films",
   "iowork",
@@ -83,6 +88,9 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "create",
   "data-analysis",
   "deep-research",
+  // DISCORD (the owner's Discord directive, 2026-11-05): behind the switch
+  // "discord-bot", notFound() for anyone it is not open to, like "sheets".
+  "discord",
   "documents",
   "favorites",
   "games",
@@ -104,6 +112,7 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "rebuild",
   "overview",
   "activity",
+  "payments",
   "predictions",
   "presentations",
   "posts",
@@ -114,6 +123,18 @@ export const NAV_STATIC_SEGMENTS: readonly string[] = [
   "reflection",
   "routing",
   "settings",
+  // SHEETS (the owner's «28. SHEETS: ΠΙΝΑΚΕΣ ΜΕ ΠΡΑΓΜΑΤΙΚΟΥΣ ΤΥΠΟΥΣ»,
+  // 2026-10-31): a brand new tool's own address, behind the switch
+  // "sheets-tool" and notFound() for anyone it is not open to. It is
+  // tracked like every other screen even though only the owner and the
+  // test account can open it — a screen nobody can measure is a screen
+  // nobody can tell is being used when it does open.
+  "sheets",
+  // SKILLS (the owner's «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», 2026-10-31):
+  // a hidden sidebar row (lib/sidebar-nav.ts), same shape as Affiliate —
+  // in the palette, not drawn in the list — behind the switch
+  // "skills-tool", notFound() for anyone it is not open to.
+  "skills",
   "system-health",
   "team",
   "timeline",

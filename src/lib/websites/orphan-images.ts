@@ -40,42 +40,61 @@ export type OrphanDecision = {
   kept: { path: string; reason: string }[];
 };
 
+/**
+ * Adds every bucket path `doc` embeds to `into`.
+ *
+ * Its own export so the sweep (lib/websites/storage-cleanup.ts) can read
+ * one page of rows at a time and keep only the paths, rather than hold
+ * every document of every table in memory at once.
+ */
+export function addEmbeddedPaths(doc: unknown, into: Set<string>): void {
+  if (typeof doc !== "string") return;
+  const marker = `/${REFERENCE_IMAGE_BUCKET}/`;
+  let from = 0;
+  for (;;) {
+    const at = doc.indexOf(marker, from);
+    if (at === -1) break;
+    const start = at + marker.length;
+    // The path runs to the first character that cannot be in a URL
+    // path. Quotes end an attribute; whitespace and ) end a CSS url().
+    const end = (() => {
+      for (let i = start; i < doc.length; i += 1) {
+        const c = doc[i];
+        if (c === '"' || c === "'" || c === ")" || c === " " || c === "\n" || c === "\t" || c === "?") return i;
+      }
+      return doc.length;
+    })();
+    // A malformed escape is not a path anything can be serving; the raw
+    // text is kept rather than thrown on, because a throw here would stop
+    // the sweep over one odd character in somebody's page.
+    const raw = doc.slice(start, end);
+    try {
+      into.add(decodeURIComponent(raw));
+    } catch {
+      into.add(raw);
+    }
+    from = end;
+  }
+}
+
 export function findOrphanImages(params: {
   files: StoredFile[];
   /** Every path any surviving website row still points at. */
   referencedPaths: Set<string>;
   /** Every document that could embed a URL — html_content of drafts,
    *  published snapshots and versions, plus sub-pages. */
-  documents: string[];
+  documents?: string[];
+  /** Paths already pulled out of documents with addEmbeddedPaths. */
+  embeddedPaths?: Set<string>;
   nowMs: number;
 }): OrphanDecision {
-  const { files, referencedPaths, documents, nowMs } = params;
+  const { files, referencedPaths, nowMs } = params;
 
   // One pass over the documents, not one per file: a user with 200
   // uploads and 40 documents is 8,000 substring searches otherwise, and
   // this runs over every account.
-  const embedded = new Set<string>();
-  const marker = `/${REFERENCE_IMAGE_BUCKET}/`;
-  for (const doc of documents) {
-    if (typeof doc !== "string") continue;
-    let from = 0;
-    for (;;) {
-      const at = doc.indexOf(marker, from);
-      if (at === -1) break;
-      const start = at + marker.length;
-      // The path runs to the first character that cannot be in a URL
-      // path. Quotes end an attribute; whitespace and ) end a CSS url().
-      const end = (() => {
-        for (let i = start; i < doc.length; i += 1) {
-          const c = doc[i];
-          if (c === '"' || c === "'" || c === ")" || c === " " || c === "\n" || c === "\t" || c === "?") return i;
-        }
-        return doc.length;
-      })();
-      embedded.add(decodeURIComponent(doc.slice(start, end)));
-      from = end;
-    }
-  }
+  const embedded = new Set<string>(params.embeddedPaths ?? []);
+  for (const doc of params.documents ?? []) addEmbeddedPaths(doc, embedded);
 
   const orphans: string[] = [];
   const kept: { path: string; reason: string }[] = [];

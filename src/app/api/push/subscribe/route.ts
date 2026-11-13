@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isPushConfigured, PUSH_TYPES, type PushType } from "@/lib/push/web-push";
+import { isAllowedPushEndpoint, isPushKey, MAX_PUSH_SUBSCRIPTIONS_PER_USER } from "@/lib/push/delivery";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +20,15 @@ export const dynamic = "force-dynamic";
 // can push to that browser — and the route is where we can guarantee the
 // row is stamped with the caller's own user_id rather than one supplied
 // by the client.
+//
+// SINCE 2026-11-05 THE ROUTE IS THE ONLY WAY TO WRITE ONE.
+// supabase/migrations/20261116000000_push_subscriptions_server_written.sql
+// takes INSERT and UPDATE away from the signed-in role, so the checks
+// below — a known push service's host (lib/push/delivery.ts), keys of
+// the right shape, a rate limit, at most MAX_PUSH_SUBSCRIPTIONS_PER_USER
+// rows — cannot be stepped around by writing the table directly. POST and
+// PATCH write with the service role, scoped to the caller's id; GET and
+// DELETE still go through the caller's own client and its policies.
 
 type SubscriptionBody = {
   endpoint?: unknown;
@@ -24,15 +36,15 @@ type SubscriptionBody = {
 };
 
 function readSubscription(body: SubscriptionBody): { endpoint: string; p256dh: string; auth: string } | null {
-  const endpoint = typeof body?.endpoint === "string" ? body.endpoint : "";
-  const p256dh = typeof body?.keys?.p256dh === "string" ? body.keys.p256dh : "";
-  const auth = typeof body?.keys?.auth === "string" ? body.keys.auth : "";
-  // An endpoint must be an https URL from a push service. Rejecting
-  // anything else keeps a malformed or hostile body from being stored and
-  // retried forever by the sender.
-  if (!endpoint.startsWith("https://") || !p256dh || !auth) return null;
-  if (endpoint.length > 2000) return null;
-  return { endpoint, p256dh, auth };
+  const endpoint = body?.endpoint;
+  const p256dh = body?.keys?.p256dh;
+  const auth = body?.keys?.auth;
+  // An endpoint must be a URL minted by a known push service. Rejecting
+  // anything else keeps a hostile body from turning the sender into a
+  // way to make signed requests to an arbitrary host, and from being
+  // retried forever. The sender checks the same list again.
+  if (!isAllowedPushEndpoint(endpoint) || !isPushKey(p256dh) || !isPushKey(auth)) return null;
+  return { endpoint: endpoint as string, p256dh, auth };
 }
 
 /**
@@ -99,6 +111,11 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
 
+    // A browser subscribes once and refreshes now and then; thirty an
+    // hour is far above that and far below a loop.
+    const limited = await checkRateLimit({ scope: "push_subscribe", identifier: user.id, maxAttempts: 30, windowMinutes: 60 });
+    if (!limited.allowed) return NextResponse.json({ ok: false, code: "rate_limited" }, { status: 429 });
+
     let body: SubscriptionBody;
     try {
       body = await request.json();
@@ -108,11 +125,12 @@ export async function POST(request: Request) {
     const sub = readSubscription(body);
     if (!sub) return NextResponse.json({ ok: false, error: "Invalid subscription." }, { status: 400 });
 
+    const admin = createAdminClient();
     // onConflict on endpoint, not on (user, endpoint): a browser that was
     // signed into another account keeps the same endpoint, and the row
     // must move to whoever is signed in now rather than pushing that
     // account's notifications to the new user.
-    const { error } = await supabase.from("push_subscriptions").upsert(
+    const { error } = await admin.from("push_subscriptions").upsert(
       {
         user_id: user.id,
         endpoint: sub.endpoint,
@@ -126,6 +144,28 @@ export async function POST(request: Request) {
     if (error) {
       logApiError("/api/push/subscribe", error, { stage: "upsert" });
       return NextResponse.json({ ok: false, error: "Could not save the subscription." }, { status: 500 });
+    }
+
+    // AT MOST MAX_PUSH_SUBSCRIPTIONS_PER_USER, THE OLDEST GOING FIRST. The
+    // one just written is the newest, so it is never the one removed. A
+    // failure here leaves one row too many, which the sender's own limit
+    // already bounds; it does not undo the subscription.
+    const { data: rows, error: listError } = await admin
+      .from("push_subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(MAX_PUSH_SUBSCRIPTIONS_PER_USER, MAX_PUSH_SUBSCRIPTIONS_PER_USER + 99);
+    if (listError) {
+      logApiError("/api/push/subscribe", listError, { stage: "cap_list" });
+    } else if (rows && rows.length > 0) {
+      const { error: capError } = await admin
+        .from("push_subscriptions")
+        .delete()
+        .eq("user_id", user.id)
+        .in("id", rows.map((r) => r.id as string));
+      if (capError) logApiError("/api/push/subscribe", capError, { stage: "cap_delete" });
     }
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -161,9 +201,10 @@ export async function PATCH(request: Request) {
       collaboration: "notify_collaboration",
     }[type];
 
-    // RLS scopes the update to this user's own rows, so a stranger's
-    // endpoint simply matches nothing.
-    const { error } = await supabase
+    // The service role, because the signed-in role cannot update this
+    // table any more (see the header); scoped to the caller's own rows,
+    // so a stranger's endpoint simply matches nothing.
+    const { error } = await createAdminClient()
       .from("push_subscriptions")
       .update({ [column]: body.enabled })
       .eq("endpoint", endpoint)

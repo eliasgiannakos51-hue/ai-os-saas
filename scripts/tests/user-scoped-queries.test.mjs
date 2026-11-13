@@ -107,6 +107,22 @@ const ALLOWED = new Map([
     "Keyed by the reportId this run already loaded and authorised.",
   ],
   [
+    "src/app/api/admin/costs/route.ts::breakdown",
+    "Not a function: `const breakdown = (meta.modelBreakdown ?? null)` is a parenthesised expression " +
+      "the scan reads as an arrow, and the slice it measures is the rest of GET. That GET is the admin " +
+      "dashboard's cost report, behind isAdminEmail (404 otherwise) and the admin-dashboard switch, and " +
+      "reads ai_cost_log and user_credits across every account on purpose — the same argument as " +
+      "dashboard/costs/page.tsx::CostsPage above. The `userId: string` is a field of its own result rows.",
+  ],
+  [
+    "src/lib/discord/signatures.ts::verifyState",
+    "Queries no table — the QUERIES detector is matching Buffer.from(json) " +
+      "and Buffer.from(a), not a Supabase .from(). verifyState compares the " +
+      "state's embedded user id against opts.userId in constant time " +
+      "(sameText(p.u, opts.userId)), which IS the ownership check — the " +
+      "same explicit-compare shape route-mechanisms.mjs names for routes.",
+  ],
+  [
     "src/lib/images/image-access.ts::showImages",
     "Its query is to storage, for paths read off rows the caller already selected with .eq(\"user_id\", user.id); " +
       "userId is the owner folder every one of those paths must start with (readVariants), so a path that is not the owner's is never signed.",
@@ -250,6 +266,48 @@ console.log("\n== the OTHER shape: functions scoped by the CALLER'S client ==");
       "Sweeps agent_runs in status 'queued' across all accounts on purpose — collecting Anthropic Batch results is a cross-account job by definition, and it settles each run against the account that owns it.",
     "derivedDataHealth@src/app/api/health/route.ts":
       "Counts search_index across every account on purpose: the question it exists to answer is whether the index has ANY rows at all, and a caller-scoped client would answer it about one person. Nothing identifying leaves the function — it returns three integers and a verdict, never a user_id, a title or an href — and it sits beside navFreshness, which reads nav_events the same way for the same reason.",
+    // Deferred account deletion (directive 39 Κομμάτι 3). pending_deletions
+    // is deny-all, so these helpers take the service-role client by type
+    // (lib/account/pending-deletion.ts) — a session client would see no
+    // rows at all. What scopes each call is written here.
+    // (cancelDeletion is not here: since 2026-11-04 its update is scoped
+    // with .eq("user_id", ownerId), the account the emailed link resolves
+    // to, so the rule above judges it like any other.)
+    "getActionableDeletions@src/app/api/cron/execute-deletions/route.ts":
+      "Sweeps pending_deletions across every account on purpose — carrying out each deletion whose 30-day grace has ended is a cross-account job by definition, behind CRON_SECRET, at most 50 rows a run. Only rows not cancelled, with an account still attached and delete_after in the past are returned, and the route reads no request body.",
+    "claimExecution@src/app/api/cron/execute-deletions/route.ts":
+      "Keyed by row.id from getActionableDeletions in the same run, before anything of that account is erased, and conditional on the row being uncancelled with an account still attached. The id is never from a request: the cron route reads no body and takes no parameter.",
+    "releaseExecution@src/app/api/cron/execute-deletions/route.ts":
+      "Keyed by row.id from getActionableDeletions in the same run, only after a step of that account's erase failed, and only while the row still has its account (user_id not null). The id is never from a request: the cron route reads no body and takes no parameter.",
+    "modesByFlowIds@src/app/api/cron/automation-flows/route.ts":
+      "Reads every due automation's mode in the same tick that already swept automation_flows across every account on purpose (step 3, the cron's own header) — the SAME cross-account shape collectAgentBatches above is argued under, for the same reason: there is no one caller to scope a client to. It answers only id and mode, keyed by flow ids the cron already holds from that earlier, equally cross-account read; nothing identifying a stranger's account reaches this function or leaves it.",
+    "loadProjectDetail@src/app/shared/[token]/page.tsx":
+      "There is no session here to scope a caller's client to — this is Projects Κομμάτι 7's public share page, reached by the token alone. byToken.id is not attacker-supplied: it is read ONE line above from projects.share_token, an unguessable value randomBytes(24) generates server-side in api/projects/[id]/share's own POST, and a token that does not resolve already returned before this call. So the id this hands loadProjectDetail is exactly the one capability the token proves, the same argument the cron entries above make for an id read first through the user's own client.",
+    // FS1 live voice: closeLiveSession updates voice_live_sessions, a
+    // deny-all table. The admin client is required because the table has
+    // no policies; every call addresses only the session row it already
+    // loaded by (id, user_id) or, in the sweep, by ended_at IS NULL.
+    "closeLiveSession@src/app/api/cron/voice-live-sweep/route.ts":
+      "The sweep reads stale sessions across every account on purpose (ended_at IS NULL AND paid_until < cutoff) — the same cross-account cron shape as collectAgentBatches. The admin client is required because voice_live_sessions is deny-all; nothing identifying a stranger's account leaves the function beyond what was already in the row the cron read.",
+    "closeLiveSession@src/app/api/voice/live/end/route.ts":
+      "Keyed by the session's id from a row the route loaded one line up through .eq('id', body.id).eq('user_id', user.id) — the user_id is the authenticated session's own, so the id cannot name another account's row. The admin client is required because voice_live_sessions is deny-all.",
+    "closeLiveSession@src/app/api/voice/live/start/route.ts":
+      "Closes any open call the SAME user has, loaded by .eq('user_id', user.id).is('ended_at', null). The user_id is the authenticated session's own, so the query cannot find another account's row. The admin client is required because voice_live_sessions is deny-all.",
+    "closeLiveSession@src/app/api/voice/live/tick/route.ts":
+      "Closes a call that has exceeded its cap or whose billing failed, on a row loaded by .eq('id', body.id).eq('user_id', user.id) — the user_id is the authenticated session's own, so the id cannot name another account's row. The admin client is required because voice_live_sessions is deny-all.",
+    // Ionexa Payments: refreshPaymentsAccount reads payments_accounts, a
+    // deny-all table. The admin client is required because it has no policies.
+    "refreshPaymentsAccount@src/app/api/payments/connect/route.ts":
+      "Reads the authenticated user's own payments_accounts row by user_id (getPaymentsAccount scopes by user.id), and writes back its Stripe status from a fresh accounts.retrieve. The admin client is required because payments_accounts is deny-all — a session client would see nothing.",
+    // Ionexa Payments coupons: deactivateCoupon deletes the Stripe coupon
+    // and marks the row inactive. The admin client is required because
+    // payments_coupons is deny-all.
+    "deactivateCoupon@src/app/api/payments/coupons/route.ts":
+      "The route verifies ownership before this call: it loads all coupons by user.id (listCoupons), finds the one matching the request id, checks coupon.user_id !== user.id, and returns 404 on mismatch. The admin client is required because payments_coupons is deny-all — a session client would see nothing.",
+    // saveAgentTools@src/app/api/agents/tools/route.ts: removed 2026-11-12.
+    // The route now has an explicit ownership check (.eq("user_id", user.id))
+    // before calling saveAgentTools, so the scanner sees the explicit_compare
+    // pattern and the entry is no longer needed here.
   };
 
   const violations = [];

@@ -62,6 +62,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "No active subscription found for this account." }, { status: 400 });
     }
 
+    // A DOWNGRADE WAITING AT PERIOD END IS A SCHEDULE (api/checkout), and
+    // Stripe refuses cancel_at_period_end on a scheduled subscription.
+    // Cancelling makes the downgrade moot, so the schedule is released
+    // first; a failure here throws before anything is changed.
+    const scheduleRef = (subscription as unknown as { schedule?: string | { id: string } | null }).schedule;
+    const scheduleId = typeof scheduleRef === "string" ? scheduleRef : scheduleRef?.id ?? null;
+    if (scheduleId) await stripe.subscriptionSchedules.release(scheduleId);
+
     const updated = await stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });

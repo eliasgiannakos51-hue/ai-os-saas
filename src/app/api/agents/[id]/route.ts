@@ -40,6 +40,9 @@ type PatchBody = {
   outputFormat?: unknown;
   deliveryMethod?: unknown;
   deliveryTarget?: unknown;
+  creditCap?: unknown;
+  approvalSettings?: unknown;
+  enabledToolIds?: unknown;
 };
 
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
@@ -223,12 +226,40 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       updates.delivery_target = decision.target;
     }
 
-    if (body.needsWebSearch !== undefined || body.outputFormat !== undefined) {
+    if (body.needsWebSearch !== undefined || body.outputFormat !== undefined || body.enabledToolIds !== undefined) {
       updates.config = {
         ...agent.config,
         ...(body.needsWebSearch !== undefined ? { needsWebSearch: body.needsWebSearch === true } : {}),
         ...(isAgentOutputFormat(body.outputFormat) ? { outputFormat: body.outputFormat } : {}),
+        ...(Array.isArray(body.enabledToolIds) ? { enabledToolIds: body.enabledToolIds.filter((id: unknown): id is string => typeof id === "string").slice(0, 50) } : {}),
       };
+    }
+
+    // AG1 Κ3: credit cap — integer ≥ 0, or null to remove.
+    if (body.creditCap !== undefined) {
+      if (body.creditCap === null) {
+        updates.credit_cap = null;
+      } else {
+        const n = Number(body.creditCap);
+        if (!Number.isInteger(n) || n < 0 || n > 10_000_000) {
+          return NextResponse.json({ ok: false, error: "Credit cap must be 0–10 000 000 or null." }, { status: 400 });
+        }
+        updates.credit_cap = n;
+      }
+    }
+
+    // AG1 Κ3: approval settings — {send: bool, publish: bool, spend: bool}.
+    if (body.approvalSettings !== undefined) {
+      if (body.approvalSettings === null) {
+        updates.approval_settings = null;
+      } else if (typeof body.approvalSettings === "object" && body.approvalSettings !== null) {
+        const s = body.approvalSettings as Record<string, unknown>;
+        const valid: Record<string, boolean> = {};
+        for (const kind of ["send", "publish", "spend"] as const) {
+          valid[kind] = s[kind] !== false; // default true
+        }
+        updates.approval_settings = valid;
+      }
     }
 
     if (scheduleChanged || statusChanged) {

@@ -6,6 +6,9 @@ import { useTranslations } from "next-intl";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { Earth } from "@/components/brand/earth";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ACTION, OPTION } from "@/components/shell/tool-shell-styles";
+import { EditorShell } from "@/components/shell/editor-shell";
+import { useEditorShell, useFieldSelection } from "@/components/shell/editor-shell-context";
 
 /**
  * ONE SHELL FOR EVERY TOOL (docs/CONTEXT.md, ΣΥΣΤΗΜΑ DESIGN §5, «ΕΝΑ
@@ -73,9 +76,29 @@ type Props = {
   options?: ReactNode[];
   /** Lines under the field: the price before sending, one plain limit. */
   footer?: ReactNode;
-  /** What the tool made, beside the conversation. */
-  work?: { title: string; actions?: ReactNode; body: ReactNode } | null;
+  /** What the tool made, beside the conversation.
+   *
+   *  `mode` DRAWS THE «Simple | Pro» SWITCH IN THIS BAR, and it lives
+   *  here rather than in each tool's own `actions` on purpose
+   *  (docs/TOOL-RULES.md, «κάθε εργαλείο πάνω στο κοινό κέλυφος, κανένα
+   *  δεν φτιάχνει δική του μπάρα»): one control, one pair of words, one
+   *  place, so Automations and Agents cannot drift into two switches
+   *  that look different. The tool owns only what each level SHOWS.
+   *  Omitted by every tool that has one level, which is all of them bar
+   *  the ones directive 55 names. */
+  work?: ShellWork | null;
   onCloseWork?: () => void;
+  /** THE SELECTED PIECE, said as a chip inside the editor layout's field
+   *  (the switch "editor-shell", components/shell/editor-shell.tsx). A
+   *  tool that already draws a `ChosenBox` under the field gets the chip
+   *  without passing this; it is for a selection said some other way.
+   *  The old shell ignores it. */
+  selection?: { label: string; onClear: () => void } | null;
+  /** The price before sending, as the editor layout's field says it
+   *  («≈ 2 credits», muted, before send). A `CostEstimateHint` or a
+   *  `FieldCost` under the field fills it on its own; the old shell
+   *  ignores it and draws `footer` as it always did. */
+  cost?: string | null;
   /** Files given to the field — the «+», a paste, a drop — and what they
    *  are, drawn above the text; the same as Chat's (package 9). Slides
    *  passes them for a spreadsheet to chart (package 13). */
@@ -83,21 +106,85 @@ type Props = {
   tray?: ReactNode;
   /** Send waits while a file is still being read. */
   holdSend?: boolean;
-  /** The empty landing: one question and up to three examples, drawn with
-   *  the small globe while there are no turns and no work open. Omit for
-   *  a blank thread (the old behaviour). */
-  empty?: { heading: string; examples?: ShellExample[] };
+  /** The empty landing: one question, optionally one sentence under it,
+   *  and up to three examples, drawn with the small globe while there are
+   *  no turns and no work open. Omit for a blank thread (the old
+   *  behaviour).
+   *
+   *  `why` EXISTS BECAUSE A LIST SURFACE MOVING IN WOULD OTHERWISE LOSE
+   *  IT (2026-10-31, Agents Κομμάτι 1). lib/list-empty-states.ts requires
+   *  every non-module list screen to render a `.title` AND a `.why` — the
+   *  heading says what to do, the sentence says what the tool is for, and
+   *  Agents' was the one sentence explaining what a scheduled agent is.
+   *  A landing with only a heading had nowhere to put it. Optional, so
+   *  every tool already on this landing draws exactly what it drew. */
+  empty?: { heading: string; why?: string; examples?: ShellExample[] };
   /** The [◧] history column: its open state, what toggles and opens it,
    *  and its own content (a `ShellHistoryColumn`, typically). Omit to
    *  keep the tool's own history UI (an option under the field). */
   history?: { open: boolean; onToggle: () => void; onNew: () => void; newLabel: string; column: ReactNode };
 };
 
-export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(
-  { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend, empty, history },
-  ref
-) {
+/**
+ * THE TWO LEVELS OF ONE TOOL (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS:
+ * SIMPLE ΚΑΙ PRO», 2026-11-04, Κομμάτι 1).
+ *
+ * Simple is the steps in a list, in plain words; Pro is the whole
+ * mechanism, boxes and lines, with every box configurable. The SAME
+ * thing either way — «ό,τι φτιάχνεις στο Simple ανοίγει και στο Pro, και
+ * αντίστροφα» — so this is a view of one artefact, never two copies of
+ * it, and nothing a tool stores depends on which level is showing.
+ */
+export type ShellMode = "simple" | "pro";
+
+/**
+ * THE SCREEN'S ONE WHITE BUTTON, in the editor layout's bar (and
+ * full-width above the field on a phone). The tool says what it is and
+ * what it does; components/shell/editor-shell.tsx draws it, so no tool can
+ * draw a second one. The old shell has no bar for it and ignores it.
+ */
+export type ShellPrimary = {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  busy?: boolean;
+  icon?: ReactNode;
+};
+
+/** What a tool made, and what the bar above it carries. */
+export type ShellWork = {
+  title: string;
+  /** The bar's own buttons — the editor layout draws them outlined, after
+   *  the spacer; the old shell, beside the title. */
+  actions?: ReactNode;
+  body: ReactNode;
+  mode?: { value: ShellMode; onChange: (next: ShellMode) => void };
+  /** The editor layout only: a tool's own control beside the title
+   *  (Site's computer | phone). */
+  controls?: ReactNode;
+  /** The editor layout only: ONE status tag beside the title
+   *  («Version 3 · not published», «4 drafts»). */
+  status?: string | null;
+  /** The editor layout only: the one white button. */
+  primary?: ShellPrimary | null;
+  /** The editor layout only: the 288px settings panel on the right. While
+   *  it is there the tool's `options` are not drawn in the field — the
+   *  panel carries them (14-Image.png). Omit for no panel. */
+  panel?: ReactNode;
+};
+
+export type ToolShellProps = Props;
+
+export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShell(props, ref) {
+  const { name, help, turns, working, placeholder, sending, onSend, onStop, initialText, onLengthChange, options = [], footer, work, onCloseWork, attach, tray, holdSend, empty, history } = props;
+  const editor = useEditorShell();
   const t = useTranslations("dashboard.toolShell");
+  // THE APPROVED EDITOR LAYOUT, for whoever the switch "editor-shell" is
+  // open to (read once in app/dashboard/layout.tsx). Everything below this
+  // line is the shell every other reader has, untouched.
+  if (editor) {
+    return <EditorShell ref={ref} {...props} modeSwitch={work?.mode ? <ShellModeSwitch value={work.mode.value} onChange={work.mode.onChange} /> : null} />;
+  }
   const showEmpty = Boolean(empty) && turns.length === 0 && !work;
   return (
     <div data-testid="tool-shell" className="relative flex h-full overflow-hidden">
@@ -109,7 +196,19 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
           <div
             data-testid="tool-shell-history"
             data-open={history.open}
-            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:w-[280px] md:max-w-none ${
+            // ONE `md:w-*` PER STATE, NOT TWO FIGHTING. The base classes
+            // used to carry `md:w-[280px]` unconditionally alongside the
+            // closed branch's `md:w-0` — both targeting the same property
+            // at the same breakpoint, and Tailwind's generated stylesheet
+            // orders arbitrary-value utilities after the named scale, so
+            // `w-[280px]` always won: a "closed" column still measured
+            // 280px wide on desktop, silently eating that width from the
+            // conversation column next to it (found 2026-10-30, Image
+            // Κομμάτι 2 — the first screen with `history` wired AND `work`
+            // open at a desktop width, which is what made it visible: its
+            // own h1 wrapped to one letter per line in the 200px left
+            // over). Each branch now owns its own width end to end.
+            className={`absolute inset-y-0 start-0 z-30 w-[85%] max-w-[320px] border-e border-divider bg-background transition-[width,transform] duration-200 ease-out md:relative md:z-auto md:max-w-none ${
               history.open
                 ? "translate-x-0 md:w-[280px]"
                 : "-translate-x-full rtl:translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-e-0"
@@ -164,6 +263,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
             <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
               <Earth variant="small" px={96} />
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">{empty!.heading}</h2>
+              {empty!.why && <p className="max-w-sm text-sm leading-relaxed text-muted">{empty!.why}</p>}
               {empty!.examples && empty!.examples.length > 0 && (
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   {empty!.examples.map((ex) => (
@@ -262,6 +362,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </button>
             <p className="min-w-0 flex-1 break-words px-1 text-sm font-medium text-foreground">{work.title}</p>
+            {work.mode && <ShellModeSwitch value={work.mode.value} onChange={work.mode.onChange} />}
             {work.actions}
             <button type="button" onClick={onCloseWork} aria-label={t("close")} data-testid="tool-shell-close" className={`${ACTION} hidden lg:inline-flex`}>
               <X className="h-4 w-4" aria-hidden="true" />
@@ -274,12 +375,12 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
   );
 });
 
-/** A 44px icon action in the work area's top row. */
-export const ACTION =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground";
-
-/** One option under the field: a label that is pressed, or that opens a choice. */
-export const OPTION = "chip-link gap-1.5";
+/** A 44px icon action in the work area's top row; one option under the
+ *  field that is pressed, or that opens a choice — both pure style
+ *  tokens, kept in tool-shell-styles.ts for the same reason explained
+ *  there, imported above for this file's own use and re-exported here
+ *  so existing callers see no difference. */
+export { ACTION, OPTION };
 
 /**
  * ONE BOX CHOSEN (package 4): under the field, what the next change will
@@ -288,6 +389,10 @@ export const OPTION = "chip-link gap-1.5";
  */
 export function ChosenBox({ label, onClear }: { label: string; onClear: () => void }) {
   const t = useTranslations("dashboard.toolShell");
+  // In the editor layout the same fact is the chip inside the field
+  // (components/shell/editor-shell-context.tsx); nothing is drawn here.
+  const inField = useFieldSelection(label, onClear);
+  if (inField) return null;
   return (
     <p data-testid="box-chosen" className="mt-1 flex items-center gap-1 text-xs text-foreground">
       <span className="min-w-0 break-words">{t("box.only", { name: label })}</span>
@@ -301,4 +406,65 @@ export function ChosenBox({ label, onClear }: { label: string; onClear: () => vo
 /** Whether the work sits beside the conversation (a computer) or covers it (a phone). */
 export function workIsBeside(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+}
+
+/**
+ * THE «Simple | Pro» SWITCH, drawn in the work bar whenever a tool passes
+ * `work.mode` (the owner's «55. AGENTS ΚΑΙ AUTOMATIONS: SIMPLE ΚΑΙ PRO»,
+ * Κομμάτι 1).
+ *
+ * The same segmented shape the product already uses for a pair of
+ * exclusive choices (components/sort-toggle.tsx): both words always
+ * visible, so nobody has to press to learn what the other level is
+ * called, and neither is ever shortened — on a 320px phone this row is
+ * the back arrow, a title that WRAPS rather than overflows, this switch
+ * and the tool's own icons.
+ *
+ * It is not the screen's one white button (ΣΥΣΤΗΜΑ DESIGN, «ένα λευκό
+ * κουμπί ανά οθόνη»): the chosen half is `bg-foreground`, the ink the
+ * background, which is the product's "selected" pair everywhere, and the
+ * field's send stays the only filled button.
+ */
+export function ShellModeSwitch({ value, onChange }: { value: ShellMode; onChange: (next: ShellMode) => void }) {
+  const t = useTranslations("dashboard.toolShell");
+  // BOTH KEYS WRITTEN OUT, not t(`mode.${mode}`). A template-literal key
+  // is a key lib/i18n/message-slices.ts cannot see, which is what makes a
+  // component "unbounded" there and a whole group untrimmable — the same
+  // rule flow-boxes.tsx keeps («every word is a literal key here, so the
+  // message slicer sees them all»). Two levels, two literals.
+  const modes: { mode: ShellMode; label: string }[] = [
+    { mode: "simple", label: t("mode.simple") },
+    { mode: "pro", label: t("mode.pro") },
+  ];
+  return (
+    <div
+      data-testid="shell-mode"
+      data-mode={value}
+      role="group"
+      aria-label={t("mode.label")}
+      // A `bg-panel` TRACK, NOT A HAIRLINE BORDER. The recessed-panel
+      // treatment this product already uses for a row inside the work
+      // area (components/automations/flow-boxes.tsx's ROW) separates the
+      // two halves from the bar on its own, and the border it replaces
+      // would have been the 686th border utility in the build against
+      // design-density.test.mjs's ceiling of 685 — a ceiling that exists
+      // to stop exactly this, one hairline at a time.
+      className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-panel p-0.5"
+    >
+      {modes.map(({ mode, label }) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => onChange(mode)}
+          aria-pressed={value === mode}
+          data-testid={`shell-mode-${mode}`}
+          className={`min-h-[44px] whitespace-nowrap rounded-full px-3 text-xs font-medium transition-colors duration-150 ${
+            value === mode ? "bg-foreground text-background" : "text-muted hover:text-foreground"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 }

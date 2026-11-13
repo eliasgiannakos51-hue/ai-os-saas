@@ -268,7 +268,10 @@ console.log(`${literalKeys.size} literal t()-call keys, ${dynamicNamespaces.size
 // header). Adding to it is fine when a NEW key is genuinely unreachable
 // after the same reading; adding to it to silence this test without
 // reading the code is exactly the mistake the header describes.
-const KNOWN_ORPHANS = [];
+const KNOWN_ORPHANS = [
+  // AG1 Κ3 (2026-11-11): creditCap is now read by agents-shell.tsx via
+  // t("approvals.creditCap"). KNOWN_ORPHANS is empty again.
+];
 
 check(`the message-key walk found keys (${allKeys.length})`, allKeys.length >= 2000,
   "orphans is a filter of these — an empty walk makes the check below pass on nothing");

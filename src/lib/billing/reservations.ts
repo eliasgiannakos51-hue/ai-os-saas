@@ -63,7 +63,14 @@ export type ReservationResult =
   | { ok: false; reason: "error"; message: string };
 
 export type OverageRefusal = {
-  reason: "not_enabled" | "consent_out_of_date" | "cap_reached" | "would_exceed_cap" | "nothing_to_charge" | "unavailable";
+  reason:
+    | "not_enabled"
+    | "no_subscription"
+    | "consent_out_of_date"
+    | "cap_reached"
+    | "would_exceed_cap"
+    | "nothing_to_charge"
+    | "unavailable";
   spentEur: number;
   capEur: number | null;
 };
@@ -171,9 +178,10 @@ type OverageTopUp =
  * dies half way.
  *
  *   1. ASK. decideOverage says no unless the account has consented under
- *      the current terms, set a cap, and has room under it for the WHOLE
- *      shortfall. A part-charged action is a half-finished thing somebody
- *      paid for.
+ *      the current terms, has a live subscription at this moment (read by
+ *      loadOverageState, not remembered from the consent), set a cap, and
+ *      has room under it for the WHOLE shortfall. A part-charged action is
+ *      a half-finished thing somebody paid for.
  *   2. WRITE THE LEDGER ROW — the money owed — BEFORE the credits exist.
  *      A crash here bills for work that did not happen: visible, and a
  *      refund. The other order loses the charge for work that DID happen,

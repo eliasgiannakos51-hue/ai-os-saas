@@ -8,7 +8,6 @@ export type GitHubConnectionStatus = "connected" | "expired" | "revoked" | "erro
 
 export type GitHubConnectionSummary = {
   login: string;
-  installationId: number | null;
   status: GitHubConnectionStatus;
   connectedAt: string;
 };
@@ -40,9 +39,11 @@ export type GitHubFileContent = {
   size: number;
 };
 
+/** A file to commit. Whether it already exists is asked of GitHub at commit
+ *  time (lib/github/client.ts), never declared by the screen, which cannot
+ *  know. */
 export type GitHubDiffFile = {
   path: string;
-  action: "create" | "update";
   content: string;
 };
 

@@ -6,7 +6,8 @@
  *
  *   1. WHAT A REQUEST MAY CARRY: PDFs by id, images inside the sender's
  *      own folder only, within the caps — and a stored row is checked
- *      again when it is read back for the model.
+ *      again when it is read back for the model; a PDF's own text is
+ *      fenced as untrusted before it joins the prompt (ΑΣ2-3.2, §1c).
  *   2. WHICH MEMORIES AN ANSWER USED: the facts are numbered, the answer
  *      names them in one marker at its end, the marker never reaches the
  *      screen or the row, and a bracket that is not a marker loses nothing.
@@ -99,18 +100,34 @@ check("beyond the cap the newest win, and this message's own are always kept",
 console.log("\n== 1b. which chosen files the browser takes ==");
 // ---------------------------------------------------------------------
 const f = (name, type, size) => ({ name, type, size });
-let a = admit.admitFiles([f("a.pdf", "application/pdf", 1000), f("b.png", "image/png", 1000), f("c.jpg", "image/jpeg", 1000)], { pdfs: 0, images: 0 });
+let a = admit.admitFiles([f("a.pdf", "application/pdf", 1000), f("b.png", "image/png", 1000), f("c.jpg", "image/jpeg", 1000)], { pdfs: 0, images: 0, data: 0 });
 check("PDFs, PNGs and JPGs are taken", a.taken.map((t) => t.kind).join() === "pdf,image,image" && a.refused.length === 0);
-a = admit.admitFiles([f("a.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 10), f("b.gif", "image/gif", 10)], { pdfs: 0, images: 0 });
+a = admit.admitFiles([f("a.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 10), f("b.gif", "image/gif", 10)], { pdfs: 0, images: 0, data: 0 });
 check("anything else is refused, and each one said", a.taken.length === 0 && a.refused.map((r) => r.why).join() === "type,type");
-a = admit.admitFiles([f("a.pdf", "application/pdf", 21 * 1024 * 1024), f("b.png", "image/png", 6 * 1024 * 1024)], { pdfs: 0, images: 0 });
+a = admit.admitFiles([f("a.pdf", "application/pdf", 21 * 1024 * 1024), f("b.png", "image/png", 6 * 1024 * 1024)], { pdfs: 0, images: 0, data: 0 });
 check("a PDF over 20 MB and an image over 5 MB are refused before uploading", a.refused.map((r) => r.why).join() === "pdfTooLarge,imageTooLarge");
-a = admit.admitFiles([f("a.pdf", "application/pdf", 10), f("b.pdf", "application/pdf", 10)], { pdfs: 2, images: 3 });
+a = admit.admitFiles([f("a.pdf", "application/pdf", 10), f("b.pdf", "application/pdf", 10)], { pdfs: 2, images: 3, data: 0 });
 check("the caps count what the message already carries", a.taken.map((t) => t.file.name).join() === "a.pdf" && a.refused[0]?.why === "tooManyPdfs");
-a = admit.admitFiles([f("x.png", "image/png", 10)], { pdfs: 0, images: 3 });
+a = admit.admitFiles([f("x.png", "image/png", 10)], { pdfs: 0, images: 3, data: 0 });
 check("...images too", a.refused[0]?.why === "tooManyImages");
 check("a PDF with no type, by its name", admit.attachKindOf({ name: "scan.PDF", type: "" }) === "pdf");
-check("the file picker offers exactly these", admit.CHAT_ACCEPT === "application/pdf,image/jpeg,image/png");
+check("the file picker offers exactly these", admit.CHAT_ACCEPT === "application/pdf,image/jpeg,image/png,.csv,.xlsx");
+
+// ---------------------------------------------------------------------
+console.log("\n== 1c. a PDF's text reaches the model fenced, not bare (ΑΣ2-3.2) ==");
+// A stranger wrote this text, not the user — same rule as Files' own
+// ask() and every other untrusted-text path in this repository, all
+// through the one helper (src/lib/agents/agent-config.ts, wrapUntrusted).
+// The behavioural proof (the real fence appears around the real block,
+// surviving a hostile echo of the fence markers) runs in
+// scripts/tests/chat-attachments.itest.mjs, against the real function;
+// this file only holds that the loader is wired to call it, by source,
+// because the loader itself needs Supabase and a real PDF to run.
+// ---------------------------------------------------------------------
+const attachments = code("src/lib/chat/attachments.ts");
+check("the loader imports the one untrusted-text fence", /import \{ wrapUntrusted \} from "@\/lib\/agents\/agent-config";/.test(attachments));
+check("...and wraps a document's text with it before pushing the block the model reads",
+  /const wrapped = wrapUntrusted\(block\);[\s\S]{0,120}blocks\.push\(\{ type: "text", text: wrapped \}\);/.test(attachments));
 
 // ---------------------------------------------------------------------
 console.log("\n== 2. which memories an answer used ==");
@@ -163,7 +180,7 @@ const route = code("src/app/api/chat/route.ts");
 check('"chat-attachments" is declared as a switch', /\n  "chat-attachments": "/.test(code("src/lib/flags/flags.ts")));
 check("the route reads it", /const attachmentsOn = await isFeatureOn\("chat-attachments", user\);/.test(route));
 check("with it off, attachments in a request are refused (400)",
-  /if \(!readAttachments\.ok \|\| \(!attachmentsOn && readAttachments\.list\.length > 0\)\) \{\s*return NextResponse\.json\(\s*\{ ok: false, reason: "bad_attachments"[\s\S]{0,80}\{ status: 400 \}/.test(route));
+  /if \(\s*!readAttachments\.ok \|\|\s*\(!attachmentsOn && readAttachments\.list\.length > 0\) \|\|[\s\S]{0,120}\) \{\s*return NextResponse\.json\(\s*\{ ok: false, reason: "bad_attachments"[\s\S]{0,80}\{ status: 400 \}/.test(route));
 const notReady = route.indexOf('reason: "attachment_not_ready"');
 check("an attachment that cannot be read is said (409) before anything is held or free-counted",
   notReady > 0 && notReady < route.indexOf("consumeFreeChatMessage(") && notReady < route.indexOf("await reserveCredits(") &&

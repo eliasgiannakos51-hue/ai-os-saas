@@ -21,6 +21,7 @@
  *   E. the ten languages       (a locale left behind)
  *   F. the hierarchy           (the vaguest thing loudest again)
  *   G. the instruments         (the gate's own reach)
+ *   J. only the app sends      (an address fills the field; A8)
  *
  * Run: node scripts/tests/first-screen.mutation.mjs
  */
@@ -38,11 +39,14 @@ const GREETING = "src/components/overview/greeting-header.tsx";
 const OVERVIEW = "src/app/dashboard/overview/page.tsx";
 const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
 const CHAT_WS = "src/components/chat/chat-workspace.tsx";
-const AGENTS_WS = "src/components/agents/agents-workspace.tsx";
+const AGENTS_WS = "src/components/agents/agents-shell.tsx";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
 const TEMPLATES_ROUTE = "src/app/api/agents/templates/route.ts";
-const TARGETS = [GATE, LIB, GREETING, OVERVIEW, CHAT_PAGE, CHAT_WS, AGENTS_WS, EN, EL, TEMPLATES_ROUTE];
+const SEND_LIB = "src/lib/nav/send-on-arrival.ts";
+const SITE_WS = "src/components/website-builder/website-builder-workspace.tsx";
+const TOOLS_GRID = "src/components/tools/tools-grid.tsx";
+const TARGETS = [GATE, LIB, GREETING, OVERVIEW, CHAT_PAGE, CHAT_WS, AGENTS_WS, EN, EL, TEMPLATES_ROUTE, SEND_LIB, SITE_WS, TOOLS_GRID];
 
 const MUTANTS = [
   // ---- A. THE CAPABILITIES ------------------------------------------
@@ -128,7 +132,7 @@ const MUTANTS = [
     file: AGENTS_WS,
     from: "  initialAgent?: string;",
     to: "  initialAgentXX?: string;",
-    expect: "repeat: agents-workspace.tsx accepts initialAgent",
+    expect: "repeat: agents-shell.tsx accepts initialAgent",
   },
   {
     dimension: "C. arriving runs it",
@@ -311,6 +315,63 @@ const MUTANTS = [
     from: "const overview = read(OVERVIEW);",
     to: 'const overview = read(OVERVIEW + ".gone");',
     expect: "Home renders the quick actions",
+  },
+  // ---- J. ONLY THE APP PRESSES SEND (2026-11-05 review, A8) ---------
+  {
+    dimension: "J. only the app sends",
+    name: "any address sends its question again",
+    file: CHAT_WS,
+    from: '    if (takeSendOnArrival("ask", initialAsk)) void handleSend(initialAsk);\n    else composerRef.current?.setText(initialAsk);',
+    to: "    void handleSend(initialAsk);",
+    expect: "Chat sends an arriving question only when the app asked",
+  },
+  {
+    dimension: "J. only the app sends",
+    name: "an intent for one text sends another",
+    file: SEND_LIB,
+    from: "    return armed.param === param && armed.text === normalise(text) && age >= 0 && age < SEND_ON_ARRIVAL_FRESH_MS;",
+    to: "    return armed.param === param && typeof armed.text === \"string\" && age >= 0 && age < SEND_ON_ARRIVAL_FRESH_MS;",
+    expect: "another text in the address is not sent",
+  },
+  {
+    dimension: "J. only the app sends",
+    name: "an intent is never spent",
+    file: SEND_LIB,
+    from: "    window.sessionStorage.removeItem(STORAGE_KEY);\n",
+    to: "",
+    expect: "...and only once",
+  },
+  {
+    dimension: "J. only the app sends",
+    name: "an intent never goes stale",
+    file: SEND_LIB,
+    from: "age >= 0 && age < SEND_ON_ARRIVAL_FRESH_MS;",
+    to: "age >= 0 && age < Number.MAX_VALUE;",
+    expect: "a stale intent sends nothing",
+  },
+  {
+    dimension: "J. only the app sends",
+    name: "a link to another origin arms the intent",
+    file: SEND_LIB,
+    from: "  if (url.origin !== window.location.origin) return;\n",
+    to: "",
+    expect: "a link to another origin arms nothing",
+  },
+  {
+    dimension: "J. only the app sends",
+    name: "the older Site workspace submits any arriving brief",
+    file: SITE_WS,
+    from: '    if (takeSendOnArrival("brief", initialBrief)) void submitGeneration(',
+    to: "    void submitGeneration(",
+    expect: "the older Site workspace submits an arriving brief only when the app asked",
+  },
+  {
+    dimension: "J. only the app sends",
+    name: "a quick-job tile stops saying it is the app's own press",
+    file: TOOLS_GRID,
+    from: "          onClick={() => armSendOnArrival(href)}",
+    to: "          onClick={() => void href}",
+    expect: "src/components/tools/tools-grid.tsx arms the intent on the app's own press",
   },
 ];
 

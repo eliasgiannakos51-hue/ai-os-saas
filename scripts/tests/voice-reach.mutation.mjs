@@ -26,7 +26,7 @@ const SETTINGS = "src/components/settings/voice-settings.tsx";
 const AVAIL = "src/components/voice/voice-availability.tsx";
 const LEVEL = "src/components/voice/use-audio-level.ts";
 const PLAYER = "src/components/voice/voice-player.tsx";
-const AGENTS = "src/components/agents/agents-workspace.tsx";
+const AGENTS = "src/components/agents/agents-shell.tsx";
 const ONBOARDING = "src/components/onboarding/onboarding-flow.tsx";
 const ZH = "messages/zh.json";
 const AR = "messages/ar.json";
@@ -213,7 +213,7 @@ try {
       const current = byFile.get(e.file) ?? originals.get(e.file);
       // `all` REPLACES EVERY OCCURRENCE. Without it a mutant that
       // deletes "the" call site deletes only the FIRST — and
-      // agents-workspace.tsx renders <VoicePlayer twice, so the gate
+      // agents-shell.tsx renders <VoicePlayer twice, so the gate
       // stayed correctly green over a file that still had one, and the
       // mutant was filed as a survivor of a check that works.
       byFile.set(e.file, e.all ? current.replaceAll(e.from, e.to) : current.replace(e.from, e.to));

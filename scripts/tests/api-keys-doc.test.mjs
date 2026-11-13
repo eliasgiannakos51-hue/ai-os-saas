@@ -104,12 +104,34 @@ check("the stated count matches the block", listed.length === 15, `${listed.leng
 check("...and the conditional one is the one named as conditional",
   listed.includes("MAX_FUNCTION_DURATION") && /depends on your Vercel plan/.test(doc));
 
+// DERIVED, NOT HARDCODED, and that is the whole point. This check used to
+// read `crons.length === 13` with "all thirteen" beside it, so the day the
+// deferred-deletion cron landed (20261108, /api/cron/execute-deletions) the
+// gate went red on a true sentence having become false — correct — but the
+// ONLY way to fix it was to hand-edit two literals in this file as well as
+// the document. A number that has to be maintained in two places is a number
+// that will disagree with itself. Now the population is vercel.json and the
+// document is held against it, so adding a cron is a one-line doc change.
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+  "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one",
+  "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six",
+  "twenty-seven", "twenty-eight", "twenty-nine", "thirty",
+];
+const word = (n) => NUMBER_WORDS[n] ?? String(n);
+
 const crons = JSON.parse(readFileSync("vercel.json", "utf8")).crons;
+const underCron = crons.filter((c) => c.path.startsWith("/api/cron"));
+const elsewhere = crons.filter((c) => !c.path.startsWith("/api/cron"));
+
 check(`the cron count is the cron count (${crons.length})`,
-  doc.includes(`all twelve scheduled routes`) && crons.length === 12,
-  `vercel.json has ${crons.length}`);
+  doc.includes(`all ${word(crons.length)} scheduled routes`),
+  `vercel.json has ${crons.length}, so the document must say "all ${word(crons.length)} scheduled routes"`);
 check("...and the split between /api/cron and the digest is right",
-  crons.filter((c) => c.path.startsWith("/api/cron")).length === 11);
+  doc.includes(`${word(underCron.length)} under \`/api/cron\``) &&
+  underCron.length + elsewhere.length === crons.length,
+  `${underCron.length} under /api/cron plus ${elsewhere.length} elsewhere (${elsewhere.map((c) => c.path).join(", ")})`);
 
 check(`the registry size is right (${ENV_REQUIREMENTS.length})`,
   doc.includes(`all ${ENV_REQUIREMENTS.length} variables`),
@@ -121,9 +143,11 @@ console.log("\n== 4. 'not in the code' still is not in the code ==");
 // tells a reader not to bother setting its key — and the feature is dark
 // for exactly as long as nobody re-reads this file.
 const NOT_WIRED = [
-  "XAI", "GROK", "PERPLEXITY", "MANUS", "DEEPSEEK", "TOGETHER", "MISTRAL", "COHERE",
+  "XAI", "GROK", "PERPLEXITY", "MANUS", "DEEPSEEK", "TOGETHER", "COHERE",
   // RUNWAY, IDEOGRAM and DEEPGRAM left this list on 2026-10-03, when the
-  // document moved them to Table A ("Keys the code CHECKS").
+  // document moved them to Table A ("Keys the code CHECKS"). MISTRAL left
+  // on 2026-11-07, when agent/mistral wired it as the fifth AI provider
+  // and the only EU destination in the chain (eu-only.ts).
   "LUMA", "KLING", "PIKA", "HEYGEN", "SYNTHESIA",
   "MIDJOURNEY", "RECRAFT", "ASSEMBLYAI",
   "PLAID", "TINK", "GOCARDLESS", "ALCHEMY", "MORALIS",
@@ -138,9 +162,9 @@ check(
 // And the registry really is the closed set of four the document quotes.
 const registry = readFileSync("src/lib/ai/providers/registry.ts", "utf8");
 const providers = [...(registry.match(/PROVIDER_KEY_ENV_VARS[\s\S]*?\};/)?.[0] ?? "").matchAll(/^\s+(\w+): "/gm)].map((m) => m[1]);
-check(`the model registry holds four providers (${providers.join(", ")})`, providers.length === 4);
-check("...the four the document names",
-  JSON.stringify(providers.slice().sort()) === JSON.stringify(["anthropic", "google", "groq", "openai"]));
+check(`the model registry holds five providers (${providers.join(", ")})`, providers.length === 5);
+check("...the five the document names",
+  JSON.stringify(providers.slice().sort()) === JSON.stringify(["anthropic", "google", "groq", "mistral", "openai"]));
 
 // ---------------------------------------------------------------------
 console.log("\n== 5. every gate it points at exists, and does what it says ==");
@@ -165,8 +189,8 @@ console.log("\n== 6. the honesty clause is still there ==");
 check("it says the prices are not measured", /have not measured any provider's price/i.test(doc));
 check("...and quotes the constant that agrees", /UNVERIFIED_PRICE_PROVIDERS/.test(doc));
 const catalog = readFileSync("src/lib/ai/providers/catalog.ts", "utf8");
-check("...which still exists and still names three providers",
-  /UNVERIFIED_PRICE_PROVIDERS[^=]*=\s*\["openai", "google", "groq"\]/.test(catalog));
+check("...which still exists and still names four providers",
+  /UNVERIFIED_PRICE_PROVIDERS[^=]*=\s*\["openai", "google", "groq", "mistral"\]/.test(catalog));
 
 console.log("");
 if (failures.length > 0) {

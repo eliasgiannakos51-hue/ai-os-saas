@@ -6,6 +6,8 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { Earth } from "@/components/brand/earth";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { createClient } from "@/lib/supabase/client";
+import { signOutAndForget } from "@/lib/auth/sign-out";
 
 type Status = "idle" | "loading" | "done";
 
@@ -62,6 +64,10 @@ export function ConfirmDeleteAccountForm() {
         return;
       }
 
+      // The account is gone on the server; this browser's session and the
+      // pages the offline cache kept for it go too (lib/auth/sign-out.ts).
+      // "local": there is no account left for a global sign-out to reach.
+      await signOutAndForget(createClient(), { scope: "local" }).catch(() => undefined);
       window.location.href = "/?deleted=success";
     } catch (err) {
       // eslint-disable-next-line no-console

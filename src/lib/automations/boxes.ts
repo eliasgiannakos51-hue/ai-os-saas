@@ -148,6 +148,32 @@ export function connectionsNeeded(boxes: Box[]): ("google_calendar" | "telegram"
   return [...needs];
 }
 
+/**
+ * «ΌΤΑΝ → ΑΝ → ΚΆΝΕ» (When → If → Do): the part of the sentence each box
+ * is, for Simple to say beside every step (the owner, 2026-11-05, after
+ * the automation videos; behind "agents-automations-pro"). The start is
+ * the WHEN; a condition and an approval are the IF — each one is a
+ * "go on only if": something was found, the person said yes; reading,
+ * the AI step and the action are the DO.
+ *
+ * A record over every kind, so a seventh kind cannot be added without
+ * being given a part (the compiler refuses the missing key), and pure,
+ * so scripts/tests/automations.test.mjs §10 holds it. Presentation only:
+ * nothing stored changes and no box carries its part.
+ */
+export type SentencePart = "when" | "if" | "do";
+export const SENTENCE_PART: Record<BoxKind, SentencePart> = {
+  start: "when",
+  condition: "if",
+  approval: "if",
+  read: "do",
+  ai: "do",
+  action: "do",
+};
+export function partOf(box: Box): SentencePart {
+  return SENTENCE_PART[box.kind];
+}
+
 /** How many boxes call a model: what a run is priced on. */
 export function aiBoxCount(boxes: Box[]): number {
   return boxes.filter((b) => b.kind === "ai").length;
@@ -156,4 +182,67 @@ export function aiBoxCount(boxes: Box[]): number {
 /** Replaces one box, keeping its place and its id. */
 export function replaceBox(boxes: Box[], id: string, next: Box): Box[] {
   return boxes.map((b) => (b.id === id ? { ...next, id } : b));
+}
+
+/**
+ * HOW MUCH THE OWNER TRUSTS ONE AUTOMATION, ON ITS OWN (AUTOMATIONS
+ * ΚΟΜΜΑΤΙ 2a, οδηγία 55, 2026-11-08). Stored on automation_flows.mode,
+ * in a query of its own — never FLOW_COLUMNS, see the migration's own
+ * comment (20261123000000) for why, the same reason as minutes_saved.
+ *
+ *   auto        σήμερα, αμετάβλητο.
+ *   shadow      κάθε τρέξιμο ΑΠΟ ΤΟ ΠΡΟΓΡΑΜΜΑ Ή ΑΡΧΕΙΟ τρέχει στεγνό — ένα
+ *               «Εκτέλεση τώρα» πατημένο με το χέρι παραμένει πραγματικό,
+ *               γιατί εκεί είσαι ήδη εσύ, ζωντανά, αποφασίζοντας.
+ *   supervised  κάθε κουτί "action" χωρίς δικό του "approval" από πριν
+ *               παίρνει ένα, αυτόματα, πριν εκτελεστεί πραγματικά.
+ */
+export const FLOW_MODES = ["auto", "shadow", "supervised"] as const;
+export type FlowMode = (typeof FLOW_MODES)[number];
+export const DEFAULT_FLOW_MODE: FlowMode = "auto";
+export function isFlowMode(value: unknown): value is FlowMode {
+  return typeof value === "string" && (FLOW_MODES as readonly string[]).includes(value);
+}
+
+/**
+ * WHETHER THIS RUN IS DRY, as the one function every call site uses —
+ * not a copy of the rule in the cron route, the manual-run route, the
+ * approve route and event-runs.ts each deciding it their own way, which
+ * is exactly the "two lists that can silently disagree" shape this
+ * codebase has already been burned by (ALLOWED_IFRAME_EMBEDS/CSP, the
+ * strip/scan cinematicSitesEnabled read). {dry:true} from the "Δοκιμή"
+ * button always wins; otherwise "shadow" forces it UNLESS a person
+ * pressed "Εκτέλεση τώρα" themselves — manual is the one case where
+ * somebody is already there, right now, choosing this to be real.
+ */
+export function effectiveDry(mode: FlowMode, startedBy: "time" | "event" | "manual" | "dry"): boolean {
+  if (startedBy === "dry") return true;
+  return mode === "shadow" && startedBy !== "manual";
+}
+
+/**
+ * "SUPERVISED": an approval inserted, at RUN TIME ONLY, before every
+ * action box that does not already have one directly before it. Never
+ * written back — automation_flows.boxes stays exactly what the person
+ * designed; MAX_BOXES (8) bounds what is STORED, not what a supervised
+ * run walks through, and the inserted boxes are never counted against it.
+ *
+ * DETERMINISTIC FROM (boxes, mode) ALONE, on purpose: a run that stops at
+ * one of these synthetic approvals and is resumed later calls this again
+ * on the same stored boxes and the same mode, and must land on the exact
+ * same array — same length, same box at every index — or the resume's
+ * stored `at` points at the wrong box. (If the owner changes the mode
+ * itself while a run is waiting, that guarantee no longer holds; runFlow
+ * guards the resume index against the rebuilt array's length, so a
+ * mismatch fails the run instead of running the wrong box.)
+ */
+export function withSupervisedApprovals(boxes: Box[]): Box[] {
+  const out: Box[] = [];
+  for (const box of boxes) {
+    if (box.kind === "action" && out[out.length - 1]?.kind !== "approval") {
+      out.push({ id: `${box.id}-auto-gate`, kind: "approval" });
+    }
+    out.push(box);
+  }
+  return out;
 }

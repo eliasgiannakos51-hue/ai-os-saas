@@ -65,6 +65,10 @@ const createAdminClient = () => ({
       if (globalThis.__db.failReset) return { data: null, error: { code: "XX000", message: "reset blew up" } };
       globalThis.__db.resets.push(args);
     }
+    if (fn === "clamp_credits_to_plan") {
+      (globalThis.__db.clamps ??= []).push(args);
+      if (globalThis.__db.failClamp) return { data: null, error: { code: "42883", message: "function does not exist" } };
+    }
     return { data: null, error: null };
   },
 });
@@ -78,6 +82,7 @@ const clearLegacyEntitlements = async () => {};
 // calls them.
 const resolvePlanSlug = () => "free";
 const resolvePlan = () => null;
+const hasLiveSubscription = () => false;
 // The real plan table: the amounts must be the product's, not invented
 // here, or the gate would prove nothing about what a customer receives.
 const PLAN_CREDITS = { free: 100, starter: 1000, growth: 5000, professional: 12000, ultimate: 30000 };
@@ -136,6 +141,35 @@ check("...and the claim was released", db().deletes.length === 1, JSON.stringify
 globalThis.__db.failReset = false;
 await credits.syncCreditsForPlan(USER, "growth", "invoice.paid");
 check("so the retry works", db().resets.length === 1, `resets=${db().resets.length}`);
+
+console.log("\n== 4. ONE RESET PER PAID PERIOD, whatever the calendar says (2026-11-05) ==");
+// The key was the calendar month. One paid period runs across a month
+// boundary, so the same plan inside ONE period had two keys: up, down and
+// up again across the 1st opened the higher plan twice. The webhook now
+// passes the period (creditPeriodKey), and the key is that.
+globalThis.__db = { resets: [], inserts: [], deletes: [], failReset: false, claimed: new Set() };
+const P1 = "period-1761955200";
+const P2 = "period-1764547200";
+await credits.syncCreditsForPlan(USER, "growth", "upgrade on Oct 30", P1);
+await credits.syncCreditsForPlan(USER, "growth", "upgrade again on Nov 2", P1);
+check("the same plan twice in one paid period resets once", db().resets.length === 1, `resets=${db().resets.length}`);
+check("…and the claim names the period",
+  String(db().inserts[0]?.idempotency_key) === `plan_reset:${USER}:growth:${P1}`, String(db().inserts[0]?.idempotency_key));
+await credits.syncCreditsForPlan(USER, "growth", "invoice.paid renewal", P2);
+check("the next paid period is a new reset", db().resets.length === 2, `resets=${db().resets.length}`);
+
+console.log("\n== 5. a move down lowers and never refills ==");
+globalThis.__db = { resets: [], inserts: [], deletes: [], failReset: false, claimed: new Set(), clamps: [] };
+await credits.clampCreditsToPlan(USER, "starter", "ultimate -> starter");
+check("a downgrade runs the clamp", db().clamps.length === 1, JSON.stringify(db().clamps));
+check("…at the lower plan's allowance", db().clamps[0]?.p_monthly === 1000 && db().clamps[0]?.p_plan_tier === "starter",
+  JSON.stringify(db().clamps[0]));
+check("…and never the reset that refills", db().resets.length === 0, `resets=${db().resets.length}`);
+globalThis.__db.failClamp = true;
+let clampThrew = false;
+await credits.clampCreditsToPlan(USER, "starter", "before the migration").catch(() => { clampThrew = true; });
+check("a missing clamp function leaves the balance alone and does not throw into the webhook",
+  !clampThrew && db().resets.length === 0);
 
 console.log(failures.length === 0 ? `\nALL PASS: ${pass} passed, 0 failed` : `\n${failures.length} FAILED, ${pass} passed`);
 process.exit(failures.length === 0 ? 0 : 1);

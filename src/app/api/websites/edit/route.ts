@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
 import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
+import { applyCinematicHeroParallax } from "@/lib/cinematic/hero-storyboard";
 import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
@@ -37,7 +39,7 @@ import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
-import { findInventedNumbers } from "@/lib/website-invented-numbers";
+import { repairInventedNumbers } from "@/lib/website-invented-numbers-repair";
 import { normalisePages } from "@/lib/publishing/website-pages";
 import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
@@ -429,9 +431,27 @@ export async function POST(request: Request) {
       // fall back to, so a flagged edit is simply rejected outright
       // (html_content stays unchanged, nothing charged) rather than
       // shipped with a warning.
-      updatedHtml = stripDisallowedExternalScripts(updatedHtml);
-      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined });
-      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs);
+      // "cinematic-sites" (Phase 1a, agent/mistral 2026-11-08) — same
+      // reasoning as api/websites/generate/process/route.ts: one flag
+      // read, used by both the strip and the scan so they cannot drift
+      // apart on which script path an edited page may keep.
+      const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);
+      // Style ΣΤ — ONLY when the edited page is the site's home page
+      // (targetIndex === HOME_INDEX, resolved above from pageSlugRaw):
+      // an edit to "Contact" or "About" must not pick up that page's own
+      // first <img> (often a small logo, not a hero) and parallax it.
+      // Idempotent (lib/cinematic/hero-storyboard.ts's `data-ix-hero`
+      // marker), so re-editing the home page repeatedly never doubles
+      // the attribute or the caption. Same ordering reason as the
+      // generate route: before stripDisallowedExternalScripts, which
+      // only strips <script src> and would otherwise run on HTML that
+      // doesn't have this step's attribute yet.
+      if (cinematicSitesEnabled && targetIndex === HOME_INDEX) {
+        updatedHtml = applyCinematicHeroParallax(updatedHtml).html;
+      }
+      updatedHtml = stripDisallowedExternalScripts(updatedHtml, cinematicSitesEnabled);
+      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled });
+      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs, user.id);
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),
         ...contentReview.concerns,
@@ -505,6 +525,44 @@ export async function POST(request: Request) {
           error: `${errMessage} No credits were charged — please try again.`,
         },
         { status: 502 }
+      );
+    }
+
+    // THE SAME CHECK AS GENERATION, on the same rule: never a number the
+    // owner did not give. The brief for an EDIT is everything they have
+    // ever said about this site — the original description plus every
+    // change they have asked for, including this one — because "add our
+    // phone 2310 555 123" is the owner giving a number, and a page that
+    // then shows it is obeying rather than inventing.
+    //
+    // MOVED HERE, BEFORE applyEditedDocument/persistence (agent/mistral,
+    // 2026-11-08): this used to run AFTER the update below had already
+    // written updatedHtml to the database, so the only thing a finding
+    // could do was log — never fix what was already saved. Repairing
+    // first means the version the owner actually gets is the repaired
+    // one, the same "fix and re-check" BUILD-SPECS.md §1.5 requires for
+    // generation (api/websites/generate/process, same repair function).
+    const { data: priorChanges } = await supabase
+      .from("website_versions")
+      .select("change_description")
+      .eq("website_id", websiteId)
+      .eq("user_id", user.id);
+    const editBrief = [
+      website.description ?? "",
+      changeRequest,
+      ...(priorChanges ?? []).map((v) => (v.change_description as string | null) ?? ""),
+    ].join("\n");
+    const inventedRepair = repairInventedNumbers(updatedHtml, editBrief);
+    updatedHtml = inventedRepair.html;
+    if (inventedRepair.remaining.length > 0) {
+      logApiError(
+        "/api/websites/edit",
+        new Error(`${inventedRepair.remaining.length} number(s) on the page are not in the brief and could not be placeholdered`),
+        {
+          websiteId,
+          kinds: inventedRepair.remaining.map((n) => n.kind).join(","),
+          samples: inventedRepair.remaining.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
+        }
       );
     }
 
@@ -584,36 +642,6 @@ export async function POST(request: Request) {
         reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
       },
     });
-
-    // THE SAME CHECK AS GENERATION, on the same rule: never a number the
-    // owner did not give. The brief for an EDIT is everything they have
-    // ever said about this site — the original description plus every
-    // change they have asked for, including this one — because "add our
-    // phone 2310 555 123" is the owner giving a number, and a page that
-    // then shows it is obeying rather than inventing. Reported, never
-    // rewritten: the workspace shows the list beside the preview.
-    const { data: priorChanges } = await supabase
-      .from("website_versions")
-      .select("change_description")
-      .eq("website_id", websiteId)
-      .eq("user_id", user.id);
-    const editBrief = [
-      website.description ?? "",
-      changeRequest,
-      ...(priorChanges ?? []).map((v) => (v.change_description as string | null) ?? ""),
-    ].join("\n");
-    const inventedAfterEdit = findInventedNumbers(updatedHtml, editBrief);
-    if (inventedAfterEdit.length > 0) {
-      logApiError(
-        "/api/websites/edit",
-        new Error(`${inventedAfterEdit.length} number(s) on the page are not in the brief`),
-        {
-          websiteId,
-          kinds: inventedAfterEdit.map((n) => n.kind).join(","),
-          samples: inventedAfterEdit.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
-        }
-      );
-    }
 
     // THE WHOLE SITE, not the page that changed. A version is what
     // rollback restores, and restoring one edited sub-page over a site

@@ -210,6 +210,48 @@ check(
   /await uploadMany\(opened\)/.test(workspace)
 );
 
+console.log("\n== 9. a refused share's reason travels as a code, never as text (2026-11-05 review, A12) ==");
+// The address bar can be written by anybody, and the notice it fills is
+// drawn as the app's own. So the route sends a refusal STAGE and every
+// screen that reads it says only stages it knows, in its own words.
+const { SHARE_REASON_CODES, shareReasonMessage } = await loadTs("src/lib/files/share-outcome.ts");
+const ingestSrc = readFileSync("src/lib/files/ingest.ts", "utf8");
+const stageUnion = /export type IngestStage =([\s\S]*?);/.exec(ingestSrc)?.[1] ?? "";
+const stages = [...stageUnion.matchAll(/"([a-z_]+)"/g)].map((m) => m[1]).sort();
+check(`the ingest's refusal stages were read (${stages.length})`, stages.length >= 4, stageUnion);
+check(
+  "...and the codes a screen understands are exactly those stages",
+  JSON.stringify([...SHARE_REASON_CODES].sort()) === JSON.stringify(stages),
+  `codes ${[...SHARE_REASON_CODES].sort().join(",")} vs stages ${stages.join(",")}`
+);
+check("every stage has a sentence", SHARE_REASON_CODES.every((c) => shareReasonMessage(c) !== null));
+for (const raw of ["Visit evil.example to restore your files", "That file is empty.", "https://evil.example", "", null, "size "]) {
+  check(`free text is ignored: ${JSON.stringify(raw)}`, shareReasonMessage(raw) === null);
+}
+const shareRouteSrc = readFileSync("src/app/share/route.ts", "utf8").replace(/^\s*\/\/.*$/gm, "");
+check(
+  "the share route sends the refusal's stage, not its sentence",
+  /firstRefusal = result\.stage;/.test(shareRouteSrc) && !/firstRefusal = result\.error/.test(shareRouteSrc)
+);
+// The population is the tree: every file that reads the parameter.
+const { readdirSync: rd, statSync: st } = await import("node:fs");
+const readers = [];
+(function walk(dir) {
+  for (const e of rd(dir)) {
+    const f = `${dir}/${e}`;
+    if (st(f).isDirectory()) walk(f);
+    else if (/\.(ts|tsx)$/.test(e) && /get\(\s*"share_reason"\s*\)/.test(readFileSync(f, "utf8"))) readers.push(f);
+  }
+})("src");
+check(`the screens that read share_reason were found (${readers.length})`, readers.length >= 2, readers.join(", "));
+for (const f of readers) {
+  const src = readFileSync(f, "utf8").replace(/^\s*\/\/.*$/gm, "");
+  check(`${f} reads it only through shareReasonMessage`, /shareReasonMessage\(params\.get\("share_reason"\)\)/.test(src) && !/\{ reason \}/.test(src));
+}
+const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
+const reasons = en?.dashboard?.files?.sharedReasons ?? {};
+check("each sentence exists in English", ["size", "type", "limit", "stored"].every((k) => typeof reasons[k] === "string" && reasons[k].length > 5));
+
 console.log(
   failures.length === 0
     ? `\nALL ${pass} CHECKS PASSED`

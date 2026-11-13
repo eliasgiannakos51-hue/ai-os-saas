@@ -43,9 +43,41 @@ for (const [raw, want] of [
   ["https://evil.example", "/dashboard/overview"],
   ["javascript:alert(1)", "/dashboard/overview"],
   [undefined, "/dashboard/overview"],
+  // THE PARSER'S OWN REWRITES (2026-11-05 review, A4). The URL parser
+  // drops tab, LF and CR anywhere and reads a backslash as a slash, so a
+  // prefix test passes a string the redirect then resolves off-site.
+  ["/\t/evil.example", "/dashboard/overview"],
+  ["/\n/evil.example", "/dashboard/overview"],
+  ["/\r/evil.example", "/dashboard/overview"],
+  ["/dash\nboard", "/dashboard/overview"],
+  ["/a\\b", "/dashboard/overview"],
+  ["/\u0000x", "/dashboard/overview"],
+  // A dot segment can collapse into a leading double slash.
+  ["/.//evil.example", "/dashboard/overview"],
+  ["/a/..//evil.example", "/dashboard/overview"],
+  ["pricing", "/dashboard/overview"],
+  // What a real path keeps: its query and its fragment.
+  ["/pricing?plan=pro#top", "/pricing?plan=pro#top"],
 ]) {
   ok(`safeNextPath(${JSON.stringify(raw)}) -> ${want}`, safe(raw) === want, `got ${safe(raw)}`);
 }
+// EVERY ROUTE THAT FOLLOWS A `next` USES THE ONE RULE. The population is
+// the tree: every route.ts or page that reads a `next` query parameter.
+const { readdirSync, statSync } = await import("node:fs");
+const followers = [];
+(function walk(dir) {
+  for (const entry of readdirSync(dir)) {
+    const full = `${dir}/${entry}`;
+    if (statSync(full).isDirectory()) walk(full);
+    else if (/\.(ts|tsx)$/.test(entry) && /searchParams\.get\(\s*"next"\s*\)|body\??\.next\b/.test(read(full))) followers.push(full);
+  }
+})("src/app");
+ok(`the routes that follow a next were found (${followers.length})`, followers.length >= 3, followers.join(", "));
+for (const f of followers) {
+  const src = read(f);
+  ok(`${f} passes its next through safeNextPath`, /safeNextPath\(\s*(url\.searchParams\.get\("next"\)|body\?\.next)\s*\)/.test(src));
+}
+ok("auth/callback has no prefix test of its own any more", !/rawNext/.test(read("src/app/auth/callback/route.ts")));
 const libSrc = read("src/lib/auth/confirm-email.ts");
 ok("the link carries the hashed token, for the server to verify", /token_hash: hashed/.test(libSrc));
 ok("…and its next goes through the same rule", /next: safeNextPath\(next\)/.test(libSrc));

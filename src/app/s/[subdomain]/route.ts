@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { contentDomain, wrongOriginRedirect } from "@/lib/publishing/content-origin";
 import { logApiError } from "@/lib/log-error";
 import { validateSubdomain } from "@/lib/publishing/subdomain";
 import { injectBadge } from "@/lib/publishing/badge";
@@ -54,9 +55,16 @@ export const revalidate = 0;
 //      React runtime. Returning the bytes as their own document is both
 //      safer and exactly what the user published.
 //
-// Path-based (/s/acme) until there is a wildcard domain to serve
-// acme.ionexa.ai from — see publishedSiteUrl().
+// Path-based (/s/acme) on the app's own domain until PUBLISHED_SITE_DOMAIN
+// names a domain of their own; then acme.<that domain> is rewritten here
+// by src/proxy.ts, and this address redirects there (see
+// lib/publishing/content-origin.ts and publishedSiteUrl()).
 export async function GET(request: Request, props: { params: Promise<{ subdomain: string }> }) {
+  // ON A DOMAIN OF ITS OWN once one is configured: this address on the
+  // app's own domain then answers with a permanent redirect there, so
+  // the app's domain serves no user content (lib/publishing/content-origin.ts).
+  const moved = wrongOriginRedirect(request, contentDomain(process.env.PUBLISHED_SITE_DOMAIN));
+  if (moved) return Response.redirect(moved, 308);
   const params = await props.params;
   try {
     if (!publicRequestAllowed(request)) {

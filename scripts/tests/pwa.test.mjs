@@ -8,7 +8,7 @@
 // user sees a stale credit balance).
 //
 // Run: node scripts/tests/pwa.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -136,10 +136,16 @@ for (const [file, type] of WIRING) {
 }
 const push = readFileSync("src/lib/push/web-push.ts", "utf8");
 check("sends are per-type opt-in filtered", /\.eq\(column, true\)/.test(push));
-check("dead subscriptions (404/410) are revoked, not retried forever", /status === 404 \|\| status === 410/.test(push));
+// The per-row decisions moved to lib/push/delivery.ts on 2026-11-05, where
+// scripts/tests/push-delivery.test.mjs runs them against a sender that
+// answers 410; the line itself is still checked here, where it now lives.
+const delivery = readFileSync("src/lib/push/delivery.ts", "utf8");
+check("dead subscriptions (404/410) are revoked, not retried forever", /status === 404 \|\| status === 410/.test(delivery) && /deliverToSubscriptions\(/.test(push));
 check("an unconfigured deployment is a no-op, not a crash", /skipped = "unconfigured"/.test(push));
 const route = readFileSync("src/app/api/push/subscribe/route.ts", "utf8");
-check("only https endpoints are stored", /startsWith\("https:\/\/"\)/.test(route));
+// Stronger than it was: not any https URL, a known push service's
+// (lib/push/delivery.ts, executed by push-delivery.test.mjs).
+check("only known push services' endpoints are stored", /isAllowedPushEndpoint\(endpoint\)/.test(route));
 check("the row is stamped with the CALLER's user id", /user_id: user\.id/.test(route));
 
 console.log("\n== 10. every asset the manifest names is ON DISK, at the size it claims ==");
@@ -241,10 +247,53 @@ check(
   "the worker is registered with a build stamp, so a deploy reaches it",
   /register\(`\/sw\.js\?build=/.test(provider)
 );
-const logout = readFileSync("src/components/logout-button.tsx", "utf8");
+// EVERY WAY A SESSION ENDS, NOT THE ONE BUTTON (2026-11-05 review, A6).
+// Only the logout button used to clear the cache; the password reset, the
+// account deletion and an expired session did not. The population is the
+// tree: every `auth.signOut(` in src/ must be the one inside
+// lib/auth/sign-out.ts, which clears the cache in a `finally`.
+const stripJs = (t) => t.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+const SIGN_OUT_LIB = "src/lib/auth/sign-out.ts";
+const signOutCalls = [];
+const signOutUsers = [];
+(function walk(dir) {
+  for (const e of readdirSync(dir)) {
+    const f = `${dir}/${e}`;
+    if (statSync(f).isDirectory()) walk(f);
+    else if (/\.(ts|tsx)$/.test(e)) {
+      const src = stripJs(readFileSync(f, "utf8"));
+      for (const _ of src.matchAll(/\.auth\s*\.\s*signOut\s*\(/g)) signOutCalls.push(f);
+      if (/\bsignOutAndForget\s*\(/.test(src) && f !== SIGN_OUT_LIB) signOutUsers.push(f);
+    }
+  }
+})("src");
+check(`every auth.signOut( in src/ was found (${signOutCalls.length})`, signOutCalls.length >= 1, signOutCalls.join(", "));
 check(
-  "signing out throws away the cached (personalised) pages",
-  /clearPrivatePwaCaches/.test(logout)
+  "...and every one of them is the one inside lib/auth/sign-out.ts",
+  signOutCalls.length === 1 && signOutCalls[0] === SIGN_OUT_LIB,
+  `outside the helper: ${signOutCalls.filter((f) => f !== SIGN_OUT_LIB).join(", ") || "(none)"}`
+);
+const signOutLib = stripJs(readFileSync(SIGN_OUT_LIB, "utf8"));
+check(
+  "the one sign-out throws away the cached (personalised) pages, even when the request fails",
+  /try\s*\{\s*await supabase\.auth\.signOut\(options\);\s*\}\s*finally\s*\{\s*await clearPrivatePwaCaches\(\);/.test(signOutLib)
+);
+// The doors a person leaves by, each named so a removed call is a red line.
+for (const f of [
+  "src/components/logout-button.tsx",
+  "src/app/reset-password/reset-password-form.tsx",
+  "src/app/delete-account/confirm/confirm-delete-account-form.tsx",
+  "src/components/suspended-notice.tsx",
+]) {
+  check(`${f} leaves through the one sign-out`, signOutUsers.includes(f));
+}
+check(
+  "a session that ends on its own clears them too: the listener reacts to SIGNED_OUT",
+  /onAuthStateChange\(\(event\) => \{\s*if \(event === "SIGNED_OUT"\) void clearPrivatePwaCaches\(\);/.test(signOutLib)
+);
+check(
+  "...and it is mounted beside the worker that fills the cache",
+  /useEffect\(\(\) => forgetOnSignOut\(createClient\(\)\), \[\]\)/.test(stripJs(provider))
 );
 const reset = readFileSync("src/lib/pwa/cache-reset.ts", "utf8");
 check(

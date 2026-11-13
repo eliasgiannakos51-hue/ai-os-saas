@@ -59,7 +59,7 @@ check(
   "a known reader is found (VAPID_PRIVATE_KEY in src/lib/push/web-push.ts)",
   readsVar(code.get("src/lib/push/web-push.ts") ?? "", "VAPID_PRIVATE_KEY"),
 );
-check(`the inventory has its ten entries (${KEY_INVENTORY.length})`, KEY_INVENTORY.length === 10);
+check(`the inventory has its eleven entries (${KEY_INVENTORY.length})`, KEY_INVENTORY.length === 11);
 
 console.log("\n== 2. readBy matches src/, both ways ==");
 for (const entry of KEY_INVENTORY) {
@@ -179,6 +179,25 @@ check("the panel says when a key is set and read by nothing", /No code reads thi
 const page = stripComments(readFileSync(PAGE, "utf8"));
 check("the page renders the panel", /<KeyChecks rows={keyRows} \/>/.test(page));
 check("the page passes whether a key is set, as a boolean", /set:\s*keyVarFor\(entry,\s*process\.env\)\s*!==\s*null/.test(page));
+
+// §7 — "where do I get this key", the owner's own request (2026-11-09):
+// a missing key should say where it comes from, without ever accepting
+// the value itself anywhere but Vercel.
+console.log("\n== 7. setupUrl: where to get a missing key, never where to paste it ==");
+check("the page passes setupUrl through to the panel", /setupUrl:\s*entry\.setupUrl/.test(page));
+for (const entry of KEY_INVENTORY) {
+  if (entry.setupUrl === null) continue;
+  check(`${entry.id}: setupUrl is https`, /^https:\/\//.test(entry.setupUrl), entry.setupUrl);
+  check(`${entry.id}: setupUrl carries no key or secret in it`, !/key=|secret=|token=/i.test(entry.setupUrl), entry.setupUrl);
+}
+check(
+  "vapid has no setupUrl — it is generated locally, not a provider sign-up page",
+  KEY_INVENTORY.find((e) => e.id === "vapid")?.setupUrl === null,
+);
+check("the panel renders a 'Get a key' link only when the key is NOT set", /!row\.set && row\.setupUrl/.test(panel));
+check("the panel's paste-hint names Vercel and Environment Variables, never the value", /Vercel.*Environment Variables/.test(panel) && !/value/i.test(panel.match(/PASTE_HINT[^;]*;/)?.[0] ?? ""));
+check("the panel links to the setup URL itself, not a hardcoded string", /href={row\.setupUrl}/.test(panel));
+check("the setup link opens in a new tab with noopener (it leaves the app)", /target="_blank" rel="noopener noreferrer"/.test(panel));
 
 console.log(
   failures.length === 0

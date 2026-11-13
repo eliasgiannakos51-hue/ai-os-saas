@@ -3,20 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { FlaskConical, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
+import { Bell, FlaskConical, LayoutTemplate, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
-import { ToolShell, ACTION, ChosenBox, type ShellTurn } from "@/components/shell/tool-shell";
+import { ToolShell, ACTION, OPTION, ChosenBox, type ShellMode, type ShellTurn } from "@/components/shell/tool-shell";
 import { ShellHistoryColumn } from "@/components/shell/shell-history-column";
 import type { ChatComposerHandle } from "@/components/chat/chat-composer";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
-import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, RunHistory, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
+import { BoxEditor, BoxRow, CONNECTION_NAME, CostLimitForm, FlowSteps, ModeForm, PendingApprovals, RunHistory, TimeSavedForm, useBoxLabel, type Connected } from "@/components/automations/flow-boxes";
+import { TemplateGallery } from "@/components/automations/template-gallery";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
-import { aiBoxCount, type Box } from "@/lib/automations/boxes";
+import { aiBoxCount, type Box, type FlowMode } from "@/lib/automations/boxes";
 import type { FlowPrices } from "@/lib/automations/flow-pricing";
 import { readShownFlow, readShownRun, type ShownFlow, type ShownRun } from "@/lib/automations/flow-view";
+import { PROGRESS_POLL_MS, followedRun, isLive, runProgress, type Watch } from "@/lib/automations/run-progress";
+import { readMinutes } from "@/lib/automations/time-saved";
+import type { TemplateId } from "@/lib/automations/templates";
 import { resolveBrowserTimeZone } from "@/lib/agents/cron-expression";
 import type { UserAutomation } from "@/types/user-automation";
 
@@ -41,8 +45,8 @@ import type { UserAutomation } from "@/types/user-automation";
  * scripts/tests/automations.test.mjs.
  */
 type Turn = { id: string; role: "user" | "tool"; text: string; flow?: string };
-type Running = "build" | "change" | "try" | "run" | "save" | "approve" | null;
-type Open = "flow" | null;
+type Running = "build" | "change" | "try" | "run" | "save" | "approve" | "template" | null;
+type Open = "flow" | "templates" | "approvals" | null;
 
 export function AutomationShell({
   initialFlows,
@@ -55,6 +59,12 @@ export function AutomationShell({
   older,
   initialProjectId = null,
   initialSaid,
+  simplePro = false,
+  templates = false,
+  initialMinutesSaved = null,
+  initialDoneRuns = 0,
+  initialModes = null,
+  initialPendingApprovals = [],
 }: {
   initialFlows: Record<string, unknown>[];
   /** The runs of the automation opened on arrival. */
@@ -75,6 +85,31 @@ export function AutomationShell({
   initialProjectId?: string | null;
   /** The sentence to start the field with, from the project's own goal. */
   initialSaid?: string;
+  /** Whether the «Simple | Pro» switch is open to this reader (the switch
+   *  "agents-automations-pro", read in app/dashboard/[module]/page.tsx).
+   *  False is the screen exactly as it was: the boxes, with no switch
+   *  above them and nothing a person has to press to reach them. */
+  simplePro?: boolean;
+  /** Whether the ready-made automations are open to this reader (the
+   *  switch "automation-templates"): the «Έτοιμες αυτοματοποιήσεις»
+   *  option under the field, and the gallery it opens. */
+  templates?: boolean;
+  /** The minutes each automation saves, as typed — or null when the switch
+   *  "automation-time-saved" is closed to this reader or the database has
+   *  no such column yet (lib/automations/page-data.ts): then neither the
+   *  field nor the figure is drawn. */
+  initialMinutesSaved?: Record<string, number | null> | null;
+  /** The opened automation's finished runs that were not trials. */
+  initialDoneRuns?: number;
+  /** Each automation's Auto/Shadow/Supervised mode — or null when
+   *  "agents-automations-pro" is closed to this reader or the database
+   *  has no such column yet (lib/automations/page-data.ts loadModes):
+   *  then no selector is drawn. */
+  initialModes?: Record<string, FlowMode> | null;
+  /** Every run waiting for approval, across every automation — the
+   *  Approval Center (lib/automations/page-data.ts loadPendingApprovals).
+   *  No switch gates this. */
+  initialPendingApprovals?: Record<string, unknown>[];
 }) {
   const t = useTranslations("dashboard.automations");
   const tSteps = useTranslations("aiSteps");
@@ -95,6 +130,14 @@ export function AutomationShell({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [pending, setPending] = useState<{ said: string; question: string } | null>(null);
   const [confirming, setConfirming] = useState<{ credits: number; go: () => void } | null>(null);
+  const [minutesSaved, setMinutesSaved] = useState<Record<string, number | null> | null>(initialMinutesSaved);
+  const [modes, setModes] = useState<Record<string, FlowMode> | null>(initialModes);
+  const [pendingApprovals, setPendingApprovals] = useState<ShownRun[]>(() => initialPendingApprovals.map(readShownRun));
+  const [doneRuns, setDoneRuns] = useState<Record<string, number>>(() => (initialOpenId ? { [initialOpenId]: initialDoneRuns } : {}));
+  // THE RUN THIS SCREEN STARTED, while its request is in flight: which run
+  // the canvas follows (lib/automations/run-progress.ts followedRun).
+  const [watch, setWatch] = useState<(Watch & { flowId: string }) | null>(null);
+  const [starting, setStarting] = useState<TemplateId | null>(null);
 
   // THE [◧] COLUMN, remembered per device — same key shape as Chat's own
   // (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
@@ -118,10 +161,74 @@ export function AutomationShell({
     });
   }
 
+  // «Simple | Pro», remembered per device — the same shape and the same
+  // storage as the [◧] column above, for the same reason: it is a way of
+  // looking at the thing, not part of the thing, so it belongs to this
+  // browser and never to the automation (nothing is stored server-side
+  // and no migration carries it; an automation made in either level
+  // opens in the other, which is directive 55's own rule).
+  //
+  // SIMPLE IS THE DEFAULT, because the owner's own ordering puts it first
+  // and describes it as the plain path («Simple: γράφεις τι θέλεις και
+  // τρέχει»). A reader who presses Pro once gets Pro from then on.
+  const [mode, setMode] = useState<ShellMode>("simple");
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem("ionexa.automationMode") === "pro") setMode("pro");
+    } catch {
+      // private window or storage off: Simple, which is the default
+    }
+  }, []);
+  function chooseMode(next: ShellMode) {
+    setMode(next);
+    // Pro's own editor is the only thing that reads `chosen`; leaving a
+    // box chosen while Simple is showing would reopen that editor the
+    // moment Pro came back, under a box nobody pressed this time.
+    if (next === "simple") setChosen(null);
+    try {
+      window.localStorage.setItem("ionexa.automationMode", next);
+    } catch {
+      // nothing to persist to; the switch still works for this visit
+    }
+  }
+  // Pro unless the reader has the switch: without it this screen is what
+  // it always was, so `mode` cannot hide the boxes from anybody.
+  const level: ShellMode = simplePro ? mode : "pro";
+
   const shown = flows.find((f) => f.id === openId) ?? null;
-  const chosenBox = shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
+  const chosenBox = level === "pro" && shown && chosen ? shown.boxes.find((b) => b.id === chosen) ?? null : null;
   const runPrice = shown ? prices.step * aiBoxCount(shown.boxes) : 0;
   const names = CONNECTION_NAME;
+
+  // THE PRO CANVAS, ALIVE (the owner, 2026-11-05, after the automation
+  // videos): for the readers "agents-automations-pro" is open to, Pro
+  // follows one run of the automation on its boxes — the one this screen
+  // just started, or the newest one, whoever started it — and lights the
+  // line into the box it is in (lib/automations/run-progress.ts). Where
+  // it is comes from the run's own row: the runner writes its steps before
+  // every box (lib/automations/runner.ts), and while the run is going this
+  // screen reads them back once a second. When it is not going, nothing
+  // is asked and nothing moves.
+  const alive = simplePro && level === "pro";
+  const shownRuns = shown ? runs.filter((r) => r.flowId === shown.id) : [];
+  const followed = shown ? followedRun(shownRuns, watch && watch.flowId === shown.id ? watch : null) : null;
+  const progress = shown && alive ? runProgress(shown.boxes, followed) : null;
+  const pollId = shown && open === "flow" && alive && ((watch && watch.flowId === shown.id) || isLive(followed)) ? shown.id : null;
+  useEffect(() => {
+    if (!pollId) return;
+    let stopped = false;
+    const tick = () => {
+      if (!stopped) void refreshRuns(pollId);
+    };
+    tick();
+    const timer = window.setInterval(tick, PROGRESS_POLL_MS);
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
+    // refreshRuns only sets state; the poll is keyed on WHICH automation is live.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollId]);
 
   function say(role: Turn["role"], text: string, flow?: string) {
     setTurns((prev) => [...prev, { id: `${role}${prev.length}`, role, text, flow }]);
@@ -165,6 +272,10 @@ export function AutomationShell({
         return t("errors.noFile");
       case "bad_limit":
         return t("errors.badLimit", { min: Number(data?.min ?? 1), max: Number(data?.max ?? 5000) });
+      case "bad_minutes":
+        return t("errors.badMinutes", { min: Number(data?.min ?? 1), max: Number(data?.max ?? 480) });
+      case "not_ready":
+        return t("errors.notReady");
       case "not_waiting":
         return t("errors.notWaiting");
       case "expired":
@@ -196,7 +307,7 @@ export function AutomationShell({
         body: body ? JSON.stringify(body) : undefined,
       });
       const data = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-      if (kind !== "save") void refreshCredits();
+      if (kind !== "save" && kind !== "template") void refreshCredits();
       if (!response.ok || !data?.ok) {
         say("tool", refusal(data));
         return null;
@@ -218,6 +329,20 @@ export function AutomationShell({
     return flow;
   }
 
+  /** The history of one automation, read again: the runs and how many of them did the job. */
+  async function refreshRuns(id: string): Promise<void> {
+    try {
+      const response = await fetch(`/api/automations/flows/${id}/runs`);
+      const data = (await response.json().catch(() => null)) as { ok?: boolean; runs?: Record<string, unknown>[]; doneRuns?: unknown } | null;
+      if (!data?.ok || !Array.isArray(data.runs)) return;
+      const fresh = data.runs.map(readShownRun);
+      setRuns((prev) => [...fresh, ...prev.filter((r) => r.flowId !== id)]);
+      if (typeof data.doneRuns === "number") setDoneRuns((prev) => ({ ...prev, [id]: data.doneRuns as number }));
+    } catch {
+      /* the history stays as it was; the boxes are already on the screen */
+    }
+  }
+
   function pausedNote(data: Record<string, unknown>) {
     const paused = Array.isArray(data.paused) ? (data.paused as (keyof Connected)[]) : [];
     if (paused.length > 0) say("tool", t("paused", { names: paused.map((m) => names[m] ?? m).join(", ") }));
@@ -228,13 +353,7 @@ export function AutomationShell({
     setChosen(null);
     setOpen("flow");
     setRuns([]);
-    try {
-      const response = await fetch(`/api/automations/flows/${id}/runs`);
-      const data = (await response.json().catch(() => null)) as { ok?: boolean; runs?: Record<string, unknown>[] } | null;
-      if (data?.ok && Array.isArray(data.runs)) setRuns(data.runs.map(readShownRun));
-    } catch {
-      /* the history stays empty; the boxes are already on the screen */
-    }
+    await refreshRuns(id);
   }
 
   async function build(said: string) {
@@ -301,23 +420,69 @@ export function AutomationShell({
   }
 
   async function runIt(flow: ShownFlow, dry: boolean) {
-    const data = await call(`/api/automations/flows/${flow.id}/run`, "POST", { dry }, dry ? "try" : "run");
-    if (!data || !data.run) return;
-    const run = readShownRun(data.run as Record<string, unknown>);
-    setRuns((prev) => [run, ...prev.filter((r) => r.id !== run.id)]);
-    say("tool", dry ? t("tried") : t("ran"), flow.id);
+    // Follow the run this press makes: the one that is not in the list yet.
+    setWatch({ flowId: flow.id, known: runs.filter((r) => r.flowId === flow.id).map((r) => r.id) });
+    try {
+      const data = await call(`/api/automations/flows/${flow.id}/run`, "POST", { dry }, dry ? "try" : "run");
+      if (!data || !data.run) return;
+      const run = readShownRun(data.run as Record<string, unknown>);
+      setRuns((prev) => [run, ...prev.filter((r) => r.id !== run.id)]);
+      say("tool", dry ? t("tried") : t("ran"), flow.id);
+      if (!dry && minutesSaved) void refreshRuns(flow.id);
+    } finally {
+      setWatch(null);
+    }
   }
 
   async function decide(run: ShownRun, approve: boolean) {
     setBusyRun(run.id);
+    if (approve) setWatch({ flowId: run.flowId, known: [], runId: run.id });
     try {
       const data = await call(`/api/automations/runs/${run.id}/${approve ? "approve" : "cancel"}`, "POST", null, approve ? "approve" : "save");
       if (!data || !data.run) return;
       const next = readShownRun(data.run as Record<string, unknown>);
       setRuns((prev) => prev.map((r) => (r.id === next.id ? next : r)));
+      // Decided one way or the other, it is no longer waiting — out of
+      // the Approval Center regardless of which screen made the call.
+      setPendingApprovals((prev) => prev.filter((r) => r.id !== next.id));
+      if (approve && minutesSaved) void refreshRuns(run.flowId);
     } finally {
       setBusyRun(null);
+      setWatch(null);
     }
+  }
+
+  async function startTemplate(id: TemplateId) {
+    setStarting(id);
+    try {
+      const data = await call("/api/automations/templates", "POST", { template: id, timeZone: resolveBrowserTimeZone() }, "template");
+      if (!data) return;
+      const flow = placeFlow(data.flow);
+      if (!flow) return;
+      say("tool", t("templates.made", { name: flow.name }), flow.id);
+      setOpenId(flow.id);
+      setChosen(null);
+      setRuns([]);
+      setDoneRuns((prev) => ({ ...prev, [flow.id]: 0 }));
+      setOpen("flow");
+      router.refresh();
+    } finally {
+      setStarting(null);
+    }
+  }
+
+  async function saveMinutes(flow: ShownFlow, minutes: number | null) {
+    const data = await call(`/api/automations/flows/${flow.id}`, "PATCH", { minutes_saved: minutes }, "save");
+    if (!data) return;
+    placeFlow(data.flow);
+    setMinutesSaved((prev) => (prev ? { ...prev, [flow.id]: readMinutes(data.minutesSaved) } : prev));
+  }
+
+  async function saveMode(flow: ShownFlow, mode: FlowMode) {
+    const data = await call(`/api/automations/flows/${flow.id}`, "PATCH", { mode }, "save");
+    if (!data) return;
+    placeFlow(data.flow);
+    setModes((prev) => (prev ? { ...prev, [flow.id]: (data.mode as FlowMode | undefined) ?? mode } : prev));
   }
 
   // BARE DELETE, no confirm of its own — the work panel's trash button
@@ -377,6 +542,7 @@ export function AutomationShell({
     open === "flow" && shown
       ? {
           title: shown.name,
+          ...(simplePro ? { mode: { value: mode, onChange: chooseMode } } : {}),
           actions: (
             <>
               <button type="button" disabled={running !== null || shown.version <= 1} onClick={() => void undo(shown)} aria-label={t("undo")} title={t("undo")} data-testid="flow-undo" className={`${ACTION} disabled:opacity-40`}>
@@ -413,14 +579,17 @@ export function AutomationShell({
 
               {shown.boxes.length === 0 ? (
                 <p className="text-xs text-warning">{t("errors.broken")}</p>
+              ) : level === "simple" ? (
+                <FlowSteps boxes={shown.boxes} connected={connected} />
               ) : (
-                <BoxRow boxes={shown.boxes} chosen={chosen} onChoose={(id) => setChosen((c) => (c === id ? null : id))} connected={connected} />
+                <BoxRow boxes={shown.boxes} chosen={chosen} onChoose={(id) => setChosen((c) => (c === id ? null : id))} connected={connected} progress={progress} />
               )}
-              {chosenBox ? (
-                <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
-              ) : (
-                shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
-              )}
+              {level === "pro" &&
+                (chosenBox ? (
+                  <BoxEditor key={`${shown.id}-${shown.version}-${chosenBox.id}`} box={chosenBox} saving={running === "save"} onSave={(next) => void saveByHand(shown, next)} />
+                ) : (
+                  shown.boxes.length > 0 && <p className="text-xs text-muted">{t("choose")}</p>
+                ))}
 
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
@@ -454,6 +623,25 @@ export function AutomationShell({
 
               <CostLimitForm key={`${shown.id}-${shown.costLimit}`} limit={shown.costLimit} saving={running !== null} onSave={(limit) => void saveLimit(shown, limit)} />
 
+              {modes && (
+                <ModeForm
+                  key={`${shown.id}-${modes[shown.id] ?? "auto"}`}
+                  mode={modes[shown.id] ?? "auto"}
+                  saving={running !== null}
+                  onSave={(mode) => void saveMode(shown, mode)}
+                />
+              )}
+
+              {minutesSaved && (
+                <TimeSavedForm
+                  key={`${shown.id}-${minutesSaved[shown.id] ?? "none"}`}
+                  minutes={minutesSaved[shown.id] ?? null}
+                  doneRuns={doneRuns[shown.id] ?? 0}
+                  saving={running !== null}
+                  onSave={(minutes) => void saveMinutes(shown, minutes)}
+                />
+              )}
+
               <section aria-labelledby="flow-history-title" className="space-y-2">
                 <h2 id="flow-history-title" className="text-xs font-medium text-foreground">
                   {t("history")}
@@ -473,7 +661,65 @@ export function AutomationShell({
             </div>
           ),
         }
-      : null;
+      : open === "templates" && templates
+        ? {
+            title: t("templates.title"),
+            body: <TemplateGallery stepPrice={prices.step} starting={starting} disabled={running !== null || !configured} connected={connected} onStart={(id) => void startTemplate(id)} />,
+          }
+        : open === "approvals"
+          ? {
+              title: t("pendingApprovals.title"),
+              body: (
+                <PendingApprovals
+                  runs={pendingApprovals}
+                  flowName={Object.fromEntries(flows.map((f) => [f.id, f.name]))}
+                  locale={locale}
+                  busy={busyRun}
+                  onApprove={(run) => void decide(run, true)}
+                  onCancel={(run) => void decide(run, false)}
+                  onOpenFlow={(flowId) => void openFlow(flowId)}
+                />
+              ),
+            }
+          : null;
+
+  // THE OPTION BUTTONS beside the field — templates and the Approval
+  // Center, each drawn only while there is something to open (templates
+  // behind its own switch; approvals only while something is waiting).
+  const optionButtons = [
+    templates ? (
+      <button
+        key="templates"
+        type="button"
+        onClick={() => {
+          setChosen(null);
+          setOpen("templates");
+        }}
+        aria-pressed={open === "templates"}
+        data-testid="flow-templates-open"
+        className={`${OPTION} ${open === "templates" ? "bg-panel-hover" : ""}`}
+      >
+        <LayoutTemplate className="h-3.5 w-3.5" aria-hidden="true" />
+        {t("templates.title")}
+      </button>
+    ) : null,
+    pendingApprovals.length > 0 ? (
+      <button
+        key="approvals"
+        type="button"
+        onClick={() => {
+          setChosen(null);
+          setOpen("approvals");
+        }}
+        aria-pressed={open === "approvals"}
+        data-testid="flow-approvals-open"
+        className={`${OPTION} ${open === "approvals" ? "bg-panel-hover" : ""}`}
+      >
+        <Bell className="h-3.5 w-3.5" aria-hidden="true" />
+        {t("pendingApprovals.button", { count: pendingApprovals.length })}
+      </button>
+    ) : null,
+  ].filter((b): b is React.JSX.Element => b !== null);
 
   const working =
     running === "build"
@@ -505,6 +751,7 @@ export function AutomationShell({
         onSend={send}
         onStop={() => abortRef.current?.abort()}
         initialText={initialSaid}
+        options={optionButtons.length > 0 ? optionButtons : undefined}
         footer={
           <>
             {shown && chosenBox && <ChosenBox label={boxLabel(chosenBox)} onClear={() => setChosen(null)} />}

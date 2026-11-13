@@ -44,12 +44,43 @@ export const ABSENT_ON_PURPOSE = {
       "Editing the earlier entry to point at the merged file would make it describe a splice that had " +
       "not happened yet. The 2026-10-08 entry on the Image tool's name names src/lib/nav/switched-names.ts " +
       "and src/lib/nav/switched-on.ts; on 2026-10-23 the owner opened Image to everybody, the switch went, " +
-      "and the first became src/lib/nav/tool-names.ts while the second was deleted.",
+      "and the first became src/lib/nav/tool-names.ts while the second was deleted. The 2026-10-22 " +
+      "«Τα δικά μου» build entry names src/components/my-stuff/my-stuff-browse.tsx, true the moment it " +
+      "was written; on 2026-10-28, «1. MY STUFF: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 1 folded its list into the new " +
+      "list+details screen (my-stuff-list.tsx, my-stuff-workspace.tsx) and deleted the old file, along " +
+      "with my-stuff-shell.tsx, which no entry in this log names by path. " +
+      "The 2026-11-01 «ΔΗΜΟΣΙΟ SITE» Κομμάτι 1 entry (directive 38) is the one entry here whose files " +
+      "never reached this repository at all: checked 2026-11-04, none of the six it names is on this " +
+      "branch, on main, or on any of origin's 114 branches, and neither are its message keys. The entry " +
+      "is left as written because it is the only record of what was built; docs/QUEUE.md's PS1 row and " +
+      "docs/NEEDS-FROM-ELIAS.md say plainly that the code is missing. Each path stops being an exception " +
+      "the day that work is redone or found.",
     paths: [
       "src/lib/nav/tool-status.ts",
       "src/components/data-analysis/analysis-shell.tsx",
       "src/lib/nav/switched-names.ts",
       "src/lib/nav/switched-on.ts",
+      "src/components/my-stuff/my-stuff-browse.tsx",
+      "src/lib/landing/build-redirect.ts",
+      "scripts/generate-home-tool-shots.mjs",
+      "scripts/tests/marketing-site-honesty.test.mjs",
+      "scripts/tests/landing-build-field.test.mjs",
+      "scripts/tests/landing-build-field.mutation.mjs",
+      "scripts/tests/home-page.prodtest.mjs",
+    ],
+  },
+  "docs/QUEUE.md": {
+    reason:
+      "THE PS1 ROW (directive 38, «ΔΗΜΟΣΙΟ SITE» Κομμάτι 1) NAMES WHAT ITS CODE WAS, AND ITS STATUS " +
+      "CELL SAYS THAT CODE IS NOT HERE. Checked 2026-11-04: none of these four files is on this branch, " +
+      "on main, or on any of origin's 114 branches — only this row and the 2026-11-01 PROGRESS entry " +
+      "arrived. The paths stay so the row still says what has to be redone; each one stops being an " +
+      "exception, and fails this gate, the day its file is written.",
+    paths: [
+      "src/components/landing/build-field.tsx",
+      "src/lib/landing/build-redirect.ts",
+      "scripts/generate-home-tool-shots.mjs",
+      "scripts/tests/marketing-site-honesty.test.mjs",
     ],
   },
   "docs/MASTER.md": {

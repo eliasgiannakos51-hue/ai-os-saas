@@ -281,6 +281,7 @@ console.log("== 6. which routes can reach a provider call, and what bounds them 
     [path.join("agents", "[id]", "run"), "checkRateLimit + the agent runner's own checkAiCallAllowed in lib/agents/execute-agent.ts"],
     [path.join("import", "csv", "apply"), "checkRateLimit on the route"],
     [path.join("websites", "[id]", "submit-form"), "public: two checkRateLimit scopes, per-IP and per-website"],
+    [path.join("voice", "live", "start"), "checkRateLimit on the route (scope voice_live, 20/hr); the call goes to the provider's Realtime API, not to a chat model, and is billed per minute through billLiveMinutes before the session row is created"],
   ]);
   const unexplained = unguarded.map(label).filter((l) => !ALLOWED.has(l));
   check("every route that reaches a provider call is bounded by something named", unexplained.length === 0,

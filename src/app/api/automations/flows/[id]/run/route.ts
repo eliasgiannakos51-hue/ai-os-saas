@@ -17,10 +17,12 @@ import {
   claimFlow,
   flowGate,
   missingConnections,
+  modeFor,
   refuse,
   releaseFlow,
   type FlowRecord,
 } from "@/lib/automations/flow-access";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 // At most eight boxes; each AI box is one call of at most 1,500 tokens,
@@ -111,8 +113,9 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
 
   if (!(await claimFlow(id, user.id))) return refuse("busy", 409);
   try {
+    const mode = await modeFor(createAdminClient(), id, user.id);
     const started = await startRun({
-      flow: { id: flow.id, user_id: user.id, name: flow.name, boxes: verdict.boxes, cost_limit: flow.cost_limit, time_zone: flow.time_zone },
+      flow: { id: flow.id, user_id: user.id, name: flow.name, boxes: verdict.boxes, cost_limit: flow.cost_limit, time_zone: flow.time_zone, mode },
       user,
       account,
       startedBy: dry ? "dry" : "manual",

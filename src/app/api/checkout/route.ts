@@ -3,13 +3,8 @@ import { diagLog } from "@/lib/diag";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createStripeClient } from "@/lib/stripe/server";
-import {
-  getPlan,
-  isPaidPlanSlug,
-  isBillingInterval,
-  annualPriceEur,
-  type BillingInterval,
-} from "@/lib/billing/plans";
+import { getPlan, isPaidPlanSlug, isBillingInterval, type BillingInterval } from "@/lib/billing/plans";
+import { planChangeDirection, scheduledDowngradePhases } from "@/lib/billing/plan-change";
 import { getPlanPriceId, getPlanFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
@@ -165,32 +160,59 @@ export async function POST(request: Request) {
     // subscription: billed for both, credited for neither correctly (the
     // webhook re-derives the tier from whichever subscription the event
     // was about), and with no proration for the Starter time they had
-    // already paid for. That is the pre-existing shape "add proration on
-    // upgrade/downgrade" runs into first — there was nothing to prorate
-    // because nothing was being changed.
+    // already paid for.
     //
-    // Updating the existing subscription item is what makes proration
-    // possible at all, and Stripe then does the arithmetic:
-    //   UPGRADE  -> always_invoice: the customer gets the bigger plan now
-    //               and pays the difference now, minus credit for the
-    //               unused remainder of what they already bought.
-    //   DOWNGRADE-> create_prorations: the unused remainder becomes a
-    //               credit balance applied to their next invoice. Nobody
-    //               expects a refund to arrive as a card charge.
+    // Updating the existing subscription is what makes a plan change
+    // possible at all, and the two directions are different operations:
+    //   UPGRADE  -> always_invoice now, applied only once that invoice is
+    //               paid (pending_if_incomplete): the bigger plan for the
+    //               difference, minus credit for the unused remainder.
+    //   DOWNGRADE-> nothing changes today. A subscription schedule moves
+    //               the subscription to the lower plan when the period
+    //               already paid for ends, with no proration: the customer
+    //               keeps what they bought until then, and nothing of the
+    //               higher plan is credited back after its allowance was
+    //               used (lib/billing/plan-change.ts).
     const existingSubscriptionId =
       typeof user.user_metadata?.stripe_subscription_id === "string"
         ? user.user_metadata.stripe_subscription_id
         : "";
     if (existingSubscriptionId) {
+      // ONLY "STRIPE DOES NOT KNOW THIS SUBSCRIPTION" FALLS THROUGH. A
+      // subscription id Stripe no longer has (deleted in the dashboard,
+      // wrong environment) must not block the customer from buying, so a
+      // failed retrieve goes on to a normal Checkout Session below. A
+      // failure AFTER the subscription is known to be live does not: that
+      // customer already pays, and a new session would sell them a second
+      // subscription.
+      let existing: Awaited<ReturnType<typeof stripe.subscriptions.retrieve>> | null = null;
       try {
-        const existing = await stripe.subscriptions.retrieve(existingSubscriptionId);
-        const live = existing.status === "active" || existing.status === "trialing";
-        // The plan line, as opposed to the team-seat line.
-        const planItem = existing.items.data.find((item) => getPlanFromPriceId(item.price.id));
-        const current = planItem ? getPlanFromPriceId(planItem.price.id) : null;
+        existing = await stripe.subscriptions.retrieve(existingSubscriptionId);
+      } catch (err) {
+        logApiError("/api/checkout", err, { stage: "update_existing_subscription" });
+      }
+      const live = existing !== null && (existing.status === "active" || existing.status === "trialing");
+      // The plan line, as opposed to the team-seat line.
+      const planItem = live ? existing!.items.data.find((item) => getPlanFromPriceId(item.price.id)) : undefined;
+      const current = planItem ? getPlanFromPriceId(planItem.price.id) : null;
 
-        if (live && planItem && current) {
+      if (existing && live && planItem && current) {
+        try {
+          // A downgrade already waiting at period end is a schedule on the
+          // subscription. Anything else this route does has to take it off
+          // first: Stripe refuses most direct changes to a scheduled
+          // subscription, and choosing a plan is choosing THAT plan.
+          const scheduleRef = (existing as unknown as { schedule?: string | { id: string } | null }).schedule;
+          const scheduleId = typeof scheduleRef === "string" ? scheduleRef : scheduleRef?.id ?? null;
+
           if (planItem.price.id === planPriceId) {
+            // Choosing the plan already being paid for, while a downgrade
+            // waits, means "stay on it": the schedule is released and
+            // nothing else changes.
+            if (scheduleId) {
+              await stripe.subscriptionSchedules.release(scheduleId);
+              return NextResponse.json({ ok: true, unchanged: true, downgradeCancelled: true, redirectPath: successPath });
+            }
             // Nothing to change. Returned as a success with no url so the
             // client shows "you are already on this plan" rather than
             // bouncing the user through a Stripe page that would create a
@@ -198,20 +220,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ ok: true, unchanged: true, redirectPath: successPath });
           }
 
-          // Which direction, measured on what the account actually pays
-          // per month — so month→year counts as an upgrade (a year up
-          // front) even though the monthly-equivalent is lower.
-          const currentMonthly =
-            current.interval === "year"
-              ? (annualPriceEur(getPlan(current.slug) ?? { price: 0 }) ?? 0)
-              : (typeof getPlan(current.slug)?.price === "number"
-                  ? (getPlan(current.slug)!.price as number)
-                  : 0);
-          const nextMonthly =
-            interval === "year"
-              ? (annualPriceEur(planDefinition ?? { price: 0 }) ?? 0)
-              : (typeof planDefinition?.price === "number" ? planDefinition.price : 0);
-          const isUpgrade = nextMonthly > currentMonthly;
+          const direction = planChangeDirection({
+            fromSlug: current.slug,
+            fromInterval: current.interval,
+            toSlug: plan,
+            toInterval: interval,
+          });
 
           // TWO CLICKS MUST NOT BE TWO CHARGES.
           //
@@ -249,35 +263,6 @@ export async function POST(request: Request) {
             );
           }
 
-          // NO PLAN WITHOUT PAYMENT (ΑΣ-4.3, 2026-10-05). An upgrade is a
-          // PENDING update: Stripe applies the new price only once the
-          // prorated invoice is paid, and drops the change if it is not.
-          // Without it the subscription took the bigger price at once and
-          // the invoice was left to be paid later — and the webhook reads
-          // the plan from the subscription's price. A downgrade costs
-          // nothing up front, so it applies as before.
-          //
-          // Stripe refuses `metadata` on a pending update; nothing reads it
-          // for the plan (the webhook reads the price), so it rides only on
-          // the downgrade.
-          const subscriptionUpdate = isUpgrade
-            ? {
-                items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
-                proration_behavior: "always_invoice" as const,
-                payment_behavior: "pending_if_incomplete" as const,
-                // Stripe otherwise keeps the old anniversary when moving
-                // between intervals, which bills a full year on a date the
-                // customer has no reason to expect.
-                ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
-                expand: ["latest_invoice"],
-              }
-            : {
-                items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
-                proration_behavior: "create_prorations" as const,
-                ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
-                metadata: { supabase_user_id: user.id, plan, interval },
-              };
-
           // THE BACKSTOP, and its limitation stated rather than left to be
           // discovered. A Stripe idempotency key lives for 24 hours, so a
           // key derived only from (subscription, plan, interval) would
@@ -288,10 +273,83 @@ export async function POST(request: Request) {
           // A pair of clicks that straddles a bucket boundary is not
           // deduped HERE — that is what the database guard above is for,
           // and it has no buckets.
+          const bucket = Math.floor(Date.now() / 120000);
+
+          if (direction === "downgrade") {
+            // AT PERIOD END, WITH NO PRORATION (2026-11-05). This applied at
+            // once with create_prorations, which credited the unused part
+            // of the higher plan back to the customer after its allowance
+            // had already been spent. The plan now stays as bought until
+            // the paid period ends; the schedule switches it then.
+            const schedule = scheduleId
+              ? await stripe.subscriptionSchedules.retrieve(scheduleId)
+              : await stripe.subscriptionSchedules.create(
+                  { from_subscription: existingSubscriptionId },
+                  { idempotencyKey: `sub_schedule:${existingSubscriptionId}:${bucket}` }
+                );
+            const nowSeconds = Math.floor(Date.now() / 1000);
+            const currentPhase =
+              schedule.phases.find((p) => p.start_date <= nowSeconds && nowSeconds < p.end_date) ?? schedule.phases[0];
+            if (!currentPhase) throw new Error("subscription schedule has no current phase");
+            const seatPriceId = getTeamSeatPriceId();
+            const phases = scheduledDowngradePhases({
+              currentStart: currentPhase.start_date,
+              currentEnd: currentPhase.end_date,
+              currentItems: existing.items.data.map((item) => ({ price: item.price.id, quantity: item.quantity ?? 1 })),
+              currentPlanPriceId: planItem.price.id,
+              nextPlanPriceId: planPriceId,
+              nextInterval: interval,
+              // The paid seat line goes when the lower plan has no paid seats.
+              dropPriceIds: !needsPaidTeamSeats && seatPriceId ? [seatPriceId] : [],
+              nextMetadata: { supabase_user_id: user.id, plan, interval },
+            });
+            await stripe.subscriptionSchedules.update(
+              schedule.id,
+              { end_behavior: "release", proration_behavior: "none", phases },
+              { idempotencyKey: `sub_downgrade:${schedule.id}:${plan}:${interval}:${bucket}` }
+            );
+            const effectiveAt = new Date(currentPhase.end_date * 1000).toISOString();
+            diagLog(
+              `[checkout-diag] downgrade scheduled id=${existingSubscriptionId} ${current.slug}/${current.interval} -> ${plan}/${interval} at=${effectiveAt}`
+            );
+            // The webhook moves the tier when Stripe switches the
+            // subscription at period end, and the paid renewal resets the
+            // balance at the lower plan then. Settings says when, in the
+            // reader's language (components/billing/checkout-notice.tsx).
+            return NextResponse.json({
+              ok: true,
+              updated: true,
+              scheduled: true,
+              effectiveAt,
+              redirectPath: "/dashboard/settings?checkout=scheduled",
+            });
+          }
+
+          // An upgrade replaces any downgrade that was waiting.
+          if (scheduleId) await stripe.subscriptionSchedules.release(scheduleId);
+
+          // NO PLAN WITHOUT PAYMENT (ΑΣ-4.3, 2026-10-05). An upgrade is a
+          // PENDING update: Stripe applies the new price only once the
+          // prorated invoice is paid, and drops the change if it is not.
+          // Without it the subscription took the bigger price at once and
+          // the invoice was left to be paid later — and the webhook reads
+          // the plan from the subscription's price.
+          //
+          // Stripe refuses `metadata` on a pending update; nothing reads it
+          // for the plan (the webhook reads the price).
+          const subscriptionUpdate = {
+            items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
+            proration_behavior: "always_invoice" as const,
+            payment_behavior: "pending_if_incomplete" as const,
+            // Stripe otherwise keeps the old anniversary when moving
+            // between intervals, which bills a full year on a date the
+            // customer has no reason to expect.
+            ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
+            expand: ["latest_invoice"],
+          };
+
           const updated = await stripe.subscriptions.update(existingSubscriptionId, subscriptionUpdate, {
-            idempotencyKey: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${Math.floor(
-              Date.now() / 120000
-            )}`,
+            idempotencyKey: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${bucket}`,
           });
 
           // THE PAYMENT DID NOT GO THROUGH YET — most often a bank asking
@@ -318,18 +376,19 @@ export async function POST(request: Request) {
           }
 
           diagLog(
-            `[checkout-diag] subscription updated id=${existingSubscriptionId} ${current.slug}/${current.interval} -> ${plan}/${interval} upgrade=${isUpgrade}`
+            `[checkout-diag] subscription updated id=${existingSubscriptionId} ${current.slug}/${current.interval} -> ${plan}/${interval} direction=${direction}`
           );
           // The webhook (customer.subscription.updated) owns the tier and
           // the credits from here — the same path a renewal takes, so a
           // plan change and a renewal cannot diverge.
           return NextResponse.json({ ok: true, updated: true, redirectPath: successPath });
+        } catch (err) {
+          // The customer has a live subscription, so this is NOT the
+          // fall-through case: a second Checkout Session here would sell
+          // them a second subscription. Refused, and nothing changed.
+          logApiError("/api/checkout", err, { stage: "change_existing_subscription" });
+          return NextResponse.json({ ok: false, code: "plan_change_failed" }, { status: 502 });
         }
-      } catch (err) {
-        // A subscription id that Stripe no longer knows (deleted in the
-        // dashboard, wrong environment) must not block the customer from
-        // buying. Fall through to a normal Checkout Session.
-        logApiError("/api/checkout", err, { stage: "update_existing_subscription" });
       }
     }
 

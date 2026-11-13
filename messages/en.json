@@ -60,6 +60,13 @@
       "stillOffline": "Still no connection.",
       "lastResortBody": "Ionexa needs a connection to load new data. Pages you already opened are still available from this device's cache — and anything you were working on is safe on the server."
     },
+    "suspended": {
+      "title": "Account suspended",
+      "message": "Your account has been suspended for violating our terms of use.",
+      "reason": "Reason",
+      "contact": "If you believe this is a mistake, contact support.",
+      "signOut": "Sign out"
+    },
     "creditsUnlimited": "Unlimited",
     "examplesLabel": "Try:",
     "newMessagesBelow": "New message below",
@@ -125,6 +132,7 @@
       "apps": "App ideas",
       "images": "Image ideas",
       "imageTool": "Image",
+      "appBuilder": "Apps",
       "videos": "Video ideas",
       "coding": "Coding",
       "dataAnalysis": "See what the numbers say",
@@ -227,7 +235,9 @@
       "personalJournal": "Journaling",
       "personalLifeOs": "Life OS",
       "activity": "Activity",
-      "games": "Games"
+      "games": "Games",
+      "skills": "Skills",
+      "payments": "Payments"
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",
@@ -292,7 +302,9 @@
       "aiMemory": "What the chat has kept about you, and how to remove it.",
       "meetings": "Turn a recording into a transcript, a summary, and actions you choose from.",
       "activity": "Your next step, what changed, your progress and your numbers",
-      "games": "Describe a game, change its plan in words, and play it here, sealed off from your account."
+      "games": "Describe a game, change its plan in words, and play it here, sealed off from your account.",
+      "skills": "Procedures you taught Ionexa once, so it follows the same steps every time. For now this only shows them.",
+      "payments": "Accept payments from your customers. Connect, create products, get paid."
     },
     "closeMenu": "Close menu",
     "rail": {
@@ -397,7 +409,8 @@
       "teamMembers": "Team members",
       "recordSearch": "Record search across modules",
       "meetings": "Meetings → actions",
-      "games": "Games"
+      "games": "Games",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -606,7 +619,8 @@
       "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure.",
       "oauthFailed": "That sign-in didn't complete. Try again, or use your email and password below.",
       "sharedSignInFirst": "Sign in to save what you shared.",
-      "emailNotConfirmed": "Confirm your email first. We just sent a new link to your inbox."
+      "emailNotConfirmed": "Confirm your email first. We just sent a new link to your inbox.",
+      "rateLimited": "Too many attempts. Please try again later."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -685,6 +699,18 @@
         "subscription_retry": "We couldn't cancel the subscription on this account, so nothing was deleted. Your link still works — please try again."
       }
     },
+    "cancelDeletion": {
+      "title": "Cancel account deletion",
+      "missingToken": "This link is missing its cancellation token. Please use the link from your email exactly as sent.",
+      "body": "Your account is scheduled for deletion. Click below to cancel and keep your account.",
+      "cancelling": "Cancelling…",
+      "cancelButton": "Keep my account",
+      "failed": "We couldn't cancel the deletion. Please try the link again, or contact support.",
+      "successTitle": "Deletion cancelled",
+      "successBody": "Your account is safe. The scheduled deletion has been cancelled.",
+      "backToDashboard": "Back to dashboard",
+      "home": "Go to home page"
+    },
     "generateStrongPassword": "Generate strong password",
     "verifyEmail": {
       "title": "Confirm your email",
@@ -737,6 +763,16 @@
       "switchedOff": "Memory is switched off, so nothing is being saved from your conversations.",
       "nothingYet": "Nothing saved yet. Memory is on and working — it keeps durable things like your name, your work or a preference, once a conversation mentions one.",
       "seeAll": "See what it remembers"
+    },
+    "euOnly": {
+      "title": "Only Europe",
+      "toggleLabel": "Serve this account's AI calls only from the EU",
+      "toggleDescription": "When on, every AI call this account makes is refused rather than answered by a provider outside the EU.",
+      "turnedOn": "✓ Only Europe turned on",
+      "turnedOff": "✓ Only Europe turned off",
+      "couldNotUpdate": "✗ could not update this setting",
+      "effectOn": "AI calls for this account are served only by Mistral AI (EU). A call that provider cannot serve is refused rather than answered from elsewhere.",
+      "effectOff": "AI calls for this account may be served by any configured provider, regardless of where it is based."
     },
     "loginActivity": {
       "title": "Login Activity",
@@ -811,7 +847,13 @@
       "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it.",
       "emailDoesNotMatch": "Email doesn't match.",
       "couldNotStartDeletion": "✗ could not start account deletion",
-      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted."
+      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted.",
+      "pendingTitle": "Deletion scheduled",
+      "pendingDescription": "Your account is scheduled for permanent deletion on {date}. You can cancel any time before then.",
+      "cancelDeletion": "Cancel deletion",
+      "cancelling": "Cancelling...",
+      "cancelledOk": "✓ deletion cancelled — your account is safe",
+      "cancelFailed": "Could not cancel — please try again or use the link in the email we sent you."
     },
     "emailNotifications": {
       "title": "Email notifications",
@@ -896,7 +938,8 @@
       "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own.",
       "checkout": {
         "success": "Payment received. Your plan updates here as soon as Stripe confirms it — usually within a few seconds.",
-        "cancelled": "Checkout was cancelled. Nothing was charged."
+        "cancelled": "Checkout was cancelled. Nothing was charged.",
+        "scheduled": "Your plan change is booked. You keep your current plan until the end of the period you have already paid for, and the new one starts then. Nothing is charged today."
       },
       "buyCreditsDescription": "Need more credits this month? Buy a one-time top-up — no subscription change.",
       "creditsAmount": "{count, plural, one {# credit} other {# credits}}"
@@ -1044,7 +1087,7 @@
         "rate": "€{price} per credit, fixed at today's price.",
         "cap": "Never more than €{cap} in one calendar month.",
         "credits": "That buys up to {credits, plural, one {# extra credit} other {# extra credits}}.",
-        "invoice": "Charged as its own line on your next invoice, separate from your plan."
+        "invoice": "Charged on its own invoice after each month, separate from your plan, to the card your plan uses."
       },
       "agree": "Turn on overage",
       "saved": "Saved. You can turn this off at any time.",
@@ -1054,7 +1097,7 @@
       "capReached": "You have reached your limit. Nothing further will be charged until you raise it.",
       "turnOff": "Turn off overage",
       "turnOffNote": "Turning it off stops future charges. Anything already used this month is still invoiced.",
-      "needsSubscription": "Pay-as-you-go is for paying plans: it is billed with your next invoice. Choose a plan first."
+      "needsSubscription": "Pay-as-you-go is for paying plans: it is billed to the card your plan uses, and it stops when the plan ends. Choose a plan first."
     },
     "addons": {
       "title": "Add-ons",
@@ -1105,6 +1148,11 @@
       "saveFailed": "We couldn't save the name. Try again in a moment.",
       "save": "Save",
       "saving": "Saving…"
+    },
+    "skills": {
+      "title": "Skills",
+      "description": "Teach Ionexa a procedure once, and it follows the same steps every time that procedure is needed again.",
+      "open": "Open Skills"
     }
   },
   "dashboard": {
@@ -1347,7 +1395,8 @@
             "cv": "A CV for a marketing role",
             "letter": "A letter asking for an extension"
           }
-        }
+        },
+        "words": "{count, plural, one {# word} other {# words}}"
       }
     },
     "chat": {
@@ -1443,7 +1492,7 @@
         "fileLimit": "“{name}”: this would go over your plan’s limit in Files. Delete a file in Files or upgrade your plan.",
         "uploadLimit": "Too many file uploads in the last hour. Try again in a little while.",
         "offline": "No connection. Check the network and try again.",
-        "type": "“{name}”: only PDF, JPG or PNG.",
+        "type": "“{name}”: only PDF, JPG, PNG, CSV or XLSX.",
         "pdfTooLarge": "“{name}”: the PDF is over 20 MB.",
         "imageTooLarge": "“{name}”: the image is over 5 MB.",
         "tooManyPdfs": "Up to {max} PDFs per message.",
@@ -1455,7 +1504,11 @@
         "refused": "The attachments were not accepted. Attach them again.",
         "openInFiles": "Open in Files",
         "memoryUsed": "From memory ({count})",
-        "manageMemory": "What Ionexa remembers"
+        "manageMemory": "What Ionexa remembers",
+        "dataTooLarge": "“{name}”: the file is over 8 MB.",
+        "tooManyData": "Up to {max} data file per message.",
+        "readyData": "Ready — also in Analyze",
+        "openInAnalyze": "Open in Analyze"
       },
       "deleteFailed": "That conversation wasn't deleted. It is still here.",
       "undo": "Undo",
@@ -1464,7 +1517,10 @@
       "moved": "Moved to {project}.",
       "moveFailed": "That didn't move. Try again.",
       "projectFull": "That project already holds {limit} things, which is the most it keeps.",
-      "selectOne": "Select {title}"
+      "selectOne": "Select {title}",
+      "chart": {
+        "cardTitle": "How this was computed"
+      }
     },
     "create": {
       "title": "Create Anything",
@@ -1735,6 +1791,9 @@
       "tabPreview": "Preview",
       "tabEdit": "Edit",
       "tabHistory": "History",
+      "viewportGroup": "Preview width",
+      "viewportDesktop": "Desktop view",
+      "viewportMobile": "Mobile view",
       "statusLabel": "Status",
       "statusCompleted": "Ready",
       "statusFlagged": "Flagged",
@@ -1838,7 +1897,8 @@
           "colours": "From memory: the colours {colours}.",
           "both": "From memory: the name «{name}» and the colours {colours}. To change them, tell Chat."
         },
-        "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it."
+        "pagesShort": "You asked for {asked} pages and {made} were made. Say which one is missing and I will add it.",
+        "placeholdered": "{count, plural, one {A detail was} other {# details were}} not in your brief — a phone number, price, time or address — and replaced with a placeholder for you to fill in."
       },
       "regeneratePaid": "Regenerate · about {count} credits",
       "regenerateNoCredits": "Not enough credits for another regeneration: it needs about {needed}, you have {available}. Nothing was started.",
@@ -2004,7 +2064,6 @@
       "cancel": "Cancel",
       "agentsUsed": "{used} of {cap} agents",
       "agentsTotal": "{total} total (incl. paused)",
-      "requestLabel": "What should this agent do for you?",
       "requestPlaceholder": "e.g. Every morning, send me the latest news about Nvidia",
       "deliveryNote": "Results are emailed to {email} — the address on your account.",
       "designButton": "Design your agent",
@@ -2033,8 +2092,6 @@
       "menuRunNow": "Run now",
       "menuPause": "Pause",
       "menuResume": "Resume",
-      "menuEdit": "Edit",
-      "menuDelete": "Delete",
       "pauseSuccess": "Agent paused.",
       "resumeSuccess": "Agent resumed.",
       "deleteSuccess": "Agent deleted.",
@@ -2083,9 +2140,8 @@
       },
       "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again.",
       "empty": {
-        "title": "Work that happens without you",
-        "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it.",
-        "example": "Every Monday morning, summarise last week's sales"
+        "title": "What should the new agent do?",
+        "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it."
       },
       "delivery": {
         "label": "Where the result goes",
@@ -2226,7 +2282,61 @@
         "withdrawFailed": "That could not be withdrawn. It is still shared."
       },
       "failingWarning": "{failures} of the last {max} runs failed in a row. After {max}, this agent switches itself off.",
-      "disabledReason": "Last failure: {reason}"
+      "disabledReason": "Last failure: {reason}",
+      "shell": {
+        "approvalsTitle": "Approval rules",
+        "atCapacity": "active limit reached",
+        "capNoHardStop": "These are the cost, not a limit: there is no credit limit that stops the agent yet. It stops when the account runs out of credits, or by itself after {max} failures in a row.",
+        "capPerMonth": "Per month, roughly",
+        "capPerMonthValue": "{credits} credits · {runs} runs",
+        "capPerRun": "Per run",
+        "capsTitle": "Cost in credits",
+        "descriptionChanged": "The description changed.",
+        "fieldTarget": "The field changes:",
+        "inboxApprovals": "Waiting for approval",
+        "inboxApprovalsNone": "Nothing: this agent takes no action that cannot be undone — it searches, writes, and sends the result to you.",
+        "inboxReceived": "What it received",
+        "inboxReceivedNone": "Nothing: the agent has no email address of its own yet, so it cannot receive messages.",
+        "noRunYet": "No step has started. The states fill in live as it runs, one step at a time.",
+        "ownEmail": "Its own address",
+        "ownEmailNone": "It has none. The result leaves from the Ionexa address, to the channel you chose below.",
+        "placeholderDescription": "Write this agent's new description…",
+        "placeholderTask": "Write this agent's new task…",
+        "renameHint": "Rename from the ⋯ beside the name, in the list.",
+        "scheduleTitle": "Schedule",
+        "stateDone": "Done",
+        "stateWaiting": "Waiting",
+        "stateWorking": "Working",
+        "tabInbox": "Inbox",
+        "tabPlan": "Plan",
+        "tabsLabel": "What you are looking at for this agent",
+        "taskChanged": "The task changed.",
+        "toolsNone": "There is no separate per-agent allowlist of tools yet: every agent searches (if you allow it), writes, and sends to the one channel you set.",
+        "toolsTitle": "Tools",
+        "approvalsHint": "When checked, the agent pauses and asks before acting. Uncheck to let it act on its own.",
+        "creditCapNone": "No limit",
+        "creditCapHint": "The agent stops when it has spent this many credits. Leave empty for no limit.",
+        "spendingTiersTitle": "Spending tiers",
+        "autoBelow": "Auto below (credits)",
+        "approveAbove": "Approve above (credits)",
+        "spendingTiersHint": "Between these values, the agent spends and notifies you. Below: auto. Above: waits for approval.",
+        "toolsLoading": "Loading tools…",
+        "toolsHint": "Select which tools this agent can use."
+      },
+      "approvals": {
+        "title": "Pending approvals",
+        "approve": "Approve",
+        "deny": "Deny",
+        "empty": "No pending approvals",
+        "send": "Send",
+        "publish": "Publish",
+        "spend": "Spend",
+        "expired": "Expired",
+        "creditCap": "Credit cap",
+        "creditCapHint": "Maximum credits this agent may spend across all runs",
+        "noCap": "No limit",
+        "capReached": "Credit cap reached"
+      }
     },
     "publishing": {
       "title": "Live sites",
@@ -2246,6 +2356,7 @@
       "paidOnly": "Publishing is available on paid plans.",
       "tooManyToday": "You have published a lot of changes today. Try again tomorrow.",
       "securityBlocked": "The security check found something that should not go live, so the site was not published.",
+      "securityBlockedPassword": "A page that asks for a password can't be published: it would look like this app's sign-in page. Remove the password field and try again.",
       "unpublish": "Unpublish",
       "unpublishSuccess": "Your site is no longer public.",
       "unpublishError": "Could not unpublish that site. Please try again.",
@@ -2424,6 +2535,71 @@
           "empty": "Write what you want first.",
           "default": "Something went wrong. Try again."
         }
+      },
+      "telegram": {
+        "title": "Ionexa in Telegram",
+        "intro": "Connect your own Telegram chat and Ionexa works from there too: you write, it builds. Private chats only — never a group.",
+        "notReady": "Telegram is not switched on yet on this installation, so there is nothing here to connect to. Nothing is missing from your account.",
+        "offerBody": "Write to Ionexa from Telegram and it builds — sites, documents, images, posts. You will be shown a one-time code that lasts ten minutes.",
+        "connect": "Connect",
+        "consentTitle": "Connect Telegram to your account",
+        "consentBody": "A connected chat can ask Ionexa to do work and spend your credits. Read both lists before you connect, and disconnect whenever you like.",
+        "consentApprove": "Agree and show my code",
+        "consentCancel": "Not now",
+        "connecting": "Connecting…",
+        "canTitle": "Ionexa can",
+        "cannotTitle": "Ionexa can’t",
+        "can": {
+          "chat": "Answer you in Telegram the way it does in Chat, with the same memory and in your language.",
+          "make": "Make what you ask for — a site, a document, an image, a post — after showing the price and waiting for your press.",
+          "status": "Tell you how a job is going, and stop one.",
+          "files": "Take a photo or a file you send and put it in My Stuff."
+        },
+        "cannot": {
+          "approve": "Spend a single credit before you have pressed Approve on the price.",
+          "publish": "Publish anything — a site, an app, a post — without a separate approval for that one thing.",
+          "secrets": "Send you a password, a key or a code, or accept one from you in a message.",
+          "groups": "Work in a group chat. Only the one private chat you connected."
+        },
+        "activityTitle": "Recent activity",
+        "activityEmpty": "Nothing yet. Once work starts arriving from Telegram, what came and when will be listed here.",
+        "activityNotYet": "Nothing yet — you have not connected a chat.",
+        "activityLast": "Last message acted on: {time}",
+        "waitingHeading": "Open Telegram and send this code",
+        "waitingHint": "Press the button and Telegram sends the code for you. If nothing opens, write /start and the code by hand in a chat with the bot.",
+        "expiresIn": "Expires in {time}",
+        "expiredNow": "This code has expired. Ask for a new one.",
+        "openInTelegram": "Open in Telegram",
+        "cancel": "Cancel",
+        "noWebhookYet": "The bot cannot answer a code yet — that is the next piece. Until it is built, nothing will happen in Telegram when you send this.",
+        "presentedHeading": "Is this you?",
+        "presentedBody": "{who} sent your code to the bot. Nothing is connected until you say it is yours.",
+        "presentedWarning": "If you did not do this, press “That is not me”. Otherwise whoever holds your code can ask Ionexa to work and spend your credits.",
+        "presentedConfirm": "Yes, connect it",
+        "presentedReject": "That is not me",
+        "unknownAsker": "a Telegram account with no name",
+        "connected": "Telegram is connected.",
+        "connectedTo": "Connected to {who}",
+        "connectedSince": "Connected {time}",
+        "disconnect": "Disconnect",
+        "disconnecting": "Disconnecting…",
+        "disconnected": "Telegram is disconnected.",
+        "confirmDisconnect": "Disconnect Telegram? The chat will no longer be able to ask Ionexa for anything. Your notifications are not affected.",
+        "notTheSameAsNotifications": "This is not the same thing as Telegram notifications. Those only let Ionexa send to you; this lets the chat ask Ionexa to work. Turning one off does not turn the other off.",
+        "errors": {
+          "not_signed_in": "Sign in again and try once more.",
+          "not_enabled": "Telegram is not open on your account yet.",
+          "bad_action": "Something went wrong with that press. Try again.",
+          "bot_unavailable": "Telegram would not answer just now, so no code was made. Try again in a moment.",
+          "encryption_unavailable": "The key needed to store a chat safely is missing, so nothing was stored. Nothing was lost.",
+          "already_linked": "A chat is already connected. Disconnect it first.",
+          "chat_in_use": "That Telegram chat is already connected to another account. Disconnect it there first.",
+          "nothing_to_confirm": "There is nothing waiting to be confirmed. The code may have been used or cancelled already.",
+          "expired": "That code has expired. Ask for a new one.",
+          "rateLimited": "Too many tries. Wait an hour and try again.",
+          "not_started": "The code could not be made. Try again.",
+          "failed": "That did not work. Try again."
+        }
       }
     },
     "files": {
@@ -2518,6 +2694,12 @@
       "sharedStored": "{count, plural, one {# file} other {# files}} added from the share.",
       "sharedFailed": "{count, plural, one {# file} other {# files}} could not be added.",
       "sharedReason": "Why: {reason}",
+      "sharedReasons": {
+        "size": "the file is empty or too large",
+        "type": "that kind of file is not supported",
+        "limit": "your plan's file or storage limit is reached",
+        "stored": "it could not be saved — try again"
+      },
       "sharedRateLimit": "Too many uploads in the last hour. Try sharing again shortly.",
       "sharedDropped": "Only the first {max} files were taken.",
       "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device.",
@@ -2987,8 +3169,13 @@
       "description": "Upload a recording. Get the transcript, a summary, and a list of actions you choose from.",
       "audioNoticeTitle": "The audio is not kept",
       "audioNotice": "The audio is deleted the moment it is transcribed. Make sure the people speaking know.",
+      "recordConfirmAllow": "Continue",
+      "recordConfirmCancel": "Cancel",
       "pick": "Choose a recording",
       "dropHint": "M4A, MP3, WAV, WebM or OGG",
+      "record": "Record",
+      "stopRecording": "Stop recording",
+      "recording": "Recording…",
       "limitHint": "Up to {mb} MB, about {minutes} minutes of speech",
       "tooLarge": "That file is {actual} MB. The limit is {allowed} MB — export it as a voice recording, or split it in two.",
       "tooLong": "That recording is {actual} minutes. The limit is {allowed} minutes — split it in two.",
@@ -3001,6 +3188,7 @@
       "start": "Transcribe",
       "transcribing": "Transcribing…",
       "analysing": "Reading the transcript…",
+      "playerUnavailable": "No audio to play — it was deleted right after this meeting was transcribed.",
       "transcriptTitle": "Transcript",
       "summaryTitle": "Summary",
       "analyse": "Summarise and find actions",
@@ -3033,7 +3221,11 @@
         "unsupported_type": "That audio format is not supported.",
         "rate_limited": "You've reached a request limit. It clears by itself as time passes — try again later.",
         "empty": "That recording was empty.",
-        "failed": "Something went wrong. Nothing was charged."
+        "failed": "Something went wrong. Nothing was charged.",
+        "record_denied": "The microphone was not allowed. Check your browser's permissions and try again.",
+        "record_unsupported": "This browser cannot record audio. Upload a file instead.",
+        "record_empty": "Nothing was heard. Try again closer to the microphone.",
+        "record_failed": "The recording failed. Try again."
       },
       "goal": {
         "title": "{count, plural, one {Make this action a step of a goal} other {Make these # actions the steps of a goal}}",
@@ -3048,6 +3240,22 @@
         "projectLimit": "Your plan's projects are all in use. Choose one of them, or archive one first.",
         "projectName": "Give the new project a name of at least two letters.",
         "projectFull": "That project is full. Choose another one."
+      },
+      "remind": {
+        "button": "Remind me",
+        "label": "On this day",
+        "save": "Set the reminder",
+        "cancel": "Cancel the reminder",
+        "pending": "Reminds you on {date}",
+        "bad": "Choose a day after today, within a year.",
+        "notifyTitle": "Reminder: {what}",
+        "notifyBody": "From a meeting — {who}"
+      },
+      "ask": {
+        "title": "Ask about this meeting",
+        "placeholder": "Ask something about this meeting…",
+        "submit": "Ask",
+        "asking": "Asking…"
       }
     },
     "voicePage": {
@@ -3140,6 +3348,7 @@
         "sales": "Sales",
         "trading": "Trading",
         "image": "Image",
+        "threeD": "3D",
         "document": "Document",
         "games": "Games",
         "connect": "Connect",
@@ -3153,7 +3362,10 @@
         "iowork": "iowork",
         "translate": "Translate",
         "apps": "Apps",
-        "audio": "Audio"
+        "audio": "Audio",
+        "sheets": "Sheets",
+        "skills": "Skills",
+        "discord": "Discord"
       },
       "lines": {
         "site": "A website from a description",
@@ -3173,6 +3385,7 @@
         "sales": "Contacts, outreach and next steps.",
         "trading": "A log of your trades.",
         "image": "Images from a description",
+        "threeD": "A 3D model from a few photos",
         "document": "Documents and sheets",
         "games": "A game from a description.",
         "connect": "Bring your other apps in",
@@ -3236,7 +3449,9 @@
         "versions": "Every version",
         "versionsHint": "Press one to see it. What you write next still changes the latest.",
         "liveVersions": "Published versions",
-        "undid": "Undid: {change}"
+        "undid": "Undid: {change}",
+        "version": "Version {n} · {live, select, yes {published} other {not published}}",
+        "publishState": "{live, select, yes {Published} other {Not published}}"
       },
       "box": {
         "only": "Changing only: {name}",
@@ -3252,6 +3467,20 @@
         "partChanged": "Only “{name}” changed. The rest of the site stayed the same.",
         "lost": "The box did not come back from the change, so nothing changed. Try again.",
         "boxes": "Boxes"
+      },
+      "motion": {
+        "button": "Motion",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "None",
+          "softFade": "Soft fade",
+          "slideUp": "Slide up",
+          "parallax": "Parallax",
+          "glass": "Glass",
+          "holographic": "Holographic",
+          "typewriter": "Typewriter",
+          "hoverLift": "Hover lift"
+        }
       },
       "pages": {
         "auto": "Pages: as many as needed",
@@ -3269,6 +3498,26 @@
         "rename": "Rename",
         "undo": "Undo",
         "deleteConfirm": "Delete “{title}”?"
+      },
+      "mode": {
+        "label": "Level",
+        "simple": "Simple",
+        "pro": "Pro"
+      },
+      "editor": {
+        "chat": "Chat",
+        "result": "Result",
+        "view": "What to show",
+        "conversation": "Conversation",
+        "closeChat": "Close the conversation",
+        "settings": "Settings",
+        "credits": "Credits",
+        "selected": "Selected: {name}",
+        "isOpen": "Open now",
+        "more": "More",
+        "selectedTag": "{name} · selected",
+        "changeThis": "Change this…",
+        "changeWork": "Say what to change…"
       }
     },
     "library": {
@@ -3306,6 +3555,11 @@
           "report": "report",
           "customers": "customers"
         }
+      },
+      "favoritesOnly": "Favorites only",
+      "noFavorites": {
+        "title": "Nothing starred yet",
+        "why": "Star something in Site, Slides or Documents to pin it here."
       }
     },
     "myStuff": {
@@ -3329,7 +3583,45 @@
         "kindsLabel": "Show only",
         "all": "All",
         "empty": "Nothing found",
-        "untitled": "Untitled"
+        "untitled": "Untitled",
+        "failed": "Could not load: {kinds}. The rest is shown."
+      },
+      "details": {
+        "empty": "Select something on the left to see it here.",
+        "open": "Open",
+        "back": "Back to the list",
+        "madeFrom": "Made from",
+        "viewers": "Who sees this",
+        "viewersAnswer": "Only you. Sharing one record with someone else isn't built yet."
+      },
+      "history": {
+        "title": "Previous questions",
+        "show": "Show previous questions",
+        "hide": "Hide previous questions",
+        "back": "Back to previous questions"
+      },
+      "ask": {
+        "send": "Ask",
+        "dismiss": "Hide the answer"
+      },
+      "filters": {
+        "label": "Filter by kind",
+        "all": "All",
+        "documents": "Documents",
+        "images": "Images",
+        "data": "Data",
+        "more": "More",
+        "moreLabel": "More filters",
+        "video": "Video",
+        "audio": "Audio",
+        "sitesApps": "Sites and Apps",
+        "meetings": "Meetings",
+        "project": "Project",
+        "allProjects": "All projects"
+      },
+      "upload": {
+        "button": "Upload",
+        "uploading": "Uploading…"
       },
       "kinds": {
         "site": "Sites",
@@ -3343,7 +3635,10 @@
         "coding": "Code",
         "finance": "Finance",
         "sales": "Sales",
-        "trading": "Trading"
+        "trading": "Trading",
+        "images": "Images",
+        "meetings": "Meetings",
+        "apps": "Apps"
       },
       "errors": {
         "empty": "Write a question.",
@@ -3382,6 +3677,14 @@
       "price": "{count, plural, one {# credit} other {# credits}}",
       "delete": "Delete image",
       "deleteConfirm": "Delete this image and all its versions? This cannot be undone.",
+      "tools": {
+        "productAd": "Product ad",
+        "animate": "Animate",
+        "sameProduct": "Same product",
+        "addReference": "Add a reference image",
+        "removeReference": "Remove this reference image",
+        "searchWeb": "Search the web first"
+      },
       "notConfigured": "Images are not switched on yet. Nothing is charged.",
       "working": {
         "variants": "Making 4 images…",
@@ -3408,7 +3711,15 @@
           "avatar": "A simple avatar icon for a tech app"
         }
       },
-      "new": "New image"
+      "new": "New image",
+      "panel": {
+        "status": "{count, plural, one {# image} other {# images}}",
+        "variants": "{n} images",
+        "change": "Changing one",
+        "full": "Full resolution",
+        "have": "You have",
+        "credits": "{count, plural, one {# credit} other {# credits}}"
+      }
     },
     "automations": {
       "name": "Automations",
@@ -3594,12 +3905,82 @@
         "expired": "The deadline passed; it was cancelled with no charge.",
         "broken": "These boxes cannot be read any more. Delete the automation and make it again.",
         "failed": "Something went wrong. Nothing was charged for what did not happen.",
-        "offline": "No connection. Check the network and try again."
+        "offline": "No connection. Check the network and try again.",
+        "badMinutes": "Minutes must be from {min} to {max}, or empty.",
+        "notReady": "This isn’t available yet. Try again later."
       },
       "empty": {
         "heading": "What should happen by itself?"
       },
-      "new": "New automation"
+      "new": "New automation",
+      "simple": {
+        "reads": "Reads: {what}",
+        "does": "Ionexa does: {what}",
+        "onlyIf": "Goes on only if something was found. Otherwise it stops here, and nothing is charged.",
+        "hint": "These are the steps, in order. Press Pro to change any of them."
+      },
+      "parts": {
+        "when": "When",
+        "if": "If",
+        "do": "Do"
+      },
+      "failedHere": "The last run stopped here: {reason}",
+      "templates": {
+        "title": "Ready-made automations",
+        "intro": "Start from one with a single press. Then change it like any other, and switch it on whenever you want.",
+        "start": "Start from this",
+        "free": "Free to set up",
+        "soon": "Coming soon",
+        "made": "Ready: “{name}”. Change anything you like, and switch it on whenever you want.",
+        "groups": {
+          "finance": "Finance assistant",
+          "instagram": "Instagram → Telegram"
+        },
+        "finance_daily": {
+          "name": "Morning finance summary",
+          "description": "Every day at 08:30: this week’s finances, in a short summary, to your Telegram.",
+          "instruction": "Write a short summary of this week’s income and expenses: what came in, what went out, the net, and the three largest expenses. Use only amounts that are in the data."
+        },
+        "finance_weekly": {
+          "name": "Monthly analysis every Monday",
+          "description": "Every Monday at 08:30: this month’s finances, analysed, to your Telegram.",
+          "instruction": "Analyse the last month’s income and expenses: the totals, the net, where most of the money goes and anything that stands out. Use only amounts that are in the data, and end with one practical observation."
+        },
+        "finance_expense_telegram": {
+          "name": "Record an expense from Telegram",
+          "description": "You write “paid €50 electricity” to the bot and it goes into your Finances.",
+          "why": "It needs Ionexa to read the messages you send its Telegram bot, which it cannot do yet."
+        },
+        "instagram_to_telegram": {
+          "name": "New Instagram post → Telegram message",
+          "description": "As soon as you post on Instagram, a message arrives in your Telegram.",
+          "why": "There is no Instagram connection yet."
+        }
+      },
+      "timeSaved": {
+        "label": "How many minutes did this take you by hand?",
+        "unit": "minutes",
+        "help": "Optional. It is what the time saved is counted from; leave it empty and nothing is shown.",
+        "hours": "Saved you ~{hours, plural, one {# hour} other {# hours}}",
+        "minutes": "Saved you ~{minutes, plural, one {# minute} other {# minutes}}",
+        "notYet": "Once the first run finishes, you’ll see here how much time it saved you.",
+        "how": "How: finished runs ({runs}) × the minutes you gave ({minutes}). Trials don’t count."
+      },
+      "mode": {
+        "label": "How it runs",
+        "auto": "Auto",
+        "autoHelp": "Runs for real, on schedule or by hand.",
+        "shadow": "Shadow",
+        "shadowHelp": "Rehearses when it starts on its own — nothing real is sent until you run it by hand.",
+        "supervised": "Supervised",
+        "supervisedHelp": "Every action waits for your approval before it sends anything.",
+        "save": "Save"
+      },
+      "pendingApprovals": {
+        "button": "Approvals ({count})",
+        "title": "Approvals waiting",
+        "empty": "Nothing is waiting for approval right now."
+      }
     },
     "flows": {
       "name": "Projects",
@@ -3808,6 +4189,197 @@
         "failed": "Something went wrong. Try again."
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "What should Editing do with your material?"
+      },
+      "notBuilt": "Not built yet. Nothing was charged.",
+      "placeholder": "Describe the edit, in your own words…",
+      "workspaceTitle": "Workspace",
+      "tools": {
+        "zoom": "Zoom",
+        "graphics": "Graphics"
+      },
+      "noMaterial": "No material yet."
+    },
+    "threeD": {
+      "empty": {
+        "heading": "What do you want to become 3D?"
+      },
+      "notBuilt": "Not built yet. Nothing was charged.",
+      "placeholder": "Describe what should become 3D, in your own words…",
+      "attachPhotos": "Add photos (1 to 4)",
+      "workspaceTitle": "3D model",
+      "photos": {
+        "heading": "My photos",
+        "remove": "Remove this photo"
+      },
+      "viewer": {
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "reset": "Reset view",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "Type",
+        "typeOptions": {
+          "product": "Product",
+          "furniture": "Furniture",
+          "object": "Object"
+        },
+        "quality": "Quality",
+        "qualityOptions": {
+          "draft": "Draft",
+          "final": "Final"
+        },
+        "realSize": "Real size",
+        "realSizeUnknown": "not set yet",
+        "format": "Format",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "Background",
+        "backgroundOptions": {
+          "white": "White",
+          "transparent": "Transparent"
+        },
+        "price": "Price"
+      },
+      "bar": {
+        "viewInAr": "View in AR",
+        "download": "Download",
+        "makeFinal": "Make final"
+      }
+    },
+    "films": {
+      "empty": {
+        "heading": "What's your film about?"
+      },
+      "notBuilt": "Not built yet. Nothing was charged.",
+      "placeholder": "Describe the film, in your own words…",
+      "workspaceTitle": "Film production",
+      "stages": {
+        "script": "Script",
+        "characters": "Characters & places",
+        "storyboard": "Storyboard",
+        "shooting": "Shooting",
+        "edit": "Edit"
+      },
+      "stageStatus": {
+        "waiting": "Waiting",
+        "working": "Working",
+        "done": "Done"
+      },
+      "credits": {
+        "label": "Credits",
+        "unknown": "worked out once a script exists"
+      },
+      "charactersPlaces": {
+        "heading": "Characters & places",
+        "addCharacter": "Add a character",
+        "addPlace": "Add a place",
+        "empty": "None added yet."
+      },
+      "storyboard": {
+        "heading": "Storyboard",
+        "shot": "Shot {n}",
+        "sampleCaption": "Sample grid — your shots appear here once the script is written."
+      },
+      "panel": {
+        "cameraAngle": "Camera angle",
+        "angleOptions": {
+          "wide": "Wide",
+          "medium": "Medium",
+          "closeUp": "Close-up",
+          "fromAbove": "From above",
+          "low": "Low"
+        },
+        "light": "Light",
+        "lightOptions": {
+          "day": "Day",
+          "goldenHour": "Golden hour",
+          "night": "Night",
+          "warmInside": "Warm inside"
+        },
+        "cameraMove": "Camera move",
+        "moveOptions": {
+          "still": "Still",
+          "slowPush": "Slow push",
+          "pan": "Pan",
+          "handheld": "Handheld"
+        },
+        "continueFromPrevious": "Continue from previous shot",
+        "reshoot": "Reshoot"
+      }
+    },
+    "appBuilder": {
+      "empty": {
+        "heading": "Describe the app your business needs",
+        "examples": {
+          "a": "A booking app for my salon",
+          "b": "An app that keeps my orders and who they go to",
+          "c": "A form for customers, with the answers in a list"
+        }
+      },
+      "placeholder": "Describe the app, in your own words…",
+      "placeholderBox": "Say what to change in this box…",
+      "placeholderAnother": "Describe another app…",
+      "recent": "Recent apps",
+      "noneYet": "No app yet.",
+      "boxHint": "Press a box and say what to change in it.",
+      "tabs": {
+        "preview": "Preview",
+        "data": "Data",
+        "plan": "Plan"
+      },
+      "box": {
+        "data": "Data",
+        "screens": "Screens",
+        "access": "Who sees what",
+        "notifications": "Notifications"
+      },
+      "type": {
+        "text": "Text",
+        "longText": "Long text",
+        "number": "Number",
+        "date": "Date",
+        "time": "Time",
+        "choice": "Choice",
+        "email": "Email",
+        "phone": "Phone",
+        "checkbox": "Yes or no"
+      },
+      "kindForm": "a form",
+      "kindList": "a list",
+      "seesOwn": "each visitor sees only their own",
+      "seesOwner": "only you see these",
+      "toCustomer": "to the customer",
+      "toOwner": "to you",
+      "noNotifications": "Nothing is sent.",
+      "noScreensYet": "No screen in the plan yet.",
+      "previewCaption": "Live preview of the plan — not a working app yet.",
+      "formSubmit": "Send",
+      "sampleRow": "Sample — real entries will show up here once this is live.",
+      "approve": "Approve the plan",
+      "approved": "The plan is approved.",
+      "approvedNote": "Approved",
+      "planned": "Here is the plan, in four boxes.",
+      "boxChanged": "The {box} box changed.",
+      "boxChangedAndDropped": "The {box} box changed, and this went with it: {what}.",
+      "errors": {
+        "empty": "Write what the app should do.",
+        "tooLong": "That is longer than one description can be ({limit} characters).",
+        "insufficient": "Not enough credits for this. Nothing was charged.",
+        "rateLimited": "Too many attempts at once. Try again shortly.",
+        "notIncluded": "This tool is not in your plan.",
+        "unavailable": "The app cannot be planned right now.",
+        "unusable": "The answer was not usable. Only what was spent is charged.",
+        "notSaved": "The plan was made but could not be saved.",
+        "failed": "The plan could not be made. No credits were charged."
+      }
+    },
     "chats": {
       "title": "Chats",
       "searchPlaceholder": "Search your conversations",
@@ -3848,6 +4420,26 @@
         "actions": "Actions",
         "look": "Look"
       },
+      "features": {
+        "heading": "Capabilities",
+        "hint": "These are the capabilities apps like this one often have. Toggle any off, or press the pencil to change its words.",
+        "found": "Here are the capabilities such apps often have. Toggle any off, or change one's words, then continue.",
+        "changed": "Changed that capability's words.",
+        "continue": "Use these features",
+        "continuing": "Making the plan…",
+        "edit": "Change this capability's words",
+        "editPlaceholder": "Say the new words for this capability"
+      },
+      "phases": {
+        "heading": "Phases",
+        "note": "Today this is one phase: the whole app, built at once. More phases are coming.",
+        "noteTwo": "This app needs two phases: first its data and screens, then the app itself, written from them. Approve the plan to start the first phase; the second phase's own price is shown once the first is done.",
+        "appLogic": "App logic",
+        "writeApp": "Write the app",
+        "approve": "Approve plan",
+        "approving": "Starting…",
+        "appLogicDone": "The app's data and screens are planned. Now write the app."
+      },
       "build": "Build the app",
       "building": "Building the app…",
       "download": "Download the app",
@@ -3855,6 +4447,7 @@
       "preview": "The app, running",
       "sealed": "It runs sealed off from everything else, so what you enter here stays in this preview. Download it to use it on your own computer.",
       "original": "Your own version, not a copy: it takes the idea and the kinds of screens, never the name, words, pictures or code of the original.",
+      "selfTest": "Every button was checked that it is wired to code before this was shown to you.",
       "versions": "{count} versions",
       "version": "Version {n}",
       "first": "First build",
@@ -3877,6 +4470,20 @@
           "tooLarge": "That page is too large to read. Nothing was charged.",
           "invalid": "That is not a web address I can read. Nothing was charged."
         }
+      },
+      "publish": {
+        "summary": "Publish this app",
+        "liveSummary": "Live at its own address",
+        "label": "Choose an address",
+        "edit": "Choose a different address",
+        "editPlaceholder": "Type the address you want",
+        "button": "Publish",
+        "unpublish": "Unpublish",
+        "taken": "That address is already taken.",
+        "invalid": "Choose a valid address — lowercase letters, numbers and hyphens, at least 3 characters.",
+        "notBuilt": "Build the app first.",
+        "done": "Published at {url}",
+        "offline": "Unpublished. The address is kept — publish again to use it."
       }
     },
     "comingSoon": {
@@ -3891,6 +4498,11 @@
           "a": "A booking app for my salon",
           "b": "An app for delivery orders",
           "c": "A staff shift-tracking app"
+        },
+        "threeD": {
+          "a": "A vase from my shop, ready for the site",
+          "b": "A wooden chair, to view from every angle",
+          "c": "A ceramic mug, with AR on my phone"
         },
         "video": {
           "a": "A 30-second ad video for my product",
@@ -4135,6 +4747,283 @@
         "label": "Language practice",
         "text": "I want to practise "
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "Paste text to translate",
+        "examples": {
+          "a": "Welcome to our business. We're happy to help.\n\nOur office is open Monday to Friday, 9am to 6pm.",
+          "b": "Dear customer,\n\nThank you for your order. You'll receive it within 3 business days.",
+          "c": "Our company was founded in 2015 and specialises in software solutions for small businesses."
+        }
+      },
+      "placeholder": "Paste or type the text…",
+      "targetsLabel": "Into: {languages}",
+      "styleLabel": "Style",
+      "style": {
+        "formal": "Formal",
+        "friendly": "Friendly",
+        "source": "As the original"
+      },
+      "detectedFrom": "Detected: {language}",
+      "sameLanguageNote": "The text is already in this language.",
+      "kept": "{count, plural, one {# paragraph was left as it was} other {# paragraphs were left as they were}}, because its translation did not come back.",
+      "done": "{count, plural, one {Translated into # language.} other {Translated into # languages.}}",
+      "translating": "Translating…",
+      "errors": {
+        "nothing": "There is no text to translate.",
+        "tooLong": "This is too long for one translation ({chars} characters; the limit is {limit}).",
+        "sameLanguage": "The languages you picked are already the text's language. Choose at least one different one.",
+        "insufficient": "Not enough credits for this translation. Nothing was charged.",
+        "rateLimited": "Too many attempts at once. Try again shortly.",
+        "unavailable": "Translation is not available right now.",
+        "unusable": "The answer was not usable, and nothing was written. Only what was spent is charged.",
+        "failed": "The translation could not be made. No credits were charged."
+      },
+      "editPlaceholder": "Say what to change about this paragraph…",
+      "editDone": "Paragraph {n} ({language}) changed.",
+      "editingLabel": "Paragraph {n} · {language}",
+      "glossaryLabel": "{count, plural, =0 {Glossary} one {Glossary (1)} other {Glossary (#)}}",
+      "glossaryHint": "Words that stay the same in every language.",
+      "glossarySuggested": "Add \"{term}\"",
+      "glossaryPlaceholder": "New word…",
+      "glossaryRemove": "Remove \"{term}\"",
+      "glossaryAdd": "Add a term",
+      "glossaryAdding": "New glossary term",
+      "openDocument": "Open as a document"
+    },
+    "iowork": {
+      "noAppYet": "The app for your computer is not out yet. This screen is the account's side of it: when the app exists, this is where you connect it.",
+      "connectHeading": "Connect a computer",
+      "connectHint": "Type the eight characters your computer is showing.",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "Connect",
+      "connecting": "Connecting…",
+      "previewHeading": "A computer wants to connect",
+      "previewBody": "It says it is “{label}” ({platform}), requested at {time} from {ip}.",
+      "previewIpUnknown": "an address we could not read",
+      "previewWarning": "If you did not just now open iowork yourself, on your own computer, press Cancel.",
+      "previewConfirm": "Yes, connect",
+      "previewCancel": "Cancel",
+      "cancelled": "Cancelled. That code will not work again.",
+      "codeAccepted": "{name} accepted the code. It appears below once the computer finishes connecting.",
+      "listHeading": "Connected computers ({count} of {max})",
+      "empty": "No computer is connected yet.",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "Paired more than 30 days ago",
+      "disconnect": "Disconnect",
+      "disconnectLabel": "Disconnect {name}",
+      "confirmDisconnect": "Disconnect {name}? It will stop working at once and will have to be connected again.",
+      "safetyLine": "Once the app exists: a connected computer will reach only the folders you pick on it, never passwords, keys or system folders, and every change will wait for your approval there.",
+      "errors": {
+        "bad_code": "That is not a code. It is eight characters, as shown on your computer.",
+        "bad_action": "That request did not make sense. Try again.",
+        "not_found": "No computer is showing that code.",
+        "expired": "That code has expired. Your computer will show a new one.",
+        "tooMany": "This account already has {max} computers. Disconnect one first.",
+        "rateLimited": "Too many tries. Wait a while and try again.",
+        "not_enabled": "iowork is not open yet.",
+        "not_signed_in": "Sign in again.",
+        "failed": "That did not work. Nothing changed."
+      }
+    },
+    "sheets": {
+      "placeholder": "Describe the table you need, or the change you want",
+      "limits": "Formulas, charts and xlsx export are not wired yet · nothing is charged on this screen",
+      "soon": "I can't build the table yet — this screen is the first piece. Formulas come next, then a table from a description.",
+      "download": "Download",
+      "downloadSoon": "Download arrives with xlsx and csv export, with the formulas intact",
+      "work": {
+        "title": "Table"
+      },
+      "formula": {
+        "label": "Formula",
+        "empty": "Empty cell",
+        "selected": "{count, plural, one {# cell} other {# cells}}"
+      },
+      "sheet": {
+        "tab": "Sheet {n}",
+        "add": "New sheet"
+      },
+      "empty": {
+        "heading": "What should the table work out?",
+        "why": "Sheets builds a table with real formulas inside it, so every total works itself out again when you change a number — never a result typed in by hand.",
+        "examples": {
+          "budget": "A monthly budget for my shop",
+          "stock": "A stock list with reorder levels",
+          "pricelist": "A price list with VAT and margin"
+        }
+      },
+      "extend": "Extend the selection"
+    },
+    "skills": {
+      "name": "Skills",
+      "empty": {
+        "title": "No skills yet",
+        "why": "A skill is a procedure you teach Ionexa once — its name, when it applies, its steps — and from then on it follows the same steps every time. Nothing can be taught here yet; this screen only shows what already exists."
+      },
+      "details": {
+        "empty": "Select a skill on the left to see it here.",
+        "back": "Back to the list",
+        "whenUsedLabel": "When it is used",
+        "whenUsedEmpty": "Not set",
+        "stepsLabel": "Steps",
+        "stepsEmpty": "No steps yet",
+        "filesLabel": "Files",
+        "filesEmpty": "No files attached"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "Discord is not set up here yet",
+        "why": "These values are missing on the deployment: {names}. Nothing here can work without them.",
+        "unreadable": "Discord is not ready on this deployment yet: its tables are not in the database."
+      },
+      "connect": {
+        "heading": "Connect a Discord server",
+        "why": "First make an empty server in Discord: the + at the bottom of your server list, then Create My Own. Then connect Ionexa to it.",
+        "button": "Connect Ionexa",
+        "permissions": "Ionexa asks only for: {list}. Never Administrator."
+      },
+      "perm": {
+        "manage_roles": "Manage Roles",
+        "manage_channels": "Manage Channels",
+        "view_channel": "View Channels",
+        "send_messages": "Send Messages",
+        "embed_links": "Embed Links",
+        "read_message_history": "Read Message History",
+        "manage_guild": "Manage Server",
+        "manage_webhooks": "Manage Webhooks",
+        "administrator": "Administrator",
+        "ban_members": "Ban Members"
+      },
+      "flash": {
+        "connected": "The server is connected. Describe it and Ionexa plans it.",
+        "cancelled": "Connecting was cancelled. Nothing changed.",
+        "invalid_state": "That link was not yours or has expired. Try again.",
+        "expired": "The link expired. Try again.",
+        "exchange_failed": "Discord did not confirm the connection. Try again.",
+        "no_server": "Discord did not say which server. Pick a server on Discord's screen.",
+        "bot_not_in_server": "Ionexa is not in that server. Try connecting again.",
+        "taken": "This server is already connected to another Ionexa account.",
+        "save_failed": "The connection could not be saved. Try again.",
+        "rate_limited": "Too many tries. Wait a little and try again.",
+        "error": "Something went wrong. Try again.",
+        "not_configured": "Discord is not set up on this deployment.",
+        "unavailable": "Discord is not open for this account.",
+        "invalid_response": "Discord's answer was incomplete. Try again."
+      },
+      "placeholder": "Describe the server you want…",
+      "changePlaceholder": "Change the plan…",
+      "boxPlaceholder": "What should change in “{name}”?",
+      "empty": {
+        "heading": "What server do you want?",
+        "why": "For {server}. Describe it in words: you see the plan as boxes before anything changes in Discord.",
+        "examples": {
+          "bakery": "A server for my bakery's community, with a channel for orders",
+          "club": "A server for a small gaming club, with voice rooms",
+          "class": "A server for my class, with announcements and homework"
+        }
+      },
+      "server": "Server",
+      "disconnect": "Disconnect",
+      "disconnectConfirm": "Ionexa will leave this server. What it made stays in Discord and can no longer be undone from here.",
+      "priceLabel": "Price",
+      "price": "≈ {credits, plural, one {# credit} other {# credits}} for a plan or a change with words. Making it in Discord, ticks, deleting a box and Undo cost nothing.",
+      "cost": "≈ {credits, plural, one {# credit} other {# credits}}",
+      "slashLabel": "In the server",
+      "slash": "/ionexa ask answers in the server with this account's credits, for members who can manage the server.",
+      "planning": "Planning the server…",
+      "changing": "Changing the plan…",
+      "making": "Making it in Discord… {n} made",
+      "planned": "The plan is ready: {roles} roles, {channels} channels. Nothing has changed in Discord yet.",
+      "changed": "The plan changed.",
+      "changedOne": "Only “{name}” changed. The rest stayed the same.",
+      "applied": "Done. Everything in the plan is in Discord.",
+      "undone": "Undone. Only what Ionexa made was deleted.",
+      "stoppedAt": "It stopped at “{name}”. What is marked made is in Discord; Undo deletes it.",
+      "streamInterrupted": "The connection dropped. Nothing was made in Discord.",
+      "streamInterruptedPartial": "The connection dropped partway through. What is marked made above is in Discord; the rest was not.",
+      "undo": "Undo",
+      "undoConfirm": "Delete only what Ionexa made in this server? Nothing that was there before is touched.",
+      "primary": "Make it in Discord",
+      "deleteBox": "Delete this box",
+      "boxCount": "{n} boxes",
+      "status": {
+        "planned": "Plan · not made yet",
+        "applying": "Making it…",
+        "applied": "Made in Discord",
+        "failed": "Stopped half-way",
+        "undoing": "Undoing…",
+        "undone": "Undone"
+      },
+      "state": {
+        "made": "Made",
+        "failed": "Failed",
+        "deleted": "Undone"
+      },
+      "note": {
+        "community_needed": "Made as a text channel: this needs a Community server."
+      },
+      "section": {
+        "roles": "Roles",
+        "channels": "Categories and channels",
+        "messages": "Messages",
+        "automod": "AutoMod"
+      },
+      "kind": {
+        "text": "Text channel",
+        "voice": "Voice channel",
+        "forum": "Forum",
+        "announcement": "Announcements",
+        "category": "Category"
+      },
+      "message": {
+        "welcome": "Welcome message",
+        "rules": "Rules"
+      },
+      "automod": {
+        "keywords": "Blocks {n} words",
+        "spam": "Blocks spam",
+        "preset": "Blocks: {list}",
+        "mentions": "At most {n} mentions in a message"
+      },
+      "preset": {
+        "profanity": "swearing",
+        "sexual_content": "sexual content",
+        "slurs": "slurs"
+      },
+      "private": "Only for: {roles}",
+      "readOnly": "Read-only for everyone",
+      "hoist": "Shown separately in the member list",
+      "tickTitle": "Only if you tick it:",
+      "elevated": {
+        "manage_guild": "Manage Server: change the server's name, settings and AutoMod.",
+        "manage_channels": "Manage Channels: create, change and delete any channel.",
+        "manage_roles": "Manage Roles: create and change roles below their own, and give them to members."
+      },
+      "refusedNote": "Administrator and Ban Members are never given by Ionexa: the server's owner gives them in Discord.",
+      "errors": {
+        "insufficient_credits": "Not enough credits: this needs about {needed}.",
+        "ai_unavailable": "Ionexa could not plan right now. Nothing was charged.",
+        "unusable": "The answer was not a plan that can be made. Try saying it differently.",
+        "failed": "Something went wrong. Try again.",
+        "conflict": "The plan changed in another tab. Reload the page.",
+        "rate_limited": "Too many tries. Wait a little.",
+        "busy": "It is already running.",
+        "already_applied": "Undo what was made first.",
+        "bot_not_in_server": "Ionexa is no longer in this server. Connect it again.",
+        "not_connected": "This server is not connected.",
+        "empty": "Write a little more.",
+        "too_long": "That is too long.",
+        "stopped": "Stopped. Nothing was charged.",
+        "bypass_ceiling": "This account has reached its monthly limit.",
+        "refused_permission": "Administrator and Ban Members are never given by Ionexa.",
+        "not_configured": "Discord is not set up on this deployment."
+      }
     }
   },
   "module": {
@@ -4304,7 +5193,8 @@
       "confirmTitle": "This is a large action",
       "confirmBody": "This will cost about {count, plural, one {# credit} other {# credits}}. You can continue, or edit your request to make it smaller.",
       "cancel": "Cancel",
-      "continue": "Continue"
+      "continue": "Continue",
+      "approxWithRemaining": "~{count, plural, one {# credit} other {# credits}} · {remaining, plural, one {# credit} other {# credits}} left"
     },
     "freeChat": {
       "remaining": "{count, plural, one {# free message left} other {# free messages left}} this month",
@@ -4867,6 +5757,11 @@
       "does": "It shows you the plan in five boxes first; change any of them in words, then it writes the game and you play it here, with the keyboard or by touch.",
       "doesNot": "It does not see your account and does not reach the internet: the game plays sealed off, and so does the file you download."
     },
+    "apps": {
+      "is": "A place to describe an app that keeps your data — bookings, orders, stock, customers, form answers.",
+      "does": "It plans the app in four boxes, you change any box with words, and you approve it.",
+      "doesNot": "It does not take payments, and it never asks a customer for a card or a password."
+    },
     "chats": {
       "is": "Every conversation you have had, in one place.",
       "does": "Lists them newest first, searches both their titles and what was said inside them, and renames, pins, files or deletes any of them.",
@@ -4881,6 +5776,21 @@
       "is": "Your own version of an app you like.",
       "does": "Describe an app, or paste the address of one public page of an app you like. You get a plan in four boxes, change what you want with words, then build it: a working app you can use, change with words, step back from, and download as one file.",
       "doesNot": "It does not copy the other app: the name, words, pictures and code are your own, and it reads only the labels of the one page you point at, never anything behind a sign-in. It is not a hosted service: what you enter in the preview is not saved, and the downloaded file keeps its data on your own computer."
+    },
+    "iowork": {
+      "is": "The app that works inside your own computer",
+      "does": "Reads and writes files in the folders you pick, when you ask it to, and shows you every change before it happens",
+      "doesNot": "It does not reach passwords, keys, your browser or system folders, it never runs programs on your computer, and it deletes nothing without your approval"
+    },
+    "skills": {
+      "is": "A procedure you teach Ionexa once, so it follows the same steps every time it is needed again.",
+      "does": "Shows a skill's name, when it is used, its steps and its files, exactly as they were taught.",
+      "doesNot": "It does not let you create, edit or run a skill yet, and it does not use any skill on its own — pressing a row only opens it to read."
+    },
+    "admin": {
+      "is": "The owner's admin dashboard.",
+      "does": "Shows user accounts, billing, platform cost and revenue, with an audit log entry on every open.",
+      "doesNot": "It does not show what a user wrote — their chats, documents and records stay private."
     }
   },
   "helpCentre": {
@@ -4904,10 +5814,12 @@
       "files": "Files",
       "integrations": "Integrations",
       "account": "Account",
-      "privacy": "Privacy and data"
+      "privacy": "Privacy and data",
+      "tools": "Tools"
     }
   },
   "pageTitle": {
+    "admin": "Admin",
     "document": "Document",
     "systemHealth": "System Health",
     "onboarding": "Get started",
@@ -4922,6 +5834,8 @@
     "forgotPasswordDescription": "Reset your Ionexa AI account password.",
     "resetPasswordDescription": "Set a new password for your Ionexa AI account.",
     "confirmDeletionDescription": "Confirm permanent deletion of your Ionexa AI account.",
+    "cancelDeletion": "Cancel Account Deletion",
+    "cancelDeletionDescription": "Cancel the scheduled deletion of your Ionexa AI account.",
     "termsDescription": "Terms of Service for Ionexa AI.",
     "privacyDescription": "Privacy Policy for Ionexa AI.",
     "cookiesDescription": "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
@@ -5125,7 +6039,9 @@
       "unsupported_type": "That audio format is not supported.",
       "usage_unavailable": "Voice minutes could not be checked right now.",
       "streamInterrupted": "The connection dropped before the reply finished.",
-      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+      "not_ready": "Live conversation is not set up here yet. You were not charged.",
+      "ended": "The conversation has ended."
     },
     "permission": {
       "title": "Before the microphone opens",
@@ -5174,6 +6090,18 @@
       "directionNotConfigured": "Not set up on this deployment",
       "speakNotConfigured": "Having answers read to you is not set up on this deployment, so the Listen buttons do not appear. Speaking to it works normally.",
       "transcribeNotConfigured": "Speaking to it is not set up on this deployment, so the microphone buttons do not appear. Having answers read to you works normally."
+    },
+    "live": {
+      "price": "{credits, plural, one {# credit} other {# credits}} a minute · up to {minutes, plural, one {# minute} other {# minutes}} a conversation",
+      "start": "Start talking",
+      "connecting": "Connecting…",
+      "ended": "The conversation has ended",
+      "endedCap": "This conversation reached its longest length. Everything said is in Chat as text; you can start another.",
+      "mute": "Mute your microphone",
+      "unmute": "Turn your microphone back on",
+      "subtitlesOn": "Show subtitles",
+      "subtitlesOff": "Hide subtitles",
+      "close": "End the conversation"
     }
   },
   "dataAnalysis": {
@@ -5600,6 +6528,12 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this project? The things in it stay where they are.",
     "removeMember": "Take out of the project",
+    "back": "Back to projects",
+    "selectPrompt": "Select a project from the list to see it here.",
+    "empty": {
+      "title": "No projects yet",
+      "description": "Create your first project on the left to see it here."
+    },
     "addToProject": {
       "button": "Add to project",
       "title": "Add to a project",
@@ -5622,6 +6556,24 @@
     "automateIt": {
       "button": "Automate it",
       "hint": "Builds an automation scoped to this project — it reads what is in it and the goal above."
+    },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "Facts, decisions, preferences — written here, read only by this project's own chats, creates, plans and agent builds.",
+      "hint": "Fed into this project's own generation. Nothing outside this project reads it."
+    },
+    "share": {
+      "heading": "Share",
+      "hint": "Anyone with this link can view this project, read-only, with no sign-in. Revoke it any time.",
+      "create": "Create link",
+      "revoke": "Revoke",
+      "public": {
+        "readOnly": "Shared with you — read-only",
+        "notFound": {
+          "heading": "This link isn't available",
+          "body": "It may have been revoked, or it never existed."
+        }
+      }
     },
     "errors": {
       "tooShort": "Give it a name first.",
@@ -5843,6 +6795,17 @@
       "posts": "Posts",
       "coding": "Code",
       "agent": "Agents"
+    },
+    "contacts": {
+      "heading": "Your business network",
+      "description": "Names Ionexa has picked up from your chats — customers, suppliers, partners — remembered automatically so every tool can use them.",
+      "empty": "No contacts remembered yet. Mention one in Chat and it starts here.",
+      "roleCustomer": "Customer",
+      "roleSupplier": "Supplier",
+      "rolePartner": "Partner",
+      "roleOther": "Contact",
+      "mentions": "mentioned {count} times",
+      "knownSince": "known since {date}"
     }
   },
   "email": {
@@ -5860,6 +6823,14 @@
       "cta": "Confirm deletion",
       "expiry": "This link expires in 1 hour. If you didn't request this, ignore this email and your account will stay exactly as it is.",
       "preheader": "Confirm permanent deletion of your Ionexa AI account."
+    },
+    "deletionScheduled": {
+      "label": "account deletion scheduled",
+      "title": "your account is scheduled for deletion",
+      "body": "Your Ionexa AI account will be permanently deleted on {date}. Until then you can cancel the deletion and keep your account exactly as it is.",
+      "cta": "Cancel deletion",
+      "footer": "If you did not request this, use the link above to cancel immediately.",
+      "preheader": "Your Ionexa AI account will be deleted on {date} — cancel any time before then."
     },
     "cancelled": {
       "label": "subscription",
@@ -6050,5 +7021,298 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "Only the newest {cap} requests were read; the figures cover those.",
     "empty": "No settled requests in this period."
+  },
+  "adminDashboard": {
+    "title": "Admin",
+    "description": "User management, costs, revenue and audit log. Owner only.",
+    "tabs": {
+      "users": "Users",
+      "costs": "Costs",
+      "revenue": "Revenue",
+      "flags": "Flags",
+      "reports": "Reports",
+      "auditLog": "Audit log"
+    },
+    "users": {
+      "search": "Search by email or name...",
+      "email": "Email",
+      "name": "Name",
+      "plan": "Plan",
+      "credits": "Credits",
+      "cost30d": "Cost (30d)",
+      "margin": "Margin",
+      "calls": "Calls",
+      "lastSignIn": "Last sign-in",
+      "suspended": "Suspended",
+      "noUsers": "No users found.",
+      "loading": "Loading users...",
+      "adjust": "Adjust",
+      "refundBtn": "Refund",
+      "suspendBtn": "Suspend",
+      "unsuspendBtn": "Reactivate"
+    },
+    "creditAdjust": {
+      "title": "Adjust credits",
+      "current": "Current credits",
+      "amount": "Amount",
+      "amountPlaceholder": "+50 to add, -10 to deduct",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why are you adjusting credits?",
+      "cancel": "Cancel",
+      "confirm": "Adjust",
+      "submitting": "Adjusting...",
+      "success": "Credits updated.",
+      "button": "Credits",
+      "errorNetwork": "Network error — please try again."
+    },
+    "refund": {
+      "title": "Refund",
+      "loadingCharges": "Loading charges...",
+      "noCharges": "No charges found for this user.",
+      "refundedPartial": "{amount} refunded",
+      "alreadyRefunded": "Refunded",
+      "selectBtn": "Select",
+      "confirmWarning": "This action will refund the customer through Stripe. It cannot be undone.",
+      "chargeAmount": "Charge amount",
+      "refundableAmount": "Refundable amount",
+      "partialRefund": "Partial refund",
+      "refundAmount": "Refund amount (cents)",
+      "amountPlaceholder": "Max {max}",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why are you issuing this refund?",
+      "back": "Back",
+      "processing": "Processing...",
+      "confirmRefund": "Confirm refund",
+      "close": "Close",
+      "errorNetwork": "Network error — please try again."
+    },
+    "suspend": {
+      "suspendTitle": "Suspend account",
+      "unsuspendTitle": "Reactivate account",
+      "suspendWarning": "This user will be blocked from using the platform. They will see a suspension notice on their next login.",
+      "unsuspendConfirm": "Are you sure you want to reactivate this account?",
+      "reason": "Reason for suspension",
+      "reasonPlaceholder": "Describe the violation or abuse…",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "suspendBtn": "Suspend account",
+      "unsuspendBtn": "Reactivate account",
+      "errorNetwork": "Network error — please try again."
+    },
+    "costs": {
+      "loading": "Loading cost data...",
+      "noData": "No cost data available.",
+      "period": "Period",
+      "days": "days",
+      "totalCost": "Total cost",
+      "totalCalls": "Total calls",
+      "callsLabel": "calls",
+      "flaggedTitle": "Users costing more than they pay",
+      "flaggedEmail": "Email",
+      "flaggedCost": "Cost",
+      "flaggedPays": "Pays",
+      "flaggedMargin": "Margin",
+      "flaggedCalls": "Calls",
+      "byProvider": "Cost by provider",
+      "provider": "Provider",
+      "cost": "Cost",
+      "share": "Share",
+      "dailyBreakdown": "Daily breakdown",
+      "date": "Date",
+      "dayTotal": "Total"
+    },
+    "revenue": {
+      "loading": "Loading revenue data...",
+      "noData": "No revenue data available.",
+      "period": "Period",
+      "days": "days",
+      "currentMrr": "Current MRR",
+      "payingSubscribers": "Paying subscribers",
+      "totalAccounts": "total accounts",
+      "newUsers": "New users",
+      "cancellations": "Cancellations",
+      "keyMetrics": "Key metrics",
+      "otherMetrics": "Other metrics",
+      "metric": "Metric",
+      "value": "Value",
+      "status": "Status",
+      "needsInput": "Owner input required",
+      "needsHistory": "Needs more history",
+      "needsHistoryDays": "Needs more daily snapshots",
+      "mrrTrend": "MRR trend",
+      "date": "Date",
+      "aiCost": "AI cost",
+      "subscribers": "Subscribers",
+      "margin": "Margin",
+      "eventsByMonth": "Subscription events by month",
+      "month": "Month",
+      "started": "Started",
+      "reactivated": "Reactivated",
+      "cancelled": "Cancelled",
+      "upgraded": "Upgraded",
+      "downgraded": "Downgraded",
+      "net": "Net"
+    },
+    "auditLog": {
+      "loading": "Loading audit log...",
+      "noEntries": "No entries yet.",
+      "time": "Time",
+      "admin": "Admin",
+      "action": "Action",
+      "target": "Target"
+    }
+  },
+  "suspended": {
+    "title": "Account suspended",
+    "message": "Your account has been suspended due to a violation of our terms of service.",
+    "reason": "Reason",
+    "contact": "If you believe this is a mistake, please contact support.",
+    "signOut": "Sign out"
+  },
+  "discordBot": {
+    "notLinked": "This server is not connected to an Ionexa account.",
+    "notAllowed": "Only members who can manage this server can use /ionexa: it uses the connected account's credits.",
+    "accountMissing": "This server's Ionexa account could not be found.",
+    "notOpen": "Ionexa in Discord is not open for this account yet.",
+    "tooMany": "Too many questions right now. Try again in a little while.",
+    "ceiling": "The connected account has reached its monthly limit.",
+    "noCredits": "The connected Ionexa account does not have enough credits (this needs about {needed}).",
+    "failed": "Ionexa could not answer right now. Nothing was charged.",
+    "cut": "(The answer was cut at its length limit.)",
+    "unknownCommand": "Unknown command.",
+    "empty": "Write a question after /ionexa ask."
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Accept payments from your customers",
+    "connect": {
+      "title": "Connect your business",
+      "description": "Connect your business through Stripe to start accepting payments. Stripe handles the verification and bank details.",
+      "button": "Connect with Stripe",
+      "resumeButton": "Continue setup",
+      "connected": "Connected",
+      "pendingVerification": "Verification pending",
+      "notConnected": "Not connected yet"
+    },
+    "balance": {
+      "title": "Balance",
+      "available": "Available",
+      "pending": "Pending",
+      "totalEarnings": "Total earnings",
+      "nothingYet": "No earnings yet"
+    },
+    "products": {
+      "title": "Products",
+      "create": "New product",
+      "name": "Product name",
+      "description": "Description",
+      "price": "Price",
+      "currency": "Currency",
+      "recurring": "Recurring payment",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "oneTime": "One-time",
+      "active": "Active",
+      "inactive": "Inactive",
+      "copyLink": "Copy payment link",
+      "linkCopied": "Link copied",
+      "deactivate": "Deactivate",
+      "noProducts": "No products yet. Create your first product to start accepting payments."
+    },
+    "transactions": {
+      "title": "Transactions",
+      "noTransactions": "No transactions yet",
+      "succeeded": "Succeeded",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "payouts": {
+      "title": "Payouts",
+      "cashout": "Withdraw to bank",
+      "amount": "Amount",
+      "requestPayout": "Request payout",
+      "noPayouts": "No payouts yet",
+      "inTransit": "In transit",
+      "paid": "Paid",
+      "failed": "Failed"
+    },
+    "dashboard": {
+      "openStripeDashboard": "Open Stripe Dashboard",
+      "overview": "Overview",
+      "productsTab": "Products",
+      "transactionsTab": "Transactions",
+      "payoutsTab": "Payouts",
+      "subscriptionsTab": "Subscriptions",
+      "couponsTab": "Coupons",
+      "invoicesTab": "Invoices"
+    },
+    "errors": {
+      "notConfigured": "Payments are not available yet.",
+      "notConnected": "Connect your business first.",
+      "chargesNotEnabled": "Your account is not yet verified for payments.",
+      "payoutsNotEnabled": "Your account is not yet verified for payouts.",
+      "insufficientBalance": "Insufficient balance for this payout.",
+      "invalidPrice": "Price must be between €1 and €999,999.",
+      "nameRequired": "Product name is required."
+    },
+    "platformFee": "Platform fee: {fee}% per transaction",
+    "cancel": "Cancel",
+    "subscriptions": {
+      "active": "Active subscriptions",
+      "churnedThisMonth": "Churned this month",
+      "total": "Total subscriptions",
+      "noSubscriptions": "No subscriptions yet",
+      "hint": "When your customers subscribe to a recurring product, their subscriptions will appear here.",
+      "unknownProduct": "Unknown product",
+      "renewsOn": "Renews on {date}",
+      "cancelling": "Cancelling",
+      "cancel": "Cancel",
+      "cancelledOk": "Subscription set to cancel at period end",
+      "status": {
+        "active": "Active",
+        "trialing": "Trial",
+        "past_due": "Past due",
+        "canceled": "Canceled",
+        "paused": "Paused",
+        "unpaid": "Unpaid"
+      }
+    },
+    "analytics": {
+      "thisMonthRevenue": "Revenue this month",
+      "vsLastMonth": "vs last month",
+      "mrr": "Monthly recurring revenue",
+      "totalRevenue": "Total revenue",
+      "transactions": "Transactions",
+      "avgOrderValue": "Avg. order value",
+      "platformFees": "Platform fees (this month)",
+      "topProducts": "Top products by revenue",
+      "sales": "sales"
+    },
+    "coupons": {
+      "createTitle": "Create coupon",
+      "code": "Code",
+      "percentOff": "% off",
+      "once": "Once",
+      "repeating": "Repeating",
+      "forever": "Forever",
+      "create": "Create",
+      "created": "Coupon created",
+      "none": "No coupons yet",
+      "used": "used",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "invoices": {
+      "createTitle": "Send invoice",
+      "customerEmail": "Customer email",
+      "description": "Description",
+      "descriptionPlaceholder": "Consulting services",
+      "amount": "Amount",
+      "sendInvoice": "Send",
+      "sent": "Invoice sent",
+      "none": "No invoices yet",
+      "view": "View"
+    }
   }
 }

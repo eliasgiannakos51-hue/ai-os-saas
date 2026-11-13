@@ -3,7 +3,8 @@
  * CAN all-tools.test.mjs SEE ALL TOOLS DRIFT FROM THE DESIGN?
  *
  * Rewritten 2026-10-24 for the owner's "ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ" round:
- * 24 tiles in 6 groups (Learn carrying only small jobs), a tile that is not
+ * 24 tiles in 6 groups (Learn carrying only small jobs; 25 since 3D joined,
+ * 2026-10-31), a tile that is not
  * ready still drawn with a «Σύντομα» mark instead of vanishing, its address
  * rendering the Coming Soon shell instead of the real tool, the small
  * ready-made jobs (quick-jobs.ts) each pointing at the param their target
@@ -49,14 +50,14 @@ const MUTANTS = [
     file: GROUPS,
     from: '  { name: "automations", group: "runAlone", href: "/dashboard/automation", ready: true },\n',
     to: "",
-    expect: "the registry is exactly the owner's 24",
+    expect: "the registry is exactly the owner's 25",
   },
   {
     name: "a tile moves to another group than the owner put it in",
     file: GROUPS,
     from: '{ name: "agents", group: "runAlone"',
     to: '{ name: "agents", group: "organise"',
-    expect: "the registry is exactly the owner's 24",
+    expect: "the registry is exactly the owner's 25",
   },
   {
     name: "Learn gets a big tile of its own",

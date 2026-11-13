@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getGitHubAccessToken } from "@/lib/github/store";
+import { authorizeRepoOperation } from "@/lib/github/access";
 import { createBranchCommitAndPr } from "@/lib/github/client";
+import { isValidBranchName, isValidRepoPath } from "@/lib/github/validate";
 import type { GitHubDiffFile } from "@/lib/github/types";
 
 export const dynamic = "force-dynamic";
+
+/** One pull request's worth of files; the Coding screen sends what it shows. */
+const MAX_FILES = 100;
+
+function parseFiles(raw: unknown): GitHubDiffFile[] | null {
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_FILES) return null;
+  const files: GitHubDiffFile[] = [];
+  for (const f of raw as Array<{ path?: unknown; content?: unknown }>) {
+    if (!f || !isValidRepoPath(f.path) || typeof f.content !== "string") return null;
+    files.push({ path: f.path, content: f.content });
+  }
+  return files;
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -17,16 +31,26 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json().catch(() => null)) as {
-    repo?: string;
-    baseBranch?: string;
-    newBranch?: string;
-    files?: GitHubDiffFile[];
-    commitMessage?: string;
-    prTitle?: string;
-    prBody?: string;
+    repo?: unknown;
+    baseBranch?: unknown;
+    newBranch?: unknown;
+    files?: unknown;
+    commitMessage?: unknown;
+    prTitle?: unknown;
+    prBody?: unknown;
   } | null;
 
-  if (!body?.repo || !body.baseBranch || !body.newBranch || !body.files?.length || !body.commitMessage || !body.prTitle) {
+  const files = parseFiles(body?.files);
+  if (
+    !body?.repo ||
+    !isValidBranchName(body.baseBranch) ||
+    !isValidBranchName(body.newBranch) ||
+    !files ||
+    typeof body.commitMessage !== "string" ||
+    !body.commitMessage ||
+    typeof body.prTitle !== "string" ||
+    !body.prTitle
+  ) {
     return NextResponse.json({ ok: false, error: "Missing required fields." }, { status: 400 });
   }
 
@@ -34,26 +58,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Cannot commit directly to the base branch." }, { status: 400 });
   }
 
-  const token = await getGitHubAccessToken(user.id);
-  if (!token.ok || !token.installationId) {
-    return NextResponse.json({ ok: false, reason: "not_connected" }, { status: 403 });
+  const access = await authorizeRepoOperation(user.id, body.repo, "commit");
+  if (!access.ok) {
+    return NextResponse.json({ ok: false, reason: access.reason }, { status: access.status });
   }
 
-  const [owner, name] = body.repo.split("/", 2);
-  if (!owner || !name) {
-    return NextResponse.json({ ok: false, error: "Invalid repo format." }, { status: 400 });
-  }
-
-  const result = await createBranchCommitAndPr({
-    installationId: token.installationId,
-    owner,
-    repo: name,
+  const result = await createBranchCommitAndPr(access.grant, {
     baseBranch: body.baseBranch,
     newBranch: body.newBranch,
-    files: body.files,
+    files,
     commitMessage: body.commitMessage,
     prTitle: body.prTitle,
-    prBody: body.prBody ?? "",
+    prBody: typeof body.prBody === "string" ? body.prBody : "",
   });
 
   if (!result.ok) {

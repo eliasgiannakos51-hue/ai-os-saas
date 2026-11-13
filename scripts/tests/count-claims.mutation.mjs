@@ -57,11 +57,29 @@ const MUTANTS = [
     // when /dashboard/my-stuff did.
     // ...and 2026-10-24 (53 -> 61) when the final All tools grid's eight
     // Coming Soon pages (app-builder, audio, avatars, editing, films,
-    // iowork, translate, video-studio) landed.
+    // iowork, translate, video-studio) landed, and 2026-10-31 (61 -> 62)
+    // when /dashboard/3d did (the owner's "23. 3D: ΝΕΟ ΕΡΓΑΛΕΙΟ", the
+    // 25th All tools tile), and 2026-10-31 again (62 -> 63) when
+    // /dashboard/sheets did (his "28. SHEETS: ΠΙΝΑΚΕΣ ΜΕ ΠΡΑΓΜΑΤΙΚΟΥΣ
+    // ΤΥΠΟΥΣ", Κομμάτι 1) — a tool with no All tools tile at all, which
+    // is why that round found this anchor through the gate rather than
+    // through the grid.
+    // ...and 2026-10-31 a third time (63 -> 64) when /dashboard/skills
+    // did (his «29. SKILLS: ΤΟ ΜΑΘΑΙΝΕΙΣ ΜΙΑ ΦΟΡΑ», Κομμάτι 1) — the
+    // same shape as Sheets: no All tools tile, found through the gate.
     // The anchor has to move with the number it is about, which is the
     // same drift this mutation exists to catch, one level up.
-    from: "                    61 pages instead of 8, and the four components below",
-    to: "                    44 pages instead of 8, and the four components below",
+    // 64 -> 65 on 2026-11-04, for the third time this anchor has moved and
+    // for the same reason: /dashboard/admin landed (οδηγία 42 Κομμάτι 1) and
+    // the marker followed it. Worth saying that the DRIFT WAS CAUGHT BY THE
+    // SURVEY, not by this suite — editing the sentence breaks the anchor, and
+    // mutation-anchors is the gate that reports it, two gates further down a
+    // chain that stops at the first red. Fixing count-claims and pushing it
+    // without running the mutation suites is how a broken anchor ships.
+    // 65 -> 66 on 2026-11-07, agent/discord: /dashboard/discord landed.
+    // 66 -> 67 on 2026-11-11: /dashboard/payments landed.
+    from: "                    67 pages instead of 8, and the four components below",
+    to: "                    45 pages instead of 8, and the four components below",
     expect: "every marker's number is also written in the sentence it vouches for",
   },
   {

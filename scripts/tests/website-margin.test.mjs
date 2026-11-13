@@ -11,8 +11,10 @@
 //     3. generateWebsiteHtml       (+ up to 2 continuation rounds)
 //     4. reviewWebsiteContentSafety
 //
-// Both library functions take an optional `costs?: CostAccumulator`. The
-// WORKER passes one and settles on measured usage, so calls 3 and 4 hit 4x
+// At the time, both library functions took an optional
+// `costs?: CostAccumulator` (reviewWebsiteContentSafety's own became
+// required on 2026-11-07, matching lead-classification.ts). The WORKER
+// passed one and settled on measured usage, so calls 3 and 4 hit 4x
 // exactly. The START route passed NEITHER, so calls 1 and 2 were:
 //
 //   - never measured   (no usage recorded anywhere)
@@ -176,7 +178,11 @@ const STAGES = [
   ["security_review", "src/lib/website-security-review.ts"],
 ];
 for (const [stage, file] of STAGES) {
-  checkTrue(`${stage} is recorded in ${file}`, new RegExp(`costs\\?\\.record\\("${stage}"`).test(readFileSync(file, "utf8")));
+  // costs became a REQUIRED parameter on reviewWebsiteContentSafety
+  // (agent/mistral, 2026-11-07, once userId had to follow it), so its own
+  // `costs.record(...)` lost the `?.` that clarification.ts and
+  // website-builder.ts still carry; the pattern accepts either.
+  checkTrue(`${stage} is recorded in ${file}`, new RegExp(`costs\\??\\.record\\("${stage}"`).test(readFileSync(file, "utf8")));
 }
 // The two start-route stages must be settled by the start route, and the
 // worker's by the worker — no stage may be orphaned between them.

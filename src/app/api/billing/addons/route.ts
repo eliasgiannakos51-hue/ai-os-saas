@@ -17,6 +17,7 @@ import {
   type AddonSlug,
 } from "@/lib/billing/addons";
 import { loadAddons } from "@/lib/billing/addon-store";
+import { currentPeriodEndIso } from "@/lib/billing/subscription-period";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,11 @@ export const dynamic = "force-dynamic";
  * a customer reads as "this product is broken" rather than "this is not
  * set up".
  *
- * DELETE cancels a recurring add-on. It removes the Stripe subscription
- * item and marks the row cancelled with an expiry at the end of the paid
- * period — the entitlement survives until then, because taking it away on
- * click would be keeping their money and their agents.
+ * DELETE cancels a recurring add-on. It sets the add-on's own Stripe
+ * subscription to cancel at period end and marks the row cancelled with an
+ * expiry at the end of the paid period — the entitlement survives until
+ * then, because taking it away on click would be keeping their money and
+ * their agents.
  */
 export async function GET() {
   const supabase = await createClient();
@@ -184,34 +186,39 @@ export async function DELETE(request: Request) {
     if (!rows || rows.length === 0) return NextResponse.json({ error: "not_owned" }, { status: 404 });
 
     const stripe = createStripeClient();
-    let periodEnd: string | null = null;
+    const customerId =
+      typeof user.user_metadata?.stripe_customer_id === "string" ? user.user_metadata.stripe_customer_id : null;
+    // A subscription already matched to one row is not matched to another,
+    // so two held agents_5 add-ons are two cancellations, not one twice.
+    const claimed = new Set<string>();
+    // Row id -> when its paid period ends (null: it has already ended).
+    const ends = new Map<string, string | null>();
 
     for (const row of rows) {
       let itemId = row.stripe_subscription_item_id as string | null;
+      let subscriptionId: string | null = null;
 
       // A NULL ITEM ID ON A RECURRING ADD-ON IS THE SAME DEFECT AS A
       // STRIPE FAILURE, AND IT USED TO `continue`.
       //
       // The handler refuses one-off add-ons at the top, so by here the
-      // slug is always monthly — and the table's own comment says a
-      // recurring add-on HAS a subscription item and "cancelling it means
-      // removing that item in Stripe". So a null here is never "nothing
-      // to remove": it is the link being lost, and skipping it fell
-      // straight through to the update below, marking the row cancelled
-      // while the subscription item lived on. The product stops
-      // delivering and the card goes on paying — which is word for word
-      // the outcome the comment forty lines down was written to prevent,
-      // closed for one path and left open for the other, in the same loop.
+      // slug is always monthly, and a recurring add-on HAS a subscription
+      // of its own. So a null here is never "nothing to stop": it is the
+      // link being lost, and skipping it fell straight through to the
+      // update below, marking the row cancelled while the subscription
+      // lived on. The product stops delivering and the card goes on
+      // paying.
       //
       // HOW IT GETS LOST: api/webhooks/stripe reads the item out of the
       // session's subscription inside a try, and on failure logs and
       // inserts the row anyway with null. That is the right call for the
       // entitlement — the customer has paid — and it leaves this to
-      // recover, which it can: the same lookup usually succeeds now.
+      // recover, which it can: the add-on's own subscription is found
+      // among the customer's by its metadata.
       if (!itemId) {
-        itemId = await recoverSubscriptionItemId(stripe, user, slug);
-        if (!itemId) {
-          logApiError("/api/billing/addons", new Error("recurring add-on has no resolvable subscription item"), {
+        const found = await recoverAddonSubscription(stripe, { userId: user.id, customerId }, slug, claimed);
+        if (!found) {
+          logApiError("/api/billing/addons", new Error("recurring add-on has no resolvable subscription"), {
             stage: "recover_item",
             slug,
             rowId: row.id,
@@ -225,36 +232,66 @@ export async function DELETE(request: Request) {
             { status: 502 }
           );
         }
+        itemId = found.itemId;
+        subscriptionId = found.subscriptionId;
         // Write it back, so the next cancellation does not have to
         // rediscover it and so the row stops lying about what it knows.
         await admin.from("account_addons").update({ stripe_subscription_item_id: itemId }).eq("id", row.id);
       }
 
       try {
-        // Removed at PERIOD END rather than immediately, so the customer
-        // keeps what they have paid for. Stripe's own proration is left
-        // alone: we are not issuing a refund, we are stopping the next
-        // charge.
-        const item = await stripe.subscriptionItems.retrieve(itemId);
-        const subscription = await stripe.subscriptions.retrieve(String(item.subscription));
-        const end = (subscription as unknown as { current_period_end?: number }).current_period_end;
-        if (typeof end === "number") periodEnd = new Date(end * 1000).toISOString();
-        await stripe.subscriptionItems.del(itemId);
+        // THROUGH THE ADD-ON'S OWN SUBSCRIPTION (2026-11-05, ΑΣ-4.17).
+        // This deleted the subscription ITEM, and the item is the only one
+        // on the add-on's subscription — which Stripe refuses, so the
+        // cancel never worked. The add-on's subscription is set to cancel
+        // at the end of the period already paid for: no refund, no next
+        // charge, and the entitlement lasts until that end.
+        if (!subscriptionId) {
+          const item = await stripe.subscriptionItems.retrieve(itemId);
+          subscriptionId = String(item.subscription);
+        }
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        // ONLY THAT SUBSCRIPTION. An item that leads anywhere else — the
+        // plan's subscription above all — is refused, never cancelled.
+        if (subscription.metadata?.addon_slug !== slug || subscription.metadata?.supabase_user_id !== user.id) {
+          logApiError("/api/billing/addons", new Error("add-on item is not on the add-on's own subscription"), {
+            stage: "verify_subscription",
+            slug,
+            rowId: row.id,
+          });
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Could not find the billing line for this add-on, so it has been left active rather than cancelled here and charged in Stripe. Nothing has changed — please contact support.",
+            },
+            { status: 502 }
+          );
+        }
+        claimed.add(subscription.id);
+        if (subscription.status === "canceled" || subscription.status === "incomplete_expired") {
+          ends.set(row.id, null);
+          continue;
+        }
+        const updated = subscription.cancel_at_period_end
+          ? subscription
+          : await stripe.subscriptions.update(subscription.id, { cancel_at_period_end: true });
+        ends.set(row.id, currentPeriodEndIso(updated));
       } catch (stripeError) {
         logApiError("/api/billing/addons", stripeError, { stage: "stripe_cancel", slug });
         // A STRIPE FAILURE MUST NOT BE FOLLOWED BY A LOCAL CANCELLATION.
         //
         // This used to log and fall through to the update below, so the
-        // row said "cancelled" while the subscription item lived on: the
+        // row said "cancelled" while the subscription lived on: the
         // product stopped delivering the add-on and the card went on
         // paying for it every month. That is the wrong direction to fail
         // in — the two states disagree, and the one that costs money is
         // the one that kept running.
         //
-        // The exception is an item Stripe says is already gone. A 404
-        // there means the thing this call exists to remove is removed,
-        // and refusing on it would leave a row stuck "active" forever
-        // with nothing behind it.
+        // The exception is something Stripe says is already gone. A 404
+        // there means the thing this call exists to stop is stopped, and
+        // refusing on it would leave a row stuck "active" forever with
+        // nothing behind it.
         const code = (stripeError as { code?: string; statusCode?: number })?.code;
         const status = (stripeError as { statusCode?: number })?.statusCode;
         const alreadyGone = code === "resource_missing" || status === 404;
@@ -268,24 +305,33 @@ export async function DELETE(request: Request) {
             { status: 502 }
           );
         }
+        ends.set(row.id, null);
       }
     }
 
-    const { error: markError } = await admin
-      .from("account_addons")
-      .update({
-        status: "cancelled",
-        cancelled_at: new Date().toISOString(),
-        // NO PERIOD END MEANS IT ENDS NOW. An expiry we could not read is
-        // not an excuse to keep granting something nobody is being billed
-        // for any more.
-        expires_at: periodEnd,
-      })
-      .eq("user_id", user.id)
-      .eq("addon_slug", slug)
-      .eq("status", "active");
-    if (markError) throw markError;
+    // Each row ends with ITS subscription's paid period. A refusal above
+    // returned before any row was marked; a subscription already set to
+    // cancel is also caught by the webhook (syncAddonSubscription), which
+    // marks the row the same way.
+    const cancelledAt = new Date().toISOString();
+    for (const row of rows) {
+      const { error: markError } = await admin
+        .from("account_addons")
+        .update({
+          status: "cancelled",
+          cancelled_at: cancelledAt,
+          // NO PERIOD END MEANS IT ENDS NOW. An expiry we could not read is
+          // not an excuse to keep granting something nobody is being billed
+          // for any more.
+          expires_at: ends.get(row.id) ?? null,
+        })
+        .eq("id", row.id)
+        .eq("user_id", user.id)
+        .eq("status", "active");
+      if (markError) throw markError;
+    }
 
+    const periodEnd = [...ends.values()].filter((v): v is string => typeof v === "string").sort().pop() ?? null;
     return NextResponse.json({ ok: true, expiresAt: periodEnd });
   } catch (err) {
     logApiError("/api/billing/addons", err, { stage: "cancel" });
@@ -294,33 +340,43 @@ export async function DELETE(request: Request) {
 }
 
 /**
- * The subscription item for a recurring add-on, found the way the webhook
- * finds it: retrieve the account's subscription and match the line whose
- * price is this add-on's.
+ * The add-on's own subscription, found among the customer's by the
+ * metadata its checkout wrote (api/billing/addons POST:
+ * subscription_data.metadata.addon_slug and supabase_user_id).
  *
- * WHY IT IS HERE AND NOT ONLY IN THE WEBHOOK. The webhook does this once,
- * inside a try, at the moment of purchase — and when that call fails the
- * row is written with a null item. This is the same lookup run later,
- * when it usually succeeds, so a transient Stripe error at purchase time
- * does not become an add-on that can never be cancelled.
+ * WHY IT IS HERE AND NOT ONLY IN THE WEBHOOK. The webhook reads the item
+ * once, inside a try, at the moment of purchase — and when that call fails
+ * the row is written with a null item. This is the lookup run later, when
+ * it usually succeeds, so a transient Stripe error at purchase time does
+ * not become an add-on that can never be cancelled.
+ *
+ * IT USED TO SEARCH THE PLAN'S SUBSCRIPTION (user_metadata.
+ * stripe_subscription_id), which never holds an add-on line, so it found
+ * nothing and every such add-on was stuck (2026-11-05, ΑΣ-4.17).
  *
  * Returns null rather than throwing: the caller's job is to REFUSE on
  * null, and an exception here would land in the outer catch and be
  * reported as `cancel_failed` — a 500 that reads like our bug rather than
  * a 502 that tells the user their billing is untouched.
  */
-async function recoverSubscriptionItemId(
+async function recoverAddonSubscription(
   stripe: ReturnType<typeof createStripeClient>,
-  user: { user_metadata?: Record<string, unknown> },
-  slug: AddonSlug
-): Promise<string | null> {
+  owner: { userId: string; customerId: string | null },
+  slug: AddonSlug,
+  claimed: ReadonlySet<string>
+): Promise<{ subscriptionId: string; itemId: string } | null> {
   try {
-    const subscriptionId = user.user_metadata?.stripe_subscription_id;
-    if (typeof subscriptionId !== "string" || !subscriptionId) return null;
+    if (!owner.customerId) return null;
     const priceId = process.env[ADDONS[slug].priceEnvVar];
-    if (!priceId) return null;
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    return subscription.items.data.find((i) => i.price.id === priceId)?.id ?? null;
+    const list = await stripe.subscriptions.list({ customer: owner.customerId, status: "all", limit: 100 });
+    for (const subscription of list.data) {
+      if (claimed.has(subscription.id)) continue;
+      if (subscription.metadata?.addon_slug !== slug || subscription.metadata?.supabase_user_id !== owner.userId) continue;
+      if (subscription.status === "canceled" || subscription.status === "incomplete_expired") continue;
+      const item = subscription.items.data.find((i) => !priceId || i.price.id === priceId);
+      if (item) return { subscriptionId: subscription.id, itemId: item.id };
+    }
+    return null;
   } catch (err) {
     logApiError("/api/billing/addons", err, { stage: "recover_item_lookup", slug });
     return null;

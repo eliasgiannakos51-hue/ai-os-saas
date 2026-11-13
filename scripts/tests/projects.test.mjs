@@ -60,6 +60,10 @@ const ROUTE = "src/app/api/projects/route.ts";
 const MEMBERS_ROUTE = "src/app/api/projects/[id]/members/route.ts";
 const LIST_PAGE = "src/app/dashboard/projects/page.tsx";
 const DETAIL_PAGE = "src/app/dashboard/projects/[id]/page.tsx";
+// «2. PROJECTS: ΝΕΑ ΟΘΟΝΗ» Κομμάτι 1 (2026-10-28) moved the detail fetch
+// out of DETAIL_PAGE (now a redirect into LIST_PAGE's own ?id=) and into
+// this one function, shared by both routes.
+const PROJECT_DETAIL_LOADER = "src/lib/projects/load-project-detail.ts";
 const DETAIL_COMPONENT = "src/components/projects/project-detail.tsx";
 const CHAT_PAGE = "src/app/dashboard/chat/page.tsx";
 const CHAT_WORKSPACE = "src/components/chat/chat-workspace.tsx";
@@ -87,12 +91,13 @@ const COLOURS_MIGRATION = "supabase/migrations/20261025000000_projects_colours.s
 const project = await loadTs(PROJECT_TS);
 const {
   IN_PROJECT, PROJECTS_TABLE, PROJECT_STATUSES, MAX_MEMBERS,
-  MAX_NAME_CHARS, MIN_NAME_CHARS, MAX_GOAL_CHARS,
-  checkProjectName, clampGoal, isProjectStatus, isProjectMemberTable,
+  MAX_NAME_CHARS, MIN_NAME_CHARS, MAX_GOAL_CHARS, MAX_NOTES_CHARS,
+  checkProjectName, clampGoal, clampNotes, isProjectStatus, isProjectMemberTable,
   projectMembers, projectModuleTables, projectContextModules, projectMemberTables,
   isUuid, projectEdgeFilter,
   ROWS_PER_MODULE_UNSCOPED, UNSCOPED_MODULE_COUNT, CONTEXT_ROW_BUDGET, rowsPerModuleInProject,
   isHexColour, checkColour,
+  PROJECT_KIND_TABLES, projectKindCounts,
 } = project;
 
 ok(`ten locales were read (${LOCALES.length})`, LOCALES.length === 10);
@@ -107,6 +112,8 @@ ok("an unnamed project is refused, a long one is refused, a normal one is kept",
   checkProjectName("  Launch   the  shop ").name === "Launch the shop");
 ok("bounds are sane", MIN_NAME_CHARS >= 2 && MAX_NAME_CHARS >= 60 && MAX_GOAL_CHARS >= 500);
 ok("a goal is clamped, never rejected", clampGoal("g".repeat(MAX_GOAL_CHARS + 100)).length === MAX_GOAL_CHARS && clampGoal(null) === "");
+ok("notes are clamped too, longer than a goal, never rejected",
+  clampNotes("n".repeat(MAX_NOTES_CHARS + 500)).length === MAX_NOTES_CHARS && clampNotes(null) === "" && MAX_NOTES_CHARS > MAX_GOAL_CHARS);
 ok(`the relationship type is one string (${IN_PROJECT}) and the table is one string (${PROJECTS_TABLE})`,
   IN_PROJECT === "in_project" && PROJECTS_TABLE === "projects");
 ok(`a project is capped at ${MAX_MEMBERS} members`, MAX_MEMBERS >= 50 && MAX_MEMBERS <= 1000);
@@ -223,8 +230,18 @@ console.log("\n== 3. ONE ACCOUNT'S FOLDER IS NOT ANOTHER'S ==");
 
   const listPage = stripComments(readFileSync(LIST_PAGE, "utf8"));
   const detailPage = stripComments(readFileSync(DETAIL_PAGE, "utf8"));
-  ok("the pages read through the person's own client", !/createAdminClient/.test(listPage + detailPage));
-  ok("the project page answers 404 rather than showing somebody else's", /notFound\(\)/.test(detailPage));
+  const loader = stripComments(readFileSync(PROJECT_DETAIL_LOADER, "utf8"));
+  ok("the pages read through the person's own client", !/createAdminClient/.test(listPage + detailPage + loader));
+  // Since Κομμάτι 1 (2026-10-28) the old route-level notFound() moved into
+  // this: the loader's own "projects" read is RLS-scoped (.eq("id", …),
+  // no .eq("user_id", …) needed) and answers null, never a thrown error or
+  // somebody else's row, for an id that is not the caller's — and the
+  // screen never even reaches the loader with one, see the next check.
+  ok("the detail loader answers null, not somebody else's row, for an id that is not the caller's",
+    /\.from\("projects"\)[\s\S]{0,120}\.eq\("id", projectId\)[\s\S]{0,60}\.maybeSingle\(\)/.test(loader) &&
+    /if \(!project\) return null;/.test(loader));
+  ok("...and the screen only ever hands the loader an id its OWN rls-scoped list already proved is the caller's",
+    /projects\.some\(\(p\) => p\.id === requestedId\)/.test(listPage));
 }
 
 console.log("\n== 4. DELETING THE FOLDER DOES NOT DELETE THE CONTENTS ==");
@@ -426,7 +443,7 @@ console.log("\n== 6b. THE BUDGET IS SPENT, NOT DECLARED ==");
   ok("...divided by the modules the chat actually reads",
     /rowsPerModuleInProject\(idsByTable\.size\)/.test(ctx));
   ok("the screen divides by the same thing the prompt does",
-    /rowsPerModuleInProject\(projectContextModules\(members\)\.length\)/.test(readFileSync(DETAIL_PAGE, "utf8")) &&
+    /rowsPerModuleInProject\(projectContextModules\(members\)\.length\)/.test(readFileSync(PROJECT_DETAIL_LOADER, "utf8")) &&
     /projectContextModules/.test(ctx));
   ok("...and that is the classifier tables only, because those are the ones scanned",
     projectContextModules([{ table: "ideas", id: "a" }, { table: "user_files", id: "b" }, { table: "chat_conversations", id: "c" }]).length === 1 &&
@@ -467,10 +484,86 @@ console.log("\n== 6b. THE BUDGET IS SPENT, NOT DECLARED ==");
     ok("...and the builder throws rather than concatenating it", threw);
   }
   ok("both readers of a project's edges go through that builder",
-    /\.or\(projectEdgeFilter\(/.test(readFileSync(DETAIL_PAGE, "utf8")) && /\.or\(projectEdgeFilter\(projectId\)\)/.test(ctx));
+    /\.or\(projectEdgeFilter\(/.test(readFileSync(PROJECT_DETAIL_LOADER, "utf8")) && /\.or\(projectEdgeFilter\(projectId\)\)/.test(ctx));
   ok("the scope read is scoped to the person explicitly, not left to RLS",
     /\.eq\("user_id", userId\)[\s\S]{0,200}\.eq\("relationship_type", IN_PROJECT\)/.test(ctx),
     "two job handlers call getUserFullContext with the service-role client");
+}
+
+console.log("\n== 6c. «What Ionexa knows» (Κομμάτι 4) ACTUALLY REACHES THE PROMPT ==");
+{
+  // NOT A REGEX OVER THE SOURCE — the REAL getUserFullContext and the
+  // REAL two prompt-serializer functions, executed, against a small
+  // generic stand-in for the Supabase query-builder chain. Every other
+  // check in this section reads the source text; this one runs it, which
+  // is the only way to prove the notes column actually arrives at
+  // context.projectNotes and from there into the rendered prompt text,
+  // rather than merely that the code reads as though it should.
+  //
+  // The stand-in does not attempt to be a real Supabase client: it is a
+  // thenable that answers every `.from(table)...` chain with an empty
+  // list (or null, for a `.maybeSingle()` chain) UNLESS the table is
+  // "entity_links" or "projects", the two this test cares about. That is
+  // enough to let getUserFullContext's other ~13 module scans, its
+  // missions read and its energy check-in read all resolve to "nothing"
+  // without throwing, so the one thing under test — the notes — is not
+  // drowned in fixture work it does not need.
+  const uc = await loadTs(USER_CONTEXT);
+  function fakeSupabase({ entityLinks = [], notes } = {}) {
+    function builder(table) {
+      let single = false;
+      let headCount = null;
+      const api = {
+        select(_cols, opts) { if (opts?.head) headCount = 0; return api; },
+        eq() { return api; },
+        in() { return api; },
+        or() { return api; },
+        gte() { return api; },
+        order() { return api; },
+        limit() { return api; },
+        maybeSingle() { single = true; return api; },
+        then(resolve) {
+          if (headCount !== null) return resolve({ count: headCount, error: null });
+          if (table === "entity_links") return resolve({ data: entityLinks, error: null });
+          if (table === "projects") return resolve({ data: single && notes !== undefined ? { notes } : null, error: null });
+          return resolve(single ? { data: null, error: null } : { data: [], error: null });
+        },
+      };
+      return api;
+    }
+    return { from: builder };
+  }
+
+  const PROJECT_ID = "33333333-3333-3333-3333-333333333333";
+  const USER_ID = "44444444-4444-4444-4444-444444444444";
+  const NOTES_TEXT = "Το κοινό-στόχος είναι γυναίκες 25-40 στην Αθήνα.";
+
+  // A — a project with a paragraph of notes and NOTHING ELSE added to it
+  // yet (zero entity_links rows): the exact "just created it, wrote
+  // notes, hasn't added anything" shape. Before this round's own fix to
+  // loadProjectScope, idsByTable.size === 0 alone returned null here and
+  // the notes would never have reached the prompt for this, the single
+  // most ordinary way to use the field.
+  const withNotes = await uc.getUserFullContext(fakeSupabase({ entityLinks: [], notes: NOTES_TEXT }), USER_ID, PROJECT_ID);
+  ok("a project with notes but no members still carries them", withNotes.projectNotes === NOTES_TEXT, String(withNotes.projectNotes));
+
+  const greek = uc.buildUserContextPromptAdditionGreek(withNotes);
+  const english = uc.buildUserContextPromptAdditionEnglish(withNotes);
+  ok("...rendered into the Greek prompt, verbatim", greek.includes("Σημειώσεις που έγραψε ο χρήστης για αυτό το Project:") && greek.includes(NOTES_TEXT), greek.slice(0, 300));
+  ok("...and into the English prompt, verbatim", english.includes("Notes the user wrote for this project:") && english.includes(NOTES_TEXT), english.slice(0, 300));
+
+  // B — nothing written: null column, no members either. Scope must come
+  // back null exactly as before this round (the old behaviour, kept).
+  const empty = await uc.getUserFullContext(fakeSupabase({ entityLinks: [], notes: null }), USER_ID, PROJECT_ID);
+  ok("a project with nothing written has no notes in the context", empty.projectNotes === null);
+  ok("...and the serializers print no notes section for it, in either language",
+    !uc.buildUserContextPromptAdditionGreek(empty).includes("Σημειώσεις που έγραψε") &&
+    !uc.buildUserContextPromptAdditionEnglish(empty).includes("Notes the user wrote"));
+
+  // C — no project at all (the ordinary, unscoped chat): never reads the
+  // projects table for notes, never prints the section.
+  const unscoped = await uc.getUserFullContext(fakeSupabase({ entityLinks: [], notes: NOTES_TEXT }), USER_ID, null);
+  ok("outside a project, notes never reach the context even if the fixture has some", unscoped.projectNotes === null);
 }
 
 console.log("\n== 7. THE PAGES ==");
@@ -484,15 +577,25 @@ console.log("\n== 7. THE PAGES ==");
   }
   ok("the sections are views over ONE member list, not seven queries",
     (detail.match(/members\.filter\(/g) ?? []).length >= 4 && !/await fetch\([^)]*sections/.test(detail));
+  // Κομμάτι 5 ("Recent, τελευταία δουλειά, πατήσιμη") — the activity
+  // section opens through the SAME openHref() the Tasks/Files/Agents/
+  // Results sections above already use, not a second link-building path.
+  {
+    const activityBlock = detail.slice(detail.indexOf('aria-label={t("sections.activity")}'), detail.indexOf('aria-label={t("sections.activity")}') + 900);
+    ok("the activity section (\"Recent\") opens through openHref, not a second address-building path",
+      activityBlock.includes("openHref(member)") && activityBlock.includes('data-testid="project-recent-open"'));
+  }
   ok("the list page names itself through the nav key", /pageTitle\("sidebar\.items\.projects"\)/.test(readFileSync(LIST_PAGE, "utf8")));
   for (const l of LOCALES) {
     ok(`${l}: the nav name is the page heading`, lookup(messages[l], "sidebar.items.projects") === lookup(messages[l], "projects.title"));
   }
   ok("the row is drawn under Organise", /"\/dashboard\/projects"/.test(readFileSync("src/lib/sidebar-nav.ts", "utf8")));
   const tips = await loadTs("src/lib/help-tips.ts");
-  ok("both screens carry a help tip, and they say different things",
-    tips.HELP_TIPS.some((t) => t.id === "projects") && tips.HELP_TIPS.some((t) => t.id === "projectDetail") &&
-    lookup(messages.en, "help.projects.doesNot") !== lookup(messages.en, "help.projectDetail.doesNot"));
+  // Since Κομμάτι 1 (2026-10-28) this is one screen, not two — "projects"
+  // and "projectDetail" merged into the one entry projects-shell.tsx now
+  // mounts, so there is one tip to carry, not two to tell apart.
+  ok("the merged screen carries its own help tip",
+    tips.HELP_TIPS.some((t) => t.id === "projects") && !tips.HELP_TIPS.some((t) => t.id === "projectDetail"));
   ok("en: the tip names the absence this feature is built on", /does not pull things in by itself/i.test(lookup(messages.en, "help.projects.doesNot")));
   ok("the member count shown is the edge count, with no expansion in the page",
     /counts\.set\(id, \(counts\.get\(id\) \?\? 0\) \+ 1\)/.test(listPage));
@@ -593,6 +696,47 @@ console.log("\n== 8. ADD TO PROJECT, EVERYWHERE (owner's message 2026-10-22, poi
     !/createAdminClient/.test(updateRoute) && /\.eq\("user_id", user\.id\)/.test(updateRoute));
   ok("an invalid colour is refused with 400, not passed through to the database's own CHECK",
     (updateRoute.match(/if \(!verdict\.ok\) return NextResponse\.json\(\{ error: "invalid_colour" \}, \{ status: 400 \}\);/g) ?? []).length === 2);
+}
+
+console.log("\n== 9. Κομμάτι 3: the five count boxes read the SAME tables as My Stuff ==");
+{
+  const librarySrc = await loadTs("src/lib/library/sources.ts");
+  const myStuffSrc = await loadTs("src/lib/my-stuff/sources.ts");
+  const byKind = Object.fromEntries(PROJECT_KIND_TABLES.map((e) => [e.kind, e.table]));
+
+  ok("five kinds, no more and no fewer — the owner's own list", PROJECT_KIND_TABLES.length === 5);
+  ok("site reads the SAME table Library's own 'site' entry does",
+    byKind.site === librarySrc.LIBRARY_SOURCES.find((s) => s.kind === "site").table);
+  ok("posts reads the SAME table Library's own 'posts' entry does",
+    byKind.posts === librarySrc.LIBRARY_SOURCES.find((s) => s.kind === "posts").table);
+  ok("documents reads the SAME table Library's own 'document' entry does",
+    byKind.documents === librarySrc.LIBRARY_SOURCES.find((s) => s.kind === "document").table);
+  ok("images reads the SAME table My Stuff's own 'images' entry does",
+    byKind.images === myStuffSrc.MY_STUFF_SOURCES.find((s) => s.kind === "images").table);
+  // video HAS no My Stuff/Library entry to check against — Video (task
+  // #90-97) has no generator yet, so this just pins the one real table
+  // (the baseline schema's own ai_videos, already read by this
+  // component's RESULT_TABLES) rather than a name nobody chose on purpose.
+  ok("video pins the one real table that exists for it (no generator writes to it yet)", byKind.video === "ai_videos");
+
+  console.log("-- the count is over THIS project's own members, nothing wider --");
+  const members = [
+    { table: "user_websites", id: "s1" }, { table: "user_websites", id: "s2" },
+    { table: "generated_posts", id: "p1" },
+    { table: "generated_images", id: "i1" }, { table: "generated_images", id: "i2" }, { table: "generated_images", id: "i3" },
+    { table: "user_documents", id: "d1" },
+    { table: "ai_missions", id: "m1" }, // a kind NONE of the five boxes count
+  ];
+  const counts = projectKindCounts(members);
+  ok("site: 2", counts.site === 2);
+  ok("posts: 1", counts.posts === 1);
+  ok("images: 3", counts.images === 3);
+  ok("video: 0 (none linked)", counts.video === 0);
+  ok("documents: 1", counts.documents === 1);
+  ok("a member of a SIXTH kind (ai_missions, Tasks) inflates none of the five",
+    counts.site + counts.posts + counts.images + counts.video + counts.documents === 7);
+  ok("an empty project counts honest zeroes, not missing keys",
+    Object.values(projectKindCounts([])).every((n) => n === 0) && Object.keys(projectKindCounts([])).length === 5);
 }
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);

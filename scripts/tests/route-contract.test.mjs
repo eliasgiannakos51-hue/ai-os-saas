@@ -217,6 +217,11 @@ const OUTSIDE_EVERY_POPULATION = {
     why:
       "the landing of the confirmation mail (lib/auth/confirm-email.ts). It is reached by a link in an inbox, so no screen asks it anything; it verifies a single-use token with verifyOtp, which opens the session, writes welcome_sent_at once through merge_user_metadata for the user that verification returned, and redirects to a path that safeNextPath keeps on this site.",
   },
+  "src/app/api/delete-account/cancel/route.ts": {
+    has: ["bound:rate_limit"],
+    why:
+      "the Keep-my-account link from the deletion-scheduled email. It answers 'who is asking' with a bearer token the identity detector cannot see from this file, the same way auth/confirm's verifyOtp is invisible above: the route hands the body's token to cancelDeletion() in lib/account/pending-deletion.ts, which hashes it with hashCancelToken(), resolves the digest to the account whose open schedule it belongs to (cancelled_at and executed_at null), and cancels every open pending_deletions row of that account in a single conditional update. It inserts nothing, calls no model, and takes no row id from the request — the token IS the lookup — so there is nothing to own and nothing to bound beyond checkRateLimit with scope \"delete_account_cancel\", ten an hour per address, which answers 429.",
+  },
   "src/app/api/contact/route.ts": {
     has: ["bound:rate_limit"],
     why:
@@ -246,6 +251,21 @@ const OUTSIDE_EVERY_POPULATION = {
     has: ["bound:in_memory_window"],
     why:
       "the robots.txt of a published site — the one file on the internet defined by being fetchable without credentials. It reads the same published_sites row to decide whether the site is live and emits text, behind publicRequestAllowed; it writes nothing.",
+  },
+  "src/app/a/[subdomain]/route.ts": {
+    has: ["bound:in_memory_window"],
+    why:
+      "the public web for a published Rebuild app (Κομμάτι 4's third piece), the same boundary /s/[subdomain]/route.ts already is for sites. No session is read — the admin client is used because rebuild_projects has no public RLS policy at all, so a stranger can only receive one app's html for a live subdomain, nothing else on the row and nothing by listing. It writes nothing, so there is no row to own and no insert to bound. It calls the same publicRequestAllowed in-memory window the sites route uses before it touches the database, and re-runs checkAppHtml at read time — the HTML already passed this once before the row could be written, but this is the moment it starts being served to a stranger with no session at all, and a row that would not pass the check today is served as absent rather than as whatever it is.",
+  },
+  "src/app/api/pay/[productId]/route.ts": {
+    has: ["bound:rate_limit"],
+    why:
+      "the Ionexa Payments public checkout redirect — a customer (not an Ionexa user) clicks 'Pay' on /pay/[productId] and is sent to Stripe Checkout. No session is read because the payer has no Ionexa account and never will — Stripe collects the card. The admin client reads the product from a deny-all table (payments_products, payments_accounts) and creates a Stripe Checkout session with a fixed Price — the amount is set by the Stripe Price, not by any request parameter, so a caller cannot alter what is charged. It writes nothing and inserts no row. Bounded by checkRateLimit scope public_pay, 30 an hour per IP.",
+  },
+  "src/app/api/discord/interactions/route.ts": {
+    has: ["bound:rate_limit"],
+    why:
+      "Discord's own Interactions Endpoint (agent/discord, 2026-11-07). No session is read because Discord, not a browser, calls this — identity is verifyInteraction's Ed25519 check over timestamp plus the raw body against DISCORD_PUBLIC_KEY, which the identity detector cannot see. The request carries a guild_id, not a user id: guildOwner(guildId) resolves it to the Ionexa account that connected that server, so what gets charged is never named in the request body. It inserts no row of its own — answerAsk and the credit hold it takes live in lib/discord/ask.ts, called from after() — so there is nothing here to own and no insert to bound beyond checkRateLimit scope discord_ask, thirty an hour per guild.",
   },
 };
 

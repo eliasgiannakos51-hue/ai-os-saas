@@ -1,0 +1,50 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Editing</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.rail{position:absolute;left:24px;top:22px;display:flex;flex-direction:column;gap:4px;padding:6px;border:1px solid #222A3D;border-radius:14px;background:#0D1220}
+.rb{width:64px;height:52px;border:0;border-radius:10px;background:none;color:#DCE2EE;font-size:10.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.rb.on{background:#1E2638;color:#F5F7FB}
+.vp{position:relative;width:202px;height:360px;border-radius:12px;flex:none;background:#8FB8C9}
+.cap{position:absolute;left:0;right:0;bottom:60px;text-align:center}
+.cap span{background:rgba(7,10,18,.8);color:#FFFFFF;font-weight:800;font-size:17px;padding:3px 8px;border-radius:6px}
+.tlbox{flex:0 0 226px;border-top:1px solid #161D2E;background:#070A12;padding:12px 20px;display:flex;flex-direction:column;gap:6px}
+.trk{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center}
+.lane{position:relative;height:32px;border-radius:7px;background:#0D1220}
+.clip{position:absolute;top:2px;bottom:2px;border-radius:6px;border:1px solid #2E3850;background:#1A2235;color:#DCE2EE;font-size:11px;padding:5px 7px;overflow:hidden;white-space:nowrap}
+.clip.on{border:2px solid #F5F7FB;background:#222B40}
+.clip.ph{background:#2B3346}
+.clip.tx{background:#1E2638;padding:5px 4px;text-align:center}
+.clip.mu{background:#162131}
+.ruler{position:relative;height:16px;font-size:10.5px;color:#8D96A8}
+.ruler span{position:absolute;top:0;transform:translateX(-50%)}
+.ph2{position:absolute;top:-4px;bottom:-4px;width:2px;background:#F5F7FB;border-radius:1px}
+</style></head><body>
+<div data-tbar data-tool="Editing" data-doc="Καλοκαίρι · TikTok"><span class="tag">0:29 · your originals never change</span><div class="sp"></div><button class="ib" type="button" aria-label="Undo" style="color:#DCE2EE"><i data-i="undo"></i></button><button class="btn" type="button">Versions</button><button class="btn pri" type="button">Export · 1080p</button></div>
+<div class="stage" style="flex-direction:column">
+<div class="canvas" style="padding:22px 32px 96px;flex-direction:row;justify-content:center;align-items:flex-start;gap:20px">
+<div class="rail" role="toolbar" aria-label="Tools">
+<button class="rb on" type="button"><i data-i="cursor"></i>Select</button>
+<button class="rb" type="button"><i data-i="cut"></i>Cut</button>
+<button class="rb" type="button"><i data-i="text"></i>Text</button>
+<button class="rb" type="button"><i data-i="cc"></i>Subtitles</button>
+<button class="rb" type="button"><i data-i="music"></i>Music</button>
+<button class="rb" type="button"><i data-i="sliders"></i>Color</button>
+</div>
+<div class="vp" role="img" aria-label="Preview at 0:13, the beach photo with a subtitle"><div data-img="Your photo «Παραλία»" style="position:absolute;inset:0;background:#8FB8C9;color:rgba(7,10,18,.45)"></div><div class="cap"><span>ΤΟ ΚΑΛΟΚΑΙΡΙ</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+<button class="btn" type="button"><i data-i="play"></i>0:13 / 0:29</button>
+<span class="tag">Fast preview</span>
+<span class="sub" style="max-width:170px">The final export runs in the background and tells you when it is ready.</span>
+</div>
+<div data-ask data-sel="Photo «Παραλία»" data-cost="≈ 1 credit" style="bottom:14px"></div>
+</div>
+<div class="tlbox">
+<div class="trk"><span></span><div class="ruler"><span style="left:0%;transform:none">0s</span><span style="left:16.7%">5s</span><span style="left:33.3%">10s</span><span style="left:50%">15s</span><span style="left:66.7%">20s</span><span style="left:83.3%">25s</span><span style="left:100%;transform:translateX(-100%)">30s</span></div></div>
+<div class="trk"><span class="sub">Video</span><div class="lane"><span class="clip" style="left:0%;width:30%">Βίντεο 1 · φούρνος</span><span class="clip" style="left:30.5%;width:9.5%">Βίντεο 2</span><span class="clip" style="left:73.5%;width:23%">Βίντεο 3 · πάγκος</span><span class="ph2" style="left:43.3%"></span></div></div>
+<div class="trk"><span class="sub">Photos</span><div class="lane"><span class="clip ph on" style="left:40%;width:20%">Παραλία</span><span class="clip ph" style="left:60.5%;width:12.5%">Κουλούρια</span><span class="ph2" style="left:43.3%"></span></div></div>
+<div class="trk"><span class="sub">Subtitles</span><div class="lane"><span class="clip tx" style="left:1%;width:11%">Καλημέρα</span><span class="clip tx" style="left:13%;width:11%">φούρνος</span><span class="clip tx" style="left:25%;width:11%">ζεστά</span><span class="clip tx" style="left:40%;width:14%">καλοκαίρι</span><span class="clip tx" style="left:57%;width:13%">παραλία</span><span class="clip tx" style="left:76%;width:12%">6:00</span><span class="ph2" style="left:43.3%"></span></div></div>
+<div class="trk"><span class="sub">Music</span><div class="lane"><span class="clip mu" style="left:0%;width:96.5%">Μουσική.mp3 · lower under speech</span><span class="ph2" style="left:43.3%"></span></div></div>
+</div>
+</div>
+<script src="common.js"></script><script>mount()</script>
+</body></html>

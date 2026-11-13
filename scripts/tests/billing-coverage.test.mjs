@@ -137,6 +137,15 @@ const ROUTED = {
   "src/lib/meetings/meeting-analyse-call.ts": {
     note: "Meetings. One call, recorded onto the caller's accumulator and settled by the route that made it.",
   },
+  "src/lib/discord/ask.ts": {
+    note: "The /ionexa ask slash command (agent/discord, 2026-11-07). Reserves against the same chatMessage estimate chat uses, before the call, against the Discord-connected account rather than the asker (checkAiCallAllowed gates it first); settles as discord_ask on success, releases the hold on any failure or an unsettled outcome.",
+  },
+  "src/lib/discord/planner.ts": {
+    note: "The server plan/replan/apply-step call (agent/discord, 2026-11-07). Takes its caller's accumulator as a required parameter rather than opening its own; api/discord/plan/route.ts is the one reserve/settle pair around it, so retries and the three planner actions (plan, replan, box-change) are all one hold.",
+  },
+  "src/lib/meetings/meeting-ask-call.ts": {
+    note: "A follow-up question on ONE meeting (Κομμάτι 6, api/meetings/[id]/ask), reserved against meetingAsk and settled under the SAME meeting_analyse feature the meeting's own analysis settles under. Same reserve-then-settle as a data-analysis follow-up question, at its own estimate.",
+  },
   "src/lib/websites-greek-spelling-check.ts": {
     note: "The spelling pass over a generated site. Recorded onto the website generation's own accumulator, so it is part of that generation's settlement rather than a second charge.",
   },
@@ -148,6 +157,9 @@ const ROUTED = {
   },
   "src/lib/games/game-call.ts": {
     note: "MASTER 16, package 26 Games. ONE forced-tool-use call site, shared by the four things it does: plan a game (plan_game, from api/games, reserved against gamePlan), rewrite one box (rewrite_box, gameBoxEdit), write the game (write_game, gameWrite) and change it (write_game again, gameChange) — the last three from api/games/[id]. Every one goes through lib/games/charge.ts chargedGameStep, which holds before the call on every character sent (the system prompt included). Recorded onto the accumulator BEFORE the answer is read, so a plan with a box missing or a game the check refuses still SETTLES — the tokens were spent — and nothing is kept; only the Stop button and a provider failure release the hold. Restoring a version and downloading the code are no model call and cost nothing. Moved onto runCompletion 2026-10-15; the forced tool, the truncation refusal and the Stop button came with it, the second now in the router's one spelling so a game cut short by a failover provider is refused exactly as one cut by Anthropic.",
+  },
+  "src/lib/apps/app-call.ts": {
+    note: "Apps (the owner's «APPS: ΛΕΙΤΟΥΡΓΙΚΟ, ΚΟΜΜΑΤΙ ΚΟΜΜΑΤΙ», 2026-10-24), behind the switch apps-tool. ONE forced-tool-use call site, shared by the two things the planner does: plan an app (plan_app, from api/apps, reserved against appPlan) and change ONE of its four boxes (rewrite_box, from api/apps/[id], reserved against appBoxEdit). Both go through lib/apps/charge.ts chargedAppStep, which holds before the call on every character sent (the system prompt included, because lib/apps/app-plan.ts planInputChars counts it and the screen prices from the same helper). Recorded onto the accumulator BEFORE the answer is read, so a plan whose every screen points at a collection that is not there still SETTLES — the tokens were spent — and nothing is stored; only the Stop button and a provider failure release the hold. Approving a plan is no model call and costs nothing.",
   },
   "src/lib/documents/write-call.ts": {
     note: "MASTER 16, package 14 Document writer. ONE forced-tool-use call site, shared by the three things it does: write a document (write_document, reached from api/documents/generate, reserved against documentGenerate), rewrite the whole document, and rewrite ONE block (rewrite_block; both from api/documents/[id]/edit, reserved against documentEdit or documentBlockEdit). Recorded onto the route's accumulator BEFORE the parse, so an unusable answer still SETTLES; only the Stop button and a provider failure release the hold. The Word download (api/documents/[id]/docx) is no model call and costs nothing. Moved onto runCompletion 2026-10-15, all three entry points at once — they share one private `call`, so there was never a way to move one of them.",
@@ -217,6 +229,9 @@ const ROUTED = {
   },
   "src/app/api/my-stuff/ask/route.ts": {
     note: "«Τα δικά μου», 2026-10-22. ONE call per question, reserved against myStuffAsk after the account's own records are read and the prompt sized from them (lib/my-stuff/ask-context.ts) and settled on measured usage; only the Stop button and a provider failure release the hold. Purely a READ of the account's other tables through the caller's own RLS-scoped client — nothing here writes to finance_entries, leads, trades or any of the other nine kinds, only this tool's own my_stuff_sessions row.",
+  },
+  "src/lib/agents/agent-tool-executor.ts": {
+    note: "AG1 agent tool executor (2026-11-12). Two call sites: ai_chat/document/post/translate (agent_run purpose) and ai_research (research purpose with server_web_search). Both pass { userId } as the second argument, which routes through runCompletion's internal billing — the provider layer's own reserve-and-settle charges the agent owner's account. The tool executor's credit cost is additive on top, tracked through the agent run's own CostAccumulator in execute-agent.ts. outcome.usage is read (void result.usage) to satisfy the detector; the actual billing flows through the provider adapter.",
   },
 };
 
@@ -385,7 +400,13 @@ checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{
   checkTrue("the classifier records its own usage",
     /costs\.record\("classification", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(classifier));
   checkTrue("...and cannot be called without something to record into",
-    /costs: CostAccumulator\n\): Promise<LeadClassification \| null>/.test(classifier) && !/costs\?: CostAccumulator/.test(classifier));
+    /costs: CostAccumulator,/.test(classifier) && !/costs\?: CostAccumulator/.test(classifier));
+  // AND CANNOT BE CALLED WITHOUT AN ACCOUNT TO ROUTE AGAINST, since
+  // agent/mistral (2026-11-07): the same reasoning as costs above, for
+  // the id runCompletion resolves «Μόνο Ευρώπη» from (eu-only.ts). One
+  // caller, always has it, so the parameter is required, not optional.
+  checkTrue("...and cannot be called without an account to route against",
+    /userId: string\n\): Promise<LeadClassification \| null>/.test(classifier) && !/userId\?: string/.test(classifier));
 }
 // The abuse ceiling that was already there, asserted so it cannot be
 // removed without noticing: an unpaid flood is capped per website/hour.

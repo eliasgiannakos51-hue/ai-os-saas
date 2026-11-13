@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Audio</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.wrap{width:100%;max-width:760px;display:flex;flex-direction:column;gap:14px}
+.player{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid #222A3D;border-radius:14px;background:#0D1220}
+.line{display:grid;grid-template-columns:64px minmax(0,1fr) 40px;gap:12px;align-items:start;padding:11px 12px;border-radius:10px;font-size:14.5px;line-height:1.55}
+.line.on{outline:2px solid #F5F7FB;outline-offset:-1px;background:#0D1220}
+.w2{font-size:12.5px;font-weight:600;color:#F5F7FB;padding-top:2px}
+.vrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #222A3D;border-radius:10px;font-size:13px}
+.vav{width:28px;height:28px;border-radius:14px;background:#1E2638;display:flex;align-items:center;justify-content:center;font-size:12px;color:#F5F7FB;flex:none}
+</style></head><body>
+<div data-tbar data-tool="Audio" data-doc="Το μυστικό του προζυμιού"><div class="seg" role="group" aria-label="Mode"><button type="button">Voice-over</button><button class="on" type="button">Podcast</button><button type="button">Clean up</button></div><div class="sp"></div><button class="btn" type="button">Send to Editing</button><button class="btn pri" type="button"><i data-i="dl"></i>Download MP3</button></div>
+<div class="stage">
+<div class="canvas"><div class="wrap">
+<div class="player"><button class="play" type="button" aria-label="Play"><i data-i="play"></i></button><div data-wave="72" data-played="17"></div><span class="sub">1:12 / 5:08</span></div>
+<div class="lbl" style="margin-top:6px">Script · 14 lines</div>
+<div class="line"><span class="w2">Δανάη</span><span>Καλημέρα! Σήμερα μιλάμε για κάτι που μυρίζει υπέροχα: το προζύμι.</span><span class="sub">0:00</span></div>
+<div class="line"><span class="w2">Νίκος</span><span>Και δεν είναι τόσο δύσκολο όσο ακούγεται. Θέλεις αλεύρι, νερό και λίγη υπομονή.</span><span class="sub">0:06</span></div>
+<div class="line on"><span class="w2">Δανάη</span><span>Πόση υπομονή μιλάμε;</span><span class="sub">0:14</span></div>
+<div class="line"><span class="w2">Νίκος</span><span>Περίπου μία εβδομάδα, μέχρι να «ξυπνήσει». Κάθε μέρα το ταΐζεις λίγο αλεύρι και νερό.</span><span class="sub">0:16</span></div>
+<div class="line"><span class="w2">Δανάη</span><span>Και πώς καταλαβαίνω ότι είναι έτοιμο;</span><span class="sub">0:26</span></div>
+</div>
+<div data-ask data-sel="Line 3" data-cost="≈ 1 credit"></div>
+</div>
+<aside class="insp">
+<div class="ig"><span class="lbl">Voices · ready-made only</span>
+<div class="vrow"><span class="vav">Δ</span><span style="flex:1">Δανάη · Greek</span><button class="ib" type="button" aria-label="Hear Δανάη" style="width:28px;height:28px;color:#DCE2EE"><i data-i="play" style="width:13px;height:13px"></i></button></div>
+<div class="vrow"><span class="vav">Ν</span><span style="flex:1">Νίκος · Greek</span><button class="ib" type="button" aria-label="Hear Νίκος" style="width:28px;height:28px;color:#DCE2EE"><i data-i="play" style="width:13px;height:13px"></i></button></div>
+</div>
+<div class="ig"><span class="lbl">Length</span><div class="pills"><button class="pill" type="button">2 min</button><button class="pill on" type="button">5 min</button><button class="pill" type="button">10 min</button><button class="pill" type="button">20 min</button></div></div>
+<div class="ig"><span class="lbl">Style</span><div class="pills"><button class="pill" type="button">Calm</button><button class="pill on" type="button">Lively</button><button class="pill" type="button">Formal</button></div></div>
+<div class="ig"><span class="lbl">File</span><div class="pills"><button class="pill on" type="button">MP3</button><button class="pill" type="button">WAV</button></div></div>
+<div class="price"><div><span class="mut">5:08 podcast</span><span>6 credits</span></div></div>
+<span class="sub" style="margin-top:-8px">Marked as AI-made inside the file.</span>
+</aside>
+</div>
+<script src="common.js"></script><script>mount()</script>
+</body></html>

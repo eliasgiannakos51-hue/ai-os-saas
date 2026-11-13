@@ -5,6 +5,7 @@ import { brandBriefFor, readBrand } from "@/lib/memory/brand";
 import { memoryActiveFor } from "@/lib/memory/memory-policy";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isFeatureOn } from "@/lib/flags/flags";
 import { GenerationStoppedError, generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { pickVariation, variationDirective } from "@/lib/website-variation";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
@@ -25,11 +26,12 @@ import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { findGreekMisspellings } from "@/lib/websites-greek-spelling-check";
-import { findInventedNumbers } from "@/lib/website-invented-numbers";
+import { repairInventedNumbers } from "@/lib/website-invented-numbers-repair";
 import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
 import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
+import { applyCinematicHeroParallax } from "@/lib/cinematic/hero-storyboard";
 import {
   describeSecurityScanIssue,
   scanWebsiteHtmlForSecurityIssues,
@@ -702,15 +704,37 @@ export async function POST(request: Request) {
         logApiError("/api/websites/generate/process", err, { websiteId, stage: "sameSkeleton" });
       }
 
-      const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));
-      if (inventedNumbers.length > 0) {
+      // BUILD-SPECS.md §1.5's "fix and re-check, at most two cycles" for a
+      // phone/price/time/address/stat the model invented: each document
+      // gets its own run, since a four-page site having its first page
+      // repaired while pages 2-4 keep a fabricated phone number is the
+      // same half-measure the nav-link pass above calls out by name.
+      // REPLACED IN PLACE — documents is read again below (`cleaned`),
+      // so a page that still had a real-generation copy of the invented
+      // number would otherwise survive the repair done here.
+      let placeholderedCount = 0;
+      const stillInvented: ReturnType<typeof repairInventedNumbers>["remaining"] = [];
+      for (let i = 0; i < documents.length; i += 1) {
+        const repaired = repairInventedNumbers(documents[i], description);
+        documents[i] = repaired.html;
+        placeholderedCount += repaired.repairedCount;
+        stillInvented.push(...repaired.remaining);
+      }
+      if (placeholderedCount > 0) notes.push({ kind: "placeholdered", count: placeholderedCount });
+      // The §1.5 "clear indication of what did not pass" for whatever the
+      // two cycles above could not placeholder — kept as a log, same as
+      // before this repair existed, because the remaining cases are the
+      // ones the detector's own "WHAT IT CANNOT SEE" paragraph names (an
+      // address with no street word, say), not ones a human-visible note
+      // could act on inside the editor's number list.
+      if (stillInvented.length > 0) {
         logApiError(
           "/api/websites/generate/process",
-          new Error(`${inventedNumbers.length} number(s) on the page are not in the brief`),
+          new Error(`${stillInvented.length} number(s) on the page are not in the brief and could not be placeholdered`),
           {
             websiteId,
-            kinds: inventedNumbers.map((n) => n.kind).join(","),
-            samples: inventedNumbers.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
+            kinds: stillInvented.map((n) => n.kind).join(","),
+            samples: stillInvented.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
           }
         );
       }
@@ -795,7 +819,26 @@ export async function POST(request: Request) {
       // detect (lib/website-security-review.ts). Both layers run every
       // single generation, unconditionally — this is not an opt-in
       // toggle.
-      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc));
+      // "cinematic-sites" (Phase 1a, agent/mistral 2026-11-08): read once,
+      // used by both the strip and the scan just below — the exact
+      // disagreement this file's own history has already paid for once
+      // (ALLOWED_IFRAME_EMBEDS's comment on why it is now ONE list for
+      // both the scan and the CSP, not two that can drift apart).
+      const cinematicSitesEnabled = await isFeatureOn("cinematic-sites", user);
+      // Style ΣΤ (docs/v6-cinematic-sites-2026-10-03.md §1): the home
+      // page's first image gets a gentle parallax and an honest "not
+      // live yet" caption — see lib/cinematic/hero-storyboard.ts for why
+      // this is deterministic rather than a prompt line, and why only
+      // `cleaned[0]` (the home document; `documents`/`cleaned` are built
+      // as `[split.home, ...keptPages]` above) rather than every page.
+      // MUST run before stripDisallowedExternalScripts below: that call
+      // only strips <script src>, never touches a bare data attribute,
+      // but reading cleaned[0] before it is written would silently drop
+      // this step's own output on the next line.
+      if (cinematicSitesEnabled && cleaned.length > 0) {
+        cleaned[0] = applyCinematicHeroParallax(cleaned[0]).html;
+      }
+      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));
 
       // FINDABLE ON THE WEB. The prompt asks for a real title, a real
       // description and a real alt on every photo; this is what makes it
@@ -825,7 +868,7 @@ export async function POST(request: Request) {
       const pagesAsked = readPageRequest(description);
       const pagesMade = 1 + extraPages.length;
       if (pagesAsked !== null && pagesMade < pagesAsked) notes.push({ kind: "pagesShort", asked: pagesAsked, made: pagesMade });
-      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));
+      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled }));
       // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
       // content for what a deterministic scan cannot see, and content is
       // content wherever it sits — four separate reviews would cost four
@@ -833,7 +876,8 @@ export async function POST(request: Request) {
       const contentReview = await reviewWebsiteContentSafety(
         apiKey,
         stripped.length === 1 ? stripped[0] : stripped.join("\n"),
-        costs
+        costs,
+        writerUserId
       );
 
       const allIssueDescriptions = [

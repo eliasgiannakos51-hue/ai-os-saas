@@ -69,7 +69,19 @@ export default async function ModulePage(
   const isAutomationModule = moduleConfig.slug === "automation";
   if (isAutomationModule) {
     const searchParams = await props.searchParams;
-    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId);
+    // The two switches of 2026-11-05 (the owner, after the automation
+    // videos), read before the page's data: closed, the minutes are not
+    // even read, and the gallery is not drawn.
+    const [simplePro, templatesOn, timeSavedOn] = await Promise.all([
+      // «Simple | Pro» (directive 55 Κομμάτι 1). Off reads as the screen
+      // before it: the boxes, no switch. It fails towards 'staff'
+      // (lib/flags/flags.ts), so a customer never meets a half-built
+      // level and the configurator they already had never disappears.
+      isFeatureOn("agents-automations-pro", user),
+      isFeatureOn("automation-templates", user),
+      isFeatureOn("automation-time-saved", user),
+    ]);
+    const data = await loadAutomationPage(user, searchParams.run, searchParams.flow, searchParams.projectId, timeSavedOn, simplePro);
     return (
       <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
         <AutomationShell
@@ -83,6 +95,12 @@ export default async function ModulePage(
           older={data.older}
           initialProjectId={data.projectId}
           initialSaid={readExampleParam(searchParams.said)}
+          simplePro={simplePro}
+          templates={templatesOn}
+          initialMinutesSaved={data.minutesSaved}
+          initialDoneRuns={data.doneRuns}
+          initialModes={data.modes}
+          initialPendingApprovals={data.pendingApprovals}
         />
       </div>
     );

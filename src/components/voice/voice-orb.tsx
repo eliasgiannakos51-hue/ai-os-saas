@@ -38,6 +38,7 @@ export function VoiceOrb({
   state,
   readLevel,
   size = 180,
+  variant = "orb",
 }: {
   state: VoiceState;
   /** Reads the current 0..1 amplitude. A function rather than a value,
@@ -45,6 +46,16 @@ export function VoiceOrb({
    *  down — see components/voice/use-audio-level.ts. */
   readLevel: () => number;
   size?: number;
+  /**
+   * "globe" is the live conversation's (FS1, Κομμάτι 2-3): the globe
+   * itself at the full size, in the signal colour whatever the state,
+   * with NO halo and NO ring — the directive is «χωρίς λάμψη». The state
+   * is carried by movement alone: still while it waits, breathing with
+   * the microphone while it listens, its orbit turning while it thinks,
+   * breathing with the answer while it speaks. Under «λιγότερη κίνηση»
+   * it is the same still globe and the state is the label under it.
+   */
+  variant?: "orb" | "globe";
 }) {
   const t = useTranslations("voice.states");
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -92,6 +103,7 @@ export function VoiceOrb({
     <div
       ref={wrapRef}
       data-testid="voice-orb"
+      data-variant={variant}
       className="voice-orb relative flex items-center justify-center"
       style={
         {
@@ -99,7 +111,7 @@ export function VoiceOrb({
           height: size,
           // The colour is a variable per state, resolved in globals.css
           // so it has a light and a dark definition.
-          "--orb-color": `var(${STATE_COLOR_VAR[state]})`,
+          "--orb-color": variant === "globe" ? "rgb(var(--signal))" : `var(${STATE_COLOR_VAR[state]})`,
         } as React.CSSProperties
       }
       // ONE LIVE REGION FOR THE WHOLE ORB. A screen reader gets the state
@@ -109,10 +121,14 @@ export function VoiceOrb({
       aria-live="polite"
       aria-label={t(state)}
     >
-      <span className="voice-orb-halo" aria-hidden="true" />
-      <span className="voice-orb-ring" aria-hidden="true" />
+      {variant === "orb" && <span className="voice-orb-halo" aria-hidden="true" />}
+      {variant === "orb" && <span className="voice-orb-ring" aria-hidden="true" />}
       <span className="voice-orb-globe">
-        <GlobeMark size={Math.round(size * 0.44)} detail="full" />
+        {variant === "globe" ? (
+          <GlobeMark size={size} detail="full" spin={state === "thinking" || state === "speaking"} />
+        ) : (
+          <GlobeMark size={Math.round(size * 0.44)} detail="full" />
+        )}
       </span>
     </div>
   );

@@ -1,8 +1,8 @@
 # The first run — ja
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **618 strings**. The whole product is 4688, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **625 strings**. The whole product is 5668, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 376 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 381 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV またはタブ区切り、最大 {max}。保存する前に読み取り結�
 
 何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。
 
-## Tier 2 — The labels — skim these (376)
+## Tier 2 — The labels — skim these (381)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -548,6 +548,12 @@ AI コーディング
 
 連携済み統合
 
+**`pricing.rows.ionexaPayments`**
+
+> EN — Ionexa Payments
+
+Ionexa Payments
+
 **`pricing.rows.listRowsShown`**
 
 > EN — Rows shown in one list
@@ -807,6 +813,12 @@ Googleサインインを開始できませんでした。もう一度お試し�
 > EN — Password
 
 パスワード
+
+**`auth.login.rateLimited`**
+
+> EN — Too many attempts. Please try again later.
+
+試行回数が多すぎます。しばらくしてからもう一度お試しください。
 
 **`auth.login.resetSuccess`**
 
@@ -1532,6 +1544,12 @@ Gmail や Drive を接続
 
 アナリティクス
 
+**`sidebar.items.appBuilder`**
+
+> EN — Apps
+
+アプリ
+
 **`sidebar.items.apps`**
 
 > EN — App ideas
@@ -1970,6 +1988,12 @@ DevOps
 
 オペレーション
 
+**`sidebar.items.payments`**
+
+> EN — Payments
+
+決済
+
 **`sidebar.items.personalFinance`**
 
 > EN — Personal Finance
@@ -2095,6 +2119,12 @@ DevOps
 > EN — Settings
 
 設定
+
+**`sidebar.items.skills`**
+
+> EN — Skills
+
+スキル
 
 **`sidebar.items.systemHealth`**
 
@@ -2440,7 +2470,7 @@ credits の履歴を見る
 
 もう一度試す
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (219)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3272,6 +3302,12 @@ CSV をエクスポート
 
 その録音からは何も聞き取れませんでした。
 
+**`voice.errors.ended`**
+
+> EN — The conversation has ended.
+
+会話は終了しました。
+
 **`voice.errors.failed`**
 
 > EN — Voice is unavailable right now. You can still type.
@@ -3307,6 +3343,12 @@ CSV をエクスポート
 > EN — Voice is not included on your plan.
 
 お使いのプランに音声は含まれていません。
+
+**`voice.errors.not_ready`**
+
+> EN — Live conversation is not set up here yet. You were not charged.
+
+ライブ会話はまだここでは設定されていません。料金は発生していません。
 
 **`voice.errors.out_of_minutes`**
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { sendPushToUser } from "@/lib/push/web-push";
+import { createPushBatch } from "@/lib/push/delivery";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -29,6 +30,7 @@ import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 import type { UserAutomation } from "@/types/user-automation";
+import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
 // AWAITED, NOT FIRED AND FORGOTTEN — all eleven of them, 2026-09-24.
 //
@@ -127,7 +129,12 @@ async function closeRun(
 // configured the route refuses to run on any deployment: this one spends
 // real money per invocation, so an unauthenticated caller could run up an
 // Anthropic bill on every user's behalf. See lib/cron-auth.ts.
+/** How long a run waits at the end for pushes still in flight; each send
+ *  is bounded on its own (lib/push/delivery.ts). */
+const PUSH_SETTLE_MS = 30_000;
+
 export async function GET(request: Request) {
+  const pushes = createPushBatch();
   try {
     const auth = checkCronAuth(request);
     if (!auth.ok) {
@@ -146,12 +153,16 @@ export async function GET(request: Request) {
 
     const admin = createAdminClient();
     const today = new Date().toISOString().slice(0, 10);
+    // A SUSPENDED ACCOUNT'S WORK DOES NOT RUN (2026-11-05 review, A1;
+    // lib/auth/suspended-accounts.ts). Excluded in the query, not after it.
+    const suspended = await suspendedUserIds(admin, "/api/cron/scheduled-runs");
 
     const { data: dueRuns, error: dueError } = await admin
       .from("scheduled_agent_runs")
       .select("*")
       .eq("status", "pending")
       .lte("scheduled_for", today)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("created_at", { ascending: true });
 
     if (dueError) {
@@ -450,23 +461,31 @@ export async function GET(request: Request) {
         // the run row says done, and the person simply never hears.
         // Nobody is waiting on a cron's response, so this is a log and
         // not a third state on a screen.
-        const pushResult = await sendPushToUser(user.id, "mission_reminders", {
-          title: "Mission step done",
-          body: run.step_text.slice(0, 120),
-          url: "/dashboard/mission",
-          tag: `mission-${run.mission_id}`,
+        // QUEUED ON THE RUN'S BATCH, not awaited here: one person's slow
+        // push service must not hold the next person's run. The batch is
+        // settled in the `finally` below, on every way out of GET.
+        const pushUserId = user.id;
+        const pushStep = run.step_text.slice(0, 120);
+        const pushTag = `mission-${run.mission_id}`;
+        pushes.add(async () => {
+          const pushResult = await sendPushToUser(pushUserId, "mission_reminders", {
+            title: "Mission step done",
+            body: pushStep,
+            url: "/dashboard/mission",
+            tag: pushTag,
+          });
+          if (pushResult.skipped || pushResult.failed > 0) {
+            logApiError(
+              "/api/cron/scheduled-runs",
+              new Error(
+                pushResult.skipped
+                  ? `mission reminder not delivered: ${pushResult.skipped}`
+                  : `mission reminder failed for ${pushResult.failed} subscription(s)`
+              ),
+              { stage: "push", userId: pushUserId }
+            );
+          }
         });
-        if (pushResult.skipped || pushResult.failed > 0) {
-          logApiError(
-            "/api/cron/scheduled-runs",
-            new Error(
-              pushResult.skipped
-                ? `mission reminder not delivered: ${pushResult.skipped}`
-                : `mission reminder failed for ${pushResult.failed} subscription(s)`
-            ),
-            { stage: "push", userId: user.id }
-          );
-        }
       }
     }
 
@@ -482,6 +501,7 @@ export async function GET(request: Request) {
       .select("*")
       .eq("is_active", true)
       .lte("next_run_at", nowIso)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("created_at", { ascending: true });
 
     if (dueAutomationsError) {
@@ -789,6 +809,42 @@ export async function GET(request: Request) {
       logApiError("/api/cron/scheduled-runs", rateLimitCleanupError, { stage: "cleanup_rate_limit_log" });
     }
 
+    // Housekeeping — iowork pairings, for the same reason one line up and
+    // on a much shorter clock. A pairing is good for ten minutes
+    // (PAIRING_TTL_MINUTES, src/lib/iowork/pairing.ts) and most are never
+    // completed at all: the person starts the app, does not type the code,
+    // and the row is dead but still holding its code in a unique index.
+    // An hour is far past any live pairing, so deleting past it can never
+    // take one somebody is still using, and it is what makes
+    // iowork_pairings honest as a NON_PERSONAL_TABLES entry — nothing in
+    // it survives long enough to be anybody's data to export or erase.
+    const ioworkPairingCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { error: ioworkPairingError } = await admin
+      .from("iowork_pairings")
+      .delete()
+      .lt("created_at", ioworkPairingCutoff);
+    if (ioworkPairingError) {
+      logApiError("/api/cron/scheduled-runs", ioworkPairingError, { stage: "cleanup_iowork_pairings" });
+    }
+
+    // Housekeeping — Telegram pairings, the same rule for the same reason
+    // (the owner's directive 24, κομμάτι 1). Ten minutes of life
+    // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts) and most
+    // are abandoned: the person presses Connect, never opens Telegram, and
+    // a dead row keeps holding its code in a unique index. This delete is
+    // what makes telegram_pairings honest as a NON_PERSONAL_TABLES entry
+    // in src/lib/gdpr/user-data-registry.ts — that entry's whole argument
+    // is "nothing here survives long enough to be anybody's data", and
+    // without this line the argument would be false.
+    const telegramPairingCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { error: telegramPairingError } = await admin
+      .from("telegram_pairings")
+      .delete()
+      .lt("created_at", telegramPairingCutoff);
+    if (telegramPairingError) {
+      logApiError("/api/cron/scheduled-runs", telegramPairingError, { stage: "cleanup_telegram_pairings" });
+    }
+
     // Housekeeping — the integrations audit trail.
     //
     // integration_sync_log records every read the AI makes of a user's
@@ -854,5 +910,10 @@ export async function GET(request: Request) {
   } catch (err) {
     logApiError("/api/cron/scheduled-runs", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
+  } finally {
+    const pushed = await pushes.settle(PUSH_SETTLE_MS);
+    if (pushed.abandoned > 0) {
+      logApiError("/api/cron/scheduled-runs", new Error(`${pushed.abandoned} push(es) still in flight at the deadline`), { stage: "push" });
+    }
   }
 }

@@ -269,6 +269,38 @@ for (const [label, file] of [
   );
 }
 
+// CREATE STUDIO'S INTAKE (2026-11-05). The prompt is wholly static and
+// every Create sentence sends it; scripts/measure-prompt-cache-headroom.mjs
+// found it the largest uncached prompt in the app. Two things are held:
+// it is MEASURED over the minimum (otherwise buildCachedSystem places no
+// marker and the wiring does nothing), and the call PASSES it — read from
+// comment-stripped source, so the note above the call cannot satisfy it.
+console.log("\nCreate Studio detect");
+{
+  const detectSrc = readFileSync("src/app/api/create-studio/detect/route.ts", "utf8");
+  const detectCode = stripComments(detectSrc);
+  const tpl = detectSrc.match(/function buildSystemPrompt\(\): string \{[\s\S]*?return `([\s\S]*?)`;\s*\}/)?.[1] ?? "";
+  const modules = await loadTs("src/lib/classifier-modules.ts");
+  const moduleList = modules.CLASSIFIER_MODULES.map((m) => `"${m.slug}"`).join(", ");
+  const detectStatic = tpl
+    .replace("${moduleList}", moduleList)
+    .replace("${AI_SAFETY_BOUNDARIES_EN}", conduct.AI_SAFETY_BOUNDARIES_EN)
+    .replace("${AI_CRISIS_CLASSIFIER_EN}", conduct.AI_CRISIS_CLASSIFIER_EN)
+    .replace("${AI_QUALITY_CHECKLIST_EN}", checklist.AI_QUALITY_CHECKLIST_EN);
+  ok("found the detect prompt's template in the route", tpl.length > 0);
+  ok("no unresolved interpolation left in the detect prompt", tpl.length > 0 && !detectStatic.includes("${"));
+  ok(
+    `detect prompt (${detectStatic.length} chars, ~${cs.approximateTokens(detectStatic)} tokens) clears Sonnet's 1,024`,
+    cs.isWorthCaching(detectStatic, SONNET)
+  );
+  ok("create-studio/detect imports buildCachedSystem", /import \{ buildCachedSystem \} from "@\/lib\/ai\/cached-system"/.test(detectCode));
+  ok(
+    "create-studio/detect passes the static prompt to buildCachedSystem",
+    /system: buildCachedSystem\(\{ staticPrefix: buildSystemPrompt\(\), model: STUDIO_MODEL \}\)/.test(detectCode)
+  );
+  ok("…and no plain system block is left in the route", !/system: \[\{ type: "text", text: buildSystemPrompt\(\) \}\]/.test(detectCode));
+}
+
 // Every Anthropic system prompt this app sends that clears the model
 // minimum should be going through one of the two cached paths. This is
 // the count of call sites that do; it goes UP, never down.
@@ -277,6 +309,7 @@ const CACHED_CALL_SITES = [
   "src/lib/mission-agents.ts",
   "src/lib/jobs/handlers/create.ts",
   "src/lib/mission-step-runner.ts",
+  "src/app/api/create-studio/detect/route.ts",
 ];
 check(
   "every expected call site is wired",

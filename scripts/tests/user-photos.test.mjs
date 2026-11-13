@@ -349,16 +349,17 @@ console.log("\n== 6. the cleanup deletes only what nothing needs ==");
   ok("a URL with a query string still protects its file", withQuery.orphans.length === 0, withQuery.orphans.join(","));
 
   // NOTHING IS DELETED WHEN NOTHING IS KNOWN. A failure that produced an
-  // empty document list must not read as "everything is an orphan" — so
-  // the ROUTE has to throw rather than proceed on a partial read.
+  // empty document list must not read as "everything is an orphan". That
+  // used to be a regex here over the route's table loop; since 2026-11-05
+  // the reads live in lib/websites/storage-cleanup.ts and
+  // scripts/tests/storage-cleanup.test.mjs EXECUTES them against a
+  // stand-in that fails a page, answers nothing, or caps every answer at
+  // 1,000 rows — each of which must delete nothing. What stays here is
+  // the population: the table list the sweep iterates, against the
+  // migrations.
   const route = readFileSync("src/app/api/cron/website-storage-cleanup/route.ts", "utf8");
-  // SPECIFICALLY INSIDE THE TABLE LOOP. The file has other `throw error`
-  // lines, so a bare search passes while the document read has been made
-  // to swallow a failure — and an empty document list reads as "nothing
-  // references anything", which deletes every photograph on the site.
-  ok("a failed document read aborts the whole run",
-    /for \(const table of tables\) \{[\s\S]{0,300}if \(error\) throw error;/.test(route),
-    route.slice(route.indexOf("for (const table of tables)"), route.indexOf("for (const table of tables)") + 260));
+  const sweep = stripComments(readFileSync("src/lib/websites/storage-cleanup.ts", "utf8"));
+  ok("the route hands the run to the sweep", /runStorageCleanup\(admin,/.test(stripComments(route)));
   // THE RULE WAS ABOUT A POPULATION AND THE CHECK NAMED FOUR EXAMPLES.
   // This was `["user_websites", "published_sites", "website_versions",
   // "site_versions"].every(...)` — a list written here. On 2026-09-19 a
@@ -371,11 +372,11 @@ console.log("\n== 6. the cleanup deletes only what nothing needs ==");
   ok("the schema still has tables carrying HTML to find",
     htmlTables.length >= 4,
     `found ${htmlTables.length}: ${htmlTables.join(", ")} — an empty derivation would pass the check below`);
-  const unread = htmlTables.filter((t) => !route.includes(`"${t}"`));
+  const unread = htmlTables.filter((t) => !sweep.includes(`"${t}"`));
   ok("...and every table that carries HTML is read",
     unread.length === 0,
     `not read by the cleanup: ${unread.join(", ")}`);
-  ok("...including the sub-pages inside them", /normalisePages\(row\.pages\)/.test(route));
+  ok("...including the sub-pages inside them", /normalisePages\(row\.pages\)/.test(sweep));
   ok("the run is authenticated", /checkCronAuth\(request\)/.test(route));
   ok("...and a dry run is possible", /dry.*=== "1"/.test(route));
   const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));

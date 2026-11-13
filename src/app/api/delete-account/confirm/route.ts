@@ -6,6 +6,10 @@ import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { eraseUserStorage } from "@/lib/account/erase-storage";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { scheduleDeletion, DELETION_GRACE_DAYS } from "@/lib/account/pending-deletion";
+import { sendDeletionScheduledEmail } from "@/lib/email/send-deletion-scheduled-email";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 // @service-role-justified token-auth — the 256-bit single-use token from
 // the emailed link IS the proof of identity (see the file comment below);
@@ -25,6 +29,13 @@ const DELETE_CONFIRM_WINDOW_MINUTES = 60;
 // against scripted hammering of the endpoint, not a real brute-force gate.
 export async function POST(request: Request) {
   try {
+    // JSON ONLY (2026-11-05 review, A5; lib/security/cross-site.ts): a
+    // form on another site can post anything else without the browser
+    // asking first.
+    if (requireJsonBody(request)) {
+      return NextResponse.json({ ok: false, code: "invalid_request" }, { status: 415 });
+    }
+
     const ip = getClientIp(request);
     const { allowed } = await checkRateLimit({
       scope: "delete_account_confirm",
@@ -79,6 +90,85 @@ export async function POST(request: Request) {
         { ok: false, code: "link_invalid", error: "This link is invalid or has expired." },
         { status: 400 }
       );
+    }
+
+    // --- DEFERRED DELETION (directive 39 Κομμάτι 3) ---
+    // When the flag is on, schedule the deletion 30 days out instead of
+    // executing it inline. The user gets an email with a cancel link.
+    // The old immediate path remains as the fallback when the flag is off.
+    const { data: authUserForFlag } = await admin.auth.admin.getUserById(claimed.user_id);
+    const deferredOn = await isFeatureOn("deferred-deletion", authUserForFlag?.user);
+    if (deferredOn) {
+      // scheduleDeletion joins an open schedule rather than writing a
+      // second one, so a second confirmation gets the FIRST date and a
+      // link that cancels it (lib/account/pending-deletion.ts).
+      let result: Awaited<ReturnType<typeof scheduleDeletion>> = null;
+      try {
+        result = await scheduleDeletion(admin, claimed.user_id);
+      } catch (scheduleErr) {
+        logApiError("/api/delete-account/confirm", scheduleErr, { stage: "schedule_deferred" });
+      }
+      if (!result) {
+        logApiError("/api/delete-account/confirm", new Error("scheduleDeletion returned null"), {
+          stage: "schedule_deferred",
+          userId: claimed.user_id,
+        });
+        // NOTHING WAS SCHEDULED, SO THE LINK GOES BACK — the same give-back
+        // as the files and the subscription below. The claim above spent
+        // the single-use token; without this, "please try again" sent the
+        // person back to a link that could never work again, and the only
+        // way on was a new deletion email.
+        const { error: giveBackError } = await admin
+          .from("account_deletion_requests")
+          .update({ used_at: null })
+          .eq("token_hash", tokenHash);
+        if (giveBackError) {
+          logApiError("/api/delete-account/confirm", giveBackError, {
+            stage: "release_deletion_token",
+            hint: "nothing was scheduled and the emailed link is now spent — this request needs a new deletion link",
+          });
+          // A code and no English (QUEUE FD3): the page says it in the
+          // reader's language (confirm-delete-account-form.tsx).
+          return NextResponse.json({ ok: false, code: "contact_support" }, { status: 500 });
+        }
+        return NextResponse.json(
+          { ok: false, code: "retry", error: "Something went wrong. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      // The email carries the ONLY cancel link, so the response says
+      // whether it went: a deletion that cannot be cancelled from the
+      // inbox must at least be visible as such on the confirmation page.
+      // email-outcome-reported.test.mjs holds the binding.
+      const userEmail = authUserForFlag?.user?.email;
+      let emailSent = false;
+      if (userEmail) {
+        try {
+          const emailResult = await sendDeletionScheduledEmail(
+            userEmail,
+            result.cancelToken,
+            result.row.delete_after,
+            authUserForFlag?.user?.id,
+          );
+          emailSent = emailResult.ok;
+          if (!emailResult.ok) {
+            logApiError("/api/delete-account/confirm", emailResult.error ?? new Error("email not sent"), {
+              stage: "send_scheduled_email",
+            });
+          }
+        } catch (emailErr) {
+          logApiError("/api/delete-account/confirm", emailErr, { stage: "send_scheduled_email" });
+        }
+      }
+
+      return NextResponse.json({
+        ok: true,
+        deferred: true,
+        deleteAfter: result.row.delete_after,
+        graceDays: DELETION_GRACE_DAYS,
+        emailSent,
+      });
     }
 
     // The uploaded FILES first, and before the auth user, because

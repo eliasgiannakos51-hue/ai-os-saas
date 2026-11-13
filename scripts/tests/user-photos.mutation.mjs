@@ -30,6 +30,7 @@ const SERVER = "src/lib/website-reference-image-server.ts";
 const GEN = "src/app/api/websites/generate/process/route.ts";
 const EDIT = "src/app/api/websites/edit/route.ts";
 const CLEANUP = "src/app/api/cron/website-storage-cleanup/route.ts";
+const SWEEP = "src/lib/websites/storage-cleanup.ts";
 const USAGE = "src/app/api/websites/storage-usage/route.ts";
 const CONTROLS = "src/components/website-builder/design-controls.tsx";
 const WORKSPACE = "src/components/website-builder/website-builder-workspace.tsx";
@@ -250,23 +251,26 @@ const MUTANTS = [
     from: 'if (c === \'"\' || c === "\'" || c === ")" || c === " " || c === "\\n" || c === "\\t" || c === "?") return i;',
     to: 'if (c === \'"\' || c === "\'" || c === ")" || c === " " || c === "\\n" || c === "\\t") return i;',
   },
+  // The reads themselves (a failed page, an empty answer, a 1,000-row
+  // cap) are executed and mutated by storage-cleanup.mutation.mjs; what
+  // this gate holds is the population and the hand-off.
   {
     name: "the cleanup forgets a table that carries HTML",
-    file: CLEANUP,
-    from: 'const tables = ["user_websites", "published_sites", "website_versions", "site_versions"] as const;',
-    to: 'const tables = ["user_websites", "published_sites", "website_versions"] as const;',
+    file: SWEEP,
+    from: 'export const HTML_TABLES = ["user_websites", "published_sites", "website_versions", "site_versions"] as const;',
+    to: 'export const HTML_TABLES = ["user_websites", "published_sites", "website_versions"] as const;',
   },
   {
     name: "the cleanup ignores sub-pages, so a multi-page site's photos are orphans",
-    file: CLEANUP,
-    from: "        for (const page of normalisePages(row.pages).pages) documents.push(page.html);",
-    to: "        void normalisePages;",
+    file: SWEEP,
+    from: "      for (const page of normalisePages(row.pages).pages) addEmbeddedPaths(page.html, embeddedPaths);",
+    to: "      void normalisePages;",
   },
   {
-    name: "a failed read is treated as 'nothing references anything'",
+    name: "the route stops handing the run to the sweep",
     file: CLEANUP,
-    from: "      if (error) throw error;\n      collect(data as { html_content?: unknown; pages?: unknown }[]);",
-    to: "      collect((data ?? []) as { html_content?: unknown; pages?: unknown }[]);",
+    from: "    const report = await runStorageCleanup(admin, { nowMs: Date.now(), dryRun });",
+    to: "    const report = await runStorageCleanup(createAdminClient(), { nowMs: Date.now(), dryRun });\n    void admin;",
   },
   {
     name: "the cleanup runs unauthenticated",

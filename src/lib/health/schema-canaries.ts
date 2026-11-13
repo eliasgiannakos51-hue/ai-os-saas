@@ -447,9 +447,103 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   },
   {
     kind: "table",
+    table: "translate_glossary",
+    migration: "20261029000000_translate_glossary.sql",
+    breaks: "Glossary terms the account saved stop showing or saving in the standalone Translate tool, and «it could not be saved» answers every attempt",
+  },
+  {
+    kind: "table",
+    table: "user_apps",
+    migration: "20261030000000_user_apps.sql",
+    breaks: "The App builder plans an app, charges for it and then cannot store it: «it could not be saved» after the model has already been paid for, and no app the account made is ever listed again",
+  },
+  {
+    kind: "table",
+    table: "iowork_devices",
+    migration: "20261031000000_iowork_devices.sql",
+    breaks: "iowork can connect no computer at all: the person types the code their machine is showing and gets «something went wrong», and /dashboard/iowork lists nothing it could disconnect",
+  },
+  {
+    kind: "table",
+    table: "iowork_pairings",
+    migration: "20261031000000_iowork_devices.sql",
+    breaks: "The desktop app can never show a code: pairing fails at its first step, before the person is asked to type anything, so no computer can be connected",
+  },
+  {
+    kind: "table",
+    table: "telegram_links",
+    migration: "20261031000001_telegram_link.sql",
+    breaks: "The whole Connect page goes down to a «not ready yet» Telegram section: the account can connect no chat, and a chat that was connected before loses the right to command Ionexa with nothing on screen saying why",
+  },
+  {
+    kind: "table",
+    table: "telegram_pairings",
+    migration: "20261031000001_telegram_link.sql",
+    breaks: "Pressing «Σύνδεση» on the Telegram section fails at its first step: no code is ever shown, so no chat can be connected",
+  },
+  {
+    kind: "table",
     table: "rebuild_projects",
     migration: "20261027000000_rebuild_projects.sql",
     breaks: "Rebuild plans an app and charges for the plan, then cannot save it: the person pays and sees «it could not be saved», and no app appears in its own history",
+  },
+  {
+    kind: "column",
+    table: "rebuild_projects",
+    column: "has_app_phase",
+    migration: "20261105000000_rebuild_app_phase.sql",
+    breaks: "Rebuild's «Approve plan» (Κομμάτι 3) cannot tell a two-phase app from a one-phase one: every app looks like it needs an App-logic phase, or none ever does",
+  },
+  {
+    kind: "column",
+    table: "rebuild_projects",
+    column: "app_definition",
+    migration: "20261105000000_rebuild_app_phase.sql",
+    breaks: "Rebuild charges for the App-logic phase and then cannot save its result: the person pays and sees «it could not be saved», and the Write phase that follows never gets the structured definition it needs",
+  },
+  {
+    kind: "column",
+    table: "rebuild_projects",
+    column: "subdomain",
+    migration: "20261106000000_rebuild_publish.sql",
+    breaks: "Rebuild's Publish (Κομμάτι 4) cannot save the address the app was given: the person sees it published and the link 404s, because /a/[subdomain] has nothing to look up",
+  },
+  {
+    // Κομμάτι 1 has no write path (the migration grants select only), so
+    // a missing table would not surface as a visible error: loadSkills
+    // catches the failed select and returns [] (lib/skills/load.ts), the
+    // same empty state as a reader with zero rows. A row put there by
+    // hand for testing would silently never appear, with nothing on
+    // screen to say why.
+    kind: "table",
+    table: "user_skills",
+    migration: "20261107000000_user_skills.sql",
+    breaks: "Skills (switch \"skills-tool\") shows «no skills yet» even to a reader a skill was put in by hand — loadSkills swallows the failed select and returns an empty list, with no error on screen to say the table never arrived",
+  },
+  {
+    kind: "table",
+    table: "pending_deletions",
+    migration: "20261108000000_pending_deletions.sql",
+    breaks: "With the switch \"deferred-deletion\" on, confirming an account deletion fails at its last step: scheduleDeletion's insert fails, the link is given back, and the person sees «Something went wrong» every time they try; Settings cannot show or cancel a scheduled deletion and api/cron/execute-deletions finds nothing to run",
+  },
+  {
+    // NOTHING FAILS WITHOUT IT, which is why it needs a probe: the
+    // application falls back (lib/account/pending-deletion.ts), so the
+    // only sign this file never ran is two guarantees quietly absent.
+    kind: "column",
+    table: "pending_deletions",
+    column: "previous_cancel_token_hashes",
+    migration: "20261112000000_pending_deletions_one_open.sql",
+    breaks: "Nothing on screen: a second confirmation of a deletion already scheduled writes a second row with the same date instead of joining the first (either email's link still cancels both), and a carried-out deletion leaves no record — the row still goes with the account, so nothing shows the deletion ever ran",
+  },
+  {
+    // logAdminAction does not read its insert's error and readAuditLog
+    // answers [] on one (lib/admin/audit-log.ts), so a missing table is
+    // silent on both sides — which is why it needs a probe.
+    kind: "table",
+    table: "admin_audit_log",
+    migration: "20261110000000_admin_audit_log.sql",
+    breaks: "Every admin action goes unrecorded: the admin dashboard's audit trail stays empty while refunds, credit adjustments and suspensions go through with no record of who did them, and nothing on screen says the table never arrived",
   },
   {
     kind: "table",
@@ -470,6 +564,33 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     column: "primary_colour",
     migration: "20261025000000_projects_colours.sql",
     breaks: "a project's colour picker (owner's message 2026-10-22, point 6) cannot save either colour: the PATCH route's write fails and the page shows the colour reverting every time",
+  },
+  {
+    kind: "column",
+    table: "projects",
+    column: "notes",
+    migration: "20261101000000_projects_notes.sql",
+    breaks: "«What Ionexa knows» (Projects Κομμάτι 4) cannot save: the PATCH route's write fails, the field reverts on every blur, and nothing a project's own chats/creates/plans/agent builds read ever carries what was written there",
+  },
+  {
+    kind: "column",
+    table: "projects",
+    column: "share_token",
+    migration: "20261102000000_projects_share_token.sql",
+    breaks: "Share (Projects Κομμάτι 7) cannot create or revoke a link: api/projects/[id]/share's POST/DELETE fail, and the project page's Share button never shows one",
+  },
+  {
+    kind: "column",
+    table: "meeting_actions",
+    column: "remind_at",
+    migration: "20261103000000_meeting_action_reminders.sql",
+    breaks: "«Remind me» (Meetings Κομμάτι 4) cannot save a reminder: the PATCH route's write fails, and api/cron/meeting-action-reminders has no column to read, so nothing is ever sent",
+  },
+  {
+    kind: "table",
+    table: "meeting_questions",
+    migration: "20261104000000_meeting_questions.sql",
+    breaks: "Q&A about a meeting (Meetings Κομμάτι 6) answers the question but fails to save it: api/meetings/[id]/ask's insert fails after the model has already been charged, and the question never shows again on reopening the meeting",
   },
   {
     kind: "function",
@@ -494,6 +615,13 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
   // 2026-10-08 (src/lib/account/erase-storage.ts), because Supabase
   // refuses that function's delete, so its absence breaks nothing.
   {
+    kind: "column",
+    table: "automation_flows",
+    column: "minutes_saved",
+    migration: "20261114000000_automation_minutes_saved.sql",
+    breaks: "«Σου γλίτωσε» (Automations, the switch automation-time-saved) is not drawn for anyone: the page's own read of the column fails and hides the minutes field and the time saved, so the owner sees nothing to set and nothing measured — every other part of Automations works as before",
+  },
+  {
     kind: "table",
     table: "github_connections",
     migration: "20261025100000_github_connections.sql",
@@ -504,5 +632,112 @@ export const SCHEMA_CANARIES: readonly SchemaCanary[] = [
     table: "mcp_servers",
     migration: "20261026000000_mcp_servers.sql",
     breaks: "Connect by address: adding an app fails at its final save, and the apps already connected are not listed",
+  },
+  {
+    kind: "function",
+    fn: "clamp_credits_to_plan",
+    migration: "20261117000000_billing_reversals.sql",
+    breaks: "a move to a lower plan or the end of a subscription leaves the higher plan's balance in place instead of lowering it to the new allowance",
+  },
+  {
+    kind: "function",
+    fn: "reverse_purchased_credits",
+    migration: "20261117000000_billing_reversals.sql",
+    breaks: "a refunded or lost-dispute credit pack keeps its credits on the balance",
+  },
+  {
+    // Without the FUNCTION, nothing is ever added to the business's own
+    // network — extraction is best-effort, never allowed to fail the chat
+    // itself (lib/chat/memory.ts), the same shape memory_record above is
+    // held to, so the failure is one log line and the panel on
+    // /dashboard/ai-memory silently stops growing.
+    kind: "function",
+    fn: "business_contact_record",
+    migration: "20261121000000_business_contacts.sql",
+    breaks: "no customer, supplier or partner named in Chat is ever remembered, and the failure is a log line",
+  },
+  {
+    // «Μόνο Ευρώπη» (agent/mistral, 2026-11-07): a column add on an
+    // EXISTING table, not a new table — the shape the pending list this
+    // repository keeps said this canary should take.
+    kind: "column",
+    table: "user_credits",
+    column: "eu_only_ai",
+    migration: "20261122000000_eu_only_ai.sql",
+    breaks: "the account's own «Μόνο Ευρώπη» toggle (dashboard/settings) 500s on GET and PATCH, which looks identical to the setting simply not existing",
+  },
+  {
+    // SILENT ON PURPOSE: the crons log the failed read and skip nobody
+    // (lib/auth/suspended-accounts.ts), so this probe is the only place
+    // the gap shows.
+    kind: "function",
+    fn: "suspended_user_ids",
+    migration: "20261115000000_account_suspension.sql",
+    breaks: "A suspended account's agents, automations, flows and reminders keep running on schedule, and an account suspended before 2026-11-05 can clear its own suspension flag — sign-in and the API are still refused",
+  },
+  {
+    // ONE OBJECT FOR THE WHOLE FILE: discord_builds and discord_build_items
+    // are the other two 20261119000000 creates, and a missing
+    // discord_guilds answers the same "was this ever pasted in" question
+    // for all three — api/discord/connect's callback writes this one first.
+    kind: "table",
+    table: "discord_guilds",
+    migration: "20261119000000_discord_bot.sql",
+    breaks: "connecting a Discord server fails at the final save after the OAuth round trip, and /dashboard/discord shows no server ever connected",
+  },
+  {
+    // Automations Κομμάτι 2a (2026-11-08): modeFor/modesByFlowIds
+    // (lib/automations/flow-access.ts) already answer DEFAULT_FLOW_MODE
+    // on a column-missing error, same as minutes_saved before it — so a
+    // database this was never pasted into looks identical to one where
+    // every automation is simply "auto", and nothing else would say so.
+    kind: "column",
+    table: "automation_flows",
+    column: "mode",
+    migration: "20261123000000_automation_mode.sql",
+    breaks: "every automation silently stays \"auto\" — Shadow and Supervised can be set from the PATCH route but never take effect, with no error anywhere",
+  },
+  {
+    // FS1 (2026-11-11): api/voice/live/start writes this row after the
+    // first minute is paid and before the answer is handed to the
+    // browser; without the table it refunds nothing it has not taken and
+    // answers «not ready», which from the screen is one sentence.
+    kind: "table",
+    table: "voice_live_sessions",
+    migration: "20261124000000_voice_live_sessions.sql",
+    breaks: "a live voice conversation cannot start for anyone the switch \"voice-live\" is open to — the call is refused before it connects",
+  },
+  // Ionexa Payments (2026-11-11): one canary for the four tables.
+  {
+    kind: "table",
+    table: "payments_accounts",
+    migration: "20261125000000_ionexa_payments.sql",
+    breaks: "the Payments page cannot connect a business or show any data for anyone the switch \"ionexa-payments\" is open to — the connect route catches the missing table and answers \"not ready\"",
+  },
+  // Agent approvals (AG1 Κ3, 2026-11-11).
+  {
+    kind: "table",
+    table: "agent_approvals",
+    migration: "20261126000000_agent_approvals.sql",
+    breaks: "agents cannot request approval for irreversible actions — every action that needs approval would fail silently, with the agent either proceeding without asking or stopping with no way to resume",
+  },
+  {
+    kind: "column",
+    table: "payments_accounts",
+    column: "invoice_settings",
+    migration: "20261129000000_payments_invoices.sql",
+    breaks: "the invoice settings form returns null, and every invoice attempt falls back to hard-coded defaults rather than the seller's saved preferences",
+  },
+  {
+    kind: "table",
+    table: "payments_coupons",
+    migration: "20261128000000_payments_coupons.sql",
+    breaks: "the coupons tab shows nothing, creating a coupon fails, and applying discounts at checkout is impossible",
+  },
+  {
+    kind: "table",
+    table: "payments_subscriptions",
+    migration: "20261127000000_payments_subscriptions.sql",
+    breaks: "the payments dashboard subscriptions tab shows nothing, recurring product checkout fails to record the subscription, and webhook handlers for subscription lifecycle events silently lose data",
   },
 ];

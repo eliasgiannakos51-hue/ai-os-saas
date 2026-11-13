@@ -139,17 +139,31 @@ console.log("\n== 4. EVERY page goes through EVERY check ==");
 {
   const gen = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
   ok("the split happens before the checks",
-    gen.indexOf("splitGeneratedPages(") < gen.indexOf("findInventedNumbers("));
+    // findInventedNumbers itself moved inside website-invented-numbers-repair.ts
+    // (agent/mistral, 2026-11-08, the "fix and re-check" repair); the
+    // generate route now calls THAT, per-document, in a for loop rather
+    // than a single flatMap — see the PER_PAGE regex below.
+    gen.indexOf("splitGeneratedPages(") < gen.indexOf("repairInventedNumbers("));
   ok("...and after image resolution, so one Unsplash budget covers the site",
     gen.indexOf("resolveWebsiteImagePlaceholders(") < gen.indexOf("splitGeneratedPages("));
   const PER_PAGE = [
-    ["invented numbers", /documents\.flatMap\(\(doc\) => findInventedNumbers\(doc, description\)\)/],
+    // A for LOOP, not a .map/.flatMap, because the repaired html has to be
+    // written BACK into documents[i] (the repair, not just the detection,
+    // is per-page) — a flatMap over doc would read documents[i] without
+    // ever being able to assign into it.
+    ["invented numbers", /for \(let i = 0; i < documents\.length; i \+= 1\) \{\s*const repaired = repairInventedNumbers\(documents\[i\], description\);/],
     // AND WITH THE SITE'S OWN PAGES. Without that argument a nav link to
     // another page of this site is indistinguishable from the broken
     // /about form this pass rewrites, and every one of them became "#".
     ["link safety", /documents\.map\(\s*\(doc\) => makeGeneratedLinksSafe\(doc, \{ pageSlugs: generatedSlugs \}\)\.html\s*\)/],
     ["unsplash attribution", /cleaned\.map\(\(doc\) => enforceUnsplashAttribution\(doc\)\)/],
-    ["script stripping", /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/],
+    // NOT THE WHOLE CALL SPELLED OUT, SAME REASON AS THE SCAN BELOW. This
+    // used to be /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/,
+    // which went red the moment the strip gained a second argument
+    // (cinematicSitesEnabled, agent/mistral, cinematic sites Phase 1a) —
+    // again the punctuation, not the property. The property is that the
+    // strip runs over `cleaned`, one call per document.
+    ["script stripping", /cleaned\.map\(\s*\(doc\)\s*=>\s*stripDisallowedExternalScripts\(\s*doc\b/],
     // NOT THE WHOLE CALL SPELLED OUT. This used to be
     // /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/,
     // which went red the moment the scan gained a second argument — the

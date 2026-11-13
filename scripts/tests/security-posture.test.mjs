@@ -184,6 +184,76 @@ const ADMIN_ONLY_TABLES = new Set([
   // who could read it would learn our per-request margin. Reached only
   // through createAdminClient(), behind that gate.
   "routing_decisions",
+  // iowork (Φάση 1, 2026-10-25). THE ODD ONE ON THIS LIST, and worth the
+  // sentence: every table above is the owner's business data, kept from
+  // customers. This one is the customer's own — a ten-minute handshake
+  // row that, once claimed, even carries their user_id.
+  //
+  // Deny-all anyway, and that IS the argument. The row holds the eight
+  // characters their computer is showing (IOWORK-SECURITY-PLAN §3), and a
+  // policy letting an account select its own pending rows would be a
+  // readable surface aimed at exactly the value a guesser wants. Nothing
+  // needs to read it from a browser: the person types the code into a
+  // route, and the desktop app collects by its 32-byte claim secret.
+  // Neither is a SELECT. api/cron/scheduled-runs deletes rows past an hour.
+  "iowork_pairings",
+  // Telegram pairings (the owner's directive 24, κομμάτι 1): RLS on, no
+  // policy, on purpose and for iowork_pairings' reason one line up. The
+  // eight-character code sits here for ten minutes
+  // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts), and a
+  // policy letting an account SELECT its own pending rows is also a shape
+  // a guesser can aim at. Nothing needs it from a browser:
+  // api/telegram/link and lib/telegram/link-state.ts both read it through
+  // createAdminClient, filtered on the caller's own id.
+  "telegram_pairings",
+  // Deferred account deletion (directive 39 Κομμάτι 3): RLS on, no
+  // policy. The row holds the SHA-256 of the emailed cancel token, and
+  // the person proves who they are with that token or with their session
+  // — never by reading this table. Every query is in
+  // lib/account/pending-deletion.ts, whose helpers take
+  // ReturnType<typeof createAdminClient>; the callers are the confirm,
+  // cancel and status routes and api/cron/execute-deletions.
+  "pending_deletions",
+  // The admin dashboard's audit trail (directive 42 Κομμάτι 9). The
+  // owner's record of what staff did to which account, so a customer
+  // reading it would learn who was looked at; one writing it could forge
+  // or bury an entry. Written and read only in lib/admin/audit-log.ts,
+  // through createAdminClient, behind the isAdminEmail gates of the
+  // admin routes. RLS since 20261111000000_admin_audit_log_rls.sql — its
+  // create migration had only a REVOKE.
+  "admin_audit_log",
+  // Discord (the owner's Discord directive, 2026-11-05): RLS on, no
+  // policy, all grants revoked from anon and authenticated, deny-all for
+  // the row-points-at-someone-else's-resource reason rather than the
+  // pairing tables' secret-in-flight one — a client insert into
+  // discord_guilds could claim a server it never ran OAuth for, and one
+  // into discord_build_items could make Undo delete something that
+  // existed before an apply. Read and written only through
+  // createAdminClient() in lib/discord/store.ts, filtered on the
+  // session's own user_id, which section 2 asserts file by file.
+  "discord_guilds",
+  "discord_builds",
+  "discord_build_items",
+  // FS1 live voice (20261124000000_voice_live_sessions.sql): billing and
+  // lifecycle record. REVOKE ALL from anon, authenticated is in the
+  // migration; the table has no grants and no policies. Every read and
+  // write goes through createAdminClient() in api/voice/live/start, tick,
+  // end and cron/voice-live-sweep. A client insert could open a session
+  // row without paying; a client update could extend one past its paid
+  // time.
+  "voice_live_sessions",
+  // Ionexa Payments (20261125000000_ionexa_payments.sql): all four tables
+  // deny-all. REVOKE ALL from anon, authenticated is in the migration;
+  // every read and write goes through createAdminClient() in
+  // lib/payments/*.ts and api/payments/. A client insert into
+  // payments_products could create a checkout that charges a stranger;
+  // a client update to payments_accounts could fake payouts_enabled.
+  "payments_accounts",
+  "payments_products",
+  "payments_transactions",
+  "payments_payouts",
+  "payments_subscriptions",
+  "payments_coupons",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -356,6 +426,48 @@ checkTrue(
   !/activation_used_at\s*[:=]/.test(onboardingRoute)
 );
 
+// THE GRANT, NOT ONLY THE ROUTE (2026-11-05 review, A2). The baseline's
+// UPDATE policy sat on Supabase's table-wide UPDATE grant, so
+// activation_used_at was writable through the account's own session
+// whatever the route above did. The effective grant is REPLAYED over every
+// migration in order: Supabase starts it table-wide, a table-wide revoke
+// empties it, a column grant adds to it.
+let onboardingUpdate = { tableWide: true, cols: new Set() };
+for (const f of readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).sort()) {
+  const text = readFileSync(`supabase/migrations/${f}`, "utf8").replace(/--[^\n]*/g, "");
+  for (const m of text.matchAll(/\b(grant|revoke)\s+update(?:\s*\(([^)]*)\))?\s+on\s+(?:table\s+)?public\.user_onboarding\s+(?:to|from)\s+([^;]*);/gi)) {
+    if (!/\bauthenticated\b/.test(m[3])) continue;
+    const cols = (m[2] ?? "").split(",").map((c) => c.trim()).filter(Boolean);
+    if (m[1].toLowerCase() === "revoke") {
+      if (cols.length === 0) onboardingUpdate = { tableWide: false, cols: new Set() };
+      else for (const c of cols) onboardingUpdate.cols.delete(c);
+    } else if (cols.length === 0) onboardingUpdate.tableWide = true;
+    else for (const c of cols) onboardingUpdate.cols.add(c);
+  }
+}
+checkTrue("the account's UPDATE on user_onboarding is a column list, not the whole table", !onboardingUpdate.tableWide);
+checkTrue("...and activation_used_at is not on it", !onboardingUpdate.cols.has("activation_used_at"));
+// The population: every column the app writes through the account's OWN
+// client — each one must be on the list, or that write fails in production.
+const onboardingWritten = new Set();
+const onboardingWriters = [];
+(function walkOnboarding(dir) {
+  for (const e of readdirSync(dir)) {
+    const f = `${dir}/${e}`;
+    if (statSync(f).isDirectory()) walkOnboarding(f);
+    else if (/\.(ts|tsx)$/.test(e)) {
+      const code = readFileSync(f, "utf8");
+      if (!/supabase\s*\.from\("user_onboarding"\)\s*\.(update|upsert)\(/.test(code)) continue;
+      onboardingWriters.push(f);
+      for (const m of code.matchAll(/\.from\("user_onboarding"\)\s*\.update\(\{([^}]*)\}/g)) for (const k of m[1].matchAll(/\b([a-z_]+):/g)) onboardingWritten.add(k[1]);
+      for (const m of code.matchAll(/\bupdate\.([a-z_]+)\s*=/g)) onboardingWritten.add(m[1]);
+      for (const m of code.matchAll(/const update[^=]*=\s*\{([^}]*)\}/g)) for (const k of m[1].matchAll(/\b([a-z_]+):/g)) onboardingWritten.add(k[1]);
+    }
+  }
+})("src");
+checkTrue(`the account's own writes to user_onboarding were found (${onboardingWriters.length} files, ${onboardingWritten.size} columns)`, onboardingWriters.length >= 2 && onboardingWritten.size >= 4);
+for (const c of onboardingWritten) checkTrue(`...${c} is on the account's UPDATE list`, onboardingUpdate.cols.has(c));
+
 // The importer stamps user_id from the SESSION and drops any that came
 // in on the row. The rows originate from a model's output and a user's
 // file, and neither gets a say in whose account they land in.
@@ -457,11 +569,40 @@ const NO_SESSION_BY_DESIGN = {
     "the recipient is FIXED to ADMIN_EMAILS — the sender's address is only ever reply-to " +
     "and never selects a destination, which is the difference between a contact form and " +
     "an open relay. Nothing is stored.",
+  "src/app/api/iowork/pair/route.ts":
+    "the iowork desktop app asking for a pairing code, BEFORE any account is " +
+    "involved — that is the whole step, and there is no session to check because " +
+    "the app was just installed and belongs to nobody. It accepts an operating " +
+    "system and a label, writes one ten-minute row, and returns a code plus a " +
+    "32-byte claim secret. Rate-limited to 10/hour per IP through " +
+    "consume_rate_limit. It reads nothing, charges nothing, and the row it " +
+    "creates is useless until a SIGNED-IN person types that code at " +
+    "/dashboard/iowork (api/iowork/devices, which does authenticate).",
+  "src/app/api/iowork/pair/token/route.ts":
+    "the iowork desktop app collecting its device token, authenticated by the " +
+    "32-byte claim secret it was given above — not by a cookie, because the app " +
+    "is not a browser. The secret is looked up as a SHA-256 digest, never " +
+    "compared in process, and the pairing is single-use: collected_at is " +
+    "stamped after the device row exists, so a second call answers 409. The " +
+    "answer names the account the pairing joined, so a person whose code was " +
+    "read over their shoulder sees a name that is not theirs. Rate-limited " +
+    "to 180/hour per IP, which is well above the ~60 polls an honest ten-minute " +
+    "pairing makes.",
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
+  "src/app/api/discord/interactions/route.ts":
+    "Discord's Interactions Endpoint (the owner's Discord directive, 2026-11-05): " +
+    "authenticated by verifyInteraction's Ed25519 signature over the timestamp plus " +
+    "the raw body against DISCORD_PUBLIC_KEY, not a cookie — Discord calls this, not " +
+    "a browser, so there is no session to check. The request names a guild_id, never " +
+    "a user: guildOwner(guildId) resolves it to the Ionexa account that ran OAuth for " +
+    "that server (lib/discord/store.ts), and only a member with Manage Server or " +
+    "Administrator in that guild gets an answer. Rate-limited to 30/hour per guild " +
+    "through checkRateLimit scope discord_ask.",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/cron/lead-reminders/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; sends each due contact reminder once (package 18) — a note in the owner's bell and a push where they opted in — and marks it sent before delivering, so a run that dies leaves one unsent rather than two sent. It reads no request body and spends nothing",
+  "src/app/api/cron/meeting-action-reminders/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; same shape as cron/lead-reminders — sends each due meeting-action reminder once (Meetings Κομμάτι 4) and marks it sent before delivering, so a run that dies leaves one unsent rather than two sent. It reads no request body and spends nothing",
   "src/app/api/cron/automation-flows/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED; runs every due automation (package 30) and the runs uploaded files queued, each charged per AI box to the automation's owner, so it spends real money on many accounts per call",
   "src/app/api/cron/affiliate-payouts/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); moves real money to affiliates' Stripe Connect accounts, so the claim of accrued commissions is atomic (claim_affiliate_commissions) and each transfer carries an idempotency key",
@@ -473,6 +614,14 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/monthly-credits/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts); grants every annual subscriber their monthly credit allowance, so it moves real entitlement across many accounts per call",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
+  // The deferred-deletion pair (directive 39 Κομμάτι 3, switch
+  // "deferred-deletion"). Neither can have a session: one is Vercel's
+  // scheduler, the other a link opened from an inbox, possibly on another
+  // device and possibly by somebody already signed out.
+  "src/app/api/delete-account/cancel/route.ts":
+    "the Keep-my-account link from the deletion-scheduled email, which has to work signed out and on another device, like the confirm link beside it. The 256-bit token from generateCancelToken() is the credential: only its SHA-256 is stored (pending_deletions.cancel_token_hash, or previous_cancel_token_hashes once a second confirmation joined the same schedule). cancelDeletion() resolves that digest to the account whose OPEN schedule it belongs to — cancelled_at and executed_at both null — and then cancels every open row of that account in ONE conditional update, so a token works while its schedule is open, never after it was cancelled or carried out, never against a deletion asked for later, and a wrong one changes nothing. It can only cancel a deletion, which is the safe direction. Rate-limited to 10/hour per IP (scope delete_account_cancel), and the answer for a bad token is the same 400 whichever condition failed",
+  "src/app/api/cron/execute-deletions/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It DELETES ACCOUNTS — the most destructive job in the app — so it reads no request body and takes no parameter: everything it acts on is a pending_deletions row whose delete_after has passed, not cancelled and with its account still attached, at most 50 a run (getActionableDeletions). For each it first writes executed_at (claimExecution, conditional on the row still being uncancelled, so a cancel made during the run stops it), then runs the confirm route's erase sequence in the same order — storage, the production-errors scrub, the Stripe subscription, then deleteUser — and a failure at any step skips that account before deleteUser and gives the claim back (releaseExecution), so the row is open again and the next daily run retries it; a claim that could not be given back is retried too, because a claimed row whose account still exists stays actionable",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
   "src/app/api/health/route.ts":
@@ -491,6 +640,10 @@ const NO_SESSION_BY_DESIGN = {
     "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It collects Anthropic Batch API results for scheduled agent runs and SETTLES the charge for each one, so an unauthenticated call would take money from other people's accounts and deliver their agents' output. It reads no request body: everything it acts on is rows it finds in agent_runs with status 'queued'.",
   "src/app/api/cron/cost-alerts/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED — with no secret configured the route refuses to run on any deployment. It reads aggregates across every account's spend and can send email, so it is in the same class as the other cron routes and not a lighter one.",
+  "src/app/api/cron/voice-live-sweep/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It ENDS live voice calls left open past their paid time — hangs up each stale call, bills the overrun minutes (capped at LIVE_MAX_SESSION_MINUTES), and closes the session row as 'swept'. It reads no request body and takes no parameter: everything it acts on is a voice_live_sessions row with ended_at IS NULL whose paid_until has passed by LIVE_GRACE_SECONDS.",
+  "src/app/api/pay/[productId]/route.ts":
+    "the Ionexa Payments public checkout redirect — a customer (not an Ionexa user) clicks 'Pay' and is sent to Stripe Checkout. No session because the payer has no Ionexa account and never will; Stripe collects the card. Rate-limited to 30/hour per IP. Reads only the product and its owner's connected account through createAdminClient(), and redirects to Stripe — it writes nothing, charges nothing itself, and the amount is fixed by the product's Stripe Price, not by any request parameter.",
   "src/app/s/[subdomain]/sitemap.xml/route.ts":
     "the public site's own sitemap, for its owner to submit to Search Console. Same posture as the routes above — admin client, rate limit, subdomain validated before any lookup — and it selects only `pages, status, is_active, updated_at`: the page SLUGS and a timestamp, never html_content, so nothing about a site's contents is reachable here that /s/<subdomain>/<page> does not already serve publicly. A site that is not live is a 404 rather than an empty sitemap, so this cannot be used to learn that a withdrawn address once existed.",
   "src/app/sitemap.ts":
@@ -500,6 +653,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/opengraph-image.tsx": "the share card for the landing page, rendered from constants; it reads no table",
   "src/app/s/[subdomain]/robots.txt/route.ts":
     "the same, for robots.txt. It reads only `status, is_active` and returns a fixed two-line file built from the address in the request — it discloses nothing that requesting the site itself does not. Worth stating plainly: a crawler reads robots.txt from the HOST ROOT, so while sites are served at /s/<subdomain> the file that actually governs them is the app's own /robots.txt; this one exists for Search Console and for the day a wildcard domain makes it the root file.",
+  "src/app/a/[subdomain]/route.ts":
+    "the public web for a published Rebuild app (Κομμάτι 4's third piece) — the same posture as /s/[subdomain]/route.ts, at its own address. Reads through the admin client and selects only `id, html, is_active, updated_at`; rebuild_projects has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited (the same publicRequestAllowed window the sites route uses), and every response carries the published-site CSP. The stored html is re-checked with checkAppHtml at read time, not only at write time, because this is the moment it starts being served to a stranger with no session at all — a row that would not pass the check today is served as absent rather than as whatever it is.",
 };
 
 // THE SITEMAP'S JUSTIFICATION, MADE CHECKABLE.

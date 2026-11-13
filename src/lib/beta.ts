@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { hasLiveSubscription } from "@/lib/billing/plan-resolution";
 
 // Beta testers get full Ultimate-tier access (see api/signup/route.ts,
 // which sets subscription_tier: "ultimate" directly in user_metadata when
@@ -83,13 +84,17 @@ export async function getBetaDaysRemaining(userId: string): Promise<number | nul
 // now" bypass used at every credit-deduction and plan-gating call site —
 // combines the historical flag, the live expiry check, and one more
 // guard: an account that's gone on to become a REAL paying subscriber
-// (has a Stripe customer id) should never be downgraded just because its
-// old beta window closed — Stripe's own webhook is the source of truth
-// for them from that point on, same as any other paying customer.
+// should never be downgraded just because its old beta window closed —
+// Stripe's own webhook is the source of truth for them from that point
+// on, same as any other paying customer.
+//
+// "Paying" is a LIVE SUBSCRIPTION (hasLiveSubscription), never a customer
+// id (2026-11-05, ΑΣ-4.19): the customer id is written when a checkout
+// page is opened, before anything is paid.
 export async function hasActiveBetaBypass(
   user: { id: string; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): Promise<boolean> {
   if (!user || !isBetaTester(user)) return false;
-  if (user.user_metadata?.stripe_customer_id) return false;
+  if (hasLiveSubscription(user)) return false;
   return isBetaAccessActive(user.id);
 }

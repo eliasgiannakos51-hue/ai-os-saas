@@ -22,6 +22,7 @@ import {
 import { collectBatch, submitBatch, batchProgress, type BatchItem } from "@/lib/ai/batch/batch-client";
 import type { UserAgent } from "@/lib/agents/agent-config";
 import type { User } from "@supabase/supabase-js";
+import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
 /**
  * SCHEDULED AGENT RUNS, SUBMITTED IN BULK AND COLLECTED LATER (V4 #13).
@@ -221,11 +222,16 @@ export async function collectAgentBatches(params: {
   const { admin, apiKey } = params;
   const summary: CollectionSummary = { batchesPolled: 0, settled: 0, fellBack: 0, stillWaiting: 0 };
 
+  // A SUSPENDED ACCOUNT'S RESULTS ARE NOT COLLECTED, DELIVERED OR RE-RUN
+  // (2026-11-05 review, A1; lib/auth/suspended-accounts.ts). The run stays
+  // queued; its batch's own expiry is what eventually closes it.
+  const suspended = await suspendedUserIds(admin, "agents:batch-collect");
   const { data: queued, error } = await admin
     .from("agent_runs")
     .select("id, agent_id, user_id, batch_id, queued_at, batch_fallbacks")
     .eq("status", "queued")
     .not("batch_id", "is", null)
+    .not("user_id", "in", suspendedIn(suspended))
     .order("queued_at", { ascending: true })
     .limit(params.limit ?? 200);
   if (error) {

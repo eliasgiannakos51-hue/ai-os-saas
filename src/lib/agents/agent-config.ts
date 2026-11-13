@@ -94,6 +94,9 @@ export type AgentConfigJson = {
   /** What the builder understood, echoed back on the preview screen. Not
    *  used at run time. */
   builderSummary?: string;
+  /** IDs of the tools this agent is allowed to use (from AGENT_TOOLS).
+   *  Absent means no tools; the UI saves the selection. */
+  enabledToolIds?: string[];
 };
 
 export type AgentDraft = {
@@ -125,6 +128,10 @@ export type UserAgent = {
   last_run_at: string | null;
   next_run_at: string | null;
   consecutive_failures: number;
+  /** Per-agent credit ceiling. NULL = no cap. AG1 Κ3. */
+  credit_cap: number | null;
+  /** Which action kinds need approval: {send: bool, publish: bool, spend: bool}. AG1 Κ3. */
+  approval_settings: Record<string, boolean> | null;
 };
 
 export type AgentRun = {

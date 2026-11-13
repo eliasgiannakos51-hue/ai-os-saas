@@ -64,6 +64,27 @@ export type UserDataTable = {
   needsExplicitErasure?: boolean;
   erasureNote?: string;
   /**
+   * Set when the rows OUTLIVE the account on purpose: the foreign key to
+   * auth.users is ON DELETE SET NULL, so deleting the account detaches
+   * each row instead of removing it. Allowed only where what is left is
+   * not personal data, and the two lists are the whole table between
+   * them:
+   *
+   *   survivingColumns  keep their value — none of it about a person
+   *   clearedColumns    emptied by the database in the update that
+   *                     detaches the row (the user column itself, and
+   *                     anything a trigger forgets with it)
+   *
+   * gdpr-coverage.test.mjs holds the migrations to both lists (every
+   * column on one of them, a trigger clearing each cleared one) and
+   * gdpr-erasure.dbtest.mjs holds the live catalogue to the foreign key.
+   */
+  keptWithoutOwner?: {
+    survivingColumns: string[];
+    clearedColumns: string[];
+    note: string;
+  };
+  /**
    * Whether anything in the product still WRITES this table.
    *
    *   legacy       a feature that has been replaced. Nothing writes it
@@ -122,6 +143,67 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "chat_conversations", label: "chat_conversations", scope: "user_content" },
   { table: "chat_messages", label: "chat_messages", scope: "user_content" },
   { table: "chat_memory", label: "chat_memory", scope: "user_content" },
+  // business_contacts (the 2026-11-07 market round, docs/QUEUE.md «ΤΟ
+  // MOAT»): the customers, suppliers and partners named in a
+  // conversation — behind the switch "business-contact-memory".
+  { table: "business_contacts", label: "business_contacts", scope: "user_content" },
+  // voice_live_sessions (FS1, 2026-11-11): one row per live voice call —
+  // ids, times and minutes billed, never audio or words; the words are
+  // chat_messages. Behind the switch "voice-live".
+  {
+    table: "voice_live_sessions",
+    label: "voice_live_sessions",
+    scope: "account",
+    // Server-only table (no policy, no grant): exported by the server,
+    // without the provider's own id for the call.
+    serverExportColumns: ["id", "conversation_id", "started_at", "paid_until", "minutes_billed", "ended_at", "end_reason"],
+  },
+  // The Discord connector (agent/discord, 2026-11-07): the servers
+  // connected, the plans made for them and the items each plan built —
+  // behind the switch "discord-bot".
+  // Ionexa Payments (2026-11-11): the user's connected payment account,
+  // their products, their customers' transactions and their payout history.
+  // Behind the switch "ionexa-payments".
+  {
+    table: "payments_accounts",
+    label: "payments_accounts",
+    scope: "account",
+    serverExportColumns: ["id", "business_name", "payouts_enabled", "charges_enabled", "country", "default_currency", "created_at"],
+  },
+  { table: "payments_products", label: "payments_products", scope: "user_content" },
+  {
+    table: "payments_transactions",
+    label: "payments_transactions",
+    scope: "account",
+    serverExportColumns: ["id", "product_id", "amount_cents", "currency", "fee_cents", "net_cents", "status", "customer_email", "customer_name", "description", "created_at"],
+  },
+  {
+    table: "payments_payouts",
+    label: "payments_payouts",
+    scope: "account",
+    serverExportColumns: ["id", "amount_cents", "currency", "status", "arrival_date", "created_at"],
+  },
+  // Payments coupons (2026-11-11): discount codes the seller created.
+  {
+    table: "payments_coupons",
+    label: "payments_coupons",
+    scope: "account",
+    serverExportColumns: ["id", "code", "percent_off", "amount_off_cents", "duration", "is_active", "created_at"],
+  },
+  // Payments subscriptions (2026-11-11): recurring subscriptions the
+  // user's own customers have.
+  {
+    table: "payments_subscriptions",
+    label: "payments_subscriptions",
+    scope: "account",
+    serverExportColumns: ["id", "product_id", "stripe_subscription_id", "customer_email", "status", "current_period_end", "created_at"],
+  },
+  // Agent approvals (AG1 Κ3, 2026-11-11): pending, approved and denied
+  // actions the agent paused for.
+  { table: "agent_approvals", label: "agent_approvals", scope: "user_content" },
+  { table: "discord_guilds", label: "discord_guilds", scope: "user_content" },
+  { table: "discord_builds", label: "discord_builds", scope: "user_content" },
+  { table: "discord_build_items", label: "discord_build_items", scope: "user_content" },
   { table: "ai_missions", label: "missions", scope: "user_content" },
   { table: "user_websites", label: "websites", scope: "user_content" },
   { table: "website_versions", label: "website_versions", scope: "user_content" },
@@ -205,12 +287,34 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // MASTER 16, package 26: a game the person described — its plan, its
   // code and its last versions. All of it is theirs to take with them.
   { table: "user_games", label: "user_games", scope: "user_content" },
+  // Skills (2026-10-31): a procedure the person taught Ionexa by hand —
+  // its name, when it applies, its steps, its files. Theirs to take with
+  // them, same as every other thing they built.
+  { table: "user_skills", label: "user_skills", scope: "user_content" },
   // Rebuild (2026-10-27): an app the person described — its plan, the
   // labels of a page they pointed at, its code and its last versions.
   // All of it is theirs to take with them.
   { table: "rebuild_projects", label: "rebuild_projects", scope: "user_content" },
   // The Coming Soon screen's "Notify me": which not-ready tools this person asked about.
   { table: "tool_notify_subscriptions", label: "tool_notify_subscriptions", scope: "user_content" },
+  // The standalone Translate tool's glossary: words this person said to keep
+  // exactly as written in every translation.
+  { table: "translate_glossary", label: "translate_glossary", scope: "user_content" },
+  { table: "user_apps", label: "user_apps", scope: "user_content" },
+  // iowork (Φάση 1, 2026-10-25): which computers this account connected,
+  // what they are called and which operating system they run. It holds no
+  // path and no file name — IOWORK-SECURITY-PLAN §4 keeps all of that on
+  // the computer — so this is the whole of what an export can carry, and
+  // it is genuinely theirs: the names they gave their own machines.
+  { table: "iowork_devices", label: "iowork_devices", scope: "user_content" },
+  // Telegram (the owner's directive 24, κομμάτι 1, 2026-10-31): which
+  // Telegram chat this account connected, and the name it goes by. The chat
+  // id itself is in two unreadable shapes — a keyed HMAC and ciphertext
+  // (src/lib/telegram/identity.ts) — so what an export can honestly carry
+  // is the Telegram name and username, which are the person's own and are
+  // what they would need to recognise the row. An erasure takes the whole
+  // row, and with it the chat's ability to command the account.
+  { table: "telegram_links", label: "telegram_links", scope: "user_content" },
   // Redesign phase 2: the folder and its goal, both written by the person.
   // The MEMBERSHIP rows are entity_links, already listed elsewhere in this
   // registry, so an export carries the project and the edges that say what
@@ -228,6 +332,11 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // meeting row would make them indistinguishable from the proposals in
   // `meetings.proposed_actions`, which nobody agreed to.
   { table: "meeting_actions", label: "meeting_actions", scope: "user_content" },
+  // Κομμάτι 6: every question asked about a meeting, and the answer it
+  // got — the same reason data_analysis_questions is its own row below:
+  // a person's own words to the product, not data about the meeting
+  // itself.
+  { table: "meeting_questions", label: "meeting_questions", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
   { table: "ai_websites", label: "ai_website_entries", scope: "user_content" },
 
@@ -415,6 +524,26 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // export nothing while looking covered.
   { table: "affiliates", label: "affiliate_account", scope: "account" },
   { table: "account_deletion_requests", label: "account_deletion_requests", scope: "account" },
+  // Deferred deletion (directive 39 Κομμάτι 3): when this account was
+  // scheduled for deletion, when it will run, and whether it was
+  // cancelled. The person's own record, so it is exported — read by the
+  // server because the table is deny-all, and WITHOUT the link digests
+  // (cancel_token_hash, previous_cancel_token_hashes): a digest of the
+  // credential that can stop a deletion is not information about them.
+  // NOT removed when the deletion runs, since 20261112000000: the row is
+  // the record that it ran.
+  {
+    table: "pending_deletions",
+    label: "scheduled_account_deletion",
+    scope: "account",
+    serverExportColumns: ["id", "delete_after", "cancelled_at", "executed_at", "created_at"],
+    keptWithoutOwner: {
+      survivingColumns: ["id", "delete_after", "cancelled_at", "executed_at", "created_at"],
+      clearedColumns: ["user_id", "cancel_token_hash", "previous_cancel_token_hashes"],
+      note:
+        "The record that a deletion request was made and carried out, kept for accountability (GDPR Art. 5(2)): when it was asked for, when it was due, whether it was cancelled, when it ran. The foreign key is ON DELETE SET NULL (20261112000000_pending_deletions_one_open.sql), and its trigger pending_deletions_forget_tokens empties both link digests in the same update, so what is left names nobody: the table never had an email column, and the account id is gone with the account.",
+    },
+  },
 
   // --- Sensitive: exported, but with the secret columns stripped ---
   {
@@ -540,6 +669,29 @@ export const NON_PERSONAL_TABLES = [
   // answered. gdpr-coverage.test.mjs holds that sweep in place; without
   // it this entry would be wrong again.
   "rate_limit_log",
+  // iowork pairings: a code, two hashes, an operating system and a label,
+  // alive for ten minutes (PAIRING_TTL_MINUTES, src/lib/iowork/pairing.ts).
+  //
+  // THE SAME REASON AS rate_limit_log ABOVE, and it has to be the real one:
+  // not "no personal data" — a claimed row does carry a user_id — but that
+  // nothing in this table survives to be handed over or erased.
+  // api/cron/scheduled-runs deletes every row past an hour, which is six
+  // times the longest a pairing can be useful. The computer that pairing
+  // produced IS exported and erased: iowork_devices, listed above.
+  "iowork_pairings",
+  // Telegram pairings: an eight-character code and, for at most ten
+  // minutes, the name of whichever chat presented it
+  // (TELEGRAM_PAIRING_TTL_MINUTES, src/lib/telegram/pairing.ts).
+  //
+  // THE SAME ARGUMENT AS iowork_pairings ABOVE, and it is load-bearing
+  // rather than decorative: a row here DOES carry a user_id and, once a
+  // chat has presented the code, a Telegram display name — so "no personal
+  // data" would be false. What is true is that nothing survives:
+  // api/cron/scheduled-runs deletes every row past an hour, six times the
+  // longest a pairing can be useful, and that delete is the reason this
+  // entry is allowed to be here. The connection a pairing produces IS
+  // exported and erased: telegram_links, listed above.
+  "telegram_pairings",
   // Keyed by team + invited email; rows belong to the team owner's
   // account and are covered via the team tables' own cascade.
   "team_members",
@@ -572,6 +724,11 @@ export function exportableTables(): UserDataTable[] {
 /** Tables that deleteUser()'s cascade will NOT clear. */
 export function tablesNeedingExplicitErasure(): UserDataTable[] {
   return USER_DATA_TABLES.filter((t) => t.needsExplicitErasure);
+}
+
+/** Tables whose rows stay after the account, detached and emptied of anything personal. */
+export function tablesKeptWithoutOwner(): UserDataTable[] {
+  return USER_DATA_TABLES.filter((t) => t.keptWithoutOwner);
 }
 
 /** Strips the columns a table is not allowed to export verbatim. */

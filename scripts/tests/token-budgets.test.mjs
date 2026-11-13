@@ -127,6 +127,17 @@ const CLASSIFIED = {
     // answer gets truncationNotice appended before it is shown, saved
     // or cited — the same shape file-ask.ts uses above.
     "src/app/api/my-stuff/ask/route.ts",
+    // Meetings Κομμάτι 6 (2026-10-29): a question about one meeting,
+    // answered through modelTextFrom — the SAME shape as my-stuff/ask
+    // just above, truncationNotice appended before the answer is shown
+    // or saved to meeting_questions.
+    "src/lib/meetings/meeting-ask-call.ts",
+    // «/ionexa ask» (agent/discord, 2026-11-07): the member's own question,
+    // answered as free text through runCompletion and shown in Discord.
+    // Checks AI_TRUNCATED_STOP_REASON itself rather than calling
+    // modelTextFrom, and appends the same «cut» notice other deliverables
+    // get through that door before the answer is posted.
+    "src/lib/discord/ask.ts",
   ],
   structured: [
     // Connect by address (2026-10-26): 600 tokens for one forced tool call
@@ -187,6 +198,21 @@ const CLASSIFIED = {
     // cut at max_tokens is refused by stop_reason as "unusable" — its last
     // script would never close — and that step charges nothing.
     "src/lib/rebuild/rebuild-call.ts",
+    // Apps (2026-10-24). One forced tool call per step: the plan and a
+    // box change both at PLAN_MAX_TOKENS (lib/apps/app-plan.ts) — the
+    // output is a DEFINITION, not code, so one ceiling fits both. A
+    // reply cut at max_tokens is refused by stop_reason as "unusable":
+    // a plan missing its last screens would otherwise parse as a
+    // smaller, valid app.
+    "src/lib/apps/app-call.ts",
+    // Discord server plans (agent/discord, 2026-11-07). The same shape as
+    // app-call/game-call above: one forced tool call (set_server)
+    // returning the whole plan or one changed box, and a reply cut at
+    // PLAN_MAX_TOKENS is refused by stopReason as "unusable" — a plan
+    // missing its last boxes would otherwise parse as a smaller, valid
+    // one, which is exactly the severed-but-structured shape this file
+    // exists to stop.
+    "src/lib/discord/planner.ts",
   ],
   internal: [
     "src/lib/chat/memory.ts",
@@ -212,6 +238,12 @@ const CLASSIFIED = {
     "src/app/api/chat/route.ts",
     "src/app/api/records/ask/route.ts",
     "src/app/api/text-actions/route.ts",
+    // Agent tool executor (2026-11-12): the AI text tools (ai_chat,
+    // ai_document, ai_post, ai_translate) and ai_research each call
+    // runCompletion with a maxTokens. The output goes back into the
+    // agent's context, not to a person — a cut reply is one paragraph
+    // shorter in the agent's working memory, and the agent can re-ask.
+    "src/lib/agents/agent-tool-executor.ts",
   ],
 };
 
@@ -274,6 +306,9 @@ CLASSIFIED.routedUnmarked = [
 CLASSIFIED.passthrough = [
   "src/lib/ai/providers/adapters/anthropic.ts",
   "src/lib/ai/providers/adapters/groq.ts",
+  // Same shape as groq.ts (agent/mistral, 2026-11-07): an OpenAI-compatible
+  // request body that hands on max_tokens from the caller's AiRequest.
+  "src/lib/ai/providers/adapters/mistral.ts",
   "src/lib/ai/batch/batch-client.ts",
   // Both became visible on 2026-10-15 with the population above. The
   // batch builder hands on `spec.outputTokens`, and types.ts only

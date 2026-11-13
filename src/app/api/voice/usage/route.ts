@@ -8,6 +8,9 @@ import { logApiError } from "@/lib/log-error";
 import { creditsPerVoiceMinute, voiceMinutesForPlan } from "@/lib/voice/voice-pricing";
 import { readVoiceUsage } from "@/lib/voice/voice-usage";
 import { transcriptionConfigured, speechConfigured } from "@/lib/voice/voice-providers";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { liveConfigured } from "@/lib/voice/live-provider";
+import { LIVE_MAX_SESSION_MINUTES, liveCreditsPerMinute } from "@/lib/voice/live-pricing";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -45,6 +48,14 @@ export async function GET() {
       creditsPerMinute: {
         transcribe: creditsPerVoiceMinute("transcribe", config, margin),
         speak: creditsPerVoiceMinute("speak", config, margin),
+      },
+      // THE LIVE CONVERSATION (FS1): offered only where the switch
+      // "voice-live" is open to this account AND the one key it needs is
+      // set, so «Μίλα» never opens a screen that cannot connect.
+      live: {
+        available: (await isFeatureOn("voice-live", user)) && liveConfigured(),
+        creditsPerMinute: liveCreditsPerMinute(config, margin),
+        maxMinutes: LIVE_MAX_SESSION_MINUTES,
       },
     });
   } catch (err) {

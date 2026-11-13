@@ -138,9 +138,15 @@ const MUTANTS = [
     to: '      setStream(null);\n      recorderRef.current = null;\n      setState("idle");\n      queueMicrotask(() => releaseStream(media));',
   },
   {
+    // RE-ANCHORED 2026-10-29. Meetings Κομμάτι 2 gave this line a caller
+    // -supplied override (optionsRef.current?.maxSeconds — a meeting's
+    // own, longer ceiling), so the literal setTimeout call no longer
+    // reads MAX_CLIP_SECONDS directly; it reads the ceilingMs this
+    // computes first. The defect this stands for is unchanged: no timer
+    // armed at all.
     name: "the hard clip ceiling is removed, so a stuck tab streams a room until the browser closes",
     file: RECORDER,
-    from: "    stopTimerRef.current = window.setTimeout(() => stop(), MAX_CLIP_SECONDS * 1000);",
+    from: "    const ceilingMs = optionsRef.current?.maxSeconds\n      ? optionsRef.current.maxSeconds * 1000\n      : MAX_CLIP_SECONDS * 1000;\n    stopTimerRef.current = window.setTimeout(() => stop(), ceilingMs);",
     to: "    stopTimerRef.current = null;",
   },
   {

@@ -181,7 +181,7 @@ console.log("== 0b. THE ROUTING RULES CARRY NO PATH TO A VENDOR PACKAGE ==");
 console.log("\n== 1. the catalog, and the prices everything downstream trusts ==");
 // ===========================================================================
 
-ok("four providers", AI_PROVIDERS.length === 4, AI_PROVIDERS.join(","));
+ok("five providers", AI_PROVIDERS.length === 5, AI_PROVIDERS.join(","));
 ok("every provider has at least one model", AI_PROVIDERS.every((p) => modelsForProvider(p).length > 0));
 ok("catalog ids are unique", new Set(AI_CATALOG.map((m) => m.id)).size === AI_CATALOG.length);
 ok("every non-Anthropic id is namespaced, so it cannot collide with a bare Anthropic alias",
@@ -1119,13 +1119,13 @@ console.log("\n== 5e. THE IMAGE DOOR, AND THE CAPABILITY THAT WAS DECLARED WITHO
   ok(`${seeing.length} of ${AI_CATALOG.length} models can see a picture`,
     seeing.length > 0 && seeing.length < AI_CATALOG.length,
     "a capability every model has, or none has, is a capability the router cannot route on");
-  ok("...and the two Groq models are the ones that cannot",
-    AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).every((m) => m.provider === "groq") &&
-      !providerSupports("groq", "vision"),
+  ok("...and the Groq and Mistral models are the ones that cannot",
+    AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).every((m) => m.provider === "groq" || m.provider === "mistral") &&
+      !providerSupports("groq", "vision") && !providerSupports("mistral", "vision"),
     AI_CATALOG.filter((m) => !m.capabilities.includes("vision")).map((m) => m.id).join(","));
 
   // --- "streaming": declared by nobody, because nobody implements it ---
-  const adapterFiles = ["anthropic", "openai", "google", "groq"].map((n) => `src/lib/ai/providers/adapters/${n}.ts`);
+  const adapterFiles = ["anthropic", "openai", "google", "groq", "mistral"].map((n) => `src/lib/ai/providers/adapters/${n}.ts`);
   const anyAdapterStreams = adapterFiles.some((f) =>
     /\.messages\.stream\s*\(|["']?stream["']?\s*:\s*true|streamSSE|ReadableStream/.test(stripComments(src(f)))
   );
@@ -1514,7 +1514,7 @@ ok("the collector is registered as a cron",
   // BOTH BRANCHES. The colour and the label are two separate ternaries,
   // and breaking only the label leaves the first one still spelling
   // `run.status === "queued"` — which a single `includes` is satisfied by.
-  const workspace = stripTs(src("src/components/agents/agents-workspace.tsx"));
+  const workspace = stripTs(src("src/components/agents/agents-shell.tsx"));
   ok("a queued run is shown as queued, not as running — colour AND label",
     (workspace.match(/run\.status === "queued"/g) ?? []).length >= 2 &&
     /run\.status === "queued"[\s\S]{0,60}t\("runQueued"\)/.test(workspace),

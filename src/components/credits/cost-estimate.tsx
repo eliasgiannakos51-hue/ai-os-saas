@@ -3,6 +3,9 @@
 import { useTranslations } from "next-intl";
 import { Zap } from "lucide-react";
 import { useRipple } from "@/hooks/use-ripple";
+import { useFieldCost } from "@/components/shell/editor-shell-context";
+import { useCredits } from "@/components/credits/credits-context";
+import { creditsHintKey } from "@/components/credits/credits-hint";
 
 /**
  * Shared pre-submit estimate, so "how much will this cost me" is answered
@@ -23,11 +26,20 @@ export { useCostEstimate } from "@/components/credits/use-cost-estimate";
 /** Small "~N credits" hint, meant to sit directly under a submit button. */
 export function CostEstimateHint({ credits }: { credits: number }) {
   const t = useTranslations("credits.estimate");
-  if (credits <= 0) return null;
+  const { credits: remaining, isAdmin } = useCredits();
+  const key = creditsHintKey(remaining, isAdmin);
+  const text = (c: number) => (key === "approxWithRemaining" ? t(key, { count: c, remaining: remaining as number }) : t(key, { count: c }));
+  // UNDER THE EDITOR LAYOUT'S FIELD (the switch "editor-shell") the same
+  // words are said inside the field, before send, and nothing is drawn
+  // here (components/shell/editor-shell-context.tsx). Anywhere else —
+  // every other screen, and every tool for everyone the switch is not
+  // open to — this line is drawn exactly as it was.
+  const inField = useFieldCost(credits > 0 ? text(credits) : null);
+  if (credits <= 0 || inField) return null;
   return (
     <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
       <Zap className="h-3 w-3 text-foreground/70" aria-hidden="true" />
-      {t("approx", { count: credits })}
+      {text(credits)}
     </p>
   );
 }

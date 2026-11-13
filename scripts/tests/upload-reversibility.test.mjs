@@ -23,7 +23,8 @@
 //
 // THE RULE. A file that uploads either undoes it — a .remove() somewhere
 // in the same file — or is DECLARED below with the sweeper that collects
-// its orphans instead, and the sweeper has to exist and name that bucket.
+// its orphans instead, and the sweeper has to exist and name that bucket,
+// and the cron named beside it has to run it and be scheduled.
 //
 // Run: node scripts/tests/upload-reversibility.test.mjs
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -93,17 +94,20 @@ check(`files that upload (${uploaders.length})`, uploaders.length >= 5, "the upl
 const SWEPT = {
   "src/components/website-builder/website-builder-workspace.tsx": {
     bucket: "website-references",
-    sweeper: "src/app/api/cron/website-storage-cleanup/route.ts",
+    sweeper: "src/lib/websites/storage-cleanup.ts",
+    cron: "src/app/api/cron/website-storage-cleanup/route.ts",
     why: "reference images are uploaded before generate and are meant to outlive it; the daily sweep removes any that no site or website_reference_images row points at",
   },
   "src/lib/website-builder/site-photos.ts": {
     bucket: "website-references",
-    sweeper: "src/app/api/cron/website-storage-cleanup/route.ts",
+    sweeper: "src/lib/websites/storage-cleanup.ts",
+    cron: "src/app/api/cron/website-storage-cleanup/route.ts",
     why: "the Site shell's reference photos, uploaded before generate or edit exactly as the old page uploads them and meant to outlive the request; the daily sweep removes any that no site or website_reference_images row points at",
   },
   "src/lib/website-reference-image-server.ts": {
     bucket: "website-references",
-    sweeper: "src/app/api/cron/website-storage-cleanup/route.ts",
+    sweeper: "src/lib/websites/storage-cleanup.ts",
+    cron: "src/app/api/cron/website-storage-cleanup/route.ts",
     why: "writes a webp derivative beside the original, best-effort; an unreferenced derivative is exactly what the sweep is looking for",
   },
 };
@@ -144,6 +148,21 @@ for (const [file, entry] of Object.entries(SWEPT)) {
   const direct = sweeper.includes(`"${entry.bucket}"`);
   if (!names && !direct) {
     brokenSweepers.push(`${file}: ${entry.sweeper} does not reach the bucket ${entry.bucket}`);
+  }
+  // THE SWEEPER RUNS ONLY IF A SCHEDULED CRON CALLS IT. Since
+  // 2026-11-05 the remover is a library (so storage-cleanup.test.mjs can
+  // execute it); a library nothing schedules collects nothing.
+  if (!entry.cron || !existsSync(entry.cron)) {
+    brokenSweepers.push(`${file}: names no cron that runs ${entry.sweeper}`);
+  } else {
+    const cron = strip(readFileSync(entry.cron, "utf8"));
+    const moduleSpec = `@/${entry.sweeper.replace(/^src\//, "").replace(/\.ts$/, "")}`;
+    if (!cron.includes(`from "${moduleSpec}"`)) {
+      brokenSweepers.push(`${file}: ${entry.cron} does not import ${moduleSpec}`);
+    }
+    const route = `/${entry.cron.replace(/^src\/app\//, "").replace(/\/route\.ts$/, "")}`;
+    const scheduled = JSON.parse(readFileSync("vercel.json", "utf8")).crons?.some((c) => c.path === route);
+    if (!scheduled) brokenSweepers.push(`${file}: ${route} is not in vercel.json's crons`);
   }
   if (!entry.why || entry.why.length < 40) {
     brokenSweepers.push(`${file}: the reason is too short to be an argument`);

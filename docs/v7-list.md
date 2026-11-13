@@ -60,6 +60,16 @@ where the prompt carries Greek, taking only the part before the first
 **2 of 18.** The estimate is crude on purpose and says so; it is triage
 that names where to look, not a bill.
 
+**Superseded 2026-11-05: the instrument had gone blind.** Once the provider
+router (`runCompletion`) carried almost every call, the script's grep for
+`messages.create` saw 5 of 52 call sites. It was rewritten to count every
+call and to build each prompt with the code's own builder, judged by
+`isWorthCaching`. Its output that day: 3 uncached sites qualify, the
+Create Studio intake was wired, and this table's agent-builder still
+qualifies while `clarification` does not (3,440 characters at most). The
+current figures and how to re-derive them are in `docs/COST-LAYER.md`
+§(a). The table above stays as it was measured.
+
 ### Model choice: the candidates, and the ones that must not move
 
 Sonnet is $3/$15 per MTok and Haiku $1/$5 (`lib/billing/model-pricing.ts`),

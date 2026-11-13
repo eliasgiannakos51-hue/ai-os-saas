@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { creditSyncDecision } from "@/lib/billing/subscription-sync";
+import { creditSyncDecision, creditPeriodKey } from "@/lib/billing/subscription-sync";
+import { currentPeriodStartSeconds, currentPeriodEndIso } from "@/lib/billing/subscription-period";
 import { diagLog } from "@/lib/diag";
 import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordSubscriptionEvent } from "@/lib/billing/subscription-log";
-import { ADDONS, isAddonSlug } from "@/lib/billing/addons";
+import { ADDONS, addonStateFromSubscription, isAddonSlug } from "@/lib/billing/addons";
 import { getPlanFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import {
   getCreditPack,
@@ -17,11 +18,16 @@ import {
   grantCredits,
   grantMonthlyPlanCredits,
   syncCreditsForPlan,
+  clampCreditsToPlan,
+  reversePurchasedCredits,
   recordPackPurchaseRate,
 } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 import { revokeTeamGrants } from "@/lib/team/revoke-team-grants";
+import { syncTeamGrants } from "@/lib/team/sync-team-grants";
+import { disableOverage } from "@/lib/billing/overage-store";
+import { billOutstandingOverage } from "@/lib/billing/overage-invoice";
 import {
   recordCommissionForInvoice,
   reverseCommissionForInvoice,
@@ -60,7 +66,10 @@ async function syncSubscriptionToUser(
   fallbackSupabaseUserId?: string,
   /** Stripe's own event id, so the revenue log is idempotent: a retried
    *  webhook must not become a second cancellation in the churn count. */
-  stripeEventId?: string
+  stripeEventId?: string,
+  /** invoice.paid only: the invoice's billing_reason. A renewal opens a
+   *  paid period; a proration invoice does not (subscription-sync.ts). */
+  billingReason?: string | null
 ) {
   const subscription =
     subscriptionHint ?? (await stripe.subscriptions.retrieve(subscriptionId));
@@ -68,8 +77,11 @@ async function syncSubscriptionToUser(
   // AN ADD-ON IS NOT THE PLAN. A recurring add-on (api/billing/addons) is
   // its own Stripe subscription, marked with metadata.addon_slug, and its
   // price is no plan's price, so it must never be synced as the plan (fixed
-  // 2026-10-05). Add-ons are granted by grantAddon below.
-  if (subscription.metadata?.addon_slug) return;
+  // 2026-10-05). Add-ons are granted by grantAddon below, and their own
+  // subscription's later life — cancelled, lapsed, resumed — is followed by
+  // syncAddonSubscription (2026-11-05, ΑΣ-4.17), which touches
+  // account_addons and nothing of the plan.
+  if (subscription.metadata?.addon_slug) return syncAddonSubscription(subscription);
 
   const customerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
@@ -181,9 +193,41 @@ async function syncSubscriptionToUser(
   // THE TEAM ENDS WITH THE OWNER'S PAID PERIOD (NEEDS 24). An inactive
   // subscription here is a period that ended unpaid or a cancellation
   // reaching its end — the members' grants go with it, and nothing else.
+  //
+  // AND OVERAGE ENDS WITH IT (2026-11-05, ΑΣ-4.16). The consent row is
+  // deleted, so nothing is charged to an account with no subscription to
+  // bill; decideOverage refuses without a live subscription anyway, this
+  // is the state that says so. A subscription that has actually ENDED
+  // (status canceled) has whatever overage is still unbilled invoiced now,
+  // on the card it used — there is no later subscription invoice for it
+  // to ride on.
   if (!isActive) {
     const revoked = await revokeTeamGrants(supabaseUserId);
     diagLog(`[webhook-diag] team grants revoked=${revoked} owner=${supabaseUserId}`);
+    const overageOff = await disableOverage(supabaseUserId);
+    if (!overageOff.ok) {
+      logApiError("/api/webhooks/stripe", new Error("could not switch overage off"), { stage: "overage_off", supabaseUserId });
+    }
+    if (subscription.status === "canceled") {
+      const pm = subscription.default_payment_method;
+      const final = await billOutstandingOverage({
+        userId: supabaseUserId,
+        customerId,
+        subscriptionId: subscription.id,
+        defaultPaymentMethod: typeof pm === "string" ? pm : pm?.id ?? null,
+      });
+      diagLog(`[webhook-diag] final overage billed=${final?.billedEur ?? "failed"} owner=${supabaseUserId}`);
+    }
+  } else {
+    // THE TEAM FOLLOWS THE PLAN (2026-11-05, ΑΣ-1.16): on every sync of a
+    // live owner, members are re-stamped to the owner's tier now, and lose
+    // the grant when the plan has no team or fewer seats than members
+    // (most recently added first). Counted before and after; only the
+    // lent plan moves, never a member's own plan or data.
+    const team = await syncTeamGrants(supabaseUserId, { tier: planSlug, seatCount, active: true });
+    diagLog(
+      `[webhook-diag] team grants owner=${supabaseUserId} members=${team.members} before=${team.grantedBefore} after=${team.grantedAfter} restamped=${team.restamped} revoked=${team.revoked}`
+    );
   }
   diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
@@ -233,7 +277,10 @@ async function syncSubscriptionToUser(
     stripeEventId,
   });
 
-  const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug });
+  const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug, billingReason });
+  // ONE RESET PER PLAN PER PAID PERIOD (ΑΣ-4.15): the period this
+  // subscription is in, as Stripe reports it — not the calendar month.
+  const periodKey = creditPeriodKey(currentPeriodStartSeconds(subscription));
   if (decision === "reset") {
     try {
       if (isActive && interval === "year") {
@@ -242,14 +289,236 @@ async function syncSubscriptionToUser(
         await syncCreditsForPlan(
           supabaseUserId,
           planSlug,
-          `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`
+          `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`,
+          periodKey
         );
       }
     } catch (err) {
       logApiError("/api/webhooks/stripe", err, { stage: "sync_credits", supabaseUserId });
     }
+  } else if (decision === "clamp") {
+    // DOWN, NEVER UP: a lower plan, a lapsed period or the end of the
+    // subscription lowers the balance to the new allowance at most.
+    try {
+      await clampCreditsToPlan(
+        supabaseUserId,
+        planSlug,
+        `Subscription ${isActive ? "moved down" : "ended"}: ${planSlug} plan`
+      );
+    } catch (err) {
+      logApiError("/api/webhooks/stripe", err, { stage: "clamp_credits", supabaseUserId });
+    }
   }
-  diagLog(`[webhook-diag] creditSync decision=${decision} eventType=${eventType} previousTier=${previousTier ?? "none"} nextTier=${planSlug}`);
+  diagLog(`[webhook-diag] creditSync decision=${decision} eventType=${eventType} reason=${billingReason ?? "none"} previousTier=${previousTier ?? "none"} nextTier=${planSlug} period=${periodKey}`);
+}
+
+/**
+ * A RECURRING ADD-ON'S OWN SUBSCRIPTION CHANGED (2026-11-05, ΑΣ-4.17).
+ *
+ * The webhook used to return on every add-on subscription event, so
+ * nothing ever moved account_addons after the purchase: an add-on whose
+ * subscription was cancelled, lapsed unpaid or was deleted in Stripe kept
+ * granting for ever (lib/billing/addons.ts reads an active row as active).
+ * The row now follows the subscription: cancelled at period end keeps it
+ * until that end, an ended or unpaid subscription ends it now, and a
+ * resumed one makes it active again. The decision is
+ * addonStateFromSubscription; this finds the rows and writes it.
+ *
+ * Rows are matched by the subscription's own item ids. A row from before
+ * the item was recorded (null) is matched once, by account and add-on, and
+ * given the item id so the next event finds it directly.
+ */
+async function syncAddonSubscription(subscription: Stripe.Subscription): Promise<void> {
+  const slug = subscription.metadata?.addon_slug;
+  const supabaseUserId = subscription.metadata?.supabase_user_id;
+  if (!isAddonSlug(slug) || !supabaseUserId) {
+    logApiError("/api/webhooks/stripe", new Error("add-on subscription missing metadata"), {
+      stage: "sync_addon",
+      subscriptionId: subscription.id,
+    });
+    return;
+  }
+  const state = addonStateFromSubscription(
+    {
+      status: subscription.status,
+      cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
+      periodEndIso: currentPeriodEndIso(subscription),
+    },
+    new Date()
+  );
+  const itemIds = subscription.items.data.map((item) => item.id);
+  const admin = createAdminClient();
+
+  let { data: rows, error } = await admin
+    .from("account_addons")
+    .select("id, status")
+    .eq("user_id", supabaseUserId)
+    .eq("addon_slug", slug)
+    .in("stripe_subscription_item_id", itemIds.length > 0 ? itemIds : ["-"]);
+  if (error) {
+    logApiError("/api/webhooks/stripe", error, { stage: "sync_addon_read", slug });
+    return;
+  }
+  if (!rows || rows.length === 0) {
+    const legacy = await admin
+      .from("account_addons")
+      .select("id, status")
+      .eq("user_id", supabaseUserId)
+      .eq("addon_slug", slug)
+      .is("stripe_subscription_item_id", null)
+      .order("purchased_at", { ascending: true })
+      .limit(1);
+    rows = legacy.data ?? [];
+    if (rows.length > 0 && itemIds[0]) {
+      await admin.from("account_addons").update({ stripe_subscription_item_id: itemIds[0] }).eq("id", rows[0].id);
+    }
+  }
+  if (rows.length === 0) {
+    // Usually the purchase itself, arriving before checkout.session.completed
+    // has written the row. grantAddon writes it active, which is what a live
+    // subscription means.
+    diagLog(`[webhook-diag] add-on subscription with no row yet sub=${subscription.id} slug=${slug}`);
+    return;
+  }
+
+  const ids = rows.map((r) => r.id);
+  const write =
+    state.status === "active"
+      ? { status: "active", expires_at: null, cancelled_at: null }
+      : { status: "cancelled", expires_at: state.expiresAt };
+  const { error: writeError } = await admin.from("account_addons").update(write).in("id", ids);
+  if (writeError) {
+    logApiError("/api/webhooks/stripe", writeError, { stage: "sync_addon_write", slug });
+    return;
+  }
+  // When it was cancelled is recorded once, on the rows that were active.
+  if (state.status === "cancelled") {
+    const wasActive = rows.filter((r) => r.status === "active").map((r) => r.id);
+    if (wasActive.length > 0) {
+      await admin.from("account_addons").update({ cancelled_at: new Date().toISOString() }).in("id", wasActive);
+    }
+  }
+  diagLog(`[webhook-diag] add-on synced sub=${subscription.id} slug=${slug} rows=${ids.length} status=${state.status} expires=${state.expiresAt ?? "none"}`);
+}
+
+/**
+ * WAS THIS CHECKOUT ACTUALLY PAID? (2026-11-05, ΑΣ-4.18)
+ *
+ * checkout.session.completed means the customer finished the page, not
+ * that the money arrived: with a delayed payment method the session
+ * completes `unpaid`, and Stripe sends checkout.session.async_payment_
+ * succeeded or _failed later. Packs and add-ons were granted on
+ * completion regardless. Now they are granted only on a `paid` session —
+ * on completion when the card paid at once, on async_payment_succeeded
+ * otherwise — and both paths are keyed on the session, so a session that
+ * reports paid twice grants once.
+ */
+function sessionIsPaid(session: Stripe.Checkout.Session, eventId: string): boolean {
+  if (session.payment_status === "paid") return true;
+  diagLog(
+    `[webhook-diag] checkout not paid yet, nothing granted session=${session.id} event=${eventId} payment_status=${session.payment_status}`
+  );
+  return false;
+}
+
+/**
+ * A REFUND OR A LOST DISPUTE TAKES THE PACK'S CREDITS BACK (2026-11-05,
+ * ΑΣ-4.18).
+ *
+ * Only a one-off purchase — a credit pack or a credit add-on, found
+ * through the Checkout Session that took the payment, and only one this
+ * webhook actually granted (its ledger key is there). A subscription
+ * invoice is not a pack; its refund reverses the commission above and
+ * nothing here.
+ *
+ * Proportional to what came back: a partial refund takes that share of
+ * the pack, a lost dispute all of it. CUMULATIVE AND ONCE: every reversal
+ * for a charge is keyed `stripe_reversal:<charge>:<total so far>`, so a
+ * redelivered event takes nothing and a second, larger refund takes only
+ * the difference. The balance floors at zero (reverse_purchased_credits):
+ * what was already spent is not owed back as a negative balance, and the
+ * ledger row says how much was actually taken.
+ */
+async function reversePackForCharge(stripe: Stripe, event: Stripe.Event): Promise<void> {
+  try {
+    let chargeId: string | null = null;
+    let paymentIntentId: string | null = null;
+    let share = 0;
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object as Stripe.Charge;
+      chargeId = charge.id;
+      paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id ?? null;
+      share = charge.amount > 0 ? Math.min(1, Math.max(0, charge.amount_refunded / charge.amount)) : 0;
+    } else if (event.type === "charge.dispute.closed") {
+      const dispute = event.data.object as Stripe.Dispute;
+      // A won dispute is money that stayed with us; nothing is taken back.
+      if (dispute.status !== "lost") return;
+      chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge?.id ?? null;
+      paymentIntentId =
+        typeof dispute.payment_intent === "string" ? dispute.payment_intent : dispute.payment_intent?.id ?? null;
+      share = 1;
+    }
+    if (!chargeId || !paymentIntentId || share <= 0) return;
+
+    const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntentId, limit: 1 });
+    const session = sessions.data[0];
+    if (!session || session.mode !== "payment") return;
+    const supabaseUserId = session.metadata?.supabase_user_id;
+    const addonSlug = session.metadata?.addon_slug;
+    let packCredits = 0;
+    let grantKey = "";
+    if (addonSlug) {
+      if (isAddonSlug(addonSlug) && ADDONS[addonSlug].grants.kind === "credits") {
+        const grants = ADDONS[addonSlug].grants as { kind: "credits"; amount: number };
+        packCredits = grants.amount;
+        grantKey = `stripe_addon:${session.id}`;
+      }
+    } else {
+      packCredits = Number(session.metadata?.credit_amount) || 0;
+      grantKey = `stripe_checkout:${session.id}`;
+    }
+    if (!supabaseUserId || packCredits <= 0 || !grantKey) return;
+
+    const admin = createAdminClient();
+    // Only what this webhook granted can be taken back.
+    const { data: granted } = await admin
+      .from("credit_transactions")
+      .select("id")
+      .eq("user_id", supabaseUserId)
+      .eq("idempotency_key", grantKey)
+      .limit(1);
+    if (!granted || granted.length === 0) return;
+
+    const prefix = `stripe_reversal:${chargeId}:`;
+    const { data: earlier } = await admin
+      .from("credit_transactions")
+      .select("idempotency_key")
+      .eq("user_id", supabaseUserId)
+      .like("idempotency_key", `${prefix}%`)
+      .limit(100);
+    const alreadyRequested = Math.max(
+      0,
+      ...(earlier ?? []).map((row) => Number(String(row.idempotency_key ?? "").slice(prefix.length)) || 0)
+    );
+    const target = Math.floor(packCredits * share);
+    const delta = target - alreadyRequested;
+    if (delta <= 0) return;
+
+    // The ledger line names the purchase the way the grant named it
+    // (`Add-on: <slug>` / `Purchased <pack> credit pack`).
+    const purchase = addonSlug ? `add-on ${addonSlug}` : `${session.metadata?.credit_pack_id ?? "unknown_pack"} credit pack`;
+    const result = await reversePurchasedCredits(
+      supabaseUserId,
+      delta,
+      `${prefix}${target}`,
+      `${event.type === "charge.refunded" ? "Refunded" : "Disputed"} purchase: ${purchase}`
+    );
+    diagLog(
+      `[webhook-diag] pack reversal charge=${chargeId} requested=${delta} taken=${result?.debited ?? "failed"} applied=${result?.applied ?? false}`
+    );
+  } catch (err) {
+    logApiError("/api/webhooks/stripe", err, { stage: "reverse_pack", eventType: event.type });
+  }
 }
 
 /**
@@ -262,6 +531,8 @@ async function syncSubscriptionToUser(
  * rather than an error.
  */
 async function grantAddon(session: Stripe.Checkout.Session, eventId: string) {
+  // NOTHING BEFORE THE MONEY (2026-11-05, ΑΣ-4.18): see sessionIsPaid.
+  if (!sessionIsPaid(session, eventId)) return;
   const supabaseUserId = session.metadata?.supabase_user_id;
   const slug = session.metadata?.addon_slug;
   if (!supabaseUserId || !isAddonSlug(slug)) {
@@ -340,6 +611,8 @@ async function grantAddon(session: Stripe.Checkout.Session, eventId: string) {
 // grants credits from the session's own metadata rather than re-deriving
 // anything from a subscription, since a credit pack purchase isn't one.
 async function grantPurchasedCredits(session: Stripe.Checkout.Session, eventId: string) {
+  // NOTHING BEFORE THE MONEY (2026-11-05, ΑΣ-4.18): see sessionIsPaid.
+  if (!sessionIsPaid(session, eventId)) return;
   const supabaseUserId = session.metadata?.supabase_user_id;
   const creditAmount = Number(session.metadata?.credit_amount);
   const packId = session.metadata?.credit_pack_id ?? "unknown_pack";
@@ -454,8 +727,60 @@ export async function POST(request: Request) {
 
   try {
     switch (event.type) {
+      // A delayed payment that went through is the same purchase completing:
+      // the same path, now with a `paid` session (sessionIsPaid).
+      case "checkout.session.async_payment_succeeded":
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        // IONEXA PAYMENTS: a customer paying one of our user's products.
+        // Identified by the metadata the checkout put on the session.
+        // Handled BEFORE the subscription/credit-pack branches because
+        // those check `mode === "payment"` too and would fall through.
+        if (session.metadata?.platform === "ionexa_payments") {
+          // Subscription mode: record the new subscription.
+          if (session.mode === "subscription" && session.subscription) {
+            const { recordSubscription } = await import("@/lib/payments/subscriptions");
+            const subId = typeof session.subscription === "string"
+              ? session.subscription : session.subscription.id;
+            const custId = typeof session.customer === "string"
+              ? session.customer : session.customer?.id ?? "";
+            await recordSubscription({
+              userId: session.metadata.ionexa_user_id,
+              accountId: session.metadata.ionexa_account_id,
+              productId: session.metadata.ionexa_product_id,
+              stripeSubscriptionId: subId,
+              stripeCustomerId: custId,
+              status: "active",
+              currentPeriodStart: new Date().toISOString(),
+              currentPeriodEnd: new Date().toISOString(), // updated by sub.updated
+              cancelAtPeriodEnd: false,
+              trialEnd: null,
+              customerEmail: session.customer_details?.email ?? null,
+              customerName: session.customer_details?.name ?? null,
+            });
+          }
+          // One-time mode (or subscription first payment): record payment.
+          const { recordPayment } = await import("@/lib/payments/checkout");
+          await recordPayment({
+            userId: session.metadata.ionexa_user_id,
+            accountId: session.metadata.ionexa_account_id,
+            productId: session.metadata.ionexa_product_id || null,
+            stripePaymentIntentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id ?? null,
+            stripeCheckoutSessionId: session.id,
+            amountCents: session.amount_total ?? 0,
+            currency: session.currency ?? "eur",
+            feeCents: Math.round((session.amount_total ?? 0) * 0.025),
+            customerEmail: session.customer_details?.email ?? null,
+            customerName: session.customer_details?.name ?? null,
+            description: session.metadata.ionexa_product_id
+              ? `Product ${session.metadata.ionexa_product_id}`
+              : "Ionexa Payment",
+          });
+          break;
+        }
         if (session.mode === "subscription" && session.subscription) {
           const subscriptionId =
             typeof session.subscription === "string"
@@ -495,9 +820,41 @@ export async function POST(request: Request) {
         if (session.metadata?.addon_slug) await grantAddon(session, event.id);
         break;
       }
+      case "checkout.session.async_payment_failed": {
+        // The money never arrived, so nothing was granted for this session
+        // and nothing is taken back. A subscription bought this way stays
+        // incomplete and its own events carry it from there.
+        const session = event.data.object as Stripe.Checkout.Session;
+        diagLog(`[webhook-diag] delayed payment failed, nothing granted session=${session.id} event=${event.id}`);
+        break;
+      }
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
+        // IONEXA PAYMENTS: a subscription on a user's connected account.
+        if (subscription.metadata?.platform === "ionexa_payments") {
+          const { recordSubscription, updateSubscriptionStatus } = await import("@/lib/payments/subscriptions");
+          const status = subscription.status as "active" | "past_due" | "canceled" | "trialing" | "paused" | "unpaid";
+          if (event.type === "customer.subscription.deleted") {
+            await updateSubscriptionStatus(subscription.id, "canceled");
+          } else {
+            await recordSubscription({
+              userId: subscription.metadata.ionexa_user_id,
+              accountId: subscription.metadata.ionexa_account_id,
+              productId: subscription.metadata.ionexa_product_id,
+              stripeSubscriptionId: subscription.id,
+              stripeCustomerId: typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id,
+              status,
+              currentPeriodStart: new Date((subscription.items.data[0]?.current_period_start ?? 0) * 1000).toISOString(),
+              currentPeriodEnd: new Date((subscription.items.data[0]?.current_period_end ?? 0) * 1000).toISOString(),
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+              customerEmail: null, // not on the subscription object
+              customerName: null,
+            });
+          }
+          break;
+        }
         await syncSubscriptionToUser(stripe, subscription.id, event.type, subscription, undefined, event.id);
         break;
       }
@@ -509,7 +866,15 @@ export async function POST(request: Request) {
         const subscriptionRef = invoice.parent?.subscription_details?.subscription;
         const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
         if (subscriptionId) {
-          await syncSubscriptionToUser(stripe, subscriptionId, event.type, undefined, undefined, event.id);
+          await syncSubscriptionToUser(
+            stripe,
+            subscriptionId,
+            event.type,
+            undefined,
+            undefined,
+            event.id,
+            invoice.billing_reason ?? null
+          );
         }
         // Affiliate commission accrues from the invoice that was actually
         // PAID, not from the plan's list price — a discounted or prorated
@@ -533,6 +898,8 @@ export async function POST(request: Request) {
           object.invoice ?? (typeof object.charge === "object" ? object.charge?.invoice : null);
         const invoiceId = typeof raw === "string" ? raw : raw?.id;
         if (invoiceId) await reverseCommissionForInvoice(invoiceId);
+        // ...and a pack's credits with it (ΑΣ-4.18).
+        await reversePackForCharge(stripe, event);
         break;
       }
       default:

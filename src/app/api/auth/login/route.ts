@@ -8,6 +8,8 @@ import { LOCALE_COOKIE, resolveSupportedLocale } from "@/i18n/constants";
 import { getClientIp } from "@/lib/get-client-ip";
 import { logApiError } from "@/lib/log-error";
 import { noteLoginFailure } from "@/lib/auth/login-failure-alert";
+import { LOGIN_FAILURE_ALERT, accountKey } from "@/lib/auth/login-failure-policy";
+import { requireJsonBody } from "@/lib/security/cross-site";
 
 // @service-role-justified pre-auth — there is no session yet; the
 // rate_limit_log access in lib/rate-limit.ts uses the admin client, reads
@@ -30,6 +32,13 @@ const WINDOW_MINUTES = 15;
 
 export async function POST(request: Request) {
   try {
+    // JSON ONLY (2026-11-05 review, A5; lib/security/cross-site.ts): a
+    // form on another site can post anything else without the browser
+    // asking first.
+    if (requireJsonBody(request)) {
+      return NextResponse.json({ ok: false, code: "unsupported_media_type" }, { status: 415 });
+    }
+
     let email: string;
     let password: string;
     try {
@@ -62,7 +71,36 @@ export async function POST(request: Request) {
     // tolerance as lib/rate-limit.ts's checkRateLimit.
     if (failures.ok && failures.count >= MAX_FAILED_ATTEMPTS) {
       return NextResponse.json(
-        { ok: false, error: "Too many failed login attempts. Please try again later." },
+        { ok: false, code: "rate_limited", error: "Too many failed login attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    // THE WAVE THE PER-IP BLOCK CANNOT SEE (ΑΣ2-1.2): one account hit from
+    // many addresses, none of which alone crosses MAX_FAILED_ATTEMPTS.
+    // noteLoginFailure() below already WRITES this exact row on every
+    // failure, keyed by accountKey(email) under LOGIN_FAILURE_ALERT's own
+    // accountScope — it only ever used the count to decide whether to
+    // email the owner. Reading it here, before the count that failure
+    // adds, reuses that same row set rather than a second counter that
+    // could drift from it: the moment the owner is alerted about an
+    // account, that account is also locked, same threshold, same window.
+    const account = accountKey(email);
+    const accountFailures = await countRateLimitHits({
+      scope: LOGIN_FAILURE_ALERT.accountScope,
+      identifier: account,
+      windowMinutes: LOGIN_FAILURE_ALERT.windowMinutes,
+    });
+    if (accountFailures.ok && accountFailures.count >= LOGIN_FAILURE_ALERT.accountThreshold) {
+      // Same code, same status, same sentence as the IP block above —
+      // deliberately indistinguishable. Supabase itself already answers
+      // "wrong password" and "no such account" identically (matched below
+      // by /invalid login credentials/i), so noteLoginFailure() increments
+      // this same count for ANY email string that fails, real or not.
+      // Giving this block its own wording would be the first thing in
+      // this flow to say "this specific account exists and is locked."
+      return NextResponse.json(
+        { ok: false, code: "rate_limited", error: "Too many failed login attempts. Please try again later." },
         { status: 429 }
       );
     }

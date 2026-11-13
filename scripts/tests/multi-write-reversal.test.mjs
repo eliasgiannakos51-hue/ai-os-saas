@@ -144,10 +144,16 @@ check(
   !/if \(!itemId\) continue;/.test(addons),
   "skipping it falls through to the update below, which marks the row cancelled while the subscription item lives on — the product stops delivering and the card goes on paying."
 );
+// FROM THE ADD-ON'S OWN SUBSCRIPTION (2026-11-05, ΑΣ-4.17). This used to
+// read "recovered from the account's subscription" and searched the PLAN's
+// subscription, which never holds an add-on line — so the lookup found
+// nothing and the refusal below was the only thing it could ever return.
 check(
-  "…it is recovered from the account's subscription instead",
-  /recoverSubscriptionItemId\s*\(/.test(addons) && /subscription\.items\.data\.find/.test(addons),
-  "the same lookup api/webhooks/stripe does at purchase time, run again when it usually succeeds"
+  "…it is recovered from the add-on's own subscription instead",
+  /recoverAddonSubscription\s*\(/.test(addons) &&
+    /subscription\.metadata\?\.addon_slug !== slug/.test(addons) &&
+    /subscription\.items\.data\.find/.test(addons),
+  "found among the customer's subscriptions by the metadata its checkout wrote, then its line by price"
 );
 check(
   "…and a recovery that fails refuses rather than cancelling locally",

@@ -153,6 +153,7 @@ const FAILOVER_NAMES = {
   "src/app/api/coding/run/route.ts": "το Coding",
   "src/lib/agents/agent-runner.ts": "οι βοηθοί",
   "src/lib/meetings/meeting-analyse-call.ts": "η σύνοψη των συναντήσεων",
+  "src/lib/meetings/meeting-ask-call.ts": "η σύνοψη των συναντήσεων",
   "src/lib/websites-greek-spelling-check.ts": "ο έλεγχος ορθογραφίας του Site",
   "src/lib/lead-classification.ts": "η διαλογή των μηνυμάτων της φόρμας",
   "src/lib/website-security-review.ts": "ο έλεγχος ασφαλείας του Site",
@@ -165,6 +166,7 @@ const FAILOVER_NAMES = {
   "src/lib/agents/template-fill.ts": "τα έτοιμα πρότυπα βοηθών",
   "src/lib/clarification.ts": "οι διευκρινιστικές ερωτήσεις",
   "src/lib/games/game-call.ts": "τα Παιχνίδια",
+  "src/lib/apps/app-call.ts": "οι Εφαρμογές",
   "src/lib/documents/write-call.ts": "τα Έγγραφα",
   "src/lib/automations/builder.ts": "οι Αυτοματισμοί",
   "src/lib/chat/memory.ts": "η μνήμη του Chat",
@@ -183,6 +185,9 @@ const FAILOVER_NAMES = {
   "src/app/api/my-stuff/ask/route.ts": "το «Τα δικά σου»",
   "src/app/api/mcp/[id]/run/route.ts": "το «Σύνδεση» με εφαρμογές με διεύθυνση",
   "src/lib/rebuild/rebuild-call.ts": "το «Ξαναχτίσε»",
+  "src/lib/discord/ask.ts": "το /ionexa ask στο Discord",
+  "src/lib/discord/planner.ts": "το σχέδιο για τον server στο Discord",
+  "src/lib/agents/agent-tool-executor.ts": "οι βοηθοί",
 };
 const callers = [];
 (function walkSrc(dir) {

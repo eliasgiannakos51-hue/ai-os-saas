@@ -107,29 +107,171 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  * sent was the HSTS Vercel adds itself. Every page could be framed by any
  * site, and nothing told a browser not to guess content types.
  *
- * EVERY PATH BUT /s/. Published sites set their own, stricter set —
- * sandboxed CSP, frame-ancestors 'none' — in
+ * EVERY PATH BUT /s/ AND /a/. Published sites (/s/) and published
+ * Rebuild apps (/a/, Κομμάτι 4's third piece) each set their own,
+ * stricter set — sandboxed CSP, frame-ancestors 'none' — in
  * src/lib/publishing/public-serving.ts, and two sources for one header is
- * how a weaker value wins. The app never frames itself: every iframe in
- * src/ renders `srcDoc`, which `frame-ancestors` does not govern.
+ * how a weaker value wins: this blanket rule's own CSP has no script-src,
+ * so applying it on top silently stripped the published-app CSP down to
+ * just frame-ancestors, found by rebuild.prodtest.mjs's own live fetch of
+ * /a/<subdomain> rather than by inspection. The app never frames itself:
+ * every iframe in src/ renders `srcDoc`, which `frame-ancestors` does not
+ * govern.
  *
  * The microphone stays allowed for the app's own origin: voice input
  * (src/components/voice/) asks for it.
  */
+/**
+ * WHERE AN IMAGE ON AN APP PAGE MAY COME FROM (img-src), AND WHY EACH ONE.
+ *
+ * THE RULE (ΑΣ2-3.1, 2026-10-31). A markdown image the model's own words
+ * (or an echoed web-search result, or PDF text) can put in a chat answer
+ * had no CSP stop at all — any `https:` origin would load, and the
+ * request URL itself can carry data to whoever reads that host's logs.
+ * So the list is closed: never a bare `https:`, never a `*`, only origins
+ * whose request logs no attacker can read.
+ *
+ * THE PROJECT'S OWN SUPABASE ORIGIN (FD6, 2026-11-05). Every private
+ * picture the app shows is a signed Storage address on it — Image's
+ * pictures (lib/images/image-access.ts), a chat attachment's thumbnail
+ * (lib/chat/attach-client.ts), a slide's own photo
+ * (app/dashboard/presentations/page.tsx) — and a generated site's
+ * reference photos are public Storage addresses on it
+ * (lib/website-reference-image-server.ts). Without it every one of them
+ * was blocked, for everybody. It is derived here, at build time, from the
+ * same NEXT_PUBLIC_SUPABASE_URL every Supabase client reads
+ * (lib/supabase/admin.ts, server.ts, client.ts), so the address the
+ * pictures are signed on and the address the policy allows cannot
+ * differ. The exfiltration argument above still holds for it: the only
+ * one who can read that project's request logs is us.
+ *
+ * Built into the headers at BUILD time, like every NEXT_PUBLIC_* value
+ * (Next writes headers() into routes-manifest.json), so a deployment
+ * built with no Supabase address allows none.
+ */
+export const IMAGE_HOSTS = [
+  // Unsplash's CDN. A slide's stock photo (lib/presentations/deck.ts,
+  // parseSlideImage, refuses any other host) and every stock photo a
+  // generated site shows (lib/website-image-placeholders.ts,
+  // UNSPLASH_CDN_PREFIX) are hotlinked from it, as Unsplash's API terms
+  // require (lib/unsplash.ts) — the app never re-hosts them. Nobody but
+  // Unsplash reads its request logs.
+  "https://images.unsplash.com",
+];
+
+// A local Supabase (`supabase start`) and the test stand-in
+// (scripts/lib/mock-supabase.mjs) answer on plain http on this machine's
+// own loopback. That is the one place http is taken: a request to the
+// viewer's own machine reaches no one else, and a production build
+// cannot have a loopback Supabase and work.
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
+const DNS_NAME = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,61}[a-z0-9]$/;
+
+/**
+ * The origin of NEXT_PUBLIC_SUPABASE_URL as an img-src source, or null.
+ * https only (plus the loopback above); the host must be a plain DNS name
+ * — the URL parser accepts `*` in a host, and `https://*.supabase.co`
+ * would be a wildcard by another name. Only the origin is ever taken: a
+ * path, a query or credentials in the variable never reach the policy.
+ */
+export function supabaseImageOrigin(value) {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    return null;
+  }
+  if (url.username || url.password) return null;
+  if (url.protocol === "http:" && LOOPBACK_HOSTS.has(url.hostname)) return url.origin;
+  if (url.protocol !== "https:" || !DNS_NAME.test(url.hostname)) return null;
+  return url.origin;
+}
+
+/** The img-src sources, in order: the app, inline data, local blobs, the project's Supabase, IMAGE_HOSTS. */
+export function imageSources(env = process.env) {
+  const supabase = supabaseImageOrigin(env.NEXT_PUBLIC_SUPABASE_URL);
+  return ["'self'", "data:", "blob:", ...(supabase ? [supabase] : []), ...IMAGE_HOSTS];
+}
+
 export const APP_SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  // img-src: see IMAGE_HOSTS above. 'self'/data:/blob: are same-origin
+  // API images, inline base64, and local previews (client blob URLs,
+  // never a network fetch). A chat answer is held tighter still by
+  // message-content.tsx's own `img` guard, the matching defense-in-depth
+  // layer: it lets through only the first three. An iframe drawn from
+  // `srcDoc` (a site's preview) inherits this policy too.
+  //
+  // object-src and base-uri (hardening, 2026-11-05): no page of the app
+  // draws an <object>, an <embed> or a <base> (searched across src/ on
+  // that date), so both are closed outright. A generated site's own
+  // <base> is already taken out before it is stored
+  // (lib/website-link-safety.ts). script-src is not set here: that is a
+  // larger change of its own.
+  { key: "Content-Security-Policy", value: `frame-ancestors 'none'; img-src ${imageSources().join(" ")}; object-src 'none'; base-uri 'none'` },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },
 ];
+
+/**
+ * THE PATH EXCLUSION ABOVE IS NOT ENOUGH ONCE SITES HAVE THEIR OWN
+ * DOMAIN (SEC-C3b, ΑΣ-10.3; docs/NEEDS-FROM-ELIAS.md «Ασφάλεια
+ * 2026-11-05»).
+ *
+ * `headers()` is matched against the ORIGINAL request path, before
+ * src/proxy.ts rewrites it. On the app's own domain that is exactly
+ * right: a visitor asks for /s/<name> and the path exclusion above
+ * already skips it. On PUBLISHED_SITE_DOMAIN a site's own path is "/"
+ * or "/services" — proxy.ts rewrites that to /s/<name>/... AFTER these
+ * headers are already chosen — so the matcher above sees a path that
+ * does not start with "s/" or "a/" and this blanket, narrow img-src
+ * ('self' data: blob:) would apply on top of the published page's own,
+ * wider CSP (lib/publishing/public-serving.ts, which allows the stock
+ * photo host and the owner's uploads). Two sources for one header is how the
+ * weaker one wins — the exact failure this file's own comment above
+ * names for /a/ — and here it would be silent: the site stays up, its
+ * photos just stop loading, on every one of them, the day the domain
+ * goes live.
+ *
+ * So the content domain is excluded by HOST as well as by path. A
+ * `missing` host condition is a regex, anchored full-match
+ * (node_modules/next/dist/shared/lib/router/utils/prepare-destination.js,
+ * matchHas: `new RegExp('^' + value + '$')`), so this matches the apex
+ * AND every subdomain under it, and nothing else. Unset
+ * (contentDomainHostPattern() returns null), the `missing` clause is
+ * left out entirely and behaviour is byte-identical to before.
+ *
+ * Mirrors contentDomain() in src/lib/publishing/content-origin.ts,
+ * covered there by scripts/tests/published-isolation.test.mjs — not
+ * imported here because that is a .ts module and this file runs as
+ * plain Node ESM with no transpile step. scripts/tests/published-
+ * isolation.test.mjs §6 runs this exact function against the same
+ * fixtures the .ts one uses, so the two cannot silently drift apart.
+ */
+export function contentDomainHostPattern(raw) {
+  if (typeof raw !== "string") return null;
+  const normalised = raw.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  if (!normalised) return null;
+  if (!/^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(normalised)) return null;
+  const escaped = normalised.replace(/[.]/g, "\\.");
+  return `([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)*${escaped}`;
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // "x-powered-by: Next.js" tells a stranger which advisories to try.
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/((?!s/).*)", headers: APP_SECURITY_HEADERS }];
+    const hostPattern = contentDomainHostPattern(process.env.PUBLISHED_SITE_DOMAIN);
+    return [
+      {
+        source: "/((?!s/|a/).*)",
+        ...(hostPattern ? { missing: [{ type: "host", value: hostPattern }] } : {}),
+        headers: APP_SECURITY_HEADERS,
+      },
+    ];
   },
   // Inlined at build time — see commitDate() above. The DATE is the
   // commit's; BUILD_AT is when the build ran, and the two differ by

@@ -19,6 +19,7 @@ import { PanelLeft, Plus } from "lucide-react";
 import type { SidebarProject } from "@/lib/nav/recent-tools";
 import { MessageContent } from "@/components/chat/message-content";
 import { SourceCards } from "@/components/chat/source-cards";
+import { AnswerChart } from "@/components/chat/answer-chart";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { alignSuggestions, appendClarificationAnswers } from "@/lib/clarification-client";
 import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
@@ -27,6 +28,7 @@ import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import { VoicePlayer } from "@/components/voice/voice-player";
 import { VoiceConversation } from "@/components/voice/voice-conversation";
+import { VoiceLive } from "@/components/voice/voice-live";
 import { useVoiceAvailability } from "@/components/voice/voice-availability";
 import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
@@ -44,6 +46,7 @@ import { parseStoredAttachments, type ChatAttachment } from "@/lib/chat/attachme
 import { readAnswerBasis, readMemoriesUsed, type MemoryUsed } from "@/lib/chat/memory-citations";
 import { useToast } from "@/components/toast/toast-context";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
+import { takeSendOnArrival } from "@/lib/nav/send-on-arrival";
 import { AiJobTimeline } from "@/components/ui/ai-job-timeline";
 import type { ClientStep } from "@/lib/jobs/job-timeline";
 import type { WorkMode } from "@/lib/chat/work-modes";
@@ -321,8 +324,17 @@ export function ChatWorkspace({
    * and minutes left. False draws no Talk button at all — see the button
    * below for why it is not drawn inert any more.
    */
-  const talkAvailable =
+  const loopAvailable =
     voiceAvailability.loaded && voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && voiceAvailability.hasMinutes;
+  /**
+   * THE LIVE CONVERSATION (FS1), where the switch "voice-live" is open to
+   * this account: «Μίλα» opens the globe and one realtime call
+   * (components/voice/voice-live.tsx) instead of the loop. It needs only
+   * the transcription key, so it can be there on a deployment whose
+   * read-aloud key is missing.
+   */
+  const liveAvailable = voiceAvailability.loaded && voiceAvailability.live.available && voiceAvailability.hasMinutes;
+  const talkAvailable = loopAvailable || liveAvailable;
 
   // THE CONVERSATION COLUMN, AND WHETHER IT IS OPEN (owner, 2026-10-17:
   // «Θυμάται αν την άφησα ανοιχτή ή κλειστή»).
@@ -367,16 +379,23 @@ export function ChatWorkspace({
     });
   }
 
-  // ASKED ON ARRIVAL. Runs once per mount and only for a brand-new
-  // thread: `sentAskRef` is what stops React's development double-invoke
-  // — and any later re-render — from sending the same question twice and
-  // charging for it twice. Deliberately not guarded on `sending`, which
-  // is false at mount; the ref is the guard.
+  // ARRIVING WITH A QUESTION. Runs once per mount and only for a
+  // brand-new thread: `sentAskRef` is what stops React's development
+  // double-invoke — and any later re-render — from sending the same
+  // question twice and charging for it twice. Deliberately not guarded on
+  // `sending`, which is false at mount; the ref is the guard.
+  //
+  // THE ADDRESS ONLY FILLS THE FIELD (2026-11-05 review, A8). A link can
+  // be written by any page, and sending spends credits and can write
+  // memory, so the question is SENT only when this tab's own app asked
+  // for it just before navigating (lib/nav/send-on-arrival.ts — a quick
+  // job, the first task). Otherwise it waits in the field for a press.
   const sentAskRef = useRef(false);
   useEffect(() => {
     if (!initialAsk || sentAskRef.current) return;
     sentAskRef.current = true;
-    void handleSend(initialAsk);
+    if (takeSendOnArrival("ask", initialAsk)) void handleSend(initialAsk);
+    else composerRef.current?.setText(initialAsk);
     forgetExampleParam("ask");
     // handleSend is redeclared every render and reads its own state via
     // setState callbacks; depending on it would re-run this effect
@@ -1163,6 +1182,12 @@ export function ChatWorkspace({
                       {/* NUMBERED WEB SOURCES — only when the answer searched
                           the web; the numbers in the prose above link here. */}
                       <SourceCards content={msg.content} />
+                      {/* A CHART + CARD UNDER THE ANSWER — only when a data
+                          attachment on the message had a chart in it
+                          (lib/chat/answer-chart.ts), never in the live-
+                          streaming branch below, which has no stored
+                          content yet to read one from. */}
+                      <AnswerChart content={msg.content} />
                       {/* THE ROW UNDER THE ANSWER (ΣΥΣΤΗΜΑ DESIGN §5): the
                           26px earth, copy, the thumbs, again
                           (components/chat/answer-actions.tsx). Again only
@@ -1440,7 +1465,23 @@ export function ChatWorkspace({
           a second one nobody asked for, and every completed turn is
           pushed into the messages above — close it and the exchange is
           still there to read. */}
-      {talking && (
+      {talking && liveAvailable && (
+        <VoiceLive
+          conversationId={activeId}
+          onClose={() => setTalking(false)}
+          onKept={({ turns, conversationId: keptIn }) => {
+            if (keptIn && keptIn !== activeId) setActiveId(keptIn);
+            if (turns.length > 0) {
+              setMessages((m) => [
+                ...m,
+                ...turns.map((turn) => ({ id: nextLocalId(turn.role), role: turn.role, content: turn.text }) as ChatMessage),
+              ]);
+            }
+            refreshCredits();
+          }}
+        />
+      )}
+      {talking && !liveAvailable && (
         <VoiceConversation
           conversationId={activeId}
           onConversationId={(id) => setActiveId(id)}

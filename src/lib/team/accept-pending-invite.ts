@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlan } from "@/lib/billing/plans";
 import { logApiError } from "@/lib/log-error";
 import { mergeUserMetadata } from "@/lib/auth/user-metadata";
+import { teamSeatLimit } from "@/lib/team/team-grant-policy";
 
 // Best-effort, called on every dashboard page load (see dashboard/layout.tsx)
 // for the currently logged-in user. A no-op for the overwhelming majority
@@ -29,6 +30,26 @@ export async function acceptPendingTeamInvite(userId: string, email: string): Pr
     );
     const ownerTier = ownerData?.user?.user_metadata?.subscription_tier as string | undefined;
     if (ownerError || !ownerTier || !getPlan(ownerTier)?.capabilities.teamCollaboration) return;
+
+    // A SEAT, NOT ONLY A PLAN (2026-11-05, ΑΣ-1.16). The invitation was
+    // checked against the owner's seats when it was SENT (api/team/invite);
+    // the owner may have dropped seats or plans since. Over the limit the
+    // invitation stays pending — nothing is refused for good — and the
+    // next sync of the owner's plan (lib/team/sync-team-grants.ts) is the
+    // same rule applied to the members already in.
+    const seatLimit = teamSeatLimit({
+      tier: ownerTier,
+      seatCount: Number(ownerData?.user?.user_metadata?.seat_count) || 0,
+      active: true,
+    });
+    if (Number.isFinite(seatLimit)) {
+      const { count, error: countError } = await admin
+        .from("team_members")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", pending.owner_id)
+        .eq("status", "active");
+      if (countError || (count ?? 0) >= seatLimit) return;
+    }
 
     const { error: updateInviteError } = await admin
       .from("team_members")

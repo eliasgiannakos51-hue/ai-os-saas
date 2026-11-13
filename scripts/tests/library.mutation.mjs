@@ -66,8 +66,8 @@ const MUTANTS = [
   {
     name: "the newest are not first across tools",
     file: LOAD,
-    from: "    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())\n",
-    to: "",
+    from: "    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());",
+    to: ";",
     expect: "newest first across tools",
   },
   {
@@ -210,6 +210,73 @@ const MUTANTS = [
     from: '"library": "Bibliothek",\n      "newEntry"',
     to: '"library": "Meine Sachen",\n      "newEntry"',
     expect: "de: the old name «Meine Sachen» is on no screen",
+  },
+  {
+    // 2026-11-09: favorites-only filter, package 5 follow-up.
+    name: "a stray favorite on a non-favoritable kind counts as starred",
+    file: LOAD,
+    from: "const candidates = sorted.filter((it) => isFavoritableTable(tableOfKind.get(it.kind) ?? \"\"));",
+    to: "const candidates = sorted;",
+    expect: "a stray user_favorites row on a non-favoritable kind (posts) never surfaces as starred",
+  },
+  {
+    name: "favoriteOnly is ignored",
+    file: LOAD,
+    from: "const filtered = favoriteOnly ? withFavorites.filter((it) => it.favorited) : withFavorites;",
+    to: "const filtered = withFavorites;",
+    expect: "favoriteOnly keeps only starred items",
+  },
+  {
+    name: "every item reads favorited: true, whether starred or not",
+    file: LOAD,
+    from: "const withFavorites: LibraryItem[] = sorted.map((it) => ({ ...it, favorited: favoriteKeys.has(it.key) }));",
+    to: "const withFavorites: LibraryItem[] = sorted.map((it) => ({ ...it, favorited: true }));",
+    expect: "a favoritable, unstarred item reads favorited: false",
+  },
+  {
+    name: "the page drops ?fav=1 on the floor",
+    file: TIMELINE,
+    from: 'const favoriteOnly = searchParams.fav === "1";',
+    to: "const favoriteOnly = false;",
+    expect: "the page reads ?fav=1",
+  },
+  {
+    name: "the page does not pass favoriteOnly to the view",
+    file: TIMELINE,
+    from: "<LibraryView items={items} kind={kind} query={query} favoriteOnly={favoriteOnly} failed={failed} />",
+    to: "<LibraryView items={items} kind={kind} query={query} favoriteOnly={false} failed={failed} />",
+    expect: "the page hands favoriteOnly to the view",
+  },
+  {
+    name: "the star chip's href forgets it is already on",
+    file: VIEW,
+    from: 'if (!favoriteOnly) params.set("fav", "1");',
+    to: 'params.set("fav", "1");',
+    expect: "the toggle flips fav on and off",
+  },
+  {
+    // Anchored on hrefFor's own `if (query) …` line right before it, which
+    // onboardingHrefFor does not have (it sets "q" unconditionally) — so
+    // this hits only the kind-chip builder, not the onboarding examples.
+    name: "a kind chip drops the favorites filter when switching kind",
+    file: VIEW,
+    from: 'if (query) params.set("q", query);\n    if (favoriteOnly) params.set("fav", "1");',
+    to: "if (query) params.set(\"q\", query);",
+    expect: "the kind chips keep fav set when switching kind",
+  },
+  {
+    name: "no star badge on a starred item",
+    file: VIEW,
+    from: "{item.favorited && (",
+    to: "{false && (",
+    expect: "a starred item shows a filled star badge",
+  },
+  {
+    name: "favorites-only empties fall back to the generic «nothing made»",
+    file: VIEW,
+    from: ') : favoriteOnly ? (\n            <EmptyState icon={Star} title={t("noFavorites.title")}>',
+    to: ') : (\n            <EmptyState icon={Star} title={t("noFavorites.title")}>',
+    expect: "an empty favorites-only result gets its own message",
   },
 ];
 

@@ -53,6 +53,10 @@ export type VoiceAvailability = {
   usedSeconds: number;
   remainingSeconds: number;
   creditsPerMinute: { transcribe: number; speak: number };
+  /** The live conversation (FS1): whether it is offered to this account
+   *  on this deployment, what a minute of it costs, and how long one
+   *  call may run. Read from the same /api/voice/usage answer. */
+  live: { available: boolean; creditsPerMinute: number; maxMinutes: number };
   refresh: () => void;
 };
 
@@ -67,6 +71,7 @@ const EMPTY: Omit<VoiceAvailability, "refresh"> = {
   usedSeconds: 0,
   remainingSeconds: 0,
   creditsPerMinute: { transcribe: 0, speak: 0 },
+  live: { available: false, creditsPerMinute: 0, maxMinutes: 0 },
 };
 
 const VoiceAvailabilityContext = createContext<VoiceAvailability | null>(null);
@@ -109,6 +114,11 @@ export function VoiceAvailabilityProvider({ children }: { children: React.ReactN
           creditsPerMinute: {
             transcribe: Number(data.creditsPerMinute?.transcribe ?? 0),
             speak: Number(data.creditsPerMinute?.speak ?? 0),
+          },
+          live: {
+            available: data.live?.available === true && included,
+            creditsPerMinute: Number(data.live?.creditsPerMinute ?? 0),
+            maxMinutes: Number(data.live?.maxMinutes ?? 0),
           },
         });
       } catch {

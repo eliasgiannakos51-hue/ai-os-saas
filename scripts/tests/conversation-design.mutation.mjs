@@ -203,8 +203,11 @@ const MUTANTS = [
   {
     name: "the microphone moves back to the right, over the text",
     file: COMPOSER,
-    from: '        <div className="absolute bottom-2 start-2 flex items-center gap-1">',
-    to: '        <div className="absolute bottom-2 end-14 flex items-center gap-1">',
+    // RE-ANCHORED 2026-11-04: the class became a template literal when the
+    // field gained the editor layout's two shapes (`shape`); "chat" draws
+    // exactly these classes, and the defect is unchanged.
+    from: '          className={`absolute bottom-2 start-2 flex items-center gap-1 ${editor ? "!static" : ""}',
+    to: '          className={`absolute bottom-2 end-14 flex items-center gap-1 ${editor ? "!static" : ""}',
     expect: "voice bottom-left",
   },
   {

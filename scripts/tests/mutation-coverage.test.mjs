@@ -316,7 +316,30 @@ console.log(
 // (the owner's critical message), not renamed or orphaned.
 // 291 -> 292 on 2026-10-22, same day: my-stuff.mutation.mjs added, driving
 // the new gate for «Τα δικά μου» (my-stuff.test.mjs). Read off the run.
-const RATCHET = 292;
+// 292 -> 298 on 2026-10-24, read off the run (`node
+// scripts/tests/mutation-coverage.test.mjs` prints declared and
+// measured side by side), not reasoned to. Six suites landed in this
+// branch since the last reading and none of them bumped it, because
+// the ratchet tolerates five and each round was inside that: the
+// Translate tool's pieces, and then apps-tool.mutation.mjs for the App
+// builder, which is the one that pushed the gap to six. The ratchet is
+// a floor on how many gates have a suite at all — it exists so most of
+// the suites vanishing would be noticed — so it is raised to the truth
+// rather than to a comfortable number below it.
+// 298 -> 304 on 2026-10-31, read off the run, not reasoned to. Six
+// suites' worth of gap had accumulated inside the tolerated five and
+// agents-shell.mutation.mjs is the one that pushed it to six. The
+// ratchet is a floor on how many gates have a suite at all, so it is
+// raised to the truth rather than to a comfortable number below it.
+// 304 -> 312 -> 313 -> 317 -> 319 -> 320 -> 321 -> 322 on 2026-11-05/07/08,
+// read off each run as rounds rebased onto each other (github-repo-access,
+// billing-integrity, five accounts-security suites, prompt-caching,
+// storage-cleanup.mutation.mjs, site-pick-frame.mutation.mjs). This round
+// (2026-11-09) adds cinematic-hero.mutation.mjs (style ΣΤ's hero parallax,
+// the first cinematic-sites style actually wired into generation — see
+// docs/PROGRESS.md 2026-11-09) on top of that — the floor is whatever this
+// rebased tree measures now.
+const RATCHET = 328;
 reportBaseline("RATCHET", RATCHET, reachCovered.length);
 check(
   `mutation coverage is ${pct(reachCovered.length, reach.length)} — ${reachCovered.length} covered, ratchet ${RATCHET}`,

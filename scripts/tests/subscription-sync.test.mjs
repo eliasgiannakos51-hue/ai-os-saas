@@ -40,49 +40,70 @@ function check(name, cond, detail) {
 }
 
 const { loadTs } = await import("./load-ts.mjs");
-const { creditSyncDecision } = await loadTs("src/lib/billing/subscription-sync.ts");
+const { creditSyncDecision, creditPeriodKey } = await loadTs("src/lib/billing/subscription-sync.ts");
 
+// THE ORDER IS WRITTEN HERE, not imported from plans.ts: a gate that
+// borrowed the product's own ranking would agree with any ranking at all.
 const TIERS = ["free", "starter", "growth", "professional", "ultimate", "enterprise"];
+const rank = (t) => TIERS.indexOf(t);
 // Every event the webhook's switch handles, plus two Stripe fires that it
 // does not handle today — a decision function that only knows the current
 // switch is one new `case` away from being wrong again.
 const EVENTS = [
   "invoice.paid",
   "checkout.session.completed",
+  "checkout.session.async_payment_succeeded",
   "customer.subscription.deleted",
   "customer.subscription.updated",
   "customer.subscription.paused",
   "customer.subscription.resumed",
 ];
+// Stripe's billing_reason values, and none: only a renewal and a first
+// invoice open a paid period.
+const REASONS = [undefined, "subscription_cycle", "subscription_create", "subscription_update", "manual"];
+
+// THE RULE, RESTATED INDEPENDENTLY (2026-11-05). Until then a plan change
+// in EITHER direction reset — and a reset SETS the balance, so a move down
+// refilled an account that had spent the higher plan's allowance. A move
+// down now clamps (never raises), and a reset opens only for a period
+// that was paid for, or for a move up.
+function expected({ eventType, previousTier, nextTier, billingReason }) {
+  const newPeriod =
+    eventType === "checkout.session.completed" ||
+    eventType === "checkout.session.async_payment_succeeded" ||
+    (eventType === "invoice.paid" && (billingReason === "subscription_cycle" || billingReason === "subscription_create"));
+  if (newPeriod) return nextTier === "free" ? "clamp" : "reset";
+  if (eventType === "customer.subscription.deleted") return "clamp";
+  if (previousTier === null) return "reset";
+  if (rank(nextTier) < rank(previousTier)) return "clamp";
+  if (rank(nextTier) > rank(previousTier)) return "reset";
+  return "skip";
+}
 
 console.log("== 1. cross-product: every event against every tier pair ==");
-// 6 events x 7 previous (6 tiers + null) x 6 next = 252 combinations.
-// Not a sample: the bug lived in ONE of them (updated + same tier), which
-// is exactly the cell a spot check omits.
+// 7 events x 5 reasons x 7 previous (6 tiers + null) x 6 next = 1,470.
+// Not a sample: the first bug lived in ONE cell (updated + same tier), and
+// the second in a whole row (updated + any lower tier).
 let combos = 0;
 const wrong = [];
 for (const eventType of EVENTS) {
-  for (const previousTier of [...TIERS, null]) {
-    for (const nextTier of TIERS) {
-      combos++;
-      const actual = creditSyncDecision({ eventType, previousTier, nextTier });
-      const expected =
-        eventType === "invoice.paid" ||
-        eventType === "checkout.session.completed" ||
-        eventType === "customer.subscription.deleted" ||
-        previousTier === null ||
-        previousTier !== nextTier
-          ? "reset"
-          : "skip";
-      if (actual !== expected) {
-        wrong.push(`${eventType} ${previousTier}->${nextTier}: ${actual} (expected ${expected})`);
+  for (const billingReason of REASONS) {
+    for (const previousTier of [...TIERS, null]) {
+      for (const nextTier of TIERS) {
+        combos++;
+        const input = { eventType, previousTier, nextTier, billingReason };
+        const actual = creditSyncDecision(input);
+        const want = expected(input);
+        if (actual !== want) {
+          wrong.push(`${eventType}/${billingReason ?? "-"} ${previousTier}->${nextTier}: ${actual} (expected ${want})`);
+        }
       }
     }
   }
 }
 check(`all ${combos} combinations decided correctly`, wrong.length === 0, wrong.slice(0, 5).join("\n        "));
 
-console.log("\n== 2. the exact case that destroyed paid credits ==");
+console.log("\n== 2. the exact cases that moved money ==");
 // Pressing Cancel sets cancel_at_period_end, which fires
 // customer.subscription.updated with the status and the tier unchanged.
 for (const tier of TIERS) {
@@ -95,8 +116,8 @@ for (const tier of TIERS) {
     }) === "skip"
   );
 }
-// Same event, same shape, but the plan really changed: the allowance is
-// different, so the balance has to follow it.
+// Same event, same shape, but the plan really went up: the allowance is
+// bigger, so the balance follows it.
 check(
   "an upgrade through the same event still resets",
   creditSyncDecision({
@@ -105,19 +126,55 @@ check(
     nextTier: "growth",
   }) === "reset"
 );
+// THE SECOND DEFECT. A move down used to "reset" too, which refilled a
+// spent Ultimate balance to Starter's full allowance.
 check(
-  "and so does a downgrade",
+  "a downgrade lowers the balance and never refills it",
   creditSyncDecision({
     eventType: "customer.subscription.updated",
     previousTier: "ultimate",
     nextTier: "starter",
-  }) === "reset"
+  }) === "clamp"
+);
+check(
+  "…and a lapsed period (the tier drops to free) is a move down too",
+  creditSyncDecision({
+    eventType: "customer.subscription.updated",
+    previousTier: "growth",
+    nextTier: "free",
+  }) === "clamp"
 );
 
 console.log("\n== 3. the events that MUST still reset ==");
 check(
-  "a paid invoice opens a new month",
-  creditSyncDecision({ eventType: "invoice.paid", previousTier: "growth", nextTier: "growth" }) === "reset"
+  "a paid renewal opens a new period",
+  creditSyncDecision({
+    eventType: "invoice.paid",
+    previousTier: "growth",
+    nextTier: "growth",
+    billingReason: "subscription_cycle",
+  }) === "reset"
+);
+// The renewal that a scheduled downgrade starts can arrive BEFORE the
+// subscription.updated that moves the tier, so the stored tier is still
+// the higher one. It is a paid period at the lower plan, and must open.
+check(
+  "the first paid period after a scheduled downgrade opens at the lower plan",
+  creditSyncDecision({
+    eventType: "invoice.paid",
+    previousTier: "ultimate",
+    nextTier: "starter",
+    billingReason: "subscription_cycle",
+  }) === "reset"
+);
+check(
+  "a proration invoice is not a new period",
+  creditSyncDecision({
+    eventType: "invoice.paid",
+    previousTier: "growth",
+    nextTier: "growth",
+    billingReason: "subscription_update",
+  }) === "skip"
 );
 check(
   "a new subscription starts from the plan's allotment",
@@ -127,20 +184,26 @@ check(
     nextTier: "growth",
   }) === "reset"
 );
+check(
+  "…and a checkout that is not paid yet refills nothing",
+  creditSyncDecision({
+    eventType: "checkout.session.completed",
+    previousTier: "free",
+    nextTier: "free",
+  }) === "clamp"
+);
 // THE TIERS ARE THE SAME ON PURPOSE, and the first version of this check
 // had them differ — growth -> free — which is a plan CHANGE, so it
-// returned "reset" through the tier comparison whether or not the event
-// was in ALWAYS_RESET. Measured 2026-09-08: deleting
-// "customer.subscription.deleted" from that set left this line green.
-// A check satisfied by the branch it is not testing is a check about
-// nothing; free -> free can only reset because of the event.
+// returned through the tier comparison whether or not the event was
+// special-cased. Measured 2026-09-08: deleting the deleted-event rule left
+// this line green. free -> free can only clamp because of the event.
 check(
-  "a deleted subscription drops to Free's allotment",
+  "a deleted subscription drops to Free's allotment, never above what is there",
   creditSyncDecision({
     eventType: "customer.subscription.deleted",
     previousTier: "free",
     nextTier: "free",
-  }) === "reset"
+  }) === "clamp"
 );
 check(
   "an account with no recorded tier is initialised, not skipped",
@@ -149,6 +212,17 @@ check(
     previousTier: null,
     nextTier: "growth",
   }) === "reset"
+);
+
+console.log("\n== 3b. one reset per PAID PERIOD, not per calendar month ==");
+check("the key is the period Stripe reports", creditPeriodKey(1761955200) === "period-1761955200", creditPeriodKey(1761955200));
+check(
+  "…the same in October and in November for one period",
+  creditPeriodKey(1761955200, new Date("2026-10-30T00:00:00Z")) === creditPeriodKey(1761955200, new Date("2026-11-02T00:00:00Z"))
+);
+check(
+  "…and only without a period does it fall back to the month, under its own prefix",
+  creditPeriodKey(null, new Date("2026-11-02T00:00:00Z")) === "month-2026-11"
 );
 
 console.log("\n== 4. the webhook actually consults it ==");
@@ -175,6 +249,21 @@ check(
 check(
   "the event type is threaded through rather than assumed",
   /eventType/.test(webhook)
+);
+check(
+  "…and so is the invoice's billing reason",
+  /creditSyncDecision\(\{ eventType, previousTier, nextTier: planSlug, billingReason \}\)/.test(webhook) &&
+    /invoice\.billing_reason \?\? null/.test(webhook),
+  "without it no renewal can be told from a proration invoice"
+);
+check(
+  "a move down runs the clamp, not the reset",
+  /decision === "clamp"\) \{[\s\S]{0,200}await clampCreditsToPlan\(/.test(webhook)
+);
+check(
+  "the reset is claimed under the paid period",
+  /const periodKey = creditPeriodKey\(currentPeriodStartSeconds\(subscription\)\);/.test(webhook) &&
+    /await syncCreditsForPlan\([\s\S]{0,240}periodKey\s*\)/.test(webhook)
 );
 // The previous tier has to be READ before the update overwrites it —
 // comparing the new tier against itself would make the guard a no-op that

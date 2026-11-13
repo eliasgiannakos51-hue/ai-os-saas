@@ -50,6 +50,7 @@ export const EMAIL_GROUPS = [
   { group: "agent", likely: true, why: "an agent's result or failure" },
   { group: "cancelled", likely: true, why: "the subscription was cancelled — the last thing a leaving customer reads" },
   { group: "deletion", likely: true, why: "confirming that an account is being deleted" },
+  { group: "deletionScheduled", likely: true, why: "the deletion is scheduled, and the email carries the only link that cancels it — read closely by everyone who confirms a deletion while the switch \"deferred-deletion\" is on" },
   { group: "digest", likely: false, why: "the weekly digest, for those who opt in" },
   { group: "formSubmission", likely: false, why: "somebody filled in a form on a published site" },
   { group: "blurbs", likely: false, why: "short lines shared by several emails" },

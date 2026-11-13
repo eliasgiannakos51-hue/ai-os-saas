@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { RUN_COLUMNS, UUID, flowGate, refuse } from "@/lib/automations/flow-access";
+import { countDoneRuns } from "@/lib/automations/page-data";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,13 @@ const RUNS_SHOWN = 20;
  * THE HISTORY OF ONE AUTOMATION (MASTER 16, package 30): its last runs,
  * each with what started it, every box's step, how it ended and what it
  * cost. Read under the person's own select policy.
+ *
+ * Also what the Pro canvas asks once a second while a run is going
+ * (components/automations/automation-shell.tsx): a running row's steps
+ * are written before each box (lib/automations/runner.ts), so this
+ * answer IS where the run is. And `doneRuns`, every finished run that
+ * was not a trial, counted by the database rather than from the twenty
+ * shown — the first factor of «Σου γλίτωσε» (lib/automations/time-saved.ts).
  */
 export async function GET(_request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -36,7 +44,7 @@ export async function GET(_request: Request, props: { params: Promise<{ id: stri
       logApiError("/api/automations/flows/[id]/runs", error);
       return refuse("load_failed", 500);
     }
-    return NextResponse.json({ ok: true, runs: data ?? [] });
+    return NextResponse.json({ ok: true, runs: data ?? [], doneRuns: await countDoneRuns(supabase, user.id, id) });
   } catch (err) {
     logApiError("/api/automations/flows/[id]/runs", err);
     return refuse("load_failed", 500);

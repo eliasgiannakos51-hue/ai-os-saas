@@ -147,6 +147,15 @@ function collect(file, seen, out, allowExternals = false, declaredBy = new Map()
       stmt.moduleSpecifier &&
       ts.isStringLiteral(stmt.moduleSpecifier)
     ) {
+      // `import type { X } from "@/…"` HAS NO RUNTIME. TypeScript erases
+      // the whole statement, and so does Next, so following it bundles a
+      // module nothing executes — and fails the load when that module
+      // imports a vendor package. lib/account/pending-deletion.ts types
+      // its client as ReturnType<typeof createAdminClient>, a type-only
+      // import of lib/supabase/admin.ts (supabase-js), which is what
+      // scripts/tests/deferred-deletion.test.mjs found. A statement that
+      // also imports a value (`import { type A, b }`) is still followed.
+      if (stmt.importClause?.isTypeOnly || (ts.isExportDeclaration(stmt) && stmt.isTypeOnly)) continue;
       const resolved = resolveSpecifier(stmt.moduleSpecifier.text, abs);
       if (!resolved) continue;
       // A .json import is DATA, and the REAL data is inlined — never a
@@ -394,19 +403,49 @@ export async function loadTs(entry) {
  * the renderer directly and re-registering the fonts in the gate, which
  * proves the engine but not the app's own file.
  */
-export async function loadTsLinked(entry) {
-  const key = `linked:${path.resolve(entry)}`;
-  if (cache.has(key)) return cache.get(key);
-  const linked = bundleOf(entry, true).replace(
+function linkedBundleOf(entry, { extensionless = false } = {}) {
+  return bundleOf(entry, true).replace(
     /^(import\s+(?:[^"'\n]*?\s+from\s+)?)["']([^"'./\n][^"'\n]*)["'](;?)$/gm,
     (whole, head, spec, semi) => {
       if (spec.startsWith("node:")) return whole;
-      return `${head}"${import.meta.resolve(spec)}"${semi}`;
+      let url = import.meta.resolve(spec);
+      // `next/headers` resolves to a path with no extension, which Node's
+      // ESM loader will not open; the file beside it with `.js` is the
+      // one a bundler would pick. Only probeTs asks for this.
+      if (extensionless && url.startsWith("file:") && !/\.[cm]?js$|\.json$/.test(url) && existsSync(new URL(`${url}.js`))) url = `${url}.js`;
+      return `${head}"${url}"${semi}`;
     }
   );
+}
+
+export async function loadTsLinked(entry) {
+  const key = `linked:${path.resolve(entry)}`;
+  if (cache.has(key)) return cache.get(key);
+  const linked = linkedBundleOf(entry);
   const mod = await import("data:text/javascript;base64," + Buffer.from(linked).toString("base64"));
   cache.set(key, mod);
   return mod;
+}
+
+/**
+ * The linked bundle, plus each of `expressions` evaluated INSIDE its
+ * scope, returned in order — a string as itself, anything else as JSON,
+ * a throw as `{ error }`.
+ *
+ * FOR MEASUREMENT, NOT FOR GATES. A route's system prompt is usually a
+ * module-private function (`buildSystemPrompt()` in
+ * src/app/api/create-studio/detect/route.ts), which no namespace import
+ * can reach; the bundle is one flat scope, so an expression appended to
+ * it can. scripts/measure-prompt-cache-headroom.mjs measures every
+ * call site's real prompt this way. Nothing is written to disk.
+ */
+export async function probeTs(entry, expressions) {
+  const probe = expressions
+    .map((e) => `(() => { try { const v = (${e}); return typeof v === "string" ? v : JSON.stringify(v); } catch (err) { return { error: String(err && err.message) }; } })()`)
+    .join(",\n");
+  const code = `${linkedBundleOf(entry, { extensionless: true })}\nexport const __probe = [\n${probe}\n];\n`;
+  const mod = await import("data:text/javascript;base64," + Buffer.from(code).toString("base64"));
+  return mod.__probe;
 }
 
 /**

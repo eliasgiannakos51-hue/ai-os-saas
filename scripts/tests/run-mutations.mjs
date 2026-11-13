@@ -161,7 +161,21 @@ if (suites.length === 0) {
 // argument for counting LAST, after the round's files are all written:
 // `ls scripts/tests/*.mutation.mjs | wc -l`, with `git stash -u` so the
 // new untracked ones are not counted on both sides.
-const FLOOR = 273;
+// 273 -> 284 on 2026-10-31, and TEN of those eleven are an arrear: this
+// round's own new suite is chat-chart (#30 Κομμάτι 1) alone — web-sources
+// and chat-attachments had their stale anchors FIXED, not suites added
+// or removed. The other ten are 3d, telegram, agents, sheets, skills and
+// the rest of this session's own rounds, each landing inside the slack
+// of 10 while nobody ran this gate to notice the register had not moved
+// since 273. Counted with `ls scripts/tests/*.mutation.mjs | wc -l`,
+// after the round's files were all written.
+// 284 -> 296 on 2026-11-07, on the rebase of the 2026-11-05 accounts
+// security round onto this line: five new suites (account-suspension,
+// cross-site-writes, entity-links-owner, pwa, share-target). Read off
+// the run.
+// 308 since 2026-11-11: FS1 live voice (+1), FD2 locale-allowed-staleness
+// (+1), and nine more from the prior rounds. Read off the run.
+const FLOOR = 308;
 
 function trackedDirty() {
   const out = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], {

@@ -134,8 +134,18 @@ const PUBLIC_ON_PURPOSE = {
   "src/app/reset-password/page.tsx": "reached from an emailed recovery link, before the session exists.",
   "src/app/delete-account/confirm/page.tsx":
     "reached from an emailed single-use token. The token is the credential and it is claimed atomically by /api/delete-account/confirm; requiring a session as well would strand anybody who had already been signed out.",
+  "src/app/delete-account/cancel/page.tsx":
+    "the other half of the confirm page above: reached from the cancel link in the deletion-scheduled email, possibly signed out and on another device. The page renders a heading, one sentence and one button from fixed strings, reads no table and shows nothing of the account; the token in the address is the credential, and /api/delete-account/cancel is what checks it (by SHA-256, single-use). Requiring a session would leave somebody who signed out unable to stop their own account's deletion from their inbox.",
   "src/app/offline/page.tsx":
     "served by the service worker when the network is gone. It is fetched ONCE, over the network, at service-worker install — so it cannot depend on a session, and it deliberately holds no account data at all.",
+  "src/app/shared/[token]/page.tsx":
+    "Projects Κομμάτι 7's own read-only share link: the whole point is that whoever holds the unguessable token may read it with NO session — that is what 'share' means. It is not a cross-account leak: the token itself (randomBytes(24), api/projects/[id]/share's own POST) is the credential, looked up with createAdminClient() the same deliberate way delete-account/confirm's single-use token is above, and the page never renders the project's notes (private AI memory) regardless of who asks.",
+  // Ionexa Payments (2026-11-11): the two public pages a customer
+  // (not an Ionexa user) sees when paying for a product.
+  "src/app/pay/[productId]/page.tsx":
+    "the public payment page: a customer who clicks a payment link lands here, sees the product name and price, and is sent to Stripe Checkout. No session because the payer has no Ionexa account and never will — Stripe handles the card. The page reads only the product's name, price and description (from a deny-all table through createAdminClient), and the charges_enabled flag that Stripe set; it shows nothing else, and writes nothing.",
+  "src/app/pay/success/page.tsx":
+    "a static confirmation shown after Stripe Checkout completes. It reads no table and names no account — it is three fixed sentences and a checkmark, the same in every locale. Stripe sends the receipt email.",
 };
 
 const unguarded = [];
@@ -189,6 +199,7 @@ const STANDS_ON_THE_LAYOUT = {
   "src/app/dashboard/videos/page.tsx": "the same shell.",
   "src/app/dashboard/websites/page.tsx": "the same shell.",
   "src/app/dashboard/memory/page.tsx": "a 308 to /dashboard/search and nothing else — a kept address for old bookmarks. It has no body to protect, and the page it forwards to resolves and refuses.",
+  "src/app/dashboard/projects/[id]/page.tsx": "a redirect to /dashboard/projects?id= and nothing else (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι 1, 2026-10-28) — a kept address for meetings-workspace.tsx's old link. It has no body to protect, and the page it forwards to resolves and refuses.",
 };
 const undeclaredReliance = relyOnLayout.filter((p) => !STANDS_ON_THE_LAYOUT[p]);
 check(

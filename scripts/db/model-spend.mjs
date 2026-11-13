@@ -13,7 +13,7 @@
  * Sonnet is $3/$15 per MTok and Haiku is $1/$5 (lib/billing/model-pricing.ts),
  * so moving a task down saves two thirds of its spend. Two thirds of
  * nothing is nothing. `scripts/measure-prompt-cache-headroom.mjs` already
- * showed what happens when a lever is counted instead of measured: "18 of
+ * showed, on 2026-09-25, what happens when a lever is counted instead of measured: "18 of
  * 26 call sites do not cache" collapses to 2 once the 1,024-token minimum
  * is applied, because sixteen of those prompts are too short to cache at
  * all and Anthropic would never have said so.

@@ -96,10 +96,10 @@ export function PublishedSitesList({
   // for logs and a curl, so the case is read from what it names — the same
   // reading as components/publishing/publish-control.tsx. Literal keys, so
   // the message slicer can bound them (lib/i18n/message-slices.ts).
-  function refusalText(status: number, data: { limitReached?: unknown; upgradeRequired?: unknown; securityBlocked?: unknown } | null): string {
+  function refusalText(status: number, data: { reason?: unknown; limitReached?: unknown; upgradeRequired?: unknown; securityBlocked?: unknown } | null): string {
     if (data?.limitReached === true) return t("limitReached");
     if (data?.upgradeRequired === true) return t("paidOnly");
-    if (data?.securityBlocked === true) return t("securityBlocked");
+    if (data?.securityBlocked === true) return data.reason === "password_field" ? t("securityBlockedPassword") : t("securityBlocked");
     if (status === 429) return t("tooManyToday");
     return t("publishError");
   }

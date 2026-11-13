@@ -11,6 +11,7 @@ import {
   Paperclip,
   Presentation,
   Search,
+  Star,
   Telescope,
   type LucideIcon,
 } from "lucide-react";
@@ -45,11 +46,13 @@ export function LibraryView({
   items,
   kind,
   query,
+  favoriteOnly,
   failed,
 }: {
   items: LibraryItem[];
   kind: LibraryKind | null;
   query: string;
+  favoriteOnly: boolean;
   failed: LibraryKind[];
 }) {
   const t = useTranslations("dashboard.library");
@@ -69,9 +72,20 @@ export function LibraryView({
     const params = new URLSearchParams();
     if (next) params.set("kind", next);
     if (query) params.set("q", query);
+    if (favoriteOnly) params.set("fav", "1");
     const s = params.toString();
     return s ? `/dashboard/timeline?${s}` : "/dashboard/timeline";
   };
+  // Toggling the star chip keeps whatever kind and search are already set —
+  // it is a filter on top of them, not a replacement for them.
+  const favoriteOnlyHref = (() => {
+    const params = new URLSearchParams();
+    if (kind) params.set("kind", kind);
+    if (query) params.set("q", query);
+    if (!favoriteOnly) params.set("fav", "1");
+    const s = params.toString();
+    return s ? `/dashboard/timeline?${s}` : "/dashboard/timeline";
+  })();
   // THE SAME QUIET LANDING AS EVERY OTHER TOOL (MASTER Μέρος 16, Batch 2;
   // the owner's "lighter touch" decision, 2026-10-22) — a globe, a
   // heading, up to three examples — but Library is a search over real
@@ -81,6 +95,7 @@ export function LibraryView({
     const params = new URLSearchParams();
     if (kind) params.set("kind", kind);
     params.set("q", q);
+    if (favoriteOnly) params.set("fav", "1");
     return `/dashboard/timeline?${params.toString()}`;
   };
 
@@ -88,6 +103,7 @@ export function LibraryView({
     <div>
       <form action="/dashboard/timeline" method="get" role="search" className="flex gap-2">
         {kind && <input type="hidden" name="kind" value={kind} />}
+        {favoriteOnly && <input type="hidden" name="fav" value="1" />}
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">{t("searchLabel")}</span>
           <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -121,6 +137,15 @@ export function LibraryView({
             </Link>
           );
         })}
+        <Link
+          href={favoriteOnlyHref}
+          aria-current={favoriteOnly ? "page" : undefined}
+          data-testid="library-favorite-toggle"
+          className={`chip-link px-4 text-sm ${favoriteOnly ? "bg-foreground/15 font-semibold text-foreground" : ""}`}
+        >
+          <Star className="me-1 inline h-3.5 w-3.5" aria-hidden="true" fill={favoriteOnly ? "currentColor" : "none"} />
+          {t("favoritesOnly")}
+        </Link>
       </nav>
 
       {!query && items.length > 0 && (
@@ -163,6 +188,10 @@ export function LibraryView({
             <EmptyState icon={Search} title={t("noMatch.title", { query })}>
               {t("noMatch.why")}
             </EmptyState>
+          ) : favoriteOnly ? (
+            <EmptyState icon={Star} title={t("noFavorites.title")}>
+              {t("noFavorites.why")}
+            </EmptyState>
           ) : (
             <EmptyState icon={Library} title={t("empty.title")}>
               {t("empty.why")}
@@ -184,6 +213,14 @@ export function LibraryView({
                   <span className="flex items-center gap-2 text-xs text-muted">
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {kindNames[item.kind]}
+                    {item.favorited && (
+                      <Star
+                        className="h-3.5 w-3.5 shrink-0 text-foreground"
+                        aria-hidden="true"
+                        fill="currentColor"
+                        data-testid="library-item-favorited"
+                      />
+                    )}
                     <span className="ms-auto" title={formatDateTime(item.createdAt, locale)} suppressHydrationWarning>
                       {formatRelativeTime(item.createdAt)}
                     </span>

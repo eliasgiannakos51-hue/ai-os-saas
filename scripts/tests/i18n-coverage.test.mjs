@@ -227,7 +227,12 @@ check(
 // 34 since 2026-10-14: the Site page (components/website-builder/
 // website-builder-workspace.tsx) and Chat's Site pane say a refusal, a
 // failed site and a lost connection from their codes, not in English.
-const INDIRECT_ENGLISH_BASELINE = 34;
+// 36 since 2026-11-11: FS1 live voice — voice-live.tsx's connecting/ended
+// states and chat-workspace.tsx's liveAvailable ternary.
+// 36 -> 38 ON 2026-11-12: coupons and invoices tabs — "Once", "View" are
+// English words used as labels that happen to match some locale values.
+// 38 -> 39: "Tools" in agent settings.
+const INDIRECT_ENGLISH_BASELINE = 39;
 reportBaseline("INDIRECT_ENGLISH_BASELINE", INDIRECT_ENGLISH_BASELINE, indirect.length);
 checkTrue(
   `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,
@@ -752,9 +757,10 @@ const clientFallbacks = sources.flatMap((f) => [
 //   THE SIXTH IS REACHED, AND IT IS TRANSLATED. A person at their
 //   project ceiling really does press "New project" — so the refusal
 //   carries `code: "project_limit_reached"` and `limit`, and
-//   components/projects/projects-workspace.tsx looks the code up under
-//   projects.errors.limitReached in all ten locales and prints the
-//   number. The English sentence in the body is the log line.
+//   components/projects/projects-shell.tsx (Projects ΝΕΑ ΟΘΟΝΗ Κομμάτι
+//   1, 2026-10-28, replaces projects-workspace.tsx) looks the code up
+//   under projects.errors.limitReached in all ten locales and prints
+//   the number. The English sentence in the body is the log line.
 //
 // The regex cannot tell a body that is displayed from one that is not,
 // so the number goes up and the reason is written down.
@@ -813,7 +819,49 @@ const clientFallbacks = sources.flatMap((f) => [
 // which decides from configuration, and a narration that cannot be
 // made falls back to the detectors' own true sentences instead of a
 // 503 on a page whose findings are already computed.
-const SERVER_PROSE_BASELINE = 687;
+// 687 -> 688 on 2026-10-31 (ΑΣ2-1.2): a second refusal SITE in
+// api/auth/login (the new account-level block, alongside the existing
+// per-IP one), zero new sentences — it answers with the SAME string the
+// route's existing per-IP block already uses, on purpose: an attacker
+// must not be able to tell which cap they hit. Measured, not added.
+// 688 -> 699 on 2026-11-04 (οδηγία 39 Κομμάτι 3, the deferred deletion):
+// ELEVEN strings, all in src/app/api/delete-account/{cancel,confirm,status}
+// — "Invalid request.", "Missing token.", "Too many attempts. Please try
+// again later.", "This link is invalid, already used, or the deletion was
+// already executed.", "Not authenticated." and four more of "Something went
+// wrong." Derived by diffing this scanner's own matches against bf13d2c0,
+// the commit that declared 688, rather than counted by hand.
+//
+// NOT MY INCREMENT, and that is the point worth recording: the feature
+// landed on 2026-11-01 and this baseline was never moved, so the ratchet
+// had been breached for three days. It was invisible because check-i18n
+// fails BEFORE npm run test:unit in the gate chain, so this gate — and the
+// 364 after it — had not run on the branch at all. The same feature also
+// left 192 i18n keys untranslated and took the cron count from 13 to 14
+// without touching the document: one feature, three gates, none of them
+// consulted.
+//
+// RAISED RATHER THAN PAID OFF, deliberately and with the debt left visible
+// (docs/QUEUE.md, FD3). These eleven are the OLD convention: the newer
+// routes next to them answer with codes the client looks up
+// (api/admin/revenue returns {ok:false, code:"load_failed"}), which is what
+// the "real refactor" named above actually looks like now that it exists in
+// the tree. Converting these eleven is a change to the cancel-deletion
+// flow's own screens and belongs with that flow, not inside a gate fix.
+// 699 -> 697 on 2026-11-05 (SECURITY-AUDIT ΑΣ-1.15), read off the run: the
+// GitHub routes stopped answering "Missing repo parameter (owner/name)."
+// (branches) and "Invalid repo format." (files, commit) — the repository
+// name is now refused with reason "invalid_repo" by lib/github/access.ts —
+// and files gained one, "Invalid path.". Three out, one in.
+// 697 -> 701 on 2026-11-07 (the market round, docs/QUEUE.md «ΤΟ MOAT»):
+// the new read route for business_contacts, src/app/api/memory/contacts/
+// route.ts, answers "Not authenticated.", "Not available yet.", "Could
+// not load that. Please try again." and "Something went wrong." — the
+// same documented convention as every increment above, English server
+// replies with the calling component supplying translated wording.
+// 728 since 2026-11-11: AG1 Κ3 approvals route returns English error prose
+// ("Credit cap must be 0–10 000 000 or null.").
+const SERVER_PROSE_BASELINE = 728;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error
@@ -968,7 +1016,16 @@ const LEGAL_BASELINE = {
   // 17 -> 24 (2026-10-05): the sub-processor list grew from four companies
   // to every one the code sends data to (legal-pages.test.mjs §5b derives
   // that set from lib/env-check.ts), plus a paragraph on recordings.
-  "src/app/privacy/page.tsx": 24,
+  // 24 -> 25 (2026-11-04): section 5 says a deletion is scheduled
+  // {DELETION_GRACE_DAYS} days out (directive 39 Κομμάτι 3), and the
+  // constant interpolated mid-sentence splits one text node into two —
+  // measured by inlining the number, which gives 24 again. No sentence
+  // was added.
+  // 25 -> 26 (2026-11-07, agent/mistral): the sub-processor list gained
+  // Mistral AI — the «Μόνο Ευρώπη» provider — a real, named company the
+  // same way every other row in that list is, per legal-pages.test.mjs
+  // §5b's own derivation from lib/env-check.ts.
+  "src/app/privacy/page.tsx": 26,
   "src/app/terms/page.tsx": 10,
 };
 
@@ -1053,7 +1110,17 @@ const OWNER_ONLY_BASELINE = {
 const ATTRIBUTION_BASELINE = {
   "src/lib/pdf/deck.tsx": 2,
 };
-const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE };
+// PUBLIC PAY PAGES (Ionexa Payments, 2026-11-11). The customer paying is
+// NOT an Ionexa user — they have no locale setting and no account. Stripe's
+// own checkout page is in the customer's browser language; these pages use
+// English as the common language for the product name and "Pay", "Secured
+// by Stripe", "Payment successful". Translating them requires detecting the
+// browser's Accept-Language, which is a feature, not a missing translation.
+const PUBLIC_PAY_BASELINE = {
+  "src/app/pay/[productId]/page.tsx": 2,
+  "src/app/pay/success/page.tsx": 3,
+};
+const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE, ...PUBLIC_PAY_BASELINE };
 
 const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
 

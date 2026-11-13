@@ -138,7 +138,14 @@ export function TopNav({ email }: { email: string }) {
           // Below `lg` this is the icon alone, which `px-3 py-2` sized at
           // 40x40 — the one control in the header that stayed under 44px
           // after everything else was raised.
-          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-item bg-button px-3 py-2 text-sm font-semibold text-button-ink transition-all duration-200 hover:opacity-90 lg:px-3.5"
+          //
+          // OUTLINED, NOT FILLED (2026-11-04): every one of the owner's 26
+          // approved screens (docs/design/approved/README.md) draws it with
+          // a frame and no fill, so that the screen's ONE white button is
+          // the tool's own — «Publish», «Make final» — and never this one,
+          // which is on all of them. `.btn-quiet` is that frame, declared
+          // once in globals.css.
+          className="btn-quiet min-w-[44px] shrink-0 justify-center lg:px-3.5"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           {/* THE BUTTON AND THE PAGE IT OPENS SAY THE SAME WORD.

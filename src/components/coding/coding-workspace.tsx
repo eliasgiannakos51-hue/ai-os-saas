@@ -21,6 +21,7 @@ import { FOLDER_UPLOAD_MAX_FILES, readUploadedFolder } from "@/lib/coding/folder
 import { POWER_LEVELS, modelForPower, type PowerLevel } from "@/lib/coding/power";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { GitHubConnect, type GitHubSelection } from "@/components/coding/github-connect";
+import type { GitHubPrResult } from "@/lib/github/types";
 
 export type CodeSession = {
   id: string;
@@ -205,9 +206,11 @@ export function CodingWorkspace({ sessions, initialTask, isAdmin = false, github
           prBody: prBody || "",
         }),
       });
-      const body = (await res.json().catch(() => null)) as { ok?: boolean; pr?: { number: number; html_url: string } } | null;
+      // The route sends lib/github/types.ts's GitHubPrResult — `url`, not
+      // GitHub's own `html_url` (github-security.test.mjs §11).
+      const body = (await res.json().catch(() => null)) as { ok?: boolean; pr?: GitHubPrResult } | null;
       if (body?.ok && body.pr) {
-        setPrResult({ number: body.pr.number, url: body.pr.html_url });
+        setPrResult({ number: body.pr.number, url: body.pr.url });
         setCommitOpen(false);
         say("tool", `${tGh("prCreated")} #${body.pr.number}`);
       }

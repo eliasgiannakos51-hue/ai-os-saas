@@ -35,7 +35,7 @@ const MUTANTS = [
   {
     name: "a real reader is left off readBy",
     file: INVENTORY,
-    from: 'readBy: ["src/lib/ai/providers/registry.ts", "src/lib/voice/voice-providers.ts"],',
+    from: 'readBy: ["src/lib/ai/providers/registry.ts", "src/lib/voice/voice-providers.ts", "src/lib/voice/live-provider.ts"],',
     to: 'readBy: ["src/lib/ai/providers/registry.ts"],',
     expect: "openai: no reader is left off readBy",
   },
@@ -115,6 +115,45 @@ const MUTANTS = [
     from: "DEEPGRAM_API_KEY=\n",
     to: "",
     expect: "DEEPGRAM_API_KEY is in .env.local.example",
+  },
+  {
+    // setupUrl, 2026-11-09 (owner's own request: say where a missing key
+    // comes from). A non-https setupUrl is the one shape that could leak
+    // something — a javascript: URL, or plain http — so this is checked
+    // the same way the provider check URLs already are.
+    name: "a setupUrl stops being https",
+    file: INVENTORY,
+    from: 'setupUrl: "https://aistudio.google.com/apikey",',
+    to: 'setupUrl: "http://aistudio.google.com/apikey",',
+    expect: "google: setupUrl is https",
+  },
+  {
+    name: "vapid grows a setupUrl it should not have (there is no sign-up page to link)",
+    file: INVENTORY,
+    from: "    // generate-vapid-keys`, which is why `missing` above is null (there is\n    // nothing to wait on) and this stays null rather than pointing at a\n    // page that does not exist.\n    setupUrl: null,",
+    to: '    setupUrl: "https://example.com/vapid",',
+    expect: "vapid has no setupUrl",
+  },
+  {
+    name: "the page stops passing setupUrl through to the panel",
+    file: PAGE,
+    from: "    setupUrl: entry.setupUrl,\n",
+    to: "",
+    expect: "the page passes setupUrl through to the panel",
+  },
+  {
+    name: "the panel shows the 'Get a key' link even when the key IS already set",
+    file: PANEL,
+    from: "{!row.set && row.setupUrl && (",
+    to: "{row.setupUrl && (",
+    expect: "the panel renders a 'Get a key' link only when the key is NOT set",
+  },
+  {
+    name: "the setup link drops rel=noopener — a tab opened from here can reach back into this one",
+    file: PANEL,
+    from: '<a href={row.setupUrl} target="_blank" rel="noopener noreferrer" className="underline">',
+    to: '<a href={row.setupUrl} target="_blank" className="underline">',
+    expect: "the setup link opens in a new tab with noopener",
   },
 ];
 

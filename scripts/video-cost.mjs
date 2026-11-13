@@ -26,6 +26,14 @@ const limitsSrc = (await import("node:fs")).readFileSync("src/lib/files/limits.t
 
 // provider, model, resolution, USD per second, max seconds per call, source
 const RATES = [
+  // Veo 3.1 (Google), looked up 2026-10-03 from secondary sources —
+  // ai.google.dev is blocked by this environment's network policy, so
+  // these are not read off Google's own pricing page (docs/VIDEO-PROVIDERS.md).
+  ["Veo", "3.1 Lite", "1080p", 0.08, 8, "secondary sources, 2026-10-03 — see docs/VIDEO-PROVIDERS.md"],
+  ["Veo", "3.1 Fast", "1080p", 0.12, 8, "secondary sources, 2026-10-03 — see docs/VIDEO-PROVIDERS.md"],
+  ["Veo", "3.1 Fast", "2160p", 0.3, 8, "secondary sources, 2026-10-03 — see docs/VIDEO-PROVIDERS.md"],
+  ["Veo", "3.1 Standard", "1080p", 0.4, 8, "secondary sources, 2026-10-03 — see docs/VIDEO-PROVIDERS.md"],
+  ["Veo", "3.1 Standard", "2160p", 0.6, 8, "secondary sources, 2026-10-03 — see docs/VIDEO-PROVIDERS.md"],
   ["Kling", "2.5 Turbo", "720p", 0.042, 10, "kling.ai/document-api/pricing/base/video"],
   ["Kling", "2.5 Turbo", "1080p", 0.07, 10, "kling.ai/document-api/pricing/base/video"],
   ["Kling", "3.0 native 4K", "2160p", 0.42, 10, "kling.ai/blog/kling-video-3-0-credit-cost-guide"],
@@ -33,6 +41,12 @@ const RATES = [
   ["Runway", "Gen-4.5", "720p-1080p*", 0.12, 10, "apiframe.ai/guides/runway-api-guide"],
   ["Runway", "Gen-4 Turbo + upscale_v1", "2160p", 0.05 + 0.02, 10, "upscale_v1 at 2 credits/s, wavespeed.ai/docs"],
   ["Luma", "Ray3", "1080p", 0.24, 10, "apiframe.ai/guides/luma-api-guide"],
+  // Seedance (ByteDance/BytePlus): NO confirmed official USD per-second
+  // rate as of 2026-06-17 — ByteDance publishes in RMB, and third
+  // parties disagree by 2x on the USD conversion. This row is the
+  // MIDPOINT of third-party resellers (not an official figure), flagged
+  // so it is never read as equal confidence to the rows above it.
+  ["Seedance", "2.0 (UNCONFIRMED, third-party midpoint)", "1080p", 0.11, 10, "atlascloud.ai + llmgateway.io, 2026 — no official USD page found"],
 ];
 const MARGIN = { free: 6, starter: 5, growth: 5, professional: 5, ultimate: 5 };
 const plans = PLANS.filter((p) => typeof p.price === "number" && typeof p.monthlyCredits === "number");

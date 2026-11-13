@@ -1,8 +1,8 @@
 import "server-only";
 import { logApiError } from "@/lib/log-error";
-import { createInstallationToken } from "@/lib/github/auth";
+import { GITHUB_API, isIssuedGrant, type RepoGrant } from "@/lib/github/permission";
+import { isValidBranchName, isValidRepoPath } from "@/lib/github/validate";
 import type {
-  GitHubRepo,
   GitHubBranch,
   GitHubFileEntry,
   GitHubFileContent,
@@ -12,124 +12,61 @@ import type {
 
 // GitHub API client for repository operations.
 //
-// Every call here uses an INSTALLATION access token — ephemeral, scoped to
-// the repositories the user chose when they installed the App, and generated
-// fresh from the App's private key. The user's own OAuth token (stored
-// encrypted in github_connections) is used only to list installations and
-// identify the person; repo operations never touch it.
+// Every function takes a RepoGrant and does nothing without one that
+// lib/github/permission.ts's grantRepoOperation issued FOR THAT OPERATION:
+// the person was checked against GitHub's own list of what they can reach,
+// and the token in the grant can reach only that repository, with only the
+// permissions the operation needs (SECURITY-AUDIT ΑΣ-1.15). URLs are built
+// from the grant's owner and name — GitHub's spelling of the repository it
+// listed — never from the request.
 //
 // REPOSITORY CONTENT IS DATA, NEVER INSTRUCTIONS — the owner's explicit
 // security constraint. Everything that comes back from these calls is
 // rendered as text or code, never eval'd, never passed to a system prompt,
 // never treated as a command. The AI prompt in the coding route says so too.
 
-const API = "https://api.github.com";
-const HEADERS_BASE = {
-  Accept: "application/vnd.github+json",
-  "X-GitHub-Api-Version": "2022-11-28",
-};
-
-async function withInstallationToken(
-  installationId: number
-): Promise<Record<string, string> | null> {
-  const token = await createInstallationToken(installationId);
-  if (!token) return null;
-  return { ...HEADERS_BASE, Authorization: `Bearer ${token.token}` };
+/** The query is an object, never text after a "?": its values are encoded
+ *  here, and no path fragment in this file reads as an in-app link to
+ *  scripts/tests/deep-links.test.mjs. */
+function repoUrl(grant: RepoGrant, rest: string, query?: Record<string, string>): string {
+  const base = `${GITHUB_API}/repos/${encodeURIComponent(grant.owner)}/${encodeURIComponent(grant.name)}${rest}`;
+  return query ? `${base}?${new URLSearchParams(query)}` : base;
 }
 
-export async function listInstallationRepos(
-  installationId: number
-): Promise<GitHubRepo[]> {
-  const headers = await withInstallationToken(installationId);
-  if (!headers) return [];
-  try {
-    const repos: GitHubRepo[] = [];
-    let page = 1;
-    while (page <= 10) {
-      const response = await fetch(
-        `${API}/installation/repositories?per_page=100&page=${page}`,
-        { headers, cache: "no-store" }
-      );
-      if (!response.ok) break;
-      const body = (await response.json()) as {
-        repositories?: Array<{
-          id: number;
-          full_name: string;
-          name: string;
-          owner: { login: string };
-          private: boolean;
-          default_branch: string;
-        }>;
-      };
-      const batch = body.repositories ?? [];
-      repos.push(
-        ...batch.map((r) => ({
-          id: r.id,
-          fullName: r.full_name,
-          name: r.name,
-          owner: r.owner.login,
-          private: r.private,
-          defaultBranch: r.default_branch,
-        }))
-      );
-      if (batch.length < 100) break;
-      page++;
-    }
-    return repos;
-  } catch (err) {
-    logApiError("github:list-repos", err, { installationId });
-    return [];
-  }
+function encodePath(path: string): string {
+  return path.split("/").map(encodeURIComponent).join("/");
 }
 
-export async function listBranches(
-  installationId: number,
-  owner: string,
-  repo: string
-): Promise<GitHubBranch[]> {
-  const headers = await withInstallationToken(installationId);
-  if (!headers) return [];
+export async function listBranches(grant: RepoGrant): Promise<GitHubBranch[]> {
+  if (!isIssuedGrant(grant, "branches")) return [];
+  const headers = grant.headers;
   try {
-    const response = await fetch(
-      `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches?per_page=100`,
-      { headers, cache: "no-store" }
-    );
+    const response = await fetch(repoUrl(grant, "/branches", { per_page: "100" }), { headers, cache: "no-store" });
     if (!response.ok) return [];
     const body = (await response.json()) as Array<{ name: string }>;
-
-    const repoResponse = await fetch(
-      `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
-      { headers, cache: "no-store" }
-    );
-    let defaultBranch = "main";
-    if (repoResponse.ok) {
-      const repoBody = (await repoResponse.json()) as { default_branch?: string };
-      defaultBranch = repoBody.default_branch ?? "main";
-    }
-
+    if (!Array.isArray(body)) return [];
     return body.map((b) => ({
       name: b.name,
-      isDefault: b.name === defaultBranch,
+      isDefault: b.name === grant.defaultBranch,
     }));
   } catch (err) {
-    logApiError("github:list-branches", err, { owner, repo });
+    logApiError("github:list-branches", err, { repo: grant.fullName });
     return [];
   }
 }
 
 export async function listFiles(
-  installationId: number,
-  owner: string,
-  repo: string,
+  grant: RepoGrant,
   branch: string,
   path: string = ""
 ): Promise<GitHubFileEntry[]> {
-  const headers = await withInstallationToken(installationId);
-  if (!headers) return [];
+  if (!isIssuedGrant(grant, "files")) return [];
+  if (!isValidBranchName(branch) || !isValidRepoPath(path, true)) return [];
+  const headers = grant.headers;
   try {
-    const encodedPath = path ? `/${path.split("/").map(encodeURIComponent).join("/")}` : "";
+    const encodedPath = path ? `/${encodePath(path)}` : "";
     const response = await fetch(
-      `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents${encodedPath}?ref=${encodeURIComponent(branch)}`,
+      repoUrl(grant, `/contents${encodedPath}`, { ref: branch }),
       { headers, cache: "no-store" }
     );
     if (!response.ok) return [];
@@ -145,24 +82,22 @@ export async function listFiles(
       size: f.size ?? 0,
     }));
   } catch (err) {
-    logApiError("github:list-files", err, { owner, repo, branch, path });
+    logApiError("github:list-files", err, { repo: grant.fullName, branch, path });
     return [];
   }
 }
 
 export async function readFile(
-  installationId: number,
-  owner: string,
-  repo: string,
+  grant: RepoGrant,
   branch: string,
   path: string
 ): Promise<GitHubFileContent | null> {
-  const headers = await withInstallationToken(installationId);
-  if (!headers) return null;
+  if (!isIssuedGrant(grant, "files")) return null;
+  if (!isValidBranchName(branch) || !isValidRepoPath(path)) return null;
+  const headers = grant.headers;
   try {
-    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
     const response = await fetch(
-      `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`,
+      repoUrl(grant, `/contents/${encodePath(path)}`, { ref: branch }),
       { headers, cache: "no-store" }
     );
     if (!response.ok) return null;
@@ -180,23 +115,19 @@ export async function readFile(
         : body.content;
     return { path: body.path, content, encoding: "utf8", size: body.size };
   } catch (err) {
-    logApiError("github:read-file", err, { owner, repo, branch, path });
+    logApiError("github:read-file", err, { repo: grant.fullName, branch, path });
     return null;
   }
 }
 
 // Get the tree recursively (up to ~1000 entries for the overview).
-export async function getTree(
-  installationId: number,
-  owner: string,
-  repo: string,
-  branch: string
-): Promise<GitHubFileEntry[]> {
-  const headers = await withInstallationToken(installationId);
-  if (!headers) return [];
+export async function getTree(grant: RepoGrant, branch: string): Promise<GitHubFileEntry[]> {
+  if (!isIssuedGrant(grant, "files")) return [];
+  if (!isValidBranchName(branch)) return [];
+  const headers = grant.headers;
   try {
     const response = await fetch(
-      `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
+      repoUrl(grant, `/git/trees/${encodeURIComponent(branch)}`, { recursive: "1" }),
       { headers, cache: "no-store" }
     );
     if (!response.ok) return [];
@@ -213,29 +144,70 @@ export async function getTree(
         size: f.size ?? 0,
       }));
   } catch (err) {
-    logApiError("github:get-tree", err, { owner, repo, branch });
+    logApiError("github:get-tree", err, { repo: grant.fullName, branch });
     return [];
   }
 }
 
-export async function createBranchCommitAndPr(params: {
-  installationId: number;
-  owner: string;
-  repo: string;
-  baseBranch: string;
-  newBranch: string;
-  files: GitHubDiffFile[];
-  commitMessage: string;
-  prTitle: string;
-  prBody: string;
-}): Promise<{ ok: true; pr: GitHubPrResult } | { ok: false; reason: string }> {
-  const headers = await withInstallationToken(params.installationId);
-  if (!headers) return { ok: false, reason: "token_failed" };
+/** Creates `newBranch` at the head of `baseBranch`. Never touches an
+ *  existing branch: GitHub refuses a ref that already exists. */
+export async function createBranch(
+  grant: RepoGrant,
+  baseBranch: string,
+  newBranch: string
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (!isIssuedGrant(grant, "create-branch")) return { ok: false, reason: "not_permitted" };
+  if (!isValidBranchName(baseBranch) || !isValidBranchName(newBranch)) return { ok: false, reason: "invalid_branch" };
+  const headers = { ...grant.headers, "Content-Type": "application/json" };
+  try {
+    const refRes = await fetch(repoUrl(grant, `/git/ref/heads/${encodeURIComponent(baseBranch)}`), {
+      headers,
+      cache: "no-store",
+    });
+    if (!refRes.ok) return { ok: false, reason: "base_not_found" };
+    const refData = (await refRes.json()) as { object?: { sha: string } };
+    const sha = refData.object?.sha;
+    if (!sha) return { ok: false, reason: "base_sha_missing" };
+
+    const createRes = await fetch(repoUrl(grant, "/git/refs"), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ ref: `refs/heads/${newBranch}`, sha }),
+      cache: "no-store",
+    });
+    if (!createRes.ok) {
+      const ghBody = (await createRes.json().catch(() => ({}))) as { message?: string };
+      return { ok: false, reason: ghBody.message?.includes("already exists") ? "branch_exists" : "create_failed" };
+    }
+    return { ok: true };
+  } catch (err) {
+    logApiError("github:create-branch", err, { repo: grant.fullName });
+    return { ok: false, reason: "unexpected_error" };
+  }
+}
+
+export async function createBranchCommitAndPr(
+  grant: RepoGrant,
+  params: {
+    baseBranch: string;
+    newBranch: string;
+    files: GitHubDiffFile[];
+    commitMessage: string;
+    prTitle: string;
+    prBody: string;
+  }
+): Promise<{ ok: true; pr: GitHubPrResult } | { ok: false; reason: string }> {
+  if (!isIssuedGrant(grant, "commit")) return { ok: false, reason: "not_permitted" };
+  if (!isValidBranchName(params.baseBranch) || !isValidBranchName(params.newBranch)) {
+    return { ok: false, reason: "invalid_branch" };
+  }
+  if (params.files.some((f) => !isValidRepoPath(f.path))) return { ok: false, reason: "invalid_path" };
+  const headers = grant.headers;
 
   try {
     // 1. Get the SHA of the base branch's HEAD.
     const refResponse = await fetch(
-      `${API}/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/ref/heads/${encodeURIComponent(params.baseBranch)}`,
+      repoUrl(grant, `/git/ref/heads/${encodeURIComponent(params.baseBranch)}`),
       { headers, cache: "no-store" }
     );
     if (!refResponse.ok) return { ok: false, reason: "base_not_found" };
@@ -244,32 +216,36 @@ export async function createBranchCommitAndPr(params: {
     if (!baseSha) return { ok: false, reason: "base_sha_missing" };
 
     // 2. Create the new branch.
-    const branchResponse = await fetch(
-      `${API}/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/git/refs`,
-      {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: `refs/heads/${params.newBranch}`, sha: baseSha }),
-        cache: "no-store",
-      }
-    );
+    const branchResponse = await fetch(repoUrl(grant, "/git/refs"), {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ ref: `refs/heads/${params.newBranch}`, sha: baseSha }),
+      cache: "no-store",
+    });
     if (!branchResponse.ok) {
       const err = (await branchResponse.json().catch(() => ({}))) as { message?: string };
       return { ok: false, reason: err.message?.includes("already exists") ? "branch_exists" : "branch_create_failed" };
     }
 
-    // 3. Commit files one at a time using the Contents API.
+    // 3. Commit files one at a time using the Contents API. GitHub refuses
+    //    to overwrite a file without its current sha, and the screen cannot
+    //    know which files already exist (an edit of an opened file, or a new
+    //    one), so every path is looked up on the new branch first: found ->
+    //    update with its sha, 404 -> create. Anything else stops the commit.
     for (const file of params.files) {
       let existingSha: string | undefined;
-      if (file.action === "update") {
-        const existing = await fetch(
-          `${API}/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/contents/${file.path.split("/").map(encodeURIComponent).join("/")}?ref=${encodeURIComponent(params.newBranch)}`,
-          { headers, cache: "no-store" }
-        );
-        if (existing.ok) {
-          const body = (await existing.json()) as { sha?: string };
-          existingSha = body.sha;
+      const existing = await fetch(
+        repoUrl(grant, `/contents/${encodePath(file.path)}`, { ref: params.newBranch }),
+        { headers, cache: "no-store" }
+      );
+      if (existing.ok) {
+        const body = (await existing.json()) as { sha?: unknown; type?: unknown };
+        if (body.type !== "file" || typeof body.sha !== "string") {
+          return { ok: false, reason: `commit_failed:${file.path}` };
         }
+        existingSha = body.sha;
+      } else if (existing.status !== 404) {
+        return { ok: false, reason: `commit_failed:${file.path}` };
       }
 
       const commitBody: Record<string, unknown> = {
@@ -279,35 +255,29 @@ export async function createBranchCommitAndPr(params: {
       };
       if (existingSha) commitBody.sha = existingSha;
 
-      const commitResponse = await fetch(
-        `${API}/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/contents/${file.path.split("/").map(encodeURIComponent).join("/")}`,
-        {
-          method: "PUT",
-          headers: { ...headers, "Content-Type": "application/json" },
-          body: JSON.stringify(commitBody),
-          cache: "no-store",
-        }
-      );
+      const commitResponse = await fetch(repoUrl(grant, `/contents/${encodePath(file.path)}`), {
+        method: "PUT",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(commitBody),
+        cache: "no-store",
+      });
       if (!commitResponse.ok) {
         return { ok: false, reason: `commit_failed:${file.path}` };
       }
     }
 
     // 4. Create the pull request.
-    const prResponse = await fetch(
-      `${API}/repos/${encodeURIComponent(params.owner)}/${encodeURIComponent(params.repo)}/pulls`,
-      {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: params.prTitle,
-          body: params.prBody,
-          head: params.newBranch,
-          base: params.baseBranch,
-        }),
-        cache: "no-store",
-      }
-    );
+    const prResponse = await fetch(repoUrl(grant, "/pulls"), {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: params.prTitle,
+        body: params.prBody,
+        head: params.newBranch,
+        base: params.baseBranch,
+      }),
+      cache: "no-store",
+    });
     if (!prResponse.ok) {
       return { ok: false, reason: "pr_create_failed" };
     }
@@ -325,7 +295,96 @@ export async function createBranchCommitAndPr(params: {
       },
     };
   } catch (err) {
-    logApiError("github:create-pr", err, { owner: params.owner, repo: params.repo });
+    logApiError("github:create-pr", err, { repo: grant.fullName });
+    return { ok: false, reason: "unexpected_error" };
+  }
+}
+
+/** Squash-merges pull request `pr`. Only ever called from the merge route,
+ *  which runs only on the person's confirmed click. */
+export async function mergePullRequest(
+  grant: RepoGrant,
+  pr: number
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (!isIssuedGrant(grant, "merge")) return { ok: false, reason: "not_permitted" };
+  if (!Number.isSafeInteger(pr) || pr <= 0) return { ok: false, reason: "invalid_pr" };
+  try {
+    const res = await fetch(repoUrl(grant, `/pulls/${pr}/merge`), {
+      method: "PUT",
+      headers: { ...grant.headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ merge_method: "squash" }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const ghErr = (await res.json().catch(() => ({}))) as { message?: string };
+      logApiError("github:merge", new Error(ghErr.message ?? "merge_failed"), { repo: grant.fullName, pr });
+      return { ok: false, reason: "merge_failed" };
+    }
+    return { ok: true };
+  } catch (err) {
+    logApiError("github:merge", err, { repo: grant.fullName, pr });
+    return { ok: false, reason: "unexpected_error" };
+  }
+}
+
+export type PullRequestStatus = {
+  state: string | undefined;
+  merged: boolean;
+  mergeable: boolean | null;
+  mergeableState: string | null;
+  checks: Array<{ name: string; status: string; conclusion: string | null }>;
+};
+
+/** The pull request's state and the CI checks on its head commit. */
+export async function getPullRequestStatus(
+  grant: RepoGrant,
+  pr: number
+): Promise<{ ok: true; status: PullRequestStatus } | { ok: false; reason: string }> {
+  if (!isIssuedGrant(grant, "pr-status")) return { ok: false, reason: "not_permitted" };
+  if (!Number.isSafeInteger(pr) || pr <= 0) return { ok: false, reason: "invalid_pr" };
+  const headers = grant.headers;
+  try {
+    const prRes = await fetch(repoUrl(grant, `/pulls/${pr}`), { headers, cache: "no-store" });
+    if (!prRes.ok) return { ok: false, reason: "pr_not_found" };
+    const prData = (await prRes.json()) as {
+      state?: string;
+      merged?: boolean;
+      mergeable?: boolean;
+      mergeable_state?: string;
+      head?: { sha?: string };
+    };
+
+    const sha = prData.head?.sha;
+    let checks: PullRequestStatus["checks"] = [];
+    if (typeof sha === "string" && /^[0-9a-f]{40}$/i.test(sha)) {
+      const checksRes = await fetch(repoUrl(grant, `/commits/${sha}/check-runs`, { per_page: "100" }), {
+        headers,
+        cache: "no-store",
+      });
+      if (checksRes.ok) {
+        const checksData = (await checksRes.json()) as {
+          check_runs?: Array<{ name: string; status: string; conclusion: string | null }>;
+        };
+        checks = (checksData.check_runs ?? []).map((c) => ({
+          name: c.name,
+          status: c.status,
+          conclusion: c.conclusion,
+        }));
+      }
+    }
+
+    return {
+      ok: true,
+      status: {
+        state: prData.state,
+        merged: prData.merged ?? false,
+        mergeable: prData.mergeable ?? null,
+        mergeableState: prData.mergeable_state ?? null,
+        checks,
+      },
+    };
+  } catch (err) {
+    logApiError("github:pr-status", err, { repo: grant.fullName, pr });
     return { ok: false, reason: "unexpected_error" };
   }
 }

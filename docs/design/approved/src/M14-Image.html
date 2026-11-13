@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style>@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-400-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-400-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-500-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-500-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-600-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-600-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-700-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-700-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+</style>
+<meta charset="utf-8">
+<title>Ionexa · Image · phone</title>
+<style>
+body{margin:0;background:#070A12}
+*{box-sizing:border-box}
+h1,h2,p{margin:0}
+button{font-family:inherit;cursor:pointer}
+a{color:#DCE2EE;text-decoration:none}
+.ph{width:390px;height:844px;display:flex;flex-direction:column;background:#070A12;color:#DCE2EE;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;overflow:hidden}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mt{display:flex;align-items:center;gap:4px;height:52px;padding:0 6px;border-bottom:1px solid #161D2E;flex:none}
+.mbn{width:44px;height:44px;border:0;background:none;color:#DCE2EE;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.cr{height:32px;padding:0 10px;border:1px solid #222A3D;border-radius:10px;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#F5F7FB;background:none;margin-right:6px}
+.cr .i{width:15px;height:15px}
+.seg{display:flex;margin:10px auto 0;border:1px solid #222A3D;border-radius:12px;padding:3px;width:220px;flex:none}
+.seg button{flex:1;height:34px;border:0;border-radius:9px;background:none;color:#8D96A8;font-size:13px}
+.seg .on{background:#1E2638;color:#F5F7FB}
+.grid{display:grid;grid-template-columns:repeat(2,160px);gap:10px;justify-content:center;margin-top:12px;flex:none}
+.tile{position:relative;width:160px;height:200px;border-radius:12px;overflow:hidden;outline:2px solid transparent;outline-offset:3px}
+.tile.sel{outline-color:#F5F7FB}
+.vein{position:absolute;height:2px;border-radius:1px;background:#C9C3BA}
+.ringi{position:absolute;border-radius:50%;border:16px solid #C68A45}
+.lit{position:absolute;inset:0;background:rgba(255,255,255,.22);clip-path:polygon(0 0,62% 0,0 58%)}
+.no{position:absolute;left:8px;bottom:8px;width:22px;height:22px;border-radius:6px;background:rgba(7,10,18,.7);color:#F5F7FB;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.tools{display:flex;justify-content:space-between;padding:10px 16px 0;flex:none}
+.tl{width:62px;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:#DCE2EE;font-size:10.5px}
+.tl span.b{width:44px;height:36px;border:1px solid #222A3D;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.pri{margin:10px 12px 0;height:44px;border:0;border-radius:12px;background:#F5F7FB;color:#070A12;font-weight:600;font-size:14px;flex:none}
+.field{margin:10px 12px 10px;display:flex;flex-direction:column;gap:4px;padding:10px 8px 8px 14px;border:1px solid #222A3D;border-radius:18px;background:#0D1220;flex:none}
+.tag{align-self:flex-start;display:inline-flex;align-items:center;height:22px;padding:0 8px;border:1px solid #1E2638;border-radius:6px;font-size:11.5px;color:#DCE2EE}
+.row{display:flex;align-items:center;gap:6px}
+.ta{flex:1;height:40px;padding:8px 0 0;border:0;outline:none;resize:none;background:none;color:#F5F7FB;font:inherit;font-size:15px}
+.ta::placeholder{color:#8D96A8}
+.send{width:40px;height:40px;border:0;border-radius:20px;background:#F5F7FB;color:#070A12;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.bn{display:flex;height:64px;margin-top:auto;border-top:1px solid #161D2E;background:#080B14;flex:none}
+.bn a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:#8D96A8}
+.bn a.on{color:#F5F7FB}
+</style>
+</head>
+<body>
+<div class="ph">
+<header class="mt">
+<button class="mbn" type="button" aria-label="Back"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<span style="flex:1;min-width:0;color:#F5F7FB;font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Κουλούρι σε μαρμάρινο πάγκο</span>
+<button class="cr" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg>82</button>
+</header>
+<div class="seg" role="group" aria-label="View"><button type="button">Chat</button><button class="on" type="button">Result</button></div>
+<div class="grid">
+<div class="tile" style="background:#E9E6E1"><span class="vein" style="left:-20px;top:50px;width:220px;transform:rotate(18deg)"></span><span class="vein" style="left:20px;top:150px;width:170px;transform:rotate(-12deg)"></span><span class="ringi" style="left:34px;top:54px;width:94px;height:94px"></span><span class="lit"></span><span class="no">1</span></div>
+<div class="tile sel" style="background:#D8D3CC"><span class="vein" style="left:-20px;top:80px;width:220px;transform:rotate(-20deg)"></span><span class="ringi" style="left:16px;top:64px;width:100px;height:100px"></span><span class="ringi" style="left:100px;top:36px;width:54px;height:54px;border-width:10px;border-color:#B87A3A"></span><span class="lit"></span><span class="no">2</span></div>
+<div class="tile" style="background:#B58A62"><span class="vein" style="left:0;top:40px;width:160px;background:#A27650"></span><span class="vein" style="left:0;top:100px;width:160px;background:#A27650"></span><span class="vein" style="left:0;top:160px;width:160px;background:#A27650"></span><span class="ringi" style="left:31px;top:52px;width:98px;height:98px;border-color:#D69B5E"></span><span class="lit"></span><span class="no">3</span></div>
+<div class="tile" style="background:#E2DED8"><span style="position:absolute;left:20px;top:40px;width:120px;height:120px;border-radius:50%;background:#F6F4F0"></span><span class="ringi" style="left:37px;top:57px;width:86px;height:86px;border-width:15px"></span><span class="lit"></span><span class="no">4</span></div>
+</div>
+<div class="tools">
+<button class="tl" type="button"><span class="b"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 14.5l9-9 1.5 1.5-9 9"></path><path d="M9 15c-2 0-3 1.2-3 3s-1 2-2 2c3 1 7 0 7-3 0-1-.8-2-2-2z"></path></svg></span>Area</button>
+<button class="tl" type="button"><span class="b"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5z"></path><path d="M3 14l9 5 9-5"></path></svg></span>Background</button>
+<button class="tl" type="button"><span class="b"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-6 6M4 20l6-6"></path></svg></span>Upscale</button>
+<button class="tl" type="button"><span class="b"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6V4.5h14V6M12 4.5V20M9 20h6"></path></svg></span>Text</button>
+<button class="tl" type="button"><span class="b"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 6 7 6 10.5a6 6 0 0 1-12 0c0-3.5 3-6.5 6-10.5z"></path></svg></span>Brand Kit</button>
+</div>
+<button class="pri" type="button">Make final · 4K · 12 credits</button>
+<div class="field">
+<span class="tag">Selected: Variation 2</span>
+<div class="row"><textarea class="ta" aria-label="Message" placeholder="Change this…"></textarea><button class="send" type="button" aria-label="Send"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button></div>
+</div>
+<nav class="bn" aria-label="Main">
+<a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg>Home</a>
+<a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Chat</a>
+<a class="on" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg>Tools</a>
+<a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>You</a>
+</nav>
+</div>
+</body>
+</html>

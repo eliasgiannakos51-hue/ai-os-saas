@@ -18,7 +18,7 @@ import { getPurchasedPackCreditPriceEur, hasEnoughCredits } from "@/lib/billing/
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import type { Plan } from "@/lib/billing/plans";
 import { formatItemsForModel, searchUserData } from "@/lib/integrations/read";
-import { readFlow, type ActionBox, type Box, type ReadBox } from "@/lib/automations/boxes";
+import { readFlow, withSupervisedApprovals, DEFAULT_FLOW_MODE, type ActionBox, type Box, type FlowMode, type ReadBox } from "@/lib/automations/boxes";
 import { APPROVAL_WAIT_HOURS, type RunStep } from "@/lib/automations/run-steps";
 import { periodFor, readAiAnswer, textToDocumentHtml, type AiOutcome, type Resume } from "@/lib/automations/answers";
 
@@ -60,6 +60,10 @@ export type FlowRow = {
   boxes: unknown;
   cost_limit: number;
   time_zone: string;
+  /** Optional: every call site that still omits it gets DEFAULT_FLOW_MODE
+   *  ("auto", today's behaviour), the same fails-safe shape the column
+   *  itself has (20261123000000_automation_mode.sql). */
+  mode?: FlowMode;
 };
 
 export type RunContext = {
@@ -186,10 +190,42 @@ async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunSt
   return outcome.delivered ? { box: box.id, status: "ok", note: "sent", via: method } : { box: box.id, status: "failed", note: method === "telegram" && /no longer connected/.test(outcome.reason ?? "") ? "not_connected" : "delivery", via: method };
 }
 
+/**
+ * WHAT THE RUN HAS DONE SO FAR, written before each box it starts, so the
+ * Pro canvas can light the line into the box it is in
+ * (lib/automations/run-progress.ts reads it back; the owner, 2026-11-05).
+ *
+ * Only onto a row that is still `running`: a run another request has
+ * already closed, or cancelled, is never written back to life. It never
+ * stops the run — progress is for the screen, and a run that cannot say
+ * where it is still goes on and still closes its row with every step
+ * (finishRun).
+ */
+async function reportProgress(ctx: RunContext, steps: RunStep[]): Promise<void> {
+  const { error } = await createAdminClient()
+    .from("automation_runs")
+    .update({ steps })
+    .eq("id", ctx.runId)
+    .eq("user_id", ctx.user.id)
+    .eq("status", "running");
+  if (error) logApiError("automations:run", error, { stage: "progress" });
+}
+
 export async function runFlow(ctx: RunContext): Promise<RunResult> {
   const flow = readFlow(ctx.flow.boxes);
   if (!flow.ok) return { status: "failed", steps: [], credits: 0, error: `flow:${flow.reason}` };
-  const boxes: Box[] = flow.boxes;
+  // "supervised": one extra, synthetic approval before any action box
+  // that does not already have one — never stored, computed the SAME
+  // way on a fresh run and on a resume of it (withSupervisedApprovals's
+  // own doc comment says why that has to hold).
+  const mode = ctx.flow.mode ?? DEFAULT_FLOW_MODE;
+  const boxes: Box[] = mode === "supervised" ? withSupervisedApprovals(flow.boxes) : flow.boxes;
+  // A resume whose stored index no longer fits this rebuild — the mode
+  // changed under a waiting run, or the boxes did — fails the run
+  // instead of reading the wrong box at boxes[i].
+  if (ctx.resume && ctx.resume.at > boxes.length) {
+    return { status: "failed", steps: [...ctx.resume.steps], credits: ctx.resume.credits, error: "flow:resume_mismatch" };
+  }
   const steps: RunStep[] = ctx.resume ? [...ctx.resume.steps] : [];
   let text = ctx.resume?.text ?? "";
   let credits = ctx.resume?.credits ?? 0;
@@ -205,6 +241,7 @@ export async function runFlow(ctx: RunContext): Promise<RunResult> {
 
   for (let i = ctx.resume?.at ?? 0; i < boxes.length; i++) {
     const box = boxes[i];
+    if (steps.length > 0) await reportProgress(ctx, steps);
     if (box.kind === "start") {
       steps.push({ box: box.id, status: "ok", note: "started" });
       continue;

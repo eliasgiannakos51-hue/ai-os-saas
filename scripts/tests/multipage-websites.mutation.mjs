@@ -67,8 +67,8 @@ const MUTANTS = [
     // guarding the sub-pages the moment the call site grew an option.
     name: "the security scan sees the home page only",
     file: GEN,
-    from: "const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));",
-    to: "const securityIssues = scanWebsiteHtmlForSecurityIssues(stripped[0], { appHost: getSiteHostname() ?? undefined });",
+    from: "const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled }));",
+    to: "const securityIssues = scanWebsiteHtmlForSecurityIssues(stripped[0], { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled });",
   },
   {
     // AND THE HOST ITSELF. Dropping appHost is a one-word edit that makes
@@ -77,14 +77,14 @@ const MUTANTS = [
     // scan was rewritten to stop.
     name: "the scan stops being told which host is ours, so any host's submit path passes",
     file: GEN,
-    from: "scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined })",
-    to: "scanWebsiteHtmlForSecurityIssues(doc)",
+    from: "scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled })",
+    to: "scanWebsiteHtmlForSecurityIssues(doc, { cinematicSitesEnabled })",
   },
   {
     name: "scripts are stripped from the home page only",
     file: GEN,
-    from: "const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc));",
-    to: "const stripped = [stripDisallowedExternalScripts(cleaned[0]), ...cleaned.slice(1)];",
+    from: "const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));",
+    to: "const stripped = [stripDisallowedExternalScripts(cleaned[0], cinematicSitesEnabled), ...cleaned.slice(1)];",
   },
   {
     name: "attribution is enforced on the home page only",
@@ -93,10 +93,17 @@ const MUTANTS = [
     to: "const attributions = [enforceUnsplashAttribution(cleaned[0])];",
   },
   {
-    name: "invented numbers are looked for on the home page only",
+    // UPDATED 2026-11-08 (agent/mistral): this used to be a single
+    // flatMap call; the detector moved inside the "fix and re-check"
+    // repair (website-invented-numbers-repair.ts), which has to write the
+    // repaired html BACK into documents[i], so the call became a for loop
+    // bounded by documents.length. The defect this mutant stands for is
+    // unchanged — only the home page gets checked/repaired — expressed
+    // now as the loop bound shrinking to 1.
+    name: "invented numbers are looked for (and repaired) on the home page only",
     file: GEN,
-    from: "const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));",
-    to: "const inventedNumbers = findInventedNumbers(documents[0], description);",
+    from: "for (let i = 0; i < documents.length; i += 1) {\n        const repaired = repairInventedNumbers(documents[i], description);",
+    to: "for (let i = 0; i < 1; i += 1) {\n        const repaired = repairInventedNumbers(documents[i], description);",
   },
   {
     name: "the split moves after the checks, so they all see one blob",

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
-import { readFlow } from "@/lib/automations/boxes";
-import { FLOW_COLUMNS, UUID, claimFlow, flowGate, refuse, releaseFlow, saveVersion, scheduleAfterChange, type FlowRecord } from "@/lib/automations/flow-access";
+import { isFlowMode, readFlow } from "@/lib/automations/boxes";
+import { FLOW_COLUMNS, UUID, claimFlow, flowGate, isColumnMissing, refuse, releaseFlow, saveVersion, scheduleAfterChange, type FlowRecord } from "@/lib/automations/flow-access";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isFeatureOn } from "@/lib/flags/flags";
+import { MAX_MINUTES, MIN_MINUTES, readMinutes } from "@/lib/automations/time-saved";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,15 @@ const BY_HAND = "manual";
  *
  * DELETE takes its versions and runs with it (on delete cascade). A run
  * waiting for approval is not sent.
+ *
+ * `minutes_saved` IS ITS OWN WRITE, after the switch "automation-time-saved"
+ * (the owner, 2026-11-05): how many minutes the job used to take, the
+ * person's own figure, 1-480 or null to clear it. Its own update and not
+ * one more key in `plain`, because the column arrives with a migration
+ * pasted by hand (20261114000000): a database without it refuses that
+ * update whole, and the limit or the name sent with it must not be
+ * refused with it. Without the column the answer is `not_ready`, and the
+ * screen never offers the field then anyway (lib/automations/page-data.ts).
  */
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -55,6 +66,32 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
   }
   if (!found) return refuse("not_found", 404);
   const flow = found as FlowRecord;
+
+  let mode: string | undefined;
+  if (body.mode !== undefined) {
+    if (!(await isFeatureOn("agents-automations-pro", user))) return refuse("not_enabled", 403);
+    if (!isFlowMode(body.mode)) return refuse("bad_mode", 400);
+    mode = body.mode;
+    const { error } = await createAdminClient().from("automation_flows").update({ mode }).eq("id", id).eq("user_id", user.id);
+    if (error) {
+      if (isColumnMissing(error)) return refuse("not_ready", 409);
+      logApiError("/api/automations/flows/[id]", error, { stage: "mode" });
+      return refuse("save_failed", 500);
+    }
+  }
+
+  let minutesSaved: number | null | undefined;
+  if (body.minutes_saved !== undefined) {
+    if (!(await isFeatureOn("automation-time-saved", user))) return refuse("not_enabled", 403);
+    minutesSaved = body.minutes_saved === null ? null : readMinutes(body.minutes_saved);
+    if (body.minutes_saved !== null && minutesSaved === null) return refuse("bad_minutes", 400, { min: MIN_MINUTES, max: MAX_MINUTES });
+    const { error } = await createAdminClient().from("automation_flows").update({ minutes_saved: minutesSaved }).eq("id", id).eq("user_id", user.id);
+    if (error) {
+      if (isColumnMissing(error)) return refuse("not_ready", 409);
+      logApiError("/api/automations/flows/[id]", error, { stage: "minutes_saved" });
+      return refuse("save_failed", 500);
+    }
+  }
 
   const plain: Record<string, unknown> = {};
   if (body.cost_limit !== undefined) {
@@ -87,12 +124,12 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       logApiError("/api/automations/flows/[id]", error, { stage: "plain" });
       return refuse("save_failed", 500);
     }
-  } else {
+  } else if (minutesSaved === undefined && mode === undefined) {
     return refuse("nothing_to_change", 400);
   }
 
   const { data: row } = await supabase.from("automation_flows").select(FLOW_COLUMNS).eq("id", id).eq("user_id", user.id).maybeSingle();
-  return NextResponse.json({ ok: true, flow: row, paused });
+  return NextResponse.json({ ok: true, flow: row, paused, ...(minutesSaved !== undefined ? { minutesSaved } : {}), ...(mode !== undefined ? { mode } : {}) });
 }
 
 export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {

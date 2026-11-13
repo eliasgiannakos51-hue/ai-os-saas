@@ -69,8 +69,16 @@ check(`the migrations were read (${FILES.length} files, ${SQL.length} chars)`, F
 // ---------------------------------------------------------------------
 // 1. THE POPULATION: every table these migrations create.
 // ---------------------------------------------------------------------
+// THE `public.` PREFIX IS OPTIONAL, because Postgres's is. Until
+// 2026-11-04 this read `public\.` as required, and
+// 20261110000000_admin_audit_log.sql — `CREATE TABLE IF NOT EXISTS
+// admin_audit_log`, unprefixed, in public all the same — shipped with no
+// RLS while this file said every table had it; security-posture.test.mjs,
+// whose scraper already took the prefix as optional, was the one that
+// noticed. The lookahead keeps another schema's table (storage.x, auth.x)
+// from being read as a public table named after its schema.
 const TABLES = new Set();
-for (const m of SQL.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z_0-9]+)/gi)) {
+for (const m of SQL.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_0-9]+)\b(?!\.)/gi)) {
   TABLES.add(m[1]);
 }
 check(`tables created in public (${TABLES.size})`, TABLES.size >= 90, "the create-table scraper found almost nothing, and every check below would pass on an empty set");
@@ -171,6 +179,48 @@ const DENY_ALL_ON_PURPOSE = {
   business_inputs: "the owner's own figures for the margin report, reached only through an admin-gated route.",
   account_deletion_requests: "the emailed single-use deletion tokens. A user who could read this table could delete another account; the route claims a token atomically under the service role.",
   routing_decisions: "which model served which request, granted explicitly to service_role and to nobody else.",
+  // The one entry here that is NOT "written about a user rather than for
+  // them": a pairing row belongs to the person, and once claimed it even
+  // carries their user_id. Deny-all anyway, and that is the point — the
+  // eight-character code sits in this table for ten minutes
+  // (PAIRING_TTL_MINUTES, src/lib/iowork/pairing.ts), and a policy that
+  // let an account read its own pending rows would also be a shape a
+  // guesser could aim at. Nothing needs to read it from a browser: the
+  // desktop app collects by its claim secret and the person types the
+  // code, neither of which is a SELECT.
+  iowork_pairings: "the ten-minute handshake that connects one computer to one account (IOWORK-SECURITY-PLAN §3). Holds a code and two SHA-256 hashes, never a secret in the clear, and api/cron/scheduled-runs deletes every row past an hour. Read and written only by the service role, so a pending code cannot be harvested from any browser — including the owner's own.",
+  // The second entry here that belongs to the person rather than being
+  // written about them, and deny-all for the same reason: the code sits in
+  // this table for ten minutes (TELEGRAM_PAIRING_TTL_MINUTES,
+  // src/lib/telegram/pairing.ts), and a policy letting an account read its
+  // own pending rows is also a shape a guesser can aim at. Nothing needs
+  // to read it from a browser — api/telegram/link reads it through the
+  // service role, filtered on the caller's own id.
+  telegram_pairings: "the ten-minute handshake that connects one Telegram chat to one account (the owner's directive 24). Holds a code, a keyed HMAC of a chat id and ciphertext, never a secret in the clear, and api/cron/scheduled-runs deletes every row past an hour. Read and written only by the service role, so a pending code cannot be harvested from any browser - including the owner's own.",
+  // The third that belongs to the person, and the same reasoning as the
+  // two pairing tables: the row carries a digest of the one credential
+  // that can stop the deletion, and nothing needs to read it from a
+  // browser — the person proves who they are with the emailed token or
+  // their session, and the routes look the row up for them.
+  pending_deletions: "an account's scheduled deletion (directive 39 Κομμάτι 3): when it runs, and the SHA-256 of each emailed cancel link of that schedule; after the deletion runs, a row with no account and no digest left, the record that it ran. Read and written only through lib/account/pending-deletion.ts with the service role — by the confirm, cancel and status routes and api/cron/execute-deletions — so the digest of the one link that can stop a deletion is reachable from no browser.",
+  admin_audit_log: "the owner's record of what staff did to which account (directive 42 Κομμάτι 9). A customer who could read it would learn who was looked at and why; one who could write it could forge or bury an entry. Read and written only in lib/admin/audit-log.ts through createAdminClient(), behind the admin routes' isAdminEmail gates. RLS since 20261111000000_admin_audit_log_rls.sql.",
+  // The fourth and fifth and sixth that belong to the person rather than
+  // being written about them, deny-all for a different reason than the
+  // pairing tables: not a ten-minute secret, but a row a client insert
+  // could point at someone else's resource. discord_guilds, 20261119000000
+  // _discord_bot.sql: a browser that could insert its own row could claim
+  // a Discord server as connected to an account that never ran the
+  // invite-and-OAuth flow in api/discord/connect and api/discord/callback.
+  discord_guilds: "which Discord server an account connected (the owner's Discord directive, 2026-11-05). A client insert could point an account at a server it does not administer; only api/discord/connect and api/discord/callback write it, under the service role, after the OAuth round trip with Discord proves the caller actually has Manage Server there.",
+  discord_builds: "a server plan /ionexa (dashboard/discord) made or is applying. Same reasoning as discord_guilds: api/discord/plan and api/discord/apply write it through the service role after checking the session owns the guild_id's discord_guilds row; a client write could forge a plan for a server it never asked to change.",
+  discord_build_items: "every id api/discord/apply created inside Discord for one build, read back so «Αναίρεση» deletes those and nothing else. A client write here could make Undo delete a channel or role that existed before the apply ever ran; api/discord/apply is the only writer, through the service role.",
+  voice_live_sessions: "the billing and lifecycle record for a live voice call (FS1, 20261124000000_voice_live_sessions.sql). REVOKE ALL from anon, authenticated is in the migration itself; the table has no grants and no policies. Every read and write goes through createAdminClient() in api/voice/live/start, tick, end and cron/voice-live-sweep. A client insert could open a session row without paying; a client update could extend one past its paid time.",
+  payments_accounts: "the user's connected Stripe Express account (Ionexa Payments, 20261125000000_ionexa_payments.sql). REVOKE ALL from anon, authenticated. Every read and write through createAdminClient() in lib/payments/connect.ts and api/payments/. A client insert could connect a fake account; a client update could flip payouts_enabled without Stripe's own verification.",
+  payments_products: "products the user sells through Ionexa Payments. Same migration, same REVOKE ALL. A client insert could create a product on someone else's connected account; a client update could change another user's prices.",
+  payments_transactions: "records of payments from the user's customers. Same migration, same REVOKE ALL. A client insert could forge a payment record; a client update could change a transaction's status.",
+  payments_payouts: "payout history (cashouts to bank). Same migration, same REVOKE ALL. A client insert could forge a payout record.",
+  payments_subscriptions: "recurring subscriptions the user's customers have. Written by webhooks (no user session), read by the dashboard through API routes that verify ownership. A client insert could forge a subscription record; a client update could change status.",
+  payments_coupons: "discount codes the seller created. Written through API routes that verify ownership and create the coupon on Stripe first. A client insert could forge a coupon for another seller's account.",
 };
 
 const unprotected = [...TABLES].filter((t) => !protectedTable(t) && !RLS_NOT_NEEDED[t]).sort();

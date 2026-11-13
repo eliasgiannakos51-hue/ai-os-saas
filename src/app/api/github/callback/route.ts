@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { safeErrorDetail } from "@/lib/integrations/crypto";
 import { getSiteUrl } from "@/lib/site-url";
-import { getGitHubUser, listUserInstallations } from "@/lib/github/auth";
+import { getGitHubUser } from "@/lib/github/auth";
 import { saveGitHubConnection } from "@/lib/github/store";
 
 export const dynamic = "force-dynamic";
@@ -94,21 +94,32 @@ export async function GET(request: Request) {
       cache: "no-store",
     });
     if (!tokenResponse.ok) return back("exchange_failed");
-    const tokenBody = (await tokenResponse.json()) as { access_token?: string; error?: string };
+    const tokenBody = (await tokenResponse.json()) as {
+      access_token?: string;
+      error?: string;
+      refresh_token?: string;
+    };
     if (!tokenBody.access_token || tokenBody.error) return back("exchange_failed");
+
+    // A refresh token means the App still has user-token expiry on: this
+    // token stops working in eight hours and the person has to connect
+    // again (lib/github/auth.ts). Said in the log so the setting is found
+    // (docs/NEEDS-FROM-ELIAS.md, 11). The token itself is never logged.
+    if (tokenBody.refresh_token) {
+      logApiError("/api/github/callback", new Error("GitHub App user-token expiry is on"), { userId: user.id });
+    }
 
     const ghUser = await getGitHubUser(tokenBody.access_token);
     if (!ghUser) return back("user_fetch_failed");
 
-    const installations = await listUserInstallations(tokenBody.access_token);
-    const installationId = installations.length > 0 ? installations[0].id : null;
-
+    // No installation is stored: which installation a request acts through
+    // is resolved per request from this person's own token
+    // (lib/github/permission.ts, SECURITY-AUDIT ΑΣ-1.15).
     const saved = await saveGitHubConnection({
       userId: user.id,
       githubUserId: ghUser.id,
       githubLogin: ghUser.login,
       accessToken: tokenBody.access_token,
-      installationId,
     });
 
     const response = saved.ok ? back("connected") : back("save_failed");

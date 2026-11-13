@@ -510,7 +510,9 @@ for (const group of FEATURE_GROUPS) {
 // tools grid, "ALL TOOLS: ΟΛΑ ΤΑ ΤΕΤΡΑΓΩΝΑ") — the switch that made it
 // owner-only is gone, so it stops being `notSold` and becomes an
 // ordinary row a buyer sees, like every other "make" capability.
-check(`the table is ${sold.length} rows, and 47 is the ceiling`, sold.length <= 47);
+// 47 -> 48 on 2026-11-11: Ionexa Payments — the user's own payment
+// platform, a new "organise" capability (Starter+).
+check(`the table is ${sold.length} rows, and 48 is the ceiling`, sold.length <= 48);
 check("the table is not empty", sold.length >= 20);
 
 // AND THE ANSWER TO "WHY WOULD AN ULTIMATE PAY 10x". Stated as a floor

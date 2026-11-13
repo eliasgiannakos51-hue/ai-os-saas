@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Avatars</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.pv{width:620px;height:349px;flex:none;border-radius:14px;background:#3A2E24}
+.parts{width:620px;display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.part{display:grid;grid-template-columns:22px minmax(0,1fr) 34px;gap:10px;align-items:center;padding:9px 12px;border:1px solid #161D2E;border-radius:10px;font-size:13.5px}
+.part.on{outline:2px solid #F5F7FB;outline-offset:-1px;background:#0D1220}
+.av4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.avt{height:72px;border-radius:10px;font-size:0}
+.avt.on{outline:2px solid #F5F7FB;outline-offset:2px}
+.row2{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #222A3D;border-radius:10px;font-size:13px}
+</style></head><body>
+<div data-tbar data-tool="Avatars" data-doc="Καλωσόρισμα στο site"><span class="tag">0:40 · 16:9</span><div class="sp"></div><button class="btn" type="button"><i data-i="play"></i>Hear voice</button><button class="btn pri" type="button">Make video · 12 credits</button></div>
+<div class="stage">
+<div class="canvas">
+<div class="pv dark" data-img="AI presenter · ready-made" data-icon="user" style="background:#3A2E24;color:rgba(245,247,251,.45)"></div>
+<div class="parts">
+<div class="part"><span class="mut">1</span><span>Καλώς ήρθατε στον Φούρνο της Γειτονιάς!</span><span class="sub">4''</span></div>
+<div class="part on"><span class="mut">2</span><span>Ψήνουμε κάθε πρωί από τις 6:00, με προζύμι που φτιάχνουμε εμείς.</span><span class="sub">9''</span></div>
+<div class="part"><span class="mut">3</span><span>Για τούρτες, παραγγείλτε εδώ στο site, δύο μέρες πριν.</span><span class="sub">8''</span></div>
+<div class="part"><span class="mut">4</span><span>Σας περιμένουμε, στη γωνία της γειτονιάς σας.</span><span class="sub">5''</span></div>
+</div>
+<div data-ask data-sel="Part 2" data-cost="≈ 1 credit"></div>
+</div>
+<aside class="insp">
+<div class="seg" role="group" aria-label="Mode" style="align-self:flex-start"><button class="on" type="button">Presenter</button><button type="button">Translate my video</button></div>
+<div class="ig"><span class="lbl">Presenter · ready-made only</span><div class="av4">
+<div class="avt on" data-img="" data-icon="user" style="background:#2B3346;color:rgba(245,247,251,.45)"></div>
+<div class="avt" data-img="" data-icon="user" style="background:#33303F;color:rgba(245,247,251,.45)"></div>
+<div class="avt" data-img="" data-icon="user" style="background:#2E3A36;color:rgba(245,247,251,.45)"></div>
+<div class="avt" data-img="" data-icon="user" style="background:#3A3128;color:rgba(245,247,251,.45)"></div>
+</div></div>
+<div class="ig"><span class="lbl">Voice</span><div class="row2"><span style="flex:1">Greek · calm</span><button class="ib" type="button" aria-label="Hear sample" style="width:28px;height:28px;color:#DCE2EE"><i data-i="play" style="width:13px;height:13px"></i></button><i data-i="down" style="width:13px;height:13px;color:#8D96A8"></i></div></div>
+<div class="ig"><span class="lbl">Background</span><div class="pills"><button class="pill on" type="button">Bakery, soft</button><button class="pill" type="button">Plain</button><button class="pill" type="button">Brand colors</button></div></div>
+<div class="ig"><span class="lbl">Ratio</span><div class="pills"><button class="pill on" type="button">16:9</button><button class="pill" type="button">9:16</button><button class="pill" type="button">1:1</button></div></div>
+<div class="price"><div><span class="mut">0:40 video</span><span>12 credits</span></div></div>
+<span class="sub" style="margin-top:-8px">Marked as AI-made inside the file.</span>
+</aside>
+</div>
+<script src="common.js"></script><script>mount()</script>
+</body></html>

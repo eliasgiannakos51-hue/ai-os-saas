@@ -159,12 +159,11 @@ check(
   rlsOff.join(", ")
 );
 
-// SEALED, OR OWNED. Seven of these carry RLS and NO POLICY AT ALL —
-// account_deletion_requests, ai_cost_log, ai_provider_log,
-// production_errors, routing_decisions, subscriber_months,
-// subscription_events. On Postgres that means nothing
+// SEALED, OR OWNED. Some of these carry RLS and NO POLICY AT ALL — the
+// SEALED_ON_PURPOSE list below names them (ten on 2026-11-04; that list,
+// not this sentence, is the count). On Postgres that means nothing
 // reaches them but the service role: the server writes them and no user
-// reads them, ever. db-migrations.dbtest.mjs already knows this set as
+// reads them, ever. the live half of db-migrations.test.mjs already knows this set as
 // "every policy-less table is one we meant to be unreachable".
 //
 // The distinction is not cosmetic, it decides what the positive control
@@ -184,7 +183,7 @@ const readable = new Set(
 // AND THE SEALED SET IS NAMED, NOT INFERRED — for the same reason.
 // Reading it live from pg_policies means that DROPPING a policy moves its
 // table into the sealed category, where "A sees nothing" is the expected
-// answer, and the leak becomes the pass. The seven are written down and
+// answer, and the leak becomes the pass. They are written down and
 // the live set must equal them exactly.
 const SEALED_ON_PURPOSE = [
   "account_deletion_requests",
@@ -197,6 +196,18 @@ const SEALED_ON_PURPOSE = [
   "routing_decisions",
   "subscriber_months",
   "subscription_events",
+  // 2026-11-04, three more, each sealed by its own migration's comment and
+  // found here only now because `npm run test:db` used to stop earlier, at
+  // 20261109000000_help_articles_tools.sql. Pending pairing codes: only the
+  // service role reads or writes them, so a code cannot be harvested from
+  // the browser (20261031000000_iowork_devices.sql,
+  // 20261031000001_telegram_link.sql). Scheduled deletions: the schedule
+  // and its cancel-link hashes are the server's
+  // (20261108000000_pending_deletions.sql; the grants went in
+  // 20261112000000_pending_deletions_one_open.sql).
+  "iowork_pairings",
+  "telegram_pairings",
+  "pending_deletions",
 ];
 const sealed = owned.filter(([t]) => !readable.has(t)).map(([t]) => t).sort();
 check(

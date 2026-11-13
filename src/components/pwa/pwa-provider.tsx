@@ -17,6 +17,8 @@ import {
 } from "@/lib/pwa/platform";
 import { readPwaClientState, reportPwaState } from "@/lib/pwa/telemetry";
 import { InstallInvitation } from "@/components/pwa/install-invitation";
+import { createClient } from "@/lib/supabase/client";
+import { forgetOnSignOut } from "@/lib/auth/sign-out";
 
 // Registers the service worker, decides whether to invite an install, and
 // records what this browser is.
@@ -63,6 +65,10 @@ export function PwaProvider() {
   /** Telemetry is sent once per mount at most; the throttle inside
    *  reportPwaState decides whether it actually goes. */
   const reported = useRef(false);
+
+  // 0. A session that ends on its own (expired, revoked) takes the cached
+  // pages with it, the same as the sign-out button (lib/auth/sign-out.ts).
+  useEffect(() => forgetOnSignOut(createClient()), []);
 
   // 1. Service worker.
   useEffect(() => {

@@ -390,9 +390,16 @@ check(
   /costs\?\.record\("other", outcome\.usage, outcome\.reportedModel \|\| outcome\.model\)/.test(memSrc)
 );
 // No call site anywhere still records a bare hardcoded model constant.
+// lib/discord/apply.ts (agent/discord, 2026-11-07) has its own unrelated
+// `ctx.record(item)` — the Discord build's OWN per-item persistence
+// callback (`record: (item: CreatedItem) => Promise<boolean>`), not a
+// cost accumulator's record() at all. Same method NAME, nothing to do
+// with pricing a model's usage, so it is excluded by file the same way
+// reservations.ts and cost-accumulator.ts are, rather than naming a
+// variable this grep cannot see.
 const { execSync } = await import("node:child_process");
 const bareRecords = execSync(
-  `grep -rn "\\.record(" src --include=*.ts --include=*.tsx | grep -v "reservations.ts\\|cost-accumulator.ts" | grep -v "\\.model" || true`,
+  `grep -rn "\\.record(" src --include=*.ts --include=*.tsx | grep -v "reservations.ts\\|cost-accumulator.ts\\|discord/apply.ts" | grep -v "\\.model" || true`,
   { encoding: "utf8" }
 ).trim();
 check("no costs.record() call site ignores the response model", bareRecords === "", bareRecords);

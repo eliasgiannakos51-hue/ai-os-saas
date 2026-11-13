@@ -156,6 +156,10 @@ const DECLARED = {
     kind: "state_precondition",
     why: "it refuses with 400 unless the account has an ACTIVE subscription, and the insert it makes is the record of cancelling that subscription. A second call finds nothing active and never reaches the insert, so the row count is bounded by how many times an account has actually subscribed.",
   },
+  "src/app/api/voice/live/end/route.ts": {
+    kind: "state_precondition",
+    why: "it claims transcript_saved_at IS NULL on the session row with a conditional UPDATE before any insert, so a second call finds the row already claimed and writes nothing. The session row itself was created by voice/live/start under a rate limit, and start closes any existing open call for the user before opening a new one, so there is at most one open session per user. The chat_conversations and chat_messages rows it writes are one per call plus one per turn — bounded by the call's LIVE_MAX_SESSION_MINUTES cap.",
+  },
 };
 
 const unbounded = inserters

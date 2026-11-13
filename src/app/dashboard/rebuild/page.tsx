@@ -5,7 +5,9 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { readRequestedId } from "@/lib/library/requested";
 import { rebuildSystemPrompt } from "@/lib/rebuild/rebuild-system";
+import { appSystemPrompt } from "@/lib/apps/app-system";
 import { RebuildShell, type RebuildRow } from "@/components/rebuild/rebuild-shell";
+import { contentDomain, publishedAppBase } from "@/lib/publishing/content-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -32,13 +34,19 @@ export default async function RebuildPage(props: { searchParams?: Promise<{ reco
   const supabase = await createClient();
   const { data } = await supabase
     .from("rebuild_projects")
-    .select("id, title, plan, reference, html, versions, locale, updated_at")
+    .select("id, title, plan, reference, html, versions, locale, has_app_phase, app_definition, subdomain, is_active, published_at, updated_at")
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
     .limit(RECENT_APPS);
   return (
     <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
-      <RebuildShell initialProjects={(data as RebuildRow[] | null) ?? []} initialOpenId={readRequestedId(searchParams?.record)} systemChars={rebuildSystemPrompt().length} />
+      <RebuildShell
+        initialProjects={(data as RebuildRow[] | null) ?? []}
+        initialOpenId={readRequestedId(searchParams?.record)}
+        systemChars={rebuildSystemPrompt().length}
+        appSystemChars={appSystemPrompt().length}
+        publishedAppBase={publishedAppBase(contentDomain(process.env.PUBLISHED_SITE_DOMAIN))}
+      />
     </div>
   );
 }

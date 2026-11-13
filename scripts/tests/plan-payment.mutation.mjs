@@ -8,6 +8,10 @@
  * unpaid one to Stripe's invoice page. Each mutant below puts one half of
  * that back.
  *
+ * ΑΣ-4.15 (2026-11-05): and a DOWNGRADE that hands back money for a plan
+ * already used. The last two mutants put the immediate, prorated
+ * downgrade back.
+ *
  * Run: node scripts/tests/plan-payment.mutation.mjs
  */
 import { runMutations } from "./lib/mutation-runner.mjs";
@@ -19,7 +23,7 @@ const MUTANTS = [
   {
     name: "the upgrade applies before it is paid again",
     file: CHECKOUT,
-    from: '                payment_behavior: "pending_if_incomplete" as const,\n',
+    from: '            payment_behavior: "pending_if_incomplete" as const,\n',
     to: "",
     expect: "an upgrade applies only once its invoice is paid",
   },
@@ -31,11 +35,20 @@ const MUTANTS = [
     expect: "an unpaid upgrade sends the customer to pay",
   },
   {
-    name: "the downgrade is invoiced and held like an upgrade",
+    // ΑΣ-4.15 (2026-11-05): the downgrade takes the upgrade's road again —
+    // changed today, with the unused part of the higher plan credited.
+    name: "the downgrade is applied at once like an upgrade",
     file: CHECKOUT,
-    from: '                proration_behavior: "create_prorations" as const,',
-    to: '                proration_behavior: "always_invoice" as const,',
-    expect: "the downgrade, which costs nothing now, applies at once",
+    from: '          if (direction === "downgrade") {',
+    to: '          if (direction === ("never" as string)) {',
+    expect: "the downgrade waits for the end of the paid period",
+  },
+  {
+    name: "the scheduled downgrade prorates at the switch",
+    file: CHECKOUT,
+    from: '              { end_behavior: "release", proration_behavior: "none", phases },',
+    to: '              { end_behavior: "release", proration_behavior: "create_prorations", phases },',
+    expect: "with no proration at the switch",
   },
 ];
 

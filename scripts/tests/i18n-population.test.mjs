@@ -121,6 +121,10 @@ const ENGLISH_ON_PURPOSE = {
   "src/components/logo.tsx": "the wordmark. A brand name is not translated into nine languages; it is the same string everywhere.",
   "src/lib/pdf/deck.tsx":
     "the Unsplash photographer credit. Their API terms fix the wording — 'Photo by <name> on Unsplash', both halves linked — and scripts/unsplash-attribution-proof.mjs exists to prove it renders. Translating it would break the term that lets the product use the photographs at all.",
+  "src/app/pay/[productId]/page.tsx":
+    "the public payment page for a customer who is NOT an Ionexa user — they have no locale setting and no account. 'Secured by Stripe' and 'Powered by Ionexa Payments' are brand phrases, the same in every language. The product's own name and price are the seller's, not ours.",
+  "src/app/pay/success/page.tsx":
+    "the payment success confirmation. Same reasoning: the customer has no account and the confirmation is one screen they see once. Stripe sends the receipt email in the customer's own language.",
 };
 
 const undeclared = untranslated.filter((r) => !ENGLISH_ON_PURPOSE[r.file]);
@@ -226,6 +230,8 @@ const EMAIL_ENGLISH_ON_PURPOSE = {
     "it goes to an address that may have no account at all, so there is no raw_user_meta_data.preferred_locale to read — the plumbing every other sender now uses has nothing to read FROM here. The inviter's language is the only guess available, and it is a guess about a third party. The footer still comes out of the catalogue so it moves with the other nine when somebody decides what an invite should do.",
   "src/lib/notify/dispatch.ts":
     "its title and body are composed in English by the CALLERS — lib/publishing/badge-renewal.ts writes the badge warning, lib/billing/overage-store.ts writes the overage-cap warning. Translating the button and the footer around them would put a Greek frame on an English notice, which reads worse than an honestly English email. And it is one job rather than this one: the same two strings go to Telegram, to Discord and onto notification_events for the in-app bell, so the language has to be chosen where the notification is BUILT, not where it is mailed.",
+  "src/lib/agents/agent-tool-executor.ts":
+    "the agent composes the email body from its own AI output, which is already in whatever language the agent prompt specified. The subject and the footer are fixed English strings because the agent has no account-locale context — it acts on behalf of the business, not on behalf of a reader whose preferred_locale is known. Translating the wrapper around AI-generated content of unknown language would produce the same Greek-frame-on-English-body problem dispatch.ts has.",
 };
 // A SENDER COUNTS AS TRANSLATED WHEN IT RESOLVES A LOCALE. The .tsx rule
 // above looks for useTranslations/getTranslations, which are React hooks

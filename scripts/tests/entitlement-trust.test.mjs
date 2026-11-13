@@ -5,8 +5,9 @@
 // repository is public (BUILD-SPECS 6, «ΠΩΣ ΔΟΥΛΕΥΕΙΣ ΕΔΩ»).
 //
 //   1. Every entitlement key the billing code reads from user_metadata is
-//      on the list supabase/migrations/20261010000000_guard_entitlement_metadata.sql
-//      keeps for the server. The population is the code's own reads.
+//      on the list the guard keeps for the server — its latest definition,
+//      first written in supabase/migrations/20261010000000_guard_entitlement_metadata.sql.
+//      The population is the code's own reads.
 //   2. Signup writes the starting plan through the server's merge, not
 //      through Supabase Auth (which the migration now fences).
 //   3. The beta invite code exists only when the environment sets one.
@@ -14,7 +15,10 @@
 //   5. A recurring add-on never overwrites the plan.
 //   6. Ownership checks where the admin client reads by an id or a path
 //      that came from a user's own row or request.
-//   7. The app sends its own security headers.
+//   7. The app sends its own security headers; an image comes only from
+//      the app, inline data, a local blob, the project's own Supabase or a
+//      listed host, and plugins and <base> are refused (FD6 and hardening,
+//      2026-11-05).
 //   8. The internal hand-off secret is compared in constant time.
 //   9. A research report is written by the server only: the migration
 //      takes INSERT and UPDATE from the account, and every write in src/
@@ -72,7 +76,16 @@ function walk(dir, out = []) {
 // =====================================================================
 console.log("\n== 1. every entitlement key the billing code reads is the server's ==");
 // =====================================================================
-const MIGRATION = readFileSync("supabase/migrations/20261010000000_guard_entitlement_metadata.sql", "utf8");
+// THE LATEST DEFINITION, not the first file. The guard was written in
+// 20261010000000_guard_entitlement_metadata.sql and replaced, with a
+// longer list, by 20261115000000_account_suspension.sql (A1); a database
+// built in order ends up with the last one, so that is the one read.
+const GUARD_FILES = readdirSync("supabase/migrations")
+  .filter((f) => f.endsWith(".sql"))
+  .sort()
+  .filter((f) => readFileSync(`supabase/migrations/${f}`, "utf8").includes("create or replace function public.guard_entitlement_metadata()"));
+ok(`the guard's definitions were found (${GUARD_FILES.join(", ")})`, GUARD_FILES.length >= 1 && GUARD_FILES[0] === "20261010000000_guard_entitlement_metadata.sql");
+const MIGRATION = readFileSync(`supabase/migrations/${GUARD_FILES[GUARD_FILES.length - 1]}`, "utf8");
 const listed = new Set([...(MIGRATION.match(/protected constant text\[\] := array\[([\s\S]*?)\];/)?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((m) => m[1]));
 // Where billing decisions are made: plans, credits, checkout, the portal,
 // the team, the crons, beta, deletion.
@@ -127,7 +140,10 @@ console.log("\n== 5. an add-on never overwrites the plan ==");
 // =====================================================================
 const WEBHOOK = read("src/app/api/webhooks/stripe/route.ts");
 const sync = WEBHOOK.slice(WEBHOOK.indexOf("async function syncSubscriptionToUser"));
-const skip = sync.indexOf("if (subscription.metadata?.addon_slug) return;");
+// Since 2026-11-05 (ΑΣ-4.17) the add-on's own subscription is handed to
+// syncAddonSubscription on the way out, which writes account_addons only;
+// the property held here is the same — it leaves before the plan.
+const skip = sync.indexOf("if (subscription.metadata?.addon_slug) return syncAddonSubscription(subscription);");
 ok("the plan sync returns on an add-on subscription", skip > 0);
 ok("...before it resolves a plan from the price", skip > 0 && skip < sync.indexOf("mergeUserMetadata("));
 
@@ -150,13 +166,50 @@ ok(
 // =====================================================================
 console.log("\n== 7. the app's own security headers ==");
 // =====================================================================
+// THE SUPABASE ADDRESS IS SET HERE, NOT INHERITED. next.config.mjs derives
+// one img-src origin from NEXT_PUBLIC_SUPABASE_URL when it is imported, so
+// a gate that imported it under the machine's environment would answer
+// differently on a laptop with no Supabase and on Vercel with one — the
+// exact shape of aec56a2 (scripts/tests/env-independence.test.mjs).
+const FIXTURE_SUPABASE = "https://abcdefghijklmnopqrst.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_URL = `${FIXTURE_SUPABASE}/rest/v1/?apikey=never-in-a-policy`;
 const config = await import(path.resolve("next.config.mjs"));
 const headers = Object.fromEntries((config.APP_SECURITY_HEADERS ?? []).map((h) => [h.key, h.value]));
 ok("framing refused", headers["X-Frame-Options"] === "DENY" && /frame-ancestors 'none'/.test(headers["Content-Security-Policy"] ?? ""));
+// THE LIST, held HERE as well as in next.config.mjs: an origin added there
+// and not here is red, which is the point — every image host is a decision
+// with its reason written beside it (FD6, 2026-11-05), never a line that
+// slips in. Unsplash: slides' and generated sites' stock photos, hotlinked
+// as the Unsplash terms require.
+const LISTED_IMAGE_HOSTS = ["https://images.unsplash.com"];
+const imgSrc = /(?:^|;)\s*img-src\s+([^;]*)/.exec(headers["Content-Security-Policy"] ?? "")?.[1].trim().split(/\s+/) ?? [];
+const allowedSources = new Set(["'self'", "data:", "blob:", FIXTURE_SUPABASE, ...LISTED_IMAGE_HOSTS]);
+ok(`img-src was found and read (${imgSrc.join(" ")})`, imgSrc.length >= 3);
+ok("...an image can only come from the app itself, inline data, a local blob, the project's own Supabase or a listed host (ΑΣ2-3.1, FD6)",
+  imgSrc.length > 0 && imgSrc.every((s) => allowedSources.has(s)), `not on the list: ${imgSrc.filter((s) => !allowedSources.has(s)).join(" ")}`);
+ok("...never a bare scheme that admits every host (https:, http:, wss: …)", !imgSrc.some((s) => /^[a-z][a-z0-9+.-]*:$/i.test(s) && s !== "data:" && s !== "blob:"), imgSrc.join(" "));
+ok("...never a wildcard host", !imgSrc.some((s) => s.includes("*")), imgSrc.join(" "));
+ok("...and the project's own Supabase origin IS there, as its origin only — no path, no query",
+  imgSrc.includes(FIXTURE_SUPABASE) && !imgSrc.some((s) => /supabase\.co\/|apikey/.test(s)), imgSrc.join(" "));
+ok("...and every listed host is there, so the list cannot go stale", LISTED_IMAGE_HOSTS.every((h) => imgSrc.includes(h)));
+// The derivation itself, run on the shapes a deployment could hand it.
+const derive = typeof config.supabaseImageOrigin === "function" ? config.supabaseImageOrigin : () => "missing";
+ok("the derivation takes an https origin and nothing after it", derive("https://xyzproject.supabase.co/storage/v1?x=1") === "https://xyzproject.supabase.co");
+ok("...refuses plain http on a host that is not this machine's own loopback", derive("http://xyzproject.supabase.co") === null);
+ok("...takes http on loopback, where only the local Supabase and the test stand-in answer", derive("http://127.0.0.1:54611") === "http://127.0.0.1:54611" && derive("http://localhost:54321") === "http://localhost:54321");
+ok("...refuses a wildcard host the URL parser would accept", derive("https://*.supabase.co") === null);
+ok("...refuses credentials, a non-URL, an empty or a missing value", [derive("https://user:pw@xyzproject.supabase.co"), derive("not a url"), derive(""), derive(undefined)].every((v) => v === null));
+ok("...and with no Supabase address the policy allows none", typeof config.imageSources === "function" && config.imageSources({}).join(" ") === ["'self'", "data:", "blob:", ...LISTED_IMAGE_HOSTS].join(" "));
+// Hardening, 2026-11-05: nothing in the app draws an <object>, an <embed>
+// or a <base>, so both directives are closed. Read as directives, not as
+// substrings, so a value of 'self' or a missing quote is red too.
+const directive = (name) => new RegExp(`(?:^|;)\\s*${name}\\s+([^;]*)`).exec(headers["Content-Security-Policy"] ?? "")?.[1].trim() ?? null;
+ok("plugins refused: object-src 'none'", directive("object-src") === "'none'", String(directive("object-src")));
+ok("a <base> tag refused: base-uri 'none'", directive("base-uri") === "'none'", String(directive("base-uri")));
 ok("no content-type guessing", headers["X-Content-Type-Options"] === "nosniff");
 ok("a referrer policy and a permissions policy", Boolean(headers["Referrer-Policy"]) && /camera=\(\)/.test(headers["Permissions-Policy"] ?? ""));
 const resolved = await config.default.headers();
-ok("applied to every path but the published sites", resolved.length === 1 && resolved[0].source === "/((?!s/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
+ok("applied to every path but the published sites and published Rebuild apps", resolved.length === 1 && resolved[0].source === "/((?!s/|a/).*)" && resolved[0].headers === config.APP_SECURITY_HEADERS);
 ok("the framework is not announced", config.default.poweredByHeader === false);
 
 // =====================================================================

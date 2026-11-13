@@ -807,11 +807,20 @@ ok(
   "...inside the field, right after the microphone",
   /beside=\{\s*talkAvailable && \(/.test(chatCode) && /<VoiceInput[\s\S]{0,800}?\/>\s*\{beside\}\s*<\/div>/.test(composerCode),
 );
-ok(
-  "...which needs BOTH providers, the plan and minutes left",
-  ["transcribeAvailable", "speakAvailable", "hasMinutes"].every((k) => (talkDecl?.[1] ?? "").includes(k)),
-  talkDecl?.[1]?.trim(),
-);
+// talkAvailable = loopAvailable || liveAvailable, so look through the
+// chain: loopAvailable must have the two providers + minutes, and
+// liveAvailable must have the live flag + minutes.
+{
+  const loopDecl = chatCode.match(/const loopAvailable =([\s\S]*?);/)?.[1] ?? "";
+  const liveDecl = chatCode.match(/const liveAvailable =([\s\S]*?);/)?.[1] ?? "";
+  ok(
+    "...which needs BOTH providers, the plan and minutes left",
+    ["transcribeAvailable", "speakAvailable", "hasMinutes"].every((k) => loopDecl.includes(k)) &&
+      (talkDecl?.[1] ?? "").includes("loopAvailable") &&
+      liveDecl.includes("hasMinutes"),
+    `loopAvailable = ${loopDecl.trim()}\ntalkAvailable = ${talkDecl?.[1]?.trim()}`,
+  );
+}
 ok(
   "...and the inert Talk with its reason line is gone",
   !/talk-blocked-reason/.test(chatCode) && !/conversation\.blocked/.test(chatCode),

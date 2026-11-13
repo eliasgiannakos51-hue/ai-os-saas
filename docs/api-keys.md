@@ -15,7 +15,7 @@ about the others itself:
 
 ```ts
 // src/lib/ai/providers/catalog.ts
-export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq"];
+export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq", "mistral"];
 ```
 
 So the cost column gives the **shape** of the charge — per token, per
@@ -46,6 +46,7 @@ code itself carries.
 | **OpenAI** | `OPENAI_API_KEY` | Speech-to-text (Whisper). Voice **input** in chat, module forms, the agent builder | The microphone button is **not rendered**. Every text path unaffected | per audio minute (Whisper) | no | platform.openai.com/api-keys | V5 |
 | **Google (Gemini)** | `GOOGLE_API_KEY` | Gemini as a **failover** provider | The provider is skipped. If Anthropic is unreachable the call fails instead of failing over | per token | yes, a free tier exists | aistudio.google.com/apikey | **NOW — it is the outage plan** |
 | **Groq** | `GROQ_API_KEY` | Groq as a **failover** provider | Same: the chain is one provider shorter | per token | yes | console.groq.com/keys | V5 |
+| **Mistral AI** | `MISTRAL_API_KEY` | The only EU-resident provider in the chain. Powers **«Μόνο Ευρώπη»**: an account that turns this setting on (`/dashboard/settings`, `user_credits.eu_only_ai`) gets every AI call refused rather than silently routed to a non-EU provider, until this key exists | Without the key, every account with «Μόνο Ευρώπη» on gets `eu_only_blocked` on every call — there is no other EU provider in the catalog for it to route to. Accounts without the setting are unaffected: the chain is one provider shorter, same as any other missing failover key | per token. **Not verified against a live account** | no | console.mistral.ai/api-keys | **NOW — accounts can turn the setting on today** |
 
 `AI_PROVIDER_ORDER` and `AI_FAILOVER_ENABLED` decide the chain and whether
 it is used at all. A failover key with failover disabled is a key that
@@ -85,7 +86,7 @@ on no feature.** The panel says so next to each of them.
 | **Supabase** | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The browser's and middleware's client | Nothing works | — | — | same page | **NOW** |
 | **Supabase** | `SUPABASE_SERVICE_ROLE_KEY` | Credits, settlement, admin reads | Credits and settlement break; the dashboard shell degrades to a zero balance rather than crashing | — | — | same page (**never** ships to the browser) | **NOW** |
 | **Vercel** | *(none)* | Hosting, cron, function limits | — | per seat and per usage | yes | vercel.com | **NOW** — but no key: the platform provides `VERCEL_*` itself |
-| **Vercel Cron** | `CRON_SECRET` | Authenticates all twelve scheduled routes (eleven under `/api/cron` plus `/api/weekly-digest`) | **Every cron route returns 503.** Credits are never reset, scheduled agents and automations never fire, contact reminders never arrive, the weekly digest never goes out, and nav_events is never pruned. It fails **closed** on purpose | free with Vercel | — | any random 32+ chars you generate yourself | **NOW** |
+| **Vercel Cron** | `CRON_SECRET` | Authenticates all fifteen scheduled routes (fourteen under `/api/cron` plus `/api/weekly-digest`) | **Every cron route returns 503.** Credits are never reset, scheduled agents and automations never fire, contact and meeting-action reminders never arrive, the weekly digest never goes out, stale live voice calls are never swept, and nav_events is never pruned. It fails **closed** on purpose | free with Vercel | — | any random 32+ chars you generate yourself | **NOW** |
 | **Resend** | `RESEND_API_KEY` | All outbound email | Thirteen senders fail. Since this session they each **say which variable is missing**; before it they logged `stage: "unhandled"` | per email, per month | yes | resend.com/api-keys | **NOW** |
 | **Resend** | `RESEND_FROM_EMAIL` | The sender address | Falls back to `onboarding@resend.dev`, which is **testing mode: real users receive nothing** and no error is raised | — | — | resend.com/domains (verify a domain first) | **NOW — the fallback silently delivers to nobody** |
 | **Web Push** | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | The browser creating a push subscription at all | Settings says "not configured" and no notification is ever sent | free — it is a key pair you generate | — | `npx web-push generate-vapid-keys` | V5 |
@@ -161,10 +162,12 @@ twenty keys and wonder why nothing changed.
 
 ### Models — none of these is wired
 
-`xAI (Grok)` · `Perplexity` · `Manus` · `DeepSeek` · `Together` ·
-`Mistral` · `Cohere`
+`xAI (Grok)` · `Perplexity` · `Manus` · `DeepSeek` · `Together` · `Cohere`
 
-The provider registry is a closed set of four:
+(Mistral left this list on 2026-11-07: it is in Table A now, as the fifth
+provider and the only EU destination in the chain.)
+
+The provider registry is a closed set of five:
 
 ```ts
 // src/lib/ai/providers/registry.ts
@@ -173,10 +176,11 @@ export const PROVIDER_KEY_ENV_VARS: Record<AiProvider, string> = {
   openai:    "OPENAI_API_KEY",
   google:    "GOOGLE_API_KEY",
   groq:      "GROQ_API_KEY",
+  mistral:   "MISTRAL_API_KEY",
 };
 ```
 
-Adding a fifth is a real piece of work — the registry, the catalogue with
+Adding a sixth is a real piece of work — the registry, the catalogue with
 its per-token prices, the failover order, the cost accounting that
 settlement derives credits from — not a variable. **Perplexity in
 particular is not a model you would add here**: Deep Research already does
@@ -238,7 +242,7 @@ works rather than filling a gap.
 ### α) Which are already in the code and missing?
 
 That question has a live answer rather than a written one:
-**`/dashboard/system-health`** lists all 50 variables grouped by level,
+**`/dashboard/system-health`** lists all 51 variables grouped by level,
 with the sentence for each, computed on the server and reduced to a
 boolean before it reaches the browser — no value ever crosses.
 `scripts/tests/capability-visibility.test.mjs` holds it to being built
@@ -274,9 +278,12 @@ the order I would build them in is:
 1. **Bank connections** (`bank_connections` already exists) — the finance
    module is the most-used one in most business tools, and an automatic
    feed beats a form.
-2. **A fifth AI provider**, chosen by what the routing data says, not by
-   the name — `routing_decisions` records which model served what and at
-   what cost.
+2. ~~A fifth AI provider, chosen by what the routing data says, not by
+   the name~~ — done 2026-11-07: Mistral AI, chosen because the owner
+   needed an EU-resident destination for «Μόνο Ευρώπη», not because the
+   routing data pointed at it. A sixth provider chosen by what
+   `routing_decisions` says which model served what and at what cost is
+   still open.
 3. **Image generation** (Flux / Ideogram / Recraft) — the website builder
    is the surface that would use it, and it already places images.
 4. **Video** — last, and only with a credit price for it worked out

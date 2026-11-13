@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { loadReadableFiles } from "@/lib/files/store";
 import { deserialisePages } from "@/lib/files/extract";
 import { downloadAttachmentImage } from "@/lib/attachment-image-server";
+import { wrapUntrusted } from "@/lib/agents/agent-config";
 import type { ChatAttachment } from "@/lib/chat/attachment-types";
 
 /**
@@ -77,8 +78,16 @@ export async function loadAttachmentContent(
     const { text, cut } = clip(body, share);
     const note = cut ? `\n[Το έγγραφο κόπηκε εδώ: δόθηκαν οι πρώτοι ${share} από ${body.length} χαρακτήρες.]` : "";
     const block = `<document name="${pdf.name.replace(/"/g, "'")}">\n${text}${note}\n</document>`;
-    textChars += block.length;
-    blocks.push({ type: "text", text: block });
+    // DATA, NOT INSTRUCTIONS (ΑΣ2-3.2): a PDF's extracted text is a
+    // stranger's words, not the user's — fenced the same way Files'
+    // own ask() and every other untrusted-text path in this repo fence
+    // theirs, so the model has a signal to tell it apart from the
+    // conversation around it. wrapUntrusted() also strips any fence
+    // markers already inside the text, so a hostile PDF cannot forge a
+    // closing marker to escape into instruction position early.
+    const wrapped = wrapUntrusted(block);
+    textChars += wrapped.length;
+    blocks.push({ type: "text", text: wrapped });
   }
 
   const loaded = await Promise.all(images.map((image) => downloadAttachmentImage(supabase, image.path, callerContext)));

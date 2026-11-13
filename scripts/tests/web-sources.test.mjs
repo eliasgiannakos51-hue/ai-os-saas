@@ -111,8 +111,12 @@ const route = stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"));
 const client = stripComments(readFileSync("src/components/chat/chat-workspace.tsx", "utf8"));
 check("the route keeps every round's blocks, so the last one is the answer's", /lastRoundBlocks = finalResponse\.content;/.test(route));
 check("...numbers the answer from them", /const sourced = attachWebSources\(assistantText, lastRoundBlocks\);/.test(route));
-check("...STORES the numbered text, so a reload shows the same", /role: "assistant",\s*content: sourced\.text,/.test(route));
-check("...and sends it at the end of the stream", /content: sourced\.sources\.length > 0 \? sourced\.text : undefined,/.test(route));
+// finalText = attachAnswerChart(sourced.text, chart) — the numbered text,
+// with a chart folded in when there is one (lib/chat/answer-chart.ts); with
+// none, attachAnswerChart returns sourced.text unchanged, so this is still
+// the same guarantee web-sources made before that carrier existed.
+check("...STORES the numbered (and possibly charted) text, so a reload shows the same", /role: "assistant",\s*content: finalText,/.test(route));
+check("...and sends it at the end of the stream when it differs from what streamed", /content: finalText !== assistantText \? finalText : undefined,/.test(route));
 check("the client swaps the numbered text in", /content: finalContent \?\? accumulatedText,/.test(client) && /finalContent = event\.content;/.test(client));
 check("the thread renders the cards under every answer", /<SourceCards content=\{msg\.content\} \/>/.test(client));
 

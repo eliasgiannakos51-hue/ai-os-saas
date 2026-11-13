@@ -2,8 +2,9 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
-import { readFlow } from "@/lib/automations/boxes";
+import { readFlow, effectiveDry, DEFAULT_FLOW_MODE } from "@/lib/automations/boxes";
 import { accountFor, go } from "@/lib/automations/start-run";
+import { modeFor } from "@/lib/automations/flow-access";
 
 /**
  * THE RUNS A FILE QUEUED, TAKEN AND RUN (MASTER 16, package 30).
@@ -60,15 +61,18 @@ export async function runQueued(run: QueuedRun, user: User): Promise<boolean> {
     await cancel(run.id, account.refused);
     return true;
   }
+  // "event" — never a person pressing a button right now — so "shadow"
+  // forces this run dry the same as the 15-minute cron does.
+  const mode = await modeFor(admin, flow.id as string, run.user_id);
   await go({
-    flow: { id: flow.id as string, user_id: run.user_id, name: flow.name as string, boxes: verdict.boxes, cost_limit: flow.cost_limit as number, time_zone: flow.time_zone as string },
+    flow: { id: flow.id as string, user_id: run.user_id, name: flow.name as string, boxes: verdict.boxes, cost_limit: flow.cost_limit as number, time_zone: flow.time_zone as string, mode },
     runId: run.id,
     user: { id: user.id, email: user.email ?? null },
     plan: account.plan,
     bypass: account.bypass,
     isAdmin: account.isAdmin,
     isBeta: account.isBeta,
-    dry: false,
+    dry: effectiveDry(mode ?? DEFAULT_FLOW_MODE, "event"),
     eventRef: run.event_ref,
     resume: null,
   });

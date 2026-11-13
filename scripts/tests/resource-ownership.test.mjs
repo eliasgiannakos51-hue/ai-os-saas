@@ -65,7 +65,13 @@ const AUTHENTICATES = /auth\s*\.\s*getUser\s*\(|getCurrentUser(?:Result)?\s*\(/;
 const CRON = /checkCronAuth\s*\(/;
 const ADMIN_CLIENT = /createAdminClient\s*\(/;
 // An identifier that came from OUTSIDE: the path, the body, the query.
-const FROM_REQUEST = /params\.[a-zA-Z_]+|body\??\.[a-zA-Z_]*[Ii]d\b|searchParams\.get\(/;
+// `(?!toString\b)` excludes api/discord/connect and /share (2026-11-07):
+// both build a LOCAL `const params = new URLSearchParams(...)` to compose
+// an outbound URL and call `params.toString()` on it, a name collision
+// with Next's route-params object rather than a request-supplied id. A
+// real route param is read as `params.id` / `params.slug`, never through
+// `.toString()`, so the exclusion cannot hide a genuine one.
+const FROM_REQUEST = /params\.(?!toString\b)[a-zA-Z_]+|body\??\.[a-zA-Z_]*[Ii]d\b|searchParams\.get\(/;
 
 const authed = routes.filter((f) => AUTHENTICATES.test(SOURCE.get(f)) && !CRON.test(SOURCE.get(f)));
 const onRequestId = authed.filter((f) => FROM_REQUEST.test(SOURCE.get(f)));

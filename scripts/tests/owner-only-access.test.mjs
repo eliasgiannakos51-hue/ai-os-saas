@@ -137,6 +137,28 @@ console.log("\n== 4. NO API route exposes platform-wide data unguarded ==");
 // happen to remember. A route that uses the service-role client AND is not
 // a cron/webhook/internal endpoint must scope to the caller or check
 // admin — otherwise it can read across accounts.
+// A DECLARATION OF THE SERVICE-ROLE EXEMPTION, NOT A MENTION OF IT.
+//
+// The marker is itself a comment (`// @service-role-justified pre-auth`),
+// so this is the one place in scripts/tests that may NOT run its target
+// through stripComments: that would delete the thing being looked for.
+// What it can do instead is insist on the marker's SHAPE — it begins a
+// comment line.
+//
+// FOUND 2026-10-31, by a route that carries no exemption and explains in
+// prose why it needs none ("No @service-role-justified marker is needed
+// for the admin client below..."). The loose /@service-role-justified/
+// counted that sentence as a ninth exemption, pushing the census past its
+// cap of 8, and §4b then read the next word — "marker" — as the reason and
+// failed it for not being one of the three. A file arguing that it does
+// NOT take the exemption was being counted as taking it.
+//
+// All eight real declarations match this shape (checked both ways on
+// 2026-10-31: 8 with it, 9 without, and the ninth is the prose above);
+// each continues with an em-dash explanation on the same line, which is
+// why the reason is captured but the line is not anchored at its end.
+const SERVICE_ROLE_DECLARED = /^[ \t]*(?:\/\/|\*)[ \t]*@service-role-justified[ \t]+(\w[\w-]*)/m;
+
 const routes = walk("src/app/api", "route.ts");
 check(`the scan found the API surface (${routes.length} routes)`, routes.length >= 40);
 
@@ -146,6 +168,7 @@ const offenders = [];
 for (const file of routes) {
   const src = readFileSync(file, "utf8");
   if (!/createAdminClient\(/.test(src)) continue;
+
 
   const isWebhook = file.includes("/api/webhooks/");
   // The research continuation authenticates with the internal token when
@@ -184,7 +207,7 @@ for (const file of routes) {
   // design (a published site's contact form). Each of those must SAY SO in
   // the file — an explicit marker, so a new route cannot inherit an
   // exemption by sitting in the same folder as one.
-  const justified = /@service-role-justified/.test(src);
+  const justified = SERVICE_ROLE_DECLARED.test(src);
 
   if (isCron || isWebhook) {
     if (!hasCronAuth && !isWebhook) offenders.push(`${file}: cron route with no CRON_SECRET check`);
@@ -201,11 +224,38 @@ check("every service-role route is authorised somehow", offenders.length === 0, 
 console.log("\n== 4b. every service-role exemption states a recognised reason ==");
 // The marker must not become a way to silence this check. Only three
 // reasons are accepted, and each one is a real architectural constraint.
-const justifiedRoutes = routes.filter((f) => /@service-role-justified/.test(readFileSync(f, "utf8")));
-check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 6);
+const justifiedRoutes = routes.filter((f) => SERVICE_ROLE_DECLARED.test(readFileSync(f, "utf8")));
+// 6 -> 8 on 2026-10-25, for iowork's two app-facing routes and no others.
+// The desktop app is not a browser: it has no cookie and no session, so
+// api/iowork/pair (the app asks for a code before any account is involved
+// — pre-auth, exactly like signup) and api/iowork/pair/token (authorised
+// by a 32-byte claim secret — token-auth, exactly like jobs/continue)
+// cannot be scoped to a user the way every other route is. Both reasons
+// are ones §4b already recognises; neither is a new kind of exemption.
+// api/iowork/devices and api/iowork/devices/[id] are NOT in this count:
+// they establish the session themselves and are scoped to its user.
+//
+// 8 -> 9 on 2026-11-04, for api/delete-account/cancel and no other. It is
+// the second half of a pair already counted here: delete-account/confirm
+// schedules the deletion from an emailed single-use token, and cancel
+// stops it from the link in the email that follows — signed out, possibly
+// on another device, for the same reason confirm cannot ask for a
+// session. token-auth, exactly like confirm: a 256-bit token stored only
+// as its SHA-256, honoured only while the schedule it was sent for is
+// still open — never once cancelled or executed — and then one conditional
+// update over that account's open rows (lib/account/pending-deletion.ts). It is not
+// a new kind of exemption. api/delete-account/status, which cancels from
+// Settings, is NOT in this count: it reads the session and is scoped to
+// its user.
+// 9 -> 10 on 2026-11-11, for api/pay/[productId] — the Ionexa Payments
+// public checkout redirect. The customer has no account; the admin client
+// reads a product from a deny-all table to build a Stripe redirect. It
+// writes nothing and the amount is fixed by the Stripe Price. public,
+// exactly like the published-site routes above.
+check(`exemptions are few and declared (${justifiedRoutes.length})`, justifiedRoutes.length <= 10);
 for (const file of justifiedRoutes) {
   const src = readFileSync(file, "utf8");
-  const reason = src.match(/@service-role-justified (\w[\w-]*)/)?.[1];
+  const reason = src.match(SERVICE_ROLE_DECLARED)?.[1];
   check(
     `${file.split("/api/")[1]} declares a recognised reason (${reason ?? "none"})`,
     ["pre-auth", "token-auth", "public"].includes(reason ?? ""),
@@ -394,7 +444,14 @@ console.log("\n== a page that refuses non-owners is not offered to them ==");
     refusing.push({ p, href });
   }
   // A FLOOR, on the collection the emptiness is asserted over.
-  check(`pages that refuse a non-owner (${refusing.length})`, refusing.length >= 4,
+  //
+  // 4 -> 5 on 2026-11-04: dashboard/admin (directive 42) is the fifth,
+  // beside business-health, costs, routing and system-health. At 4 the
+  // floor sat one below the population, so a page that stopped refusing
+  // left it green — owner-only-access.mutation.mjs's "an owner-only page
+  // stops refusing" went red only on system-health's own named checks.
+  // At the population, losing any one refusal is red here.
+  check(`pages that refuse a non-owner (${refusing.length})`, refusing.length >= 5,
     refusing.map((r) => r.href).join(", "));
 
   // THE CLASSIFIER, ASKED ABOUT A SAMPLE IT IS GIVEN.

@@ -33,7 +33,7 @@ function resolveRange(value: string | undefined): TimelineRange {
 
 export default async function TimelinePage(
   props: {
-    searchParams: Promise<{ module?: string; range?: string; view?: string; kind?: string; q?: string }>;
+    searchParams: Promise<{ module?: string; range?: string; view?: string; kind?: string; q?: string; fav?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -87,14 +87,15 @@ export default async function TimelinePage(
   if (library && searchParams.view !== "entries") {
     const kind = isLibraryKind(searchParams.kind) ? searchParams.kind : null;
     const query = typeof searchParams.q === "string" ? searchParams.q.slice(0, 200) : "";
-    const { items, failed } = await loadLibrary(supabase, user.id, { kind, query });
+    const favoriteOnly = searchParams.fav === "1";
+    const { items, failed } = await loadLibrary(supabase, user.id, { kind, query, favoriteOnly });
     const tLibrary = await getTranslations("dashboard.library");
     return (
       <div className="min-h-full">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
           <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} description={tLibrary("description")} />
           <TimelineTabs view="library" library />
-          <LibraryView items={items} kind={kind} query={query} failed={failed} />
+          <LibraryView items={items} kind={kind} query={query} favoriteOnly={favoriteOnly} failed={failed} />
         </div>
       </div>
     );

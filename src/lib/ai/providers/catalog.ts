@@ -261,11 +261,54 @@ const GROQ_MODELS: CatalogModel[] = [
   },
 ];
 
+/**
+ * MISTRAL, La Plateforme — the only EU provider in this catalog
+ * (PROVIDER_REGION below), which is the entire reason it exists here:
+ * «Μόνο Ευρώπη» (eu-only.ts) needs at least one real destination or the
+ * promise is one nobody could ever keep. Prices and context window read
+ * from mistral.ai/pricing and docs.mistral.ai on 2026-11-07; see
+ * UNVERIFIED_PRICE_PROVIDERS below — no MISTRAL_API_KEY exists in this
+ * environment, so neither number has been confirmed against a bill.
+ *
+ * NO PROMPT CACHING DECLARED. La Plateforme's documentation does not
+ * describe an Anthropic-style cache_control a caller places, so this is
+ * `cacheMinimumTokens: null` for the same reason Groq is — cache-policy.ts
+ * then prices a route here the same honest way it prices a route to Groq,
+ * rather than silently assuming a cache that may not exist.
+ *
+ * NO VISION, NO SERVER-SIDE SEARCH, NO BATCH DECLARED, on the same
+ * documentation-only standing as the prices: Mistral's Pixtral line can
+ * see a picture but this table carries only the text models actually
+ * wired into an adapter, and claiming a capability nothing here can
+ * verify is a worse mistake than declining one the model might have had.
+ */
+const MISTRAL_MODELS: CatalogModel[] = [
+  {
+    id: "mistral/mistral-large-latest",
+    provider: "mistral",
+    inputPerMTok: 0.5,
+    outputPerMTok: 1.5,
+    cacheMinimumTokens: null,
+    tier: "large",
+    capabilities: [...BASE],
+  },
+  {
+    id: "mistral/mistral-small-latest",
+    provider: "mistral",
+    inputPerMTok: 0.1,
+    outputPerMTok: 0.3,
+    cacheMinimumTokens: null,
+    tier: "small",
+    capabilities: [...BASE],
+  },
+];
+
 export const AI_CATALOG: readonly CatalogModel[] = [
   ...ANTHROPIC_MODELS,
   ...OPENAI_MODELS,
   ...GOOGLE_MODELS,
   ...GROQ_MODELS,
+  ...MISTRAL_MODELS,
 ];
 
 /**
@@ -273,7 +316,31 @@ export const AI_CATALOG: readonly CatalogModel[] = [
  * live account. Anthropic's have — they are the ones this app has been
  * billing against for months, in lib/billing/model-pricing.ts.
  */
-export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq"];
+export const UNVERIFIED_PRICE_PROVIDERS: readonly AiProvider[] = ["openai", "google", "groq", "mistral"];
+
+/**
+ * WHERE EACH PROVIDER PHYSICALLY SERVES A CALL FROM — the one fact
+ * «Μόνο Ευρώπη» (eu-only.ts) is built on, and the reason it lives beside
+ * the prices rather than in registry.ts: a routing rule that can rule a
+ * provider in or out belongs with the other per-provider facts, not
+ * scattered beside the env-var lookup.
+ *
+ * MISTRAL AI IS A FRENCH COMPANY AND LA PLATEFORME IS AN EU SERVICE
+ * (mistral.ai, headquartered in Paris; the API has no non-EU region
+ * selector). Anthropic, OpenAI and Google are US companies; Groq's own
+ * documentation names US-only infrastructure. None of the other four
+ * offers an EU-only deployment this app can select, so this is a
+ * per-PROVIDER fact today, not a per-model or per-region one — the day
+ * any of them adds a real EU region a caller can pin to, this table is
+ * where that nuance has to move.
+ */
+export const PROVIDER_REGION: Record<AiProvider, "eu" | "non_eu"> = {
+  anthropic: "non_eu",
+  openai: "non_eu",
+  google: "non_eu",
+  groq: "non_eu",
+  mistral: "eu",
+};
 
 export function catalogModel(id: string | undefined): CatalogModel | null {
   if (!id) return null;

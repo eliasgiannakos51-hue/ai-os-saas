@@ -145,11 +145,22 @@ const gateFiles = readdirSync("scripts/tests")
   .map((f) => `scripts/tests/${f}`);
 
 const referenced = new Map();
+// PER KEY, NOT PER FILE: a key a file reaches only through `uiFormat` fills
+// its placeholders rather than dropping them, so the stripped-needle floor
+// below does not describe what that call site actually gets. Starts true
+// and is cleared the moment ANY reference to the key is through a
+// different helper — a key uiFormat reaches in one file and uiTextStrict
+// reaches in another is still bound by the floor, because that second
+// call site DOES get the stripped form.
+const uiFormatOnly = new Map();
 for (const file of gateFiles) {
   const src = readFileSync(file, "utf8");
   for (const m of src.matchAll(KEY_CALL)) {
-    if (!referenced.has(m[1])) referenced.set(m[1], new Set());
-    referenced.get(m[1]).add(file.replace("scripts/tests/", ""));
+    const key = m[1];
+    if (!referenced.has(key)) referenced.set(key, new Set());
+    referenced.get(key).add(file.replace("scripts/tests/", ""));
+    if (!uiFormatOnly.has(key)) uiFormatOnly.set(key, true);
+    if (!/^uiFormat\s*\(/.test(m[0])) uiFormatOnly.set(key, false);
   }
 }
 
@@ -172,10 +183,11 @@ for (const [key, users] of referenced) {
     // refuses below: a key whose whole value is a placeholder yields ""
     // and cannot be a needle in ANY language. `uiFormat` callers are
     // exempt because they format the placeholders rather than dropping
-    // them — so the floor is applied to the stripped form only when the
-    // stripped form is what a caller would get.
+    // them — so the floor is applied to the stripped form only when some
+    // reference to this key actually gets that stripped form (uiFormatOnly,
+    // built above, is false the moment one does).
     const strippedValue = value.replace(/\{[^{}]*\}/g, " ").replace(/\s+/g, " ").trim();
-    if (strippedValue.length < minNeedleLength(strippedValue) && !/uiFormat/.test([...users].join(""))) {
+    if (strippedValue.length < minNeedleLength(strippedValue) && !uiFormatOnly.get(key)) {
       tooShort.push(`${key} (${locale}) = ${JSON.stringify(value)} -> ${JSON.stringify(strippedValue)}`);
     }
   }

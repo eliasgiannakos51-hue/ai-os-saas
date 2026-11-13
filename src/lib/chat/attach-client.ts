@@ -84,6 +84,35 @@ export async function uploadChatImages(
   return { ok: true, attachments: results.map((r) => ({ kind: "image" as const, path: r.path, name: r.name })) };
 }
 
+/**
+ * A SPREADSHEET, THE SAME WAY ANALYZE'S OWN UPLOAD DOES (the owner's «30.
+ * CHAT: ΓΡΑΦΗΜΑΤΑ...», 2026-10-31, Κομμάτι 1): posted to
+ * api/data-analysis/upload (no AI call, no credits — reading a file is
+ * free), so attaching it to a message also puts it in Analyze, where it
+ * can be opened again. `words` are the already-translated failure lines
+ * presentations-shell.tsx's own addDataFile uses (presentations.chart.failed.*),
+ * reused rather than duplicated under a new key.
+ */
+export async function attachData(
+  file: File,
+  words: { tooLarge: string; unreadable: string; tooMany: string; other: string }
+): Promise<{ ok: true; attachment: ChatAttachment } | { ok: false; error: string }> {
+  try {
+    const form = new FormData();
+    form.append("file", file);
+    const response = await fetch("/api/data-analysis/upload", { method: "POST", body: form });
+    const body = await response.json().catch(() => null);
+    if (!response.ok || !body?.id) {
+      const code = String(body?.error ?? "");
+      const error = code === "too_large" ? words.tooLarge : code === "unreadable" ? words.unreadable : code === "too_many_uploads" ? words.tooMany : words.other;
+      return { ok: false, error };
+    }
+    return { ok: true, attachment: { kind: "data", dataId: String(body.id), name: file.name } };
+  } catch {
+    return { ok: false, error: words.other };
+  }
+}
+
 /** Remove images nothing will point at: a refused message's, or a deleted conversation's. Best-effort. */
 export async function discardChatImages(paths: readonly string[]): Promise<void> {
   if (paths.length === 0) return;

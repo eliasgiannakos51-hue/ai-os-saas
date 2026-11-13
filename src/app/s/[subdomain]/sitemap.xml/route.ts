@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { contentDomain, wrongOriginRedirect } from "@/lib/publishing/content-origin";
 import { logApiError } from "@/lib/log-error";
 import { validateSubdomain, publishedSiteUrl } from "@/lib/publishing/subdomain";
 import { normalisePages } from "@/lib/publishing/website-pages";
@@ -28,6 +29,11 @@ export const revalidate = 0;
  * sitemap — an empty one reads to a crawler as "this site has no pages".
  */
 export async function GET(request: Request, props: { params: Promise<{ subdomain: string }> }) {
+  // ON A DOMAIN OF ITS OWN once one is configured: this address on the
+  // app's own domain then answers with a permanent redirect there, so
+  // the app's domain serves no user content (lib/publishing/content-origin.ts).
+  const moved = wrongOriginRedirect(request, contentDomain(process.env.PUBLISHED_SITE_DOMAIN));
+  if (moved) return Response.redirect(moved, 308);
   const params = await props.params;
   try {
     if (!publicRequestAllowed(request)) {

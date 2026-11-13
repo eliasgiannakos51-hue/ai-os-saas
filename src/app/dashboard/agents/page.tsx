@@ -24,8 +24,7 @@ import {
   AGENT_BUILDER_MODEL,
 } from "@/lib/agents/agent-depth";
 import { estimateForAction } from "@/lib/billing/estimate";
-import { AgentsWorkspace } from "@/components/agents/agents-workspace";
-import { ListCappedNotice } from "@/components/ui/list-capped-notice";
+import { AgentsShell } from "@/components/agents/agents-shell";
 import { RECORD_CAP, isCapped } from "@/lib/record-cap";
 import { readExampleParam } from "@/lib/overview/first-screen-examples";
 import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
@@ -198,39 +197,43 @@ export default async function AgentsPage(
     ])
   );
 
+  // THE SCREEN IS THE COMMON SHELL NOW (directive 25, Κομμάτι 1), so the
+  // page is the wrapper and the data, and nothing else: a PageHeader, a
+  // disclosure block and a capped notice stacked ABOVE a
+  // `h-[calc(100dvh-8rem)]` child would push the field off the bottom of
+  // a phone. The two that must stay visible travel into the shell as
+  // props and are drawn under its one field — which is also where
+  // scripts/tests/agents.test.mjs §13 and record-caps.test.mjs look for
+  // them, and why both strings are still in this file.
+  //
+  // THE WALL IS THE ONE OTHER BODY THIS PAGE MAY RETURN, and it returns
+  // INSTEAD of the shell (the "replacement" moment in
+  // scripts/tests/one-primary-action.test.mjs), so its own header stays
+  // with it above.
   return (
-    <div className="min-h-full">
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
-
-        {/* EU AI Act Article 50 — the user has to know they are configuring
-            an AI system and that everything it sends them is AI-generated.
-            Stated once, on the surface where agents are created, in
-            addition to the notice carried by every delivered email. */}
-        <p className="mb-4 surface-tight text-[11px] leading-relaxed text-muted">
-          {t("aiDisclosure")}
-        </p>
-
-        {isCapped((agents as UserAgent[] | null) ?? [], RECORD_CAP) && (
-          <ListCappedNotice cap={RECORD_CAP} />
-        )}
-        {agentsError && <ErrorMessage detail={`loading agents: ${agentsError.message}`} />}
-        {runsError && <ErrorMessage detail={`loading agent runs: ${runsError.message}`} />}
-
-        <AgentsWorkspace
-          agents={(agents as UserAgent[] | null) ?? []}
-          runs={(runs as AgentRun[] | null) ?? []}
-          agentCap={cap}
-          accountEmail={user.email ?? ""}
-          slackChannels={slackChannels}
-          depthFacts={depthFacts}
-          templateCredits={templateCredits}
-          buildCredits={buildCredits}
-          // STARTED ON ARRIVAL. Clamped rather than trusted: this comes
-          // out of a URL anyone can edit.
-          initialAgent={readExampleParam(searchParams.agent)}
-        />
-      </div>
+    <div className="h-[calc(100dvh-8rem)] md:h-[calc(100vh-4rem)]">
+      {agentsError && <ErrorMessage detail={`loading agents: ${agentsError.message}`} />}
+      {runsError && <ErrorMessage detail={`loading agent runs: ${runsError.message}`} />}
+      <AgentsShell
+        agents={(agents as UserAgent[] | null) ?? []}
+        runs={(runs as AgentRun[] | null) ?? []}
+        agentCap={cap}
+        accountEmail={user.email ?? ""}
+        slackChannels={slackChannels}
+        depthFacts={depthFacts}
+        templateCredits={templateCredits}
+        buildCredits={buildCredits}
+        // EU AI Act Article 50 — the user has to know they are configuring
+        // an AI system and that everything it sends them is AI-generated.
+        // Stated once, on the surface where agents are created, in
+        // addition to the notice carried by every delivered email.
+        aiDisclosure={t("aiDisclosure")}
+        capped={isCapped((agents as UserAgent[] | null) ?? [], RECORD_CAP)}
+        cap={RECORD_CAP}
+        // STARTED ON ARRIVAL. Clamped rather than trusted: this comes out
+        // of a URL anyone can edit.
+        initialAgent={readExampleParam(searchParams.agent)}
+      />
     </div>
   );
 }

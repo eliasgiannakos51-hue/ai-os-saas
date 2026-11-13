@@ -66,10 +66,15 @@ export async function POST(request: Request) {
 
     let path = "";
     let filename = "";
+    let anyType = false;
     try {
-      const body = (await request.json()) as { path?: unknown; filename?: unknown };
+      const body = (await request.json()) as { path?: unknown; filename?: unknown; anyType?: unknown };
       path = typeof body.path === "string" ? body.path : "";
       filename = typeof body.filename === "string" ? body.filename : "";
+      // My Stuff's own upload (Κομμάτι 5) passes this; the Files tool and
+      // chat attachments never send it, and so keep refusing exactly the
+      // types they always refused. See ingestFileBytes's own comment.
+      anyType = body.anyType === true;
     } catch {
       return NextResponse.json({ ok: false, error: "Malformed request." }, { status: 400 });
     }
@@ -116,6 +121,7 @@ export async function POST(request: Request) {
       rawFilename: filename || segments[1],
       contentType: blob.type || null,
       existingPath: path,
+      acceptAnyType: anyType,
     });
 
     if (!result.ok) {

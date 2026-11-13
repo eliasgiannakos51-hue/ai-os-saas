@@ -53,8 +53,8 @@ const MUTANTS = [
   {
     name: "attachments are taken with the switch off",
     file: ROUTE,
-    from: "    if (!readAttachments.ok || (!attachmentsOn && readAttachments.list.length > 0)) {",
-    to: "    if (!readAttachments.ok) {",
+    from: "      !readAttachments.ok ||\n      (!attachmentsOn && readAttachments.list.length > 0) ||",
+    to: "      !readAttachments.ok ||",
     expect: "with it off, attachments in a request are refused (400)",
   },
   {
@@ -135,6 +135,16 @@ const MUTANTS = [
     to: '    const note = "";',
     gate: RUN,
     expect: "...and a document cut short says so inside it",
+  },
+  {
+    // ΑΣ2-3.2: a PDF's own text is a stranger's words, not the user's —
+    // this removes the one fence between it and the model's instructions.
+    name: "a PDF's text reaches the model unfenced, same as its own instructions",
+    file: CONTENT,
+    from: "    const wrapped = wrapUntrusted(block);",
+    to: "    const wrapped = block;",
+    gate: RUN,
+    expect: "fenced as data, not instructions (ΑΣ2-3.2)",
   },
   {
     name: "a question about a picture is answered with a help article",

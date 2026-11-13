@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
-import { ingestFileBytes } from "@/lib/files/ingest";
+import { ingestFileBytes, type IngestStage } from "@/lib/files/ingest";
 import { maxUploadsPerHour } from "@/lib/files/limits";
 import { getSiteUrl } from "@/lib/site-url";
 import { composeSharedText, encodeSharePayload } from "@/lib/pwa/share-payload";
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
       let stored = 0;
       let refused = 0;
-      let firstRefusal: string | null = null;
+      let firstRefusal: IngestStage | null = null;
 
       // Sequentially: each ingest runs a CPU-bound extraction, and five at
       // once inside a 60s function is how a share becomes a timeout.
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
             stored += 1;
           } else {
             refused += 1;
-            if (!firstRefusal) firstRefusal = result.error;
+            if (!firstRefusal) firstRefusal = result.stage;
           }
         } catch (err) {
           refused += 1;
@@ -116,7 +116,10 @@ export async function POST(request: Request) {
 
       const params = new URLSearchParams({ shared: String(stored) });
       if (refused > 0) params.set("share_failed", String(refused));
-      if (firstRefusal) params.set("share_reason", firstRefusal.slice(0, 200));
+      // The refusal's STAGE, never its sentence: the page that reads this
+      // says the stage's words from its own translations and ignores
+      // anything else (lib/files/share-outcome.ts).
+      if (firstRefusal) params.set("share_reason", firstRefusal);
       if (files.length > MAX_SHARED_FILES) {
         params.set("share_dropped", String(files.length - MAX_SHARED_FILES));
       }

@@ -355,6 +355,15 @@ export function repairRightToLeftText(text: string): string {
 }
 
 export function extractText(buf: Buffer, kind: FileKind): ExtractionResult {
+  // "other" (My Stuff's store-anything upload, Κομμάτι 5) is never asked
+  // to produce text — there is no reader for an opaque type, so trying
+  // would only ever throw. Returned BEFORE the shared "no pages means
+  // empty" check below: zero pages here means "nothing to extract", not
+  // "extraction failed", and the two must not share one error message.
+  if (kind === "other") {
+    return { pages: [], pageCount: 0, truncated: false };
+  }
+
   let result: ExtractionResult;
 
   try {

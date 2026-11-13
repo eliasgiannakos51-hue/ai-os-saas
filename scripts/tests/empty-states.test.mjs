@@ -315,11 +315,18 @@ for (const locale of LOCALES) {
       }
     }
     const example = lookup(messages[locale], listEmptyStateKey(entry, "example"));
-    if (entry.interactive && typeof example !== "string") missing.push(listEmptyStateKey(entry, "example"));
-    if (!entry.interactive && example !== undefined) surplus.push(`${entry.id} (not interactive)`);
+    // A SHELL LANDING'S EXAMPLES ARE THE SHARED AI CHIPS, not an
+    // `empty.example` of its own (lib/list-empty-states.ts, `shell`):
+    // lib/ai/example-prompts.ts owns them and
+    // scripts/tests/example-prompts.test.mjs §3 resolves all three in all
+    // ten locales. So the key is asserted ABSENT here, exactly as it is
+    // for a static surface — two lists of examples for one screen is how
+    // one of them goes stale.
+    if (entry.interactive && !entry.shell && typeof example !== "string") missing.push(listEmptyStateKey(entry, "example"));
+    if ((!entry.interactive || entry.shell) && example !== undefined) surplus.push(`${entry.id} (${entry.shell ? "shell landing" : "not interactive"})`);
   }
   checkList(`${locale}: every registered part resolves`, missing, []);
-  checkList(`${locale}: no static surface carries an unusable example`, surplus, []);
+  checkList(`${locale}: no surface without its own example carries an unusable one`, surplus, []);
 }
 
 // (b) why is not title, and no two surfaces say the same thing.
@@ -349,9 +356,16 @@ for (const locale of LOCALES) {
 for (const entry of LIST_EMPTY_STATES) {
   const src = readFileSync(entry.file, "utf8");
   const leaf = entry.keyPrefix.split(".").slice(-1)[0];
+  // SAME TWO KEYS EITHER WAY. A shell landing passes them as `heading`
+  // and `why` on ToolShell's own `empty` prop rather than as children of
+  // <EmptyState>, so the literals are asserted in that position: a
+  // heading that stopped being this surface's own title would fail here
+  // even though the string is still in the catalogue.
   check(
     `${entry.id}: the component renders ${leaf}.title and ${leaf}.why`,
-    src.includes(`"${leaf}.title"`) && src.includes(`"${leaf}.why"`),
+    entry.shell
+      ? new RegExp(`heading:\\s*t\\("${leaf}\\.title"\\)`).test(src) && new RegExp(`why:\\s*t\\("${leaf}\\.why"\\)`).test(src)
+      : src.includes(`"${leaf}.title"`) && src.includes(`"${leaf}.why"`),
     entry.file
   );
   // The retired single-string keys are gone from the component AND from
@@ -372,7 +386,16 @@ for (const entry of LIST_EMPTY_STATES) {
 // prose, next to the flag.
 for (const entry of INTERACTIVE) {
   const src = readFileSync(entry.file, "utf8");
-  check(`${entry.id}: presses through to ${entry.fills ?? "its field"}`, /onExample=\{/.test(src), entry.file);
+  // A SHELL LANDING'S PRESS IS THE SHELL'S OWN. ToolShell draws each
+  // example as a button whose onClick is `onSend(ex.label)` — checked
+  // where it is written, in tool-shell.test.mjs §1 — so what this
+  // component owes is the examples themselves, in the shape the shell
+  // takes them. An `examples:` array with nothing in it would fail this.
+  check(
+    `${entry.id}: presses through to ${entry.fills ?? "its field"}`,
+    entry.shell ? /examples:\s*exampleKeys\(/.test(src) && /empty=\{\{/.test(src) : /onExample=\{/.test(src),
+    entry.file
+  );
   check(`${entry.id}: and says what it fills`, typeof entry.fills === "string" && entry.fills.length > 20);
 }
 for (const entry of STATIC) {

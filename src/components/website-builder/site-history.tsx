@@ -48,6 +48,37 @@ const LIVE_VERSIONS_SHOWN = 20;
  * Held by scripts/tests/tool-shell.test.mjs, section 9, and used in the
  * built app by scripts/tests/tool-shell-edges.prodtest.mjs.
  */
+/**
+ * THE SITE'S NEWEST VERSION NUMBER, for the editor layout's tag
+ * («Version 3 · not published», docs/design/approved/08-Site.png): the same
+ * website_versions read SiteHistory makes below, newest first, one row.
+ * Null until it is known, or when it cannot be read — then the tag says
+ * only what IS known.
+ */
+export function useLatestSiteVersion(websiteId: string | null, reload: unknown): number | null {
+  const supabase = useMemo(() => createClient(), []);
+  const [latest, setLatest] = useState<{ websiteId: string; n: number } | null>(null);
+  useEffect(() => {
+    if (!websiteId) return;
+    let cancelled = false;
+    void (async () => {
+      const { data, error } = await supabase
+        .from("website_versions")
+        .select("version_number")
+        .eq("website_id", websiteId)
+        .order("version_number", { ascending: false })
+        .limit(1);
+      if (cancelled) return;
+      const n = !error && Array.isArray(data) && data[0] ? Number((data[0] as { version_number: unknown }).version_number) : NaN;
+      setLatest(Number.isInteger(n) && n > 0 ? { websiteId, n } : null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase, websiteId, reload]);
+  return latest && latest.websiteId === websiteId ? latest.n : null;
+}
+
 export function SiteHistory({
   websiteId,
   reload,

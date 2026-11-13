@@ -27,6 +27,7 @@
 // Run: node scripts/tests/unsplash-compliance.test.mjs
 import { readFileSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0,
   fail = 0;
@@ -172,10 +173,19 @@ for (const [label, src] of [
 // them. Both would be a licence breach that looks like a performance win,
 // so they are asserted where they would be configured.
 {
-  const nextConfig = readFileSync("next.config.mjs", "utf8");
+  // THE OPTIMISER'S CONFIGURATION, NOT EVERY MENTION. Since FD6
+  // (2026-11-05) next.config.mjs names Unsplash's CDN once, as an img-src
+  // host the BROWSER loads from — hotlinking, which is guideline 1 itself.
+  // What would re-host is an `images` block (domains, remotePatterns,
+  // loader) handing the bytes to /_next/image, so that is what is read:
+  // there is none, and the one line naming Unsplash is that host.
+  const nextConfig = stripComments(readFileSync("next.config.mjs", "utf8"));
+  const unsplashLines = nextConfig.split("\n").filter((l) => /unsplash/i.test(l));
   ok(
     "next.config.mjs does not allow Unsplash through the image optimiser",
-    !/unsplash/i.test(nextConfig)
+    !/\bimages\s*:/.test(nextConfig) && !/\bdomains\s*:/.test(nextConfig) &&
+      unsplashLines.length === 1 && /^\s*"https:\/\/images\.unsplash\.com",\s*$/.test(unsplashLines[0]),
+    unsplashLines.join(" | ")
   );
   ok("no remotePatterns entry exists at all", !/remotePatterns/.test(nextConfig));
   const sw = readFileSync("public/sw.js", "utf8");

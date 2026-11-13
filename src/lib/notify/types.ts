@@ -46,7 +46,10 @@ export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
  * the commit that adds its dispatchNotification() call, and
  * scripts/tests/notifications.test.mjs §7b compares the two both ways.
  */
-export const SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low"];
+// error_needs_attention joined 2026-11-05 with lib/team/sync-team-grants.ts:
+// a team owner whose plan no longer seats every member, and each member
+// who lost the plan's features — a state only the owner can change.
+export const SENT_NOTIFICATION_TYPES: readonly NotificationType[] = ["credits_low", "error_needs_attention"];
 
 export function isNotificationType(value: unknown): value is NotificationType {
   return typeof value === "string" && (NOTIFICATION_TYPES as readonly string[]).includes(value);

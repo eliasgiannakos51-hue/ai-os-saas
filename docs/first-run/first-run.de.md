@@ -1,8 +1,8 @@
 # The first run — de
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **618 strings**. The whole product is 4688, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **625 strings**. The whole product is 5668, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 376 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 381 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ Das sieht nach einer Frage aus. Soll ich sie beantworten oder ablegen?
 
 Beschreibe irgendetwas — eine Produktidee, einen Trade, das Feedback eines Nutzers, eine Kennzahl — und es landet automatisch im richtigen Modul.
 
-## Tier 2 — The labels — skim these (376)
+## Tier 2 — The labels — skim these (381)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -548,6 +548,12 @@ Abrufe aus einem verbundenen Konto
 
 Verbundene Integrationen
 
+**`pricing.rows.ionexaPayments`**
+
+> EN — Ionexa Payments
+
+Ionexa Payments
+
 **`pricing.rows.listRowsShown`**
 
 > EN — Rows shown in one list
@@ -807,6 +813,12 @@ Noch kein Konto?
 > EN — Password
 
 Passwort
+
+**`auth.login.rateLimited`**
+
+> EN — Too many attempts. Please try again later.
+
+Zu viele Versuche. Versuch es später erneut.
 
 **`auth.login.resetSuccess`**
 
@@ -1532,6 +1544,12 @@ Was es sich merkt
 
 Analytik
 
+**`sidebar.items.appBuilder`**
+
+> EN — Apps
+
+Apps
+
 **`sidebar.items.apps`**
 
 > EN — App ideas
@@ -1970,6 +1988,12 @@ Neuer Eintrag
 
 Betrieb
 
+**`sidebar.items.payments`**
+
+> EN — Payments
+
+Zahlungen
+
 **`sidebar.items.personalFinance`**
 
 > EN — Personal Finance
@@ -2095,6 +2119,12 @@ Geplante Aufgaben
 > EN — Settings
 
 Einstellungen
+
+**`sidebar.items.skills`**
+
+> EN — Skills
+
+Fähigkeiten
 
 **`sidebar.items.systemHealth`**
 
@@ -2440,7 +2470,7 @@ Credit-Verlauf ansehen
 
 Erneut versuchen
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (219)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3272,6 +3302,12 @@ Das Mikrofon wurde nicht erlaubt. Tippen geht weiterhin.
 
 In dieser Aufnahme war nichts zu hören.
 
+**`voice.errors.ended`**
+
+> EN — The conversation has ended.
+
+Das Gespräch ist beendet.
+
 **`voice.errors.failed`**
 
 > EN — Voice is unavailable right now. You can still type.
@@ -3307,6 +3343,12 @@ Sprache ist auf dieser Installation nicht eingerichtet.
 > EN — Voice is not included on your plan.
 
 Sprache ist in deinem Tarif nicht enthalten.
+
+**`voice.errors.not_ready`**
+
+> EN — Live conversation is not set up here yet. You were not charged.
+
+Das Live-Gespräch ist hier noch nicht eingerichtet. Dir wurde nichts berechnet.
 
 **`voice.errors.out_of_minutes`**
 

@@ -422,6 +422,14 @@ const credentials = [...envCheck.matchAll(/name: "([A-Z0-9_]+)"/g)]
 const COMPANY = {
   SUPABASE_SERVICE_ROLE_KEY: "Supabase",
   ANTHROPIC_API_KEY: "Anthropic",
+  // Unlike Groq (FAILOVER_OFF_BY_DEFAULT below), Mistral does not need an
+  // operator to edit AI_PROVIDER_ORDER to become reachable: registry.ts's
+  // resolveChain appends every EU provider to the chain whenever an
+  // account's own «Μόνο Ευρώπη» setting is on (eu-only.ts), which is a
+  // toggle the account controls, not an operator env var. With the key
+  // set, it is a real sub-processor the day the first account turns the
+  // setting on.
+  MISTRAL_API_KEY: "Mistral AI",
   OPENAI_API_KEY: "OpenAI",
   ELEVENLABS_API_KEY: "ElevenLabs",
   STRIPE_SECRET_KEY: "Stripe",

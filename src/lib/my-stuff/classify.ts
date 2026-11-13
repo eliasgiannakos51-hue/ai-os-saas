@@ -71,6 +71,21 @@ const TERMS: Record<SimpleKind, string[]> = {
     "code", "function", "script", "bug", "bugs", "convert", "program",
     "κώδικας", "κώδικα", "συνάρτηση", "σκριπτ", "πρόγραμμα",
   ],
+  // THE THREE Κομμάτι 3 ADDS (2026-10-28) — same flat-list shape as the
+  // nine above, for the same reason: nobody confuses "an image I made"
+  // for a question about a meeting.
+  images: [
+    "image", "images", "picture", "pictures", "photo", "photos",
+    "εικόνα", "εικόνες", "φωτογραφία", "φωτογραφίες",
+  ],
+  meetings: [
+    "meeting", "meetings", "call", "calls", "transcript", "transcripts",
+    "συνάντηση", "συναντήσεις", "κλήση", "κλήσεις", "απομαγνητοφώνηση",
+  ],
+  apps: [
+    "app", "apps", "application", "applications",
+    "εφαρμογή", "εφαρμογές",
+  ],
 };
 
 /** Every kind this question scored on, strongest first; every kind at all

@@ -3,12 +3,14 @@
 //
 // supabase/migrations/20261014000000_server_written_tables.sql,
 // 20261015000000_agents_websites_server_written.sql,
-// 20261023100000_projects_site_versions_server_written.sql and
-// 20261024000000_user_games.sql. As the signed-in role, on the account's
-// OWN rows: reading works, inserting and updating do not, and deleting
-// does not either — except a site and a game, which their screens delete,
-// and a project, which the account still renames and deletes (only its
-// creation is the server's). As the service role, all of it does.
+// 20261023100000_projects_site_versions_server_written.sql,
+// 20261024000000_user_games.sql and
+// 20261116000000_push_subscriptions_server_written.sql. As the signed-in
+// role, on the account's OWN rows: reading works, inserting and updating
+// do not, and deleting does not either — except a site, a game and a push
+// subscription, which their screens delete, and a project, which the
+// account still renames and deletes (only its creation is the server's).
+// As the service role, all of it does.
 //
 // Run: node scripts/tests/server-written-tables.dbtest.mjs   (needs a
 // database; run through `npm run test:db`, which provisions one)
@@ -63,6 +65,8 @@ const P = "eeeeeeee-0000-0000-0000-0000000008b1";
 sql(`insert into public.projects (id, user_id, name) values ('${P}', '${U}', 'camping')`);
 const G = "eeeeeeee-0000-0000-0000-0000000008b2";
 sql(`insert into public.user_games (id, user_id, title, plan) values ('${G}', '${U}', 'game', '{"title":"game","boxes":[]}')`);
+const PUSH = "eeeeeeee-0000-0000-0000-0000000008b3";
+sql(`insert into public.push_subscriptions (id, user_id, endpoint, p256dh, auth) values ('${PUSH}', '${U}', 'https://fcm.googleapis.com/fcm/send/server-written-test', 'k', 'a')`);
 
 const CASES = [
   {
@@ -105,6 +109,15 @@ const CASES = [
     read: `select count(*) from public.user_websites where user_id = '${U}'`,
     insert: `insert into public.user_websites (user_id, name, html_content, status) values ('${U}', 'b', '', 'pending')`,
     update: `update public.user_websites set status = 'completed', attempt_count = 0 where user_id = '${U}'`,
+    del: null,
+  },
+  {
+    // The route checks the endpoint's host, the keys, a rate limit and a
+    // cap on how many — none of which a direct write would meet.
+    table: "push_subscriptions",
+    read: `select count(*) from public.push_subscriptions where user_id = '${U}'`,
+    insert: `insert into public.push_subscriptions (user_id, endpoint, p256dh, auth) values ('${U}', 'https://push.example.invalid/x', 'k', 'a')`,
+    update: `update public.push_subscriptions set endpoint = 'https://push.example.invalid/y' where user_id = '${U}'`,
     del: null,
   },
   {
@@ -153,6 +166,10 @@ const gameDel = asUser(U, `delete from public.user_games where id = '${G}'`);
 ok("user_games: the person's own is deleted", gameDel.ok && sql(`select count(*) from public.user_games where id = '${G}'`) === "0", gameDel.out);
 sql(`delete from auth.users where id = '${other}'`);
 ok("user_games: a game goes with its account", sql(`select count(*) from public.user_games where user_id = '${other}'`) === "0");
+
+console.log("\n== push_subscriptions: the person still turns notifications off ==");
+const pushDel = asUser(U, `delete from public.push_subscriptions where id = '${PUSH}'`);
+ok("push_subscriptions: the person's own is deleted", pushDel.ok && sql(`select count(*) from public.push_subscriptions where id = '${PUSH}'`) === "0", pushDel.out);
 
 sql(`delete from auth.users where id = '${U}'`);
 

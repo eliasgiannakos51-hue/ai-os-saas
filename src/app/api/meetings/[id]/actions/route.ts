@@ -159,7 +159,7 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     const { data: created, error: writeError } = await supabase
       .from("meeting_actions")
       .insert(rows)
-      .select("id, who, what, when_text, due_date, done, source_index, created_at");
+      .select("id, who, what, when_text, due_date, done, source_index, created_at, remind_at, reminded_at");
     if (writeError || !created) {
       logApiError("/api/meetings/[id]/actions", writeError, { stage: "insert" });
       return NextResponse.json(

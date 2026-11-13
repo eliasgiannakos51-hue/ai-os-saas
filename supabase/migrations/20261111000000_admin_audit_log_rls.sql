@@ -1,0 +1,26 @@
+-- Row level security on admin_audit_log (directive 42, Κομμάτι 9).
+--
+-- 20261110000000_admin_audit_log.sql created the table with NO RLS and a
+-- REVOKE ALL from anon and authenticated, on the argument that the revoke
+-- is the real guard. It is one guard, and it is the one a later grant
+-- undoes silently: a `grant select on all tables in schema public to
+-- authenticated`, or a dashboard toggle, would hand every signed-in
+-- account the owner's record of which staff member looked at which
+-- customer — with nothing in the policy layer to stop it, because there
+-- was no policy layer. Every other table in this schema has RLS on, and
+-- scripts/tests/security-posture.test.mjs fails on one that does not.
+--
+-- RLS ON, NO POLICY: deny-all to every role that is not BYPASSRLS. That
+-- is exactly the access the table already has in practice — it is
+-- written and read only by lib/admin/audit-log.ts through
+-- createAdminClient(), and the service role bypasses RLS — so this
+-- changes no behaviour of the application. It is the same posture as
+-- feature_flags, production_errors and the other owner-only tables
+-- (DENY_ALL_ON_PURPOSE in scripts/tests/rls-coverage.test.mjs).
+--
+-- Idempotent: enabling RLS on a table that already has it is a no-op.
+--
+-- How to undo: alter table public.admin_audit_log disable row level security;
+-- (the REVOKE from 20261110000000 stays in place either way).
+
+alter table public.admin_audit_log enable row level security;

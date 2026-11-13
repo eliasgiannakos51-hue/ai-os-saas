@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Site</title>
+<link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="common.css">
+<style>
+.frame{width:100%;max-width:1000px;height:600px;display:flex;flex-direction:column;border:1px solid #222A3D;border-radius:14px;overflow:hidden;background:#17110C}
+.addr{height:36px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;background:#0D1220;border-bottom:1px solid #222A3D;color:#8D96A8;font-size:12px}
+.site{flex:1;overflow:hidden;color:#F3E9DC;padding:0 22px}
+.serif{font-family:Georgia,'Times New Roman',serif}
+.snav{display:flex;align-items:center;gap:22px;padding:18px 8px;font-size:13px;color:#CDBFAE}
+.shero{position:relative;margin:8px 0 24px;padding:30px 28px;border-radius:12px;outline:2px solid #F5F7FB;display:flex;gap:28px;align-items:center}
+.selb{position:absolute;top:-11px;left:14px;background:#F5F7FB;color:#070A12;font-size:11px;font-weight:600;padding:1px 8px;border-radius:6px}
+.sbtn{display:inline-flex;align-items:center;height:40px;padding:0 18px;border-radius:9px;background:#C98B4E;color:#17110C;font-weight:600;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 8px}
+.card{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid #33261A;border-radius:12px;font-size:13.5px}
+</style></head><body>
+<div data-tbar data-tool="Site" data-doc="Φούρνος της Γειτονιάς"><div class="seg" role="group" aria-label="Preview size"><button class="on" type="button" aria-label="Computer"><i data-i="monitor"></i></button><button type="button" aria-label="Phone"><i data-i="phone"></i></button></div><span class="tag">Version 3 · not published</span><div class="sp"></div><button class="btn" type="button"><i data-i="link"></i>Preview link</button><button class="btn pri" type="button">Publish</button></div>
+<div class="stage"><div class="canvas">
+<div class="frame">
+<div class="addr"><i data-i="shield" style="width:13px;height:13px"></i>fournos-geitonias.ionexa.site</div>
+<div class="site">
+<div class="snav"><span class="serif" style="font-size:18px;color:#F3E9DC;font-weight:700;margin-right:auto">Φούρνος της Γειτονιάς</span><span>Ψωμιά</span><span>Γλυκά</span><span>Ώρες</span><span>Επικοινωνία</span></div>
+<div class="shero"><span class="selb">Hero · selected</span>
+<div style="flex:1 1 0;display:flex;flex-direction:column;gap:14px">
+<h2 class="serif" style="font-size:40px;line-height:1.08;font-weight:700">Ζεστό ψωμί από τις 6:00</h2>
+<p style="color:#CDBFAE;font-size:15px">Ψήνουμε κάθε πρωί με προζύμι που φτιάχνουμε εμείς, στη γωνία της γειτονιάς σου.</p>
+<span><a class="sbtn" href="#">Δες τι ψήνουμε</a></span>
+</div>
+<div data-img="AI photo · fresh bread" class="dark" style="flex:1 1 0;height:230px;background:#2A1E14"></div>
+</div>
+<div style="display:flex;align-items:center;padding:0 8px 12px"><h3 class="serif" style="font-size:22px">Τι ψήνουμε</h3></div>
+<div class="cards">
+<div class="card"><div data-img="Photo" class="dark" style="height:100px;background:#2A1E14;border-radius:8px"></div><span>Χωριάτικο ψωμί</span><span style="font-size:12.5px;color:#CDBFAE">2,40 €</span></div>
+<div class="card"><div data-img="Photo" class="dark" style="height:100px;background:#2A1E14;border-radius:8px"></div><span>Κουλούρι Θεσσαλονίκης</span><span style="font-size:12.5px;color:#CDBFAE">0,80 €</span></div>
+<div class="card"><div data-img="Photo" class="dark" style="height:100px;background:#2A1E14;border-radius:8px"></div><span>Τυρόπιτα χωριάτικη</span><span style="font-size:12.5px;color:#CDBFAE">2,20 €</span></div>
+</div>
+</div>
+</div>
+<div data-ask data-note="Έτοιμο, 4 ενότητες. Το τηλέφωνο δεν το ξέρω, το άφησα κενό για να το συμπληρώσεις." data-sel="Hero" data-cost="≈ 2 credits"></div>
+</div></div>
+<script src="common.js"></script><script>mount()</script>
+</body></html>

@@ -145,6 +145,10 @@ const CHARGES_A_ROW_OWNER = {
     accounts: ["ctx.user.id"],
     why: "one run of one automation (package 30). `ctx.user` is the automation's OWNER: the signed-in caller on «Δοκιμή», «Εκτέλεση τώρα», «Έγκριση» and api/automations/events (each loads the row with .eq(\"user_id\", user.id)), and the row's user_id on the cron behind CRON_SECRET, whose caller is Vercel. Nobody else's automation reaches it.",
   },
+  "src/app/api/discord/interactions/route.ts": {
+    accounts: ["owner"],
+    why: "/ionexa ask, Discord's own HTTP interactions webhook, verified by its Ed25519 signature rather than a session (agent/discord, 2026-11-07). There is no Ionexa caller here at all — the caller is Discord, relaying a server member's slash command. `owner` is discord_guilds.user_id for that guild (guildOwner(), lib/discord/store.ts): the account that connected the bot and whose credits dashboard.discord.slash already tells every member this command spends. notLinked/notAllowed are checked before answerAsk is ever reached.",
+  },
 };
 
 const CALLER = /^user\.id$|^userId$|^claimed\.user_id$|^params\.userId$/;
@@ -195,6 +199,27 @@ const GRANT_WITHOUT_A_CALLER = {
     "the OAuth landing bootstraps an account api/signup would normally have set up, and grants the same starting allowance — to `user.id`, the account the single-use code exchange just returned. There is no other account in scope.",
   "src/lib/publishing/badge-credits-store.ts":
     "the REFUND path: when a badge-removal purchase fails after the deduction, the same `userId` it was taken from gets it back. A refund that could name another account would be the mint this rule exists to forbid.",
+  // THE FIRST SITE HERE WHERE A CALLER REALLY DOES NAME THE ACCOUNT, so it
+  // is declared on a different ground from the four above and the
+  // difference is the whole justification. The others are safe because no
+  // request chose the account; this one is safe because no ordinary caller
+  // reaches it. src/app/api/admin/users/credits/route.ts answers 404 unless
+  // isAdminEmail(user.email) — an allowlist read ONLY from the deployment's
+  // ADMIN_EMAILS (src/lib/auth/admin-emails.ts), never from request data,
+  // and empty when the variable is unset, so it fails CLOSED: no admins
+  // means nobody can mint. The flag admin-dashboard must also be on.
+  // Every call is written to admin_audit_log with the staff address, the
+  // amount and a reason the route requires (>= 3 chars), so a mint cannot
+  // be anonymous. This is οδηγία 42 Κομμάτι 2, «μόνο με λόγο, καταγράφεται».
+  //
+  // WHAT IT IS NOT, said here so this declaration does not read as a
+  // clean bill of health: the gate is ONE factor. Οδηγία 42 asks for
+  // «υποχρεωτικό 2FA» on the admin page and that is not enforced yet
+  // (ΑΣ2-1.1, Supabase MFA/AAL2, still open), so today a stolen staff
+  // session is enough to reach this grant. The audit row is what would
+  // show it afterwards, not what prevents it.
+  "src/app/api/admin/users/credits/route.ts":
+    "the admin credit adjustment: the caller names the account, and what makes that safe is the staff gate rather than the absence of a named account — isAdminEmail against the env-only ADMIN_EMAILS allowlist (404 otherwise, empty when unset so it fails closed), the admin-dashboard flag, and an admin_audit_log row carrying who, how much and why. NOTE: 2FA on the admin page is still owed (ΑΣ2-1.1), so this is one factor today.",
 };
 const looseGrants = grantSites.filter((g) => !GRANT_WITHOUT_A_CALLER[g.file]).map((g) => `${g.file}: grantCredits(${g.account}, …)`);
 check(

@@ -83,6 +83,7 @@ import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 import { formatDateTime } from "@/lib/format-number";
 import { matchesSearch } from "@/lib/text/search-match";
 import { forgetExampleParam } from "@/lib/overview/first-screen-examples";
+import { takeSendOnArrival } from "@/lib/nav/send-on-arrival";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
@@ -756,7 +757,9 @@ export function WebsiteBuilderWorkspace({
     setShowForm(true);
     setName(brief.slice(0, MAX_NAME_LENGTH));
     setDescription(brief);
-    void submitGeneration(brief.slice(0, MAX_NAME_LENGTH), brief, [], false);
+    // Submitted only when this tab's own app asked for it; an address
+    // alone fills the form and waits (lib/nav/send-on-arrival.ts, A8).
+    if (takeSendOnArrival("brief", initialBrief)) void submitGeneration(brief.slice(0, MAX_NAME_LENGTH), brief, [], false);
     forgetExampleParam("brief");
     // submitGeneration is redeclared every render; depending on it would
     // re-run this effect constantly and the ref would swallow it

@@ -58,9 +58,9 @@ const MUTANTS = [
   {
     name: "the route stores what streamed, so a reload loses the numbers",
     file: ROUTE,
-    from: "          content: sourced.text,\n        };",
+    from: "          content: finalText,\n        };",
     to: "          content: assistantText,\n        };",
-    expect: "STORES the numbered text",
+    expect: "STORES the numbered (and possibly charted) text",
   },
   {
     name: "the client keeps the streamed text and never shows the numbers live",

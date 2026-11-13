@@ -12,6 +12,9 @@
  *        been there and whose comment is where the rule is written down
  *   5.   the sweeper a declared entry names stops removing anything, so
  *        the excuse "a cron collects it" stops being true
+ *   6.   the cron stops running that sweeper, which is the same excuse
+ *        failing one step later (the sweeper is a library since
+ *        2026-11-05, so storage-cleanup.test.mjs can execute it)
  *
  * Run: node scripts/tests/upload-reversibility.mutation.mjs
  */
@@ -22,7 +25,8 @@ const FILES_UI = "src/components/files/files-workspace.tsx";
 const CREATE_UI = "src/components/create/create-chat.tsx";
 const DECK_UI = "src/components/presentations/presentations-workspace.tsx";
 const INGEST = "src/lib/files/ingest.ts";
-const SWEEPER = "src/app/api/cron/website-storage-cleanup/route.ts";
+const SWEEPER = "src/lib/websites/storage-cleanup.ts";
+const SWEEP_CRON = "src/app/api/cron/website-storage-cleanup/route.ts";
 
 const MUTANTS = [
   {
@@ -56,8 +60,15 @@ const MUTANTS = [
   {
     name: "the sweeper that excuses two uploaders stops removing anything",
     file: SWEEPER,
-    from: "          .remove(",
-    to: "          .list(",
+    from: "      const { error } = await bucket.remove(orphans.slice(i, i + REMOVE_BATCH));",
+    to: "      const { error } = await bucket.list(orphans.slice(i, i + REMOVE_BATCH));",
+    expect: "declared sweeper exists, removes",
+  },
+  {
+    name: "the cron stops running the sweeper, so nothing collects the orphans",
+    file: SWEEP_CRON,
+    from: 'import { runStorageCleanup } from "@/lib/websites/storage-cleanup";',
+    to: 'const runStorageCleanup = async (..._: unknown[]) => ({ ok: true as const });',
     expect: "declared sweeper exists, removes",
   },
 ];
@@ -65,6 +76,6 @@ const MUTANTS = [
 runMutations({
   name: "upload-reversibility",
   gate: GATE,
-  targets: [FILES_UI, CREATE_UI, DECK_UI, INGEST, SWEEPER],
+  targets: [FILES_UI, CREATE_UI, DECK_UI, INGEST, SWEEPER, SWEEP_CRON],
   mutants: MUTANTS,
 });

@@ -8,6 +8,7 @@ import { trySubmitAsBatch } from "@/lib/ai/batch/agent-batch";
 import { batchEnabled } from "@/lib/ai/batch/batch-policy";
 import { nextRunAt } from "@/lib/agents/cron-expression";
 import type { UserAgent } from "@/lib/agents/agent-config";
+import { suspendedIn, suspendedUserIds } from "@/lib/auth/suspended-accounts";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // @function-limit 300
@@ -94,6 +95,9 @@ export async function GET(request: Request) {
 
     const admin = createAdminClient();
     const nowIso = new Date().toISOString();
+    // A SUSPENDED ACCOUNT'S WORK DOES NOT RUN (2026-11-05 review, A1;
+    // lib/auth/suspended-accounts.ts). Excluded in the query, not after it.
+    const suspended = await suspendedUserIds(admin, "/api/cron/agent-runs");
 
     const { data: dueAgents, error: dueError } = await admin
       .from("user_agents")
@@ -101,6 +105,7 @@ export async function GET(request: Request) {
       .eq("status", "active")
       .not("next_run_at", "is", null)
       .lte("next_run_at", nowIso)
+      .not("user_id", "in", suspendedIn(suspended))
       .order("next_run_at", { ascending: true })
       .limit(MAX_AGENTS_PER_INVOCATION);
 

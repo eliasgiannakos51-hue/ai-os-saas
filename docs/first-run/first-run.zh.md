@@ -1,8 +1,8 @@
 # The first run — zh
 
-Everything a new person reads from the signup form to the first thing the product tells them about their own data: **618 strings**. The whole product is 4688, which is why this file exists.
+Everything a new person reads from the signup form to the first thing the product tells them about their own data: **625 strings**. The whole product is 5668, which is why this file exists.
 
-**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 376 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
+**Start with tier 1. It is 25 sentences and it is the whole ask** — if you only ever read that, the round was worth doing. Tier 2 is 381 labels to skim. Tier 3 is the rest, listed so nothing is hidden.
 
 **What to look for.** Not correctness alone — a sentence can be correct and still be wrong here. Does it sound like a person wrote it? Would you say it to a customer? Is a technical word translated that should have been left alone, or left in English when nobody would? Anything you would not say out loud is worth marking.
 
@@ -170,7 +170,7 @@ CSV 或制表符分隔，最大 {max}。我们会先读取并展示结果，然�
 
 描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。
 
-## Tier 2 — The labels — skim these (376)
+## Tier 2 — The labels — skim these (381)
 
 _On the same screens, shorter than a sentence. Buttons, headings, menu items. A wrong one is usually obvious; you are looking for the one that means something else in your language._
 
@@ -548,6 +548,12 @@ AI 编程
 
 已连接的集成
 
+**`pricing.rows.ionexaPayments`**
+
+> EN — Ionexa Payments
+
+Ionexa Payments
+
 **`pricing.rows.listRowsShown`**
 
 > EN — Rows shown in one list
@@ -807,6 +813,12 @@ Website Builder
 > EN — Password
 
 密码
+
+**`auth.login.rateLimited`**
+
+> EN — Too many attempts. Please try again later.
+
+尝试次数过多。请稍后再试。
 
 **`auth.login.resetSuccess`**
 
@@ -1532,6 +1544,12 @@ Website Builder
 
 数据统计
 
+**`sidebar.items.appBuilder`**
+
+> EN — Apps
+
+应用
+
 **`sidebar.items.apps`**
 
 > EN — App ideas
@@ -1970,6 +1988,12 @@ DevOps
 
 运营
 
+**`sidebar.items.payments`**
+
+> EN — Payments
+
+收款
+
 **`sidebar.items.personalFinance`**
 
 > EN — Personal Finance
@@ -2095,6 +2119,12 @@ DevOps
 > EN — Settings
 
 设置
+
+**`sidebar.items.skills`**
+
+> EN — Skills
+
+技能
 
 **`sidebar.items.systemHealth`**
 
@@ -2440,7 +2470,7 @@ Ionexa 聊天
 
 重试
 
-## Tier 3 — Further in — only if you have time (217)
+## Tier 3 — Further in — only if you have time (219)
 
 _Reachable from these screens but deeper in: shared components, error states, things that may never appear. Listed so nothing is hidden, not because it is the best use of an hour._
 
@@ -3272,6 +3302,12 @@ Safari 从不会主动提示，三步即可完成。
 
 这段录音里没有听到任何内容。
 
+**`voice.errors.ended`**
+
+> EN — The conversation has ended.
+
+对话已结束。
+
 **`voice.errors.failed`**
 
 > EN — Voice is unavailable right now. You can still type.
@@ -3307,6 +3343,12 @@ Safari 从不会主动提示，三步即可完成。
 > EN — Voice is not included on your plan.
 
 你的方案不包含语音功能。
+
+**`voice.errors.not_ready`**
+
+> EN — Live conversation is not set up here yet. You were not charged.
+
+这里尚未设置实时对话。未向你收费。
 
 **`voice.errors.out_of_minutes`**
 

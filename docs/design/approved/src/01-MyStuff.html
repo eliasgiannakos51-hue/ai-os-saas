@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style>@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-400-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-400-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-500-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-500-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-600-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-600-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-700-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-700-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+</style>
+<meta charset="utf-8">
+<title>Ionexa · My Stuff</title>
+
+<style>.chat{flex:2 1 410px !important;padding:22px 24px 20px !important}.chat ~ .work{flex:3 1 570px !important}.frow{flex-wrap:nowrap !important;gap:0 !important}.opt{padding:0 6px !important}.cost{min-width:0;overflow:hidden;text-overflow:ellipsis}</style>
+</head>
+<body>
+
+
+
+<style>
+body{margin:0;background:#070A12}
+*{box-sizing:border-box}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+button{font-family:inherit;cursor:pointer}
+a{color:#DCE2EE;text-decoration:none}
+a:hover{color:#F5F7FB}
+.app{display:flex;flex-wrap:wrap;width:100%;min-height:900px;background:#070A12;color:#DCE2EE;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5}
+.side{flex:0 0 232px;display:flex;flex-direction:column;gap:2px;padding:16px 10px 14px;background:#080B14;border-right:1px solid #161D2E}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 10px 26px;color:#F5F7FB;font-weight:600;font-size:15px;letter-spacing:.3em}
+.nav{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px}
+.nav.on{background:#0F1524;color:#F5F7FB}
+.who{margin-top:8px;padding:12px 12px 0;border-top:1px solid #161D2E;font-size:13px;color:#F5F7FB}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;height:900px}
+.top{display:flex;align-items:center;gap:6px;height:58px;padding:0 16px;border-bottom:1px solid #161D2E;flex:none}
+.search{flex:0 1 440px;margin:0 auto;height:38px;display:flex;align-items:center;gap:10px;padding:0 8px 0 14px;border:1px solid #222A3D;border-radius:19px;background:none;color:#8D96A8;font-size:14px}
+.kbd{margin-left:auto;font-size:11px;border:1px solid #222A3D;border-radius:7px;padding:1px 6px}
+.av{width:36px;height:36px;margin-left:6px;border-radius:18px;background:#1E2638;color:#F5F7FB;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex:none}
+.bar{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 16px;border-bottom:1px solid #161D2E;flex:none}
+.tn{color:#F5F7FB;font-weight:600;font-size:15px;margin:0 4px 0 6px}
+.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.g{fill:none;stroke:#F2A65A;stroke-width:1.6;flex:none}
+.ib{width:34px;height:34px;border:0;background:none;color:#8D96A8;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.btn{height:34px;padding:0 12px;border:1px solid #222A3D;background:none;color:#F5F7FB;border-radius:10px;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:none}
+.ghost{border-color:transparent;color:#DCE2EE}
+.pri{background:#F5F7FB;border-color:#F5F7FB;color:#070A12;font-weight:600}
+.opt{height:30px;padding:0 8px;border:0;background:none;color:#DCE2EE;border-radius:8px;font-size:12.5px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.opt .i{width:13px;height:13px;color:#8D96A8}
+.mut{color:#8D96A8}
+.sub{color:#8D96A8;font-size:12.5px}
+.lbl{color:#8D96A8;font-size:12px;font-weight:500}
+.sp{flex:1}
+.split{flex:1;display:flex;flex-wrap:wrap;min-height:0}
+.work{flex:3 1 600px;min-width:0;display:flex;flex-direction:column;background:#0A0E18;border-left:1px solid #161D2E}
+.tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border:1px solid #1E2638;border-radius:7px;font-size:12px;color:#DCE2EE;white-space:nowrap}
+.list{flex:3 1 560px;min-width:0;display:flex;flex-direction:column;gap:14px;padding:20px 28px}
+.sbox{display:flex;align-items:center;gap:10px;height:46px;padding:0 8px 0 14px;border:1px solid #222A3D;border-radius:14px;background:#0D1220;color:#8D96A8}
+.sin{flex:1;height:30px;border:0;outline:none;background:none;color:#F5F7FB;font:inherit;font-size:14px}
+.sin::placeholder{color:#8D96A8}
+.chips{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.chipb{height:30px;padding:0 12px;border:1px solid #222A3D;border-radius:15px;background:none;color:#DCE2EE;font-size:13px;display:inline-flex;align-items:center;gap:4px}
+.chipb.on{background:#0F1524;border-color:#3A4560;color:#F5F7FB}
+.tr{display:grid;grid-template-columns:minmax(0,1fr) 100px 118px 72px;gap:12px;align-items:center;height:46px;padding:0 12px;border-bottom:1px solid #161D2E;font-size:13.5px}
+.th{height:30px;color:#8D96A8;font-size:12px}
+.tr.on{background:#0F1524;border-radius:10px;border-bottom-color:transparent}
+.nm{display:flex;align-items:center;gap:10px;min-width:0;color:#F5F7FB}
+.nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ico{width:28px;height:28px;border-radius:8px;background:#121829;display:flex;align-items:center;justify-content:center;color:#8D96A8;flex:none}
+.ico .i{width:15px;height:15px}
+.cell{color:#8D96A8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kv{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;font-size:13px;align-items:start}
+@media (max-width:900px){.main{height:auto}.side{flex-basis:100%}}
+</style>
+
+<div class="app">
+<aside class="side">
+<div class="logo"><svg class="g" viewBox="0 0 40 40" width="24" height="24" aria-hidden="true"><circle cx="20" cy="20" r="11"></circle><ellipse cx="20" cy="20" rx="5" ry="11"></ellipse><path d="M9 20h22M10.6 14.5h18.8M10.6 25.5h18.8"></path><ellipse cx="20" cy="20" rx="18" ry="6.5" transform="rotate(-20 20 20)"></ellipse><circle cx="36.9" cy="13.8" r="1.7" fill="#F2A65A" stroke="none"></circle></svg>IONEXA</div>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Ionexa Chat</a>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"></path></svg>Coding</a>
+<a class="nav on" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg>All tools</a>
+<div style="flex:1"></div>
+<a class="nav" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"></path></svg>Settings</a>
+<div class="who">Maria Papadaki<div class="sub">Pro</div></div>
+</aside>
+<div class="main">
+<header class="top">
+<button class="search" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span>Search anything…</span><span class="kbd">⌘K</span></button>
+<button class="btn ghost" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3.5 3.5 3.5 14.5 0 18M12 3c-3.5 3.5-3.5 14.5 0 18"></path></svg>EN</button>
+<button class="ib" type="button" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg></button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"></path></svg>82</button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Make anything</button>
+<div class="av">M</div>
+</header>
+<div class="bar">
+<span class="tn">My Stuff</span>
+<div class="sp"></div>
+<span class="sub">2.1 GB of 10 GB used</span>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"></path></svg>Upload</button>
+</div>
+<div class="split">
+<section class="list">
+<div class="sbox">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<input class="sin" type="text" aria-label="Search or ask about your stuff" placeholder="Search or ask about anything you made or uploaded…">
+<button class="ib" type="button" aria-label="Voice"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"></path></svg></button>
+</div>
+<div class="chips">
+<button class="chipb on" type="button">All</button>
+<button class="chipb" type="button">Documents</button>
+<button class="chipb" type="button">Images</button>
+<button class="chipb" type="button">Data</button>
+<button class="chipb" type="button">More<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg></button>
+<div class="sp"></div>
+<button class="opt" type="button"><span class="mut">Project</span> Any<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<button class="opt" type="button"><span class="mut">Sort</span> Recent<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+</div>
+<div style="display:flex;flex-direction:column">
+<div class="tr th"><span>Name</span><span>Made with</span><span>Project</span><span>Date</span></div>
+<div class="tr on"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg></span><span>Προσφορά catering γάμου.docx</span></span><span class="cell">Document</span><span class="cell">Γάμος Ιουνίου</span><span class="cell">Today</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 8"></path></svg></span><span>Κουλούρι σε μαρμάρινο πάγκο.png</span></span><span class="cell">Image</span><span class="cell">Καλοκαίρι 2026</span><span class="cell">Yesterday</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 10h16M4 15h16M10 5v14"></path></svg></span><span>Πωλήσεις 2026.xlsx</span></span><span class="cell">Uploaded</span><span class="cell">—</span><span class="cell">Oct 22</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"></path></svg></span><span>Σύσκεψη με προμηθευτή αλεύρων</span></span><span class="cell">Meetings</span><span class="cell">—</span><span class="cell">Oct 22</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16.5V20"></path></svg></span><span>Φούρνος της Γειτονιάς (site)</span></span><span class="cell">Site</span><span class="cell">Καλοκαίρι 2026</span><span class="cell">Oct 20</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9.5l5 2.5-5 2.5z"></path></svg></span><span>Καλοκαίρι, Reels 30''.mp4</span></span><span class="cell">Video</span><span class="cell">Καλοκαίρι 2026</span><span class="cell">Oct 19</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg></span><span>Τιμοκατάλογος 2026 (EN, DE).pdf</span></span><span class="cell">Translate</span><span class="cell">—</span><span class="cell">Oct 18</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.5"></rect><path d="M11 18h2"></path></svg></span><span>Παραγγελίες τούρτας (app)</span></span><span class="cell">Apps</span><span class="cell">—</span><span class="cell">Oct 15</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h6l2 2h10V19H3z"></path></svg></span><span>Τιμολόγια Σεπτεμβρίου (14)</span></span><span class="cell">Google Drive</span><span class="cell">—</span><span class="cell">Oct 2</span></div>
+<div class="tr"><span class="nm"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 10h16M4 15h16M10 5v14"></path></svg></span><span>Έσοδα και έξοδα 2026</span></span><span class="cell">Data</span><span class="cell">—</span><span class="cell">Oct 1</span></div>
+</div>
+</section>
+<aside class="work" style="flex:2 1 400px">
+<div style="flex:1;display:flex;flex-direction:column;gap:18px;padding:24px">
+<div style="background:#0D1220;border:1px solid #161D2E;border-radius:14px;padding:22px;display:flex;justify-content:center">
+<div style="width:220px;height:280px;background:#FFFFFF;border-radius:6px;padding:22px 20px;display:flex;flex-direction:column;gap:8px;color:#1B2230">
+<div style="font-size:8px;color:#5A6273;letter-spacing:.08em">ΦΟΥΡΝΟΣ ΤΗΣ ΓΕΙΤΟΝΙΑΣ</div>
+<div style="font-size:14px;font-weight:700;line-height:1.2">Προσφορά catering</div>
+<div style="font-size:8px;color:#5A6273">Γάμος 14 Ιουνίου · 120 άτομα</div>
+<div style="height:1px;background:#E3E6EC;margin:4px 0"></div>
+<div style="font-size:8.5px;font-weight:600">1. Τι περιλαμβάνει</div>
+<div style="height:5px;background:#E3E6EC;border-radius:3px;width:92%"></div>
+<div style="height:5px;background:#E3E6EC;border-radius:3px;width:84%"></div>
+<div style="height:5px;background:#E3E6EC;border-radius:3px;width:88%"></div>
+<div style="font-size:8.5px;font-weight:600;margin-top:4px">2. Τιμή</div>
+<div style="height:34px;border:1px solid #E3E6EC;border-radius:4px"></div>
+<div style="font-size:8.5px;font-weight:600;margin-top:4px">3. Όροι</div>
+<div style="height:5px;background:#E3E6EC;border-radius:3px;width:76%"></div>
+<div style="height:5px;background:#E3E6EC;border-radius:3px;width:64%"></div>
+</div>
+</div>
+<div>
+<h2 style="font-size:17px;color:#F5F7FB;font-weight:600">Προσφορά catering γάμου.docx</h2>
+<div class="sub">Document · 3 pages · version 2 · Today 10:24</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="kv"><span class="mut">Made from</span><span style="display:flex;flex-wrap:wrap;gap:6px"><a class="tag" href="#">Chat: Προσφορά για γάμο</a><a class="tag" href="#">Τιμοκατάλογος 2026.pdf</a></span></div>
+<div class="kv"><span class="mut">Used in</span><span style="display:flex;flex-wrap:wrap;gap:6px"><a class="tag" href="#">Project: Γάμος Ιουνίου</a></span></div>
+<div class="kv"><span class="mut">Shared</span><span>Only you</span></div>
+</div>
+<div class="sp"></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button class="btn pri" type="button">Open</button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h6l2 2h10V19H3z"></path></svg>Add to Project</button>
+<button class="btn" type="button"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"></path></svg>Send to…</button>
+<button class="ib" type="button" aria-label="More"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"></path></svg></button>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+
+
+</body>
+</html>

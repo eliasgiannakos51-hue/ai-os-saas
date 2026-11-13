@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<style>@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-400-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:400;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-400-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-500-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:500;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-500-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-600-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:600;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-600-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-latin-700-normal.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2199,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Inter;font-style:normal;font-weight:700;src:url('https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/files/inter-greek-700-normal.woff2') format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+</style>
+<meta charset="utf-8">
+<title>Ionexa · My Stuff · phone</title>
+<style>
+body{margin:0;background:#070A12}
+*{box-sizing:border-box}
+button{font-family:inherit;cursor:pointer}
+a{color:#DCE2EE;text-decoration:none}
+.ph{width:390px;height:844px;display:flex;flex-direction:column;background:#070A12;color:#DCE2EE;font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;overflow:hidden}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mt{display:flex;align-items:center;gap:4px;height:52px;padding:0 6px;border-bottom:1px solid #161D2E;flex:none}
+.mbn{width:44px;height:44px;border:0;background:none;color:#DCE2EE;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.sbox{margin:12px 12px 0;display:flex;align-items:center;gap:10px;height:46px;padding:0 6px 0 14px;border:1px solid #222A3D;border-radius:14px;background:#0D1220;color:#8D96A8;flex:none}
+.sin{flex:1;min-width:0;height:30px;border:0;outline:none;background:none;color:#F5F7FB;font:inherit;font-size:15px}
+.sin::placeholder{color:#8D96A8}
+.chips{display:flex;gap:6px;padding:12px 12px 4px;overflow:hidden;flex:none}
+.chipb{height:34px;padding:0 14px;border:1px solid #222A3D;border-radius:17px;background:none;color:#DCE2EE;font-size:13px;white-space:nowrap;flex:none}
+.chipb.on{background:#0F1524;border-color:#3A4560;color:#F5F7FB}
+.lst{display:flex;flex-direction:column;padding:4px 8px 0;overflow:hidden;flex:1;min-height:0}
+.r{display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 8px;border-bottom:1px solid #161D2E}
+.ico{width:34px;height:34px;border-radius:9px;background:#121829;display:flex;align-items:center;justify-content:center;color:#8D96A8;flex:none}
+.ico .i{width:16px;height:16px}
+.nm{color:#F5F7FB;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{color:#8D96A8;font-size:12px}
+.bn{display:flex;height:64px;border-top:1px solid #161D2E;background:#080B14;flex:none}
+.bn a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:#8D96A8}
+.bn a.on{color:#F5F7FB}
+</style>
+</head>
+<body>
+<div class="ph">
+<header class="mt">
+<button class="mbn" type="button" aria-label="Menu"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+<span style="flex:1;text-align:center;color:#F5F7FB;font-weight:600;font-size:15px">My Stuff</span>
+<button class="mbn" type="button" aria-label="Upload"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"></path></svg></button>
+</header>
+<div class="sbox"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input class="sin" type="text" aria-label="Search or ask" placeholder="Search or ask about your stuff…"><button class="mbn" type="button" aria-label="Voice" style="color:#8D96A8"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"></path></svg></button></div>
+<div class="chips"><button class="chipb on" type="button">All</button><button class="chipb" type="button">Documents</button><button class="chipb" type="button">Images</button><button class="chipb" type="button">Data</button><button class="chipb" type="button">More</button></div>
+<div class="lst">
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Προσφορά catering γάμου.docx</div><div class="sub">Document · Γάμος Ιουνίου · Today</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 8"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Κουλούρι σε μαρμάρινο πάγκο.png</div><div class="sub">Image · Καλοκαίρι 2026 · Yesterday</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 10h16M4 15h16M10 5v14"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Πωλήσεις 2026.xlsx</div><div class="sub">Uploaded · Oct 22</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Σύσκεψη με προμηθευτή αλεύρων</div><div class="sub">Meetings · Oct 22</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="2"></rect><path d="M9 20h6M12 16.5V20"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Φούρνος της Γειτονιάς (site)</div><div class="sub">Site · Καλοκαίρι 2026 · Oct 20</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M10 9.5l5 2.5-5 2.5z"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Καλοκαίρι, Reels 30''.mp4</div><div class="sub">Video · Καλοκαίρι 2026 · Oct 19</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Τιμοκατάλογος 2026 (EN, DE).pdf</div><div class="sub">Translate · Oct 18</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.5"></rect><path d="M11 18h2"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Παραγγελίες τούρτας (app)</div><div class="sub">Apps · Oct 15</div></span></a>
+<a class="r" href="#"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5h6l2 2h10V19H3z"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Τιμολόγια Σεπτεμβρίου (14)</div><div class="sub">Google Drive · Oct 2</div></span></a>
+<a class="r" href="#" style="border-bottom:0"><span class="ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 10h16M4 15h16M10 5v14"></path></svg></span><span style="min-width:0;flex:1"><div class="nm">Έσοδα και έξοδα 2026</div><div class="sub">Data · Oct 1</div></span></a>
+</div>
+<nav class="bn" aria-label="Main">
+<a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg>Home</a>
+<a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Chat</a>
+<a class="on" href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect></svg>Tools</a>
+<a href="#"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>You</a>
+</nav>
+</div>
+</body>
+</html>

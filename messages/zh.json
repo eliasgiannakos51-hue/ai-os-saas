@@ -60,6 +60,13 @@
       "stillOffline": "仍然没有连接。",
       "lastResortBody": "Ionexa 需要联网才能加载新数据。你已经打开过的页面仍可从本机缓存中查看，正在处理的内容也安全地保存在服务器上。"
     },
+    "suspended": {
+      "title": "账户已暂停",
+      "message": "您的账户因违反使用条款而被暂停。",
+      "reason": "原因",
+      "contact": "如果您认为这是一个错误，请联系客服。",
+      "signOut": "退出登录"
+    },
     "creditsUnlimited": "无限制",
     "examplesLabel": "试试：",
     "newMessagesBelow": "下方有新消息",
@@ -125,6 +132,7 @@
       "apps": "应用点子",
       "images": "图片点子",
       "imageTool": "图片",
+      "appBuilder": "应用",
       "videos": "视频点子",
       "coding": "编程",
       "dataAnalysis": "看看数字怎么说",
@@ -227,7 +235,9 @@
       "personalJournal": "日志",
       "personalLifeOs": "生活系统",
       "activity": "动态",
-      "games": "游戏"
+      "games": "游戏",
+      "skills": "技能",
+      "payments": "收款"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",
@@ -292,7 +302,9 @@
       "aiMemory": "对话记住了你的哪些事，以及如何删除。",
       "meetings": "把录音变成文字记录、摘要，以及由你挑选的行动。",
       "activity": "下一步、变化、进度和你的数据",
-      "games": "描述一个游戏，用文字修改它的计划，然后在这里玩——与你的账户隔离。"
+      "games": "描述一个游戏，用文字修改它的计划，然后在这里玩——与你的账户隔离。",
+      "skills": "你教给 Ionexa 一次的流程，让它每次都遵循相同的步骤。目前这里只显示它们。",
+      "payments": "接受客户付款。连接、创建产品、收款。"
     },
     "closeMenu": "关闭菜单",
     "rail": {
@@ -397,7 +409,8 @@
       "teamMembers": "团队成员",
       "recordSearch": "跨模块记录搜索",
       "meetings": "会议 → 行动",
-      "games": "游戏"
+      "games": "游戏",
+      "ionexaPayments": "Ionexa Payments"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -606,7 +619,8 @@
       "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。",
       "oauthFailed": "该登录未完成。请重试，或在下方使用邮箱和密码登录。",
       "sharedSignInFirst": "登录后即可保存你分享的内容。",
-      "emailNotConfirmed": "请先确认你的邮箱。我们刚刚向你发送了新链接。"
+      "emailNotConfirmed": "请先确认你的邮箱。我们刚刚向你发送了新链接。",
+      "rateLimited": "尝试次数过多。请稍后再试。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -701,6 +715,18 @@
       "loading": "正在加载工作区…",
       "syncing": "正在同步数据…",
       "ready": "准备就绪。"
+    },
+    "cancelDeletion": {
+      "title": "取消账户删除",
+      "missingToken": "此链接缺少取消令牌。请完全按照邮件中发送的链接使用。",
+      "body": "你的账户已安排删除。点击下方即可取消，保留你的账户。",
+      "cancelling": "取消中…",
+      "cancelButton": "保留我的账户",
+      "failed": "我们无法取消这次删除。请重新点击链接，或联系客服。",
+      "successTitle": "删除已取消",
+      "successBody": "你的账户是安全的。原先安排的删除已经取消。",
+      "backToDashboard": "返回仪表板",
+      "home": "前往首页"
     }
   },
   "settings": {
@@ -737,6 +763,16 @@
       "switchedOff": "记忆已关闭，因此不会从您的对话中保存任何内容。",
       "nothingYet": "尚未保存任何内容。记忆已开启并正常工作 — 当对话中出现您的姓名、工作或偏好等长期有用的信息时就会记住。",
       "seeAll": "看看它记得什么"
+    },
+    "euOnly": {
+      "title": "仅限欧洲",
+      "toggleLabel": "仅由欧盟提供此账户的 AI 调用服务",
+      "toggleDescription": "开启后，此账户的每次 AI 调用都会被拒绝，而不会由欧盟以外的提供商来响应。",
+      "turnedOn": "✓ 已开启“仅限欧洲”",
+      "turnedOff": "✓ 已关闭“仅限欧洲”",
+      "couldNotUpdate": "✗ 无法更新此设置",
+      "effectOn": "此账户的 AI 调用仅由 Mistral AI（欧盟）提供服务。该提供商无法处理的调用将被拒绝，而不会转由其他地方响应。",
+      "effectOff": "此账户的 AI 调用可以由任何已配置的提供商提供服务，无论其所在地。"
     },
     "loginActivity": {
       "title": "登录活动",
@@ -811,7 +847,13 @@
       "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。",
       "emailDoesNotMatch": "电子邮件地址不匹配。",
       "couldNotStartDeletion": "✗ 无法开始删除账户",
-      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。"
+      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。",
+      "pendingTitle": "已安排删除",
+      "pendingDescription": "你的账户已安排在 {date} 永久删除。在那之前你可以随时取消。",
+      "cancelDeletion": "取消删除",
+      "cancelling": "取消中...",
+      "cancelledOk": "✓ 已取消删除——你的账户是安全的",
+      "cancelFailed": "无法取消——请重试，或使用我们发送给你的邮件中的链接。"
     },
     "emailNotifications": {
       "title": "邮件通知",
@@ -896,7 +938,8 @@
       "noSubscriptionToCancel": "没有可取消的订阅——所有者权限和 Beta 期会自行结束。",
       "checkout": {
         "success": "已收到付款。Stripe 确认后，你的方案会在这里更新，通常只需几秒。",
-        "cancelled": "结账已取消，未产生任何费用。"
+        "cancelled": "结账已取消，未产生任何费用。",
+        "scheduled": "方案变更已安排。在你已付费的周期结束前，你仍使用当前方案，之后新方案开始生效。今天不会产生任何费用。"
       },
       "buyCreditsDescription": "这个月点数不够？可以单次充值，无需更改订阅。",
       "creditsAmount": "{count, plural, other {# 点数}}"
@@ -1044,7 +1087,7 @@
         "rate": "每点数 €{price}，按今日价格锁定。",
         "cap": "同一自然月内绝不超过 €{cap}。",
         "credits": "这最多可换 {credits} 积分。",
-        "invoice": "在下一张账单上单列一行，与套餐分开计费。"
+        "invoice": "每月结束后单独开具账单，与套餐分开，从支付套餐的银行卡扣款。"
       },
       "agree": "开启超额用量",
       "saved": "已保存。你随时可以关闭。",
@@ -1054,7 +1097,7 @@
       "capReached": "已达上限。在你调高之前不会再产生费用。",
       "turnOff": "关闭超额用量",
       "turnOffNote": "关闭后不再产生新费用。本月已使用的部分仍会计入账单。",
-      "needsSubscription": "按量付费仅适用于付费方案：它会计入你的下一张账单。请先选择一个方案。"
+      "needsSubscription": "按量付费仅适用于付费方案：费用从方案所用的银行卡扣取，方案结束时随之停止。请先选择一个方案。"
     },
     "addons": {
       "title": "附加包",
@@ -1105,6 +1148,11 @@
       "saveFailed": "无法保存名字，请稍后再试。",
       "save": "保存",
       "saving": "正在保存…"
+    },
+    "skills": {
+      "title": "技能",
+      "description": "只需教 Ionexa 一次某个流程,之后每次需要该流程时它都会遵循相同的步骤。",
+      "open": "打开技能"
     }
   },
   "dashboard": {
@@ -1347,7 +1395,8 @@
             "cv": "一份市场营销职位的简历",
             "letter": "一封申请延期的信"
           }
-        }
+        },
+        "words": "{count, plural, other {# 个词}}"
       }
     },
     "chat": {
@@ -1443,7 +1492,7 @@
         "fileLimit": "“{name}”：将超出你的套餐在“文件”中的上限。请在“文件”中删除一个文件，或升级套餐。",
         "uploadLimit": "过去一小时内上传的文件过多。请稍后再试。",
         "offline": "没有网络连接。请检查网络后重试。",
-        "type": "“{name}”：仅支持 PDF、JPG 或 PNG。",
+        "type": "“{name}”：仅支持 PDF、JPG、PNG、CSV 或 XLSX。",
         "pdfTooLarge": "“{name}”：PDF 超过 20 MB。",
         "imageTooLarge": "“{name}”：图片超过 5 MB。",
         "tooManyPdfs": "每条消息最多 {max} 个 PDF。",
@@ -1455,7 +1504,11 @@
         "refused": "附件未被接受。请重新附加。",
         "openInFiles": "在文件中打开",
         "memoryUsed": "来自记忆（{count}）",
-        "manageMemory": "Ionexa 记住的内容"
+        "manageMemory": "Ionexa 记住的内容",
+        "dataTooLarge": "“{name}”：文件超过 8 MB。",
+        "tooManyData": "每条消息最多 {max} 个数据文件。",
+        "readyData": "就绪 — 京已添加到 Analyze",
+        "openInAnalyze": "在 Analyze 中打开"
       },
       "deleteFailed": "该对话未被删除，它还在。",
       "undo": "撤销",
@@ -1464,7 +1517,10 @@
       "moved": "已移动到 {project}。",
       "moveFailed": "没有移动成功，请重试。",
       "projectFull": "该项目已有 {limit} 项，这是它能存放的上限。",
-      "selectOne": "选择“{title}”"
+      "selectOne": "选择“{title}”",
+      "chart": {
+        "cardTitle": "计算方式"
+      }
     },
     "create": {
       "title": "创建任何内容",
@@ -1735,6 +1791,9 @@
       "tabPreview": "预览",
       "tabEdit": "编辑",
       "tabHistory": "历史版本",
+      "viewportGroup": "预览宽度",
+      "viewportDesktop": "桌面视图",
+      "viewportMobile": "移动视图",
       "statusLabel": "状态",
       "statusCompleted": "已就绪",
       "statusFlagged": "已标记",
@@ -1838,7 +1897,8 @@
           "colours": "来自记忆：颜色 {colours}。",
           "both": "来自记忆：名称“{name}”和颜色 {colours}。要更改，请在聊天中告诉我。"
         },
-        "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。"
+        "pagesShort": "你要求 {asked} 个页面，实际生成了 {made} 个。告诉我缺少哪一个，我来添加。",
+        "placeholdered": "有 {count} 项不在你描述中的信息（电话、价格、营业时间或地址）已替换为待填写的占位符。"
       },
       "regeneratePaid": "重新生成 · 约 {count} 积分",
       "regenerateNoCredits": "积分不足,无法再次重新生成:大约需要 {needed},你有 {available}。未开始任何操作。",
@@ -2004,7 +2064,6 @@
       "cancel": "取消",
       "agentsUsed": "{used} / {cap} 个智能体",
       "agentsTotal": "共 {total} 个（含已暂停）",
-      "requestLabel": "你希望这个智能体为你做什么？",
       "requestPlaceholder": "例如：每天早上把英伟达的最新消息发给我",
       "deliveryNote": "结果将发送到 {email}，即你账户的邮箱地址。",
       "designButton": "设计你的智能体",
@@ -2033,8 +2092,6 @@
       "menuRunNow": "立即运行",
       "menuPause": "暂停",
       "menuResume": "恢复",
-      "menuEdit": "编辑",
-      "menuDelete": "删除",
       "pauseSuccess": "智能体已暂停。",
       "resumeSuccess": "智能体已恢复。",
       "deleteSuccess": "智能体已删除。",
@@ -2083,9 +2140,8 @@
       },
       "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
       "empty": {
-        "title": "不用你动手也会发生的工作",
-        "why": "用一句话描述一件事，之后它就按时自己跑，直接把结果交给你，而不是提醒你去做。",
-        "example": "每周一早上，汇总上周的销售情况"
+        "title": "新助手要做什么？",
+        "why": "用一句话描述一件事，之后它就按时自己跑，直接把结果交给你，而不是提醒你去做。"
       },
       "delivery": {
         "label": "结果发送到哪里",
@@ -2226,7 +2282,61 @@
         "withdrawFailed": "无法撤回，它仍处于共享状态。"
       },
       "failingWarning": "最近连续 {failures} 次运行失败。达到 {max} 次后，该智能体会自动关闭。",
-      "disabledReason": "最近一次失败：{reason}"
+      "disabledReason": "最近一次失败：{reason}",
+      "shell": {
+        "approvalsTitle": "批准规则",
+        "atCapacity": "已达到启用上限",
+        "capNoHardStop": "这是花费，不是上限：目前还没有能让助手停下的积分上限。账户积分用完时它会停，或者连续失败 {max} 次后自己停下。",
+        "capPerMonth": "每月，大约",
+        "capPerMonthValue": "{credits} 积分 · {runs} 次",
+        "capPerRun": "每次运行",
+        "capsTitle": "积分花费",
+        "descriptionChanged": "说明已更改。",
+        "fieldTarget": "输入框改动的是：",
+        "inboxApprovals": "等待批准的",
+        "inboxApprovalsNone": "没有：这个助手不会做任何无法撤回的事——它查找、撰写，然后把结果发给你。",
+        "inboxReceived": "它收到的",
+        "inboxReceivedNone": "没有：这个助手还没有自己的邮箱地址，所以收不到任何消息。",
+        "noRunYet": "还没有任何一步开始。它一运行，状态就会逐步实时填上。",
+        "ownEmail": "它自己的地址",
+        "ownEmailNone": "它没有。结果从 Ionexa 的地址发出，送往你在下面选的渠道。",
+        "placeholderDescription": "写下这个助手新的说明…",
+        "placeholderTask": "写下这个助手新的任务…",
+        "renameHint": "在列表里名字旁边的 ⋯ 处重命名。",
+        "scheduleTitle": "时间安排",
+        "stateDone": "已完成",
+        "stateWaiting": "等待中",
+        "stateWorking": "进行中",
+        "tabInbox": "收件箱",
+        "tabPlan": "步骤",
+        "tabsLabel": "你正在查看这个助手的哪一部分",
+        "taskChanged": "任务已更改。",
+        "toolsNone": "目前还没有按助手单独设置的工具白名单：每个助手都会查找（如果你允许）、撰写，并发送到你设定的那一个渠道。",
+        "toolsTitle": "工具",
+        "approvalsHint": "勾选后，代理在行动前会暂停并请求确认。取消勾选可让其自行行动。",
+        "creditCapNone": "无限制",
+        "creditCapHint": "代理消耗此数量的积分后将停止。留空表示无限制。",
+        "spendingTiersTitle": "支出等级",
+        "autoBelow": "自动（低于，积分）",
+        "approveAbove": "审批（高于，积分）",
+        "spendingTiersHint": "在这些值之间，代理会消费并通知您。低于：自动。高于：等待审批。",
+        "toolsLoading": "加载工具中…",
+        "toolsHint": "选择此代理可以使用的工具。"
+      },
+      "approvals": {
+        "title": "待审批",
+        "approve": "批准",
+        "deny": "拒绝",
+        "empty": "无待审批项",
+        "send": "发送",
+        "publish": "发布",
+        "spend": "支出",
+        "expired": "已过期",
+        "creditCap": "积分上限",
+        "creditCapHint": "此代理在所有运行中可使用的最大积分",
+        "noCap": "无限制",
+        "capReached": "已达积分上限"
+      }
     },
     "publishing": {
       "title": "已上线网站",
@@ -2246,6 +2356,7 @@
       "paidOnly": "发布功能仅在付费套餐中提供。",
       "tooManyToday": "你今天发布的修改太多了。请明天再试。",
       "securityBlocked": "安全检查发现了不应上线的内容，因此网站未发布。",
+      "securityBlockedPassword": "要求输入密码的页面无法发布：它看起来会像本应用的登录页面。请删除密码字段后重试。",
       "unpublish": "下线",
       "unpublishSuccess": "你的网站已不再公开。",
       "unpublishError": "无法将网站下线，请重试。",
@@ -2424,6 +2535,71 @@
           "empty": "请先写下你想要的。",
           "default": "出了点问题，请重试。"
         }
+      },
+      "telegram": {
+        "title": "Telegram 里的 Ionexa",
+        "intro": "连接你自己的 Telegram 聊天，Ionexa 也能从那里工作：你写，它做。仅限私聊——绝不用于群组。",
+        "notReady": "这套安装还没有开启 Telegram，所以这里没有可连接的东西。你的账户没有缺少任何东西。",
+        "offerBody": "在 Telegram 里给 Ionexa 发消息，它就开始做——网站、文档、图片、帖子。我们会给你一个十分钟有效的一次性代码。",
+        "connect": "连接",
+        "consentTitle": "把 Telegram 连接到你的账户",
+        "consentBody": "已连接的聊天可以请 Ionexa 干活，并花掉你的积分。连接前请把两个清单都看一遍，想断开随时都可以。",
+        "consentApprove": "同意，给我代码",
+        "consentCancel": "现在不要",
+        "connecting": "正在连接…",
+        "canTitle": "Ionexa 可以",
+        "cannotTitle": "Ionexa 不可以",
+        "can": {
+          "chat": "在 Telegram 里像在 Chat 里一样回复你，用同一份记忆，用你的语言。",
+          "make": "做你要的东西——网站、文档、图片、帖子——先把价格给你看，等你按下去再做。",
+          "status": "告诉你一项工作进行到哪里，也能把它停下来。",
+          "files": "把你发来的照片或文件收下，放进「我的东西」。"
+        },
+        "cannot": {
+          "approve": "在你对价格按下「批准」之前花掉任何一点积分。",
+          "publish": "发布任何东西——网站、应用、帖子——都要为那一件事单独获得批准。",
+          "secrets": "给你发密码、密钥或验证码，也不会在消息里接收你发来的这些。",
+          "groups": "在群聊里工作。只在你连接的那一个私聊里。"
+        },
+        "activityTitle": "最近活动",
+        "activityEmpty": "暂时没有。等 Telegram 开始送来工作，这里就会写下来了什么、什么时候来的。",
+        "activityNotYet": "暂时没有——你还没有连接聊天。",
+        "activityLast": "最后执行的消息：{time}",
+        "waitingHeading": "打开 Telegram，把这个代码发过去",
+        "waitingHint": "按一下按钮，Telegram 会替你把代码发出去。如果什么都没打开，就在和机器人的聊天里手动写 /start 加上代码。",
+        "expiresIn": "{time} 后失效",
+        "expiredNow": "这个代码已失效。请再要一个。",
+        "openInTelegram": "在 Telegram 中打开",
+        "cancel": "取消",
+        "noWebhookYet": "机器人还不能回应代码——那是下一块。在做好之前，你把这个发出去，Telegram 里不会有任何反应。",
+        "presentedHeading": "这是你吗？",
+        "presentedBody": "{who} 把你的代码发给了机器人。在你确认是你之前，什么都不会连接。",
+        "presentedWarning": "如果不是你做的，请按「这不是我」。否则，拿着你代码的人可以请 Ionexa 干活，并花掉你的积分。",
+        "presentedConfirm": "是的，连接",
+        "presentedReject": "这不是我",
+        "unknownAsker": "一个没有名字的 Telegram 账户",
+        "connected": "Telegram 已连接。",
+        "connectedTo": "已连接到 {who}",
+        "connectedSince": "连接于 {time}",
+        "disconnect": "断开连接",
+        "disconnecting": "正在断开…",
+        "disconnected": "Telegram 已断开连接。",
+        "confirmDisconnect": "要断开 Telegram 吗？这个聊天将不能再向 Ionexa 要求任何事。你的通知不会改变。",
+        "notTheSameAsNotifications": "这和 Telegram 通知不是一回事。通知只是让 Ionexa 给你发消息；这个是让聊天可以请 Ionexa 干活。关掉一个不会关掉另一个。",
+        "errors": {
+          "not_signed_in": "请重新登录后再试一次。",
+          "not_enabled": "你的账户还没有开放 Telegram。",
+          "bad_action": "这一下出了点问题。请再试一次。",
+          "bot_unavailable": "Telegram 刚才没有回应，所以没有生成代码。请稍后再试。",
+          "encryption_unavailable": "缺少安全保存聊天所需的密钥，所以什么都没有保存。没有丢失任何东西。",
+          "already_linked": "已经有一个聊天连接着。请先断开它。",
+          "chat_in_use": "那个 Telegram 聊天已经连接到另一个账户。请先在那里断开它。",
+          "nothing_to_confirm": "没有等待确认的东西。代码可能已经用过或已取消。",
+          "expired": "那个代码已失效。请再要一个。",
+          "rateLimited": "尝试次数太多。请等一个小时后再试。",
+          "not_started": "代码没有生成。请再试一次。",
+          "failed": "没有成功。请再试一次。"
+        }
       }
     },
     "files": {
@@ -2518,6 +2694,12 @@
       "sharedStored": "已从共享添加 {count} 个文件。",
       "sharedFailed": "有 {count} 个文件无法添加。",
       "sharedReason": "原因：{reason}",
+      "sharedReasons": {
+        "size": "文件为空或过大",
+        "type": "不支持这种文件类型",
+        "limit": "已达到你的套餐的文件数量或存储空间上限",
+        "stored": "无法保存，请重试"
+      },
       "sharedRateLimit": "过去一小时上传次数过多，请稍后再共享。",
       "sharedDropped": "仅接收了前 {max} 个文件。",
       "openedFromDevice": "已从你的设备打开 {count} 个文件。",
@@ -2987,8 +3169,13 @@
       "description": "上传一段录音。你会得到文字记录、摘要，以及一份由你挑选的行动清单。",
       "audioNoticeTitle": "录音不会保存",
       "audioNotice": "录音在转写完成的那一刻就会删除。请确保说话的人知道这一点。",
+      "recordConfirmAllow": "继续",
+      "recordConfirmCancel": "取消",
       "pick": "选择录音",
       "dropHint": "M4A、MP3、WAV、WebM 或 OGG",
+      "record": "录音",
+      "stopRecording": "停止录音",
+      "recording": "正在录音…",
       "limitHint": "最多 {mb} MB，约 {minutes} 分钟的讲话",
       "tooLarge": "该文件为 {actual} MB。上限是 {allowed} MB — 请导出为语音录音，或分成两段。",
       "tooLong": "该录音为 {actual} 分钟。上限是 {allowed} 分钟 — 请分成两段。",
@@ -3001,6 +3188,7 @@
       "start": "开始转写",
       "transcribing": "正在转写…",
       "analysing": "正在阅读文字记录…",
+      "playerUnavailable": "没有可播放的音频——该会议转录完成后音频已立即删除。",
       "transcriptTitle": "文字记录",
       "summaryTitle": "摘要",
       "analyse": "生成摘要并找出行动",
@@ -3033,7 +3221,11 @@
         "unsupported_type": "不支持该音频格式。",
         "rate_limited": "已达到请求上限。上限会随时间自动恢复——请稍后再试。",
         "empty": "该录音是空的。",
-        "failed": "出了点问题。未收取任何费用。"
+        "failed": "出了点问题。未收取任何费用。",
+        "record_denied": "麦克风未被允许。请检查浏览器权限后重试。",
+        "record_unsupported": "此浏览器无法录音。请改为上传文件。",
+        "record_empty": "没有听到任何声音。请靠近麦克风后重试。",
+        "record_failed": "录音失败。请重试。"
       },
       "goal": {
         "title": "{count, plural, other {把这 # 项行动变成一个目标的步骤}}",
@@ -3048,6 +3240,22 @@
         "projectLimit": "你的套餐中的项目都已用完。请选择其中一个，或先归档一个。",
         "projectName": "请给新项目起一个至少两个字的名称。",
         "projectFull": "该项目已满。请选择另一个。"
+      },
+      "remind": {
+        "button": "提醒我",
+        "label": "在这一天",
+        "save": "设置提醒",
+        "cancel": "取消提醒",
+        "pending": "将在 {date} 提醒你",
+        "bad": "请选择今天之后、一年以内的日期。",
+        "notifyTitle": "提醒：{what}",
+        "notifyBody": "来自一次会议 — {who}"
+      },
+      "ask": {
+        "title": "询问这次会议",
+        "placeholder": "就这次会议提出问题…",
+        "submit": "提问",
+        "asking": "正在提问…"
       }
     },
     "voicePage": {
@@ -3140,6 +3348,7 @@
         "sales": "销售",
         "trading": "交易",
         "image": "图片",
+        "threeD": "3D",
         "document": "文档",
         "games": "游戏",
         "connect": "连接",
@@ -3153,7 +3362,10 @@
         "iowork": "iowork",
         "translate": "翻译",
         "apps": "应用",
-        "audio": "音频"
+        "audio": "音频",
+        "sheets": "表格",
+        "skills": "技能",
+        "discord": "Discord"
       },
       "lines": {
         "site": "根据描述生成网站",
@@ -3173,6 +3385,7 @@
         "sales": "联系人、跟进和下一步。",
         "trading": "你的交易记录。",
         "image": "根据描述生成图片",
+        "threeD": "由几张照片生成3D模型",
         "document": "文档与表格",
         "games": "根据描述生成游戏。",
         "connect": "把你的其他应用接进来",
@@ -3236,7 +3449,9 @@
         "versions": "所有版本",
         "versionsHint": "点按一个版本即可查看。你接下来写的内容仍会修改最新版本。",
         "liveVersions": "已发布的版本",
-        "undid": "已撤销：{change}"
+        "undid": "已撤销：{change}",
+        "version": "版本 {n} · {live, select, yes {已发布} other {未发布}}",
+        "publishState": "{live, select, yes {已发布} other {未发布}}"
       },
       "box": {
         "only": "只改：{name}",
@@ -3252,6 +3467,20 @@
         "partChanged": "只改了“{name}”，网站其余部分保持不变。",
         "lost": "方框没有从修改中返回，所以什么都没改。请再试一次。",
         "boxes": "方框"
+      },
+      "motion": {
+        "button": "动效",
+        "previewSample": "Aa",
+        "styles": {
+          "none": "无",
+          "softFade": "柔和淡入淡出",
+          "slideUp": "向上滑动",
+          "parallax": "视差",
+          "glass": "玻璃",
+          "holographic": "全息",
+          "typewriter": "打字机",
+          "hoverLift": "悬停上浮"
+        }
       },
       "pages": {
         "auto": "页面：按需要",
@@ -3269,6 +3498,26 @@
         "rename": "重命名",
         "undo": "撤销",
         "deleteConfirm": "删除「{title}」吗?"
+      },
+      "mode": {
+        "label": "级别",
+        "simple": "简易",
+        "pro": "Pro"
+      },
+      "editor": {
+        "chat": "对话",
+        "result": "结果",
+        "view": "显示内容",
+        "conversation": "完整对话",
+        "closeChat": "关闭对话",
+        "settings": "设置",
+        "credits": "积分",
+        "selected": "已选择：{name}",
+        "isOpen": "已打开",
+        "more": "更多",
+        "selectedTag": "{name} · 已选中",
+        "changeThis": "修改这里…",
+        "changeWork": "说说要改什么…"
       }
     },
     "library": {
@@ -3306,6 +3555,11 @@
           "report": "报告",
           "customers": "客户"
         }
+      },
+      "favoritesOnly": "仅收藏",
+      "noFavorites": {
+        "title": "还没有收藏任何内容",
+        "why": "在「网站」「幻灯片」或「文档」中给某项加星标，它就会显示在这里。"
       }
     },
     "myStuff": {
@@ -3329,7 +3583,45 @@
         "kindsLabel": "只显示",
         "all": "全部",
         "empty": "未找到任何内容",
-        "untitled": "无标题"
+        "untitled": "无标题",
+        "failed": "无法加载：{kinds}。其余内容已显示。"
+      },
+      "details": {
+        "empty": "在左侧选择一项以在此查看。",
+        "open": "打开",
+        "back": "返回列表",
+        "madeFrom": "来源于",
+        "viewers": "谁能看到",
+        "viewersAnswer": "只有你。与他人共享一项内容的功能还没有。"
+      },
+      "history": {
+        "title": "以前的问题",
+        "show": "显示以前的问题",
+        "hide": "隐藏以前的问题",
+        "back": "返回以前的问题"
+      },
+      "ask": {
+        "send": "提问",
+        "dismiss": "隐藏回答"
+      },
+      "filters": {
+        "label": "按类型筛选",
+        "all": "全部",
+        "documents": "文档",
+        "images": "图片",
+        "data": "数据",
+        "more": "更多",
+        "moreLabel": "更多筛选",
+        "video": "视频",
+        "audio": "音频",
+        "sitesApps": "网站和应用",
+        "meetings": "会议",
+        "project": "项目",
+        "allProjects": "所有项目"
+      },
+      "upload": {
+        "button": "上传",
+        "uploading": "正在上传…"
       },
       "kinds": {
         "site": "网站",
@@ -3343,7 +3635,10 @@
         "coding": "代码",
         "finance": "财务",
         "sales": "销售",
-        "trading": "交易"
+        "trading": "交易",
+        "images": "图片",
+        "meetings": "会议",
+        "apps": "应用"
       },
       "errors": {
         "empty": "请写一个问题。",
@@ -3382,6 +3677,14 @@
       "price": "{count, plural, other {# 积分}}",
       "delete": "删除图片",
       "deleteConfirm": "删除这张图片及其所有版本？此操作无法撤销。",
+      "tools": {
+        "productAd": "产品广告",
+        "animate": "动画",
+        "sameProduct": "同一产品",
+        "addReference": "添加参考图片",
+        "removeReference": "移除这张参考图片",
+        "searchWeb": "先在网上搜索"
+      },
       "notConfigured": "图片功能尚未开启。不会扣费。",
       "working": {
         "variants": "正在生成 4 张图片…",
@@ -3408,7 +3711,15 @@
           "avatar": "一个科技应用的简单头像图标"
         }
       },
-      "new": "新图片"
+      "new": "新图片",
+      "panel": {
+        "status": "{count, plural, other {# 张图片}}",
+        "variants": "{n} 张图片",
+        "change": "修改一张",
+        "full": "全分辨率",
+        "have": "你有",
+        "credits": "{count, plural, other {# 积分}}"
+      }
     },
     "automations": {
       "name": "自动化",
@@ -3594,12 +3905,82 @@
         "expired": "已过期限;已取消,不收费。",
         "broken": "这些方框已无法读取。请删除这个自动化并重新创建。",
         "failed": "出了点问题。未发生的部分不会收费。",
-        "offline": "没有网络连接。请检查网络后重试。"
+        "offline": "没有网络连接。请检查网络后重试。",
+        "badMinutes": "分钟数必须在 {min} 到 {max} 之间,或留空。",
+        "notReady": "暂时还不可用。请稍后再试。"
       },
       "empty": {
         "heading": "什么事情应该自动发生?"
       },
-      "new": "新建自动化"
+      "new": "新建自动化",
+      "simple": {
+        "reads": "读取：{what}",
+        "does": "Ionexa 执行：{what}",
+        "onlyIf": "只有找到内容时才继续。否则就在这里停下，不收取任何费用。",
+        "hint": "这是按顺序排列的步骤。按 Pro 即可修改其中任何一步。"
+      },
+      "parts": {
+        "when": "当",
+        "if": "如果",
+        "do": "执行"
+      },
+      "failedHere": "上次运行在这里停止:{reason}",
+      "templates": {
+        "title": "现成的自动化",
+        "intro": "一键即可开始。之后可以像其他自动化一样修改,准备好后随时开启。",
+        "start": "从这个开始",
+        "free": "创建免费",
+        "soon": "即将推出",
+        "made": "已就绪:“{name}”。可以随意修改,想用时再开启。",
+        "groups": {
+          "finance": "财务助手",
+          "instagram": "Instagram → Telegram"
+        },
+        "finance_daily": {
+          "name": "每天早上的财务摘要",
+          "description": "每天 08:30:把本周的财务做成简短摘要,发到你的 Telegram。",
+          "instruction": "简要总结本周的收入和支出:进账多少、支出多少、净额,以及最大的三笔支出。只使用数据中已有的金额。"
+        },
+        "finance_weekly": {
+          "name": "每周一的月度分析",
+          "description": "每周一 08:30:分析本月的财务,发到你的 Telegram。",
+          "instruction": "分析最近一个月的收入和支出:总额、净额、大部分钱花在哪里,以及值得注意的地方。只使用数据中已有的金额,最后给出一条实用的观察。"
+        },
+        "finance_expense_telegram": {
+          "name": "通过 Telegram 记一笔支出",
+          "description": "给机器人发“电费付了50欧元”,就会记到你的财务里。",
+          "why": "这需要 Ionexa 能读取你发给 Telegram 机器人的消息,目前还做不到。"
+        },
+        "instagram_to_telegram": {
+          "name": "Instagram 新帖子 → Telegram 消息",
+          "description": "你一在 Instagram 发帖,Telegram 就会收到一条消息。",
+          "why": "目前还没有与 Instagram 的连接。"
+        }
+      },
+      "timeSaved": {
+        "label": "手动做这件事需要多少分钟?",
+        "unit": "分钟",
+        "help": "可选。节省的时间根据这个数字计算;留空则不显示任何内容。",
+        "hours": "为你节省了约 {hours} 小时",
+        "minutes": "为你节省了约 {minutes} 分钟",
+        "notYet": "第一次运行完成后,这里会显示为你节省了多少时间。",
+        "how": "计算方式:已完成的运行次数({runs})× 你填写的分钟数({minutes})。试运行不计入。"
+      },
+      "mode": {
+        "label": "运行方式",
+        "auto": "自动",
+        "autoHelp": "真实运行，按计划或手动执行。",
+        "shadow": "影子模式",
+        "shadowHelp": "自动启动时只进行演练——在你手动运行之前不会发送任何真实内容。",
+        "supervised": "需审批",
+        "supervisedHelp": "每个操作在发送前都会等待你的批准。",
+        "save": "保存"
+      },
+      "pendingApprovals": {
+        "button": "待审批 ({count})",
+        "title": "等待审批",
+        "empty": "目前没有任何内容等待审批。"
+      }
     },
     "flows": {
       "name": "项目",
@@ -3808,6 +4189,197 @@
         "failed": "出了点问题。请重试。"
       }
     },
+    "editing": {
+      "empty": {
+        "heading": "您希望 Editing 对素材做什么？"
+      },
+      "notBuilt": "尚未构建。未产生任何费用。",
+      "placeholder": "用您自己的话描述要修改的内容…",
+      "workspaceTitle": "工作区",
+      "tools": {
+        "zoom": "缩放",
+        "graphics": "图形"
+      },
+      "noMaterial": "暂无素材。"
+    },
+    "threeD": {
+      "empty": {
+        "heading": "您想将什么变成3D？"
+      },
+      "notBuilt": "尚未构建。未产生任何费用。",
+      "placeholder": "用您自己的话描述想要变成3D的物品…",
+      "attachPhotos": "添加照片（1至4张）",
+      "workspaceTitle": "3D模型",
+      "photos": {
+        "heading": "我的照片",
+        "remove": "移除此照片"
+      },
+      "viewer": {
+        "zoomIn": "放大",
+        "zoomOut": "缩小",
+        "reset": "重置视图",
+        "placeholderLabel": "3D"
+      },
+      "panel": {
+        "type": "类型",
+        "typeOptions": {
+          "product": "产品",
+          "furniture": "家具",
+          "object": "物体"
+        },
+        "quality": "质量",
+        "qualityOptions": {
+          "draft": "草稿",
+          "final": "最终版"
+        },
+        "realSize": "实际尺寸",
+        "realSizeUnknown": "尚未设置",
+        "format": "格式",
+        "formatOptions": {
+          "glb": "GLB",
+          "usdz": "USDZ",
+          "stl": "STL"
+        },
+        "background": "背景",
+        "backgroundOptions": {
+          "white": "白色",
+          "transparent": "透明"
+        },
+        "price": "价格"
+      },
+      "bar": {
+        "viewInAr": "在AR中查看",
+        "download": "下载",
+        "makeFinal": "生成最终版"
+      }
+    },
+    "films": {
+      "empty": {
+        "heading": "你的电影是关于什么的？"
+      },
+      "notBuilt": "尚未构建。未产生任何费用。",
+      "placeholder": "用您自己的话描述这部电影…",
+      "workspaceTitle": "电影制作",
+      "stages": {
+        "script": "剧本",
+        "characters": "角色与场景",
+        "storyboard": "分镜",
+        "shooting": "拍摄",
+        "edit": "剪辑"
+      },
+      "stageStatus": {
+        "waiting": "等待中",
+        "working": "进行中",
+        "done": "已完成"
+      },
+      "credits": {
+        "label": "积分",
+        "unknown": "一旦有剧本即可计算"
+      },
+      "charactersPlaces": {
+        "heading": "角色与场景",
+        "addCharacter": "添加角色",
+        "addPlace": "添加场景",
+        "empty": "尚未添加。"
+      },
+      "storyboard": {
+        "heading": "分镜",
+        "shot": "镜头 {n}",
+        "sampleCaption": "示例网格——剧本写好后，您的镜头将显示在这里。"
+      },
+      "panel": {
+        "cameraAngle": "镜头角度",
+        "angleOptions": {
+          "wide": "广角",
+          "medium": "中景",
+          "closeUp": "特写",
+          "fromAbove": "俯拍",
+          "low": "低角度"
+        },
+        "light": "光线",
+        "lightOptions": {
+          "day": "白天",
+          "goldenHour": "黄金时刻",
+          "night": "夜晚",
+          "warmInside": "温暖室内"
+        },
+        "cameraMove": "镜头运动",
+        "moveOptions": {
+          "still": "静止",
+          "slowPush": "缓慢推近",
+          "pan": "横摇",
+          "handheld": "手持"
+        },
+        "continueFromPrevious": "从上一个镜头继续",
+        "reshoot": "重新拍摄"
+      }
+    },
+    "appBuilder": {
+      "empty": {
+        "heading": "说说你的生意需要什么应用",
+        "examples": {
+          "a": "一个给我美发店用的预约应用",
+          "b": "一个记录订单和收货人的应用",
+          "c": "一个给客户填的表单，答案放在列表里"
+        }
+      },
+      "placeholder": "用你自己的话描述这个应用…",
+      "placeholderBox": "说说这个方框里要改什么…",
+      "placeholderAnother": "再描述一个应用…",
+      "recent": "最近的应用",
+      "noneYet": "还没有应用。",
+      "boxHint": "点一个方框，说说里面要改什么。",
+      "tabs": {
+        "preview": "预览",
+        "data": "数据",
+        "plan": "计划"
+      },
+      "box": {
+        "data": "数据",
+        "screens": "界面",
+        "access": "谁看得到什么",
+        "notifications": "通知"
+      },
+      "type": {
+        "text": "文字",
+        "longText": "长文字",
+        "number": "数字",
+        "date": "日期",
+        "time": "时间",
+        "choice": "选项",
+        "email": "邮箱",
+        "phone": "电话",
+        "checkbox": "是或否"
+      },
+      "kindForm": "一个表单",
+      "kindList": "一个列表",
+      "seesOwn": "每位访客只看得到自己的",
+      "seesOwner": "只有你看得到",
+      "toCustomer": "给客户",
+      "toOwner": "给你",
+      "noNotifications": "不发送任何内容。",
+      "noScreensYet": "计划中还没有屏幕。",
+      "previewCaption": "计划的实时预览——还不是一个能用的应用。",
+      "formSubmit": "发送",
+      "sampleRow": "示例——上线后真实的记录会显示在这里。",
+      "approve": "批准这个方案",
+      "approved": "方案已批准。",
+      "approvedNote": "已批准",
+      "planned": "这是方案，分四个方框。",
+      "boxChanged": "{box}方框改好了。",
+      "boxChangedAndDropped": "{box}方框改好了，同时去掉了：{what}。",
+      "errors": {
+        "empty": "写下这个应用要做什么。",
+        "tooLong": "这比一段描述能有的长度还长（{limit} 个字符）。",
+        "insufficient": "点数不够。没有扣费。",
+        "rateLimited": "一次尝试太多了。稍后再试。",
+        "notIncluded": "你的套餐里没有这个工具。",
+        "unavailable": "现在无法规划这个应用。",
+        "unusable": "这个回答用不了。只按已花费的部分收费。",
+        "notSaved": "方案做好了，但没能保存。",
+        "failed": "方案没做成。没有扣点数。"
+      }
+    },
     "chats": {
       "title": "对话",
       "searchPlaceholder": "搜索你的对话",
@@ -3848,6 +4420,26 @@
         "actions": "操作",
         "look": "外观"
       },
+      "features": {
+        "heading": "功能",
+        "hint": "这些是像这样的应用通常具有的功能。关闭你不想要的,或点击铅笔更改其文字。",
+        "found": "这些是此类应用通常具有的功能。关闭你不想要的,或更改其中一项的文字,然后继续。",
+        "changed": "该功能的文字已更改。",
+        "continue": "使用这些功能",
+        "continuing": "正在制作方案…",
+        "edit": "更改此功能的文字",
+        "editPlaceholder": "说出此功能的新文字"
+      },
+      "phases": {
+        "heading": "阶段",
+        "note": "目前只有一个阶段:整个应用一次性构建完成。更多阶段即将到来。",
+        "noteTwo": "这个应用需要两个阶段:先规划它的数据和界面,再据此写出应用本身。批准计划即可开始第一阶段;第二阶段的价格会在第一阶段完成后显示。",
+        "appLogic": "应用逻辑",
+        "writeApp": "编写应用",
+        "approve": "批准计划",
+        "approving": "正在开始…",
+        "appLogicDone": "应用的数据和界面已规划完成。现在编写应用。"
+      },
       "build": "构建应用",
       "building": "正在构建应用…",
       "download": "下载应用",
@@ -3855,6 +4447,7 @@
       "preview": "运行中的应用",
       "sealed": "它与其他一切隔离运行,所以你在这里输入的内容只留在这个预览里。下载后可在你自己的电脑上使用。",
       "original": "你自己的版本,不是复制:只取想法和界面的类型,绝不使用原应用的名字、文字、图片或代码。",
+      "selfTest": "在展示给你之前,已检查每个按钮都连接着代码。",
       "versions": "{count} 个版本",
       "version": "版本 {n}",
       "first": "首次构建",
@@ -3877,6 +4470,20 @@
           "tooLarge": "该页面太大,无法读取。没有扣费。",
           "invalid": "这不是我能读取的网址。没有扣费。"
         }
+      },
+      "publish": {
+        "summary": "发布这个应用",
+        "liveSummary": "已上线，拥有自己的地址",
+        "label": "选择一个地址",
+        "edit": "选择其他地址",
+        "editPlaceholder": "输入你想要的地址",
+        "button": "发布",
+        "unpublish": "取消发布",
+        "taken": "该地址已被使用。",
+        "invalid": "请选择有效地址——小写字母、数字和连字符，至少 3 个字符。",
+        "notBuilt": "请先构建应用。",
+        "done": "已发布到 {url}",
+        "offline": "已取消发布。地址仍保留——再次发布即可重新使用。"
       }
     },
     "comingSoon": {
@@ -3887,6 +4494,11 @@
       "notified": "我们会通知你",
       "notifyFailed": "无法保存，请重试。",
       "examples": {
+        "threeD": {
+          "a": "我店里的花瓶，可用于网站",
+          "b": "一把木椅，可从各个角度查看",
+          "c": "一个陶瓷杯，可在手机上用AR查看"
+        },
         "apps": {
           "a": "我的沙龙预订应用",
           "b": "外卖订单应用",
@@ -4135,6 +4747,283 @@
         "label": "语言练习",
         "text": "我想练习"
       }
+    },
+    "translateTool": {
+      "empty": {
+        "heading": "粘贴要翻译的文本",
+        "examples": {
+          "a": "欢迎来到我们的企业。我们很乐意为您服务。\n\n我们的办公室周一至周五上午9点至下午6点开放。",
+          "b": "亲爱的客户，\n\n感谢您的订单。您将在3个工作日内收到。",
+          "c": "我们公司成立于2015年，专注于为小型企业提供软件解决方案。"
+        }
+      },
+      "placeholder": "粘贴或输入文本…",
+      "targetsLabel": "翻译成：{languages}",
+      "styleLabel": "风格",
+      "style": {
+        "formal": "正式",
+        "friendly": "亲切",
+        "source": "与原文一致"
+      },
+      "detectedFrom": "检测到：{language}",
+      "sameLanguageNote": "文本已经是这种语言了。",
+      "kept": "{count, plural, other {# 个段落保持不变}}，因为它的翻译没有返回。",
+      "done": "{count, plural, other {已翻译成 # 种语言。}}",
+      "translating": "正在翻译…",
+      "errors": {
+        "nothing": "没有可翻译的文本。",
+        "tooLong": "这段文本太长，无法一次翻译（{chars} 个字符；上限为 {limit}）。",
+        "sameLanguage": "你选择的语言已经是文本的语言。请至少选择一种不同的语言。",
+        "insufficient": "此次翻译的积分不足。未产生任何费用。",
+        "rateLimited": "同时尝试次数过多。请稍后再试。",
+        "unavailable": "翻译目前不可用。",
+        "unusable": "返回的结果无法使用，未写入任何内容。仅收取已消耗的费用。",
+        "failed": "无法完成翻译。未收取任何积分。"
+      },
+      "editPlaceholder": "说出要对这个段落做什么修改…",
+      "editDone": "第 {n} 段（{language}）已修改。",
+      "editingLabel": "第 {n} 段 · {language}",
+      "glossaryLabel": "{count, plural, =0 {词汇表} other {词汇表（#）}}",
+      "glossaryHint": "在每种语言中保持不变的词语。",
+      "glossarySuggested": "添加「{term}」",
+      "glossaryPlaceholder": "新词语…",
+      "glossaryRemove": "移除「{term}」",
+      "glossaryAdd": "添加词语",
+      "glossaryAdding": "新的词汇表词语",
+      "openDocument": "作为文档打开"
+    },
+    "iowork": {
+      "noAppYet": "电脑端应用还没有发布。这个页面是账户这一侧：应用出来之后，就从这里连接。",
+      "connectHeading": "连接一台电脑",
+      "connectHint": "输入电脑上显示的八位字符。",
+      "codePlaceholder": "ABCD-EF23",
+      "connect": "连接",
+      "connecting": "正在连接…",
+      "previewHeading": "有一台电脑想要连接",
+      "previewBody": "它说自己是“{label}”({platform}),于 {time} 从 {ip} 发起请求。",
+      "previewIpUnknown": "一个我们无法读取的地址",
+      "previewWarning": "如果你刚才没有亲自在自己的电脑上打开 iowork,请按取消。",
+      "previewConfirm": "是的,连接",
+      "previewCancel": "取消",
+      "cancelled": "已取消。该验证码将不再有效。",
+      "codeAccepted": "{name} 已接受验证码。电脑连接完成后就会出现在下面。",
+      "listHeading": "已连接的电脑（{count} / {max}）",
+      "empty": "还没有连接任何电脑。",
+      "platform": {
+        "mac": "Mac",
+        "windows": "Windows"
+      },
+      "idle": "配对时间已超过 30 天",
+      "disconnect": "断开",
+      "disconnectLabel": "断开 {name}",
+      "confirmDisconnect": "要断开 {name} 吗？它会立刻停止工作，需要重新连接。",
+      "safetyLine": "等应用上线后：已连接的电脑只能访问你在它上面选择的文件夹,绝不会碰密码、密钥或系统文件夹,每一次改动都会等待你在那台电脑上的同意。",
+      "errors": {
+        "bad_code": "这不是验证码。它是八位字符，和电脑上显示的一样。",
+        "bad_action": "该请求无法识别。请重试。",
+        "not_found": "没有电脑在显示这个验证码。",
+        "expired": "这个验证码已过期。你的电脑会显示一个新的。",
+        "tooMany": "这个账户已有 {max} 台电脑。请先断开一台。",
+        "rateLimited": "尝试次数过多。请稍候再试。",
+        "not_enabled": "iowork 还没有开放。",
+        "not_signed_in": "请重新登录。",
+        "failed": "没有成功。什么都没有改变。"
+      }
+    },
+    "sheets": {
+      "placeholder": "描述你需要的表格，或想做的修改",
+      "limits": "公式、图表和 xlsx 导出尚未接通 · 此页面不收取任何费用",
+      "soon": "我还不能生成表格——这个页面只是第一步。接下来是公式，然后才是根据描述生成表格。",
+      "download": "下载",
+      "downloadSoon": "下载将随 xlsx 和 csv 导出一起推出，公式会完整保留",
+      "work": {
+        "title": "表格"
+      },
+      "formula": {
+        "label": "公式",
+        "empty": "空单元格",
+        "selected": "{count, plural, other {# 个单元格}}"
+      },
+      "sheet": {
+        "tab": "工作表 {n}",
+        "add": "新建工作表"
+      },
+      "empty": {
+        "heading": "这张表要算什么？",
+        "why": "表格会生成带有真实公式的表：改动一个数字，所有合计都会自己重新算出来，而不是手写上去的结果。",
+        "examples": {
+          "budget": "我店铺的月度预算",
+          "stock": "带补货下限的库存清单",
+          "pricelist": "含增值税和毛利的价目表"
+        }
+      },
+      "extend": "扩展选区"
+    },
+    "skills": {
+      "name": "技能",
+      "empty": {
+        "title": "还没有技能",
+        "why": "技能是你教给 Ionexa 一次的流程——它的名称、适用场合、步骤——此后每次都会遵循相同的步骤。这里目前还不能教授任何内容;此画面只显示已经存在的内容。"
+      },
+      "details": {
+        "empty": "在左侧选择一个技能即可在此查看。",
+        "back": "返回列表",
+        "whenUsedLabel": "使用时机",
+        "whenUsedEmpty": "未设置",
+        "stepsLabel": "步骤",
+        "stepsEmpty": "还没有步骤",
+        "filesLabel": "文件",
+        "filesEmpty": "没有附加文件"
+      }
+    },
+    "discord": {
+      "notConfigured": {
+        "heading": "这里尚未设置 Discord",
+        "why": "部署中缺少这些值：{names}。没有它们，这里什么都无法运行。",
+        "unreadable": "此部署上的 Discord 尚未就绪：数据库中还没有它的表。"
+      },
+      "connect": {
+        "heading": "连接一个 Discord 服务器",
+        "why": "先在 Discord 中创建一个空服务器：点服务器列表底部的 +，再选「Create My Own」。然后把 Ionexa 连接到它。",
+        "button": "连接 Ionexa",
+        "permissions": "Ionexa 只请求：{list}。从不请求管理员权限。"
+      },
+      "perm": {
+        "manage_roles": "管理身份组",
+        "manage_channels": "管理频道",
+        "view_channel": "查看频道",
+        "send_messages": "发送消息",
+        "embed_links": "嵌入链接",
+        "read_message_history": "阅读消息历史",
+        "manage_guild": "管理服务器",
+        "manage_webhooks": "管理 Webhook",
+        "administrator": "管理员",
+        "ban_members": "封禁成员"
+      },
+      "flash": {
+        "connected": "服务器已连接。描述它，Ionexa 来规划。",
+        "cancelled": "连接已取消，没有任何改变。",
+        "invalid_state": "该链接不是你的或已过期。请重试。",
+        "expired": "链接已过期。请重试。",
+        "exchange_failed": "Discord 没有确认连接。请重试。",
+        "no_server": "Discord 没有指明服务器。请在 Discord 的页面上选择服务器。",
+        "bot_not_in_server": "Ionexa 不在那个服务器中。请重新连接。",
+        "taken": "此服务器已连接到另一个 Ionexa 账户。",
+        "save_failed": "无法保存连接。请重试。",
+        "rate_limited": "尝试次数过多。请稍等后重试。",
+        "error": "出了点问题。请重试。",
+        "not_configured": "此部署未设置 Discord。",
+        "unavailable": "此账户尚未开放 Discord。",
+        "invalid_response": "Discord 的响应不完整。请重试。"
+      },
+      "placeholder": "描述你想要的服务器…",
+      "changePlaceholder": "修改方案…",
+      "boxPlaceholder": "「{name}」要改什么？",
+      "empty": {
+        "heading": "你想要什么样的服务器？",
+        "why": "用于 {server}。用文字描述：在 Discord 发生任何变化之前，你会先看到以方块呈现的方案。",
+        "examples": {
+          "bakery": "为我的面包店社区建一个服务器，带一个订单频道",
+          "club": "为一个小游戏俱乐部建一个服务器，带语音房间",
+          "class": "为我的班级建一个服务器，带公告和作业"
+        }
+      },
+      "server": "服务器",
+      "disconnect": "断开连接",
+      "disconnectConfirm": "Ionexa 将离开此服务器。它创建的内容会留在 Discord 中，之后无法再从这里撤销。",
+      "priceLabel": "价格",
+      "price": "每个方案或每次用文字修改约 {credits, plural, other {# 点数}}。在 Discord 中创建、勾选、删除方块和撤销均免费。",
+      "cost": "约 {credits, plural, other {# 点数}}",
+      "slashLabel": "在服务器中",
+      "slash": "/ionexa ask 用此账户的积分在服务器中回答，仅限能管理服务器的成员使用。",
+      "planning": "正在规划服务器…",
+      "changing": "正在修改方案…",
+      "making": "正在 Discord 中创建… 已完成 {n} 个",
+      "planned": "方案已就绪：{roles} 个身份组，{channels} 个频道。Discord 中还没有任何改变。",
+      "changed": "方案已修改。",
+      "changedOne": "只改了「{name}」，其余保持不变。",
+      "applied": "完成。整个方案都已在 Discord 中。",
+      "undone": "已撤销。只删除了 Ionexa 创建的内容。",
+      "stoppedAt": "在「{name}」处停止。标记为已完成的内容在 Discord 中；撤销会删除它们。",
+      "streamInterrupted": "连接中断。Discord 中没有创建任何内容。",
+      "streamInterruptedPartial": "连接在中途中断。上面标记为已完成的内容已在 Discord 中；其余的没有。",
+      "undo": "撤销",
+      "undoConfirm": "只删除 Ionexa 在此服务器中创建的内容？原有的任何内容都不会被触碰。",
+      "primary": "在 Discord 中创建",
+      "deleteBox": "删除此方块",
+      "boxCount": "{n} 个方块",
+      "status": {
+        "planned": "方案 · 尚未创建",
+        "applying": "正在创建…",
+        "applied": "已在 Discord 中创建",
+        "failed": "中途停止",
+        "undoing": "正在撤销…",
+        "undone": "已撤销"
+      },
+      "state": {
+        "made": "已完成",
+        "failed": "失败",
+        "deleted": "已撤销"
+      },
+      "note": {
+        "community_needed": "已创建为文字频道：这需要社区服务器。"
+      },
+      "section": {
+        "roles": "身份组",
+        "channels": "分类和频道",
+        "messages": "消息",
+        "automod": "自动审核"
+      },
+      "kind": {
+        "text": "文字频道",
+        "voice": "语音频道",
+        "forum": "论坛",
+        "announcement": "公告",
+        "category": "分类"
+      },
+      "message": {
+        "welcome": "欢迎消息",
+        "rules": "规则"
+      },
+      "automod": {
+        "keywords": "屏蔽 {n} 个词",
+        "spam": "屏蔽垃圾信息",
+        "preset": "屏蔽：{list}",
+        "mentions": "每条消息最多 {n} 次提及"
+      },
+      "preset": {
+        "profanity": "脏话",
+        "sexual_content": "色情内容",
+        "slurs": "侮辱性用语"
+      },
+      "private": "仅限：{roles}",
+      "readOnly": "所有人只读",
+      "hoist": "在成员列表中单独显示",
+      "tickTitle": "仅在你勾选时：",
+      "elevated": {
+        "manage_guild": "管理服务器：修改服务器名称、设置和自动审核。",
+        "manage_channels": "管理频道：创建、修改和删除任何频道。",
+        "manage_roles": "管理身份组：创建和修改低于自身的身份组，并授予成员。"
+      },
+      "refusedNote": "Ionexa 从不授予管理员或封禁成员权限：由服务器所有者在 Discord 中授予。",
+      "errors": {
+        "insufficient_credits": "积分不足：大约需要 {needed}。",
+        "ai_unavailable": "Ionexa 现在无法规划。没有扣费。",
+        "unusable": "回答不是可执行的方案。请换种说法。",
+        "failed": "出了点问题。请重试。",
+        "conflict": "方案已在另一个标签页中修改。请刷新页面。",
+        "rate_limited": "尝试次数过多。请稍等。",
+        "busy": "已在运行。",
+        "already_applied": "请先撤销已创建的内容。",
+        "bot_not_in_server": "Ionexa 已不在此服务器中。请重新连接。",
+        "not_connected": "此服务器未连接。",
+        "empty": "请再多写一点。",
+        "too_long": "内容太长了。",
+        "stopped": "已停止。没有扣费。",
+        "bypass_ceiling": "此账户已达到每月上限。",
+        "refused_permission": "Ionexa 从不授予管理员或封禁成员权限。",
+        "not_configured": "此部署未设置 Discord。"
+      }
     }
   },
   "module": {
@@ -4304,7 +5193,8 @@
       "confirmTitle": "这是一次大型操作",
       "confirmBody": "此操作约需 {count} 积分。您可以继续，或缩减请求内容。",
       "cancel": "取消",
-      "continue": "继续"
+      "continue": "继续",
+      "approxWithRemaining": "~{count} 积分 · 剩余 {remaining}"
     },
     "freeChat": {
       "remaining": "本月还剩 {count} 条免费消息",
@@ -4867,6 +5757,11 @@
       "does": "先用五个框展示计划；用文字修改其中任意一个，然后写出游戏，你就在这里用键盘或触摸来玩。",
       "doesNot": "它看不到你的账户，也不会连接互联网：游戏在隔离环境中运行，你下载的文件也一样。"
     },
+    "apps": {
+      "is": "在这里描述一个保存你数据的应用：预约、订单、库存、客户、表单答案。",
+      "does": "它把应用分成四个方框来规划，你用话改任意一个方框，然后批准。",
+      "doesNot": "它不收款，也绝不向客户索取银行卡或密码。"
+    },
     "chats": {
       "is": "你所有的对话，都在一个地方。",
       "does": "按最新排列，既搜索标题也搜索对话中说过的内容，并可以重命名、置顶、归档或删除其中任意一个。",
@@ -4881,6 +5776,21 @@
       "is": "你自己版本的、你喜欢的应用。",
       "does": "描述一个应用,或粘贴你喜欢的应用的某个公开页面地址。你会得到四个框的计划,用文字改你想改的,然后构建:一个能用的应用,可以用文字修改、回退,并作为一个文件下载。",
       "doesNot": "它不会复制另一个应用:名字、文字、图片和代码都是你自己的,它只读取你指定的那一页的标签,绝不读取登录后的任何内容。它不是托管服务:你在预览里输入的内容不会保存,下载的文件把数据保存在你自己的电脑上。"
+    },
+    "iowork": {
+      "is": "在你自己的电脑里工作的应用",
+      "does": "在你选择的文件夹里读写文件，按你的要求来，并在改动之前先给你看",
+      "doesNot": "它不会接触密码、密钥、你的浏览器或系统文件夹，绝不在你的电脑上运行程序，没有你的同意不会删除任何东西"
+    },
+    "skills": {
+      "is": "你教给 Ionexa 一次的流程,这样每次再次需要时它都会遵循相同的步骤。",
+      "does": "显示技能的名称、使用时机、步骤和文件,完全按照所教授的内容。",
+      "doesNot": "目前还不能让你创建、编辑或运行技能,Ionexa 也还不会自行使用任何技能——点击一行只会将其打开以便查看。"
+    },
+    "admin": {
+      "is": "所有者的管理控制台。",
+      "does": "显示用户账户、账单、平台成本和收入,每次打开都会记录审计日志。",
+      "doesNot": "它不显示用户写的内容——他们的聊天、文档和记录仍然是私密的。"
     }
   },
   "helpCentre": {
@@ -4903,6 +5813,7 @@
       "chat": "聊天",
       "files": "文件",
       "integrations": "连接",
+      "tools": "工具",
       "account": "账号",
       "privacy": "隐私与数据"
     }
@@ -4932,7 +5843,10 @@
     "contactDescription": "与 Ionexa AI 团队取得联系。",
     "verifyEmail": "确认邮箱",
     "verifyEmailDescription": "确认你的 Ionexa AI 账户邮箱地址。",
-    "chats": "对话"
+    "chats": "对话",
+    "admin": "管理面板",
+    "cancelDeletion": "取消账户删除",
+    "cancelDeletionDescription": "取消已安排的 Ionexa AI 账户删除。"
   },
   "errors": {
     "retry": "重试",
@@ -5125,7 +6039,9 @@
       "unsupported_type": "不支持这种音频格式。",
       "usage_unavailable": "目前无法查询语音分钟数。",
       "streamInterrupted": "连接在回复完成前中断了。",
-      "streamInterruptedPartial": "连接中断了 — 上面的回复可能不完整。"
+      "streamInterruptedPartial": "连接中断了 — 上面的回复可能不完整。",
+      "not_ready": "这里尚未设置实时对话。未向你收费。",
+      "ended": "对话已结束。"
     },
     "permission": {
       "title": "在打开麦克风之前",
@@ -5174,6 +6090,18 @@
       "directionNotConfigured": "本部署未配置",
       "speakNotConfigured": "本部署未配置朗读功能，因此“收听”按钮不会出现。语音输入可正常使用。",
       "transcribeNotConfigured": "本部署未配置语音输入，因此麦克风按钮不会出现。朗读功能可正常使用。"
+    },
+    "live": {
+      "price": "每分钟 {credits} 积分 · 每次对话最长 {minutes} 分钟",
+      "start": "开始说话",
+      "connecting": "正在连接…",
+      "ended": "对话已结束",
+      "endedCap": "本次对话已达到最长时长。说过的内容都已作为文字保存在聊天中，你可以开始新的对话。",
+      "mute": "将麦克风静音",
+      "unmute": "重新打开麦克风",
+      "subtitlesOn": "显示字幕",
+      "subtitlesOff": "隐藏字幕",
+      "close": "结束对话"
     }
   },
   "dataAnalysis": {
@@ -5600,6 +6528,12 @@
     "delete": "删除",
     "deleteConfirm": "删除这个项目？里面的内容会留在原处。",
     "removeMember": "移出项目",
+    "back": "返回项目列表",
+    "selectPrompt": "从左侧列表中选择一个项目即可在此查看。",
+    "empty": {
+      "title": "还没有项目",
+      "description": "在左侧创建你的第一个项目,即可在此查看。"
+    },
     "addToProject": {
       "button": "添加到项目",
       "title": "添加到项目",
@@ -5622,6 +6556,24 @@
     "automateIt": {
       "button": "自动化它",
       "hint": "创建一个基于此项目的自动化——读取其中的内容和上面的目标。"
+    },
+    "notes": {
+      "heading": "What Ionexa knows",
+      "placeholder": "事实、决定、偏好——写在这里，只有这个项目自己的对话、创建、任务计划和智能体构建会读取。",
+      "hint": "只影响这个项目内部的生成。此外没有任何东西会读取它。"
+    },
+    "share": {
+      "heading": "分享",
+      "hint": "任何拥有此链接的人都可以查看此项目，只读，无需登录。你可以随时撤销它。",
+      "create": "创建链接",
+      "revoke": "撤销",
+      "public": {
+        "readOnly": "已与你分享 — 只读",
+        "notFound": {
+          "heading": "此链接不可用",
+          "body": "它可能已被撤销，或者从未存在过。"
+        }
+      }
     },
     "errors": {
       "tooShort": "先给它起个名字。",
@@ -5843,6 +6795,17 @@
       "posts": "帖子",
       "coding": "代码",
       "agent": "智能体"
+    },
+    "contacts": {
+      "heading": "你的业务网络",
+      "description": "Ionexa 从你的对话中学到的名字——客户、供应商、合作伙伴——让每个工具都能使用。",
+      "empty": "还没有记住任何联系人。在聊天中提到一个，它就会出现在这里。",
+      "roleCustomer": "客户",
+      "roleSupplier": "供应商",
+      "rolePartner": "合作伙伴",
+      "roleOther": "联系人",
+      "mentions": "被提及 {count} 次",
+      "knownSince": "自 {date} 起已知"
     }
   },
   "email": {
@@ -6002,6 +6965,14 @@
       "body": "点击按钮确认此地址并打开你的 Ionexa AI 账户。",
       "button": "确认邮箱",
       "ignore": "如果你没有创建此账户，请忽略此邮件：不点击链接就不会有任何变化。"
+    },
+    "deletionScheduled": {
+      "label": "账户删除已安排",
+      "title": "你的账户已安排删除",
+      "body": "你的 Ionexa AI 账户将在 {date} 被永久删除。在那之前，你可以取消删除，账户会完全保持原样。",
+      "cta": "取消删除",
+      "footer": "如果不是你提出的，请立即使用上方的链接取消。",
+      "preheader": "你的 Ionexa AI 账户将在 {date} 被删除——在那之前你可以随时取消。"
     }
   },
   "routerReport": {
@@ -6050,5 +7021,298 @@
     "pricePer1k": "${input} / ${output}",
     "truncated": "只读取了最新的 {cap} 个请求；数字针对这些请求。",
     "empty": "此时间段内没有已结算的请求。"
+  },
+  "adminDashboard": {
+    "title": "管理",
+    "description": "用户管理、成本、收入和操作日志。仅限所有者。",
+    "tabs": {
+      "users": "用户",
+      "costs": "成本",
+      "revenue": "收入",
+      "flags": "开关",
+      "reports": "报告",
+      "auditLog": "操作日志"
+    },
+    "users": {
+      "search": "按邮箱或姓名搜索...",
+      "email": "邮箱",
+      "name": "姓名",
+      "plan": "方案",
+      "credits": "积分",
+      "cost30d": "成本（30天）",
+      "margin": "利润率",
+      "calls": "调用次数",
+      "lastSignIn": "最后登录",
+      "suspended": "已暂停",
+      "noUsers": "未找到用户。",
+      "loading": "正在加载用户...",
+      "adjust": "调整",
+      "refundBtn": "退款",
+      "suspendBtn": "暂停",
+      "unsuspendBtn": "恢复"
+    },
+    "creditAdjust": {
+      "title": "调整积分",
+      "current": "当前积分",
+      "amount": "数量",
+      "amountPlaceholder": "+50 添加，-10 扣除",
+      "reason": "原因",
+      "reasonPlaceholder": "为什么要调整积分？",
+      "cancel": "取消",
+      "confirm": "调整",
+      "submitting": "调整中...",
+      "success": "积分已更新。",
+      "button": "积分",
+      "errorNetwork": "网络错误——请重试。"
+    },
+    "refund": {
+      "title": "退款",
+      "loadingCharges": "加载收费记录...",
+      "noCharges": "未找到该用户的收费记录。",
+      "refundedPartial": "已退款 {amount}",
+      "alreadyRefunded": "已退款",
+      "selectBtn": "选择",
+      "confirmWarning": "此操作将通过 Stripe 退款给客户，无法撤销。",
+      "chargeAmount": "收费金额",
+      "refundableAmount": "可退金额",
+      "partialRefund": "部分退款",
+      "refundAmount": "退款金额（分）",
+      "amountPlaceholder": "最多 {max}",
+      "reason": "原因",
+      "reasonPlaceholder": "为什么要进行此退款？",
+      "back": "返回",
+      "processing": "处理中...",
+      "confirmRefund": "确认退款",
+      "close": "关闭",
+      "errorNetwork": "网络错误——请重试。"
+    },
+    "suspend": {
+      "suspendTitle": "暂停账户",
+      "unsuspendTitle": "恢复账户",
+      "suspendWarning": "此用户将被禁止使用平台。他们下次登录时会看到暂停通知。",
+      "unsuspendConfirm": "确定要恢复此账户吗？",
+      "reason": "暂停原因",
+      "reasonPlaceholder": "描述违规或滥用行为…",
+      "cancel": "取消",
+      "processing": "处理中…",
+      "suspendBtn": "暂停账户",
+      "unsuspendBtn": "恢复账户",
+      "errorNetwork": "网络错误——请重试。"
+    },
+    "costs": {
+      "loading": "正在加载成本数据...",
+      "noData": "没有可用的成本数据。",
+      "period": "时段",
+      "days": "天",
+      "totalCost": "总成本",
+      "totalCalls": "总调用次数",
+      "callsLabel": "次调用",
+      "flaggedTitle": "成本超过付费的用户",
+      "flaggedEmail": "邮箱",
+      "flaggedCost": "成本",
+      "flaggedPays": "付费",
+      "flaggedMargin": "利润率",
+      "flaggedCalls": "调用次数",
+      "byProvider": "按供应商分列成本",
+      "provider": "供应商",
+      "cost": "成本",
+      "share": "占比",
+      "dailyBreakdown": "每日明细",
+      "date": "日期",
+      "dayTotal": "合计"
+    },
+    "revenue": {
+      "loading": "正在加载收入数据...",
+      "noData": "暂无收入数据。",
+      "period": "时间范围",
+      "days": "天",
+      "currentMrr": "当前月度经常性收入",
+      "payingSubscribers": "付费订阅者",
+      "totalAccounts": "账户总数",
+      "newUsers": "新用户",
+      "cancellations": "取消订阅",
+      "keyMetrics": "关键指标",
+      "otherMetrics": "其他指标",
+      "metric": "指标",
+      "value": "数值",
+      "status": "状态",
+      "needsInput": "需要所有者填写",
+      "needsHistory": "历史数据不足",
+      "needsHistoryDays": "每日快照不足",
+      "mrrTrend": "月度收入走势",
+      "date": "日期",
+      "aiCost": "AI 成本",
+      "subscribers": "订阅者",
+      "margin": "毛利率",
+      "eventsByMonth": "按月订阅事件",
+      "month": "月份",
+      "started": "新开通",
+      "reactivated": "重新开通",
+      "cancelled": "已取消",
+      "upgraded": "升级",
+      "downgraded": "降级",
+      "net": "净增"
+    },
+    "auditLog": {
+      "loading": "正在加载审计日志...",
+      "noEntries": "暂无记录。",
+      "time": "时间",
+      "admin": "管理员",
+      "action": "操作",
+      "target": "目标"
+    }
+  },
+  "suspended": {
+    "title": "账户已暂停",
+    "message": "由于违反服务条款，您的账户已被暂停。",
+    "reason": "原因",
+    "contact": "如果您认为这是一个错误，请联系客服支持。",
+    "signOut": "退出登录"
+  },
+  "discordBot": {
+    "notLinked": "此服务器未连接到 Ionexa 账户。",
+    "notAllowed": "只有能管理此服务器的成员才能使用 /ionexa：它会使用已连接账户的积分。",
+    "accountMissing": "找不到此服务器的 Ionexa 账户。",
+    "notOpen": "此账户尚未开放 Discord 中的 Ionexa。",
+    "tooMany": "现在问题太多了。请稍后再试。",
+    "ceiling": "已连接的账户已达到每月上限。",
+    "noCredits": "已连接的 Ionexa 账户积分不足（大约需要 {needed}）。",
+    "failed": "Ionexa 现在无法回答。没有扣费。",
+    "cut": "（回答在长度上限处被截断。）",
+    "unknownCommand": "未知命令。",
+    "empty": "请在 /ionexa ask 后面写一个问题。"
+  },
+  "payments": {
+    "title": "收款",
+    "subtitle": "接受客户付款",
+    "connect": {
+      "title": "连接您的企业",
+      "description": "通过Stripe连接您的企业以开始接受付款。Stripe负责验证和银行信息。",
+      "button": "连接Stripe",
+      "resumeButton": "继续设置",
+      "connected": "已连接",
+      "pendingVerification": "验证待处理",
+      "notConnected": "尚未连接"
+    },
+    "balance": {
+      "title": "余额",
+      "available": "可用",
+      "pending": "待处理",
+      "totalEarnings": "总收入",
+      "nothingYet": "暂无收入"
+    },
+    "products": {
+      "title": "产品",
+      "create": "新产品",
+      "name": "产品名称",
+      "description": "描述",
+      "price": "价格",
+      "currency": "货币",
+      "recurring": "定期付款",
+      "monthly": "每月",
+      "yearly": "每年",
+      "oneTime": "一次性",
+      "active": "活跃",
+      "inactive": "停用",
+      "copyLink": "复制付款链接",
+      "linkCopied": "链接已复制",
+      "deactivate": "停用",
+      "noProducts": "暂无产品。创建您的第一个产品以开始接受付款。"
+    },
+    "transactions": {
+      "title": "交易",
+      "noTransactions": "暂无交易",
+      "succeeded": "成功",
+      "pending": "待处理",
+      "failed": "失败",
+      "refunded": "已退款"
+    },
+    "payouts": {
+      "title": "提现",
+      "cashout": "提现到银行",
+      "amount": "金额",
+      "requestPayout": "请求提现",
+      "noPayouts": "暂无提现",
+      "inTransit": "转账中",
+      "paid": "已支付",
+      "failed": "失败"
+    },
+    "dashboard": {
+      "openStripeDashboard": "打开Stripe控制台",
+      "overview": "概览",
+      "productsTab": "产品",
+      "transactionsTab": "交易",
+      "payoutsTab": "提现",
+      "subscriptionsTab": "订阅",
+      "couponsTab": "优惠券",
+      "invoicesTab": "发票"
+    },
+    "errors": {
+      "notConfigured": "收款功能暂不可用。",
+      "notConnected": "请先连接您的企业。",
+      "chargesNotEnabled": "您的账户尚未完成付款验证。",
+      "payoutsNotEnabled": "您的账户尚未完成提现验证。",
+      "insufficientBalance": "此次提现余额不足。",
+      "invalidPrice": "价格必须在1€到999,999€之间。",
+      "nameRequired": "产品名称为必填项。"
+    },
+    "platformFee": "平台费用：每笔交易{fee}%",
+    "cancel": "取消",
+    "subscriptions": {
+      "active": "活跃订阅",
+      "churnedThisMonth": "本月流失",
+      "total": "订阅总数",
+      "noSubscriptions": "暂无订阅",
+      "hint": "当您的客户订阅定期产品时，他们的订阅将显示在这里。",
+      "unknownProduct": "未知产品",
+      "renewsOn": "{date}续期",
+      "cancelling": "取消中",
+      "cancel": "取消",
+      "cancelledOk": "订阅将在当期结束时取消",
+      "status": {
+        "active": "活跃",
+        "trialing": "试用",
+        "past_due": "逾期",
+        "canceled": "已取消",
+        "paused": "已暂停",
+        "unpaid": "未付款"
+      }
+    },
+    "analytics": {
+      "thisMonthRevenue": "本月收入",
+      "vsLastMonth": "与上月相比",
+      "mrr": "月度经常性收入",
+      "totalRevenue": "总收入",
+      "transactions": "交易",
+      "avgOrderValue": "平均订单金额",
+      "platformFees": "平台费用（本月）",
+      "topProducts": "收入最高的产品",
+      "sales": "笔"
+    },
+    "coupons": {
+      "createTitle": "创建优惠券",
+      "code": "代码",
+      "percentOff": "% 折扣",
+      "once": "一次性",
+      "repeating": "重复",
+      "forever": "永久",
+      "create": "创建",
+      "created": "优惠券已创建",
+      "none": "暂无优惠券",
+      "used": "已使用",
+      "active": "有效",
+      "inactive": "无效"
+    },
+    "invoices": {
+      "createTitle": "发送发票",
+      "customerEmail": "客户邮箱",
+      "description": "描述",
+      "descriptionPlaceholder": "咨询服务",
+      "amount": "金额",
+      "sendInvoice": "发送",
+      "sent": "发票已发送",
+      "none": "暂无发票",
+      "view": "查看"
+    }
   }
 }

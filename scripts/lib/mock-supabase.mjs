@@ -94,7 +94,18 @@ export async function startMockSupabase({ port = 54341, tableRows = {}, handle =
       if (url.pathname.startsWith("/auth/v1/")) return json(200, { user: MOCK_USER, session: null });
       if (url.pathname.startsWith("/rest/v1/")) {
         const table = url.pathname.slice("/rest/v1/".length).split("?")[0];
-        const rows = rowsFor[table] ?? [];
+        let rows = rowsFor[table] ?? [];
+        // THE EDITOR LAYOUT IS OFF HERE UNLESS A TEST SAYS OTHERWISE.
+        // "editor-shell" (src/lib/flags/flags.ts) starts at 'staff', and
+        // nearly every prodtest signs its user in as staff
+        // (TEST_ACCOUNT_EMAILS) to open the tool it tests — so without
+        // this, each of them would silently be measuring the new layout
+        // instead of the shell everybody else gets, which is the one they
+        // were written against. A test that wants the new layout puts its
+        // own "editor-shell" row in `feature_flags`
+        // (scripts/tests/editor-shell.prodtest.mjs does). Goes when the
+        // switch goes to 'everyone' and the old shell is deleted.
+        if (table === "feature_flags" && !rows.some((r) => r?.key === "editor-shell")) rows = [...rows, { key: "editor-shell", audience: "off" }];
         // Counts come back in a HEADER. supabase-js reports count:null when
         // Content-Range is absent, and pages read that as a degraded
         // session — so omitting it does not answer less, it answers wrong.

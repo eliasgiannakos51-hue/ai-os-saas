@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { AiToolSpec } from "@/lib/ai/providers/types";
 import { anyProviderConfigured } from "@/lib/ai/providers/registry";
 import { runCompletion } from "@/lib/ai/providers/complete";
+import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { createClient } from "@/lib/supabase/server";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { logApiError } from "@/lib/log-error";
@@ -252,7 +253,14 @@ export async function POST(request: Request) {
           purpose: "classification",
           model: STUDIO_MODEL,
           maxTokens: 512,
-          system: [{ type: "text", text: buildSystemPrompt() }],
+          // CACHED (2026-11-05, docs/COST-LAYER.md §(a)). The prompt is
+          // wholly static — the module list and three constants, nothing
+          // from the person — and measured 7,669 characters, over Sonnet's
+          // 1,024-token minimum by the repo's own rule, so every Create
+          // sentence was paying full input price for it. The forced tool
+          // sits before the system prompt in the provider's prefix and is
+          // cached with it. scripts/tests/prompt-caching.test.mjs holds it.
+          system: buildCachedSystem({ staticPrefix: buildSystemPrompt(), model: STUDIO_MODEL }),
           messages: [{ role: "user", content: message }],
           tools: [DETECT_TOOL],
           toolChoice: { type: "tool", name: "detect_intent" },

@@ -283,7 +283,9 @@ check("a brief that is not a website is said in the reader's words, not the clas
 check("...a provider failure is named, and says the hold went back", /code: "upstreamUnavailable",\s*\.\.\.\(reservationId \? \{ creditsRefunded: true \} : \{\}\),/.test(editRoute));
 const publishControl = code("src/components/publishing/publish-control.tsx");
 const liveList = code("src/components/publishing/published-sites-list.tsx");
-const REFUSAL = /if \(data\?\.limitReached === true\) return t\("limitReached"\);\s*if \(data\?\.upgradeRequired === true\) return t\("paidOnly"\);\s*if \(data\?\.securityBlocked === true\) return t\("securityBlocked"\);\s*if \(status === 429\) return t\("tooManyToday"\);/;
+// The security case names a page that asks for a password apart from the
+// rest since 2026-11-05 (published-isolation.test.mjs holds why).
+const REFUSAL = /if \(data\?\.limitReached === true\) return t\("limitReached"\);\s*if \(data\?\.upgradeRequired === true\) return t\("paidOnly"\);\s*if \(data\?\.securityBlocked === true\) return data\.reason === "password_field" \? t\("securityBlockedPassword"\) : t\("securityBlocked"\);\s*if \(status === 429\) return t\("tooManyToday"\);/;
 check("a refused publish is said from what the route names: the plan's limit, paid plans only, the security scan, today's limit",
   REFUSAL.test(publishControl) && /addToast\(refusalText\(response\.status, data\), "error"\);/.test(publishControl) &&
     REFUSAL.test(liveList) && /addToast\(refusalText\(response\.status, data\), "error"\);/.test(liveList));

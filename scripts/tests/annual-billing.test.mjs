@@ -311,17 +311,24 @@ check(
 // object for both directions, `proration_behavior: isUpgrade ? … : …`, and
 // Stripe's default payment behaviour applies the new price at once and
 // leaves the invoice to be paid later — while the webhook reads the plan
-// from that price. The two directions are two objects now, and the
-// upgrade's carries the pending update.
-const updateStart = checkoutSrc.indexOf("const subscriptionUpdate = isUpgrade");
-const updateSplit = checkoutSrc.indexOf("\n            : {\n", updateStart);
-const updateEnd = checkoutSrc.indexOf("};", updateSplit);
-const upgradeUpdate = updateStart >= 0 && updateSplit > updateStart ? checkoutSrc.slice(updateStart, updateSplit) : "";
-const downgradeUpdate = updateSplit > 0 && updateEnd > updateSplit ? checkoutSrc.slice(updateSplit, updateEnd) : "";
-check("the upgrade and the downgrade are two update objects", upgradeUpdate !== "" && downgradeUpdate !== "");
+// from that price. The upgrade's update carries the pending update.
+//
+// AND NO MONEY BACK FOR A PLAN ALREADY USED (ΑΣ-4.15, 2026-11-05). These
+// clauses used to PIN the downgrade as an immediate update with
+// `create_prorations`: the unused part of the higher plan credited to the
+// next invoice. That credit was paid out after the higher plan's
+// allowance had been spent, so the pin held the defect in place. A
+// downgrade is now a subscription schedule that switches the plan when the
+// paid period ends, with no proration, and these clauses hold THAT.
+const code = checkoutSrc.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+const updateStart = code.indexOf("const subscriptionUpdate = {");
+const upgradeUpdate = updateStart >= 0 ? code.slice(updateStart, code.indexOf("};", updateStart)) : "";
+const downgradeStart = code.indexOf('if (direction === "downgrade") {');
+const downgradeBranch = downgradeStart >= 0 ? code.slice(downgradeStart, code.indexOf("redirectPath:", downgradeStart)) : "";
+check("the upgrade and the downgrade are two different operations", upgradeUpdate !== "" && downgradeBranch !== "");
 check(
-  "…with proration: the upgrade invoices now, the downgrade credits the next invoice",
-  /proration_behavior: "always_invoice"/.test(upgradeUpdate) && /proration_behavior: "create_prorations"/.test(downgradeUpdate)
+  "…the upgrade invoices the difference now",
+  /proration_behavior: "always_invoice"/.test(upgradeUpdate)
 );
 check(
   "an upgrade applies only once its invoice is paid (pending update)",
@@ -329,8 +336,18 @@ check(
   "without it the subscription takes the bigger price before anyone has paid for it"
 );
 check(
-  "…and the downgrade, which costs nothing now, applies at once",
-  !/pending_if_incomplete/.test(downgradeUpdate) && !/always_invoice/.test(downgradeUpdate)
+  "…and the downgrade waits for the end of the paid period, on a schedule",
+  /stripe\.subscriptionSchedules\.update\(/.test(downgradeBranch) && /end_behavior: "release"/.test(downgradeBranch),
+  "an immediate downgrade hands back the unused part of a plan whose allowance was already spent"
+);
+check(
+  "…with no proration at the switch, and nothing changed today",
+  /proration_behavior: "none"/.test(downgradeBranch) && !/stripe\.subscriptions\.update\(/.test(downgradeBranch)
+);
+check(
+  "nothing in the route credits a downgrade back any more",
+  !/create_prorations/.test(code),
+  "create_prorations on a downgrade is the refund of an allowance already used"
 );
 check(
   "an unpaid upgrade sends the customer to pay, and reports the plan unchanged",
@@ -347,8 +364,10 @@ check(
     checkoutSrc.indexOf("if (updated.pending_update)") < checkoutSrc.indexOf("return NextResponse.json({ ok: true, updated: true, redirectPath: successPath });")
 );
 check(
-  "…charging the difference now on an upgrade, crediting the next invoice on a downgrade",
-  /always_invoice/.test(checkoutSrc) && /create_prorations/.test(checkoutSrc)
+  "…charging the difference now on an upgrade, and returning before the subscription is touched on a downgrade",
+  /always_invoice/.test(code) &&
+    downgradeStart > 0 &&
+    downgradeStart < code.indexOf("stripe.subscriptions.update(existingSubscriptionId")
 );
 check(
   "…and resetting the anniversary when the interval changes",

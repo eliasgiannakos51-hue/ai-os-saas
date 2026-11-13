@@ -173,17 +173,27 @@ export function takeEditedBox(stored: string, edited: string, index: number): st
 }
 
 /**
+ * Every box marked with its number from 1 (`data-ionexa-n`), and the chosen
+ * one with `data-ionexa-on`: the old preview's outlines (outlineBoxes,
+ * below) and the editor layout's pressable preview
+ * (lib/website-builder/preview-picker.ts) number them the same way.
+ */
+export function numberBoxes(html: string, boxes: PageBox[], selected: number | null = null): string {
+  let out = html;
+  for (let i = boxes.length - 1; i >= 0; i--) {
+    out = withAttribute(out, boxes[i], `data-ionexa-n="${i + 1}"${i === selected ? " data-ionexa-on" : ""}`);
+  }
+  return out;
+}
+
+/**
  * The page as the preview shows it while a box is chosen: every box
  * numbered and outlined, the chosen one in the accent. CSS only — the
  * preview stays sandbox="" with no scripts (tool-shell.mutation.mjs holds
  * that), so the boxes are pressed beside it, by number.
  */
 export function outlineBoxes(html: string, selected: number | null): string {
-  const boxes = findPageBoxes(html);
-  let out = html;
-  for (let i = boxes.length - 1; i >= 0; i--) {
-    out = withAttribute(out, boxes[i], `data-ionexa-n="${i + 1}"${i === selected ? " data-ionexa-on" : ""}`);
-  }
+  const out = numberBoxes(html, findPageBoxes(html), selected);
   const style =
     "<style>[data-ionexa-n]{outline:2px dashed rgba(120,120,120,.55);outline-offset:-2px}" +
     "[data-ionexa-n]::before{content:attr(data-ionexa-n);display:block;width:max-content;margin:4px;padding:1px 8px;border-radius:999px;font:600 12px/18px system-ui,sans-serif;background:#555;color:#fff}" +

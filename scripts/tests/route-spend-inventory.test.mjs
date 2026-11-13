@@ -263,6 +263,10 @@ const DECLARED = {
     bound: "none",
     why: "the telegram path is three hops away, through cost-alerts: a notification the account holder asked for, sent on a state change rather than per request.",
   },
+  "webhooks/stripe": {
+    bound: "none",
+    why: "a Stripe event verified by signature, not a request anyone else can send. The telegram/discord path is lib/notify/dispatch, reached through lib/team/sync-team-grants.ts (2026-11-05) only when a team member loses the owner's plan: one message per member who lost it and one to the owner, on that state change, never per event.",
+  },
 
   // --- READS AND CRUD, whose spend kind is a closure artefact ---
   // These six surfaced the day the reserve detector was tightened from a
@@ -287,6 +291,7 @@ const DECLARED = {
   "automations/flows/[id]/active": { bound: "artefact", why: "switches an automation on or off; same closure — it asks whether Telegram and the calendar are connected, it sends nothing" },
   "automations/flows/[id]/undo": { bound: "artefact", why: "puts back the previous version of the boxes; same closure as the edit" },
   "automations/flows/[id]/runs": { bound: "artefact", why: "reads the person's own run history; the closure reaches the delivery store through the shared access module, and nothing is sent" },
+  "automations/templates": { bound: "limited", scope: "automation_template", why: "makes the person's own automation from a ready-made row of boxes, no model and no charge; twenty presses an hour and MAX_FLOWS bound it, and the telegram URL is reached only through the shared access module, which asks WHETHER Telegram is connected and sends nothing" },
   "automations/runs/[runId]/cancel": { bound: "artefact", why: "cancels the person's own waiting run in one conditional update; nothing is sent or charged" },
   "cron/automation-flows": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel, bounded per tick and per person, and every AI box is held and settled in the runner on the automation's owner" },
 
@@ -295,12 +300,48 @@ const DECLARED = {
 
   // --- account deletion (2026-10-08) ---
   "delete-account/confirm": { bound: "limited", scope: "delete_account_confirm", why: "lists and removes the person's own files through the Storage API (lib/account/erase-storage.ts), once per single-use token claimed before any storage call; scope delete_account_confirm, ten an hour per address" },
+  "cron/execute-deletions": { bound: "none", why: "cron, guarded by CRON_SECRET and scheduled once a day (vercel.json, 02:00 UTC); it removes, through the Storage API, the files of at most 50 accounts a run (getActionableDeletions), each one whose 30-day grace has ended, and there is no user to charge" },
 
   // --- not a user-facing route at all ---
   "cron/website-storage-cleanup": { bound: "none", why: "cron, guarded by CRON_SECRET; the caller is Vercel and there is no user to charge" },
   "system-health/files": { bound: "none", why: "owner-only (isAdminEmail); writes and removes one canary object per call" },
   "system-health/keys": { bound: "none", why: "owner-only (isAdminEmail); one free READ per provider (a model or account list, never a generation), so the provider URLs it names are never asked to produce anything" },
   "import/csv/apply": { bound: "limited", scope: "import_apply", why: "scope import_apply; the model call it makes was reserved by import/csv/analyse" },
+  // Classified `webhook_out` only because its import closure reaches
+  // lib/notify/channels/telegram — which it imports for ONE function,
+  // telegramBotUsername(), to build the «Άνοιξε στο Telegram» link. It
+  // sends no message and spends no credit: connecting a chat and
+  // disconnecting it are both free (the owner's directive 24, κομμάτι 1).
+  "telegram/link": {
+    bound: "limited",
+    scope: "telegram_link_act",
+    why: "connects or disconnects one Telegram chat. The bot URL in its closure is lib/notify/channels/telegram, imported only to read the bot's own username for the deep link - nothing is sent from here and no credit is charged. Bounded by checkRateLimit scope telegram_link_act, twenty an hour per account, answering 429.",
+  },
+
+  // --- discord bot (agent/discord, 2026-11-07) ---
+  // Four routes that call discord.com/api, each free and each bounded by
+  // its own checkRateLimit scope — no model, no credit, same shape as the
+  // telegram_link_act route above.
+  discord: {
+    bound: "limited",
+    scope: "discord_disconnect",
+    why: "«Αποσύνδεση» of one server: the bot calls DELETE /guilds/{id}/members/@me (lib/discord/bot.ts, botLeave) and the account forgets it, through lib/discord/store.ts's ownsGuild/unlinkGuild filtered on the caller's own id. No model, no credit. Bounded by checkRateLimit scope discord_disconnect, twenty an hour per account, answering 429.",
+  },
+  "discord/connect": {
+    bound: "limited",
+    scope: "discord_connect",
+    why: "redirects to Discord's own OAuth authorize screen with a signed, ten-minute state (lib/discord/signatures.ts); it calls discord.com/api nowhere itself — DISCORD_API lives in lib/discord/rest.ts, imported here only for botPermissionInteger()'s constant. No model, no credit. Bounded by checkRateLimit scope discord_connect, ten an hour per account, answering 429.",
+  },
+  "discord/callback": {
+    bound: "limited",
+    scope: "discord_connect",
+    why: "the OAuth return leg: exchanges the single-use code at discord.com/api/oauth2/token, asks the bot for the server (GET /guilds/{id}), and registers the slash command — all free Discord API calls, no model and no credit. Shares checkRateLimit scope discord_connect with api/discord/connect, both legs of the same ten-an-hour budget, answering 429.",
+  },
+  "discord/apply": {
+    bound: "limited",
+    scope: "discord_apply",
+    why: "«Φτιάξ' το στο Discord» and «Αναίρεση»: the only route that changes anything in Discord, through lib/discord/apply.ts's applyBlueprint/undoItems calling discord.com/api box by box. No model is called and nothing is charged — every id it creates is recorded in public.discord_build_items before the next request, so a dropped stream loses no state. Bounded by checkRateLimit scope discord_apply, twenty an hour per account, answering 429.",
+  },
 };
 
 // ---------------------------------------------------------------------
@@ -323,6 +364,20 @@ if (undeclared.length) {
 // ---------------------------------------------------------------------
 // 2. A declared bound is verified against the tree, not believed.
 // ---------------------------------------------------------------------
+// A LIMITED ROUTE THAT REFUSES BY REDIRECT, NOT BY STATUS CODE.
+// api/discord/callback (agent/discord, 2026-11-07) is Discord's own
+// OAuth-return leg: the browser lands here mid-navigation, having already
+// left Ionexa's origin and come back, so a JSON 429 would render as a
+// blank page rather than anything the person could act on. It refuses
+// the same as every other limited route — `if (!limited.allowed) return
+// back("rate_limited")` stops the exchange before it starts — just
+// through a 303 to /dashboard/discord?discord=rate_limited, read by
+// dashboard.discord.flash.rate_limited (already named in limit-texts.
+// test.mjs's SAID_ELSEWHERE for this exact route). The literal-429 check
+// below is otherwise right across the tree; this is the one route whose
+// refusal a status code cannot carry.
+const REFUSES_BY_REDIRECT = new Set(["src/app/api/discord/callback/route.ts"]);
+
 const brokenClaims = [];
 for (const [name, entry] of Object.entries(DECLARED)) {
   const found = classified.find((c) => shortName(c.route) === name);
@@ -347,7 +402,7 @@ for (const [name, entry] of Object.entries(DECLARED)) {
     }
     // A limiter whose answer is never acted on is a counter. The route has
     // to be able to refuse.
-    if (!/\b429\b/.test(SOURCE.get(found.route) || "")) {
+    if (!/\b429\b/.test(SOURCE.get(found.route) || "") && !REFUSES_BY_REDIRECT.has(found.route)) {
       brokenClaims.push(`${name}: declared "limited", but the route never answers 429`);
     }
   }
@@ -433,6 +488,7 @@ const CONTINUES_SOMEBODY_ELSES_HOLD = {
     why: "it queues rather than generates: the model call and the hold both live in /api/websites/generate/process, against the SAME estimate this route computes. What stops a loop here is hasEnoughCredits — an account that cannot afford the generation is refused before the row is written, so the queue cannot outrun the balance.",
   },
   "voice/usage": { bound: "reads_only", why: "reads a usage counter; the provider URL is a constant in voice-providers, imported to say whether voice is configured at all." },
+  "voice/live/end": { bound: "reads_only", why: "closes a live voice session and saves the transcript. The model call is autoTitleFromMessage (conversation titling) and hangupLiveCall (a POST to the provider's hangup endpoint, not a generation). All spending was done by start and tick before this route runs; it reserves nothing and generates nothing." },
   "system-health/keys": { bound: "reads_only", why: "owner-only; one GET per provider to a model or account LIST, never a generation, and only when the owner presses the button. There is no loop to stop." },
 };
 // ...or through a shared step it calls whose own body reserves

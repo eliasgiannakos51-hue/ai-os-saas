@@ -11,6 +11,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
 import { Earth } from "@/components/brand/earth";
+import { signOutAndForget } from "@/lib/auth/sign-out";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -179,7 +180,9 @@ export function ResetPasswordForm() {
         return;
       }
 
-      await supabase.auth.signOut();
+      // Through the one sign-out (lib/auth/sign-out.ts), so the pages the
+      // offline cache kept for this account go with the session.
+      await signOutAndForget(supabase);
       router.push("/login?reset=success");
       router.refresh();
     } catch (err) {

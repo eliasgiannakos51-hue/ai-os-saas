@@ -62,9 +62,9 @@ const MUTATIONS = [
   {
     name: "the overage invoice item loses its idempotency key",
     file: OVERAGE,
-    from: "        { idempotencyKey: `overage:${userId}:${month}` }",
-    to: "        {}",
-    expect: "a retried cron run would add a second line",
+    from: "    { idempotencyKey: `overage_item:${runKey}` }",
+    to: "    {}",
+    expect: "A retried cron run cannot add a second line",
   },
   {
     name: "the subscription upgrade loses its database guard",
@@ -76,8 +76,8 @@ const MUTATIONS = [
   {
     name: "the subscription upgrade loses its Stripe key",
     file: CHECKOUT,
-    from: "            idempotencyKey: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${Math.floor(",
-    to: "            foo: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${Math.floor(",
+    from: "            idempotencyKey: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${bucket}`,",
+    to: "            foo: `sub_update:${existingSubscriptionId}:${plan}:${interval}:${bucket}`,",
     expect: "the backstop",
   },
   {
@@ -161,8 +161,8 @@ const MUTATIONS = [
   {
     name: "the no-money list grows a call that does not exist",
     file: GATE,
-    from: '    "stripe.subscriptionItems.del",',
-    to: '    "stripe.subscriptionItems.del", "stripe.refunds.create",',
+    from: '    "stripe.subscriptionSchedules.create", "stripe.subscriptionSchedules.update",',
+    to: '    "stripe.subscriptionSchedules.create", "stripe.subscriptionSchedules.update", "stripe.subscriptionItems.del",',
     expect: "the stale-entry check",
   },
 ];

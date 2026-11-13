@@ -53,9 +53,11 @@ export function NextCard({
               the only screen of six that did. Every other page has one,
               because the other one is the top bar's create button, which
               is on all thirty-nine.
-              The top bar keeps the fill: it is the same affordance in the
-              same place on every page, and giving Home a second one that
-              outranks it locally is what makes a person hesitate. This
+              The top bar's button has no fill either since 2026-11-04 —
+              the owner's approved screens draw it outlined
+              (docs/design/approved/README.md), so a screen's one white
+              button is the work's own. The reason for this outline is
+              unchanged: Home's one filled control is its field's send. This
               stays visually accented and obviously clickable — it is an
               outline in the accent colour, the same treatment the plan
               link below already uses — so nothing is hidden; there is

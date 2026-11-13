@@ -60,7 +60,7 @@ console.log("\n== 2. every one finishes on the Free plan ==");
 const catalog = readFileSync("src/lib/billing/feature-catalog.ts", "utf8");
 check("Chat is on the Free plan", /id: "aiChat",\s*group: "\w+",\s*minPlan: "free",/.test(catalog));
 const chatPage = code("src/app/dashboard/chat/page.tsx");
-check("Chat reads the task and sends it", /initialAsk=\{readExampleParam\(searchParams\.ask\)\}/.test(chatPage) && /if \(!initialAsk \|\| sentAskRef\.current\) return;/.test(code("src/components/chat/chat-workspace.tsx")));
+check("Chat reads the task and sends it", /initialAsk=\{readExampleParam\(searchParams\.ask\)\}/.test(chatPage) && /if \(!initialAsk \|\| sentAskRef\.current\) return;/.test(code("src/components/chat/chat-workspace.tsx")) && /takeSendOnArrival\("ask", initialAsk\)/.test(code("src/components/chat/chat-workspace.tsx")));
 check("...and reads its way of working", /initialWorkMode=\{readWorkMode\(searchParams\.mode\) \?\? undefined\}/.test(chatPage));
 const lib = code("src/lib/onboarding/first-tasks.ts");
 check("no task leaves for another tool", (lib.match(/`\/dashboard\/[a-z-]+/g) ?? []).every((p) => p === "`/dashboard/chat"));
@@ -71,7 +71,10 @@ console.log("\n== 3. the screen ==");
 const screen = code("src/components/onboarding/first-task.tsx");
 const begin = screen.slice(screen.indexOf("async function begin("), screen.indexOf("async function skip("));
 check("a press records completion and what began it, BEFORE it leaves", /await fetch\("\/api\/onboarding", \{[\s\S]*?body: JSON\.stringify\(\{ completed: true, goal \}\),[\s\S]*?\}\);[\s\S]*?router\.push\(href\);/.test(begin));
-check("...and leaves even when the record could not be kept", /\} catch \{[\s\S]*?\}\s*router\.push\(href\);/.test(begin));
+check("...and leaves even when the record could not be kept", /\} catch \{[\s\S]*?\}\s*armSendOnArrival\(href\);\s*router\.push\(href\);/.test(begin));
+// A LINK ONLY FILLS CHAT'S FIELD NOW (2026-11-05 review, A8): this press
+// is the app's own, so it says "send it" before it leaves.
+check("...saying, as the app's own press, that Chat should send the task", /armSendOnArrival\(href\);\s*router\.push\(href\);/.test(begin));
 check("...once: a second press while it leaves does nothing", /if \(busy\) return;\s*setBusy\(key\);/.test(begin));
 check("every task is offered, each with its own way of working", /FIRST_TASKS\.map\(\(task\) =>/.test(screen) && /begin\(task\.id, goalFor\(task\.id\), firstTaskHref\(text\[task\.id\], task\.mode\)\)/.test(screen));
 check("the person's own sentence goes the same way", (screen.match(/begin\("own", goalFor\("own"\), firstTaskHref\(ownText, null\)\)/g) ?? []).length === 2);

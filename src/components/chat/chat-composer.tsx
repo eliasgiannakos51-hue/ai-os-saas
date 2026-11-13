@@ -3,6 +3,7 @@
 import {
   forwardRef,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -12,7 +13,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import Link from "next/link";
-import { ArrowUp, LayoutGrid, Paperclip, Square } from "lucide-react";
+import { ArrowUp, LayoutGrid, Paperclip, Plus, Square } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { VoiceInput } from "@/components/voice/voice-input";
@@ -85,8 +86,25 @@ export const ChatComposer = forwardRef<
     tray?: React.ReactNode;
     /** Send waits: a file is still being read. Enter does nothing either. */
     holdSend?: boolean;
+    /** THE TWO SHAPES OF THE EDITOR'S FIELD (docs/design/approved/,
+     *  components/shell/editor-shell.tsx, behind the switch "editor-shell").
+     *  "chat" — the default — is this field exactly as every screen has it.
+     *  "landing" is M00-Start.png: the text on top, and one row under it
+     *  of «+», the tool's options (`beside`), the price (`trailingBeside`)
+     *  and send. "inline" is 08-Site.png / 14-Image.png: one row of «+»,
+     *  the selected piece (`leading`), the text, the price and send.
+     *  Both are the SAME textarea and the SAME send button, re-flowed by
+     *  class — never a second field and never a second filled button
+     *  (scripts/tests/one-primary-action.test.mjs counts the tags). The
+     *  All tools grid is not in either: the approved field has none, and
+     *  the sidebar and the phone's tab bar both carry All tools. */
+    shape?: "chat" | "landing" | "inline";
+    /** The selected piece's chip: after «+» in the "inline" shape, a row
+     *  of its own above the text in the "landing" one. */
+    leading?: React.ReactNode;
   }
->(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, trailingBeside, placeholder, onLengthChange, attach, tray, holdSend = false }, ref) {
+>(function ChatComposer({ sending, onSend, onStop, initialText = "", children, beside, trailingBeside, placeholder, onLengthChange, attach, tray, holdSend = false, shape = "chat", leading }, ref) {
+  const editor = shape !== "chat";
   const t = useTranslations("dashboard.chat");
   const tRail = useTranslations("sidebar.rail");
   const [input, setInput] = useState(initialText);
@@ -114,6 +132,32 @@ export const ChatComposer = forwardRef<
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
   }
+
+  // AN EMPTY EDITOR FIELD IS AS TALL AS WHAT IT SAYS. Chromium counts a
+  // wrapped placeholder in scrollHeight (measured 2026-11-05: three lines
+  // of Site's at 200px read 84px), so sizing the empty box to it means a
+  // placeholder that runs to two lines on a phone is never cut in half —
+  // in the one-row shape as well as the stacked one, whose min-h-16 was
+  // the first answer to the same thing (5031899). Re-measured when the
+  // words change and when the width does, in the next frame, so the
+  // observer never sees the size it caused.
+  useLayoutEffect(() => {
+    if (!editor) return;
+    const el = textareaRef.current;
+    if (!el) return;
+    const fit = () => {
+      if (!el.value) resize(el);
+    };
+    fit();
+    let width = el.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth === width) return;
+      width = el.clientWidth;
+      requestAnimationFrame(fit);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [editor, placeholder]);
 
   useImperativeHandle(ref, () => ({
     setText: (text: string) => {
@@ -150,7 +194,14 @@ export const ChatComposer = forwardRef<
     if (!text || holdSend) return;
     setInput("");
     onLengthChange?.(0);
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    if (textareaRef.current) {
+      const el = textareaRef.current;
+      el.style.height = "auto";
+      // Emptied by the send: back to the placeholder's own height (above).
+      if (editor) requestAnimationFrame(() => {
+        if (!el.value) resize(el);
+      });
+    }
     onSend(text);
   }
 
@@ -165,7 +216,11 @@ export const ChatComposer = forwardRef<
     <form onSubmit={submit}>
       {tray}
       <div
-        className="relative"
+        // The editor's field draws its own frame (`.editor-field`,
+        // globals.css) and lays the same children out in a row; the
+        // textarea inside it drops the frame it carries in Chat.
+        className={editor ? `editor-field flex flex-wrap items-center gap-1 p-1.5 ${dragging ? "ring-1 ring-foreground/60" : ""}` : "relative"}
+        data-shape={editor ? shape : undefined}
         onDragOver={attach ? (e) => { if (e.dataTransfer?.types?.includes("Files")) { e.preventDefault(); setDragging(true); } } : undefined}
         onDragLeave={attach ? () => setDragging(false) : undefined}
         onDrop={attach ? handleDrop : undefined}
@@ -186,8 +241,20 @@ export const ChatComposer = forwardRef<
           // πεδίο μένει κάτω, ίδιο με της αρχικής»): the controls sit on
           // a row under the text — voice bottom-left, send bottom-right —
           // so the text has the full width and never runs under a button.
-          className={`focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "ring-1 ring-foreground/60" : ""}`}
-          autoFocus
+          className={
+            editor
+              ? // The stacked shape's text is two lines tall: on a 390px
+                // phone a tool's placeholder runs to two lines (Site's
+                // does), and at one line it was cut in half (measured
+                // 2026-11-05, scripts/tests/editor-shell.prodtest.mjs).
+                `max-h-40 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-3 text-sm text-foreground outline-none placeholder:text-muted ${shape === "landing" ? "min-h-16 basis-full" : "min-h-[44px] min-w-[8rem]"}`
+              : `focus-glow max-h-[45vh] min-h-[6.5rem] w-full resize-none overflow-y-auto rounded-field border border-border bg-panel px-4 pb-14 pt-3.5 text-sm text-foreground outline-none placeholder:text-muted focus:border-foreground/60 ${dragging ? "ring-1 ring-foreground/60" : ""}`
+          }
+          // Not over open work (the one-row shape): there the page is what
+          // the person came back to, and a field focused on arrival drew
+          // its 2px ring round the field before anything was pressed
+          // (ED2, 2026-11-05). The start screen and Chat still open on it.
+          autoFocus={shape !== "inline"}
         />
         {/* THE MICROPHONE SITS BESIDE THE BOX, NEVER INSTEAD OF IT, and
             what it produces lands in the textarea for the user to read
@@ -199,7 +266,10 @@ export const ChatComposer = forwardRef<
             new tab like any other and needs nothing from this component.
             The «+» after it gives the message a PDF or an image (package
             9), when the screen passes `attach`. */}
-        <div className="absolute bottom-2 start-2 flex items-center gap-1">
+        <div
+          className={`absolute bottom-2 start-2 flex items-center gap-1 ${editor ? "!static" : ""} ${shape === "inline" ? "order-first max-lg:-order-1" : ""} ${shape === "landing" ? "min-w-0 flex-1 flex-wrap" : ""}`}
+        >
+          {!editor && (
           <Link
             href="/dashboard/tools"
             aria-label={tRail("allTools")}
@@ -209,6 +279,7 @@ export const ChatComposer = forwardRef<
           >
             <LayoutGrid className="h-4 w-4" aria-hidden="true" />
           </Link>
+          )}
           {attach && (
             <>
               <button
@@ -219,7 +290,7 @@ export const ChatComposer = forwardRef<
                 data-testid="composer-attach"
                 className="flex h-11 w-11 items-center justify-center rounded-item text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
               >
-                <Paperclip className="h-4 w-4" aria-hidden="true" />
+                {editor ? <Plus className="h-4 w-4" aria-hidden="true" /> : <Paperclip className="h-4 w-4" aria-hidden="true" />}
               </button>
               <input
                 ref={fileRef}
@@ -254,8 +325,17 @@ export const ChatComposer = forwardRef<
           />
           {beside}
         </div>
+        {/* After the controls in the source, and `order-first` like them,
+            so on one row it lands right after «+» (equal `order` keeps
+            source order); in the stacked shape, where the controls are not
+            first, it is a row of its own above the text. */}
+        {editor && leading ? (
+          // On a phone the chip is a row of its own, and the FIRST row —
+          // above «+», the text and send (M14-Image.png).
+          <div className={`order-first flex min-w-0 items-center ${shape === "landing" ? "basis-full px-1 pt-0.5" : "max-lg:-order-2 max-lg:basis-full"}`}>{leading}</div>
+        ) : null}
         {trailingBeside && (
-          <div className="absolute bottom-2 end-14 flex items-center">{trailingBeside}</div>
+          <div className={`absolute bottom-2 end-14 flex items-center ${editor ? "!static shrink-0" : ""}`}>{trailingBeside}</div>
         )}
         {sending && onStop ? (
           <button
@@ -264,7 +344,7 @@ export const ChatComposer = forwardRef<
             aria-label={t("stop")}
             title={t("stop")}
             data-testid="chat-stop"
-            className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full border border-foreground/60 bg-panel text-foreground transition-all duration-200 hover:bg-foreground/15"
+            className={`absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full border border-foreground/60 bg-panel text-foreground transition-all duration-200 hover:bg-foreground/15 ${editor ? "!static shrink-0" : ""}`}
           >
             <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
           </button>
@@ -273,7 +353,7 @@ export const ChatComposer = forwardRef<
             type="submit"
             disabled={sending || holdSend || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-button text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className={`absolute bottom-2 end-2 flex h-11 w-11 items-center justify-center rounded-full bg-button text-button-ink transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${editor ? "!static shrink-0" : ""}`}
           >
             {sending ? (
               <ThinkingIndicator size="sm" tone="inherit" />

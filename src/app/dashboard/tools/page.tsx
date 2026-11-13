@@ -46,6 +46,12 @@ export default async function ToolsPage() {
   // EVERY TILE OF THE FINAL GRID IS DRAWN NOW (the owner's "ALL TOOLS: ΟΛΑ
   // ΤΑ ΤΕΤΡΑΓΩΝΑ", 2026-10-24) — `live` is only which ones are the real
   // tool rather than the Coming Soon screen at the same address.
+  // STILL GEMINI ALONE, ON PURPOSE (docs/IMAGE-PROVIDERS.md, κομμάτι 1).
+  // The Draft provider (BFL, already in the owner's Vercel) can open the
+  // tile without Gemini once it actually generates something — that flip
+  // lands with κομμάτι 3, together with the code that makes Draft real.
+  // Flipping it here first would open a live screen with no working path
+  // whenever only the Draft key is set, which is worse than Coming Soon.
   const live = availableTools({ imageKey: Boolean(imageApiKey()) }).map((tool) => tool.href);
 
   return (

@@ -346,7 +346,7 @@ export default async function PricingPage(
           <h2 className="mb-5 text-center text-xl font-bold text-foreground">
             {t("comparePlans")}
           </h2>
-          {/* ROWS: 47, in seven sections, all open.
+          {/* ROWS: 48, in seven sections, all open.
               THE NUMBER IS HELD, NOT REMEMBERED. It said FORTY-THREE here
               for two days after the table reached 45, because a count
               written into a comment goes stale the moment somebody adds a
@@ -355,7 +355,7 @@ export default async function PricingPage(
               comment, parses the figure after "ROWS:" and requires it to
               equal soldFeatures().length, so adding a row and leaving
               this line alone fails the build with both numbers in the
-              message. feature-catalog.test.mjs holds 47 as the ceiling on
+              message. feature-catalog.test.mjs holds 48 as the ceiling on
               how long the table may get. The table this replaced had 13,
               and the thirty-two it did not have included two per-plan
               ceilings the product enforces and had never named in any

@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { hasLiveSubscription } from "@/lib/billing/plan-resolution";
 import {
   OVERAGE_OFF,
   OVERAGE_CONSENT_VERSION,
@@ -33,6 +34,13 @@ export type OverageState = OverageSettings & {
   /** Euros already charged this calendar month. */
   spentEur: number;
   month: string;
+  /**
+   * Whether the webhook says this account's subscription is live, read
+   * with the settings rather than remembered from the consent (ΑΣ-4.16).
+   * False whenever it cannot be read: overage is refused, which is what
+   * the account had before overage existed.
+   */
+  subscriptionActive: boolean;
 };
 
 // NO NAMED OFF-SENTINEL. `OVERAGE_STATE_OFF` sat here as the fails-to-off
@@ -45,7 +53,7 @@ export async function loadOverageState(userId: string, now = new Date()): Promis
   const month = billingMonth(now);
   try {
     const admin = createAdminClient();
-    const [{ data: settings }, { data: ledger }] = await Promise.all([
+    const [{ data: settings }, { data: ledger }, account] = await Promise.all([
       admin
         .from("usage_overage_settings")
         .select("enabled, monthly_cap_eur, price_per_credit_eur, consented_at, consent_version")
@@ -57,13 +65,19 @@ export async function loadOverageState(userId: string, now = new Date()): Promis
         .eq("user_id", userId)
         .eq("billing_month", month)
         .limit(5_000),
+      // THE SUBSCRIPTION, AT THE MOMENT OF USE. stripe_subscription_id is
+      // written by the webhook while the subscription is live and cleared
+      // when it is not (hasLiveSubscription). Read here, beside the
+      // consent, so no caller can decide overage without it.
+      admin.auth.admin.getUserById(userId),
     ]);
+    const subscriptionActive = !account.error && hasLiveSubscription(account.data?.user ?? null);
 
     const spentEur = round2(
       (ledger ?? []).reduce((sum: number, row: { amount_eur: unknown }) => sum + (Number(row.amount_eur) || 0), 0)
     );
 
-    if (!settings) return { ...OVERAGE_OFF, spentEur, month };
+    if (!settings) return { ...OVERAGE_OFF, spentEur, month, subscriptionActive };
 
     return {
       enabled: settings.enabled === true,
@@ -74,6 +88,7 @@ export async function loadOverageState(userId: string, now = new Date()): Promis
       consentVersion: settings.consent_version === null ? null : Number(settings.consent_version),
       spentEur,
       month,
+      subscriptionActive,
     };
   } catch (err) {
     logApiError("billing:overage", err, { stage: "load", userId });
@@ -81,7 +96,7 @@ export async function loadOverageState(userId: string, now = new Date()): Promis
     // means the action is refused for lack of credits — the same outcome
     // the account had before overage existed. Failing to ON would charge
     // somebody because a query timed out.
-    return { ...OVERAGE_OFF, spentEur: 0, month };
+    return { ...OVERAGE_OFF, spentEur: 0, month, subscriptionActive: false };
   }
 }
 
@@ -94,7 +109,12 @@ export async function checkOverage(params: {
   const now = params.now ?? new Date();
   const state = await loadOverageState(params.userId, now);
   return {
-    decision: decideOverage({ settings: state, shortfall: params.shortfall, spentEur: state.spentEur }),
+    decision: decideOverage({
+      settings: state,
+      shortfall: params.shortfall,
+      spentEur: state.spentEur,
+      subscriptionActive: state.subscriptionActive,
+    }),
     state,
   };
 }

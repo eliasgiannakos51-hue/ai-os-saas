@@ -10,7 +10,7 @@ import { checkAiCallAllowed, fingerprintRequest } from "@/lib/ai-circuit-breaker
 import { readFlow } from "@/lib/automations/boxes";
 import { resumeFrom } from "@/lib/automations/runner";
 import { go } from "@/lib/automations/start-run";
-import { FLOW_COLUMNS, RUN_COLUMNS, UUID, flowGate, refuse, type FlowRecord } from "@/lib/automations/flow-access";
+import { FLOW_COLUMNS, RUN_COLUMNS, UUID, flowGate, modeFor, refuse, type FlowRecord } from "@/lib/automations/flow-access";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // @function-limit 300
@@ -99,8 +99,12 @@ export async function POST(_request: Request, props: { params: Promise<{ runId: 
     }
     if (!taken || taken.length !== 1) return refuse("not_waiting", 409);
 
+    // The same mode the waiting run started with, so withSupervisedApprovals
+    // rebuilds the identical array and this run's stored resume index
+    // still lands on the right box (boxes.ts's own doc comment on this).
+    const mode = await modeFor(admin, flow.id, user.id);
     const result = await go({
-      flow: { id: flow.id, user_id: user.id, name: flow.name, boxes: verdict.boxes, cost_limit: flow.cost_limit, time_zone: flow.time_zone },
+      flow: { id: flow.id, user_id: user.id, name: flow.name, boxes: verdict.boxes, cost_limit: flow.cost_limit, time_zone: flow.time_zone, mode },
       runId,
       user: { id: user.id, email: user.email ?? null },
       plan: account.plan,

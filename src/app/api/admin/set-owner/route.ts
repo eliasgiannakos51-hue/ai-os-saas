@@ -8,18 +8,25 @@ import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 // Sets is_owner: true and subscription_tier: "enterprise" on the given user
 // via the admin API (not raw SQL), so GoTrue picks up the change immediately.
 // Body: { "email": "..." }
+//
+// Auth: either signed in as admin/owner, OR provide the SUPABASE_SERVICE_ROLE_KEY
+// as a Bearer token (for bootstrapping before any admin exists in the JWT).
 export async function POST(request: Request) {
-  const caller = await getCurrentUser();
-  if (!caller || !isAdminOrOwner(caller)) {
-    return NextResponse.json({ error: "admin only" }, { status: 403 });
+  const authHeader = request.headers.get("authorization");
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const isBearerAuth = authHeader && serviceKey && authHeader === `Bearer ${serviceKey}`;
+
+  if (!isBearerAuth) {
+    const caller = await getCurrentUser();
+    if (!caller || !isAdminOrOwner(caller)) {
+      return NextResponse.json({ error: "admin only" }, { status: 403 });
+    }
   }
 
   const { email } = await request.json();
   if (!email) return NextResponse.json({ error: "email required" }, { status: 400 });
 
   const admin = createAdminClient();
-  // Find user by email
-  const { data: listing } = await admin.auth.admin.listUsers({ perPage: 1 });
   // listUsers doesn't filter by email in all Supabase versions, so we search
   const { data: allUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
   const target = allUsers?.users?.find(

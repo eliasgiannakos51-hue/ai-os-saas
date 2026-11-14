@@ -197,7 +197,7 @@ check("...the line below it is the one span allowed to truncate, which is what k
   /truncate text-xs text-muted/.test(grid));
 // The Coming Soon badge was removed — all tiles look the same.
 check("every tile fills its grid cell (h-full) with the same minimum height, pin absolutely positioned",
-  /className="group relative h-full"/.test(grid) && /min-h-\[88px\]/.test(grid));
+  /className="group relative h-full"/.test(grid) && /min-h-\[104px\]/.test(grid));
 
 console.log("\n== 1. the small ready-made jobs (quick-jobs.ts): every one opens a real page, worded everywhere ==");
 const { QUICK_JOBS, quickJobHref } = await loadTs("src/lib/nav/quick-jobs.ts");

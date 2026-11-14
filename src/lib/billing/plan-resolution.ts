@@ -1,5 +1,5 @@
 import "server-only";
-import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { isAdminEmail, isOwner } from "@/lib/auth/admin-emails";
 import { getPlan, higherPlanSlug, type Plan, type PlanSlug } from "@/lib/billing/plans";
 
 /**
@@ -71,6 +71,8 @@ export function resolvePlanSlug(
   // rest of the app calls an admin — see pricing/page.tsx, team/invite
   // and dashboard/team, all of which read `isAdmin ? "enterprise" : ...`.
   // Billing was the only place that disagreed.
+  // Owner (is_owner in user_metadata) — enterprise without env var.
+  if (isOwner(user)) return "enterprise";
   if (isAdminEmail(user?.email)) return "enterprise";
 
   return "free";

@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdminEmail } from "@/lib/auth/admin-emails";
+import { isAdminEmail, isOwner } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { FLAG_AUDIENCES, type FlagAudience } from "@/lib/flags/audience";
 
@@ -131,7 +131,9 @@ export async function readFlagAudiences(): Promise<Record<FlagKey, FlagAudience>
   return out;
 }
 
-export async function isFeatureOn(key: FlagKey, user: { email?: string | null } | null | undefined): Promise<boolean> {
+export async function isFeatureOn(key: FlagKey, user: { email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined): Promise<boolean> {
+  // The owner sees everything — every flag is on for them.
+  if (isOwner(user)) return true;
   const audiences = await readFlagAudiences();
   return audienceAllows(audiences[key], isStaffEmail(user?.email));
 }

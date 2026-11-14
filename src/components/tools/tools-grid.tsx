@@ -251,6 +251,8 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     const name = bigLabel(tool.href);
     const description = bigHint(tool.href);
     const isLive = liveSet.has(tool.href);
+    // CONTEXT.md §5: "ό,τι δεν είναι λειτουργικό δεν εμφανίζεται"
+    if (!isLive) return null;
     // A PIN needs a visible row of the sidebar's main groups: Recent tools
     // (api/nav/recent-tools) takes only those, so a pin on any other tile
     // would be refused every time — a button that does nothing.

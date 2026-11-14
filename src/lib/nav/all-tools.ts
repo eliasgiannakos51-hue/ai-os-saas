@@ -83,7 +83,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // a new address (nothing existing used it) carrying the Coming Soon
   // screen until a free-standing paste-text-pick-a-language tool is built.
   {
-    name: "translate", group: "ask", href: "/dashboard/translate", ready: false,
+    name: "translate", group: "ask", href: "/dashboard/translate", ready: false, hidden: true,
     waitingFor: "not built as its own tool — today it is only the Translate button inside Documents (src/components/documents/documents-shell.tsx) and the Site builder (src/app/dashboard/website-builder/page.tsx), both behind the `translate` switch",
   },
   // 3. ΦΤΙΑΞΕ
@@ -99,7 +99,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // (/dashboard/app-builder) and /dashboard/apps is untouched, still
   // reachable, listed in HIDDEN_FROM_ALL_TOOLS below.
   {
-    name: "apps", group: "make", href: "/dashboard/app-builder", ready: false,
+    name: "apps", group: "make", href: "/dashboard/app-builder", ready: false, hidden: true,
     waitingFor: "not built: a real generator (screens, saved data, a working form/list) rather than the manually-typed tracker /dashboard/apps already is",
   },
   // GAMES: already built (MASTER 16, package 26); only the switch `games`

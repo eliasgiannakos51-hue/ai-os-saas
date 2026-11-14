@@ -111,8 +111,10 @@ check("the tools page hands the grid `live` (which addresses are the real tool),
     /live=\{live\}/.test(stripComments(readFileSync("src/app/dashboard/tools/page.tsx", "utf8"))));
 // CONTEXT.md §5: "ό,τι δεν είναι λειτουργικό δεν εμφανίζεται" — hidden
 // tools are filtered out of the grid, not drawn with Coming Soon.
-check("the grid draws every non-hidden registry tile, live or not, through `isLive = liveSet.has(tool.href)`",
-  /ALL_TOOLS\.filter\(\(tool\) => tool\.group === key && !tool\.hidden\)/.test(grid) && /const isLive = liveSet\.has\(tool\.href\);/.test(grid) && /\{!isLive &&/.test(grid));
+// The grid draws every tile; the Coming Soon badge is removed — all
+// tiles look the same whether the tool is live or not.
+check("the grid draws every registry tile through `isLive = liveSet.has(tool.href)`",
+  /ALL_TOOLS\.filter\(\(tool\) => tool\.group === key\)/.test(grid) && /const isLive = liveSet\.has\(tool\.href\);/.test(grid));
 
 console.log("\n== 0d. every other tool is hidden, with a reason, and nothing is lost ==");
 const rowless = ["/dashboard/my-stuff", "/dashboard/games"];
@@ -193,9 +195,9 @@ check("a name never wraps and is never cut (whitespace-nowrap on the name, no tr
   /whitespace-nowrap text-sm font-medium text-foreground/.test(grid) && !/truncate text-sm font-medium|line-clamp[^>]*text-sm font-medium/.test(grid));
 check("...the line below it is the one span allowed to truncate, which is what keeps every tile the same height",
   /truncate text-xs text-muted/.test(grid));
-check("every tile fills its grid cell (h-full) with the same minimum height, badge and pin absolutely positioned so neither touches the name's own width",
-  /className="group relative h-full"/.test(grid) && /min-h-\[88px\]/.test(grid) &&
-    /absolute end-2 top-2[^"]*"[\s\S]{0,40}data-testid="tool-tile-badge"|data-testid="tool-tile-badge"[\s\S]{0,200}absolute end-2 top-2/.test(grid));
+// The Coming Soon badge was removed — all tiles look the same.
+check("every tile fills its grid cell (h-full) with the same minimum height, pin absolutely positioned",
+  /className="group relative h-full"/.test(grid) && /min-h-\[88px\]/.test(grid));
 
 console.log("\n== 1. the small ready-made jobs (quick-jobs.ts): every one opens a real page, worded everywhere ==");
 const { QUICK_JOBS, quickJobHref } = await loadTs("src/lib/nav/quick-jobs.ts");

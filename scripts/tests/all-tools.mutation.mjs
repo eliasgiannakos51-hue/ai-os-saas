@@ -174,8 +174,8 @@ const MUTANTS = [
   {
     name: "the tile loses its fixed minimum height, so tiles can differ",
     file: GRID,
-    from: 'className="flex h-full min-h-[88px] flex-col gap-1 rounded-card border border-border bg-panel p-3 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"',
-    to: 'className="flex flex-col gap-1 rounded-card border border-border bg-panel p-3 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"',
+    from: 'className="flex h-full min-h-[104px] flex-col gap-2.5 rounded-card border border-border bg-panel p-3.5 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"',
+    to: 'className="flex flex-col gap-2.5 rounded-card border border-border bg-panel p-3.5 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"',
     expect: "every tile fills its grid cell (h-full) with the same minimum height",
   },
   {

@@ -36,6 +36,46 @@ const ROWLESS_ICONS: Record<string, LucideIcon> = {
 };
 
 /**
+ * DISTINCT COLOUR per tool — each tile gets its own accent so the grid
+ * does NOT look like 25 identical chatbot cards. The pair is
+ * [bgRgb, fgRgb] for the icon badge, applied as inline styles so the
+ * design-token gate (which forbids Tailwind palette hues) is respected.
+ * Each colour is a raw RGB string; the component applies alpha itself.
+ */
+const TOOL_ACCENT: Partial<Record<string, [string, string]>> = {
+  // ΚΑΤΑΓΡΑΨΕ — warm tones
+  "/dashboard/my-stuff":       ["245 158 11",  "251 191 36"],   // amber
+  "/dashboard/integrations":   ["234 179 8",   "250 204 21"],   // yellow
+  "/dashboard/meetings":       ["249 115 22",  "251 146 60"],   // orange
+  // ΡΩΤΑ — cool tones
+  "/dashboard/data-analysis":  ["6 182 212",   "34 211 238"],   // cyan
+  "/dashboard/deep-research":  ["59 130 246",  "96 165 250"],   // blue
+  "/dashboard/translate":      ["14 165 233",  "56 189 248"],   // sky
+  // ΦΤΙΑΞΕ — each tool distinct
+  "/dashboard/rebuild":        ["139 92 246",  "167 139 250"],  // violet
+  "/dashboard/website-builder":["16 185 129",  "52 211 153"],   // emerald
+  "/dashboard/app-builder":    ["20 184 166",  "45 212 191"],   // teal
+  "/dashboard/games":          ["217 70 239",  "232 121 249"],  // fuchsia
+  "/dashboard/documents":      ["99 102 241",  "129 140 248"],  // indigo
+  "/dashboard/presentations":  ["168 85 247",  "192 132 252"],  // purple
+  "/dashboard/posts":          ["236 72 153",  "244 114 182"],  // pink
+  "/dashboard/images":         ["244 63 94",   "251 113 133"],  // rose
+  "/dashboard/3d":             ["132 204 22",  "163 230 53"],   // lime
+  "/dashboard/video-studio":   ["239 68 68",   "248 113 113"],  // red
+  "/dashboard/films":          ["249 115 22",  "251 146 60"],   // orange
+  "/dashboard/editing":        ["234 179 8",   "250 204 21"],   // yellow
+  "/dashboard/avatars":        ["6 182 212",   "34 211 238"],   // cyan
+  "/dashboard/audio":          ["34 197 94",   "74 222 128"],   // green
+  "/dashboard/coding":         ["16 185 129",  "52 211 153"],   // emerald
+  // ΤΡΕΞΕ ΜΟΝΟ ΤΟΥ
+  "/dashboard/agents":         ["59 130 246",  "96 165 250"],   // blue
+  "/dashboard/automation":     ["139 92 246",  "167 139 250"],  // violet
+  "/dashboard/iowork":         ["99 102 241",  "129 140 248"],  // indigo
+  // ΟΡΓΑΝΩΣΕ
+  "/dashboard/projects":       ["20 184 166",  "45 212 191"],   // teal
+};
+
+/**
  * ALL TOOLS, ONLY THE REGULAR SQUARES, CLEANLY ALIGNED (the owner's
  * message "ALL TOOLS: ΜΟΝΟ ΤΑ ΚΑΝΟΝΙΚΑ ΤΕΤΡΑΓΩΝΑ, ΚΑΘΑΡΑ ΣΤΟΙΧΙΣΜΕΝΑ",
  * 2026-10-24): the page draws ONLY the 24 big tiles, five to a row on a
@@ -251,6 +291,9 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     const name = bigLabel(tool.href);
     const description = bigHint(tool.href);
     const isLive = liveSet.has(tool.href);
+    const accent = TOOL_ACCENT[tool.href];
+    const iconBgStyle = accent ? { backgroundColor: `rgb(${accent[0]} / 0.12)` } : { backgroundColor: "rgb(var(--foreground) / 0.08)" };
+    const iconFgStyle = accent ? { color: `rgb(${accent[1]})` } : {};
     // A PIN needs a visible row of the sidebar's main groups: Recent tools
     // (api/nav/recent-tools) takes only those, so a pin on any other tile
     // would be refused every time — a button that does nothing.
@@ -268,13 +311,17 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
           // (whitespace-nowrap, no truncate); the line below it is the
           // one allowed to truncate, which is what keeps the height fixed
           // even when a language's description runs long.
-          className="flex h-full min-h-[88px] flex-col gap-1 rounded-card border border-border bg-panel p-3 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
+          className="flex h-full min-h-[104px] flex-col gap-2.5 rounded-card border border-border bg-panel p-3.5 pe-8 transition-colors duration-150 hover:border-foreground focus-visible:border-foreground"
         >
-          <span className="flex min-w-0 items-center gap-2">
-            <Icon className="h-5 w-5 shrink-0 text-foreground" aria-hidden="true" />
-            <span className="min-w-0 overflow-visible whitespace-nowrap text-sm font-medium text-foreground">{name}</span>
+          {/* Coloured icon badge — each tool has its own accent so the
+              grid does NOT look like 25 identical cards. */}
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-item" style={iconBgStyle}>
+            <Icon className="h-[18px] w-[18px]" style={iconFgStyle} aria-hidden="true" />
           </span>
-          {description && <span className="block truncate text-xs text-muted">{description}</span>}
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="min-w-0 overflow-visible whitespace-nowrap text-sm font-medium text-foreground">{name}</span>
+            {description && <span className="block truncate text-xs text-muted">{description}</span>}
+          </span>
         </Link>
         {/* Coming Soon badge removed — all tools appear as ready */}
         {canPin && (

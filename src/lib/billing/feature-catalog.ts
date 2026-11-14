@@ -1611,6 +1611,7 @@ export const FEATURE_CATALOG: FeatureEntry[] = [
     routes: [
       "system-health/files", "system-health/flags", "system-health/keys", "system-health/resolve", "system-health/test-alert", "cron/cost-alerts",
       "admin/users", "admin/users/credits", "admin/costs", "admin/revenue", "admin/suspend", "admin/refund", "admin/audit-log",
+      "admin/debug-plan", "admin/set-owner",
     ],
     charges: false,
     enforcedIn: "src/lib/auth/admin-emails.ts",

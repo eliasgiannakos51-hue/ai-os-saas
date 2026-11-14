@@ -211,6 +211,8 @@ const ALLOWED = new Set([
   // Signup and the OAuth landing bootstrap a brand-new account to "free".
   "src/app/api/signup/route.ts",
   "src/app/auth/callback/route.ts",
+  // The admin set-owner bootstraps the owner to "enterprise" via GoTrue.
+  "src/app/api/admin/set-owner/route.ts",
 ]);
 const unexpected = hits.filter((f) => !ALLOWED.has(f));
 check(

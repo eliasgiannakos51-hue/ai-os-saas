@@ -289,6 +289,8 @@ const diagLog = () => {};
 const hasActiveBetaBypass = async () => false;
 const isBetaTester = (u) => u?.user_metadata?.is_beta_tester === true;
 const isAdminEmail = () => false;
+const isOwner = () => false;
+const isAdminOrOwner = () => false;
 const clearLegacyEntitlements = async () => {};
 const resolvePlanSlug = (u) => u?.user_metadata?.subscription_tier ?? "free";
 const resolvePlan = () => null;

@@ -269,8 +269,9 @@ console.log(`${literalKeys.size} literal t()-call keys, ${dynamicNamespaces.size
 // after the same reading; adding to it to silence this test without
 // reading the code is exactly the mistake the header describes.
 const KNOWN_ORPHANS = [
-  // AG1 Κ3 (2026-11-11): creditCap is now read by agents-shell.tsx via
-  // t("approvals.creditCap"). KNOWN_ORPHANS is empty again.
+  // Coming Soon badge removed from tools grid (2026-11-14): the key stays
+  // in the messages for when tools are re-enabled with the badge.
+  "dashboard.tools.comingSoonBadge",
 ];
 
 check(`the message-key walk found keys (${allKeys.length})`, allKeys.length >= 2000,

@@ -83,7 +83,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // a new address (nothing existing used it) carrying the Coming Soon
   // screen until a free-standing paste-text-pick-a-language tool is built.
   {
-    name: "translate", group: "ask", href: "/dashboard/translate", ready: false, hidden: true,
+    name: "translate", group: "ask", href: "/dashboard/translate", ready: false,
     waitingFor: "not built as its own tool — today it is only the Translate button inside Documents (src/components/documents/documents-shell.tsx) and the Site builder (src/app/dashboard/website-builder/page.tsx), both behind the `translate` switch",
   },
   // 3. ΦΤΙΑΞΕ
@@ -99,7 +99,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // (/dashboard/app-builder) and /dashboard/apps is untouched, still
   // reachable, listed in HIDDEN_FROM_ALL_TOOLS below.
   {
-    name: "apps", group: "make", href: "/dashboard/app-builder", ready: false, hidden: true,
+    name: "apps", group: "make", href: "/dashboard/app-builder", ready: false,
     waitingFor: "not built: a real generator (screens, saved data, a working form/list) rather than the manually-typed tracker /dashboard/apps already is",
   },
   // GAMES: already built (MASTER 16, package 26); only the switch `games`
@@ -123,30 +123,30 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   // so it is registered and reachable at all; it flips to `ready: true`
   // only once every piece of the directive passes.
   {
-    name: "threeD", group: "make", href: "/dashboard/3d", ready: false, hidden: true,
+    name: "threeD", group: "make", href: "/dashboard/3d", ready: false,
     waitingFor: "the screen is built behind the '3d-tool' switch (Κομμάτι 2, docs/3D-PROVIDERS.md) but stays Σύντομα here until every piece passes — no photo-to-3D provider key from the owner yet",
   },
   // VIDEO: same reasoning as Apps — /dashboard/videos already exists as
   // the older manually-typed tracker (hidden sidebar row), so this tile's
   // address is new (/dashboard/video-studio) rather than overwriting it.
   {
-    name: "video", group: "make", href: "/dashboard/video-studio", ready: false, hidden: true,
+    name: "video", group: "make", href: "/dashboard/video-studio", ready: false,
     waitingFor: "needs a video provider key from the owner (Veo, NEEDS-FROM-ELIAS) and the real build",
   },
   {
-    name: "films", group: "make", href: "/dashboard/films", ready: false, hidden: true,
+    name: "films", group: "make", href: "/dashboard/films", ready: false,
     waitingFor: "the screen is built behind the 'films-tool' switch (Κομμάτι 2, docs/FILMS-HONESTY.md) but stays Σύντομα here until every piece passes — pieces 5-9 still need Video/Audio/Editing's own generators, not just their provider keys",
   },
   {
-    name: "editing", group: "make", href: "/dashboard/editing", ready: false, hidden: true,
+    name: "editing", group: "make", href: "/dashboard/editing", ready: false,
     waitingFor: "the Remotion-engine screen is built behind the 'editing-tool' switch (Κομμάτι 2, docs/EDITING-REMOTION.md) but stays Σύντομα here until every piece of the owner's directive passes, same as every other half-built tool on this tile",
   },
   {
-    name: "avatars", group: "make", href: "/dashboard/avatars", ready: false, hidden: true,
+    name: "avatars", group: "make", href: "/dashboard/avatars", ready: false,
     waitingFor: "needs an avatar provider key from the owner (HeyGen, NEEDS-FROM-ELIAS)",
   },
   {
-    name: "audio", group: "make", href: "/dashboard/audio", ready: false, hidden: true,
+    name: "audio", group: "make", href: "/dashboard/audio", ready: false,
     waitingFor: "voice-over alone could reuse /dashboard/voice's engine, but podcasts and music are not built, so the combined tool is not ready end to end",
   },
   // CODING: its line stays "Write and fix code" rather than naming GitHub
@@ -157,7 +157,7 @@ export const ALL_TOOLS: readonly AllToolsEntry[] = [
   { name: "agents", group: "runAlone", href: "/dashboard/agents", ready: true },
   { name: "automations", group: "runAlone", href: "/dashboard/automation", ready: true },
   {
-    name: "iowork", group: "runAlone", href: "/dashboard/iowork", ready: false, hidden: true,
+    name: "iowork", group: "runAlone", href: "/dashboard/iowork", ready: false,
     // The security plan is approved (2026-10-25). What is still missing is
     // the two unanswered questions of its §8 and the signing accounts they
     // decide — docs/IOWORK-TECH.md carries both, with costs.

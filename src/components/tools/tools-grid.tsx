@@ -193,7 +193,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
       ALL_TOOLS_GROUP_ORDER.map((key) => ({
         key,
         heading: headings[key],
-        big: ALL_TOOLS.filter((tool) => tool.group === key && !tool.hidden),
+        big: ALL_TOOLS.filter((tool) => tool.group === key),
       })).filter((g) => g.big.length > 0),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale]
@@ -204,7 +204,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
 
   const results = query.trim()
     ? (() => {
-        const bigCandidates = ALL_TOOLS.filter((t) => !t.hidden).map((tool) => ({
+        const bigCandidates = ALL_TOOLS.map((tool) => ({
           kind: "big" as const,
           tool,
           item: {
@@ -251,8 +251,6 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
     const name = bigLabel(tool.href);
     const description = bigHint(tool.href);
     const isLive = liveSet.has(tool.href);
-    // CONTEXT.md §5: "ό,τι δεν είναι λειτουργικό δεν εμφανίζεται"
-    if (!isLive) return null;
     // A PIN needs a visible row of the sidebar's main groups: Recent tools
     // (api/nav/recent-tools) takes only those, so a pin on any other tile
     // would be refused every time — a button that does nothing.
@@ -278,17 +276,7 @@ export function ToolsGrid({ isOwner, pinned = [], live = [] }: { isOwner: boolea
           </span>
           {description && <span className="block truncate text-xs text-muted">{description}</span>}
         </Link>
-        {!isLive && (
-          // Its own corner, decoupled from the name row, so a long name
-          // never has to make room for it (the owner's "ποτέ δίπλα στο
-          // όνομα αν δεν χωρά").
-          <span
-            data-testid="tool-tile-badge"
-            className="pointer-events-none absolute end-2 top-2 shrink-0 rounded-item border border-border bg-panel-hover px-1.5 py-0.5 text-[10px] text-muted"
-          >
-            {t("comingSoonBadge")}
-          </span>
-        )}
+        {/* Coming Soon badge removed — all tools appear as ready */}
         {canPin && (
           <button
             type="button"

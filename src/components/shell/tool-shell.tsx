@@ -118,7 +118,7 @@ type Props = {
    *  Agents' was the one sentence explaining what a scheduled agent is.
    *  A landing with only a heading had nowhere to put it. Optional, so
    *  every tool already on this landing draws exactly what it drew. */
-  empty?: { heading: string; why?: string; examples?: ShellExample[] };
+  empty?: { heading: string; why?: string; examples?: ShellExample[]; extra?: ReactNode };
   /** The [◧] history column: its open state, what toggles and opens it,
    *  and its own content (a `ShellHistoryColumn`, typically). Omit to
    *  keep the tool's own history UI (an option under the field). */
@@ -279,6 +279,7 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
                   ))}
                 </div>
               )}
+              {empty!.extra}
             </div>
           ) : (
           <ol className="chat-measure space-y-4">

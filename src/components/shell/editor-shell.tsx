@@ -364,6 +364,13 @@ export const EditorShell = forwardRef<ChatComposerHandle, Props>(function Editor
             ) : (
               <div data-testid="tool-shell-thread" className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
                 {showEmpty ? (
+                  empty!.extra ? (
+                    /* A tool that provides its own empty screen replaces the
+                       default globe + heading + examples entirely. */
+                    <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-lg flex-col items-center justify-center gap-5 px-2 text-center">
+                      {empty!.extra}
+                    </div>
+                  ) : (
                   // THE START SCREEN (M00-Start.png): the globe, one heading,
                   // the examples as full-width rows in one ~560px column.
                   <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full w-full max-w-[560px] flex-col items-center justify-center gap-6 text-center">
@@ -386,6 +393,7 @@ export const EditorShell = forwardRef<ChatComposerHandle, Props>(function Editor
                       </div>
                     )}
                   </div>
+                  )
                 ) : (
                   thread
                 )}

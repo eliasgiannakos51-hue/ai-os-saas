@@ -293,7 +293,8 @@ console.log("\n== 2. the lines ==");
 // 733 -> 743: coupons + invoices tabs (form inputs and list borders).
 // 743 -> 744: job role picker buttons in agent settings.
 // 744 -> 745: tool preview content borders (tool-preview-content.tsx).
-ok(`border utilities (${r.counts.borders}), ceiling 745`, r.counts.borders <= 745);
+// 745 -> 746: image empty state preview area + aspect pills.
+ok(`border utilities (${r.counts.borders}), ceiling 746`, r.counts.borders <= 746);
 // 6 -> 7 WITH THE BORDER COUNT UNMOVED, which is the only shape of this
 // trade worth allowing. /dashboard/ai-memory is a list of remembered
 // facts, forty of them on a talkative account. Written the ordinary way —

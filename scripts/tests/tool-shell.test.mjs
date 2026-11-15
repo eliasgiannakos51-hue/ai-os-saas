@@ -73,7 +73,7 @@ check("with no turns and no work open, the empty landing is the small globe, one
 // saying what a scheduled agent is for). Optional, and drawn only when
 // given, so every landing already shipped is byte-identical.
 check("...and one optional sentence under it, for a surface whose empty screen owes the reader a why",
-  /empty\?: \{ heading: string; why\?: string; examples\?: ShellExample\[\] \};/.test(shell) &&
+  /empty\?: \{ heading: string; why\?: string; examples\?: ShellExample\[\]; extra\?: ReactNode \};/.test(shell) &&
     /\{empty!\.why && <p className="max-w-sm text-sm leading-relaxed text-muted">\{empty!\.why\}<\/p>\}/.test(shell));
 check("the [◧] history column slides over the whole shell, same shape as Chat's and Coding's own, with New beside it",
   /data-testid="tool-shell-history"/.test(shell) && /data-testid="tool-shell-history-toggle"/.test(shell) &&

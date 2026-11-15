@@ -671,6 +671,30 @@ export function ImageShell({
             { key: "poster", label: t("empty.examples.poster") },
             { key: "avatar", label: t("empty.examples.avatar") },
           ],
+          extra: (
+            <div className="mt-4 flex w-full max-w-sm flex-col gap-4">
+              {/* Preview area */}
+              <div className={`w-full overflow-hidden rounded-card border-2 border-dashed border-border bg-panel ${ASPECT_CLASS[aspect]}`} style={{ maxWidth: 320, margin: "0 auto" }}>
+                <div className="flex h-full flex-col items-center justify-center gap-2">
+                  <span className="text-3xl opacity-30">🖼️</span>
+                </div>
+              </div>
+              {/* Size pills */}
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-xs text-muted">{t("aspect")}</span>
+                {IMAGE_ASPECTS.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setAspect(a)}
+                    className={`rounded-full px-3 py-1 text-[11px] ${aspect === a ? "border border-foreground text-foreground" : "border border-border text-muted"}`}
+                  >
+                    {aspectLabel[a]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ),
         }}
         history={{
           open: historyOpen,

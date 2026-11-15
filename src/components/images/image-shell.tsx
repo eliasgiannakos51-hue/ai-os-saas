@@ -672,24 +672,49 @@ export function ImageShell({
             { key: "avatar", label: t("empty.examples.avatar") },
           ],
           extra: (
-            <div className="mt-4 flex w-full max-w-sm flex-col gap-4">
-              {/* Preview area */}
-              <div className={`w-full overflow-hidden rounded-card border-2 border-dashed border-border bg-panel ${ASPECT_CLASS[aspect]}`} style={{ maxWidth: 320, margin: "0 auto" }}>
-                <div className="flex h-full flex-col items-center justify-center gap-2">
-                  <span className="text-3xl opacity-30">🖼️</span>
+            <div className="flex w-full flex-col items-center gap-5">
+              {/* Big image preview area */}
+              <div
+                className={`w-full max-w-xs overflow-hidden rounded-card border-2 border-dashed border-border bg-panel ${ASPECT_CLASS[aspect]}`}
+              >
+                <div className="flex h-full flex-col items-center justify-center gap-2 py-12">
+                  <span className="text-4xl opacity-20">🖼️</span>
+                  <span className="text-xs text-muted">{t("empty.heading")}</span>
                 </div>
               </div>
-              {/* Size pills */}
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-xs text-muted">{t("aspect")}</span>
-                {IMAGE_ASPECTS.map((a) => (
+
+              {/* Size selector */}
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[11px] font-semibold text-muted">{t("aspect")}</span>
+                <div className="flex gap-2">
+                  {IMAGE_ASPECTS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAspect(a)}
+                      className={`min-h-[44px] rounded-full px-4 py-1.5 text-xs ${aspect === a ? "border border-foreground text-foreground" : "border border-border text-muted"}`}
+                    >
+                      {aspectLabel[a]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Examples */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {[
+                  { key: "logo", label: t("empty.examples.logo") },
+                  { key: "poster", label: t("empty.examples.poster") },
+                  { key: "avatar", label: t("empty.examples.avatar") },
+                ].map((ex) => (
                   <button
-                    key={a}
+                    key={ex.key}
                     type="button"
-                    onClick={() => setAspect(a)}
-                    className={`rounded-full px-3 py-1 text-[11px] ${aspect === a ? "border border-foreground text-foreground" : "border border-border text-muted"}`}
+                    onClick={() => send(ex.label)}
+                    data-testid="tool-shell-example"
+                    className="min-h-[44px] rounded-full bg-panel px-4 text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                   >
-                    {aspectLabel[a]}
+                    {ex.label}
                   </button>
                 ))}
               </div>

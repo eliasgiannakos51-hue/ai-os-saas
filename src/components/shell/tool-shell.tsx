@@ -260,6 +260,13 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
         </div>
         <div data-testid="tool-shell-thread" className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
           {showEmpty ? (
+            empty!.extra ? (
+              /* A tool that provides its own empty screen replaces the
+                 default globe + heading + examples entirely. */
+              <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-lg flex-col items-center justify-center gap-5 px-2 text-center">
+                {empty!.extra}
+              </div>
+            ) : (
             <div data-testid="tool-shell-empty" className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
               <Earth variant="small" px={96} />
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">{empty!.heading}</h2>
@@ -279,8 +286,8 @@ export const ToolShell = forwardRef<ChatComposerHandle, Props>(function ToolShel
                   ))}
                 </div>
               )}
-              {empty!.extra}
             </div>
+            )
           ) : (
           <ol className="chat-measure space-y-4">
             {turns.map((turn) => (

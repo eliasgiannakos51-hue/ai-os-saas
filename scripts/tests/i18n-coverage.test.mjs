@@ -1120,7 +1120,15 @@ const PUBLIC_PAY_BASELINE = {
   "src/app/pay/[productId]/page.tsx": 2,
   "src/app/pay/success/page.tsx": 3,
 };
-const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE, ...PUBLIC_PAY_BASELINE };
+// TOOL PREVIEW CONTENT (2026-11-15). Static mockup text shown inside each
+// tool's landing/coming-soon screen — what the tool will look like. The
+// strings are labels and example data ("Headphones", "€89.99", "142 runs")
+// that describe the tool's purpose. They are not prose addressed to the
+// user; translating them is a polish step, not a missing translation.
+const TOOL_PREVIEW_BASELINE = {
+  "src/components/tools/tool-preview-content.tsx": 42,
+};
+const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE, ...PUBLIC_PAY_BASELINE, ...TOOL_PREVIEW_BASELINE };
 
 const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
 

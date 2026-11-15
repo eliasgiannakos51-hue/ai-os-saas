@@ -125,6 +125,8 @@ const ENGLISH_ON_PURPOSE = {
     "the public payment page for a customer who is NOT an Ionexa user — they have no locale setting and no account. 'Secured by Stripe' and 'Powered by Ionexa Payments' are brand phrases, the same in every language. The product's own name and price are the seller's, not ours.",
   "src/app/pay/success/page.tsx":
     "the payment success confirmation. Same reasoning: the customer has no account and the confirmation is one screen they see once. Stripe sends the receipt email in the customer's own language.",
+  "src/components/tools/tool-preview-content.tsx":
+    "static mockup content shown inside each tool's landing screen — example labels, placeholder data and tool descriptions. The strings describe the tool's purpose, not prose addressed to the user. Translating them is a polish step.",
 };
 
 const undeclared = untranslated.filter((r) => !ENGLISH_ON_PURPOSE[r.file]);

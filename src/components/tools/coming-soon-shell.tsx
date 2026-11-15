@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Earth } from "@/components/brand/earth";
 import { useToast } from "@/components/toast/toast-context";
+import { ToolPreviewContent, hasPreview } from "@/components/tools/tool-preview-content";
+import type { AllToolsNameKey } from "@/lib/nav/all-tools";
 
 /**
  * A TOOL THAT IS NOT BUILT YET, SHOWN AS A TILE ANYWAY (the owner's
@@ -70,20 +72,29 @@ export function ComingSoonShell({
       </div>
       <div data-testid="coming-soon" className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
         <div className="mx-auto flex min-h-full max-w-md flex-col items-center justify-center gap-5 text-center">
-          <Earth variant="small" px={96} />
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">{name}</h2>
-          {examples.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {examples.slice(0, 3).map((ex) => (
-                <span
-                  key={ex}
-                  data-testid="coming-soon-example"
-                  className="rounded-full bg-panel px-4 py-2 text-xs text-muted"
-                >
-                  {ex}
-                </span>
-              ))}
-            </div>
+          {hasPreview(toolKey) ? (
+            <>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{name}</h2>
+              <ToolPreviewContent toolKey={toolKey as AllToolsNameKey} />
+            </>
+          ) : (
+            <>
+              <Earth variant="small" px={96} />
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{name}</h2>
+              {examples.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {examples.slice(0, 3).map((ex) => (
+                    <span
+                      key={ex}
+                      data-testid="coming-soon-example"
+                      className="rounded-full bg-panel px-4 py-2 text-xs text-muted"
+                    >
+                      {ex}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

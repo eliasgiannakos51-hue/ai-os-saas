@@ -26,7 +26,7 @@
  *    when one is clicked.
  */
 
-const VERSION = "ionexa-v1";
+const VERSION = "ionexa-v2";
 const SHELL_CACHE = `${VERSION}-shell`;
 const PAGE_CACHE = `${VERSION}-pages`;
 const OFFLINE_URL = "/offline";

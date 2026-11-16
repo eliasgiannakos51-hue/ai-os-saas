@@ -622,7 +622,7 @@ export function ImageShell({
         onSend={send}
         onStop={() => abortRef.current?.abort()}
         options={[
-          <span key="aspect" className="relative">
+          <span key="aspect" className={`relative ${turns.length === 0 && !open ? "hidden" : ""}`}>
             <button type="button" onClick={() => setChoosingAspect((v) => !v)} aria-expanded={choosingAspect} data-testid="image-aspect" className={OPTION}>
               {aspectLabel[aspect]}
               <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />

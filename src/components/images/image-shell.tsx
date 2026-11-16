@@ -628,23 +628,28 @@ export function ImageShell({
               <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             {choosingAspect && (
-              <fieldset className="surface absolute bottom-full start-0 z-10 mb-2 w-56 space-y-1">
-                <legend className="sr-only">{t("aspect")}</legend>
-                {IMAGE_ASPECTS.map((a) => (
-                  <label key={a} className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm text-foreground">
-                    <input
-                      type="radio"
-                      name="image-aspect"
-                      checked={aspect === a}
-                      onChange={() => {
-                        setAspect(a);
-                        setChoosingAspect(false);
-                      }}
-                    />
-                    <span className="flex-1">{aspectLabel[a]}</span>
-                  </label>
-                ))}
-              </fieldset>
+              <>
+                {/* Invisible overlay — click anywhere outside to close */}
+                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- dismiss overlay */}
+                <div className="fixed inset-0 z-[9]" onClick={() => setChoosingAspect(false)} />
+                <fieldset className="surface absolute bottom-full start-0 z-10 mb-2 w-56 space-y-1">
+                  <legend className="sr-only">{t("aspect")}</legend>
+                  {IMAGE_ASPECTS.map((a) => (
+                    <label key={a} className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm text-foreground">
+                      <input
+                        type="radio"
+                        name="image-aspect"
+                        checked={aspect === a}
+                        onChange={() => {
+                          setAspect(a);
+                          setChoosingAspect(false);
+                        }}
+                      />
+                      <span className="flex-1">{aspectLabel[a]}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              </>
             )}
           </span>,
         ]}

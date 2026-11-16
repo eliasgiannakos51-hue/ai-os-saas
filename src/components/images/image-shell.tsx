@@ -702,18 +702,26 @@ export function ImageShell({
                 ))}
               </div>
 
-              {/* Workflow hint */}
-              <div className="flex items-center gap-3 text-[11px] text-muted/70">
-                <span className="flex items-center gap-1"><span style={{ color: "rgb(96 165 250)" }}>1</span> {t("empty.heading")}</span>
-                <span aria-hidden="true">→</span>
-                <span className="flex items-center gap-1"><span style={{ color: "rgb(96 165 250)" }}>2</span> {IMAGE_VARIANTS} {t("panel.status", { count: IMAGE_VARIANTS })}</span>
-                <span aria-hidden="true">→</span>
-                <span className="flex items-center gap-1"><span style={{ color: "rgb(96 165 250)" }}>3</span> {t("download")}</span>
+              {/* Workflow steps */}
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="flex items-center gap-1.5 rounded-full bg-panel px-3 py-1">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgb(59 130 246 / 0.15)", color: "rgb(96 165 250)" }}>1</span>
+                  <span className="text-muted">{t("placeholder")}</span>
+                </span>
+                <span className="text-muted/40" aria-hidden="true">→</span>
+                <span className="flex items-center gap-1.5 rounded-full bg-panel px-3 py-1">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgb(59 130 246 / 0.15)", color: "rgb(96 165 250)" }}>2</span>
+                  <span className="text-muted">{IMAGE_VARIANTS} versions</span>
+                </span>
+                <span className="text-muted/40" aria-hidden="true">→</span>
+                <span className="flex items-center gap-1.5 rounded-full bg-panel px-3 py-1">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgb(59 130 246 / 0.15)", color: "rgb(96 165 250)" }}>3</span>
+                  <span className="text-muted">{t("download")}</span>
+                </span>
               </div>
 
               {/* Quick start examples */}
               <div className="w-full space-y-1.5">
-                <p className="mb-2 text-center text-[11px] font-medium text-muted/70">{t("empty.heading")}</p>
                 {[
                   { key: "logo", label: t("empty.examples.logo") },
                   { key: "poster", label: t("empty.examples.poster") },

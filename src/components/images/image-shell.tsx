@@ -672,7 +672,7 @@ export function ImageShell({
             { key: "avatar", label: t("empty.examples.avatar") },
           ],
           extra: (
-            <div className="flex w-full max-w-md flex-col items-center gap-6">
+            <div className="flex w-full max-w-md flex-col items-center gap-5">
               {/* Preview area — changes shape with aspect */}
               <div
                 className={`relative w-full max-w-[260px] overflow-hidden ${ASPECT_CLASS[aspect]}`}
@@ -688,56 +688,57 @@ export function ImageShell({
                 </div>
               </div>
 
-              {/* Aspect ratio — segmented control */}
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
-                {IMAGE_ASPECTS.map((a) => (
-                  <button
-                    key={a}
-                    type="button"
-                    onClick={() => setAspect(a)}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
-                  >
-                    {aspectLabel[a]}
-                  </button>
-                ))}
+              {/* Size — aspect ratio */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">{t("aspect")}</span>
+                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+                  {IMAGE_ASPECTS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAspect(a)}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                    >
+                      {aspectLabel[a]}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Workflow steps */}
-              <div className="flex items-center gap-2 text-[11px]">
-                <span className="flex items-center gap-1.5 rounded-full bg-panel px-3 py-1">
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgb(59 130 246 / 0.15)", color: "rgb(96 165 250)" }}>1</span>
-                  <span className="text-muted">{t("placeholder")}</span>
-                </span>
-                <span className="text-muted/40" aria-hidden="true">→</span>
-                <span className="flex items-center gap-1.5 rounded-full bg-panel px-3 py-1">
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgb(59 130 246 / 0.15)", color: "rgb(96 165 250)" }}>2</span>
-                  <span className="text-muted">{IMAGE_VARIANTS} versions</span>
-                </span>
-                <span className="text-muted/40" aria-hidden="true">→</span>
-                <span className="flex items-center gap-1.5 rounded-full bg-panel px-3 py-1">
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgb(59 130 246 / 0.15)", color: "rgb(96 165 250)" }}>3</span>
-                  <span className="text-muted">{t("download")}</span>
-                </span>
+              {/* Quality — resolution selector */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Quality</span>
+                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+                  {(["720p", "1080p", "2K", "4K"] as const).map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      disabled
+                      className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted/40"
+                      title="Coming soon"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Quick start examples */}
-              <div className="w-full space-y-1.5">
-                {[
-                  { key: "logo", label: t("empty.examples.logo") },
-                  { key: "poster", label: t("empty.examples.poster") },
-                  { key: "avatar", label: t("empty.examples.avatar") },
-                ].map((ex) => (
-                  <button
-                    key={ex.key}
-                    type="button"
-                    onClick={() => send(ex.label)}
-                    data-testid="tool-shell-example"
-                    className="flex min-h-[44px] w-full items-center gap-3 rounded-card bg-panel px-4 text-sm text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
-                  >
-                    <Zap className="h-3.5 w-3.5 shrink-0 opacity-40" aria-hidden="true" />
-                    {ex.label}
-                  </button>
-                ))}
+              {/* Style selector */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Style</span>
+                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+                  {(["Natural", "Vivid", "Artistic"] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      disabled
+                      className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted/40"
+                      title="Coming soon"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ),

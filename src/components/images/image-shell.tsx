@@ -672,29 +672,24 @@ export function ImageShell({
             { key: "avatar", label: t("empty.examples.avatar") },
           ],
           extra: (
-            <div className="flex w-full max-w-sm flex-col items-center gap-8">
-              {/* Heading */}
-              <div className="space-y-1 text-center">
-                <h2 className="text-xl font-semibold text-foreground">{t("empty.heading")}</h2>
-                <p className="text-xs text-muted">{t("help")}</p>
-              </div>
-
+            <div className="flex w-full max-w-md flex-col items-center gap-6">
               {/* Preview area — changes shape with aspect */}
               <div
-                className={`w-full max-w-[240px] ${ASPECT_CLASS[aspect]}`}
-                style={{ background: "rgb(30 32 40 / 0.6)", borderRadius: "var(--radius-card)" }}
+                className={`relative w-full max-w-[260px] overflow-hidden ${ASPECT_CLASS[aspect]}`}
+                style={{ background: "rgb(30 32 40 / 0.5)", borderRadius: "var(--radius-card)", border: "1px solid rgb(255 255 255 / 0.06)" }}
               >
-                <div className="flex h-full flex-col items-center justify-center">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true" className="opacity-30">
-                    <rect x="6" y="10" width="36" height="28" rx="4" stroke="currentColor" strokeWidth="1.5" />
-                    <circle cx="18" cy="22" r="4" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M6 32 l10-8 6 4 10-10 10 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <div className="flex h-full flex-col items-center justify-center gap-3">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true" className="opacity-25">
+                    <rect x="5" y="8" width="30" height="24" rx="3" stroke="currentColor" strokeWidth="1.2" />
+                    <circle cx="15" cy="18" r="3.5" stroke="currentColor" strokeWidth="1.2" />
+                    <path d="M5 27 l8-6 5 3 9-9 8 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
+                  <span className="text-[11px] text-muted/60">{aspectLabel[aspect]}</span>
                 </div>
               </div>
 
-              {/* Aspect ratio selector */}
-              <div className="flex items-center gap-1.5 rounded-full bg-panel p-1">
+              {/* Aspect ratio — segmented control */}
+              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
                 {IMAGE_ASPECTS.map((a) => (
                   <button
                     key={a}
@@ -707,8 +702,18 @@ export function ImageShell({
                 ))}
               </div>
 
-              {/* Try these */}
-              <div className="w-full space-y-2">
+              {/* Workflow hint */}
+              <div className="flex items-center gap-3 text-[11px] text-muted/70">
+                <span className="flex items-center gap-1"><span style={{ color: "rgb(96 165 250)" }}>1</span> {t("empty.heading")}</span>
+                <span aria-hidden="true">→</span>
+                <span className="flex items-center gap-1"><span style={{ color: "rgb(96 165 250)" }}>2</span> {IMAGE_VARIANTS} {t("panel.status", { count: IMAGE_VARIANTS })}</span>
+                <span aria-hidden="true">→</span>
+                <span className="flex items-center gap-1"><span style={{ color: "rgb(96 165 250)" }}>3</span> {t("download")}</span>
+              </div>
+
+              {/* Quick start examples */}
+              <div className="w-full space-y-1.5">
+                <p className="mb-2 text-center text-[11px] font-medium text-muted/70">{t("empty.heading")}</p>
                 {[
                   { key: "logo", label: t("empty.examples.logo") },
                   { key: "poster", label: t("empty.examples.poster") },
@@ -719,8 +724,9 @@ export function ImageShell({
                     type="button"
                     onClick={() => send(ex.label)}
                     data-testid="tool-shell-example"
-                    className="flex min-h-[44px] w-full items-center rounded-card bg-panel px-4 text-sm text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                    className="flex min-h-[44px] w-full items-center gap-3 rounded-card bg-panel px-4 text-sm text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                   >
+                    <Zap className="h-3.5 w-3.5 shrink-0 opacity-40" aria-hidden="true" />
                     {ex.label}
                   </button>
                 ))}

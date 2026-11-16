@@ -939,6 +939,76 @@ export function WebsiteShell({
           { key: "portfolio", label: t("empty.examples.portfolio") },
           { key: "restaurant", label: t("empty.examples.restaurant") },
         ],
+        extra: (
+          <div className="flex w-full max-w-md flex-col items-center gap-5">
+            {/* Browser preview placeholder */}
+            <div className="w-full max-w-[320px] overflow-hidden" style={{ borderRadius: "var(--radius-card)", border: "1px solid rgb(255 255 255 / 0.06)" }}>
+              {/* Browser chrome bar */}
+              <div className="flex items-center gap-1.5 px-3 py-2" style={{ background: "rgb(30 32 40 / 0.8)" }}>
+                <span className="h-2 w-2 rounded-full" style={{ background: "rgb(255 95 87 / 0.5)" }} />
+                <span className="h-2 w-2 rounded-full" style={{ background: "rgb(255 189 46 / 0.5)" }} />
+                <span className="h-2 w-2 rounded-full" style={{ background: "rgb(39 201 63 / 0.5)" }} />
+                <span className="ml-2 flex-1 rounded-full px-3 py-0.5 text-[10px] text-muted/40" style={{ background: "rgb(255 255 255 / 0.04)" }}>yoursite.com</span>
+              </div>
+              {/* Page area */}
+              <div className="flex aspect-video flex-col items-center justify-center gap-2" style={{ background: "rgb(30 32 40 / 0.4)" }}>
+                <Monitor className="h-8 w-8 opacity-20" aria-hidden="true" />
+                <span className="text-[11px] text-muted/50">{t("empty.heading")}</span>
+              </div>
+            </div>
+
+            {/* Pages */}
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Pages</span>
+              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+                {[null, ...PAGE_COUNT_CHOICES].map((n) => (
+                  <button
+                    key={n ?? "auto"}
+                    type="button"
+                    onClick={() => setPageCount(n)}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${pageCount === n ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                  >
+                    {n === null ? "Auto" : n}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Background style */}
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Background</span>
+              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
+                {(["auto", "solid", "gradient", "pattern"] as const).map((bg) => (
+                  <button
+                    key={bg}
+                    type="button"
+                    onClick={() => setDesign((d) => ({ ...d, background: bg }))}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-all duration-200 ${design.background === bg ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                  >
+                    {bg}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Photos */}
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Photos</span>
+              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+                {(["stock", "own", "none"] as const).map((ps) => (
+                  <button
+                    key={ps}
+                    type="button"
+                    onClick={() => setDesign((d) => ({ ...d, photoSource: ps }))}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-all duration-200 ${design.photoSource === ps ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                  >
+                    {ps === "own" ? "My photos" : ps === "none" ? "None" : "Stock"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ),
       }}
       history={{
         open: historyOpen,

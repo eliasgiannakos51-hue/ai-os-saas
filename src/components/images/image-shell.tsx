@@ -672,35 +672,43 @@ export function ImageShell({
             { key: "avatar", label: t("empty.examples.avatar") },
           ],
           extra: (
-            <div className="flex w-full flex-col items-center gap-6">
-              {/* Preview placeholder */}
+            <div className="flex w-full max-w-sm flex-col items-center gap-8">
+              {/* Heading */}
+              <div className="space-y-1 text-center">
+                <h2 className="text-xl font-semibold text-foreground">{t("empty.heading")}</h2>
+                <p className="text-xs text-muted">{t("help")}</p>
+              </div>
+
+              {/* Preview area — changes shape with aspect */}
               <div
-                className={`w-full max-w-[280px] overflow-hidden rounded-card bg-panel ${ASPECT_CLASS[aspect]}`}
+                className={`w-full max-w-[240px] ${ASPECT_CLASS[aspect]}`}
+                style={{ background: "rgb(30 32 40 / 0.6)", borderRadius: "var(--radius-card)" }}
               >
-                <div className="flex h-full flex-col items-center justify-center gap-3">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: "rgb(59 130 246 / 0.1)" }}>
-                    <Maximize2 className="h-7 w-7" style={{ color: "rgb(59 130 246 / 0.5)" }} aria-hidden="true" />
-                  </div>
-                  <p className="text-sm text-muted">{t("empty.heading")}</p>
+                <div className="flex h-full flex-col items-center justify-center">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true" className="opacity-30">
+                    <rect x="6" y="10" width="36" height="28" rx="4" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="18" cy="22" r="4" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M6 32 l10-8 6 4 10-10 10 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </div>
               </div>
 
-              {/* Aspect ratio pills */}
-              <div className="flex gap-2">
+              {/* Aspect ratio selector */}
+              <div className="flex items-center gap-1.5 rounded-full bg-panel p-1">
                 {IMAGE_ASPECTS.map((a) => (
                   <button
                     key={a}
                     type="button"
                     onClick={() => setAspect(a)}
-                    className={`min-h-[36px] rounded-full px-4 text-xs transition-colors duration-150 ${aspect === a ? "bg-foreground text-background" : "bg-panel text-muted hover:text-foreground"}`}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
                   >
                     {aspectLabel[a]}
                   </button>
                 ))}
               </div>
 
-              {/* Quick examples */}
-              <div className="flex flex-wrap justify-center gap-2">
+              {/* Try these */}
+              <div className="w-full space-y-2">
                 {[
                   { key: "logo", label: t("empty.examples.logo") },
                   { key: "poster", label: t("empty.examples.poster") },
@@ -711,7 +719,7 @@ export function ImageShell({
                     type="button"
                     onClick={() => send(ex.label)}
                     data-testid="tool-shell-example"
-                    className="min-h-[44px] rounded-full border border-border px-4 text-xs text-muted transition-colors duration-150 hover:border-foreground/30 hover:text-foreground"
+                    className="flex min-h-[44px] w-full items-center rounded-card bg-panel px-4 text-sm text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                   >
                     {ex.label}
                   </button>

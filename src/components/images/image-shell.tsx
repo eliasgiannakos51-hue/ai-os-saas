@@ -101,6 +101,8 @@ export function ImageShell({
   const [open, setOpen] = useState<"image" | null>(asked ? "image" : null);
   const [chosen, setChosen] = useState<number | null>(null);
   const [aspect, setAspect] = useState<ImageAspect>(IMAGE_ASPECTS[0]);
+  const [quality, setQuality] = useState<"720p" | "1080p" | "2K" | "4K">("1080p");
+  const [imgStyle, setImgStyle] = useState<"Natural" | "Vivid" | "Artistic">("Natural");
   const [choosingAspect, setChoosingAspect] = useState(false);
   const [running, setRunning] = useState<Running>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -678,17 +680,16 @@ export function ImageShell({
                 className={`relative w-full max-w-[260px] overflow-hidden ${ASPECT_CLASS[aspect]}`}
                 style={{ background: "rgb(30 32 40 / 0.5)", borderRadius: "var(--radius-card)", border: "1px solid rgb(255 255 255 / 0.06)" }}
               >
-                <div className="flex h-full flex-col items-center justify-center gap-3">
+                <div className="flex h-full flex-col items-center justify-center">
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true" className="opacity-25">
                     <rect x="5" y="8" width="30" height="24" rx="3" stroke="currentColor" strokeWidth="1.2" />
                     <circle cx="15" cy="18" r="3.5" stroke="currentColor" strokeWidth="1.2" />
                     <path d="M5 27 l8-6 5 3 9-9 8 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <span className="text-[11px] text-muted/60">{aspectLabel[aspect]}</span>
                 </div>
               </div>
 
-              {/* Size — aspect ratio */}
+              {/* Shape — aspect ratio */}
               <div className="flex flex-col items-center gap-1.5">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">{t("aspect")}</span>
                 <div className="flex items-center gap-1 rounded-full bg-panel p-1">
@@ -705,7 +706,7 @@ export function ImageShell({
                 </div>
               </div>
 
-              {/* Quality — resolution selector */}
+              {/* Quality */}
               <div className="flex flex-col items-center gap-1.5">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Quality</span>
                 <div className="flex items-center gap-1 rounded-full bg-panel p-1">
@@ -713,9 +714,8 @@ export function ImageShell({
                     <button
                       key={q}
                       type="button"
-                      disabled
-                      className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted/40"
-                      title="Coming soon"
+                      onClick={() => setQuality(q)}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${quality === q ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
                     >
                       {q}
                     </button>
@@ -723,7 +723,7 @@ export function ImageShell({
                 </div>
               </div>
 
-              {/* Style selector */}
+              {/* Style */}
               <div className="flex flex-col items-center gap-1.5">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Style</span>
                 <div className="flex items-center gap-1 rounded-full bg-panel p-1">
@@ -731,9 +731,8 @@ export function ImageShell({
                     <button
                       key={s}
                       type="button"
-                      disabled
-                      className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted/40"
-                      title="Coming soon"
+                      onClick={() => setImgStyle(s)}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${imgStyle === s ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
                     >
                       {s}
                     </button>

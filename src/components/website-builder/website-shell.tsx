@@ -422,52 +422,12 @@ export function WebsiteShell({
       // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
       const styleHints: Record<string, string> = {
         "Modern": "",
-        "Minimal": "\n\nDesign style: MINIMAL. Clean whitespace, restrained palette, elegant typography, no decorative elements. Let content breathe.",
-        "3D Premium": `\n\nDesign style: 3D PREMIUM — Awwwards-level quality. MANDATORY CSS effects to include:
-1. 3D TILT ON HOVER for all cards/images: .tilt-wrap{perspective:1000px} .tilt-card{transform-style:preserve-3d;transition:transform 0.6s cubic-bezier(0.23,1,0.32,1)} .tilt-card:hover{transform:rotateX(8deg) rotateY(-12deg)} — add a light reflection overlay with ::after gradient that appears on hover.
-2. FLOATING ELEMENTS: @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}} — apply to hero decorative elements, orbs, icons.
-3. LAYERED DEPTH SHADOWS on containers: box-shadow:0 1px 1px rgba(0,0,0,0.08),0 4px 4px rgba(0,0,0,0.06),0 16px 16px rgba(0,0,0,0.04),0 32px 32px rgba(0,0,0,0.02). On hover add translateY(-8px) with deeper shadows.
-4. GLASS PANELS: background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px — use for navigation, feature cards, pricing cards.
-5. SCROLL REVEAL with stagger: each section fades in with translateY(30px) and 0.15s delay between children using IntersectionObserver.
-6. IMAGE ZOOM on hover: overflow:hidden on parent, img transition:transform 0.5s, img:hover transform:scale(1.08).
-7. ANIMATED GRADIENT BLOBS in background: border-radius morphing animation (60% 40% 30% 70% cycling), placed behind content with position:absolute and z-index:-1.
-8. ROTATING GLOW BORDERS on feature cards using @property --angle with conic-gradient.
-Make EVERY element interactive. Dark background (#0a0a0a). The site must feel like a premium 3D experience.`,
-        "Glassmorphism": `\n\nDesign style: GLASSMORPHISM. MANDATORY CSS:
-1. ALL cards and panels: background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.3).
-2. Background: colorful gradient mesh or animated gradient blobs (border-radius morphing) behind glass panels.
-3. Navigation bar: glass effect with blur, sticky.
-4. Cards hover: increase background opacity to 0.15, add translateY(-4px).
-5. Floating orbs with blur in background for depth.
-6. Scroll reveal on all sections. Dark base background (#0d0d0d).`,
-        "Dark Luxury": `\n\nDesign style: DARK LUXURY. MANDATORY:
-1. Background: #0a0a0a or #050505 — pure dark.
-2. Accent: gold (#c9a84c or #d4af37) or champagne — used SPARINGLY on borders, highlights, hover states.
-3. Typography: elegant SERIF for headings (Playfair Display, Cormorant, Bodoni Moda), generous letter-spacing on uppercase labels.
-4. Spacing: very generous — min 120px between sections, 80px padding.
-5. Hover effects: subtle gold glow (box-shadow: 0 0 20px rgba(201,168,76,0.15)), smooth translateY(-4px).
-6. Thin gold lines (1px solid rgba(201,168,76,0.2)) as section dividers.
-7. Images with subtle parallax and hover zoom.
-8. Scroll reveal: elegant fade-in with 1s duration. Every element should feel expensive and refined.`,
-        "Neon": `\n\nDesign style: NEON CYBERPUNK. MANDATORY CSS:
-1. Dark background (#0a0a0f).
-2. Neon text: text-shadow:0 0 7px GLOW,0 0 10px GLOW,0 0 21px GLOW,0 0 42px GLOW — use the site's accent color as GLOW.
-3. Neon borders: box-shadow:0 0 5px GLOW,0 0 10px GLOW,0 0 20px GLOW,inset 0 0 5px GLOW;border:1px solid GLOW.
-4. Pulsing glow animation: @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}} on neon elements.
-5. Rotating glow borders on cards: @property --angle conic-gradient animation.
-6. Scanline overlay effect for cyberpunk feel.
-7. Scroll reveal with neon flash on entrance.`,
-        "Animated": `\n\nDesign style: HEAVILY ANIMATED. Use ALL these effects:
-1. Scroll reveal (IntersectionObserver) on EVERY section with staggered children (0.15s delay each).
-2. Parallax backgrounds on hero and divider sections (background-attachment:fixed).
-3. Hover lift on ALL interactive elements (translateY(-8px) + deeper shadow).
-4. Animated gradient background on hero (background-size:400% 400%, gradientShift keyframes).
-5. Staggered entrance for every list/grid.
-6. Image zoom on hover (scale 1.08).
-7. Floating decorative elements (translateY keyframes, 6s infinite).
-8. Smooth scroll behavior (scroll-behavior:smooth).
-9. Text fade-in animations on headings.
-The page must feel ALIVE with continuous subtle motion everywhere.`,
+        "Minimal": "\n\nDesign style requested: Minimal — clean whitespace, restrained palette, elegant typography.",
+        "3D Premium": "\n\nDesign style requested: 3D Premium — use 3D card tilt on hover with perspective, floating elements, glassmorphism panels, layered depth shadows, scroll reveal with stagger, image zoom on hover, animated gradient blobs in background, rotating glow borders. Dark background. Awwwards-level premium quality.",
+        "Glassmorphism": "\n\nDesign style requested: Glassmorphism — frosted glass cards with backdrop blur, gradient mesh background, sticky glass navigation, hover transitions, floating depth orbs. Dark background.",
+        "Dark Luxury": "\n\nDesign style requested: Dark Luxury — pure dark background, gold accent color, elegant serif headings, very generous spacing, gold glow on hover, thin gold line dividers, parallax images, elegant scroll reveal animations.",
+        "Neon": "\n\nDesign style requested: Neon Cyberpunk — dark background, neon glow on text and borders using text-shadow and box-shadow, pulsing glow animation, rotating glow borders, strong color contrasts.",
+        "Animated": "\n\nDesign style requested: Heavily Animated — scroll reveal on every section with stagger, parallax backgrounds, hover lifts on all elements, animated gradient hero, image zoom, floating decorative elements, smooth scroll, text fade-in.",
       };
       const styleHint = styleHints[siteStyle] ?? "";
       const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount) + styleHint;

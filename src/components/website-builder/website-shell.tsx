@@ -187,7 +187,7 @@ export function WebsiteShell({
   // How many pages the next site is asked for; null lets the site decide.
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [choosingPages, setChoosingPages] = useState(false);
-  const [siteStyle, setSiteStyle] = useState<"Modern" | "Minimal" | "3D" | "Colorful" | "AI">("Modern");
+  const [siteStyle, setSiteStyle] = useState<"Modern" | "Minimal" | "3D Premium" | "Glassmorphism" | "Dark Luxury" | "Neon" | "Animated">("Modern");
   const [customPages, setCustomPages] = useState(false);
   // THE BROWSER FRAME (package 5, Κομμάτι 1): which simulated width the
   // preview shows at. Remembered only for this visit — a real address
@@ -420,7 +420,16 @@ export function WebsiteShell({
         return;
       }
       // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
-      const styleHint = siteStyle !== "Modern" ? `\n\nDesign style: ${siteStyle}` : "";
+      const styleHints: Record<string, string> = {
+        "Modern": "",
+        "Minimal": "\n\nDesign style: Minimal — clean whitespace, restrained palette, elegant typography, no decorative elements.",
+        "3D Premium": "\n\nDesign style: 3D Premium — use CSS 3D transforms, perspective, rotateX/rotateY on hover for cards and images, dramatic depth with layered shadows (box-shadow with multiple layers), floating elements with translateZ, parallax scrolling backgrounds, glass-like surfaces with backdrop-filter: blur. Make it look like a premium Awwwards-winning 3D website.",
+        "Glassmorphism": "\n\nDesign style: Glassmorphism — frosted glass cards with backdrop-filter: blur(20px) and semi-transparent backgrounds (rgba white 0.1-0.2), subtle borders (1px solid rgba white 0.2), layered depth, soft shadows, gradient backgrounds behind glass panels. Modern and premium.",
+        "Dark Luxury": "\n\nDesign style: Dark Luxury — deep dark background (#0a0a0a or similar), gold/champagne accents, elegant serif typography, generous spacing, subtle animations, high-end feel like a luxury brand website. Minimal use of color, let typography and spacing create the premium feeling.",
+        "Neon": "\n\nDesign style: Neon — dark background with vibrant neon glow effects using CSS box-shadow with colored glows (0 0 20px color, 0 0 40px color), neon text with text-shadow glow, cyberpunk aesthetic, strong color contrasts, animated glow pulses.",
+        "Animated": "\n\nDesign style: Heavily Animated — use ALL available CSS animations: scroll-reveal on every section, parallax backgrounds, hover lifts on all interactive elements, staggered entrances for lists and grids, animated gradient backgrounds, smooth transitions everywhere. The page should feel alive and dynamic with continuous subtle motion.",
+      };
+      const styleHint = styleHints[siteStyle] ?? "";
       const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount) + styleHint;
       await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);
     })();
@@ -969,7 +978,7 @@ export function WebsiteShell({
             <div className="flex flex-col items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Design</span>
               <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
-                {(["Modern", "Minimal", "3D", "Colorful", "AI"] as const).map((s) => (
+                {(["Modern", "Minimal", "3D Premium", "Glassmorphism", "Dark Luxury", "Neon", "Animated"] as const).map((s) => (
                   <button
                     key={s}
                     type="button"

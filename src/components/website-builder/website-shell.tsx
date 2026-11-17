@@ -421,10 +421,7 @@ export function WebsiteShell({
         return;
       }
       // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
-      // Style hint: appended as a short line so the AI knows the requested style.
-      // Kept minimal to avoid confusing the off-topic classifier.
-      const styleTag = siteStyle !== "Modern" ? `\nDesign style: ${siteStyle}.` : "";
-      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount) + styleTag;
+      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount);
       await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);
     })();
   }

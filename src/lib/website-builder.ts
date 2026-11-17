@@ -284,9 +284,7 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
      @keyframes fadeInUp { from { opacity: 0; transform: translateY(MOTION_DISTANCE); } to { opacity: 1; transform: translateY(0); } }
 
 MOTION_DURATION, MOTION_DISTANCE, MOTION_EASING, MOTION_STAGGER and MOTION_AMBIENT are PLACEHOLDERS, like the gradient's COLOR_1..COLOR_4: substitute the numbers from the MOTION TIMING line of this site's DESIGN VARIATION block, never literals. Every site moving at the same speed reads as the same template however different its layout is.
-Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.
-
-PREMIUM EFFECTS: when brief says 3D/premium/glass/neon, use these CSS techniques: 3D tilt (perspective+rotateY/X+translateZ on hover), glassmorphism (backdrop-filter:blur(20px)+rgba bg), neon glow (text-shadow/box-shadow with site palette color), float animation (translateY keyframes).`;
+Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.`;
 
 // THE SECTION THAT DID NOT EXIST, and whose absence is the real reason
 // every generated site looked the same.

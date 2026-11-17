@@ -313,7 +313,7 @@ export function WebsiteShell({
         return;
       }
       if (outcome.kind === "notMade") {
-        say({ role: "tool", text: outcome.offTopic ? tShell("site.offTopic") : t("generateFailed") });
+        say({ role: "tool", text: outcome.offTopic ? tShell("site.offTopic") : (outcome.serverMessage ? `${t("generateFailed")} (${outcome.serverMessage})` : t("generateFailed")) });
         return;
       }
       const record = outcome.record;

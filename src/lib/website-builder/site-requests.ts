@@ -48,7 +48,7 @@ export type SiteStart =
    * reader's language from `offTopic` alone. A field nobody reads is an
    * invitation to put the English back.
    */
-  | { kind: "notMade"; offTopic: boolean }
+  | { kind: "notMade"; offTopic: boolean; serverMessage?: string }
   /**
    * Refused: the plan, the credits, today's limit, the size, a failure.
    * `code` is the route's own ("not_included" when the plan has no Site,
@@ -137,7 +137,7 @@ export async function startSiteGeneration(input: {
   if (data.needsClarification) return { kind: "questions", questions: (data.questions as string[]) ?? [] };
   if (!data.generated) {
     if (data.rateLimited) return { kind: "refused", error: refusedBeforeWork(data), ...routeSaid(data) };
-    return { kind: "notMade", offTopic: data.offTopic === true };
+    return { kind: "notMade", offTopic: data.offTopic === true, serverMessage: typeof data.message === "string" ? data.message : `server: ${JSON.stringify(data).slice(0, 200)}` };
   }
   const record = data.record as UserWebsite;
   // THE WORKER, fired and not awaited: it runs for minutes, and the

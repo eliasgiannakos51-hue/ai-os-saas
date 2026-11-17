@@ -889,19 +889,23 @@ export function WebsiteShell({
       // so in the editor layout they leave the field then, and it is the
       // approved one-row field (08-Site.png). They come back with «New».
       options={editor && current?.status === "completed" && !pending ? [] : [
-        <span key="design" className={`relative ${turns.length === 0 && !current ? "hidden" : ""}`}>
+        <span key="design" className="relative">
           <button type="button" onClick={() => setChoosingDesign((v) => !v)} aria-expanded={choosingDesign} data-testid="site-design" className={OPTION}>
             <Palette className="h-3.5 w-3.5" aria-hidden="true" />
             {tShell("site.design")}
           </button>
           {choosingDesign && (
-            <div className="surface absolute bottom-full start-0 z-10 mb-2 max-h-[60vh] w-80 overflow-y-auto">
-              <DesignControls value={design} onChange={setDesign} imageCount={photos.length} />
-            </div>
+            <>
+              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- dismiss overlay */}
+              <div className="fixed inset-0 z-[9]" onClick={() => setChoosingDesign(false)} />
+              <div className="surface absolute bottom-full start-0 z-10 mb-2 max-h-[60vh] w-80 overflow-y-auto">
+                <DesignControls value={design} onChange={setDesign} imageCount={photos.length} />
+              </div>
+            </>
           )}
         </span>,
-        // HOW MANY PAGES (package 10): the third option, for a new site.
-        <span key="pages" className={`relative ${turns.length === 0 && !current ? "hidden" : ""}`}>
+        // HOW MANY PAGES (package 10): hidden — pages selector is in the landing.
+        <span key="pages" className="relative hidden">
                 <button
                   type="button"
                   onClick={() => setChoosingPages((v) => !v)}
@@ -914,24 +918,28 @@ export function WebsiteShell({
                   {pageCount === null ? tShell("pages.auto") : tShell("pages.count", { count: pageCount })}
                 </button>
                 {choosingPages && (
-                  <div role="menu" className="surface absolute bottom-full start-0 z-10 mb-2 flex w-56 flex-col gap-1">
-                    {[null, ...PAGE_COUNT_CHOICES].map((n) => (
-                      <button
-                        key={n ?? "auto"}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={pageCount === n}
-                        data-testid="site-page-count-choice"
-                        onClick={() => {
-                          setPageCount(n);
-                          setChoosingPages(false);
-                        }}
-                        className={`${OPTION} justify-start ${pageCount === n ? "border-foreground text-foreground" : ""}`}
-                      >
-                        {n === null ? tShell("pages.auto") : tShell("pages.count", { count: n })}
-                      </button>
-                    ))}
-                  </div>
+                  <>
+                    {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- dismiss overlay */}
+                    <div className="fixed inset-0 z-[9]" onClick={() => setChoosingPages(false)} />
+                    <div role="menu" className="surface absolute bottom-full start-0 z-10 mb-2 flex w-56 flex-col gap-1">
+                      {[null, ...PAGE_COUNT_CHOICES].map((n) => (
+                        <button
+                          key={n ?? "auto"}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={pageCount === n}
+                          data-testid="site-page-count-choice"
+                          onClick={() => {
+                            setPageCount(n);
+                            setChoosingPages(false);
+                          }}
+                          className={`${OPTION} justify-start ${pageCount === n ? "border-foreground text-foreground" : ""}`}
+                        >
+                          {n === null ? tShell("pages.auto") : tShell("pages.count", { count: n })}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
         </span>,
       ]}
@@ -974,90 +982,6 @@ export function WebsiteShell({
               </div>
             </div>
 
-            {/* Pages */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Pages</span>
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
-                {[null, ...PAGE_COUNT_CHOICES].map((n) => (
-                  <button
-                    key={n ?? "auto"}
-                    type="button"
-                    onClick={() => { setPageCount(n); setCustomPages(false); }}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${!customPages && pageCount === n ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
-                  >
-                    {n === null ? "Auto" : n}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setCustomPages(true)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${customPages ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
-                >
-                  Other
-                </button>
-              </div>
-              {customPages && (
-                <input
-                  type="number"
-                  min={1}
-                  max={5}
-                  defaultValue={pageCount ?? 2}
-                  onChange={(e) => { const v = parseInt(e.target.value, 10); if (v >= 1 && v <= 5) setPageCount(v); }}
-                  className="mt-1 w-16 rounded-field bg-panel px-2 py-1 text-center text-xs text-foreground"
-                  placeholder="1-5"
-                />
-              )}
-            </div>
-
-            {/* Background */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Background</span>
-              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
-                {(["auto", "solid", "gradient", "photo", "pattern", "own-photo"] as const).map((bg) => (
-                  <button
-                    key={bg}
-                    type="button"
-                    onClick={() => setDesign((d) => ({ ...d, background: bg }))}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${design.background === bg ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
-                  >
-                    {bg === "own-photo" ? "My photo" : bg.charAt(0).toUpperCase() + bg.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Photos */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Photos</span>
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
-                {(["stock", "own", "none"] as const).map((ps) => (
-                  <button
-                    key={ps}
-                    type="button"
-                    onClick={() => setDesign((d) => ({ ...d, photoSource: ps }))}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${design.photoSource === ps ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
-                  >
-                    {ps === "own" ? "My photos" : ps === "none" ? "None" : "Stock"}
-                  </button>
-                ))}
-              </div>
-              {design.photoSource === "own" && (
-                <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-card bg-panel px-4 py-2 text-xs text-muted hover:bg-panel-hover hover:text-foreground">
-                  <Square className="h-4 w-4" aria-hidden="true" />
-                  Upload images
-                  <input
-                    type="file"
-                    accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
-                    multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files) addPhotos(Array.from(e.target.files));
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-              )}
-            </div>
           </div>
         ),
       }}

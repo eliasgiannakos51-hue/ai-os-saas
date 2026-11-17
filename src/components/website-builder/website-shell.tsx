@@ -187,6 +187,8 @@ export function WebsiteShell({
   // How many pages the next site is asked for; null lets the site decide.
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [choosingPages, setChoosingPages] = useState(false);
+  const [siteStyle, setSiteStyle] = useState<"Modern" | "Minimal" | "3D" | "Colorful" | "AI">("Modern");
+  const [customPages, setCustomPages] = useState(false);
   // THE BROWSER FRAME (package 5, Κομμάτι 1): which simulated width the
   // preview shows at. Remembered only for this visit — a real address
   // does not change by device, so there is nothing to persist.
@@ -418,7 +420,8 @@ export function WebsiteShell({
         return;
       }
       // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
-      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount);
+      const styleHint = siteStyle !== "Modern" ? `\n\nDesign style: ${siteStyle}` : "";
+      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount) + styleHint;
       await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);
     })();
   }
@@ -886,7 +889,7 @@ export function WebsiteShell({
       // so in the editor layout they leave the field then, and it is the
       // approved one-row field (08-Site.png). They come back with «New».
       options={editor && current?.status === "completed" && !pending ? [] : [
-        <span key="design" className="relative">
+        <span key="design" className={`relative ${turns.length === 0 && !current ? "hidden" : ""}`}>
           <button type="button" onClick={() => setChoosingDesign((v) => !v)} aria-expanded={choosingDesign} data-testid="site-design" className={OPTION}>
             <Palette className="h-3.5 w-3.5" aria-hidden="true" />
             {tShell("site.design")}
@@ -898,7 +901,7 @@ export function WebsiteShell({
           )}
         </span>,
         // HOW MANY PAGES (package 10): the third option, for a new site.
-        <span key="pages" className="relative">
+        <span key="pages" className={`relative ${turns.length === 0 && !current ? "hidden" : ""}`}>
                 <button
                   type="button"
                   onClick={() => setChoosingPages((v) => !v)}
@@ -943,17 +946,31 @@ export function WebsiteShell({
           <div className="flex w-full max-w-md flex-col items-center gap-5">
             {/* Browser preview placeholder */}
             <div className="w-full max-w-[320px] overflow-hidden" style={{ borderRadius: "var(--radius-card)", border: "1px solid rgb(255 255 255 / 0.06)" }}>
-              {/* Browser chrome bar */}
               <div className="flex items-center gap-1.5 px-3 py-2" style={{ background: "rgb(30 32 40 / 0.8)" }}>
                 <span className="h-2 w-2 rounded-full" style={{ background: "rgb(255 95 87 / 0.5)" }} />
                 <span className="h-2 w-2 rounded-full" style={{ background: "rgb(255 189 46 / 0.5)" }} />
                 <span className="h-2 w-2 rounded-full" style={{ background: "rgb(39 201 63 / 0.5)" }} />
                 <span className="ml-2 flex-1 rounded-full px-3 py-0.5 text-[10px] text-muted/40" style={{ background: "rgb(255 255 255 / 0.04)" }}>yoursite.com</span>
               </div>
-              {/* Page area */}
               <div className="flex aspect-video flex-col items-center justify-center gap-2" style={{ background: "rgb(30 32 40 / 0.4)" }}>
                 <Monitor className="h-8 w-8 opacity-20" aria-hidden="true" />
-                <span className="text-[11px] text-muted/50">{t("empty.heading")}</span>
+              </div>
+            </div>
+
+            {/* Design style */}
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Design</span>
+              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
+                {(["Modern", "Minimal", "3D", "Colorful", "AI"] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSiteStyle(s)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${siteStyle === s ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -965,27 +982,45 @@ export function WebsiteShell({
                   <button
                     key={n ?? "auto"}
                     type="button"
-                    onClick={() => setPageCount(n)}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${pageCount === n ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                    onClick={() => { setPageCount(n); setCustomPages(false); }}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${!customPages && pageCount === n ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
                   >
                     {n === null ? "Auto" : n}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setCustomPages(true)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${customPages ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                >
+                  Other
+                </button>
               </div>
+              {customPages && (
+                <input
+                  type="number"
+                  min={1}
+                  max={5}
+                  defaultValue={pageCount ?? 2}
+                  onChange={(e) => { const v = parseInt(e.target.value, 10); if (v >= 1 && v <= 5) setPageCount(v); }}
+                  className="mt-1 w-16 rounded-field bg-panel px-2 py-1 text-center text-xs text-foreground"
+                  placeholder="1-5"
+                />
+              )}
             </div>
 
-            {/* Background style */}
+            {/* Background */}
             <div className="flex flex-col items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Background</span>
               <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
-                {(["auto", "solid", "gradient", "pattern"] as const).map((bg) => (
+                {(["auto", "solid", "gradient", "photo", "pattern", "own-photo"] as const).map((bg) => (
                   <button
                     key={bg}
                     type="button"
                     onClick={() => setDesign((d) => ({ ...d, background: bg }))}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-all duration-200 ${design.background === bg ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${design.background === bg ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
                   >
-                    {bg}
+                    {bg === "own-photo" ? "My photo" : bg.charAt(0).toUpperCase() + bg.slice(1)}
                   </button>
                 ))}
               </div>
@@ -1000,12 +1035,28 @@ export function WebsiteShell({
                     key={ps}
                     type="button"
                     onClick={() => setDesign((d) => ({ ...d, photoSource: ps }))}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-all duration-200 ${design.photoSource === ps ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${design.photoSource === ps ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
                   >
                     {ps === "own" ? "My photos" : ps === "none" ? "None" : "Stock"}
                   </button>
                 ))}
               </div>
+              {design.photoSource === "own" && (
+                <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-card bg-panel px-4 py-2 text-xs text-muted hover:bg-panel-hover hover:text-foreground">
+                  <Square className="h-4 w-4" aria-hidden="true" />
+                  Upload images
+                  <input
+                    type="file"
+                    accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files) addPhotos(Array.from(e.target.files));
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
             </div>
           </div>
         ),

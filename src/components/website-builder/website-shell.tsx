@@ -421,17 +421,10 @@ export function WebsiteShell({
         return;
       }
       // The brief says what to do with the photos only when there are some (lib/website-design-brief.ts).
-      const styleHints: Record<string, string> = {
-        "Modern": "",
-        "Minimal": "\n\nDesign style requested: Minimal — clean whitespace, restrained palette, elegant typography.",
-        "3D Premium": "\n\nDesign style requested: 3D Premium — use 3D card tilt on hover with perspective, floating elements, glassmorphism panels, layered depth shadows, scroll reveal with stagger, image zoom on hover, animated gradient blobs in background, rotating glow borders. Dark background. Awwwards-level premium quality.",
-        "Glassmorphism": "\n\nDesign style requested: Glassmorphism — frosted glass cards with backdrop blur, gradient mesh background, sticky glass navigation, hover transitions, floating depth orbs. Dark background.",
-        "Dark Luxury": "\n\nDesign style requested: Dark Luxury — pure dark background, gold accent color, elegant serif headings, very generous spacing, gold glow on hover, thin gold line dividers, parallax images, elegant scroll reveal animations.",
-        "Neon": "\n\nDesign style requested: Neon Cyberpunk — dark background, neon glow on text and borders using text-shadow and box-shadow, pulsing glow animation, rotating glow borders, strong color contrasts.",
-        "Animated": "\n\nDesign style requested: Heavily Animated — scroll reveal on every section with stagger, parallax backgrounds, hover lifts on all elements, animated gradient hero, image zoom, floating decorative elements, smooth scroll, text fade-in.",
-      };
-      const styleHint = styleHints[siteStyle] ?? "";
-      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount) + styleHint;
+      // Style hint: appended as a short line so the AI knows the requested style.
+      // Kept minimal to avoid confusing the off-topic classifier.
+      const styleTag = siteStyle !== "Modern" ? `\nDesign style: ${siteStyle}.` : "";
+      const description = applyDesignBrief(text.slice(0, MAX_DESCRIPTION_LENGTH), { ...design, imageCount: paths.length }) + pageRequestBrief(pageCount) + styleTag;
       await generate(websiteNameFrom(text).slice(0, MAX_NAME_LENGTH), description, false, paths);
     })();
   }

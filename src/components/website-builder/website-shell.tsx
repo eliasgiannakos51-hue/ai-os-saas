@@ -325,7 +325,8 @@ export function WebsiteShell({
       say({ role: "tool", text: tShell("site.building", { name: record.name }) });
       poll(record.id);
     } catch (err) {
-      say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : t("generateFailed") });
+      const detail = err instanceof Error ? err.message : String(err);
+      say({ role: "tool", text: err instanceof TypeError ? tCommon("networkErrorCheckConnection") : `${t("generateFailed")} (${detail.slice(0, 200)})` });
     } finally {
       setBusy(false);
     }

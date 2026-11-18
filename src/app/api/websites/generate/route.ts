@@ -70,7 +70,6 @@ export async function POST(request: Request) {
 
     let name: string;
     let description: string;
-    let designStyle: string;
     let referenceImagePaths: string[];
     let skipClarification: boolean;
     let requestedProjectId: string | null;
@@ -78,7 +77,6 @@ export async function POST(request: Request) {
       const body = await request.json();
       name = typeof body?.name === "string" ? body.name.trim().slice(0, MAX_NAME_LENGTH) : "";
       description = typeof body?.description === "string" ? body.description.trim() : "";
-      designStyle = typeof body?.designStyle === "string" ? body.designStyle.trim() : "";
       referenceImagePaths = Array.isArray(body?.referenceImagePaths)
         ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
         : [];
@@ -409,13 +407,6 @@ export async function POST(request: Request) {
     // away between the two), and an AI call that already happened must be
     // charged regardless of what happens next.
     await settlePrechecks(clarificationRecord);
-
-    // DESIGN STYLE (2026-11-18): appended AFTER the classifier so it
-    // cannot confuse the off-topic check. The process route reads
-    // description from the DB, so this hint reaches the generation prompt.
-    if (designStyle) {
-      description = `${description}\nDesign style: ${designStyle}.`;
-    }
 
     // Credits: a READ-ONLY check against a rough pre-generation estimate
     // (lib/website-generation-cost.ts) — rejects early, before creating

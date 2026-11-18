@@ -119,9 +119,6 @@ export async function startSiteGeneration(input: {
   /** Starting a site FROM a project auto-joins it (owner's message
    *  2026-10-22, point 6) — read back as the caller's own by the route. */
   projectId?: string | null;
-  /** The design style from the landing selector (e.g. "3D Premium").
-   *  Sent separately so the off-topic classifier never sees it. */
-  designStyle?: string;
 }): Promise<SiteStart> {
   const referenceImagePaths = input.referenceImagePaths ?? [];
   const res = await fetchWithAuthRetry("/api/websites/generate", {
@@ -133,7 +130,6 @@ export async function startSiteGeneration(input: {
       referenceImagePaths,
       skipClarification: input.skipClarification,
       ...(input.projectId ? { projectId: input.projectId } : {}),
-      ...(input.designStyle ? { designStyle: input.designStyle } : {}),
     }),
   });
   const data = await res.json().catch(() => null);

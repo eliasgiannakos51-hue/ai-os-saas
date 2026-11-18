@@ -301,7 +301,7 @@ export function WebsiteShell({
   async function generate(name: string, description: string, skipClarification: boolean, referenceImagePaths: string[]) {
     setBusy(true);
     try {
-      const outcome = await startSiteGeneration({ name, description, skipClarification, referenceImagePaths, projectId: initialProjectId });
+      const outcome = await startSiteGeneration({ name, description, skipClarification, referenceImagePaths, projectId: initialProjectId, designStyle: siteStyle !== "Modern" ? siteStyle : undefined });
       if (outcome.kind === "refused") {
         say({ role: "tool", text: describe(outcome.error).text });
         return;

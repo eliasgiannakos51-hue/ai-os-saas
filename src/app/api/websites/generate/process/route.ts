@@ -250,7 +250,7 @@ export async function POST(request: Request) {
         .from("user_websites")
         .update({
           status: "failed",
-          error_message: "Something went wrong generating your website — please try again. No credits were charged.",
+          error_message: `This website has been attempted ${website.attempt_count} times and reached the retry limit (${MAX_GENERATION_ATTEMPTS}). Please create a new site with "+ New site" instead of retrying this one. No credits were charged for this attempt.`,
         })
         .eq("id", websiteId)
         .eq("user_id", writerUserId);

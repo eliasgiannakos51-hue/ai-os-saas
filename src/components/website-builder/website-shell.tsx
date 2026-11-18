@@ -225,7 +225,10 @@ export function WebsiteShell({
     const stopped = parseGenerationNotes(record.generation_notes).find((note) => note.kind === "stopped");
     if (stopped) return describeNote(stopped);
     const written = looksLikeCompleteHtmlDocument(record.html_content ?? "");
-    return `${t("generateFailed")} ${written ? tErrors("credits.unverified") : tErrors("credits.notCharged")}`;
+    const base = `${t("generateFailed")} ${written ? tErrors("credits.unverified") : tErrors("credits.notCharged")}`;
+    // Surface the actual server reason so the owner can diagnose.
+    const reason = typeof record.error_message === "string" && record.error_message.length > 0 ? ` (${record.error_message.slice(0, 200)})` : "";
+    return base + reason;
   }
   const current = websites.find((w) => w.id === currentId) ?? null;
   const running = isSiteRunning;

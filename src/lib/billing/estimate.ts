@@ -47,7 +47,7 @@ export type EstimateInput = {
   /**
    * Extra "continue where you left off" rounds the action may need when a
    * single call's output ceiling isn't enough (Website Builder allows
-   * MAX_CONTINUATION_ROUNDS = 2, see lib/website-builder.ts).
+   * MAX_CONTINUATION_ROUNDS = 1, see lib/website-builder.ts).
    *
    * These are not free repeats of the first call — each round re-sends
    * everything written so far as INPUT, so the input cost grows with each
@@ -157,7 +157,7 @@ export const ACTION_PROFILES = {
     // balance go negative.
     baseOutputChars: 34000,
     outputCharsPerInputChar: 9,
-    // MAX_CONTINUATION_ROUNDS in lib/website-builder.ts, which is 2 — and
+    // MAX_CONTINUATION_ROUNDS in lib/website-builder.ts, which is 1 — and
     // its loop is `for (round = 0; round <= MAX_CONTINUATION_ROUNDS)`, so
     // one initial call plus up to FOUR continuations.
     //
@@ -179,7 +179,7 @@ export const ACTION_PROFILES = {
     // The two numbers are kept in step by
     // scripts/tests/module-charges.test.mjs, which reads both files: a
     // comment claiming they agree is what let them disagree.
-    continuationRounds: 2,
+    continuationRounds: 1,
   },
   websiteEdit: {
     systemPromptTokens: 2900,

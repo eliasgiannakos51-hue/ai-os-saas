@@ -52,11 +52,11 @@ const WEBSITE_MAX_TOKENS = 128000;
 // call (latency + real money), so this stays bounded — but 2 was too tight
 // once pause_turn rounds are in the mix, since a server-side search loop
 // can consume a round without producing much document.
-// Reduced from 4 to 2 (2026-11-19): on Vercel Pro the function timeout
-// is 300s, and 4 rounds of ~60s each plus post-processing exceeded it,
-// causing every generation to be killed mid-flight. 2 rounds (1 initial
-// + 2 continuations = 3 calls) keeps total time under ~200s.
-const MAX_CONTINUATION_ROUNDS = 2;
+// Reduced to 1 (2026-11-19): on Vercel Pro the function timeout is 300s.
+// Even 2 rounds (3 calls × ~80s = ~240s + post-processing) exceeded it.
+// 1 round (1 initial + 1 continuation = 2 calls max) keeps total under
+// ~200s with room for Unsplash resolution and post-processing.
+const MAX_CONTINUATION_ROUNDS = 1;
 // Vercel kills the function at maxDuration (800s for the generate
 // processor) and everything in flight is lost — we have already paid for
 // every token generated up to that point. Starting a fresh round with

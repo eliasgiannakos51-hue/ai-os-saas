@@ -3,6 +3,34 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-19 (Website generation timeout fix + 3D effects + tool landings) 🔧
+
+Αντιμετώπιση timeout στο Website Builder (generation fails on Vercel Pro 300s).
+
+- **Παράλληλα AI calls** (`process/route.ts`): Greek spelling check + security
+  review τρέχουν ταυτόχρονα με `Promise.allSettled`. Γλιτώνει ~10-20s.
+- **MAX_CONTINUATION_ROUNDS 4→2→1** (`website-builder.ts`): μέγιστο 2 AI κλήσεις
+  αντί 5. Τα sites θα είναι λίγο μικρότερα αλλά θα ολοκληρώνονται.
+- **maxDuration 300** (`process/route.ts`): Vercel Pro cap.
+- **baseOutputChars 34k→36k** (`estimate.ts`): το hold καλύπτει 5-page site (75k chars).
+- **3D cinematic effects** (`enhance-3d.ts`): post-processing 3D (tilt, scroll-reveal,
+  parallax, hover zoom, depth shadows) πίσω από `cinematic-sites` flag.
+- **Image tool landing**: Quality pills (720p/1080p/2K/4K), Style pills
+  (Natural/Vivid/Artistic), aspect ratio.
+- **Website Builder landing**: browser frame, Design row, Pages, Background, Photos.
+- **Presentations landing**: slide preview, Slides/Images/Style pills.
+- **EditorShell `extra` prop**: root cause γιατί ο owner δεν έβλεπε τα changes.
+- **SW v3**: force cache clear.
+- **Design token fixes**: αφαίρεση rgb() literals, shadow-sm, rounded-sm, text-muted/50.
+  RTL fix (ml-2 → ms-2). Mutation anchors + i18n baseline ενημερωμένα.
+
+**Τι μετρήθηκε, 2026-11-19.** `npm run gates`: 417/418 πέρασαν. Μόνο
+`write-guards.test.mjs` (gate 418, pre-existing: attempt_count text στο
+error_message μπερδεύει τον updateChains parser — ίδιο failure στο HEAD
+πριν τα changes μου). `npm run build:ci` πράσινο.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-11γ (Ionexa Payments: recurring subscriptions, subscriptions tab, webhook lifecycle) ✅
 
 Ουρά Ionexa Payments — recurring subscriptions.

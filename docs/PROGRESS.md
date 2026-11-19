@@ -24,6 +24,13 @@
 - **Design token fixes**: αφαίρεση rgb() literals, shadow-sm, rounded-sm, text-muted/50.
   RTL fix (ml-2 → ms-2). Mutation anchors + i18n baseline ενημερωμένα.
 
+- **ROOT CAUSE 1: maxDuration 300→800** (`process/route.ts`): Vercel Pro
+  επιτρέπει 800s, ΟΧΙ 300. Η function σκοτωνόταν στα 300s ενώ η generation
+  χρειάζεται 400-600s.
+- **ROOT CAUSE 2: stale reaper 5min→15min** (`website-generation-limits.ts`):
+  ο status poller σκότωνε τη ROW στα 5 λεπτά (300s) ενώ η function τρέχει
+  μέχρι 800s. Τώρα 15 λεπτά (πάνω από τα 800s).
+
 **Τι μετρήθηκε, 2026-11-19.** `npm run gates`: 417/418 πέρασαν. Μόνο
 `write-guards.test.mjs` (gate 418, pre-existing: attempt_count text στο
 error_message μπερδεύει τον updateChains parser — ίδιο failure στο HEAD

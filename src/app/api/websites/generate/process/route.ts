@@ -656,8 +656,14 @@ export async function POST(request: Request) {
       // classification call, capped at 60 words, and REPORTED rather than
       // rewritten: a flagged word may be a brand, a village or a surname.
       // Never allowed to fail a generation — it returns [] on any error.
-      const misspelled = await findGreekMisspellings(htmlContent, description, { userId: user.id, costs });
-      if (misspelled.length > 0) notes.push({ kind: "spelling", words: misspelled });
+      //
+      // DEFERRED TO RUN IN PARALLEL with the security review below. The
+      // check only reads htmlContent and produces notes — it never modifies
+      // the HTML. Running it here sequentially added ~10-15s of AI call
+      // latency that pushed total generation time past Vercel's 300s Pro
+      // cap. The promise is awaited alongside reviewWebsiteContentSafety
+      // in a Promise.allSettled further down (search "PARALLEL AI CHECKS").
+      const greekSpellingPromise = findGreekMisspellings(htmlContent, description, { userId: user.id, costs });
 
       // DID THIS COME OUT AS THE SAME PAGE AS THEIR LAST ONE? — V5 #4.
       //
@@ -879,16 +885,32 @@ export async function POST(request: Request) {
       const pagesMade = 1 + extraPages.length;
       if (pagesAsked !== null && pagesMade < pagesAsked) notes.push({ kind: "pagesShort", asked: pagesAsked, made: pagesMade });
       const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined, cinematicSitesEnabled }));
-      // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
-      // content for what a deterministic scan cannot see, and content is
-      // content wherever it sits — four separate reviews would cost four
-      // times as much to answer the same question.
-      const contentReview = await reviewWebsiteContentSafety(
-        apiKey,
-        stripped.length === 1 ? stripped[0] : stripped.join("\n"),
-        costs,
-        writerUserId
-      );
+      // PARALLEL AI CHECKS — the two post-generation AI calls (Greek
+      // spelling + content-safety review) run at the same time. Neither
+      // modifies the HTML; both only produce metadata (notes / flags).
+      // Running them sequentially added ~10-20s that pushed total time
+      // past Vercel's 300s Pro cap. Promise.allSettled so a failure in
+      // one does not kill the other (Greek check already swallows errors
+      // internally, but belt-and-suspenders).
+      const [greekResult, contentReviewResult] = await Promise.allSettled([
+        greekSpellingPromise,
+        reviewWebsiteContentSafety(
+          apiKey,
+          stripped.length === 1 ? stripped[0] : stripped.join("\n"),
+          costs,
+          writerUserId
+        ),
+      ]);
+      // Greek spelling — the promise was started before the split (search
+      // "greekSpellingPromise" above).
+      const misspelled = greekResult.status === "fulfilled" ? greekResult.value : [];
+      if (misspelled.length > 0) notes.push({ kind: "spelling", words: misspelled });
+      // Content-safety review — ONE AI CALL FOR THE WHOLE SITE, not one
+      // per page. The review reads content for what a deterministic scan
+      // cannot see, and content is content wherever it sits.
+      const contentReview = contentReviewResult.status === "fulfilled"
+        ? contentReviewResult.value
+        : { isSafe: true, concerns: [] };
 
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),

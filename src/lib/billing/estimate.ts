@@ -155,26 +155,18 @@ export const ACTION_PROFILES = {
     // from the upper end instead: over-holding costs the user nothing
     // (the remainder is released at settlement), under-holding lets a
     // balance go negative.
-    baseOutputChars: 34000,
+    baseOutputChars: 36000,
     outputCharsPerInputChar: 9,
     // MAX_CONTINUATION_ROUNDS in lib/website-builder.ts, which is 1 — and
     // its loop is `for (round = 0; round <= MAX_CONTINUATION_ROUNDS)`, so
-    // one initial call plus up to FOUR continuations.
+    // one initial call plus up to ONE continuation.
     //
-    // This said 2, with a comment asserting MAX_CONTINUATION_ROUNDS was 2.
-    // It has been 4. The hold was therefore short of what a full-length
-    // generation can cost by a measured 26-32%, across every plan:
-    //
-    //   plan        input chars   held (2)   needed (4)   short by
-    //   free               1200         87          114     27 (+31%)
-    //   starter            1200         73           95     22 (+30%)
-    //   pro                3000         74           95     21 (+28%)
-    //
-    // A hold that is short is not a smaller charge — settlement bills the
-    // real usage either way. It is a balance that can go negative on the
-    // longest generations, which is the one thing a reservation exists to
-    // prevent, and the same failure the baseOutputChars note above this
-    // was written to fix.
+    // Reduced from 4 → 2 → 1 to fit within Vercel Pro's 300s function
+    // timeout. Each continuation re-sends everything so far as INPUT, so
+    // fewer rounds means a smaller hold — but the worst-case output for a
+    // 5-page site (75,000 chars at 15k/page) is unchanged, so
+    // baseOutputChars was bumped from 34k → 36k to keep the hold above
+    // the settlement for that case.
     //
     // The two numbers are kept in step by
     // scripts/tests/module-charges.test.mjs, which reads both files: a

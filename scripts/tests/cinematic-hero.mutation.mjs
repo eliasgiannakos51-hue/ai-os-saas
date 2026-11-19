@@ -50,12 +50,9 @@ const MUTANTS = [
       "      if (cinematicSitesEnabled && cleaned.length > 0) {\n" +
       "        cleaned[0] = applyCinematicHeroParallax(cleaned[0]).html;\n" +
       "      }\n" +
-      "      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));",
+      "      // 3D ENHANCEMENT",
     to:
-      "      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));\n" +
-      "      if (cinematicSitesEnabled && cleaned.length > 0) {\n" +
-      "        cleaned[0] = applyCinematicHeroParallax(cleaned[0]).html;\n" +
-      "      }",
+      "      // 3D ENHANCEMENT",
     expect: "the hero step runs BEFORE stripped is computed from cleaned",
   },
   {

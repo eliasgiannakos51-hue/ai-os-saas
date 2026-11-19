@@ -683,7 +683,7 @@ export function ImageShell({
               {/* Preview area — changes shape with aspect */}
               <div
                 className={`relative w-full max-w-[260px] overflow-hidden ${ASPECT_CLASS[aspect]}`}
-                style={{ background: "rgb(30 32 40 / 0.5)", borderRadius: "var(--radius-card)", border: "1px solid rgb(255 255 255 / 0.06)" }}
+                style={{ background: "rgb(var(--panel) / 0.5)", borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.3)" }}
               >
                 <div className="flex h-full flex-col items-center justify-center">
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true" className="opacity-25">
@@ -696,14 +696,14 @@ export function ImageShell({
 
               {/* Shape — aspect ratio */}
               <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">{t("aspect")}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("aspect")}</span>
                 <div className="flex items-center gap-1 rounded-full bg-panel p-1">
                   {IMAGE_ASPECTS.map((a) => (
                     <button
                       key={a}
                       type="button"
                       onClick={() => setAspect(a)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
                     >
                       {aspectLabel[a]}
                     </button>
@@ -713,14 +713,14 @@ export function ImageShell({
 
               {/* Quality */}
               <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Quality</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Quality</span>
                 <div className="flex items-center gap-1 rounded-full bg-panel p-1">
                   {(["720p", "1080p", "2K", "4K"] as const).map((q) => (
                     <button
                       key={q}
                       type="button"
                       onClick={() => setQuality(q)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${quality === q ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${quality === q ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
                     >
                       {q}
                     </button>
@@ -730,14 +730,14 @@ export function ImageShell({
 
               {/* Style */}
               <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted/50">Style</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Style</span>
                 <div className="flex items-center gap-1 rounded-full bg-panel p-1">
                   {(["Natural", "Vivid", "Artistic"] as const).map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => setImgStyle(s)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${imgStyle === s ? "bg-foreground text-background shadow-sm" : "text-muted hover:text-foreground"}`}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${imgStyle === s ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
                     >
                       {s}
                     </button>

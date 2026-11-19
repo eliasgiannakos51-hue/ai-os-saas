@@ -261,8 +261,8 @@ const MUTANTS = [
     name: "the classifier's own sentence is carried to the screen again",
     file: REQ,
     gate: RUN,
-    from: '    return { kind: "notMade", offTopic: data.offTopic === true };',
-    to: '    return { kind: "notMade", offTopic: data.offTopic === true, message: typeof data.message === "string" ? data.message : null };',
+    from: '    return { kind: "notMade", offTopic: data.offTopic === true, serverMessage: typeof data.message === "string" ? data.message : `server: ${JSON.stringify(data).slice(0, 200)}` };',
+    to: '    return { kind: "notMade", offTopic: data.offTopic === true, serverMessage: typeof data.message === "string" ? data.message : `server: ${JSON.stringify(data).slice(0, 200)}`, message: typeof data.message === "string" ? data.message : null };',
     expect: "the server's own sentence is not carried to the screen",
   },
 ];

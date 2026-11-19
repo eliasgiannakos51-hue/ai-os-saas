@@ -838,6 +838,16 @@ export async function POST(request: Request) {
       if (cinematicSitesEnabled && cleaned.length > 0) {
         cleaned[0] = applyCinematicHeroParallax(cleaned[0]).html;
       }
+      // 3D ENHANCEMENT (2026-11-19): every page gets CSS-based 3D effects
+      // (tilt, scroll-reveal, parallax, hover zoom, depth shadows) as a
+      // deterministic post-processing step — the AI never writes these.
+      // See lib/cinematic/enhance-3d.ts for the full list of effects.
+      if (cinematicSitesEnabled) {
+        const { enhance3D } = await import("@/lib/cinematic/enhance-3d");
+        for (let i = 0; i < cleaned.length; i++) {
+          cleaned[i] = enhance3D(cleaned[i]);
+        }
+      }
       const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc, cinematicSitesEnabled));
 
       // FINDABLE ON THE WEB. The prompt asks for a real title, a real

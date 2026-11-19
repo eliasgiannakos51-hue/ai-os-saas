@@ -108,7 +108,7 @@ export const dynamic = "force-dynamic";
 // true 20-30 minute single-request generations would need a different
 // execution model (a queue + long-running worker, or chunked/resumable
 // generation) — a real architecture change, out of scope here.
-export const maxDuration = 300; // @function-limit 300 — Vercel Pro cap
+export const maxDuration = 800; // @function-limit 800 — Vercel Pro GA ceiling (extended beta goes to 1800)
 
 const MAX_DESCRIPTION_LENGTH = 20000;
 

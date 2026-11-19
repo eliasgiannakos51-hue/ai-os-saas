@@ -42,7 +42,10 @@ export const MAX_GENERATION_ATTEMPTS = 3;
 // specific ceiling it's chosen against) so the platform's own execution
 // timeout is always what kills a truly stuck job first — this is purely
 // the client-visible backstop for when even that doesn't happen.
-export const STALE_JOB_TIMEOUT_MS = 5 * 60 * 1000;
+// Must be ABOVE maxDuration (800s on Pro) so the platform's own kill is
+// what fires first, not this backstop. 15 min = 900s, above the 800s
+// function ceiling plus margin for the row-write that follows.
+export const STALE_JOB_TIMEOUT_MS = 15 * 60 * 1000;
 export const STALE_JOB_TIMEOUT_WITH_IMAGES_MS = 12 * 60 * 1000;
 export const STALE_JOB_TIMEOUT_LARGE_REQUEST_MS = 25 * 60 * 1000;
 

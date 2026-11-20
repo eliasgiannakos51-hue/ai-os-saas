@@ -782,32 +782,53 @@ export function AutomationShell({
           ],
           extra: (
             <div className="flex w-full max-w-md flex-col items-center gap-5">
-              {/* Visual flow preview — 3 boxes connected by lines */}
-              <div className="flex w-full max-w-[340px] items-center justify-center gap-0">
-                {/* Trigger box */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.5)" }}>
-                    <Zap className="h-5 w-5 text-foreground/40" aria-hidden="true" />
+              {/* Visual flow preview — n8n-style node chain */}
+              <div className="flex w-full max-w-[420px] flex-col items-center gap-0">
+                {/* Row 1: Trigger → Read → AI */}
+                <div className="flex items-center gap-0">
+                  {/* Trigger node */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
+                      <Zap className="h-5 w-5 text-foreground/60" aria-hidden="true" />
+                      <span className="text-[9px] font-medium text-muted">{t("kinds.start")}</span>
+                    </div>
                   </div>
-                  <span className="text-[9px] text-muted">Trigger</span>
+                  <div className="h-px w-5" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                  {/* Read node */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
+                      <FileUp className="h-5 w-5 text-foreground/60" aria-hidden="true" />
+                      <span className="text-[9px] font-medium text-muted">{t("kinds.read")}</span>
+                    </div>
+                  </div>
+                  <div className="h-px w-5" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                  {/* AI node */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
+                      <Sparkles className="h-5 w-5 text-foreground/60" aria-hidden="true" />
+                      <span className="text-[9px] font-medium text-muted">{t("kinds.ai")}</span>
+                    </div>
+                  </div>
                 </div>
-                {/* Line */}
-                <div className="mb-4 h-px w-8" style={{ background: "rgb(var(--border) / 0.4)" }} />
-                {/* AI box */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.5)" }}>
-                    <Sparkles className="h-5 w-5 text-foreground/40" aria-hidden="true" />
+                {/* Vertical connector */}
+                <div className="h-4 w-px" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                {/* Row 2: Condition → Action */}
+                <div className="flex items-center gap-0">
+                  {/* Condition node */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
+                      <svg width="20" height="20" viewBox="0 0 20 20" className="text-foreground/60" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.2" /></svg>
+                      <span className="text-[9px] font-medium text-muted">{t("kinds.condition")}</span>
+                    </div>
                   </div>
-                  <span className="text-[9px] text-muted">AI</span>
-                </div>
-                {/* Line */}
-                <div className="mb-4 h-px w-8" style={{ background: "rgb(var(--border) / 0.4)" }} />
-                {/* Action box */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.5)" }}>
-                    <ArrowRight className="h-5 w-5 text-foreground/40" aria-hidden="true" />
+                  <div className="h-px w-5" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                  {/* Action node */}
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
+                      <ArrowRight className="h-5 w-5 text-foreground/60" aria-hidden="true" />
+                      <span className="text-[9px] font-medium text-muted">{t("kinds.action")}</span>
+                    </div>
                   </div>
-                  <span className="text-[9px] text-muted">Action</span>
                 </div>
               </div>
 

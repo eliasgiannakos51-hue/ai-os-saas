@@ -46,6 +46,7 @@ export async function POST(request: Request) {
   if (said.length < 3) return refuse("empty", 400);
   if (said.length > MAX_SAID_CHARS) return refuse("too_long", 400, { limit: MAX_SAID_CHARS });
   const timeZone = readTimeZone(body.timeZone);
+  const tier = body.tier === "premium" ? "premium" as const : "simple" as const;
 
   // NOT "is the Anthropic key set" any more: the call below goes through
   // the router, which can be served by any configured provider
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
     void recordAiCallForDailySpend(price);
 
     const costs = new CostAccumulator();
-    const built = await buildFlow({ said, timeZone, costs, userId: user.id, signal: request.signal });
+    const built = await buildFlow({ said, timeZone, tier, costs, userId: user.id, signal: request.signal });
     if (!built.ok && built.kind === "provider") {
       await releaseReservation(user.id, reservationId);
       logApiError("/api/automations/flows", new Error(built.detail), { stage: "build" });

@@ -1039,9 +1039,9 @@ input:-webkit-autofill:focus {
 .flow-line {
   position: relative;
   display: block;
-  width: 1px;
-  height: 1.5rem;
-  margin-inline-start: 1.25rem;
+  width: 2px;
+  height: 2rem;
+  margin-inline-start: 2.25rem;
   background-color: rgb(var(--border));
   transition: background-color var(--dur-fast) var(--ease);
 }

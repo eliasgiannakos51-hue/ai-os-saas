@@ -365,7 +365,7 @@ export function AutomationShell({
     const data = await call(
       "/api/automations/flows",
       "POST",
-      { said, timeZone: resolveBrowserTimeZone(), ...(initialProjectId ? { projectId: initialProjectId } : {}) },
+      { said, timeZone: resolveBrowserTimeZone(), tier: landingTier, ...(initialProjectId ? { projectId: initialProjectId } : {}) },
       "build"
     );
     if (!data) return;

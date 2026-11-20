@@ -31,7 +31,11 @@
   ο status poller σκότωνε τη ROW στα 5 λεπτά (300s) ενώ η function τρέχει
   μέχρι 800s. Τώρα 15 λεπτά (πάνω από τα 800s).
 
-**Τι μετρήθηκε, 2026-11-19.** `npm run gates`: 417/418 πέρασαν. Μόνο
+- **Automation landing (n8n-style)** (`automation-shell.tsx`): visual flow
+  preview (3 κουτιά Trigger→AI→Action), Files/Links/Paste hints,
+  Simple|Premium toggle, 6 quick-start templates. i18n 10 γλώσσες.
+
+**Τι μετρήθηκε, 2026-11-20.** `npm run gates`: 417/418 πέρασαν. Μόνο
 `write-guards.test.mjs` (gate 418, pre-existing: attempt_count text στο
 error_message μπερδεύει τον updateChains parser — ίδιο failure στο HEAD
 πριν τα changes μου). `npm run build:ci` πράσινο.

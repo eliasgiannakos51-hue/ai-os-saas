@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowRight, Bell, Crown, FileUp, FlaskConical, LayoutTemplate, Link2, Pause, Play, Power, Sparkles, Trash2, Undo2, Zap } from "lucide-react";
+import { ArrowRight, Bell, ClipboardPaste, Crown, FileUp, FlaskConical, LayoutTemplate, Link2, Pause, Play, Power, Sparkles, Trash2, Undo2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
@@ -811,12 +811,21 @@ export function AutomationShell({
                 </div>
               </div>
 
-              {/* Input hints — files, links */}
-              <div className="flex items-center gap-3 text-[11px] text-muted">
-                <span className="inline-flex items-center gap-1"><FileUp className="h-3 w-3" aria-hidden="true" /> Files</span>
-                <span className="inline-flex items-center gap-1"><Link2 className="h-3 w-3" aria-hidden="true" /> Links</span>
-                <span className="text-foreground/20">|</span>
-                <span>{t("landing.paste")}</span>
+              {/* Context inputs — files, links, paste: real clickable cards */}
+              <div className="flex w-full max-w-[340px] gap-2">
+                <label className="flex flex-1 cursor-pointer flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
+                  <FileUp className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-[10px] font-medium">Files</span>
+                  <input type="file" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) composerRef.current?.focus(); e.target.value = ""; }} />
+                </label>
+                <button type="button" onClick={() => { composerRef.current?.setText?.("https://"); composerRef.current?.focus(); }} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
+                  <Link2 className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-[10px] font-medium">Links</span>
+                </button>
+                <button type="button" onClick={() => composerRef.current?.focus()} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
+                  <ClipboardPaste className="h-4 w-4" aria-hidden="true" />
+                  <span className="text-[10px] font-medium">{t("landing.paste")}</span>
+                </button>
               </div>
 
               {/* Simple | Premium toggle */}

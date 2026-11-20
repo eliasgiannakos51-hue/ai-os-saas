@@ -587,65 +587,46 @@ export function PresentationsShell({
           { key: "training", label: t("empty.examples.training") },
         ],
         extra: (
-          <div className="flex w-full max-w-md flex-col items-center gap-5">
-            {/* Slide preview placeholder */}
-            <div className="w-full max-w-[320px] overflow-hidden" style={{ borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.3)" }}>
-              <div className="flex aspect-video flex-col items-center justify-center gap-2" style={{ background: "rgb(var(--panel) / 0.5)" }}>
-                <BarChart3 className="h-8 w-8 opacity-20" aria-hidden="true" />
+          <div className="flex w-full max-w-md flex-col items-center gap-6">
+            {/* Slide preview — premium deck frame */}
+            <div className="w-full max-w-[340px] overflow-hidden" style={{ borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.5)" }}>
+              <div className="flex aspect-video flex-col items-center justify-center gap-3" style={{ background: "rgb(var(--panel) / 0.5)" }}>
+                <BarChart3 className="h-10 w-10 text-foreground/15" aria-hidden="true" />
+                <span className="text-[10px] text-muted">Slide 1</span>
               </div>
-              <div className="flex gap-1 px-2 py-1.5" style={{ background: "rgb(var(--panel) / 0.8)" }}>
+              <div className="flex gap-1.5 px-3 py-2" style={{ background: "rgb(var(--panel) / 0.8)" }}>
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-6 flex-1 rounded-item" style={{ background: i === 0 ? "rgb(var(--foreground) / 0.12)" : "rgb(var(--foreground) / 0.04)" }} />
+                  <div key={i} className="h-7 flex-1 rounded-item" style={{ background: i === 0 ? "rgb(var(--foreground) / 0.12)" : "rgb(var(--foreground) / 0.04)" }} />
                 ))}
               </div>
             </div>
 
             {/* Slides count */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Slides</span>
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Slides</span>
+              <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {[5, 8, 10, 15, 20].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setSlideCount(n)}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${slideCount === n ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                  >
-                    {n}
-                  </button>
+                  <button key={n} type="button" onClick={() => setSlideCount(n)} className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${slideCount === n ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>{n}</button>
                 ))}
               </div>
             </div>
 
             {/* Images */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Images</span>
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Images</span>
+              <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {(["unsplash", "own", "none"] as const).map((src) => (
-                  <button
-                    key={src}
-                    type="button"
-                    onClick={() => setImageSource(src)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${imageSource === src ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                  >
-                    {src === "unsplash" ? "Stock" : src === "own" ? "My photos" : "None"}
-                  </button>
+                  <button key={src} type="button" onClick={() => setImageSource(src)} className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${imageSource === src ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>{src === "unsplash" ? "Stock" : src === "own" ? "My photos" : "None"}</button>
                 ))}
               </div>
             </div>
 
             {/* Style */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Style</span>
-              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Style</span>
+              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {(["Professional", "Creative", "Minimal", "Bold"] as const).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    className="rounded-full px-3 py-1.5 text-xs font-medium text-muted hover:text-foreground"
-                  >
-                    {s}
-                  </button>
+                  <button key={s} type="button" className="rounded-full px-4 py-2 text-xs font-medium text-muted hover:text-foreground">{s}</button>
                 ))}
               </div>
             </div>

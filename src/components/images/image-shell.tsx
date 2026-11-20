@@ -679,31 +679,32 @@ export function ImageShell({
             { key: "avatar", label: t("empty.examples.avatar") },
           ],
           extra: (
-            <div className="flex w-full max-w-md flex-col items-center gap-5">
-              {/* Preview area — changes shape with aspect */}
+            <div className="flex w-full max-w-md flex-col items-center gap-6">
+              {/* Preview area — changes shape with aspect, premium frame */}
               <div
-                className={`relative w-full max-w-[260px] overflow-hidden ${ASPECT_CLASS[aspect]}`}
-                style={{ background: "rgb(var(--panel) / 0.5)", borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.3)" }}
+                className={`relative w-full max-w-[280px] overflow-hidden ${ASPECT_CLASS[aspect]}`}
+                style={{ background: "rgb(var(--panel) / 0.6)", borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.5)" }}
               >
-                <div className="flex h-full flex-col items-center justify-center">
-                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true" className="opacity-25">
-                    <rect x="5" y="8" width="30" height="24" rx="3" stroke="currentColor" strokeWidth="1.2" />
-                    <circle cx="15" cy="18" r="3.5" stroke="currentColor" strokeWidth="1.2" />
-                    <path d="M5 27 l8-6 5 3 9-9 8 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                <div className="flex h-full flex-col items-center justify-center gap-2">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true" className="text-foreground/20">
+                    <rect x="6" y="10" width="36" height="28" rx="4" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="18" cy="22" r="4" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M6 33 l10-7 6 4 11-11 9 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
+                  <span className="text-[10px] text-muted">{aspectLabel[aspect]}</span>
                 </div>
               </div>
 
               {/* Shape — aspect ratio */}
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("aspect")}</span>
-                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{t("aspect")}</span>
+                <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                   {IMAGE_ASPECTS.map((a) => (
                     <button
                       key={a}
                       type="button"
                       onClick={() => setAspect(a)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
+                      className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${aspect === a ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
                     >
                       {aspectLabel[a]}
                     </button>
@@ -712,15 +713,15 @@ export function ImageShell({
               </div>
 
               {/* Quality */}
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Quality</span>
-                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Quality</span>
+                <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                   {(["720p", "1080p", "2K", "4K"] as const).map((q) => (
                     <button
                       key={q}
                       type="button"
                       onClick={() => setQuality(q)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${quality === q ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
+                      className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${quality === q ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
                     >
                       {q}
                     </button>
@@ -729,15 +730,15 @@ export function ImageShell({
               </div>
 
               {/* Style */}
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Style</span>
-                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Style</span>
+                <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                   {(["Natural", "Vivid", "Artistic"] as const).map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => setImgStyle(s)}
-                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${imgStyle === s ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
+                      className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${imgStyle === s ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
                     >
                       {s}
                     </button>

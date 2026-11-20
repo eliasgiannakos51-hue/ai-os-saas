@@ -951,118 +951,68 @@ export function WebsiteShell({
           { key: "restaurant", label: t("empty.examples.restaurant") },
         ],
         extra: (
-          <div className="flex w-full max-w-md flex-col items-center gap-5">
-            {/* Browser preview placeholder */}
-            <div className="w-full max-w-[320px] overflow-hidden" style={{ borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.3)" }}>
-              <div className="flex items-center gap-1.5 px-3 py-2" style={{ background: "rgb(var(--panel) / 0.8)" }}>
-                <span className="h-2 w-2 rounded-full" style={{ background: "rgb(var(--muted) / 0.3)" }} />
-                <span className="h-2 w-2 rounded-full" style={{ background: "rgb(var(--muted) / 0.3)" }} />
-                <span className="h-2 w-2 rounded-full" style={{ background: "rgb(var(--muted) / 0.3)" }} />
-                <span className="ms-2 flex-1 rounded-full px-3 py-0.5 text-[10px] text-muted" style={{ background: "rgb(var(--foreground) / 0.04)" }}>yoursite.com</span>
+          <div className="flex w-full max-w-md flex-col items-center gap-6">
+            {/* Browser frame preview — premium */}
+            <div className="w-full max-w-[340px] overflow-hidden" style={{ borderRadius: "var(--radius-card)", border: "1px solid rgb(var(--border) / 0.5)" }}>
+              <div className="flex items-center gap-1.5 px-3 py-2.5" style={{ background: "rgb(var(--panel) / 0.8)" }}>
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: "rgb(var(--muted) / 0.25)" }} />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: "rgb(var(--muted) / 0.25)" }} />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: "rgb(var(--muted) / 0.25)" }} />
+                <span className="ms-2 flex-1 rounded-full px-3 py-1 text-[10px] text-muted" style={{ background: "rgb(var(--foreground) / 0.04)" }}>yoursite.com</span>
               </div>
-              <div className="flex aspect-video flex-col items-center justify-center gap-2" style={{ background: "rgb(var(--panel) / 0.4)" }}>
-                <Monitor className="h-8 w-8 opacity-20" aria-hidden="true" />
+              <div className="flex aspect-video flex-col items-center justify-center gap-3" style={{ background: "rgb(var(--panel) / 0.3)" }}>
+                <Monitor className="h-10 w-10 text-foreground/15" aria-hidden="true" />
+                <span className="text-[10px] text-muted">Your website preview</span>
               </div>
             </div>
 
             {/* Design style */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Design</span>
-              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Design</span>
+              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {(["Modern", "Minimal", "3D Premium", "Glassmorphism", "Dark Luxury", "Neon", "Animated"] as const).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSiteStyle(s)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${siteStyle === s ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                  >
-                    {s}
-                  </button>
+                  <button key={s} type="button" onClick={() => setSiteStyle(s)} className={`rounded-full px-3.5 py-2 text-xs font-medium transition-all duration-200 ${siteStyle === s ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>{s}</button>
                 ))}
               </div>
             </div>
 
             {/* Pages */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Pages</span>
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Pages</span>
+              <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {[null, ...PAGE_COUNT_CHOICES].map((n) => (
-                  <button
-                    key={n ?? "auto"}
-                    type="button"
-                    onClick={() => { setPageCount(n); setCustomPages(false); }}
-                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${!customPages && pageCount === n ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                  >
-                    {n === null ? "Auto" : n}
-                  </button>
+                  <button key={n ?? "auto"} type="button" onClick={() => { setPageCount(n); setCustomPages(false); }} className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${!customPages && pageCount === n ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>{n === null ? "Auto" : n}</button>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => setCustomPages(true)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${customPages ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                >
-                  Other
-                </button>
+                <button type="button" onClick={() => setCustomPages(true)} className={`rounded-full px-3.5 py-2 text-xs font-medium transition-all duration-200 ${customPages ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>Other</button>
               </div>
               {customPages && (
-                <input
-                  type="number"
-                  min={1}
-                  max={5}
-                  defaultValue={pageCount ?? 2}
-                  onChange={(e) => { const v = parseInt(e.target.value, 10); if (v >= 1 && v <= 5) setPageCount(v); }}
-                  className="mt-1 w-16 rounded-field bg-panel px-2 py-1 text-center text-xs text-foreground"
-                  placeholder="1-5"
-                />
+                <input type="number" min={1} max={5} defaultValue={pageCount ?? 2} onChange={(e) => { const v = parseInt(e.target.value, 10); if (v >= 1 && v <= 5) setPageCount(v); }} className="mt-1 w-16 rounded-field bg-panel px-2 py-1.5 text-center text-xs text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }} placeholder="1-5" />
               )}
             </div>
 
             {/* Background */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Background</span>
-              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Background</span>
+              <div className="flex flex-wrap items-center justify-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {(["auto", "solid", "gradient", "photo", "pattern", "own-photo"] as const).map((bg) => (
-                  <button
-                    key={bg}
-                    type="button"
-                    onClick={() => setDesign((d) => ({ ...d, background: bg }))}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${design.background === bg ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                  >
-                    {bg === "own-photo" ? "My photo" : bg.charAt(0).toUpperCase() + bg.slice(1)}
-                  </button>
+                  <button key={bg} type="button" onClick={() => setDesign((d) => ({ ...d, background: bg }))} className={`rounded-full px-3.5 py-2 text-xs font-medium transition-all duration-200 ${design.background === bg ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>{bg === "own-photo" ? "My photo" : bg.charAt(0).toUpperCase() + bg.slice(1)}</button>
                 ))}
               </div>
             </div>
 
             {/* Photos */}
-            <div className="flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Photos</span>
-              <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Photos</span>
+              <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                 {(["stock", "own", "none"] as const).map((ps) => (
-                  <button
-                    key={ps}
-                    type="button"
-                    onClick={() => setDesign((d) => ({ ...d, photoSource: ps }))}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${design.photoSource === ps ? "bg-foreground text-background " : "text-muted hover:text-foreground"}`}
-                  >
-                    {ps === "own" ? "My photos" : ps === "none" ? "None" : "Stock"}
-                  </button>
+                  <button key={ps} type="button" onClick={() => setDesign((d) => ({ ...d, photoSource: ps }))} className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${design.photoSource === ps ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>{ps === "own" ? "My photos" : ps === "none" ? "None" : "Stock"}</button>
                 ))}
               </div>
               {design.photoSource === "own" && (
-                <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-card bg-panel px-4 py-2 text-xs text-muted hover:bg-panel-hover hover:text-foreground">
+                <label className="mt-1 flex cursor-pointer items-center gap-2 rounded-card px-4 py-2.5 text-xs text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
                   <Square className="h-4 w-4" aria-hidden="true" />
                   Upload images
-                  <input
-                    type="file"
-                    accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
-                    multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files) addPhotos(Array.from(e.target.files));
-                      e.target.value = "";
-                    }}
-                  />
+                  <input type="file" accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")} multiple className="hidden" onChange={(e) => { if (e.target.files) addPhotos(Array.from(e.target.files)); e.target.value = ""; }} />
                 </label>
               )}
             </div>

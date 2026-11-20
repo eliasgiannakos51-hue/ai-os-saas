@@ -781,101 +781,71 @@ export function AutomationShell({
             { key: "file", label: t("example.file") },
           ],
           extra: (
-            <div className="flex w-full max-w-md flex-col items-center gap-5">
-              {/* Visual flow preview — n8n-style node chain */}
+            <div className="flex w-full max-w-md flex-col items-center gap-6">
+              {/* n8n-style flow diagram — matching the actual node cards */}
               <div className="flex w-full max-w-[420px] flex-col items-center gap-0">
-                {/* Row 1: Trigger → Read → AI */}
+                {/* Row 1: Start → Read → AI (horizontal, with SVG connectors) */}
                 <div className="flex items-center gap-0">
-                  {/* Trigger node */}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
-                      <Zap className="h-5 w-5 text-foreground/60" aria-hidden="true" />
-                      <span className="text-[9px] font-medium text-muted">{t("kinds.start")}</span>
+                  {[
+                    { icon: <Zap className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.start"), bg: "rgb(var(--foreground) / 0.14)" },
+                    { icon: <FileUp className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.read"), bg: "rgb(var(--foreground) / 0.08)" },
+                    { icon: <Sparkles className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.ai"), bg: "rgb(var(--foreground) / 0.18)" },
+                  ].map((node, idx) => (
+                    <div key={node.label} className="flex items-center">
+                      {idx > 0 && <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className="text-border"><circle cx="2" cy="6" r="2" fill="currentColor" /><line x1="4" y1="6" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" /><circle cx="18" cy="6" r="2" fill="currentColor" /></svg>}
+                      <div className="flex overflow-hidden rounded-card" style={{ border: "1px solid rgb(var(--border) / 0.5)" }}>
+                        <div className="flex h-[52px] w-11 items-center justify-center" style={{ background: node.bg }}>{node.icon}</div>
+                        <div className="flex h-[52px] items-center bg-panel px-3"><span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{node.label}</span></div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="h-px w-5" style={{ background: "rgb(var(--border) / 0.4)" }} />
-                  {/* Read node */}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
-                      <FileUp className="h-5 w-5 text-foreground/60" aria-hidden="true" />
-                      <span className="text-[9px] font-medium text-muted">{t("kinds.read")}</span>
-                    </div>
-                  </div>
-                  <div className="h-px w-5" style={{ background: "rgb(var(--border) / 0.4)" }} />
-                  {/* AI node */}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
-                      <Sparkles className="h-5 w-5 text-foreground/60" aria-hidden="true" />
-                      <span className="text-[9px] font-medium text-muted">{t("kinds.ai")}</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-                {/* Vertical connector */}
-                <div className="h-4 w-px" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                {/* Vertical SVG connector */}
+                <svg width="12" height="24" viewBox="0 0 12 24" aria-hidden="true" className="text-border"><circle cx="6" cy="2" r="2" fill="currentColor" /><line x1="6" y1="4" x2="6" y2="20" stroke="currentColor" strokeWidth="1.5" /><circle cx="6" cy="22" r="2" fill="currentColor" /></svg>
                 {/* Row 2: Condition → Action */}
                 <div className="flex items-center gap-0">
-                  {/* Condition node */}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
-                      <svg width="20" height="20" viewBox="0 0 20 20" className="text-foreground/60" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.2" /></svg>
-                      <span className="text-[9px] font-medium text-muted">{t("kinds.condition")}</span>
+                  {[
+                    { icon: <svg width="18" height="18" viewBox="0 0 20 20" className="text-foreground" aria-hidden="true"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>, label: t("kinds.condition"), bg: "rgb(var(--foreground) / 0.06)" },
+                    { icon: <ArrowRight className="h-5 w-5 text-foreground" aria-hidden="true" />, label: t("kinds.action"), bg: "rgb(var(--foreground) / 0.12)" },
+                  ].map((node, idx) => (
+                    <div key={node.label} className="flex items-center">
+                      {idx > 0 && <svg width="20" height="12" viewBox="0 0 20 12" aria-hidden="true" className="text-border"><circle cx="2" cy="6" r="2" fill="currentColor" /><line x1="4" y1="6" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" /><circle cx="18" cy="6" r="2" fill="currentColor" /></svg>}
+                      <div className="flex overflow-hidden rounded-card" style={{ border: "1px solid rgb(var(--border) / 0.5)" }}>
+                        <div className="flex h-[52px] w-11 items-center justify-center" style={{ background: node.bg }}>{node.icon}</div>
+                        <div className="flex h-[52px] items-center bg-panel px-3"><span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{node.label}</span></div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="h-px w-5" style={{ background: "rgb(var(--border) / 0.4)" }} />
-                  {/* Action node */}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="flex h-[60px] w-[90px] flex-col items-center justify-center gap-0.5 rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.6)" }}>
-                      <ArrowRight className="h-5 w-5 text-foreground/60" aria-hidden="true" />
-                      <span className="text-[9px] font-medium text-muted">{t("kinds.action")}</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Context inputs — files, links, paste: real clickable cards */}
+              {/* Context inputs — files, links, paste */}
               <div className="flex w-full max-w-[340px] gap-2">
-                <label className="flex flex-1 cursor-pointer flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
-                  <FileUp className="h-4 w-4" aria-hidden="true" />
-                  <span className="text-[10px] font-medium">Files</span>
-                  <input type="file" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) composerRef.current?.focus(); e.target.value = ""; }} />
-                </label>
-                <button type="button" onClick={() => { composerRef.current?.setText?.("https://"); composerRef.current?.focus(); }} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
-                  <Link2 className="h-4 w-4" aria-hidden="true" />
-                  <span className="text-[10px] font-medium">Links</span>
-                </button>
-                <button type="button" onClick={() => composerRef.current?.focus()} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.4)" }}>
-                  <ClipboardPaste className="h-4 w-4" aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{t("landing.paste")}</span>
-                </button>
+                {[
+                  { icon: <FileUp className="h-4 w-4" aria-hidden="true" />, label: "Files", onClick: () => {} },
+                  { icon: <Link2 className="h-4 w-4" aria-hidden="true" />, label: "Links", onClick: () => { composerRef.current?.setText?.("https://"); composerRef.current?.focus(); } },
+                  { icon: <ClipboardPaste className="h-4 w-4" aria-hidden="true" />, label: t("landing.paste"), onClick: () => composerRef.current?.focus() },
+                ].map((item) => (
+                  <button key={item.label} type="button" onClick={item.onClick} className="flex flex-1 flex-col items-center gap-1.5 rounded-card px-3 py-3 text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ background: "rgb(var(--panel) / 0.5)", border: "1px solid rgb(var(--border) / 0.3)" }}>
+                    {item.icon}
+                    <span className="text-[10px] font-medium">{item.label}</span>
+                  </button>
+                ))}
               </div>
 
-              {/* Simple | Premium toggle */}
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Plan</span>
-                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
-                  <button
-                    type="button"
-                    onClick={() => setLandingTier("simple")}
-                    className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${landingTier === "simple" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
-                  >
-                    Simple
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLandingTier("premium")}
-                    className={`inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${landingTier === "premium" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
-                  >
-                    <Crown className="h-3 w-3" aria-hidden="true" /> Premium
-                  </button>
+              {/* Simple | Premium */}
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Plan</span>
+                <div className="flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--panel) / 0.6)", border: "1px solid rgb(var(--border) / 0.3)" }}>
+                  <button type="button" onClick={() => setLandingTier("simple")} className={`rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${landingTier === "simple" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}>Simple</button>
+                  <button type="button" onClick={() => setLandingTier("premium")} className={`inline-flex items-center gap-1 rounded-full px-4 py-2 text-xs font-medium transition-all duration-200 ${landingTier === "premium" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}><Crown className="h-3 w-3" aria-hidden="true" /> Premium</button>
                 </div>
-                <span className="text-[10px] text-muted">
-                  {landingTier === "simple" ? t("landing.simpleHint") : t("landing.premiumHint")}
-                </span>
+                <span className="text-[10px] text-muted">{landingTier === "simple" ? t("landing.simpleHint") : t("landing.premiumHint")}</span>
               </div>
 
               {/* Quick templates */}
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("landing.templates")}</span>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">{t("landing.templates")}</span>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {[
                     { emoji: "📧", label: t("landing.tpl.leadEmail") },
@@ -885,15 +855,7 @@ export function AutomationShell({
                     { emoji: "🤖", label: t("landing.tpl.aiClassify") },
                     { emoji: "📱", label: t("landing.tpl.socialPost") },
                   ].map(({ emoji, label }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => composerRef.current?.setText?.(label)}
-                      className="rounded-full px-3 py-1.5 text-[11px] font-medium text-muted transition-colors hover:bg-panel hover:text-foreground"
-                      style={{ border: "1px solid rgb(var(--border) / 0.4)" }}
-                    >
-                      {emoji} {label}
-                    </button>
+                    <button key={label} type="button" onClick={() => composerRef.current?.setText?.(label)} className="rounded-full px-3.5 py-2 text-[11px] font-medium text-muted transition-colors hover:bg-panel-hover hover:text-foreground" style={{ border: "1px solid rgb(var(--border) / 0.3)" }}>{emoji} {label}</button>
                   ))}
                 </div>
               </div>

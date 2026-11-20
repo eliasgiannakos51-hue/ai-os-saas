@@ -23,7 +23,10 @@ export type { BuildOutcome, ChangeOutcome };
  * (sanitiseAgentText) and handed over as data, as for the Assistants.
  */
 export const AUTOMATION_BUILDER_MODEL = AGENT_BUILDER_MODEL;
-const MAX_TOKENS = 1500;
+// Raised from 1500: complex multi-step descriptions in Greek produce
+// larger tool call JSON (longer instruction strings, more boxes).
+// 1500 caused truncation on 5+ box flows, which readBuilt rejects.
+const MAX_TOKENS = 2500;
 
 const BOX_SCHEMA = {
   type: "object",
@@ -53,7 +56,9 @@ THE BOXES, top to bottom:
 - approval: stop and wait until the person approves what was made. Put it before an action whenever they say "after I approve", "αφού την εγκρίνω", or the action sends something on their behalf they asked to check.
 - action: send_telegram (to the person's own Telegram), send_email (to the person's own address), notify (inside the app), save_to_library (as a document in their Library).
 
-RULES. At most ${MAX_BOXES} boxes. Nothing that sends to anyone but the person. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes. Never invent data sources that are not in the list; if they ask for one, say so in "unsupported".`;
+RULES. At most ${MAX_BOXES} boxes. Nothing that sends to anyone but the person. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes. Never invent data sources that are not in the list; if they ask for one, say so in "unsupported".
+
+COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into boxes. Use all the box types that fit. A description that says "do X and also Y" with the same trigger is ONE automation with multiple actions. Prefer MORE boxes (read + ai + condition + multiple actions) over fewer. Always try to produce boxes rather than asking a question — only ask when the sentence truly cannot be parsed. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
 
 const BUILD_TOOL: AiToolSpec = {
   name: "set_automation",

@@ -54,18 +54,25 @@ export const CONNECT_AT: Record<keyof Connected, string> = {
   telegram: "/dashboard/agents",
 };
 
-const ROW = "flex w-full items-start gap-3 rounded-card bg-panel px-4 py-3.5 text-start transition-colors hover:bg-panel-hover";
-
-// n8n-style color accent per box type — applied as a left border.
-// Uses design system tokens where possible; inline style for the
-// border-color since the design system has no per-kind tokens.
-const KIND_BORDER: Record<Box["kind"], string> = {
-  start: "rgb(var(--foreground) / 0.5)",
-  read: "rgb(var(--foreground) / 0.3)",
-  ai: "rgb(var(--foreground) / 0.5)",
-  condition: "rgb(var(--foreground) / 0.25)",
-  approval: "rgb(var(--foreground) / 0.35)",
-  action: "rgb(var(--foreground) / 0.4)",
+// n8n-style NODE CARDS — a colored header strip on top, the body below.
+// Each node is a full card with its own visual identity per type.
+// The border and header background use foreground at different opacities
+// per kind, staying within the design system's token palette.
+const NODE_HEADER_BG: Record<Box["kind"], string> = {
+  start: "rgb(var(--foreground) / 0.12)",
+  read: "rgb(var(--foreground) / 0.08)",
+  ai: "rgb(var(--foreground) / 0.14)",
+  condition: "rgb(var(--foreground) / 0.06)",
+  approval: "rgb(var(--foreground) / 0.10)",
+  action: "rgb(var(--foreground) / 0.10)",
+};
+const NODE_BORDER: Record<Box["kind"], string> = {
+  start: "rgb(var(--foreground) / 0.20)",
+  read: "rgb(var(--foreground) / 0.12)",
+  ai: "rgb(var(--foreground) / 0.22)",
+  condition: "rgb(var(--foreground) / 0.10)",
+  approval: "rgb(var(--foreground) / 0.15)",
+  action: "rgb(var(--foreground) / 0.15)",
 };
 
 function useWords() {
@@ -224,7 +231,9 @@ export function BoxRow({
         const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
         return (
           <li key={box.id} className="relative">
-            {i > 0 && (progress ? <FlowLine state={progress.lines[i - 1] ?? "idle"} /> : <span aria-hidden="true" className="ms-7 block h-4 w-px bg-border" />)}
+            {/* Connector line between nodes */}
+            {i > 0 && (progress ? <FlowLine state={progress.lines[i - 1] ?? "idle"} /> : <span aria-hidden="true" className="ms-6 block h-5 w-px bg-border" />)}
+            {/* n8n-style NODE CARD */}
             <div className="flex items-start gap-2">
               <button
                 type="button"
@@ -233,24 +242,29 @@ export function BoxRow({
                 data-testid="flow-box"
                 data-kind={box.kind}
                 data-state={progress ? state : undefined}
-                className={`${ROW} ${mark}`}
-                style={{ borderInlineStart: `3px solid ${KIND_BORDER[box.kind]}` }}
+                className={`w-full overflow-hidden rounded-card text-start transition-all ${mark}`}
+                style={{ border: `1px solid ${NODE_BORDER[box.kind]}` }}
               >
-                <BoxIcon box={box} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] font-semibold uppercase tracking-wide text-muted">{kind[box.kind]}</span>
+                {/* Header strip — colored, with icon + kind label */}
+                <div className="flex items-center gap-2.5 px-4 py-2" style={{ background: NODE_HEADER_BG[box.kind] }}>
+                  <BoxIcon box={box} />
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/70">{kind[box.kind]}</span>
+                  <span className="flex-1" />
+                  {state === "active" && (
+                    <span className="shrink-0">
+                      <ThinkingIndicator size="sm" />
+                      <span className="sr-only">{t("runStatus.running")}</span>
+                    </span>
+                  )}
+                  {state === "done" && <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
+                </div>
+                {/* Body — the description */}
+                <div className="bg-panel px-4 py-3 hover:bg-panel-hover">
                   <span className="block break-words text-sm leading-relaxed text-foreground">{describe(box)}</span>
-                </span>
-                {state === "active" && (
-                  <span className="mt-0.5 shrink-0">
-                    <ThinkingIndicator size="sm" />
-                    <span className="sr-only">{t("runStatus.running")}</span>
-                  </span>
-                )}
-                {state === "done" && <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
+                </div>
               </button>
               {box.kind === "condition" && (
-                <span data-testid="flow-branch" className="mt-2.5 shrink-0 text-[11px] text-muted">
+                <span data-testid="flow-branch" className="mt-6 shrink-0 text-[11px] text-muted">
                   {t("conditionElse")}
                 </span>
               )}

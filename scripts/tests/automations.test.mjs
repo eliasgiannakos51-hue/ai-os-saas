@@ -464,7 +464,7 @@ check("…it asks how the run is going only while one is going (or its own press
 check("…and the boxes get it", /<BoxRow boxes=\{shown\.boxes\}[^\n]{0,200}? progress=\{progress\} \/>/.test(shell));
 const rowBlock = flowBoxes.slice(flowBoxes.indexOf("export function BoxRow"), flowBoxes.indexOf("export function FlowSteps"));
 check("without progress the row is drawn exactly as before: the short still line",
-  /\{i > 0 && \(progress \? <FlowLine state=\{progress\.lines\[i - 1\] \?\? "idle"\} \/> : <span aria-hidden="true" className="ms-5 block h-3 w-px bg-border" \/>\)\}/.test(rowBlock));
+  /\{i > 0 && \(progress \? <FlowLine state=\{progress\.lines\[i - 1\] \?\? "idle"\} \/> : <span aria-hidden="true" className="ms-6 block h-5 w-px bg-border" \/>\)\}/.test(rowBlock));
 check("the failed box is marked in the danger colour, with the reason in words",
   /state === "failed" \? "ring-1 ring-danger"/.test(rowBlock) && /data-testid="flow-failed" className="[^"]*text-danger"/.test(rowBlock) && /t\("failedHere", \{ reason: noteWords\(/.test(rowBlock));
 const css = readFileSync("src/app/globals.css", "utf8");

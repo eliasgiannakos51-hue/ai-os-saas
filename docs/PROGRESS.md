@@ -32,8 +32,18 @@
   μέχρι 800s. Τώρα 15 λεπτά (πάνω από τα 800s).
 
 - **Automation landing (n8n-style)** (`automation-shell.tsx`): visual flow
-  preview (3 κουτιά Trigger→AI→Action), Files/Links/Paste hints,
-  Simple|Premium toggle, 6 quick-start templates. i18n 10 γλώσσες.
+  preview (5 nodes: Start→Read→AI→Condition→Action), Files/Links/Paste
+  clickable cards, Simple|Premium toggle (wired to builder), 6 quick-start
+  templates. i18n 12 keys × 10 γλώσσες.
+- **Automation node design** (`flow-boxes.tsx`): n8n-style premium cards —
+  3px accent top-border ανά τύπο box, 36px icon badges σε κύκλο,
+  connector dots μεταξύ nodes, 2px connector lines. Κάθε node card:
+  kind label (10px UPPERCASE TRACKING-WIDEST) + description (13px).
+- **Builder improvements** (`builder.ts`): MAX_TOKENS 1500→2500 (fix
+  truncation σε πολύπλοκα ελληνικά flows), βελτιωμένο system prompt
+  (χειρίζεται complex descriptions, premium tier produces richer flows).
+- **Landing tier wiring**: Simple|Premium toggle στέλνει `tier` στο API →
+  builder → model prompt. Premium ζητάει περισσότερα boxes + conditions.
 
 **Τι μετρήθηκε, 2026-11-20.** `npm run gates`: 417/418 πέρασαν. Μόνο
 `write-guards.test.mjs` (gate 418, pre-existing: attempt_count text στο

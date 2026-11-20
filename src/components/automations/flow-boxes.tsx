@@ -54,7 +54,19 @@ export const CONNECT_AT: Record<keyof Connected, string> = {
   telegram: "/dashboard/agents",
 };
 
-const ROW = "flex w-full items-start gap-3 rounded-item bg-panel px-3 py-2.5 text-start hover:bg-panel-hover";
+const ROW = "flex w-full items-start gap-3 rounded-card bg-panel px-4 py-3.5 text-start transition-colors hover:bg-panel-hover";
+
+// n8n-style color accent per box type — applied as a left border.
+// Uses design system tokens where possible; inline style for the
+// border-color since the design system has no per-kind tokens.
+const KIND_BORDER: Record<Box["kind"], string> = {
+  start: "rgb(var(--foreground) / 0.5)",
+  read: "rgb(var(--foreground) / 0.3)",
+  ai: "rgb(var(--foreground) / 0.5)",
+  condition: "rgb(var(--foreground) / 0.25)",
+  approval: "rgb(var(--foreground) / 0.35)",
+  action: "rgb(var(--foreground) / 0.4)",
+};
 
 function useWords() {
   const t = useTranslations("dashboard.automations");
@@ -170,16 +182,19 @@ export function useBoxLabel(): (box: Box) => string {
 }
 
 function BoxIcon({ box }: { box: Box }) {
-  const cls = "mt-0.5 h-4 w-4 shrink-0 text-muted";
-  if (box.kind === "start") return box.when === "file_uploaded" ? <FileUp className={cls} aria-hidden="true" /> : <Clock className={cls} aria-hidden="true" />;
-  if (box.kind === "read") return box.source.startsWith("calendar_") ? <CalendarDays className={cls} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={cls} aria-hidden="true" /> : <Table2 className={cls} aria-hidden="true" />;
-  if (box.kind === "ai") return <Sparkles className={cls} aria-hidden="true" />;
-  if (box.kind === "condition") return <Filter className={cls} aria-hidden="true" />;
-  if (box.kind === "approval") return <PauseCircle className={cls} aria-hidden="true" />;
-  if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
-  if (box.do === "send_email") return <Mail className={cls} aria-hidden="true" />;
-  if (box.do === "notify") return <Bell className={cls} aria-hidden="true" />;
-  return <BookOpen className={cls} aria-hidden="true" />;
+  // Larger icon inside a subtle circle — the visual anchor of each node.
+  const icon = "h-4.5 w-4.5 text-foreground/70";
+  const wrap = "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full" as const;
+  const bg = "bg-panel-hover";
+  if (box.kind === "start") return <span className={`${wrap} ${bg}`}>{box.when === "file_uploaded" ? <FileUp className={icon} aria-hidden="true" /> : <Clock className={icon} aria-hidden="true" />}</span>;
+  if (box.kind === "read") return <span className={`${wrap} ${bg}`}>{box.source.startsWith("calendar_") ? <CalendarDays className={icon} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={icon} aria-hidden="true" /> : <Table2 className={icon} aria-hidden="true" />}</span>;
+  if (box.kind === "ai") return <span className={`${wrap} ${bg}`}><Sparkles className={icon} aria-hidden="true" /></span>;
+  if (box.kind === "condition") return <span className={`${wrap} ${bg}`}><Filter className={icon} aria-hidden="true" /></span>;
+  if (box.kind === "approval") return <span className={`${wrap} ${bg}`}><PauseCircle className={icon} aria-hidden="true" /></span>;
+  if (box.do === "send_telegram") return <span className={`${wrap} ${bg}`}><Send className={icon} aria-hidden="true" /></span>;
+  if (box.do === "send_email") return <span className={`${wrap} ${bg}`}><Mail className={icon} aria-hidden="true" /></span>;
+  if (box.do === "notify") return <span className={`${wrap} ${bg}`}><Bell className={icon} aria-hidden="true" /></span>;
+  return <span className={`${wrap} ${bg}`}><BookOpen className={icon} aria-hidden="true" /></span>;
 }
 
 export function BoxRow({
@@ -209,7 +224,7 @@ export function BoxRow({
         const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
         return (
           <li key={box.id} className="relative">
-            {i > 0 && (progress ? <FlowLine state={progress.lines[i - 1] ?? "idle"} /> : <span aria-hidden="true" className="ms-5 block h-3 w-px bg-border" />)}
+            {i > 0 && (progress ? <FlowLine state={progress.lines[i - 1] ?? "idle"} /> : <span aria-hidden="true" className="ms-7 block h-4 w-px bg-border" />)}
             <div className="flex items-start gap-2">
               <button
                 type="button"
@@ -219,11 +234,12 @@ export function BoxRow({
                 data-kind={box.kind}
                 data-state={progress ? state : undefined}
                 className={`${ROW} ${mark}`}
+                style={{ borderInlineStart: `3px solid ${KIND_BORDER[box.kind]}` }}
               >
                 <BoxIcon box={box} />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] uppercase tracking-wide text-muted">{kind[box.kind]}</span>
-                  <span className="block break-words text-sm text-foreground">{describe(box)}</span>
+                  <span className="block text-[11px] font-semibold uppercase tracking-wide text-muted">{kind[box.kind]}</span>
+                  <span className="block break-words text-sm leading-relaxed text-foreground">{describe(box)}</span>
                 </span>
                 {state === "active" && (
                   <span className="mt-0.5 shrink-0">

@@ -54,18 +54,18 @@ export const CONNECT_AT: Record<keyof Connected, string> = {
   telegram: "/dashboard/agents",
 };
 
-// PREMIUM NODE DESIGN — each box type has its own visual weight.
-// Header bg uses panel-hover for the strip, border uses the border token.
-// A 4px top-border accent stripe gives each kind its colour identity
-// within the design system (foreground at stepped opacities — no raw
-// hex or rgb, no gradient, passes every gate).
-const NODE_ACCENT: Record<Box["kind"], string> = {
-  start: "rgb(var(--foreground) / 0.6)",
-  read: "rgb(var(--foreground) / 0.3)",
-  ai: "rgb(var(--foreground) / 0.7)",
-  condition: "rgb(var(--foreground) / 0.2)",
-  approval: "rgb(var(--foreground) / 0.4)",
-  action: "rgb(var(--foreground) / 0.5)",
+// n8n-QUALITY NODE DESIGN. Each node is a compact card with a coloured
+// icon panel on the inline-start side (like n8n's square icon area),
+// then the kind label + description to its right. The icon panel bg
+// uses foreground at different opacities per kind — the same token at
+// six weights. The card border is the design system's --border.
+const ICON_BG: Record<Box["kind"], string> = {
+  start: "rgb(var(--foreground) / 0.14)",
+  read: "rgb(var(--foreground) / 0.08)",
+  ai: "rgb(var(--foreground) / 0.18)",
+  condition: "rgb(var(--foreground) / 0.06)",
+  approval: "rgb(var(--foreground) / 0.10)",
+  action: "rgb(var(--foreground) / 0.12)",
 };
 
 function useWords() {
@@ -181,30 +181,32 @@ export function useBoxLabel(): (box: Box) => string {
   return (box) => kind[box.kind];
 }
 
-function BoxIcon({ box }: { box: Box }) {
-  const icon = "h-[18px] w-[18px] text-foreground";
-  function inner() {
-    if (box.kind === "start") return box.when === "file_uploaded" ? <FileUp className={icon} aria-hidden="true" /> : <Clock className={icon} aria-hidden="true" />;
-    if (box.kind === "read") return box.source.startsWith("calendar_") ? <CalendarDays className={icon} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={icon} aria-hidden="true" /> : <Table2 className={icon} aria-hidden="true" />;
-    if (box.kind === "ai") return <Sparkles className={icon} aria-hidden="true" />;
-    if (box.kind === "condition") return <Filter className={icon} aria-hidden="true" />;
-    if (box.kind === "approval") return <PauseCircle className={icon} aria-hidden="true" />;
-    if (box.do === "send_telegram") return <Send className={icon} aria-hidden="true" />;
-    if (box.do === "send_email") return <Mail className={icon} aria-hidden="true" />;
-    if (box.do === "notify") return <Bell className={icon} aria-hidden="true" />;
-    return <BookOpen className={icon} aria-hidden="true" />;
-  }
-  return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-item bg-panel-hover">
-      {inner()}
-    </span>
-  );
+/** The icon for one box — a 20px lucide icon, white. */
+function BoxIconInner({ box }: { box: Box }) {
+  const cls = "h-5 w-5 text-foreground";
+  if (box.kind === "start") return box.when === "file_uploaded" ? <FileUp className={cls} aria-hidden="true" /> : <Clock className={cls} aria-hidden="true" />;
+  if (box.kind === "read") return box.source.startsWith("calendar_") ? <CalendarDays className={cls} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={cls} aria-hidden="true" /> : <Table2 className={cls} aria-hidden="true" />;
+  if (box.kind === "ai") return <Sparkles className={cls} aria-hidden="true" />;
+  if (box.kind === "condition") return <Filter className={cls} aria-hidden="true" />;
+  if (box.kind === "approval") return <PauseCircle className={cls} aria-hidden="true" />;
+  if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
+  if (box.do === "send_email") return <Mail className={cls} aria-hidden="true" />;
+  if (box.do === "notify") return <Bell className={cls} aria-hidden="true" />;
+  return <BookOpen className={cls} aria-hidden="true" />;
 }
 
-/** Connector dot — a small circle at the top/bottom of the vertical line
- *  between two nodes, like n8n's port handles. */
-function ConnectorDot() {
-  return <span aria-hidden="true" className="mx-auto block h-[6px] w-[6px] rounded-full bg-border" />;
+/** SVG connector between two nodes — a vertical line with rounded port
+ *  dots at each end, like n8n's handles. */
+function NodeConnector() {
+  return (
+    <div aria-hidden="true" className="flex justify-center py-0.5" style={{ paddingInlineStart: "1.5rem" }}>
+      <svg width="12" height="28" viewBox="0 0 12 28" className="text-border">
+        <circle cx="6" cy="3" r="3" fill="currentColor" />
+        <line x1="6" y1="6" x2="6" y2="22" stroke="currentColor" strokeWidth="2" />
+        <circle cx="6" cy="25" r="3" fill="currentColor" />
+      </svg>
+    </div>
+  );
 }
 
 export function BoxRow({
@@ -234,16 +236,12 @@ export function BoxRow({
         const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
         return (
           <li key={box.id} className="relative">
-            {/* Connector: dot → line → dot between nodes */}
+            {/* SVG connector between nodes */}
             {i > 0 && (progress
               ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
-              : <div className="flex flex-col items-center" style={{ marginInlineStart: "2.25rem" }}>
-                  <ConnectorDot />
-                  <span aria-hidden="true" className="block h-3 w-px bg-border" />
-                  <ConnectorDot />
-                </div>
+              : <NodeConnector />
             )}
-            {/* NODE CARD */}
+            {/* n8n-STYLE NODE CARD — icon panel left, content right */}
             <div className="flex items-start gap-2">
               <button
                 type="button"
@@ -252,11 +250,15 @@ export function BoxRow({
                 data-testid="flow-box"
                 data-kind={box.kind}
                 data-state={progress ? state : undefined}
-                className={`w-full overflow-hidden rounded-card bg-panel text-start transition-all hover:bg-panel-hover ${mark}`}
-                style={{ borderTop: `3px solid ${NODE_ACCENT[box.kind]}`, border: `1px solid rgb(var(--border))`, borderBlockStart: `3px solid ${NODE_ACCENT[box.kind]}` }}
+                className={`flex w-full overflow-hidden rounded-card text-start transition-all ${mark}`}
+                style={{ border: "1px solid rgb(var(--border))" }}
               >
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <BoxIcon box={box} />
+                {/* Icon panel — coloured square, like n8n */}
+                <div className="flex w-12 shrink-0 items-center justify-center self-stretch" style={{ background: ICON_BG[box.kind] }}>
+                  <BoxIconInner box={box} />
+                </div>
+                {/* Content */}
+                <div className="flex min-w-0 flex-1 items-center gap-2 bg-panel px-3 py-2.5 hover:bg-panel-hover">
                   <span className="min-w-0 flex-1">
                     <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{kind[box.kind]}</span>
                     <span className="mt-0.5 block break-words text-[13px] leading-snug text-foreground">{describe(box)}</span>

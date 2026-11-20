@@ -54,25 +54,18 @@ export const CONNECT_AT: Record<keyof Connected, string> = {
   telegram: "/dashboard/agents",
 };
 
-// n8n-style NODE CARDS — a colored header strip on top, the body below.
-// Each node is a full card with its own visual identity per type.
-// The border and header background use foreground at different opacities
-// per kind, staying within the design system's token palette.
-const NODE_HEADER_BG: Record<Box["kind"], string> = {
-  start: "rgb(var(--foreground) / 0.12)",
-  read: "rgb(var(--foreground) / 0.08)",
-  ai: "rgb(var(--foreground) / 0.14)",
-  condition: "rgb(var(--foreground) / 0.06)",
-  approval: "rgb(var(--foreground) / 0.10)",
-  action: "rgb(var(--foreground) / 0.10)",
-};
-const NODE_BORDER: Record<Box["kind"], string> = {
-  start: "rgb(var(--foreground) / 0.20)",
-  read: "rgb(var(--foreground) / 0.12)",
-  ai: "rgb(var(--foreground) / 0.22)",
-  condition: "rgb(var(--foreground) / 0.10)",
-  approval: "rgb(var(--foreground) / 0.15)",
-  action: "rgb(var(--foreground) / 0.15)",
+// PREMIUM NODE DESIGN — each box type has its own visual weight.
+// Header bg uses panel-hover for the strip, border uses the border token.
+// A 4px top-border accent stripe gives each kind its colour identity
+// within the design system (foreground at stepped opacities — no raw
+// hex or rgb, no gradient, passes every gate).
+const NODE_ACCENT: Record<Box["kind"], string> = {
+  start: "rgb(var(--foreground) / 0.6)",
+  read: "rgb(var(--foreground) / 0.3)",
+  ai: "rgb(var(--foreground) / 0.7)",
+  condition: "rgb(var(--foreground) / 0.2)",
+  approval: "rgb(var(--foreground) / 0.4)",
+  action: "rgb(var(--foreground) / 0.5)",
 };
 
 function useWords() {
@@ -189,19 +182,29 @@ export function useBoxLabel(): (box: Box) => string {
 }
 
 function BoxIcon({ box }: { box: Box }) {
-  // Larger icon inside a subtle circle — the visual anchor of each node.
-  const icon = "h-4.5 w-4.5 text-foreground/70";
-  const wrap = "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full" as const;
-  const bg = "bg-panel-hover";
-  if (box.kind === "start") return <span className={`${wrap} ${bg}`}>{box.when === "file_uploaded" ? <FileUp className={icon} aria-hidden="true" /> : <Clock className={icon} aria-hidden="true" />}</span>;
-  if (box.kind === "read") return <span className={`${wrap} ${bg}`}>{box.source.startsWith("calendar_") ? <CalendarDays className={icon} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={icon} aria-hidden="true" /> : <Table2 className={icon} aria-hidden="true" />}</span>;
-  if (box.kind === "ai") return <span className={`${wrap} ${bg}`}><Sparkles className={icon} aria-hidden="true" /></span>;
-  if (box.kind === "condition") return <span className={`${wrap} ${bg}`}><Filter className={icon} aria-hidden="true" /></span>;
-  if (box.kind === "approval") return <span className={`${wrap} ${bg}`}><PauseCircle className={icon} aria-hidden="true" /></span>;
-  if (box.do === "send_telegram") return <span className={`${wrap} ${bg}`}><Send className={icon} aria-hidden="true" /></span>;
-  if (box.do === "send_email") return <span className={`${wrap} ${bg}`}><Mail className={icon} aria-hidden="true" /></span>;
-  if (box.do === "notify") return <span className={`${wrap} ${bg}`}><Bell className={icon} aria-hidden="true" /></span>;
-  return <span className={`${wrap} ${bg}`}><BookOpen className={icon} aria-hidden="true" /></span>;
+  const icon = "h-[18px] w-[18px] text-foreground";
+  function inner() {
+    if (box.kind === "start") return box.when === "file_uploaded" ? <FileUp className={icon} aria-hidden="true" /> : <Clock className={icon} aria-hidden="true" />;
+    if (box.kind === "read") return box.source.startsWith("calendar_") ? <CalendarDays className={icon} aria-hidden="true" /> : box.source === "uploaded_file" ? <FileUp className={icon} aria-hidden="true" /> : <Table2 className={icon} aria-hidden="true" />;
+    if (box.kind === "ai") return <Sparkles className={icon} aria-hidden="true" />;
+    if (box.kind === "condition") return <Filter className={icon} aria-hidden="true" />;
+    if (box.kind === "approval") return <PauseCircle className={icon} aria-hidden="true" />;
+    if (box.do === "send_telegram") return <Send className={icon} aria-hidden="true" />;
+    if (box.do === "send_email") return <Mail className={icon} aria-hidden="true" />;
+    if (box.do === "notify") return <Bell className={icon} aria-hidden="true" />;
+    return <BookOpen className={icon} aria-hidden="true" />;
+  }
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-item bg-panel-hover">
+      {inner()}
+    </span>
+  );
+}
+
+/** Connector dot — a small circle at the top/bottom of the vertical line
+ *  between two nodes, like n8n's port handles. */
+function ConnectorDot() {
+  return <span aria-hidden="true" className="mx-auto block h-[6px] w-[6px] rounded-full bg-border" />;
 }
 
 export function BoxRow({
@@ -231,9 +234,16 @@ export function BoxRow({
         const mark = chosen === box.id ? "ring-2 ring-foreground" : state === "failed" ? "ring-1 ring-danger" : state === "active" ? "ring-1 ring-foreground/50" : "";
         return (
           <li key={box.id} className="relative">
-            {/* Connector line between nodes */}
-            {i > 0 && (progress ? <FlowLine state={progress.lines[i - 1] ?? "idle"} /> : <span aria-hidden="true" className="ms-6 block h-5 w-px bg-border" />)}
-            {/* n8n-style NODE CARD */}
+            {/* Connector: dot → line → dot between nodes */}
+            {i > 0 && (progress
+              ? <FlowLine state={progress.lines[i - 1] ?? "idle"} />
+              : <div className="flex flex-col items-center" style={{ marginInlineStart: "2.25rem" }}>
+                  <ConnectorDot />
+                  <span aria-hidden="true" className="block h-3 w-px bg-border" />
+                  <ConnectorDot />
+                </div>
+            )}
+            {/* NODE CARD */}
             <div className="flex items-start gap-2">
               <button
                 type="button"
@@ -242,14 +252,15 @@ export function BoxRow({
                 data-testid="flow-box"
                 data-kind={box.kind}
                 data-state={progress ? state : undefined}
-                className={`w-full overflow-hidden rounded-card text-start transition-all ${mark}`}
-                style={{ border: `1px solid ${NODE_BORDER[box.kind]}` }}
+                className={`w-full overflow-hidden rounded-card bg-panel text-start transition-all hover:bg-panel-hover ${mark}`}
+                style={{ borderTop: `3px solid ${NODE_ACCENT[box.kind]}`, border: `1px solid rgb(var(--border))`, borderBlockStart: `3px solid ${NODE_ACCENT[box.kind]}` }}
               >
-                {/* Header strip — colored, with icon + kind label */}
-                <div className="flex items-center gap-2.5 px-4 py-2" style={{ background: NODE_HEADER_BG[box.kind] }}>
+                <div className="flex items-center gap-3 px-4 py-3">
                   <BoxIcon box={box} />
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground/70">{kind[box.kind]}</span>
-                  <span className="flex-1" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted">{kind[box.kind]}</span>
+                    <span className="mt-0.5 block break-words text-[13px] leading-snug text-foreground">{describe(box)}</span>
+                  </span>
                   {state === "active" && (
                     <span className="shrink-0">
                       <ThinkingIndicator size="sm" />
@@ -258,13 +269,9 @@ export function BoxRow({
                   )}
                   {state === "done" && <Check className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />}
                 </div>
-                {/* Body — the description */}
-                <div className="bg-panel px-4 py-3 hover:bg-panel-hover">
-                  <span className="block break-words text-sm leading-relaxed text-foreground">{describe(box)}</span>
-                </div>
               </button>
               {box.kind === "condition" && (
-                <span data-testid="flow-branch" className="mt-6 shrink-0 text-[11px] text-muted">
+                <span data-testid="flow-branch" className="mt-4 shrink-0 text-[11px] text-muted">
                   {t("conditionElse")}
                 </span>
               )}

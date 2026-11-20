@@ -3982,6 +3982,20 @@
         "button": "الموافقات ({count})",
         "title": "الموافقات المعلقة",
         "empty": "لا يوجد شيء في انتظار الموافقة حاليًا."
+      },
+      "landing": {
+        "simpleHint": "أتمتة سريعة بخطوات ذكاء اصطناعي",
+        "premiumHint": "تدفقات متقدمة مع شروط وموافقات",
+        "templates": "بداية سريعة",
+        "tpl": {
+          "leadEmail": "عميل جديد → بريد",
+          "formSheet": "نموذج → Sheets",
+          "orderSlack": "طلب → Slack",
+          "scheduleReport": "جدول → تقرير",
+          "aiClassify": "تصنيف AI → توجيه",
+          "socialPost": "اجتماعي → نشر"
+        },
+        "paste": "الصق أي شيء"
       }
     },
     "flows": {

@@ -3982,6 +3982,20 @@
         "button": "承認待ち ({count})",
         "title": "承認待ちの一覧",
         "empty": "現在、承認待ちのものはありません。"
+      },
+      "landing": {
+        "simpleHint": "AIステップで素早い自動化",
+        "premiumHint": "条件と承認を含む高度なフロー",
+        "templates": "クイックスタート",
+        "tpl": {
+          "leadEmail": "新規リード → メール",
+          "formSheet": "フォーム → Sheets",
+          "orderSlack": "注文 → Slack",
+          "scheduleReport": "スケジュール → レポート",
+          "aiClassify": "AI分類 → ルート",
+          "socialPost": "ソーシャル → 投稿"
+        },
+        "paste": "何でも貼り付け"
       }
     },
     "flows": {

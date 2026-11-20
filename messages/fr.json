@@ -3982,6 +3982,20 @@
         "button": "Approbations ({count})",
         "title": "Approbations en attente",
         "empty": "Rien n'attend d'approbation pour le moment."
+      },
+      "landing": {
+        "simpleHint": "Automatisations rapides avec étapes IA",
+        "premiumHint": "Flux avancés avec conditions et approbations",
+        "templates": "Démarrage rapide",
+        "tpl": {
+          "leadEmail": "Nouveau lead → Email",
+          "formSheet": "Formulaire → Sheets",
+          "orderSlack": "Commande → Slack",
+          "scheduleReport": "Planning → Rapport",
+          "aiClassify": "IA classifier → Route",
+          "socialPost": "Social → Post"
+        },
+        "paste": "Collez n'importe quoi"
       }
     },
     "flows": {

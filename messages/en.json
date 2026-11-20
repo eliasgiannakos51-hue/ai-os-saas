@@ -3982,6 +3982,20 @@
         "button": "Approvals ({count})",
         "title": "Approvals waiting",
         "empty": "Nothing is waiting for approval right now."
+      },
+      "landing": {
+        "simpleHint": "Quick automations with AI steps",
+        "premiumHint": "Advanced flows with conditions, approvals and integrations",
+        "templates": "Quick start",
+        "tpl": {
+          "leadEmail": "New lead → Email",
+          "formSheet": "Form → Sheets",
+          "orderSlack": "Order → Slack",
+          "scheduleReport": "Schedule → Report",
+          "aiClassify": "AI classify → Route",
+          "socialPost": "Social → Post"
+        },
+        "paste": "Paste anything"
       }
     },
     "flows": {

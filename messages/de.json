@@ -3982,6 +3982,20 @@
         "button": "Genehmigungen ({count})",
         "title": "Ausstehende Genehmigungen",
         "empty": "Derzeit wartet nichts auf Genehmigung."
+      },
+      "landing": {
+        "simpleHint": "Schnelle Automatisierungen mit AI-Schritten",
+        "premiumHint": "Erweiterte Flows mit Bedingungen und Integrationen",
+        "templates": "Schnellstart",
+        "tpl": {
+          "leadEmail": "Neuer Lead → E-Mail",
+          "formSheet": "Formular → Sheets",
+          "orderSlack": "Bestellung → Slack",
+          "scheduleReport": "Zeitplan → Bericht",
+          "aiClassify": "AI klassifiz. → Route",
+          "socialPost": "Social → Post"
+        },
+        "paste": "Alles einfügen"
       }
     },
     "flows": {

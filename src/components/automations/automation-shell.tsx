@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Bell, FlaskConical, LayoutTemplate, Pause, Play, Power, Trash2, Undo2, Zap } from "lucide-react";
+import { ArrowRight, Bell, Crown, FileUp, FlaskConical, LayoutTemplate, Link2, Pause, Play, Power, Sparkles, Trash2, Undo2, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { LargeActionConfirm } from "@/components/credits/cost-estimate";
 import { useCredits } from "@/components/credits/credits-context";
@@ -138,6 +138,11 @@ export function AutomationShell({
   // the canvas follows (lib/automations/run-progress.ts followedRun).
   const [watch, setWatch] = useState<(Watch & { flowId: string }) | null>(null);
   const [starting, setStarting] = useState<TemplateId | null>(null);
+  // LANDING TIER (n8n-style landing, 2026-11-20): cosmetic only — the
+  // tier selection is shown on the landing and passed to the builder
+  // as a hint. "simple" is the default; "premium" tells the builder to
+  // use more boxes and richer instructions.
+  const [landingTier, setLandingTier] = useState<"simple" | "premium">("simple");
 
   // THE [◧] COLUMN, remembered per device — same key shape as Chat's own
   // (components/chat/chat-workspace.tsx, components/chat/conversation-column.tsx).
@@ -775,6 +780,95 @@ export function AutomationShell({
             { key: "finance", label: t("example.finance") },
             { key: "file", label: t("example.file") },
           ],
+          extra: (
+            <div className="flex w-full max-w-md flex-col items-center gap-5">
+              {/* Visual flow preview — 3 boxes connected by lines */}
+              <div className="flex w-full max-w-[340px] items-center justify-center gap-0">
+                {/* Trigger box */}
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.5)" }}>
+                    <Zap className="h-5 w-5 text-foreground/40" aria-hidden="true" />
+                  </div>
+                  <span className="text-[9px] text-muted">Trigger</span>
+                </div>
+                {/* Line */}
+                <div className="mb-4 h-px w-8" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                {/* AI box */}
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.5)" }}>
+                    <Sparkles className="h-5 w-5 text-foreground/40" aria-hidden="true" />
+                  </div>
+                  <span className="text-[9px] text-muted">AI</span>
+                </div>
+                {/* Line */}
+                <div className="mb-4 h-px w-8" style={{ background: "rgb(var(--border) / 0.4)" }} />
+                {/* Action box */}
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-card" style={{ background: "rgb(var(--panel) / 0.8)", border: "1px solid rgb(var(--border) / 0.5)" }}>
+                    <ArrowRight className="h-5 w-5 text-foreground/40" aria-hidden="true" />
+                  </div>
+                  <span className="text-[9px] text-muted">Action</span>
+                </div>
+              </div>
+
+              {/* Input hints — files, links */}
+              <div className="flex items-center gap-3 text-[11px] text-muted">
+                <span className="inline-flex items-center gap-1"><FileUp className="h-3 w-3" aria-hidden="true" /> Files</span>
+                <span className="inline-flex items-center gap-1"><Link2 className="h-3 w-3" aria-hidden="true" /> Links</span>
+                <span className="text-foreground/20">|</span>
+                <span>{t("landing.paste")}</span>
+              </div>
+
+              {/* Simple | Premium toggle */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">Plan</span>
+                <div className="flex items-center gap-1 rounded-full bg-panel p-1">
+                  <button
+                    type="button"
+                    onClick={() => setLandingTier("simple")}
+                    className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${landingTier === "simple" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
+                  >
+                    Simple
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLandingTier("premium")}
+                    className={`inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${landingTier === "premium" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
+                  >
+                    <Crown className="h-3 w-3" aria-hidden="true" /> Premium
+                  </button>
+                </div>
+                <span className="text-[10px] text-muted">
+                  {landingTier === "simple" ? t("landing.simpleHint") : t("landing.premiumHint")}
+                </span>
+              </div>
+
+              {/* Quick templates */}
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{t("landing.templates")}</span>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {[
+                    { emoji: "📧", label: t("landing.tpl.leadEmail") },
+                    { emoji: "📋", label: t("landing.tpl.formSheet") },
+                    { emoji: "🔔", label: t("landing.tpl.orderSlack") },
+                    { emoji: "📅", label: t("landing.tpl.scheduleReport") },
+                    { emoji: "🤖", label: t("landing.tpl.aiClassify") },
+                    { emoji: "📱", label: t("landing.tpl.socialPost") },
+                  ].map(({ emoji, label }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => composerRef.current?.setText?.(label)}
+                      className="rounded-full px-3 py-1.5 text-[11px] font-medium text-muted transition-colors hover:bg-panel hover:text-foreground"
+                      style={{ border: "1px solid rgb(var(--border) / 0.4)" }}
+                    >
+                      {emoji} {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ),
         }}
         history={{
           open: historyOpen,

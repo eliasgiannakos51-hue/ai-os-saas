@@ -3982,6 +3982,20 @@
         "button": "待审批 ({count})",
         "title": "等待审批",
         "empty": "目前没有任何内容等待审批。"
+      },
+      "landing": {
+        "simpleHint": "使用AI步骤快速自动化",
+        "premiumHint": "包含条件和审批的高级流程",
+        "templates": "快速开始",
+        "tpl": {
+          "leadEmail": "新线索 → 邮件",
+          "formSheet": "表单 → Sheets",
+          "orderSlack": "订单 → Slack",
+          "scheduleReport": "定时 → 报告",
+          "aiClassify": "AI分类 → 路由",
+          "socialPost": "社交 → 发布"
+        },
+        "paste": "粘贴任何内容"
       }
     },
     "flows": {

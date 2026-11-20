@@ -3982,6 +3982,20 @@
         "button": "Εγκρίσεις ({count})",
         "title": "Εγκρίσεις σε αναμονή",
         "empty": "Δεν περιμένει καμία έγκριση αυτή τη στιγμή."
+      },
+      "landing": {
+        "simpleHint": "Γρήγορες αυτοματοποιήσεις με AI βήματα",
+        "premiumHint": "Προχωρημένες ροές με συνθήκες, εγκρίσεις και συνδέσεις",
+        "templates": "Γρήγορη εκκίνηση",
+        "tpl": {
+          "leadEmail": "Νέο lead → Email",
+          "formSheet": "Φόρμα → Sheets",
+          "orderSlack": "Παραγγελία → Slack",
+          "scheduleReport": "Χρονοδ/μα → Αναφορά",
+          "aiClassify": "AI ταξινόμηση → Δρομολόγηση",
+          "socialPost": "Social → Post"
+        },
+        "paste": "Επικόλληση"
       }
     },
     "flows": {

@@ -782,6 +782,14 @@ const LOCALE_ALLOWED = new Set([
   "de:dashboard.appBuilder.tabs.plan",
   "fr:dashboard.appBuilder.tabs.plan",
   "es:dashboard.appBuilder.tabs.plan",
+  // "E-commerce" is the standard term in French, Italian and Portuguese
+  // — not an English word left untranslated. "Content Marketing" is the
+  // standard German and Italian term for the same reason.
+  "fr:dashboard.automations.templates.groups.ecommerce",
+  "it:dashboard.automations.templates.groups.ecommerce",
+  "pt:dashboard.automations.templates.groups.ecommerce",
+  "de:dashboard.automations.templates.groups.marketing",
+  "it:dashboard.automations.templates.groups.marketing",
   // The small ready-made jobs (quick-jobs.ts, 2026-10-24): loanwords that
   // stay English in that one language's everyday tech/office vocabulary —
   // "Quiz", "CV", "Logo", "Poster", "Notes", "Voice-over", "Apps", "Audio"

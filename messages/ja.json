@@ -4012,7 +4012,11 @@
         "made": "準備できました:「{name}」。自由に変更して、好きなときにオンにしてください。",
         "groups": {
           "finance": "財務アシスタント",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "ECサイト",
+          "support": "カスタマーサポート",
+          "marketing": "コンテンツマーケティング",
+          "sales": "セールスパイプライン"
         },
         "finance_daily": {
           "name": "毎朝の財務サマリー",
@@ -4033,6 +4037,26 @@
           "name": "Instagram の新しい投稿 → Telegram にメッセージ",
           "description": "Instagram に投稿すると、すぐに Telegram にメッセージが届きます。",
           "why": "Instagram との接続はまだありません。"
+        },
+        "ecommerce_daily": {
+          "name": "日次注文サマリー",
+          "description": "毎朝：昨日の注文をまとめてメールでお届け。",
+          "instruction": "昨日の注文をまとめてください：総売上、注文数、売れ筋商品、問題のある注文。提供されたデータのみを使用してください。"
+        },
+        "support_triage": {
+          "name": "メールトリアージ",
+          "description": "メール受信時：AIが緊急度を分類しタスクを作成。",
+          "instruction": "このサポートメールを読み、緊急度を分類してください（重大/高/中/低）。抽出項目：件名、顧客名、問題の要約。タスクの説明として整形してください。"
+        },
+        "content_repurpose": {
+          "name": "コンテンツをLinkedInへ",
+          "description": "ドキュメントをアップロードするとAIが承認用のLinkedIn投稿に変換。",
+          "instruction": "このコンテンツをプロフェッショナルなLinkedIn投稿に変換してください。1300文字以内に収め、関連するハッシュタグを追加し、ビジネス向けに魅力的にしてください。"
+        },
+        "lead_enrich": {
+          "name": "週次リードスコアリング",
+          "description": "毎週月曜日：HubSpotの連絡先をスコアリングして更新。",
+          "instruction": "各連絡先をエンゲージメントデータに基づいてスコアリングしてください。1-100のスコアとカテゴリ（ホット/ウォーム/コールド）を割り当て、今週フォローアップすべきトップ5のリードをリストアップしてください。"
         }
       },
       "timeSaved": {

@@ -4012,7 +4012,11 @@
         "made": "Prête : « {name} ». Modifie ce que tu veux et active-la quand tu veux.",
         "groups": {
           "finance": "Assistant financier",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "E-commerce",
+          "support": "Support client",
+          "marketing": "Marketing de contenu",
+          "sales": "Pipeline commercial"
         },
         "finance_daily": {
           "name": "Résumé financier chaque matin",
@@ -4033,6 +4037,26 @@
           "name": "Nouvelle publication Instagram → message Telegram",
           "description": "Dès que tu publies sur Instagram, un message arrive sur ton Telegram.",
           "why": "Il n’y a pas encore de connexion à Instagram."
+        },
+        "ecommerce_daily": {
+          "name": "Résumé quotidien des commandes",
+          "description": "Chaque matin : les commandes d'hier résumées et envoyées par email.",
+          "instruction": "Résume les commandes d'hier : chiffre d'affaires total, nombre de commandes, articles les plus vendus et commandes problématiques. Utilise uniquement les données fournies."
+        },
+        "support_triage": {
+          "name": "Tri des emails",
+          "description": "Quand un email arrive : l'IA classe l'urgence et crée une tâche.",
+          "instruction": "Lis cet email de support et classe son urgence (critique/élevée/moyenne/faible). Extrais : sujet, nom du client, résumé du problème. Formate comme description de tâche."
+        },
+        "content_repurpose": {
+          "name": "Contenu vers LinkedIn",
+          "description": "Téléverse un document et l'IA le transforme en post LinkedIn pour approbation.",
+          "instruction": "Transforme ce contenu en post LinkedIn professionnel. Garde-le sous 1300 caractères, ajoute des hashtags pertinents et rends-le engageant pour un public professionnel."
+        },
+        "lead_enrich": {
+          "name": "Scoring hebdomadaire des leads",
+          "description": "Chaque lundi : évalue tes contacts HubSpot et mets-les à jour.",
+          "instruction": "Évalue chaque contact selon ses données d'engagement. Attribue un score 1-100 et une catégorie (chaud/tiède/froid). Liste les 5 meilleurs leads à suivre cette semaine."
         }
       },
       "timeSaved": {

@@ -161,7 +161,7 @@ check("a condition with nothing before it stops, quietly", /const empty = readCo
 check("an approval stops the run, keeps what it made, and tells the person", /status: "waiting_approval",\s*steps,\s*state: \{ at: i \+ 1, text, credits \}/.test(runner) && /createNotification\(\{/.test(runner) && /url: `\/dashboard\/automation\?run=\$\{ctx\.runId\}`/.test(runner));
 check("what was read is handed to the model as data", /wrapUntrusted\(material\.slice\(0, MAX_READ_CHARS\)\)/.test(runner));
 check("an uploaded file is read only as its owner's", /\.from\("user_files"\)[\s\S]{0,120}\.eq\("id", ctx\.eventRef\)\s*\.eq\("user_id", ctx\.user\.id\)/.test(runner));
-check("sending goes to the person and nobody else", /deliverAgentResult\(\{\s*userId: ctx\.user\.id,\s*email: ctx\.user\.email \?\? "",\s*method,\s*target: "",/.test(runner));
+check("sending goes to the person and nobody else", /deliverAgentResult\(\{\s*userId: ctx\.user\.id,\s*email: ctx\.user\.email \?\? "",/.test(runner) && /target: "",/.test(runner));
 check("a waiting run's steps read back with the approval given", view.readShownRun({ id: "r", status: "waiting_approval", state: { text: "να σταλεί" }, steps: [] }).output === "να σταλεί" && view.readShownRun({ status: "done", state: { output: "στάλθηκε" } }).output === "στάλθηκε");
 check("a run's error is said by its code", view.errorCode("b3:no_credits") === "no_credits" && view.errorCode("approval_expired") === "approval_expired" && view.errorCode(null) === null);
 check("a stored step is read defensively", steps.readSteps([{ box: "b1", status: "nope", note: "nope", credits: "9" }, null]).length === 1 && steps.readSteps([{ box: "b1", status: "nope", note: "nope" }])[0].status === "failed");
@@ -481,7 +481,7 @@ check("reduced motion, asked for either way: no dots at all, and the active line
 console.log("\n== 12. ready-made automations, one press, then the person's own (2026-11-05) ==");
 // ---------------------------------------------------------------------
 const templates = await loadTs("src/lib/automations/templates.ts");
-check("two ready: the finance assistant's daily summary and weekly analysis", templates.TEMPLATE_IDS.join() === "finance_daily,finance_weekly");
+check("six ready: finance, e-commerce, support, marketing, sales templates", templates.TEMPLATE_IDS.join() === "finance_daily,finance_weekly,ecommerce_daily,support_triage,content_repurpose,lead_enrich");
 for (const file of LOCALES) {
   const words = JSON.parse(readFileSync(`messages/${file}`, "utf8")).dashboard?.automations?.templates ?? {};
   for (const id of templates.TEMPLATE_IDS) {

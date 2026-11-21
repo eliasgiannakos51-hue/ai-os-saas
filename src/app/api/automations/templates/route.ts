@@ -81,6 +81,10 @@ export async function POST(request: Request) {
   const words: Record<TemplateId, { name: string; said: string; instruction: string }> = {
     finance_daily: { name: t("finance_daily.name"), said: t("finance_daily.description"), instruction: t("finance_daily.instruction") },
     finance_weekly: { name: t("finance_weekly.name"), said: t("finance_weekly.description"), instruction: t("finance_weekly.instruction") },
+    ecommerce_daily: { name: t("ecommerce_daily.name"), said: t("ecommerce_daily.description"), instruction: t("ecommerce_daily.instruction") },
+    support_triage: { name: t("support_triage.name"), said: t("support_triage.description"), instruction: t("support_triage.instruction") },
+    content_repurpose: { name: t("content_repurpose.name"), said: t("content_repurpose.description"), instruction: t("content_repurpose.instruction") },
+    lead_enrich: { name: t("lead_enrich.name"), said: t("lead_enrich.description"), instruction: t("lead_enrich.instruction") },
   };
   const { name, said, instruction } = words[template];
   const boxes = templateFlow(template, instruction);

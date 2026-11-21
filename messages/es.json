@@ -4012,7 +4012,11 @@
         "made": "Lista: «{name}». Cambia lo que quieras y actívala cuando quieras.",
         "groups": {
           "finance": "Asistente financiero",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "Comercio electrónico",
+          "support": "Soporte al cliente",
+          "marketing": "Marketing de contenidos",
+          "sales": "Pipeline de ventas"
         },
         "finance_daily": {
           "name": "Resumen financiero cada mañana",
@@ -4033,6 +4037,26 @@
           "name": "Nueva publicación en Instagram → mensaje en Telegram",
           "description": "En cuanto publicas en Instagram, te llega un mensaje a Telegram.",
           "why": "Todavía no hay conexión con Instagram."
+        },
+        "ecommerce_daily": {
+          "name": "Resumen diario de pedidos",
+          "description": "Cada mañana: los pedidos de ayer resumidos y enviados por email.",
+          "instruction": "Resume los pedidos de ayer: ingresos totales, número de pedidos, artículos más vendidos y pedidos con problemas. Usa solo los datos proporcionados."
+        },
+        "support_triage": {
+          "name": "Triaje de email",
+          "description": "Cuando llega un email: la IA clasifica la urgencia y crea una tarea.",
+          "instruction": "Lee este email de soporte y clasifica su urgencia (crítica/alta/media/baja). Extrae: asunto, nombre del cliente, resumen del problema. Formatea como descripción de tarea."
+        },
+        "content_repurpose": {
+          "name": "Contenido a LinkedIn",
+          "description": "Sube un documento y la IA lo convierte en un post de LinkedIn para tu aprobación.",
+          "instruction": "Transforma este contenido en un post profesional de LinkedIn. Mantenlo por debajo de 1300 caracteres, añade hashtags relevantes y hazlo atractivo para una audiencia empresarial."
+        },
+        "lead_enrich": {
+          "name": "Puntuación semanal de leads",
+          "description": "Cada lunes: puntúa tus contactos de HubSpot y actualízalos.",
+          "instruction": "Puntúa cada contacto según sus datos de interacción. Asigna una puntuación 1-100 y una categoría (caliente/tibio/frío). Lista los 5 mejores leads para seguimiento esta semana."
         }
       },
       "timeSaved": {

@@ -4012,7 +4012,11 @@
         "made": "已就绪:“{name}”。可以随意修改,想用时再开启。",
         "groups": {
           "finance": "财务助手",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "电子商务",
+          "support": "客户支持",
+          "marketing": "内容营销",
+          "sales": "销售管道"
         },
         "finance_daily": {
           "name": "每天早上的财务摘要",
@@ -4033,6 +4037,26 @@
           "name": "Instagram 新帖子 → Telegram 消息",
           "description": "你一在 Instagram 发帖,Telegram 就会收到一条消息。",
           "why": "目前还没有与 Instagram 的连接。"
+        },
+        "ecommerce_daily": {
+          "name": "每日订单摘要",
+          "description": "每天早上：昨天的订单汇总发送到您的邮箱。",
+          "instruction": "汇总昨天的订单：总收入、订单数量、畅销商品以及有问题的订单。仅使用提供的数据。"
+        },
+        "support_triage": {
+          "name": "邮件分诊",
+          "description": "收到邮件时：AI分类紧急程度并创建任务。",
+          "instruction": "阅读这封支持邮件并分类其紧急程度（严重/高/中/低）。提取：主题、客户姓名、问题摘要。格式化为任务描述。"
+        },
+        "content_repurpose": {
+          "name": "内容转LinkedIn",
+          "description": "上传文档，AI将其转为LinkedIn帖子待您审批。",
+          "instruction": "将此内容转化为专业的LinkedIn帖子。保持在1300字以内，添加相关话题标签，使其对商业受众具有吸引力。"
+        },
+        "lead_enrich": {
+          "name": "每周线索评分",
+          "description": "每周一：为您的HubSpot联系人评分并更新。",
+          "instruction": "根据互动数据为每个联系人评分。分配1-100的分数和类别（热门/温和/冷淡）。列出本周需要跟进的前5个线索。"
         }
       },
       "timeSaved": {

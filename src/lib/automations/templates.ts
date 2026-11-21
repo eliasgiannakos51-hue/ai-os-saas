@@ -30,17 +30,25 @@ import { readFlow, type Box } from "@/lib/automations/boxes";
  * WhatsApp is not drawn at all: it needs Meta's WhatsApp Business API,
  * which is the owner's to obtain (docs/NEEDS-FROM-ELIAS.md).
  */
-export const TEMPLATE_IDS = ["finance_daily", "finance_weekly"] as const;
+export const TEMPLATE_IDS = [
+  "finance_daily", "finance_weekly",
+  // New templates (2026-11-21): one per category, showing the new capabilities.
+  "ecommerce_daily", "support_triage", "content_repurpose", "lead_enrich",
+] as const;
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
 export const SOON_TEMPLATE_IDS = ["finance_expense_telegram", "instagram_to_telegram"] as const;
 export type SoonTemplateId = (typeof SOON_TEMPLATE_IDS)[number];
 
-export type TemplateGroup = "finance" | "instagram";
+export type TemplateGroup = "finance" | "instagram" | "ecommerce" | "support" | "marketing" | "sales";
 
-/** The order and grouping of the gallery: the finance assistant's three, then Instagram's one. */
+/** The order and grouping of the gallery. */
 export const GALLERY: readonly { group: TemplateGroup; ready: readonly TemplateId[]; soon: readonly SoonTemplateId[] }[] = [
   { group: "finance", ready: ["finance_daily", "finance_weekly"], soon: ["finance_expense_telegram"] },
+  { group: "ecommerce", ready: ["ecommerce_daily"], soon: [] },
+  { group: "support", ready: ["support_triage"], soon: [] },
+  { group: "marketing", ready: ["content_repurpose"], soon: [] },
+  { group: "sales", ready: ["lead_enrich"], soon: [] },
   { group: "instagram", ready: [], soon: ["instagram_to_telegram"] },
 ];
 
@@ -63,11 +71,52 @@ export function templateBoxes(id: TemplateId, instruction: string): Box[] {
       { id: "b4", kind: "action", do: "send_telegram" },
     ];
   }
+  if (id === "finance_weekly") {
+    return [
+      { id: "b1", kind: "start", when: "time", every: "week", at: "08:30", weekday: 1 },
+      { id: "b2", kind: "read", source: "finances_month" },
+      { id: "b3", kind: "ai", instruction },
+      { id: "b4", kind: "action", do: "send_telegram" },
+    ];
+  }
+  // E-COMMERCE DAILY: every morning, read Shopify orders → AI summarise → email report.
+  if (id === "ecommerce_daily") {
+    return [
+      { id: "b1", kind: "start", when: "time", every: "day", at: "09:00" },
+      { id: "b2", kind: "read", source: "shopify_orders" },
+      { id: "b3", kind: "condition", test: "has_content" },
+      { id: "b4", kind: "ai", instruction },
+      { id: "b5", kind: "action", do: "send_email" },
+    ];
+  }
+  // SUPPORT TRIAGE: when email arrives → AI classify urgency → create task.
+  if (id === "support_triage") {
+    return [
+      { id: "b1", kind: "start", when: "new_email" },
+      { id: "b2", kind: "read", source: "last_emails" },
+      { id: "b3", kind: "ai", instruction },
+      { id: "b4", kind: "condition", test: "has_content" },
+      { id: "b5", kind: "action", do: "create_task" },
+    ];
+  }
+  // CONTENT REPURPOSE: on file upload → AI transform → post to LinkedIn.
+  if (id === "content_repurpose") {
+    return [
+      { id: "b1", kind: "start", when: "file_uploaded" },
+      { id: "b2", kind: "read", source: "uploaded_file" },
+      { id: "b3", kind: "ai", instruction },
+      { id: "b4", kind: "approval" },
+      { id: "b5", kind: "action", do: "post_linkedin" },
+    ];
+  }
+  // LEAD ENRICH: weekly, read CRM contacts → AI score → update HubSpot.
+  // id === "lead_enrich"
   return [
-    { id: "b1", kind: "start", when: "time", every: "week", at: "08:30", weekday: 1 },
-    { id: "b2", kind: "read", source: "finances_month" },
-    { id: "b3", kind: "ai", instruction },
-    { id: "b4", kind: "action", do: "send_telegram" },
+    { id: "b1", kind: "start", when: "time", every: "week", at: "07:00", weekday: 1 },
+    { id: "b2", kind: "read", source: "hubspot_contacts" },
+    { id: "b3", kind: "condition", test: "has_content" },
+    { id: "b4", kind: "ai", instruction },
+    { id: "b5", kind: "action", do: "hubspot_update" },
   ];
 }
 

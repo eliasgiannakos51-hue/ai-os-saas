@@ -4012,7 +4012,11 @@
         "made": "Fertig: „{name}“. Ändere, was du willst, und schalte sie ein, wann du willst.",
         "groups": {
           "finance": "Finanzassistent",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "E-Commerce",
+          "support": "Kundensupport",
+          "marketing": "Content Marketing",
+          "sales": "Vertrieb"
         },
         "finance_daily": {
           "name": "Finanzübersicht jeden Morgen",
@@ -4033,6 +4037,26 @@
           "name": "Neuer Instagram-Beitrag → Telegram-Nachricht",
           "description": "Sobald du auf Instagram postest, kommt eine Nachricht in deinem Telegram an.",
           "why": "Es gibt noch keine Verbindung zu Instagram."
+        },
+        "ecommerce_daily": {
+          "name": "Tägliche Bestellübersicht",
+          "description": "Jeden Morgen: die gestrigen Bestellungen zusammengefasst per E-Mail.",
+          "instruction": "Fasse die gestrigen Bestellungen zusammen: Gesamtumsatz, Anzahl der Bestellungen, meistverkaufte Artikel und eventuelle Probleme. Verwende nur die bereitgestellten Daten."
+        },
+        "support_triage": {
+          "name": "E-Mail-Triage",
+          "description": "Bei Eingang einer E-Mail: KI klassifiziert die Dringlichkeit und erstellt eine Aufgabe.",
+          "instruction": "Lies diese Support-E-Mail und klassifiziere ihre Dringlichkeit (kritisch/hoch/mittel/niedrig). Extrahiere: Betreff, Kundenname, Problemzusammenfassung. Formatiere als Aufgabenbeschreibung."
+        },
+        "content_repurpose": {
+          "name": "Inhalt für LinkedIn",
+          "description": "Lade ein Dokument hoch und die KI erstellt einen LinkedIn-Post zur Genehmigung.",
+          "instruction": "Verwandle diesen Inhalt in einen professionellen LinkedIn-Post. Halte ihn unter 1300 Zeichen, füge relevante Hashtags hinzu und gestalte ihn ansprechend für ein Geschäftspublikum."
+        },
+        "lead_enrich": {
+          "name": "Wöchentliche Lead-Bewertung",
+          "description": "Jeden Montag: HubSpot-Kontakte bewerten und aktualisieren.",
+          "instruction": "Bewerte jeden Kontakt anhand seiner Interaktionsdaten. Vergib eine Punktzahl von 1-100 und eine Kategorie (heiß/warm/kalt). Liste die Top 5 Leads für Follow-up diese Woche auf."
         }
       },
       "timeSaved": {

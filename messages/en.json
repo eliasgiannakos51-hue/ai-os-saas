@@ -4012,7 +4012,11 @@
         "made": "Ready: “{name}”. Change anything you like, and switch it on whenever you want.",
         "groups": {
           "finance": "Finance assistant",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "E-commerce",
+          "support": "Customer Support",
+          "marketing": "Content Marketing",
+          "sales": "Sales Pipeline"
         },
         "finance_daily": {
           "name": "Morning finance summary",
@@ -4033,6 +4037,26 @@
           "name": "New Instagram post → Telegram message",
           "description": "As soon as you post on Instagram, a message arrives in your Telegram.",
           "why": "There is no Instagram connection yet."
+        },
+        "ecommerce_daily": {
+          "name": "Daily orders summary",
+          "description": "Every morning: yesterday\"s orders summarised and emailed to you.",
+          "instruction": "Summarise yesterday\"s orders: total revenue, number of orders, top-selling items, and any orders with issues. Use only data provided."
+        },
+        "support_triage": {
+          "name": "Email triage",
+          "description": "When an email arrives: AI classifies urgency and creates a task.",
+          "instruction": "Read this support email and classify its urgency (critical/high/medium/low). Extract: subject, customer name, issue summary. Format as a task description."
+        },
+        "content_repurpose": {
+          "name": "Content to LinkedIn",
+          "description": "Upload a document and AI turns it into a LinkedIn post for your approval.",
+          "instruction": "Transform this content into a professional LinkedIn post. Keep it under 1300 characters, add relevant hashtags, and make it engaging for a business audience."
+        },
+        "lead_enrich": {
+          "name": "Weekly lead scoring",
+          "description": "Every Monday: score your HubSpot contacts and update them.",
+          "instruction": "Score each contact based on their engagement data. Assign a score 1-100 and a category (hot/warm/cold). List the top 5 leads to follow up with this week."
         }
       },
       "timeSaved": {

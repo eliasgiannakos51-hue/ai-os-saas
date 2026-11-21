@@ -45,10 +45,18 @@ export function TemplateGallery({
   const group: Record<(typeof GALLERY)[number]["group"], string> = {
     finance: t("templates.groups.finance"),
     instagram: t("templates.groups.instagram"),
+    ecommerce: t("templates.groups.ecommerce"),
+    support: t("templates.groups.support"),
+    marketing: t("templates.groups.marketing"),
+    sales: t("templates.groups.sales"),
   };
   const ready: Record<TemplateId, { name: string; description: string; instruction: string }> = {
     finance_daily: { name: t("templates.finance_daily.name"), description: t("templates.finance_daily.description"), instruction: t("templates.finance_daily.instruction") },
     finance_weekly: { name: t("templates.finance_weekly.name"), description: t("templates.finance_weekly.description"), instruction: t("templates.finance_weekly.instruction") },
+    ecommerce_daily: { name: t("templates.ecommerce_daily.name"), description: t("templates.ecommerce_daily.description"), instruction: t("templates.ecommerce_daily.instruction") },
+    support_triage: { name: t("templates.support_triage.name"), description: t("templates.support_triage.description"), instruction: t("templates.support_triage.instruction") },
+    content_repurpose: { name: t("templates.content_repurpose.name"), description: t("templates.content_repurpose.description"), instruction: t("templates.content_repurpose.instruction") },
+    lead_enrich: { name: t("templates.lead_enrich.name"), description: t("templates.lead_enrich.description"), instruction: t("templates.lead_enrich.instruction") },
   };
   const soon: Record<SoonTemplateId, { name: string; description: string; why: string }> = {
     finance_expense_telegram: { name: t("templates.finance_expense_telegram.name"), description: t("templates.finance_expense_telegram.description"), why: t("templates.finance_expense_telegram.why") },

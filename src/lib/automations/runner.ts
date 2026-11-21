@@ -86,6 +86,27 @@ export type RunResult = { status: "done" | "stopped" | "waiting_approval" | "fai
 /** How much of a run's result its row keeps, for the history. */
 export const MAX_OUTPUT_CHARS = 8000;
 
+/**
+ * SOURCES THAT NEED AN EXTERNAL INTEGRATION WIRED UP. Each is a read
+ * source that asks a third-party API for the person's data. Until its
+ * integration is built (OAuth + API calls), it returns not_connected so
+ * the person sees "Needs a connection" and not a silent failure.
+ *
+ * The pattern for each: check the connection → fetch → format as text.
+ * When an integration IS wired (e.g. google_sheets → Google Sheets API),
+ * its branch calls the real API and returns the data. The not_connected
+ * fallback is never reached for a connected source.
+ */
+const EXTERNAL_SOURCES = new Set([
+  "google_sheets", "website_scrape", "rss_feed", "last_emails",
+  "database_query", "crm_contacts", "social_mentions", "analytics_report",
+  "notion_pages", "airtable_records", "google_drive_files",
+  "jira_issues", "github_issues", "hubspot_contacts", "shopify_orders",
+  "http_request", "pdf_extract", "weather_data", "stock_prices",
+  "discord_messages", "trello_cards", "asana_tasks", "clickup_tasks",
+  "stripe_payments", "typeform_responses", "google_forms",
+]);
+
 async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text: string; count: number } | { ok: false; note: "not_connected" | "no_file" | "failed" }> {
   const admin = createAdminClient();
   if (box.source.startsWith("calendar_")) {
@@ -110,17 +131,60 @@ async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text
     const lines = rows.map((r) => `${String(r.created_at).slice(0, 10)} · ${r.type} · ${Number(r.amount || 0).toFixed(2)} · ${String(r.description ?? "").slice(0, 200)}`);
     return { ok: true, text: rows.length ? `income ${income.toFixed(2)} · expense ${expense.toFixed(2)} · net ${(income - expense).toFixed(2)}\n${lines.join("\n")}` : "", count: rows.length };
   }
-  // uploaded_file: the one that started this run, the person's own.
-  if (!ctx.eventRef) return { ok: false, note: "no_file" };
-  const { data, error } = await admin
-    .from("user_files")
-    .select("filename, extracted_text, processing_status")
-    .eq("id", ctx.eventRef)
-    .eq("user_id", ctx.user.id)
-    .maybeSingle();
-  if (error || !data || data.processing_status !== "ready") return { ok: false, note: "no_file" };
-  const text = String(data.extracted_text ?? "").replace(/\[\[PAGE \d+\|[^\]]*\]\]\n?/g, "\n").trim();
-  return { ok: true, text: text ? `file: ${data.filename}\n\n${text}` : "", count: text ? 1 : 0 };
+  if (box.source === "uploaded_file") {
+    // uploaded_file: the one that started this run, the person's own.
+    if (!ctx.eventRef) return { ok: false, note: "no_file" };
+    const { data, error } = await admin
+      .from("user_files")
+      .select("filename, extracted_text, processing_status")
+      .eq("id", ctx.eventRef)
+      .eq("user_id", ctx.user.id)
+      .maybeSingle();
+    if (error || !data || data.processing_status !== "ready") return { ok: false, note: "no_file" };
+    const text = String(data.extracted_text ?? "").replace(/\[\[PAGE \d+\|[^\]]*\]\]\n?/g, "\n").trim();
+    return { ok: true, text: text ? `file: ${data.filename}\n\n${text}` : "", count: text ? 1 : 0 };
+  }
+  // --- EXTERNAL SOURCES: each is wired here when its integration is built. ---
+  // Until then, the source returns not_connected so the user sees the right
+  // message and can connect the service on /dashboard/integrations.
+  if (EXTERNAL_SOURCES.has(box.source)) {
+    // Check if this source has a connected integration
+    const integration = await readExternalSource(box.source, ctx);
+    if (integration) return integration;
+    return { ok: false, note: "not_connected" };
+  }
+  return { ok: false, note: "failed" };
+}
+
+/**
+ * READ FROM AN EXTERNAL SOURCE. Each integration is added here as it is
+ * built. The function returns null when the integration is not yet wired,
+ * which makes readData fall through to not_connected.
+ *
+ * WIRED:
+ *   (none yet — each integration is wired here as its OAuth/API is built)
+ *
+ * When wiring a new source:
+ * 1. Import its client/SDK
+ * 2. Check the user's connection (getUsableAccessToken or equivalent)
+ * 3. Fetch the data, respecting MAX_READ_CHARS
+ * 4. Return { ok: true, text, count } or { ok: false, note }
+ */
+async function readExternalSource(
+  source: string,
+  _ctx: RunContext
+): Promise<{ ok: true; text: string; count: number } | { ok: false; note: "not_connected" | "failed" } | null> {
+  // Each integration is wired as a case here. Example pattern:
+  //
+  //   if (source === "google_sheets") {
+  //     const token = await getUsableAccessToken(_ctx.user.id, "google_sheets");
+  //     if (!token) return { ok: false, note: "not_connected" };
+  //     const data = await fetchGoogleSheetsData(token, ...);
+  //     return { ok: true, text: formatAsText(data), count: data.length };
+  //   }
+  //
+  void source;
+  return null;
 }
 
 async function runAi(instruction: string, material: string, userId: string, costs: CostAccumulator, locale: string): Promise<AiOutcome> {
@@ -163,8 +227,40 @@ async function runAi(instruction: string, material: string, userId: string, cost
   return { kind: "provider", answered };
 }
 
+/**
+ * ACTIONS THAT ARE ROUTED THROUGH deliverAgentResult: messaging channels
+ * that all follow the same pattern — compose a message and send it through
+ * the person's own connected channel.
+ */
+const DELIVERY_METHOD: Partial<Record<string, string>> = {
+  send_telegram: "telegram",
+  send_email: "email",
+  send_whatsapp: "whatsapp",
+  send_slack: "slack",
+  send_sms: "sms",
+  send_discord: "discord",
+  notify: "in_app",
+};
+
+/**
+ * ACTIONS THAT NEED AN EXTERNAL INTEGRATION. Each is wired here when its
+ * API integration is built. Until then, they return not_connected.
+ */
+const EXTERNAL_ACTIONS = new Set([
+  "notion_write", "airtable_write", "google_drive_upload",
+  "jira_create", "github_create", "hubspot_update", "shopify_update",
+  "http_request", "generate_pdf", "translate_text", "compress_files",
+  "resize_image", "convert_format", "trello_create", "asana_create",
+  "clickup_create", "stripe_charge", "mailchimp_add", "sendgrid_send",
+  "twilio_call", "zoom_create", "google_ads_update", "facebook_ads_update",
+  "youtube_upload", "wordpress_post", "supabase_insert", "redis_set",
+  "mqtt_publish", "s3_upload",
+]);
+
 async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunStep> {
   if (ctx.dry) return { box: box.id, status: "would", note: box.do === "save_to_library" ? "would_save" : "would_send", via: box.do };
+
+  // --- SAVE TO LIBRARY: writes to the person's own documents. ---
   if (box.do === "save_to_library") {
     const date = new Intl.DateTimeFormat("en-CA", { timeZone: ctx.flow.time_zone }).format(new Date());
     const title = `${ctx.flow.name} — ${date}`.slice(0, 120);
@@ -177,17 +273,108 @@ async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunSt
     }
     return { box: box.id, status: "ok", note: "saved" };
   }
-  const method = box.do === "send_telegram" ? "telegram" : box.do === "send_email" ? "email" : "in_app";
-  const outcome = await deliverAgentResult({
-    userId: ctx.user.id,
-    email: ctx.user.email ?? "",
-    method,
-    target: "",
-    agentName: ctx.flow.name,
-    output: text,
-    language: await emailLocaleFor(ctx.user.id),
-  });
-  return outcome.delivered ? { box: box.id, status: "ok", note: "sent", via: method } : { box: box.id, status: "failed", note: method === "telegram" && /no longer connected/.test(outcome.reason ?? "") ? "not_connected" : "delivery", via: method };
+
+  // --- MESSAGING ACTIONS: telegram, email, whatsapp, slack, sms, discord, notify. ---
+  const deliveryMethod = DELIVERY_METHOD[box.do];
+  if (deliveryMethod) {
+    const outcome = await deliverAgentResult({
+      userId: ctx.user.id,
+      email: ctx.user.email ?? "",
+      method: deliveryMethod as Parameters<typeof deliverAgentResult>[0]["method"],
+      target: "",
+      agentName: ctx.flow.name,
+      output: text,
+      language: await emailLocaleFor(ctx.user.id),
+    });
+    return outcome.delivered
+      ? { box: box.id, status: "ok", note: "sent", via: deliveryMethod }
+      : { box: box.id, status: "failed", note: deliveryMethod === "telegram" && /no longer connected/.test(outcome.reason ?? "") ? "not_connected" : "delivery", via: deliveryMethod };
+  }
+
+  // --- SOCIAL MEDIA: post to Instagram, Facebook, Twitter, LinkedIn, YouTube, WordPress. ---
+  if (box.do === "post_instagram" || box.do === "post_facebook" || box.do === "post_twitter" ||
+      box.do === "post_linkedin" || box.do === "youtube_upload" || box.do === "wordpress_post") {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  // --- SPREADSHEET WRITES: Google Sheets, Airtable. ---
+  if (box.do === "sheets_write" || box.do === "airtable_write") {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  // --- DATA/WEBHOOK WRITES: database_write, webhook_post, supabase, redis, mqtt, s3. ---
+  if (box.do === "database_write" || box.do === "webhook_post" || box.do === "supabase_insert" ||
+      box.do === "redis_set" || box.do === "mqtt_publish" || box.do === "s3_upload") {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  // --- CALENDAR / MEETINGS: create_event, zoom_create. ---
+  if (box.do === "create_event" || box.do === "zoom_create") {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  // --- PROJECT MANAGEMENT: create_task, jira, github, trello, asana, clickup. ---
+  if (box.do === "create_task" || box.do === "jira_create" || box.do === "github_create" ||
+      box.do === "trello_create" || box.do === "asana_create" || box.do === "clickup_create") {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  // --- CRM / SALES: hubspot, shopify, stripe, create_invoice. ---
+  if (box.do === "create_invoice" || box.do === "hubspot_update" || box.do === "shopify_update" || box.do === "stripe_charge") {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  // --- ALL OTHER EXTERNAL ACTIONS. ---
+  if (EXTERNAL_ACTIONS.has(box.do)) {
+    const result = await runExternalAction(box.do, text, ctx);
+    if (result) return result;
+    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+  }
+
+  return { box: box.id, status: "failed", note: "failed", via: box.do };
+}
+
+/**
+ * RUN AN EXTERNAL ACTION. Each integration is added here as it is built.
+ * Returns null when the integration is not yet wired, which makes act()
+ * fall through to not_connected.
+ *
+ * WIRED:
+ *   (none yet — each integration is wired here as its OAuth/API is built)
+ *
+ * When wiring a new action:
+ * 1. Import its client/SDK
+ * 2. Check the user's connection
+ * 3. Execute the action with the text as payload
+ * 4. Return { box, status: "ok", note: "sent"/"saved", via } or failure
+ */
+async function runExternalAction(
+  _action: string,
+  _text: string,
+  _ctx: RunContext
+): Promise<RunStep | null> {
+  // Each integration is wired as a case here. Example pattern:
+  //
+  //   if (_action === "notion_write") {
+  //     const token = await getUsableAccessToken(_ctx.user.id, "notion");
+  //     if (!token) return null; // falls through to not_connected
+  //     await notionClient.pages.create({ ... });
+  //     return { box: _ctx.flow.id, status: "ok", note: "sent", via: "notion" };
+  //   }
+  //
+  return null;
 }
 
 /**

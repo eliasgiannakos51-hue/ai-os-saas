@@ -4012,7 +4012,11 @@
         "made": "Pronta: «{name}». Cambia quello che vuoi e attivala quando vuoi.",
         "groups": {
           "finance": "Assistente finanziario",
-          "instagram": "Instagram → Telegram"
+          "instagram": "Instagram → Telegram",
+          "ecommerce": "E-commerce",
+          "support": "Assistenza clienti",
+          "marketing": "Content Marketing",
+          "sales": "Pipeline vendite"
         },
         "finance_daily": {
           "name": "Riepilogo finanziario ogni mattina",
@@ -4033,6 +4037,26 @@
           "name": "Nuovo post su Instagram → messaggio su Telegram",
           "description": "Appena pubblichi su Instagram, ti arriva un messaggio su Telegram.",
           "why": "Non c’è ancora un collegamento con Instagram."
+        },
+        "ecommerce_daily": {
+          "name": "Riepilogo ordini giornaliero",
+          "description": "Ogni mattina: gli ordini di ieri riassunti e inviati per email.",
+          "instruction": "Riassumi gli ordini di ieri: ricavi totali, numero di ordini, articoli più venduti e ordini con problemi. Usa solo i dati forniti."
+        },
+        "support_triage": {
+          "name": "Triage delle email",
+          "description": "Quando arriva una email: l'AI classifica l'urgenza e crea un'attività.",
+          "instruction": "Leggi questa email di supporto e classifica la sua urgenza (critica/alta/media/bassa). Estrai: oggetto, nome cliente, riepilogo del problema. Formatta come descrizione attività."
+        },
+        "content_repurpose": {
+          "name": "Contenuto per LinkedIn",
+          "description": "Carica un documento e l'AI lo trasforma in un post LinkedIn per la tua approvazione.",
+          "instruction": "Trasforma questo contenuto in un post LinkedIn professionale. Mantienilo sotto i 1300 caratteri, aggiungi hashtag pertinenti e rendilo coinvolgente per un pubblico aziendale."
+        },
+        "lead_enrich": {
+          "name": "Punteggio settimanale dei lead",
+          "description": "Ogni lunedì: valuta i contatti HubSpot e aggiornali.",
+          "instruction": "Valuta ogni contatto in base ai dati di interazione. Assegna un punteggio 1-100 e una categoria (caldo/tiepido/freddo). Elenca i 5 migliori lead per follow-up questa settimana."
         }
       },
       "timeSaved": {

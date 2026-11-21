@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Database, FileUp, Filter, Globe, Hash, Mail, MessageCircle, MessageSquare, PauseCircle, Phone, Rss, Send, Share2, Sparkles, Table2, Timer, Webhook, Zap } from "lucide-react";
+import { BarChart3, Bell, BookOpen, Briefcase, Calendar, CalendarDays, Check, Clock, Cloud, CreditCard, Database, DollarSign, FileOutput, FileText, FileUp, Filter, FolderUp, FormInput, GitBranch, Globe, Hash, Image, Layers, Mail, MessageCircle, MessageSquare, Package, PauseCircle, Phone, Play, Rss, Send, Share2, ShoppingCart, Sparkles, Table2, Timer, Video, Webhook, Zap } from "lucide-react";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import {
   ACTIONS,
@@ -56,22 +56,51 @@ export const CONNECTION_NAME: Record<string, string> = {
   sms: "SMS",
   crm: "CRM",
   webhook: "Webhook",
+  notion: "Notion",
+  airtable: "Airtable",
+  google_drive: "Google Drive",
+  jira: "Jira",
+  github: "GitHub",
+  hubspot: "HubSpot",
+  shopify: "Shopify",
+  discord: "Discord",
+  trello: "Trello",
+  asana: "Asana",
+  clickup: "ClickUp",
+  stripe: "Stripe",
+  mailchimp: "Mailchimp",
+  sendgrid: "SendGrid",
+  twilio: "Twilio",
+  zoom: "Zoom",
+  google_ads: "Google Ads",
+  facebook_ads: "Facebook Ads",
+  youtube: "YouTube",
+  wordpress: "WordPress",
+  supabase: "Supabase",
+  redis: "Redis",
+  mqtt: "MQTT",
+  s3: "Amazon S3",
+  typeform: "Typeform",
+  google_forms: "Google Forms",
 };
 
 /** Where each connection is made. */
+const INTEGRATIONS = "/dashboard/integrations";
 export const CONNECT_AT: Record<string, string> = {
-  google_calendar: "/dashboard/integrations",
+  google_calendar: INTEGRATIONS,
   telegram: "/dashboard/agents",
-  whatsapp: "/dashboard/integrations",
-  slack: "/dashboard/integrations",
-  instagram: "/dashboard/integrations",
-  facebook: "/dashboard/integrations",
-  twitter: "/dashboard/integrations",
-  linkedin: "/dashboard/integrations",
-  google_sheets: "/dashboard/integrations",
-  sms: "/dashboard/integrations",
-  crm: "/dashboard/integrations",
-  webhook: "/dashboard/integrations",
+  whatsapp: INTEGRATIONS, slack: INTEGRATIONS, instagram: INTEGRATIONS,
+  facebook: INTEGRATIONS, twitter: INTEGRATIONS, linkedin: INTEGRATIONS,
+  google_sheets: INTEGRATIONS, sms: INTEGRATIONS, crm: INTEGRATIONS,
+  webhook: INTEGRATIONS, notion: INTEGRATIONS, airtable: INTEGRATIONS,
+  google_drive: INTEGRATIONS, jira: INTEGRATIONS, github: INTEGRATIONS,
+  hubspot: INTEGRATIONS, shopify: INTEGRATIONS, discord: INTEGRATIONS,
+  trello: INTEGRATIONS, asana: INTEGRATIONS, clickup: INTEGRATIONS,
+  stripe: INTEGRATIONS, mailchimp: INTEGRATIONS, sendgrid: INTEGRATIONS,
+  twilio: INTEGRATIONS, zoom: INTEGRATIONS, google_ads: INTEGRATIONS,
+  facebook_ads: INTEGRATIONS, youtube: INTEGRATIONS, wordpress: INTEGRATIONS,
+  supabase: INTEGRATIONS, redis: INTEGRATIONS, mqtt: INTEGRATIONS,
+  s3: INTEGRATIONS, typeform: INTEGRATIONS, google_forms: INTEGRATIONS,
 };
 
 // n8n-QUALITY NODE DESIGN. Each node is a compact card with a coloured
@@ -113,6 +142,24 @@ function useWords() {
     crm_contacts: t("sources.crm_contacts"),
     social_mentions: t("sources.social_mentions"),
     analytics_report: t("sources.analytics_report"),
+    notion_pages: t("sources.notion_pages"),
+    airtable_records: t("sources.airtable_records"),
+    google_drive_files: t("sources.google_drive_files"),
+    jira_issues: t("sources.jira_issues"),
+    github_issues: t("sources.github_issues"),
+    hubspot_contacts: t("sources.hubspot_contacts"),
+    shopify_orders: t("sources.shopify_orders"),
+    http_request: t("sources.http_request"),
+    pdf_extract: t("sources.pdf_extract"),
+    weather_data: t("sources.weather_data"),
+    stock_prices: t("sources.stock_prices"),
+    discord_messages: t("sources.discord_messages"),
+    trello_cards: t("sources.trello_cards"),
+    asana_tasks: t("sources.asana_tasks"),
+    clickup_tasks: t("sources.clickup_tasks"),
+    stripe_payments: t("sources.stripe_payments"),
+    typeform_responses: t("sources.typeform_responses"),
+    google_forms: t("sources.google_forms"),
   };
   const action: Record<ActionKind, string> = {
     send_telegram: t("actions.send_telegram"),
@@ -132,6 +179,36 @@ function useWords() {
     create_task: t("actions.create_task"),
     create_event: t("actions.create_event"),
     create_invoice: t("actions.create_invoice"),
+    send_discord: t("actions.send_discord"),
+    notion_write: t("actions.notion_write"),
+    airtable_write: t("actions.airtable_write"),
+    google_drive_upload: t("actions.google_drive_upload"),
+    jira_create: t("actions.jira_create"),
+    github_create: t("actions.github_create"),
+    hubspot_update: t("actions.hubspot_update"),
+    shopify_update: t("actions.shopify_update"),
+    http_request: t("actions.http_request"),
+    generate_pdf: t("actions.generate_pdf"),
+    translate_text: t("actions.translate_text"),
+    compress_files: t("actions.compress_files"),
+    resize_image: t("actions.resize_image"),
+    convert_format: t("actions.convert_format"),
+    trello_create: t("actions.trello_create"),
+    asana_create: t("actions.asana_create"),
+    clickup_create: t("actions.clickup_create"),
+    stripe_charge: t("actions.stripe_charge"),
+    mailchimp_add: t("actions.mailchimp_add"),
+    sendgrid_send: t("actions.sendgrid_send"),
+    twilio_call: t("actions.twilio_call"),
+    zoom_create: t("actions.zoom_create"),
+    google_ads_update: t("actions.google_ads_update"),
+    facebook_ads_update: t("actions.facebook_ads_update"),
+    youtube_upload: t("actions.youtube_upload"),
+    wordpress_post: t("actions.wordpress_post"),
+    supabase_insert: t("actions.supabase_insert"),
+    redis_set: t("actions.redis_set"),
+    mqtt_publish: t("actions.mqtt_publish"),
+    s3_upload: t("actions.s3_upload"),
   };
   const weekday = [t("weekdays.d1"), t("weekdays.d2"), t("weekdays.d3"), t("weekdays.d4"), t("weekdays.d5"), t("weekdays.d6"), t("weekdays.d7")];
   // «Όταν → Αν → Κάνε»: the part of the sentence each box is (lib/automations/boxes.ts SENTENCE_PART).
@@ -142,6 +219,10 @@ function useWords() {
     if (box.when === "webhook") return t("start.webhook");
     if (box.when === "new_email") return t("start.new_email");
     if (box.when === "rss") return t("start.rss");
+    if (box.when === "form_submitted") return t("start.form_submitted");
+    if (box.when === "chat_message") return t("start.chat_message");
+    if (box.when === "app_event") return t("start.app_event");
+    if (box.when === "manual") return t("start.manual");
     if (box.when === "time") {
       if (box.every === "day") return t("start.day", { at: box.at });
       if (box.every === "weekdays") return t("start.weekdays", { at: box.at });
@@ -236,19 +317,34 @@ function BoxIconInner({ box }: { box: Box }) {
     if (box.when === "webhook") return <Webhook className={cls} aria-hidden="true" />;
     if (box.when === "new_email") return <Mail className={cls} aria-hidden="true" />;
     if (box.when === "rss") return <Rss className={cls} aria-hidden="true" />;
+    if (box.when === "form_submitted") return <FormInput className={cls} aria-hidden="true" />;
+    if (box.when === "chat_message") return <MessageCircle className={cls} aria-hidden="true" />;
+    if (box.when === "app_event") return <Zap className={cls} aria-hidden="true" />;
+    if (box.when === "manual") return <Play className={cls} aria-hidden="true" />;
     return <Clock className={cls} aria-hidden="true" />;
   }
   if (box.kind === "read") {
     if (box.source.startsWith("calendar_")) return <CalendarDays className={cls} aria-hidden="true" />;
     if (box.source === "uploaded_file") return <FileUp className={cls} aria-hidden="true" />;
-    if (box.source === "google_sheets") return <Table2 className={cls} aria-hidden="true" />;
+    if (box.source === "google_sheets" || box.source === "airtable_records") return <Table2 className={cls} aria-hidden="true" />;
     if (box.source === "website_scrape") return <Globe className={cls} aria-hidden="true" />;
     if (box.source === "rss_feed") return <Rss className={cls} aria-hidden="true" />;
-    if (box.source === "last_emails") return <Mail className={cls} aria-hidden="true" />;
+    if (box.source === "last_emails" || box.source === "discord_messages") return <Mail className={cls} aria-hidden="true" />;
     if (box.source === "database_query") return <Database className={cls} aria-hidden="true" />;
-    if (box.source === "crm_contacts") return <BookOpen className={cls} aria-hidden="true" />;
+    if (box.source === "crm_contacts" || box.source === "hubspot_contacts") return <BookOpen className={cls} aria-hidden="true" />;
     if (box.source === "social_mentions") return <Hash className={cls} aria-hidden="true" />;
     if (box.source === "analytics_report") return <BarChart3 className={cls} aria-hidden="true" />;
+    if (box.source === "notion_pages") return <FileText className={cls} aria-hidden="true" />;
+    if (box.source === "google_drive_files") return <FolderUp className={cls} aria-hidden="true" />;
+    if (box.source === "jira_issues" || box.source === "trello_cards" || box.source === "asana_tasks" || box.source === "clickup_tasks") return <Layers className={cls} aria-hidden="true" />;
+    if (box.source === "github_issues") return <GitBranch className={cls} aria-hidden="true" />;
+    if (box.source === "shopify_orders") return <ShoppingCart className={cls} aria-hidden="true" />;
+    if (box.source === "http_request") return <Globe className={cls} aria-hidden="true" />;
+    if (box.source === "pdf_extract") return <FileText className={cls} aria-hidden="true" />;
+    if (box.source === "weather_data") return <Cloud className={cls} aria-hidden="true" />;
+    if (box.source === "stock_prices") return <DollarSign className={cls} aria-hidden="true" />;
+    if (box.source === "stripe_payments") return <CreditCard className={cls} aria-hidden="true" />;
+    if (box.source === "typeform_responses" || box.source === "google_forms") return <FormInput className={cls} aria-hidden="true" />;
     return <Table2 className={cls} aria-hidden="true" />;
   }
   if (box.kind === "ai") return <Sparkles className={cls} aria-hidden="true" />;
@@ -256,19 +352,31 @@ function BoxIconInner({ box }: { box: Box }) {
   if (box.kind === "approval") return <PauseCircle className={cls} aria-hidden="true" />;
   if (box.kind === "action") {
     if (box.do === "send_telegram") return <Send className={cls} aria-hidden="true" />;
-    if (box.do === "send_email") return <Mail className={cls} aria-hidden="true" />;
+    if (box.do === "send_email" || box.do === "sendgrid_send") return <Mail className={cls} aria-hidden="true" />;
     if (box.do === "send_whatsapp") return <MessageCircle className={cls} aria-hidden="true" />;
-    if (box.do === "send_slack") return <MessageSquare className={cls} aria-hidden="true" />;
-    if (box.do === "send_sms") return <Phone className={cls} aria-hidden="true" />;
+    if (box.do === "send_slack" || box.do === "send_discord") return <MessageSquare className={cls} aria-hidden="true" />;
+    if (box.do === "send_sms" || box.do === "twilio_call") return <Phone className={cls} aria-hidden="true" />;
     if (box.do === "post_instagram" || box.do === "post_facebook" || box.do === "post_twitter") return <Share2 className={cls} aria-hidden="true" />;
     if (box.do === "post_linkedin") return <Briefcase className={cls} aria-hidden="true" />;
-    if (box.do === "sheets_write") return <Table2 className={cls} aria-hidden="true" />;
-    if (box.do === "database_write") return <Database className={cls} aria-hidden="true" />;
-    if (box.do === "webhook_post") return <Webhook className={cls} aria-hidden="true" />;
-    if (box.do === "create_task") return <Zap className={cls} aria-hidden="true" />;
-    if (box.do === "create_event") return <Calendar className={cls} aria-hidden="true" />;
-    if (box.do === "create_invoice") return <BookOpen className={cls} aria-hidden="true" />;
+    if (box.do === "sheets_write" || box.do === "airtable_write") return <Table2 className={cls} aria-hidden="true" />;
+    if (box.do === "database_write" || box.do === "supabase_insert" || box.do === "redis_set") return <Database className={cls} aria-hidden="true" />;
+    if (box.do === "webhook_post" || box.do === "http_request" || box.do === "mqtt_publish") return <Webhook className={cls} aria-hidden="true" />;
+    if (box.do === "create_task" || box.do === "jira_create" || box.do === "trello_create" || box.do === "asana_create" || box.do === "clickup_create") return <Layers className={cls} aria-hidden="true" />;
+    if (box.do === "create_event" || box.do === "zoom_create") return <Calendar className={cls} aria-hidden="true" />;
+    if (box.do === "create_invoice" || box.do === "stripe_charge") return <CreditCard className={cls} aria-hidden="true" />;
     if (box.do === "notify") return <Bell className={cls} aria-hidden="true" />;
+    if (box.do === "notion_write") return <FileText className={cls} aria-hidden="true" />;
+    if (box.do === "google_drive_upload" || box.do === "s3_upload") return <FolderUp className={cls} aria-hidden="true" />;
+    if (box.do === "github_create") return <GitBranch className={cls} aria-hidden="true" />;
+    if (box.do === "hubspot_update" || box.do === "mailchimp_add") return <BookOpen className={cls} aria-hidden="true" />;
+    if (box.do === "shopify_update") return <ShoppingCart className={cls} aria-hidden="true" />;
+    if (box.do === "generate_pdf") return <FileOutput className={cls} aria-hidden="true" />;
+    if (box.do === "translate_text") return <Globe className={cls} aria-hidden="true" />;
+    if (box.do === "compress_files" || box.do === "convert_format") return <Package className={cls} aria-hidden="true" />;
+    if (box.do === "resize_image") return <Image className={cls} aria-hidden="true" />;
+    if (box.do === "google_ads_update" || box.do === "facebook_ads_update") return <DollarSign className={cls} aria-hidden="true" />;
+    if (box.do === "youtube_upload") return <Video className={cls} aria-hidden="true" />;
+    if (box.do === "wordpress_post") return <Globe className={cls} aria-hidden="true" />;
   }
   return <BookOpen className={cls} aria-hidden="true" />;
 }

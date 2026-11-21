@@ -33,8 +33,9 @@ const BOX_SCHEMA = {
   properties: {
     id: { type: "string", description: "Short id: b1, b2, …" },
     kind: { type: "string", enum: ["start", "read", "ai", "condition", "approval", "action"] },
-    when: { type: "string", enum: ["time", "file_uploaded", "webhook", "new_email", "rss"], description: "start only" },
+    when: { type: "string", enum: ["time", "file_uploaded", "webhook", "new_email", "rss", "form_submitted", "chat_message", "app_event", "manual"], description: "start only" },
     url: { type: "string", description: "start with when=rss: the RSS feed URL" },
+    app: { type: "string", description: "start with when=app_event: which app triggers it (e.g. shopify, github, stripe)" },
     every: { type: "string", enum: ["day", "weekdays", "week", "month"], description: "start with when=time only" },
     at: { type: "string", description: "start with when=time: HH:MM, 24-hour, in the person's time zone" },
     weekday: { type: "integer", description: "start with every=week: 1 Monday … 7 Sunday" },
@@ -50,12 +51,12 @@ const BOX_SCHEMA = {
 const SYSTEM = `You turn one sentence into an automation: a row of boxes that runs on the person's own data.
 
 THE BOXES, top to bottom:
-- start (exactly one, first): when=time with every (day|weekdays|week|month) and at (HH:MM, the person's time), weekday for every=week (1 Monday … 7 Sunday), monthDay for every=month; or when=file_uploaded; or when=webhook (triggered by an external HTTP call); or when=new_email (triggered when a new email arrives); or when=rss (triggered by new RSS feed items, with optional url field).
-- read: calendar_today, calendar_tomorrow, calendar_week (Google Calendar), finances_week, finances_month (income/expense entries), uploaded_file (only when start=file_uploaded), google_sheets (read from a connected Google Sheet), website_scrape (read content from a URL), rss_feed (read latest RSS items), last_emails (read recent emails), database_query (read from a connected database), crm_contacts (read CRM contacts/leads), social_mentions (read social media mentions), analytics_report (read analytics data).
-- ai: one instruction, in the person's language, saying what to do with the data (summarise, analyse, classify, translate, write, report, extract, compare, format, score…).
+- start (exactly one, first): when=time with every (day|weekdays|week|month) and at (HH:MM, the person's time), weekday for every=week (1 Monday … 7 Sunday), monthDay for every=month; or when=file_uploaded; or when=webhook (triggered by an external HTTP call); or when=new_email (triggered when a new email arrives); or when=rss (triggered by new RSS feed items, with optional url field); or when=form_submitted (triggered when a form is submitted); or when=chat_message (triggered by an incoming chat/support message); or when=app_event (triggered by an event in a connected app, with app field); or when=manual (triggered by clicking "Run now").
+- read: CALENDAR: calendar_today, calendar_tomorrow, calendar_week. FINANCE: finances_week, finances_month. FILES: uploaded_file (only when start=file_uploaded), google_drive_files, pdf_extract. SPREADSHEETS: google_sheets, airtable_records. PROJECT MANAGEMENT: notion_pages, jira_issues, github_issues, trello_cards, asana_tasks, clickup_tasks. CRM/SALES: hubspot_contacts, crm_contacts, shopify_orders, stripe_payments. COMMUNICATION: last_emails, discord_messages. FORMS: typeform_responses, google_forms. DATA: website_scrape, rss_feed, database_query, http_request, weather_data, stock_prices. ANALYTICS: analytics_report, social_mentions.
+- ai: one instruction, in the person's language, saying what to do with the data (summarise, analyse, classify, translate, write, report, extract, compare, format, score, generate, transform, enrich…).
 - condition: has_content — go on only if what came before is not empty; otherwise stop quietly.
 - approval: stop and wait until the person approves. Put before actions that send on their behalf.
-- action: send_telegram, send_email, notify (in-app), save_to_library, send_whatsapp, send_slack, send_sms, post_instagram, post_facebook, post_twitter, post_linkedin, sheets_write (write to Google Sheets), database_write, webhook_post (HTTP POST to a URL), create_task (create a project task), create_event (create calendar event), create_invoice.
+- action: MESSAGING: send_telegram, send_email, send_whatsapp, send_slack, send_sms, send_discord, notify (in-app). SOCIAL MEDIA: post_instagram, post_facebook, post_twitter, post_linkedin, youtube_upload, wordpress_post. SPREADSHEETS: sheets_write, airtable_write. PROJECT MANAGEMENT: notion_write, jira_create, github_create, trello_create, asana_create, clickup_create, create_task. CRM/SALES: hubspot_update, shopify_update, stripe_charge, create_invoice. MARKETING: mailchimp_add, sendgrid_send, google_ads_update, facebook_ads_update. CALENDAR: create_event, zoom_create. FILES: google_drive_upload, generate_pdf, compress_files, resize_image, convert_format, s3_upload, save_to_library. DATA: database_write, supabase_insert, redis_set, webhook_post, http_request, mqtt_publish. COMMUNICATION: twilio_call, translate_text.
 
 RULES. At most ${MAX_BOXES} boxes. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes. Never invent data sources or actions that are not in the list above; if they ask for one, say so in "unsupported".
 

@@ -28,7 +28,11 @@ export type StartBox =
   | { id: string; kind: "start"; when: "file_uploaded" }
   | { id: string; kind: "start"; when: "webhook" }
   | { id: string; kind: "start"; when: "new_email" }
-  | { id: string; kind: "start"; when: "rss"; url?: string };
+  | { id: string; kind: "start"; when: "rss"; url?: string }
+  | { id: string; kind: "start"; when: "form_submitted" }
+  | { id: string; kind: "start"; when: "chat_message" }
+  | { id: string; kind: "start"; when: "app_event"; app?: string }
+  | { id: string; kind: "start"; when: "manual" };
 
 export const READ_SOURCES = [
   // Original
@@ -38,6 +42,13 @@ export const READ_SOURCES = [
   "google_sheets", "website_scrape", "rss_feed",
   "last_emails", "database_query", "crm_contacts",
   "social_mentions", "analytics_report",
+  // Extended data sources (2026-11-21, n8n/Zapier/Make parity)
+  "notion_pages", "airtable_records", "google_drive_files",
+  "jira_issues", "github_issues", "hubspot_contacts",
+  "shopify_orders", "http_request", "pdf_extract",
+  "weather_data", "stock_prices", "discord_messages",
+  "trello_cards", "asana_tasks", "clickup_tasks",
+  "stripe_payments", "typeform_responses", "google_forms",
 ] as const;
 export type ReadSource = (typeof READ_SOURCES)[number];
 export type ReadBox = { id: string; kind: "read"; source: ReadSource };
@@ -60,6 +71,17 @@ export const ACTIONS = [
   "sheets_write", "database_write", "webhook_post",
   // Productivity (2026-11-21)
   "create_task", "create_event", "create_invoice",
+  // Extended actions (2026-11-21, n8n/Zapier/Make parity)
+  "send_discord", "notion_write", "airtable_write",
+  "google_drive_upload", "jira_create", "github_create",
+  "hubspot_update", "shopify_update", "http_request",
+  "generate_pdf", "translate_text", "compress_files",
+  "resize_image", "convert_format", "trello_create",
+  "asana_create", "clickup_create", "stripe_charge",
+  "mailchimp_add", "sendgrid_send", "twilio_call",
+  "zoom_create", "google_ads_update", "facebook_ads_update",
+  "youtube_upload", "wordpress_post", "supabase_insert",
+  "redis_set", "mqtt_publish", "s3_upload",
 ] as const;
 export type ActionKind = (typeof ACTIONS)[number];
 export type ActionBox = { id: string; kind: "action"; do: ActionKind };
@@ -75,6 +97,10 @@ function readStart(v: Record<string, unknown>, id: string): StartBox | null {
   if (v.when === "webhook") return { id, kind: "start", when: "webhook" };
   if (v.when === "new_email") return { id, kind: "start", when: "new_email" };
   if (v.when === "rss") return { id, kind: "start", when: "rss", ...(typeof v.url === "string" ? { url: v.url.slice(0, 500) } : {}) };
+  if (v.when === "form_submitted") return { id, kind: "start", when: "form_submitted" };
+  if (v.when === "chat_message") return { id, kind: "start", when: "chat_message" };
+  if (v.when === "app_event") return { id, kind: "start", when: "app_event", ...(typeof v.app === "string" ? { app: v.app.slice(0, 100) } : {}) };
+  if (v.when === "manual") return { id, kind: "start", when: "manual" };
   if (v.when !== "time") return null;
   const every = v.every;
   if (every !== "day" && every !== "weekdays" && every !== "week" && every !== "month") return null;
@@ -166,27 +192,59 @@ export function cronFor(start: StartBox): string | null {
 /** What a box needs connected before the automation may be switched on.
  *  Every integration that is not built into Ionexa itself is listed here;
  *  the screen says "Needs a connection: X" and links to Connect. */
-export type ConnectionKey = "google_calendar" | "telegram" | "whatsapp" | "slack" | "instagram" | "facebook" | "twitter" | "linkedin" | "google_sheets" | "sms" | "crm" | "webhook";
+export type ConnectionKey =
+  | "google_calendar" | "telegram" | "whatsapp" | "slack" | "instagram"
+  | "facebook" | "twitter" | "linkedin" | "google_sheets" | "sms" | "crm"
+  | "webhook" | "notion" | "airtable" | "google_drive" | "jira" | "github"
+  | "hubspot" | "shopify" | "discord" | "trello" | "asana" | "clickup"
+  | "stripe" | "mailchimp" | "sendgrid" | "twilio" | "zoom"
+  | "google_ads" | "facebook_ads" | "youtube" | "wordpress" | "supabase"
+  | "redis" | "mqtt" | "s3" | "typeform" | "google_forms";
+
+/** Source → connection key, for reads that need a connection. */
+const SOURCE_CONNECTION: Partial<Record<ReadSource, ConnectionKey>> = {
+  calendar_today: "google_calendar", calendar_tomorrow: "google_calendar", calendar_week: "google_calendar",
+  google_sheets: "google_sheets", crm_contacts: "crm", social_mentions: "instagram",
+  notion_pages: "notion", airtable_records: "airtable", google_drive_files: "google_drive",
+  jira_issues: "jira", github_issues: "github", hubspot_contacts: "hubspot",
+  shopify_orders: "shopify", discord_messages: "discord", trello_cards: "trello",
+  asana_tasks: "asana", clickup_tasks: "clickup", stripe_payments: "stripe",
+  typeform_responses: "typeform", google_forms: "google_forms",
+};
+
+/** Action → connection key, for actions that need a connection. */
+const ACTION_CONNECTION: Partial<Record<ActionKind, ConnectionKey>> = {
+  send_telegram: "telegram", send_whatsapp: "whatsapp", send_slack: "slack",
+  send_sms: "sms", post_instagram: "instagram", post_facebook: "facebook",
+  post_twitter: "twitter", post_linkedin: "linkedin", sheets_write: "google_sheets",
+  webhook_post: "webhook", create_event: "google_calendar",
+  send_discord: "discord", notion_write: "notion", airtable_write: "airtable",
+  google_drive_upload: "google_drive", jira_create: "jira", github_create: "github",
+  hubspot_update: "hubspot", shopify_update: "shopify",
+  trello_create: "trello", asana_create: "asana", clickup_create: "clickup",
+  stripe_charge: "stripe", mailchimp_add: "mailchimp", sendgrid_send: "sendgrid",
+  twilio_call: "twilio", zoom_create: "zoom", google_ads_update: "google_ads",
+  facebook_ads_update: "facebook_ads", youtube_upload: "youtube",
+  wordpress_post: "wordpress", supabase_insert: "supabase", redis_set: "redis",
+  mqtt_publish: "mqtt", s3_upload: "s3",
+};
+
 export function connectionsNeeded(boxes: Box[]): ConnectionKey[] {
   const needs = new Set<ConnectionKey>();
   for (const box of boxes) {
     if (box.kind === "start" && box.when === "webhook") needs.add("webhook");
-    if (box.kind === "read" && box.source.startsWith("calendar_")) needs.add("google_calendar");
-    if (box.kind === "read" && box.source === "google_sheets") needs.add("google_sheets");
-    if (box.kind === "read" && box.source === "crm_contacts") needs.add("crm");
-    if (box.kind === "read" && box.source === "social_mentions") needs.add("instagram");
+    if (box.kind === "start" && box.when === "app_event") {
+      // Generic app event — the specific connection depends on the app field
+      const app = (box as { app?: string }).app;
+      if (app && app in SOURCE_CONNECTION) needs.add(SOURCE_CONNECTION[app as ReadSource]!);
+    }
+    if (box.kind === "read") {
+      const conn = SOURCE_CONNECTION[box.source];
+      if (conn) needs.add(conn);
+    }
     if (box.kind === "action") {
-      if (box.do === "send_telegram") needs.add("telegram");
-      if (box.do === "send_whatsapp") needs.add("whatsapp");
-      if (box.do === "send_slack") needs.add("slack");
-      if (box.do === "send_sms") needs.add("sms");
-      if (box.do === "post_instagram") needs.add("instagram");
-      if (box.do === "post_facebook") needs.add("facebook");
-      if (box.do === "post_twitter") needs.add("twitter");
-      if (box.do === "post_linkedin") needs.add("linkedin");
-      if (box.do === "sheets_write") needs.add("google_sheets");
-      if (box.do === "webhook_post") needs.add("webhook");
-      if (box.do === "create_event") needs.add("google_calendar");
+      const conn = ACTION_CONNECTION[box.do];
+      if (conn) needs.add(conn);
     }
   }
   return [...needs];

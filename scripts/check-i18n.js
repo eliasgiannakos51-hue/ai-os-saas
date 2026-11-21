@@ -1129,6 +1129,14 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // arrow + "Post" follow the same pattern as the template group names
   // above. ar/ja/zh translate the whole phrase.
   "dashboard.automations.landing.tpl.socialPost",
+  // Brand-name sources/actions (2026-11-21): these contain product names
+  // that stay unchanged across all locales — "Notion pages", "Jira issues",
+  // "GitHub issues", "Discord messages", "Trello cards" etc. The
+  // translations prefix or suffix the brand name with the locale's word
+  // for the data type, but many locales use the brand name + an English
+  // loanword that happens to match the English version verbatim.
+  "dashboard.automations.sources.http_request",
+  "dashboard.automations.actions.http_request",
 ]);
 
 function flatten(obj, prefix = "") {

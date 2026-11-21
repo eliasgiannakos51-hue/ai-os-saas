@@ -3,27 +3,41 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
-## 2026-11-21 (Automation capability expansion — n8n parity) 🔧
+## 2026-11-21 (Automation mega-expansion — n8n/Zapier/Make parity+) 🔧
 
-Πλήρης επέκταση δυνατοτήτων automations σε επίπεδο n8n και παραπάνω.
+Πλήρης επέκταση δυνατοτήτων automations σε επίπεδο n8n/Zapier/Make και παραπάνω.
+Έρευνα σε n8n (400+ nodes), Zapier (7000+ apps), Make.com (1500+ integrations)
+για εντοπισμό κενών.
 
-- **8 νέα READ_SOURCES** (`boxes.ts`): google_sheets, website_scrape, rss_feed,
-  last_emails, database_query, crm_contacts, social_mentions, analytics_report.
-- **13 νέα ACTIONS** (`boxes.ts`): send_whatsapp, send_slack, send_sms,
-  post_instagram, post_facebook, post_twitter, post_linkedin, sheets_write,
-  database_write, webhook_post, create_task, create_event, create_invoice.
-- **3 νέα START triggers** (`boxes.ts`): webhook, new_email, rss (με url field).
-- **ConnectionKey** (`boxes.ts`): 12 integrations (google_calendar, telegram,
-  whatsapp, slack, instagram, facebook, twitter, linkedin, google_sheets,
-  sms, crm, webhook).
-- **flow-boxes.tsx**: icons + translations για κάθε νέο source/action,
-  Connected type → `Record<string, boolean>`, CONNECTION_NAME 12 entries.
-- **builder.ts**: system prompt ενημερωμένο με όλα τα νέα sources/actions/triggers.
-- **flow-access.ts**: ConnectionKey type, missingConnections covers all new integrations.
-- **i18n**: 30 νέα κλειδιά × 10 γλώσσες (120 strings + INTENTIONALLY_IDENTICAL).
-- **check-i18n.js**: +2 exceptions (socialPost template, rss_feed).
+**Φάση 1 (commit 51fa7dc3):**
+- 8 νέα READ_SOURCES, 13 νέα ACTIONS, 3 νέα START triggers.
 
-**Τι μετρήθηκε, 2026-11-21.** Build: πράσινο. i18n: 5704 keys × 9 locales.
+**Φάση 2 (αυτό το commit) — full parity:**
+- **+18 νέα READ_SOURCES** (`boxes.ts`): notion_pages, airtable_records,
+  google_drive_files, jira_issues, github_issues, hubspot_contacts,
+  shopify_orders, http_request, pdf_extract, weather_data, stock_prices,
+  discord_messages, trello_cards, asana_tasks, clickup_tasks,
+  stripe_payments, typeform_responses, google_forms.
+- **+30 νέα ACTIONS** (`boxes.ts`): send_discord, notion_write, airtable_write,
+  google_drive_upload, jira_create, github_create, hubspot_update,
+  shopify_update, http_request, generate_pdf, translate_text,
+  compress_files, resize_image, convert_format, trello_create,
+  asana_create, clickup_create, stripe_charge, mailchimp_add,
+  sendgrid_send, twilio_call, zoom_create, google_ads_update,
+  facebook_ads_update, youtube_upload, wordpress_post, supabase_insert,
+  redis_set, mqtt_publish, s3_upload.
+- **+4 νέα START triggers**: form_submitted, chat_message, app_event, manual.
+- **ConnectionKey** (`boxes.ts`): 37 integrations (πριν 12).
+- **SOURCE_CONNECTION + ACTION_CONNECTION lookup tables** αντί if-chains.
+- **flow-boxes.tsx**: 37 CONNECTION_NAME entries, icons για κάθε νέο τύπο.
+- **builder.ts**: system prompt κατηγοριοποιημένο (CALENDAR, FINANCE, FILES,
+  SPREADSHEETS, PROJECT MANAGEMENT, CRM/SALES, COMMUNICATION, FORMS,
+  DATA, ANALYTICS, MESSAGING, SOCIAL MEDIA, MARKETING, FILES, DATA).
+- **i18n**: 52 νέα κλειδιά × 10 γλώσσες (520 strings).
+
+**ΣΥΝΟΛΟ τώρα:** 7 start triggers, 26 read sources, 47 actions = **80 δυνατότητες**.
+
+**Τι μετρήθηκε, 2026-11-21.** Build: πράσινο. i18n: 5756 keys × 9 locales.
 Automations test: 283/283. Design tokens: 82/82.
 
 **ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**

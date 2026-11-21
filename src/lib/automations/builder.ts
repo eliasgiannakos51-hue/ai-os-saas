@@ -34,7 +34,7 @@ const BOX_SCHEMA = {
     id: { type: "string", description: "Short id: b1, b2, …" },
     kind: { type: "string", enum: ["start", "read", "ai", "condition", "approval", "action"] },
     when: { type: "string", enum: ["time", "file_uploaded", "webhook", "new_email", "rss", "form_submitted", "chat_message", "app_event", "manual"], description: "start only" },
-    url: { type: "string", description: "start with when=rss: the RSS feed URL" },
+    url: { type: "string", description: "For start with when=rss: the RSS feed URL. For read with source=http_request or source=website_scrape: the URL to fetch. For action with do=webhook_post or do=http_request: the URL to POST to." },
     app: { type: "string", description: "start with when=app_event: which app triggers it (e.g. shopify, github, stripe)" },
     every: { type: "string", enum: ["day", "weekdays", "week", "month"], description: "start with when=time only" },
     at: { type: "string", description: "start with when=time: HH:MM, 24-hour, in the person's time zone" },
@@ -58,7 +58,16 @@ THE BOXES, top to bottom:
 - approval: stop and wait until the person approves. Put before actions that send on their behalf.
 - action: MESSAGING: send_telegram, send_email, send_whatsapp, send_slack, send_sms, send_discord, notify (in-app). SOCIAL MEDIA: post_instagram, post_facebook, post_twitter, post_linkedin, youtube_upload, wordpress_post. SPREADSHEETS: sheets_write, airtable_write. PROJECT MANAGEMENT: notion_write, jira_create, github_create, trello_create, asana_create, clickup_create, create_task. CRM/SALES: hubspot_update, shopify_update, stripe_charge, create_invoice. MARKETING: mailchimp_add, sendgrid_send, google_ads_update, facebook_ads_update. CALENDAR: create_event, zoom_create. FILES: google_drive_upload, generate_pdf, compress_files, resize_image, convert_format, s3_upload, save_to_library. DATA: database_write, supabase_insert, redis_set, webhook_post, http_request, mqtt_publish. COMMUNICATION: twilio_call, translate_text.
 
-RULES. At most ${MAX_BOXES} boxes. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes. Never invent data sources or actions that are not in the list above; if they ask for one, say so in "unsupported".
+OPEN-ENDED. This system can automate ANYTHING. The named sources and actions above are shortcuts for common services. For anything NOT in the list:
+- Use http_request (read) with a url field to fetch data from ANY API or website.
+- Use website_scrape (read) with a url field to read ANY web page.
+- Use http_request (action) with a url field to send data to ANY API endpoint.
+- Use webhook_post (action) with a url field to POST to ANY URL.
+- The ai box can transform, translate, generate, analyse, classify, format, code, calculate — ANYTHING with text.
+- Combine read (http_request) → ai → action (webhook_post) for custom API-to-API workflows.
+NEVER say something is unsupported just because it is not a named integration. Build it with http_request, website_scrape, webhook_post, and ai boxes instead. Only say "unsupported" when no combination of boxes can achieve it.
+
+RULES. At most ${MAX_BOXES} boxes. If the sentence does not say WHEN or WHAT TO DO and you cannot reasonably tell, ask ONE short question in the person's language instead of boxes.
 
 COMPLEX DESCRIPTIONS. When the person writes a long description with multiple steps, break it into boxes. Use all the box types that fit. A description that says "do X and also Y" with the same trigger is ONE automation with multiple actions. Prefer MORE boxes (read + ai + condition + multiple actions) over fewer. Always try to produce boxes rather than asking a question — only ask when the sentence truly cannot be parsed. ONE automation has ONE start; if the person describes two separate schedules, pick the one that fits best and note the other in "unsupported".`;
 

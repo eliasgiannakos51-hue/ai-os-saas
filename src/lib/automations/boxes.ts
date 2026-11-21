@@ -51,7 +51,7 @@ export const READ_SOURCES = [
   "stripe_payments", "typeform_responses", "google_forms",
 ] as const;
 export type ReadSource = (typeof READ_SOURCES)[number];
-export type ReadBox = { id: string; kind: "read"; source: ReadSource };
+export type ReadBox = { id: string; kind: "read"; source: ReadSource; url?: string };
 
 export type AiBox = { id: string; kind: "ai"; instruction: string };
 
@@ -84,7 +84,7 @@ export const ACTIONS = [
   "redis_set", "mqtt_publish", "s3_upload",
 ] as const;
 export type ActionKind = (typeof ACTIONS)[number];
-export type ActionBox = { id: string; kind: "action"; do: ActionKind };
+export type ActionBox = { id: string; kind: "action"; do: ActionKind; url?: string };
 
 export type Box = StartBox | ReadBox | AiBox | ConditionBox | ApprovalBox | ActionBox;
 export type BoxKind = Box["kind"];
@@ -128,7 +128,7 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
     case "start":
       return readStart(v, id);
     case "read":
-      return (READ_SOURCES as readonly unknown[]).includes(v.source) ? { id, kind: "read", source: v.source as ReadSource } : null;
+      return (READ_SOURCES as readonly unknown[]).includes(v.source) ? { id, kind: "read", source: v.source as ReadSource, ...(typeof v.url === "string" ? { url: v.url.slice(0, 500) } : {}) } : null;
     case "ai": {
       const instruction = typeof v.instruction === "string" ? v.instruction.trim().slice(0, MAX_INSTRUCTION_CHARS) : "";
       return instruction.length >= 3 ? { id, kind: "ai", instruction } : null;
@@ -138,7 +138,7 @@ export function readBox(raw: unknown, fallbackId: string): Box | null {
     case "approval":
       return { id, kind: "approval" };
     case "action":
-      return (ACTIONS as readonly unknown[]).includes(v.do) ? { id, kind: "action", do: v.do as ActionKind } : null;
+      return (ACTIONS as readonly unknown[]).includes(v.do) ? { id, kind: "action", do: v.do as ActionKind, ...(typeof v.url === "string" ? { url: v.url.slice(0, 500) } : {}) } : null;
     default:
       return null;
   }
@@ -212,12 +212,14 @@ const SOURCE_CONNECTION: Partial<Record<ReadSource, ConnectionKey>> = {
   typeform_responses: "typeform", google_forms: "google_forms",
 };
 
-/** Action → connection key, for actions that need a connection. */
+/** Action → connection key, for actions that need a connection.
+ *  webhook_post, http_request and generate_pdf are NOT here: they work
+ *  without any connection (they just call a URL or save to the library). */
 const ACTION_CONNECTION: Partial<Record<ActionKind, ConnectionKey>> = {
   send_telegram: "telegram", send_whatsapp: "whatsapp", send_slack: "slack",
   send_sms: "sms", post_instagram: "instagram", post_facebook: "facebook",
   post_twitter: "twitter", post_linkedin: "linkedin", sheets_write: "google_sheets",
-  webhook_post: "webhook", create_event: "google_calendar",
+  create_event: "google_calendar",
   send_discord: "discord", notion_write: "notion", airtable_write: "airtable",
   google_drive_upload: "google_drive", jira_create: "jira", github_create: "github",
   hubspot_update: "hubspot", shopify_update: "shopify",
@@ -232,7 +234,7 @@ const ACTION_CONNECTION: Partial<Record<ActionKind, ConnectionKey>> = {
 export function connectionsNeeded(boxes: Box[]): ConnectionKey[] {
   const needs = new Set<ConnectionKey>();
   for (const box of boxes) {
-    if (box.kind === "start" && box.when === "webhook") needs.add("webhook");
+    // Webhook start does NOT need a connection — it's an incoming HTTP call.
     if (box.kind === "start" && box.when === "app_event") {
       // Generic app event — the specific connection depends on the app field
       const app = (box as { app?: string }).app;

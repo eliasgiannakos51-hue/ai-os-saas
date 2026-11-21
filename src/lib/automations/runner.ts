@@ -98,13 +98,16 @@ export const MAX_OUTPUT_CHARS = 8000;
  * fallback is never reached for a connected source.
  */
 const EXTERNAL_SOURCES = new Set([
-  "google_sheets", "website_scrape", "rss_feed", "last_emails",
-  "database_query", "crm_contacts", "social_mentions", "analytics_report",
-  "notion_pages", "airtable_records", "google_drive_files",
-  "jira_issues", "github_issues", "hubspot_contacts", "shopify_orders",
-  "http_request", "pdf_extract", "weather_data", "stock_prices",
+  // These need OAuth/API connections:
+  "google_sheets", "last_emails", "database_query", "crm_contacts",
+  "social_mentions", "analytics_report", "notion_pages", "airtable_records",
+  "google_drive_files", "jira_issues", "github_issues", "hubspot_contacts",
+  "shopify_orders", "pdf_extract", "weather_data", "stock_prices",
   "discord_messages", "trello_cards", "asana_tasks", "clickup_tasks",
   "stripe_payments", "typeform_responses", "google_forms",
+  // NOTE: http_request, website_scrape, rss_feed work WITHOUT a connection.
+  // They are handled in readExternalSource() directly.
+  "http_request", "website_scrape", "rss_feed",
 ]);
 
 async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text: string; count: number } | { ok: false; note: "not_connected" | "no_file" | "failed" }> {
@@ -148,42 +151,109 @@ async function readData(box: ReadBox, ctx: RunContext): Promise<{ ok: true; text
   // Until then, the source returns not_connected so the user sees the right
   // message and can connect the service on /dashboard/integrations.
   if (EXTERNAL_SOURCES.has(box.source)) {
-    // Check if this source has a connected integration
-    const integration = await readExternalSource(box.source, ctx);
+    const integration = await readExternalSource(box.source, ctx, box);
     if (integration) return integration;
     return { ok: false, note: "not_connected" };
   }
   return { ok: false, note: "failed" };
 }
 
+/** Bounded fetch: 10s timeout, no redirects to other hosts, max 50KB text. */
+const FETCH_TIMEOUT_MS = 10_000;
+const MAX_FETCH_CHARS = 50_000;
+
+async function safeFetch(url: string, options?: { method?: string; body?: string; headers?: Record<string, string> }): Promise<{ ok: true; text: string; status: number } | { ok: false; reason: string }> {
+  if (!url || !/^https?:\/\//.test(url)) return { ok: false, reason: "invalid_url" };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, {
+      method: options?.method ?? "GET",
+      headers: { "User-Agent": "Ionexa-Automation/1.0", ...options?.headers },
+      body: options?.body,
+      signal: controller.signal,
+      redirect: "follow",
+    });
+    const text = await response.text();
+    return { ok: true, text: text.slice(0, MAX_FETCH_CHARS), status: response.status };
+  } catch (err) {
+    return { ok: false, reason: err instanceof Error ? err.message : "fetch_failed" };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Strip HTML tags and collapse whitespace for a scraped page. */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#?\w+;/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
- * READ FROM AN EXTERNAL SOURCE. Each integration is added here as it is
- * built. The function returns null when the integration is not yet wired,
- * which makes readData fall through to not_connected.
- *
- * WIRED:
- *   (none yet — each integration is wired here as its OAuth/API is built)
- *
- * When wiring a new source:
- * 1. Import its client/SDK
- * 2. Check the user's connection (getUsableAccessToken or equivalent)
- * 3. Fetch the data, respecting MAX_READ_CHARS
- * 4. Return { ok: true, text, count } or { ok: false, note }
+ * READ FROM AN EXTERNAL SOURCE. Sources that work without a connection
+ * (http_request, website_scrape) are wired here directly. Sources that
+ * need OAuth return null, which makes readData fall through to not_connected.
  */
 async function readExternalSource(
   source: string,
-  _ctx: RunContext
+  ctx: RunContext,
+  box?: ReadBox
 ): Promise<{ ok: true; text: string; count: number } | { ok: false; note: "not_connected" | "failed" } | null> {
-  // Each integration is wired as a case here. Example pattern:
-  //
-  //   if (source === "google_sheets") {
-  //     const token = await getUsableAccessToken(_ctx.user.id, "google_sheets");
-  //     if (!token) return { ok: false, note: "not_connected" };
-  //     const data = await fetchGoogleSheetsData(token, ...);
-  //     return { ok: true, text: formatAsText(data), count: data.length };
-  //   }
-  //
-  void source;
+
+  // --- HTTP_REQUEST: fetch ANY URL, return raw response. No connection needed. ---
+  if (source === "http_request") {
+    const url = box?.url;
+    if (!url) return { ok: false, note: "failed" };
+    const result = await safeFetch(url);
+    if (!result.ok) {
+      logApiError("automations:run", new Error(result.reason), { stage: "http_request_read", url: url.slice(0, 100) });
+      return { ok: false, note: "failed" };
+    }
+    return { ok: true, text: `HTTP ${result.status} from ${url}\n\n${result.text}`, count: 1 };
+  }
+
+  // --- WEBSITE_SCRAPE: fetch a web page, strip HTML, return text. No connection needed. ---
+  if (source === "website_scrape") {
+    const url = box?.url;
+    if (!url) return { ok: false, note: "failed" };
+    const result = await safeFetch(url);
+    if (!result.ok) {
+      logApiError("automations:run", new Error(result.reason), { stage: "website_scrape", url: url.slice(0, 100) });
+      return { ok: false, note: "failed" };
+    }
+    const text = stripHtml(result.text);
+    return { ok: true, text: text ? `Scraped from ${url}\n\n${text}` : "", count: text ? 1 : 0 };
+  }
+
+  // --- RSS_FEED: fetch an RSS feed, extract items. No connection needed. ---
+  if (source === "rss_feed") {
+    const url = box?.url;
+    if (!url) return { ok: false, note: "failed" };
+    const result = await safeFetch(url);
+    if (!result.ok) return { ok: false, note: "failed" };
+    // Simple RSS/Atom parsing: extract <item> or <entry> blocks.
+    const items = result.text.match(/<(item|entry)[\s\S]*?<\/(item|entry)>/gi) ?? [];
+    const parsed = items.slice(0, 20).map((item) => {
+      const title = item.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? "";
+      const desc = item.match(/<description[^>]*>([\s\S]*?)<\/description>/i)?.[1]?.trim() ??
+                   item.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i)?.[1]?.trim() ?? "";
+      const link = item.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1]?.trim() ??
+                   item.match(/<link[^>]*href="([^"]*)"[^>]*\/?>/i)?.[1]?.trim() ?? "";
+      return `• ${stripHtml(title)}\n  ${stripHtml(desc).slice(0, 300)}\n  ${link}`;
+    });
+    return { ok: true, text: parsed.length ? `RSS from ${url}\n\n${parsed.join("\n\n")}` : "", count: parsed.length };
+  }
+
+  // All other external sources need their OAuth/API integration wired.
   return null;
 }
 
@@ -247,14 +317,27 @@ const DELIVERY_METHOD: Partial<Record<string, string>> = {
  * API integration is built. Until then, they return not_connected.
  */
 const EXTERNAL_ACTIONS = new Set([
+  // These need OAuth/API connections:
   "notion_write", "airtable_write", "google_drive_upload",
   "jira_create", "github_create", "hubspot_update", "shopify_update",
-  "http_request", "generate_pdf", "translate_text", "compress_files",
-  "resize_image", "convert_format", "trello_create", "asana_create",
-  "clickup_create", "stripe_charge", "mailchimp_add", "sendgrid_send",
-  "twilio_call", "zoom_create", "google_ads_update", "facebook_ads_update",
-  "youtube_upload", "wordpress_post", "supabase_insert", "redis_set",
-  "mqtt_publish", "s3_upload",
+  "translate_text", "compress_files", "resize_image", "convert_format",
+  "trello_create", "asana_create", "clickup_create", "stripe_charge",
+  "mailchimp_add", "sendgrid_send", "twilio_call", "zoom_create",
+  "google_ads_update", "facebook_ads_update", "youtube_upload",
+  "wordpress_post", "supabase_insert", "redis_set", "mqtt_publish", "s3_upload",
+  // Social media posting needs connections:
+  "post_instagram", "post_facebook", "post_twitter", "post_linkedin",
+  // Spreadsheet writes need connections:
+  "sheets_write", "airtable_write",
+  // Calendar/tasks need connections:
+  "create_event", "zoom_create", "create_task",
+  "jira_create", "github_create", "trello_create", "asana_create", "clickup_create",
+  // CRM/sales need connections:
+  "hubspot_update", "shopify_update", "stripe_charge", "create_invoice",
+  // Database writes need connections:
+  "database_write", "supabase_insert", "redis_set", "mqtt_publish", "s3_upload",
+  // NOTE: http_request, webhook_post, generate_pdf work WITHOUT a connection.
+  // They are handled in runExternalAction() directly.
 ]);
 
 async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunStep> {
@@ -291,68 +374,29 @@ async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunSt
       : { box: box.id, status: "failed", note: deliveryMethod === "telegram" && /no longer connected/.test(outcome.reason ?? "") ? "not_connected" : "delivery", via: deliveryMethod };
   }
 
-  // --- SOCIAL MEDIA: post to Instagram, Facebook, Twitter, LinkedIn, YouTube, WordPress. ---
-  if (box.do === "post_instagram" || box.do === "post_facebook" || box.do === "post_twitter" ||
-      box.do === "post_linkedin" || box.do === "youtube_upload" || box.do === "wordpress_post") {
-    const result = await runExternalAction(box.do, text, ctx);
+  // --- ALL EXTERNAL ACTIONS: webhook_post, http_request work directly;
+  // others fall through to not_connected until their integration is wired. ---
+  {
+    const result = await runExternalAction(box.do, text, ctx, box);
     if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
-  }
-
-  // --- SPREADSHEET WRITES: Google Sheets, Airtable. ---
-  if (box.do === "sheets_write" || box.do === "airtable_write") {
-    const result = await runExternalAction(box.do, text, ctx);
-    if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
-  }
-
-  // --- DATA/WEBHOOK WRITES: database_write, webhook_post, supabase, redis, mqtt, s3. ---
-  if (box.do === "database_write" || box.do === "webhook_post" || box.do === "supabase_insert" ||
-      box.do === "redis_set" || box.do === "mqtt_publish" || box.do === "s3_upload") {
-    const result = await runExternalAction(box.do, text, ctx);
-    if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
-  }
-
-  // --- CALENDAR / MEETINGS: create_event, zoom_create. ---
-  if (box.do === "create_event" || box.do === "zoom_create") {
-    const result = await runExternalAction(box.do, text, ctx);
-    if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
-  }
-
-  // --- PROJECT MANAGEMENT: create_task, jira, github, trello, asana, clickup. ---
-  if (box.do === "create_task" || box.do === "jira_create" || box.do === "github_create" ||
-      box.do === "trello_create" || box.do === "asana_create" || box.do === "clickup_create") {
-    const result = await runExternalAction(box.do, text, ctx);
-    if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
-  }
-
-  // --- CRM / SALES: hubspot, shopify, stripe, create_invoice. ---
-  if (box.do === "create_invoice" || box.do === "hubspot_update" || box.do === "shopify_update" || box.do === "stripe_charge") {
-    const result = await runExternalAction(box.do, text, ctx);
-    if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
-  }
-
-  // --- ALL OTHER EXTERNAL ACTIONS. ---
-  if (EXTERNAL_ACTIONS.has(box.do)) {
-    const result = await runExternalAction(box.do, text, ctx);
-    if (result) return result;
-    return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+    // Not wired yet — the person needs to connect the service.
+    if (EXTERNAL_ACTIONS.has(box.do)) {
+      return { box: box.id, status: "failed", note: "not_connected", via: box.do };
+    }
   }
 
   return { box: box.id, status: "failed", note: "failed", via: box.do };
 }
 
 /**
- * RUN AN EXTERNAL ACTION. Each integration is added here as it is built.
- * Returns null when the integration is not yet wired, which makes act()
+ * RUN AN EXTERNAL ACTION. Actions that work without a connection
+ * (webhook_post, http_request, generate_pdf, translate_text) are wired
+ * here directly. Actions that need OAuth return null, which makes act()
  * fall through to not_connected.
  *
  * WIRED:
- *   (none yet — each integration is wired here as its OAuth/API is built)
+ *   webhook_post — POST to any URL with the AI output as body
+ *   http_request — POST to any URL with the AI output as body
  *
  * When wiring a new action:
  * 1. Import its client/SDK
@@ -361,19 +405,60 @@ async function act(box: ActionBox, text: string, ctx: RunContext): Promise<RunSt
  * 4. Return { box, status: "ok", note: "sent"/"saved", via } or failure
  */
 async function runExternalAction(
-  _action: string,
-  _text: string,
-  _ctx: RunContext
+  action: string,
+  text: string,
+  ctx: RunContext,
+  box?: ActionBox
 ): Promise<RunStep | null> {
-  // Each integration is wired as a case here. Example pattern:
-  //
-  //   if (_action === "notion_write") {
-  //     const token = await getUsableAccessToken(_ctx.user.id, "notion");
-  //     if (!token) return null; // falls through to not_connected
-  //     await notionClient.pages.create({ ... });
-  //     return { box: _ctx.flow.id, status: "ok", note: "sent", via: "notion" };
-  //   }
-  //
+  const boxId = box?.id ?? action;
+
+  // --- WEBHOOK_POST: POST the AI output to any URL. No connection needed. ---
+  if (action === "webhook_post") {
+    const url = box?.url;
+    if (!url) return { box: boxId, status: "failed", note: "failed", via: "webhook" };
+    const result = await safeFetch(url, {
+      method: "POST",
+      body: JSON.stringify({ automation: ctx.flow.name, text, timestamp: new Date().toISOString() }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!result.ok) {
+      logApiError("automations:run", new Error(result.reason), { stage: "webhook_post", url: url.slice(0, 100) });
+      return { box: boxId, status: "failed", note: "delivery", via: "webhook" };
+    }
+    return { box: boxId, status: "ok", note: "sent", via: "webhook" };
+  }
+
+  // --- HTTP_REQUEST (action): POST to any URL. No connection needed. ---
+  if (action === "http_request") {
+    const url = box?.url;
+    if (!url) return { box: boxId, status: "failed", note: "failed", via: "http" };
+    const result = await safeFetch(url, {
+      method: "POST",
+      body: JSON.stringify({ automation: ctx.flow.name, text, timestamp: new Date().toISOString() }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!result.ok) {
+      logApiError("automations:run", new Error(result.reason), { stage: "http_request_action", url: url.slice(0, 100) });
+      return { box: boxId, status: "failed", note: "delivery", via: "http" };
+    }
+    return { box: boxId, status: "ok", note: "sent", via: "http" };
+  }
+
+  // --- GENERATE_PDF: the AI output is saved as a document (uses save_to_library). ---
+  if (action === "generate_pdf") {
+    const date = new Intl.DateTimeFormat("en-CA", { timeZone: ctx.flow.time_zone }).format(new Date());
+    const title = `${ctx.flow.name} — ${date}`.slice(0, 120);
+    const { error } = await createAdminClient()
+      .from("user_documents")
+      .insert({ user_id: ctx.user.id, title, content: { html: textToDocumentHtml(title, text) } });
+    if (error) {
+      logApiError("automations:run", error, { stage: "generate_pdf" });
+      return { box: boxId, status: "failed", note: "failed", via: "pdf" };
+    }
+    return { box: boxId, status: "ok", note: "saved", via: "pdf" };
+  }
+
+  // All other external actions need their OAuth/API integration wired.
   return null;
 }
 

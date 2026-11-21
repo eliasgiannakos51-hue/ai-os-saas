@@ -3,6 +3,29 @@
 Μία εγγραφή ανά βήμα: τι έγινε, τι δοκιμάστηκε, αποτέλεσμα. Το νεότερο
 πάνω.
 
+## 2026-11-21γ (Open-ended automations — anything works) 🔧
+
+Αλλαγή φιλοσοφίας: τα automations δεν περιορίζονται σε συγκεκριμένες υπηρεσίες.
+Ό,τι ζητάς, ο AI γράφει boxes που ΔΟΥΛΕΥΟΥΝ — χωρίς connection.
+
+- **http_request (read)**: κάνει GET σε ΟΠΟΙΟΔΗΠΟΤΕ URL, επιστρέφει δεδομένα.
+  `safeFetch()` με 10s timeout, 50KB max, redirect follow.
+- **website_scrape (read)**: κάνει GET + `stripHtml()`, επιστρέφει καθαρό κείμενο.
+- **rss_feed (read)**: κάνει GET + XML parsing (title/desc/link από items).
+- **webhook_post (action)**: κάνει POST σε ΟΠΟΙΟΔΗΠΟΤΕ URL με JSON body.
+- **http_request (action)**: κάνει POST σε ΟΠΟΙΟΔΗΠΟΤΕ URL.
+- **generate_pdf (action)**: αποθηκεύει στη Βιβλιοθήκη (ίδιο μηχανισμό με save_to_library).
+- **ReadBox/ActionBox url field**: νέο πεδίο `url?` για boxes που χρειάζονται URL.
+- **Builder OPEN-ENDED prompt**: το μοντέλο μαθαίνει ότι http_request + ai +
+  webhook_post καλύπτουν ΟΤΙΔΗΠΟΤΕ, και ΔΕΝ λέει ποτέ "unsupported" αν μπορεί
+  να χρησιμοποιήσει αυτά τα boxes.
+- **connectionsNeeded**: webhook_post, http_request, generate_pdf, website_scrape,
+  rss_feed δεν ζητάνε connection — δουλεύουν αμέσως.
+
+**Τι μετρήθηκε, 2026-11-21.** Build: πράσινο. Automations test: 323/323.
+
+**ΝΕΑ MIGRATIONS ΝΑ ΤΡΕΞΕΙΣ: καμία**
+
 ## 2026-11-21 (Automation mega-expansion — n8n/Zapier/Make parity+) 🔧
 
 Πλήρης επέκταση δυνατοτήτων automations σε επίπεδο n8n/Zapier/Make και παραπάνω.

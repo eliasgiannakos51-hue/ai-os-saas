@@ -1127,9 +1127,9 @@ const PUBLIC_PAY_BASELINE = {
 // user; translating them is a polish step, not a missing translation.
 const TOOL_PREVIEW_BASELINE = {
   "src/components/tools/tool-preview-content.tsx": 42,
-  // "Upload images" in the Website Builder's empty-landing photo upload
-  // placeholder — a label inside the tool preview, same category as above.
-  "src/components/website-builder/website-shell.tsx": 1,
+  // "Upload images" and "Your website preview" label in the Website Builder's
+  // empty-landing — labels inside the tool preview, same category as above.
+  "src/components/website-builder/website-shell.tsx": 2,
 };
 const BARE_TEXT_BASELINE = { ...LEGAL_BASELINE, ...OWNER_ONLY_BASELINE, ...ATTRIBUTION_BASELINE, ...PUBLIC_PAY_BASELINE, ...TOOL_PREVIEW_BASELINE };
 

@@ -125,8 +125,8 @@ const MUTANTS = [
   {
     name: "any person's uploaded file can be read",
     file: RUNNER,
-    from: '    .eq("id", ctx.eventRef)\n    .eq("user_id", ctx.user.id)\n',
-    to: '    .eq("id", ctx.eventRef)\n',
+    from: '      .eq("id", ctx.eventRef)\n      .eq("user_id", ctx.user.id)\n',
+    to: '      .eq("id", ctx.eventRef)\n',
     expect: "an uploaded file is read only as its owner's",
   },
   {
@@ -330,9 +330,9 @@ const MUTANTS = [
   {
     name: "a «Σύντομα» template becomes something to press",
     file: TEMPLATES,
-    from: 'export const TEMPLATE_IDS = ["finance_daily", "finance_weekly"] as const;',
-    to: 'export const TEMPLATE_IDS = ["finance_daily", "finance_weekly", "instagram_to_telegram"] as const;',
-    expect: "two ready: the finance assistant's daily summary and weekly analysis",
+    from: '  "ecommerce_daily", "support_triage", "content_repurpose", "lead_enrich",\n] as const;',
+    to: '  "ecommerce_daily", "support_triage", "content_repurpose", "lead_enrich", "instagram_to_telegram",\n] as const;',
+    expect: "six ready: finance, e-commerce, support, marketing, sales templates",
   },
   {
     name: "a «Σύντομα» card grows a button",

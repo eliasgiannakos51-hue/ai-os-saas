@@ -92,13 +92,14 @@ export async function missingConnections(user: { id: string; email?: string | nu
     calendar ? listIntegrations(user.id) : Promise.resolve([]),
     needs.includes("telegram") ? listDeliveryChannels(user.id) : Promise.resolve([]),
   ]);
-  return needs.filter((need) => {
-    // Known connected integrations
-    if (need === "google_calendar") return !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected");
-    if (need === "telegram") return !channels.some((c) => c.channel === "telegram");
-    // All other integrations: not yet connected (will be available through Connect)
-    return true;
-  });
+  return needs.filter((need) =>
+    need === "google_calendar"
+      ? !integrations.some((i) => i.provider === "google_calendar" && i.status === "connected")
+      : need === "telegram"
+        ? !channels.some((c) => c.channel === "telegram")
+        // All other integrations: not yet connected (will be available through Connect)
+        : true
+  );
 }
 
 /** A claim older than this belonged to a request that died. */
